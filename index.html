@@ -211,7 +211,15 @@
 
   // =========================
 
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+
+   global: {
+
+    fetch: (...args) => globalThis.fetch(...args),
+
+   },
+
+  });
 
   document.getElementById("sbUrl").textContent = SUPABASE_URL;
 
