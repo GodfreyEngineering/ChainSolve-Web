@@ -1,495 +1,349 @@
+
+
 <!doctype html>
-<script>
-    !function(t,e){var o,n,p,r;e.__SV||(window.posthog && window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init ls vs Ce hs cs ns us capture calculateEventProperties gs register register_once register_for_session unregister unregister_for_session xs getFeatureFlag getFeatureFlagPayload getFeatureFlagResult isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty ys createPersonProfile setInternalOrTestUser ws rs $s opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing fs debug M bs getPageViewId captureTraceFeedback captureTraceMetric Zr".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-    posthog.init('phc_dy0mQLseJ8DypIG0uIskjNeKGAY7hgDLpZcm32cixm', {
-        api_host: 'https://eu.i.posthog.com',
-        defaults: '2026-01-30',
-        person_profiles: 'identified_only', // or 'always' to create profiles for anonymous users as well
-    })
-</script>
-<script src="https://js-de.sentry-cdn.com/14ba135522882fcdc7796e315dcf9c8a.min.js" crossorigin="anonymous"></script>
 <html lang="en">
-
 <head>
-
   <meta charset="utf-8" />
-
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-
   <title>ChainSolve — App Smoke Test</title>
 
-
-  <!-- Supabase JS (CDN) -->
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.97.0"></script>
-
-  <!-- Sentry (optional). If you don’t want it yet, delete these 2 lines. -->
-
-  <script src="https://cdn.jsdelivr.net/npm/@sentry/browser@10.39.0"></script>
-
-  <!-- PostHog (optional). If you don’t want it yet, delete these 2 lines. -->
-
-  <script src="https://cdn.jsdelivr.net/npm/posthog-js@1.353.0/dist/umd/index.js"></script>
-
-
   <style>
-
     :root { color-scheme: dark; }
-
     body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0b0c10; color:#e9eef2; }
-
     .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
-
     .card { border:1px solid rgba(255,255,255,.12); border-radius:16px; background: rgba(255,255,255,.04); padding:16px; margin: 12px 0; }
-
     .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-
     input, button { border-radius:12px; border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.25); color:#e9eef2; padding:10px 12px; }
-
     button { cursor:pointer; font-weight: 700; }
-
     button.primary { border-color: rgba(28,171,176,.55); background: rgba(28,171,176,.12); }
-
     button.danger { border-color: rgba(255,80,80,.55); background: rgba(255,80,80,.12); }
-
     pre { white-space: pre-wrap; word-break: break-word; background: rgba(0,0,0,.35); padding: 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.10); }
-
     .pill { display:inline-flex; padding: 6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.22); }
-
     .ok { color: #7CFFB2; }
-
     .bad { color: #FF8C8C; }
-
+    .muted { opacity:.8; }
   </style>
 
+  <!-- Vendor libs (load ONCE each) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.97.0"></script>
+
+  <!-- Sentry (optional) -->
+  <script src="https://js-de.sentry-cdn.com/14ba135522882fcdc7796e315dcf9c8a.min.js" crossorigin="anonymous"></script>
+
+  <!-- PostHog (optional) -->
+  <script src="https://cdn.jsdelivr.net/npm/posthog-js@1.353.0/dist/umd/index.js"></script>
 </head>
 
 <body>
-
   <div class="wrap">
-
     <h1 style="margin:0 0 6px 0;">ChainSolve — Setup Smoke Test</h1>
-
     <div class="pill">Domain: <b style="margin-left:8px;">app.chainsolve.co.uk</b></div>
 
+    <div class="card">
+      <h2 style="margin:0 0 10px 0;">0) Runtime</h2>
+      <p id="bootState" class="muted" style="margin:0;">Booting…</p>
+    </div>
 
     <div class="card">
-
       <h2 style="margin:0 0 10px 0;">1) Config</h2>
-
       <div class="row">
-
         <div class="pill">Supabase URL: <span id="sbUrl" style="margin-left:8px;opacity:.9;"></span></div>
-
       </div>
-
-      <p style="opacity:.8;margin:10px 0 0 0;">
-
-        Paste your Supabase anon key into the code (search for <b>PASTE_ANON_KEY_HERE</b>).
-
+      <p class="muted" style="margin:10px 0 0 0;">
+        If anything breaks, check the Logs panel below first — it will show the exact JS error.
       </p>
-
     </div>
 
-
     <div class="card">
-
       <h2 style="margin:0 0 10px 0;">2) Auth (Magic Link)</h2>
-
       <div class="row">
-
         <input id="email" type="email" placeholder="you@domain.com" style="min-width:260px;" />
-
-        <button id="btnLogin" class="primary">Send magic link</button>
-
-        <button id="btnLogout" class="danger">Logout</button>
-
+        <button id="btnLogin" class="primary" type="button">Send magic link</button>
+        <button id="btnLogout" class="danger" type="button">Logout</button>
       </div>
-
       <p id="authState" style="margin:10px 0 0 0; opacity:.9;"></p>
-
     </div>
 
-
     <div class="card">
-
       <h2 style="margin:0 0 10px 0;">3) Entitlements + Billing</h2>
-
       <div class="row">
-
-        <button id="btnEnt">Check my_entitlements</button>
-
-        <button id="btnUpgrade" class="primary">Upgrade (£10/mo)</button>
-
-        <button id="btnPortal">Manage subscription</button>
-
+        <button id="btnEnt" type="button">Check my_entitlements</button>
+        <button id="btnUpgrade" class="primary" type="button">Upgrade (£10/mo)</button>
+        <button id="btnPortal" type="button">Manage subscription</button>
       </div>
-
       <p id="entState" style="margin:10px 0 0 0; opacity:.9;"></p>
-
     </div>
 
-
     <div class="card">
-
       <h2 style="margin:0 0 10px 0;">4) Projects table (PRO feature)</h2>
-
       <div class="row">
-
         <input id="projName" type="text" placeholder="Project name" style="min-width:260px;" />
-
-        <button id="btnSaveProj" class="primary">Save test project</button>
-
-        <button id="btnListProj">List my projects</button>
-
+        <button id="btnSaveProj" class="primary" type="button">Save test project</button>
+        <button id="btnListProj" type="button">List my projects</button>
       </div>
-
-      <p style="opacity:.8;margin:10px 0 0 0;">
-
-        This will only work if you’re logged in. You can later gate “save” in your UI if not PRO.
-
+      <p class="muted" style="margin:10px 0 0 0;">
+        This will only work if you’re logged in.
       </p>
-
     </div>
-
 
     <div class="card">
-
       <h2 style="margin:0 0 10px 0;">Logs</h2>
-
       <pre id="log"></pre>
-
     </div>
-
   </div>
 
-
-<script>
-
-  // =========================
-
-  // 0) Paste your keys here
-
-  // =========================
-
-  const SUPABASE_URL = "https://zjgfosqtnlhlfgpohnnu.supabase.co";
-
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZ2Zvc3F0bmxobGZncG9obm51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NTE5MzYsImV4cCI6MjA4NzQyNzkzNn0.vyKMEWde9gEODj5ocUTCnz3l9AyXMuegLcEmMfnqmjE";
-
-
-  // Optional
-
-  const SENTRY_DSN = "https://14ba135522882fcdc7796e315dcf9c8a@o4510940617834496.ingest.de.sentry.io/4510940620128336";     // paste DSN or leave blank
-
-  const POSTHOG_KEY = "phc_dy0mQLseJ8DypIG0uIskjNeKGAY7hgDLpZcm32cixm";    // paste key or leave blank
-
-  const POSTHOG_HOST = "https://app.posthog.com"; // or your regional host
-
-
-  // =========================
-
-  // 1) Init Sentry + PostHog
-
-  // =========================
-
-  if (SENTRY_DSN && window.Sentry) {
-
-    Sentry.init({ dsn: SENTRY_DSN });
-
-  }
-
-  if (POSTHOG_KEY && window.posthog) {
-
-    posthog.init(POSTHOG_KEY, { api_host: POSTHOG_HOST, autocapture: true });
-
-  }
-
-
-  // =========================
-
-  // 2) Init Supabase
-
-  // =========================
-
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-
-   global: {
-
-    fetch: (...args) => globalThis.fetch(...args),
-
-   },
-
-  });
-
-  document.getElementById("sbUrl").textContent = SUPABASE_URL;
-
-
-  const $log = document.getElementById("log");
-
-  const log = (...args) => {
-
-    const line = args.map(a => (typeof a === "string" ? a : JSON.stringify(a, null, 2))).join(" ");
-
-    $log.textContent = (line + "\n\n" + $log.textContent).slice(0, 12000);
-
-    console.log(...args);
-
-  };
-
-
-  const setAuthState = (txt, ok=true) => {
-
-    const el = document.getElementById("authState");
-
-    el.innerHTML = ok ? `<span class="ok">✔</span> ${txt}` : `<span class="bad">✘</span> ${txt}`;
-
-  };
-
-  const setEntState = (txt, ok=true) => {
-
-    const el = document.getElementById("entState");
-
-    el.innerHTML = ok ? `<span class="ok">✔</span> ${txt}` : `<span class="bad">✘</span> ${txt}`;
-
-  };
-
-
-  async function refreshUser() {
-
-    const { data } = await sb.auth.getUser();
-
-    if (data?.user) {
-
-      setAuthState(`Logged in as <b>${data.user.email}</b> (uid: ${data.user.id})`);
-
-      if (window.posthog && POSTHOG_KEY) posthog.identify(data.user.id, { email: data.user.email });
-
-      return data.user;
-
-    } else {
-
-      setAuthState("Not logged in");
-
-      if (window.posthog && POSTHOG_KEY) posthog.reset();
-
-      return null;
-
-    }
-
-  }
-
-
-  sb.auth.onAuthStateChange((_event, _session) => refreshUser());
-
-
-  // =========================
-
-  // 3) Buttons
-
-  // =========================
-
-  document.getElementById("btnLogin").addEventListener("click", async () => {
-
-    const email = document.getElementById("email").value.trim();
-
-    if (!email) return alert("Enter an email first");
-
-
-    log("Sending magic link to:", email);
-
-    const { error } = await sb.auth.signInWithOtp({
-
-      email,
-
-      options: { emailRedirectTo: "https://app.chainsolve.co.uk" }
-
-    });
-
-    if (error) { log("Auth error:", error); setAuthState(error.message, false); return; }
-
-    setAuthState("Magic link sent — check your email.");
-
-  });
-
-
-  document.getElementById("btnLogout").addEventListener("click", async () => {
-
-    await sb.auth.signOut();
-
-    setAuthState("Logged out");
-
-    setEntState("");
-
-  });
-
-
-  document.getElementById("btnEnt").addEventListener("click", async () => {
-
-    const user = await refreshUser();
-
-    if (!user) return setEntState("Login first.", false);
-
-
-    const { data, error } = await sb
-
-      .from("my_entitlements")
-
-      .select("is_pro,status,current_period_end,cancel_at_period_end")
-
-      .eq("user_id", user.id)
-
-      .maybeSingle();
-
-
-    if (error) { log("Entitlements error:", error); setEntState(error.message, false); return; }
-
-    if (!data) { setEntState("No subscription row yet (expected before first purchase)."); return; }
-
-
-    setEntState(`PRO: <b>${data.is_pro}</b> · status: ${data.status} · period_end: ${data.current_period_end || "—"}`);
-
-    log("Entitlements:", data);
-
-  });
-
-
-  document.getElementById("btnUpgrade").addEventListener("click", async () => {
-
-    const user = await refreshUser();
-
-    if (!user) return alert("Login first.");
-
-
-    log("Calling create-checkout-session…");
-
-    // This requires JWT (Supabase docs: invoke requires Authorization; SDK handles it)  [oai_citation:11‡Supabase](https://supabase.com/docs/reference/javascript/functions-invoke)
-
-    const { data, error } = await sb.functions.invoke("create-checkout-session", {
-
-      body: {
-
-        success_url: "https://app.chainsolve.co.uk/?success=1",
-
-        cancel_url: "https://app.chainsolve.co.uk/?canceled=1"
-
-      }
-
-    });
-
-
-    if (error) { log("Checkout function error:", error); alert(error.message); return; }
-
-    if (!data?.url) { log("No url returned:", data); alert("No checkout URL returned"); return; }
-
-
-    log("Redirecting to Stripe Checkout:", data.url);
-
-    window.location.href = data.url;
-
-  });
-
-
-  document.getElementById("btnPortal").addEventListener("click", async () => {
-
-    const user = await refreshUser();
-
-    if (!user) return alert("Login first.");
-
-
-    log("Calling create-portal-session…");
-
-    const { data, error } = await sb.functions.invoke("create-portal-session", {
-
-      body: { return_url: "https://app.chainsolve.co.uk" }
-
-    });
-
-
-    if (error) { log("Portal function error:", error); alert(error.message); return; }
-
-    if (!data?.url) { log("No url returned:", data); alert("No portal URL returned"); return; }
-
-
-    log("Redirecting to Stripe Portal:", data.url);
-
-    window.location.href = data.url;
-
-  });
-
-
-  document.getElementById("btnSaveProj").addEventListener("click", async () => {
-
-    const user = await refreshUser();
-
-    if (!user) return alert("Login first.");
-
-
-    const name = (document.getElementById("projName").value || "Test project").trim();
-
-    const payload = {
-
-      nodes: [{ id: "n1", type: "input", x: 10, y: 20 }],
-
-      edges: []
-
+  <script>
+  (() => {
+    "use strict";
+
+    // =========================
+    // 0) Keys / config
+    // =========================
+    const SUPABASE_URL = "https://zjgfosqtnlhlfgpohnnu.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZ2Zvc3F0bmxobGZncG9obm51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4NTE5MzYsImV4cCI6MjA4NzQyNzkzNn0.vyKMEWde9gEODj5ocUTCnz3l9AyXMuegLcEmMfnqmjE";
+
+    const SENTRY_DSN = "https://14ba135522882fcdc7796e315dcf9c8a@o4510940617834496.ingest.de.sentry.io/4510940620128336";
+    const POSTHOG_KEY = "phc_dy0mQLseJ8DypIG0uIskjNeKGAY7hgDLpZcm32cixm";
+    const POSTHOG_HOST = "https://eu.i.posthog.com"; // EU region
+
+    // =========================
+    // 1) Logging (always visible)
+    // =========================
+    const $log = document.getElementById("log");
+    const log = (...args) => {
+      const line = args.map(a => (typeof a === "string" ? a : JSON.stringify(a, null, 2))).join(" ");
+      $log.textContent = (line + "\n\n" + $log.textContent).slice(0, 20000);
+      console.log(...args);
     };
 
+    // Catch *all* JS errors in the UI
+    window.addEventListener("error", (e) => {
+      log("✘ JS error:", { message: e.message, file: e.filename, line: e.lineno, col: e.colno });
+      try { window.Sentry && Sentry.captureException(e.error || new Error(e.message)); } catch(_) {}
+    });
 
-    const { data, error } = await sb
+    window.addEventListener("unhandledrejection", (e) => {
+      log("✘ Unhandled promise rejection:", String(e.reason));
+      try { window.Sentry && Sentry.captureException(e.reason); } catch(_) {}
+    });
 
-      .from("projects")
+    // Prove buttons are clickable + handlers are attached
+    document.addEventListener("click", (e) => {
+      const btn = e.target && e.target.closest ? e.target.closest("button") : null;
+      if (btn && btn.id) log("Clicked:", btn.id);
+    }, true);
 
-      .insert({ user_id: user.id, name, data: payload })
+    // =========================
+    // 2) Init Sentry + PostHog (once)
+    // =========================
+    if (SENTRY_DSN && window.Sentry) {
+      try { Sentry.init({ dsn: SENTRY_DSN }); log("Sentry: init OK"); } catch(e) { log("Sentry init failed:", String(e)); }
+    } else {
+      log("Sentry: disabled");
+    }
 
-      .select("*")
+    if (POSTHOG_KEY && window.posthog) {
+      try {
+        posthog.init(POSTHOG_KEY, { api_host: POSTHOG_HOST, autocapture: true, person_profiles: "identified_only" });
+        log("PostHog: init OK");
+      } catch (e) {
+        log("PostHog init failed:", String(e));
+      }
+    } else {
+      log("PostHog: disabled");
+    }
 
-      .single();
+    // =========================
+    // 3) Init Supabase
+    // =========================
+    if (!window.supabase) {
+      document.getElementById("bootState").innerHTML = '<span class="bad">✘</span> Supabase library not loaded.';
+      log("✘ window.supabase missing (supabase-js CDN failed)");
+      return;
+    }
 
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    document.getElementById("sbUrl").textContent = SUPABASE_URL;
 
-    if (error) { log("Save project error:", error); alert(error.message); return; }
+    const setBoot = (txt, ok=true) => {
+      document.getElementById("bootState").innerHTML = ok
+        ? `<span class="ok">✔</span> ${txt}`
+        : `<span class="bad">✘</span> ${txt}`;
+    };
 
-    log("Saved project:", data);
+    const setAuthState = (txt, ok=true) => {
+      const el = document.getElementById("authState");
+      el.innerHTML = ok ? `<span class="ok">✔</span> ${txt}` : `<span class="bad">✘</span> ${txt}`;
+    };
 
-    alert("Saved project OK");
+    const setEntState = (txt, ok=true) => {
+      const el = document.getElementById("entState");
+      el.innerHTML = ok ? `<span class="ok">✔</span> ${txt}` : `<span class="bad">✘</span> ${txt}`;
+    };
 
-  });
+    async function refreshUser() {
+      const { data, error } = await sb.auth.getUser();
+      if (error) {
+        setAuthState(error.message, false);
+        log("Auth getUser error:", error);
+        return null;
+      }
 
+      if (data?.user) {
+        setAuthState(`Logged in as <b>${data.user.email}</b> (uid: ${data.user.id})`);
+        try { window.posthog && POSTHOG_KEY && posthog.identify(data.user.id, { email: data.user.email }); } catch(_) {}
+        return data.user;
+      } else {
+        setAuthState("Not logged in");
+        try { window.posthog && POSTHOG_KEY && posthog.reset(); } catch(_) {}
+        return null;
+      }
+    }
 
-  document.getElementById("btnListProj").addEventListener("click", async () => {
+    sb.auth.onAuthStateChange((_event, _session) => { refreshUser(); });
 
-    const user = await refreshUser();
+    // =========================
+    // 4) Wire buttons (each handler has try/catch)
+    // =========================
+    document.getElementById("btnLogin").addEventListener("click", async () => {
+      try {
+        const email = document.getElementById("email").value.trim();
+        if (!email) return alert("Enter an email first");
 
-    if (!user) return alert("Login first.");
+        log("Sending magic link to:", email);
+        const { error } = await sb.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: "https://app.chainsolve.co.uk" }
+        });
 
+        if (error) { log("Auth error:", error); setAuthState(error.message, false); return; }
+        setAuthState("Magic link sent — check your email.");
+      } catch (e) {
+        log("btnLogin failed:", String(e));
+      }
+    });
 
-    const { data, error } = await sb
+    document.getElementById("btnLogout").addEventListener("click", async () => {
+      try {
+        await sb.auth.signOut();
+        setAuthState("Logged out");
+        setEntState("");
+        log("Logged out");
+      } catch (e) {
+        log("btnLogout failed:", String(e));
+      }
+    });
 
-      .from("projects")
+    document.getElementById("btnEnt").addEventListener("click", async () => {
+      try {
+        const user = await refreshUser();
+        if (!user) return setEntState("Login first.", false);
 
-      .select("id,name,updated_at")
+        const { data, error } = await sb
+          .from("my_entitlements")
+          .select("is_pro,status,current_period_end,cancel_at_period_end")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-      .order("updated_at", { ascending: false })
+        if (error) { log("Entitlements error:", error); setEntState(error.message, false); return; }
+        if (!data) { setEntState("No subscription row yet (expected before first purchase)."); return; }
 
-      .limit(20);
+        setEntState(`PRO: <b>${data.is_pro}</b> · status: ${data.status} · period_end: ${data.current_period_end || "—"}`);
+        log("Entitlements:", data);
+      } catch (e) {
+        log("btnEnt failed:", String(e));
+      }
+    });
 
+    document.getElementById("btnUpgrade").addEventListener("click", async () => {
+      try {
+        const user = await refreshUser();
+        if (!user) return alert("Login first.");
 
-    if (error) { log("List projects error:", error); alert(error.message); return; }
+        log("Calling create-checkout-session…");
+        const { data, error } = await sb.functions.invoke("create-checkout-session", {
+          body: {
+            success_url: "https://app.chainsolve.co.uk/?success=1",
+            cancel_url: "https://app.chainsolve.co.uk/?canceled=1"
+          }
+        });
 
-    log("My projects:", data);
+        if (error) { log("Checkout function error:", error); alert(error.message); return; }
+        if (!data?.url) { log("No url returned:", data); alert("No checkout URL returned"); return; }
 
-    alert(`Found ${data.length} projects (see logs).`);
+        log("Redirecting to Stripe Checkout:", data.url);
+        window.location.href = data.url;
+      } catch (e) {
+        log("btnUpgrade failed:", String(e));
+      }
+    });
 
-  });
+    document.getElementById("btnPortal").addEventListener("click", async () => {
+      try {
+        const user = await refreshUser();
+        if (!user) return alert("Login first.");
 
+        log("Calling create-portal-session…");
+        const { data, error } = await sb.functions.invoke("create-portal-session", {
+          body: { return_url: "https://app.chainsolve.co.uk" }
+        });
 
-  // Boot
+        if (error) { log("Portal function error:", error); alert(error.message); return; }
+        if (!data?.url) { log("No url returned:", data); alert("No portal URL returned"); return; }
 
-  refreshUser();
+        log("Redirecting to Stripe Portal:", data.url);
+        window.location.href = data.url;
+      } catch (e) {
+        log("btnPortal failed:", String(e));
+      }
+    });
 
-  log("Smoke test loaded.");
+    document.getElementById("btnSaveProj").addEventListener("click", async () => {
+      try {
+        const user = await refreshUser();
+        if (!user) return alert("Login first.");
 
-</script>
+        const name = (document.getElementById("projName").value || "Test project").trim();
+        const payload = { nodes: [{ id: "n1", type: "input", x: 10, y: 20 }], edges: [] };
 
+        const { data, error } = await sb
+          .from("projects")
+          .insert({ user_id: user.id, name, data: payload })
+          .select("*")
+          .single();
+
+        if (error) { log("Save project error:", error); alert(error.message); return; }
+        log("Saved project:", data);
+        alert("Saved project OK");
+      } catch (e) {
+        log("btnSaveProj failed:", String(e));
+      }
+    });
+
+    document.getElementById("btnListProj").addEventListener("click", async () => {
+      try {
+        const user = await refreshUser();
+        if (!user) return alert("Login first.");
+
+        const { data, error } = await sb
+          .from("projects")
+          .select("id,name,updated_at")
+          .order("updated_at", { ascending: false })
+          .limit(20);
+
+        if (error) { log("List projects error:", error); alert(error.message); return; }
+        log("My projects:", data);
+        alert(`Found ${data.length} projects (see logs).`);
+      } catch (e) {
+        log("btnListProj failed:", String(e));
+      }
+    });
+
+    // Boot
+    setBoot("JS loaded + handlers attached");
+    refreshUser();
+    log("Smoke test loaded.");
+  })();
+  </script>
 </body>
-
 </html>
