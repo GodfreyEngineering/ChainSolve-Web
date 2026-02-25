@@ -250,3 +250,20 @@ Completed in W9.1:
 - Added 22 missing block implementations (data, vector, table, plot)
 - Fixed all port name mismatches between Rust and TS
 - Added portOverrides/manualValues support to Rust evaluator
+
+## W9.2 changes (Engine Scale Upgrade)
+
+Completed in W9.2:
+
+- Added persistent `EngineGraph` struct with dirty tracking and incremental evaluation
+- Worker protocol v2: `loadSnapshot`, `applyPatch`, `setInput`, `registerDataset`, `releaseDataset`
+- `IncrementalEvalResult` returns only changed values (evaluated_count vs total_count)
+- Dirty propagation via BFS forward through adjacency list
+- Value-unchanged pruning: if a node produces the same output, downstream nodes are skipped
+- Dataset registry for zero-copy transfer of large Float64Arrays via `Transferable`
+- `useGraphEngine` hook replaces manual `useEffect` + snapshot evaluation in CanvasArea
+- `diffGraph` function diffs React Flow state into `PatchOp[]` for incremental updates
+- `evaluate_node_with_datasets()` checks `data.datasetRef` before inline data
+- WASM-side persistent state via `thread_local!` + `RefCell<Option<EngineGraph>>`
+
+See [W9_2_SCALE.md](W9_2_SCALE.md) for full architecture details.

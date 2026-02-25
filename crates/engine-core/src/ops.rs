@@ -2,13 +2,25 @@ use crate::types::Value;
 use std::collections::HashMap;
 
 /// Evaluate a single node given its block type, resolved input values,
-/// and the node's own data map.
+/// the node's own data map, and an optional dataset registry.
 ///
 /// Unknown block types return `Value::Error`.
 pub fn evaluate_node(
     block_type: &str,
     inputs: &HashMap<String, Value>,
     data: &HashMap<String, serde_json::Value>,
+) -> Value {
+    evaluate_node_with_datasets(block_type, inputs, data, None)
+}
+
+/// Like `evaluate_node` but with access to a dataset registry.
+/// Data blocks (`vectorInput`, `tableInput`, `csvImport`) will check
+/// `data.datasetRef` and look up large arrays from the registry.
+pub fn evaluate_node_with_datasets(
+    block_type: &str,
+    inputs: &HashMap<String, Value>,
+    data: &HashMap<String, serde_json::Value>,
+    datasets: Option<&HashMap<String, Vec<f64>>>,
 ) -> Value {
     match block_type {
         // ── Sources (0 inputs) ────────────────────────────────────
@@ -96,8 +108,14 @@ pub fn evaluate_node(
                 .unwrap_or(Value::scalar(f64::NAN))
         }
 
-        // ── Data blocks (0 inputs, read from node data) ────────
+        // ── Data blocks (0 inputs, read from node data or dataset registry) ────
         "vectorInput" => {
+            // Check dataset registry first (zero-copy path for large arrays).
+            if let Some(ds_id) = data.get("datasetRef").and_then(|v| v.as_str()) {
+                if let Some(ds) = datasets.and_then(|d| d.get(ds_id)) {
+                    return Value::Vector { value: ds.clone() };
+                }
+            }
             match data.get("vectorData").and_then(|v| v.as_array()) {
                 Some(arr) => {
                     let values: Vec<f64> = arr.iter().filter_map(|v| v.as_f64()).collect();

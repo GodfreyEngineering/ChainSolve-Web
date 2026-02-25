@@ -1,6 +1,6 @@
 # ChainSolve — Architecture
 
-> Updated at each milestone. Current: **W9.1 (Single Source of Truth Engine)**
+> Updated at each milestone. Current: **W9.2 (Engine Scale Upgrade)**
 
 ---
 
@@ -67,10 +67,12 @@ src/
     csv-parse.ts  Lightweight CSV parser (auto-detect separator, quoted fields) (W5)
     csv-worker.ts Web Worker for off-thread CSV parsing (W5)
     index.ts      WASM engine public API: createEngine() → EngineAPI (W9)
-    worker.ts     Web Worker: loads WASM, handles evaluate messages (W9)
-    wasm-types.ts Typed worker messages + EngineSnapshotV1 schema (W9)
+    worker.ts     Web Worker: loads WASM, protocol v2 message handlers (W9/W9.2)
+    wasm-types.ts Typed messages, PatchOp, IncrementalEvalResult (W9/W9.2)
     bridge.ts     React Flow graph → EngineSnapshotV1 conversion (W9)
-    wasm.d.ts     Type declarations for wasm-pack output (W9)
+    wasm.d.ts     Type declarations for wasm-pack output (W9/W9.2)
+    diffGraph.ts  React Flow state diff → PatchOp[] (W9.2)
+    useGraphEngine.ts  Incremental evaluation hook for CanvasArea (W9.2)
   i18n/           Internationalization (W3)
     config.ts     i18next initialization + language detector
     locales/
@@ -129,8 +131,8 @@ supabase/
     0010_group_templates.sql             Group templates table + RLS (W7)
 
 crates/
-  engine-core/    Pure Rust compute engine: types, validation, evaluation, ops (W9)
-  engine-wasm/    wasm-bindgen wrapper — thin JSON boundary over engine-core (W9)
+  engine-core/    Pure Rust compute engine: types, validation, evaluation, ops, graph (W9/W9.2)
+  engine-wasm/    wasm-bindgen wrapper — persistent EngineGraph via thread_local (W9/W9.2)
 
 e2e/
   smoke.spec.ts   Playwright smoke tests: title, meta tags, robots.txt, #root, no errors (W5.3)
@@ -265,18 +267,19 @@ evaluation is handled by the Rust/WASM engine.
 
 This eliminates the `registry → pack → registry` cycle that caused TDZ crashes (`ReferenceError: can't access lexical declaration before initialization`).
 
-### Evaluation (Rust/WASM — sole engine since W9.1)
+### Evaluation (Rust/WASM — incremental since W9.2)
 
 All evaluation runs in the Rust/WASM engine via Web Worker. The TS evaluation
 engine (`evaluate.ts`) was removed in W9.1.
 
-1. `CanvasArea.tsx` converts React Flow graph → `EngineSnapshotV1` via `bridge.ts`
-2. `engine.evaluateGraph(snapshot)` sends to Web Worker → Rust `evaluate()` via wasm-bindgen
-3. Rust: Kahn's topo sort → evaluate nodes in order → returns `{values, diagnostics, elapsedUs}`
-4. Result `Map<nodeId, Value>` provided to React tree via `ComputedContext`
+1. `CanvasArea.tsx` uses `useGraphEngine(nodes, edges, engine)` hook
+2. On first render: `loadSnapshot()` sends full graph to persistent `EngineGraph` in Rust
+3. On changes: `diffGraph()` computes `PatchOp[]`, `applyPatch()` sends to Rust
+4. Rust: dirty propagation → only re-evaluates changed nodes → returns `IncrementalEvalResult`
+5. Result merged into `Map<nodeId, Value>` provided via `ComputedContext`
 
 Block definitions in `src/blocks/registry.ts` are metadata-only (no evaluate functions).
-See `docs/W9_ENGINE.md` for full engine documentation.
+See `docs/W9_ENGINE.md` and `docs/W9_2_SCALE.md` for full engine documentation.
 
 ### React Flow node types
 
@@ -390,6 +393,7 @@ UI gating:
 | W8 | Done | Security perimeter: CORS middleware, CSP reporting, security headers |
 | W9 | Done | Rust/WASM compute engine foundation: engine-core, engine-wasm, Worker integration, e2e |
 | W9.1 | Done | Single source of truth: WASM sole engine, TS eval removed, ops catalog, fatal error screen |
+| W9.2 | Done | Engine scale upgrade: persistent EngineGraph, dirty propagation, patch protocol, dataset registry |
 | W10 | Planned | Branching/rules for conditional flows (Pro) |
 | W11 | Planned | Custom blocks editor (Pro) |
 | W12 | Planned | Project/file browser with folders, search, tags |

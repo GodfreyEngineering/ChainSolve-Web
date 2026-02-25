@@ -201,3 +201,132 @@ test.describe('WASM engine — catalog & handshake (W9.1)', () => {
     await expect(display.first()).toContainText('7', { timeout: 5_000 })
   })
 })
+
+test.describe('WASM engine — incremental protocol (W9.2)', () => {
+  test('loadSnapshot returns full results, applyPatch returns incremental', async ({ page }) => {
+    await page.goto('/')
+    await waitForEngine(page)
+
+    const result = await page.evaluate(async () => {
+      const engine = (window as Record<string, unknown>).__chainsolve_engine as {
+        loadSnapshot: (s: unknown) => Promise<unknown>
+        applyPatch: (ops: unknown[]) => Promise<unknown>
+      }
+
+      // Load a snapshot — should return full results.
+      const full = (await engine.loadSnapshot({
+        version: 1,
+        nodes: [
+          { id: 'n1', blockType: 'number', data: { value: 3 } },
+          { id: 'n2', blockType: 'number', data: { value: 4 } },
+          { id: 'add', blockType: 'add', data: {} },
+        ],
+        edges: [
+          { id: 'e1', source: 'n1', sourceHandle: 'out', target: 'add', targetHandle: 'a' },
+          { id: 'e2', source: 'n2', sourceHandle: 'out', target: 'add', targetHandle: 'b' },
+        ],
+      })) as Record<string, unknown>
+
+      // Apply a patch changing n1 from 3 to 10.
+      const inc = (await engine.applyPatch([
+        { op: 'updateNodeData', nodeId: 'n1', data: { value: 10 } },
+      ])) as Record<string, unknown>
+
+      return { full, inc }
+    })
+
+    const full = result.full as { values: Record<string, { kind: string; value: number }> }
+    const inc = result.inc as {
+      changedValues: Record<string, { kind: string; value: number }>
+      evaluatedCount: number
+      totalCount: number
+    }
+
+    // Full result should have all 3 nodes.
+    expect(Object.keys(full.values)).toHaveLength(3)
+    expect(full.values.add).toEqual({ kind: 'scalar', value: 7 })
+
+    // Incremental result: n1 changed (10), add changed (14). n2 was not re-evaluated.
+    expect(inc.changedValues.n1).toEqual({ kind: 'scalar', value: 10 })
+    expect(inc.changedValues.add).toEqual({ kind: 'scalar', value: 14 })
+    expect(inc.evaluatedCount).toBe(2) // only n1 and add
+    expect(inc.totalCount).toBe(3)
+  })
+
+  test('setInput updates manual values and re-evaluates', async ({ page }) => {
+    await page.goto('/')
+    await waitForEngine(page)
+
+    const result = await page.evaluate(async () => {
+      const engine = (window as Record<string, unknown>).__chainsolve_engine as {
+        loadSnapshot: (s: unknown) => Promise<unknown>
+        setInput: (nodeId: string, portId: string, value: number) => Promise<unknown>
+      }
+
+      await engine.loadSnapshot({
+        version: 1,
+        nodes: [{ id: 'add', blockType: 'add', data: {} }],
+        edges: [],
+      })
+
+      // Set inputs via setInput API.
+      await engine.setInput('add', 'a', 5)
+      const r = await engine.setInput('add', 'b', 3)
+      return r
+    })
+
+    const r = result as {
+      changedValues: Record<string, { kind: string; value: number }>
+      evaluatedCount: number
+    }
+    expect(r.changedValues.add).toEqual({ kind: 'scalar', value: 8 })
+    expect(r.evaluatedCount).toBe(1)
+  })
+
+  test('applyPatch addNode/removeNode', async ({ page }) => {
+    await page.goto('/')
+    await waitForEngine(page)
+
+    const result = await page.evaluate(async () => {
+      const engine = (window as Record<string, unknown>).__chainsolve_engine as {
+        loadSnapshot: (s: unknown) => Promise<unknown>
+        applyPatch: (ops: unknown[]) => Promise<unknown>
+      }
+
+      await engine.loadSnapshot({
+        version: 1,
+        nodes: [
+          { id: 'n1', blockType: 'number', data: { value: 5 } },
+        ],
+        edges: [],
+      })
+
+      // Add a display node + edge.
+      const addResult = (await engine.applyPatch([
+        { op: 'addNode', node: { id: 'disp', blockType: 'display', data: {} } },
+        {
+          op: 'addEdge',
+          edge: { id: 'e1', source: 'n1', sourceHandle: 'out', target: 'disp', targetHandle: 'value' },
+        },
+      ])) as Record<string, unknown>
+
+      // Remove the display node.
+      const removeResult = (await engine.applyPatch([
+        { op: 'removeNode', nodeId: 'disp' },
+      ])) as Record<string, unknown>
+
+      return { addResult, removeResult }
+    })
+
+    const add = result.addResult as {
+      changedValues: Record<string, { kind: string; value: number }>
+    }
+    expect(add.changedValues.disp).toEqual({ kind: 'scalar', value: 5 })
+
+    const remove = result.removeResult as {
+      changedValues: Record<string, unknown>
+      totalCount: number
+    }
+    expect(remove.totalCount).toBe(1) // only n1 left
+  })
+})

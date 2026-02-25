@@ -13,15 +13,34 @@
 import type {
   EngineSnapshotV1,
   EngineEvalResult,
+  IncrementalEvalResult,
+  PatchOp,
   CatalogEntry,
+  WorkerRequest,
   WorkerResponse,
 } from './wasm-types.ts'
 
-export type { EngineSnapshotV1, EngineEvalResult, CatalogEntry } from './wasm-types.ts'
+export type {
+  EngineSnapshotV1,
+  EngineEvalResult,
+  IncrementalEvalResult,
+  PatchOp,
+  CatalogEntry,
+} from './wasm-types.ts'
 
 export interface EngineAPI {
   /** Evaluate a graph snapshot via Rust/WASM (async, off-main-thread). */
   evaluateGraph(snapshot: EngineSnapshotV1): Promise<EngineEvalResult>
+  /** Load a full snapshot into the persistent engine graph. Returns full results. */
+  loadSnapshot(snapshot: EngineSnapshotV1): Promise<EngineEvalResult>
+  /** Apply incremental patch ops. Returns only changed values. */
+  applyPatch(ops: PatchOp[]): Promise<IncrementalEvalResult>
+  /** Set a manual input on a node port. Returns only changed values. */
+  setInput(nodeId: string, portId: string, value: number): Promise<IncrementalEvalResult>
+  /** Register a large dataset for zero-copy transfer. Fire-and-forget. */
+  registerDataset(id: string, data: Float64Array): void
+  /** Release a previously registered dataset. */
+  releaseDataset(id: string): void
   /** Ops catalog received from the WASM engine on startup. */
   readonly catalog: CatalogEntry[]
   /** Engine version string from Rust crate. */
@@ -69,34 +88,84 @@ export async function createEngine(): Promise<EngineAPI> {
   })
 
   // Request/response bookkeeping.
+  // Pending map supports both full results (EngineEvalResult) and incremental results.
   let nextId = 0
-  const pending = new Map<
-    number,
-    { resolve: (r: EngineEvalResult) => void; reject: (e: Error) => void }
-  >()
+  type PendingEntry =
+    | { kind: 'full'; resolve: (r: EngineEvalResult) => void; reject: (e: Error) => void }
+    | {
+        kind: 'incremental'
+        resolve: (r: IncrementalEvalResult) => void
+        reject: (e: Error) => void
+      }
+  const pending = new Map<number, PendingEntry>()
 
   worker.addEventListener('message', (e: MessageEvent<WorkerResponse>) => {
     const msg = e.data
-    if (msg.type === 'result' || msg.type === 'error') {
+    if (msg.type === 'result' || msg.type === 'incremental' || msg.type === 'error') {
       const p = pending.get(msg.requestId)
       if (!p) return
       pending.delete(msg.requestId)
 
-      if (msg.type === 'result') {
-        p.resolve(msg.result)
-      } else {
+      if (msg.type === 'error') {
         p.reject(new Error(`[${msg.error.code}] ${msg.error.message}`))
+      } else if (msg.type === 'result' && p.kind === 'full') {
+        p.resolve(msg.result)
+      } else if (msg.type === 'incremental' && p.kind === 'incremental') {
+        p.resolve(msg.result)
       }
     }
   })
+
+  function postRequest(msg: WorkerRequest) {
+    worker.postMessage(msg)
+  }
 
   return {
     evaluateGraph(snapshot) {
       return new Promise((resolve, reject) => {
         const id = nextId++
-        pending.set(id, { resolve, reject })
-        worker.postMessage({ type: 'evaluate', requestId: id, snapshot })
+        pending.set(id, { kind: 'full', resolve, reject })
+        postRequest({ type: 'evaluate', requestId: id, snapshot })
       })
+    },
+
+    loadSnapshot(snapshot) {
+      return new Promise((resolve, reject) => {
+        const id = nextId++
+        pending.set(id, { kind: 'full', resolve, reject })
+        postRequest({ type: 'loadSnapshot', requestId: id, snapshot })
+      })
+    },
+
+    applyPatch(ops) {
+      return new Promise((resolve, reject) => {
+        const id = nextId++
+        pending.set(id, { kind: 'incremental', resolve, reject })
+        postRequest({ type: 'applyPatch', requestId: id, ops })
+      })
+    },
+
+    setInput(nodeId, portId, value) {
+      return new Promise((resolve, reject) => {
+        const id = nextId++
+        pending.set(id, { kind: 'incremental', resolve, reject })
+        postRequest({ type: 'setInput', requestId: id, nodeId, portId, value })
+      })
+    },
+
+    registerDataset(id, data) {
+      const buffer = data.buffer.slice(
+        data.byteOffset,
+        data.byteOffset + data.byteLength,
+      ) as ArrayBuffer
+      worker.postMessage(
+        { type: 'registerDataset', datasetId: id, buffer } satisfies WorkerRequest,
+        [buffer],
+      )
+    },
+
+    releaseDataset(id) {
+      worker.postMessage({ type: 'releaseDataset', datasetId: id } satisfies WorkerRequest)
     },
 
     catalog,

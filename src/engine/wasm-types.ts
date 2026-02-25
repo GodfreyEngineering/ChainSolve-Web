@@ -64,14 +64,40 @@ export interface CatalogEntry {
   proOnly: boolean
 }
 
+// ── Patch operations (W9.2) ──────────────────────────────────────
+
+export type PatchOp =
+  | { op: 'addNode'; node: EngineNodeDef }
+  | { op: 'removeNode'; nodeId: string }
+  | { op: 'updateNodeData'; nodeId: string; data: Record<string, unknown> }
+  | { op: 'addEdge'; edge: EngineEdgeDef }
+  | { op: 'removeEdge'; edgeId: string }
+
+// ── Incremental result (W9.2) ───────────────────────────────────
+
+export interface IncrementalEvalResult {
+  changedValues: Record<string, EngineValue>
+  diagnostics: EngineDiagnostic[]
+  elapsedUs: number
+  evaluatedCount: number
+  totalCount: number
+}
+
 // ── Worker messages ───────────────────────────────────────────────
 
 /** Messages sent from main thread → worker. */
-export type WorkerRequest = { type: 'evaluate'; requestId: number; snapshot: EngineSnapshotV1 }
+export type WorkerRequest =
+  | { type: 'evaluate'; requestId: number; snapshot: EngineSnapshotV1 }
+  | { type: 'loadSnapshot'; requestId: number; snapshot: EngineSnapshotV1 }
+  | { type: 'applyPatch'; requestId: number; ops: PatchOp[] }
+  | { type: 'setInput'; requestId: number; nodeId: string; portId: string; value: number }
+  | { type: 'registerDataset'; datasetId: string; buffer: ArrayBuffer }
+  | { type: 'releaseDataset'; datasetId: string }
 
 /** Messages sent from worker → main thread. */
 export type WorkerResponse =
   | { type: 'ready'; catalog: CatalogEntry[]; engineVersion: string }
   | { type: 'result'; requestId: number; result: EngineEvalResult }
+  | { type: 'incremental'; requestId: number; result: IncrementalEvalResult }
   | { type: 'error'; requestId: number; error: { code: string; message: string } }
   | { type: 'init-error'; error: { code: string; message: string } }

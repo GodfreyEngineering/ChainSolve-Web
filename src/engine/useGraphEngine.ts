@@ -1,0 +1,80 @@
+/**
+ * React hook that connects React Flow graph state to the WASM engine
+ * using the incremental patch protocol.
+ *
+ * On first render: loads a full snapshot into the engine.
+ * On subsequent changes: diffs previous vs current state and applies patches.
+ * Results are merged incrementally (only changed values update the map).
+ */
+
+import { useEffect, useRef, useState } from 'react'
+import type { Node, Edge } from '@xyflow/react'
+import type { EngineAPI } from './index.ts'
+import type { Value } from './value.ts'
+import { toEngineSnapshot } from './bridge.ts'
+import { diffGraph } from './diffGraph.ts'
+
+/** Convert a Record<string, EngineValue> into a Map<string, Value>. */
+function toValueMap(values: Record<string, unknown>): Map<string, Value> {
+  const map = new Map<string, Value>()
+  for (const [id, val] of Object.entries(values)) {
+    map.set(id, val as Value)
+  }
+  return map
+}
+
+export function useGraphEngine(
+  nodes: Node[],
+  edges: Edge[],
+  engine: EngineAPI,
+): ReadonlyMap<string, Value> {
+  const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
+  const prevNodesRef = useRef<Node[]>([])
+  const prevEdgesRef = useRef<Edge[]>([])
+  const snapshotLoaded = useRef(false)
+  const pendingRef = useRef(0) // Coalescing counter: skip stale results.
+
+  useEffect(() => {
+    const reqId = ++pendingRef.current
+
+    if (!snapshotLoaded.current) {
+      // First render: load full snapshot into persistent engine graph.
+      snapshotLoaded.current = true
+      const snapshot = toEngineSnapshot(nodes, edges)
+      engine.loadSnapshot(snapshot).then((result) => {
+        if (reqId !== pendingRef.current) return
+        setComputed(toValueMap(result.values))
+      })
+    } else {
+      // Subsequent renders: diff and apply patch.
+      const ops = diffGraph(prevNodesRef.current, prevEdgesRef.current, nodes, edges)
+      if (ops.length === 0) {
+        prevNodesRef.current = nodes
+        prevEdgesRef.current = edges
+        return
+      }
+      engine.applyPatch(ops).then((result) => {
+        if (reqId !== pendingRef.current) return
+        // MERGE changed values into existing map (not replace).
+        setComputed((prev) => {
+          const next = new Map(prev)
+          for (const [id, val] of Object.entries(result.changedValues)) {
+            next.set(id, val as Value)
+          }
+          // Remove values for nodes that were removed.
+          for (const op of ops) {
+            if (op.op === 'removeNode') {
+              next.delete(op.nodeId)
+            }
+          }
+          return next
+        })
+      })
+    }
+
+    prevNodesRef.current = nodes
+    prevEdgesRef.current = edges
+  }, [nodes, edges, engine])
+
+  return computed
+}

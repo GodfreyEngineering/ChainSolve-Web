@@ -96,3 +96,18 @@ pub enum DiagLevel {
     Warning,
     Error,
 }
+
+// ── Incremental evaluation result ────────────────────────────────────
+
+/// Result of an incremental (dirty-only) evaluation.
+/// Contains only the values that changed, not the full graph.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IncrementalEvalResult {
+    /// Only nodes that were re-evaluated and produced a value.
+    pub changed_values: HashMap<String, Value>,
+    pub diagnostics: Vec<Diagnostic>,
+    pub elapsed_us: u64,
+    pub evaluated_count: usize,
+    pub total_count: usize,
+}

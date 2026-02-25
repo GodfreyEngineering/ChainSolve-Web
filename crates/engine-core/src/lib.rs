@@ -1,12 +1,14 @@
 pub mod catalog;
 pub mod error;
 pub mod eval;
+pub mod graph;
 pub mod ops;
 pub mod types;
 pub mod validate;
 
 use error::{EngineError, ErrorCode};
-use types::{EngineSnapshotV1, EvalResult};
+use graph::PatchOp;
+use types::{EngineSnapshotV1, EvalResult, IncrementalEvalResult};
 
 /// Top-level public API: validate + evaluate a JSON snapshot.
 ///
@@ -25,4 +27,55 @@ pub fn run(snapshot_json: &str) -> Result<EvalResult, EngineError> {
     result.diagnostics.append(&mut diags);
 
     Ok(result)
+}
+
+/// Load a snapshot into an EngineGraph and perform a full evaluation.
+/// Returns an EvalResult with all values.
+pub fn run_load_snapshot(
+    graph: &mut graph::EngineGraph,
+    snapshot_json: &str,
+) -> Result<EvalResult, EngineError> {
+    let snapshot: EngineSnapshotV1 = serde_json::from_str(snapshot_json).map_err(|e| {
+        EngineError::new(
+            ErrorCode::InvalidSnapshot,
+            format!("Failed to parse snapshot: {}", e),
+        )
+    })?;
+
+    validate::validate(&snapshot)?;
+    graph.load_snapshot(snapshot);
+    let inc = graph.evaluate_dirty();
+
+    Ok(EvalResult {
+        values: inc.changed_values,
+        diagnostics: inc.diagnostics,
+        elapsed_us: inc.elapsed_us,
+    })
+}
+
+/// Apply a JSON patch to an existing EngineGraph and return incremental results.
+pub fn run_patch(
+    graph: &mut graph::EngineGraph,
+    patch_json: &str,
+) -> Result<IncrementalEvalResult, EngineError> {
+    let ops: Vec<PatchOp> = serde_json::from_str(patch_json).map_err(|e| {
+        EngineError::new(
+            ErrorCode::InvalidSnapshot,
+            format!("Failed to parse patch: {}", e),
+        )
+    })?;
+
+    graph.apply_patch(ops);
+    Ok(graph.evaluate_dirty())
+}
+
+/// Set a manual input on a node and return incremental results.
+pub fn run_set_input(
+    graph: &mut graph::EngineGraph,
+    node_id: &str,
+    port_id: &str,
+    value: f64,
+) -> IncrementalEvalResult {
+    graph.set_input(node_id, port_id, value);
+    graph.evaluate_dirty()
 }
