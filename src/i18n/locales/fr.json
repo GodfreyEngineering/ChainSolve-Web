@@ -123,7 +123,21 @@
     "themeDark": "Sombre",
     "themeLight": "Clair (bientôt)",
     "save": "Enregistrer",
-    "saved": "Enregistré !"
+    "saved": "Enregistré !",
+    "buildInfo": "Infos de build",
+    "version": "Version",
+    "commitSha": "Commit",
+    "buildDate": "Compilé le",
+    "environment": "Environnement",
+    "reportBug": "Signaler un bug",
+    "bugTitle": "Titre du bug",
+    "bugTitlePlaceholder": "Brève description du problème",
+    "bugDescription": "Description",
+    "bugDescriptionPlaceholder": "Étapes pour reproduire, comportement attendu vs réel…",
+    "bugSubmit": "Envoyer le rapport",
+    "bugSubmitting": "Envoi…",
+    "bugSuccess": "Rapport envoyé. Merci !",
+    "bugError": "Échec de l'envoi du rapport."
   },
   "ui": {
     "close": "Fermer",

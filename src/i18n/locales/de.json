@@ -123,7 +123,21 @@
     "themeDark": "Dunkel",
     "themeLight": "Hell (kommt bald)",
     "save": "Speichern",
-    "saved": "Gespeichert!"
+    "saved": "Gespeichert!",
+    "buildInfo": "Build-Info",
+    "version": "Version",
+    "commitSha": "Commit",
+    "buildDate": "Erstellt am",
+    "environment": "Umgebung",
+    "reportBug": "Fehler melden",
+    "bugTitle": "Fehlertitel",
+    "bugTitlePlaceholder": "Kurze Beschreibung des Problems",
+    "bugDescription": "Beschreibung",
+    "bugDescriptionPlaceholder": "Schritte zur Reproduktion, erwartetes vs tatsächliches Verhalten…",
+    "bugSubmit": "Bericht senden",
+    "bugSubmitting": "Wird gesendet…",
+    "bugSuccess": "Fehlerbericht gesendet. Danke!",
+    "bugError": "Fehlerbericht konnte nicht gesendet werden."
   },
   "ui": {
     "close": "Schließen",

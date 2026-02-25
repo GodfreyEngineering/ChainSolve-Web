@@ -123,7 +123,21 @@
     "themeDark": "Dark",
     "themeLight": "Light (coming soon)",
     "save": "Save",
-    "saved": "Saved!"
+    "saved": "Saved!",
+    "buildInfo": "Build Info",
+    "version": "Version",
+    "commitSha": "Commit",
+    "buildDate": "Built",
+    "environment": "Environment",
+    "reportBug": "Report a Bug",
+    "bugTitle": "Bug title",
+    "bugTitlePlaceholder": "Brief description of the issue",
+    "bugDescription": "Description",
+    "bugDescriptionPlaceholder": "Steps to reproduce, expected vs actual behavior…",
+    "bugSubmit": "Submit Report",
+    "bugSubmitting": "Submitting…",
+    "bugSuccess": "Bug report submitted. Thank you!",
+    "bugError": "Failed to submit bug report."
   },
   "ui": {
     "close": "Close",

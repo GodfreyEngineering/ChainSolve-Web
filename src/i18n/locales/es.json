@@ -123,7 +123,21 @@
     "themeDark": "Oscuro",
     "themeLight": "Claro (próximamente)",
     "save": "Guardar",
-    "saved": "¡Guardado!"
+    "saved": "¡Guardado!",
+    "buildInfo": "Info de compilación",
+    "version": "Versión",
+    "commitSha": "Commit",
+    "buildDate": "Compilado",
+    "environment": "Entorno",
+    "reportBug": "Reportar un error",
+    "bugTitle": "Título del error",
+    "bugTitlePlaceholder": "Breve descripción del problema",
+    "bugDescription": "Descripción",
+    "bugDescriptionPlaceholder": "Pasos para reproducir, comportamiento esperado vs real…",
+    "bugSubmit": "Enviar reporte",
+    "bugSubmitting": "Enviando…",
+    "bugSuccess": "Reporte enviado. ¡Gracias!",
+    "bugError": "Error al enviar el reporte."
   },
   "ui": {
     "close": "Cerrar",

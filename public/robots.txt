@@ -1,0 +1,11 @@
+# ChainSolve — robots policy
+# Allow indexing of landing/marketing pages, block app routes.
+
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /canvas
+Disallow: /settings
+Disallow: /billing
+Disallow: /login
+Disallow: /api/

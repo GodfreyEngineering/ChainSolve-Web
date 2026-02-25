@@ -1,6 +1,6 @@
 # ChainSolve — Architecture
 
-> Updated at each milestone. Current: **W5 (Arrays/Tables + CSV Import + Value System)**
+> Updated at each milestone. Current: **W5.3 (Production Hardening)**
 
 ---
 
@@ -9,6 +9,8 @@
 | Layer | Choice | Notes |
 |---|---|---|
 | Frontend | Vite 7 + React 19 + TypeScript 5.9 | Strict mode: `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`, `erasableSyntaxOnly` |
+| E2E Testing | Playwright | Chromium smoke tests (`e2e/smoke.spec.ts`) |
+| CI | GitHub Actions | Typecheck, lint, build, e2e tests |
 | Routing | react-router-dom v7 | BrowserRouter; `/` → `/app` → `/canvas` → `/settings` |
 | Canvas | @xyflow/react (React Flow v12) | Node graph editor |
 | i18n | react-i18next + i18next | EN/ES/FR/IT/DE; browser language detection |
@@ -49,6 +51,7 @@ src/
       Select.tsx  Dropdown select with label/hint
       index.ts    Barrel export
     UpgradeModal.tsx  Upgrade prompt when project limit or feature gate is hit (W4)
+    BugReportModal.tsx  In-app bug reporting modal (W5.3)
     ErrorBoundary.tsx   Top-level class-based error boundary
   contexts/
     ComputedContext.ts  React context for computed Map<nodeId,number>
@@ -68,6 +71,7 @@ src/
       de.json     German
   lib/
     supabase.ts     Browser Supabase client (anon key)
+    build-info.ts   Build metadata: version, SHA, build time, environment (W5.3)
     entitlements.ts Plan-based feature gating: getEntitlements, isPro, isReadOnly, canCreateProject (W4)
     projects.ts     Project CRUD: list, create, load, save, rename, delete, duplicate, import
     storage.ts      Storage helpers: saveProjectJson, uploadCsv, listProjectAssets, etc.
@@ -79,7 +83,7 @@ src/
     settings/
       ProfileSettings.tsx    Account info (email, user ID, plan, member since)
       BillingSettings.tsx    Subscription management (upgrade/manage)
-      PreferencesSettings.tsx  Language selector, theme (dark only for now)
+      PreferencesSettings.tsx  Language, theme, build info, bug report (W5.3)
   stores/
     projectStore.ts  Zustand store: save lifecycle, project metadata
   App.tsx         Route tree (BrowserRouter)
@@ -100,6 +104,19 @@ supabase/
     0004_projects_description.sql  Adds projects.description
     0005_projects_storage_key_nullable.sql  Drops NOT NULL on storage_key
     0006_entitlements_enforcement.sql       Plan limit trigger, storage RLS tightening (W4)
+    0007_bug_reports.sql                    In-app bug reporting table + RLS (W5.3)
+
+e2e/
+  smoke.spec.ts   Playwright smoke tests: title, meta tags, robots.txt, #root, no errors (W5.3)
+
+.github/
+  workflows/
+    ci.yml        GitHub Actions: typecheck, lint, build, e2e tests (W5.3)
+
+public/
+  _headers        Cloudflare Pages security headers (CSP, HSTS, etc.) (W5.3)
+  _redirects      SPA fallback for Cloudflare Pages
+  robots.txt      Crawler policy: block app routes (W5.3)
 
 docs/
   SETUP.md        Production deploy guide
@@ -126,6 +143,9 @@ project_assets  id, project_id, user_id, name (original filename), storage_path,
                 mime_type, size (bytes), kind ('csv' | ...)
 
 stripe_events   id (= Stripe event ID), type, payload (jsonb)
+
+bug_reports     id, user_id (FK profiles), title, description, metadata (jsonb),
+                created_at (W5.3)
 ```
 
 RLS: all tables enable row-level security. Users own their rows via `owner_id = auth.uid()`.
@@ -309,6 +329,7 @@ UI gating:
 | W5 | ✅ Done | Arrays/Tables + CSV import (Pro): Value type system, 18 new blocks, DataNode + editors, CSV Web Worker |
 | W5.1 | ✅ Done | Save fixpack: forwardRef snapshot, Save button, Ctrl+S, beforeunload, boot guard |
 | W5.2 | ✅ Done | Circular import fix (TDZ crash), true bootloader, mobile baseline |
+| W5.3 | ✅ Done | Production hardening: security headers, CI, Playwright e2e, build info, bug reporting |
 | W6 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
 | W7 | Planned | Plot output nodes (Pro, uPlot) |
 | W8 | Planned | Branching/rules for conditional flows (Pro) |
