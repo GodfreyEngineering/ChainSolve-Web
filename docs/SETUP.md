@@ -29,7 +29,8 @@ Run each file in `supabase/migrations/` **in numeric order** via **Supabase → 
 | `0005_projects_storage_key_nullable.sql` | Drops NOT NULL on `projects.storage_key` (safety net) |
 | `0006_entitlements_enforcement.sql` | Plan-based limits: project count trigger, storage RLS tightening, helper functions. Casts `plan` to text to avoid enum-name coupling. Includes `NOTIFY pgrst, 'reload schema'` to refresh PostgREST. |
 | `0007_bug_reports.sql` | In-app bug reporting table (`bug_reports`) with RLS (users insert/read own). |
-| `0008_advisor_fixes.sql` | Advisor fixpack: function `search_path`, RLS initplan optimization, deduplicate project policies, FK indexes. See §15 below. |
+| `0008_advisor_fixes.sql` | ~~Superseded by 0009~~ — kept for history. Fails on schemas where `fs_items`/`project_assets` use `owner_id`. |
+| `0009_advisor_fixes_v2.sql` | Advisor fixpack v2: same fixes as 0008 but auto-detects `owner_id` vs `user_id` at runtime. See §15 below. |
 
 After running 0001, confirm these tables appear under **Table Editor**:
 `profiles`, `projects`, `fs_items`, `project_assets`, `stripe_events`
@@ -547,17 +548,23 @@ This happens when `projects.storage_key` has a NOT NULL constraint in the DB but
 
 ---
 
-## 15. Supabase Advisor Fixes (0008)
+## 15. Supabase Advisor Fixes (0009)
 
-Migration `0008_advisor_fixes.sql` addresses four categories of Supabase Advisor warnings. Apply it via **Supabase → SQL Editor** after all previous migrations.
+> **Note:** `0008_advisor_fixes.sql` is **superseded** by `0009_advisor_fixes_v2.sql`.
+> 0008 failed in production because it hardcoded `user_id` for `fs_items` and
+> `project_assets`, but the live schema has `owner_id` (from the 0003 rename
+> propagating to those tables). **Do not run 0008** — it is kept in the repo
+> for history only. Run **0009** instead.
+
+Migration `0009_advisor_fixes_v2.sql` addresses the same four categories of Supabase Advisor warnings as 0008, but uses dynamic SQL to auto-detect whether `fs_items` and `project_assets` use `owner_id` or `user_id`. It works on any schema variant.
 
 ### What it fixes
 
 #### 1. `function_search_path_mutable` — function security
 
-**Problem:** Functions `trigger_set_updated_at()` and `handle_new_user()` were created without `SET search_path`, making them vulnerable to search_path manipulation.
+**Problem:** Functions `set_updated_at()`, `set_updated_at_metadata()`, `trigger_set_updated_at()`, and `handle_new_user()` were created without `SET search_path`, making them vulnerable to search_path manipulation.
 
-**Fix:** All public functions now include `SET search_path = public` in their declaration. This is set at the function level (not inside the body), which is what the advisor checks.
+**Fix:** All public functions now include `SET search_path = public` in their declaration. This covers both the names flagged by the Supabase advisor (`set_updated_at`, `set_updated_at_metadata`) and our own function names.
 
 #### 2. `auth_rls_initplan` — RLS performance
 
@@ -584,19 +591,54 @@ USING (owner_id = (select auth.uid()))
 
 **Problem:** Foreign key columns on `fs_items` and `project_assets` may lack covering indexes, which degrades JOIN and CASCADE performance.
 
-**Fix:** Ensures indexes exist (using `IF NOT EXISTS`) for:
-- `fs_items(user_id)`, `fs_items(parent_id)`, `fs_items(project_id)`
-- `project_assets(user_id)`, `project_assets(project_id)`
+**Fix:** Uses dynamic SQL to detect the actual column name (`owner_id` or `user_id`) from `information_schema.columns`, then creates indexes on the detected column. Also creates static indexes for `parent_id`, `project_id`.
 
-These were originally created in 0001 but the migration re-asserts them for safety.
+### How the auto-detection works
+
+The migration uses `DO $$ ... $$` blocks with dynamic SQL:
+
+```sql
+SELECT column_name INTO _col
+  FROM information_schema.columns
+ WHERE table_schema = 'public'
+   AND table_name   = 'fs_items'
+   AND column_name  IN ('owner_id', 'user_id')
+ ORDER BY CASE column_name WHEN 'owner_id' THEN 0 ELSE 1 END
+ LIMIT 1;
+
+EXECUTE format(
+  'CREATE POLICY "fs_items_select_own" ON public.fs_items FOR SELECT
+   TO authenticated USING (%I = (select auth.uid()))',
+  _col
+);
+```
+
+This pattern is used for both `fs_items` and `project_assets` policies and indexes.
 
 ### Apply checklist
 
-- [ ] Run `0008_advisor_fixes.sql` in **Supabase → SQL Editor**
+- [ ] **Skip 0008** — do NOT run it (it will fail on `owner_id` schemas)
+- [ ] Run `0009_advisor_fixes_v2.sql` in **Supabase → SQL Editor**
 - [ ] Confirm it completes without errors (it's wrapped in `BEGIN/COMMIT`)
-- [ ] Go to **Supabase → Advisors** and rerun checks:
-  - [ ] `function_search_path_mutable` — no warnings for `public.*` functions
-  - [ ] `auth_rls_initplan` — no warnings for `profiles`, `projects`, `fs_items`, `project_assets`, `bug_reports`
-  - [ ] `multiple_permissive_policies` — no warnings for `projects`
-  - [ ] `unindexed_foreign_keys` — no warnings for `fs_items` or `project_assets`
-- [ ] Smoke test: sign in → create project → CRUD works → cannot see other users' data
+- [ ] Check the NOTICE messages — they report which column was detected for each table
+
+### How to verify advisors are cleared
+
+After running 0009, go to **Supabase Dashboard → Advisors** and rerun all checks:
+
+- [ ] `function_search_path_mutable` — no warnings for any `public.*` functions
+- [ ] `auth_rls_initplan` — no warnings for `profiles`, `projects`, `fs_items`, `project_assets`, `bug_reports`
+- [ ] `multiple_permissive_policies` — no warnings for `projects`
+- [ ] `unindexed_foreign_keys` — no warnings for `fs_items` or `project_assets`
+
+If any advisor warning persists, check:
+
+1. **Function warnings** — run `\df+ public.set_updated_at` in psql or check function definition in Supabase → Database → Functions. The `SET search_path = public` must appear in the function attributes, not just inside the body.
+2. **RLS warnings** — run `SELECT policyname, qual, with_check FROM pg_policies WHERE schemaname = 'public'` and verify every policy uses `(select auth.uid())` (with parentheses), not bare `auth.uid()`.
+3. **Index warnings** — run `SELECT indexname FROM pg_indexes WHERE tablename IN ('fs_items', 'project_assets')` and confirm covering indexes exist for all FK columns.
+
+### Smoke test
+
+- [ ] Sign in → create project → CRUD works → cannot see other users' data
+- [ ] Upload a CSV → appears in asset list → download works
+- [ ] Delete a project → storage files cleaned up
