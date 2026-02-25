@@ -14,6 +14,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # ── Rust toolchain + wasm-pack ──────────────────────────────
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo registry + target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Rust tests
+        run: cargo test --workspace
+
+      - name: Build WASM
+        run: wasm-pack build crates/engine-wasm --target web --release
+
+      # ── Node.js ─────────────────────────────────────────────────
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -22,7 +47,7 @@ jobs:
       - run: npm ci
 
       - name: Typecheck (app)
-        run: npm run typecheck
+        run: tsc -b --noEmit
 
       - name: Typecheck (functions)
         run: npm run typecheck:functions
@@ -34,7 +59,7 @@ jobs:
         run: npm run format:check
 
       - name: Build
-        run: npm run build
+        run: tsc -b && vite build
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

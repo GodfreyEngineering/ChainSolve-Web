@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { execSync } from 'child_process'
 import { readFileSync } from 'fs'
+import { resolve } from 'path'
 
 function getGitSha(): string {
   try {
@@ -28,5 +29,13 @@ export default defineConfig({
     __CS_SHA__: JSON.stringify(getGitSha()),
     __CS_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
     __CS_ENV__: JSON.stringify(process.env.NODE_ENV ?? 'development'),
+  },
+  resolve: {
+    alias: {
+      '@engine-wasm': resolve(__dirname, 'crates/engine-wasm/pkg'),
+    },
+  },
+  worker: {
+    format: 'es',
   },
 })

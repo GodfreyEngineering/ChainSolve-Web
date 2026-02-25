@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 
 .env
+
+# Rust / WASM
+/target
+crates/engine-wasm/pkg

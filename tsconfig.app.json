@@ -22,7 +22,12 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* WASM engine alias (mirrors vite.config.ts resolve.alias) */
+    "paths": {
+      "@engine-wasm/*": ["./crates/engine-wasm/pkg/*"]
+    }
   },
   "include": ["src"]
 }

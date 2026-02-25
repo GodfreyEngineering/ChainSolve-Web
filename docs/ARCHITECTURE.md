@@ -1,6 +1,6 @@
 # ChainSolve — Architecture
 
-> Updated at each milestone. Current: **W7 (Block Groups + Templates)**
+> Updated at each milestone. Current: **W9 (Rust/WASM Compute Engine)**
 
 ---
 
@@ -9,6 +9,7 @@
 | Layer | Choice | Notes |
 |---|---|---|
 | Frontend | Vite 7 + React 19 + TypeScript 5.9 | Strict mode: `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`, `erasableSyntaxOnly` |
+| Compute Engine | Rust → WASM (via wasm-pack) | `engine-core` (pure Rust) + `engine-wasm` (wasm-bindgen), runs in Web Worker (W9) |
 | E2E Testing | Playwright | Chromium smoke tests (`e2e/smoke.spec.ts`) |
 | CI | GitHub Actions | Typecheck, lint, build, e2e tests |
 | Routing | react-router-dom v7 | BrowserRouter; `/` → `/app` → `/canvas` → `/settings` |
@@ -61,10 +62,15 @@ src/
     ComputedContext.ts  React context for computed Map<nodeId,number>
   engine/
     value.ts      Polymorphic Value type system: Scalar | Vector | Table | Error (W5)
-    evaluate.ts   Pure function: nodes + edges → Map<nodeId, Value>
+    evaluate.ts   TS evaluation engine (legacy, to be replaced by WASM engine)
                   Topological sort (Kahn's algorithm), NaN/Error propagation
     csv-parse.ts  Lightweight CSV parser (auto-detect separator, quoted fields) (W5)
     csv-worker.ts Web Worker for off-thread CSV parsing (W5)
+    index.ts      WASM engine public API: createEngine() → EngineAPI (W9)
+    worker.ts     Web Worker: loads WASM, handles evaluate messages (W9)
+    wasm-types.ts Typed worker messages + EngineSnapshotV1 schema (W9)
+    bridge.ts     React Flow graph → EngineSnapshotV1 conversion (W9)
+    wasm.d.ts     Type declarations for wasm-pack output (W9)
   i18n/           Internationalization (W3)
     config.ts     i18next initialization + language detector
     locales/
@@ -122,10 +128,15 @@ supabase/
     0009_advisor_fixes_v2.sql              Owner_id-safe advisor fixes: dynamic SQL auto-detection (W5.3.1b)
     0010_group_templates.sql             Group templates table + RLS (W7)
 
+crates/
+  engine-core/    Pure Rust compute engine: types, validation, evaluation, ops (W9)
+  engine-wasm/    wasm-bindgen wrapper — thin JSON boundary over engine-core (W9)
+
 e2e/
   smoke.spec.ts   Playwright smoke tests: title, meta tags, robots.txt, #root, no errors (W5.3)
   plot-smoke.spec.ts  Plot feature smoke tests: block library, no CSP violations (W6)
   groups.spec.ts      Group feature smoke tests: DOM structure, keyboard shortcuts (W7)
+  wasm-engine.spec.ts WASM engine e2e: init + evaluate via worker (W9)
 
 .github/
   workflows/
@@ -144,6 +155,8 @@ docs/
   BRANDING.md     Brand asset management, naming conventions, theme variants (W6.1)
   PLOTTING.md     Plot blocks: chart types, export, CSP, downsampling, architecture (W6)
   GROUPS.md       Block groups + templates: usage, schema V3, Pro gating (W7)
+  SECURITY.md     CORS, CSP, security headers, rollout docs (W8)
+  W9_ENGINE.md    Rust/WASM compute engine: build, debug, extend ops (W9)
   ARCHITECTURE.md This file
 ```
 
@@ -366,9 +379,8 @@ UI gating:
 | W6 | ✅ Done | Scientific plotting + export: 4 chart types (Vega-Lite), SVG/PNG/CSV export, CSP-safe, theme presets |
 | W6.1 | ✅ Done | Brand pack integration: logos, favicon, login header, nav branding, plot export branding toggle |
 | W7 | ✅ Done | Block groups + templates: csGroup node, collapse/expand, proxy handles, templates (Supabase), Pro gating |
-| W8 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
-| W9 | Planned | Branching/rules for conditional flows (Pro) |
-| W10 | Planned | Custom blocks editor (Pro) |
-| W11 | Planned | Project/file browser with folders, search, tags |
-| W12 | Planned | WASM/Rust compute engine swap-in |
-| W13 | Planned | Block versioning (blockVersions manifest) |
+| W8 | Done | Security perimeter: CORS middleware, CSP reporting, security headers |
+| W9 | Done | Rust/WASM compute engine foundation: engine-core, engine-wasm, Worker integration, e2e |
+| W10 | Planned | Branching/rules for conditional flows (Pro) |
+| W11 | Planned | Custom blocks editor (Pro) |
+| W12 | Planned | Project/file browser with folders, search, tags |
