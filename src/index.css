@@ -153,6 +153,27 @@ textarea:focus {
   background: var(--primary);
 }
 
+/* ── Mobile / touch ───────────────────────────────────────────────────────── */
+@media (max-width: 899px) {
+  /* Larger connection handles for touch */
+  .react-flow__handle {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* Larger zoom controls */
+  .react-flow__controls-button {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  /* Prevent pull-to-refresh on the canvas */
+  .react-flow {
+    touch-action: none;
+    overscroll-behavior: none;
+  }
+}
+
 /* ── Animations ───────────────────────────────────────────────────────────── */
 @keyframes cs-fade-in {
   from {

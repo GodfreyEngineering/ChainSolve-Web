@@ -7,76 +7,17 @@
  * their `(number|null)[] → number` function via `wrapScalarEvaluate()`.
  * New Value-aware blocks use `regValue()` directly.
  *
+ * Types are defined in ./types.ts and re-exported here for backward
+ * compatibility with existing import paths.
+ *
  * NodeData must extend Record<string, unknown> for @xyflow/react.
  */
 
 import { type Value, mkScalar, mkError, extractScalar } from '../engine/value'
+import type { BlockCategory, NodeKind, NodeData, BlockDef } from './types'
 
-export type BlockCategory =
-  | 'input'
-  | 'math'
-  | 'trig'
-  | 'constants'
-  | 'logic'
-  | 'output'
-  | 'data'
-  | 'vectorOps'
-  | 'tableOps'
-
-/** Which React Flow custom-node renderer to use. */
-export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay' | 'csData'
-
-export interface PortDef {
-  /** Unique within the block — used as targetHandle / sourceHandle. */
-  id: string
-  label: string
-}
-
-/** Data payload stored inside each ReactFlow node. */
-export interface NodeData extends Record<string, unknown> {
-  blockType: string
-  label: string
-  /** For Number + Slider + Display passthrough value. */
-  value?: number
-  /** Slider range. */
-  min?: number
-  max?: number
-  step?: number
-  /**
-   * Per-port manual values for operation nodes.
-   * portId → number. Used when port is disconnected or portOverrides[portId]=true.
-   */
-  manualValues?: Record<string, number>
-  /**
-   * Per-port override flags. When true for a connected port, manualValues[portId]
-   * is used instead of the upstream computed value.
-   */
-  portOverrides?: Record<string, boolean>
-  /** Vector data for vectorInput nodes. */
-  vectorData?: number[]
-  /** Table data for tableInput / csvImport nodes. */
-  tableData?: { columns: string[]; rows: number[][] }
-  /** Storage path of an uploaded CSV file. */
-  csvStoragePath?: string
-}
-
-export interface BlockDef {
-  type: string
-  label: string
-  category: BlockCategory
-  /** Which React Flow node component to render. */
-  nodeKind: NodeKind
-  inputs: PortDef[]
-  defaultData: NodeData
-  /** True for Pro-only blocks (data, vectorOps, tableOps). */
-  proOnly?: boolean
-  /**
-   * Pure evaluation function operating on the polymorphic Value type.
-   * `inputs` is ordered by `inputs[]`; null = port disconnected.
-   * Must never throw — return mkError(...) on any error.
-   */
-  evaluate: (inputs: ReadonlyArray<Value | null>, data: NodeData) => Value
-}
+// Re-export types so existing `import { ... } from '../../blocks/registry'` still works.
+export type { BlockCategory, NodeKind, PortDef, NodeData, BlockDef } from './types'
 
 // ── Registry ─────────────────────────────────────────────────────────────────
 
@@ -103,7 +44,7 @@ function reg(def: {
   label: string
   category: BlockCategory
   nodeKind: NodeKind
-  inputs: PortDef[]
+  inputs: { id: string; label: string }[]
   defaultData: NodeData
   evaluate: (inputs: ReadonlyArray<number | null>, data: NodeData) => number
 }): void {
@@ -114,7 +55,7 @@ function reg(def: {
 }
 
 /** Register a Value-aware block directly (no wrapping). */
-export function regValue(def: BlockDef): void {
+function regValue(def: BlockDef): void {
   BLOCK_REGISTRY.set(def.type, def)
 }
 
@@ -552,7 +493,13 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   tableOps: 'Table Ops',
 }
 
-// ── Pro-only block imports (side-effect registration) ────────────────────────
-import './data-blocks'
-import './vector-blocks'
-import './table-blocks'
+// ── Pro-only block registration (no circular imports) ────────────────────────
+// Block packs export registration functions instead of importing regValue.
+
+import { registerDataBlocks } from './data-blocks'
+import { registerVectorBlocks } from './vector-blocks'
+import { registerTableBlocks } from './table-blocks'
+
+registerDataBlocks(regValue)
+registerVectorBlocks(regValue)
+registerTableBlocks(regValue)

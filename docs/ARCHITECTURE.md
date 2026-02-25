@@ -24,7 +24,9 @@
 
 ```
 src/
+  boot.ts         True bootloader (no static imports): catches import-time TDZ/module errors (W5.2)
   blocks/         Block definitions and registry
+    types.ts      Shared types: BlockCategory, NodeKind, PortDef, NodeData, BlockDef (W5.2)
     registry.ts   All block types, categories, port definitions, evaluate fns
     data-blocks.ts    Data input blocks: vectorInput, tableInput, csvImport (W5)
     vector-blocks.ts  Vector operation blocks: length, sum, mean, min, max, sort, etc. (W5)
@@ -81,7 +83,7 @@ src/
   stores/
     projectStore.ts  Zustand store: save lifecycle, project metadata
   App.tsx         Route tree (BrowserRouter)
-  main.tsx        Entry point, ErrorBoundary + ToastProvider wrapper
+  main.tsx        React entry point, ErrorBoundary + ToastProvider wrapper (loaded by boot.ts)
 
 functions/
   api/stripe/
@@ -183,6 +185,18 @@ The engine uses a polymorphic `Value` type (`src/engine/value.ts`):
 | `error` | `{ kind: 'error', message: string }` | Error text |
 
 Existing scalar blocks use the `wrapScalarEvaluate()` adapter — their registration code is unchanged.
+
+### Block registration pattern (W5.2)
+
+Block types are defined in `src/blocks/types.ts` to avoid circular imports. Block packs (data-blocks, vector-blocks, table-blocks) export registration functions instead of importing `regValue` from registry:
+
+```
+types.ts ← registry.ts (imports types, re-exports for backward compat)
+types.ts ← data-blocks.ts (imports BlockDef, NodeData)
+data-blocks.ts ← registry.ts (imports registerDataBlocks, calls with regValue)
+```
+
+This eliminates the `registry → pack → registry` cycle that caused TDZ crashes (`ReferenceError: can't access lexical declaration before initialization`).
 
 ### Evaluation (src/engine/evaluate.ts)
 
@@ -293,6 +307,8 @@ UI gating:
 | W3 | ✅ Done | Design system, i18n (5 languages), settings pages, favicon/metadata |
 | W4 | ✅ Done | Entitlements + backend enforcement: plan gating, UpgradeModal, read-only canvas, storage cleanup |
 | W5 | ✅ Done | Arrays/Tables + CSV import (Pro): Value type system, 18 new blocks, DataNode + editors, CSV Web Worker |
+| W5.1 | ✅ Done | Save fixpack: forwardRef snapshot, Save button, Ctrl+S, beforeunload, boot guard |
+| W5.2 | ✅ Done | Circular import fix (TDZ crash), true bootloader, mobile baseline |
 | W6 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
 | W7 | Planned | Plot output nodes (Pro, uPlot) |
 | W8 | Planned | Branching/rules for conditional flows (Pro) |

@@ -7,6 +7,7 @@
  *  Context menus:     right-click on canvas, node, or edge.
  *  Delete:            Delete/Backspace key removes selected elements.
  *  Snap to grid:      toggle button in toolbar.
+ *  Mobile:            panels render as overlay drawers; touch-friendly targets.
  */
 
 import {
@@ -127,6 +128,23 @@ export interface CanvasAreaHandle {
   getSnapshot: () => { nodes: Node<NodeData>[]; edges: Edge[] }
 }
 
+// ── Mobile breakpoint ─────────────────────────────────────────────────────────
+
+const MOBILE_BP = 900
+
+function useIsMobile(): boolean {
+  const [mobile, setMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < MOBILE_BP : false,
+  )
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BP - 1}px)`)
+    const handler = (e: MediaQueryListEvent) => setMobile(e.matches)
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
+  return mobile
+}
+
 // ── Resize-drag helpers ───────────────────────────────────────────────────────
 
 function clamp(v: number, min: number, max: number) {
@@ -177,6 +195,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   { initialNodes, initialEdges, onGraphChange, readOnly, plan = 'free' },
   ref,
 ) {
+  const isMobile = useIsMobile()
   const ent = getEntitlements(plan)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(
@@ -209,8 +228,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // Panel widths + visibility
   const [libWidth, setLibWidth] = useState(200)
   const [inspWidth, setInspWidth] = useState(260)
-  const [libVisible, setLibVisible] = useState(true)
+  const [libVisible, setLibVisible] = useState(() => !isMobile)
   const [inspVisible, setInspVisible] = useState(false)
+
+  // Auto-close panels when switching to mobile
+  useEffect(() => {
+    if (isMobile) {
+      setLibVisible(false)
+      setInspVisible(false)
+    }
+  }, [isMobile])
 
   // Inspector state (open on click, not selection)
   const [inspectedId, setInspectedId] = useState<string | null>(null)
@@ -247,14 +274,23 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   )
 
   // ── Inspector: open on node body click, NOT on drag ────────────────────────
-  const onNodeClick = useCallback((_: MouseEvent, node: Node) => {
-    setInspectedId(node.id)
-    setInspVisible(true)
-  }, [])
+  const onNodeClick = useCallback(
+    (_: MouseEvent, node: Node) => {
+      setInspectedId(node.id)
+      setInspVisible(true)
+      // On mobile, close library when opening inspector
+      if (isMobile) setLibVisible(false)
+    },
+    [isMobile],
+  )
 
   const onPaneClick = useCallback(() => {
     setInspectedId(null)
-  }, [])
+    if (isMobile) {
+      setLibVisible(false)
+      setInspVisible(false)
+    }
+  }, [isMobile])
 
   const closeInspector = useCallback(() => {
     setInspectedId(null)
@@ -437,6 +473,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [inspWidth],
   )
 
+  // ── Mobile panel width ────────────────────────────────────────────────────
+  const mobileDrawerWidth = isMobile ? Math.min(280, window.innerWidth * 0.85) : 0
+
   // ── Toolbar ─────────────────────────────────────────────────────────────────
   const toolbar = (
     <div
@@ -455,54 +494,70 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         boxShadow: '0 2px 10px rgba(0,0,0,0.4)',
       }}
     >
-      <button
-        onClick={() => setLibVisible((v) => !v)}
-        style={{
-          ...tbBtn,
-          background: libVisible ? 'rgba(28,171,176,0.15)' : 'transparent',
-          borderColor: libVisible ? '#1CABB0' : undefined,
-          color: libVisible ? '#1CABB0' : undefined,
-        }}
-        title="Toggle block library"
-      >
-        ☰ Blocks
-      </button>
+      {!readOnly && (
+        <button
+          onClick={() => {
+            setLibVisible((v) => !v)
+            if (isMobile) setInspVisible(false)
+          }}
+          style={{
+            ...tbBtn,
+            background: libVisible ? 'rgba(28,171,176,0.15)' : 'transparent',
+            borderColor: libVisible ? '#1CABB0' : undefined,
+            color: libVisible ? '#1CABB0' : undefined,
+            minHeight: isMobile ? 36 : undefined,
+            padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
+          }}
+          title="Toggle block library"
+        >
+          ☰ Blocks
+        </button>
+      )}
 
-      <div style={{ width: 1, background: 'rgba(255,255,255,0.1)', margin: '0 0.1rem' }} />
+      {!isMobile && (
+        <div style={{ width: 1, background: 'rgba(255,255,255,0.1)', margin: '0 0.1rem' }} />
+      )}
 
-      <button
-        onClick={() => fitView({ padding: 0.15, duration: 300 })}
-        style={tbBtn}
-        title="Fit view"
-      >
-        ⊡ Fit
-      </button>
-      <button
-        onClick={() => setSnapToGrid((v) => !v)}
-        style={{
-          ...tbBtn,
-          background: snapToGrid ? 'rgba(28,171,176,0.15)' : 'transparent',
-          borderColor: snapToGrid ? '#1CABB0' : undefined,
-          color: snapToGrid ? '#1CABB0' : undefined,
-        }}
-        title="Snap to 16×16 grid"
-      >
-        ⊞ Snap
-      </button>
-
-      <div style={{ width: 1, background: 'rgba(255,255,255,0.1)', margin: '0 0.1rem' }} />
+      {!isMobile && (
+        <>
+          <button
+            onClick={() => fitView({ padding: 0.15, duration: 300 })}
+            style={tbBtn}
+            title="Fit view"
+          >
+            ⊡ Fit
+          </button>
+          <button
+            onClick={() => setSnapToGrid((v) => !v)}
+            style={{
+              ...tbBtn,
+              background: snapToGrid ? 'rgba(28,171,176,0.15)' : 'transparent',
+              borderColor: snapToGrid ? '#1CABB0' : undefined,
+              color: snapToGrid ? '#1CABB0' : undefined,
+            }}
+            title="Snap to 16×16 grid"
+          >
+            ⊞ Snap
+          </button>
+          <div style={{ width: 1, background: 'rgba(255,255,255,0.1)', margin: '0 0.1rem' }} />
+        </>
+      )}
 
       <button
         onClick={() => {
-          setInspVisible((v) => !v)
-          if (!inspVisible) return
-          setInspectedId(null)
+          setInspVisible((v) => {
+            if (v) setInspectedId(null)
+            return !v
+          })
+          if (isMobile) setLibVisible(false)
         }}
         style={{
           ...tbBtn,
           background: inspVisible ? 'rgba(28,171,176,0.15)' : 'transparent',
           borderColor: inspVisible ? '#1CABB0' : undefined,
           color: inspVisible ? '#1CABB0' : undefined,
+          minHeight: isMobile ? 36 : undefined,
+          padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
         }}
         title="Toggle inspector"
       >
@@ -510,6 +565,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       </button>
     </div>
   )
+
+  // ── Drawer backdrop (mobile only) ──────────────────────────────────────────
+  const showBackdrop = isMobile && (libVisible || inspVisible)
 
   return (
     <ComputedContext.Provider value={computed}>
@@ -522,8 +580,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           position: 'relative',
         }}
       >
-        {/* Block library panel (hidden in read-only mode) */}
-        {libVisible && !readOnly && (
+        {/* Block library panel — desktop inline, mobile overlay */}
+        {libVisible && !readOnly && !isMobile && (
           <BlockLibrary
             width={libWidth}
             onResizeStart={onLibResizeStart}
@@ -576,14 +634,70 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           </ReactFlow>
         </div>
 
-        {/* Inspector panel */}
-        {inspVisible && (
+        {/* Inspector panel — desktop inline */}
+        {inspVisible && !isMobile && (
           <Inspector
             nodeId={inspectedId}
             width={inspWidth}
             onClose={closeInspector}
             onResizeStart={onInspResizeStart}
           />
+        )}
+
+        {/* ── Mobile overlay drawers ──────────────────────────────────────────── */}
+        {showBackdrop && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(0,0,0,0.5)',
+              zIndex: 19,
+            }}
+            onClick={() => {
+              setLibVisible(false)
+              setInspVisible(false)
+            }}
+          />
+        )}
+
+        {libVisible && !readOnly && isMobile && (
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              zIndex: 20,
+              width: mobileDrawerWidth,
+            }}
+          >
+            <BlockLibrary
+              width={mobileDrawerWidth}
+              onResizeStart={() => {}}
+              plan={plan}
+              onProBlocked={() => setShowUpgradeModal(true)}
+            />
+          </div>
+        )}
+
+        {inspVisible && isMobile && (
+          <div
+            style={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              zIndex: 20,
+              width: mobileDrawerWidth,
+            }}
+          >
+            <Inspector
+              nodeId={inspectedId}
+              width={mobileDrawerWidth}
+              onClose={closeInspector}
+              onResizeStart={() => {}}
+            />
+          </div>
         )}
 
         {/* Context menu */}

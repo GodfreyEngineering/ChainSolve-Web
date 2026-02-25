@@ -468,7 +468,56 @@ Run through this checklist after any change to the save/load pipeline.
 
 ---
 
-## 13. Prod Debug — Billing / Token issues
+## 13. Debugging blank screen / TDZ errors
+
+### Symptom: completely blank white page, no visible UI
+
+**What to check first:** Open browser DevTools (F12) → Console. Look for:
+
+- `ReferenceError: can't access lexical declaration 'X' before initialization` — **circular import / TDZ crash**
+- `TypeError: ... is not a function` or `... is undefined` — module resolution failure
+- Boot error screen ("Something went wrong during startup") — the bootloader caught the error; the message will indicate the cause
+
+### How it works
+
+The app loads via a two-stage boot sequence:
+
+1. **`src/boot.ts`** — loaded directly by `index.html`. Has **zero static imports**. Attaches `error` + `unhandledrejection` listeners, then dynamically imports `./main`.
+2. **`src/main.tsx`** — mounts React with ErrorBoundary and ToastProvider.
+
+If any module fails to load (circular dependency, missing export, syntax error), the bootloader catches it and renders a visible error screen with the error message instead of leaving a blank page.
+
+### Quick local reproduction
+
+```bash
+# 1. Build for production
+npm run build
+
+# 2. Preview with a local server
+npm run preview
+
+# 3. Open http://localhost:4173 — the app should load normally
+# 4. If blank: check the console for the exact error
+```
+
+### Common causes
+
+| Console error | Cause | Fix |
+|---|---|---|
+| `can't access lexical declaration before initialization` | Circular import creating a TDZ (temporal dead zone) | Check import chains: no A → B → A cycles. Use `types.ts` for shared types. |
+| `Failed to fetch dynamically imported module` | Build artifact missing or Vite config issue | Run `npm run build` again; check `dist/` contents |
+| `X is not a constructor` | Module loaded but export not yet initialized | Break the circular dependency chain |
+
+### Architecture fix (W5.2)
+
+The circular dependency `registry.ts → data-blocks.ts → registry.ts` was broken by:
+1. Extracting shared types to `src/blocks/types.ts`
+2. Block packs export registration functions instead of importing `regValue` from registry
+3. `registry.ts` calls the registration functions after defining `regValue`
+
+---
+
+## 14. Prod Debug — Billing / Token issues
 
 ### Symptom: "Authentication failed" or "Invalid or expired token"
 
