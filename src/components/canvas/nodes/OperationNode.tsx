@@ -22,12 +22,13 @@ import { formatValue } from '../../../engine/evaluate'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
 import { NODE_STYLES as s } from './nodeStyles'
 
-function OperationNodeInner({ id, data, selected }: NodeProps) {
+function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const nd = data as NodeData
   const { updateNodeData } = useReactFlow()
   const allEdges = useEdges()
   const computed = useComputed()
   const value = computed.get(id)
+  const isLocked = draggable === false
 
   const def = BLOCK_REGISTRY.get(nd.blockType)
   const inputs = def?.inputs ?? []
@@ -66,7 +67,10 @@ function OperationNodeInner({ id, data, selected }: NodeProps) {
     <div style={{ ...s.node, ...(selected ? s.nodeSelected : {}) }}>
       <div style={s.header}>
         <span style={s.headerLabel}>{nd.label}</span>
-        <span style={s.headerValue}>{formatValue(value)}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
+          {isLocked && <span style={{ fontSize: '0.6rem', lineHeight: 1, opacity: 0.7 }}>🔒</span>}
+          <span style={s.headerValue}>{formatValue(value)}</span>
+        </div>
       </div>
 
       <div style={{ position: 'relative', height: bodyH }}>

@@ -13,11 +13,12 @@ import { formatValue } from '../../../engine/evaluate'
 import type { NodeData } from '../../../blocks/registry'
 import { NODE_STYLES as s } from './nodeStyles'
 
-function SourceNodeInner({ id, data, selected }: NodeProps) {
+function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
   const nd = data as NodeData
   const { updateNodeData } = useReactFlow()
   const computed = useComputed()
   const value = computed.get(id)
+  const isLocked = draggable === false
 
   const updateValue = useCallback(
     (v: number) => updateNodeData(id, { value: v }),
@@ -32,7 +33,10 @@ function SourceNodeInner({ id, data, selected }: NodeProps) {
     <div style={{ ...s.node, ...(selected ? s.nodeSelected : {}) }}>
       <div style={s.header}>
         <span style={s.headerLabel}>{nd.label}</span>
-        <span style={s.headerValue}>{formatValue(value)}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
+          {isLocked && <span style={{ fontSize: '0.6rem', lineHeight: 1, opacity: 0.7 }}>🔒</span>}
+          <span style={s.headerValue}>{formatValue(value)}</span>
+        </div>
       </div>
 
       {isNumber && (

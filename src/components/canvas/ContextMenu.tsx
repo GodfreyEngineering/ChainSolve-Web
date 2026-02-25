@@ -9,7 +9,7 @@ import type { CSSProperties } from 'react'
 
 export type ContextMenuTarget =
   | { kind: 'canvas'; x: number; y: number }
-  | { kind: 'node'; x: number; y: number; nodeId: string }
+  | { kind: 'node'; x: number; y: number; nodeId: string; isLocked: boolean }
   | { kind: 'edge'; x: number; y: number; edgeId: string }
 
 interface ContextMenuProps {
@@ -19,7 +19,10 @@ interface ContextMenuProps {
   onDeleteNode: (nodeId: string) => void
   onDeleteEdge: (edgeId: string) => void
   onInspectNode: (nodeId: string) => void
+  onRenameNode: (nodeId: string) => void
+  onLockNode: (nodeId: string) => void
   onFitView: () => void
+  onAddBlockAtCursor: (x: number, y: number) => void
 }
 
 const item: CSSProperties = {
@@ -77,7 +80,10 @@ export function ContextMenu({
   onDeleteNode,
   onDeleteEdge,
   onInspectNode,
+  onRenameNode,
+  onLockNode,
   onFitView,
+  onAddBlockAtCursor,
 }: ContextMenuProps) {
   const menuStyle: CSSProperties = {
     position: 'fixed',
@@ -111,9 +117,20 @@ export function ContextMenu({
               onClick={() => { onInspectNode(target.nodeId); onClose() }}
             />
             <MenuItem
+              icon="✎"
+              label="Rename…"
+              onClick={() => { onRenameNode(target.nodeId); onClose() }}
+            />
+            <MenuItem
               icon="⧉"
               label="Duplicate"
               onClick={() => { onDuplicateNode(target.nodeId); onClose() }}
+            />
+            <div style={sep} />
+            <MenuItem
+              icon={target.isLocked ? '🔓' : '🔒'}
+              label={target.isLocked ? 'Unlock position' : 'Lock position'}
+              onClick={() => { onLockNode(target.nodeId); onClose() }}
             />
             <div style={sep} />
             <MenuItem
@@ -136,6 +153,12 @@ export function ContextMenu({
 
         {target.kind === 'canvas' && (
           <>
+            <MenuItem
+              icon="+"
+              label="Add block here"
+              onClick={() => { onAddBlockAtCursor(target.x, target.y); onClose() }}
+            />
+            <div style={sep} />
             <MenuItem icon="⊡" label="Fit view" onClick={() => { onFitView(); onClose() }} />
           </>
         )}

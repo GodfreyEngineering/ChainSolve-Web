@@ -11,6 +11,7 @@
 
 import {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -40,6 +41,7 @@ import { DisplayNode } from './nodes/DisplayNode'
 import { BlockLibrary, DRAG_TYPE } from './BlockLibrary'
 import { Inspector } from './Inspector'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
+import { QuickAddPalette } from './QuickAddPalette'
 import { ComputedContext } from '../../contexts/ComputedContext'
 import { evaluateGraph } from '../../engine/evaluate'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
@@ -54,20 +56,34 @@ const NODE_TYPES = {
 
 // ── Default graph ─────────────────────────────────────────────────────────────
 
-const INITIAL_NODES: Node<NodeData>[] = [
+export const INITIAL_NODES: Node<NodeData>[] = [
   { id: 'n1', type: 'csSource',    position: { x: 80,  y: 120 }, data: { blockType: 'number',  label: 'Number', value: 3 } },
   { id: 'n2', type: 'csSource',    position: { x: 80,  y: 240 }, data: { blockType: 'number',  label: 'Number', value: 4 } },
   { id: 'n3', type: 'csOperation', position: { x: 320, y: 160 }, data: { blockType: 'add',     label: 'Add' } },
   { id: 'n4', type: 'csDisplay',   position: { x: 540, y: 180 }, data: { blockType: 'display', label: 'Result' } },
 ]
 
-const INITIAL_EDGES: Edge[] = [
+export const INITIAL_EDGES: Edge[] = [
   { id: 'e1', source: 'n1', sourceHandle: 'out', target: 'n3', targetHandle: 'a',     animated: true },
   { id: 'e2', source: 'n2', sourceHandle: 'out', target: 'n3', targetHandle: 'b',     animated: true },
   { id: 'e3', source: 'n3', sourceHandle: 'out', target: 'n4', targetHandle: 'value', animated: true },
 ]
 
 let nodeIdCounter = 100
+
+// ── Public props interface ─────────────────────────────────────────────────────
+
+export interface CanvasAreaProps {
+  /** Nodes to hydrate on mount. When not provided, uses the built-in demo graph. */
+  initialNodes?: Node<NodeData>[]
+  /** Edges to hydrate on mount. When not provided, uses the built-in demo graph. */
+  initialEdges?: Edge[]
+  /**
+   * Called when the graph changes (debounce is the caller's responsibility).
+   * Skipped on the very first render so initial load does not trigger dirty state.
+   */
+  onGraphChange?: (nodes: Node<NodeData>[], edges: Edge[]) => void
+}
 
 // ── Resize-drag helpers ───────────────────────────────────────────────────────
 
@@ -115,9 +131,17 @@ const tbBtn: React.CSSProperties = {
 
 // ── Inner canvas (inside ReactFlowProvider) ───────────────────────────────────
 
-function CanvasInner() {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(INITIAL_NODES)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(INITIAL_EDGES)
+function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaProps) {
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(initialNodes ?? INITIAL_NODES)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges ?? INITIAL_EDGES)
+
+  // Notify parent of graph changes — skip the initial mount so loading a project
+  // does not immediately mark the canvas as dirty.
+  const isFirstRender = useRef(true)
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return }
+    onGraphChange?.(nodes, edges)
+  }, [nodes, edges, onGraphChange])
 
   // Panel widths + visibility
   const [libWidth,  setLibWidth]  = useState(200)
@@ -133,6 +157,14 @@ function CanvasInner() {
 
   // Context menu
   const [contextMenu, setContextMenu] = useState<ContextMenuTarget | null>(null)
+
+  // Quick-add palette (opened from canvas context menu "Add block here")
+  const [quickAdd, setQuickAdd] = useState<{
+    screenX: number
+    screenY: number
+    flowX: number
+    flowY: number
+  } | null>(null)
 
   const canvasWrapRef = useRef<HTMLDivElement>(null)
   const { screenToFlowPosition, fitView } = useReactFlow()
@@ -212,7 +244,13 @@ function CanvasInner() {
   // ── Context menus ───────────────────────────────────────────────────────────
   const onNodeContextMenu = useCallback((e: MouseEvent, node: Node) => {
     e.preventDefault()
-    setContextMenu({ kind: 'node', x: e.clientX, y: e.clientY, nodeId: node.id })
+    setContextMenu({
+      kind: 'node',
+      x: e.clientX,
+      y: e.clientY,
+      nodeId: node.id,
+      isLocked: node.draggable === false,
+    })
   }, [])
 
   const onEdgeContextMenu = useCallback((e: MouseEvent, edge: Edge) => {
@@ -250,6 +288,52 @@ function CanvasInner() {
     setInspectedId(nodeId)
     setInspVisible(true)
   }, [])
+
+  // Rename: prompt for a new label then update node data directly
+  const renameNode = useCallback((nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId)
+    const current = node?.data.label ?? ''
+    const next = window.prompt('Rename block:', current)
+    if (next !== null && next.trim()) {
+      setNodes(nds =>
+        nds.map(n =>
+          n.id === nodeId ? { ...n, data: { ...n.data, label: next.trim() } } : n,
+        ),
+      )
+    }
+  }, [nodes, setNodes])
+
+  // Lock / unlock: toggles node.draggable (undefined = draggable, false = locked)
+  const lockNode = useCallback((nodeId: string) => {
+    setNodes(nds =>
+      nds.map(n =>
+        n.id === nodeId ? { ...n, draggable: n.draggable === false ? undefined : false } : n,
+      ),
+    )
+  }, [setNodes])
+
+  // Add block at the canvas position where user right-clicked
+  const onAddBlockAtCursor = useCallback((screenX: number, screenY: number) => {
+    const pos = screenToFlowPosition({ x: screenX, y: screenY })
+    setQuickAdd({ screenX, screenY, flowX: pos.x, flowY: pos.y })
+  }, [screenToFlowPosition])
+
+  const onQuickAddBlock = useCallback((blockType: string) => {
+    if (!quickAdd) return
+    const def = BLOCK_REGISTRY.get(blockType)
+    if (!def) return
+    const id = `node_${++nodeIdCounter}`
+    setNodes(nds => [
+      ...nds,
+      {
+        id,
+        type: def.nodeKind,
+        position: { x: quickAdd.flowX, y: quickAdd.flowY },
+        data: { ...def.defaultData },
+      } as Node<NodeData>,
+    ])
+    setQuickAdd(null)
+  }, [quickAdd, setNodes])
 
   // ── Panel resize start handlers ─────────────────────────────────────────────
   const onLibResizeStart = useCallback(
@@ -373,7 +457,20 @@ function CanvasInner() {
             onDeleteNode={deleteNode}
             onDeleteEdge={deleteEdge}
             onInspectNode={inspectNode}
+            onRenameNode={renameNode}
+            onLockNode={lockNode}
             onFitView={() => fitView({ padding: 0.15, duration: 300 })}
+            onAddBlockAtCursor={onAddBlockAtCursor}
+          />
+        )}
+
+        {/* Quick-add palette */}
+        {quickAdd && (
+          <QuickAddPalette
+            screenX={quickAdd.screenX}
+            screenY={quickAdd.screenY}
+            onAdd={onQuickAddBlock}
+            onClose={() => setQuickAdd(null)}
           />
         )}
       </div>
@@ -383,10 +480,10 @@ function CanvasInner() {
 
 // ── Public export ─────────────────────────────────────────────────────────────
 
-export function CanvasArea() {
+export function CanvasArea(props: CanvasAreaProps) {
   return (
     <ReactFlowProvider>
-      <CanvasInner />
+      <CanvasInner {...props} />
     </ReactFlowProvider>
   )
 }

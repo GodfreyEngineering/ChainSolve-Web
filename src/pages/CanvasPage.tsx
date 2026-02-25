@@ -1,64 +1,403 @@
 /**
- * CanvasPage — full-page layout for the node-graph editor.
- * Thin top bar with a back link; the rest is CanvasArea.
+ * CanvasPage — full-page canvas editor.
+ *
+ * Route: /canvas/:projectId   (project mode — autosaved to Supabase storage)
+ *        /canvas              (scratch mode — no persistence)
+ *
+ * Lifecycle:
+ *   1. Mount → load project.json from storage (when projectId is present).
+ *   2. CanvasArea fires onGraphChange on every node/edge mutation.
+ *   3. 2 s debounce → saveProject() → update save-status store.
+ *   4. Conflict detected → banner with "Keep mine" / "Reload" choices.
  */
 
-import { CanvasArea } from '../components/canvas/CanvasArea'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import {
+  CanvasArea,
+  INITIAL_NODES,
+  INITIAL_EDGES,
+  type CanvasAreaProps,
+} from '../components/canvas/CanvasArea'
+import type { Node, Edge } from '@xyflow/react'
+import type { NodeData } from '../blocks/registry'
+import {
+  loadProject,
+  saveProject,
+  renameProject,
+  type ProjectJSON,
+} from '../lib/projects'
+import { useProjectStore } from '../stores/projectStore'
 
-const s = {
-  page: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    height: '100vh',
-    overflow: 'hidden',
-    background: 'var(--bg)',
-  },
-  topBar: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '0 1rem',
-    height: 44,
-    borderBottom: '1px solid var(--border)',
-    background: 'var(--card-bg)',
-    flexShrink: 0,
-  },
-  backLink: {
-    fontSize: '0.82rem',
-    opacity: 0.6,
-    textDecoration: 'none',
-    color: 'inherit',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.3rem',
-  },
-  title: {
-    fontWeight: 700,
-    fontSize: '0.95rem',
-    letterSpacing: '-0.3px',
-  },
-  hint: {
-    marginLeft: 'auto',
-    fontSize: '0.72rem',
-    opacity: 0.4,
-  },
+const AUTOSAVE_DELAY_MS = 2000
+
+function fmtTime(d: Date): string {
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 }
 
 export default function CanvasPage() {
+  const { projectId } = useParams<{ projectId?: string }>()
+
+  // ── Store selectors ────────────────────────────────────────────────────────
+  const saveStatus   = useProjectStore(s => s.saveStatus)
+  const projectName  = useProjectStore(s => s.projectName)
+  const errorMessage = useProjectStore(s => s.errorMessage)
+  const isDirty      = useProjectStore(s => s.isDirty)
+  const lastSavedAt  = useProjectStore(s => s.lastSavedAt)
+
+  const beginLoad     = useProjectStore(s => s.beginLoad)
+  const markDirty     = useProjectStore(s => s.markDirty)
+  const beginSave     = useProjectStore(s => s.beginSave)
+  const completeSave  = useProjectStore(s => s.completeSave)
+  const failSave      = useProjectStore(s => s.failSave)
+  const detectConflict = useProjectStore(s => s.detectConflict)
+  const setStoreName  = useProjectStore(s => s.setProjectName)
+  const reset         = useProjectStore(s => s.reset)
+
+  // ── Load state ────────────────────────────────────────────────────────────
+  const [loadPhase, setLoadPhase] = useState<'loading' | 'ready' | 'error'>(
+    projectId ? 'loading' : 'ready',
+  )
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [initNodes, setInitNodes] = useState<Node<NodeData>[] | undefined>()
+  const [initEdges, setInitEdges] = useState<Edge[] | undefined>()
+
+  // ── Autosave / conflict refs ───────────────────────────────────────────────
+  const autosaveTimer           = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingNodes            = useRef<Node<NodeData>[]>([])
+  const pendingEdges            = useRef<Edge[]>([])
+  const isSaving                = useRef(false)
+  // The server's updated_at captured when a conflict is detected.
+  // Passed as knownUpdatedAt in a force-overwrite save.
+  const conflictServerTs        = useRef<string | null>(null)
+
+  // ── Inline project name editing ───────────────────────────────────────────
+  const [nameEditing, setNameEditing] = useState(false)
+  const [nameInput,   setNameInput]   = useState('')
+  const nameInputRef                  = useRef<HTMLInputElement>(null)
+
+  // ── Load project on mount (or when projectId changes) ─────────────────────
+  useEffect(() => {
+    reset()
+    conflictServerTs.current = null
+
+    if (!projectId) {
+      setLoadPhase('ready')
+      return
+    }
+
+    setLoadPhase('loading')
+    setLoadError(null)
+
+    loadProject(projectId)
+      .then((pj: ProjectJSON) => {
+        beginLoad(
+          projectId,
+          pj.project.name,
+          pj.updatedAt,
+          pj.formatVersion,
+          pj.createdAt,
+        )
+        setInitNodes(pj.graph.nodes as Node<NodeData>[])
+        setInitEdges(pj.graph.edges as Edge[])
+        setLoadPhase('ready')
+      })
+      .catch((err: unknown) => {
+        setLoadError(err instanceof Error ? err.message : 'Failed to load project')
+        setLoadPhase('error')
+      })
+    // beginLoad and reset are stable Zustand actions
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId])
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
+    }
+  }, [])
+
+  // ── Core save function ────────────────────────────────────────────────────
+  const doSave = useCallback(
+    async (opts?: { forceKnownUpdatedAt?: string }) => {
+      if (!projectId || isSaving.current) return
+
+      // Read freshest state from store to avoid stale closure values
+      const state = useProjectStore.getState()
+      const knownUpdatedAt = opts?.forceKnownUpdatedAt ?? state.dbUpdatedAt
+      if (!knownUpdatedAt) return
+
+      isSaving.current = true
+      beginSave()
+
+      try {
+        const result = await saveProject(
+          projectId,
+          state.projectName,
+          pendingNodes.current,
+          pendingEdges.current,
+          knownUpdatedAt,
+          {
+            formatVersion: state.formatVersion,
+            createdAt: state.createdAt ?? new Date().toISOString(),
+          },
+        )
+
+        if (result.conflict) {
+          conflictServerTs.current = result.updatedAt
+          detectConflict()
+        } else {
+          conflictServerTs.current = null
+          completeSave(result.updatedAt)
+        }
+      } catch (err: unknown) {
+        failSave(err instanceof Error ? err.message : 'Save failed')
+      } finally {
+        isSaving.current = false
+      }
+    },
+    [projectId, beginSave, completeSave, failSave, detectConflict],
+  )
+
+  // ── onGraphChange — debounced autosave trigger ────────────────────────────
+  const handleGraphChange: NonNullable<CanvasAreaProps['onGraphChange']> = useCallback(
+    (nodes, edges) => {
+      pendingNodes.current = nodes
+      pendingEdges.current = edges
+      markDirty()
+      if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
+      autosaveTimer.current = setTimeout(() => { void doSave() }, AUTOSAVE_DELAY_MS)
+    },
+    [markDirty, doSave],
+  )
+
+  // ── Inline project name editing ───────────────────────────────────────────
+  const startNameEdit = useCallback(() => {
+    setNameInput(useProjectStore.getState().projectName)
+    setNameEditing(true)
+    setTimeout(() => nameInputRef.current?.select(), 0)
+  }, [])
+
+  const commitNameEdit = useCallback(async () => {
+    setNameEditing(false)
+    const trimmed = nameInput.trim()
+    const current = useProjectStore.getState().projectName
+    if (!trimmed || !projectId || trimmed === current) return
+    try {
+      await renameProject(projectId, trimmed)
+      setStoreName(trimmed)
+    } catch {
+      // Silently revert — the store still holds the old name
+    }
+  }, [nameInput, projectId, setStoreName])
+
+  // ── Conflict resolution ───────────────────────────────────────────────────
+  const handleOverwrite = useCallback(() => {
+    const serverTs = conflictServerTs.current
+    if (!serverTs) return
+    // Re-save using the server's updated_at as our known anchor,
+    // which skips the "DB is newer" guard.
+    void doSave({ forceKnownUpdatedAt: serverTs })
+  }, [doSave])
+
+  const handleReload = useCallback(() => {
+    window.location.reload()
+  }, [])
+
+  // ── Save status label ─────────────────────────────────────────────────────
+  const statusLabel: { text: string; color: string } | null = (() => {
+    if (!projectId) return null
+    switch (saveStatus) {
+      case 'saving':
+        return { text: 'Saving…', color: 'rgba(244,244,243,0.45)' }
+      case 'saved':
+        return { text: `Saved ${lastSavedAt ? fmtTime(lastSavedAt) : ''}`, color: '#22c55e' }
+      case 'conflict':
+        return { text: '⚠ Conflict', color: '#f59e0b' }
+      case 'error':
+        return { text: '⚠ Save failed', color: '#ef4444' }
+      default:
+        return isDirty ? { text: 'Unsaved', color: 'rgba(244,244,243,0.45)' } : null
+    }
+  })()
+
+  // ── Loading / error screens ───────────────────────────────────────────────
+  if (loadPhase === 'loading') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.5 }}>
+        Loading project…
+      </div>
+    )
+  }
+
+  if (loadPhase === 'error') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+        <p style={{ color: '#ef4444', margin: 0 }}>{loadError}</p>
+        <a href="/app" style={{ opacity: 0.6, fontSize: '0.85rem', color: 'inherit' }}>← Back to projects</a>
+      </div>
+    )
+  }
+
   return (
-    <div style={s.page}>
-      <div style={s.topBar}>
-        <a href="/app" style={s.backLink}>
-          ← Back
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg)' }}>
+
+      {/* ── Top bar ──────────────────────────────────────────────────────────── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          padding: '0 1rem',
+          height: 44,
+          borderBottom: '1px solid var(--border)',
+          background: 'var(--card-bg)',
+          flexShrink: 0,
+        }}
+      >
+        <a
+          href="/app"
+          style={{ fontSize: '0.82rem', opacity: 0.6, textDecoration: 'none', color: 'inherit' }}
+        >
+          ← Projects
         </a>
-        <span style={s.title}>ChainSolve Canvas</span>
-        <span style={s.hint}>
-          Drag blocks from the left panel · Connect handles · Delete to remove
+
+        <div style={{ width: 1, height: 18, background: 'var(--border)' }} />
+
+        {/* Project name — click to rename */}
+        {projectId && !nameEditing && (
+          <span
+            onClick={startNameEdit}
+            title="Click to rename"
+            style={{
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              letterSpacing: '-0.3px',
+              cursor: 'text',
+              borderBottom: '1px solid transparent',
+              userSelect: 'none',
+              paddingBottom: 1,
+            }}
+            onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderBottomColor = 'rgba(255,255,255,0.2)' }}
+            onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderBottomColor = 'transparent' }}
+          >
+            {projectName}
+          </span>
+        )}
+        {projectId && nameEditing && (
+          <input
+            ref={nameInputRef}
+            value={nameInput}
+            onChange={e => setNameInput(e.target.value)}
+            onBlur={() => { void commitNameEdit() }}
+            onKeyDown={e => {
+              if (e.key === 'Enter') { void commitNameEdit() }
+              if (e.key === 'Escape') { setNameEditing(false) }
+            }}
+            style={{
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              letterSpacing: '-0.3px',
+              background: 'transparent',
+              border: 'none',
+              borderBottom: '1px solid var(--primary)',
+              outline: 'none',
+              color: 'inherit',
+              width: 220,
+              padding: 0,
+              fontFamily: 'inherit',
+            }}
+          />
+        )}
+        {!projectId && (
+          <span style={{ fontWeight: 600, fontSize: '0.9rem', opacity: 0.4 }}>Scratch canvas</span>
+        )}
+
+        {/* Save status badge */}
+        {statusLabel && (
+          <span style={{ fontSize: '0.72rem', color: statusLabel.color }}>
+            {statusLabel.text}
+          </span>
+        )}
+        {saveStatus === 'error' && errorMessage && (
+          <span
+            title={errorMessage}
+            style={{
+              fontSize: '0.7rem',
+              color: '#ef4444',
+              opacity: 0.75,
+              maxWidth: 200,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {errorMessage}
+          </span>
+        )}
+
+        <span style={{ marginLeft: 'auto', fontSize: '0.72rem', opacity: 0.35 }}>
+          Drag blocks · Connect handles · Delete to remove
         </span>
       </div>
 
+      {/* ── Conflict banner ───────────────────────────────────────────────────── */}
+      {saveStatus === 'conflict' && (
+        <div
+          style={{
+            background: 'rgba(245,158,11,0.1)',
+            borderBottom: '1px solid rgba(245,158,11,0.3)',
+            padding: '0.45rem 1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            fontSize: '0.82rem',
+            color: '#fbbf24',
+            flexShrink: 0,
+          }}
+        >
+          <span>Another session saved this project — your local changes may conflict.</span>
+          <button
+            onClick={handleOverwrite}
+            style={{
+              padding: '0.2rem 0.75rem',
+              border: '1px solid rgba(245,158,11,0.4)',
+              background: 'transparent',
+              color: '#fbbf24',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '0.78rem',
+              fontFamily: 'inherit',
+            }}
+          >
+            Keep mine (overwrite)
+          </button>
+          <button
+            onClick={handleReload}
+            style={{
+              padding: '0.2rem 0.75rem',
+              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'transparent',
+              color: 'rgba(244,244,243,0.65)',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '0.78rem',
+              fontFamily: 'inherit',
+            }}
+          >
+            Reload from server
+          </button>
+        </div>
+      )}
+
+      {/* ── Canvas ───────────────────────────────────────────────────────────── */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
-        <CanvasArea />
+        <CanvasArea
+          key={projectId ?? 'scratch'}
+          initialNodes={initNodes ?? INITIAL_NODES}
+          initialEdges={initEdges ?? INITIAL_EDGES}
+          onGraphChange={projectId ? handleGraphChange : undefined}
+        />
       </div>
     </div>
   )

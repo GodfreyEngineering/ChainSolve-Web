@@ -66,6 +66,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/app" element={<AppShell />} />
         <Route path="/canvas" element={<CanvasPage />} />
+        <Route path="/canvas/:projectId" element={<CanvasPage />} />
         <Route path="/billing/success" element={<BillingSuccess />} />
         <Route path="/billing/cancel" element={<BillingCancel />} />
       </Routes>
