@@ -281,13 +281,16 @@ export default function AppShell() {
     setBillingLoading(true)
     setBillingError(null)
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session) throw new Error('Not authenticated')
+      // Force a token refresh so the access_token is never stale
+      const { data: refreshData, error: refreshErr } = await supabase.auth.refreshSession()
+      if (refreshErr || !refreshData.session) {
+        await supabase.auth.signOut()
+        navigate('/login')
+        return
+      }
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${refreshData.session.access_token}` },
       })
       let json: Record<string, unknown>
       try {

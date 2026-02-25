@@ -27,7 +27,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     } = context.env;
 
     if (!STRIPE_SECRET_KEY || !STRIPE_PRICE_ID_PRO_MONTHLY) {
-      console.error(`[checkout ${reqId}] Missing env vars`);
+      console.error(`[checkout ${reqId}] Missing STRIPE_SECRET_KEY or STRIPE_PRICE_ID_PRO_MONTHLY`);
+      return jsonError("Server configuration error", 500);
+    }
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.error(`[checkout ${reqId}] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY`);
       return jsonError("Server configuration error", 500);
     }
 
@@ -42,7 +46,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (!token) return jsonError("Missing Authorization Bearer token", 401);
 
     const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token);
-    if (userErr || !userData?.user) return jsonError("Invalid or expired token", 401);
+    if (userErr || !userData?.user) {
+      console.error(`[checkout ${reqId}] Auth failed:`, userErr?.message, userErr?.status);
+      return jsonError("Authentication failed", 401);
+    }
     const user = userData.user;
 
     // Load or create Stripe customer

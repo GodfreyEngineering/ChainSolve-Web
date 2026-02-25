@@ -109,10 +109,12 @@ export async function listProjects(): Promise<ProjectRow[]> {
 /** Create a new project row + empty project.json in storage. */
 export async function createProject(name: string): Promise<ProjectRow> {
   const session = await requireSession()
+  const projectId = crypto.randomUUID()
+  const storageKey = `${session.user.id}/${projectId}/project.json`
 
   const { data, error } = await supabase
     .from('projects')
-    .insert({ owner_id: session.user.id, name })
+    .insert({ id: projectId, owner_id: session.user.id, name, storage_key: storageKey })
     .select(SELECT_COLS)
     .single()
 
@@ -190,10 +192,12 @@ export async function deleteProject(projectId: string): Promise<void> {
 /** Create a new project that is a copy of the source project's graph. */
 export async function duplicateProject(sourceId: string, newName: string): Promise<ProjectRow> {
   const session = await requireSession()
+  const projectId = crypto.randomUUID()
+  const storageKey = `${session.user.id}/${projectId}/project.json`
 
   const { data, error } = await supabase
     .from('projects')
-    .insert({ owner_id: session.user.id, name: newName })
+    .insert({ id: projectId, owner_id: session.user.id, name: newName, storage_key: storageKey })
     .select(SELECT_COLS)
     .single()
 
@@ -226,10 +230,12 @@ export async function importProject(json: ProjectJSON, overrideName?: string): P
 
   const name = overrideName ?? json.project?.name ?? 'Imported Project'
   const session = await requireSession()
+  const projectId = crypto.randomUUID()
+  const storageKey = `${session.user.id}/${projectId}/project.json`
 
   const { data, error } = await supabase
     .from('projects')
-    .insert({ owner_id: session.user.id, name })
+    .insert({ id: projectId, owner_id: session.user.id, name, storage_key: storageKey })
     .select(SELECT_COLS)
     .single()
 

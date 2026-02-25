@@ -20,7 +20,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const { STRIPE_SECRET_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = context.env;
 
     if (!STRIPE_SECRET_KEY) {
-      console.error(`[portal ${reqId}] Missing env vars`);
+      console.error(`[portal ${reqId}] Missing STRIPE_SECRET_KEY`);
+      return jsonError("Server configuration error", 500);
+    }
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.error(`[portal ${reqId}] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY`);
       return jsonError("Server configuration error", 500);
     }
 
@@ -35,7 +39,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (!token) return jsonError("Missing Authorization Bearer token", 401);
 
     const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token);
-    if (userErr || !userData?.user) return jsonError("Invalid or expired token", 401);
+    if (userErr || !userData?.user) {
+      console.error(`[portal ${reqId}] Auth failed:`, userErr?.message, userErr?.status);
+      return jsonError("Authentication failed", 401);
+    }
     const user = userData.user;
 
     // Load profile and stripe_customer_id

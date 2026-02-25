@@ -26,6 +26,7 @@ Run each file in `supabase/migrations/` **in numeric order** via **Supabase → 
 | `0002_storage_columns.sql` | Adds `projects.storage_key` and `project_assets.kind` |
 | `0003_projects_owner_id.sql` | Renames `projects.user_id` → `owner_id`, rebuilds RLS |
 | `0004_projects_description.sql` | Ensures `projects.description` column exists |
+| `0005_projects_storage_key_nullable.sql` | Drops NOT NULL on `projects.storage_key` (safety net) |
 
 After running 0001, confirm these tables appear under **Table Editor**:
 `profiles`, `projects`, `fs_items`, `project_assets`, `stripe_events`
@@ -412,3 +413,31 @@ PostgREST (the Supabase REST API layer) caches the DB schema at startup. The `NO
 - [ ] Cloudflare Pages deploy succeeded (`npm run build` → `dist/`)
 - [ ] Stripe test webhook returns `200 ok` and `stripe_events` row appears
 - [ ] End-to-end test: sign up → upgrade (7-day trial) → portal → cancel
+
+---
+
+## 12. Prod Debug — Billing / Token issues
+
+### Symptom: "Authentication failed" or "Invalid or expired token"
+
+**Root cause:** The frontend was sending a stale Supabase access token. Supabase JWTs expire after 1 hour by default. If a user has the app open for a while and then clicks "Upgrade", the token may have expired.
+
+**Fix applied:** The frontend now calls `supabase.auth.refreshSession()` before every billing API call. This forces a fresh access token. If the refresh itself fails (e.g. refresh token is also expired), the user is signed out and redirected to `/login`.
+
+### Symptom: "Server configuration error" (HTTP 500)
+
+This means one or more server-side env vars are missing. Check Cloudflare logs for the specific variable name:
+
+1. **Cloudflare Dashboard** → Workers & Pages → `chainsolve-web` → Functions → Real-time logs
+2. Look for log lines like `[checkout abc123] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY`
+
+**Important:** Cloudflare Pages has **separate env vars** for Production vs Preview. If billing works on preview but not production (or vice versa), check that all 7 env vars are set for **both** environments in Settings → Environment Variables.
+
+### Symptom: "null value in column storage_key violates not-null constraint"
+
+This happens when `projects.storage_key` has a NOT NULL constraint in the DB but the app INSERT didn't include it.
+
+**Fix applied:**
+1. The app now generates a `storage_key` (`{userId}/{projectId}/project.json`) upfront and includes it in every INSERT.
+2. Migration `0005_projects_storage_key_nullable.sql` drops the NOT NULL constraint as a safety net.
+3. Run the migration: Supabase → SQL Editor → paste contents of `0005`.
