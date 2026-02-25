@@ -105,6 +105,7 @@ supabase/
     0005_projects_storage_key_nullable.sql  Drops NOT NULL on storage_key
     0006_entitlements_enforcement.sql       Plan limit trigger, storage RLS tightening (W4)
     0007_bug_reports.sql                    In-app bug reporting table + RLS (W5.3)
+    0008_advisor_fixes.sql                 search_path, RLS initplan, dedup policies, FK indexes (W5.3.1)
 
 e2e/
   smoke.spec.ts   Playwright smoke tests: title, meta tags, robots.txt, #root, no errors (W5.3)

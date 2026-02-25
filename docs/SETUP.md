@@ -28,6 +28,8 @@ Run each file in `supabase/migrations/` **in numeric order** via **Supabase → 
 | `0004_projects_description.sql` | Ensures `projects.description` column exists |
 | `0005_projects_storage_key_nullable.sql` | Drops NOT NULL on `projects.storage_key` (safety net) |
 | `0006_entitlements_enforcement.sql` | Plan-based limits: project count trigger, storage RLS tightening, helper functions. Casts `plan` to text to avoid enum-name coupling. Includes `NOTIFY pgrst, 'reload schema'` to refresh PostgREST. |
+| `0007_bug_reports.sql` | In-app bug reporting table (`bug_reports`) with RLS (users insert/read own). |
+| `0008_advisor_fixes.sql` | Advisor fixpack: function `search_path`, RLS initplan optimization, deduplicate project policies, FK indexes. See §15 below. |
 
 After running 0001, confirm these tables appear under **Table Editor**:
 `profiles`, `projects`, `fs_items`, `project_assets`, `stripe_events`
@@ -542,3 +544,59 @@ This happens when `projects.storage_key` has a NOT NULL constraint in the DB but
 1. The app now generates a `storage_key` (`{userId}/{projectId}/project.json`) upfront and includes it in every INSERT.
 2. Migration `0005_projects_storage_key_nullable.sql` drops the NOT NULL constraint as a safety net.
 3. Run the migration: Supabase → SQL Editor → paste contents of `0005`.
+
+---
+
+## 15. Supabase Advisor Fixes (0008)
+
+Migration `0008_advisor_fixes.sql` addresses four categories of Supabase Advisor warnings. Apply it via **Supabase → SQL Editor** after all previous migrations.
+
+### What it fixes
+
+#### 1. `function_search_path_mutable` — function security
+
+**Problem:** Functions `trigger_set_updated_at()` and `handle_new_user()` were created without `SET search_path`, making them vulnerable to search_path manipulation.
+
+**Fix:** All public functions now include `SET search_path = public` in their declaration. This is set at the function level (not inside the body), which is what the advisor checks.
+
+#### 2. `auth_rls_initplan` — RLS performance
+
+**Problem:** RLS policies on `profiles`, `projects`, `fs_items`, `project_assets`, and `bug_reports` used `auth.uid()` directly. PostgreSQL re-evaluates this function call for every row, which becomes expensive at scale.
+
+**Fix:** All policies now use `(select auth.uid())` instead of bare `auth.uid()`. This forces PostgreSQL to evaluate the UID once as a subquery (an "initplan") and reuse the result across all rows — turning an O(n) function-call overhead into O(1).
+
+Example:
+```sql
+-- Before (slow at scale):
+USING (owner_id = auth.uid())
+
+-- After (initplan-optimized):
+USING (owner_id = (select auth.uid()))
+```
+
+#### 3. `multiple_permissive_policies` — duplicate projects policies
+
+**Problem:** The `projects` table had duplicate permissive policies for the same actions (leftover from the `user_id` → `owner_id` rename in 0003).
+
+**Fix:** All existing policies on `projects` are dropped and replaced with a single clean set using consistent naming (`projects_select_own`, `projects_insert_own`, etc.).
+
+#### 4. `unindexed_foreign_keys` — missing FK indexes
+
+**Problem:** Foreign key columns on `fs_items` and `project_assets` may lack covering indexes, which degrades JOIN and CASCADE performance.
+
+**Fix:** Ensures indexes exist (using `IF NOT EXISTS`) for:
+- `fs_items(user_id)`, `fs_items(parent_id)`, `fs_items(project_id)`
+- `project_assets(user_id)`, `project_assets(project_id)`
+
+These were originally created in 0001 but the migration re-asserts them for safety.
+
+### Apply checklist
+
+- [ ] Run `0008_advisor_fixes.sql` in **Supabase → SQL Editor**
+- [ ] Confirm it completes without errors (it's wrapped in `BEGIN/COMMIT`)
+- [ ] Go to **Supabase → Advisors** and rerun checks:
+  - [ ] `function_search_path_mutable` — no warnings for `public.*` functions
+  - [ ] `auth_rls_initplan` — no warnings for `profiles`, `projects`, `fs_items`, `project_assets`, `bug_reports`
+  - [ ] `multiple_permissive_policies` — no warnings for `projects`
+  - [ ] `unindexed_foreign_keys` — no warnings for `fs_items` or `project_assets`
+- [ ] Smoke test: sign in → create project → CRUD works → cannot see other users' data
