@@ -89,11 +89,7 @@ async function requireSession() {
 }
 
 async function readUpdatedAt(projectId: string): Promise<string | null> {
-  const { data } = await supabase
-    .from('projects')
-    .select('updated_at')
-    .eq('id', projectId)
-    .single()
+  const { data } = await supabase.from('projects').select('updated_at').eq('id', projectId).single()
   return (data as { updated_at: string } | null)?.updated_at ?? null
 }
 

@@ -2,10 +2,18 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import AppShell from './pages/AppShell'
 import CanvasPage from './pages/CanvasPage'
+import Settings from './pages/Settings'
 
 function BillingSuccess() {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
       <div style={{ textAlign: 'center', maxWidth: '400px', padding: '2rem' }}>
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
         <h1 style={{ margin: '0 0 0.5rem' }}>You&apos;re all set!</h1>
@@ -33,7 +41,14 @@ function BillingSuccess() {
 
 function BillingCancel() {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
       <div style={{ textAlign: 'center', maxWidth: '400px', padding: '2rem' }}>
         <h1 style={{ margin: '0 0 0.5rem' }}>Checkout cancelled</h1>
         <p style={{ opacity: 0.6, margin: '0 0 1.5rem' }}>
@@ -67,6 +82,7 @@ export default function App() {
         <Route path="/app" element={<AppShell />} />
         <Route path="/canvas" element={<CanvasPage />} />
         <Route path="/canvas/:projectId" element={<CanvasPage />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/billing/success" element={<BillingSuccess />} />
         <Route path="/billing/cancel" element={<BillingCancel />} />
       </Routes>

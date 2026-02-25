@@ -21,12 +21,7 @@ import {
 } from '../components/canvas/CanvasArea'
 import type { Node, Edge } from '@xyflow/react'
 import type { NodeData } from '../blocks/registry'
-import {
-  loadProject,
-  saveProject,
-  renameProject,
-  type ProjectJSON,
-} from '../lib/projects'
+import { loadProject, saveProject, renameProject, type ProjectJSON } from '../lib/projects'
 import { useProjectStore } from '../stores/projectStore'
 
 const AUTOSAVE_DELAY_MS = 2000
@@ -39,20 +34,20 @@ export default function CanvasPage() {
   const { projectId } = useParams<{ projectId?: string }>()
 
   // ── Store selectors ────────────────────────────────────────────────────────
-  const saveStatus   = useProjectStore(s => s.saveStatus)
-  const projectName  = useProjectStore(s => s.projectName)
-  const errorMessage = useProjectStore(s => s.errorMessage)
-  const isDirty      = useProjectStore(s => s.isDirty)
-  const lastSavedAt  = useProjectStore(s => s.lastSavedAt)
+  const saveStatus = useProjectStore((s) => s.saveStatus)
+  const projectName = useProjectStore((s) => s.projectName)
+  const errorMessage = useProjectStore((s) => s.errorMessage)
+  const isDirty = useProjectStore((s) => s.isDirty)
+  const lastSavedAt = useProjectStore((s) => s.lastSavedAt)
 
-  const beginLoad     = useProjectStore(s => s.beginLoad)
-  const markDirty     = useProjectStore(s => s.markDirty)
-  const beginSave     = useProjectStore(s => s.beginSave)
-  const completeSave  = useProjectStore(s => s.completeSave)
-  const failSave      = useProjectStore(s => s.failSave)
-  const detectConflict = useProjectStore(s => s.detectConflict)
-  const setStoreName  = useProjectStore(s => s.setProjectName)
-  const reset         = useProjectStore(s => s.reset)
+  const beginLoad = useProjectStore((s) => s.beginLoad)
+  const markDirty = useProjectStore((s) => s.markDirty)
+  const beginSave = useProjectStore((s) => s.beginSave)
+  const completeSave = useProjectStore((s) => s.completeSave)
+  const failSave = useProjectStore((s) => s.failSave)
+  const detectConflict = useProjectStore((s) => s.detectConflict)
+  const setStoreName = useProjectStore((s) => s.setProjectName)
+  const reset = useProjectStore((s) => s.reset)
 
   // ── Load state ────────────────────────────────────────────────────────────
   const [loadPhase, setLoadPhase] = useState<'loading' | 'ready' | 'error'>(
@@ -63,18 +58,18 @@ export default function CanvasPage() {
   const [initEdges, setInitEdges] = useState<Edge[] | undefined>()
 
   // ── Autosave / conflict refs ───────────────────────────────────────────────
-  const autosaveTimer           = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pendingNodes            = useRef<Node<NodeData>[]>([])
-  const pendingEdges            = useRef<Edge[]>([])
-  const isSaving                = useRef(false)
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingNodes = useRef<Node<NodeData>[]>([])
+  const pendingEdges = useRef<Edge[]>([])
+  const isSaving = useRef(false)
   // The server's updated_at captured when a conflict is detected.
   // Passed as knownUpdatedAt in a force-overwrite save.
-  const conflictServerTs        = useRef<string | null>(null)
+  const conflictServerTs = useRef<string | null>(null)
 
   // ── Inline project name editing ───────────────────────────────────────────
   const [nameEditing, setNameEditing] = useState(false)
-  const [nameInput,   setNameInput]   = useState('')
-  const nameInputRef                  = useRef<HTMLInputElement>(null)
+  const [nameInput, setNameInput] = useState('')
+  const nameInputRef = useRef<HTMLInputElement>(null)
 
   // ── Load project on mount (or when projectId changes) ─────────────────────
   useEffect(() => {
@@ -91,13 +86,7 @@ export default function CanvasPage() {
 
     loadProject(projectId)
       .then((pj: ProjectJSON) => {
-        beginLoad(
-          projectId,
-          pj.project.name,
-          pj.updatedAt,
-          pj.formatVersion,
-          pj.createdAt,
-        )
+        beginLoad(projectId, pj.project.name, pj.updatedAt, pj.formatVersion, pj.createdAt)
         setInitNodes(pj.graph.nodes as Node<NodeData>[])
         setInitEdges(pj.graph.edges as Edge[])
         setLoadPhase('ready')
@@ -166,7 +155,9 @@ export default function CanvasPage() {
       pendingEdges.current = edges
       markDirty()
       if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
-      autosaveTimer.current = setTimeout(() => { void doSave() }, AUTOSAVE_DELAY_MS)
+      autosaveTimer.current = setTimeout(() => {
+        void doSave()
+      }, AUTOSAVE_DELAY_MS)
     },
     [markDirty, doSave],
   )
@@ -224,7 +215,15 @@ export default function CanvasPage() {
   // ── Loading / error screens ───────────────────────────────────────────────
   if (loadPhase === 'loading') {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.5 }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: 0.5,
+        }}
+      >
         Loading project…
       </div>
     )
@@ -232,16 +231,34 @@ export default function CanvasPage() {
 
   if (loadPhase === 'error') {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '1rem',
+        }}
+      >
         <p style={{ color: '#ef4444', margin: 0 }}>{loadError}</p>
-        <a href="/app" style={{ opacity: 0.6, fontSize: '0.85rem', color: 'inherit' }}>← Back to projects</a>
+        <a href="/app" style={{ opacity: 0.6, fontSize: '0.85rem', color: 'inherit' }}>
+          ← Back to projects
+        </a>
       </div>
     )
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg)' }}>
-
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        overflow: 'hidden',
+        background: 'var(--bg)',
+      }}
+    >
       {/* ── Top bar ──────────────────────────────────────────────────────────── */}
       <div
         style={{
@@ -278,8 +295,12 @@ export default function CanvasPage() {
               userSelect: 'none',
               paddingBottom: 1,
             }}
-            onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderBottomColor = 'rgba(255,255,255,0.2)' }}
-            onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderBottomColor = 'transparent' }}
+            onMouseOver={(e) => {
+              ;(e.currentTarget as HTMLElement).style.borderBottomColor = 'rgba(255,255,255,0.2)'
+            }}
+            onMouseOut={(e) => {
+              ;(e.currentTarget as HTMLElement).style.borderBottomColor = 'transparent'
+            }}
           >
             {projectName}
           </span>
@@ -288,11 +309,17 @@ export default function CanvasPage() {
           <input
             ref={nameInputRef}
             value={nameInput}
-            onChange={e => setNameInput(e.target.value)}
-            onBlur={() => { void commitNameEdit() }}
-            onKeyDown={e => {
-              if (e.key === 'Enter') { void commitNameEdit() }
-              if (e.key === 'Escape') { setNameEditing(false) }
+            onChange={(e) => setNameInput(e.target.value)}
+            onBlur={() => {
+              void commitNameEdit()
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                void commitNameEdit()
+              }
+              if (e.key === 'Escape') {
+                setNameEditing(false)
+              }
             }}
             style={{
               fontWeight: 700,
@@ -315,9 +342,7 @@ export default function CanvasPage() {
 
         {/* Save status badge */}
         {statusLabel && (
-          <span style={{ fontSize: '0.72rem', color: statusLabel.color }}>
-            {statusLabel.text}
-          </span>
+          <span style={{ fontSize: '0.72rem', color: statusLabel.color }}>{statusLabel.text}</span>
         )}
         {saveStatus === 'error' && errorMessage && (
           <span

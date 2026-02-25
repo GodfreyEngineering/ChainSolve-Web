@@ -27,7 +27,17 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
         <span style={s.headerLabel}>{nd.label}</span>
       </div>
 
-      <div style={{ ...s.body, textAlign: 'center', position: 'relative', minHeight: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        style={{
+          ...s.body,
+          textAlign: 'center',
+          position: 'relative',
+          minHeight: 48,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <Handle
           type="target"
           position={Position.Left}

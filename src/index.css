@@ -2,23 +2,27 @@
 
 /* ── Design tokens ─────────────────────────────────────────────────────────── */
 :root {
-  --primary:      #1CABB0;
-  --primary-dim:  rgba(28, 171, 176, 0.15);
+  --primary: #1cabb0;
+  --primary-dim: rgba(28, 171, 176, 0.15);
   --primary-glow: rgba(28, 171, 176, 0.35);
 
-  --bg:       #1a1a1a;
-  --card-bg:  #383838;
+  --bg: #1a1a1a;
+  --card-bg: #383838;
   --surface2: #2c2c2c;
-  --border:   rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.1);
   --input-bg: #252525;
 
-  --text:       #F4F4F3;
+  --text: #f4f4f3;
   --text-muted: rgba(244, 244, 243, 0.5);
 
   --success: #22c55e;
-  --danger:  #ef4444;
+  --danger: #ef4444;
 
-  font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+  font-family:
+    'Montserrat',
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 14px;
   line-height: 1.5;
   font-weight: 400;
@@ -33,7 +37,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -43,24 +51,51 @@ body {
   color: var(--text);
 }
 
-h1 { font-size: 1.8rem; line-height: 1.2; font-weight: 700; }
+h1 {
+  font-size: 1.8rem;
+  line-height: 1.2;
+  font-weight: 700;
+}
 
-a { font-weight: 500; color: var(--primary); text-decoration: none; }
-a:hover { opacity: 0.8; }
+a {
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: none;
+}
+a:hover {
+  opacity: 0.8;
+}
 
-button { font-family: inherit; cursor: pointer; }
-button:hover { opacity: 0.85; }
-button:disabled { cursor: not-allowed; opacity: 0.5; }
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+button:hover {
+  opacity: 0.85;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 
-input, textarea, select { font-family: inherit; color: var(--text); }
-input:focus, textarea:focus { outline: 2px solid var(--primary); outline-offset: 0; }
+input,
+textarea,
+select {
+  font-family: inherit;
+  color: var(--text);
+}
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 0;
+}
 
 /* React Flow overrides */
 .react-flow__controls {
   background: var(--card-bg) !important;
   border: 1px solid var(--border) !important;
   border-radius: 8px !important;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.45) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45) !important;
   overflow: hidden;
   /* Position bottom-right; React Flow's own panel positions are applied via inline style
      so we force right/bottom here. */
@@ -90,12 +125,50 @@ input:focus, textarea:focus { outline: 2px solid var(--primary); outline-offset:
 .react-flow__controls-button:hover svg {
   fill: var(--primary) !important;
 }
-.react-flow__edge-path { stroke: var(--primary) !important; opacity: 0.65; }
-.react-flow__edge.selected .react-flow__edge-path { opacity: 1; stroke-width: 2; }
-.react-flow__connectionline { stroke: var(--primary) !important; }
+.react-flow__edge-path {
+  stroke: var(--primary) !important;
+  opacity: 0.65;
+}
+.react-flow__edge.selected .react-flow__edge-path {
+  opacity: 1;
+  stroke-width: 2;
+}
+.react-flow__connectionline {
+  stroke: var(--primary) !important;
+}
 
 /* Scrollbars */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ── Animations ───────────────────────────────────────────────────────────── */
+@keyframes cs-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes cs-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

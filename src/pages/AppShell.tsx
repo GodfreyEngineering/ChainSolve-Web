@@ -38,20 +38,27 @@ interface Profile {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const PLAN_LABELS: Record<Plan, string> = {
-  free: 'Free', trialing: 'Trial', pro: 'Pro', past_due: 'Past Due', canceled: 'Canceled',
+  free: 'Free',
+  trialing: 'Trial',
+  pro: 'Pro',
+  past_due: 'Past Due',
+  canceled: 'Canceled',
 }
 
 const PLAN_COLORS: Record<Plan, string> = {
-  free: '#6b7280', trialing: '#3b82f6', pro: '#22c55e',
-  past_due: '#f59e0b', canceled: '#ef4444',
+  free: '#6b7280',
+  trialing: '#3b82f6',
+  pro: '#22c55e',
+  past_due: '#f59e0b',
+  canceled: '#ef4444',
 }
 
 function fmtDate(iso: string): string {
   const d = new Date(iso)
   const diff = (Date.now() - d.getTime()) / 1000
-  if (diff < 60)        return 'just now'
-  if (diff < 3600)      return `${Math.floor(diff / 60)}m ago`
-  if (diff < 86400)     return `${Math.floor(diff / 3600)}h ago`
+  if (diff < 60) return 'just now'
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
   if (diff < 7 * 86400) return `${Math.floor(diff / 86400)}d ago`
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
@@ -90,24 +97,40 @@ function btnBase(extra?: React.CSSProperties): React.CSSProperties {
 }
 
 const btnPrimary: React.CSSProperties = btnBase({
-  padding: '0.6rem 1.25rem', border: 'none',
-  background: 'var(--primary)', color: '#fff', fontWeight: 600,
+  padding: '0.6rem 1.25rem',
+  border: 'none',
+  background: 'var(--primary)',
+  color: '#fff',
+  fontWeight: 600,
 })
 
 const btnSecondary: React.CSSProperties = btnBase({
   padding: '0.6rem 1.25rem',
   border: '1px solid var(--border)',
-  background: 'transparent', color: 'inherit', fontWeight: 500,
+  background: 'transparent',
+  color: 'inherit',
+  fontWeight: 500,
 })
 
 const btnDanger: React.CSSProperties = btnBase({
   padding: '0.5rem 1rem',
   border: '1px solid rgba(239,68,68,0.3)',
-  background: 'transparent', color: '#f87171', fontWeight: 500, fontSize: '0.85rem',
+  background: 'transparent',
+  color: '#f87171',
+  fontWeight: 500,
+  fontSize: '0.85rem',
 })
 
-const btnSmall: React.CSSProperties = { ...btnSecondary, padding: '0.4rem 0.85rem', fontSize: '0.82rem' }
-const btnSmallPrimary: React.CSSProperties = { ...btnPrimary, padding: '0.4rem 0.85rem', fontSize: '0.82rem' }
+const btnSmall: React.CSSProperties = {
+  ...btnSecondary,
+  padding: '0.4rem 0.85rem',
+  fontSize: '0.82rem',
+}
+const btnSmallPrimary: React.CSSProperties = {
+  ...btnPrimary,
+  padding: '0.4rem 0.85rem',
+  fontSize: '0.82rem',
+}
 const btnDisabled: React.CSSProperties = { opacity: 0.55, cursor: 'not-allowed' }
 
 // ── AppShell component ────────────────────────────────────────────────────────
@@ -115,19 +138,19 @@ const btnDisabled: React.CSSProperties = { opacity: 0.55, cursor: 'not-allowed' 
 export default function AppShell() {
   const navigate = useNavigate()
 
-  const [user,    setUser]    = useState<User | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
   // Billing
   const [billingLoading, setBillingLoading] = useState(false)
-  const [billingError,   setBillingError]   = useState<string | null>(null)
+  const [billingError, setBillingError] = useState<string | null>(null)
 
   // Projects
-  const [projects,    setProjects]    = useState<ProjectRow[]>([])
+  const [projects, setProjects] = useState<ProjectRow[]>([])
   const [projLoading, setProjLoading] = useState(false)
-  const [projError,   setProjError]   = useState<string | null>(null)
-  const [menuOpen,    setMenuOpen]    = useState<string | null>(null) // projectId
+  const [projError, setProjError] = useState<string | null>(null)
+  const [menuOpen, setMenuOpen] = useState<string | null>(null) // projectId
 
   const importRef = useRef<HTMLInputElement>(null)
 
@@ -135,7 +158,10 @@ export default function AppShell() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) { navigate('/login'); return }
+      if (!session) {
+        navigate('/login')
+        return
+      }
       setUser(session.user)
       void loadProfile(session.user.id)
     })
@@ -241,7 +267,11 @@ export default function AppShell() {
       const proj = await importProject(json)
       navigate(`/canvas/${proj.id}`)
     } catch (err: unknown) {
-      setProjError(err instanceof Error ? err.message : 'Import failed — check the file is a valid project.json')
+      setProjError(
+        err instanceof Error
+          ? err.message
+          : 'Import failed — check the file is a valid project.json',
+      )
     }
   }
 
@@ -251,7 +281,9 @@ export default function AppShell() {
     setBillingLoading(true)
     setBillingError(null)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       if (!session) throw new Error('Not authenticated')
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -259,11 +291,12 @@ export default function AppShell() {
       })
       let json: Record<string, unknown>
       try {
-        json = await res.json() as Record<string, unknown>
+        json = (await res.json()) as Record<string, unknown>
       } catch {
         throw new Error(`Server returned a non-JSON response (HTTP ${res.status})`)
       }
-      if (!res.ok) throw new Error(typeof json.error === 'string' ? json.error : `HTTP ${res.status}`)
+      if (!res.ok)
+        throw new Error(typeof json.error === 'string' ? json.error : `HTTP ${res.status}`)
       if (typeof json.url !== 'string') throw new Error('No redirect URL returned by server')
       window.location.assign(json.url)
     } catch (err: unknown) {
@@ -281,52 +314,90 @@ export default function AppShell() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.5 }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: 0.5,
+        }}
+      >
         Loading…
       </div>
     )
   }
 
-  const plan       = (profile?.plan ?? 'free') as Plan
+  const plan = (profile?.plan ?? 'free') as Plan
   const canUpgrade = plan === 'free' || plan === 'canceled'
-  const canManage  = plan === 'trialing' || plan === 'pro' || plan === 'past_due'
-  const periodEnd  = profile?.current_period_end
-    ? new Date(profile.current_period_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  const canManage = plan === 'trialing' || plan === 'pro' || plan === 'past_due'
+  const periodEnd = profile?.current_period_end
+    ? new Date(profile.current_period_end).toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
     : null
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-
       {/* Nav */}
-      <nav style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 1.5rem', height: 56,
-        borderBottom: '1px solid var(--border)', background: 'var(--card-bg)',
-      }}>
-        <span style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.5px' }}>ChainSolve</span>
+      <nav
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 1.5rem',
+          height: 56,
+          borderBottom: '1px solid var(--border)',
+          background: 'var(--card-bg)',
+        }}
+      >
+        <span style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.5px' }}>
+          ChainSolve
+        </span>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <span style={{ fontSize: '0.85rem', opacity: 0.6 }}>{user?.email}</span>
-          <button style={btnDanger} onClick={() => void handleLogout()}>Sign out</button>
+          <button style={btnSmall} onClick={() => navigate('/settings')}>
+            Settings
+          </button>
+          <button style={btnDanger} onClick={() => void handleLogout()}>
+            Sign out
+          </button>
         </div>
       </nav>
 
-      <main style={{ flex: 1, padding: '2rem 1.5rem', maxWidth: 960, width: '100%', margin: '0 auto' }}>
-
+      <main
+        style={{ flex: 1, padding: '2rem 1.5rem', maxWidth: 960, width: '100%', margin: '0 auto' }}
+      >
         {/* ── Subscription card ── */}
         <div style={cardStyle}>
           <p style={sectionLabel}>Subscription</p>
           {billingError && <div style={errorBox}>{billingError}</div>}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '0.75rem',
+            }}
+          >
             <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                 <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Current plan</span>
-                <span style={{
-                  display: 'inline-block', padding: '0.25rem 0.75rem', borderRadius: 999,
-                  fontSize: '0.8rem', fontWeight: 700,
-                  background: PLAN_COLORS[plan] + '22',
-                  color: PLAN_COLORS[plan],
-                  border: `1px solid ${PLAN_COLORS[plan]}44`,
-                }}>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: 999,
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    background: PLAN_COLORS[plan] + '22',
+                    color: PLAN_COLORS[plan],
+                    border: `1px solid ${PLAN_COLORS[plan]}44`,
+                  }}
+                >
                   {PLAN_LABELS[plan]}
                 </span>
               </div>
@@ -364,7 +435,14 @@ export default function AppShell() {
 
         {/* ── Projects card ── */}
         <div style={cardStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '1.25rem',
+            }}
+          >
             <p style={{ ...sectionLabel, margin: 0 }}>Projects</p>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               <input
@@ -372,7 +450,7 @@ export default function AppShell() {
                 type="file"
                 accept=".json,application/json"
                 style={{ display: 'none' }}
-                onChange={e => void handleImportFile(e)}
+                onChange={(e) => void handleImportFile(e)}
               />
               <button style={btnSmall} onClick={() => importRef.current?.click()}>
                 Import .json
@@ -394,16 +472,22 @@ export default function AppShell() {
           ) : projects.length === 0 ? (
             <div style={{ padding: '2.5rem 1rem', textAlign: 'center', opacity: 0.4 }}>
               <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⟁</div>
-              <p style={{ margin: '0 0 0.35rem', fontSize: '0.95rem', fontWeight: 600 }}>No projects yet</p>
-              <p style={{ margin: 0, fontSize: '0.82rem' }}>Create your first project to get started.</p>
+              <p style={{ margin: '0 0 0.35rem', fontSize: '0.95rem', fontWeight: 600 }}>
+                No projects yet
+              </p>
+              <p style={{ margin: 0, fontSize: '0.82rem' }}>
+                Create your first project to get started.
+              </p>
             </div>
           ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
-              gap: '0.75rem',
-            }}>
-              {projects.map(proj => (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+                gap: '0.75rem',
+              }}
+            >
+              {projects.map((proj) => (
                 <ProjectCard
                   key={proj.id}
                   project={proj}
@@ -440,15 +524,22 @@ interface ProjectCardProps {
 }
 
 const menuActions = [
-  { key: 'rename',    label: 'Rename…' },
+  { key: 'rename', label: 'Rename…' },
   { key: 'duplicate', label: 'Duplicate' },
-  { key: 'export',    label: 'Export .json' },
-  { key: 'delete',    label: 'Delete', danger: true },
+  { key: 'export', label: 'Export .json' },
+  { key: 'delete', label: 'Delete', danger: true },
 ] as const
 
 function ProjectCard({
-  project, menuOpen, onOpenMenu, onCloseMenu,
-  onOpen, onRename, onDuplicate, onDelete, onExport,
+  project,
+  menuOpen,
+  onOpenMenu,
+  onCloseMenu,
+  onOpen,
+  onRename,
+  onDuplicate,
+  onDelete,
+  onExport,
 }: ProjectCardProps) {
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -464,13 +555,17 @@ function ProjectCard({
     return () => document.removeEventListener('mousedown', handler)
   }, [menuOpen, onCloseMenu])
 
-  const handleAction = (key: typeof menuActions[number]['key']) => {
+  const handleAction = (key: (typeof menuActions)[number]['key']) => {
     onCloseMenu()
     switch (key) {
-      case 'rename':    return onRename()
-      case 'duplicate': return onDuplicate()
-      case 'export':    return onExport()
-      case 'delete':    return onDelete()
+      case 'rename':
+        return onRename()
+      case 'duplicate':
+        return onDuplicate()
+      case 'export':
+        return onExport()
+      case 'delete':
+        return onDelete()
     }
   }
 
@@ -486,39 +581,58 @@ function ProjectCard({
         position: 'relative',
         transition: 'border-color 0.15s',
       }}
-      onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(28,171,176,0.4)' }}
-      onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)' }}
+      onMouseOver={(e) => {
+        ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(28,171,176,0.4)'
+      }}
+      onMouseOut={(e) => {
+        ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'
+      }}
     >
       {/* Icon */}
-      <div style={{ fontSize: '1.4rem', marginBottom: '0.4rem', userSelect: 'none', lineHeight: 1 }}>⟁</div>
+      <div
+        style={{ fontSize: '1.4rem', marginBottom: '0.4rem', userSelect: 'none', lineHeight: 1 }}
+      >
+        ⟁
+      </div>
 
       {/* Name */}
-      <div style={{
-        fontWeight: 600, fontSize: '0.88rem', marginBottom: '0.25rem',
-        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        paddingRight: '1.4rem', // space for ⋯ button
-      }}>
+      <div
+        style={{
+          fontWeight: 600,
+          fontSize: '0.88rem',
+          marginBottom: '0.25rem',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          paddingRight: '1.4rem', // space for ⋯ button
+        }}
+      >
         {project.name}
       </div>
 
       {/* Updated time */}
-      <div style={{ fontSize: '0.72rem', opacity: 0.4 }}>
-        {fmtDate(project.updated_at)}
-      </div>
+      <div style={{ fontSize: '0.72rem', opacity: 0.4 }}>{fmtDate(project.updated_at)}</div>
 
       {/* Three-dot menu */}
       <div
         ref={menuRef}
         style={{ position: 'absolute', top: '0.55rem', right: '0.55rem' }}
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
         <button
-          onClick={() => { menuOpen ? onCloseMenu() : onOpenMenu() }}
+          onClick={() => {
+            menuOpen ? onCloseMenu() : onOpenMenu()
+          }}
           title="Project actions"
           style={{
-            background: 'transparent', border: 'none', cursor: 'pointer',
-            color: 'rgba(244,244,243,0.45)', fontSize: '1.1rem',
-            padding: '0.1rem 0.35rem', borderRadius: 4, lineHeight: 1,
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'rgba(244,244,243,0.45)',
+            fontSize: '1.1rem',
+            padding: '0.1rem 0.35rem',
+            borderRadius: 4,
+            lineHeight: 1,
             fontFamily: 'inherit',
           }}
         >
@@ -526,30 +640,45 @@ function ProjectCard({
         </button>
 
         {menuOpen && (
-          <div style={{
-            position: 'absolute', right: 0, top: '115%', zIndex: 500,
-            background: '#2c2c2c', border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.55)',
-            minWidth: 148, overflow: 'hidden',
-          }}>
-            {menuActions.map(item => (
+          <div
+            style={{
+              position: 'absolute',
+              right: 0,
+              top: '115%',
+              zIndex: 500,
+              background: '#2c2c2c',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 8,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.55)',
+              minWidth: 148,
+              overflow: 'hidden',
+            }}
+          >
+            {menuActions.map((item) => (
               <button
                 key={item.key}
                 onClick={() => handleAction(item.key)}
                 style={{
-                  display: 'block', width: '100%', textAlign: 'left',
+                  display: 'block',
+                  width: '100%',
+                  textAlign: 'left',
                   padding: '0.45rem 0.85rem',
-                  background: 'transparent', border: 'none',
-                  cursor: 'pointer', fontSize: '0.82rem', fontFamily: 'inherit',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.82rem',
+                  fontFamily: 'inherit',
                   color: 'danger' in item && item.danger ? '#f87171' : '#F4F4F3',
                 }}
-                onMouseOver={e => {
+                onMouseOver={(e) => {
                   const isDanger = 'danger' in item && item.danger
                   ;(e.currentTarget as HTMLElement).style.background = isDanger
                     ? 'rgba(239,68,68,0.12)'
                     : 'rgba(28,171,176,0.1)'
                 }}
-                onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+                onMouseOut={(e) => {
+                  ;(e.currentTarget as HTMLElement).style.background = 'transparent'
+                }}
               >
                 {item.label}
               </button>

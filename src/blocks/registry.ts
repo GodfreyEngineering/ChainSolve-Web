@@ -134,7 +134,10 @@ reg({
   label: 'Add',
   category: 'math',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+  inputs: [
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
+  ],
   defaultData: { blockType: 'add', label: 'Add' },
   evaluate: ([a, b]) => (a === null || b === null ? NaN : a + b),
 })
@@ -144,7 +147,10 @@ reg({
   label: 'Subtract',
   category: 'math',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+  inputs: [
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
+  ],
   defaultData: { blockType: 'subtract', label: 'Subtract' },
   evaluate: ([a, b]) => (a === null || b === null ? NaN : a - b),
 })
@@ -154,7 +160,10 @@ reg({
   label: 'Multiply',
   category: 'math',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+  inputs: [
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
+  ],
   defaultData: { blockType: 'multiply', label: 'Multiply' },
   evaluate: ([a, b]) => (a === null || b === null ? NaN : a * b),
 })
@@ -164,7 +173,10 @@ reg({
   label: 'Divide',
   category: 'math',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+  inputs: [
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
+  ],
   defaultData: { blockType: 'divide', label: 'Divide' },
   evaluate: ([a, b]) => (a === null || b === null ? NaN : b === 0 ? Infinity : a / b),
 })
@@ -204,7 +216,10 @@ reg({
   label: 'Power',
   category: 'math',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'base', label: 'Base' }, { id: 'exp', label: 'Exp' }],
+  inputs: [
+    { id: 'base', label: 'Base' },
+    { id: 'exp', label: 'Exp' },
+  ],
   defaultData: { blockType: 'power', label: 'Power' },
   evaluate: ([base, exp]) => (base === null || exp === null ? NaN : Math.pow(base, exp)),
 })
@@ -244,7 +259,10 @@ reg({
   label: 'Mod',
   category: 'math',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+  inputs: [
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
+  ],
   defaultData: { blockType: 'mod', label: 'Mod' },
   evaluate: ([a, b]) => (a === null || b === null ? NaN : b === 0 ? NaN : a % b),
 })
@@ -254,12 +272,14 @@ reg({
   label: 'Clamp',
   category: 'math',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'val', label: 'Val' }, { id: 'min', label: 'Min' }, { id: 'max', label: 'Max' }],
+  inputs: [
+    { id: 'val', label: 'Val' },
+    { id: 'min', label: 'Min' },
+    { id: 'max', label: 'Max' },
+  ],
   defaultData: { blockType: 'clamp', label: 'Clamp' },
   evaluate: ([val, min, max]) =>
-    val === null || min === null || max === null
-      ? NaN
-      : Math.min(Math.max(val, min), max),
+    val === null || min === null || max === null ? NaN : Math.min(Math.max(val, min), max),
 })
 
 // ── Trig category ─────────────────────────────────────────────────────────────
@@ -329,7 +349,10 @@ reg({
   label: 'Atan2',
   category: 'trig',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'y', label: 'Y' }, { id: 'x', label: 'X' }],
+  inputs: [
+    { id: 'y', label: 'Y' },
+    { id: 'x', label: 'X' },
+  ],
   defaultData: { blockType: 'atan2', label: 'Atan2' },
   evaluate: ([y, x]) => (y === null || x === null ? NaN : Math.atan2(y, x)),
 })
@@ -361,7 +384,10 @@ reg({
   label: 'Greater',
   category: 'logic',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+  inputs: [
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
+  ],
   defaultData: { blockType: 'greater', label: 'A > B' },
   evaluate: ([a, b]) => (a === null || b === null ? NaN : a > b ? 1 : 0),
 })
@@ -371,7 +397,10 @@ reg({
   label: 'Less',
   category: 'logic',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+  inputs: [
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
+  ],
   defaultData: { blockType: 'less', label: 'A < B' },
   evaluate: ([a, b]) => (a === null || b === null ? NaN : a < b ? 1 : 0),
 })
@@ -381,10 +410,12 @@ reg({
   label: 'Equal',
   category: 'logic',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+  inputs: [
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
+  ],
   defaultData: { blockType: 'equal', label: 'A = B' },
-  evaluate: ([a, b]) =>
-    a === null || b === null ? NaN : Math.abs(a - b) < 1e-10 ? 1 : 0,
+  evaluate: ([a, b]) => (a === null || b === null ? NaN : Math.abs(a - b) < 1e-10 ? 1 : 0),
 })
 
 reg({
@@ -399,11 +430,7 @@ reg({
   ],
   defaultData: { blockType: 'ifthenelse', label: 'If/Then/Else' },
   evaluate: ([cond, then_, else_]) =>
-    cond === null || then_ === null || else_ === null
-      ? NaN
-      : cond !== 0
-        ? then_
-        : else_,
+    cond === null || then_ === null || else_ === null ? NaN : cond !== 0 ? then_ : else_,
 })
 
 reg({
@@ -411,7 +438,10 @@ reg({
   label: 'Max',
   category: 'logic',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+  inputs: [
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
+  ],
   defaultData: { blockType: 'max', label: 'Max' },
   evaluate: ([a, b]) => (a === null || b === null ? NaN : Math.max(a, b)),
 })
@@ -421,7 +451,10 @@ reg({
   label: 'Min',
   category: 'logic',
   nodeKind: 'csOperation',
-  inputs: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
+  inputs: [
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
+  ],
   defaultData: { blockType: 'min', label: 'Min' },
   evaluate: ([a, b]) => (a === null || b === null ? NaN : Math.min(a, b)),
 })
@@ -441,7 +474,12 @@ reg({
 // ── Block palette (ordered for display) ──────────────────────────────────────
 
 export const CATEGORY_ORDER: BlockCategory[] = [
-  'input', 'math', 'trig', 'constants', 'logic', 'output',
+  'input',
+  'math',
+  'trig',
+  'constants',
+  'logic',
+  'output',
 ]
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {

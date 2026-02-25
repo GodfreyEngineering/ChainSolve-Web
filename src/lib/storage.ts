@@ -39,7 +39,9 @@ export interface ProjectAsset {
 // ── Private helper ────────────────────────────────────────────────────────────
 
 async function requireSession() {
-  const { data: { session } } = await supabase.auth.getSession()
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
   if (!session) throw new Error('You must be logged in to access storage.')
   return session
 }
@@ -73,7 +75,7 @@ export async function saveProjectJson(projectId: string, projectJson: unknown): 
     .from('projects')
     .update({ storage_key: key })
     .eq('id', projectId)
-    .eq('owner_id', userId)  // projects table uses owner_id, not user_id
+    .eq('owner_id', userId) // projects table uses owner_id, not user_id
 
   if (dbErr) throw new Error(`DB update (storage_key) failed: ${dbErr.message}`)
 }
@@ -102,19 +104,14 @@ export async function loadProjectJson(projectId: string): Promise<unknown> {
  * Returns the `storage_key` (= storage_path in the DB column) so the caller
  * can store or display it.
  */
-export async function uploadCsv(
-  projectId: string,
-  file: File,
-): Promise<{ storage_key: string }> {
+export async function uploadCsv(projectId: string, file: File): Promise<{ storage_key: string }> {
   const session = await requireSession()
   const userId = session.user.id
 
   const safe = sanitiseFilename(file.name)
   const key = `${userId}/${projectId}/uploads/${Date.now()}_${safe}`
 
-  const { error: uploadErr } = await supabase.storage
-    .from('uploads')
-    .upload(key, file)     // no upsert: timestamps keep each upload unique
+  const { error: uploadErr } = await supabase.storage.from('uploads').upload(key, file) // no upsert: timestamps keep each upload unique
 
   if (uploadErr) throw new Error(`CSV upload failed: ${uploadErr.message}`)
 
@@ -122,10 +119,10 @@ export async function uploadCsv(
     project_id: projectId,
     user_id: userId,
     kind: 'csv',
-    name: file.name,          // original filename
-    storage_path: key,        // storage key
+    name: file.name, // original filename
+    storage_path: key, // storage key
     mime_type: file.type || 'text/csv',
-    size: file.size,          // bytes
+    size: file.size, // bytes
   })
 
   if (dbErr) throw new Error(`project_assets insert failed: ${dbErr.message}`)

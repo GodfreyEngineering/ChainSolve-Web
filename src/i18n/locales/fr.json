@@ -1,0 +1,107 @@
+{
+  "app": {
+    "name": "ChainSolve",
+    "tagline": "Calculatrice scientifique en nœuds"
+  },
+  "nav": {
+    "signOut": "Déconnexion",
+    "settings": "Paramètres",
+    "backToApp": "Retour à l'app"
+  },
+  "auth": {
+    "login": "Connexion",
+    "signup": "Créer un compte",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "signUpLink": "S'inscrire",
+    "signInLink": "Se connecter",
+    "emailPending": "Vérifiez votre e-mail pour le lien de confirmation.",
+    "resend": "Renvoyer l'e-mail",
+    "submitting": "Envoi…"
+  },
+  "projects": {
+    "title": "Projets",
+    "newProject": "Nouveau Projet",
+    "import": "Importer .json",
+    "noProjects": "Aucun projet pour le moment",
+    "noProjectsHint": "Créez votre premier projet pour commencer.",
+    "loading": "Chargement…",
+    "rename": "Renommer…",
+    "duplicate": "Dupliquer",
+    "export": "Exporter .json",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer \"{{name}}\" ? Cette action est irréversible.",
+    "promptName": "Nom du projet :",
+    "defaultName": "Projet sans titre",
+    "promptRename": "Renommer le projet :"
+  },
+  "billing": {
+    "title": "Abonnement",
+    "currentPlan": "Plan actuel",
+    "trialEnds": "Fin de l'essai",
+    "renews": "Renouvellement",
+    "upgrade": "Améliorer — 10£/mois",
+    "manage": "Gérer la facturation",
+    "redirecting": "Redirection…",
+    "successTitle": "C'est parti !",
+    "successMsg": "Votre abonnement est maintenant actif. Cela peut prendre quelques secondes.",
+    "cancelTitle": "Paiement annulé",
+    "cancelMsg": "Aucun montant n'a été débité. Vous pouvez mettre à jour à tout moment.",
+    "goToApp": "Aller à l'app",
+    "backToApp": "Retour à l'app"
+  },
+  "plans": {
+    "free": "Gratuit",
+    "trialing": "Essai",
+    "pro": "Pro",
+    "past_due": "Paiement en retard",
+    "canceled": "Annulé"
+  },
+  "canvas": {
+    "scratch": "Canevas temporaire",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré",
+    "conflict": "Conflit",
+    "error": "Erreur",
+    "conflictBanner": "Ce projet a été mis à jour dans une autre session.",
+    "keepMine": "Garder ma version",
+    "reload": "Recharger depuis le serveur",
+    "instructions": "Glissez des blocs depuis la bibliothèque. Connectez sorties → entrées. Clic droit pour plus d'options."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "profile": "Profil",
+    "profileDesc": "Gérez vos informations de compte",
+    "billing": "Facturation",
+    "billingDesc": "Abonnement et factures",
+    "preferences": "Préférences",
+    "preferencesDesc": "Thème, langue et raccourcis",
+    "emailLabel": "Adresse e-mail",
+    "emailHint": "Contactez le support pour changer votre e-mail.",
+    "userIdLabel": "ID utilisateur",
+    "memberSince": "Membre depuis",
+    "planLabel": "Plan actuel",
+    "languageLabel": "Langue",
+    "languageHint": "Choisissez votre langue d'affichage.",
+    "themeLabel": "Thème",
+    "themeDark": "Sombre",
+    "themeLight": "Clair (bientôt)",
+    "save": "Enregistrer",
+    "saved": "Enregistré !"
+  },
+  "ui": {
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "search": "Rechercher…",
+    "loading": "Chargement…"
+  },
+  "time": {
+    "justNow": "à l'instant",
+    "mAgo": "il y a {{count}}m",
+    "hAgo": "il y a {{count}}h",
+    "dAgo": "il y a {{count}}j"
+  }
+}

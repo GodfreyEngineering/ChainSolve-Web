@@ -1,0 +1,79 @@
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+
+type ToastVariant = 'info' | 'success' | 'error'
+
+interface ToastItem {
+  id: number
+  message: string
+  variant: ToastVariant
+}
+
+interface ToastContextValue {
+  toast: (message: string, variant?: ToastVariant) => void
+}
+
+const ToastContext = createContext<ToastContextValue>({ toast: () => {} })
+
+export function useToast() {
+  return useContext(ToastContext)
+}
+
+let nextId = 1
+
+const containerStyle: React.CSSProperties = {
+  position: 'fixed',
+  bottom: 20,
+  right: 20,
+  zIndex: 9500,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.5rem',
+  pointerEvents: 'none',
+}
+
+const variantColors: Record<ToastVariant, string> = {
+  info: 'var(--primary)',
+  success: 'var(--success)',
+  error: 'var(--danger)',
+}
+
+function toastStyle(variant: ToastVariant): React.CSSProperties {
+  return {
+    pointerEvents: 'auto',
+    background: 'var(--card-bg)',
+    border: `1px solid ${variantColors[variant]}44`,
+    borderLeft: `3px solid ${variantColors[variant]}`,
+    borderRadius: 8,
+    padding: '0.65rem 1rem',
+    fontSize: '0.85rem',
+    color: 'var(--text)',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+    animation: 'cs-slide-up 0.2s ease',
+    maxWidth: 360,
+  }
+}
+
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<ToastItem[]>([])
+
+  const toast = useCallback((message: string, variant: ToastVariant = 'info') => {
+    const id = nextId++
+    setItems((prev) => [...prev, { id, message, variant }])
+    setTimeout(() => {
+      setItems((prev) => prev.filter((t) => t.id !== id))
+    }, 3500)
+  }, [])
+
+  return (
+    <ToastContext.Provider value={{ toast }}>
+      {children}
+      <div style={containerStyle}>
+        {items.map((t) => (
+          <div key={t.id} style={toastStyle(t.variant)}>
+            {t.message}
+          </div>
+        ))}
+      </div>
+    </ToastContext.Provider>
+  )
+}

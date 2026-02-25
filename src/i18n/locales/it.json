@@ -1,0 +1,107 @@
+{
+  "app": {
+    "name": "ChainSolve",
+    "tagline": "Calcolatrice scientifica a nodi"
+  },
+  "nav": {
+    "signOut": "Esci",
+    "settings": "Impostazioni",
+    "backToApp": "Torna all'app"
+  },
+  "auth": {
+    "login": "Accedi",
+    "signup": "Crea un account",
+    "email": "Email",
+    "password": "Password",
+    "noAccount": "Non hai un account?",
+    "hasAccount": "Hai già un account?",
+    "signUpLink": "Registrati",
+    "signInLink": "Accedi",
+    "emailPending": "Controlla la tua email per il link di conferma.",
+    "resend": "Rinvia email",
+    "submitting": "Invio…"
+  },
+  "projects": {
+    "title": "Progetti",
+    "newProject": "Nuovo Progetto",
+    "import": "Importa .json",
+    "noProjects": "Nessun progetto ancora",
+    "noProjectsHint": "Crea il tuo primo progetto per iniziare.",
+    "loading": "Caricamento…",
+    "rename": "Rinomina…",
+    "duplicate": "Duplica",
+    "export": "Esporta .json",
+    "delete": "Elimina",
+    "deleteConfirm": "Eliminare \"{{name}}\"? Questa azione non può essere annullata.",
+    "promptName": "Nome del progetto:",
+    "defaultName": "Progetto senza titolo",
+    "promptRename": "Rinomina progetto:"
+  },
+  "billing": {
+    "title": "Abbonamento",
+    "currentPlan": "Piano attuale",
+    "trialEnds": "Fine prova",
+    "renews": "Rinnovo",
+    "upgrade": "Aggiorna — £10/mese",
+    "manage": "Gestisci fatturazione",
+    "redirecting": "Reindirizzamento…",
+    "successTitle": "Tutto pronto!",
+    "successMsg": "Il tuo abbonamento è ora attivo. Potrebbe volerci qualche secondo.",
+    "cancelTitle": "Pagamento annullato",
+    "cancelMsg": "Nessun addebito effettuato. Puoi aggiornare in qualsiasi momento.",
+    "goToApp": "Vai all'app",
+    "backToApp": "Torna all'app"
+  },
+  "plans": {
+    "free": "Gratuito",
+    "trialing": "Prova",
+    "pro": "Pro",
+    "past_due": "Pagamento in ritardo",
+    "canceled": "Annullato"
+  },
+  "canvas": {
+    "scratch": "Tela temporanea",
+    "saving": "Salvataggio…",
+    "saved": "Salvato",
+    "conflict": "Conflitto",
+    "error": "Errore",
+    "conflictBanner": "Questo progetto è stato aggiornato in un'altra sessione.",
+    "keepMine": "Mantieni la mia versione",
+    "reload": "Ricarica dal server",
+    "instructions": "Trascina i blocchi dalla libreria. Collega uscite → ingressi. Clic destro per più opzioni."
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "profile": "Profilo",
+    "profileDesc": "Gestisci le informazioni del tuo account",
+    "billing": "Fatturazione",
+    "billingDesc": "Abbonamento e fatture",
+    "preferences": "Preferenze",
+    "preferencesDesc": "Tema, lingua e scorciatoie",
+    "emailLabel": "Indirizzo email",
+    "emailHint": "Contatta il supporto per cambiare la tua email.",
+    "userIdLabel": "ID utente",
+    "memberSince": "Membro dal",
+    "planLabel": "Piano attuale",
+    "languageLabel": "Lingua",
+    "languageHint": "Scegli la lingua di visualizzazione preferita.",
+    "themeLabel": "Tema",
+    "themeDark": "Scuro",
+    "themeLight": "Chiaro (in arrivo)",
+    "save": "Salva",
+    "saved": "Salvato!"
+  },
+  "ui": {
+    "close": "Chiudi",
+    "cancel": "Annulla",
+    "confirm": "Conferma",
+    "search": "Cerca…",
+    "loading": "Caricamento…"
+  },
+  "time": {
+    "justNow": "proprio ora",
+    "mAgo": "{{count}}m fa",
+    "hAgo": "{{count}}h fa",
+    "dAgo": "{{count}}g fa"
+  }
+}

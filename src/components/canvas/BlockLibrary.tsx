@@ -26,18 +26,24 @@ const RECENT_KEY = 'cs:recent'
 const FAV_KEY = 'cs:favs'
 
 function getRecent(): string[] {
-  try { return JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]') as string[] }
-  catch { return [] }
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]') as string[]
+  } catch {
+    return []
+  }
 }
 
 export function trackBlockUsed(blockType: string): void {
-  const prev = getRecent().filter(t => t !== blockType)
+  const prev = getRecent().filter((t) => t !== blockType)
   localStorage.setItem(RECENT_KEY, JSON.stringify([blockType, ...prev].slice(0, 8)))
 }
 
 function getFavs(): Set<string> {
-  try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY) ?? '[]') as string[]) }
-  catch { return new Set() }
+  try {
+    return new Set(JSON.parse(localStorage.getItem(FAV_KEY) ?? '[]') as string[])
+  } catch {
+    return new Set()
+  }
 }
 
 function saveFavs(favs: Set<string>): void {
@@ -192,7 +198,15 @@ function BlockItem({ def, favs, onToggleFav }: BlockItemProps) {
       }}
       title={`Drag to add ${def.label}`}
     >
-      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: hovered ? 20 : 0 }}>
+      <span
+        style={{
+          flex: 1,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          paddingRight: hovered ? 20 : 0,
+        }}
+      >
         {def.label}
       </span>
       {hovered && (
@@ -202,7 +216,10 @@ function BlockItem({ def, favs, onToggleFav }: BlockItemProps) {
             color: isFav ? '#f59e0b' : 'rgba(255,255,255,0.3)',
           }}
           title={isFav ? 'Remove from favourites' : 'Add to favourites'}
-          onClick={e => { e.stopPropagation(); onToggleFav(def.type) }}
+          onClick={(e) => {
+            e.stopPropagation()
+            onToggleFav(def.type)
+          }}
         >
           {isFav ? '★' : '☆'}
         </button>
@@ -229,7 +246,7 @@ export function BlockLibrary({ width, onResizeStart }: BlockLibraryProps) {
   const refreshRecent = useCallback(() => setRecent(getRecent()), [])
 
   const toggleFav = useCallback((type: string) => {
-    setFavs(prev => {
+    setFavs((prev) => {
       const next = new Set(prev)
       if (next.has(type)) next.delete(type)
       else next.add(type)
@@ -255,9 +272,9 @@ export function BlockLibrary({ width, onResizeStart }: BlockLibraryProps) {
   }, [])
 
   const q = query.trim().toLowerCase()
-  const favList = [...BLOCK_REGISTRY.values()].filter(d => favs.has(d.type))
+  const favList = [...BLOCK_REGISTRY.values()].filter((d) => favs.has(d.type))
   const recentList = recent
-    .map(t => BLOCK_REGISTRY.get(t))
+    .map((t) => BLOCK_REGISTRY.get(t))
     .filter((d): d is BlockDef => d !== undefined)
 
   return (
@@ -271,7 +288,7 @@ export function BlockLibrary({ width, onResizeStart }: BlockLibraryProps) {
             type="search"
             placeholder='Search…  ("/" to focus)'
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={(e) => setQuery(e.target.value)}
           />
         </div>
 
@@ -287,7 +304,7 @@ export function BlockLibrary({ width, onResizeStart }: BlockLibraryProps) {
           >
             All
           </button>
-          {CATEGORY_ORDER.map(cat => (
+          {CATEGORY_ORDER.map((cat) => (
             <button
               key={cat}
               style={{
@@ -309,7 +326,7 @@ export function BlockLibrary({ width, onResizeStart }: BlockLibraryProps) {
         {!q && favList.length > 0 && (
           <div>
             <div style={s.sectionLabel}>Favourites</div>
-            {favList.map(def => (
+            {favList.map((def) => (
               <BlockItem key={def.type} def={def} favs={favs} onToggleFav={toggleFav} />
             ))}
           </div>
@@ -319,22 +336,22 @@ export function BlockLibrary({ width, onResizeStart }: BlockLibraryProps) {
         {!q && recentList.length > 0 && (
           <div>
             <div style={s.sectionLabel}>Recent</div>
-            {recentList.map(def => (
+            {recentList.map((def) => (
               <BlockItem key={def.type} def={def} favs={favs} onToggleFav={toggleFav} />
             ))}
           </div>
         )}
 
         {/* All blocks by category */}
-        {CATEGORY_ORDER.filter(cat => !filterCat || cat === filterCat).map(cat => {
+        {CATEGORY_ORDER.filter((cat) => !filterCat || cat === filterCat).map((cat) => {
           const blocks = (GROUPED.get(cat) ?? []).filter(
-            d => !q || d.label.toLowerCase().includes(q) || d.type.includes(q),
+            (d) => !q || d.label.toLowerCase().includes(q) || d.type.includes(q),
           )
           if (blocks.length === 0) return null
           return (
             <div key={cat}>
               <div style={s.sectionLabel}>{CATEGORY_LABELS[cat]}</div>
-              {blocks.map(def => (
+              {blocks.map((def) => (
                 <BlockItem key={def.type} def={def} favs={favs} onToggleFav={toggleFav} />
               ))}
             </div>

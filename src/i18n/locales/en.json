@@ -1,0 +1,107 @@
+{
+  "app": {
+    "name": "ChainSolve",
+    "tagline": "Scientific node-graph calculator"
+  },
+  "nav": {
+    "signOut": "Sign out",
+    "settings": "Settings",
+    "backToApp": "Back to app"
+  },
+  "auth": {
+    "login": "Sign in",
+    "signup": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signUpLink": "Sign up",
+    "signInLink": "Sign in",
+    "emailPending": "Check your email for a confirmation link.",
+    "resend": "Resend email",
+    "submitting": "Submitting…"
+  },
+  "projects": {
+    "title": "Projects",
+    "newProject": "New Project",
+    "import": "Import .json",
+    "noProjects": "No projects yet",
+    "noProjectsHint": "Create your first project to get started.",
+    "loading": "Loading…",
+    "rename": "Rename…",
+    "duplicate": "Duplicate",
+    "export": "Export .json",
+    "delete": "Delete",
+    "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone.",
+    "promptName": "Project name:",
+    "defaultName": "Untitled project",
+    "promptRename": "Rename project:"
+  },
+  "billing": {
+    "title": "Subscription",
+    "currentPlan": "Current plan",
+    "trialEnds": "Trial ends",
+    "renews": "Renews",
+    "upgrade": "Upgrade — £10/mo",
+    "manage": "Manage billing",
+    "redirecting": "Redirecting…",
+    "successTitle": "You're all set!",
+    "successMsg": "Your subscription is now active. It may take a few seconds to reflect in your account.",
+    "cancelTitle": "Checkout cancelled",
+    "cancelMsg": "No charge was made. You can upgrade any time from your account.",
+    "goToApp": "Go to app",
+    "backToApp": "Back to app"
+  },
+  "plans": {
+    "free": "Free",
+    "trialing": "Trial",
+    "pro": "Pro",
+    "past_due": "Past Due",
+    "canceled": "Canceled"
+  },
+  "canvas": {
+    "scratch": "Scratch canvas",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "conflict": "Conflict",
+    "error": "Error",
+    "conflictBanner": "This project was updated in another session.",
+    "keepMine": "Keep mine (overwrite)",
+    "reload": "Reload from server",
+    "instructions": "Drag blocks from the library. Connect outputs → inputs. Right-click for more options."
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "profileDesc": "Manage your account information",
+    "billing": "Billing",
+    "billingDesc": "Subscription and invoices",
+    "preferences": "Preferences",
+    "preferencesDesc": "Theme, language, and shortcuts",
+    "emailLabel": "Email address",
+    "emailHint": "Contact support to change your email.",
+    "userIdLabel": "User ID",
+    "memberSince": "Member since",
+    "planLabel": "Current plan",
+    "languageLabel": "Language",
+    "languageHint": "Choose your preferred display language.",
+    "themeLabel": "Theme",
+    "themeDark": "Dark",
+    "themeLight": "Light (coming soon)",
+    "save": "Save",
+    "saved": "Saved!"
+  },
+  "ui": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "search": "Search…",
+    "loading": "Loading…"
+  },
+  "time": {
+    "justNow": "just now",
+    "mAgo": "{{count}}m ago",
+    "hAgo": "{{count}}h ago",
+    "dAgo": "{{count}}d ago"
+  }
+}

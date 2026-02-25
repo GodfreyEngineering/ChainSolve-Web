@@ -57,16 +57,43 @@ const NODE_TYPES = {
 // ── Default graph ─────────────────────────────────────────────────────────────
 
 export const INITIAL_NODES: Node<NodeData>[] = [
-  { id: 'n1', type: 'csSource',    position: { x: 80,  y: 120 }, data: { blockType: 'number',  label: 'Number', value: 3 } },
-  { id: 'n2', type: 'csSource',    position: { x: 80,  y: 240 }, data: { blockType: 'number',  label: 'Number', value: 4 } },
-  { id: 'n3', type: 'csOperation', position: { x: 320, y: 160 }, data: { blockType: 'add',     label: 'Add' } },
-  { id: 'n4', type: 'csDisplay',   position: { x: 540, y: 180 }, data: { blockType: 'display', label: 'Result' } },
+  {
+    id: 'n1',
+    type: 'csSource',
+    position: { x: 80, y: 120 },
+    data: { blockType: 'number', label: 'Number', value: 3 },
+  },
+  {
+    id: 'n2',
+    type: 'csSource',
+    position: { x: 80, y: 240 },
+    data: { blockType: 'number', label: 'Number', value: 4 },
+  },
+  {
+    id: 'n3',
+    type: 'csOperation',
+    position: { x: 320, y: 160 },
+    data: { blockType: 'add', label: 'Add' },
+  },
+  {
+    id: 'n4',
+    type: 'csDisplay',
+    position: { x: 540, y: 180 },
+    data: { blockType: 'display', label: 'Result' },
+  },
 ]
 
 export const INITIAL_EDGES: Edge[] = [
-  { id: 'e1', source: 'n1', sourceHandle: 'out', target: 'n3', targetHandle: 'a',     animated: true },
-  { id: 'e2', source: 'n2', sourceHandle: 'out', target: 'n3', targetHandle: 'b',     animated: true },
-  { id: 'e3', source: 'n3', sourceHandle: 'out', target: 'n4', targetHandle: 'value', animated: true },
+  { id: 'e1', source: 'n1', sourceHandle: 'out', target: 'n3', targetHandle: 'a', animated: true },
+  { id: 'e2', source: 'n2', sourceHandle: 'out', target: 'n3', targetHandle: 'b', animated: true },
+  {
+    id: 'e3',
+    source: 'n3',
+    sourceHandle: 'out',
+    target: 'n4',
+    targetHandle: 'value',
+    animated: true,
+  },
 ]
 
 let nodeIdCounter = 100
@@ -94,7 +121,7 @@ function clamp(v: number, min: number, max: number) {
 function makeResizeHandler(
   startWidth: number,
   setWidth: (w: number) => void,
-  direction: 1 | -1,   // 1 = dragging right grows, -1 = dragging right shrinks
+  direction: 1 | -1, // 1 = dragging right grows, -1 = dragging right shrinks
   min = 160,
   max = 420,
 ) {
@@ -132,21 +159,26 @@ const tbBtn: React.CSSProperties = {
 // ── Inner canvas (inside ReactFlowProvider) ───────────────────────────────────
 
 function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(initialNodes ?? INITIAL_NODES)
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(
+    initialNodes ?? INITIAL_NODES,
+  )
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges ?? INITIAL_EDGES)
 
   // Notify parent of graph changes — skip the initial mount so loading a project
   // does not immediately mark the canvas as dirty.
   const isFirstRender = useRef(true)
   useEffect(() => {
-    if (isFirstRender.current) { isFirstRender.current = false; return }
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
     onGraphChange?.(nodes, edges)
   }, [nodes, edges, onGraphChange])
 
   // Panel widths + visibility
-  const [libWidth,  setLibWidth]  = useState(200)
+  const [libWidth, setLibWidth] = useState(200)
   const [inspWidth, setInspWidth] = useState(260)
-  const [libVisible,  setLibVisible]  = useState(true)
+  const [libVisible, setLibVisible] = useState(true)
   const [inspVisible, setInspVisible] = useState(false)
 
   // Inspector state (open on click, not selection)
@@ -174,13 +206,12 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
 
   // ── Connection validation: 1 edge per input handle ──────────────────────────
   const isValidConnection = useCallback<IsValidConnection>(
-    (conn) =>
-      !edges.some(e => e.target === conn.target && e.targetHandle === conn.targetHandle),
+    (conn) => !edges.some((e) => e.target === conn.target && e.targetHandle === conn.targetHandle),
     [edges],
   )
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges(eds => addEdge({ ...params, animated: true }, eds)),
+    (params: Connection) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
     [setEdges],
   )
 
@@ -214,7 +245,7 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
       if (!def) return
       const position = screenToFlowPosition({ x: e.clientX, y: e.clientY })
       const id = `node_${++nodeIdCounter}`
-      setNodes(nds => [
+      setNodes((nds) => [
         ...nds,
         { id, type: def.nodeKind, position, data: { ...def.defaultData } } as Node<NodeData>,
       ])
@@ -226,12 +257,12 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        setNodes(nds => {
-          const deleted = new Set(nds.filter(n => n.selected).map(n => n.id))
+        setNodes((nds) => {
+          const deleted = new Set(nds.filter((n) => n.selected).map((n) => n.id))
           if (inspectedId && deleted.has(inspectedId)) setInspectedId(null)
-          return nds.filter(n => !n.selected)
+          return nds.filter((n) => !n.selected)
         })
-        setEdges(eds => eds.filter(ed => !ed.selected))
+        setEdges((eds) => eds.filter((ed) => !ed.selected))
       }
       if (e.key === 'Escape') {
         setContextMenu(null)
@@ -264,25 +295,39 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
   }, [])
 
   // ── Context menu actions ────────────────────────────────────────────────────
-  const duplicateNode = useCallback((nodeId: string) => {
-    const src = nodes.find(n => n.id === nodeId)
-    if (!src) return
-    const newId = `node_${++nodeIdCounter}`
-    setNodes(nds => [
-      ...nds,
-      { ...src, id: newId, position: { x: src.position.x + 24, y: src.position.y + 24 }, selected: false },
-    ])
-  }, [nodes, setNodes])
+  const duplicateNode = useCallback(
+    (nodeId: string) => {
+      const src = nodes.find((n) => n.id === nodeId)
+      if (!src) return
+      const newId = `node_${++nodeIdCounter}`
+      setNodes((nds) => [
+        ...nds,
+        {
+          ...src,
+          id: newId,
+          position: { x: src.position.x + 24, y: src.position.y + 24 },
+          selected: false,
+        },
+      ])
+    },
+    [nodes, setNodes],
+  )
 
-  const deleteNode = useCallback((nodeId: string) => {
-    setNodes(nds => nds.filter(n => n.id !== nodeId))
-    setEdges(eds => eds.filter(e => e.source !== nodeId && e.target !== nodeId))
-    if (inspectedId === nodeId) setInspectedId(null)
-  }, [setNodes, setEdges, inspectedId])
+  const deleteNode = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) => nds.filter((n) => n.id !== nodeId))
+      setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId))
+      if (inspectedId === nodeId) setInspectedId(null)
+    },
+    [setNodes, setEdges, inspectedId],
+  )
 
-  const deleteEdge = useCallback((edgeId: string) => {
-    setEdges(eds => eds.filter(e => e.id !== edgeId))
-  }, [setEdges])
+  const deleteEdge = useCallback(
+    (edgeId: string) => {
+      setEdges((eds) => eds.filter((e) => e.id !== edgeId))
+    },
+    [setEdges],
+  )
 
   const inspectNode = useCallback((nodeId: string) => {
     setInspectedId(nodeId)
@@ -290,50 +335,60 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
   }, [])
 
   // Rename: prompt for a new label then update node data directly
-  const renameNode = useCallback((nodeId: string) => {
-    const node = nodes.find(n => n.id === nodeId)
-    const current = node?.data.label ?? ''
-    const next = window.prompt('Rename block:', current)
-    if (next !== null && next.trim()) {
-      setNodes(nds =>
-        nds.map(n =>
-          n.id === nodeId ? { ...n, data: { ...n.data, label: next.trim() } } : n,
-        ),
-      )
-    }
-  }, [nodes, setNodes])
+  const renameNode = useCallback(
+    (nodeId: string) => {
+      const node = nodes.find((n) => n.id === nodeId)
+      const current = node?.data.label ?? ''
+      const next = window.prompt('Rename block:', current)
+      if (next !== null && next.trim()) {
+        setNodes((nds) =>
+          nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, label: next.trim() } } : n)),
+        )
+      }
+    },
+    [nodes, setNodes],
+  )
 
   // Lock / unlock: toggles node.draggable (undefined = draggable, false = locked)
-  const lockNode = useCallback((nodeId: string) => {
-    setNodes(nds =>
-      nds.map(n =>
-        n.id === nodeId ? { ...n, draggable: n.draggable === false ? undefined : false } : n,
-      ),
-    )
-  }, [setNodes])
+  const lockNode = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) =>
+        nds.map((n) =>
+          n.id === nodeId ? { ...n, draggable: n.draggable === false ? undefined : false } : n,
+        ),
+      )
+    },
+    [setNodes],
+  )
 
   // Add block at the canvas position where user right-clicked
-  const onAddBlockAtCursor = useCallback((screenX: number, screenY: number) => {
-    const pos = screenToFlowPosition({ x: screenX, y: screenY })
-    setQuickAdd({ screenX, screenY, flowX: pos.x, flowY: pos.y })
-  }, [screenToFlowPosition])
+  const onAddBlockAtCursor = useCallback(
+    (screenX: number, screenY: number) => {
+      const pos = screenToFlowPosition({ x: screenX, y: screenY })
+      setQuickAdd({ screenX, screenY, flowX: pos.x, flowY: pos.y })
+    },
+    [screenToFlowPosition],
+  )
 
-  const onQuickAddBlock = useCallback((blockType: string) => {
-    if (!quickAdd) return
-    const def = BLOCK_REGISTRY.get(blockType)
-    if (!def) return
-    const id = `node_${++nodeIdCounter}`
-    setNodes(nds => [
-      ...nds,
-      {
-        id,
-        type: def.nodeKind,
-        position: { x: quickAdd.flowX, y: quickAdd.flowY },
-        data: { ...def.defaultData },
-      } as Node<NodeData>,
-    ])
-    setQuickAdd(null)
-  }, [quickAdd, setNodes])
+  const onQuickAddBlock = useCallback(
+    (blockType: string) => {
+      if (!quickAdd) return
+      const def = BLOCK_REGISTRY.get(blockType)
+      if (!def) return
+      const id = `node_${++nodeIdCounter}`
+      setNodes((nds) => [
+        ...nds,
+        {
+          id,
+          type: def.nodeKind,
+          position: { x: quickAdd.flowX, y: quickAdd.flowY },
+          data: { ...def.defaultData },
+        } as Node<NodeData>,
+      ])
+      setQuickAdd(null)
+    },
+    [quickAdd, setNodes],
+  )
 
   // ── Panel resize start handlers ─────────────────────────────────────────────
   const onLibResizeStart = useCallback(
@@ -364,18 +419,36 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
         boxShadow: '0 2px 10px rgba(0,0,0,0.4)',
       }}
     >
-      <button onClick={() => setLibVisible(v => !v)} style={{ ...tbBtn, background: libVisible ? 'rgba(28,171,176,0.15)' : 'transparent', borderColor: libVisible ? '#1CABB0' : undefined, color: libVisible ? '#1CABB0' : undefined }} title="Toggle block library">
+      <button
+        onClick={() => setLibVisible((v) => !v)}
+        style={{
+          ...tbBtn,
+          background: libVisible ? 'rgba(28,171,176,0.15)' : 'transparent',
+          borderColor: libVisible ? '#1CABB0' : undefined,
+          color: libVisible ? '#1CABB0' : undefined,
+        }}
+        title="Toggle block library"
+      >
         ☰ Blocks
       </button>
 
       <div style={{ width: 1, background: 'rgba(255,255,255,0.1)', margin: '0 0.1rem' }} />
 
-      <button onClick={() => fitView({ padding: 0.15, duration: 300 })} style={tbBtn} title="Fit view">
+      <button
+        onClick={() => fitView({ padding: 0.15, duration: 300 })}
+        style={tbBtn}
+        title="Fit view"
+      >
         ⊡ Fit
       </button>
       <button
-        onClick={() => setSnapToGrid(v => !v)}
-        style={{ ...tbBtn, background: snapToGrid ? 'rgba(28,171,176,0.15)' : 'transparent', borderColor: snapToGrid ? '#1CABB0' : undefined, color: snapToGrid ? '#1CABB0' : undefined }}
+        onClick={() => setSnapToGrid((v) => !v)}
+        style={{
+          ...tbBtn,
+          background: snapToGrid ? 'rgba(28,171,176,0.15)' : 'transparent',
+          borderColor: snapToGrid ? '#1CABB0' : undefined,
+          color: snapToGrid ? '#1CABB0' : undefined,
+        }}
         title="Snap to 16×16 grid"
       >
         ⊞ Snap
@@ -384,8 +457,17 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
       <div style={{ width: 1, background: 'rgba(255,255,255,0.1)', margin: '0 0.1rem' }} />
 
       <button
-        onClick={() => { setInspVisible(v => !v); if (!inspVisible) return; setInspectedId(null) }}
-        style={{ ...tbBtn, background: inspVisible ? 'rgba(28,171,176,0.15)' : 'transparent', borderColor: inspVisible ? '#1CABB0' : undefined, color: inspVisible ? '#1CABB0' : undefined }}
+        onClick={() => {
+          setInspVisible((v) => !v)
+          if (!inspVisible) return
+          setInspectedId(null)
+        }}
+        style={{
+          ...tbBtn,
+          background: inspVisible ? 'rgba(28,171,176,0.15)' : 'transparent',
+          borderColor: inspVisible ? '#1CABB0' : undefined,
+          color: inspVisible ? '#1CABB0' : undefined,
+        }}
         title="Toggle inspector"
       >
         ⊟ Inspector
@@ -395,12 +477,17 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
 
   return (
     <ComputedContext.Provider value={computed}>
-      <div style={{ display: 'flex', flex: 1, height: '100%', overflow: 'hidden', position: 'relative' }}>
-
+      <div
+        style={{
+          display: 'flex',
+          flex: 1,
+          height: '100%',
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+      >
         {/* Block library panel */}
-        {libVisible && (
-          <BlockLibrary width={libWidth} onResizeStart={onLibResizeStart} />
-        )}
+        {libVisible && <BlockLibrary width={libWidth} onResizeStart={onLibResizeStart} />}
 
         {/* Canvas */}
         <div
@@ -433,7 +520,12 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
             minZoom={0.08}
             maxZoom={4}
           >
-            <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="rgba(255,255,255,0.06)" />
+            <Background
+              variant={BackgroundVariant.Dots}
+              gap={24}
+              size={1}
+              color="rgba(255,255,255,0.06)"
+            />
             <Controls />
           </ReactFlow>
         </div>

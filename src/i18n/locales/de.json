@@ -1,0 +1,107 @@
+{
+  "app": {
+    "name": "ChainSolve",
+    "tagline": "Wissenschaftlicher Knotengraph-Rechner"
+  },
+  "nav": {
+    "signOut": "Abmelden",
+    "settings": "Einstellungen",
+    "backToApp": "Zurück zur App"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "signup": "Konto erstellen",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "noAccount": "Kein Konto?",
+    "hasAccount": "Bereits ein Konto?",
+    "signUpLink": "Registrieren",
+    "signInLink": "Anmelden",
+    "emailPending": "Überprüfen Sie Ihre E-Mail für den Bestätigungslink.",
+    "resend": "E-Mail erneut senden",
+    "submitting": "Wird gesendet…"
+  },
+  "projects": {
+    "title": "Projekte",
+    "newProject": "Neues Projekt",
+    "import": ".json importieren",
+    "noProjects": "Noch keine Projekte",
+    "noProjectsHint": "Erstellen Sie Ihr erstes Projekt.",
+    "loading": "Laden…",
+    "rename": "Umbenennen…",
+    "duplicate": "Duplizieren",
+    "export": ".json exportieren",
+    "delete": "Löschen",
+    "deleteConfirm": "\"{{name}}\" löschen? Dies kann nicht rückgängig gemacht werden.",
+    "promptName": "Projektname:",
+    "defaultName": "Unbenanntes Projekt",
+    "promptRename": "Projekt umbenennen:"
+  },
+  "billing": {
+    "title": "Abonnement",
+    "currentPlan": "Aktueller Plan",
+    "trialEnds": "Testende",
+    "renews": "Erneuerung",
+    "upgrade": "Upgraden — 10£/Monat",
+    "manage": "Abrechnung verwalten",
+    "redirecting": "Weiterleitung…",
+    "successTitle": "Alles bereit!",
+    "successMsg": "Ihr Abonnement ist jetzt aktiv. Es kann einige Sekunden dauern.",
+    "cancelTitle": "Zahlung abgebrochen",
+    "cancelMsg": "Es wurde nichts berechnet. Sie können jederzeit upgraden.",
+    "goToApp": "Zur App",
+    "backToApp": "Zurück zur App"
+  },
+  "plans": {
+    "free": "Kostenlos",
+    "trialing": "Testphase",
+    "pro": "Pro",
+    "past_due": "Überfällig",
+    "canceled": "Gekündigt"
+  },
+  "canvas": {
+    "scratch": "Temporäre Leinwand",
+    "saving": "Speichern…",
+    "saved": "Gespeichert",
+    "conflict": "Konflikt",
+    "error": "Fehler",
+    "conflictBanner": "Dieses Projekt wurde in einer anderen Sitzung aktualisiert.",
+    "keepMine": "Meine Version behalten",
+    "reload": "Vom Server neu laden",
+    "instructions": "Ziehen Sie Blöcke aus der Bibliothek. Verbinden Sie Ausgänge → Eingänge. Rechtsklick für mehr Optionen."
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "profile": "Profil",
+    "profileDesc": "Kontoinformationen verwalten",
+    "billing": "Abrechnung",
+    "billingDesc": "Abonnement und Rechnungen",
+    "preferences": "Einstellungen",
+    "preferencesDesc": "Thema, Sprache und Tastenkürzel",
+    "emailLabel": "E-Mail-Adresse",
+    "emailHint": "Kontaktieren Sie den Support, um Ihre E-Mail zu ändern.",
+    "userIdLabel": "Benutzer-ID",
+    "memberSince": "Mitglied seit",
+    "planLabel": "Aktueller Plan",
+    "languageLabel": "Sprache",
+    "languageHint": "Wählen Sie Ihre bevorzugte Anzeigesprache.",
+    "themeLabel": "Thema",
+    "themeDark": "Dunkel",
+    "themeLight": "Hell (kommt bald)",
+    "save": "Speichern",
+    "saved": "Gespeichert!"
+  },
+  "ui": {
+    "close": "Schließen",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "search": "Suchen…",
+    "loading": "Laden…"
+  },
+  "time": {
+    "justNow": "gerade eben",
+    "mAgo": "vor {{count}}m",
+    "hAgo": "vor {{count}}h",
+    "dAgo": "vor {{count}}T"
+  }
+}

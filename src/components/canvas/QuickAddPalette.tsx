@@ -23,8 +23,8 @@ interface QuickAddPaletteProps {
 
 // Flatten all blocks ordered by category
 function buildAllBlocks(): BlockDef[] {
-  return CATEGORY_ORDER.flatMap(cat =>
-    [...BLOCK_REGISTRY.values()].filter(d => d.category === cat),
+  return CATEGORY_ORDER.flatMap((cat) =>
+    [...BLOCK_REGISTRY.values()].filter((d) => d.category === cat),
   )
 }
 
@@ -43,7 +43,7 @@ export function QuickAddPalette({ screenX, screenY, onAdd, onClose }: QuickAddPa
 
   const q = query.trim().toLowerCase()
   const filtered = q
-    ? ALL_BLOCKS.filter(d => d.label.toLowerCase().includes(q) || d.type.includes(q))
+    ? ALL_BLOCKS.filter((d) => d.label.toLowerCase().includes(q) || d.type.includes(q))
     : ALL_BLOCKS
 
   const clampedIdx = Math.min(activeIdx, Math.max(0, filtered.length - 1))
@@ -67,10 +67,10 @@ export function QuickAddPalette({ screenX, screenY, onAdd, onClose }: QuickAddPa
       onClose()
     } else if (e.key === 'ArrowDown') {
       e.preventDefault()
-      setActiveIdx(i => Math.min(i + 1, filtered.length - 1))
+      setActiveIdx((i) => Math.min(i + 1, filtered.length - 1))
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
-      setActiveIdx(i => Math.max(i - 1, 0))
+      setActiveIdx((i) => Math.max(i - 1, 0))
     } else if (e.key === 'Enter') {
       e.preventDefault()
       const def = filtered[clampedIdx]
@@ -90,7 +90,10 @@ export function QuickAddPalette({ screenX, screenY, onAdd, onClose }: QuickAddPa
       <div
         style={{ position: 'fixed', inset: 0, zIndex: 1001 }}
         onClick={onClose}
-        onContextMenu={e => { e.preventDefault(); onClose() }}
+        onContextMenu={(e) => {
+          e.preventDefault()
+          onClose()
+        }}
       />
 
       <div
@@ -110,7 +113,7 @@ export function QuickAddPalette({ screenX, screenY, onAdd, onClose }: QuickAddPa
           overflow: 'hidden',
           fontFamily: "'Montserrat', system-ui, sans-serif",
         }}
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -158,7 +161,7 @@ export function QuickAddPalette({ screenX, screenY, onAdd, onClose }: QuickAddPa
           <input
             ref={inputRef}
             value={query}
-            onChange={e => {
+            onChange={(e) => {
               setQuery(e.target.value)
               setActiveIdx(0)
             }}

@@ -67,7 +67,14 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
             value={nd.value ?? 0}
             onChange={(e) => updateValue(parseFloat(e.target.value))}
           />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', opacity: 0.5 }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              fontSize: '0.7rem',
+              opacity: 0.5,
+            }}
+          >
             <span>{nd.min ?? 0}</span>
             <span style={{ fontWeight: 600, opacity: 1 }}>{nd.value ?? 0}</span>
             <span>{nd.max ?? 100}</span>

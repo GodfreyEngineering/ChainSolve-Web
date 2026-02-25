@@ -186,9 +186,8 @@ export default function Login() {
           <p style={s.sub}>Almost there — one more step</p>
 
           <div style={s.infoBox}>
-            Account created. We sent a confirmation link to{' '}
-            <strong>{email}</strong>. Click the link in that email to activate
-            your account, then return here to sign in.
+            Account created. We sent a confirmation link to <strong>{email}</strong>. Click the link
+            in that email to activate your account, then return here to sign in.
           </div>
 
           {error && <div style={s.errorBox}>{error}</div>}
@@ -229,26 +228,30 @@ export default function Login() {
         {error && <div style={s.errorBox}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          <label style={s.label} htmlFor="email">Email</label>
+          <label style={s.label} htmlFor="email">
+            Email
+          </label>
           <input
             ref={emailRef}
             id="email"
             style={s.input}
             type="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             autoComplete="email"
             required
           />
 
-          <label style={s.label} htmlFor="password">Password</label>
+          <label style={s.label} htmlFor="password">
+            Password
+          </label>
           <input
             id="password"
             style={s.input}
             type="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
             autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
             required
@@ -268,7 +271,10 @@ export default function Login() {
           {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
           <button
             style={s.toggleLink}
-            onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null) }}
+            onClick={() => {
+              setMode(mode === 'login' ? 'signup' : 'login')
+              setError(null)
+            }}
           >
             {mode === 'login' ? 'Sign up' : 'Sign in'}
           </button>

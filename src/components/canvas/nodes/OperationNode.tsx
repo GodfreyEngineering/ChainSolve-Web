@@ -37,7 +37,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const portOverrides = (nd.portOverrides ?? {}) as Record<string, boolean>
 
   const isPortConnected = useCallback(
-    (portId: string) => allEdges.some(e => e.target === id && e.targetHandle === portId),
+    (portId: string) => allEdges.some((e) => e.target === id && e.targetHandle === portId),
     [allEdges, id],
   )
 
@@ -56,7 +56,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   // Allow ≤1 incoming edge per target handle.
   const isValidConnection = useCallback<IsValidConnection>(
     (conn) =>
-      !allEdges.some(e => e.target === conn.target && e.targetHandle === conn.targetHandle),
+      !allEdges.some((e) => e.target === conn.target && e.targetHandle === conn.targetHandle),
     [allEdges],
   )
 
@@ -119,14 +119,12 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
                   className="nodrag"
                   style={{
                     ...s.inlineInput,
-                    ...(override
-                      ? { borderColor: 'rgba(28,171,176,0.5)', color: '#1CABB0' }
-                      : {}),
+                    ...(override ? { borderColor: 'rgba(28,171,176,0.5)', color: '#1CABB0' } : {}),
                   }}
                   value={manualValues[port.id] ?? ''}
                   placeholder="0"
                   step="any"
-                  onChange={e => {
+                  onChange={(e) => {
                     const v = parseFloat(e.target.value)
                     if (!isNaN(v)) updateManual(port.id, v)
                   }}

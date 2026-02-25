@@ -58,12 +58,12 @@ function MenuItem({
       style={item}
       role="menuitem"
       onClick={onClick}
-      onMouseEnter={e => {
+      onMouseEnter={(e) => {
         ;(e.currentTarget as HTMLDivElement).style.background = danger
           ? 'rgba(239,68,68,0.15)'
           : 'rgba(28,171,176,0.15)'
       }}
-      onMouseLeave={e => {
+      onMouseLeave={(e) => {
         ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
       }}
     >
@@ -105,39 +105,61 @@ export function ContextMenu({
       <div
         style={{ position: 'fixed', inset: 0, zIndex: 999 }}
         onClick={onClose}
-        onContextMenu={e => { e.preventDefault(); onClose() }}
+        onContextMenu={(e) => {
+          e.preventDefault()
+          onClose()
+        }}
       />
 
-      <div style={{ ...menuStyle, zIndex: 1000 }} role="menu" onKeyDown={e => e.key === 'Escape' && onClose()}>
+      <div
+        style={{ ...menuStyle, zIndex: 1000 }}
+        role="menu"
+        onKeyDown={(e) => e.key === 'Escape' && onClose()}
+      >
         {target.kind === 'node' && (
           <>
             <MenuItem
               icon="⬚"
               label="Inspect"
-              onClick={() => { onInspectNode(target.nodeId); onClose() }}
+              onClick={() => {
+                onInspectNode(target.nodeId)
+                onClose()
+              }}
             />
             <MenuItem
               icon="✎"
               label="Rename…"
-              onClick={() => { onRenameNode(target.nodeId); onClose() }}
+              onClick={() => {
+                onRenameNode(target.nodeId)
+                onClose()
+              }}
             />
             <MenuItem
               icon="⧉"
               label="Duplicate"
-              onClick={() => { onDuplicateNode(target.nodeId); onClose() }}
+              onClick={() => {
+                onDuplicateNode(target.nodeId)
+                onClose()
+              }}
             />
             <div style={sep} />
             <MenuItem
               icon={target.isLocked ? '🔓' : '🔒'}
               label={target.isLocked ? 'Unlock position' : 'Lock position'}
-              onClick={() => { onLockNode(target.nodeId); onClose() }}
+              onClick={() => {
+                onLockNode(target.nodeId)
+                onClose()
+              }}
             />
             <div style={sep} />
             <MenuItem
               icon="✕"
               label="Delete node"
               danger
-              onClick={() => { onDeleteNode(target.nodeId); onClose() }}
+              onClick={() => {
+                onDeleteNode(target.nodeId)
+                onClose()
+              }}
             />
           </>
         )}
@@ -147,7 +169,10 @@ export function ContextMenu({
             icon="✕"
             label="Delete connection"
             danger
-            onClick={() => { onDeleteEdge(target.edgeId); onClose() }}
+            onClick={() => {
+              onDeleteEdge(target.edgeId)
+              onClose()
+            }}
           />
         )}
 
@@ -156,10 +181,20 @@ export function ContextMenu({
             <MenuItem
               icon="+"
               label="Add block here"
-              onClick={() => { onAddBlockAtCursor(target.x, target.y); onClose() }}
+              onClick={() => {
+                onAddBlockAtCursor(target.x, target.y)
+                onClose()
+              }}
             />
             <div style={sep} />
-            <MenuItem icon="⊡" label="Fit view" onClick={() => { onFitView(); onClose() }} />
+            <MenuItem
+              icon="⊡"
+              label="Fit view"
+              onClick={() => {
+                onFitView()
+                onClose()
+              }}
+            />
           </>
         )}
       </div>
