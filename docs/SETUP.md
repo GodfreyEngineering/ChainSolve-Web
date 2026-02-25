@@ -16,11 +16,23 @@ Follow these steps **in order** to get a fully working deployment.
 
 ## 2. Supabase — Database & Auth
 
-### 2a. Run the SQL migration
+### 2a. Run the SQL migrations
 
-1. Open your Supabase project → **SQL Editor**
-2. Paste the contents of `supabase/migrations/0001_init.sql` and click **Run**
-3. Confirm all tables appear under **Table Editor**: `profiles`, `projects`, `fs_items`, `project_assets`, `stripe_events`
+Run each file in `supabase/migrations/` **in numeric order** via **Supabase → SQL Editor**:
+
+| File | What it does |
+| ---- | ------------ |
+| `0001_init.sql` | Full schema: all tables, enums, RLS policies, triggers |
+| `0002_storage_columns.sql` | Adds `projects.storage_key` and `project_assets.kind` |
+| `0003_projects_owner_id.sql` | Renames `projects.user_id` → `owner_id`, rebuilds RLS |
+| `0004_projects_description.sql` | Ensures `projects.description` column exists |
+
+After running 0001, confirm these tables appear under **Table Editor**:
+`profiles`, `projects`, `fs_items`, `project_assets`, `stripe_events`
+
+> **Keep migrations in sync:** If you apply schema changes directly in the
+> Supabase SQL editor, also commit an equivalent migration file to
+> `supabase/migrations/` so the repo stays the authoritative source of truth.
 
 ### 2b. Configure Auth settings
 
