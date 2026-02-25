@@ -46,10 +46,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
   const headerValue = computed.get(id)
 
   // Derive spec result from inputs (pure computation, no side-effects)
-  const specResult = useMemo(
-    () => buildInlineSpec(inputValue, config),
-    [inputValue, config],
-  )
+  const specResult = useMemo(() => buildInlineSpec(inputValue, config), [inputValue, config])
   const specError = 'error' in specResult ? specResult.error : null
   const isDownsampled = !specError && (specResult as SpecResult).isDownsampled
 

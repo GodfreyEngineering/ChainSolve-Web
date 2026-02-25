@@ -21,7 +21,11 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { CanvasArea, type CanvasAreaProps, type CanvasAreaHandle } from '../components/canvas/CanvasArea'
+import {
+  CanvasArea,
+  type CanvasAreaProps,
+  type CanvasAreaHandle,
+} from '../components/canvas/CanvasArea'
 import { INITIAL_NODES, INITIAL_EDGES } from '../components/canvas/canvasDefaults'
 import type { Node, Edge } from '@xyflow/react'
 import type { NodeData } from '../blocks/registry'
@@ -195,16 +199,13 @@ export default function CanvasPage() {
   // Note: we do NOT capture nodes/edges here for the save — doSave() pulls the
   // authoritative snapshot from canvasRef at save time. This avoids the stale-ref
   // bug where pendingNodes was empty on first render.
-  const handleGraphChange: NonNullable<CanvasAreaProps['onGraphChange']> = useCallback(
-    () => {
-      markDirty()
-      if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
-      autosaveTimer.current = setTimeout(() => {
-        void doSave()
-      }, AUTOSAVE_DELAY_MS)
-    },
-    [markDirty, doSave],
-  )
+  const handleGraphChange: NonNullable<CanvasAreaProps['onGraphChange']> = useCallback(() => {
+    markDirty()
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
+    autosaveTimer.current = setTimeout(() => {
+      void doSave()
+    }, AUTOSAVE_DELAY_MS)
+  }, [markDirty, doSave])
 
   // ── Flush save on tab close / refresh (best-effort) ────────────────────────
   useEffect(() => {
