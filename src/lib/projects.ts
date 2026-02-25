@@ -95,6 +95,18 @@ async function readUpdatedAt(projectId: string): Promise<string | null> {
 
 // ── Exported operations ───────────────────────────────────────────────────────
 
+/** Read a single project row (name + updated_at). Used by CanvasPage to anchor conflict detection. */
+export async function readProjectRow(
+  projectId: string,
+): Promise<{ name: string; updated_at: string } | null> {
+  const { data } = await supabase
+    .from('projects')
+    .select('name,updated_at')
+    .eq('id', projectId)
+    .single()
+  return data as { name: string; updated_at: string } | null
+}
+
 /** Return all projects for the current user, newest first. */
 export async function listProjects(): Promise<ProjectRow[]> {
   const { data, error } = await supabase

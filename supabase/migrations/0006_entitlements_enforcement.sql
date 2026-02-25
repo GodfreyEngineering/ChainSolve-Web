@@ -8,6 +8,9 @@
 --      projects INSERT/UPDATE blocked for canceled users
 --   5. Index on projects(owner_id) for fast project-count lookups
 --
+-- NOTE: profiles.plan is cast to text in all comparisons to avoid coupling
+-- to the enum type name (which may vary between environments).
+--
 -- Idempotent: all statements use CREATE OR REPLACE / IF NOT EXISTS / DROP IF EXISTS.
 -- Safe to re-run.
 
@@ -23,7 +26,7 @@ LANGUAGE sql STABLE SECURITY DEFINER
 SET search_path = public
 AS $$
   SELECT COALESCE(
-    (SELECT p.plan IN ('trialing', 'pro')
+    (SELECT (p.plan)::text IN ('trialing', 'pro')
      FROM public.profiles p
      WHERE p.id = uid),
     false
@@ -40,7 +43,7 @@ LANGUAGE sql STABLE SECURITY DEFINER
 SET search_path = public
 AS $$
   SELECT COALESCE(
-    (SELECT p.plan <> 'canceled'
+    (SELECT (p.plan)::text <> 'canceled'
      FROM public.profiles p
      WHERE p.id = uid),
     true  -- if no profile row yet, allow (new user)
@@ -61,12 +64,12 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  _plan public.plan_status;
+  _plan text;
   _count integer;
   _max integer;
 BEGIN
-  -- Read the user's plan
-  SELECT p.plan INTO _plan
+  -- Read the user's plan, cast to text to avoid enum-name coupling
+  SELECT (p.plan)::text INTO _plan
     FROM public.profiles p
    WHERE p.id = NEW.owner_id;
 
@@ -107,10 +110,20 @@ CREATE TRIGGER trg_enforce_project_limit
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4. Tighten storage policies
+--
+--    Drop BOTH possible naming conventions that may exist in production:
+--      a) "uploads bucket: users insert own files" (from 0001_init.sql)
+--      b) "uploads_insert_own_prefix" (alternate naming)
+--    Then create the final gated policies.
+--    SELECT and DELETE policies are NOT replaced — they remain ownership-only.
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- 4a. uploads bucket: only trialing/pro can INSERT or UPDATE
+
+-- Drop all possible existing INSERT policies
 DROP POLICY IF EXISTS "uploads bucket: users insert own files" ON storage.objects;
+DROP POLICY IF EXISTS "uploads_insert_own_prefix" ON storage.objects;
+-- Create gated INSERT
 CREATE POLICY "uploads bucket: users insert own files"
   ON storage.objects FOR INSERT
   TO authenticated
@@ -120,7 +133,10 @@ CREATE POLICY "uploads bucket: users insert own files"
     AND public.user_has_active_plan(auth.uid())
   );
 
+-- Drop all possible existing UPDATE policies
 DROP POLICY IF EXISTS "uploads bucket: users update own files" ON storage.objects;
+DROP POLICY IF EXISTS "uploads_update_own_prefix" ON storage.objects;
+-- Create gated UPDATE
 CREATE POLICY "uploads bucket: users update own files"
   ON storage.objects FOR UPDATE
   TO authenticated
@@ -131,7 +147,11 @@ CREATE POLICY "uploads bucket: users update own files"
   );
 
 -- 4b. projects bucket: block writes for canceled users
+
+-- Drop all possible existing INSERT policies
 DROP POLICY IF EXISTS "projects bucket: users insert own files" ON storage.objects;
+DROP POLICY IF EXISTS "projects_insert_own_prefix" ON storage.objects;
+-- Create gated INSERT
 CREATE POLICY "projects bucket: users insert own files"
   ON storage.objects FOR INSERT
   TO authenticated
@@ -141,7 +161,10 @@ CREATE POLICY "projects bucket: users insert own files"
     AND public.user_can_write_projects(auth.uid())
   );
 
+-- Drop all possible existing UPDATE policies
 DROP POLICY IF EXISTS "projects bucket: users update own files" ON storage.objects;
+DROP POLICY IF EXISTS "projects_update_own_prefix" ON storage.objects;
+-- Create gated UPDATE
 CREATE POLICY "projects bucket: users update own files"
   ON storage.objects FOR UPDATE
   TO authenticated
@@ -160,5 +183,11 @@ CREATE INDEX IF NOT EXISTS idx_projects_owner_id
 
 CREATE INDEX IF NOT EXISTS idx_projects_owner_updated
   ON public.projects (owner_id, updated_at DESC);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 6. Refresh PostgREST schema cache so new functions are visible
+-- ─────────────────────────────────────────────────────────────────────────────
+
+NOTIFY pgrst, 'reload schema';
 
 COMMIT;

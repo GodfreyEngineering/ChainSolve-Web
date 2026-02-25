@@ -21,7 +21,13 @@ import {
 } from '../components/canvas/CanvasArea'
 import type { Node, Edge } from '@xyflow/react'
 import type { NodeData } from '../blocks/registry'
-import { loadProject, saveProject, renameProject, type ProjectJSON } from '../lib/projects'
+import {
+  loadProject,
+  saveProject,
+  renameProject,
+  readProjectRow,
+  type ProjectJSON,
+} from '../lib/projects'
 import { useProjectStore } from '../stores/projectStore'
 import { supabase } from '../lib/supabase'
 import { isReadOnly, showBillingBanner, type Plan } from '../lib/entitlements'
@@ -55,17 +61,21 @@ export default function CanvasPage() {
   const [plan, setPlan] = useState<Plan>('free')
 
   useEffect(() => {
+    let cancelled = false
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) return
+      if (!session || cancelled) return
       supabase
         .from('profiles')
         .select('plan')
         .eq('id', session.user.id)
         .maybeSingle()
         .then(({ data }) => {
-          if (data?.plan) setPlan(data.plan as Plan)
+          if (!cancelled && data?.plan) setPlan(data.plan as Plan)
         })
     })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const readOnly = isReadOnly(plan) && !!projectId
@@ -106,9 +116,14 @@ export default function CanvasPage() {
     setLoadPhase('loading')
     setLoadError(null)
 
-    loadProject(projectId)
-      .then((pj: ProjectJSON) => {
-        beginLoad(projectId, pj.project.name, pj.updatedAt, pj.formatVersion, pj.createdAt)
+    // Fetch BOTH the DB row (for conflict-anchor updated_at) and project.json
+    // in parallel. The DB updated_at is the authoritative anchor for conflict
+    // detection — NOT project.json's updatedAt field.
+    Promise.all([readProjectRow(projectId), loadProject(projectId)])
+      .then(([row, pj]: [{ name: string; updated_at: string } | null, ProjectJSON]) => {
+        const dbUpdatedAt = row?.updated_at ?? pj.updatedAt
+        const dbName = row?.name ?? pj.project.name
+        beginLoad(projectId, dbName, dbUpdatedAt, pj.formatVersion, pj.createdAt)
         setInitNodes(pj.graph.nodes as Node<NodeData>[])
         setInitEdges(pj.graph.edges as Edge[])
         setLoadPhase('ready')
