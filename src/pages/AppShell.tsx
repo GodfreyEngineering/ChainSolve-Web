@@ -22,10 +22,8 @@ import {
   type ProjectRow,
   type ProjectJSON,
 } from '../lib/projects'
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-type Plan = 'free' | 'trialing' | 'pro' | 'past_due' | 'canceled'
+import { canCreateProject, isReadOnly, showBillingBanner, type Plan } from '../lib/entitlements'
+import { UpgradeModal } from '../components/UpgradeModal'
 
 interface Profile {
   id: string
@@ -151,6 +149,7 @@ export default function AppShell() {
   const [projLoading, setProjLoading] = useState(false)
   const [projError, setProjError] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState<string | null>(null) // projectId
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
 
   const importRef = useRef<HTMLInputElement>(null)
 
@@ -193,6 +192,11 @@ export default function AppShell() {
   }, [])
 
   const handleNewProject = async () => {
+    const plan = (profile?.plan ?? 'free') as Plan
+    if (!canCreateProject(plan, projects.length)) {
+      setUpgradeOpen(true)
+      return
+    }
     const name = window.prompt('Project name:', 'Untitled project')
     if (!name?.trim()) return
     setProjLoading(true)
@@ -220,6 +224,11 @@ export default function AppShell() {
 
   const handleDuplicate = async (proj: ProjectRow) => {
     setMenuOpen(null)
+    const plan = (profile?.plan ?? 'free') as Plan
+    if (!canCreateProject(plan, projects.length)) {
+      setUpgradeOpen(true)
+      return
+    }
     setProjLoading(true)
     try {
       await duplicateProject(proj.id, `${proj.name} (copy)`)
@@ -261,6 +270,11 @@ export default function AppShell() {
     const file = e.target.files?.[0]
     e.target.value = '' // reset so same file can be re-picked
     if (!file) return
+    const plan = (profile?.plan ?? 'free') as Plan
+    if (!canCreateProject(plan, projects.length)) {
+      setUpgradeOpen(true)
+      return
+    }
     try {
       const text = await file.text()
       const json = JSON.parse(text) as ProjectJSON
@@ -334,6 +348,9 @@ export default function AppShell() {
   const plan = (profile?.plan ?? 'free') as Plan
   const canUpgrade = plan === 'free' || plan === 'canceled'
   const canManage = plan === 'trialing' || plan === 'pro' || plan === 'past_due'
+  const readOnly = isReadOnly(plan)
+  const bannerKind = showBillingBanner(plan)
+  const allowCreate = canCreateProject(plan, projects.length)
   const periodEnd = profile?.current_period_end
     ? new Date(profile.current_period_end).toLocaleDateString('en-GB', {
         day: 'numeric',
@@ -344,6 +361,12 @@ export default function AppShell() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* ── Upgrade modal ── */}
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        reason="project_limit"
+      />
       {/* Nav */}
       <nav
         style={{
@@ -369,6 +392,34 @@ export default function AppShell() {
           </button>
         </div>
       </nav>
+
+      {/* ── Billing banners ── */}
+      {bannerKind === 'past_due' && (
+        <div
+          style={{
+            background: 'rgba(245,158,11,0.1)',
+            borderBottom: '1px solid rgba(245,158,11,0.3)',
+            padding: '0.55rem 1.5rem',
+            fontSize: '0.85rem',
+            color: '#fbbf24',
+          }}
+        >
+          Your payment is past due. Please update your billing info to avoid losing access.
+        </div>
+      )}
+      {bannerKind === 'canceled' && (
+        <div
+          style={{
+            background: 'rgba(239,68,68,0.1)',
+            borderBottom: '1px solid rgba(239,68,68,0.3)',
+            padding: '0.55rem 1.5rem',
+            fontSize: '0.85rem',
+            color: '#f87171',
+          }}
+        >
+          Your subscription has been canceled. Existing projects are read-only.
+        </div>
+      )}
 
       <main
         style={{ flex: 1, padding: '2rem 1.5rem', maxWidth: 960, width: '100%', margin: '0 auto' }}
@@ -455,13 +506,28 @@ export default function AppShell() {
                 style={{ display: 'none' }}
                 onChange={(e) => void handleImportFile(e)}
               />
-              <button style={btnSmall} onClick={() => importRef.current?.click()}>
+              <button
+                style={{ ...btnSmall, ...(readOnly ? btnDisabled : {}) }}
+                disabled={readOnly}
+                onClick={() => importRef.current?.click()}
+                title={readOnly ? 'Canceled accounts cannot import projects' : undefined}
+              >
                 Import .json
               </button>
               <button
-                style={{ ...btnSmallPrimary, ...(projLoading ? btnDisabled : {}) }}
-                disabled={projLoading}
+                style={{
+                  ...btnSmallPrimary,
+                  ...(projLoading || !allowCreate ? btnDisabled : {}),
+                }}
+                disabled={projLoading || !allowCreate}
                 onClick={() => void handleNewProject()}
+                title={
+                  readOnly
+                    ? 'Canceled accounts cannot create projects'
+                    : !allowCreate
+                      ? 'Project limit reached — upgrade to Pro'
+                      : undefined
+                }
               >
                 + New Project
               </button>

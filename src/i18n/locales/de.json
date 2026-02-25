@@ -98,6 +98,21 @@
     "search": "Suchen…",
     "loading": "Laden…"
   },
+  "entitlements": {
+    "projectLimitTitle": "Projektlimit erreicht",
+    "projectLimitMsg": "Kostenlose Konten können 1 Projekt haben. Upgraden Sie auf Pro für unbegrenzte Projekte.",
+    "featureLockedTitle": "Pro-Funktion",
+    "featureLockedMsg": "Diese Funktion erfordert ein Pro-Abonnement.",
+    "readOnlyBanner": "Ihr Abonnement wurde gekündigt. Dieses Projekt ist schreibgeschützt.",
+    "pastDueBanner": "Ihre Zahlung ist überfällig. Aktualisieren Sie Ihre Rechnungsdaten.",
+    "canceledBanner": "Ihr Abonnement wurde gekündigt. Bestehende Projekte sind schreibgeschützt.",
+    "upgradeFeature1": "Unbegrenzte Projekte",
+    "upgradeFeature2": "CSV-Datei-Upload",
+    "upgradeFeature3": "Array-Operationen",
+    "upgradeFeature4": "Diagramm-Visualisierungen",
+    "upgradeCta": "Upgraden — 10£/Monat",
+    "canceledNoCreate": "Gekündigte Konten können keine neuen Projekte erstellen."
+  },
   "time": {
     "justNow": "gerade eben",
     "mAgo": "vor {{count}}m",

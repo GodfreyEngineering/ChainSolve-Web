@@ -98,6 +98,21 @@
     "search": "Buscar…",
     "loading": "Cargando…"
   },
+  "entitlements": {
+    "projectLimitTitle": "Límite de proyectos alcanzado",
+    "projectLimitMsg": "Las cuentas gratuitas pueden tener 1 proyecto. Mejora a Pro para proyectos ilimitados.",
+    "featureLockedTitle": "Función Pro",
+    "featureLockedMsg": "Esta función requiere una suscripción Pro.",
+    "readOnlyBanner": "Tu suscripción ha sido cancelada. Este proyecto es de solo lectura.",
+    "pastDueBanner": "Tu pago está vencido. Actualiza tu información de facturación para no perder el acceso.",
+    "canceledBanner": "Tu suscripción ha sido cancelada. Los proyectos existentes son de solo lectura.",
+    "upgradeFeature1": "Proyectos ilimitados",
+    "upgradeFeature2": "Carga de archivos CSV",
+    "upgradeFeature3": "Operaciones con arrays",
+    "upgradeFeature4": "Visualizaciones de gráficos",
+    "upgradeCta": "Mejorar — £10/mes",
+    "canceledNoCreate": "Las cuentas canceladas no pueden crear nuevos proyectos."
+  },
   "time": {
     "justNow": "ahora mismo",
     "mAgo": "hace {{count}}m",

@@ -27,6 +27,7 @@ Run each file in `supabase/migrations/` **in numeric order** via **Supabase → 
 | `0003_projects_owner_id.sql` | Renames `projects.user_id` → `owner_id`, rebuilds RLS |
 | `0004_projects_description.sql` | Ensures `projects.description` column exists |
 | `0005_projects_storage_key_nullable.sql` | Drops NOT NULL on `projects.storage_key` (safety net) |
+| `0006_entitlements_enforcement.sql` | Plan-based limits: project count trigger, storage RLS tightening, helper functions |
 
 After running 0001, confirm these tables appear under **Table Editor**:
 `profiles`, `projects`, `fs_items`, `project_assets`, `stripe_events`

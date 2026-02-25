@@ -23,6 +23,8 @@ import type { Node, Edge } from '@xyflow/react'
 import type { NodeData } from '../blocks/registry'
 import { loadProject, saveProject, renameProject, type ProjectJSON } from '../lib/projects'
 import { useProjectStore } from '../stores/projectStore'
+import { supabase } from '../lib/supabase'
+import { isReadOnly, showBillingBanner, type Plan } from '../lib/entitlements'
 
 const AUTOSAVE_DELAY_MS = 2000
 
@@ -48,6 +50,26 @@ export default function CanvasPage() {
   const detectConflict = useProjectStore((s) => s.detectConflict)
   const setStoreName = useProjectStore((s) => s.setProjectName)
   const reset = useProjectStore((s) => s.reset)
+
+  // ── Plan awareness ───────────────────────────────────────────────────────
+  const [plan, setPlan] = useState<Plan>('free')
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) return
+      supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', session.user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.plan) setPlan(data.plan as Plan)
+        })
+    })
+  }, [])
+
+  const readOnly = isReadOnly(plan) && !!projectId
+  const bannerKind = showBillingBanner(plan)
 
   // ── Load state ────────────────────────────────────────────────────────────
   const [loadPhase, setLoadPhase] = useState<'loading' | 'ready' | 'error'>(
@@ -281,16 +303,16 @@ export default function CanvasPage() {
 
         <div style={{ width: 1, height: 18, background: 'var(--border)' }} />
 
-        {/* Project name — click to rename */}
+        {/* Project name — click to rename (disabled in read-only) */}
         {projectId && !nameEditing && (
           <span
-            onClick={startNameEdit}
-            title="Click to rename"
+            onClick={readOnly ? undefined : startNameEdit}
+            title={readOnly ? undefined : 'Click to rename'}
             style={{
               fontWeight: 700,
               fontSize: '0.95rem',
               letterSpacing: '-0.3px',
-              cursor: 'text',
+              cursor: readOnly ? 'default' : 'text',
               borderBottom: '1px solid transparent',
               userSelect: 'none',
               paddingBottom: 1,
@@ -366,6 +388,36 @@ export default function CanvasPage() {
         </span>
       </div>
 
+      {/* ── Read-only / billing banner ──────────────────────────────────────── */}
+      {readOnly && (
+        <div
+          style={{
+            background: 'rgba(239,68,68,0.1)',
+            borderBottom: '1px solid rgba(239,68,68,0.3)',
+            padding: '0.45rem 1rem',
+            fontSize: '0.82rem',
+            color: '#f87171',
+            flexShrink: 0,
+          }}
+        >
+          Your subscription has been canceled. This project is read-only.
+        </div>
+      )}
+      {bannerKind === 'past_due' && (
+        <div
+          style={{
+            background: 'rgba(245,158,11,0.1)',
+            borderBottom: '1px solid rgba(245,158,11,0.3)',
+            padding: '0.45rem 1rem',
+            fontSize: '0.82rem',
+            color: '#fbbf24',
+            flexShrink: 0,
+          }}
+        >
+          Your payment is past due. Please update your billing info to avoid losing access.
+        </div>
+      )}
+
       {/* ── Conflict banner ───────────────────────────────────────────────────── */}
       {saveStatus === 'conflict' && (
         <div
@@ -421,7 +473,8 @@ export default function CanvasPage() {
           key={projectId ?? 'scratch'}
           initialNodes={initNodes ?? INITIAL_NODES}
           initialEdges={initEdges ?? INITIAL_EDGES}
-          onGraphChange={projectId ? handleGraphChange : undefined}
+          onGraphChange={projectId && !readOnly ? handleGraphChange : undefined}
+          readOnly={readOnly}
         />
       </div>
     </div>

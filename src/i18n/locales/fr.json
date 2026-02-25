@@ -98,6 +98,21 @@
     "search": "Rechercher…",
     "loading": "Chargement…"
   },
+  "entitlements": {
+    "projectLimitTitle": "Limite de projets atteinte",
+    "projectLimitMsg": "Les comptes gratuits peuvent avoir 1 projet. Passez à Pro pour des projets illimités.",
+    "featureLockedTitle": "Fonction Pro",
+    "featureLockedMsg": "Cette fonction nécessite un abonnement Pro.",
+    "readOnlyBanner": "Votre abonnement a été annulé. Ce projet est en lecture seule.",
+    "pastDueBanner": "Votre paiement est en retard. Mettez à jour vos informations de facturation.",
+    "canceledBanner": "Votre abonnement a été annulé. Les projets existants sont en lecture seule.",
+    "upgradeFeature1": "Projets illimités",
+    "upgradeFeature2": "Import de fichiers CSV",
+    "upgradeFeature3": "Opérations sur tableaux",
+    "upgradeFeature4": "Visualisations graphiques",
+    "upgradeCta": "Améliorer — 10£/mois",
+    "canceledNoCreate": "Les comptes annulés ne peuvent pas créer de nouveaux projets."
+  },
   "time": {
     "justNow": "à l'instant",
     "mAgo": "il y a {{count}}m",

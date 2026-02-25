@@ -183,8 +183,39 @@ export async function renameProject(projectId: string, name: string): Promise<st
   return (data as { updated_at: string }).updated_at
 }
 
-/** Delete the project row (storage files are orphaned — cleanup in W4+). */
+/**
+ * Delete a project: clean up storage files first, then remove the DB row.
+ * Storage errors are logged but do not block deletion — a missing blob is
+ * harmless, while a stuck DB row is not.
+ */
 export async function deleteProject(projectId: string): Promise<void> {
+  const session = await requireSession()
+  const userId = session.user.id
+  const prefix = `${userId}/${projectId}/`
+
+  // Clean up project.json in the "projects" bucket
+  try {
+    const { data: projFiles } = await supabase.storage.from('projects').list(prefix)
+    if (projFiles?.length) {
+      await supabase.storage.from('projects').remove(projFiles.map((f) => `${prefix}${f.name}`))
+    }
+  } catch {
+    // Storage cleanup is best-effort
+  }
+
+  // Clean up uploads in the "uploads" bucket
+  try {
+    const uploadPrefix = `${userId}/${projectId}/uploads/`
+    const { data: uploadFiles } = await supabase.storage.from('uploads').list(uploadPrefix)
+    if (uploadFiles?.length) {
+      await supabase.storage
+        .from('uploads')
+        .remove(uploadFiles.map((f) => `${uploadPrefix}${f.name}`))
+    }
+  } catch {
+    // Storage cleanup is best-effort
+  }
+
   const { error } = await supabase.from('projects').delete().eq('id', projectId)
   if (error) throw new Error(`Delete failed: ${error.message}`)
 }

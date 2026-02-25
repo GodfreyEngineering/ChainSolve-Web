@@ -98,6 +98,21 @@
     "search": "Search…",
     "loading": "Loading…"
   },
+  "entitlements": {
+    "projectLimitTitle": "Project limit reached",
+    "projectLimitMsg": "Free accounts can have 1 project. Upgrade to Pro for unlimited projects.",
+    "featureLockedTitle": "Pro feature",
+    "featureLockedMsg": "This feature requires a Pro subscription.",
+    "readOnlyBanner": "Your subscription has been canceled. This project is read-only.",
+    "pastDueBanner": "Your payment is past due. Please update your billing info to avoid losing access.",
+    "canceledBanner": "Your subscription has been canceled. Existing projects are read-only.",
+    "upgradeFeature1": "Unlimited projects",
+    "upgradeFeature2": "CSV file uploads",
+    "upgradeFeature3": "Array operations",
+    "upgradeFeature4": "Plot visualizations",
+    "upgradeCta": "Upgrade — £10/mo",
+    "canceledNoCreate": "Canceled accounts cannot create new projects."
+  },
   "time": {
     "justNow": "just now",
     "mAgo": "{{count}}m ago",

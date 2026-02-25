@@ -1,6 +1,6 @@
 # ChainSolve — Architecture
 
-> Updated at each milestone. Current: **W3 (Design System + i18n + Settings)**
+> Updated at each milestone. Current: **W4 (Entitlements + Backend Enforcement)**
 
 ---
 
@@ -42,6 +42,7 @@ src/
       Tabs.tsx    Tab bar component
       Select.tsx  Dropdown select with label/hint
       index.ts    Barrel export
+    UpgradeModal.tsx  Upgrade prompt when project limit or feature gate is hit (W4)
     ErrorBoundary.tsx   Top-level class-based error boundary
   contexts/
     ComputedContext.ts  React context for computed Map<nodeId,number>
@@ -57,9 +58,10 @@ src/
       it.json     Italian
       de.json     German
   lib/
-    supabase.ts   Browser Supabase client (anon key)
-    projects.ts   Project CRUD: list, create, load, save, rename, delete, duplicate, import
-    storage.ts    Storage helpers: saveProjectJson, uploadCsv, listProjectAssets, etc.
+    supabase.ts     Browser Supabase client (anon key)
+    entitlements.ts Plan-based feature gating: getEntitlements, isPro, isReadOnly, canCreateProject (W4)
+    projects.ts     Project CRUD: list, create, load, save, rename, delete, duplicate, import
+    storage.ts      Storage helpers: saveProjectJson, uploadCsv, listProjectAssets, etc.
   pages/
     Login.tsx     Email/password login + signup
     AppShell.tsx  Protected dashboard: plan status, billing, project browser
@@ -87,6 +89,8 @@ supabase/
     0002_storage_columns.sql  Adds projects.storage_key + project_assets.kind
     0003_projects_owner_id.sql  Renames user_id → owner_id + RLS fix
     0004_projects_description.sql  Adds projects.description
+    0005_projects_storage_key_nullable.sql  Drops NOT NULL on storage_key
+    0006_entitlements_enforcement.sql       Plan limit trigger, storage RLS tightening (W4)
 
 docs/
   SETUP.md        Production deploy guide
@@ -117,6 +121,7 @@ stripe_events   id (= Stripe event ID), type, payload (jsonb)
 
 RLS: all tables enable row-level security. Users own their rows via `owner_id = auth.uid()`.
 Trigger: `handle_new_user()` auto-creates a `profiles` row on `auth.users` INSERT.
+Trigger: `enforce_project_limit()` — BEFORE INSERT on projects, checks plan-based project limits (W4).
 
 ---
 
@@ -128,6 +133,11 @@ Trigger: `handle_new_user()` auto-creates a `profiles` row on `auth.users` INSER
 | `uploads` | `{userId}/{projectId}/uploads/{timestamp}_{safeFilename}` |
 
 RLS policy: `(storage.foldername(name))[1] = auth.uid()::text`
+
+**Plan-gated policies (W4):**
+
+- `uploads` INSERT/UPDATE: requires `user_has_active_plan(uid)` (trialing/pro only)
+- `projects` INSERT/UPDATE: requires `user_can_write_projects(uid)` (blocked for canceled)
 
 ---
 
@@ -189,7 +199,42 @@ Design tokens defined in `src/index.css`:
 - Framework: react-i18next + i18next + i18next-browser-languagedetector
 - Languages: English (default), Spanish, French, Italian, German
 - Detection: localStorage key `cs:lang`, falls back to browser language
-- Translation keys organized by namespace: app, nav, auth, projects, billing, canvas, settings, ui, time
+- Translation keys organized by namespace: app, nav, auth, projects, billing, canvas, settings, ui, time, entitlements
+
+---
+
+## Entitlements (W4)
+
+Plan-based feature gating with **two layers of enforcement**:
+
+### 1. Frontend (`src/lib/entitlements.ts`)
+
+| Plan | maxProjects | CSV | Arrays | Plots | Rules | Groups | Canvas |
+|------|-------------|-----|--------|-------|-------|--------|--------|
+| free | 1 | No | No | No | No | No | Read-write |
+| trialing | Unlimited | Yes | Yes | Yes | Yes | Yes | Read-write |
+| pro | Unlimited | Yes | Yes | Yes | Yes | Yes | Read-write |
+| past_due | 1 | No | No | No | No | No | Read-write + banner |
+| canceled | 1 | No | No | No | No | No | **Read-only** + banner |
+
+UI gating:
+
+- **UpgradeModal** — shown when free/past_due users hit project limit or feature gate
+- **Project limit** — "New Project" / "Import" / "Duplicate" disabled when at limit
+- **Read-only canvas** — canceled users: no drag-drop, no delete, no connect, no node dragging
+- **Billing banners** — past_due (amber) and canceled (red) banners on AppShell + CanvasPage
+
+### 2. Backend (`0006_entitlements_enforcement.sql`)
+
+- **`enforce_project_limit()`** — BEFORE INSERT trigger on `projects`: free/past_due max 1, canceled max 0
+- **`user_has_active_plan(uid)`** — helper function: true for trialing/pro
+- **`user_can_write_projects(uid)`** — helper function: false for canceled
+- **Storage RLS** — uploads bucket INSERT/UPDATE gated by active plan; projects bucket blocked for canceled
+- **Indexes** — `idx_projects_owner_id`, `idx_projects_owner_updated` for fast lookups
+
+### Storage cleanup
+
+`deleteProject()` now removes storage files from both `projects` and `uploads` buckets before deleting the DB row. Errors are best-effort (logged, not blocking).
 
 ---
 
@@ -215,8 +260,8 @@ Design tokens defined in `src/index.css`:
 | M1 | ✅ Done | Canvas MVP: drag-drop blocks, scalar evaluation, inspector |
 | W2 | ✅ Done | Projects: browser, autosave, conflict detection, import/export |
 | W3 | ✅ Done | Design system, i18n (5 languages), settings pages, favicon/metadata |
-| W4 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
-| W5 | Planned | Free limit enforcement, code-splitting, Stripe plan gating UX |
+| W4 | ✅ Done | Entitlements + backend enforcement: plan gating, UpgradeModal, read-only canvas, storage cleanup |
+| W5 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
 | W6 | Planned | Arrays + CSV import (Pro) |
 | W7 | Planned | Plot output nodes (Pro, uPlot) |
 | W8 | Planned | Branching/rules for conditional flows (Pro) |

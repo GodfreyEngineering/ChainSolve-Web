@@ -110,6 +110,8 @@ export interface CanvasAreaProps {
    * Skipped on the very first render so initial load does not trigger dirty state.
    */
   onGraphChange?: (nodes: Node<NodeData>[], edges: Edge[]) => void
+  /** When true, the canvas is view-only: no adding, connecting, deleting, or dragging nodes. */
+  readOnly?: boolean
 }
 
 // ── Resize-drag helpers ───────────────────────────────────────────────────────
@@ -158,7 +160,7 @@ const tbBtn: React.CSSProperties = {
 
 // ── Inner canvas (inside ReactFlowProvider) ───────────────────────────────────
 
-function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaProps) {
+function CanvasInner({ initialNodes, initialEdges, onGraphChange, readOnly }: CanvasAreaProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(
     initialNodes ?? INITIAL_NODES,
   )
@@ -239,6 +241,7 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
   const onDrop = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault()
+      if (readOnly) return
       const blockType = e.dataTransfer.getData(DRAG_TYPE)
       if (!blockType) return
       const def = BLOCK_REGISTRY.get(blockType)
@@ -250,13 +253,13 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
         { id, type: def.nodeKind, position, data: { ...def.defaultData } } as Node<NodeData>,
       ])
     },
-    [screenToFlowPosition, setNodes],
+    [readOnly, screenToFlowPosition, setNodes],
   )
 
   // ── Keyboard: Delete/Backspace removes selected ─────────────────────────────
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Delete' || e.key === 'Backspace') {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && !readOnly) {
         setNodes((nds) => {
           const deleted = new Set(nds.filter((n) => n.selected).map((n) => n.id))
           if (inspectedId && deleted.has(inspectedId)) setInspectedId(null)
@@ -269,7 +272,7 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
         closeInspector()
       }
     },
-    [setNodes, setEdges, closeInspector, inspectedId],
+    [readOnly, setNodes, setEdges, closeInspector, inspectedId],
   )
 
   // ── Context menus ───────────────────────────────────────────────────────────
@@ -486,8 +489,10 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
           position: 'relative',
         }}
       >
-        {/* Block library panel */}
-        {libVisible && <BlockLibrary width={libWidth} onResizeStart={onLibResizeStart} />}
+        {/* Block library panel (hidden in read-only mode) */}
+        {libVisible && !readOnly && (
+          <BlockLibrary width={libWidth} onResizeStart={onLibResizeStart} />
+        )}
 
         {/* Canvas */}
         <div
@@ -503,15 +508,18 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange }: CanvasAreaPr
             nodes={nodes}
             edges={edges}
             nodeTypes={NODE_TYPES}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
+            onNodesChange={readOnly ? undefined : onNodesChange}
+            onEdgesChange={readOnly ? undefined : onEdgesChange}
+            onConnect={readOnly ? undefined : onConnect}
             isValidConnection={isValidConnection}
             onNodeClick={onNodeClick}
             onPaneClick={onPaneClick}
-            onNodeContextMenu={onNodeContextMenu}
-            onEdgeContextMenu={onEdgeContextMenu}
-            onPaneContextMenu={onPaneContextMenu}
+            onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
+            onEdgeContextMenu={readOnly ? undefined : onEdgeContextMenu}
+            onPaneContextMenu={readOnly ? undefined : onPaneContextMenu}
+            nodesConnectable={!readOnly}
+            nodesDraggable={!readOnly}
+            elementsSelectable={!readOnly}
             snapToGrid={snapToGrid}
             snapGrid={[16, 16]}
             fitView
