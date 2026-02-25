@@ -21,7 +21,7 @@ export type BlockCategory =
   | 'plot'
 
 /** Which React Flow custom-node renderer to use. */
-export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay' | 'csData' | 'csPlot'
+export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay' | 'csData' | 'csPlot' | 'csGroup'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 
@@ -96,6 +96,12 @@ export interface NodeData extends Record<string, unknown> {
   csvStoragePath?: string
   /** Plot visualization configuration (csPlot nodes). */
   plotConfig?: PlotConfig
+  /** Group color — hex string, default '#1CABB0' (csGroup nodes only). */
+  groupColor?: string
+  /** Optional notes/annotations for the group (csGroup nodes only). */
+  groupNotes?: string
+  /** Whether the group is collapsed — members hidden, proxy handles shown (csGroup nodes only). */
+  groupCollapsed?: boolean
 }
 
 export interface BlockDef {

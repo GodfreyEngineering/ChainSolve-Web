@@ -5,12 +5,12 @@ It lives at `projects/{userId}/{projectId}/project.json` in Supabase Storage.
 
 ---
 
-## JSON Schema (schemaVersion 2)
+## JSON Schema (schemaVersion 3)
 
 ```jsonc
 {
   // ── Versioning ──────────────────────────────────────────────────────────
-  "schemaVersion": 2,         // integer — ONLY bumped for breaking changes (was 1 before W5)
+  "schemaVersion": 3,         // integer — ONLY bumped for breaking changes (W5: 1→2, W7: 2→3)
   "formatVersion": 7,         // integer — monotonically increasing per-save
 
   // ── Timestamps ──────────────────────────────────────────────────────────
@@ -43,11 +43,15 @@ It lives at `projects/{userId}/{projectId}/project.json` in Supabase Storage.
 
 - Increments only when the overall JSON envelope is incompatible with an
   older reader (e.g. a field is removed or semantics change fundamentally).
-- Current readers accept `schemaVersion` 1 or 2 (V1→V2 migration is transparent).
-- Saving always writes `schemaVersion: 2`.
+- Current readers accept `schemaVersion` 1, 2, or 3 (migrations are transparent).
+- Saving always writes `schemaVersion: 3`.
 - **V1 → V2 changes (W5):** added support for `csData` node type, `vectorData`,
   `tableData`, and `csvStoragePath` fields on NodeData. V1 files contain only
   scalar nodes and load without any structural migration.
+- **V2 → V3 changes (W7):** added `csGroup` node type and `parentId` field on
+  child nodes. Positions with `parentId` are **relative** to the parent node.
+  A V2 reader would position grouped nodes incorrectly. V1/V2 files have no
+  groups and load unchanged.
 
 ### `formatVersion`
 
@@ -74,7 +78,7 @@ Each element of `graph.nodes` is a React Flow `Node` with `data` typed as
 ```jsonc
 {
   "id":       "node_101",
-  "type":     "csSource",          // "csSource" | "csOperation" | "csDisplay" | "csData"
+  "type":     "csSource",          // "csSource" | "csOperation" | "csDisplay" | "csData" | "csPlot" | "csGroup"
   "position": { "x": 80, "y": 120 },
   "data": {
     "blockType": "number",         // must exist in BLOCK_REGISTRY
@@ -89,11 +93,18 @@ Each element of `graph.nodes` is a React Flow `Node` with `data` typed as
       "columns": ["A", "B"],
       "rows": [[1, 2], [3, 4]]
     },
-    "csvStoragePath": "uploads/…/file.csv" // csvImport — storage reference
+    "csvStoragePath": "uploads/…/file.csv", // csvImport — storage reference
+
+    // W7 group-node fields (csGroup kind only):
+    "groupColor":     "#1CABB0",         // hex color for the group container
+    "groupNotes":     "Analysis step 1", // optional user annotations
+    "groupCollapsed": false              // true = collapsed with proxy handles
   },
   // Optional React Flow fields preserved verbatim:
   "selected":  false,
-  "draggable": false              // false = locked position (🔒)
+  "draggable": false,             // false = locked position (🔒)
+  "parentId":  "group_123",       // W7: member nodes reference their group
+  "style":     { "width": 400, "height": 300 }  // W7: csGroup nodes set explicit size
 }
 ```
 
@@ -105,6 +116,8 @@ Each element of `graph.nodes` is a React Flow `Node` with `data` typed as
 | `csOperation` | `add`, `multiply`, `sin`, `if`, vector/table ops | 1–N    | 1      |
 | `csDisplay`   | `display`                                        | 1      | 0      |
 | `csData`      | `vectorInput`, `tableInput`, `csvImport` (W5)    | 0      | 1      |
+| `csPlot`      | `xyPlot`, `histogram`, `barChart`, `heatmap` (W6) | 1      | 0      |
+| `csGroup`     | `__group__` (visual container, W7)                 | 0      | 0      |
 
 ---
 
@@ -190,9 +203,9 @@ optimistic lock.
 
 - **Export:** `loadProject(id)` → `JSON.stringify(pj, null, 2)` → download
   as `{name}.json`.
-- **Import:** parse file → validate `schemaVersion` is 1 or 2 → `importProject(json)`:
+- **Import:** parse file → validate `schemaVersion` is 1, 2, or 3 → `importProject(json)`:
   - Creates a new DB row with a fresh `id` and `owner_id`.
   - Rebinds `project.id` in the JSON to the new row.
   - Resets `createdAt`/`updatedAt` to import time.
-  - Writes `schemaVersion: 2` regardless of source version.
+  - Writes `schemaVersion: 3` regardless of source version.
   - Preserves `graph` and `blockVersions` verbatim.

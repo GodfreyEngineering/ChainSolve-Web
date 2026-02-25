@@ -43,6 +43,7 @@ import { OperationNode } from './nodes/OperationNode'
 import { DisplayNode } from './nodes/DisplayNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
+import { GroupNode } from './nodes/GroupNode'
 import { BlockLibrary, DRAG_TYPE } from './BlockLibrary'
 import { Inspector } from './Inspector'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
@@ -52,6 +53,17 @@ import { evaluateGraph } from '../../engine/evaluate'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 import { UpgradeModal } from '../UpgradeModal'
+import {
+  createGroup,
+  ungroupNodes,
+  collapseGroup,
+  expandGroup,
+  getCanonicalSnapshot,
+  insertTemplate,
+  type TemplatePayload,
+} from '../../lib/groups'
+import { saveTemplate as saveTemplateApi } from '../../lib/templates'
+import type { Template } from '../../lib/templates'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -61,6 +73,7 @@ const NODE_TYPES = {
   csDisplay: DisplayNode,
   csData: DataNode,
   csPlot: PlotNode,
+  csGroup: GroupNode,
 } as const
 
 // ── Default graph ─────────────────────────────────────────────────────────────
@@ -213,7 +226,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   latestEdges.current = edges
 
   useImperativeHandle(ref, () => ({
-    getSnapshot: () => ({ nodes: latestNodes.current, edges: latestEdges.current }),
+    getSnapshot: () => getCanonicalSnapshot(latestNodes.current, latestEdges.current),
   }))
 
   // Notify parent of graph changes — skip the initial mount so loading a project
@@ -327,36 +340,32 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [readOnly, ent, screenToFlowPosition, setNodes],
   )
 
-  // ── Keyboard: Delete/Backspace removes selected ─────────────────────────────
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if ((e.key === 'Delete' || e.key === 'Backspace') && !readOnly) {
-        setNodes((nds) => {
-          const deleted = new Set(nds.filter((n) => n.selected).map((n) => n.id))
-          if (inspectedId && deleted.has(inspectedId)) setInspectedId(null)
-          return nds.filter((n) => !n.selected)
+  // ── Context menus ───────────────────────────────────────────────────────────
+  const onNodeContextMenu = useCallback(
+    (e: MouseEvent, node: Node) => {
+      e.preventDefault()
+      const selectedCount = nodes.filter((n) => n.selected).length
+      if (selectedCount > 1 && node.selected) {
+        setContextMenu({
+          kind: 'selection',
+          x: e.clientX,
+          y: e.clientY,
+          selectedCount,
         })
-        setEdges((eds) => eds.filter((ed) => !ed.selected))
-      }
-      if (e.key === 'Escape') {
-        setContextMenu(null)
-        closeInspector()
+      } else {
+        setContextMenu({
+          kind: 'node',
+          x: e.clientX,
+          y: e.clientY,
+          nodeId: node.id,
+          isLocked: node.draggable === false,
+          isGroup: node.type === 'csGroup',
+          isCollapsed: !!(node.data as NodeData).groupCollapsed,
+        })
       }
     },
-    [readOnly, setNodes, setEdges, closeInspector, inspectedId],
+    [nodes],
   )
-
-  // ── Context menus ───────────────────────────────────────────────────────────
-  const onNodeContextMenu = useCallback((e: MouseEvent, node: Node) => {
-    e.preventDefault()
-    setContextMenu({
-      kind: 'node',
-      x: e.clientX,
-      y: e.clientY,
-      nodeId: node.id,
-      isLocked: node.draggable === false,
-    })
-  }, [])
 
   const onEdgeContextMenu = useCallback((e: MouseEvent, edge: Edge) => {
     e.preventDefault()
@@ -389,7 +398,17 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   const deleteNode = useCallback(
     (nodeId: string) => {
-      setNodes((nds) => nds.filter((n) => n.id !== nodeId))
+      setNodes((nds) => {
+        // If deleting a group, also delete its children
+        const node = nds.find((n) => n.id === nodeId)
+        if (node?.type === 'csGroup') {
+          const childIds = new Set(nds.filter((n) => n.parentId === nodeId).map((n) => n.id))
+          childIds.add(nodeId)
+          setEdges((eds) => eds.filter((e) => !childIds.has(e.source) && !childIds.has(e.target)))
+          return nds.filter((n) => !childIds.has(n.id))
+        }
+        return nds.filter((n) => n.id !== nodeId)
+      })
       setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId))
       if (inspectedId === nodeId) setInspectedId(null)
     },
@@ -433,6 +452,157 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       )
     },
     [setNodes],
+  )
+
+  const deleteSelected = useCallback(() => {
+    setNodes((nds) => {
+      const selected = nds.filter((n) => n.selected)
+      const deleted = new Set(selected.map((n) => n.id))
+      // Also cascade-delete children of selected groups
+      for (const n of selected) {
+        if (n.type === 'csGroup') {
+          for (const child of nds) {
+            if (child.parentId === n.id) deleted.add(child.id)
+          }
+        }
+      }
+      if (inspectedId && deleted.has(inspectedId)) setInspectedId(null)
+      setEdges((eds) => eds.filter((e) => !deleted.has(e.source) && !deleted.has(e.target)))
+      return nds.filter((n) => !deleted.has(n.id))
+    })
+  }, [setNodes, setEdges, inspectedId])
+
+  // ── Group operations ──────────────────────────────────────────────────────
+  const groupSelection = useCallback(() => {
+    if (!ent.canUseGroups) {
+      setShowUpgradeModal(true)
+      return
+    }
+    const selectedIds = nodes.filter((n) => n.selected && n.type !== 'csGroup').map((n) => n.id)
+    if (selectedIds.length < 2) return
+    const { groupNode, updatedNodes } = createGroup(selectedIds, nodes)
+    // Group node must come before its children in the array for React Flow parent rendering
+    const nonSelected = updatedNodes.filter((n) => !selectedIds.includes(n.id))
+    const selected = updatedNodes.filter((n) => selectedIds.includes(n.id))
+    setNodes([...nonSelected, groupNode, ...selected] as Node<NodeData>[])
+  }, [nodes, ent.canUseGroups, setNodes])
+
+  const ungroupNode = useCallback(
+    (groupId: string) => {
+      if (!ent.canUseGroups) return
+      // First expand if collapsed
+      const group = nodes.find((n) => n.id === groupId)
+      let currentNodes = nodes
+      let currentEdges = edges
+      if (group && (group.data as NodeData).groupCollapsed) {
+        const expanded = expandGroup(groupId, currentNodes, currentEdges)
+        currentNodes = expanded.nodes as Node<NodeData>[]
+        currentEdges = expanded.edges
+      }
+      const result = ungroupNodes(groupId, currentNodes as Node<NodeData>[])
+      setNodes(result)
+      setEdges(currentEdges)
+      if (inspectedId === groupId) setInspectedId(null)
+    },
+    [nodes, edges, ent.canUseGroups, setNodes, setEdges, inspectedId],
+  )
+
+  const toggleGroupCollapse = useCallback(
+    (groupId: string) => {
+      const group = nodes.find((n) => n.id === groupId)
+      if (!group) return
+      const isCollapsed = (group.data as NodeData).groupCollapsed
+      if (isCollapsed) {
+        const result = expandGroup(groupId, nodes, edges)
+        setNodes(result.nodes as Node<NodeData>[])
+        setEdges(result.edges)
+      } else {
+        const result = collapseGroup(groupId, nodes, edges)
+        setNodes(result.nodes as Node<NodeData>[])
+        setEdges(result.edges)
+      }
+    },
+    [nodes, edges, setNodes, setEdges],
+  )
+
+  const saveAsTemplate = useCallback(
+    (groupId: string) => {
+      if (!ent.canUseGroups) return
+      const group = nodes.find((n) => n.id === groupId)
+      if (!group) return
+      const nd = group.data as NodeData
+      const name = window.prompt('Template name:', nd.label)
+      if (!name?.trim()) return
+      const memberNodes = nodes.filter((n) => n.parentId === groupId)
+      const memberIds = new Set(memberNodes.map((n) => n.id))
+      const internalEdges = edges.filter((e) => memberIds.has(e.source) && memberIds.has(e.target))
+      // Normalize positions to origin
+      let minX = Infinity,
+        minY = Infinity
+      for (const m of memberNodes) {
+        if (m.position.x < minX) minX = m.position.x
+        if (m.position.y < minY) minY = m.position.y
+      }
+      const payload: TemplatePayload = {
+        nodes: memberNodes.map((n) => ({
+          ...n,
+          position: { x: n.position.x - minX, y: n.position.y - minY },
+          parentId: undefined,
+        })) as unknown as Record<string, unknown>[],
+        edges: internalEdges as unknown as Record<string, unknown>[],
+      }
+      saveTemplateApi(name.trim(), nd.groupColor ?? '#1CABB0', payload).catch(() => {
+        // Silently handle — template save failure is non-critical
+      })
+    },
+    [nodes, edges, ent.canUseGroups],
+  )
+
+  const onInsertTemplate = useCallback(
+    (template: Template) => {
+      const center = screenToFlowPosition({
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+      })
+      const {
+        groupNode,
+        memberNodes,
+        edges: newEdges,
+      } = insertTemplate(template.payload, center, template.name, template.color)
+      setNodes((nds) => [...nds, groupNode, ...memberNodes] as Node<NodeData>[])
+      setEdges((eds) => [...eds, ...newEdges])
+    },
+    [screenToFlowPosition, setNodes, setEdges],
+  )
+
+  // ── Keyboard: Delete/Backspace removes selected ─────────────────────────────
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && !readOnly) {
+        setNodes((nds) => {
+          const deleted = new Set(nds.filter((n) => n.selected).map((n) => n.id))
+          if (inspectedId && deleted.has(inspectedId)) setInspectedId(null)
+          return nds.filter((n) => !n.selected)
+        })
+        setEdges((eds) => eds.filter((ed) => !ed.selected))
+      }
+      if (e.key === 'Escape') {
+        setContextMenu(null)
+        closeInspector()
+      }
+      // Ctrl+G: group selected nodes
+      if (e.key === 'g' && (e.ctrlKey || e.metaKey) && !e.shiftKey && !readOnly) {
+        e.preventDefault()
+        groupSelection()
+      }
+      // Ctrl+Shift+G: ungroup selected group
+      if (e.key === 'G' && (e.ctrlKey || e.metaKey) && e.shiftKey && !readOnly) {
+        e.preventDefault()
+        const selectedGroup = nodes.find((n) => n.selected && n.type === 'csGroup')
+        if (selectedGroup) ungroupNode(selectedGroup.id)
+      }
+    },
+    [readOnly, setNodes, setEdges, closeInspector, inspectedId, groupSelection, ungroupNode, nodes],
   )
 
   // Add block at the canvas position where user right-clicked
@@ -589,6 +759,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             onResizeStart={onLibResizeStart}
             plan={plan}
             onProBlocked={() => setShowUpgradeModal(true)}
+            onInsertTemplate={onInsertTemplate}
           />
         )}
 
@@ -643,6 +814,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             width={inspWidth}
             onClose={closeInspector}
             onResizeStart={onInspResizeStart}
+            onToggleCollapse={toggleGroupCollapse}
+            onUngroupNode={ungroupNode}
+            canUseGroups={ent.canUseGroups}
           />
         )}
 
@@ -678,6 +852,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               onResizeStart={() => {}}
               plan={plan}
               onProBlocked={() => setShowUpgradeModal(true)}
+              onInsertTemplate={onInsertTemplate}
             />
           </div>
         )}
@@ -698,6 +873,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               width={mobileDrawerWidth}
               onClose={closeInspector}
               onResizeStart={() => {}}
+              onToggleCollapse={toggleGroupCollapse}
+              onUngroupNode={ungroupNode}
+              canUseGroups={ent.canUseGroups}
             />
           </div>
         )}
@@ -715,6 +893,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             onLockNode={lockNode}
             onFitView={() => fitView({ padding: 0.15, duration: 300 })}
             onAddBlockAtCursor={onAddBlockAtCursor}
+            onGroupSelection={groupSelection}
+            onUngroupNode={ungroupNode}
+            onToggleCollapse={toggleGroupCollapse}
+            onDeleteSelected={deleteSelected}
+            onSaveAsTemplate={saveAsTemplate}
+            canUseGroups={ent.canUseGroups}
           />
         )}
 

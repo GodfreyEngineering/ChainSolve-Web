@@ -1,6 +1,6 @@
 # ChainSolve — Architecture
 
-> Updated at each milestone. Current: **W6 (Scientific Plotting + Export)**
+> Updated at each milestone. Current: **W7 (Block Groups + Templates)**
 
 ---
 
@@ -36,14 +36,15 @@ src/
     plot-blocks.ts    Plot blocks: xyPlot, histogram, barChart, heatmap (W6, Pro-only)
   components/
     canvas/       Canvas UI components
-      nodes/      Custom React Flow node renderers (SourceNode, OperationNode, DisplayNode, DataNode, PlotNode)
+      nodes/      Custom React Flow node renderers (SourceNode, OperationNode, DisplayNode, DataNode, PlotNode, GroupNode)
       editors/    Inline editors for data nodes (VectorEditor, TableEditor, CsvPicker) (W5)
-      BlockLibrary.tsx  Left-sidebar draggable block palette
+      BlockLibrary.tsx  Left-sidebar draggable block palette + templates section (W7)
       Inspector.tsx     Right-sidebar node property editor
+      GroupInspector.tsx Group property sub-panel in Inspector (W7)
       PlotInspector.tsx Plot configuration sub-panel in Inspector (W6)
       PlotExpandModal.tsx Full-size plot modal with export buttons (W6)
-      CanvasArea.tsx    ReactFlow wrapper with drag-drop, keyboard shortcuts
-      ContextMenu.tsx   Right-click context menus (canvas/node/edge)
+      CanvasArea.tsx    ReactFlow wrapper with drag-drop, keyboard shortcuts, group ops
+      ContextMenu.tsx   Right-click context menus (canvas/node/edge/selection/group)
       QuickAddPalette.tsx  Floating block picker
     ui/           Design system components (W3)
       Button.tsx  Primary/secondary/danger/ghost button
@@ -79,6 +80,8 @@ src/
     projects.ts     Project CRUD: list, create, load, save, rename, delete, duplicate, import
     storage.ts      Storage helpers: saveProjectJson, uploadCsv, listProjectAssets, etc.
     vega-loader.ts  Lazy Vega/Vega-Lite/vega-interpreter loader (singleton, CSP-safe) (W6)
+    groups.ts       Pure group operations: create, ungroup, collapse, expand, resize, template insert (W7)
+    templates.ts    Template CRUD (Supabase group_templates table) (W7)
     plot-spec.ts    Pure Vega-Lite spec generation: inline (node) + full (modal) (W6)
     plot-export.ts  SVG/PNG/CSV export utilities + open-in-tab (W6)
     downsample.ts   LTTB downsampling algorithm for large datasets (W6)
@@ -117,10 +120,12 @@ supabase/
     0007_bug_reports.sql                    In-app bug reporting table + RLS (W5.3)
     0008_advisor_fixes.sql                 ~~Superseded by 0009~~ — kept for history (W5.3.1)
     0009_advisor_fixes_v2.sql              Owner_id-safe advisor fixes: dynamic SQL auto-detection (W5.3.1b)
+    0010_group_templates.sql             Group templates table + RLS (W7)
 
 e2e/
   smoke.spec.ts   Playwright smoke tests: title, meta tags, robots.txt, #root, no errors (W5.3)
   plot-smoke.spec.ts  Plot feature smoke tests: block library, no CSP violations (W6)
+  groups.spec.ts      Group feature smoke tests: DOM structure, keyboard shortcuts (W7)
 
 .github/
   workflows/
@@ -138,6 +143,7 @@ docs/
   PROJECT_FORMAT.md  project.json schema + versioning contract
   BRANDING.md     Brand asset management, naming conventions, theme variants (W6.1)
   PLOTTING.md     Plot blocks: chart types, export, CSP, downsampling, architecture (W6)
+  GROUPS.md       Block groups + templates: usage, schema V3, Pro gating (W7)
   ARCHITECTURE.md This file
 ```
 
@@ -162,6 +168,9 @@ stripe_events   id (= Stripe event ID), type, payload (jsonb)
 
 bug_reports     id, user_id (FK profiles), title, description, metadata (jsonb),
                 created_at (W5.3)
+
+group_templates id, owner_id (FK profiles), name, color, payload (jsonb),
+                created_at, updated_at (W7)
 ```
 
 RLS: all tables enable row-level security. Users own their rows via `owner_id = auth.uid()`.
@@ -257,6 +266,7 @@ This eliminates the `registry → pack → registry` cycle that caused TDZ crash
 | `csDisplay` | DisplayNode | Output/Display (1 input, shows computed value) |
 | `csData` | DataNode | Vector Input, Table Input, CSV Import (0 inputs, 1 output) (W5) |
 | `csPlot` | PlotNode | XY Plot, Histogram, Bar Chart, Heatmap (1 input, 0 outputs, Vega render) (W6) |
+| `csGroup` | GroupNode | Visual container for grouped nodes (no I/O, parentId mechanism) (W7) |
 
 ---
 
@@ -287,7 +297,7 @@ Design tokens defined in `src/index.css`:
 - Framework: react-i18next + i18next + i18next-browser-languagedetector
 - Languages: English (default), Spanish, French, Italian, German
 - Detection: localStorage key `cs:lang`, falls back to browser language
-- Translation keys organized by namespace: app, nav, auth, projects, billing, canvas, settings, ui, time, entitlements, blocks
+- Translation keys organized by namespace: app, nav, auth, projects, billing, canvas, settings, ui, time, entitlements, blocks, plot, groups
 
 ---
 
@@ -297,13 +307,13 @@ Plan-based feature gating with **two layers of enforcement**:
 
 ### 1. Frontend (`src/lib/entitlements.ts`)
 
-| Plan | maxProjects | CSV | Arrays | Plots | Rules | Groups | Canvas |
-|------|-------------|-----|--------|-------|-------|--------|--------|
-| free | 1 | No | No | No | No | No | Read-write |
-| trialing | Unlimited | Yes | Yes | Yes | Yes | Yes | Read-write |
-| pro | Unlimited | Yes | Yes | Yes | Yes | Yes | Read-write |
-| past_due | 1 | No | No | No | No | No | Read-write + banner |
-| canceled | 1 | No | No | No | No | No | **Read-only** + banner |
+| Plan | maxProjects | CSV | Arrays | Plots | Rules | Groups/Templates | Canvas |
+|------|-------------|-----|--------|-------|-------|------------------|--------|
+| free | 1 | No | No | No | No | View only | Read-write |
+| trialing | Unlimited | Yes | Yes | Yes | Yes | Full | Read-write |
+| pro | Unlimited | Yes | Yes | Yes | Yes | Full | Read-write |
+| past_due | 1 | No | No | No | No | View only | Read-write + banner |
+| canceled | 1 | No | No | No | No | View only | **Read-only** + banner |
 
 UI gating:
 
@@ -355,9 +365,10 @@ UI gating:
 | W5.3 | ✅ Done | Production hardening: security headers, CI, Playwright e2e, build info, bug reporting |
 | W6 | ✅ Done | Scientific plotting + export: 4 chart types (Vega-Lite), SVG/PNG/CSV export, CSP-safe, theme presets |
 | W6.1 | ✅ Done | Brand pack integration: logos, favicon, login header, nav branding, plot export branding toggle |
-| W7 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
-| W8 | Planned | Branching/rules for conditional flows (Pro) |
-| W9 | Planned | Custom blocks editor + block groups (Pro) |
-| W10 | Planned | Project/file browser with folders, search, tags |
-| W11 | Planned | WASM/Rust compute engine swap-in |
-| W12 | Planned | Block versioning (blockVersions manifest) |
+| W7 | ✅ Done | Block groups + templates: csGroup node, collapse/expand, proxy handles, templates (Supabase), Pro gating |
+| W8 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
+| W9 | Planned | Branching/rules for conditional flows (Pro) |
+| W10 | Planned | Custom blocks editor (Pro) |
+| W11 | Planned | Project/file browser with folders, search, tags |
+| W12 | Planned | WASM/Rust compute engine swap-in |
+| W13 | Planned | Block versioning (blockVersions manifest) |

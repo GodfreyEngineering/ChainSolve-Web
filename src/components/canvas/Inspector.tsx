@@ -14,12 +14,16 @@ import { isError, isScalar } from '../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 import type { PlotConfig } from '../../blocks/types'
 import { PlotInspector } from './PlotInspector'
+import { GroupInspector } from './GroupInspector'
 
 interface InspectorProps {
   nodeId: string | null
   width: number
   onClose: () => void
   onResizeStart: (e: React.MouseEvent) => void
+  onToggleCollapse?: (groupId: string) => void
+  onUngroupNode?: (groupId: string) => void
+  canUseGroups?: boolean
 }
 
 const inp: React.CSSProperties = {
@@ -51,7 +55,15 @@ const fieldLabel: React.CSSProperties = {
   userSelect: 'none',
 }
 
-export function Inspector({ nodeId, width, onClose, onResizeStart }: InspectorProps) {
+export function Inspector({
+  nodeId,
+  width,
+  onClose,
+  onResizeStart,
+  onToggleCollapse,
+  onUngroupNode,
+  canUseGroups,
+}: InspectorProps) {
   const allNodes = useNodes()
   const allEdges = useEdges()
   const { updateNodeData } = useReactFlow()
@@ -132,6 +144,7 @@ export function Inspector({ nodeId, width, onClose, onResizeStart }: InspectorPr
     )
   }
 
+  const isGroup = nd.blockType === '__group__'
   const def = BLOCK_REGISTRY.get(nd.blockType)
   const value = computed.get(node.id)
   const manualValues = (nd.manualValues ?? {}) as Record<string, number>
@@ -213,231 +226,247 @@ export function Inspector({ nodeId, width, onClose, onResizeStart }: InspectorPr
 
       {/* Body */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>
-        {/* Label */}
-        {field(
-          'Label',
-          <input
-            style={inp}
-            value={nd.label}
-            onChange={(e) => update({ label: e.target.value })}
-          />,
-        )}
-
-        {/* Number source */}
-        {nd.blockType === 'number' &&
-          field(
-            'Value',
-            <input
-              type="number"
-              style={monoInp}
-              value={nd.value ?? 0}
-              step="any"
-              onChange={(e) => {
-                const v = parseFloat(e.target.value)
-                if (!isNaN(v)) update({ value: v })
-              }}
-            />,
-          )}
-
-        {/* Slider source */}
-        {nd.blockType === 'slider' && (
+        {/* Group inspector */}
+        {isGroup ? (
+          <GroupInspector
+            groupId={node.id}
+            data={nd}
+            onUpdate={(patch) => update(patch)}
+            onCollapse={() => onToggleCollapse?.(node.id)}
+            onUngroup={() => onUngroupNode?.(node.id)}
+            readOnly={!canUseGroups}
+          />
+        ) : (
           <>
+            {/* Label */}
             {field(
-              'Value',
-              <>
+              'Label',
+              <input
+                style={inp}
+                value={nd.label}
+                onChange={(e) => update({ label: e.target.value })}
+              />,
+            )}
+
+            {/* Number source */}
+            {nd.blockType === 'number' &&
+              field(
+                'Value',
                 <input
-                  type="range"
-                  style={{ width: '100%', accentColor: 'var(--primary)', margin: '0.2rem 0' }}
-                  min={nd.min ?? 0}
-                  max={nd.max ?? 100}
-                  step={nd.step ?? 1}
+                  type="number"
+                  style={monoInp}
                   value={nd.value ?? 0}
-                  onChange={(e) => update({ value: parseFloat(e.target.value) })}
-                />
+                  step="any"
+                  onChange={(e) => {
+                    const v = parseFloat(e.target.value)
+                    if (!isNaN(v)) update({ value: v })
+                  }}
+                />,
+              )}
+
+            {/* Slider source */}
+            {nd.blockType === 'slider' && (
+              <>
+                {field(
+                  'Value',
+                  <>
+                    <input
+                      type="range"
+                      style={{ width: '100%', accentColor: 'var(--primary)', margin: '0.2rem 0' }}
+                      min={nd.min ?? 0}
+                      max={nd.max ?? 100}
+                      step={nd.step ?? 1}
+                      value={nd.value ?? 0}
+                      onChange={(e) => update({ value: parseFloat(e.target.value) })}
+                    />
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        fontSize: '0.7rem',
+                        color: 'rgba(244,244,243,0.4)',
+                      }}
+                    >
+                      <span>{nd.min ?? 0}</span>
+                      <span style={{ fontFamily: 'monospace', color: '#1CABB0', fontWeight: 700 }}>
+                        {nd.value ?? 0}
+                      </span>
+                      <span>{nd.max ?? 100}</span>
+                    </div>
+                  </>,
+                )}
                 <div
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    fontSize: '0.7rem',
-                    color: 'rgba(244,244,243,0.4)',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr 1fr',
+                    gap: '0.4rem',
+                    marginBottom: '0.7rem',
                   }}
                 >
-                  <span>{nd.min ?? 0}</span>
-                  <span style={{ fontFamily: 'monospace', color: '#1CABB0', fontWeight: 700 }}>
-                    {nd.value ?? 0}
-                  </span>
-                  <span>{nd.max ?? 100}</span>
+                  {(['min', 'max', 'step'] as const).map((k) => (
+                    <div key={k}>
+                      <span style={fieldLabel}>{k.charAt(0).toUpperCase() + k.slice(1)}</span>
+                      <input
+                        type="number"
+                        style={{ ...monoInp, fontSize: '0.72rem' }}
+                        value={nd[k] ?? (k === 'step' ? 1 : k === 'min' ? 0 : 100)}
+                        onChange={(e) => {
+                          const v = parseFloat(e.target.value)
+                          if (!isNaN(v)) update({ [k]: v })
+                        }}
+                      />
+                    </div>
+                  ))}
                 </div>
-              </>,
+              </>
             )}
+
+            {/* Per-port inputs (operation nodes) */}
+            {def && def.inputs.length > 0 && (
+              <div style={{ marginBottom: '0.7rem' }}>
+                <span style={fieldLabel}>Inputs</span>
+                {def.inputs.map((port) => {
+                  const connected = isPortConnected(port.id)
+                  const override = portOverrides[port.id] === true
+                  const showInput = !connected || override
+
+                  return (
+                    <div
+                      key={port.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        marginBottom: '0.4rem',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: '0.75rem',
+                          color: 'rgba(244,244,243,0.6)',
+                          width: 40,
+                          flexShrink: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {port.label}
+                      </span>
+                      {showInput ? (
+                        <input
+                          type="number"
+                          style={{
+                            ...monoInp,
+                            flex: 1,
+                            fontSize: '0.75rem',
+                            borderColor: override ? 'rgba(28,171,176,0.4)' : undefined,
+                            color: override ? '#1CABB0' : undefined,
+                          }}
+                          value={manualValues[port.id] ?? ''}
+                          placeholder="0"
+                          step="any"
+                          onChange={(e) => {
+                            const v = parseFloat(e.target.value)
+                            if (!isNaN(v)) updateManual(port.id, v)
+                          }}
+                        />
+                      ) : (
+                        <span
+                          style={{
+                            flex: 1,
+                            fontSize: '0.75rem',
+                            fontFamily: 'monospace',
+                            color: '#1CABB0',
+                            padding: '0.28rem 0.45rem',
+                          }}
+                        >
+                          ▶ connected
+                        </span>
+                      )}
+                      {connected && (
+                        <button
+                          onClick={() => toggleOverride(port.id)}
+                          title={override ? 'Use connected value' : 'Override with manual value'}
+                          style={{
+                            width: 22,
+                            height: 22,
+                            padding: 0,
+                            flexShrink: 0,
+                            background: override ? 'rgba(28,171,176,0.15)' : 'transparent',
+                            border: `1px solid ${override ? '#1CABB0' : 'rgba(255,255,255,0.15)'}`,
+                            borderRadius: 4,
+                            color: override ? '#1CABB0' : 'rgba(255,255,255,0.35)',
+                            cursor: 'pointer',
+                            fontSize: '0.72rem',
+                            fontFamily: 'inherit',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {override ? '↩' : '✎'}
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Plot inspector (csPlot nodes) */}
+            {def?.nodeKind === 'csPlot' &&
+              (() => {
+                const dataEdge = allEdges.find(
+                  (e) => e.target === node.id && e.targetHandle === 'data',
+                )
+                const inputValue = dataEdge ? computed.get(dataEdge.source) : undefined
+                const plotConfig: PlotConfig = (nd.plotConfig as PlotConfig) ?? {
+                  chartType: 'xyLine',
+                }
+                return (
+                  <PlotInspector
+                    config={plotConfig}
+                    inputValue={inputValue}
+                    onUpdate={(patch) => update({ plotConfig: { ...plotConfig, ...patch } })}
+                  />
+                )
+              })()}
+
+            {/* Output value */}
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: '0.4rem',
-                marginBottom: '0.7rem',
+                background: isErrVal || isInfVal ? 'rgba(239,68,68,0.08)' : 'rgba(28,171,176,0.08)',
+                border: `1px solid ${isErrVal || isInfVal ? 'rgba(239,68,68,0.25)' : 'rgba(28,171,176,0.25)'}`,
+                borderRadius: 8,
+                padding: '0.6rem',
+                textAlign: 'center',
               }}
             >
-              {(['min', 'max', 'step'] as const).map((k) => (
-                <div key={k}>
-                  <span style={fieldLabel}>{k.charAt(0).toUpperCase() + k.slice(1)}</span>
-                  <input
-                    type="number"
-                    style={{ ...monoInp, fontSize: '0.72rem' }}
-                    value={nd[k] ?? (k === 'step' ? 1 : k === 'min' ? 0 : 100)}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value)
-                      if (!isNaN(v)) update({ [k]: v })
-                    }}
-                  />
-                </div>
-              ))}
+              <span
+                style={{
+                  display: 'block',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '1.4rem',
+                  fontWeight: 700,
+                  color: isErrVal || isInfVal ? '#f87171' : '#1CABB0',
+                }}
+              >
+                {formatValue(value)}
+              </span>
+              <span
+                style={{
+                  fontSize: '0.65rem',
+                  color: 'rgba(244,244,243,0.35)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                output
+              </span>
             </div>
           </>
         )}
-
-        {/* Per-port inputs (operation nodes) */}
-        {def && def.inputs.length > 0 && (
-          <div style={{ marginBottom: '0.7rem' }}>
-            <span style={fieldLabel}>Inputs</span>
-            {def.inputs.map((port) => {
-              const connected = isPortConnected(port.id)
-              const override = portOverrides[port.id] === true
-              const showInput = !connected || override
-
-              return (
-                <div
-                  key={port.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    marginBottom: '0.4rem',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      color: 'rgba(244,244,243,0.6)',
-                      width: 40,
-                      flexShrink: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {port.label}
-                  </span>
-                  {showInput ? (
-                    <input
-                      type="number"
-                      style={{
-                        ...monoInp,
-                        flex: 1,
-                        fontSize: '0.75rem',
-                        borderColor: override ? 'rgba(28,171,176,0.4)' : undefined,
-                        color: override ? '#1CABB0' : undefined,
-                      }}
-                      value={manualValues[port.id] ?? ''}
-                      placeholder="0"
-                      step="any"
-                      onChange={(e) => {
-                        const v = parseFloat(e.target.value)
-                        if (!isNaN(v)) updateManual(port.id, v)
-                      }}
-                    />
-                  ) : (
-                    <span
-                      style={{
-                        flex: 1,
-                        fontSize: '0.75rem',
-                        fontFamily: 'monospace',
-                        color: '#1CABB0',
-                        padding: '0.28rem 0.45rem',
-                      }}
-                    >
-                      ▶ connected
-                    </span>
-                  )}
-                  {connected && (
-                    <button
-                      onClick={() => toggleOverride(port.id)}
-                      title={override ? 'Use connected value' : 'Override with manual value'}
-                      style={{
-                        width: 22,
-                        height: 22,
-                        padding: 0,
-                        flexShrink: 0,
-                        background: override ? 'rgba(28,171,176,0.15)' : 'transparent',
-                        border: `1px solid ${override ? '#1CABB0' : 'rgba(255,255,255,0.15)'}`,
-                        borderRadius: 4,
-                        color: override ? '#1CABB0' : 'rgba(255,255,255,0.35)',
-                        cursor: 'pointer',
-                        fontSize: '0.72rem',
-                        fontFamily: 'inherit',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      {override ? '↩' : '✎'}
-                    </button>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Plot inspector (csPlot nodes) */}
-        {def?.nodeKind === 'csPlot' &&
-          (() => {
-            const dataEdge = allEdges.find((e) => e.target === node.id && e.targetHandle === 'data')
-            const inputValue = dataEdge ? computed.get(dataEdge.source) : undefined
-            const plotConfig: PlotConfig = (nd.plotConfig as PlotConfig) ?? {
-              chartType: 'xyLine',
-            }
-            return (
-              <PlotInspector
-                config={plotConfig}
-                inputValue={inputValue}
-                onUpdate={(patch) => update({ plotConfig: { ...plotConfig, ...patch } })}
-              />
-            )
-          })()}
-
-        {/* Output value */}
-        <div
-          style={{
-            background: isErrVal || isInfVal ? 'rgba(239,68,68,0.08)' : 'rgba(28,171,176,0.08)',
-            border: `1px solid ${isErrVal || isInfVal ? 'rgba(239,68,68,0.25)' : 'rgba(28,171,176,0.25)'}`,
-            borderRadius: 8,
-            padding: '0.6rem',
-            textAlign: 'center',
-          }}
-        >
-          <span
-            style={{
-              display: 'block',
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: '1.4rem',
-              fontWeight: 700,
-              color: isErrVal || isInfVal ? '#f87171' : '#1CABB0',
-            }}
-          >
-            {formatValue(value)}
-          </span>
-          <span
-            style={{
-              fontSize: '0.65rem',
-              color: 'rgba(244,244,243,0.35)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}
-          >
-            output
-          </span>
-        </div>
       </div>
     </div>
   )

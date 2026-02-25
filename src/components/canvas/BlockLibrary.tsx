@@ -18,6 +18,12 @@ import {
   type BlockDef,
 } from '../../blocks/registry'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
+import {
+  listTemplates,
+  deleteTemplate as deleteTemplateApi,
+  renameTemplate as renameTemplateApi,
+  type Template,
+} from '../../lib/templates'
 
 export const DRAG_TYPE = 'application/chainsolve-block'
 
@@ -243,6 +249,157 @@ function BlockItem({ def, favs, onToggleFav, entitled, onProBlocked }: BlockItem
   )
 }
 
+// ── TemplateItem ─────────────────────────────────────────────────────────────
+
+interface TemplateItemProps {
+  template: Template
+  onInsert: () => void
+  onRename: (name: string) => void
+  onDelete: () => void
+}
+
+function TemplateItem({ template, onInsert, onRename, onDelete }: TemplateItemProps) {
+  const [hovered, setHovered] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const nodeCount = template.payload.nodes?.length ?? 0
+
+  return (
+    <div
+      style={{
+        ...s.blockItem,
+        background: hovered ? 'rgba(28,171,176,0.12)' : 'transparent',
+        cursor: 'pointer',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => {
+        setHovered(false)
+        setMenuOpen(false)
+      }}
+      onClick={onInsert}
+      title={`Insert "${template.name}" (${nodeCount} nodes)`}
+    >
+      <span
+        style={{
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
+          background: template.color,
+          flexShrink: 0,
+          marginRight: 4,
+        }}
+      />
+      <span
+        style={{
+          flex: 1,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          paddingRight: hovered ? 24 : 0,
+        }}
+      >
+        {template.name}
+      </span>
+      <span
+        style={{
+          fontSize: '0.65rem',
+          color: 'rgba(244,244,243,0.35)',
+          flexShrink: 0,
+        }}
+      >
+        {nodeCount}n
+      </span>
+      {hovered && (
+        <div style={{ position: 'absolute', right: 6 }}>
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'rgba(255,255,255,0.4)',
+              fontSize: '0.85rem',
+              padding: '0 2px',
+              fontFamily: 'inherit',
+              lineHeight: 1,
+            }}
+            title="Template actions"
+            onClick={(e) => {
+              e.stopPropagation()
+              setMenuOpen((p) => !p)
+            }}
+          >
+            ⋯
+          </button>
+          {menuOpen && (
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: '100%',
+                background: '#2c2c2c',
+                border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 6,
+                padding: '0.2rem',
+                zIndex: 100,
+                minWidth: 100,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+              }}
+            >
+              <div
+                style={{
+                  padding: '0.3rem 0.5rem',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  borderRadius: 3,
+                }}
+                role="menuitem"
+                onMouseEnter={(e) => {
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'rgba(28,171,176,0.15)'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const name = window.prompt('Rename template:', template.name)
+                  if (name?.trim()) {
+                    onRename(name.trim())
+                    setMenuOpen(false)
+                  }
+                }}
+              >
+                Rename…
+              </div>
+              <div
+                style={{
+                  padding: '0.3rem 0.5rem',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  borderRadius: 3,
+                  color: '#f87171',
+                }}
+                role="menuitem"
+                onMouseEnter={(e) => {
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'rgba(239,68,68,0.12)'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete()
+                  setMenuOpen(false)
+                }}
+              >
+                Delete
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── BlockLibrary ──────────────────────────────────────────────────────────────
 
 interface BlockLibraryProps {
@@ -250,6 +407,7 @@ interface BlockLibraryProps {
   onResizeStart: (e: React.MouseEvent) => void
   plan?: Plan
   onProBlocked?: () => void
+  onInsertTemplate?: (template: Template) => void
 }
 
 export function BlockLibrary({
@@ -257,6 +415,7 @@ export function BlockLibrary({
   onResizeStart,
   plan = 'free',
   onProBlocked,
+  onInsertTemplate,
 }: BlockLibraryProps) {
   const ent = getEntitlements(plan)
   const [query, setQuery] = useState('')
@@ -264,6 +423,9 @@ export function BlockLibrary({
   const [favs, setFavs] = useState<Set<string>>(getFavs)
   const [recent, setRecent] = useState<string[]>(getRecent)
   const searchRef = useRef<HTMLInputElement>(null)
+  const [templatesOpen, setTemplatesOpen] = useState(false)
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [templatesLoaded, setTemplatesLoaded] = useState(false)
 
   // Refresh recent list when panel is focused (user may have added blocks)
   const refreshRecent = useCallback(() => setRecent(getRecent()), [])
@@ -276,6 +438,22 @@ export function BlockLibrary({
       saveFavs(next)
       return next
     })
+  }, [])
+
+  // Load templates lazily on first expand
+  const loadTemplates = useCallback(() => {
+    if (templatesLoaded) return
+    setTemplatesLoaded(true)
+    listTemplates()
+      .then(setTemplates)
+      .catch(() => setTemplates([]))
+  }, [templatesLoaded])
+
+  /** Refresh the templates list (call after save/delete). */
+  const refreshTemplates = useCallback(() => {
+    listTemplates()
+      .then(setTemplates)
+      .catch(() => setTemplates([]))
   }, [])
 
   // Press "/" anywhere (not in an input) to focus search
@@ -421,6 +599,74 @@ export function BlockLibrary({
             </div>
           )
         })}
+
+        {/* Templates section (Pro only) */}
+        {ent.canUseGroups && (
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '0.3rem' }}>
+            <div
+              style={{
+                ...s.sectionLabel,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                padding: '0.45rem 0.6rem 0.2rem',
+              }}
+              onClick={() => {
+                setTemplatesOpen((p) => !p)
+                loadTemplates()
+              }}
+            >
+              <span style={{ fontSize: '0.55rem', opacity: 0.5 }}>{templatesOpen ? '▼' : '▶'}</span>
+              Templates
+              <span
+                style={{
+                  marginLeft: 4,
+                  fontSize: '0.55rem',
+                  padding: '1px 4px',
+                  borderRadius: 3,
+                  background: 'rgba(28,171,176,0.15)',
+                  color: '#1CABB0',
+                  fontWeight: 700,
+                  letterSpacing: '0.05em',
+                }}
+              >
+                PRO
+              </span>
+            </div>
+            {templatesOpen && (
+              <div style={{ padding: '0.2rem 0' }}>
+                {templates.length === 0 ? (
+                  <div
+                    style={{
+                      padding: '0.5rem 0.6rem',
+                      fontSize: '0.75rem',
+                      color: 'rgba(244,244,243,0.3)',
+                    }}
+                  >
+                    No templates yet.
+                    <br />
+                    <span style={{ fontSize: '0.68rem' }}>Save a group as template.</span>
+                  </div>
+                ) : (
+                  templates.map((t) => (
+                    <TemplateItem
+                      key={t.id}
+                      template={t}
+                      onInsert={() => onInsertTemplate?.(t)}
+                      onRename={(newName) => {
+                        renameTemplateApi(t.id, newName).then(refreshTemplates)
+                      }}
+                      onDelete={() => {
+                        deleteTemplateApi(t.id).then(refreshTemplates)
+                      }}
+                    />
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Resize handle */}

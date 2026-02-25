@@ -22,9 +22,10 @@ import { saveProjectJson, loadProjectJson } from './storage'
  * Current schema version for project.json.
  * V1: scalar-only graph (W1-W4).
  * V2: adds Value type system, data/vector/table blocks (W5).
- * V1 → V2 migration is transparent (no structural change needed).
+ * V3: adds csGroup node type with parentId-based grouping (W7).
+ * V1 → V2 → V3 migrations are transparent (no structural change needed).
  */
-export const SCHEMA_VERSION = 2 as const
+export const SCHEMA_VERSION = 3 as const
 
 // ── Public types ──────────────────────────────────────────────────────────────
 
@@ -45,7 +46,7 @@ export interface ProjectRow {
  * See docs/PROJECT_FORMAT.md for the full versioning contract.
  */
 export interface ProjectJSON {
-  schemaVersion: 1 | 2
+  schemaVersion: 1 | 2 | 3
   /** Monotonically increasing; incremented on every save. */
   formatVersion: number
   createdAt: string
@@ -153,9 +154,9 @@ export async function loadProject(projectId: string): Promise<ProjectJSON> {
   const raw = await loadProjectJson(projectId)
   const pj = raw as Partial<ProjectJSON>
 
-  if (pj.schemaVersion === 1 || pj.schemaVersion === 2) {
-    // V1 → V2: no structural migration needed (V1 nodes are all scalar;
-    // the V2 reader handles them identically).
+  if (pj.schemaVersion === 1 || pj.schemaVersion === 2 || pj.schemaVersion === 3) {
+    // V1 → V2 → V3: no structural migration needed.
+    // V1 nodes are all scalar; V2 adds data/vector/table; V3 adds groups (csGroup + parentId).
     return raw as ProjectJSON
   }
   throw new Error(`Unsupported schemaVersion: ${String(pj.schemaVersion ?? 'missing')}`)
@@ -275,7 +276,7 @@ export async function duplicateProject(sourceId: string, newName: string): Promi
  * Validates schemaVersion and rebinds IDs to a fresh DB row.
  */
 export async function importProject(json: ProjectJSON, overrideName?: string): Promise<ProjectRow> {
-  if (json.schemaVersion !== 1 && json.schemaVersion !== 2) {
+  if (json.schemaVersion !== 1 && json.schemaVersion !== 2 && json.schemaVersion !== 3) {
     throw new Error(`Cannot import: unsupported schemaVersion ${String(json.schemaVersion)}`)
   }
 

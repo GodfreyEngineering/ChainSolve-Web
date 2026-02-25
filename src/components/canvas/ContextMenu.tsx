@@ -9,8 +9,17 @@ import type { CSSProperties } from 'react'
 
 export type ContextMenuTarget =
   | { kind: 'canvas'; x: number; y: number }
-  | { kind: 'node'; x: number; y: number; nodeId: string; isLocked: boolean }
+  | {
+      kind: 'node'
+      x: number
+      y: number
+      nodeId: string
+      isLocked: boolean
+      isGroup?: boolean
+      isCollapsed?: boolean
+    }
   | { kind: 'edge'; x: number; y: number; edgeId: string }
+  | { kind: 'selection'; x: number; y: number; selectedCount: number }
 
 interface ContextMenuProps {
   target: ContextMenuTarget
@@ -23,6 +32,12 @@ interface ContextMenuProps {
   onLockNode: (nodeId: string) => void
   onFitView: () => void
   onAddBlockAtCursor: (x: number, y: number) => void
+  onGroupSelection?: () => void
+  onUngroupNode?: (nodeId: string) => void
+  onToggleCollapse?: (nodeId: string) => void
+  onDeleteSelected?: () => void
+  onSaveAsTemplate?: (nodeId: string) => void
+  canUseGroups?: boolean
 }
 
 const item: CSSProperties = {
@@ -84,6 +99,12 @@ export function ContextMenu({
   onLockNode,
   onFitView,
   onAddBlockAtCursor,
+  onGroupSelection,
+  onUngroupNode,
+  onToggleCollapse,
+  onDeleteSelected,
+  onSaveAsTemplate,
+  canUseGroups,
 }: ContextMenuProps) {
   const menuStyle: CSSProperties = {
     position: 'fixed',
@@ -116,7 +137,7 @@ export function ContextMenu({
         role="menu"
         onKeyDown={(e) => e.key === 'Escape' && onClose()}
       >
-        {target.kind === 'node' && (
+        {target.kind === 'node' && !target.isGroup && (
           <>
             <MenuItem
               icon="⬚"
@@ -158,6 +179,85 @@ export function ContextMenu({
               danger
               onClick={() => {
                 onDeleteNode(target.nodeId)
+                onClose()
+              }}
+            />
+          </>
+        )}
+
+        {target.kind === 'node' && target.isGroup && (
+          <>
+            <MenuItem
+              icon={target.isCollapsed ? '▼' : '▶'}
+              label={target.isCollapsed ? 'Expand' : 'Collapse'}
+              onClick={() => {
+                onToggleCollapse?.(target.nodeId)
+                onClose()
+              }}
+            />
+            <MenuItem
+              icon="✎"
+              label="Rename…"
+              onClick={() => {
+                onRenameNode(target.nodeId)
+                onClose()
+              }}
+            />
+            <MenuItem
+              icon="⬚"
+              label="Inspect"
+              onClick={() => {
+                onInspectNode(target.nodeId)
+                onClose()
+              }}
+            />
+            <MenuItem
+              icon="💾"
+              label="Save as template…"
+              onClick={() => {
+                onSaveAsTemplate?.(target.nodeId)
+                onClose()
+              }}
+            />
+            <div style={sep} />
+            <MenuItem
+              icon="⊟"
+              label="Ungroup"
+              onClick={() => {
+                onUngroupNode?.(target.nodeId)
+                onClose()
+              }}
+            />
+            <div style={sep} />
+            <MenuItem
+              icon="✕"
+              label="Delete group"
+              danger
+              onClick={() => {
+                onDeleteNode(target.nodeId)
+                onClose()
+              }}
+            />
+          </>
+        )}
+
+        {target.kind === 'selection' && (
+          <>
+            <MenuItem
+              icon="▢"
+              label={canUseGroups ? 'Group selection' : '🔒 Group selection'}
+              onClick={() => {
+                onGroupSelection?.()
+                onClose()
+              }}
+            />
+            <div style={sep} />
+            <MenuItem
+              icon="✕"
+              label={`Delete ${target.selectedCount} selected`}
+              danger
+              onClick={() => {
+                onDeleteSelected?.()
                 onClose()
               }}
             />
