@@ -6,8 +6,6 @@
  * Both registry.ts and individual block files import from here.
  */
 
-import type { Value } from '../engine/value'
-
 export type BlockCategory =
   | 'input'
   | 'math'
@@ -114,10 +112,4 @@ export interface BlockDef {
   defaultData: NodeData
   /** True for Pro-only blocks (data, vectorOps, tableOps). */
   proOnly?: boolean
-  /**
-   * Pure evaluation function operating on the polymorphic Value type.
-   * `inputs` is ordered by `inputs[]`; null = port disconnected.
-   * Must never throw — return mkError(...) on any error.
-   */
-  evaluate: (inputs: ReadonlyArray<Value | null>, data: NodeData) => Value
 }

@@ -3,8 +3,11 @@
 ## Overview
 
 W9 introduces a **single compute engine** written in Rust, compiled to WebAssembly,
-and executed in a Web Worker. This replaces the TypeScript evaluation engine with a
-deterministic, high-performance alternative that runs off the main thread.
+and executed in a Web Worker.
+
+**W9.1** made Rust/WASM the **sole evaluation path** — the TypeScript evaluation
+engine (`evaluate.ts`) has been removed. If the WASM engine fails to initialize, the
+app shows a fatal error screen with retry. There is no silent TS fallback.
 
 ### Architecture
 
@@ -32,11 +35,14 @@ passes it to the WASM `evaluate()` function, and deserializes the result.
 
 | File | Purpose |
 |------|---------|
-| `src/engine/index.ts` | Public API: `createEngine()` → `EngineAPI` with `evaluateGraph()` |
-| `src/engine/worker.ts` | Web Worker entry. Loads WASM, handles messages. |
-| `src/engine/wasm-types.ts` | Shared TypeScript types for worker messages + engine I/O. |
+| `src/engine/index.ts` | Public API: `createEngine()` → `EngineAPI` with `evaluateGraph()`, `catalog`, `engineVersion` |
+| `src/engine/worker.ts` | Web Worker entry. Loads WASM, handles messages, sends catalog on ready. |
+| `src/engine/wasm-types.ts` | Shared TypeScript types for worker messages, engine I/O, and `CatalogEntry`. |
 | `src/engine/bridge.ts` | Converts React Flow graph → `EngineSnapshotV1`. |
 | `src/engine/wasm.d.ts` | Type declarations for wasm-pack output. |
+| `src/engine/value.ts` | Value type system + `formatValue()` for display nodes. |
+| `src/contexts/EngineContext.ts` | React context providing `EngineAPI` to components via `useEngine()`. |
+| `src/components/EngineFatalError.tsx` | Full-screen error shown when WASM fails, with retry + reload. |
 
 ## Prerequisites
 
@@ -71,9 +77,10 @@ npm run wasm:build
 npm run dev
 ```
 
-The WASM engine initializes asynchronously on app boot. If the WASM files are
-missing (e.g. you haven't run `wasm:build`), the engine logs a warning and the
-existing TypeScript engine continues to serve the UI. No features break.
+The WASM engine initializes asynchronously on app boot in `main.tsx`. The React
+tree is not rendered until the engine is ready. If initialization fails, a
+full-screen `EngineFatalError` component is shown with retry and reload buttons.
+There is **no TypeScript fallback** — the app requires WASM.
 
 ## Debugging
 
@@ -115,24 +122,39 @@ console.log(result.values.c)  // { kind: 'scalar', value: 30 }
 
 ## Extending operations
 
-To add a new block type to the Rust engine:
+To add a new block type:
 
-1. **Add the case** in `crates/engine-core/src/ops.rs` → `evaluate_node()` match block.
-2. **Add a test** in the same file's `#[cfg(test)]` module.
-3. **Run tests**: `cargo test --workspace`
-4. **Rebuild WASM**: `npm run wasm:build`
-5. No changes needed in the WASM wrapper or TS layer.
+1. **Add the op** in `crates/engine-core/src/ops.rs` → `evaluate_node()` match block.
+2. **Add catalog entry** in `crates/engine-core/src/catalog.rs` → `catalog()` function.
+3. **Add a test** in the ops.rs `#[cfg(test)]` module.
+4. **Run tests**: `cargo test --workspace`
+5. **Rebuild WASM**: `npm run wasm:build`
+6. **Register in TS** in `src/blocks/registry.ts` (or a block-pack file) with `reg()` — metadata only, no evaluate function.
+7. On app boot, `validateCatalog()` will log a warning if the TS registry and Rust catalog are out of sync.
 
 ### Input port conventions
 
 | Block kind | Input ports |
 |-----------|-------------|
-| Unary ops (sin, abs, negate, ...) | `in` |
+| Unary ops (sin, abs, negate, ...) | `a` |
 | Binary ops (add, multiply, ...) | `a`, `b` |
-| Special (clamp) | `in`, `min`, `max` |
-| Special (ifThenElse) | `cond`, `then`, `else` |
-| Display | `in` |
+| Power | `base`, `exp` |
+| Atan2 | `y`, `x` |
+| Clamp | `val`, `min`, `max` |
+| If/Then/Else | `cond`, `then`, `else` |
+| Deg→Rad | `deg` |
+| Rad→Deg | `rad` |
+| Display | `value` |
 | Sources (number, slider, constants) | none (read from `data`) |
+| Data (vectorInput, tableInput, csvImport) | none (read from `data`) |
+| Vector ops (length, sum, mean, ...) | `vec` |
+| Vector ops (slice) | `vec`, `start`, `end` |
+| Vector ops (concat) | `a`, `b` |
+| Vector ops (map/scalar multiply) | `vec`, `scalar` |
+| Table ops (filter, sort, column) | `table`, `col`, optional `threshold` |
+| Table ops (addColumn) | `table`, `vec` |
+| Table ops (join) | `a`, `b` |
+| Plot blocks | `data` |
 
 ## EngineSnapshotV1 schema
 
@@ -177,15 +199,54 @@ interface Diagnostic {
 }
 ```
 
-## Migration plan (TS engine removal)
+## Ops Catalog (W9.1)
 
-The TypeScript engine (`src/engine/evaluate.ts`) remains active during W9.
-Once all block types have Rust implementations and golden tests confirm parity:
+The Rust engine exports a canonical **ops catalog** — the single source of truth for
+all block metadata. The catalog is returned in the worker handshake `ready` message
+and available at `engine.catalog` and `window.__chainsolve_engine.catalog`.
 
-1. Wire `CanvasArea` to call `evaluateGraph()` via the WASM engine API
-2. Remove `src/engine/evaluate.ts` and `wrapScalarEvaluate()` adapter
-3. Remove block `evaluate` functions from the registry (keep metadata only)
-4. Delete the bridge compatibility layer
-5. Update `ComputedContext` to consume WASM results directly
+Each `CatalogEntry` contains: `opId`, `label`, `category`, `nodeKind`, `inputs[]`
+(port id + label), and `proOnly` flag.
 
-This is tracked in W10+.
+On boot, `validateCatalog()` in `src/blocks/registry.ts` cross-checks the TS
+registry against the Rust catalog and logs warnings for any drift.
+
+```javascript
+// DevTools console:
+window.__chainsolve_engine.catalog       // array of 57+ entries
+window.__chainsolve_engine.engineVersion // e.g. "0.1.0"
+```
+
+## Worker handshake protocol
+
+1. Main thread creates worker → worker loads WASM via `initWasm()`
+2. Worker sends `{ type: 'ready', catalog: CatalogEntry[], engineVersion: string }`
+3. Main thread resolves `createEngine()` promise and provides `EngineAPI`
+4. If init fails, worker sends `{ type: 'init-error', error: { code, message } }`
+5. Main thread shows `EngineFatalError` screen with retry button
+
+## portOverrides / manualValues
+
+The Rust engine supports the same manual-value system as the former TS engine:
+
+- `data.manualValues: Record<string, number>` — per-port manual scalar values
+- `data.portOverrides: Record<string, boolean>` — when `true`, use manual value even if port is connected
+
+This allows users to set manual input values on disconnected ports and override
+connected port values via the Inspector panel.
+
+## W9.1 changes (TS engine removal)
+
+Completed in W9.1:
+
+- Removed `src/engine/evaluate.ts` (TS evaluation engine)
+- Removed `evaluate` field from `BlockDef` interface
+- Removed `wrapScalarEvaluate()` adapter from registry
+- Block definitions in registry are metadata-only (no evaluate functions)
+- `CanvasArea.tsx` evaluates via async `engine.evaluateGraph()` + `useEffect`
+- `main.tsx` gates entire React tree on engine readiness via `EngineContext`
+- Fatal error screen (`EngineFatalError.tsx`) shown if WASM init fails
+- All `formatValue` imports point to `engine/value.ts` directly
+- Added 22 missing block implementations (data, vector, table, plot)
+- Fixed all port name mismatches between Rust and TS
+- Added portOverrides/manualValues support to Rust evaluator

@@ -1,6 +1,6 @@
 # ChainSolve — Architecture
 
-> Updated at each milestone. Current: **W9 (Rust/WASM Compute Engine)**
+> Updated at each milestone. Current: **W9.1 (Single Source of Truth Engine)**
 
 ---
 
@@ -252,23 +252,31 @@ Existing scalar blocks use the `wrapScalarEvaluate()` adapter — their registra
 
 ### Block registration pattern (W5.2)
 
-Block types are defined in `src/blocks/types.ts` to avoid circular imports. Block packs (data-blocks, vector-blocks, table-blocks) export registration functions instead of importing `regValue` from registry:
+Block types are defined in `src/blocks/types.ts` to avoid circular imports. Block packs (data-blocks, vector-blocks, table-blocks, plot-blocks) export registration functions instead of importing `reg` from registry:
 
 ```
 types.ts ← registry.ts (imports types, re-exports for backward compat)
-types.ts ← data-blocks.ts (imports BlockDef, NodeData)
-data-blocks.ts ← registry.ts (imports registerDataBlocks, calls with regValue)
+types.ts ← data-blocks.ts (imports BlockDef)
+data-blocks.ts ← registry.ts (imports registerDataBlocks, calls with reg)
 ```
+
+Since W9.1, block definitions are **metadata only** — no `evaluate` functions. All
+evaluation is handled by the Rust/WASM engine.
 
 This eliminates the `registry → pack → registry` cycle that caused TDZ crashes (`ReferenceError: can't access lexical declaration before initialization`).
 
-### Evaluation (src/engine/evaluate.ts)
+### Evaluation (Rust/WASM — sole engine since W9.1)
 
-1. Build in-edge map from `edges[]`
-2. Kahn's topological sort (detects cycles → cycle nodes get `mkError(...)`)
-3. Evaluate nodes in order: source nodes return configured value; operation nodes call `def.evaluate(inputs, data)`
-4. Disconnected input ports → `null` → scalar operations emit `NaN`, Value operations emit `mkError(...)`
-5. Returns `Map<nodeId, Value>`
+All evaluation runs in the Rust/WASM engine via Web Worker. The TS evaluation
+engine (`evaluate.ts`) was removed in W9.1.
+
+1. `CanvasArea.tsx` converts React Flow graph → `EngineSnapshotV1` via `bridge.ts`
+2. `engine.evaluateGraph(snapshot)` sends to Web Worker → Rust `evaluate()` via wasm-bindgen
+3. Rust: Kahn's topo sort → evaluate nodes in order → returns `{values, diagnostics, elapsedUs}`
+4. Result `Map<nodeId, Value>` provided to React tree via `ComputedContext`
+
+Block definitions in `src/blocks/registry.ts` are metadata-only (no evaluate functions).
+See `docs/W9_ENGINE.md` for full engine documentation.
 
 ### React Flow node types
 
@@ -381,6 +389,7 @@ UI gating:
 | W7 | ✅ Done | Block groups + templates: csGroup node, collapse/expand, proxy handles, templates (Supabase), Pro gating |
 | W8 | Done | Security perimeter: CORS middleware, CSP reporting, security headers |
 | W9 | Done | Rust/WASM compute engine foundation: engine-core, engine-wasm, Worker integration, e2e |
+| W9.1 | Done | Single source of truth: WASM sole engine, TS eval removed, ops catalog, fatal error screen |
 | W10 | Planned | Branching/rules for conditional flows (Pro) |
 | W11 | Planned | Custom blocks editor (Pro) |
 | W12 | Planned | Project/file browser with folders, search, tags |

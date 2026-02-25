@@ -9,7 +9,7 @@
 import { memo, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Handle, Position, useEdges, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
-import { formatValue } from '../../../engine/evaluate'
+import { formatValue } from '../../../engine/value'
 import type { Value } from '../../../engine/value'
 import type { NodeData, PlotConfig } from '../../../blocks/types'
 import { NODE_STYLES as s } from './nodeStyles'

@@ -53,15 +53,25 @@ export interface EngineErrorResult {
   error: { code: string; message: string }
 }
 
+// ── Ops catalog (from Rust) ───────────────────────────────────────
+
+export interface CatalogEntry {
+  opId: string
+  label: string
+  category: string
+  nodeKind: string
+  inputs: { id: string; label: string }[]
+  proOnly: boolean
+}
+
 // ── Worker messages ───────────────────────────────────────────────
 
 /** Messages sent from main thread → worker. */
-export type WorkerRequest =
-  | { type: 'evaluate'; requestId: number; snapshot: EngineSnapshotV1 }
+export type WorkerRequest = { type: 'evaluate'; requestId: number; snapshot: EngineSnapshotV1 }
 
 /** Messages sent from worker → main thread. */
 export type WorkerResponse =
-  | { type: 'ready' }
+  | { type: 'ready'; catalog: CatalogEntry[]; engineVersion: string }
   | { type: 'result'; requestId: number; result: EngineEvalResult }
   | { type: 'error'; requestId: number; error: { code: string; message: string } }
   | { type: 'init-error'; error: { code: string; message: string } }

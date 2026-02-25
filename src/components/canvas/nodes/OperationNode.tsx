@@ -18,7 +18,7 @@ import {
   type IsValidConnection,
 } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
-import { formatValue } from '../../../engine/evaluate'
+import { formatValue } from '../../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
 import { NODE_STYLES as s } from './nodeStyles'
 

@@ -8,19 +8,19 @@ declare module '@engine-wasm/engine_wasm.js' {
    */
   export function evaluate(snapshot_json: string): string
 
+  /** Return the ops catalog as a JSON array. */
+  export function get_catalog(): string
+
+  /** Return the engine version string. */
+  export function get_engine_version(): string
+
   /**
    * Initialize the WASM module.
    * Must be called before any other exported function.
    * @param input - URL, Response, BufferSource, or WebAssembly.Module for the .wasm file
    */
   export default function init(
-    input?:
-      | string
-      | URL
-      | Request
-      | Response
-      | BufferSource
-      | WebAssembly.Module,
+    input?: string | URL | Request | Response | BufferSource | WebAssembly.Module,
   ): Promise<void>
 }
 

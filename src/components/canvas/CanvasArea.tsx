@@ -13,7 +13,6 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   forwardRef,
@@ -50,7 +49,9 @@ import { Inspector } from './Inspector'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
 import { QuickAddPalette } from './QuickAddPalette'
 import { ComputedContext } from '../../contexts/ComputedContext'
-import { evaluateGraph } from '../../engine/evaluate'
+import { useEngine } from '../../contexts/EngineContext'
+import { toEngineSnapshot } from '../../engine/bridge'
+import type { Value } from '../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 import { UpgradeModal } from '../UpgradeModal'
@@ -234,8 +235,23 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const canvasWrapRef = useRef<HTMLDivElement>(null)
   const { screenToFlowPosition, fitView } = useReactFlow()
 
-  // ── Computed values ─────────────────────────────────────────────────────────
-  const computed = useMemo(() => evaluateGraph(nodes, edges), [nodes, edges])
+  // ── Computed values (async via WASM engine) ────────────────────────────────
+  const engine = useEngine()
+  const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
+
+  useEffect(() => {
+    let cancelled = false
+    const snapshot = toEngineSnapshot(nodes, edges)
+    engine.evaluateGraph(snapshot).then((result) => {
+      if (cancelled) return
+      const map = new Map<string, Value>()
+      for (const [id, val] of Object.entries(result.values)) map.set(id, val as Value)
+      setComputed(map)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [engine, nodes, edges])
 
   // ── Connection validation: 1 edge per input handle ──────────────────────────
   const isValidConnection = useCallback<IsValidConnection>(

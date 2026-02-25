@@ -9,7 +9,7 @@
  *  5. Returns { type: 'result', requestId, result } or { type: 'error', ... }
  */
 
-import initWasm, { evaluate } from '@engine-wasm/engine_wasm.js'
+import initWasm, { evaluate, get_catalog, get_engine_version } from '@engine-wasm/engine_wasm.js'
 import wasmUrl from '@engine-wasm/engine_wasm_bg.wasm?url'
 import type {
   WorkerRequest,
@@ -25,7 +25,9 @@ function post(msg: WorkerResponse) {
 async function initialize() {
   try {
     await initWasm(wasmUrl)
-    post({ type: 'ready' })
+    const catalog = JSON.parse(get_catalog())
+    const engineVersion = get_engine_version()
+    post({ type: 'ready', catalog, engineVersion })
   } catch (err) {
     post({
       type: 'init-error',

@@ -104,6 +104,26 @@ pub fn evaluate(snapshot: &EngineSnapshotV1) -> EvalResult {
             }
         }
 
+        // Apply portOverrides / manualValues from node.data.
+        // If a port has no edge value and a manual value exists, use it.
+        // If a port has an edge value but override is true, use manual value.
+        let overrides = node.data.get("portOverrides").and_then(|v| v.as_object());
+        let manuals = node.data.get("manualValues").and_then(|v| v.as_object());
+
+        if let Some(manuals) = manuals {
+            for (port_id, val) in manuals {
+                if let Some(n) = val.as_f64() {
+                    let is_overridden = overrides
+                        .and_then(|o| o.get(port_id))
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false);
+                    if !node_inputs.contains_key(port_id) || is_overridden {
+                        node_inputs.insert(port_id.clone(), Value::scalar(n));
+                    }
+                }
+            }
+        }
+
         let result = evaluate_node(&node.block_type, &node_inputs, &node.data);
 
         // Report unknown blocks.
@@ -221,6 +241,64 @@ mod tests {
     }
 
     #[test]
+    fn manual_value_on_disconnected_port() {
+        let mut data = HashMap::new();
+        data.insert("manualValues".to_string(), serde_json::json!({"a": 5.0, "b": 3.0}));
+        let snap = EngineSnapshotV1 {
+            version: 1,
+            nodes: vec![
+                NodeDef { id: "n1".into(), block_type: "add".into(), data },
+            ],
+            edges: vec![],
+        };
+        let result = evaluate(&snap);
+        assert_eq!(result.values.get("n1").unwrap().as_scalar(), Some(8.0));
+    }
+
+    #[test]
+    fn override_connected_port() {
+        // n1(10) --a--> add, but override a=99
+        let mut add_data = HashMap::new();
+        add_data.insert("portOverrides".to_string(), serde_json::json!({"a": true}));
+        add_data.insert("manualValues".to_string(), serde_json::json!({"a": 99.0}));
+        let snap = EngineSnapshotV1 {
+            version: 1,
+            nodes: vec![
+                num_node("n1", 10.0),
+                NodeDef { id: "add".into(), block_type: "add".into(), data: add_data },
+            ],
+            edges: vec![
+                edge("e1", "n1", "out", "add", "a"),
+            ],
+        };
+        let result = evaluate(&snap);
+        // a is overridden to 99, b is NaN → result is NaN
+        assert!(result.values.get("add").unwrap().as_scalar().unwrap().is_nan());
+    }
+
+    #[test]
+    fn no_override_keeps_edge_value() {
+        let mut add_data = HashMap::new();
+        add_data.insert("manualValues".to_string(), serde_json::json!({"a": 99.0}));
+        // portOverrides not set or false → edge value used
+        let snap = EngineSnapshotV1 {
+            version: 1,
+            nodes: vec![
+                num_node("n1", 10.0),
+                num_node("n2", 20.0),
+                NodeDef { id: "add".into(), block_type: "add".into(), data: add_data },
+            ],
+            edges: vec![
+                edge("e1", "n1", "out", "add", "a"),
+                edge("e2", "n2", "out", "add", "b"),
+            ],
+        };
+        let result = evaluate(&snap);
+        // Edge value 10 used for a (not manual 99), b=20 → 30
+        assert_eq!(result.values.get("add").unwrap().as_scalar(), Some(30.0));
+    }
+
+    #[test]
     fn unknown_block_produces_warning() {
         let snap = EngineSnapshotV1 {
             version: 1,
@@ -243,7 +321,7 @@ mod tests {
                 op_node("d", "display"),
             ],
             edges: vec![
-                edge("e1", "n1", "out", "d", "in"),
+                edge("e1", "n1", "out", "d", "value"),
             ],
         };
 

@@ -13,14 +13,19 @@
 import type {
   EngineSnapshotV1,
   EngineEvalResult,
+  CatalogEntry,
   WorkerResponse,
 } from './wasm-types.ts'
 
-export type { EngineSnapshotV1, EngineEvalResult } from './wasm-types.ts'
+export type { EngineSnapshotV1, EngineEvalResult, CatalogEntry } from './wasm-types.ts'
 
 export interface EngineAPI {
   /** Evaluate a graph snapshot via Rust/WASM (async, off-main-thread). */
   evaluateGraph(snapshot: EngineSnapshotV1): Promise<EngineEvalResult>
+  /** Ops catalog received from the WASM engine on startup. */
+  readonly catalog: CatalogEntry[]
+  /** Engine version string from Rust crate. */
+  readonly engineVersion: string
   /** Terminate the worker. After this call, the engine cannot be used. */
   dispose(): void
 }
@@ -32,12 +37,11 @@ export interface EngineAPI {
  * Rejects if WASM fails to initialize.
  */
 export async function createEngine(): Promise<EngineAPI> {
-  const worker = new Worker(
-    new URL('./worker.ts', import.meta.url),
-    { type: 'module' },
-  )
+  const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' })
 
   // Wait for the worker to signal readiness.
+  let catalog: CatalogEntry[] = []
+  let engineVersion = ''
   await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
       cleanup()
@@ -46,6 +50,8 @@ export async function createEngine(): Promise<EngineAPI> {
 
     function handler(e: MessageEvent<WorkerResponse>) {
       if (e.data.type === 'ready') {
+        catalog = e.data.catalog
+        engineVersion = e.data.engineVersion
         cleanup()
         resolve()
       } else if (e.data.type === 'init-error') {
@@ -92,6 +98,9 @@ export async function createEngine(): Promise<EngineAPI> {
         worker.postMessage({ type: 'evaluate', requestId: id, snapshot })
       })
     },
+
+    catalog,
+    engineVersion,
 
     dispose() {
       worker.terminate()

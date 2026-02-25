@@ -2,15 +2,13 @@
  * data-blocks.ts — Data input blocks (Pro only).
  *
  * VectorInput, TableInput, CSVImport — all use the csData node kind.
+ * Evaluation is handled by the Rust/WASM engine (W9.1).
  * Exports a registration function called by registry.ts (no circular imports).
  */
 
-import type { BlockDef, NodeData } from './types'
-import { mkVector, mkTable, mkError } from '../engine/value'
+import type { BlockDef } from './types'
 
 export function registerDataBlocks(register: (def: BlockDef) => void): void {
-  // ── Vector Input ──────────────────────────────────────────────────────────
-
   register({
     type: 'vectorInput',
     label: 'Vector Input',
@@ -23,10 +21,7 @@ export function registerDataBlocks(register: (def: BlockDef) => void): void {
       label: 'Vector',
       vectorData: [],
     },
-    evaluate: (_inputs, data) => mkVector((data.vectorData as number[] | undefined) ?? []),
   })
-
-  // ── Table Input ───────────────────────────────────────────────────────────
 
   register({
     type: 'tableInput',
@@ -40,13 +35,7 @@ export function registerDataBlocks(register: (def: BlockDef) => void): void {
       label: 'Table',
       tableData: { columns: ['A'], rows: [] },
     },
-    evaluate: (_inputs, data) => {
-      const td = data.tableData as { columns: string[]; rows: number[][] } | undefined
-      return td ? mkTable(td.columns, td.rows) : mkTable(['A'], [])
-    },
   })
-
-  // ── CSV Import ────────────────────────────────────────────────────────────
 
   register({
     type: 'csvImport',
@@ -58,10 +47,6 @@ export function registerDataBlocks(register: (def: BlockDef) => void): void {
     defaultData: {
       blockType: 'csvImport',
       label: 'CSV Import',
-    },
-    evaluate: (_inputs, data: NodeData) => {
-      const td = data.tableData as { columns: string[]; rows: number[][] } | undefined
-      return td ? mkTable(td.columns, td.rows) : mkError('No CSV loaded')
     },
   })
 }

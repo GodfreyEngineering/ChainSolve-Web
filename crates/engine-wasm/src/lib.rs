@@ -27,3 +27,15 @@ pub fn evaluate(snapshot_json: &str) -> String {
         }
     }
 }
+
+/// Return the ops catalog as a JSON array of CatalogEntry objects.
+#[wasm_bindgen]
+pub fn get_catalog() -> String {
+    engine_core::catalog::catalog_json()
+}
+
+/// Return the engine version string.
+#[wasm_bindgen]
+pub fn get_engine_version() -> String {
+    engine_core::catalog::engine_version().to_string()
+}

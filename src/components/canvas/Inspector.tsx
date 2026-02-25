@@ -9,7 +9,7 @@
 import { useEffect } from 'react'
 import { useNodes, useEdges, useReactFlow } from '@xyflow/react'
 import { useComputed } from '../../contexts/ComputedContext'
-import { formatValue } from '../../engine/evaluate'
+import { formatValue } from '../../engine/value'
 import { isError, isScalar } from '../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 import type { PlotConfig } from '../../blocks/types'

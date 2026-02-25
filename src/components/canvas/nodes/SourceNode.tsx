@@ -9,7 +9,7 @@
 import { memo, useCallback } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
-import { formatValue } from '../../../engine/evaluate'
+import { formatValue } from '../../../engine/value'
 import type { NodeData } from '../../../blocks/registry'
 import { NODE_STYLES as s } from './nodeStyles'
 

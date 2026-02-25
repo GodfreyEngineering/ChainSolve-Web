@@ -17,10 +17,7 @@ import type { EngineSnapshotV1 } from './wasm-types.ts'
  * they are purely visual containers and do not participate in
  * evaluation.
  */
-export function toEngineSnapshot(
-  nodes: Node[],
-  edges: Edge[],
-): EngineSnapshotV1 {
+export function toEngineSnapshot(nodes: Node[], edges: Edge[]): EngineSnapshotV1 {
   const evalNodes = nodes.filter(
     (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
   )

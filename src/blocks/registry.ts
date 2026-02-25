@@ -1,11 +1,9 @@
 /**
  * Block registry — defines every block type available on the canvas.
- * Each entry describes its category, React Flow node type, input ports,
- * and a pure evaluate function that operates on the polymorphic Value type.
  *
- * Existing scalar blocks use the legacy `reg()` helper which auto-wraps
- * their `(number|null)[] → number` function via `wrapScalarEvaluate()`.
- * New Value-aware blocks use `regValue()` directly.
+ * Each entry describes its category, React Flow node type, input ports,
+ * and default data. Evaluation is handled exclusively by the Rust/WASM
+ * engine (W9.1). This registry provides only UI metadata.
  *
  * Types are defined in ./types.ts and re-exported here for backward
  * compatibility with existing import paths.
@@ -13,8 +11,8 @@
  * NodeData must extend Record<string, unknown> for @xyflow/react.
  */
 
-import { type Value, mkScalar, mkError, extractScalar } from '../engine/value'
-import type { BlockCategory, NodeKind, NodeData, BlockDef } from './types'
+import type { BlockCategory, NodeKind, BlockDef } from './types'
+import type { CatalogEntry } from '../engine/wasm-types'
 
 // Re-export types so existing `import { ... } from '../../blocks/registry'` still works.
 export type { BlockCategory, NodeKind, PortDef, NodeData, BlockDef } from './types'
@@ -23,39 +21,16 @@ export type { BlockCategory, NodeKind, PortDef, NodeData, BlockDef } from './typ
 
 export const BLOCK_REGISTRY = new Map<string, BlockDef>()
 
-/**
- * Wraps a legacy scalar evaluate function into the Value-based signature.
- * Non-scalar inputs are treated as null (→ NaN in the original function).
- */
-function wrapScalarEvaluate(
-  fn: (inputs: ReadonlyArray<number | null>, data: NodeData) => number,
-): (inputs: ReadonlyArray<Value | null>, data: NodeData) => Value {
-  return (inputs, data) => {
-    const scalarInputs = inputs.map(extractScalar)
-    const result = fn(scalarInputs, data)
-    if (isNaN(result)) return mkError('NaN')
-    return mkScalar(result)
-  }
-}
-
-/** Register a legacy scalar block — its evaluate is auto-wrapped. */
+/** Register a block definition (metadata only, no evaluate). */
 function reg(def: {
   type: string
   label: string
   category: BlockCategory
   nodeKind: NodeKind
   inputs: { id: string; label: string }[]
-  defaultData: NodeData
-  evaluate: (inputs: ReadonlyArray<number | null>, data: NodeData) => number
+  defaultData: BlockDef['defaultData']
+  proOnly?: boolean
 }): void {
-  BLOCK_REGISTRY.set(def.type, {
-    ...def,
-    evaluate: wrapScalarEvaluate(def.evaluate),
-  })
-}
-
-/** Register a Value-aware block directly (no wrapping). */
-function regValue(def: BlockDef): void {
   BLOCK_REGISTRY.set(def.type, def)
 }
 
@@ -68,7 +43,6 @@ reg({
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'number', label: 'Number', value: 0 },
-  evaluate: (_inputs, data) => data.value ?? 0,
 })
 
 reg({
@@ -78,7 +52,6 @@ reg({
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'slider', label: 'Slider', value: 0, min: 0, max: 100, step: 1 },
-  evaluate: (_inputs, data) => data.value ?? 0,
 })
 
 // ── Constants category ────────────────────────────────────────────────────────
@@ -90,7 +63,6 @@ reg({
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'pi', label: 'π' },
-  evaluate: () => Math.PI,
 })
 
 reg({
@@ -100,7 +72,6 @@ reg({
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'euler', label: 'e' },
-  evaluate: () => Math.E,
 })
 
 reg({
@@ -110,7 +81,6 @@ reg({
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'tau', label: 'τ' },
-  evaluate: () => 2 * Math.PI,
 })
 
 reg({
@@ -120,7 +90,6 @@ reg({
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'phi', label: 'φ' },
-  evaluate: () => (1 + Math.sqrt(5)) / 2,
 })
 
 // ── Math category ─────────────────────────────────────────────────────────────
@@ -135,7 +104,6 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'add', label: 'Add' },
-  evaluate: ([a, b]) => (a === null || b === null ? NaN : a + b),
 })
 
 reg({
@@ -148,7 +116,6 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'subtract', label: 'Subtract' },
-  evaluate: ([a, b]) => (a === null || b === null ? NaN : a - b),
 })
 
 reg({
@@ -161,7 +128,6 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'multiply', label: 'Multiply' },
-  evaluate: ([a, b]) => (a === null || b === null ? NaN : a * b),
 })
 
 reg({
@@ -174,7 +140,6 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'divide', label: 'Divide' },
-  evaluate: ([a, b]) => (a === null || b === null ? NaN : b === 0 ? Infinity : a / b),
 })
 
 reg({
@@ -184,7 +149,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'negate', label: 'Negate' },
-  evaluate: ([a]) => (a === null ? NaN : -a),
 })
 
 reg({
@@ -194,7 +158,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'abs', label: 'Abs' },
-  evaluate: ([a]) => (a === null ? NaN : Math.abs(a)),
 })
 
 reg({
@@ -204,7 +167,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'sqrt', label: 'Sqrt' },
-  evaluate: ([a]) => (a === null ? NaN : Math.sqrt(a)),
 })
 
 reg({
@@ -217,7 +179,6 @@ reg({
     { id: 'exp', label: 'Exp' },
   ],
   defaultData: { blockType: 'power', label: 'Power' },
-  evaluate: ([base, exp]) => (base === null || exp === null ? NaN : Math.pow(base, exp)),
 })
 
 reg({
@@ -227,7 +188,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'floor', label: 'Floor' },
-  evaluate: ([a]) => (a === null ? NaN : Math.floor(a)),
 })
 
 reg({
@@ -237,7 +197,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'ceil', label: 'Ceil' },
-  evaluate: ([a]) => (a === null ? NaN : Math.ceil(a)),
 })
 
 reg({
@@ -247,7 +206,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'round', label: 'Round' },
-  evaluate: ([a]) => (a === null ? NaN : Math.round(a)),
 })
 
 reg({
@@ -260,7 +218,6 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'mod', label: 'Mod' },
-  evaluate: ([a, b]) => (a === null || b === null ? NaN : b === 0 ? NaN : a % b),
 })
 
 reg({
@@ -274,8 +231,6 @@ reg({
     { id: 'max', label: 'Max' },
   ],
   defaultData: { blockType: 'clamp', label: 'Clamp' },
-  evaluate: ([val, min, max]) =>
-    val === null || min === null || max === null ? NaN : Math.min(Math.max(val, min), max),
 })
 
 // ── Trig category ─────────────────────────────────────────────────────────────
@@ -287,7 +242,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'θ (rad)' }],
   defaultData: { blockType: 'sin', label: 'Sin' },
-  evaluate: ([a]) => (a === null ? NaN : Math.sin(a)),
 })
 
 reg({
@@ -297,7 +251,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'θ (rad)' }],
   defaultData: { blockType: 'cos', label: 'Cos' },
-  evaluate: ([a]) => (a === null ? NaN : Math.cos(a)),
 })
 
 reg({
@@ -307,7 +260,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'θ (rad)' }],
   defaultData: { blockType: 'tan', label: 'Tan' },
-  evaluate: ([a]) => (a === null ? NaN : Math.tan(a)),
 })
 
 reg({
@@ -317,7 +269,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'asin', label: 'Asin' },
-  evaluate: ([a]) => (a === null ? NaN : Math.asin(a)),
 })
 
 reg({
@@ -327,7 +278,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'acos', label: 'Acos' },
-  evaluate: ([a]) => (a === null ? NaN : Math.acos(a)),
 })
 
 reg({
@@ -337,7 +287,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'atan', label: 'Atan' },
-  evaluate: ([a]) => (a === null ? NaN : Math.atan(a)),
 })
 
 reg({
@@ -350,7 +299,6 @@ reg({
     { id: 'x', label: 'X' },
   ],
   defaultData: { blockType: 'atan2', label: 'Atan2' },
-  evaluate: ([y, x]) => (y === null || x === null ? NaN : Math.atan2(y, x)),
 })
 
 reg({
@@ -360,7 +308,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'deg', label: '°' }],
   defaultData: { blockType: 'degToRad', label: 'Deg→Rad' },
-  evaluate: ([deg]) => (deg === null ? NaN : (deg * Math.PI) / 180),
 })
 
 reg({
@@ -370,7 +317,6 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'rad', label: 'rad' }],
   defaultData: { blockType: 'radToDeg', label: 'Rad→Deg' },
-  evaluate: ([rad]) => (rad === null ? NaN : (rad * 180) / Math.PI),
 })
 
 // ── Logic category ────────────────────────────────────────────────────────────
@@ -385,7 +331,6 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'greater', label: 'A > B' },
-  evaluate: ([a, b]) => (a === null || b === null ? NaN : a > b ? 1 : 0),
 })
 
 reg({
@@ -398,7 +343,6 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'less', label: 'A < B' },
-  evaluate: ([a, b]) => (a === null || b === null ? NaN : a < b ? 1 : 0),
 })
 
 reg({
@@ -411,7 +355,6 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'equal', label: 'A = B' },
-  evaluate: ([a, b]) => (a === null || b === null ? NaN : Math.abs(a - b) < 1e-10 ? 1 : 0),
 })
 
 reg({
@@ -425,8 +368,6 @@ reg({
     { id: 'else', label: 'Else' },
   ],
   defaultData: { blockType: 'ifthenelse', label: 'If/Then/Else' },
-  evaluate: ([cond, then_, else_]) =>
-    cond === null || then_ === null || else_ === null ? NaN : cond !== 0 ? then_ : else_,
 })
 
 reg({
@@ -439,7 +380,6 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'max', label: 'Max' },
-  evaluate: ([a, b]) => (a === null || b === null ? NaN : Math.max(a, b)),
 })
 
 reg({
@@ -452,7 +392,6 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'min', label: 'Min' },
-  evaluate: ([a, b]) => (a === null || b === null ? NaN : Math.min(a, b)),
 })
 
 // ── Output category ───────────────────────────────────────────────────────────
@@ -464,7 +403,6 @@ reg({
   nodeKind: 'csDisplay',
   inputs: [{ id: 'value', label: 'Value' }],
   defaultData: { blockType: 'display', label: 'Display' },
-  evaluate: ([v]) => (v === null ? NaN : v),
 })
 
 // ── Block palette (ordered for display) ──────────────────────────────────────
@@ -496,14 +434,37 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
 }
 
 // ── Pro-only block registration (no circular imports) ────────────────────────
-// Block packs export registration functions instead of importing regValue.
+// Block packs export registration functions instead of importing reg.
 
 import { registerDataBlocks } from './data-blocks'
 import { registerVectorBlocks } from './vector-blocks'
 import { registerTableBlocks } from './table-blocks'
 import { registerPlotBlocks } from './plot-blocks'
 
-registerDataBlocks(regValue)
-registerVectorBlocks(regValue)
-registerTableBlocks(regValue)
-registerPlotBlocks(regValue)
+registerDataBlocks(reg)
+registerVectorBlocks(reg)
+registerTableBlocks(reg)
+registerPlotBlocks(reg)
+
+// ── Catalog validation (called after WASM engine boots) ──────────────────────
+
+/**
+ * Validate that the TS registry matches the Rust catalog.
+ * Logs warnings for any mismatches. Does not replace entries —
+ * TS keeps defaultData (Rust doesn't carry UI defaults).
+ */
+export function validateCatalog(catalog: CatalogEntry[]): void {
+  for (const entry of catalog) {
+    const def = BLOCK_REGISTRY.get(entry.opId)
+    if (!def) {
+      console.warn(`[registry] Catalog op "${entry.opId}" has no TS default — UI may not render it`)
+    }
+  }
+  for (const [type] of BLOCK_REGISTRY) {
+    if (!catalog.some((e) => e.opId === type)) {
+      console.warn(
+        `[registry] TS block "${type}" is not in the Rust catalog — engine won't evaluate it`,
+      )
+    }
+  }
+}
