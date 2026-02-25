@@ -73,7 +73,7 @@ export async function saveProjectJson(projectId: string, projectJson: unknown): 
     .from('projects')
     .update({ storage_key: key })
     .eq('id', projectId)
-    .eq('user_id', userId)
+    .eq('owner_id', userId)  // projects table uses owner_id, not user_id
 
   if (dbErr) throw new Error(`DB update (storage_key) failed: ${dbErr.message}`)
 }

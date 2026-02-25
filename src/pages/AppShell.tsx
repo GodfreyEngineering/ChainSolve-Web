@@ -169,13 +169,25 @@ export default function AppShell() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('Not authenticated')
+
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
-      if (!res.ok) throw new Error(await res.text())
-      const { url } = await res.json() as { url: string }
-      window.location.href = url
+
+      // Always parse JSON — functions return { ok, url|error } in all cases.
+      let json: Record<string, unknown>
+      try {
+        json = await res.json() as Record<string, unknown>
+      } catch {
+        throw new Error(`Server returned a non-JSON response (HTTP ${res.status})`)
+      }
+
+      if (!res.ok) {
+        throw new Error(typeof json.error === 'string' ? json.error : `HTTP ${res.status}`)
+      }
+      if (typeof json.url !== 'string') throw new Error('No redirect URL returned by server')
+      window.location.assign(json.url)
     } catch (err: unknown) {
       setBillingError(err instanceof Error ? err.message : 'Billing request failed')
       setBillingLoading(false)
@@ -201,7 +213,7 @@ export default function AppShell() {
 
       const { data, error: projErr } = await supabase
         .from('projects')
-        .insert({ user_id: userId, name: projectName })
+        .insert({ owner_id: userId, name: projectName })
         .select('id,name')
         .single()
 

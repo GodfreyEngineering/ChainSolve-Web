@@ -56,7 +56,7 @@ function SourceNodeInner({ id, data, selected }: NodeProps) {
           <input
             type="range"
             className="nodrag"
-            style={{ width: '100%', accentColor: '#646cff' }}
+            style={{ width: '100%', accentColor: 'var(--primary)' }}
             min={nd.min ?? 0}
             max={nd.max ?? 100}
             step={nd.step ?? 1}

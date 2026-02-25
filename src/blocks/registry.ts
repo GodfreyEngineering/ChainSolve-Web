@@ -27,6 +27,16 @@ export interface NodeData extends Record<string, unknown> {
   min?: number
   max?: number
   step?: number
+  /**
+   * Per-port manual values for operation nodes.
+   * portId → number. Used when port is disconnected or portOverrides[portId]=true.
+   */
+  manualValues?: Record<string, number>
+  /**
+   * Per-port override flags. When true for a connected port, manualValues[portId]
+   * is used instead of the upstream computed value.
+   */
+  portOverrides?: Record<string, boolean>
 }
 
 export interface BlockDef {

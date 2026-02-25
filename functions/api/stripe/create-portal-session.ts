@@ -1,54 +1,74 @@
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-export const onRequestPost: PagesFunction<{
+// Production URL is hardcoded so it never resolves to the Pages preview domain.
+const PORTAL_RETURN_URL = "https://app.chainsolve.co.uk/app";
+
+type Env = {
   STRIPE_SECRET_KEY: string;
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
-}> = async (context) => {
-  const { STRIPE_SECRET_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = context.env;
+};
 
-  const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-01-27.acacia" as any });
-  const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+function jsonError(message: string, status: number): Response {
+  return Response.json({ ok: false, error: message }, { status });
+}
 
-  // Validate Supabase access token
-  const authHeader = context.request.headers.get("Authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  if (!token) return new Response("Missing Authorization Bearer token", { status: 401 });
+export const onRequestPost: PagesFunction<Env> = async (context) => {
+  const reqId = crypto.randomUUID().slice(0, 8);
+  try {
+    const { STRIPE_SECRET_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = context.env;
 
-  const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token);
-  if (userErr || !userData?.user) return new Response("Invalid token", { status: 401 });
-  const user = userData.user;
+    if (!STRIPE_SECRET_KEY) {
+      console.error(`[portal ${reqId}] Missing env vars`);
+      return jsonError("Server configuration error", 500);
+    }
 
-  // Load profile and stripe_customer_id
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("id,stripe_customer_id")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  let customerId = profile?.stripe_customer_id ?? null;
-
-  if (!customerId) {
-    // Create Stripe customer if one doesn't exist yet
-    const customer = await stripe.customers.create({
-      email: user.email ?? undefined,
-      metadata: { supabase_user_id: user.id },
+    const stripe = new Stripe(STRIPE_SECRET_KEY, {
+      apiVersion: "2025-01-27.acacia" as any,
     });
-    customerId = customer.id;
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    await supabaseAdmin
+    // Authenticate caller via Supabase access token
+    const authHeader = context.request.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!token) return jsonError("Missing Authorization Bearer token", 401);
+
+    const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token);
+    if (userErr || !userData?.user) return jsonError("Invalid or expired token", 401);
+    const user = userData.user;
+
+    // Load profile and stripe_customer_id
+    const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .update({ stripe_customer_id: customerId })
-      .eq("id", user.id);
+      .select("id,stripe_customer_id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    let customerId = profile?.stripe_customer_id ?? null;
+
+    if (!customerId) {
+      // Create a Stripe customer so the portal session can be opened
+      const customer = await stripe.customers.create({
+        email: user.email ?? undefined,
+        metadata: { supabase_user_id: user.id },
+      });
+      customerId = customer.id;
+      await supabaseAdmin
+        .from("profiles")
+        .update({ stripe_customer_id: customerId })
+        .eq("id", user.id);
+    }
+
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: PORTAL_RETURN_URL,
+    });
+
+    return Response.json({ ok: true, url: portalSession.url });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Internal error";
+    console.error(`[portal ${reqId}]`, err);
+    return jsonError(msg, 500);
   }
-
-  const origin = new URL(context.request.url).origin;
-
-  const portalSession = await stripe.billingPortal.sessions.create({
-    customer: customerId,
-    return_url: `${origin}/app`,
-  });
-
-  return Response.json({ url: portalSession.url });
 };

@@ -82,10 +82,19 @@ export function evaluateGraph(
 
     const inputValues: Array<number | null> = def.inputs.map((port) => {
       const edge = (inEdges.get(nodeId) ?? []).find((e) => e.targetHandle === port.id)
-      if (!edge) return null
-      const upstream = results.get(edge.source)
-      // If upstream node was in a cycle (no result), propagate NaN
-      return upstream ?? NaN
+      const overrides = node.data.portOverrides as Record<string, boolean> | undefined
+      const manualVals = node.data.manualValues as Record<string, number> | undefined
+      const overrideActive = overrides?.[port.id] === true
+
+      if (edge && !overrideActive) {
+        // Connected, no manual override — use upstream computed value.
+        const upstream = results.get(edge.source)
+        // Upstream not yet evaluated (cycle) → propagate NaN.
+        return upstream !== undefined ? upstream : NaN
+      }
+      // Not connected, or override active — use manual value.
+      // null means "unset" and most blocks treat null inputs as NaN.
+      return manualVals?.[port.id] ?? null
     })
 
     try {

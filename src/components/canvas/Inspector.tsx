@@ -1,245 +1,257 @@
 /**
- * Inspector — right sidebar showing properties of the selected node.
- * Editable fields: label, value (Number), range (Slider).
- * Always shows the live computed output value.
+ * Inspector — right panel that shows properties for the inspected node.
+ *
+ * Opens via onNodeClick (not drag). Closed with ESC, onClose(), or pane click.
+ * Uses useNodes() internally so data stays in sync without prop-drilling.
+ * Shows per-port manual value + override toggle for operation nodes.
  */
 
-import { useReactFlow, type Node } from '@xyflow/react'
+import { useEffect } from 'react'
+import { useNodes, useEdges, useReactFlow } from '@xyflow/react'
 import { useComputed } from '../../contexts/ComputedContext'
 import { formatValue } from '../../engine/evaluate'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 
 interface InspectorProps {
-  selectedNode: Node | null
+  nodeId: string | null
+  width: number
+  onClose: () => void
+  onResizeStart: (e: React.MouseEvent) => void
 }
 
-const s = {
-  panel: {
-    width: 240,
-    flexShrink: 0,
-    borderLeft: '1px solid var(--border)',
-    background: 'var(--card-bg)',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    overflow: 'hidden',
-  },
-  header: {
-    padding: '0.6rem 0.75rem',
-    borderBottom: '1px solid var(--border)',
-    fontWeight: 700,
-    fontSize: '0.78rem',
-    letterSpacing: '0.04em',
-    opacity: 0.5,
-    textTransform: 'uppercase' as const,
-  },
-  body: {
-    flex: 1,
-    overflowY: 'auto' as const,
-    padding: '0.75rem',
-  },
-  empty: {
-    opacity: 0.4,
-    fontSize: '0.82rem',
-    textAlign: 'center' as const,
-    marginTop: '2rem',
-  },
-  fieldLabel: {
-    fontSize: '0.72rem',
-    opacity: 0.55,
-    marginBottom: '0.2rem',
-    display: 'block',
-    userSelect: 'none' as const,
-  },
-  field: {
-    marginBottom: '0.85rem',
-  },
-  input: {
-    width: '100%',
-    padding: '0.3rem 0.5rem',
-    borderRadius: 6,
-    border: '1px solid var(--border)',
-    background: 'var(--input-bg)',
-    color: 'inherit',
-    fontSize: '0.85rem',
-    fontFamily: 'inherit',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
-  },
-  numInput: {
-    width: '100%',
-    padding: '0.3rem 0.5rem',
-    borderRadius: 6,
-    border: '1px solid var(--border)',
-    background: 'var(--input-bg)',
-    color: 'inherit',
-    fontSize: '0.85rem',
-    fontFamily: 'monospace',
-    outline: 'none',
-    boxSizing: 'border-box' as const,
-  },
-  outputBox: {
-    background: 'rgba(34,197,94,0.1)',
-    border: '1px solid rgba(34,197,94,0.3)',
-    borderRadius: 8,
-    padding: '0.6rem 0.75rem',
-    textAlign: 'center' as const,
-    marginTop: '0.5rem',
-  },
-  outputValue: {
-    fontFamily: 'monospace',
-    fontSize: '1.4rem',
-    fontWeight: 700,
-    color: '#22c55e',
-    display: 'block',
-  },
-  outputLabel: {
-    fontSize: '0.7rem',
-    opacity: 0.5,
-    marginTop: '0.15rem',
-    display: 'block',
-  },
-  divider: {
-    borderTop: '1px solid var(--border)',
-    margin: '0.75rem 0',
-  },
-  portList: {
-    marginTop: '0.5rem',
-  },
-  portRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '0.78rem',
-    padding: '0.15rem 0',
-    opacity: 0.7,
-  },
+const inp: React.CSSProperties = {
+  width: '100%',
+  padding: '0.28rem 0.45rem',
+  borderRadius: 6,
+  border: '1px solid rgba(255,255,255,0.12)',
+  background: 'rgba(0,0,0,0.2)',
+  color: '#F4F4F3',
+  fontSize: '0.8rem',
+  fontFamily: 'inherit',
+  outline: 'none',
+  boxSizing: 'border-box',
 }
 
-export function Inspector({ selectedNode }: InspectorProps) {
+const monoInp: React.CSSProperties = {
+  ...inp,
+  fontFamily: "'JetBrains Mono', monospace",
+}
+
+const fieldLabel: React.CSSProperties = {
+  fontSize: '0.65rem',
+  fontWeight: 700,
+  letterSpacing: '0.05em',
+  color: 'rgba(244,244,243,0.4)',
+  textTransform: 'uppercase',
+  display: 'block',
+  marginBottom: '0.2rem',
+  userSelect: 'none',
+}
+
+export function Inspector({ nodeId, width, onClose, onResizeStart }: InspectorProps) {
+  const allNodes = useNodes()
+  const allEdges = useEdges()
   const { updateNodeData } = useReactFlow()
   const computed = useComputed()
 
-  if (!selectedNode) {
+  const node = nodeId ? allNodes.find(n => n.id === nodeId) ?? null : null
+  const nd = node?.data as NodeData | undefined
+
+  // ESC closes inspector
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  const panelStyle: React.CSSProperties = {
+    width,
+    flexShrink: 0,
+    borderLeft: '1px solid rgba(255,255,255,0.08)',
+    background: '#2c2c2c',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    height: '100%',
+    position: 'relative',
+    transition: 'width 0.2s ease',
+  }
+
+  const headerStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '0.5rem 0.7rem',
+    borderBottom: '1px solid rgba(255,255,255,0.08)',
+    flexShrink: 0,
+  }
+
+  if (!node || !nd) {
     return (
-      <div style={s.panel}>
-        <div style={s.header}>Inspector</div>
-        <div style={s.body}>
-          <p style={s.empty}>Select a block to inspect</p>
+      <div style={panelStyle}>
+        <div style={{ ...headerStyle, justifyContent: 'flex-start', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', color: 'rgba(244,244,243,0.4)', textTransform: 'uppercase' }}>Inspector</span>
         </div>
+        <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'rgba(244,244,243,0.3)', fontSize: '0.82rem' }}>
+          Click a block to inspect
+        </div>
+        <div style={{ position: 'absolute', left: -3, top: 0, bottom: 0, width: 6, cursor: 'ew-resize' }} onMouseDown={onResizeStart} />
       </div>
     )
   }
 
-  const nd = selectedNode.data as NodeData
   const def = BLOCK_REGISTRY.get(nd.blockType)
-  const value = computed.get(selectedNode.id)
+  const value = computed.get(node.id)
+  const manualValues = (nd.manualValues ?? {}) as Record<string, number>
+  const portOverrides = (nd.portOverrides ?? {}) as Record<string, boolean>
 
-  const update = (patch: Partial<NodeData>) => {
-    updateNodeData(selectedNode.id, patch)
-  }
+  const isPortConnected = (portId: string) =>
+    allEdges.some(e => e.target === node.id && e.targetHandle === portId)
 
-  const isNumber = nd.blockType === 'number'
-  const isSlider = nd.blockType === 'slider'
+  const update = (patch: Partial<NodeData>) => updateNodeData(node.id, patch)
+
+  const updateManual = (portId: string, v: number) =>
+    update({ manualValues: { ...manualValues, [portId]: v } })
+
+  const toggleOverride = (portId: string) =>
+    update({ portOverrides: { ...portOverrides, [portId]: !portOverrides[portId] } })
+
+  const isNaNVal = value !== undefined && isNaN(value)
+  const isInfVal = value !== undefined && !isNaN(value) && !isFinite(value)
+
+  const field = (label: string, children: React.ReactNode) => (
+    <div style={{ marginBottom: '0.7rem' }}>
+      <span style={fieldLabel}>{label}</span>
+      {children}
+    </div>
+  )
 
   return (
-    <div style={s.panel}>
-      <div style={s.header}>Inspector</div>
-      <div style={s.body}>
-        {/* Block type badge */}
-        <div style={s.field}>
-          <span style={s.fieldLabel}>Block type</span>
-          <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>{def?.label ?? nd.blockType}</span>
-        </div>
+    <div style={panelStyle}>
+      {/* Resize handle */}
+      <div style={{ position: 'absolute', left: -3, top: 0, bottom: 0, width: 6, cursor: 'ew-resize', zIndex: 10 }} onMouseDown={onResizeStart} />
 
-        {/* Label editor */}
-        <div style={s.field}>
-          <span style={s.fieldLabel}>Label</span>
-          <input
-            style={s.input}
-            value={nd.label}
-            onChange={(e) => update({ label: e.target.value })}
-          />
-        </div>
-
-        {/* Number value */}
-        {isNumber && (
-          <div style={s.field}>
-            <span style={s.fieldLabel}>Value</span>
-            <input
-              type="number"
-              style={s.numInput}
-              value={nd.value ?? 0}
-              step="any"
-              onChange={(e) => {
-                const v = parseFloat(e.target.value)
-                if (!isNaN(v)) update({ value: v })
-              }}
-            />
+      {/* Header */}
+      <div style={headerStyle}>
+        <div>
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', color: 'rgba(244,244,243,0.4)', textTransform: 'uppercase' as const }}>
+            Inspector
+          </span>
+          <div style={{ fontSize: '0.82rem', fontWeight: 600, marginTop: 2 }}>
+            {def?.label ?? nd.blockType}
           </div>
+        </div>
+        <button
+          onClick={onClose}
+          style={{ background: 'none', border: 'none', color: 'rgba(244,244,243,0.4)', cursor: 'pointer', fontSize: '1rem', padding: '0 0.2rem', lineHeight: 1 }}
+          title="Close (ESC)"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>
+        {/* Label */}
+        {field('Label',
+          <input style={inp} value={nd.label} onChange={e => update({ label: e.target.value })} />
         )}
 
-        {/* Slider config */}
-        {isSlider && (
-          <>
-            <div style={s.field}>
-              <span style={s.fieldLabel}>Value</span>
-              <input
-                type="range"
-                style={{ width: '100%', accentColor: '#646cff' }}
-                min={nd.min ?? 0}
-                max={nd.max ?? 100}
-                step={nd.step ?? 1}
-                value={nd.value ?? 0}
-                onChange={(e) => update({ value: parseFloat(e.target.value) })}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', opacity: 0.5 }}>
+        {/* Number source */}
+        {nd.blockType === 'number' && field('Value',
+          <input type="number" style={monoInp} value={nd.value ?? 0} step="any"
+            onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) update({ value: v }) }} />
+        )}
+
+        {/* Slider source */}
+        {nd.blockType === 'slider' && <>
+          {field('Value',
+            <>
+              <input type="range" style={{ width: '100%', accentColor: 'var(--primary)', margin: '0.2rem 0' }}
+                min={nd.min ?? 0} max={nd.max ?? 100} step={nd.step ?? 1} value={nd.value ?? 0}
+                onChange={e => update({ value: parseFloat(e.target.value) })} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'rgba(244,244,243,0.4)' }}>
                 <span>{nd.min ?? 0}</span>
-                <span style={{ fontWeight: 700, opacity: 1 }}>{nd.value ?? 0}</span>
+                <span style={{ fontFamily: 'monospace', color: '#1CABB0', fontWeight: 700 }}>{nd.value ?? 0}</span>
                 <span>{nd.max ?? 100}</span>
               </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.4rem', marginBottom: '0.85rem' }}>
-              {(['min', 'max', 'step'] as const).map((key) => (
-                <div key={key}>
-                  <span style={s.fieldLabel}>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-                  <input
-                    type="number"
-                    style={{ ...s.numInput, fontSize: '0.78rem' }}
-                    value={nd[key] ?? (key === 'step' ? 1 : key === 'min' ? 0 : 100)}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value)
-                      if (!isNaN(v)) update({ [key]: v })
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        <div style={s.divider} />
-
-        {/* Input ports (connected / disconnected info) */}
-        {def && def.inputs.length > 0 && (
-          <div style={s.portList}>
-            <span style={s.fieldLabel}>Inputs</span>
-            {def.inputs.map((port) => (
-              <div key={port.id} style={s.portRow}>
-                <span>{port.label}</span>
-                <span style={{ fontFamily: 'monospace', opacity: 0.5 }}>—</span>
+            </>
+          )}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.4rem', marginBottom: '0.7rem' }}>
+            {(['min', 'max', 'step'] as const).map(k => (
+              <div key={k}>
+                <span style={fieldLabel}>{k.charAt(0).toUpperCase() + k.slice(1)}</span>
+                <input type="number" style={{ ...monoInp, fontSize: '0.72rem' }}
+                  value={nd[k] ?? (k === 'step' ? 1 : k === 'min' ? 0 : 100)}
+                  onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) update({ [k]: v }) }} />
               </div>
             ))}
+          </div>
+        </>}
+
+        {/* Per-port inputs (operation nodes) */}
+        {def && def.inputs.length > 0 && (
+          <div style={{ marginBottom: '0.7rem' }}>
+            <span style={fieldLabel}>Inputs</span>
+            {def.inputs.map(port => {
+              const connected = isPortConnected(port.id)
+              const override = portOverrides[port.id] === true
+              const showInput = !connected || override
+
+              return (
+                <div key={port.id} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.4rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'rgba(244,244,243,0.6)', width: 40, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {port.label}
+                  </span>
+                  {showInput ? (
+                    <input type="number" style={{ ...monoInp, flex: 1, fontSize: '0.75rem', borderColor: override ? 'rgba(28,171,176,0.4)' : undefined, color: override ? '#1CABB0' : undefined }}
+                      value={manualValues[port.id] ?? ''}
+                      placeholder="0"
+                      step="any"
+                      onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) updateManual(port.id, v) }} />
+                  ) : (
+                    <span style={{ flex: 1, fontSize: '0.75rem', fontFamily: 'monospace', color: '#1CABB0', padding: '0.28rem 0.45rem' }}>
+                      ▶ connected
+                    </span>
+                  )}
+                  {connected && (
+                    <button
+                      onClick={() => toggleOverride(port.id)}
+                      title={override ? 'Use connected value' : 'Override with manual value'}
+                      style={{
+                        width: 22, height: 22, padding: 0, flexShrink: 0,
+                        background: override ? 'rgba(28,171,176,0.15)' : 'transparent',
+                        border: `1px solid ${override ? '#1CABB0' : 'rgba(255,255,255,0.15)'}`,
+                        borderRadius: 4, color: override ? '#1CABB0' : 'rgba(255,255,255,0.35)',
+                        cursor: 'pointer', fontSize: '0.72rem', fontFamily: 'inherit',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}
+                    >
+                      {override ? '↩' : '✎'}
+                    </button>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
 
         {/* Output value */}
-        <div style={s.outputBox}>
+        <div style={{
+          background: isNaNVal || isInfVal ? 'rgba(239,68,68,0.08)' : 'rgba(28,171,176,0.08)',
+          border: `1px solid ${isNaNVal || isInfVal ? 'rgba(239,68,68,0.25)' : 'rgba(28,171,176,0.25)'}`,
+          borderRadius: 8, padding: '0.6rem', textAlign: 'center',
+        }}>
           <span style={{
-            ...s.outputValue,
-            ...(value !== undefined && isNaN(value) ? { color: '#f87171' } : {}),
+            display: 'block',
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '1.4rem',
+            fontWeight: 700,
+            color: isNaNVal || isInfVal ? '#f87171' : '#1CABB0',
           }}>
             {formatValue(value)}
           </span>
-          <span style={s.outputLabel}>output</span>
+          <span style={{ fontSize: '0.65rem', color: 'rgba(244,244,243,0.35)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>output</span>
         </div>
       </div>
     </div>

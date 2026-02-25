@@ -323,7 +323,71 @@ you expect the user to access.
 
 ---
 
-## 9. Go-live checklist
+## 9. Debugging Cloudflare Error 1101
+
+**What it means:** HTTP 1101 = an uncaught exception was thrown inside a Pages Function (Worker). Cloudflare caught it and returned a generic error page instead.
+
+### Where to find logs
+
+1. **Cloudflare Dashboard** → **Workers & Pages** → select `chainsolve-web` → **Functions** tab → **Real-time logs**
+2. Enable **Log level: Error** and trigger the action that failed (e.g. click Upgrade).
+3. The log entry will show the exception message, stack trace, and the request ID (`[checkout xxxx]` / `[portal xxxx]`) printed by `console.error`.
+
+### Most common causes and fixes
+
+| Symptom | Root cause | Fix |
+|---|---|---|
+| 1101 on `/api/stripe/create-checkout-session` | Missing `STRIPE_SECRET_KEY` or `STRIPE_PRICE_ID_PRO_MONTHLY` env var | Set vars in CF Dashboard → Settings → Environment Variables → **Production** |
+| 1101 on `/api/stripe/create-portal-session` | Customer Portal not enabled in Stripe | Dashboard → Billing → Customer portal → Activate |
+| 1101 on `/api/stripe/webhook` | Wrong `STRIPE_WEBHOOK_SECRET` (test vs live) | Copy the correct `whsec_…` from the Stripe webhook endpoint for your domain |
+| 1101 immediately after deploy | Build deployed with wrong/missing env var | Check Functions tab → "Environment variables" column per deployment |
+
+### Required env vars — Production vs Preview
+
+All 7 vars must be set. Preview deployments (branch deploys, PRs) share the **Preview** environment in Cloudflare; Production deployments use the **Production** environment.
+
+| Variable | Production | Preview |
+|---|---|---|
+| `VITE_SUPABASE_URL` | ✅ same value | ✅ same value |
+| `VITE_SUPABASE_ANON_KEY` | ✅ same value | ✅ same value |
+| `SUPABASE_URL` | ✅ same value | ✅ same value |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ **live** service role key | ✅ same (or test project) |
+| `STRIPE_SECRET_KEY` | `sk_live_…` | `sk_test_…` |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_…` (live endpoint) | `whsec_…` (test endpoint / Stripe CLI) |
+| `STRIPE_PRICE_ID_PRO_MONTHLY` | `price_1T40yZCYM0atbSlvxvrIZjSf` | test mode price ID |
+
+> **Important:** Cloudflare does NOT inherit Production vars into Preview automatically. You must set them separately in **Settings → Environment Variables → Preview**.
+
+### Quick diagnosis steps
+
+```bash
+# 1. Test the function locally with Wrangler
+npx wrangler pages dev dist --compatibility-date=2025-01-01
+
+# 2. Send a test checkout request
+curl -X POST http://localhost:8788/api/stripe/create-checkout-session \
+  -H "Authorization: Bearer <supabase-access-token>"
+
+# 3. Check the terminal — errors print with request ID
+```
+
+---
+
+## 10. PostgREST schema cache
+
+If you add or rename columns in Supabase (e.g. `projects.owner_id`) and PostgREST returns a 404 or "column does not exist" error despite the migration running, the schema cache may be stale.
+
+Run this in the **SQL Editor** to force a reload:
+
+```sql
+NOTIFY pgrst, 'reload schema';
+```
+
+PostgREST (the Supabase REST API layer) caches the DB schema at startup. The `NOTIFY` command reloads it without restarting the service.
+
+---
+
+## 11. Go-live checklist
 
 - [ ] SQL migration applied successfully
 - [ ] Supabase Auth site URL set to `https://app.chainsolve.co.uk`
