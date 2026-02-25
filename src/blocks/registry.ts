@@ -479,6 +479,7 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   'data',
   'vectorOps',
   'tableOps',
+  'plot',
 ]
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -491,6 +492,7 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   data: 'Data',
   vectorOps: 'Vector Ops',
   tableOps: 'Table Ops',
+  plot: 'Plot',
 }
 
 // ── Pro-only block registration (no circular imports) ────────────────────────
@@ -499,7 +501,9 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
 import { registerDataBlocks } from './data-blocks'
 import { registerVectorBlocks } from './vector-blocks'
 import { registerTableBlocks } from './table-blocks'
+import { registerPlotBlocks } from './plot-blocks'
 
 registerDataBlocks(regValue)
 registerVectorBlocks(regValue)
 registerTableBlocks(regValue)
+registerPlotBlocks(regValue)

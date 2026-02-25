@@ -42,6 +42,7 @@ import { SourceNode } from './nodes/SourceNode'
 import { OperationNode } from './nodes/OperationNode'
 import { DisplayNode } from './nodes/DisplayNode'
 import { DataNode } from './nodes/DataNode'
+import { PlotNode } from './nodes/PlotNode'
 import { BlockLibrary, DRAG_TYPE } from './BlockLibrary'
 import { Inspector } from './Inspector'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
@@ -49,7 +50,7 @@ import { QuickAddPalette } from './QuickAddPalette'
 import { ComputedContext } from '../../contexts/ComputedContext'
 import { evaluateGraph } from '../../engine/evaluate'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
-import { type Plan, getEntitlements } from '../../lib/entitlements'
+import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 import { UpgradeModal } from '../UpgradeModal'
 
 // ── Node type registry ────────────────────────────────────────────────────────
@@ -59,6 +60,7 @@ const NODE_TYPES = {
   csOperation: OperationNode,
   csDisplay: DisplayNode,
   csData: DataNode,
+  csPlot: PlotNode,
 } as const
 
 // ── Default graph ─────────────────────────────────────────────────────────────
@@ -311,7 +313,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       if (!blockType) return
       const def = BLOCK_REGISTRY.get(blockType)
       if (!def) return
-      if (def.proOnly && !ent.canUseArrays) {
+      if (def.proOnly && !isBlockEntitled(def, ent)) {
         setShowUpgradeModal(true)
         return
       }
@@ -322,7 +324,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         { id, type: def.nodeKind, position, data: { ...def.defaultData } } as Node<NodeData>,
       ])
     },
-    [readOnly, ent.canUseArrays, screenToFlowPosition, setNodes],
+    [readOnly, ent, screenToFlowPosition, setNodes],
   )
 
   // ── Keyboard: Delete/Backspace removes selected ─────────────────────────────

@@ -9,7 +9,7 @@
 import { useState, useEffect, useRef, type KeyboardEvent } from 'react'
 import { BLOCK_REGISTRY, CATEGORY_ORDER, type BlockDef } from '../../blocks/registry'
 import { trackBlockUsed } from './BlockLibrary'
-import { type Plan, getEntitlements } from '../../lib/entitlements'
+import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 
 interface QuickAddPaletteProps {
   /** Screen X (px) where the palette should anchor */
@@ -68,7 +68,7 @@ export function QuickAddPalette({
   }, [clampedIdx])
 
   const commit = (def: BlockDef) => {
-    if (def.proOnly && !ent.canUseArrays) {
+    if (def.proOnly && !isBlockEntitled(def, ent)) {
       onProBlocked?.()
       return
     }
@@ -213,7 +213,7 @@ export function QuickAddPalette({
           ) : (
             filtered.map((def, i) => {
               const isActive = i === clampedIdx
-              const locked = !!def.proOnly && !ent.canUseArrays
+              const locked = !!def.proOnly && !isBlockEntitled(def, ent)
               return (
                 <div
                   key={def.type}

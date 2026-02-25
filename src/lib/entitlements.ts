@@ -92,3 +92,16 @@ export function showBillingBanner(plan: Plan): 'past_due' | 'canceled' | null {
   if (plan === 'canceled') return 'canceled'
   return null
 }
+
+/**
+ * Whether a block is usable under the given entitlements.
+ * Free blocks always pass. Pro blocks are gated by category.
+ */
+export function isBlockEntitled(
+  def: { proOnly?: boolean; category: string },
+  ent: Entitlements,
+): boolean {
+  if (!def.proOnly) return true
+  if (def.category === 'plot') return ent.canUsePlots
+  return ent.canUseArrays
+}

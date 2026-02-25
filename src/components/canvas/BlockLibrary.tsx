@@ -17,7 +17,7 @@ import {
   type BlockCategory,
   type BlockDef,
 } from '../../blocks/registry'
-import { type Plan, getEntitlements } from '../../lib/entitlements'
+import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 
 export const DRAG_TYPE = 'application/chainsolve-block'
 
@@ -171,8 +171,8 @@ const s: StyleMap = {
 
 // ── BlockItem ─────────────────────────────────────────────────────────────────
 
-/** Pro-only categories that require canUseArrays entitlement. */
-const PRO_CATEGORIES: Set<BlockCategory> = new Set(['data', 'vectorOps', 'tableOps'])
+/** Pro-only categories that require specific entitlements. */
+const PRO_CATEGORIES: Set<BlockCategory> = new Set(['data', 'vectorOps', 'tableOps', 'plot'])
 
 interface BlockItemProps {
   def: BlockDef
@@ -355,7 +355,7 @@ export function BlockLibrary({
                 def={def}
                 favs={favs}
                 onToggleFav={toggleFav}
-                entitled={!def.proOnly || ent.canUseArrays}
+                entitled={isBlockEntitled(def, ent)}
                 onProBlocked={onProBlocked}
               />
             ))}
@@ -372,7 +372,7 @@ export function BlockLibrary({
                 def={def}
                 favs={favs}
                 onToggleFav={toggleFav}
-                entitled={!def.proOnly || ent.canUseArrays}
+                entitled={isBlockEntitled(def, ent)}
                 onProBlocked={onProBlocked}
               />
             ))}
@@ -414,7 +414,7 @@ export function BlockLibrary({
                   def={def}
                   favs={favs}
                   onToggleFav={toggleFav}
-                  entitled={!def.proOnly || ent.canUseArrays}
+                  entitled={isBlockEntitled(def, ent)}
                   onProBlocked={onProBlocked}
                 />
               ))}

@@ -12,6 +12,8 @@ import { useComputed } from '../../contexts/ComputedContext'
 import { formatValue } from '../../engine/evaluate'
 import { isError, isScalar } from '../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
+import type { PlotConfig } from '../../blocks/types'
+import { PlotInspector } from './PlotInspector'
 
 interface InspectorProps {
   nodeId: string | null
@@ -386,6 +388,23 @@ export function Inspector({ nodeId, width, onClose, onResizeStart }: InspectorPr
             })}
           </div>
         )}
+
+        {/* Plot inspector (csPlot nodes) */}
+        {def?.nodeKind === 'csPlot' &&
+          (() => {
+            const dataEdge = allEdges.find((e) => e.target === node.id && e.targetHandle === 'data')
+            const inputValue = dataEdge ? computed.get(dataEdge.source) : undefined
+            const plotConfig: PlotConfig = (nd.plotConfig as PlotConfig) ?? {
+              chartType: 'xyLine',
+            }
+            return (
+              <PlotInspector
+                config={plotConfig}
+                inputValue={inputValue}
+                onUpdate={(patch) => update({ plotConfig: { ...plotConfig, ...patch } })}
+              />
+            )
+          })()}
 
         {/* Output value */}
         <div

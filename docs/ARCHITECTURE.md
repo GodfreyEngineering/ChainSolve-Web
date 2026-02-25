@@ -1,6 +1,6 @@
 # ChainSolve — Architecture
 
-> Updated at each milestone. Current: **W5.3 (Production Hardening)**
+> Updated at each milestone. Current: **W6 (Scientific Plotting + Export)**
 
 ---
 
@@ -33,12 +33,15 @@ src/
     data-blocks.ts    Data input blocks: vectorInput, tableInput, csvImport (W5)
     vector-blocks.ts  Vector operation blocks: length, sum, mean, min, max, sort, etc. (W5)
     table-blocks.ts   Table operation blocks: filter, sort, column, addColumn, join (W5)
+    plot-blocks.ts    Plot blocks: xyPlot, histogram, barChart, heatmap (W6, Pro-only)
   components/
     canvas/       Canvas UI components
-      nodes/      Custom React Flow node renderers (SourceNode, OperationNode, DisplayNode, DataNode)
+      nodes/      Custom React Flow node renderers (SourceNode, OperationNode, DisplayNode, DataNode, PlotNode)
       editors/    Inline editors for data nodes (VectorEditor, TableEditor, CsvPicker) (W5)
       BlockLibrary.tsx  Left-sidebar draggable block palette
       Inspector.tsx     Right-sidebar node property editor
+      PlotInspector.tsx Plot configuration sub-panel in Inspector (W6)
+      PlotExpandModal.tsx Full-size plot modal with export buttons (W6)
       CanvasArea.tsx    ReactFlow wrapper with drag-drop, keyboard shortcuts
       ContextMenu.tsx   Right-click context menus (canvas/node/edge)
       QuickAddPalette.tsx  Floating block picker
@@ -72,9 +75,13 @@ src/
   lib/
     supabase.ts     Browser Supabase client (anon key)
     build-info.ts   Build metadata: version, SHA, build time, environment (W5.3)
-    entitlements.ts Plan-based feature gating: getEntitlements, isPro, isReadOnly, canCreateProject (W4)
+    entitlements.ts Plan-based feature gating: getEntitlements, isPro, isReadOnly, canCreateProject, isBlockEntitled (W4/W6)
     projects.ts     Project CRUD: list, create, load, save, rename, delete, duplicate, import
     storage.ts      Storage helpers: saveProjectJson, uploadCsv, listProjectAssets, etc.
+    vega-loader.ts  Lazy Vega/Vega-Lite/vega-interpreter loader (singleton, CSP-safe) (W6)
+    plot-spec.ts    Pure Vega-Lite spec generation: inline (node) + full (modal) (W6)
+    plot-export.ts  SVG/PNG/CSV export utilities + open-in-tab (W6)
+    downsample.ts   LTTB downsampling algorithm for large datasets (W6)
   pages/
     Login.tsx     Email/password login + signup
     AppShell.tsx  Protected dashboard: plan status, billing, project browser
@@ -110,6 +117,7 @@ supabase/
 
 e2e/
   smoke.spec.ts   Playwright smoke tests: title, meta tags, robots.txt, #root, no errors (W5.3)
+  plot-smoke.spec.ts  Plot feature smoke tests: block library, no CSP violations (W6)
 
 .github/
   workflows/
@@ -124,6 +132,7 @@ docs/
   SETUP.md        Production deploy guide
   UX.md           Canvas UX interaction rules
   PROJECT_FORMAT.md  project.json schema + versioning contract
+  PLOTTING.md     Plot blocks: chart types, export, CSP, downsampling, architecture (W6)
   ARCHITECTURE.md This file
 ```
 
@@ -195,6 +204,12 @@ RLS policy: `(storage.foldername(name))[1] = auth.uid()::text`
 | Vector Ops | Length, Sum, Mean, Min, Max, Sort, Reverse, Slice, Concat, Map |
 | Table Ops | Filter, Sort, Column, Add Column, Join |
 
+**Plot blocks (W6, Pro-only)**
+
+| Category | Blocks |
+|---|---|
+| Plot | XY Plot (line/scatter), Histogram, Bar Chart, Heatmap |
+
 ### Value type system (W5)
 
 The engine uses a polymorphic `Value` type (`src/engine/value.ts`):
@@ -236,6 +251,7 @@ This eliminates the `registry → pack → registry` cycle that caused TDZ crash
 | `csOperation` | OperationNode | All math/trig/logic/vector/table ops (1+ inputs, 1 output) |
 | `csDisplay` | DisplayNode | Output/Display (1 input, shows computed value) |
 | `csData` | DataNode | Vector Input, Table Input, CSV Import (0 inputs, 1 output) (W5) |
+| `csPlot` | PlotNode | XY Plot, Histogram, Bar Chart, Heatmap (1 input, 0 outputs, Vega render) (W6) |
 
 ---
 
@@ -332,8 +348,8 @@ UI gating:
 | W5.1 | ✅ Done | Save fixpack: forwardRef snapshot, Save button, Ctrl+S, beforeunload, boot guard |
 | W5.2 | ✅ Done | Circular import fix (TDZ crash), true bootloader, mobile baseline |
 | W5.3 | ✅ Done | Production hardening: security headers, CI, Playwright e2e, build info, bug reporting |
-| W6 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
-| W7 | Planned | Plot output nodes (Pro, uPlot) |
+| W6 | ✅ Done | Scientific plotting + export: 4 chart types (Vega-Lite), SVG/PNG/CSV export, CSP-safe, theme presets |
+| W7 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
 | W8 | Planned | Branching/rules for conditional flows (Pro) |
 | W9 | Planned | Custom blocks editor + block groups (Pro) |
 | W10 | Planned | Project/file browser with folders, search, tags |

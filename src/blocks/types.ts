@@ -18,9 +18,47 @@ export type BlockCategory =
   | 'data'
   | 'vectorOps'
   | 'tableOps'
+  | 'plot'
 
 /** Which React Flow custom-node renderer to use. */
-export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay' | 'csData'
+export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay' | 'csData' | 'csPlot'
+
+// ── Plot configuration types ────────────────────────────────────────────────
+
+export type ChartType = 'xyLine' | 'xyScatter' | 'histogram' | 'bar' | 'heatmap'
+export type ScaleType = 'linear' | 'log'
+export type LegendPosition = 'right' | 'bottom' | 'none'
+export type PlotThemePreset = 'paper-single' | 'paper-double' | 'presentation' | 'report'
+
+export interface ReferenceLine {
+  axis: 'x' | 'y'
+  value: number
+  label?: string
+  color?: string
+}
+
+export interface PlotConfig {
+  chartType: ChartType
+  title?: string
+  subtitle?: string
+  xLabel?: string
+  yLabel?: string
+  xScale?: ScaleType
+  yScale?: ScaleType
+  showGrid?: boolean
+  showLegend?: boolean
+  legendPosition?: LegendPosition
+  themePreset?: PlotThemePreset
+  referenceLines?: ReferenceLine[]
+  /** Max data points to render (LTTB downsampling). Full data always exported. */
+  maxPoints?: number
+  /** Bin count for histogram charts. */
+  binCount?: number
+  /** For Table input: column name for X axis. */
+  xColumn?: string
+  /** For Table input: column names for Y series. */
+  yColumns?: string[]
+}
 
 export interface PortDef {
   /** Unique within the block — used as targetHandle / sourceHandle. */
@@ -54,6 +92,8 @@ export interface NodeData extends Record<string, unknown> {
   tableData?: { columns: string[]; rows: number[][] }
   /** Storage path of an uploaded CSV file. */
   csvStoragePath?: string
+  /** Plot visualization configuration (csPlot nodes). */
+  plotConfig?: PlotConfig
 }
 
 export interface BlockDef {
