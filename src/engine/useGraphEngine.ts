@@ -47,11 +47,10 @@ export function useGraphEngine(
   const pendingRef = useRef(0) // Coalescing counter: skip stale results.
 
   useEffect(() => {
-    const reqId = ++pendingRef.current
-
     if (!snapshotLoaded.current) {
       // First render: load full snapshot into persistent engine graph.
       snapshotLoaded.current = true
+      const reqId = ++pendingRef.current
       const snapshot = toEngineSnapshot(nodes, edges)
       const t0 = perfEnabled ? performance.now() : 0
       engine.loadSnapshot(snapshot, options).then((result) => {
@@ -78,10 +77,14 @@ export function useGraphEngine(
       // Subsequent renders: diff and apply patch.
       const ops = diffGraph(prevNodesRef.current, prevEdgesRef.current, nodes, edges)
       if (ops.length === 0) {
+        // No engine-relevant changes (e.g. position-only update from React Flow).
+        // Do NOT increment pendingRef — this would invalidate the in-flight
+        // loadSnapshot result and cause computed values to never arrive.
         prevNodesRef.current = nodes
         prevEdgesRef.current = edges
         return
       }
+      const reqId = ++pendingRef.current
       const t0 = perfEnabled ? performance.now() : 0
       engine.applyPatch(ops, options).then((result) => {
         if (reqId !== pendingRef.current) return

@@ -57,6 +57,7 @@ function Root() {
 
   return (
     <EngineContext.Provider value={engine}>
+      <div data-testid="engine-ready" style={{ display: 'none' }} />
       <App />
     </EngineContext.Provider>
   )

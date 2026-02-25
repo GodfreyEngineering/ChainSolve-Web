@@ -704,6 +704,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   return (
     <ComputedContext.Provider value={computed}>
+      {computed.size > 0 && <div data-testid="canvas-computed" style={{ display: 'none' }} />}
       <div
         style={{
           display: 'flex',

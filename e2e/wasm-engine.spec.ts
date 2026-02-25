@@ -9,6 +9,11 @@ async function waitForEngine(page: import('@playwright/test').Page) {
   )
 }
 
+// Helper: wait for canvas to have computed values (first eval cycle done)
+async function waitForCanvasComputed(page: import('@playwright/test').Page) {
+  await page.locator('[data-testid="canvas-computed"]').waitFor({ state: 'attached', timeout: 15_000 })
+}
+
 test.describe('WASM engine (W9)', () => {
   test('engine initialises and evaluates 3 + 4 = 7', async ({ page }) => {
     await page.goto('/')
@@ -191,14 +196,12 @@ test.describe('WASM engine — catalog & handshake (W9.1)', () => {
 
   test('starter graph renders "7" in display node on canvas', async ({ page }) => {
     await page.goto('/canvas')
-    await waitForEngine(page)
-
-    // Wait for the display node to show the computed value "7"
-    const display = page.locator('.react-flow__node-csDisplay')
-    await expect(display.first()).toBeVisible({ timeout: 10_000 })
+    await waitForCanvasComputed(page)
 
     // The display node should show the value 7 (from 3 + 4 starter graph)
-    await expect(display.first()).toContainText('7', { timeout: 5_000 })
+    const display = page.locator('.react-flow__node-csDisplay')
+    await expect(display.first()).toBeVisible()
+    await expect(display.first()).toContainText('7')
   })
 })
 
