@@ -470,6 +470,11 @@ Run through this checklist after any change to the save/load pipeline.
 - [ ] HTML pages show `Cache-Control: public, max-age=0, must-revalidate`
 - [ ] Stripe test webhook returns `200 ok` and `stripe_events` row appears
 - [ ] End-to-end test: sign up → upgrade (7-day trial) → portal → cancel
+- [ ] CSP report endpoint receiving: `curl -X POST .../api/security/csp-report` returns 204, row in `csp_reports`
+- [ ] OPTIONS preflight: `curl -X OPTIONS -H "Origin: https://app.chainsolve.co.uk" .../api/stripe/create-checkout-session` returns 204 with `Access-Control-Allow-Origin`
+- [ ] No wildcard CORS: grep codebase for `Access-Control-Allow-Origin: *` returns nothing
+- [ ] CSP headers present: document response includes both `Content-Security-Policy` and `Content-Security-Policy-Report-Only` with `report-uri`
+- [ ] Security headers: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `HSTS`, `Referrer-Policy` all present
 
 ---
 
