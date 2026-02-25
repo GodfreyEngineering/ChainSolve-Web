@@ -6,18 +6,27 @@
  *
  * Lifecycle:
  *   1. Mount → load project.json from storage (when projectId is present).
- *   2. CanvasArea fires onGraphChange on every node/edge mutation.
- *   3. 2 s debounce → saveProject() → update save-status store.
+ *   2. CanvasArea fires onGraphChange on every node/edge mutation (dirty tracking).
+ *   3. 2 s debounce → doSave() pulls live snapshot via canvasRef → saveProject().
  *   4. Conflict detected → banner with "Keep mine" / "Reload" choices.
+ *
+ * W5.1 fixes:
+ *   - doSave() uses canvasRef.getSnapshot() for authoritative graph state
+ *     (replaces stale pendingNodes/pendingEdges refs that caused blank reopens).
+ *   - "Save now" button + Ctrl+S for immediate save.
+ *   - beforeunload handler flushes a best-effort save on tab close.
+ *   - Route-leave handler saves before navigating back to /app.
+ *   - Status label shows saved node/edge counts for debugging.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import {
   CanvasArea,
   INITIAL_NODES,
   INITIAL_EDGES,
   type CanvasAreaProps,
+  type CanvasAreaHandle,
 } from '../components/canvas/CanvasArea'
 import type { Node, Edge } from '@xyflow/react'
 import type { NodeData } from '../blocks/registry'
@@ -40,6 +49,7 @@ function fmtTime(d: Date): string {
 
 export default function CanvasPage() {
   const { projectId } = useParams<{ projectId?: string }>()
+  const navigate = useNavigate()
 
   // ── Store selectors ────────────────────────────────────────────────────────
   const saveStatus = useProjectStore((s) => s.saveStatus)
@@ -91,12 +101,12 @@ export default function CanvasPage() {
 
   // ── Autosave / conflict refs ───────────────────────────────────────────────
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pendingNodes = useRef<Node<NodeData>[]>([])
-  const pendingEdges = useRef<Edge[]>([])
+  const canvasRef = useRef<CanvasAreaHandle>(null)
   const isSaving = useRef(false)
-  // The server's updated_at captured when a conflict is detected.
-  // Passed as knownUpdatedAt in a force-overwrite save.
   const conflictServerTs = useRef<string | null>(null)
+
+  // ── Saved counts for status display ─────────────────────────────────────────
+  const [savedCounts, setSavedCounts] = useState<{ nodes: number; edges: number } | null>(null)
 
   // ── Inline project name editing ───────────────────────────────────────────
   const [nameEditing, setNameEditing] = useState(false)
@@ -116,9 +126,6 @@ export default function CanvasPage() {
     setLoadPhase('loading')
     setLoadError(null)
 
-    // Fetch BOTH the DB row (for conflict-anchor updated_at) and project.json
-    // in parallel. The DB updated_at is the authoritative anchor for conflict
-    // detection — NOT project.json's updatedAt field.
     Promise.all([readProjectRow(projectId), loadProject(projectId)])
       .then(([row, pj]: [{ name: string; updated_at: string } | null, ProjectJSON]) => {
         const dbUpdatedAt = row?.updated_at ?? pj.updatedAt
@@ -132,7 +139,6 @@ export default function CanvasPage() {
         setLoadError(err instanceof Error ? err.message : 'Failed to load project')
         setLoadPhase('error')
       })
-    // beginLoad and reset are stable Zustand actions
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId])
 
@@ -144,11 +150,15 @@ export default function CanvasPage() {
   }, [])
 
   // ── Core save function ────────────────────────────────────────────────────
+  // Uses canvasRef.getSnapshot() to get the authoritative live graph state,
+  // instead of relying on stale refs (which caused blank reopens).
   const doSave = useCallback(
     async (opts?: { forceKnownUpdatedAt?: string }) => {
       if (!projectId || isSaving.current) return
 
-      // Read freshest state from store to avoid stale closure values
+      const snapshot = canvasRef.current?.getSnapshot()
+      if (!snapshot) return
+
       const state = useProjectStore.getState()
       const knownUpdatedAt = opts?.forceKnownUpdatedAt ?? state.dbUpdatedAt
       if (!knownUpdatedAt) return
@@ -160,8 +170,8 @@ export default function CanvasPage() {
         const result = await saveProject(
           projectId,
           state.projectName,
-          pendingNodes.current,
-          pendingEdges.current,
+          snapshot.nodes,
+          snapshot.edges,
           knownUpdatedAt,
           {
             formatVersion: state.formatVersion,
@@ -175,6 +185,7 @@ export default function CanvasPage() {
         } else {
           conflictServerTs.current = null
           completeSave(result.updatedAt)
+          setSavedCounts({ nodes: snapshot.nodes.length, edges: snapshot.edges.length })
         }
       } catch (err: unknown) {
         failSave(err instanceof Error ? err.message : 'Save failed')
@@ -185,11 +196,12 @@ export default function CanvasPage() {
     [projectId, beginSave, completeSave, failSave, detectConflict],
   )
 
-  // ── onGraphChange — debounced autosave trigger ────────────────────────────
+  // ── onGraphChange — dirty tracking + debounced autosave ────────────────────
+  // Note: we do NOT capture nodes/edges here for the save — doSave() pulls the
+  // authoritative snapshot from canvasRef at save time. This avoids the stale-ref
+  // bug where pendingNodes was empty on first render.
   const handleGraphChange: NonNullable<CanvasAreaProps['onGraphChange']> = useCallback(
-    (nodes, edges) => {
-      pendingNodes.current = nodes
-      pendingEdges.current = edges
+    (_nodes, _edges) => {
       markDirty()
       if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
       autosaveTimer.current = setTimeout(() => {
@@ -197,6 +209,41 @@ export default function CanvasPage() {
       }, AUTOSAVE_DELAY_MS)
     },
     [markDirty, doSave],
+  )
+
+  // ── Flush save on tab close / refresh (best-effort) ────────────────────────
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!useProjectStore.getState().isDirty || !projectId) return
+      void doSave()
+      e.preventDefault()
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [projectId, doSave])
+
+  // ── Ctrl+S / Cmd+S → immediate save ────────────────────────────────────────
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        if (projectId && !readOnly) void doSave()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [projectId, readOnly, doSave])
+
+  // ── Route-leave: save before navigating back to /app ──────────────────────
+  const handleBackToProjects = useCallback(
+    async (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault()
+      if (useProjectStore.getState().isDirty && projectId) {
+        await doSave()
+      }
+      navigate('/app')
+    },
+    [projectId, doSave, navigate],
   )
 
   // ── Inline project name editing ───────────────────────────────────────────
@@ -223,8 +270,6 @@ export default function CanvasPage() {
   const handleOverwrite = useCallback(() => {
     const serverTs = conflictServerTs.current
     if (!serverTs) return
-    // Re-save using the server's updated_at as our known anchor,
-    // which skips the "DB is newer" guard.
     void doSave({ forceKnownUpdatedAt: serverTs })
   }, [doSave])
 
@@ -239,7 +284,12 @@ export default function CanvasPage() {
       case 'saving':
         return { text: 'Saving…', color: 'rgba(244,244,243,0.45)' }
       case 'saved':
-        return { text: `Saved ${lastSavedAt ? fmtTime(lastSavedAt) : ''}`, color: '#22c55e' }
+        return {
+          text: savedCounts
+            ? `Saved ${savedCounts.nodes}n / ${savedCounts.edges}e · ${lastSavedAt ? fmtTime(lastSavedAt) : ''}`
+            : `Saved ${lastSavedAt ? fmtTime(lastSavedAt) : ''}`,
+          color: '#22c55e',
+        }
       case 'conflict':
         return { text: '⚠ Conflict', color: '#f59e0b' }
       case 'error':
@@ -311,6 +361,7 @@ export default function CanvasPage() {
       >
         <a
           href="/app"
+          onClick={handleBackToProjects}
           style={{ fontSize: '0.82rem', opacity: 0.6, textDecoration: 'none', color: 'inherit' }}
         >
           ← Projects
@@ -396,6 +447,28 @@ export default function CanvasPage() {
           >
             {errorMessage}
           </span>
+        )}
+
+        {/* Save now button (project mode only) */}
+        {projectId && !readOnly && (
+          <button
+            onClick={() => void doSave()}
+            disabled={!isDirty || saveStatus === 'saving'}
+            style={{
+              padding: '0.15rem 0.55rem',
+              borderRadius: 5,
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: isDirty ? 'rgba(28,171,176,0.15)' : 'transparent',
+              color: isDirty ? '#1CABB0' : 'rgba(244,244,243,0.35)',
+              cursor: isDirty ? 'pointer' : 'default',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              fontFamily: 'inherit',
+            }}
+            title="Save now (Ctrl+S)"
+          >
+            Save
+          </button>
         )}
 
         <span style={{ marginLeft: 'auto', fontSize: '0.72rem', opacity: 0.35 }}>
@@ -485,6 +558,7 @@ export default function CanvasPage() {
       {/* ── Canvas ───────────────────────────────────────────────────────────── */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
         <CanvasArea
+          ref={canvasRef}
           key={projectId ?? 'scratch'}
           initialNodes={initNodes ?? INITIAL_NODES}
           initialEdges={initEdges ?? INITIAL_EDGES}

@@ -29,12 +29,17 @@ export class ErrorBoundary extends Component<Props, State> {
             alignItems: 'center',
             justifyContent: 'center',
             padding: '2rem',
+            background: '#1a1a1a',
+            color: '#F4F4F3',
           }}
         >
           <div style={{ maxWidth: '480px', textAlign: 'center' }}>
             <h2 style={{ margin: '0 0 0.75rem', color: '#f87171' }}>Something went wrong</h2>
-            <p style={{ opacity: 0.6, marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+            <p style={{ opacity: 0.6, marginBottom: '1rem', fontSize: '0.9rem' }}>
               {this.state.error.message}
+            </p>
+            <p style={{ opacity: 0.35, marginBottom: '1.5rem', fontSize: '0.75rem' }}>
+              Check browser DevTools (F12 → Console) for details.
             </p>
             <button
               style={{

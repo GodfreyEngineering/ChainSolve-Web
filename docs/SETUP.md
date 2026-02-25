@@ -401,7 +401,58 @@ PostgREST (the Supabase REST API layer) caches the DB schema at startup. The `NO
 
 ---
 
-## 11. Go-live checklist
+## 11. Persistence smoke test
+
+Run through this checklist after any change to the save/load pipeline.
+
+### Basic save/load round-trip
+
+- [ ] Open `/app`, click **Create project** → canvas opens
+- [ ] Add 2–3 blocks, connect them with edges
+- [ ] Wait for status bar to show **Saved** (with node/edge counts, e.g. `Saved 3n / 2e`)
+- [ ] Close the browser tab entirely
+- [ ] Reopen the app → open the same project → graph is identical (same blocks, same connections, same values)
+
+### Save Now button
+
+- [ ] Make a change on the canvas (add or move a block)
+- [ ] Click the **Save** button in the top bar before autosave fires
+- [ ] Status changes to **Saving…** then **Saved** with correct counts
+- [ ] Reload the page — change is persisted
+
+### Keyboard shortcut
+
+- [ ] Make a change, press **Ctrl+S** (or **Cmd+S** on macOS)
+- [ ] Status shows **Saved** — change persists after reload
+
+### Node/edge counts in status bar
+
+- [ ] With a saved project open, verify the status text shows `Saved Xn / Ye` where X = number of nodes and Y = number of edges on the canvas
+- [ ] Add a node → save → count increments
+- [ ] Delete a node → save → count decrements
+
+### Tab close protection
+
+- [ ] Make a change (status shows unsaved/dirty)
+- [ ] Close the tab — browser shows a "Leave site?" confirmation dialog
+- [ ] Click **Stay** → project still open, change still present
+
+### Back-to-projects navigation
+
+- [ ] Make a change on the canvas
+- [ ] Click **← Projects** in the top bar
+- [ ] The app saves before navigating (status briefly shows Saving…)
+- [ ] Reopen the project → change is persisted
+
+### Scratch canvas (no project)
+
+- [ ] Open `/canvas` (no project ID) — scratch mode
+- [ ] Verify no save button, no autosave, no status bar save indicators
+- [ ] Changes are ephemeral — closing and reopening `/canvas` starts fresh
+
+---
+
+## 12. Go-live checklist
 
 - [ ] SQL migration applied successfully
 - [ ] Supabase Auth site URL set to `https://app.chainsolve.co.uk`
@@ -417,7 +468,7 @@ PostgREST (the Supabase REST API layer) caches the DB schema at startup. The `NO
 
 ---
 
-## 12. Prod Debug — Billing / Token issues
+## 13. Prod Debug — Billing / Token issues
 
 ### Symptom: "Authentication failed" or "Invalid or expired token"
 

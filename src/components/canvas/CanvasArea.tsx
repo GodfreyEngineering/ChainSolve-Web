@@ -15,6 +15,8 @@ import {
   useMemo,
   useRef,
   useState,
+  forwardRef,
+  useImperativeHandle,
   type DragEvent,
   type MouseEvent,
 } from 'react'
@@ -120,6 +122,11 @@ export interface CanvasAreaProps {
   plan?: Plan
 }
 
+/** Handle exposed by CanvasArea via forwardRef for authoritative save snapshots. */
+export interface CanvasAreaHandle {
+  getSnapshot: () => { nodes: Node<NodeData>[]; edges: Edge[] }
+}
+
 // ── Resize-drag helpers ───────────────────────────────────────────────────────
 
 function clamp(v: number, min: number, max: number) {
@@ -166,19 +173,27 @@ const tbBtn: React.CSSProperties = {
 
 // ── Inner canvas (inside ReactFlowProvider) ───────────────────────────────────
 
-function CanvasInner({
-  initialNodes,
-  initialEdges,
-  onGraphChange,
-  readOnly,
-  plan = 'free',
-}: CanvasAreaProps) {
+const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function CanvasInner(
+  { initialNodes, initialEdges, onGraphChange, readOnly, plan = 'free' },
+  ref,
+) {
   const ent = getEntitlements(plan)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(
     initialNodes ?? INITIAL_NODES,
   )
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges ?? INITIAL_EDGES)
+
+  // Expose a live snapshot getter so the parent can read the authoritative
+  // graph state at save time (instead of relying on stale refs).
+  const latestNodes = useRef(nodes)
+  const latestEdges = useRef(edges)
+  latestNodes.current = nodes
+  latestEdges.current = edges
+
+  useImperativeHandle(ref, () => ({
+    getSnapshot: () => ({ nodes: latestNodes.current, edges: latestEdges.current }),
+  }))
 
   // Notify parent of graph changes — skip the initial mount so loading a project
   // does not immediately mark the canvas as dirty.
@@ -612,14 +627,16 @@ function CanvasInner({
       </div>
     </ComputedContext.Provider>
   )
-}
+})
 
 // ── Public export ─────────────────────────────────────────────────────────────
 
-export function CanvasArea(props: CanvasAreaProps) {
-  return (
-    <ReactFlowProvider>
-      <CanvasInner {...props} />
-    </ReactFlowProvider>
-  )
-}
+export const CanvasArea = forwardRef<CanvasAreaHandle, CanvasAreaProps>(
+  function CanvasArea(props, ref) {
+    return (
+      <ReactFlowProvider>
+        <CanvasInner {...props} ref={ref} />
+      </ReactFlowProvider>
+    )
+  },
+)
