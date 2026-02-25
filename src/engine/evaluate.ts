@@ -1,20 +1,23 @@
 /**
- * evaluate.ts — Pure, synchronous scalar evaluation engine.
+ * evaluate.ts — Pure, synchronous evaluation engine.
  *
  * Algorithm:
  *  1. Build an in-edge map (target → edges) and out-edge map (source → edges).
  *  2. Kahn's topological sort. Nodes in cycles never reach in-degree 0 and
  *     are therefore not evaluated — their result stays absent from the map
- *     (treated as NaN by downstream nodes).
+ *     (treated as error by downstream nodes).
  *  3. Evaluate nodes in topological order. Source nodes call evaluate() with
- *     an empty inputs array; operation nodes pass the computed values of their
+ *     an empty inputs array; operation nodes pass the computed Values of their
  *     upstream connections.
- *  4. Returns Map<nodeId, number>. NaN signals an error, cycle, or
- *     disconnected required input.
+ *  4. Returns Map<nodeId, Value>.
  */
 
 import type { Edge } from '@xyflow/react'
 import { BLOCK_REGISTRY, type NodeData } from '../blocks/registry'
+import { type Value, mkScalar, mkError } from './value'
+
+// Re-export formatValue from value.ts so existing import paths still work.
+export { formatValue } from './value'
 
 /** Minimal node shape we need — avoids importing the full RF Node type. */
 interface SlimNode {
@@ -25,7 +28,7 @@ interface SlimNode {
 export function evaluateGraph(
   nodes: ReadonlyArray<SlimNode>,
   edges: ReadonlyArray<Edge>,
-): Map<string, number> {
+): Map<string, Value> {
   // ── 1. Build adjacency maps ─────────────────────────────────────────────────
 
   /** target nodeId → edges entering it */
@@ -65,13 +68,13 @@ export function evaluateGraph(
       if (newDeg === 0) queue.push(edge.target)
     }
   }
-  // Nodes not in `order` are part of cycles — they produce NaN implicitly
+  // Nodes not in `order` are part of cycles — they produce errors implicitly
   // because their results are never written into `results`.
 
   // ── 3. Evaluate in topological order ───────────────────────────────────────
 
   const nodeMap = new Map(nodes.map((n) => [n.id, n]))
-  const results = new Map<string, number>()
+  const results = new Map<string, Value>()
 
   for (const nodeId of order) {
     const node = nodeMap.get(nodeId)
@@ -80,7 +83,7 @@ export function evaluateGraph(
     const def = BLOCK_REGISTRY.get(node.data.blockType)
     if (!def) continue
 
-    const inputValues: Array<number | null> = def.inputs.map((port) => {
+    const inputValues: Array<Value | null> = def.inputs.map((port) => {
       const edge = (inEdges.get(nodeId) ?? []).find((e) => e.targetHandle === port.id)
       const overrides = node.data.portOverrides as Record<string, boolean> | undefined
       const manualVals = node.data.manualValues as Record<string, number> | undefined
@@ -89,37 +92,21 @@ export function evaluateGraph(
       if (edge && !overrideActive) {
         // Connected, no manual override — use upstream computed value.
         const upstream = results.get(edge.source)
-        // Upstream not yet evaluated (cycle) → propagate NaN.
-        return upstream !== undefined ? upstream : NaN
+        // Upstream not yet evaluated (cycle) → return null.
+        return upstream !== undefined ? upstream : null
       }
-      // Not connected, or override active — use manual value.
-      // null means "unset" and most blocks treat null inputs as NaN.
-      return manualVals?.[port.id] ?? null
+      // Not connected, or override active — use manual value as scalar.
+      const manual = manualVals?.[port.id]
+      return manual !== undefined ? mkScalar(manual) : null
     })
 
     try {
       const result = def.evaluate(inputValues, node.data)
-      results.set(nodeId, isFinite(result) || isNaN(result) ? result : result)
-    } catch {
-      results.set(nodeId, NaN)
+      results.set(nodeId, result)
+    } catch (err) {
+      results.set(nodeId, mkError(err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
   return results
-}
-
-/** Format a computed number for display. */
-export function formatValue(value: number | undefined): string {
-  if (value === undefined) return '—'
-  if (isNaN(value)) return 'NaN'
-  if (!isFinite(value)) return value > 0 ? '+∞' : '−∞'
-
-  // Use toPrecision for compact display with up to 6 significant figures
-  const abs = Math.abs(value)
-  if (abs === 0) return '0'
-  if (abs >= 1e6 || (abs > 0 && abs < 1e-3)) {
-    return value.toExponential(4)
-  }
-  // Strip trailing zeros
-  return parseFloat(value.toPrecision(6)).toString()
 }

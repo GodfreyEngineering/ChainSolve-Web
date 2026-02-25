@@ -490,6 +490,7 @@ export default function CanvasPage() {
           initialEdges={initEdges ?? INITIAL_EDGES}
           onGraphChange={projectId && !readOnly ? handleGraphChange : undefined}
           readOnly={readOnly}
+          plan={plan}
         />
       </div>
     </div>

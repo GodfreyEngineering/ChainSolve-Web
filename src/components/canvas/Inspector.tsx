@@ -10,6 +10,7 @@ import { useEffect } from 'react'
 import { useNodes, useEdges, useReactFlow } from '@xyflow/react'
 import { useComputed } from '../../contexts/ComputedContext'
 import { formatValue } from '../../engine/evaluate'
+import { isError, isScalar } from '../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 
 interface InspectorProps {
@@ -145,8 +146,10 @@ export function Inspector({ nodeId, width, onClose, onResizeStart }: InspectorPr
   const toggleOverride = (portId: string) =>
     update({ portOverrides: { ...portOverrides, [portId]: !portOverrides[portId] } })
 
-  const isNaNVal = value !== undefined && isNaN(value)
-  const isInfVal = value !== undefined && !isNaN(value) && !isFinite(value)
+  const isErrVal =
+    value !== undefined && (isError(value) || (isScalar(value) && isNaN(value.value)))
+  const isInfVal =
+    value !== undefined && isScalar(value) && !isNaN(value.value) && !isFinite(value.value)
 
   const field = (label: string, children: React.ReactNode) => (
     <div style={{ marginBottom: '0.7rem' }}>
@@ -387,8 +390,8 @@ export function Inspector({ nodeId, width, onClose, onResizeStart }: InspectorPr
         {/* Output value */}
         <div
           style={{
-            background: isNaNVal || isInfVal ? 'rgba(239,68,68,0.08)' : 'rgba(28,171,176,0.08)',
-            border: `1px solid ${isNaNVal || isInfVal ? 'rgba(239,68,68,0.25)' : 'rgba(28,171,176,0.25)'}`,
+            background: isErrVal || isInfVal ? 'rgba(239,68,68,0.08)' : 'rgba(28,171,176,0.08)',
+            border: `1px solid ${isErrVal || isInfVal ? 'rgba(239,68,68,0.25)' : 'rgba(28,171,176,0.25)'}`,
             borderRadius: 8,
             padding: '0.6rem',
             textAlign: 'center',
@@ -400,7 +403,7 @@ export function Inspector({ nodeId, width, onClose, onResizeStart }: InspectorPr
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: '1.4rem',
               fontWeight: 700,
-              color: isNaNVal || isInfVal ? '#f87171' : '#1CABB0',
+              color: isErrVal || isInfVal ? '#f87171' : '#1CABB0',
             }}
           >
             {formatValue(value)}

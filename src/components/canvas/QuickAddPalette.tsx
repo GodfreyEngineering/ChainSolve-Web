@@ -9,6 +9,7 @@
 import { useState, useEffect, useRef, type KeyboardEvent } from 'react'
 import { BLOCK_REGISTRY, CATEGORY_ORDER, type BlockDef } from '../../blocks/registry'
 import { trackBlockUsed } from './BlockLibrary'
+import { type Plan, getEntitlements } from '../../lib/entitlements'
 
 interface QuickAddPaletteProps {
   /** Screen X (px) where the palette should anchor */
@@ -19,6 +20,8 @@ interface QuickAddPaletteProps {
   onAdd: (blockType: string) => void
   /** Called when user dismisses without selecting */
   onClose: () => void
+  plan?: Plan
+  onProBlocked?: () => void
 }
 
 // Flatten all blocks ordered by category
@@ -30,7 +33,15 @@ function buildAllBlocks(): BlockDef[] {
 
 const ALL_BLOCKS = buildAllBlocks()
 
-export function QuickAddPalette({ screenX, screenY, onAdd, onClose }: QuickAddPaletteProps) {
+export function QuickAddPalette({
+  screenX,
+  screenY,
+  onAdd,
+  onClose,
+  plan = 'free',
+  onProBlocked,
+}: QuickAddPaletteProps) {
+  const ent = getEntitlements(plan)
   const [query, setQuery] = useState('')
   const [activeIdx, setActiveIdx] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -57,6 +68,10 @@ export function QuickAddPalette({ screenX, screenY, onAdd, onClose }: QuickAddPa
   }, [clampedIdx])
 
   const commit = (def: BlockDef) => {
+    if (def.proOnly && !ent.canUseArrays) {
+      onProBlocked?.()
+      return
+    }
     trackBlockUsed(def.type)
     onAdd(def.type)
   }
@@ -198,6 +213,7 @@ export function QuickAddPalette({ screenX, screenY, onAdd, onClose }: QuickAddPa
           ) : (
             filtered.map((def, i) => {
               const isActive = i === clampedIdx
+              const locked = !!def.proOnly && !ent.canUseArrays
               return (
                 <div
                   key={def.type}
@@ -211,8 +227,10 @@ export function QuickAddPalette({ screenX, screenY, onAdd, onClose }: QuickAddPa
                     color: isActive ? '#1CABB0' : '#F4F4F3',
                     borderLeft: `2px solid ${isActive ? '#1CABB0' : 'transparent'}`,
                     userSelect: 'none',
+                    opacity: locked ? 0.45 : 1,
                   }}
                 >
+                  {locked && <span style={{ fontSize: '0.65rem', marginRight: 4 }}>🔒</span>}
                   {def.label}
                 </div>
               )

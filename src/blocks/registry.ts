@@ -1,15 +1,30 @@
 /**
  * Block registry — defines every block type available on the canvas.
  * Each entry describes its category, React Flow node type, input ports,
- * and a pure scalar evaluate function.
+ * and a pure evaluate function that operates on the polymorphic Value type.
+ *
+ * Existing scalar blocks use the legacy `reg()` helper which auto-wraps
+ * their `(number|null)[] → number` function via `wrapScalarEvaluate()`.
+ * New Value-aware blocks use `regValue()` directly.
  *
  * NodeData must extend Record<string, unknown> for @xyflow/react.
  */
 
-export type BlockCategory = 'input' | 'math' | 'trig' | 'constants' | 'logic' | 'output'
+import { type Value, mkScalar, mkError, extractScalar } from '../engine/value'
+
+export type BlockCategory =
+  | 'input'
+  | 'math'
+  | 'trig'
+  | 'constants'
+  | 'logic'
+  | 'output'
+  | 'data'
+  | 'vectorOps'
+  | 'tableOps'
 
 /** Which React Flow custom-node renderer to use. */
-export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay'
+export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay' | 'csData'
 
 export interface PortDef {
   /** Unique within the block — used as targetHandle / sourceHandle. */
@@ -37,6 +52,12 @@ export interface NodeData extends Record<string, unknown> {
    * is used instead of the upstream computed value.
    */
   portOverrides?: Record<string, boolean>
+  /** Vector data for vectorInput nodes. */
+  vectorData?: number[]
+  /** Table data for tableInput / csvImport nodes. */
+  tableData?: { columns: string[]; rows: number[][] }
+  /** Storage path of an uploaded CSV file. */
+  csvStoragePath?: string
 }
 
 export interface BlockDef {
@@ -47,19 +68,53 @@ export interface BlockDef {
   nodeKind: NodeKind
   inputs: PortDef[]
   defaultData: NodeData
+  /** True for Pro-only blocks (data, vectorOps, tableOps). */
+  proOnly?: boolean
   /**
-   * Pure evaluation function.
+   * Pure evaluation function operating on the polymorphic Value type.
    * `inputs` is ordered by `inputs[]`; null = port disconnected.
-   * Must never throw — return NaN on any error.
+   * Must never throw — return mkError(...) on any error.
    */
-  evaluate: (inputs: ReadonlyArray<number | null>, data: NodeData) => number
+  evaluate: (inputs: ReadonlyArray<Value | null>, data: NodeData) => Value
 }
 
 // ── Registry ─────────────────────────────────────────────────────────────────
 
 export const BLOCK_REGISTRY = new Map<string, BlockDef>()
 
-function reg(def: BlockDef): void {
+/**
+ * Wraps a legacy scalar evaluate function into the Value-based signature.
+ * Non-scalar inputs are treated as null (→ NaN in the original function).
+ */
+function wrapScalarEvaluate(
+  fn: (inputs: ReadonlyArray<number | null>, data: NodeData) => number,
+): (inputs: ReadonlyArray<Value | null>, data: NodeData) => Value {
+  return (inputs, data) => {
+    const scalarInputs = inputs.map(extractScalar)
+    const result = fn(scalarInputs, data)
+    if (isNaN(result)) return mkError('NaN')
+    return mkScalar(result)
+  }
+}
+
+/** Register a legacy scalar block — its evaluate is auto-wrapped. */
+function reg(def: {
+  type: string
+  label: string
+  category: BlockCategory
+  nodeKind: NodeKind
+  inputs: PortDef[]
+  defaultData: NodeData
+  evaluate: (inputs: ReadonlyArray<number | null>, data: NodeData) => number
+}): void {
+  BLOCK_REGISTRY.set(def.type, {
+    ...def,
+    evaluate: wrapScalarEvaluate(def.evaluate),
+  })
+}
+
+/** Register a Value-aware block directly (no wrapping). */
+export function regValue(def: BlockDef): void {
   BLOCK_REGISTRY.set(def.type, def)
 }
 
@@ -480,6 +535,9 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   'constants',
   'logic',
   'output',
+  'data',
+  'vectorOps',
+  'tableOps',
 ]
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -489,4 +547,12 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   constants: 'Constants',
   logic: 'Logic',
   output: 'Output',
+  data: 'Data',
+  vectorOps: 'Vector Ops',
+  tableOps: 'Table Ops',
 }
+
+// ── Pro-only block imports (side-effect registration) ────────────────────────
+import './data-blocks'
+import './vector-blocks'
+import './table-blocks'

@@ -1,8 +1,9 @@
 import { createContext, useContext } from 'react'
+import type { Value } from '../engine/value'
 
-/** Map from node id → computed scalar value (NaN = error/disconnected). */
-export const ComputedContext = createContext<ReadonlyMap<string, number>>(new Map())
+/** Map from node id → computed Value (error kind = error/disconnected). */
+export const ComputedContext = createContext<ReadonlyMap<string, Value>>(new Map())
 
-export function useComputed(): ReadonlyMap<string, number> {
+export function useComputed(): ReadonlyMap<string, Value> {
   return useContext(ComputedContext)
 }

@@ -18,8 +18,13 @@ import { saveProjectJson, loadProjectJson } from './storage'
 
 // ── Schema versioning ─────────────────────────────────────────────────────────
 
-/** Bump only when the JSON shape is incompatible with older readers. */
-export const SCHEMA_VERSION = 1 as const
+/**
+ * Current schema version for project.json.
+ * V1: scalar-only graph (W1-W4).
+ * V2: adds Value type system, data/vector/table blocks (W5).
+ * V1 → V2 migration is transparent (no structural change needed).
+ */
+export const SCHEMA_VERSION = 2 as const
 
 // ── Public types ──────────────────────────────────────────────────────────────
 
@@ -34,11 +39,13 @@ export interface ProjectRow {
 }
 
 /**
- * Canonical project.json wire format (schemaVersion 1).
+ * Canonical project.json wire format.
+ * schemaVersion 1: scalar-only (W1-W4)
+ * schemaVersion 2: polymorphic Value system, data/vector/table blocks (W5+)
  * See docs/PROJECT_FORMAT.md for the full versioning contract.
  */
 export interface ProjectJSON {
-  schemaVersion: 1
+  schemaVersion: 1 | 2
   /** Monotonically increasing; incremented on every save. */
   formatVersion: number
   createdAt: string
@@ -53,7 +60,7 @@ export interface ProjectJSON {
   }
   /**
    * blockType → semver string. Populated in W8 for deterministic replays.
-   * Empty object is valid for schemaVersion 1.
+   * Empty object is valid for all schema versions.
    */
   blockVersions: Record<string, string>
 }
@@ -70,7 +77,7 @@ function buildJson(
   prev?: Pick<ProjectJSON, 'createdAt' | 'formatVersion'>,
 ): ProjectJSON {
   return {
-    schemaVersion: 1,
+    schemaVersion: SCHEMA_VERSION,
     formatVersion: (prev?.formatVersion ?? 0) + 1,
     createdAt: prev?.createdAt ?? new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -141,16 +148,17 @@ export async function createProject(name: string): Promise<ProjectRow> {
   return { ...proj, updated_at: updated ?? proj.updated_at }
 }
 
-/** Load and parse the project.json from storage. Throws on schema mismatch. */
+/** Load and parse the project.json from storage. Accepts V1 and V2 transparently. */
 export async function loadProject(projectId: string): Promise<ProjectJSON> {
   const raw = await loadProjectJson(projectId)
   const pj = raw as Partial<ProjectJSON>
 
-  if (pj.schemaVersion !== 1) {
-    // Migration stub: W3+ will transform older schemas before returning.
-    throw new Error(`Unsupported schemaVersion: ${String(pj.schemaVersion ?? 'missing')}`)
+  if (pj.schemaVersion === 1 || pj.schemaVersion === 2) {
+    // V1 → V2: no structural migration needed (V1 nodes are all scalar;
+    // the V2 reader handles them identically).
+    return raw as ProjectJSON
   }
-  return raw as ProjectJSON
+  throw new Error(`Unsupported schemaVersion: ${String(pj.schemaVersion ?? 'missing')}`)
 }
 
 /**
@@ -267,7 +275,7 @@ export async function duplicateProject(sourceId: string, newName: string): Promi
  * Validates schemaVersion and rebinds IDs to a fresh DB row.
  */
 export async function importProject(json: ProjectJSON, overrideName?: string): Promise<ProjectRow> {
-  if (json.schemaVersion !== 1) {
+  if (json.schemaVersion !== 1 && json.schemaVersion !== 2) {
     throw new Error(`Cannot import: unsupported schemaVersion ${String(json.schemaVersion)}`)
   }
 
@@ -286,7 +294,7 @@ export async function importProject(json: ProjectJSON, overrideName?: string): P
   const proj = data as ProjectRow
 
   const pj: ProjectJSON = {
-    schemaVersion: 1,
+    schemaVersion: SCHEMA_VERSION,
     formatVersion: (json.formatVersion ?? 0) + 1,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

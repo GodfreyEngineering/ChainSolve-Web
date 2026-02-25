@@ -38,6 +38,7 @@ import '@xyflow/react/dist/style.css'
 import { SourceNode } from './nodes/SourceNode'
 import { OperationNode } from './nodes/OperationNode'
 import { DisplayNode } from './nodes/DisplayNode'
+import { DataNode } from './nodes/DataNode'
 import { BlockLibrary, DRAG_TYPE } from './BlockLibrary'
 import { Inspector } from './Inspector'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
@@ -45,6 +46,8 @@ import { QuickAddPalette } from './QuickAddPalette'
 import { ComputedContext } from '../../contexts/ComputedContext'
 import { evaluateGraph } from '../../engine/evaluate'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
+import { type Plan, getEntitlements } from '../../lib/entitlements'
+import { UpgradeModal } from '../UpgradeModal'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -52,6 +55,7 @@ const NODE_TYPES = {
   csSource: SourceNode,
   csOperation: OperationNode,
   csDisplay: DisplayNode,
+  csData: DataNode,
 } as const
 
 // ── Default graph ─────────────────────────────────────────────────────────────
@@ -112,6 +116,8 @@ export interface CanvasAreaProps {
   onGraphChange?: (nodes: Node<NodeData>[], edges: Edge[]) => void
   /** When true, the canvas is view-only: no adding, connecting, deleting, or dragging nodes. */
   readOnly?: boolean
+  /** User's plan for entitlement gating of Pro blocks. */
+  plan?: Plan
 }
 
 // ── Resize-drag helpers ───────────────────────────────────────────────────────
@@ -160,7 +166,15 @@ const tbBtn: React.CSSProperties = {
 
 // ── Inner canvas (inside ReactFlowProvider) ───────────────────────────────────
 
-function CanvasInner({ initialNodes, initialEdges, onGraphChange, readOnly }: CanvasAreaProps) {
+function CanvasInner({
+  initialNodes,
+  initialEdges,
+  onGraphChange,
+  readOnly,
+  plan = 'free',
+}: CanvasAreaProps) {
+  const ent = getEntitlements(plan)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(
     initialNodes ?? INITIAL_NODES,
   )
@@ -246,6 +260,10 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange, readOnly }: Ca
       if (!blockType) return
       const def = BLOCK_REGISTRY.get(blockType)
       if (!def) return
+      if (def.proOnly && !ent.canUseArrays) {
+        setShowUpgradeModal(true)
+        return
+      }
       const position = screenToFlowPosition({ x: e.clientX, y: e.clientY })
       const id = `node_${++nodeIdCounter}`
       setNodes((nds) => [
@@ -253,7 +271,7 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange, readOnly }: Ca
         { id, type: def.nodeKind, position, data: { ...def.defaultData } } as Node<NodeData>,
       ])
     },
-    [readOnly, screenToFlowPosition, setNodes],
+    [readOnly, ent.canUseArrays, screenToFlowPosition, setNodes],
   )
 
   // ── Keyboard: Delete/Backspace removes selected ─────────────────────────────
@@ -491,7 +509,12 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange, readOnly }: Ca
       >
         {/* Block library panel (hidden in read-only mode) */}
         {libVisible && !readOnly && (
-          <BlockLibrary width={libWidth} onResizeStart={onLibResizeStart} />
+          <BlockLibrary
+            width={libWidth}
+            onResizeStart={onLibResizeStart}
+            plan={plan}
+            onProBlocked={() => setShowUpgradeModal(true)}
+          />
         )}
 
         {/* Canvas */}
@@ -571,6 +594,19 @@ function CanvasInner({ initialNodes, initialEdges, onGraphChange, readOnly }: Ca
             screenY={quickAdd.screenY}
             onAdd={onQuickAddBlock}
             onClose={() => setQuickAdd(null)}
+            plan={plan}
+            onProBlocked={() => {
+              setQuickAdd(null)
+              setShowUpgradeModal(true)
+            }}
+          />
+        )}
+        {/* Upgrade modal for Pro-only blocks */}
+        {showUpgradeModal && (
+          <UpgradeModal
+            open={showUpgradeModal}
+            onClose={() => setShowUpgradeModal(false)}
+            reason="feature_locked"
           />
         )}
       </div>

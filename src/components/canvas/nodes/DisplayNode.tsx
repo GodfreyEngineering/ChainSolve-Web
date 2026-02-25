@@ -7,6 +7,7 @@ import { memo } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
 import { formatValue } from '../../../engine/evaluate'
+import { isError, isScalar } from '../../../engine/value'
 import type { NodeData } from '../../../blocks/registry'
 import { NODE_STYLES as s } from './nodeStyles'
 
@@ -15,10 +16,11 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
   const computed = useComputed()
   const value = computed.get(id)
 
-  const isNaNVal = value !== undefined && isNaN(value)
+  const isErrVal =
+    value !== undefined && (isError(value) || (isScalar(value) && isNaN(value.value)))
   const displayStyle: React.CSSProperties = {
     ...s.displayValue,
-    ...(isNaNVal ? { color: '#f87171', opacity: 0.7 } : {}),
+    ...(isErrVal ? { color: '#f87171', opacity: 0.7 } : {}),
   }
 
   return (

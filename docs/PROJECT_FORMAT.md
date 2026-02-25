@@ -5,12 +5,12 @@ It lives at `projects/{userId}/{projectId}/project.json` in Supabase Storage.
 
 ---
 
-## JSON Schema (schemaVersion 1)
+## JSON Schema (schemaVersion 2)
 
 ```jsonc
 {
   // ── Versioning ──────────────────────────────────────────────────────────
-  "schemaVersion": 1,         // integer — ONLY bumped for breaking changes
+  "schemaVersion": 2,         // integer — ONLY bumped for breaking changes (was 1 before W5)
   "formatVersion": 7,         // integer — monotonically increasing per-save
 
   // ── Timestamps ──────────────────────────────────────────────────────────
@@ -43,9 +43,11 @@ It lives at `projects/{userId}/{projectId}/project.json` in Supabase Storage.
 
 - Increments only when the overall JSON envelope is incompatible with an
   older reader (e.g. a field is removed or semantics change fundamentally).
-- Current readers **MUST** reject any file where `schemaVersion !== 1`.
-- Future migration stubs in `loadProject()` will transform older schemas
-  before returning to callers (see `src/lib/projects.ts`).
+- Current readers accept `schemaVersion` 1 or 2 (V1→V2 migration is transparent).
+- Saving always writes `schemaVersion: 2`.
+- **V1 → V2 changes (W5):** added support for `csData` node type, `vectorData`,
+  `tableData`, and `csvStoragePath` fields on NodeData. V1 files contain only
+  scalar nodes and load without any structural migration.
 
 ### `formatVersion`
 
@@ -72,14 +74,22 @@ Each element of `graph.nodes` is a React Flow `Node` with `data` typed as
 ```jsonc
 {
   "id":       "node_101",
-  "type":     "csSource",          // "csSource" | "csOperation" | "csDisplay"
+  "type":     "csSource",          // "csSource" | "csOperation" | "csDisplay" | "csData"
   "position": { "x": 80, "y": 120 },
   "data": {
     "blockType": "number",         // must exist in BLOCK_REGISTRY
     "label":     "Number",
     "value":     3,                // source nodes only
     "manualValues":   { "a": 5 }, // operation nodes — inline overrides
-    "portOverrides":  { "a": true }
+    "portOverrides":  { "a": true },
+
+    // W5 data-node fields (csData kind only):
+    "vectorData":     [1, 2, 3],          // vectorInput — array of numbers
+    "tableData": {                         // tableInput / csvImport
+      "columns": ["A", "B"],
+      "rows": [[1, 2], [3, 4]]
+    },
+    "csvStoragePath": "uploads/…/file.csv" // csvImport — storage reference
   },
   // Optional React Flow fields preserved verbatim:
   "selected":  false,
@@ -89,11 +99,12 @@ Each element of `graph.nodes` is a React Flow `Node` with `data` typed as
 
 ### Node types
 
-| `type`        | Blocks                                | Inputs | Output |
-|---------------|---------------------------------------|--------|--------|
-| `csSource`    | `number`, `slider`, `pi`, `e`, …      | 0      | 1      |
-| `csOperation` | `add`, `multiply`, `sin`, `if`, …     | 1–N    | 1      |
-| `csDisplay`   | `display`                             | 1      | 0      |
+| `type`        | Blocks                                         | Inputs | Output |
+|---------------|-------------------------------------------------|--------|--------|
+| `csSource`    | `number`, `slider`, `pi`, `e`, …                | 0      | 1      |
+| `csOperation` | `add`, `multiply`, `sin`, `if`, vector/table ops | 1–N    | 1      |
+| `csDisplay`   | `display`                                        | 1      | 0      |
+| `csData`      | `vectorInput`, `tableInput`, `csvImport` (W5)    | 0      | 1      |
 
 ---
 
@@ -179,8 +190,9 @@ optimistic lock.
 
 - **Export:** `loadProject(id)` → `JSON.stringify(pj, null, 2)` → download
   as `{name}.json`.
-- **Import:** parse file → validate `schemaVersion === 1` → `importProject(json)`:
+- **Import:** parse file → validate `schemaVersion` is 1 or 2 → `importProject(json)`:
   - Creates a new DB row with a fresh `id` and `owner_id`.
   - Rebinds `project.id` in the JSON to the new row.
   - Resets `createdAt`/`updatedAt` to import time.
+  - Writes `schemaVersion: 2` regardless of source version.
   - Preserves `graph` and `blockVersions` verbatim.

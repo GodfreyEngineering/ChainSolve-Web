@@ -17,6 +17,7 @@ import {
   type BlockCategory,
   type BlockDef,
 } from '../../blocks/registry'
+import { type Plan, getEntitlements } from '../../lib/entitlements'
 
 export const DRAG_TYPE = 'application/chainsolve-block'
 
@@ -170,17 +171,27 @@ const s: StyleMap = {
 
 // ── BlockItem ─────────────────────────────────────────────────────────────────
 
+/** Pro-only categories that require canUseArrays entitlement. */
+const PRO_CATEGORIES: Set<BlockCategory> = new Set(['data', 'vectorOps', 'tableOps'])
+
 interface BlockItemProps {
   def: BlockDef
   favs: Set<string>
   onToggleFav: (type: string) => void
+  entitled: boolean
+  onProBlocked?: () => void
 }
 
-function BlockItem({ def, favs, onToggleFav }: BlockItemProps) {
+function BlockItem({ def, favs, onToggleFav, entitled, onProBlocked }: BlockItemProps) {
   const [hovered, setHovered] = useState(false)
   const isFav = favs.has(def.type)
 
   const onDragStart = (e: DragEvent<HTMLDivElement>) => {
+    if (!entitled) {
+      e.preventDefault()
+      onProBlocked?.()
+      return
+    }
     e.dataTransfer.setData(DRAG_TYPE, def.type)
     e.dataTransfer.effectAllowed = 'copy'
     trackBlockUsed(def.type)
@@ -188,16 +199,20 @@ function BlockItem({ def, favs, onToggleFav }: BlockItemProps) {
 
   return (
     <div
-      draggable
+      draggable={entitled}
       onDragStart={onDragStart}
+      onClick={!entitled ? onProBlocked : undefined}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         ...s.blockItem,
         background: hovered ? 'rgba(28,171,176,0.12)' : 'transparent',
+        opacity: entitled ? 1 : 0.45,
+        cursor: entitled ? 'grab' : 'pointer',
       }}
-      title={`Drag to add ${def.label}`}
+      title={entitled ? `Drag to add ${def.label}` : `${def.label} (Pro)`}
     >
+      {!entitled && <span style={{ fontSize: '0.65rem', marginRight: 4, opacity: 0.6 }}>🔒</span>}
       <span
         style={{
           flex: 1,
@@ -209,7 +224,7 @@ function BlockItem({ def, favs, onToggleFav }: BlockItemProps) {
       >
         {def.label}
       </span>
-      {hovered && (
+      {hovered && entitled && (
         <button
           style={{
             ...s.starBtn,
@@ -233,9 +248,17 @@ function BlockItem({ def, favs, onToggleFav }: BlockItemProps) {
 interface BlockLibraryProps {
   width: number
   onResizeStart: (e: React.MouseEvent) => void
+  plan?: Plan
+  onProBlocked?: () => void
 }
 
-export function BlockLibrary({ width, onResizeStart }: BlockLibraryProps) {
+export function BlockLibrary({
+  width,
+  onResizeStart,
+  plan = 'free',
+  onProBlocked,
+}: BlockLibraryProps) {
+  const ent = getEntitlements(plan)
   const [query, setQuery] = useState('')
   const [filterCat, setFilterCat] = useState<BlockCategory | null>(null)
   const [favs, setFavs] = useState<Set<string>>(getFavs)
@@ -327,7 +350,14 @@ export function BlockLibrary({ width, onResizeStart }: BlockLibraryProps) {
           <div>
             <div style={s.sectionLabel}>Favourites</div>
             {favList.map((def) => (
-              <BlockItem key={def.type} def={def} favs={favs} onToggleFav={toggleFav} />
+              <BlockItem
+                key={def.type}
+                def={def}
+                favs={favs}
+                onToggleFav={toggleFav}
+                entitled={!def.proOnly || ent.canUseArrays}
+                onProBlocked={onProBlocked}
+              />
             ))}
           </div>
         )}
@@ -337,7 +367,14 @@ export function BlockLibrary({ width, onResizeStart }: BlockLibraryProps) {
           <div>
             <div style={s.sectionLabel}>Recent</div>
             {recentList.map((def) => (
-              <BlockItem key={def.type} def={def} favs={favs} onToggleFav={toggleFav} />
+              <BlockItem
+                key={def.type}
+                def={def}
+                favs={favs}
+                onToggleFav={toggleFav}
+                entitled={!def.proOnly || ent.canUseArrays}
+                onProBlocked={onProBlocked}
+              />
             ))}
           </div>
         )}
@@ -348,11 +385,38 @@ export function BlockLibrary({ width, onResizeStart }: BlockLibraryProps) {
             (d) => !q || d.label.toLowerCase().includes(q) || d.type.includes(q),
           )
           if (blocks.length === 0) return null
+          const isPro = PRO_CATEGORIES.has(cat)
           return (
             <div key={cat}>
-              <div style={s.sectionLabel}>{CATEGORY_LABELS[cat]}</div>
+              <div style={s.sectionLabel}>
+                {CATEGORY_LABELS[cat]}
+                {isPro && (
+                  <span
+                    style={{
+                      marginLeft: 6,
+                      fontSize: '0.55rem',
+                      padding: '1px 4px',
+                      borderRadius: 3,
+                      background: 'rgba(28,171,176,0.15)',
+                      color: '#1CABB0',
+                      fontWeight: 700,
+                      letterSpacing: '0.05em',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    PRO
+                  </span>
+                )}
+              </div>
               {blocks.map((def) => (
-                <BlockItem key={def.type} def={def} favs={favs} onToggleFav={toggleFav} />
+                <BlockItem
+                  key={def.type}
+                  def={def}
+                  favs={favs}
+                  onToggleFav={toggleFav}
+                  entitled={!def.proOnly || ent.canUseArrays}
+                  onProBlocked={onProBlocked}
+                />
               ))}
             </div>
           )

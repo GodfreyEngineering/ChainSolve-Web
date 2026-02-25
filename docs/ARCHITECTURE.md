@@ -1,6 +1,6 @@
 # ChainSolve — Architecture
 
-> Updated at each milestone. Current: **W4 (Entitlements + Backend Enforcement)**
+> Updated at each milestone. Current: **W5 (Arrays/Tables + CSV Import + Value System)**
 
 ---
 
@@ -26,9 +26,13 @@
 src/
   blocks/         Block definitions and registry
     registry.ts   All block types, categories, port definitions, evaluate fns
+    data-blocks.ts    Data input blocks: vectorInput, tableInput, csvImport (W5)
+    vector-blocks.ts  Vector operation blocks: length, sum, mean, min, max, sort, etc. (W5)
+    table-blocks.ts   Table operation blocks: filter, sort, column, addColumn, join (W5)
   components/
     canvas/       Canvas UI components
-      nodes/      Custom React Flow node renderers (SourceNode, OperationNode, DisplayNode)
+      nodes/      Custom React Flow node renderers (SourceNode, OperationNode, DisplayNode, DataNode)
+      editors/    Inline editors for data nodes (VectorEditor, TableEditor, CsvPicker) (W5)
       BlockLibrary.tsx  Left-sidebar draggable block palette
       Inspector.tsx     Right-sidebar node property editor
       CanvasArea.tsx    ReactFlow wrapper with drag-drop, keyboard shortcuts
@@ -47,8 +51,11 @@ src/
   contexts/
     ComputedContext.ts  React context for computed Map<nodeId,number>
   engine/
-    evaluate.ts   Pure function: nodes + edges → Map<nodeId, number>
-                  Topological sort (Kahn's algorithm), NaN propagation
+    value.ts      Polymorphic Value type system: Scalar | Vector | Table | Error (W5)
+    evaluate.ts   Pure function: nodes + edges → Map<nodeId, Value>
+                  Topological sort (Kahn's algorithm), NaN/Error propagation
+    csv-parse.ts  Lightweight CSV parser (auto-detect separator, quoted fields) (W5)
+    csv-worker.ts Web Worker for off-thread CSV parsing (W5)
   i18n/           Internationalization (W3)
     config.ts     i18next initialization + language detector
     locales/
@@ -143,7 +150,9 @@ RLS policy: `(storage.foldername(name))[1] = auth.uid()::text`
 
 ## Node Graph Engine
 
-### Block types (M1, scalar only)
+### Block types
+
+**Scalar blocks (M1)**
 
 | Category | Blocks |
 |---|---|
@@ -154,21 +163,43 @@ RLS policy: `(storage.foldername(name))[1] = auth.uid()::text`
 | Logic | Greater, Less, Equal, IfThenElse, Max, Min |
 | Output | Display |
 
+**Data/Vector/Table blocks (W5, Pro-only)**
+
+| Category | Blocks |
+|---|---|
+| Data | Vector Input, Table Input, CSV Import |
+| Vector Ops | Length, Sum, Mean, Min, Max, Sort, Reverse, Slice, Concat, Map |
+| Table Ops | Filter, Sort, Column, Add Column, Join |
+
+### Value type system (W5)
+
+The engine uses a polymorphic `Value` type (`src/engine/value.ts`):
+
+| Kind | Structure | Display |
+|---|---|---|
+| `scalar` | `{ kind: 'scalar', value: number }` | 6-sig-fig number |
+| `vector` | `{ kind: 'vector', value: number[] }` | `[N items]` |
+| `table` | `{ kind: 'table', columns: string[], rows: number[][] }` | `R×C table` |
+| `error` | `{ kind: 'error', message: string }` | Error text |
+
+Existing scalar blocks use the `wrapScalarEvaluate()` adapter — their registration code is unchanged.
+
 ### Evaluation (src/engine/evaluate.ts)
 
 1. Build in-edge map from `edges[]`
-2. Kahn's topological sort (detects cycles → cycle nodes get `NaN`)
+2. Kahn's topological sort (detects cycles → cycle nodes get `mkError(...)`)
 3. Evaluate nodes in order: source nodes return configured value; operation nodes call `def.evaluate(inputs, data)`
-4. Disconnected input ports → `null` → operation emits `NaN`
-5. Returns `Map<nodeId, number>` (NaN for errors/cycles/disconnected)
+4. Disconnected input ports → `null` → scalar operations emit `NaN`, Value operations emit `mkError(...)`
+5. Returns `Map<nodeId, Value>`
 
 ### React Flow node types
 
 | RF type key | Component | Used for |
 |---|---|---|
 | `csSource` | SourceNode | Number, Slider, Pi, E, Tau, Phi (0 inputs) |
-| `csOperation` | OperationNode | All math/trig/logic blocks (1+ inputs, 1 output) |
+| `csOperation` | OperationNode | All math/trig/logic/vector/table ops (1+ inputs, 1 output) |
 | `csDisplay` | DisplayNode | Output/Display (1 input, shows computed value) |
+| `csData` | DataNode | Vector Input, Table Input, CSV Import (0 inputs, 1 output) (W5) |
 
 ---
 
@@ -199,7 +230,7 @@ Design tokens defined in `src/index.css`:
 - Framework: react-i18next + i18next + i18next-browser-languagedetector
 - Languages: English (default), Spanish, French, Italian, German
 - Detection: localStorage key `cs:lang`, falls back to browser language
-- Translation keys organized by namespace: app, nav, auth, projects, billing, canvas, settings, ui, time, entitlements
+- Translation keys organized by namespace: app, nav, auth, projects, billing, canvas, settings, ui, time, entitlements, blocks
 
 ---
 
@@ -261,8 +292,8 @@ UI gating:
 | W2 | ✅ Done | Projects: browser, autosave, conflict detection, import/export |
 | W3 | ✅ Done | Design system, i18n (5 languages), settings pages, favicon/metadata |
 | W4 | ✅ Done | Entitlements + backend enforcement: plan gating, UpgradeModal, read-only canvas, storage cleanup |
-| W5 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
-| W6 | Planned | Arrays + CSV import (Pro) |
+| W5 | ✅ Done | Arrays/Tables + CSV import (Pro): Value type system, 18 new blocks, DataNode + editors, CSV Web Worker |
+| W6 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
 | W7 | Planned | Plot output nodes (Pro, uPlot) |
 | W8 | Planned | Branching/rules for conditional flows (Pro) |
 | W9 | Planned | Custom blocks editor + block groups (Pro) |
