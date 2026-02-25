@@ -150,7 +150,9 @@
     "noData": "Aucune donnée connectée",
     "error": "Erreur de graphique",
     "expand": "Agrandir",
-    "downsampled": "Sous-échantillonné"
+    "downsampled": "Sous-échantillonné",
+    "branding": "Inclure la marque dans l'export",
+    "brandingCaption": "Généré par ChainSolve"
   },
   "settings": {
     "title": "Paramètres",

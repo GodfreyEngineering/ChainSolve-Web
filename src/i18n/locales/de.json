@@ -150,7 +150,9 @@
     "noData": "Keine Daten verbunden",
     "error": "Diagrammfehler",
     "expand": "Vergrößern",
-    "downsampled": "Heruntergesampelt"
+    "downsampled": "Heruntergesampelt",
+    "branding": "Branding in Export einschließen",
+    "brandingCaption": "Erstellt mit ChainSolve"
   },
   "settings": {
     "title": "Einstellungen",

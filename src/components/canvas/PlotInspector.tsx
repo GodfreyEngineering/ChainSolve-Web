@@ -206,6 +206,15 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
           />
           Show legend
         </label>
+        <label style={checkRow}>
+          <input
+            type="checkbox"
+            checked={config.showBranding ?? false}
+            onChange={(e) => onUpdate({ showBranding: e.target.checked })}
+            style={{ accentColor: '#1CABB0' }}
+          />
+          Include branding in export
+        </label>
       </div>
 
       {/* Legend Position (only if legend shown) */}

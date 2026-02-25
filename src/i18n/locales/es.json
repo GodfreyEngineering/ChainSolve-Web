@@ -150,7 +150,9 @@
     "noData": "Sin datos conectados",
     "error": "Error de gráfico",
     "expand": "Expandir",
-    "downsampled": "Submuestreado"
+    "downsampled": "Submuestreado",
+    "branding": "Incluir marca en exportación",
+    "brandingCaption": "Generado por ChainSolve"
   },
   "settings": {
     "title": "Ajustes",

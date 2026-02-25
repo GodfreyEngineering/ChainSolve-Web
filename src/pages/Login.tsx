@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { BRAND } from '../lib/brand'
 
 type Mode = 'login' | 'signup'
 
@@ -19,9 +20,24 @@ const s = {
     padding: '2.5rem',
     width: '100%',
     maxWidth: '400px',
+    animation: 'cs-fade-in 0.4s ease',
+  } as React.CSSProperties,
+  logoWrap: {
+    textAlign: 'center' as const,
+    marginBottom: '1.5rem',
+  } as React.CSSProperties,
+  logo: {
+    height: 40,
+    marginBottom: '0.5rem',
+    display: 'inline-block',
   } as React.CSSProperties,
   heading: { margin: '0 0 0.25rem', fontSize: '1.5rem', fontWeight: 700 } as React.CSSProperties,
-  sub: { margin: '0 0 2rem', opacity: 0.6, fontSize: '0.9rem' } as React.CSSProperties,
+  sub: {
+    margin: '0 0 2rem',
+    opacity: 0.6,
+    fontSize: '0.9rem',
+    textAlign: 'center' as const,
+  } as React.CSSProperties,
   label: {
     display: 'block',
     marginBottom: '0.35rem',
@@ -222,7 +238,9 @@ export default function Login() {
   return (
     <div style={s.page}>
       <div style={s.card}>
-        <h1 style={s.heading}>ChainSolve</h1>
+        <div style={s.logoWrap}>
+          <img src={BRAND.logoWideText} alt="ChainSolve" style={s.logo} />
+        </div>
         <p style={s.sub}>{mode === 'login' ? 'Sign in to your account' : 'Create your account'}</p>
 
         {error && <div style={s.errorBox}>{error}</div>}

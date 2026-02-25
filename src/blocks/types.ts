@@ -58,6 +58,8 @@ export interface PlotConfig {
   xColumn?: string
   /** For Table input: column names for Y series. */
   yColumns?: string[]
+  /** Show ChainSolve branding in exports (default false). */
+  showBranding?: boolean
 }
 
 export interface PortDef {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { BRAND } from '../lib/brand'
 import type { User } from '@supabase/supabase-js'
 import { ProfileSettings } from './settings/ProfileSettings'
 import { BillingSettings } from './settings/BillingSettings'
@@ -79,9 +80,9 @@ export default function Settings() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Nav */}
       <nav style={navStyle}>
-        <span style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.5px' }}>
-          {t('app.name')}
-        </span>
+        <a href="/app" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <img src={BRAND.logoWideText} alt={t('app.name')} style={{ height: 28 }} />
+        </a>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <button style={backBtnStyle} onClick={() => navigate('/app')}>
             ← {t('nav.backToApp')}

@@ -82,6 +82,9 @@ src/
     plot-spec.ts    Pure Vega-Lite spec generation: inline (node) + full (modal) (W6)
     plot-export.ts  SVG/PNG/CSV export utilities + open-in-tab (W6)
     downsample.ts   LTTB downsampling algorithm for large datasets (W6)
+    brand.ts        Centralized brand asset paths + theme helper (W6.1)
+  assets/
+    brand/          SVG brand assets for Vite bundling (only logo-wide-text.svg is small enough) (W6.1)
   pages/
     Login.tsx     Email/password login + signup
     AppShell.tsx  Protected dashboard: plan status, billing, project browser
@@ -127,11 +130,13 @@ public/
   _headers        Cloudflare Pages security headers (CSP, HSTS, etc.) (W5.3)
   _redirects      SPA fallback for Cloudflare Pages
   robots.txt      Crawler policy: block app routes (W5.3)
+  brand/          Static brand assets (SVGs + PNGs) served at /brand/* URLs (W6.1)
 
 docs/
   SETUP.md        Production deploy guide
   UX.md           Canvas UX interaction rules
   PROJECT_FORMAT.md  project.json schema + versioning contract
+  BRANDING.md     Brand asset management, naming conventions, theme variants (W6.1)
   PLOTTING.md     Plot blocks: chart types, export, CSP, downsampling, architecture (W6)
   ARCHITECTURE.md This file
 ```
@@ -349,6 +354,7 @@ UI gating:
 | W5.2 | ✅ Done | Circular import fix (TDZ crash), true bootloader, mobile baseline |
 | W5.3 | ✅ Done | Production hardening: security headers, CI, Playwright e2e, build info, bug reporting |
 | W6 | ✅ Done | Scientific plotting + export: 4 chart types (Vega-Lite), SVG/PNG/CSV export, CSP-safe, theme presets |
+| W6.1 | ✅ Done | Brand pack integration: logos, favicon, login header, nav branding, plot export branding toggle |
 | W7 | Planned | Deterministic JS compute engine (Web Worker, golden test suite) |
 | W8 | Planned | Branching/rules for conditional flows (Pro) |
 | W9 | Planned | Custom blocks editor + block groups (Pro) |

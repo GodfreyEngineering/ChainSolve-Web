@@ -150,7 +150,9 @@
     "noData": "Nessun dato collegato",
     "error": "Errore grafico",
     "expand": "Espandi",
-    "downsampled": "Sottocampionato"
+    "downsampled": "Sottocampionato",
+    "branding": "Includi marchio nell'esportazione",
+    "brandingCaption": "Generato da ChainSolve"
   },
   "settings": {
     "title": "Impostazioni",
