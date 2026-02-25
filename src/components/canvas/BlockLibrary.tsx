@@ -25,7 +25,7 @@ import {
   type Template,
 } from '../../lib/templates'
 
-export const DRAG_TYPE = 'application/chainsolve-block'
+import { DRAG_TYPE, trackBlockUsed } from './blockLibraryUtils'
 
 // ── localStorage helpers ──────────────────────────────────────────────────────
 
@@ -38,11 +38,6 @@ function getRecent(): string[] {
   } catch {
     return []
   }
-}
-
-export function trackBlockUsed(blockType: string): void {
-  const prev = getRecent().filter((t) => t !== blockType)
-  localStorage.setItem(RECENT_KEY, JSON.stringify([blockType, ...prev].slice(0, 8)))
 }
 
 function getFavs(): Set<string> {

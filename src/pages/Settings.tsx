@@ -46,19 +46,17 @@ export default function Settings() {
         return
       }
       setUser(session.user)
-      void loadProfile(session.user.id)
+      supabase
+        .from('profiles')
+        .select('id,email,plan,stripe_customer_id,current_period_end')
+        .eq('id', session.user.id)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (!error && data) setProfile(data as Profile)
+          setLoading(false)
+        })
     })
   }, [navigate])
-
-  const loadProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id,email,plan,stripe_customer_id,current_period_end')
-      .eq('id', userId)
-      .maybeSingle()
-    if (!error && data) setProfile(data as Profile)
-    setLoading(false)
-  }
 
   if (loading) {
     return (

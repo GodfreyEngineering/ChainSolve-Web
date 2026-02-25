@@ -154,30 +154,6 @@ export default function AppShell() {
 
   const importRef = useRef<HTMLInputElement>(null)
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate('/login')
-        return
-      }
-      setUser(session.user)
-      void loadProfile(session.user.id)
-    })
-  }, [navigate])
-
-  const loadProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id,email,plan,stripe_customer_id,current_period_end')
-      .eq('id', userId)
-      .maybeSingle()
-    if (!error && data) setProfile(data as Profile)
-    setLoading(false)
-    void fetchProjects()
-  }
-
   // ── Projects ──────────────────────────────────────────────────────────────
 
   const fetchProjects = useCallback(async () => {
@@ -191,6 +167,28 @@ export default function AppShell() {
       setProjLoading(false)
     }
   }, [])
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate('/login')
+        return
+      }
+      setUser(session.user)
+      supabase
+        .from('profiles')
+        .select('id,email,plan,stripe_customer_id,current_period_end')
+        .eq('id', session.user.id)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (!error && data) setProfile(data as Profile)
+          setLoading(false)
+          void fetchProjects()
+        })
+    })
+  }, [navigate, fetchProjects])
 
   const handleNewProject = async () => {
     const plan = (profile?.plan ?? 'free') as Plan
@@ -691,7 +689,8 @@ function ProjectCard({
       >
         <button
           onClick={() => {
-            menuOpen ? onCloseMenu() : onOpenMenu()
+            if (menuOpen) onCloseMenu()
+            else onOpenMenu()
           }}
           title="Project actions"
           style={{

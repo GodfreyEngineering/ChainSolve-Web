@@ -9,7 +9,7 @@ export const onRequestPost: PagesFunction<{
 }> = async (context) => {
   const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = context.env;
 
-  const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2025-01-27.acacia" as any });
+  const stripe = new Stripe(STRIPE_SECRET_KEY);
   const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   const sig = context.request.headers.get("Stripe-Signature");
@@ -33,15 +33,16 @@ export const onRequestPost: PagesFunction<{
       undefined,      // default timestamp tolerance (300 s)
       cryptoProvider,
     );
-  } catch (err: any) {
-    return new Response(`Webhook signature verification failed: ${err.message}`, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return new Response(`Webhook signature verification failed: ${message}`, { status: 400 });
   }
 
   // Idempotent audit log — event.id (PK) makes duplicate deliveries safe.
   await supabaseAdmin.from("stripe_events").upsert({
     id: event.id,
     type: event.type,
-    payload: event as any,
+    payload: event as unknown as Record<string, unknown>,
   });
 
   // Helper: map Stripe subscription status → plan enum
@@ -62,7 +63,10 @@ export const onRequestPost: PagesFunction<{
 
     // In Stripe SDK v20 / API 2025+, current_period_end lives on SubscriptionItem
     const firstItem = sub.items?.data?.[0];
-    const periodEnd: number | undefined = (firstItem as any)?.current_period_end;
+    const firstItemRecord = firstItem as unknown as Record<string, unknown> | undefined;
+    const periodEnd = typeof firstItemRecord?.current_period_end === "number"
+      ? firstItemRecord.current_period_end
+      : undefined;
     const currentPeriodEnd = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
 
     await supabaseAdmin

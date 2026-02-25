@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Modal } from './ui/Modal'
 import { Input } from './ui/Input'
 import { Button } from './ui/Button'
-import { useToast } from './ui/Toast'
+import { useToast } from './ui/useToast'
 import { supabase } from '../lib/supabase'
 import { BUILD_VERSION, BUILD_SHA, BUILD_ENV } from '../lib/build-info'
 

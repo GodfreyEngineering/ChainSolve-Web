@@ -27,8 +27,8 @@ export const BRAND = {
 } as const
 
 /** Logo appropriate for the current theme (currently always dark). */
-export function chooseLogoForTheme(_isDark: boolean): string {
+export function chooseLogoForTheme(): string {
   // Both light/dark use the same logo-wide-text for now.
-  // When light theme ships, swap to a dark-text variant here.
+  // When light theme ships, accept a theme param and swap to a dark-text variant here.
   return BRAND.logoWideText
 }

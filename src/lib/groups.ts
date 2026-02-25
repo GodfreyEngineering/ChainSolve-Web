@@ -304,7 +304,8 @@ export function expandGroup(
     }
     // Unhide internal edges
     if (e.hidden && memberIds.has(e.source) && memberIds.has(e.target)) {
-      const { hidden: _, ...rest } = e
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { hidden, ...rest } = e
       return rest as Edge
     }
     return e
@@ -330,7 +331,8 @@ export function expandGroup(
 
   const updatedNodes = allNodes.map((n) => {
     if (memberIds.has(n.id)) {
-      const { hidden: _, ...rest } = n
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { hidden, ...rest } = n
       return rest as Node<NodeData>
     }
     if (n.id === groupId) {

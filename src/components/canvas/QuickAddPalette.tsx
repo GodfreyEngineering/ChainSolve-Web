@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useRef, type KeyboardEvent } from 'react'
 import { BLOCK_REGISTRY, CATEGORY_ORDER, type BlockDef } from '../../blocks/registry'
-import { trackBlockUsed } from './BlockLibrary'
+import { trackBlockUsed } from './blockLibraryUtils'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 
 interface QuickAddPaletteProps {

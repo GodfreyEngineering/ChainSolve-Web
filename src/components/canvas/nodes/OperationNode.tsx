@@ -8,7 +8,7 @@
  * - useEdges() for live connection state without prop-drilling.
  */
 
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useMemo } from 'react'
 import {
   Handle,
   Position,
@@ -33,8 +33,14 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const def = BLOCK_REGISTRY.get(nd.blockType)
   const inputs = def?.inputs ?? []
 
-  const manualValues = (nd.manualValues ?? {}) as Record<string, number>
-  const portOverrides = (nd.portOverrides ?? {}) as Record<string, boolean>
+  const manualValues = useMemo(
+    () => (nd.manualValues ?? {}) as Record<string, number>,
+    [nd.manualValues],
+  )
+  const portOverrides = useMemo(
+    () => (nd.portOverrides ?? {}) as Record<string, boolean>,
+    [nd.portOverrides],
+  )
 
   const isPortConnected = useCallback(
     (portId: string) => allEdges.some((e) => e.target === id && e.targetHandle === portId),

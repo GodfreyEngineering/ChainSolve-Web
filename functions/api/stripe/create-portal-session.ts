@@ -28,9 +28,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return jsonError("Server configuration error", 500);
     }
 
-    const stripe = new Stripe(STRIPE_SECRET_KEY, {
-      apiVersion: "2025-01-27.acacia" as any,
-    });
+    const stripe = new Stripe(STRIPE_SECRET_KEY);
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Authenticate caller via Supabase access token

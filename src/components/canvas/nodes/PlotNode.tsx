@@ -6,7 +6,7 @@
  * Supports expand-to-modal and export.
  */
 
-import { memo, lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Handle, Position, useEdges, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
 import { formatValue } from '../../../engine/evaluate'
@@ -14,7 +14,7 @@ import type { Value } from '../../../engine/value'
 import type { NodeData, PlotConfig } from '../../../blocks/types'
 import { NODE_STYLES as s } from './nodeStyles'
 import { loadVega, type VegaAPI } from '../../../lib/vega-loader'
-import { buildInlineSpec } from '../../../lib/plot-spec'
+import { buildInlineSpec, type SpecResult } from '../../../lib/plot-spec'
 
 const PlotExpandModalComponent = lazy(() => import('../PlotExpandModal'))
 
@@ -33,7 +33,10 @@ function PlotExpandModalLazy(props: {
 
 function PlotNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
-  const config = (nd.plotConfig ?? { chartType: 'xyLine' as const }) as PlotConfig
+  const config = useMemo(
+    () => (nd.plotConfig ?? { chartType: 'xyLine' as const }) as PlotConfig,
+    [nd.plotConfig],
+  )
   const computed = useComputed()
   const edges = useEdges()
 
@@ -42,15 +45,24 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
   const inputValue = inputEdge ? computed.get(inputEdge.source) : undefined
   const headerValue = computed.get(id)
 
+  // Derive spec result from inputs (pure computation, no side-effects)
+  const specResult = useMemo(
+    () => buildInlineSpec(inputValue, config),
+    [inputValue, config],
+  )
+  const specError = 'error' in specResult ? specResult.error : null
+  const isDownsampled = !specError && (specResult as SpecResult).isDownsampled
+
   // Vega state
   const containerRef = useRef<HTMLDivElement>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const viewRef = useRef<any>(null)
+  const viewRef = useRef<{ finalize: () => void } | null>(null)
   const [vegaApi, setVegaApi] = useState<VegaAPI | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [renderError, setRenderError] = useState<string | null>(null)
   const [expandOpen, setExpandOpen] = useState(false)
-  const [downsampled, setDownsampled] = useState(false)
+
+  // Combined error: spec parsing errors take precedence over render errors
+  const error = specError ?? renderError
 
   // Lazy-load Vega on mount
   useEffect(() => {
@@ -64,7 +76,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
       })
       .catch((err) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to load chart library')
+          setRenderError(err instanceof Error ? err.message : 'Failed to load chart library')
           setLoading(false)
         }
       })
@@ -74,41 +86,54 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
   }, [])
 
   // Render chart when data, config, or vega API changes
+  // setState is only called inside async callbacks (not synchronously in the effect body).
   useEffect(() => {
-    if (!vegaApi || !containerRef.current) return
-
-    const result = buildInlineSpec(inputValue, config)
-    if ('error' in result) {
-      setError(result.error)
-      setDownsampled(false)
-      return
-    }
-
-    setError(null)
-    setDownsampled(result.isDownsampled)
-
-    try {
-      // Dispose previous view
+    if (!vegaApi || !containerRef.current || specError) {
+      // Clean up existing view when spec becomes invalid
       if (viewRef.current) {
         viewRef.current.finalize()
         viewRef.current = null
       }
-      containerRef.current.innerHTML = ''
-
-      const compiled = vegaApi.compile(result.spec)
-      const runtime = vegaApi.parse(compiled.spec)
-      const view = new vegaApi.View(runtime, {
-        renderer: 'svg',
-        container: containerRef.current,
-        hover: false,
-        expr: vegaApi.expressionInterpreter,
-      })
-      void (view as unknown as { runAsync: () => Promise<void> }).runAsync()
-      viewRef.current = view
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Render error')
+      return
     }
-  }, [vegaApi, inputValue, config])
+
+    const spec = (specResult as SpecResult).spec
+    const container = containerRef.current
+    let cancelled = false
+
+    ;(async () => {
+      try {
+        // Dispose previous view
+        if (viewRef.current) {
+          viewRef.current.finalize()
+          viewRef.current = null
+        }
+        container.innerHTML = ''
+
+        const compiled = vegaApi.compile(spec)
+        const runtime = vegaApi.parse(compiled.spec)
+        const view = new vegaApi.View(runtime, {
+          renderer: 'svg',
+          container,
+          hover: false,
+          expr: vegaApi.expressionInterpreter,
+        })
+        await (view as unknown as { runAsync: () => Promise<void> }).runAsync()
+        if (!cancelled) {
+          viewRef.current = view
+          setRenderError(null)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setRenderError(err instanceof Error ? err.message : 'Render error')
+        }
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [vegaApi, specResult, specError])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -119,7 +144,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
     }
   }, [])
 
-  const onExpand = useCallback(() => setExpandOpen(true), [])
+  const onExpand = useCallback(() => setExpandOpen(true), [setExpandOpen])
 
   return (
     <>
@@ -174,7 +199,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
           />
 
           {/* Downsampled warning */}
-          {downsampled && !loading && !error && (
+          {isDownsampled && !loading && !error && (
             <div
               style={{
                 position: 'absolute',
