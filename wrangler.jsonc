@@ -1,0 +1,6 @@
+{
+  // Cloudflare Pages — minimal config.
+  // Only sets the compatibility date so Functions use a consistent runtime.
+  // Build/deploy settings are managed in the Cloudflare Dashboard.
+  "compatibility_date": "2026-02-25"
+}

@@ -1,7 +1,25 @@
-# Cloudflare Pages — security headers
+# Cloudflare Pages — security + caching headers
 # Applied to all routes. Functions (/api/*) can set their own headers.
+# Order matters: specific rules must come BEFORE the catch-all.
 
+# ── Vite hashed assets — immutable forever ───────────────────────────────────
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── Brand assets — immutable (filenames are stable, content rarely changes) ──
+/brand/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── Infrequently changing static files ───────────────────────────────────────
+/favicon.svg
+  Cache-Control: public, max-age=86400
+
+/robots.txt
+  Cache-Control: public, max-age=86400
+
+# ── Everything else (HTML, SPA routes) — always revalidate ───────────────────
 /*
+  Cache-Control: public, max-age=0, must-revalidate
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

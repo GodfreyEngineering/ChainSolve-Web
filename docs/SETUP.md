@@ -466,6 +466,8 @@ Run through this checklist after any change to the save/load pipeline.
 - [ ] Stripe Customer Portal return URL set to `https://app.chainsolve.co.uk/app`
 - [ ] All 7 Cloudflare environment variables set for Production
 - [ ] Cloudflare Pages deploy succeeded (`npm run build` → `dist/`)
+- [ ] `/assets/*` responses show `Cache-Control: public, max-age=31536000, immutable`
+- [ ] HTML pages show `Cache-Control: public, max-age=0, must-revalidate`
 - [ ] Stripe test webhook returns `200 ok` and `stripe_events` row appears
 - [ ] End-to-end test: sign up → upgrade (7-day trial) → portal → cancel
 
@@ -642,3 +644,79 @@ If any advisor warning persists, check:
 - [ ] Sign in → create project → CRUD works → cannot see other users' data
 - [ ] Upload a CSV → appears in asset list → download works
 - [ ] Delete a project → storage files cleaned up
+
+---
+
+## 16. Cloudflare Performance — Caching & Compatibility
+
+### Cache-Control strategy
+
+The file `public/_headers` configures Cloudflare's edge cache. The rules are
+evaluated top-to-bottom; **specific paths come before the catch-all**.
+
+| Path | `Cache-Control` | Why |
+|------|----------------|-----|
+| `/assets/*` | `public, max-age=31536000, immutable` | Vite adds content hashes to filenames (`index-abc123.js`). A new deploy produces new filenames, so old files never need revalidation. |
+| `/brand/*` | `public, max-age=31536000, immutable` | Logo/icon files with stable names. Replace the file in `public/brand/` and redeploy to bust the cache. |
+| `/favicon.svg`, `/robots.txt` | `public, max-age=86400` | Change infrequently. 24-hour cache is a good balance. |
+| `/*` (everything else) | `public, max-age=0, must-revalidate` | HTML pages, SPA routes. The browser always checks with Cloudflare for the latest `index.html`. Cloudflare still returns `304 Not Modified` when the content hasn't changed, so this is fast. |
+
+### How to verify after deploy
+
+1. Open `https://app.chainsolve.co.uk` in Chrome
+2. Open **DevTools → Network** tab
+3. Hard-refresh (Ctrl+Shift+R) to bypass local cache
+4. Click on any `/assets/index-*.js` request → **Response Headers** should show:
+   ```
+   cache-control: public, max-age=31536000, immutable
+   ```
+5. Click on the document request (`/` or `/app`) → should show:
+   ```
+   cache-control: public, max-age=0, must-revalidate
+   ```
+
+> **Note:** `vite preview` (local) does not apply `_headers` rules — those are
+> Cloudflare-specific. Verify on a real deployment or Preview URL.
+
+### Compatibility date
+
+The file `wrangler.jsonc` at the repo root sets:
+
+```jsonc
+{ "compatibility_date": "2026-02-25" }
+```
+
+This locks the Cloudflare Workers runtime to a known API surface for Pages
+Functions. It prevents surprise breakage when Cloudflare ships runtime changes.
+Update the date periodically (e.g. quarterly) after reviewing the
+[compatibility flags changelog](https://developers.cloudflare.com/workers/configuration/compatibility-flags/).
+
+> **Alternative:** You can also set the compatibility date in the Cloudflare
+> Dashboard → Workers & Pages → `chainsolve-web` → Settings → Compatibility
+> date. The repo file takes precedence if present.
+
+### Local verification
+
+After building, you can preview the app locally and spot-check the output:
+
+```bash
+# Build and preview
+npm run build && npm run preview
+# → http://localhost:4173
+
+# In another terminal, check that hashed assets exist:
+ls dist/assets/index-*.js
+# Should list 1+ files with content hashes in the filename
+```
+
+`vite preview` does **not** apply `_headers` caching rules (those are
+Cloudflare-specific), but it confirms the build output is correct and SPA
+routing works. To verify actual cache headers, deploy to a Cloudflare Preview
+URL and use DevTools as described above.
+
+### Preview vs Production env vars
+
+Cloudflare Pages has **separate** environment variable sets for Production and
+Preview. They do **not** inherit from each other. If billing works on one
+environment but not the other, check that all 7 env vars (see §5b) are set for
+**both** environments in Settings → Environment Variables.
