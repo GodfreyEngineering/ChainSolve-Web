@@ -227,3 +227,15 @@ pub fn get_engine_version() -> String {
 pub fn get_engine_contract_version() -> u32 {
     engine_core::catalog::engine_contract_version()
 }
+
+/// Return the number of registered datasets (dev diagnostics).
+#[wasm_bindgen]
+pub fn dataset_count() -> usize {
+    with_engine(|graph| graph.dataset_count())
+}
+
+/// Return total bytes used by registered datasets (dev diagnostics).
+#[wasm_bindgen]
+pub fn dataset_total_bytes() -> usize {
+    with_engine(|graph| graph.dataset_total_bytes())
+}

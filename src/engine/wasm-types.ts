@@ -138,6 +138,14 @@ export type WorkerRequest =
   | { type: 'registerDataset'; datasetId: string; buffer: ArrayBuffer }
   | { type: 'releaseDataset'; datasetId: string }
   | { type: 'cancel'; requestId: number }
+  | { type: 'getStats'; requestId: number }
+
+// ── Engine stats (W9.4) ──────────────────────────────────────────
+
+export interface EngineStats {
+  datasetCount: number
+  datasetTotalBytes: number
+}
 
 /** Messages sent from worker → main thread. */
 export type WorkerResponse =
@@ -158,3 +166,4 @@ export type WorkerResponse =
       totalNodesEstimate: number
       elapsedMs: number
     }
+  | { type: 'stats'; requestId: number; stats: EngineStats }

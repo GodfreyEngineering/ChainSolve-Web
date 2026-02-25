@@ -35,6 +35,10 @@ jobs:
       - name: Rust tests
         run: cargo test --workspace
 
+      - name: Rust benchmarks (informational)
+        run: cargo bench --package engine-core -- --output-format bencher 2>&1 | tee /tmp/bench-output.txt | head -60
+        continue-on-error: true
+
       - name: Build WASM
         run: wasm-pack build crates/engine-wasm --target web --release
 
@@ -47,7 +51,7 @@ jobs:
       - run: npm ci
 
       - name: Typecheck (app)
-        run: tsc -b --noEmit
+        run: npx tsc -b --noEmit
 
       - name: Typecheck (functions)
         run: npm run typecheck:functions
@@ -59,7 +63,7 @@ jobs:
         run: npm run format:check
 
       - name: Build
-        run: tsc -b && vite build
+        run: npx tsc -b && npx vite build
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

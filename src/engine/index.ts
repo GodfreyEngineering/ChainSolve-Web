@@ -17,6 +17,7 @@ import type {
   PatchOp,
   CatalogEntry,
   EvalOptions,
+  EngineStats,
   WorkerRequest,
   WorkerResponse,
 } from './wasm-types.ts'
@@ -28,6 +29,7 @@ export type {
   PatchOp,
   CatalogEntry,
   EvalOptions,
+  EngineStats,
 } from './wasm-types.ts'
 
 export interface ProgressEvent {
@@ -56,6 +58,8 @@ export interface EngineAPI {
   readonly engineVersion: string
   /** Engine contract version (bumped on correctness policy changes). */
   readonly contractVersion: number
+  /** Query dataset registry stats from the WASM engine. */
+  getStats(): Promise<EngineStats>
   /** Subscribe to progress events. Returns unsubscribe function. */
   onProgress(handler: (event: ProgressEvent) => void): () => void
   /** Terminate the worker. After this call, the engine cannot be used. */
@@ -112,6 +116,7 @@ export async function createEngine(): Promise<EngineAPI> {
         resolve: (r: IncrementalEvalResult) => void
         reject: (e: Error) => void
       }
+    | { kind: 'stats'; resolve: (r: EngineStats) => void; reject: (e: Error) => void }
   const pending = new Map<number, PendingEntry>()
 
   // Progress event subscribers.
@@ -129,6 +134,16 @@ export async function createEngine(): Promise<EngineAPI> {
       }
       for (const listener of progressListeners) {
         listener(event)
+      }
+      return
+    }
+
+    if (msg.type === 'stats') {
+      const p = pending.get(msg.requestId)
+      if (!p) return
+      pending.delete(msg.requestId)
+      if (p.kind === 'stats') {
+        p.resolve(msg.stats)
       }
       return
     }
@@ -182,6 +197,14 @@ export async function createEngine(): Promise<EngineAPI> {
         const id = nextId++
         pending.set(id, { kind: 'incremental', resolve, reject })
         postRequest({ type: 'setInput', requestId: id, nodeId, portId, value })
+      })
+    },
+
+    getStats() {
+      return new Promise<EngineStats>((resolve, reject) => {
+        const id = nextId++
+        pending.set(id, { kind: 'stats', resolve, reject })
+        postRequest({ type: 'getStats', requestId: id })
       })
     },
 

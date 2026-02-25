@@ -19,7 +19,7 @@
  *   - Status label shows saved node/edge counts for debugging.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   CanvasArea,
@@ -39,6 +39,11 @@ import {
 import { useProjectStore } from '../stores/projectStore'
 import { supabase } from '../lib/supabase'
 import { isReadOnly, showBillingBanner, type Plan } from '../lib/entitlements'
+import { isPerfHudEnabled } from '../lib/devFlags'
+
+const PerfHud = lazy(() =>
+  import('../components/PerfHud.tsx').then((m) => ({ default: m.PerfHud })),
+)
 
 const AUTOSAVE_DELAY_MS = 2000
 
@@ -563,6 +568,11 @@ export default function CanvasPage() {
           plan={plan}
         />
       </div>
+      {isPerfHudEnabled() && (
+        <Suspense fallback={null}>
+          <PerfHud />
+        </Suspense>
+      )}
     </div>
   )
 }

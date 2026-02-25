@@ -14,6 +14,10 @@ import type { EvalOptions } from './wasm-types.ts'
 import type { Value } from './value.ts'
 import { toEngineSnapshot } from './bridge.ts'
 import { diffGraph } from './diffGraph.ts'
+import { isPerfHudEnabled } from '../lib/devFlags.ts'
+import { updatePerfMetrics } from './perfMetrics.ts'
+
+const perfEnabled = isPerfHudEnabled()
 
 /** Convert a Record<string, EngineValue> into a Map<string, Value>. */
 function toValueMap(values: Record<string, unknown>): Map<string, Value> {
@@ -49,10 +53,26 @@ export function useGraphEngine(
       // First render: load full snapshot into persistent engine graph.
       snapshotLoaded.current = true
       const snapshot = toEngineSnapshot(nodes, edges)
+      const t0 = perfEnabled ? performance.now() : 0
       engine.loadSnapshot(snapshot, options).then((result) => {
         if (reqId !== pendingRef.current) return
         setComputed(toValueMap(result.values))
         setIsPartial(result.partial ?? false)
+        if (perfEnabled) {
+          updatePerfMetrics({
+            lastEvalMs: result.elapsedUs / 1000,
+            workerRoundTripMs: performance.now() - t0,
+            nodesEvaluated: Object.keys(result.values).length,
+            totalNodes: nodes.length,
+            isPartial: result.partial ?? false,
+          })
+          engine.getStats().then((stats) => {
+            updatePerfMetrics({
+              datasetCount: stats.datasetCount,
+              datasetTotalBytes: stats.datasetTotalBytes,
+            })
+          })
+        }
       })
     } else {
       // Subsequent renders: diff and apply patch.
@@ -62,6 +82,7 @@ export function useGraphEngine(
         prevEdgesRef.current = edges
         return
       }
+      const t0 = perfEnabled ? performance.now() : 0
       engine.applyPatch(ops, options).then((result) => {
         if (reqId !== pendingRef.current) return
         setIsPartial(result.partial ?? false)
@@ -79,6 +100,21 @@ export function useGraphEngine(
           }
           return next
         })
+        if (perfEnabled) {
+          updatePerfMetrics({
+            lastEvalMs: result.elapsedUs / 1000,
+            workerRoundTripMs: performance.now() - t0,
+            nodesEvaluated: result.evaluatedCount,
+            totalNodes: result.totalCount,
+            isPartial: result.partial ?? false,
+          })
+          engine.getStats().then((stats) => {
+            updatePerfMetrics({
+              datasetCount: stats.datasetCount,
+              datasetTotalBytes: stats.datasetTotalBytes,
+            })
+          })
+        }
       })
     }
 

@@ -46,6 +46,12 @@ declare module '@engine-wasm/engine_wasm.js' {
   /** Return the engine contract version (semantic, bumped on correctness changes). */
   export function get_engine_contract_version(): number
 
+  /** Return the number of registered datasets (dev diagnostics). */
+  export function dataset_count(): number
+
+  /** Return total bytes used by registered datasets (dev diagnostics). */
+  export function dataset_total_bytes(): number
+
   /**
    * Load a snapshot with eval options (trace, time budget) and a JS progress callback.
    * @param snapshot_json - JSON-encoded EngineSnapshotV1

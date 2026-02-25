@@ -17,7 +17,8 @@
     "typecheck:functions": "tsc -p functions/tsconfig.json --noEmit",
     "preview": "vite preview",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "bench:rust": "cargo bench --package engine-core"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",

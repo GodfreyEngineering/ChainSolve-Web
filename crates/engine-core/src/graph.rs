@@ -183,6 +183,16 @@ impl EngineGraph {
         self.datasets.remove(id);
     }
 
+    /// Number of datasets currently registered.
+    pub fn dataset_count(&self) -> usize {
+        self.datasets.len()
+    }
+
+    /// Total bytes used by all registered datasets (each f64 = 8 bytes).
+    pub fn dataset_total_bytes(&self) -> usize {
+        self.datasets.values().map(|v| v.len() * 8).sum()
+    }
+
     /// Evaluate only dirty nodes. Returns changed values.
     pub fn evaluate_dirty(&mut self) -> IncrementalEvalResult {
         self.evaluate_dirty_with_options(&EvalOptions::default())
@@ -948,5 +958,35 @@ mod tests {
         let result = g.evaluate_dirty();
         assert_eq!(result.evaluated_count, 3); // remaining 3 nodes
         assert!(!result.partial);
+    }
+
+    #[test]
+    fn dataset_introspection_counts() {
+        let mut g = EngineGraph::new();
+        assert_eq!(g.dataset_count(), 0);
+        assert_eq!(g.dataset_total_bytes(), 0);
+
+        g.register_dataset("a".into(), vec![1.0; 1000]);
+        assert_eq!(g.dataset_count(), 1);
+        assert_eq!(g.dataset_total_bytes(), 8000);
+
+        g.register_dataset("b".into(), vec![2.0; 500]);
+        assert_eq!(g.dataset_count(), 2);
+        assert_eq!(g.dataset_total_bytes(), 12000);
+
+        g.release_dataset("a");
+        assert_eq!(g.dataset_count(), 1);
+        assert_eq!(g.dataset_total_bytes(), 4000);
+
+        g.release_dataset("b");
+        assert_eq!(g.dataset_count(), 0);
+        assert_eq!(g.dataset_total_bytes(), 0);
+    }
+
+    #[test]
+    fn release_nonexistent_dataset_is_noop() {
+        let mut g = EngineGraph::new();
+        g.release_dataset("nope"); // should not panic
+        assert_eq!(g.dataset_count(), 0);
     }
 }

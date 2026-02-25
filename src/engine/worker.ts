@@ -21,6 +21,8 @@ import initWasm, {
   get_catalog,
   get_engine_version,
   get_engine_contract_version,
+  dataset_count,
+  dataset_total_bytes,
 } from '@engine-wasm/engine_wasm.js'
 import wasmUrl from '@engine-wasm/engine_wasm_bg.wasm?url'
 import type {
@@ -194,6 +196,22 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
         release_dataset(msg.datasetId)
       } catch {
         // Fire-and-forget.
+      }
+      break
+    }
+
+    case 'getStats': {
+      try {
+        post({
+          type: 'stats',
+          requestId: msg.requestId,
+          stats: {
+            datasetCount: dataset_count(),
+            datasetTotalBytes: dataset_total_bytes(),
+          },
+        })
+      } catch (err) {
+        postError(msg.requestId, 'STATS_EXCEPTION', err)
       }
       break
     }
