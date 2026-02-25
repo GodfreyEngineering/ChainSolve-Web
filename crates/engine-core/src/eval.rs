@@ -145,6 +145,8 @@ pub fn evaluate(snapshot: &EngineSnapshotV1) -> EvalResult {
         values,
         diagnostics,
         elapsed_us: 0,
+        trace: None,
+        partial: false,
     }
 }
 

@@ -7,8 +7,8 @@ pub mod types;
 pub mod validate;
 
 use error::{EngineError, ErrorCode};
-use graph::PatchOp;
-use types::{EngineSnapshotV1, EvalResult, IncrementalEvalResult};
+use graph::{EvalSignal, PatchOp};
+use types::{EngineSnapshotV1, EvalOptions, EvalResult, IncrementalEvalResult};
 
 /// Top-level public API: validate + evaluate a JSON snapshot.
 ///
@@ -50,6 +50,8 @@ pub fn run_load_snapshot(
         values: inc.changed_values,
         diagnostics: inc.diagnostics,
         elapsed_us: inc.elapsed_us,
+        trace: inc.trace,
+        partial: inc.partial,
     })
 }
 
@@ -78,4 +80,55 @@ pub fn run_set_input(
 ) -> IncrementalEvalResult {
     graph.set_input(node_id, port_id, value);
     graph.evaluate_dirty()
+}
+
+/// Load a snapshot with eval options and a progress callback.
+pub fn run_load_snapshot_with_options<F>(
+    graph: &mut graph::EngineGraph,
+    snapshot_json: &str,
+    opts: &EvalOptions,
+    on_progress: F,
+) -> Result<EvalResult, EngineError>
+where
+    F: FnMut(usize, usize) -> EvalSignal,
+{
+    let snapshot: EngineSnapshotV1 = serde_json::from_str(snapshot_json).map_err(|e| {
+        EngineError::new(
+            ErrorCode::InvalidSnapshot,
+            format!("Failed to parse snapshot: {}", e),
+        )
+    })?;
+
+    validate::validate(&snapshot)?;
+    graph.load_snapshot(snapshot);
+    let inc = graph.evaluate_dirty_with_callback(opts, on_progress);
+
+    Ok(EvalResult {
+        values: inc.changed_values,
+        diagnostics: inc.diagnostics,
+        elapsed_us: inc.elapsed_us,
+        trace: inc.trace,
+        partial: inc.partial,
+    })
+}
+
+/// Apply a JSON patch with eval options and a progress callback.
+pub fn run_patch_with_options<F>(
+    graph: &mut graph::EngineGraph,
+    patch_json: &str,
+    opts: &EvalOptions,
+    on_progress: F,
+) -> Result<IncrementalEvalResult, EngineError>
+where
+    F: FnMut(usize, usize) -> EvalSignal,
+{
+    let ops: Vec<PatchOp> = serde_json::from_str(patch_json).map_err(|e| {
+        EngineError::new(
+            ErrorCode::InvalidSnapshot,
+            format!("Failed to parse patch: {}", e),
+        )
+    })?;
+
+    graph.apply_patch(ops);
+    Ok(graph.evaluate_dirty_with_callback(opts, on_progress))
 }

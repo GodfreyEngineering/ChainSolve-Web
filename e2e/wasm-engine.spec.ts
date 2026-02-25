@@ -330,3 +330,188 @@ test.describe('WASM engine — incremental protocol (W9.2)', () => {
     expect(remove.totalCount).toBe(1) // only n1 left
   })
 })
+
+test.describe('WASM engine — correctness contract (W9.3)', () => {
+  test('contract version is exposed in handshake', async ({ page }) => {
+    await page.goto('/')
+    await waitForEngine(page)
+
+    const contractVersion = await page.evaluate(() => {
+      const engine = (window as Record<string, unknown>).__chainsolve_engine as {
+        contractVersion: number
+      }
+      return engine.contractVersion
+    })
+
+    expect(contractVersion).toBeGreaterThanOrEqual(1)
+    expect(typeof contractVersion).toBe('number')
+  })
+
+  test('scalar + vector broadcasting produces vector', async ({ page }) => {
+    await page.goto('/')
+    await waitForEngine(page)
+
+    const result = await page.evaluate(async () => {
+      const engine = (window as Record<string, unknown>).__chainsolve_engine as {
+        evaluateGraph: (s: unknown, opts?: unknown) => Promise<unknown>
+      }
+
+      return engine.evaluateGraph({
+        version: 1,
+        nodes: [
+          { id: 'n1', blockType: 'number', data: { value: 10 } },
+          { id: 'v1', blockType: 'vectorInput', data: { vectorData: [1, 2, 3] } },
+          { id: 'add', blockType: 'add', data: {} },
+        ],
+        edges: [
+          { id: 'e1', source: 'n1', sourceHandle: 'out', target: 'add', targetHandle: 'a' },
+          { id: 'e2', source: 'v1', sourceHandle: 'out', target: 'add', targetHandle: 'b' },
+        ],
+      })
+    })
+
+    const r = result as { values: Record<string, { kind: string; value: number[] }> }
+    expect(r.values.add.kind).toBe('vector')
+    expect(r.values.add.value).toEqual([11, 12, 13])
+  })
+
+  test('vector length mismatch produces error', async ({ page }) => {
+    await page.goto('/')
+    await waitForEngine(page)
+
+    const result = await page.evaluate(async () => {
+      const engine = (window as Record<string, unknown>).__chainsolve_engine as {
+        evaluateGraph: (s: unknown) => Promise<unknown>
+      }
+
+      return engine.evaluateGraph({
+        version: 1,
+        nodes: [
+          { id: 'v1', blockType: 'vectorInput', data: { vectorData: [1, 2, 3] } },
+          { id: 'v2', blockType: 'vectorInput', data: { vectorData: [4, 5] } },
+          { id: 'add', blockType: 'add', data: {} },
+        ],
+        edges: [
+          { id: 'e1', source: 'v1', sourceHandle: 'out', target: 'add', targetHandle: 'a' },
+          { id: 'e2', source: 'v2', sourceHandle: 'out', target: 'add', targetHandle: 'b' },
+        ],
+      })
+    })
+
+    const r = result as { values: Record<string, { kind: string; message?: string }> }
+    expect(r.values.add.kind).toBe('error')
+    expect(r.values.add.message).toContain('length')
+  })
+
+  test('unary broadcast: sin of vector', async ({ page }) => {
+    await page.goto('/')
+    await waitForEngine(page)
+
+    const result = await page.evaluate(async () => {
+      const engine = (window as Record<string, unknown>).__chainsolve_engine as {
+        evaluateGraph: (s: unknown) => Promise<unknown>
+      }
+
+      return engine.evaluateGraph({
+        version: 1,
+        nodes: [
+          { id: 'v1', blockType: 'vectorInput', data: { vectorData: [0] } },
+          { id: 'sin', blockType: 'sin', data: {} },
+        ],
+        edges: [
+          { id: 'e1', source: 'v1', sourceHandle: 'out', target: 'sin', targetHandle: 'a' },
+        ],
+      })
+    })
+
+    const r = result as { values: Record<string, { kind: string; value: number[] }> }
+    expect(r.values.sin.kind).toBe('vector')
+    expect(r.values.sin.value).toEqual([0])
+  })
+
+  test('trace mode returns trace entries', async ({ page }) => {
+    await page.goto('/')
+    await waitForEngine(page)
+
+    const result = await page.evaluate(async () => {
+      const engine = (window as Record<string, unknown>).__chainsolve_engine as {
+        evaluateGraph: (s: unknown, opts?: unknown) => Promise<unknown>
+      }
+
+      return engine.evaluateGraph(
+        {
+          version: 1,
+          nodes: [
+            { id: 'n1', blockType: 'number', data: { value: 5 } },
+            { id: 'n2', blockType: 'number', data: { value: 3 } },
+            { id: 'add', blockType: 'add', data: {} },
+          ],
+          edges: [
+            { id: 'e1', source: 'n1', sourceHandle: 'out', target: 'add', targetHandle: 'a' },
+            { id: 'e2', source: 'n2', sourceHandle: 'out', target: 'add', targetHandle: 'b' },
+          ],
+        },
+        { trace: true },
+      )
+    })
+
+    const r = result as {
+      values: Record<string, unknown>
+      trace: Array<{
+        nodeId: string
+        opId: string
+        inputs: Record<string, unknown>
+        output: unknown
+      }>
+    }
+
+    expect(r.trace).toBeDefined()
+    expect(r.trace.length).toBe(3)
+
+    // Trace should contain entries for all 3 nodes
+    const nodeIds = r.trace.map((t) => t.nodeId).sort()
+    expect(nodeIds).toEqual(['add', 'n1', 'n2'])
+
+    // Each entry should have opId, inputs, and output
+    for (const entry of r.trace) {
+      expect(entry.opId).toBeTruthy()
+      expect(entry.output).toBeDefined()
+    }
+  })
+
+  test('time budget option is accepted and partial field is returned', async ({ page }) => {
+    await page.goto('/')
+    await waitForEngine(page)
+
+    // Verify that the engine accepts timeBudgetMs and returns a result
+    // with the partial field. WASM evaluation is too fast (~0.1ms for
+    // simple graphs) to reliably trigger a timeout in e2e, so we just
+    // verify the protocol works.
+    const result = await page.evaluate(async () => {
+      const engine = (window as Record<string, unknown>).__chainsolve_engine as {
+        evaluateGraph: (s: unknown, opts?: unknown) => Promise<unknown>
+      }
+
+      return engine.evaluateGraph(
+        {
+          version: 1,
+          nodes: [
+            { id: 'n1', blockType: 'number', data: { value: 1 } },
+            { id: 'n2', blockType: 'number', data: { value: 2 } },
+            { id: 'add', blockType: 'add', data: {} },
+          ],
+          edges: [
+            { id: 'e1', source: 'n1', sourceHandle: 'out', target: 'add', targetHandle: 'a' },
+            { id: 'e2', source: 'n2', sourceHandle: 'out', target: 'add', targetHandle: 'b' },
+          ],
+        },
+        { timeBudgetMs: 5000 }, // generous budget — should complete fully
+      )
+    })
+
+    const r = result as { partial: boolean; values: Record<string, { kind: string; value: number }> }
+    expect(typeof r.partial).toBe('boolean')
+    expect(r.partial).toBe(false) // small graph finishes within budget
+    expect(r.values.add).toEqual({ kind: 'scalar', value: 3 })
+  })
+})

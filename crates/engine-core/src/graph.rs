@@ -1,9 +1,19 @@
 use crate::ops::evaluate_node_with_datasets;
 use crate::types::{
-    Diagnostic, DiagLevel, EdgeDef, EngineSnapshotV1, IncrementalEvalResult, NodeDef, Value,
+    Diagnostic, DiagLevel, EdgeDef, EngineSnapshotV1, EvalOptions, IncrementalEvalResult, NodeDef,
+    TraceEntry, Value,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet, VecDeque};
+
+// ── Progress callback signal ────────────────────────────────────────
+
+/// Signal returned by the progress callback.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum EvalSignal {
+    Continue,
+    Abort,
+}
 
 // ── Patch types ──────────────────────────────────────────────────────
 
@@ -175,7 +185,29 @@ impl EngineGraph {
 
     /// Evaluate only dirty nodes. Returns changed values.
     pub fn evaluate_dirty(&mut self) -> IncrementalEvalResult {
+        self.evaluate_dirty_with_options(&EvalOptions::default())
+    }
+
+    /// Evaluate dirty nodes with options (trace, time budget).
+    pub fn evaluate_dirty_with_options(&mut self, opts: &EvalOptions) -> IncrementalEvalResult {
+        self.evaluate_dirty_with_callback(opts, |_, _| EvalSignal::Continue)
+    }
+
+    /// Evaluate dirty nodes with a progress callback.
+    ///
+    /// The callback receives `(evaluated_count, dirty_count)` after each node
+    /// and returns `Continue` or `Abort`. On `Abort`, remaining dirty nodes
+    /// stay dirty for resumption on the next call.
+    pub fn evaluate_dirty_with_callback<F>(
+        &mut self,
+        opts: &EvalOptions,
+        mut on_progress: F,
+    ) -> IncrementalEvalResult
+    where
+        F: FnMut(usize, usize) -> EvalSignal,
+    {
         let mut diagnostics: Vec<Diagnostic> = Vec::new();
+        let mut trace: Vec<TraceEntry> = Vec::new();
 
         // Rebuild topo order if structure changed.
         if self.topo_dirty {
@@ -184,8 +216,10 @@ impl EngineGraph {
         }
 
         let total_count = self.nodes.len();
+        let dirty_count = self.dirty.len();
         let mut changed_values: HashMap<String, Value> = HashMap::new();
         let mut evaluated_count: usize = 0;
+        let mut partial = false;
 
         // Walk topo order, evaluate dirty nodes.
         for node_id in &self.topo_order.clone() {
@@ -234,6 +268,27 @@ impl EngineGraph {
             );
             evaluated_count += 1;
 
+            // Collect trace if enabled.
+            if opts.trace {
+                let within_limit = opts
+                    .max_trace_nodes
+                    .map(|max| trace.len() < max)
+                    .unwrap_or(true);
+                if within_limit {
+                    let input_summaries = node_inputs
+                        .iter()
+                        .map(|(k, v)| (k.clone(), v.summarize()))
+                        .collect();
+                    trace.push(TraceEntry {
+                        node_id: node_id.clone(),
+                        op_id: node.block_type.clone(),
+                        inputs: input_summaries,
+                        output: result.summarize(),
+                        diagnostics: vec![],
+                    });
+                }
+            }
+
             // Report unknown blocks.
             if let Value::Error { ref message } = result {
                 if message.starts_with("Unknown block type") {
@@ -260,6 +315,12 @@ impl EngineGraph {
                 // (they were pre-marked dirty by mark_dirty BFS, but can be pruned).
                 self.prune_downstream(node_id);
             }
+
+            // Call progress callback (also used for time budget checking).
+            if on_progress(evaluated_count, dirty_count) == EvalSignal::Abort {
+                partial = true;
+                break;
+            }
         }
 
         IncrementalEvalResult {
@@ -268,6 +329,8 @@ impl EngineGraph {
             elapsed_us: 0,
             evaluated_count,
             total_count,
+            trace: if opts.trace { Some(trace) } else { None },
+            partial,
         }
     }
 
@@ -767,5 +830,123 @@ mod tests {
 
         let result = g.evaluate_dirty();
         assert!(result.changed_values.contains_key("disp"));
+    }
+
+    // ── W9.3: Trace tests ──────────────────────────────────────────
+
+    #[test]
+    fn trace_mode_collects_entries() {
+        let mut g = EngineGraph::new();
+        g.load_snapshot(snapshot_3_plus_4());
+        let opts = EvalOptions {
+            trace: true,
+            ..Default::default()
+        };
+        let result = g.evaluate_dirty_with_options(&opts);
+        assert!(result.trace.is_some());
+        let trace = result.trace.unwrap();
+        assert_eq!(trace.len(), 3); // n1, n2, add
+    }
+
+    #[test]
+    fn trace_off_by_default() {
+        let mut g = EngineGraph::new();
+        g.load_snapshot(snapshot_3_plus_4());
+        let result = g.evaluate_dirty();
+        assert!(result.trace.is_none());
+    }
+
+    #[test]
+    fn max_trace_nodes_caps() {
+        let mut g = EngineGraph::new();
+        g.load_snapshot(snapshot_3_plus_4());
+        let opts = EvalOptions {
+            trace: true,
+            max_trace_nodes: Some(2),
+            ..Default::default()
+        };
+        let result = g.evaluate_dirty_with_options(&opts);
+        assert_eq!(result.trace.unwrap().len(), 2);
+    }
+
+    // ── W9.3: Partial / callback tests ─────────────────────────────
+
+    #[test]
+    fn callback_abort_produces_partial_result() {
+        // 5 nodes in chain: n1 → neg1 → neg2 → neg3 → neg4
+        let snap = EngineSnapshotV1 {
+            version: 1,
+            nodes: vec![
+                num_node("n1", 1.0),
+                op_node("neg1", "negate"),
+                op_node("neg2", "negate"),
+                op_node("neg3", "negate"),
+                op_node("neg4", "negate"),
+            ],
+            edges: vec![
+                edge("e1", "n1", "out", "neg1", "a"),
+                edge("e2", "neg1", "out", "neg2", "a"),
+                edge("e3", "neg2", "out", "neg3", "a"),
+                edge("e4", "neg3", "out", "neg4", "a"),
+            ],
+        };
+
+        let mut g = EngineGraph::new();
+        g.load_snapshot(snap);
+
+        // Abort after evaluating 2 nodes.
+        let mut count = 0;
+        let result =
+            g.evaluate_dirty_with_callback(&EvalOptions::default(), |_eval, _total| {
+                count += 1;
+                if count >= 2 {
+                    EvalSignal::Abort
+                } else {
+                    EvalSignal::Continue
+                }
+            });
+
+        assert!(result.partial);
+        assert_eq!(result.evaluated_count, 2);
+    }
+
+    #[test]
+    fn partial_resumable() {
+        // Same chain as above, abort after 2, then resume.
+        let snap = EngineSnapshotV1 {
+            version: 1,
+            nodes: vec![
+                num_node("n1", 1.0),
+                op_node("neg1", "negate"),
+                op_node("neg2", "negate"),
+                op_node("neg3", "negate"),
+                op_node("neg4", "negate"),
+            ],
+            edges: vec![
+                edge("e1", "n1", "out", "neg1", "a"),
+                edge("e2", "neg1", "out", "neg2", "a"),
+                edge("e3", "neg2", "out", "neg3", "a"),
+                edge("e4", "neg3", "out", "neg4", "a"),
+            ],
+        };
+
+        let mut g = EngineGraph::new();
+        g.load_snapshot(snap);
+
+        // Abort after 2 nodes.
+        let mut count = 0;
+        g.evaluate_dirty_with_callback(&EvalOptions::default(), |_eval, _total| {
+            count += 1;
+            if count >= 2 {
+                EvalSignal::Abort
+            } else {
+                EvalSignal::Continue
+            }
+        });
+
+        // Resume — remaining dirty nodes should be evaluated.
+        let result = g.evaluate_dirty();
+        assert_eq!(result.evaluated_count, 3); // remaining 3 nodes
+        assert!(!result.partial);
     }
 }

@@ -5,19 +5,22 @@
  *  1. Worker loads → imports WASM init + glue
  *  2. Calls init(wasmUrl) to instantiate the WASM module
  *  3. Posts { type: 'ready' } to main thread
- *  4. Listens for messages: evaluate, loadSnapshot, applyPatch, setInput, registerDataset, releaseDataset
+ *  4. Listens for messages: evaluate, loadSnapshot, applyPatch, setInput, registerDataset, releaseDataset, cancel
  *  5. Returns typed responses to main thread
  */
 
 import initWasm, {
   evaluate,
   load_snapshot,
+  load_snapshot_with_options,
   apply_patch,
+  apply_patch_with_options,
   set_input,
   register_dataset,
   release_dataset,
   get_catalog,
   get_engine_version,
+  get_engine_contract_version,
 } from '@engine-wasm/engine_wasm.js'
 import wasmUrl from '@engine-wasm/engine_wasm_bg.wasm?url'
 import type {
@@ -26,6 +29,7 @@ import type {
   EngineEvalResult,
   EngineErrorResult,
   IncrementalEvalResult,
+  EvalOptions,
 } from './wasm-types.ts'
 
 function post(msg: WorkerResponse) {
@@ -63,12 +67,32 @@ function parseIncrementalResult(raw: string, requestId: number): void {
   }
 }
 
+/** Check if eval options require the *_with_options WASM path. */
+function needsOptions(opts?: EvalOptions): opts is EvalOptions {
+  return !!opts && (!!opts.trace || !!opts.timeBudgetMs || !!opts.maxTraceNodes)
+}
+
+/** Create a progress callback that posts progress messages. */
+function makeProgressCb(requestId: number, startMs: number) {
+  return (evaluated: number, total: number) => {
+    const elapsedMs = performance.now() - startMs
+    post({
+      type: 'progress',
+      requestId,
+      evaluatedNodes: evaluated,
+      totalNodesEstimate: total,
+      elapsedMs,
+    })
+  }
+}
+
 async function initialize() {
   try {
     await initWasm(wasmUrl)
     const catalog = JSON.parse(get_catalog())
     const engineVersion = get_engine_version()
-    post({ type: 'ready', catalog, engineVersion })
+    const contractVersion = get_engine_contract_version()
+    post({ type: 'ready', catalog, engineVersion, contractVersion })
   } catch (err) {
     post({
       type: 'init-error',
@@ -86,8 +110,19 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
   switch (msg.type) {
     case 'evaluate': {
       try {
-        const raw = evaluate(JSON.stringify(msg.snapshot))
-        parseFullResult(raw, msg.requestId)
+        if (needsOptions(msg.options)) {
+          // When options are present, use persistent graph path for trace/budget support.
+          const startMs = performance.now()
+          const raw = load_snapshot_with_options(
+            JSON.stringify(msg.snapshot),
+            JSON.stringify(msg.options),
+            makeProgressCb(msg.requestId, startMs),
+          )
+          parseFullResult(raw, msg.requestId)
+        } else {
+          const raw = evaluate(JSON.stringify(msg.snapshot))
+          parseFullResult(raw, msg.requestId)
+        }
       } catch (err) {
         postError(msg.requestId, 'EVAL_EXCEPTION', err)
       }
@@ -96,8 +131,18 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
 
     case 'loadSnapshot': {
       try {
-        const raw = load_snapshot(JSON.stringify(msg.snapshot))
-        parseFullResult(raw, msg.requestId)
+        if (needsOptions(msg.options)) {
+          const startMs = performance.now()
+          const raw = load_snapshot_with_options(
+            JSON.stringify(msg.snapshot),
+            JSON.stringify(msg.options),
+            makeProgressCb(msg.requestId, startMs),
+          )
+          parseFullResult(raw, msg.requestId)
+        } else {
+          const raw = load_snapshot(JSON.stringify(msg.snapshot))
+          parseFullResult(raw, msg.requestId)
+        }
       } catch (err) {
         postError(msg.requestId, 'LOAD_EXCEPTION', err)
       }
@@ -106,8 +151,18 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
 
     case 'applyPatch': {
       try {
-        const raw = apply_patch(JSON.stringify(msg.ops))
-        parseIncrementalResult(raw, msg.requestId)
+        if (needsOptions(msg.options)) {
+          const startMs = performance.now()
+          const raw = apply_patch_with_options(
+            JSON.stringify(msg.ops),
+            JSON.stringify(msg.options),
+            makeProgressCb(msg.requestId, startMs),
+          )
+          parseIncrementalResult(raw, msg.requestId)
+        } else {
+          const raw = apply_patch(JSON.stringify(msg.ops))
+          parseIncrementalResult(raw, msg.requestId)
+        }
       } catch (err) {
         postError(msg.requestId, 'PATCH_EXCEPTION', err)
       }
@@ -140,6 +195,12 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
       } catch {
         // Fire-and-forget.
       }
+      break
+    }
+
+    case 'cancel': {
+      // WASM is synchronous — can't interrupt mid-execution.
+      // The main thread discards stale results via pendingRef.
       break
     }
   }

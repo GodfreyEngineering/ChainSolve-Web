@@ -61,6 +61,52 @@ impl Value {
             _ => None,
         }
     }
+
+    pub fn as_vector(&self) -> Option<&Vec<f64>> {
+        match self {
+            Value::Vector { value } => Some(value),
+            _ => None,
+        }
+    }
+
+    pub fn as_table(&self) -> Option<(&Vec<String>, &Vec<Vec<f64>>)> {
+        match self {
+            Value::Table { columns, rows } => Some((columns, rows)),
+            _ => None,
+        }
+    }
+
+    pub fn is_error(&self) -> bool {
+        matches!(self, Value::Error { .. })
+    }
+
+    /// Returns the kind tag as a string for error messages.
+    pub fn kind_str(&self) -> &'static str {
+        match self {
+            Value::Scalar { .. } => "scalar",
+            Value::Vector { .. } => "vector",
+            Value::Table { .. } => "table",
+            Value::Error { .. } => "error",
+        }
+    }
+
+    /// Compact summary for trace serialization (large vectors/tables summarized).
+    pub fn summarize(&self) -> ValueSummary {
+        match self {
+            Value::Scalar { value } => ValueSummary::Scalar { value: *value },
+            Value::Vector { value } => ValueSummary::Vector {
+                length: value.len(),
+                sample: value.iter().take(5).copied().collect(),
+            },
+            Value::Table { columns, rows } => ValueSummary::Table {
+                rows: rows.len(),
+                columns: columns.len(),
+            },
+            Value::Error { message } => ValueSummary::Error {
+                message: message.clone(),
+            },
+        }
+    }
 }
 
 // ── Evaluation result ─────────────────────────────────────────────
@@ -74,6 +120,12 @@ pub struct EvalResult {
     pub diagnostics: Vec<Diagnostic>,
     /// Wall-clock evaluation time in microseconds.
     pub elapsed_us: u64,
+    /// Audit trace (only present when `options.trace = true`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trace: Option<Vec<TraceEntry>>,
+    /// True if evaluation was cut short by time budget.
+    #[serde(default)]
+    pub partial: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -110,4 +162,61 @@ pub struct IncrementalEvalResult {
     pub elapsed_us: u64,
     pub evaluated_count: usize,
     pub total_count: usize,
+    /// Audit trace (only present when `options.trace = true`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trace: Option<Vec<TraceEntry>>,
+    /// True if evaluation was cut short by time budget.
+    #[serde(default)]
+    pub partial: bool,
+}
+
+// ── Evaluation options ──────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EvalOptions {
+    /// Enable audit trace collection.
+    #[serde(default)]
+    pub trace: bool,
+    /// Max number of nodes to include in trace (default: unlimited).
+    #[serde(default)]
+    pub max_trace_nodes: Option<usize>,
+    /// Time budget in milliseconds. 0 = no budget.
+    #[serde(default)]
+    pub time_budget_ms: u64,
+}
+
+impl Default for EvalOptions {
+    fn default() -> Self {
+        Self {
+            trace: false,
+            max_trace_nodes: None,
+            time_budget_ms: 0,
+        }
+    }
+}
+
+// ── Audit trace ─────────────────────────────────────────────────────
+
+/// Compact summary of a Value for trace serialization.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "camelCase")]
+pub enum ValueSummary {
+    Scalar { value: f64 },
+    Vector { length: usize, sample: Vec<f64> },
+    Table { rows: usize, columns: usize },
+    Error { message: String },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TraceEntry {
+    pub node_id: String,
+    pub op_id: String,
+    /// Input summaries: port_id → ValueSummary.
+    pub inputs: HashMap<String, ValueSummary>,
+    /// Output summary.
+    pub output: ValueSummary,
+    /// Node-level diagnostics (if any).
+    pub diagnostics: Vec<Diagnostic>,
 }

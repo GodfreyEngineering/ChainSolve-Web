@@ -220,7 +220,7 @@ window.__chainsolve_engine.engineVersion // e.g. "0.1.0"
 ## Worker handshake protocol
 
 1. Main thread creates worker → worker loads WASM via `initWasm()`
-2. Worker sends `{ type: 'ready', catalog: CatalogEntry[], engineVersion: string }`
+2. Worker sends `{ type: 'ready', catalog: CatalogEntry[], engineVersion: string, contractVersion: number }`
 3. Main thread resolves `createEngine()` promise and provides `EngineAPI`
 4. If init fails, worker sends `{ type: 'init-error', error: { code, message } }`
 5. Main thread shows `EngineFatalError` screen with retry button
@@ -267,3 +267,19 @@ Completed in W9.2:
 - WASM-side persistent state via `thread_local!` + `RefCell<Option<EngineGraph>>`
 
 See [W9_2_SCALE.md](W9_2_SCALE.md) for full architecture details.
+
+## W9.3 changes (Scientific Correctness Contract)
+
+Completed in W9.3:
+
+- **Broadcasting**: All unary/binary math/trig/logic ops broadcast across Scalar, Vector, and Table values
+- **NaN canonicalization**: All op outputs normalized (NaN → canonical NaN, -0 → +0)
+- **Contract version**: `engine.contractVersion` (currently `1`) included in worker handshake
+- **Audit trace**: Optional `{ trace: true }` returns per-node `TraceEntry[]` with input/output summaries
+- **Progress events**: `engine.onProgress(handler)` fires per-node during evaluation
+- **Time budget**: `{ timeBudgetMs: N }` cooperatively aborts evaluation, sets `partial: true`
+- **Partial results**: Aborted evaluations preserve dirty state for resumable re-evaluation
+- **EvalOptions**: `{ trace, maxTraceNodes, timeBudgetMs }` accepted by all evaluation methods
+- Worker protocol v3: `progress` messages, `cancel` handler, `contractVersion` in handshake
+
+See [W9_3_CORRECTNESS.md](W9_3_CORRECTNESS.md) for full correctness contract details.

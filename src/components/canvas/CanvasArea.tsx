@@ -236,7 +236,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   // ── Computed values (incremental via WASM engine) ──────────────────────────
   const engine = useEngine()
-  const computed = useGraphEngine(nodes, edges, engine)
+  const { computed } = useGraphEngine(nodes, edges, engine)
 
   // ── Connection validation: 1 edge per input handle ──────────────────────────
   const isValidConnection = useCallback<IsValidConnection>(

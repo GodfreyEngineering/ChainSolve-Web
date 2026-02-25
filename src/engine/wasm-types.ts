@@ -34,6 +34,8 @@ export interface EngineEvalResult {
   values: Record<string, EngineValue>
   diagnostics: EngineDiagnostic[]
   elapsedUs: number
+  trace?: TraceEntry[]
+  partial?: boolean
 }
 
 export type EngineValue =
@@ -81,23 +83,78 @@ export interface IncrementalEvalResult {
   elapsedUs: number
   evaluatedCount: number
   totalCount: number
+  trace?: TraceEntry[]
+  partial?: boolean
+}
+
+// ── Eval options (W9.3) ─────────────────────────────────────────
+
+export interface EvalOptions {
+  trace?: boolean
+  maxTraceNodes?: number
+  timeBudgetMs?: number
+}
+
+// ── Trace types (W9.3) ──────────────────────────────────────────
+
+export type ValueSummary =
+  | { kind: 'scalar'; value: number }
+  | { kind: 'vector'; length: number; sample: number[] }
+  | { kind: 'table'; rows: number; columns: number }
+  | { kind: 'error'; message: string }
+
+export interface TraceEntry {
+  nodeId: string
+  opId: string
+  inputs: Record<string, ValueSummary>
+  output: ValueSummary
+  diagnostics: EngineDiagnostic[]
 }
 
 // ── Worker messages ───────────────────────────────────────────────
 
 /** Messages sent from main thread → worker. */
 export type WorkerRequest =
-  | { type: 'evaluate'; requestId: number; snapshot: EngineSnapshotV1 }
-  | { type: 'loadSnapshot'; requestId: number; snapshot: EngineSnapshotV1 }
-  | { type: 'applyPatch'; requestId: number; ops: PatchOp[] }
-  | { type: 'setInput'; requestId: number; nodeId: string; portId: string; value: number }
+  | {
+      type: 'evaluate'
+      requestId: number
+      snapshot: EngineSnapshotV1
+      options?: EvalOptions
+    }
+  | {
+      type: 'loadSnapshot'
+      requestId: number
+      snapshot: EngineSnapshotV1
+      options?: EvalOptions
+    }
+  | { type: 'applyPatch'; requestId: number; ops: PatchOp[]; options?: EvalOptions }
+  | {
+      type: 'setInput'
+      requestId: number
+      nodeId: string
+      portId: string
+      value: number
+    }
   | { type: 'registerDataset'; datasetId: string; buffer: ArrayBuffer }
   | { type: 'releaseDataset'; datasetId: string }
+  | { type: 'cancel'; requestId: number }
 
 /** Messages sent from worker → main thread. */
 export type WorkerResponse =
-  | { type: 'ready'; catalog: CatalogEntry[]; engineVersion: string }
+  | {
+      type: 'ready'
+      catalog: CatalogEntry[]
+      engineVersion: string
+      contractVersion: number
+    }
   | { type: 'result'; requestId: number; result: EngineEvalResult }
   | { type: 'incremental'; requestId: number; result: IncrementalEvalResult }
   | { type: 'error'; requestId: number; error: { code: string; message: string } }
   | { type: 'init-error'; error: { code: string; message: string } }
+  | {
+      type: 'progress'
+      requestId: number
+      evaluatedNodes: number
+      totalNodesEstimate: number
+      elapsedMs: number
+    }

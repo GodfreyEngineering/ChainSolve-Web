@@ -22,6 +22,17 @@ pub fn evaluate_node_with_datasets(
     data: &HashMap<String, serde_json::Value>,
     datasets: Option<&HashMap<String, Vec<f64>>>,
 ) -> Value {
+    let raw = evaluate_node_inner(block_type, inputs, data, datasets);
+    canonicalize_value(raw)
+}
+
+/// Inner dispatch — not canonicalized. Called by evaluate_node_with_datasets.
+fn evaluate_node_inner(
+    block_type: &str,
+    inputs: &HashMap<String, Value>,
+    data: &HashMap<String, serde_json::Value>,
+    datasets: Option<&HashMap<String, Vec<f64>>>,
+) -> Value {
     match block_type {
         // ── Sources (0 inputs) ────────────────────────────────────
         "number" | "slider" => {
@@ -43,56 +54,42 @@ pub fn evaluate_node_with_datasets(
         "inf" => Value::scalar(f64::INFINITY),
 
         // ── Math (2 inputs: a, b or 1 input: in) ─────────────────
-        "add" => binary(inputs, |a, b| a + b),
-        "subtract" => binary(inputs, |a, b| a - b),
-        "multiply" => binary(inputs, |a, b| a * b),
-        "divide" => binary(inputs, |a, b| a / b),
-        "power" => {
-            let base = scalar_or_nan(inputs, "base");
-            let exp = scalar_or_nan(inputs, "exp");
-            Value::scalar(base.powf(exp))
-        }
-        "mod" => binary(inputs, |a, b| a % b),
+        "add" => binary_broadcast(inputs, |a, b| a + b),
+        "subtract" => binary_broadcast(inputs, |a, b| a - b),
+        "multiply" => binary_broadcast(inputs, |a, b| a * b),
+        "divide" => binary_broadcast(inputs, |a, b| a / b),
+        "power" => binary_broadcast_ports(inputs, "base", "exp", |base, exp| base.powf(exp)),
+        "mod" => binary_broadcast(inputs, |a, b| a % b),
         "clamp" => {
             let x = scalar_or_nan(inputs, "val");
             let lo = scalar_or_nan(inputs, "min");
             let hi = scalar_or_nan(inputs, "max");
             Value::scalar(x.max(lo).min(hi))
         }
-        "negate" => unary(inputs, |x| -x),
-        "abs" => unary(inputs, |x| x.abs()),
-        "sqrt" => unary(inputs, |x| x.sqrt()),
-        "floor" => unary(inputs, |x| x.floor()),
-        "ceil" => unary(inputs, |x| x.ceil()),
-        "round" => unary(inputs, |x| x.round()),
+        "negate" => unary_broadcast(inputs, |x| -x),
+        "abs" => unary_broadcast(inputs, |x| x.abs()),
+        "sqrt" => unary_broadcast(inputs, |x| x.sqrt()),
+        "floor" => unary_broadcast(inputs, |x| x.floor()),
+        "ceil" => unary_broadcast(inputs, |x| x.ceil()),
+        "round" => unary_broadcast(inputs, |x| x.round()),
 
         // ── Trig ──────────────────────────────────────────────────
-        "sin" => unary(inputs, |x| x.sin()),
-        "cos" => unary(inputs, |x| x.cos()),
-        "tan" => unary(inputs, |x| x.tan()),
-        "asin" => unary(inputs, |x| x.asin()),
-        "acos" => unary(inputs, |x| x.acos()),
-        "atan" => unary(inputs, |x| x.atan()),
-        "atan2" => {
-            let y = scalar_or_nan(inputs, "y");
-            let x = scalar_or_nan(inputs, "x");
-            Value::scalar(y.atan2(x))
-        }
-        "degToRad" => {
-            let d = scalar_or_nan(inputs, "deg");
-            Value::scalar(d.to_radians())
-        }
-        "radToDeg" => {
-            let r = scalar_or_nan(inputs, "rad");
-            Value::scalar(r.to_degrees())
-        }
+        "sin" => unary_broadcast(inputs, |x| x.sin()),
+        "cos" => unary_broadcast(inputs, |x| x.cos()),
+        "tan" => unary_broadcast(inputs, |x| x.tan()),
+        "asin" => unary_broadcast(inputs, |x| x.asin()),
+        "acos" => unary_broadcast(inputs, |x| x.acos()),
+        "atan" => unary_broadcast(inputs, |x| x.atan()),
+        "atan2" => binary_broadcast_ports(inputs, "y", "x", |y, x| y.atan2(x)),
+        "degToRad" => unary_broadcast_port(inputs, "deg", |d| d.to_radians()),
+        "radToDeg" => unary_broadcast_port(inputs, "rad", |r| r.to_degrees()),
 
         // ── Logic ─────────────────────────────────────────────────
-        "greater" => binary(inputs, |a, b| if a > b { 1.0 } else { 0.0 }),
-        "less" => binary(inputs, |a, b| if a < b { 1.0 } else { 0.0 }),
-        "equal" => binary(inputs, |a, b| if (a - b).abs() < f64::EPSILON { 1.0 } else { 0.0 }),
-        "max" => binary(inputs, |a, b| a.max(b)),
-        "min" => binary(inputs, |a, b| a.min(b)),
+        "greater" => binary_broadcast(inputs, |a, b| if a > b { 1.0 } else { 0.0 }),
+        "less" => binary_broadcast(inputs, |a, b| if a < b { 1.0 } else { 0.0 }),
+        "equal" => binary_broadcast(inputs, |a, b| if (a - b).abs() < f64::EPSILON { 1.0 } else { 0.0 }),
+        "max" => binary_broadcast(inputs, |a, b| a.max(b)),
+        "min" => binary_broadcast(inputs, |a, b| a.min(b)),
         "ifthenelse" => {
             let cond = scalar_or_nan(inputs, "cond");
             let then = scalar_or_nan(inputs, "then");
@@ -310,6 +307,40 @@ pub fn evaluate_node_with_datasets(
     }
 }
 
+// ── Canonicalization ─────────────────────────────────────────────
+
+/// Canonicalize NaN to a single bit pattern and normalize -0 to +0.
+#[inline]
+fn canonicalize(v: f64) -> f64 {
+    if v.is_nan() {
+        f64::NAN
+    } else if v == 0.0 {
+        0.0 // normalizes -0.0 to +0.0
+    } else {
+        v
+    }
+}
+
+/// Canonicalize all f64 values in a Value.
+fn canonicalize_value(v: Value) -> Value {
+    match v {
+        Value::Scalar { value } => Value::Scalar {
+            value: canonicalize(value),
+        },
+        Value::Vector { value } => Value::Vector {
+            value: value.into_iter().map(canonicalize).collect(),
+        },
+        Value::Table { columns, rows } => Value::Table {
+            columns,
+            rows: rows
+                .into_iter()
+                .map(|row| row.into_iter().map(canonicalize).collect())
+                .collect(),
+        },
+        Value::Error { .. } => v,
+    }
+}
+
 // ── Helpers ───────────────────────────────────────────────────────
 
 fn scalar_or_nan(inputs: &HashMap<String, Value>, port: &str) -> f64 {
@@ -319,15 +350,188 @@ fn scalar_or_nan(inputs: &HashMap<String, Value>, port: &str) -> f64 {
         .unwrap_or(f64::NAN)
 }
 
-fn unary(inputs: &HashMap<String, Value>, f: impl Fn(f64) -> f64) -> Value {
-    let x = scalar_or_nan(inputs, "a");
-    Value::scalar(f(x))
+// ── Broadcasting helpers ────────────────────────────────────────
+
+/// Unary operation with broadcasting on a named port:
+/// Scalar → Scalar, Vector → Vector (elementwise), Table → Table (elementwise),
+/// Error → propagate, None → f(NaN).
+fn unary_broadcast_port(
+    inputs: &HashMap<String, Value>,
+    port: &str,
+    f: impl Fn(f64) -> f64,
+) -> Value {
+    match inputs.get(port) {
+        Some(Value::Scalar { value }) => Value::scalar(f(*value)),
+        Some(Value::Vector { value }) => Value::Vector {
+            value: value.iter().map(|x| f(*x)).collect(),
+        },
+        Some(Value::Table { columns, rows }) => Value::Table {
+            columns: columns.clone(),
+            rows: rows
+                .iter()
+                .map(|row| row.iter().map(|x| f(*x)).collect())
+                .collect(),
+        },
+        Some(Value::Error { message }) => Value::error(message.clone()),
+        None => Value::scalar(f(f64::NAN)),
+    }
 }
 
-fn binary(inputs: &HashMap<String, Value>, f: impl Fn(f64, f64) -> f64) -> Value {
-    let a = scalar_or_nan(inputs, "a");
-    let b = scalar_or_nan(inputs, "b");
-    Value::scalar(f(a, b))
+/// Convenience: unary broadcast on port "a".
+fn unary_broadcast(inputs: &HashMap<String, Value>, f: impl Fn(f64) -> f64) -> Value {
+    unary_broadcast_port(inputs, "a", f)
+}
+
+/// Binary operation with broadcasting on named ports.
+///
+/// Rules:
+/// - Scalar ⊕ Scalar → Scalar
+/// - Scalar ⊕ Vector → Vector (broadcast scalar)
+/// - Vector ⊕ Scalar → Vector (broadcast scalar)
+/// - Vector ⊕ Vector → Vector (same-length, else error)
+/// - Scalar ⊕ Table → Table (broadcast scalar)
+/// - Table ⊕ Scalar → Table (broadcast scalar)
+/// - Table ⊕ Table → Table (same-shape, else error)
+/// - Error on either side → propagate first error
+/// - Vector ⊕ Table / Table ⊕ Vector → error
+fn binary_broadcast_ports(
+    inputs: &HashMap<String, Value>,
+    port_a: &str,
+    port_b: &str,
+    f: impl Fn(f64, f64) -> f64,
+) -> Value {
+    let a = inputs.get(port_a);
+    let b = inputs.get(port_b);
+
+    // Propagate errors first.
+    if let Some(Value::Error { message }) = a {
+        return Value::error(message.clone());
+    }
+    if let Some(Value::Error { message }) = b {
+        return Value::error(message.clone());
+    }
+
+    match (a, b) {
+        // Scalar ⊕ Scalar
+        (Some(Value::Scalar { value: va }), Some(Value::Scalar { value: vb })) => {
+            Value::scalar(f(*va, *vb))
+        }
+        // None cases → treat missing as NaN scalar
+        (None, None) => Value::scalar(f(f64::NAN, f64::NAN)),
+        (Some(Value::Scalar { value: va }), None) => Value::scalar(f(*va, f64::NAN)),
+        (None, Some(Value::Scalar { value: vb })) => Value::scalar(f(f64::NAN, *vb)),
+
+        // Scalar ⊕ Vector → Vector
+        (Some(Value::Scalar { value: s }), Some(Value::Vector { value: vec })) => Value::Vector {
+            value: vec.iter().map(|x| f(*s, *x)).collect(),
+        },
+        // Vector ⊕ Scalar → Vector
+        (Some(Value::Vector { value: vec }), Some(Value::Scalar { value: s })) => Value::Vector {
+            value: vec.iter().map(|x| f(*x, *s)).collect(),
+        },
+        // Vector ⊕ Vector → same length
+        (Some(Value::Vector { value: va }), Some(Value::Vector { value: vb })) => {
+            if va.len() != vb.len() {
+                return Value::error(format!(
+                    "Vector length mismatch: {} vs {}",
+                    va.len(),
+                    vb.len()
+                ));
+            }
+            Value::Vector {
+                value: va.iter().zip(vb.iter()).map(|(a, b)| f(*a, *b)).collect(),
+            }
+        }
+
+        // Scalar ⊕ Table → Table
+        (Some(Value::Scalar { value: s }), Some(Value::Table { columns, rows })) => Value::Table {
+            columns: columns.clone(),
+            rows: rows
+                .iter()
+                .map(|row| row.iter().map(|x| f(*s, *x)).collect())
+                .collect(),
+        },
+        // Table ⊕ Scalar → Table
+        (Some(Value::Table { columns, rows }), Some(Value::Scalar { value: s })) => Value::Table {
+            columns: columns.clone(),
+            rows: rows
+                .iter()
+                .map(|row| row.iter().map(|x| f(*x, *s)).collect())
+                .collect(),
+        },
+        // Table ⊕ Table → same shape
+        (
+            Some(Value::Table {
+                columns: ca,
+                rows: ra,
+            }),
+            Some(Value::Table {
+                columns: cb,
+                rows: rb,
+            }),
+        ) => {
+            if ca.len() != cb.len() || ra.len() != rb.len() {
+                return Value::error(format!(
+                    "Table shape mismatch: {}x{} vs {}x{}",
+                    ra.len(),
+                    ca.len(),
+                    rb.len(),
+                    cb.len()
+                ));
+            }
+            Value::Table {
+                columns: ca.clone(),
+                rows: ra
+                    .iter()
+                    .zip(rb.iter())
+                    .map(|(row_a, row_b)| {
+                        row_a.iter().zip(row_b.iter()).map(|(a, b)| f(*a, *b)).collect()
+                    })
+                    .collect(),
+            }
+        }
+
+        // Vector ⊕ None → broadcast NaN
+        (Some(Value::Vector { value: vec }), None) => Value::Vector {
+            value: vec.iter().map(|x| f(*x, f64::NAN)).collect(),
+        },
+        (None, Some(Value::Vector { value: vec })) => Value::Vector {
+            value: vec.iter().map(|x| f(f64::NAN, *x)).collect(),
+        },
+        // Table ⊕ None → broadcast NaN
+        (Some(Value::Table { columns, rows }), None) => Value::Table {
+            columns: columns.clone(),
+            rows: rows
+                .iter()
+                .map(|row| row.iter().map(|x| f(*x, f64::NAN)).collect())
+                .collect(),
+        },
+        (None, Some(Value::Table { columns, rows })) => Value::Table {
+            columns: columns.clone(),
+            rows: rows
+                .iter()
+                .map(|row| row.iter().map(|x| f(f64::NAN, *x)).collect())
+                .collect(),
+        },
+
+        // Incompatible: Vector ⊕ Table, Table ⊕ Vector, or Error ⊕ None
+        (Some(va), Some(vb)) => Value::error(format!(
+            "Cannot broadcast {} with {}",
+            va.kind_str(),
+            vb.kind_str()
+        )),
+        (Some(Value::Error { message }), None) | (None, Some(Value::Error { message })) => {
+            Value::error(message.clone())
+        }
+    }
+}
+
+/// Convenience: binary broadcast on ports "a" and "b".
+fn binary_broadcast(
+    inputs: &HashMap<String, Value>,
+    f: impl Fn(f64, f64) -> f64,
+) -> Value {
+    binary_broadcast_ports(inputs, "a", "b", f)
 }
 
 fn require_vector<'a>(
@@ -598,6 +802,156 @@ mod tests {
         match v {
             Value::Error { message } => assert_eq!(message, "No data"),
             _ => panic!("Expected Error"),
+        }
+    }
+
+    // ── W9.3: Broadcasting tests ─────────────────────────────────
+
+    #[test]
+    fn add_scalar_plus_vector() {
+        let mut inputs = HashMap::new();
+        inputs.insert("a".into(), Value::scalar(10.0));
+        inputs.insert("b".into(), Value::Vector { value: vec![1.0, 2.0, 3.0] });
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => assert_eq!(value, vec![11.0, 12.0, 13.0]),
+            _ => panic!("Expected Vector, got {:?}", v),
+        }
+    }
+
+    #[test]
+    fn multiply_vector_times_scalar() {
+        let mut inputs = HashMap::new();
+        inputs.insert("a".into(), Value::Vector { value: vec![2.0, 4.0, 6.0] });
+        inputs.insert("b".into(), Value::scalar(3.0));
+        let v = evaluate_node("multiply", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => assert_eq!(value, vec![6.0, 12.0, 18.0]),
+            _ => panic!("Expected Vector"),
+        }
+    }
+
+    #[test]
+    fn add_vector_length_mismatch() {
+        let mut inputs = HashMap::new();
+        inputs.insert("a".into(), Value::Vector { value: vec![1.0, 2.0] });
+        inputs.insert("b".into(), Value::Vector { value: vec![1.0, 2.0, 3.0] });
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn sin_of_vector() {
+        let mut inputs = HashMap::new();
+        inputs.insert(
+            "a".into(),
+            Value::Vector {
+                value: vec![0.0, std::f64::consts::FRAC_PI_2],
+            },
+        );
+        let v = evaluate_node("sin", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => {
+                assert!((value[0] - 0.0).abs() < 1e-10);
+                assert!((value[1] - 1.0).abs() < 1e-10);
+            }
+            _ => panic!("Expected Vector"),
+        }
+    }
+
+    #[test]
+    fn add_scalar_plus_table() {
+        let mut inputs = HashMap::new();
+        inputs.insert("a".into(), Value::scalar(100.0));
+        inputs.insert(
+            "b".into(),
+            Value::Table {
+                columns: vec!["X".into(), "Y".into()],
+                rows: vec![vec![1.0, 2.0], vec![3.0, 4.0]],
+            },
+        );
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        match v {
+            Value::Table { rows, .. } => {
+                assert_eq!(rows, vec![vec![101.0, 102.0], vec![103.0, 104.0]]);
+            }
+            _ => panic!("Expected Table"),
+        }
+    }
+
+    #[test]
+    fn vector_cross_table_is_error() {
+        let mut inputs = HashMap::new();
+        inputs.insert("a".into(), Value::Vector { value: vec![1.0] });
+        inputs.insert(
+            "b".into(),
+            Value::Table {
+                columns: vec!["X".into()],
+                rows: vec![vec![1.0]],
+            },
+        );
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn nan_canonicalization() {
+        // Missing inputs default to NaN → result should be canonical NaN
+        let v = evaluate_node("add", &HashMap::new(), &HashMap::new());
+        match v {
+            Value::Scalar { value } => {
+                assert!(value.is_nan());
+                assert_eq!(value.to_bits(), f64::NAN.to_bits());
+            }
+            _ => panic!("Expected Scalar"),
+        }
+    }
+
+    #[test]
+    fn negative_zero_normalized() {
+        let mut inputs = HashMap::new();
+        inputs.insert("a".into(), Value::scalar(0.0));
+        inputs.insert("b".into(), Value::scalar(0.0));
+        let v = evaluate_node("multiply", &inputs, &HashMap::new());
+        match v {
+            Value::Scalar { value } => {
+                // 0 * 0 = 0, canonicalized to +0
+                assert_eq!(value.to_bits(), 0.0_f64.to_bits());
+            }
+            _ => panic!("Expected Scalar"),
+        }
+    }
+
+    #[test]
+    fn power_broadcasts() {
+        let mut inputs = HashMap::new();
+        inputs.insert(
+            "base".into(),
+            Value::Vector { value: vec![2.0, 3.0, 4.0] },
+        );
+        inputs.insert("exp".into(), Value::scalar(2.0));
+        let v = evaluate_node("power", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => assert_eq!(value, vec![4.0, 9.0, 16.0]),
+            _ => panic!("Expected Vector, got {:?}", v),
+        }
+    }
+
+    #[test]
+    fn deg_to_rad_broadcasts() {
+        let mut inputs = HashMap::new();
+        inputs.insert(
+            "deg".into(),
+            Value::Vector { value: vec![0.0, 90.0, 180.0] },
+        );
+        let v = evaluate_node("degToRad", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => {
+                assert!((value[0] - 0.0).abs() < 1e-10);
+                assert!((value[1] - std::f64::consts::FRAC_PI_2).abs() < 1e-10);
+                assert!((value[2] - std::f64::consts::PI).abs() < 1e-10);
+            }
+            _ => panic!("Expected Vector"),
         }
     }
 }

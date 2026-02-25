@@ -508,6 +508,14 @@ pub fn engine_version() -> &'static str {
     env!("CARGO_PKG_VERSION")
 }
 
+/// Semantic contract version. Bumped when broadcasting rules, value semantics,
+/// or correctness guarantees change in a way that consumers must acknowledge.
+pub const ENGINE_CONTRACT_VERSION: u32 = 1;
+
+pub fn engine_contract_version() -> u32 {
+    ENGINE_CONTRACT_VERSION
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

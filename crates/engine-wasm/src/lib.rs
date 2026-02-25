@@ -1,4 +1,5 @@
-use engine_core::graph::EngineGraph;
+use engine_core::graph::{EngineGraph, EvalSignal};
+use engine_core::types::EvalOptions;
 use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
 
@@ -72,6 +73,114 @@ pub fn apply_patch(patch_json: &str) -> String {
     })
 }
 
+/// Load a snapshot with eval options (trace, time budget) and a JS progress callback.
+/// The `progress_cb` is a JS function(evaluated, total) called after each node.
+#[wasm_bindgen]
+pub fn load_snapshot_with_options(
+    snapshot_json: &str,
+    options_json: &str,
+    progress_cb: &js_sys::Function,
+) -> String {
+    let opts: EvalOptions = match serde_json::from_str(options_json) {
+        Ok(o) => o,
+        Err(e) => return err_json("INVALID_OPTIONS", &e.to_string()),
+    };
+
+    let start = js_sys::Date::now();
+    let budget_ms = opts.time_budget_ms;
+    let cb = progress_cb;
+
+    with_engine(|graph| {
+        let result = engine_core::run_load_snapshot_with_options(
+            graph,
+            snapshot_json,
+            &opts,
+            |evaluated, total| {
+                // Check time budget.
+                if budget_ms > 0 {
+                    let elapsed = js_sys::Date::now() - start;
+                    if elapsed >= budget_ms as f64 {
+                        return EvalSignal::Abort;
+                    }
+                }
+                // Call JS progress callback.
+                let this = JsValue::NULL;
+                let _ = cb.call2(
+                    &this,
+                    &JsValue::from(evaluated as f64),
+                    &JsValue::from(total as f64),
+                );
+                EvalSignal::Continue
+            },
+        );
+
+        match result {
+            Ok(mut r) => {
+                let elapsed_ms = js_sys::Date::now() - start;
+                r.elapsed_us = (elapsed_ms * 1000.0) as u64;
+                serde_json::to_string(&r).unwrap_or_else(|e| {
+                    err_json("SERIALIZE_FAILED", &e.to_string())
+                })
+            }
+            Err(err) => err_json(&err.code.to_string(), &err.message),
+        }
+    })
+}
+
+/// Apply a JSON patch with eval options (trace, time budget) and a JS progress callback.
+/// The `progress_cb` is a JS function(evaluated, total) called after each node.
+#[wasm_bindgen]
+pub fn apply_patch_with_options(
+    patch_json: &str,
+    options_json: &str,
+    progress_cb: &js_sys::Function,
+) -> String {
+    let opts: EvalOptions = match serde_json::from_str(options_json) {
+        Ok(o) => o,
+        Err(e) => return err_json("INVALID_OPTIONS", &e.to_string()),
+    };
+
+    let start = js_sys::Date::now();
+    let budget_ms = opts.time_budget_ms;
+    let cb = progress_cb;
+
+    with_engine(|graph| {
+        let result = engine_core::run_patch_with_options(
+            graph,
+            patch_json,
+            &opts,
+            |evaluated, total| {
+                // Check time budget.
+                if budget_ms > 0 {
+                    let elapsed = js_sys::Date::now() - start;
+                    if elapsed >= budget_ms as f64 {
+                        return EvalSignal::Abort;
+                    }
+                }
+                // Call JS progress callback.
+                let this = JsValue::NULL;
+                let _ = cb.call2(
+                    &this,
+                    &JsValue::from(evaluated as f64),
+                    &JsValue::from(total as f64),
+                );
+                EvalSignal::Continue
+            },
+        );
+
+        match result {
+            Ok(mut r) => {
+                let elapsed_ms = js_sys::Date::now() - start;
+                r.elapsed_us = (elapsed_ms * 1000.0) as u64;
+                serde_json::to_string(&r).unwrap_or_else(|e| {
+                    err_json("SERIALIZE_FAILED", &e.to_string())
+                })
+            }
+            Err(err) => err_json(&err.code.to_string(), &err.message),
+        }
+    })
+}
+
 /// Set a manual input value on a node port.
 /// Returns `IncrementalEvalResult` JSON (only changed values).
 #[wasm_bindgen]
@@ -111,4 +220,10 @@ pub fn get_catalog() -> String {
 #[wasm_bindgen]
 pub fn get_engine_version() -> String {
     engine_core::catalog::engine_version().to_string()
+}
+
+/// Return the engine contract version.
+#[wasm_bindgen]
+pub fn get_engine_contract_version() -> u32 {
+    engine_core::catalog::engine_contract_version()
 }

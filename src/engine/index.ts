@@ -16,6 +16,7 @@ import type {
   IncrementalEvalResult,
   PatchOp,
   CatalogEntry,
+  EvalOptions,
   WorkerRequest,
   WorkerResponse,
 } from './wasm-types.ts'
@@ -26,15 +27,23 @@ export type {
   IncrementalEvalResult,
   PatchOp,
   CatalogEntry,
+  EvalOptions,
 } from './wasm-types.ts'
+
+export interface ProgressEvent {
+  requestId: number
+  evaluatedNodes: number
+  totalNodesEstimate: number
+  elapsedMs: number
+}
 
 export interface EngineAPI {
   /** Evaluate a graph snapshot via Rust/WASM (async, off-main-thread). */
-  evaluateGraph(snapshot: EngineSnapshotV1): Promise<EngineEvalResult>
+  evaluateGraph(snapshot: EngineSnapshotV1, options?: EvalOptions): Promise<EngineEvalResult>
   /** Load a full snapshot into the persistent engine graph. Returns full results. */
-  loadSnapshot(snapshot: EngineSnapshotV1): Promise<EngineEvalResult>
+  loadSnapshot(snapshot: EngineSnapshotV1, options?: EvalOptions): Promise<EngineEvalResult>
   /** Apply incremental patch ops. Returns only changed values. */
-  applyPatch(ops: PatchOp[]): Promise<IncrementalEvalResult>
+  applyPatch(ops: PatchOp[], options?: EvalOptions): Promise<IncrementalEvalResult>
   /** Set a manual input on a node port. Returns only changed values. */
   setInput(nodeId: string, portId: string, value: number): Promise<IncrementalEvalResult>
   /** Register a large dataset for zero-copy transfer. Fire-and-forget. */
@@ -45,6 +54,10 @@ export interface EngineAPI {
   readonly catalog: CatalogEntry[]
   /** Engine version string from Rust crate. */
   readonly engineVersion: string
+  /** Engine contract version (bumped on correctness policy changes). */
+  readonly contractVersion: number
+  /** Subscribe to progress events. Returns unsubscribe function. */
+  onProgress(handler: (event: ProgressEvent) => void): () => void
   /** Terminate the worker. After this call, the engine cannot be used. */
   dispose(): void
 }
@@ -61,6 +74,7 @@ export async function createEngine(): Promise<EngineAPI> {
   // Wait for the worker to signal readiness.
   let catalog: CatalogEntry[] = []
   let engineVersion = ''
+  let contractVersion = 0
   await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
       cleanup()
@@ -71,6 +85,7 @@ export async function createEngine(): Promise<EngineAPI> {
       if (e.data.type === 'ready') {
         catalog = e.data.catalog
         engineVersion = e.data.engineVersion
+        contractVersion = e.data.contractVersion
         cleanup()
         resolve()
       } else if (e.data.type === 'init-error') {
@@ -99,8 +114,25 @@ export async function createEngine(): Promise<EngineAPI> {
       }
   const pending = new Map<number, PendingEntry>()
 
+  // Progress event subscribers.
+  const progressListeners = new Set<(event: ProgressEvent) => void>()
+
   worker.addEventListener('message', (e: MessageEvent<WorkerResponse>) => {
     const msg = e.data
+
+    if (msg.type === 'progress') {
+      const event: ProgressEvent = {
+        requestId: msg.requestId,
+        evaluatedNodes: msg.evaluatedNodes,
+        totalNodesEstimate: msg.totalNodesEstimate,
+        elapsedMs: msg.elapsedMs,
+      }
+      for (const listener of progressListeners) {
+        listener(event)
+      }
+      return
+    }
+
     if (msg.type === 'result' || msg.type === 'incremental' || msg.type === 'error') {
       const p = pending.get(msg.requestId)
       if (!p) return
@@ -121,27 +153,27 @@ export async function createEngine(): Promise<EngineAPI> {
   }
 
   return {
-    evaluateGraph(snapshot) {
+    evaluateGraph(snapshot, options) {
       return new Promise((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'full', resolve, reject })
-        postRequest({ type: 'evaluate', requestId: id, snapshot })
+        postRequest({ type: 'evaluate', requestId: id, snapshot, options })
       })
     },
 
-    loadSnapshot(snapshot) {
+    loadSnapshot(snapshot, options) {
       return new Promise((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'full', resolve, reject })
-        postRequest({ type: 'loadSnapshot', requestId: id, snapshot })
+        postRequest({ type: 'loadSnapshot', requestId: id, snapshot, options })
       })
     },
 
-    applyPatch(ops) {
+    applyPatch(ops, options) {
       return new Promise((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'incremental', resolve, reject })
-        postRequest({ type: 'applyPatch', requestId: id, ops })
+        postRequest({ type: 'applyPatch', requestId: id, ops, options })
       })
     },
 
@@ -170,6 +202,14 @@ export async function createEngine(): Promise<EngineAPI> {
 
     catalog,
     engineVersion,
+    contractVersion,
+
+    onProgress(handler) {
+      progressListeners.add(handler)
+      return () => {
+        progressListeners.delete(handler)
+      }
+    },
 
     dispose() {
       worker.terminate()

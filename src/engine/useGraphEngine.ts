@@ -10,6 +10,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Node, Edge } from '@xyflow/react'
 import type { EngineAPI } from './index.ts'
+import type { EvalOptions } from './wasm-types.ts'
 import type { Value } from './value.ts'
 import { toEngineSnapshot } from './bridge.ts'
 import { diffGraph } from './diffGraph.ts'
@@ -23,12 +24,19 @@ function toValueMap(values: Record<string, unknown>): Map<string, Value> {
   return map
 }
 
+export interface GraphEngineResult {
+  computed: ReadonlyMap<string, Value>
+  isPartial: boolean
+}
+
 export function useGraphEngine(
   nodes: Node[],
   edges: Edge[],
   engine: EngineAPI,
-): ReadonlyMap<string, Value> {
+  options?: EvalOptions,
+): GraphEngineResult {
   const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
+  const [isPartial, setIsPartial] = useState(false)
   const prevNodesRef = useRef<Node[]>([])
   const prevEdgesRef = useRef<Edge[]>([])
   const snapshotLoaded = useRef(false)
@@ -41,9 +49,10 @@ export function useGraphEngine(
       // First render: load full snapshot into persistent engine graph.
       snapshotLoaded.current = true
       const snapshot = toEngineSnapshot(nodes, edges)
-      engine.loadSnapshot(snapshot).then((result) => {
+      engine.loadSnapshot(snapshot, options).then((result) => {
         if (reqId !== pendingRef.current) return
         setComputed(toValueMap(result.values))
+        setIsPartial(result.partial ?? false)
       })
     } else {
       // Subsequent renders: diff and apply patch.
@@ -53,8 +62,9 @@ export function useGraphEngine(
         prevEdgesRef.current = edges
         return
       }
-      engine.applyPatch(ops).then((result) => {
+      engine.applyPatch(ops, options).then((result) => {
         if (reqId !== pendingRef.current) return
+        setIsPartial(result.partial ?? false)
         // MERGE changed values into existing map (not replace).
         setComputed((prev) => {
           const next = new Map(prev)
@@ -74,7 +84,7 @@ export function useGraphEngine(
 
     prevNodesRef.current = nodes
     prevEdgesRef.current = edges
-  }, [nodes, edges, engine])
+  }, [nodes, edges, engine, options])
 
-  return computed
+  return { computed, isPartial }
 }
