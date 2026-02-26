@@ -21,7 +21,7 @@
 
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useSettingsModal } from '../contexts/SettingsModalContext'
+import { AppHeader } from '../components/app/AppHeader'
 import {
   CanvasArea,
   type CanvasAreaProps,
@@ -48,21 +48,12 @@ const PerfHud = lazy(() =>
 
 const AUTOSAVE_DELAY_MS = 2000
 
-function fmtTime(d: Date): string {
-  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-}
-
 export default function CanvasPage() {
   const { projectId } = useParams<{ projectId?: string }>()
   const navigate = useNavigate()
-  const { openSettings } = useSettingsModal()
-
   // ── Store selectors ────────────────────────────────────────────────────────
   const saveStatus = useProjectStore((s) => s.saveStatus)
   const projectName = useProjectStore((s) => s.projectName)
-  const errorMessage = useProjectStore((s) => s.errorMessage)
-  const isDirty = useProjectStore((s) => s.isDirty)
-  const lastSavedAt = useProjectStore((s) => s.lastSavedAt)
 
   const beginLoad = useProjectStore((s) => s.beginLoad)
   const markDirty = useProjectStore((s) => s.markDirty)
@@ -110,9 +101,6 @@ export default function CanvasPage() {
   const canvasRef = useRef<CanvasAreaHandle>(null)
   const isSaving = useRef(false)
   const conflictServerTs = useRef<string | null>(null)
-
-  // ── Saved counts for status display ─────────────────────────────────────────
-  const [savedCounts, setSavedCounts] = useState<{ nodes: number; edges: number } | null>(null)
 
   // ── Inline project name editing ───────────────────────────────────────────
   const [nameEditing, setNameEditing] = useState(false)
@@ -191,7 +179,6 @@ export default function CanvasPage() {
         } else {
           conflictServerTs.current = null
           completeSave(result.updatedAt)
-          setSavedCounts({ nodes: snapshot.nodes.length, edges: snapshot.edges.length })
         }
       } catch (err: unknown) {
         failSave(err instanceof Error ? err.message : 'Save failed')
@@ -280,28 +267,6 @@ export default function CanvasPage() {
     window.location.reload()
   }, [])
 
-  // ── Save status label ─────────────────────────────────────────────────────
-  const statusLabel: { text: string; color: string } | null = (() => {
-    if (!projectId) return null
-    switch (saveStatus) {
-      case 'saving':
-        return { text: 'Saving…', color: 'rgba(244,244,243,0.45)' }
-      case 'saved':
-        return {
-          text: savedCounts
-            ? `Saved ${savedCounts.nodes}n / ${savedCounts.edges}e · ${lastSavedAt ? fmtTime(lastSavedAt) : ''}`
-            : `Saved ${lastSavedAt ? fmtTime(lastSavedAt) : ''}`,
-          color: '#22c55e',
-        }
-      case 'conflict':
-        return { text: '⚠ Conflict', color: '#f59e0b' }
-      case 'error':
-        return { text: '⚠ Save failed', color: '#ef4444' }
-      default:
-        return isDirty ? { text: 'Unsaved', color: 'rgba(244,244,243,0.45)' } : null
-    }
-  })()
-
   // ── Loading / error screens ───────────────────────────────────────────────
   if (loadPhase === 'loading') {
     return (
@@ -349,154 +314,23 @@ export default function CanvasPage() {
         background: 'var(--bg)',
       }}
     >
-      {/* ── Top bar ──────────────────────────────────────────────────────────── */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          padding: '0 1rem',
-          height: 44,
-          borderBottom: '1px solid var(--border)',
-          background: 'var(--card-bg)',
-          flexShrink: 0,
-        }}
-      >
-        <a
-          href="/app"
-          onClick={handleBackToProjects}
-          style={{ fontSize: '0.82rem', opacity: 0.6, textDecoration: 'none', color: 'inherit' }}
-        >
-          ← Projects
-        </a>
-
-        <div style={{ width: 1, height: 18, background: 'var(--border)' }} />
-
-        {/* Project name — click to rename (disabled in read-only) */}
-        {projectId && !nameEditing && (
-          <span
-            onClick={readOnly ? undefined : startNameEdit}
-            title={readOnly ? undefined : 'Click to rename'}
-            style={{
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              letterSpacing: '-0.3px',
-              cursor: readOnly ? 'default' : 'text',
-              borderBottom: '1px solid transparent',
-              userSelect: 'none',
-              paddingBottom: 1,
-            }}
-            onMouseOver={(e) => {
-              ;(e.currentTarget as HTMLElement).style.borderBottomColor = 'rgba(255,255,255,0.2)'
-            }}
-            onMouseOut={(e) => {
-              ;(e.currentTarget as HTMLElement).style.borderBottomColor = 'transparent'
-            }}
-          >
-            {projectName}
-          </span>
-        )}
-        {projectId && nameEditing && (
-          <input
-            ref={nameInputRef}
-            value={nameInput}
-            onChange={(e) => setNameInput(e.target.value)}
-            onBlur={() => {
-              void commitNameEdit()
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                void commitNameEdit()
-              }
-              if (e.key === 'Escape') {
-                setNameEditing(false)
-              }
-            }}
-            style={{
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              letterSpacing: '-0.3px',
-              background: 'transparent',
-              border: 'none',
-              borderBottom: '1px solid var(--primary)',
-              outline: 'none',
-              color: 'inherit',
-              width: 220,
-              padding: 0,
-              fontFamily: 'inherit',
-            }}
-          />
-        )}
-        {!projectId && (
-          <span style={{ fontWeight: 600, fontSize: '0.9rem', opacity: 0.4 }}>Scratch canvas</span>
-        )}
-
-        {/* Save status badge */}
-        {statusLabel && (
-          <span style={{ fontSize: '0.72rem', color: statusLabel.color }}>{statusLabel.text}</span>
-        )}
-        {saveStatus === 'error' && errorMessage && (
-          <span
-            title={errorMessage}
-            style={{
-              fontSize: '0.7rem',
-              color: '#ef4444',
-              opacity: 0.75,
-              maxWidth: 200,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {errorMessage}
-          </span>
-        )}
-
-        {/* Save now button (project mode only) */}
-        {projectId && !readOnly && (
-          <button
-            onClick={() => void doSave()}
-            disabled={!isDirty || saveStatus === 'saving'}
-            style={{
-              padding: '0.15rem 0.55rem',
-              borderRadius: 5,
-              border: '1px solid rgba(255,255,255,0.12)',
-              background: isDirty ? 'rgba(28,171,176,0.15)' : 'transparent',
-              color: isDirty ? '#1CABB0' : 'rgba(244,244,243,0.35)',
-              cursor: isDirty ? 'pointer' : 'default',
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              fontFamily: 'inherit',
-            }}
-            title="Save now (Ctrl+S)"
-          >
-            Save
-          </button>
-        )}
-
-        <button
-          onClick={() => openSettings()}
-          title="Settings"
-          aria-label="Settings"
-          style={{
-            marginLeft: 'auto',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--text-muted)',
-            fontSize: '1rem',
-            padding: '0.2rem 0.4rem',
-            borderRadius: 4,
-            fontFamily: 'inherit',
-            lineHeight: 1,
-          }}
-        >
-          ⚙
-        </button>
-        <span style={{ fontSize: '0.72rem', opacity: 0.35 }}>
-          Drag blocks · Connect handles · Delete to remove
-        </span>
-      </div>
+      {/* ── App header ────────────────────────────────────────────────────────── */}
+      <AppHeader
+        projectId={projectId}
+        projectName={projectName}
+        readOnly={readOnly}
+        plan={plan}
+        nameEditing={nameEditing}
+        nameInput={nameInput}
+        nameInputRef={nameInputRef}
+        onStartNameEdit={startNameEdit}
+        onNameInputChange={setNameInput}
+        onCommitNameEdit={() => void commitNameEdit()}
+        onCancelNameEdit={() => setNameEditing(false)}
+        onSave={() => void doSave()}
+        onNavigateBack={handleBackToProjects}
+        canvasRef={canvasRef}
+      />
 
       {/* ── Read-only / billing banner ──────────────────────────────────────── */}
       {readOnly && (
