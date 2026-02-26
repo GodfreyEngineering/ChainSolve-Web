@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { test, expect } from '@playwright/test'
 import { waitForEngineOrFatal } from './helpers'
 
@@ -55,5 +56,38 @@ test.describe('Smoke tests', () => {
     // 60-second budget covers cold CI runners where first WASM compilation is slow.
     await waitForEngineOrFatal(page, errors)
     expect(errors).toEqual([])
+  })
+
+  test('WASM engine reaches engine-ready state', async ({ page }) => {
+    const errors: string[] = []
+    page.on('pageerror', (err) => errors.push(err.message))
+    await page.goto('/')
+    // Throws with [engine-fatal] <message> if WASM init fails (e.g. CSP block).
+    await waitForEngineOrFatal(page, errors)
+    await expect(page.locator('[data-testid="engine-ready"]')).toBeAttached()
+  })
+
+  // ── Static configuration guard ──────────────────────────────────────────────
+  // Verifies that public/_headers (the Cloudflare Pages header file) contains
+  // 'wasm-unsafe-eval' in both the enforced and report-only CSP.  This is a
+  // file-system assertion that guards against accidental removal of the
+  // directive that allows WebAssembly.instantiateStreaming() in the engine
+  // worker.  Vite preview does not apply _headers, so we check the file
+  // directly rather than inspecting response headers.
+  test("_headers CSP includes 'wasm-unsafe-eval' for WASM engine", () => {
+    const content = readFileSync('public/_headers', 'utf-8')
+    // Match lines that declare a Content-Security-Policy header value.
+    // In _headers format, header lines are indented (leading whitespace).
+    // Both Content-Security-Policy and Content-Security-Policy-Report-Only
+    // must include wasm-unsafe-eval.
+    const cspLines = content
+      .split('\n')
+      .filter((l) => l.trimStart().startsWith('Content-Security-Policy'))
+    expect(cspLines).toHaveLength(2)
+    for (const line of cspLines) {
+      expect(line, `Missing 'wasm-unsafe-eval' in: ${line.slice(0, 80)}…`).toContain(
+        "'wasm-unsafe-eval'",
+      )
+    }
   })
 })

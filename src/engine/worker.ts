@@ -96,11 +96,19 @@ async function initialize() {
     const contractVersion = get_engine_contract_version()
     post({ type: 'ready', catalog, engineVersion, contractVersion })
   } catch (err) {
+    const raw = err instanceof Error ? err.message : String(err)
+    // Detect CSP-blocked WebAssembly compilation.
+    // Chrome ≥95:  "call to WebAssembly.instantiateStreaming() blocked by CSP"
+    // Firefox ≥102: "Content Security Policy: The page's settings blocked …"
+    // Safari ≥16:  similar phrasing with "Content Security Policy"
+    const isCspBlock = /\bCSP\b|Content.{0,5}Security.{0,5}Policy|blocked by/i.test(raw)
     post({
       type: 'init-error',
       error: {
-        code: 'WASM_INIT_FAILED',
-        message: err instanceof Error ? err.message : String(err),
+        code: isCspBlock ? 'WASM_CSP_BLOCKED' : 'WASM_INIT_FAILED',
+        message: isCspBlock
+          ? `Blocked by CSP: add 'wasm-unsafe-eval' to script-src. (${raw})`
+          : raw,
       },
     })
   }

@@ -73,7 +73,7 @@ The `Reporting-Endpoints` header maps `csp-endpoint` to the report URL.
 | Directive | Value | Why |
 |-----------|-------|-----|
 | `default-src` | `'self'` | Fallback: only same-origin |
-| `script-src` | `'self'` | No inline scripts, no CDN scripts |
+| `script-src` | `'self' 'wasm-unsafe-eval'` | No inline scripts, no CDN scripts; `'wasm-unsafe-eval'` required for the Rust/WASM engine (see §2.1) |
 | `style-src` | `'self' 'unsafe-inline' https://fonts.googleapis.com` | `unsafe-inline` required by React Flow inline styles + Vite CSS injection; Google Fonts for Montserrat/JetBrains Mono |
 | `font-src` | `'self' https://fonts.gstatic.com` | Google Fonts file delivery |
 | `img-src` | `'self' data: blob:` | SVG data URIs, canvas blob exports |
@@ -83,6 +83,42 @@ The `Reporting-Endpoints` header maps `csp-endpoint` to the report URL.
 | `object-src` | `'none'` | Block Flash/plugins |
 | `base-uri` | `'self'` | Prevent base tag hijacking |
 | `form-action` | `'self'` | Restrict form submissions |
+
+### 2.1 Why `'wasm-unsafe-eval'` is required
+
+ChainSolve ships a Rust/WASM compute engine (`crates/engine-wasm/`). At
+runtime it is loaded via `WebAssembly.instantiateStreaming()` inside a
+dedicated Web Worker (`src/engine/worker.ts`). Browsers gate WebAssembly
+compilation under the `script-src` directive — including inside workers that
+carry no own CSP, which inherit the parent page's policy.
+
+Without `'wasm-unsafe-eval'` in `script-src`, all major browsers block the
+call with:
+
+> Refused to compile or instantiate WebAssembly module because neither
+> `'unsafe-eval'` nor `'wasm-unsafe-eval'` appears in the `script-src`
+> directive of the Content Security Policy.
+
+The worker detects this failure and surfaces the error code `WASM_CSP_BLOCKED`
+so `EngineFatalError` can display a clear, actionable message.
+
+**Why `'wasm-unsafe-eval'` and not `'unsafe-eval'`?**
+
+`'wasm-unsafe-eval'` (CSP Level 3, 2021) is a precise directive that permits
+only WebAssembly compilation. It does **not** allow:
+
+- `eval(string)` — arbitrary JS string execution
+- `new Function(string)` — runtime function creation
+- `setTimeout("string")` / `setInterval("string")` — string-as-timer
+
+`'unsafe-eval'` permits all of the above and is broadly dangerous (XSS
+escalation). We use `'wasm-unsafe-eval'` to keep the attack surface minimal.
+
+**Browser support**: Chrome 95+ (Sep 2021), Firefox 102+ (Jun 2022),
+Safari 16+ (Sep 2022). The engine already requires modern browsers; these
+versions are a subset of our supported range.
+
+---
 
 ### Rollout plan: Report-Only → Enforce
 
@@ -246,4 +282,6 @@ Test thoroughly before deploying.
       (frame-src allows js.stripe.com)
 - [ ] **Security headers**: Check `X-Frame-Options: DENY`,
       `X-Content-Type-Options: nosniff`, `HSTS`, `Referrer-Policy` are present
+- [ ] **WASM engine loads**: Navigate to the app — `data-testid="engine-ready"` appears
+      in the DOM within ~60 s; no `data-testid="engine-fatal"` with code `WASM_CSP_BLOCKED`
 - [ ] **No browser console errors**: Load the app — zero CSP violations in Console
