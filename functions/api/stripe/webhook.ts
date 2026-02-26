@@ -1,3 +1,23 @@
+/**
+ * POST /api/stripe/webhook
+ *
+ * Receives Stripe webhook events and keeps the Supabase `profiles` table
+ * in sync with the customer's subscription state.
+ *
+ * Verified events handled:
+ *   - checkout.session.completed       → set plan to 'trialing' or 'pro'
+ *   - customer.subscription.updated    → update plan + current_period_end
+ *   - customer.subscription.deleted    → set plan to 'canceled'
+ *
+ * Security:
+ *   - HMAC-SHA256 signature verified via Stripe's constructEventAsync()
+ *     using SubtleCrypto (Web Crypto API — available in Workers runtime).
+ *   - Raw body is read once and passed to signature verification before parsing.
+ *   - Events are stored in stripe_events (idempotent: Stripe event ID = PK).
+ *
+ * Env vars required: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
+ *                    SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ */
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 

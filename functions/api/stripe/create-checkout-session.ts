@@ -1,3 +1,18 @@
+/**
+ * POST /api/stripe/create-checkout-session
+ *
+ * Creates a Stripe Checkout session for the Pro Monthly subscription.
+ * Requires a valid Supabase JWT in the Authorization header (Bearer <token>).
+ *
+ * Flow:
+ *   1. Verify the Supabase JWT and resolve the user's profile.
+ *   2. Look up or create a Stripe Customer for this user.
+ *   3. Create a Checkout session with the PRO_MONTHLY price.
+ *   4. Return { url } — the client redirects the browser to Stripe Checkout.
+ *
+ * Env vars required: STRIPE_SECRET_KEY, STRIPE_PRICE_ID_PRO_MONTHLY,
+ *                    SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ */
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 

@@ -1,3 +1,17 @@
+/**
+ * POST /api/stripe/create-portal-session
+ *
+ * Opens the Stripe Customer Portal for the authenticated user so they can
+ * manage their subscription (upgrade, cancel, update payment method).
+ * Requires a valid Supabase JWT in the Authorization header (Bearer <token>).
+ *
+ * Flow:
+ *   1. Verify the Supabase JWT and resolve the user's stripe_customer_id.
+ *   2. Create a Portal session for that customer.
+ *   3. Return { url } — the client redirects the browser to the Portal.
+ *
+ * Env vars required: STRIPE_SECRET_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ */
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 

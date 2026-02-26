@@ -15,6 +15,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\"",
     "typecheck": "npm run wasm:build && tsc -b --noEmit",
     "typecheck:functions": "tsc -p functions/tsconfig.json --noEmit",
+    "check": "npm run format:check && npm run lint && npx tsc -b --noEmit && npm run typecheck:functions",
     "preview": "vite preview",
     "test:e2e": "playwright test --project=full",
     "test:e2e:smoke": "playwright test --project=smoke",

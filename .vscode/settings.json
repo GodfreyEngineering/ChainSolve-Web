@@ -1,0 +1,42 @@
+{
+  // ── Formatter defaults ────────────────────────────────────────────────────
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+
+  // ── rust-analyzer — Codespaces reliability settings ───────────────────────
+  //
+  // Codespaces containers have limited RAM (typically 8 GB).  With a large
+  // workspace, rust-analyzer can OOM or become unresponsive if proc-macros and
+  // build scripts are enabled.  The settings below trade some IDE features for
+  // stability.  On a powerful local machine you can remove or override them in
+  // your user settings.
+  //
+  // Symptoms of an overloaded rust-analyzer:
+  //   • "rust-analyzer: loading…" spinner that never completes
+  //   • High CPU / memory in the rust-analyzer process
+  //   • Completions timing out or producing stale results
+  //
+  // Mitigations applied here:
+  "rust-analyzer.cargo.buildScripts.enable": false,
+  "rust-analyzer.procMacro.enable": false,
+  //
+  // If the above are not enough, also try:
+  //   "rust-analyzer.checkOnSave": false      — disables background Clippy runs
+  //   "rust-analyzer.cargo.features": []      — reduces feature permutations
+  //
+  // The WASM target (wasm32-unknown-unknown) is set in rust-toolchain.toml.
+  // rust-analyzer should pick it up automatically; no manual target override needed.
+
+  // ── ESLint ────────────────────────────────────────────────────────────────
+  "eslint.useFlatConfig": true
+}

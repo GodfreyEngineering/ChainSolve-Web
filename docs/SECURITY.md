@@ -260,7 +260,41 @@ Test thoroughly before deploying.
 
 ---
 
-## 5. Verification Checklist
+## 5. Third-Party Analytics and CSP
+
+### Decision: No Cloudflare Web Analytics beacon
+
+Cloudflare Pages offers opt-in Web Analytics, which injects a JavaScript beacon
+(`beacon.min.js` from `static.cloudflareinsights.com`) into every page.
+**This feature is intentionally disabled** on ChainSolve.
+
+**Reason:** Enabling the beacon would require adding `static.cloudflareinsights.com`
+to `script-src` and `connect-src` in the Content Security Policy.  This weakens
+the CSP by allowing a third-party script and additional outbound connections that
+are not necessary for the application to function.  See `docs/DECISIONS/ADR-0002-csp-wasm-unsafe-eval.md`
+for the full CSP rationale.
+
+**If Cloudflare Web Analytics is ever enabled:**
+
+1. Add to the `script-src` directive in `public/_headers`:
+   ```
+   https://static.cloudflareinsights.com
+   ```
+2. Add to the `connect-src` directive:
+   ```
+   https://cloudflareinsights.com
+   ```
+3. Update both the enforced `Content-Security-Policy` and the
+   `Content-Security-Policy-Report-Only` lines (they must stay in sync).
+4. Verify no new CSP violations appear in `csp_reports` after deploy.
+5. Update this section to document the trade-off.
+
+Until then: **do not enable Cloudflare Web Analytics in the Cloudflare dashboard**
+unless the CSP is updated simultaneously.
+
+---
+
+## 6. Verification Checklist
 
 ### After deploy
 
