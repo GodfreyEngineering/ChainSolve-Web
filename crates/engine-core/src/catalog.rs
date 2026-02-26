@@ -983,6 +983,334 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![p("m3s", "m\u{00B3}/s")],
             pro_only: false,
         },
+        // ── Finance → TVM ──────────────────────────────────────────────
+        CatalogEntry {
+            op_id: "fin.tvm.simple_interest",
+            label: "Simple Interest",
+            category: "finTvm",
+            node_kind: "csOperation",
+            inputs: vec![p("P", "P"), p("r", "r"), p("t", "t")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.tvm.compound_fv",
+            label: "Compound FV",
+            category: "finTvm",
+            node_kind: "csOperation",
+            inputs: vec![p("PV", "PV"), p("r", "r"), p("n", "n"), p("t", "t")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.tvm.compound_pv",
+            label: "Compound PV",
+            category: "finTvm",
+            node_kind: "csOperation",
+            inputs: vec![p("FV", "FV"), p("r", "r"), p("n", "n"), p("t", "t")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.tvm.continuous_fv",
+            label: "Continuous FV",
+            category: "finTvm",
+            node_kind: "csOperation",
+            inputs: vec![p("PV", "PV"), p("r", "r"), p("t", "t")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.tvm.annuity_pv",
+            label: "Annuity PV",
+            category: "finTvm",
+            node_kind: "csOperation",
+            inputs: vec![p("PMT", "PMT"), p("r", "r"), p("n", "n")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.tvm.annuity_fv",
+            label: "Annuity FV",
+            category: "finTvm",
+            node_kind: "csOperation",
+            inputs: vec![p("PMT", "PMT"), p("r", "r"), p("n", "n")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.tvm.annuity_pmt",
+            label: "Annuity PMT",
+            category: "finTvm",
+            node_kind: "csOperation",
+            inputs: vec![p("PV", "PV"), p("r", "r"), p("n", "n")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.tvm.npv",
+            label: "NPV",
+            category: "finTvm",
+            node_kind: "csOperation",
+            inputs: vec![p("r", "r"), p("c", "Count"), p("cf0", "CF0"), p("cf1", "CF1"), p("cf2", "CF2"), p("cf3", "CF3"), p("cf4", "CF4"), p("cf5", "CF5")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.tvm.rule_of_72",
+            label: "Rule of 72",
+            category: "finTvm",
+            node_kind: "csOperation",
+            inputs: vec![p("r", "r (decimal)")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.tvm.effective_rate",
+            label: "Effective Rate",
+            category: "finTvm",
+            node_kind: "csOperation",
+            inputs: vec![p("r", "r (nominal)"), p("n", "n (periods)")],
+            pro_only: true,
+        },
+        // ── Finance → Returns & Risk ───────────────────────────────────
+        CatalogEntry {
+            op_id: "fin.returns.pct_return",
+            label: "% Return",
+            category: "finReturns",
+            node_kind: "csOperation",
+            inputs: vec![p("v0", "V\u{2080}"), p("v1", "V\u{2081}")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.returns.log_return",
+            label: "Log Return",
+            category: "finReturns",
+            node_kind: "csOperation",
+            inputs: vec![p("v0", "V\u{2080}"), p("v1", "V\u{2081}")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.returns.cagr",
+            label: "CAGR",
+            category: "finReturns",
+            node_kind: "csOperation",
+            inputs: vec![p("v0", "V\u{2080}"), p("v1", "V\u{2081}"), p("t", "t (yrs)")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.returns.sharpe",
+            label: "Sharpe Ratio",
+            category: "finReturns",
+            node_kind: "csOperation",
+            inputs: vec![p("ret", "Return"), p("rf", "R\u{1D193}"), p("sigma", "\u{03C3}")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.returns.weighted_avg",
+            label: "Weighted Avg",
+            category: "finReturns",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6"), p("y1", "W1"), p("y2", "W2"), p("y3", "W3"), p("y4", "W4"), p("y5", "W5"), p("y6", "W6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.returns.portfolio_variance",
+            label: "Portfolio Var (2-asset)",
+            category: "finReturns",
+            node_kind: "csOperation",
+            inputs: vec![p("w1", "w\u{2081}"), p("w2", "w\u{2082}"), p("s1", "\u{03C3}\u{2081}"), p("s2", "\u{03C3}\u{2082}"), p("rho", "\u{03C1}")],
+            pro_only: true,
+        },
+        // ── Finance → Depreciation ─────────────────────────────────────
+        CatalogEntry {
+            op_id: "fin.depr.straight_line",
+            label: "SL Depreciation",
+            category: "finDepr",
+            node_kind: "csOperation",
+            inputs: vec![p("cost", "Cost"), p("salvage", "Salvage"), p("life", "Life")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "fin.depr.declining_balance",
+            label: "DB Depreciation",
+            category: "finDepr",
+            node_kind: "csOperation",
+            inputs: vec![p("cost", "Cost"), p("salvage", "Salvage"), p("life", "Life"), p("period", "Period")],
+            pro_only: true,
+        },
+        // ── Stats → Descriptive ────────────────────────────────────────
+        CatalogEntry {
+            op_id: "stats.desc.mean",
+            label: "Mean",
+            category: "statsDesc",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "stats.desc.median",
+            label: "Median",
+            category: "statsDesc",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "stats.desc.mode_approx",
+            label: "Mode (approx)",
+            category: "statsDesc",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "stats.desc.range",
+            label: "Range",
+            category: "statsDesc",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "stats.desc.variance",
+            label: "Variance",
+            category: "statsDesc",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "stats.desc.stddev",
+            label: "Std Dev",
+            category: "statsDesc",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "stats.desc.sum",
+            label: "Sum",
+            category: "statsDesc",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "stats.desc.geo_mean",
+            label: "Geometric Mean",
+            category: "statsDesc",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "stats.desc.zscore",
+            label: "Z-Score",
+            category: "statsDesc",
+            node_kind: "csOperation",
+            inputs: vec![p("x", "x"), p("mu", "\u{03BC}"), p("sigma", "\u{03C3}")],
+            pro_only: true,
+        },
+        // ── Stats → Relationships ──────────────────────────────────────
+        CatalogEntry {
+            op_id: "stats.rel.covariance",
+            label: "Covariance",
+            category: "statsRel",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6"), p("y1", "Y1"), p("y2", "Y2"), p("y3", "Y3"), p("y4", "Y4"), p("y5", "Y5"), p("y6", "Y6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "stats.rel.correlation",
+            label: "Correlation",
+            category: "statsRel",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6"), p("y1", "Y1"), p("y2", "Y2"), p("y3", "Y3"), p("y4", "Y4"), p("y5", "Y5"), p("y6", "Y6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "stats.rel.linreg_slope",
+            label: "LinReg Slope",
+            category: "statsRel",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6"), p("y1", "Y1"), p("y2", "Y2"), p("y3", "Y3"), p("y4", "Y4"), p("y5", "Y5"), p("y6", "Y6")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "stats.rel.linreg_intercept",
+            label: "LinReg Intercept",
+            category: "statsRel",
+            node_kind: "csOperation",
+            inputs: vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6"), p("y1", "Y1"), p("y2", "Y2"), p("y3", "Y3"), p("y4", "Y4"), p("y5", "Y5"), p("y6", "Y6")],
+            pro_only: true,
+        },
+        // ── Probability → Combinatorics ────────────────────────────────
+        CatalogEntry {
+            op_id: "prob.comb.factorial",
+            label: "n!",
+            category: "probComb",
+            node_kind: "csOperation",
+            inputs: vec![p("n", "n")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "prob.comb.permutation",
+            label: "P(n,k)",
+            category: "probComb",
+            node_kind: "csOperation",
+            inputs: vec![p("n", "n"), p("k", "k")],
+            pro_only: true,
+        },
+        // ── Probability → Distributions ────────────────────────────────
+        CatalogEntry {
+            op_id: "prob.dist.binomial_pmf",
+            label: "Binomial PMF",
+            category: "probDist",
+            node_kind: "csOperation",
+            inputs: vec![p("n", "n"), p("k", "k"), p("p", "p")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "prob.dist.poisson_pmf",
+            label: "Poisson PMF",
+            category: "probDist",
+            node_kind: "csOperation",
+            inputs: vec![p("k", "k"), p("lambda", "\u{03BB}")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "prob.dist.exponential_pdf",
+            label: "Exponential PDF",
+            category: "probDist",
+            node_kind: "csOperation",
+            inputs: vec![p("x", "x"), p("lambda", "\u{03BB}")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "prob.dist.exponential_cdf",
+            label: "Exponential CDF",
+            category: "probDist",
+            node_kind: "csOperation",
+            inputs: vec![p("x", "x"), p("lambda", "\u{03BB}")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "prob.dist.normal_pdf",
+            label: "Normal PDF",
+            category: "probDist",
+            node_kind: "csOperation",
+            inputs: vec![p("x", "x"), p("mu", "\u{03BC}"), p("sigma", "\u{03C3}")],
+            pro_only: true,
+        },
+        // ── Utilities ──────────────────────────────────────────────────
+        CatalogEntry {
+            op_id: "util.round.to_dp",
+            label: "Round to DP",
+            category: "utilCalc",
+            node_kind: "csOperation",
+            inputs: vec![p("x", "x"), p("dp", "DP")],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "util.pct.to_decimal",
+            label: "% \u{2192} Decimal",
+            category: "utilCalc",
+            node_kind: "csOperation",
+            inputs: vec![p("pct", "%")],
+            pro_only: true,
+        },
     ]
 }
 
@@ -1015,21 +1343,21 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 117);
+        assert_eq!(cat.len(), 157);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 117);
+        assert_eq!(parsed.as_array().unwrap().len(), 157);
     }
 
     #[test]
     fn known_ops_present() {
         let cat = catalog();
         let ids: Vec<&str> = cat.iter().map(|e| e.op_id).collect();
-        for expected in &["add", "sin", "vectorSum", "tableFilter", "xyPlot", "display", "eng.mechanics.force_ma", "eng.elec.ohms_V"] {
+        for expected in &["add", "sin", "vectorSum", "tableFilter", "xyPlot", "display", "eng.mechanics.force_ma", "eng.elec.ohms_V", "fin.tvm.compound_fv", "stats.desc.mean", "prob.dist.binomial_pmf"] {
             assert!(ids.contains(expected), "Missing op: {}", expected);
         }
     }

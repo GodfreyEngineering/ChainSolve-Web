@@ -351,3 +351,29 @@ targeting `.cs-node-body` and `.cs-node-header-value` classes.
 2. Add `CatalogEntry` in `crates/engine-core/src/catalog.rs` (update test count)
 3. Add `register({...})` call in `src/blocks/eng-blocks.ts`
 4. Run `cargo test` + `npm run typecheck` + `npm run build`
+
+## Finance & Statistics block pack (W11b)
+
+40 finance, statistics, and probability blocks across 8 categories, powered by Rust/WASM ops.
+
+### Categories (40 blocks)
+
+| Category | Count | Examples |
+|----------|-------|---------|
+| TVM | 10 | Simple/compound interest, annuity PV/FV/PMT, NPV, Rule of 72 |
+| Returns & Risk | 6 | % return, log return, CAGR, Sharpe, weighted avg, portfolio variance |
+| Depreciation | 2 | Straight-line, declining balance |
+| Descriptive Stats | 9 | Mean, median, mode, range, variance, stddev, sum, geo mean, z-score |
+| Relationships | 4 | Covariance, correlation, linear regression slope & intercept |
+| Combinatorics | 2 | Factorial (n!), permutation P(n,k) |
+| Distributions | 5 | Binomial PMF, Poisson PMF, exponential PDF/CDF, normal PDF |
+| Utilities | 2 | Round to DP, % → decimal |
+
+### Architecture
+
+- **Op IDs**: Stable namespaced IDs — `fin.*`, `stats.*`, `prob.*`, `util.*`
+- **Rust ops**: Match arms in `crates/engine-core/src/ops.rs`, catalog entries in `catalog.rs`
+- **TS blocks**: `src/blocks/fin-stats-blocks.ts` exports `registerFinStatsBlocks()`, called from `registry.ts`
+- **Fixed-port stats**: Descriptive & relationship blocks use 6 fixed data slots (X1–X6, Y1–Y6) with a count parameter
+- **Error handling**: Division-by-zero, invalid inputs return `Value::error("message")`
+- **All Pro-only**: All 40 blocks require Pro entitlement

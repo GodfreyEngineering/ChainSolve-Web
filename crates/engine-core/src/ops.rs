@@ -668,6 +668,437 @@ fn evaluate_node_inner(
         "eng.conv.lpm_to_m3s" => unary_broadcast_port(inputs, "lpm", |v| v / 60_000.0),
         "eng.conv.m3s_to_lpm" => unary_broadcast_port(inputs, "m3s", |v| v * 60_000.0),
 
+        // ── Finance → TVM ─────────────────────────────────────────────
+        "fin.tvm.simple_interest" => {
+            let p = scalar_or_nan(inputs, "P");
+            let r = scalar_or_nan(inputs, "r");
+            let t = scalar_or_nan(inputs, "t");
+            Value::scalar(p * r * t)
+        }
+        "fin.tvm.compound_fv" => {
+            let pv = scalar_or_nan(inputs, "PV");
+            let r = scalar_or_nan(inputs, "r");
+            let n = scalar_or_nan(inputs, "n");
+            let t = scalar_or_nan(inputs, "t");
+            if n == 0.0 {
+                Value::error("Compound FV: n = 0")
+            } else {
+                Value::scalar(pv * (1.0 + r / n).powf(n * t))
+            }
+        }
+        "fin.tvm.compound_pv" => {
+            let fv = scalar_or_nan(inputs, "FV");
+            let r = scalar_or_nan(inputs, "r");
+            let n = scalar_or_nan(inputs, "n");
+            let t = scalar_or_nan(inputs, "t");
+            if n == 0.0 {
+                Value::error("Compound PV: n = 0")
+            } else {
+                let denom = (1.0 + r / n).powf(n * t);
+                if denom == 0.0 {
+                    Value::error("Compound PV: denominator = 0")
+                } else {
+                    Value::scalar(fv / denom)
+                }
+            }
+        }
+        "fin.tvm.continuous_fv" => {
+            let pv = scalar_or_nan(inputs, "PV");
+            let r = scalar_or_nan(inputs, "r");
+            let t = scalar_or_nan(inputs, "t");
+            Value::scalar(pv * (r * t).exp())
+        }
+        "fin.tvm.annuity_pv" => {
+            let pmt = scalar_or_nan(inputs, "PMT");
+            let r = scalar_or_nan(inputs, "r");
+            let n = scalar_or_nan(inputs, "n");
+            if r == 0.0 {
+                Value::scalar(pmt * n)
+            } else {
+                Value::scalar(pmt * (1.0 - (1.0 + r).powf(-n)) / r)
+            }
+        }
+        "fin.tvm.annuity_fv" => {
+            let pmt = scalar_or_nan(inputs, "PMT");
+            let r = scalar_or_nan(inputs, "r");
+            let n = scalar_or_nan(inputs, "n");
+            if r == 0.0 {
+                Value::scalar(pmt * n)
+            } else {
+                Value::scalar(pmt * ((1.0 + r).powf(n) - 1.0) / r)
+            }
+        }
+        "fin.tvm.annuity_pmt" => {
+            let pv = scalar_or_nan(inputs, "PV");
+            let r = scalar_or_nan(inputs, "r");
+            let n = scalar_or_nan(inputs, "n");
+            if r == 0.0 {
+                if n == 0.0 {
+                    Value::error("Annuity PMT: n = 0")
+                } else {
+                    Value::scalar(pv / n)
+                }
+            } else {
+                let denom = 1.0 - (1.0 + r).powf(-n);
+                if denom == 0.0 {
+                    Value::error("Annuity PMT: denominator = 0")
+                } else {
+                    Value::scalar(pv * r / denom)
+                }
+            }
+        }
+        "fin.tvm.npv" => {
+            let r = scalar_or_nan(inputs, "r");
+            let count = validated_count(inputs, 1);
+            let cfs = collect_values(inputs, &CF_PORTS, count);
+            let mut npv = 0.0_f64;
+            for (i, cf) in cfs.iter().enumerate() {
+                npv += cf / (1.0 + r).powi(i as i32);
+            }
+            Value::scalar(npv)
+        }
+        "fin.tvm.rule_of_72" => {
+            let r = scalar_or_nan(inputs, "r");
+            if r == 0.0 {
+                Value::error("Rule of 72: r = 0")
+            } else {
+                Value::scalar(72.0 / (r * 100.0))
+            }
+        }
+        "fin.tvm.effective_rate" => {
+            let r = scalar_or_nan(inputs, "r");
+            let n = scalar_or_nan(inputs, "n");
+            if n == 0.0 {
+                Value::error("Effective rate: n = 0")
+            } else {
+                Value::scalar((1.0 + r / n).powf(n) - 1.0)
+            }
+        }
+
+        // ── Finance → Returns & Risk ──────────────────────────────────
+        "fin.returns.pct_return" => {
+            let v0 = scalar_or_nan(inputs, "v0");
+            let v1 = scalar_or_nan(inputs, "v1");
+            if v0 == 0.0 {
+                Value::error("% Return: v0 = 0")
+            } else {
+                Value::scalar((v1 - v0) / v0)
+            }
+        }
+        "fin.returns.log_return" => {
+            let v0 = scalar_or_nan(inputs, "v0");
+            let v1 = scalar_or_nan(inputs, "v1");
+            if v0 <= 0.0 || v1 <= 0.0 {
+                Value::error("Log Return: values must be > 0")
+            } else {
+                Value::scalar((v1 / v0).ln())
+            }
+        }
+        "fin.returns.cagr" => {
+            let v0 = scalar_or_nan(inputs, "v0");
+            let v1 = scalar_or_nan(inputs, "v1");
+            let t = scalar_or_nan(inputs, "t");
+            if v0 <= 0.0 {
+                Value::error("CAGR: v0 must be > 0")
+            } else if t == 0.0 {
+                Value::error("CAGR: t = 0")
+            } else {
+                Value::scalar((v1 / v0).powf(1.0 / t) - 1.0)
+            }
+        }
+        "fin.returns.sharpe" => {
+            let ret = scalar_or_nan(inputs, "ret");
+            let rf = scalar_or_nan(inputs, "rf");
+            let sigma = scalar_or_nan(inputs, "sigma");
+            if sigma == 0.0 {
+                Value::error("Sharpe: \u{03C3} = 0")
+            } else {
+                Value::scalar((ret - rf) / sigma)
+            }
+        }
+        "fin.returns.weighted_avg" => {
+            let count = validated_count(inputs, 2);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            let ys = collect_values(inputs, &Y_PORTS, count);
+            let w_sum: f64 = ys.iter().sum();
+            if w_sum == 0.0 {
+                Value::error("Weighted avg: weights sum to 0")
+            } else {
+                let wval: f64 = xs.iter().zip(ys.iter()).map(|(x, w)| x * w).sum();
+                Value::scalar(wval / w_sum)
+            }
+        }
+        "fin.returns.portfolio_variance" => {
+            // 2-asset: w1²σ1² + w2²σ2² + 2·w1·w2·ρ·σ1·σ2
+            let w1 = scalar_or_nan(inputs, "w1");
+            let w2 = scalar_or_nan(inputs, "w2");
+            let s1 = scalar_or_nan(inputs, "s1");
+            let s2 = scalar_or_nan(inputs, "s2");
+            let rho = scalar_or_nan(inputs, "rho");
+            Value::scalar(
+                w1 * w1 * s1 * s1
+                + w2 * w2 * s2 * s2
+                + 2.0 * w1 * w2 * rho * s1 * s2,
+            )
+        }
+
+        // ── Finance → Depreciation ────────────────────────────────────
+        "fin.depr.straight_line" => {
+            let cost = scalar_or_nan(inputs, "cost");
+            let salvage = scalar_or_nan(inputs, "salvage");
+            let life = scalar_or_nan(inputs, "life");
+            if life == 0.0 {
+                Value::error("SL Depreciation: life = 0")
+            } else {
+                Value::scalar((cost - salvage) / life)
+            }
+        }
+        "fin.depr.declining_balance" => {
+            let cost = scalar_or_nan(inputs, "cost");
+            let salvage = scalar_or_nan(inputs, "salvage");
+            let life = scalar_or_nan(inputs, "life");
+            let period = scalar_or_nan(inputs, "period");
+            if life == 0.0 {
+                Value::error("DB Depreciation: life = 0")
+            } else if cost == 0.0 {
+                Value::scalar(0.0)
+            } else {
+                let rate = 1.0 - (salvage / cost).powf(1.0 / life);
+                let bv_start = cost * (1.0 - rate).powf(period - 1.0);
+                Value::scalar(bv_start * rate)
+            }
+        }
+
+        // ── Stats → Descriptive ───────────────────────────────────────
+        "stats.desc.mean" => {
+            let count = validated_count(inputs, 1);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            let sum: f64 = xs.iter().sum();
+            Value::scalar(sum / count as f64)
+        }
+        "stats.desc.median" => {
+            let count = validated_count(inputs, 1);
+            let mut xs = collect_values(inputs, &X_PORTS, count);
+            xs.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+            let mid = count / 2;
+            if count % 2 == 0 {
+                Value::scalar((xs[mid - 1] + xs[mid]) / 2.0)
+            } else {
+                Value::scalar(xs[mid])
+            }
+        }
+        "stats.desc.mode_approx" => {
+            // For fixed 6 slots: return most frequent (first tie wins)
+            let count = validated_count(inputs, 1);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            let mut best = xs[0];
+            let mut best_count = 1_usize;
+            for i in 0..count {
+                let c = xs[i..count].iter().filter(|&&x| (x - xs[i]).abs() < f64::EPSILON).count();
+                if c > best_count {
+                    best_count = c;
+                    best = xs[i];
+                }
+            }
+            Value::scalar(best)
+        }
+        "stats.desc.range" => {
+            let count = validated_count(inputs, 1);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            let min = xs.iter().cloned().fold(f64::INFINITY, f64::min);
+            let max = xs.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+            Value::scalar(max - min)
+        }
+        "stats.desc.variance" => {
+            let count = validated_count(inputs, 2);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            let n = count as f64;
+            let mean = xs.iter().sum::<f64>() / n;
+            let var = xs.iter().map(|x| (x - mean) * (x - mean)).sum::<f64>() / n;
+            Value::scalar(var)
+        }
+        "stats.desc.stddev" => {
+            let count = validated_count(inputs, 2);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            let n = count as f64;
+            let mean = xs.iter().sum::<f64>() / n;
+            let var = xs.iter().map(|x| (x - mean) * (x - mean)).sum::<f64>() / n;
+            Value::scalar(var.sqrt())
+        }
+        "stats.desc.sum" => {
+            let count = validated_count(inputs, 1);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            Value::scalar(xs.iter().sum())
+        }
+        "stats.desc.geo_mean" => {
+            let count = validated_count(inputs, 1);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            if xs.iter().any(|&x| x <= 0.0) {
+                Value::error("Geo mean: all values must be > 0")
+            } else {
+                let log_sum: f64 = xs.iter().map(|x| x.ln()).sum();
+                Value::scalar((log_sum / count as f64).exp())
+            }
+        }
+        "stats.desc.zscore" => {
+            let x = scalar_or_nan(inputs, "x");
+            let mu = scalar_or_nan(inputs, "mu");
+            let sigma = scalar_or_nan(inputs, "sigma");
+            if sigma == 0.0 {
+                Value::error("Z-score: \u{03C3} = 0")
+            } else {
+                Value::scalar((x - mu) / sigma)
+            }
+        }
+
+        // ── Stats → Relationships ─────────────────────────────────────
+        "stats.rel.covariance" => {
+            let count = validated_count(inputs, 2);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            let ys = collect_values(inputs, &Y_PORTS, count);
+            let n = count as f64;
+            let mx = xs.iter().sum::<f64>() / n;
+            let my = ys.iter().sum::<f64>() / n;
+            let cov = xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my)).sum::<f64>() / n;
+            Value::scalar(cov)
+        }
+        "stats.rel.correlation" => {
+            let count = validated_count(inputs, 2);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            let ys = collect_values(inputs, &Y_PORTS, count);
+            let n = count as f64;
+            let mx = xs.iter().sum::<f64>() / n;
+            let my = ys.iter().sum::<f64>() / n;
+            let cov: f64 = xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my)).sum::<f64>() / n;
+            let sx = (xs.iter().map(|x| (x - mx).powi(2)).sum::<f64>() / n).sqrt();
+            let sy = (ys.iter().map(|y| (y - my).powi(2)).sum::<f64>() / n).sqrt();
+            if sx == 0.0 || sy == 0.0 {
+                Value::error("Correlation: zero variance")
+            } else {
+                Value::scalar(cov / (sx * sy))
+            }
+        }
+        "stats.rel.linreg_slope" => {
+            let count = validated_count(inputs, 2);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            let ys = collect_values(inputs, &Y_PORTS, count);
+            let n = count as f64;
+            let mx = xs.iter().sum::<f64>() / n;
+            let my = ys.iter().sum::<f64>() / n;
+            let num: f64 = xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my)).sum();
+            let den: f64 = xs.iter().map(|x| (x - mx).powi(2)).sum();
+            if den == 0.0 {
+                Value::error("LinReg slope: zero variance in X")
+            } else {
+                Value::scalar(num / den)
+            }
+        }
+        "stats.rel.linreg_intercept" => {
+            let count = validated_count(inputs, 2);
+            let xs = collect_values(inputs, &X_PORTS, count);
+            let ys = collect_values(inputs, &Y_PORTS, count);
+            let n = count as f64;
+            let mx = xs.iter().sum::<f64>() / n;
+            let my = ys.iter().sum::<f64>() / n;
+            let num: f64 = xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my)).sum();
+            let den: f64 = xs.iter().map(|x| (x - mx).powi(2)).sum();
+            if den == 0.0 {
+                Value::error("LinReg intercept: zero variance in X")
+            } else {
+                let slope = num / den;
+                Value::scalar(my - slope * mx)
+            }
+        }
+
+        // ── Probability → Combinatorics ───────────────────────────────
+        "prob.comb.factorial" => {
+            unary_broadcast_port(inputs, "n", |n| {
+                if n < 0.0 || n != n.floor() { f64::NAN } else { factorial_val(n as u64) }
+            })
+        }
+        "prob.comb.permutation" => {
+            let n = scalar_or_nan(inputs, "n");
+            let k = scalar_or_nan(inputs, "k");
+            if n < 0.0 || k < 0.0 || n != n.floor() || k != k.floor() {
+                Value::error("P(n,k): n,k must be non-negative integers")
+            } else {
+                Value::scalar(permutation_val(n as u64, k as u64))
+            }
+        }
+
+        // ── Probability → Distributions ───────────────────────────────
+        "prob.dist.binomial_pmf" => {
+            let n = scalar_or_nan(inputs, "n");
+            let k = scalar_or_nan(inputs, "k");
+            let p = scalar_or_nan(inputs, "p");
+            if n < 0.0 || k < 0.0 || n != n.floor() || k != k.floor() {
+                Value::error("Binomial PMF: n,k must be non-negative integers")
+            } else if !(0.0..=1.0).contains(&p) {
+                Value::error("Binomial PMF: p must be in [0,1]")
+            } else {
+                let ni = n as u64;
+                let ki = k as u64;
+                Value::scalar(combination(ni, ki) * p.powi(ki as i32) * (1.0 - p).powi((ni - ki) as i32))
+            }
+        }
+        "prob.dist.poisson_pmf" => {
+            let k = scalar_or_nan(inputs, "k");
+            let lambda = scalar_or_nan(inputs, "lambda");
+            if k < 0.0 || k != k.floor() {
+                Value::error("Poisson PMF: k must be a non-negative integer")
+            } else if lambda < 0.0 {
+                Value::error("Poisson PMF: \u{03BB} must be \u{2265} 0")
+            } else {
+                let ki = k as u64;
+                Value::scalar((-lambda).exp() * lambda.powi(ki as i32) / factorial_val(ki))
+            }
+        }
+        "prob.dist.exponential_pdf" => {
+            let x = scalar_or_nan(inputs, "x");
+            let lambda = scalar_or_nan(inputs, "lambda");
+            if lambda <= 0.0 {
+                Value::error("Exponential PDF: \u{03BB} must be > 0")
+            } else if x < 0.0 {
+                Value::scalar(0.0)
+            } else {
+                Value::scalar(lambda * (-lambda * x).exp())
+            }
+        }
+        "prob.dist.exponential_cdf" => {
+            let x = scalar_or_nan(inputs, "x");
+            let lambda = scalar_or_nan(inputs, "lambda");
+            if lambda <= 0.0 {
+                Value::error("Exponential CDF: \u{03BB} must be > 0")
+            } else if x < 0.0 {
+                Value::scalar(0.0)
+            } else {
+                Value::scalar(1.0 - (-lambda * x).exp())
+            }
+        }
+        "prob.dist.normal_pdf" => {
+            let x = scalar_or_nan(inputs, "x");
+            let mu = scalar_or_nan(inputs, "mu");
+            let sigma = scalar_or_nan(inputs, "sigma");
+            if sigma <= 0.0 {
+                Value::error("Normal PDF: \u{03C3} must be > 0")
+            } else {
+                let z = (x - mu) / sigma;
+                let coeff = 1.0 / (sigma * (2.0 * std::f64::consts::PI).sqrt());
+                Value::scalar(coeff * (-0.5 * z * z).exp())
+            }
+        }
+
+        // ── Utilities ─────────────────────────────────────────────────
+        "util.round.to_dp" => {
+            let x = scalar_or_nan(inputs, "x");
+            let dp = scalar_or_nan(inputs, "dp");
+            let factor = 10.0_f64.powi(dp.round() as i32);
+            Value::scalar((x * factor).round() / factor)
+        }
+        "util.pct.to_decimal" => {
+            unary_broadcast_port(inputs, "pct", |p| p / 100.0)
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }
@@ -958,6 +1389,52 @@ fn read_table_from_data(data: &HashMap<String, serde_json::Value>, require: bool
             }
         }
     }
+}
+
+// ── W11b helpers ─────────────────────────────────────────────────
+
+/// Port names for fixed-slot stats blocks (X1..X6).
+const X_PORTS: [&str; 6] = ["x1", "x2", "x3", "x4", "x5", "x6"];
+/// Port names for Y slots in relationship blocks (Y1..Y6).
+const Y_PORTS: [&str; 6] = ["y1", "y2", "y3", "y4", "y5", "y6"];
+/// Port names for cash-flow slots (CF0..CF5).
+const CF_PORTS: [&str; 6] = ["cf0", "cf1", "cf2", "cf3", "cf4", "cf5"];
+
+/// Read the `c` (count) port, clamp to [min_c..6], return as usize.
+fn validated_count(inputs: &HashMap<String, Value>, min_c: usize) -> usize {
+    let raw = scalar_or_nan(inputs, "c");
+    if raw.is_nan() { min_c } else { (raw.round() as usize).clamp(min_c, 6) }
+}
+
+/// Collect `count` values from the named port array, defaulting missing to 0.
+fn collect_values(inputs: &HashMap<String, Value>, ports: &[&str], count: usize) -> Vec<f64> {
+    (0..count).map(|i| {
+        inputs.get(ports[i]).and_then(|v| v.as_scalar()).unwrap_or(0.0)
+    }).collect()
+}
+
+/// n! as f64 (n ≤ 170 to avoid inf).
+fn factorial_val(n: u64) -> f64 {
+    if n > 170 { return f64::INFINITY; }
+    (1..=n).fold(1.0_f64, |acc, i| acc * i as f64)
+}
+
+/// P(n,k) = n! / (n-k)!
+fn permutation_val(n: u64, k: u64) -> f64 {
+    if k > n { return 0.0; }
+    ((n - k + 1)..=n).fold(1.0_f64, |acc, i| acc * i as f64)
+}
+
+/// C(n,k) = n! / (k! * (n-k)!)
+fn combination(n: u64, k: u64) -> f64 {
+    if k > n { return 0.0; }
+    let k = k.min(n - k); // symmetry optimisation
+    let mut result = 1.0_f64;
+    for i in 0..k {
+        result *= (n - i) as f64;
+        result /= (i + 1) as f64;
+    }
+    result
 }
 
 fn data_point_count(input: Option<&Value>) -> Value {
@@ -1568,5 +2045,408 @@ mod tests {
         let inputs = make_inputs(&[("lpm", 60_000.0)]);
         let v = evaluate_node("eng.conv.lpm_to_m3s", &inputs, &HashMap::new());
         assert_eq!(v.as_scalar(), Some(1.0));
+    }
+
+    // ── W11b: Finance / Stats / Probability tests ─────────────────
+
+    #[test]
+    fn fin_simple_interest() {
+        let inputs = make_inputs(&[("P", 1000.0), ("r", 0.05), ("t", 3.0)]);
+        let v = evaluate_node("fin.tvm.simple_interest", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 150.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn fin_compound_fv() {
+        // FV = 1000*(1+0.05/12)^(12*10) ≈ 1647.01
+        let inputs = make_inputs(&[("PV", 1000.0), ("r", 0.05), ("n", 12.0), ("t", 10.0)]);
+        let v = evaluate_node("fin.tvm.compound_fv", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 1647.0095).abs() < 0.01);
+    }
+
+    #[test]
+    fn fin_compound_pv() {
+        let inputs = make_inputs(&[("FV", 1647.01), ("r", 0.05), ("n", 12.0), ("t", 10.0)]);
+        let v = evaluate_node("fin.tvm.compound_pv", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 1000.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn fin_compound_fv_n_zero() {
+        let inputs = make_inputs(&[("PV", 1000.0), ("r", 0.05), ("n", 0.0), ("t", 10.0)]);
+        let v = evaluate_node("fin.tvm.compound_fv", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn fin_continuous_fv() {
+        // FV = 1000 * e^(0.05*10) ≈ 1648.72
+        let inputs = make_inputs(&[("PV", 1000.0), ("r", 0.05), ("t", 10.0)]);
+        let v = evaluate_node("fin.tvm.continuous_fv", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 1648.72).abs() < 0.01);
+    }
+
+    #[test]
+    fn fin_annuity_pv() {
+        // PMT=100, r=0.05, n=10: PV = 100*(1-(1.05)^-10)/0.05 ≈ 772.17
+        let inputs = make_inputs(&[("PMT", 100.0), ("r", 0.05), ("n", 10.0)]);
+        let v = evaluate_node("fin.tvm.annuity_pv", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 772.17).abs() < 0.01);
+    }
+
+    #[test]
+    fn fin_annuity_pv_zero_rate() {
+        let inputs = make_inputs(&[("PMT", 100.0), ("r", 0.0), ("n", 10.0)]);
+        let v = evaluate_node("fin.tvm.annuity_pv", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(1000.0));
+    }
+
+    #[test]
+    fn fin_annuity_fv() {
+        // PMT=100, r=0.05, n=10: FV = 100*((1.05)^10-1)/0.05 ≈ 1257.79
+        let inputs = make_inputs(&[("PMT", 100.0), ("r", 0.05), ("n", 10.0)]);
+        let v = evaluate_node("fin.tvm.annuity_fv", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 1257.79).abs() < 0.01);
+    }
+
+    #[test]
+    fn fin_annuity_pmt() {
+        // PV=772.17, r=0.05, n=10 → PMT ≈ 100
+        let inputs = make_inputs(&[("PV", 772.17), ("r", 0.05), ("n", 10.0)]);
+        let v = evaluate_node("fin.tvm.annuity_pmt", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 100.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn fin_npv() {
+        // r=0.1, CFs=[-100, 50, 60, 70] → NPV ≈ 46.07
+        let inputs = make_inputs(&[("r", 0.1), ("c", 4.0), ("cf0", -100.0), ("cf1", 50.0), ("cf2", 60.0), ("cf3", 70.0)]);
+        let v = evaluate_node("fin.tvm.npv", &inputs, &HashMap::new());
+        let expected = -100.0 + 50.0/1.1 + 60.0/1.21 + 70.0/1.331;
+        assert!((v.as_scalar().unwrap() - expected).abs() < 0.01);
+    }
+
+    #[test]
+    fn fin_rule_of_72() {
+        let inputs = make_inputs(&[("r", 0.06)]);
+        let v = evaluate_node("fin.tvm.rule_of_72", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(12.0));
+    }
+
+    #[test]
+    fn fin_rule_of_72_zero() {
+        let inputs = make_inputs(&[("r", 0.0)]);
+        let v = evaluate_node("fin.tvm.rule_of_72", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn fin_effective_rate() {
+        // EAR = (1 + 0.12/12)^12 - 1 ≈ 0.12683
+        let inputs = make_inputs(&[("r", 0.12), ("n", 12.0)]);
+        let v = evaluate_node("fin.tvm.effective_rate", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.12683).abs() < 0.0001);
+    }
+
+    #[test]
+    fn fin_pct_return() {
+        let inputs = make_inputs(&[("v0", 100.0), ("v1", 120.0)]);
+        let v = evaluate_node("fin.returns.pct_return", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(0.2));
+    }
+
+    #[test]
+    fn fin_pct_return_zero() {
+        let inputs = make_inputs(&[("v0", 0.0), ("v1", 120.0)]);
+        let v = evaluate_node("fin.returns.pct_return", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn fin_log_return() {
+        let inputs = make_inputs(&[("v0", 100.0), ("v1", 110.0)]);
+        let v = evaluate_node("fin.returns.log_return", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - (1.1_f64).ln()).abs() < 1e-10);
+    }
+
+    #[test]
+    fn fin_cagr() {
+        // CAGR: v0=100, v1=200, t=7 → (2)^(1/7)-1 ≈ 0.10409
+        let inputs = make_inputs(&[("v0", 100.0), ("v1", 200.0), ("t", 7.0)]);
+        let v = evaluate_node("fin.returns.cagr", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.10409).abs() < 0.0001);
+    }
+
+    #[test]
+    fn fin_sharpe() {
+        let inputs = make_inputs(&[("ret", 0.12), ("rf", 0.02), ("sigma", 0.15)]);
+        let v = evaluate_node("fin.returns.sharpe", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.6667).abs() < 0.001);
+    }
+
+    #[test]
+    fn fin_sharpe_zero_sigma() {
+        let inputs = make_inputs(&[("ret", 0.12), ("rf", 0.02), ("sigma", 0.0)]);
+        let v = evaluate_node("fin.returns.sharpe", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn fin_portfolio_variance() {
+        // w1=0.6, w2=0.4, σ1=0.15, σ2=0.20, ρ=0.3
+        let inputs = make_inputs(&[("w1", 0.6), ("w2", 0.4), ("s1", 0.15), ("s2", 0.20), ("rho", 0.3)]);
+        let v = evaluate_node("fin.returns.portfolio_variance", &inputs, &HashMap::new());
+        let expected = 0.36*0.0225 + 0.16*0.04 + 2.0*0.6*0.4*0.3*0.15*0.20;
+        assert!((v.as_scalar().unwrap() - expected).abs() < 1e-10);
+    }
+
+    #[test]
+    fn fin_sl_depreciation() {
+        let inputs = make_inputs(&[("cost", 10000.0), ("salvage", 2000.0), ("life", 5.0)]);
+        let v = evaluate_node("fin.depr.straight_line", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(1600.0));
+    }
+
+    #[test]
+    fn fin_sl_depreciation_zero_life() {
+        let inputs = make_inputs(&[("cost", 10000.0), ("salvage", 2000.0), ("life", 0.0)]);
+        let v = evaluate_node("fin.depr.straight_line", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn fin_db_depreciation() {
+        // DB: cost=10000, salvage=1000, life=5, period=1
+        let inputs = make_inputs(&[("cost", 10000.0), ("salvage", 1000.0), ("life", 5.0), ("period", 1.0)]);
+        let v = evaluate_node("fin.depr.declining_balance", &inputs, &HashMap::new());
+        // rate = 1 - (1000/10000)^(1/5) ≈ 0.36904
+        // bv_start = 10000 * (1 - rate)^0 = 10000
+        // depr = 10000 * rate ≈ 3690.4
+        let rate = 1.0 - (0.1_f64).powf(0.2);
+        assert!((v.as_scalar().unwrap() - 10000.0 * rate).abs() < 0.01);
+    }
+
+    #[test]
+    fn stats_mean() {
+        let inputs = make_inputs(&[("c", 3.0), ("x1", 10.0), ("x2", 20.0), ("x3", 30.0)]);
+        let v = evaluate_node("stats.desc.mean", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(20.0));
+    }
+
+    #[test]
+    fn stats_median_odd() {
+        let inputs = make_inputs(&[("c", 3.0), ("x1", 30.0), ("x2", 10.0), ("x3", 20.0)]);
+        let v = evaluate_node("stats.desc.median", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(20.0));
+    }
+
+    #[test]
+    fn stats_median_even() {
+        let inputs = make_inputs(&[("c", 4.0), ("x1", 1.0), ("x2", 2.0), ("x3", 3.0), ("x4", 4.0)]);
+        let v = evaluate_node("stats.desc.median", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(2.5));
+    }
+
+    #[test]
+    fn stats_range() {
+        let inputs = make_inputs(&[("c", 4.0), ("x1", 5.0), ("x2", 2.0), ("x3", 8.0), ("x4", 1.0)]);
+        let v = evaluate_node("stats.desc.range", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(7.0));
+    }
+
+    #[test]
+    fn stats_variance() {
+        // values: 2, 4, 4, 4, 5, 5, 7, 9 → but we only have 6 slots
+        // Use: 2, 4, 4, 5, 5, 7 → mean=4.5, var = mean of (2.5^2, 0.5^2, 0.5^2, 0.5^2, 0.5^2, 2.5^2) / 6
+        let inputs = make_inputs(&[("c", 3.0), ("x1", 2.0), ("x2", 4.0), ("x3", 6.0)]);
+        let v = evaluate_node("stats.desc.variance", &inputs, &HashMap::new());
+        // mean=4, var = (4+0+4)/3 = 8/3 ≈ 2.6667
+        assert!((v.as_scalar().unwrap() - 8.0/3.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn stats_stddev() {
+        let inputs = make_inputs(&[("c", 3.0), ("x1", 2.0), ("x2", 4.0), ("x3", 6.0)]);
+        let v = evaluate_node("stats.desc.stddev", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - (8.0_f64/3.0).sqrt()).abs() < 1e-10);
+    }
+
+    #[test]
+    fn stats_sum() {
+        let inputs = make_inputs(&[("c", 4.0), ("x1", 1.0), ("x2", 2.0), ("x3", 3.0), ("x4", 4.0)]);
+        let v = evaluate_node("stats.desc.sum", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(10.0));
+    }
+
+    #[test]
+    fn stats_geo_mean() {
+        // geo_mean(2, 8) = sqrt(16) = 4
+        let inputs = make_inputs(&[("c", 2.0), ("x1", 2.0), ("x2", 8.0)]);
+        let v = evaluate_node("stats.desc.geo_mean", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(4.0));
+    }
+
+    #[test]
+    fn stats_geo_mean_negative() {
+        let inputs = make_inputs(&[("c", 2.0), ("x1", -2.0), ("x2", 8.0)]);
+        let v = evaluate_node("stats.desc.geo_mean", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn stats_zscore() {
+        let inputs = make_inputs(&[("x", 85.0), ("mu", 70.0), ("sigma", 10.0)]);
+        let v = evaluate_node("stats.desc.zscore", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(1.5));
+    }
+
+    #[test]
+    fn stats_zscore_zero_sigma() {
+        let inputs = make_inputs(&[("x", 85.0), ("mu", 70.0), ("sigma", 0.0)]);
+        let v = evaluate_node("stats.desc.zscore", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn stats_covariance() {
+        // X=[1,2,3], Y=[2,4,6] → cov = mean of [(1-2)(2-4), (2-2)(4-4), (3-2)(6-4)] = mean of [2,0,2] = 4/3
+        let inputs = make_inputs(&[("c", 3.0), ("x1", 1.0), ("x2", 2.0), ("x3", 3.0), ("y1", 2.0), ("y2", 4.0), ("y3", 6.0)]);
+        let v = evaluate_node("stats.rel.covariance", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 4.0/3.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn stats_correlation_perfect() {
+        let inputs = make_inputs(&[("c", 3.0), ("x1", 1.0), ("x2", 2.0), ("x3", 3.0), ("y1", 2.0), ("y2", 4.0), ("y3", 6.0)]);
+        let v = evaluate_node("stats.rel.correlation", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 1.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn stats_linreg_slope() {
+        // X=[1,2,3], Y=[2,4,6] → slope=2
+        let inputs = make_inputs(&[("c", 3.0), ("x1", 1.0), ("x2", 2.0), ("x3", 3.0), ("y1", 2.0), ("y2", 4.0), ("y3", 6.0)]);
+        let v = evaluate_node("stats.rel.linreg_slope", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 2.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn stats_linreg_intercept() {
+        // X=[1,2,3], Y=[2,4,6] → intercept=0
+        let inputs = make_inputs(&[("c", 3.0), ("x1", 1.0), ("x2", 2.0), ("x3", 3.0), ("y1", 2.0), ("y2", 4.0), ("y3", 6.0)]);
+        let v = evaluate_node("stats.rel.linreg_intercept", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn prob_factorial() {
+        let inputs = make_inputs(&[("n", 5.0)]);
+        let v = evaluate_node("prob.comb.factorial", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(120.0));
+    }
+
+    #[test]
+    fn prob_factorial_zero() {
+        let inputs = make_inputs(&[("n", 0.0)]);
+        let v = evaluate_node("prob.comb.factorial", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(1.0));
+    }
+
+    #[test]
+    fn prob_permutation() {
+        // P(5,2) = 20
+        let inputs = make_inputs(&[("n", 5.0), ("k", 2.0)]);
+        let v = evaluate_node("prob.comb.permutation", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(20.0));
+    }
+
+    #[test]
+    fn prob_binomial_pmf() {
+        // B(10,3,0.5) = C(10,3)*0.5^3*0.5^7 = 120*0.5^10 ≈ 0.117188
+        let inputs = make_inputs(&[("n", 10.0), ("k", 3.0), ("p", 0.5)]);
+        let v = evaluate_node("prob.dist.binomial_pmf", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.117188).abs() < 0.0001);
+    }
+
+    #[test]
+    fn prob_binomial_invalid_p() {
+        let inputs = make_inputs(&[("n", 10.0), ("k", 3.0), ("p", 1.5)]);
+        let v = evaluate_node("prob.dist.binomial_pmf", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn prob_poisson_pmf() {
+        // P(k=2, λ=3) = e^-3 * 9 / 2 ≈ 0.22404
+        let inputs = make_inputs(&[("k", 2.0), ("lambda", 3.0)]);
+        let v = evaluate_node("prob.dist.poisson_pmf", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.22404).abs() < 0.0001);
+    }
+
+    #[test]
+    fn prob_exponential_pdf() {
+        // f(1, λ=2) = 2*e^-2 ≈ 0.27067
+        let inputs = make_inputs(&[("x", 1.0), ("lambda", 2.0)]);
+        let v = evaluate_node("prob.dist.exponential_pdf", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.27067).abs() < 0.0001);
+    }
+
+    #[test]
+    fn prob_exponential_cdf() {
+        // F(1, λ=2) = 1 - e^-2 ≈ 0.86466
+        let inputs = make_inputs(&[("x", 1.0), ("lambda", 2.0)]);
+        let v = evaluate_node("prob.dist.exponential_cdf", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.86466).abs() < 0.0001);
+    }
+
+    #[test]
+    fn prob_exponential_negative_x() {
+        let inputs = make_inputs(&[("x", -1.0), ("lambda", 2.0)]);
+        let v = evaluate_node("prob.dist.exponential_pdf", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(0.0));
+    }
+
+    #[test]
+    fn prob_normal_pdf() {
+        // f(0, μ=0, σ=1) = 1/√(2π) ≈ 0.39894
+        let inputs = make_inputs(&[("x", 0.0), ("mu", 0.0), ("sigma", 1.0)]);
+        let v = evaluate_node("prob.dist.normal_pdf", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.39894).abs() < 0.0001);
+    }
+
+    #[test]
+    fn prob_normal_pdf_zero_sigma() {
+        let inputs = make_inputs(&[("x", 0.0), ("mu", 0.0), ("sigma", 0.0)]);
+        let v = evaluate_node("prob.dist.normal_pdf", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn util_round_to_dp() {
+        let inputs = make_inputs(&[("x", 3.14159), ("dp", 2.0)]);
+        let v = evaluate_node("util.round.to_dp", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(3.14));
+    }
+
+    #[test]
+    fn util_pct_to_decimal() {
+        let inputs = make_inputs(&[("pct", 45.0)]);
+        let v = evaluate_node("util.pct.to_decimal", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(0.45));
+    }
+
+    #[test]
+    fn fin_weighted_avg() {
+        // values=[10,20,30], weights=[1,2,3] → (10+40+90)/6 = 140/6 ≈ 23.333
+        let inputs = make_inputs(&[("c", 3.0), ("x1", 10.0), ("x2", 20.0), ("x3", 30.0), ("y1", 1.0), ("y2", 2.0), ("y3", 3.0)]);
+        let v = evaluate_node("fin.returns.weighted_avg", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 140.0/6.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn stats_mode_approx() {
+        let inputs = make_inputs(&[("c", 5.0), ("x1", 1.0), ("x2", 2.0), ("x3", 2.0), ("x4", 3.0), ("x5", 2.0)]);
+        let v = evaluate_node("stats.desc.mode_approx", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(2.0));
     }
 }

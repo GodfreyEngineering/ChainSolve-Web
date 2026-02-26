@@ -25,6 +25,14 @@ export type BlockCategory =
   | 'engThermo'
   | 'engElectrical'
   | 'engConversions'
+  | 'finTvm'
+  | 'finReturns'
+  | 'finDepr'
+  | 'statsDesc'
+  | 'statsRel'
+  | 'probComb'
+  | 'probDist'
+  | 'utilCalc'
 
 /** Which React Flow custom-node renderer to use. */
 export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay' | 'csData' | 'csPlot' | 'csGroup'
