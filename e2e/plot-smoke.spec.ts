@@ -3,12 +3,13 @@ import { test, expect } from '@playwright/test'
 test.describe('Plot smoke tests', () => {
   test('plot blocks exist in the block registry', async ({ page }) => {
     // Navigate to the canvas (scratch mode, no auth required for loading)
-    await page.goto('/canvas')
-    await expect(page.locator('#root')).toBeAttached()
-    // The page should load without console errors
+    // Register pageerror handler BEFORE goto so we catch any init-time throws.
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
-    await page.waitForTimeout(1500)
+    await page.goto('/canvas')
+    // canvas-computed renders once the engine has loaded and evaluated the
+    // starter graph (3+4=7) — a deterministic signal replacing waitForTimeout.
+    await page.locator('[data-testid="canvas-computed"]').waitFor({ state: 'attached', timeout: 15_000 })
     expect(errors).toEqual([])
   })
 
@@ -25,7 +26,9 @@ test.describe('Plot smoke tests', () => {
       }
     })
     await page.goto('/canvas')
-    await page.waitForTimeout(2000)
+    // Wait for canvas-computed to confirm the full eval cycle (including
+    // lazy Vega-interpreter loading) has completed without CSP violations.
+    await page.locator('[data-testid="canvas-computed"]').waitFor({ state: 'attached', timeout: 15_000 })
     expect(cspErrors).toEqual([])
   })
 

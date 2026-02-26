@@ -49,8 +49,10 @@ test.describe('Smoke tests', () => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
     await page.goto('/')
-    // Wait a tick for any async errors
-    await page.waitForTimeout(1000)
+    // Wait for the deterministic engine-ready sentinel instead of a fixed timeout.
+    // engine-ready renders only after WASM init resolves, so any init-time errors
+    // will have already fired the pageerror handler before this resolves.
+    await page.locator('[data-testid="engine-ready"]').waitFor({ state: 'attached', timeout: 15_000 })
     expect(errors).toEqual([])
   })
 })
