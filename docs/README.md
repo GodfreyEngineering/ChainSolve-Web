@@ -197,3 +197,77 @@
 - `cs push` stages all, commits, pushes, suggests PR creation
 - `cs ship` creates/reuses PR, squash-merges, deletes branch, updates local main
 - `cs hotfix <name>` creates `hotfix/<name>-YYYYMMDD` branch from main
+
+---
+
+## Multi-canvas "Sheets" (W10.7)
+
+Each project supports multiple canvases (sheets). Metadata lives in the DB; graph JSON is stored per-canvas in Supabase Storage.
+
+**DB schema:**
+
+- **`canvases`** — `id` (uuid PK), `project_id` (FK), `owner_id` (FK), `name`, `position` (int, unique per project), `storage_path`, `created_at`, `updated_at`
+- **`projects`** — added `active_canvas_id` (uuid, no FK — avoids circular dep; enforced at app level)
+
+**Storage path convention:**
+
+```text
+projects bucket:
+  └── {userId}/{projectId}/canvases/{canvasId}.json   ← per-canvas graph (V4)
+  └── {userId}/{projectId}/project.json                ← legacy V3 (preserved)
+```
+
+**Per-canvas JSON format (schemaVersion 4):**
+
+```jsonc
+{
+  "schemaVersion": 4,
+  "canvasId": "...",
+  "projectId": "...",
+  "nodes": [...],
+  "edges": [...],
+  "datasetRefs": []
+}
+```
+
+**Migration behavior (V3 → multi-canvas):**
+
+- On first open of a legacy project (no `canvases` rows in DB):
+  1. Creates a default canvas row "Sheet 1" with position 0
+  2. Uploads the migrated graph JSON to `canvases/{canvasId}.json`
+  3. Sets `projects.active_canvas_id`
+  4. Does NOT delete the legacy `project.json` (left in place for backward compat)
+- Safe to re-run: if canvases already exist, migration is a no-op.
+
+**Active canvas persistence:**
+
+- `projects.active_canvas_id` is stored in the DB for cross-device state.
+- On load, if the stored active ID doesn't exist in the canvases list, falls back to position 0.
+
+**Entitlements:**
+
+- Free/past\_due/canceled: max 2 canvases per project
+- Trialing/Pro: unlimited canvases
+
+**UI (desktop):** Horizontal tab bar below the header, above the canvas.
+
+- Click tab to switch, double-click to rename, right-click for context menu (Rename, Duplicate, Delete).
+- `+` button to add a new sheet (entitlement gated).
+
+**UI (mobile):** Dropdown selector with `+` button.
+
+**Key files:**
+
+- Migration SQL: `supabase/migrations/0014_multi_canvas.sql`
+- Storage helpers: `src/lib/canvasStorage.ts`
+- Schema V4 + migration: `src/lib/canvasSchema.ts`
+- CRUD operations: `src/lib/canvases.ts`
+- Canvases store: `src/stores/canvasesStore.ts`
+- Sheets tab bar: `src/components/app/SheetsBar.tsx`
+- i18n: `sheets.*` namespace in all 5 locale files
+
+**Known limitations:**
+
+- Drag-and-drop reorder of tabs is deferred (position model in place, UI deferred).
+- Save As duplicates only the active canvas's legacy project.json (full multi-canvas duplication is a follow-up).
+- Background canvas autosave (dirty canvases other than active) is active-only for now.

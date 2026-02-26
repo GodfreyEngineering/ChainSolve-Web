@@ -335,5 +335,19 @@
     "findPlaceholder": "Rechercher…",
     "noMatches": "Aucun résultat",
     "findHint": "↑↓ · ↵ cibler · ESC"
+  },
+  "sheets": {
+    "title": "Feuilles",
+    "addSheet": "Ajouter une feuille",
+    "rename": "Renommer",
+    "duplicate": "Dupliquer",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer cette feuille ? Cette action est irréversible.",
+    "limitReached": "Limite de feuilles atteinte. Passez à Pro pour des feuilles illimitées.",
+    "cannotDeleteLast": "Impossible de supprimer la dernière feuille.",
+    "switchConfirmTitle": "Modifications non enregistrées",
+    "switchSave": "Enregistrer et basculer",
+    "switchDiscard": "Abandonner et basculer",
+    "switchCancel": "Annuler"
   }
 }

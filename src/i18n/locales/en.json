@@ -234,7 +234,8 @@
     "upgradeFeature4": "Plot visualizations",
     "upgradeCta": "Upgrade — £10/mo",
     "upgradeFeature5": "Block groups & templates",
-    "canceledNoCreate": "Canceled accounts cannot create new projects."
+    "canceledNoCreate": "Canceled accounts cannot create new projects.",
+    "upgradeFeature6": "Unlimited canvas sheets"
   },
   "groups": {
     "groupSelection": "Group Selection",
@@ -335,5 +336,19 @@
     "findPlaceholder": "Search blocks…",
     "noMatches": "No blocks match",
     "findHint": "↑↓ · ↵ focus · ESC"
+  },
+  "sheets": {
+    "title": "Sheets",
+    "addSheet": "Add sheet",
+    "rename": "Rename",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this sheet? This cannot be undone.",
+    "limitReached": "Sheet limit reached. Upgrade to Pro for unlimited sheets.",
+    "cannotDeleteLast": "Cannot delete the last sheet.",
+    "switchConfirmTitle": "Unsaved changes",
+    "switchSave": "Save & switch",
+    "switchDiscard": "Discard & switch",
+    "switchCancel": "Cancel"
   }
 }

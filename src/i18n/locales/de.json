@@ -335,5 +335,19 @@
     "findPlaceholder": "Blöcke suchen…",
     "noMatches": "Keine Treffer",
     "findHint": "↑↓ · ↵ fokus · ESC"
+  },
+  "sheets": {
+    "title": "Blätter",
+    "addSheet": "Blatt hinzufügen",
+    "rename": "Umbenennen",
+    "duplicate": "Duplizieren",
+    "delete": "Löschen",
+    "deleteConfirm": "Dieses Blatt löschen? Dies kann nicht rückgängig gemacht werden.",
+    "limitReached": "Blattlimit erreicht. Upgraden Sie auf Pro für unbegrenzte Blätter.",
+    "cannotDeleteLast": "Das letzte Blatt kann nicht gelöscht werden.",
+    "switchConfirmTitle": "Ungespeicherte Änderungen",
+    "switchSave": "Speichern & wechseln",
+    "switchDiscard": "Verwerfen & wechseln",
+    "switchCancel": "Abbrechen"
   }
 }

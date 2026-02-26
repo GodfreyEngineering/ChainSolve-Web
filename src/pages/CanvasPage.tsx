@@ -1,22 +1,16 @@
 /**
- * CanvasPage — full-page canvas editor.
+ * CanvasPage — full-page canvas editor with multi-canvas "Sheets" (W10.7).
  *
  * Route: /canvas/:projectId   (project mode — autosaved to Supabase storage)
  *        /canvas              (scratch mode — no persistence)
  *
  * Lifecycle:
- *   1. Mount → load project.json from storage (when projectId is present).
- *   2. CanvasArea fires onGraphChange on every node/edge mutation (dirty tracking).
- *   3. 2 s debounce → doSave() pulls live snapshot via canvasRef → saveProject().
- *   4. Conflict detected → banner with "Keep mine" / "Reload" choices.
- *
- * W5.1 fixes:
- *   - doSave() uses canvasRef.getSnapshot() for authoritative graph state
- *     (replaces stale pendingNodes/pendingEdges refs that caused blank reopens).
- *   - "Save now" button + Ctrl+S for immediate save.
- *   - beforeunload handler flushes a best-effort save on tab close.
- *   - Route-leave handler saves before navigating back to /app.
- *   - Status label shows saved node/edge counts for debugging.
+ *   1. Mount → load project row + canvases list from DB.
+ *   2. If legacy (no canvases rows), migrate V3 graph to multi-canvas.
+ *   3. Load active canvas graph from per-canvas storage.
+ *   4. CanvasArea fires onGraphChange → dirty tracking + debounced autosave.
+ *   5. Autosave writes to per-canvas storage + project-level conflict detection.
+ *   6. Sheets tab bar (W10.7b) enables switching between canvases.
  */
 
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
@@ -39,14 +33,32 @@ import {
   listProjects,
   renameProject,
   readProjectRow,
-  type ProjectJSON,
 } from '../lib/projects'
+import {
+  listCanvases,
+  loadCanvasGraph,
+  saveCanvasGraph,
+  setActiveCanvas,
+  migrateProjectToMultiCanvas,
+  createCanvas,
+  renameCanvas,
+  deleteCanvas,
+  duplicateCanvas,
+} from '../lib/canvases'
 import { useProjectStore } from '../stores/projectStore'
+import { useCanvasesStore } from '../stores/canvasesStore'
 import { supabase } from '../lib/supabase'
-import { isReadOnly, canCreateProject, showBillingBanner, type Plan } from '../lib/entitlements'
+import {
+  isReadOnly,
+  canCreateProject,
+  canCreateCanvas,
+  showBillingBanner,
+  type Plan,
+} from '../lib/entitlements'
 import { isPerfHudEnabled } from '../lib/devFlags'
 import { addRecentProject } from '../lib/recentProjects'
 import { useToast } from '../components/ui/useToast'
+import { SheetsBar } from '../components/app/SheetsBar'
 
 const PerfHud = lazy(() =>
   import('../components/PerfHud.tsx').then((m) => ({ default: m.PerfHud })),
@@ -59,7 +71,8 @@ export default function CanvasPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { toast } = useToast()
-  // ── Store selectors ────────────────────────────────────────────────────────
+
+  // ── Project store selectors ────────────────────────────────────────────────
   const saveStatus = useProjectStore((s) => s.saveStatus)
   const projectName = useProjectStore((s) => s.projectName)
 
@@ -70,9 +83,21 @@ export default function CanvasPage() {
   const failSave = useProjectStore((s) => s.failSave)
   const detectConflict = useProjectStore((s) => s.detectConflict)
   const setStoreName = useProjectStore((s) => s.setProjectName)
-  const reset = useProjectStore((s) => s.reset)
+  const resetProject = useProjectStore((s) => s.reset)
 
-  // ── Plan awareness ───────────────────────────────────────────────────────
+  // ── Canvases store selectors ───────────────────────────────────────────────
+  const canvases = useCanvasesStore((s) => s.canvases)
+  const activeCanvasId = useCanvasesStore((s) => s.activeCanvasId)
+  const setCanvases = useCanvasesStore((s) => s.setCanvases)
+  const setActiveCanvasId = useCanvasesStore((s) => s.setActiveCanvasId)
+  const addCanvasToStore = useCanvasesStore((s) => s.addCanvas)
+  const removeCanvasFromStore = useCanvasesStore((s) => s.removeCanvas)
+  const updateCanvasInStore = useCanvasesStore((s) => s.updateCanvas)
+  const markCanvasDirty = useCanvasesStore((s) => s.markCanvasDirty)
+  const markCanvasClean = useCanvasesStore((s) => s.markCanvasClean)
+  const resetCanvases = useCanvasesStore((s) => s.reset)
+
+  // ── Plan awareness ─────────────────────────────────────────────────────────
   const [plan, setPlan] = useState<Plan>('free')
 
   useEffect(() => {
@@ -96,7 +121,7 @@ export default function CanvasPage() {
   const readOnly = isReadOnly(plan) && !!projectId
   const bannerKind = showBillingBanner(plan)
 
-  // ── Load state ────────────────────────────────────────────────────────────
+  // ── Load state ──────────────────────────────────────────────────────────────
   const [loadPhase, setLoadPhase] = useState<'loading' | 'ready' | 'error'>(
     projectId ? 'loading' : 'ready',
   )
@@ -110,14 +135,15 @@ export default function CanvasPage() {
   const isSaving = useRef(false)
   const conflictServerTs = useRef<string | null>(null)
 
-  // ── Inline project name editing ───────────────────────────────────────────
+  // ── Inline project name editing ────────────────────────────────────────────
   const [nameEditing, setNameEditing] = useState(false)
   const [nameInput, setNameInput] = useState('')
   const nameInputRef = useRef<HTMLInputElement>(null)
 
-  // ── Load project on mount (or when projectId changes) ─────────────────────
+  // ── Load project + canvases on mount ───────────────────────────────────────
   useEffect(() => {
-    reset()
+    resetProject()
+    resetCanvases()
     conflictServerTs.current = null
 
     if (!projectId) {
@@ -128,20 +154,56 @@ export default function CanvasPage() {
     setLoadPhase('loading')
     setLoadError(null)
 
-    Promise.all([readProjectRow(projectId), loadProject(projectId)])
-      .then(([row, pj]: [{ name: string; updated_at: string } | null, ProjectJSON]) => {
+    async function load() {
+      try {
+        // 1. Load project row + legacy project.json in parallel
+        const [row, pj] = await Promise.all([readProjectRow(projectId!), loadProject(projectId!)])
+
         const dbUpdatedAt = row?.updated_at ?? pj.updatedAt
         const dbName = row?.name ?? pj.project.name
-        beginLoad(projectId, dbName, dbUpdatedAt, pj.formatVersion, pj.createdAt)
-        addRecentProject(projectId, dbName)
-        setInitNodes(pj.graph.nodes as Node<NodeData>[])
-        setInitEdges(pj.graph.edges as Edge[])
+        beginLoad(projectId!, dbName, dbUpdatedAt, pj.formatVersion, pj.createdAt)
+        addRecentProject(projectId!, dbName)
+
+        // 2. Load canvases list
+        let canvasList = await listCanvases(projectId!)
+
+        // 3. If no canvases exist, migrate legacy V3 graph
+        if (canvasList.length === 0) {
+          await migrateProjectToMultiCanvas(projectId!, pj.graph.nodes, pj.graph.edges)
+          canvasList = await listCanvases(projectId!)
+        }
+
+        setCanvases(canvasList)
+
+        // 4. Determine active canvas
+        let activeId = row?.active_canvas_id ?? null
+        if (!activeId || !canvasList.find((c) => c.id === activeId)) {
+          activeId = canvasList[0]?.id ?? null
+          if (activeId) {
+            await setActiveCanvas(projectId!, activeId)
+          }
+        }
+
+        if (activeId) {
+          setActiveCanvasId(activeId)
+
+          // 5. Load active canvas graph
+          const canvasGraph = await loadCanvasGraph(projectId!, activeId)
+          setInitNodes(canvasGraph.nodes as Node<NodeData>[])
+          setInitEdges(canvasGraph.edges as Edge[])
+        } else {
+          setInitNodes([])
+          setInitEdges([])
+        }
+
         setLoadPhase('ready')
-      })
-      .catch((err: unknown) => {
+      } catch (err: unknown) {
         setLoadError(err instanceof Error ? err.message : 'Failed to load project')
         setLoadPhase('error')
-      })
+      }
+    }
+
+    void load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId])
 
@@ -152,9 +214,8 @@ export default function CanvasPage() {
     }
   }, [])
 
-  // ── Core save function ────────────────────────────────────────────────────
-  // Uses canvasRef.getSnapshot() to get the authoritative live graph state,
-  // instead of relying on stale refs (which caused blank reopens).
+  // ── Core save function ──────────────────────────────────────────────────────
+  // Saves to both per-canvas storage and project-level conflict detection.
   const doSave = useCallback(
     async (opts?: { forceKnownUpdatedAt?: string }) => {
       if (!projectId || isSaving.current) return
@@ -163,6 +224,7 @@ export default function CanvasPage() {
       if (!snapshot) return
 
       const state = useProjectStore.getState()
+      const canvasesState = useCanvasesStore.getState()
       const knownUpdatedAt = opts?.forceKnownUpdatedAt ?? state.dbUpdatedAt
       if (!knownUpdatedAt) return
 
@@ -170,6 +232,14 @@ export default function CanvasPage() {
       beginSave()
 
       try {
+        // Save to per-canvas storage if we have an active canvas
+        const currentCanvasId = canvasesState.activeCanvasId
+        if (currentCanvasId) {
+          await saveCanvasGraph(projectId, currentCanvasId, snapshot.nodes, snapshot.edges)
+          markCanvasClean(currentCanvasId)
+        }
+
+        // Also save to legacy project.json for backward compat + conflict detection
         const result = await saveProject(
           projectId,
           state.projectName,
@@ -195,20 +265,19 @@ export default function CanvasPage() {
         isSaving.current = false
       }
     },
-    [projectId, beginSave, completeSave, failSave, detectConflict],
+    [projectId, beginSave, completeSave, failSave, detectConflict, markCanvasClean],
   )
 
   // ── onGraphChange — dirty tracking + debounced autosave ────────────────────
-  // Note: we do NOT capture nodes/edges here for the save — doSave() pulls the
-  // authoritative snapshot from canvasRef at save time. This avoids the stale-ref
-  // bug where pendingNodes was empty on first render.
   const handleGraphChange: NonNullable<CanvasAreaProps['onGraphChange']> = useCallback(() => {
     markDirty()
+    const currentCanvasId = useCanvasesStore.getState().activeCanvasId
+    if (currentCanvasId) markCanvasDirty(currentCanvasId)
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
     autosaveTimer.current = setTimeout(() => {
       void doSave()
     }, AUTOSAVE_DELAY_MS)
-  }, [markDirty, doSave])
+  }, [markDirty, markCanvasDirty, doSave])
 
   // ── Flush save on tab close / refresh (best-effort) ────────────────────────
   useEffect(() => {
@@ -245,7 +314,7 @@ export default function CanvasPage() {
     [projectId, doSave, navigate],
   )
 
-  // ── Inline project name editing ───────────────────────────────────────────
+  // ── Inline project name editing ────────────────────────────────────────────
   const startNameEdit = useCallback(() => {
     setNameInput(useProjectStore.getState().projectName)
     setNameEditing(true)
@@ -265,7 +334,7 @@ export default function CanvasPage() {
     }
   }, [nameInput, projectId, setStoreName])
 
-  // ── Conflict resolution ───────────────────────────────────────────────────
+  // ── Conflict resolution ─────────────────────────────────────────────────────
   const handleOverwrite = useCallback(() => {
     const serverTs = conflictServerTs.current
     if (!serverTs) return
@@ -276,8 +345,7 @@ export default function CanvasPage() {
     window.location.reload()
   }, [])
 
-  // ── Project operations (for AppHeader File menu) ────────────────────────────
-
+  // ── Project operations (for AppHeader File menu) ──────────────────────────
   const handleNewProject = useCallback(async () => {
     try {
       const projects = await listProjects()
@@ -326,7 +394,121 @@ export default function CanvasPage() {
     [projectId, navigate, toast],
   )
 
-  // ── Loading / error screens ───────────────────────────────────────────────
+  // ── Sheet / canvas operations ──────────────────────────────────────────────
+
+  const handleSwitchCanvas = useCallback(
+    async (canvasId: string) => {
+      if (!projectId || canvasId === activeCanvasId) return
+
+      // Save current canvas if dirty before switching
+      if (useProjectStore.getState().isDirty) {
+        await doSave()
+      }
+
+      try {
+        // Load the target canvas graph
+        const canvasGraph = await loadCanvasGraph(projectId, canvasId)
+        setActiveCanvasId(canvasId)
+        await setActiveCanvas(projectId, canvasId)
+        setInitNodes(canvasGraph.nodes as Node<NodeData>[])
+        setInitEdges(canvasGraph.edges as Edge[])
+        // Force CanvasArea remount by updating the key (via initNodes/initEdges change)
+        // Reset dirty state for new canvas
+        const state = useProjectStore.getState()
+        if (state.dbUpdatedAt) {
+          completeSave(state.dbUpdatedAt)
+        }
+      } catch (err: unknown) {
+        toast(err instanceof Error ? err.message : 'Failed to switch canvas', 'error')
+      }
+    },
+    [projectId, activeCanvasId, doSave, setActiveCanvasId, completeSave, toast],
+  )
+
+  const handleCreateCanvas = useCallback(async () => {
+    if (!projectId) return
+    if (!canCreateCanvas(plan, canvases.length)) {
+      toast(t('sheets.limitReached'), 'error')
+      return
+    }
+    try {
+      const name = `Sheet ${canvases.length + 1}`
+      const row = await createCanvas(projectId, name)
+      addCanvasToStore(row)
+      // Switch to new canvas
+      await handleSwitchCanvas(row.id)
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : 'Failed to create sheet', 'error')
+    }
+  }, [projectId, plan, canvases.length, toast, t, addCanvasToStore, handleSwitchCanvas])
+
+  const handleRenameCanvas = useCallback(
+    async (canvasId: string, newName: string) => {
+      try {
+        await renameCanvas(canvasId, newName)
+        updateCanvasInStore(canvasId, { name: newName })
+      } catch (err: unknown) {
+        toast(err instanceof Error ? err.message : 'Failed to rename sheet', 'error')
+      }
+    },
+    [updateCanvasInStore, toast],
+  )
+
+  const handleDeleteCanvas = useCallback(
+    async (canvasId: string) => {
+      if (!projectId) return
+      // Enforce at least one canvas
+      if (canvases.length <= 1) {
+        toast(t('sheets.cannotDeleteLast'), 'error')
+        return
+      }
+      try {
+        await deleteCanvas(canvasId, projectId)
+        removeCanvasFromStore(canvasId)
+
+        // If we deleted the active canvas, switch to the first remaining
+        if (canvasId === activeCanvasId) {
+          const remaining = useCanvasesStore.getState().canvases
+          if (remaining.length > 0) {
+            await handleSwitchCanvas(remaining[0].id)
+          }
+        }
+      } catch (err: unknown) {
+        toast(err instanceof Error ? err.message : 'Failed to delete sheet', 'error')
+      }
+    },
+    [
+      projectId,
+      canvases.length,
+      activeCanvasId,
+      toast,
+      t,
+      removeCanvasFromStore,
+      handleSwitchCanvas,
+    ],
+  )
+
+  const handleDuplicateCanvas = useCallback(
+    async (canvasId: string) => {
+      if (!projectId) return
+      if (!canCreateCanvas(plan, canvases.length)) {
+        toast(t('sheets.limitReached'), 'error')
+        return
+      }
+      try {
+        const source = canvases.find((c) => c.id === canvasId)
+        const newName = `${source?.name ?? 'Sheet'} (copy)`
+        const row = await duplicateCanvas(projectId, canvasId, newName)
+        addCanvasToStore(row)
+        await handleSwitchCanvas(row.id)
+      } catch (err: unknown) {
+        toast(err instanceof Error ? err.message : 'Failed to duplicate sheet', 'error')
+      }
+    },
+    [projectId, plan, canvases, toast, t, addCanvasToStore, handleSwitchCanvas],
+  )
+
+  // ── Loading / error screens ────────────────────────────────────────────────
   if (loadPhase === 'loading') {
     return (
       <div
@@ -373,7 +555,7 @@ export default function CanvasPage() {
         background: 'var(--bg)',
       }}
     >
-      {/* ── App header ────────────────────────────────────────────────────────── */}
+      {/* ── App header ──────────────────────────────────────────────────────── */}
       <AppHeader
         projectId={projectId}
         projectName={projectName}
@@ -394,7 +576,7 @@ export default function CanvasPage() {
         canvasRef={canvasRef}
       />
 
-      {/* ── Read-only / billing banner ──────────────────────────────────────── */}
+      {/* ── Read-only / billing banner ────────────────────────────────────── */}
       {readOnly && (
         <div
           style={{
@@ -424,7 +606,7 @@ export default function CanvasPage() {
         </div>
       )}
 
-      {/* ── Conflict banner ───────────────────────────────────────────────────── */}
+      {/* ── Conflict banner ──────────────────────────────────────────────── */}
       {saveStatus === 'conflict' && (
         <div
           style={{
@@ -473,11 +655,26 @@ export default function CanvasPage() {
         </div>
       )}
 
-      {/* ── Canvas ───────────────────────────────────────────────────────────── */}
+      {/* ── Sheets tab bar ────────────────────────────────────────────────── */}
+      {projectId && canvases.length > 0 && (
+        <SheetsBar
+          canvases={canvases}
+          activeCanvasId={activeCanvasId}
+          plan={plan}
+          readOnly={readOnly}
+          onSwitchCanvas={handleSwitchCanvas}
+          onCreateCanvas={handleCreateCanvas}
+          onRenameCanvas={handleRenameCanvas}
+          onDeleteCanvas={handleDeleteCanvas}
+          onDuplicateCanvas={handleDuplicateCanvas}
+        />
+      )}
+
+      {/* ── Canvas ─────────────────────────────────────────────────────────── */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
         <CanvasArea
           ref={canvasRef}
-          key={projectId ?? 'scratch'}
+          key={activeCanvasId ?? projectId ?? 'scratch'}
           initialNodes={initNodes ?? INITIAL_NODES}
           initialEdges={initEdges ?? INITIAL_EDGES}
           onGraphChange={projectId && !readOnly ? handleGraphChange : undefined}

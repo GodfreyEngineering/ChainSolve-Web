@@ -335,5 +335,19 @@
     "findPlaceholder": "Cerca blocchi…",
     "noMatches": "Nessun risultato",
     "findHint": "↑↓ · ↵ focus · ESC"
+  },
+  "sheets": {
+    "title": "Fogli",
+    "addSheet": "Aggiungi foglio",
+    "rename": "Rinomina",
+    "duplicate": "Duplica",
+    "delete": "Elimina",
+    "deleteConfirm": "Eliminare questo foglio? L'azione non può essere annullata.",
+    "limitReached": "Limite fogli raggiunto. Passa a Pro per fogli illimitati.",
+    "cannotDeleteLast": "Impossibile eliminare l'ultimo foglio.",
+    "switchConfirmTitle": "Modifiche non salvate",
+    "switchSave": "Salva e cambia",
+    "switchDiscard": "Scarta e cambia",
+    "switchCancel": "Annulla"
   }
 }
