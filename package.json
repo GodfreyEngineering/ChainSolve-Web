@@ -22,6 +22,9 @@
     "test:e2e:full": "playwright test --project=full",
     "test:e2e:ui": "playwright test --ui",
     "bench:rust": "cargo bench --package engine-core",
+    "perf:bundle": "node scripts/check-bundle-size.mjs",
+    "perf:engine": "cargo bench --package engine-core 2>&1 | tail -60",
+    "perf:all": "npm run perf:bundle",
     "test:unit": "vitest run"
   },
   "dependencies": {
