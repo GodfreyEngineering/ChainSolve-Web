@@ -12,6 +12,8 @@ import type { Node, Edge } from '@xyflow/react'
 import type { EngineAPI } from './index.ts'
 import type { EvalOptions } from './wasm-types.ts'
 import type { Value } from './value.ts'
+import type { ConstantsLookup } from './resolveBindings.ts'
+import type { VariablesMap } from '../lib/variables.ts'
 import { toEngineSnapshot } from './bridge.ts'
 import { diffGraph } from './diffGraph.ts'
 import { isPerfHudEnabled } from '../lib/devFlags.ts'
@@ -43,6 +45,10 @@ export function useGraphEngine(
   refreshKey?: number,
   /** When true, skip all evaluation. On unpause, forces a full re-eval. */
   paused?: boolean,
+  /** W12.2: Constants lookup for binding resolution. */
+  constants?: ConstantsLookup,
+  /** W12.2: Project variables for binding resolution. */
+  variables?: VariablesMap,
 ): GraphEngineResult {
   const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
   const [isPartial, setIsPartial] = useState(false)
@@ -73,7 +79,7 @@ export function useGraphEngine(
       // First render: load full snapshot into persistent engine graph.
       snapshotLoaded.current = true
       const reqId = ++pendingRef.current
-      const snapshot = toEngineSnapshot(nodes, edges)
+      const snapshot = toEngineSnapshot(nodes, edges, constants, variables)
       const t0 = perfEnabled ? performance.now() : 0
       perfMark('cs:eval:start')
       engine.loadSnapshot(snapshot, options).then((result) => {
@@ -159,7 +165,7 @@ export function useGraphEngine(
 
     prevNodesRef.current = nodes
     prevEdgesRef.current = edges
-  }, [nodes, edges, engine, options, refreshKey, paused])
+  }, [nodes, edges, engine, options, refreshKey, paused, constants, variables])
 
   return { computed, isPartial }
 }

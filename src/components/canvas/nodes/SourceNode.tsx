@@ -6,11 +6,12 @@
  * The single output handle sits on the right edge.
  */
 
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useEffect } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
 import { formatValue } from '../../../engine/value'
 import type { NodeData } from '../../../blocks/registry'
+import { useVariablesStore } from '../../../stores/variablesStore'
 import { NODE_STYLES as s } from './nodeStyles'
 
 function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
@@ -20,14 +21,32 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
   const value = computed.get(id)
   const isLocked = draggable === false
 
+  const updateVarValue = useVariablesStore((s) => s.updateValue)
   const updateValue = useCallback(
-    (v: number) => updateNodeData(id, { value: v }),
-    [id, updateNodeData],
+    (v: number) => {
+      updateNodeData(id, { value: v })
+      // W12.2: Two-way slider→variable binding
+      const nodeData = data as NodeData
+      if (nodeData.varId) updateVarValue(nodeData.varId, v)
+    },
+    [id, data, updateNodeData, updateVarValue],
   )
 
   const isSlider = nd.blockType === 'slider'
   const isNumber = nd.blockType === 'number'
-  const isEditable = isSlider || isNumber
+  const isVariableSource = nd.blockType === 'variableSource'
+  const isEditable = isSlider || isNumber || isVariableSource
+
+  // W12.2: variableSource — sync variable value → node value
+  const variables = useVariablesStore((s) => s.variables)
+  const varId = nd.varId
+  const boundVar = varId ? variables[varId] : undefined
+
+  useEffect(() => {
+    if (isVariableSource && boundVar !== undefined && boundVar.value !== nd.value) {
+      updateNodeData(id, { value: boundVar.value })
+    }
+  }, [isVariableSource, boundVar, nd.value, id, updateNodeData])
 
   return (
     <div style={{ ...s.node, ...(selected ? s.nodeSelected : {}) }}>
@@ -79,6 +98,43 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
             <span style={{ fontWeight: 600, opacity: 1 }}>{nd.value ?? 0}</span>
             <span>{nd.max ?? 100}</span>
           </div>
+        </div>
+      )}
+
+      {isVariableSource && (
+        <div className="cs-node-body" style={s.body}>
+          <select
+            className="nodrag"
+            style={{
+              width: '100%',
+              padding: '0.2rem 0.3rem',
+              borderRadius: 4,
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(0,0,0,0.2)',
+              color: varId ? '#93c5fd' : 'rgba(244,244,243,0.4)',
+              fontSize: '0.7rem',
+              fontFamily: 'inherit',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+            value={varId ?? ''}
+            onChange={(e) => {
+              const selectedVarId = e.target.value || undefined
+              const selectedVar = selectedVarId ? variables[selectedVarId] : undefined
+              updateNodeData(id, {
+                varId: selectedVarId,
+                value: selectedVar?.value ?? 0,
+                label: selectedVar?.name ?? 'Variable',
+              })
+            }}
+          >
+            <option value="">Select variable...</option>
+            {Object.values(variables).map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.name} = {v.value}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 

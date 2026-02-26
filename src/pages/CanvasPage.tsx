@@ -47,6 +47,8 @@ import {
 } from '../lib/canvases'
 import { useProjectStore } from '../stores/projectStore'
 import { useCanvasesStore } from '../stores/canvasesStore'
+import { useVariablesStore } from '../stores/variablesStore'
+import { saveVariables } from '../lib/variablesService'
 import { supabase } from '../lib/supabase'
 import {
   isReadOnly,
@@ -97,6 +99,11 @@ export default function CanvasPage() {
   const markCanvasClean = useCanvasesStore((s) => s.markCanvasClean)
   const resetCanvases = useCanvasesStore((s) => s.reset)
 
+  // ── Variables store selectors ──────────────────────────────────────────────
+  const loadVariablesStore = useVariablesStore((s) => s.load)
+  const resetVariables = useVariablesStore((s) => s.reset)
+  const markVariablesClean = useVariablesStore((s) => s.markClean)
+
   // ── Plan awareness ─────────────────────────────────────────────────────────
   const [plan, setPlan] = useState<Plan>('free')
 
@@ -144,6 +151,7 @@ export default function CanvasPage() {
   useEffect(() => {
     resetProject()
     resetCanvases()
+    resetVariables()
     conflictServerTs.current = null
 
     if (!projectId) {
@@ -163,6 +171,9 @@ export default function CanvasPage() {
         const dbName = row?.name ?? pj.project.name
         beginLoad(projectId!, dbName, dbUpdatedAt, pj.formatVersion, pj.createdAt)
         addRecentProject(projectId!, dbName)
+
+        // W12.2: Load project-level variables
+        loadVariablesStore(row?.variables ?? {})
 
         // 2. Load canvases list
         let canvasList = await listCanvases(projectId!)
@@ -232,6 +243,13 @@ export default function CanvasPage() {
       beginSave()
 
       try {
+        // W12.2: Save variables if dirty
+        const varsState = useVariablesStore.getState()
+        if (varsState.isDirty) {
+          await saveVariables(projectId, varsState.variables)
+          markVariablesClean()
+        }
+
         // Save to per-canvas storage if we have an active canvas
         const currentCanvasId = canvasesState.activeCanvasId
         if (currentCanvasId) {
@@ -265,7 +283,7 @@ export default function CanvasPage() {
         isSaving.current = false
       }
     },
-    [projectId, beginSave, completeSave, failSave, detectConflict, markCanvasClean],
+    [projectId, beginSave, completeSave, failSave, detectConflict, markCanvasClean, markVariablesClean],
   )
 
   // ── onGraphChange — dirty tracking + debounced autosave ────────────────────

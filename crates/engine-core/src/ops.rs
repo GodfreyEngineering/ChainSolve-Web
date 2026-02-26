@@ -60,7 +60,7 @@ fn evaluate_node_inner(
 ) -> Value {
     match block_type {
         // ── Sources (0 inputs) ────────────────────────────────────
-        "number" | "slider" => {
+        "number" | "slider" | "variableSource" => {
             let v = data
                 .get("value")
                 .and_then(|v| v.as_f64())
@@ -77,6 +77,59 @@ fn evaluate_node_inner(
         "ln10" => Value::scalar(std::f64::consts::LN_10),
         "sqrt2" => Value::scalar(std::f64::consts::SQRT_2),
         "inf" => Value::scalar(f64::INFINITY),
+
+        // ── W11c: Constants & Presets (0 inputs → 1 scalar) ──────
+        // Math
+        "const.math.sqrt2"  => Value::scalar(std::f64::consts::SQRT_2),
+        "const.math.ln2"    => Value::scalar(std::f64::consts::LN_2),
+        "const.math.ln10"   => Value::scalar(std::f64::consts::LN_10),
+        // Physics
+        "const.physics.g0"        => Value::scalar(9.806_65),
+        "const.physics.R_molar"   => Value::scalar(8.314_462_618),
+        "const.physics.c"         => Value::scalar(299_792_458.0),
+        "const.physics.h"         => Value::scalar(6.626_070_15e-34),
+        "const.physics.hbar"      => Value::scalar(1.054_571_817e-34),
+        "const.physics.kB"        => Value::scalar(1.380_649e-23),
+        "const.physics.Na"        => Value::scalar(6.022_140_76e23),
+        "const.physics.qe"        => Value::scalar(1.602_176_634e-19),
+        "const.physics.F"         => Value::scalar(96_485.332_12),
+        "const.physics.me"        => Value::scalar(9.109_383_7015e-31),
+        "const.physics.mp"        => Value::scalar(1.672_621_923_69e-27),
+        "const.physics.G"         => Value::scalar(6.674_30e-11),
+        "const.physics.mu0"       => Value::scalar(1.256_637_062_12e-6),
+        "const.physics.eps0"      => Value::scalar(8.854_187_8128e-12),
+        "const.physics.sigma_sb"  => Value::scalar(5.670_374_419e-8),
+        // Atmosphere (typical ISA values)
+        "const.atmos.p0_pa"       => Value::scalar(101_325.0),
+        "const.atmos.t0_k"        => Value::scalar(288.15),
+        "const.atmos.rho_air_sl"  => Value::scalar(1.225),
+        "const.atmos.gamma_air"   => Value::scalar(1.4),
+        "const.atmos.R_air"       => Value::scalar(287.05),
+        "const.atmos.mu_air_20c"  => Value::scalar(1.81e-5),
+        "const.atmos.a_air_20c"   => Value::scalar(343.0),
+        // Thermo (typical ~20°C values)
+        "const.thermo.cp_air"     => Value::scalar(1005.0),
+        "const.thermo.cv_air"     => Value::scalar(718.0),
+        "const.thermo.k_air"      => Value::scalar(0.0262),
+        "const.thermo.k_water"    => Value::scalar(0.6),
+        // Electrical (typical ~20°C values)
+        "const.elec.rho_copper"     => Value::scalar(1.68e-8),
+        "const.elec.rho_aluminium"  => Value::scalar(2.82e-8),
+        // Preset → Materials (typical engineering values)
+        "preset.materials.steel_rho" => Value::scalar(7850.0),
+        "preset.materials.steel_E"   => Value::scalar(200e9),
+        "preset.materials.steel_nu"  => Value::scalar(0.30),
+        "preset.materials.al_rho"    => Value::scalar(2700.0),
+        "preset.materials.al_E"      => Value::scalar(69e9),
+        "preset.materials.al_nu"     => Value::scalar(0.33),
+        "preset.materials.ti_rho"    => Value::scalar(4430.0),
+        "preset.materials.ti_E"      => Value::scalar(116e9),
+        "preset.materials.ti_nu"     => Value::scalar(0.34),
+        // Preset → Fluids (typical values)
+        "preset.fluids.water_rho_20c"  => Value::scalar(998.0),
+        "preset.fluids.water_mu_20c"   => Value::scalar(1.002e-3),
+        "preset.fluids.gasoline_rho"   => Value::scalar(745.0),
+        "preset.fluids.diesel_rho"     => Value::scalar(832.0),
 
         // ── Math (2 inputs: a, b or 1 input: in) ─────────────────
         "add" => binary_broadcast(inputs, |a, b| a + b),
@@ -2448,5 +2501,89 @@ mod tests {
         let inputs = make_inputs(&[("c", 5.0), ("x1", 1.0), ("x2", 2.0), ("x3", 2.0), ("x4", 3.0), ("x5", 2.0)]);
         let v = evaluate_node("stats.desc.mode_approx", &inputs, &HashMap::new());
         assert_eq!(v.as_scalar(), Some(2.0));
+    }
+
+    // ── W11c: Constants & Presets (table-driven) ──────────────────
+
+    #[test]
+    fn w11c_constants_table_driven() {
+        let cases: &[(&str, f64, f64)] = &[
+            // Math constants
+            ("const.math.sqrt2", std::f64::consts::SQRT_2, 1e-15),
+            ("const.math.ln2", std::f64::consts::LN_2, 1e-15),
+            ("const.math.ln10", std::f64::consts::LN_10, 1e-15),
+            // Physics constants (exact SI 2019 where applicable)
+            ("const.physics.g0", 9.806_65, 1e-10),
+            ("const.physics.R_molar", 8.314_462_618, 1e-9),
+            ("const.physics.c", 299_792_458.0, 0.0),
+            ("const.physics.h", 6.626_070_15e-34, 1e-43),
+            ("const.physics.hbar", 1.054_571_817e-34, 1e-43),
+            ("const.physics.kB", 1.380_649e-23, 1e-32),
+            ("const.physics.Na", 6.022_140_76e23, 1e14),
+            ("const.physics.qe", 1.602_176_634e-19, 1e-28),
+            ("const.physics.F", 96_485.332_12, 1e-3),
+            ("const.physics.me", 9.109_383_7015e-31, 1e-40),
+            ("const.physics.mp", 1.672_621_923_69e-27, 1e-37),
+            ("const.physics.G", 6.674_30e-11, 1e-16),
+            ("const.physics.mu0", 1.256_637_062_12e-6, 1e-15),
+            ("const.physics.eps0", 8.854_187_8128e-12, 1e-21),
+            ("const.physics.sigma_sb", 5.670_374_419e-8, 1e-17),
+            // Atmosphere
+            ("const.atmos.p0_pa", 101_325.0, 0.0),
+            ("const.atmos.t0_k", 288.15, 0.0),
+            ("const.atmos.rho_air_sl", 1.225, 0.0),
+            ("const.atmos.gamma_air", 1.4, 0.0),
+            ("const.atmos.R_air", 287.05, 0.0),
+            ("const.atmos.mu_air_20c", 1.81e-5, 1e-10),
+            ("const.atmos.a_air_20c", 343.0, 0.0),
+            // Thermo
+            ("const.thermo.cp_air", 1005.0, 0.0),
+            ("const.thermo.cv_air", 718.0, 0.0),
+            ("const.thermo.k_air", 0.0262, 1e-10),
+            ("const.thermo.k_water", 0.6, 0.0),
+            // Electrical
+            ("const.elec.rho_copper", 1.68e-8, 1e-15),
+            ("const.elec.rho_aluminium", 2.82e-8, 1e-15),
+            // Preset Materials
+            ("preset.materials.steel_rho", 7850.0, 0.0),
+            ("preset.materials.steel_E", 200e9, 0.0),
+            ("preset.materials.steel_nu", 0.30, 0.0),
+            ("preset.materials.al_rho", 2700.0, 0.0),
+            ("preset.materials.al_E", 69e9, 0.0),
+            ("preset.materials.al_nu", 0.33, 1e-10),
+            ("preset.materials.ti_rho", 4430.0, 0.0),
+            ("preset.materials.ti_E", 116e9, 0.0),
+            ("preset.materials.ti_nu", 0.34, 1e-10),
+            // Preset Fluids
+            ("preset.fluids.water_rho_20c", 998.0, 0.0),
+            ("preset.fluids.water_mu_20c", 1.002e-3, 1e-10),
+            ("preset.fluids.gasoline_rho", 745.0, 0.0),
+            ("preset.fluids.diesel_rho", 832.0, 0.0),
+        ];
+        for &(op_id, expected, tol) in cases {
+            let v = evaluate_node(op_id, &HashMap::new(), &HashMap::new());
+            let got = v.as_scalar().unwrap_or(f64::NAN);
+            assert!(
+                (got - expected).abs() <= tol,
+                "{}: expected {} ± {}, got {}",
+                op_id, expected, tol, got,
+            );
+        }
+    }
+
+    #[test]
+    fn w11c_preset_values_are_positive() {
+        let presets = [
+            "preset.materials.steel_rho", "preset.materials.steel_E", "preset.materials.steel_nu",
+            "preset.materials.al_rho", "preset.materials.al_E", "preset.materials.al_nu",
+            "preset.materials.ti_rho", "preset.materials.ti_E", "preset.materials.ti_nu",
+            "preset.fluids.water_rho_20c", "preset.fluids.water_mu_20c",
+            "preset.fluids.gasoline_rho", "preset.fluids.diesel_rho",
+        ];
+        for op_id in &presets {
+            let v = evaluate_node(op_id, &HashMap::new(), &HashMap::new());
+            let got = v.as_scalar().unwrap_or(f64::NAN);
+            assert!(got > 0.0, "{}: expected positive, got {}", op_id, got);
+        }
     }
 }

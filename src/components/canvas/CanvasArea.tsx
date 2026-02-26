@@ -51,8 +51,11 @@ import { Inspector } from './Inspector'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
 import { QuickAddPalette } from './QuickAddPalette'
 import { ComputedContext } from '../../contexts/ComputedContext'
+import { BindingContext } from '../../contexts/BindingContext'
 import { useEngine } from '../../contexts/EngineContext'
 import { useGraphEngine } from '../../engine/useGraphEngine'
+import { buildConstantsLookup } from '../../engine/resolveBindings'
+import { useVariablesStore } from '../../stores/variablesStore'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 import { UpgradeModal } from '../UpgradeModal'
@@ -413,7 +416,21 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   // ── Computed values (incremental via WASM engine) ──────────────────────────
   const engine = useEngine()
-  const { computed } = useGraphEngine(nodes, edges, engine, undefined, engineKey, paused)
+  const variables = useVariablesStore((s) => s.variables)
+
+  // W12.2: Build constants lookup + binding context from engine catalog
+  const constantsLookup = useMemo(
+    () => buildConstantsLookup(engine.constantValues),
+    [engine.constantValues],
+  )
+  const bindingCtx = useMemo(
+    () => ({ constants: constantsLookup, catalog: engine.catalog }),
+    [constantsLookup, engine.catalog],
+  )
+
+  const { computed } = useGraphEngine(
+    nodes, edges, engine, undefined, engineKey, paused, constantsLookup, variables,
+  )
 
   // ── Auto-organise layout ──────────────────────────────────────────────────
 
@@ -1086,6 +1103,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   return (
     <ComputedContext.Provider value={computed}>
+      <BindingContext.Provider value={bindingCtx}>
       <CanvasSettingsContext.Provider value={canvasSettings}>
       {computed.size > 0 && <div data-testid="canvas-computed" style={{ display: 'none' }} />}
       <div
@@ -1362,6 +1380,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         )}
       </div>
     </CanvasSettingsContext.Provider>
+      </BindingContext.Provider>
     </ComputedContext.Provider>
   )
 })

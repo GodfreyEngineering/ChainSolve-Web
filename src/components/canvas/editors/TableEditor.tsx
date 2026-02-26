@@ -8,7 +8,7 @@
  * - className="nodrag" on all interactive elements
  */
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, type ChangeEvent } from 'react'
 
 const ROW_H = 26
 const MAX_VISIBLE_H = 200
@@ -81,6 +81,39 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
   const addRow = useCallback(() => {
     onChange(columns, [...rows, new Array(columns.length).fill(0)])
   }, [columns, rows, onChange])
+
+  // W12.2: CSV import
+  const fileRef = useRef<HTMLInputElement>(null)
+  const handleCsvImport = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = () => {
+        const text = reader.result as string
+        const lines = text.split(/\r?\n/).filter((l) => l.trim())
+        if (lines.length === 0) return
+
+        // First line is header
+        const header = lines[0].split(',').map((h) => h.trim())
+        const dataRows: number[][] = []
+        for (let i = 1; i < lines.length; i++) {
+          const cells = lines[i].split(',').map((c) => {
+            const v = parseFloat(c.trim())
+            return isNaN(v) ? 0 : v
+          })
+          // Pad or trim to match header length
+          while (cells.length < header.length) cells.push(0)
+          dataRows.push(cells.slice(0, header.length))
+        }
+        onChange(header, dataRows)
+      }
+      reader.readAsText(file)
+      // Reset so the same file can be re-imported
+      e.target.value = ''
+    },
+    [onChange],
+  )
 
   const cellStyle: React.CSSProperties = {
     width: COL_W,
@@ -253,24 +286,51 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
         </div>
       </div>
 
-      {/* Add row */}
-      <button
-        className="nodrag"
-        onClick={addRow}
-        style={{
-          padding: '3px 8px',
-          background: 'rgba(28,171,176,0.12)',
-          border: '1px solid rgba(28,171,176,0.25)',
-          borderRadius: 4,
-          color: '#1CABB0',
-          cursor: 'pointer',
-          fontSize: '0.68rem',
-          fontWeight: 600,
-          fontFamily: 'inherit',
-        }}
-      >
-        + Add row
-      </button>
+      {/* Add row + CSV import */}
+      <div style={{ display: 'flex', gap: 4 }}>
+        <button
+          className="nodrag"
+          onClick={addRow}
+          style={{
+            padding: '3px 8px',
+            background: 'rgba(28,171,176,0.12)',
+            border: '1px solid rgba(28,171,176,0.25)',
+            borderRadius: 4,
+            color: '#1CABB0',
+            cursor: 'pointer',
+            fontSize: '0.68rem',
+            fontWeight: 600,
+            fontFamily: 'inherit',
+          }}
+        >
+          + Add row
+        </button>
+        <button
+          className="nodrag"
+          onClick={() => fileRef.current?.click()}
+          style={{
+            padding: '3px 8px',
+            background: 'rgba(168,85,247,0.12)',
+            border: '1px solid rgba(168,85,247,0.25)',
+            borderRadius: 4,
+            color: '#c084fc',
+            cursor: 'pointer',
+            fontSize: '0.68rem',
+            fontWeight: 600,
+            fontFamily: 'inherit',
+          }}
+          title="Import CSV file"
+        >
+          CSV
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".csv,text/csv"
+          style={{ display: 'none' }}
+          onChange={handleCsvImport}
+        />
+      </div>
     </div>
   )
 }

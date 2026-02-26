@@ -152,6 +152,8 @@ export type WorkerResponse =
   | {
       type: 'ready'
       catalog: CatalogEntry[]
+      /** Pre-computed constant values for zero-input source blocks (W12.2). */
+      constantValues: Record<string, number>
       engineVersion: string
       contractVersion: number
     }

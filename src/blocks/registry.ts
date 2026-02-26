@@ -54,6 +54,15 @@ reg({
   defaultData: { blockType: 'slider', label: 'Slider', value: 0, min: 0, max: 100, step: 1 },
 })
 
+reg({
+  type: 'variableSource',
+  label: 'Variable',
+  category: 'input',
+  nodeKind: 'csSource',
+  inputs: [],
+  defaultData: { blockType: 'variableSource', label: 'Variable', value: 0 },
+})
+
 // ── Constants category ────────────────────────────────────────────────────────
 
 reg({
@@ -434,6 +443,13 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   'probComb',
   'probDist',
   'utilCalc',
+  'constMath',
+  'constPhysics',
+  'constAtmos',
+  'constThermo',
+  'constElec',
+  'presetMaterials',
+  'presetFluids',
 ]
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -463,6 +479,13 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   probComb: 'Combinatorics',
   probDist: 'Distributions',
   utilCalc: 'Utilities',
+  constMath: 'Math Constants',
+  constPhysics: 'Physics',
+  constAtmos: 'Atmospheric',
+  constThermo: 'Thermodynamic',
+  constElec: 'Electrical',
+  presetMaterials: 'Material Presets',
+  presetFluids: 'Fluid Presets',
 }
 
 // ── Pro-only block registration (no circular imports) ────────────────────────
@@ -474,6 +497,7 @@ import { registerTableBlocks } from './table-blocks'
 import { registerPlotBlocks } from './plot-blocks'
 import { registerEngBlocks } from './eng-blocks'
 import { registerFinStatsBlocks } from './fin-stats-blocks'
+import { registerConstantsBlocks } from './constants-blocks'
 
 registerDataBlocks(reg)
 registerVectorBlocks(reg)
@@ -481,6 +505,7 @@ registerTableBlocks(reg)
 registerPlotBlocks(reg)
 registerEngBlocks(reg)
 registerFinStatsBlocks(reg)
+registerConstantsBlocks(reg)
 
 // ── Catalog validation (called after WASM engine boots) ──────────────────────
 

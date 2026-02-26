@@ -377,3 +377,83 @@ targeting `.cs-node-body` and `.cs-node-header-value` classes.
 - **Fixed-port stats**: Descriptive & relationship blocks use 6 fixed data slots (X1–X6, Y1–Y6) with a count parameter
 - **Error handling**: Division-by-zero, invalid inputs return `Value::error("message")`
 - **All Pro-only**: All 40 blocks require Pro entitlement
+
+## Constants & Presets block pack (W11c)
+
+44 constant / preset source blocks across 7 categories, powered by Rust/WASM ops. All blocks are **FREE** (not Pro-gated).
+
+### Categories (44 blocks)
+
+| Category | Count | Examples |
+|----------|-------|---------|
+| Math Constants | 3 | √2, ln 2, ln 10 (pi/e/τ/φ already in core "constants" category) |
+| Physics | 15 | g₀, R, c, h, ℏ, kB, Nₐ, qₑ, F, mₑ, mₚ, G, μ₀, ε₀, σ_SB |
+| Atmospheric | 7 | p₀, T₀, ρ_air, γ_air, R_air, μ_air, a_air |
+| Thermodynamic | 4 | cp_air, cv_air, k_air, k_water |
+| Electrical | 2 | ρ_copper, ρ_aluminium |
+| Material Presets | 9 | Steel/Aluminium/Titanium ρ, E, ν |
+| Fluid Presets | 4 | Water ρ/μ, gasoline ρ, diesel ρ |
+
+### Architecture
+
+- **Op IDs**: Stable namespaced IDs — `const.<domain>.<name>` and `preset.<domain>.<name>`
+- **Rust ops**: Match arms in `crates/engine-core/src/ops.rs`, catalog entries in `catalog.rs`
+- **TS blocks**: `src/blocks/constants-blocks.ts` exports `registerConstantsBlocks()`, called from `registry.ts`
+- **Source blocks**: All are `csSource` with zero inputs and one scalar output
+- **Free tier**: None of these categories are in `PRO_CATEGORIES`
+
+## Value Bindings + Variables + Table Inputs (W12.2)
+
+### Binding model
+
+Each unconnected input port can hold a **binding** instead of a bare number:
+
+| Kind | Data | Meaning |
+|------|------|---------|
+| `literal` | `{ kind: 'literal', value: number, raw?: string }` | Direct numeric value (equivalent to legacy `manualValues`) |
+| `const` | `{ kind: 'const', constOpId: string }` | Reference to a catalog constant (full precision from Rust) |
+| `var` | `{ kind: 'var', varId: string }` | Reference to a project-level variable |
+
+Bindings are stored in `node.data.inputBindings: Record<portId, InputBinding>`.
+
+### Resolution architecture (V1)
+
+Bindings are resolved to `manualValues` in the TS bridge layer (`src/engine/resolveBindings.ts`) **before** the snapshot reaches Rust. This means no changes to the Rust evaluation loop — `eval.rs` and `graph.rs` continue reading `manualValues` exactly as today.
+
+The single resolution point is `src/engine/bridge.ts` → `toEngineSnapshot()`.
+
+### Project variables
+
+Project-level scalar variables are stored as JSONB on the `projects` table (`variables` column). They are shared across all canvases in a project.
+
+- **Store**: `src/stores/variablesStore.ts` (Zustand)
+- **Service**: `src/lib/variablesService.ts`
+- **Migration**: `supabase/migrations/0015_project_variables.sql`
+- **Types**: `src/lib/variables.ts`
+
+### ValueEditor
+
+Replaces bare `<input type="number">` on unconnected/overridden ports. Shows:
+- Literal mode: number input + picker button
+- Const binding: purple chip with name + value
+- Var binding: blue chip with name + value
+- Popover with searchable constant + variable lists
+
+### New blocks
+
+- **variableSource**: Source block bound to a project variable (two-way sync)
+- **Table CSV import**: "CSV" button on TableEditor for importing `.csv` files
+
+### Key files
+
+| File | Purpose |
+|------|---------|
+| `src/blocks/types.ts` | `InputBinding` type, `NodeData.inputBindings`, `NodeData.varId` |
+| `src/engine/resolveBindings.ts` | Single resolution point for all bindings |
+| `src/engine/bridge.ts` | Injects resolved values into snapshot |
+| `src/engine/useGraphEngine.ts` | Threads constants+variables to bridge |
+| `src/contexts/BindingContext.ts` | Provides constants+catalog to ValueEditor |
+| `src/components/canvas/editors/ValueEditor.tsx` | Rich editor replacing bare inputs |
+| `src/stores/variablesStore.ts` | Variables state management |
+| `src/components/canvas/VariablesPanel.tsx` | Variables UI panel |
+| `crates/engine-core/src/catalog.rs` | `constant_values()` function |

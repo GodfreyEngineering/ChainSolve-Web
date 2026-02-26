@@ -20,6 +20,9 @@ import {
 import { useComputed } from '../../../contexts/ComputedContext'
 import { formatValue } from '../../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
+import type { InputBinding } from '../../../blocks/types'
+import { ensureBinding } from '../../../lib/migrateBindings'
+import { ValueEditor } from '../editors/ValueEditor'
 import { NODE_STYLES as s } from './nodeStyles'
 
 function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
@@ -37,6 +40,10 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
     () => (nd.manualValues ?? {}) as Record<string, number>,
     [nd.manualValues],
   )
+  const inputBindings = useMemo(
+    () => (nd.inputBindings ?? {}) as Record<string, InputBinding>,
+    [nd.inputBindings],
+  )
   const portOverrides = useMemo(
     () => (nd.portOverrides ?? {}) as Record<string, boolean>,
     [nd.portOverrides],
@@ -47,10 +54,16 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
     [allEdges, id],
   )
 
-  const updateManual = useCallback(
-    (portId: string, v: number) =>
-      updateNodeData(id, { manualValues: { ...manualValues, [portId]: v } }),
-    [id, manualValues, updateNodeData],
+  const updateBinding = useCallback(
+    (portId: string, binding: InputBinding) =>
+      updateNodeData(id, {
+        inputBindings: { ...inputBindings, [portId]: binding },
+        // Keep manualValues in sync for backward compat
+        ...(binding.kind === 'literal'
+          ? { manualValues: { ...manualValues, [portId]: binding.value } }
+          : {}),
+      }),
+    [id, inputBindings, manualValues, updateNodeData],
   )
 
   const toggleOverride = useCallback(
@@ -120,21 +133,11 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
               <span style={s.portLabel}>{port.label}</span>
 
               {showInput ? (
-                <input
-                  type="number"
-                  className="nodrag"
-                  style={{
-                    ...s.inlineInput,
-                    ...(override ? { borderColor: 'rgba(28,171,176,0.5)', color: '#1CABB0' } : {}),
-                  }}
-                  value={manualValues[port.id] ?? ''}
-                  placeholder="0"
-                  step="any"
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value)
-                    if (!isNaN(v)) updateManual(port.id, v)
-                  }}
-                  title={override ? `Manual override (connected to upstream)` : `Manual value`}
+                <ValueEditor
+                  compact
+                  override={override}
+                  binding={ensureBinding(inputBindings, manualValues, port.id)}
+                  onChange={(b) => updateBinding(port.id, b)}
                 />
               ) : (
                 <span

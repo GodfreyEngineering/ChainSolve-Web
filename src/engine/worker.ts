@@ -19,6 +19,7 @@ import initWasm, {
   register_dataset,
   release_dataset,
   get_catalog,
+  get_constant_values,
   get_engine_version,
   get_engine_contract_version,
   dataset_count,
@@ -103,9 +104,10 @@ async function initialize() {
   try {
     await initWasm(wasmUrl)
     const catalog = JSON.parse(get_catalog())
+    const constantValues = JSON.parse(get_constant_values()) as Record<string, number>
     const engineVersion = get_engine_version()
     const contractVersion = get_engine_contract_version()
-    post({ type: 'ready', catalog, engineVersion, contractVersion })
+    post({ type: 'ready', catalog, constantValues, engineVersion, contractVersion })
   } catch (err) {
     const raw = err instanceof Error ? err.message : String(err)
     // Detect CSP-blocked WebAssembly compilation.

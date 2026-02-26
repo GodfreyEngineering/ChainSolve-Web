@@ -61,6 +61,8 @@ export interface EngineAPI {
   releaseDataset(id: string): void
   /** Ops catalog received from the WASM engine on startup. */
   readonly catalog: CatalogEntry[]
+  /** Pre-computed constant values for zero-input source blocks (W12.2). */
+  readonly constantValues: Record<string, number>
   /** Engine version string from Rust crate. */
   readonly engineVersion: string
   /** Engine contract version (bumped on correctness policy changes). */
@@ -91,7 +93,7 @@ const defaultWorkerFactory: WorkerFactory = () =>
 /** Wait for a worker to post 'ready', or reject on init-error / timeout. */
 function waitForWorkerReady(
   w: Worker,
-  onReady?: (catalog: CatalogEntry[], engineVersion: string, contractVersion: number) => void,
+  onReady?: (catalog: CatalogEntry[], constantValues: Record<string, number>, engineVersion: string, contractVersion: number) => void,
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
@@ -101,7 +103,7 @@ function waitForWorkerReady(
 
     function handler(e: MessageEvent<WorkerResponse>) {
       if (e.data.type === 'ready') {
-        onReady?.(e.data.catalog, e.data.engineVersion, e.data.contractVersion)
+        onReady?.(e.data.catalog, e.data.constantValues, e.data.engineVersion, e.data.contractVersion)
         cleanup()
         resolve()
       } else if (e.data.type === 'init-error') {
@@ -271,13 +273,15 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
   // ── Initial worker setup ──────────────────────────────────────────────
 
   let catalog: CatalogEntry[] = []
+  let constantValues: Record<string, number> = {}
   let engineVersion = ''
   let contractVersion = 0
 
-  await waitForWorkerReady(worker, (c, ev, cv) => {
+  await waitForWorkerReady(worker, (c, cv, ev, contractV) => {
     catalog = c
+    constantValues = cv
     engineVersion = ev
-    contractVersion = cv
+    contractVersion = contractV
   })
 
   setupMessageHandler(worker)
@@ -353,6 +357,7 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
     },
 
     catalog,
+    constantValues,
     engineVersion,
     contractVersion,
 

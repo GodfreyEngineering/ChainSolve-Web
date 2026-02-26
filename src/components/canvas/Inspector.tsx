@@ -12,7 +12,9 @@ import { useComputed } from '../../contexts/ComputedContext'
 import { formatValue } from '../../engine/value'
 import { isError, isScalar } from '../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
-import type { PlotConfig } from '../../blocks/types'
+import type { InputBinding, PlotConfig } from '../../blocks/types'
+import { ensureBinding } from '../../lib/migrateBindings'
+import { ValueEditor } from './editors/ValueEditor'
 import { PlotInspector } from './PlotInspector'
 import { GroupInspector } from './GroupInspector'
 
@@ -148,6 +150,7 @@ export function Inspector({
   const def = BLOCK_REGISTRY.get(nd.blockType)
   const value = computed.get(node.id)
   const manualValues = (nd.manualValues ?? {}) as Record<string, number>
+  const inputBindings = (nd.inputBindings ?? {}) as Record<string, InputBinding>
   const portOverrides = (nd.portOverrides ?? {}) as Record<string, boolean>
 
   const isPortConnected = (portId: string) =>
@@ -155,8 +158,13 @@ export function Inspector({
 
   const update = (patch: Partial<NodeData>) => updateNodeData(node.id, patch)
 
-  const updateManual = (portId: string, v: number) =>
-    update({ manualValues: { ...manualValues, [portId]: v } })
+  const updateBinding = (portId: string, binding: InputBinding) =>
+    update({
+      inputBindings: { ...inputBindings, [portId]: binding },
+      ...(binding.kind === 'literal'
+        ? { manualValues: { ...manualValues, [portId]: binding.value } }
+        : {}),
+    })
 
   const toggleOverride = (portId: string) =>
     update({ portOverrides: { ...portOverrides, [portId]: !portOverrides[portId] } })
@@ -354,23 +362,13 @@ export function Inspector({
                         {port.label}
                       </span>
                       {showInput ? (
-                        <input
-                          type="number"
-                          style={{
-                            ...monoInp,
-                            flex: 1,
-                            fontSize: '0.75rem',
-                            borderColor: override ? 'rgba(28,171,176,0.4)' : undefined,
-                            color: override ? '#1CABB0' : undefined,
-                          }}
-                          value={manualValues[port.id] ?? ''}
-                          placeholder="0"
-                          step="any"
-                          onChange={(e) => {
-                            const v = parseFloat(e.target.value)
-                            if (!isNaN(v)) updateManual(port.id, v)
-                          }}
-                        />
+                        <div style={{ flex: 1 }}>
+                          <ValueEditor
+                            binding={ensureBinding(inputBindings, manualValues, port.id)}
+                            onChange={(b) => updateBinding(port.id, b)}
+                            override={override}
+                          />
+                        </div>
                       ) : (
                         <span
                           style={{

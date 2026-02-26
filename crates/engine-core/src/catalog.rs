@@ -4,6 +4,7 @@
 //! UI reads this catalog on startup to build the block library palette.
 
 use serde::Serialize;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -41,6 +42,14 @@ pub fn catalog() -> Vec<CatalogEntry> {
         CatalogEntry {
             op_id: "slider",
             label: "Slider",
+            category: "input",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "variableSource",
+            label: "Variable",
             category: "input",
             node_kind: "csSource",
             inputs: vec![],
@@ -1311,12 +1320,404 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![p("pct", "%")],
             pro_only: true,
         },
+        // ── W11c: Constants → Math ─────────────────────────────────
+        CatalogEntry {
+            op_id: "const.math.sqrt2",
+            label: "\u{221A}2",
+            category: "constMath",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.math.ln2",
+            label: "ln(2)",
+            category: "constMath",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.math.ln10",
+            label: "ln(10)",
+            category: "constMath",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        // ── W11c: Constants → Physics ──────────────────────────────
+        CatalogEntry {
+            op_id: "const.physics.g0",
+            label: "g\u{2080} (m/s\u{00B2})",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.R_molar",
+            label: "R (J/mol\u{00B7}K)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.c",
+            label: "c (m/s)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.h",
+            label: "h (J\u{00B7}s)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.hbar",
+            label: "\u{0127} (J\u{00B7}s)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.kB",
+            label: "k\u{0042} (J/K)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.Na",
+            label: "N\u{0041} (1/mol)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.qe",
+            label: "e (C)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.F",
+            label: "F (C/mol)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.me",
+            label: "m\u{2091} (kg)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.mp",
+            label: "m\u{209A} (kg)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.G",
+            label: "G (m\u{00B3}/kg/s\u{00B2})",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.mu0",
+            label: "\u{03BC}\u{2080} (H/m)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.eps0",
+            label: "\u{03B5}\u{2080} (F/m)",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.physics.sigma_sb",
+            label: "\u{03C3}\u{209B}\u{209C} (W/m\u{00B2}/K\u{2074})",
+            category: "constPhysics",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        // ── W11c: Constants → Atmosphere ───────────────────────────
+        CatalogEntry {
+            op_id: "const.atmos.p0_pa",
+            label: "p\u{2080} (Pa)",
+            category: "constAtmos",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.atmos.t0_k",
+            label: "T\u{2080} ISA (K)",
+            category: "constAtmos",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.atmos.rho_air_sl",
+            label: "\u{03C1} air SL (kg/m\u{00B3})",
+            category: "constAtmos",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.atmos.gamma_air",
+            label: "\u{03B3} air",
+            category: "constAtmos",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.atmos.R_air",
+            label: "R air (J/kg/K)",
+            category: "constAtmos",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.atmos.mu_air_20c",
+            label: "\u{03BC} air (Pa\u{00B7}s)",
+            category: "constAtmos",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.atmos.a_air_20c",
+            label: "a air (m/s)",
+            category: "constAtmos",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        // ── W11c: Constants → Thermo ──────────────────────────────
+        CatalogEntry {
+            op_id: "const.thermo.cp_air",
+            label: "c\u{209A} air (J/kg/K)",
+            category: "constThermo",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.thermo.cv_air",
+            label: "c\u{1D65} air (J/kg/K)",
+            category: "constThermo",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.thermo.k_air",
+            label: "k air (W/m/K)",
+            category: "constThermo",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.thermo.k_water",
+            label: "k water (W/m/K)",
+            category: "constThermo",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        // ── W11c: Constants → Electrical ──────────────────────────
+        CatalogEntry {
+            op_id: "const.elec.rho_copper",
+            label: "\u{03C1} copper (\u{03A9}\u{00B7}m)",
+            category: "constElec",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "const.elec.rho_aluminium",
+            label: "\u{03C1} aluminium (\u{03A9}\u{00B7}m)",
+            category: "constElec",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        // ── W11c: Presets → Materials (typical) ───────────────────
+        CatalogEntry {
+            op_id: "preset.materials.steel_rho",
+            label: "\u{03C1} steel (kg/m\u{00B3})",
+            category: "presetMaterials",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "preset.materials.steel_E",
+            label: "E steel (Pa)",
+            category: "presetMaterials",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "preset.materials.steel_nu",
+            label: "\u{03BD} steel",
+            category: "presetMaterials",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "preset.materials.al_rho",
+            label: "\u{03C1} aluminium (kg/m\u{00B3})",
+            category: "presetMaterials",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "preset.materials.al_E",
+            label: "E aluminium (Pa)",
+            category: "presetMaterials",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "preset.materials.al_nu",
+            label: "\u{03BD} aluminium",
+            category: "presetMaterials",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "preset.materials.ti_rho",
+            label: "\u{03C1} titanium (kg/m\u{00B3})",
+            category: "presetMaterials",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "preset.materials.ti_E",
+            label: "E titanium (Pa)",
+            category: "presetMaterials",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "preset.materials.ti_nu",
+            label: "\u{03BD} titanium",
+            category: "presetMaterials",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        // ── W11c: Presets → Fluids (typical) ──────────────────────
+        CatalogEntry {
+            op_id: "preset.fluids.water_rho_20c",
+            label: "\u{03C1} water (kg/m\u{00B3})",
+            category: "presetFluids",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "preset.fluids.water_mu_20c",
+            label: "\u{03BC} water (Pa\u{00B7}s)",
+            category: "presetFluids",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "preset.fluids.gasoline_rho",
+            label: "\u{03C1} gasoline (kg/m\u{00B3})",
+            category: "presetFluids",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "preset.fluids.diesel_rho",
+            label: "\u{03C1} diesel (kg/m\u{00B3})",
+            category: "presetFluids",
+            node_kind: "csSource",
+            inputs: vec![],
+            pro_only: false,
+        },
     ]
 }
 
 /// Serialize the catalog as JSON.
 pub fn catalog_json() -> String {
     serde_json::to_string(&catalog()).expect("catalog serialization")
+}
+
+/// Compute constant values for all zero-input source blocks.
+///
+/// Evaluates each `csSource` block with no inputs using `evaluate_node`
+/// and collects those that return a finite scalar. This gives the TS side
+/// access to constant values (e.g. pi, g0, steel_E) without duplicating
+/// the Rust definitions.
+pub fn constant_values() -> HashMap<String, f64> {
+    use crate::ops::evaluate_node;
+
+    let cat = catalog();
+    let empty_inputs: HashMap<String, crate::types::Value> = HashMap::new();
+    let empty_data: HashMap<String, serde_json::Value> = HashMap::new();
+    let mut map = HashMap::new();
+
+    for entry in &cat {
+        if entry.node_kind == "csSource" && entry.inputs.is_empty() {
+            let result = evaluate_node(entry.op_id, &empty_inputs, &empty_data);
+            if let Some(v) = result.as_scalar() {
+                if v.is_finite() {
+                    map.insert(entry.op_id.to_string(), v);
+                }
+            }
+        }
+    }
+
+    map
+}
+
+/// Serialize constant values as a JSON object { opId: number, ... }.
+pub fn constant_values_json() -> String {
+    serde_json::to_string(&constant_values()).expect("constant_values serialization")
 }
 
 /// Return the engine crate version.
@@ -1343,21 +1744,21 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 157);
+        assert_eq!(cat.len(), 202);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 157);
+        assert_eq!(parsed.as_array().unwrap().len(), 201);
     }
 
     #[test]
     fn known_ops_present() {
         let cat = catalog();
         let ids: Vec<&str> = cat.iter().map(|e| e.op_id).collect();
-        for expected in &["add", "sin", "vectorSum", "tableFilter", "xyPlot", "display", "eng.mechanics.force_ma", "eng.elec.ohms_V", "fin.tvm.compound_fv", "stats.desc.mean", "prob.dist.binomial_pmf"] {
+        for expected in &["add", "sin", "vectorSum", "tableFilter", "xyPlot", "display", "eng.mechanics.force_ma", "eng.elec.ohms_V", "fin.tvm.compound_fv", "stats.desc.mean", "prob.dist.binomial_pmf", "const.physics.g0", "preset.materials.steel_E"] {
             assert!(ids.contains(expected), "Missing op: {}", expected);
         }
     }

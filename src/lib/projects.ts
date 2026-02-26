@@ -13,6 +13,7 @@
  * RPC (CAS on updated_at). See docs/PROJECT_FORMAT.md §Conflict detection.
  */
 
+import type { VariablesMap } from './variables'
 import { supabase } from './supabase'
 import { saveProjectJson, loadProjectJson } from './storage'
 
@@ -108,13 +109,25 @@ async function readUpdatedAt(projectId: string): Promise<string | null> {
 /** Read a single project row. Used by CanvasPage to anchor conflict detection + resolve active canvas. */
 export async function readProjectRow(
   projectId: string,
-): Promise<{ name: string; updated_at: string; active_canvas_id: string | null } | null> {
+): Promise<{
+  name: string
+  updated_at: string
+  active_canvas_id: string | null
+  variables: VariablesMap
+} | null> {
   const { data } = await supabase
     .from('projects')
-    .select('name,updated_at,active_canvas_id')
+    .select('name,updated_at,active_canvas_id,variables')
     .eq('id', projectId)
     .single()
-  return data as { name: string; updated_at: string; active_canvas_id: string | null } | null
+  if (!data) return null
+  const row = data as {
+    name: string
+    updated_at: string
+    active_canvas_id: string | null
+    variables: VariablesMap | null
+  }
+  return { ...row, variables: row.variables ?? {} }
 }
 
 /** Return all projects for the current user, newest first. */
@@ -256,15 +269,25 @@ export async function deleteProject(projectId: string): Promise<void> {
   if (error) throw new Error(`Delete failed: ${error.message}`)
 }
 
-/** Create a new project that is a copy of the source project's graph. */
+/** Create a new project that is a copy of the source project's graph + variables. */
 export async function duplicateProject(sourceId: string, newName: string): Promise<ProjectRow> {
   const session = await requireSession()
   const projectId = crypto.randomUUID()
   const storageKey = `${session.user.id}/${projectId}/project.json`
 
+  // Copy variables from source project
+  const srcRow = await readProjectRow(sourceId)
+  const srcVariables = srcRow?.variables ?? {}
+
   const { data, error } = await supabase
     .from('projects')
-    .insert({ id: projectId, owner_id: session.user.id, name: newName, storage_key: storageKey })
+    .insert({
+      id: projectId,
+      owner_id: session.user.id,
+      name: newName,
+      storage_key: storageKey,
+      variables: srcVariables,
+    })
     .select(SELECT_COLS)
     .single()
 

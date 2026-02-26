@@ -235,6 +235,13 @@ pub fn get_catalog() -> String {
     engine_core::catalog::catalog_json()
 }
 
+/// Return pre-computed constant values for zero-input source blocks.
+/// JSON object: { opId: number, ... }.
+#[wasm_bindgen]
+pub fn get_constant_values() -> String {
+    engine_core::catalog::constant_values_json()
+}
+
 /// Return the engine version string.
 #[wasm_bindgen]
 pub fn get_engine_version() -> String {

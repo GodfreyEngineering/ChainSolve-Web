@@ -33,6 +33,13 @@ export type BlockCategory =
   | 'probComb'
   | 'probDist'
   | 'utilCalc'
+  | 'constMath'
+  | 'constPhysics'
+  | 'constAtmos'
+  | 'constThermo'
+  | 'constElec'
+  | 'presetMaterials'
+  | 'presetFluids'
 
 /** Which React Flow custom-node renderer to use. */
 export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay' | 'csData' | 'csPlot' | 'csGroup'
@@ -82,6 +89,14 @@ export interface PortDef {
   label: string
 }
 
+// ── Input binding types (W12.2) ──────────────────────────────────────────────
+
+/** Binding for an unconnected (or overridden) input port. */
+export type InputBinding =
+  | { kind: 'literal'; value: number; raw?: string }
+  | { kind: 'const'; constOpId: string }
+  | { kind: 'var'; varId: string }
+
 /** Data payload stored inside each ReactFlow node. */
 export interface NodeData extends Record<string, unknown> {
   blockType: string
@@ -102,6 +117,13 @@ export interface NodeData extends Record<string, unknown> {
    * is used instead of the upstream computed value.
    */
   portOverrides?: Record<string, boolean>
+  /**
+   * Per-port input bindings (W12.2). Richer replacement for manualValues.
+   * portId → InputBinding. Connected ports ignore this unless portOverrides[portId]=true.
+   */
+  inputBindings?: Record<string, InputBinding>
+  /** Bound variable ID for variableSource and slider nodes (W12.2). */
+  varId?: string
   /** Vector data for vectorInput nodes. */
   vectorData?: number[]
   /** Table data for tableInput / csvImport nodes. */
