@@ -1,3 +1,20 @@
+//! Shared data types for the engine ↔ WASM boundary.
+//!
+//! # Value
+//!
+//! [`Value`] is the polymorphic output of every node evaluation:
+//!
+//! - `Scalar(f64)` — single number. NaN and ±Inf are valid (they propagate).
+//! - `Vector(Vec<f64>)` — ordered list of numbers.
+//! - `Table { columns, rows }` — typed column names + row data.
+//! - `Error(String)` — propagates downstream; no further computation on this path.
+//!
+//! # Snapshot contract
+//!
+//! [`EngineSnapshotV1`] is the stable, versioned input format sent from the
+//! TypeScript UI (via `src/engine/bridge.ts`) to the engine. `version` must
+//! be `1`; breaking schema changes require a new version struct.
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

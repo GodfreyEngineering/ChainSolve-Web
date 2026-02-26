@@ -1,3 +1,22 @@
+//! WASM boundary wrapper for `engine-core`.
+//!
+//! All public functions are annotated with `#[wasm_bindgen]` and are
+//! callable from JavaScript. The JSON string I/O contract means the TypeScript
+//! side never touches Rust-allocated memory directly — it only passes and
+//! receives `String` values across the boundary.
+//!
+//! # Thread model
+//!
+//! WASM is single-threaded. The persistent [`EngineGraph`] is stored in a
+//! `thread_local!` `RefCell<Option<EngineGraph>>`. The `with_engine` helper
+//! lazily initialises it on first use.
+//!
+//! # Startup
+//!
+//! [`init`] is marked `#[wasm_bindgen(start)]` and runs automatically when
+//! the WASM module is instantiated. It installs `console_error_panic_hook`
+//! so Rust panics appear as readable messages in the browser console.
+
 use engine_core::graph::{EngineGraph, EvalSignal};
 use engine_core::types::EvalOptions;
 use std::cell::RefCell;

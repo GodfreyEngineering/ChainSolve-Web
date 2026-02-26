@@ -1,6 +1,6 @@
 # ChainSolve — Architecture
 
-> Updated at each milestone. Current: **W9.5.5 (Production Hardening)**
+> Updated at each milestone. Current: **W9.6 (Repo Housekeeping)**
 
 ---
 
@@ -62,8 +62,6 @@ src/
     ComputedContext.ts  React context for computed Map<nodeId,number>
   engine/
     value.ts      Polymorphic Value type system: Scalar | Vector | Table | Error (W5)
-    evaluate.ts   TS evaluation engine (legacy, to be replaced by WASM engine)
-                  Topological sort (Kahn's algorithm), NaN/Error propagation
     csv-parse.ts  Lightweight CSV parser (auto-detect separator, quoted fields) (W5)
     csv-worker.ts Web Worker for off-thread CSV parsing (W5)
     index.ts      WASM engine public API: createEngine() → EngineAPI (W9)
@@ -73,6 +71,7 @@ src/
     wasm.d.ts     Type declarations for wasm-pack output (W9/W9.2)
     diffGraph.ts  React Flow state diff → PatchOp[] (W9.2)
     useGraphEngine.ts  Incremental evaluation hook for CanvasArea (W9.2)
+    perfMetrics.ts     Perf timing helpers: frame budget tracker (W9.4)
   i18n/           Internationalization (W3)
     config.ts     i18next initialization + language detector
     locales/
@@ -134,6 +133,8 @@ supabase/
     0008_advisor_fixes.sql                 ~~Superseded by 0009~~ — kept for history (W5.3.1)
     0009_advisor_fixes_v2.sql              Owner_id-safe advisor fixes: dynamic SQL auto-detection (W5.3.1b)
     0010_group_templates.sql             Group templates table + RLS (W7)
+    0011_rls_perf_canonical.sql          Canonical RLS policies + performance indexes (W8)
+    0012_csp_reports.sql                 CSP violation reports table + RLS (W8)
 
 crates/
   engine-core/    Pure Rust compute engine: types, validation, evaluation, ops, graph (W9/W9.2)
@@ -147,7 +148,7 @@ e2e/
 
 .github/
   workflows/
-    ci.yml        GitHub Actions: typecheck, lint, build, e2e tests (W5.3)
+    ci.yml        GitHub Actions: typecheck + lint (PRs); smoke e2e + deploy (push to main) (W5.3/W9.5)
 
 public/
   _headers        Cloudflare Pages security headers (CSP, HSTS, etc.) (W5.3)
@@ -164,6 +165,7 @@ docs/
   GROUPS.md       Block groups + templates: usage, schema V3, Pro gating (W7)
   SECURITY.md     CORS, CSP, security headers, rollout docs (W8)
   W9_ENGINE.md    Rust/WASM compute engine: build, debug, extend ops (W9)
+  TROUBLESHOOTING.md  Common failures: WASM init, placeholder env, CI failures (W9.6)
   ARCHITECTURE.md This file
 ```
 
@@ -406,6 +408,7 @@ UI gating:
 | W9.5.3 | ✅ Done | CI preview parity: placeholder Supabase creds in `node_checks` build, two-build split, `VITE_IS_CI_BUILD` flag |
 | W9.5.4 | ✅ Done | CSP fix for WASM: `'wasm-unsafe-eval'` in `script-src`, `WASM_CSP_BLOCKED` error code, `EngineFatalError` rewrite, `_headers` smoke test |
 | W9.5.5 | ✅ Done | Production guardrails: strict `CONFIG_INVALID` in `supabase.ts`, CI secret validation + bundle grep, `GET /api/health` endpoint |
+| W9.6 | ✅ Done | Repo housekeeping: `.editorconfig`, `.vscode/`, `TROUBLESHOOTING.md`, architecture doc updates, e2e-full build fix |
 | W10 | Planned | Branching/rules for conditional flows (Pro) |
 | W11 | Planned | Custom blocks editor (Pro) |
 | W12 | Planned | Project/file browser with folders, search, tags |

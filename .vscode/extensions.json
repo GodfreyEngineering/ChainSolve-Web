@@ -1,0 +1,14 @@
+{
+  // VS Code workspace extension recommendations.
+  // Install all with: Extensions panel → "Show Recommended Extensions".
+  "recommendations": [
+    // Rust language server — required for crates/engine-core and crates/engine-wasm
+    "rust-lang.rust-analyzer",
+    // Prettier formatter — matches .prettierrc (singleQuote, semi:false, tabWidth:2)
+    "esbenp.prettier-vscode",
+    // ESLint — matches eslint.config.js
+    "dbaeumer.vscode-eslint",
+    // Playwright Test runner UI
+    "ms-playwright.playwright"
+  ]
+}

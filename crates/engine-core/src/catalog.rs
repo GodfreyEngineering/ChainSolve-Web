@@ -510,6 +510,10 @@ pub fn engine_version() -> &'static str {
 
 /// Semantic contract version. Bumped when broadcasting rules, value semantics,
 /// or correctness guarantees change in a way that consumers must acknowledge.
+///
+/// If you bump this, you must also:
+/// 1. Update the expected version check in `src/engine/index.ts` (TypeScript host).
+/// 2. Document the change in `docs/W9_3_CORRECTNESS.md`.
 pub const ENGINE_CONTRACT_VERSION: u32 = 1;
 
 pub fn engine_contract_version() -> u32 {

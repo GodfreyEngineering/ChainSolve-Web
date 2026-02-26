@@ -1,3 +1,29 @@
+//! Persistent `EngineGraph` with dirty tracking and incremental evaluation.
+//!
+//! # Design
+//!
+//! [`EngineGraph`] is the long-lived state held by the WASM wrapper
+//! (`engine-wasm`). Rather than re-evaluating the full graph on every change,
+//! it tracks a *dirty set*: the nodes whose inputs changed since the last eval.
+//! Only dirty nodes (and their downstream dependents) are re-evaluated.
+//!
+//! # PatchOp protocol
+//!
+//! The TypeScript diff engine (`src/engine/diffGraph.ts`) computes a
+//! `PatchOp[]` from the React Flow state delta and sends it to the worker.
+//! Each [`PatchOp`] variant mutates the graph structure and marks affected
+//! nodes dirty:
+//!
+//! - `AddNode`        — inserts node, marks it dirty
+//! - `RemoveNode`     — removes node + its edges, marks downstream dirty
+//! - `UpdateNodeData` — updates node data (e.g. slider value), marks node dirty
+//! - `AddEdge`        — inserts edge, marks target node dirty
+//! - `RemoveEdge`     — removes edge, marks former target dirty
+//!
+//! After patching, `evaluate_dirty()` re-evaluates only the dirty set in
+//! topological order and returns an [`IncrementalEvalResult`] with only the
+//! changed values.
+
 use crate::ops::evaluate_node_with_datasets;
 use crate::types::{
     Diagnostic, DiagLevel, EdgeDef, EngineSnapshotV1, EvalOptions, IncrementalEvalResult, NodeDef,
@@ -17,6 +43,11 @@ pub enum EvalSignal {
 
 // ── Patch types ──────────────────────────────────────────────────────
 
+/// Incremental graph mutation sent from the TypeScript diff engine.
+///
+/// The full set of ops for one React Flow state delta is sent as a
+/// `Vec<PatchOp>` (JSON array) via the worker's `applyPatch` message.
+/// See `src/engine/diffGraph.ts` for how the diff is computed.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "camelCase")]
 pub enum PatchOp {
@@ -43,6 +74,17 @@ pub enum PatchOp {
 
 // ── Persistent graph with dirty tracking ─────────────────────────────
 
+/// Persistent graph with lazy topological sort and dirty-set tracking.
+///
+/// # Invariants
+///
+/// - `dirty` contains every node whose output may have changed since the last
+///   `evaluate_dirty()` call. It is always a superset of the truly stale nodes.
+/// - `topo_order` is valid iff `topo_dirty == false`. It is rebuilt lazily on
+///   the next `evaluate_dirty*` call.
+/// - `values` holds the last-known output of every evaluated node.
+///   Dirty nodes may have stale entries — do not read `values` directly; use
+///   `evaluate_dirty()` to get a fresh [`IncrementalEvalResult`].
 pub struct EngineGraph {
     nodes: HashMap<String, NodeDef>,
     edges: HashMap<String, EdgeDef>,

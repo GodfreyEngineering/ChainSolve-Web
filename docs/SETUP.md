@@ -31,6 +31,9 @@ Run each file in `supabase/migrations/` **in numeric order** via **Supabase → 
 | `0007_bug_reports.sql` | In-app bug reporting table (`bug_reports`) with RLS (users insert/read own). |
 | `0008_advisor_fixes.sql` | ~~Superseded by 0009~~ — kept for history. Fails on schemas where `fs_items`/`project_assets` use `owner_id`. |
 | `0009_advisor_fixes_v2.sql` | Advisor fixpack v2: same fixes as 0008 but auto-detects `owner_id` vs `user_id` at runtime. See §15 below. |
+| `0010_group_templates.sql` | Block group templates table (`group_templates`) with RLS. |
+| `0011_rls_perf_canonical.sql` | Canonical RLS policy rewrites + performance indexes. |
+| `0012_csp_reports.sql` | CSP violation reports table (`csp_reports`) with RLS + dedup key. |
 
 After running 0001, confirm these tables appear under **Table Editor**:
 `profiles`, `projects`, `fs_items`, `project_assets`, `stripe_events`

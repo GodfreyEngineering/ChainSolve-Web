@@ -1,0 +1,21 @@
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+# TypeScript, CSS, JSON, YAML, TOML, Markdown — 2-space indent (Prettier default)
+[*.{ts,tsx,css,json,yaml,yml,toml,md,html}]
+indent_style = space
+indent_size = 2
+
+# Rust — 4-space indent (rustfmt default)
+[*.rs]
+indent_style = space
+indent_size = 4
+
+# Makefiles require tabs
+[Makefile]
+indent_style = tab

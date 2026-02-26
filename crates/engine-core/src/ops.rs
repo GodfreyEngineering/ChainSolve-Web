@@ -1,3 +1,28 @@
+//! Per-node evaluation dispatch for all ~60 block types.
+//!
+//! # Entry point
+//!
+//! [`evaluate_node`] (and the dataset-aware [`evaluate_node_with_datasets`]) are
+//! the only public functions. The graph evaluator calls one of them once per node
+//! in topological order.
+//!
+//! # Broadcasting
+//!
+//! Most binary ops (add, multiply, …) support mixed Scalar/Vector operands:
+//!
+//! - Scalar  ⊕ Scalar  → Scalar
+//! - Scalar  ⊕ Vector  → Vector (broadcast scalar across each element)
+//! - Vector  ⊕ Scalar  → Vector
+//! - Vector  ⊕ Vector  → Vector (element-wise; lengths must match or Error)
+//! - Any     ⊕ Error   → Error  (error propagates)
+//! - Table inputs pass through unchanged for ops that accept them.
+//!
+//! # Error propagation
+//!
+//! If any required input is `Value::Error`, the node immediately returns
+//! `Value::Error` without computing. NaN and Inf propagate for scalar paths
+//! (e.g. `1.0 / 0.0 → Inf`, `0.0 / 0.0 → NaN`).
+
 use crate::types::Value;
 use std::collections::HashMap;
 

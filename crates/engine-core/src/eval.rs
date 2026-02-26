@@ -1,3 +1,25 @@
+//! Stateless full-graph evaluation using Kahn's topological sort.
+//!
+//! This module provides a single-pass evaluator that processes every node in
+//! the snapshot exactly once (in topological order).
+//!
+//! # Relationship to `graph`
+//!
+//! [`evaluate`] here is *stateless*: it re-evaluates the entire graph from
+//! a snapshot on each call. It is used for one-shot evaluations
+//! (`engine_core::run`) and as a reference implementation.
+//!
+//! The persistent [`crate::graph::EngineGraph`] uses an incremental variant:
+//! only dirty nodes are re-evaluated, reusing the same per-node dispatch
+//! from [`crate::ops`].
+//!
+//! # Cycle handling
+//!
+//! Nodes involved in a cycle never enter the evaluation queue. After the Kahn
+//! pass, any node with remaining `in_degree > 0` is part of a cycle; it is
+//! skipped and a `Diagnostic` is emitted. Downstream nodes of cycle members
+//! receive `Value::Error` via normal error propagation.
+
 use crate::ops::evaluate_node;
 use crate::types::{Diagnostic, DiagLevel, EngineSnapshotV1, EvalResult, Value};
 use std::collections::{HashMap, VecDeque};

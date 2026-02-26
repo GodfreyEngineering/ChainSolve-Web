@@ -1,73 +1,66 @@
-# React + TypeScript + Vite
+# ChainSolve Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A browser-based visual computation platform: wire together blocks on a canvas, the
+Rust/WASM engine evaluates the graph in a Web Worker, and results appear in real time.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Vite 7 + React 19 + TypeScript 5.9 (strict) |
+| Compute engine | Rust → WASM (wasm-pack) in a Web Worker |
+| Canvas | @xyflow/react (React Flow v12) |
+| Auth + DB | Supabase (supabase-js v2, RLS) |
+| Storage | Supabase Storage (projects + uploads buckets) |
+| Billing | Stripe v20 SDK (Checkout + Customer Portal + webhooks) |
+| Hosting | Cloudflare Pages (static + Pages Functions) |
+| i18n | react-i18next — EN / ES / FR / IT / DE |
+| E2E tests | Playwright (Chromium) |
 
-## React Compiler
+## Quick start
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Prerequisites:** Rust stable, [wasm-pack](https://rustwasm.github.io/wasm-pack/), Node 20+, npm.
 
-## Expanding the ESLint configuration
+```bash
+# Install dependencies
+npm ci
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# Build the Rust/WASM engine (required before first dev start)
+npm run wasm:build:dev       # fast debug build
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Start the dev server
+# VITE_SUPABASE_* defaults to placeholder — auth calls fail silently, which is fine
+# for local UI dev.  Add a .env file with real credentials to enable auth locally.
+npm run dev                  # http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Key commands
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Command | What it does |
+|---------|-------------|
+| `npm run dev` | Vite dev server |
+| `npm run build` | Full production build (WASM + tsc + Vite) |
+| `npm run wasm:build` | Release WASM build only |
+| `npm run wasm:build:dev` | Debug WASM build (faster) |
+| `npm run format` | Prettier write |
+| `npm run format:check` | Prettier check (CI gate) |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | WASM build + tsc app |
+| `npm run typecheck:functions` | tsc for Cloudflare Functions |
+| `npm run wasm:test` | `cargo test --workspace` |
+| `npm run test:e2e:smoke` | Playwright smoke suite (mirrors CI) |
+| `npm run test:e2e` | Full Playwright suite |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Architecture
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full directory map,
+data model, engine design, and milestone history.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, workflow, CI structure, and
+the invariants you must not break.
+
+## Docs
+
+See [docs/README.md](docs/README.md) for a full index of the documentation.

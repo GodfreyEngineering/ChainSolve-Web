@@ -1,3 +1,27 @@
+//! `engine-core` — pure Rust compute engine.
+//!
+//! No WASM, no JS, no I/O. All inputs and outputs are plain Rust types
+//! (serialisable to JSON via serde for the WASM boundary in `engine-wasm`).
+//!
+//! # Modules
+//!
+//! - [`catalog`]  — ops catalog: metadata for every block type, version constants
+//! - [`types`]    — shared data types: `Value`, `EngineSnapshotV1`, eval results
+//! - [`ops`]      — per-node evaluation dispatch (~60 block types)
+//! - [`graph`]    — persistent `EngineGraph` with dirty-tracking and `PatchOp` protocol
+//! - [`eval`]     — stateless full-graph evaluation (Kahn's topological sort)
+//! - [`validate`] — graph validation (version check, dangling edges)
+//! - [`error`]    — error types (`EngineError`, `ErrorCode`)
+//!
+//! # Entry points (called by `engine-wasm`)
+//!
+//! - [`run`]                       — one-shot snapshot evaluation
+//! - [`run_load_snapshot`]         — load snapshot into persistent `EngineGraph`, full eval
+//! - [`run_patch`]                 — apply `PatchOp[]` to persistent graph, incremental eval
+//! - [`run_set_input`]             — override one node input, incremental eval
+//! - [`run_load_snapshot_with_options`] — load with eval options + progress callback
+//! - [`run_patch_with_options`]    — patch with eval options + progress callback
+
 pub mod catalog;
 pub mod error;
 pub mod eval;

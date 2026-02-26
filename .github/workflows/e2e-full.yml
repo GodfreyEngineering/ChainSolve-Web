@@ -57,6 +57,10 @@ jobs:
           # exercise auth or database features.
           VITE_SUPABASE_URL: https://placeholder.supabase.co
           VITE_SUPABASE_ANON_KEY: placeholder
+          # Required: suppresses the CONFIG_INVALID guard in src/lib/supabase.ts
+          # that throws at module init when it detects placeholder credentials in
+          # a production build.  MUST NOT be set in the deploy job.
+          VITE_IS_CI_BUILD: 'true'
 
       # ── Playwright ───────────────────────────────────────────────────────
       - name: Cache Playwright browsers
