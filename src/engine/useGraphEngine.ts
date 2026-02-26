@@ -39,15 +39,36 @@ export function useGraphEngine(
   edges: Edge[],
   engine: EngineAPI,
   options?: EvalOptions,
+  /** Incrementing this key forces a full snapshot re-evaluation. */
+  refreshKey?: number,
+  /** When true, skip all evaluation. On unpause, forces a full re-eval. */
+  paused?: boolean,
 ): GraphEngineResult {
   const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
   const [isPartial, setIsPartial] = useState(false)
   const prevNodesRef = useRef<Node[]>([])
   const prevEdgesRef = useRef<Edge[]>([])
   const snapshotLoaded = useRef(false)
+  const prevRefreshKey = useRef(refreshKey)
+  const prevPausedRef = useRef(paused)
   const pendingRef = useRef(0) // Coalescing counter: skip stale results.
 
   useEffect(() => {
+    // When refreshKey changes, force a full snapshot re-evaluation.
+    if (refreshKey !== prevRefreshKey.current) {
+      prevRefreshKey.current = refreshKey
+      snapshotLoaded.current = false
+    }
+
+    // Detect unpause transition: force a full re-eval of the latest graph.
+    if (prevPausedRef.current && !paused) {
+      snapshotLoaded.current = false
+    }
+    prevPausedRef.current = paused
+
+    // Skip all evaluation while paused.
+    if (paused) return
+
     if (!snapshotLoaded.current) {
       // First render: load full snapshot into persistent engine graph.
       snapshotLoaded.current = true
@@ -138,7 +159,7 @@ export function useGraphEngine(
 
     prevNodesRef.current = nodes
     prevEdgesRef.current = edges
-  }, [nodes, edges, engine, options])
+  }, [nodes, edges, engine, options, refreshKey, paused])
 
   return { computed, isPartial }
 }

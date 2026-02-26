@@ -106,6 +106,56 @@
 - Right section: user avatar (initials), plan badge, notifications (stub), settings gear
 - i18n: `menu.*` namespace in all 5 locale files
 
+**Bottom canvas toolbar (W10.2c):**
+
+- Professional floating toolbar at bottom of canvas, replacing React Flow's default `<Controls />`
+- Component: `src/components/canvas/BottomToolbar.tsx`
+- 13 controls: pan mode, zoom out/in/%, fit, lock layout, snap to grid, auto-organise (stub), minimap, pause/resume eval, refresh, toggle library, toggle inspector
+- Zoom display: click to edit inline, Enter applies (8–400%), Escape cancels
+- Pan mode: enables drag-to-pan on all mouse buttons, disables node dragging
+- Lock layout: disables node dragging and connecting
+- MiniMap: `@xyflow/react` `<MiniMap>`, toggled via toolbar
+- Pause evaluation: gates `onGraphChange` callback to parent
+- Refresh: increments `refreshKey` param on `useGraphEngine` to force full re-evaluation
+- i18n: `toolbar.*` namespace in all 5 locale files
+
+**Canvas tooling polish (W10.3):**
+
+- Auto-organise layout: dagre-based (`src/lib/autoLayout.ts`) — click for LR, Shift+click for TB
+  - Applies to selected nodes (≥2) or all non-group nodes
+  - One-level Ctrl+Z undo for layout changes (`layoutUndoRef`)
+  - `CanvasAreaHandle.autoOrganise(direction?)` exposed for menu wiring
+- Minimap persistence: on/off state saved to `localStorage` (`chainsolve.minimap`)
+  - Theme-aware styling: `nodeColor` uses `--primary` for groups, `--text-muted` for others
+- Pause/resume correctness fix:
+  - `onGraphChange` always fires (autosave works while paused)
+  - `useGraphEngine` accepts `paused` param — skips evaluation when true
+  - On unpause: forces full snapshot re-evaluation of accumulated changes
+  - Non-intrusive "Evaluation paused" banner shown when paused
+- Menu wiring: View → Zoom In/Out/Minimap, Tools → Auto Organise now call real canvas handlers
+- i18n: `toolbar.pausedBanner` key added to all 5 locale files
+
+**Editing power pack (W10.4):**
+
+- Undo/redo: bounded 50-entry history stack (`src/hooks/useGraphHistory.ts`)
+  - Explicit save points before every mutation (17 call sites in CanvasArea)
+  - Drag undo via `onNodeDragStart` — saves snapshot once per drag
+  - Two-stack pattern: `useRef` stacks (no re-render), `useState` for `canUndo`/`canRedo`
+  - Replaces single-level `layoutUndoRef` with general undo system
+- Cut/copy/paste: in-memory clipboard (`src/lib/clipboard.ts`)
+  - `copyToClipboard` stores selected nodes + internal edges, best-effort `navigator.clipboard` write
+  - `pasteFromClipboard` generates fresh IDs via `nextNodeId()`, +30px offset, remaps edges/parentId
+  - Cut = copy + delete (single undo point)
+- Find block: Ctrl+F floating dialog (`src/components/canvas/FindBlockDialog.tsx`)
+  - Filters by node label and block type (case-insensitive), max 10 results
+  - Arrow keys navigate, Enter zooms to node via `fitView`, Escape closes
+  - Theme-aware styling with CSS variables
+- Select all (Ctrl+A), delete selected (Del/Backspace) exposed via keyboard + menu
+- Keyboard shortcuts: input target check skips shortcuts when typing in INPUT/TEXTAREA
+- AppHeader Edit menu: all 9 stubs replaced with real `canvasRef` handlers
+- Shortcuts: Ctrl+Z undo, Ctrl+Shift+Z/Y redo, Ctrl+X/C/V cut/copy/paste, Ctrl+A select all, Ctrl+F find, Del delete
+- i18n: `canvas.findPlaceholder`, `canvas.noMatches`, `canvas.findHint` added to all 5 locales
+
 **Dev CLI (`cs`):**
 - Single executable: `./cs <command>` — no installation needed
 - Commands: `new`, `test`, `push`, `ship`, `hotfix`, `help`

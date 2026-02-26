@@ -291,5 +291,26 @@
     "mAgo": "{{count}}m fa",
     "hAgo": "{{count}}h fa",
     "dAgo": "{{count}}g fa"
+  },
+  "toolbar": {
+    "label": "Barra degli strumenti del canvas",
+    "panMode": "Modalità panoramica",
+    "zoomOut": "Rimpicciolisci",
+    "zoomIn": "Ingrandisci",
+    "zoomLevel": "Livello di zoom",
+    "fitView": "Adatta allo schermo",
+    "lockLayout": "Blocca disposizione",
+    "snapGrid": "Aggancia alla griglia",
+    "autoOrganise": "Organizza automaticamente",
+    "minimap": "Attiva/disattiva minimappa",
+    "pauseEval": "Metti in pausa la valutazione",
+    "resumeEval": "Riprendi la valutazione",
+    "refresh": "Aggiorna (rivaluta)",
+    "library": "Attiva/disattiva libreria blocchi",
+    "inspector": "Attiva/disattiva ispettore",
+    "pausedBanner": "Valutazione in pausa",
+    "findPlaceholder": "Cerca blocchi…",
+    "noMatches": "Nessun risultato",
+    "findHint": "↑↓ · ↵ focus · ESC"
   }
 }

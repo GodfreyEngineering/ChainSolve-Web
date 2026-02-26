@@ -158,25 +158,33 @@ export function AppHeader({
 
   const editItems = useMemo(
     (): MenuEntry[] => [
-      { label: t('menu.undo'), shortcut: 'Ctrl+Z', onClick: stub },
-      { label: t('menu.redo'), shortcut: 'Ctrl+Shift+Z', onClick: stub },
+      { label: t('menu.undo'), shortcut: 'Ctrl+Z', disabled: readOnly, onClick: () => canvasRef.current?.undo() },
+      { label: t('menu.redo'), shortcut: 'Ctrl+Shift+Z', disabled: readOnly, onClick: () => canvasRef.current?.redo() },
       { separator: true },
-      { label: t('menu.cut'), shortcut: 'Ctrl+X', onClick: stub },
-      { label: t('menu.copy'), shortcut: 'Ctrl+C', onClick: stub },
-      { label: t('menu.paste'), shortcut: 'Ctrl+V', onClick: stub },
+      { label: t('menu.cut'), shortcut: 'Ctrl+X', disabled: readOnly, onClick: () => canvasRef.current?.cut() },
+      { label: t('menu.copy'), shortcut: 'Ctrl+C', onClick: () => canvasRef.current?.copy() },
+      { label: t('menu.paste'), shortcut: 'Ctrl+V', disabled: readOnly, onClick: () => canvasRef.current?.paste() },
       { separator: true },
-      { label: t('menu.selectAll'), shortcut: 'Ctrl+A', onClick: stub },
-      { label: t('menu.deleteSelected'), shortcut: 'Del', onClick: stub },
+      { label: t('menu.selectAll'), shortcut: 'Ctrl+A', onClick: () => canvasRef.current?.selectAll() },
+      { label: t('menu.deleteSelected'), shortcut: 'Del', disabled: readOnly, onClick: () => canvasRef.current?.deleteSelected() },
       { separator: true },
-      { label: t('menu.findBlock'), onClick: stub },
+      { label: t('menu.findBlock'), shortcut: 'Ctrl+F', onClick: () => canvasRef.current?.openFind() },
     ],
-    [t, stub],
+    [t, readOnly, canvasRef],
   )
 
   const viewItems = useMemo(
     (): MenuEntry[] => [
-      { label: t('menu.zoomIn'), shortcut: 'Ctrl++', onClick: stub },
-      { label: t('menu.zoomOut'), shortcut: 'Ctrl+-', onClick: stub },
+      {
+        label: t('menu.zoomIn'),
+        shortcut: 'Ctrl++',
+        onClick: () => canvasRef.current?.zoomIn(),
+      },
+      {
+        label: t('menu.zoomOut'),
+        shortcut: 'Ctrl+-',
+        onClick: () => canvasRef.current?.zoomOut(),
+      },
       {
         label: t('menu.fitToScreen'),
         onClick: () => canvasRef.current?.fitView(),
@@ -190,7 +198,10 @@ export function AppHeader({
         label: t('menu.toggleInspector'),
         onClick: () => canvasRef.current?.toggleInspector(),
       },
-      { label: t('menu.toggleMinimap'), onClick: stub },
+      {
+        label: t('menu.toggleMinimap'),
+        onClick: () => canvasRef.current?.toggleMinimap(),
+      },
       { separator: true },
       {
         label: t('menu.theme'),
@@ -236,13 +247,16 @@ export function AppHeader({
 
   const toolsItems = useMemo(
     (): MenuEntry[] => [
-      { label: t('menu.autoOrganise'), onClick: stub },
+      {
+        label: t('menu.autoOrganise'),
+        onClick: () => canvasRef.current?.autoOrganise(),
+      },
       { label: t('menu.validateGraph'), onClick: stub },
       { label: t('menu.clearCanvas'), onClick: stub },
       { separator: true },
       { label: t('menu.canvasSettings'), onClick: stub },
     ],
-    [t, stub],
+    [t, stub, canvasRef],
   )
 
   const helpItems = useMemo(

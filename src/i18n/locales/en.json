@@ -291,5 +291,26 @@
     "mAgo": "{{count}}m ago",
     "hAgo": "{{count}}h ago",
     "dAgo": "{{count}}d ago"
+  },
+  "toolbar": {
+    "label": "Canvas toolbar",
+    "panMode": "Pan mode",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in",
+    "zoomLevel": "Zoom level",
+    "fitView": "Fit to screen",
+    "lockLayout": "Lock layout",
+    "snapGrid": "Snap to grid",
+    "autoOrganise": "Auto-organise layout",
+    "minimap": "Toggle minimap",
+    "pauseEval": "Pause evaluation",
+    "resumeEval": "Resume evaluation",
+    "refresh": "Refresh (re-evaluate)",
+    "library": "Toggle block library",
+    "inspector": "Toggle inspector",
+    "pausedBanner": "Evaluation paused",
+    "findPlaceholder": "Search blocks…",
+    "noMatches": "No blocks match",
+    "findHint": "↑↓ · ↵ focus · ESC"
   }
 }

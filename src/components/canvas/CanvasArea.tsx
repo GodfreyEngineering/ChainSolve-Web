@@ -24,7 +24,7 @@ import {
   ReactFlow,
   Background,
   BackgroundVariant,
-  Controls,
+  MiniMap,
   addEdge,
   useNodesState,
   useEdgesState,
@@ -65,6 +65,12 @@ import {
 } from '../../lib/groups'
 import { saveTemplate as saveTemplateApi } from '../../lib/templates'
 import type { Template } from '../../lib/templates'
+import { BottomToolbar } from './BottomToolbar'
+import { useTranslation } from 'react-i18next'
+import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
+import { useGraphHistory } from '../../hooks/useGraphHistory'
+import { copyToClipboard, pasteFromClipboard } from '../../lib/clipboard'
+import { FindBlockDialog } from './FindBlockDialog'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 
 // ── Node type registry ────────────────────────────────────────────────────────
@@ -102,10 +108,51 @@ export interface CanvasAreaProps {
 export interface CanvasAreaHandle {
   getSnapshot: () => { nodes: Node<NodeData>[]; edges: Edge[] }
   fitView: () => void
+  zoomIn: () => void
+  zoomOut: () => void
   toggleLibrary: () => void
   toggleInspector: () => void
   toggleSnap: () => void
+  togglePan: () => void
+  toggleLock: () => void
+  toggleMinimap: () => void
+  togglePause: () => void
+  refresh: () => void
+  autoOrganise: (direction?: LayoutDirection) => void
+  undo: () => void
+  redo: () => void
+  cut: () => void
+  copy: () => void
+  paste: () => void
+  deleteSelected: () => void
+  selectAll: () => void
+  openFind: () => void
 }
+
+// ── Minimap persistence ──────────────────────────────────────────────────────
+
+const MINIMAP_KEY = 'chainsolve.minimap'
+
+function getMinimapPref(): boolean {
+  try {
+    return localStorage.getItem(MINIMAP_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+function setMinimapPref(v: boolean) {
+  try {
+    localStorage.setItem(MINIMAP_KEY, String(v))
+  } catch {
+    // Ignore — private browsing
+  }
+}
+
+// ── Default node dimensions for layout ───────────────────────────────────────
+
+const DEFAULT_NODE_WIDTH = 168
+const DEFAULT_NODE_HEIGHT = 60
 
 // ── Mobile breakpoint ─────────────────────────────────────────────────────────
 
@@ -182,6 +229,15 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   )
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges ?? INITIAL_EDGES)
 
+  // ── Graph history (undo/redo) ───────────────────────────────────────────────
+  const history = useGraphHistory(50)
+
+  const { save: historySave, undo: historyUndo, redo: historyRedo } = history
+
+  const doSaveHistory = useCallback(() => {
+    historySave({ nodes: latestNodes.current, edges: latestEdges.current })
+  }, [historySave])
+
   // Expose a live snapshot getter so the parent can read the authoritative
   // graph state at save time (instead of relying on stale refs).
   const latestNodes = useRef(nodes)
@@ -192,21 +248,34 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   useImperativeHandle(ref, () => ({
     getSnapshot: () => getCanonicalSnapshot(latestNodes.current, latestEdges.current),
     fitView: () => fitView({ padding: 0.15, duration: 300 }),
+    zoomIn: () => zoomIn({ duration: 200 }),
+    zoomOut: () => zoomOut({ duration: 200 }),
     toggleLibrary: () => setLibVisible((v) => !v),
     toggleInspector: () => setInspVisible((v) => !v),
     toggleSnap: () => setSnapToGrid((v) => !v),
+    togglePan: () => setPanMode((v) => !v),
+    toggleLock: () => setLocked((v) => !v),
+    toggleMinimap: () => {
+      setMinimap((v) => {
+        setMinimapPref(!v)
+        return !v
+      })
+    },
+    togglePause: () => setPaused((v) => !v),
+    refresh: () => setEngineKey((k) => k + 1),
+    autoOrganise: (direction?: LayoutDirection) => handleAutoOrganise(direction ?? 'LR'),
+    undo: handleUndo,
+    redo: handleRedo,
+    cut: handleCut,
+    copy: handleCopy,
+    paste: handlePaste,
+    deleteSelected: () => {
+      doSaveHistory()
+      deleteSelected()
+    },
+    selectAll,
+    openFind: () => setFindOpen(true),
   }))
-
-  // Notify parent of graph changes — skip the initial mount so loading a project
-  // does not immediately mark the canvas as dirty.
-  const isFirstRender = useRef(true)
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
-    }
-    onGraphChange?.(nodes, edges)
-  }, [nodes, edges, onGraphChange])
 
   // Panel widths + visibility
   const [libWidth, setLibWidth] = useState(200)
@@ -228,6 +297,28 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // Snap-to-grid
   const [snapToGrid, setSnapToGrid] = useState(false)
 
+  // Bottom toolbar state
+  const [panMode, setPanMode] = useState(false)
+  const [locked, setLocked] = useState(false)
+  const [minimap, setMinimap] = useState(getMinimapPref)
+  const [paused, setPaused] = useState(false)
+  const [engineKey, setEngineKey] = useState(0)
+
+  const { t } = useTranslation()
+
+  // Notify parent of graph changes — skip the initial mount so loading a project
+  // does not immediately mark the canvas as dirty.  Always fire regardless of
+  // pause state so autosave keeps working; engine evaluation is gated separately
+  // inside useGraphEngine.
+  const isFirstRender = useRef(true)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    onGraphChange?.(nodes, edges)
+  }, [nodes, edges, onGraphChange])
+
   // Context menu
   const [contextMenu, setContextMenu] = useState<ContextMenuTarget | null>(null)
 
@@ -240,11 +331,45 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   } | null>(null)
 
   const canvasWrapRef = useRef<HTMLDivElement>(null)
-  const { screenToFlowPosition, fitView } = useReactFlow()
+  const { screenToFlowPosition, fitView, zoomIn, zoomOut } = useReactFlow()
 
   // ── Computed values (incremental via WASM engine) ──────────────────────────
   const engine = useEngine()
-  const { computed } = useGraphEngine(nodes, edges, engine)
+  const { computed } = useGraphEngine(nodes, edges, engine, undefined, engineKey, paused)
+
+  // ── Auto-organise layout ──────────────────────────────────────────────────
+
+  const handleAutoOrganise = useCallback(
+    (direction: LayoutDirection = 'LR') => {
+      // Determine target: selected (≥2) or all non-group nodes
+      const selected = nodes.filter((n) => n.selected && n.type !== 'csGroup')
+      const targets = selected.length >= 2 ? selected : nodes.filter((n) => n.type !== 'csGroup')
+      if (targets.length === 0) return
+
+      const targetIds = new Set(targets.map((n) => n.id))
+      const relevantEdges = edges.filter((e) => targetIds.has(e.source) && targetIds.has(e.target))
+
+      const layoutNodes = targets.map((n) => ({
+        id: n.id,
+        width: (n.measured?.width as number | undefined) ?? DEFAULT_NODE_WIDTH,
+        height: (n.measured?.height as number | undefined) ?? DEFAULT_NODE_HEIGHT,
+      }))
+
+      const positions = autoLayout(layoutNodes, relevantEdges, direction)
+
+      doSaveHistory()
+      setNodes((nds) =>
+        nds.map((n) => {
+          const pos = positions.get(n.id)
+          return pos ? { ...n, position: pos } : n
+        }),
+      )
+
+      // Fit view after layout
+      requestAnimationFrame(() => fitView({ padding: 0.15, duration: 300 }))
+    },
+    [nodes, edges, setNodes, fitView, doSaveHistory],
+  )
 
   // ── Connection validation: 1 edge per input handle ──────────────────────────
   const isValidConnection = useCallback<IsValidConnection>(
@@ -253,8 +378,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   )
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
-    [setEdges],
+    (params: Connection) => {
+      doSaveHistory()
+      setEdges((eds) => addEdge({ ...params, animated: true }, eds))
+    },
+    [setEdges, doSaveHistory],
   )
 
   // ── Inspector: open on node body click, NOT on drag ────────────────────────
@@ -301,12 +429,13 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       }
       const position = screenToFlowPosition({ x: e.clientX, y: e.clientY })
       const id = `node_${++nodeIdCounter}`
+      doSaveHistory()
       setNodes((nds) => [
         ...nds,
         { id, type: def.nodeKind, position, data: { ...def.defaultData } } as Node<NodeData>,
       ])
     },
-    [readOnly, ent, screenToFlowPosition, setNodes],
+    [readOnly, ent, screenToFlowPosition, setNodes, doSaveHistory],
   )
 
   // ── Context menus ───────────────────────────────────────────────────────────
@@ -352,6 +481,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       const src = nodes.find((n) => n.id === nodeId)
       if (!src) return
       const newId = `node_${++nodeIdCounter}`
+      doSaveHistory()
       setNodes((nds) => [
         ...nds,
         {
@@ -362,11 +492,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         },
       ])
     },
-    [nodes, setNodes],
+    [nodes, setNodes, doSaveHistory],
   )
 
   const deleteNode = useCallback(
     (nodeId: string) => {
+      doSaveHistory()
       setNodes((nds) => {
         // If deleting a group, also delete its children
         const node = nds.find((n) => n.id === nodeId)
@@ -381,14 +512,15 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId))
       if (inspectedId === nodeId) setInspectedId(null)
     },
-    [setNodes, setEdges, inspectedId],
+    [setNodes, setEdges, inspectedId, doSaveHistory],
   )
 
   const deleteEdge = useCallback(
     (edgeId: string) => {
+      doSaveHistory()
       setEdges((eds) => eds.filter((e) => e.id !== edgeId))
     },
-    [setEdges],
+    [setEdges, doSaveHistory],
   )
 
   const inspectNode = useCallback((nodeId: string) => {
@@ -403,27 +535,30 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       const current = node?.data.label ?? ''
       const next = window.prompt('Rename block:', current)
       if (next !== null && next.trim()) {
+        doSaveHistory()
         setNodes((nds) =>
           nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, label: next.trim() } } : n)),
         )
       }
     },
-    [nodes, setNodes],
+    [nodes, setNodes, doSaveHistory],
   )
 
   // Lock / unlock: toggles node.draggable (undefined = draggable, false = locked)
   const lockNode = useCallback(
     (nodeId: string) => {
+      doSaveHistory()
       setNodes((nds) =>
         nds.map((n) =>
           n.id === nodeId ? { ...n, draggable: n.draggable === false ? undefined : false } : n,
         ),
       )
     },
-    [setNodes],
+    [setNodes, doSaveHistory],
   )
 
   const deleteSelected = useCallback(() => {
+    doSaveHistory()
     setNodes((nds) => {
       const selected = nds.filter((n) => n.selected)
       const deleted = new Set(selected.map((n) => n.id))
@@ -439,7 +574,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       setEdges((eds) => eds.filter((e) => !deleted.has(e.source) && !deleted.has(e.target)))
       return nds.filter((n) => !deleted.has(n.id))
     })
-  }, [setNodes, setEdges, inspectedId])
+  }, [setNodes, setEdges, inspectedId, doSaveHistory])
 
   // ── Group operations ──────────────────────────────────────────────────────
   const groupSelection = useCallback(() => {
@@ -453,8 +588,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     // Group node must come before its children in the array for React Flow parent rendering
     const nonSelected = updatedNodes.filter((n) => !selectedIds.includes(n.id))
     const selected = updatedNodes.filter((n) => selectedIds.includes(n.id))
+    doSaveHistory()
     setNodes([...nonSelected, groupNode, ...selected] as Node<NodeData>[])
-  }, [nodes, ent.canUseGroups, setNodes])
+  }, [nodes, ent.canUseGroups, setNodes, doSaveHistory])
 
   const ungroupNode = useCallback(
     (groupId: string) => {
@@ -469,17 +605,19 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         currentEdges = expanded.edges
       }
       const result = ungroupNodes(groupId, currentNodes as Node<NodeData>[])
+      doSaveHistory()
       setNodes(result)
       setEdges(currentEdges)
       if (inspectedId === groupId) setInspectedId(null)
     },
-    [nodes, edges, ent.canUseGroups, setNodes, setEdges, inspectedId],
+    [nodes, edges, ent.canUseGroups, setNodes, setEdges, inspectedId, doSaveHistory],
   )
 
   const toggleGroupCollapse = useCallback(
     (groupId: string) => {
       const group = nodes.find((n) => n.id === groupId)
       if (!group) return
+      doSaveHistory()
       const isCollapsed = (group.data as NodeData).groupCollapsed
       if (isCollapsed) {
         const result = expandGroup(groupId, nodes, edges)
@@ -491,7 +629,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         setEdges(result.edges)
       }
     },
-    [nodes, edges, setNodes, setEdges],
+    [nodes, edges, setNodes, setEdges, doSaveHistory],
   )
 
   const saveAsTemplate = useCallback(
@@ -538,40 +676,174 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         memberNodes,
         edges: newEdges,
       } = insertTemplate(template.payload, center, template.name, template.color)
+      doSaveHistory()
       setNodes((nds) => [...nds, groupNode, ...memberNodes] as Node<NodeData>[])
       setEdges((eds) => [...eds, ...newEdges])
     },
-    [screenToFlowPosition, setNodes, setEdges],
+    [screenToFlowPosition, setNodes, setEdges, doSaveHistory],
   )
 
-  // ── Keyboard: Delete/Backspace removes selected ─────────────────────────────
+  // ── Undo / Redo handlers ──────────────────────────────────────────────────
+
+  const handleUndo = useCallback(() => {
+    const prev = historyUndo({ nodes: latestNodes.current, edges: latestEdges.current })
+    if (!prev) return
+    setNodes(prev.nodes)
+    setEdges(prev.edges)
+  }, [historyUndo, setNodes, setEdges])
+
+  const handleRedo = useCallback(() => {
+    const next = historyRedo({ nodes: latestNodes.current, edges: latestEdges.current })
+    if (!next) return
+    setNodes(next.nodes)
+    setEdges(next.edges)
+  }, [historyRedo, setNodes, setEdges])
+
+  // ── Clipboard handlers ──────────────────────────────────────────────────
+
+  const handleCopy = useCallback(() => {
+    const selected = latestNodes.current.filter((n) => n.selected)
+    if (selected.length === 0) return
+    copyToClipboard(selected, latestEdges.current)
+  }, [])
+
+  const handleCut = useCallback(() => {
+    handleCopy()
+    deleteSelected()
+  }, [handleCopy, deleteSelected])
+
+  const handlePaste = useCallback(() => {
+    const result = pasteFromClipboard()
+    if (!result) return
+    doSaveHistory()
+    setNodes((nds) => [
+      ...nds.map((n) => (n.selected ? { ...n, selected: false } : n)),
+      ...result.nodes,
+    ])
+    setEdges((eds) => [...eds, ...result.edges])
+  }, [doSaveHistory, setNodes, setEdges])
+
+  // ── Select all ──────────────────────────────────────────────────────────
+
+  const selectAll = useCallback(() => {
+    setNodes((nds) => nds.map((n) => ({ ...n, selected: true })))
+  }, [setNodes])
+
+  // ── Find block ──────────────────────────────────────────────────────────
+
+  const [findOpen, setFindOpen] = useState(false)
+
+  const focusNode = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === nodeId })))
+      setFindOpen(false)
+      requestAnimationFrame(() => {
+        fitView({ nodes: [{ id: nodeId }], padding: 0.5, duration: 400 })
+      })
+    },
+    [setNodes, fitView],
+  )
+
+  // ── Drag undo ──────────────────────────────────────────────────────────
+
+  const onNodeDragStart = useCallback(() => {
+    doSaveHistory()
+  }, [doSaveHistory])
+
+  // ── Keyboard shortcuts ─────────────────────────────────────────────────
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if ((e.key === 'Delete' || e.key === 'Backspace') && !readOnly) {
-        setNodes((nds) => {
-          const deleted = new Set(nds.filter((n) => n.selected).map((n) => n.id))
-          if (inspectedId && deleted.has(inspectedId)) setInspectedId(null)
-          return nds.filter((n) => !n.selected)
-        })
-        setEdges((eds) => eds.filter((ed) => !ed.selected))
-      }
+      const tag = (e.target as HTMLElement).tagName
+      const isInput =
+        tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement).isContentEditable
+
+      // Escape always works
       if (e.key === 'Escape') {
         setContextMenu(null)
+        setFindOpen(false)
         closeInspector()
+        return
       }
-      // Ctrl+G: group selected nodes
-      if (e.key === 'g' && (e.ctrlKey || e.metaKey) && !e.shiftKey && !readOnly) {
+
+      // Skip shortcuts when typing in form fields
+      if (isInput) return
+
+      const ctrl = e.ctrlKey || e.metaKey
+
+      // Delete / Backspace
+      if ((e.key === 'Delete' || e.key === 'Backspace') && !readOnly) {
+        deleteSelected()
+      }
+
+      // Ctrl+Z: Undo
+      if (ctrl && e.key === 'z' && !e.shiftKey && !readOnly) {
+        e.preventDefault()
+        handleUndo()
+      }
+
+      // Ctrl+Shift+Z / Ctrl+Y: Redo
+      if (ctrl && ((e.key === 'Z' && e.shiftKey) || e.key === 'y') && !readOnly) {
+        e.preventDefault()
+        handleRedo()
+      }
+
+      // Ctrl+C: Copy
+      if (ctrl && e.key === 'c' && !e.shiftKey) {
+        e.preventDefault()
+        handleCopy()
+      }
+
+      // Ctrl+X: Cut
+      if (ctrl && e.key === 'x' && !readOnly) {
+        e.preventDefault()
+        handleCut()
+      }
+
+      // Ctrl+V: Paste
+      if (ctrl && e.key === 'v' && !readOnly) {
+        e.preventDefault()
+        handlePaste()
+      }
+
+      // Ctrl+A: Select all
+      if (ctrl && e.key === 'a') {
+        e.preventDefault()
+        selectAll()
+      }
+
+      // Ctrl+F: Find block
+      if (ctrl && e.key === 'f') {
+        e.preventDefault()
+        setFindOpen(true)
+      }
+
+      // Ctrl+G: Group selected nodes
+      if (ctrl && e.key === 'g' && !e.shiftKey && !readOnly) {
         e.preventDefault()
         groupSelection()
       }
-      // Ctrl+Shift+G: ungroup selected group
-      if (e.key === 'G' && (e.ctrlKey || e.metaKey) && e.shiftKey && !readOnly) {
+
+      // Ctrl+Shift+G: Ungroup selected group
+      if (ctrl && e.key === 'G' && e.shiftKey && !readOnly) {
         e.preventDefault()
         const selectedGroup = nodes.find((n) => n.selected && n.type === 'csGroup')
         if (selectedGroup) ungroupNode(selectedGroup.id)
       }
     },
-    [readOnly, setNodes, setEdges, closeInspector, inspectedId, groupSelection, ungroupNode, nodes],
+    [
+      readOnly,
+      closeInspector,
+      deleteSelected,
+      handleUndo,
+      handleRedo,
+      handleCopy,
+      handleCut,
+      handlePaste,
+      selectAll,
+      groupSelection,
+      ungroupNode,
+      nodes,
+    ],
   )
 
   // Add block at the canvas position where user right-clicked
@@ -589,6 +861,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       const def = BLOCK_REGISTRY.get(blockType)
       if (!def) return
       const id = `node_${++nodeIdCounter}`
+      doSaveHistory()
       setNodes((nds) => [
         ...nds,
         {
@@ -600,7 +873,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       ])
       setQuickAdd(null)
     },
-    [quickAdd, setNodes],
+    [quickAdd, setNodes, doSaveHistory],
   )
 
   // ── Panel resize start handlers ─────────────────────────────────────────────
@@ -743,6 +1016,27 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           tabIndex={0}
         >
           {toolbar}
+          {paused && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 52,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 10,
+                background: 'var(--card-bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 6,
+                padding: '0.2rem 0.7rem',
+                fontSize: '0.72rem',
+                color: 'var(--text-muted)',
+                boxShadow: '0 1px 6px rgba(0,0,0,0.25)',
+                pointerEvents: 'none',
+              }}
+            >
+              {'\u23f8'} {t('toolbar.pausedBanner')}
+            </div>
+          )}
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -751,14 +1045,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             onEdgesChange={readOnly ? undefined : onEdgesChange}
             onConnect={readOnly ? undefined : onConnect}
             isValidConnection={isValidConnection}
+            onNodeDragStart={readOnly ? undefined : onNodeDragStart}
             onNodeClick={onNodeClick}
             onPaneClick={onPaneClick}
             onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
             onEdgeContextMenu={readOnly ? undefined : onEdgeContextMenu}
             onPaneContextMenu={readOnly ? undefined : onPaneContextMenu}
-            nodesConnectable={!readOnly}
-            nodesDraggable={!readOnly}
+            nodesConnectable={!readOnly && !locked}
+            nodesDraggable={!readOnly && !locked && !panMode}
             elementsSelectable={!readOnly}
+            panOnDrag={panMode || locked ? [0, 1, 2] : [1, 2]}
             snapToGrid={snapToGrid}
             snapGrid={[16, 16]}
             fitView
@@ -773,8 +1069,51 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               size={1}
               color="rgba(255,255,255,0.06)"
             />
-            <Controls />
+            {minimap && (
+              <MiniMap
+                pannable
+                zoomable
+                style={{ background: 'var(--card-bg)', border: '1px solid var(--border)' }}
+                nodeColor={(node) =>
+                  node.type === 'csGroup' ? 'var(--primary)' : 'var(--text-muted)'
+                }
+                maskColor="rgba(0,0,0,0.15)"
+              />
+            )}
           </ReactFlow>
+          <BottomToolbar
+            panMode={panMode}
+            locked={locked}
+            snapToGrid={snapToGrid}
+            minimap={minimap}
+            paused={paused}
+            libVisible={libVisible}
+            inspVisible={inspVisible}
+            readOnly={!!readOnly}
+            onTogglePan={() => setPanMode((v) => !v)}
+            onToggleLock={() => setLocked((v) => !v)}
+            onToggleSnap={() => setSnapToGrid((v) => !v)}
+            onToggleMinimap={() => {
+              setMinimap((v) => {
+                setMinimapPref(!v)
+                return !v
+              })
+            }}
+            onTogglePause={() => setPaused((v) => !v)}
+            onRefresh={() => setEngineKey((k) => k + 1)}
+            onToggleLibrary={() => {
+              setLibVisible((v) => !v)
+              if (isMobile) setInspVisible(false)
+            }}
+            onToggleInspector={() => {
+              setInspVisible((v) => {
+                if (v) setInspectedId(null)
+                return !v
+              })
+              if (isMobile) setLibVisible(false)
+            }}
+            onAutoOrganise={(shiftKey) => handleAutoOrganise(shiftKey ? 'TB' : 'LR')}
+          />
         </div>
 
         {/* Inspector panel — desktop inline */}
@@ -884,6 +1223,14 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               setQuickAdd(null)
               setShowUpgradeModal(true)
             }}
+          />
+        )}
+        {/* Find block dialog */}
+        {findOpen && (
+          <FindBlockDialog
+            nodes={nodes}
+            onFocusNode={focusNode}
+            onClose={() => setFindOpen(false)}
           />
         )}
         {/* Upgrade modal for Pro-only blocks */}

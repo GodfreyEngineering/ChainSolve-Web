@@ -291,5 +291,26 @@
     "mAgo": "vor {{count}}m",
     "hAgo": "vor {{count}}h",
     "dAgo": "vor {{count}}T"
+  },
+  "toolbar": {
+    "label": "Zeichenflächen-Symbolleiste",
+    "panMode": "Schwenkmodus",
+    "zoomOut": "Verkleinern",
+    "zoomIn": "Vergrößern",
+    "zoomLevel": "Zoomstufe",
+    "fitView": "An Bildschirm anpassen",
+    "lockLayout": "Layout sperren",
+    "snapGrid": "Am Raster einrasten",
+    "autoOrganise": "Automatisch anordnen",
+    "minimap": "Minimap umschalten",
+    "pauseEval": "Auswertung pausieren",
+    "resumeEval": "Auswertung fortsetzen",
+    "refresh": "Aktualisieren (neu auswerten)",
+    "library": "Blockbibliothek umschalten",
+    "inspector": "Inspektor umschalten",
+    "pausedBanner": "Auswertung pausiert",
+    "findPlaceholder": "Blöcke suchen…",
+    "noMatches": "Keine Treffer",
+    "findHint": "↑↓ · ↵ fokus · ESC"
   }
 }

@@ -291,5 +291,26 @@
     "mAgo": "il y a {{count}}m",
     "hAgo": "il y a {{count}}h",
     "dAgo": "il y a {{count}}j"
+  },
+  "toolbar": {
+    "label": "Barre d'outils du canevas",
+    "panMode": "Mode panoramique",
+    "zoomOut": "Dézoomer",
+    "zoomIn": "Zoomer",
+    "zoomLevel": "Niveau de zoom",
+    "fitView": "Ajuster à l'écran",
+    "lockLayout": "Verrouiller la disposition",
+    "snapGrid": "Aligner sur la grille",
+    "autoOrganise": "Organisation automatique",
+    "minimap": "Basculer la minimap",
+    "pauseEval": "Mettre en pause l'évaluation",
+    "resumeEval": "Reprendre l'évaluation",
+    "refresh": "Rafraîchir (réévaluer)",
+    "library": "Basculer la bibliothèque de blocs",
+    "inspector": "Basculer l'inspecteur",
+    "pausedBanner": "Évaluation en pause",
+    "findPlaceholder": "Rechercher…",
+    "noMatches": "Aucun résultat",
+    "findHint": "↑↓ · ↵ cibler · ESC"
   }
 }
