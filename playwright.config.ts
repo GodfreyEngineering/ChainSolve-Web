@@ -11,9 +11,10 @@ const chromiumArgs = [
 export default defineConfig({
   testDir: 'e2e',
 
-  // 60 s per test: WASM cold-compilation on a fresh GitHub runner can exceed 15 s.
-  // Passing tests resolve well before the deadline; only genuine failures pay this cost.
-  timeout: 60_000,
+  // 90 s per test: the two-stage boot-ladder wait (15 s react-mounted + 55 s
+  // engine-ready) totals 70 s in the worst case.  90 s leaves 20 s headroom for
+  // the diagnostic dump and other test body work before the hard deadline fires.
+  timeout: 90_000,
 
   // In CI run sequentially; locally Playwright picks an appropriate default.
   workers: process.env.CI ? 1 : undefined,

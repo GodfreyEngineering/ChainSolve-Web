@@ -11,6 +11,10 @@
     <meta property="og:description" content="Scientific node-graph calculator. Build computation chains visually." />
     <meta property="og:type" content="website" />
     <meta name="robots" content="noindex, nofollow" />
+    <!-- Boot ladder rung 1: HTML parsed by browser (no JS required).
+         e2e tests check for this sentinel to distinguish a network/server
+         failure from a JS/React/WASM failure. -->
+    <meta name="x-boot" data-testid="boot-html" content="loaded" />
     <title>ChainSolve</title>
   </head>
   <body>

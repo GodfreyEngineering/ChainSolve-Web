@@ -34,6 +34,16 @@ window.addEventListener('unhandledrejection', (e) =>
   showBootError((e as PromiseRejectionEvent).reason?.message ?? String(e)),
 )
 
+// Boot ladder rung 2: JS module has executed and global error-handlers are
+// installed.  The sentinel appears even if the dynamic import below fails,
+// letting e2e helpers distinguish "JS never ran" from "main.tsx import error".
+{
+  const el = document.createElement('div')
+  el.setAttribute('data-testid', 'boot-js')
+  el.style.display = 'none'
+  document.body.appendChild(el)
+}
+
 import('./main').catch((err: unknown) => {
   showBootError(err instanceof Error ? err.message : 'Failed to load application')
 })

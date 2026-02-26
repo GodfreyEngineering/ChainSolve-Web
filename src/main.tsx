@@ -47,19 +47,24 @@ function Root() {
     setRetryCount((c) => c + 1)
   }, [])
 
-  if (error) {
-    return <EngineFatalError error={error} onRetry={handleRetry} />
-  }
-
-  if (!engine) {
-    return null // Brief flash while WASM loads (typically < 100ms)
-  }
-
   return (
-    <EngineContext.Provider value={engine}>
-      <div data-testid="engine-ready" style={{ display: 'none' }} />
-      <App />
-    </EngineContext.Provider>
+    <>
+      {/* Boot ladder rung 3: React has rendered at least once.
+          Present from the very first render (even before engine loads),
+          so e2e helpers can distinguish "React never mounted" from
+          "WASM init hung". */}
+      <div data-testid="react-mounted" style={{ display: 'none' }} />
+
+      {error && <EngineFatalError error={error} onRetry={handleRetry} />}
+
+      {engine && (
+        <EngineContext.Provider value={engine}>
+          {/* Boot ladder rung 4: WASM engine is ready. */}
+          <div data-testid="engine-ready" style={{ display: 'none' }} />
+          <App />
+        </EngineContext.Provider>
+      )}
+    </>
   )
 }
 

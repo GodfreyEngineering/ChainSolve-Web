@@ -87,10 +87,14 @@ jobs:
   # Runs only the `smoke` project (smoke.spec.ts: 8 tests).
   # One WASM compilation for the engine-ready test; all others are instant.
   # Target: < 90 s on warm runners.
+  #
+  # Skipped on PRs — PRs get typecheck + lint + build as the gate.
+  # Playwright only runs on direct pushes to main (where deploy follows).
   e2e_smoke:
     name: E2E smoke
     runs-on: ubuntu-latest
     needs: [node_checks]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - uses: actions/checkout@v4
