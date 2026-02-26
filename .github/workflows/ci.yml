@@ -73,6 +73,9 @@ jobs:
       - name: Format check
         run: npm run format:check
 
+      - name: Unit tests
+        run: npm run test:unit
+
       - name: Build
         run: npx tsc -b && npx vite build
         env:
@@ -86,6 +89,12 @@ jobs:
           # Tells src/lib/supabase.ts not to throw CONFIG_INVALID for placeholder
           # credentials.  MUST NOT be set in the deploy job.
           VITE_IS_CI_BUILD: 'true'
+
+      - name: Bundle size check
+        # Fail the build if any bundle exceeds its budget.
+        # Budgets: main-*.js < 900 KB, total JS < 1600 KB, *.wasm < 600 KB.
+        # See scripts/check-bundle-size.mjs and docs/performance/budgets.md.
+        run: node scripts/check-bundle-size.mjs
 
       - name: Upload WASM pkg artifact
         # Uploaded separately so the deploy job can reuse the compiled WASM

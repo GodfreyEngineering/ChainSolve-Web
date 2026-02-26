@@ -16,4 +16,16 @@ interface ImportMetaEnv {
    * in the deploy job — see .github/workflows/ci.yml.
    */
   readonly VITE_IS_CI_BUILD?: string
+
+  // ── Observability (W9.8) ──────────────────────────────────────────────────
+  /** Set to 'false' to disable the client observability pipeline entirely. */
+  readonly VITE_OBS_ENABLED?: string
+  /**
+   * Enables the /diagnostics UI in production when set to 'true'.
+   * In development, /diagnostics is always available.
+   * In production it is also gated by localStorage key 'cs_diag=1'.
+   */
+  readonly VITE_DIAGNOSTICS_UI_ENABLED?: string
+  /** Sampling rate for client events (0.0–1.0). Default: 1.0. */
+  readonly VITE_OBS_SAMPLE_RATE?: string
 }

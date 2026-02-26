@@ -170,8 +170,9 @@
     "languageLabel": "Idioma",
     "languageHint": "Elige tu idioma de visualización preferido.",
     "themeLabel": "Tema",
+    "themeSystem": "Sistema",
     "themeDark": "Oscuro",
-    "themeLight": "Claro (próximamente)",
+    "themeLight": "Claro",
     "save": "Guardar",
     "saved": "¡Guardado!",
     "buildInfo": "Info de compilación",
@@ -187,7 +188,13 @@
     "bugSubmit": "Enviar reporte",
     "bugSubmitting": "Enviando…",
     "bugSuccess": "Reporte enviado. ¡Gracias!",
-    "bugError": "Error al enviar el reporte."
+    "bugError": "Error al enviar el reporte.",
+    "billingVerifyPrompt": "Por seguridad, confirma tu contraseña para acceder a la facturación.",
+    "billingSessionExpired": "La verificación ha caducado. Vuelve a introducir tu contraseña.",
+    "billingPasswordLabel": "Contraseña",
+    "billingVerifyBtn": "Verificar identidad",
+    "billingAuthFailed": "Contraseña incorrecta. Inténtalo de nuevo.",
+    "billingOAuthHint": "Iniciaste sesión con un proveedor social. Cierra sesión y vuelve a iniciar para acceder a la facturación."
   },
   "ui": {
     "close": "Cerrar",

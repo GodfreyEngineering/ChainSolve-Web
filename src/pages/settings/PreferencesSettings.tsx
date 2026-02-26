@@ -5,9 +5,12 @@ import { Button } from '../../components/ui/Button'
 import { SUPPORTED_LANGUAGES } from '../../i18n/config'
 import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../../lib/build-info'
 import { BugReportModal } from '../../components/BugReportModal'
+import { useTheme } from '../../contexts/ThemeContext'
+import type { ThemeMode } from '../../contexts/ThemeContext'
 
 export function PreferencesSettings() {
   const { t, i18n } = useTranslation()
+  const { mode, setMode } = useTheme()
   const [bugOpen, setBugOpen] = useState(false)
 
   const buildDate = (() => {
@@ -39,11 +42,12 @@ export function PreferencesSettings() {
           <Select
             label={t('settings.themeLabel')}
             options={[
+              { value: 'system', label: t('settings.themeSystem') },
               { value: 'dark', label: t('settings.themeDark') },
               { value: 'light', label: t('settings.themeLight') },
             ]}
-            value="dark"
-            disabled
+            value={mode}
+            onChange={(e) => setMode(e.target.value as ThemeMode)}
           />
         </div>
       </div>

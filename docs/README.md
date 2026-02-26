@@ -62,3 +62,33 @@
 | [W9_3_CORRECTNESS.md](W9_3_CORRECTNESS.md) | NaN/Error propagation, `ENGINE_CONTRACT_VERSION` policy, golden tests |
 | [W9_4_PERF.md](W9_4_PERF.md) | Performance metrics, `?perf=1` profiling, optimization notes |
 | [W9_5_VERIFICATION.md](W9_5_VERIFICATION.md) | Test strategy, golden fixtures, property tests, smoke vs full e2e |
+
+---
+
+## Housekeeping (W9.10)
+
+**AI memory:** Project memory for Claude Code lives in `.claude/projects/…/memory/MEMORY.md` (index) with topic files under `topics/` (engine, blocks, infra). Not checked into git.
+
+**SEO files (public/):**
+
+| File | Purpose |
+|------|---------|
+| `robots.txt` | Allows `/`, disallows app routes. Links to sitemap. |
+| `sitemap.xml` | Static sitemap: `/` and `/login` only. |
+| `og.svg` | Open Graph image for social sharing. |
+
+**Theme:**
+- Modes: `system` (default), `light`, `dark`
+- Persisted to `localStorage` key `chainsolve.theme`
+- Applied via `data-theme` attribute on `<html>` + CSS variable overrides in `src/index.css`
+- Early-applied in `src/boot.ts` (before React) to prevent FOUC
+- Context: `src/contexts/ThemeContext.ts` · Provider: `src/components/ThemeProvider.tsx`
+- Settings UI: `src/pages/settings/PreferencesSettings.tsx`
+
+**Settings modal (W10.2a):**
+- Settings are a centred modal overlay, not a full-page route
+- `/settings` and `/settings?tab=billing` deep-links open the modal then redirect to `/app`
+- Gear icon (⚙) in AppShell and CanvasPage header opens the modal
+- Billing tab requires password re-authentication (10-minute window, OAuth fallback message)
+- Context: `src/contexts/SettingsModalContext.ts` · Provider: `src/components/SettingsModalProvider.tsx`
+- Core: `src/components/SettingsModal.tsx` · `src/components/BillingAuthGate.tsx`

@@ -37,6 +37,20 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Light theme ───────────────────────────────────────────────────────────── */
+:root[data-theme='light'] {
+  --bg: #f5f5f4;
+  --card-bg: #ffffff;
+  --surface2: #eaeae9;
+  --border: rgba(0, 0, 0, 0.12);
+  --input-bg: #ffffff;
+
+  --text: #1a1a1a;
+  --text-muted: rgba(26, 26, 26, 0.5);
+
+  color-scheme: light;
+}
+
 *,
 *::before,
 *::after {
@@ -146,7 +160,7 @@ textarea:focus {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(128, 128, 128, 0.3);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {

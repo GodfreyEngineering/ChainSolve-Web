@@ -16,6 +16,7 @@ import { toEngineSnapshot } from './bridge.ts'
 import { diffGraph } from './diffGraph.ts'
 import { isPerfHudEnabled } from '../lib/devFlags.ts'
 import { updatePerfMetrics } from './perfMetrics.ts'
+import { perfMark, perfMeasure } from '../perf/marks.ts'
 
 const perfEnabled = isPerfHudEnabled()
 
@@ -53,8 +54,10 @@ export function useGraphEngine(
       const reqId = ++pendingRef.current
       const snapshot = toEngineSnapshot(nodes, edges)
       const t0 = perfEnabled ? performance.now() : 0
+      perfMark('cs:eval:start')
       engine.loadSnapshot(snapshot, options).then((result) => {
         if (reqId !== pendingRef.current) return
+        perfMeasure('cs:eval:snapshot', 'cs:eval:start')
         setComputed(toValueMap(result.values))
         setIsPartial(result.partial ?? false)
         if (perfEnabled) {
@@ -86,39 +89,51 @@ export function useGraphEngine(
       }
       const reqId = ++pendingRef.current
       const t0 = perfEnabled ? performance.now() : 0
-      engine.applyPatch(ops, options).then((result) => {
-        if (reqId !== pendingRef.current) return
-        setIsPartial(result.partial ?? false)
-        // MERGE changed values into existing map (not replace).
-        setComputed((prev) => {
-          const next = new Map(prev)
-          for (const [id, val] of Object.entries(result.changedValues)) {
-            next.set(id, val as Value)
-          }
-          // Remove values for nodes that were removed.
-          for (const op of ops) {
-            if (op.op === 'removeNode') {
-              next.delete(op.nodeId)
+      perfMark('cs:eval:start')
+      // Apply 300 ms interactive time budget so large evals return partial
+      // results quickly rather than blocking the worker. Callers can override
+      // by passing a higher timeBudgetMs in `options`.
+      engine
+        .applyPatch(ops, { timeBudgetMs: 300, ...options })
+        .then((result) => {
+          if (reqId !== pendingRef.current) return
+          perfMeasure('cs:eval:patch', 'cs:eval:start')
+          if (result.partial) perfMark('cs:eval:partial')
+          setIsPartial(result.partial ?? false)
+          // MERGE changed values into existing map (not replace).
+          setComputed((prev) => {
+            const next = new Map(prev)
+            for (const [id, val] of Object.entries(result.changedValues)) {
+              next.set(id, val as Value)
             }
-          }
-          return next
-        })
-        if (perfEnabled) {
-          updatePerfMetrics({
-            lastEvalMs: result.elapsedUs / 1000,
-            workerRoundTripMs: performance.now() - t0,
-            nodesEvaluated: result.evaluatedCount,
-            totalNodes: result.totalCount,
-            isPartial: result.partial ?? false,
+            // Remove values for nodes that were removed.
+            for (const op of ops) {
+              if (op.op === 'removeNode') {
+                next.delete(op.nodeId)
+              }
+            }
+            return next
           })
-          engine.getStats().then((stats) => {
+          if (perfEnabled) {
             updatePerfMetrics({
-              datasetCount: stats.datasetCount,
-              datasetTotalBytes: stats.datasetTotalBytes,
+              lastEvalMs: result.elapsedUs / 1000,
+              workerRoundTripMs: performance.now() - t0,
+              nodesEvaluated: result.evaluatedCount,
+              totalNodes: result.totalCount,
+              isPartial: result.partial ?? false,
             })
-          })
-        }
-      })
+            engine.getStats().then((stats) => {
+              updatePerfMetrics({
+                datasetCount: stats.datasetCount,
+                datasetTotalBytes: stats.datasetTotalBytes,
+              })
+            })
+          }
+        })
+        .catch(() => {
+          // Watchdog fired or worker was recreated — next user interaction
+          // will retrigger evaluation via the useEffect dependency array.
+        })
     }
 
     prevNodesRef.current = nodes

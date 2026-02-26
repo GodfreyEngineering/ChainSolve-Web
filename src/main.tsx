@@ -3,10 +3,21 @@ import { StrictMode, useCallback, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './i18n/config'
+import { initObservability } from './observability/client'
 import App from './App.tsx'
+
+// Initialise observability early — installs global error handlers.
+// Never throws; failures are silently swallowed so the app always boots.
+try {
+  initObservability()
+} catch {
+  // intentionally swallowed
+}
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
+import { ThemeProvider } from './components/ThemeProvider.tsx'
 import { ToastProvider } from './components/ui/Toast.tsx'
 import { EngineFatalError } from './components/EngineFatalError.tsx'
+import { SettingsModalProvider } from './components/SettingsModalProvider.tsx'
 import { EngineContext } from './contexts/EngineContext.ts'
 import { createEngine, type EngineAPI } from './engine/index.ts'
 import { validateCatalog } from './blocks/registry'
@@ -57,13 +68,15 @@ function Root() {
 
       {error && <EngineFatalError error={error} onRetry={handleRetry} />}
 
-      {engine && (
-        <EngineContext.Provider value={engine}>
-          {/* Boot ladder rung 4: WASM engine is ready. */}
-          <div data-testid="engine-ready" style={{ display: 'none' }} />
-          <App />
-        </EngineContext.Provider>
-      )}
+      <SettingsModalProvider>
+        {engine && (
+          <EngineContext.Provider value={engine}>
+            {/* Boot ladder rung 4: WASM engine is ready. */}
+            <div data-testid="engine-ready" style={{ display: 'none' }} />
+            <App />
+          </EngineContext.Provider>
+        )}
+      </SettingsModalProvider>
     </>
   )
 }
@@ -71,9 +84,11 @@ function Root() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      <ToastProvider>
-        <Root />
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <Root />
+        </ToastProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   </StrictMode>,
 )

@@ -21,7 +21,11 @@
     "test:e2e:smoke": "playwright test --project=smoke",
     "test:e2e:full": "playwright test --project=full",
     "test:e2e:ui": "playwright test --ui",
-    "bench:rust": "cargo bench --package engine-core"
+    "bench:rust": "cargo bench --package engine-core",
+    "perf:bundle": "node scripts/check-bundle-size.mjs",
+    "perf:engine": "cargo bench --package engine-core 2>&1 | tail -60",
+    "perf:all": "npm run perf:bundle",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",
@@ -50,9 +54,11 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "jsdom": "^28.1.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vitest": "^3.2.4"
   }
 }
