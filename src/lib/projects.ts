@@ -35,6 +35,7 @@ export interface ProjectRow {
   name: string
   description: string | null
   storage_key: string | null
+  active_canvas_id: string | null
   created_at: string
   updated_at: string
 }
@@ -68,7 +69,8 @@ export interface ProjectJSON {
 
 // ── Private helpers ───────────────────────────────────────────────────────────
 
-const SELECT_COLS = 'id,owner_id,name,description,storage_key,created_at,updated_at'
+const SELECT_COLS =
+  'id,owner_id,name,description,storage_key,active_canvas_id,created_at,updated_at'
 
 function buildJson(
   projectId: string,
@@ -103,16 +105,16 @@ async function readUpdatedAt(projectId: string): Promise<string | null> {
 
 // ── Exported operations ───────────────────────────────────────────────────────
 
-/** Read a single project row (name + updated_at). Used by CanvasPage to anchor conflict detection. */
+/** Read a single project row. Used by CanvasPage to anchor conflict detection + resolve active canvas. */
 export async function readProjectRow(
   projectId: string,
-): Promise<{ name: string; updated_at: string } | null> {
+): Promise<{ name: string; updated_at: string; active_canvas_id: string | null } | null> {
   const { data } = await supabase
     .from('projects')
-    .select('name,updated_at')
+    .select('name,updated_at,active_canvas_id')
     .eq('id', projectId)
     .single()
-  return data as { name: string; updated_at: string } | null
+  return data as { name: string; updated_at: string; active_canvas_id: string | null } | null
 }
 
 /** Return all projects for the current user, newest first. */
@@ -219,6 +221,19 @@ export async function deleteProject(projectId: string): Promise<void> {
     const { data: projFiles } = await supabase.storage.from('projects').list(prefix)
     if (projFiles?.length) {
       await supabase.storage.from('projects').remove(projFiles.map((f) => `${prefix}${f.name}`))
+    }
+  } catch {
+    // Storage cleanup is best-effort
+  }
+
+  // Clean up per-canvas JSONs in the "projects" bucket (W10.7)
+  try {
+    const canvasPrefix = `${prefix}canvases/`
+    const { data: canvasFiles } = await supabase.storage.from('projects').list(canvasPrefix)
+    if (canvasFiles?.length) {
+      await supabase.storage
+        .from('projects')
+        .remove(canvasFiles.map((f) => `${canvasPrefix}${f.name}`))
     }
   } catch {
     // Storage cleanup is best-effort

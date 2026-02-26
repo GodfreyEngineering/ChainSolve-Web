@@ -12,6 +12,7 @@ export type Plan = 'free' | 'trialing' | 'pro' | 'past_due' | 'canceled'
 
 export interface Entitlements {
   maxProjects: number
+  maxCanvases: number
   canUploadCsv: boolean
   canUseArrays: boolean
   canUsePlots: boolean
@@ -24,6 +25,7 @@ export interface Entitlements {
 const ENTITLEMENTS: Record<Plan, Entitlements> = {
   free: {
     maxProjects: 1,
+    maxCanvases: 2,
     canUploadCsv: false,
     canUseArrays: false,
     canUsePlots: false,
@@ -32,6 +34,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   },
   trialing: {
     maxProjects: Infinity,
+    maxCanvases: Infinity,
     canUploadCsv: true,
     canUseArrays: true,
     canUsePlots: true,
@@ -40,6 +43,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   },
   pro: {
     maxProjects: Infinity,
+    maxCanvases: Infinity,
     canUploadCsv: true,
     canUseArrays: true,
     canUsePlots: true,
@@ -48,6 +52,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   },
   past_due: {
     maxProjects: 1,
+    maxCanvases: 2,
     canUploadCsv: false,
     canUseArrays: false,
     canUsePlots: false,
@@ -56,6 +61,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
   },
   canceled: {
     maxProjects: 1,
+    maxCanvases: 2,
     canUploadCsv: false,
     canUseArrays: false,
     canUsePlots: false,
@@ -84,6 +90,12 @@ export function isReadOnly(plan: Plan): boolean {
 export function canCreateProject(plan: Plan, currentCount: number): boolean {
   if (plan === 'canceled') return false
   return currentCount < getEntitlements(plan).maxProjects
+}
+
+/** Whether the user is allowed to create a new canvas in a project. */
+export function canCreateCanvas(plan: Plan, currentCount: number): boolean {
+  if (plan === 'canceled') return false
+  return currentCount < getEntitlements(plan).maxCanvases
 }
 
 /** Returns a banner kind when the plan requires a warning, or null. */
