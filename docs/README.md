@@ -271,3 +271,83 @@ projects bucket:
 - Drag-and-drop reorder of tabs is deferred (position model in place, UI deferred).
 - Save As duplicates only the active canvas's legacy project.json (full multi-canvas duplication is a follow-up).
 - Background canvas autosave (dirty canvases other than active) is active-only for now.
+
+---
+
+## Canvas visual polish (W12.1)
+
+### Animated edges
+
+Custom edge component colours connections by the source node's value kind:
+
+- Scalar: teal (`#14b8a6`)
+- Vector: purple (`#a78bfa`)
+- Table: orange (`#f59e0b`)
+- Error: red (`#ef4444`)
+- Unknown/disconnected: grey (`var(--text-muted)`)
+
+When enabled, edges animate a flowing dash pattern via CSS `stroke-dashoffset`.
+Auto-disables when edge count exceeds 400 for performance.
+Respects `prefers-reduced-motion` media query at init time.
+
+### Zoom LOD (Level of Detail)
+
+Three zoom tiers control node rendering density:
+
+- **Full** (zoom > 0.7): all node content visible
+- **Compact** (0.4 <= zoom <= 0.7): node body sections hidden
+- **Minimal** (zoom < 0.4): body + header value text hidden
+
+Driven by a `data-lod` attribute on the canvas wrapper with CSS rules
+targeting `.cs-node-body` and `.cs-node-header-value` classes.
+
+### Controls
+
+- **BottomToolbar**: animated-edges button (`\u2248`) and LOD button (`\u25e7`)
+- **View menu**: "Toggle animated edges" and "Toggle zoom LOD"
+- **Keyboard**: `Alt+E` (animated edges), `Alt+L` (LOD)
+- **Command Palette**: auto-registered via menu flattening
+
+### Persistence
+
+- `localStorage` keys: `chainsolve.edgesAnimated`, `chainsolve.lod`
+- Defaults: both enabled (edges off if `prefers-reduced-motion`)
+
+### Key files
+
+- Custom edge: `src/components/canvas/edges/AnimatedEdge.tsx`
+- Settings context: `src/contexts/CanvasSettingsContext.ts`
+- LOD CSS rules: `src/index.css` (search `cs-edge-flow`, `data-lod`)
+- Node LOD classes: `className="cs-node-body"` / `"cs-node-header-value"` in node components
+
+## Engineering & Physics block pack (W11a)
+
+60 deterministic engineering blocks across 8 categories, powered by Rust/WASM ops.
+
+### Categories (60 blocks)
+
+| Category | Count | Examples |
+|----------|-------|---------|
+| Mechanics | 17 | F=ma, KE=½mv², P=W/t, centripetal force |
+| Materials | 7 | σ=F/A, ε=ΔL/L, E=σ/ε, Hooke's law |
+| Sections | 7 | Area circle/annulus, I rect/circle, bending stress |
+| Inertia | 5 | Solid/hollow cylinder, sphere, rod |
+| Fluids | 7 | Q=Av, Reynolds, Hagen-Poiseuille, Darcy-Weisbach |
+| Thermo | 5 | Ideal gas PV=nRT, Q=mcΔT, conduction, convection |
+| Electrical | 4 | V=IR, P=VI, P=I²R, P=V²/R |
+| Conversions | 8 | deg↔rad, mm↔m, bar↔Pa, L/min↔m³/s |
+
+### Architecture
+
+- **Op IDs**: Stable namespaced IDs — `eng.<category>.<formula>` (e.g. `eng.mechanics.force_ma`)
+- **Rust ops**: Match arms in `crates/engine-core/src/ops.rs`, catalog entries in `catalog.rs`
+- **TS blocks**: `src/blocks/eng-blocks.ts` exports `registerEngBlocks()`, called from `registry.ts`
+- **Error handling**: Division-by-zero and invalid-sqrt return `Value::error("message")`, not NaN
+- **Defaults**: g=9.80665 m/s², R=8.314462618 J/mol·K via `manualValues` in defaultData
+
+### Adding a new engineering block
+
+1. Add match arm in `crates/engine-core/src/ops.rs` (before `_ =>` fallthrough)
+2. Add `CatalogEntry` in `crates/engine-core/src/catalog.rs` (update test count)
+3. Add `register({...})` call in `src/blocks/eng-blocks.ts`
+4. Run `cargo test` + `npm run typecheck` + `npm run build`

@@ -13,6 +13,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   forwardRef,
@@ -34,6 +35,7 @@ import {
   type Edge,
   type Connection,
   type IsValidConnection,
+  useOnViewportChange,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
@@ -65,6 +67,8 @@ import {
 } from '../../lib/groups'
 import { saveTemplate as saveTemplateApi } from '../../lib/templates'
 import type { Template } from '../../lib/templates'
+import { AnimatedEdge } from './edges/AnimatedEdge'
+import { CanvasSettingsContext } from '../../contexts/CanvasSettingsContext'
 import { BottomToolbar } from './BottomToolbar'
 import { useTranslation } from 'react-i18next'
 import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
@@ -83,6 +87,10 @@ const NODE_TYPES = {
   csData: DataNode,
   csPlot: PlotNode,
   csGroup: GroupNode,
+} as const
+
+const EDGE_TYPES = {
+  default: AnimatedEdge,
 } as const
 
 let nodeIdCounter = 100
@@ -128,6 +136,8 @@ export interface CanvasAreaHandle {
   deleteSelected: () => void
   selectAll: () => void
   openFind: () => void
+  toggleAnimatedEdges: () => void
+  toggleLod: () => void
 }
 
 // ── Minimap persistence ──────────────────────────────────────────────────────
@@ -148,6 +158,59 @@ function setMinimapPref(v: boolean) {
   } catch {
     // Ignore — private browsing
   }
+}
+
+// ── Animated-edges persistence ───────────────────────────────────────────────
+
+const EDGES_ANIM_KEY = 'chainsolve.edgesAnimated'
+
+function getEdgesAnimatedPref(): boolean {
+  if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    return false
+  }
+  try {
+    const v = localStorage.getItem(EDGES_ANIM_KEY)
+    return v === null ? true : v === 'true'
+  } catch {
+    return true
+  }
+}
+
+function setEdgesAnimatedPref(v: boolean) {
+  try {
+    localStorage.setItem(EDGES_ANIM_KEY, String(v))
+  } catch {
+    // Ignore — private browsing
+  }
+}
+
+// ── LOD persistence ─────────────────────────────────────────────────────────
+
+const LOD_KEY = 'chainsolve.lod'
+
+function getLodPref(): boolean {
+  try {
+    const v = localStorage.getItem(LOD_KEY)
+    return v === null ? true : v === 'true'
+  } catch {
+    return true
+  }
+}
+
+function setLodPref(v: boolean) {
+  try {
+    localStorage.setItem(LOD_KEY, String(v))
+  } catch {
+    // Ignore — private browsing
+  }
+}
+
+type LodTier = 'full' | 'compact' | 'minimal'
+
+function zoomToLodTier(zoom: number): LodTier {
+  if (zoom > 0.7) return 'full'
+  if (zoom >= 0.4) return 'compact'
+  return 'minimal'
 }
 
 // ── Default node dimensions for layout ───────────────────────────────────────
@@ -259,6 +322,18 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     },
     selectAll,
     openFind: () => setFindOpen(true),
+    toggleAnimatedEdges: () => {
+      setEdgesAnimated((v) => {
+        setEdgesAnimatedPref(!v)
+        return !v
+      })
+    },
+    toggleLod: () => {
+      setLodEnabled((v) => {
+        setLodPref(!v)
+        return !v
+      })
+    },
   }))
 
   // Panel widths + visibility
@@ -287,6 +362,25 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const [minimap, setMinimap] = useState(getMinimapPref)
   const [paused, setPaused] = useState(false)
   const [engineKey, setEngineKey] = useState(0)
+
+  // Visual polish state (W12.1)
+  const [edgesAnimated, setEdgesAnimated] = useState(getEdgesAnimatedPref)
+  const [lodEnabled, setLodEnabled] = useState(getLodPref)
+  const [lodTier, setLodTier] = useState<LodTier>('full')
+
+  // Auto-disable animation on large graphs (>400 edges)
+  const effectiveEdgesAnimated = edgesAnimated && edges.length <= 400
+  const effectiveLodTier: LodTier = lodEnabled ? lodTier : 'full'
+
+  // Track zoom for LOD tier calculation
+  useOnViewportChange({
+    onChange: useCallback(({ zoom }: { zoom: number }) => {
+      setLodTier((prev) => {
+        const next = zoomToLodTier(zoom)
+        return prev !== next ? next : prev
+      })
+    }, []),
+  })
 
   const { t } = useTranslation()
 
@@ -364,7 +458,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const onConnect = useCallback(
     (params: Connection) => {
       doSaveHistory()
-      setEdges((eds) => addEdge({ ...params, animated: true }, eds))
+      setEdges((eds) => addEdge(params, eds))
     },
     [setEdges, doSaveHistory],
   )
@@ -813,6 +907,24 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         const selectedGroup = nodes.find((n) => n.selected && n.type === 'csGroup')
         if (selectedGroup) ungroupNode(selectedGroup.id)
       }
+
+      // Alt+E: Toggle animated edges
+      if (e.altKey && e.key === 'e') {
+        e.preventDefault()
+        setEdgesAnimated((v) => {
+          setEdgesAnimatedPref(!v)
+          return !v
+        })
+      }
+
+      // Alt+L: Toggle LOD
+      if (e.altKey && e.key === 'l') {
+        e.preventDefault()
+        setLodEnabled((v) => {
+          setLodPref(!v)
+          return !v
+        })
+      }
     },
     [
       readOnly,
@@ -967,10 +1079,18 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // ── Drawer backdrop (mobile only) ──────────────────────────────────────────
   const showBackdrop = isMobile && (libVisible || inspVisible)
 
+  const canvasSettings = useMemo(
+    () => ({ edgesAnimated: effectiveEdgesAnimated }),
+    [effectiveEdgesAnimated],
+  )
+
   return (
     <ComputedContext.Provider value={computed}>
+      <CanvasSettingsContext.Provider value={canvasSettings}>
       {computed.size > 0 && <div data-testid="canvas-computed" style={{ display: 'none' }} />}
       <div
+        data-edges-animated={effectiveEdgesAnimated ? 'true' : 'false'}
+        data-lod={effectiveLodTier}
         style={{
           display: 'flex',
           flex: 1,
@@ -1025,6 +1145,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             nodes={nodes}
             edges={edges}
             nodeTypes={NODE_TYPES}
+            edgeTypes={EDGE_TYPES}
             onNodesChange={readOnly ? undefined : onNodesChange}
             onEdgesChange={readOnly ? undefined : onEdgesChange}
             onConnect={readOnly ? undefined : onConnect}
@@ -1097,6 +1218,20 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               if (isMobile) setLibVisible(false)
             }}
             onAutoOrganise={(shiftKey) => handleAutoOrganise(shiftKey ? 'TB' : 'LR')}
+            edgesAnimated={edgesAnimated}
+            lodEnabled={lodEnabled}
+            onToggleEdgesAnimated={() => {
+              setEdgesAnimated((v) => {
+                setEdgesAnimatedPref(!v)
+                return !v
+              })
+            }}
+            onToggleLod={() => {
+              setLodEnabled((v) => {
+                setLodPref(!v)
+                return !v
+              })
+            }}
           />
         </div>
 
@@ -1226,6 +1361,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           />
         )}
       </div>
+    </CanvasSettingsContext.Provider>
     </ComputedContext.Provider>
   )
 })

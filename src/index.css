@@ -140,7 +140,7 @@ textarea:focus {
   fill: var(--primary) !important;
 }
 .react-flow__edge-path {
-  stroke: var(--primary) !important;
+  /* Stroke colour now set inline by AnimatedEdge; keep opacity here */
   opacity: 0.65;
 }
 .react-flow__edge.selected .react-flow__edge-path {
@@ -149,6 +149,31 @@ textarea:focus {
 }
 .react-flow__connectionline {
   stroke: var(--primary) !important;
+}
+
+/* ── Animated-edge dash flow ─────────────────────────────────────────────── */
+@keyframes cs-edge-flow {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+[data-edges-animated='true'] .react-flow__edge-path {
+  stroke-dasharray: 5 5;
+  animation: cs-edge-flow 0.5s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .react-flow__edge-path {
+    animation: none !important;
+  }
+}
+
+/* ── LOD — Level of Detail zoom tiers ────────────────────────────────────── */
+[data-lod='compact'] .cs-node-body {
+  display: none !important;
+}
+[data-lod='minimal'] .cs-node-body,
+[data-lod='minimal'] .cs-node-header-value {
+  display: none !important;
 }
 
 /* Scrollbars */

@@ -75,11 +75,11 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
         <span style={s.headerLabel}>{nd.label}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
           {isLocked && <span style={{ fontSize: '0.6rem', lineHeight: 1, opacity: 0.7 }}>🔒</span>}
-          <span style={s.headerValue}>{formatValue(value)}</span>
+          <span className="cs-node-header-value" style={s.headerValue}>{formatValue(value)}</span>
         </div>
       </div>
 
-      <div style={{ position: 'relative', height: bodyH }}>
+      <div className="cs-node-body" style={{ position: 'relative', height: bodyH }}>
         {inputs.map((port, i) => {
           const connected = isPortConnected(port.id)
           const override = portOverrides[port.id] === true

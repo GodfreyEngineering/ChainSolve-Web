@@ -35,12 +35,12 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
         <span style={s.headerLabel}>{nd.label}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
           {isLocked && <span style={{ fontSize: '0.6rem', lineHeight: 1, opacity: 0.7 }}>🔒</span>}
-          <span style={s.headerValue}>{formatValue(value)}</span>
+          <span className="cs-node-header-value" style={s.headerValue}>{formatValue(value)}</span>
         </div>
       </div>
 
       {isNumber && (
-        <div style={s.body}>
+        <div className="cs-node-body" style={s.body}>
           <input
             type="number"
             style={s.numInput}
@@ -56,7 +56,7 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
       )}
 
       {isSlider && (
-        <div style={s.body}>
+        <div className="cs-node-body" style={s.body}>
           <input
             type="range"
             className="nodrag"
@@ -83,7 +83,7 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
       )}
 
       {!isEditable && (
-        <div style={s.body}>
+        <div className="cs-node-body" style={s.body}>
           <span style={s.constValue}>{formatValue(value)}</span>
         </div>
       )}

@@ -30,6 +30,7 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
       </div>
 
       <div
+        className="cs-node-body"
         style={{
           ...s.body,
           textAlign: 'center',

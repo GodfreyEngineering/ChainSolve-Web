@@ -20,6 +20,10 @@ export interface BottomToolbarProps {
   onToggleLibrary: () => void
   onToggleInspector: () => void
   onAutoOrganise: (shiftKey: boolean) => void
+  edgesAnimated: boolean
+  lodEnabled: boolean
+  onToggleEdgesAnimated: () => void
+  onToggleLod: () => void
 }
 
 export function BottomToolbar({
@@ -40,6 +44,10 @@ export function BottomToolbar({
   onToggleLibrary,
   onToggleInspector,
   onAutoOrganise,
+  edgesAnimated,
+  lodEnabled,
+  onToggleEdgesAnimated,
+  onToggleLod,
 }: BottomToolbarProps) {
   const { t } = useTranslation()
   const { zoomIn, zoomOut, zoomTo, fitView } = useReactFlow()
@@ -171,6 +179,24 @@ export function BottomToolbar({
         aria-pressed={minimap}
       >
         {'\ud83d\uddfa'}
+      </button>
+
+      <button
+        onClick={onToggleEdgesAnimated}
+        style={btnStyle(edgesAnimated)}
+        title={t('toolbar.animatedEdges')}
+        aria-pressed={edgesAnimated}
+      >
+        {'\u2248'}
+      </button>
+
+      <button
+        onClick={onToggleLod}
+        style={btnStyle(lodEnabled)}
+        title={t('toolbar.lod')}
+        aria-pressed={lodEnabled}
+      >
+        {'\u25e7'}
       </button>
 
       <div style={sepStyle} />

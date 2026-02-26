@@ -17,6 +17,14 @@ export type BlockCategory =
   | 'vectorOps'
   | 'tableOps'
   | 'plot'
+  | 'engMechanics'
+  | 'engMaterials'
+  | 'engSections'
+  | 'engInertia'
+  | 'engFluids'
+  | 'engThermo'
+  | 'engElectrical'
+  | 'engConversions'
 
 /** Which React Flow custom-node renderer to use. */
 export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay' | 'csData' | 'csPlot' | 'csGroup'

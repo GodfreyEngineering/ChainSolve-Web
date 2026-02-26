@@ -328,6 +328,346 @@ fn evaluate_node_inner(
             data_point_count(inputs.get("data"))
         }
 
+        // ── Engineering → Mechanics ──────────────────────────────────
+        "eng.mechanics.v_from_uat" => {
+            let u = scalar_or_nan(inputs, "u");
+            let a = scalar_or_nan(inputs, "a");
+            let t = scalar_or_nan(inputs, "t");
+            Value::scalar(u + a * t)
+        }
+        "eng.mechanics.s_from_ut_a_t" => {
+            let u = scalar_or_nan(inputs, "u");
+            let t = scalar_or_nan(inputs, "t");
+            let a = scalar_or_nan(inputs, "a");
+            Value::scalar(u * t + 0.5 * a * t * t)
+        }
+        "eng.mechanics.v2_from_u2_as" => {
+            let u = scalar_or_nan(inputs, "u");
+            let a = scalar_or_nan(inputs, "a");
+            let s = scalar_or_nan(inputs, "s");
+            let disc = u * u + 2.0 * a * s;
+            if disc < 0.0 {
+                Value::error("v\u{00B2}: discriminant < 0")
+            } else {
+                Value::scalar(disc.sqrt())
+            }
+        }
+        "eng.mechanics.force_ma" => binary_broadcast_ports(inputs, "m", "a", |m, a| m * a),
+        "eng.mechanics.weight_mg" => binary_broadcast_ports(inputs, "m", "g", |m, g| m * g),
+        "eng.mechanics.momentum_mv" => binary_broadcast_ports(inputs, "m", "v", |m, v| m * v),
+        "eng.mechanics.kinetic_energy" => {
+            let m = scalar_or_nan(inputs, "m");
+            let v = scalar_or_nan(inputs, "v");
+            Value::scalar(0.5 * m * v * v)
+        }
+        "eng.mechanics.potential_energy" => {
+            let m = scalar_or_nan(inputs, "m");
+            let g = scalar_or_nan(inputs, "g");
+            let h = scalar_or_nan(inputs, "h");
+            Value::scalar(m * g * h)
+        }
+        "eng.mechanics.work_Fs" => binary_broadcast_ports(inputs, "F", "s", |f, s| f * s),
+        "eng.mechanics.power_work_time" => {
+            let w = scalar_or_nan(inputs, "W");
+            let t = scalar_or_nan(inputs, "t");
+            if t == 0.0 {
+                Value::error("Power: t = 0")
+            } else {
+                Value::scalar(w / t)
+            }
+        }
+        "eng.mechanics.power_Fv" => binary_broadcast_ports(inputs, "F", "v", |f, v| f * v),
+        "eng.mechanics.torque_Fr" => binary_broadcast_ports(inputs, "F", "r", |f, r| f * r),
+        "eng.mechanics.omega_from_rpm" => {
+            unary_broadcast_port(inputs, "rpm", |rpm| rpm * std::f64::consts::TAU / 60.0)
+        }
+        "eng.mechanics.rpm_from_omega" => {
+            unary_broadcast_port(inputs, "omega", |w| w * 60.0 / std::f64::consts::TAU)
+        }
+        "eng.mechanics.power_rot_Tomega" => {
+            binary_broadcast_ports(inputs, "T", "omega", |t, w| t * w)
+        }
+        "eng.mechanics.centripetal_acc" => {
+            let v = scalar_or_nan(inputs, "v");
+            let r = scalar_or_nan(inputs, "r");
+            if r == 0.0 {
+                Value::error("Centripetal: r = 0")
+            } else {
+                Value::scalar(v * v / r)
+            }
+        }
+        "eng.mechanics.centripetal_force" => {
+            let m = scalar_or_nan(inputs, "m");
+            let v = scalar_or_nan(inputs, "v");
+            let r = scalar_or_nan(inputs, "r");
+            if r == 0.0 {
+                Value::error("Centripetal: r = 0")
+            } else {
+                Value::scalar(m * v * v / r)
+            }
+        }
+
+        // ── Engineering → Materials & Strength ───────────────────────
+        "eng.materials.stress_F_A" => {
+            let f = scalar_or_nan(inputs, "F");
+            let a = scalar_or_nan(inputs, "A");
+            if a == 0.0 {
+                Value::error("Stress: A = 0")
+            } else {
+                Value::scalar(f / a)
+            }
+        }
+        "eng.materials.strain_dL_L" => {
+            let dl = scalar_or_nan(inputs, "dL");
+            let l = scalar_or_nan(inputs, "L");
+            if l == 0.0 {
+                Value::error("Strain: L = 0")
+            } else {
+                Value::scalar(dl / l)
+            }
+        }
+        "eng.materials.youngs_modulus" => {
+            let sigma = scalar_or_nan(inputs, "sigma");
+            let eps = scalar_or_nan(inputs, "epsilon");
+            if eps == 0.0 {
+                Value::error("Young's modulus: \u{03B5} = 0")
+            } else {
+                Value::scalar(sigma / eps)
+            }
+        }
+        "eng.materials.pressure_F_A" => {
+            let f = scalar_or_nan(inputs, "F");
+            let a = scalar_or_nan(inputs, "A");
+            if a == 0.0 {
+                Value::error("Pressure: A = 0")
+            } else {
+                Value::scalar(f / a)
+            }
+        }
+        "eng.materials.safety_factor" => {
+            let strength = scalar_or_nan(inputs, "strength");
+            let stress = scalar_or_nan(inputs, "stress");
+            if stress == 0.0 {
+                Value::error("Safety factor: stress = 0")
+            } else {
+                Value::scalar(strength / stress)
+            }
+        }
+        "eng.materials.spring_force_kx" => {
+            binary_broadcast_ports(inputs, "k", "x", |k, x| k * x)
+        }
+        "eng.materials.spring_energy" => {
+            let k = scalar_or_nan(inputs, "k");
+            let x = scalar_or_nan(inputs, "x");
+            Value::scalar(0.5 * k * x * x)
+        }
+
+        // ── Engineering → Section Properties ─────────────────────────
+        "eng.sections.area_circle" => {
+            unary_broadcast_port(inputs, "d", |d| std::f64::consts::PI * d * d / 4.0)
+        }
+        "eng.sections.area_annulus" => {
+            let d_o = scalar_or_nan(inputs, "d_outer");
+            let d_i = scalar_or_nan(inputs, "d_inner");
+            let diff = d_o * d_o - d_i * d_i;
+            if diff < 0.0 {
+                Value::error("Annulus: d_inner > d_outer")
+            } else {
+                Value::scalar(std::f64::consts::PI * diff / 4.0)
+            }
+        }
+        "eng.sections.I_rect" => {
+            let b = scalar_or_nan(inputs, "b");
+            let h = scalar_or_nan(inputs, "h");
+            Value::scalar(b * h * h * h / 12.0)
+        }
+        "eng.sections.I_circle" => {
+            unary_broadcast_port(inputs, "d", |d| std::f64::consts::PI * d.powi(4) / 64.0)
+        }
+        "eng.sections.J_circle" => {
+            unary_broadcast_port(inputs, "d", |d| std::f64::consts::PI * d.powi(4) / 32.0)
+        }
+        "eng.sections.bending_stress" => {
+            let m_val = scalar_or_nan(inputs, "M");
+            let y = scalar_or_nan(inputs, "y");
+            let i = scalar_or_nan(inputs, "I");
+            if i == 0.0 {
+                Value::error("Bending stress: I = 0")
+            } else {
+                Value::scalar(m_val * y / i)
+            }
+        }
+        "eng.sections.torsional_shear" => {
+            let t = scalar_or_nan(inputs, "T");
+            let r = scalar_or_nan(inputs, "r");
+            let j = scalar_or_nan(inputs, "J");
+            if j == 0.0 {
+                Value::error("Torsional shear: J = 0")
+            } else {
+                Value::scalar(t * r / j)
+            }
+        }
+
+        // ── Engineering → Rotational Inertia ─────────────────────────
+        "eng.inertia.solid_cylinder" => {
+            let m = scalar_or_nan(inputs, "m");
+            let r = scalar_or_nan(inputs, "r");
+            Value::scalar(0.5 * m * r * r)
+        }
+        "eng.inertia.hollow_cylinder" => {
+            let m = scalar_or_nan(inputs, "m");
+            let ri = scalar_or_nan(inputs, "r_inner");
+            let ro = scalar_or_nan(inputs, "r_outer");
+            Value::scalar(0.5 * m * (ri * ri + ro * ro))
+        }
+        "eng.inertia.solid_sphere" => {
+            let m = scalar_or_nan(inputs, "m");
+            let r = scalar_or_nan(inputs, "r");
+            Value::scalar(0.4 * m * r * r)
+        }
+        "eng.inertia.rod_center" => {
+            let m = scalar_or_nan(inputs, "m");
+            let l = scalar_or_nan(inputs, "L");
+            Value::scalar(m * l * l / 12.0)
+        }
+        "eng.inertia.rod_end" => {
+            let m = scalar_or_nan(inputs, "m");
+            let l = scalar_or_nan(inputs, "L");
+            Value::scalar(m * l * l / 3.0)
+        }
+
+        // ── Engineering → Fluids ─────────────────────────────────────
+        "eng.fluids.flow_Q_from_Av" => {
+            binary_broadcast_ports(inputs, "A", "v", |a, v| a * v)
+        }
+        "eng.fluids.velocity_from_QA" => {
+            let q = scalar_or_nan(inputs, "Q");
+            let a = scalar_or_nan(inputs, "A");
+            if a == 0.0 {
+                Value::error("Velocity: A = 0")
+            } else {
+                Value::scalar(q / a)
+            }
+        }
+        "eng.fluids.mass_flow" => {
+            binary_broadcast_ports(inputs, "rho", "Q", |rho, q| rho * q)
+        }
+        "eng.fluids.reynolds" => {
+            let rho = scalar_or_nan(inputs, "rho");
+            let v = scalar_or_nan(inputs, "v");
+            let d = scalar_or_nan(inputs, "D");
+            let mu = scalar_or_nan(inputs, "mu");
+            if mu == 0.0 {
+                Value::error("Reynolds: \u{03BC} = 0")
+            } else {
+                Value::scalar(rho * v * d / mu)
+            }
+        }
+        "eng.fluids.dynamic_pressure" => {
+            let rho = scalar_or_nan(inputs, "rho");
+            let v = scalar_or_nan(inputs, "v");
+            Value::scalar(0.5 * rho * v * v)
+        }
+        "eng.fluids.hagen_poiseuille_dp" => {
+            let mu = scalar_or_nan(inputs, "mu");
+            let l = scalar_or_nan(inputs, "L");
+            let q = scalar_or_nan(inputs, "Q");
+            let d = scalar_or_nan(inputs, "D");
+            if d == 0.0 {
+                Value::error("Hagen-Poiseuille: D = 0")
+            } else {
+                Value::scalar(128.0 * mu * l * q / (std::f64::consts::PI * d.powi(4)))
+            }
+        }
+        "eng.fluids.darcy_weisbach_dp" => {
+            let f = scalar_or_nan(inputs, "f");
+            let l = scalar_or_nan(inputs, "L");
+            let d = scalar_or_nan(inputs, "D");
+            let rho = scalar_or_nan(inputs, "rho");
+            let v = scalar_or_nan(inputs, "v");
+            if d == 0.0 {
+                Value::error("Darcy-Weisbach: D = 0")
+            } else {
+                Value::scalar(f * (l / d) * (rho * v * v / 2.0))
+            }
+        }
+
+        // ── Engineering → Thermo ─────────────────────────────────────
+        "eng.thermo.ideal_gas_P" => {
+            let n = scalar_or_nan(inputs, "n");
+            let r = scalar_or_nan(inputs, "R");
+            let t = scalar_or_nan(inputs, "T");
+            let v = scalar_or_nan(inputs, "V");
+            if v == 0.0 {
+                Value::error("Ideal gas: V = 0")
+            } else {
+                Value::scalar(n * r * t / v)
+            }
+        }
+        "eng.thermo.ideal_gas_T" => {
+            let p = scalar_or_nan(inputs, "P");
+            let v = scalar_or_nan(inputs, "V");
+            let n = scalar_or_nan(inputs, "n");
+            let r = scalar_or_nan(inputs, "R");
+            let denom = n * r;
+            if denom == 0.0 {
+                Value::error("Ideal gas: n\u{00B7}R = 0")
+            } else {
+                Value::scalar(p * v / denom)
+            }
+        }
+        "eng.thermo.heat_Q_mcDT" => {
+            let m = scalar_or_nan(inputs, "m");
+            let c = scalar_or_nan(inputs, "c");
+            let dt = scalar_or_nan(inputs, "dT");
+            Value::scalar(m * c * dt)
+        }
+        "eng.thermo.conduction_Qdot" => {
+            let k = scalar_or_nan(inputs, "k");
+            let a = scalar_or_nan(inputs, "A");
+            let dt = scalar_or_nan(inputs, "dT");
+            let l = scalar_or_nan(inputs, "L");
+            if l == 0.0 {
+                Value::error("Conduction: L = 0")
+            } else {
+                Value::scalar(k * a * dt / l)
+            }
+        }
+        "eng.thermo.convection_Qdot" => {
+            let h = scalar_or_nan(inputs, "h");
+            let a = scalar_or_nan(inputs, "A");
+            let dt = scalar_or_nan(inputs, "dT");
+            Value::scalar(h * a * dt)
+        }
+
+        // ── Engineering → Electrical ─────────────────────────────────
+        "eng.elec.ohms_V" => binary_broadcast_ports(inputs, "I", "R", |i, r| i * r),
+        "eng.elec.power_VI" => binary_broadcast_ports(inputs, "V", "I", |v, i| v * i),
+        "eng.elec.power_I2R" => {
+            let i = scalar_or_nan(inputs, "I");
+            let r = scalar_or_nan(inputs, "R");
+            Value::scalar(i * i * r)
+        }
+        "eng.elec.power_V2R" => {
+            let v = scalar_or_nan(inputs, "V");
+            let r = scalar_or_nan(inputs, "R");
+            if r == 0.0 {
+                Value::error("Power: R = 0")
+            } else {
+                Value::scalar(v * v / r)
+            }
+        }
+
+        // ── Engineering → Conversions ────────────────────────────────
+        "eng.conv.deg_to_rad" => unary_broadcast_port(inputs, "deg", |d| d.to_radians()),
+        "eng.conv.rad_to_deg" => unary_broadcast_port(inputs, "rad", |r| r.to_degrees()),
+        "eng.conv.mm_to_m" => unary_broadcast_port(inputs, "mm", |v| v / 1000.0),
+        "eng.conv.m_to_mm" => unary_broadcast_port(inputs, "m", |v| v * 1000.0),
+        "eng.conv.bar_to_pa" => unary_broadcast_port(inputs, "bar", |v| v * 100_000.0),
+        "eng.conv.pa_to_bar" => unary_broadcast_port(inputs, "Pa", |v| v / 100_000.0),
+        "eng.conv.lpm_to_m3s" => unary_broadcast_port(inputs, "lpm", |v| v / 60_000.0),
+        "eng.conv.m3s_to_lpm" => unary_broadcast_port(inputs, "m3s", |v| v * 60_000.0),
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }
@@ -978,5 +1318,255 @@ mod tests {
             }
             _ => panic!("Expected Vector"),
         }
+    }
+
+    // ── W11a: Engineering ops tests ──────────────────────────────
+
+    #[test]
+    fn eng_force_ma() {
+        let inputs = make_inputs(&[("m", 10.0), ("a", 3.0)]);
+        let v = evaluate_node("eng.mechanics.force_ma", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(30.0));
+    }
+
+    #[test]
+    fn eng_weight_mg() {
+        let inputs = make_inputs(&[("m", 5.0), ("g", 9.80665)]);
+        let v = evaluate_node("eng.mechanics.weight_mg", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 49.03325).abs() < 1e-6);
+    }
+
+    #[test]
+    fn eng_v_from_uat() {
+        let inputs = make_inputs(&[("u", 10.0), ("a", 2.0), ("t", 5.0)]);
+        let v = evaluate_node("eng.mechanics.v_from_uat", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(20.0));
+    }
+
+    #[test]
+    fn eng_s_from_ut_a_t() {
+        let inputs = make_inputs(&[("u", 0.0), ("t", 4.0), ("a", 10.0)]);
+        let v = evaluate_node("eng.mechanics.s_from_ut_a_t", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(80.0)); // 0*4 + 0.5*10*16
+    }
+
+    #[test]
+    fn eng_v2_from_u2_as() {
+        let inputs = make_inputs(&[("u", 3.0), ("a", 4.0), ("s", 2.0)]);
+        let v = evaluate_node("eng.mechanics.v2_from_u2_as", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 5.0).abs() < 1e-10); // sqrt(9+16)=5
+    }
+
+    #[test]
+    fn eng_v2_negative_discriminant() {
+        let inputs = make_inputs(&[("u", 1.0), ("a", -2.0), ("s", 1.0)]);
+        let v = evaluate_node("eng.mechanics.v2_from_u2_as", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. })); // 1 + 2*(-2)*1 = -3
+    }
+
+    #[test]
+    fn eng_kinetic_energy() {
+        let inputs = make_inputs(&[("m", 2.0), ("v", 3.0)]);
+        let v = evaluate_node("eng.mechanics.kinetic_energy", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(9.0)); // 0.5*2*9
+    }
+
+    #[test]
+    fn eng_power_work_time() {
+        let inputs = make_inputs(&[("W", 100.0), ("t", 5.0)]);
+        let v = evaluate_node("eng.mechanics.power_work_time", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(20.0));
+    }
+
+    #[test]
+    fn eng_power_work_time_zero() {
+        let inputs = make_inputs(&[("W", 100.0), ("t", 0.0)]);
+        let v = evaluate_node("eng.mechanics.power_work_time", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn eng_centripetal_acc() {
+        let inputs = make_inputs(&[("v", 10.0), ("r", 5.0)]);
+        let v = evaluate_node("eng.mechanics.centripetal_acc", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(20.0)); // 100/5
+    }
+
+    #[test]
+    fn eng_centripetal_r_zero() {
+        let inputs = make_inputs(&[("v", 10.0), ("r", 0.0)]);
+        let v = evaluate_node("eng.mechanics.centripetal_acc", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn eng_omega_from_rpm() {
+        let inputs = make_inputs(&[("rpm", 60.0)]);
+        let v = evaluate_node("eng.mechanics.omega_from_rpm", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - std::f64::consts::TAU).abs() < 1e-10);
+    }
+
+    #[test]
+    fn eng_stress_f_a() {
+        let inputs = make_inputs(&[("F", 1000.0), ("A", 0.01)]);
+        let v = evaluate_node("eng.materials.stress_F_A", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(100_000.0));
+    }
+
+    #[test]
+    fn eng_stress_zero_area() {
+        let inputs = make_inputs(&[("F", 1000.0), ("A", 0.0)]);
+        let v = evaluate_node("eng.materials.stress_F_A", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn eng_youngs_modulus() {
+        let inputs = make_inputs(&[("sigma", 200e6), ("epsilon", 0.001)]);
+        let v = evaluate_node("eng.materials.youngs_modulus", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 200e9).abs() < 1e3);
+    }
+
+    #[test]
+    fn eng_spring_force() {
+        let inputs = make_inputs(&[("k", 500.0), ("x", 0.1)]);
+        let v = evaluate_node("eng.materials.spring_force_kx", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(50.0));
+    }
+
+    #[test]
+    fn eng_area_circle() {
+        let inputs = make_inputs(&[("d", 2.0)]);
+        let v = evaluate_node("eng.sections.area_circle", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - std::f64::consts::PI).abs() < 1e-10);
+    }
+
+    #[test]
+    fn eng_area_annulus() {
+        let inputs = make_inputs(&[("d_outer", 2.0), ("d_inner", 1.0)]);
+        let v = evaluate_node("eng.sections.area_annulus", &inputs, &HashMap::new());
+        let expected = std::f64::consts::PI * (4.0 - 1.0) / 4.0;
+        assert!((v.as_scalar().unwrap() - expected).abs() < 1e-10);
+    }
+
+    #[test]
+    fn eng_area_annulus_negative() {
+        let inputs = make_inputs(&[("d_outer", 1.0), ("d_inner", 2.0)]);
+        let v = evaluate_node("eng.sections.area_annulus", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn eng_i_rect() {
+        let inputs = make_inputs(&[("b", 0.1), ("h", 0.2)]);
+        let v = evaluate_node("eng.sections.I_rect", &inputs, &HashMap::new());
+        let expected = 0.1 * 0.008 / 12.0; // b*h^3/12
+        assert!((v.as_scalar().unwrap() - expected).abs() < 1e-15);
+    }
+
+    #[test]
+    fn eng_bending_stress_zero_i() {
+        let inputs = make_inputs(&[("M", 100.0), ("y", 0.05), ("I", 0.0)]);
+        let v = evaluate_node("eng.sections.bending_stress", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn eng_solid_cylinder() {
+        let inputs = make_inputs(&[("m", 10.0), ("r", 0.5)]);
+        let v = evaluate_node("eng.inertia.solid_cylinder", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(1.25)); // 0.5*10*0.25
+    }
+
+    #[test]
+    fn eng_solid_sphere() {
+        let inputs = make_inputs(&[("m", 10.0), ("r", 1.0)]);
+        let v = evaluate_node("eng.inertia.solid_sphere", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(4.0)); // 0.4*10*1
+    }
+
+    #[test]
+    fn eng_reynolds() {
+        let inputs = make_inputs(&[("rho", 1000.0), ("v", 1.0), ("D", 0.05), ("mu", 0.001)]);
+        let v = evaluate_node("eng.fluids.reynolds", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(50_000.0));
+    }
+
+    #[test]
+    fn eng_reynolds_zero_mu() {
+        let inputs = make_inputs(&[("rho", 1000.0), ("v", 1.0), ("D", 0.05), ("mu", 0.0)]);
+        let v = evaluate_node("eng.fluids.reynolds", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn eng_dynamic_pressure() {
+        let inputs = make_inputs(&[("rho", 1.225), ("v", 100.0)]);
+        let v = evaluate_node("eng.fluids.dynamic_pressure", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 6125.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn eng_ideal_gas_p() {
+        let inputs = make_inputs(&[("n", 1.0), ("R", 8.314), ("T", 273.15), ("V", 0.02241)]);
+        let v = evaluate_node("eng.thermo.ideal_gas_P", &inputs, &HashMap::new());
+        let expected = 1.0 * 8.314 * 273.15 / 0.02241;
+        assert!((v.as_scalar().unwrap() - expected).abs() < 1.0);
+    }
+
+    #[test]
+    fn eng_ideal_gas_v_zero() {
+        let inputs = make_inputs(&[("n", 1.0), ("R", 8.314), ("T", 300.0), ("V", 0.0)]);
+        let v = evaluate_node("eng.thermo.ideal_gas_P", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn eng_heat_q_mcdt() {
+        let inputs = make_inputs(&[("m", 1.0), ("c", 4186.0), ("dT", 10.0)]);
+        let v = evaluate_node("eng.thermo.heat_Q_mcDT", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(41860.0));
+    }
+
+    #[test]
+    fn eng_ohms_v() {
+        let inputs = make_inputs(&[("I", 2.0), ("R", 100.0)]);
+        let v = evaluate_node("eng.elec.ohms_V", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(200.0));
+    }
+
+    #[test]
+    fn eng_power_i2r() {
+        let inputs = make_inputs(&[("I", 3.0), ("R", 10.0)]);
+        let v = evaluate_node("eng.elec.power_I2R", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(90.0));
+    }
+
+    #[test]
+    fn eng_power_v2r_zero() {
+        let inputs = make_inputs(&[("V", 12.0), ("R", 0.0)]);
+        let v = evaluate_node("eng.elec.power_V2R", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn eng_conv_mm_to_m() {
+        let inputs = make_inputs(&[("mm", 1500.0)]);
+        let v = evaluate_node("eng.conv.mm_to_m", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(1.5));
+    }
+
+    #[test]
+    fn eng_conv_bar_to_pa() {
+        let inputs = make_inputs(&[("bar", 1.0)]);
+        let v = evaluate_node("eng.conv.bar_to_pa", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(100_000.0));
+    }
+
+    #[test]
+    fn eng_conv_lpm_to_m3s() {
+        let inputs = make_inputs(&[("lpm", 60_000.0)]);
+        let v = evaluate_node("eng.conv.lpm_to_m3s", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(1.0));
     }
 }

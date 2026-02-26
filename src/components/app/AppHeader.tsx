@@ -323,6 +323,16 @@ export function AppHeader({
         label: t('menu.toggleMinimap'),
         onClick: () => canvasRef.current?.toggleMinimap(),
       },
+      {
+        label: t('menu.toggleAnimatedEdges'),
+        shortcut: 'Alt+E',
+        onClick: () => canvasRef.current?.toggleAnimatedEdges(),
+      },
+      {
+        label: t('menu.toggleLod'),
+        shortcut: 'Alt+L',
+        onClick: () => canvasRef.current?.toggleLod(),
+      },
       { separator: true },
       {
         label: t('menu.theme'),

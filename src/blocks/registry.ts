@@ -418,6 +418,14 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   'vectorOps',
   'tableOps',
   'plot',
+  'engMechanics',
+  'engMaterials',
+  'engSections',
+  'engInertia',
+  'engFluids',
+  'engThermo',
+  'engElectrical',
+  'engConversions',
 ]
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -431,6 +439,14 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   vectorOps: 'Vector Ops',
   tableOps: 'Table Ops',
   plot: 'Plot',
+  engMechanics: 'Mechanics',
+  engMaterials: 'Materials',
+  engSections: 'Sections',
+  engInertia: 'Inertia',
+  engFluids: 'Fluids',
+  engThermo: 'Thermo',
+  engElectrical: 'Electrical',
+  engConversions: 'Conversions',
 }
 
 // ── Pro-only block registration (no circular imports) ────────────────────────
@@ -440,11 +456,13 @@ import { registerDataBlocks } from './data-blocks'
 import { registerVectorBlocks } from './vector-blocks'
 import { registerTableBlocks } from './table-blocks'
 import { registerPlotBlocks } from './plot-blocks'
+import { registerEngBlocks } from './eng-blocks'
 
 registerDataBlocks(reg)
 registerVectorBlocks(reg)
 registerTableBlocks(reg)
 registerPlotBlocks(reg)
+registerEngBlocks(reg)
 
 // ── Catalog validation (called after WASM engine boots) ──────────────────────
 
