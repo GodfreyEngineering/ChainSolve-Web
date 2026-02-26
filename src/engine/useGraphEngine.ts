@@ -90,41 +90,50 @@ export function useGraphEngine(
       const reqId = ++pendingRef.current
       const t0 = perfEnabled ? performance.now() : 0
       perfMark('cs:eval:start')
-      engine.applyPatch(ops, options).then((result) => {
-        if (reqId !== pendingRef.current) return
-        perfMeasure('cs:eval:patch', 'cs:eval:start')
-        if (result.partial) perfMark('cs:eval:partial')
-        setIsPartial(result.partial ?? false)
-        // MERGE changed values into existing map (not replace).
-        setComputed((prev) => {
-          const next = new Map(prev)
-          for (const [id, val] of Object.entries(result.changedValues)) {
-            next.set(id, val as Value)
-          }
-          // Remove values for nodes that were removed.
-          for (const op of ops) {
-            if (op.op === 'removeNode') {
-              next.delete(op.nodeId)
+      // Apply 300 ms interactive time budget so large evals return partial
+      // results quickly rather than blocking the worker. Callers can override
+      // by passing a higher timeBudgetMs in `options`.
+      engine
+        .applyPatch(ops, { timeBudgetMs: 300, ...options })
+        .then((result) => {
+          if (reqId !== pendingRef.current) return
+          perfMeasure('cs:eval:patch', 'cs:eval:start')
+          if (result.partial) perfMark('cs:eval:partial')
+          setIsPartial(result.partial ?? false)
+          // MERGE changed values into existing map (not replace).
+          setComputed((prev) => {
+            const next = new Map(prev)
+            for (const [id, val] of Object.entries(result.changedValues)) {
+              next.set(id, val as Value)
             }
-          }
-          return next
-        })
-        if (perfEnabled) {
-          updatePerfMetrics({
-            lastEvalMs: result.elapsedUs / 1000,
-            workerRoundTripMs: performance.now() - t0,
-            nodesEvaluated: result.evaluatedCount,
-            totalNodes: result.totalCount,
-            isPartial: result.partial ?? false,
+            // Remove values for nodes that were removed.
+            for (const op of ops) {
+              if (op.op === 'removeNode') {
+                next.delete(op.nodeId)
+              }
+            }
+            return next
           })
-          engine.getStats().then((stats) => {
+          if (perfEnabled) {
             updatePerfMetrics({
-              datasetCount: stats.datasetCount,
-              datasetTotalBytes: stats.datasetTotalBytes,
+              lastEvalMs: result.elapsedUs / 1000,
+              workerRoundTripMs: performance.now() - t0,
+              nodesEvaluated: result.evaluatedCount,
+              totalNodes: result.totalCount,
+              isPartial: result.partial ?? false,
             })
-          })
-        }
-      })
+            engine.getStats().then((stats) => {
+              updatePerfMetrics({
+                datasetCount: stats.datasetCount,
+                datasetTotalBytes: stats.datasetTotalBytes,
+              })
+            })
+          }
+        })
+        .catch(() => {
+          // Watchdog fired or worker was recreated — next user interaction
+          // will retrigger evaluation via the useEffect dependency array.
+        })
     }
 
     prevNodesRef.current = nodes

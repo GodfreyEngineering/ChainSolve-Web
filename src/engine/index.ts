@@ -8,6 +8,13 @@
  *
  * If WASM fails to load the promise rejects with a descriptive error.
  * The caller (boot/main) should catch and degrade gracefully.
+ *
+ * W9.9 additions:
+ *   - 5-second watchdog: terminates and recreates the worker if no response
+ *     arrives within WATCHDOG_TIMEOUT_MS. Handles WASM hangs / infinite loops.
+ *   - Snapshot cache: the last loadSnapshot args are stored so the worker can
+ *     be automatically reloaded after recreation.
+ *   - createEngine accepts an optional workerFactory for testing.
  */
 
 import type {
@@ -66,20 +73,27 @@ export interface EngineAPI {
   dispose(): void
 }
 
-/**
- * Create and initialize the WASM engine worker.
- *
- * Resolves when the worker reports 'ready' (WASM loaded successfully).
- * Rejects if WASM fails to initialize.
- */
-export async function createEngine(): Promise<EngineAPI> {
-  const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' })
+// ── Watchdog constant ─────────────────────────────────────────────────────
 
-  // Wait for the worker to signal readiness.
-  let catalog: CatalogEntry[] = []
-  let engineVersion = ''
-  let contractVersion = 0
-  await new Promise<void>((resolve, reject) => {
+/** Milliseconds before the watchdog kills and recreates the worker. */
+export const WATCHDOG_TIMEOUT_MS = 5_000
+
+// ── Worker factory type ───────────────────────────────────────────────────
+
+/** Factory function that creates a new Worker instance. Injectable for tests. */
+export type WorkerFactory = () => Worker
+
+const defaultWorkerFactory: WorkerFactory = () =>
+  new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' })
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+/** Wait for a worker to post 'ready', or reject on init-error / timeout. */
+function waitForWorkerReady(
+  w: Worker,
+  onReady?: (catalog: CatalogEntry[], engineVersion: string, contractVersion: number) => void,
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
       cleanup()
       reject(new Error('WASM engine init timed out after 10 s'))
@@ -87,9 +101,7 @@ export async function createEngine(): Promise<EngineAPI> {
 
     function handler(e: MessageEvent<WorkerResponse>) {
       if (e.data.type === 'ready') {
-        catalog = e.data.catalog
-        engineVersion = e.data.engineVersion
-        contractVersion = e.data.contractVersion
+        onReady?.(e.data.catalog, e.data.engineVersion, e.data.contractVersion)
         cleanup()
         resolve()
       } else if (e.data.type === 'init-error') {
@@ -100,15 +112,39 @@ export async function createEngine(): Promise<EngineAPI> {
 
     function cleanup() {
       clearTimeout(timeout)
-      worker.removeEventListener('message', handler)
+      w.removeEventListener('message', handler)
     }
 
-    worker.addEventListener('message', handler)
+    w.addEventListener('message', handler)
   })
+}
 
-  // Request/response bookkeeping.
-  // Pending map supports both full results (EngineEvalResult) and incremental results.
+// ── createEngine ──────────────────────────────────────────────────────────
+
+/**
+ * Create and initialize the WASM engine worker.
+ *
+ * Resolves when the worker reports 'ready' (WASM loaded successfully).
+ * Rejects if WASM fails to initialize.
+ *
+ * @param factory Optional worker factory for testing (default: real Worker).
+ */
+export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> {
+  const workerFactory = factory ?? defaultWorkerFactory
+
+  // ── Mutable state ──────────────────────────────────────────────────────
+  let worker = workerFactory()
   let nextId = 0
+  let disposed = false
+  let isRecreating = false
+
+  // Snapshot cache: stores args from the last loadSnapshot call so we can
+  // reload after a worker recreation.
+  let lastSnapshotArgs: { snapshot: EngineSnapshotV1; options?: EvalOptions } | null = null
+
+  // Watchdog timer: cleared on every response, set before each eval request.
+  let watchdogTimer: ReturnType<typeof setTimeout> | null = null
+
   type PendingEntry =
     | { kind: 'full'; resolve: (r: EngineEvalResult) => void; reject: (e: Error) => void }
     | {
@@ -117,69 +153,159 @@ export async function createEngine(): Promise<EngineAPI> {
         reject: (e: Error) => void
       }
     | { kind: 'stats'; resolve: (r: EngineStats) => void; reject: (e: Error) => void }
-  const pending = new Map<number, PendingEntry>()
 
-  // Progress event subscribers.
+  const pending = new Map<number, PendingEntry>()
   const progressListeners = new Set<(event: ProgressEvent) => void>()
 
-  worker.addEventListener('message', (e: MessageEvent<WorkerResponse>) => {
-    const msg = e.data
+  // ── Watchdog ──────────────────────────────────────────────────────────
 
-    if (msg.type === 'progress') {
-      const event: ProgressEvent = {
-        requestId: msg.requestId,
-        evaluatedNodes: msg.evaluatedNodes,
-        totalNodesEstimate: msg.totalNodesEstimate,
-        elapsedMs: msg.elapsedMs,
-      }
-      for (const listener of progressListeners) {
-        listener(event)
-      }
-      return
+  function clearWatchdog() {
+    if (watchdogTimer !== null) {
+      clearTimeout(watchdogTimer)
+      watchdogTimer = null
     }
+  }
 
-    if (msg.type === 'stats') {
-      const p = pending.get(msg.requestId)
-      if (!p) return
-      pending.delete(msg.requestId)
-      if (p.kind === 'stats') {
-        p.resolve(msg.stats)
+  function startWatchdog(requestId: number) {
+    clearWatchdog()
+    watchdogTimer = setTimeout(() => {
+      console.warn(`[cs:engine] Watchdog fired — requestId=${requestId}, recreating worker`)
+      void doRecreate()
+    }, WATCHDOG_TIMEOUT_MS)
+  }
+
+  // ── Message handler ───────────────────────────────────────────────────
+
+  function setupMessageHandler(w: Worker) {
+    w.addEventListener('message', (e: MessageEvent<WorkerResponse>) => {
+      // Ignore messages from the old worker after recreation.
+      if (w !== worker) return
+
+      const msg = e.data
+
+      if (msg.type === 'progress') {
+        const event: ProgressEvent = {
+          requestId: msg.requestId,
+          evaluatedNodes: msg.evaluatedNodes,
+          totalNodesEstimate: msg.totalNodesEstimate,
+          elapsedMs: msg.elapsedMs,
+        }
+        for (const listener of progressListeners) {
+          listener(event)
+        }
+        return
       }
-      return
-    }
 
-    if (msg.type === 'result' || msg.type === 'incremental' || msg.type === 'error') {
-      const p = pending.get(msg.requestId)
-      if (!p) return
-      pending.delete(msg.requestId)
-
-      if (msg.type === 'error') {
-        p.reject(new Error(`[${msg.error.code}] ${msg.error.message}`))
-      } else if (msg.type === 'result' && p.kind === 'full') {
-        p.resolve(msg.result)
-      } else if (msg.type === 'incremental' && p.kind === 'incremental') {
-        p.resolve(msg.result)
+      if (msg.type === 'stats') {
+        clearWatchdog()
+        const p = pending.get(msg.requestId)
+        if (!p) return
+        pending.delete(msg.requestId)
+        if (p.kind === 'stats') {
+          p.resolve(msg.stats)
+        }
+        return
       }
+
+      if (msg.type === 'result' || msg.type === 'incremental' || msg.type === 'error') {
+        clearWatchdog()
+        const p = pending.get(msg.requestId)
+        if (!p) return
+        pending.delete(msg.requestId)
+
+        if (msg.type === 'error') {
+          p.reject(new Error(`[${msg.error.code}] ${msg.error.message}`))
+        } else if (msg.type === 'result' && p.kind === 'full') {
+          p.resolve(msg.result)
+        } else if (msg.type === 'incremental' && p.kind === 'incremental') {
+          p.resolve(msg.result)
+        }
+      }
+    })
+  }
+
+  // ── Worker recreation ─────────────────────────────────────────────────
+
+  async function doRecreate(): Promise<void> {
+    if (isRecreating || disposed) return
+    isRecreating = true
+    clearWatchdog()
+
+    // Terminate old worker and reject all pending requests.
+    worker.terminate()
+    const watchdogError = new Error('[WORKER_WATCHDOG] Worker unresponsive — recreating')
+    for (const [, p] of pending) {
+      p.reject(watchdogError)
     }
+    pending.clear()
+
+    try {
+      // Create a fresh worker and wait for it to be ready.
+      const newWorker = workerFactory()
+      await waitForWorkerReady(newWorker)
+      worker = newWorker
+      setupMessageHandler(worker)
+
+      // Reload the last snapshot so the worker's engine state is consistent.
+      if (lastSnapshotArgs) {
+        const id = nextId++
+        // Fire-and-forget: we only need the worker state restored, not the result.
+        pending.set(id, {
+          kind: 'full',
+          resolve: () => {},
+          reject: () => {},
+        })
+        worker.postMessage({
+          type: 'loadSnapshot',
+          requestId: id,
+          snapshot: lastSnapshotArgs.snapshot,
+        } satisfies WorkerRequest)
+      }
+    } catch (err) {
+      console.error('[cs:engine] Worker recreation failed:', err)
+    } finally {
+      isRecreating = false
+    }
+  }
+
+  // ── Initial worker setup ──────────────────────────────────────────────
+
+  let catalog: CatalogEntry[] = []
+  let engineVersion = ''
+  let contractVersion = 0
+
+  await waitForWorkerReady(worker, (c, ev, cv) => {
+    catalog = c
+    engineVersion = ev
+    contractVersion = cv
   })
+
+  setupMessageHandler(worker)
+
+  // ── postRequest ───────────────────────────────────────────────────────
 
   function postRequest(msg: WorkerRequest) {
     worker.postMessage(msg)
   }
+
+  // ── Public API ────────────────────────────────────────────────────────
 
   return {
     evaluateGraph(snapshot, options) {
       return new Promise((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'full', resolve, reject })
+        startWatchdog(id)
         postRequest({ type: 'evaluate', requestId: id, snapshot, options })
       })
     },
 
     loadSnapshot(snapshot, options) {
+      lastSnapshotArgs = { snapshot, options }
       return new Promise((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'full', resolve, reject })
+        startWatchdog(id)
         postRequest({ type: 'loadSnapshot', requestId: id, snapshot, options })
       })
     },
@@ -188,6 +314,7 @@ export async function createEngine(): Promise<EngineAPI> {
       return new Promise((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'incremental', resolve, reject })
+        startWatchdog(id)
         postRequest({ type: 'applyPatch', requestId: id, ops, options })
       })
     },
@@ -196,6 +323,7 @@ export async function createEngine(): Promise<EngineAPI> {
       return new Promise((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'incremental', resolve, reject })
+        startWatchdog(id)
         postRequest({ type: 'setInput', requestId: id, nodeId, portId, value })
       })
     },
@@ -204,6 +332,7 @@ export async function createEngine(): Promise<EngineAPI> {
       return new Promise<EngineStats>((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'stats', resolve, reject })
+        startWatchdog(id)
         postRequest({ type: 'getStats', requestId: id })
       })
     },
@@ -235,6 +364,8 @@ export async function createEngine(): Promise<EngineAPI> {
     },
 
     dispose() {
+      disposed = true
+      clearWatchdog()
       worker.terminate()
       for (const [, p] of pending) {
         p.reject(new Error('Engine disposed'))

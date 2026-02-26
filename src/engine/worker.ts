@@ -74,6 +74,17 @@ function needsOptions(opts?: EvalOptions): opts is EvalOptions {
   return !!opts && (!!opts.trace || !!opts.timeBudgetMs || !!opts.maxTraceNodes)
 }
 
+// ── Cooperative cancellation (defence-in-depth) ───────────────────────────
+//
+// WASM is synchronous: no message can arrive while WASM is evaluating.
+// Therefore a 'cancel' message can never interrupt an in-progress eval.
+// The main thread handles stale results via `pendingRef` coalescing.
+//
+// We track `latestEvalSeq` to document intent and to discard the response for
+// any request that was superseded by a cancel BEFORE WASM started (the case
+// where cancel + eval are both queued and cancel is processed first).
+let latestEvalSeq = 0
+
 /** Create a progress callback that posts progress messages. */
 function makeProgressCb(requestId: number, startMs: number) {
   return (evaluated: number, total: number) => {
@@ -160,6 +171,7 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
     }
 
     case 'applyPatch': {
+      const patchSeq = ++latestEvalSeq
       try {
         if (needsOptions(msg.options)) {
           const startMs = performance.now()
@@ -168,9 +180,12 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
             JSON.stringify(msg.options),
             makeProgressCb(msg.requestId, startMs),
           )
+          // Discard if a cancel arrived before this eval began (seq mismatch).
+          if (patchSeq !== latestEvalSeq) break
           parseIncrementalResult(raw, msg.requestId)
         } else {
           const raw = apply_patch(JSON.stringify(msg.ops))
+          if (patchSeq !== latestEvalSeq) break
           parseIncrementalResult(raw, msg.requestId)
         }
       } catch (err) {
@@ -225,8 +240,11 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
     }
 
     case 'cancel': {
-      // WASM is synchronous — can't interrupt mid-execution.
-      // The main thread discards stale results via pendingRef.
+      // WASM is synchronous — can't interrupt mid-execution once started.
+      // Set latestEvalSeq to a sentinel so any request that hasn't started
+      // yet (queued before this cancel) discards its result.
+      // The main thread also handles stale results via pendingRef coalescing.
+      latestEvalSeq = Number.MAX_SAFE_INTEGER
       break
     }
   }
