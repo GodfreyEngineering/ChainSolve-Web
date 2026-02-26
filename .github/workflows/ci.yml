@@ -73,6 +73,9 @@ jobs:
       - name: Format check
         run: npm run format:check
 
+      - name: Unit tests
+        run: npm run test:unit
+
       - name: Build
         run: npx tsc -b && npx vite build
         env:
