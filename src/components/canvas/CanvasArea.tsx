@@ -72,6 +72,7 @@ import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard } from '../../lib/clipboard'
 import { FindBlockDialog } from './FindBlockDialog'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -153,23 +154,6 @@ function setMinimapPref(v: boolean) {
 
 const DEFAULT_NODE_WIDTH = 168
 const DEFAULT_NODE_HEIGHT = 60
-
-// ── Mobile breakpoint ─────────────────────────────────────────────────────────
-
-const MOBILE_BP = 900
-
-function useIsMobile(): boolean {
-  const [mobile, setMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth < MOBILE_BP : false,
-  )
-  useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BP - 1}px)`)
-    const handler = (e: MediaQueryListEvent) => setMobile(e.matches)
-    mql.addEventListener('change', handler)
-    return () => mql.removeEventListener('change', handler)
-  }, [])
-  return mobile
-}
 
 // ── Resize-drag helpers ───────────────────────────────────────────────────────
 

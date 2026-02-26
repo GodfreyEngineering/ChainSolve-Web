@@ -309,6 +309,12 @@
     "hAgo": "vor {{count}}h",
     "dAgo": "vor {{count}}T"
   },
+  "commandPalette": {
+    "title": "Befehlspalette",
+    "placeholder": "Befehl eingeben…",
+    "noResults": "Keine passenden Aktionen",
+    "hint": "↑↓ navigieren · ↵ ausführen · ESC schließen"
+  },
   "toolbar": {
     "label": "Zeichenflächen-Symbolleiste",
     "panMode": "Schwenkmodus",

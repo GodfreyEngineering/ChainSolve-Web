@@ -309,6 +309,12 @@
     "hAgo": "il y a {{count}}h",
     "dAgo": "il y a {{count}}j"
   },
+  "commandPalette": {
+    "title": "Palette de commandes",
+    "placeholder": "Saisir une commande…",
+    "noResults": "Aucune action correspondante",
+    "hint": "↑↓ naviguer · ↵ exécuter · ESC fermer"
+  },
   "toolbar": {
     "label": "Barre d'outils du canevas",
     "panMode": "Mode panoramique",

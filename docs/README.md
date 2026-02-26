@@ -171,6 +171,23 @@
 - `onSave` prop changed to `() => Promise<void>` so AppHeader can await before navigating
 - i18n: 15 `project.*` keys added to all 5 locales
 
+**Command palette + responsive header (W10.6):**
+
+- Command Palette (Ctrl+K / Cmd+K): search-first overlay for fast action access
+  - Flattens all 6 menu definitions (File, Edit, View, Insert, Tools, Help) into searchable `PaletteAction[]`
+  - Utility: `src/lib/actions.ts` — `flattenMenusToActions()`, `filterActions()`
+  - Component: `src/components/app/CommandPalette.tsx`
+  - Case-insensitive substring match on label, group, and shortcut
+  - Keyboard navigation: ↑↓ navigate, Enter execute, ESC close
+  - Accessible: `role="dialog"`, `aria-modal`, focus trap via `useFocusTrap`
+  - z-index 9500/9501 (above Modal at 9000)
+- Responsive header: desktop shows 6 dropdown menus, mobile (<900px) shows ⋯ overflow button
+  - ⋯ button opens the same CommandPalette — one component serves both use cases
+  - Shared hook: `src/hooks/useIsMobile.ts` (extracted from CanvasArea)
+  - Breakpoint: 900px (matches existing CanvasArea mobile breakpoint)
+- Theme-safe: all palette styling uses CSS variables (`--card-bg`, `--border`, `--text`, `--primary-dim`)
+- i18n: `commandPalette.*` namespace (title, placeholder, noResults, hint) in all 5 locales
+
 **Dev CLI (`cs`):**
 - Single executable: `./cs <command>` — no installation needed
 - Commands: `new`, `test`, `push`, `ship`, `hotfix`, `help`

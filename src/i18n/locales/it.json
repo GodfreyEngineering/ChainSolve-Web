@@ -309,6 +309,12 @@
     "hAgo": "{{count}}h fa",
     "dAgo": "{{count}}g fa"
   },
+  "commandPalette": {
+    "title": "Tavolozza comandi",
+    "placeholder": "Digita un comando…",
+    "noResults": "Nessuna azione corrispondente",
+    "hint": "↑↓ navigare · ↵ eseguire · ESC chiudere"
+  },
   "toolbar": {
     "label": "Barra degli strumenti del canvas",
     "panMode": "Modalità panoramica",

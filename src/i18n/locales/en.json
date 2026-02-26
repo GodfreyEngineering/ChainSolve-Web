@@ -309,6 +309,12 @@
     "hAgo": "{{count}}h ago",
     "dAgo": "{{count}}d ago"
   },
+  "commandPalette": {
+    "title": "Command Palette",
+    "placeholder": "Type a command…",
+    "noResults": "No matching actions",
+    "hint": "↑↓ navigate · ↵ execute · ESC close"
+  },
   "toolbar": {
     "label": "Canvas toolbar",
     "panMode": "Pan mode",

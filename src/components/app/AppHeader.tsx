@@ -14,6 +14,9 @@ import { SaveAsDialog } from './SaveAsDialog'
 import { CATEGORY_ORDER, CATEGORY_LABELS } from '../../blocks/registry'
 import { supabase } from '../../lib/supabase'
 import { getRecentProjects } from '../../lib/recentProjects'
+import { useIsMobile } from '../../hooks/useIsMobile'
+import { CommandPalette } from './CommandPalette'
+import { flattenMenusToActions, type MenuDef } from '../../lib/actions'
 import type { CanvasAreaHandle } from '../canvas/CanvasArea'
 import type { Plan } from '../../lib/entitlements'
 import type { ThemeMode } from '../../contexts/ThemeContext'
@@ -92,6 +95,9 @@ export function AppHeader({
     action: 'new' | 'open'
     targetId?: string
   } | null>(null)
+
+  const isMobile = useIsMobile()
+  const [paletteOpen, setPaletteOpen] = useState(false)
 
   // Fetch user email once for avatar
   useEffect(() => {
@@ -411,6 +417,24 @@ export function AppHeader({
     [t, fileItems, editItems, viewItems, insertItems, toolsItems, helpItems],
   )
 
+  // ── Command palette ────────────────────────────────────────────────────────
+
+  const paletteActions = useMemo(
+    () => flattenMenusToActions(menus as MenuDef[]),
+    [menus],
+  )
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setPaletteOpen((prev) => !prev)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
   // ── User avatar initials ────────────────────────────────────────────────────
 
   const initials = userEmail
@@ -501,19 +525,32 @@ export function AppHeader({
           )}
         </div>
 
-        {/* ── Center section: menus ────────────────────────────────────────── */}
-        <div role="menubar" style={menuBarStyle}>
-          {menus.map((m) => (
-            <DropdownMenu
-              key={m.id}
-              label={m.label}
-              items={m.items}
-              open={openMenu === m.id}
-              onOpenChange={(isOpen) => setOpenMenu(isOpen ? m.id : null)}
-              onHoverTrigger={openMenu ? () => setOpenMenu(m.id) : undefined}
-            />
-          ))}
-        </div>
+        {/* ── Center section: menus (desktop) / overflow (mobile) ──────── */}
+        {!isMobile ? (
+          <div role="menubar" style={menuBarStyle}>
+            {menus.map((m) => (
+              <DropdownMenu
+                key={m.id}
+                label={m.label}
+                items={m.items}
+                open={openMenu === m.id}
+                onOpenChange={(isOpen) => setOpenMenu(isOpen ? m.id : null)}
+                onHoverTrigger={openMenu ? () => setOpenMenu(m.id) : undefined}
+              />
+            ))}
+          </div>
+        ) : (
+          <div style={mobileMenuBarStyle}>
+            <button
+              onClick={() => setPaletteOpen(true)}
+              style={overflowBtnStyle}
+              aria-label={t('commandPalette.title')}
+              title={t('commandPalette.title')}
+            >
+              &#x22EF;
+            </button>
+          </div>
+        )}
 
         {/* ── Right section ────────────────────────────────────────────────── */}
         <div style={{ ...sectionStyle, justifyContent: 'flex-end' }}>
@@ -585,6 +622,12 @@ export function AppHeader({
         message={t('project.unsavedMessage')}
         actions={confirmActions}
       />
+      {paletteOpen && (
+        <CommandPalette
+          actions={paletteActions}
+          onClose={() => setPaletteOpen(false)}
+        />
+      )}
     </>
   )
 }
@@ -700,4 +743,23 @@ const avatarStyle: React.CSSProperties = {
   letterSpacing: '0.02em',
   flexShrink: 0,
   userSelect: 'none',
+}
+
+const mobileMenuBarStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  flexShrink: 0,
+}
+
+const overflowBtnStyle: React.CSSProperties = {
+  background: 'transparent',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  color: 'var(--text)',
+  fontSize: '1.1rem',
+  padding: '0.15rem 0.55rem',
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+  lineHeight: 1,
+  letterSpacing: '0.1em',
 }

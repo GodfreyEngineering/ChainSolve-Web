@@ -309,6 +309,12 @@
     "hAgo": "hace {{count}}h",
     "dAgo": "hace {{count}}d"
   },
+  "commandPalette": {
+    "title": "Paleta de comandos",
+    "placeholder": "Escribir un comando…",
+    "noResults": "No hay acciones coincidentes",
+    "hint": "↑↓ navegar · ↵ ejecutar · ESC cerrar"
+  },
   "toolbar": {
     "label": "Barra de herramientas del lienzo",
     "panMode": "Modo panorámica",
