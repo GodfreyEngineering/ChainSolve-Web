@@ -849,6 +849,34 @@ environment.
 | `Authentication error` | `CLOUDFLARE_API_TOKEN` missing or expired | Re-create the token in Cloudflare → API Tokens, update the GitHub secret |
 | `Project not found` | First-ever deploy on a fresh account | Run once locally: `npx wrangler pages project create chainsolve-web` |
 | Functions 500 / 1101 after deploy | Cloudflare env vars missing | Add all 7 vars in CF Dashboard → Settings → Environment Variables → Production |
+| App shows "CONFIG_INVALID" or login fails against `placeholder.supabase.co` | `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` GitHub Secrets are not set | Set both secrets under **Settings → Secrets → Actions → Repository secrets**, then re-run the deploy job. The "Validate production secrets" step will catch this before the build. |
+
+### Go-live verification
+
+After a successful deploy, confirm that all server-side environment variables are
+configured and the app works end-to-end:
+
+```bash
+# 1. Health check — all values should be true
+curl https://app.chainsolve.co.uk/api/health | jq .
+# Expected: { "ok": true, "checks": { "SUPABASE_URL": true, ... } }
+
+# 2. Confirm the production JS bundle does NOT contain the placeholder URL
+curl -s https://app.chainsolve.co.uk/assets/ 2>/dev/null || \
+  echo "Check manually: open DevTools → Sources, search for placeholder.supabase.co"
+
+# 3. Load the app and verify the engine boots
+# Open https://app.chainsolve.co.uk — data-testid="engine-ready" must appear
+# in the DOM within ~60 s (no "Engine failed to load" screen).
+
+# 4. Attempt login
+# Sign in with a real account — the login should complete without errors,
+# confirming that the real Supabase project URL is in the production bundle.
+```
+
+If `/api/health` returns `500` with a `false` check, add the missing variable in
+**Cloudflare Dashboard → Workers & Pages → chainsolve-web → Settings →
+Environment Variables → Production** and re-deploy.
 
 ---
 

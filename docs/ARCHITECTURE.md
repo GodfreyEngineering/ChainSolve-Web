@@ -1,6 +1,6 @@
 # ChainSolve — Architecture
 
-> Updated at each milestone. Current: **W9.2 (Engine Scale Upgrade)**
+> Updated at each milestone. Current: **W9.5.5 (Production Hardening)**
 
 ---
 
@@ -82,7 +82,7 @@ src/
       it.json     Italian
       de.json     German
   lib/
-    supabase.ts     Browser Supabase client (anon key)
+    supabase.ts     Browser Supabase client (anon key); throws CONFIG_INVALID in production if credentials missing/placeholder (W9.5.5)
     build-info.ts   Build metadata: version, SHA, build time, environment (W5.3)
     entitlements.ts Plan-based feature gating: getEntitlements, isPro, isReadOnly, canCreateProject, isBlockEntitled (W4/W6)
     projects.ts     Project CRUD: list, create, load, save, rename, delete, duplicate, import
@@ -111,10 +111,15 @@ src/
   main.tsx        React entry point, ErrorBoundary + ToastProvider wrapper (loaded by boot.ts)
 
 functions/
-  api/stripe/
-    create-checkout-session.ts   POST /api/stripe/create-checkout-session
-    create-portal-session.ts     POST /api/stripe/create-portal-session
-    webhook.ts                   POST /api/stripe/webhook (Stripe events)
+  api/
+    _middleware.ts               CORS middleware for all /api/* routes (W8)
+    health.ts                    GET /api/health — server-side env var presence check (W9.5.5)
+    stripe/
+      create-checkout-session.ts   POST /api/stripe/create-checkout-session
+      create-portal-session.ts     POST /api/stripe/create-portal-session
+      webhook.ts                   POST /api/stripe/webhook (Stripe events)
+    security/
+      csp-report.ts              POST /api/security/csp-report — CSP violation receiver (W8)
   tsconfig.json   Separate tsconfig for @cloudflare/workers-types
 
 supabase/
@@ -135,7 +140,7 @@ crates/
   engine-wasm/    wasm-bindgen wrapper — persistent EngineGraph via thread_local (W9/W9.2)
 
 e2e/
-  smoke.spec.ts   Playwright smoke tests: title, meta tags, robots.txt, #root, no errors (W5.3)
+  smoke.spec.ts   Playwright smoke tests: title, meta tags, #root, engine-ready, _headers CSP check (W5.3/W9.5.x)
   plot-smoke.spec.ts  Plot feature smoke tests: block library, no CSP violations (W6)
   groups.spec.ts      Group feature smoke tests: DOM structure, keyboard shortcuts (W7)
   wasm-engine.spec.ts WASM engine e2e: init + evaluate via worker (W9)
@@ -364,8 +369,9 @@ UI gating:
 
 | Variable | Used in |
 |---|---|
-| `VITE_SUPABASE_URL` | Browser (build-time injection) |
-| `VITE_SUPABASE_ANON_KEY` | Browser |
+| `VITE_SUPABASE_URL` | Browser (build-time injection). GitHub Secret. |
+| `VITE_SUPABASE_ANON_KEY` | Browser. GitHub Secret. |
+| `VITE_IS_CI_BUILD` | Set to `'true'` in `node_checks` CI build only — suppresses the placeholder-credential check in `supabase.ts`. **Must NOT be set in the `deploy` job.** (W9.5.5) |
 | `SUPABASE_URL` | Cloudflare Pages Functions (server-side) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Cloudflare Pages Functions |
 | `STRIPE_SECRET_KEY` | Cloudflare Pages Functions |
@@ -393,7 +399,13 @@ UI gating:
 | W8 | Done | Security perimeter: CORS middleware, CSP reporting, security headers |
 | W9 | Done | Rust/WASM compute engine foundation: engine-core, engine-wasm, Worker integration, e2e |
 | W9.1 | Done | Single source of truth: WASM sole engine, TS eval removed, ops catalog, fatal error screen |
-| W9.2 | Done | Engine scale upgrade: persistent EngineGraph, dirty propagation, patch protocol, dataset registry |
+| W9.2 | ✅ Done | Engine scale upgrade: persistent EngineGraph, dirty propagation, patch protocol, dataset registry |
+| W9.5 | ✅ Done | Boot reliability: WASM worker, engine hook, smoke tests baseline |
+| W9.5.1 | ✅ Done | Boot ladder fixpack: `boot-fatal` sentinel, `waitForEngineOrFatal` helper, smoke suite green |
+| W9.5.2 | ✅ Done | Smoke suite hardening: 8-test suite, `dumpBootDiagnostics`, retry-safe timing |
+| W9.5.3 | ✅ Done | CI preview parity: placeholder Supabase creds in `node_checks` build, two-build split, `VITE_IS_CI_BUILD` flag |
+| W9.5.4 | ✅ Done | CSP fix for WASM: `'wasm-unsafe-eval'` in `script-src`, `WASM_CSP_BLOCKED` error code, `EngineFatalError` rewrite, `_headers` smoke test |
+| W9.5.5 | ✅ Done | Production guardrails: strict `CONFIG_INVALID` in `supabase.ts`, CI secret validation + bundle grep, `GET /api/health` endpoint |
 | W10 | Planned | Branching/rules for conditional flows (Pro) |
 | W11 | Planned | Custom blocks editor (Pro) |
 | W12 | Planned | Project/file browser with folders, search, tags |

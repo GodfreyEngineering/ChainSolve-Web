@@ -83,6 +83,9 @@ jobs:
           # The deploy job rebuilds with real credentials from secrets.
           VITE_SUPABASE_URL: https://placeholder.supabase.co
           VITE_SUPABASE_ANON_KEY: placeholder
+          # Tells src/lib/supabase.ts not to throw CONFIG_INVALID for placeholder
+          # credentials.  MUST NOT be set in the deploy job.
+          VITE_IS_CI_BUILD: 'true'
 
       - name: Upload WASM pkg artifact
         # Uploaded separately so the deploy job can reuse the compiled WASM
@@ -204,6 +207,35 @@ jobs:
           name: wasm-pkg
           path: crates/engine-wasm/pkg
 
+      - name: Validate production secrets
+        # Fail fast if VITE_SUPABASE_* secrets are absent or still placeholder.
+        # When a GitHub Secret is not configured, Actions substitutes "".
+        # When a secret was accidentally set to the placeholder value, catch that too.
+        run: |
+          fail=0
+          if [ -z "$VITE_SUPABASE_URL" ]; then
+            echo "::error::VITE_SUPABASE_URL secret is not set in GitHub Secrets"
+            fail=1
+          elif [ "$VITE_SUPABASE_URL" = "https://placeholder.supabase.co" ]; then
+            echo "::error::VITE_SUPABASE_URL is still set to the placeholder value"
+            fail=1
+          fi
+          if [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "::error::VITE_SUPABASE_ANON_KEY secret is not set in GitHub Secrets"
+            fail=1
+          elif [ "$VITE_SUPABASE_ANON_KEY" = "placeholder" ]; then
+            echo "::error::VITE_SUPABASE_ANON_KEY is still set to the placeholder value"
+            fail=1
+          fi
+          if [ "$fail" -eq 1 ]; then
+            echo "Add secrets at: GitHub → Settings → Secrets and variables → Actions → Repository secrets"
+            exit 1
+          fi
+          echo "✓ VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set to non-placeholder values"
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
       - name: Build (production — real Supabase credentials)
         # Re-run only the Vite build (TypeScript + asset bundling).  The WASM
         # binary is already in crates/engine-wasm/pkg/ from the artifact above.
@@ -211,6 +243,18 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Guard — no placeholder Supabase URL in production bundle
+        # Belt-and-suspenders: if the URL secret was absent or placeholder, Vite
+        # bakes that string into the JS bundle.  Catch it here before deploying.
+        run: |
+          if grep -rq "placeholder\.supabase\.co" dist/ --include="*.js" --include="*.html" 2>/dev/null; then
+            echo "::error::Found 'placeholder.supabase.co' in production bundle"
+            echo "VITE_SUPABASE_URL was not set or was the placeholder value."
+            echo "Set the real URL in GitHub Secrets and re-run the deploy job."
+            exit 1
+          fi
+          echo "✓ No placeholder Supabase URL in production bundle"
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
