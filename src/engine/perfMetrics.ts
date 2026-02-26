@@ -50,3 +50,15 @@ export function subscribePerfMetrics(fn: () => void): () => void {
     listeners.delete(fn)
   }
 }
+
+/**
+ * Export recent User Timing measures for diagnostics bundles.
+ * Returns at most 20 entries to keep the payload small.
+ * Lazily imports marks.ts to avoid loading perf infrastructure in workers.
+ */
+export async function userTimingExport(): Promise<
+  ReadonlyArray<{ name: string; durationMs: number; startTime: number }>
+> {
+  const { getRecentMeasures } = await import('../perf/marks.ts')
+  return getRecentMeasures().slice(-20)
+}

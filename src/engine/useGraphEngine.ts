@@ -16,6 +16,7 @@ import { toEngineSnapshot } from './bridge.ts'
 import { diffGraph } from './diffGraph.ts'
 import { isPerfHudEnabled } from '../lib/devFlags.ts'
 import { updatePerfMetrics } from './perfMetrics.ts'
+import { perfMark, perfMeasure } from '../perf/marks.ts'
 
 const perfEnabled = isPerfHudEnabled()
 
@@ -53,8 +54,10 @@ export function useGraphEngine(
       const reqId = ++pendingRef.current
       const snapshot = toEngineSnapshot(nodes, edges)
       const t0 = perfEnabled ? performance.now() : 0
+      perfMark('cs:eval:start')
       engine.loadSnapshot(snapshot, options).then((result) => {
         if (reqId !== pendingRef.current) return
+        perfMeasure('cs:eval:snapshot', 'cs:eval:start')
         setComputed(toValueMap(result.values))
         setIsPartial(result.partial ?? false)
         if (perfEnabled) {
@@ -86,8 +89,11 @@ export function useGraphEngine(
       }
       const reqId = ++pendingRef.current
       const t0 = perfEnabled ? performance.now() : 0
+      perfMark('cs:eval:start')
       engine.applyPatch(ops, options).then((result) => {
         if (reqId !== pendingRef.current) return
+        perfMeasure('cs:eval:patch', 'cs:eval:start')
+        if (result.partial) perfMark('cs:eval:partial')
         setIsPartial(result.partial ?? false)
         // MERGE changed values into existing map (not replace).
         setComputed((prev) => {

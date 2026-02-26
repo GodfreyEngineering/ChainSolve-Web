@@ -232,9 +232,9 @@ export default function DiagnosticsPage() {
                   <span style={{ opacity: 0.4 }}>{e.ts}</span>
                   <span style={{ opacity: 0.4 }}>{e.route_path}</span>
                 </div>
-                {'message' in (e.payload as Record<string, unknown>) && (
+                {'message' in (e.payload as unknown as Record<string, unknown>) && (
                   <div style={{ fontFamily: 'monospace', opacity: 0.8, wordBreak: 'break-all' }}>
-                    {String((e.payload as Record<string, unknown>)['message'] ?? '')}
+                    {String((e.payload as unknown as Record<string, unknown>)['message'] ?? '')}
                   </div>
                 )}
               </div>
