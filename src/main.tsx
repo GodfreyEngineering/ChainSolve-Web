@@ -3,7 +3,16 @@ import { StrictMode, useCallback, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './i18n/config'
+import { initObservability } from './observability/client'
 import App from './App.tsx'
+
+// Initialise observability early — installs global error handlers.
+// Never throws; failures are silently swallowed so the app always boots.
+try {
+  initObservability()
+} catch {
+  // intentionally swallowed
+}
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { ToastProvider } from './components/ui/Toast.tsx'
 import { EngineFatalError } from './components/EngineFatalError.tsx'

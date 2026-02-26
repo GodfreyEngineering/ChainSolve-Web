@@ -1,4 +1,5 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react'
+import { captureReactBoundary } from '../observability/client'
 
 interface Props {
   children: ReactNode
@@ -17,6 +18,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[ErrorBoundary]', error, info.componentStack)
+    // Report to observability pipeline (best-effort; captureReactBoundary never throws)
+    captureReactBoundary(error, info.componentStack ?? undefined)
   }
 
   render() {

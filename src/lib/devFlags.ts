@@ -11,3 +11,21 @@ const params = typeof window !== 'undefined' ? new URLSearchParams(window.locati
 export function isPerfHudEnabled(): boolean {
   return params?.get('perf') === '1'
 }
+
+/**
+ * Returns true if the /diagnostics UI should be accessible.
+ *
+ * Rules:
+ *   - Development: always enabled.
+ *   - Production: only if VITE_DIAGNOSTICS_UI_ENABLED=true AND
+ *     localStorage contains 'cs_diag=1'.
+ */
+export function isDiagnosticsUIEnabled(): boolean {
+  if (import.meta.env.DEV) return true
+  if (import.meta.env.VITE_DIAGNOSTICS_UI_ENABLED !== 'true') return false
+  try {
+    return typeof window !== 'undefined' && localStorage.getItem('cs_diag') === '1'
+  } catch {
+    return false
+  }
+}

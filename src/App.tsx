@@ -1,8 +1,14 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import AppShell from './pages/AppShell'
 import CanvasPage from './pages/CanvasPage'
 import Settings from './pages/Settings'
+import { isDiagnosticsUIEnabled } from './lib/devFlags'
+
+// Lazy-load diagnostics page so it is not included in the main bundle for
+// production users unless VITE_DIAGNOSTICS_UI_ENABLED=true.
+const DiagnosticsPage = lazy(() => import('./pages/DiagnosticsPage'))
 
 function BillingSuccess() {
   return (
@@ -85,6 +91,16 @@ export default function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/billing/success" element={<BillingSuccess />} />
         <Route path="/billing/cancel" element={<BillingCancel />} />
+        {isDiagnosticsUIEnabled() && (
+          <Route
+            path="/diagnostics"
+            element={
+              <Suspense fallback={null}>
+                <DiagnosticsPage />
+              </Suspense>
+            }
+          />
+        )}
       </Routes>
     </BrowserRouter>
   )
