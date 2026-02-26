@@ -756,18 +756,22 @@ are therefore driven exclusively by GitHub Actions using **Wrangler Direct Uploa
 
 ### How it works
 
-1. Every push to `main` (and every PR) runs three jobs in the `CI` workflow.
-   `rust_tests` and `node_checks` run **in parallel**:
+1. Every push to `main` (and every PR) runs two jobs in parallel in the `CI` workflow:
    - **rust_tests**: `cargo test --workspace` (no wasm-pack, no Node)
-   - **node_checks**: wasm-pack build → TypeScript typecheck → lint →
-     format check → Vite production build (uploads `dist/` artifact)
-2. Once `node_checks` finishes, **e2e_smoke** runs the Playwright `smoke`
-   project — just `smoke.spec.ts` (8 tests). Target: < 90 s.
-3. If (and only if) all three jobs pass, **deploy** runs. It downloads the
-   already-built `dist/` artifact, then calls:
-   ```
+   - **node_checks**: wasm-pack build → typecheck → lint → format check →
+     Vite build with **placeholder** Supabase credentials (allows the app to
+     boot in e2e without real auth) → uploads `dist/` and `wasm-pkg/` artifacts
+2. **e2e_smoke** runs after `node_checks` (push to `main` only, skipped on PRs).
+   Downloads `dist/`, runs a sanity check (verifies `.wasm` present), installs
+   Playwright, then runs `smoke.spec.ts` (8 tests). Target: < 90 s.
+3. If all jobs pass, **deploy** runs. It downloads the `wasm-pkg/` artifact
+   (skips re-running wasm-pack), then re-runs only the Vite build with **real**
+   Supabase credentials from GitHub secrets, then calls:
+
+   ```text
    wrangler pages deploy dist --project-name=chainsolve-web --branch=main
    ```
+
 4. Wrangler uploads `dist/` as static assets and compiles `functions/` (TypeScript
    Pages Functions) using its own bundler. The `wrangler.jsonc` at the repo root
    provides the `compatibility_date`.
@@ -782,13 +786,24 @@ are therefore driven exclusively by GitHub Actions using **Wrangler Direct Uploa
 Add these in your GitHub repository →
 **Settings → Secrets and variables → Actions → Repository secrets**:
 
-| Secret                  | How to obtain                                                          |
-|-------------------------|------------------------------------------------------------------------|
-| `CLOUDFLARE_API_TOKEN`  | Cloudflare Dashboard → My Profile → API Tokens → Create Token.        |
-|                         | Use the **Edit Cloudflare Workers** template, then scope it to         |
-|                         | *Cloudflare Pages: Edit* on your account. Copy the token immediately. |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Dashboard → right-hand sidebar on any zone or Workers page. |
-|                         | Alternatively: Dashboard URL contains `/ACCOUNT_ID/`.                 |
+| Secret                   | How to obtain                                                         |
+|--------------------------|-----------------------------------------------------------------------|
+| `VITE_SUPABASE_URL`      | Supabase Dashboard → Project → Settings → API → Project URL.          |
+|                          | This is the **public** anon URL — safe to store as a secret or plain  |
+|                          | repository variable. Already visible in your deployed JS bundle.      |
+| `VITE_SUPABASE_ANON_KEY` | Supabase Dashboard → Project → Settings → API → `anon` `public` key.  |
+|                          | Same — publicly visible in the bundle, protected by Supabase RLS.     |
+| `CLOUDFLARE_API_TOKEN`   | Cloudflare Dashboard → My Profile → API Tokens → Create Token.        |
+|                          | Use the **Edit Cloudflare Workers** template, scope to                |
+|                          | *Cloudflare Pages: Edit* on your account. Copy the token immediately. |
+| `CLOUDFLARE_ACCOUNT_ID`  | Cloudflare Dashboard → right-hand sidebar on any zone/Workers page.   |
+|                          | Alternatively: the Dashboard URL contains `/ACCOUNT_ID/`.             |
+
+> **Why are the Supabase credentials needed here?**  The `node_checks` build bakes
+> **placeholder** credentials into `dist/` so that CI smoke tests can boot the app
+> without real auth (Supabase calls fail silently to a non-existent hostname). The
+> `deploy` job re-runs only the Vite build with **real** credentials so the deployed
+> production app has a functioning Supabase connection.
 
 ### Required manual step in Cloudflare UI
 

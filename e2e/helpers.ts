@@ -7,12 +7,16 @@
  *   react-mounted  → React Root rendered at least once (set in main.tsx)
  *   engine-ready   → WASM engine ready (set in main.tsx inside EngineContext.Provider)
  *   engine-fatal   → WASM engine failed (set in EngineFatalError component)
+ *   boot-fatal     → import('./main') threw (set in boot.ts showBootError);
+ *                    carries the error message in data-fatal-message
  *
  * Key exports
  * ───────────
- * waitForEngineOrFatal   – two-stage wait (react-mounted → engine-ready/fatal);
- *                          dumps structured diagnostics on timeout
- * waitForCanvasOrFatal   – two-stage wait (react-mounted → canvas-computed/fatal)
+ * waitForEngineOrFatal   – two-stage ladder wait:
+ *                            stage 1 (15 s): react-mounted OR boot-fatal
+ *                            stage 2 (55 s): engine-ready OR engine-fatal
+ *                          dumps structured diagnostics on any timeout
+ * waitForCanvasOrFatal   – same stage 1, then canvas-computed OR engine-fatal
  * test                   – custom test object with a worker-scoped `enginePage`
  *                          fixture (WASM compiled once per worker, reused across
  *                          tests in the same file)
@@ -53,11 +57,15 @@ async function dumpBootDiagnostics(
 ): Promise<void> {
   const url = page.url()
 
-  // Query the boot ladder from the live DOM.
+  // Query the full boot ladder from the live DOM.
   const ladder = await page
     .evaluate(() => ({
       bootHtml: !!document.querySelector('[data-testid="boot-html"]'),
       bootJs: !!document.querySelector('[data-testid="boot-js"]'),
+      bootFatal: !!document.querySelector('[data-testid="boot-fatal"]'),
+      bootFatalMessage:
+        document.querySelector('[data-testid="boot-fatal"]')?.getAttribute('data-fatal-message') ??
+        null,
       reactMounted: !!document.querySelector('[data-testid="react-mounted"]'),
       engineReady: !!document.querySelector('[data-testid="engine-ready"]'),
       engineFatal: !!document.querySelector('[data-testid="engine-fatal"]'),
@@ -94,6 +102,23 @@ async function dumpBootDiagnostics(
   )
 }
 
+// ── Boot-fatal fast-fail helper ───────────────────────────────────────────────
+
+/**
+ * After stage-1 resolves, check whether it was boot-fatal (not react-mounted)
+ * that appeared.  If so, fail immediately with the error from the sentinel.
+ */
+async function checkBootFatal(page: Page, consoleErrors?: string[]): Promise<void> {
+  if ((await page.locator('[data-testid="boot-fatal"]').count()) > 0) {
+    const msg =
+      (await page
+        .locator('[data-testid="boot-fatal"]')
+        .getAttribute('data-fatal-message')) ?? '(no message)'
+    await dumpBootDiagnostics(page, 'boot-fatal detected', consoleErrors)
+    throw new Error(`[boot-fatal] ${msg}`)
+  }
+}
+
 // ── Deterministic wait helpers ────────────────────────────────────────────────
 
 /**
@@ -101,10 +126,12 @@ async function dumpBootDiagnostics(
  * (engine-fatal).
  *
  * Uses a two-stage boot-ladder approach:
- *   Stage 1 (15 s): wait for react-mounted — React has rendered.
- *     Failure here means boot.ts or main.tsx failed to execute.
+ *   Stage 1 (15 s): wait for react-mounted OR boot-fatal.
+ *     react-mounted → import('./main') succeeded; React has rendered.
+ *     boot-fatal    → import('./main') threw; fails immediately with the message.
+ *     Timeout here means JS ran but React's module graph failed to load.
  *   Stage 2 (55 s): wait for engine-ready OR engine-fatal.
- *     Failure here means WASM init hung (worker crash, init loop, etc.).
+ *     Timeout here means WASM init hung (worker crash, init loop, etc.).
  *
  * On any timeout, structured diagnostics are printed to stderr before throwing.
  *
@@ -116,18 +143,22 @@ export async function waitForEngineOrFatal(
   page: Page,
   consoleErrors?: string[],
 ): Promise<void> {
-  // ── Stage 1: React must mount quickly ──────────────────────────────────────
+  // ── Stage 1: React mounts (or boot throws) quickly ────────────────────────
   try {
     await page
-      .locator('[data-testid="react-mounted"]')
+      .locator('[data-testid="react-mounted"], [data-testid="boot-fatal"]')
+      .first()
       .waitFor({ state: 'attached', timeout: 15_000 })
   } catch {
-    await dumpBootDiagnostics(page, 'react-mounted (15 s)', consoleErrors)
+    await dumpBootDiagnostics(page, 'react-mounted / boot-fatal (15 s)', consoleErrors)
     throw new Error(
       '[engine] React never mounted — boot.ts or main.tsx import failed ' +
         '(check boot-js sentinel; if missing, JS never ran)',
     )
   }
+
+  // Fail immediately if boot threw before React could mount.
+  await checkBootFatal(page, consoleErrors)
 
   // ── Stage 2: WASM init (can be slow on cold CI runners) ───────────────────
   try {
@@ -164,15 +195,18 @@ export async function waitForCanvasOrFatal(
   page: Page,
   consoleErrors?: string[],
 ): Promise<void> {
-  // ── Stage 1: React must mount quickly ──────────────────────────────────────
+  // ── Stage 1: React mounts (or boot throws) quickly ────────────────────────
   try {
     await page
-      .locator('[data-testid="react-mounted"]')
+      .locator('[data-testid="react-mounted"], [data-testid="boot-fatal"]')
+      .first()
       .waitFor({ state: 'attached', timeout: 15_000 })
   } catch {
-    await dumpBootDiagnostics(page, 'react-mounted (15 s)', consoleErrors)
+    await dumpBootDiagnostics(page, 'react-mounted / boot-fatal (15 s)', consoleErrors)
     throw new Error('[engine] React never mounted — canvas route failed to boot')
   }
+
+  await checkBootFatal(page, consoleErrors)
 
   // ── Stage 2: canvas eval + WASM ────────────────────────────────────────────
   try {

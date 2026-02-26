@@ -75,6 +75,23 @@ jobs:
 
       - name: Build
         run: npx tsc -b && npx vite build
+        env:
+          # Placeholder credentials baked into the e2e artifact.  These allow
+          # the app to boot (React mounts, WASM loads) without real Supabase
+          # credentials.  Supabase network calls fail silently to a non-existent
+          # host — that is fine because smoke tests do not exercise auth.
+          # The deploy job rebuilds with real credentials from secrets.
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: placeholder
+
+      - name: Upload WASM pkg artifact
+        # Uploaded separately so the deploy job can reuse the compiled WASM
+        # without re-running wasm-pack (saves ~2-3 min on the deploy job).
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-pkg
+          path: crates/engine-wasm/pkg/
+          retention-days: 1
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -112,6 +129,19 @@ jobs:
           name: dist
           path: dist
 
+      - name: Sanity-check dist (WASM must be present)
+        # Fail fast before spending time on browser install if the build was
+        # missing or the WASM file was not included in the artifact.
+        run: |
+          echo "=== dist/assets/ ==="
+          ls dist/assets/
+          count=$(find dist/assets -name '*.wasm' | wc -l)
+          if [ "$count" -eq 0 ]; then
+            echo "ERROR: no .wasm file found in dist/assets/ — Build step may have failed"
+            exit 1
+          fi
+          echo "Found $count WASM file(s) — OK"
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
@@ -137,6 +167,16 @@ jobs:
 
   # ── Job 4: Deploy → Cloudflare Pages ──────────────────────────────────────
   # Runs only on direct pushes to main, and only after all checks pass.
+  #
+  # The e2e artifact (dist/) was built with placeholder Supabase credentials so
+  # smoke tests can boot the app without real auth.  This job downloads the
+  # compiled WASM pkg (no Rust/wasm-pack needed) and re-runs only the Vite build
+  # with real credentials from GitHub secrets — producing a correct production
+  # bundle.  Required secrets:
+  #   VITE_SUPABASE_URL       — Supabase project URL (public anon credential)
+  #   VITE_SUPABASE_ANON_KEY  — Supabase anon key   (public anon credential)
+  #   CLOUDFLARE_API_TOKEN
+  #   CLOUDFLARE_ACCOUNT_ID
   deploy:
     name: Deploy → Cloudflare Pages
     runs-on: ubuntu-latest
@@ -146,8 +186,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         # Checkout is required so the `functions/` directory is present.
-        # Wrangler compiles Pages Functions at deploy time using its own bundler;
-        # static assets come from the artifact downloaded below.
+        # Wrangler compiles Pages Functions at deploy time using its own bundler.
 
       - uses: actions/setup-node@v4
         with:
@@ -158,11 +197,20 @@ jobs:
         # node_modules must exist so wrangler's esbuild can resolve imports
         # inside functions/ (e.g. `stripe`, `@supabase/supabase-js`).
 
-      - name: Download dist artifact
+      - name: Download WASM pkg artifact
+        # Reuse the WASM compiled by node_checks — no need to re-run wasm-pack.
         uses: actions/download-artifact@v4
         with:
-          name: dist
-          path: dist
+          name: wasm-pkg
+          path: crates/engine-wasm/pkg
+
+      - name: Build (production — real Supabase credentials)
+        # Re-run only the Vite build (TypeScript + asset bundling).  The WASM
+        # binary is already in crates/engine-wasm/pkg/ from the artifact above.
+        run: npx tsc -b && npx vite build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

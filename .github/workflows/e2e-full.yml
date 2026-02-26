@@ -51,6 +51,12 @@ jobs:
 
       - name: Build
         run: npx tsc -b && npx vite build
+        env:
+          # Same placeholder credentials as the CI smoke build — allows the app
+          # to boot without real Supabase credentials.  Full E2E tests do not
+          # exercise auth or database features.
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: placeholder
 
       # ── Playwright ───────────────────────────────────────────────────────
       - name: Cache Playwright browsers
