@@ -72,5 +72,20 @@ export default defineConfig({
         launchOptions: { args: chromiumArgs },
       },
     },
+
+    // ── perf ───────────────────────────────────────────────────────────────
+    // Scheduled nightly performance smoke tests (NOT PR-gated).
+    // Tests: engine boot < 10 s, applyPatch 2k-chain p50 < 500 ms.
+    // Each test boots the full app; allow 120 s for WASM init + 20 patch rounds.
+    // Run via: npx playwright test --project=perf
+    {
+      name: 'perf',
+      testMatch: '**/perf-smoke.spec.ts',
+      timeout: 120_000,
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: { args: chromiumArgs },
+      },
+    },
   ],
 })

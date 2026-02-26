@@ -1,0 +1,104 @@
+name: Performance
+
+on:
+  schedule:
+    # Monday 03:00 UTC — weekly nightly perf health check.
+    # Not PR-gated; failures here are tracked but do not block merges.
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+# Only one perf run at a time — no need for concurrent runs.
+concurrency:
+  group: perf
+  cancel-in-progress: true
+
+jobs:
+  # ── Job 1: Playwright perf smoke (browser timing) ─────────────────────────
+  # Boots the full app and measures:
+  #   - Engine boot time < 10 s
+  #   - applyPatch 2k-chain p50 < 500 ms, p95 < 1 000 ms
+  #
+  # Requires a fresh build (WASM + Vite) to serve via `npm run preview`.
+  perf_ui:
+    name: Playwright perf smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build WASM
+        run: wasm-pack build crates/engine-wasm --target web --release
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build app
+        run: npx tsc -b && npx vite build
+        env:
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: placeholder
+          VITE_IS_CI_BUILD: 'true'
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-perf-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright perf smoke
+        run: npx playwright test --project=perf
+        timeout-minutes: 10
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-playwright-report-${{ github.run_id }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 30
+
+  # ── Job 2: Criterion benchmarks (report only, no thresholds) ─────────────
+  # Runs `cargo bench` for the engine-core crate and uploads the HTML report.
+  # No pass/fail threshold — informational only, used for trend tracking.
+  rust_bench:
+    name: Criterion benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Run Criterion benchmarks
+        # Criterion writes HTML reports to target/criterion/.
+        # `-- --noplot` skips gnuplot (not installed on CI) — text output only.
+        run: cargo bench --package engine-core -- --noplot
+        timeout-minutes: 15
+
+      - name: Upload Criterion report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: criterion-report-${{ github.run_id }}
+          path: target/criterion/
+          retention-days: 30
