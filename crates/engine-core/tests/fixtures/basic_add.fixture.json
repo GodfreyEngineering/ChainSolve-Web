@@ -1,0 +1,24 @@
+{
+  "name": "basic_add",
+  "description": "Number(3) + Number(4) → Add → 7",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      { "id": "n1", "blockType": "number", "data": { "value": 3.0 } },
+      { "id": "n2", "blockType": "number", "data": { "value": 4.0 } },
+      { "id": "n3", "blockType": "add", "data": {} }
+    ],
+    "edges": [
+      { "id": "e1", "source": "n1", "sourceHandle": "out", "target": "n3", "targetHandle": "a" },
+      { "id": "e2", "source": "n2", "sourceHandle": "out", "target": "n3", "targetHandle": "b" }
+    ]
+  },
+  "expected": {
+    "n1": { "kind": "scalar", "value": 3.0 },
+    "n2": { "kind": "scalar", "value": 4.0 },
+    "n3": { "kind": "scalar", "value": 7.0 }
+  },
+  "diagnostics": [],
+  "tolerance": null
+}

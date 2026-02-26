@@ -1,0 +1,22 @@
+{
+  "name": "negative_zero_canon",
+  "description": "-1 × 0 canonicalizes to +0 (not -0)",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      { "id": "neg1", "blockType": "number", "data": { "value": -1.0 } },
+      { "id": "zero", "blockType": "number", "data": { "value": 0.0 } },
+      { "id": "mul", "blockType": "multiply", "data": {} }
+    ],
+    "edges": [
+      { "id": "e1", "source": "neg1", "sourceHandle": "out", "target": "mul", "targetHandle": "a" },
+      { "id": "e2", "source": "zero", "sourceHandle": "out", "target": "mul", "targetHandle": "b" }
+    ]
+  },
+  "expected": {
+    "mul": { "kind": "scalar", "value": 0.0 }
+  },
+  "diagnostics": [],
+  "tolerance": null
+}

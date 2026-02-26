@@ -1,0 +1,27 @@
+{
+  "name": "chain_negate",
+  "description": "Number(5) → negate → negate → negate = -5",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      { "id": "n0", "blockType": "number", "data": { "value": 5.0 } },
+      { "id": "n1", "blockType": "negate", "data": {} },
+      { "id": "n2", "blockType": "negate", "data": {} },
+      { "id": "n3", "blockType": "negate", "data": {} }
+    ],
+    "edges": [
+      { "id": "e1", "source": "n0", "sourceHandle": "out", "target": "n1", "targetHandle": "a" },
+      { "id": "e2", "source": "n1", "sourceHandle": "out", "target": "n2", "targetHandle": "a" },
+      { "id": "e3", "source": "n2", "sourceHandle": "out", "target": "n3", "targetHandle": "a" }
+    ]
+  },
+  "expected": {
+    "n0": { "kind": "scalar", "value": 5.0 },
+    "n1": { "kind": "scalar", "value": -5.0 },
+    "n2": { "kind": "scalar", "value": 5.0 },
+    "n3": { "kind": "scalar", "value": -5.0 }
+  },
+  "diagnostics": [],
+  "tolerance": null
+}

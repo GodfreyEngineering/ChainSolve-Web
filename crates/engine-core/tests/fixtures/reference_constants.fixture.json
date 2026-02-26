@@ -1,0 +1,29 @@
+{
+  "name": "reference_constants",
+  "description": "Built-in constants: π, e, τ, φ, ln2, ln10, √2",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      { "id": "pi", "blockType": "pi", "data": {} },
+      { "id": "euler", "blockType": "euler", "data": {} },
+      { "id": "tau", "blockType": "tau", "data": {} },
+      { "id": "phi", "blockType": "phi", "data": {} },
+      { "id": "ln2", "blockType": "ln2", "data": {} },
+      { "id": "ln10", "blockType": "ln10", "data": {} },
+      { "id": "sqrt2", "blockType": "sqrt2", "data": {} }
+    ],
+    "edges": []
+  },
+  "expected": {
+    "pi":    { "kind": "scalar", "value": 3.141592653589793 },
+    "euler": { "kind": "scalar", "value": 2.718281828459045 },
+    "tau":   { "kind": "scalar", "value": 6.283185307179586 },
+    "phi":   { "kind": "scalar", "value": 1.618033988749895 },
+    "ln2":   { "kind": "scalar", "value": 0.6931471805599453 },
+    "ln10":  { "kind": "scalar", "value": 2.302585092994046 },
+    "sqrt2": { "kind": "scalar", "value": 1.4142135623730951 }
+  },
+  "diagnostics": [],
+  "tolerance": 1e-15
+}

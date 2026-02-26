@@ -1,0 +1,23 @@
+{
+  "name": "disconnected_ports",
+  "description": "Manual values and port overrides on disconnected/overridden ports",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      { "id": "n1", "blockType": "number", "data": { "value": 10.0 } },
+      { "id": "n2", "blockType": "add", "data": { "manualValues": { "a": 5.0, "b": 3.0 } } },
+      { "id": "n3", "blockType": "add", "data": { "manualValues": { "a": 99.0, "b": 1.0 }, "portOverrides": { "a": true } } }
+    ],
+    "edges": [
+      { "id": "e1", "source": "n1", "sourceHandle": "out", "target": "n2", "targetHandle": "a" },
+      { "id": "e2", "source": "n1", "sourceHandle": "out", "target": "n3", "targetHandle": "a" }
+    ]
+  },
+  "expected": {
+    "n2": { "kind": "scalar", "value": 13.0 },
+    "n3": { "kind": "scalar", "value": 100.0 }
+  },
+  "diagnostics": [],
+  "tolerance": null
+}

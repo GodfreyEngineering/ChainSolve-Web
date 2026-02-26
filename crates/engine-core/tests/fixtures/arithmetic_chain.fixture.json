@@ -1,0 +1,27 @@
+{
+  "name": "arithmetic_chain",
+  "description": "(3 + 4) × 2 = 14",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      { "id": "n1", "blockType": "number", "data": { "value": 3.0 } },
+      { "id": "n2", "blockType": "number", "data": { "value": 4.0 } },
+      { "id": "n3", "blockType": "add", "data": {} },
+      { "id": "n4", "blockType": "number", "data": { "value": 2.0 } },
+      { "id": "n5", "blockType": "multiply", "data": {} }
+    ],
+    "edges": [
+      { "id": "e1", "source": "n1", "sourceHandle": "out", "target": "n3", "targetHandle": "a" },
+      { "id": "e2", "source": "n2", "sourceHandle": "out", "target": "n3", "targetHandle": "b" },
+      { "id": "e3", "source": "n3", "sourceHandle": "out", "target": "n5", "targetHandle": "a" },
+      { "id": "e4", "source": "n4", "sourceHandle": "out", "target": "n5", "targetHandle": "b" }
+    ]
+  },
+  "expected": {
+    "n3": { "kind": "scalar", "value": 7.0 },
+    "n5": { "kind": "scalar", "value": 14.0 }
+  },
+  "diagnostics": [],
+  "tolerance": null
+}

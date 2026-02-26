@@ -1,0 +1,21 @@
+{
+  "name": "cycle_detection",
+  "description": "Cycle in graph produces CYCLE_DETECTED diagnostic",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      { "id": "a", "blockType": "add", "data": {} },
+      { "id": "b", "blockType": "add", "data": {} }
+    ],
+    "edges": [
+      { "id": "e1", "source": "a", "sourceHandle": "out", "target": "b", "targetHandle": "a" },
+      { "id": "e2", "source": "b", "sourceHandle": "out", "target": "a", "targetHandle": "a" }
+    ]
+  },
+  "expected": {},
+  "diagnostics": [
+    { "code": "CYCLE_DETECTED", "level": "error" }
+  ],
+  "tolerance": null
+}

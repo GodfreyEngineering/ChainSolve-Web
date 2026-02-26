@@ -1,0 +1,20 @@
+{
+  "name": "unknown_block",
+  "description": "Unknown block type produces UNKNOWN_BLOCK diagnostic",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      { "id": "n1", "blockType": "number", "data": { "value": 5.0 } },
+      { "id": "n2", "blockType": "nonexistent_op", "data": {} }
+    ],
+    "edges": [
+      { "id": "e1", "source": "n1", "sourceHandle": "out", "target": "n2", "targetHandle": "a" }
+    ]
+  },
+  "expected": {},
+  "diagnostics": [
+    { "code": "UNKNOWN_BLOCK", "level": "warning" }
+  ],
+  "tolerance": null
+}

@@ -1,0 +1,38 @@
+{
+  "name": "vector_ops_suite",
+  "description": "Vector ops: sum, mean, min, max, length on [3,1,4,1,5]",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      { "id": "v", "blockType": "vectorInput", "data": { "vectorData": [3.0, 1.0, 4.0, 1.0, 5.0] } },
+      { "id": "sum", "blockType": "vectorSum", "data": {} },
+      { "id": "mean", "blockType": "vectorMean", "data": {} },
+      { "id": "min", "blockType": "vectorMin", "data": {} },
+      { "id": "max", "blockType": "vectorMax", "data": {} },
+      { "id": "len", "blockType": "vectorLength", "data": {} },
+      { "id": "sort", "blockType": "vectorSort", "data": {} },
+      { "id": "rev", "blockType": "vectorReverse", "data": {} }
+    ],
+    "edges": [
+      { "id": "e1", "source": "v", "sourceHandle": "out", "target": "sum", "targetHandle": "vec" },
+      { "id": "e2", "source": "v", "sourceHandle": "out", "target": "mean", "targetHandle": "vec" },
+      { "id": "e3", "source": "v", "sourceHandle": "out", "target": "min", "targetHandle": "vec" },
+      { "id": "e4", "source": "v", "sourceHandle": "out", "target": "max", "targetHandle": "vec" },
+      { "id": "e5", "source": "v", "sourceHandle": "out", "target": "len", "targetHandle": "vec" },
+      { "id": "e6", "source": "v", "sourceHandle": "out", "target": "sort", "targetHandle": "vec" },
+      { "id": "e7", "source": "v", "sourceHandle": "out", "target": "rev", "targetHandle": "vec" }
+    ]
+  },
+  "expected": {
+    "sum": { "kind": "scalar", "value": 14.0 },
+    "mean": { "kind": "scalar", "value": 2.8 },
+    "min": { "kind": "scalar", "value": 1.0 },
+    "max": { "kind": "scalar", "value": 5.0 },
+    "len": { "kind": "scalar", "value": 5.0 },
+    "sort": { "kind": "vector", "value": [1.0, 1.0, 3.0, 4.0, 5.0] },
+    "rev": { "kind": "vector", "value": [5.0, 1.0, 4.0, 1.0, 3.0] }
+  },
+  "diagnostics": [],
+  "tolerance": null
+}
