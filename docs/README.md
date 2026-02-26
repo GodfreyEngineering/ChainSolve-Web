@@ -92,3 +92,16 @@
 - Billing tab requires password re-authentication (10-minute window, OAuth fallback message)
 - Context: `src/contexts/SettingsModalContext.ts` · Provider: `src/components/SettingsModalProvider.tsx`
 - Core: `src/components/SettingsModal.tsx` · `src/components/BillingAuthGate.tsx`
+
+**App header with dropdown menus (W10.2b):**
+- Professional app bar replaces the old CanvasPage top bar
+- Component: `src/components/app/AppHeader.tsx`
+- Dropdown menus: File, Edit, View, Insert, Tools, Help
+- Reusable dropdown primitive: `src/components/ui/DropdownMenu.tsx`
+- Accessible: `role="menubar"` / `role="menu"`, arrow-key navigation, ESC closes
+- View menu wires to canvas operations via expanded `CanvasAreaHandle` (fitView, toggleLibrary, toggleInspector, toggleSnap)
+- Insert menu shows block categories; opens block library
+- Help > Bug report opens existing `BugReportModal`; About shows version info
+- Stub items toast "Coming soon" — search for `stub` in AppHeader to wire up later
+- Right section: user avatar (initials), plan badge, notifications (stub), settings gear
+- i18n: `menu.*` namespace in all 5 locale files

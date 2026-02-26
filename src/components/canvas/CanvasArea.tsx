@@ -98,9 +98,13 @@ export interface CanvasAreaProps {
   plan?: Plan
 }
 
-/** Handle exposed by CanvasArea via forwardRef for authoritative save snapshots. */
+/** Handle exposed by CanvasArea via forwardRef. */
 export interface CanvasAreaHandle {
   getSnapshot: () => { nodes: Node<NodeData>[]; edges: Edge[] }
+  fitView: () => void
+  toggleLibrary: () => void
+  toggleInspector: () => void
+  toggleSnap: () => void
 }
 
 // ── Mobile breakpoint ─────────────────────────────────────────────────────────
@@ -187,6 +191,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   useImperativeHandle(ref, () => ({
     getSnapshot: () => getCanonicalSnapshot(latestNodes.current, latestEdges.current),
+    fitView: () => fitView({ padding: 0.15, duration: 300 }),
+    toggleLibrary: () => setLibVisible((v) => !v),
+    toggleInspector: () => setInspVisible((v) => !v),
+    toggleSnap: () => setSnapToGrid((v) => !v),
   }))
 
   // Notify parent of graph changes — skip the initial mount so loading a project
