@@ -156,6 +156,21 @@
 - Shortcuts: Ctrl+Z undo, Ctrl+Shift+Z/Y redo, Ctrl+X/C/V cut/copy/paste, Ctrl+A select all, Ctrl+F find, Del delete
 - i18n: `canvas.findPlaceholder`, `canvas.noMatches`, `canvas.findHint` added to all 5 locales
 
+**Project management + real save status (W10.5):**
+
+- Save status badge: tooltip shows "Last saved: HH:MM:SS", error badge clickable to show details
+- File → New Project: entitlement check via `canCreateProject(plan, count)`, creates via `createProject()`, navigates
+- File → Open: project picker modal (`OpenProjectDialog`) with search, keyboard navigation, relative timestamps
+- File → Save As: duplicate dialog (`SaveAsDialog`), works from both project and scratch canvas
+  - Project mode: `duplicateProject(sourceId, newName)` + navigate
+  - Scratch mode: `createProject(name)` + `saveProject()` with current graph + navigate
+- File → Recent Projects: localStorage MRU list (`chainsolve.recentProjects`, max 10)
+  - Updated on every project load, shown as submenu in File menu
+- Unsaved changes safety: `ConfirmDialog` with Save & continue / Discard & continue / Cancel
+  - Shown before New Project and Open when `isDirty && projectId`
+- `onSave` prop changed to `() => Promise<void>` so AppHeader can await before navigating
+- i18n: 15 `project.*` keys added to all 5 locales
+
 **Dev CLI (`cs`):**
 - Single executable: `./cs <command>` — no installation needed
 - Commands: `new`, `test`, `push`, `ship`, `hotfix`, `help`

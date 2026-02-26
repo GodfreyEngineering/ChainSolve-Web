@@ -59,6 +59,23 @@
     "past_due": "Past Due",
     "canceled": "Canceled"
   },
+  "project": {
+    "openProject": "Open project",
+    "saveAs": "Save as",
+    "searchPlaceholder": "Search projects…",
+    "noProjects": "No projects found",
+    "loadError": "Failed to load projects",
+    "retry": "Retry",
+    "unsavedTitle": "Unsaved changes",
+    "unsavedMessage": "Save before continuing?",
+    "saveAndContinue": "Save & continue",
+    "discardAndContinue": "Discard & continue",
+    "cancel": "Cancel",
+    "limitReached": "Project limit reached",
+    "noRecent": "No recent projects",
+    "nameLabel": "Project name",
+    "confirm": "Save"
+  },
   "canvas": {
     "scratch": "Scratch canvas",
     "saving": "Saving…",

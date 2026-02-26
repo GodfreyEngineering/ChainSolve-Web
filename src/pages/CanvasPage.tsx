@@ -21,6 +21,7 @@
 
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { AppHeader } from '../components/app/AppHeader'
 import {
   CanvasArea,
@@ -33,14 +34,19 @@ import type { NodeData } from '../blocks/registry'
 import {
   loadProject,
   saveProject,
+  createProject,
+  duplicateProject,
+  listProjects,
   renameProject,
   readProjectRow,
   type ProjectJSON,
 } from '../lib/projects'
 import { useProjectStore } from '../stores/projectStore'
 import { supabase } from '../lib/supabase'
-import { isReadOnly, showBillingBanner, type Plan } from '../lib/entitlements'
+import { isReadOnly, canCreateProject, showBillingBanner, type Plan } from '../lib/entitlements'
 import { isPerfHudEnabled } from '../lib/devFlags'
+import { addRecentProject } from '../lib/recentProjects'
+import { useToast } from '../components/ui/useToast'
 
 const PerfHud = lazy(() =>
   import('../components/PerfHud.tsx').then((m) => ({ default: m.PerfHud })),
@@ -51,6 +57,8 @@ const AUTOSAVE_DELAY_MS = 2000
 export default function CanvasPage() {
   const { projectId } = useParams<{ projectId?: string }>()
   const navigate = useNavigate()
+  const { t } = useTranslation()
+  const { toast } = useToast()
   // ── Store selectors ────────────────────────────────────────────────────────
   const saveStatus = useProjectStore((s) => s.saveStatus)
   const projectName = useProjectStore((s) => s.projectName)
@@ -125,6 +133,7 @@ export default function CanvasPage() {
         const dbUpdatedAt = row?.updated_at ?? pj.updatedAt
         const dbName = row?.name ?? pj.project.name
         beginLoad(projectId, dbName, dbUpdatedAt, pj.formatVersion, pj.createdAt)
+        addRecentProject(projectId, dbName)
         setInitNodes(pj.graph.nodes as Node<NodeData>[])
         setInitEdges(pj.graph.edges as Edge[])
         setLoadPhase('ready')
@@ -267,6 +276,56 @@ export default function CanvasPage() {
     window.location.reload()
   }, [])
 
+  // ── Project operations (for AppHeader File menu) ────────────────────────────
+
+  const handleNewProject = useCallback(async () => {
+    try {
+      const projects = await listProjects()
+      if (!canCreateProject(plan, projects.length)) {
+        toast(t('project.limitReached'), 'error')
+        return
+      }
+      const proj = await createProject('Untitled project')
+      navigate(`/canvas/${proj.id}`)
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : 'Failed to create project', 'error')
+    }
+  }, [plan, navigate, toast, t])
+
+  const handleOpenProject = useCallback(
+    async (id: string) => {
+      navigate(`/canvas/${id}`)
+    },
+    [navigate],
+  )
+
+  const handleSaveAs = useCallback(
+    async (name: string) => {
+      try {
+        if (projectId) {
+          const proj = await duplicateProject(projectId, name)
+          addRecentProject(proj.id, proj.name)
+          navigate(`/canvas/${proj.id}`)
+        } else {
+          // Scratch canvas → create new project with current graph
+          const snapshot = canvasRef.current?.getSnapshot()
+          if (!snapshot) return
+          const proj = await createProject(name)
+          await saveProject(proj.id, name, snapshot.nodes, snapshot.edges, proj.updated_at, {
+            formatVersion: 1,
+            createdAt: proj.created_at,
+          })
+          addRecentProject(proj.id, proj.name)
+          navigate(`/canvas/${proj.id}`)
+        }
+      } catch (err: unknown) {
+        toast(err instanceof Error ? err.message : 'Failed to save copy', 'error')
+        throw err
+      }
+    },
+    [projectId, navigate, toast],
+  )
+
   // ── Loading / error screens ───────────────────────────────────────────────
   if (loadPhase === 'loading') {
     return (
@@ -327,7 +386,10 @@ export default function CanvasPage() {
         onNameInputChange={setNameInput}
         onCommitNameEdit={() => void commitNameEdit()}
         onCancelNameEdit={() => setNameEditing(false)}
-        onSave={() => void doSave()}
+        onSave={doSave}
+        onNewProject={handleNewProject}
+        onOpenProject={handleOpenProject}
+        onSaveAs={handleSaveAs}
         onNavigateBack={handleBackToProjects}
         canvasRef={canvasRef}
       />

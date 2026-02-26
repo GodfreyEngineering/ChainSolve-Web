@@ -8,8 +8,12 @@ import { useToast } from '../ui/useToast'
 import { DropdownMenu, type MenuEntry } from '../ui/DropdownMenu'
 import { BugReportModal } from '../BugReportModal'
 import { AboutModal } from './AboutModal'
+import { ConfirmDialog, type ConfirmAction } from './ConfirmDialog'
+import { OpenProjectDialog } from './OpenProjectDialog'
+import { SaveAsDialog } from './SaveAsDialog'
 import { CATEGORY_ORDER, CATEGORY_LABELS } from '../../blocks/registry'
 import { supabase } from '../../lib/supabase'
+import { getRecentProjects } from '../../lib/recentProjects'
 import type { CanvasAreaHandle } from '../canvas/CanvasArea'
 import type { Plan } from '../../lib/entitlements'
 import type { ThemeMode } from '../../contexts/ThemeContext'
@@ -40,7 +44,10 @@ export interface AppHeaderProps {
   onCommitNameEdit: () => void
   onCancelNameEdit: () => void
   // Actions
-  onSave: () => void
+  onSave: () => Promise<void>
+  onNewProject: () => Promise<void>
+  onOpenProject: (projectId: string) => Promise<void>
+  onSaveAs: (name: string) => Promise<void>
   onNavigateBack: (e: React.MouseEvent<HTMLAnchorElement>) => void
   canvasRef: React.RefObject<CanvasAreaHandle | null>
 }
@@ -58,6 +65,9 @@ export function AppHeader({
   onCommitNameEdit,
   onCancelNameEdit,
   onSave,
+  onNewProject,
+  onOpenProject,
+  onSaveAs,
   onNavigateBack,
   canvasRef,
 }: AppHeaderProps) {
@@ -69,11 +79,19 @@ export function AppHeader({
   const saveStatus = useProjectStore((s) => s.saveStatus)
   const isDirty = useProjectStore((s) => s.isDirty)
   const lastSavedAt = useProjectStore((s) => s.lastSavedAt)
+  const errorMessage = useProjectStore((s) => s.errorMessage)
 
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [bugReportOpen, setBugReportOpen] = useState(false)
   const [aboutOpen, setAboutOpen] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [openDialogOpen, setOpenDialogOpen] = useState(false)
+  const [saveAsOpen, setSaveAsOpen] = useState(false)
+  const [saveAsLoading, setSaveAsLoading] = useState(false)
+  const [confirmState, setConfirmState] = useState<{
+    action: 'new' | 'open'
+    targetId?: string
+  } | null>(null)
 
   // Fetch user email once for avatar
   useEffect(() => {
@@ -111,6 +129,83 @@ export function AppHeader({
     [toast, t],
   )
 
+  // ── File menu handlers ──────────────────────────────────────────────────────
+
+  const handleNewProject = useCallback(() => {
+    setOpenMenu(null)
+    if (isDirty && projectId) {
+      setConfirmState({ action: 'new' })
+    } else {
+      void onNewProject()
+    }
+  }, [isDirty, projectId, onNewProject])
+
+  const handleSelectProject = useCallback(
+    (id: string) => {
+      setOpenDialogOpen(false)
+      setOpenMenu(null)
+      if (isDirty && projectId) {
+        setConfirmState({ action: 'open', targetId: id })
+      } else {
+        void onOpenProject(id)
+      }
+    },
+    [isDirty, projectId, onOpenProject],
+  )
+
+  const handleSaveAsConfirm = useCallback(
+    async (name: string) => {
+      setSaveAsLoading(true)
+      try {
+        await onSaveAs(name)
+        setSaveAsOpen(false)
+      } catch {
+        // Error toasted by caller
+      } finally {
+        setSaveAsLoading(false)
+      }
+    },
+    [onSaveAs],
+  )
+
+  const confirmProceed = useCallback(
+    (state: NonNullable<typeof confirmState>) => {
+      if (state.action === 'new') void onNewProject()
+      else if (state.targetId) void onOpenProject(state.targetId)
+    },
+    [onNewProject, onOpenProject],
+  )
+
+  const confirmActions: ConfirmAction[] = useMemo(
+    () => [
+      {
+        label: t('project.saveAndContinue'),
+        variant: 'primary' as const,
+        onClick: () => {
+          const state = confirmState
+          setConfirmState(null)
+          if (!state) return
+          void onSave().then(() => confirmProceed(state))
+        },
+      },
+      {
+        label: t('project.discardAndContinue'),
+        variant: 'danger' as const,
+        onClick: () => {
+          const state = confirmState
+          setConfirmState(null)
+          if (state) confirmProceed(state)
+        },
+      },
+      {
+        label: t('project.cancel'),
+        variant: 'muted' as const,
+        onClick: () => setConfirmState(null),
+      },
+    ],
+    [t, confirmState, onSave, confirmProceed],
+  )
+
   // ── Save status badge ───────────────────────────────────────────────────────
 
   const statusLabel: { text: string; color: string } | null = (() => {
@@ -134,27 +229,47 @@ export function AppHeader({
 
   // ── Menu definitions ────────────────────────────────────────────────────────
 
-  const fileItems = useMemo(
-    (): MenuEntry[] => [
-      { label: t('menu.newProject'), onClick: stub },
-      { label: t('menu.open'), onClick: stub },
+  const fileItems = useMemo((): MenuEntry[] => {
+    const recents = getRecentProjects()
+      .filter((r) => r.id !== projectId)
+      .slice(0, 5)
+    const recentChildren: MenuEntry[] =
+      recents.length > 0
+        ? recents.map((r) => ({ label: r.name, onClick: () => handleSelectProject(r.id) }))
+        : [{ label: t('project.noRecent'), disabled: true, onClick: () => {} }]
+
+    return [
+      { label: t('menu.newProject'), onClick: handleNewProject },
+      {
+        label: t('menu.open'),
+        onClick: () => {
+          setOpenMenu(null)
+          setOpenDialogOpen(true)
+        },
+      },
       { separator: true },
       {
         label: t('menu.save'),
         shortcut: 'Ctrl+S',
         disabled: readOnly || !isDirty,
-        onClick: onSave,
+        onClick: () => void onSave(),
       },
-      { label: t('menu.saveAs'), onClick: stub },
+      {
+        label: t('menu.saveAs'),
+        disabled: readOnly,
+        onClick: () => {
+          setOpenMenu(null)
+          setSaveAsOpen(true)
+        },
+      },
       { separator: true },
       { label: t('menu.import'), onClick: stub },
       { label: t('menu.exportPdf'), onClick: stub },
       { label: t('menu.exportExcel'), onClick: stub },
       { separator: true },
-      { label: t('menu.recentProjects'), disabled: true, onClick: stub },
-    ],
-    [t, stub, readOnly, isDirty, onSave],
-  )
+      { label: t('menu.recentProjects'), children: recentChildren },
+    ]
+  }, [t, stub, readOnly, isDirty, onSave, projectId, handleNewProject, handleSelectProject])
 
   const editItems = useMemo(
     (): MenuEntry[] => [
@@ -355,7 +470,20 @@ export function AppHeader({
 
           {/* Save status badge */}
           {statusLabel && (
-            <span style={{ fontSize: '0.68rem', color: statusLabel.color, whiteSpace: 'nowrap' }}>
+            <span
+              title={lastSavedAt ? `Last saved: ${fmtTime(lastSavedAt)}` : undefined}
+              onClick={
+                saveStatus === 'error' && errorMessage
+                  ? () => toast(errorMessage, 'error')
+                  : undefined
+              }
+              style={{
+                fontSize: '0.68rem',
+                color: statusLabel.color,
+                whiteSpace: 'nowrap',
+                cursor: saveStatus === 'error' ? 'pointer' : undefined,
+              }}
+            >
               {statusLabel.text}
             </span>
           )}
@@ -438,6 +566,25 @@ export function AppHeader({
 
       <BugReportModal open={bugReportOpen} onClose={() => setBugReportOpen(false)} />
       <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <OpenProjectDialog
+        open={openDialogOpen}
+        onClose={() => setOpenDialogOpen(false)}
+        onSelect={handleSelectProject}
+      />
+      <SaveAsDialog
+        open={saveAsOpen}
+        onClose={() => setSaveAsOpen(false)}
+        currentName={projectName}
+        onConfirm={handleSaveAsConfirm}
+        saving={saveAsLoading}
+      />
+      <ConfirmDialog
+        open={!!confirmState}
+        onClose={() => setConfirmState(null)}
+        title={t('project.unsavedTitle')}
+        message={t('project.unsavedMessage')}
+        actions={confirmActions}
+      />
     </>
   )
 }

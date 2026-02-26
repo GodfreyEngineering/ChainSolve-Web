@@ -59,6 +59,23 @@
     "past_due": "Pago pendiente",
     "canceled": "Cancelado"
   },
+  "project": {
+    "openProject": "Abrir proyecto",
+    "saveAs": "Guardar como",
+    "searchPlaceholder": "Buscar proyectos…",
+    "noProjects": "Sin proyectos",
+    "loadError": "Error al cargar",
+    "retry": "Reintentar",
+    "unsavedTitle": "Cambios sin guardar",
+    "unsavedMessage": "¿Guardar antes de continuar?",
+    "saveAndContinue": "Guardar y continuar",
+    "discardAndContinue": "Descartar y continuar",
+    "cancel": "Cancelar",
+    "limitReached": "Límite alcanzado",
+    "noRecent": "Sin proyectos recientes",
+    "nameLabel": "Nombre del proyecto",
+    "confirm": "Guardar"
+  },
   "canvas": {
     "scratch": "Lienzo temporal",
     "saving": "Guardando…",

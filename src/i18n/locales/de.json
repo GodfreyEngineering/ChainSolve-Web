@@ -59,6 +59,23 @@
     "past_due": "Überfällig",
     "canceled": "Gekündigt"
   },
+  "project": {
+    "openProject": "Projekt öffnen",
+    "saveAs": "Speichern unter",
+    "searchPlaceholder": "Projekte suchen…",
+    "noProjects": "Keine Projekte",
+    "loadError": "Fehler beim Laden",
+    "retry": "Erneut versuchen",
+    "unsavedTitle": "Ungespeicherte Änderungen",
+    "unsavedMessage": "Vor dem Fortfahren speichern?",
+    "saveAndContinue": "Speichern und fortfahren",
+    "discardAndContinue": "Verwerfen und fortfahren",
+    "cancel": "Abbrechen",
+    "limitReached": "Projektlimit erreicht",
+    "noRecent": "Keine kürzlichen Projekte",
+    "nameLabel": "Projektname",
+    "confirm": "Speichern"
+  },
   "canvas": {
     "scratch": "Temporäre Leinwand",
     "saving": "Speichern…",
