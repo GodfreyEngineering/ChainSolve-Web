@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSettingsModal } from '../contexts/SettingsModalContext'
 import { supabase } from '../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import {
@@ -136,6 +137,7 @@ const btnDisabled: React.CSSProperties = { opacity: 0.55, cursor: 'not-allowed' 
 
 export default function AppShell() {
   const navigate = useNavigate()
+  const { openSettings } = useSettingsModal()
 
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -383,8 +385,18 @@ export default function AppShell() {
         </a>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <span style={{ fontSize: '0.85rem', opacity: 0.6 }}>{user?.email}</span>
-          <button style={btnSmall} onClick={() => navigate('/settings')}>
-            Settings
+          <button
+            style={{
+              ...btnSmall,
+              fontSize: '1.1rem',
+              padding: '0.25rem 0.55rem',
+              lineHeight: 1,
+            }}
+            onClick={() => openSettings()}
+            title="Settings"
+            aria-label="Settings"
+          >
+            ⚙
           </button>
           <button style={btnDanger} onClick={() => void handleLogout()}>
             Sign out

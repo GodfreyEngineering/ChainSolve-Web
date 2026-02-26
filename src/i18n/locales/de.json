@@ -170,8 +170,9 @@
     "languageLabel": "Sprache",
     "languageHint": "Wählen Sie Ihre bevorzugte Anzeigesprache.",
     "themeLabel": "Thema",
+    "themeSystem": "System",
     "themeDark": "Dunkel",
-    "themeLight": "Hell (kommt bald)",
+    "themeLight": "Hell",
     "save": "Speichern",
     "saved": "Gespeichert!",
     "buildInfo": "Build-Info",
@@ -187,7 +188,13 @@
     "bugSubmit": "Bericht senden",
     "bugSubmitting": "Wird gesendet…",
     "bugSuccess": "Fehlerbericht gesendet. Danke!",
-    "bugError": "Fehlerbericht konnte nicht gesendet werden."
+    "bugError": "Fehlerbericht konnte nicht gesendet werden.",
+    "billingVerifyPrompt": "Bestätigen Sie aus Sicherheitsgründen Ihr Passwort, um auf die Abrechnung zuzugreifen.",
+    "billingSessionExpired": "Die Verifizierung ist abgelaufen. Bitte geben Sie Ihr Passwort erneut ein.",
+    "billingPasswordLabel": "Passwort",
+    "billingVerifyBtn": "Identität bestätigen",
+    "billingAuthFailed": "Falsches Passwort. Bitte versuchen Sie es erneut.",
+    "billingOAuthHint": "Sie haben sich mit einem sozialen Anbieter angemeldet. Melden Sie sich ab und wieder an, um auf die Abrechnung zuzugreifen."
   },
   "ui": {
     "close": "Schließen",

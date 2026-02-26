@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import AppShell from './pages/AppShell'
 import CanvasPage from './pages/CanvasPage'
-import Settings from './pages/Settings'
+import { SettingsRedirect } from './components/SettingsRedirect'
 import { isDiagnosticsUIEnabled } from './lib/devFlags'
 
 // Lazy-load diagnostics page so it is not included in the main bundle for
@@ -88,7 +88,7 @@ export default function App() {
         <Route path="/app" element={<AppShell />} />
         <Route path="/canvas" element={<CanvasPage />} />
         <Route path="/canvas/:projectId" element={<CanvasPage />} />
-        <Route path="/settings" element={<Settings />} />
+        <Route path="/settings" element={<SettingsRedirect />} />
         <Route path="/billing/success" element={<BillingSuccess />} />
         <Route path="/billing/cancel" element={<BillingCancel />} />
         {isDiagnosticsUIEnabled() && (

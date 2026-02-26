@@ -21,6 +21,7 @@
 
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useSettingsModal } from '../contexts/SettingsModalContext'
 import {
   CanvasArea,
   type CanvasAreaProps,
@@ -54,6 +55,7 @@ function fmtTime(d: Date): string {
 export default function CanvasPage() {
   const { projectId } = useParams<{ projectId?: string }>()
   const navigate = useNavigate()
+  const { openSettings } = useSettingsModal()
 
   // ── Store selectors ────────────────────────────────────────────────────────
   const saveStatus = useProjectStore((s) => s.saveStatus)
@@ -472,7 +474,26 @@ export default function CanvasPage() {
           </button>
         )}
 
-        <span style={{ marginLeft: 'auto', fontSize: '0.72rem', opacity: 0.35 }}>
+        <button
+          onClick={() => openSettings()}
+          title="Settings"
+          aria-label="Settings"
+          style={{
+            marginLeft: 'auto',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'var(--text-muted)',
+            fontSize: '1rem',
+            padding: '0.2rem 0.4rem',
+            borderRadius: 4,
+            fontFamily: 'inherit',
+            lineHeight: 1,
+          }}
+        >
+          ⚙
+        </button>
+        <span style={{ fontSize: '0.72rem', opacity: 0.35 }}>
           Drag blocks · Connect handles · Delete to remove
         </span>
       </div>

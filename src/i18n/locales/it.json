@@ -170,8 +170,9 @@
     "languageLabel": "Lingua",
     "languageHint": "Scegli la lingua di visualizzazione preferita.",
     "themeLabel": "Tema",
+    "themeSystem": "Sistema",
     "themeDark": "Scuro",
-    "themeLight": "Chiaro (in arrivo)",
+    "themeLight": "Chiaro",
     "save": "Salva",
     "saved": "Salvato!",
     "buildInfo": "Info build",
@@ -187,7 +188,13 @@
     "bugSubmit": "Invia segnalazione",
     "bugSubmitting": "Invio…",
     "bugSuccess": "Segnalazione inviata. Grazie!",
-    "bugError": "Impossibile inviare la segnalazione."
+    "bugError": "Impossibile inviare la segnalazione.",
+    "billingVerifyPrompt": "Per sicurezza, conferma la tua password per accedere alla fatturazione.",
+    "billingSessionExpired": "La verifica è scaduta. Reinserisci la tua password.",
+    "billingPasswordLabel": "Password",
+    "billingVerifyBtn": "Verifica identità",
+    "billingAuthFailed": "Password errata. Riprova.",
+    "billingOAuthHint": "Hai effettuato l'accesso con un provider social. Esci e accedi di nuovo per la fatturazione."
   },
   "ui": {
     "close": "Chiudi",

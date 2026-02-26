@@ -7,5 +7,7 @@ Disallow: /app
 Disallow: /canvas
 Disallow: /settings
 Disallow: /billing
-Disallow: /login
+Disallow: /diagnostics
 Disallow: /api/
+
+Sitemap: https://app.chainsolve.co.uk/sitemap.xml

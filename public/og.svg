@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#1a1a1a"/>
+  <rect x="0" y="0" width="1200" height="4" fill="#1cabb0"/>
+  <!-- Icon: simplified chain/node motif -->
+  <circle cx="480" cy="295" r="28" fill="none" stroke="#1cabb0" stroke-width="3"/>
+  <circle cx="560" cy="295" r="28" fill="none" stroke="#1cabb0" stroke-width="3"/>
+  <line x1="508" y1="295" x2="532" y2="295" stroke="#1cabb0" stroke-width="3"/>
+  <circle cx="640" cy="295" r="28" fill="none" stroke="#1cabb0" stroke-width="3"/>
+  <line x1="588" y1="295" x2="612" y2="295" stroke="#1cabb0" stroke-width="3"/>
+  <circle cx="720" cy="295" r="28" fill="none" stroke="#1cabb0" stroke-width="3"/>
+  <line x1="668" y1="295" x2="692" y2="295" stroke="#1cabb0" stroke-width="3"/>
+  <!-- Small filled dots inside nodes -->
+  <circle cx="480" cy="295" r="6" fill="#1cabb0" opacity="0.6"/>
+  <circle cx="560" cy="295" r="6" fill="#1cabb0" opacity="0.6"/>
+  <circle cx="640" cy="295" r="6" fill="#1cabb0" opacity="0.6"/>
+  <circle cx="720" cy="295" r="6" fill="#1cabb0" opacity="0.6"/>
+  <!-- Title -->
+  <text x="600" y="400" text-anchor="middle" fill="#f4f4f3" font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="700">ChainSolve</text>
+  <!-- Subtitle -->
+  <text x="600" y="445" text-anchor="middle" fill="#f4f4f3" font-family="system-ui, -apple-system, sans-serif" font-size="22" opacity="0.6">Scientific node-graph calculator</text>
+</svg>

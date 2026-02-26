@@ -9,6 +9,25 @@
  * takes over for runtime errors.
  */
 
+// Apply saved theme immediately to prevent flash of wrong theme.
+// Must run before any rendering. Mirrors logic in ThemeProvider.
+{
+  let mode: string | null = null
+  try {
+    mode = localStorage.getItem('chainsolve.theme')
+  } catch {
+    // ignore
+  }
+  let resolved: string
+  if (mode === 'light' || mode === 'dark') {
+    resolved = mode
+  } else {
+    resolved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+  }
+  document.documentElement.setAttribute('data-theme', resolved)
+  document.documentElement.style.colorScheme = resolved
+}
+
 function showBootError(message: string) {
   const root = document.getElementById('root')
   if (!root) return

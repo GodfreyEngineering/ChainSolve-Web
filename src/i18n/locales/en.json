@@ -170,8 +170,9 @@
     "languageLabel": "Language",
     "languageHint": "Choose your preferred display language.",
     "themeLabel": "Theme",
+    "themeSystem": "System",
     "themeDark": "Dark",
-    "themeLight": "Light (coming soon)",
+    "themeLight": "Light",
     "save": "Save",
     "saved": "Saved!",
     "buildInfo": "Build Info",
@@ -187,7 +188,13 @@
     "bugSubmit": "Submit Report",
     "bugSubmitting": "Submitting…",
     "bugSuccess": "Bug report submitted. Thank you!",
-    "bugError": "Failed to submit bug report."
+    "bugError": "Failed to submit bug report.",
+    "billingVerifyPrompt": "For security, confirm your password to access billing settings.",
+    "billingSessionExpired": "Your verification has expired. Please re-enter your password.",
+    "billingPasswordLabel": "Password",
+    "billingVerifyBtn": "Verify identity",
+    "billingAuthFailed": "Incorrect password. Please try again.",
+    "billingOAuthHint": "You signed in with a social provider. Sign out and sign back in to access billing."
   },
   "ui": {
     "close": "Close",
