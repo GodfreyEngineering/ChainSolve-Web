@@ -756,18 +756,22 @@ are therefore driven exclusively by GitHub Actions using **Wrangler Direct Uploa
 
 ### How it works
 
-1. Every push to `main` runs the `CI / Typecheck, Lint & Build` job:
-   Rust tests → WASM build → TypeScript typecheck → lint → format check →
-   Vite production build → Playwright e2e.
-2. If (and only if) all checks pass, the `CI / Deploy → Cloudflare Pages` job
-   runs next. It downloads the already-built `dist/` artifact, then calls:
+1. Every push to `main` (and every PR) runs three jobs in the `CI` workflow.
+   `rust_tests` and `node_checks` run **in parallel**:
+   - **rust_tests**: `cargo test --workspace` (no wasm-pack, no Node)
+   - **node_checks**: wasm-pack build → TypeScript typecheck → lint →
+     format check → Vite production build (uploads `dist/` artifact)
+2. Once `node_checks` finishes, **e2e_smoke** runs the Playwright `smoke`
+   project — just `smoke.spec.ts` (8 tests). Target: < 90 s.
+3. If (and only if) all three jobs pass, **deploy** runs. It downloads the
+   already-built `dist/` artifact, then calls:
    ```
    wrangler pages deploy dist --project-name=chainsolve-web --branch=main
    ```
-3. Wrangler uploads `dist/` as static assets and compiles `functions/` (TypeScript
+4. Wrangler uploads `dist/` as static assets and compiles `functions/` (TypeScript
    Pages Functions) using its own bundler. The `wrangler.jsonc` at the repo root
    provides the `compatibility_date`.
-4. Cloudflare Pages serves the result from its edge network.
+5. Cloudflare Pages serves the result from its edge network.
 
 > **Key gotcha — Pages Functions:** `functions/` must exist in the working
 > directory where `wrangler pages deploy` is run (the repo root), **not** inside
@@ -830,3 +834,94 @@ environment.
 | `Authentication error` | `CLOUDFLARE_API_TOKEN` missing or expired | Re-create the token in Cloudflare → API Tokens, update the GitHub secret |
 | `Project not found` | First-ever deploy on a fresh account | Run once locally: `npx wrangler pages project create chainsolve-web` |
 | Functions 500 / 1101 after deploy | Cloudflare env vars missing | Add all 7 vars in CF Dashboard → Settings → Environment Variables → Production |
+
+---
+
+## 18. CI tiers — speed, coverage, and how to run each
+
+### Overview
+
+| Tier         | Workflow                    | Trigger                                 | Tests                       | Target time |
+|--------------|-----------------------------|-----------------------------------------|-----------------------------|-------------|
+| **CI smoke** | `CI` (`e2e_smoke` job)      | every push / PR                         | `smoke.spec.ts` (8 tests)   | < 90 s      |
+| **Full E2E** | `Full E2E suite`            | nightly 02:00 UTC + `workflow_dispatch` | all `*.spec.ts` (~35 tests) | < 5 min     |
+
+### CI workflow (`CI`)
+
+Three jobs run on every push to `main` and on every PR:
+
+- **`rust_tests`** and **`node_checks`** run **in parallel**:
+  - `rust_tests`: `cargo test --workspace` — pure Rust unit + property tests.
+  - `node_checks`: wasm-pack → typecheck → lint → format → Vite build → upload
+    `dist/` artifact.
+- **`e2e_smoke`** runs after `node_checks`. It downloads the artifact, starts
+  `vite preview`, and runs only the Playwright `smoke` project
+  (`smoke.spec.ts`).
+
+The `smoke` project has one WASM compilation (for the "no console errors"
+test); the other 7 tests are instant (HTTP, meta-tag, title checks).
+
+On a **warm runner** (Swatinem/rust-cache + npm cache hit) the entire CI
+pipeline completes in roughly:
+
+- `rust_tests`: ~1 min  ┐
+- `node_checks`: ~3 min ┘ parallel → wall clock ~3 min
+- `e2e_smoke`: ~1 min (sequential after node_checks)
+- **Total**: ~4 min
+
+### Full E2E workflow (`Full E2E suite`)
+
+Runs all spec files via the Playwright `full` project:
+
+- `smoke.spec.ts`, `groups.spec.ts`, `plot-smoke.spec.ts`, `wasm-engine.spec.ts`
+- `wasm-engine.spec.ts` uses a **worker-scoped `enginePage` fixture**: WASM is
+  compiled once per Playwright worker then shared across all ~16 API tests in
+  that file — no repeated cold-compilation cost.
+
+#### How to trigger manually
+
+```bash
+# Option A: GitHub UI
+# Actions → "Full E2E suite" → Run workflow
+
+# Option B: GitHub CLI
+gh workflow run e2e-full.yml --ref main
+
+# Option C: run locally against the preview server
+npm run build && npm run test:e2e:full
+```
+
+### Running E2E locally
+
+```bash
+# Smoke only (mirrors CI)
+npm run build && npm run test:e2e:smoke
+
+# Full suite
+npm run build && npm run test:e2e:full
+
+# Interactive UI mode (full suite, headed)
+npm run build && npm run test:e2e:ui
+```
+
+### Playwright projects reference
+
+| Project | Spec files            | Use case                                  |
+|---------|-----------------------|-------------------------------------------|
+| `smoke` | `smoke.spec.ts` only  | CI gate (fast, stable)                    |
+| `full`  | all `*.spec.ts`       | Nightly / pre-release / manual deep check |
+
+### `engine-fatal` sentinel
+
+If the WASM engine fails to initialise in any environment, every test that
+waits for engine boot will now **fail immediately** with the error message from
+`data-fatal-message` on `[data-testid="engine-fatal"]` — instead of hanging
+until the 60-second per-test deadline.
+
+This means a broken WASM build in CI shows a 1-second failure like:
+
+```text
+Error: [engine-fatal] RuntimeError: unreachable executed at ...
+```
+
+rather than 20 tests each timing out after 60 s.

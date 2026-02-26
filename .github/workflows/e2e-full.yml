@@ -1,0 +1,81 @@
+name: Full E2E suite
+
+# Triggers:
+#   1. Nightly at 02:00 UTC — catches regressions before the next working day.
+#   2. workflow_dispatch — run manually from the GitHub Actions UI at any time.
+#      Use this after a large refactor, before a release, or to investigate a
+#      specific regression that only shows up in the full suite.
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Optional: reason for manual run'
+        required: false
+        default: ''
+
+# Allow only one full-e2e run at a time (nightly + manual could overlap).
+concurrency:
+  group: e2e-full
+  cancel-in-progress: true
+
+jobs:
+  full_e2e:
+    name: Full E2E suite (Playwright)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Rust + WASM ──────────────────────────────────────────────────────
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build WASM
+        run: wasm-pack build crates/engine-wasm --target web --release
+
+      # ── Node ─────────────────────────────────────────────────────────────
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npx tsc -b && npx vite build
+
+      # ── Playwright ───────────────────────────────────────────────────────
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Full E2E suite
+        # Runs all spec files via the `full` project.
+        # wasm-engine.spec.ts uses the worker-scoped enginePage fixture:
+        # WASM is compiled once per worker (~16 API tests share one V8 compilation).
+        run: npx playwright test --project=full
+
+      # Always upload on nightly so failures can be investigated even after
+      # the workflow finishes.
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-full-report-${{ github.run_id }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 14

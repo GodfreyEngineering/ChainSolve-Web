@@ -1,13 +1,14 @@
 import { test, expect } from '@playwright/test'
+import { waitForEngineOrFatal } from './helpers'
 
 test.describe('Groups smoke tests', () => {
   test('page loads without errors', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
     await page.goto('/')
-    // Wait for engine-ready: fires only after WASM resolves, ensuring all
-    // async init errors have had a chance to propagate before we assert.
-    await page.locator('[data-testid="engine-ready"]').waitFor({ state: 'attached', timeout: 15_000 })
+    // waitForEngineOrFatal: resolves when engine-ready appears (WASM init done)
+    // OR throws immediately if engine-fatal appears, including the error message.
+    await waitForEngineOrFatal(page, errors)
     expect(errors).toHaveLength(0)
   })
 

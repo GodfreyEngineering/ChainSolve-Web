@@ -13,6 +13,8 @@ interface Props {
 export function EngineFatalError({ error, onRetry }: Props) {
   return (
     <div
+      data-testid="engine-fatal"
+      data-fatal-message={error.message}
       style={{
         position: 'fixed',
         inset: 0,

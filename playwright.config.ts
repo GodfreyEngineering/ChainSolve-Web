@@ -1,42 +1,74 @@
 import { defineConfig, devices } from '@playwright/test'
 
+// Chromium launch flags shared by all projects.
+const chromiumArgs = [
+  // --disable-dev-shm-usage: /dev/shm is only 64 MB in most containers/codespaces;
+  // Chromium's renderer writes shared memory there, causing page crashes when the
+  // WASM binary is compiled repeatedly. Redirecting to /tmp eliminates the crash.
+  '--disable-dev-shm-usage',
+]
+
 export default defineConfig({
   testDir: 'e2e',
-  timeout: 30_000,
-  // In CI run sequentially to eliminate parallel-context interference.
-  // Locally, Playwright picks an appropriate default (usually half CPU cores).
+
+  // 60 s per test: WASM cold-compilation on a fresh GitHub runner can exceed 15 s.
+  // Passing tests resolve well before the deadline; only genuine failures pay this cost.
+  timeout: 60_000,
+
+  // In CI run sequentially; locally Playwright picks an appropriate default.
   workers: process.env.CI ? 1 : undefined,
+
+  // Retries catch transient infrastructure hiccups without hiding real bugs.
   retries: process.env.CI ? 2 : 0,
-  // Give assertions a longer deadline in CI where the WASM worker init can be
-  // slower due to cold caches and limited /dev/shm.
+
+  // Assertion deadline: engine API calls resolve in < 1 ms once WASM is loaded;
+  // 15 s is ample even on slow machines.
   expect: {
-    timeout: process.env.CI ? 15_000 : 5_000,
+    timeout: 15_000,
   },
+
   use: {
     baseURL: 'http://localhost:4173',
     headless: true,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
+
   webServer: {
     command: 'npm run preview -- --port 4173',
     port: 4173,
     reuseExistingServer: !process.env.CI,
-    // 60 s gives the preview server plenty of time to start in CI after build.
+    // 60 s for the preview server to start after a fresh build in CI.
     timeout: 60_000,
   },
+
   projects: [
+    // ── smoke ──────────────────────────────────────────────────────────────
+    // Minimal CI suite: static asset checks + engine boot + canvas eval.
+    // Only smoke.spec.ts runs.  One WASM compilation for the engine-ready test;
+    // all other tests are instant (HTTP, meta-tag, title).
+    // Target: < 90 s stable on repeated runs.
     {
-      name: 'chromium',
+      name: 'smoke',
+      testMatch: '**/smoke.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
-        // --disable-dev-shm-usage: Chromium's renderer writes shared memory to
-        // /dev/shm; that partition is only 64 MB in most containers/codespaces,
-        // causing renderer crashes when the WASM binary is compiled repeatedly.
-        // Redirecting to /tmp eliminates the crash entirely.
-        launchOptions: {
-          args: ['--disable-dev-shm-usage'],
-        },
+        launchOptions: { args: chromiumArgs },
+      },
+    },
+
+    // ── full ───────────────────────────────────────────────────────────────
+    // Complete suite: all spec files including wasm-engine.spec.ts.
+    // wasm-engine.spec.ts uses the worker-scoped `enginePage` fixture so
+    // WASM is compiled once per worker, not once per test (~16 API tests share
+    // one V8 compilation).
+    // Run via: npm run test:e2e:full   (nightly workflow or manual dispatch)
+    {
+      name: 'full',
+      testMatch: '**/*.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: { args: chromiumArgs },
       },
     },
   ],

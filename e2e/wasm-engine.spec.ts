@@ -1,24 +1,23 @@
-import { test, expect } from '@playwright/test'
+/**
+ * WASM engine e2e tests — W9 / W9.1 / W9.2 / W9.3
+ *
+ * All API tests (evaluateGraph, loadSnapshot, applyPatch, …) use the worker-scoped
+ * `enginePage` fixture from helpers.ts.  The engine is initialised ONCE per worker;
+ * subsequent tests reuse the same Chromium context and the already-compiled WASM
+ * module — no repeated cold-compilation cost.
+ *
+ * The single UI test that navigates to /canvas uses the default `page` fixture so
+ * it gets its own isolated browser context and does not corrupt shared state.
+ */
 
-// Helper: wait for engine on window and return typed handle
-async function waitForEngine(page: import('@playwright/test').Page) {
-  await page.waitForFunction(
-    () => (window as Record<string, unknown>).__chainsolve_engine != null,
-    null,
-    { timeout: 15_000 },
-  )
-}
+import { expect, test } from './helpers'
+import { expect as baseExpect, test as baseTest } from '@playwright/test'
+import { waitForCanvasOrFatal } from './helpers'
 
-// Helper: wait for canvas to have computed values (first eval cycle done)
-async function waitForCanvasComputed(page: import('@playwright/test').Page) {
-  await page.locator('[data-testid="canvas-computed"]').waitFor({ state: 'attached', timeout: 15_000 })
-}
+// ── W9: Core engine ──────────────────────────────────────────────────────────
 
 test.describe('WASM engine (W9)', () => {
-  test('engine initialises and evaluates 3 + 4 = 7', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('engine initialises and evaluates 3 + 4 = 7', async ({ enginePage: page }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         evaluateGraph: (s: unknown) => Promise<unknown>
@@ -63,10 +62,7 @@ test.describe('WASM engine (W9)', () => {
     expect(typeof r.elapsedUs).toBe('number')
   })
 
-  test('engine returns diagnostics for unknown blocks', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('engine returns diagnostics for unknown blocks', async ({ enginePage: page }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         evaluateGraph: (s: unknown) => Promise<unknown>
@@ -90,11 +86,12 @@ test.describe('WASM engine (W9)', () => {
   })
 })
 
-test.describe('WASM engine — catalog & handshake (W9.1)', () => {
-  test('engine exposes catalog with 57+ entries and a version string', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
+// ── W9.1: Catalog & handshake ────────────────────────────────────────────────
 
+test.describe('WASM engine — catalog & handshake (W9.1)', () => {
+  test('engine exposes catalog with 57+ entries and a version string', async ({
+    enginePage: page,
+  }) => {
     const info = await page.evaluate(() => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         catalog: unknown[]
@@ -108,10 +105,7 @@ test.describe('WASM engine — catalog & handshake (W9.1)', () => {
     expect(info.engineVersion.length).toBeGreaterThan(0)
   })
 
-  test('catalog contains known ops across all categories', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('catalog contains known ops across all categories', async ({ enginePage: page }) => {
     const opIds = await page.evaluate(() => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         catalog: { opId: string }[]
@@ -129,10 +123,7 @@ test.describe('WASM engine — catalog & handshake (W9.1)', () => {
     }
   })
 
-  test('manual values on disconnected ports', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('manual values on disconnected ports', async ({ enginePage: page }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         evaluateGraph: (s: unknown) => Promise<unknown>
@@ -155,10 +146,7 @@ test.describe('WASM engine — catalog & handshake (W9.1)', () => {
     expect(r.values.n1).toEqual({ kind: 'scalar', value: 8 })
   })
 
-  test('portOverrides forces manual value over edge value', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('portOverrides forces manual value over edge value', async ({ enginePage: page }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         evaluateGraph: (s: unknown) => Promise<unknown>
@@ -194,22 +182,28 @@ test.describe('WASM engine — catalog & handshake (W9.1)', () => {
     expect(r.values.n2).toEqual({ kind: 'scalar', value: 100 })
   })
 
-  test('starter graph renders "7" in display node on canvas', async ({ page }) => {
-    await page.goto('/canvas')
-    await waitForCanvasComputed(page)
+  // Canvas UI test: needs to navigate to /canvas, so it uses a fresh default page
+  // to avoid corrupting the shared enginePage state.
+  baseTest(
+    'starter graph renders "7" in display node on canvas',
+    async ({ page }) => {
+      await page.goto('/canvas')
+      await waitForCanvasOrFatal(page)
 
-    // The display node should show the value 7 (from 3 + 4 starter graph)
-    const display = page.locator('.react-flow__node-csDisplay')
-    await expect(display.first()).toBeVisible()
-    await expect(display.first()).toContainText('7')
-  })
+      // The display node should show the value 7 (from 3 + 4 starter graph)
+      const display = page.locator('.react-flow__node-csDisplay')
+      await baseExpect(display.first()).toBeVisible()
+      await baseExpect(display.first()).toContainText('7')
+    },
+  )
 })
 
-test.describe('WASM engine — incremental protocol (W9.2)', () => {
-  test('loadSnapshot returns full results, applyPatch returns incremental', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
+// ── W9.2: Incremental protocol ───────────────────────────────────────────────
 
+test.describe('WASM engine — incremental protocol (W9.2)', () => {
+  test('loadSnapshot returns full results, applyPatch returns incremental', async ({
+    enginePage: page,
+  }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         loadSnapshot: (s: unknown) => Promise<unknown>
@@ -256,10 +250,7 @@ test.describe('WASM engine — incremental protocol (W9.2)', () => {
     expect(inc.totalCount).toBe(3)
   })
 
-  test('setInput updates manual values and re-evaluates', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('setInput updates manual values and re-evaluates', async ({ enginePage: page }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         loadSnapshot: (s: unknown) => Promise<unknown>
@@ -286,10 +277,7 @@ test.describe('WASM engine — incremental protocol (W9.2)', () => {
     expect(r.evaluatedCount).toBe(1)
   })
 
-  test('applyPatch addNode/removeNode', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('applyPatch addNode/removeNode', async ({ enginePage: page }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         loadSnapshot: (s: unknown) => Promise<unknown>
@@ -298,9 +286,7 @@ test.describe('WASM engine — incremental protocol (W9.2)', () => {
 
       await engine.loadSnapshot({
         version: 1,
-        nodes: [
-          { id: 'n1', blockType: 'number', data: { value: 5 } },
-        ],
+        nodes: [{ id: 'n1', blockType: 'number', data: { value: 5 } }],
         edges: [],
       })
 
@@ -309,7 +295,13 @@ test.describe('WASM engine — incremental protocol (W9.2)', () => {
         { op: 'addNode', node: { id: 'disp', blockType: 'display', data: {} } },
         {
           op: 'addEdge',
-          edge: { id: 'e1', source: 'n1', sourceHandle: 'out', target: 'disp', targetHandle: 'value' },
+          edge: {
+            id: 'e1',
+            source: 'n1',
+            sourceHandle: 'out',
+            target: 'disp',
+            targetHandle: 'value',
+          },
         },
       ])) as Record<string, unknown>
 
@@ -334,11 +326,10 @@ test.describe('WASM engine — incremental protocol (W9.2)', () => {
   })
 })
 
-test.describe('WASM engine — correctness contract (W9.3)', () => {
-  test('contract version is exposed in handshake', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
+// ── W9.3: Correctness contract ───────────────────────────────────────────────
 
+test.describe('WASM engine — correctness contract (W9.3)', () => {
+  test('contract version is exposed in handshake', async ({ enginePage: page }) => {
     const contractVersion = await page.evaluate(() => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         contractVersion: number
@@ -350,10 +341,7 @@ test.describe('WASM engine — correctness contract (W9.3)', () => {
     expect(typeof contractVersion).toBe('number')
   })
 
-  test('scalar + vector broadcasting produces vector', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('scalar + vector broadcasting produces vector', async ({ enginePage: page }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         evaluateGraph: (s: unknown, opts?: unknown) => Promise<unknown>
@@ -378,10 +366,7 @@ test.describe('WASM engine — correctness contract (W9.3)', () => {
     expect(r.values.add.value).toEqual([11, 12, 13])
   })
 
-  test('vector length mismatch produces error', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('vector length mismatch produces error', async ({ enginePage: page }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         evaluateGraph: (s: unknown) => Promise<unknown>
@@ -406,10 +391,7 @@ test.describe('WASM engine — correctness contract (W9.3)', () => {
     expect(r.values.add.message).toContain('length')
   })
 
-  test('unary broadcast: sin of vector', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('unary broadcast: sin of vector', async ({ enginePage: page }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         evaluateGraph: (s: unknown) => Promise<unknown>
@@ -432,10 +414,7 @@ test.describe('WASM engine — correctness contract (W9.3)', () => {
     expect(r.values.sin.value).toEqual([0])
   })
 
-  test('trace mode returns trace entries', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('trace mode returns trace entries', async ({ enginePage: page }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         evaluateGraph: (s: unknown, opts?: unknown) => Promise<unknown>
@@ -482,10 +461,9 @@ test.describe('WASM engine — correctness contract (W9.3)', () => {
     }
   })
 
-  test('time budget option is accepted and partial field is returned', async ({ page }) => {
-    await page.goto('/')
-    await waitForEngine(page)
-
+  test('time budget option is accepted and partial field is returned', async ({
+    enginePage: page,
+  }) => {
     // Verify that the engine accepts timeBudgetMs and returns a result
     // with the partial field. WASM evaluation is too fast (~0.1ms for
     // simple graphs) to reliably trigger a timeout in e2e, so we just

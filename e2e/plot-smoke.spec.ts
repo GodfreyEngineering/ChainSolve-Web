@@ -1,15 +1,16 @@
 import { test, expect } from '@playwright/test'
+import { waitForCanvasOrFatal } from './helpers'
 
 test.describe('Plot smoke tests', () => {
   test('plot blocks exist in the block registry', async ({ page }) => {
-    // Navigate to the canvas (scratch mode, no auth required for loading)
+    // Navigate to the canvas (scratch mode, no auth required for loading).
     // Register pageerror handler BEFORE goto so we catch any init-time throws.
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
     await page.goto('/canvas')
-    // canvas-computed renders once the engine has loaded and evaluated the
-    // starter graph (3+4=7) — a deterministic signal replacing waitForTimeout.
-    await page.locator('[data-testid="canvas-computed"]').waitFor({ state: 'attached', timeout: 15_000 })
+    // waitForCanvasOrFatal: resolves once engine + first eval cycle complete
+    // OR throws immediately if engine-fatal appears (instead of timing out).
+    await waitForCanvasOrFatal(page, errors)
     expect(errors).toEqual([])
   })
 
@@ -26,9 +27,9 @@ test.describe('Plot smoke tests', () => {
       }
     })
     await page.goto('/canvas')
-    // Wait for canvas-computed to confirm the full eval cycle (including
-    // lazy Vega-interpreter loading) has completed without CSP violations.
-    await page.locator('[data-testid="canvas-computed"]').waitFor({ state: 'attached', timeout: 15_000 })
+    // Wait for canvas-computed (full eval cycle, including lazy Vega loading)
+    // or fail fast on engine-fatal instead of hitting a 15-second wall.
+    await waitForCanvasOrFatal(page)
     expect(cspErrors).toEqual([])
   })
 

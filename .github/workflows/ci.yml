@@ -6,43 +6,54 @@ on:
   pull_request:
     branches: [main]
 
+# Cancel in-progress runs on the same ref so new pushes don't queue behind stale jobs.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
-    name: Typecheck, Lint & Build
+  # ── Job 1: Rust tests ──────────────────────────────────────────────────────
+  # Pure cargo test — no wasm-pack, no Node.  Runs in parallel with node_checks.
+  rust_tests:
+    name: Rust tests
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      # ── Rust toolchain + wasm-pack ──────────────────────────────
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
 
-      - name: Cache Cargo registry + target
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: cargo-${{ runner.os }}-
-
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      # Swatinem/rust-cache caches ~/.cargo/registry + ~/.cargo/git + target/
+      # keyed on Cargo.lock — better hit rate than the manual actions/cache setup.
+      - uses: Swatinem/rust-cache@v2
 
       - name: Rust tests
         run: cargo test --workspace
 
-      - name: Rust benchmarks (informational)
-        run: cargo bench --package engine-core -- --output-format bencher 2>&1 | tee /tmp/bench-output.txt | head -60
-        continue-on-error: true
+  # ── Job 2: WASM build + Node checks + Vite build ──────────────────────────
+  # Runs in parallel with rust_tests.  Produces the dist/ artifact consumed by
+  # e2e_smoke and deploy.
+  node_checks:
+    name: WASM build + Node checks + Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Build WASM
         run: wasm-pack build crates/engine-wasm --target web --release
 
-      # ── Node.js ─────────────────────────────────────────────────
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -65,11 +76,50 @@ jobs:
       - name: Build
         run: npx tsc -b && npx vite build
 
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # ── Job 3: E2E smoke (Playwright) ─────────────────────────────────────────
+  # Runs only the `smoke` project (smoke.spec.ts: 8 tests).
+  # One WASM compilation for the engine-ready test; all others are instant.
+  # Target: < 90 s on warm runners.
+  e2e_smoke:
+    name: E2E smoke
+    runs-on: ubuntu-latest
+    needs: [node_checks]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
       - name: Install Playwright browsers
+        # Always run for system deps; browser binary is served from cache if present.
         run: npx playwright install --with-deps chromium
 
       - name: E2E smoke tests
-        run: npm run test:e2e
+        run: npx playwright test --project=smoke
 
       - name: Upload Playwright report
         if: failure()
@@ -81,30 +131,19 @@ jobs:
             playwright-report/
           retention-days: 7
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
-          retention-days: 7
-
-  # ── Deploy ────────────────────────────────────────────────────────────────
-  # Runs only on direct pushes to main (not on PRs) and only after every check
-  # in the build job has passed (typecheck, lint, format, Rust tests, e2e).
-  # Wrangler Direct Upload bypasses the Cloudflare Git-integrated build image
-  # (which lacks Rust/wasm-pack) and instead ships the artifact produced above.
+  # ── Job 4: Deploy → Cloudflare Pages ──────────────────────────────────────
+  # Runs only on direct pushes to main, and only after all checks pass.
   deploy:
     name: Deploy → Cloudflare Pages
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [rust_tests, node_checks, e2e_smoke]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - uses: actions/checkout@v4
         # Checkout is required so the `functions/` directory is present.
-        # Wrangler compiles Pages Functions (TypeScript under functions/) at
-        # deploy time using its own bundler; static assets come from the
-        # artifact downloaded below.
+        # Wrangler compiles Pages Functions at deploy time using its own bundler;
+        # static assets come from the artifact downloaded below.
 
       - uses: actions/setup-node@v4
         with:

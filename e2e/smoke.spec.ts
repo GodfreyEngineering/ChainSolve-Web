@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { waitForEngineOrFatal } from './helpers'
 
 test.describe('Smoke tests', () => {
   test('index.html loads and renders #root', async ({ page }) => {
@@ -49,10 +50,10 @@ test.describe('Smoke tests', () => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
     await page.goto('/')
-    // Wait for the deterministic engine-ready sentinel instead of a fixed timeout.
-    // engine-ready renders only after WASM init resolves, so any init-time errors
-    // will have already fired the pageerror handler before this resolves.
-    await page.locator('[data-testid="engine-ready"]').waitFor({ state: 'attached', timeout: 15_000 })
+    // waitForEngineOrFatal: resolves when engine-ready appears (WASM init done)
+    // OR throws immediately if engine-fatal appears, printing the fatal message.
+    // 60-second budget covers cold CI runners where first WASM compilation is slow.
+    await waitForEngineOrFatal(page, errors)
     expect(errors).toEqual([])
   })
 })
