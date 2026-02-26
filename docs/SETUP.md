@@ -107,24 +107,33 @@ From **Project Settings → API**:
 
 ---
 
-## 5. Cloudflare Pages — Deploy
+## 5. Cloudflare Pages — Project Setup
 
-### 5a. Connect your repository
+> **How deploys work:** GitHub Actions builds the project (Rust + WASM + Vite)
+> and pushes the output to Cloudflare via Wrangler Direct Upload. The Cloudflare
+> Git-integrated build image is **never used** — see §17 for full details.
 
-1. [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages → Create → Pages → Connect to Git**
-2. Select your GitHub/GitLab repository
-3. Use these **build settings**:
+### 5a. Create the Pages project
 
-   | Setting | Value |
-   |---------|-------|
-   | Framework preset | None |
-   | Build command | `npm run build` |
-   | Build output directory | `dist` |
-   | Root directory | *(leave blank)* |
+**Option A — existing project (migrating from Git-integrated builds):**
+
+1. Open [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Workers & Pages → chainsolve-web → Settings → Builds**
+2. **Disable automatic builds** (the setting may be labelled "Pause builds" or
+   "Disconnect Git"). This stops Cloudflare from attempting its own build when
+   you push — GitHub Actions takes over that role.
+3. The project itself (and all its environment variables) stays intact.
+
+**Option B — fresh project (no existing Cloudflare project):**
+
+GitHub Actions creates the project automatically on the first successful deploy
+via `wrangler pages deploy --project-name=chainsolve-web`. No manual project
+creation is needed.
 
 ### 5b. Add environment variables
 
-Go to **Settings → Environment variables** and add **all** of the following for **Production** (and optionally Preview):
+In Cloudflare Dashboard → Workers & Pages → `chainsolve-web` →
+**Settings → Environment variables**, add all of the following for **both
+Production and Preview** (they do not inherit from each other):
 
 | Variable | Where to find it |
 |----------|-----------------|
@@ -136,11 +145,22 @@ Go to **Settings → Environment variables** and add **all** of the following fo
 | `STRIPE_WEBHOOK_SECRET` | Stripe → Webhooks → signing secret |
 | `STRIPE_PRICE_ID_PRO_MONTHLY` | Stripe → Products → your price ID |
 
-> **Note**: Variables prefixed `VITE_` are injected into the browser bundle at build time. All others are server-side only (Functions).
+> **Note**: Variables prefixed `VITE_` are injected into the browser bundle at
+> build time by Vite (they are baked into `dist/`). All others are runtime
+> secrets used exclusively by Pages Functions.
 
-### 5c. Deploy
+### 5c. Add GitHub Actions secrets
 
-Click **Save and Deploy**. The first deploy will take ~1 minute.
+In your GitHub repository → **Settings → Secrets and variables → Actions**,
+add two repository secrets (see §17 for details on how to obtain them):
+
+| Secret                  | Description                                           |
+|-------------------------|-------------------------------------------------------|
+| `CLOUDFLARE_API_TOKEN`  | CF API token with *Cloudflare Pages: Edit* permission |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID                            |
+
+Once these are in place, pushing to `main` triggers the full CI + deploy pipeline
+automatically.
 
 ---
 
@@ -725,3 +745,88 @@ Cloudflare Pages has **separate** environment variable sets for Production and
 Preview. They do **not** inherit from each other. If billing works on one
 environment but not the other, check that all 7 env vars (see §5b) are set for
 **both** environments in Settings → Environment Variables.
+
+---
+
+## 17. Deployments (GitHub Actions → Cloudflare Pages)
+
+The Cloudflare Pages Git-integrated build image does **not** have Rust or
+wasm-pack installed, so it cannot run `npm run build`. All builds and deployments
+are therefore driven exclusively by GitHub Actions using **Wrangler Direct Upload**.
+
+### How it works
+
+1. Every push to `main` runs the `CI / Typecheck, Lint & Build` job:
+   Rust tests → WASM build → TypeScript typecheck → lint → format check →
+   Vite production build → Playwright e2e.
+2. If (and only if) all checks pass, the `CI / Deploy → Cloudflare Pages` job
+   runs next. It downloads the already-built `dist/` artifact, then calls:
+   ```
+   wrangler pages deploy dist --project-name=chainsolve-web --branch=main
+   ```
+3. Wrangler uploads `dist/` as static assets and compiles `functions/` (TypeScript
+   Pages Functions) using its own bundler. The `wrangler.jsonc` at the repo root
+   provides the `compatibility_date`.
+4. Cloudflare Pages serves the result from its edge network.
+
+> **Key gotcha — Pages Functions:** `functions/` must exist in the working
+> directory where `wrangler pages deploy` is run (the repo root), **not** inside
+> `dist/`. The deploy job checks out the repo so `functions/` is always present.
+
+### Required GitHub secrets
+
+Add these in your GitHub repository →
+**Settings → Secrets and variables → Actions → Repository secrets**:
+
+| Secret                  | How to obtain                                                          |
+|-------------------------|------------------------------------------------------------------------|
+| `CLOUDFLARE_API_TOKEN`  | Cloudflare Dashboard → My Profile → API Tokens → Create Token.        |
+|                         | Use the **Edit Cloudflare Workers** template, then scope it to         |
+|                         | *Cloudflare Pages: Edit* on your account. Copy the token immediately. |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Dashboard → right-hand sidebar on any zone or Workers page. |
+|                         | Alternatively: Dashboard URL contains `/ACCOUNT_ID/`.                 |
+
+### Required manual step in Cloudflare UI
+
+**Disable Git-integrated auto-builds** so Cloudflare never attempts to build the
+repo itself:
+
+1. [Cloudflare Dashboard](https://dash.cloudflare.com/) →
+   **Workers & Pages → chainsolve-web → Settings → Builds**
+2. Click **Disable automatic builds** (or "Pause builds" / "Disconnect Git",
+   depending on the Dashboard version).
+
+> Failing to disable this means every push to `main` triggers *two* deploy
+> attempts: one from GitHub Actions (succeeds) and one from Cloudflare
+> (fails with `wasm-pack: not found`). The Cloudflare failure is cosmetic but
+> creates noise in the deployment history.
+
+### Re-deploying manually
+
+To redeploy without a code change (e.g. after updating a Cloudflare environment
+variable):
+
+1. GitHub → **Actions** tab → select the `CI` workflow
+2. Find the last successful run on `main`
+3. Click **Re-run jobs → Re-run all jobs**
+
+This re-runs the full CI pipeline and, on success, re-deploys to Cloudflare.
+
+### Preview deployments (PRs)
+
+Pull requests trigger the `build` job but **not** the `deploy` job (the deploy
+condition requires `github.event_name == 'push'` on `main`). PR builds are
+verification-only; no Cloudflare deployment is created.
+
+If you need per-PR preview URLs in the future, add a second deploy job with
+`--branch=${{ github.head_ref }}` and a separate Cloudflare Pages preview
+environment.
+
+### Troubleshooting deploy failures
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `Error: No such file or directory 'dist'` | Download artifact step failed or build job failed before uploading | Check the `build` job logs; re-run if transient |
+| `Authentication error` | `CLOUDFLARE_API_TOKEN` missing or expired | Re-create the token in Cloudflare → API Tokens, update the GitHub secret |
+| `Project not found` | First-ever deploy on a fresh account | Run once locally: `npx wrangler pages project create chainsolve-web` |
+| Functions 500 / 1101 after deploy | Cloudflare env vars missing | Add all 7 vars in CF Dashboard → Settings → Environment Variables → Production |

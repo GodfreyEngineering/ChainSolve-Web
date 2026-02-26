@@ -87,3 +87,46 @@ jobs:
           name: dist
           path: dist/
           retention-days: 7
+
+  # ── Deploy ────────────────────────────────────────────────────────────────
+  # Runs only on direct pushes to main (not on PRs) and only after every check
+  # in the build job has passed (typecheck, lint, format, Rust tests, e2e).
+  # Wrangler Direct Upload bypasses the Cloudflare Git-integrated build image
+  # (which lacks Rust/wasm-pack) and instead ships the artifact produced above.
+  deploy:
+    name: Deploy → Cloudflare Pages
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+        # Checkout is required so the `functions/` directory is present.
+        # Wrangler compiles Pages Functions (TypeScript under functions/) at
+        # deploy time using its own bundler; static assets come from the
+        # artifact downloaded below.
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+        # node_modules must exist so wrangler's esbuild can resolve imports
+        # inside functions/ (e.g. `stripe`, `@supabase/supabase-js`).
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Deploy static assets from dist/ as production (--branch=main).
+          # Wrangler picks up functions/ from the working directory automatically.
+          # wrangler.jsonc provides the compatibility_date.
+          command: pages deploy dist --project-name=chainsolve-web --branch=main
