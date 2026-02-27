@@ -212,6 +212,68 @@ describe('createEngine (mock worker)', () => {
     expect(reloadMsg).toBeDefined()
   })
 
+  it('partial_result_is_resolved: partial=true incremental result resolves the promise', async () => {
+    const { engine, getWorker } = await makeEngine()
+    const w = getWorker()!
+
+    // Start applyPatch.
+    const patchPromise = engine.applyPatch([])
+    await Promise.resolve()
+
+    // Worker returns a partial result (engine hit time budget).
+    const partialRes = incrementalResult(true)
+    w.dispatch({ type: 'incremental', requestId: 0, result: partialRes })
+
+    const resolved = await patchPromise
+    expect(resolved.partial).toBe(true)
+    expect(resolved.changedValues).toEqual({})
+  })
+
+  it('progress_event_dispatched: progress messages invoke registered listeners', async () => {
+    const { engine, getWorker } = await makeEngine()
+    const w = getWorker()!
+
+    const received: number[] = []
+    const unsub = engine.onProgress((ev) => received.push(ev.evaluatedNodes))
+
+    // Start a request so there's an active requestId.
+    engine.applyPatch([]).catch(() => {})
+    await Promise.resolve()
+
+    // Simulate two progress messages.
+    w.dispatch({
+      type: 'progress',
+      requestId: 0,
+      evaluatedNodes: 3,
+      totalNodesEstimate: 10,
+      elapsedMs: 5,
+    })
+    w.dispatch({
+      type: 'progress',
+      requestId: 0,
+      evaluatedNodes: 7,
+      totalNodesEstimate: 10,
+      elapsedMs: 12,
+    })
+
+    expect(received).toEqual([3, 7])
+
+    unsub()
+
+    // After unsubscribe, no more events.
+    w.dispatch({
+      type: 'progress',
+      requestId: 0,
+      evaluatedNodes: 10,
+      totalNodesEstimate: 10,
+      elapsedMs: 20,
+    })
+    expect(received).toHaveLength(2)
+
+    // Clean up.
+    engine.dispose()
+  })
+
   it('dispose_clears_watchdog_and_terminates', async () => {
     const { engine, getWorker } = await makeEngine()
     const w = getWorker()!
