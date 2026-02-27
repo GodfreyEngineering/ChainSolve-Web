@@ -8,27 +8,7 @@
 
 import { buildChainsolveJsonExport, validateNoSecrets, type BuildChainsolveJsonArgs } from './model'
 import { stableStringify } from './hashes'
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
-
-function downloadBlob(blob: Blob, filename: string): void {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
-
-function safeName(name: string): string {
-  return name.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80)
-}
-
-function formatTimestampForFilename(iso: string): string {
-  return iso.replace(/[-:T]/g, '').slice(0, 13)
-}
+import { downloadBlob, safeName, formatTimestampForFilename } from '../export-file-utils'
 
 // ── Export function ─────────────────────────────────────────────────────────
 

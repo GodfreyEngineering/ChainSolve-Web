@@ -9,6 +9,7 @@
 import type { PDFFont, PDFPage } from '../pdf-loader'
 import { loadPdfLib } from '../pdf-loader'
 import type { AuditModel, ProjectAuditModel } from './auditModel'
+import { downloadBlob, safeName, formatTimestampForFilename } from '../export-file-utils'
 
 /** pdf-lib rgb return type — avoids re-exporting the enum-based Color union. */
 type RGBColor = ReturnType<Awaited<ReturnType<typeof loadPdfLib>>['rgb']>
@@ -29,25 +30,6 @@ const SECTION_GAP = 20
 const FOOTER_Y = 30
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-function downloadBlob(blob: Blob, filename: string): void {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
-
-function safeName(name: string): string {
-  return name.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80)
-}
-
-function formatTimestampForFilename(iso: string): string {
-  return iso.replace(/[-:T]/g, '').slice(0, 13)
-}
 
 /** Truncate text to fit within maxWidth using the given font/size. */
 function truncateText(text: string, font: PDFFont, size: number, maxWidth: number): string {

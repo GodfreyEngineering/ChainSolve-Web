@@ -104,7 +104,7 @@ Claude MUST:
     - verify-ci PASS
     - docs updated (REPO_MAP updated)
 
-- [x] RH-4: Standardize “export infrastructure”
+- [x] RH-4: Standardize “export infrastructure”  <!-- completed 2026-02-27 -->
   - Ensure exports live in:
     - `src/lib/pdf/*`
     - `src/lib/xlsx/*`

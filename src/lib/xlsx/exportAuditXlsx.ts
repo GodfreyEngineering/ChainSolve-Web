@@ -10,6 +10,7 @@ import type { AuditModel } from '../pdf/auditModel'
 import type { VariablesMap } from '../variables'
 import { loadXlsx } from '../xlsx-loader'
 import { buildAuditWorkbook } from './xlsxModel'
+import { safeName, formatTimestampForFilename } from '../export-file-utils'
 
 /**
  * Build and download an audit .xlsx for a single canvas.
@@ -18,9 +19,9 @@ export async function exportAuditXlsx(model: AuditModel, variables: VariablesMap
   const { writeXlsxFile } = await loadXlsx()
   const workbook = buildAuditWorkbook(model, variables)
 
-  const safeName = (model.meta.projectName || 'ChainSolve').replace(/[^a-zA-Z0-9_-]/g, '_')
-  const ts = model.meta.exportTimestamp.replace(/[:.]/g, '').replace('T', 'T').slice(0, 13)
-  const fileName = `${safeName}_${ts}_audit.xlsx`
+  const name = safeName(model.meta.projectName || 'ChainSolve')
+  const ts = formatTimestampForFilename(model.meta.exportTimestamp)
+  const fileName = `${name}_${ts}_audit.xlsx`
 
   await writeXlsxFile(workbook.sheets, {
     sheets: workbook.sheetNames,

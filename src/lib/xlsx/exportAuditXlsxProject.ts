@@ -11,6 +11,7 @@ import type { VariablesMap } from '../variables'
 import type { TableExport } from './xlsxModel'
 import { loadXlsx } from '../xlsx-loader'
 import { buildProjectWorkbook } from './xlsxModel'
+import { safeName, formatTimestampForFilename } from '../export-file-utils'
 
 /**
  * Build and download a project-level audit .xlsx with all canvases.
@@ -23,9 +24,9 @@ export async function exportAuditXlsxProject(
   const { writeXlsxFile } = await loadXlsx()
   const workbook = buildProjectWorkbook(model, variables, tables)
 
-  const safeName = (model.meta.projectName || 'ChainSolve').replace(/[^a-zA-Z0-9_-]/g, '_')
-  const ts = model.meta.exportTimestamp.replace(/[:.]/g, '').replace('T', 'T').slice(0, 13)
-  const fileName = `${safeName}_${ts}_project_audit.xlsx`
+  const name = safeName(model.meta.projectName || 'ChainSolve')
+  const ts = formatTimestampForFilename(model.meta.exportTimestamp)
+  const fileName = `${name}_${ts}_project_audit.xlsx`
 
   await writeXlsxFile(workbook.sheets, {
     sheets: workbook.sheetNames,
