@@ -12,6 +12,81 @@
  * Migration from V3 → V4 is handled by `migrateV3toV4()`.
  */
 
+// ── Validation ──────────────────────────────────────────────────────────────
+
+export interface CanvasValidationResult {
+  ok: boolean
+  errors: string[]
+}
+
+/**
+ * Validate that `raw` conforms to the schemaVersion 4 CanvasJSON shape.
+ *
+ * Checks:
+ *   - Plain object (not null, not array)
+ *   - schemaVersion === 4
+ *   - canvasId: non-empty string
+ *   - projectId: non-empty string
+ *   - nodes: array
+ *   - edges: array
+ */
+export function validateCanvasShape(raw: unknown): CanvasValidationResult {
+  const errors: string[] = []
+
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
+    return { ok: false, errors: ['canvas JSON must be a plain object'] }
+  }
+
+  const obj = raw as Record<string, unknown>
+
+  if (obj.schemaVersion !== 4) {
+    errors.push(`schemaVersion must be 4 (got ${String(obj.schemaVersion)})`)
+  }
+
+  if (typeof obj.canvasId !== 'string' || obj.canvasId.length === 0) {
+    errors.push('canvasId must be a non-empty string')
+  }
+
+  if (typeof obj.projectId !== 'string' || obj.projectId.length === 0) {
+    errors.push('projectId must be a non-empty string')
+  }
+
+  if (!Array.isArray(obj.nodes)) {
+    errors.push('nodes must be an array')
+  }
+
+  if (!Array.isArray(obj.edges)) {
+    errors.push('edges must be an array')
+  }
+
+  return { ok: errors.length === 0, errors }
+}
+
+/**
+ * Recursively replace non-finite numbers (NaN, Infinity, -Infinity) with
+ * `null` so they can safely round-trip through JSON.stringify.
+ *
+ * ReactFlow node and edge data can contain arbitrary nested objects; this
+ * guard ensures we never persist a value that would silently become `null`
+ * or cause a JSON.parse error depending on the serialiser.
+ */
+export function sanitizeJsonNumbers(value: unknown): unknown {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null
+  }
+  if (Array.isArray(value)) {
+    return value.map(sanitizeJsonNumbers)
+  }
+  if (value !== null && typeof value === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = sanitizeJsonNumbers(v)
+    }
+    return out
+  }
+  return value
+}
+
 // ── Types ───────────────────────────────────────────────────────────────────
 
 /**
@@ -41,7 +116,11 @@ export function buildCanvasJson(canvasId: string, projectId: string): CanvasJSON
   }
 }
 
-/** Build a CanvasJSON from existing nodes/edges. */
+/** Build a CanvasJSON from existing nodes/edges.
+ *
+ * Sanitizes NaN/Infinity in node and edge data before serialisation so that
+ * no non-finite numbers are ever persisted to storage.
+ */
 export function buildCanvasJsonFromGraph(
   canvasId: string,
   projectId: string,
@@ -52,8 +131,8 @@ export function buildCanvasJsonFromGraph(
     schemaVersion: 4,
     canvasId,
     projectId,
-    nodes,
-    edges,
+    nodes: sanitizeJsonNumbers(nodes) as unknown[],
+    edges: sanitizeJsonNumbers(edges) as unknown[],
     datasetRefs: [],
   }
 }
@@ -91,8 +170,12 @@ export function migrateV3toV4(json: unknown, canvasId: string, projectId: string
 
 /**
  * Parse and validate a raw canvas JSON download.
- * Returns a valid CanvasJSON or throws on unsupported versions.
- * Returns an empty canvas if `raw` is null (file missing).
+ *
+ * - Returns an empty canvas if `raw` is null/undefined (file missing).
+ * - Migrates V1–V3 transparently.
+ * - For V4: validates shape; on failure logs errors and returns an empty
+ *   canvas (no crash) so the caller can show an error report without
+ *   overwriting the original storage file.
  */
 export function parseCanvasJson(raw: unknown, canvasId: string, projectId: string): CanvasJSON {
   if (raw === null || raw === undefined) {
@@ -102,6 +185,11 @@ export function parseCanvasJson(raw: unknown, canvasId: string, projectId: strin
   const obj = raw as Record<string, unknown>
 
   if (obj.schemaVersion === 4) {
+    const result = validateCanvasShape(raw)
+    if (!result.ok) {
+      console.warn('[canvas] Invalid V4 canvas JSON — using empty canvas. Errors:', result.errors)
+      return buildCanvasJson(canvasId, projectId)
+    }
     return obj as unknown as CanvasJSON
   }
 

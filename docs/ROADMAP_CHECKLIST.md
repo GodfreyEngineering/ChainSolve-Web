@@ -144,7 +144,7 @@ Claude MUST:
     - Explain what changed (at minimum timestamps and affected canvases)
   - Tests: conflict handling logic unit tests
 
-- [ ] P024: Canvas JSON validator (pre-save + on-load)
+- [x] P024: Canvas JSON validator (pre-save + on-load)
   - Validate schemaVersion 4 shape
   - Block NaN/Infinity persistence
   - If invalid load: preserve original file and show error report (no crash)
