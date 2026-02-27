@@ -96,7 +96,7 @@ Claude MUST:
     - `git status` clean after normal dev actions
     - `verify-ci` PASS
 
-- [ ] RH-3: Delete or quarantine true dead code paths (surgical)
+- [x] RH-3: Delete or quarantine true dead code paths (surgical)
   - Remove stale stubs / unused legacy folders (only what RH-1 proves unused)
   - If unsure, move to `src/_legacy_quarantine/` with README explaining why
   - Acceptance:
@@ -104,7 +104,7 @@ Claude MUST:
     - verify-ci PASS
     - docs updated (REPO_MAP updated)
 
-- [ ] RH-4: Standardize “export infrastructure”
+- [x] RH-4: Standardize “export infrastructure”
   - Ensure exports live in:
     - `src/lib/pdf/*`
     - `src/lib/xlsx/*`
