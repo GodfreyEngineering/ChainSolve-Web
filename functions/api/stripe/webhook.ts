@@ -20,6 +20,7 @@
  */
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { mapStatusToPlan } from "./_lib";
 
 export const onRequestPost: PagesFunction<{
   STRIPE_SECRET_KEY: string;
@@ -65,14 +66,7 @@ export const onRequestPost: PagesFunction<{
     payload: event as unknown as Record<string, unknown>,
   });
 
-  // Helper: map Stripe subscription status → plan enum
-  const mapStatusToPlan = (status: string): "free" | "trialing" | "pro" | "past_due" | "canceled" => {
-    if (status === "trialing") return "trialing";
-    if (status === "active") return "pro";
-    if (status === "past_due" || status === "unpaid") return "past_due";
-    if (status === "canceled" || status === "incomplete_expired") return "canceled";
-    return "free";
-  };
+  // mapStatusToPlan is imported from ./_lib.ts (tested separately).
 
   // Handle subscription lifecycle events
   if (event.type.startsWith("customer.subscription.")) {

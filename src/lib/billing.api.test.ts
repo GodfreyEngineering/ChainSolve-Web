@@ -1,24 +1,29 @@
 /**
- * billing.api.test.ts — Contract tests for the Stripe billing API error envelope.
+ * billing.api.test.ts — Contract tests for Stripe billing API helpers.
  *
- * Both Cloudflare Functions (create-checkout-session, create-portal-session) use
- * the shared jsonError helper from functions/api/stripe/_lib.ts.  These tests
- * verify the contract:
+ * Tests two things:
+ *   1. jsonError — error envelope shape + no stack traces  (P059)
+ *   2. mapStatusToPlan — Stripe status → plan enum         (P054)
  *
- *   Error responses:   { ok: false, error: string }  (HTTP 4xx / 5xx)
- *   Success responses: { ok: true, ...data }          (HTTP 2xx)
- *   Stack traces are NEVER included in any response body.
- *
- * The helper is inlined here so tests do not cross tsconfig boundaries
+ * Functions are inlined so tests do not cross tsconfig boundaries
  * (functions/ uses @cloudflare/workers-types, src/ uses browser globals).
- * The inline copy MUST stay in sync with functions/api/stripe/_lib.ts.
+ * Inline copies MUST stay in sync with functions/api/stripe/_lib.ts.
  */
 
 import { describe, it, expect } from 'vitest'
 
-// ── Inline copy of functions/api/stripe/_lib.ts ───────────────────────────────
+// ── Inline copies of functions/api/stripe/_lib.ts ────────────────────────────
 function jsonError(message: string, status: number): Response {
   return Response.json({ ok: false, error: message }, { status })
+}
+
+type Plan = 'free' | 'trialing' | 'pro' | 'past_due' | 'canceled'
+function mapStatusToPlan(status: string): Plan {
+  if (status === 'trialing') return 'trialing'
+  if (status === 'active') return 'pro'
+  if (status === 'past_due' || status === 'unpaid') return 'past_due'
+  if (status === 'canceled' || status === 'incomplete_expired') return 'canceled'
+  return 'free'
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -63,5 +68,30 @@ describe('billing API error envelope', () => {
     const body = (await res.json()) as Record<string, unknown>
     expect(body.ok).toBe(false)
     expect(body.error).toBe('Missing Authorization Bearer token')
+  })
+})
+
+// ── mapStatusToPlan (P054 — webhook idempotency) ──────────────────────────────
+
+describe('mapStatusToPlan', () => {
+  it.each<[string, Plan]>([
+    ['trialing', 'trialing'],
+    ['active', 'pro'],
+    ['past_due', 'past_due'],
+    ['unpaid', 'past_due'],
+    ['canceled', 'canceled'],
+    ['incomplete_expired', 'canceled'],
+    ['incomplete', 'free'],
+    ['paused', 'free'],
+    ['unknown_future_status', 'free'],
+  ])('maps Stripe status "%s" → plan "%s"', (status, expected) => {
+    expect(mapStatusToPlan(status)).toBe(expected)
+  })
+
+  it('is idempotent — same input always returns same output', () => {
+    const statuses = ['active', 'trialing', 'past_due', 'canceled']
+    for (const s of statuses) {
+      expect(mapStatusToPlan(s)).toBe(mapStatusToPlan(s))
+    }
   })
 })

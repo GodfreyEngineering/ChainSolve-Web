@@ -12,3 +12,19 @@
 export function jsonError(message: string, status: number): Response {
   return Response.json({ ok: false, error: message }, { status })
 }
+
+// ── Webhook helpers ───────────────────────────────────────────────────────────
+
+export type Plan = 'free' | 'trialing' | 'pro' | 'past_due' | 'canceled'
+
+/**
+ * Map a Stripe subscription status string to the app's plan enum.
+ * Extracted so it can be unit-tested independently of the Worker runtime.
+ */
+export function mapStatusToPlan(status: string): Plan {
+  if (status === 'trialing') return 'trialing'
+  if (status === 'active') return 'pro'
+  if (status === 'past_due' || status === 'unpaid') return 'past_due'
+  if (status === 'canceled' || status === 'incomplete_expired') return 'canceled'
+  return 'free'
+}
