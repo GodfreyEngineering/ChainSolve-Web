@@ -17,6 +17,7 @@
  */
 
 import { supabase } from './supabase'
+import { assertSafeStoragePath } from './validateStoragePath'
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
@@ -167,6 +168,7 @@ export async function getSignedDownloadUrl(
   storage_key: string,
   expiresSeconds: number,
 ): Promise<string> {
+  assertSafeStoragePath(storage_key)
   await requireSession()
 
   const { data, error } = await supabase.storage
@@ -189,6 +191,7 @@ export async function downloadAssetBytes(
   storagePath: string,
   bucket: 'uploads' | 'projects' = 'uploads',
 ): Promise<Uint8Array> {
+  assertSafeStoragePath(storagePath)
   await requireSession()
 
   const { data, error } = await supabase.storage.from(bucket).download(storagePath)

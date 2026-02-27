@@ -150,7 +150,7 @@ Claude MUST:
   - If invalid load: preserve original file and show error report (no crash)
   - Tests: validator suite, migration compatibility tests
 
-- [ ] P025: Storage path traversal rejection + encoding bypass tests
+- [x] P025: Storage path traversal rejection + encoding bypass tests <!-- completed 2026-02-27 -->
   - Normalize and reject `..`, encoded traversal, invalid prefix
   - Tests: path sanitizer unit tests
 
