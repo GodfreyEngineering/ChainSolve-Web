@@ -312,7 +312,7 @@ Claude MUST:
   - Canvases used / allowed
   - Storage usage (optional)
 
-- [ ] P058: Trial UX (SHOULD)
+- [x] P058: Trial UX (SHOULD)
   - Banner + expiry warning
 
 - [ ] P059: Billing error UX
@@ -349,7 +349,7 @@ Claude MUST:
 - [ ] P065: “What’s New” panel (SHOULD)
   - Based on changelog entries
 
-- [ ] P066: Empty states (MUST)
+- [x] P066: Empty states (MUST)
   - Projects page empty state
   - Canvas empty state
   - Inspector empty state
@@ -358,7 +358,7 @@ Claude MUST:
 - [ ] P067: Command palette ranking + synonyms (SHOULD)
 - [ ] P068: Favorites + recently used blocks (COULD)
 - [ ] P069: Quick-add palette improvements (SHOULD)
-- [ ] P070: Docs change process enforcement (MUST)
+- [x] P070: Docs change process enforcement (MUST)
   - Add reminder/checklist in PR template or CI doc step
 
 ## A7 — Accessibility + i18n quality gates
