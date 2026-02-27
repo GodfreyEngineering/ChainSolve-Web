@@ -34,6 +34,20 @@ void i18n
       caches: ['localStorage'],
       lookupLocalStorage: 'cs:lang',
     },
+    // Synchronous init: with all resources pre-bundled (static JSON imports)
+    // i18next resolves synchronously when initImmediate is false.  React
+    // therefore renders with the correct locale on the very first pass,
+    // eliminating the English flash for non-English users.
+    initImmediate: false,
   })
+
+// Keep <html lang> in sync when the user changes language in Settings.
+// The pre-paint value is written by boot.ts; this listener handles
+// subsequent changes without a page reload.
+i18n.on('languageChanged', (lng: string) => {
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = lng.slice(0, 2)
+  }
+})
 
 export default i18n

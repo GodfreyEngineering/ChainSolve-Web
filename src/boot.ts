@@ -28,6 +28,21 @@
   document.documentElement.style.colorScheme = resolved
 }
 
+// Apply saved language to <html lang> before React renders (no FOUC).
+// i18next uses 'cs:lang' as its localStorage key (see src/i18n/config.ts).
+// This runs synchronously, so screen-readers and browser translations see
+// the correct lang attribute from the very first paint.
+{
+  let lang = 'en'
+  try {
+    const stored = localStorage.getItem('cs:lang')
+    if (stored) lang = stored.slice(0, 2)
+  } catch {
+    // ignore
+  }
+  document.documentElement.lang = lang
+}
+
 function showBootError(message: string) {
   const root = document.getElementById('root')
   if (!root) return

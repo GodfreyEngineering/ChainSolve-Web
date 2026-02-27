@@ -371,7 +371,7 @@ Claude MUST:
 - [x] P077: i18n lint rule (no hard-coded strings)
 - [x] P078: missing-i18n keys detector + CI hook
 - [x] P079: Locale-aware number formatting (display-only) (SHOULD)
-- [ ] P080: Language selection persists + pre-paint apply (no FOUC)
+- [x] P080: Language selection persists + pre-paint apply (no FOUC)
 
 ## A8 — Performance + scale (500–1000 nodes)
 - [ ] P081: Perf harness (generate/load 500/1000-node graphs)
