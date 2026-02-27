@@ -363,7 +363,7 @@ Claude MUST:
 
 ## A7 — Accessibility + i18n quality gates
 - [ ] P071: Focus order audit + fixes
-- [ ] P072: Menubar ARIA + keyboard nav regression tests
+- [x] P072: Menubar ARIA + keyboard nav regression tests
 - [x] P073: Modal focus trap + ESC close + aria-live status
 - [ ] P074: Contrast pass toward WCAG AA
 - [x] P075: prefers-reduced-motion reliability

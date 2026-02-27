@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { isSeparator, isSubmenu, type MenuEntry, type MenuItem } from './dropdownMenuTypes'
+import {
+  computeNextFocusIdx,
+  isSeparator,
+  isSubmenu,
+  type MenuEntry,
+  type MenuItem,
+} from './dropdownMenuTypes'
 
 // Re-export types only (functions live in dropdownMenuTypes.ts)
 export type { MenuEntry, MenuItem, MenuSeparator, MenuSubmenu } from './dropdownMenuTypes'
@@ -32,11 +38,6 @@ export function DropdownMenu({
     setSubOpen(null)
     onOpenChange(false)
   }, [onOpenChange])
-
-  // Actionable items (not separators) for keyboard nav
-  const actionable = items
-    .map((e, i) => ({ entry: e, index: i }))
-    .filter(({ entry }) => !isSeparator(entry))
 
   // Close on outside click
   useEffect(() => {
@@ -87,19 +88,15 @@ export function DropdownMenu({
         return
       }
 
-      const currentActionIdx = actionable.findIndex((a) => a.index === focusIdx)
-
       switch (e.key) {
         case 'ArrowDown': {
           e.preventDefault()
-          const next = currentActionIdx < actionable.length - 1 ? currentActionIdx + 1 : 0
-          setFocusIdx(actionable[next].index)
+          setFocusIdx(computeNextFocusIdx(focusIdx, 'ArrowDown', items))
           break
         }
         case 'ArrowUp': {
           e.preventDefault()
-          const prev = currentActionIdx > 0 ? currentActionIdx - 1 : actionable.length - 1
-          setFocusIdx(actionable[prev].index)
+          setFocusIdx(computeNextFocusIdx(focusIdx, 'ArrowUp', items))
           break
         }
         case 'ArrowRight': {
@@ -132,7 +129,7 @@ export function DropdownMenu({
         }
       }
     },
-    [open, focusIdx, items, actionable, onOpenChange, doClose, subOpen],
+    [open, focusIdx, items, onOpenChange, doClose, subOpen],
   )
 
   return (
