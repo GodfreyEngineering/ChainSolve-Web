@@ -315,7 +315,7 @@ Claude MUST:
 - [x] P058: Trial UX (SHOULD)
   - Banner + expiry warning
 
-- [ ] P059: Billing error UX
+- [x] P059: Billing error UX
   - Consistent API error envelope
   - No stack traces in prod
 
