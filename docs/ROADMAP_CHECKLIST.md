@@ -154,7 +154,7 @@ Claude MUST:
   - Normalize and reject `..`, encoded traversal, invalid prefix
   - Tests: path sanitizer unit tests
 
-- [ ] P026: Variables JSON shape validator (client + service layer)
+- [x] P026: Variables JSON shape validator (client + service layer)
   - Enforce `ProjectVariable` shape, finite values, unique names (case-insensitive)
   - Tests: unit tests
 

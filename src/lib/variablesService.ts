@@ -5,6 +5,7 @@
  */
 
 import type { VariablesMap } from './variables'
+import { safeParseVariablesMap } from './validateVariables'
 import { supabase } from './supabase'
 import { dlog } from '../observability/debugLog'
 
@@ -21,7 +22,8 @@ export async function loadVariables(projectId: string): Promise<VariablesMap> {
     dlog.error('variables', 'Load failed', { projectId, error: error.message })
     throw new Error(`Failed to load variables: ${error.message}`)
   }
-  const result = ((data as { variables: VariablesMap } | null)?.variables ?? {}) as VariablesMap
+  const raw = (data as { variables: unknown } | null)?.variables ?? {}
+  const result = safeParseVariablesMap(raw)
   dlog.info('variables', 'Variables loaded', { projectId, count: Object.keys(result).length })
   return result
 }
