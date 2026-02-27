@@ -129,7 +129,7 @@ Claude MUST:
     - integration test for save retry path (mock adapter)
   - Docs: requirements §Project mgmt / reliability
 
-- [ ] P022: Autosave contract (≤5s loss) + crash-safe tests
+- [x] P022: Autosave contract (≤5s loss) + crash-safe tests <!-- completed 2026-02-27 -->
   - Debounced autosave schedule
   - Ensure crash loses ≤5s (best effort)
   - Ensure autosave doesn’t thrash large graphs

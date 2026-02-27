@@ -62,6 +62,7 @@ import { isPerfHudEnabled } from '../lib/devFlags'
 import { addRecentProject } from '../lib/recentProjects'
 import { useToast } from '../components/ui/useToast'
 import { useNetworkStatus } from '../hooks/useNetworkStatus'
+import { AutosaveScheduler } from '../lib/autosaveScheduler'
 import { SheetsBar } from '../components/app/SheetsBar'
 import { useEngine } from '../contexts/EngineContext'
 import { buildConstantsLookup } from '../engine/resolveBindings'
@@ -87,7 +88,6 @@ const LazyImportProjectDialog = lazy(() =>
   })),
 )
 
-const AUTOSAVE_DELAY_MS = 2000
 const EXPORT_SETTLE_MS = 300
 const OFFLINE_RETRY_DELAYS = [3_000, 6_000, 12_000, 24_000, 60_000]
 
@@ -165,7 +165,10 @@ export default function CanvasPage() {
   const [initEdges, setInitEdges] = useState<Edge[] | undefined>()
 
   // ── Autosave / conflict refs ───────────────────────────────────────────────
-  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // doSaveRef holds the latest doSave callback so the scheduler can call it
+  // without needing to be recreated when doSave's deps change.
+  const doSaveRef = useRef<() => Promise<void>>(() => Promise.resolve())
+  const autosaveScheduler = useRef(new AutosaveScheduler(() => void doSaveRef.current()))
   const canvasRef = useRef<CanvasAreaHandle>(null)
   const isSaving = useRef(false)
   const conflictServerTs = useRef<string | null>(null)
@@ -260,8 +263,9 @@ export default function CanvasPage() {
 
   // Cleanup debounce timer on unmount
   useEffect(() => {
+    const scheduler = autosaveScheduler.current
     return () => {
-      if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
+      scheduler.cancel()
       if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
     }
   }, [])
@@ -368,6 +372,9 @@ export default function CanvasPage() {
     ],
   )
 
+  // Keep the stable ref in sync so the scheduler always calls the latest doSave
+  doSaveRef.current = doSave
+
   // ── Auto-retry when connection is restored ─────────────────────────────────
   useEffect(() => {
     if (!isOnline) return
@@ -386,11 +393,8 @@ export default function CanvasPage() {
     markDirty()
     const currentCanvasId = useCanvasesStore.getState().activeCanvasId
     if (currentCanvasId) markCanvasDirty(currentCanvasId)
-    if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
-    autosaveTimer.current = setTimeout(() => {
-      void doSave()
-    }, AUTOSAVE_DELAY_MS)
-  }, [markDirty, markCanvasDirty, doSave])
+    autosaveScheduler.current.schedule()
+  }, [markDirty, markCanvasDirty])
 
   // ── Flush save on tab close / refresh (best-effort) ────────────────────────
   useEffect(() => {
