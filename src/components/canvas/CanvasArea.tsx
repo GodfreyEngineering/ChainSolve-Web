@@ -1537,6 +1537,31 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     {'\u23f8'} {t('toolbar.pausedBanner')}
                   </div>
                 )}
+                {nodes.length === 0 && !readOnly && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      pointerEvents: 'none',
+                      zIndex: 1,
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: '0.85rem',
+                        color: 'rgba(255,255,255,0.2)',
+                        textAlign: 'center',
+                        lineHeight: 1.6,
+                        userSelect: 'none',
+                      }}
+                    >
+                      {t('canvas.emptyHint')}
+                    </p>
+                  </div>
+                )}
                 <ReactFlow
                   nodes={nodes}
                   edges={edges}

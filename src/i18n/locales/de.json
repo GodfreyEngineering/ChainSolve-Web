@@ -87,6 +87,7 @@
     "conflictLocalTime": "Ihre letzte Speicherung um {{time}}",
     "keepMine": "Meine Version behalten",
     "reload": "Vom Server neu laden",
+    "emptyHint": "Doppelklicken Sie auf die Leinwand oder ziehen Sie einen Block aus der Bibliothek, um zu beginnen.",
     "instructions": "Ziehen Sie Blöcke aus der Bibliothek. Verbinden Sie Ausgänge → Eingänge. Rechtsklick für mehr Optionen.",
     "proRequired": "Pro erforderlich",
     "csvParsing": "CSV wird analysiert…",

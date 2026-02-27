@@ -485,6 +485,14 @@ export function BlockLibrary({
   const recentList = recent
     .map((t) => BLOCK_REGISTRY.get(t))
     .filter((d): d is BlockDef => d !== undefined)
+  const noBlockResults =
+    q.length > 0 &&
+    CATEGORY_ORDER.filter((cat) => !filterCat || cat === filterCat).every(
+      (cat) =>
+        (GROUPED.get(cat) ?? []).filter(
+          (d) => d.label.toLowerCase().includes(q) || d.type.includes(q),
+        ).length === 0,
+    )
 
   return (
     <div style={{ ...s.panel, width: px(width) }} onFocus={refreshRecent}>
@@ -562,6 +570,20 @@ export function BlockLibrary({
                 onProBlocked={onProBlocked}
               />
             ))}
+          </div>
+        )}
+
+        {/* Zero search results */}
+        {noBlockResults && (
+          <div
+            style={{
+              padding: '0.75rem 0.6rem',
+              fontSize: '0.78rem',
+              color: 'rgba(244,244,243,0.35)',
+              textAlign: 'center',
+            }}
+          >
+            No blocks match &ldquo;{query}&rdquo;
           </div>
         )}
 

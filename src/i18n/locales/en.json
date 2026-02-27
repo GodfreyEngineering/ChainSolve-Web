@@ -87,6 +87,7 @@
     "conflictLocalTime": "your last save at {{time}}",
     "keepMine": "Keep mine (overwrite)",
     "reload": "Reload from server",
+    "emptyHint": "Double-click the canvas or drag a block from the library to get started.",
     "instructions": "Drag blocks from the library. Connect outputs → inputs. Right-click for more options.",
     "proRequired": "Pro required",
     "csvParsing": "Parsing CSV…",

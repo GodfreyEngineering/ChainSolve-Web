@@ -368,6 +368,12 @@ export default function AppShell() {
         year: 'numeric',
       })
     : null
+  const trialDaysLeft =
+    plan === 'trialing' && profile?.current_period_end
+      ? Math.ceil(
+          (new Date(profile.current_period_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+        )
+      : null
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -438,6 +444,21 @@ export default function AppShell() {
           }}
         >
           Your subscription has been canceled. Existing projects are read-only.
+        </div>
+      )}
+      {trialDaysLeft !== null && trialDaysLeft <= 7 && (
+        <div
+          style={{
+            background: 'rgba(59,130,246,0.1)',
+            borderBottom: '1px solid rgba(59,130,246,0.3)',
+            padding: '0.55rem 1.5rem',
+            fontSize: '0.85rem',
+            color: '#93c5fd',
+          }}
+        >
+          {trialDaysLeft <= 0
+            ? 'Your trial has expired. Upgrade to keep full access.'
+            : `Your trial ends in ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'}. Upgrade to keep full access.`}
         </div>
       )}
 

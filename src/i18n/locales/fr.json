@@ -87,6 +87,7 @@
     "conflictLocalTime": "votre dernière sauvegarde à {{time}}",
     "keepMine": "Garder ma version",
     "reload": "Recharger depuis le serveur",
+    "emptyHint": "Double-cliquez sur le canevas ou faites glisser un bloc depuis la bibliothèque pour commencer.",
     "instructions": "Glissez des blocs depuis la bibliothèque. Connectez sorties → entrées. Clic droit pour plus d'options.",
     "proRequired": "Pro requis",
     "csvParsing": "Analyse du CSV…",
