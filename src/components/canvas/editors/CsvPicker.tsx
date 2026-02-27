@@ -7,8 +7,10 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { useReactFlow } from '@xyflow/react'
+import { useTranslation } from 'react-i18next'
 import type { NodeData } from '../../../blocks/registry'
 import { useProjectStore } from '../../../stores/projectStore'
+import { MAX_UPLOAD_BYTES } from '../../../lib/storage'
 
 interface CsvPickerProps {
   nodeId: string
@@ -18,6 +20,7 @@ interface CsvPickerProps {
 export function CsvPicker({ nodeId, data }: CsvPickerProps) {
   const { updateNodeData } = useReactFlow()
   const projectId = useProjectStore((s) => s.projectId)
+  const { t } = useTranslation()
   const fileRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<'idle' | 'parsing' | 'error'>(
     data.tableData ? 'idle' : 'idle',
@@ -85,10 +88,17 @@ export function CsvPicker({ nodeId, data }: CsvPickerProps) {
   const onFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
-      if (file) handleFile(file)
+      if (!file) return
+      if (file.size > MAX_UPLOAD_BYTES) {
+        setStatus('error')
+        setErrorMsg(t('canvas.csvFileTooLarge', { maxMb: MAX_UPLOAD_BYTES / 1024 / 1024 }))
+        e.target.value = ''
+        return
+      }
+      handleFile(file)
       e.target.value = ''
     },
-    [handleFile],
+    [handleFile, t],
   )
 
   return (

@@ -19,6 +19,11 @@
 import { supabase } from './supabase'
 import { assertSafeStoragePath } from './validateStoragePath'
 
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+/** Maximum permitted upload size (matches the Supabase bucket `file_size_limit`). */
+export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024 // 50 MB
+
 // ── Public types ─────────────────────────────────────────────────────────────
 
 export interface ProjectAsset {
@@ -109,6 +114,12 @@ export async function loadProjectJson(projectId: string): Promise<unknown> {
  * can store or display it.
  */
 export async function uploadCsv(projectId: string, file: File): Promise<{ storage_key: string }> {
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error(
+      `File is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is ${MAX_UPLOAD_BYTES / 1024 / 1024} MB.`,
+    )
+  }
+
   const session = await requireSession()
   const userId = session.user.id
 
@@ -216,6 +227,12 @@ export async function uploadAssetBytes(
   sha256: string | null,
   kind: string,
 ): Promise<{ storage_key: string }> {
+  if (bytes.length > MAX_UPLOAD_BYTES) {
+    throw new Error(
+      `Asset is too large (${(bytes.length / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is ${MAX_UPLOAD_BYTES / 1024 / 1024} MB.`,
+    )
+  }
+
   const session = await requireSession()
   const userId = session.user.id
 

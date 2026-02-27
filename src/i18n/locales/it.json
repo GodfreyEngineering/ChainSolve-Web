@@ -93,6 +93,7 @@
     "csvError": "Errore analisi CSV",
     "csvLoaded": "{{rows}} righe × {{cols}} colonne",
     "chooseCsv": "Scegli CSV",
+    "csvFileTooLarge": "File troppo grande (max {{maxMb}} MB)",
     "vectorItems": "{{count}} elementi",
     "tableRowCount": "{{rows}} × {{cols}}",
     "addItem": "Aggiungi elemento",

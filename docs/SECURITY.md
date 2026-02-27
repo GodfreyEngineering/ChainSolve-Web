@@ -319,3 +319,127 @@ unless the CSP is updated simultaneously.
 - [ ] **WASM engine loads**: Navigate to the app — `data-testid="engine-ready"` appears
       in the DOM within ~60 s; no `data-testid="engine-fatal"` with code `WASM_CSP_BLOCKED`
 - [ ] **No browser console errors**: Load the app — zero CSP violations in Console
+
+---
+
+## 7. Row-Level Security (RLS) Audit
+
+> W9 P044 — all tables confirmed 2026-02-27.
+
+### Policy summary
+
+All application tables have RLS enabled. The canonical ownership expression
+`(select auth.uid())` is used throughout (not bare `auth.uid()`, which causes
+a per-row function call; the subquery form is evaluated once per query).
+
+| Table | RLS | Policies | Notes |
+|-------|-----|----------|-------|
+| `profiles` | ✓ | SELECT own, UPDATE own | `(select auth.uid()) = id` |
+| `projects` | ✓ | SELECT / INSERT / UPDATE / DELETE own | `(select auth.uid()) = owner_id` |
+| `fs_items` | ✓ | SELECT / INSERT / UPDATE / DELETE own | `(select auth.uid()) = user_id` |
+| `project_assets` | ✓ | SELECT / INSERT / UPDATE / DELETE own | `(select auth.uid()) = user_id` |
+| `canvases` | ✓ | SELECT / INSERT / UPDATE / DELETE own | `(select auth.uid()) = user_id` |
+| `group_templates` | ✓ | SELECT / INSERT / UPDATE / DELETE own | `(select auth.uid()) = user_id` |
+| `bug_reports` | ✓ | INSERT own, SELECT own | `(select auth.uid()) = user_id` |
+| `stripe_events` | ✓ | **None** — service_role only | Webhook receiver; no user access needed |
+| `csp_reports` | ✓ | INSERT only | Browser fire-and-forget; no auth token; service_role writes |
+| `observability_events` | ✓ | Explicit deny-all for authenticated | Service_role writes; no user reads |
+
+### Canonical migration reference
+
+Migration `0011_rls_perf_canonical.sql` drops and recreates all policies on
+user-owned tables using the `(select auth.uid())` pattern. No bare `auth.uid()`
+calls remain.
+
+### Intentional no-access tables
+
+`stripe_events` and `observability_events` have RLS enabled but grant
+**zero** rows to authenticated users.  This is intentional and explicit:
+
+- `stripe_events` — written only by the Stripe webhook handler via
+  `service_role` (which bypasses RLS). Users must not read raw webhook payloads.
+- `observability_events` — has an explicit `obs_events_deny_all` policy
+  (`USING (false)`) added in `0016_*` to make the intent unmissable in
+  Supabase's policy UI.
+
+### Verification
+
+```sql
+-- List all tables, RLS status, and policy count
+SELECT
+  t.tablename,
+  t.rowsecurity AS rls_enabled,
+  count(p.policyname) AS policy_count
+FROM pg_tables t
+LEFT JOIN pg_policies p ON p.tablename = t.tablename AND p.schemaname = 'public'
+WHERE t.schemaname = 'public'
+GROUP BY t.tablename, t.rowsecurity
+ORDER BY t.tablename;
+
+-- Confirm no bare auth.uid() calls in policy definitions
+SELECT tablename, policyname, qual, with_check
+FROM pg_policies
+WHERE schemaname = 'public'
+  AND (qual LIKE '%auth.uid()%' OR with_check LIKE '%auth.uid()%')
+  AND (qual NOT LIKE '%(select auth.uid())%' AND with_check NOT LIKE '%(select auth.uid())%');
+-- → should return 0 rows
+```
+
+---
+
+## 8. Storage ACL Audit
+
+> W9 P045 — confirmed 2026-02-27.
+
+### Buckets
+
+| Bucket | Public | File size limit | Purpose |
+|--------|--------|-----------------|---------|
+| `projects` | No | 50 MB | Project JSON snapshots |
+| `uploads` | No | 50 MB | User-uploaded assets (CSV, images) |
+
+Both buckets are private; all access requires signed URLs or authenticated
+session tokens.
+
+### Path-prefix enforcement
+
+All storage policies enforce that the first path component matches the
+authenticated user's ID:
+
+```sql
+(storage.foldername(name))[1] = auth.uid()::text
+```
+
+This means files stored at `{userId}/...` can only be accessed by that user.
+The application layer (see `src/lib/storage.ts`) hardcodes this prefix in
+every upload and download path.
+
+### Additional plan-gated policies
+
+The `uploads` bucket INSERT/UPDATE policies (added in
+`0006_entitlements_enforcement.sql`) also check `public.user_has_active_plan(auth.uid())`.
+Free/canceled users cannot upload files to the `uploads` bucket.
+
+The `projects` bucket INSERT/UPDATE policies check
+`public.user_can_write_projects(auth.uid())`.  Canceled users cannot write
+project files.
+
+### Manual verification
+
+```bash
+# After deploy, confirm bucket policies in Supabase SQL Editor:
+SELECT
+  b.name AS bucket,
+  b.public,
+  b.file_size_limit,
+  p.name AS policy,
+  p.operation,
+  p.definition
+FROM storage.buckets b
+LEFT JOIN storage.policies p ON p.bucket_id = b.id
+WHERE b.name IN ('projects', 'uploads')
+ORDER BY b.name, p.operation;
+```
+
+Expected: each bucket has 4 policies (SELECT / INSERT / UPDATE / DELETE), all
+containing `(storage.foldername(name))[1] = auth.uid()::text`.

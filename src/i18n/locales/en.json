@@ -93,6 +93,7 @@
     "csvError": "CSV parse error",
     "csvLoaded": "{{rows}} rows × {{cols}} columns",
     "chooseCsv": "Choose CSV",
+    "csvFileTooLarge": "File too large (max {{maxMb}} MB)",
     "vectorItems": "{{count}} items",
     "tableRowCount": "{{rows}} × {{cols}}",
     "addItem": "Add item",
