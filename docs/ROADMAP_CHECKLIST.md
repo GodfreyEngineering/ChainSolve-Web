@@ -289,7 +289,7 @@ Claude MUST:
   - UI blocks edits
   - Service layer blocks writes
 
-- [ ] P053: Upgrade prompts (limits/features)
+- [x] P053: Upgrade prompts (limits/features)
   - Clear, consistent prompts for:
     - project limits
     - canvas limits
@@ -303,11 +303,11 @@ Claude MUST:
   - Billing-sensitive ops require re-auth
   - Tests: unit/integration for re-auth logic
 
-- [ ] P056: DB-level enforcement tests
+- [x] P056: DB-level enforcement tests
   - project limit triggers
   - canvas limit checks (if enforced server-side)
 
-- [ ] P057: Usage counters UI (SHOULD)
+- [x] P057: Usage counters UI (SHOULD)
   - Projects used / allowed
   - Canvases used / allowed
   - Storage usage (optional)
