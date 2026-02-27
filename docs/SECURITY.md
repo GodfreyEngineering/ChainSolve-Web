@@ -292,6 +292,23 @@ for the full CSP rationale.
 Until then: **do not enable Cloudflare Web Analytics in the Cloudflare dashboard**
 unless the CSP is updated simultaneously.
 
+### CI enforcement (P050)
+
+`scripts/check-csp-allowlist.mjs` runs as part of `verify-ci.sh` and parses
+`public/_headers` to verify that every external origin in the enforced
+`Content-Security-Policy` is present in the `APPROVED_ORIGINS` allowlist
+inside that script.
+
+**Adding a new external resource requires:**
+
+1. Add the origin to `APPROVED_ORIGINS` in `scripts/check-csp-allowlist.mjs`
+   with a comment explaining the rationale.
+2. Add it to `public/_headers` (both enforced CSP and Report-Only).
+3. Document the trade-off in this section (§5).
+
+The CI check will fail with a `CSP ALLOWLIST VIOLATION` error if an external
+origin appears in the enforced header without a matching allowlist entry.
+
 ---
 
 ## 6. Verification Checklist

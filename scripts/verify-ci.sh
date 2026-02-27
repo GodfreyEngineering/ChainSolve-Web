@@ -83,6 +83,10 @@ section "Adapter boundary check"
 bash scripts/check-adapter-boundary.sh || fail "adapter boundary"
 pass "adapter boundary"
 
+section "CSP third-party allowlist"
+node scripts/check-csp-allowlist.mjs || fail "CSP allowlist"
+pass "CSP allowlist"
+
 # ── WASM build ─────────────────────────────────────────────────────────────
 section "Build WASM (release)"
 wasm-pack build crates/engine-wasm --target web --release || fail "wasm-pack build"

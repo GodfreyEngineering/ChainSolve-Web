@@ -277,7 +277,7 @@ Claude MUST:
   - Ensure no analytics loaded by default
   - Opt-in only, documented
 
-- [ ] P050: Guardrails on third-party scripts
+- [x] P050: Guardrails on third-party scripts
   - Document and enforce: any new third-party script requires CSP review + opt-in
 
 ## A5 — Entitlements + billing correctness (public monetization)
