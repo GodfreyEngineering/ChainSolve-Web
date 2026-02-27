@@ -291,6 +291,7 @@
     "toggleMinimap": "Mostrar/ocultar minimapa",
     "toggleAnimatedEdges": "Alternar bordes animados",
     "toggleLod": "Alternar LOD de zoom",
+    "toggleDebugConsole": "Mostrar/ocultar consola de depuración",
     "theme": "Tema",
     "perfHud": "HUD de rendimiento",
     "autoOrganise": "Organizar automáticamente",
@@ -338,7 +339,8 @@
     "pausedBanner": "Evaluación en pausa",
     "findPlaceholder": "Buscar bloques…",
     "noMatches": "Sin resultados",
-    "findHint": "↑↓ · ↵ enfocar · ESC"
+    "findHint": "↑↓ · ↵ enfocar · ESC",
+    "debugConsole": "Consola de depuración"
   },
   "sheets": {
     "title": "Hojas",
@@ -353,5 +355,17 @@
     "switchSave": "Guardar y cambiar",
     "switchDiscard": "Descartar y cambiar",
     "switchCancel": "Cancelar"
+  },
+  "debugConsole": {
+    "title": "Consola de depuración",
+    "logLevel": "Nivel de registro",
+    "search": "Filtrar…",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "autoScroll": "Desplazamiento automático",
+    "clear": "Limpiar",
+    "exportTxt": "Exportar .txt",
+    "exportJson": "Exportar .json",
+    "noLogs": "Sin entradas de registro"
   }
 }

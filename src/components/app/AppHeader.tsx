@@ -335,6 +335,12 @@ export function AppHeader({
       },
       { separator: true },
       {
+        label: t('menu.toggleDebugConsole'),
+        shortcut: 'Ctrl+Shift+D',
+        onClick: () => canvasRef.current?.toggleDebugConsole(),
+      },
+      { separator: true },
+      {
         label: t('menu.theme'),
         children: [
           {

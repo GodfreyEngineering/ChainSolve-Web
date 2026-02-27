@@ -291,6 +291,7 @@
     "toggleMinimap": "Afficher/masquer la mini-carte",
     "toggleAnimatedEdges": "Basculer les arêtes animées",
     "toggleLod": "Basculer le LOD de zoom",
+    "toggleDebugConsole": "Afficher/masquer la console de débogage",
     "theme": "Thème",
     "perfHud": "HUD de performance",
     "autoOrganise": "Organisation automatique",
@@ -338,7 +339,8 @@
     "pausedBanner": "Évaluation en pause",
     "findPlaceholder": "Rechercher…",
     "noMatches": "Aucun résultat",
-    "findHint": "↑↓ · ↵ cibler · ESC"
+    "findHint": "↑↓ · ↵ cibler · ESC",
+    "debugConsole": "Console de débogage"
   },
   "sheets": {
     "title": "Feuilles",
@@ -353,5 +355,17 @@
     "switchSave": "Enregistrer et basculer",
     "switchDiscard": "Abandonner et basculer",
     "switchCancel": "Annuler"
+  },
+  "debugConsole": {
+    "title": "Console de débogage",
+    "logLevel": "Niveau de journalisation",
+    "search": "Filtrer…",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "autoScroll": "Défilement automatique",
+    "clear": "Effacer",
+    "exportTxt": "Exporter .txt",
+    "exportJson": "Exporter .json",
+    "noLogs": "Aucune entrée de journal"
   }
 }

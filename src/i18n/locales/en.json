@@ -292,6 +292,7 @@
     "toggleMinimap": "Toggle minimap",
     "toggleAnimatedEdges": "Toggle animated edges",
     "toggleLod": "Toggle zoom LOD",
+    "toggleDebugConsole": "Toggle debug console",
     "theme": "Theme",
     "perfHud": "Performance HUD",
     "autoOrganise": "Auto-organise layout",
@@ -339,7 +340,20 @@
     "pausedBanner": "Evaluation paused",
     "findPlaceholder": "Search blocks…",
     "noMatches": "No blocks match",
-    "findHint": "↑↓ · ↵ focus · ESC"
+    "findHint": "↑↓ · ↵ focus · ESC",
+    "debugConsole": "Debug console"
+  },
+  "debugConsole": {
+    "title": "Debug Console",
+    "logLevel": "Log level",
+    "search": "Filter…",
+    "pause": "Pause",
+    "resume": "Resume",
+    "autoScroll": "Auto-scroll",
+    "clear": "Clear",
+    "exportTxt": "Export .txt",
+    "exportJson": "Export .json",
+    "noLogs": "No log entries"
   },
   "sheets": {
     "title": "Sheets",

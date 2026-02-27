@@ -39,6 +39,8 @@ export type {
   EngineStats,
 } from './wasm-types.ts'
 
+import { dlog } from '../observability/debugLog.ts'
+
 export interface ProgressEvent {
   requestId: number
   evaluatedNodes: number
@@ -172,6 +174,7 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
     clearWatchdog()
     watchdogTimer = setTimeout(() => {
       console.warn(`[cs:engine] Watchdog fired — requestId=${requestId}, recreating worker`)
+      dlog.warn('engine', 'Watchdog fired — recreating worker', { requestId, timeoutMs: WATCHDOG_TIMEOUT_MS })
       void doRecreate()
     }, WATCHDOG_TIMEOUT_MS)
   }
@@ -247,6 +250,7 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
       await waitForWorkerReady(newWorker)
       worker = newWorker
       setupMessageHandler(worker)
+      dlog.info('engine', 'Worker recreated', { snapshotRestored: !!lastSnapshotArgs })
 
       // Reload the last snapshot so the worker's engine state is consistent.
       if (lastSnapshotArgs) {
@@ -265,6 +269,7 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
       }
     } catch (err) {
       console.error('[cs:engine] Worker recreation failed:', err)
+      dlog.error('engine', 'Worker recreation failed', { error: String(err) })
     } finally {
       isRecreating = false
     }
@@ -285,6 +290,7 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
   })
 
   setupMessageHandler(worker)
+  dlog.info('engine', 'Worker ready', { engineVersion, contractVersion, catalogSize: catalog.length })
 
   // ── postRequest ───────────────────────────────────────────────────────
 

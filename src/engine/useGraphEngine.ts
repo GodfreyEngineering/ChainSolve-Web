@@ -19,6 +19,7 @@ import { diffGraph } from './diffGraph.ts'
 import { isPerfHudEnabled } from '../lib/devFlags.ts'
 import { updatePerfMetrics } from './perfMetrics.ts'
 import { perfMark, perfMeasure } from '../perf/marks.ts'
+import { dlog } from '../observability/debugLog.ts'
 
 const perfEnabled = isPerfHudEnabled()
 
@@ -80,6 +81,7 @@ export function useGraphEngine(
       snapshotLoaded.current = true
       const reqId = ++pendingRef.current
       const snapshot = toEngineSnapshot(nodes, edges, constants, variables)
+      dlog.debug('engine', 'Snapshot eval started', { nodeCount: nodes.length, edgeCount: edges.length })
       const t0 = perfEnabled ? performance.now() : 0
       perfMark('cs:eval:start')
       engine.loadSnapshot(snapshot, options).then((result) => {
@@ -87,6 +89,7 @@ export function useGraphEngine(
         perfMeasure('cs:eval:snapshot', 'cs:eval:start')
         setComputed(toValueMap(result.values))
         setIsPartial(result.partial ?? false)
+        dlog.info('engine', 'Snapshot eval complete', { evalMs: Math.round(result.elapsedUs / 1000), nodesComputed: Object.keys(result.values).length, partial: result.partial ?? false })
         if (perfEnabled) {
           updatePerfMetrics({
             lastEvalMs: result.elapsedUs / 1000,
@@ -115,6 +118,7 @@ export function useGraphEngine(
         return
       }
       const reqId = ++pendingRef.current
+      dlog.debug('engine', 'Patch eval started', { opCount: ops.length })
       const t0 = perfEnabled ? performance.now() : 0
       perfMark('cs:eval:start')
       // Apply 300 ms interactive time budget so large evals return partial
@@ -126,6 +130,7 @@ export function useGraphEngine(
           if (reqId !== pendingRef.current) return
           perfMeasure('cs:eval:patch', 'cs:eval:start')
           if (result.partial) perfMark('cs:eval:partial')
+          dlog.info('engine', 'Patch eval complete', { evalMs: Math.round(result.elapsedUs / 1000), changedCount: Object.keys(result.changedValues).length, partial: result.partial ?? false })
           setIsPartial(result.partial ?? false)
           // MERGE changed values into existing map (not replace).
           setComputed((prev) => {
@@ -157,9 +162,8 @@ export function useGraphEngine(
             })
           }
         })
-        .catch(() => {
-          // Watchdog fired or worker was recreated — next user interaction
-          // will retrigger evaluation via the useEffect dependency array.
+        .catch((err: unknown) => {
+          dlog.warn('engine', 'Eval interrupted', { error: String(err) })
         })
     }
 

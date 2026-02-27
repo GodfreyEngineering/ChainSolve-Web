@@ -78,8 +78,10 @@ import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard } from '../../lib/clipboard'
 import { FindBlockDialog } from './FindBlockDialog'
+import DebugConsolePanel from './DebugConsolePanel'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { useDebugConsoleStore } from '../../stores/debugConsoleStore'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -141,6 +143,7 @@ export interface CanvasAreaHandle {
   openFind: () => void
   toggleAnimatedEdges: () => void
   toggleLod: () => void
+  toggleDebugConsole: () => void
 }
 
 // ── Minimap persistence ──────────────────────────────────────────────────────
@@ -273,6 +276,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 ) {
   const isMobile = useIsMobile()
   const ent = getEntitlements(plan)
+  const debugConsoleVisible = useDebugConsoleStore((s) => s.visible)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(
     initialNodes ?? INITIAL_NODES,
@@ -337,6 +341,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         return !v
       })
     },
+    toggleDebugConsole: () => useDebugConsoleStore.getState().toggleVisible(),
   }))
 
   // Panel widths + visibility
@@ -942,6 +947,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           return !v
         })
       }
+
+      // Ctrl+Shift+D: Toggle debug console
+      if (ctrl && e.shiftKey && e.key === 'D') {
+        e.preventDefault()
+        useDebugConsoleStore.getState().toggleVisible()
+      }
     },
     [
       readOnly,
@@ -1250,7 +1261,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 return !v
               })
             }}
+            debugConsoleVisible={debugConsoleVisible}
+            onToggleDebugConsole={() => useDebugConsoleStore.getState().toggleVisible()}
           />
+          {debugConsoleVisible && <DebugConsolePanel />}
         </div>
 
         {/* Inspector panel — desktop inline */}

@@ -291,6 +291,7 @@
     "toggleMinimap": "Mostra/nascondi minimappa",
     "toggleAnimatedEdges": "Attiva/disattiva archi animati",
     "toggleLod": "Attiva/disattiva LOD zoom",
+    "toggleDebugConsole": "Mostra/nascondi console di debug",
     "theme": "Tema",
     "perfHud": "HUD prestazioni",
     "autoOrganise": "Organizza automaticamente",
@@ -338,7 +339,8 @@
     "pausedBanner": "Valutazione in pausa",
     "findPlaceholder": "Cerca blocchi…",
     "noMatches": "Nessun risultato",
-    "findHint": "↑↓ · ↵ focus · ESC"
+    "findHint": "↑↓ · ↵ focus · ESC",
+    "debugConsole": "Console di debug"
   },
   "sheets": {
     "title": "Fogli",
@@ -353,5 +355,17 @@
     "switchSave": "Salva e cambia",
     "switchDiscard": "Scarta e cambia",
     "switchCancel": "Annulla"
+  },
+  "debugConsole": {
+    "title": "Console di debug",
+    "logLevel": "Livello di registrazione",
+    "search": "Filtra…",
+    "pause": "Pausa",
+    "resume": "Riprendi",
+    "autoScroll": "Scorrimento automatico",
+    "clear": "Cancella",
+    "exportTxt": "Esporta .txt",
+    "exportJson": "Esporta .json",
+    "noLogs": "Nessuna voce di registro"
   }
 }

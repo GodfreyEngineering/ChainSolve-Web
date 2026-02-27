@@ -16,6 +16,7 @@
 import type { VariablesMap } from './variables'
 import { supabase } from './supabase'
 import { saveProjectJson, loadProjectJson } from './storage'
+import { dlog } from '../observability/debugLog'
 
 // ── Schema versioning ─────────────────────────────────────────────────────────
 
@@ -166,14 +167,17 @@ export async function createProject(name: string): Promise<ProjectRow> {
 
 /** Load and parse the project.json from storage. Accepts V1 and V2 transparently. */
 export async function loadProject(projectId: string): Promise<ProjectJSON> {
+  dlog.debug('persistence', 'Loading project', { projectId })
   const raw = await loadProjectJson(projectId)
   const pj = raw as Partial<ProjectJSON>
 
   if (pj.schemaVersion === 1 || pj.schemaVersion === 2 || pj.schemaVersion === 3) {
     // V1 → V2 → V3: no structural migration needed.
     // V1 nodes are all scalar; V2 adds data/vector/table; V3 adds groups (csGroup + parentId).
+    dlog.info('persistence', 'Project loaded', { projectId, schemaVersion: pj.schemaVersion })
     return raw as ProjectJSON
   }
+  dlog.error('persistence', 'Unsupported schemaVersion', { projectId, schemaVersion: String(pj.schemaVersion ?? 'missing') })
   throw new Error(`Unsupported schemaVersion: ${String(pj.schemaVersion ?? 'missing')}`)
 }
 
@@ -195,6 +199,7 @@ export async function saveProject(
   // Optimistic lock check
   const dbUpdatedAt = await readUpdatedAt(projectId)
   if (dbUpdatedAt && new Date(dbUpdatedAt) > new Date(knownUpdatedAt)) {
+    dlog.warn('persistence', 'Conflict detected', { projectId })
     return { updatedAt: dbUpdatedAt, conflict: true }
   }
 
@@ -203,6 +208,7 @@ export async function saveProject(
   await saveProjectJson(projectId, pj)
 
   const freshUpdatedAt = (await readUpdatedAt(projectId)) ?? new Date().toISOString()
+  dlog.info('persistence', 'Project saved', { projectId, formatVersion: pj.formatVersion })
   return { updatedAt: freshUpdatedAt, conflict: false }
 }
 

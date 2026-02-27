@@ -24,6 +24,8 @@ export interface BottomToolbarProps {
   lodEnabled: boolean
   onToggleEdgesAnimated: () => void
   onToggleLod: () => void
+  debugConsoleVisible?: boolean
+  onToggleDebugConsole?: () => void
 }
 
 export function BottomToolbar({
@@ -48,6 +50,8 @@ export function BottomToolbar({
   lodEnabled,
   onToggleEdgesAnimated,
   onToggleLod,
+  debugConsoleVisible,
+  onToggleDebugConsole,
 }: BottomToolbarProps) {
   const { t } = useTranslation()
   const { zoomIn, zoomOut, zoomTo, fitView } = useReactFlow()
@@ -237,6 +241,17 @@ export function BottomToolbar({
       >
         {'\u229f'}
       </button>
+
+      {onToggleDebugConsole && (
+        <button
+          onClick={onToggleDebugConsole}
+          style={btnStyle(!!debugConsoleVisible)}
+          title={t('toolbar.debugConsole')}
+          aria-pressed={!!debugConsoleVisible}
+        >
+          {'\u2261'}
+        </button>
+      )}
     </div>
   )
 }

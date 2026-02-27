@@ -291,6 +291,7 @@
     "toggleMinimap": "Minimap ein-/ausblenden",
     "toggleAnimatedEdges": "Animierte Kanten umschalten",
     "toggleLod": "Zoom-LOD umschalten",
+    "toggleDebugConsole": "Debug-Konsole ein-/ausblenden",
     "theme": "Design",
     "perfHud": "Leistungs-HUD",
     "autoOrganise": "Automatisch anordnen",
@@ -338,7 +339,8 @@
     "pausedBanner": "Auswertung pausiert",
     "findPlaceholder": "Blöcke suchen…",
     "noMatches": "Keine Treffer",
-    "findHint": "↑↓ · ↵ fokus · ESC"
+    "findHint": "↑↓ · ↵ fokus · ESC",
+    "debugConsole": "Debug-Konsole"
   },
   "sheets": {
     "title": "Blätter",
@@ -353,5 +355,17 @@
     "switchSave": "Speichern & wechseln",
     "switchDiscard": "Verwerfen & wechseln",
     "switchCancel": "Abbrechen"
+  },
+  "debugConsole": {
+    "title": "Debug-Konsole",
+    "logLevel": "Protokollebene",
+    "search": "Filtern…",
+    "pause": "Pausieren",
+    "resume": "Fortsetzen",
+    "autoScroll": "Automatisch scrollen",
+    "clear": "Leeren",
+    "exportTxt": ".txt exportieren",
+    "exportJson": ".json exportieren",
+    "noLogs": "Keine Protokolleinträge"
   }
 }
