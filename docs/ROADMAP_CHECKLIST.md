@@ -281,11 +281,11 @@ Claude MUST:
   - Document and enforce: any new third-party script requires CSP review + opt-in
 
 ## A5 — Entitlements + billing correctness (public monetization)
-- [ ] P051: Entitlement matrix tests
+- [x] P051: Entitlement matrix tests
   - Full plan matrix coverage
   - Ensure free/trial/pro/past_due/canceled behave per spec
 
-- [ ] P052: past_due/canceled read-only enforcement
+- [x] P052: past_due/canceled read-only enforcement
   - UI blocks edits
   - Service layer blocks writes
 
