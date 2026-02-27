@@ -1,4 +1,4 @@
-# PDF Export (W14a.1 + W14a.2)
+# PDF Export (W14a.1 + W14a.2 + W14a.3)
 
 Audit-ready PDF export for the **active canvas sheet** (v1) or
 **all sheets with Table of Contents** (v2).
@@ -69,10 +69,10 @@ is generated that wraps every canvas into a single document.
 
 - The **active canvas** uses the live in-memory graph.
 - **Non-active canvases** are loaded from Supabase Storage via
-  `loadCanvasGraph()` — no UI switching occurs.
-- Graph images are only captured for the active canvas (DOM capture
-  requires the viewport to be rendered). Non-active canvases show
-  "Graph image unavailable (non-active canvas)".
+  `loadCanvasGraph()`.
+- Image capture uses the **CanvasPage orchestrator** pattern (W14a.3):
+  the export loop programmatically switches each canvas, waits for
+  ReactFlow to remount (300 ms settle), then captures the viewport.
 
 ### UI
 
@@ -81,13 +81,55 @@ is generated that wraps every canvas into a single document.
 - **Active sheet** — single-canvas export (v1 behaviour).
 - **All sheets** — project-level export (disabled for scratch projects).
 
+## Image capture hardening (W14a.3)
+
+### Fallback ladder
+
+Image capture uses `html-to-image` `toBlob` (not `toPng`) to avoid
+base64 data URL overhead. A fallback ladder is applied per canvas:
+
+1. **pixelRatio = 2** — if output fits under `MAX_CAPTURE_PIXELS` (16 MP).
+2. **pixelRatio = 1** — standard resolution.
+3. **pixelRatio = 1 + downscale** — ratio < 1, clamped so output < 16 MP.
+4. **Skip** — returns `null` with an error message.
+
+The pure function `computeSafePixelRatio(w, h, desired, maxPixels)` computes
+the effective ratio. It is fully unit-tested.
+
+### toBlob optimization
+
+`toBlob` returns a `Blob` which is converted to `Uint8Array` and passed
+directly to `pdf-lib`'s `embedPng()`. This skips the base64 encoding round-trip
+that `toPng` would require, halving peak memory for large images.
+
+### Values-only mode
+
+Users can toggle **"Images: skip (values only)"** in the Export PDF submenu.
+When disabled, no viewport capture is performed — the export is significantly
+faster and the PDF omits graph snapshots. The setting persists in
+`localStorage('cs:pdfExportIncludeImages')`.
+
+### Export progress + cancel
+
+All-sheets export shows per-canvas progress toasts ("Sheet 1/5…") and
+supports cancellation via `AbortController`. The cancel button appears in
+the Export PDF submenu during an active export.
+
+### Autosave suppression
+
+During the export canvas-switching loop, `handleGraphChange` is suppressed
+via `exportingRef.current` to prevent spurious dirty/autosave triggers.
+The DB active-canvas pointer is NOT updated during export (only the local
+Zustand store changes); the original canvas is restored in `finally`.
+
 ## Known limitations
 
 - Graph image capture may fail in some browsers or if the viewport is
   hidden; the PDF will include a "Graph image unavailable" notice.
 - Very large graphs (>500 nodes) may produce multi-page node value tables
   with simple line wrapping (no column auto-sizing).
-- Non-active canvas images are not captured (requires DOM rendering).
+- Canvas switching during export briefly shows each sheet. The original
+  canvas is restored after export completes or is cancelled.
 
 ## File naming
 

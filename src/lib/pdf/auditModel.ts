@@ -58,6 +58,11 @@ export interface AuditModel {
 
 // ── Multi-canvas types (v2) ──────────────────────────────────────────────────
 
+export interface ExportOptions {
+  includeImages: boolean
+  scope: 'active' | 'project'
+}
+
 export interface CanvasAuditSection {
   canvasId: string
   canvasName: string
@@ -71,8 +76,9 @@ export interface CanvasAuditSection {
   diagnosticCounts: { info: number; warning: number; error: number }
   diagnostics: AuditDiagnosticRow[]
   nodeValues: AuditNodeRow[]
-  graphImageDataUrl: string | null
+  graphImageBytes: Uint8Array | null
   imageError?: string
+  captureRung?: string
 }
 
 export interface ProjectAuditModel {
@@ -83,6 +89,7 @@ export interface ProjectAuditModel {
   }
   projectHash: string
   canvases: CanvasAuditSection[]
+  exportOptions?: ExportOptions
 }
 
 // ── Shared helpers ───────────────────────────────────────────────────────────
@@ -184,8 +191,9 @@ export interface BuildCanvasSectionArgs {
   evalResult: EngineEvalResult
   healthSummary: string
   snapshotHash: string
-  graphImageDataUrl: string | null
+  graphImageBytes: Uint8Array | null
   imageError?: string
+  captureRung?: string
 }
 
 export function buildCanvasAuditSection(args: BuildCanvasSectionArgs): CanvasAuditSection {
@@ -202,8 +210,9 @@ export function buildCanvasAuditSection(args: BuildCanvasSectionArgs): CanvasAud
     diagnosticCounts: countDiagnostics(args.evalResult.diagnostics),
     diagnostics: mapDiagnostics(args.evalResult.diagnostics),
     nodeValues: mapNodeValues(args.nodes, args.evalResult),
-    graphImageDataUrl: args.graphImageDataUrl,
+    graphImageBytes: args.graphImageBytes,
     imageError: args.imageError,
+    captureRung: args.captureRung,
   }
 }
 
@@ -222,6 +231,7 @@ export interface BuildProjectAuditModelArgs {
   activeCanvasId: string | null
   projectHash: string
   canvases: CanvasAuditSection[]
+  exportOptions?: ExportOptions
 }
 
 export function buildProjectAuditModel(args: BuildProjectAuditModelArgs): ProjectAuditModel {
@@ -247,5 +257,6 @@ export function buildProjectAuditModel(args: BuildProjectAuditModelArgs): Projec
     },
     projectHash: args.projectHash,
     canvases: [...args.canvases].sort((a, b) => a.position - b.position),
+    exportOptions: args.exportOptions,
   }
 }

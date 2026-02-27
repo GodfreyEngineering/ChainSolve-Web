@@ -103,13 +103,8 @@ import { useProjectStore } from '../../stores/projectStore'
 import { toEngineSnapshot } from '../../engine/bridge'
 import { stableStringify } from '../../lib/pdf/stableStringify'
 import { sha256Hex } from '../../lib/pdf/sha256'
-import {
-  buildAuditModel,
-  buildCanvasAuditSection,
-  buildProjectAuditModel,
-} from '../../lib/pdf/auditModel'
-import { useCanvasesStore } from '../../stores/canvasesStore'
-import { listCanvases, loadCanvasGraph } from '../../lib/canvases'
+import { buildAuditModel } from '../../lib/pdf/auditModel'
+import type { CaptureResult } from '../../lib/pdf/captureCanvasImage'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -177,7 +172,7 @@ export interface CanvasAreaHandle {
   toggleEdgeBadges: () => void
   toggleHealthPanel: () => void
   exportPdfAudit: () => Promise<void>
-  exportPdfAuditProject: () => Promise<void>
+  captureViewportImage: (signal?: AbortSignal) => Promise<CaptureResult>
 }
 
 // ── Minimap persistence ──────────────────────────────────────────────────────
@@ -459,7 +454,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } =
         await import('../../lib/build-info')
       const { exportAuditPdf } = await import('../../lib/pdf/exportAuditPdf')
-      const { loadPdfLib } = await import('../../lib/pdf-loader')
+      const { captureCanvasImage } = await import('../../lib/pdf/captureCanvasImage')
 
       const projectName = useProjectStore.getState().projectName
       const projectId = useProjectStore.getState().projectId
@@ -512,171 +507,48 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         snapshotHash,
       })
 
-      // 6. Capture graph image
-      let graphImageDataUrl: string | null = null
-      try {
-        const { toPng } = await loadPdfLib()
-        // Find the ReactFlow viewport element inside canvasWrapRef
-        const viewport = canvasWrapRef.current?.querySelector(
-          '.react-flow__viewport',
-        ) as HTMLElement | null
-        if (viewport) {
-          // Temporarily fit view for a clean capture
-          fitView({ padding: 0.15, duration: 0 })
-          // Small delay to let React Flow settle
-          await new Promise((r) => setTimeout(r, 150))
-          graphImageDataUrl = await toPng(viewport, {
-            pixelRatio: 2,
-            backgroundColor:
-              getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() ||
-              '#1a1a2e',
-          })
-        }
-      } catch {
-        // Image capture failed — proceed without it
+      // 6. Capture graph image via fallback ladder
+      let graphImageBytes: Uint8Array | null = null
+      const viewport = canvasWrapRef.current?.querySelector(
+        '.react-flow__viewport',
+      ) as HTMLElement | null
+      if (viewport) {
+        fitView({ padding: 0.15, duration: 0 })
+        await new Promise((r) => setTimeout(r, 150))
+        const result = await captureCanvasImage({
+          element: viewport,
+          backgroundColor:
+            getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() ||
+            '#1a1a2e',
+        })
+        graphImageBytes = result.bytes
       }
 
       // 7. Export PDF
-      await exportAuditPdf(model, graphImageDataUrl)
+      await exportAuditPdf(model, graphImageBytes)
     },
 
-    exportPdfAuditProject: async () => {
-      const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } =
-        await import('../../lib/build-info')
-      const { exportProjectAuditPdf } = await import('../../lib/pdf/exportAuditPdf')
-      const { loadPdfLib } = await import('../../lib/pdf-loader')
+    captureViewportImage: async (signal?: AbortSignal) => {
+      const { captureCanvasImage } = await import('../../lib/pdf/captureCanvasImage')
 
-      const projectName = useProjectStore.getState().projectName
-      const projectId = useProjectStore.getState().projectId
-      const activeCanvasId = useCanvasesStore.getState().activeCanvasId
-      const currentVariables = useVariablesStore.getState().variables
+      const viewport = canvasWrapRef.current?.querySelector(
+        '.react-flow__viewport',
+      ) as HTMLElement | null
 
-      if (!projectId) {
-        throw new Error('Cannot export all sheets for a scratch project')
+      if (!viewport) {
+        return { bytes: null, rung: 'skipped' as const, error: 'Viewport element not found' }
       }
 
-      // 1. List all canvases
-      const canvasRows = await listCanvases(projectId)
-      if (canvasRows.length === 0) {
-        throw new Error('No canvases found for this project')
-      }
+      fitView({ padding: 0.15, duration: 0 })
+      await new Promise((r) => setTimeout(r, 300))
 
-      // 2. Build per-canvas sections
-      const canvasSections = []
-      const allHashInputs: string[] = []
-
-      for (const row of canvasRows) {
-        const isActive = row.id === activeCanvasId
-
-        let canvasNodes: Node[]
-        let canvasEdges: Edge[]
-
-        if (isActive) {
-          // Use live graph from current canvas
-          const snap = getCanonicalSnapshot(latestNodes.current, latestEdges.current)
-          canvasNodes = snap.nodes
-          canvasEdges = snap.edges
-        } else {
-          // Load from storage
-          const graph = await loadCanvasGraph(projectId, row.id)
-          canvasNodes = (graph.nodes ?? []) as Node[]
-          canvasEdges = (graph.edges ?? []) as Edge[]
-        }
-
-        // Evaluate graph
-        const engineSnap = toEngineSnapshot(
-          canvasNodes,
-          canvasEdges,
-          constantsLookup,
-          currentVariables,
-        )
-        const evalResult = await engine.evaluateGraph(engineSnap)
-
-        // Compute snapshot hash
-        const hashInput = stableStringify({
-          nodes: canvasNodes.map((n) => ({
-            id: n.id,
-            data: n.data,
-            position: n.position,
-          })),
-          edges: canvasEdges.map((e) => ({
-            id: e.id,
-            source: e.source,
-            sourceHandle: e.sourceHandle,
-            target: e.target,
-            targetHandle: e.targetHandle,
-          })),
-          variables: currentVariables,
-        })
-        const snapshotHash = await sha256Hex(hashInput)
-        allHashInputs.push(hashInput)
-
-        // Graph health
-        const health = computeGraphHealth(canvasNodes, canvasEdges)
-        const healthSummary = formatHealthReport(health, t)
-
-        // Capture graph image (only for active canvas)
-        let graphImageDataUrl: string | null = null
-        if (isActive) {
-          try {
-            const { toPng } = await loadPdfLib()
-            const viewport = canvasWrapRef.current?.querySelector(
-              '.react-flow__viewport',
-            ) as HTMLElement | null
-            if (viewport) {
-              fitView({ padding: 0.15, duration: 0 })
-              await new Promise((r) => setTimeout(r, 150))
-              graphImageDataUrl = await toPng(viewport, {
-                pixelRatio: 2,
-                backgroundColor:
-                  getComputedStyle(document.documentElement)
-                    .getPropertyValue('--canvas-bg')
-                    .trim() || '#1a1a2e',
-              })
-            }
-          } catch {
-            // Image capture failed — proceed without it
-          }
-        }
-
-        canvasSections.push(
-          buildCanvasAuditSection({
-            canvasId: row.id,
-            canvasName: row.name,
-            position: row.position,
-            nodes: canvasNodes,
-            edges: canvasEdges,
-            evalResult,
-            healthSummary,
-            snapshotHash,
-            graphImageDataUrl,
-            imageError: !isActive ? 'Non-active canvas (image capture requires DOM)' : undefined,
-          }),
-        )
-      }
-
-      // 3. Compute project-level hash (hash of all canvas hashes)
-      const projectHashInput = stableStringify(allHashInputs)
-      const projectHash = await sha256Hex(projectHashInput)
-
-      // 4. Build project audit model
-      const model = buildProjectAuditModel({
-        projectName,
-        projectId,
-        exportTimestamp: new Date().toISOString(),
-        buildVersion: BUILD_VERSION,
-        buildSha: BUILD_SHA,
-        buildTime: BUILD_TIME,
-        buildEnv: BUILD_ENV,
-        engineVersion: engine.engineVersion,
-        contractVersion: engine.contractVersion,
-        activeCanvasId,
-        projectHash,
-        canvases: canvasSections,
+      return captureCanvasImage({
+        element: viewport,
+        backgroundColor:
+          getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() ||
+          '#1a1a2e',
+        signal,
       })
-
-      // 5. Export PDF
-      await exportProjectAuditPdf(model)
     },
   }))
 

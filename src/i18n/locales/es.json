@@ -399,6 +399,12 @@
       "project": "All sheets"
     },
     "tocTitle": "Table of Contents",
-    "sheetLabel": "Sheet"
+    "sheetLabel": "Sheet",
+    "progress": "Exportando hoja {{current}}/{{total}}…",
+    "cancelled": "Exportación cancelada.",
+    "includeImages": "Imágenes: incluidas",
+    "skipImages": "Imágenes: omitir (solo valores)",
+    "cancelExport": "Cancelar exportación",
+    "restoring": "Restaurando canvas…"
   }
 }

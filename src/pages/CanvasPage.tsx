@@ -13,7 +13,7 @@
  *   6. Sheets tab bar (W10.7b) enables switching between canvases.
  */
 
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppHeader } from '../components/app/AppHeader'
@@ -61,18 +61,33 @@ import { isPerfHudEnabled } from '../lib/devFlags'
 import { addRecentProject } from '../lib/recentProjects'
 import { useToast } from '../components/ui/useToast'
 import { SheetsBar } from '../components/app/SheetsBar'
+import { useEngine } from '../contexts/EngineContext'
+import { buildConstantsLookup } from '../engine/resolveBindings'
+import { toEngineSnapshot } from '../engine/bridge'
+import { getCanonicalSnapshot } from '../lib/groups'
+import { stableStringify } from '../lib/pdf/stableStringify'
+import { sha256Hex } from '../lib/pdf/sha256'
+import { computeGraphHealth, formatHealthReport } from '../lib/graphHealth'
+import {
+  buildCanvasAuditSection,
+  buildProjectAuditModel,
+  type ExportOptions,
+} from '../lib/pdf/auditModel'
+import type { CaptureResult } from '../lib/pdf/captureCanvasImage'
 
 const PerfHud = lazy(() =>
   import('../components/PerfHud.tsx').then((m) => ({ default: m.PerfHud })),
 )
 
 const AUTOSAVE_DELAY_MS = 2000
+const EXPORT_SETTLE_MS = 300
 
 export default function CanvasPage() {
   const { projectId } = useParams<{ projectId?: string }>()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { toast } = useToast()
+  const engine = useEngine()
 
   // ── Project store selectors ────────────────────────────────────────────────
   const saveStatus = useProjectStore((s) => s.saveStatus)
@@ -141,6 +156,16 @@ export default function CanvasPage() {
   const canvasRef = useRef<CanvasAreaHandle>(null)
   const isSaving = useRef(false)
   const conflictServerTs = useRef<string | null>(null)
+
+  // ── Export state ──────────────────────────────────────────────────────────
+  const exportingRef = useRef(false)
+  const exportAbortRef = useRef<AbortController | null>(null)
+  const [exportInProgress, setExportInProgress] = useState(false)
+
+  const constantsLookup = useMemo(
+    () => buildConstantsLookup(engine.constantValues),
+    [engine.constantValues],
+  )
 
   // ── Inline project name editing ────────────────────────────────────────────
   const [nameEditing, setNameEditing] = useState(false)
@@ -296,6 +321,8 @@ export default function CanvasPage() {
 
   // ── onGraphChange — dirty tracking + debounced autosave ────────────────────
   const handleGraphChange: NonNullable<CanvasAreaProps['onGraphChange']> = useCallback(() => {
+    // Suppress dirty/autosave during export canvas switching
+    if (exportingRef.current) return
     markDirty()
     const currentCanvasId = useCanvasesStore.getState().activeCanvasId
     if (currentCanvasId) markCanvasDirty(currentCanvasId)
@@ -534,6 +561,190 @@ export default function CanvasPage() {
     [projectId, plan, canvases, toast, t, addCanvasToStore, handleSwitchCanvas],
   )
 
+  // ── Export all-sheets orchestrator ─────────────────────────────────────────
+
+  const handleExportAllSheets = useCallback(
+    async (opts: { includeImages: boolean }) => {
+      if (!projectId || exportingRef.current) return
+
+      const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } = await import('../lib/build-info')
+      const { exportProjectAuditPdf } = await import('../lib/pdf/exportAuditPdf')
+
+      const abort = new AbortController()
+      exportAbortRef.current = abort
+      exportingRef.current = true
+      setExportInProgress(true)
+
+      // Save original state to restore at end
+      const origCanvasId = useCanvasesStore.getState().activeCanvasId
+      const origInitNodes = initNodes
+      const origInitEdges = initEdges
+
+      const canvasRows = [...useCanvasesStore.getState().canvases].sort(
+        (a, b) => a.position - b.position,
+      )
+      const currentVariables = useVariablesStore.getState().variables
+      const canvasSections: ReturnType<typeof buildCanvasAuditSection>[] = []
+      const allHashInputs: string[] = []
+
+      try {
+        for (let i = 0; i < canvasRows.length; i++) {
+          if (abort.signal.aborted) {
+            toast(t('pdfExport.cancelled'), 'info')
+            return
+          }
+
+          const row = canvasRows[i]
+          toast(t('pdfExport.progress', { current: i + 1, total: canvasRows.length }), 'info')
+
+          const isActive = row.id === origCanvasId
+
+          let canvasNodes: Node<NodeData>[]
+          let canvasEdges: Edge[]
+
+          if (isActive && canvasRef.current) {
+            // Use live graph from current canvas
+            const snap = canvasRef.current.getSnapshot()
+            canvasNodes = snap.nodes
+            canvasEdges = snap.edges
+          } else {
+            // Load from storage
+            const graph = await loadCanvasGraph(projectId, row.id)
+            canvasNodes = (graph.nodes ?? []) as Node<NodeData>[]
+            canvasEdges = (graph.edges ?? []) as Edge[]
+          }
+
+          // Switch canvas for image capture (only if includeImages and not already active)
+          let captureResult: CaptureResult = { bytes: null, rung: 'skipped' }
+
+          if (opts.includeImages) {
+            if (!isActive) {
+              // Switch to this canvas for capture
+              setActiveCanvasId(row.id)
+              setInitNodes(canvasNodes as Node<NodeData>[])
+              setInitEdges(canvasEdges as Edge[])
+              // Wait for remount
+              await new Promise((r) => setTimeout(r, EXPORT_SETTLE_MS))
+            }
+
+            if (canvasRef.current) {
+              captureResult = await canvasRef.current.captureViewportImage(abort.signal)
+            }
+          }
+
+          // Get canonical snapshot for eval
+          const snap = getCanonicalSnapshot(canvasNodes, canvasEdges)
+
+          // Evaluate graph
+          const engineSnap = toEngineSnapshot(
+            snap.nodes,
+            snap.edges,
+            constantsLookup,
+            currentVariables,
+          )
+          const evalResult = await engine.evaluateGraph(engineSnap)
+
+          // Compute snapshot hash
+          const hashInput = stableStringify({
+            nodes: snap.nodes.map((n) => ({
+              id: n.id,
+              data: n.data,
+              position: n.position,
+            })),
+            edges: snap.edges.map((e) => ({
+              id: e.id,
+              source: e.source,
+              sourceHandle: e.sourceHandle,
+              target: e.target,
+              targetHandle: e.targetHandle,
+            })),
+            variables: currentVariables,
+          })
+          const snapshotHash = await sha256Hex(hashInput)
+          allHashInputs.push(hashInput)
+
+          // Graph health
+          const health = computeGraphHealth(snap.nodes, snap.edges)
+          const healthSummary = formatHealthReport(health, t)
+
+          canvasSections.push(
+            buildCanvasAuditSection({
+              canvasId: row.id,
+              canvasName: row.name,
+              position: row.position,
+              nodes: snap.nodes,
+              edges: snap.edges,
+              evalResult,
+              healthSummary,
+              snapshotHash,
+              graphImageBytes: captureResult.bytes,
+              imageError: !opts.includeImages
+                ? 'Images skipped (values-only mode)'
+                : captureResult.rung === 'skipped'
+                  ? (captureResult.error ?? 'Capture failed')
+                  : undefined,
+              captureRung: captureResult.rung,
+            }),
+          )
+        }
+
+        if (abort.signal.aborted) {
+          toast(t('pdfExport.cancelled'), 'info')
+          return
+        }
+
+        // Compute project hash
+        const projectHashInput = stableStringify(allHashInputs)
+        const projectHash = await sha256Hex(projectHashInput)
+
+        const exportOptions: ExportOptions = {
+          includeImages: opts.includeImages,
+          scope: 'project',
+        }
+
+        const model = buildProjectAuditModel({
+          projectName: useProjectStore.getState().projectName,
+          projectId,
+          exportTimestamp: new Date().toISOString(),
+          buildVersion: BUILD_VERSION,
+          buildSha: BUILD_SHA,
+          buildTime: BUILD_TIME,
+          buildEnv: BUILD_ENV,
+          engineVersion: engine.engineVersion,
+          contractVersion: engine.contractVersion,
+          activeCanvasId: origCanvasId,
+          projectHash,
+          canvases: canvasSections,
+          exportOptions,
+        })
+
+        await exportProjectAuditPdf(model)
+        toast(t('pdfExport.success'), 'success')
+      } catch (err: unknown) {
+        if (!abort.signal.aborted) {
+          console.error('[pdf-export-project]', err)
+          toast(t('pdfExport.failed'), 'error')
+        }
+      } finally {
+        // Restore original canvas
+        if (origCanvasId && origCanvasId !== useCanvasesStore.getState().activeCanvasId) {
+          toast(t('pdfExport.restoring'), 'info')
+          setActiveCanvasId(origCanvasId)
+          setInitNodes(origInitNodes)
+          setInitEdges(origInitEdges)
+        }
+        exportingRef.current = false
+        exportAbortRef.current = null
+        setExportInProgress(false)
+      }
+    },
+    [projectId, initNodes, initEdges, setActiveCanvasId, engine, constantsLookup, toast, t],
+  )
+
+  const handleCancelExport = useCallback(() => {
+    exportAbortRef.current?.abort()
+  }, [])
+
   // ── Loading / error screens ────────────────────────────────────────────────
   if (loadPhase === 'loading') {
     return (
@@ -600,6 +811,9 @@ export default function CanvasPage() {
         onSaveAs={handleSaveAs}
         onNavigateBack={handleBackToProjects}
         canvasRef={canvasRef}
+        exportInProgress={exportInProgress}
+        onExportPdfProject={handleExportAllSheets}
+        onCancelExport={handleCancelExport}
       />
 
       {/* ── Read-only / billing banner ────────────────────────────────────── */}

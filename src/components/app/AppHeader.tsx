@@ -65,6 +65,29 @@ export interface AppHeaderProps {
   onSaveAs: (name: string) => Promise<void>
   onNavigateBack: (e: React.MouseEvent<HTMLAnchorElement>) => void
   canvasRef: React.RefObject<CanvasAreaHandle | null>
+  // Export (W14a.3)
+  exportInProgress?: boolean
+  onExportPdfProject?: (opts: { includeImages: boolean }) => void
+  onCancelExport?: () => void
+}
+
+const INCLUDE_IMAGES_KEY = 'cs:pdfExportIncludeImages'
+
+function getIncludeImagesPref(): boolean {
+  try {
+    const v = localStorage.getItem(INCLUDE_IMAGES_KEY)
+    return v === null ? true : v === 'true'
+  } catch {
+    return true
+  }
+}
+
+function setIncludeImagesPref(v: boolean) {
+  try {
+    localStorage.setItem(INCLUDE_IMAGES_KEY, String(v))
+  } catch {
+    // Ignore — private browsing
+  }
 }
 
 export function AppHeader({
@@ -85,6 +108,9 @@ export function AppHeader({
   onSaveAs,
   onNavigateBack,
   canvasRef,
+  exportInProgress,
+  onExportPdfProject,
+  onCancelExport,
 }: AppHeaderProps) {
   const { t } = useTranslation()
   const { toast } = useToast()
@@ -96,6 +122,7 @@ export function AppHeader({
   const lastSavedAt = useProjectStore((s) => s.lastSavedAt)
   const errorMessage = useProjectStore((s) => s.errorMessage)
 
+  const [includeImages, setIncludeImages] = useState(getIncludeImagesPref)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [bugReportOpen, setBugReportOpen] = useState(false)
   const [aboutOpen, setAboutOpen] = useState(false)
@@ -158,15 +185,19 @@ export function AppHeader({
 
   const handleExportPdfAll = useCallback(() => {
     setOpenMenu(null)
-    toast(t('pdfExport.generatingAll'), 'info')
-    canvasRef.current
-      ?.exportPdfAuditProject()
-      .then(() => toast(t('pdfExport.success'), 'success'))
-      .catch((err: unknown) => {
-        console.error('[pdf-export-project]', err)
-        toast(t('pdfExport.failed'), 'error')
-      })
-  }, [canvasRef, toast, t])
+    if (onExportPdfProject) {
+      toast(t('pdfExport.generatingAll'), 'info')
+      onExportPdfProject({ includeImages })
+    }
+  }, [onExportPdfProject, includeImages, toast, t])
+
+  const handleToggleIncludeImages = useCallback(() => {
+    setIncludeImages((v) => {
+      const next = !v
+      setIncludeImagesPref(next)
+      return next
+    })
+  }, [])
 
   // ── File menu handlers ──────────────────────────────────────────────────────
 
@@ -306,12 +337,30 @@ export function AppHeader({
       {
         label: t('menu.exportPdf'),
         children: [
-          { label: t('pdfExport.scope.active'), onClick: handleExportPdfActive },
+          {
+            label: t('pdfExport.scope.active'),
+            onClick: handleExportPdfActive,
+            disabled: !!exportInProgress,
+          },
           {
             label: t('pdfExport.scope.project'),
             onClick: handleExportPdfAll,
-            disabled: !projectId,
+            disabled: !projectId || !!exportInProgress,
           },
+          { separator: true },
+          {
+            label: includeImages ? t('pdfExport.includeImages') : t('pdfExport.skipImages'),
+            onClick: handleToggleIncludeImages,
+          },
+          ...(exportInProgress
+            ? [
+                { separator: true } as const,
+                {
+                  label: t('pdfExport.cancelExport'),
+                  onClick: () => onCancelExport?.(),
+                },
+              ]
+            : []),
         ],
       },
       { label: t('menu.exportExcel'), onClick: stub },
@@ -329,6 +378,10 @@ export function AppHeader({
     handleSelectProject,
     handleExportPdfActive,
     handleExportPdfAll,
+    handleToggleIncludeImages,
+    includeImages,
+    exportInProgress,
+    onCancelExport,
   ])
 
   const editItems = useMemo(

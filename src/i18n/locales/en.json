@@ -400,6 +400,12 @@
       "project": "All sheets"
     },
     "tocTitle": "Table of Contents",
-    "sheetLabel": "Sheet"
+    "sheetLabel": "Sheet",
+    "progress": "Exporting sheet {{current}}/{{total}}…",
+    "cancelled": "Export cancelled.",
+    "includeImages": "Images: included",
+    "skipImages": "Images: skip (values only)",
+    "cancelExport": "Cancel export",
+    "restoring": "Restoring canvas…"
   }
 }

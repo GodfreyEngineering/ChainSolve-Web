@@ -470,6 +470,19 @@ variable state, file I/O, network activity, and performance metrics.
 | EX-15 | Graph images are captured for the active canvas; non-active canvases show "Graph image unavailable" notice. | MUST |
 | EX-16 | Non-active canvas data is loaded from Supabase Storage without switching the active canvas in the UI. | MUST |
 
+### 17.3 PDF export hardening (W14a.3)
+
+| ID    | Requirement                                                                                                                 | Priority |
+|-------|-----------------------------------------------------------------------------------------------------------------------------|----------|
+| EX-17 | All-sheets export captures graph images for **every** canvas by programmatically switching canvases (CanvasPage orchestrator). | MUST |
+| EX-18 | Image capture uses `toBlob` (not `toPng`) to avoid base64 memory overhead. Bytes passed directly to `embedPng`. | MUST |
+| EX-19 | A fallback ladder (PR=2 → PR=1 → PR=1-downscale → skip) prevents Chrome canvas crashes on large graphs. | MUST |
+| EX-20 | `MAX_CAPTURE_PIXELS` (16 MP) cap enforced via the pure `computeSafePixelRatio` function. | MUST |
+| EX-21 | "Images: skip (values only)" toggle in the Export PDF submenu, persisted in localStorage. | MUST |
+| EX-22 | Export progress shown as per-canvas toasts ("Sheet N/M"). | SHOULD |
+| EX-23 | Export cancellable via AbortController; cancel button appears in menu during export. | SHOULD |
+| EX-24 | Autosave suppressed during export canvas switching. Original canvas restored in `finally`. | MUST |
+
 ---
 
 ## 18. Out of scope (for now)
@@ -499,6 +512,7 @@ variable state, file I/O, network activity, and performance metrics.
 
 | Date       | Author | Change                                                                                            |
 |------------|--------|---------------------------------------------------------------------------------------------------|
+| 2026-02-27 | —      | W14a.3: Added §17.3 (PDF export hardening EX-17–EX-24). Per-canvas image capture, fallback ladder, values-only mode. |
 | 2026-02-27 | —      | W14a.2: Added §17.2 (all-sheets PDF export EX-9–EX-16). Struck multi-sheet from Future extensions. |
 | 2026-02-27 | —      | W14a.1: Added §17 Export (PDF export requirements). Moved PDF out of Out-of-scope. Renum §18/§19. |
 | 2026-02-26 | —      | Initial version (v1.0).                                                                           |

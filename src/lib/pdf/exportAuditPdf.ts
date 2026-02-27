@@ -6,9 +6,17 @@
  * No eval, no inline scripts — fully CSP-safe.
  */
 
-import type { PDFDocument as PDFDocumentType, PDFFont, PDFPage } from '../pdf-loader'
+import type { PDFFont, PDFPage } from '../pdf-loader'
 import { loadPdfLib } from '../pdf-loader'
 import type { AuditModel, ProjectAuditModel } from './auditModel'
+
+/** pdf-lib rgb return type — avoids re-exporting the enum-based Color union. */
+type RGBColor = ReturnType<Awaited<ReturnType<typeof loadPdfLib>>['rgb']>
+
+/** PDFDocument instance type — avoids InstanceType<> on private constructor. */
+type PDFDocInstance = Awaited<
+  ReturnType<Awaited<ReturnType<typeof loadPdfLib>>['PDFDocument']['create']>
+>
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -168,11 +176,7 @@ function renderDiagnosticsTable(
   pm: PageManager,
   diagnostics: { nodeId: string; level: string; code: string; message: string }[],
   fonts: Fonts,
-  rgb: (
-    r: number,
-    g: number,
-    b: number,
-  ) => { type: symbol; red: number; green: number; blue: number },
+  rgb: (r: number, g: number, b: number) => RGBColor,
 ): void {
   if (diagnostics.length === 0) return
 
@@ -281,15 +285,14 @@ function renderNodeValuesTable(
 
 async function renderGraphImage(
   pm: PageManager,
-  pdfDoc: InstanceType<typeof PDFDocumentType>,
-  graphImageDataUrl: string | null,
+  pdfDoc: PDFDocInstance,
+  graphImageBytes: Uint8Array | null,
   fonts: Fonts,
+  imageError?: string,
 ): Promise<void> {
-  if (graphImageDataUrl) {
+  if (graphImageBytes) {
     try {
-      const base64 = graphImageDataUrl.split(',')[1]
-      const pngBytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
-      const pngImage = await pdfDoc.embedPng(pngBytes)
+      const pngImage = await pdfDoc.embedPng(graphImageBytes)
 
       // Fit image to a new A4 page with margins
       const imgDims = pngImage.scaleToFit(CONTENT_WIDTH, A4_HEIGHT - 2 * MARGIN - 30)
@@ -310,12 +313,15 @@ async function renderGraphImage(
     } catch {
       pm.ensureSpace(A4_HEIGHT)
       pm.drawSectionTitle('Graph Snapshot', fonts.bold)
-      pm.drawText('Graph image unavailable (capture failed).', { font: fonts.regular, size: 10 })
+      pm.drawText('Graph image unavailable (embed failed).', { font: fonts.regular, size: 10 })
     }
   } else {
     pm.ensureSpace(A4_HEIGHT)
     pm.drawSectionTitle('Graph Snapshot', fonts.bold)
-    pm.drawText('Graph image unavailable.', { font: fonts.regular, size: 10 })
+    const reason = imageError
+      ? `Graph image unavailable: ${imageError}`
+      : 'Graph image unavailable.'
+    pm.drawText(reason, { font: fonts.regular, size: 10 })
   }
 }
 
@@ -323,7 +329,7 @@ async function renderGraphImage(
 
 export async function exportAuditPdf(
   model: AuditModel,
-  graphImageDataUrl: string | null,
+  graphImageBytes: Uint8Array | null,
 ): Promise<void> {
   const { PDFDocument, StandardFonts, rgb } = await loadPdfLib()
 
@@ -390,7 +396,7 @@ export async function exportAuditPdf(
 
   // ── Graph Image Page ───────────────────────────────────────────────────────
 
-  await renderGraphImage(pm, pdfDoc, graphImageDataUrl, fonts)
+  await renderGraphImage(pm, pdfDoc, graphImageBytes, fonts)
 
   // ── Save & Download ────────────────────────────────────────────────────────
 
@@ -440,6 +446,14 @@ export async function exportProjectAuditPdf(model: ProjectAuditModel): Promise<v
   pm.drawKeyValue('Total canvases', String(model.meta.totalCanvases), fontRegular, fontBold)
   pm.drawKeyValue('Total nodes', String(model.meta.nodeCount), fontRegular, fontBold)
   pm.drawKeyValue('Total edges', String(model.meta.edgeCount), fontRegular, fontBold)
+  if (model.exportOptions) {
+    pm.drawKeyValue(
+      'Images',
+      model.exportOptions.includeImages ? 'Included' : 'Skipped (values-only)',
+      fontRegular,
+      fontBold,
+    )
+  }
 
   // ── Project Hash ───────────────────────────────────────────────────────────
 
@@ -504,7 +518,7 @@ export async function exportProjectAuditPdf(model: ProjectAuditModel): Promise<v
     renderNodeValuesTable(pm, canvas.nodeValues, fonts)
 
     // Graph image
-    await renderGraphImage(pm, pdfDoc, canvas.graphImageDataUrl, fonts)
+    await renderGraphImage(pm, pdfDoc, canvas.graphImageBytes, fonts, canvas.imageError)
   }
 
   // ── Fill TOC pages ─────────────────────────────────────────────────────────

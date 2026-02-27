@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest'
 import { stableStringify } from './stableStringify'
 import { sha256Hex } from './sha256'
 import { buildAuditModel, buildCanvasAuditSection, buildProjectAuditModel } from './auditModel'
+import { computeSafePixelRatio, MAX_CAPTURE_PIXELS } from './captureCanvasImage'
 import type { EngineEvalResult } from '../../engine/wasm-types'
 
 // ── stableStringify ──────────────────────────────────────────────────────────
@@ -279,7 +280,7 @@ describe('buildCanvasAuditSection', () => {
       evalResult: fakeEvalResult,
       healthSummary: 'OK',
       snapshotHash: 'abc123',
-      graphImageDataUrl: null,
+      graphImageBytes: null,
     })
 
     expect(section.canvasId).toBe('canvas-1')
@@ -288,7 +289,7 @@ describe('buildCanvasAuditSection', () => {
     expect(section.nodeCount).toBe(1) // groups excluded
     expect(section.edgeCount).toBe(1)
     expect(section.snapshotHash).toBe('abc123')
-    expect(section.graphImageDataUrl).toBeNull()
+    expect(section.graphImageBytes).toBeNull()
   })
 
   it('records image error for non-active canvases', () => {
@@ -301,12 +302,12 @@ describe('buildCanvasAuditSection', () => {
       evalResult: fakeEvalResult,
       healthSummary: '',
       snapshotHash: 'def456',
-      graphImageDataUrl: null,
+      graphImageBytes: null,
       imageError: 'Non-active canvas',
     })
 
     expect(section.imageError).toBe('Non-active canvas')
-    expect(section.graphImageDataUrl).toBeNull()
+    expect(section.graphImageBytes).toBeNull()
   })
 
   it('excludes group nodes from node values', () => {
@@ -319,7 +320,7 @@ describe('buildCanvasAuditSection', () => {
       evalResult: fakeEvalResult,
       healthSummary: '',
       snapshotHash: 'abc',
-      graphImageDataUrl: null,
+      graphImageBytes: null,
     })
 
     expect(section.nodeValues).toHaveLength(1)
@@ -346,7 +347,7 @@ describe('buildProjectAuditModel', () => {
     evalResult: { values: {}, diagnostics: [], elapsedUs: 100, partial: false },
     healthSummary: 'OK',
     snapshotHash: 'hash1',
-    graphImageDataUrl: 'data:image/png;base64,abc',
+    graphImageBytes: new Uint8Array([137, 80, 78, 71]),
   })
 
   const fakeSection2 = buildCanvasAuditSection({
@@ -373,7 +374,7 @@ describe('buildProjectAuditModel', () => {
     evalResult: { values: {}, diagnostics: [], elapsedUs: 200, partial: false },
     healthSummary: 'OK',
     snapshotHash: 'hash2',
-    graphImageDataUrl: null,
+    graphImageBytes: null,
     imageError: 'Non-active canvas',
   })
 
@@ -451,5 +452,116 @@ describe('buildProjectAuditModel', () => {
     const h1 = await sha256Hex(stableStringify(['hash1', 'hash2']))
     const h2 = await sha256Hex(stableStringify(['hash2', 'hash1']))
     expect(h1).not.toBe(h2)
+  })
+
+  it('passes through exportOptions to model', () => {
+    const model = buildProjectAuditModel({
+      projectName: 'Test',
+      projectId: 'proj-1',
+      exportTimestamp: '2026-02-27T12:00:00Z',
+      buildVersion: '1.0.0',
+      buildSha: 'abc',
+      buildTime: '2026-02-27',
+      buildEnv: 'test',
+      engineVersion: '0.5.0',
+      contractVersion: 3,
+      activeCanvasId: 'c1',
+      projectHash: 'hash',
+      canvases: [fakeSection1],
+      exportOptions: { includeImages: false, scope: 'project' },
+    })
+
+    expect(model.exportOptions).toEqual({ includeImages: false, scope: 'project' })
+  })
+})
+
+// ── computeSafePixelRatio ──────────────────────────────────────────────────
+
+describe('computeSafePixelRatio', () => {
+  it('returns desired ratio when under pixel cap', () => {
+    // 1000 × 1000 at PR=2 → 4M pixels, well under 16M
+    expect(computeSafePixelRatio(1000, 1000, 2)).toBe(2)
+  })
+
+  it('scales down when desired ratio exceeds pixel cap', () => {
+    // 4096 × 4096 at PR=2 → 67M pixels, exceeds 16M
+    const ratio = computeSafePixelRatio(4096, 4096, 2)
+    expect(ratio).toBeLessThan(2)
+    // Effective output: 4096 * ratio * 4096 * ratio <= 16M
+    expect(4096 * ratio * 4096 * ratio).toBeLessThanOrEqual(MAX_CAPTURE_PIXELS)
+  })
+
+  it('returns desired ratio for zero/negative dimensions', () => {
+    expect(computeSafePixelRatio(0, 100, 2)).toBe(2)
+    expect(computeSafePixelRatio(100, 0, 2)).toBe(2)
+    expect(computeSafePixelRatio(-1, 100, 2)).toBe(2)
+  })
+
+  it('uses custom maxPixels cap', () => {
+    // 100 × 100 at PR=2 → 40000 pixels, exceeds cap of 10000
+    const ratio = computeSafePixelRatio(100, 100, 2, 10000)
+    expect(ratio).toBeLessThan(2)
+    expect(100 * ratio * 100 * ratio).toBeLessThanOrEqual(10000)
+  })
+
+  it('handles PR=1 at exactly the cap boundary', () => {
+    // 4096 × 4096 at PR=1 → 16M pixels, exactly at the cap
+    expect(computeSafePixelRatio(4096, 4096, 1)).toBe(1)
+  })
+
+  it('returns exactly desired ratio at the boundary', () => {
+    // 2048 × 2048 at PR=2 → 16M, exactly at cap
+    expect(computeSafePixelRatio(2048, 2048, 2)).toBe(2)
+  })
+})
+
+// ── buildCanvasAuditSection with graphImageBytes ─────────────────────────
+
+describe('buildCanvasAuditSection with Uint8Array', () => {
+  const fakeEval: EngineEvalResult = {
+    values: {},
+    diagnostics: [],
+    elapsedUs: 100,
+    partial: false,
+  }
+
+  it('stores Uint8Array bytes in graphImageBytes', () => {
+    const bytes = new Uint8Array([137, 80, 78, 71])
+    const section = buildCanvasAuditSection({
+      canvasId: 'c1',
+      canvasName: 'Sheet 1',
+      position: 0,
+      nodes: [] as never,
+      edges: [] as never,
+      evalResult: fakeEval,
+      healthSummary: 'OK',
+      snapshotHash: 'hash',
+      graphImageBytes: bytes,
+      captureRung: 'pr2',
+    })
+
+    expect(section.graphImageBytes).toBeInstanceOf(Uint8Array)
+    expect(section.graphImageBytes).toEqual(bytes)
+    expect(section.captureRung).toBe('pr2')
+  })
+
+  it('stores null when no image captured', () => {
+    const section = buildCanvasAuditSection({
+      canvasId: 'c2',
+      canvasName: 'Sheet 2',
+      position: 1,
+      nodes: [] as never,
+      edges: [] as never,
+      evalResult: fakeEval,
+      healthSummary: '',
+      snapshotHash: 'hash2',
+      graphImageBytes: null,
+      imageError: 'Capture failed',
+      captureRung: 'skipped',
+    })
+
+    expect(section.graphImageBytes).toBeNull()
+    expect(section.imageError).toBe('Capture failed')
+    expect(section.captureRung).toBe('skipped')
   })
 })

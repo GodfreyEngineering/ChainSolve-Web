@@ -15,6 +15,8 @@ export interface PdfAPI {
   rgb: typeof import('pdf-lib').rgb
   /** html-to-image toPng function */
   toPng: (node: HTMLElement, options?: Record<string, unknown>) => Promise<string>
+  /** html-to-image toBlob function (avoids base64 overhead) */
+  toBlob: (node: HTMLElement, options?: Record<string, unknown>) => Promise<Blob | null>
 }
 
 export type { PDFDocument, PDFFont, PDFPage, PDFImage }
@@ -30,6 +32,7 @@ export function loadPdfLib(): Promise<PdfAPI> {
       StandardFonts: pdfLib.StandardFonts,
       rgb: pdfLib.rgb,
       toPng: htmlToImage.toPng as PdfAPI['toPng'],
+      toBlob: htmlToImage.toBlob as PdfAPI['toBlob'],
     }
   })()
   return cached
