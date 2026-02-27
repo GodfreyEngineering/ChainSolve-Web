@@ -431,3 +431,86 @@ proptest! {
             "Non-deterministic: {}, {}, {}", r1, r2, r3);
     }
 }
+
+// ── Random DAG properties ─────────────────────────────────────────────
+//
+// Build random chains of binary ops by construction — node i only receives
+// inputs from nodes j < i, guaranteeing acyclicity.  Tests verify:
+//   1. No panics (engine.run() always returns Ok).
+//   2. Determinism: identical JSON → bitwise identical scalar outputs.
+
+/// Binary ops safe to chain (finite inputs → finite or NaN output, no panics).
+const CHAIN_OPS: [&str; 3] = ["add", "subtract", "multiply"];
+
+/// Build a chain snapshot: input nodes i0..iN, then a sequence of binary ops
+/// each taking the previous result and the next input node.
+fn build_chain_snap(inputs: &[f64], op_indices: &[usize]) -> EngineSnapshotV1 {
+    let mut nodes: Vec<NodeDef> = inputs
+        .iter()
+        .enumerate()
+        .map(|(i, &v)| {
+            let mut d = HashMap::new();
+            d.insert("value".to_string(), serde_json::json!(v));
+            NodeDef {
+                id: format!("i{i}"),
+                block_type: "number".to_string(),
+                data: d,
+            }
+        })
+        .collect();
+
+    let mut edges: Vec<EdgeDef> = Vec::new();
+    let mut prev = "i0".to_string();
+
+    for (step, &idx) in op_indices.iter().enumerate() {
+        let op = CHAIN_OPS[idx % CHAIN_OPS.len()];
+        let op_id = format!("op{step}");
+        nodes.push(op_node(&op_id, op));
+        edges.push(edge(&format!("ea{step}"), &prev, "out", &op_id, "a"));
+        // "b" always gets the next input (wrapping)
+        let b_src = format!("i{}", (step + 1).min(inputs.len() - 1));
+        edges.push(edge(&format!("eb{step}"), &b_src, "out", &op_id, "b"));
+        prev = op_id;
+    }
+
+    EngineSnapshotV1 { version: 1, nodes, edges }
+}
+
+proptest! {
+    #![proptest_config(ProptestConfig::with_cases(64))]
+
+    /// Random chains never panic and always return Ok.
+    #[test]
+    fn random_chain_no_panic(
+        inputs  in prop::collection::vec(finite_f64(), 2..=6),
+        op_idxs in prop::collection::vec(0usize..3, 1..=5),
+    ) {
+        let snap = build_chain_snap(&inputs, &op_idxs);
+        let json = serde_json::to_string(&snap).unwrap();
+        let result = engine_core::run(&json);
+        prop_assert!(result.is_ok(), "engine returned Err: {:?}", result.err());
+    }
+
+    /// Same random chain JSON → bitwise identical scalar outputs across two runs.
+    #[test]
+    fn random_chain_deterministic(
+        inputs  in prop::collection::vec(finite_f64(), 2..=6),
+        op_idxs in prop::collection::vec(0usize..3, 1..=5),
+    ) {
+        let snap = build_chain_snap(&inputs, &op_idxs);
+        let json = serde_json::to_string(&snap).unwrap();
+        let r1 = engine_core::run(&json).unwrap();
+        let r2 = engine_core::run(&json).unwrap();
+
+        for (id, v1) in &r1.values {
+            if let (Value::Scalar { value: a }, Some(Value::Scalar { value: b })) =
+                (v1, r2.values.get(id))
+            {
+                prop_assert!(
+                    a.to_bits() == b.to_bits(),
+                    "Determinism failed for node {id}: {a} vs {b}"
+                );
+            }
+        }
+    }
+}
