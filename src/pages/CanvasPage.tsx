@@ -25,6 +25,7 @@ import {
 import { INITIAL_NODES, INITIAL_EDGES } from '../components/canvas/canvasDefaults'
 import type { Node, Edge } from '@xyflow/react'
 import type { NodeData } from '../blocks/registry'
+import type { ExportAsset } from '../lib/chainsolvejson/model'
 import {
   loadProject,
   saveProject,
@@ -78,6 +79,11 @@ import type { TableExport } from '../lib/xlsx/xlsxModel'
 
 const PerfHud = lazy(() =>
   import('../components/PerfHud.tsx').then((m) => ({ default: m.PerfHud })),
+)
+const LazyImportProjectDialog = lazy(() =>
+  import('../components/app/ImportProjectDialog').then((m) => ({
+    default: m.ImportProjectDialog,
+  })),
 )
 
 const AUTOSAVE_DELAY_MS = 2000
@@ -996,6 +1002,46 @@ export default function CanvasPage() {
         return
       }
 
+      // Load project assets from DB and embed/reference them
+      const { listProjectAssets, downloadAssetBytes } = await import('../lib/storage')
+      const { buildEmbeddedAsset, buildReferencedAsset, EMBED_SIZE_LIMIT } =
+        await import('../lib/chainsolvejson/model')
+
+      const dbAssets = await listProjectAssets(projectId)
+      const exportAssets: ExportAsset[] = []
+
+      for (let ai = 0; ai < dbAssets.length; ai++) {
+        if (abort.signal.aborted) break
+        const a = dbAssets[ai]
+
+        toast(
+          t('chainsolveJsonExport.loadingAssets', { current: ai + 1, total: dbAssets.length }),
+          'info',
+        )
+
+        if (a.size != null && a.size <= EMBED_SIZE_LIMIT) {
+          const bytes = await downloadAssetBytes(a.storage_path)
+          exportAssets.push(
+            await buildEmbeddedAsset(a.name, a.mime_type ?? 'application/octet-stream', bytes),
+          )
+        } else {
+          exportAssets.push(
+            buildReferencedAsset(
+              a.name,
+              a.mime_type ?? 'application/octet-stream',
+              a.size ?? 0,
+              a.storage_path,
+              a.sha256,
+            ),
+          )
+        }
+      }
+
+      if (abort.signal.aborted) {
+        toast(t('chainsolveJsonExport.cancelled'), 'info')
+        return
+      }
+
       const ps = useProjectStore.getState()
 
       await exportChainsolveJsonProject({
@@ -1013,7 +1059,7 @@ export default function CanvasPage() {
         createdAt: ps.createdAt,
         updatedAt: ps.dbUpdatedAt,
         canvases: canvasInputs,
-        assets: [],
+        assets: exportAssets,
       })
       toast(t('chainsolveJsonExport.success'), 'success')
     } catch (err: unknown) {
@@ -1027,6 +1073,98 @@ export default function CanvasPage() {
       setExportInProgress(false)
     }
   }, [projectId, engine, toast, t])
+
+  // ── .chainsolvejson import ──────────────────────────────────────────────────
+
+  const importFileRef = useRef<HTMLInputElement>(null)
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const [importSummary, setImportSummary] = useState<null | {
+    text: string
+    fileName: string
+    summary: import('../lib/chainsolvejson/import/report').ImportSummary
+    model: import('../lib/chainsolvejson/model').ChainsolveJsonV1
+    validation: import('../lib/chainsolvejson/import/validate').ValidationResult
+  }>(null)
+  const [importing, setImporting] = useState(false)
+
+  const handleImportChainsolveJson = useCallback(() => {
+    importFileRef.current?.click()
+  }, [])
+
+  const handleImportFileSelected = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      e.target.value = ''
+      if (!file) return
+
+      toast(t('importProject.validating'), 'info')
+
+      try {
+        const text = await file.text()
+        const { preImport } = await import('../lib/chainsolvejson/import/importProject')
+        const result = await preImport(text)
+
+        setImportSummary({
+          text,
+          fileName: file.name,
+          summary: result.summary,
+          model: result.model,
+          validation: result.validation,
+        })
+        setImportDialogOpen(true)
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Failed to parse import file.'
+        toast(msg, 'error')
+      }
+    },
+    [toast, t],
+  )
+
+  const handleConfirmImport = useCallback(async () => {
+    if (!importSummary) return
+    setImporting(true)
+
+    try {
+      const { importChainsolveJsonAsNewProject } =
+        await import('../lib/chainsolvejson/import/importProject')
+
+      const result = await importChainsolveJsonAsNewProject(
+        importSummary.text,
+        importSummary.model,
+        importSummary.validation,
+        {
+          fileName: importSummary.fileName,
+          onProgress: (p) => {
+            if (p.phase === 'canvases' && p.current && p.total) {
+              toast(t('importProject.progress', { current: p.current, total: p.total }), 'info')
+            } else if (p.phase === 'assets' && p.current && p.total) {
+              toast(
+                t('importProject.uploadingAssets', { current: p.current, total: p.total }),
+                'info',
+              )
+            }
+          },
+        },
+      )
+
+      setImportDialogOpen(false)
+      setImportSummary(null)
+
+      if (result.ok && result.projectId) {
+        toast(t('importProject.success'), 'success')
+        navigate(`/canvas/${result.projectId}`)
+      } else {
+        toast(t('importProject.failed'), 'error')
+        const { downloadImportReport } = await import('../lib/chainsolvejson/import/report')
+        downloadImportReport(result.report)
+      }
+    } catch (err: unknown) {
+      console.error('[chainsolvejson-import]', err)
+      toast(t('importProject.failed'), 'error')
+    } finally {
+      setImporting(false)
+    }
+  }, [importSummary, toast, t, navigate])
 
   // ── Loading / error screens ────────────────────────────────────────────────
   if (loadPhase === 'loading') {
@@ -1099,6 +1237,7 @@ export default function CanvasPage() {
         onCancelExport={handleCancelExport}
         onExportExcelProject={handleExportAllSheetsExcel}
         onExportChainsolveJson={handleExportChainsolveJson}
+        onImportChainsolveJson={handleImportChainsolveJson}
       />
 
       {/* ── Read-only / billing banner ────────────────────────────────────── */}
@@ -1207,6 +1346,27 @@ export default function CanvasPage() {
           plan={plan}
         />
       </div>
+      {/* ── Import file input + dialog ────────────────────────────────────── */}
+      <input
+        ref={importFileRef}
+        type="file"
+        accept=".chainsolvejson,.json,application/json"
+        style={{ display: 'none' }}
+        onChange={(e) => void handleImportFileSelected(e)}
+      />
+      <Suspense fallback={null}>
+        <LazyImportProjectDialog
+          open={importDialogOpen}
+          onClose={() => {
+            setImportDialogOpen(false)
+            setImportSummary(null)
+          }}
+          onConfirm={() => void handleConfirmImport()}
+          summary={importSummary?.summary ?? null}
+          validation={importSummary?.validation ?? null}
+          importing={importing}
+        />
+      </Suspense>
       {isPerfHudEnabled() && (
         <Suspense fallback={null}>
           <PerfHud />

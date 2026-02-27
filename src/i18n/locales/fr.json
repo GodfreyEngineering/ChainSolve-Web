@@ -275,6 +275,7 @@
     "import": "Importer",
     "exportPdf": "Exporter PDF",
     "exportExcel": "Exporter Excel",
+    "importProject": "Importer un projet (.chainsolvejson)",
     "exportProject": "Exporter le projet (.chainsolvejson)",
     "recentProjects": "Projets récents",
     "undo": "Annuler",
@@ -423,11 +424,31 @@
     "cancelled": "Export Excel annulé.",
     "tableTruncated": "Tronqué de {{originalRowCount}} lignes à {{maxRows}}"
   },
+  "importProject": {
+    "title": "Importer un projet",
+    "projectName": "Nom du projet",
+    "canvases": "Canevas",
+    "variables": "Variables",
+    "embeddedAssets": "Assets intégrés",
+    "referencedAssets": "Assets référencés",
+    "exportedAt": "Exporté le",
+    "validationErrors": "{{count}} erreur(s) de validation",
+    "warnings": "{{count}} avertissement(s)",
+    "cancel": "Annuler",
+    "confirm": "Importer comme nouveau projet",
+    "importing": "Importation…",
+    "validating": "Validation du fichier projet…",
+    "progress": "Importation du canevas {{current}}/{{total}}…",
+    "uploadingAssets": "Téléversement de l'asset {{current}}/{{total}}…",
+    "success": "Projet importé avec succès",
+    "failed": "Échec de l'importation du projet"
+  },
   "chainsolveJsonExport": {
     "generating": "Export du projet en cours…",
     "success": "Projet exporté avec succès",
     "failed": "Échec de l'export du projet",
     "progress": "Chargement de la feuille {{current}} sur {{total}}…",
+    "loadingAssets": "Chargement de l'asset {{current}} sur {{total}}…",
     "cancelled": "Export du projet annulé."
   }
 }

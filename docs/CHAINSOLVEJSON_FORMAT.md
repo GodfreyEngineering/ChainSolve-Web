@@ -1,4 +1,4 @@
-# .chainsolvejson Format (W14c.1)
+# .chainsolvejson Format (W14c.1 + W14c.2)
 
 Single-file JSON project archive containing all project data, canvases, and assets.
 
@@ -182,9 +182,67 @@ CanvasPage.handleExportChainsolveJson()
 
 No DOM switching needed. All canvas data is loaded from storage or memory.
 
+## Import behavior (W14c.2)
+
+Importing a `.chainsolvejson` file creates a NEW project. It never overwrites
+an existing project. The import flow is:
+
+```text
+User: File → Import Project (.chainsolvejson)
+  → file picker (accept=".chainsolvejson")
+  → parse + deep validate (parse.ts + validate.ts)
+  → show summary dialog (ImportProjectDialog)
+  → user confirms
+  → create project row (Supabase)
+  → for each canvas: remap IDs, normalize graph, upload JSON, insert row
+  → for each embedded asset: decode base64, verify SHA-256, upload, insert row
+  → save legacy project.json (schemaVersion 3)
+  → navigate to new project
+```
+
+### ID remapping
+
+All canvas IDs are regenerated as new UUIDs on import. A remap table
+(`oldId → newId`) is recorded in the import report. Graph JSON fields
+`canvasId` and `projectId` are rewritten to match the new identifiers.
+
+### Validation checks
+
+| Check                  | Severity | Description                                    |
+|------------------------|----------|------------------------------------------------|
+| Secrets scan           | Error    | Forbidden fields (auth tokens, keys, emails)   |
+| Numeric safety         | Error    | No NaN or Infinity in variables or graph data  |
+| Schema version         | Error    | All canvases must be schemaVersion 4           |
+| Duplicate canvas IDs   | Error    | No duplicate canvas IDs in input               |
+| Embedded asset size    | Error    | Must not exceed 10 MB (EMBED_SIZE_LIMIT)       |
+| Hash integrity         | Error    | Per-canvas and project hashes re-verified      |
+| Canvas ID consistency  | Warning  | graph.canvasId mismatch (auto-normalized)      |
+
+### Error handling
+
+On failure, the orchestrator performs cleanup:
+
+1. Delete uploaded canvas graph files from storage
+2. Delete created canvas rows from DB
+3. Delete the project row (cascades to project_assets)
+4. Download an import report (JSON) with details
+
+### StorageRef assets
+
+Assets with `encoding: "storageRef"` cannot be restored from a file export
+(the storage path is specific to the original account). These are recorded
+as unrestorable in the import report.
+
+## Asset integration (W14c.3)
+
+CSV files uploaded via the CsvPicker are stored in the `uploads` bucket and
+recorded in the `project_assets` table (with `sha256` integrity hash). On
+export, assets <= 10 MB are base64-embedded; larger assets are referenced by
+`storagePath`. On import, embedded assets are verified against their SHA-256
+digest, uploaded to the new project's storage, and re-linked in `project_assets`.
+
 ## Limitations
 
 - v1 does not include evaluated values or diagnostics (use PDF/Excel for audit data).
-- Assets are currently empty (no project_assets table yet).
 - Very large projects with many canvases may produce large JSON files.
-- Import (.chainsolvejson) is not yet implemented (planned for W14c.2).
+- StorageRef assets cannot be restored during import (logged in report).

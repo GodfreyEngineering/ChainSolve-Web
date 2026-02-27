@@ -276,6 +276,7 @@
     "import": "Import",
     "exportPdf": "Export PDF",
     "exportExcel": "Export Excel",
+    "importProject": "Import Project (.chainsolvejson)",
     "exportProject": "Export Project (.chainsolvejson)",
     "recentProjects": "Recent projects",
     "undo": "Undo",
@@ -424,11 +425,31 @@
     "cancelled": "Excel export cancelled.",
     "tableTruncated": "Truncated from {{originalRowCount}} rows to {{maxRows}}"
   },
+  "importProject": {
+    "title": "Import Project",
+    "projectName": "Project name",
+    "canvases": "Canvases",
+    "variables": "Variables",
+    "embeddedAssets": "Embedded assets",
+    "referencedAssets": "Referenced assets",
+    "exportedAt": "Exported at",
+    "validationErrors": "{{count}} validation error(s)",
+    "warnings": "{{count}} warning(s)",
+    "cancel": "Cancel",
+    "confirm": "Import as new project",
+    "importing": "Importing…",
+    "validating": "Validating project file…",
+    "progress": "Importing canvas {{current}}/{{total}}…",
+    "uploadingAssets": "Uploading asset {{current}}/{{total}}…",
+    "success": "Project imported successfully",
+    "failed": "Failed to import project"
+  },
   "chainsolveJsonExport": {
     "generating": "Exporting project…",
     "success": "Project exported successfully",
     "failed": "Failed to export project",
     "progress": "Loading canvas {{current}} of {{total}}…",
+    "loadingAssets": "Loading asset {{current}} of {{total}}…",
     "cancelled": "Project export cancelled."
   }
 }

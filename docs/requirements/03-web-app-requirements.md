@@ -533,6 +533,39 @@ variable state, file I/O, network activity, and performance metrics.
 | EX-58 | No bundle size impact; export code lazy-loaded on first use.                                    | MUST     |
 | EX-59 | CSP intact (no unsafe-eval, no inline scripts).                                                 | MUST     |
 
+### 17.7 Project import - .chainsolvejson (W14c.2)
+
+| ID    | Requirement                                                                                     | Priority |
+|-------|-------------------------------------------------------------------------------------------------|----------|
+| EX-60 | File - Import Project (.chainsolvejson) opens a file picker filtered to .chainsolvejson.        | MUST     |
+| EX-61 | Import creates a NEW project; never overwrites an existing project.                             | MUST     |
+| EX-62 | Pre-import dialog shows summary (project name, canvas count, variables, assets, exportedAt).    | MUST     |
+| EX-63 | Deep validation: secrets scan, email detection, NaN/Infinity check, schema version check.       | MUST     |
+| EX-64 | Hash integrity: per-canvas and project hashes recomputed and compared to embedded hashes.       | MUST     |
+| EX-65 | All canvas IDs remapped to new UUIDs; graph canvasId and projectId normalized.                  | MUST     |
+| EX-66 | Embedded assets (base64): decoded, SHA-256 verified, uploaded to storage, project_assets row.   | SHOULD   |
+| EX-67 | StorageRef assets: skipped (not restorable), recorded in import report.                         | MUST     |
+| EX-68 | On failure: cleanup partially created resources (storage, canvas rows, project row).            | MUST     |
+| EX-69 | On failure: download import report (JSON) with error details.                                   | SHOULD   |
+| EX-70 | On success: navigate to the new project.                                                        | MUST     |
+| EX-71 | Import disabled in read-only mode and during active export.                                     | MUST     |
+| EX-72 | No bundle size impact; import code lazy-loaded via dynamic import().                            | MUST     |
+| EX-73 | CSP intact (no unsafe-eval, no inline scripts).                                                 | MUST     |
+| EX-74 | Progress toasts shown for validation, canvas import, and asset upload phases.                   | SHOULD   |
+
+### 17.8 Asset plumbing for .chainsolvejson (W14c.3)
+
+| ID    | Requirement                                                                                     | Priority |
+|-------|-------------------------------------------------------------------------------------------------|----------|
+| EX-75 | `project_assets` table has `sha256 TEXT` column (idempotent migration).                         | MUST     |
+| EX-76 | `uploadCsv` creates `project_assets` row on successful CSV parse.                               | MUST     |
+| EX-77 | Export embeds assets <= 10 MB as base64 with SHA-256 integrity hash.                            | MUST     |
+| EX-78 | Export references assets > 10 MB as storageRef entries.                                         | MUST     |
+| EX-79 | Import restores embedded assets: decode base64, verify SHA-256, upload, insert `project_assets`. | MUST     |
+| EX-80 | Import records storageRef assets as unrestorable in the import report.                          | MUST     |
+| EX-81 | CsvPicker uploads CSV to storage on successful parse (background, fire-and-forget).             | SHOULD   |
+| EX-82 | Asset hashes included in project hash computation for deterministic exports.                    | MUST     |
+
 ---
 
 ## 18. Out of scope (for now)
@@ -562,6 +595,8 @@ variable state, file I/O, network activity, and performance metrics.
 
 | Date       | Author | Change                                                                                            |
 |------------|--------|---------------------------------------------------------------------------------------------------|
+| 2026-02-27 | -      | W14c.3: Added 17.8 (Asset plumbing EX-75 to EX-82). Export/import real assets, CSV upload wire.   |
+| 2026-02-27 | -      | W14c.2: Added 17.7 (Project import .chainsolvejson EX-60 to EX-74). Parse, validate, create new.  |
 | 2026-02-27 | -      | W14c.1: Added 17.6 (Project export .chainsolvejson EX-45 to EX-59). Deterministic JSON archive.   |
 | 2026-02-27 | -      | W14b.2: Added 17.5 (Excel all sheets + tables EX-35 to EX-44). TOC, table sheets, truncation.     |
 | 2026-02-27 | -      | W14b.1: Added 17.4 (Excel active sheet EX-25 to EX-34). Lazy write-excel-file, 5-sheet wb.        |

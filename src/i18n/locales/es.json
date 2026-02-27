@@ -275,6 +275,7 @@
     "import": "Importar",
     "exportPdf": "Exportar PDF",
     "exportExcel": "Exportar Excel",
+    "importProject": "Importar proyecto (.chainsolvejson)",
     "exportProject": "Exportar proyecto (.chainsolvejson)",
     "recentProjects": "Proyectos recientes",
     "undo": "Deshacer",
@@ -423,11 +424,31 @@
     "cancelled": "Exportación Excel cancelada.",
     "tableTruncated": "Truncado de {{originalRowCount}} filas a {{maxRows}}"
   },
+  "importProject": {
+    "title": "Importar proyecto",
+    "projectName": "Nombre del proyecto",
+    "canvases": "Lienzos",
+    "variables": "Variables",
+    "embeddedAssets": "Assets incrustados",
+    "referencedAssets": "Assets referenciados",
+    "exportedAt": "Exportado el",
+    "validationErrors": "{{count}} error(es) de validación",
+    "warnings": "{{count}} advertencia(s)",
+    "cancel": "Cancelar",
+    "confirm": "Importar como nuevo proyecto",
+    "importing": "Importando…",
+    "validating": "Validando archivo de proyecto…",
+    "progress": "Importando lienzo {{current}}/{{total}}…",
+    "uploadingAssets": "Subiendo asset {{current}}/{{total}}…",
+    "success": "Proyecto importado correctamente",
+    "failed": "Error al importar el proyecto"
+  },
   "chainsolveJsonExport": {
     "generating": "Exportando proyecto…",
     "success": "Proyecto exportado correctamente",
     "failed": "Error al exportar el proyecto",
     "progress": "Cargando hoja {{current}} de {{total}}…",
+    "loadingAssets": "Cargando recurso {{current}} de {{total}}…",
     "cancelled": "Exportación del proyecto cancelada."
   }
 }

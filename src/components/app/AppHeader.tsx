@@ -65,11 +65,12 @@ export interface AppHeaderProps {
   onSaveAs: (name: string) => Promise<void>
   onNavigateBack: (e: React.MouseEvent<HTMLAnchorElement>) => void
   canvasRef: React.RefObject<CanvasAreaHandle | null>
-  // Export (W14a.3 + W14b.2 + W14c.1)
+  // Export (W14a.3 + W14b.2 + W14c.1) + Import (W14c.2)
   exportInProgress?: boolean
   onExportPdfProject?: (opts: { includeImages: boolean }) => void
   onExportExcelProject?: (opts: { includeTables: boolean }) => void
   onExportChainsolveJson?: () => void
+  onImportChainsolveJson?: () => void
   onCancelExport?: () => void
 }
 
@@ -132,6 +133,7 @@ export function AppHeader({
   onExportPdfProject,
   onExportExcelProject,
   onExportChainsolveJson,
+  onImportChainsolveJson,
   onCancelExport,
 }: AppHeaderProps) {
   const { t } = useTranslation()
@@ -392,7 +394,14 @@ export function AppHeader({
         },
       },
       { separator: true },
-      { label: t('menu.import'), onClick: stub },
+      {
+        label: t('menu.importProject'),
+        onClick: () => {
+          setOpenMenu(null)
+          onImportChainsolveJson?.()
+        },
+        disabled: readOnly || !!exportInProgress,
+      },
       {
         label: t('menu.exportPdf'),
         children: [
@@ -461,7 +470,6 @@ export function AppHeader({
     ]
   }, [
     t,
-    stub,
     readOnly,
     isDirty,
     onSave,
@@ -473,6 +481,7 @@ export function AppHeader({
     handleExportExcelActive,
     handleExportExcelAll,
     handleExportChainsolveJson,
+    onImportChainsolveJson,
     handleToggleIncludeImages,
     handleToggleIncludeTables,
     includeImages,

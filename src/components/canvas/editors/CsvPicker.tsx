@@ -8,6 +8,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { useReactFlow } from '@xyflow/react'
 import type { NodeData } from '../../../blocks/registry'
+import { useProjectStore } from '../../../stores/projectStore'
 
 interface CsvPickerProps {
   nodeId: string
@@ -16,6 +17,7 @@ interface CsvPickerProps {
 
 export function CsvPicker({ nodeId, data }: CsvPickerProps) {
   const { updateNodeData } = useReactFlow()
+  const projectId = useProjectStore((s) => s.projectId)
   const fileRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<'idle' | 'parsing' | 'error'>(
     data.tableData ? 'idle' : 'idle',
@@ -46,6 +48,15 @@ export function CsvPicker({ nodeId, data }: CsvPickerProps) {
                 csvStoragePath: file.name,
               })
               setStatus('idle')
+
+              // Background upload to storage (fire-and-forget)
+              if (projectId) {
+                import('../../../lib/storage')
+                  .then(({ uploadCsv }) => uploadCsv(projectId, file))
+                  .catch(() => {
+                    /* best effort — CSV already works locally */
+                  })
+              }
             } else {
               setStatus('error')
               setErrorMsg(msg.error)
@@ -68,7 +79,7 @@ export function CsvPicker({ nodeId, data }: CsvPickerProps) {
       }
       reader.readAsText(file)
     },
-    [nodeId, updateNodeData],
+    [nodeId, updateNodeData, projectId],
   )
 
   const onFileChange = useCallback(

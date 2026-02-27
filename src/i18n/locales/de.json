@@ -275,6 +275,7 @@
     "import": "Importieren",
     "exportPdf": "PDF exportieren",
     "exportExcel": "Excel exportieren",
+    "importProject": "Projekt importieren (.chainsolvejson)",
     "exportProject": "Projekt exportieren (.chainsolvejson)",
     "recentProjects": "Letzte Projekte",
     "undo": "Rückgängig",
@@ -423,11 +424,31 @@
     "cancelled": "Excel-Export abgebrochen.",
     "tableTruncated": "Gekürzt von {{originalRowCount}} Zeilen auf {{maxRows}}"
   },
+  "importProject": {
+    "title": "Projekt importieren",
+    "projectName": "Projektname",
+    "canvases": "Zeichenflächen",
+    "variables": "Variablen",
+    "embeddedAssets": "Eingebettete Assets",
+    "referencedAssets": "Referenzierte Assets",
+    "exportedAt": "Exportiert am",
+    "validationErrors": "{{count}} Validierungsfehler",
+    "warnings": "{{count}} Warnung(en)",
+    "cancel": "Abbrechen",
+    "confirm": "Als neues Projekt importieren",
+    "importing": "Importieren…",
+    "validating": "Projektdatei wird validiert…",
+    "progress": "Importiere Zeichenfläche {{current}}/{{total}}…",
+    "uploadingAssets": "Lade Asset {{current}}/{{total}} hoch…",
+    "success": "Projekt erfolgreich importiert",
+    "failed": "Projektimport fehlgeschlagen"
+  },
   "chainsolveJsonExport": {
     "generating": "Projekt wird exportiert…",
     "success": "Projekt erfolgreich exportiert",
     "failed": "Projektexport fehlgeschlagen",
     "progress": "Lade Blatt {{current}} von {{total}}…",
+    "loadingAssets": "Lade Asset {{current}} von {{total}}…",
     "cancelled": "Projektexport abgebrochen."
   }
 }

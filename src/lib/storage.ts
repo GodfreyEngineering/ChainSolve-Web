@@ -33,7 +33,10 @@ export interface ProjectAsset {
   mime_type: string | null
   /** File size in bytes */
   size: number | null
+  /** SHA-256 hex digest of the raw file bytes (nullable for legacy rows) */
+  sha256: string | null
   created_at: string
+  updated_at: string
 }
 
 // ── Private helper ────────────────────────────────────────────────────────────
@@ -140,7 +143,9 @@ export async function listProjectAssets(projectId: string): Promise<ProjectAsset
 
   const { data, error } = await supabase
     .from('project_assets')
-    .select('id,project_id,user_id,kind,name,storage_path,mime_type,size,created_at')
+    .select(
+      'id,project_id,user_id,kind,name,storage_path,mime_type,size,sha256,created_at,updated_at',
+    )
     .eq('project_id', projectId)
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
@@ -172,4 +177,66 @@ export async function getSignedDownloadUrl(
   if (!data?.signedUrl) throw new Error('No signed URL returned')
 
   return data.signedUrl
+}
+
+/**
+ * Download raw bytes of an asset from Supabase Storage.
+ *
+ * @param storagePath  Full storage path as stored in `project_assets.storage_path`
+ * @param bucket       Storage bucket name (default: 'uploads')
+ */
+export async function downloadAssetBytes(
+  storagePath: string,
+  bucket: 'uploads' | 'projects' = 'uploads',
+): Promise<Uint8Array> {
+  await requireSession()
+
+  const { data, error } = await supabase.storage.from(bucket).download(storagePath)
+  if (error) throw new Error(`Asset download failed: ${error.message}`)
+  if (!data) throw new Error('Asset download returned no data')
+
+  return new Uint8Array(await data.arrayBuffer())
+}
+
+/**
+ * Upload raw bytes as a project asset and insert a `project_assets` row.
+ *
+ * Used by the .chainsolvejson import flow to restore embedded assets.
+ *
+ * @returns The storage key where the file was uploaded.
+ */
+export async function uploadAssetBytes(
+  projectId: string,
+  name: string,
+  mimeType: string,
+  bytes: Uint8Array,
+  sha256: string | null,
+  kind: string,
+): Promise<{ storage_key: string }> {
+  const session = await requireSession()
+  const userId = session.user.id
+
+  const safe = sanitiseFilename(name)
+  const key = `${userId}/${projectId}/uploads/${Date.now()}_${safe}`
+
+  const { error: uploadErr } = await supabase.storage
+    .from('uploads')
+    .upload(key, bytes, { contentType: mimeType })
+
+  if (uploadErr) throw new Error(`Asset upload failed: ${uploadErr.message}`)
+
+  const { error: dbErr } = await supabase.from('project_assets').insert({
+    project_id: projectId,
+    user_id: userId,
+    kind,
+    name,
+    storage_path: key,
+    mime_type: mimeType,
+    size: bytes.length,
+    sha256,
+  })
+
+  if (dbErr) throw new Error(`project_assets insert failed: ${dbErr.message}`)
+
+  return { storage_key: key }
 }
