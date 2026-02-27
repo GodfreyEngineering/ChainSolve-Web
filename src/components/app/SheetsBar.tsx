@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import { canCreateCanvas, type Plan } from '../../lib/entitlements'
+import { canCreateCanvas, getEntitlements, type Plan } from '../../lib/entitlements'
 import type { CanvasRow } from '../../lib/canvases'
 
 // ── Props ───────────────────────────────────────────────────────────────────
@@ -169,6 +169,9 @@ function DesktopSheetsBar({
   }, [contextMenu, onDuplicateCanvas])
 
   const canAdd = !readOnly && canCreateCanvas(plan, canvases.length)
+  const ent = getEntitlements(plan)
+  const canvasCountLabel =
+    ent.maxCanvases === Infinity ? `${canvases.length}` : `${canvases.length} / ${ent.maxCanvases}`
 
   return (
     <div style={barStyle}>
@@ -221,6 +224,7 @@ function DesktopSheetsBar({
           +
         </button>
       </div>
+      <span style={canvasCounterStyle}>{canvasCountLabel}</span>
 
       {/* Context menu */}
       {contextMenu && (
@@ -278,6 +282,11 @@ function MobileSheetsBar({
 
   const activeCanvas = canvases.find((c) => c.id === activeCanvasId)
   const canAdd = !readOnly && canCreateCanvas(plan, canvases.length)
+  const mobileEnt = getEntitlements(plan)
+  const mobileCountLabel =
+    mobileEnt.maxCanvases === Infinity
+      ? `${canvases.length}`
+      : `${canvases.length} / ${mobileEnt.maxCanvases}`
 
   // Close on outside click
   useEffect(() => {
@@ -329,11 +338,21 @@ function MobileSheetsBar({
       >
         +
       </button>
+      <span style={canvasCounterStyle}>{mobileCountLabel}</span>
     </div>
   )
 }
 
 // ── Styles ──────────────────────────────────────────────────────────────────
+
+const canvasCounterStyle: React.CSSProperties = {
+  fontSize: '0.72rem',
+  opacity: 0.4,
+  fontVariantNumeric: 'tabular-nums',
+  whiteSpace: 'nowrap',
+  padding: '0 0.5rem',
+  flexShrink: 0,
+}
 
 const barStyle: React.CSSProperties = {
   display: 'flex',

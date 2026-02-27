@@ -23,7 +23,13 @@ import {
   type ProjectRow,
   type ProjectJSON,
 } from '../lib/projects'
-import { canCreateProject, isReadOnly, showBillingBanner, type Plan } from '../lib/entitlements'
+import {
+  canCreateProject,
+  getEntitlements,
+  isReadOnly,
+  showBillingBanner,
+  type Plan,
+} from '../lib/entitlements'
 import { BRAND } from '../lib/brand'
 import { UpgradeModal } from '../components/UpgradeModal'
 
@@ -352,6 +358,9 @@ export default function AppShell() {
   const readOnly = isReadOnly(plan)
   const bannerKind = showBillingBanner(plan)
   const allowCreate = canCreateProject(plan, projects.length)
+  const ent = getEntitlements(plan)
+  const projectCountLabel =
+    ent.maxProjects === Infinity ? `${projects.length}` : `${projects.length} / ${ent.maxProjects}`
   const periodEnd = profile?.current_period_end
     ? new Date(profile.current_period_end).toLocaleDateString('en-GB', {
         day: 'numeric',
@@ -508,7 +517,14 @@ export default function AppShell() {
               marginBottom: '1.25rem',
             }}
           >
-            <p style={{ ...sectionLabel, margin: 0 }}>Projects</p>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+              <p style={{ ...sectionLabel, margin: 0 }}>Projects</p>
+              <span
+                style={{ fontSize: '0.78rem', opacity: 0.45, fontVariantNumeric: 'tabular-nums' }}
+              >
+                {projectCountLabel}
+              </span>
+            </div>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               <input
                 ref={importRef}
