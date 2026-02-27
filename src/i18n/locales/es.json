@@ -97,7 +97,11 @@
     "removeItem": "Eliminar",
     "addRow": "Agregar fila",
     "addColumn": "Agregar columna",
-    "collapseCrossingWarn": "{{count}} arista(s) cruzan el límite del grupo"
+    "collapseCrossingWarn": "{{count}} arista(s) cruzan el límite del grupo",
+    "offline": "Sin conexión",
+    "offlineQueued": "En cola — sin conexión",
+    "retryNow": "Reintentar ahora",
+    "backOnline": "Conectado — sincronizando cambios"
   },
   "blocks": {
     "categoryData": "Datos",

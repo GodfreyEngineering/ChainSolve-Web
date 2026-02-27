@@ -9,7 +9,7 @@
 
 import { create } from 'zustand'
 
-export type SaveStatus = 'idle' | 'saving' | 'saved' | 'conflict' | 'error'
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'conflict' | 'error' | 'offline-queued'
 
 interface ProjectState {
   // ── Current project identity ──────────────────────────────────────────────
@@ -41,6 +41,7 @@ interface ProjectState {
   beginSave: () => void
   completeSave: (dbUpdatedAt: string) => void
   failSave: (err: string) => void
+  queueOffline: () => void
   detectConflict: () => void
   dismissConflict: () => void
   reset: () => void
@@ -75,7 +76,9 @@ export const useProjectStore = create<ProjectState>((set) => ({
   markDirty: () =>
     set((s) => ({
       isDirty: true,
-      saveStatus: s.saveStatus === 'error' ? 'idle' : s.saveStatus,
+      // Clear error/offline-queued so the debounce autosave fires a fresh attempt
+      saveStatus:
+        s.saveStatus === 'error' || s.saveStatus === 'offline-queued' ? 'idle' : s.saveStatus,
     })),
 
   beginSave: () => set({ saveStatus: 'saving', errorMessage: null }),
@@ -84,6 +87,9 @@ export const useProjectStore = create<ProjectState>((set) => ({
     set({ saveStatus: 'saved', dbUpdatedAt, lastSavedAt: new Date(), isDirty: false }),
 
   failSave: (err) => set({ saveStatus: 'error', errorMessage: err }),
+
+  /** Save failed while offline — queued for retry. */
+  queueOffline: () => set({ saveStatus: 'offline-queued', errorMessage: null }),
 
   detectConflict: () => set({ saveStatus: 'conflict' }),
 

@@ -97,7 +97,11 @@
     "removeItem": "Rimuovi",
     "addRow": "Aggiungi riga",
     "addColumn": "Aggiungi colonna",
-    "collapseCrossingWarn": "{{count}} connessione/i attraversano il confine del gruppo"
+    "collapseCrossingWarn": "{{count}} connessione/i attraversano il confine del gruppo",
+    "offline": "Offline",
+    "offlineQueued": "In coda — offline",
+    "retryNow": "Riprova ora",
+    "backOnline": "Di nuovo online — sincronizzazione in corso"
   },
   "blocks": {
     "categoryData": "Dati",

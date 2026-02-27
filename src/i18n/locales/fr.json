@@ -97,7 +97,11 @@
     "removeItem": "Supprimer",
     "addRow": "Ajouter une ligne",
     "addColumn": "Ajouter une colonne",
-    "collapseCrossingWarn": "{{count}} connexion(s) traversent la limite du groupe"
+    "collapseCrossingWarn": "{{count}} connexion(s) traversent la limite du groupe",
+    "offline": "Hors ligne",
+    "offlineQueued": "En file d'attente — hors ligne",
+    "retryNow": "Réessayer maintenant",
+    "backOnline": "Reconnecté — synchronisation en cours"
   },
   "blocks": {
     "categoryData": "Données",

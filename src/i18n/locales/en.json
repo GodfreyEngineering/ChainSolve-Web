@@ -97,7 +97,11 @@
     "removeItem": "Remove",
     "addRow": "Add row",
     "addColumn": "Add column",
-    "collapseCrossingWarn": "{{count}} edge(s) cross this group's boundary"
+    "collapseCrossingWarn": "{{count}} edge(s) cross this group's boundary",
+    "offline": "Offline",
+    "offlineQueued": "Queued — offline",
+    "retryNow": "Retry now",
+    "backOnline": "Back online — syncing changes"
   },
   "blocks": {
     "categoryData": "Data",

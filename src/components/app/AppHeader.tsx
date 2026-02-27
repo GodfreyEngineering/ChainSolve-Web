@@ -72,6 +72,9 @@ export interface AppHeaderProps {
   onExportChainsolveJson?: () => void
   onImportChainsolveJson?: () => void
   onCancelExport?: () => void
+  /** Network status — drives offline badge and offline-queued retry action. */
+  isOnline?: boolean
+  onRetryOffline?: () => void
 }
 
 const INCLUDE_IMAGES_KEY = 'cs:pdfExportIncludeImages'
@@ -135,6 +138,8 @@ export function AppHeader({
   onExportChainsolveJson,
   onImportChainsolveJson,
   onCancelExport,
+  isOnline = true,
+  onRetryOffline,
 }: AppHeaderProps) {
   const { t } = useTranslation()
   const { toast } = useToast()
@@ -339,20 +344,22 @@ export function AppHeader({
 
   // ── Save status badge ───────────────────────────────────────────────────────
 
-  const statusLabel: { text: string; color: string } | null = (() => {
+  const statusLabel: { text: string; color: string; clickable?: boolean } | null = (() => {
     if (!projectId) return null
     switch (saveStatus) {
       case 'saving':
-        return { text: 'Saving\u2026', color: 'rgba(244,244,243,0.45)' }
+        return { text: t('canvas.saving'), color: 'rgba(244,244,243,0.45)' }
       case 'saved':
         return {
-          text: `Saved${lastSavedAt ? ' \u00b7 ' + fmtTime(lastSavedAt) : ''}`,
+          text: `${t('canvas.saved')}${lastSavedAt ? ' \u00b7 ' + fmtTime(lastSavedAt) : ''}`,
           color: '#22c55e',
         }
       case 'conflict':
-        return { text: '\u26a0 Conflict', color: '#f59e0b' }
+        return { text: `\u26a0 ${t('canvas.conflict')}`, color: '#f59e0b' }
       case 'error':
-        return { text: '\u26a0 Save failed', color: '#ef4444' }
+        return { text: `\u26a0 ${t('canvas.error')}`, color: '#ef4444', clickable: true }
+      case 'offline-queued':
+        return { text: `\u23f3 ${t('canvas.offlineQueued')}`, color: '#f59e0b', clickable: true }
       default:
         return isDirty ? { text: 'Unsaved', color: 'rgba(244,244,243,0.45)' } : null
     }
@@ -766,6 +773,21 @@ export function AppHeader({
             </span>
           )}
 
+          {/* Offline indicator */}
+          {!isOnline && (
+            <span
+              title={t('canvas.offline')}
+              style={{
+                fontSize: '0.68rem',
+                color: '#ef4444',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ⚡ {t('canvas.offline')}
+            </span>
+          )}
+
           {/* Save status badge */}
           {statusLabel && (
             <span
@@ -773,13 +795,15 @@ export function AppHeader({
               onClick={
                 saveStatus === 'error' && errorMessage
                   ? () => toast(errorMessage, 'error')
-                  : undefined
+                  : saveStatus === 'offline-queued' && onRetryOffline
+                    ? onRetryOffline
+                    : undefined
               }
               style={{
                 fontSize: '0.68rem',
                 color: statusLabel.color,
                 whiteSpace: 'nowrap',
-                cursor: saveStatus === 'error' ? 'pointer' : undefined,
+                cursor: statusLabel.clickable ? 'pointer' : undefined,
               }}
             >
               {statusLabel.text}
@@ -794,7 +818,7 @@ export function AppHeader({
               style={saveButtonStyle(isDirty)}
               title="Save now (Ctrl+S)"
             >
-              Save
+              {t('menu.save')}
             </button>
           )}
         </div>

@@ -61,6 +61,7 @@ import {
 import { isPerfHudEnabled } from '../lib/devFlags'
 import { addRecentProject } from '../lib/recentProjects'
 import { useToast } from '../components/ui/useToast'
+import { useNetworkStatus } from '../hooks/useNetworkStatus'
 import { SheetsBar } from '../components/app/SheetsBar'
 import { useEngine } from '../contexts/EngineContext'
 import { buildConstantsLookup } from '../engine/resolveBindings'
@@ -88,6 +89,7 @@ const LazyImportProjectDialog = lazy(() =>
 
 const AUTOSAVE_DELAY_MS = 2000
 const EXPORT_SETTLE_MS = 300
+const OFFLINE_RETRY_DELAYS = [3_000, 6_000, 12_000, 24_000, 60_000]
 
 export default function CanvasPage() {
   const { projectId } = useParams<{ projectId?: string }>()
@@ -105,6 +107,7 @@ export default function CanvasPage() {
   const beginSave = useProjectStore((s) => s.beginSave)
   const completeSave = useProjectStore((s) => s.completeSave)
   const failSave = useProjectStore((s) => s.failSave)
+  const queueOffline = useProjectStore((s) => s.queueOffline)
   const detectConflict = useProjectStore((s) => s.detectConflict)
   const setStoreName = useProjectStore((s) => s.setProjectName)
   const resetProject = useProjectStore((s) => s.reset)
@@ -125,6 +128,9 @@ export default function CanvasPage() {
   const loadVariablesStore = useVariablesStore((s) => s.load)
   const resetVariables = useVariablesStore((s) => s.reset)
   const markVariablesClean = useVariablesStore((s) => s.markClean)
+
+  // ── Network status ─────────────────────────────────────────────────────────
+  const { isOnline } = useNetworkStatus()
 
   // ── Plan awareness ─────────────────────────────────────────────────────────
   const [plan, setPlan] = useState<Plan>('free')
@@ -163,6 +169,8 @@ export default function CanvasPage() {
   const canvasRef = useRef<CanvasAreaHandle>(null)
   const isSaving = useRef(false)
   const conflictServerTs = useRef<string | null>(null)
+  const offlineRetryTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const offlineRetryCount = useRef(0)
 
   // ── Export state ──────────────────────────────────────────────────────────
   const exportingRef = useRef(false)
@@ -254,6 +262,7 @@ export default function CanvasPage() {
   useEffect(() => {
     return () => {
       if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
+      if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
     }
   }, [])
 
@@ -307,10 +316,40 @@ export default function CanvasPage() {
           detectConflict()
         } else {
           conflictServerTs.current = null
+          // Clear offline retry state on successful save
+          if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
+          offlineRetryCount.current = 0
           completeSave(result.updatedAt)
         }
       } catch (err: unknown) {
-        failSave(err instanceof Error ? err.message : 'Save failed')
+        if (!navigator.onLine) {
+          // Offline — queue for retry using exponential backoff
+          queueOffline()
+          if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
+          const delay =
+            OFFLINE_RETRY_DELAYS[
+              Math.min(offlineRetryCount.current, OFFLINE_RETRY_DELAYS.length - 1)
+            ]
+          offlineRetryTimer.current = setTimeout(() => {
+            offlineRetryCount.current++
+            void doSave()
+          }, delay)
+          // Only toast on the first failure (not on each retry)
+          if (offlineRetryCount.current === 0) {
+            toast(t('canvas.offlineQueued'), 'info', {
+              label: t('canvas.retryNow'),
+              onClick: () => {
+                if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
+                void doSave()
+              },
+            })
+          }
+        } else {
+          // Network is up but save failed — clear retry state and report error
+          if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
+          offlineRetryCount.current = 0
+          failSave(err instanceof Error ? err.message : 'Save failed')
+        }
       } finally {
         isSaving.current = false
       }
@@ -320,11 +359,25 @@ export default function CanvasPage() {
       beginSave,
       completeSave,
       failSave,
+      queueOffline,
       detectConflict,
       markCanvasClean,
       markVariablesClean,
+      toast,
+      t,
     ],
   )
+
+  // ── Auto-retry when connection is restored ─────────────────────────────────
+  useEffect(() => {
+    if (!isOnline) return
+    if (useProjectStore.getState().saveStatus !== 'offline-queued') return
+    // Back online — clear the backoff timer and retry immediately
+    if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
+    void doSave()
+    toast(t('canvas.backOnline'), 'success')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnline])
 
   // ── onGraphChange — dirty tracking + debounced autosave ────────────────────
   const handleGraphChange: NonNullable<CanvasAreaProps['onGraphChange']> = useCallback(() => {
@@ -1238,6 +1291,11 @@ export default function CanvasPage() {
         onExportExcelProject={handleExportAllSheetsExcel}
         onExportChainsolveJson={handleExportChainsolveJson}
         onImportChainsolveJson={handleImportChainsolveJson}
+        isOnline={isOnline}
+        onRetryOffline={() => {
+          if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
+          void doSave()
+        }}
       />
 
       {/* ── Read-only / billing banner ────────────────────────────────────── */}

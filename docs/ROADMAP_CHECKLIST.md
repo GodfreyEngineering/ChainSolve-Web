@@ -120,7 +120,7 @@ Claude MUST:
 > Goal: ship a stable, secure, auditable, fast web app with excellent first-run UX.
 
 ## A2 — Data integrity + reliability (core saving correctness)
-- [ ] P021: Offline detection + retry queue UX
+- [x] P021: Offline detection + retry queue UX <!-- completed 2026-02-27 -->
   - Add connection state indicator (online/offline)
   - Queue save attempts when offline; auto-retry with backoff
   - Toast + “retry now” action

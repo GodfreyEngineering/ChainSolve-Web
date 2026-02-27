@@ -97,7 +97,11 @@
     "removeItem": "Entfernen",
     "addRow": "Zeile hinzufügen",
     "addColumn": "Spalte hinzufügen",
-    "collapseCrossingWarn": "{{count}} Kante(n) kreuzen die Gruppengrenze"
+    "collapseCrossingWarn": "{{count}} Kante(n) kreuzen die Gruppengrenze",
+    "offline": "Offline",
+    "offlineQueued": "Ausstehend — offline",
+    "retryNow": "Jetzt erneut versuchen",
+    "backOnline": "Wieder online — Änderungen werden synchronisiert"
   },
   "blocks": {
     "categoryData": "Daten",
