@@ -87,6 +87,10 @@ section "CSP third-party allowlist"
 node scripts/check-csp-allowlist.mjs || fail "CSP allowlist"
 pass "CSP allowlist"
 
+section "i18n hardcoded-attribute check"
+node scripts/check-i18n-hardcoded.mjs || fail "i18n hardcoded attributes"
+pass "i18n hardcoded attributes"
+
 section "Billing functions — no stack-trace exposure"
 if grep -n 'err\.stack\|error\.stack' \
      functions/api/stripe/create-checkout-session.ts \
