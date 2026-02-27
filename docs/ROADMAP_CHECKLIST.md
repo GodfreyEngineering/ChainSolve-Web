@@ -181,21 +181,21 @@ Claude MUST:
   - Keep simple; do not balloon scope
 
 ## A3 — Engine determinism + correctness hardening
-- [ ] P031: Expand engine golden fixtures (eng/fin/stats/const)
+- [x] P031: Expand engine golden fixtures (eng/fin/stats/const)
   - Add more fixtures for edge cases (domain errors, arity mismatch, type mismatch)
   - Ensure stable outputs across platforms
   - Tests: Rust golden fixtures + TS integration tests where relevant
 
-- [ ] P032: Property tests for random DAGs (SHOULD)
+- [x] P032: Property tests for random DAGs (SHOULD)
   - Ensure no panics
   - Determinism across repeated evals
   - Keep runtime bounded (CI friendly)
 
-- [ ] P033: NaN eradication audit (UI never shows NaN)
+- [x] P033: NaN eradication audit (UI never shows NaN)
   - Central formatting layer guarantees: NaN -> explicit error
   - Add tests for formatting + display nodes
 
-- [ ] P034: Domain error consistency
+- [x] P034: Domain error consistency
   - Standardize error codes/messages for common failures
   - Tests in Rust + TS boundary
 
