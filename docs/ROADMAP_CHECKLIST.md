@@ -163,14 +163,14 @@ Claude MUST:
   - Tooltip includes last save timestamp + target (canvas/project)
   - Tests: UI smoke tests where feasible
 
-- [ ] P028: Save As duplicates full project (all canvases + vars + assets)
+- [x] P028: Save As duplicates full project (all canvases + vars + assets)
   - Duplicate project row
   - Copy canvases rows + storage JSON
   - Copy assets metadata + bytes references
   - Tests: mock adapter duplication tests
   - Docs: requirements
 
-- [ ] P029: Recent projects resilience
+- [x] P029: Recent projects resilience
   - Handle missing/deleted projects gracefully
   - Cross-device continuity improvements (optional)
   - Tests: MRU logic tests

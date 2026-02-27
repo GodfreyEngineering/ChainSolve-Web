@@ -15,7 +15,14 @@
 
 import type { VariablesMap } from './variables'
 import { supabase } from './supabase'
-import { saveProjectJson, loadProjectJson } from './storage'
+import {
+  saveProjectJson,
+  loadProjectJson,
+  listProjectAssets,
+  downloadAssetBytes,
+  uploadAssetBytes,
+} from './storage'
+import { listCanvases, loadCanvasGraph, createCanvas, setActiveCanvas } from './canvases'
 import { dlog } from '../observability/debugLog'
 
 // ── Schema versioning ─────────────────────────────────────────────────────────
@@ -276,7 +283,7 @@ export async function deleteProject(projectId: string): Promise<void> {
   if (error) throw new Error(`Delete failed: ${error.message}`)
 }
 
-/** Create a new project that is a copy of the source project's graph + variables. */
+/** Create a new project that is a copy of the source project's graph + variables + canvases + assets. */
 export async function duplicateProject(sourceId: string, newName: string): Promise<ProjectRow> {
   const session = await requireSession()
   const projectId = crypto.randomUUID()
@@ -311,6 +318,35 @@ export async function duplicateProject(sourceId: string, newName: string): Promi
 
   const pj = buildJson(newProj.id, newName, srcGraph.nodes, srcGraph.edges)
   await saveProjectJson(newProj.id, pj)
+
+  // Copy canvases (rows + per-canvas storage JSON)
+  const sourceCanvases = await listCanvases(sourceId)
+  let firstNewCanvasId: string | null = null
+  for (const canvas of sourceCanvases) {
+    const graph = await loadCanvasGraph(sourceId, canvas.id)
+    const newCanvas = await createCanvas(newProj.id, canvas.name, {
+      nodes: graph.nodes,
+      edges: graph.edges,
+    })
+    if (firstNewCanvasId === null) firstNewCanvasId = newCanvas.id
+  }
+  if (firstNewCanvasId) {
+    await setActiveCanvas(newProj.id, firstNewCanvasId)
+  }
+
+  // Copy project assets (metadata + bytes)
+  const srcAssets = await listProjectAssets(sourceId)
+  for (const asset of srcAssets) {
+    const bytes = await downloadAssetBytes(asset.storage_path)
+    await uploadAssetBytes(
+      newProj.id,
+      asset.name,
+      asset.mime_type ?? 'application/octet-stream',
+      bytes,
+      asset.sha256,
+      asset.kind ?? 'csv',
+    )
+  }
 
   const updated = await readUpdatedAt(newProj.id)
   return { ...newProj, updated_at: updated ?? newProj.updated_at }

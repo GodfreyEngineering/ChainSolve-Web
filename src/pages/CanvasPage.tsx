@@ -59,7 +59,7 @@ import {
   type Plan,
 } from '../lib/entitlements'
 import { isPerfHudEnabled } from '../lib/devFlags'
-import { addRecentProject } from '../lib/recentProjects'
+import { addRecentProject, removeRecentProject } from '../lib/recentProjects'
 import { useToast } from '../components/ui/useToast'
 import { useNetworkStatus } from '../hooks/useNetworkStatus'
 import { AutosaveScheduler } from '../lib/autosaveScheduler'
@@ -254,7 +254,12 @@ export default function CanvasPage() {
 
         setLoadPhase('ready')
       } catch (err: unknown) {
-        setLoadError(err instanceof Error ? err.message : 'Failed to load project')
+        const msg = err instanceof Error ? err.message : 'Failed to load project'
+        // Remove stale MRU entry when the project no longer exists
+        if (projectId && /not found/i.test(msg)) {
+          removeRecentProject(projectId)
+        }
+        setLoadError(msg)
         setLoadPhase('error')
       }
     }
