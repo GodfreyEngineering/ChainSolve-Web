@@ -390,9 +390,16 @@
   },
   "pdfExport": {
     "generating": "Generating PDF…",
+    "generatingAll": "Generating PDF for all sheets…",
     "success": "PDF exported successfully",
     "failed": "Failed to generate PDF",
     "imageUnavailable": "Graph image unavailable",
-    "title": "Audit Report"
+    "title": "Audit Report",
+    "scope": {
+      "active": "Active sheet",
+      "project": "All sheets"
+    },
+    "tocTitle": "Table of Contents",
+    "sheetLabel": "Sheet"
   }
 }

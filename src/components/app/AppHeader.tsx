@@ -144,7 +144,7 @@ export function AppHeader({
 
   const stub = useCallback(() => toast(t('menu.comingSoon'), 'info'), [toast, t])
 
-  const handleExportPdf = useCallback(() => {
+  const handleExportPdfActive = useCallback(() => {
     setOpenMenu(null)
     toast(t('pdfExport.generating'), 'info')
     canvasRef.current
@@ -152,6 +152,18 @@ export function AppHeader({
       .then(() => toast(t('pdfExport.success'), 'success'))
       .catch((err: unknown) => {
         console.error('[pdf-export]', err)
+        toast(t('pdfExport.failed'), 'error')
+      })
+  }, [canvasRef, toast, t])
+
+  const handleExportPdfAll = useCallback(() => {
+    setOpenMenu(null)
+    toast(t('pdfExport.generatingAll'), 'info')
+    canvasRef.current
+      ?.exportPdfAuditProject()
+      .then(() => toast(t('pdfExport.success'), 'success'))
+      .catch((err: unknown) => {
+        console.error('[pdf-export-project]', err)
         toast(t('pdfExport.failed'), 'error')
       })
   }, [canvasRef, toast, t])
@@ -291,7 +303,17 @@ export function AppHeader({
       },
       { separator: true },
       { label: t('menu.import'), onClick: stub },
-      { label: t('menu.exportPdf'), onClick: handleExportPdf },
+      {
+        label: t('menu.exportPdf'),
+        children: [
+          { label: t('pdfExport.scope.active'), onClick: handleExportPdfActive },
+          {
+            label: t('pdfExport.scope.project'),
+            onClick: handleExportPdfAll,
+            disabled: !projectId,
+          },
+        ],
+      },
       { label: t('menu.exportExcel'), onClick: stub },
       { separator: true },
       { label: t('menu.recentProjects'), children: recentChildren },
@@ -305,7 +327,8 @@ export function AppHeader({
     projectId,
     handleNewProject,
     handleSelectProject,
-    handleExportPdf,
+    handleExportPdfActive,
+    handleExportPdfAll,
   ])
 
   const editItems = useMemo(

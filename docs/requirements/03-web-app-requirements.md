@@ -457,6 +457,19 @@ variable state, file I/O, network activity, and performance metrics.
 | EX-7 | CSP integrity is preserved (no unsafe-eval, no inline scripts). | MUST |
 | EX-8 | If graph image capture fails, PDF is still generated with a "Graph image unavailable" notice. | MUST |
 
+### 17.2 PDF export (W14a.2 — all sheets)
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| EX-9  | File > Export PDF submenu offers "Active sheet" and "All sheets" options. | MUST |
+| EX-10 | "All sheets" export produces a single PDF with a Table of Contents and per-canvas sections. | MUST |
+| EX-11 | Each canvas section includes: header, snapshot hash, health summary, eval summary, diagnostics, node values, and graph image. | MUST |
+| EX-12 | A project-level SHA-256 hash is computed from the ordered per-canvas hashes. | MUST |
+| EX-13 | TOC lists all canvases with page numbers and dot leaders. | MUST |
+| EX-14 | "All sheets" is disabled for scratch (unsaved) projects. | MUST |
+| EX-15 | Graph images are captured for the active canvas; non-active canvases show "Graph image unavailable" notice. | MUST |
+| EX-16 | Non-active canvas data is loaded from Supabase Storage without switching the active canvas in the UI. | MUST |
+
 ---
 
 ## 18. Out of scope (for now)
@@ -467,7 +480,6 @@ variable state, file I/O, network activity, and performance metrics.
 - Simulation / time-stepping mode.
 - Plugin / extension system.
 - Drag-to-reorder canvas tabs (position model exists; UI deferred).
-- PDF export of all sheets (multi-canvas export deferred to W14a.2).
 
 ---
 
@@ -476,7 +488,7 @@ variable state, file I/O, network activity, and performance metrics.
 1. **Offline PWA shell**: Service Worker caches app shell + recent projects for read-only offline access.
 2. **Custom block editor**: Structured visual editor for user-defined blocks with typed I/O.
 3. **Collaborative canvas**: CRDT-based real-time sync for shared editing sessions.
-4. **Multi-sheet PDF export**: Extend PDF export to include all canvases in a single document.
+4. **Multi-sheet PDF export**: ~~Extend PDF export to include all canvases in a single document.~~ Implemented in W14a.2.
 5. **Plugin API**: Allow third-party block packs to be loaded at runtime.
 6. **Theming SDK**: Allow users to create and share custom themes.
 7. **Embedded mode**: Render a read-only graph in an iframe for documentation / sharing.
@@ -487,5 +499,6 @@ variable state, file I/O, network activity, and performance metrics.
 
 | Date       | Author | Change                                                                                            |
 |------------|--------|---------------------------------------------------------------------------------------------------|
+| 2026-02-27 | —      | W14a.2: Added §17.2 (all-sheets PDF export EX-9–EX-16). Struck multi-sheet from Future extensions. |
 | 2026-02-27 | —      | W14a.1: Added §17 Export (PDF export requirements). Moved PDF out of Out-of-scope. Renum §18/§19. |
 | 2026-02-26 | —      | Initial version (v1.0).                                                                           |

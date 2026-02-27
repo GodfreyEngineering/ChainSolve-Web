@@ -1,7 +1,8 @@
 /**
  * auditModel.ts — Pure data model for the audit PDF report.
  *
- * buildAuditModel is completely side-effect-free and can be unit-tested
+ * Supports both single-canvas (v1) and multi-canvas (v2) export.
+ * All builder functions are side-effect-free and can be unit-tested
  * without any DOM or pdf-lib dependency.
  */
 
@@ -11,7 +12,7 @@ import type { EngineEvalResult, EngineDiagnostic } from '../../engine/wasm-types
 import { formatValue } from '../../engine/value'
 import { formatValueFull } from '../../engine/valueFormat'
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// ── Shared types ─────────────────────────────────────────────────────────────
 
 export interface AuditMeta {
   projectName: string
@@ -42,6 +43,8 @@ export interface AuditNodeRow {
   full: string
 }
 
+// ── Single-canvas model (v1) ─────────────────────────────────────────────────
+
 export interface AuditModel {
   meta: AuditMeta
   snapshotHash: string
@@ -53,7 +56,80 @@ export interface AuditModel {
   nodeValues: AuditNodeRow[]
 }
 
-// ── Builder ──────────────────────────────────────────────────────────────────
+// ── Multi-canvas types (v2) ──────────────────────────────────────────────────
+
+export interface CanvasAuditSection {
+  canvasId: string
+  canvasName: string
+  position: number
+  nodeCount: number
+  edgeCount: number
+  snapshotHash: string
+  healthSummary: string
+  evalElapsedMs: number
+  evalPartial: boolean
+  diagnosticCounts: { info: number; warning: number; error: number }
+  diagnostics: AuditDiagnosticRow[]
+  nodeValues: AuditNodeRow[]
+  graphImageDataUrl: string | null
+  imageError?: string
+}
+
+export interface ProjectAuditModel {
+  meta: AuditMeta & {
+    exportScope: 'project'
+    totalCanvases: number
+    activeCanvasId: string | null
+  }
+  projectHash: string
+  canvases: CanvasAuditSection[]
+}
+
+// ── Shared helpers ───────────────────────────────────────────────────────────
+
+function countDiagnostics(diagnostics: EngineDiagnostic[]) {
+  const counts = { info: 0, warning: 0, error: 0 }
+  for (const d of diagnostics) {
+    if (d.level in counts) {
+      counts[d.level as keyof typeof counts]++
+    }
+  }
+  return counts
+}
+
+function mapDiagnostics(diagnostics: EngineDiagnostic[]): AuditDiagnosticRow[] {
+  return diagnostics.map((d) => ({
+    nodeId: d.nodeId ?? '',
+    level: d.level,
+    code: d.code,
+    message: d.message,
+  }))
+}
+
+function mapNodeValues(nodes: Node[], evalResult: EngineEvalResult): AuditNodeRow[] {
+  const evalNodes = nodes.filter(
+    (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
+  )
+  return evalNodes.map((n) => {
+    const data = n.data as Record<string, unknown>
+    const blockType = data.blockType as string
+    const label = (data.label as string) ?? blockType
+    const raw = evalResult.values[n.id] as Value | undefined
+    return {
+      nodeId: n.id,
+      label,
+      blockType,
+      compact: formatValue(raw),
+      full: formatValueFull(raw),
+    }
+  })
+}
+
+function evalNodeCount(nodes: Node[]): number {
+  return nodes.filter((n) => (n.data as Record<string, unknown>).blockType !== '__group__').length
+}
+
+// ── Single-canvas builder (v1, preserved) ────────────────────────────────────
 
 export interface BuildAuditModelArgs {
   projectName: string
@@ -73,79 +149,103 @@ export interface BuildAuditModelArgs {
 }
 
 export function buildAuditModel(args: BuildAuditModelArgs): AuditModel {
-  const {
-    projectName,
-    projectId,
-    exportTimestamp,
-    buildVersion,
-    buildSha,
-    buildTime,
-    buildEnv,
-    engineVersion,
-    contractVersion,
-    nodes,
-    edges,
-    evalResult,
-    healthSummary,
-    snapshotHash,
-  } = args
-
-  // Filter out group nodes for the value table
-  const evalNodes = nodes.filter(
-    (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
-  )
-
-  // Diagnostic counts
-  const diagnosticCounts = { info: 0, warning: 0, error: 0 }
-  for (const d of evalResult.diagnostics) {
-    if (d.level in diagnosticCounts) {
-      diagnosticCounts[d.level as keyof typeof diagnosticCounts]++
-    }
+  return {
+    meta: {
+      projectName: args.projectName,
+      projectId: args.projectId,
+      exportTimestamp: args.exportTimestamp,
+      buildVersion: args.buildVersion,
+      buildSha: args.buildSha,
+      buildTime: args.buildTime,
+      buildEnv: args.buildEnv,
+      engineVersion: args.engineVersion,
+      contractVersion: args.contractVersion,
+      nodeCount: evalNodeCount(args.nodes),
+      edgeCount: args.edges.length,
+    },
+    snapshotHash: args.snapshotHash,
+    healthSummary: args.healthSummary,
+    evalElapsedMs: args.evalResult.elapsedUs / 1000,
+    evalPartial: args.evalResult.partial ?? false,
+    diagnosticCounts: countDiagnostics(args.evalResult.diagnostics),
+    diagnostics: mapDiagnostics(args.evalResult.diagnostics),
+    nodeValues: mapNodeValues(args.nodes, args.evalResult),
   }
+}
 
-  // Diagnostics table
-  const diagnostics: AuditDiagnosticRow[] = evalResult.diagnostics.map((d: EngineDiagnostic) => ({
-    nodeId: d.nodeId ?? '',
-    level: d.level,
-    code: d.code,
-    message: d.message,
-  }))
+// ── Per-canvas section builder (v2) ──────────────────────────────────────────
 
-  // Node value table
-  const nodeValues: AuditNodeRow[] = evalNodes.map((n) => {
-    const data = n.data as Record<string, unknown>
-    const blockType = data.blockType as string
-    const label = (data.label as string) ?? blockType
-    const raw = evalResult.values[n.id] as Value | undefined
-    return {
-      nodeId: n.id,
-      label,
-      blockType,
-      compact: formatValue(raw),
-      full: formatValueFull(raw),
-    }
-  })
+export interface BuildCanvasSectionArgs {
+  canvasId: string
+  canvasName: string
+  position: number
+  nodes: Node[]
+  edges: Edge[]
+  evalResult: EngineEvalResult
+  healthSummary: string
+  snapshotHash: string
+  graphImageDataUrl: string | null
+  imageError?: string
+}
+
+export function buildCanvasAuditSection(args: BuildCanvasSectionArgs): CanvasAuditSection {
+  return {
+    canvasId: args.canvasId,
+    canvasName: args.canvasName,
+    position: args.position,
+    nodeCount: evalNodeCount(args.nodes),
+    edgeCount: args.edges.length,
+    snapshotHash: args.snapshotHash,
+    healthSummary: args.healthSummary,
+    evalElapsedMs: args.evalResult.elapsedUs / 1000,
+    evalPartial: args.evalResult.partial ?? false,
+    diagnosticCounts: countDiagnostics(args.evalResult.diagnostics),
+    diagnostics: mapDiagnostics(args.evalResult.diagnostics),
+    nodeValues: mapNodeValues(args.nodes, args.evalResult),
+    graphImageDataUrl: args.graphImageDataUrl,
+    imageError: args.imageError,
+  }
+}
+
+// ── Project-level model builder (v2) ─────────────────────────────────────────
+
+export interface BuildProjectAuditModelArgs {
+  projectName: string
+  projectId: string | null
+  exportTimestamp: string
+  buildVersion: string
+  buildSha: string
+  buildTime: string
+  buildEnv: string
+  engineVersion: string
+  contractVersion: number
+  activeCanvasId: string | null
+  projectHash: string
+  canvases: CanvasAuditSection[]
+}
+
+export function buildProjectAuditModel(args: BuildProjectAuditModelArgs): ProjectAuditModel {
+  const totalNodes = args.canvases.reduce((sum, c) => sum + c.nodeCount, 0)
+  const totalEdges = args.canvases.reduce((sum, c) => sum + c.edgeCount, 0)
 
   return {
     meta: {
-      projectName,
-      projectId,
-      exportTimestamp,
-      buildVersion,
-      buildSha,
-      buildTime,
-      buildEnv,
-      engineVersion,
-      contractVersion,
-      nodeCount: evalNodes.length,
-      edgeCount: edges.length,
+      projectName: args.projectName,
+      projectId: args.projectId,
+      exportTimestamp: args.exportTimestamp,
+      buildVersion: args.buildVersion,
+      buildSha: args.buildSha,
+      buildTime: args.buildTime,
+      buildEnv: args.buildEnv,
+      engineVersion: args.engineVersion,
+      contractVersion: args.contractVersion,
+      nodeCount: totalNodes,
+      edgeCount: totalEdges,
+      exportScope: 'project',
+      totalCanvases: args.canvases.length,
+      activeCanvasId: args.activeCanvasId,
     },
-    snapshotHash,
-    healthSummary,
-    evalElapsedMs: evalResult.elapsedUs / 1000,
-    evalPartial: evalResult.partial ?? false,
-    diagnosticCounts,
-    diagnostics,
-    nodeValues,
+    projectHash: args.projectHash,
+    canvases: [...args.canvases].sort((a, b) => a.position - b.position),
   }
 }
