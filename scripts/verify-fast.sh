@@ -12,6 +12,23 @@ pass() { echo -e "${GREEN}PASS${NC} $1"; }
 fail() { echo -e "${RED}FAIL${NC} $1"; exit 1; }
 section() { echo -e "\n${BOLD}── $1 ──${NC}"; }
 
+section "Lockfile sync check"
+node -e "
+  const pkg = require('./package.json');
+  const lock = require('./package-lock.json');
+  const all = { ...pkg.dependencies, ...pkg.devDependencies };
+  const lockPkgs = lock.packages?.['']?.dependencies ?? {};
+  const lockDev  = lock.packages?.['']?.devDependencies ?? {};
+  const lockAll  = { ...lockPkgs, ...lockDev };
+  const missing = Object.keys(all).filter(k => !lockAll[k] && !lock.packages?.['node_modules/' + k]);
+  if (missing.length) {
+    console.error('Lockfile out of sync! Missing: ' + missing.join(', '));
+    console.error('Run: npm install --package-lock-only');
+    process.exit(1);
+  }
+" || fail "lockfile sync"
+pass "lockfile sync"
+
 section "Prettier format check"
 npm run format:check || fail "prettier"
 pass "prettier"

@@ -42,6 +42,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Lockfile sanity check
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "::error::package-lock.json is missing"
+            exit 1
+          fi
+          node -e "
+            const pkg = require('./package.json');
+            const lock = require('./package-lock.json');
+            const all = { ...pkg.dependencies, ...pkg.devDependencies };
+            const lockDev = lock.packages['']?.devDependencies ?? {};
+            const lockDeps = lock.packages['']?.dependencies ?? {};
+            const lockAll = { ...lockDeps, ...lockDev };
+            const missing = Object.keys(all).filter(k => !lockAll[k] && !lock.packages['node_modules/' + k]);
+            if (missing.length) {
+              console.error('::error::package-lock.json out of sync — missing: ' + missing.join(', '));
+              console.error('Fix: npm install --package-lock-only && git add package-lock.json');
+              process.exit(1);
+            }
+            console.log('Lockfile OK — all deps present');
+          "
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
