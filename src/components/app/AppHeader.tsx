@@ -29,6 +29,7 @@ import { supabase } from '../../lib/supabase'
 import { getRecentProjects } from '../../lib/recentProjects'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { flattenMenusToActions, type MenuDef } from '../../lib/actions'
+import { computeSaveStatusLabel } from '../../lib/saveStatusLabel'
 import type { CanvasAreaHandle } from '../canvas/CanvasArea'
 import type { Plan } from '../../lib/entitlements'
 import type { ThemeMode } from '../../contexts/ThemeContext'
@@ -344,26 +345,15 @@ export function AppHeader({
 
   // ── Save status badge ───────────────────────────────────────────────────────
 
-  const statusLabel: { text: string; color: string; clickable?: boolean } | null = (() => {
-    if (!projectId) return null
-    switch (saveStatus) {
-      case 'saving':
-        return { text: t('canvas.saving'), color: 'rgba(244,244,243,0.45)' }
-      case 'saved':
-        return {
-          text: `${t('canvas.saved')}${lastSavedAt ? ' \u00b7 ' + fmtTime(lastSavedAt) : ''}`,
-          color: '#22c55e',
-        }
-      case 'conflict':
-        return { text: `\u26a0 ${t('canvas.conflict')}`, color: '#f59e0b' }
-      case 'error':
-        return { text: `\u26a0 ${t('canvas.error')}`, color: '#ef4444', clickable: true }
-      case 'offline-queued':
-        return { text: `\u23f3 ${t('canvas.offlineQueued')}`, color: '#f59e0b', clickable: true }
-      default:
-        return isDirty ? { text: 'Unsaved', color: 'rgba(244,244,243,0.45)' } : null
-    }
-  })()
+  const statusLabel = computeSaveStatusLabel(
+    saveStatus,
+    lastSavedAt,
+    isDirty,
+    projectId,
+    projectName,
+    fmtTime,
+    t,
+  )
 
   // ── Menu definitions ────────────────────────────────────────────────────────
 
@@ -791,7 +781,7 @@ export function AppHeader({
           {/* Save status badge */}
           {statusLabel && (
             <span
-              title={lastSavedAt ? `Last saved: ${fmtTime(lastSavedAt)}` : undefined}
+              title={statusLabel?.tooltip}
               onClick={
                 saveStatus === 'error' && errorMessage
                   ? () => toast(errorMessage, 'error')

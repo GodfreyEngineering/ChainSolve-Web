@@ -158,7 +158,7 @@ Claude MUST:
   - Enforce `ProjectVariable` shape, finite values, unique names (case-insensitive)
   - Tests: unit tests
 
-- [ ] P027: Save status indicator polish
+- [x] P027: Save status indicator polish
   - States: idle/saving/saved/conflict/error/offline-queued
   - Tooltip includes last save timestamp + target (canvas/project)
   - Tests: UI smoke tests where feasible

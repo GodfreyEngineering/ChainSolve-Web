@@ -100,6 +100,8 @@
     "addRow": "Agregar fila",
     "addColumn": "Agregar columna",
     "collapseCrossingWarn": "{{count}} arista(s) cruzan el límite del grupo",
+    "unsaved": "Sin guardar",
+    "lastSaved": "Guardado: {{time}} · {{target}}",
     "offline": "Sin conexión",
     "offlineQueued": "En cola — sin conexión",
     "retryNow": "Reintentar ahora",

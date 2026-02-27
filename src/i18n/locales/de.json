@@ -100,6 +100,8 @@
     "addRow": "Zeile hinzufügen",
     "addColumn": "Spalte hinzufügen",
     "collapseCrossingWarn": "{{count}} Kante(n) kreuzen die Gruppengrenze",
+    "unsaved": "Nicht gespeichert",
+    "lastSaved": "Gespeichert: {{time}} · {{target}}",
     "offline": "Offline",
     "offlineQueued": "Ausstehend — offline",
     "retryNow": "Jetzt erneut versuchen",

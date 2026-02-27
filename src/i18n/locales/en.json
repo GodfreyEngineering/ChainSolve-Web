@@ -100,6 +100,8 @@
     "addRow": "Add row",
     "addColumn": "Add column",
     "collapseCrossingWarn": "{{count}} edge(s) cross this group's boundary",
+    "unsaved": "Unsaved",
+    "lastSaved": "Last saved: {{time}} · {{target}}",
     "offline": "Offline",
     "offlineQueued": "Queued — offline",
     "retryNow": "Retry now",
