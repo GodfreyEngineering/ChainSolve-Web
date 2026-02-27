@@ -64,7 +64,7 @@ Both headers are set in `public/_headers` for all routes (`/*`):
 | `Content-Security-Policy` | **Enforced** — blocks violations and reports them |
 | `Content-Security-Policy-Report-Only` | **Report-only** — identical baseline policy, edit to test stricter rules |
 
-Both include `report-uri /api/security/csp-report; report-to csp-endpoint`.
+Both include `report-uri /api/report/csp; report-to csp-endpoint`.
 
 The `Reporting-Endpoints` header maps `csp-endpoint` to the report URL.
 
@@ -125,13 +125,16 @@ versions are a subset of our supported range.
 1. **Current**: Enforced CSP + identical Report-Only with reporting.
 2. **To tighten**: Edit ONLY the `Content-Security-Policy-Report-Only` header
    (e.g., remove `'unsafe-inline'` from `style-src`, or drop a connect-src host).
-3. **Deploy** and wait 24–48 hours. Check the `csp_reports` table for violations:
+3. **Deploy** and wait 24–48 hours. Check the `observability_events` table for violations:
 
    ```sql
-   SELECT violated_directive, blocked_uri, count(*)
-   FROM csp_reports
-   WHERE created_at > now() - interval '48 hours'
-   GROUP BY violated_directive, blocked_uri
+   SELECT payload->>'effectiveDirective' AS violated_directive,
+          payload->>'blockedUrl'         AS blocked_uri,
+          count(*)
+   FROM observability_events
+   WHERE event_type = 'csp_violation'
+     AND ts > now() - interval '48 hours'
+   GROUP BY 1, 2
    ORDER BY count DESC;
    ```
 
@@ -154,15 +157,16 @@ versions are a subset of our supported range.
 
 ### Location
 
-`functions/api/security/csp-report.ts` — Cloudflare Pages Function.
+`functions/api/report/csp.ts` — Cloudflare Pages Function.
 
 ### How it works
 
 1. Browser detects a CSP violation
-2. Browser POSTs `application/csp-report` JSON to `/api/security/csp-report`
+2. Browser POSTs `application/csp-report` JSON to `/api/report/csp`
 3. Endpoint parses the report, computes a dedup key
-   (`SHA-256(violated_directive | blocked_uri | document_uri | minute_bucket)`)
-4. Upserts into `public.csp_reports` with `ON CONFLICT (dedup_key) DO NOTHING`
+   (`SHA-256(effectiveDirective | blockedUrl | documentUrl | minute_bucket)`)
+4. Inserts into `public.observability_events` as `event_type = 'csp_violation'`
+   (fingerprint uniqueness prevents duplicate rows)
 5. Returns `204 No Content`
 
 ### Abuse mitigation
@@ -176,34 +180,28 @@ versions are a subset of our supported range.
   that don't carry auth tokens. The endpoint uses `SUPABASE_SERVICE_ROLE_KEY`
   to write.
 
-### Database table
+### Storage
 
-`public.csp_reports` — created by `supabase/migrations/0012_csp_reports.sql`.
+CSP violations are stored in `public.observability_events` (shared with all
+observability events) with `event_type = 'csp_violation'`.
 
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | uuid | PK |
-| `created_at` | timestamptz | Default `now()` |
-| `user_id` | uuid (nullable) | FK → profiles; null for browser CSP reports |
-| `page` | text | Page URL (from Referer header) |
-| `document_uri` | text | Document that violated the policy |
-| `referrer` | text | |
-| `violated_directive` | text | e.g., `script-src 'self'` |
-| `effective_directive` | text | |
-| `original_policy` | text | Full CSP string |
-| `blocked_uri` | text | URI that was blocked |
-| `disposition` | text | `enforce` or `report` |
-| `user_agent` | text | |
-| `raw` | jsonb | Full original report payload |
-| `dedup_key` | text (UNIQUE) | SHA-256 dedup hash |
+Key `payload` fields (from the normalised CSP report):
 
-RLS: Enabled. Authenticated users can INSERT own (user_id match).
-No SELECT/UPDATE/DELETE for authenticated users. service_role bypasses RLS.
+| Field | Notes |
+|-------|-------|
+| `effectiveDirective` | e.g., `script-src` |
+| `blockedUrl` | Origin + path only (query stripped) |
+| `documentUrl` | Path of the page that triggered the violation |
+| `disposition` | `enforce` or `report` |
+| `ua` | User-Agent string (truncated to 500 chars) |
+
+The `fingerprint` column (SHA-256 of `effectiveDirective|blockedUrl|documentUrl|minute`)
+prevents duplicate rows for the same violation within a 60-second window.
 
 ### Simulating a CSP report
 
 ```bash
-curl -X POST https://app.chainsolve.co.uk/api/security/csp-report \
+curl -X POST https://app.chainsolve.co.uk/api/report/csp \
   -H "Content-Type: application/csp-report" \
   -d '{
     "csp-report": {
@@ -217,8 +215,10 @@ curl -X POST https://app.chainsolve.co.uk/api/security/csp-report \
 # → 204
 
 # Verify in Supabase SQL Editor:
-# SELECT * FROM csp_reports ORDER BY created_at DESC LIMIT 5;
+# SELECT * FROM observability_events WHERE event_type = 'csp_violation' ORDER BY ts DESC LIMIT 5;
 ```
+
+For local testing with Wrangler, see `docs/observability/csp-reporting.md`.
 
 ---
 
@@ -236,7 +236,7 @@ All set in `public/_headers` under the `/*` catch-all.
 | `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` | Force HTTPS for 2 years, all subdomains, eligible for HSTS preload |
 | `Content-Security-Policy` | *(see §2)* | Enforced CSP with reporting |
 | `Content-Security-Policy-Report-Only` | *(see §2)* | Report-only baseline for testing |
-| `Reporting-Endpoints` | `csp-endpoint="/api/security/csp-report"` | Maps report-to group to URL |
+| `Reporting-Endpoints` | `csp-endpoint="/api/report/csp"` | Maps report-to group to URL |
 
 ### Why X-XSS-Protection is set to 0
 
@@ -304,12 +304,12 @@ unless the CSP is updated simultaneously.
 - [ ] **No wildcard CORS**: `grep -r "Access-Control-Allow-Origin: \*"` returns
       nothing in the codebase
 - [ ] **CSP report endpoint**: Run the curl test from §3 → verify `204` and
-      row appears in `csp_reports` table
+      row appears in `observability_events` table with `event_type = 'csp_violation'`
 - [ ] **CSP headers**: In DevTools → Network → click the document request →
       Response Headers should show both `Content-Security-Policy` and
       `Content-Security-Policy-Report-Only` with `report-uri`
 - [ ] **Reporting-Endpoints**: Same response should include
-      `Reporting-Endpoints: csp-endpoint="/api/security/csp-report"`
+      `Reporting-Endpoints: csp-endpoint="/api/report/csp"`
 - [ ] **Stripe webhook**: Send a test webhook from Stripe Dashboard →
       returns `200 ok` (CORS middleware doesn't break it)
 - [ ] **Stripe checkout**: Click Upgrade → redirected to Stripe Checkout

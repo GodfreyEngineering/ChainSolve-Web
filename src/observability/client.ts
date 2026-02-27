@@ -16,7 +16,7 @@
  * Transport: POST /api/report/client (JSON)
  *
  * Gating:
- *   VITE_OBS_ENABLED=false  → skip init entirely
+ *   VITE_OBS_ENABLED=true   → opt-in to enable (default: disabled)
  *   VITE_OBS_SAMPLE_RATE    → 0.0–1.0, default 1.0
  */
 
@@ -97,7 +97,7 @@ function truncate(s: string, max: number): string {
 }
 
 function isEnabled(): boolean {
-  return import.meta.env.VITE_OBS_ENABLED !== 'false'
+  return import.meta.env.VITE_OBS_ENABLED === 'true'
 }
 
 function sampleRate(): number {

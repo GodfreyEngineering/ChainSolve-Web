@@ -257,3 +257,88 @@ describe('exportJson', () => {
     expect(exportJson([])).toBe('[]')
   })
 })
+
+// ── Export redaction regression ───────────────────────────────────────────────
+
+describe('export redaction regression — exportText', () => {
+  it('does not emit token values in text export', () => {
+    useDebugConsoleStore.getState().add('info', 'network', 'auth event', {
+      token: 'super-secret-token',
+      nodeId: 'n1',
+    })
+    const entries = useDebugConsoleStore.getState().entries
+    const text = exportText(entries)
+    expect(text).not.toContain('super-secret-token')
+    expect(text).toContain('[REDACTED]')
+    expect(text).toContain('n1')
+  })
+
+  it('does not emit email addresses in text export', () => {
+    useDebugConsoleStore.getState().add('info', 'engine', 'user event', {
+      description: 'login for user@example.com',
+    })
+    const entries = useDebugConsoleStore.getState().entries
+    const text = exportText(entries)
+    expect(text).not.toContain('user@example.com')
+    expect(text).toContain('[EMAIL]')
+  })
+
+  it('does not emit JWT tokens in text export', () => {
+    useDebugConsoleStore.getState().add('debug', 'network', 'request', {
+      authorization: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.payload.signature',
+    })
+    const entries = useDebugConsoleStore.getState().entries
+    const text = exportText(entries)
+    expect(text).not.toContain('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9')
+    expect(text).toContain('[REDACTED]')
+  })
+
+  it('does not emit supabase keys in text export', () => {
+    useDebugConsoleStore.getState().add('debug', 'network', 'init', {
+      supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.supabase-payload.sig',
+    })
+    const entries = useDebugConsoleStore.getState().entries
+    const text = exportText(entries)
+    expect(text).not.toContain('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.supabase-payload.sig')
+    expect(text).toContain('[REDACTED]')
+  })
+})
+
+describe('export redaction regression — exportJson', () => {
+  it('does not emit token values in JSON export', () => {
+    useDebugConsoleStore.getState().add('info', 'network', 'auth event', {
+      token: 'super-secret-token',
+      nodeId: 'n1',
+    })
+    const entries = useDebugConsoleStore.getState().entries
+    const json = exportJson(entries)
+    expect(json).not.toContain('super-secret-token')
+    expect(json).toContain('[REDACTED]')
+    expect(json).toContain('n1')
+  })
+
+  it('does not emit email addresses in JSON export', () => {
+    useDebugConsoleStore.getState().add('info', 'engine', 'user event', {
+      description: 'login for user@example.com',
+    })
+    const entries = useDebugConsoleStore.getState().entries
+    const json = exportJson(entries)
+    expect(json).not.toContain('user@example.com')
+    expect(json).toContain('[EMAIL]')
+  })
+
+  it('preserves safe metadata in JSON export', () => {
+    useDebugConsoleStore.getState().add('info', 'engine', 'perf', {
+      nodeId: 'n42',
+      durationMs: 123,
+      label: 'solver-run',
+    })
+    const entries = useDebugConsoleStore.getState().entries
+    const parsed = JSON.parse(exportJson(entries)) as Array<{
+      meta: { nodeId: string; durationMs: number; label: string }
+    }>
+    expect(parsed[0].meta.nodeId).toBe('n42')
+    expect(parsed[0].meta.durationMs).toBe(123)
+    expect(parsed[0].meta.label).toBe('solver-run')
+  })
+})

@@ -20,8 +20,8 @@ ChainSolve declares both:
 
 ```
 # public/_headers (Cloudflare Pages)
-Content-Security-Policy: …; report-uri /api/report/csp
-Reporting-Endpoints: default="/api/report/csp"
+Content-Security-Policy: …; report-uri /api/report/csp; report-to csp-endpoint
+Reporting-Endpoints: csp-endpoint="/api/report/csp"
 ```
 
 ### 2. Endpoint normalises the report
@@ -69,33 +69,91 @@ limit 50;
 
 ## Testing CSP reports locally
 
-Vite dev server does **not** serve `public/_headers`, so CSP reports are not
-sent during local development.  To test the endpoint:
+### Option A — Wrangler (full Pages Function support, recommended)
+
+Wrangler executes Cloudflare Pages Functions locally, including the CSP
+report endpoint.  Run it after building the app:
 
 ```bash
-# Start the Vite preview server (serves _headers)
+# 1. Build the app
 npm run build
-npm run preview
 
-# In another terminal — send a synthetic CSP report (legacy format)
-curl -X POST http://localhost:4173/api/report/csp \
+# 2. Start Wrangler dev server (Functions + static assets)
+npx wrangler pages dev dist --compatibility-date=2024-09-23
+
+# 3. In another terminal — send a synthetic CSP report (legacy format)
+curl -X POST http://localhost:8788/api/report/csp \
   -H 'Content-Type: application/csp-report' \
   -d '{
     "csp-report": {
-      "document-uri": "http://localhost:4173/canvas/test",
+      "document-uri": "http://localhost:8788/app",
       "blocked-uri": "https://evil.example.com/script.js",
       "violated-directive": "script-src",
       "original-policy": "script-src '\''self'\'' '\''wasm-unsafe-eval'\''",
+      "effective-directive": "script-src",
       "disposition": "enforce"
     }
   }'
+# → 204 No Content
+
+# 4. Verify the event was stored (Supabase SQL Editor or psql):
+# SELECT ts, payload->>'effectiveDirective' AS directive,
+#        payload->>'blockedUrl' AS blocked
+# FROM observability_events
+# WHERE event_type = 'csp_violation'
+# ORDER BY ts DESC LIMIT 5;
 ```
 
-Expected response: `{"ok":true}` (HTTP 204 or 200).
+### Option B — Vite preview server (endpoint only)
 
-> Note: Cloudflare Pages Functions are not executed by `vite preview`.
-> Use `wrangler pages dev dist --compatibility-date=2024-09-23` to run
-> Functions locally with the Wrangler dev server.
+Vite dev server does **not** execute Pages Functions, so the report
+endpoint is unavailable.  `npm run preview` serves `public/_headers`
+(so CSP headers are sent) but calls to `/api/report/csp` will 404.
+Use Option A for end-to-end testing.
+
+### Verifying CSP headers
+
+```bash
+# Check that both CSP headers and Reporting-Endpoints are present
+curl -sI http://localhost:8788/app | grep -iE 'content-security|reporting'
+# Expected output includes:
+#   content-security-policy: …; report-uri /api/report/csp; report-to csp-endpoint
+#   content-security-policy-report-only: …; report-uri /api/report/csp; …
+#   reporting-endpoints: csp-endpoint="/api/report/csp"
+```
+
+### Testing the Reporting API v1 format (Chrome 70+)
+
+```bash
+curl -X POST http://localhost:8788/api/report/csp \
+  -H 'Content-Type: application/reports+json' \
+  -d '[{
+    "type": "csp-violation",
+    "url": "http://localhost:8788/app",
+    "body": {
+      "effectiveDirective": "script-src",
+      "blockedURL": "https://evil.example.com/script.js",
+      "documentURL": "http://localhost:8788/app",
+      "disposition": "enforce"
+    }
+  }]'
+# → 204 No Content
+```
+
+### Testing abuse mitigations
+
+```bash
+# Wrong Content-Type → 415
+curl -sI -X POST http://localhost:8788/api/report/csp \
+  -H 'Content-Type: text/plain' -d '{}' | head -1
+# HTTP/2 415
+
+# Oversized payload → 413
+curl -sI -X POST http://localhost:8788/api/report/csp \
+  -H 'Content-Type: application/csp-report' \
+  --data-binary @<(python3 -c "print('x'*40000)") | head -1
+# HTTP/2 413
+```
 
 ---
 
