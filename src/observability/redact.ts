@@ -34,6 +34,7 @@ const SECRET_KEY_PATTERNS = [
   'signature',
   'signing',
   'hmac',
+  'supabase',
 ]
 
 /** Regex patterns for sensitive values in strings. */

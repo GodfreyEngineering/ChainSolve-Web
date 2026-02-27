@@ -128,6 +128,9 @@ describe('isSecretKey', () => {
     'STRIPE_SECRET_KEY',
     'client_credential',
     'private_key',
+    'supabaseKey',
+    'SUPABASE_SERVICE_ROLE_KEY',
+    'supabase_anon_key',
   ])('flags %s as secret', (key) => {
     expect(isSecretKey(key)).toBe(true)
   })
@@ -182,6 +185,18 @@ describe('redactObject', () => {
 
   it('handles null', () => {
     expect(redactObject(null)).toBe(null)
+  })
+
+  it('redacts supabase key values', () => {
+    const obj = {
+      supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.payload.sig',
+      SUPABASE_SERVICE_ROLE_KEY: 'super-secret-service-key',
+      canvasId: 'c123',
+    }
+    const result = redactObject(obj) as Record<string, unknown>
+    expect(result['supabaseKey']).toBe('[REDACTED]')
+    expect(result['SUPABASE_SERVICE_ROLE_KEY']).toBe('[REDACTED]')
+    expect(result['canvasId']).toBe('c123')
   })
 })
 
