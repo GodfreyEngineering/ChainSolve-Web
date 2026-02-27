@@ -68,7 +68,13 @@ cargo test --workspace                         # run all Rust unit tests
 cargo test -p engine-core                      # engine-core only
 cargo bench -p engine-core                     # benchmarks (criterion)
 wasm-pack build crates/engine-wasm --target web --release   # manual release build
+node scripts/optimize-wasm.mjs                             # deterministic wasm-opt -Oz
 ```
+
+> **Note:** wasm-pack's built-in `wasm-opt` download is disabled via
+> `Cargo.toml` metadata (`wasm-opt = false`). We use the `binaryen` npm
+> devDependency instead (`scripts/optimize-wasm.mjs`) so CI never makes
+> network requests to download Binaryen binaries.
 
 ## CI structure
 
