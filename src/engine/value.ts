@@ -81,8 +81,15 @@ export function extractScalar(v: Value | null): number | null {
 
 // ── Display formatting ───────────────────────────────────────────────────────
 
-/** Format a Value for display in nodes and the inspector. */
-export function formatValue(v: Value | undefined): string {
+/**
+ * Format a Value for display in nodes and the inspector.
+ *
+ * @param locale  Optional BCP 47 locale tag (e.g. 'de', 'fr').  When supplied,
+ *                finite scalars are formatted with `Intl.NumberFormat` so that
+ *                the decimal separator and grouping match the user's language.
+ *                Omit (or pass undefined) for locale-neutral output (exports).
+ */
+export function formatValue(v: Value | undefined, locale?: string): string {
   if (v === undefined) return '\u2014' // em dash
   switch (v.kind) {
     case 'scalar': {
@@ -91,7 +98,15 @@ export function formatValue(v: Value | undefined): string {
       if (!isFinite(n)) return n > 0 ? '+\u221E' : '\u2212\u221E'
       const abs = Math.abs(n)
       if (abs === 0) return '0'
+      // Scientific notation is universally understood; keep locale-neutral.
       if (abs >= 1e6 || (abs > 0 && abs < 1e-3)) return n.toExponential(4)
+      if (locale) {
+        try {
+          return new Intl.NumberFormat(locale, { maximumSignificantDigits: 6 }).format(n)
+        } catch {
+          // Unknown locale tag — fall through to default formatting.
+        }
+      }
       return parseFloat(n.toPrecision(6)).toString()
     }
     case 'vector':

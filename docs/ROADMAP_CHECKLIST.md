@@ -370,7 +370,7 @@ Claude MUST:
 - [ ] P076: Screen-reader labels sweep (SHOULD)
 - [x] P077: i18n lint rule (no hard-coded strings)
 - [x] P078: missing-i18n keys detector + CI hook
-- [ ] P079: Locale-aware number formatting (display-only) (SHOULD)
+- [x] P079: Locale-aware number formatting (display-only) (SHOULD)
 - [ ] P080: Language selection persists + pre-paint apply (no FOUC)
 
 ## A8 — Performance + scale (500–1000 nodes)

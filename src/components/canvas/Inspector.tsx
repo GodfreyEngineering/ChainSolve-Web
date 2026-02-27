@@ -9,8 +9,8 @@
 import { useEffect } from 'react'
 import { useNodes, useEdges, useReactFlow } from '@xyflow/react'
 import { useComputed } from '../../contexts/ComputedContext'
-import { formatValue } from '../../engine/value'
 import { isError, isScalar } from '../../engine/value'
+import { useFormatValue } from '../../hooks/useFormatValue'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 import type { InputBinding, PlotConfig } from '../../blocks/types'
 import { ensureBinding } from '../../lib/migrateBindings'
@@ -71,6 +71,7 @@ export function Inspector({
   const { updateNodeData } = useReactFlow()
   const computed = useComputed()
 
+  const formatValue = useFormatValue()
   const node = nodeId ? (allNodes.find((n) => n.id === nodeId) ?? null) : null
   const nd = node?.data as NodeData | undefined
 

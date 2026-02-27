@@ -6,8 +6,8 @@
 import { memo } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
-import { formatValue } from '../../../engine/value'
 import { isError, isScalar } from '../../../engine/value'
+import { useFormatValue } from '../../../hooks/useFormatValue'
 import type { NodeData } from '../../../blocks/registry'
 import { NODE_STYLES as s } from './nodeStyles'
 
@@ -15,6 +15,7 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
   const computed = useComputed()
   const value = computed.get(id)
+  const formatValue = useFormatValue()
 
   const isErrVal =
     value !== undefined && (isError(value) || (isScalar(value) && isNaN(value.value)))

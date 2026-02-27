@@ -107,3 +107,50 @@ describe('formatValue — error', () => {
     expect(formatValue(mkError(''))).toBe('')
   })
 })
+
+// ── P079 — Locale-aware number formatting ────────────────────────────────────
+describe('formatValue — locale parameter (P079)', () => {
+  it('without locale, formats using dot decimal separator', () => {
+    // Default (locale-neutral) output for exports / tests
+    expect(formatValue(mkScalar(3.14))).toBe('3.14')
+  })
+
+  it('with locale "en", uses dot decimal separator', () => {
+    expect(formatValue(mkScalar(3.14), 'en')).toMatch(/3\.14/)
+  })
+
+  it('with locale "de", uses comma decimal separator', () => {
+    const result = formatValue(mkScalar(3.14), 'de')
+    // German: "3,14"
+    expect(result).toContain(',')
+    expect(result).not.toContain('.')
+  })
+
+  it('with locale "fr", uses comma decimal separator', () => {
+    const result = formatValue(mkScalar(1.5), 'fr')
+    expect(result).toContain(',')
+  })
+
+  it('NaN is always "NaN" regardless of locale', () => {
+    expect(formatValue(mkScalar(NaN), 'de')).toBe('NaN')
+  })
+
+  it('Infinity is always +∞ regardless of locale', () => {
+    expect(formatValue(mkScalar(Infinity), 'de')).toBe('+\u221E')
+  })
+
+  it('scientific notation is locale-neutral (universally understood)', () => {
+    // Very large number: always uses n.toExponential(4)
+    const result = formatValue(mkScalar(1e7), 'de')
+    expect(result).toMatch(/e\+/)
+  })
+
+  it('unknown locale tag falls back to default formatting', () => {
+    // Should not throw; falls through to toPrecision
+    expect(() => formatValue(mkScalar(3.14), 'xx-invalid-locale')).not.toThrow()
+  })
+
+  it('zero is always "0" regardless of locale', () => {
+    expect(formatValue(mkScalar(0), 'de')).toBe('0')
+  })
+})
