@@ -1,4 +1,5 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 
 interface ModalProps {
   open: boolean
@@ -57,6 +58,8 @@ const closeBtn: React.CSSProperties = {
 
 export function Modal({ open, onClose, title, children, width = 440 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null)
+  const titleId = useId()
+  useFocusTrap(panelRef, open)
 
   useEffect(() => {
     if (!open) return
@@ -77,12 +80,14 @@ export function Modal({ open, onClose, title, children, width = 440 }: ModalProp
       }}
       role="dialog"
       aria-modal="true"
-      aria-label={title}
+      aria-labelledby={title ? titleId : undefined}
     >
       <div ref={panelRef} style={{ ...panelStyle, width, maxWidth: '92vw' }}>
         {title && (
           <div style={headerStyle}>
-            <h2 style={titleStyle}>{title}</h2>
+            <h2 id={titleId} style={titleStyle}>
+              {title}
+            </h2>
             <button style={closeBtn} onClick={onClose} aria-label="Close">
               ✕
             </button>

@@ -73,9 +73,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div style={containerStyle}>
+      <div style={containerStyle} aria-live="polite" aria-atomic="false">
         {items.map((t) => (
-          <div key={t.id} style={toastStyle(t.variant)}>
+          <div
+            key={t.id}
+            role={t.variant === 'error' ? 'alert' : 'status'}
+            style={toastStyle(t.variant)}
+          >
             {t.message}
             {t.action && (
               <button style={actionButtonStyle} onClick={t.action.onClick}>

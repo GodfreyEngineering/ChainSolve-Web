@@ -295,7 +295,7 @@ Claude MUST:
     - canvas limits
     - pro-only features (plots/tables/groups/exports as applicable)
 
-- [ ] P054: Stripe webhook idempotency + event logging
+- [x] P054: Stripe webhook idempotency + event logging
   - Ensure webhook handler is idempotent
   - stripe_events audit trail confirmed
 
@@ -364,7 +364,7 @@ Claude MUST:
 ## A7 — Accessibility + i18n quality gates
 - [ ] P071: Focus order audit + fixes
 - [ ] P072: Menubar ARIA + keyboard nav regression tests
-- [ ] P073: Modal focus trap + ESC close + aria-live status
+- [x] P073: Modal focus trap + ESC close + aria-live status
 - [ ] P074: Contrast pass toward WCAG AA
 - [ ] P075: prefers-reduced-motion reliability
 - [ ] P076: Screen-reader labels sweep (SHOULD)
