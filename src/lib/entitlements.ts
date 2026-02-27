@@ -81,20 +81,20 @@ export function isPro(plan: Plan): boolean {
   return plan === 'trialing' || plan === 'pro'
 }
 
-/** Canceled users get read-only access to existing projects. */
+/** Past-due and canceled users get read-only access to existing projects. */
 export function isReadOnly(plan: Plan): boolean {
-  return plan === 'canceled'
+  return plan === 'past_due' || plan === 'canceled'
 }
 
 /** Whether the user is allowed to create / duplicate / import a project. */
 export function canCreateProject(plan: Plan, currentCount: number): boolean {
-  if (plan === 'canceled') return false
+  if (plan === 'past_due' || plan === 'canceled') return false
   return currentCount < getEntitlements(plan).maxProjects
 }
 
 /** Whether the user is allowed to create a new canvas in a project. */
 export function canCreateCanvas(plan: Plan, currentCount: number): boolean {
-  if (plan === 'canceled') return false
+  if (plan === 'past_due' || plan === 'canceled') return false
   return currentCount < getEntitlements(plan).maxCanvases
 }
 

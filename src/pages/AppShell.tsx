@@ -521,7 +521,7 @@ export default function AppShell() {
                 style={{ ...btnSmall, ...(readOnly ? btnDisabled : {}) }}
                 disabled={readOnly}
                 onClick={() => importRef.current?.click()}
-                title={readOnly ? 'Canceled accounts cannot import projects' : undefined}
+                title={readOnly ? 'Read-only accounts cannot import projects' : undefined}
               >
                 Import .json
               </button>

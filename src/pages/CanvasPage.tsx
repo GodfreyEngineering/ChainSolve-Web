@@ -400,8 +400,8 @@ export default function CanvasPage() {
     markDirty()
     const currentCanvasId = useCanvasesStore.getState().activeCanvasId
     if (currentCanvasId) markCanvasDirty(currentCanvasId)
-    autosaveScheduler.current.schedule()
-  }, [markDirty, markCanvasDirty])
+    if (!readOnly) autosaveScheduler.current.schedule()
+  }, [markDirty, markCanvasDirty, readOnly])
 
   // ── Flush save on tab close / refresh (best-effort) ────────────────────────
   useEffect(() => {
