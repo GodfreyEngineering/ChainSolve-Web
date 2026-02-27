@@ -101,19 +101,6 @@ export default function DiagnosticsPage() {
   const [sendStatus, setSendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const errors: readonly ObsEvent[] = getErrorBuffer()
 
-  if (!isDiagnosticsUIEnabled()) {
-    return (
-      <div style={{ ...s.page, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', opacity: 0.5 }}>
-          <p>Diagnostics UI is not enabled in this environment.</p>
-          <p style={{ fontSize: '0.8rem' }}>
-            Set <code>localStorage.setItem(&apos;cs_diag&apos;, &apos;1&apos;)</code> and reload.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   const handleRunDoctor = useCallback(async () => {
     setDoctorRunning(true)
     try {
@@ -158,6 +145,19 @@ export default function DiagnosticsPage() {
       setSendStatus('error')
     }
   }, [])
+
+  if (!isDiagnosticsUIEnabled()) {
+    return (
+      <div style={{ ...s.page, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', opacity: 0.5 }}>
+          <p>Diagnostics UI is not enabled in this environment.</p>
+          <p style={{ fontSize: '0.8rem' }}>
+            Set <code>localStorage.setItem(&apos;cs_diag&apos;, &apos;1&apos;)</code> and reload.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={s.page}>

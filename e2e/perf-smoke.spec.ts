@@ -84,7 +84,6 @@ test.describe('Performance smoke', () => {
     await waitForEngineOrFatal(page, consoleErrors)
     const bootMs = Date.now() - t0
 
-    // eslint-disable-next-line no-console
     console.log(`Engine boot: ${bootMs} ms`)
     expect(bootMs).toBeLessThan(10_000)
   })
@@ -133,7 +132,6 @@ test.describe('Performance smoke', () => {
     const min = timings[0]
     const max = timings[timings.length - 1]
 
-    // eslint-disable-next-line no-console
     console.log(
       `applyPatch 2k-chain (${timings.length} rounds): ` +
         `min=${min.toFixed(1)}ms p50=${p50.toFixed(1)}ms p95=${p95.toFixed(1)}ms max=${max.toFixed(1)}ms`,

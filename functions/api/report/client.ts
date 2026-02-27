@@ -135,12 +135,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const appVersion = str(body["app_version"]).slice(0, 64);
   const routePath = str(body["route_path"]).slice(0, 512);
   const sessionId = str(body["session_id"]).slice(0, 64);
-  const ua = str(body["ua"]).slice(0, 500);
-
   // payload: accept as-is (already redacted client-side); store as jsonb
   const payload = typeof body["payload"] === "object" ? body["payload"] : {};
   const tags = safeStringRecord(body["tags"]);
-  const _clientCf = safeCf(body["cf"]);
+  safeCf(body["cf"]); // validate shape; value discarded — server-side CF headers used instead
 
   // ── Enrich CF data server-side (overrides client-submitted cf) ─────────────
   const cf = {

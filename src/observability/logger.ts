@@ -28,7 +28,7 @@ function currentMinLevel(): number {
   return LEVELS[isDev ? MIN_LEVEL_DEV : MIN_LEVEL_PROD]
 }
 
-function format(level: LogLevel, event: string, _context?: unknown): string {
+function format(level: LogLevel, event: string): string {
   return `[cs:${level}] ${event}`
 }
 

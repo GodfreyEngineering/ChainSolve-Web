@@ -39,10 +39,10 @@ const SECRET_KEY_PATTERNS = [
 /** Regex patterns for sensitive values in strings. */
 const JWT_PATTERN =
   /eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g
-const BEARER_PATTERN = /Bearer\s+[A-Za-z0-9._\-+/=]{10,}/gi
-const EMAIL_PATTERN = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g
+const BEARER_PATTERN = /Bearer\s+[A-Za-z0-9._+/=-]{10,}/gi
+const EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g
 /** Very conservative CC detection: 16 digits in groups of 4 */
-const CC_PATTERN = /\b\d{4}[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{4}\b/g
+const CC_PATTERN = /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g
 
 // ── URL redaction ─────────────────────────────────────────────────────────────
 

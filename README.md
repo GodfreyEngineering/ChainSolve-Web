@@ -64,3 +64,5 @@ the invariants you must not break.
 ## Docs
 
 See [docs/README.md](docs/README.md) for a full index of the documentation.
+
+Product requirements suite: [docs/requirements/README.md](docs/requirements/README.md).
