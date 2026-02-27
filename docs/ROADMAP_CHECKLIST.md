@@ -199,7 +199,7 @@ Claude MUST:
   - Standardize error codes/messages for common failures
   - Tests in Rust + TS boundary
 
-- [ ] P035: Watchdog behavior test
+- [x] P035: Watchdog behavior test
   - Ensure partial results are surfaced clearly
   - Worker respawn + recovery path
   - Tests: worker timeout simulation
@@ -216,11 +216,11 @@ Claude MUST:
     - trace timing (if available)
   - Keep UX minimal, powerful
 
-- [ ] P038: Cross-canvas isolation proof
+- [x] P038: Cross-canvas isolation proof
   - Tests that canvas A evaluation cannot read canvas B state
   - Documented invariants
 
-- [ ] P039: Incremental patch correctness tests (SHOULD)
+- [x] P039: Incremental patch correctness tests (SHOULD)
   - Patch protocol correctness: patch-eval equals full-eval
 
 - [ ] P040: Engine contract mismatch UX
