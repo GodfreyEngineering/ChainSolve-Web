@@ -228,7 +228,7 @@ Claude MUST:
   - Diagnostic log entry + copy-to-clipboard
 
 ## A4 — Security + privacy hardening (pre-public gates)
-- [ ] P041: Central redaction utility + tests
+- [x] P041: Central redaction utility + tests
   - One canonical redaction function used by:
     - debug console export
     - PDF/Excel/JSON export
@@ -243,7 +243,7 @@ Claude MUST:
   - Ensure export never includes secrets
   - Add regression tests
 
-- [ ] P043: Adapter boundary enforcement
+- [x] P043: Adapter boundary enforcement
   - Add lint rule or CI script that forbids `supabase` imports in UI components
   - Enforce service layer usage
 
@@ -263,7 +263,7 @@ Claude MUST:
   - Add “how to validate CSP locally” playbook
   - Ensure report endpoint usage documented
 
-- [ ] P047: Input validation sweep
+- [x] P047: Input validation sweep
   - Project name validation
   - Variable name validation
   - CSV numeric validation UX
