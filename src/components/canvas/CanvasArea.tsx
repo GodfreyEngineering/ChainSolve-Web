@@ -172,6 +172,7 @@ export interface CanvasAreaHandle {
   toggleEdgeBadges: () => void
   toggleHealthPanel: () => void
   exportPdfAudit: () => Promise<void>
+  exportXlsxAuditActive: () => Promise<void>
   captureViewportImage: (signal?: AbortSignal) => Promise<CaptureResult>
 }
 
@@ -526,6 +527,66 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
       // 7. Export PDF
       await exportAuditPdf(model, graphImageBytes)
+    },
+
+    exportXlsxAuditActive: async () => {
+      const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } =
+        await import('../../lib/build-info')
+      const { exportAuditXlsx } = await import('../../lib/xlsx/exportAuditXlsx')
+
+      const projectName = useProjectStore.getState().projectName
+      const projectId = useProjectStore.getState().projectId
+
+      // 1. Get canonical snapshot
+      const snap = getCanonicalSnapshot(latestNodes.current, latestEdges.current)
+      const currentVariables = useVariablesStore.getState().variables
+
+      // 2. Build engine snapshot and evaluate
+      const engineSnap = toEngineSnapshot(snap.nodes, snap.edges, constantsLookup, currentVariables)
+      const evalResult = await engine.evaluateGraph(engineSnap)
+
+      // 3. Compute snapshot hash
+      const hashInput = stableStringify({
+        nodes: snap.nodes.map((n) => ({
+          id: n.id,
+          data: n.data,
+          position: n.position,
+        })),
+        edges: snap.edges.map((e) => ({
+          id: e.id,
+          source: e.source,
+          sourceHandle: e.sourceHandle,
+          target: e.target,
+          targetHandle: e.targetHandle,
+        })),
+        variables: currentVariables,
+      })
+      const snapshotHash = await sha256Hex(hashInput)
+
+      // 4. Graph health
+      const health = computeGraphHealth(snap.nodes, snap.edges)
+      const healthSummary = formatHealthReport(health, t)
+
+      // 5. Build audit model
+      const model = buildAuditModel({
+        projectName,
+        projectId,
+        exportTimestamp: new Date().toISOString(),
+        buildVersion: BUILD_VERSION,
+        buildSha: BUILD_SHA,
+        buildTime: BUILD_TIME,
+        buildEnv: BUILD_ENV,
+        engineVersion: engine.engineVersion,
+        contractVersion: engine.contractVersion,
+        nodes: snap.nodes,
+        edges: snap.edges,
+        evalResult,
+        healthSummary,
+        snapshotHash,
+      })
+
+      // 6. Export XLSX
+      await exportAuditXlsx(model, currentVariables)
     },
 
     captureViewportImage: async (signal?: AbortSignal) => {

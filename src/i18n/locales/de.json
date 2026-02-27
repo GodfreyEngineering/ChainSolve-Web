@@ -406,5 +406,10 @@
     "skipImages": "Bilder: überspringen (nur Werte)",
     "cancelExport": "Export abbrechen",
     "restoring": "Canvas wiederherstellen…"
+  },
+  "excelExport": {
+    "generating": "Excel wird erstellt…",
+    "success": "Excel erfolgreich exportiert",
+    "failed": "Excel-Export fehlgeschlagen"
   }
 }

@@ -406,5 +406,10 @@
     "skipImages": "Images : ignorer (valeurs seules)",
     "cancelExport": "Annuler l'export",
     "restoring": "Restauration du canvas…"
+  },
+  "excelExport": {
+    "generating": "Génération Excel…",
+    "success": "Excel exporté avec succès",
+    "failed": "Échec de la génération Excel"
   }
 }

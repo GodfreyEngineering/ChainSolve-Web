@@ -191,6 +191,18 @@ export function AppHeader({
     }
   }, [onExportPdfProject, includeImages, toast, t])
 
+  const handleExportExcelActive = useCallback(() => {
+    setOpenMenu(null)
+    toast(t('excelExport.generating'), 'info')
+    canvasRef.current
+      ?.exportXlsxAuditActive()
+      .then(() => toast(t('excelExport.success'), 'success'))
+      .catch((err: unknown) => {
+        console.error('[xlsx-export]', err)
+        toast(t('excelExport.failed'), 'error')
+      })
+  }, [canvasRef, toast, t])
+
   const handleToggleIncludeImages = useCallback(() => {
     setIncludeImages((v) => {
       const next = !v
@@ -363,7 +375,7 @@ export function AppHeader({
             : []),
         ],
       },
-      { label: t('menu.exportExcel'), onClick: stub },
+      { label: t('menu.exportExcel'), onClick: handleExportExcelActive },
       { separator: true },
       { label: t('menu.recentProjects'), children: recentChildren },
     ]
@@ -378,6 +390,7 @@ export function AppHeader({
     handleSelectProject,
     handleExportPdfActive,
     handleExportPdfAll,
+    handleExportExcelActive,
     handleToggleIncludeImages,
     includeImages,
     exportInProgress,

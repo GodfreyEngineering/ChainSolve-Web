@@ -483,6 +483,21 @@ variable state, file I/O, network activity, and performance metrics.
 | EX-23 | Export cancellable via AbortController; cancel button appears in menu during export. | SHOULD |
 | EX-24 | Autosave suppressed during export canvas switching. Original canvas restored in `finally`. | MUST |
 
+### 17.4 Excel export — active sheet (W14b.1)
+
+| ID    | Requirement                                                                                  | Priority |
+|-------|----------------------------------------------------------------------------------------------|----------|
+| EX-25 | "File > Export Excel" generates an `.xlsx` for the active canvas sheet.                       | MUST     |
+| EX-26 | Workbook contains 5 worksheets: Summary, Variables, Node Values, Diagnostics, Graph Health.   | MUST     |
+| EX-27 | `write-excel-file/browser` lazy-loaded via cached singleton (no initial bundle impact).       | MUST     |
+| EX-28 | Reuses `buildAuditModel()` as single source of truth (same data as PDF export).               | MUST     |
+| EX-29 | Header rows use bold teal styling; row 1 frozen across all sheets.                            | SHOULD   |
+| EX-30 | No secrets, PII, or auth tokens included in exported file.                                    | MUST     |
+| EX-31 | CSP intact — no `unsafe-eval`; `write-excel-file` uses `fflate` (pure JS).                   | MUST     |
+| EX-32 | i18n toast messages for generating/success/failed in all 5 locales.                           | MUST     |
+| EX-33 | File named `{projectName}_{timestamp}_audit.xlsx` with sanitised project name.                | SHOULD   |
+| EX-34 | `xlsxModel.ts` pure functions fully unit-tested.                                              | MUST     |
+
 ---
 
 ## 18. Out of scope (for now)
@@ -512,6 +527,7 @@ variable state, file I/O, network activity, and performance metrics.
 
 | Date       | Author | Change                                                                                            |
 |------------|--------|---------------------------------------------------------------------------------------------------|
+| 2026-02-27 | —      | W14b.1: Added §17.4 (Excel export active sheet EX-25–EX-34). Lazy-loaded write-excel-file, 5-sheet workbook. |
 | 2026-02-27 | —      | W14a.3: Added §17.3 (PDF export hardening EX-17–EX-24). Per-canvas image capture, fallback ladder, values-only mode. |
 | 2026-02-27 | —      | W14a.2: Added §17.2 (all-sheets PDF export EX-9–EX-16). Struck multi-sheet from Future extensions. |
 | 2026-02-27 | —      | W14a.1: Added §17 Export (PDF export requirements). Moved PDF out of Out-of-scope. Renum §18/§19. |
