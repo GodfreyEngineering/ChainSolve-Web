@@ -135,17 +135,38 @@ Mirrors the GitHub Actions pipeline exactly:
 
 1. `npm ci`
 2. `wasm-pack build` (release)
-3. WASM export guard
-4. `tsc -b --noEmit` (app + functions)
-5. ESLint + Prettier
-6. vitest
-7. `cargo test --workspace`
-8. Vite build + bundle size check
+3. `wasm-opt -Oz` (via `binaryen` devDependency)
+4. WASM export guard
+5. `tsc -b --noEmit` (app + functions)
+6. ESLint + Prettier
+7. vitest
+8. `cargo test --workspace`
+9. Vite build + bundle size check
 
 **When to use which:**
 
 - `verify:fast` — quick iteration, before every push
 - `verify:ci` — before merging to main, after WASM/Rust changes
+
+## Bundle size budgets
+
+The CI gate (`scripts/check-bundle-size.mjs`) enforces two hard budgets:
+
+| Metric | Budget | Notes |
+|--------|--------|-------|
+| Initial JS (gzip) | 350 KB | Entry + main chunk — what the CDN serves on first paint |
+| WASM (raw) | 600 KB | Per-file, before Brotli on the wire |
+
+Total JS is reported for visibility but does **not** fail the build, since lazy
+chunks (dialogs, panels) only load on demand.
+
+Run `npm run perf:bundle` after a build to check locally. The script reads the
+Vite manifest (`dist/.vite/manifest.json`) to compute the initial-load closure
+and reports both raw and gzip sizes.
+
+To reduce initial JS: use `React.lazy()` for components that are conditionally
+rendered (dialogs, panels, popovers). To reduce WASM: the `wasm-opt -Oz` step
+in the build pipeline handles this automatically via the `binaryen` devDependency.
 
 ## Editor setup
 

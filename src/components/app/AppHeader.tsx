@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BRAND } from '../../lib/brand'
 import { useProjectStore } from '../../stores/projectStore'
@@ -6,16 +6,28 @@ import { useSettingsModal } from '../../contexts/SettingsModalContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../ui/useToast'
 import { DropdownMenu, type MenuEntry } from '../ui/DropdownMenu'
-import { BugReportModal } from '../BugReportModal'
-import { AboutModal } from './AboutModal'
-import { ConfirmDialog, type ConfirmAction } from './ConfirmDialog'
-import { OpenProjectDialog } from './OpenProjectDialog'
-import { SaveAsDialog } from './SaveAsDialog'
+import type { ConfirmAction } from './ConfirmDialog'
+
+const LazyBugReportModal = lazy(() =>
+  import('../BugReportModal').then((m) => ({ default: m.BugReportModal })),
+)
+const LazyAboutModal = lazy(() => import('./AboutModal').then((m) => ({ default: m.AboutModal })))
+const LazyConfirmDialog = lazy(() =>
+  import('./ConfirmDialog').then((m) => ({ default: m.ConfirmDialog })),
+)
+const LazyOpenProjectDialog = lazy(() =>
+  import('./OpenProjectDialog').then((m) => ({ default: m.OpenProjectDialog })),
+)
+const LazySaveAsDialog = lazy(() =>
+  import('./SaveAsDialog').then((m) => ({ default: m.SaveAsDialog })),
+)
+const LazyCommandPalette = lazy(() =>
+  import('./CommandPalette').then((m) => ({ default: m.CommandPalette })),
+)
 import { CATEGORY_ORDER, CATEGORY_LABELS } from '../../blocks/registry'
 import { supabase } from '../../lib/supabase'
 import { getRecentProjects } from '../../lib/recentProjects'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import { CommandPalette } from './CommandPalette'
 import { flattenMenusToActions, type MenuDef } from '../../lib/actions'
 import type { CanvasAreaHandle } from '../canvas/CanvasArea'
 import type { Plan } from '../../lib/entitlements'
@@ -656,29 +668,51 @@ export function AppHeader({
         </div>
       </div>
 
-      <BugReportModal open={bugReportOpen} onClose={() => setBugReportOpen(false)} />
-      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
-      <OpenProjectDialog
-        open={openDialogOpen}
-        onClose={() => setOpenDialogOpen(false)}
-        onSelect={handleSelectProject}
-      />
-      <SaveAsDialog
-        open={saveAsOpen}
-        onClose={() => setSaveAsOpen(false)}
-        currentName={projectName}
-        onConfirm={handleSaveAsConfirm}
-        saving={saveAsLoading}
-      />
-      <ConfirmDialog
-        open={!!confirmState}
-        onClose={() => setConfirmState(null)}
-        title={t('project.unsavedTitle')}
-        message={t('project.unsavedMessage')}
-        actions={confirmActions}
-      />
+      {bugReportOpen && (
+        <Suspense fallback={null}>
+          <LazyBugReportModal open onClose={() => setBugReportOpen(false)} />
+        </Suspense>
+      )}
+      {aboutOpen && (
+        <Suspense fallback={null}>
+          <LazyAboutModal open onClose={() => setAboutOpen(false)} />
+        </Suspense>
+      )}
+      {openDialogOpen && (
+        <Suspense fallback={null}>
+          <LazyOpenProjectDialog
+            open
+            onClose={() => setOpenDialogOpen(false)}
+            onSelect={handleSelectProject}
+          />
+        </Suspense>
+      )}
+      {saveAsOpen && (
+        <Suspense fallback={null}>
+          <LazySaveAsDialog
+            open
+            onClose={() => setSaveAsOpen(false)}
+            currentName={projectName}
+            onConfirm={handleSaveAsConfirm}
+            saving={saveAsLoading}
+          />
+        </Suspense>
+      )}
+      {!!confirmState && (
+        <Suspense fallback={null}>
+          <LazyConfirmDialog
+            open
+            onClose={() => setConfirmState(null)}
+            title={t('project.unsavedTitle')}
+            message={t('project.unsavedMessage')}
+            actions={confirmActions}
+          />
+        </Suspense>
+      )}
       {paletteOpen && (
-        <CommandPalette actions={paletteActions} onClose={() => setPaletteOpen(false)} />
+        <Suspense fallback={null}>
+          <LazyCommandPalette actions={paletteActions} onClose={() => setPaletteOpen(false)} />
+        </Suspense>
       )}
     </>
   )

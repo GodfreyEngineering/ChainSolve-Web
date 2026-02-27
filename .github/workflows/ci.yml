@@ -61,6 +61,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Optimize WASM (wasm-opt -Oz)
+        run: node scripts/optimize-wasm.mjs
+
       - name: Format check
         run: npm run format:check
 

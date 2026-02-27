@@ -35,6 +35,9 @@ export default defineConfig({
       '@engine-wasm': resolve(__dirname, 'crates/engine-wasm/pkg'),
     },
   },
+  build: {
+    manifest: true,
+  },
   worker: {
     format: 'es',
   },

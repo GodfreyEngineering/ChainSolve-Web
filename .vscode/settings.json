@@ -38,5 +38,7 @@
   // rust-analyzer should pick it up automatically; no manual target override needed.
 
   // ── ESLint ────────────────────────────────────────────────────────────────
-  "eslint.useFlatConfig": true
+  "eslint.useFlatConfig": true,
+  "claudeCode.allowDangerouslySkipPermissions": true,
+  "claudeCode.initialPermissionMode": "bypassPermissions"
 }

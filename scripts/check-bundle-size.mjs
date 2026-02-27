@@ -5,141 +5,214 @@
  * Run after `npm run build`:
  *   node scripts/check-bundle-size.mjs
  *
- * Budgets (uncompressed — Cloudflare serves Brotli at ~40–60% smaller):
- *   main-*.js       900 KB   (+13% headroom over current ~796 KB)
- *   total JS       1600 KB   (+4% headroom over current ~1537 KB)
- *   *.wasm          600 KB   (+22% headroom over current ~493 KB)
+ * Reads the Vite manifest (dist/.vite/manifest.json) to compute the
+ * **initial-load closure** — the entry JS plus all transitive static imports
+ * and the entry's direct dynamic imports (the app bundle, not lazy chunks).
  *
- * Exits 1 if any budget is exceeded.
+ * Reports raw and gzip sizes.  Budgets:
+ *   initial JS (gzip)   350 KB   — what the CDN actually serves
+ *   *.wasm (raw)         600 KB   — before Brotli/gzip on the wire
+ *
+ * Total JS is reported for visibility but does NOT fail the build, since
+ * lazy chunks (dialogs, panels) only load on demand.
+ *
+ * Exits 1 if any hard budget is exceeded.
  */
 
-import { readdirSync, statSync, existsSync } from 'fs'
-import { join, basename } from 'path'
+import { readFileSync, readdirSync, statSync, existsSync } from 'fs'
+import { join, basename, dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { dirname, resolve } from 'path'
+import { gzipSync } from 'zlib'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
-
-// ── Locate dist/assets ────────────────────────────────────────────
-
-function findDistDir() {
-  const candidates = [join(ROOT, 'dist', 'assets'), join(ROOT, 'dist')]
-  for (const c of candidates) {
-    if (existsSync(c)) return c
-  }
-  return null
-}
-
-const distDir = findDistDir()
-if (!distDir) {
-  console.error(
-    '\nBundle size check: dist/ not found.\nRun `npm run build` first.\n',
-  )
-  process.exit(1)
-}
-
-// ── Collect files ─────────────────────────────────────────────────
-
-function listFiles(dir) {
-  try {
-    return readdirSync(dir)
-      .map((f) => join(dir, f))
-      .filter((f) => {
-        try {
-          return statSync(f).isFile()
-        } catch {
-          return false
-        }
-      })
-  } catch {
-    return []
-  }
-}
-
-const allFiles = listFiles(distDir)
-const jsFiles = allFiles.filter((f) => f.endsWith('.js'))
-const wasmFiles = allFiles.filter((f) => f.endsWith('.wasm'))
+const DIST = join(ROOT, 'dist')
+const ASSETS = join(DIST, 'assets')
+const MANIFEST_PATH = join(DIST, '.vite', 'manifest.json')
 
 // ── Budget constants ──────────────────────────────────────────────
 
 const KB = 1024
 const BUDGETS = {
-  mainJs: 900 * KB,
-  totalJs: 1600 * KB,
-  wasm: 600 * KB,
+  initialGzip: 350 * KB, // initial-load JS closure (gzip)
+  wasmRaw: 600 * KB, // per-WASM file (raw)
 }
 
-// ── Check each budget ─────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────
+
+function gzipSize(filePath) {
+  const buf = readFileSync(filePath)
+  return gzipSync(buf, { level: 9 }).length
+}
+
+function fmtKB(n) {
+  return `${(n / KB).toFixed(0)} KB`
+}
+
+// ── Locate dist ──────────────────────────────────────────────────
+
+if (!existsSync(ASSETS)) {
+  console.error('\nBundle size check: dist/assets/ not found.\nRun `npm run build` first.\n')
+  process.exit(1)
+}
+
+// ── Compute initial closure from manifest ────────────────────────
+
+let initialFiles = [] // asset filenames in initial closure
+let hasManifest = false
+
+if (existsSync(MANIFEST_PATH)) {
+  hasManifest = true
+  const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf-8'))
+
+  // Find entry point
+  const entryKey = Object.keys(manifest).find((k) => manifest[k].isEntry)
+  if (!entryKey) {
+    console.error('No entry point found in manifest')
+    process.exit(1)
+  }
+
+  // Walk: collect a chunk and all its transitive static imports
+  const visited = new Set()
+  function walkStatic(key) {
+    if (visited.has(key)) return
+    visited.add(key)
+    const chunk = manifest[key]
+    if (!chunk) return
+    if (chunk.file && chunk.file.endsWith('.js')) {
+      initialFiles.push(chunk.file)
+    }
+    for (const imp of chunk.imports ?? []) {
+      walkStatic(imp)
+    }
+  }
+
+  // Start with the entry itself
+  walkStatic(entryKey)
+
+  // Also include the entry's direct dynamic imports — these are the app
+  // bundle(s), not lazy chunks.  Lazy chunks are dynamic imports of the
+  // app bundle, one level deeper.
+  for (const dynKey of manifest[entryKey].dynamicImports ?? []) {
+    walkStatic(dynKey)
+  }
+}
+
+// Fallback: if no manifest, use main-*.js as the initial closure
+if (!hasManifest || initialFiles.length === 0) {
+  const files = readdirSync(ASSETS).filter((f) => f.startsWith('main-') && f.endsWith('.js'))
+  initialFiles = files.map((f) => `assets/${f}`)
+}
+
+// ── Collect all asset files ──────────────────────────────────────
+
+const allAssets = readdirSync(ASSETS).map((f) => ({
+  name: f,
+  path: join(ASSETS, f),
+  size: statSync(join(ASSETS, f)).size,
+}))
+
+const jsFiles = allAssets.filter((f) => f.name.endsWith('.js'))
+const wasmFiles = allAssets.filter((f) => f.name.endsWith('.wasm'))
+
+// ── Compute sizes ────────────────────────────────────────────────
+
+// Initial closure
+const initialPaths = initialFiles.map((f) => join(DIST, f))
+const initialRaw = initialPaths.reduce((s, p) => s + statSync(p).size, 0)
+const initialGzip = initialPaths.reduce((s, p) => s + gzipSize(p), 0)
+
+// Total JS
+const totalRaw = jsFiles.reduce((s, f) => s + f.size, 0)
+const totalGzip = jsFiles.reduce((s, f) => s + gzipSize(f.path), 0)
+
+// ── Check budgets ────────────────────────────────────────────────
 
 let failed = false
 
-/** @type {Array<{file: string, size: number, budget: number, ok: boolean}>} */
+/** @type {Array<{label: string, raw: number, gz: number, budget?: number, budgetType?: string, ok: boolean, warn?: boolean}>} */
 const rows = []
 
-function addRow(file, size, budget) {
-  const ok = size <= budget
+function addRow(label, raw, gz, budget, budgetType) {
+  const size = budgetType === 'gzip' ? gz : raw
+  const ok = !budget || size <= budget
   if (!ok) failed = true
-  rows.push({ file, size, budget, ok })
+  rows.push({ label, raw, gz, budget, budgetType, ok })
 }
 
-// main-*.js
-const mainJs = jsFiles.find((f) => basename(f).startsWith('main-'))
-if (mainJs) {
-  addRow(basename(mainJs), statSync(mainJs).size, BUDGETS.mainJs)
-} else {
-  // main chunk not found — might be chunked differently; treat as warning not failure
-  rows.push({ file: 'main-*.js (not found)', size: 0, budget: BUDGETS.mainJs, ok: true })
+function addWarn(label, raw, gz) {
+  rows.push({ label, raw, gz, ok: true, warn: true })
 }
 
-// total JS
-const totalJsSize = jsFiles.reduce((sum, f) => sum + statSync(f).size, 0)
-addRow(`total JS (${jsFiles.length} files)`, totalJsSize, BUDGETS.totalJs)
+// Initial closure
+addRow(
+  `initial JS (${initialFiles.length} files)`,
+  initialRaw,
+  initialGzip,
+  BUDGETS.initialGzip,
+  'gzip',
+)
 
-// individual wasm files
+// Total JS (informational — does not fail)
+addWarn(`total JS (${jsFiles.length} files)`, totalRaw, totalGzip)
+
+// WASM
 for (const wasm of wasmFiles) {
-  addRow(basename(wasm), statSync(wasm).size, BUDGETS.wasm)
+  addRow(wasm.name, wasm.size, gzipSize(wasm.path), BUDGETS.wasmRaw, 'raw')
 }
-
 if (wasmFiles.length === 0) {
-  rows.push({ file: '*.wasm (none found)', size: 0, budget: BUDGETS.wasm, ok: true })
+  rows.push({ label: '*.wasm (none)', raw: 0, gz: 0, ok: true })
 }
 
-// ── Print table ───────────────────────────────────────────────────
+// ── Print table ──────────────────────────────────────────────────
 
-const kbLabel = (n) => `${(n / KB).toFixed(0)} KB`
-const COL_FILE = 46
-const COL_SIZE = 12
+const COL_LABEL = 40
+const COL_RAW = 10
+const COL_GZ = 10
 const COL_BUDGET = 12
-const LINE_WIDTH = COL_FILE + COL_SIZE + COL_BUDGET + 8
+const LINE = COL_LABEL + COL_RAW + COL_GZ + COL_BUDGET + 18
 
 const pad = (s, n) => String(s).padEnd(n)
-const lpad = (s, n) => String(s).padStart(n)
-const hr = '─'.repeat(LINE_WIDTH)
+const rpad = (s, n) => String(s).padStart(n)
+const hr = '─'.repeat(LINE)
 
 console.log('')
 console.log('Bundle size check')
-console.log(`Scanning: ${distDir}`)
+console.log(`Scanning: ${ASSETS}`)
+if (hasManifest) console.log(`Manifest: ${initialFiles.length} initial chunks identified`)
 console.log(hr)
 console.log(
-  `${pad('File', COL_FILE)}  ${lpad('Size', COL_SIZE)}  ${lpad('Budget', COL_BUDGET)}  Status`,
+  `${pad('', COL_LABEL)}  ${rpad('Raw', COL_RAW)}  ${rpad('Gzip', COL_GZ)}  ${rpad('Budget', COL_BUDGET)}  Status`,
 )
 console.log(hr)
 
 for (const r of rows) {
-  const status = r.ok ? 'PASS' : '*** FAIL ***'
+  const budgetStr = r.budget
+    ? `${fmtKB(r.budget)} ${r.budgetType === 'gzip' ? '(gz)' : '(raw)'}`
+    : '—'
+  let status = 'PASS'
+  if (!r.ok) status = '*** FAIL ***'
+  else if (r.warn) status = '(info)'
   console.log(
-    `${pad(r.file, COL_FILE)}  ${lpad(kbLabel(r.size), COL_SIZE)}  ${lpad(kbLabel(r.budget), COL_BUDGET)}  ${status}`,
+    `${pad(r.label, COL_LABEL)}  ${rpad(fmtKB(r.raw), COL_RAW)}  ${rpad(fmtKB(r.gz), COL_GZ)}  ${rpad(budgetStr, COL_BUDGET)}  ${status}`,
   )
 }
 
 console.log(hr)
+
+// List initial closure files for transparency
+if (hasManifest && initialFiles.length > 0) {
+  console.log('\nInitial closure files:')
+  for (const f of initialFiles) {
+    const p = join(DIST, f)
+    console.log(`  ${basename(f)}  ${fmtKB(statSync(p).size)} raw  ${fmtKB(gzipSize(p))} gz`)
+  }
+}
+
 console.log('')
 
 if (failed) {
-  console.error(
-    'Bundle size check FAILED — one or more files exceed their budget.\n',
-  )
+  console.error('Bundle size check FAILED — one or more files exceed their budget.\n')
   process.exit(1)
 } else {
   console.log('Bundle size check PASSED.\n')

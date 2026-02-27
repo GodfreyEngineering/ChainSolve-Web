@@ -1,6 +1,9 @@
-import { useState, useMemo, useCallback, type ReactNode } from 'react'
+import { useState, useMemo, useCallback, lazy, Suspense, type ReactNode } from 'react'
 import { SettingsModalContext, type SettingsTab } from '../contexts/SettingsModalContext'
-import { SettingsModal } from './SettingsModal'
+
+const LazySettingsModal = lazy(() =>
+  import('./SettingsModal').then((m) => ({ default: m.SettingsModal })),
+)
 
 export function SettingsModalProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
@@ -21,7 +24,11 @@ export function SettingsModalProvider({ children }: { children: ReactNode }) {
   return (
     <SettingsModalContext.Provider value={value}>
       {children}
-      <SettingsModal />
+      {open && (
+        <Suspense fallback={null}>
+          <LazySettingsModal />
+        </Suspense>
+      )}
     </SettingsModalContext.Provider>
   )
 }

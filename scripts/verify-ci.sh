@@ -41,6 +41,10 @@ section "Build WASM (release)"
 wasm-pack build crates/engine-wasm --target web --release || fail "wasm-pack build"
 pass "wasm-pack build"
 
+section "Optimize WASM (wasm-opt -Oz)"
+node scripts/optimize-wasm.mjs || fail "wasm-opt"
+pass "wasm-opt"
+
 # ── WASM export guard ─────────────────────────────────────────────────────
 section "WASM export guard"
 node scripts/check-wasm-exports.mjs || fail "WASM export check"

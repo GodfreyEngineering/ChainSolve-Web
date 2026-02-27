@@ -18,6 +18,8 @@ import {
   useState,
   forwardRef,
   useImperativeHandle,
+  lazy,
+  Suspense,
   type DragEvent,
   type MouseEvent,
 } from 'react'
@@ -77,16 +79,20 @@ import { useTranslation } from 'react-i18next'
 import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard } from '../../lib/clipboard'
-import { FindBlockDialog } from './FindBlockDialog'
-import DebugConsolePanel from './DebugConsolePanel'
+const LazyFindBlockDialog = lazy(() =>
+  import('./FindBlockDialog').then((m) => ({ default: m.FindBlockDialog })),
+)
+const LazyDebugConsolePanel = lazy(() => import('./DebugConsolePanel'))
+const LazyGraphHealthPanel = lazy(() => import('./GraphHealthPanel'))
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { useDebugConsoleStore } from '../../stores/debugConsoleStore'
 import { ValuePopoverContext, type ShowValuePopover } from '../../contexts/ValuePopoverContext'
-import { ValuePopover } from './ValuePopover'
+const LazyValuePopover = lazy(() =>
+  import('./ValuePopover').then((m) => ({ default: m.ValuePopover })),
+)
 import { ProbeNode } from './nodes/ProbeNode'
 import { copyValueToClipboard } from '../../engine/valueFormat'
-import GraphHealthPanel from './GraphHealthPanel'
 import { getCrossingEdgesForGroup } from '../../lib/graphHealth'
 import { useToast } from '../ui/useToast'
 
@@ -1473,16 +1479,22 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     })
                   }}
                 />
-                {debugConsoleVisible && <DebugConsolePanel />}
+                {debugConsoleVisible && (
+                  <Suspense fallback={null}>
+                    <LazyDebugConsolePanel />
+                  </Suspense>
+                )}
                 {healthPanelVisible && (
-                  <GraphHealthPanel
-                    nodes={nodes}
-                    edges={edges}
-                    onClose={() => {
-                      setHealthPanelVisible(false)
-                      setHealthPanelPref(false)
-                    }}
-                  />
+                  <Suspense fallback={null}>
+                    <LazyGraphHealthPanel
+                      nodes={nodes}
+                      edges={edges}
+                      onClose={() => {
+                        setHealthPanelVisible(false)
+                        setHealthPanelPref(false)
+                      }}
+                    />
+                  </Suspense>
                 )}
               </div>
 
@@ -1600,11 +1612,13 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               )}
               {/* Find block dialog */}
               {findOpen && (
-                <FindBlockDialog
-                  nodes={nodes}
-                  onFocusNode={focusNode}
-                  onClose={() => setFindOpen(false)}
-                />
+                <Suspense fallback={null}>
+                  <LazyFindBlockDialog
+                    nodes={nodes}
+                    onFocusNode={focusNode}
+                    onClose={() => setFindOpen(false)}
+                  />
+                </Suspense>
               )}
               {/* Upgrade modal for Pro-only blocks */}
               {showUpgradeModal && (
@@ -1616,14 +1630,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               )}
               {/* Value popover (W12.4) */}
               {popoverTarget && (
-                <ValuePopover
-                  nodeId={popoverTarget.nodeId}
-                  x={popoverTarget.x}
-                  y={popoverTarget.y}
-                  computed={computed}
-                  onClose={() => setPopoverTarget(null)}
-                  onJumpToNode={jumpToNode}
-                />
+                <Suspense fallback={null}>
+                  <LazyValuePopover
+                    nodeId={popoverTarget.nodeId}
+                    x={popoverTarget.x}
+                    y={popoverTarget.y}
+                    computed={computed}
+                    onClose={() => setPopoverTarget(null)}
+                    onJumpToNode={jumpToNode}
+                  />
+                </Suspense>
               )}
             </div>
           </ValuePopoverContext.Provider>

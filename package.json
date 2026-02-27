@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run wasm:build && tsc -b && vite build",
-    "wasm:build": "wasm-pack build crates/engine-wasm --target web --release",
+    "wasm:build": "wasm-pack build crates/engine-wasm --target web --release && node scripts/optimize-wasm.mjs",
     "wasm:build:dev": "wasm-pack build crates/engine-wasm --target web --dev",
     "wasm:test": "cargo test --workspace",
     "lint": "eslint .",
@@ -64,6 +64,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1",
+    "binaryen": "^124.0.0",
     "vitest": "^3.2.4"
   }
 }
