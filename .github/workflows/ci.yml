@@ -61,6 +61,9 @@ jobs:
 
       - run: npm ci
 
+      - name: WASM export guard
+        run: node scripts/check-wasm-exports.mjs
+
       - name: Typecheck (app)
         run: npx tsc -b --noEmit
 

@@ -40,6 +40,9 @@ declare module '@engine-wasm/engine_wasm.js' {
   /** Return the ops catalog as a JSON array. */
   export function get_catalog(): string
 
+  /** Return pre-computed constant values for zero-input source blocks (JSON object). */
+  export function get_constant_values(): string
+
   /** Return the engine version string. */
   export function get_engine_version(): string
 

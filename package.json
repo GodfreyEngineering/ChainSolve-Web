@@ -25,7 +25,10 @@
     "perf:bundle": "node scripts/check-bundle-size.mjs",
     "perf:engine": "cargo bench --package engine-core 2>&1 | tail -60",
     "perf:all": "npm run perf:bundle",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run",
+    "verify:fast": "bash scripts/verify-fast.sh",
+    "verify:ci": "bash scripts/verify-ci.sh",
+    "check:wasm-exports": "node scripts/check-wasm-exports.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",

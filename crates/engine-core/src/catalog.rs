@@ -1751,7 +1751,20 @@ mod tests {
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 201);
+        assert_eq!(parsed.as_array().unwrap().len(), 202);
+    }
+
+    #[test]
+    fn catalog_op_ids_are_unique() {
+        let cat = catalog();
+        let mut seen = std::collections::HashSet::new();
+        for entry in &cat {
+            assert!(
+                seen.insert(entry.op_id),
+                "Duplicate op_id in catalog: {}",
+                entry.op_id
+            );
+        }
     }
 
     #[test]

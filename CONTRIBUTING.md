@@ -81,6 +81,60 @@ wasm-pack build crates/engine-wasm --target web --release   # manual release bui
 **Key point:** Playwright does NOT run on PRs to keep the gate fast. Smoke e2e runs
 only after merging to `main`, before (and as a precondition for) the deploy job.
 
+## Codespaces quick start
+
+A `.devcontainer/devcontainer.json` is provided. On first launch it installs
+Rust, wasm-pack, Node 20, and runs `npm ci` + `npm run wasm:build:dev`
+automatically. Once the container is ready:
+
+```bash
+npm run dev                  # start dev server
+npm run verify:fast          # quick local checks (no cargo/wasm-pack needed)
+npm run verify:ci            # full CI-equivalent pipeline
+```
+
+If you're in an existing Codespace without devcontainer support, bootstrap
+manually:
+
+```bash
+rustup target add wasm32-unknown-unknown
+curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+npm ci
+npm run wasm:build:dev
+```
+
+## Verification workflow
+
+Two verification scripts mirror what CI runs. Use them before pushing.
+
+### `npm run verify:fast` (pre-push)
+
+Runs checks that don't require wasm-pack or cargo:
+
+- WASM export guard (`scripts/check-wasm-exports.mjs`)
+- TypeScript typecheck (app + functions)
+- ESLint
+- Prettier format check
+- Unit tests (vitest)
+
+### `npm run verify:ci` (full CI-equivalent)
+
+Mirrors the GitHub Actions pipeline exactly:
+
+1. `npm ci`
+2. `wasm-pack build` (release)
+3. WASM export guard
+4. `tsc -b --noEmit` (app + functions)
+5. ESLint + Prettier
+6. vitest
+7. `cargo test --workspace`
+8. Vite build + bundle size check
+
+**When to use which:**
+
+- `verify:fast` — quick iteration, before every push
+- `verify:ci` — before merging to main, after WASM/Rust changes
+
 ## Editor setup
 
 `.vscode/extensions.json` contains recommended VS Code extensions (Prettier,
