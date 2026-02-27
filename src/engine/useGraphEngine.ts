@@ -89,7 +89,14 @@ export function useGraphEngine(
         perfMeasure('cs:eval:snapshot', 'cs:eval:start')
         setComputed(toValueMap(result.values))
         setIsPartial(result.partial ?? false)
-        dlog.info('engine', 'Snapshot eval complete', { evalMs: Math.round(result.elapsedUs / 1000), nodesComputed: Object.keys(result.values).length, partial: result.partial ?? false })
+        const snapshotErrors = Object.keys(result.values).filter((id) => (result.values[id] as Value)?.kind === 'error')
+        dlog.info('engine', 'Snapshot eval complete', {
+          evalMs: Math.round(result.elapsedUs / 1000),
+          nodesComputed: Object.keys(result.values).length,
+          partial: result.partial ?? false,
+          errorCount: snapshotErrors.length,
+          ...(snapshotErrors.length > 0 ? { errorNodeIds: snapshotErrors.slice(0, 5) } : {}),
+        })
         if (perfEnabled) {
           updatePerfMetrics({
             lastEvalMs: result.elapsedUs / 1000,
@@ -130,7 +137,14 @@ export function useGraphEngine(
           if (reqId !== pendingRef.current) return
           perfMeasure('cs:eval:patch', 'cs:eval:start')
           if (result.partial) perfMark('cs:eval:partial')
-          dlog.info('engine', 'Patch eval complete', { evalMs: Math.round(result.elapsedUs / 1000), changedCount: Object.keys(result.changedValues).length, partial: result.partial ?? false })
+          const patchErrors = Object.keys(result.changedValues).filter((id) => (result.changedValues[id] as Value)?.kind === 'error')
+          dlog.info('engine', 'Patch eval complete', {
+            evalMs: Math.round(result.elapsedUs / 1000),
+            changedCount: Object.keys(result.changedValues).length,
+            partial: result.partial ?? false,
+            errorCount: patchErrors.length,
+            ...(patchErrors.length > 0 ? { errorNodeIds: patchErrors.slice(0, 5) } : {}),
+          })
           setIsPartial(result.partial ?? false)
           // MERGE changed values into existing map (not replace).
           setComputed((prev) => {

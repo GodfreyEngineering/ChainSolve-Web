@@ -333,6 +333,16 @@ export function AppHeader({
         shortcut: 'Alt+L',
         onClick: () => canvasRef.current?.toggleLod(),
       },
+      {
+        label: t('menu.toggleValueBadges'),
+        shortcut: 'Ctrl+Shift+B',
+        onClick: () => canvasRef.current?.toggleBadges(),
+      },
+      {
+        label: t('menu.toggleEdgeBadges'),
+        shortcut: 'Ctrl+Shift+E',
+        onClick: () => canvasRef.current?.toggleEdgeBadges(),
+      },
       { separator: true },
       {
         label: t('menu.toggleDebugConsole'),

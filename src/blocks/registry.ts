@@ -414,6 +414,15 @@ reg({
   defaultData: { blockType: 'display', label: 'Display' },
 })
 
+reg({
+  type: 'probe',
+  label: 'Probe',
+  category: 'output',
+  nodeKind: 'csProbe',
+  inputs: [{ id: 'value', label: 'Value' }],
+  defaultData: { blockType: 'probe', label: 'Probe' },
+})
+
 // ── Block palette (ordered for display) ──────────────────────────────────────
 
 export const CATEGORY_ORDER: BlockCategory[] = [

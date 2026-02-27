@@ -10,9 +10,10 @@
  */
 
 import { memo } from 'react'
-import { BaseEdge, getBezierPath, type EdgeProps } from '@xyflow/react'
+import { BaseEdge, EdgeLabelRenderer, getBezierPath, type EdgeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
 import { useCanvasSettings } from '../../../contexts/CanvasSettingsContext'
+import { formatValue } from '../../../engine/value'
 import type { Value } from '../../../engine/value'
 
 const KIND_COLORS: Record<string, string> = {
@@ -40,9 +41,10 @@ function AnimatedEdgeInner({
   source,
 }: EdgeProps) {
   const computed = useComputed()
-  const { edgesAnimated } = useCanvasSettings()
+  const { edgesAnimated, edgeBadgesEnabled } = useCanvasSettings()
+  const sourceValue = computed.get(source)
 
-  const [edgePath] = getBezierPath({
+  const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
     targetX,
@@ -52,11 +54,36 @@ function AnimatedEdgeInner({
   })
 
   return (
-    <BaseEdge
-      path={edgePath}
-      markerEnd={markerEnd}
-      style={{ ...style, stroke: edgeStroke(computed.get(source), edgesAnimated) }}
-    />
+    <>
+      <BaseEdge
+        path={edgePath}
+        markerEnd={markerEnd}
+        style={{ ...style, stroke: edgeStroke(sourceValue, edgesAnimated) }}
+      />
+      {edgeBadgesEnabled && sourceValue !== undefined && (
+        <EdgeLabelRenderer>
+          <div
+            className="cs-edge-badge"
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+              pointerEvents: 'none',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '0.6rem',
+              color: 'var(--text)',
+              background: 'var(--card-bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 3,
+              padding: '0.05rem 0.3rem',
+              whiteSpace: 'nowrap',
+              opacity: 0.85,
+            }}
+          >
+            {formatValue(sourceValue)}
+          </div>
+        </EdgeLabelRenderer>
+      )}
+    </>
   )
 }
 

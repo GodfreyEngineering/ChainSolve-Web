@@ -293,6 +293,8 @@
     "toggleAnimatedEdges": "Toggle animated edges",
     "toggleLod": "Toggle zoom LOD",
     "toggleDebugConsole": "Toggle debug console",
+    "toggleValueBadges": "Toggle value badges",
+    "toggleEdgeBadges": "Toggle edge badges",
     "theme": "Theme",
     "perfHud": "Performance HUD",
     "autoOrganise": "Auto-organise layout",
@@ -341,7 +343,9 @@
     "findPlaceholder": "Search blocks…",
     "noMatches": "No blocks match",
     "findHint": "↑↓ · ↵ focus · ESC",
-    "debugConsole": "Debug console"
+    "debugConsole": "Debug console",
+    "valueBadges": "Value badges",
+    "edgeBadges": "Edge badges"
   },
   "debugConsole": {
     "title": "Debug Console",

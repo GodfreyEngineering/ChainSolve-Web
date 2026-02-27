@@ -292,6 +292,8 @@
     "toggleAnimatedEdges": "Alternar bordes animados",
     "toggleLod": "Alternar LOD de zoom",
     "toggleDebugConsole": "Mostrar/ocultar consola de depuración",
+    "toggleValueBadges": "Alternar insignias de valor",
+    "toggleEdgeBadges": "Alternar insignias de arista",
     "theme": "Tema",
     "perfHud": "HUD de rendimiento",
     "autoOrganise": "Organizar automáticamente",
@@ -340,7 +342,9 @@
     "findPlaceholder": "Buscar bloques…",
     "noMatches": "Sin resultados",
     "findHint": "↑↓ · ↵ enfocar · ESC",
-    "debugConsole": "Consola de depuración"
+    "debugConsole": "Consola de depuración",
+    "valueBadges": "Insignias de valor",
+    "edgeBadges": "Insignias de arista"
   },
   "sheets": {
     "title": "Hojas",

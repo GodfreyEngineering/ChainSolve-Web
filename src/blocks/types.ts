@@ -42,7 +42,7 @@ export type BlockCategory =
   | 'presetFluids'
 
 /** Which React Flow custom-node renderer to use. */
-export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay' | 'csData' | 'csPlot' | 'csGroup'
+export type NodeKind = 'csSource' | 'csOperation' | 'csDisplay' | 'csData' | 'csPlot' | 'csGroup' | 'csProbe'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

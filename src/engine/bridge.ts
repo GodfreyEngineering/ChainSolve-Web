@@ -36,6 +36,8 @@ export function toEngineSnapshot(
     version: 1,
     nodes: evalNodes.map((n) => {
       const data = n.data as Record<string, unknown>
+      // W12.4: Probe maps to display for the engine (no Rust changes needed).
+      const blockType = (data.blockType === 'probe' ? 'display' : data.blockType) as string
       // W12.2: resolve inputBindings → manualValues before sending to Rust.
       if (constants && variables && data.inputBindings) {
         const resolved = resolveNodeBindings(
@@ -46,13 +48,13 @@ export function toEngineSnapshot(
         )
         return {
           id: n.id,
-          blockType: data.blockType as string,
+          blockType,
           data: { ...data, manualValues: resolved },
         }
       }
       return {
         id: n.id,
-        blockType: data.blockType as string,
+        blockType,
         data,
       }
     }),

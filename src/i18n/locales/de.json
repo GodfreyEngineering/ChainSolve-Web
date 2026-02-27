@@ -292,6 +292,8 @@
     "toggleAnimatedEdges": "Animierte Kanten umschalten",
     "toggleLod": "Zoom-LOD umschalten",
     "toggleDebugConsole": "Debug-Konsole ein-/ausblenden",
+    "toggleValueBadges": "Wert-Badges umschalten",
+    "toggleEdgeBadges": "Kanten-Badges umschalten",
     "theme": "Design",
     "perfHud": "Leistungs-HUD",
     "autoOrganise": "Automatisch anordnen",
@@ -340,7 +342,9 @@
     "findPlaceholder": "Blöcke suchen…",
     "noMatches": "Keine Treffer",
     "findHint": "↑↓ · ↵ fokus · ESC",
-    "debugConsole": "Debug-Konsole"
+    "debugConsole": "Debug-Konsole",
+    "valueBadges": "Wert-Badges",
+    "edgeBadges": "Kanten-Badges"
   },
   "sheets": {
     "title": "Blätter",

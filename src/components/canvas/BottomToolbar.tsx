@@ -26,6 +26,10 @@ export interface BottomToolbarProps {
   onToggleLod: () => void
   debugConsoleVisible?: boolean
   onToggleDebugConsole?: () => void
+  badgesEnabled?: boolean
+  onToggleBadges?: () => void
+  edgeBadgesEnabled?: boolean
+  onToggleEdgeBadges?: () => void
 }
 
 export function BottomToolbar({
@@ -52,6 +56,10 @@ export function BottomToolbar({
   onToggleLod,
   debugConsoleVisible,
   onToggleDebugConsole,
+  badgesEnabled,
+  onToggleBadges,
+  edgeBadgesEnabled,
+  onToggleEdgeBadges,
 }: BottomToolbarProps) {
   const { t } = useTranslation()
   const { zoomIn, zoomOut, zoomTo, fitView } = useReactFlow()
@@ -202,6 +210,28 @@ export function BottomToolbar({
       >
         {'\u25e7'}
       </button>
+
+      {onToggleBadges && (
+        <button
+          onClick={onToggleBadges}
+          style={btnStyle(!!badgesEnabled)}
+          title={t('toolbar.valueBadges')}
+          aria-pressed={!!badgesEnabled}
+        >
+          {'\u2b1a'}
+        </button>
+      )}
+
+      {onToggleEdgeBadges && (
+        <button
+          onClick={onToggleEdgeBadges}
+          style={btnStyle(!!edgeBadgesEnabled)}
+          title={t('toolbar.edgeBadges')}
+          aria-pressed={!!edgeBadgesEnabled}
+        >
+          {'\u22ef'}
+        </button>
+      )}
 
       <div style={sepStyle} />
 

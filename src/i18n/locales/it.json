@@ -292,6 +292,8 @@
     "toggleAnimatedEdges": "Attiva/disattiva archi animati",
     "toggleLod": "Attiva/disattiva LOD zoom",
     "toggleDebugConsole": "Mostra/nascondi console di debug",
+    "toggleValueBadges": "Attiva/disattiva badge di valore",
+    "toggleEdgeBadges": "Attiva/disattiva badge di connessione",
     "theme": "Tema",
     "perfHud": "HUD prestazioni",
     "autoOrganise": "Organizza automaticamente",
@@ -340,7 +342,9 @@
     "findPlaceholder": "Cerca blocchi…",
     "noMatches": "Nessun risultato",
     "findHint": "↑↓ · ↵ focus · ESC",
-    "debugConsole": "Console di debug"
+    "debugConsole": "Console di debug",
+    "valueBadges": "Badge di valore",
+    "edgeBadges": "Badge di connessione"
   },
   "sheets": {
     "title": "Fogli",

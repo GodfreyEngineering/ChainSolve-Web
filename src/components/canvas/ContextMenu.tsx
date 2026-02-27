@@ -6,6 +6,8 @@
  */
 
 import type { CSSProperties } from 'react'
+import type { Value } from '../../engine/value'
+import { isError } from '../../engine/value'
 
 export type ContextMenuTarget =
   | { kind: 'canvas'; x: number; y: number }
@@ -38,6 +40,9 @@ interface ContextMenuProps {
   onDeleteSelected?: () => void
   onSaveAsTemplate?: (nodeId: string) => void
   canUseGroups?: boolean
+  onCopyNodeValue?: (nodeId: string) => void
+  onJumpToNode?: (nodeId: string) => void
+  computed?: ReadonlyMap<string, Value>
 }
 
 const item: CSSProperties = {
@@ -105,6 +110,9 @@ export function ContextMenu({
   onDeleteSelected,
   onSaveAsTemplate,
   canUseGroups,
+  onCopyNodeValue,
+  onJumpToNode,
+  computed,
 }: ContextMenuProps) {
   const menuStyle: CSSProperties = {
     position: 'fixed',
@@ -172,6 +180,32 @@ export function ContextMenu({
                 onClose()
               }}
             />
+            {onCopyNodeValue && (
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon="⎘"
+                  label="Copy value"
+                  onClick={() => {
+                    onCopyNodeValue(target.nodeId)
+                    onClose()
+                  }}
+                />
+              </>
+            )}
+            {onJumpToNode && computed && (() => {
+              const v = computed.get(target.nodeId)
+              return v !== undefined && isError(v)
+            })() && (
+              <MenuItem
+                icon="⤳"
+                label="Jump to source"
+                onClick={() => {
+                  onJumpToNode(target.nodeId)
+                  onClose()
+                }}
+              />
+            )}
             <div style={sep} />
             <MenuItem
               icon="✕"

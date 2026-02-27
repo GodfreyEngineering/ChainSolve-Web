@@ -18,6 +18,7 @@ import {
   type IsValidConnection,
 } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
+import { useShowValuePopover } from '../../../contexts/ValuePopoverContext'
 import { formatValue } from '../../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
 import type { InputBinding } from '../../../blocks/types'
@@ -30,6 +31,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const { updateNodeData } = useReactFlow()
   const allEdges = useEdges()
   const computed = useComputed()
+  const showPopover = useShowValuePopover()
   const value = computed.get(id)
   const isLocked = draggable === false
 
@@ -88,7 +90,16 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
         <span style={s.headerLabel}>{nd.label}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
           {isLocked && <span style={{ fontSize: '0.6rem', lineHeight: 1, opacity: 0.7 }}>🔒</span>}
-          <span className="cs-node-header-value" style={s.headerValue}>{formatValue(value)}</span>
+          <span
+            className="cs-node-header-value cs-value-badge nodrag"
+            style={{ ...s.headerValue, cursor: 'pointer' }}
+            onClick={(e) => {
+              e.stopPropagation()
+              showPopover(id, e.clientX, e.clientY)
+            }}
+          >
+            {formatValue(value)}
+          </span>
         </div>
       </div>
 

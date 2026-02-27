@@ -82,6 +82,10 @@ import DebugConsolePanel from './DebugConsolePanel'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { useDebugConsoleStore } from '../../stores/debugConsoleStore'
+import { ValuePopoverContext, type ShowValuePopover } from '../../contexts/ValuePopoverContext'
+import { ValuePopover } from './ValuePopover'
+import { ProbeNode } from './nodes/ProbeNode'
+import { copyValueToClipboard } from '../../engine/valueFormat'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -92,6 +96,7 @@ const NODE_TYPES = {
   csData: DataNode,
   csPlot: PlotNode,
   csGroup: GroupNode,
+  csProbe: ProbeNode,
 } as const
 
 const EDGE_TYPES = {
@@ -144,6 +149,8 @@ export interface CanvasAreaHandle {
   toggleAnimatedEdges: () => void
   toggleLod: () => void
   toggleDebugConsole: () => void
+  toggleBadges: () => void
+  toggleEdgeBadges: () => void
 }
 
 // ── Minimap persistence ──────────────────────────────────────────────────────
@@ -217,6 +224,44 @@ function zoomToLodTier(zoom: number): LodTier {
   if (zoom > 0.7) return 'full'
   if (zoom >= 0.4) return 'compact'
   return 'minimal'
+}
+
+// ── Badge persistence ────────────────────────────────────────────────────────
+
+const BADGES_KEY = 'chainsolve.badges'
+
+function getBadgesPref(): boolean {
+  try {
+    return localStorage.getItem(BADGES_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+function setBadgesPref(v: boolean) {
+  try {
+    localStorage.setItem(BADGES_KEY, String(v))
+  } catch {
+    // Ignore — private browsing
+  }
+}
+
+const EDGE_BADGES_KEY = 'chainsolve.edgeBadges'
+
+function getEdgeBadgesPref(): boolean {
+  try {
+    return localStorage.getItem(EDGE_BADGES_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+function setEdgeBadgesPref(v: boolean) {
+  try {
+    localStorage.setItem(EDGE_BADGES_KEY, String(v))
+  } catch {
+    // Ignore — private browsing
+  }
 }
 
 // ── Default node dimensions for layout ───────────────────────────────────────
@@ -342,6 +387,18 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       })
     },
     toggleDebugConsole: () => useDebugConsoleStore.getState().toggleVisible(),
+    toggleBadges: () => {
+      setBadgesEnabled((v) => {
+        setBadgesPref(!v)
+        return !v
+      })
+    },
+    toggleEdgeBadges: () => {
+      setEdgeBadgesEnabled((v) => {
+        setEdgeBadgesPref(!v)
+        return !v
+      })
+    },
   }))
 
   // Panel widths + visibility
@@ -376,9 +433,24 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const [lodEnabled, setLodEnabled] = useState(getLodPref)
   const [lodTier, setLodTier] = useState<LodTier>('full')
 
+  // Badge state (W12.4)
+  const [badgesEnabled, setBadgesEnabled] = useState(getBadgesPref)
+  const [edgeBadgesEnabled, setEdgeBadgesEnabled] = useState(getEdgeBadgesPref)
+
+  // Value popover state (W12.4)
+  const [popoverTarget, setPopoverTarget] = useState<{
+    nodeId: string
+    x: number
+    y: number
+  } | null>(null)
+
   // Auto-disable animation on large graphs (>400 edges)
   const effectiveEdgesAnimated = edgesAnimated && edges.length <= 400
   const effectiveLodTier: LodTier = lodEnabled ? lodTier : 'full'
+
+  // Perf-gate badges: auto-hide at >300 nodes
+  const effectiveBadges = badgesEnabled && nodes.length <= 300
+  const effectiveEdgeBadges = edgeBadgesEnabled && edges.length <= 200
 
   // Track zoom for LOD tier calculation
   useOnViewportChange({
@@ -844,6 +916,31 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [setNodes, fitView],
   )
 
+  // ── Value popover + context actions (W12.4) ─────────────────────────────
+
+  const showValuePopover = useCallback<ShowValuePopover>(
+    (nodeId, x, y) => setPopoverTarget({ nodeId, x, y }),
+    [],
+  )
+
+  const copyNodeValue = useCallback(
+    (nodeId: string) => {
+      const v = computed.get(nodeId)
+      copyValueToClipboard(v, 'compact')
+    },
+    [computed],
+  )
+
+  const jumpToNode = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === nodeId })))
+      requestAnimationFrame(() => {
+        fitView({ nodes: [{ id: nodeId }], padding: 0.5, duration: 400 })
+      })
+    },
+    [setNodes, fitView],
+  )
+
   // ── Drag undo ──────────────────────────────────────────────────────────
 
   const onNodeDragStart = useCallback(() => {
@@ -952,6 +1049,24 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       if (ctrl && e.shiftKey && e.key === 'D') {
         e.preventDefault()
         useDebugConsoleStore.getState().toggleVisible()
+      }
+
+      // Ctrl+Shift+B: Toggle value badges
+      if (ctrl && e.shiftKey && e.key === 'B') {
+        e.preventDefault()
+        setBadgesEnabled((v) => {
+          setBadgesPref(!v)
+          return !v
+        })
+      }
+
+      // Ctrl+Shift+E: Toggle edge badges
+      if (ctrl && e.shiftKey && e.key === 'E') {
+        e.preventDefault()
+        setEdgeBadgesEnabled((v) => {
+          setEdgeBadgesPref(!v)
+          return !v
+        })
       }
     },
     [
@@ -1108,18 +1223,25 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const showBackdrop = isMobile && (libVisible || inspVisible)
 
   const canvasSettings = useMemo(
-    () => ({ edgesAnimated: effectiveEdgesAnimated }),
-    [effectiveEdgesAnimated],
+    () => ({
+      edgesAnimated: effectiveEdgesAnimated,
+      badgesEnabled: effectiveBadges,
+      edgeBadgesEnabled: effectiveEdgeBadges,
+    }),
+    [effectiveEdgesAnimated, effectiveBadges, effectiveEdgeBadges],
   )
 
   return (
     <ComputedContext.Provider value={computed}>
       <BindingContext.Provider value={bindingCtx}>
       <CanvasSettingsContext.Provider value={canvasSettings}>
+      <ValuePopoverContext.Provider value={showValuePopover}>
       {computed.size > 0 && <div data-testid="canvas-computed" style={{ display: 'none' }} />}
       <div
         data-edges-animated={effectiveEdgesAnimated ? 'true' : 'false'}
         data-lod={effectiveLodTier}
+        data-badges={effectiveBadges ? 'true' : 'false'}
+        data-edge-badges={effectiveEdgeBadges ? 'true' : 'false'}
         style={{
           display: 'flex',
           flex: 1,
@@ -1263,6 +1385,20 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             }}
             debugConsoleVisible={debugConsoleVisible}
             onToggleDebugConsole={() => useDebugConsoleStore.getState().toggleVisible()}
+            badgesEnabled={badgesEnabled}
+            onToggleBadges={() => {
+              setBadgesEnabled((v) => {
+                setBadgesPref(!v)
+                return !v
+              })
+            }}
+            edgeBadgesEnabled={edgeBadgesEnabled}
+            onToggleEdgeBadges={() => {
+              setEdgeBadgesEnabled((v) => {
+                setEdgeBadgesPref(!v)
+                return !v
+              })
+            }}
           />
           {debugConsoleVisible && <DebugConsolePanel />}
         </div>
@@ -1359,6 +1495,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             onDeleteSelected={deleteSelected}
             onSaveAsTemplate={saveAsTemplate}
             canUseGroups={ent.canUseGroups}
+            onCopyNodeValue={copyNodeValue}
+            onJumpToNode={jumpToNode}
+            computed={computed}
           />
         )}
 
@@ -1392,7 +1531,19 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             reason="feature_locked"
           />
         )}
+        {/* Value popover (W12.4) */}
+        {popoverTarget && (
+          <ValuePopover
+            nodeId={popoverTarget.nodeId}
+            x={popoverTarget.x}
+            y={popoverTarget.y}
+            computed={computed}
+            onClose={() => setPopoverTarget(null)}
+            onJumpToNode={jumpToNode}
+          />
+        )}
       </div>
+    </ValuePopoverContext.Provider>
     </CanvasSettingsContext.Provider>
       </BindingContext.Provider>
     </ComputedContext.Provider>

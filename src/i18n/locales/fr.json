@@ -292,6 +292,8 @@
     "toggleAnimatedEdges": "Basculer les arêtes animées",
     "toggleLod": "Basculer le LOD de zoom",
     "toggleDebugConsole": "Afficher/masquer la console de débogage",
+    "toggleValueBadges": "Basculer les badges de valeurs",
+    "toggleEdgeBadges": "Basculer les badges de connexions",
     "theme": "Thème",
     "perfHud": "HUD de performance",
     "autoOrganise": "Organisation automatique",
@@ -340,7 +342,9 @@
     "findPlaceholder": "Rechercher…",
     "noMatches": "Aucun résultat",
     "findHint": "↑↓ · ↵ cibler · ESC",
-    "debugConsole": "Console de débogage"
+    "debugConsole": "Console de débogage",
+    "valueBadges": "Badges de valeurs",
+    "edgeBadges": "Badges de connexions"
   },
   "sheets": {
     "title": "Feuilles",

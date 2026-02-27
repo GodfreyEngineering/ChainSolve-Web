@@ -176,6 +176,20 @@ textarea:focus {
   display: none !important;
 }
 
+/* ── Value badges — toggleable header value labels ───────────────────────── */
+[data-badges='false'] .cs-value-badge {
+  display: none !important;
+}
+
+/* ── Edge badges — value labels on wires ─────────────────────────────────── */
+[data-edge-badges='false'] .cs-edge-badge {
+  display: none !important;
+}
+[data-lod='compact'] .cs-edge-badge,
+[data-lod='minimal'] .cs-edge-badge {
+  display: none !important;
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
