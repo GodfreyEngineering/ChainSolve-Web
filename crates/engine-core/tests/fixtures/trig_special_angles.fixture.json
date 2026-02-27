@@ -5,36 +5,155 @@
   "snapshot": {
     "version": 1,
     "nodes": [
-      { "id": "zero", "blockType": "number", "data": { "value": 0.0 } },
-      { "id": "sin0", "blockType": "sin", "data": {} },
-      { "id": "cos0", "blockType": "cos", "data": {} },
-      { "id": "pi_const", "blockType": "pi", "data": {} },
-      { "id": "half", "blockType": "number", "data": { "value": 0.5 } },
-      { "id": "pi_over_2", "blockType": "multiply", "data": {} },
-      { "id": "sin_pi2", "blockType": "sin", "data": {} },
-      { "id": "cos_pi", "blockType": "cos", "data": {} },
-      { "id": "quarter", "blockType": "number", "data": { "value": 0.25 } },
-      { "id": "pi_over_4", "blockType": "multiply", "data": {} },
-      { "id": "tan_pi4", "blockType": "tan", "data": {} }
+      {
+        "id": "zero",
+        "blockType": "number",
+        "data": {
+          "value": 0.0
+        }
+      },
+      {
+        "id": "sin0",
+        "blockType": "sin",
+        "data": {}
+      },
+      {
+        "id": "cos0",
+        "blockType": "cos",
+        "data": {}
+      },
+      {
+        "id": "pi_const",
+        "blockType": "pi",
+        "data": {}
+      },
+      {
+        "id": "half",
+        "blockType": "number",
+        "data": {
+          "value": 0.5
+        }
+      },
+      {
+        "id": "pi_over_2",
+        "blockType": "multiply",
+        "data": {}
+      },
+      {
+        "id": "sin_pi2",
+        "blockType": "sin",
+        "data": {}
+      },
+      {
+        "id": "cos_pi",
+        "blockType": "cos",
+        "data": {}
+      },
+      {
+        "id": "quarter",
+        "blockType": "number",
+        "data": {
+          "value": 0.25
+        }
+      },
+      {
+        "id": "pi_over_4",
+        "blockType": "multiply",
+        "data": {}
+      },
+      {
+        "id": "tan_pi4",
+        "blockType": "tan",
+        "data": {}
+      }
     ],
     "edges": [
-      { "id": "e1", "source": "zero", "sourceHandle": "out", "target": "sin0", "targetHandle": "a" },
-      { "id": "e2", "source": "zero", "sourceHandle": "out", "target": "cos0", "targetHandle": "a" },
-      { "id": "e3", "source": "pi_const", "sourceHandle": "out", "target": "pi_over_2", "targetHandle": "a" },
-      { "id": "e4", "source": "half", "sourceHandle": "out", "target": "pi_over_2", "targetHandle": "b" },
-      { "id": "e5", "source": "pi_over_2", "sourceHandle": "out", "target": "sin_pi2", "targetHandle": "a" },
-      { "id": "e6", "source": "pi_const", "sourceHandle": "out", "target": "cos_pi", "targetHandle": "a" },
-      { "id": "e7", "source": "pi_const", "sourceHandle": "out", "target": "pi_over_4", "targetHandle": "a" },
-      { "id": "e8", "source": "quarter", "sourceHandle": "out", "target": "pi_over_4", "targetHandle": "b" },
-      { "id": "e9", "source": "pi_over_4", "sourceHandle": "out", "target": "tan_pi4", "targetHandle": "a" }
+      {
+        "id": "e1",
+        "source": "zero",
+        "sourceHandle": "out",
+        "target": "sin0",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e2",
+        "source": "zero",
+        "sourceHandle": "out",
+        "target": "cos0",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e3",
+        "source": "pi_const",
+        "sourceHandle": "out",
+        "target": "pi_over_2",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e4",
+        "source": "half",
+        "sourceHandle": "out",
+        "target": "pi_over_2",
+        "targetHandle": "b"
+      },
+      {
+        "id": "e5",
+        "source": "pi_over_2",
+        "sourceHandle": "out",
+        "target": "sin_pi2",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e6",
+        "source": "pi_const",
+        "sourceHandle": "out",
+        "target": "cos_pi",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e7",
+        "source": "pi_const",
+        "sourceHandle": "out",
+        "target": "pi_over_4",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e8",
+        "source": "quarter",
+        "sourceHandle": "out",
+        "target": "pi_over_4",
+        "targetHandle": "b"
+      },
+      {
+        "id": "e9",
+        "source": "pi_over_4",
+        "sourceHandle": "out",
+        "target": "tan_pi4",
+        "targetHandle": "a"
+      }
     ]
   },
   "expected": {
-    "sin0": { "kind": "scalar", "value": 0.0 },
-    "cos0": { "kind": "scalar", "value": 1.0 },
-    "sin_pi2": { "kind": "scalar", "value": 1.0 },
-    "cos_pi": { "kind": "scalar", "value": -1.0 },
-    "tan_pi4": { "kind": "scalar", "value": 1.0 }
+    "sin0": {
+      "kind": "scalar",
+      "value": 0.0
+    },
+    "sin_pi2": {
+      "kind": "scalar",
+      "value": 1.0
+    },
+    "cos0": {
+      "kind": "scalar",
+      "value": 1.0
+    },
+    "cos_pi": {
+      "kind": "scalar",
+      "value": -1.0
+    },
+    "tan_pi4": {
+      "kind": "scalar",
+      "value": 0.9999999999999999
+    }
   },
   "diagnostics": [],
   "tolerance": 1e-15

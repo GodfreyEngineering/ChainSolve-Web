@@ -1,0 +1,255 @@
+{
+  "name": "stats_reference",
+  "description": "Stats ops: mean, stddev, linreg slope/intercept for x=[10,20,30] and perfect-fit y=2x",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      {
+        "id": "c3",
+        "blockType": "number",
+        "data": {
+          "value": 3.0
+        }
+      },
+      {
+        "id": "x1",
+        "blockType": "number",
+        "data": {
+          "value": 10.0
+        }
+      },
+      {
+        "id": "x2",
+        "blockType": "number",
+        "data": {
+          "value": 20.0
+        }
+      },
+      {
+        "id": "x3",
+        "blockType": "number",
+        "data": {
+          "value": 30.0
+        }
+      },
+      {
+        "id": "y1",
+        "blockType": "number",
+        "data": {
+          "value": 20.0
+        }
+      },
+      {
+        "id": "y2",
+        "blockType": "number",
+        "data": {
+          "value": 40.0
+        }
+      },
+      {
+        "id": "y3",
+        "blockType": "number",
+        "data": {
+          "value": 60.0
+        }
+      },
+      {
+        "id": "mean_n",
+        "blockType": "stats.desc.mean",
+        "data": {}
+      },
+      {
+        "id": "std_n",
+        "blockType": "stats.desc.stddev",
+        "data": {}
+      },
+      {
+        "id": "slope_n",
+        "blockType": "stats.rel.linreg_slope",
+        "data": {}
+      },
+      {
+        "id": "icpt_n",
+        "blockType": "stats.rel.linreg_intercept",
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "m1",
+        "source": "c3",
+        "sourceHandle": "out",
+        "target": "mean_n",
+        "targetHandle": "c"
+      },
+      {
+        "id": "m2",
+        "source": "x1",
+        "sourceHandle": "out",
+        "target": "mean_n",
+        "targetHandle": "x1"
+      },
+      {
+        "id": "m3",
+        "source": "x2",
+        "sourceHandle": "out",
+        "target": "mean_n",
+        "targetHandle": "x2"
+      },
+      {
+        "id": "m4",
+        "source": "x3",
+        "sourceHandle": "out",
+        "target": "mean_n",
+        "targetHandle": "x3"
+      },
+      {
+        "id": "s1",
+        "source": "c3",
+        "sourceHandle": "out",
+        "target": "std_n",
+        "targetHandle": "c"
+      },
+      {
+        "id": "s2",
+        "source": "x1",
+        "sourceHandle": "out",
+        "target": "std_n",
+        "targetHandle": "x1"
+      },
+      {
+        "id": "s3",
+        "source": "x2",
+        "sourceHandle": "out",
+        "target": "std_n",
+        "targetHandle": "x2"
+      },
+      {
+        "id": "s4",
+        "source": "x3",
+        "sourceHandle": "out",
+        "target": "std_n",
+        "targetHandle": "x3"
+      },
+      {
+        "id": "r1",
+        "source": "c3",
+        "sourceHandle": "out",
+        "target": "slope_n",
+        "targetHandle": "c"
+      },
+      {
+        "id": "r2",
+        "source": "x1",
+        "sourceHandle": "out",
+        "target": "slope_n",
+        "targetHandle": "x1"
+      },
+      {
+        "id": "r3",
+        "source": "x2",
+        "sourceHandle": "out",
+        "target": "slope_n",
+        "targetHandle": "x2"
+      },
+      {
+        "id": "r4",
+        "source": "x3",
+        "sourceHandle": "out",
+        "target": "slope_n",
+        "targetHandle": "x3"
+      },
+      {
+        "id": "r5",
+        "source": "y1",
+        "sourceHandle": "out",
+        "target": "slope_n",
+        "targetHandle": "y1"
+      },
+      {
+        "id": "r6",
+        "source": "y2",
+        "sourceHandle": "out",
+        "target": "slope_n",
+        "targetHandle": "y2"
+      },
+      {
+        "id": "r7",
+        "source": "y3",
+        "sourceHandle": "out",
+        "target": "slope_n",
+        "targetHandle": "y3"
+      },
+      {
+        "id": "i1",
+        "source": "c3",
+        "sourceHandle": "out",
+        "target": "icpt_n",
+        "targetHandle": "c"
+      },
+      {
+        "id": "i2",
+        "source": "x1",
+        "sourceHandle": "out",
+        "target": "icpt_n",
+        "targetHandle": "x1"
+      },
+      {
+        "id": "i3",
+        "source": "x2",
+        "sourceHandle": "out",
+        "target": "icpt_n",
+        "targetHandle": "x2"
+      },
+      {
+        "id": "i4",
+        "source": "x3",
+        "sourceHandle": "out",
+        "target": "icpt_n",
+        "targetHandle": "x3"
+      },
+      {
+        "id": "i5",
+        "source": "y1",
+        "sourceHandle": "out",
+        "target": "icpt_n",
+        "targetHandle": "y1"
+      },
+      {
+        "id": "i6",
+        "source": "y2",
+        "sourceHandle": "out",
+        "target": "icpt_n",
+        "targetHandle": "y2"
+      },
+      {
+        "id": "i7",
+        "source": "y3",
+        "sourceHandle": "out",
+        "target": "icpt_n",
+        "targetHandle": "y3"
+      }
+    ]
+  },
+  "expected": {
+    "mean_n": {
+      "kind": "scalar",
+      "value": 20.0
+    },
+    "slope_n": {
+      "kind": "scalar",
+      "value": 2.0
+    },
+    "icpt_n": {
+      "kind": "scalar",
+      "value": 0.0
+    },
+    "std_n": {
+      "kind": "scalar",
+      "value": 8.16496580927726
+    }
+  },
+  "diagnostics": [],
+  "tolerance": 0.001
+}

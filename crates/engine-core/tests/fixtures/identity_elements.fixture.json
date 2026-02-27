@@ -5,26 +5,101 @@
   "snapshot": {
     "version": 1,
     "nodes": [
-      { "id": "x", "blockType": "number", "data": { "value": 42.0 } },
-      { "id": "zero", "blockType": "number", "data": { "value": 0.0 } },
-      { "id": "one", "blockType": "number", "data": { "value": 1.0 } },
-      { "id": "add0", "blockType": "add", "data": {} },
-      { "id": "mul1", "blockType": "multiply", "data": {} },
-      { "id": "pow1", "blockType": "power", "data": {} }
+      {
+        "id": "x",
+        "blockType": "number",
+        "data": {
+          "value": 42.0
+        }
+      },
+      {
+        "id": "zero",
+        "blockType": "number",
+        "data": {
+          "value": 0.0
+        }
+      },
+      {
+        "id": "one",
+        "blockType": "number",
+        "data": {
+          "value": 1.0
+        }
+      },
+      {
+        "id": "add0",
+        "blockType": "add",
+        "data": {}
+      },
+      {
+        "id": "mul1",
+        "blockType": "multiply",
+        "data": {}
+      },
+      {
+        "id": "pow1",
+        "blockType": "power",
+        "data": {}
+      }
     ],
     "edges": [
-      { "id": "e1", "source": "x", "sourceHandle": "out", "target": "add0", "targetHandle": "a" },
-      { "id": "e2", "source": "zero", "sourceHandle": "out", "target": "add0", "targetHandle": "b" },
-      { "id": "e3", "source": "x", "sourceHandle": "out", "target": "mul1", "targetHandle": "a" },
-      { "id": "e4", "source": "one", "sourceHandle": "out", "target": "mul1", "targetHandle": "b" },
-      { "id": "e5", "source": "x", "sourceHandle": "out", "target": "pow1", "targetHandle": "base" },
-      { "id": "e6", "source": "one", "sourceHandle": "out", "target": "pow1", "targetHandle": "exp" }
+      {
+        "id": "e1",
+        "source": "x",
+        "sourceHandle": "out",
+        "target": "add0",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e2",
+        "source": "zero",
+        "sourceHandle": "out",
+        "target": "add0",
+        "targetHandle": "b"
+      },
+      {
+        "id": "e3",
+        "source": "x",
+        "sourceHandle": "out",
+        "target": "mul1",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e4",
+        "source": "one",
+        "sourceHandle": "out",
+        "target": "mul1",
+        "targetHandle": "b"
+      },
+      {
+        "id": "e5",
+        "source": "x",
+        "sourceHandle": "out",
+        "target": "pow1",
+        "targetHandle": "base"
+      },
+      {
+        "id": "e6",
+        "source": "one",
+        "sourceHandle": "out",
+        "target": "pow1",
+        "targetHandle": "exp"
+      }
     ]
   },
   "expected": {
-    "add0": { "kind": "scalar", "value": 42.0 },
-    "mul1": { "kind": "scalar", "value": 42.0 },
-    "pow1": { "kind": "scalar", "value": 42.0 }
+    "mul1": {
+      "kind": "scalar",
+      "value": 42.0
+    },
+    "add0": {
+      "kind": "scalar",
+      "value": 42.0
+    },
+    "pow1": {
+      "kind": "scalar",
+      "value": 42.0
+    }
   },
   "diagnostics": [],
   "tolerance": null

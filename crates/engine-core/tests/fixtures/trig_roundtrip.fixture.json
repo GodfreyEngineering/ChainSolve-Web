@@ -5,29 +5,116 @@
   "snapshot": {
     "version": 1,
     "nodes": [
-      { "id": "v05", "blockType": "number", "data": { "value": 0.5 } },
-      { "id": "sin05", "blockType": "sin", "data": {} },
-      { "id": "asin_sin05", "blockType": "asin", "data": {} },
-      { "id": "v10", "blockType": "number", "data": { "value": 1.0 } },
-      { "id": "cos10", "blockType": "cos", "data": {} },
-      { "id": "acos_cos10", "blockType": "acos", "data": {} },
-      { "id": "v07", "blockType": "number", "data": { "value": 0.7 } },
-      { "id": "tan07", "blockType": "tan", "data": {} },
-      { "id": "atan_tan07", "blockType": "atan", "data": {} }
+      {
+        "id": "v05",
+        "blockType": "number",
+        "data": {
+          "value": 0.5
+        }
+      },
+      {
+        "id": "sin05",
+        "blockType": "sin",
+        "data": {}
+      },
+      {
+        "id": "asin_sin05",
+        "blockType": "asin",
+        "data": {}
+      },
+      {
+        "id": "v10",
+        "blockType": "number",
+        "data": {
+          "value": 1.0
+        }
+      },
+      {
+        "id": "cos10",
+        "blockType": "cos",
+        "data": {}
+      },
+      {
+        "id": "acos_cos10",
+        "blockType": "acos",
+        "data": {}
+      },
+      {
+        "id": "v07",
+        "blockType": "number",
+        "data": {
+          "value": 0.7
+        }
+      },
+      {
+        "id": "tan07",
+        "blockType": "tan",
+        "data": {}
+      },
+      {
+        "id": "atan_tan07",
+        "blockType": "atan",
+        "data": {}
+      }
     ],
     "edges": [
-      { "id": "e1", "source": "v05", "sourceHandle": "out", "target": "sin05", "targetHandle": "a" },
-      { "id": "e2", "source": "sin05", "sourceHandle": "out", "target": "asin_sin05", "targetHandle": "a" },
-      { "id": "e3", "source": "v10", "sourceHandle": "out", "target": "cos10", "targetHandle": "a" },
-      { "id": "e4", "source": "cos10", "sourceHandle": "out", "target": "acos_cos10", "targetHandle": "a" },
-      { "id": "e5", "source": "v07", "sourceHandle": "out", "target": "tan07", "targetHandle": "a" },
-      { "id": "e6", "source": "tan07", "sourceHandle": "out", "target": "atan_tan07", "targetHandle": "a" }
+      {
+        "id": "e1",
+        "source": "v05",
+        "sourceHandle": "out",
+        "target": "sin05",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e2",
+        "source": "sin05",
+        "sourceHandle": "out",
+        "target": "asin_sin05",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e3",
+        "source": "v10",
+        "sourceHandle": "out",
+        "target": "cos10",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e4",
+        "source": "cos10",
+        "sourceHandle": "out",
+        "target": "acos_cos10",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e5",
+        "source": "v07",
+        "sourceHandle": "out",
+        "target": "tan07",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e6",
+        "source": "tan07",
+        "sourceHandle": "out",
+        "target": "atan_tan07",
+        "targetHandle": "a"
+      }
     ]
   },
   "expected": {
-    "asin_sin05": { "kind": "scalar", "value": 0.5 },
-    "acos_cos10": { "kind": "scalar", "value": 1.0 },
-    "atan_tan07": { "kind": "scalar", "value": 0.7 }
+    "asin_sin05": {
+      "kind": "scalar",
+      "value": 0.5
+    },
+    "atan_tan07": {
+      "kind": "scalar",
+      "value": 0.7
+    },
+    "acos_cos10": {
+      "kind": "scalar",
+      "value": 0.9999999999999999
+    }
   },
   "diagnostics": [],
   "tolerance": 1e-14

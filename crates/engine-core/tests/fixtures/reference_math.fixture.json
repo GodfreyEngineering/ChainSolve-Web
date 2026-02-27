@@ -5,31 +5,126 @@
   "snapshot": {
     "version": 1,
     "nodes": [
-      { "id": "two", "blockType": "number", "data": { "value": 2.0 } },
-      { "id": "sqrt2", "blockType": "sqrt", "data": {} },
-      { "id": "neg7", "blockType": "number", "data": { "value": -7.0 } },
-      { "id": "abs7", "blockType": "abs", "data": {} },
-      { "id": "v37", "blockType": "number", "data": { "value": 3.7 } },
-      { "id": "fl", "blockType": "floor", "data": {} },
-      { "id": "v32", "blockType": "number", "data": { "value": 3.2 } },
-      { "id": "ce", "blockType": "ceil", "data": {} },
-      { "id": "v35", "blockType": "number", "data": { "value": 3.5 } },
-      { "id": "rn", "blockType": "round", "data": {} }
+      {
+        "id": "two",
+        "blockType": "number",
+        "data": {
+          "value": 2.0
+        }
+      },
+      {
+        "id": "sqrt2",
+        "blockType": "sqrt",
+        "data": {}
+      },
+      {
+        "id": "neg7",
+        "blockType": "number",
+        "data": {
+          "value": -7.0
+        }
+      },
+      {
+        "id": "abs7",
+        "blockType": "abs",
+        "data": {}
+      },
+      {
+        "id": "v37",
+        "blockType": "number",
+        "data": {
+          "value": 3.7
+        }
+      },
+      {
+        "id": "fl",
+        "blockType": "floor",
+        "data": {}
+      },
+      {
+        "id": "v32",
+        "blockType": "number",
+        "data": {
+          "value": 3.2
+        }
+      },
+      {
+        "id": "ce",
+        "blockType": "ceil",
+        "data": {}
+      },
+      {
+        "id": "v35",
+        "blockType": "number",
+        "data": {
+          "value": 3.5
+        }
+      },
+      {
+        "id": "rn",
+        "blockType": "round",
+        "data": {}
+      }
     ],
     "edges": [
-      { "id": "e1", "source": "two", "sourceHandle": "out", "target": "sqrt2", "targetHandle": "a" },
-      { "id": "e2", "source": "neg7", "sourceHandle": "out", "target": "abs7", "targetHandle": "a" },
-      { "id": "e3", "source": "v37", "sourceHandle": "out", "target": "fl", "targetHandle": "a" },
-      { "id": "e4", "source": "v32", "sourceHandle": "out", "target": "ce", "targetHandle": "a" },
-      { "id": "e5", "source": "v35", "sourceHandle": "out", "target": "rn", "targetHandle": "a" }
+      {
+        "id": "e1",
+        "source": "two",
+        "sourceHandle": "out",
+        "target": "sqrt2",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e2",
+        "source": "neg7",
+        "sourceHandle": "out",
+        "target": "abs7",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e3",
+        "source": "v37",
+        "sourceHandle": "out",
+        "target": "fl",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e4",
+        "source": "v32",
+        "sourceHandle": "out",
+        "target": "ce",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e5",
+        "source": "v35",
+        "sourceHandle": "out",
+        "target": "rn",
+        "targetHandle": "a"
+      }
     ]
   },
   "expected": {
-    "sqrt2": { "kind": "scalar", "value": 1.4142135623730951 },
-    "abs7": { "kind": "scalar", "value": 7.0 },
-    "fl": { "kind": "scalar", "value": 3.0 },
-    "ce": { "kind": "scalar", "value": 4.0 },
-    "rn": { "kind": "scalar", "value": 4.0 }
+    "fl": {
+      "kind": "scalar",
+      "value": 3.0
+    },
+    "abs7": {
+      "kind": "scalar",
+      "value": 7.0
+    },
+    "ce": {
+      "kind": "scalar",
+      "value": 4.0
+    },
+    "sqrt2": {
+      "kind": "scalar",
+      "value": 1.4142135623730951
+    },
+    "rn": {
+      "kind": "scalar",
+      "value": 4.0
+    }
   },
   "diagnostics": [],
   "tolerance": 1e-15

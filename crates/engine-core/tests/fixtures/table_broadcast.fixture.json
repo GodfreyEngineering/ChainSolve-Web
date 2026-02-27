@@ -5,17 +5,76 @@
   "snapshot": {
     "version": 1,
     "nodes": [
-      { "id": "s", "blockType": "number", "data": { "value": 10.0 } },
-      { "id": "t", "blockType": "tableInput", "data": { "tableData": { "columns": ["A", "B"], "rows": [[1.0, 2.0], [3.0, 4.0]] } } },
-      { "id": "add", "blockType": "add", "data": {} }
+      {
+        "id": "s",
+        "blockType": "number",
+        "data": {
+          "value": 10.0
+        }
+      },
+      {
+        "id": "t",
+        "blockType": "tableInput",
+        "data": {
+          "tableData": {
+            "columns": [
+              "A",
+              "B"
+            ],
+            "rows": [
+              [
+                1.0,
+                2.0
+              ],
+              [
+                3.0,
+                4.0
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "id": "add",
+        "blockType": "add",
+        "data": {}
+      }
     ],
     "edges": [
-      { "id": "e1", "source": "s", "sourceHandle": "out", "target": "add", "targetHandle": "a" },
-      { "id": "e2", "source": "t", "sourceHandle": "out", "target": "add", "targetHandle": "b" }
+      {
+        "id": "e1",
+        "source": "s",
+        "sourceHandle": "out",
+        "target": "add",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e2",
+        "source": "t",
+        "sourceHandle": "out",
+        "target": "add",
+        "targetHandle": "b"
+      }
     ]
   },
   "expected": {
-    "add": { "kind": "table", "columns": ["A", "B"], "rows": [[11.0, 12.0], [13.0, 14.0]] }
+    "add": {
+      "kind": "table",
+      "columns": [
+        "A",
+        "B"
+      ],
+      "rows": [
+        [
+          11.0,
+          12.0
+        ],
+        [
+          13.0,
+          14.0
+        ]
+      ]
+    }
   },
   "diagnostics": [],
   "tolerance": null

@@ -5,17 +5,44 @@
   "snapshot": {
     "version": 1,
     "nodes": [
-      { "id": "a", "blockType": "add", "data": {} },
-      { "id": "b", "blockType": "add", "data": {} }
+      {
+        "id": "a",
+        "blockType": "add",
+        "data": {}
+      },
+      {
+        "id": "b",
+        "blockType": "add",
+        "data": {}
+      }
     ],
     "edges": [
-      { "id": "e1", "source": "a", "sourceHandle": "out", "target": "b", "targetHandle": "a" },
-      { "id": "e2", "source": "b", "sourceHandle": "out", "target": "a", "targetHandle": "a" }
+      {
+        "id": "e1",
+        "source": "a",
+        "sourceHandle": "out",
+        "target": "b",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e2",
+        "source": "b",
+        "sourceHandle": "out",
+        "target": "a",
+        "targetHandle": "a"
+      }
     ]
   },
   "expected": {},
   "diagnostics": [
-    { "code": "CYCLE_DETECTED", "level": "error" }
+    {
+      "code": "CYCLE_DETECTED",
+      "level": "error"
+    },
+    {
+      "code": "CYCLE_DETECTED",
+      "level": "error"
+    }
   ],
   "tolerance": null
 }

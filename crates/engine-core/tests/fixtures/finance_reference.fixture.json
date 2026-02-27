@@ -1,0 +1,185 @@
+{
+  "name": "finance_reference",
+  "description": "Finance TVM reference values: simple interest, compound FV, rule of 72; domain error for n=0",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      {
+        "id": "P",
+        "blockType": "number",
+        "data": {
+          "value": 1000.0
+        }
+      },
+      {
+        "id": "r_5pct",
+        "blockType": "number",
+        "data": {
+          "value": 0.05
+        }
+      },
+      {
+        "id": "t_1yr",
+        "blockType": "number",
+        "data": {
+          "value": 1.0
+        }
+      },
+      {
+        "id": "simp_int",
+        "blockType": "fin.tvm.simple_interest",
+        "data": {}
+      },
+      {
+        "id": "n_12",
+        "blockType": "number",
+        "data": {
+          "value": 12.0
+        }
+      },
+      {
+        "id": "t_10yr",
+        "blockType": "number",
+        "data": {
+          "value": 10.0
+        }
+      },
+      {
+        "id": "comp_fv",
+        "blockType": "fin.tvm.compound_fv",
+        "data": {}
+      },
+      {
+        "id": "r_6pct",
+        "blockType": "number",
+        "data": {
+          "value": 0.06
+        }
+      },
+      {
+        "id": "rule72",
+        "blockType": "fin.tvm.rule_of_72",
+        "data": {}
+      },
+      {
+        "id": "n_zero",
+        "blockType": "number",
+        "data": {
+          "value": 0.0
+        }
+      },
+      {
+        "id": "cfv_err",
+        "blockType": "fin.tvm.compound_fv",
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "P",
+        "sourceHandle": "out",
+        "target": "simp_int",
+        "targetHandle": "P"
+      },
+      {
+        "id": "e2",
+        "source": "r_5pct",
+        "sourceHandle": "out",
+        "target": "simp_int",
+        "targetHandle": "r"
+      },
+      {
+        "id": "e3",
+        "source": "t_1yr",
+        "sourceHandle": "out",
+        "target": "simp_int",
+        "targetHandle": "t"
+      },
+      {
+        "id": "e4",
+        "source": "P",
+        "sourceHandle": "out",
+        "target": "comp_fv",
+        "targetHandle": "PV"
+      },
+      {
+        "id": "e5",
+        "source": "r_5pct",
+        "sourceHandle": "out",
+        "target": "comp_fv",
+        "targetHandle": "r"
+      },
+      {
+        "id": "e6",
+        "source": "n_12",
+        "sourceHandle": "out",
+        "target": "comp_fv",
+        "targetHandle": "n"
+      },
+      {
+        "id": "e7",
+        "source": "t_10yr",
+        "sourceHandle": "out",
+        "target": "comp_fv",
+        "targetHandle": "t"
+      },
+      {
+        "id": "e8",
+        "source": "r_6pct",
+        "sourceHandle": "out",
+        "target": "rule72",
+        "targetHandle": "r"
+      },
+      {
+        "id": "e9",
+        "source": "P",
+        "sourceHandle": "out",
+        "target": "cfv_err",
+        "targetHandle": "PV"
+      },
+      {
+        "id": "e10",
+        "source": "r_5pct",
+        "sourceHandle": "out",
+        "target": "cfv_err",
+        "targetHandle": "r"
+      },
+      {
+        "id": "e11",
+        "source": "n_zero",
+        "sourceHandle": "out",
+        "target": "cfv_err",
+        "targetHandle": "n"
+      },
+      {
+        "id": "e12",
+        "source": "t_1yr",
+        "sourceHandle": "out",
+        "target": "cfv_err",
+        "targetHandle": "t"
+      }
+    ]
+  },
+  "expected": {
+    "cfv_err": {
+      "kind": "error",
+      "message": "Compound FV: n = 0"
+    },
+    "rule72": {
+      "kind": "scalar",
+      "value": 12.0
+    },
+    "simp_int": {
+      "kind": "scalar",
+      "value": 50.0
+    },
+    "comp_fv": {
+      "kind": "scalar",
+      "value": 1647.00949769028
+    }
+  },
+  "diagnostics": [],
+  "tolerance": 0.01
+}

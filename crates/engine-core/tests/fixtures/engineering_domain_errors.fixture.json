@@ -1,0 +1,206 @@
+{
+  "name": "engineering_domain_errors",
+  "description": "Engineering ops that return errors for invalid inputs: zero denominators, impossible geometry",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      {
+        "id": "M",
+        "blockType": "number",
+        "data": {
+          "value": 100.0
+        }
+      },
+      {
+        "id": "y_val",
+        "blockType": "number",
+        "data": {
+          "value": 0.5
+        }
+      },
+      {
+        "id": "I_zero",
+        "blockType": "number",
+        "data": {
+          "value": 0.0
+        }
+      },
+      {
+        "id": "bending_err",
+        "blockType": "eng.sections.bending_stress",
+        "data": {}
+      },
+      {
+        "id": "rho",
+        "blockType": "number",
+        "data": {
+          "value": 1000.0
+        }
+      },
+      {
+        "id": "v_flow",
+        "blockType": "number",
+        "data": {
+          "value": 1.0
+        }
+      },
+      {
+        "id": "D_pipe",
+        "blockType": "number",
+        "data": {
+          "value": 0.05
+        }
+      },
+      {
+        "id": "mu_zero",
+        "blockType": "number",
+        "data": {
+          "value": 0.0
+        }
+      },
+      {
+        "id": "reynolds_err",
+        "blockType": "eng.fluids.reynolds",
+        "data": {}
+      },
+      {
+        "id": "W_work",
+        "blockType": "number",
+        "data": {
+          "value": 100.0
+        }
+      },
+      {
+        "id": "t_zero",
+        "blockType": "number",
+        "data": {
+          "value": 0.0
+        }
+      },
+      {
+        "id": "power_err",
+        "blockType": "eng.mechanics.power_work_time",
+        "data": {}
+      },
+      {
+        "id": "d_inner_big",
+        "blockType": "number",
+        "data": {
+          "value": 0.2
+        }
+      },
+      {
+        "id": "d_outer_sml",
+        "blockType": "number",
+        "data": {
+          "value": 0.1
+        }
+      },
+      {
+        "id": "annulus_err",
+        "blockType": "eng.sections.area_annulus",
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "M",
+        "sourceHandle": "out",
+        "target": "bending_err",
+        "targetHandle": "M"
+      },
+      {
+        "id": "e2",
+        "source": "y_val",
+        "sourceHandle": "out",
+        "target": "bending_err",
+        "targetHandle": "y"
+      },
+      {
+        "id": "e3",
+        "source": "I_zero",
+        "sourceHandle": "out",
+        "target": "bending_err",
+        "targetHandle": "I"
+      },
+      {
+        "id": "e4",
+        "source": "rho",
+        "sourceHandle": "out",
+        "target": "reynolds_err",
+        "targetHandle": "rho"
+      },
+      {
+        "id": "e5",
+        "source": "v_flow",
+        "sourceHandle": "out",
+        "target": "reynolds_err",
+        "targetHandle": "v"
+      },
+      {
+        "id": "e6",
+        "source": "D_pipe",
+        "sourceHandle": "out",
+        "target": "reynolds_err",
+        "targetHandle": "D"
+      },
+      {
+        "id": "e7",
+        "source": "mu_zero",
+        "sourceHandle": "out",
+        "target": "reynolds_err",
+        "targetHandle": "mu"
+      },
+      {
+        "id": "e8",
+        "source": "W_work",
+        "sourceHandle": "out",
+        "target": "power_err",
+        "targetHandle": "W"
+      },
+      {
+        "id": "e9",
+        "source": "t_zero",
+        "sourceHandle": "out",
+        "target": "power_err",
+        "targetHandle": "t"
+      },
+      {
+        "id": "e10",
+        "source": "d_inner_big",
+        "sourceHandle": "out",
+        "target": "annulus_err",
+        "targetHandle": "d_inner"
+      },
+      {
+        "id": "e11",
+        "source": "d_outer_sml",
+        "sourceHandle": "out",
+        "target": "annulus_err",
+        "targetHandle": "d_outer"
+      }
+    ]
+  },
+  "expected": {
+    "power_err": {
+      "kind": "error",
+      "message": "Power: t = 0"
+    },
+    "bending_err": {
+      "kind": "error",
+      "message": "Bending stress: I = 0"
+    },
+    "reynolds_err": {
+      "kind": "error",
+      "message": "Reynolds: μ = 0"
+    },
+    "annulus_err": {
+      "kind": "error",
+      "message": "Annulus: d_inner > d_outer"
+    }
+  },
+  "diagnostics": [],
+  "tolerance": null
+}

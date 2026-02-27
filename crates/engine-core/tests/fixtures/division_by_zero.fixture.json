@@ -5,22 +5,78 @@
   "snapshot": {
     "version": 1,
     "nodes": [
-      { "id": "ten", "blockType": "number", "data": { "value": 10.0 } },
-      { "id": "two", "blockType": "number", "data": { "value": 2.0 } },
-      { "id": "five", "blockType": "number", "data": { "value": 5.0 } },
-      { "id": "d1", "blockType": "divide", "data": {} },
-      { "id": "d2", "blockType": "divide", "data": {} }
+      {
+        "id": "ten",
+        "blockType": "number",
+        "data": {
+          "value": 10.0
+        }
+      },
+      {
+        "id": "two",
+        "blockType": "number",
+        "data": {
+          "value": 2.0
+        }
+      },
+      {
+        "id": "five",
+        "blockType": "number",
+        "data": {
+          "value": 5.0
+        }
+      },
+      {
+        "id": "d1",
+        "blockType": "divide",
+        "data": {}
+      },
+      {
+        "id": "d2",
+        "blockType": "divide",
+        "data": {}
+      }
     ],
     "edges": [
-      { "id": "e1", "source": "ten", "sourceHandle": "out", "target": "d1", "targetHandle": "a" },
-      { "id": "e2", "source": "two", "sourceHandle": "out", "target": "d1", "targetHandle": "b" },
-      { "id": "e3", "source": "ten", "sourceHandle": "out", "target": "d2", "targetHandle": "a" },
-      { "id": "e4", "source": "five", "sourceHandle": "out", "target": "d2", "targetHandle": "b" }
+      {
+        "id": "e1",
+        "source": "ten",
+        "sourceHandle": "out",
+        "target": "d1",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e2",
+        "source": "two",
+        "sourceHandle": "out",
+        "target": "d1",
+        "targetHandle": "b"
+      },
+      {
+        "id": "e3",
+        "source": "ten",
+        "sourceHandle": "out",
+        "target": "d2",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e4",
+        "source": "five",
+        "sourceHandle": "out",
+        "target": "d2",
+        "targetHandle": "b"
+      }
     ]
   },
   "expected": {
-    "d1": { "kind": "scalar", "value": 5.0 },
-    "d2": { "kind": "scalar", "value": 2.0 }
+    "d1": {
+      "kind": "scalar",
+      "value": 5.0
+    },
+    "d2": {
+      "kind": "scalar",
+      "value": 2.0
+    }
   },
   "diagnostics": [],
   "tolerance": null

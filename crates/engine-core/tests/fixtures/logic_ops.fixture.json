@@ -1,0 +1,233 @@
+{
+  "name": "logic_ops",
+  "description": "Logic/comparison ops: greater, less, equal, ifthenelse, atan2",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      {
+        "id": "five",
+        "blockType": "number",
+        "data": {
+          "value": 5.0
+        }
+      },
+      {
+        "id": "three",
+        "blockType": "number",
+        "data": {
+          "value": 3.0
+        }
+      },
+      {
+        "id": "one",
+        "blockType": "number",
+        "data": {
+          "value": 1.0
+        }
+      },
+      {
+        "id": "zero",
+        "blockType": "number",
+        "data": {
+          "value": 0.0
+        }
+      },
+      {
+        "id": "seven",
+        "blockType": "number",
+        "data": {
+          "value": 7.0
+        }
+      },
+      {
+        "id": "two",
+        "blockType": "number",
+        "data": {
+          "value": 2.0
+        }
+      },
+      {
+        "id": "gt",
+        "blockType": "greater",
+        "data": {}
+      },
+      {
+        "id": "lt",
+        "blockType": "less",
+        "data": {}
+      },
+      {
+        "id": "eq_t",
+        "blockType": "equal",
+        "data": {}
+      },
+      {
+        "id": "eq_f",
+        "blockType": "equal",
+        "data": {}
+      },
+      {
+        "id": "ite_t",
+        "blockType": "ifthenelse",
+        "data": {}
+      },
+      {
+        "id": "ite_f",
+        "blockType": "ifthenelse",
+        "data": {}
+      },
+      {
+        "id": "atan2_n",
+        "blockType": "atan2",
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "five",
+        "sourceHandle": "out",
+        "target": "gt",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e2",
+        "source": "three",
+        "sourceHandle": "out",
+        "target": "gt",
+        "targetHandle": "b"
+      },
+      {
+        "id": "e3",
+        "source": "three",
+        "sourceHandle": "out",
+        "target": "lt",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e4",
+        "source": "five",
+        "sourceHandle": "out",
+        "target": "lt",
+        "targetHandle": "b"
+      },
+      {
+        "id": "e5",
+        "source": "three",
+        "sourceHandle": "out",
+        "target": "eq_t",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e6",
+        "source": "three",
+        "sourceHandle": "out",
+        "target": "eq_t",
+        "targetHandle": "b"
+      },
+      {
+        "id": "e7",
+        "source": "three",
+        "sourceHandle": "out",
+        "target": "eq_f",
+        "targetHandle": "a"
+      },
+      {
+        "id": "e8",
+        "source": "five",
+        "sourceHandle": "out",
+        "target": "eq_f",
+        "targetHandle": "b"
+      },
+      {
+        "id": "e9",
+        "source": "one",
+        "sourceHandle": "out",
+        "target": "ite_t",
+        "targetHandle": "cond"
+      },
+      {
+        "id": "e10",
+        "source": "seven",
+        "sourceHandle": "out",
+        "target": "ite_t",
+        "targetHandle": "then"
+      },
+      {
+        "id": "e11",
+        "source": "two",
+        "sourceHandle": "out",
+        "target": "ite_t",
+        "targetHandle": "else"
+      },
+      {
+        "id": "e12",
+        "source": "zero",
+        "sourceHandle": "out",
+        "target": "ite_f",
+        "targetHandle": "cond"
+      },
+      {
+        "id": "e13",
+        "source": "seven",
+        "sourceHandle": "out",
+        "target": "ite_f",
+        "targetHandle": "then"
+      },
+      {
+        "id": "e14",
+        "source": "two",
+        "sourceHandle": "out",
+        "target": "ite_f",
+        "targetHandle": "else"
+      },
+      {
+        "id": "e15",
+        "source": "one",
+        "sourceHandle": "out",
+        "target": "atan2_n",
+        "targetHandle": "y"
+      },
+      {
+        "id": "e16",
+        "source": "one",
+        "sourceHandle": "out",
+        "target": "atan2_n",
+        "targetHandle": "x"
+      }
+    ]
+  },
+  "expected": {
+    "atan2_n": {
+      "kind": "scalar",
+      "value": 0.7853981633974483
+    },
+    "eq_f": {
+      "kind": "scalar",
+      "value": 0.0
+    },
+    "ite_t": {
+      "kind": "scalar",
+      "value": 7.0
+    },
+    "gt": {
+      "kind": "scalar",
+      "value": 1.0
+    },
+    "lt": {
+      "kind": "scalar",
+      "value": 1.0
+    },
+    "eq_t": {
+      "kind": "scalar",
+      "value": 1.0
+    },
+    "ite_f": {
+      "kind": "scalar",
+      "value": 2.0
+    }
+  },
+  "diagnostics": [],
+  "tolerance": 1e-15
+}
