@@ -1,3 +1,12 @@
 [workspace]
 resolver = "2"
 members = ["crates/*"]
+
+# Size-optimized release profile for WASM builds.
+# lto + opt-level "z" + codegen-units 1 produce the smallest binary.
+[profile.release]
+lto = true
+opt-level = "z"
+codegen-units = 1
+panic = "abort"
+strip = true

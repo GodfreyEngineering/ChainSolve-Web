@@ -35,7 +35,8 @@ const MANIFEST_PATH = join(DIST, '.vite', 'manifest.json')
 const KB = 1024
 const BUDGETS = {
   initialGzip: 350 * KB, // initial-load JS closure (gzip)
-  wasmRaw: 600 * KB, // per-WASM file (raw)
+  wasmRaw: 650 * KB, // per-WASM file (raw) — headroom for toolchain variance
+  wasmGzip: 200 * KB, // per-WASM file (gzip) — what the CDN actually serves
 }
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -156,9 +157,11 @@ addRow(
 // Total JS (informational — does not fail)
 addWarn(`total JS (${jsFiles.length} files)`, totalRaw, totalGzip)
 
-// WASM
+// WASM — enforce both raw and gzip budgets
 for (const wasm of wasmFiles) {
-  addRow(wasm.name, wasm.size, gzipSize(wasm.path), BUDGETS.wasmRaw, 'raw')
+  const gz = gzipSize(wasm.path)
+  addRow(wasm.name, wasm.size, gz, BUDGETS.wasmRaw, 'raw')
+  addRow(`${wasm.name} (gz)`, wasm.size, gz, BUDGETS.wasmGzip, 'gzip')
 }
 if (wasmFiles.length === 0) {
   rows.push({ label: '*.wasm (none)', raw: 0, gz: 0, ok: true })

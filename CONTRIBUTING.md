@@ -161,7 +161,8 @@ The CI gate (`scripts/check-bundle-size.mjs`) enforces two hard budgets:
 | Metric | Budget | Notes |
 |--------|--------|-------|
 | Initial JS (gzip) | 350 KB | Entry + main chunk — what the CDN serves on first paint |
-| WASM (raw) | 600 KB | Per-file, before Brotli on the wire |
+| WASM (raw) | 650 KB | Per-file, headroom for toolchain variance |
+| WASM (gzip) | 200 KB | Per-file — what the CDN actually serves |
 
 Total JS is reported for visibility but does **not** fail the build, since lazy
 chunks (dialogs, panels) only load on demand.

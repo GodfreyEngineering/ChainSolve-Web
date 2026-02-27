@@ -41,9 +41,9 @@ section "Build WASM (release)"
 wasm-pack build crates/engine-wasm --target web --release || fail "wasm-pack build"
 pass "wasm-pack build"
 
-section "Optimize WASM (wasm-opt -Oz)"
-node scripts/optimize-wasm.mjs || fail "wasm-opt"
-pass "wasm-opt"
+section "Optimize WASM pkg (wasm-opt -Oz)"
+node scripts/optimize-wasm.mjs || fail "wasm-opt (pkg)"
+pass "wasm-opt (pkg)"
 
 # ── WASM export guard ─────────────────────────────────────────────────────
 section "WASM export guard"
@@ -76,6 +76,11 @@ VITE_SUPABASE_ANON_KEY=placeholder \
 VITE_IS_CI_BUILD=true \
 npx tsc -b && npx vite build || fail "vite build"
 pass "vite build"
+
+# ── Optimize dist WASM ────────────────────────────────────────────────────
+section "Optimize dist WASM (wasm-opt -Oz)"
+node scripts/optimize-wasm.mjs || fail "wasm-opt (dist)"
+pass "wasm-opt (dist)"
 
 # ── Bundle size ────────────────────────────────────────────────────────────
 section "Bundle size check"

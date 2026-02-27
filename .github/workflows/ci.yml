@@ -83,7 +83,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Optimize WASM (wasm-opt -Oz)
+      - name: Optimize WASM pkg (wasm-opt -Oz)
         run: node scripts/optimize-wasm.mjs
 
       - name: Format check
@@ -118,10 +118,12 @@ jobs:
           # credentials.  MUST NOT be set in the deploy job.
           VITE_IS_CI_BUILD: 'true'
 
+      - name: Optimize dist WASM (wasm-opt -Oz)
+        run: node scripts/optimize-wasm.mjs
+
       - name: Bundle size check
         # Fail the build if any bundle exceeds its budget.
-        # Budgets: main-*.js < 900 KB, total JS < 1600 KB, *.wasm < 600 KB.
-        # See scripts/check-bundle-size.mjs and docs/performance/budgets.md.
+        # See scripts/check-bundle-size.mjs for current budgets.
         run: node scripts/check-bundle-size.mjs
 
       - name: Upload WASM pkg artifact
