@@ -93,8 +93,17 @@ const LazyValuePopover = lazy(() =>
 )
 import { ProbeNode } from './nodes/ProbeNode'
 import { copyValueToClipboard } from '../../engine/valueFormat'
-import { getCrossingEdgesForGroup } from '../../lib/graphHealth'
+import {
+  computeGraphHealth,
+  formatHealthReport,
+  getCrossingEdgesForGroup,
+} from '../../lib/graphHealth'
 import { useToast } from '../ui/useToast'
+import { useProjectStore } from '../../stores/projectStore'
+import { toEngineSnapshot } from '../../engine/bridge'
+import { stableStringify } from '../../lib/pdf/stableStringify'
+import { sha256Hex } from '../../lib/pdf/sha256'
+import { buildAuditModel } from '../../lib/pdf/auditModel'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -161,6 +170,7 @@ export interface CanvasAreaHandle {
   toggleBadges: () => void
   toggleEdgeBadges: () => void
   toggleHealthPanel: () => void
+  exportPdfAudit: () => Promise<void>
 }
 
 // ── Minimap persistence ──────────────────────────────────────────────────────
@@ -437,6 +447,90 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         setHealthPanelPref(!v)
         return !v
       })
+    },
+    exportPdfAudit: async () => {
+      const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } =
+        await import('../../lib/build-info')
+      const { exportAuditPdf } = await import('../../lib/pdf/exportAuditPdf')
+      const { loadPdfLib } = await import('../../lib/pdf-loader')
+
+      const projectName = useProjectStore.getState().projectName
+      const projectId = useProjectStore.getState().projectId
+
+      // 1. Get canonical snapshot (expands collapsed groups)
+      const snap = getCanonicalSnapshot(latestNodes.current, latestEdges.current)
+      const currentVariables = useVariablesStore.getState().variables
+
+      // 2. Build engine snapshot and evaluate
+      const engineSnap = toEngineSnapshot(snap.nodes, snap.edges, constantsLookup, currentVariables)
+      const evalResult = await engine.evaluateGraph(engineSnap)
+
+      // 3. Compute snapshot hash
+      const hashInput = stableStringify({
+        nodes: snap.nodes.map((n) => ({
+          id: n.id,
+          data: n.data,
+          position: n.position,
+        })),
+        edges: snap.edges.map((e) => ({
+          id: e.id,
+          source: e.source,
+          sourceHandle: e.sourceHandle,
+          target: e.target,
+          targetHandle: e.targetHandle,
+        })),
+        variables: currentVariables,
+      })
+      const snapshotHash = await sha256Hex(hashInput)
+
+      // 4. Graph health
+      const health = computeGraphHealth(snap.nodes, snap.edges)
+      const healthSummary = formatHealthReport(health, t)
+
+      // 5. Build audit model
+      const model = buildAuditModel({
+        projectName,
+        projectId,
+        exportTimestamp: new Date().toISOString(),
+        buildVersion: BUILD_VERSION,
+        buildSha: BUILD_SHA,
+        buildTime: BUILD_TIME,
+        buildEnv: BUILD_ENV,
+        engineVersion: engine.engineVersion,
+        contractVersion: engine.contractVersion,
+        nodes: snap.nodes,
+        edges: snap.edges,
+        evalResult,
+        healthSummary,
+        snapshotHash,
+      })
+
+      // 6. Capture graph image
+      let graphImageDataUrl: string | null = null
+      try {
+        const { toPng } = await loadPdfLib()
+        // Find the ReactFlow viewport element inside canvasWrapRef
+        const viewport = canvasWrapRef.current?.querySelector(
+          '.react-flow__viewport',
+        ) as HTMLElement | null
+        if (viewport) {
+          // Temporarily fit view for a clean capture
+          fitView({ padding: 0.15, duration: 0 })
+          // Small delay to let React Flow settle
+          await new Promise((r) => setTimeout(r, 150))
+          graphImageDataUrl = await toPng(viewport, {
+            pixelRatio: 2,
+            backgroundColor:
+              getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() ||
+              '#1a1a2e',
+          })
+        }
+      } catch {
+        // Image capture failed — proceed without it
+      }
+
+      // 7. Export PDF
+      await exportAuditPdf(model, graphImageDataUrl)
     },
   }))
 

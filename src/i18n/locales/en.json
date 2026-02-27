@@ -387,5 +387,12 @@
     "switchSave": "Save & switch",
     "switchDiscard": "Discard & switch",
     "switchCancel": "Cancel"
+  },
+  "pdfExport": {
+    "generating": "Generating PDF…",
+    "success": "PDF exported successfully",
+    "failed": "Failed to generate PDF",
+    "imageUnavailable": "Graph image unavailable",
+    "title": "Audit Report"
   }
 }

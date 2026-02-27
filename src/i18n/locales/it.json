@@ -386,5 +386,12 @@
     "largeGraph": "Grafo grande — badge nascosti automaticamente",
     "cycleDetected": "Ciclo rilevato — può causare valutazione infinita",
     "copyReport": "Copia rapporto"
+  },
+  "pdfExport": {
+    "generating": "Generating PDF…",
+    "success": "PDF exported successfully",
+    "failed": "Failed to generate PDF",
+    "imageUnavailable": "Graph image unavailable",
+    "title": "Audit Report"
   }
 }

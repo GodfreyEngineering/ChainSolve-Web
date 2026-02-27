@@ -386,5 +386,12 @@
     "largeGraph": "Großer Graph — Badges automatisch ausgeblendet",
     "cycleDetected": "Zyklus erkannt — kann unendliche Auswertung verursachen",
     "copyReport": "Bericht kopieren"
+  },
+  "pdfExport": {
+    "generating": "Generating PDF…",
+    "success": "PDF exported successfully",
+    "failed": "Failed to generate PDF",
+    "imageUnavailable": "Graph image unavailable",
+    "title": "Audit Report"
   }
 }

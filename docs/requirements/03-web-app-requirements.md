@@ -442,24 +442,41 @@ variable state, file I/O, network activity, and performance metrics.
 
 ---
 
-## 17. Out of scope (for now)
+## 17. Export
+
+### 17.1 PDF export (W14a.1 — active sheet)
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| EX-1 | File > Export PDF downloads an audit-ready PDF for the active canvas. | MUST |
+| EX-2 | PDF includes: cover/meta, snapshot SHA-256 hash, graph health, engine evaluation summary, diagnostics table, node value table, and graph image. | MUST |
+| EX-3 | Snapshot hash is computed from a stable-stringified `{ nodes, edges, variables }` object (sorted keys, preserved array order). | MUST |
+| EX-4 | PDF is deterministic for the same graph + inputs (only the export timestamp may vary). | MUST |
+| EX-5 | No secrets leak into the PDF (no auth tokens, Supabase keys, or emails). | MUST |
+| EX-6 | pdf-lib and html-to-image are lazy-loaded; initial bundle size is unchanged. | MUST |
+| EX-7 | CSP integrity is preserved (no unsafe-eval, no inline scripts). | MUST |
+| EX-8 | If graph image capture fails, PDF is still generated with a "Graph image unavailable" notice. | MUST |
+
+---
+
+## 18. Out of scope (for now)
 
 - Real-time collaboration (concurrent editing of the same canvas).
 - Offline mode for the web app (Service Worker / PWA shell).
 - Custom block editor (user-defined blocks).
 - Simulation / time-stepping mode.
-- PDF export of calculation chains.
 - Plugin / extension system.
 - Drag-to-reorder canvas tabs (position model exists; UI deferred).
+- PDF export of all sheets (multi-canvas export deferred to W14a.2).
 
 ---
 
-## 18. Future extensions
+## 19. Future extensions
 
 1. **Offline PWA shell**: Service Worker caches app shell + recent projects for read-only offline access.
 2. **Custom block editor**: Structured visual editor for user-defined blocks with typed I/O.
 3. **Collaborative canvas**: CRDT-based real-time sync for shared editing sessions.
-4. **PDF / report export**: Generate a formatted document from a calculation chain with inputs, intermediate values, and results.
+4. **Multi-sheet PDF export**: Extend PDF export to include all canvases in a single document.
 5. **Plugin API**: Allow third-party block packs to be loaded at runtime.
 6. **Theming SDK**: Allow users to create and share custom themes.
 7. **Embedded mode**: Render a read-only graph in an iframe for documentation / sharing.
@@ -468,6 +485,7 @@ variable state, file I/O, network activity, and performance metrics.
 
 ## Change Log
 
-| Date | Author | Change |
-|------|--------|--------|
-| 2026-02-26 | — | Initial version (v1.0). |
+| Date       | Author | Change                                                                                            |
+|------------|--------|---------------------------------------------------------------------------------------------------|
+| 2026-02-27 | —      | W14a.1: Added §17 Export (PDF export requirements). Moved PDF out of Out-of-scope. Renum §18/§19. |
+| 2026-02-26 | —      | Initial version (v1.0).                                                                           |

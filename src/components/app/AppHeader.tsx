@@ -144,6 +144,18 @@ export function AppHeader({
 
   const stub = useCallback(() => toast(t('menu.comingSoon'), 'info'), [toast, t])
 
+  const handleExportPdf = useCallback(() => {
+    setOpenMenu(null)
+    toast(t('pdfExport.generating'), 'info')
+    canvasRef.current
+      ?.exportPdfAudit()
+      .then(() => toast(t('pdfExport.success'), 'success'))
+      .catch((err: unknown) => {
+        console.error('[pdf-export]', err)
+        toast(t('pdfExport.failed'), 'error')
+      })
+  }, [canvasRef, toast, t])
+
   // ── File menu handlers ──────────────────────────────────────────────────────
 
   const handleNewProject = useCallback(() => {
@@ -279,12 +291,22 @@ export function AppHeader({
       },
       { separator: true },
       { label: t('menu.import'), onClick: stub },
-      { label: t('menu.exportPdf'), onClick: stub },
+      { label: t('menu.exportPdf'), onClick: handleExportPdf },
       { label: t('menu.exportExcel'), onClick: stub },
       { separator: true },
       { label: t('menu.recentProjects'), children: recentChildren },
     ]
-  }, [t, stub, readOnly, isDirty, onSave, projectId, handleNewProject, handleSelectProject])
+  }, [
+    t,
+    stub,
+    readOnly,
+    isDirty,
+    onSave,
+    projectId,
+    handleNewProject,
+    handleSelectProject,
+    handleExportPdf,
+  ])
 
   const editItems = useMemo(
     (): MenuEntry[] => [
