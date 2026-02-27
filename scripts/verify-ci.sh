@@ -87,6 +87,14 @@ section "CSP third-party allowlist"
 node scripts/check-csp-allowlist.mjs || fail "CSP allowlist"
 pass "CSP allowlist"
 
+section "Billing functions — no stack-trace exposure"
+if grep -n 'err\.stack\|error\.stack' \
+     functions/api/stripe/create-checkout-session.ts \
+     functions/api/stripe/create-portal-session.ts 2>/dev/null | grep -v '^\s*//' ; then
+  fail "Billing function exposes err.stack in response body"
+fi
+pass "No err.stack exposure in billing JSON functions"
+
 # ── WASM build ─────────────────────────────────────────────────────────────
 section "Build WASM (release)"
 wasm-pack build crates/engine-wasm --target web --release || fail "wasm-pack build"

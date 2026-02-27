@@ -14,6 +14,7 @@
  */
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { jsonError } from "./_lib";
 
 // Production URL is hardcoded so it never resolves to the Pages preview domain.
 const PORTAL_RETURN_URL = "https://app.chainsolve.co.uk/app";
@@ -23,10 +24,6 @@ type Env = {
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
 };
-
-function jsonError(message: string, status: number): Response {
-  return Response.json({ ok: false, error: message }, { status });
-}
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const reqId = crypto.randomUUID().slice(0, 8);
