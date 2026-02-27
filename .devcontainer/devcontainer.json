@@ -3,6 +3,7 @@
   "image": "mcr.microsoft.com/devcontainers/rust:1-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/node:1": { "version": "20" },
+    "ghcr.io/devcontainers/features/git-lfs:1": {},
     "ghcr.io/anthropics/devcontainer-features/claude-code:latest": {}
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
@@ -13,6 +14,7 @@
     "vscode": {
       "extensions": [
         "rust-lang.rust-analyzer",
+        "github.vscode-github-actions",
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
         "ms-playwright.playwright"

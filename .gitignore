@@ -29,3 +29,6 @@ dist-ssr
 # Rust / WASM
 /target
 crates/engine-wasm/pkg.claude/
+
+# Local Claude settings
+.claude/
