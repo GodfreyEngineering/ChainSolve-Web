@@ -8,6 +8,13 @@
 
 ---
 
+## Product requirements
+
+> **[requirements/README.md](requirements/README.md)** — full product requirements suite
+> covering Web, Mobile, Desktop, platform/backend, and non-functional requirements.
+
+---
+
 ## Start here
 
 | Document | Description |
