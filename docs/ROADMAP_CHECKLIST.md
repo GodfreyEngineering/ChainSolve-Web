@@ -247,7 +247,7 @@ Claude MUST:
   - Add lint rule or CI script that forbids `supabase` imports in UI components
   - Enforce service layer usage
 
-- [ ] P044: RLS audit (explicit policies)
+- [x] P044: RLS audit (explicit policies)
   - Confirm all tables have:
     - RLS enabled
     - explicit SELECT/INSERT/UPDATE/DELETE policies
@@ -255,7 +255,7 @@ Claude MUST:
   - Provide migration fixes if needed
   - Document in SECURITY.md / requirements
 
-- [ ] P045: Storage ACL audit
+- [x] P045: Storage ACL audit
   - Ensure buckets enforce `{auth.uid()}/` prefixes
   - Add tests in migration or docs + manual check procedure
 
@@ -269,7 +269,7 @@ Claude MUST:
   - CSV numeric validation UX
   - Tests: unit tests for validators
 
-- [ ] P048: Upload size limits (client + server)
+- [x] P048: Upload size limits (client + server)
   - Enforce file size caps
   - Friendly messages, no crashes
 
