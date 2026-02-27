@@ -87,7 +87,7 @@ Claude MUST:
     - legacy paths no longer referenced
   - Do NOT delete anything yet; just report.
 
-- [ ] RH-2: Remove accidental/tracking noise (guaranteed clean git status)
+- [x] RH-2: Remove accidental/tracking noise (guaranteed clean git status)
   - Ensure `.claude/` ignored and not tracked
   - Ensure devcontainer pins required VS Code extensions
   - Ensure Git LFS exists in devcontainer features
