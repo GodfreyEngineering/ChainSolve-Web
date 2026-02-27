@@ -6,6 +6,9 @@
     "ghcr.io/anthropics/devcontainer-features/claude-code:latest": {}
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "remoteEnv": {
+    "PATH": "${containerEnv:HOME}/.cargo/bin:${containerEnv:PATH}"
+  },
   "customizations": {
     "vscode": {
       "extensions": [

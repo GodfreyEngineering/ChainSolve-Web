@@ -6,6 +6,7 @@ set -euo pipefail
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
 BOLD='\033[1m'
 NC='\033[0m'
 
@@ -13,11 +14,45 @@ pass() { echo -e "${GREEN}PASS${NC} $1"; }
 fail() { echo -e "${RED}FAIL${NC} $1"; exit 1; }
 section() { echo -e "\n${BOLD}── $1 ──${NC}"; }
 
+# ── Source cargo env if available (non-interactive shells may not have it) ──
+if [ -f "$HOME/.cargo/env" ]; then
+  # shellcheck source=/dev/null
+  . "$HOME/.cargo/env"
+fi
+
 # ── Pre-flight checks ─────────────────────────────────────────────────────
 section "Pre-flight"
-command -v cargo >/dev/null 2>&1 || { echo -e "${RED}ERROR: cargo not found. Install Rust: https://rustup.rs${NC}"; exit 1; }
-command -v wasm-pack >/dev/null 2>&1 || { echo -e "${RED}ERROR: wasm-pack not found. Install: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh${NC}"; exit 1; }
-command -v node >/dev/null 2>&1 || { echo -e "${RED}ERROR: node not found. Install Node 20+: https://nodejs.org${NC}"; exit 1; }
+
+missing=0
+
+if ! command -v cargo >/dev/null 2>&1; then
+  echo -e "${RED}ERROR: cargo not found.${NC}"
+  echo -e "  ${YELLOW}Install Rust:${NC}  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+  echo -e "  ${YELLOW}Or in Codespaces:${NC} bash .devcontainer/post-create.sh"
+  missing=1
+fi
+
+if ! command -v wasm-pack >/dev/null 2>&1; then
+  echo -e "${RED}ERROR: wasm-pack not found.${NC}"
+  echo -e "  ${YELLOW}Install:${NC}  curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh"
+  echo -e "  ${YELLOW}Or in Codespaces:${NC} bash .devcontainer/post-create.sh"
+  missing=1
+fi
+
+if ! command -v node >/dev/null 2>&1; then
+  echo -e "${RED}ERROR: node not found.${NC}"
+  echo -e "  ${YELLOW}Install Node 20+:${NC}  https://nodejs.org"
+  echo -e "  ${YELLOW}Or in Codespaces:${NC} the devcontainer image includes Node."
+  missing=1
+fi
+
+if [ "$missing" -ne 0 ]; then
+  echo ""
+  echo -e "${RED}${BOLD}Missing required tools. Fix the above errors and retry.${NC}"
+  echo -e "If you're in a GitHub Codespace, run: ${BOLD}bash .devcontainer/post-create.sh${NC}"
+  exit 1
+fi
+
 echo "cargo: $(cargo --version)"
 echo "wasm-pack: $(wasm-pack --version)"
 echo "node: $(node --version)"
