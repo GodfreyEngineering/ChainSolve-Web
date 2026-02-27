@@ -91,6 +91,10 @@ section "i18n hardcoded-attribute check"
 node scripts/check-i18n-hardcoded.mjs || fail "i18n hardcoded attributes"
 pass "i18n hardcoded attributes"
 
+section "i18n missing-key check"
+node scripts/check-i18n-keys.mjs || fail "i18n missing keys"
+pass "i18n missing keys"
+
 section "Billing functions — no stack-trace exposure"
 if grep -n 'err\.stack\|error\.stack' \
      functions/api/stripe/create-checkout-session.ts \
