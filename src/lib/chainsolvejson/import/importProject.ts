@@ -8,6 +8,7 @@
  */
 
 import type { ChainsolveJsonV1 } from '../model'
+import type { CanvasJSON } from '../../canvasSchema'
 import { parseChainsolveJson } from './parse'
 import { validateImport, type ValidationResult } from './validate'
 import {
@@ -24,6 +25,84 @@ export interface ImportProgress {
   phase: 'validating' | 'creating' | 'canvases' | 'assets' | 'done' | 'failed'
   current?: number
   total?: number
+}
+
+/** Pure normalization result — no side effects, testable without a backend. */
+export interface NormalizedImportPlan {
+  newProjectId: string
+  newProjectName: string
+  activeCanvasId: string
+  variables: ChainsolveJsonV1['project']['variables']
+  canvasIdRemap: Record<string, string>
+  canvases: {
+    oldId: string
+    newId: string
+    name: string
+    position: number
+    normalizedGraph: CanvasJSON
+  }[]
+  assets: ChainsolveJsonV1['assets']
+}
+
+/**
+ * Pure function: compute an import plan from a validated model.
+ *
+ * Sorts canvases, generates new IDs, normalizes graph fields.
+ * Does NOT perform any network I/O — safe for unit tests.
+ *
+ * @param idGenerator  Function that returns a new UUID. Defaults to crypto.randomUUID().
+ *                     Override in tests for deterministic IDs.
+ */
+export function normalizeImportPlan(
+  model: ChainsolveJsonV1,
+  idGenerator: () => string = () => crypto.randomUUID(),
+): NormalizedImportPlan {
+  const newProjectId = idGenerator()
+
+  // Sort canvases by position, compact to 0..N-1
+  const sortedCanvases = model.canvases.slice().sort((a, b) => a.position - b.position)
+
+  // Generate new canvas IDs
+  const canvasIdRemap: Record<string, string> = {}
+  for (const c of sortedCanvases) {
+    canvasIdRemap[c.id] = idGenerator()
+  }
+
+  // Determine active canvas
+  const originalActiveId = model.project.activeCanvasId
+  const activeCanvasId =
+    originalActiveId && canvasIdRemap[originalActiveId]
+      ? canvasIdRemap[originalActiveId]
+      : canvasIdRemap[sortedCanvases[0].id]
+
+  // Build normalized canvases with graph IDs rewritten
+  const canvases = sortedCanvases.map((c, i) => {
+    const newId = canvasIdRemap[c.id]
+    return {
+      oldId: c.id,
+      newId,
+      name: c.name,
+      position: i,
+      normalizedGraph: {
+        schemaVersion: 4 as const,
+        canvasId: newId,
+        projectId: newProjectId,
+        nodes: c.graph.nodes,
+        edges: c.graph.edges,
+        datasetRefs: c.graph.datasetRefs,
+      },
+    }
+  })
+
+  return {
+    newProjectId,
+    newProjectName: model.project.name,
+    activeCanvasId,
+    variables: model.project.variables,
+    canvasIdRemap,
+    canvases,
+    assets: model.assets,
+  }
 }
 
 export interface ImportResult {
@@ -127,22 +206,9 @@ export async function importChainsolveJsonAsNewProject(
   if (!session) throw new Error('Not authenticated')
   const userId = session.user.id
 
-  // Sort canvases by position, compact to 0..N-1
-  const sortedCanvases = model.canvases.slice().sort((a, b) => a.position - b.position)
-
-  // Generate new IDs
-  const newProjectId = crypto.randomUUID()
-  const canvasIdRemap: Record<string, string> = {}
-  for (const c of sortedCanvases) {
-    canvasIdRemap[c.id] = crypto.randomUUID()
-  }
-
-  // Determine active canvas
-  const originalActiveId = model.project.activeCanvasId
-  const newActiveCanvasId =
-    originalActiveId && canvasIdRemap[originalActiveId]
-      ? canvasIdRemap[originalActiveId]
-      : canvasIdRemap[sortedCanvases[0].id]
+  // Compute the pure import plan (sorting, ID generation, normalization)
+  const plan = normalizeImportPlan(model)
+  const { newProjectId, canvasIdRemap } = plan
 
   let projectCreated = false
   const createdCanvasIds: string[] = []
@@ -153,10 +219,10 @@ export async function importChainsolveJsonAsNewProject(
     const { error: projErr } = await supabase.from('projects').insert({
       id: newProjectId,
       owner_id: userId,
-      name: model.project.name,
+      name: plan.newProjectName,
       storage_key: storageKey,
-      active_canvas_id: newActiveCanvasId,
-      variables: model.project.variables,
+      active_canvas_id: plan.activeCanvasId,
+      variables: plan.variables,
     })
 
     if (projErr) throw new Error(`Failed to create project: ${projErr.message}`)
@@ -168,43 +234,32 @@ export async function importChainsolveJsonAsNewProject(
     }
 
     // 2. For each canvas: insert row + upload graph JSON
-    for (let i = 0; i < sortedCanvases.length; i++) {
+    for (let i = 0; i < plan.canvases.length; i++) {
       if (signal?.aborted) {
         await cleanup(supabase, newProjectId, userId, createdCanvasIds, canvasStorage)
         return abortResult(fileName, model, validation)
       }
 
-      progress({ phase: 'canvases', current: i + 1, total: sortedCanvases.length })
+      progress({ phase: 'canvases', current: i + 1, total: plan.canvases.length })
 
-      const c = sortedCanvases[i]
-      const newCanvasId = canvasIdRemap[c.id]
-      const storagePath = `${userId}/${newProjectId}/canvases/${newCanvasId}.json`
-
-      // Normalize graph: set correct canvasId and projectId
-      const normalizedGraph = {
-        schemaVersion: 4 as const,
-        canvasId: newCanvasId,
-        projectId: newProjectId,
-        nodes: c.graph.nodes,
-        edges: c.graph.edges,
-        datasetRefs: c.graph.datasetRefs,
-      }
+      const c = plan.canvases[i]
+      const storagePath = `${userId}/${newProjectId}/canvases/${c.newId}.json`
 
       // Upload graph JSON to storage
-      await canvasStorage.uploadCanvasGraph(userId, newProjectId, newCanvasId, normalizedGraph)
+      await canvasStorage.uploadCanvasGraph(userId, newProjectId, c.newId, c.normalizedGraph)
 
       // Insert canvas DB row
       const { error: canvasErr } = await supabase.from('canvases').insert({
-        id: newCanvasId,
+        id: c.newId,
         project_id: newProjectId,
         owner_id: userId,
         name: c.name,
-        position: i,
+        position: c.position,
         storage_path: storagePath,
       })
 
       if (canvasErr) throw new Error(`Failed to create canvas "${c.name}": ${canvasErr.message}`)
-      createdCanvasIds.push(newCanvasId)
+      createdCanvasIds.push(c.newId)
     }
 
     // 3. Upload embedded assets (best effort)
