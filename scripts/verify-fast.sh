@@ -29,6 +29,14 @@ node -e "
 " || fail "lockfile sync"
 pass "lockfile sync"
 
+section "Robots meta guard (source)"
+node scripts/check-robots-meta.mjs || fail "robots meta guard"
+pass "robots meta guard"
+
+section "npm audit (zero vulnerabilities)"
+npm audit --audit-level=high || fail "npm audit"
+pass "npm audit"
+
 section "Prettier format check"
 npm run format:check || fail "prettier"
 pass "prettier"

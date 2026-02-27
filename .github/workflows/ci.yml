@@ -86,6 +86,12 @@ jobs:
       - name: Optimize WASM pkg (wasm-opt -Oz)
         run: node scripts/optimize-wasm.mjs
 
+      - name: Robots meta guard (source)
+        run: node scripts/check-robots-meta.mjs
+
+      - name: npm audit (zero high/critical)
+        run: npm audit --audit-level=high
+
       - name: Format check
         run: npm run format:check
 
@@ -125,6 +131,9 @@ jobs:
         # Fail the build if any bundle exceeds its budget.
         # See scripts/check-bundle-size.mjs for current budgets.
         run: node scripts/check-bundle-size.mjs
+
+      - name: Robots meta guard (dist)
+        run: node scripts/check-robots-meta.mjs
 
       - name: Upload WASM pkg artifact
         # Uploaded separately so the deploy job can reuse the compiled WASM

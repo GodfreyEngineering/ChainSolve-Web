@@ -28,6 +28,14 @@ npm ci || fail "npm ci"
 pass "npm ci"
 
 # ── Format + lint (fast-fail before heavy steps) ──────────────────────────
+section "Robots meta guard (source)"
+node scripts/check-robots-meta.mjs || fail "robots meta guard"
+pass "robots meta guard (source)"
+
+section "npm audit (zero vulnerabilities)"
+npm audit --audit-level=high || fail "npm audit"
+pass "npm audit"
+
 section "Prettier format check"
 npm run format:check || fail "prettier"
 pass "prettier"
@@ -86,5 +94,9 @@ pass "wasm-opt (dist)"
 section "Bundle size check"
 node scripts/check-bundle-size.mjs || fail "bundle size"
 pass "bundle size"
+
+section "Robots meta guard (dist)"
+node scripts/check-robots-meta.mjs || fail "robots meta guard (dist)"
+pass "robots meta guard (dist)"
 
 echo -e "\n${GREEN}${BOLD}All CI checks passed.${NC}"
