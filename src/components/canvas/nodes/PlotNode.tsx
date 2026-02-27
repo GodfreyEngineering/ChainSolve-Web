@@ -155,10 +155,15 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
       >
         <div style={s.header}>
           <span style={s.headerLabel}>{nd.label}</span>
-          <span className="cs-node-header-value" style={s.headerValue}>{formatValue(headerValue)}</span>
+          <span className="cs-node-header-value" style={s.headerValue}>
+            {formatValue(headerValue)}
+          </span>
         </div>
 
-        <div className="cs-node-body" style={{ ...s.body, padding: '0.3rem', position: 'relative' }}>
+        <div
+          className="cs-node-body"
+          style={{ ...s.body, padding: '0.3rem', position: 'relative' }}
+        >
           <Handle
             type="target"
             position={Position.Left}

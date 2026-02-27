@@ -182,7 +182,10 @@ function setMinimapPref(v: boolean) {
 const EDGES_ANIM_KEY = 'chainsolve.edgesAnimated'
 
 function getEdgesAnimatedPref(): boolean {
-  if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+  if (
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  ) {
     return false
   }
   try {
@@ -540,7 +543,14 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   )
 
   const { computed } = useGraphEngine(
-    nodes, edges, engine, undefined, engineKey, paused, constantsLookup, variables,
+    nodes,
+    edges,
+    engine,
+    undefined,
+    engineKey,
+    paused,
+    constantsLookup,
+    variables,
   )
 
   // ── Auto-organise layout ──────────────────────────────────────────────────
@@ -1290,334 +1300,334 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   return (
     <ComputedContext.Provider value={computed}>
       <BindingContext.Provider value={bindingCtx}>
-      <CanvasSettingsContext.Provider value={canvasSettings}>
-      <ValuePopoverContext.Provider value={showValuePopover}>
-      {computed.size > 0 && <div data-testid="canvas-computed" style={{ display: 'none' }} />}
-      <div
-        data-edges-animated={effectiveEdgesAnimated ? 'true' : 'false'}
-        data-lod={effectiveLodTier}
-        data-badges={effectiveBadges ? 'true' : 'false'}
-        data-edge-badges={effectiveEdgeBadges ? 'true' : 'false'}
-        style={{
-          display: 'flex',
-          flex: 1,
-          height: '100%',
-          overflow: 'hidden',
-          position: 'relative',
-        }}
-      >
-        {/* Block library panel — desktop inline, mobile overlay */}
-        {libVisible && !readOnly && !isMobile && (
-          <BlockLibrary
-            width={libWidth}
-            onResizeStart={onLibResizeStart}
-            plan={plan}
-            onProBlocked={() => setShowUpgradeModal(true)}
-            onInsertTemplate={onInsertTemplate}
-          />
-        )}
-
-        {/* Canvas */}
-        <div
-          ref={canvasWrapRef}
-          style={{ flex: 1, position: 'relative', overflow: 'hidden' }}
-          onDragOver={onDragOver}
-          onDrop={onDrop}
-          onKeyDown={onKeyDown}
-          tabIndex={0}
-        >
-          {toolbar}
-          {paused && (
+        <CanvasSettingsContext.Provider value={canvasSettings}>
+          <ValuePopoverContext.Provider value={showValuePopover}>
+            {computed.size > 0 && <div data-testid="canvas-computed" style={{ display: 'none' }} />}
             <div
+              data-edges-animated={effectiveEdgesAnimated ? 'true' : 'false'}
+              data-lod={effectiveLodTier}
+              data-badges={effectiveBadges ? 'true' : 'false'}
+              data-edge-badges={effectiveEdgeBadges ? 'true' : 'false'}
               style={{
-                position: 'absolute',
-                top: 52,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                zIndex: 10,
-                background: 'var(--card-bg)',
-                border: '1px solid var(--border)',
-                borderRadius: 6,
-                padding: '0.2rem 0.7rem',
-                fontSize: '0.72rem',
-                color: 'var(--text-muted)',
-                boxShadow: '0 1px 6px rgba(0,0,0,0.25)',
-                pointerEvents: 'none',
+                display: 'flex',
+                flex: 1,
+                height: '100%',
+                overflow: 'hidden',
+                position: 'relative',
               }}
             >
-              {'\u23f8'} {t('toolbar.pausedBanner')}
+              {/* Block library panel — desktop inline, mobile overlay */}
+              {libVisible && !readOnly && !isMobile && (
+                <BlockLibrary
+                  width={libWidth}
+                  onResizeStart={onLibResizeStart}
+                  plan={plan}
+                  onProBlocked={() => setShowUpgradeModal(true)}
+                  onInsertTemplate={onInsertTemplate}
+                />
+              )}
+
+              {/* Canvas */}
+              <div
+                ref={canvasWrapRef}
+                style={{ flex: 1, position: 'relative', overflow: 'hidden' }}
+                onDragOver={onDragOver}
+                onDrop={onDrop}
+                onKeyDown={onKeyDown}
+                tabIndex={0}
+              >
+                {toolbar}
+                {paused && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 52,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      zIndex: 10,
+                      background: 'var(--card-bg)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 6,
+                      padding: '0.2rem 0.7rem',
+                      fontSize: '0.72rem',
+                      color: 'var(--text-muted)',
+                      boxShadow: '0 1px 6px rgba(0,0,0,0.25)',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    {'\u23f8'} {t('toolbar.pausedBanner')}
+                  </div>
+                )}
+                <ReactFlow
+                  nodes={nodes}
+                  edges={edges}
+                  nodeTypes={NODE_TYPES}
+                  edgeTypes={EDGE_TYPES}
+                  onNodesChange={readOnly ? undefined : onNodesChange}
+                  onEdgesChange={readOnly ? undefined : onEdgesChange}
+                  onConnect={readOnly ? undefined : onConnect}
+                  isValidConnection={isValidConnection}
+                  onNodeDragStart={readOnly ? undefined : onNodeDragStart}
+                  onNodeClick={onNodeClick}
+                  onPaneClick={onPaneClick}
+                  onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
+                  onEdgeContextMenu={readOnly ? undefined : onEdgeContextMenu}
+                  onPaneContextMenu={readOnly ? undefined : onPaneContextMenu}
+                  nodesConnectable={!readOnly && !locked}
+                  nodesDraggable={!readOnly && !locked && !panMode}
+                  elementsSelectable={!readOnly}
+                  panOnDrag={panMode || locked ? [0, 1, 2] : [1, 2]}
+                  snapToGrid={snapToGrid}
+                  snapGrid={[16, 16]}
+                  fitView
+                  fitViewOptions={{ padding: 0.2 }}
+                  deleteKeyCode={null}
+                  minZoom={0.08}
+                  maxZoom={4}
+                >
+                  <Background
+                    variant={BackgroundVariant.Dots}
+                    gap={24}
+                    size={1}
+                    color="rgba(255,255,255,0.06)"
+                  />
+                  {minimap && (
+                    <MiniMap
+                      pannable
+                      zoomable
+                      style={{ background: 'var(--card-bg)', border: '1px solid var(--border)' }}
+                      nodeColor={(node) =>
+                        node.type === 'csGroup' ? 'var(--primary)' : 'var(--text-muted)'
+                      }
+                      maskColor="rgba(0,0,0,0.15)"
+                    />
+                  )}
+                </ReactFlow>
+                <BottomToolbar
+                  panMode={panMode}
+                  locked={locked}
+                  snapToGrid={snapToGrid}
+                  minimap={minimap}
+                  paused={paused}
+                  libVisible={libVisible}
+                  inspVisible={inspVisible}
+                  readOnly={!!readOnly}
+                  onTogglePan={() => setPanMode((v) => !v)}
+                  onToggleLock={() => setLocked((v) => !v)}
+                  onToggleSnap={() => setSnapToGrid((v) => !v)}
+                  onToggleMinimap={() => {
+                    setMinimap((v) => {
+                      setMinimapPref(!v)
+                      return !v
+                    })
+                  }}
+                  onTogglePause={() => setPaused((v) => !v)}
+                  onRefresh={() => setEngineKey((k) => k + 1)}
+                  onToggleLibrary={() => {
+                    setLibVisible((v) => !v)
+                    if (isMobile) setInspVisible(false)
+                  }}
+                  onToggleInspector={() => {
+                    setInspVisible((v) => {
+                      if (v) setInspectedId(null)
+                      return !v
+                    })
+                    if (isMobile) setLibVisible(false)
+                  }}
+                  onAutoOrganise={(shiftKey) => handleAutoOrganise(shiftKey ? 'TB' : 'LR')}
+                  edgesAnimated={edgesAnimated}
+                  lodEnabled={lodEnabled}
+                  onToggleEdgesAnimated={() => {
+                    setEdgesAnimated((v) => {
+                      setEdgesAnimatedPref(!v)
+                      return !v
+                    })
+                  }}
+                  onToggleLod={() => {
+                    setLodEnabled((v) => {
+                      setLodPref(!v)
+                      return !v
+                    })
+                  }}
+                  debugConsoleVisible={debugConsoleVisible}
+                  onToggleDebugConsole={() => useDebugConsoleStore.getState().toggleVisible()}
+                  badgesEnabled={badgesEnabled}
+                  onToggleBadges={() => {
+                    setBadgesEnabled((v) => {
+                      setBadgesPref(!v)
+                      return !v
+                    })
+                  }}
+                  edgeBadgesEnabled={edgeBadgesEnabled}
+                  onToggleEdgeBadges={() => {
+                    setEdgeBadgesEnabled((v) => {
+                      setEdgeBadgesPref(!v)
+                      return !v
+                    })
+                  }}
+                  healthPanelVisible={healthPanelVisible}
+                  onToggleHealthPanel={() => {
+                    setHealthPanelVisible((v) => {
+                      setHealthPanelPref(!v)
+                      return !v
+                    })
+                  }}
+                />
+                {debugConsoleVisible && <DebugConsolePanel />}
+                {healthPanelVisible && (
+                  <GraphHealthPanel
+                    nodes={nodes}
+                    edges={edges}
+                    onClose={() => {
+                      setHealthPanelVisible(false)
+                      setHealthPanelPref(false)
+                    }}
+                  />
+                )}
+              </div>
+
+              {/* Inspector panel — desktop inline */}
+              {inspVisible && !isMobile && (
+                <Inspector
+                  nodeId={inspectedId}
+                  width={inspWidth}
+                  onClose={closeInspector}
+                  onResizeStart={onInspResizeStart}
+                  onToggleCollapse={toggleGroupCollapse}
+                  onUngroupNode={ungroupNode}
+                  canUseGroups={ent.canUseGroups}
+                />
+              )}
+
+              {/* ── Mobile overlay drawers ──────────────────────────────────────────── */}
+              {showBackdrop && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'rgba(0,0,0,0.5)',
+                    zIndex: 19,
+                  }}
+                  onClick={() => {
+                    setLibVisible(false)
+                    setInspVisible(false)
+                  }}
+                />
+              )}
+
+              {libVisible && !readOnly && isMobile && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    zIndex: 20,
+                    width: mobileDrawerWidth,
+                  }}
+                >
+                  <BlockLibrary
+                    width={mobileDrawerWidth}
+                    onResizeStart={() => {}}
+                    plan={plan}
+                    onProBlocked={() => setShowUpgradeModal(true)}
+                    onInsertTemplate={onInsertTemplate}
+                  />
+                </div>
+              )}
+
+              {inspVisible && isMobile && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    zIndex: 20,
+                    width: mobileDrawerWidth,
+                  }}
+                >
+                  <Inspector
+                    nodeId={inspectedId}
+                    width={mobileDrawerWidth}
+                    onClose={closeInspector}
+                    onResizeStart={() => {}}
+                    onToggleCollapse={toggleGroupCollapse}
+                    onUngroupNode={ungroupNode}
+                    canUseGroups={ent.canUseGroups}
+                  />
+                </div>
+              )}
+
+              {/* Context menu */}
+              {contextMenu && (
+                <ContextMenu
+                  target={contextMenu}
+                  onClose={() => setContextMenu(null)}
+                  onDuplicateNode={duplicateNode}
+                  onDeleteNode={deleteNode}
+                  onDeleteEdge={deleteEdge}
+                  onInspectNode={inspectNode}
+                  onRenameNode={renameNode}
+                  onLockNode={lockNode}
+                  onFitView={() => fitView({ padding: 0.15, duration: 300 })}
+                  onAddBlockAtCursor={onAddBlockAtCursor}
+                  onGroupSelection={groupSelection}
+                  onUngroupNode={ungroupNode}
+                  onToggleCollapse={toggleGroupCollapse}
+                  onDeleteSelected={deleteSelected}
+                  onSaveAsTemplate={saveAsTemplate}
+                  canUseGroups={ent.canUseGroups}
+                  onCopyNodeValue={copyNodeValue}
+                  onJumpToNode={jumpToNode}
+                  computed={computed}
+                />
+              )}
+
+              {/* Quick-add palette */}
+              {quickAdd && (
+                <QuickAddPalette
+                  screenX={quickAdd.screenX}
+                  screenY={quickAdd.screenY}
+                  onAdd={onQuickAddBlock}
+                  onClose={() => setQuickAdd(null)}
+                  plan={plan}
+                  onProBlocked={() => {
+                    setQuickAdd(null)
+                    setShowUpgradeModal(true)
+                  }}
+                />
+              )}
+              {/* Find block dialog */}
+              {findOpen && (
+                <FindBlockDialog
+                  nodes={nodes}
+                  onFocusNode={focusNode}
+                  onClose={() => setFindOpen(false)}
+                />
+              )}
+              {/* Upgrade modal for Pro-only blocks */}
+              {showUpgradeModal && (
+                <UpgradeModal
+                  open={showUpgradeModal}
+                  onClose={() => setShowUpgradeModal(false)}
+                  reason="feature_locked"
+                />
+              )}
+              {/* Value popover (W12.4) */}
+              {popoverTarget && (
+                <ValuePopover
+                  nodeId={popoverTarget.nodeId}
+                  x={popoverTarget.x}
+                  y={popoverTarget.y}
+                  computed={computed}
+                  onClose={() => setPopoverTarget(null)}
+                  onJumpToNode={jumpToNode}
+                />
+              )}
             </div>
-          )}
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            nodeTypes={NODE_TYPES}
-            edgeTypes={EDGE_TYPES}
-            onNodesChange={readOnly ? undefined : onNodesChange}
-            onEdgesChange={readOnly ? undefined : onEdgesChange}
-            onConnect={readOnly ? undefined : onConnect}
-            isValidConnection={isValidConnection}
-            onNodeDragStart={readOnly ? undefined : onNodeDragStart}
-            onNodeClick={onNodeClick}
-            onPaneClick={onPaneClick}
-            onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
-            onEdgeContextMenu={readOnly ? undefined : onEdgeContextMenu}
-            onPaneContextMenu={readOnly ? undefined : onPaneContextMenu}
-            nodesConnectable={!readOnly && !locked}
-            nodesDraggable={!readOnly && !locked && !panMode}
-            elementsSelectable={!readOnly}
-            panOnDrag={panMode || locked ? [0, 1, 2] : [1, 2]}
-            snapToGrid={snapToGrid}
-            snapGrid={[16, 16]}
-            fitView
-            fitViewOptions={{ padding: 0.2 }}
-            deleteKeyCode={null}
-            minZoom={0.08}
-            maxZoom={4}
-          >
-            <Background
-              variant={BackgroundVariant.Dots}
-              gap={24}
-              size={1}
-              color="rgba(255,255,255,0.06)"
-            />
-            {minimap && (
-              <MiniMap
-                pannable
-                zoomable
-                style={{ background: 'var(--card-bg)', border: '1px solid var(--border)' }}
-                nodeColor={(node) =>
-                  node.type === 'csGroup' ? 'var(--primary)' : 'var(--text-muted)'
-                }
-                maskColor="rgba(0,0,0,0.15)"
-              />
-            )}
-          </ReactFlow>
-          <BottomToolbar
-            panMode={panMode}
-            locked={locked}
-            snapToGrid={snapToGrid}
-            minimap={minimap}
-            paused={paused}
-            libVisible={libVisible}
-            inspVisible={inspVisible}
-            readOnly={!!readOnly}
-            onTogglePan={() => setPanMode((v) => !v)}
-            onToggleLock={() => setLocked((v) => !v)}
-            onToggleSnap={() => setSnapToGrid((v) => !v)}
-            onToggleMinimap={() => {
-              setMinimap((v) => {
-                setMinimapPref(!v)
-                return !v
-              })
-            }}
-            onTogglePause={() => setPaused((v) => !v)}
-            onRefresh={() => setEngineKey((k) => k + 1)}
-            onToggleLibrary={() => {
-              setLibVisible((v) => !v)
-              if (isMobile) setInspVisible(false)
-            }}
-            onToggleInspector={() => {
-              setInspVisible((v) => {
-                if (v) setInspectedId(null)
-                return !v
-              })
-              if (isMobile) setLibVisible(false)
-            }}
-            onAutoOrganise={(shiftKey) => handleAutoOrganise(shiftKey ? 'TB' : 'LR')}
-            edgesAnimated={edgesAnimated}
-            lodEnabled={lodEnabled}
-            onToggleEdgesAnimated={() => {
-              setEdgesAnimated((v) => {
-                setEdgesAnimatedPref(!v)
-                return !v
-              })
-            }}
-            onToggleLod={() => {
-              setLodEnabled((v) => {
-                setLodPref(!v)
-                return !v
-              })
-            }}
-            debugConsoleVisible={debugConsoleVisible}
-            onToggleDebugConsole={() => useDebugConsoleStore.getState().toggleVisible()}
-            badgesEnabled={badgesEnabled}
-            onToggleBadges={() => {
-              setBadgesEnabled((v) => {
-                setBadgesPref(!v)
-                return !v
-              })
-            }}
-            edgeBadgesEnabled={edgeBadgesEnabled}
-            onToggleEdgeBadges={() => {
-              setEdgeBadgesEnabled((v) => {
-                setEdgeBadgesPref(!v)
-                return !v
-              })
-            }}
-            healthPanelVisible={healthPanelVisible}
-            onToggleHealthPanel={() => {
-              setHealthPanelVisible((v) => {
-                setHealthPanelPref(!v)
-                return !v
-              })
-            }}
-          />
-          {debugConsoleVisible && <DebugConsolePanel />}
-          {healthPanelVisible && (
-            <GraphHealthPanel
-              nodes={nodes}
-              edges={edges}
-              onClose={() => {
-                setHealthPanelVisible(false)
-                setHealthPanelPref(false)
-              }}
-            />
-          )}
-        </div>
-
-        {/* Inspector panel — desktop inline */}
-        {inspVisible && !isMobile && (
-          <Inspector
-            nodeId={inspectedId}
-            width={inspWidth}
-            onClose={closeInspector}
-            onResizeStart={onInspResizeStart}
-            onToggleCollapse={toggleGroupCollapse}
-            onUngroupNode={ungroupNode}
-            canUseGroups={ent.canUseGroups}
-          />
-        )}
-
-        {/* ── Mobile overlay drawers ──────────────────────────────────────────── */}
-        {showBackdrop && (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'rgba(0,0,0,0.5)',
-              zIndex: 19,
-            }}
-            onClick={() => {
-              setLibVisible(false)
-              setInspVisible(false)
-            }}
-          />
-        )}
-
-        {libVisible && !readOnly && isMobile && (
-          <div
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              bottom: 0,
-              zIndex: 20,
-              width: mobileDrawerWidth,
-            }}
-          >
-            <BlockLibrary
-              width={mobileDrawerWidth}
-              onResizeStart={() => {}}
-              plan={plan}
-              onProBlocked={() => setShowUpgradeModal(true)}
-              onInsertTemplate={onInsertTemplate}
-            />
-          </div>
-        )}
-
-        {inspVisible && isMobile && (
-          <div
-            style={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              zIndex: 20,
-              width: mobileDrawerWidth,
-            }}
-          >
-            <Inspector
-              nodeId={inspectedId}
-              width={mobileDrawerWidth}
-              onClose={closeInspector}
-              onResizeStart={() => {}}
-              onToggleCollapse={toggleGroupCollapse}
-              onUngroupNode={ungroupNode}
-              canUseGroups={ent.canUseGroups}
-            />
-          </div>
-        )}
-
-        {/* Context menu */}
-        {contextMenu && (
-          <ContextMenu
-            target={contextMenu}
-            onClose={() => setContextMenu(null)}
-            onDuplicateNode={duplicateNode}
-            onDeleteNode={deleteNode}
-            onDeleteEdge={deleteEdge}
-            onInspectNode={inspectNode}
-            onRenameNode={renameNode}
-            onLockNode={lockNode}
-            onFitView={() => fitView({ padding: 0.15, duration: 300 })}
-            onAddBlockAtCursor={onAddBlockAtCursor}
-            onGroupSelection={groupSelection}
-            onUngroupNode={ungroupNode}
-            onToggleCollapse={toggleGroupCollapse}
-            onDeleteSelected={deleteSelected}
-            onSaveAsTemplate={saveAsTemplate}
-            canUseGroups={ent.canUseGroups}
-            onCopyNodeValue={copyNodeValue}
-            onJumpToNode={jumpToNode}
-            computed={computed}
-          />
-        )}
-
-        {/* Quick-add palette */}
-        {quickAdd && (
-          <QuickAddPalette
-            screenX={quickAdd.screenX}
-            screenY={quickAdd.screenY}
-            onAdd={onQuickAddBlock}
-            onClose={() => setQuickAdd(null)}
-            plan={plan}
-            onProBlocked={() => {
-              setQuickAdd(null)
-              setShowUpgradeModal(true)
-            }}
-          />
-        )}
-        {/* Find block dialog */}
-        {findOpen && (
-          <FindBlockDialog
-            nodes={nodes}
-            onFocusNode={focusNode}
-            onClose={() => setFindOpen(false)}
-          />
-        )}
-        {/* Upgrade modal for Pro-only blocks */}
-        {showUpgradeModal && (
-          <UpgradeModal
-            open={showUpgradeModal}
-            onClose={() => setShowUpgradeModal(false)}
-            reason="feature_locked"
-          />
-        )}
-        {/* Value popover (W12.4) */}
-        {popoverTarget && (
-          <ValuePopover
-            nodeId={popoverTarget.nodeId}
-            x={popoverTarget.x}
-            y={popoverTarget.y}
-            computed={computed}
-            onClose={() => setPopoverTarget(null)}
-            onJumpToNode={jumpToNode}
-          />
-        )}
-      </div>
-    </ValuePopoverContext.Provider>
-    </CanvasSettingsContext.Provider>
+          </ValuePopoverContext.Provider>
+        </CanvasSettingsContext.Provider>
       </BindingContext.Provider>
     </ComputedContext.Provider>
   )

@@ -130,10 +130,7 @@ export function AppHeader({
     }
   }, [openMenu])
 
-  const stub = useCallback(
-    () => toast(t('menu.comingSoon'), 'info'),
-    [toast, t],
-  )
+  const stub = useCallback(() => toast(t('menu.comingSoon'), 'info'), [toast, t])
 
   // ── File menu handlers ──────────────────────────────────────────────────────
 
@@ -279,17 +276,50 @@ export function AppHeader({
 
   const editItems = useMemo(
     (): MenuEntry[] => [
-      { label: t('menu.undo'), shortcut: 'Ctrl+Z', disabled: readOnly, onClick: () => canvasRef.current?.undo() },
-      { label: t('menu.redo'), shortcut: 'Ctrl+Shift+Z', disabled: readOnly, onClick: () => canvasRef.current?.redo() },
+      {
+        label: t('menu.undo'),
+        shortcut: 'Ctrl+Z',
+        disabled: readOnly,
+        onClick: () => canvasRef.current?.undo(),
+      },
+      {
+        label: t('menu.redo'),
+        shortcut: 'Ctrl+Shift+Z',
+        disabled: readOnly,
+        onClick: () => canvasRef.current?.redo(),
+      },
       { separator: true },
-      { label: t('menu.cut'), shortcut: 'Ctrl+X', disabled: readOnly, onClick: () => canvasRef.current?.cut() },
+      {
+        label: t('menu.cut'),
+        shortcut: 'Ctrl+X',
+        disabled: readOnly,
+        onClick: () => canvasRef.current?.cut(),
+      },
       { label: t('menu.copy'), shortcut: 'Ctrl+C', onClick: () => canvasRef.current?.copy() },
-      { label: t('menu.paste'), shortcut: 'Ctrl+V', disabled: readOnly, onClick: () => canvasRef.current?.paste() },
+      {
+        label: t('menu.paste'),
+        shortcut: 'Ctrl+V',
+        disabled: readOnly,
+        onClick: () => canvasRef.current?.paste(),
+      },
       { separator: true },
-      { label: t('menu.selectAll'), shortcut: 'Ctrl+A', onClick: () => canvasRef.current?.selectAll() },
-      { label: t('menu.deleteSelected'), shortcut: 'Del', disabled: readOnly, onClick: () => canvasRef.current?.deleteSelected() },
+      {
+        label: t('menu.selectAll'),
+        shortcut: 'Ctrl+A',
+        onClick: () => canvasRef.current?.selectAll(),
+      },
+      {
+        label: t('menu.deleteSelected'),
+        shortcut: 'Del',
+        disabled: readOnly,
+        onClick: () => canvasRef.current?.deleteSelected(),
+      },
       { separator: true },
-      { label: t('menu.findBlock'), shortcut: 'Ctrl+F', onClick: () => canvasRef.current?.openFind() },
+      {
+        label: t('menu.findBlock'),
+        shortcut: 'Ctrl+F',
+        onClick: () => canvasRef.current?.openFind(),
+      },
     ],
     [t, readOnly, canvasRef],
   )
@@ -450,10 +480,7 @@ export function AppHeader({
 
   // ── Command palette ────────────────────────────────────────────────────────
 
-  const paletteActions = useMemo(
-    () => flattenMenusToActions(menus as MenuDef[]),
-    [menus],
-  )
+  const paletteActions = useMemo(() => flattenMenusToActions(menus as MenuDef[]), [menus])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -623,10 +650,7 @@ export function AppHeader({
           </button>
 
           {/* User avatar */}
-          <div
-            title={userEmail ?? undefined}
-            style={avatarStyle}
-          >
+          <div title={userEmail ?? undefined} style={avatarStyle}>
             {initials}
           </div>
         </div>
@@ -654,10 +678,7 @@ export function AppHeader({
         actions={confirmActions}
       />
       {paletteOpen && (
-        <CommandPalette
-          actions={paletteActions}
-          onClose={() => setPaletteOpen(false)}
-        />
+        <CommandPalette actions={paletteActions} onClose={() => setPaletteOpen(false)} />
       )}
     </>
   )

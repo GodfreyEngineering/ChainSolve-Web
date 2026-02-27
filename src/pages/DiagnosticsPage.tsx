@@ -68,7 +68,12 @@ const s = {
     padding: '1.5rem',
   } satisfies React.CSSProperties,
   h2: { margin: '0 0 1rem', fontSize: '1.1rem', color: '#1CABB0' } satisfies React.CSSProperties,
-  kv: { display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', fontSize: '0.85rem' } satisfies React.CSSProperties,
+  kv: {
+    display: 'flex',
+    gap: '0.5rem',
+    marginBottom: '0.5rem',
+    fontSize: '0.85rem',
+  } satisfies React.CSSProperties,
   key: { opacity: 0.5, minWidth: '140px' } satisfies React.CSSProperties,
   btn: {
     padding: '0.45rem 1rem',

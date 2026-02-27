@@ -27,6 +27,15 @@ section "Install Node dependencies"
 npm ci || fail "npm ci"
 pass "npm ci"
 
+# ── Format + lint (fast-fail before heavy steps) ──────────────────────────
+section "Prettier format check"
+npm run format:check || fail "prettier"
+pass "prettier"
+
+section "ESLint"
+npm run lint || fail "eslint"
+pass "eslint"
+
 # ── WASM build ─────────────────────────────────────────────────────────────
 section "Build WASM (release)"
 wasm-pack build crates/engine-wasm --target web --release || fail "wasm-pack build"
@@ -45,15 +54,6 @@ pass "tsc (app)"
 section "TypeScript typecheck (functions)"
 npm run typecheck:functions || fail "tsc (functions)"
 pass "tsc (functions)"
-
-# ── Lint + format ──────────────────────────────────────────────────────────
-section "ESLint"
-npm run lint || fail "eslint"
-pass "eslint"
-
-section "Prettier format check"
-npm run format:check || fail "prettier"
-pass "prettier"
 
 # ── Unit tests ─────────────────────────────────────────────────────────────
 section "Unit tests (vitest)"

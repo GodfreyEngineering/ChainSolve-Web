@@ -11,8 +11,7 @@ import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../pages/Settings'
 
 // ── Mobile breakpoint ──────────────────────────────────────────────────────
-const mql =
-  typeof window !== 'undefined' ? window.matchMedia('(max-width: 639px)') : null
+const mql = typeof window !== 'undefined' ? window.matchMedia('(max-width: 639px)') : null
 
 function subscribeNarrow(cb: () => void) {
   mql?.addEventListener('change', cb)
@@ -85,8 +84,7 @@ export function SettingsModal() {
     <div
       style={overlayStyle}
       onClick={(e) => {
-        if (panelRef.current && !panelRef.current.contains(e.target as Node))
-          closeSettings()
+        if (panelRef.current && !panelRef.current.contains(e.target as Node)) closeSettings()
       }}
       role="dialog"
       aria-modal="true"
@@ -116,11 +114,7 @@ export function SettingsModal() {
           {!narrow && (
             <div style={sidebarHeader}>
               <h2 style={sidebarTitle}>{t('settings.title')}</h2>
-              <button
-                onClick={closeSettings}
-                style={closeBtnStyle}
-                aria-label="Close"
-              >
+              <button onClick={closeSettings} style={closeBtnStyle} aria-label="Close">
                 ✕
               </button>
             </div>
@@ -129,18 +123,12 @@ export function SettingsModal() {
             <button
               key={key}
               onClick={() => setTab(key)}
-              style={
-                narrow
-                  ? narrowTabStyle(tab === key)
-                  : tabBtnStyle(tab === key)
-              }
+              style={narrow ? narrowTabStyle(tab === key) : tabBtnStyle(tab === key)}
             >
               <span style={{ fontSize: narrow ? '1rem' : '0.95rem' }}>{icon}</span>
               {!narrow && (
                 <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontWeight: tab === key ? 600 : 400 }}>
-                    {t(`settings.${key}`)}
-                  </div>
+                  <div style={{ fontWeight: tab === key ? 600 : 400 }}>{t(`settings.${key}`)}</div>
                   <div style={tabDescStyle}>{t(`settings.${key}Desc`)}</div>
                 </div>
               )}

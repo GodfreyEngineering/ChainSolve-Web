@@ -29,17 +29,8 @@ import type {
   ReactBoundaryPayload,
   Breadcrumb,
 } from './types'
-import {
-  OBS_EVENT_TYPE,
-  OBS_LIMITS,
-} from './types'
-import {
-  redactString,
-  redactUrl,
-  pathOnly,
-  redactTags,
-  makeFingerprint,
-} from './redact'
+import { OBS_EVENT_TYPE, OBS_LIMITS } from './types'
+import { redactString, redactUrl, pathOnly, redactTags, makeFingerprint } from './redact'
 import { BUILD_SHA, BUILD_ENV } from '../lib/build-info'
 
 // ── Configuration ─────────────────────────────────────────────────────────────
@@ -261,9 +252,10 @@ function flushQueue(): void {
  */
 function captureWindowError(e: ErrorEvent): void {
   const msg = truncate(redactString(e.message ?? 'Unknown error'), OBS_LIMITS.MAX_MESSAGE_CHARS)
-  const stack = e.error instanceof Error
-    ? truncate(redactString(e.error.stack ?? ''), OBS_LIMITS.MAX_STACK_CHARS)
-    : undefined
+  const stack =
+    e.error instanceof Error
+      ? truncate(redactString(e.error.stack ?? ''), OBS_LIMITS.MAX_STACK_CHARS)
+      : undefined
   const fp = makeFingerprint(OBS_EVENT_TYPE.CLIENT_ERROR, msg, currentRoute())
   if (!checkRateLimit() || !checkDedup(fp)) return
   if (Math.random() > sampleRate()) return
@@ -286,7 +278,8 @@ function captureWindowError(e: ErrorEvent): void {
  * Capture an unhandled promise rejection.
  */
 function captureUnhandledRejection(e: PromiseRejectionEvent): void {
-  const raw = e.reason instanceof Error ? e.reason.message : String(e.reason ?? 'Unhandled rejection')
+  const raw =
+    e.reason instanceof Error ? e.reason.message : String(e.reason ?? 'Unhandled rejection')
   const msg = truncate(redactString(raw), OBS_LIMITS.MAX_MESSAGE_CHARS)
   const fp = makeFingerprint(OBS_EVENT_TYPE.CLIENT_UNHANDLED_REJECTION, msg, currentRoute())
   if (!checkRateLimit() || !checkDedup(fp)) return
@@ -315,7 +308,9 @@ export function captureReactBoundary(error: Error, componentStack?: string): voi
 
   const payload: ReactBoundaryPayload = {
     message: msg,
-    stack: error.stack ? truncate(redactString(error.stack), OBS_LIMITS.MAX_STACK_CHARS) : undefined,
+    stack: error.stack
+      ? truncate(redactString(error.stack), OBS_LIMITS.MAX_STACK_CHARS)
+      : undefined,
     componentStack: componentStack
       ? truncate(redactString(componentStack), OBS_LIMITS.MAX_COMPONENT_STACK_CHARS)
       : undefined,

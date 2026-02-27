@@ -5,11 +5,7 @@
  * searchable list of PaletteActions — zero duplication of handlers.
  */
 
-import {
-  isSeparator,
-  isSubmenu,
-  type MenuEntry,
-} from '../components/ui/dropdownMenuTypes'
+import { isSeparator, isSubmenu, type MenuEntry } from '../components/ui/dropdownMenuTypes'
 
 /* ── Types ─────────────────────────────────────────────────────────────────── */
 
@@ -52,7 +48,10 @@ export function flattenMenusToActions(menus: MenuDef[]): PaletteAction[] {
         for (const child of entry.children) {
           if (isSeparator(child)) continue
           if (isSubmenu(child)) continue // skip nested submenus
-          if (!child.onClick) { childIdx++; continue }
+          if (!child.onClick) {
+            childIdx++
+            continue
+          }
           result.push({
             id: `${menu.id}:${entry.label}:${childIdx}`,
             label: child.label,
@@ -64,7 +63,10 @@ export function flattenMenusToActions(menus: MenuDef[]): PaletteAction[] {
           childIdx++
         }
       } else {
-        if (!entry.onClick) { idx++; continue }
+        if (!entry.onClick) {
+          idx++
+          continue
+        }
         result.push({
           id: `${menu.id}:${idx}`,
           label: entry.label,
@@ -84,10 +86,7 @@ export function flattenMenusToActions(menus: MenuDef[]): PaletteAction[] {
 /* ── Filter ────────────────────────────────────────────────────────────────── */
 
 /** Filter actions by a search query (case-insensitive substring match). */
-export function filterActions(
-  actions: PaletteAction[],
-  query: string,
-): PaletteAction[] {
+export function filterActions(actions: PaletteAction[], query: string): PaletteAction[] {
   const q = query.trim().toLowerCase()
   if (!q) return actions
   return actions.filter(

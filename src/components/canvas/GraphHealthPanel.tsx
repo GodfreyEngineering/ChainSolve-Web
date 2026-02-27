@@ -35,7 +35,11 @@ export default function GraphHealthPanel({ nodes, edges, onClose }: GraphHealthP
           {t('graphHealth.title', 'Graph Health')}
         </span>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
-          <button onClick={handleCopy} style={ctrlBtn} title={t('graphHealth.copyReport', 'Copy report')}>
+          <button
+            onClick={handleCopy}
+            style={ctrlBtn}
+            title={t('graphHealth.copyReport', 'Copy report')}
+          >
             {'\u2398'}
           </button>
           <button onClick={onClose} style={ctrlBtn} title="Close">
@@ -51,7 +55,10 @@ export default function GraphHealthPanel({ nodes, edges, onClose }: GraphHealthP
           <StatCell label={t('graphHealth.nodes', 'Nodes')} value={report.nodeCount} />
           <StatCell label={t('graphHealth.edges', 'Edges')} value={report.edgeCount} />
           <StatCell label={t('graphHealth.groups', 'Groups')} value={report.groupCount} />
-          <StatCell label={t('graphHealth.collapsed', 'Collapsed')} value={report.collapsedGroupCount} />
+          <StatCell
+            label={t('graphHealth.collapsed', 'Collapsed')}
+            value={report.collapsedGroupCount}
+          />
         </div>
 
         {/* Warnings */}
@@ -62,9 +69,7 @@ export default function GraphHealthPanel({ nodes, edges, onClose }: GraphHealthP
             ))}
           </div>
         ) : (
-          <div style={noWarningsStyle}>
-            {'\u2713'} No issues detected
-          </div>
+          <div style={noWarningsStyle}>{'\u2713'} No issues detected</div>
         )}
       </div>
     </div>
@@ -93,9 +98,7 @@ function WarningRow({
 }) {
   const icon = warning.severity === 'warn' ? '\u26a0' : '\u2139'
   const color = warning.severity === 'warn' ? '#f59e0b' : '#3b82f6'
-  const msg = warning.detail
-    ? t(warning.key, { count: Number(warning.detail) })
-    : t(warning.key)
+  const msg = warning.detail ? t(warning.key, { count: Number(warning.detail) }) : t(warning.key)
   return (
     <div style={warningRowStyle}>
       <span style={{ color, flexShrink: 0 }}>{icon}</span>

@@ -44,30 +44,30 @@ export interface ObsCf {
 // ── Per-event-type payloads ───────────────────────────────────────────────────
 
 export interface ClientErrorPayload {
-  message: string           // truncated to 2 KB
-  stack?: string            // truncated to 8 KB
-  filename?: string         // origin+path only, no query
+  message: string // truncated to 2 KB
+  stack?: string // truncated to 8 KB
+  filename?: string // origin+path only, no query
   lineno?: number
   colno?: number
   breadcrumbs: Breadcrumb[] // last ≤ 30 actions
 }
 
 export interface ClientRejectionPayload {
-  reason: string            // truncated to 2 KB; redacted
+  reason: string // truncated to 2 KB; redacted
   breadcrumbs: Breadcrumb[]
 }
 
 export interface ReactBoundaryPayload {
   message: string
-  stack?: string            // truncated to 8 KB
-  componentStack?: string   // truncated to 4 KB
+  stack?: string // truncated to 8 KB
+  componentStack?: string // truncated to 4 KB
   breadcrumbs: Breadcrumb[]
 }
 
 export interface CspViolationPayload {
   effectiveDirective: string
-  blockedUrl: string        // origin+path only
-  documentUrl: string       // path only (no origin)
+  blockedUrl: string // origin+path only
+  documentUrl: string // path only (no origin)
   disposition: 'enforce' | 'report' | string
   statusCode?: number
 }
@@ -79,7 +79,7 @@ export interface EngineDiagnosticsPayload {
   edgeCount: number
   evalDurationUs: number
   diagnostics: Array<{ nodeId?: string; level: string; code: string; message: string }>
-  trace: Array<{ nodeId: string; opId: string; durationUs?: number }>  // summary only, no values
+  trace: Array<{ nodeId: string; opId: string; durationUs?: number }> // summary only, no values
   workerEvents: WorkerLifecycleEvent[]
 }
 
@@ -89,7 +89,7 @@ export interface DoctorResultPayload {
 }
 
 export interface ServerErrorPayload {
-  handler: string           // e.g. "POST /api/report/client"
+  handler: string // e.g. "POST /api/report/client"
   message: string
   statusCode: number
 }
@@ -106,8 +106,8 @@ export type ObsPayload =
 // ── Breadcrumb (action log) ───────────────────────────────────────────────────
 
 export interface Breadcrumb {
-  ts: string                // ISO timestamp
-  action: string            // e.g. "route_change", "project_save", "canvas_open"
+  ts: string // ISO timestamp
+  action: string // e.g. "route_change", "project_save", "canvas_open"
   /** Small set of safe context keys: canvasId, projectId, feature flags. */
   ctx?: Record<string, string>
 }
@@ -158,8 +158,8 @@ export interface ObsEvent {
 // ── Size constants ────────────────────────────────────────────────────────────
 
 export const OBS_LIMITS = {
-  MAX_EVENT_BYTES: 16_384,         // 16 KB total JSON
-  MAX_STACK_CHARS: 8_192,          // 8 KB stack trace
+  MAX_EVENT_BYTES: 16_384, // 16 KB total JSON
+  MAX_STACK_CHARS: 8_192, // 8 KB stack trace
   MAX_COMPONENT_STACK_CHARS: 4_096,
   MAX_MESSAGE_CHARS: 2_048,
   MAX_BREADCRUMBS: 30,

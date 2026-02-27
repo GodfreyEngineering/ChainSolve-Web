@@ -50,9 +50,10 @@ export interface DiagnosticsBundle {
   canvasId: string | null
   engineVersion: string
   contractVersion: number
-  recentEvals: EngineEvalRecord[]       // last 20
-  workerEvents: WorkerLifecycleEvent[]  // last 50
-  engineDiagnostics: Array<{            // last 50 non-info diagnostics
+  recentEvals: EngineEvalRecord[] // last 20
+  workerEvents: WorkerLifecycleEvent[] // last 50
+  engineDiagnostics: Array<{
+    // last 50 non-info diagnostics
     ts: string
     nodeId?: string
     level: string
@@ -139,10 +140,7 @@ export function captureEvalResult(input: CaptureEvalInput): void {
 /**
  * Record a worker lifecycle event.
  */
-export function captureWorkerEvent(
-  event: WorkerLifecycleEvent['event'],
-  detail?: string,
-): void {
+export function captureWorkerEvent(event: WorkerLifecycleEvent['event'], detail?: string): void {
   _workerEvents.push({ ts: new Date().toISOString(), event, detail })
   if (_workerEvents.length > OBS_LIMITS.MAX_WORKER_EVENTS) {
     _workerEvents.shift()

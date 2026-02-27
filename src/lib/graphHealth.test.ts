@@ -53,12 +53,7 @@ describe('getCrossingEdges', () => {
   })
 
   it('detects edges crossing between groups', () => {
-    const nodes = [
-      mkGroup('g1'),
-      mkGroup('g2'),
-      mkNode('a', 'g1'),
-      mkNode('b', 'g2'),
-    ]
+    const nodes = [mkGroup('g1'), mkGroup('g2'), mkNode('a', 'g1'), mkNode('b', 'g2')]
     const edges = [mkEdge('e1', 'a', 'b')]
     const result = getCrossingEdges(nodes, edges)
     expect(result).toHaveLength(1)
@@ -88,12 +83,7 @@ describe('getCrossingEdges', () => {
 
 describe('getCrossingEdgesForGroup', () => {
   it('returns edges crossing a specific group boundary', () => {
-    const nodes = [
-      mkGroup('g1'),
-      mkNode('a', 'g1'),
-      mkNode('b', 'g1'),
-      mkNode('c'),
-    ]
+    const nodes = [mkGroup('g1'), mkNode('a', 'g1'), mkNode('b', 'g1'), mkNode('c')]
     const edges = [mkEdge('e1', 'a', 'b'), mkEdge('e2', 'a', 'c')]
     const result = getCrossingEdgesForGroup('g1', nodes, edges)
     expect(result).toHaveLength(1)
@@ -133,12 +123,7 @@ describe('computeGraphHealth', () => {
   })
 
   it('counts groups and collapsed groups', () => {
-    const nodes = [
-      mkGroup('g1'),
-      mkGroup('g2', true),
-      mkNode('a', 'g1'),
-      mkNode('b', 'g2'),
-    ]
+    const nodes = [mkGroup('g1'), mkGroup('g2', true), mkNode('a', 'g1'), mkNode('b', 'g2')]
     const edges = [mkEdge('e1', 'a', 'b')]
     const report = computeGraphHealth(nodes, edges)
     expect(report.groupCount).toBe(2)
@@ -148,12 +133,7 @@ describe('computeGraphHealth', () => {
   })
 
   it('detects crossing edges', () => {
-    const nodes = [
-      mkGroup('g1'),
-      mkGroup('g2'),
-      mkNode('a', 'g1'),
-      mkNode('b', 'g2'),
-    ]
+    const nodes = [mkGroup('g1'), mkGroup('g2'), mkNode('a', 'g1'), mkNode('b', 'g2')]
     const edges = [mkEdge('e1', 'a', 'b')]
     const report = computeGraphHealth(nodes, edges)
     expect(report.crossingEdgeCount).toBe(1)
@@ -162,11 +142,7 @@ describe('computeGraphHealth', () => {
 
   it('detects cycles', () => {
     const nodes = [mkNode('a'), mkNode('b'), mkNode('c')]
-    const edges = [
-      mkEdge('e1', 'a', 'b'),
-      mkEdge('e2', 'b', 'c'),
-      mkEdge('e3', 'c', 'a'),
-    ]
+    const edges = [mkEdge('e1', 'a', 'b'), mkEdge('e2', 'b', 'c'), mkEdge('e3', 'c', 'a')]
     const report = computeGraphHealth(nodes, edges)
     expect(report.cycleDetected).toBe(true)
     expect(report.warnings.some((w) => w.key === 'graphHealth.cycleDetected')).toBe(true)
@@ -202,10 +178,7 @@ describe('formatHealthReport', () => {
   })
 
   it('includes stats in the output', () => {
-    const report = computeGraphHealth(
-      [mkNode('a'), mkNode('b')],
-      [mkEdge('e1', 'a', 'b')],
-    )
+    const report = computeGraphHealth([mkNode('a'), mkNode('b')], [mkEdge('e1', 'a', 'b')])
     const result = formatHealthReport(report, mockT)
     expect(result).toContain('graphHealth.nodes')
     expect(result).toContain('2')

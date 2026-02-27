@@ -46,7 +46,15 @@ beforeEach(() => {
     paused: false,
     search: '',
     minLevel: 'trace',
-    enabledScopes: new Set(['engine', 'bindings', 'variables', 'persistence', 'network', 'perf', 'ui']),
+    enabledScopes: new Set([
+      'engine',
+      'bindings',
+      'variables',
+      'persistence',
+      'network',
+      'perf',
+      'ui',
+    ]),
     autoScroll: true,
     visible: false,
   })
@@ -113,7 +121,15 @@ describe('redaction', () => {
 // ── filterEntries ──────────────────────────────────────────────────────────────
 
 describe('filterEntries', () => {
-  const allScopes = new Set(['engine', 'bindings', 'variables', 'persistence', 'network', 'perf', 'ui'] as const)
+  const allScopes = new Set([
+    'engine',
+    'bindings',
+    'variables',
+    'persistence',
+    'network',
+    'perf',
+    'ui',
+  ] as const)
 
   it('filters by minLevel (error only)', () => {
     const entries = [
@@ -204,9 +220,7 @@ describe('exportText', () => {
   })
 
   it('includes meta as JSON suffix', () => {
-    const entries = [
-      makeEntry({ msg: 'test', meta: { nodeId: 'n1' } }),
-    ]
+    const entries = [makeEntry({ msg: 'test', meta: { nodeId: 'n1' } })]
     const text = exportText(entries)
     expect(text).toContain('{"nodeId":"n1"}')
   })
@@ -220,7 +234,12 @@ describe('exportJson', () => {
       makeEntry({ ts: 1700000000000, level: 'warn', scope: 'persistence', msg: 'Conflict' }),
     ]
     const json = exportJson(entries)
-    const parsed = JSON.parse(json) as Array<{ ts: string; level: string; scope: string; msg: string }>
+    const parsed = JSON.parse(json) as Array<{
+      ts: string
+      level: string
+      scope: string
+      msg: string
+    }>
     expect(parsed).toHaveLength(1)
     expect(parsed[0].ts).toMatch(/^\d{4}-\d{2}-\d{2}T/)
     expect(parsed[0].level).toBe('warn')
@@ -229,9 +248,7 @@ describe('exportJson', () => {
   })
 
   it('includes meta when present', () => {
-    const entries = [
-      makeEntry({ meta: { count: 42 } }),
-    ]
+    const entries = [makeEntry({ meta: { count: 42 } })]
     const parsed = JSON.parse(exportJson(entries)) as Array<{ meta: { count: number } }>
     expect(parsed[0].meta.count).toBe(42)
   })

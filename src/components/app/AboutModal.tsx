@@ -13,7 +13,15 @@ export function AboutModal({ open, onClose }: Props) {
 
   return (
     <Modal open={open} onClose={onClose} title={t('menu.about')} width={380}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '0.5rem 0' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem',
+          padding: '0.5rem 0',
+        }}
+      >
         <img src={BRAND.logoWideText} alt="ChainSolve" style={{ height: 32 }} />
         <p style={{ fontSize: '0.85rem', opacity: 0.6, margin: 0, textAlign: 'center' }}>
           {t('app.tagline')}

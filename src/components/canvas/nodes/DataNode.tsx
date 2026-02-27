@@ -68,10 +68,14 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
     >
       <div style={{ ...s.header, ...(selected ? {} : {}) }}>
         <span style={s.headerLabel}>{nd.label}</span>
-        <span className="cs-node-header-value" style={s.headerValue}>{formatValue(value)}</span>
+        <span className="cs-node-header-value" style={s.headerValue}>
+          {formatValue(value)}
+        </span>
       </div>
 
-      <div className="cs-node-body" style={s.body}>{renderEditor()}</div>
+      <div className="cs-node-body" style={s.body}>
+        {renderEditor()}
+      </div>
 
       <Handle
         type="source"

@@ -154,7 +154,14 @@ export const useDebugConsoleStore = create<DebugConsoleState>((set, get) => ({
     if (get().paused) return
     const redactedMeta = meta ? (redactObject(meta) as Record<string, unknown>) : undefined
     set((s) => {
-      const entry: LogEntry = { id: s.nextId, ts: Date.now(), level, scope, msg, meta: redactedMeta }
+      const entry: LogEntry = {
+        id: s.nextId,
+        ts: Date.now(),
+        level,
+        scope,
+        msg,
+        meta: redactedMeta,
+      }
       const next = [...s.entries, entry]
       // Ring buffer: trim from the front
       if (next.length > MAX_ENTRIES) next.splice(0, next.length - MAX_ENTRIES)

@@ -27,15 +27,9 @@ export async function loadVariables(projectId: string): Promise<VariablesMap> {
 }
 
 /** Save variables for a project (full overwrite of the JSONB column). */
-export async function saveVariables(
-  projectId: string,
-  variables: VariablesMap,
-): Promise<void> {
+export async function saveVariables(projectId: string, variables: VariablesMap): Promise<void> {
   dlog.debug('variables', 'Saving variables', { projectId, count: Object.keys(variables).length })
-  const { error } = await supabase
-    .from('projects')
-    .update({ variables })
-    .eq('id', projectId)
+  const { error } = await supabase.from('projects').update({ variables }).eq('id', projectId)
 
   if (error) {
     dlog.error('variables', 'Save failed', { projectId, error: error.message })

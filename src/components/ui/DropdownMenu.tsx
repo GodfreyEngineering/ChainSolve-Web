@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  isSeparator,
-  isSubmenu,
-  type MenuEntry,
-  type MenuItem,
-} from './dropdownMenuTypes'
+import { isSeparator, isSubmenu, type MenuEntry, type MenuItem } from './dropdownMenuTypes'
 
 // Re-export types only (functions live in dropdownMenuTypes.ts)
 export type { MenuEntry, MenuItem, MenuSeparator, MenuSubmenu } from './dropdownMenuTypes'
@@ -103,8 +98,7 @@ export function DropdownMenu({
         }
         case 'ArrowUp': {
           e.preventDefault()
-          const prev =
-            currentActionIdx > 0 ? currentActionIdx - 1 : actionable.length - 1
+          const prev = currentActionIdx > 0 ? currentActionIdx - 1 : actionable.length - 1
           setFocusIdx(actionable[prev].index)
           break
         }
@@ -191,11 +185,7 @@ export function DropdownMenu({
                       {entry.children.map((child, ci) => {
                         if (isSeparator(child)) {
                           return (
-                            <div
-                              key={`sub-sep-${ci}`}
-                              style={separatorStyle}
-                              role="separator"
-                            />
+                            <div key={`sub-sep-${ci}`} style={separatorStyle} role="separator" />
                           )
                         }
                         const c = child as MenuItem
@@ -214,9 +204,7 @@ export function DropdownMenu({
                             }}
                           >
                             <span>{c.label}</span>
-                            {c.shortcut && (
-                              <span style={shortcutStyle}>{c.shortcut}</span>
-                            )}
+                            {c.shortcut && <span style={shortcutStyle}>{c.shortcut}</span>}
                           </div>
                         )
                       })}

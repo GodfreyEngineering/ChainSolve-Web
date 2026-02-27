@@ -174,8 +174,18 @@ const s: StyleMap = {
 
 /** Pro-only categories that require specific entitlements. */
 const PRO_CATEGORIES: Set<BlockCategory> = new Set([
-  'data', 'vectorOps', 'tableOps', 'plot',
-  'finTvm', 'finReturns', 'finDepr', 'statsDesc', 'statsRel', 'probComb', 'probDist', 'utilCalc',
+  'data',
+  'vectorOps',
+  'tableOps',
+  'plot',
+  'finTvm',
+  'finReturns',
+  'finDepr',
+  'statsDesc',
+  'statsRel',
+  'probComb',
+  'probDist',
+  'utilCalc',
 ])
 
 interface BlockItemProps {

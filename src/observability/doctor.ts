@@ -18,10 +18,7 @@ import type { DoctorCheck } from './types'
 
 // ── Check runner ──────────────────────────────────────────────────────────────
 
-async function check(
-  name: string,
-  fn: () => Promise<string>,
-): Promise<DoctorCheck> {
+async function check(name: string, fn: () => Promise<string>): Promise<DoctorCheck> {
   const t0 = performance.now()
   try {
     const message = await fn()

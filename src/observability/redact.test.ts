@@ -43,9 +43,7 @@ describe('redactUrl', () => {
   })
 
   it('strips both query and fragment', () => {
-    expect(redactUrl('https://example.com/path?a=1&b=2#frag')).toBe(
-      'https://example.com/path',
-    )
+    expect(redactUrl('https://example.com/path?a=1&b=2#frag')).toBe('https://example.com/path')
   })
 
   it('returns path-only URL unchanged if no query', () => {
@@ -65,9 +63,7 @@ describe('redactUrl', () => {
 
 describe('pathOnly', () => {
   it('extracts pathname from full URL', () => {
-    expect(pathOnly('https://app.chainsolve.co.uk/canvas/proj123?x=y')).toBe(
-      '/canvas/proj123',
-    )
+    expect(pathOnly('https://app.chainsolve.co.uk/canvas/proj123?x=y')).toBe('/canvas/proj123')
   })
 
   it('handles bare path', () => {
@@ -93,9 +89,7 @@ describe('redactString', () => {
   })
 
   it('replaces credit-card-like numbers', () => {
-    expect(redactString('Card: 4111 1111 1111 1111 declined')).toBe(
-      'Card: [CC] declined',
-    )
+    expect(redactString('Card: 4111 1111 1111 1111 declined')).toBe('Card: [CC] declined')
   })
 
   it('replaces CC without spaces', () => {
@@ -138,17 +132,12 @@ describe('isSecretKey', () => {
     expect(isSecretKey(key)).toBe(true)
   })
 
-  it.each([
-    'canvasId',
-    'projectId',
-    'locale',
-    'message',
-    'nodeId',
-    'count',
-    'ok',
-  ])('does not flag %s as secret', (key) => {
-    expect(isSecretKey(key)).toBe(false)
-  })
+  it.each(['canvasId', 'projectId', 'locale', 'message', 'nodeId', 'count', 'ok'])(
+    'does not flag %s as secret',
+    (key) => {
+      expect(isSecretKey(key)).toBe(false)
+    },
+  )
 })
 
 // ── redactObject ──────────────────────────────────────────────────────────────

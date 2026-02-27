@@ -231,7 +231,11 @@ export function registerFinStatsBlocks(register: (def: BlockDef) => void): void 
       { id: 'y5', label: 'W5' },
       { id: 'y6', label: 'W6' },
     ],
-    defaultData: { blockType: 'fin.returns.weighted_avg', label: 'Weighted Avg', manualValues: { c: 3 } },
+    defaultData: {
+      blockType: 'fin.returns.weighted_avg',
+      label: 'Weighted Avg',
+      manualValues: { c: 3 },
+    },
     proOnly: true,
   })
 
@@ -488,7 +492,11 @@ export function registerFinStatsBlocks(register: (def: BlockDef) => void): void 
       { id: 'y5', label: 'Y5' },
       { id: 'y6', label: 'Y6' },
     ],
-    defaultData: { blockType: 'stats.rel.correlation', label: 'Correlation', manualValues: { c: 3 } },
+    defaultData: {
+      blockType: 'stats.rel.correlation',
+      label: 'Correlation',
+      manualValues: { c: 3 },
+    },
     proOnly: true,
   })
 
@@ -512,7 +520,11 @@ export function registerFinStatsBlocks(register: (def: BlockDef) => void): void 
       { id: 'y5', label: 'Y5' },
       { id: 'y6', label: 'Y6' },
     ],
-    defaultData: { blockType: 'stats.rel.linreg_slope', label: 'LinReg Slope', manualValues: { c: 3 } },
+    defaultData: {
+      blockType: 'stats.rel.linreg_slope',
+      label: 'LinReg Slope',
+      manualValues: { c: 3 },
+    },
     proOnly: true,
   })
 

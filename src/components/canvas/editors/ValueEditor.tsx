@@ -202,7 +202,12 @@ export function ValueEditor({ binding, onChange, compact, override }: ValueEdito
     <div
       ref={containerRef}
       className={compact ? 'nodrag' : undefined}
-      style={{ position: 'relative', display: compact ? 'inline-flex' : 'flex', alignItems: 'center', gap: '0.2rem' }}
+      style={{
+        position: 'relative',
+        display: compact ? 'inline-flex' : 'flex',
+        alignItems: 'center',
+        gap: '0.2rem',
+      }}
     >
       {/* Literal mode: number input + picker button */}
       {(!binding || binding.kind === 'literal') && (
@@ -284,10 +289,7 @@ export function ValueEditor({ binding, onChange, compact, override }: ValueEdito
           />
           <div style={{ flex: 1, overflowY: 'auto' }}>
             {/* Literal option */}
-            <div
-              style={{ ...listItemStyle, color: '#F4F4F3' }}
-              onMouseDown={switchToLiteral}
-            >
+            <div style={{ ...listItemStyle, color: '#F4F4F3' }} onMouseDown={switchToLiteral}>
               Literal value
             </div>
 

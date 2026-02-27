@@ -8,11 +8,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import {
-  resolveBinding,
-  resolveNodeBindings,
-  buildConstantsLookup,
-} from './resolveBindings'
+import { resolveBinding, resolveNodeBindings, buildConstantsLookup } from './resolveBindings'
 import type { InputBinding } from '../blocks/types'
 import type { VariablesMap } from '../lib/variables'
 

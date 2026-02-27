@@ -35,7 +35,12 @@ function btnStyle(variant: ConfirmAction['variant']): React.CSSProperties {
     case 'primary':
       return { ...btnBase, background: 'var(--primary)', color: '#fff', border: 'none' }
     case 'danger':
-      return { ...btnBase, background: 'transparent', color: '#ef4444', border: '1px solid #ef4444' }
+      return {
+        ...btnBase,
+        background: 'transparent',
+        color: '#ef4444',
+        border: '1px solid #ef4444',
+      }
     default:
       return {
         ...btnBase,

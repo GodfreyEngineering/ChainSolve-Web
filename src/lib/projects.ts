@@ -108,9 +108,7 @@ async function readUpdatedAt(projectId: string): Promise<string | null> {
 // ── Exported operations ───────────────────────────────────────────────────────
 
 /** Read a single project row. Used by CanvasPage to anchor conflict detection + resolve active canvas. */
-export async function readProjectRow(
-  projectId: string,
-): Promise<{
+export async function readProjectRow(projectId: string): Promise<{
   name: string
   updated_at: string
   active_canvas_id: string | null
@@ -177,7 +175,10 @@ export async function loadProject(projectId: string): Promise<ProjectJSON> {
     dlog.info('persistence', 'Project loaded', { projectId, schemaVersion: pj.schemaVersion })
     return raw as ProjectJSON
   }
-  dlog.error('persistence', 'Unsupported schemaVersion', { projectId, schemaVersion: String(pj.schemaVersion ?? 'missing') })
+  dlog.error('persistence', 'Unsupported schemaVersion', {
+    projectId,
+    schemaVersion: String(pj.schemaVersion ?? 'missing'),
+  })
   throw new Error(`Unsupported schemaVersion: ${String(pj.schemaVersion ?? 'missing')}`)
 }
 

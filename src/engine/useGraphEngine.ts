@@ -82,7 +82,10 @@ export function useGraphEngine(
       snapshotLoaded.current = true
       const reqId = ++pendingRef.current
       const snapshot = toEngineSnapshot(nodes, edges, constants, variables)
-      dlog.debug('engine', 'Snapshot eval started', { nodeCount: nodes.length, edgeCount: edges.length })
+      dlog.debug('engine', 'Snapshot eval started', {
+        nodeCount: nodes.length,
+        edgeCount: edges.length,
+      })
       const t0 = perfEnabled ? performance.now() : 0
       perfMark('cs:eval:start')
       engine.loadSnapshot(snapshot, options).then((result) => {
@@ -90,7 +93,9 @@ export function useGraphEngine(
         perfMeasure('cs:eval:snapshot', 'cs:eval:start')
         setComputed(toValueMap(result.values))
         setIsPartial(result.partial ?? false)
-        const snapshotErrors = Object.keys(result.values).filter((id) => (result.values[id] as Value)?.kind === 'error')
+        const snapshotErrors = Object.keys(result.values).filter(
+          (id) => (result.values[id] as Value)?.kind === 'error',
+        )
         dlog.info('engine', 'Snapshot eval complete', {
           evalMs: Math.round(result.elapsedUs / 1000),
           nodesComputed: Object.keys(result.values).length,
@@ -148,7 +153,9 @@ export function useGraphEngine(
           if (reqId !== pendingRef.current) return
           perfMeasure('cs:eval:patch', 'cs:eval:start')
           if (result.partial) perfMark('cs:eval:partial')
-          const patchErrors = Object.keys(result.changedValues).filter((id) => (result.changedValues[id] as Value)?.kind === 'error')
+          const patchErrors = Object.keys(result.changedValues).filter(
+            (id) => (result.changedValues[id] as Value)?.kind === 'error',
+          )
           dlog.info('engine', 'Patch eval complete', {
             evalMs: Math.round(result.elapsedUs / 1000),
             changedCount: Object.keys(result.changedValues).length,

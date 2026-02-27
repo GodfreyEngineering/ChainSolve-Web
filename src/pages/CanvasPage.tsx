@@ -283,7 +283,15 @@ export default function CanvasPage() {
         isSaving.current = false
       }
     },
-    [projectId, beginSave, completeSave, failSave, detectConflict, markCanvasClean, markVariablesClean],
+    [
+      projectId,
+      beginSave,
+      completeSave,
+      failSave,
+      detectConflict,
+      markCanvasClean,
+      markVariablesClean,
+    ],
   )
 
   // ── onGraphChange — dirty tracking + debounced autosave ────────────────────

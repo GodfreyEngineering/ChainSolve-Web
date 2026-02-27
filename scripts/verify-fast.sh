@@ -12,6 +12,14 @@ pass() { echo -e "${GREEN}PASS${NC} $1"; }
 fail() { echo -e "${RED}FAIL${NC} $1"; exit 1; }
 section() { echo -e "\n${BOLD}── $1 ──${NC}"; }
 
+section "Prettier format check"
+npm run format:check || fail "prettier"
+pass "prettier"
+
+section "ESLint"
+npm run lint || fail "eslint"
+pass "eslint"
+
 section "WASM export guard"
 node scripts/check-wasm-exports.mjs || fail "WASM export check"
 pass "WASM exports"
@@ -23,14 +31,6 @@ pass "tsc (app)"
 section "TypeScript typecheck (functions)"
 npm run typecheck:functions || fail "tsc (functions)"
 pass "tsc (functions)"
-
-section "ESLint"
-npm run lint || fail "eslint"
-pass "eslint"
-
-section "Prettier format check"
-npm run format:check || fail "prettier"
-pass "prettier"
 
 section "Unit tests (vitest)"
 npm run test:unit || fail "vitest"

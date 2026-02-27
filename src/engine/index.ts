@@ -95,7 +95,12 @@ const defaultWorkerFactory: WorkerFactory = () =>
 /** Wait for a worker to post 'ready', or reject on init-error / timeout. */
 function waitForWorkerReady(
   w: Worker,
-  onReady?: (catalog: CatalogEntry[], constantValues: Record<string, number>, engineVersion: string, contractVersion: number) => void,
+  onReady?: (
+    catalog: CatalogEntry[],
+    constantValues: Record<string, number>,
+    engineVersion: string,
+    contractVersion: number,
+  ) => void,
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
@@ -105,7 +110,12 @@ function waitForWorkerReady(
 
     function handler(e: MessageEvent<WorkerResponse>) {
       if (e.data.type === 'ready') {
-        onReady?.(e.data.catalog, e.data.constantValues, e.data.engineVersion, e.data.contractVersion)
+        onReady?.(
+          e.data.catalog,
+          e.data.constantValues,
+          e.data.engineVersion,
+          e.data.contractVersion,
+        )
         cleanup()
         resolve()
       } else if (e.data.type === 'init-error') {
@@ -174,7 +184,10 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
     clearWatchdog()
     watchdogTimer = setTimeout(() => {
       console.warn(`[cs:engine] Watchdog fired — requestId=${requestId}, recreating worker`)
-      dlog.warn('engine', 'Watchdog fired — recreating worker', { requestId, timeoutMs: WATCHDOG_TIMEOUT_MS })
+      dlog.warn('engine', 'Watchdog fired — recreating worker', {
+        requestId,
+        timeoutMs: WATCHDOG_TIMEOUT_MS,
+      })
       void doRecreate()
     }, WATCHDOG_TIMEOUT_MS)
   }
@@ -290,7 +303,11 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
   })
 
   setupMessageHandler(worker)
-  dlog.info('engine', 'Worker ready', { engineVersion, contractVersion, catalogSize: catalog.length })
+  dlog.info('engine', 'Worker ready', {
+    engineVersion,
+    contractVersion,
+    catalogSize: catalog.length,
+  })
 
   // ── postRequest ───────────────────────────────────────────────────────
 

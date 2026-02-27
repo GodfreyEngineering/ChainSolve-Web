@@ -53,14 +53,8 @@ export function getCrossingEdges(nodes: Node[], edges: Edge[]): Edge[] {
  * Returns crossing edges scoped to a single group's members.
  * Used for collapse safety warning.
  */
-export function getCrossingEdgesForGroup(
-  groupId: string,
-  nodes: Node[],
-  edges: Edge[],
-): Edge[] {
-  const memberIds = new Set(
-    nodes.filter((n) => n.parentId === groupId).map((n) => n.id),
-  )
+export function getCrossingEdgesForGroup(groupId: string, nodes: Node[], edges: Edge[]): Edge[] {
+  const memberIds = new Set(nodes.filter((n) => n.parentId === groupId).map((n) => n.id))
   return edges.filter((e) => {
     const srcIn = memberIds.has(e.source)
     const tgtIn = memberIds.has(e.target)
@@ -133,13 +127,8 @@ function hasCycle(nodes: Node[], edges: Edge[]): boolean {
  * Compute a full health report from the current graph state.
  * All operations are O(N) in nodes + edges.
  */
-export function computeGraphHealth(
-  nodes: Node[],
-  edges: Edge[],
-): GraphHealthReport {
-  const groups = nodes.filter(
-    (n) => (n.data as Record<string, unknown>).blockType === '__group__',
-  )
+export function computeGraphHealth(nodes: Node[], edges: Edge[]): GraphHealthReport {
+  const groups = nodes.filter((n) => (n.data as Record<string, unknown>).blockType === '__group__')
   const evalNodes = nodes.filter(
     (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
   )

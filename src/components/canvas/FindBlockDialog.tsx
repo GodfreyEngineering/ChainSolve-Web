@@ -195,7 +195,9 @@ export function FindBlockDialog({ nodes, onFocusNode, onClose }: FindBlockDialog
                     gap: '0.5rem',
                   }}
                 >
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span
+                    style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  >
                     {nd.label}
                   </span>
                   <span

@@ -103,6 +103,18 @@ npm ci
 npm run wasm:build:dev
 ```
 
+## Pre-commit hook (recommended)
+
+Enable the formatting + lint pre-commit hook to catch issues before they
+reach CI:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+The hook runs `format:check` and `lint` — fast enough to run on every commit.
+If it flags issues, fix them with `npm run format` and `npm run lint:fix`.
+
 ## Verification workflow
 
 Two verification scripts mirror what CI runs. Use them before pushing.
@@ -111,10 +123,10 @@ Two verification scripts mirror what CI runs. Use them before pushing.
 
 Runs checks that don't require wasm-pack or cargo:
 
+- Prettier format check
+- ESLint
 - WASM export guard (`scripts/check-wasm-exports.mjs`)
 - TypeScript typecheck (app + functions)
-- ESLint
-- Prettier format check
 - Unit tests (vitest)
 
 ### `npm run verify:ci` (full CI-equivalent)

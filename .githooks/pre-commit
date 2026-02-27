@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Pre-commit hook: fast formatting + lint check.
+# Enable: git config core.hooksPath .githooks
+set -euo pipefail
+
+echo "[pre-commit] Running format check..."
+npm run format:check || {
+  echo ""
+  echo "Formatting issues found. Run: npm run format"
+  exit 1
+}
+
+echo "[pre-commit] Running lint..."
+npm run lint || {
+  echo ""
+  echo "Lint issues found. Run: npm run lint:fix"
+  exit 1
+}
+
+echo "[pre-commit] OK"

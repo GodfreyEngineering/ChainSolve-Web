@@ -61,6 +61,12 @@ jobs:
 
       - run: npm ci
 
+      - name: Format check
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
       - name: WASM export guard
         run: node scripts/check-wasm-exports.mjs
 
@@ -69,12 +75,6 @@ jobs:
 
       - name: Typecheck (functions)
         run: npm run typecheck:functions
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Format check
-        run: npm run format:check
 
       - name: Unit tests
         run: npm run test:unit

@@ -28,8 +28,7 @@ function ProbeNodeInner({ id, data, selected }: NodeProps) {
   const full = formatValueFull(value)
 
   const hasError = value !== undefined && isError(value)
-  const isErrOrNaN =
-    hasError || (value !== undefined && isScalar(value) && isNaN(value.value))
+  const isErrOrNaN = hasError || (value !== undefined && isScalar(value) && isNaN(value.value))
 
   const handleCopy = useCallback(() => {
     copyValueToClipboard(value, 'compact')

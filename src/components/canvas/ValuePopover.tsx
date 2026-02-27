@@ -22,14 +22,7 @@ interface ValuePopoverProps {
   onJumpToNode?: (nodeId: string) => void
 }
 
-export function ValuePopover({
-  nodeId,
-  x,
-  y,
-  computed,
-  onClose,
-  onJumpToNode,
-}: ValuePopoverProps) {
+export function ValuePopover({ nodeId, x, y, computed, onClose, onJumpToNode }: ValuePopoverProps) {
   const ref = useRef<HTMLDivElement>(null)
   const value = computed.get(nodeId)
 
@@ -86,7 +79,9 @@ export function ValuePopover({
       }}
     >
       {/* Kind badge */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
+      <div
+        style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}
+      >
         <span
           style={{
             fontSize: '0.65rem',

@@ -193,19 +193,21 @@ export function ContextMenu({
                 />
               </>
             )}
-            {onJumpToNode && computed && (() => {
-              const v = computed.get(target.nodeId)
-              return v !== undefined && isError(v)
-            })() && (
-              <MenuItem
-                icon="⤳"
-                label="Jump to source"
-                onClick={() => {
-                  onJumpToNode(target.nodeId)
-                  onClose()
-                }}
-              />
-            )}
+            {onJumpToNode &&
+              computed &&
+              (() => {
+                const v = computed.get(target.nodeId)
+                return v !== undefined && isError(v)
+              })() && (
+                <MenuItem
+                  icon="⤳"
+                  label="Jump to source"
+                  onClick={() => {
+                    onJumpToNode(target.nodeId)
+                    onClose()
+                  }}
+                />
+              )}
             <div style={sep} />
             <MenuItem
               icon="✕"

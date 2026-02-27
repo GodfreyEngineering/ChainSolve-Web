@@ -45,7 +45,15 @@ describe('formatValueFull', () => {
   })
 
   it('formats table as TSV', () => {
-    const result = formatValueFull(mkTable(['a', 'b'], [[1, 2], [3, 4]]))
+    const result = formatValueFull(
+      mkTable(
+        ['a', 'b'],
+        [
+          [1, 2],
+          [3, 4],
+        ],
+      ),
+    )
     expect(result).toBe('a\tb\n1\t2\n3\t4')
   })
 
