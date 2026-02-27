@@ -12,7 +12,7 @@ interface UpgradeModalProps {
   open: boolean
   onClose: () => void
   /** Why the modal was triggered — drives the message shown. */
-  reason: 'project_limit' | 'feature_locked'
+  reason: 'project_limit' | 'canvas_limit' | 'feature_locked'
 }
 
 const features = [
@@ -51,12 +51,19 @@ export function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const title = reason === 'project_limit' ? 'Project limit reached' : 'Pro feature'
+  const title =
+    reason === 'project_limit'
+      ? 'Project limit reached'
+      : reason === 'canvas_limit'
+        ? 'Canvas limit reached'
+        : 'Pro feature'
 
   const message =
     reason === 'project_limit'
       ? 'Free accounts can have 1 project. Upgrade to Pro for unlimited projects.'
-      : 'This feature requires a Pro subscription.'
+      : reason === 'canvas_limit'
+        ? 'Free accounts can have 2 canvases per project. Upgrade to Pro for unlimited canvases.'
+        : 'This feature requires a Pro subscription.'
 
   const handleUpgrade = useCallback(async () => {
     setLoading(true)

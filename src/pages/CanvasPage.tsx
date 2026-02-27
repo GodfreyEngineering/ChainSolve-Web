@@ -65,6 +65,7 @@ import { useNetworkStatus } from '../hooks/useNetworkStatus'
 import { AutosaveScheduler } from '../lib/autosaveScheduler'
 import { SheetsBar } from '../components/app/SheetsBar'
 import { ConflictBanner } from '../components/app/ConflictBanner'
+import { UpgradeModal } from '../components/UpgradeModal'
 import { useEngine } from '../contexts/EngineContext'
 import { buildConstantsLookup } from '../engine/resolveBindings'
 import { toEngineSnapshot } from '../engine/bridge'
@@ -552,7 +553,7 @@ export default function CanvasPage() {
   const handleCreateCanvas = useCallback(async () => {
     if (!projectId) return
     if (!canCreateCanvas(plan, canvases.length)) {
-      toast(t('sheets.limitReached'), 'error')
+      setUpgradeCanvasOpen(true)
       return
     }
     try {
@@ -616,7 +617,7 @@ export default function CanvasPage() {
     async (canvasId: string) => {
       if (!projectId) return
       if (!canCreateCanvas(plan, canvases.length)) {
-        toast(t('sheets.limitReached'), 'error')
+        setUpgradeCanvasOpen(true)
         return
       }
       try {
@@ -1141,6 +1142,7 @@ export default function CanvasPage() {
   // ── .chainsolvejson import ──────────────────────────────────────────────────
 
   const importFileRef = useRef<HTMLInputElement>(null)
+  const [upgradeCanvasOpen, setUpgradeCanvasOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [importSummary, setImportSummary] = useState<null | {
     text: string
@@ -1377,6 +1379,12 @@ export default function CanvasPage() {
           plan={plan}
         />
       </div>
+      {/* ── Canvas limit upgrade modal ──────────────────────────────────── */}
+      <UpgradeModal
+        open={upgradeCanvasOpen}
+        onClose={() => setUpgradeCanvasOpen(false)}
+        reason="canvas_limit"
+      />
       {/* ── Import file input + dialog ────────────────────────────────────── */}
       <input
         ref={importFileRef}
