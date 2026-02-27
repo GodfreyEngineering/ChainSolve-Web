@@ -239,7 +239,7 @@ Claude MUST:
     - supabase keys
     - authorization headers
 
-- [ ] P042: Debug console export redaction verification
+- [x] P042: Debug console export redaction verification
   - Ensure export never includes secrets
   - Add regression tests
 
@@ -259,7 +259,7 @@ Claude MUST:
   - Ensure buckets enforce `{auth.uid()}/` prefixes
   - Add tests in migration or docs + manual check procedure
 
-- [ ] P046: CSP verification automation doc
+- [x] P046: CSP verification automation doc
   - Add “how to validate CSP locally” playbook
   - Ensure report endpoint usage documented
 
@@ -273,7 +273,7 @@ Claude MUST:
   - Enforce file size caps
   - Friendly messages, no crashes
 
-- [ ] P049: Telemetry defaults OFF (confirm)
+- [x] P049: Telemetry defaults OFF (confirm)
   - Ensure no analytics loaded by default
   - Opt-in only, documented
 
