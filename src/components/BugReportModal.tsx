@@ -4,7 +4,8 @@ import { Modal } from './ui/Modal'
 import { Input } from './ui/Input'
 import { Button } from './ui/Button'
 import { useToast } from './ui/useToast'
-import { supabase } from '../lib/supabase'
+import { getCurrentUser } from '../lib/auth'
+import { submitBugReport } from '../lib/bugReportsService'
 import { BUILD_VERSION, BUILD_SHA, BUILD_ENV } from '../lib/build-info'
 
 interface Props {
@@ -23,16 +24,14 @@ export function BugReportModal({ open, onClose }: Props) {
     if (!title.trim()) return
     setSubmitting(true)
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      const user = await getCurrentUser()
       if (!user) {
         toast(t('settings.bugError'), 'error')
         return
       }
 
-      const { error } = await supabase.from('bug_reports').insert({
-        user_id: user.id,
+      await submitBugReport({
+        userId: user.id,
         title: title.trim(),
         description: description.trim(),
         metadata: {
@@ -45,8 +44,6 @@ export function BugReportModal({ open, onClose }: Props) {
           timestamp: new Date().toISOString(),
         },
       })
-
-      if (error) throw error
 
       toast(t('settings.bugSuccess'), 'success')
       setTitle('')

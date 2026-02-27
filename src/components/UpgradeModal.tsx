@@ -6,7 +6,7 @@
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Modal } from './ui/Modal'
-import { supabase } from '../lib/supabase'
+import { refreshSession, signOut } from '../lib/auth'
 
 interface UpgradeModalProps {
   open: boolean
@@ -62,15 +62,15 @@ export function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
     setLoading(true)
     setError(null)
     try {
-      const { data, error: refreshErr } = await supabase.auth.refreshSession()
-      if (refreshErr || !data.session) {
-        await supabase.auth.signOut()
+      const { session, error: refreshErr } = await refreshSession()
+      if (refreshErr || !session) {
+        await signOut()
         navigate('/login')
         return
       }
       const res = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${data.session.access_token}` },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       })
       let json: Record<string, unknown>
       try {

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase'
+import { getSession } from '../lib/auth'
+import { getProfile } from '../lib/profilesService'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
 import type { SettingsTab } from '../contexts/SettingsModalContext'
 import { useFocusTrap } from '../hooks/useFocusTrap'
@@ -8,7 +9,7 @@ import { ProfileSettings } from '../pages/settings/ProfileSettings'
 import { PreferencesSettings } from '../pages/settings/PreferencesSettings'
 import { BillingAuthGate } from './BillingAuthGate'
 import type { User } from '@supabase/supabase-js'
-import type { Profile } from '../pages/Settings'
+import type { Profile } from '../lib/profilesService'
 
 // ── Mobile breakpoint ──────────────────────────────────────────────────────
 const mql = typeof window !== 'undefined' ? window.matchMedia('(max-width: 639px)') : null
@@ -41,17 +42,12 @@ export function SettingsModal() {
 
   useEffect(() => {
     if (!open) return
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    getSession().then((session) => {
       if (!session) return
       setUser(session.user)
-      supabase
-        .from('profiles')
-        .select('id,email,plan,stripe_customer_id,current_period_end')
-        .eq('id', session.user.id)
-        .maybeSingle()
-        .then(({ data, error }) => {
-          if (!error && data) setProfile(data as Profile)
-        })
+      getProfile(session.user.id).then((data) => {
+        if (data) setProfile(data)
+      })
     })
   }, [open])
 

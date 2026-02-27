@@ -1,10 +1,10 @@
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase'
+import { getCurrentUser, signInWithPassword } from '../lib/auth'
 import { Input } from './ui/Input'
 import { Button } from './ui/Button'
 import { BillingSettings } from '../pages/settings/BillingSettings'
-import type { Profile } from '../pages/Settings'
+import type { Profile } from '../lib/profilesService'
 
 interface Props {
   profile: Profile | null
@@ -30,9 +30,7 @@ export function BillingAuthGate({ profile }: Props) {
     setLoading(true)
     setError(null)
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      const user = await getCurrentUser()
       if (!user?.email) throw new Error('No user session')
 
       // OAuth users cannot verify via password
@@ -43,10 +41,7 @@ export function BillingAuthGate({ profile }: Props) {
         return
       }
 
-      const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password,
-      })
+      const { error: signInErr } = await signInWithPassword(user.email, password)
       if (signInErr) throw new Error(t('settings.billingAuthFailed'))
 
       verifiedAt.current = Date.now()

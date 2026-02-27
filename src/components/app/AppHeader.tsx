@@ -25,7 +25,7 @@ const LazyCommandPalette = lazy(() =>
   import('./CommandPalette').then((m) => ({ default: m.CommandPalette })),
 )
 import { CATEGORY_ORDER, CATEGORY_LABELS } from '../../blocks/registry'
-import { supabase } from '../../lib/supabase'
+import { getCurrentUser } from '../../lib/auth'
 import { getRecentProjects } from '../../lib/recentProjects'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { flattenMenusToActions, type MenuDef } from '../../lib/actions'
@@ -171,7 +171,7 @@ export function AppHeader({
 
   // Fetch user email once for avatar
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    getCurrentUser().then((user) => {
       if (user?.email) setUserEmail(user.email)
     })
   }, [])

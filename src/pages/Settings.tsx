@@ -7,17 +7,9 @@ import type { User } from '@supabase/supabase-js'
 import { ProfileSettings } from './settings/ProfileSettings'
 import { BillingSettings } from './settings/BillingSettings'
 import { PreferencesSettings } from './settings/PreferencesSettings'
+import type { Profile } from '../lib/profilesService'
 
-type Plan = 'free' | 'trialing' | 'pro' | 'past_due' | 'canceled'
-
-export interface Profile {
-  id: string
-  email: string | null
-  plan: Plan
-  stripe_customer_id: string | null
-  current_period_end: string | null
-  created_at?: string
-}
+export type { Profile }
 
 const TABS = ['profile', 'billing', 'preferences'] as const
 type SettingsTab = (typeof TABS)[number]
