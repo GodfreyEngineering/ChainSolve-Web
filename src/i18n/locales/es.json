@@ -83,6 +83,8 @@
     "conflict": "Conflicto",
     "error": "Error",
     "conflictBanner": "Este proyecto fue actualizado en otra sesión.",
+    "conflictServerTime": "servidor guardado a las {{time}}",
+    "conflictLocalTime": "su último guardado a las {{time}}",
     "keepMine": "Mantener mi versión",
     "reload": "Recargar del servidor",
     "instructions": "Arrastra bloques desde la biblioteca. Conecta salidas → entradas. Clic derecho para más opciones.",

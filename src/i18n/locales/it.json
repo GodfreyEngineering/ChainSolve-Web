@@ -83,6 +83,8 @@
     "conflict": "Conflitto",
     "error": "Errore",
     "conflictBanner": "Questo progetto è stato aggiornato in un'altra sessione.",
+    "conflictServerTime": "server salvato alle {{time}}",
+    "conflictLocalTime": "il tuo ultimo salvataggio alle {{time}}",
     "keepMine": "Mantieni la mia versione",
     "reload": "Ricarica dal server",
     "instructions": "Trascina i blocchi dalla libreria. Collega uscite → ingressi. Clic destro per più opzioni.",

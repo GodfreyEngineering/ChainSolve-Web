@@ -83,6 +83,8 @@
     "conflict": "Konflikt",
     "error": "Fehler",
     "conflictBanner": "Dieses Projekt wurde in einer anderen Sitzung aktualisiert.",
+    "conflictServerTime": "Server gespeichert um {{time}}",
+    "conflictLocalTime": "Ihre letzte Speicherung um {{time}}",
     "keepMine": "Meine Version behalten",
     "reload": "Vom Server neu laden",
     "instructions": "Ziehen Sie Blöcke aus der Bibliothek. Verbinden Sie Ausgänge → Eingänge. Rechtsklick für mehr Optionen.",

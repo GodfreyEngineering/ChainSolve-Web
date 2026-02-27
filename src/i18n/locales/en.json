@@ -83,6 +83,8 @@
     "conflict": "Conflict",
     "error": "Error",
     "conflictBanner": "This project was updated in another session.",
+    "conflictServerTime": "server saved at {{time}}",
+    "conflictLocalTime": "your last save at {{time}}",
     "keepMine": "Keep mine (overwrite)",
     "reload": "Reload from server",
     "instructions": "Drag blocks from the library. Connect outputs → inputs. Right-click for more options.",

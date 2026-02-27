@@ -83,6 +83,8 @@
     "conflict": "Conflit",
     "error": "Erreur",
     "conflictBanner": "Ce projet a été mis à jour dans une autre session.",
+    "conflictServerTime": "serveur sauvegardé à {{time}}",
+    "conflictLocalTime": "votre dernière sauvegarde à {{time}}",
     "keepMine": "Garder ma version",
     "reload": "Recharger depuis le serveur",
     "instructions": "Glissez des blocs depuis la bibliothèque. Connectez sorties → entrées. Clic droit pour plus d'options.",

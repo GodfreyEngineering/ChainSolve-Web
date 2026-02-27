@@ -64,6 +64,7 @@ import { useToast } from '../components/ui/useToast'
 import { useNetworkStatus } from '../hooks/useNetworkStatus'
 import { AutosaveScheduler } from '../lib/autosaveScheduler'
 import { SheetsBar } from '../components/app/SheetsBar'
+import { ConflictBanner } from '../components/app/ConflictBanner'
 import { useEngine } from '../contexts/EngineContext'
 import { buildConstantsLookup } from '../engine/resolveBindings'
 import { toEngineSnapshot } from '../engine/bridge'
@@ -100,6 +101,7 @@ export default function CanvasPage() {
 
   // ── Project store selectors ────────────────────────────────────────────────
   const saveStatus = useProjectStore((s) => s.saveStatus)
+  const lastSavedAt = useProjectStore((s) => s.lastSavedAt)
   const projectName = useProjectStore((s) => s.projectName)
 
   const beginLoad = useProjectStore((s) => s.beginLoad)
@@ -1334,51 +1336,13 @@ export default function CanvasPage() {
 
       {/* ── Conflict banner ──────────────────────────────────────────────── */}
       {saveStatus === 'conflict' && (
-        <div
-          style={{
-            background: 'rgba(245,158,11,0.1)',
-            borderBottom: '1px solid rgba(245,158,11,0.3)',
-            padding: '0.45rem 1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            fontSize: '0.82rem',
-            color: '#fbbf24',
-            flexShrink: 0,
-          }}
-        >
-          <span>Another session saved this project — your local changes may conflict.</span>
-          <button
-            onClick={handleOverwrite}
-            style={{
-              padding: '0.2rem 0.75rem',
-              border: '1px solid rgba(245,158,11,0.4)',
-              background: 'transparent',
-              color: '#fbbf24',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontSize: '0.78rem',
-              fontFamily: 'inherit',
-            }}
-          >
-            Keep mine (overwrite)
-          </button>
-          <button
-            onClick={handleReload}
-            style={{
-              padding: '0.2rem 0.75rem',
-              border: '1px solid rgba(255,255,255,0.15)',
-              background: 'transparent',
-              color: 'rgba(244,244,243,0.65)',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontSize: '0.78rem',
-              fontFamily: 'inherit',
-            }}
-          >
-            Reload from server
-          </button>
-        </div>
+        <ConflictBanner
+          serverTs={conflictServerTs.current}
+          lastSavedAt={lastSavedAt}
+          readOnly={readOnly}
+          onKeepMine={handleOverwrite}
+          onReload={handleReload}
+        />
       )}
 
       {/* ── Sheets tab bar ────────────────────────────────────────────────── */}

@@ -136,7 +136,7 @@ Claude MUST:
   - Tests: unit tests + simulated timers
   - Docs: requirements §Reliability
 
-- [ ] P023: Conflict UX (reload / keep mine / explain)
+- [x] P023: Conflict UX (reload / keep mine / explain)
   - Detect conflict by updated_at mismatch
   - Modal with:
     - “Reload server”
