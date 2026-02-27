@@ -246,3 +246,20 @@ textarea:focus {
     transform: translateY(0);
   }
 }
+
+/* ── prefers-reduced-motion — P075 ───────────────────────────────────────── */
+/* Collapse all CSS animations/transitions to near-instant so that            */
+/* cs-fade-in, cs-slide-up, and any future keyframes are inert for users     */
+/* who have requested reduced motion in their OS accessibility settings.      */
+/* The edge-flow @media rule above (animation: none) remains in place as a   */
+/* belt-and-suspenders guard for the infinite edge animation.                 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
