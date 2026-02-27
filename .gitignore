@@ -28,4 +28,4 @@ dist-ssr
 
 # Rust / WASM
 /target
-crates/engine-wasm/pkg
+crates/engine-wasm/pkg.claude/
