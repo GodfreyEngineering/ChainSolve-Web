@@ -20,6 +20,7 @@ import { isPerfHudEnabled } from '../lib/devFlags.ts'
 import { updatePerfMetrics } from './perfMetrics.ts'
 import { perfMark, perfMeasure } from '../perf/marks.ts'
 import { dlog } from '../observability/debugLog.ts'
+import { computeGraphHealth } from '../lib/graphHealth.ts'
 
 const perfEnabled = isPerfHudEnabled()
 
@@ -96,6 +97,16 @@ export function useGraphEngine(
           partial: result.partial ?? false,
           errorCount: snapshotErrors.length,
           ...(snapshotErrors.length > 0 ? { errorNodeIds: snapshotErrors.slice(0, 5) } : {}),
+        })
+        const health = computeGraphHealth(nodes, edges)
+        dlog.info('engine', 'Graph health', {
+          nodeCount: health.nodeCount,
+          edgeCount: health.edgeCount,
+          groupCount: health.groupCount,
+          orphanCount: health.orphanCount,
+          crossingEdgeCount: health.crossingEdgeCount,
+          cycleDetected: health.cycleDetected,
+          warningCount: health.warnings.length,
         })
         if (perfEnabled) {
           updatePerfMetrics({

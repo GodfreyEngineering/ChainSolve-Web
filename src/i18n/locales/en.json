@@ -96,7 +96,8 @@
     "addItem": "Add item",
     "removeItem": "Remove",
     "addRow": "Add row",
-    "addColumn": "Add column"
+    "addColumn": "Add column",
+    "collapseCrossingWarn": "{{count}} edge(s) cross this group's boundary"
   },
   "blocks": {
     "categoryData": "Data",
@@ -295,6 +296,7 @@
     "toggleDebugConsole": "Toggle debug console",
     "toggleValueBadges": "Toggle value badges",
     "toggleEdgeBadges": "Toggle edge badges",
+    "toggleGraphHealth": "Toggle graph health",
     "theme": "Theme",
     "perfHud": "Performance HUD",
     "autoOrganise": "Auto-organise layout",
@@ -345,7 +347,8 @@
     "findHint": "↑↓ · ↵ focus · ESC",
     "debugConsole": "Debug console",
     "valueBadges": "Value badges",
-    "edgeBadges": "Edge badges"
+    "edgeBadges": "Edge badges",
+    "graphHealth": "Graph health"
   },
   "debugConsole": {
     "title": "Debug Console",
@@ -358,6 +361,18 @@
     "exportTxt": "Export .txt",
     "exportJson": "Export .json",
     "noLogs": "No log entries"
+  },
+  "graphHealth": {
+    "title": "Graph Health",
+    "nodes": "Nodes",
+    "edges": "Edges",
+    "groups": "Groups",
+    "collapsed": "Collapsed",
+    "orphans": "{{count}} disconnected node(s)",
+    "crossingEdges": "{{count}} edge(s) cross group boundaries",
+    "largeGraph": "Large graph — badges auto-hidden",
+    "cycleDetected": "Cycle detected — may cause infinite eval",
+    "copyReport": "Copy report"
   },
   "sheets": {
     "title": "Sheets",

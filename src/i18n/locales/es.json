@@ -96,7 +96,8 @@
     "addItem": "Agregar elemento",
     "removeItem": "Eliminar",
     "addRow": "Agregar fila",
-    "addColumn": "Agregar columna"
+    "addColumn": "Agregar columna",
+    "collapseCrossingWarn": "{{count}} arista(s) cruzan el límite del grupo"
   },
   "blocks": {
     "categoryData": "Datos",
@@ -294,6 +295,7 @@
     "toggleDebugConsole": "Mostrar/ocultar consola de depuración",
     "toggleValueBadges": "Alternar insignias de valor",
     "toggleEdgeBadges": "Alternar insignias de arista",
+    "toggleGraphHealth": "Alternar estado del grafo",
     "theme": "Tema",
     "perfHud": "HUD de rendimiento",
     "autoOrganise": "Organizar automáticamente",
@@ -344,7 +346,8 @@
     "findHint": "↑↓ · ↵ enfocar · ESC",
     "debugConsole": "Consola de depuración",
     "valueBadges": "Insignias de valor",
-    "edgeBadges": "Insignias de arista"
+    "edgeBadges": "Insignias de arista",
+    "graphHealth": "Estado del grafo"
   },
   "sheets": {
     "title": "Hojas",
@@ -371,5 +374,17 @@
     "exportTxt": "Exportar .txt",
     "exportJson": "Exportar .json",
     "noLogs": "Sin entradas de registro"
+  },
+  "graphHealth": {
+    "title": "Estado del grafo",
+    "nodes": "Nodos",
+    "edges": "Aristas",
+    "groups": "Grupos",
+    "collapsed": "Colapsados",
+    "orphans": "{{count}} nodo(s) desconectado(s)",
+    "crossingEdges": "{{count}} arista(s) cruzan límites de grupo",
+    "largeGraph": "Grafo grande — insignias ocultas automáticamente",
+    "cycleDetected": "Ciclo detectado — puede causar evaluación infinita",
+    "copyReport": "Copiar informe"
   }
 }

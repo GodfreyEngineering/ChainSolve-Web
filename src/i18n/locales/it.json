@@ -96,7 +96,8 @@
     "addItem": "Aggiungi elemento",
     "removeItem": "Rimuovi",
     "addRow": "Aggiungi riga",
-    "addColumn": "Aggiungi colonna"
+    "addColumn": "Aggiungi colonna",
+    "collapseCrossingWarn": "{{count}} connessione/i attraversano il confine del gruppo"
   },
   "blocks": {
     "categoryData": "Dati",
@@ -294,6 +295,7 @@
     "toggleDebugConsole": "Mostra/nascondi console di debug",
     "toggleValueBadges": "Attiva/disattiva badge di valore",
     "toggleEdgeBadges": "Attiva/disattiva badge di connessione",
+    "toggleGraphHealth": "Attiva/disattiva salute del grafo",
     "theme": "Tema",
     "perfHud": "HUD prestazioni",
     "autoOrganise": "Organizza automaticamente",
@@ -344,7 +346,8 @@
     "findHint": "↑↓ · ↵ focus · ESC",
     "debugConsole": "Console di debug",
     "valueBadges": "Badge di valore",
-    "edgeBadges": "Badge di connessione"
+    "edgeBadges": "Badge di connessione",
+    "graphHealth": "Salute del grafo"
   },
   "sheets": {
     "title": "Fogli",
@@ -371,5 +374,17 @@
     "exportTxt": "Esporta .txt",
     "exportJson": "Esporta .json",
     "noLogs": "Nessuna voce di registro"
+  },
+  "graphHealth": {
+    "title": "Salute del grafo",
+    "nodes": "Nodi",
+    "edges": "Connessioni",
+    "groups": "Gruppi",
+    "collapsed": "Compressi",
+    "orphans": "{{count}} nodo/i disconnesso/i",
+    "crossingEdges": "{{count}} connessione/i attraversano i confini del gruppo",
+    "largeGraph": "Grafo grande — badge nascosti automaticamente",
+    "cycleDetected": "Ciclo rilevato — può causare valutazione infinita",
+    "copyReport": "Copia rapporto"
   }
 }

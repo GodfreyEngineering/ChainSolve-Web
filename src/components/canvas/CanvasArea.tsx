@@ -86,6 +86,9 @@ import { ValuePopoverContext, type ShowValuePopover } from '../../contexts/Value
 import { ValuePopover } from './ValuePopover'
 import { ProbeNode } from './nodes/ProbeNode'
 import { copyValueToClipboard } from '../../engine/valueFormat'
+import GraphHealthPanel from './GraphHealthPanel'
+import { getCrossingEdgesForGroup } from '../../lib/graphHealth'
+import { useToast } from '../ui/useToast'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -151,6 +154,7 @@ export interface CanvasAreaHandle {
   toggleDebugConsole: () => void
   toggleBadges: () => void
   toggleEdgeBadges: () => void
+  toggleHealthPanel: () => void
 }
 
 // ── Minimap persistence ──────────────────────────────────────────────────────
@@ -259,6 +263,26 @@ function getEdgeBadgesPref(): boolean {
 function setEdgeBadgesPref(v: boolean) {
   try {
     localStorage.setItem(EDGE_BADGES_KEY, String(v))
+  } catch {
+    // Ignore — private browsing
+  }
+}
+
+// ── Health panel persistence ────────────────────────────────────────────────
+
+const HEALTH_PANEL_KEY = 'chainsolve.healthPanel'
+
+function getHealthPanelPref(): boolean {
+  try {
+    return localStorage.getItem(HEALTH_PANEL_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+function setHealthPanelPref(v: boolean) {
+  try {
+    localStorage.setItem(HEALTH_PANEL_KEY, String(v))
   } catch {
     // Ignore — private browsing
   }
@@ -399,6 +423,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         return !v
       })
     },
+    toggleHealthPanel: () => {
+      setHealthPanelVisible((v) => {
+        setHealthPanelPref(!v)
+        return !v
+      })
+    },
   }))
 
   // Panel widths + visibility
@@ -437,6 +467,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const [badgesEnabled, setBadgesEnabled] = useState(getBadgesPref)
   const [edgeBadgesEnabled, setEdgeBadgesEnabled] = useState(getEdgeBadgesPref)
 
+  // Health panel state (W12.5)
+  const [healthPanelVisible, setHealthPanelVisible] = useState(getHealthPanelPref)
+
   // Value popover state (W12.4)
   const [popoverTarget, setPopoverTarget] = useState<{
     nodeId: string
@@ -463,6 +496,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   })
 
   const { t } = useTranslation()
+  const { toast } = useToast()
 
   // Notify parent of graph changes — skip the initial mount so loading a project
   // does not immediately mark the canvas as dirty.  Always fire regardless of
@@ -796,12 +830,17 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         setNodes(result.nodes as Node<NodeData>[])
         setEdges(result.edges)
       } else {
+        // W12.5: Warn about boundary-crossing edges before collapsing
+        const crossing = getCrossingEdgesForGroup(groupId, nodes, edges)
+        if (crossing.length > 0) {
+          toast(t('canvas.collapseCrossingWarn', { count: crossing.length }), 'info')
+        }
         const result = collapseGroup(groupId, nodes, edges)
         setNodes(result.nodes as Node<NodeData>[])
         setEdges(result.edges)
       }
     },
-    [nodes, edges, setNodes, setEdges, doSaveHistory],
+    [nodes, edges, setNodes, setEdges, doSaveHistory, toast, t],
   )
 
   const saveAsTemplate = useCallback(
@@ -1068,6 +1107,22 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           return !v
         })
       }
+
+      // Ctrl+Alt+G: Toggle collapse on selected group (W12.5)
+      if (ctrl && e.altKey && e.key === 'g' && !readOnly) {
+        e.preventDefault()
+        const selectedGroup = nodes.find((n) => n.selected && n.type === 'csGroup')
+        if (selectedGroup) toggleGroupCollapse(selectedGroup.id)
+      }
+
+      // Ctrl+Shift+H: Toggle graph health panel (W12.5)
+      if (ctrl && e.shiftKey && e.key === 'H') {
+        e.preventDefault()
+        setHealthPanelVisible((v) => {
+          setHealthPanelPref(!v)
+          return !v
+        })
+      }
     },
     [
       readOnly,
@@ -1081,6 +1136,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       selectAll,
       groupSelection,
       ungroupNode,
+      toggleGroupCollapse,
       nodes,
     ],
   )
@@ -1399,8 +1455,25 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 return !v
               })
             }}
+            healthPanelVisible={healthPanelVisible}
+            onToggleHealthPanel={() => {
+              setHealthPanelVisible((v) => {
+                setHealthPanelPref(!v)
+                return !v
+              })
+            }}
           />
           {debugConsoleVisible && <DebugConsolePanel />}
+          {healthPanelVisible && (
+            <GraphHealthPanel
+              nodes={nodes}
+              edges={edges}
+              onClose={() => {
+                setHealthPanelVisible(false)
+                setHealthPanelPref(false)
+              }}
+            />
+          )}
         </div>
 
         {/* Inspector panel — desktop inline */}

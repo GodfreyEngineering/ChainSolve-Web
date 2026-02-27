@@ -96,7 +96,8 @@
     "addItem": "Element hinzufügen",
     "removeItem": "Entfernen",
     "addRow": "Zeile hinzufügen",
-    "addColumn": "Spalte hinzufügen"
+    "addColumn": "Spalte hinzufügen",
+    "collapseCrossingWarn": "{{count}} Kante(n) kreuzen die Gruppengrenze"
   },
   "blocks": {
     "categoryData": "Daten",
@@ -294,6 +295,7 @@
     "toggleDebugConsole": "Debug-Konsole ein-/ausblenden",
     "toggleValueBadges": "Wert-Badges umschalten",
     "toggleEdgeBadges": "Kanten-Badges umschalten",
+    "toggleGraphHealth": "Graph-Zustand umschalten",
     "theme": "Design",
     "perfHud": "Leistungs-HUD",
     "autoOrganise": "Automatisch anordnen",
@@ -344,7 +346,8 @@
     "findHint": "↑↓ · ↵ fokus · ESC",
     "debugConsole": "Debug-Konsole",
     "valueBadges": "Wert-Badges",
-    "edgeBadges": "Kanten-Badges"
+    "edgeBadges": "Kanten-Badges",
+    "graphHealth": "Graph-Zustand"
   },
   "sheets": {
     "title": "Blätter",
@@ -371,5 +374,17 @@
     "exportTxt": ".txt exportieren",
     "exportJson": ".json exportieren",
     "noLogs": "Keine Protokolleinträge"
+  },
+  "graphHealth": {
+    "title": "Graph-Zustand",
+    "nodes": "Knoten",
+    "edges": "Kanten",
+    "groups": "Gruppen",
+    "collapsed": "Eingeklappt",
+    "orphans": "{{count}} nicht verbundene(r) Knoten",
+    "crossingEdges": "{{count}} Kante(n) kreuzen Gruppengrenzen",
+    "largeGraph": "Großer Graph — Badges automatisch ausgeblendet",
+    "cycleDetected": "Zyklus erkannt — kann unendliche Auswertung verursachen",
+    "copyReport": "Bericht kopieren"
   }
 }

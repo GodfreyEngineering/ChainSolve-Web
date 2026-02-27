@@ -30,6 +30,8 @@ export interface BottomToolbarProps {
   onToggleBadges?: () => void
   edgeBadgesEnabled?: boolean
   onToggleEdgeBadges?: () => void
+  healthPanelVisible?: boolean
+  onToggleHealthPanel?: () => void
 }
 
 export function BottomToolbar({
@@ -60,6 +62,8 @@ export function BottomToolbar({
   onToggleBadges,
   edgeBadgesEnabled,
   onToggleEdgeBadges,
+  healthPanelVisible,
+  onToggleHealthPanel,
 }: BottomToolbarProps) {
   const { t } = useTranslation()
   const { zoomIn, zoomOut, zoomTo, fitView } = useReactFlow()
@@ -230,6 +234,17 @@ export function BottomToolbar({
           aria-pressed={!!edgeBadgesEnabled}
         >
           {'\u22ef'}
+        </button>
+      )}
+
+      {onToggleHealthPanel && (
+        <button
+          onClick={onToggleHealthPanel}
+          style={btnStyle(!!healthPanelVisible)}
+          title={t('toolbar.graphHealth')}
+          aria-pressed={!!healthPanelVisible}
+        >
+          {'\u2695'}
         </button>
       )}
 

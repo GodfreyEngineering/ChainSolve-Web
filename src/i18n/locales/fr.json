@@ -96,7 +96,8 @@
     "addItem": "Ajouter un élément",
     "removeItem": "Supprimer",
     "addRow": "Ajouter une ligne",
-    "addColumn": "Ajouter une colonne"
+    "addColumn": "Ajouter une colonne",
+    "collapseCrossingWarn": "{{count}} connexion(s) traversent la limite du groupe"
   },
   "blocks": {
     "categoryData": "Données",
@@ -294,6 +295,7 @@
     "toggleDebugConsole": "Afficher/masquer la console de débogage",
     "toggleValueBadges": "Basculer les badges de valeurs",
     "toggleEdgeBadges": "Basculer les badges de connexions",
+    "toggleGraphHealth": "Basculer la santé du graphe",
     "theme": "Thème",
     "perfHud": "HUD de performance",
     "autoOrganise": "Organisation automatique",
@@ -344,7 +346,8 @@
     "findHint": "↑↓ · ↵ cibler · ESC",
     "debugConsole": "Console de débogage",
     "valueBadges": "Badges de valeurs",
-    "edgeBadges": "Badges de connexions"
+    "edgeBadges": "Badges de connexions",
+    "graphHealth": "Santé du graphe"
   },
   "sheets": {
     "title": "Feuilles",
@@ -371,5 +374,17 @@
     "exportTxt": "Exporter .txt",
     "exportJson": "Exporter .json",
     "noLogs": "Aucune entrée de journal"
+  },
+  "graphHealth": {
+    "title": "Santé du graphe",
+    "nodes": "Nœuds",
+    "edges": "Connexions",
+    "groups": "Groupes",
+    "collapsed": "Réduits",
+    "orphans": "{{count}} nœud(s) déconnecté(s)",
+    "crossingEdges": "{{count}} connexion(s) traversent les limites de groupe",
+    "largeGraph": "Grand graphe — badges masqués automatiquement",
+    "cycleDetected": "Cycle détecté — peut causer une évaluation infinie",
+    "copyReport": "Copier le rapport"
   }
 }
