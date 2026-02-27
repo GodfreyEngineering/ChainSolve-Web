@@ -44,6 +44,11 @@ describe('formatValueFull', () => {
     expect(result).toBe('[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]')
   })
 
+  it('formats vector with NaN element as explicit "NaN" string in output', () => {
+    const result = formatValueFull(mkVector([1, NaN, 3]))
+    expect(result).toBe('[1, NaN, 3]')
+  })
+
   it('formats table as TSV', () => {
     const result = formatValueFull(
       mkTable(
@@ -80,6 +85,10 @@ describe('formatValueJson', () => {
 
   it('formats Infinity as quoted string', () => {
     expect(formatValueJson(mkScalar(Infinity))).toBe('"Infinity"')
+  })
+
+  it('formats -Infinity as quoted string', () => {
+    expect(formatValueJson(mkScalar(-Infinity))).toBe('"-Infinity"')
   })
 
   it('formats vector as JSON array', () => {
