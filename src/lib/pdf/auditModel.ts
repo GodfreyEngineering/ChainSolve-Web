@@ -41,6 +41,7 @@ export interface AuditNodeRow {
   blockType: string
   compact: string
   full: string
+  valueKind?: string
 }
 
 // ── Single-canvas model (v1) ─────────────────────────────────────────────────
@@ -128,6 +129,7 @@ function mapNodeValues(nodes: Node[], evalResult: EngineEvalResult): AuditNodeRo
       blockType,
       compact: formatValue(raw),
       full: formatValueFull(raw),
+      valueKind: raw?.kind,
     }
   })
 }

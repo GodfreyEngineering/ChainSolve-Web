@@ -275,6 +275,7 @@
     "import": "Importer",
     "exportPdf": "Exporter PDF",
     "exportExcel": "Exporter Excel",
+    "exportProject": "Exporter le projet (.chainsolvejson)",
     "recentProjects": "Projets récents",
     "undo": "Annuler",
     "redo": "Rétablir",
@@ -409,7 +410,24 @@
   },
   "excelExport": {
     "generating": "Génération Excel…",
+    "generatingAll": "Génération Excel (toutes les feuilles)…",
     "success": "Excel exporté avec succès",
-    "failed": "Échec de la génération Excel"
+    "failed": "Échec de la génération Excel",
+    "scope": {
+      "active": "Feuille active",
+      "project": "Toutes les feuilles"
+    },
+    "includeTables": "Tableaux : inclus",
+    "skipTables": "Tableaux : ignorer",
+    "progress": "Export de la feuille {{current}} sur {{total}}…",
+    "cancelled": "Export Excel annulé.",
+    "tableTruncated": "Tronqué de {{originalRowCount}} lignes à {{maxRows}}"
+  },
+  "chainsolveJsonExport": {
+    "generating": "Export du projet en cours…",
+    "success": "Projet exporté avec succès",
+    "failed": "Échec de l'export du projet",
+    "progress": "Chargement de la feuille {{current}} sur {{total}}…",
+    "cancelled": "Export du projet annulé."
   }
 }

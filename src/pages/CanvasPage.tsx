@@ -74,6 +74,7 @@ import {
   type ExportOptions,
 } from '../lib/pdf/auditModel'
 import type { CaptureResult } from '../lib/pdf/captureCanvasImage'
+import type { TableExport } from '../lib/xlsx/xlsxModel'
 
 const PerfHud = lazy(() =>
   import('../components/PerfHud.tsx').then((m) => ({ default: m.PerfHud })),
@@ -745,6 +746,288 @@ export default function CanvasPage() {
     exportAbortRef.current?.abort()
   }, [])
 
+  // ── Excel all-sheets orchestrator ──────────────────────────────────────────
+
+  const handleExportAllSheetsExcel = useCallback(
+    async (opts: { includeTables: boolean }) => {
+      if (!projectId || exportingRef.current) return
+
+      const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } = await import('../lib/build-info')
+      const { exportAuditXlsxProject } = await import('../lib/xlsx/exportAuditXlsxProject')
+      const { SAFE_MAX_TABLE_ROWS, SAFE_MAX_TABLE_COLS } = await import('../lib/xlsx/constants')
+
+      const abort = new AbortController()
+      exportAbortRef.current = abort
+      exportingRef.current = true
+      setExportInProgress(true)
+
+      const canvasRows = [...useCanvasesStore.getState().canvases].sort(
+        (a, b) => a.position - b.position,
+      )
+      const currentVariables = useVariablesStore.getState().variables
+      const canvasSections: ReturnType<typeof buildCanvasAuditSection>[] = []
+      const allHashInputs: string[] = []
+      const allTables: TableExport[] = []
+
+      try {
+        for (let i = 0; i < canvasRows.length; i++) {
+          if (abort.signal.aborted) {
+            toast(t('excelExport.cancelled'), 'info')
+            return
+          }
+
+          const row = canvasRows[i]
+          toast(t('excelExport.progress', { current: i + 1, total: canvasRows.length }), 'info')
+
+          const origCanvasId = useCanvasesStore.getState().activeCanvasId
+          const isActive = row.id === origCanvasId
+
+          let canvasNodes: Node<NodeData>[]
+          let canvasEdges: Edge[]
+
+          if (isActive && canvasRef.current) {
+            const snap = canvasRef.current.getSnapshot()
+            canvasNodes = snap.nodes
+            canvasEdges = snap.edges
+          } else {
+            const graph = await loadCanvasGraph(projectId, row.id)
+            canvasNodes = (graph.nodes ?? []) as Node<NodeData>[]
+            canvasEdges = (graph.edges ?? []) as Edge[]
+          }
+
+          // Get canonical snapshot for eval
+          const snap = getCanonicalSnapshot(canvasNodes, canvasEdges)
+
+          // Evaluate graph
+          const engineSnap = toEngineSnapshot(
+            snap.nodes,
+            snap.edges,
+            constantsLookup,
+            currentVariables,
+          )
+          const evalResult = await engine.evaluateGraph(engineSnap)
+
+          // Extract table values
+          if (opts.includeTables) {
+            for (const [nodeId, val] of Object.entries(evalResult.values)) {
+              if (val && typeof val === 'object' && 'kind' in val && val.kind === 'table') {
+                const tableVal = val as { kind: 'table'; columns: string[]; rows: number[][] }
+                const node = snap.nodes.find((n) => n.id === nodeId)
+                const data = node?.data as Record<string, unknown> | undefined
+                const label = (data?.label as string) ?? nodeId
+                const origRows = tableVal.rows.length
+                const origCols = tableVal.columns.length
+                const truncated = origRows > SAFE_MAX_TABLE_ROWS || origCols > SAFE_MAX_TABLE_COLS
+                allTables.push({
+                  canvasPosition: row.position,
+                  canvasName: row.name,
+                  canvasId: row.id,
+                  nodeId,
+                  nodeLabel: label,
+                  columns: tableVal.columns.slice(0, SAFE_MAX_TABLE_COLS),
+                  rows: tableVal.rows
+                    .slice(0, SAFE_MAX_TABLE_ROWS)
+                    .map((r) => r.slice(0, SAFE_MAX_TABLE_COLS)),
+                  truncated,
+                  originalRowCount: origRows,
+                  originalColCount: origCols,
+                })
+              }
+            }
+          }
+
+          // Compute snapshot hash
+          const hashInput = stableStringify({
+            nodes: snap.nodes.map((n) => ({
+              id: n.id,
+              data: n.data,
+              position: n.position,
+            })),
+            edges: snap.edges.map((e) => ({
+              id: e.id,
+              source: e.source,
+              sourceHandle: e.sourceHandle,
+              target: e.target,
+              targetHandle: e.targetHandle,
+            })),
+            variables: currentVariables,
+          })
+          const snapshotHash = await sha256Hex(hashInput)
+          allHashInputs.push(hashInput)
+
+          // Graph health
+          const health = computeGraphHealth(snap.nodes, snap.edges)
+          const healthSummary = formatHealthReport(health, t)
+
+          canvasSections.push(
+            buildCanvasAuditSection({
+              canvasId: row.id,
+              canvasName: row.name,
+              position: row.position,
+              nodes: snap.nodes,
+              edges: snap.edges,
+              evalResult,
+              healthSummary,
+              snapshotHash,
+              graphImageBytes: null,
+              imageError: 'Excel export (no images)',
+            }),
+          )
+        }
+
+        if (abort.signal.aborted) {
+          toast(t('excelExport.cancelled'), 'info')
+          return
+        }
+
+        // Compute project hash
+        const projectHashInput = stableStringify(allHashInputs)
+        const projectHash = await sha256Hex(projectHashInput)
+
+        const model = buildProjectAuditModel({
+          projectName: useProjectStore.getState().projectName,
+          projectId,
+          exportTimestamp: new Date().toISOString(),
+          buildVersion: BUILD_VERSION,
+          buildSha: BUILD_SHA,
+          buildTime: BUILD_TIME,
+          buildEnv: BUILD_ENV,
+          engineVersion: engine.engineVersion,
+          contractVersion: engine.contractVersion,
+          activeCanvasId: useCanvasesStore.getState().activeCanvasId,
+          projectHash,
+          canvases: canvasSections,
+        })
+
+        await exportAuditXlsxProject(model, currentVariables, allTables)
+        toast(t('excelExport.success'), 'success')
+      } catch (err: unknown) {
+        if (!abort.signal.aborted) {
+          console.error('[xlsx-export-project]', err)
+          toast(t('excelExport.failed'), 'error')
+        }
+      } finally {
+        exportingRef.current = false
+        exportAbortRef.current = null
+        setExportInProgress(false)
+      }
+    },
+    [projectId, engine, constantsLookup, toast, t],
+  )
+
+  // ── .chainsolvejson export orchestrator ─────────────────────────────────────
+
+  const handleExportChainsolveJson = useCallback(async () => {
+    if (!projectId || exportingRef.current) return
+
+    const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } = await import('../lib/build-info')
+    const { exportChainsolveJsonProject } =
+      await import('../lib/chainsolvejson/exportChainsolveJson')
+
+    const abort = new AbortController()
+    exportAbortRef.current = abort
+    exportingRef.current = true
+    setExportInProgress(true)
+
+    const canvasRows = [...useCanvasesStore.getState().canvases].sort(
+      (a, b) => a.position - b.position,
+    )
+    const currentVariables = useVariablesStore.getState().variables
+
+    try {
+      const canvasInputs: {
+        id: string
+        name: string
+        position: number
+        graph: {
+          schemaVersion: 4
+          canvasId: string
+          projectId: string
+          nodes: unknown[]
+          edges: unknown[]
+          datasetRefs: string[]
+        }
+      }[] = []
+
+      for (let i = 0; i < canvasRows.length; i++) {
+        if (abort.signal.aborted) {
+          toast(t('chainsolveJsonExport.cancelled'), 'info')
+          return
+        }
+
+        const row = canvasRows[i]
+        toast(
+          t('chainsolveJsonExport.progress', { current: i + 1, total: canvasRows.length }),
+          'info',
+        )
+
+        const isActive = row.id === useCanvasesStore.getState().activeCanvasId
+
+        let nodes: unknown[]
+        let edges: unknown[]
+
+        if (isActive && canvasRef.current) {
+          const snap = canvasRef.current.getSnapshot()
+          nodes = snap.nodes
+          edges = snap.edges
+        } else {
+          const graph = await loadCanvasGraph(projectId, row.id)
+          nodes = graph.nodes
+          edges = graph.edges
+        }
+
+        canvasInputs.push({
+          id: row.id,
+          name: row.name,
+          position: row.position,
+          graph: {
+            schemaVersion: 4 as const,
+            canvasId: row.id,
+            projectId,
+            nodes,
+            edges,
+            datasetRefs: [],
+          },
+        })
+      }
+
+      if (abort.signal.aborted) {
+        toast(t('chainsolveJsonExport.cancelled'), 'info')
+        return
+      }
+
+      const ps = useProjectStore.getState()
+
+      await exportChainsolveJsonProject({
+        exportedAt: new Date().toISOString(),
+        appVersion: BUILD_VERSION,
+        buildSha: BUILD_SHA,
+        buildTime: BUILD_TIME,
+        buildEnv: BUILD_ENV,
+        engineVersion: engine.engineVersion,
+        engineContractVersion: engine.contractVersion,
+        projectId,
+        projectName: ps.projectName,
+        activeCanvasId: useCanvasesStore.getState().activeCanvasId,
+        variables: currentVariables,
+        createdAt: ps.createdAt,
+        updatedAt: ps.dbUpdatedAt,
+        canvases: canvasInputs,
+        assets: [],
+      })
+      toast(t('chainsolveJsonExport.success'), 'success')
+    } catch (err: unknown) {
+      if (!abort.signal.aborted) {
+        console.error('[chainsolvejson-export]', err)
+        toast(t('chainsolveJsonExport.failed'), 'error')
+      }
+    } finally {
+      exportingRef.current = false
+      exportAbortRef.current = null
+      setExportInProgress(false)
+    }
+  }, [projectId, engine, toast, t])
+
   // ── Loading / error screens ────────────────────────────────────────────────
   if (loadPhase === 'loading') {
     return (
@@ -814,6 +1097,8 @@ export default function CanvasPage() {
         exportInProgress={exportInProgress}
         onExportPdfProject={handleExportAllSheets}
         onCancelExport={handleCancelExport}
+        onExportExcelProject={handleExportAllSheetsExcel}
+        onExportChainsolveJson={handleExportChainsolveJson}
       />
 
       {/* ── Read-only / billing banner ────────────────────────────────────── */}

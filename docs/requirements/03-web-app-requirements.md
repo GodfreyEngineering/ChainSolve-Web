@@ -498,6 +498,41 @@ variable state, file I/O, network activity, and performance metrics.
 | EX-33 | File named `{projectName}_{timestamp}_audit.xlsx` with sanitised project name.                | SHOULD   |
 | EX-34 | `xlsxModel.ts` pure functions fully unit-tested.                                              | MUST     |
 
+### 17.5 Excel export — all sheets + tables (W14b.2)
+
+| ID    | Requirement                                                                                    | Priority |
+|-------|------------------------------------------------------------------------------------------------|----------|
+| EX-35 | File > Export Excel submenu offers Active sheet and All sheets options.                        | MUST     |
+| EX-36 | All sheets exports all canvases into a single workbook with combined data sheets.              | MUST     |
+| EX-37 | Workbook includes TOC sheet (Canvases) listing position, name, ID, counts, hash.               | MUST     |
+| EX-38 | Combined Node Values, Diagnostics, Graph Health sheets include Canvas prefix.                  | MUST     |
+| EX-39 | Engine table values exported as dedicated worksheets (one per table node).                     | SHOULD   |
+| EX-40 | Tables included/skip toggle persisted in localStorage.                                         | SHOULD   |
+| EX-41 | Sheet names sanitized (max 31 chars, forbidden chars removed) and deduplicated.                | MUST     |
+| EX-42 | Tables exceeding 200,000 rows truncated with note row; no crash on large data.                 | MUST     |
+| EX-43 | Cell text exceeding 32,767 chars truncated silently.                                           | MUST     |
+| EX-44 | No DOM switching needed; canvas data loaded from storage, evaluated without remount.           | MUST     |
+
+### 17.6 Project export - .chainsolvejson (W14c.1)
+
+| ID    | Requirement                                                                                     | Priority |
+|-------|-------------------------------------------------------------------------------------------------|----------|
+| EX-45 | File - Export Project (.chainsolvejson) downloads a single JSON file with all project data.     | MUST     |
+| EX-46 | Export includes project metadata, variables, all canvases (schemaVersion 4), and assets.        | MUST     |
+| EX-47 | Output is deterministic for identical project state (except exportedAt timestamp).              | MUST     |
+| EX-48 | Per-canvas hash = sha256(stableStringify({ nodes, edges, variables })).                         | MUST     |
+| EX-49 | Project hash = sha256(stableStringify({ project, canvases, assetsManifest })).                  | MUST     |
+| EX-50 | Assets under 10 MB base64-embedded; larger assets referenced by storagePath.                    | SHOULD   |
+| EX-51 | Asset ordering stable: sorted by (name, storagePath).                                           | MUST     |
+| EX-52 | Canvas ordering stable: sorted by position ascending.                                           | MUST     |
+| EX-53 | Export validates no secrets/PII (auth tokens, Supabase keys, emails) in output.                 | MUST     |
+| EX-54 | Export validates all numeric values are finite (no NaN/Infinity).                               | SHOULD   |
+| EX-55 | Menu item disabled if no project (scratch mode).                                                | MUST     |
+| EX-56 | Export uses AbortController for cancellation; progress toasts shown.                            | SHOULD   |
+| EX-57 | Filename pattern: safeName_timestamp.chainsolvejson.                                            | MUST     |
+| EX-58 | No bundle size impact; export code lazy-loaded on first use.                                    | MUST     |
+| EX-59 | CSP intact (no unsafe-eval, no inline scripts).                                                 | MUST     |
+
 ---
 
 ## 18. Out of scope (for now)
@@ -527,8 +562,10 @@ variable state, file I/O, network activity, and performance metrics.
 
 | Date       | Author | Change                                                                                            |
 |------------|--------|---------------------------------------------------------------------------------------------------|
-| 2026-02-27 | —      | W14b.1: Added §17.4 (Excel export active sheet EX-25–EX-34). Lazy-loaded write-excel-file, 5-sheet workbook. |
-| 2026-02-27 | —      | W14a.3: Added §17.3 (PDF export hardening EX-17–EX-24). Per-canvas image capture, fallback ladder, values-only mode. |
-| 2026-02-27 | —      | W14a.2: Added §17.2 (all-sheets PDF export EX-9–EX-16). Struck multi-sheet from Future extensions. |
-| 2026-02-27 | —      | W14a.1: Added §17 Export (PDF export requirements). Moved PDF out of Out-of-scope. Renum §18/§19. |
-| 2026-02-26 | —      | Initial version (v1.0).                                                                           |
+| 2026-02-27 | -      | W14c.1: Added 17.6 (Project export .chainsolvejson EX-45 to EX-59). Deterministic JSON archive.   |
+| 2026-02-27 | -      | W14b.2: Added 17.5 (Excel all sheets + tables EX-35 to EX-44). TOC, table sheets, truncation.     |
+| 2026-02-27 | -      | W14b.1: Added 17.4 (Excel active sheet EX-25 to EX-34). Lazy write-excel-file, 5-sheet wb.        |
+| 2026-02-27 | -      | W14a.3: Added 17.3 (PDF hardening EX-17 to EX-24). Per-canvas capture, fallback, values-only.     |
+| 2026-02-27 | -      | W14a.2: Added 17.2 (all-sheets PDF EX-9 to EX-16). Struck multi-sheet from Future extensions.     |
+| 2026-02-27 | -      | W14a.1: Added 17 Export (PDF export requirements). Moved PDF out of Out-of-scope. Renum 18.       |
+| 2026-02-26 | -      | Initial version (v1.0).                                                                           |

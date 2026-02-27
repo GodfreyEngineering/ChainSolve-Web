@@ -65,13 +65,16 @@ export interface AppHeaderProps {
   onSaveAs: (name: string) => Promise<void>
   onNavigateBack: (e: React.MouseEvent<HTMLAnchorElement>) => void
   canvasRef: React.RefObject<CanvasAreaHandle | null>
-  // Export (W14a.3)
+  // Export (W14a.3 + W14b.2 + W14c.1)
   exportInProgress?: boolean
   onExportPdfProject?: (opts: { includeImages: boolean }) => void
+  onExportExcelProject?: (opts: { includeTables: boolean }) => void
+  onExportChainsolveJson?: () => void
   onCancelExport?: () => void
 }
 
 const INCLUDE_IMAGES_KEY = 'cs:pdfExportIncludeImages'
+const INCLUDE_TABLES_KEY = 'cs:xlsxExportIncludeTables'
 
 function getIncludeImagesPref(): boolean {
   try {
@@ -85,6 +88,23 @@ function getIncludeImagesPref(): boolean {
 function setIncludeImagesPref(v: boolean) {
   try {
     localStorage.setItem(INCLUDE_IMAGES_KEY, String(v))
+  } catch {
+    // Ignore — private browsing
+  }
+}
+
+function getIncludeTablesPref(): boolean {
+  try {
+    const v = localStorage.getItem(INCLUDE_TABLES_KEY)
+    return v === null ? true : v === 'true'
+  } catch {
+    return true
+  }
+}
+
+function setIncludeTablesPref(v: boolean) {
+  try {
+    localStorage.setItem(INCLUDE_TABLES_KEY, String(v))
   } catch {
     // Ignore — private browsing
   }
@@ -110,6 +130,8 @@ export function AppHeader({
   canvasRef,
   exportInProgress,
   onExportPdfProject,
+  onExportExcelProject,
+  onExportChainsolveJson,
   onCancelExport,
 }: AppHeaderProps) {
   const { t } = useTranslation()
@@ -123,6 +145,7 @@ export function AppHeader({
   const errorMessage = useProjectStore((s) => s.errorMessage)
 
   const [includeImages, setIncludeImages] = useState(getIncludeImagesPref)
+  const [includeTables, setIncludeTables] = useState(getIncludeTablesPref)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [bugReportOpen, setBugReportOpen] = useState(false)
   const [aboutOpen, setAboutOpen] = useState(false)
@@ -210,6 +233,30 @@ export function AppHeader({
       return next
     })
   }, [])
+
+  const handleExportExcelAll = useCallback(() => {
+    setOpenMenu(null)
+    if (onExportExcelProject) {
+      toast(t('excelExport.generatingAll'), 'info')
+      onExportExcelProject({ includeTables })
+    }
+  }, [onExportExcelProject, includeTables, toast, t])
+
+  const handleToggleIncludeTables = useCallback(() => {
+    setIncludeTables((v) => {
+      const next = !v
+      setIncludeTablesPref(next)
+      return next
+    })
+  }, [])
+
+  const handleExportChainsolveJson = useCallback(() => {
+    setOpenMenu(null)
+    if (onExportChainsolveJson) {
+      toast(t('chainsolveJsonExport.generating'), 'info')
+      onExportChainsolveJson()
+    }
+  }, [onExportChainsolveJson, toast, t])
 
   // ── File menu handlers ──────────────────────────────────────────────────────
 
@@ -375,7 +422,40 @@ export function AppHeader({
             : []),
         ],
       },
-      { label: t('menu.exportExcel'), onClick: handleExportExcelActive },
+      {
+        label: t('menu.exportExcel'),
+        children: [
+          {
+            label: t('excelExport.scope.active'),
+            onClick: handleExportExcelActive,
+            disabled: !!exportInProgress,
+          },
+          {
+            label: t('excelExport.scope.project'),
+            onClick: handleExportExcelAll,
+            disabled: !projectId || !!exportInProgress,
+          },
+          { separator: true },
+          {
+            label: includeTables ? t('excelExport.includeTables') : t('excelExport.skipTables'),
+            onClick: handleToggleIncludeTables,
+          },
+          ...(exportInProgress
+            ? [
+                { separator: true } as const,
+                {
+                  label: t('pdfExport.cancelExport'),
+                  onClick: () => onCancelExport?.(),
+                },
+              ]
+            : []),
+        ],
+      },
+      {
+        label: t('menu.exportProject'),
+        onClick: handleExportChainsolveJson,
+        disabled: !projectId || !!exportInProgress,
+      },
       { separator: true },
       { label: t('menu.recentProjects'), children: recentChildren },
     ]
@@ -391,8 +471,12 @@ export function AppHeader({
     handleExportPdfActive,
     handleExportPdfAll,
     handleExportExcelActive,
+    handleExportExcelAll,
+    handleExportChainsolveJson,
     handleToggleIncludeImages,
+    handleToggleIncludeTables,
     includeImages,
+    includeTables,
     exportInProgress,
     onCancelExport,
   ])

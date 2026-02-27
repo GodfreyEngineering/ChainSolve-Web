@@ -276,6 +276,7 @@
     "import": "Import",
     "exportPdf": "Export PDF",
     "exportExcel": "Export Excel",
+    "exportProject": "Export Project (.chainsolvejson)",
     "recentProjects": "Recent projects",
     "undo": "Undo",
     "redo": "Redo",
@@ -410,7 +411,24 @@
   },
   "excelExport": {
     "generating": "Generating Excel…",
+    "generatingAll": "Generating Excel (all sheets)…",
     "success": "Excel exported successfully",
-    "failed": "Failed to generate Excel"
+    "failed": "Failed to generate Excel",
+    "scope": {
+      "active": "Active sheet",
+      "project": "All sheets"
+    },
+    "includeTables": "Tables: included",
+    "skipTables": "Tables: skip",
+    "progress": "Exporting sheet {{current}} of {{total}}…",
+    "cancelled": "Excel export cancelled.",
+    "tableTruncated": "Truncated from {{originalRowCount}} rows to {{maxRows}}"
+  },
+  "chainsolveJsonExport": {
+    "generating": "Exporting project…",
+    "success": "Project exported successfully",
+    "failed": "Failed to export project",
+    "progress": "Loading canvas {{current}} of {{total}}…",
+    "cancelled": "Project export cancelled."
   }
 }
