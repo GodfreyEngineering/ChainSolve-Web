@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   validateVariablesMap,
+  validateVariableName,
   safeParseVariablesMap,
   MAX_VARIABLE_NAME_LENGTH,
   MAX_VARIABLE_DESCRIPTION_LENGTH,
@@ -187,5 +188,34 @@ describe('safeParseVariablesMap', () => {
 
   it('returns empty map for invalid input', () => {
     expect(safeParseVariablesMap({ 'var-1': makeVar({ value: NaN }) })).toEqual({})
+  })
+})
+
+// ── validateVariableName ───────────────────────────────────────────────────
+
+describe('validateVariableName', () => {
+  it('accepts a simple name', () => {
+    expect(validateVariableName('speed')).toEqual({ ok: true })
+  })
+
+  it('accepts a name at the maximum length', () => {
+    expect(validateVariableName('a'.repeat(MAX_VARIABLE_NAME_LENGTH))).toEqual({ ok: true })
+  })
+
+  it('rejects empty string', () => {
+    const result = validateVariableName('')
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/non-empty/)
+  })
+
+  it('rejects name exceeding max length', () => {
+    const result = validateVariableName('a'.repeat(MAX_VARIABLE_NAME_LENGTH + 1))
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/exceed/)
+  })
+
+  it('rejects non-string input', () => {
+    expect(validateVariableName(null).ok).toBe(false)
+    expect(validateVariableName(42).ok).toBe(false)
   })
 })

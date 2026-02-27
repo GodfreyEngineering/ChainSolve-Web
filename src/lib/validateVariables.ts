@@ -92,6 +92,25 @@ export function validateVariablesMap(vars: unknown): VariablesValidationResult {
 }
 
 /**
+ * Validate a single variable name for real-time UI feedback.
+ *
+ * Returns `{ ok: true }` for valid names, or `{ ok: false, error }` if invalid.
+ * Identical rules to the name checks inside `validateVariablesMap`.
+ */
+export function validateVariableName(name: unknown): { ok: boolean; error?: string } {
+  if (typeof name !== 'string' || name.length === 0) {
+    return { ok: false, error: 'variable name must be a non-empty string' }
+  }
+  if (name.length > MAX_VARIABLE_NAME_LENGTH) {
+    return {
+      ok: false,
+      error: `variable name must not exceed ${MAX_VARIABLE_NAME_LENGTH} characters`,
+    }
+  }
+  return { ok: true }
+}
+
+/**
  * Return `vars` cast to `VariablesMap` if valid, or an empty map on error.
  * Logs a warning to console when falling back so developers notice.
  */
