@@ -645,7 +645,7 @@ Claude MUST:
 ---
 
 ## D7 — Variable + Constant + Material blocks (unification + wizards)
-- [ ] D7-1: Variables window upgrade (table + units + validation)
+- [x] D7-1: Variables window upgrade (table + units + validation)
   - Variables have:
     - name, value, unit (string), description
   - Enforce unique names (case-insensitive)
