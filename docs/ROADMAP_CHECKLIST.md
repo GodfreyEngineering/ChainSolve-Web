@@ -449,4 +449,4 @@ Claude MUST:
 - [x] P147: Performance regression CI
 - [x] P148: RTL language support
 - [x] P149: LLM-assisted graph building (future)
-- [ ] P150: Template editor (user-defined reusable groups)
+- [x] P150: Template editor (user-defined reusable groups)
