@@ -195,6 +195,9 @@ export default function AppShell() {
   const [projError, setProjError] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState<string | null>(null) // projectId
   const [upgradeOpen, setUpgradeOpen] = useState(false)
+  const [upgradeReason, setUpgradeReason] = useState<'project_limit' | 'export_locked'>(
+    'project_limit',
+  )
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('recent')
   const [filterTab, setFilterTab] = useState<FilterTab>('all')
@@ -354,6 +357,13 @@ export default function AppShell() {
 
   const handleExport = async (proj: ProjectRow) => {
     setMenuOpen(null)
+    // D11-4: Gate export behind canExport
+    const plan = (profile?.plan ?? 'free') as Plan
+    if (!getEntitlements(plan).canExport) {
+      setUpgradeReason('export_locked')
+      setUpgradeOpen(true)
+      return
+    }
     try {
       const pj = await loadProject(proj.id)
       const blob = new Blob([JSON.stringify(pj, null, 2)], { type: 'application/json' })
@@ -373,6 +383,12 @@ export default function AppShell() {
     e.target.value = '' // reset so same file can be re-picked
     if (!file) return
     const plan = (profile?.plan ?? 'free') as Plan
+    // D11-4: Gate import behind canExport
+    if (!getEntitlements(plan).canExport) {
+      setUpgradeReason('export_locked')
+      setUpgradeOpen(true)
+      return
+    }
     if (!canCreateProject(plan, projects.length)) {
       setUpgradeOpen(true)
       return
@@ -498,7 +514,7 @@ export default function AppShell() {
       <UpgradeModal
         open={upgradeOpen}
         onClose={() => setUpgradeOpen(false)}
-        reason="project_limit"
+        reason={upgradeReason}
       />
       {/* ── First-run onboarding modal ── */}
       {firstRunOpen && !loading && (

@@ -58,6 +58,7 @@ import {
   canCreateProject,
   canCreateCanvas,
   showBillingBanner,
+  getEntitlements,
   type Plan,
 } from '../lib/entitlements'
 import { isPerfHudEnabled } from '../lib/devFlags'
@@ -1178,6 +1179,7 @@ export default function CanvasPage() {
 
   const importFileRef = useRef<HTMLInputElement>(null)
   const [upgradeCanvasOpen, setUpgradeCanvasOpen] = useState(false)
+  const [upgradeExportOpen, setUpgradeExportOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [importSummary, setImportSummary] = useState<null | {
     text: string
@@ -1267,6 +1269,47 @@ export default function CanvasPage() {
     }
   }, [importSummary, toast, t, navigate])
 
+  // D11-4: Gate export/import behind canExport entitlement
+  const ent = getEntitlements(plan)
+
+  const gatedExportPdf = useCallback(
+    (opts: { includeImages: boolean }) => {
+      if (!ent.canExport) {
+        setUpgradeExportOpen(true)
+        return
+      }
+      void handleExportAllSheets(opts)
+    },
+    [ent.canExport, handleExportAllSheets],
+  )
+
+  const gatedExportExcel = useCallback(
+    (opts: { includeTables: boolean }) => {
+      if (!ent.canExport) {
+        setUpgradeExportOpen(true)
+        return
+      }
+      void handleExportAllSheetsExcel(opts)
+    },
+    [ent.canExport, handleExportAllSheetsExcel],
+  )
+
+  const gatedExportJson = useCallback(() => {
+    if (!ent.canExport) {
+      setUpgradeExportOpen(true)
+      return
+    }
+    void handleExportChainsolveJson()
+  }, [ent.canExport, handleExportChainsolveJson])
+
+  const gatedImportJson = useCallback(() => {
+    if (!ent.canExport) {
+      setUpgradeExportOpen(true)
+      return
+    }
+    handleImportChainsolveJson()
+  }, [ent.canExport, handleImportChainsolveJson])
+
   // ── Loading / error screens ────────────────────────────────────────────────
   if (loadPhase === 'loading') {
     return (
@@ -1343,11 +1386,11 @@ export default function CanvasPage() {
         onNavigateBack={handleBackToProjects}
         canvasRef={canvasRef}
         exportInProgress={exportInProgress}
-        onExportPdfProject={handleExportAllSheets}
+        onExportPdfProject={gatedExportPdf}
         onCancelExport={handleCancelExport}
-        onExportExcelProject={handleExportAllSheetsExcel}
-        onExportChainsolveJson={handleExportChainsolveJson}
-        onImportChainsolveJson={handleImportChainsolveJson}
+        onExportExcelProject={gatedExportExcel}
+        onExportChainsolveJson={gatedExportJson}
+        onImportChainsolveJson={gatedImportJson}
         isOnline={isOnline}
         onRetryOffline={() => {
           if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
@@ -1429,6 +1472,12 @@ export default function CanvasPage() {
         open={upgradeCanvasOpen}
         onClose={() => setUpgradeCanvasOpen(false)}
         reason="canvas_limit"
+      />
+      {/* ── D11-4: Export locked upgrade modal ────────────────────────────── */}
+      <UpgradeModal
+        open={upgradeExportOpen}
+        onClose={() => setUpgradeExportOpen(false)}
+        reason="export_locked"
       />
       {/* ── Import file input + dialog ────────────────────────────────────── */}
       <input
