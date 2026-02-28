@@ -620,7 +620,7 @@ Claude MUST:
     - fixed light-mode background bug
   - Acceptance: light mode has correct library background.
 
-- [ ] D6-2: Locked Pro features visible to Free users
+- [x] D6-2: Locked Pro features visible to Free users
   - Greyed out + lock icon
   - Clicking opens upgrade modal
   - Acceptance: consistent gating across all UI entrypoints.
