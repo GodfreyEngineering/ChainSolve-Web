@@ -422,8 +422,8 @@ Claude MUST:
 - [x] P116: block_pack install mechanism
 - [x] P117: theme install mechanism (CSS vars)
 - [x] P118: dependency/compat checks (engine contract)
-- [ ] P119: moderation tools
-- [ ] P120: Marketplace E2E smoke
+- [x] P119: moderation tools
+- [x] P120: Marketplace E2E smoke
 
 ---
 
