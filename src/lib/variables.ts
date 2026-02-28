@@ -10,6 +10,7 @@ export interface ProjectVariable {
   id: string
   name: string
   value: number
+  unit?: string
   description?: string
 }
 

@@ -15,6 +15,7 @@
 import type { VariablesMap } from './variables'
 
 export const MAX_VARIABLE_NAME_LENGTH = 64
+export const MAX_VARIABLE_UNIT_LENGTH = 32
 export const MAX_VARIABLE_DESCRIPTION_LENGTH = 256
 
 export interface VariablesValidationResult {
@@ -74,6 +75,15 @@ export function validateVariablesMap(vars: unknown): VariablesValidationResult {
       errors.push(`variable "${key}": value must be a number`)
     } else if (!Number.isFinite(v.value)) {
       errors.push(`variable "${key}": value must be finite (no NaN or Infinity)`)
+    }
+
+    // unit: optional string within length limit
+    if (v.unit !== undefined) {
+      if (typeof v.unit !== 'string') {
+        errors.push(`variable "${key}": unit must be a string`)
+      } else if (v.unit.length > MAX_VARIABLE_UNIT_LENGTH) {
+        errors.push(`variable "${key}": unit exceeds ${MAX_VARIABLE_UNIT_LENGTH} characters`)
+      }
     }
 
     // description: optional string within length limit

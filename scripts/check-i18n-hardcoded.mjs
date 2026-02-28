@@ -29,6 +29,8 @@ const ALLOWLIST = new Set([
   'src/components/canvas/QuickAddPalette.tsx|Filter blocks…',
   // VariablesPanel — does not yet import useTranslation
   'src/components/canvas/VariablesPanel.tsx|Variable name',
+  'src/components/canvas/VariablesPanel.tsx|e.g. m/s',
+  'src/components/canvas/VariablesPanel.tsx|Optional description',
   // ValueEditor — complex inline search, no matching key yet
   'src/components/canvas/editors/ValueEditor.tsx|Search constants & variables...',
   // GroupInspector — does not yet import useTranslation

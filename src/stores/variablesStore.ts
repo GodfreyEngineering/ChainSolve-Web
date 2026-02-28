@@ -23,6 +23,10 @@ interface VariablesState {
   renameVariable: (varId: string, newName: string) => void
   /** Update just the numeric value. */
   updateValue: (varId: string, value: number) => void
+  /** Update just the unit string. */
+  updateUnit: (varId: string, unit: string) => void
+  /** Update just the description. */
+  updateDescription: (varId: string, description: string) => void
   /** Reset store (called on project close). */
   reset: () => void
   /** Mark clean after a successful save. */
@@ -64,6 +68,29 @@ export const useVariablesStore = create<VariablesState>((set) => ({
       if (!existing) return s
       return {
         variables: { ...s.variables, [varId]: { ...existing, value } },
+        isDirty: true,
+      }
+    }),
+
+  updateUnit: (varId, unit) =>
+    set((s) => {
+      const existing = s.variables[varId]
+      if (!existing) return s
+      return {
+        variables: { ...s.variables, [varId]: { ...existing, unit: unit || undefined } },
+        isDirty: true,
+      }
+    }),
+
+  updateDescription: (varId, description) =>
+    set((s) => {
+      const existing = s.variables[varId]
+      if (!existing) return s
+      return {
+        variables: {
+          ...s.variables,
+          [varId]: { ...existing, description: description || undefined },
+        },
         isDirty: true,
       }
     }),

@@ -4,6 +4,7 @@ import {
   validateVariableName,
   safeParseVariablesMap,
   MAX_VARIABLE_NAME_LENGTH,
+  MAX_VARIABLE_UNIT_LENGTH,
   MAX_VARIABLE_DESCRIPTION_LENGTH,
 } from './validateVariables'
 
@@ -28,6 +29,20 @@ describe('validateVariablesMap — valid inputs', () => {
   it('accepts a variable with optional description', () => {
     const result = validateVariablesMap({
       'var-1': makeVar({ description: 'meters per second' }),
+    })
+    expect(result.ok).toBe(true)
+  })
+
+  it('accepts a variable with optional unit', () => {
+    const result = validateVariablesMap({
+      'var-1': makeVar({ unit: 'm/s' }),
+    })
+    expect(result.ok).toBe(true)
+  })
+
+  it('accepts a variable with unit + description', () => {
+    const result = validateVariablesMap({
+      'var-1': makeVar({ unit: 'kg', description: 'mass' }),
     })
     expect(result.ok).toBe(true)
   })
@@ -155,6 +170,26 @@ describe('validateVariablesMap — value validation', () => {
     const result = validateVariablesMap({ 'var-1': makeVar({ value: 'fast' }) })
     expect(result.ok).toBe(false)
     expect(result.errors.some((e) => e.includes('must be a number'))).toBe(true)
+  })
+})
+
+describe('validateVariablesMap — unit validation', () => {
+  it('rejects non-string unit', () => {
+    const result = validateVariablesMap({ 'var-1': makeVar({ unit: 42 }) })
+    expect(result.ok).toBe(false)
+    expect(result.errors.some((e) => e.includes('unit must be a string'))).toBe(true)
+  })
+
+  it('rejects unit exceeding max length', () => {
+    const unit = 'x'.repeat(MAX_VARIABLE_UNIT_LENGTH + 1)
+    const result = validateVariablesMap({ 'var-1': makeVar({ unit }) })
+    expect(result.ok).toBe(false)
+    expect(result.errors.some((e) => e.includes('unit exceeds'))).toBe(true)
+  })
+
+  it('accepts unit at exact max length', () => {
+    const unit = 'x'.repeat(MAX_VARIABLE_UNIT_LENGTH)
+    expect(validateVariablesMap({ 'var-1': makeVar({ unit }) }).ok).toBe(true)
   })
 })
 

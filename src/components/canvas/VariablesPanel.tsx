@@ -123,6 +123,8 @@ function VariableRow({ variable }: { variable: ProjectVariable }) {
   const updateValue = useVariablesStore((s) => s.updateValue)
   const renameVariable = useVariablesStore((s) => s.renameVariable)
   const removeVariable = useVariablesStore((s) => s.removeVariable)
+  const updateUnit = useVariablesStore((s) => s.updateUnit)
+  const updateDescription = useVariablesStore((s) => s.updateDescription)
 
   return (
     <div style={rowStyle}>
@@ -148,6 +150,15 @@ function VariableRow({ variable }: { variable: ProjectVariable }) {
             }}
           />
         </div>
+        <div style={{ width: 60, flexShrink: 0 }}>
+          <span style={fieldLabel}>Unit</span>
+          <input
+            style={inp}
+            value={variable.unit ?? ''}
+            onChange={(e) => updateUnit(variable.id, e.target.value)}
+            placeholder="e.g. m/s"
+          />
+        </div>
         <button
           style={{ ...deleteBtn, alignSelf: 'flex-end', marginBottom: '0.1rem' }}
           onClick={() => removeVariable(variable.id)}
@@ -155,6 +166,15 @@ function VariableRow({ variable }: { variable: ProjectVariable }) {
         >
           &times;
         </button>
+      </div>
+      <div>
+        <span style={fieldLabel}>Description</span>
+        <input
+          style={inp}
+          value={variable.description ?? ''}
+          onChange={(e) => updateDescription(variable.id, e.target.value)}
+          placeholder="Optional description"
+        />
       </div>
     </div>
   )
