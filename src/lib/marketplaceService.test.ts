@@ -40,6 +40,7 @@ const mockUpsert = vi.fn()
 const mockInsert = vi.fn()
 const mockUpdate = vi.fn()
 const mockSingle = vi.fn()
+const mockContains = vi.fn()
 
 // Build a chainable query builder
 function makeQueryBuilder(finalResult: { data: unknown; error: unknown }) {
@@ -53,10 +54,12 @@ function makeQueryBuilder(finalResult: { data: unknown; error: unknown }) {
     insert: mockInsert,
     update: mockUpdate,
     single: mockSingle,
+    contains: mockContains,
   }
   mockSelect.mockReturnValue(qb)
   mockEq.mockReturnValue(qb)
   mockIlike.mockReturnValue(qb)
+  mockContains.mockReturnValue(qb)
   mockOrder.mockResolvedValue(finalResult)
   mockMaybeSingle.mockResolvedValue(finalResult)
   mockUpsert.mockResolvedValue(finalResult)
@@ -129,6 +132,7 @@ describe('listPublishedItems', () => {
       eq: mockEq,
       ilike: mockIlike,
       order: mockOrder,
+      contains: mockContains,
     })
 
     const result = await listPublishedItems()
@@ -143,6 +147,7 @@ describe('listPublishedItems', () => {
       eq: mockEq,
       ilike: mockIlike,
       order: mockOrder,
+      contains: mockContains,
     })
 
     const result = await listPublishedItems()
@@ -156,9 +161,59 @@ describe('listPublishedItems', () => {
       eq: mockEq,
       ilike: mockIlike,
       order: mockOrder,
+      contains: mockContains,
     })
 
     await expect(listPublishedItems()).rejects.toMatchObject({ message: 'DB down' })
+  })
+
+  it('D9-5: calls order with likes_count when sort=likes', async () => {
+    makeQueryBuilder({ data: [], error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      ilike: mockIlike,
+      order: mockOrder,
+      contains: mockContains,
+    })
+
+    await listPublishedItems(undefined, undefined, 'likes')
+    expect(mockOrder).toHaveBeenCalledWith('likes_count', { ascending: false })
+  })
+
+  it('D9-5: calls order with created_at when sort=newest', async () => {
+    makeQueryBuilder({ data: [], error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      ilike: mockIlike,
+      order: mockOrder,
+      contains: mockContains,
+    })
+
+    await listPublishedItems(undefined, undefined, 'newest')
+    expect(mockOrder).toHaveBeenCalledWith('created_at', { ascending: false })
+  })
+
+  it('D9-5: calls contains when tag is provided', async () => {
+    const finalResult = { data: [], error: null }
+    const qb = {
+      select: mockSelect,
+      eq: mockEq,
+      ilike: mockIlike,
+      order: mockOrder,
+      contains: mockContains,
+    }
+    mockSelect.mockReturnValue(qb)
+    mockEq.mockReturnValue(qb)
+    mockIlike.mockReturnValue(qb)
+    // order returns the builder (so .contains can chain), contains resolves
+    mockOrder.mockReturnValue(qb)
+    mockContains.mockResolvedValue(finalResult)
+    supabaseMock.from.mockReturnValue(qb)
+
+    await listPublishedItems(undefined, undefined, 'downloads', 'physics')
+    expect(mockContains).toHaveBeenCalledWith('tags', ['physics'])
   })
 })
 

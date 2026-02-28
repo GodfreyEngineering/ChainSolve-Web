@@ -94,22 +94,31 @@ export function validateMarketplaceVersion(v: string): { ok: boolean; error?: st
 
 // ── Queries ────────────────────────────────────────────────────────────────────
 
+/** Sort options for Explore browse listing. */
+export type ExploreSortKey = 'downloads' | 'likes' | 'newest'
+
 /**
- * List all published marketplace items, optionally filtered by category
- * and/or a name search query. Ordered by downloads descending (most popular first).
+ * List all published marketplace items, optionally filtered by category,
+ * name search query, and/or tag. Supports multiple sort orders.
  */
 export async function listPublishedItems(
   category?: string,
   query?: string,
+  sort: ExploreSortKey = 'downloads',
+  tag?: string,
 ): Promise<MarketplaceItem[]> {
+  const orderCol =
+    sort === 'likes' ? 'likes_count' : sort === 'newest' ? 'created_at' : 'downloads_count'
+
   let q = supabase
     .from('marketplace_items')
     .select('*')
     .eq('is_published', true)
-    .order('downloads_count', { ascending: false })
+    .order(orderCol, { ascending: false })
 
   if (category && category !== 'all') q = q.eq('category', category)
   if (query && query.trim()) q = q.ilike('name', `%${query.trim()}%`)
+  if (tag && tag.trim()) q = q.contains('tags', [tag.trim()])
 
   const { data, error } = await q
   if (error) throw error
