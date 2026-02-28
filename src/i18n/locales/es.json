@@ -323,7 +323,8 @@
     "about": "Acerca de",
     "changelog": "Registro de cambios",
     "comingSoon": "Próximamente",
-    "notifications": "Notificaciones"
+    "notifications": "Notificaciones",
+    "menubar": "Menú de la aplicación"
   },
   "time": {
     "justNow": "ahora mismo",

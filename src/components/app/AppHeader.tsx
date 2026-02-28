@@ -815,7 +815,7 @@ export function AppHeader({
 
         {/* ── Center section: menus (desktop) / overflow (mobile) ──────── */}
         {!isMobile ? (
-          <div role="menubar" style={menuBarStyle}>
+          <div role="menubar" aria-label={t('menu.menubar')} style={menuBarStyle}>
             {menus.map((m) => (
               <DropdownMenu
                 key={m.id}
@@ -872,8 +872,8 @@ export function AppHeader({
           {/* Settings gear */}
           <button
             onClick={() => openSettings()}
-            title="Settings"
-            aria-label="Settings"
+            title={t('settings.title')}
+            aria-label={t('settings.title')}
             style={iconButtonStyle}
           >
             &#x2699;

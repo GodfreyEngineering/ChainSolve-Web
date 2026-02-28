@@ -323,7 +323,8 @@
     "about": "À propos",
     "changelog": "Journal des modifications",
     "comingSoon": "Bientôt disponible",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "menubar": "Menu de l'application"
   },
   "time": {
     "justNow": "à l'instant",

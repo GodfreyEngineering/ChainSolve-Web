@@ -362,12 +362,12 @@ Claude MUST:
   - Add reminder/checklist in PR template or CI doc step
 
 ## A7 — Accessibility + i18n quality gates
-- [ ] P071: Focus order audit + fixes
+- [x] P071: Focus order audit + fixes
 - [x] P072: Menubar ARIA + keyboard nav regression tests
 - [x] P073: Modal focus trap + ESC close + aria-live status
 - [ ] P074: Contrast pass toward WCAG AA
 - [x] P075: prefers-reduced-motion reliability
-- [ ] P076: Screen-reader labels sweep (SHOULD)
+- [x] P076: Screen-reader labels sweep (SHOULD)
 - [x] P077: i18n lint rule (no hard-coded strings)
 - [x] P078: missing-i18n keys detector + CI hook
 - [x] P079: Locale-aware number formatting (display-only) (SHOULD)
