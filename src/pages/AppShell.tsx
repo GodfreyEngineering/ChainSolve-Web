@@ -53,6 +53,7 @@ const PLAN_LABELS: Record<Plan, string> = {
   free: 'Free',
   trialing: 'Trial',
   pro: 'Pro',
+  enterprise: 'Enterprise',
   past_due: 'Past Due',
   canceled: 'Canceled',
 }
@@ -61,6 +62,7 @@ const PLAN_COLORS: Record<Plan, string> = {
   free: '#6b7280',
   trialing: '#3b82f6',
   pro: '#22c55e',
+  enterprise: '#8b5cf6',
   past_due: '#f59e0b',
   canceled: '#ef4444',
 }
@@ -388,7 +390,8 @@ export default function AppShell() {
 
   const plan = (profile?.plan ?? 'free') as Plan
   const canUpgrade = plan === 'free' || plan === 'canceled'
-  const canManage = plan === 'trialing' || plan === 'pro' || plan === 'past_due'
+  const canManage =
+    plan === 'trialing' || plan === 'pro' || plan === 'enterprise' || plan === 'past_due'
   const readOnly = isReadOnly(plan)
   const bannerKind = showBillingBanner(plan)
   const allowCreate = canCreateProject(plan, projects.length)

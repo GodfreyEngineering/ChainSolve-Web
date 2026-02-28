@@ -20,13 +20,17 @@
  */
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
-import { mapStatusToPlan } from "./_lib";
+import { mapStatusToPlan, resolveEnterprise } from "./_lib";
 
 export const onRequestPost: PagesFunction<{
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
+  STRIPE_PRICE_ID_ENT_10_MONTHLY?: string;
+  STRIPE_PRICE_ID_ENT_10_ANNUAL?: string;
+  STRIPE_PRICE_ID_ENT_UNLIMITED_MONTHLY?: string;
+  STRIPE_PRICE_ID_ENT_UNLIMITED_ANNUAL?: string;
 }> = async (context) => {
   const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = context.env;
 
@@ -73,10 +77,23 @@ export const onRequestPost: PagesFunction<{
     const sub = event.data.object as Stripe.Subscription;
 
     const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
-    const plan = mapStatusToPlan(sub.status);
+    const basePlan = mapStatusToPlan(sub.status);
+
+    // Collect enterprise price IDs from env (optional — absent until configured)
+    const enterprisePriceIds = [
+      context.env.STRIPE_PRICE_ID_ENT_10_MONTHLY,
+      context.env.STRIPE_PRICE_ID_ENT_10_ANNUAL,
+      context.env.STRIPE_PRICE_ID_ENT_UNLIMITED_MONTHLY,
+      context.env.STRIPE_PRICE_ID_ENT_UNLIMITED_ANNUAL,
+    ].filter((id): id is string => !!id);
+
+    // Determine if this is an enterprise subscription
+    const firstItem = sub.items?.data?.[0];
+    const priceId = firstItem?.price?.id ?? null;
+    const subMeta = (sub.metadata ?? null) as Record<string, string> | null;
+    const plan = resolveEnterprise(basePlan, subMeta, priceId, enterprisePriceIds);
 
     // In Stripe SDK v20 / API 2025+, current_period_end lives on SubscriptionItem
-    const firstItem = sub.items?.data?.[0];
     const firstItemRecord = firstItem as unknown as Record<string, unknown> | undefined;
     const periodEnd = typeof firstItemRecord?.current_period_end === "number"
       ? firstItemRecord.current_period_end

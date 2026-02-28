@@ -47,6 +47,10 @@ describe('getEntitlements', () => {
     expect(getEntitlements('pro')).toEqual(getEntitlements('trialing'))
   })
 
+  it('enterprise plan: identical entitlements to pro', () => {
+    expect(getEntitlements('enterprise')).toEqual(getEntitlements('pro'))
+  })
+
   it('past_due plan: identical entitlements to free', () => {
     expect(getEntitlements('past_due')).toEqual(getEntitlements('free'))
   })
@@ -59,7 +63,7 @@ describe('getEntitlements', () => {
 // ── isPro ─────────────────────────────────────────────────────────────────────
 
 describe('isPro', () => {
-  const proCases: Plan[] = ['trialing', 'pro']
+  const proCases: Plan[] = ['trialing', 'pro', 'enterprise']
   const nonProCases: Plan[] = ['free', 'past_due', 'canceled']
 
   for (const plan of proCases) {
@@ -86,7 +90,7 @@ describe('isReadOnly', () => {
     expect(isReadOnly('past_due')).toBe(true)
   })
 
-  const writablePlans: Plan[] = ['free', 'trialing', 'pro']
+  const writablePlans: Plan[] = ['free', 'trialing', 'pro', 'enterprise']
   for (const plan of writablePlans) {
     it(`returns false for ${plan}`, () => {
       expect(isReadOnly(plan)).toBe(false)
@@ -125,6 +129,11 @@ describe('canCreateProject', () => {
     expect(canCreateProject('pro', 0)).toBe(true)
     expect(canCreateProject('pro', 100)).toBe(true)
   })
+
+  it('enterprise: always true (unlimited)', () => {
+    expect(canCreateProject('enterprise', 0)).toBe(true)
+    expect(canCreateProject('enterprise', 100)).toBe(true)
+  })
 })
 
 // ── canCreateCanvas ────────────────────────────────────────────────────────────
@@ -157,6 +166,11 @@ describe('canCreateCanvas', () => {
     expect(canCreateCanvas('pro', 0)).toBe(true)
     expect(canCreateCanvas('pro', 100)).toBe(true)
   })
+
+  it('enterprise: always true (unlimited)', () => {
+    expect(canCreateCanvas('enterprise', 0)).toBe(true)
+    expect(canCreateCanvas('enterprise', 100)).toBe(true)
+  })
 })
 
 // ── showBillingBanner ──────────────────────────────────────────────────────────
@@ -170,7 +184,7 @@ describe('showBillingBanner', () => {
     expect(showBillingBanner('canceled')).toBe('canceled')
   })
 
-  const noBannerPlans: Plan[] = ['free', 'trialing', 'pro']
+  const noBannerPlans: Plan[] = ['free', 'trialing', 'pro', 'enterprise']
   for (const plan of noBannerPlans) {
     it(`returns null for ${plan}`, () => {
       expect(showBillingBanner(plan)).toBeNull()
@@ -211,5 +225,11 @@ describe('isBlockEntitled', () => {
     const trialingEnt = getEntitlements('trialing')
     expect(isBlockEntitled({ proOnly: true, category: 'plot' }, trialingEnt)).toBe(true)
     expect(isBlockEntitled({ proOnly: true, category: 'array' }, trialingEnt)).toBe(true)
+  })
+
+  it('enterprise entitlements allow all pro features', () => {
+    const entEnt = getEntitlements('enterprise')
+    expect(isBlockEntitled({ proOnly: true, category: 'plot' }, entEnt)).toBe(true)
+    expect(isBlockEntitled({ proOnly: true, category: 'array' }, entEnt)).toBe(true)
   })
 })

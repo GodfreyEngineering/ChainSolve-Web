@@ -63,6 +63,7 @@
     "free": "Free",
     "trialing": "Trial",
     "pro": "Pro",
+    "enterprise": "Enterprise",
     "past_due": "Past Due",
     "canceled": "Canceled"
   },

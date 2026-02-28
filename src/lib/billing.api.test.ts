@@ -17,13 +17,29 @@ function jsonError(message: string, status: number): Response {
   return Response.json({ ok: false, error: message }, { status })
 }
 
-type Plan = 'free' | 'trialing' | 'pro' | 'past_due' | 'canceled'
+type Plan = 'free' | 'trialing' | 'pro' | 'enterprise' | 'past_due' | 'canceled'
 function mapStatusToPlan(status: string): Plan {
   if (status === 'trialing') return 'trialing'
   if (status === 'active') return 'pro'
   if (status === 'past_due' || status === 'unpaid') return 'past_due'
   if (status === 'canceled' || status === 'incomplete_expired') return 'canceled'
   return 'free'
+}
+
+/**
+ * resolveEnterprise — inline copy of functions/api/stripe/_lib.ts
+ * MUST stay in sync with the server-side implementation.
+ */
+function resolveEnterprise(
+  basePlan: Plan,
+  metadata: Record<string, string> | null | undefined,
+  priceId: string | null | undefined,
+  enterprisePriceIds: string[],
+): Plan {
+  if (basePlan !== 'pro' && basePlan !== 'trialing') return basePlan
+  if (metadata?.plan_tier === 'enterprise') return 'enterprise'
+  if (priceId && enterprisePriceIds.includes(priceId)) return 'enterprise'
+  return basePlan
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -93,5 +109,56 @@ describe('mapStatusToPlan', () => {
     for (const s of statuses) {
       expect(mapStatusToPlan(s)).toBe(mapStatusToPlan(s))
     }
+  })
+})
+
+// ── resolveEnterprise (D0-1 — enterprise plan detection) ────────────────────
+
+describe('resolveEnterprise', () => {
+  const entPrices = ['price_ent_10_mo', 'price_ent_10_yr', 'price_ent_unlim_mo']
+
+  it('returns enterprise when metadata.plan_tier is "enterprise"', () => {
+    expect(resolveEnterprise('pro', { plan_tier: 'enterprise' }, null, entPrices)).toBe(
+      'enterprise',
+    )
+  })
+
+  it('returns enterprise when priceId matches an enterprise price', () => {
+    expect(resolveEnterprise('pro', null, 'price_ent_10_mo', entPrices)).toBe('enterprise')
+    expect(resolveEnterprise('pro', null, 'price_ent_unlim_mo', entPrices)).toBe('enterprise')
+  })
+
+  it('returns pro when priceId does not match any enterprise price', () => {
+    expect(resolveEnterprise('pro', null, 'price_pro_monthly', entPrices)).toBe('pro')
+  })
+
+  it('does not upgrade non-active plans to enterprise', () => {
+    expect(resolveEnterprise('free', { plan_tier: 'enterprise' }, null, entPrices)).toBe('free')
+    expect(resolveEnterprise('past_due', { plan_tier: 'enterprise' }, null, entPrices)).toBe(
+      'past_due',
+    )
+    expect(resolveEnterprise('canceled', null, 'price_ent_10_mo', entPrices)).toBe('canceled')
+  })
+
+  it('upgrades trialing to enterprise when metadata indicates enterprise', () => {
+    expect(resolveEnterprise('trialing', { plan_tier: 'enterprise' }, null, entPrices)).toBe(
+      'enterprise',
+    )
+  })
+
+  it('returns basePlan when no metadata and no priceId', () => {
+    expect(resolveEnterprise('pro', null, null, entPrices)).toBe('pro')
+    expect(resolveEnterprise('trialing', null, null, entPrices)).toBe('trialing')
+  })
+
+  it('returns basePlan when enterprisePriceIds is empty', () => {
+    expect(resolveEnterprise('pro', null, 'price_ent_10_mo', [])).toBe('pro')
+  })
+
+  it('metadata takes precedence over priceId', () => {
+    // pro price ID + enterprise metadata → enterprise
+    expect(
+      resolveEnterprise('pro', { plan_tier: 'enterprise' }, 'price_pro_monthly', entPrices),
+    ).toBe('enterprise')
   })
 })

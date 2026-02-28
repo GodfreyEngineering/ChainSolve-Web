@@ -9,7 +9,7 @@ const LazyReauthModal = lazy(() =>
   import('../../components/ui/ReauthModal').then((m) => ({ default: m.ReauthModal })),
 )
 
-type Plan = 'free' | 'trialing' | 'pro' | 'past_due' | 'canceled'
+type Plan = 'free' | 'trialing' | 'pro' | 'enterprise' | 'past_due' | 'canceled'
 
 interface Props {
   profile: Profile | null
@@ -19,6 +19,7 @@ const PLAN_COLORS: Record<Plan, string> = {
   free: '#6b7280',
   trialing: '#3b82f6',
   pro: '#22c55e',
+  enterprise: '#8b5cf6',
   past_due: '#f59e0b',
   canceled: '#ef4444',
 }
@@ -32,7 +33,8 @@ export function BillingSettings({ profile }: Props) {
 
   const plan = (profile?.plan ?? 'free') as Plan
   const canUpgrade = plan === 'free' || plan === 'canceled'
-  const canManage = plan === 'trialing' || plan === 'pro' || plan === 'past_due'
+  const canManage =
+    plan === 'trialing' || plan === 'pro' || plan === 'enterprise' || plan === 'past_due'
 
   const periodEnd = profile?.current_period_end
     ? new Date(profile.current_period_end).toLocaleDateString('en-GB', {

@@ -8,7 +8,7 @@
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type Plan = 'free' | 'trialing' | 'pro' | 'past_due' | 'canceled'
+export type Plan = 'free' | 'trialing' | 'pro' | 'enterprise' | 'past_due' | 'canceled'
 
 export interface Entitlements {
   maxProjects: number
@@ -50,6 +50,15 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseRules: true,
     canUseGroups: true,
   },
+  enterprise: {
+    maxProjects: Infinity,
+    maxCanvases: Infinity,
+    canUploadCsv: true,
+    canUseArrays: true,
+    canUsePlots: true,
+    canUseRules: true,
+    canUseGroups: true,
+  },
   past_due: {
     maxProjects: 1,
     maxCanvases: 2,
@@ -76,9 +85,9 @@ export function getEntitlements(plan: Plan): Entitlements {
   return ENTITLEMENTS[plan]
 }
 
-/** True for trialing or pro (full access). */
+/** True for trialing, pro, or enterprise (full access). */
 export function isPro(plan: Plan): boolean {
-  return plan === 'trialing' || plan === 'pro'
+  return plan === 'trialing' || plan === 'pro' || plan === 'enterprise'
 }
 
 /** Past-due and canceled users get read-only access to existing projects. */
