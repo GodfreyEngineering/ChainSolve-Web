@@ -209,7 +209,7 @@ Claude MUST:
   - Redaction guarantee
   - Keep behind debug toggle
 
-- [ ] P037: “Explain this value” view
+- [x] P037: “Explain this value” view
   - Selected node shows:
     - input bindings resolved
     - upstream sources
