@@ -625,7 +625,7 @@ Claude MUST:
   - Clicking opens upgrade modal
   - Acceptance: consistent gating across all UI entrypoints.
 
-- [ ] D6-3: Remove “Variables block” CRUD concept from library
+- [x] D6-3: Remove “Variables block” CRUD concept from library
   - Variables should be managed in Variables window
   - Keep only a *Variable Source node* that selects from saved variables (see D7)
   - Acceptance: library no longer exposes “variable CRUD” as blocks.
