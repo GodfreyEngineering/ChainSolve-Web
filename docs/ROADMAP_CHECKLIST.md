@@ -434,11 +434,11 @@ Claude MUST:
 - [x] P124: Org UI v0 (create org, invite, roles)
 - [x] P125: org billing separation doc
 
-- [ ] P126: Audit log schema + capture key events
-- [ ] P127: Audit log viewer (enterprise-only)
-- [ ] P128: Audit log redaction guarantee (MUST)
-- [ ] P129: Retention policy doc
-- [ ] P130: Enterprise policy hooks for Desktop (policy.json future)
+- [x] P126: Audit log schema + capture key events
+- [x] P127: Audit log viewer (enterprise-only)
+- [x] P128: Audit log redaction guarantee (MUST)
+- [x] P129: Retention policy doc
+- [x] P130: Enterprise policy hooks for Desktop (policy.json future)
 
 ---
 
