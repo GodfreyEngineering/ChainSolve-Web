@@ -707,7 +707,7 @@ Claude MUST:
   - Save theme to profile; switch theme instantly.
   - Acceptance: theme wizard works and preview is accurate.
 
-- [ ] D8-3: Saved themes + upload to Explore (Pro)
+- [x] D8-3: Saved themes + upload to Explore (Pro)
   - Theme library window: list saved themes, apply, delete
   - Upload flow gated to Pro:
     - attaches metadata
