@@ -37,7 +37,11 @@ export function toEngineSnapshot(
     nodes: evalNodes.map((n) => {
       const data = n.data as Record<string, unknown>
       // W12.4: Probe maps to display for the engine (no Rust changes needed).
-      const blockType = (data.blockType === 'probe' ? 'display' : data.blockType) as string
+      // D7-3: Unified constant block maps to the selected constant's op ID.
+      let blockType = (data.blockType === 'probe' ? 'display' : data.blockType) as string
+      if (blockType === 'constant' && typeof data.selectedConstantId === 'string') {
+        blockType = data.selectedConstantId
+      }
       // W12.2: resolve inputBindings → manualValues before sending to Rust.
       if (constants && variables && data.inputBindings) {
         const resolved = resolveNodeBindings(

@@ -146,6 +146,31 @@ describe('toEngineSnapshot — edges', () => {
   })
 })
 
+describe('toEngineSnapshot — constant block mapping (D7-3)', () => {
+  it('maps constant blockType to selectedConstantId', () => {
+    const nodes = [
+      makeNode('c1', 'constant', {
+        blockType: 'constant',
+        selectedConstantId: 'const.physics.g0',
+      }),
+    ]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes[0].blockType).toBe('const.physics.g0')
+  })
+
+  it('keeps blockType as "constant" when no selectedConstantId', () => {
+    const nodes = [makeNode('c1', 'constant', { blockType: 'constant' })]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes[0].blockType).toBe('constant')
+  })
+
+  it('keeps blockType as "constant" when selectedConstantId is not a string', () => {
+    const nodes = [makeNode('c1', 'constant', { blockType: 'constant', selectedConstantId: 42 })]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes[0].blockType).toBe('constant')
+  })
+})
+
 describe('toEngineSnapshot — multi-node graph', () => {
   it('produces a correct snapshot for physics-101-style graph', () => {
     const nodes = [

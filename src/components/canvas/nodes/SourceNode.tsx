@@ -6,11 +6,12 @@
  * The single output handle sits on the right edge.
  */
 
-import { memo, useCallback, useEffect } from 'react'
+import { memo, useCallback, useEffect, useMemo } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
 import { useShowValuePopover } from '../../../contexts/ValuePopoverContext'
 import { formatValue } from '../../../engine/value'
+import { CATEGORY_LABELS, getConstantsCatalog } from '../../../blocks/registry'
 import type { NodeData } from '../../../blocks/registry'
 import { useVariablesStore } from '../../../stores/variablesStore'
 import { NODE_STYLES as s } from './nodeStyles'
@@ -37,7 +38,26 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
   const isSlider = nd.blockType === 'slider'
   const isNumber = nd.blockType === 'number'
   const isVariableSource = nd.blockType === 'variableSource'
-  const isEditable = isSlider || isNumber || isVariableSource
+  const isConstantPicker = nd.blockType === 'constant'
+  const isEditable = isSlider || isNumber || isVariableSource || isConstantPicker
+
+  // D7-3: Constants catalog for the unified Constant node
+  const constantsCatalog = useMemo(() => {
+    if (!isConstantPicker) return []
+    const catalog = getConstantsCatalog()
+    // Group by category for <optgroup>
+    const grouped = new Map<string, typeof catalog>()
+    for (const entry of catalog) {
+      const group = grouped.get(entry.category) ?? []
+      group.push(entry)
+      grouped.set(entry.category, group)
+    }
+    return Array.from(grouped.entries()).map(([cat, entries]) => ({
+      category: cat,
+      label: CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ?? cat,
+      entries,
+    }))
+  }, [isConstantPicker])
 
   // W12.2: variableSource — sync variable value → node value
   const variables = useVariablesStore((s) => s.variables)
@@ -161,6 +181,48 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
                 {v.name} = {v.value}
                 {v.unit ? ` ${v.unit}` : ''}
               </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {isConstantPicker && (
+        <div className="cs-node-body" style={s.body}>
+          <select
+            className="nodrag"
+            style={{
+              width: '100%',
+              padding: '0.2rem 0.3rem',
+              borderRadius: 4,
+              border: `1px solid ${nd.selectedConstantId ? 'rgba(255,255,255,0.12)' : 'rgba(251,191,36,0.4)'}`,
+              background: 'rgba(0,0,0,0.2)',
+              color: nd.selectedConstantId ? '#93c5fd' : 'rgba(244,244,243,0.4)',
+              fontSize: '0.7rem',
+              fontFamily: 'inherit',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+            value={(nd.selectedConstantId as string) ?? ''}
+            onChange={(e) => {
+              const constId = e.target.value || undefined
+              const entry = constantsCatalog
+                .flatMap((g) => g.entries)
+                .find((c) => c.type === constId)
+              updateNodeData(id, {
+                selectedConstantId: constId,
+                label: entry?.label ?? 'Constant',
+              })
+            }}
+          >
+            <option value="">Select constant...</option>
+            {constantsCatalog.map((group) => (
+              <optgroup key={group.category} label={group.label}>
+                {group.entries.map((c) => (
+                  <option key={c.type} value={c.type}>
+                    {c.label}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </div>

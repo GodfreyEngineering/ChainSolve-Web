@@ -101,6 +101,16 @@ reg({
   defaultData: { blockType: 'phi', label: 'φ' },
 })
 
+// D7-3: Unified constant picker — one block to search all constants
+reg({
+  type: 'constant',
+  label: 'Constant',
+  category: 'constants',
+  nodeKind: 'csSource',
+  inputs: [],
+  defaultData: { blockType: 'constant', label: 'Constant' },
+})
+
 // ── Math category ─────────────────────────────────────────────────────────────
 
 reg({
@@ -558,6 +568,39 @@ export const LIBRARY_FAMILIES: LibraryFamily[] = [
   },
   { id: 'plots', label: 'Plots', categories: ['plot'] },
 ]
+
+// ── Constants catalog for unified Constant node (D7-3) ──────────────────────
+
+/** Categories that contain physical/math constants (not material presets). */
+const CONSTANT_CATEGORIES: ReadonlySet<BlockCategory> = new Set([
+  'constants',
+  'constMath',
+  'constPhysics',
+  'constAtmos',
+  'constThermo',
+  'constElec',
+])
+
+export interface ConstantCatalogEntry {
+  type: string
+  label: string
+  category: BlockCategory
+}
+
+/**
+ * Returns the list of all constant block types that can be selected
+ * in the unified Constant node. Excludes material/fluid presets
+ * (handled by the unified Material node in D7-4).
+ */
+export function getConstantsCatalog(): ConstantCatalogEntry[] {
+  const entries: ConstantCatalogEntry[] = []
+  for (const [, def] of BLOCK_REGISTRY) {
+    if (CONSTANT_CATEGORIES.has(def.category) && def.type !== 'constant') {
+      entries.push({ type: def.type, label: def.label, category: def.category })
+    }
+  }
+  return entries
+}
 
 // ── Pro-only block registration (no circular imports) ────────────────────────
 // Block packs export registration functions instead of importing reg.

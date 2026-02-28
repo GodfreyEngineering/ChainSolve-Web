@@ -131,6 +131,8 @@ export interface NodeData extends Record<string, unknown> {
   inputBindings?: Record<string, InputBinding>
   /** Bound variable ID for variableSource and slider nodes (W12.2). */
   varId?: string
+  /** Selected constant op ID for unified "constant" nodes (D7-3). */
+  selectedConstantId?: string
   /** Vector data for vectorInput nodes. */
   vectorData?: number[]
   /** Table data for tableInput / csvImport nodes. */

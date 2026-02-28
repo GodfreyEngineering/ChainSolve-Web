@@ -7,7 +7,12 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { BLOCK_REGISTRY, CATEGORY_ORDER, LIBRARY_FAMILIES } from '../../blocks/registry'
+import {
+  BLOCK_REGISTRY,
+  CATEGORY_ORDER,
+  LIBRARY_FAMILIES,
+  getConstantsCatalog,
+} from '../../blocks/registry'
 import { getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 
 /** Pro-only categories (must match BlockLibrary.tsx PRO_CATEGORIES). */
@@ -130,5 +135,41 @@ describe('Library families structure (D6-4)', () => {
     for (const fam of LIBRARY_FAMILIES) {
       expect(fam.categories.length, `${fam.id} has no categories`).toBeGreaterThan(0)
     }
+  })
+})
+
+// ── D7-3: Unified Constant node catalog ─────────────────────────────────────
+
+describe('Constants catalog (D7-3)', () => {
+  it('unified constant block is registered', () => {
+    const def = BLOCK_REGISTRY.get('constant')
+    expect(def).toBeDefined()
+    expect(def!.nodeKind).toBe('csSource')
+    expect(def!.category).toBe('constants')
+    expect(def!.inputs).toEqual([])
+  })
+
+  it('catalog contains all constant blocks except the unified one', () => {
+    const catalog = getConstantsCatalog()
+    const catalogTypes = new Set(catalog.map((c) => c.type))
+    // Should NOT include the unified 'constant' block itself
+    expect(catalogTypes.has('constant')).toBe(false)
+    // Should include known constants
+    expect(catalogTypes.has('pi')).toBe(true)
+    expect(catalogTypes.has('const.physics.g0')).toBe(true)
+    expect(catalogTypes.has('const.math.sqrt2')).toBe(true)
+  })
+
+  it('catalog does not include material/fluid presets', () => {
+    const catalog = getConstantsCatalog()
+    const materialTypes = catalog.filter(
+      (c) => c.type.startsWith('preset.materials.') || c.type.startsWith('preset.fluids.'),
+    )
+    expect(materialTypes).toEqual([])
+  })
+
+  it('catalog has at least 20 entries', () => {
+    const catalog = getConstantsCatalog()
+    expect(catalog.length).toBeGreaterThanOrEqual(20)
   })
 })
