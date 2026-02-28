@@ -612,7 +612,7 @@ Claude MUST:
 ---
 
 ## D6 — Block library redesign (premium discovery + usability)
-- [ ] D6-1: Block library UI overhaul
+- [x] D6-1: Block library UI overhaul
   - Goals:
     - faster searching
     - clearer categories
