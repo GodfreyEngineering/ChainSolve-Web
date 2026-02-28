@@ -3,6 +3,7 @@
 /* ── Design tokens ─────────────────────────────────────────────────────────── */
 :root {
   --primary: #1cabb0;
+  --primary-text: #1cabb0; /* same as --primary in dark theme; overridden in light */
   --primary-dim: rgba(28, 171, 176, 0.15);
   --primary-glow: rgba(28, 171, 176, 0.35);
 
@@ -13,7 +14,7 @@
   --input-bg: #252525;
 
   --text: #f4f4f3;
-  --text-muted: rgba(244, 244, 243, 0.5);
+  --text-muted: rgba(244, 244, 243, 0.65); /* raised from 0.5 → 4.5:1 AA on both bg and card-bg */
 
   --success: #22c55e;
   --danger: #ef4444;
@@ -46,7 +47,8 @@
   --input-bg: #ffffff;
 
   --text: #1a1a1a;
-  --text-muted: rgba(26, 26, 26, 0.5);
+  --text-muted: rgba(26, 26, 26, 0.65); /* raised from 0.5 → 4.5:1 AA on bg and card-bg */
+  --primary-text: #0f7578; /* darker teal: 4.5:1 AA on light bg (--primary #1cabb0 only 2.5:1) */
 
   color-scheme: light;
 }
@@ -73,7 +75,7 @@ h1 {
 
 a {
   font-weight: 500;
-  color: var(--primary);
+  color: var(--primary-text);
   text-decoration: none;
 }
 a:hover {
