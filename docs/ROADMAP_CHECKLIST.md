@@ -587,7 +587,7 @@ Claude MUST:
   - Sheet tab: rename, delete, duplicate
   - Acceptance: power-user UX is coherent.
 
-- [ ] D4-4: Delete edges via Delete key
+- [x] D4-4: Delete edges via Delete key
   - Clicking an edge selects it; Delete removes it.
   - Ensure undo/redo works.
   - Acceptance: quick deletion works and is stable.
