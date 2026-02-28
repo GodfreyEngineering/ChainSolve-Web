@@ -664,7 +664,7 @@ Claude MUST:
   - Show resolved value + description
   - Acceptance: constants are one block, easy to search.
 
-- [ ] D7-4: Material Source node unification
+- [x] D7-4: Material Source node unification
   - Replace scattered material blocks with one “Material” block
   - Dropdown/search over material presets
   - Outputs: comprehensive material properties
