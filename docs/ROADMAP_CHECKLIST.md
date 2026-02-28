@@ -554,7 +554,7 @@ Claude MUST:
   - Option B: keep above dock and make dock push layout up
   - Acceptance: toolbar never sits “behind” panels.
 
-- [ ] D3-3: Bottom Dock System (for all bottom panels)
+- [x] D3-3: Bottom Dock System (for all bottom panels)
   - Panels: Debug Console, Graph Health, (future) Observability, (future) Export Logs
   - Dock supports:
     - resize height
