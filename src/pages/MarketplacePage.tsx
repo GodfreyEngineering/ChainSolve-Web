@@ -1,7 +1,7 @@
 /**
  * MarketplacePage — P103 shell + P104 browse/search/filter UI.
  *
- * Route: /marketplace
+ * Route: /explore (D9-1: renamed from /marketplace)
  *
  * Features:
  *   - Search bar (name filter)
@@ -200,7 +200,7 @@ export default function MarketplacePage() {
         </span>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <a
-            href="/marketplace/author"
+            href="/explore/author"
             style={{ fontSize: '0.82rem', color: 'rgba(244,244,243,0.5)', textDecoration: 'none' }}
           >
             {t('marketplace.myItems')}
@@ -323,7 +323,7 @@ export default function MarketplacePage() {
                     }}
                   >
                     <a
-                      href={`/marketplace/items/${item.id}`}
+                      href={`/explore/items/${item.id}`}
                       style={{
                         fontWeight: 600,
                         fontSize: '0.95rem',

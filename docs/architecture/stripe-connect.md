@@ -1,4 +1,4 @@
-# Stripe Connect — Marketplace Architecture
+# Stripe Connect — Explore Architecture
 
 _Status: stub (P111). Full implementation: P112 (purchase flow), P113 (gating UI)._
 
@@ -6,8 +6,8 @@ _Status: stub (P111). Full implementation: P112 (purchase flow), P113 (gating UI
 
 ## Overview
 
-ChainSolve Marketplace uses **Stripe Connect** (Express accounts) to enable
-verified authors to receive payment for premium marketplace items. ChainSolve
+ChainSolve Explore uses **Stripe Connect** (Express accounts) to enable
+verified authors to receive payment for premium Explore items. ChainSolve
 acts as the **platform** and takes a percentage cut; the author's connected
 Stripe account receives the remainder.
 
@@ -18,7 +18,7 @@ Stripe account receives the remainder.
 | Role | Stripe entity |
 |---|---|
 | ChainSolve platform | Stripe platform account |
-| Marketplace author | Stripe Express connected account |
+| Explore author | Stripe Express connected account |
 | Buyer | Stripe customer (ephemeral, no stored card) |
 
 ---
@@ -31,7 +31,7 @@ Author dashboard
     → POST /api/stripe/connect/onboard   (edge function)
       → stripe.accountLinks.create(...)
         → redirect to Stripe hosted onboarding
-          → Stripe redirects back to /marketplace/author?stripe=success|refresh
+          → Stripe redirects back to /explore/author?stripe=success|refresh
 ```
 
 1. Edge function calls `stripe.accounts.create({ type: 'express', ... })` and
@@ -67,7 +67,7 @@ Item detail page
   },
   line_items: [{ price_data: { ... }, quantity: 1 }],
   success_url: `${origin}/marketplace/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
-  cancel_url:  `${origin}/marketplace/items/${itemId}`,
+  cancel_url:  `${origin}/explore/items/${itemId}`,
 }
 ```
 

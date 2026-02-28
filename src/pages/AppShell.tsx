@@ -165,12 +165,12 @@ const btnSmallPrimary: React.CSSProperties = {
 }
 const btnDisabled: React.CSSProperties = { opacity: 0.55, cursor: 'not-allowed' }
 
-type GuideAction = 'scratch' | 'settings' | 'marketplace' | 'import'
+type GuideAction = 'scratch' | 'settings' | 'explore' | 'import'
 
 const GUIDE_LINKS: { key: string; icon: string; action: GuideAction }[] = [
   { key: 'home.guideScratch', icon: '⟁', action: 'scratch' },
   { key: 'home.guideSettings', icon: '⚙', action: 'settings' },
-  { key: 'home.guideMarketplace', icon: '◈', action: 'marketplace' },
+  { key: 'home.guideExplore', icon: '◈', action: 'explore' },
   { key: 'home.guideImport', icon: '↥', action: 'import' },
 ]
 
@@ -528,7 +528,7 @@ export default function AppShell() {
             <img src={BRAND.logoWideText} alt="ChainSolve" style={{ height: 28 }} />
           </a>
           <a
-            href="/marketplace"
+            href="/explore"
             style={{
               fontSize: '0.85rem',
               fontWeight: 500,
@@ -536,7 +536,7 @@ export default function AppShell() {
               textDecoration: 'none',
             }}
           >
-            Marketplace
+            {t('home.explore')}
           </a>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
@@ -1009,8 +1009,8 @@ export default function AppShell() {
                     case 'settings':
                       openSettings('preferences')
                       break
-                    case 'marketplace':
-                      navigate('/marketplace')
+                    case 'explore':
+                      navigate('/explore')
                       break
                     case 'import':
                       importRef.current?.click()
@@ -1031,7 +1031,7 @@ export default function AppShell() {
           </div>
         </div>
 
-        {/* ── Explore Marketplace CTA ── */}
+        {/* ── Explore CTA ── */}
         <div
           style={{
             ...cardStyle,
@@ -1047,7 +1047,7 @@ export default function AppShell() {
             <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.6 }}>{t('home.exploreDesc')}</p>
           </div>
           {isPro(plan) ? (
-            <button style={btnSecondary} onClick={() => navigate('/marketplace')}>
+            <button style={btnSecondary} onClick={() => navigate('/explore')}>
               {t('home.exploreCta')}
             </button>
           ) : (

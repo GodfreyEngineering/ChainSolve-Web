@@ -1,7 +1,7 @@
 /**
  * MarketplaceAuthorPage — P108 author dashboard v0.
  *
- * Route: /marketplace/author
+ * Route: /explore/author (D9-1: renamed from /marketplace)
  *
  * Features:
  *   - Lists all items the current user has authored (published + drafts)
@@ -261,10 +261,10 @@ export default function MarketplaceAuthorPage() {
           <img src={BRAND.logoWideText} alt="ChainSolve" style={{ height: 28 }} />
         </a>
         <a
-          href="/marketplace"
+          href="/explore"
           style={{ fontSize: '0.82rem', color: 'rgba(244,244,243,0.5)', textDecoration: 'none' }}
         >
-          ← {t('marketplace.title')}
+          {t('marketplace.backToMarketplace')}
         </a>
       </nav>
 
@@ -503,7 +503,7 @@ export default function MarketplaceAuthorPage() {
           <div key={item.id} style={s.card} data-testid="author-item">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1 }}>
               <a
-                href={`/marketplace/items/${item.id}`}
+                href={`/explore/items/${item.id}`}
                 style={{
                   fontWeight: 600,
                   fontSize: '0.95rem',

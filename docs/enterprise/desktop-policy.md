@@ -65,7 +65,7 @@ User-level settings (`~/...`) are always overridden by machine-level policy.
   // ── Feature flags ───────────────────────────────────────────────────────
   "features": {
     // Disable the public Marketplace for managed users.
-    "marketplace": false,
+    "explore": false,
     // Disable CSV import/export.
     "csvImport": true,
     // Allow or block external sharing of project exports.
@@ -109,7 +109,7 @@ Keys supported in `organizations.policy` (subset of `policy.json`):
 
 | Key | Type | Description |
 |-----|------|-------------|
-| `features.marketplace` | boolean | Enable/disable marketplace for org members |
+| `features.explore` | boolean | Enable/disable Explore for org members |
 | `auditLog.forceEnabled` | boolean | Force audit log on for all org members |
 | `auditLog.retentionDays` | number | Override default retention for org events |
 

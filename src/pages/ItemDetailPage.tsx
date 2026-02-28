@@ -1,7 +1,7 @@
 /**
  * ItemDetailPage — P105 item detail + install button.
  *
- * Route: /marketplace/items/:itemId
+ * Route: /explore/items/:itemId (D9-1: renamed from /marketplace)
  *
  * Features:
  *   - Item metadata (name, version, author, category, downloads)
@@ -151,7 +151,7 @@ export default function ItemDetailPage() {
           <img src={BRAND.logoWideText} alt="ChainSolve" style={{ height: 28 }} />
         </a>
         <a
-          href="/marketplace"
+          href="/explore"
           style={{ fontSize: '0.82rem', color: 'rgba(244,244,243,0.5)', textDecoration: 'none' }}
         >
           ← {t('marketplace.title')}

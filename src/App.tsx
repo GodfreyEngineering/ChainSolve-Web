@@ -10,7 +10,7 @@ import { isDiagnosticsUIEnabled } from './lib/devFlags'
 // production users unless VITE_DIAGNOSTICS_UI_ENABLED=true.
 const DiagnosticsPage = lazy(() => import('./pages/DiagnosticsPage'))
 
-// Lazy-load marketplace pages (not needed on initial load)
+// Lazy-load Explore (formerly marketplace) pages (not needed on initial load)
 const MarketplacePage = lazy(() => import('./pages/MarketplacePage'))
 const ItemDetailPage = lazy(() => import('./pages/ItemDetailPage'))
 const MarketplaceAuthorPage = lazy(() => import('./pages/MarketplaceAuthorPage'))
@@ -101,7 +101,7 @@ export default function App() {
         <Route path="/billing/success" element={<BillingSuccess />} />
         <Route path="/billing/cancel" element={<BillingCancel />} />
         <Route
-          path="/marketplace"
+          path="/explore"
           element={
             <Suspense fallback={null}>
               <MarketplacePage />
@@ -109,7 +109,7 @@ export default function App() {
           }
         />
         <Route
-          path="/marketplace/items/:itemId"
+          path="/explore/items/:itemId"
           element={
             <Suspense fallback={null}>
               <ItemDetailPage />
@@ -117,13 +117,16 @@ export default function App() {
           }
         />
         <Route
-          path="/marketplace/author"
+          path="/explore/author"
           element={
             <Suspense fallback={null}>
               <MarketplaceAuthorPage />
             </Suspense>
           }
         />
+        {/* Legacy marketplace routes redirect to explore */}
+        <Route path="/marketplace" element={<Navigate to="/explore" replace />} />
+        <Route path="/marketplace/*" element={<Navigate to="/explore" replace />} />
         <Route
           path="/orgs"
           element={
