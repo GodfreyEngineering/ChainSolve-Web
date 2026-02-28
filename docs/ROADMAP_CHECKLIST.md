@@ -671,7 +671,7 @@ Claude MUST:
   - Pro-only: “Custom material…” opens wizard to build a new material preset
   - Acceptance: materials are coherent and powerful.
 
-- [ ] D7-5: Custom material wizard (Pro)
+- [x] D7-5: Custom material wizard (Pro)
   - Guided creation:
     - base template
     - fill properties table
