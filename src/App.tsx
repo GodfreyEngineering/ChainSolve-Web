@@ -10,6 +10,10 @@ import { isDiagnosticsUIEnabled } from './lib/devFlags'
 // production users unless VITE_DIAGNOSTICS_UI_ENABLED=true.
 const DiagnosticsPage = lazy(() => import('./pages/DiagnosticsPage'))
 
+// Lazy-load marketplace pages (not needed on initial load)
+const MarketplacePage = lazy(() => import('./pages/MarketplacePage'))
+const ItemDetailPage = lazy(() => import('./pages/ItemDetailPage'))
+
 function BillingSuccess() {
   return (
     <div
@@ -91,6 +95,22 @@ export default function App() {
         <Route path="/settings" element={<SettingsRedirect />} />
         <Route path="/billing/success" element={<BillingSuccess />} />
         <Route path="/billing/cancel" element={<BillingCancel />} />
+        <Route
+          path="/marketplace"
+          element={
+            <Suspense fallback={null}>
+              <MarketplacePage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/marketplace/items/:itemId"
+          element={
+            <Suspense fallback={null}>
+              <ItemDetailPage />
+            </Suspense>
+          }
+        />
         {isDiagnosticsUIEnabled() && (
           <Route
             path="/diagnostics"

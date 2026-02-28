@@ -478,5 +478,30 @@
     "templateComingSoon": "Plantillas próximamente",
     "import": "Importar proyecto",
     "importDesc": "Cargar un archivo .chainsolvejson"
+  },
+  "marketplace": {
+    "title": "Marketplace",
+    "subtitle": "Browse and install templates, block packs, and themes",
+    "searchPlaceholder": "Search marketplace…",
+    "allCategories": "All",
+    "categoryTemplate": "Templates",
+    "categoryBlockPack": "Block packs",
+    "categoryTheme": "Themes",
+    "sortPopular": "Most popular",
+    "sortNewest": "Newest",
+    "noResults": "No items found",
+    "loading": "Loading…",
+    "install": "Install",
+    "installing": "Installing…",
+    "installed": "Installed",
+    "downloads": "{{count}} installs",
+    "by": "by {{author}}",
+    "version": "v{{version}}",
+    "itemNotFound": "Item not found",
+    "backToMarketplace": "← Back to Marketplace",
+    "installError": "Install failed. Please try again.",
+    "navLabel": "Marketplace navigation",
+    "itemNavLabel": "Item detail navigation",
+    "categoryFilterLabel": "Category filter"
   }
 }

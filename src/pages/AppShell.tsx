@@ -440,9 +440,22 @@ export default function AppShell() {
           background: 'var(--card-bg)',
         }}
       >
-        <a href="/app" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <img src={BRAND.logoWideText} alt="ChainSolve" style={{ height: 28 }} />
-        </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          <a href="/app" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+            <img src={BRAND.logoWideText} alt="ChainSolve" style={{ height: 28 }} />
+          </a>
+          <a
+            href="/marketplace"
+            style={{
+              fontSize: '0.85rem',
+              fontWeight: 500,
+              color: 'rgba(244,244,243,0.6)',
+              textDecoration: 'none',
+            }}
+          >
+            Marketplace
+          </a>
+        </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <span style={{ fontSize: '0.85rem', opacity: 0.6 }}>{user?.email}</span>
           <button
