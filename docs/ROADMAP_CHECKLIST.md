@@ -749,7 +749,7 @@ Claude MUST:
     - has org-only content space (see D10)
   - Acceptance: all rules enforced both client-side and server-side.
 
-- [ ] D9-4: Comments system (moderated)
+- [x] D9-4: Comments system (moderated)
   - Commenting best practices:
     - rate limiting
     - report comment
@@ -772,7 +772,7 @@ Claude MUST:
 ---
 
 ## D10 — Enterprise org-only Explore + admin controls
-- [ ] D10-1: Org-only Explore “Company Library”
+- [x] D10-1: Org-only Explore “Company Library”
   - Items visible only to users in org
   - Optionally separate tab “Company”
   - Acceptance: org-only isolation works.
