@@ -793,13 +793,13 @@ Claude MUST:
 ---
 
 ## D11 — Billing + entitlements upgrades (Stripe Annual + Enterprise)
-- [ ] D11-1: Update Stripe Checkout flow to support:
+- [x] D11-1: Update Stripe Checkout flow to support:
   - Pro Monthly + Pro Annual
   - Enterprise 10 seats (monthly/annual)
   - Enterprise Unlimited (monthly/annual)
   - Acceptance: checkout creates correct subscription.
 
-- [ ] D11-2: Update webhook processing
+- [x] D11-2: Update webhook processing
   - Map new Stripe price IDs to plan states
   - Persist:
     - plan
@@ -807,13 +807,13 @@ Claude MUST:
     - org seat count if enterprise
   - Acceptance: plan badge updates reliably.
 
-- [ ] D11-3: Upgrade modal window
+- [x] D11-3: Upgrade modal window
   - Shows Free / Pro / Enterprise with monthly/annual toggle
   - Explains locked features
   - “Contact sales” flow for enterprise (info@chainsolve.co.uk)
   - Acceptance: upgrade UX is premium and persuasive.
 
-- [ ] D11-4: Lock import/export for Free
+- [x] D11-4: Lock import/export for Free
   - Even though export exists, Free must be blocked:
     - export PDF/XLSX/.chainsolvejson
     - import .chainsolvejson
