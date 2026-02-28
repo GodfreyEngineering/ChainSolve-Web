@@ -503,7 +503,7 @@ Claude MUST:
   - If project open: go to canvas environment.
   - Acceptance: brand new user always lands inside app shell, not a half-state.
 
-- [ ] D1-2: Workbench Home (no project open)
+- [x] D1-2: Workbench Home (no project open)
   - Render: header only + premium home panel
   - Show:
     - Create Project CTA
@@ -524,14 +524,14 @@ Claude MUST:
 ## D2 — Window system (draggable/resizable popups everywhere)
 > Replace “random modals” with consistent in-app windows.
 
-- [ ] D2-1: Implement a Window Manager (internal framework)
+- [x] D2-1: Implement a Window Manager (internal framework)
   - Draggable + resizable + z-index stacking
   - Standard window chrome: title, close, minimize, maximize, restore
   - Keyboard: ESC closes topmost, Cmd/Ctrl+W closes active window
   - Persist window geometry optionally per-user.
   - Acceptance: Settings/About/Docs/Inspector all use the same window system.
 
-- [ ] D2-2: Replace “About”, “Settings”, “Documentation”, “Variables”, “Profile” into Window Manager windows
+- [x] D2-2: Replace “About”, “Settings”, “Documentation”, “Variables”, “Profile” into Window Manager windows
   - No new browser windows. Everything in-app.
   - Acceptance: consistent UI/UX across all windows.
 
