@@ -3,6 +3,7 @@
  * consistency across block library and UI entrypoints.
  *
  * D6-2: Locked Pro features visible to Free users.
+ * D6-3: Variable CRUD must not exist in block library.
  */
 
 import { describe, it, expect } from 'vitest'
@@ -77,5 +78,24 @@ describe('Pro feature gating', () => {
     for (const cat of PRO_CATEGORIES) {
       expect(CATEGORY_ORDER).toContain(cat)
     }
+  })
+})
+
+// ── D6-3: Variable CRUD separation ──────────────────────────────────────────
+
+describe('Variable block separation (D6-3)', () => {
+  it('only one variable-related block exists: variableSource', () => {
+    const varBlocks = [...BLOCK_REGISTRY.values()].filter(
+      (d) => d.type.toLowerCase().includes('variable') || d.type === 'variableSource',
+    )
+    expect(varBlocks).toHaveLength(1)
+    expect(varBlocks[0].type).toBe('variableSource')
+  })
+
+  it('variableSource is a source node (no inputs — select-only)', () => {
+    const def = BLOCK_REGISTRY.get('variableSource')
+    expect(def).toBeDefined()
+    expect(def!.nodeKind).toBe('csSource')
+    expect(def!.inputs).toEqual([])
   })
 })
