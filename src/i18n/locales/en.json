@@ -643,7 +643,9 @@
     "commentRateLimited": "Too many comments — please wait a moment",
     "noComments": "No comments yet. Be the first to share your thoughts!",
     "companyLibrary": "Company Library",
-    "companyLibraryEmpty": "No items in your company library yet."
+    "companyLibraryEmpty": "No items in your company library yet.",
+    "installsDisabled": "Your organisation has disabled installs.",
+    "commentsDisabled": "Your organisation has disabled comments."
   },
   "orgs": {
     "title": "Organizations",

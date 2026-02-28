@@ -37,6 +37,7 @@ import { getProfile } from '../lib/profilesService'
 import { getProjectCount } from '../lib/projects'
 import { canInstallExploreItem, type Plan } from '../lib/entitlements'
 import { getSession } from '../lib/auth'
+import { listMyOrgs, getOrgPolicy, type OrgPolicy } from '../lib/orgsService'
 import { BRAND } from '../lib/brand'
 
 const CATEGORY_LABEL_KEYS: Record<string, string> = {
@@ -134,6 +135,9 @@ export default function ItemDetailPage() {
   const [commentError, setCommentError] = useState<string | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
+  // D10-2: org policy
+  const [orgPolicy, setOrgPolicy] = useState<OrgPolicy | null>(null)
+
   useEffect(() => {
     if (!itemId) {
       setNotFound(true)
@@ -156,16 +160,23 @@ export default function ItemDetailPage() {
           setInstalled(installs.some((p) => p.item_id === itemId))
           setLiked(likes.has(itemId))
         }
-        // D9-3: fetch plan + project count; D9-4: fetch comments
+        // D9-3: fetch plan + project count; D9-4: fetch comments; D10-2: org policy
         const session = await getSession()
         if (session) {
           setCurrentUserId(session.user.id)
-          const [profile, count] = await Promise.all([
+          const [profile, count, orgs] = await Promise.all([
             getProfile(session.user.id),
             getProjectCount(),
+            listMyOrgs(),
           ])
           if (profile?.plan) setPlan(profile.plan as Plan)
           setProjectCount(count)
+          // D10-2: fetch policy for first org
+          if (orgs.length > 0) {
+            getOrgPolicy(orgs[0].id)
+              .then(setOrgPolicy)
+              .catch(() => {})
+          }
         }
         // D9-4: load comments (non-blocking)
         if (fetched) {
@@ -210,6 +221,12 @@ export default function ItemDetailPage() {
   const handleInstall = useCallback(async () => {
     if (!itemId || installed || installing) return
 
+    // D10-2: org policy install check
+    if (orgPolicy?.policy_installs_allowed === false) {
+      setError(t('marketplace.installsDisabled'))
+      return
+    }
+
     // D9-3: plan gating check
     if (!isPaid && item && !canInstallExploreItem(plan, item.category, projectCount)) {
       setError(t('marketplace.upgradeToInstall'))
@@ -247,11 +264,16 @@ export default function ItemDetailPage() {
     } finally {
       setInstalling(false)
     }
-  }, [itemId, installed, installing, navigate, item, isPaid, plan, projectCount, t])
+  }, [itemId, installed, installing, navigate, item, isPaid, plan, projectCount, t, orgPolicy])
 
   // D9-4: comment handlers
   const handlePostComment = useCallback(async () => {
     if (!itemId || !commentText.trim()) return
+    // D10-2: org policy comment check
+    if (orgPolicy?.policy_comments_allowed === false) {
+      setCommentError(t('marketplace.commentsDisabled'))
+      return
+    }
     if (!checkCommentRateLimit()) {
       setCommentError(t('marketplace.commentRateLimited'))
       return
@@ -272,7 +294,7 @@ export default function ItemDetailPage() {
     } finally {
       setCommentPosting(false)
     }
-  }, [itemId, commentText, navigate, t])
+  }, [itemId, commentText, navigate, t, orgPolicy])
 
   const handleDeleteComment = useCallback(async (commentId: string) => {
     try {

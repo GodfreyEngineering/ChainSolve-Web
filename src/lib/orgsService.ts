@@ -15,8 +15,19 @@ export interface Org {
   id: string
   name: string
   owner_id: string
+  /** D10-2: enterprise policy flags */
+  policy_explore_enabled: boolean
+  policy_installs_allowed: boolean
+  policy_comments_allowed: boolean
   created_at: string
   updated_at: string
+}
+
+/** D10-2: subset of Org fields for policy checks. */
+export interface OrgPolicy {
+  policy_explore_enabled: boolean
+  policy_installs_allowed: boolean
+  policy_comments_allowed: boolean
 }
 
 export interface OrgMember {
@@ -178,6 +189,35 @@ export async function renameOrg(orgId: string, name: string): Promise<void> {
  */
 export async function deleteOrg(orgId: string): Promise<void> {
   const { error } = await supabase.from('organizations').delete().eq('id', orgId)
+
+  if (error) throw error
+}
+
+// ── D10-2: Enterprise policy flags ────────────────────────────────────────────
+
+/**
+ * Fetch policy flags for an organization.
+ * Caller must be a member of the org (enforced by RLS).
+ */
+export async function getOrgPolicy(orgId: string): Promise<OrgPolicy> {
+  const { data, error } = await supabase
+    .from('organizations')
+    .select('policy_explore_enabled,policy_installs_allowed,policy_comments_allowed')
+    .eq('id', orgId)
+    .maybeSingle()
+
+  if (error) throw error
+  if (!data) throw new Error('Organization not found')
+
+  return data as OrgPolicy
+}
+
+/**
+ * Update policy flags for an organization.
+ * Caller must be the org owner (enforced by RLS update policy).
+ */
+export async function updateOrgPolicy(orgId: string, policy: Partial<OrgPolicy>): Promise<void> {
+  const { error } = await supabase.from('organizations').update(policy).eq('id', orgId)
 
   if (error) throw error
 }

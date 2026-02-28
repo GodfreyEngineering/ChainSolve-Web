@@ -11,6 +11,8 @@ import {
   removeOrgMember,
   renameOrg,
   deleteOrg,
+  getOrgPolicy,
+  updateOrgPolicy,
 } from './orgsService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
@@ -23,6 +25,7 @@ const mockInsert = vi.fn()
 const mockUpdate = vi.fn()
 const mockDelete = vi.fn()
 const mockSingle = vi.fn()
+const mockMaybeSingle = vi.fn()
 
 function makeQb(finalResult: { data: unknown; error: unknown }) {
   const qb: Record<string, unknown> = {
@@ -34,6 +37,7 @@ function makeQb(finalResult: { data: unknown; error: unknown }) {
     update: mockUpdate,
     delete: mockDelete,
     single: mockSingle,
+    maybeSingle: mockMaybeSingle,
   }
   mockSelect.mockReturnValue(qb)
   mockEq.mockReturnValue(qb)
@@ -43,6 +47,7 @@ function makeQb(finalResult: { data: unknown; error: unknown }) {
   mockUpdate.mockReturnValue(qb)
   mockDelete.mockResolvedValue(finalResult)
   mockSingle.mockResolvedValue(finalResult)
+  mockMaybeSingle.mockResolvedValue(finalResult)
   return qb
 }
 
@@ -301,5 +306,73 @@ describe('deleteOrg', () => {
     const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: { message: 'not owner' } })
     supabaseMock.from.mockReturnValue({ delete: vi.fn().mockReturnValue({ eq: mockEqFn }) })
     await expect(deleteOrg('org-1')).rejects.toMatchObject({ message: 'not owner' })
+  })
+})
+
+// ── getOrgPolicy (D10-2) ─────────────────────────────────────────────────────
+
+describe('getOrgPolicy', () => {
+  it('returns policy flags for org', async () => {
+    const policy = {
+      policy_explore_enabled: true,
+      policy_installs_allowed: false,
+      policy_comments_allowed: true,
+    }
+    makeQb({ data: policy, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    const result = await getOrgPolicy('org-1')
+    expect(result).toEqual(policy)
+    expect(supabaseMock.from).toHaveBeenCalledWith('organizations')
+  })
+
+  it('throws when org not found', async () => {
+    makeQb({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    await expect(getOrgPolicy('missing')).rejects.toThrow('not found')
+  })
+
+  it('throws on supabase error', async () => {
+    makeQb({ data: null, error: { message: 'RLS denied' } })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    await expect(getOrgPolicy('org-1')).rejects.toMatchObject({ message: 'RLS denied' })
+  })
+})
+
+// ── updateOrgPolicy (D10-2) ──────────────────────────────────────────────────
+
+describe('updateOrgPolicy', () => {
+  it('calls update with policy flags', async () => {
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    const mockUpdateFn = vi.fn().mockReturnValue({ eq: mockEqFn })
+    supabaseMock.from.mockReturnValue({ update: mockUpdateFn })
+
+    await updateOrgPolicy('org-1', { policy_explore_enabled: false })
+    expect(supabaseMock.from).toHaveBeenCalledWith('organizations')
+    expect(mockUpdateFn).toHaveBeenCalledWith({ policy_explore_enabled: false })
+    expect(mockEqFn).toHaveBeenCalledWith('id', 'org-1')
+  })
+
+  it('throws on supabase error', async () => {
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: { message: 'not owner' } })
+    supabaseMock.from.mockReturnValue({ update: vi.fn().mockReturnValue({ eq: mockEqFn }) })
+
+    await expect(
+      updateOrgPolicy('org-1', { policy_comments_allowed: false }),
+    ).rejects.toMatchObject({ message: 'not owner' })
   })
 })

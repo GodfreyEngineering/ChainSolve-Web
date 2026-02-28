@@ -30,7 +30,7 @@ import {
   type MarketplaceItem,
   type ExploreSortKey,
 } from '../lib/marketplaceService'
-import { listMyOrgs, type Org } from '../lib/orgsService'
+import { listMyOrgs, getOrgPolicy, type Org, type OrgPolicy } from '../lib/orgsService'
 import { getProfile } from '../lib/profilesService'
 import { getProjectCount } from '../lib/projects'
 import { canInstallExploreItem, type Plan } from '../lib/entitlements'
@@ -188,6 +188,9 @@ export default function MarketplacePage() {
   const [orgItems, setOrgItems] = useState<MarketplaceItem[]>([])
   const [orgLoading, setOrgLoading] = useState(false)
 
+  // D10-2: org policy flags
+  const [orgPolicy, setOrgPolicy] = useState<OrgPolicy | null>(null)
+
   // Fetch plan + project count + orgs on mount
   useEffect(() => {
     void (async () => {
@@ -202,6 +205,12 @@ export default function MarketplacePage() {
         if (profile?.plan) setPlan(profile.plan as Plan)
         setProjectCount(count)
         setMyOrgs(orgs)
+        // D10-2: fetch policy for first org
+        if (orgs.length > 0) {
+          getOrgPolicy(orgs[0].id)
+            .then(setOrgPolicy)
+            .catch(() => {})
+        }
       } catch {
         // Non-critical — default to 'free' plan
       }
@@ -258,6 +267,12 @@ export default function MarketplacePage() {
       if (installedIds.has(itemId) || installingId === itemId) return
       const item = items.find((i) => i.id === itemId)
       if (!item) return
+
+      // D10-2: org policy install check
+      if (orgPolicy?.policy_installs_allowed === false) {
+        setError(t('marketplace.installsDisabled'))
+        return
+      }
 
       // D9-3: plan gating check
       if (!canInstallExploreItem(plan, item.category, projectCount)) {
@@ -387,8 +402,8 @@ export default function MarketplacePage() {
           {t('marketplace.subtitle')}
         </p>
 
-        {/* D10-1: Public / Company toggle */}
-        {myOrgs.length > 0 && (
+        {/* D10-1: Public / Company toggle (hidden if policy disables Explore D10-2) */}
+        {myOrgs.length > 0 && orgPolicy?.policy_explore_enabled !== false && (
           <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1rem' }} role="tablist">
             <button
               role="tab"
