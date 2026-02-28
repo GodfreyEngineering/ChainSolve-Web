@@ -387,8 +387,8 @@ Claude MUST:
 
 ## A9 — Test suite completion + release hardening
 - [x] P091: Coverage thresholds (src/lib + src/engine)
-- [ ] P092: Integration tests: WASM worker snapshot → result
-- [ ] P093: Integration tests: save/load round-trip (SHOULD)
+- [x] P092: Integration tests: WASM worker snapshot → result
+- [x] P093: Integration tests: save/load round-trip (SHOULD)
 - [ ] P094: E2E smoke: create project, add blocks, connect, eval, save
 - [ ] P095: E2E multi-canvas switching + persistence
 - [ ] P096: E2E variables + bindings + sliders
