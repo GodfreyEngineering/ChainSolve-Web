@@ -595,16 +595,16 @@ Claude MUST:
 ---
 
 ## D5 — Sheets toolbar overhaul (Excel-grade)
-- [ ] D5-1: Sheet delete option (non-last)
+- [x] D5-1: Sheet delete option (non-last)
   - Prevent deleting last sheet.
   - Confirmation modal with warnings if large canvas.
   - Acceptance: delete works, ordering compacted correctly.
 
-- [ ] D5-2: Sheet rename, duplicate, reorder (drag-and-drop)
+- [x] D5-2: Sheet rename, duplicate, reorder (drag-and-drop)
   - Reorder persists to DB position with stable batching.
   - Acceptance: feels like Excel; no weird reorder bugs.
 
-- [ ] D5-3: Sheet context menu
+- [x] D5-3: Sheet context menu
   - Rename / Duplicate / Delete
   - Optional: “Export this sheet” shortcuts
   - Acceptance: consistent with Excel mental model.
