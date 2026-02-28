@@ -719,7 +719,7 @@ Claude MUST:
 ## D9 — Explore (rename Marketplace → Explore + new rules)
 > “Explore” is not a store; it is discovery + sharing. Nothing “for sale” here.
 
-- [ ] D9-1: Rename “Marketplace” -> “Explore” in UI, routes, copy, docs
+- [x] D9-1: Rename “Marketplace” -> “Explore” in UI, routes, copy, docs
   - Keep DB table names if you want, but user-facing must be Explore.
   - Acceptance: no user-facing “Marketplace” remains.
 
