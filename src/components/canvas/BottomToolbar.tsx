@@ -331,7 +331,7 @@ const barStyle: React.CSSProperties = {
   bottom: 12,
   left: '50%',
   transform: 'translateX(-50%)',
-  zIndex: 10,
+  zIndex: 16,
   display: 'flex',
   alignItems: 'center',
   gap: '0.2rem',

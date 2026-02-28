@@ -345,7 +345,7 @@ function makeResizeHandler(
 // ── Toolbar button style ──────────────────────────────────────────────────────
 
 const tbBtn: React.CSSProperties = {
-  padding: '0.2rem 0.55rem',
+  padding: '0.3rem 0.55rem',
   borderRadius: 5,
   border: '1px solid rgba(255,255,255,0.12)',
   background: 'transparent',
@@ -355,6 +355,8 @@ const tbBtn: React.CSSProperties = {
   fontWeight: 600,
   fontFamily: 'inherit',
   letterSpacing: '0.02em',
+  textAlign: 'left',
+  whiteSpace: 'nowrap',
 }
 
 // ── Inner canvas (inside ReactFlowProvider) ───────────────────────────────────
@@ -1383,21 +1385,21 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // ── Mobile panel width ────────────────────────────────────────────────────
   const mobileDrawerWidth = isMobile ? Math.min(280, window.innerWidth * 0.85) : 0
 
-  // ── Toolbar ─────────────────────────────────────────────────────────────────
+  // ── Toolbar (right-side vertical strip) ──────────────────────────────────
   const toolbar = (
     <div
       style={{
         position: 'absolute',
         top: 10,
-        left: '50%',
-        transform: 'translateX(-50%)',
+        right: 10,
         zIndex: 10,
         display: 'flex',
+        flexDirection: 'column',
         gap: '0.3rem',
         background: '#383838',
         border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: 8,
-        padding: '0.28rem 0.45rem',
+        padding: '0.35rem',
         boxShadow: '0 2px 10px rgba(0,0,0,0.4)',
       }}
     >
@@ -1446,7 +1448,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           >
             ⊞ Snap
           </button>
-          <div style={{ width: 1, background: 'rgba(255,255,255,0.1)', margin: '0 0.1rem' }} />
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.1)', margin: '0.1rem 0' }} />
         </>
       )}
 
