@@ -56,9 +56,11 @@ const SCOPE_COLORS: Record<LogScope, string> = {
 
 interface DebugConsolePanelProps {
   onClose?: () => void
+  /** When true, skip outer positioning chrome (rendered inside BottomDock). */
+  docked?: boolean
 }
 
-export default function DebugConsolePanel({ onClose }: DebugConsolePanelProps) {
+export default function DebugConsolePanel({ onClose, docked }: DebugConsolePanelProps) {
   const { t } = useTranslation()
   const listRef = useRef<HTMLDivElement>(null)
   const [minimized, setMinimized] = useState(false)
@@ -100,7 +102,7 @@ export default function DebugConsolePanel({ onClose }: DebugConsolePanelProps) {
   }, [filtered])
 
   return (
-    <div style={minimized ? { ...panelStyle, height: 'auto' } : panelStyle}>
+    <div style={docked ? dockedStyle : minimized ? { ...panelStyle, height: 'auto' } : panelStyle}>
       {/* Header row */}
       <div style={headerStyle}>
         <span style={{ fontWeight: 600, fontSize: '0.75rem', opacity: 0.7 }}>
@@ -246,6 +248,15 @@ const panelStyle: React.CSSProperties = {
   flexDirection: 'column',
   background: 'var(--card-bg, #1e1e1e)',
   borderTop: '1px solid var(--border, #333)',
+  fontFamily: 'ui-monospace, "Cascadia Code", "Fira Code", monospace',
+  fontSize: '0.72rem',
+  color: 'var(--text, #f4f4f3)',
+}
+
+const dockedStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
   fontFamily: 'ui-monospace, "Cascadia Code", "Fira Code", monospace',
   fontSize: '0.72rem',
   color: 'var(--text, #f4f4f3)',

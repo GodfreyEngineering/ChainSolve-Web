@@ -87,6 +87,7 @@ const LazyFindBlockDialog = lazy(() =>
 )
 const LazyDebugConsolePanel = lazy(() => import('./DebugConsolePanel'))
 const LazyGraphHealthPanel = lazy(() => import('./GraphHealthPanel'))
+import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { useDebugConsoleStore } from '../../stores/debugConsoleStore'
@@ -1489,6 +1490,45 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [effectiveEdgesAnimated, effectiveBadges, effectiveEdgeBadges],
   )
 
+  // ── Bottom dock panels ──────────────────────────────────────────────────
+  const dockPanels = useMemo<DockPanel[]>(() => {
+    const panels: DockPanel[] = []
+    if (debugConsoleVisible) {
+      panels.push({
+        id: 'console' as DockTab,
+        label: t('debugConsole.title', 'Debug Console'),
+        content: (
+          <Suspense fallback={null}>
+            <LazyDebugConsolePanel
+              docked
+              onClose={() => useDebugConsoleStore.getState().setVisible(false)}
+            />
+          </Suspense>
+        ),
+      })
+    }
+    if (healthPanelVisible) {
+      panels.push({
+        id: 'health' as DockTab,
+        label: t('toolbar.graphHealth', 'Graph Health'),
+        content: (
+          <Suspense fallback={null}>
+            <LazyGraphHealthPanel
+              docked
+              nodes={nodes}
+              edges={edges}
+              onClose={() => {
+                setHealthPanelVisible(false)
+                setHealthPanelPref(false)
+              }}
+            />
+          </Suspense>
+        ),
+      })
+    }
+    return panels
+  }, [debugConsoleVisible, healthPanelVisible, nodes, edges, t])
+
   return (
     <ComputedContext.Provider value={computed}>
       <BindingContext.Provider value={bindingCtx}>
@@ -1692,24 +1732,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     })
                   }}
                 />
-                {debugConsoleVisible && (
-                  <Suspense fallback={null}>
-                    <LazyDebugConsolePanel
-                      onClose={() => useDebugConsoleStore.getState().toggleVisible()}
-                    />
-                  </Suspense>
-                )}
-                {healthPanelVisible && (
-                  <Suspense fallback={null}>
-                    <LazyGraphHealthPanel
-                      nodes={nodes}
-                      edges={edges}
-                      onClose={() => {
-                        setHealthPanelVisible(false)
-                        setHealthPanelPref(false)
-                      }}
-                    />
-                  </Suspense>
+                {/* Bottom Dock — tabbed panel container */}
+                {(debugConsoleVisible || healthPanelVisible) && (
+                  <BottomDock
+                    panels={dockPanels}
+                    onClose={() => {
+                      useDebugConsoleStore.getState().setVisible(false)
+                      setHealthPanelVisible(false)
+                      setHealthPanelPref(false)
+                    }}
+                  />
                 )}
               </div>
 
