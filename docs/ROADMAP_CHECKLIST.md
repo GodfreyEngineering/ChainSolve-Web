@@ -514,7 +514,7 @@ Claude MUST:
   - Hide: block library, inspector, sheets bar, canvas toolbar until a project is open.
   - Acceptance: app feels intentional, not “empty canvas with random panels”.
 
-- [ ] D1-3: “Project Directory” becomes a first-class view
+- [x] D1-3: “Project Directory” becomes a first-class view
   - Folder-like experience (filters, recent, pinned, search)
   - Consistent empty states and i18n.
   - Acceptance: directory is usable as a product surface.
