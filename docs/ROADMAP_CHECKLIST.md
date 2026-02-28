@@ -535,7 +535,7 @@ Claude MUST:
   - No new browser windows. Everything in-app.
   - Acceptance: consistent UI/UX across all windows.
 
-- [ ] D2-3: Floating Inspector window (remove right sidebar inspector)
+- [x] D2-3: Floating Inspector window (remove right sidebar inspector)
   - Inspector opens as a window
   - Supports selection following:
     - optionally pin to selection
