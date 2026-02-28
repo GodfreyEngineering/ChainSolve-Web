@@ -462,6 +462,7 @@
     "duplicate": "Duplicate",
     "delete": "Delete",
     "deleteConfirm": "Delete this sheet? This cannot be undone.",
+    "deleteConfirmInline": "Delete \"{{name}}\"? This cannot be undone.",
     "limitReached": "Sheet limit reached. Upgrade to Pro for unlimited sheets.",
     "cannotDeleteLast": "Cannot delete the last sheet.",
     "switchConfirmTitle": "Unsaved changes",

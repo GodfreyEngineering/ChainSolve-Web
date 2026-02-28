@@ -23,6 +23,7 @@ export interface SheetsBarProps {
   onRenameCanvas: (canvasId: string, name: string) => void
   onDeleteCanvas: (canvasId: string) => void
   onDuplicateCanvas: (canvasId: string) => void
+  onReorderCanvases?: (orderedIds: string[]) => void
 }
 
 // ── Component ───────────────────────────────────────────────────────────────
@@ -37,9 +38,9 @@ export function SheetsBar({
   onRenameCanvas,
   onDeleteCanvas,
   onDuplicateCanvas,
+  onReorderCanvases,
 }: SheetsBarProps) {
   const isMobile = useIsMobile()
-  const { t } = useTranslation()
 
   if (isMobile) {
     return (
@@ -60,34 +61,31 @@ export function SheetsBar({
       activeCanvasId={activeCanvasId}
       plan={plan}
       readOnly={readOnly}
-      t={t}
       onSwitchCanvas={onSwitchCanvas}
       onCreateCanvas={onCreateCanvas}
       onRenameCanvas={onRenameCanvas}
       onDeleteCanvas={onDeleteCanvas}
       onDuplicateCanvas={onDuplicateCanvas}
+      onReorderCanvases={onReorderCanvases}
     />
   )
 }
 
 // ── Desktop Tab Bar ─────────────────────────────────────────────────────────
 
-interface DesktopProps extends SheetsBarProps {
-  t: (key: string) => string
-}
-
 function DesktopSheetsBar({
   canvases,
   activeCanvasId,
   plan,
   readOnly,
-  t,
   onSwitchCanvas,
   onCreateCanvas,
   onRenameCanvas,
   onDeleteCanvas,
   onDuplicateCanvas,
-}: DesktopProps) {
+  onReorderCanvases,
+}: SheetsBarProps) {
+  const { t } = useTranslation()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
   const editInputRef = useRef<HTMLInputElement>(null)
@@ -96,7 +94,12 @@ function DesktopSheetsBar({
     x: number
     y: number
   } | null>(null)
+  // Inline delete confirmation (replaces confirm())
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const contextRef = useRef<HTMLDivElement>(null)
+  // Drag-and-drop reorder
+  const dragIdRef = useRef<string | null>(null)
+  const [dropTargetId, setDropTargetId] = useState<string | null>(null)
 
   // Focus input when editing starts
   useEffect(() => {
@@ -111,6 +114,7 @@ function DesktopSheetsBar({
     const handler = (e: MouseEvent) => {
       if (contextRef.current && !contextRef.current.contains(e.target as Node)) {
         setContextMenu(null)
+        setConfirmDeleteId(null)
       }
     }
     document.addEventListener('mousedown', handler)
@@ -121,7 +125,10 @@ function DesktopSheetsBar({
   useEffect(() => {
     if (!contextMenu) return
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setContextMenu(null)
+      if (e.key === 'Escape') {
+        setContextMenu(null)
+        setConfirmDeleteId(null)
+      }
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
@@ -134,6 +141,7 @@ function DesktopSheetsBar({
       setEditValue(canvas.name)
       setEditingId(canvasId)
       setContextMenu(null)
+      setConfirmDeleteId(null)
     },
     [canvases],
   )
@@ -149,29 +157,81 @@ function DesktopSheetsBar({
 
   const handleTabContextMenu = useCallback((e: React.MouseEvent, canvasId: string) => {
     e.preventDefault()
+    setConfirmDeleteId(null)
     setContextMenu({ canvasId, x: e.clientX, y: e.clientY })
   }, [])
 
   const handleDeleteFromMenu = useCallback(() => {
     if (!contextMenu) return
-    const id = contextMenu.canvasId
+    // Show inline confirmation instead of confirm()
+    setConfirmDeleteId(contextMenu.canvasId)
+  }, [contextMenu])
+
+  const confirmDelete = useCallback(() => {
+    if (!confirmDeleteId) return
     setContextMenu(null)
-    if (confirm(t('sheets.deleteConfirm'))) {
-      onDeleteCanvas(id)
-    }
-  }, [contextMenu, t, onDeleteCanvas])
+    setConfirmDeleteId(null)
+    onDeleteCanvas(confirmDeleteId)
+  }, [confirmDeleteId, onDeleteCanvas])
 
   const handleDuplicateFromMenu = useCallback(() => {
     if (!contextMenu) return
     const id = contextMenu.canvasId
     setContextMenu(null)
+    setConfirmDeleteId(null)
     onDuplicateCanvas(id)
   }, [contextMenu, onDuplicateCanvas])
+
+  // ── Drag-and-drop reorder ──────────────────────────────────────────────
+  const handleDragStart = useCallback((e: React.DragEvent, canvasId: string) => {
+    dragIdRef.current = canvasId
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', canvasId)
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent, canvasId: string) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (dragIdRef.current && dragIdRef.current !== canvasId) {
+      setDropTargetId(canvasId)
+    }
+  }, [])
+
+  const handleDragLeave = useCallback(() => {
+    setDropTargetId(null)
+  }, [])
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent, targetId: string) => {
+      e.preventDefault()
+      setDropTargetId(null)
+      const dragId = dragIdRef.current
+      dragIdRef.current = null
+      if (!dragId || dragId === targetId || !onReorderCanvases) return
+
+      const ids = canvases.map((c) => c.id)
+      const fromIdx = ids.indexOf(dragId)
+      const toIdx = ids.indexOf(targetId)
+      if (fromIdx === -1 || toIdx === -1) return
+
+      ids.splice(fromIdx, 1)
+      ids.splice(toIdx, 0, dragId)
+      onReorderCanvases(ids)
+    },
+    [canvases, onReorderCanvases],
+  )
+
+  const handleDragEnd = useCallback(() => {
+    dragIdRef.current = null
+    setDropTargetId(null)
+  }, [])
 
   const canAdd = !readOnly && canCreateCanvas(plan, canvases.length)
   const ent = getEntitlements(plan)
   const canvasCountLabel =
     ent.maxCanvases === Infinity ? `${canvases.length}` : `${canvases.length} / ${ent.maxCanvases}`
+
+  const deleteTargetCanvas = confirmDeleteId ? canvases.find((c) => c.id === confirmDeleteId) : null
 
   return (
     <div style={barStyle}>
@@ -179,20 +239,32 @@ function DesktopSheetsBar({
         {canvases.map((canvas) => {
           const isActive = canvas.id === activeCanvasId
           const isEditing = canvas.id === editingId
+          const isDropTarget = canvas.id === dropTargetId
 
           return (
             <div
               key={canvas.id}
               role="tab"
               aria-selected={isActive}
-              style={tabStyle(isActive)}
+              draggable={!readOnly && !isEditing}
+              style={{
+                ...tabStyle(isActive),
+                ...(isDropTarget ? { borderLeft: '2px solid var(--primary)' } : {}),
+              }}
               onClick={() => {
                 if (!isEditing) onSwitchCanvas(canvas.id)
               }}
               onDoubleClick={() => {
                 if (!readOnly) startRename(canvas.id)
               }}
-              onContextMenu={(e) => handleTabContextMenu(e, canvas.id)}
+              onContextMenu={(e) => {
+                if (!readOnly) handleTabContextMenu(e, canvas.id)
+              }}
+              onDragStart={(e) => handleDragStart(e, canvas.id)}
+              onDragOver={(e) => handleDragOver(e, canvas.id)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, canvas.id)}
+              onDragEnd={handleDragEnd}
             >
               {isEditing ? (
                 <input
@@ -229,30 +301,80 @@ function DesktopSheetsBar({
       {/* Context menu */}
       {contextMenu && (
         <div ref={contextRef} style={contextMenuStyle(contextMenu.x, contextMenu.y)}>
-          <div
-            role="menuitem"
-            style={contextItemStyle}
-            onClick={() => startRename(contextMenu.canvasId)}
-          >
-            {t('sheets.rename')}
-          </div>
-          <div role="menuitem" style={contextItemStyle} onClick={handleDuplicateFromMenu}>
-            {t('sheets.duplicate')}
-          </div>
-          <div style={contextSeparatorStyle} role="separator" />
-          <div
-            role="menuitem"
-            style={{
-              ...contextItemStyle,
-              color: canvases.length <= 1 ? 'var(--text-muted)' : '#ef4444',
-              cursor: canvases.length <= 1 ? 'default' : 'pointer',
-            }}
-            onClick={canvases.length > 1 ? handleDeleteFromMenu : undefined}
-          >
-            {t('sheets.delete')}
-          </div>
+          {confirmDeleteId && deleteTargetCanvas ? (
+            /* Inline delete confirmation */
+            <div style={{ padding: '0.4rem 0.75rem' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text)', marginBottom: 6 }}>
+                {t('sheets.deleteConfirmInline', {
+                  defaultValue: 'Delete "{{name}}"? This cannot be undone.',
+                  name: deleteTargetCanvas.name,
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button onClick={confirmDelete} style={confirmDeleteBtnStyle}>
+                  {t('sheets.delete')}
+                </button>
+                <button onClick={() => setConfirmDeleteId(null)} style={confirmCancelBtnStyle}>
+                  {t('common.cancel', 'Cancel')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Normal context menu */
+            <>
+              <CtxItem
+                label={t('sheets.rename')}
+                onClick={() => startRename(contextMenu.canvasId)}
+              />
+              <CtxItem label={t('sheets.duplicate')} onClick={handleDuplicateFromMenu} />
+              <div style={contextSeparatorStyle} role="separator" />
+              <CtxItem
+                label={t('sheets.delete')}
+                danger
+                disabled={canvases.length <= 1}
+                onClick={canvases.length > 1 ? handleDeleteFromMenu : undefined}
+              />
+            </>
+          )}
         </div>
       )}
+    </div>
+  )
+}
+
+/** Context menu item with hover effect. */
+function CtxItem({
+  label,
+  danger,
+  disabled,
+  onClick,
+}: {
+  label: string
+  danger?: boolean
+  disabled?: boolean
+  onClick?: () => void
+}) {
+  return (
+    <div
+      role="menuitem"
+      style={{
+        ...contextItemStyle,
+        color: disabled ? 'var(--text-muted)' : danger ? '#ef4444' : 'var(--text)',
+        cursor: disabled ? 'default' : 'pointer',
+        opacity: disabled ? 0.4 : 1,
+      }}
+      onClick={disabled ? undefined : onClick}
+      onMouseEnter={(e) => {
+        if (!disabled)
+          (e.currentTarget as HTMLDivElement).style.background = danger
+            ? 'rgba(239,68,68,0.1)'
+            : 'rgba(28,171,176,0.1)'
+      }}
+      onMouseLeave={(e) => {
+        ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
+      }}
+    >
+      {label}
     </div>
   )
 }
@@ -463,6 +585,28 @@ const contextSeparatorStyle: React.CSSProperties = {
   height: 1,
   background: 'var(--border)',
   margin: '0.3rem 0.5rem',
+}
+
+const confirmDeleteBtnStyle: React.CSSProperties = {
+  padding: '0.25rem 0.6rem',
+  fontSize: '0.75rem',
+  fontFamily: 'inherit',
+  border: 'none',
+  borderRadius: 4,
+  background: '#ef4444',
+  color: '#fff',
+  cursor: 'pointer',
+}
+
+const confirmCancelBtnStyle: React.CSSProperties = {
+  padding: '0.25rem 0.6rem',
+  fontSize: '0.75rem',
+  fontFamily: 'inherit',
+  border: '1px solid var(--border)',
+  borderRadius: 4,
+  background: 'transparent',
+  color: 'var(--text)',
+  cursor: 'pointer',
 }
 
 // ── Mobile styles ───────────────────────────────────────────────────────────

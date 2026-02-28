@@ -418,6 +418,7 @@
     "duplicate": "Dupliquer",
     "delete": "Supprimer",
     "deleteConfirm": "Supprimer cette feuille ? Cette action est irréversible.",
+    "deleteConfirmInline": "Supprimer \"{{name}}\" ? Cette action est irréversible.",
     "limitReached": "Limite de feuilles atteinte. Passez à Pro pour des feuilles illimitées.",
     "cannotDeleteLast": "Impossible de supprimer la dernière feuille.",
     "switchConfirmTitle": "Modifications non enregistrées",

@@ -418,6 +418,7 @@
     "duplicate": "Duplizieren",
     "delete": "Löschen",
     "deleteConfirm": "Dieses Blatt löschen? Dies kann nicht rückgängig gemacht werden.",
+    "deleteConfirmInline": "\"{{name}}\" löschen? Dies kann nicht rückgängig gemacht werden.",
     "limitReached": "Blattlimit erreicht. Upgraden Sie auf Pro für unbegrenzte Blätter.",
     "cannotDeleteLast": "Das letzte Blatt kann nicht gelöscht werden.",
     "switchConfirmTitle": "Ungespeicherte Änderungen",

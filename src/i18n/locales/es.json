@@ -418,6 +418,7 @@
     "duplicate": "Duplicar",
     "delete": "Eliminar",
     "deleteConfirm": "¿Eliminar esta hoja? No se puede deshacer.",
+    "deleteConfirmInline": "¿Eliminar \"{{name}}\"? No se puede deshacer.",
     "limitReached": "Límite de hojas alcanzado. Actualiza a Pro para hojas ilimitadas.",
     "cannotDeleteLast": "No se puede eliminar la última hoja.",
     "switchConfirmTitle": "Cambios sin guardar",

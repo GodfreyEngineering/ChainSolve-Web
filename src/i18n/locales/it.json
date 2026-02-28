@@ -418,6 +418,7 @@
     "duplicate": "Duplica",
     "delete": "Elimina",
     "deleteConfirm": "Eliminare questo foglio? L'azione non può essere annullata.",
+    "deleteConfirmInline": "Eliminare \"{{name}}\"? L'azione non può essere annullata.",
     "limitReached": "Limite fogli raggiunto. Passa a Pro per fogli illimitati.",
     "cannotDeleteLast": "Impossibile eliminare l'ultimo foglio.",
     "switchConfirmTitle": "Modifiche non salvate",
