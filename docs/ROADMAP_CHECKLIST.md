@@ -410,8 +410,8 @@ Claude MUST:
 - [x] P106: Install flow for project_template (fork into user projects)
 - [x] P107: Template packaging + semver rules
 - [x] P108: Author dashboard v0
-- [ ] P109: Verified author gating
-- [ ] P110: Review gate v0
+- [x] P109: Verified author gating
+- [x] P110: Review gate v0
 
 - [ ] P111: Stripe Connect architecture doc + stubs
 - [ ] P112: Paid purchase flow (record purchase)
