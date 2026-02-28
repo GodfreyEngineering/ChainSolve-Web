@@ -696,7 +696,7 @@ Claude MUST:
     - default include images, default export format settings
   - Acceptance: settings feels like a pro tool.
 
-- [ ] D8-2: Theme wizard (Pro)
+- [x] D8-2: Theme wizard (Pro)
   - Full theme editor:
     - colors for every surface (backgrounds, panels, edges, nodes, text)
     - fonts, font sizes
