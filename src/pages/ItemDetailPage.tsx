@@ -21,10 +21,33 @@ import {
   installBlockPack,
   installTheme,
   getUserInstalls,
+  getUserLikes,
+  likeItem,
+  unlikeItem,
   type MarketplaceItem,
 } from '../lib/marketplaceService'
 import { createCheckoutSession } from '../lib/stripeConnectService'
 import { BRAND } from '../lib/brand'
+
+const CATEGORY_LABEL_KEYS: Record<string, string> = {
+  template: 'marketplace.categoryTemplate',
+  block_pack: 'marketplace.categoryBlockPack',
+  theme: 'marketplace.categoryTheme',
+  group: 'marketplace.categoryGroup',
+  custom_block: 'marketplace.categoryCustomBlock',
+}
+
+function formatDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
+  } catch {
+    return iso
+  }
+}
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
 
@@ -77,6 +100,7 @@ export default function ItemDetailPage() {
 
   const [item, setItem] = useState<MarketplaceItem | null>(null)
   const [installed, setInstalled] = useState(false)
+  const [liked, setLiked] = useState(false)
   const [installing, setInstalling] = useState(false)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -92,12 +116,17 @@ export default function ItemDetailPage() {
       setLoading(true)
       setError(null)
       try {
-        const [fetched, installs] = await Promise.all([getItem(itemId), getUserInstalls()])
+        const [fetched, installs, likes] = await Promise.all([
+          getItem(itemId),
+          getUserInstalls(),
+          getUserLikes(),
+        ])
         if (!fetched) {
           setNotFound(true)
         } else {
           setItem(fetched)
           setInstalled(installs.some((p) => p.item_id === itemId))
+          setLiked(likes.has(itemId))
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err))
@@ -108,6 +137,28 @@ export default function ItemDetailPage() {
   }, [itemId])
 
   const isPaid = (item?.price_cents ?? 0) > 0
+
+  const handleToggleLike = useCallback(async () => {
+    if (!itemId || !item) return
+    const wasLiked = liked
+    setLiked(!wasLiked)
+    setItem((prev) =>
+      prev ? { ...prev, likes_count: prev.likes_count + (wasLiked ? -1 : 1) } : prev,
+    )
+    try {
+      if (wasLiked) await unlikeItem(itemId)
+      else await likeItem(itemId)
+    } catch (err) {
+      setLiked(wasLiked)
+      setItem((prev) =>
+        prev ? { ...prev, likes_count: prev.likes_count + (wasLiked ? 1 : -1) } : prev,
+      )
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.toLowerCase().includes('sign in')) {
+        navigate('/login')
+      }
+    }
+  }, [itemId, item, liked, navigate])
 
   const handleInstall = useCallback(async () => {
     if (!itemId || installed || installing) return
@@ -239,10 +290,56 @@ export default function ItemDetailPage() {
                     flexWrap: 'wrap',
                   }}
                 >
+                  <span>
+                    {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')}
+                  </span>
                   <span>{t('marketplace.version', { version: item.version })}</span>
-                  <span>{item.category}</span>
                   <span>{t('marketplace.downloads', { count: item.downloads_count })}</span>
+                  <span>{t('marketplace.likes', { count: item.likes_count ?? 0 })}</span>
                 </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    fontSize: '0.75rem',
+                    color: 'rgba(244,244,243,0.35)',
+                    marginTop: '0.35rem',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <span>
+                    {t('marketplace.created')}: {formatDate(item.created_at)}
+                  </span>
+                  <span>
+                    {t('marketplace.updated')}: {formatDate(item.updated_at)}
+                  </span>
+                </div>
+                {/* Tags */}
+                {item.tags && item.tags.length > 0 && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '0.35rem',
+                      flexWrap: 'wrap',
+                      marginTop: '0.5rem',
+                    }}
+                  >
+                    {item.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        style={{
+                          padding: '0.15rem 0.5rem',
+                          borderRadius: 4,
+                          fontSize: '0.68rem',
+                          background: 'rgba(255,255,255,0.06)',
+                          color: 'rgba(244,244,243,0.55)',
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div
@@ -275,6 +372,22 @@ export default function ItemDetailPage() {
                             price: (item.price_cents / 100).toFixed(2),
                           })
                         : t('marketplace.install')}
+                </button>
+                <button
+                  onClick={() => void handleToggleLike()}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    color: liked ? 'var(--danger, #ef4444)' : 'rgba(244,244,243,0.45)',
+                    padding: '0.2rem 0',
+                    fontFamily: 'inherit',
+                  }}
+                  aria-label={t('marketplace.toggleLike')}
+                  data-testid="like-btn"
+                >
+                  {liked ? '\u2665' : '\u2661'} {item.likes_count ?? 0}
                 </button>
               </div>
             </div>

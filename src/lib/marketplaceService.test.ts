@@ -24,6 +24,9 @@ import {
   emitInstallEvent,
   getItemAnalyticsSummary,
   setReviewStatus,
+  getUserLikes,
+  likeItem,
+  unlikeItem,
 } from './marketplaceService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
@@ -881,5 +884,75 @@ describe('setReviewStatus', () => {
     await expect(setReviewStatus('item-1', 'approved')).rejects.toMatchObject({
       message: 'RLS violation',
     })
+  })
+})
+
+// ── getUserLikes (D9-2) ─────────────────────────────────────────────────────
+
+describe('getUserLikes', () => {
+  it('returns empty set when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getSession as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { session: null },
+    })
+    const result = await getUserLikes()
+    expect(result).toEqual(new Set())
+  })
+
+  it('returns set of liked item IDs when authenticated', async () => {
+    const likes = [{ item_id: 'i1' }, { item_id: 'i2' }]
+    const mockSelectFn = vi.fn().mockResolvedValue({ data: likes, error: null })
+    supabaseMock.from.mockReturnValue({ select: mockSelectFn })
+
+    const result = await getUserLikes()
+    expect(result).toEqual(new Set(['i1', 'i2']))
+  })
+})
+
+// ── likeItem (D9-2) ─────────────────────────────────────────────────────────
+
+describe('likeItem', () => {
+  it('throws when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+    await expect(likeItem('item-1')).rejects.toThrow('Sign in')
+  })
+
+  it('calls upsert on marketplace_likes', async () => {
+    makeQueryBuilder({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({ upsert: mockUpsert })
+
+    await likeItem('item-1')
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_likes')
+    expect(mockUpsert).toHaveBeenCalledWith(
+      { user_id: 'uid-1', item_id: 'item-1' },
+      expect.objectContaining({ onConflict: 'user_id,item_id' }),
+    )
+  })
+})
+
+// ── unlikeItem (D9-2) ───────────────────────────────────────────────────────
+
+describe('unlikeItem', () => {
+  it('throws when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+    await expect(unlikeItem('item-1')).rejects.toThrow('Sign in')
+  })
+
+  it('calls delete on marketplace_likes with correct filters', async () => {
+    const mockDeleteEq2 = vi.fn().mockResolvedValue({ data: null, error: null })
+    const mockDeleteEq1 = vi.fn().mockReturnValue({ eq: mockDeleteEq2 })
+    const mockDeleteFn = vi.fn().mockReturnValue({ eq: mockDeleteEq1 })
+    supabaseMock.from.mockReturnValue({ delete: mockDeleteFn })
+
+    await unlikeItem('item-1')
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_likes')
+    expect(mockDeleteEq1).toHaveBeenCalledWith('user_id', 'uid-1')
+    expect(mockDeleteEq2).toHaveBeenCalledWith('item_id', 'item-1')
   })
 })

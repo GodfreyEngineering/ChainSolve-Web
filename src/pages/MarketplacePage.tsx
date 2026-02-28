@@ -20,9 +20,33 @@ import {
   installBlockPack,
   installTheme,
   getUserInstalls,
+  getUserLikes,
+  likeItem,
+  unlikeItem,
   type MarketplaceItem,
 } from '../lib/marketplaceService'
 import { BRAND } from '../lib/brand'
+
+/** Map category key to i18n label key. */
+const CATEGORY_LABEL_KEYS: Record<string, string> = {
+  template: 'marketplace.categoryTemplate',
+  block_pack: 'marketplace.categoryBlockPack',
+  theme: 'marketplace.categoryTheme',
+  group: 'marketplace.categoryGroup',
+  custom_block: 'marketplace.categoryCustomBlock',
+}
+
+function formatDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
+  } catch {
+    return iso
+  }
+}
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
 
@@ -117,23 +141,26 @@ export default function MarketplacePage() {
 
   const [items, setItems] = useState<MarketplaceItem[]>([])
   const [installedIds, setInstalledIds] = useState<Set<string>>(new Set())
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
   const [installingId, setInstallingId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('all')
 
-  // Fetch items + user installs on mount / filter change
+  // Fetch items + user installs + likes on mount / filter change
   const fetchItems = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const [fetched, installs] = await Promise.all([
+      const [fetched, installs, likes] = await Promise.all([
         listPublishedItems(category === 'all' ? undefined : category, query),
         getUserInstalls(),
+        getUserLikes(),
       ])
       setItems(fetched)
       setInstalledIds(new Set(installs.map((p) => p.item_id)))
+      setLikedIds(likes)
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     } finally {
@@ -178,11 +205,54 @@ export default function MarketplacePage() {
     [installedIds, installingId, navigate, items],
   )
 
+  const handleToggleLike = useCallback(
+    async (itemId: string) => {
+      const isLiked = likedIds.has(itemId)
+      // Optimistic update
+      setLikedIds((prev) => {
+        const next = new Set(prev)
+        if (isLiked) next.delete(itemId)
+        else next.add(itemId)
+        return next
+      })
+      setItems((prev) =>
+        prev.map((i) =>
+          i.id === itemId ? { ...i, likes_count: i.likes_count + (isLiked ? -1 : 1) } : i,
+        ),
+      )
+      try {
+        if (isLiked) await unlikeItem(itemId)
+        else await likeItem(itemId)
+      } catch (err) {
+        // Revert on failure
+        setLikedIds((prev) => {
+          const next = new Set(prev)
+          if (isLiked) next.add(itemId)
+          else next.delete(itemId)
+          return next
+        })
+        setItems((prev) =>
+          prev.map((i) =>
+            i.id === itemId ? { ...i, likes_count: i.likes_count + (isLiked ? 1 : -1) } : i,
+          ),
+        )
+        const msg = err instanceof Error ? err.message : String(err)
+        if (msg.toLowerCase().includes('sign in')) {
+          navigate('/login')
+          return
+        }
+      }
+    },
+    [likedIds, navigate],
+  )
+
   const categories = [
     { key: 'all', label: t('marketplace.allCategories') },
     { key: 'template', label: t('marketplace.categoryTemplate') },
     { key: 'block_pack', label: t('marketplace.categoryBlockPack') },
     { key: 'theme', label: t('marketplace.categoryTheme') },
+    { key: 'group', label: t('marketplace.categoryGroup') },
+    { key: 'custom_block', label: t('marketplace.categoryCustomBlock') },
   ]
 
   return (
@@ -364,11 +434,60 @@ export default function MarketplacePage() {
                       color: 'rgba(244,244,243,0.35)',
                       display: 'flex',
                       gap: '0.75rem',
+                      flexWrap: 'wrap',
                     }}
                   >
-                    <span>{item.category}</span>
+                    <span>
+                      {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')}
+                    </span>
                     <span>{t('marketplace.downloads', { count: item.downloads_count })}</span>
+                    <span>{t('marketplace.likes', { count: item.likes_count ?? 0 })}</span>
+                    <span>{formatDate(item.updated_at)}</span>
                   </div>
+                  {/* Tags */}
+                  {item.tags && item.tags.length > 0 && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: '0.3rem',
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      {item.tags.slice(0, 4).map((tag) => (
+                        <span
+                          key={tag}
+                          style={{
+                            padding: '0.1rem 0.4rem',
+                            borderRadius: 4,
+                            fontSize: '0.62rem',
+                            background: 'rgba(255,255,255,0.06)',
+                            color: 'rgba(244,244,243,0.5)',
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* Like button */}
+                  <button
+                    onClick={() => void handleToggleLike(item.id)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '0.78rem',
+                      color: likedIds.has(item.id)
+                        ? 'var(--danger, #ef4444)'
+                        : 'rgba(244,244,243,0.35)',
+                      padding: '0.15rem 0',
+                      fontFamily: 'inherit',
+                      textAlign: 'left',
+                    }}
+                    aria-label={t('marketplace.toggleLike')}
+                  >
+                    {likedIds.has(item.id) ? '\u2665' : '\u2661'} {item.likes_count ?? 0}
+                  </button>
                   <button
                     style={s.installBtn(isInstalled, isInstalling)}
                     onClick={() => void handleInstall(item.id)}

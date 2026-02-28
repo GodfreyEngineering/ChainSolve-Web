@@ -17,7 +17,7 @@ import { ENGINE_CONTRACT_VERSION } from './engineContractVersion'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-export type MarketplaceCategory = 'template' | 'block_pack' | 'theme'
+export type MarketplaceCategory = 'template' | 'block_pack' | 'theme' | 'group' | 'custom_block'
 
 export interface MarketplaceItem {
   id: string
@@ -28,6 +28,10 @@ export interface MarketplaceItem {
   version: string
   thumbnail_url: string | null
   downloads_count: number
+  /** D9-2: denormalised like count. */
+  likes_count: number
+  /** D9-2: discoverable tags. */
+  tags: string[]
   is_published: boolean
   /** For category='template': a ProjectJSON snapshot forked on install. */
   payload: unknown | null
@@ -53,6 +57,8 @@ export interface AuthorItemInput {
   category: MarketplaceCategory
   version: string
   thumbnail_url?: string | null
+  /** D9-2: optional tags for discoverability. */
+  tags?: string[]
 }
 
 /**
@@ -455,6 +461,7 @@ export async function createAuthorItem(input: AuthorItemInput): Promise<Marketpl
       category: input.category,
       version: input.version.trim(),
       thumbnail_url: input.thumbnail_url ?? null,
+      tags: input.tags ?? [],
       is_published: false,
     })
     .select('*')
@@ -499,5 +506,58 @@ export async function setReviewStatus(itemId: string, status: ReviewStatus): Pro
     .update({ review_status: status })
     .eq('id', itemId)
 
+  if (error) throw error
+}
+
+// ── Likes (D9-2) ─────────────────────────────────────────────────────────────
+
+/**
+ * Return the set of item IDs the current user has liked.
+ * Returns empty set when unauthenticated.
+ */
+export async function getUserLikes(): Promise<Set<string>> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) return new Set()
+
+  const { data, error } = await supabase.from('marketplace_likes').select('item_id')
+  if (error) throw error
+  return new Set((data ?? []).map((r: { item_id: string }) => r.item_id))
+}
+
+/**
+ * Like an item. Idempotent — does nothing if already liked.
+ * likes_count on the item is auto-incremented by a DB trigger.
+ */
+export async function likeItem(itemId: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in to like items')
+
+  const { error } = await supabase
+    .from('marketplace_likes')
+    .upsert(
+      { user_id: user.id, item_id: itemId },
+      { onConflict: 'user_id,item_id', ignoreDuplicates: true },
+    )
+  if (error) throw error
+}
+
+/**
+ * Unlike an item. Idempotent — does nothing if not liked.
+ */
+export async function unlikeItem(itemId: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in to unlike items')
+
+  const { error } = await supabase
+    .from('marketplace_likes')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('item_id', itemId)
   if (error) throw error
 }

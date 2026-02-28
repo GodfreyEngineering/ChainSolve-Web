@@ -137,7 +137,13 @@ const s = {
   } satisfies React.CSSProperties,
 }
 
-const CATEGORIES: MarketplaceCategory[] = ['template', 'block_pack', 'theme']
+const CATEGORIES: MarketplaceCategory[] = [
+  'template',
+  'block_pack',
+  'theme',
+  'group',
+  'custom_block',
+]
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -429,11 +435,15 @@ export default function MarketplaceAuthorPage() {
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c} value={c}>
-                      {c === 'template'
-                        ? t('marketplace.categoryTemplate')
-                        : c === 'block_pack'
-                          ? t('marketplace.categoryBlockPack')
-                          : t('marketplace.categoryTheme')}
+                      {t(
+                        {
+                          template: 'marketplace.categoryTemplate',
+                          block_pack: 'marketplace.categoryBlockPack',
+                          theme: 'marketplace.categoryTheme',
+                          group: 'marketplace.categoryGroup',
+                          custom_block: 'marketplace.categoryCustomBlock',
+                        }[c],
+                      )}
                     </option>
                   ))}
                 </select>
