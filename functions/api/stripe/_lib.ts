@@ -51,3 +51,21 @@ export function resolveEnterprise(
   if (priceId && enterprisePriceIds.includes(priceId)) return 'enterprise'
   return basePlan
 }
+
+/**
+ * D11-2: Resolve the org seat count from subscription metadata.
+ *
+ * plan_key format: "ent_10_monthly" | "ent_10_annual" → 10 seats
+ *                  "ent_unlimited_monthly" | "ent_unlimited_annual" → null (unlimited)
+ *
+ * Returns undefined if the plan is not enterprise (no seat update needed).
+ */
+export function resolveEnterpriseSeatCount(
+  metadata: Record<string, string> | null | undefined,
+): number | null | undefined {
+  const planKey = metadata?.plan_key
+  if (!planKey) return undefined
+  if (planKey.startsWith('ent_10_')) return 10
+  if (planKey.startsWith('ent_unlimited_')) return null
+  return undefined
+}

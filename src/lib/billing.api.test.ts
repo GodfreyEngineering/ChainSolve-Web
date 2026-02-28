@@ -41,6 +41,20 @@ function resolveEnterprise(
   if (priceId && enterprisePriceIds.includes(priceId)) return 'enterprise'
   return basePlan
 }
+
+/**
+ * resolveEnterpriseSeatCount — inline copy of functions/api/stripe/_lib.ts (D11-2)
+ * MUST stay in sync with the server-side implementation.
+ */
+function resolveEnterpriseSeatCount(
+  metadata: Record<string, string> | null | undefined,
+): number | null | undefined {
+  const planKey = metadata?.plan_key
+  if (!planKey) return undefined
+  if (planKey.startsWith('ent_10_')) return 10
+  if (planKey.startsWith('ent_unlimited_')) return null
+  return undefined
+}
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('billing API error envelope', () => {
@@ -160,5 +174,39 @@ describe('resolveEnterprise', () => {
     expect(
       resolveEnterprise('pro', { plan_tier: 'enterprise' }, 'price_pro_monthly', entPrices),
     ).toBe('enterprise')
+  })
+})
+
+// ── resolveEnterpriseSeatCount (D11-2) ──────────────────────────────────────
+
+describe('resolveEnterpriseSeatCount', () => {
+  it('returns 10 for ent_10_monthly plan_key', () => {
+    expect(resolveEnterpriseSeatCount({ plan_key: 'ent_10_monthly' })).toBe(10)
+  })
+
+  it('returns 10 for ent_10_annual plan_key', () => {
+    expect(resolveEnterpriseSeatCount({ plan_key: 'ent_10_annual' })).toBe(10)
+  })
+
+  it('returns null for ent_unlimited_monthly plan_key', () => {
+    expect(resolveEnterpriseSeatCount({ plan_key: 'ent_unlimited_monthly' })).toBeNull()
+  })
+
+  it('returns null for ent_unlimited_annual plan_key', () => {
+    expect(resolveEnterpriseSeatCount({ plan_key: 'ent_unlimited_annual' })).toBeNull()
+  })
+
+  it('returns undefined when no metadata', () => {
+    expect(resolveEnterpriseSeatCount(null)).toBeUndefined()
+    expect(resolveEnterpriseSeatCount(undefined)).toBeUndefined()
+  })
+
+  it('returns undefined when no plan_key in metadata', () => {
+    expect(resolveEnterpriseSeatCount({ plan_tier: 'enterprise' })).toBeUndefined()
+  })
+
+  it('returns undefined for non-enterprise plan_key', () => {
+    expect(resolveEnterpriseSeatCount({ plan_key: 'pro_monthly' })).toBeUndefined()
+    expect(resolveEnterpriseSeatCount({ plan_key: 'pro_annual' })).toBeUndefined()
   })
 })
