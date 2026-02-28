@@ -16,8 +16,9 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   listPublishedItems,
-  recordInstall,
   forkTemplate,
+  installBlockPack,
+  installTheme,
   getUserInstalls,
   type MarketplaceItem,
 } from '../lib/marketplaceService'
@@ -156,7 +157,11 @@ export default function MarketplacePage() {
           navigate(`/canvas/${projectId}`)
           return
         }
-        await recordInstall(itemId)
+        if (item?.category === 'block_pack') {
+          await installBlockPack(itemId)
+        } else if (item?.category === 'theme') {
+          await installTheme(itemId)
+        }
         setInstalledIds((prev) => new Set([...prev, itemId]))
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)

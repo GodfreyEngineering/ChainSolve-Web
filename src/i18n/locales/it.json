@@ -532,6 +532,7 @@
     "buying": "Redirecting…",
     "purchased": "Purchased",
     "connectStripeNotice": "Connect a Stripe account to accept payments for paid items.",
-    "connectStripe": "Connect Stripe"
+    "connectStripe": "Connect Stripe",
+    "incompatibleVersion": "This item requires a newer version of ChainSolve. Please update the app."
   }
 }

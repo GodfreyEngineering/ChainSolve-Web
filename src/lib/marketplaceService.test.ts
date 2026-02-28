@@ -12,6 +12,8 @@ import {
   recordInstall,
   getUserInstalls,
   forkTemplate,
+  installBlockPack,
+  installTheme,
   listAuthorItems,
   createAuthorItem,
   togglePublishItem,
@@ -77,11 +79,33 @@ vi.mock('./projects', () => ({
   importProject: (...args: unknown[]) => mockImportProject(...args),
 }))
 
+// Mock installedBlockPacksService for installBlockPack tests
+const mockAddInstalledBlockPack = vi.fn()
+vi.mock('./installedBlockPacksService', () => ({
+  addInstalledBlockPack: (...args: unknown[]) => mockAddInstalledBlockPack(...args),
+}))
+
+// Mock marketplaceThemeService for installTheme tests
+const mockInstallMarketplaceTheme = vi.fn()
+vi.mock('./marketplaceThemeService', () => ({
+  sanitizeThemeVariables: (raw: Record<string, unknown>) => {
+    // Minimal sanitizer: keep string values for '--' keys
+    const out: Record<string, string> = {}
+    for (const [k, v] of Object.entries(raw)) {
+      if (k.startsWith('--') && typeof v === 'string') out[k] = v
+    }
+    return out
+  },
+  installMarketplaceTheme: (...args: unknown[]) => mockInstallMarketplaceTheme(...args),
+}))
+
 let supabaseMock: { from: ReturnType<typeof vi.fn>; auth: unknown }
 
 beforeEach(async () => {
   vi.clearAllMocks()
   mockImportProject.mockResolvedValue({ id: 'new-proj-1' })
+  mockAddInstalledBlockPack.mockResolvedValue(undefined)
+  mockInstallMarketplaceTheme.mockReturnValue(undefined)
   const mod = await import('./supabase')
   supabaseMock = mod.supabase as unknown as typeof supabaseMock
 })
@@ -668,5 +692,124 @@ describe('getItemAnalyticsSummary', () => {
     makeAnalyticsMock({ data: null, error: { message: 'Forbidden' } })
 
     await expect(getItemAnalyticsSummary('item-1')).rejects.toMatchObject({ message: 'Forbidden' })
+  })
+})
+
+// ── installBlockPack (P116) ───────────────────────────────────────────────────
+
+describe('installBlockPack', () => {
+  const VALID_PAYLOAD = {
+    defs: [{ id: 'd1', label: 'Power', block_type: 'eng.mechanics.power_work_time', data: {} }],
+  }
+
+  it('throws when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+    await expect(installBlockPack('item-1')).rejects.toThrow('Sign in')
+  })
+
+  it('throws when item not found', async () => {
+    makeQueryBuilder({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+    await expect(installBlockPack('item-x')).rejects.toThrow('not found')
+  })
+
+  it('throws when category is not block_pack', async () => {
+    makeQueryBuilder({
+      data: { id: 'i1', name: 'T', category: 'template', payload: VALID_PAYLOAD },
+      error: null,
+    })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+    await expect(installBlockPack('item-1')).rejects.toThrow('not a block pack')
+  })
+
+  it('throws when minContractVersion exceeds current (P118)', async () => {
+    const incompatiblePayload = { ...VALID_PAYLOAD, minContractVersion: 999 }
+    makeQueryBuilder({
+      data: { id: 'i1', name: 'P', category: 'block_pack', payload: incompatiblePayload },
+      error: null,
+    })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+    await expect(installBlockPack('item-1')).rejects.toThrow('contract version')
+  })
+
+  it('calls addInstalledBlockPack and recordInstall on success', async () => {
+    makeQueryBuilder({
+      data: { id: 'item-1', name: 'Physics', category: 'block_pack', payload: VALID_PAYLOAD },
+      error: null,
+    })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+    // recordInstall will call supabase.from again — mock it for upsert
+    const mockUpsertFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    supabaseMock.from
+      .mockReturnValueOnce({ select: mockSelect, eq: mockEq, maybeSingle: mockMaybeSingle })
+      .mockReturnValue({ upsert: mockUpsertFn })
+
+    await installBlockPack('item-1')
+    expect(mockAddInstalledBlockPack).toHaveBeenCalledWith(
+      expect.objectContaining({ itemId: 'item-1', name: 'Physics' }),
+    )
+  })
+})
+
+// ── installTheme (P117) ───────────────────────────────────────────────────────
+
+describe('installTheme', () => {
+  const VALID_PAYLOAD = { variables: { '--primary': '#ff6b6b', '--bg': '#0a0a0a' } }
+
+  it('throws when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+    await expect(installTheme('item-1')).rejects.toThrow('Sign in')
+  })
+
+  it('throws when category is not theme', async () => {
+    makeQueryBuilder({
+      data: { id: 'i1', name: 'T', category: 'template', payload: VALID_PAYLOAD },
+      error: null,
+    })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+    await expect(installTheme('item-1')).rejects.toThrow('not a theme')
+  })
+
+  it('calls installMarketplaceTheme and recordInstall on success', async () => {
+    makeQueryBuilder({
+      data: { id: 'item-1', name: 'Ocean', category: 'theme', payload: VALID_PAYLOAD },
+      error: null,
+    })
+    supabaseMock.from
+      .mockReturnValueOnce({ select: mockSelect, eq: mockEq, maybeSingle: mockMaybeSingle })
+      .mockReturnValue({ upsert: vi.fn().mockResolvedValue({ data: null, error: null }) })
+
+    await installTheme('item-1')
+    expect(mockInstallMarketplaceTheme).toHaveBeenCalledWith(
+      'item-1',
+      'Ocean',
+      expect.objectContaining({ '--primary': '#ff6b6b' }),
+    )
   })
 })

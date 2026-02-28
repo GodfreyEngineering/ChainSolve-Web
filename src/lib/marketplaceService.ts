@@ -7,6 +7,13 @@
 
 import { supabase } from './supabase'
 import { importProject, type ProjectJSON } from './projects'
+import { addInstalledBlockPack, type BlockPackPayload } from './installedBlockPacksService'
+import {
+  sanitizeThemeVariables,
+  installMarketplaceTheme,
+  type MarketplaceThemePayload,
+} from './marketplaceThemeService'
+import { ENGINE_CONTRACT_VERSION } from './engineContractVersion'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -221,6 +228,18 @@ export async function forkTemplate(itemId: string): Promise<string> {
   if (item.category !== 'template') throw new Error('Item is not a project template')
   if (!item.payload) throw new Error('Template has no project data attached')
 
+  // P118: contract version compatibility check
+  const payloadMeta = item.payload as { minContractVersion?: number } | null
+  if (
+    typeof payloadMeta?.minContractVersion === 'number' &&
+    payloadMeta.minContractVersion > ENGINE_CONTRACT_VERSION
+  ) {
+    throw new Error(
+      `This template requires engine contract version ${payloadMeta.minContractVersion}, ` +
+        `but this app supports up to v${ENGINE_CONTRACT_VERSION}. Please update ChainSolve.`,
+    )
+  }
+
   const proj = await importProject(item.payload as ProjectJSON, item.name)
   await recordInstall(itemId)
   // Override the generic 'install' event emitted by recordInstall with 'fork'
@@ -248,6 +267,98 @@ export async function getUserInstalls(): Promise<MarketplacePurchase[]> {
 
   if (error) throw error
   return (data ?? []) as MarketplacePurchase[]
+}
+
+// ── block_pack install (P116) ─────────────────────────────────────────────────
+
+/**
+ * Install a block_pack marketplace item.
+ *
+ * Fetches the item, validates the payload format, checks engine contract
+ * compatibility (P118), persists the block definitions to localStorage via
+ * installedBlockPacksService, and records the install in marketplace_purchases.
+ *
+ * Throws if unauthenticated, item not found, payload invalid, or incompatible.
+ */
+export async function installBlockPack(itemId: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in to install marketplace items')
+
+  const { data: item, error: fetchErr } = await supabase
+    .from('marketplace_items')
+    .select('id,name,category,payload')
+    .eq('id', itemId)
+    .eq('is_published', true)
+    .maybeSingle()
+
+  if (fetchErr) throw fetchErr
+  if (!item) throw new Error('Marketplace item not found')
+  if (item.category !== 'block_pack') throw new Error('Item is not a block pack')
+  if (!item.payload) throw new Error('Block pack has no definitions attached')
+
+  const payload = item.payload as BlockPackPayload
+  if (!Array.isArray(payload.defs) || payload.defs.length === 0) {
+    throw new Error('Block pack payload is missing or empty')
+  }
+
+  // P118: contract version compatibility check
+  if (
+    typeof payload.minContractVersion === 'number' &&
+    payload.minContractVersion > ENGINE_CONTRACT_VERSION
+  ) {
+    throw new Error(
+      `This block pack requires engine contract version ${payload.minContractVersion}, ` +
+        `but this app supports up to v${ENGINE_CONTRACT_VERSION}. Please update ChainSolve.`,
+    )
+  }
+
+  addInstalledBlockPack({ itemId, name: item.name as string, defs: payload.defs })
+  await recordInstall(itemId)
+}
+
+// ── theme install (P117) ──────────────────────────────────────────────────────
+
+/**
+ * Install a theme marketplace item.
+ *
+ * Fetches the item, validates the payload, sanitises the CSS variable map,
+ * applies the variables to :root via marketplaceThemeService, and records
+ * the install in marketplace_purchases.
+ *
+ * Throws if unauthenticated, item not found, payload invalid.
+ */
+export async function installTheme(itemId: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in to install marketplace items')
+
+  const { data: item, error: fetchErr } = await supabase
+    .from('marketplace_items')
+    .select('id,name,category,payload')
+    .eq('id', itemId)
+    .eq('is_published', true)
+    .maybeSingle()
+
+  if (fetchErr) throw fetchErr
+  if (!item) throw new Error('Marketplace item not found')
+  if (item.category !== 'theme') throw new Error('Item is not a theme')
+  if (!item.payload) throw new Error('Theme has no variables attached')
+
+  const payload = item.payload as MarketplaceThemePayload
+  if (!payload.variables || typeof payload.variables !== 'object') {
+    throw new Error('Theme payload is missing variables')
+  }
+
+  const variables = sanitizeThemeVariables(payload.variables)
+  if (Object.keys(variables).length === 0) {
+    throw new Error('Theme has no valid CSS variable definitions')
+  }
+
+  installMarketplaceTheme(itemId, item.name as string, variables)
+  await recordInstall(itemId)
 }
 
 // ── Author verification + publish gate (P109 / P113) ─────────────────────────
