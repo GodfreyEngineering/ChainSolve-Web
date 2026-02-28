@@ -465,6 +465,16 @@ export async function createAuthorItem(input: AuthorItemInput): Promise<Marketpl
 }
 
 /**
+ * Set the payload (JSONB) for an author's marketplace item.
+ * Used when uploading theme variables, template snapshots, or block-pack defs.
+ */
+export async function updateItemPayload(itemId: string, payload: unknown): Promise<void> {
+  const { error } = await supabase.from('marketplace_items').update({ payload }).eq('id', itemId)
+
+  if (error) throw error
+}
+
+/**
  * Toggle the published state of an item the current user authored.
  */
 export async function togglePublishItem(itemId: string, published: boolean): Promise<void> {

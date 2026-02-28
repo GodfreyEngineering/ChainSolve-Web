@@ -12,10 +12,17 @@ import { usePreferencesStore } from '../../stores/preferencesStore'
 import { useCustomThemesStore } from '../../stores/customThemesStore'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { THEME_WIZARD_WINDOW_ID } from '../../components/ThemeWizard'
+import { THEME_LIBRARY_WINDOW_ID } from '../../components/ThemeLibraryWindow'
 import { isPro, type Plan } from '../../lib/entitlements'
 
 const LazyThemeWizard = lazy(() =>
   import('../../components/ThemeWizard').then((m) => ({ default: m.ThemeWizard })),
+)
+
+const LazyThemeLibraryWindow = lazy(() =>
+  import('../../components/ThemeLibraryWindow').then((m) => ({
+    default: m.ThemeLibraryWindow,
+  })),
 )
 
 interface Props {
@@ -31,6 +38,7 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
   const { themes, activeThemeId, activateTheme, deleteTheme } = useCustomThemesStore()
   const { openWindow, isOpen } = useWindowManager()
   const wizardOpen = isOpen(THEME_WIZARD_WINDOW_ID)
+  const libraryOpen = isOpen(THEME_LIBRARY_WINDOW_ID)
   const pro = isPro(plan)
 
   const buildDate = (() => {
@@ -51,6 +59,14 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
       return
     }
     openWindow(THEME_WIZARD_WINDOW_ID, { width: 900, height: 600 })
+  }
+
+  const handleOpenLibrary = () => {
+    if (!pro) {
+      setUpgradeOpen(true)
+      return
+    }
+    openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })
   }
 
   return (
@@ -91,9 +107,16 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
           {t('settings.themeWizardDesc')}
         </p>
 
-        <Button variant="primary" size="sm" onClick={handleOpenWizard}>
-          {t('settings.createTheme')}
-        </Button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Button variant="primary" size="sm" onClick={handleOpenWizard}>
+            {t('settings.createTheme')}
+          </Button>
+          {themes.length > 0 && (
+            <Button variant="secondary" size="sm" onClick={handleOpenLibrary}>
+              {t('settings.themeLibraryTitle')}
+            </Button>
+          )}
+        </div>
 
         {/* Saved themes list */}
         {themes.length > 0 && (
@@ -365,6 +388,11 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
       {wizardOpen && (
         <Suspense fallback={null}>
           <LazyThemeWizard />
+        </Suspense>
+      )}
+      {libraryOpen && (
+        <Suspense fallback={null}>
+          <LazyThemeLibraryWindow plan={plan} />
         </Suspense>
       )}
     </div>

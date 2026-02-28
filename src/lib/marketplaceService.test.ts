@@ -17,6 +17,7 @@ import {
   listAuthorItems,
   createAuthorItem,
   togglePublishItem,
+  updateItemPayload,
   validateMarketplaceVersion,
   isVerifiedAuthor,
   getPublishGate,
@@ -600,6 +601,33 @@ describe('togglePublishItem', () => {
 
     await expect(togglePublishItem('item-x', false)).rejects.toMatchObject({
       message: 'Permission denied',
+    })
+  })
+})
+
+// ── updateItemPayload (D8-3) ────────────────────────────────────────────────
+
+describe('updateItemPayload', () => {
+  it('calls update with the payload on the correct item', async () => {
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    const mockUpdateFn = vi.fn().mockReturnValue({ eq: mockEqFn })
+    supabaseMock.from.mockReturnValue({ update: mockUpdateFn })
+
+    const payload = { variables: { '--primary': '#ff0000' } }
+    await updateItemPayload('item-1', payload)
+
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_items')
+    expect(mockUpdateFn).toHaveBeenCalledWith({ payload })
+    expect(mockEqFn).toHaveBeenCalledWith('id', 'item-1')
+  })
+
+  it('throws when Supabase returns an error', async () => {
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: { message: 'RLS violation' } })
+    const mockUpdateFn = vi.fn().mockReturnValue({ eq: mockEqFn })
+    supabaseMock.from.mockReturnValue({ update: mockUpdateFn })
+
+    await expect(updateItemPayload('item-1', {})).rejects.toMatchObject({
+      message: 'RLS violation',
     })
   })
 })
