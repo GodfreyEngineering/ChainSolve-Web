@@ -480,7 +480,7 @@ Claude MUST:
   - Ensure plan badge supports: Free / Pro / Enterprise.
   - Acceptance: subscriptions reflect correctly in UI badge after webhook update.
 
-- [ ] D0-2: Secrets synchronization checklist + documentation
+- [x] D0-2: Secrets synchronization checklist + documentation
   - Add `docs/ENV_SECRETS.md`:
     - Cloudflare Pages env vars you listed
     - GitHub Secrets equivalents
