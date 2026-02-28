@@ -18,6 +18,7 @@ import {
   validateMarketplaceVersion,
   isVerifiedAuthor,
   getPublishGate,
+  emitInstallEvent,
 } from './marketplaceService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
@@ -574,5 +575,39 @@ describe('togglePublishItem', () => {
     await expect(togglePublishItem('item-x', false)).rejects.toMatchObject({
       message: 'Permission denied',
     })
+  })
+})
+
+// ── emitInstallEvent (P114) ───────────────────────────────────────────────────
+
+describe('emitInstallEvent', () => {
+  it('inserts into marketplace_install_events with correct fields', async () => {
+    const mockInsertFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({ insert: mockInsertFn })
+
+    await emitInstallEvent('uid-1', 'item-1', 'install')
+
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_install_events')
+    expect(mockInsertFn).toHaveBeenCalledWith({
+      user_id: 'uid-1',
+      item_id: 'item-1',
+      event_type: 'install',
+    })
+  })
+
+  it('inserts event_type fork', async () => {
+    const mockInsertFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({ insert: mockInsertFn })
+
+    await emitInstallEvent('uid-1', 'item-2', 'fork')
+    expect(mockInsertFn).toHaveBeenCalledWith(expect.objectContaining({ event_type: 'fork' }))
+  })
+
+  it('inserts event_type purchase', async () => {
+    const mockInsertFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({ insert: mockInsertFn })
+
+    await emitInstallEvent('uid-1', 'item-3', 'purchase')
+    expect(mockInsertFn).toHaveBeenCalledWith(expect.objectContaining({ event_type: 'purchase' }))
   })
 })

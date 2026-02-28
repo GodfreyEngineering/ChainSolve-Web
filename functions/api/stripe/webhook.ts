@@ -138,6 +138,14 @@ export const onRequestPost: PagesFunction<{
         } catch {
           // RPC may not exist in all environments; ignore.
         }
+        // Audit event — best-effort (P114).
+        try {
+          await supabaseAdmin
+            .from("marketplace_install_events")
+            .insert({ user_id: buyerId, item_id: itemId, event_type: "purchase" });
+        } catch {
+          // Audit failures must not block the purchase flow.
+        }
       }
     }
   }

@@ -102,6 +102,24 @@ export async function getItem(itemId: string): Promise<MarketplaceItem | null> {
 }
 
 /**
+ * Append an entry to the marketplace_install_events audit log.
+ * Best-effort: errors are swallowed so they never block the install flow.
+ *
+ * @param userId - Supabase user UUID of the installer.
+ * @param itemId - Marketplace item UUID.
+ * @param eventType - 'install' | 'fork' | 'purchase'
+ */
+export async function emitInstallEvent(
+  userId: string,
+  itemId: string,
+  eventType: 'install' | 'fork' | 'purchase',
+): Promise<void> {
+  await supabase
+    .from('marketplace_install_events')
+    .insert({ user_id: userId, item_id: itemId, event_type: eventType })
+}
+
+/**
  * Record an install (upsert — idempotent: does nothing if already installed).
  * Requires an authenticated session.
  */
@@ -118,6 +136,13 @@ export async function recordInstall(itemId: string): Promise<void> {
       { onConflict: 'user_id,item_id', ignoreDuplicates: true },
     )
   if (error) throw error
+
+  // Best-effort audit event
+  try {
+    await emitInstallEvent(user.id, itemId, 'install')
+  } catch {
+    // Audit failures must not block the install.
+  }
 }
 
 /**
@@ -151,6 +176,12 @@ export async function forkTemplate(itemId: string): Promise<string> {
 
   const proj = await importProject(item.payload as ProjectJSON, item.name)
   await recordInstall(itemId)
+  // Override the generic 'install' event emitted by recordInstall with 'fork'
+  try {
+    await emitInstallEvent(user.id, itemId, 'fork')
+  } catch {
+    // Audit failures must not block the fork.
+  }
   return proj.id
 }
 
