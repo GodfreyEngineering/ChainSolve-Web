@@ -415,9 +415,9 @@ Claude MUST:
 
 - [x] P111: Stripe Connect architecture doc + stubs
 - [x] P112: Paid purchase flow (record purchase)
-- [ ] P113: canPublishMarketplace gating UI + server
-- [ ] P114: Download/install audit events (future enterprise)
-- [ ] P115: Marketplace analytics (privacy constrained)
+- [x] P113: canPublishMarketplace gating UI + server
+- [x] P114: Download/install audit events (future enterprise)
+- [x] P115: Marketplace analytics (privacy constrained)
 
 - [ ] P116: block_pack install mechanism
 - [ ] P117: theme install mechanism (CSS vars)
