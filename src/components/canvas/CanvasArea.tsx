@@ -1685,7 +1685,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 />
                 {debugConsoleVisible && (
                   <Suspense fallback={null}>
-                    <LazyDebugConsolePanel />
+                    <LazyDebugConsolePanel
+                      onClose={() => useDebugConsoleStore.getState().toggleVisible()}
+                    />
                   </Suspense>
                 )}
                 {healthPanelVisible && (

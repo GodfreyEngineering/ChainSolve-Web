@@ -5,7 +5,7 @@
  * bottom). Recomputes stats on every nodes/edges change via useMemo.
  */
 
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Node, Edge } from '@xyflow/react'
 import { computeGraphHealth, formatHealthReport } from '../../lib/graphHealth'
@@ -19,6 +19,7 @@ interface GraphHealthPanelProps {
 
 export default function GraphHealthPanel({ nodes, edges, onClose }: GraphHealthPanelProps) {
   const { t } = useTranslation()
+  const [minimized, setMinimized] = useState(false)
 
   const report = useMemo(() => computeGraphHealth(nodes, edges), [nodes, edges])
 
@@ -28,7 +29,7 @@ export default function GraphHealthPanel({ nodes, edges, onClose }: GraphHealthP
   }, [report, t])
 
   return (
-    <div style={panelStyle}>
+    <div style={minimized ? { ...panelStyle, height: 'auto' } : panelStyle}>
       {/* Header */}
       <div style={headerStyle}>
         <span style={{ fontWeight: 600, fontSize: '0.75rem', opacity: 0.7 }}>
@@ -42,36 +43,46 @@ export default function GraphHealthPanel({ nodes, edges, onClose }: GraphHealthP
           >
             {'\u2398'}
           </button>
-          <button onClick={onClose} style={ctrlBtn} title="Close">
+          <button
+            onClick={() => setMinimized((v) => !v)}
+            style={ctrlBtn}
+            title={minimized ? 'Expand' : 'Minimize'}
+            aria-label={minimized ? 'Expand' : 'Minimize'}
+          >
+            {minimized ? '\u25b3' : '\u25bd'}
+          </button>
+          <button onClick={onClose} style={ctrlBtn} title={t('common.close', 'Close')}>
             {'\u2715'}
           </button>
         </div>
       </div>
 
       {/* Body */}
-      <div style={bodyStyle}>
-        {/* Stats grid */}
-        <div style={gridStyle}>
-          <StatCell label={t('graphHealth.nodes', 'Nodes')} value={report.nodeCount} />
-          <StatCell label={t('graphHealth.edges', 'Edges')} value={report.edgeCount} />
-          <StatCell label={t('graphHealth.groups', 'Groups')} value={report.groupCount} />
-          <StatCell
-            label={t('graphHealth.collapsed', 'Collapsed')}
-            value={report.collapsedGroupCount}
-          />
-        </div>
-
-        {/* Warnings */}
-        {report.warnings.length > 0 ? (
-          <div style={warningsStyle}>
-            {report.warnings.map((w) => (
-              <WarningRow key={w.key} warning={w} t={t} />
-            ))}
+      {!minimized && (
+        <div style={bodyStyle}>
+          {/* Stats grid */}
+          <div style={gridStyle}>
+            <StatCell label={t('graphHealth.nodes', 'Nodes')} value={report.nodeCount} />
+            <StatCell label={t('graphHealth.edges', 'Edges')} value={report.edgeCount} />
+            <StatCell label={t('graphHealth.groups', 'Groups')} value={report.groupCount} />
+            <StatCell
+              label={t('graphHealth.collapsed', 'Collapsed')}
+              value={report.collapsedGroupCount}
+            />
           </div>
-        ) : (
-          <div style={noWarningsStyle}>{'\u2713'} No issues detected</div>
-        )}
-      </div>
+
+          {/* Warnings */}
+          {report.warnings.length > 0 ? (
+            <div style={warningsStyle}>
+              {report.warnings.map((w) => (
+                <WarningRow key={w.key} warning={w} t={t} />
+              ))}
+            </div>
+          ) : (
+            <div style={noWarningsStyle}>{'\u2713'} No issues detected</div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

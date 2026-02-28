@@ -5,7 +5,7 @@
  * bottom). All state lives in debugConsoleStore.
  */
 
-import { useRef, useEffect, useCallback, useMemo } from 'react'
+import { useRef, useEffect, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   useDebugConsoleStore,
@@ -54,9 +54,14 @@ const SCOPE_COLORS: Record<LogScope, string> = {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export default function DebugConsolePanel() {
+interface DebugConsolePanelProps {
+  onClose?: () => void
+}
+
+export default function DebugConsolePanel({ onClose }: DebugConsolePanelProps) {
   const { t } = useTranslation()
   const listRef = useRef<HTMLDivElement>(null)
+  const [minimized, setMinimized] = useState(false)
 
   const entries = useDebugConsoleStore((s) => s.entries)
   const minLevel = useDebugConsoleStore((s) => s.minLevel)
@@ -95,7 +100,7 @@ export default function DebugConsolePanel() {
   }, [filtered])
 
   return (
-    <div style={panelStyle}>
+    <div style={minimized ? { ...panelStyle, height: 'auto' } : panelStyle}>
       {/* Header row */}
       <div style={headerStyle}>
         <span style={{ fontWeight: 600, fontSize: '0.75rem', opacity: 0.7 }}>
@@ -175,18 +180,41 @@ export default function DebugConsolePanel() {
         <span style={{ fontSize: '0.65rem', opacity: 0.4, marginLeft: 'auto' }}>
           {filtered.length}/{entries.length}
         </span>
+
+        <button
+          onClick={() => setMinimized((v) => !v)}
+          style={ctrlBtn(false)}
+          title={minimized ? 'Expand' : 'Minimize'}
+          aria-label={minimized ? 'Expand' : 'Minimize'}
+        >
+          {minimized ? '\u25b3' : '\u25bd'}
+        </button>
+        {onClose && (
+          <button
+            onClick={onClose}
+            style={ctrlBtn(false)}
+            title={t('common.close', 'Close')}
+            aria-label={t('common.close', 'Close')}
+          >
+            {'\u2715'}
+          </button>
+        )}
       </div>
 
       {/* Log list */}
-      <div ref={listRef} style={listStyle}>
-        {filtered.length === 0 ? (
-          <div style={{ padding: '1rem', opacity: 0.4, fontSize: '0.75rem', textAlign: 'center' }}>
-            {t('debugConsole.noLogs', 'No log entries')}
-          </div>
-        ) : (
-          filtered.map((e) => <Row key={e.id} entry={e} />)
-        )}
-      </div>
+      {!minimized && (
+        <div ref={listRef} style={listStyle}>
+          {filtered.length === 0 ? (
+            <div
+              style={{ padding: '1rem', opacity: 0.4, fontSize: '0.75rem', textAlign: 'center' }}
+            >
+              {t('debugConsole.noLogs', 'No log entries')}
+            </div>
+          ) : (
+            filtered.map((e) => <Row key={e.id} entry={e} />)
+          )}
+        </div>
+      )}
     </div>
   )
 }
