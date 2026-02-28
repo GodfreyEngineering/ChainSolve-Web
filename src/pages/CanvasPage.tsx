@@ -46,6 +46,7 @@ import {
   renameCanvas,
   deleteCanvas,
   duplicateCanvas,
+  reorderCanvases,
 } from '../lib/canvases'
 import { useProjectStore } from '../stores/projectStore'
 import { useCanvasesStore } from '../stores/canvasesStore'
@@ -641,6 +642,26 @@ export default function CanvasPage() {
       }
     },
     [projectId, plan, canvases, toast, t, addCanvasToStore, handleSwitchCanvas],
+  )
+
+  const handleReorderCanvases = useCallback(
+    async (orderedIds: string[]) => {
+      if (!projectId) return
+      // Optimistic local update
+      const reordered = orderedIds
+        .map((id, i) => {
+          const c = canvases.find((cv) => cv.id === id)
+          return c ? { ...c, position: i } : null
+        })
+        .filter(Boolean) as typeof canvases
+      setCanvases(reordered)
+      try {
+        await reorderCanvases(projectId, orderedIds)
+      } catch (err: unknown) {
+        toast(err instanceof Error ? err.message : 'Failed to reorder sheets', 'error')
+      }
+    },
+    [projectId, canvases, setCanvases, toast],
   )
 
   // ── Export all-sheets orchestrator ─────────────────────────────────────────
@@ -1383,6 +1404,7 @@ export default function CanvasPage() {
           onRenameCanvas={handleRenameCanvas}
           onDeleteCanvas={handleDeleteCanvas}
           onDuplicateCanvas={handleDuplicateCanvas}
+          onReorderCanvases={readOnly ? undefined : handleReorderCanvases}
         />
       )}
 
