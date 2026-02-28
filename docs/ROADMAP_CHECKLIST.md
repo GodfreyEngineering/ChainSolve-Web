@@ -338,7 +338,7 @@ Claude MUST:
   - Deterministic node IDs + positions
   - Tests: template validation suite (schemaVersion 4, finite numbers, no duplicate IDs)
 
-- [ ] P063: In-app docs index (searchable)
+- [x] P063: In-app docs index (searchable)
   - Search overlay that links to docs topics
   - Keep assets local; no remote fetch required
 
@@ -395,7 +395,7 @@ Claude MUST:
 - [ ] P097: E2E CSV import + validation errors (Pro gating)
 - [ ] P098: E2E plot render + export (SHOULD)
 - [ ] P099: E2E export download assertions (PDF/Excel) (SHOULD, if CI supports)
-- [ ] P100: Go-live doc: release checklist + verification steps
+- [x] P100: Go-live doc: release checklist + verification steps
 
 ---
 
