@@ -158,6 +158,10 @@ section "Bundle splits audit (lazy chunks)"
 node scripts/check-bundle-splits.mjs || fail "bundle splits"
 pass "bundle splits"
 
+section "Performance budget (structural)"
+node scripts/check-perf-budget.mjs || fail "performance budget"
+pass "performance budget"
+
 section "Robots meta guard (dist)"
 node scripts/check-robots-meta.mjs || fail "robots meta guard (dist)"
 pass "robots meta guard (dist)"
