@@ -734,7 +734,7 @@ Claude MUST:
     - likes
   - Acceptance: browse feels real and complete.
 
-- [ ] D9-3: Explore permissions + plan rules
+- [x] D9-3: Explore permissions + plan rules
   - Free:
     - can browse
     - can only install 1 project template IF they have 0 projects (maxProjects=1 rule)
@@ -758,13 +758,13 @@ Claude MUST:
   - No toxic content allowed: basic filters + report flow.
   - Acceptance: safe comment UX with controls.
 
-- [ ] D9-5: Explore sort/filter
+- [x] D9-5: Explore sort/filter
   - Most downloaded, most liked, newest
   - Tag filter
   - Type filter
   - Acceptance: discovery is strong.
 
-- [ ] D9-6: Install event tracking
+- [x] D9-6: Install event tracking
   - Track installs (count) without collecting project content.
   - Respect privacy defaults (opt-in telemetry).
   - Acceptance: stats work without violating privacy.
