@@ -11,7 +11,25 @@
   "home": {
     "title": "Home dell'area di lavoro",
     "welcome": "Benvenuto su ChainSolve",
-    "subtitle": "Il tuo spazio di lavoro scientifico a nodi"
+    "subtitle": "Il tuo spazio di lavoro scientifico a nodi",
+    "createProject": "Crea progetto",
+    "createProjectDesc": "Inizia un nuovo progetto salvato",
+    "openScratch": "Lavagna temporanea",
+    "openScratchDesc": "Calcoli rapidi senza salvare",
+    "searchProjects": "Cerca progetti…",
+    "sortRecent": "Aggiornati di recente",
+    "sortName": "Nome A–Z",
+    "sortCreated": "Più recenti",
+    "noSearchResults": "Nessun progetto corrisponde alla ricerca.",
+    "quickStart": "Avvio rapido",
+    "guideScratch": "Apri lavagna temporanea",
+    "guideSettings": "Preferenze",
+    "guideMarketplace": "Esplora marketplace",
+    "guideImport": "Importa un progetto",
+    "explore": "Esplora",
+    "exploreDesc": "Sfoglia modelli, pacchetti di blocchi e temi nel marketplace.",
+    "exploreCta": "Apri Marketplace",
+    "exploreLocked": "Richiesto Pro"
   },
   "contact": {
     "support": "Assistenza",

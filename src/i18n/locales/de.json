@@ -11,7 +11,25 @@
   "home": {
     "title": "Arbeitsbereich-Startseite",
     "welcome": "Willkommen bei ChainSolve",
-    "subtitle": "Ihr wissenschaftlicher Knotengraph-Arbeitsbereich"
+    "subtitle": "Ihr wissenschaftlicher Knotengraph-Arbeitsbereich",
+    "createProject": "Projekt erstellen",
+    "createProjectDesc": "Neues gespeichertes Projekt starten",
+    "openScratch": "Skizzen-Leinwand",
+    "openScratchDesc": "Schnelle Berechnungen ohne Speichern",
+    "searchProjects": "Projekte suchen…",
+    "sortRecent": "Zuletzt aktualisiert",
+    "sortName": "Name A–Z",
+    "sortCreated": "Neueste zuerst",
+    "noSearchResults": "Keine Projekte entsprechen Ihrer Suche.",
+    "quickStart": "Schnellstart",
+    "guideScratch": "Skizzen-Leinwand öffnen",
+    "guideSettings": "Einstellungen",
+    "guideMarketplace": "Marketplace durchsuchen",
+    "guideImport": "Projekt importieren",
+    "explore": "Entdecken",
+    "exploreDesc": "Durchsuchen Sie Vorlagen, Blockpakete und Themes im Marketplace.",
+    "exploreCta": "Marketplace öffnen",
+    "exploreLocked": "Pro erforderlich"
   },
   "contact": {
     "support": "Support",

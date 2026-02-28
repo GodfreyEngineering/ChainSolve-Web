@@ -11,7 +11,25 @@
   "home": {
     "title": "Accueil de l'atelier",
     "welcome": "Bienvenue sur ChainSolve",
-    "subtitle": "Votre espace de travail scientifique à nœuds"
+    "subtitle": "Votre espace de travail scientifique à nœuds",
+    "createProject": "Créer un projet",
+    "createProjectDesc": "Démarrer un nouveau projet enregistré",
+    "openScratch": "Canevas brouillon",
+    "openScratchDesc": "Calculs rapides sans sauvegarde",
+    "searchProjects": "Rechercher des projets…",
+    "sortRecent": "Mis à jour récemment",
+    "sortName": "Nom A–Z",
+    "sortCreated": "Plus récents d'abord",
+    "noSearchResults": "Aucun projet ne correspond à votre recherche.",
+    "quickStart": "Démarrage rapide",
+    "guideScratch": "Ouvrir un canevas brouillon",
+    "guideSettings": "Préférences",
+    "guideMarketplace": "Parcourir le marketplace",
+    "guideImport": "Importer un projet",
+    "explore": "Explorer",
+    "exploreDesc": "Parcourez les modèles, packs de blocs et thèmes dans le marketplace.",
+    "exploreCta": "Ouvrir le Marketplace",
+    "exploreLocked": "Pro requis"
   },
   "contact": {
     "support": "Assistance",

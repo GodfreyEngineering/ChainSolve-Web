@@ -11,7 +11,25 @@
   "home": {
     "title": "Workbench Home",
     "welcome": "Welcome to ChainSolve",
-    "subtitle": "Your scientific node-graph workspace"
+    "subtitle": "Your scientific node-graph workspace",
+    "createProject": "Create Project",
+    "createProjectDesc": "Start a new saved project",
+    "openScratch": "Scratch Canvas",
+    "openScratchDesc": "Quick calculations without saving",
+    "searchProjects": "Search projects…",
+    "sortRecent": "Recently updated",
+    "sortName": "Name A–Z",
+    "sortCreated": "Newest first",
+    "noSearchResults": "No projects match your search.",
+    "quickStart": "Quick Start",
+    "guideScratch": "Open scratch canvas",
+    "guideSettings": "Preferences",
+    "guideMarketplace": "Browse marketplace",
+    "guideImport": "Import a project",
+    "explore": "Explore",
+    "exploreDesc": "Browse templates, block packs, and themes in the marketplace.",
+    "exploreCta": "Open Marketplace",
+    "exploreLocked": "Pro required"
   },
   "contact": {
     "support": "Support",

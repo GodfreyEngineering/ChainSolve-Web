@@ -9,7 +9,16 @@
  *  - Project browser (create, open, rename, duplicate, export, delete, import)
  */
 
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
@@ -29,12 +38,15 @@ import {
 import {
   canCreateProject,
   getEntitlements,
+  isPro,
   isReadOnly,
   showBillingBanner,
   type Plan,
 } from '../lib/entitlements'
 import { BRAND } from '../lib/brand'
 import { UpgradeModal } from '../components/UpgradeModal'
+
+type SortMode = 'recent' | 'name' | 'created'
 
 const LazyFirstRunModal = lazy(() =>
   import('../components/app/FirstRunModal').then((m) => ({ default: m.FirstRunModal })),
@@ -150,6 +162,15 @@ const btnSmallPrimary: React.CSSProperties = {
 }
 const btnDisabled: React.CSSProperties = { opacity: 0.55, cursor: 'not-allowed' }
 
+type GuideAction = 'scratch' | 'settings' | 'marketplace' | 'import'
+
+const GUIDE_LINKS: { key: string; icon: string; action: GuideAction }[] = [
+  { key: 'home.guideScratch', icon: '⟁', action: 'scratch' },
+  { key: 'home.guideSettings', icon: '⚙', action: 'settings' },
+  { key: 'home.guideMarketplace', icon: '◈', action: 'marketplace' },
+  { key: 'home.guideImport', icon: '↥', action: 'import' },
+]
+
 // ── AppShell component ────────────────────────────────────────────────────────
 
 export default function AppShell() {
@@ -171,6 +192,8 @@ export default function AppShell() {
   const [projError, setProjError] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState<string | null>(null) // projectId
   const [upgradeOpen, setUpgradeOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortMode, setSortMode] = useState<SortMode>('recent')
   const [firstRunOpen, setFirstRunOpen] = useState(() => {
     try {
       return !localStorage.getItem(ONBOARDED_KEY)
@@ -194,6 +217,28 @@ export default function AppShell() {
       setProjLoading(false)
     }
   }, [])
+
+  const filteredProjects = useMemo(() => {
+    let list = projects
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase()
+      list = list.filter((p) => p.name.toLowerCase().includes(q))
+    }
+    const sorted = [...list]
+    switch (sortMode) {
+      case 'name':
+        sorted.sort((a, b) => a.name.localeCompare(b.name))
+        break
+      case 'created':
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        break
+      case 'recent':
+      default:
+        sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+        break
+    }
+    return sorted
+  }, [projects, searchQuery, sortMode])
 
   // ── Auth ──────────────────────────────────────────────────────────────────
 
@@ -530,7 +575,7 @@ export default function AppShell() {
       <main
         style={{ flex: 1, padding: '2rem 1.5rem', maxWidth: 960, width: '100%', margin: '0 auto' }}
       >
-        {/* ── Workbench Home header ── */}
+        {/* ── Workbench Home header + hero CTAs ── */}
         <div style={{ marginBottom: '1.5rem' }}>
           <h1
             style={{
@@ -551,6 +596,81 @@ export default function AppShell() {
           >
             {t('home.subtitle')}
           </p>
+        </div>
+
+        {/* ── Hero CTAs ── */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '0.75rem',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <button
+            style={{
+              ...cardStyle,
+              marginBottom: 0,
+              cursor: projLoading || !allowCreate ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              opacity: projLoading || !allowCreate ? 0.55 : 1,
+              border: '1px solid rgba(28,171,176,0.25)',
+              fontFamily: 'inherit',
+              color: 'inherit',
+              textAlign: 'left',
+              transition: 'border-color 0.15s',
+            }}
+            disabled={projLoading || !allowCreate}
+            onClick={() => void handleNewProject()}
+            onMouseOver={(e) => {
+              if (!projLoading && allowCreate)
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(28,171,176,0.5)'
+            }}
+            onMouseOut={(e) => {
+              ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(28,171,176,0.25)'
+            }}
+          >
+            <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>+</span>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t('home.createProject')}</div>
+              <div style={{ fontSize: '0.78rem', opacity: 0.5, marginTop: '0.15rem' }}>
+                {t('home.createProjectDesc')}
+              </div>
+            </div>
+          </button>
+
+          <button
+            style={{
+              ...cardStyle,
+              marginBottom: 0,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              border: '1px solid var(--border)',
+              fontFamily: 'inherit',
+              color: 'inherit',
+              textAlign: 'left',
+              transition: 'border-color 0.15s',
+            }}
+            onClick={() => navigate('/canvas')}
+            onMouseOver={(e) => {
+              ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(28,171,176,0.4)'
+            }}
+            onMouseOut={(e) => {
+              ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'
+            }}
+          >
+            <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>⟁</span>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t('home.openScratch')}</div>
+              <div style={{ fontSize: '0.78rem', opacity: 0.5, marginTop: '0.15rem' }}>
+                {t('home.openScratchDesc')}
+              </div>
+            </div>
+          </button>
         </div>
 
         {/* ── Subscription card ── */}
@@ -623,7 +743,9 @@ export default function AppShell() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: '1.25rem',
+              marginBottom: '1rem',
+              flexWrap: 'wrap',
+              gap: '0.5rem',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
@@ -648,7 +770,7 @@ export default function AppShell() {
                 onClick={() => importRef.current?.click()}
                 title={readOnly ? 'Read-only accounts cannot import projects' : undefined}
               >
-                Import .json
+                {t('projects.import')}
               </button>
               <button
                 style={{
@@ -659,30 +781,80 @@ export default function AppShell() {
                 onClick={() => void handleNewProject()}
                 title={
                   readOnly
-                    ? 'Canceled accounts cannot create projects'
+                    ? t('entitlements.canceledNoCreate')
                     : !allowCreate
-                      ? 'Project limit reached — upgrade to Pro'
+                      ? t('entitlements.projectLimitMsg')
                       : undefined
                 }
               >
-                + New Project
+                + {t('projects.newProject')}
               </button>
             </div>
           </div>
 
+          {/* ── Search + sort controls ── */}
+          {projects.length > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                gap: '0.5rem',
+                marginBottom: '1rem',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+              }}
+            >
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('home.searchProjects')}
+                style={{
+                  flex: '1 1 160px',
+                  padding: '0.45rem 0.75rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: 6,
+                  background: 'transparent',
+                  color: 'inherit',
+                  fontFamily: 'inherit',
+                  fontSize: '0.82rem',
+                }}
+              />
+              <select
+                value={sortMode}
+                onChange={(e) => setSortMode(e.target.value as SortMode)}
+                style={{
+                  padding: '0.45rem 0.6rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: 6,
+                  background: 'var(--card-bg)',
+                  color: 'inherit',
+                  fontFamily: 'inherit',
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="recent">{t('home.sortRecent')}</option>
+                <option value="name">{t('home.sortName')}</option>
+                <option value="created">{t('home.sortCreated')}</option>
+              </select>
+            </div>
+          )}
+
           {projError && <div style={errorBox}>{projError}</div>}
 
           {projLoading && projects.length === 0 ? (
-            <p style={{ opacity: 0.4, fontSize: '0.85rem', margin: 0 }}>Loading…</p>
+            <p style={{ opacity: 0.4, fontSize: '0.85rem', margin: 0 }}>{t('projects.loading')}</p>
           ) : projects.length === 0 ? (
             <div style={{ padding: '2.5rem 1rem', textAlign: 'center', opacity: 0.4 }}>
               <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⟁</div>
               <p style={{ margin: '0 0 0.35rem', fontSize: '0.95rem', fontWeight: 600 }}>
-                No projects yet
+                {t('projects.noProjects')}
               </p>
-              <p style={{ margin: 0, fontSize: '0.82rem' }}>
-                Create your first project to get started.
-              </p>
+              <p style={{ margin: 0, fontSize: '0.82rem' }}>{t('projects.noProjectsHint')}</p>
+            </div>
+          ) : filteredProjects.length === 0 ? (
+            <div style={{ padding: '1.5rem 1rem', textAlign: 'center', opacity: 0.4 }}>
+              <p style={{ margin: 0, fontSize: '0.85rem' }}>{t('home.noSearchResults')}</p>
             </div>
           ) : (
             <div
@@ -692,7 +864,7 @@ export default function AppShell() {
                 gap: '0.75rem',
               }}
             >
-              {projects.map((proj) => (
+              {filteredProjects.map((proj) => (
                 <ProjectCard
                   key={proj.id}
                   project={proj}
@@ -707,6 +879,94 @@ export default function AppShell() {
                 />
               ))}
             </div>
+          )}
+        </div>
+
+        {/* ── Quick guide links ── */}
+        <div style={cardStyle}>
+          <p style={sectionLabel}>{t('home.quickStart')}</p>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+              gap: '0.5rem',
+            }}
+          >
+            {GUIDE_LINKS.map((link) => (
+              <button
+                key={link.key}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.6rem',
+                  padding: '0.6rem 0.75rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: 8,
+                  background: 'transparent',
+                  color: 'inherit',
+                  fontFamily: 'inherit',
+                  cursor: 'pointer',
+                  fontSize: '0.82rem',
+                  textAlign: 'left',
+                  transition: 'border-color 0.15s',
+                }}
+                onClick={() => {
+                  switch (link.action) {
+                    case 'scratch':
+                      navigate('/canvas')
+                      break
+                    case 'settings':
+                      openSettings('preferences')
+                      break
+                    case 'marketplace':
+                      navigate('/marketplace')
+                      break
+                    case 'import':
+                      importRef.current?.click()
+                      break
+                  }
+                }}
+                onMouseOver={(e) => {
+                  ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(28,171,176,0.4)'
+                }}
+                onMouseOut={(e) => {
+                  ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'
+                }}
+              >
+                <span style={{ fontSize: '1.1rem', lineHeight: 1, opacity: 0.7 }}>{link.icon}</span>
+                <span style={{ fontWeight: 500 }}>{t(link.key)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Explore Marketplace CTA ── */}
+        <div
+          style={{
+            ...cardStyle,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+          }}
+        >
+          <div>
+            <p style={{ ...sectionLabel, margin: '0 0 0.35rem' }}>{t('home.explore')}</p>
+            <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.6 }}>{t('home.exploreDesc')}</p>
+          </div>
+          {isPro(plan) ? (
+            <button style={btnSecondary} onClick={() => navigate('/marketplace')}>
+              {t('home.exploreCta')}
+            </button>
+          ) : (
+            <button
+              style={{ ...btnSecondary, opacity: 0.65, cursor: 'not-allowed' }}
+              disabled
+              title={t('home.exploreLocked')}
+            >
+              {t('home.exploreLocked')}
+            </button>
           )}
         </div>
       </main>
