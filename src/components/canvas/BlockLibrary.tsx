@@ -25,32 +25,13 @@ import {
   type Template,
 } from '../../lib/templates'
 
-import { DRAG_TYPE, trackBlockUsed } from './blockLibraryUtils'
-
-// ── localStorage helpers ──────────────────────────────────────────────────────
-
-const RECENT_KEY = 'cs:recent'
-const FAV_KEY = 'cs:favs'
-
-function getRecent(): string[] {
-  try {
-    return JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]') as string[]
-  } catch {
-    return []
-  }
-}
-
-function getFavs(): Set<string> {
-  try {
-    return new Set(JSON.parse(localStorage.getItem(FAV_KEY) ?? '[]') as string[])
-  } catch {
-    return new Set()
-  }
-}
-
-function saveFavs(favs: Set<string>): void {
-  localStorage.setItem(FAV_KEY, JSON.stringify([...favs]))
-}
+import {
+  DRAG_TYPE,
+  trackBlockUsed,
+  getRecentlyUsed,
+  getFavourites,
+  toggleFavourite,
+} from './blockLibraryUtils'
 
 // ── Block grouping ────────────────────────────────────────────────────────────
 
@@ -428,24 +409,18 @@ export function BlockLibrary({
   const ent = getEntitlements(plan)
   const [query, setQuery] = useState('')
   const [filterCat, setFilterCat] = useState<BlockCategory | null>(null)
-  const [favs, setFavs] = useState<Set<string>>(getFavs)
-  const [recent, setRecent] = useState<string[]>(getRecent)
+  const [favs, setFavs] = useState<Set<string>>(getFavourites)
+  const [recent, setRecent] = useState<string[]>(getRecentlyUsed)
   const searchRef = useRef<HTMLInputElement>(null)
   const [templatesOpen, setTemplatesOpen] = useState(false)
   const [templates, setTemplates] = useState<Template[]>([])
   const [templatesLoaded, setTemplatesLoaded] = useState(false)
 
   // Refresh recent list when panel is focused (user may have added blocks)
-  const refreshRecent = useCallback(() => setRecent(getRecent()), [])
+  const refreshRecent = useCallback(() => setRecent(getRecentlyUsed()), [])
 
   const toggleFav = useCallback((type: string) => {
-    setFavs((prev) => {
-      const next = new Set(prev)
-      if (next.has(type)) next.delete(type)
-      else next.add(type)
-      saveFavs(next)
-      return next
-    })
+    setFavs(toggleFavourite(type))
   }, [])
 
   // Load templates lazily on first expand
