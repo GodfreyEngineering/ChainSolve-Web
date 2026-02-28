@@ -333,6 +333,10 @@
     "hAgo": "{{count}}h ago",
     "dAgo": "{{count}}d ago"
   },
+  "whatsNew": {
+    "title": "What's New",
+    "version": "v{{version}}"
+  },
   "docs": {
     "title": "Documentation",
     "searchPlaceholder": "Search docs…",

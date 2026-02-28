@@ -30,6 +30,9 @@ const LazyKeyboardShortcutsModal = lazy(() =>
 const LazyDocsSearchModal = lazy(() =>
   import('./DocsSearchModal').then((m) => ({ default: m.DocsSearchModal })),
 )
+const LazyWhatsNewModal = lazy(() =>
+  import('./WhatsNewModal').then((m) => ({ default: m.WhatsNewModal })),
+)
 import { CATEGORY_ORDER, CATEGORY_LABELS } from '../../blocks/registry'
 import { getCurrentUser } from '../../lib/auth'
 import { getRecentProjects } from '../../lib/recentProjects'
@@ -165,6 +168,7 @@ export function AppHeader({
   const [aboutOpen, setAboutOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [docsOpen, setDocsOpen] = useState(false)
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [openDialogOpen, setOpenDialogOpen] = useState(false)
   const [saveAsOpen, setSaveAsOpen] = useState(false)
@@ -686,7 +690,13 @@ export function AppHeader({
           setOpenMenu(null)
         },
       },
-      { label: t('menu.changelog'), onClick: stub },
+      {
+        label: t('menu.changelog'),
+        onClick: () => {
+          setWhatsNewOpen(true)
+          setOpenMenu(null)
+        },
+      },
       { separator: true },
       {
         label: t('menu.about'),
@@ -928,6 +938,11 @@ export function AppHeader({
       {docsOpen && (
         <Suspense fallback={null}>
           <LazyDocsSearchModal open onClose={() => setDocsOpen(false)} />
+        </Suspense>
+      )}
+      {whatsNewOpen && (
+        <Suspense fallback={null}>
+          <LazyWhatsNewModal open onClose={() => setWhatsNewOpen(false)} />
         </Suspense>
       )}
       {openDialogOpen && (
