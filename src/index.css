@@ -169,11 +169,21 @@ textarea:focus {
   }
 }
 
-/* ── LOD — Level of Detail zoom tiers ────────────────────────────────────── */
-[data-lod='compact'] .cs-node-body {
-  display: none !important;
+/* ── LOD — Level of Detail zoom tiers ────────────────────────────────────── *
+ * IMPORTANT: Do NOT use `display: none` on .cs-node-body — it unmounts
+ * React Flow handles, causing edges to collapse to the node origin (0,0).
+ * Instead, visually collapse the body while keeping handles in the DOM
+ * so getBoundingClientRect() still returns correct positions.
+ */
+[data-lod='compact'] .cs-node-body,
+[data-lod='minimal'] .cs-node-body {
+  max-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
 }
-[data-lod='minimal'] .cs-node-body,
 [data-lod='minimal'] .cs-node-header-value {
   display: none !important;
 }
