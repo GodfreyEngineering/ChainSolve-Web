@@ -333,6 +333,13 @@
     "hAgo": "{{count}}h ago",
     "dAgo": "{{count}}d ago"
   },
+  "docs": {
+    "title": "Documentation",
+    "searchPlaceholder": "Search docs…",
+    "results": "Search results",
+    "noResults": "No results for \u201c{{query}}\u201d",
+    "browseHint": "Browse all topics, or type to search."
+  },
   "commandPalette": {
     "title": "Command Palette",
     "placeholder": "Type a command…",
