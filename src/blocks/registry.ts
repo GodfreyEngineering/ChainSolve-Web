@@ -497,6 +497,68 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   presetFluids: 'Fluid Presets',
 }
 
+// ── Library families (D6-4: primary grouping for block library) ──────────────
+
+export interface LibraryFamily {
+  id: string
+  label: string
+  categories: BlockCategory[]
+}
+
+/** Primary families for the block library sidebar. */
+export const LIBRARY_FAMILIES: LibraryFamily[] = [
+  { id: 'inputs', label: 'Inputs', categories: ['input'] },
+  {
+    id: 'constants',
+    label: 'Constants',
+    categories: [
+      'constants',
+      'constMath',
+      'constPhysics',
+      'constAtmos',
+      'constThermo',
+      'constElec',
+    ],
+  },
+  {
+    id: 'materials',
+    label: 'Materials',
+    categories: ['presetMaterials', 'presetFluids'],
+  },
+  {
+    id: 'functions',
+    label: 'Functions',
+    categories: [
+      'math',
+      'trig',
+      'logic',
+      'engMechanics',
+      'engMaterials',
+      'engSections',
+      'engInertia',
+      'engFluids',
+      'engThermo',
+      'engElectrical',
+      'engConversions',
+      'finTvm',
+      'finReturns',
+      'finDepr',
+      'statsDesc',
+      'statsRel',
+      'probComb',
+      'probDist',
+      'utilCalc',
+    ],
+  },
+  { id: 'outputs', label: 'Outputs', categories: ['output'] },
+  {
+    id: 'data',
+    label: 'Data',
+    categories: ['data', 'vectorOps', 'tableOps'],
+  },
+  { id: 'plots', label: 'Plots', categories: ['plot'] },
+]
+
 // ── Pro-only block registration (no circular imports) ────────────────────────
 // Block packs export registration functions instead of importing reg.
 

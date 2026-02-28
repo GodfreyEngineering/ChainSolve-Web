@@ -14,6 +14,7 @@ import {
   BLOCK_REGISTRY,
   CATEGORY_ORDER,
   CATEGORY_LABELS,
+  LIBRARY_FAMILIES,
   type BlockCategory,
   type BlockDef,
 } from '../../blocks/registry'
@@ -417,7 +418,7 @@ export function BlockLibrary({
 }: BlockLibraryProps) {
   const ent = getEntitlements(plan)
   const [query, setQuery] = useState('')
-  const [filterCat, setFilterCat] = useState<BlockCategory | null>(null)
+  const [filterFamily, setFilterFamily] = useState<string | null>(null)
   const [favs, setFavs] = useState<Set<string>>(getFavourites)
   const [recent, setRecent] = useState<string[]>(getRecentlyUsed)
   const searchRef = useRef<HTMLInputElement>(null)
@@ -469,9 +470,11 @@ export function BlockLibrary({
   const recentList = recent
     .map((t) => BLOCK_REGISTRY.get(t))
     .filter((d): d is BlockDef => d !== undefined)
+  const activeFamily = filterFamily ? LIBRARY_FAMILIES.find((f) => f.id === filterFamily) : null
+  const activeCats = new Set(activeFamily ? activeFamily.categories : CATEGORY_ORDER)
   const noBlockResults =
     q.length > 0 &&
-    CATEGORY_ORDER.filter((cat) => !filterCat || cat === filterCat).every(
+    [...activeCats].every(
       (cat) => (GROUPED.get(cat) ?? []).filter((d) => matchesQuery(d, q)).length === 0,
     )
 
@@ -494,26 +497,26 @@ export function BlockLibrary({
           <button
             style={{
               ...s.catPill,
-              background: !filterCat ? 'rgba(28,171,176,0.2)' : 'transparent',
-              borderColor: !filterCat ? '#1CABB0' : undefined,
-              color: !filterCat ? '#1CABB0' : undefined,
+              background: !filterFamily ? 'rgba(28,171,176,0.2)' : 'transparent',
+              borderColor: !filterFamily ? '#1CABB0' : undefined,
+              color: !filterFamily ? '#1CABB0' : undefined,
             }}
-            onClick={() => setFilterCat(null)}
+            onClick={() => setFilterFamily(null)}
           >
             All
           </button>
-          {CATEGORY_ORDER.map((cat) => (
+          {LIBRARY_FAMILIES.map((fam) => (
             <button
-              key={cat}
+              key={fam.id}
               style={{
                 ...s.catPill,
-                background: filterCat === cat ? 'rgba(28,171,176,0.2)' : 'transparent',
-                borderColor: filterCat === cat ? '#1CABB0' : undefined,
-                color: filterCat === cat ? '#1CABB0' : undefined,
+                background: filterFamily === fam.id ? 'rgba(28,171,176,0.2)' : 'transparent',
+                borderColor: filterFamily === fam.id ? '#1CABB0' : undefined,
+                color: filterFamily === fam.id ? '#1CABB0' : undefined,
               }}
-              onClick={() => setFilterCat(cat === filterCat ? null : cat)}
+              onClick={() => setFilterFamily(fam.id === filterFamily ? null : fam.id)}
             >
-              {CATEGORY_LABELS[cat]}
+              {fam.label}
             </button>
           ))}
         </div>
@@ -568,16 +571,19 @@ export function BlockLibrary({
           </div>
         )}
 
-        {/* All blocks by category */}
-        {CATEGORY_ORDER.filter((cat) => !filterCat || cat === filterCat).map((cat) => {
-          const blocks = (GROUPED.get(cat) ?? []).filter((d) => !q || matchesQuery(d, q))
-          if (blocks.length === 0) return null
-          const isPro = PRO_CATEGORIES.has(cat)
+        {/* All blocks by family → category */}
+        {LIBRARY_FAMILIES.filter((fam) => !filterFamily || fam.id === filterFamily).map((fam) => {
+          const familyBlocks = fam.categories.flatMap((cat) =>
+            (GROUPED.get(cat) ?? []).filter((d) => !q || matchesQuery(d, q)),
+          )
+          if (familyBlocks.length === 0) return null
+          const familyHasPro = fam.categories.some((c) => PRO_CATEGORIES.has(c))
+          const showSubLabels = fam.categories.length > 1
           return (
-            <div key={cat}>
+            <div key={fam.id}>
               <div style={s.sectionLabel}>
-                {CATEGORY_LABELS[cat]}
-                {isPro && (
+                {fam.label}
+                {familyHasPro && (
                   <span
                     style={{
                       marginLeft: 6,
@@ -595,16 +601,45 @@ export function BlockLibrary({
                   </span>
                 )}
               </div>
-              {blocks.map((def) => (
-                <BlockItem
-                  key={def.type}
-                  def={def}
-                  favs={favs}
-                  onToggleFav={toggleFav}
-                  entitled={isBlockEntitled(def, ent)}
-                  onProBlocked={onProBlocked}
-                />
-              ))}
+              {showSubLabels
+                ? fam.categories.map((cat) => {
+                    const blocks = (GROUPED.get(cat) ?? []).filter((d) => !q || matchesQuery(d, q))
+                    if (blocks.length === 0) return null
+                    return (
+                      <div key={cat}>
+                        <div
+                          style={{
+                            ...s.sectionLabel,
+                            fontSize: '0.58rem',
+                            paddingLeft: '0.9rem',
+                            opacity: 0.6,
+                          }}
+                        >
+                          {CATEGORY_LABELS[cat]}
+                        </div>
+                        {blocks.map((def) => (
+                          <BlockItem
+                            key={def.type}
+                            def={def}
+                            favs={favs}
+                            onToggleFav={toggleFav}
+                            entitled={isBlockEntitled(def, ent)}
+                            onProBlocked={onProBlocked}
+                          />
+                        ))}
+                      </div>
+                    )
+                  })
+                : familyBlocks.map((def) => (
+                    <BlockItem
+                      key={def.type}
+                      def={def}
+                      favs={favs}
+                      onToggleFav={toggleFav}
+                      entitled={isBlockEntitled(def, ent)}
+                      onProBlocked={onProBlocked}
+                    />
+                  ))}
             </div>
           )
         })}

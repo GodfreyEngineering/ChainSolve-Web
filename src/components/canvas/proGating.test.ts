@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { BLOCK_REGISTRY, CATEGORY_ORDER } from '../../blocks/registry'
+import { BLOCK_REGISTRY, CATEGORY_ORDER, LIBRARY_FAMILIES } from '../../blocks/registry'
 import { getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 
 /** Pro-only categories (must match BlockLibrary.tsx PRO_CATEGORIES). */
@@ -97,5 +97,38 @@ describe('Variable block separation (D6-3)', () => {
     expect(def).toBeDefined()
     expect(def!.nodeKind).toBe('csSource')
     expect(def!.inputs).toEqual([])
+  })
+})
+
+// ── D6-4: Library families structure ────────────────────────────────────────
+
+describe('Library families structure (D6-4)', () => {
+  it('LIBRARY_FAMILIES covers all categories in CATEGORY_ORDER', () => {
+    const familyCats = new Set(LIBRARY_FAMILIES.flatMap((f) => f.categories))
+    const missing = CATEGORY_ORDER.filter((c) => !familyCats.has(c))
+    expect(missing, `Categories not in any family:\n${missing.join('\n')}`).toEqual([])
+  })
+
+  it('no category appears in multiple families', () => {
+    const seen = new Map<string, string>()
+    const dupes: string[] = []
+    for (const fam of LIBRARY_FAMILIES) {
+      for (const cat of fam.categories) {
+        if (seen.has(cat)) dupes.push(`${cat} in both ${seen.get(cat)} and ${fam.id}`)
+        seen.set(cat, fam.id)
+      }
+    }
+    expect(dupes).toEqual([])
+  })
+
+  it('each family has a unique id', () => {
+    const ids = LIBRARY_FAMILIES.map((f) => f.id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('each family has at least one category', () => {
+    for (const fam of LIBRARY_FAMILIES) {
+      expect(fam.categories.length, `${fam.id} has no categories`).toBeGreaterThan(0)
+    }
   })
 })
