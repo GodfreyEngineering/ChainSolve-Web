@@ -573,7 +573,7 @@ Claude MUST:
     - or open block library search
   - Acceptance: guidance matches behavior; no misleading copy.
 
-- [ ] D4-2: Edge “top-left collapse” bug at low zoom (LOD handle bug)
+- [x] D4-2: Edge “top-left collapse” bug at low zoom (LOD handle bug)
   - Fix by ensuring edge anchor handles still exist logically at low LOD:
     - keep handles mounted but visually hidden
     - or provide stable anchor points independent of UI ears
