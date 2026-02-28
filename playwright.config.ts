@@ -63,10 +63,55 @@ export default defineConfig({
     // wasm-engine.spec.ts uses the worker-scoped `enginePage` fixture so
     // WASM is compiled once per worker, not once per test (~16 API tests share
     // one V8 compilation).
+    // Excludes visual.spec.ts — that project manages its own snapshot baselines.
     // Run via: npm run test:e2e:full   (nightly workflow or manual dispatch)
     {
       name: 'full',
       testMatch: '**/*.spec.ts',
+      testIgnore: '**/visual.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: { args: chromiumArgs },
+      },
+    },
+
+    // ── visual ─────────────────────────────────────────────────────────────
+    // Visual regression tests using Playwright screenshot comparison.
+    // P144: baselines are created on first run (updateSnapshots: 'missing')
+    // and committed to git.  Subsequent runs compare pixel-by-pixel.
+    // Run via: npx playwright test --project=visual
+    // Update baselines: npx playwright test --project=visual --update-snapshots
+    {
+      name: 'visual',
+      testMatch: '**/visual.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: { args: chromiumArgs },
+        viewport: { width: 1280, height: 720 },
+      },
+    },
+
+    // ── a11y ───────────────────────────────────────────────────────────────
+    // Axe accessibility automation (P145).
+    // Runs WCAG 2.1 AA checks on public, auth-free routes.
+    // Run via: npx playwright test --project=a11y
+    {
+      name: 'a11y',
+      testMatch: '**/a11y.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: { args: chromiumArgs },
+      },
+    },
+
+    // ── chaos ──────────────────────────────────────────────────────────────
+    // Chaos / resilience tests (P146).
+    // Simulates Supabase outages via page.route() and verifies the WASM
+    // engine still boots successfully (no real Supabase connection required).
+    // Run via: npx playwright test --project=chaos
+    {
+      name: 'chaos',
+      testMatch: '**/chaos.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
         launchOptions: { args: chromiumArgs },
@@ -88,4 +133,8 @@ export default defineConfig({
       },
     },
   ],
+
+  // Create missing snapshots on first run (visual regression baseline setup).
+  // Does not overwrite existing snapshots — use --update-snapshots for that.
+  updateSnapshots: 'missing',
 })
