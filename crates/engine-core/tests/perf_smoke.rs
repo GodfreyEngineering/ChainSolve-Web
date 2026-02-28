@@ -185,6 +185,63 @@ fn perf_smoke_incremental_unchanged_under_50ms() {
     );
 }
 
+// ── P081: 500-node harness ─────────────────────────────────────────────────
+//
+// These tests cover the mid-scale range (500 nodes) which sits between the
+// small benchmarks (< 100 nodes in unit tests) and the large-scale 1k/10k
+// smoke tests above.  Together they form the "perf harness" for 500–1000 nodes.
+
+/// Linear 500-node chain: number(1) → negate × 499.  Full eval.
+/// Budget: 200 ms (generous — expected to be well under 50 ms).
+#[test]
+fn perf_smoke_500_chain_under_200ms() {
+    let snap = chain_dag(500);
+    let start = Instant::now();
+    let mut g = EngineGraph::new();
+    g.load_snapshot(snap);
+    g.evaluate_dirty();
+    let elapsed = start.elapsed();
+    assert!(
+        elapsed.as_millis() < 200,
+        "500-node chain full eval took {}ms (budget: 200ms)",
+        elapsed.as_millis()
+    );
+}
+
+/// Fan-out 500: one number source → 499 negate leaves.  Full eval.
+/// Budget: 200 ms.
+#[test]
+fn perf_smoke_fanout_500_under_200ms() {
+    let snap = fan_out_dag(500);
+    let start = Instant::now();
+    let mut g = EngineGraph::new();
+    g.load_snapshot(snap);
+    g.evaluate_dirty();
+    let elapsed = start.elapsed();
+    assert!(
+        elapsed.as_millis() < 200,
+        "500-node fan-out full eval took {}ms (budget: 200ms)",
+        elapsed.as_millis()
+    );
+}
+
+/// load_snapshot-only benchmark (no evaluate_dirty) for 1 000 nodes.
+/// Measures the graph-structure-building step in isolation.
+/// Budget: 50 ms.
+#[test]
+fn perf_smoke_load_only_1k_under_50ms() {
+    let snap = chain_dag(1_000);
+    let mut g = EngineGraph::new();
+    let start = Instant::now();
+    g.load_snapshot(snap);
+    let elapsed = start.elapsed();
+    assert!(
+        elapsed.as_millis() < 50,
+        "1k-node load_snapshot (no eval) took {}ms (budget: 50ms)",
+        elapsed.as_millis()
+    );
+}
+
 /// Register a 1M-element dataset and compute vectorSum over it.
 /// Budget: 2 000 ms.
 #[test]
