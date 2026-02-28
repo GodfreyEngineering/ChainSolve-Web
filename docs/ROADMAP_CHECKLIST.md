@@ -419,9 +419,9 @@ Claude MUST:
 - [x] P114: Download/install audit events (future enterprise)
 - [x] P115: Marketplace analytics (privacy constrained)
 
-- [ ] P116: block_pack install mechanism
-- [ ] P117: theme install mechanism (CSS vars)
-- [ ] P118: dependency/compat checks (engine contract)
+- [x] P116: block_pack install mechanism
+- [x] P117: theme install mechanism (CSS vars)
+- [x] P118: dependency/compat checks (engine contract)
 - [ ] P119: moderation tools
 - [ ] P120: Marketplace E2E smoke
 
