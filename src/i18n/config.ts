@@ -7,6 +7,9 @@ import es from './locales/es.json'
 import fr from './locales/fr.json'
 import it from './locales/it.json'
 import de from './locales/de.json'
+import he from './locales/he.json'
+
+import { getDirection } from './rtl'
 
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -14,6 +17,8 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'fr', label: 'Français' },
   { code: 'it', label: 'Italiano' },
   { code: 'de', label: 'Deutsch' },
+  // P148: RTL support — Hebrew stub locale (translations pending; falls back to English).
+  { code: 'he', label: 'עברית' },
 ] as const
 
 void i18n
@@ -26,6 +31,7 @@ void i18n
       fr: { translation: fr },
       it: { translation: it },
       de: { translation: de },
+      he: { translation: he },
     },
     fallbackLng: 'en',
     interpolation: { escapeValue: false },
@@ -41,12 +47,15 @@ void i18n
     initImmediate: false,
   })
 
-// Keep <html lang> in sync when the user changes language in Settings.
-// The pre-paint value is written by boot.ts; this listener handles
+// Keep <html lang> and <html dir> in sync when the user changes language.
+// The pre-paint values are written by boot.ts; this listener handles
 // subsequent changes without a page reload.
+// P148: dir is set to 'rtl' for Hebrew, Arabic, and other RTL languages.
 i18n.on('languageChanged', (lng: string) => {
   if (typeof document !== 'undefined') {
-    document.documentElement.lang = lng.slice(0, 2)
+    const code = lng.slice(0, 2)
+    document.documentElement.lang = code
+    document.documentElement.dir = getDirection(code)
   }
 })
 

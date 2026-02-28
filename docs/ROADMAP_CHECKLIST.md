@@ -447,6 +447,6 @@ Claude MUST:
 - [x] P145: Axe accessibility automation in E2E
 - [x] P146: Chaos testing (Supabase outages, worker crashes)
 - [x] P147: Performance regression CI
-- [ ] P148: RTL language support
+- [x] P148: RTL language support
 - [ ] P149: LLM-assisted graph building (future)
 - [ ] P150: Template editor (user-defined reusable groups)

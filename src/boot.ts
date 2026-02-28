@@ -28,11 +28,13 @@
   document.documentElement.style.colorScheme = resolved
 }
 
-// Apply saved language to <html lang> before React renders (no FOUC).
+// Apply saved language to <html lang> and <html dir> before React renders.
 // i18next uses 'cs:lang' as its localStorage key (see src/i18n/config.ts).
-// This runs synchronously, so screen-readers and browser translations see
-// the correct lang attribute from the very first paint.
+// Both attributes are set synchronously so screen-readers, browser translations,
+// and CSS logical-property layouts see the correct values from the first paint.
+// RTL language codes: ar, he, fa, ur, ps, sd (see src/i18n/rtl.ts).
 {
+  const RTL = new Set(['ar', 'he', 'fa', 'ur', 'ps', 'sd'])
   let lang = 'en'
   try {
     const stored = localStorage.getItem('cs:lang')
@@ -41,6 +43,7 @@
     // ignore
   }
   document.documentElement.lang = lang
+  document.documentElement.dir = RTL.has(lang) ? 'rtl' : 'ltr'
 }
 
 function showBootError(message: string) {
