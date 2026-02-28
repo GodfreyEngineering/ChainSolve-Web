@@ -389,12 +389,12 @@ Claude MUST:
 - [x] P091: Coverage thresholds (src/lib + src/engine)
 - [x] P092: Integration tests: WASM worker snapshot → result
 - [x] P093: Integration tests: save/load round-trip (SHOULD)
-- [ ] P094: E2E smoke: create project, add blocks, connect, eval, save
-- [ ] P095: E2E multi-canvas switching + persistence
-- [ ] P096: E2E variables + bindings + sliders
-- [ ] P097: E2E CSV import + validation errors (Pro gating)
-- [ ] P098: E2E plot render + export (SHOULD)
-- [ ] P099: E2E export download assertions (PDF/Excel) (SHOULD, if CI supports)
+- [x] P094: E2E smoke: create project, add blocks, connect, eval, save
+- [x] P095: E2E multi-canvas switching + persistence
+- [x] P096: E2E variables + bindings + sliders
+- [x] P097: E2E CSV import + validation errors (Pro gating)
+- [x] P098: E2E plot render + export (SHOULD)
+- [x] P099: E2E export download assertions (PDF/Excel) (SHOULD, if CI supports)
 - [x] P100: Go-live doc: release checklist + verification steps
 
 ---
