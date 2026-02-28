@@ -374,13 +374,13 @@ Claude MUST:
 - [x] P080: Language selection persists + pre-paint apply (no FOUC)
 
 ## A8 — Performance + scale (500–1000 nodes)
-- [ ] P081: Perf harness (generate/load 500/1000-node graphs)
+- [x] P081: Perf harness (generate/load 500/1000-node graphs)
 - [ ] P082: ?perf=1 FPS overlay + perf logs (SHOULD)
-- [ ] P083: Animated edges thresholds + hysteresis + tests
+- [x] P083: Animated edges thresholds + hysteresis + tests
 - [ ] P084: LOD thresholds tuning
 - [x] P085: WASM init timing logged + regression guard
 - [x] P086: Bundle splitting audit (ensure lazy libs remain lazy)
-- [ ] P087: Table limits enforcement + UX
+- [x] P087: Table limits enforcement + UX
 - [x] P088: Worker resilience (crash → respawn → notice)
 - [ ] P089: Eval scheduling to avoid main-thread stalls (SHOULD)
 - [ ] P090: Lighthouse/perf budget doc + optional CI check (SHOULD)
