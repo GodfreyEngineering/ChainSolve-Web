@@ -154,6 +154,10 @@ section "Bundle size check"
 node scripts/check-bundle-size.mjs || fail "bundle size"
 pass "bundle size"
 
+section "Bundle splits audit (lazy chunks)"
+node scripts/check-bundle-splits.mjs || fail "bundle splits"
+pass "bundle splits"
+
 section "Robots meta guard (dist)"
 node scripts/check-robots-meta.mjs || fail "robots meta guard (dist)"
 pass "robots meta guard (dist)"
