@@ -78,6 +78,17 @@ export interface EngineAPI {
   dispose(): void
 }
 
+// ── Contract version guard ────────────────────────────────────────────────
+
+/**
+ * The engine contract version this app version was built against.
+ * Must match the value returned by `get_engine_contract_version()` in the WASM
+ * module. If they disagree the engine was updated without a matching app
+ * update (or vice-versa) — reject with a CONTRACT_MISMATCH error so the user
+ * knows to clear cache and reload.
+ */
+const EXPECTED_CONTRACT_VERSION = 1
+
 // ── Watchdog constant ─────────────────────────────────────────────────────
 
 /** Milliseconds before the watchdog kills and recreates the worker. */
@@ -316,6 +327,18 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
     contractVersion = contractV
     wasmInitMs = initMs
   })
+
+  // Validate contract version: if the WASM module was built against a different
+  // contract than this app expects, fail loudly with a clear error code so the
+  // EngineFatalError UI can give the user actionable recovery steps.
+  if (contractVersion !== EXPECTED_CONTRACT_VERSION) {
+    worker.terminate()
+    throw new Error(
+      `[CONTRACT_MISMATCH] Engine contract version ${contractVersion} is not compatible ` +
+        `with this app version (expected ${EXPECTED_CONTRACT_VERSION}). ` +
+        `Clear your browser cache and reload to get the latest version.`,
+    )
+  }
 
   updatePerfMetrics({ wasmInitMs })
   setupMessageHandler(worker)

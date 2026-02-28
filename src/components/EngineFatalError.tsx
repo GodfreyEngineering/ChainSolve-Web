@@ -5,9 +5,12 @@
  * engine, so we offer retry and full page reload.
  *
  * Error codes (prefixed in error.message as [CODE]):
- *   WASM_CSP_BLOCKED  — WebAssembly blocked by Content Security Policy
- *   WASM_INIT_FAILED  — any other initialization failure
+ *   WASM_CSP_BLOCKED   — WebAssembly blocked by Content Security Policy
+ *   WASM_INIT_FAILED   — any other initialization failure
+ *   CONTRACT_MISMATCH  — WASM contract version ≠ app expected version
  */
+
+import { useState, useCallback } from 'react'
 
 interface Props {
   error: Error
@@ -19,6 +22,56 @@ export function EngineFatalError({ error, onRetry }: Props) {
   const codeMatch = error.message.match(/^\[([A-Z_]+)\]/)
   const errorCode = codeMatch?.[1] ?? 'WASM_INIT_FAILED'
   const isCspBlocked = errorCode === 'WASM_CSP_BLOCKED'
+  const isContractMismatch = errorCode === 'CONTRACT_MISMATCH'
+
+  const [copied, setCopied] = useState(false)
+
+  const handleCopyDiagnostics = useCallback(() => {
+    const diag = JSON.stringify(
+      {
+        ts: new Date().toISOString(),
+        errorCode,
+        message: error.message,
+        url: window.location.href,
+        ua: navigator.userAgent,
+      },
+      null,
+      2,
+    )
+    void navigator.clipboard.writeText(diag).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }, [error.message, errorCode])
+
+  function getTitle(): string {
+    if (isCspBlocked) return 'Engine blocked by Content Security Policy'
+    if (isContractMismatch) return 'Engine version mismatch — please update'
+    return 'Engine failed to load'
+  }
+
+  function getDescription(): string {
+    if (isCspBlocked) {
+      return (
+        'WebAssembly compilation was blocked by the page\u2019s Content Security Policy. ' +
+        'If this is the production site, please contact support \u2014 this is a server ' +
+        'configuration issue. Administrators: add \u2018wasm-unsafe-eval\u2019 to the ' +
+        'script-src CSP directive (see docs/SECURITY.md).'
+      )
+    }
+    if (isContractMismatch) {
+      return (
+        'The compute engine and the app are out of sync. This can happen after an update ' +
+        'if your browser is serving a cached version of the app or the engine. ' +
+        'To fix: (1) clear your browser cache (Ctrl+Shift+Delete / Cmd+Shift+Delete), ' +
+        'then (2) reload the page.'
+      )
+    }
+    return (
+      'The compute engine could not initialize. This may be caused by a browser ' +
+      'extension blocking WebAssembly or a network issue.'
+    )
+  }
 
   return (
     <div
@@ -38,9 +91,7 @@ export function EngineFatalError({ error, onRetry }: Props) {
         textAlign: 'center',
       }}
     >
-      <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#f87171' }}>
-        {isCspBlocked ? 'Engine blocked by Content Security Policy' : 'Engine failed to load'}
-      </h2>
+      <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#f87171' }}>{getTitle()}</h2>
 
       {/* Short error code badge */}
       <div style={{ marginBottom: '1rem' }}>
@@ -58,13 +109,7 @@ export function EngineFatalError({ error, onRetry }: Props) {
       </div>
 
       <p style={{ maxWidth: '30rem', marginBottom: '1.5rem', lineHeight: 1.5, color: '#a1a1aa' }}>
-        {isCspBlocked
-          ? 'WebAssembly compilation was blocked by the page\u2019s Content Security Policy. ' +
-            'If this is the production site, please contact support \u2014 this is a server ' +
-            'configuration issue. Administrators: add \u2018wasm-unsafe-eval\u2019 to the ' +
-            'script-src CSP directive (see docs/SECURITY.md).'
-          : 'The compute engine could not initialize. This may be caused by a browser ' +
-            'extension blocking WebAssembly or a network issue.'}
+        {getDescription()}
       </p>
 
       <code
@@ -83,7 +128,7 @@ export function EngineFatalError({ error, onRetry }: Props) {
         {error.message}
       </code>
 
-      <div style={{ display: 'flex', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
         <button
           onClick={onRetry}
           style={{
@@ -113,6 +158,20 @@ export function EngineFatalError({ error, onRetry }: Props) {
         >
           Reload page
         </a>
+        <button
+          onClick={handleCopyDiagnostics}
+          style={{
+            padding: '0.5rem 1.25rem',
+            backgroundColor: '#27272a',
+            color: '#a1a1aa',
+            border: '1px solid #3f3f46',
+            borderRadius: '0.375rem',
+            cursor: 'pointer',
+            fontWeight: 500,
+          }}
+        >
+          {copied ? 'Copied!' : 'Copy diagnostics'}
+        </button>
       </div>
     </div>
   )
