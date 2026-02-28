@@ -549,7 +549,7 @@ Claude MUST:
   - Ensure panels never hide core canvas toolbar.
   - Acceptance: user can always close/minimize, and core controls remain accessible.
 
-- [ ] D3-2: Redesign canvas toolbar placement
+- [x] D3-2: Redesign canvas toolbar placement
   - Option A: move canvas toolbar to right side (recommended)
   - Option B: keep above dock and make dock push layout up
   - Acceptance: toolbar never sits “behind” panels.
