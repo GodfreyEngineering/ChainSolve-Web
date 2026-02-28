@@ -29,7 +29,13 @@
     "explore": "Esplora",
     "exploreDesc": "Sfoglia modelli, pacchetti di blocchi e temi nel marketplace.",
     "exploreCta": "Apri Marketplace",
-    "exploreLocked": "Richiesto Pro"
+    "exploreLocked": "Richiesto Pro",
+    "directory": "Directory progetti",
+    "filterAll": "Tutti",
+    "filterRecent": "Recenti",
+    "filterPinned": "Fissati",
+    "noPinned": "Nessun progetto fissato. Contrassegna un progetto con la stella per fissarlo qui.",
+    "noRecent": "Nessun progetto aperto di recente."
   },
   "contact": {
     "support": "Assistenza",

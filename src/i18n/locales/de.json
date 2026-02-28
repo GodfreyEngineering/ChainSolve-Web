@@ -29,7 +29,13 @@
     "explore": "Entdecken",
     "exploreDesc": "Durchsuchen Sie Vorlagen, Blockpakete und Themes im Marketplace.",
     "exploreCta": "Marketplace öffnen",
-    "exploreLocked": "Pro erforderlich"
+    "exploreLocked": "Pro erforderlich",
+    "directory": "Projektverzeichnis",
+    "filterAll": "Alle",
+    "filterRecent": "Kürzlich",
+    "filterPinned": "Angeheftet",
+    "noPinned": "Keine angehefteten Projekte. Markieren Sie ein Projekt mit einem Stern.",
+    "noRecent": "Keine kürzlich geöffneten Projekte."
   },
   "contact": {
     "support": "Support",

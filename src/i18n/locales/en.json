@@ -29,7 +29,13 @@
     "explore": "Explore",
     "exploreDesc": "Browse templates, block packs, and themes in the marketplace.",
     "exploreCta": "Open Marketplace",
-    "exploreLocked": "Pro required"
+    "exploreLocked": "Pro required",
+    "directory": "Project Directory",
+    "filterAll": "All",
+    "filterRecent": "Recent",
+    "filterPinned": "Pinned",
+    "noPinned": "No pinned projects. Star a project to pin it here.",
+    "noRecent": "No recently opened projects."
   },
   "contact": {
     "support": "Support",

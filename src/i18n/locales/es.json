@@ -29,7 +29,13 @@
     "explore": "Explorar",
     "exploreDesc": "Explora plantillas, paquetes de bloques y temas en el marketplace.",
     "exploreCta": "Abrir Marketplace",
-    "exploreLocked": "Se requiere Pro"
+    "exploreLocked": "Se requiere Pro",
+    "directory": "Directorio de proyectos",
+    "filterAll": "Todos",
+    "filterRecent": "Recientes",
+    "filterPinned": "Fijados",
+    "noPinned": "Sin proyectos fijados. Marca un proyecto con estrella para fijarlo aquí.",
+    "noRecent": "No hay proyectos abiertos recientemente."
   },
   "contact": {
     "support": "Soporte",

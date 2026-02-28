@@ -45,8 +45,11 @@ import {
 } from '../lib/entitlements'
 import { BRAND } from '../lib/brand'
 import { UpgradeModal } from '../components/UpgradeModal'
+import { getRecentProjects } from '../lib/recentProjects'
+import { getPinnedProjects, togglePinnedProject } from '../lib/pinnedProjects'
 
 type SortMode = 'recent' | 'name' | 'created'
+type FilterTab = 'all' | 'recent' | 'pinned'
 
 const LazyFirstRunModal = lazy(() =>
   import('../components/app/FirstRunModal').then((m) => ({ default: m.FirstRunModal })),
@@ -194,6 +197,8 @@ export default function AppShell() {
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('recent')
+  const [filterTab, setFilterTab] = useState<FilterTab>('all')
+  const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => getPinnedProjects())
   const [firstRunOpen, setFirstRunOpen] = useState(() => {
     try {
       return !localStorage.getItem(ONBOARDED_KEY)
@@ -218,27 +223,49 @@ export default function AppShell() {
     }
   }, [])
 
+  const recentIds = useMemo(() => {
+    return new Set(getRecentProjects().map((r) => r.id))
+  }, [projects]) // eslint-disable-line react-hooks/exhaustive-deps -- re-derive when projects change
+
   const filteredProjects = useMemo(() => {
     let list = projects
+
+    // Apply filter tab
+    if (filterTab === 'pinned') {
+      list = list.filter((p) => pinnedIds.has(p.id))
+    } else if (filterTab === 'recent') {
+      const recent = getRecentProjects()
+      const recentOrder = new Map(recent.map((r, i) => [r.id, i]))
+      list = list.filter((p) => recentOrder.has(p.id))
+      // Sort by MRU order for "recent" tab
+      list = [...list].sort((a, b) => (recentOrder.get(a.id) ?? 0) - (recentOrder.get(b.id) ?? 0))
+    }
+
+    // Apply search
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase()
       list = list.filter((p) => p.name.toLowerCase().includes(q))
     }
-    const sorted = [...list]
-    switch (sortMode) {
-      case 'name':
-        sorted.sort((a, b) => a.name.localeCompare(b.name))
-        break
-      case 'created':
-        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        break
-      case 'recent':
-      default:
-        sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-        break
+
+    // Apply sort (skip if recent tab — already sorted by MRU)
+    if (filterTab !== 'recent') {
+      const sorted = [...list]
+      switch (sortMode) {
+        case 'name':
+          sorted.sort((a, b) => a.name.localeCompare(b.name))
+          break
+        case 'created':
+          sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          break
+        case 'recent':
+        default:
+          sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+          break
+      }
+      return sorted
     }
-    return sorted
-  }, [projects, searchQuery, sortMode])
+    return list
+  }, [projects, searchQuery, sortMode, filterTab, pinnedIds])
 
   // ── Auth ──────────────────────────────────────────────────────────────────
 
@@ -320,6 +347,10 @@ export default function AppShell() {
       setProjError(err instanceof Error ? err.message : 'Delete failed')
     }
   }
+
+  const handleTogglePin = useCallback((projectId: string) => {
+    setPinnedIds(togglePinnedProject(projectId))
+  }, [])
 
   const handleExport = async (proj: ProjectRow) => {
     setMenuOpen(null)
@@ -736,7 +767,7 @@ export default function AppShell() {
           </div>
         </div>
 
-        {/* ── Projects card ── */}
+        {/* ── Projects directory ── */}
         <div style={cardStyle}>
           <div
             style={{
@@ -749,7 +780,7 @@ export default function AppShell() {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-              <p style={{ ...sectionLabel, margin: 0 }}>Projects</p>
+              <p style={{ ...sectionLabel, margin: 0 }}>{t('home.directory')}</p>
               <span
                 style={{ fontSize: '0.78rem', opacity: 0.45, fontVariantNumeric: 'tabular-nums' }}
               >
@@ -792,6 +823,56 @@ export default function AppShell() {
             </div>
           </div>
 
+          {/* ── Filter tabs ── */}
+          {projects.length > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                gap: '0.25rem',
+                marginBottom: '0.75rem',
+                borderBottom: '1px solid var(--border)',
+                paddingBottom: '0.5rem',
+              }}
+            >
+              {(
+                [
+                  { key: 'all', label: t('home.filterAll'), count: projects.length },
+                  { key: 'recent', label: t('home.filterRecent'), count: recentIds.size },
+                  { key: 'pinned', label: t('home.filterPinned'), count: pinnedIds.size },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setFilterTab(tab.key)}
+                  style={{
+                    padding: '0.35rem 0.75rem',
+                    border: 'none',
+                    borderRadius: 6,
+                    background: filterTab === tab.key ? 'rgba(28,171,176,0.15)' : 'transparent',
+                    color: filterTab === tab.key ? 'rgba(28,171,176,1)' : 'rgba(244,244,243,0.55)',
+                    fontFamily: 'inherit',
+                    fontSize: '0.78rem',
+                    fontWeight: filterTab === tab.key ? 600 : 400,
+                    cursor: 'pointer',
+                    transition: 'background 0.15s, color 0.15s',
+                  }}
+                >
+                  {tab.label}
+                  <span
+                    style={{
+                      marginLeft: '0.35rem',
+                      fontSize: '0.7rem',
+                      opacity: 0.6,
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* ── Search + sort controls ── */}
           {projects.length > 0 && (
             <div
@@ -819,24 +900,26 @@ export default function AppShell() {
                   fontSize: '0.82rem',
                 }}
               />
-              <select
-                value={sortMode}
-                onChange={(e) => setSortMode(e.target.value as SortMode)}
-                style={{
-                  padding: '0.45rem 0.6rem',
-                  border: '1px solid var(--border)',
-                  borderRadius: 6,
-                  background: 'var(--card-bg)',
-                  color: 'inherit',
-                  fontFamily: 'inherit',
-                  fontSize: '0.82rem',
-                  cursor: 'pointer',
-                }}
-              >
-                <option value="recent">{t('home.sortRecent')}</option>
-                <option value="name">{t('home.sortName')}</option>
-                <option value="created">{t('home.sortCreated')}</option>
-              </select>
+              {filterTab !== 'recent' && (
+                <select
+                  value={sortMode}
+                  onChange={(e) => setSortMode(e.target.value as SortMode)}
+                  style={{
+                    padding: '0.45rem 0.6rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: 6,
+                    background: 'var(--card-bg)',
+                    color: 'inherit',
+                    fontFamily: 'inherit',
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <option value="recent">{t('home.sortRecent')}</option>
+                  <option value="name">{t('home.sortName')}</option>
+                  <option value="created">{t('home.sortCreated')}</option>
+                </select>
+              )}
             </div>
           )}
 
@@ -854,7 +937,13 @@ export default function AppShell() {
             </div>
           ) : filteredProjects.length === 0 ? (
             <div style={{ padding: '1.5rem 1rem', textAlign: 'center', opacity: 0.4 }}>
-              <p style={{ margin: 0, fontSize: '0.85rem' }}>{t('home.noSearchResults')}</p>
+              <p style={{ margin: 0, fontSize: '0.85rem' }}>
+                {filterTab === 'pinned'
+                  ? t('home.noPinned')
+                  : filterTab === 'recent'
+                    ? t('home.noRecent')
+                    : t('home.noSearchResults')}
+              </p>
             </div>
           ) : (
             <div
@@ -868,6 +957,8 @@ export default function AppShell() {
                 <ProjectCard
                   key={proj.id}
                   project={proj}
+                  pinned={pinnedIds.has(proj.id)}
+                  onTogglePin={() => handleTogglePin(proj.id)}
                   menuOpen={menuOpen === proj.id}
                   onOpenMenu={() => setMenuOpen(proj.id)}
                   onCloseMenu={() => setMenuOpen(null)}
@@ -978,6 +1069,8 @@ export default function AppShell() {
 
 interface ProjectCardProps {
   project: ProjectRow
+  pinned: boolean
+  onTogglePin: () => void
   menuOpen: boolean
   onOpenMenu: () => void
   onCloseMenu: () => void
@@ -997,6 +1090,8 @@ const menuActions = [
 
 function ProjectCard({
   project,
+  pinned,
+  onTogglePin,
   menuOpen,
   onOpenMenu,
   onCloseMenu,
@@ -1053,11 +1148,37 @@ function ProjectCard({
         ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'
       }}
     >
-      {/* Icon */}
+      {/* Icon + pin */}
       <div
-        style={{ fontSize: '1.4rem', marginBottom: '0.4rem', userSelect: 'none', lineHeight: 1 }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '0.4rem',
+        }}
       >
-        ⟁
+        <span style={{ fontSize: '1.4rem', userSelect: 'none', lineHeight: 1 }}>⟁</span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onTogglePin()
+          }}
+          title={pinned ? 'Unpin project' : 'Pin project'}
+          aria-label={pinned ? 'Unpin project' : 'Pin project'}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: pinned ? '#f59e0b' : 'rgba(244,244,243,0.25)',
+            fontSize: '0.85rem',
+            padding: '0.1rem 0.25rem',
+            lineHeight: 1,
+            fontFamily: 'inherit',
+            transition: 'color 0.15s',
+          }}
+        >
+          {pinned ? '\u2605' : '\u2606'}
+        </button>
       </div>
 
       {/* Name */}
