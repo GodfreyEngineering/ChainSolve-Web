@@ -45,10 +45,14 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
   const boundVar = varId ? variables[varId] : undefined
 
   useEffect(() => {
-    if (isVariableSource && boundVar !== undefined && boundVar.value !== nd.value) {
+    if (!isVariableSource) return
+    if (varId && !boundVar) {
+      // Variable was deleted — set value to NaN to surface error
+      if (nd.value === nd.value) updateNodeData(id, { value: NaN })
+    } else if (boundVar !== undefined && boundVar.value !== nd.value) {
       updateNodeData(id, { value: boundVar.value })
     }
-  }, [isVariableSource, boundVar, nd.value, id, updateNodeData])
+  }, [isVariableSource, varId, boundVar, nd.value, id, updateNodeData])
 
   return (
     <div style={{ ...s.node, ...(selected ? s.nodeSelected : {}) }}>
@@ -114,15 +118,27 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
 
       {isVariableSource && (
         <div className="cs-node-body" style={s.body}>
+          {varId && !boundVar && (
+            <div
+              style={{
+                fontSize: '0.6rem',
+                color: '#f87171',
+                marginBottom: '0.2rem',
+                fontWeight: 600,
+              }}
+            >
+              Variable deleted
+            </div>
+          )}
           <select
             className="nodrag"
             style={{
               width: '100%',
               padding: '0.2rem 0.3rem',
               borderRadius: 4,
-              border: '1px solid rgba(255,255,255,0.12)',
+              border: `1px solid ${varId && !boundVar ? 'rgba(248,113,113,0.4)' : 'rgba(255,255,255,0.12)'}`,
               background: 'rgba(0,0,0,0.2)',
-              color: varId ? '#93c5fd' : 'rgba(244,244,243,0.4)',
+              color: varId && boundVar ? '#93c5fd' : 'rgba(244,244,243,0.4)',
               fontSize: '0.7rem',
               fontFamily: 'inherit',
               outline: 'none',
@@ -143,6 +159,7 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
             {Object.values(variables).map((v) => (
               <option key={v.id} value={v.id}>
                 {v.name} = {v.value}
+                {v.unit ? ` ${v.unit}` : ''}
               </option>
             ))}
           </select>
