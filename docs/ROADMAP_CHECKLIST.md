@@ -428,11 +428,11 @@ Claude MUST:
 ---
 
 # PHASE C — Enterprise v1.2 (Org/RBAC + Audit)
-- [ ] P121: organizations + org_members tables + role enum
-- [ ] P122: projects.org_id support
-- [ ] P123: org RLS policies (membership + role)
-- [ ] P124: Org UI v0 (create org, invite, roles)
-- [ ] P125: org billing separation doc
+- [x] P121: organizations + org_members tables + role enum
+- [x] P122: projects.org_id support
+- [x] P123: org RLS policies (membership + role)
+- [x] P124: Org UI v0 (create org, invite, roles)
+- [x] P125: org billing separation doc
 
 - [ ] P126: Audit log schema + capture key events
 - [ ] P127: Audit log viewer (enterprise-only)
