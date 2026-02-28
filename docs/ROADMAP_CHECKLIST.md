@@ -682,7 +682,7 @@ Claude MUST:
 ---
 
 ## D8 — Settings + Preferences + Theme Wizard (major product surface)
-- [ ] D8-1: Settings window overhaul (massive)
+- [x] D8-1: Settings window overhaul (massive)
   - Autosave default OFF (per your request)
   - Numeric formatting:
     - decimal places
