@@ -413,7 +413,7 @@ Claude MUST:
 - [x] P109: Verified author gating
 - [x] P110: Review gate v0
 
-- [ ] P111: Stripe Connect architecture doc + stubs
+- [x] P111: Stripe Connect architecture doc + stubs
 - [ ] P112: Paid purchase flow (record purchase)
 - [ ] P113: canPublishMarketplace gating UI + server
 - [ ] P114: Download/install audit events (future enterprise)
