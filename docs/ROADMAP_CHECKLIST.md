@@ -299,7 +299,7 @@ Claude MUST:
   - Ensure webhook handler is idempotent
   - stripe_events audit trail confirmed
 
-- [ ] P055: Customer portal + re-auth window
+- [x] P055: Customer portal + re-auth window
   - Billing-sensitive ops require re-auth
   - Tests: unit/integration for re-auth logic
 
@@ -319,7 +319,7 @@ Claude MUST:
   - Consistent API error envelope
   - No stack traces in prod
 
-- [ ] P060: Billing E2E mocks (SHOULD)
+- [x] P060: Billing E2E mocks (SHOULD)
   - CI-safe mocks for upgrade flow
 
 ## A6 — Onboarding + docs + discoverability (time-to-first-result)
@@ -356,7 +356,7 @@ Claude MUST:
   - Block library empty state
 
 - [x] P067: Command palette ranking + synonyms (SHOULD)
-- [ ] P068: Favorites + recently used blocks (COULD)
+- [x] P068: Favorites + recently used blocks (COULD)
 - [x] P069: Quick-add palette improvements (SHOULD)
 - [x] P070: Docs change process enforcement (MUST)
   - Add reminder/checklist in PR template or CI doc step
