@@ -445,7 +445,7 @@ Claude MUST:
 # PHASE D — Perfection (optional)
 - [x] P144: Visual regression testing (Playwright screenshots)
 - [x] P145: Axe accessibility automation in E2E
-- [ ] P146: Chaos testing (Supabase outages, worker crashes)
+- [x] P146: Chaos testing (Supabase outages, worker crashes)
 - [ ] P147: Performance regression CI
 - [ ] P148: RTL language support
 - [ ] P149: LLM-assisted graph building (future)
