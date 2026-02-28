@@ -502,6 +502,23 @@
     "installError": "Install failed. Please try again.",
     "navLabel": "Marketplace navigation",
     "itemNavLabel": "Item detail navigation",
-    "categoryFilterLabel": "Category filter"
+    "categoryFilterLabel": "Category filter",
+    "authorTitle": "My Marketplace Items",
+    "authorSubtitle": "Manage your published templates, block packs, and themes",
+    "authorNavLabel": "Author dashboard navigation",
+    "myItems": "My items",
+    "newItem": "+ New item",
+    "noAuthorItems": "You haven't created any marketplace items yet.",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "createItem": "Create",
+    "cancelCreate": "Cancel",
+    "itemNamePlaceholder": "Item name",
+    "itemVersionPlaceholder": "1.0.0",
+    "itemDescriptionPlaceholder": "Brief description…",
+    "categoryLabel": "Category",
+    "versionInvalid": "Version must be X.Y.Z (e.g. 1.0.0)",
+    "nameRequired": "Name is required",
+    "creating": "Creating…"
   }
 }

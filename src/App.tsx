@@ -13,6 +13,7 @@ const DiagnosticsPage = lazy(() => import('./pages/DiagnosticsPage'))
 // Lazy-load marketplace pages (not needed on initial load)
 const MarketplacePage = lazy(() => import('./pages/MarketplacePage'))
 const ItemDetailPage = lazy(() => import('./pages/ItemDetailPage'))
+const MarketplaceAuthorPage = lazy(() => import('./pages/MarketplaceAuthorPage'))
 
 function BillingSuccess() {
   return (
@@ -108,6 +109,14 @@ export default function App() {
           element={
             <Suspense fallback={null}>
               <ItemDetailPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/marketplace/author"
+          element={
+            <Suspense fallback={null}>
+              <MarketplaceAuthorPage />
             </Suspense>
           }
         />
