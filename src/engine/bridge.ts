@@ -43,8 +43,13 @@ export function toEngineSnapshot(
         blockType = data.selectedConstantId
       }
       // D7-4: Unified material block maps to the selected material preset's op ID.
+      // D7-5: Custom materials (custom:*) map to 'number' — value stored in node data.
       if (blockType === 'material' && typeof data.selectedMaterialId === 'string') {
-        blockType = data.selectedMaterialId
+        if (data.selectedMaterialId.startsWith('custom:')) {
+          blockType = 'number'
+        } else {
+          blockType = data.selectedMaterialId
+        }
       }
       // W12.2: resolve inputBindings → manualValues before sending to Rust.
       if (constants && variables && data.inputBindings) {

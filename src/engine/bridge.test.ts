@@ -194,6 +194,18 @@ describe('toEngineSnapshot — material block mapping (D7-4)', () => {
     const snap = toEngineSnapshot(nodes, [])
     expect(snap.nodes[0].blockType).toBe('material')
   })
+
+  it('maps custom material to "number" blockType (D7-5)', () => {
+    const nodes = [
+      makeNode('m1', 'material', {
+        blockType: 'material',
+        selectedMaterialId: 'custom:cm_abc:rho',
+        value: 7800,
+      }),
+    ]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes[0].blockType).toBe('number')
+  })
 })
 
 describe('toEngineSnapshot — multi-node graph', () => {
