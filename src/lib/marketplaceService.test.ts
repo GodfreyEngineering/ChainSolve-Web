@@ -8,6 +8,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   listPublishedItems,
+  listOrgExploreItems,
   getItem,
   recordInstall,
   getUserInstalls,
@@ -219,6 +220,48 @@ describe('listPublishedItems', () => {
 
     await listPublishedItems(undefined, undefined, 'downloads', 'physics')
     expect(mockContains).toHaveBeenCalledWith('tags', ['physics'])
+  })
+})
+
+// ── listOrgExploreItems (D10-1) ─────────────────────────────────────────────
+
+describe('listOrgExploreItems', () => {
+  it('returns org-scoped items ordered by created_at desc', async () => {
+    const items = [{ id: 'o1', name: 'Internal Template', org_id: 'org-1' }]
+    makeQueryBuilder({ data: items, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      order: mockOrder,
+    })
+
+    const result = await listOrgExploreItems('org-1')
+    expect(result).toEqual(items)
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_items')
+    expect(mockEq).toHaveBeenCalledWith('org_id', 'org-1')
+  })
+
+  it('returns empty array when no org items', async () => {
+    makeQueryBuilder({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      order: mockOrder,
+    })
+
+    const result = await listOrgExploreItems('org-1')
+    expect(result).toEqual([])
+  })
+
+  it('throws on supabase error', async () => {
+    makeQueryBuilder({ data: null, error: { message: 'RLS denied' } })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      order: mockOrder,
+    })
+
+    await expect(listOrgExploreItems('org-1')).rejects.toMatchObject({ message: 'RLS denied' })
   })
 })
 

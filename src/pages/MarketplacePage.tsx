@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   listPublishedItems,
+  listOrgExploreItems,
   forkTemplate,
   installBlockPack,
   installTheme,
@@ -29,6 +30,7 @@ import {
   type MarketplaceItem,
   type ExploreSortKey,
 } from '../lib/marketplaceService'
+import { listMyOrgs, type Org } from '../lib/orgsService'
 import { getProfile } from '../lib/profilesService'
 import { getProjectCount } from '../lib/projects'
 import { canInstallExploreItem, type Plan } from '../lib/entitlements'
@@ -180,15 +182,26 @@ export default function MarketplacePage() {
   const [sort, setSort] = useState<ExploreSortKey>('downloads')
   const [tagFilter, setTagFilter] = useState('')
 
-  // Fetch plan + project count on mount
+  // D10-1: Company Library tab
+  const [viewMode, setViewMode] = useState<'public' | 'company'>('public')
+  const [myOrgs, setMyOrgs] = useState<Org[]>([])
+  const [orgItems, setOrgItems] = useState<MarketplaceItem[]>([])
+  const [orgLoading, setOrgLoading] = useState(false)
+
+  // Fetch plan + project count + orgs on mount
   useEffect(() => {
     void (async () => {
       try {
         const session = await getSession()
         if (!session) return
-        const [profile, count] = await Promise.all([getProfile(session.user.id), getProjectCount()])
+        const [profile, count, orgs] = await Promise.all([
+          getProfile(session.user.id),
+          getProjectCount(),
+          listMyOrgs(),
+        ])
         if (profile?.plan) setPlan(profile.plan as Plan)
         setProjectCount(count)
+        setMyOrgs(orgs)
       } catch {
         // Non-critical — default to 'free' plan
       }
@@ -223,6 +236,22 @@ export default function MarketplacePage() {
   useEffect(() => {
     void fetchItems()
   }, [fetchItems])
+
+  // D10-1: fetch org items when switching to company view
+  useEffect(() => {
+    if (viewMode !== 'company' || myOrgs.length === 0) return
+    setOrgLoading(true)
+    void (async () => {
+      try {
+        const all = await Promise.all(myOrgs.map((o) => listOrgExploreItems(o.id)))
+        setOrgItems(all.flat())
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err))
+      } finally {
+        setOrgLoading(false)
+      }
+    })()
+  }, [viewMode, myOrgs])
 
   const handleInstall = useCallback(
     async (itemId: string) => {
@@ -358,53 +387,84 @@ export default function MarketplacePage() {
           {t('marketplace.subtitle')}
         </p>
 
-        {/* Search + Sort + Tag filter (D9-5) */}
-        <div style={s.searchRow}>
-          <input
-            type="search"
-            placeholder={t('marketplace.searchPlaceholder')}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            style={s.searchInput}
-            aria-label={t('marketplace.searchPlaceholder')}
-            data-testid="marketplace-search"
-          />
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as ExploreSortKey)}
-            style={s.selectStyle}
-            aria-label={t('marketplace.sortMostDownloaded')}
-            data-testid="marketplace-sort"
-          >
-            <option value="downloads">{t('marketplace.sortMostDownloaded')}</option>
-            <option value="likes">{t('marketplace.sortMostLiked')}</option>
-            <option value="newest">{t('marketplace.sortNewestFirst')}</option>
-          </select>
-          <input
-            type="text"
-            placeholder={t('marketplace.filterByTag')}
-            value={tagFilter}
-            onChange={(e) => setTagFilter(e.target.value)}
-            style={{ ...s.searchInput, flex: 'none', minWidth: 140, width: 160 }}
-            aria-label={t('marketplace.filterByTag')}
-            data-testid="marketplace-tag-filter"
-          />
-        </div>
-
-        {/* Category filter */}
-        <div style={s.categoryRow} role="tablist" aria-label={t('marketplace.categoryFilterLabel')}>
-          {categories.map((cat) => (
+        {/* D10-1: Public / Company toggle */}
+        {myOrgs.length > 0 && (
+          <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1rem' }} role="tablist">
             <button
-              key={cat.key}
               role="tab"
-              aria-selected={category === cat.key}
-              style={s.catBtn(category === cat.key)}
-              onClick={() => setCategory(cat.key)}
+              aria-selected={viewMode === 'public'}
+              style={s.catBtn(viewMode === 'public')}
+              onClick={() => setViewMode('public')}
             >
-              {cat.label}
+              {t('marketplace.title')}
             </button>
-          ))}
-        </div>
+            <button
+              role="tab"
+              aria-selected={viewMode === 'company'}
+              style={s.catBtn(viewMode === 'company')}
+              onClick={() => setViewMode('company')}
+              data-testid="company-library-tab"
+            >
+              {t('marketplace.companyLibrary')}
+            </button>
+          </div>
+        )}
+
+        {/* Search + Sort + Tag filter (D9-5) — public view only */}
+        {viewMode === 'public' && (
+          <div style={s.searchRow}>
+            <input
+              type="search"
+              placeholder={t('marketplace.searchPlaceholder')}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              style={s.searchInput}
+              aria-label={t('marketplace.searchPlaceholder')}
+              data-testid="marketplace-search"
+            />
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as ExploreSortKey)}
+              style={s.selectStyle}
+              aria-label={t('marketplace.sortMostDownloaded')}
+              data-testid="marketplace-sort"
+            >
+              <option value="downloads">{t('marketplace.sortMostDownloaded')}</option>
+              <option value="likes">{t('marketplace.sortMostLiked')}</option>
+              <option value="newest">{t('marketplace.sortNewestFirst')}</option>
+            </select>
+            <input
+              type="text"
+              placeholder={t('marketplace.filterByTag')}
+              value={tagFilter}
+              onChange={(e) => setTagFilter(e.target.value)}
+              style={{ ...s.searchInput, flex: 'none', minWidth: 140, width: 160 }}
+              aria-label={t('marketplace.filterByTag')}
+              data-testid="marketplace-tag-filter"
+            />
+          </div>
+        )}
+
+        {/* Category filter — public view only */}
+        {viewMode === 'public' && (
+          <div
+            style={s.categoryRow}
+            role="tablist"
+            aria-label={t('marketplace.categoryFilterLabel')}
+          >
+            {categories.map((cat) => (
+              <button
+                key={cat.key}
+                role="tab"
+                aria-selected={category === cat.key}
+                style={s.catBtn(category === cat.key)}
+                onClick={() => setCategory(cat.key)}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Error */}
         {error && (
@@ -424,8 +484,82 @@ export default function MarketplacePage() {
           </div>
         )}
 
-        {/* Loading */}
-        {loading && (
+        {/* D10-1: Company Library view */}
+        {viewMode === 'company' && (
+          <>
+            {orgLoading && (
+              <div
+                style={{
+                  opacity: 0.45,
+                  fontSize: '0.88rem',
+                  textAlign: 'center',
+                  padding: '3rem 0',
+                }}
+              >
+                {t('marketplace.loading')}
+              </div>
+            )}
+            {!orgLoading && orgItems.length === 0 && (
+              <div
+                style={{
+                  opacity: 0.35,
+                  fontSize: '0.88rem',
+                  textAlign: 'center',
+                  padding: '3rem 0',
+                }}
+                data-testid="company-library-empty"
+              >
+                {t('marketplace.companyLibraryEmpty')}
+              </div>
+            )}
+            {!orgLoading && orgItems.length > 0 && (
+              <div style={s.grid} data-testid="company-library-grid">
+                {orgItems.map((item) => (
+                  <article key={item.id} style={s.card}>
+                    <a
+                      href={`/explore/items/${item.id}`}
+                      style={{
+                        fontWeight: 600,
+                        fontSize: '0.95rem',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                    >
+                      {item.name}
+                    </a>
+                    {item.description && (
+                      <p
+                        style={{
+                          fontSize: '0.8rem',
+                          opacity: 0.55,
+                          margin: 0,
+                          overflow: 'hidden',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                        }}
+                      >
+                        {item.description}
+                      </p>
+                    )}
+                    <div
+                      style={{
+                        fontSize: '0.72rem',
+                        color: 'rgba(244,244,243,0.35)',
+                      }}
+                    >
+                      {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')} ·{' '}
+                      {formatDate(item.updated_at)}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Loading — public view */}
+        {viewMode === 'public' && loading && (
           <div
             style={{ opacity: 0.45, fontSize: '0.88rem', textAlign: 'center', padding: '3rem 0' }}
           >
@@ -433,8 +567,8 @@ export default function MarketplacePage() {
           </div>
         )}
 
-        {/* Empty */}
-        {!loading && !error && items.length === 0 && (
+        {/* Empty — public view */}
+        {viewMode === 'public' && !loading && !error && items.length === 0 && (
           <div
             style={{ opacity: 0.35, fontSize: '0.88rem', textAlign: 'center', padding: '3rem 0' }}
             data-testid="marketplace-empty"
@@ -443,8 +577,8 @@ export default function MarketplacePage() {
           </div>
         )}
 
-        {/* Items grid */}
-        {!loading && items.length > 0 && (
+        {/* Items grid — public view */}
+        {viewMode === 'public' && !loading && items.length > 0 && (
           <div style={s.grid} data-testid="marketplace-grid">
             {items.map((item) => {
               const isInstalled = installedIds.has(item.id)

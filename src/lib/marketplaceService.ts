@@ -41,6 +41,8 @@ export interface MarketplaceItem {
   review_status: 'pending' | 'approved' | 'rejected'
   /** P112: price in smallest currency unit (GBP pence). 0 = free. */
   price_cents: number
+  /** D10-1: org-scoped items. NULL = public. */
+  org_id: string | null
   created_at: string
   updated_at: string
 }
@@ -123,6 +125,21 @@ export async function listPublishedItems(
   if (tag && tag.trim()) q = q.contains('tags', [tag.trim()])
 
   const { data, error } = await q
+  if (error) throw error
+  return (data ?? []) as MarketplaceItem[]
+}
+
+/**
+ * D10-1: List org-scoped items ("Company Library").
+ * Returns items where org_id matches, visible to org members via RLS.
+ */
+export async function listOrgExploreItems(orgId: string): Promise<MarketplaceItem[]> {
+  const { data, error } = await supabase
+    .from('marketplace_items')
+    .select('*')
+    .eq('org_id', orgId)
+    .order('created_at', { ascending: false })
+
   if (error) throw error
   return (data ?? []) as MarketplaceItem[]
 }
