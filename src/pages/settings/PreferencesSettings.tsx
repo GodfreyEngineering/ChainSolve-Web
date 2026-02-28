@@ -1,19 +1,37 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Select } from '../../components/ui/Select'
 import { Button } from '../../components/ui/Button'
 import { SUPPORTED_LANGUAGES } from '../../i18n/config'
 import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../../lib/build-info'
 import { BugReportModal } from '../../components/BugReportModal'
+import { UpgradeModal } from '../../components/UpgradeModal'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { ThemeMode } from '../../contexts/ThemeContext'
 import { usePreferencesStore } from '../../stores/preferencesStore'
+import { useCustomThemesStore } from '../../stores/customThemesStore'
+import { useWindowManager } from '../../contexts/WindowManagerContext'
+import { THEME_WIZARD_WINDOW_ID } from '../../components/ThemeWizard'
+import { isPro, type Plan } from '../../lib/entitlements'
 
-export function PreferencesSettings() {
+const LazyThemeWizard = lazy(() =>
+  import('../../components/ThemeWizard').then((m) => ({ default: m.ThemeWizard })),
+)
+
+interface Props {
+  plan?: Plan
+}
+
+export function PreferencesSettings({ plan = 'free' }: Props) {
   const { t, i18n } = useTranslation()
   const { mode, setMode } = useTheme()
   const [bugOpen, setBugOpen] = useState(false)
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
   const prefs = usePreferencesStore()
+  const { themes, activeThemeId, activateTheme, deleteTheme } = useCustomThemesStore()
+  const { openWindow, isOpen } = useWindowManager()
+  const wizardOpen = isOpen(THEME_WIZARD_WINDOW_ID)
+  const pro = isPro(plan)
 
   const buildDate = (() => {
     try {
@@ -26,6 +44,14 @@ export function PreferencesSettings() {
       return BUILD_TIME
     }
   })()
+
+  const handleOpenWizard = () => {
+    if (!pro) {
+      setUpgradeOpen(true)
+      return
+    }
+    openWindow(THEME_WIZARD_WINDOW_ID, { width: 900, height: 600 })
+  }
 
   return (
     <div>
@@ -52,6 +78,83 @@ export function PreferencesSettings() {
             onChange={(e) => setMode(e.target.value as ThemeMode)}
           />
         </div>
+      </div>
+
+      {/* ── Theme wizard (Pro) ──────────────────────────────────────────── */}
+      <h2 style={{ ...headingStyle, marginTop: '2rem' }}>
+        {t('settings.themeWizardTitle')}
+        {!pro && <span style={proBadgeStyle}>PRO</span>}
+      </h2>
+
+      <div style={cardStyle}>
+        <p style={{ margin: '0 0 0.75rem', fontSize: '0.82rem', opacity: 0.6 }}>
+          {t('settings.themeWizardDesc')}
+        </p>
+
+        <Button variant="primary" size="sm" onClick={handleOpenWizard}>
+          {t('settings.createTheme')}
+        </Button>
+
+        {/* Saved themes list */}
+        {themes.length > 0 && (
+          <div style={{ marginTop: '1rem' }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+              {t('settings.savedThemes')}
+            </div>
+            {themes.map((th) => (
+              <div key={th.id} style={themeRowStyle}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    flex: 1,
+                    minWidth: 0,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: 12,
+                      height: 12,
+                      borderRadius: '50%',
+                      background: th.variables['--primary'] ?? 'var(--primary)',
+                      border: '1px solid var(--border)',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: '0.82rem',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {th.name}
+                  </span>
+                  {activeThemeId === th.id && (
+                    <span style={activeBadgeStyle}>{t('settings.activeThemeBadge')}</span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '0.3rem', flexShrink: 0 }}>
+                  {activeThemeId === th.id ? (
+                    <Button variant="secondary" size="sm" onClick={() => activateTheme(null)}>
+                      {t('settings.deactivateTheme')}
+                    </Button>
+                  ) : (
+                    <Button variant="primary" size="sm" onClick={() => activateTheme(th.id)}>
+                      {t('settings.applyTheme')}
+                    </Button>
+                  )}
+                  <Button variant="secondary" size="sm" onClick={() => deleteTheme(th.id)}>
+                    {t('settings.deleteTheme')}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Autosave ───────────────────────────────────────────────────── */}
@@ -253,6 +356,17 @@ export function PreferencesSettings() {
       </div>
 
       <BugReportModal open={bugOpen} onClose={() => setBugOpen(false)} />
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        reason="feature_locked"
+      />
+
+      {wizardOpen && (
+        <Suspense fallback={null}>
+          <LazyThemeWizard />
+        </Suspense>
+      )}
     </div>
   )
 }
@@ -318,6 +432,38 @@ const checkHintStyle: React.CSSProperties = {
   fontSize: '0.75rem',
   opacity: 0.45,
   marginTop: '0.1rem',
+}
+
+const proBadgeStyle: React.CSSProperties = {
+  display: 'inline-block',
+  marginLeft: '0.5rem',
+  padding: '0.1rem 0.4rem',
+  borderRadius: 4,
+  fontSize: '0.6rem',
+  fontWeight: 700,
+  background: 'rgba(28,171,176,0.15)',
+  color: 'var(--primary)',
+  verticalAlign: 'middle',
+}
+
+const themeRowStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '0.5rem 0',
+  borderBottom: '1px solid var(--border)',
+  gap: '0.5rem',
+}
+
+const activeBadgeStyle: React.CSSProperties = {
+  display: 'inline-block',
+  padding: '0.05rem 0.35rem',
+  borderRadius: 4,
+  fontSize: '0.6rem',
+  fontWeight: 700,
+  background: 'rgba(34,197,94,0.15)',
+  color: 'var(--success)',
+  flexShrink: 0,
 }
 
 function envBadgeStyle(env: string): React.CSSProperties {

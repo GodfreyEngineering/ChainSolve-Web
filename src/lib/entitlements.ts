@@ -18,6 +18,7 @@ export interface Entitlements {
   canUsePlots: boolean
   canUseRules: boolean
   canUseGroups: boolean
+  canEditThemes: boolean
 }
 
 // ── Entitlement map ──────────────────────────────────────────────────────────
@@ -31,6 +32,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUsePlots: false,
     canUseRules: false,
     canUseGroups: false,
+    canEditThemes: false,
   },
   trialing: {
     maxProjects: Infinity,
@@ -40,6 +42,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUsePlots: true,
     canUseRules: true,
     canUseGroups: true,
+    canEditThemes: true,
   },
   pro: {
     maxProjects: Infinity,
@@ -49,6 +52,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUsePlots: true,
     canUseRules: true,
     canUseGroups: true,
+    canEditThemes: true,
   },
   enterprise: {
     maxProjects: Infinity,
@@ -58,6 +62,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUsePlots: true,
     canUseRules: true,
     canUseGroups: true,
+    canEditThemes: true,
   },
   past_due: {
     maxProjects: 1,
@@ -67,6 +72,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUsePlots: false,
     canUseRules: false,
     canUseGroups: false,
+    canEditThemes: false,
   },
   canceled: {
     maxProjects: 1,
@@ -76,6 +82,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUsePlots: false,
     canUseRules: false,
     canUseGroups: false,
+    canEditThemes: false,
   },
 }
 

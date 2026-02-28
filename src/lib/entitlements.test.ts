@@ -30,6 +30,7 @@ describe('getEntitlements', () => {
     expect(ent.canUsePlots).toBe(false)
     expect(ent.canUseRules).toBe(false)
     expect(ent.canUseGroups).toBe(false)
+    expect(ent.canEditThemes).toBe(false)
   })
 
   it('trialing plan: unlimited projects and canvases, all pro features', () => {
@@ -41,6 +42,7 @@ describe('getEntitlements', () => {
     expect(ent.canUsePlots).toBe(true)
     expect(ent.canUseRules).toBe(true)
     expect(ent.canUseGroups).toBe(true)
+    expect(ent.canEditThemes).toBe(true)
   })
 
   it('pro plan: identical to trialing', () => {

@@ -103,7 +103,19 @@ export default function Settings() {
         <main style={contentStyle}>
           {tab === 'profile' && <ProfileSettings user={user} profile={profile} />}
           {tab === 'billing' && <BillingSettings profile={profile} />}
-          {tab === 'preferences' && <PreferencesSettings />}
+          {tab === 'preferences' && (
+            <PreferencesSettings
+              plan={
+                (profile?.plan as
+                  | 'free'
+                  | 'trialing'
+                  | 'pro'
+                  | 'enterprise'
+                  | 'past_due'
+                  | 'canceled') ?? 'free'
+              }
+            />
+          )}
         </main>
       </div>
     </div>

@@ -13,6 +13,14 @@ try {
 } catch {
   // intentionally swallowed
 }
+
+// Apply any persisted custom theme (D8-2) before first render to avoid flash.
+import { applyPersistedCustomTheme } from './lib/customThemes'
+try {
+  applyPersistedCustomTheme()
+} catch {
+  // intentionally swallowed
+}
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { ThemeProvider } from './components/ThemeProvider.tsx'
 import { ToastProvider } from './components/ui/Toast.tsx'

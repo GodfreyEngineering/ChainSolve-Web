@@ -1,6 +1,8 @@
 /**
  * Shared inline styles for all custom canvas node types.
- * Palette: primary #1CABB0, surface #383838, text #F4F4F3
+ *
+ * D8-2: Refactored to use CSS custom properties so themes can override
+ * node colours via the theme wizard.
  */
 
 import type { CSSProperties } from 'react'
@@ -11,19 +13,19 @@ export const NODE_STYLES = {
   node: {
     minWidth: 168,
     maxWidth: 240,
-    background: '#383838',
-    border: '1px solid rgba(255,255,255,0.12)',
+    background: 'var(--node-bg)',
+    border: '1px solid var(--node-border)',
     borderRadius: 10,
     boxShadow: '0 3px 12px rgba(0,0,0,0.4)',
     fontFamily: "'Montserrat', system-ui, sans-serif",
     fontSize: '0.8rem',
-    color: '#F4F4F3',
+    color: 'var(--text)',
     overflow: 'hidden',
   } as CSSProperties,
 
   nodeSelected: {
-    border: '1px solid #1CABB0',
-    boxShadow: '0 0 0 2px rgba(28,171,176,0.35), 0 3px 12px rgba(0,0,0,0.4)',
+    border: '1px solid var(--node-selected-border)',
+    boxShadow: '0 0 0 2px var(--primary-glow), 0 3px 12px rgba(0,0,0,0.4)',
   } as CSSProperties,
 
   header: {
@@ -31,8 +33,8 @@ export const NODE_STYLES = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '0.32rem 0.6rem',
-    background: 'rgba(28,171,176,0.15)',
-    borderBottom: '1px solid rgba(255,255,255,0.08)',
+    background: 'var(--node-header-bg)',
+    borderBottom: '1px solid var(--node-border)',
     gap: '0.5rem',
   } as CSSProperties,
 
@@ -49,7 +51,7 @@ export const NODE_STYLES = {
   headerValue: {
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '0.72rem',
-    color: '#1CABB0',
+    color: 'var(--primary)',
     whiteSpace: 'nowrap' as const,
     flexShrink: 0,
   } as CSSProperties,
@@ -69,7 +71,7 @@ export const NODE_STYLES = {
 
   portLabel: {
     fontSize: '0.72rem',
-    color: 'rgba(244,244,243,0.6)',
+    color: 'var(--text-muted)',
     flex: 1,
     paddingLeft: '0.5rem',
     minWidth: 0,
@@ -82,9 +84,9 @@ export const NODE_STYLES = {
     width: 60,
     flexShrink: 0,
     background: 'rgba(0,0,0,0.25)',
-    border: '1px solid rgba(255,255,255,0.15)',
+    border: '1px solid var(--node-border)',
     borderRadius: 4,
-    color: '#F4F4F3',
+    color: 'var(--text)',
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '0.72rem',
     padding: '0.1rem 0.3rem',
@@ -95,9 +97,9 @@ export const NODE_STYLES = {
   numInput: {
     width: '100%',
     background: 'rgba(0,0,0,0.2)',
-    border: '1px solid rgba(255,255,255,0.12)',
+    border: '1px solid var(--node-border)',
     borderRadius: 6,
-    color: '#F4F4F3',
+    color: 'var(--text)',
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '0.82rem',
     padding: '0.22rem 0.4rem',
@@ -109,7 +111,7 @@ export const NODE_STYLES = {
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '1rem',
     fontWeight: 600,
-    color: '#1CABB0',
+    color: 'var(--primary)',
   } as CSSProperties,
 
   displayValue: {
@@ -118,15 +120,15 @@ export const NODE_STYLES = {
     fontWeight: 700,
     textAlign: 'center' as const,
     padding: '0.2rem 0',
-    color: '#1CABB0',
+    color: 'var(--primary)',
   } as CSSProperties,
 
   handleLeft: {
     left: -(HANDLE_SIZE / 2),
     width: HANDLE_SIZE,
     height: HANDLE_SIZE,
-    background: '#1CABB0',
-    border: '2px solid #383838',
+    background: 'var(--handle-input)',
+    border: '2px solid var(--node-bg)',
   } as CSSProperties,
 
   handleLeftDisconnected: {
@@ -134,14 +136,14 @@ export const NODE_STYLES = {
     width: HANDLE_SIZE,
     height: HANDLE_SIZE,
     background: '#555',
-    border: '2px solid #383838',
+    border: '2px solid var(--node-bg)',
   } as CSSProperties,
 
   handleRight: {
     right: -(HANDLE_SIZE / 2),
     width: HANDLE_SIZE,
     height: HANDLE_SIZE,
-    background: '#22c55e',
-    border: '2px solid #383838',
+    background: 'var(--handle-output)',
+    border: '2px solid var(--node-bg)',
   } as CSSProperties,
 }
