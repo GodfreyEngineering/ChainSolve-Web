@@ -331,7 +331,7 @@ Claude MUST:
   - Persist dismissed state per browser
   - Respect plan limits
 
-- [ ] P062: Sample templates pack #1
+- [x] P062: Sample templates pack #1
   - Physics 101 (F=ma, conversions)
   - Finance 101 (TVM / loan)
   - Stats 101 (dataset + mean/stddev + plot-ready)
