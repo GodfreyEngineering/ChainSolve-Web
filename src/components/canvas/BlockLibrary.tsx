@@ -44,6 +44,15 @@ function buildGrouped(): Map<BlockCategory, BlockDef[]> {
 
 const GROUPED = buildGrouped()
 
+/** Match query against block label, type, and type keywords (split on . and _). */
+function matchesQuery(def: BlockDef, q: string): boolean {
+  if (def.label.toLowerCase().includes(q)) return true
+  if (def.type.toLowerCase().includes(q)) return true
+  // Split type into keywords for broader matching (e.g. "power" matches "eng.mechanics.power_work_time")
+  const keywords = def.type.toLowerCase().split(/[._]/)
+  return keywords.some((kw) => kw.includes(q))
+}
+
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const px = (v: number) => `${v}px`
@@ -54,15 +63,15 @@ const s: StyleMap = {
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    borderRight: '1px solid rgba(255,255,255,0.08)',
-    background: '#2c2c2c',
+    borderRight: '1px solid var(--border, rgba(255,255,255,0.08))',
+    background: 'var(--card-bg, #2c2c2c)',
     height: '100%',
     transition: 'width 0.2s ease',
     position: 'relative',
   },
   topBar: {
     padding: '0.45rem 0.5rem 0.35rem',
-    borderBottom: '1px solid rgba(255,255,255,0.08)',
+    borderBottom: '1px solid var(--border, rgba(255,255,255,0.08))',
     display: 'flex',
     flexDirection: 'column',
     gap: '0.35rem',
@@ -77,9 +86,9 @@ const s: StyleMap = {
     flex: 1,
     padding: '0.28rem 0.5rem',
     borderRadius: 6,
-    border: '1px solid rgba(255,255,255,0.12)',
-    background: 'rgba(0,0,0,0.2)',
-    color: '#F4F4F3',
+    border: '1px solid var(--border, rgba(255,255,255,0.12))',
+    background: 'var(--input-bg, rgba(0,0,0,0.2))',
+    color: 'var(--text, #F4F4F3)',
     fontSize: '0.78rem',
     outline: 'none',
     fontFamily: 'inherit',
@@ -97,9 +106,9 @@ const s: StyleMap = {
     fontWeight: 600,
     cursor: 'pointer',
     letterSpacing: '0.04em',
-    border: '1px solid rgba(255,255,255,0.12)',
+    border: '1px solid var(--border, rgba(255,255,255,0.12))',
     background: 'transparent',
-    color: '#F4F4F3',
+    color: 'var(--text, #F4F4F3)',
     userSelect: 'none',
     transition: 'background 0.1s',
     fontFamily: 'inherit',
@@ -324,8 +333,8 @@ function TemplateItem({ template, onInsert, onRename, onDelete }: TemplateItemPr
                 position: 'absolute',
                 right: 0,
                 top: '100%',
-                background: '#2c2c2c',
-                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'var(--card-bg, #2c2c2c)',
+                border: '1px solid var(--border, rgba(255,255,255,0.12))',
                 borderRadius: 6,
                 padding: '0.2rem',
                 zIndex: 100,
@@ -463,10 +472,7 @@ export function BlockLibrary({
   const noBlockResults =
     q.length > 0 &&
     CATEGORY_ORDER.filter((cat) => !filterCat || cat === filterCat).every(
-      (cat) =>
-        (GROUPED.get(cat) ?? []).filter(
-          (d) => d.label.toLowerCase().includes(q) || d.type.includes(q),
-        ).length === 0,
+      (cat) => (GROUPED.get(cat) ?? []).filter((d) => matchesQuery(d, q)).length === 0,
     )
 
   return (
@@ -564,9 +570,7 @@ export function BlockLibrary({
 
         {/* All blocks by category */}
         {CATEGORY_ORDER.filter((cat) => !filterCat || cat === filterCat).map((cat) => {
-          const blocks = (GROUPED.get(cat) ?? []).filter(
-            (d) => !q || d.label.toLowerCase().includes(q) || d.type.includes(q),
-          )
+          const blocks = (GROUPED.get(cat) ?? []).filter((d) => !q || matchesQuery(d, q))
           if (blocks.length === 0) return null
           const isPro = PRO_CATEGORIES.has(cat)
           return (
