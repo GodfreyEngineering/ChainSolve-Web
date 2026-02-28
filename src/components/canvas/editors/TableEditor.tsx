@@ -9,6 +9,11 @@
  */
 
 import { useState, useRef, useCallback, type ChangeEvent } from 'react'
+import {
+  MAX_TABLE_INPUT_ROWS,
+  MAX_TABLE_INPUT_COLS,
+  enforceTableLimits,
+} from '../../../lib/tableConstants'
 
 const ROW_H = 26
 const MAX_VISIBLE_H = 200
@@ -53,6 +58,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
   )
 
   const addCol = useCallback(() => {
+    if (columns.length >= MAX_TABLE_INPUT_COLS) return
     const nextCols = [...columns, `Col${columns.length + 1}`]
     const nextRows = rows.map((row) => [...row, 0])
     onChange(nextCols, nextRows)
@@ -79,11 +85,13 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
   )
 
   const addRow = useCallback(() => {
+    if (rows.length >= MAX_TABLE_INPUT_ROWS) return
     onChange(columns, [...rows, new Array(columns.length).fill(0)])
   }, [columns, rows, onChange])
 
   // W12.2: CSV import
   const fileRef = useRef<HTMLInputElement>(null)
+  const [csvTruncated, setCsvTruncated] = useState(false)
   const handleCsvImport = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
@@ -106,7 +114,13 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
           while (cells.length < header.length) cells.push(0)
           dataRows.push(cells.slice(0, header.length))
         }
-        onChange(header, dataRows)
+        const {
+          columns: clampedCols,
+          rows: clampedRows,
+          truncated,
+        } = enforceTableLimits(header, dataRows)
+        setCsvTruncated(truncated)
+        onChange(clampedCols, clampedRows)
       }
       reader.readAsText(file)
       // Reset so the same file can be re-imported
@@ -331,6 +345,58 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
           onChange={handleCsvImport}
         />
       </div>
+
+      {/* Limit / truncation warnings */}
+      {(csvTruncated ||
+        rows.length >= MAX_TABLE_INPUT_ROWS ||
+        columns.length >= MAX_TABLE_INPUT_COLS) && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {csvTruncated && (
+            <div
+              style={{
+                fontSize: '0.62rem',
+                color: '#f59e0b',
+                background: 'rgba(245,158,11,0.08)',
+                border: '1px solid rgba(245,158,11,0.2)',
+                borderRadius: 3,
+                padding: '2px 6px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <span>
+                CSV truncated to fit limits ({MAX_TABLE_INPUT_COLS} cols ×{' '}
+                {MAX_TABLE_INPUT_ROWS.toLocaleString()} rows)
+              </span>
+              <button
+                className="nodrag"
+                onClick={() => setCsvTruncated(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#f59e0b',
+                  cursor: 'pointer',
+                  fontSize: '0.6rem',
+                  padding: '0 2px',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
+          {rows.length >= MAX_TABLE_INPUT_ROWS && (
+            <span style={{ fontSize: '0.62rem', color: '#f59e0b' }}>
+              Row limit reached ({MAX_TABLE_INPUT_ROWS.toLocaleString()})
+            </span>
+          )}
+          {columns.length >= MAX_TABLE_INPUT_COLS && (
+            <span style={{ fontSize: '0.62rem', color: '#f59e0b' }}>
+              Column limit reached ({MAX_TABLE_INPUT_COLS})
+            </span>
+          )}
+        </div>
+      )}
     </div>
   )
 }
