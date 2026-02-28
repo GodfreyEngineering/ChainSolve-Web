@@ -982,6 +982,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   const deleteSelected = useCallback(() => {
     doSaveHistory()
+    // Delete selected edges
+    setEdges((eds) => {
+      const selectedEdgeIds = new Set(eds.filter((e) => e.selected).map((e) => e.id))
+      // Keep this set for node-deletion cascade below
+      return selectedEdgeIds.size > 0 ? eds.filter((e) => !selectedEdgeIds.has(e.id)) : eds
+    })
     setNodes((nds) => {
       const selected = nds.filter((n) => n.selected)
       const deleted = new Set(selected.map((n) => n.id))
@@ -993,6 +999,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           }
         }
       }
+      if (deleted.size === 0) return nds
       if (inspectedId && deleted.has(inspectedId)) setInspectedId(null)
       setEdges((eds) => eds.filter((e) => !deleted.has(e.source) && !deleted.has(e.target)))
       return nds.filter((n) => !deleted.has(n.id))
