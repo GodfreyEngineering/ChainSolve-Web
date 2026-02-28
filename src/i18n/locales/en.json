@@ -117,7 +117,8 @@
     "offline": "Offline",
     "offlineQueued": "Queued — offline",
     "retryNow": "Retry now",
-    "backOnline": "Back online — syncing changes"
+    "backOnline": "Back online — syncing changes",
+    "signInToSave": "Sign in to save your work to the cloud"
   },
   "blocks": {
     "categoryData": "Data",

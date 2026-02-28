@@ -135,13 +135,16 @@ export default function CanvasPage() {
   // ── Network status ─────────────────────────────────────────────────────────
   const { isOnline } = useNetworkStatus()
 
-  // ── Plan awareness ─────────────────────────────────────────────────────────
+  // ── Plan awareness + auth state ────────────────────────────────────────────
   const [plan, setPlan] = useState<Plan>('free')
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
 
   useEffect(() => {
     let cancelled = false
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session || cancelled) return
+      if (cancelled) return
+      setIsAuthenticated(!!session)
+      if (!session) return
       supabase
         .from('profiles')
         .select('plan')
@@ -500,7 +503,13 @@ export default function CanvasPage() {
           addRecentProject(proj.id, proj.name)
           navigate(`/canvas/${proj.id}`)
         } else {
-          // Scratch canvas → create new project with current graph
+          // Scratch canvas → create new project with current graph.
+          // Require authentication — prompt login if not signed in.
+          if (isAuthenticated === false) {
+            toast(t('canvas.signInToSave'), 'info')
+            navigate('/login')
+            return
+          }
           const snapshot = canvasRef.current?.getSnapshot()
           if (!snapshot) return
           const proj = await createProject(name)
