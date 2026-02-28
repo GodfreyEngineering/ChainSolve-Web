@@ -58,6 +58,7 @@ import { useEngine } from '../../contexts/EngineContext'
 import { useGraphEngine } from '../../engine/useGraphEngine'
 import { buildConstantsLookup } from '../../engine/resolveBindings'
 import { computeEffectiveEdgesAnimated } from '../../engine/edgesAnimGate'
+import { computeLodTier, type LodTier as LodTierGate } from '../../engine/lodGate'
 import { useVariablesStore } from '../../stores/variablesStore'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
@@ -245,13 +246,8 @@ function setLodPref(v: boolean) {
   }
 }
 
-type LodTier = 'full' | 'compact' | 'minimal'
-
-function zoomToLodTier(zoom: number): LodTier {
-  if (zoom > 0.7) return 'full'
-  if (zoom >= 0.4) return 'compact'
-  return 'minimal'
-}
+// LodTier re-exported from lodGate for use throughout this file.
+type LodTier = LodTierGate
 
 // ── Badge persistence ────────────────────────────────────────────────────────
 
@@ -680,13 +676,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const effectiveBadges = badgesEnabled && nodes.length <= 300
   const effectiveEdgeBadges = edgeBadgesEnabled && edges.length <= 200
 
-  // Track zoom for LOD tier calculation
+  // Track zoom for LOD tier calculation (hysteresis via computeLodTier — P084).
   useOnViewportChange({
     onChange: useCallback(({ zoom }: { zoom: number }) => {
-      setLodTier((prev) => {
-        const next = zoomToLodTier(zoom)
-        return prev !== next ? next : prev
-      })
+      setLodTier((prev) => computeLodTier(zoom, prev))
     }, []),
   })
 
