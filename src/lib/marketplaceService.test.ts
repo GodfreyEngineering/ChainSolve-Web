@@ -22,6 +22,7 @@ import {
   getPublishGate,
   emitInstallEvent,
   getItemAnalyticsSummary,
+  setReviewStatus,
 } from './marketplaceService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
@@ -811,5 +812,46 @@ describe('installTheme', () => {
       'Ocean',
       expect.objectContaining({ '--primary': '#ff6b6b' }),
     )
+  })
+})
+
+// ── setReviewStatus (P119) ────────────────────────────────────────────────────
+
+describe('setReviewStatus', () => {
+  it('calls update with the given review_status and returns on success', async () => {
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    const mockUpdateFn = vi.fn().mockReturnValue({ eq: mockEqFn })
+    supabaseMock.from.mockReturnValue({ update: mockUpdateFn })
+
+    await setReviewStatus('item-1', 'approved')
+
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_items')
+    expect(mockUpdateFn).toHaveBeenCalledWith({ review_status: 'approved' })
+    expect(mockEqFn).toHaveBeenCalledWith('id', 'item-1')
+  })
+
+  it('can set status to rejected', async () => {
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({ update: vi.fn().mockReturnValue({ eq: mockEqFn }) })
+
+    await setReviewStatus('item-2', 'rejected')
+    expect(mockEqFn).toHaveBeenCalledWith('id', 'item-2')
+  })
+
+  it('can set status to pending', async () => {
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({ update: vi.fn().mockReturnValue({ eq: mockEqFn }) })
+
+    await setReviewStatus('item-3', 'pending')
+    expect(mockEqFn).toHaveBeenCalledWith('id', 'item-3')
+  })
+
+  it('throws when Supabase returns an error', async () => {
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: { message: 'RLS violation' } })
+    supabaseMock.from.mockReturnValue({ update: vi.fn().mockReturnValue({ eq: mockEqFn }) })
+
+    await expect(setReviewStatus('item-1', 'approved')).rejects.toMatchObject({
+      message: 'RLS violation',
+    })
   })
 })

@@ -475,3 +475,19 @@ export async function togglePublishItem(itemId: string, published: boolean): Pro
 
   if (error) throw error
 }
+
+/**
+ * P119: Set the review_status of any marketplace item.
+ * Requires the caller to be a moderator (is_moderator = true on their profile).
+ * Supabase RLS enforces this — a non-moderator UPDATE will be rejected.
+ */
+export type ReviewStatus = 'pending' | 'approved' | 'rejected'
+
+export async function setReviewStatus(itemId: string, status: ReviewStatus): Promise<void> {
+  const { error } = await supabase
+    .from('marketplace_items')
+    .update({ review_status: status })
+    .eq('id', itemId)
+
+  if (error) throw error
+}
