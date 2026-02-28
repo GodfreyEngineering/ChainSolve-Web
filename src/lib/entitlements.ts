@@ -10,6 +10,15 @@
 
 export type Plan = 'free' | 'trialing' | 'pro' | 'enterprise' | 'past_due' | 'canceled'
 
+/** D11-1: Keys accepted by the checkout endpoint's plan_key parameter. */
+export type PlanKey =
+  | 'pro_monthly'
+  | 'pro_annual'
+  | 'ent_10_monthly'
+  | 'ent_10_annual'
+  | 'ent_unlimited_monthly'
+  | 'ent_unlimited_annual'
+
 export interface Entitlements {
   maxProjects: number
   maxCanvases: number
@@ -19,6 +28,8 @@ export interface Entitlements {
   canUseRules: boolean
   canUseGroups: boolean
   canEditThemes: boolean
+  /** D11-4: Whether user can export (PDF/XLSX/.chainsolvejson) and import. */
+  canExport: boolean
 }
 
 // ── Entitlement map ──────────────────────────────────────────────────────────
@@ -33,6 +44,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseRules: false,
     canUseGroups: false,
     canEditThemes: false,
+    canExport: false,
   },
   trialing: {
     maxProjects: Infinity,
@@ -43,6 +55,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseRules: true,
     canUseGroups: true,
     canEditThemes: true,
+    canExport: true,
   },
   pro: {
     maxProjects: Infinity,
@@ -53,6 +66,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseRules: true,
     canUseGroups: true,
     canEditThemes: true,
+    canExport: true,
   },
   enterprise: {
     maxProjects: Infinity,
@@ -63,6 +77,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseRules: true,
     canUseGroups: true,
     canEditThemes: true,
+    canExport: true,
   },
   past_due: {
     maxProjects: 1,
@@ -73,6 +88,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseRules: false,
     canUseGroups: false,
     canEditThemes: false,
+    canExport: false,
   },
   canceled: {
     maxProjects: 1,
@@ -83,6 +99,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseRules: false,
     canUseGroups: false,
     canEditThemes: false,
+    canExport: false,
   },
 }
 
