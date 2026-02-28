@@ -22,6 +22,7 @@ import {
   getUserInstalls,
   type MarketplaceItem,
 } from '../lib/marketplaceService'
+import { createCheckoutSession } from '../lib/stripeConnectService'
 import { BRAND } from '../lib/brand'
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
@@ -47,15 +48,21 @@ const s = {
     margin: '0 auto',
     padding: '2rem 1.5rem',
   } satisfies React.CSSProperties,
-  installBtn: (installed: boolean, loading: boolean): React.CSSProperties => ({
+  installBtn: (done: boolean, loading: boolean, isPaid: boolean): React.CSSProperties => ({
     padding: '0.6rem 1.5rem',
     borderRadius: 8,
     border: 'none',
-    background: installed ? 'rgba(74,222,128,0.12)' : loading ? '#3f3f46' : '#1CABB0',
-    color: installed ? '#4ade80' : loading ? 'rgba(244,244,243,0.4)' : '#fff',
+    background: done
+      ? 'rgba(74,222,128,0.12)'
+      : loading
+        ? '#3f3f46'
+        : isPaid
+          ? '#7c3aed'
+          : '#1CABB0',
+    color: done ? '#4ade80' : loading ? 'rgba(244,244,243,0.4)' : '#fff',
     fontSize: '0.9rem',
     fontWeight: 600,
-    cursor: installed || loading ? 'default' : 'pointer',
+    cursor: done || loading ? 'default' : 'pointer',
     fontFamily: 'inherit',
   }),
 }
@@ -99,10 +106,18 @@ export default function ItemDetailPage() {
     })()
   }, [itemId])
 
+  const isPaid = (item?.price_cents ?? 0) > 0
+
   const handleInstall = useCallback(async () => {
     if (!itemId || installed || installing) return
     setInstalling(true)
     try {
+      // Paid item — redirect to Stripe Checkout
+      if (isPaid) {
+        const { url } = await createCheckoutSession(itemId)
+        window.location.href = url
+        return
+      }
       if (item?.category === 'template') {
         // Fork the template into the user's projects, then navigate there
         const projectId = await forkTemplate(itemId)
@@ -121,7 +136,7 @@ export default function ItemDetailPage() {
     } finally {
       setInstalling(false)
     }
-  }, [itemId, installed, installing, navigate, item])
+  }, [itemId, installed, installing, navigate, item, isPaid])
 
   return (
     <div style={s.page}>
@@ -225,22 +240,38 @@ export default function ItemDetailPage() {
                 </div>
               </div>
 
-              <button
-                style={s.installBtn(installed, installing)}
-                onClick={() => void handleInstall()}
-                disabled={installed || installing}
-                aria-label={
-                  installed
-                    ? t('marketplace.installed')
-                    : t('marketplace.install') + ' ' + item.name
-                }
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  gap: '0.3rem',
+                }}
               >
-                {installed
-                  ? t('marketplace.installed')
-                  : installing
-                    ? t('marketplace.installing')
-                    : t('marketplace.install')}
-              </button>
+                {!isPaid && !installed && (
+                  <span style={{ fontSize: '0.72rem', color: 'rgba(74,222,128,0.7)' }}>
+                    {t('marketplace.free')}
+                  </span>
+                )}
+                <button
+                  style={s.installBtn(installed, installing, isPaid)}
+                  onClick={() => void handleInstall()}
+                  disabled={installed || installing}
+                  data-testid="install-btn"
+                >
+                  {installed
+                    ? t('marketplace.installed')
+                    : installing
+                      ? isPaid
+                        ? t('marketplace.buying')
+                        : t('marketplace.installing')
+                      : isPaid
+                        ? t('marketplace.buyFor', {
+                            price: (item.price_cents / 100).toFixed(2),
+                          })
+                        : t('marketplace.install')}
+                </button>
+              </div>
             </div>
 
             {/* Description */}

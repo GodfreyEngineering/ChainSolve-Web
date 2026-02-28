@@ -95,8 +95,51 @@ export const onRequestPost: PagesFunction<{
   }
 
   if (event.type === "checkout.session.completed") {
-    // Subscription lifecycle events above are sufficient;
-    // nothing additional required here.
+    const session = event.data.object as Stripe.Checkout.Session;
+    // Marketplace one-time purchase: item_id + buyer_id are stored in the
+    // PaymentIntent metadata at checkout creation time.
+    const meta = session.payment_intent
+      ? undefined  // will resolve below
+      : session.metadata;
+
+    // Resolve metadata from PaymentIntent when the session itself doesn't carry it.
+    let itemId: string | undefined;
+    let buyerId: string | undefined;
+
+    if (session.metadata?.item_id) {
+      itemId  = session.metadata.item_id;
+      buyerId = session.metadata.buyer_id ?? undefined;
+    } else if (typeof session.payment_intent === "string") {
+      // Retrieve the PaymentIntent to read its metadata.
+      try {
+        const pi = await stripe.paymentIntents.retrieve(session.payment_intent);
+        itemId  = pi.metadata?.item_id;
+        buyerId = pi.metadata?.buyer_id;
+      } catch (err) {
+        console.error("[webhook] Failed to retrieve PaymentIntent:", err);
+      }
+    }
+    void meta; // unused fallback reference
+
+    if (itemId && buyerId) {
+      // Upsert into marketplace_purchases — idempotent if webhook replays.
+      const { error: purchaseErr } = await supabaseAdmin
+        .from("marketplace_purchases")
+        .upsert(
+          { user_id: buyerId, item_id: itemId },
+          { onConflict: "user_id,item_id" },
+        );
+      if (purchaseErr) {
+        console.error("[webhook] marketplace_purchases upsert failed:", purchaseErr.message);
+      } else {
+        // Increment downloads_count (best-effort, not critical).
+        try {
+          await supabaseAdmin.rpc("increment_mkt_downloads", { p_item_id: itemId });
+        } catch {
+          // RPC may not exist in all environments; ignore.
+        }
+      }
+    }
   }
 
   return new Response("ok", { status: 200 });

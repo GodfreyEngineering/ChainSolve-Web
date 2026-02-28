@@ -546,6 +546,12 @@
     "draftBadge": "Draft",
     "reviewPending": "Pending review",
     "reviewApproved": "Approved",
-    "reviewRejected": "Rejected"
+    "reviewRejected": "Rejected",
+    "free": "Free",
+    "buyFor": "Buy · £{{price}}",
+    "buying": "Redirecting…",
+    "purchased": "Purchased",
+    "connectStripeNotice": "Connect a Stripe account to accept payments for paid items.",
+    "connectStripe": "Connect Stripe"
   }
 }

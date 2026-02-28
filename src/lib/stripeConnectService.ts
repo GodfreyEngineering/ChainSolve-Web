@@ -1,13 +1,13 @@
 /**
- * stripeConnectService.ts — P111 stubs for Stripe Connect marketplace payments.
+ * stripeConnectService.ts — P111/P112 Stripe Connect marketplace payments.
  *
  * These functions call ChainSolve edge function endpoints, which in turn call
  * the Stripe API server-side.  The Stripe secret key is NEVER handled here.
  *
- * Full implementation: P112 (purchase flow), P113 (gating UI).
- *
  * Architecture: docs/architecture/stripe-connect.md
  */
+
+import { supabase } from './supabase'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -24,19 +24,19 @@ export interface CheckoutResult {
  * Start Stripe Connect Express onboarding for the current user.
  * Returns a one-time Stripe-hosted onboarding URL.
  *
- * @stub — edge function endpoint not yet implemented.
+ * @stub — edge function endpoint not yet implemented (P113).
  */
 export async function startConnectOnboarding(): Promise<string> {
-  throw new Error('stripeConnectService.startConnectOnboarding: not yet implemented (P112)')
+  throw new Error('stripeConnectService.startConnectOnboarding: not yet implemented (P113)')
 }
 
 /**
  * Get the Stripe Connect account status for the current user.
  *
- * @stub — edge function endpoint not yet implemented.
+ * @stub — edge function endpoint not yet implemented (P113).
  */
 export async function getConnectStatus(): Promise<ConnectStatus> {
-  throw new Error('stripeConnectService.getConnectStatus: not yet implemented (P112)')
+  throw new Error('stripeConnectService.getConnectStatus: not yet implemented (P113)')
 }
 
 // ── Buyer purchase flow ───────────────────────────────────────────────────────
@@ -46,21 +46,45 @@ export async function getConnectStatus(): Promise<ConnectStatus> {
  * Returns the hosted Checkout URL to redirect the buyer to.
  *
  * Free items (price_cents = 0) bypass Stripe — use recordInstall() instead.
- *
- * @stub — edge function endpoint not yet implemented.
  */
 export async function createCheckoutSession(itemId: string): Promise<CheckoutResult> {
-  void itemId
-  throw new Error('stripeConnectService.createCheckoutSession: not yet implemented (P112)')
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) throw new Error('Sign in to purchase items')
+
+  const res = await fetch('/api/stripe/marketplace-checkout', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ item_id: itemId }),
+  })
+
+  const data = (await res.json()) as { ok: boolean; url?: string; error?: string }
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error ?? 'Checkout failed')
+  }
+  return { url: data.url! }
 }
 
 /**
  * Check whether the current authenticated user has purchased a given item.
  * Returns false when unauthenticated.
- *
- * @stub — not yet implemented.
  */
 export async function hasPurchased(itemId: string): Promise<boolean> {
-  void itemId
-  throw new Error('stripeConnectService.hasPurchased: not yet implemented (P112)')
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return false
+
+  const { data, error } = await supabase
+    .from('marketplace_purchases')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('item_id', itemId)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  return data !== null
 }

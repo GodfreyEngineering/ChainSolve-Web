@@ -26,6 +26,8 @@ export interface MarketplaceItem {
   payload: unknown | null
   /** P110: review gate — 'pending' | 'approved' | 'rejected' */
   review_status: 'pending' | 'approved' | 'rejected'
+  /** P112: price in smallest currency unit (GBP pence). 0 = free. */
+  price_cents: number
   created_at: string
   updated_at: string
 }
