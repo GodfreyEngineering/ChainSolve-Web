@@ -28,6 +28,8 @@ interface InspectorProps {
   onToggleCollapse?: (groupId: string) => void
   onUngroupNode?: (groupId: string) => void
   canUseGroups?: boolean
+  /** When true, hides own chrome (header/resize handle) — AppWindow provides those. */
+  floating?: boolean
 }
 
 const inp: React.CSSProperties = {
@@ -67,6 +69,7 @@ export function Inspector({
   onToggleCollapse,
   onUngroupNode,
   canUseGroups,
+  floating,
 }: InspectorProps) {
   const allNodes = useNodes()
   const allEdges = useEdges()
@@ -78,27 +81,37 @@ export function Inspector({
   const node = nodeId ? (allNodes.find((n) => n.id === nodeId) ?? null) : null
   const nd = node?.data as NodeData | undefined
 
-  // ESC closes inspector
+  // ESC closes inspector (only when not floating — AppWindow handles ESC)
   useEffect(() => {
+    if (floating) return
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
+  }, [onClose, floating])
 
-  const panelStyle: React.CSSProperties = {
-    width,
-    flexShrink: 0,
-    borderLeft: '1px solid rgba(255,255,255,0.08)',
-    background: '#2c2c2c',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-    height: '100%',
-    position: 'relative',
-    transition: 'width 0.2s ease',
-  }
+  const panelStyle: React.CSSProperties = floating
+    ? {
+        flex: 1,
+        background: '#2c2c2c',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        position: 'relative',
+      }
+    : {
+        width,
+        flexShrink: 0,
+        borderLeft: '1px solid rgba(255,255,255,0.08)',
+        background: '#2c2c2c',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        height: '100%',
+        position: 'relative',
+        transition: 'width 0.2s ease',
+      }
 
   const headerStyle: React.CSSProperties = {
     display: 'flex',
@@ -112,19 +125,21 @@ export function Inspector({
   if (!node || !nd) {
     return (
       <div style={panelStyle}>
-        <div style={{ ...headerStyle, justifyContent: 'flex-start', gap: '0.5rem' }}>
-          <span
-            style={{
-              fontSize: '0.68rem',
-              fontWeight: 700,
-              letterSpacing: '0.06em',
-              color: 'rgba(244,244,243,0.4)',
-              textTransform: 'uppercase',
-            }}
-          >
-            Inspector
-          </span>
-        </div>
+        {!floating && (
+          <div style={{ ...headerStyle, justifyContent: 'flex-start', gap: '0.5rem' }}>
+            <span
+              style={{
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                color: 'rgba(244,244,243,0.4)',
+                textTransform: 'uppercase',
+              }}
+            >
+              Inspector
+            </span>
+          </div>
+        )}
         <div
           style={{
             padding: '2rem 1rem',
@@ -135,17 +150,19 @@ export function Inspector({
         >
           Click a block to inspect
         </div>
-        <div
-          style={{
-            position: 'absolute',
-            left: -3,
-            top: 0,
-            bottom: 0,
-            width: 6,
-            cursor: 'ew-resize',
-          }}
-          onMouseDown={onResizeStart}
-        />
+        {!floating && (
+          <div
+            style={{
+              position: 'absolute',
+              left: -3,
+              top: 0,
+              bottom: 0,
+              width: 6,
+              cursor: 'ew-resize',
+            }}
+            onMouseDown={onResizeStart}
+          />
+        )}
       </div>
     )
   }
@@ -187,54 +204,73 @@ export function Inspector({
 
   return (
     <div style={panelStyle}>
-      {/* Resize handle */}
-      <div
-        style={{
-          position: 'absolute',
-          left: -3,
-          top: 0,
-          bottom: 0,
-          width: 6,
-          cursor: 'ew-resize',
-          zIndex: 10,
-        }}
-        onMouseDown={onResizeStart}
-      />
-
-      {/* Header */}
-      <div style={headerStyle}>
-        <div>
-          <span
-            style={{
-              fontSize: '0.68rem',
-              fontWeight: 700,
-              letterSpacing: '0.06em',
-              color: 'rgba(244,244,243,0.4)',
-              textTransform: 'uppercase' as const,
-            }}
-          >
-            Inspector
-          </span>
-          <div style={{ fontSize: '0.82rem', fontWeight: 600, marginTop: 2 }}>
-            {def?.label ?? nd.blockType}
-          </div>
-        </div>
-        <button
-          onClick={onClose}
+      {/* Resize handle (sidebar mode only) */}
+      {!floating && (
+        <div
           style={{
-            background: 'none',
-            border: 'none',
-            color: 'rgba(244,244,243,0.4)',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            padding: '0 0.2rem',
-            lineHeight: 1,
+            position: 'absolute',
+            left: -3,
+            top: 0,
+            bottom: 0,
+            width: 6,
+            cursor: 'ew-resize',
+            zIndex: 10,
           }}
-          title="Close (ESC)"
+          onMouseDown={onResizeStart}
+        />
+      )}
+
+      {/* Header (sidebar mode only — floating mode uses AppWindow chrome) */}
+      {!floating && (
+        <div style={headerStyle}>
+          <div>
+            <span
+              style={{
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                color: 'rgba(244,244,243,0.4)',
+                textTransform: 'uppercase' as const,
+              }}
+            >
+              Inspector
+            </span>
+            <div style={{ fontSize: '0.82rem', fontWeight: 600, marginTop: 2 }}>
+              {def?.label ?? nd.blockType}
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'rgba(244,244,243,0.4)',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              padding: '0 0.2rem',
+              lineHeight: 1,
+            }}
+            title="Close (ESC)"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Node label summary (floating mode only) */}
+      {floating && (
+        <div
+          style={{
+            padding: '0.4rem 0.75rem',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            fontSize: '0.82rem',
+            fontWeight: 600,
+            flexShrink: 0,
+          }}
         >
-          ✕
-        </button>
-      </div>
+          {def?.label ?? nd.blockType}
+        </div>
+      )}
 
       {/* Body */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>

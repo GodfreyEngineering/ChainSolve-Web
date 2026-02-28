@@ -49,7 +49,8 @@ import { PlotNode } from './nodes/PlotNode'
 import { GroupNode } from './nodes/GroupNode'
 import { BlockLibrary } from './BlockLibrary'
 import { DRAG_TYPE } from './blockLibraryUtils'
-import { Inspector } from './Inspector'
+import { FloatingInspector, INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS } from './FloatingInspector'
+import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
 import { QuickAddPalette } from './QuickAddPalette'
 import { ComputedContext } from '../../contexts/ComputedContext'
@@ -393,7 +394,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     zoomIn: () => zoomIn({ duration: 200 }),
     zoomOut: () => zoomOut({ duration: 200 }),
     toggleLibrary: () => setLibVisible((v) => !v),
-    toggleInspector: () => setInspVisible((v) => !v),
+    toggleInspector: () => {
+      if (isWinOpen(INSPECTOR_WINDOW_ID)) closeWindow(INSPECTOR_WINDOW_ID)
+      else openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
+    },
     toggleSnap: () => setSnapToGrid((v) => !v),
     togglePan: () => setPanMode((v) => !v),
     toggleLock: () => setLocked((v) => !v),
@@ -612,20 +616,21 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   // Panel widths + visibility
   const [libWidth, setLibWidth] = useState(200)
-  const [inspWidth, setInspWidth] = useState(260)
   const [libVisible, setLibVisible] = useState(() => !isMobile)
-  const [inspVisible, setInspVisible] = useState(false)
+
+  // Inspector state (open on click, not selection)
+  const [inspectedId, setInspectedId] = useState<string | null>(null)
+  const [inspPinned, setInspPinned] = useState(false)
+  const { openWindow, closeWindow, isOpen: isWinOpen } = useWindowManager()
+  const inspVisible = isWinOpen(INSPECTOR_WINDOW_ID)
 
   // Auto-close panels when switching to mobile
   useEffect(() => {
     if (isMobile) {
       setLibVisible(false)
-      setInspVisible(false)
+      closeWindow(INSPECTOR_WINDOW_ID)
     }
-  }, [isMobile])
-
-  // Inspector state (open on click, not selection)
-  const [inspectedId, setInspectedId] = useState<string | null>(null)
+  }, [isMobile, closeWindow])
 
   // Snap-to-grid
   const [snapToGrid, setSnapToGrid] = useState(false)
@@ -789,26 +794,26 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // ── Inspector: open on node body click, NOT on drag ────────────────────────
   const onNodeClick = useCallback(
     (_: MouseEvent, node: Node) => {
-      setInspectedId(node.id)
-      setInspVisible(true)
+      if (!inspPinned) setInspectedId(node.id)
+      openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
       // On mobile, close library when opening inspector
       if (isMobile) setLibVisible(false)
     },
-    [isMobile],
+    [isMobile, inspPinned, openWindow],
   )
 
   const onPaneClick = useCallback(() => {
-    setInspectedId(null)
+    if (!inspPinned) setInspectedId(null)
     if (isMobile) {
       setLibVisible(false)
-      setInspVisible(false)
+      closeWindow(INSPECTOR_WINDOW_ID)
     }
-  }, [isMobile])
+  }, [isMobile, inspPinned, closeWindow])
 
   const closeInspector = useCallback(() => {
     setInspectedId(null)
-    setInspVisible(false)
-  }, [])
+    closeWindow(INSPECTOR_WINDOW_ID)
+  }, [closeWindow])
 
   // ── Drag-to-add from BlockLibrary ───────────────────────────────────────────
   const onDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -924,10 +929,13 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [setEdges, doSaveHistory],
   )
 
-  const inspectNode = useCallback((nodeId: string) => {
-    setInspectedId(nodeId)
-    setInspVisible(true)
-  }, [])
+  const inspectNode = useCallback(
+    (nodeId: string) => {
+      setInspectedId(nodeId)
+      openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
+    },
+    [openWindow],
+  )
 
   // Rename: prompt for a new label then update node data directly
   const renameNode = useCallback(
@@ -1372,11 +1380,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [libWidth],
   )
 
-  const onInspResizeStart = useCallback(
-    (e: React.MouseEvent) => makeResizeHandler(inspWidth, setInspWidth, -1)(e),
-    [inspWidth],
-  )
-
   // ── Mobile panel width ────────────────────────────────────────────────────
   const mobileDrawerWidth = isMobile ? Math.min(280, window.innerWidth * 0.85) : 0
 
@@ -1402,7 +1405,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         <button
           onClick={() => {
             setLibVisible((v) => !v)
-            if (isMobile) setInspVisible(false)
+            if (isMobile) closeWindow(INSPECTOR_WINDOW_ID)
           }}
           style={{
             ...tbBtn,
@@ -1449,10 +1452,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
       <button
         onClick={() => {
-          setInspVisible((v) => {
-            if (v) setInspectedId(null)
-            return !v
-          })
+          if (inspVisible) {
+            setInspectedId(null)
+            closeWindow(INSPECTOR_WINDOW_ID)
+          } else {
+            openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
+          }
           if (isMobile) setLibVisible(false)
         }}
         style={{
@@ -1470,8 +1475,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     </div>
   )
 
-  // ── Drawer backdrop (mobile only) ──────────────────────────────────────────
-  const showBackdrop = isMobile && (libVisible || inspVisible)
+  // ── Drawer backdrop (mobile only — for library drawer) ─────────────────────
+  const showBackdrop = isMobile && libVisible
 
   const canvasSettings = useMemo(
     () => ({
@@ -1635,13 +1640,15 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   onRefresh={() => setEngineKey((k) => k + 1)}
                   onToggleLibrary={() => {
                     setLibVisible((v) => !v)
-                    if (isMobile) setInspVisible(false)
+                    if (isMobile) closeWindow(INSPECTOR_WINDOW_ID)
                   }}
                   onToggleInspector={() => {
-                    setInspVisible((v) => {
-                      if (v) setInspectedId(null)
-                      return !v
-                    })
+                    if (inspVisible) {
+                      setInspectedId(null)
+                      closeWindow(INSPECTOR_WINDOW_ID)
+                    } else {
+                      openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
+                    }
                     if (isMobile) setLibVisible(false)
                   }}
                   onAutoOrganise={(shiftKey) => handleAutoOrganise(shiftKey ? 'TB' : 'LR')}
@@ -1704,13 +1711,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 )}
               </div>
 
-              {/* Inspector panel — desktop inline */}
-              {inspVisible && !isMobile && (
-                <Inspector
+              {/* Floating Inspector window (replaces sidebar + mobile drawer) */}
+              {inspVisible && (
+                <FloatingInspector
                   nodeId={inspectedId}
-                  width={inspWidth}
-                  onClose={closeInspector}
-                  onResizeStart={onInspResizeStart}
+                  pinned={inspPinned}
+                  onTogglePin={() => setInspPinned((v) => !v)}
                   onToggleCollapse={toggleGroupCollapse}
                   onUngroupNode={ungroupNode}
                   canUseGroups={ent.canUseGroups}
@@ -1728,7 +1734,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   }}
                   onClick={() => {
                     setLibVisible(false)
-                    setInspVisible(false)
                   }}
                 />
               )}
@@ -1750,29 +1755,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     plan={plan}
                     onProBlocked={() => setShowUpgradeModal(true)}
                     onInsertTemplate={onInsertTemplate}
-                  />
-                </div>
-              )}
-
-              {inspVisible && isMobile && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                    zIndex: 20,
-                    width: mobileDrawerWidth,
-                  }}
-                >
-                  <Inspector
-                    nodeId={inspectedId}
-                    width={mobileDrawerWidth}
-                    onClose={closeInspector}
-                    onResizeStart={() => {}}
-                    onToggleCollapse={toggleGroupCollapse}
-                    onUngroupNode={ungroupNode}
-                    canUseGroups={ent.canUseGroups}
                   />
                 </div>
               )}

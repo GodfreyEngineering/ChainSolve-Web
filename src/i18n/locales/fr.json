@@ -405,6 +405,12 @@
     "edgeBadges": "Badges de connexions",
     "graphHealth": "Santé du graphe"
   },
+  "inspector": {
+    "pin": "Épingler au nœud actuel",
+    "unpin": "Détacher la sélection",
+    "pinned": "Épinglé",
+    "followSelection": "Suit la sélection"
+  },
   "sheets": {
     "title": "Feuilles",
     "addSheet": "Ajouter une feuille",

@@ -405,6 +405,12 @@
     "edgeBadges": "Kanten-Badges",
     "graphHealth": "Graph-Zustand"
   },
+  "inspector": {
+    "pin": "An aktuellen Knoten anheften",
+    "unpin": "Auswahl lösen",
+    "pinned": "Angeheftet",
+    "followSelection": "Auswahl folgen"
+  },
   "sheets": {
     "title": "Blätter",
     "addSheet": "Blatt hinzufügen",

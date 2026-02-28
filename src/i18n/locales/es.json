@@ -405,6 +405,12 @@
     "edgeBadges": "Insignias de arista",
     "graphHealth": "Estado del grafo"
   },
+  "inspector": {
+    "pin": "Fijar al nodo actual",
+    "unpin": "Desfijar selección",
+    "pinned": "Fijado",
+    "followSelection": "Siguiendo selección"
+  },
   "sheets": {
     "title": "Hojas",
     "addSheet": "Añadir hoja",

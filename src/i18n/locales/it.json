@@ -405,6 +405,12 @@
     "edgeBadges": "Badge di connessione",
     "graphHealth": "Salute del grafo"
   },
+  "inspector": {
+    "pin": "Fissa al nodo corrente",
+    "unpin": "Sgancia la selezione",
+    "pinned": "Fissato",
+    "followSelection": "Segue la selezione"
+  },
   "sheets": {
     "title": "Fogli",
     "addSheet": "Aggiungi foglio",

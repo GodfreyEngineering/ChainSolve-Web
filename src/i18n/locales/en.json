@@ -425,6 +425,12 @@
     "edgeBadges": "Edge badges",
     "graphHealth": "Graph health"
   },
+  "inspector": {
+    "pin": "Pin to current node",
+    "unpin": "Unpin selection",
+    "pinned": "Pinned",
+    "followSelection": "Following selection"
+  },
   "debugConsole": {
     "title": "Debug Console",
     "logLevel": "Log level",
