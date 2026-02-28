@@ -65,6 +65,7 @@ import { addRecentProject, removeRecentProject } from '../lib/recentProjects'
 import { useToast } from '../components/ui/useToast'
 import { useNetworkStatus } from '../hooks/useNetworkStatus'
 import { AutosaveScheduler } from '../lib/autosaveScheduler'
+import { usePreferencesStore } from '../stores/preferencesStore'
 import { SheetsBar } from '../components/app/SheetsBar'
 import { ConflictBanner } from '../components/app/ConflictBanner'
 import { UpgradeModal } from '../components/UpgradeModal'
@@ -406,7 +407,10 @@ export default function CanvasPage() {
     markDirty()
     const currentCanvasId = useCanvasesStore.getState().activeCanvasId
     if (currentCanvasId) markCanvasDirty(currentCanvasId)
-    if (!readOnly) autosaveScheduler.current.schedule()
+    // D8-1: autosave gated by user preference (default OFF)
+    if (!readOnly && usePreferencesStore.getState().autosaveEnabled) {
+      autosaveScheduler.current.schedule()
+    }
   }, [markDirty, markCanvasDirty, readOnly])
 
   // ── Flush save on tab close / refresh (best-effort) ────────────────────────

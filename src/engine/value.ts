@@ -89,7 +89,17 @@ export function extractScalar(v: Value | null): number | null {
  *                the decimal separator and grouping match the user's language.
  *                Omit (or pass undefined) for locale-neutral output (exports).
  */
-export function formatValue(v: Value | undefined, locale?: string): string {
+/** D8-1: Optional formatting preferences for numeric display. */
+export interface FormatOptions {
+  /** Number of decimal places. -1 = auto (smart precision). Default: -1. */
+  decimalPlaces?: number
+  /** Abs value above this uses scientific notation. Default: 1e6. */
+  scientificNotationThreshold?: number
+  /** Whether to add thousands separators. Default: false. */
+  thousandsSeparator?: boolean
+}
+
+export function formatValue(v: Value | undefined, locale?: string, opts?: FormatOptions): string {
   if (v === undefined) return '\u2014' // em dash
   switch (v.kind) {
     case 'scalar': {
@@ -98,11 +108,25 @@ export function formatValue(v: Value | undefined, locale?: string): string {
       if (!isFinite(n)) return n > 0 ? '+\u221E' : '\u2212\u221E'
       const abs = Math.abs(n)
       if (abs === 0) return '0'
-      // Scientific notation is universally understood; keep locale-neutral.
-      if (abs >= 1e6 || (abs > 0 && abs < 1e-3)) return n.toExponential(4)
-      if (locale) {
+      const sciThreshold = opts?.scientificNotationThreshold ?? 1e6
+      // Scientific notation for large/small values
+      if (abs >= sciThreshold || (abs > 0 && abs < 1e-3)) {
+        const dp = opts?.decimalPlaces
+        return n.toExponential(dp !== undefined && dp >= 0 ? dp : 4)
+      }
+      // Fixed decimal places mode
+      if (opts?.decimalPlaces !== undefined && opts.decimalPlaces >= 0) {
+        const formatted = n.toFixed(opts.decimalPlaces)
+        if (opts.thousandsSeparator) return addThousandsSep(formatted)
+        return formatted
+      }
+      // Auto precision mode
+      if (opts?.thousandsSeparator || locale) {
         try {
-          return new Intl.NumberFormat(locale, { maximumSignificantDigits: 6 }).format(n)
+          const intlOpts: Intl.NumberFormatOptions = { maximumSignificantDigits: 6 }
+          if (opts?.thousandsSeparator) intlOpts.useGrouping = true
+          else intlOpts.useGrouping = false
+          return new Intl.NumberFormat(locale ?? 'en', intlOpts).format(n)
         } catch {
           // Unknown locale tag — fall through to default formatting.
         }
@@ -118,4 +142,11 @@ export function formatValue(v: Value | undefined, locale?: string): string {
     case 'error':
       return v.message
   }
+}
+
+/** Add commas as thousands separators to a fixed-point string. */
+function addThousandsSep(s: string): string {
+  const [intPart, decPart] = s.split('.')
+  const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return decPart !== undefined ? `${withCommas}.${decPart}` : withCommas
 }

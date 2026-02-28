@@ -154,3 +154,65 @@ describe('formatValue — locale parameter (P079)', () => {
     expect(formatValue(mkScalar(0), 'de')).toBe('0')
   })
 })
+
+// ── D8-1 — FormatOptions (numeric formatting preferences) ────────────────
+
+describe('formatValue — FormatOptions (D8-1)', () => {
+  it('decimalPlaces=2 formats scalar with 2 decimals', () => {
+    expect(formatValue(mkScalar(3.14159), undefined, { decimalPlaces: 2 })).toBe('3.14')
+  })
+
+  it('decimalPlaces=0 formats scalar as integer', () => {
+    expect(formatValue(mkScalar(42.7), undefined, { decimalPlaces: 0 })).toBe('43')
+  })
+
+  it('decimalPlaces=-1 (auto) uses smart precision', () => {
+    expect(formatValue(mkScalar(3.14), undefined, { decimalPlaces: -1 })).toBe('3.14')
+  })
+
+  it('thousandsSeparator adds commas', () => {
+    expect(
+      formatValue(mkScalar(1234567), undefined, {
+        thousandsSeparator: true,
+        scientificNotationThreshold: 1e9,
+      }),
+    ).toContain(',')
+  })
+
+  it('thousandsSeparator with fixed decimals', () => {
+    expect(
+      formatValue(mkScalar(1234567.89), undefined, {
+        decimalPlaces: 2,
+        thousandsSeparator: true,
+        scientificNotationThreshold: 1e9,
+      }),
+    ).toBe('1,234,567.89')
+  })
+
+  it('custom scientificNotationThreshold at 1000', () => {
+    expect(formatValue(mkScalar(5000), undefined, { scientificNotationThreshold: 1000 })).toMatch(
+      /e\+/,
+    )
+  })
+
+  it('high scientificNotationThreshold prevents sci notation', () => {
+    expect(
+      formatValue(mkScalar(5000000), undefined, {
+        scientificNotationThreshold: 1e9,
+        decimalPlaces: 0,
+      }),
+    ).toBe('5000000')
+  })
+
+  it('NaN is always NaN regardless of FormatOptions', () => {
+    expect(formatValue(mkScalar(NaN), undefined, { decimalPlaces: 2 })).toBe('NaN')
+  })
+
+  it('Infinity is always +∞ regardless of FormatOptions', () => {
+    expect(formatValue(mkScalar(Infinity), undefined, { decimalPlaces: 2 })).toBe('+\u221E')
+  })
+
+  it('zero is always "0" regardless of FormatOptions', () => {
+    expect(formatValue(mkScalar(0), undefined, { decimalPlaces: 3 })).toBe('0')
+  })
+})
