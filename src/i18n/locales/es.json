@@ -467,5 +467,16 @@
     "progress": "Cargando hoja {{current}} de {{total}}…",
     "loadingAssets": "Cargando recurso {{current}} de {{total}}…",
     "cancelled": "Exportación del proyecto cancelada."
+  },
+  "onboarding": {
+    "title": "Bienvenido a ChainSolve",
+    "subtitle": "Empieza: construye tu primera cadena de cálculo en minutos.",
+    "scratch": "Empezar desde cero",
+    "scratchDesc": "Abrir un lienzo en blanco",
+    "template": "Crear desde plantilla",
+    "templateDesc": "Elegir un proyecto de inicio",
+    "templateComingSoon": "Plantillas próximamente",
+    "import": "Importar proyecto",
+    "importDesc": "Cargar un archivo .chainsolvejson"
   }
 }

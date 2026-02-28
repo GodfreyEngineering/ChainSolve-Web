@@ -467,5 +467,16 @@
     "progress": "Lade Blatt {{current}} von {{total}}…",
     "loadingAssets": "Lade Asset {{current}} von {{total}}…",
     "cancelled": "Projektexport abgebrochen."
+  },
+  "onboarding": {
+    "title": "Willkommen bei ChainSolve",
+    "subtitle": "Legen Sie los – erstellen Sie Ihre erste Berechnungskette in Minuten.",
+    "scratch": "Von vorne beginnen",
+    "scratchDesc": "Leere Zeichenfläche öffnen",
+    "template": "Aus Vorlage erstellen",
+    "templateDesc": "Startprojekt auswählen",
+    "templateComingSoon": "Vorlagen demnächst verfügbar",
+    "import": "Projekt importieren",
+    "importDesc": "Eine .chainsolvejson-Datei laden"
   }
 }

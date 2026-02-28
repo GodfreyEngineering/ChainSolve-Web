@@ -467,5 +467,16 @@
     "progress": "Chargement de la feuille {{current}} sur {{total}}…",
     "loadingAssets": "Chargement de l'asset {{current}} sur {{total}}…",
     "cancelled": "Export du projet annulé."
+  },
+  "onboarding": {
+    "title": "Bienvenue sur ChainSolve",
+    "subtitle": "Commencez — créez votre première chaîne de calcul en quelques minutes.",
+    "scratch": "Partir de zéro",
+    "scratchDesc": "Ouvrir un canevas vide",
+    "template": "Créer depuis un modèle",
+    "templateDesc": "Choisir un projet de départ",
+    "templateComingSoon": "Modèles bientôt disponibles",
+    "import": "Importer un projet",
+    "importDesc": "Charger un fichier .chainsolvejson"
   }
 }

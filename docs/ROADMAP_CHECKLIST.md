@@ -323,7 +323,7 @@ Claude MUST:
   - CI-safe mocks for upgrade flow
 
 ## A6 — Onboarding + docs + discoverability (time-to-first-result)
-- [ ] P061: First-run onboarding (“10 nodes in 2 minutes”)
+- [x] P061: First-run onboarding (“10 nodes in 2 minutes”)
   - First-run modal:
     - Start from scratch
     - Create from template

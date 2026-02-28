@@ -7,7 +7,7 @@
  *  - Project browser (create, open, rename, duplicate, export, delete, import)
  */
 
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
 import { supabase } from '../lib/supabase'
@@ -32,6 +32,12 @@ import {
 } from '../lib/entitlements'
 import { BRAND } from '../lib/brand'
 import { UpgradeModal } from '../components/UpgradeModal'
+
+const LazyFirstRunModal = lazy(() =>
+  import('../components/app/FirstRunModal').then((m) => ({ default: m.FirstRunModal })),
+)
+
+const ONBOARDED_KEY = 'cs:onboarded'
 
 interface Profile {
   id: string
@@ -159,6 +165,13 @@ export default function AppShell() {
   const [projError, setProjError] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState<string | null>(null) // projectId
   const [upgradeOpen, setUpgradeOpen] = useState(false)
+  const [firstRunOpen, setFirstRunOpen] = useState(() => {
+    try {
+      return !localStorage.getItem(ONBOARDED_KEY)
+    } catch {
+      return false
+    }
+  })
 
   const importRef = useRef<HTMLInputElement>(null)
 
@@ -296,6 +309,27 @@ export default function AppShell() {
     }
   }
 
+  // ── First-run onboarding ───────────────────────────────────────────────────
+
+  const dismissFirstRun = useCallback(() => {
+    try {
+      localStorage.setItem(ONBOARDED_KEY, '1')
+    } catch {
+      // Ignore — private browsing
+    }
+    setFirstRunOpen(false)
+  }, [])
+
+  const handleFirstRunScratch = useCallback(() => {
+    dismissFirstRun()
+    navigate('/canvas')
+  }, [dismissFirstRun, navigate])
+
+  const handleFirstRunImport = useCallback(() => {
+    dismissFirstRun()
+    importRef.current?.click()
+  }, [dismissFirstRun])
+
   // ── Billing ───────────────────────────────────────────────────────────────
 
   const callBillingApi = async (endpoint: string) => {
@@ -383,6 +417,17 @@ export default function AppShell() {
         onClose={() => setUpgradeOpen(false)}
         reason="project_limit"
       />
+      {/* ── First-run onboarding modal ── */}
+      {firstRunOpen && !loading && (
+        <Suspense fallback={null}>
+          <LazyFirstRunModal
+            open
+            onClose={dismissFirstRun}
+            onStartScratch={handleFirstRunScratch}
+            onImport={handleFirstRunImport}
+          />
+        </Suspense>
+      )}
       {/* Nav */}
       <nav
         style={{

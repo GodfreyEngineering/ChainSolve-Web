@@ -468,5 +468,16 @@
     "progress": "Loading canvas {{current}} of {{total}}…",
     "loadingAssets": "Loading asset {{current}} of {{total}}…",
     "cancelled": "Project export cancelled."
+  },
+  "onboarding": {
+    "title": "Welcome to ChainSolve",
+    "subtitle": "Get started — build your first computation chain in minutes.",
+    "scratch": "Start from scratch",
+    "scratchDesc": "Open a blank canvas",
+    "template": "Create from template",
+    "templateDesc": "Choose a starter project",
+    "templateComingSoon": "Templates coming soon",
+    "import": "Import project",
+    "importDesc": "Load a .chainsolvejson file"
   }
 }
