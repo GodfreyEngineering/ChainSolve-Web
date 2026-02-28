@@ -346,7 +346,7 @@ Claude MUST:
   - Single source of truth from action registry
   - Render in Help menu / modal
 
-- [ ] P065: “What’s New” panel (SHOULD)
+- [x] P065: “What’s New” panel (SHOULD)
   - Based on changelog entries
 
 - [x] P066: Empty states (MUST)
@@ -355,9 +355,9 @@ Claude MUST:
   - Inspector empty state
   - Block library empty state
 
-- [ ] P067: Command palette ranking + synonyms (SHOULD)
+- [x] P067: Command palette ranking + synonyms (SHOULD)
 - [ ] P068: Favorites + recently used blocks (COULD)
-- [ ] P069: Quick-add palette improvements (SHOULD)
+- [x] P069: Quick-add palette improvements (SHOULD)
 - [x] P070: Docs change process enforcement (MUST)
   - Add reminder/checklist in PR template or CI doc step
 
