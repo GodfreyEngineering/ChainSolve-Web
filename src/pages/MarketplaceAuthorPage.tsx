@@ -18,6 +18,7 @@ import {
   createAuthorItem,
   togglePublishItem,
   validateMarketplaceVersion,
+  isVerifiedAuthor,
   type MarketplaceItem,
   type MarketplaceCategory,
 } from '../lib/marketplaceService'
@@ -126,6 +127,8 @@ export default function MarketplaceAuthorPage() {
   const [items, setItems] = useState<MarketplaceItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  /** null = still loading, true/false = result of isVerifiedAuthor() */
+  const [verified, setVerified] = useState<boolean | null>(null)
 
   // Create-item form state
   const [showForm, setShowForm] = useState(false)
@@ -140,10 +143,9 @@ export default function MarketplaceAuthorPage() {
     setLoading(true)
     setError(null)
     try {
-      const fetched = await listAuthorItems()
+      const [fetched, verifiedStatus] = await Promise.all([listAuthorItems(), isVerifiedAuthor()])
       setItems(fetched)
-      // Redirect to login if unauthenticated (service returns [] but no error)
-      // We detect this on mount by checking the response after a short attempt
+      setVerified(verifiedStatus)
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       if (msg.toLowerCase().includes('sign in') || msg.toLowerCase().includes('auth')) {
@@ -244,7 +246,7 @@ export default function MarketplaceAuthorPage() {
               {t('marketplace.authorSubtitle')}
             </p>
           </div>
-          {!showForm && (
+          {!showForm && verified === true && (
             <button
               style={s.primaryBtn(false)}
               onClick={() => setShowForm(true)}
@@ -254,6 +256,32 @@ export default function MarketplaceAuthorPage() {
             </button>
           )}
         </div>
+
+        {/* Not-verified notice */}
+        {verified === false && (
+          <div
+            style={{
+              padding: '0.75rem 1rem',
+              borderRadius: 8,
+              background: 'rgba(251,191,36,0.08)',
+              border: '1px solid rgba(251,191,36,0.25)',
+              color: '#fbbf24',
+              fontSize: '0.85rem',
+              marginBottom: '1rem',
+              display: 'flex',
+              gap: '0.5rem',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+            data-testid="not-verified-notice"
+            role="status"
+          >
+            <span>{t('marketplace.notVerifiedNotice')}</span>
+            <a href="mailto:support@chainsolve.com" style={{ color: '#fbbf24', fontWeight: 600 }}>
+              {t('marketplace.contactSupport')}
+            </a>
+          </div>
+        )}
 
         {/* Global error */}
         {error && (

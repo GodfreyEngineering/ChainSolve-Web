@@ -1,5 +1,5 @@
 /**
- * marketplaceService.ts — Marketplace data layer (P101–P108)
+ * marketplaceService.ts — Marketplace data layer (P101–P109)
  *
  * All Supabase calls for marketplace_items and marketplace_purchases
  * live here. UI components MUST NOT import supabase directly.
@@ -166,6 +166,28 @@ export async function getUserInstalls(): Promise<MarketplacePurchase[]> {
 
   if (error) throw error
   return (data ?? []) as MarketplacePurchase[]
+}
+
+// ── Author verification (P109) ────────────────────────────────────────────────
+
+/**
+ * Check whether the current user has the verified_author flag on their profile.
+ * Returns false when unauthenticated or when the flag is not set.
+ */
+export async function isVerifiedAuthor(): Promise<boolean> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return false
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('verified_author')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+
+  return (data as { verified_author: boolean } | null)?.verified_author ?? false
 }
 
 // ── Author CRUD (P108) ─────────────────────────────────────────────────────────

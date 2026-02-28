@@ -16,6 +16,7 @@ import {
   createAuthorItem,
   togglePublishItem,
   validateMarketplaceVersion,
+  isVerifiedAuthor,
 } from './marketplaceService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
@@ -424,6 +425,67 @@ describe('createAuthorItem', () => {
     })
     expect(result).toEqual(created)
     expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_items')
+  })
+})
+
+// ── isVerifiedAuthor (P109) ───────────────────────────────────────────────────
+
+describe('isVerifiedAuthor', () => {
+  it('returns false when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+
+    const result = await isVerifiedAuthor()
+    expect(result).toBe(false)
+  })
+
+  it('returns true when profile has verified_author = true', async () => {
+    makeQueryBuilder({ data: { verified_author: true }, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    const result = await isVerifiedAuthor()
+    expect(result).toBe(true)
+  })
+
+  it('returns false when profile has verified_author = false', async () => {
+    makeQueryBuilder({ data: { verified_author: false }, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    const result = await isVerifiedAuthor()
+    expect(result).toBe(false)
+  })
+
+  it('returns false when profile row not found', async () => {
+    makeQueryBuilder({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    const result = await isVerifiedAuthor()
+    expect(result).toBe(false)
+  })
+
+  it('throws on supabase error', async () => {
+    makeQueryBuilder({ data: null, error: { message: 'DB error' } })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    await expect(isVerifiedAuthor()).rejects.toMatchObject({ message: 'DB error' })
   })
 })
 

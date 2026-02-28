@@ -539,6 +539,12 @@
     "categoryLabel": "Category",
     "versionInvalid": "Version must be X.Y.Z (e.g. 1.0.0)",
     "nameRequired": "Name is required",
-    "creating": "Creating…"
+    "creating": "Creating…",
+    "notVerifiedNotice": "Your account is not yet verified as a marketplace author.",
+    "contactSupport": "Contact support to get verified.",
+    "verifiedBadge": "Verified author",
+    "reviewPending": "Pending review",
+    "reviewApproved": "Approved",
+    "reviewRejected": "Rejected"
   }
 }
