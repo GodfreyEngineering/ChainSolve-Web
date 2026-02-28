@@ -57,6 +57,7 @@ import { BindingContext } from '../../contexts/BindingContext'
 import { useEngine } from '../../contexts/EngineContext'
 import { useGraphEngine } from '../../engine/useGraphEngine'
 import { buildConstantsLookup } from '../../engine/resolveBindings'
+import { computeEffectiveEdgesAnimated } from '../../engine/edgesAnimGate'
 import { useVariablesStore } from '../../stores/variablesStore'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
@@ -659,8 +660,20 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     y: number
   } | null>(null)
 
-  // Auto-disable animation on large graphs (>400 edges)
-  const effectiveEdgesAnimated = edgesAnimated && edges.length <= 400
+  // Auto-disable animation on large graphs with hysteresis (P083).
+  // Ref persists whether animation was auto-disabled so we only re-enable
+  // once the edge count drops below ANIM_EDGES_REENABLE_AT (< ANIM_EDGES_DISABLE_AT).
+  const animAutoDisabledRef = useRef(false)
+  const effectiveEdgesAnimated = computeEffectiveEdgesAnimated(
+    edgesAnimated,
+    edges.length,
+    animAutoDisabledRef.current,
+  )
+  // Keep hysteresis state in sync.  We are "auto-disabled" any time the user
+  // wants animation ON but the gate forced it OFF (either over the hard
+  // threshold or in the hysteresis band).
+  animAutoDisabledRef.current = !effectiveEdgesAnimated && edgesAnimated
+
   const effectiveLodTier: LodTier = lodEnabled ? lodTier : 'full'
 
   // Perf-gate badges: auto-hide at >300 nodes
