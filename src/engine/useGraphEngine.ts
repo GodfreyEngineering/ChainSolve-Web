@@ -10,7 +10,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Node, Edge } from '@xyflow/react'
 import type { EngineAPI } from './index.ts'
-import type { EvalOptions } from './wasm-types.ts'
+import type { EvalOptions, PatchOp } from './wasm-types.ts'
 import type { Value } from './value.ts'
 import type { ConstantsLookup } from './resolveBindings.ts'
 import type { VariablesMap } from '../lib/variables.ts'
@@ -23,6 +23,23 @@ import { dlog } from '../observability/debugLog.ts'
 import { computeGraphHealth } from '../lib/graphHealth.ts'
 
 const perfEnabled = isPerfHudEnabled()
+
+/**
+ * Milliseconds to wait before sending a data-only patch to the engine.
+ * Rapid keystrokes in number/formula inputs within this window are coalesced
+ * into a single applyPatch call, reducing worker message-queue pressure.
+ * Structural changes (add/remove node/edge) bypass this delay entirely.
+ */
+export const PATCH_DEBOUNCE_MS = 50
+
+/**
+ * Returns true when at least one op is a structural change (i.e. anything
+ * other than a node-data update).  Structural ops require immediate dispatch
+ * so the engine graph stays consistent.
+ */
+export function hasStructuralChange(ops: PatchOp[]): boolean {
+  return ops.some((op) => op.op !== 'updateNodeData')
+}
 
 /** Convert a Record<string, EngineValue> into a Map<string, Value>. */
 function toValueMap(values: Record<string, unknown>): Map<string, Value> {
@@ -60,6 +77,8 @@ export function useGraphEngine(
   const prevRefreshKey = useRef(refreshKey)
   const prevPausedRef = useRef(paused)
   const pendingRef = useRef(0) // Coalescing counter: skip stale results.
+  // Debounce timer for data-only patches (see PATCH_DEBOUNCE_MS).
+  const patchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     // When refreshKey changes, force a full snapshot re-evaluation.
@@ -140,63 +159,86 @@ export function useGraphEngine(
         prevEdgesRef.current = edges
         return
       }
-      const reqId = ++pendingRef.current
-      dlog.debug('engine', 'Patch eval started', { opCount: ops.length })
-      const t0 = perfEnabled ? performance.now() : 0
-      perfMark('cs:eval:start')
-      // Apply 300 ms interactive time budget so large evals return partial
-      // results quickly rather than blocking the worker. Callers can override
-      // by passing a higher timeBudgetMs in `options`.
-      engine
-        .applyPatch(ops, { timeBudgetMs: 300, ...options })
-        .then((result) => {
-          if (reqId !== pendingRef.current) return
-          perfMeasure('cs:eval:patch', 'cs:eval:start')
-          if (result.partial) perfMark('cs:eval:partial')
-          const patchErrors = Object.keys(result.changedValues).filter(
-            (id) => (result.changedValues[id] as Value)?.kind === 'error',
-          )
-          dlog.info('engine', 'Patch eval complete', {
-            evalMs: Math.round(result.elapsedUs / 1000),
-            changedCount: Object.keys(result.changedValues).length,
-            partial: result.partial ?? false,
-            errorCount: patchErrors.length,
-            ...(patchErrors.length > 0 ? { errorNodeIds: patchErrors.slice(0, 5) } : {}),
-          })
-          setIsPartial(result.partial ?? false)
-          // MERGE changed values into existing map (not replace).
-          setComputed((prev) => {
-            const next = new Map(prev)
-            for (const [id, val] of Object.entries(result.changedValues)) {
-              next.set(id, val as Value)
-            }
-            // Remove values for nodes that were removed.
-            for (const op of ops) {
-              if (op.op === 'removeNode') {
-                next.delete(op.nodeId)
+
+      /** Dispatch a set of patch ops to the engine worker. */
+      const firePatch = (opsToSend: PatchOp[]) => {
+        const reqId = ++pendingRef.current
+        dlog.debug('engine', 'Patch eval started', { opCount: opsToSend.length })
+        const t0 = perfEnabled ? performance.now() : 0
+        perfMark('cs:eval:start')
+        // Apply 300 ms interactive time budget so large evals return partial
+        // results quickly rather than blocking the worker. Callers can override
+        // by passing a higher timeBudgetMs in `options`.
+        engine
+          .applyPatch(opsToSend, { timeBudgetMs: 300, ...options })
+          .then((result) => {
+            if (reqId !== pendingRef.current) return
+            perfMeasure('cs:eval:patch', 'cs:eval:start')
+            if (result.partial) perfMark('cs:eval:partial')
+            const patchErrors = Object.keys(result.changedValues).filter(
+              (id) => (result.changedValues[id] as Value)?.kind === 'error',
+            )
+            dlog.info('engine', 'Patch eval complete', {
+              evalMs: Math.round(result.elapsedUs / 1000),
+              changedCount: Object.keys(result.changedValues).length,
+              partial: result.partial ?? false,
+              errorCount: patchErrors.length,
+              ...(patchErrors.length > 0 ? { errorNodeIds: patchErrors.slice(0, 5) } : {}),
+            })
+            setIsPartial(result.partial ?? false)
+            // MERGE changed values into existing map (not replace).
+            setComputed((prev) => {
+              const next = new Map(prev)
+              for (const [id, val] of Object.entries(result.changedValues)) {
+                next.set(id, val as Value)
               }
-            }
-            return next
-          })
-          if (perfEnabled) {
-            updatePerfMetrics({
-              lastEvalMs: result.elapsedUs / 1000,
-              workerRoundTripMs: performance.now() - t0,
-              nodesEvaluated: result.evaluatedCount,
-              totalNodes: result.totalCount,
-              isPartial: result.partial ?? false,
+              // Remove values for nodes that were removed.
+              for (const op of opsToSend) {
+                if (op.op === 'removeNode') {
+                  next.delete(op.nodeId)
+                }
+              }
+              return next
             })
-            engine.getStats().then((stats) => {
+            if (perfEnabled) {
               updatePerfMetrics({
-                datasetCount: stats.datasetCount,
-                datasetTotalBytes: stats.datasetTotalBytes,
+                lastEvalMs: result.elapsedUs / 1000,
+                workerRoundTripMs: performance.now() - t0,
+                nodesEvaluated: result.evaluatedCount,
+                totalNodes: result.totalCount,
+                isPartial: result.partial ?? false,
               })
-            })
-          }
-        })
-        .catch((err: unknown) => {
-          dlog.warn('engine', 'Eval interrupted', { error: String(err) })
-        })
+              engine.getStats().then((stats) => {
+                updatePerfMetrics({
+                  datasetCount: stats.datasetCount,
+                  datasetTotalBytes: stats.datasetTotalBytes,
+                })
+              })
+            }
+          })
+          .catch((err: unknown) => {
+            dlog.warn('engine', 'Eval interrupted', { error: String(err) })
+          })
+      }
+
+      if (hasStructuralChange(ops)) {
+        // Structural changes (add/remove node or edge) fire immediately.
+        // Also flush any pending data-only debounce to avoid lost updates.
+        if (patchTimerRef.current !== null) {
+          clearTimeout(patchTimerRef.current)
+          patchTimerRef.current = null
+        }
+        firePatch(ops)
+      } else {
+        // Data-only changes (node value/formula edits): debounce to coalesce
+        // rapid keystrokes before sending to the worker.
+        if (patchTimerRef.current !== null) clearTimeout(patchTimerRef.current)
+        const capturedOps = ops // snapshot at this render
+        patchTimerRef.current = setTimeout(() => {
+          patchTimerRef.current = null
+          firePatch(capturedOps)
+        }, PATCH_DEBOUNCE_MS)
+      }
     }
 
     prevNodesRef.current = nodes
