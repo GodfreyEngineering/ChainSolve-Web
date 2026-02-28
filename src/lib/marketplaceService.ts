@@ -48,6 +48,23 @@ export interface AuthorItemInput {
   thumbnail_url?: string | null
 }
 
+/**
+ * Privacy-safe aggregated analytics for a single marketplace item.
+ * No per-user identity is included — counts only.
+ */
+export interface ItemAnalyticsSummary {
+  /** Total events recorded for this item in marketplace_install_events. */
+  total: number
+  /** Events recorded in the last 30 calendar days. */
+  last30Days: number
+  /** Breakdown by event_type. */
+  byType: {
+    install: number
+    fork: number
+    purchase: number
+  }
+}
+
 // ── Semver validation (P107) ────────────────────────────────────────────────────
 
 const SEMVER_RE = /^\d+\.\d+\.\d+$/
@@ -117,6 +134,36 @@ export async function emitInstallEvent(
   await supabase
     .from('marketplace_install_events')
     .insert({ user_id: userId, item_id: itemId, event_type: eventType })
+}
+
+/**
+ * Return aggregated, privacy-safe analytics for a marketplace item.
+ *
+ * Callers must be the item author (enforced by the "mie_author_select" RLS
+ * policy on marketplace_install_events).  Raw events are aggregated here so
+ * no per-user identity is ever forwarded to the caller.
+ */
+export async function getItemAnalyticsSummary(itemId: string): Promise<ItemAnalyticsSummary> {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+  const { data, error } = await supabase
+    .from('marketplace_install_events')
+    .select('event_type, created_at')
+    .eq('item_id', itemId)
+
+  if (error) throw new Error(error.message)
+
+  const events = (data ?? []) as Array<{ event_type: string; created_at: string }>
+
+  return {
+    total: events.length,
+    last30Days: events.filter((e) => e.created_at >= thirtyDaysAgo).length,
+    byType: {
+      install: events.filter((e) => e.event_type === 'install').length,
+      fork: events.filter((e) => e.event_type === 'fork').length,
+      purchase: events.filter((e) => e.event_type === 'purchase').length,
+    },
+  }
 }
 
 /**

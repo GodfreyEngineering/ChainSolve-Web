@@ -19,6 +19,7 @@ import {
   isVerifiedAuthor,
   getPublishGate,
   emitInstallEvent,
+  getItemAnalyticsSummary,
 } from './marketplaceService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
@@ -609,5 +610,63 @@ describe('emitInstallEvent', () => {
 
     await emitInstallEvent('uid-1', 'item-3', 'purchase')
     expect(mockInsertFn).toHaveBeenCalledWith(expect.objectContaining({ event_type: 'purchase' }))
+  })
+})
+
+// ── getItemAnalyticsSummary (P115) ────────────────────────────────────────────
+
+// Helper: set up a mock chain for select().eq() that resolves directly from eq().
+function makeAnalyticsMock(result: { data: unknown; error: unknown }) {
+  const eqFn = vi.fn().mockResolvedValue(result)
+  const selectFn = vi.fn().mockReturnValue({ eq: eqFn })
+  supabaseMock.from.mockReturnValue({ select: selectFn })
+  return { eqFn, selectFn }
+}
+
+describe('getItemAnalyticsSummary', () => {
+  const now = new Date().toISOString()
+  const old = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString() // 60 days ago
+
+  it('returns zero counts when no events', async () => {
+    makeAnalyticsMock({ data: [], error: null })
+
+    const result = await getItemAnalyticsSummary('item-1')
+    expect(result).toEqual({
+      total: 0,
+      last30Days: 0,
+      byType: { install: 0, fork: 0, purchase: 0 },
+    })
+  })
+
+  it('counts total and last-30-days correctly', async () => {
+    const events = [
+      { event_type: 'install', created_at: now },
+      { event_type: 'install', created_at: old },
+      { event_type: 'fork', created_at: now },
+    ]
+    makeAnalyticsMock({ data: events, error: null })
+
+    const result = await getItemAnalyticsSummary('item-1')
+    expect(result.total).toBe(3)
+    expect(result.last30Days).toBe(2) // only the 2 'now' events
+  })
+
+  it('counts event types correctly', async () => {
+    const events = [
+      { event_type: 'install', created_at: now },
+      { event_type: 'fork', created_at: now },
+      { event_type: 'fork', created_at: now },
+      { event_type: 'purchase', created_at: now },
+    ]
+    makeAnalyticsMock({ data: events, error: null })
+
+    const result = await getItemAnalyticsSummary('item-1')
+    expect(result.byType).toEqual({ install: 1, fork: 2, purchase: 1 })
+  })
+
+  it('throws on supabase error', async () => {
+    makeAnalyticsMock({ data: null, error: { message: 'Forbidden' } })
+
+    await expect(getItemAnalyticsSummary('item-1')).rejects.toMatchObject({ message: 'Forbidden' })
   })
 })
