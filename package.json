@@ -26,6 +26,7 @@
     "perf:engine": "cargo bench --package engine-core 2>&1 | tail -60",
     "perf:all": "npm run perf:bundle",
     "test:unit": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "verify:fast": "bash scripts/verify-fast.sh",
     "verify:ci": "bash scripts/verify-ci.sh",
     "check:wasm-exports": "node scripts/check-wasm-exports.mjs"
@@ -62,6 +63,7 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "@vitest/coverage-v8": "^3.2.4",
     "binaryen": "^124.0.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
