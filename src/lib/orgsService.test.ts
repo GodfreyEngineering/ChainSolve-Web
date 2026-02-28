@@ -13,6 +13,7 @@ import {
   deleteOrg,
   getOrgPolicy,
   updateOrgPolicy,
+  getOrgSeatUsage,
 } from './orgsService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
@@ -218,12 +219,22 @@ describe('inviteOrgMember', () => {
       role: 'member',
       invited_by: 'uid-1',
     }
+    // D10-3: first two from() calls are for getOrgSeatUsage
+    const mockMaybeSingleFn = vi.fn().mockResolvedValue({ data: { max_seats: 10 }, error: null })
+    const mockSeatEq1 = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingleFn })
+    const mockSeatSelect1 = vi.fn().mockReturnValue({ eq: mockSeatEq1 })
+    const mockSeatEq2 = vi.fn().mockResolvedValue({ count: 1, error: null })
+    const mockSeatSelect2 = vi.fn().mockReturnValue({ eq: mockSeatEq2 })
+
     const mockSingleFn = vi.fn().mockResolvedValue({ data: MEMBER, error: null })
-    supabaseMock.from.mockReturnValue({
-      insert: vi
-        .fn()
-        .mockReturnValue({ select: vi.fn().mockReturnValue({ single: mockSingleFn }) }),
-    })
+    supabaseMock.from
+      .mockReturnValueOnce({ select: mockSeatSelect1 }) // org lookup
+      .mockReturnValueOnce({ select: mockSeatSelect2 }) // member count
+      .mockReturnValueOnce({
+        insert: vi
+          .fn()
+          .mockReturnValue({ select: vi.fn().mockReturnValue({ single: mockSingleFn }) }),
+      })
 
     const member = await inviteOrgMember('org-1', 'uid-2')
     expect(member.user_id).toBe('uid-2')
@@ -374,5 +385,96 @@ describe('updateOrgPolicy', () => {
     await expect(
       updateOrgPolicy('org-1', { policy_comments_allowed: false }),
     ).rejects.toMatchObject({ message: 'not owner' })
+  })
+})
+
+// ── getOrgSeatUsage (D10-3) ──────────────────────────────────────────────────
+
+describe('getOrgSeatUsage', () => {
+  it('returns used count and max seats', async () => {
+    // First call: organizations select max_seats
+    const mockMaybeSingleFn = vi.fn().mockResolvedValue({ data: { max_seats: 10 }, error: null })
+    const mockEqFn1 = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingleFn })
+    const mockSelectFn1 = vi.fn().mockReturnValue({ eq: mockEqFn1 })
+
+    // Second call: org_members count
+    const mockEqFn2 = vi.fn().mockResolvedValue({ count: 4, error: null })
+    const mockSelectFn2 = vi.fn().mockReturnValue({ eq: mockEqFn2 })
+
+    supabaseMock.from
+      .mockReturnValueOnce({ select: mockSelectFn1 })
+      .mockReturnValueOnce({ select: mockSelectFn2 })
+
+    const usage = await getOrgSeatUsage('org-1')
+    expect(usage).toEqual({ used: 4, max: 10 })
+  })
+
+  it('returns max=null for unlimited orgs', async () => {
+    const mockMaybeSingleFn = vi.fn().mockResolvedValue({ data: { max_seats: null }, error: null })
+    const mockEqFn1 = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingleFn })
+    const mockSelectFn1 = vi.fn().mockReturnValue({ eq: mockEqFn1 })
+
+    const mockEqFn2 = vi.fn().mockResolvedValue({ count: 50, error: null })
+    const mockSelectFn2 = vi.fn().mockReturnValue({ eq: mockEqFn2 })
+
+    supabaseMock.from
+      .mockReturnValueOnce({ select: mockSelectFn1 })
+      .mockReturnValueOnce({ select: mockSelectFn2 })
+
+    const usage = await getOrgSeatUsage('org-1')
+    expect(usage).toEqual({ used: 50, max: null })
+  })
+
+  it('throws when org not found', async () => {
+    const mockMaybeSingleFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    const mockEqFn1 = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingleFn })
+    supabaseMock.from.mockReturnValue({ select: vi.fn().mockReturnValue({ eq: mockEqFn1 }) })
+
+    await expect(getOrgSeatUsage('missing')).rejects.toThrow('not found')
+  })
+})
+
+// ── inviteOrgMember seat limit (D10-3) ───────────────────────────────────────
+
+describe('inviteOrgMember (D10-3 seat limit)', () => {
+  it('throws when seat limit reached', async () => {
+    // getOrgSeatUsage: org lookup then member count
+    const mockMaybeSingleFn = vi.fn().mockResolvedValue({ data: { max_seats: 2 }, error: null })
+    const mockEqFn1 = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingleFn })
+    const mockSelectFn1 = vi.fn().mockReturnValue({ eq: mockEqFn1 })
+
+    const mockEqFn2 = vi.fn().mockResolvedValue({ count: 2, error: null })
+    const mockSelectFn2 = vi.fn().mockReturnValue({ eq: mockEqFn2 })
+
+    supabaseMock.from
+      .mockReturnValueOnce({ select: mockSelectFn1 })
+      .mockReturnValueOnce({ select: mockSelectFn2 })
+
+    await expect(inviteOrgMember('org-1', 'uid-2')).rejects.toThrow('Seat limit')
+  })
+
+  it('allows invite when max_seats is null (unlimited)', async () => {
+    // getOrgSeatUsage: org lookup then member count
+    const mockMaybeSingleFn = vi.fn().mockResolvedValue({ data: { max_seats: null }, error: null })
+    const mockEqFn1 = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingleFn })
+    const mockSelectFn1 = vi.fn().mockReturnValue({ eq: mockEqFn1 })
+
+    const mockEqFn2 = vi.fn().mockResolvedValue({ count: 100, error: null })
+    const mockSelectFn2 = vi.fn().mockReturnValue({ eq: mockEqFn2 })
+
+    // inviteOrgMember insert
+    const MEMBER = { id: 'm2', org_id: 'org-1', user_id: 'uid-2', role: 'member' }
+    const mockSingleFn = vi.fn().mockResolvedValue({ data: MEMBER, error: null })
+    const mockInsertResult = {
+      select: vi.fn().mockReturnValue({ single: mockSingleFn }),
+    }
+
+    supabaseMock.from
+      .mockReturnValueOnce({ select: mockSelectFn1 }) // org lookup
+      .mockReturnValueOnce({ select: mockSelectFn2 }) // member count
+      .mockReturnValueOnce({ insert: vi.fn().mockReturnValue(mockInsertResult) }) // insert
+
+    const member = await inviteOrgMember('org-1', 'uid-2')
+    expect(member.user_id).toBe('uid-2')
   })
 })

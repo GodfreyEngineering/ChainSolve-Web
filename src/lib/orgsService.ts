@@ -19,8 +19,16 @@ export interface Org {
   policy_explore_enabled: boolean
   policy_installs_allowed: boolean
   policy_comments_allowed: boolean
+  /** D10-3: seat limit. NULL = unlimited. */
+  max_seats: number | null
   created_at: string
   updated_at: string
+}
+
+/** D10-3: seat usage info for an organization. */
+export interface OrgSeatUsage {
+  used: number
+  max: number | null
 }
 
 /** D10-2: subset of Org fields for policy checks. */
@@ -122,8 +130,38 @@ export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
 }
 
 /**
+ * D10-3: Get seat usage for an organization.
+ * Returns { used, max } where max=null means unlimited.
+ */
+export async function getOrgSeatUsage(orgId: string): Promise<OrgSeatUsage> {
+  // Fetch org max_seats
+  const { data: org, error: orgErr } = await supabase
+    .from('organizations')
+    .select('max_seats')
+    .eq('id', orgId)
+    .maybeSingle()
+
+  if (orgErr) throw orgErr
+  if (!org) throw new Error('Organization not found')
+
+  // Count current members
+  const { count, error: countErr } = await supabase
+    .from('org_members')
+    .select('id', { count: 'exact', head: true })
+    .eq('org_id', orgId)
+
+  if (countErr) throw countErr
+
+  return {
+    used: count ?? 0,
+    max: (org as { max_seats: number | null }).max_seats,
+  }
+}
+
+/**
  * Invite a user (by their user ID) to an organization.
  * Caller must be an owner or admin (enforced by RLS).
+ * D10-3: checks seat limit before inserting.
  */
 export async function inviteOrgMember(
   orgId: string,
@@ -134,6 +172,12 @@ export async function inviteOrgMember(
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) throw new Error('Sign in to invite members')
+
+  // D10-3: seat limit check
+  const { used, max } = await getOrgSeatUsage(orgId)
+  if (max !== null && used >= max) {
+    throw new Error(`Seat limit reached (${used}/${max}). Upgrade your plan to add more members.`)
+  }
 
   const { data, error } = await supabase
     .from('org_members')
