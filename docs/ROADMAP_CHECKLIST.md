@@ -723,7 +723,7 @@ Claude MUST:
   - Keep DB table names if you want, but user-facing must be Explore.
   - Acceptance: no user-facing “Marketplace” remains.
 
-- [ ] D9-2: Explore content types (v1)
+- [x] D9-2: Explore content types (v1)
   - Project templates
   - Groups
   - Themes
