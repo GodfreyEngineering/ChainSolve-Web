@@ -742,6 +742,7 @@ function ProjectCard({
             else onOpenMenu()
           }}
           title="Project actions"
+          aria-label="Project actions"
           style={{
             background: 'transparent',
             border: 'none',

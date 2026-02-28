@@ -101,6 +101,7 @@ export function BottomToolbar({
             onClick={onTogglePan}
             style={btnStyle(panMode)}
             title={t('toolbar.panMode')}
+            aria-label={t('toolbar.panMode')}
             aria-pressed={panMode}
           >
             {'\u270b'}
@@ -114,6 +115,7 @@ export function BottomToolbar({
         onClick={() => zoomOut({ duration: 200 })}
         style={btnStyle(false)}
         title={t('toolbar.zoomOut')}
+        aria-label={t('toolbar.zoomOut')}
       >
         {'\u2212'}
       </button>
@@ -134,6 +136,7 @@ export function BottomToolbar({
           onClick={() => setEditingZoom(String(Math.round(zoom * 100)))}
           style={zoomDisplayStyle}
           title={t('toolbar.zoomLevel')}
+          aria-label={t('toolbar.zoomLevel')}
         >
           {pct}
         </button>
@@ -143,6 +146,7 @@ export function BottomToolbar({
         onClick={() => zoomIn({ duration: 200 })}
         style={btnStyle(false)}
         title={t('toolbar.zoomIn')}
+        aria-label={t('toolbar.zoomIn')}
       >
         +
       </button>
@@ -151,6 +155,7 @@ export function BottomToolbar({
         onClick={() => fitView({ padding: 0.15, duration: 300 })}
         style={btnStyle(false)}
         title={t('toolbar.fitView')}
+        aria-label={t('toolbar.fitView')}
       >
         {'\u2b13'}
       </button>
@@ -163,6 +168,7 @@ export function BottomToolbar({
             onClick={onToggleLock}
             style={btnStyle(locked)}
             title={t('toolbar.lockLayout')}
+            aria-label={t('toolbar.lockLayout')}
             aria-pressed={locked}
           >
             {locked ? '\ud83d\udd12' : '\ud83d\udd13'}
@@ -171,6 +177,7 @@ export function BottomToolbar({
             onClick={onToggleSnap}
             style={btnStyle(snapToGrid)}
             title={t('toolbar.snapGrid')}
+            aria-label={t('toolbar.snapGrid')}
             aria-pressed={snapToGrid}
           >
             {'\u229e'}
@@ -179,6 +186,7 @@ export function BottomToolbar({
             onClick={(e) => onAutoOrganise(e.shiftKey)}
             style={btnStyle(false)}
             title={t('toolbar.autoOrganise')}
+            aria-label={t('toolbar.autoOrganise')}
           >
             {'\u26a1'}
           </button>
@@ -192,6 +200,7 @@ export function BottomToolbar({
         onClick={onToggleMinimap}
         style={btnStyle(minimap)}
         title={t('toolbar.minimap')}
+        aria-label={t('toolbar.minimap')}
         aria-pressed={minimap}
       >
         {'\ud83d\uddfa'}
@@ -201,6 +210,7 @@ export function BottomToolbar({
         onClick={onToggleEdgesAnimated}
         style={btnStyle(edgesAnimated)}
         title={t('toolbar.animatedEdges')}
+        aria-label={t('toolbar.animatedEdges')}
         aria-pressed={edgesAnimated}
       >
         {'\u2248'}
@@ -210,6 +220,7 @@ export function BottomToolbar({
         onClick={onToggleLod}
         style={btnStyle(lodEnabled)}
         title={t('toolbar.lod')}
+        aria-label={t('toolbar.lod')}
         aria-pressed={lodEnabled}
       >
         {'\u25e7'}
@@ -220,6 +231,7 @@ export function BottomToolbar({
           onClick={onToggleBadges}
           style={btnStyle(!!badgesEnabled)}
           title={t('toolbar.valueBadges')}
+          aria-label={t('toolbar.valueBadges')}
           aria-pressed={!!badgesEnabled}
         >
           {'\u2b1a'}
@@ -231,6 +243,7 @@ export function BottomToolbar({
           onClick={onToggleEdgeBadges}
           style={btnStyle(!!edgeBadgesEnabled)}
           title={t('toolbar.edgeBadges')}
+          aria-label={t('toolbar.edgeBadges')}
           aria-pressed={!!edgeBadgesEnabled}
         >
           {'\u22ef'}
@@ -242,6 +255,7 @@ export function BottomToolbar({
           onClick={onToggleHealthPanel}
           style={btnStyle(!!healthPanelVisible)}
           title={t('toolbar.graphHealth')}
+          aria-label={t('toolbar.graphHealth')}
           aria-pressed={!!healthPanelVisible}
         >
           {'\u2695'}
@@ -255,12 +269,18 @@ export function BottomToolbar({
         onClick={onTogglePause}
         style={btnStyle(paused)}
         title={paused ? t('toolbar.resumeEval') : t('toolbar.pauseEval')}
+        aria-label={paused ? t('toolbar.resumeEval') : t('toolbar.pauseEval')}
         aria-pressed={paused}
       >
         {paused ? '\u25b6' : '\u23f8'}
       </button>
 
-      <button onClick={onRefresh} style={btnStyle(false)} title={t('toolbar.refresh')}>
+      <button
+        onClick={onRefresh}
+        style={btnStyle(false)}
+        title={t('toolbar.refresh')}
+        aria-label={t('toolbar.refresh')}
+      >
         {'\u21bb'}
       </button>
 
@@ -272,6 +292,7 @@ export function BottomToolbar({
           onClick={onToggleLibrary}
           style={btnStyle(libVisible)}
           title={t('toolbar.library')}
+          aria-label={t('toolbar.library')}
           aria-pressed={libVisible}
         >
           {'\u2630'}
@@ -282,6 +303,7 @@ export function BottomToolbar({
         onClick={onToggleInspector}
         style={btnStyle(inspVisible)}
         title={t('toolbar.inspector')}
+        aria-label={t('toolbar.inspector')}
         aria-pressed={inspVisible}
       >
         {'\u229f'}
@@ -292,6 +314,7 @@ export function BottomToolbar({
           onClick={onToggleDebugConsole}
           style={btnStyle(!!debugConsoleVisible)}
           title={t('toolbar.debugConsole')}
+          aria-label={t('toolbar.debugConsole')}
           aria-pressed={!!debugConsoleVisible}
         >
           {'\u2261'}

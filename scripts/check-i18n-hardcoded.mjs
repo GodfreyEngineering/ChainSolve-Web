@@ -33,6 +33,8 @@ const ALLOWLIST = new Set([
   'src/components/canvas/editors/ValueEditor.tsx|Search constants & variables...',
   // GroupInspector — does not yet import useTranslation
   'src/components/canvas/GroupInspector.tsx|Add notes…',
+  // AppShell — project card ⋯ button; AppShell does not yet import useTranslation
+  'src/pages/AppShell.tsx|Project actions',
 ])
 
 // ── Scan ──────────────────────────────────────────────────────────────────────
