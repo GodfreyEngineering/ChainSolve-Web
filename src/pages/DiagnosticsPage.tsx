@@ -14,6 +14,7 @@
  *   - Doctor check results (run on demand)
  *   - Export diagnostics JSON (downloads file)
  *   - Send diagnostics to server
+ *   - Trace export (P036): toggle trace mode + download/copy last trace JSON
  */
 
 import { useState, useCallback } from 'react'
@@ -22,8 +23,32 @@ import { isDiagnosticsUIEnabled } from '../lib/devFlags'
 import { getErrorBuffer } from '../observability/client'
 import { exportDiagnostics } from '../observability/diagnostics'
 import { runDoctorChecks } from '../observability/doctor'
+import { redactObject } from '../observability/redact'
 import type { DoctorCheck } from '../observability/types'
 import type { ObsEvent } from '../observability/types'
+import type { EngineAPI, TraceEntry } from '../engine/index.ts'
+
+// ── Trace helpers (P036) ──────────────────────────────────────────────────────
+
+/** Access the global engine instance (set by main.tsx on WASM ready). */
+function getGlobalEngine(): EngineAPI | null {
+  return (
+    ((window as unknown as Record<string, unknown>).__chainsolve_engine as EngineAPI | undefined) ??
+    null
+  )
+}
+
+/**
+ * Redact error messages within a trace before export.
+ * ValueSummary.kind === 'error' has a message field that may contain user data.
+ */
+function redactTrace(trace: TraceEntry[]): unknown {
+  return trace.map((entry) => ({
+    ...entry,
+    inputs: Object.fromEntries(Object.entries(entry.inputs).map(([k, v]) => [k, redactObject(v)])),
+    output: redactObject(entry.output),
+  }))
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -104,6 +129,8 @@ export default function DiagnosticsPage() {
   const [doctorResults, setDoctorResults] = useState<DoctorCheck[] | null>(null)
   const [doctorRunning, setDoctorRunning] = useState(false)
   const [sendStatus, setSendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [traceModeOn, setTraceModeOn] = useState(false)
+  const [traceCopied, setTraceCopied] = useState(false)
   const errors: readonly ObsEvent[] = getErrorBuffer()
 
   const handleRunDoctor = useCallback(async () => {
@@ -120,6 +147,42 @@ export default function DiagnosticsPage() {
     const bundle = exportDiagnostics()
     const ts = new Date().toISOString().replace(/[:.]/g, '-')
     downloadJson(bundle, `chainsolve-diagnostics-${ts}.json`)
+  }, [])
+
+  const handleToggleTrace = useCallback(() => {
+    const engine = getGlobalEngine()
+    if (!engine) return
+    const next = !traceModeOn
+    engine.setTraceMode(next)
+    setTraceModeOn(next)
+  }, [traceModeOn])
+
+  const handleCopyTrace = useCallback(() => {
+    const engine = getGlobalEngine()
+    if (!engine) return
+    const trace = engine.getLastTrace()
+    if (!trace) return
+    const redacted = redactTrace(trace)
+    const bundle = JSON.stringify(
+      { ts: new Date().toISOString(), traceEntries: trace.length, trace: redacted },
+      null,
+      2,
+    )
+    void navigator.clipboard.writeText(bundle).then(() => {
+      setTraceCopied(true)
+      setTimeout(() => setTraceCopied(false), 2000)
+    })
+  }, [])
+
+  const handleDownloadTrace = useCallback(() => {
+    const engine = getGlobalEngine()
+    if (!engine) return
+    const trace = engine.getLastTrace()
+    if (!trace) return
+    const redacted = redactTrace(trace)
+    const bundle = { ts: new Date().toISOString(), traceEntries: trace.length, trace: redacted }
+    const ts = new Date().toISOString().replace(/[:.]/g, '-')
+    downloadJson(bundle, `chainsolve-trace-${ts}.json`)
   }, [])
 
   const handleSend = useCallback(async () => {
@@ -244,6 +307,42 @@ export default function DiagnosticsPage() {
                 )}
               </div>
             ))
+        )}
+      </section>
+
+      {/* Trace export (P036) */}
+      <section style={s.section}>
+        <h2 style={s.h2}>Trace Export</h2>
+        <p style={{ opacity: 0.5, fontSize: '0.82rem', marginTop: 0, marginBottom: '1rem' }}>
+          Enable trace mode to capture per-node execution details on the next evaluation. Navigate
+          to <code>/canvas</code> with trace mode on, then return here to export. Error messages in
+          the trace are redacted before export.
+        </p>
+        <button
+          style={{ ...s.btn, background: traceModeOn ? '#16a34a' : '#52525b' }}
+          onClick={handleToggleTrace}
+          disabled={!getGlobalEngine()}
+        >
+          {traceModeOn ? 'Trace ON — click to disable' : 'Enable trace mode'}
+        </button>
+        <button
+          style={{ ...s.btn, background: '#646cff' }}
+          onClick={handleCopyTrace}
+          disabled={!getGlobalEngine()?.getLastTrace()}
+        >
+          {traceCopied ? 'Copied!' : 'Copy trace JSON'}
+        </button>
+        <button
+          style={s.btn}
+          onClick={handleDownloadTrace}
+          disabled={!getGlobalEngine()?.getLastTrace()}
+        >
+          Download trace JSON
+        </button>
+        {!getGlobalEngine() && (
+          <p style={{ opacity: 0.4, fontSize: '0.78rem', marginTop: '0.75rem' }}>
+            Engine not ready. Navigate to <code>/canvas</code> first to initialise the engine.
+          </p>
         )}
       </section>
 

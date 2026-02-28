@@ -37,6 +37,7 @@ export type {
   CatalogEntry,
   EvalOptions,
   EngineStats,
+  TraceEntry,
 } from './wasm-types.ts'
 
 import { dlog } from '../observability/debugLog.ts'
@@ -76,6 +77,17 @@ export interface EngineAPI {
   onProgress(handler: (event: ProgressEvent) => void): () => void
   /** Terminate the worker. After this call, the engine cannot be used. */
   dispose(): void
+  /**
+   * Enable or disable per-evaluation trace capture. Debug-only.
+   * When enabled, subsequent evaluateGraph / loadSnapshot calls request a
+   * TraceEntry[] from the WASM engine and store it in the engine instance.
+   */
+  setTraceMode(enabled: boolean): void
+  /**
+   * Return the last captured trace, or null if trace mode is off or no
+   * evaluation has completed since trace mode was enabled.
+   */
+  getLastTrace(): import('./wasm-types.ts').TraceEntry[] | null
 }
 
 // ── Contract version guard ────────────────────────────────────────────────
@@ -173,6 +185,11 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
   // Watchdog timer: cleared on every response, set before each eval request.
   let watchdogTimer: ReturnType<typeof setTimeout> | null = null
 
+  // Trace mode (debug-only): when enabled, evals request a full TraceEntry[]
+  // from the WASM engine and the latest trace is stored here for export.
+  let traceEnabled = false
+  let lastTrace: import('./wasm-types.ts').TraceEntry[] | null = null
+
   type PendingEntry =
     | { kind: 'full'; resolve: (r: EngineEvalResult) => void; reject: (e: Error) => void }
     | {
@@ -248,8 +265,10 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
         if (msg.type === 'error') {
           p.reject(new Error(`[${msg.error.code}] ${msg.error.message}`))
         } else if (msg.type === 'result' && p.kind === 'full') {
+          if (msg.result.trace) lastTrace = msg.result.trace
           p.resolve(msg.result)
         } else if (msg.type === 'incremental' && p.kind === 'incremental') {
+          if (msg.result.trace) lastTrace = msg.result.trace
           p.resolve(msg.result)
         }
       }
@@ -359,21 +378,23 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
 
   return {
     evaluateGraph(snapshot, options) {
+      const opts = traceEnabled ? { ...options, trace: true } : options
       return new Promise((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'full', resolve, reject })
         startWatchdog(id)
-        postRequest({ type: 'evaluate', requestId: id, snapshot, options })
+        postRequest({ type: 'evaluate', requestId: id, snapshot, options: opts })
       })
     },
 
     loadSnapshot(snapshot, options) {
-      lastSnapshotArgs = { snapshot, options }
+      const opts = traceEnabled ? { ...options, trace: true } : options
+      lastSnapshotArgs = { snapshot, options: opts }
       return new Promise((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'full', resolve, reject })
         startWatchdog(id)
-        postRequest({ type: 'loadSnapshot', requestId: id, snapshot, options })
+        postRequest({ type: 'loadSnapshot', requestId: id, snapshot, options: opts })
       })
     },
 
@@ -429,6 +450,15 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
       return () => {
         progressListeners.delete(handler)
       }
+    },
+
+    setTraceMode(enabled) {
+      traceEnabled = enabled
+      if (!enabled) lastTrace = null
+    },
+
+    getLastTrace() {
+      return lastTrace
     },
 
     dispose() {
