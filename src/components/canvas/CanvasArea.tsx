@@ -940,6 +940,17 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [openWindow],
   )
 
+  const inspectEdge = useCallback(
+    (edgeId: string) => {
+      const edge = latestEdges.current.find((e) => e.id === edgeId)
+      if (edge) {
+        setInspectedId(edge.source)
+        openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
+      }
+    },
+    [openWindow],
+  )
+
   // Rename: prompt for a new label then update node data directly
   const renameNode = useCallback(
     (nodeId: string) => {
@@ -1815,6 +1826,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   onCopyNodeValue={copyNodeValue}
                   onJumpToNode={jumpToNode}
                   computed={computed}
+                  onPaste={readOnly ? undefined : handlePaste}
+                  onAutoLayout={readOnly ? undefined : () => handleAutoOrganise('LR')}
+                  onInspectEdge={inspectEdge}
                 />
               )}
 

@@ -43,6 +43,9 @@ interface ContextMenuProps {
   onCopyNodeValue?: (nodeId: string) => void
   onJumpToNode?: (nodeId: string) => void
   computed?: ReadonlyMap<string, Value>
+  onPaste?: () => void
+  onAutoLayout?: () => void
+  onInspectEdge?: (edgeId: string) => void
 }
 
 const item: CSSProperties = {
@@ -113,6 +116,9 @@ export function ContextMenu({
   onCopyNodeValue,
   onJumpToNode,
   computed,
+  onPaste,
+  onAutoLayout,
+  onInspectEdge,
 }: ContextMenuProps) {
   const menuStyle: CSSProperties = {
     position: 'fixed',
@@ -301,15 +307,30 @@ export function ContextMenu({
         )}
 
         {target.kind === 'edge' && (
-          <MenuItem
-            icon="✕"
-            label="Delete connection"
-            danger
-            onClick={() => {
-              onDeleteEdge(target.edgeId)
-              onClose()
-            }}
-          />
+          <>
+            {onInspectEdge && (
+              <>
+                <MenuItem
+                  icon="⬚"
+                  label="Inspect connection"
+                  onClick={() => {
+                    onInspectEdge(target.edgeId)
+                    onClose()
+                  }}
+                />
+                <div style={sep} />
+              </>
+            )}
+            <MenuItem
+              icon="✕"
+              label="Delete connection"
+              danger
+              onClick={() => {
+                onDeleteEdge(target.edgeId)
+                onClose()
+              }}
+            />
+          </>
         )}
 
         {target.kind === 'canvas' && (
@@ -322,6 +343,16 @@ export function ContextMenu({
                 onClose()
               }}
             />
+            {onPaste && (
+              <MenuItem
+                icon="⎗"
+                label="Paste"
+                onClick={() => {
+                  onPaste()
+                  onClose()
+                }}
+              />
+            )}
             <div style={sep} />
             <MenuItem
               icon="⊡"
@@ -331,6 +362,16 @@ export function ContextMenu({
                 onClose()
               }}
             />
+            {onAutoLayout && (
+              <MenuItem
+                icon="⊞"
+                label="Auto-layout"
+                onClick={() => {
+                  onAutoLayout()
+                  onClose()
+                }}
+              />
+            )}
           </>
         )}
       </div>
