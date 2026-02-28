@@ -658,7 +658,7 @@ Claude MUST:
   - If variable deleted, node shows warning and resolves NaN→error
   - Acceptance: variable flow coherent and robust.
 
-- [ ] D7-3: Constant Source node unification
+- [x] D7-3: Constant Source node unification
   - Replace multiple constant blocks with one “Constant” block
   - Dropdown/search over full constants catalog
   - Show resolved value + description
