@@ -156,6 +156,8 @@ export type WorkerResponse =
       constantValues: Record<string, number>
       engineVersion: string
       contractVersion: number
+      /** Milliseconds taken to instantiate the WASM module. */
+      initMs: number
     }
   | { type: 'result'; requestId: number; result: EngineEvalResult }
   | { type: 'incremental'; requestId: number; result: IncrementalEvalResult }

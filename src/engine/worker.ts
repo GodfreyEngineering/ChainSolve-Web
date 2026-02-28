@@ -101,13 +101,15 @@ function makeProgressCb(requestId: number, startMs: number) {
 }
 
 async function initialize() {
+  const t0 = performance.now()
   try {
     await initWasm(wasmUrl)
+    const initMs = performance.now() - t0
     const catalog = JSON.parse(get_catalog())
     const constantValues = JSON.parse(get_constant_values()) as Record<string, number>
     const engineVersion = get_engine_version()
     const contractVersion = get_engine_contract_version()
-    post({ type: 'ready', catalog, constantValues, engineVersion, contractVersion })
+    post({ type: 'ready', catalog, constantValues, engineVersion, contractVersion, initMs })
   } catch (err) {
     const raw = err instanceof Error ? err.message : String(err)
     // Detect CSP-blocked WebAssembly compilation.

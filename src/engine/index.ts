@@ -40,6 +40,7 @@ export type {
 } from './wasm-types.ts'
 
 import { dlog } from '../observability/debugLog.ts'
+import { updatePerfMetrics } from './perfMetrics.ts'
 
 export interface ProgressEvent {
   requestId: number
@@ -100,6 +101,7 @@ function waitForWorkerReady(
     constantValues: Record<string, number>,
     engineVersion: string,
     contractVersion: number,
+    initMs: number,
   ) => void,
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
@@ -115,6 +117,7 @@ function waitForWorkerReady(
           e.data.constantValues,
           e.data.engineVersion,
           e.data.contractVersion,
+          e.data.initMs,
         )
         cleanup()
         resolve()
@@ -240,6 +243,16 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
         }
       }
     })
+
+    // Resilience: handle uncaught crashes in the worker (e.g. JS exception escaping
+    // the message handler, OOM, or OS-level termination). The 'error' event fires
+    // on the Worker object from the main-thread side.
+    w.addEventListener('error', (e: ErrorEvent) => {
+      // Ignore events from old workers after a previous recreation.
+      if (w !== worker) return
+      dlog.warn('engine', 'Worker crashed — recreating', { message: e.message })
+      void doRecreate()
+    })
   }
 
   // ── Worker recreation ─────────────────────────────────────────────────
@@ -294,19 +307,23 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
   let constantValues: Record<string, number> = {}
   let engineVersion = ''
   let contractVersion = 0
+  let wasmInitMs = 0
 
-  await waitForWorkerReady(worker, (c, cv, ev, contractV) => {
+  await waitForWorkerReady(worker, (c, cv, ev, contractV, initMs) => {
     catalog = c
     constantValues = cv
     engineVersion = ev
     contractVersion = contractV
+    wasmInitMs = initMs
   })
 
+  updatePerfMetrics({ wasmInitMs })
   setupMessageHandler(worker)
   dlog.info('engine', 'Worker ready', {
     engineVersion,
     contractVersion,
     catalogSize: catalog.length,
+    wasmInitMs,
   })
 
   // ── postRequest ───────────────────────────────────────────────────────

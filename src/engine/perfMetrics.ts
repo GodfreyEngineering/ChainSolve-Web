@@ -14,6 +14,8 @@ export interface PerfSnapshot {
   datasetCount: number
   datasetTotalBytes: number
   timestamp: number
+  /** Milliseconds taken to instantiate the WASM module on last worker boot. */
+  wasmInitMs: number
 }
 
 const INITIAL: PerfSnapshot = {
@@ -25,6 +27,7 @@ const INITIAL: PerfSnapshot = {
   datasetCount: 0,
   datasetTotalBytes: 0,
   timestamp: 0,
+  wasmInitMs: 0,
 }
 
 let current: PerfSnapshot = { ...INITIAL }

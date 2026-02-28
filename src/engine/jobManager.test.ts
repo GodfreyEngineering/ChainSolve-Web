@@ -18,6 +18,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createEngine, WATCHDOG_TIMEOUT_MS } from './index.ts'
 import type { WorkerFactory } from './index.ts'
 import type { WorkerRequest, WorkerResponse, IncrementalEvalResult } from './wasm-types.ts'
+import { getPerfSnapshot } from './perfMetrics.ts'
 
 // ── Mock Worker ────────────────────────────────────────────────────────────
 
@@ -47,6 +48,11 @@ class MockWorker extends EventTarget implements EventTarget {
   /** Simulate a message from the worker → main thread. */
   dispatch(data: WorkerResponse): void {
     this.dispatchEvent(new MessageEvent('message', { data }))
+  }
+
+  /** Simulate an unhandled error in the worker (crash). */
+  dispatchError(message = 'Worker crashed'): void {
+    this.dispatchEvent(new ErrorEvent('error', { message }))
   }
 }
 
@@ -84,6 +90,7 @@ const READY_RESPONSE: WorkerResponse = {
   constantValues: {},
   engineVersion: '0.0.0-test',
   contractVersion: 1,
+  initMs: 42,
 }
 
 // ── Helper: create engine backed by a mock worker ──────────────────────────
@@ -291,5 +298,75 @@ describe('createEngine (mock worker)', () => {
     // If it fired it would try to recreate; since worker is already terminated,
     // the test would still pass but we verify terminated stays true.
     expect(w.terminated).toBe(true)
+  })
+
+  // ── P085: WASM init timing ──────────────────────────────────────────────
+
+  it('wasmInitMs_is_captured: initMs from ready message is stored in perfMetrics', async () => {
+    const [factory, getWorker] = mockFactory()
+    const enginePromise = createEngine(factory)
+    await Promise.resolve()
+    const w = getWorker()!
+    // Use a specific initMs value so we can verify it's forwarded.
+    w.dispatch({ ...READY_RESPONSE, initMs: 123 })
+    await enginePromise
+
+    const snap = getPerfSnapshot()
+    expect(snap.wasmInitMs).toBe(123)
+
+    // Regression guard: initMs must be a non-negative finite number.
+    expect(snap.wasmInitMs).toBeGreaterThanOrEqual(0)
+    expect(Number.isFinite(snap.wasmInitMs)).toBe(true)
+  })
+
+  // ── P088: Worker crash → respawn ────────────────────────────────────────
+
+  it('worker_crash_triggers_recreate: ErrorEvent on worker causes new worker to be created', async () => {
+    const [factory, getWorker] = mockFactory()
+
+    const enginePromise = createEngine(factory)
+    await Promise.resolve()
+    const w1 = getWorker()!
+    w1.dispatch(READY_RESPONSE)
+    const engine = await enginePromise
+
+    // Simulate an unhandled error in the worker (crash).
+    w1.dispatchError('Unexpected token')
+
+    // Let doRecreate run.
+    await Promise.resolve()
+    await Promise.resolve()
+
+    // A new worker should have been created.
+    const w2 = getWorker()!
+    expect(w2).not.toBe(w1)
+
+    // Clean up.
+    engine.dispose()
+  })
+
+  it('worker_crash_rejects_pending_requests: pending requests are rejected on crash', async () => {
+    const [factory, getWorker] = mockFactory()
+
+    const enginePromise = createEngine(factory)
+    await Promise.resolve()
+    const w1 = getWorker()!
+    w1.dispatch(READY_RESPONSE)
+    const engine = await enginePromise
+
+    // Start a request that won't be answered (worker will crash first).
+    const patchPromise = engine.applyPatch([]).catch((e: Error) => e.message)
+    await Promise.resolve()
+
+    // Crash the worker — pending request should be rejected.
+    w1.dispatchError('Worker crashed')
+    await Promise.resolve()
+    await Promise.resolve()
+
+    const result = await patchPromise
+    expect(typeof result).toBe('string')
+
+    // Clean up.
+    engine.dispose()
   })
 })
