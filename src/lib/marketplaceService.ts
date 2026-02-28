@@ -24,6 +24,8 @@ export interface MarketplaceItem {
   is_published: boolean
   /** For category='template': a ProjectJSON snapshot forked on install. */
   payload: unknown | null
+  /** P110: review gate — 'pending' | 'approved' | 'rejected' */
+  review_status: 'pending' | 'approved' | 'rejected'
   created_at: string
   updated_at: string
 }

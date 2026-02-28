@@ -525,6 +525,7 @@
     "verifiedBadge": "Verified author",
     "reviewPending": "Pending review",
     "reviewApproved": "Approved",
+    "draftBadge": "Draft",
     "reviewRejected": "Rejected"
   }
 }

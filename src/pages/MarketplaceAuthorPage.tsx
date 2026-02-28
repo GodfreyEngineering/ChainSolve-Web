@@ -69,6 +69,26 @@ const s = {
     border: published ? '1px solid rgba(74,222,128,0.25)' : '1px solid rgba(255,255,255,0.08)',
     flexShrink: 0,
   }),
+  reviewBadge: (status: 'pending' | 'approved' | 'rejected'): React.CSSProperties => ({
+    padding: '0.2rem 0.6rem',
+    borderRadius: 12,
+    fontSize: '0.72rem',
+    fontWeight: 600,
+    flexShrink: 0,
+    background:
+      status === 'approved'
+        ? 'rgba(74,222,128,0.12)'
+        : status === 'rejected'
+          ? 'rgba(239,68,68,0.10)'
+          : 'rgba(251,191,36,0.10)',
+    color: status === 'approved' ? '#4ade80' : status === 'rejected' ? '#f87171' : '#fbbf24',
+    border:
+      status === 'approved'
+        ? '1px solid rgba(74,222,128,0.25)'
+        : status === 'rejected'
+          ? '1px solid rgba(239,68,68,0.25)'
+          : '1px solid rgba(251,191,36,0.25)',
+  }),
   input: {
     padding: '0.5rem 0.75rem',
     borderRadius: 8,
@@ -455,8 +475,18 @@ export default function MarketplaceAuthorPage() {
             </div>
 
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+              <span
+                style={s.reviewBadge(item.review_status)}
+                data-testid={`review-status-${item.id}`}
+              >
+                {item.review_status === 'approved'
+                  ? t('marketplace.reviewApproved')
+                  : item.review_status === 'rejected'
+                    ? t('marketplace.reviewRejected')
+                    : t('marketplace.reviewPending')}
+              </span>
               <span style={s.badge(item.is_published)}>
-                {item.is_published ? t('marketplace.installed') : 'Draft'}
+                {item.is_published ? t('marketplace.installed') : t('marketplace.draftBadge')}
               </span>
               <button
                 style={s.ghostBtn}

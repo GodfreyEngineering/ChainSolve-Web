@@ -543,6 +543,7 @@
     "notVerifiedNotice": "Your account is not yet verified as a marketplace author.",
     "contactSupport": "Contact support to get verified.",
     "verifiedBadge": "Verified author",
+    "draftBadge": "Draft",
     "reviewPending": "Pending review",
     "reviewApproved": "Approved",
     "reviewRejected": "Rejected"
