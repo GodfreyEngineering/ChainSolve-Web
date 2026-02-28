@@ -534,5 +534,32 @@
     "connectStripeNotice": "Connect a Stripe account to accept payments for paid items.",
     "connectStripe": "Connect Stripe",
     "incompatibleVersion": "This item requires a newer version of ChainSolve. Please update the app."
+  },
+  "orgs": {
+    "title": "Organisationen",
+    "createOrg": "Organisation erstellen",
+    "createOrgPlaceholder": "Organisationsname",
+    "creating": "Wird erstellt…",
+    "noOrgs": "Sie gehören noch keiner Organisation an.",
+    "members": "Mitglieder",
+    "invite": "Mitglied einladen",
+    "invitePlaceholder": "Benutzer-ID",
+    "inviting": "Einladen…",
+    "roleOwner": "Eigentümer",
+    "roleAdmin": "Administrator",
+    "roleMember": "Mitglied",
+    "remove": "Entfernen",
+    "leave": "Verlassen",
+    "rename": "Umbenennen",
+    "dissolve": "Org auflösen",
+    "dissolveConfirm": "Diese Organisation auflösen? Dies kann nicht rückgängig gemacht werden.",
+    "leaveConfirm": "Diese Organisation verlassen?",
+    "removeConfirm": "Dieses Mitglied entfernen?",
+    "nameRequired": "Organisationsname ist erforderlich",
+    "nameTooLong": "Der Name darf höchstens 80 Zeichen lang sein",
+    "errorLoad": "Organisationen konnten nicht geladen werden",
+    "errorCreate": "Organisation konnte nicht erstellt werden",
+    "errorInvite": "Mitglied konnte nicht eingeladen werden",
+    "backToOrgs": "Zurück zu Organisationen"
   }
 }

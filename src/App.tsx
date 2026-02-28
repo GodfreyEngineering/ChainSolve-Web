@@ -15,6 +15,9 @@ const MarketplacePage = lazy(() => import('./pages/MarketplacePage'))
 const ItemDetailPage = lazy(() => import('./pages/ItemDetailPage'))
 const MarketplaceAuthorPage = lazy(() => import('./pages/MarketplaceAuthorPage'))
 
+// Lazy-load org pages (not needed on initial load)
+const OrgsPage = lazy(() => import('./pages/OrgsPage'))
+
 function BillingSuccess() {
   return (
     <div
@@ -117,6 +120,14 @@ export default function App() {
           element={
             <Suspense fallback={null}>
               <MarketplaceAuthorPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/orgs"
+          element={
+            <Suspense fallback={null}>
+              <OrgsPage />
             </Suspense>
           }
         />
