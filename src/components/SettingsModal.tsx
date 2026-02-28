@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getSession } from '../lib/auth'
 import { getProfile } from '../lib/profilesService'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
 import type { SettingsTab } from '../contexts/SettingsModalContext'
-import { useFocusTrap } from '../hooks/useFocusTrap'
 import { ProfileSettings } from '../pages/settings/ProfileSettings'
 import { PreferencesSettings } from '../pages/settings/PreferencesSettings'
 import { BillingAuthGate } from './BillingAuthGate'
+import { AppWindow } from './ui/AppWindow'
+import { SETTINGS_WINDOW_ID } from './SettingsModalProvider'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../lib/profilesService'
 
@@ -33,7 +34,6 @@ const TABS: { key: SettingsTab; icon: string }[] = [
 export function SettingsModal() {
   const { open, tab, closeSettings, setTab } = useSettingsModal()
   const { t } = useTranslation()
-  const panelRef = useRef<HTMLDivElement>(null)
   const narrow = useSyncExternalStore(subscribeNarrow, getNarrow)
 
   // ── Data loading ───────────────────────────────────────────────────────
@@ -51,46 +51,13 @@ export function SettingsModal() {
     })
   }, [open])
 
-  // ── ESC to close ───────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!open) return
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeSettings()
-    }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [open, closeSettings])
-
-  // ── Body scroll lock ───────────────────────────────────────────────────
-  useEffect(() => {
-    if (!open) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = prev
-    }
-  }, [open])
-
-  // ── Focus trap ─────────────────────────────────────────────────────────
-  useFocusTrap(panelRef, open)
-
-  if (!open) return null
-
   return (
-    <div
-      style={overlayStyle}
-      onClick={(e) => {
-        if (panelRef.current && !panelRef.current.contains(e.target as Node)) closeSettings()
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-label={t('settings.title')}
-    >
+    <AppWindow windowId={SETTINGS_WINDOW_ID} title={t('settings.title')} minWidth={400}>
       <div
-        ref={panelRef}
         style={{
-          ...panelStyle,
+          display: 'flex',
           flexDirection: narrow ? 'column' : 'row',
+          height: '100%',
         }}
       >
         {/* ── Sidebar / tab bar ────────────────────────────────────────── */}
@@ -148,35 +115,11 @@ export function SettingsModal() {
           {tab === 'preferences' && <PreferencesSettings />}
         </main>
       </div>
-    </div>
+    </AppWindow>
   )
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  zIndex: 9000,
-  background: 'rgba(0,0,0,0.6)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  animation: 'cs-fade-in 0.15s ease',
-}
-
-const panelStyle: React.CSSProperties = {
-  background: 'var(--card-bg)',
-  border: '1px solid var(--border)',
-  borderRadius: 14,
-  boxShadow: '0 12px 48px rgba(0,0,0,0.55)',
-  width: 720,
-  maxWidth: '94vw',
-  maxHeight: '85vh',
-  display: 'flex',
-  overflow: 'hidden',
-  animation: 'cs-slide-up 0.2s ease',
-}
 
 const sidebarStyle: React.CSSProperties = {
   width: 200,

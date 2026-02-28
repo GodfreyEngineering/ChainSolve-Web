@@ -3,15 +3,18 @@ import { useTranslation } from 'react-i18next'
 import { BRAND, CONTACT } from '../../lib/brand'
 import { useProjectStore } from '../../stores/projectStore'
 import { useSettingsModal } from '../../contexts/SettingsModalContext'
+import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../ui/useToast'
 import { DropdownMenu, type MenuEntry } from '../ui/DropdownMenu'
 import type { ConfirmAction } from './ConfirmDialog'
+import { ABOUT_WINDOW_ID } from './AboutModal'
+import { DOCS_WINDOW_ID } from './DocsSearchModal'
 
 const LazyBugReportModal = lazy(() =>
   import('../BugReportModal').then((m) => ({ default: m.BugReportModal })),
 )
-const LazyAboutModal = lazy(() => import('./AboutModal').then((m) => ({ default: m.AboutModal })))
+const LazyAboutWindow = lazy(() => import('./AboutModal').then((m) => ({ default: m.AboutWindow })))
 const LazyConfirmDialog = lazy(() =>
   import('./ConfirmDialog').then((m) => ({ default: m.ConfirmDialog })),
 )
@@ -27,8 +30,8 @@ const LazyCommandPalette = lazy(() =>
 const LazyKeyboardShortcutsModal = lazy(() =>
   import('./KeyboardShortcutsModal').then((m) => ({ default: m.KeyboardShortcutsModal })),
 )
-const LazyDocsSearchModal = lazy(() =>
-  import('./DocsSearchModal').then((m) => ({ default: m.DocsSearchModal })),
+const LazyDocsSearchWindow = lazy(() =>
+  import('./DocsSearchModal').then((m) => ({ default: m.DocsSearchWindow })),
 )
 const LazyWhatsNewModal = lazy(() =>
   import('./WhatsNewModal').then((m) => ({ default: m.WhatsNewModal })),
@@ -160,6 +163,7 @@ export function AppHeader({
   const { t } = useTranslation()
   const { toast } = useToast()
   const { openSettings } = useSettingsModal()
+  const { openWindow: openWin, isOpen: isWinOpen } = useWindowManager()
   const { mode: themeMode, setMode: setThemeMode } = useTheme()
 
   const saveStatus = useProjectStore((s) => s.saveStatus)
@@ -171,9 +175,7 @@ export function AppHeader({
   const [includeTables, setIncludeTables] = useState(getIncludeTablesPref)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [bugReportOpen, setBugReportOpen] = useState(false)
-  const [aboutOpen, setAboutOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
-  const [docsOpen, setDocsOpen] = useState(false)
   const [whatsNewOpen, setWhatsNewOpen] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [openDialogOpen, setOpenDialogOpen] = useState(false)
@@ -694,7 +696,7 @@ export function AppHeader({
       {
         label: t('menu.documentation'),
         onClick: () => {
-          setDocsOpen(true)
+          openWin(DOCS_WINDOW_ID, { width: 580, height: 500 })
           setOpenMenu(null)
         },
       },
@@ -731,12 +733,12 @@ export function AppHeader({
       {
         label: t('menu.about'),
         onClick: () => {
-          setAboutOpen(true)
+          openWin(ABOUT_WINDOW_ID, { width: 380, height: 280 })
           setOpenMenu(null)
         },
       },
     ],
-    [t, stub],
+    [t, stub, openWin],
   )
 
   const menus = useMemo(
@@ -951,9 +953,9 @@ export function AppHeader({
           <LazyBugReportModal open onClose={() => setBugReportOpen(false)} />
         </Suspense>
       )}
-      {aboutOpen && (
+      {isWinOpen(ABOUT_WINDOW_ID) && (
         <Suspense fallback={null}>
-          <LazyAboutModal open onClose={() => setAboutOpen(false)} />
+          <LazyAboutWindow />
         </Suspense>
       )}
       {shortcutsOpen && (
@@ -965,9 +967,9 @@ export function AppHeader({
           />
         </Suspense>
       )}
-      {docsOpen && (
+      {isWinOpen(DOCS_WINDOW_ID) && (
         <Suspense fallback={null}>
-          <LazyDocsSearchModal open onClose={() => setDocsOpen(false)} />
+          <LazyDocsSearchWindow />
         </Suspense>
       )}
       {whatsNewOpen && (

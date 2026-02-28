@@ -1,25 +1,22 @@
 import { useTranslation } from 'react-i18next'
-import { Modal } from '../ui/Modal'
+import { AppWindow } from '../ui/AppWindow'
 import { BRAND, CONTACT } from '../../lib/brand'
 import { BUILD_VERSION, BUILD_SHA } from '../../lib/build-info'
 
-interface Props {
-  open: boolean
-  onClose: () => void
-}
+export const ABOUT_WINDOW_ID = 'about'
 
-export function AboutModal({ open, onClose }: Props) {
+export function AboutWindow() {
   const { t } = useTranslation()
 
   return (
-    <Modal open={open} onClose={onClose} title={t('menu.about')} width={380}>
+    <AppWindow windowId={ABOUT_WINDOW_ID} title={t('menu.about')} minWidth={320} minHeight={200}>
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           gap: '1rem',
-          padding: '0.5rem 0',
+          padding: '1.5rem',
         }}
       >
         <img src={BRAND.logoWideText} alt="ChainSolve" style={{ height: 32 }} />
@@ -39,9 +36,12 @@ export function AboutModal({ open, onClose }: Props) {
           </a>
         </div>
       </div>
-    </Modal>
+    </AppWindow>
   )
 }
+
+/** @deprecated Use AboutWindow + useWindowManager().openWindow('about') instead. */
+export const AboutModal = AboutWindow
 
 const versionStyle: React.CSSProperties = {
   fontFamily: "'JetBrains Mono', monospace",

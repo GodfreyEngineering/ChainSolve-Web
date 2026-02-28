@@ -1,14 +1,11 @@
 import { useState, useRef, useMemo, useLayoutEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Modal } from '../ui/Modal'
+import { AppWindow } from '../ui/AppWindow'
 import { searchDocs, DOCS_INDEX, type DocsEntry } from '../../docs/docsIndex'
 
-interface Props {
-  open: boolean
-  onClose: () => void
-}
+export const DOCS_WINDOW_ID = 'docs'
 
-export function DocsSearchModal({ open, onClose }: Props) {
+export function DocsSearchWindow() {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -47,54 +44,59 @@ export function DocsSearchModal({ open, onClose }: Props) {
   const isSearching = query.trim().length > 0
 
   return (
-    <Modal open={open} onClose={onClose} title={t('docs.title')} width={580}>
-      {/* Search input */}
-      <input
-        ref={inputRef}
-        style={inputStyle}
-        type="search"
-        placeholder={t('docs.searchPlaceholder')}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        aria-label={t('docs.searchPlaceholder')}
-        autoComplete="off"
-        spellCheck={false}
-      />
+    <AppWindow windowId={DOCS_WINDOW_ID} title={t('docs.title')} minWidth={400} minHeight={300}>
+      <div style={{ padding: '1rem' }}>
+        {/* Search input */}
+        <input
+          ref={inputRef}
+          style={inputStyle}
+          type="search"
+          placeholder={t('docs.searchPlaceholder')}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label={t('docs.searchPlaceholder')}
+          autoComplete="off"
+          spellCheck={false}
+        />
 
-      {/* Results / browse */}
-      <div style={listStyle} role="list" aria-label={t('docs.results')}>
-        {isSearching && !hasResults && <p style={emptyStyle}>{t('docs.noResults', { query })}</p>}
+        {/* Results / browse */}
+        <div style={listStyle} role="list" aria-label={t('docs.results')}>
+          {isSearching && !hasResults && <p style={emptyStyle}>{t('docs.noResults', { query })}</p>}
 
-        {isSearching && hasResults && (
-          <>
-            {grouped.map(([section, entries]) => (
-              <section key={section} aria-label={section}>
-                <h3 style={sectionHeadingStyle}>{section}</h3>
-                {entries.map((entry) => (
-                  <DocsItem key={entry.id} entry={entry} />
-                ))}
-              </section>
-            ))}
-          </>
-        )}
+          {isSearching && hasResults && (
+            <>
+              {grouped.map(([section, entries]) => (
+                <section key={section} aria-label={section}>
+                  <h3 style={sectionHeadingStyle}>{section}</h3>
+                  {entries.map((entry) => (
+                    <DocsItem key={entry.id} entry={entry} />
+                  ))}
+                </section>
+              ))}
+            </>
+          )}
 
-        {!isSearching && (
-          <>
-            <p style={browseHintStyle}>{t('docs.browseHint')}</p>
-            {sections.map(([section, entries]) => (
-              <section key={section} aria-label={section}>
-                <h3 style={sectionHeadingStyle}>{section}</h3>
-                {entries.map((entry) => (
-                  <DocsItem key={entry.id} entry={entry} />
-                ))}
-              </section>
-            ))}
-          </>
-        )}
+          {!isSearching && (
+            <>
+              <p style={browseHintStyle}>{t('docs.browseHint')}</p>
+              {sections.map(([section, entries]) => (
+                <section key={section} aria-label={section}>
+                  <h3 style={sectionHeadingStyle}>{section}</h3>
+                  {entries.map((entry) => (
+                    <DocsItem key={entry.id} entry={entry} />
+                  ))}
+                </section>
+              ))}
+            </>
+          )}
+        </div>
       </div>
-    </Modal>
+    </AppWindow>
   )
 }
+
+/** @deprecated Use DocsSearchWindow + useWindowManager().openWindow('docs') instead. */
+export const DocsSearchModal = DocsSearchWindow
 
 // ── DocsItem ─────────────────────────────────────────────────────────────────
 
