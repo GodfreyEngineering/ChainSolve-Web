@@ -63,6 +63,10 @@ const MUST_BE_LAZY = [
 
   // Perf HUD
   'src/components/PerfHud.tsx',
+
+  // P149 / P150: Canvas dialogs (always lazy)
+  'src/components/canvas/LlmGraphBuilderDialog.tsx',
+  'src/components/canvas/TemplateManagerDialog.tsx',
 ]
 
 // ── Load manifest ─────────────────────────────────────────────────────────

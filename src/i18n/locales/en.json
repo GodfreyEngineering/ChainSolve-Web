@@ -333,7 +333,9 @@
     "changelog": "Changelog",
     "comingSoon": "Coming soon",
     "notifications": "Notifications",
-    "menubar": "Application menu"
+    "menubar": "Application menu",
+    "buildWithAI": "Build with AI…",
+    "manageTemplates": "Manage Templates…"
   },
   "time": {
     "justNow": "just now",
@@ -349,7 +351,7 @@
     "title": "Documentation",
     "searchPlaceholder": "Search docs…",
     "results": "Search results",
-    "noResults": "No results for \u201c{{query}}\u201d",
+    "noResults": "No results for “{{query}}”",
     "browseHint": "Browse all topics, or type to search."
   },
   "commandPalette": {
@@ -597,5 +599,36 @@
     "colId": "ID",
     "filterUser": "My events",
     "filterOrg": "Org events"
+  },
+  "llmBuilder": {
+    "title": "Build with AI",
+    "subtitle": "Describe the graph you want to create in natural language.",
+    "promptLabel": "Describe your graph",
+    "promptPlaceholder": "e.g. Calculate the drag force on a sphere moving through water at various speeds",
+    "generate": "Generate",
+    "generating": "Generating…",
+    "planReady": "Graph plan generated!",
+    "planSummaryLabel": "Summary",
+    "nodeCount": "{{count}} nodes",
+    "edgeCount": "{{count}} edges",
+    "notConfiguredTitle": "AI not configured",
+    "notConfiguredBody": "Set VITE_LLM_API_KEY in your .env file to enable AI-assisted graph building."
+  },
+  "templateManager": {
+    "title": "Manage Templates",
+    "subtitle": "Rename or delete your saved reusable group templates.",
+    "empty": "No templates saved yet. Save a group as a template to see it here.",
+    "loading": "Loading templates…",
+    "rename": "Rename",
+    "confirmRename": "Confirm rename",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this template? This cannot be undone.",
+    "errorLoad": "Failed to load templates.",
+    "errorRename": "Failed to rename template.",
+    "errorDelete": "Failed to delete template."
+  },
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close"
   }
 }

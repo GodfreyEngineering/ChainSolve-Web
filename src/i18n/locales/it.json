@@ -324,7 +324,9 @@
     "changelog": "Registro modifiche",
     "comingSoon": "Prossimamente",
     "notifications": "Notifiche",
-    "menubar": "Menu dell'applicazione"
+    "menubar": "Menu dell'applicazione",
+    "buildWithAI": "Crea con IA…",
+    "manageTemplates": "Gestisci modelli…"
   },
   "time": {
     "justNow": "proprio ora",
@@ -577,5 +579,36 @@
     "colId": "ID",
     "filterUser": "I miei eventi",
     "filterOrg": "Eventi org"
+  },
+  "llmBuilder": {
+    "title": "Crea con IA",
+    "subtitle": "Descrivi il grafo che vuoi creare in linguaggio naturale.",
+    "promptLabel": "Descrivi il tuo grafo",
+    "promptPlaceholder": "es. Calcola la forza di resistenza su una sfera che si muove nell'acqua",
+    "generate": "Genera",
+    "generating": "Generazione…",
+    "planReady": "Piano del grafo generato!",
+    "planSummaryLabel": "Riepilogo",
+    "nodeCount": "{{count}} nodi",
+    "edgeCount": "{{count}} archi",
+    "notConfiguredTitle": "IA non configurata",
+    "notConfiguredBody": "Imposta VITE_LLM_API_KEY nel tuo file .env per abilitare la creazione assistita dall'IA."
+  },
+  "templateManager": {
+    "title": "Gestisci modelli",
+    "subtitle": "Rinomina o elimina i tuoi modelli di gruppo riutilizzabili.",
+    "empty": "Nessun modello salvato. Salva un gruppo come modello per vederlo qui.",
+    "loading": "Caricamento modelli…",
+    "rename": "Rinomina",
+    "confirmRename": "Conferma rinomina",
+    "delete": "Elimina",
+    "deleteConfirm": "Eliminare questo modello? Questa azione non può essere annullata.",
+    "errorLoad": "Impossibile caricare i modelli.",
+    "errorRename": "Impossibile rinominare il modello.",
+    "errorDelete": "Impossibile eliminare il modello."
+  },
+  "common": {
+    "cancel": "Annulla",
+    "close": "Chiudi"
   }
 }

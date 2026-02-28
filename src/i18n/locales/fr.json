@@ -324,7 +324,9 @@
     "changelog": "Journal des modifications",
     "comingSoon": "Bientôt disponible",
     "notifications": "Notifications",
-    "menubar": "Menu de l'application"
+    "menubar": "Menu de l'application",
+    "buildWithAI": "Créer avec l'IA…",
+    "manageTemplates": "Gérer les modèles…"
   },
   "time": {
     "justNow": "à l'instant",
@@ -577,5 +579,36 @@
     "colId": "ID",
     "filterUser": "Mes événements",
     "filterOrg": "Événements de l'org"
+  },
+  "llmBuilder": {
+    "title": "Créer avec l'IA",
+    "subtitle": "Décrivez le graphe que vous souhaitez créer en langage naturel.",
+    "promptLabel": "Décrivez votre graphe",
+    "promptPlaceholder": "ex. Calculer la force de traînée sur une sphère se déplaçant dans l'eau",
+    "generate": "Générer",
+    "generating": "Génération…",
+    "planReady": "Plan du graphe généré !",
+    "planSummaryLabel": "Résumé",
+    "nodeCount": "{{count}} nœuds",
+    "edgeCount": "{{count}} arêtes",
+    "notConfiguredTitle": "IA non configurée",
+    "notConfiguredBody": "Définissez VITE_LLM_API_KEY dans votre fichier .env pour activer la construction assistée par IA."
+  },
+  "templateManager": {
+    "title": "Gérer les modèles",
+    "subtitle": "Renommez ou supprimez vos modèles de groupes réutilisables.",
+    "empty": "Aucun modèle enregistré. Sauvegardez un groupe comme modèle pour le voir ici.",
+    "loading": "Chargement des modèles…",
+    "rename": "Renommer",
+    "confirmRename": "Confirmer le renommage",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer ce modèle ? Cette action est irréversible.",
+    "errorLoad": "Impossible de charger les modèles.",
+    "errorRename": "Impossible de renommer le modèle.",
+    "errorDelete": "Impossible de supprimer le modèle."
+  },
+  "common": {
+    "cancel": "Annuler",
+    "close": "Fermer"
   }
 }

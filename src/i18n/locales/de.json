@@ -324,7 +324,9 @@
     "changelog": "Änderungsprotokoll",
     "comingSoon": "Demnächst",
     "notifications": "Benachrichtigungen",
-    "menubar": "Anwendungsmenü"
+    "menubar": "Anwendungsmenü",
+    "buildWithAI": "Mit KI erstellen…",
+    "manageTemplates": "Vorlagen verwalten…"
   },
   "time": {
     "justNow": "gerade eben",
@@ -577,5 +579,36 @@
     "colId": "ID",
     "filterUser": "Meine Ereignisse",
     "filterOrg": "Org-Ereignisse"
+  },
+  "llmBuilder": {
+    "title": "Mit KI erstellen",
+    "subtitle": "Beschreibe den Graphen, den du erstellen möchtest, in natürlicher Sprache.",
+    "promptLabel": "Beschreibe deinen Graphen",
+    "promptPlaceholder": "z.B. Berechne die Widerstandskraft auf eine Kugel, die sich durch Wasser bewegt",
+    "generate": "Generieren",
+    "generating": "Wird generiert…",
+    "planReady": "Graphenplan erstellt!",
+    "planSummaryLabel": "Zusammenfassung",
+    "nodeCount": "{{count}} Knoten",
+    "edgeCount": "{{count}} Kanten",
+    "notConfiguredTitle": "KI nicht konfiguriert",
+    "notConfiguredBody": "Setze VITE_LLM_API_KEY in deiner .env-Datei, um KI-gestützte Graphenerstellung zu aktivieren."
+  },
+  "templateManager": {
+    "title": "Vorlagen verwalten",
+    "subtitle": "Benenne wiederverwendbare Gruppenvorlagen um oder lösche sie.",
+    "empty": "Noch keine Vorlagen gespeichert. Speichere eine Gruppe als Vorlage, um sie hier zu sehen.",
+    "loading": "Vorlagen werden geladen…",
+    "rename": "Umbenennen",
+    "confirmRename": "Umbenennung bestätigen",
+    "delete": "Löschen",
+    "deleteConfirm": "Diese Vorlage löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "errorLoad": "Vorlagen konnten nicht geladen werden.",
+    "errorRename": "Vorlage konnte nicht umbenannt werden.",
+    "errorDelete": "Vorlage konnte nicht gelöscht werden."
+  },
+  "common": {
+    "cancel": "Abbrechen",
+    "close": "Schließen"
   }
 }

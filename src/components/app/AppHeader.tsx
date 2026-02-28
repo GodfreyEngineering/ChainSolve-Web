@@ -33,6 +33,12 @@ const LazyDocsSearchModal = lazy(() =>
 const LazyWhatsNewModal = lazy(() =>
   import('./WhatsNewModal').then((m) => ({ default: m.WhatsNewModal })),
 )
+const LazyLlmGraphBuilderDialog = lazy(() =>
+  import('../canvas/LlmGraphBuilderDialog').then((m) => ({ default: m.LlmGraphBuilderDialog })),
+)
+const LazyTemplateManagerDialog = lazy(() =>
+  import('../canvas/TemplateManagerDialog').then((m) => ({ default: m.TemplateManagerDialog })),
+)
 import { CATEGORY_ORDER, CATEGORY_LABELS } from '../../blocks/registry'
 import { getCurrentUser } from '../../lib/auth'
 import { getRecentProjects } from '../../lib/recentProjects'
@@ -180,6 +186,8 @@ export function AppHeader({
 
   const isMobile = useIsMobile()
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [llmBuilderOpen, setLlmBuilderOpen] = useState(false)
+  const [templateManagerOpen, setTemplateManagerOpen] = useState(false)
 
   // Fetch user email once for avatar
   useEffect(() => {
@@ -662,6 +670,21 @@ export function AppHeader({
       { label: t('menu.clearCanvas'), onClick: stub },
       { separator: true },
       { label: t('menu.canvasSettings'), onClick: stub },
+      { separator: true },
+      {
+        label: t('menu.buildWithAI'),
+        onClick: () => {
+          setLlmBuilderOpen(true)
+          setOpenMenu(null)
+        },
+      },
+      {
+        label: t('menu.manageTemplates'),
+        onClick: () => {
+          setTemplateManagerOpen(true)
+          setOpenMenu(null)
+        },
+      },
     ],
     [t, stub, canvasRef],
   )
@@ -979,6 +1002,16 @@ export function AppHeader({
       {paletteOpen && (
         <Suspense fallback={null}>
           <LazyCommandPalette actions={paletteActions} onClose={() => setPaletteOpen(false)} />
+        </Suspense>
+      )}
+      {llmBuilderOpen && (
+        <Suspense fallback={null}>
+          <LazyLlmGraphBuilderDialog open onClose={() => setLlmBuilderOpen(false)} />
+        </Suspense>
+      )}
+      {templateManagerOpen && (
+        <Suspense fallback={null}>
+          <LazyTemplateManagerDialog open onClose={() => setTemplateManagerOpen(false)} />
         </Suspense>
       )}
     </>

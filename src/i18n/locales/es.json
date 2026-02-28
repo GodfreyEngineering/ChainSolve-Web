@@ -324,7 +324,9 @@
     "changelog": "Registro de cambios",
     "comingSoon": "Próximamente",
     "notifications": "Notificaciones",
-    "menubar": "Menú de la aplicación"
+    "menubar": "Menú de la aplicación",
+    "buildWithAI": "Construir con IA…",
+    "manageTemplates": "Administrar plantillas…"
   },
   "time": {
     "justNow": "ahora mismo",
@@ -577,5 +579,36 @@
     "colId": "ID",
     "filterUser": "Mis eventos",
     "filterOrg": "Eventos de la org"
+  },
+  "llmBuilder": {
+    "title": "Construir con IA",
+    "subtitle": "Describe el grafo que deseas crear en lenguaje natural.",
+    "promptLabel": "Describe tu grafo",
+    "promptPlaceholder": "ej. Calcular la fuerza de arrastre sobre una esfera moviéndose en agua",
+    "generate": "Generar",
+    "generating": "Generando…",
+    "planReady": "¡Plan del grafo generado!",
+    "planSummaryLabel": "Resumen",
+    "nodeCount": "{{count}} nodos",
+    "edgeCount": "{{count}} aristas",
+    "notConfiguredTitle": "IA no configurada",
+    "notConfiguredBody": "Establece VITE_LLM_API_KEY en tu archivo .env para habilitar la construcción asistida por IA."
+  },
+  "templateManager": {
+    "title": "Administrar plantillas",
+    "subtitle": "Renombra o elimina tus plantillas de grupos reutilizables.",
+    "empty": "No hay plantillas guardadas. Guarda un grupo como plantilla para verlo aquí.",
+    "loading": "Cargando plantillas…",
+    "rename": "Renombrar",
+    "confirmRename": "Confirmar nombre",
+    "delete": "Eliminar",
+    "deleteConfirm": "¿Eliminar esta plantilla? Esta acción no se puede deshacer.",
+    "errorLoad": "Error al cargar las plantillas.",
+    "errorRename": "Error al renombrar la plantilla.",
+    "errorDelete": "Error al eliminar la plantilla."
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "close": "Cerrar"
   }
 }
