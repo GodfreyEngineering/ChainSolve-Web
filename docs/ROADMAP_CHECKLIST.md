@@ -382,7 +382,7 @@ Claude MUST:
 - [x] P086: Bundle splitting audit (ensure lazy libs remain lazy)
 - [x] P087: Table limits enforcement + UX
 - [x] P088: Worker resilience (crash → respawn → notice)
-- [ ] P089: Eval scheduling to avoid main-thread stalls (SHOULD)
+- [x] P089: Eval scheduling to avoid main-thread stalls (SHOULD)
 - [x] P090: Lighthouse/perf budget doc + optional CI check (SHOULD)
 
 ## A9 — Test suite completion + release hardening
