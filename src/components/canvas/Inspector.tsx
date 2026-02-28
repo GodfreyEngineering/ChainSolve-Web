@@ -9,10 +9,12 @@
 import { useEffect } from 'react'
 import { useNodes, useEdges, useReactFlow } from '@xyflow/react'
 import { useComputed } from '../../contexts/ComputedContext'
+import { useEngine } from '../../contexts/EngineContext'
 import { isError, isScalar } from '../../engine/value'
 import { useFormatValue } from '../../hooks/useFormatValue'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 import type { InputBinding, PlotConfig } from '../../blocks/types'
+import type { TraceEntry } from '../../engine/index.ts'
 import { ensureBinding } from '../../lib/migrateBindings'
 import { ValueEditor } from './editors/ValueEditor'
 import { PlotInspector } from './PlotInspector'
@@ -70,6 +72,7 @@ export function Inspector({
   const allEdges = useEdges()
   const { updateNodeData } = useReactFlow()
   const computed = useComputed()
+  const engine = useEngine()
 
   const formatValue = useFormatValue()
   const node = nodeId ? (allNodes.find((n) => n.id === nodeId) ?? null) : null
@@ -412,6 +415,149 @@ export function Inspector({
                 })}
               </div>
             )}
+
+            {/* Explain this value — P037 ─────────────────────────────── */}
+            {/* Show connected input values (upstream sources + resolved value) */}
+            {def &&
+              def.inputs.length > 0 &&
+              (() => {
+                const connectedPorts = def.inputs.filter((port) =>
+                  allEdges.some((e) => e.target === node.id && e.targetHandle === port.id),
+                )
+                if (connectedPorts.length === 0) return null
+                return (
+                  <div style={{ marginBottom: '0.7rem' }}>
+                    <span style={fieldLabel}>Input values</span>
+                    {connectedPorts.map((port) => {
+                      const edge = allEdges.find(
+                        (e) => e.target === node.id && e.targetHandle === port.id,
+                      )
+                      if (!edge) return null
+                      const srcNode = allNodes.find((n) => n.id === edge.source)
+                      const srcLabel =
+                        (srcNode?.data as NodeData | undefined)?.label ??
+                        (srcNode?.data as NodeData | undefined)?.blockType ??
+                        edge.source
+                      const srcValue = computed.get(edge.source)
+                      return (
+                        <div
+                          key={port.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'baseline',
+                            gap: '0.35rem',
+                            marginBottom: '0.25rem',
+                            fontSize: '0.72rem',
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: 'rgba(244,244,243,0.5)',
+                              width: 40,
+                              flexShrink: 0,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {port.label}
+                          </span>
+                          <span
+                            style={{
+                              color: 'rgba(244,244,243,0.4)',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              flex: 1,
+                            }}
+                            title={String(srcLabel)}
+                          >
+                            ← {srcLabel}
+                          </span>
+                          <span
+                            style={{
+                              fontFamily: 'monospace',
+                              color: '#1CABB0',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {srcValue !== undefined ? formatValue(srcValue) : '—'}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+
+            {/* Trace timing — show if trace mode captured data for this node */}
+            {(() => {
+              const traceData: TraceEntry[] | null = engine.getLastTrace()
+              const entry = traceData?.find((t) => t.nodeId === node.id) ?? null
+              if (!entry) return null
+
+              function summariseValue(v: TraceEntry['output']): string {
+                if (v.kind === 'scalar')
+                  return String(isFinite(v.value) ? v.value : v.value > 0 ? '+∞' : '−∞')
+                if (v.kind === 'vector') return `vector[${v.length}]`
+                if (v.kind === 'table') return `table(${v.rows}×${v.columns})`
+                return v.message.slice(0, 40)
+              }
+
+              return (
+                <div style={{ marginBottom: '0.7rem' }}>
+                  <span style={fieldLabel}>Trace</span>
+                  {Object.entries(entry.inputs).map(([portId, summary]) => (
+                    <div
+                      key={portId}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        gap: '0.35rem',
+                        marginBottom: '0.2rem',
+                        fontSize: '0.72rem',
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: 'rgba(244,244,243,0.5)',
+                          width: 40,
+                          flexShrink: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {portId}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: 'monospace',
+                          color: 'rgba(244,244,243,0.55)',
+                          flex: 1,
+                        }}
+                      >
+                        {summariseValue(summary)}
+                      </span>
+                    </div>
+                  ))}
+                  <div
+                    style={{
+                      marginTop: '0.25rem',
+                      fontSize: '0.68rem',
+                      display: 'flex',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    <span style={{ color: 'rgba(244,244,243,0.35)' }}>out</span>
+                    <span style={{ fontFamily: 'monospace', color: '#1CABB0' }}>
+                      {summariseValue(entry.output)}
+                    </span>
+                  </div>
+                </div>
+              )
+            })()}
+            {/* ───────────────────────────────────────────────────────────── */}
 
             {/* Plot inspector (csPlot nodes) */}
             {def?.nodeKind === 'csPlot' &&
