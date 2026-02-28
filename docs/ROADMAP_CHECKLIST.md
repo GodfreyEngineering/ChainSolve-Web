@@ -630,7 +630,7 @@ Claude MUST:
   - Keep only a *Variable Source node* that selects from saved variables (see D7)
   - Acceptance: library no longer exposes “variable CRUD” as blocks.
 
-- [ ] D6-4: Library structure refactor
+- [x] D6-4: Library structure refactor
   - Primary families:
     - Inputs
     - Variable Source
