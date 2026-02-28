@@ -5,8 +5,11 @@
  *
  * Features:
  *   - Search bar (name filter)
- *   - Category filter tabs (All | Templates | Block packs | Themes)
+ *   - Category filter tabs (All | Templates | Block packs | Themes | Groups | Custom Blocks)
+ *   - Sort: most downloaded, most liked, newest (D9-5)
+ *   - Tag filter (D9-5)
  *   - Item grid with install button
+ *   - Plan-based install gating (D9-3)
  *   - Loading and empty states
  *   - Auth-gated install (prompts login for unauthenticated users)
  */
@@ -24,7 +27,12 @@ import {
   likeItem,
   unlikeItem,
   type MarketplaceItem,
+  type ExploreSortKey,
 } from '../lib/marketplaceService'
+import { getProfile } from '../lib/profilesService'
+import { getProjectCount } from '../lib/projects'
+import { canInstallExploreItem, type Plan } from '../lib/entitlements'
+import { getSession } from '../lib/auth'
 import { BRAND } from '../lib/brand'
 
 /** Map category key to i18n label key. */
@@ -119,18 +127,34 @@ const s = {
     cursor: 'pointer',
     fontFamily: 'inherit',
   }),
-  installBtn: (installed: boolean, loading: boolean): React.CSSProperties => ({
+  installBtn: (installed: boolean, loading: boolean, locked: boolean): React.CSSProperties => ({
     marginTop: 'auto',
     padding: '0.45rem 1rem',
     borderRadius: 8,
     border: 'none',
-    background: installed ? 'rgba(74,222,128,0.12)' : loading ? '#3f3f46' : '#1CABB0',
-    color: installed ? '#4ade80' : loading ? 'rgba(244,244,243,0.4)' : '#fff',
+    background: installed
+      ? 'rgba(74,222,128,0.12)'
+      : locked
+        ? 'rgba(124,58,237,0.15)'
+        : loading
+          ? '#3f3f46'
+          : '#1CABB0',
+    color: installed ? '#4ade80' : locked ? '#a78bfa' : loading ? 'rgba(244,244,243,0.4)' : '#fff',
     fontSize: '0.82rem',
     fontWeight: 600,
     cursor: installed || loading ? 'default' : 'pointer',
     fontFamily: 'inherit',
   }),
+  selectStyle: {
+    padding: '0.4rem 0.6rem',
+    borderRadius: 8,
+    border: '1px solid rgba(255,255,255,0.12)',
+    background: 'rgba(0,0,0,0.25)',
+    color: 'var(--fg, #F4F4F3)',
+    fontSize: '0.82rem',
+    outline: 'none',
+    fontFamily: 'inherit',
+  } satisfies React.CSSProperties,
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -148,13 +172,41 @@ export default function MarketplacePage() {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('all')
 
+  // D9-3: plan + project count for install gating
+  const [plan, setPlan] = useState<Plan>('free')
+  const [projectCount, setProjectCount] = useState(0)
+
+  // D9-5: sort + tag filter
+  const [sort, setSort] = useState<ExploreSortKey>('downloads')
+  const [tagFilter, setTagFilter] = useState('')
+
+  // Fetch plan + project count on mount
+  useEffect(() => {
+    void (async () => {
+      try {
+        const session = await getSession()
+        if (!session) return
+        const [profile, count] = await Promise.all([getProfile(session.user.id), getProjectCount()])
+        if (profile?.plan) setPlan(profile.plan as Plan)
+        setProjectCount(count)
+      } catch {
+        // Non-critical — default to 'free' plan
+      }
+    })()
+  }, [])
+
   // Fetch items + user installs + likes on mount / filter change
   const fetchItems = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
       const [fetched, installs, likes] = await Promise.all([
-        listPublishedItems(category === 'all' ? undefined : category, query),
+        listPublishedItems(
+          category === 'all' ? undefined : category,
+          query,
+          sort,
+          tagFilter || undefined,
+        ),
         getUserInstalls(),
         getUserLikes(),
       ])
@@ -166,7 +218,7 @@ export default function MarketplacePage() {
     } finally {
       setLoading(false)
     }
-  }, [category, query])
+  }, [category, query, sort, tagFilter])
 
   useEffect(() => {
     void fetchItems()
@@ -175,24 +227,31 @@ export default function MarketplacePage() {
   const handleInstall = useCallback(
     async (itemId: string) => {
       if (installedIds.has(itemId) || installingId === itemId) return
-      setInstallingId(itemId)
       const item = items.find((i) => i.id === itemId)
+      if (!item) return
+
+      // D9-3: plan gating check
+      if (!canInstallExploreItem(plan, item.category, projectCount)) {
+        setError(t('marketplace.upgradeToInstall'))
+        return
+      }
+
+      setInstallingId(itemId)
       try {
-        if (item?.category === 'template') {
-          // Fork the template into the user's projects, then navigate there
+        if (item.category === 'template') {
           const projectId = await forkTemplate(itemId)
+          setProjectCount((c) => c + 1)
           navigate(`/canvas/${projectId}`)
           return
         }
-        if (item?.category === 'block_pack') {
+        if (item.category === 'block_pack') {
           await installBlockPack(itemId)
-        } else if (item?.category === 'theme') {
+        } else if (item.category === 'theme') {
           await installTheme(itemId)
         }
         setInstalledIds((prev) => new Set([...prev, itemId]))
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
-        // If unauthenticated, redirect to login
         if (msg.toLowerCase().includes('sign in')) {
           navigate('/login')
           return
@@ -202,7 +261,7 @@ export default function MarketplacePage() {
         setInstallingId(null)
       }
     },
-    [installedIds, installingId, navigate, items],
+    [installedIds, installingId, navigate, items, plan, projectCount, t],
   )
 
   const handleToggleLike = useCallback(
@@ -299,7 +358,7 @@ export default function MarketplacePage() {
           {t('marketplace.subtitle')}
         </p>
 
-        {/* Search */}
+        {/* Search + Sort + Tag filter (D9-5) */}
         <div style={s.searchRow}>
           <input
             type="search"
@@ -309,6 +368,26 @@ export default function MarketplacePage() {
             style={s.searchInput}
             aria-label={t('marketplace.searchPlaceholder')}
             data-testid="marketplace-search"
+          />
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as ExploreSortKey)}
+            style={s.selectStyle}
+            aria-label={t('marketplace.sortMostDownloaded')}
+            data-testid="marketplace-sort"
+          >
+            <option value="downloads">{t('marketplace.sortMostDownloaded')}</option>
+            <option value="likes">{t('marketplace.sortMostLiked')}</option>
+            <option value="newest">{t('marketplace.sortNewestFirst')}</option>
+          </select>
+          <input
+            type="text"
+            placeholder={t('marketplace.filterByTag')}
+            value={tagFilter}
+            onChange={(e) => setTagFilter(e.target.value)}
+            style={{ ...s.searchInput, flex: 'none', minWidth: 140, width: 160 }}
+            aria-label={t('marketplace.filterByTag')}
+            data-testid="marketplace-tag-filter"
           />
         </div>
 
@@ -370,6 +449,8 @@ export default function MarketplacePage() {
             {items.map((item) => {
               const isInstalled = installedIds.has(item.id)
               const isInstalling = installingId === item.id
+              const canInstall = canInstallExploreItem(plan, item.category, projectCount)
+              const isLocked = !canInstall && !isInstalled
               return (
                 <article key={item.id} style={s.card}>
                   {item.thumbnail_url && (
@@ -488,21 +569,27 @@ export default function MarketplacePage() {
                   >
                     {likedIds.has(item.id) ? '\u2665' : '\u2661'} {item.likes_count ?? 0}
                   </button>
+                  {/* Install / Locked button */}
                   <button
-                    style={s.installBtn(isInstalled, isInstalling)}
+                    style={s.installBtn(isInstalled, isInstalling, isLocked)}
                     onClick={() => void handleInstall(item.id)}
                     disabled={isInstalled || isInstalling}
                     aria-label={
                       isInstalled
                         ? t('marketplace.installed')
-                        : t('marketplace.install') + ' ' + item.name
+                        : isLocked
+                          ? t('marketplace.upgradeToInstall')
+                          : t('marketplace.install') + ' ' + item.name
                     }
+                    data-testid={`install-btn-${item.id}`}
                   >
                     {isInstalled
                       ? t('marketplace.installed')
                       : isInstalling
                         ? t('marketplace.installing')
-                        : t('marketplace.install')}
+                        : isLocked
+                          ? t('marketplace.proRequired')
+                          : t('marketplace.install')}
                   </button>
                 </article>
               )

@@ -102,6 +102,28 @@ export function isReadOnly(plan: Plan): boolean {
   return plan === 'past_due' || plan === 'canceled'
 }
 
+/**
+ * Whether the user can install an Explore item of the given category.
+ *
+ * D9-3 rules:
+ * - past_due / canceled: never
+ * - Pro / trialing / enterprise: always
+ * - Free: templates only, and only if projectCount < maxProjects (1)
+ * - Free cannot install groups, themes, custom blocks, or block packs
+ */
+export function canInstallExploreItem(plan: Plan, category: string, projectCount: number): boolean {
+  if (plan === 'past_due' || plan === 'canceled') return false
+  if (isPro(plan)) return true
+  // Free plan: templates only if project limit allows
+  if (category === 'template') return projectCount < getEntitlements(plan).maxProjects
+  return false
+}
+
+/** Whether the user can upload/publish content to Explore. Pro+ only. */
+export function canUploadToExplore(plan: Plan): boolean {
+  return isPro(plan)
+}
+
 /** Whether the user is allowed to create / duplicate / import a project. */
 export function canCreateProject(plan: Plan, currentCount: number): boolean {
   if (plan === 'past_due' || plan === 'canceled') return false

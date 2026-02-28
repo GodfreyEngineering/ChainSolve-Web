@@ -14,6 +14,8 @@ import {
   canCreateCanvas,
   showBillingBanner,
   isBlockEntitled,
+  canInstallExploreItem,
+  canUploadToExplore,
   type Plan,
   type Entitlements,
 } from './entitlements'
@@ -233,5 +235,60 @@ describe('isBlockEntitled', () => {
     const entEnt = getEntitlements('enterprise')
     expect(isBlockEntitled({ proOnly: true, category: 'plot' }, entEnt)).toBe(true)
     expect(isBlockEntitled({ proOnly: true, category: 'array' }, entEnt)).toBe(true)
+  })
+})
+
+// ── canInstallExploreItem (D9-3) ─────────────────────────────────────────────
+
+describe('canInstallExploreItem', () => {
+  it('pro/trialing/enterprise can install any category', () => {
+    const proCases: Plan[] = ['pro', 'trialing', 'enterprise']
+    for (const plan of proCases) {
+      expect(canInstallExploreItem(plan, 'template', 0)).toBe(true)
+      expect(canInstallExploreItem(plan, 'block_pack', 5)).toBe(true)
+      expect(canInstallExploreItem(plan, 'theme', 10)).toBe(true)
+      expect(canInstallExploreItem(plan, 'group', 0)).toBe(true)
+      expect(canInstallExploreItem(plan, 'custom_block', 0)).toBe(true)
+    }
+  })
+
+  it('free can install template when projectCount < maxProjects', () => {
+    expect(canInstallExploreItem('free', 'template', 0)).toBe(true)
+  })
+
+  it('free cannot install template when projectCount >= maxProjects', () => {
+    expect(canInstallExploreItem('free', 'template', 1)).toBe(false)
+    expect(canInstallExploreItem('free', 'template', 5)).toBe(false)
+  })
+
+  it('free cannot install non-template categories', () => {
+    expect(canInstallExploreItem('free', 'block_pack', 0)).toBe(false)
+    expect(canInstallExploreItem('free', 'theme', 0)).toBe(false)
+    expect(canInstallExploreItem('free', 'group', 0)).toBe(false)
+    expect(canInstallExploreItem('free', 'custom_block', 0)).toBe(false)
+  })
+
+  it('past_due and canceled cannot install anything', () => {
+    for (const plan of ['past_due', 'canceled'] as Plan[]) {
+      expect(canInstallExploreItem(plan, 'template', 0)).toBe(false)
+      expect(canInstallExploreItem(plan, 'block_pack', 0)).toBe(false)
+      expect(canInstallExploreItem(plan, 'theme', 0)).toBe(false)
+    }
+  })
+})
+
+// ── canUploadToExplore (D9-3) ────────────────────────────────────────────────
+
+describe('canUploadToExplore', () => {
+  it('returns true for pro/trialing/enterprise', () => {
+    expect(canUploadToExplore('pro')).toBe(true)
+    expect(canUploadToExplore('trialing')).toBe(true)
+    expect(canUploadToExplore('enterprise')).toBe(true)
+  })
+
+  it('returns false for free/past_due/canceled', () => {
+    expect(canUploadToExplore('free')).toBe(false)
+    expect(canUploadToExplore('past_due')).toBe(false)
+    expect(canUploadToExplore('canceled')).toBe(false)
   })
 })

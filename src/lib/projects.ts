@@ -147,6 +147,25 @@ export async function listProjects(): Promise<ProjectRow[]> {
   return (data ?? []) as ProjectRow[]
 }
 
+/**
+ * Return the number of projects owned by the current user.
+ * Lightweight head-only query — does not fetch row data.
+ * Returns 0 when unauthenticated.
+ */
+export async function getProjectCount(): Promise<number> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) return 0
+
+  const { count, error } = await supabase
+    .from('projects')
+    .select('id', { count: 'exact', head: true })
+
+  if (error) throw new Error(`Failed to count projects: ${error.message}`)
+  return count ?? 0
+}
+
 /** Create a new project row + empty project.json in storage. */
 export async function createProject(name: string): Promise<ProjectRow> {
   const session = await requireSession()

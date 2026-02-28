@@ -7,8 +7,8 @@
  *   - Item metadata (name, version, author, category, downloads)
  *   - Thumbnail
  *   - Description (full)
- *   - Install / Installed button (auth-gated)
- *   - Back link to marketplace browse
+ *   - Install / Installed button (auth-gated + plan-gated D9-3)
+ *   - Back link to Explore browse
  *   - Loading and not-found states
  */
 
@@ -27,6 +27,10 @@ import {
   type MarketplaceItem,
 } from '../lib/marketplaceService'
 import { createCheckoutSession } from '../lib/stripeConnectService'
+import { getProfile } from '../lib/profilesService'
+import { getProjectCount } from '../lib/projects'
+import { canInstallExploreItem, type Plan } from '../lib/entitlements'
+import { getSession } from '../lib/auth'
 import { BRAND } from '../lib/brand'
 
 const CATEGORY_LABEL_KEYS: Record<string, string> = {
@@ -72,18 +76,25 @@ const s = {
     margin: '0 auto',
     padding: '2rem 1.5rem',
   } satisfies React.CSSProperties,
-  installBtn: (done: boolean, loading: boolean, isPaid: boolean): React.CSSProperties => ({
+  installBtn: (
+    done: boolean,
+    loading: boolean,
+    isPaid: boolean,
+    locked: boolean,
+  ): React.CSSProperties => ({
     padding: '0.6rem 1.5rem',
     borderRadius: 8,
     border: 'none',
     background: done
       ? 'rgba(74,222,128,0.12)'
-      : loading
-        ? '#3f3f46'
-        : isPaid
-          ? '#7c3aed'
-          : '#1CABB0',
-    color: done ? '#4ade80' : loading ? 'rgba(244,244,243,0.4)' : '#fff',
+      : locked
+        ? 'rgba(124,58,237,0.15)'
+        : loading
+          ? '#3f3f46'
+          : isPaid
+            ? '#7c3aed'
+            : '#1CABB0',
+    color: done ? '#4ade80' : locked ? '#a78bfa' : loading ? 'rgba(244,244,243,0.4)' : '#fff',
     fontSize: '0.9rem',
     fontWeight: 600,
     cursor: done || loading ? 'default' : 'pointer',
@@ -105,6 +116,10 @@ export default function ItemDetailPage() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // D9-3: plan + project count for install gating
+  const [plan, setPlan] = useState<Plan>('free')
+  const [projectCount, setProjectCount] = useState(0)
 
   useEffect(() => {
     if (!itemId) {
@@ -128,6 +143,16 @@ export default function ItemDetailPage() {
           setInstalled(installs.some((p) => p.item_id === itemId))
           setLiked(likes.has(itemId))
         }
+        // D9-3: fetch plan + project count
+        const session = await getSession()
+        if (session) {
+          const [profile, count] = await Promise.all([
+            getProfile(session.user.id),
+            getProjectCount(),
+          ])
+          if (profile?.plan) setPlan(profile.plan as Plan)
+          setProjectCount(count)
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err))
       } finally {
@@ -137,6 +162,8 @@ export default function ItemDetailPage() {
   }, [itemId])
 
   const isPaid = (item?.price_cents ?? 0) > 0
+  const canInstall = item ? canInstallExploreItem(plan, item.category, projectCount) : false
+  const isLocked = !canInstall && !installed && !isPaid
 
   const handleToggleLike = useCallback(async () => {
     if (!itemId || !item) return
@@ -162,6 +189,13 @@ export default function ItemDetailPage() {
 
   const handleInstall = useCallback(async () => {
     if (!itemId || installed || installing) return
+
+    // D9-3: plan gating check
+    if (!isPaid && item && !canInstallExploreItem(plan, item.category, projectCount)) {
+      setError(t('marketplace.upgradeToInstall'))
+      return
+    }
+
     setInstalling(true)
     try {
       // Paid item — redirect to Stripe Checkout
@@ -173,6 +207,7 @@ export default function ItemDetailPage() {
       if (item?.category === 'template') {
         // Fork the template into the user's projects, then navigate there
         const projectId = await forkTemplate(itemId)
+        setProjectCount((c) => c + 1)
         navigate(`/canvas/${projectId}`)
         return
       }
@@ -192,7 +227,7 @@ export default function ItemDetailPage() {
     } finally {
       setInstalling(false)
     }
-  }, [itemId, installed, installing, navigate, item, isPaid])
+  }, [itemId, installed, installing, navigate, item, isPaid, plan, projectCount, t])
 
   return (
     <div style={s.page}>
@@ -350,28 +385,35 @@ export default function ItemDetailPage() {
                   gap: '0.3rem',
                 }}
               >
-                {!isPaid && !installed && (
+                {!isPaid && !installed && !isLocked && (
                   <span style={{ fontSize: '0.72rem', color: 'rgba(74,222,128,0.7)' }}>
                     {t('marketplace.free')}
                   </span>
                 )}
+                {isLocked && (
+                  <span style={{ fontSize: '0.72rem', color: '#a78bfa' }}>
+                    {t('marketplace.proRequired')}
+                  </span>
+                )}
                 <button
-                  style={s.installBtn(installed, installing, isPaid)}
+                  style={s.installBtn(installed, installing, isPaid, isLocked)}
                   onClick={() => void handleInstall()}
                   disabled={installed || installing}
                   data-testid="install-btn"
                 >
                   {installed
                     ? t('marketplace.installed')
-                    : installing
-                      ? isPaid
-                        ? t('marketplace.buying')
-                        : t('marketplace.installing')
-                      : isPaid
-                        ? t('marketplace.buyFor', {
-                            price: (item.price_cents / 100).toFixed(2),
-                          })
-                        : t('marketplace.install')}
+                    : isLocked
+                      ? t('marketplace.upgradeToInstall')
+                      : installing
+                        ? isPaid
+                          ? t('marketplace.buying')
+                          : t('marketplace.installing')
+                        : isPaid
+                          ? t('marketplace.buyFor', {
+                              price: (item.price_cents / 100).toFixed(2),
+                            })
+                          : t('marketplace.install')}
                 </button>
                 <button
                   onClick={() => void handleToggleLike()}

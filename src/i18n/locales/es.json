@@ -606,7 +606,14 @@
     "purchased": "Purchased",
     "connectStripeNotice": "Connect a Stripe account to accept payments for paid items.",
     "connectStripe": "Connect Stripe",
-    "incompatibleVersion": "This item requires a newer version of ChainSolve. Please update the app."
+    "incompatibleVersion": "This item requires a newer version of ChainSolve. Please update the app.",
+    "upgradeToInstall": "Upgrade to Pro to install this item",
+    "projectLimitReached": "Project limit reached — upgrade to Pro for unlimited projects",
+    "proRequired": "Pro",
+    "sortMostDownloaded": "Most downloaded",
+    "sortMostLiked": "Most liked",
+    "sortNewestFirst": "Newest first",
+    "filterByTag": "Filter by tag…"
   },
   "orgs": {
     "title": "Organizaciones",
