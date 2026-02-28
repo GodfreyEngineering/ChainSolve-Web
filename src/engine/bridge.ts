@@ -42,6 +42,10 @@ export function toEngineSnapshot(
       if (blockType === 'constant' && typeof data.selectedConstantId === 'string') {
         blockType = data.selectedConstantId
       }
+      // D7-4: Unified material block maps to the selected material preset's op ID.
+      if (blockType === 'material' && typeof data.selectedMaterialId === 'string') {
+        blockType = data.selectedMaterialId
+      }
       // W12.2: resolve inputBindings → manualValues before sending to Rust.
       if (constants && variables && data.inputBindings) {
         const resolved = resolveNodeBindings(

@@ -111,6 +111,16 @@ reg({
   defaultData: { blockType: 'constant', label: 'Constant' },
 })
 
+// D7-4: Unified material/fluid picker
+reg({
+  type: 'material',
+  label: 'Material',
+  category: 'presetMaterials',
+  nodeKind: 'csSource',
+  inputs: [],
+  defaultData: { blockType: 'material', label: 'Material' },
+})
+
 // ── Math category ─────────────────────────────────────────────────────────────
 
 reg({
@@ -596,6 +606,25 @@ export function getConstantsCatalog(): ConstantCatalogEntry[] {
   const entries: ConstantCatalogEntry[] = []
   for (const [, def] of BLOCK_REGISTRY) {
     if (CONSTANT_CATEGORIES.has(def.category) && def.type !== 'constant') {
+      entries.push({ type: def.type, label: def.label, category: def.category })
+    }
+  }
+  return entries
+}
+
+// ── Materials catalog for unified Material node (D7-4) ──────────────────────
+
+/** Categories that contain material and fluid presets. */
+const MATERIAL_CATEGORIES: ReadonlySet<BlockCategory> = new Set(['presetMaterials', 'presetFluids'])
+
+/**
+ * Returns the list of all material/fluid preset block types that can be
+ * selected in the unified Material node.
+ */
+export function getMaterialsCatalog(): ConstantCatalogEntry[] {
+  const entries: ConstantCatalogEntry[] = []
+  for (const [, def] of BLOCK_REGISTRY) {
+    if (MATERIAL_CATEGORIES.has(def.category) && def.type !== 'material') {
       entries.push({ type: def.type, label: def.label, category: def.category })
     }
   }

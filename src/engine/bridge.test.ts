@@ -171,6 +171,31 @@ describe('toEngineSnapshot — constant block mapping (D7-3)', () => {
   })
 })
 
+describe('toEngineSnapshot — material block mapping (D7-4)', () => {
+  it('maps material blockType to selectedMaterialId', () => {
+    const nodes = [
+      makeNode('m1', 'material', {
+        blockType: 'material',
+        selectedMaterialId: 'preset.materials.steel_rho',
+      }),
+    ]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes[0].blockType).toBe('preset.materials.steel_rho')
+  })
+
+  it('keeps blockType as "material" when no selectedMaterialId', () => {
+    const nodes = [makeNode('m1', 'material', { blockType: 'material' })]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes[0].blockType).toBe('material')
+  })
+
+  it('keeps blockType as "material" when selectedMaterialId is not a string', () => {
+    const nodes = [makeNode('m1', 'material', { blockType: 'material', selectedMaterialId: 99 })]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes[0].blockType).toBe('material')
+  })
+})
+
 describe('toEngineSnapshot — multi-node graph', () => {
   it('produces a correct snapshot for physics-101-style graph', () => {
     const nodes = [

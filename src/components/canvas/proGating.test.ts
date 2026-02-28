@@ -12,6 +12,7 @@ import {
   CATEGORY_ORDER,
   LIBRARY_FAMILIES,
   getConstantsCatalog,
+  getMaterialsCatalog,
 } from '../../blocks/registry'
 import { getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 
@@ -171,5 +172,38 @@ describe('Constants catalog (D7-3)', () => {
   it('catalog has at least 20 entries', () => {
     const catalog = getConstantsCatalog()
     expect(catalog.length).toBeGreaterThanOrEqual(20)
+  })
+})
+
+// ── D7-4: Unified Material node catalog ─────────────────────────────────────
+
+describe('Materials catalog (D7-4)', () => {
+  it('unified material block is registered', () => {
+    const def = BLOCK_REGISTRY.get('material')
+    expect(def).toBeDefined()
+    expect(def!.nodeKind).toBe('csSource')
+    expect(def!.category).toBe('presetMaterials')
+    expect(def!.inputs).toEqual([])
+  })
+
+  it('catalog contains all material/fluid presets except the unified one', () => {
+    const catalog = getMaterialsCatalog()
+    const catalogTypes = new Set(catalog.map((c) => c.type))
+    expect(catalogTypes.has('material')).toBe(false)
+    expect(catalogTypes.has('preset.materials.steel_rho')).toBe(true)
+    expect(catalogTypes.has('preset.fluids.water_rho')).toBe(true)
+  })
+
+  it('catalog does not include physics/math constants', () => {
+    const catalog = getMaterialsCatalog()
+    const constTypes = catalog.filter(
+      (c) => c.type.startsWith('const.') || ['pi', 'euler', 'tau', 'phi'].includes(c.type),
+    )
+    expect(constTypes).toEqual([])
+  })
+
+  it('catalog has at least 10 entries', () => {
+    const catalog = getMaterialsCatalog()
+    expect(catalog.length).toBeGreaterThanOrEqual(10)
   })
 })

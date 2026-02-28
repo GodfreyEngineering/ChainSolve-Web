@@ -133,6 +133,8 @@ export interface NodeData extends Record<string, unknown> {
   varId?: string
   /** Selected constant op ID for unified "constant" nodes (D7-3). */
   selectedConstantId?: string
+  /** Selected material/fluid preset op ID for unified "material" nodes (D7-4). */
+  selectedMaterialId?: string
   /** Vector data for vectorInput nodes. */
   vectorData?: number[]
   /** Table data for tableInput / csvImport nodes. */

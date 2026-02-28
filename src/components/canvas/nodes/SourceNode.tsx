@@ -11,7 +11,7 @@ import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
 import { useShowValuePopover } from '../../../contexts/ValuePopoverContext'
 import { formatValue } from '../../../engine/value'
-import { CATEGORY_LABELS, getConstantsCatalog } from '../../../blocks/registry'
+import { CATEGORY_LABELS, getConstantsCatalog, getMaterialsCatalog } from '../../../blocks/registry'
 import type { NodeData } from '../../../blocks/registry'
 import { useVariablesStore } from '../../../stores/variablesStore'
 import { NODE_STYLES as s } from './nodeStyles'
@@ -39,25 +39,37 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
   const isNumber = nd.blockType === 'number'
   const isVariableSource = nd.blockType === 'variableSource'
   const isConstantPicker = nd.blockType === 'constant'
-  const isEditable = isSlider || isNumber || isVariableSource || isConstantPicker
+  const isMaterialPicker = nd.blockType === 'material'
+  const isEditable =
+    isSlider || isNumber || isVariableSource || isConstantPicker || isMaterialPicker
 
-  // D7-3: Constants catalog for the unified Constant node
-  const constantsCatalog = useMemo(() => {
-    if (!isConstantPicker) return []
-    const catalog = getConstantsCatalog()
-    // Group by category for <optgroup>
-    const grouped = new Map<string, typeof catalog>()
-    for (const entry of catalog) {
-      const group = grouped.get(entry.category) ?? []
-      group.push(entry)
-      grouped.set(entry.category, group)
-    }
-    return Array.from(grouped.entries()).map(([cat, entries]) => ({
-      category: cat,
-      label: CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ?? cat,
-      entries,
-    }))
-  }, [isConstantPicker])
+  // D7-3/D7-4: Catalog grouping helper for unified picker nodes
+  const groupCatalog = useCallback(
+    (catalog: { type: string; label: string; category: string }[]) => {
+      const grouped = new Map<string, typeof catalog>()
+      for (const entry of catalog) {
+        const group = grouped.get(entry.category) ?? []
+        group.push(entry)
+        grouped.set(entry.category, group)
+      }
+      return Array.from(grouped.entries()).map(([cat, entries]) => ({
+        category: cat,
+        label: CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ?? cat,
+        entries,
+      }))
+    },
+    [],
+  )
+
+  const constantsCatalog = useMemo(
+    () => (isConstantPicker ? groupCatalog(getConstantsCatalog()) : []),
+    [isConstantPicker, groupCatalog],
+  )
+
+  const materialsCatalog = useMemo(
+    () => (isMaterialPicker ? groupCatalog(getMaterialsCatalog()) : []),
+    [isMaterialPicker, groupCatalog],
+  )
 
   // W12.2: variableSource — sync variable value → node value
   const variables = useVariablesStore((s) => s.variables)
@@ -220,6 +232,46 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
                 {group.entries.map((c) => (
                   <option key={c.type} value={c.type}>
                     {c.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {isMaterialPicker && (
+        <div className="cs-node-body" style={s.body}>
+          <select
+            className="nodrag"
+            style={{
+              width: '100%',
+              padding: '0.2rem 0.3rem',
+              borderRadius: 4,
+              border: `1px solid ${nd.selectedMaterialId ? 'rgba(255,255,255,0.12)' : 'rgba(251,191,36,0.4)'}`,
+              background: 'rgba(0,0,0,0.2)',
+              color: nd.selectedMaterialId ? '#93c5fd' : 'rgba(244,244,243,0.4)',
+              fontSize: '0.7rem',
+              fontFamily: 'inherit',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+            value={(nd.selectedMaterialId as string) ?? ''}
+            onChange={(e) => {
+              const matId = e.target.value || undefined
+              const entry = materialsCatalog.flatMap((g) => g.entries).find((m) => m.type === matId)
+              updateNodeData(id, {
+                selectedMaterialId: matId,
+                label: entry?.label ?? 'Material',
+              })
+            }}
+          >
+            <option value="">Select material...</option>
+            {materialsCatalog.map((group) => (
+              <optgroup key={group.category} label={group.label}>
+                {group.entries.map((m) => (
+                  <option key={m.type} value={m.type}>
+                    {m.label}
                   </option>
                 ))}
               </optgroup>
