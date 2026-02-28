@@ -1,8 +1,13 @@
-import { useState } from 'react'
+import { useState, Suspense, lazy } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../../lib/supabase'
 import { Button } from '../../components/ui/Button'
+import { isReauthed } from '../../lib/reauth'
 import type { Profile } from '../Settings'
+
+const LazyReauthModal = lazy(() =>
+  import('../../components/ui/ReauthModal').then((m) => ({ default: m.ReauthModal })),
+)
 
 type Plan = 'free' | 'trialing' | 'pro' | 'past_due' | 'canceled'
 
@@ -22,6 +27,8 @@ export function BillingSettings({ profile }: Props) {
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [reauthOpen, setReauthOpen] = useState(false)
+  const [pendingEndpoint, setPendingEndpoint] = useState<string | null>(null)
 
   const plan = (profile?.plan ?? 'free') as Plan
   const canUpgrade = plan === 'free' || plan === 'canceled'
@@ -66,60 +73,92 @@ export function BillingSettings({ profile }: Props) {
     }
   }
 
+  const handleBillingClick = (endpoint: string) => {
+    if (isReauthed()) {
+      void callBillingApi(endpoint)
+    } else {
+      setPendingEndpoint(endpoint)
+      setReauthOpen(true)
+    }
+  }
+
+  const onReauthSuccess = () => {
+    setReauthOpen(false)
+    if (pendingEndpoint) {
+      void callBillingApi(pendingEndpoint)
+      setPendingEndpoint(null)
+    }
+  }
+
   return (
-    <div>
-      <h2 style={headingStyle}>{t('settings.billing')}</h2>
+    <>
+      {reauthOpen && (
+        <Suspense fallback={null}>
+          <LazyReauthModal
+            open={reauthOpen}
+            onClose={() => {
+              setReauthOpen(false)
+              setPendingEndpoint(null)
+            }}
+            onSuccess={onReauthSuccess}
+          />
+        </Suspense>
+      )}
 
-      <div style={cardStyle}>
-        {error && <div style={errorBox}>{error}</div>}
+      <div>
+        <h2 style={headingStyle}>{t('settings.billing')}</h2>
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem',
-          }}
-        >
-          <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-            <div style={fieldCol}>
-              <span style={fieldLabel}>{t('billing.currentPlan')}</span>
-              <span style={planBadgeStyle(plan)}>{t(`plans.${plan}`)}</span>
-            </div>
-            {periodEnd && (
+        <div style={cardStyle}>
+          {error && <div style={errorBox}>{error}</div>}
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '1rem',
+            }}
+          >
+            <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
               <div style={fieldCol}>
-                <span style={fieldLabel}>
-                  {plan === 'trialing' ? t('billing.trialEnds') : t('billing.renews')}
-                </span>
-                <span style={{ fontWeight: 500 }}>{periodEnd}</span>
+                <span style={fieldLabel}>{t('billing.currentPlan')}</span>
+                <span style={planBadgeStyle(plan)}>{t(`plans.${plan}`)}</span>
               </div>
-            )}
-          </div>
+              {periodEnd && (
+                <div style={fieldCol}>
+                  <span style={fieldLabel}>
+                    {plan === 'trialing' ? t('billing.trialEnds') : t('billing.renews')}
+                  </span>
+                  <span style={{ fontWeight: 500 }}>{periodEnd}</span>
+                </div>
+              )}
+            </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            {canUpgrade && (
-              <Button
-                variant="primary"
-                disabled={loading}
-                onClick={() => void callBillingApi('/api/stripe/create-checkout-session')}
-              >
-                {loading ? t('billing.redirecting') : t('billing.upgrade')}
-              </Button>
-            )}
-            {canManage && (
-              <Button
-                variant="secondary"
-                disabled={loading}
-                onClick={() => void callBillingApi('/api/stripe/create-portal-session')}
-              >
-                {loading ? t('billing.redirecting') : t('billing.manage')}
-              </Button>
-            )}
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              {canUpgrade && (
+                <Button
+                  variant="primary"
+                  disabled={loading}
+                  onClick={() => handleBillingClick('/api/stripe/create-checkout-session')}
+                >
+                  {loading ? t('billing.redirecting') : t('billing.upgrade')}
+                </Button>
+              )}
+              {canManage && (
+                <Button
+                  variant="secondary"
+                  disabled={loading}
+                  onClick={() => handleBillingClick('/api/stripe/create-portal-session')}
+                >
+                  {loading ? t('billing.redirecting') : t('billing.manage')}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

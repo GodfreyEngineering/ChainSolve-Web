@@ -41,3 +41,14 @@ export async function refreshSession(): Promise<{
   const { data, error } = await supabase.auth.refreshSession()
   return { session: data.session, error }
 }
+
+/**
+ * Re-authenticate the current user by verifying their password.
+ * Used by billing-sensitive operations (SEC-4, AU-5).
+ */
+export async function reauthenticate(password: string): Promise<{ error: AuthError | null }> {
+  const user = await getCurrentUser()
+  if (!user?.email) return { error: null }
+  const { error } = await supabase.auth.signInWithPassword({ email: user.email, password })
+  return { error }
+}

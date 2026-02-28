@@ -8,6 +8,13 @@
     "settings": "Settings",
     "backToApp": "Back to app"
   },
+  "reauth": {
+    "title": "Confirm your password",
+    "description": "For security, please re-enter your password to continue with billing changes.",
+    "confirm": "Confirm",
+    "verifying": "Verifying…",
+    "wrongPassword": "Incorrect password. Please try again."
+  },
   "auth": {
     "login": "Sign in",
     "signup": "Create account",
