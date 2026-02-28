@@ -175,7 +175,7 @@ Claude MUST:
   - Cross-device continuity improvements (optional)
   - Tests: MRU logic tests
 
-- [ ] P030: Scratch mode (optional)
+- [x] P030: Scratch mode (optional)
   - Allow exploring without auth
   - Export/import prompts login only for cloud save
   - Keep simple; do not balloon scope
@@ -204,7 +204,7 @@ Claude MUST:
   - Worker respawn + recovery path
   - Tests: worker timeout simulation
 
-- [ ] P036: Trace export (opt-in)
+- [x] P036: Trace export (opt-in)
   - JSON trace export for audits/debug
   - Redaction guarantee
   - Keep behind debug toggle
@@ -223,7 +223,7 @@ Claude MUST:
 - [x] P039: Incremental patch correctness tests (SHOULD)
   - Patch protocol correctness: patch-eval equals full-eval
 
-- [ ] P040: Engine contract mismatch UX
+- [x] P040: Engine contract mismatch UX
   - Fatal error screen with actionable steps
   - Diagnostic log entry + copy-to-clipboard
 
