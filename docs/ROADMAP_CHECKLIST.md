@@ -566,7 +566,7 @@ Claude MUST:
 ---
 
 ## D4 — Canvas interaction fixes (bugs + polish)
-- [ ] D4-1: Blank canvas instruction fix
+- [x] D4-1: Blank canvas instruction fix
   - Replace “double-click to add” with correct guidance:
     - right-click canvas → context menu → insert block
     - or press `/` (quick insert)
