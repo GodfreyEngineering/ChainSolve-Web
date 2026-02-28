@@ -407,9 +407,9 @@ Claude MUST:
 - [x] P103: Marketplace shell page
 - [x] P104: Browse/search/filter UI
 - [x] P105: Item detail pages
-- [ ] P106: Install flow for project_template (fork into user projects)
-- [ ] P107: Template packaging + semver rules
-- [ ] P108: Author dashboard v0
+- [x] P106: Install flow for project_template (fork into user projects)
+- [x] P107: Template packaging + semver rules
+- [x] P108: Author dashboard v0
 - [ ] P109: Verified author gating
 - [ ] P110: Review gate v0
 
