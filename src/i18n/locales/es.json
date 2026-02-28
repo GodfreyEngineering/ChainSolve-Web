@@ -338,6 +338,9 @@
     "noResults": "No hay acciones coincidentes",
     "hint": "↑↓ navegar · ↵ ejecutar · ESC cerrar"
   },
+  "shortcuts": {
+    "global": "Global"
+  },
   "toolbar": {
     "label": "Barra de herramientas del lienzo",
     "panMode": "Modo panorámica",

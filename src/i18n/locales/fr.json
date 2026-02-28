@@ -338,6 +338,9 @@
     "noResults": "Aucune action correspondante",
     "hint": "↑↓ naviguer · ↵ exécuter · ESC fermer"
   },
+  "shortcuts": {
+    "global": "Global"
+  },
   "toolbar": {
     "label": "Barre d'outils du canevas",
     "panMode": "Mode panoramique",

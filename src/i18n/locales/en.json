@@ -339,6 +339,9 @@
     "noResults": "No matching actions",
     "hint": "↑↓ navigate · ↵ execute · ESC close"
   },
+  "shortcuts": {
+    "global": "Global"
+  },
   "toolbar": {
     "label": "Canvas toolbar",
     "panMode": "Pan mode",

@@ -24,6 +24,9 @@ const LazySaveAsDialog = lazy(() =>
 const LazyCommandPalette = lazy(() =>
   import('./CommandPalette').then((m) => ({ default: m.CommandPalette })),
 )
+const LazyKeyboardShortcutsModal = lazy(() =>
+  import('./KeyboardShortcutsModal').then((m) => ({ default: m.KeyboardShortcutsModal })),
+)
 import { CATEGORY_ORDER, CATEGORY_LABELS } from '../../blocks/registry'
 import { getCurrentUser } from '../../lib/auth'
 import { getRecentProjects } from '../../lib/recentProjects'
@@ -157,6 +160,7 @@ export function AppHeader({
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [bugReportOpen, setBugReportOpen] = useState(false)
   const [aboutOpen, setAboutOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [openDialogOpen, setOpenDialogOpen] = useState(false)
   const [saveAsOpen, setSaveAsOpen] = useState(false)
@@ -657,7 +661,13 @@ export function AppHeader({
   const helpItems = useMemo(
     (): MenuEntry[] => [
       { label: t('menu.documentation'), onClick: stub },
-      { label: t('menu.keyboardShortcuts'), onClick: stub },
+      {
+        label: t('menu.keyboardShortcuts'),
+        onClick: () => {
+          setShortcutsOpen(true)
+          setOpenMenu(null)
+        },
+      },
       { separator: true },
       {
         label: t('menu.bugReport'),
@@ -894,6 +904,15 @@ export function AppHeader({
       {aboutOpen && (
         <Suspense fallback={null}>
           <LazyAboutModal open onClose={() => setAboutOpen(false)} />
+        </Suspense>
+      )}
+      {shortcutsOpen && (
+        <Suspense fallback={null}>
+          <LazyKeyboardShortcutsModal
+            open
+            onClose={() => setShortcutsOpen(false)}
+            actions={paletteActions}
+          />
         </Suspense>
       )}
       {openDialogOpen && (

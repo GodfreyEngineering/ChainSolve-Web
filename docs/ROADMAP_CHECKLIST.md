@@ -342,7 +342,7 @@ Claude MUST:
   - Search overlay that links to docs topics
   - Keep assets local; no remote fetch required
 
-- [ ] P064: Shortcut help auto-generated (SHOULD)
+- [x] P064: Shortcut help auto-generated (SHOULD)
   - Single source of truth from action registry
   - Render in Help menu / modal
 

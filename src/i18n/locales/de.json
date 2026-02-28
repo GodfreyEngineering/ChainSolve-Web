@@ -338,6 +338,9 @@
     "noResults": "Keine passenden Aktionen",
     "hint": "↑↓ navigieren · ↵ ausführen · ESC schließen"
   },
+  "shortcuts": {
+    "global": "Global"
+  },
   "toolbar": {
     "label": "Zeichenflächen-Symbolleiste",
     "panMode": "Schwenkmodus",

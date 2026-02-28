@@ -338,6 +338,9 @@
     "noResults": "Nessuna azione corrispondente",
     "hint": "↑↓ navigare · ↵ eseguire · ESC chiudere"
   },
+  "shortcuts": {
+    "global": "Globale"
+  },
   "toolbar": {
     "label": "Barra degli strumenti del canvas",
     "panMode": "Modalità panoramica",
