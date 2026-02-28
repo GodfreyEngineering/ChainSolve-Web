@@ -6,7 +6,17 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { listPublishedItems, getItem, recordInstall, getUserInstalls } from './marketplaceService'
+import {
+  listPublishedItems,
+  getItem,
+  recordInstall,
+  getUserInstalls,
+  forkTemplate,
+  listAuthorItems,
+  createAuthorItem,
+  togglePublishItem,
+  validateMarketplaceVersion,
+} from './marketplaceService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
 
@@ -16,6 +26,9 @@ const mockIlike = vi.fn()
 const mockOrder = vi.fn()
 const mockMaybeSingle = vi.fn()
 const mockUpsert = vi.fn()
+const mockInsert = vi.fn()
+const mockUpdate = vi.fn()
+const mockSingle = vi.fn()
 
 // Build a chainable query builder
 function makeQueryBuilder(finalResult: { data: unknown; error: unknown }) {
@@ -26,6 +39,9 @@ function makeQueryBuilder(finalResult: { data: unknown; error: unknown }) {
     order: mockOrder,
     maybeSingle: mockMaybeSingle,
     upsert: mockUpsert,
+    insert: mockInsert,
+    update: mockUpdate,
+    single: mockSingle,
   }
   mockSelect.mockReturnValue(qb)
   mockEq.mockReturnValue(qb)
@@ -33,6 +49,9 @@ function makeQueryBuilder(finalResult: { data: unknown; error: unknown }) {
   mockOrder.mockResolvedValue(finalResult)
   mockMaybeSingle.mockResolvedValue(finalResult)
   mockUpsert.mockResolvedValue(finalResult)
+  mockInsert.mockReturnValue(qb)
+  mockUpdate.mockReturnValue(qb)
+  mockSingle.mockResolvedValue(finalResult)
   return qb
 }
 
@@ -48,10 +67,17 @@ vi.mock('./supabase', () => ({
   },
 }))
 
+// Mock projects service for forkTemplate tests
+const mockImportProject = vi.fn().mockResolvedValue({ id: 'new-proj-1' })
+vi.mock('./projects', () => ({
+  importProject: (...args: unknown[]) => mockImportProject(...args),
+}))
+
 let supabaseMock: { from: ReturnType<typeof vi.fn>; auth: unknown }
 
 beforeEach(async () => {
   vi.clearAllMocks()
+  mockImportProject.mockResolvedValue({ id: 'new-proj-1' })
   const mod = await import('./supabase')
   supabaseMock = mod.supabase as unknown as typeof supabaseMock
 })
@@ -175,6 +201,111 @@ describe('recordInstall', () => {
   })
 })
 
+// ── forkTemplate ─────────────────────────────────────────────────────────────
+
+describe('forkTemplate', () => {
+  const templateItem = {
+    id: 'item-t1',
+    name: 'Beam Analysis',
+    category: 'template',
+    payload: { schemaVersion: 3, graph: { nodes: [], edges: [] } },
+  }
+
+  it('throws when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+
+    await expect(forkTemplate('item-t1')).rejects.toThrow('Sign in')
+  })
+
+  it('throws when item not found', async () => {
+    makeQueryBuilder({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    await expect(forkTemplate('missing')).rejects.toThrow('not found')
+  })
+
+  it('throws when item is not a template', async () => {
+    makeQueryBuilder({ data: { ...templateItem, category: 'theme' }, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    await expect(forkTemplate('item-t1')).rejects.toThrow('not a project template')
+  })
+
+  it('throws when payload is null', async () => {
+    makeQueryBuilder({ data: { ...templateItem, payload: null }, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    await expect(forkTemplate('item-t1')).rejects.toThrow('no project data')
+  })
+
+  it('calls importProject with the payload and item name', async () => {
+    // First call: maybeSingle for item lookup
+    makeQueryBuilder({ data: templateItem, error: null })
+    // Second call: upsert for recordInstall
+    const mockUpsertFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    supabaseMock.from
+      .mockReturnValueOnce({
+        select: mockSelect,
+        eq: mockEq,
+        maybeSingle: mockMaybeSingle,
+      })
+      .mockReturnValueOnce({ upsert: mockUpsertFn })
+
+    await forkTemplate('item-t1')
+
+    expect(mockImportProject).toHaveBeenCalledWith(templateItem.payload, templateItem.name)
+  })
+
+  it('records the install after forking', async () => {
+    makeQueryBuilder({ data: templateItem, error: null })
+    const mockUpsertFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    supabaseMock.from
+      .mockReturnValueOnce({
+        select: mockSelect,
+        eq: mockEq,
+        maybeSingle: mockMaybeSingle,
+      })
+      .mockReturnValueOnce({ upsert: mockUpsertFn })
+
+    await forkTemplate('item-t1')
+
+    expect(mockUpsertFn).toHaveBeenCalledWith(
+      expect.objectContaining({ item_id: 'item-t1' }),
+      expect.anything(),
+    )
+  })
+
+  it('returns the new project ID', async () => {
+    makeQueryBuilder({ data: templateItem, error: null })
+    const mockUpsertFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    supabaseMock.from
+      .mockReturnValueOnce({
+        select: mockSelect,
+        eq: mockEq,
+        maybeSingle: mockMaybeSingle,
+      })
+      .mockReturnValueOnce({ upsert: mockUpsertFn })
+
+    const projectId = await forkTemplate('item-t1')
+    expect(projectId).toBe('new-proj-1')
+  })
+})
+
 // ── getUserInstalls ───────────────────────────────────────────────────────────
 
 describe('getUserInstalls', () => {
@@ -198,5 +329,126 @@ describe('getUserInstalls', () => {
 
     const result = await getUserInstalls()
     expect(result).toEqual(installs)
+  })
+})
+
+// ── validateMarketplaceVersion (P107) ────────────────────────────────────────
+
+describe('validateMarketplaceVersion', () => {
+  it('accepts valid semver strings', () => {
+    expect(validateMarketplaceVersion('1.0.0').ok).toBe(true)
+    expect(validateMarketplaceVersion('0.0.1').ok).toBe(true)
+    expect(validateMarketplaceVersion('10.20.300').ok).toBe(true)
+  })
+
+  it('rejects missing patch component', () => {
+    expect(validateMarketplaceVersion('1.0').ok).toBe(false)
+  })
+
+  it('rejects single digit', () => {
+    expect(validateMarketplaceVersion('1').ok).toBe(false)
+  })
+
+  it('rejects prerelease suffixes', () => {
+    expect(validateMarketplaceVersion('1.0.0-alpha').ok).toBe(false)
+    expect(validateMarketplaceVersion('1.0.0+build').ok).toBe(false)
+  })
+
+  it('rejects non-numeric components', () => {
+    expect(validateMarketplaceVersion('a.b.c').ok).toBe(false)
+    expect(validateMarketplaceVersion('v1.0.0').ok).toBe(false)
+  })
+
+  it('returns an error message on failure', () => {
+    const res = validateMarketplaceVersion('bad')
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/X\.Y\.Z/)
+  })
+})
+
+// ── listAuthorItems (P108) ────────────────────────────────────────────────────
+
+describe('listAuthorItems', () => {
+  it('returns empty array when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+
+    const result = await listAuthorItems()
+    expect(result).toEqual([])
+  })
+
+  it('returns author items ordered by created_at desc', async () => {
+    const items = [{ id: 'i1', author_id: 'uid-1', name: 'My Template' }]
+    makeQueryBuilder({ data: items, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      order: mockOrder,
+    })
+
+    const result = await listAuthorItems()
+    expect(result).toEqual(items)
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_items')
+  })
+})
+
+// ── createAuthorItem (P108) ───────────────────────────────────────────────────
+
+describe('createAuthorItem', () => {
+  it('throws when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+
+    await expect(
+      createAuthorItem({ name: 'Test', category: 'template', version: '1.0.0' }),
+    ).rejects.toThrow('Sign in')
+  })
+
+  it('inserts item and returns it', async () => {
+    const created = { id: 'new-item', name: 'My Pack', category: 'block_pack', version: '1.0.0' }
+    makeQueryBuilder({ data: created, error: null })
+    supabaseMock.from.mockReturnValue({
+      insert: mockInsert,
+      select: mockSelect,
+      single: mockSingle,
+    })
+
+    const result = await createAuthorItem({
+      name: 'My Pack',
+      category: 'block_pack',
+      version: '1.0.0',
+    })
+    expect(result).toEqual(created)
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_items')
+  })
+})
+
+// ── togglePublishItem (P108) ──────────────────────────────────────────────────
+
+describe('togglePublishItem', () => {
+  it('updates is_published on the item', async () => {
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    const mockUpdateFn = vi.fn().mockReturnValue({ eq: mockEqFn })
+    supabaseMock.from.mockReturnValue({ update: mockUpdateFn })
+
+    await togglePublishItem('item-x', true)
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_items')
+    expect(mockUpdateFn).toHaveBeenCalledWith({ is_published: true })
+  })
+
+  it('throws on supabase error', async () => {
+    const mockEqFn = vi
+      .fn()
+      .mockResolvedValue({ data: null, error: { message: 'Permission denied' } })
+    const mockUpdateFn = vi.fn().mockReturnValue({ eq: mockEqFn })
+    supabaseMock.from.mockReturnValue({ update: mockUpdateFn })
+
+    await expect(togglePublishItem('item-x', false)).rejects.toMatchObject({
+      message: 'Permission denied',
+    })
   })
 })

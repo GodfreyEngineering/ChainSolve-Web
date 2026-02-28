@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next'
 import {
   getItem,
   recordInstall,
+  forkTemplate,
   getUserInstalls,
   type MarketplaceItem,
 } from '../lib/marketplaceService'
@@ -102,6 +103,12 @@ export default function ItemDetailPage() {
     if (!itemId || installed || installing) return
     setInstalling(true)
     try {
+      if (item?.category === 'template') {
+        // Fork the template into the user's projects, then navigate there
+        const projectId = await forkTemplate(itemId)
+        navigate(`/canvas/${projectId}`)
+        return
+      }
       await recordInstall(itemId)
       setInstalled(true)
     } catch (err) {
@@ -114,7 +121,7 @@ export default function ItemDetailPage() {
     } finally {
       setInstalling(false)
     }
-  }, [itemId, installed, installing, navigate])
+  }, [itemId, installed, installing, navigate, item])
 
   return (
     <div style={s.page}>

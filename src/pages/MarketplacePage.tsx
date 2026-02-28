@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import {
   listPublishedItems,
   recordInstall,
+  forkTemplate,
   getUserInstalls,
   type MarketplaceItem,
 } from '../lib/marketplaceService'
@@ -147,7 +148,14 @@ export default function MarketplacePage() {
     async (itemId: string) => {
       if (installedIds.has(itemId) || installingId === itemId) return
       setInstallingId(itemId)
+      const item = items.find((i) => i.id === itemId)
       try {
+        if (item?.category === 'template') {
+          // Fork the template into the user's projects, then navigate there
+          const projectId = await forkTemplate(itemId)
+          navigate(`/canvas/${projectId}`)
+          return
+        }
         await recordInstall(itemId)
         setInstalledIds((prev) => new Set([...prev, itemId]))
       } catch (err) {
@@ -162,7 +170,7 @@ export default function MarketplacePage() {
         setInstallingId(null)
       }
     },
-    [installedIds, installingId, navigate],
+    [installedIds, installingId, navigate, items],
   )
 
   const categories = [
@@ -185,12 +193,20 @@ export default function MarketplacePage() {
         >
           {t('marketplace.title')}
         </span>
-        <a
-          href="/app"
-          style={{ fontSize: '0.82rem', color: 'rgba(244,244,243,0.5)', textDecoration: 'none' }}
-        >
-          ← {t('app.name')}
-        </a>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <a
+            href="/marketplace/author"
+            style={{ fontSize: '0.82rem', color: 'rgba(244,244,243,0.5)', textDecoration: 'none' }}
+          >
+            {t('marketplace.myItems')}
+          </a>
+          <a
+            href="/app"
+            style={{ fontSize: '0.82rem', color: 'rgba(244,244,243,0.5)', textDecoration: 'none' }}
+          >
+            ← {t('app.name')}
+          </a>
+        </div>
       </nav>
 
       {/* Body */}
