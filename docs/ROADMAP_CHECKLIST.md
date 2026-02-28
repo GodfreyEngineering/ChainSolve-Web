@@ -402,11 +402,11 @@ Claude MUST:
 # PHASE B — Growth v1.1 (Marketplace)
 > Claude may start this ONLY after Phase A is complete unless explicitly told otherwise.
 
-- [ ] P101: Marketplace schema v0 (items, purchases, storage bucket)
-- [ ] P102: Marketplace RLS (public browse metadata, gated downloads)
-- [ ] P103: Marketplace shell page
-- [ ] P104: Browse/search/filter UI
-- [ ] P105: Item detail pages
+- [x] P101: Marketplace schema v0 (items, purchases, storage bucket)
+- [x] P102: Marketplace RLS (public browse metadata, gated downloads)
+- [x] P103: Marketplace shell page
+- [x] P104: Browse/search/filter UI
+- [x] P105: Item detail pages
 - [ ] P106: Install flow for project_template (fork into user projects)
 - [ ] P107: Template packaging + semver rules
 - [ ] P108: Author dashboard v0
