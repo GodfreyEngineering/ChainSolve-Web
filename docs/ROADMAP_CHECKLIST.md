@@ -378,10 +378,10 @@ Claude MUST:
 - [ ] P082: ?perf=1 FPS overlay + perf logs (SHOULD)
 - [ ] P083: Animated edges thresholds + hysteresis + tests
 - [ ] P084: LOD thresholds tuning
-- [ ] P085: WASM init timing logged + regression guard
-- [ ] P086: Bundle splitting audit (ensure lazy libs remain lazy)
+- [x] P085: WASM init timing logged + regression guard
+- [x] P086: Bundle splitting audit (ensure lazy libs remain lazy)
 - [ ] P087: Table limits enforcement + UX
-- [ ] P088: Worker resilience (crash → respawn → notice)
+- [x] P088: Worker resilience (crash → respawn → notice)
 - [ ] P089: Eval scheduling to avoid main-thread stalls (SHOULD)
 - [ ] P090: Lighthouse/perf budget doc + optional CI check (SHOULD)
 
