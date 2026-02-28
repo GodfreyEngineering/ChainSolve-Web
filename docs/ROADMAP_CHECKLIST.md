@@ -777,7 +777,7 @@ Claude MUST:
   - Optionally separate tab “Company”
   - Acceptance: org-only isolation works.
 
-- [ ] D10-2: Enterprise policy flags (Web)
+- [x] D10-2: Enterprise policy flags (Web)
   - Policy can enforce:
     - Explore enabled/disabled
     - allow installs yes/no
@@ -785,7 +785,7 @@ Claude MUST:
   - Persist policy per org
   - Acceptance: admin control has real effect.
 
-- [ ] D10-3: Seat model + org membership enforcement
+- [x] D10-3: Seat model + org membership enforcement
   - Enterprise 10 seats vs unlimited
   - Ensure invites + membership checks align with plan
   - Acceptance: seats enforced in org admin.
