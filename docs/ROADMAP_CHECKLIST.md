@@ -651,7 +651,7 @@ Claude MUST:
   - Enforce unique names (case-insensitive)
   - Acceptance: variables robust and unit-ready.
 
-- [ ] D7-2: Variable Source node redesign
+- [x] D7-2: Variable Source node redesign
   - Single node “Variable”
   - Dropdown of existing project variables
   - Option “Create new variable…” opens Variables window
