@@ -128,7 +128,7 @@
     "conflictLocalTime": "your last save at {{time}}",
     "keepMine": "Keep mine (overwrite)",
     "reload": "Reload from server",
-    "emptyHint": "Double-click the canvas or drag a block from the library to get started.",
+    "emptyHint": "Right-click the canvas to insert a block, press / for quick insert, or open the block library.",
     "findPlaceholder": "Search nodes…",
     "findHint": "↑↓ navigate · ↵ focus · ESC",
     "noMatches": "No blocks match",

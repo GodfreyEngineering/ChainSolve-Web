@@ -121,7 +121,7 @@
     "conflictLocalTime": "votre dernière sauvegarde à {{time}}",
     "keepMine": "Garder ma version",
     "reload": "Recharger depuis le serveur",
-    "emptyHint": "Double-cliquez sur le canevas ou faites glisser un bloc depuis la bibliothèque pour commencer.",
+    "emptyHint": "Clic droit sur le canevas pour insérer un bloc, appuyez sur / pour l'insertion rapide, ou ouvrez la bibliothèque de blocs.",
     "findPlaceholder": "Rechercher des nœuds…",
     "findHint": "↑↓ naviguer · ↵ focus · ESC",
     "noMatches": "Aucun bloc trouvé",

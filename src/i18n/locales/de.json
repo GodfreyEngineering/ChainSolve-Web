@@ -121,7 +121,7 @@
     "conflictLocalTime": "Ihre letzte Speicherung um {{time}}",
     "keepMine": "Meine Version behalten",
     "reload": "Vom Server neu laden",
-    "emptyHint": "Doppelklicken Sie auf die Leinwand oder ziehen Sie einen Block aus der Bibliothek, um zu beginnen.",
+    "emptyHint": "Rechtsklick auf die Leinwand, um einen Block einzufügen, / für Schnelleinfügung drücken, oder die Blockbibliothek öffnen.",
     "findPlaceholder": "Knoten suchen…",
     "findHint": "↑↓ navigieren · ↵ Fokus · ESC",
     "noMatches": "Keine Blöcke gefunden",

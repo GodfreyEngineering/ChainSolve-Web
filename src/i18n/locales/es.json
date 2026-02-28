@@ -121,7 +121,7 @@
     "conflictLocalTime": "su último guardado a las {{time}}",
     "keepMine": "Mantener mi versión",
     "reload": "Recargar del servidor",
-    "emptyHint": "Haz doble clic en el lienzo o arrastra un bloque desde la biblioteca para comenzar.",
+    "emptyHint": "Haz clic derecho en el lienzo para insertar un bloque, pulsa / para inserción rápida, o abre la biblioteca de bloques.",
     "findPlaceholder": "Buscar nodos…",
     "findHint": "↑↓ navegar · ↵ enfocar · ESC",
     "noMatches": "No se encontraron bloques",
