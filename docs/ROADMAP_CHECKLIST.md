@@ -580,7 +580,7 @@ Claude MUST:
   - Add regression test / manual test doc steps.
   - Acceptance: edges never jump to origin when zooming out/in.
 
-- [ ] D4-3: Right-click context menus everywhere
+- [x] D4-3: Right-click context menus everywhere
   - Canvas: insert block, paste, fit view, layout
   - Node: duplicate, group, inspect, delete
   - Edge: delete, inspect connection
