@@ -1,5 +1,6 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react'
 import { captureReactBoundary } from '../observability/client'
+import { CONTACT } from '../lib/brand'
 
 interface Props {
   children: ReactNode
@@ -41,8 +42,17 @@ export class ErrorBoundary extends Component<Props, State> {
             <p style={{ opacity: 0.6, marginBottom: '1rem', fontSize: '0.9rem' }}>
               {this.state.error.message}
             </p>
-            <p style={{ opacity: 0.35, marginBottom: '1.5rem', fontSize: '0.75rem' }}>
+            <p style={{ opacity: 0.35, marginBottom: '0.75rem', fontSize: '0.75rem' }}>
               Check browser DevTools (F12 → Console) for details.
+            </p>
+            <p style={{ opacity: 0.35, marginBottom: '1.5rem', fontSize: '0.75rem' }}>
+              Need help?{' '}
+              <a
+                href={`mailto:${CONTACT.support}`}
+                style={{ color: '#93c5fd', textDecoration: 'none' }}
+              >
+                {CONTACT.support}
+              </a>
             </p>
             <button
               style={{

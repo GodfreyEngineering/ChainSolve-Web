@@ -26,6 +26,12 @@ export const BRAND = {
   iconSquarePng: '/brand/icon-square.png',
 } as const
 
+/** Centralized contact emails — no hardcoded emails elsewhere. */
+export const CONTACT = {
+  support: 'support@chainsolve.co.uk',
+  info: 'info@chainsolve.co.uk',
+} as const
+
 /** Logo appropriate for the current theme (currently always dark). */
 export function chooseLogoForTheme(): string {
   // Both light/dark use the same logo-wide-text for now.

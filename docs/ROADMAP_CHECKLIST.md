@@ -488,7 +488,7 @@ Claude MUST:
     - “source of truth” + how to rotate
   - Acceptance: team can set up from scratch without missing keys.
 
-- [ ] D0-3: In-app contact + support wiring
+- [x] D0-3: In-app contact + support wiring
   - Add “Support” links to:
     - `support@chainsolve.co.uk` (support)
     - `info@chainsolve.co.uk` (general enquiries)

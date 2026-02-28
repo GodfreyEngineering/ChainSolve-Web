@@ -13,6 +13,10 @@
     "welcome": "Willkommen bei ChainSolve",
     "subtitle": "Ihr wissenschaftlicher Knotengraph-Arbeitsbereich"
   },
+  "contact": {
+    "support": "Support",
+    "generalEnquiries": "Allgemeine Anfragen"
+  },
   "auth": {
     "login": "Anmelden",
     "signup": "Konto erstellen",
@@ -328,6 +332,7 @@
     "bugReport": "Fehler melden",
     "about": "Über",
     "changelog": "Änderungsprotokoll",
+    "contactSupport": "Support kontaktieren",
     "comingSoon": "Demnächst",
     "notifications": "Benachrichtigungen",
     "menubar": "Anwendungsmenü",

@@ -13,6 +13,10 @@
     "welcome": "Welcome to ChainSolve",
     "subtitle": "Your scientific node-graph workspace"
   },
+  "contact": {
+    "support": "Support",
+    "generalEnquiries": "General enquiries"
+  },
   "reauth": {
     "title": "Confirm your password",
     "description": "For security, please re-enter your password to continue with billing changes.",
@@ -337,6 +341,7 @@
     "bugReport": "Bug report",
     "about": "About",
     "changelog": "Changelog",
+    "contactSupport": "Contact support",
     "comingSoon": "Coming soon",
     "notifications": "Notifications",
     "menubar": "Application menu",

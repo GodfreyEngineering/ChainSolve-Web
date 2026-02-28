@@ -13,6 +13,10 @@
     "welcome": "Bienvenido a ChainSolve",
     "subtitle": "Tu espacio de trabajo científico de nodos"
   },
+  "contact": {
+    "support": "Soporte",
+    "generalEnquiries": "Consultas generales"
+  },
   "auth": {
     "login": "Iniciar sesión",
     "signup": "Crear cuenta",
@@ -328,6 +332,7 @@
     "bugReport": "Reportar error",
     "about": "Acerca de",
     "changelog": "Registro de cambios",
+    "contactSupport": "Contactar soporte",
     "comingSoon": "Próximamente",
     "notifications": "Notificaciones",
     "menubar": "Menú de la aplicación",

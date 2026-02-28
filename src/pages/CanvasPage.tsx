@@ -17,6 +17,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppHeader } from '../components/app/AppHeader'
+import { CONTACT } from '../lib/brand'
 import {
   CanvasArea,
   type CanvasAreaProps,
@@ -1274,6 +1275,15 @@ export default function CanvasPage() {
         <a href="/app" style={{ opacity: 0.6, fontSize: '0.85rem', color: 'inherit' }}>
           ← Back to projects
         </a>
+        <p style={{ opacity: 0.35, fontSize: '0.75rem', margin: 0 }}>
+          Need help?{' '}
+          <a
+            href={`mailto:${CONTACT.support}`}
+            style={{ color: '#93c5fd', textDecoration: 'none' }}
+          >
+            {CONTACT.support}
+          </a>
+        </p>
       </div>
     )
   }

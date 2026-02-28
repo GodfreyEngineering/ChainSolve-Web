@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BRAND } from '../../lib/brand'
+import { BRAND, CONTACT } from '../../lib/brand'
 import { useProjectStore } from '../../stores/projectStore'
 import { useSettingsModal } from '../../contexts/SettingsModalContext'
 import { useTheme } from '../../contexts/ThemeContext'
@@ -717,6 +717,13 @@ export function AppHeader({
         label: t('menu.changelog'),
         onClick: () => {
           setWhatsNewOpen(true)
+          setOpenMenu(null)
+        },
+      },
+      {
+        label: t('menu.contactSupport'),
+        onClick: () => {
+          window.location.href = `mailto:${CONTACT.support}`
           setOpenMenu(null)
         },
       },

@@ -23,7 +23,7 @@ import {
   type MarketplaceCategory,
 } from '../lib/marketplaceService'
 import { startConnectOnboarding } from '../lib/stripeConnectService'
-import { BRAND } from '../lib/brand'
+import { BRAND, CONTACT } from '../lib/brand'
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
 
@@ -320,7 +320,7 @@ export default function MarketplaceAuthorPage() {
             role="status"
           >
             <span>{t('marketplace.notVerifiedNotice')}</span>
-            <a href="mailto:support@chainsolve.com" style={{ color: '#fbbf24', fontWeight: 600 }}>
+            <a href={`mailto:${CONTACT.support}`} style={{ color: '#fbbf24', fontWeight: 600 }}>
               {t('marketplace.contactSupport')}
             </a>
           </div>

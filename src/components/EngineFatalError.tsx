@@ -11,6 +11,7 @@
  */
 
 import { useState, useCallback } from 'react'
+import { CONTACT } from '../lib/brand'
 
 interface Props {
   error: Error
@@ -127,6 +128,15 @@ export function EngineFatalError({ error, onRetry }: Props) {
       >
         {error.message}
       </code>
+
+      <p
+        style={{ maxWidth: '30rem', marginBottom: '1.5rem', fontSize: '0.82rem', color: '#71717a' }}
+      >
+        Need help?{' '}
+        <a href={`mailto:${CONTACT.support}`} style={{ color: '#93c5fd', textDecoration: 'none' }}>
+          {CONTACT.support}
+        </a>
+      </p>
 
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
         <button
