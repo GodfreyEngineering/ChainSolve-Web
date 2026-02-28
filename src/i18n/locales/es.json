@@ -561,5 +561,21 @@
     "errorCreate": "Error al crear la organización",
     "errorInvite": "Error al invitar al miembro",
     "backToOrgs": "Volver a organizaciones"
+  },
+  "auditLog": {
+    "title": "Registro de auditoría",
+    "backToApp": "Volver a la aplicación",
+    "proOnly": "El registro de auditoría está disponible en el plan Pro.",
+    "upgrade": "Actualizar a Pro",
+    "empty": "No se encontraron eventos de auditoría.",
+    "loadMore": "Cargar más",
+    "loading": "Cargando…",
+    "errorLoad": "Error al cargar el registro de auditoría",
+    "colTime": "Hora",
+    "colEvent": "Evento",
+    "colObject": "Objeto",
+    "colId": "ID",
+    "filterUser": "Mis eventos",
+    "filterOrg": "Eventos de la org"
   }
 }

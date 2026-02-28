@@ -561,5 +561,21 @@
     "errorCreate": "Impossible de créer l'organisation",
     "errorInvite": "Impossible d'inviter le membre",
     "backToOrgs": "Retour aux organisations"
+  },
+  "auditLog": {
+    "title": "Journal d'audit",
+    "backToApp": "Retour à l'application",
+    "proOnly": "Le journal d'audit est disponible avec l'abonnement Pro.",
+    "upgrade": "Passer à Pro",
+    "empty": "Aucun événement d'audit trouvé.",
+    "loadMore": "Charger plus",
+    "loading": "Chargement…",
+    "errorLoad": "Impossible de charger le journal d'audit",
+    "colTime": "Heure",
+    "colEvent": "Événement",
+    "colObject": "Objet",
+    "colId": "ID",
+    "filterUser": "Mes événements",
+    "filterOrg": "Événements de l'org"
   }
 }

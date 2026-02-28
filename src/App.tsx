@@ -17,6 +17,7 @@ const MarketplaceAuthorPage = lazy(() => import('./pages/MarketplaceAuthorPage')
 
 // Lazy-load org pages (not needed on initial load)
 const OrgsPage = lazy(() => import('./pages/OrgsPage'))
+const AuditLogPage = lazy(() => import('./pages/AuditLogPage'))
 
 function BillingSuccess() {
   return (
@@ -128,6 +129,14 @@ export default function App() {
           element={
             <Suspense fallback={null}>
               <OrgsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/audit-log"
+          element={
+            <Suspense fallback={null}>
+              <AuditLogPage />
             </Suspense>
           }
         />

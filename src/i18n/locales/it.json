@@ -561,5 +561,21 @@
     "errorCreate": "Impossibile creare l'organizzazione",
     "errorInvite": "Impossibile invitare il membro",
     "backToOrgs": "Torna alle organizzazioni"
+  },
+  "auditLog": {
+    "title": "Registro di audit",
+    "backToApp": "Torna all'app",
+    "proOnly": "Il registro di audit è disponibile nel piano Pro.",
+    "upgrade": "Passa a Pro",
+    "empty": "Nessun evento di audit trovato.",
+    "loadMore": "Carica altri",
+    "loading": "Caricamento…",
+    "errorLoad": "Impossibile caricare il registro di audit",
+    "colTime": "Ora",
+    "colEvent": "Evento",
+    "colObject": "Oggetto",
+    "colId": "ID",
+    "filterUser": "I miei eventi",
+    "filterOrg": "Eventi org"
   }
 }

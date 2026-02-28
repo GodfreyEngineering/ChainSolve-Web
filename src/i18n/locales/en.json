@@ -581,5 +581,21 @@
     "errorCreate": "Failed to create organization",
     "errorInvite": "Failed to invite member",
     "backToOrgs": "Back to organizations"
+  },
+  "auditLog": {
+    "title": "Audit Log",
+    "backToApp": "Back to app",
+    "proOnly": "Audit log is available on the Pro plan.",
+    "upgrade": "Upgrade to Pro",
+    "empty": "No audit events found.",
+    "loadMore": "Load more",
+    "loading": "Loading…",
+    "errorLoad": "Failed to load audit log",
+    "colTime": "Time",
+    "colEvent": "Event",
+    "colObject": "Object",
+    "colId": "ID",
+    "filterUser": "My events",
+    "filterOrg": "Org events"
   }
 }

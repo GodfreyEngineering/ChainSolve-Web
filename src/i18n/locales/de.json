@@ -561,5 +561,21 @@
     "errorCreate": "Organisation konnte nicht erstellt werden",
     "errorInvite": "Mitglied konnte nicht eingeladen werden",
     "backToOrgs": "Zurück zu Organisationen"
+  },
+  "auditLog": {
+    "title": "Audit-Protokoll",
+    "backToApp": "Zurück zur App",
+    "proOnly": "Das Audit-Protokoll ist im Pro-Tarif verfügbar.",
+    "upgrade": "Auf Pro upgraden",
+    "empty": "Keine Audit-Ereignisse gefunden.",
+    "loadMore": "Mehr laden",
+    "loading": "Wird geladen…",
+    "errorLoad": "Audit-Protokoll konnte nicht geladen werden",
+    "colTime": "Zeit",
+    "colEvent": "Ereignis",
+    "colObject": "Objekt",
+    "colId": "ID",
+    "filterUser": "Meine Ereignisse",
+    "filterOrg": "Org-Ereignisse"
   }
 }
