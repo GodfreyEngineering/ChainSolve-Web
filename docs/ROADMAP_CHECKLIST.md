@@ -545,7 +545,7 @@ Claude MUST:
 ---
 
 ## D3 — Docking + bottom panels (console/health)
-- [ ] D3-1: Add close/minimize for console/terminal and graph health panel
+- [x] D3-1: Add close/minimize for console/terminal and graph health panel
   - Ensure panels never hide core canvas toolbar.
   - Acceptance: user can always close/minimize, and core controls remain accessible.
 
