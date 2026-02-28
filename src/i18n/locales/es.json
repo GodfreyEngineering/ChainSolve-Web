@@ -8,6 +8,11 @@
     "settings": "Ajustes",
     "backToApp": "Volver a la app"
   },
+  "home": {
+    "title": "Inicio del espacio de trabajo",
+    "welcome": "Bienvenido a ChainSolve",
+    "subtitle": "Tu espacio de trabajo científico de nodos"
+  },
   "auth": {
     "login": "Iniciar sesión",
     "signup": "Crear cuenta",

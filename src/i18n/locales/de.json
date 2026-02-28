@@ -8,6 +8,11 @@
     "settings": "Einstellungen",
     "backToApp": "Zurück zur App"
   },
+  "home": {
+    "title": "Arbeitsbereich-Startseite",
+    "welcome": "Willkommen bei ChainSolve",
+    "subtitle": "Ihr wissenschaftlicher Knotengraph-Arbeitsbereich"
+  },
   "auth": {
     "login": "Anmelden",
     "signup": "Konto erstellen",

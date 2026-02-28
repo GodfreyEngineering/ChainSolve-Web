@@ -1,14 +1,17 @@
 /**
- * AppShell — protected app shell.
+ * AppShell — Workbench Home (protected app shell).
  *
- * Contains:
+ * This is the default post-login landing page (/app).
+ * When no project is open, it shows the "Workbench Home" view with:
  *  - Top nav (logo, user email, sign out)
+ *  - Welcome header
  *  - Subscription / billing card
  *  - Project browser (create, open, rename, duplicate, export, delete, import)
  */
 
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
 import { supabase } from '../lib/supabase'
 import type { User } from '@supabase/supabase-js'
@@ -151,6 +154,7 @@ const btnDisabled: React.CSSProperties = { opacity: 0.55, cursor: 'not-allowed' 
 
 export default function AppShell() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { openSettings } = useSettingsModal()
 
   const [user, setUser] = useState<User | null>(null)
@@ -526,6 +530,29 @@ export default function AppShell() {
       <main
         style={{ flex: 1, padding: '2rem 1.5rem', maxWidth: 960, width: '100%', margin: '0 auto' }}
       >
+        {/* ── Workbench Home header ── */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: '1.6rem',
+              fontWeight: 700,
+              letterSpacing: '-0.01em',
+            }}
+          >
+            {t('home.title')}
+          </h1>
+          <p
+            style={{
+              margin: '0.35rem 0 0',
+              fontSize: '0.9rem',
+              opacity: 0.5,
+            }}
+          >
+            {t('home.subtitle')}
+          </p>
+        </div>
+
         {/* ── Subscription card ── */}
         <div style={cardStyle}>
           <p style={sectionLabel}>Subscription</p>

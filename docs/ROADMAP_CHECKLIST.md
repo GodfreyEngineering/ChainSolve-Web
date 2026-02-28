@@ -498,7 +498,7 @@ Claude MUST:
 ---
 
 ## D1 — App landing + routing redesign (first impression)
-- [ ] D1-1: Make `/app` the post-login default route (always land in the app environment)
+- [x] D1-1: Make `/app` the post-login default route (always land in the app environment)
   - If no project open: show “Workbench Home” view (not canvas).
   - If project open: go to canvas environment.
   - Acceptance: brand new user always lands inside app shell, not a half-state.

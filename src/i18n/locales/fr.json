@@ -8,6 +8,11 @@
     "settings": "Paramètres",
     "backToApp": "Retour à l'app"
   },
+  "home": {
+    "title": "Accueil de l'atelier",
+    "welcome": "Bienvenue sur ChainSolve",
+    "subtitle": "Votre espace de travail scientifique à nœuds"
+  },
   "auth": {
     "login": "Connexion",
     "signup": "Créer un compte",

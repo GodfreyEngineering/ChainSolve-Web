@@ -8,6 +8,11 @@
     "settings": "Settings",
     "backToApp": "Back to app"
   },
+  "home": {
+    "title": "Workbench Home",
+    "welcome": "Welcome to ChainSolve",
+    "subtitle": "Your scientific node-graph workspace"
+  },
   "reauth": {
     "title": "Confirm your password",
     "description": "For security, please re-enter your password to continue with billing changes.",

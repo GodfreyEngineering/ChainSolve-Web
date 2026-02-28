@@ -8,6 +8,11 @@
     "settings": "Impostazioni",
     "backToApp": "Torna all'app"
   },
+  "home": {
+    "title": "Home dell'area di lavoro",
+    "welcome": "Benvenuto su ChainSolve",
+    "subtitle": "Il tuo spazio di lavoro scientifico a nodi"
+  },
   "auth": {
     "login": "Accedi",
     "signup": "Crea un account",
