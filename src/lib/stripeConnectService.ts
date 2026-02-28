@@ -22,21 +22,37 @@ export interface CheckoutResult {
 
 /**
  * Start Stripe Connect Express onboarding for the current user.
- * Returns a one-time Stripe-hosted onboarding URL.
- *
- * @stub — edge function endpoint not yet implemented (P113).
+ * Calls the edge function which creates/retrieves the Express account and returns
+ * a one-time Stripe-hosted account-link URL.
  */
 export async function startConnectOnboarding(): Promise<string> {
-  throw new Error('stripeConnectService.startConnectOnboarding: not yet implemented (P113)')
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) throw new Error('Sign in to connect Stripe')
+
+  const res = await fetch('/api/stripe/connect-onboarding', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
+    },
+  })
+
+  const data = (await res.json()) as { ok: boolean; url?: string; error?: string }
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error ?? 'Failed to start Stripe onboarding')
+  }
+  return data.url!
 }
 
 /**
  * Get the Stripe Connect account status for the current user.
  *
- * @stub — edge function endpoint not yet implemented (P113).
+ * @stub — edge function endpoint not yet implemented (future).
  */
 export async function getConnectStatus(): Promise<ConnectStatus> {
-  throw new Error('stripeConnectService.getConnectStatus: not yet implemented (P113)')
+  throw new Error('stripeConnectService.getConnectStatus: not yet implemented')
 }
 
 // ── Buyer purchase flow ───────────────────────────────────────────────────────

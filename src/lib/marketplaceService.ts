@@ -172,7 +172,7 @@ export async function getUserInstalls(): Promise<MarketplacePurchase[]> {
   return (data ?? []) as MarketplacePurchase[]
 }
 
-// ── Author verification (P109) ────────────────────────────────────────────────
+// ── Author verification + publish gate (P109 / P113) ─────────────────────────
 
 /**
  * Check whether the current user has the verified_author flag on their profile.
@@ -192,6 +192,37 @@ export async function isVerifiedAuthor(): Promise<boolean> {
   if (error) throw new Error(error.message)
 
   return (data as { verified_author: boolean } | null)?.verified_author ?? false
+}
+
+export interface PublishGate {
+  /** User has verified_author = true on their profile. */
+  verified: boolean
+  /** User has stripe_onboarded = true on their profile (needed for paid items). */
+  stripeOnboarded: boolean
+}
+
+/**
+ * Fetch both verified_author and stripe_onboarded in a single profile query.
+ * Returns all-false when unauthenticated.
+ */
+export async function getPublishGate(): Promise<PublishGate> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { verified: false, stripeOnboarded: false }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('verified_author, stripe_onboarded')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+
+  const profile = data as { verified_author: boolean; stripe_onboarded: boolean } | null
+  return {
+    verified: profile?.verified_author ?? false,
+    stripeOnboarded: profile?.stripe_onboarded ?? false,
+  }
 }
 
 // ── Author CRUD (P108) ─────────────────────────────────────────────────────────

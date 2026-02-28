@@ -18,10 +18,11 @@ import {
   createAuthorItem,
   togglePublishItem,
   validateMarketplaceVersion,
-  isVerifiedAuthor,
+  getPublishGate,
   type MarketplaceItem,
   type MarketplaceCategory,
 } from '../lib/marketplaceService'
+import { startConnectOnboarding } from '../lib/stripeConnectService'
 import { BRAND } from '../lib/brand'
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
@@ -147,8 +148,11 @@ export default function MarketplaceAuthorPage() {
   const [items, setItems] = useState<MarketplaceItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  /** null = still loading, true/false = result of isVerifiedAuthor() */
+  /** null = still loading, true/false = verified_author from profile */
   const [verified, setVerified] = useState<boolean | null>(null)
+  /** null = still loading, true/false = stripe_onboarded from profile */
+  const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null)
+  const [connectLoading, setConnectLoading] = useState(false)
 
   // Create-item form state
   const [showForm, setShowForm] = useState(false)
@@ -163,9 +167,10 @@ export default function MarketplaceAuthorPage() {
     setLoading(true)
     setError(null)
     try {
-      const [fetched, verifiedStatus] = await Promise.all([listAuthorItems(), isVerifiedAuthor()])
+      const [fetched, gate] = await Promise.all([listAuthorItems(), getPublishGate()])
       setItems(fetched)
-      setVerified(verifiedStatus)
+      setVerified(gate.verified)
+      setStripeOnboarded(gate.stripeOnboarded)
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       if (msg.toLowerCase().includes('sign in') || msg.toLowerCase().includes('auth')) {
@@ -229,6 +234,24 @@ export default function MarketplaceAuthorPage() {
       setError(err instanceof Error ? err.message : String(err))
     }
   }, [])
+
+  const handleConnectStripe = useCallback(async () => {
+    setConnectLoading(true)
+    setError(null)
+    try {
+      const url = await startConnectOnboarding()
+      window.location.href = url
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.toLowerCase().includes('sign in')) {
+        navigate('/login')
+        return
+      }
+      setError(msg)
+    } finally {
+      setConnectLoading(false)
+    }
+  }, [navigate])
 
   return (
     <div style={s.page}>
@@ -300,6 +323,37 @@ export default function MarketplaceAuthorPage() {
             <a href="mailto:support@chainsolve.com" style={{ color: '#fbbf24', fontWeight: 600 }}>
               {t('marketplace.contactSupport')}
             </a>
+          </div>
+        )}
+
+        {/* Connect Stripe CTA — shown when verified but not yet onboarded */}
+        {verified === true && stripeOnboarded === false && (
+          <div
+            style={{
+              padding: '0.75rem 1rem',
+              borderRadius: 8,
+              background: 'rgba(99,102,241,0.08)',
+              border: '1px solid rgba(99,102,241,0.25)',
+              color: 'rgba(244,244,243,0.85)',
+              fontSize: '0.85rem',
+              marginBottom: '1rem',
+              display: 'flex',
+              gap: '0.75rem',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+            data-testid="connect-stripe-notice"
+            role="status"
+          >
+            <span style={{ flex: 1 }}>{t('marketplace.connectStripeNotice')}</span>
+            <button
+              style={s.primaryBtn(connectLoading)}
+              disabled={connectLoading}
+              onClick={() => void handleConnectStripe()}
+              data-testid="connect-stripe-btn"
+            >
+              {t('marketplace.connectStripe')}
+            </button>
           </div>
         )}
 

@@ -47,13 +47,59 @@ beforeEach(async () => {
   supabaseMock.from.mockReturnValue({ select: mockSelect })
 })
 
-// ── Stubs still pending (P113) ────────────────────────────────────────────────
+// ── startConnectOnboarding (P113) ─────────────────────────────────────────────
 
-describe('stripeConnectService — remaining stubs', () => {
-  it('startConnectOnboarding throws not-implemented', async () => {
-    await expect(startConnectOnboarding()).rejects.toThrow('not yet implemented')
+describe('startConnectOnboarding', () => {
+  it('throws when not authenticated', async () => {
+    supabaseMock.auth.getSession.mockResolvedValueOnce({ data: { session: null } })
+
+    await expect(startConnectOnboarding()).rejects.toThrow('Sign in')
   })
 
+  it('returns onboarding URL on success', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ ok: true, url: 'https://connect.stripe.com/setup/e/abc' }),
+      }),
+    )
+
+    const url = await startConnectOnboarding()
+    expect(url).toBe('https://connect.stripe.com/setup/e/abc')
+    vi.unstubAllGlobals()
+  })
+
+  it('throws when edge function returns error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: async () => ({ ok: false, error: 'Stripe unavailable' }),
+      }),
+    )
+
+    await expect(startConnectOnboarding()).rejects.toThrow('Stripe unavailable')
+    vi.unstubAllGlobals()
+  })
+
+  it('sends Authorization Bearer token', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true, url: 'https://connect.stripe.com/setup/e/abc' }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    await startConnectOnboarding()
+    const [, options] = mockFetch.mock.calls[0] as [string, RequestInit]
+    expect((options.headers as Record<string, string>)['Authorization']).toBe('Bearer tok-abc')
+    vi.unstubAllGlobals()
+  })
+})
+
+// ── Stubs still pending (future) ──────────────────────────────────────────────
+
+describe('stripeConnectService — remaining stubs', () => {
   it('getConnectStatus throws not-implemented', async () => {
     await expect(getConnectStatus()).rejects.toThrow('not yet implemented')
   })

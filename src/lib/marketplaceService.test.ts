@@ -17,6 +17,7 @@ import {
   togglePublishItem,
   validateMarketplaceVersion,
   isVerifiedAuthor,
+  getPublishGate,
 } from './marketplaceService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
@@ -486,6 +487,67 @@ describe('isVerifiedAuthor', () => {
     })
 
     await expect(isVerifiedAuthor()).rejects.toMatchObject({ message: 'DB error' })
+  })
+})
+
+// ── getPublishGate (P113) ─────────────────────────────────────────────────────
+
+describe('getPublishGate', () => {
+  it('returns all-false when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+
+    const result = await getPublishGate()
+    expect(result).toEqual({ verified: false, stripeOnboarded: false })
+  })
+
+  it('returns verified=true, stripeOnboarded=true when both flags are set', async () => {
+    makeQueryBuilder({ data: { verified_author: true, stripe_onboarded: true }, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    const result = await getPublishGate()
+    expect(result).toEqual({ verified: true, stripeOnboarded: true })
+  })
+
+  it('returns verified=true, stripeOnboarded=false when not yet onboarded', async () => {
+    makeQueryBuilder({ data: { verified_author: true, stripe_onboarded: false }, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    const result = await getPublishGate()
+    expect(result).toEqual({ verified: true, stripeOnboarded: false })
+  })
+
+  it('returns all-false when profile row not found', async () => {
+    makeQueryBuilder({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    const result = await getPublishGate()
+    expect(result).toEqual({ verified: false, stripeOnboarded: false })
+  })
+
+  it('throws on supabase error', async () => {
+    makeQueryBuilder({ data: null, error: { message: 'DB error' } })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      maybeSingle: mockMaybeSingle,
+    })
+
+    await expect(getPublishGate()).rejects.toMatchObject({ message: 'DB error' })
   })
 })
 
