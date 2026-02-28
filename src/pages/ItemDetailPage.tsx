@@ -24,7 +24,13 @@ import {
   getUserLikes,
   likeItem,
   unlikeItem,
+  getItemComments,
+  postComment,
+  deleteComment,
+  reportComment,
+  checkCommentRateLimit,
   type MarketplaceItem,
+  type MarketplaceComment,
 } from '../lib/marketplaceService'
 import { createCheckoutSession } from '../lib/stripeConnectService'
 import { getProfile } from '../lib/profilesService'
@@ -121,6 +127,13 @@ export default function ItemDetailPage() {
   const [plan, setPlan] = useState<Plan>('free')
   const [projectCount, setProjectCount] = useState(0)
 
+  // D9-4: comments
+  const [comments, setComments] = useState<MarketplaceComment[]>([])
+  const [commentText, setCommentText] = useState('')
+  const [commentPosting, setCommentPosting] = useState(false)
+  const [commentError, setCommentError] = useState<string | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
   useEffect(() => {
     if (!itemId) {
       setNotFound(true)
@@ -143,15 +156,22 @@ export default function ItemDetailPage() {
           setInstalled(installs.some((p) => p.item_id === itemId))
           setLiked(likes.has(itemId))
         }
-        // D9-3: fetch plan + project count
+        // D9-3: fetch plan + project count; D9-4: fetch comments
         const session = await getSession()
         if (session) {
+          setCurrentUserId(session.user.id)
           const [profile, count] = await Promise.all([
             getProfile(session.user.id),
             getProjectCount(),
           ])
           if (profile?.plan) setPlan(profile.plan as Plan)
           setProjectCount(count)
+        }
+        // D9-4: load comments (non-blocking)
+        if (fetched) {
+          getItemComments(itemId)
+            .then(setComments)
+            .catch(() => {})
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err))
@@ -228,6 +248,57 @@ export default function ItemDetailPage() {
       setInstalling(false)
     }
   }, [itemId, installed, installing, navigate, item, isPaid, plan, projectCount, t])
+
+  // D9-4: comment handlers
+  const handlePostComment = useCallback(async () => {
+    if (!itemId || !commentText.trim()) return
+    if (!checkCommentRateLimit()) {
+      setCommentError(t('marketplace.commentRateLimited'))
+      return
+    }
+    setCommentPosting(true)
+    setCommentError(null)
+    try {
+      const newComment = await postComment(itemId, commentText)
+      setComments((prev) => [newComment, ...prev])
+      setCommentText('')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.toLowerCase().includes('sign in')) {
+        navigate('/login')
+        return
+      }
+      setCommentError(msg)
+    } finally {
+      setCommentPosting(false)
+    }
+  }, [itemId, commentText, navigate, t])
+
+  const handleDeleteComment = useCallback(async (commentId: string) => {
+    try {
+      await deleteComment(commentId)
+      setComments((prev) => prev.filter((c) => c.id !== commentId))
+    } catch (err) {
+      setCommentError(err instanceof Error ? err.message : String(err))
+    }
+  }, [])
+
+  const handleReportComment = useCallback(
+    async (commentId: string) => {
+      try {
+        await reportComment(commentId, 'Reported by user')
+        setComments((prev) => prev.filter((c) => c.id !== commentId))
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        if (msg.toLowerCase().includes('sign in')) {
+          navigate('/login')
+          return
+        }
+        setCommentError(msg)
+      }
+    },
+    [navigate],
+  )
 
   return (
     <div style={s.page}>
@@ -448,6 +519,151 @@ export default function ItemDetailPage() {
                 {item.description}
               </p>
             )}
+
+            {/* D9-4: Comments section */}
+            <section style={{ marginTop: '2rem' }} data-testid="comments-section">
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>
+                {t('marketplace.comments')} ({comments.length})
+              </h2>
+
+              {/* Comment form */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <textarea
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder={t('marketplace.commentPlaceholder')}
+                  maxLength={2000}
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 0.75rem',
+                    borderRadius: 8,
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'rgba(0,0,0,0.25)',
+                    color: 'var(--fg, #F4F4F3)',
+                    fontSize: '0.85rem',
+                    outline: 'none',
+                    fontFamily: 'inherit',
+                    resize: 'vertical',
+                    boxSizing: 'border-box',
+                  }}
+                  data-testid="comment-input"
+                />
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    alignItems: 'center',
+                    marginTop: '0.5rem',
+                  }}
+                >
+                  <button
+                    onClick={() => void handlePostComment()}
+                    disabled={commentPosting || !commentText.trim()}
+                    style={{
+                      padding: '0.4rem 1rem',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: commentPosting || !commentText.trim() ? '#3f3f46' : '#1CABB0',
+                      color:
+                        commentPosting || !commentText.trim() ? 'rgba(244,244,243,0.4)' : '#fff',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      cursor: commentPosting || !commentText.trim() ? 'default' : 'pointer',
+                      fontFamily: 'inherit',
+                    }}
+                    data-testid="comment-submit"
+                  >
+                    {commentPosting
+                      ? t('marketplace.commentPosting')
+                      : t('marketplace.commentSubmit')}
+                  </button>
+                  {commentError && (
+                    <span style={{ fontSize: '0.78rem', color: '#f87171' }}>{commentError}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Comment list */}
+              {comments.length === 0 && (
+                <p
+                  style={{ fontSize: '0.82rem', opacity: 0.4, margin: 0 }}
+                  data-testid="no-comments"
+                >
+                  {t('marketplace.noComments')}
+                </p>
+              )}
+              {comments.map((c) => (
+                <div
+                  key={c.id}
+                  style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: 8,
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    marginBottom: '0.5rem',
+                  }}
+                  data-testid="comment-item"
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'baseline',
+                      marginBottom: '0.3rem',
+                    }}
+                  >
+                    <span style={{ fontSize: '0.72rem', color: 'rgba(244,244,243,0.35)' }}>
+                      {formatDate(c.created_at)}
+                    </span>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {currentUserId === c.user_id && (
+                        <button
+                          onClick={() => void handleDeleteComment(c.id)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '0.7rem',
+                            color: 'rgba(244,244,243,0.3)',
+                            fontFamily: 'inherit',
+                            padding: 0,
+                          }}
+                        >
+                          {t('marketplace.commentDelete')}
+                        </button>
+                      )}
+                      {currentUserId && currentUserId !== c.user_id && (
+                        <button
+                          onClick={() => void handleReportComment(c.id)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '0.7rem',
+                            color: 'rgba(244,244,243,0.3)',
+                            fontFamily: 'inherit',
+                            padding: 0,
+                          }}
+                        >
+                          {t('marketplace.commentReport')}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: '0.85rem',
+                      margin: 0,
+                      lineHeight: 1.5,
+                      whiteSpace: 'pre-wrap',
+                    }}
+                  >
+                    {c.content}
+                  </p>
+                </div>
+              ))}
+            </section>
           </article>
         )}
       </main>

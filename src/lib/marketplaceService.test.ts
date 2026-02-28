@@ -5,7 +5,7 @@
  * touching a real database.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   listPublishedItems,
   getItem,
@@ -27,6 +27,11 @@ import {
   getUserLikes,
   likeItem,
   unlikeItem,
+  checkCommentRateLimit,
+  getItemComments,
+  postComment,
+  deleteComment,
+  reportComment,
 } from './marketplaceService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
@@ -1009,5 +1014,245 @@ describe('unlikeItem', () => {
     expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_likes')
     expect(mockDeleteEq1).toHaveBeenCalledWith('user_id', 'uid-1')
     expect(mockDeleteEq2).toHaveBeenCalledWith('item_id', 'item-1')
+  })
+})
+
+// ── checkCommentRateLimit (D9-4) ────────────────────────────────────────────
+
+describe('checkCommentRateLimit', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let getItemSpy: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let setItemSpy: any
+
+  beforeEach(() => {
+    localStorage.clear()
+    getItemSpy = vi.spyOn(Storage.prototype, 'getItem')
+    setItemSpy = vi.spyOn(Storage.prototype, 'setItem')
+  })
+
+  afterEach(() => {
+    getItemSpy.mockRestore()
+    setItemSpy.mockRestore()
+  })
+
+  it('returns true when no previous comments', () => {
+    expect(checkCommentRateLimit()).toBe(true)
+  })
+
+  it('returns true when fewer than 5 recent comments', () => {
+    const now = Date.now()
+    const timestamps = [now - 10_000, now - 20_000, now - 30_000]
+    localStorage.setItem('cs:comment-rate', JSON.stringify(timestamps))
+    expect(checkCommentRateLimit()).toBe(true)
+  })
+
+  it('returns false when 5 or more comments within window', () => {
+    const now = Date.now()
+    const timestamps = [now - 1000, now - 2000, now - 3000, now - 4000, now - 5000]
+    localStorage.setItem('cs:comment-rate', JSON.stringify(timestamps))
+    expect(checkCommentRateLimit()).toBe(false)
+  })
+
+  it('ignores timestamps older than 60s', () => {
+    const now = Date.now()
+    const timestamps = [
+      now - 70_000,
+      now - 80_000,
+      now - 90_000,
+      now - 100_000,
+      now - 110_000,
+      now - 5000,
+    ]
+    localStorage.setItem('cs:comment-rate', JSON.stringify(timestamps))
+    expect(checkCommentRateLimit()).toBe(true)
+  })
+
+  it('returns true when localStorage throws', () => {
+    getItemSpy.mockImplementation(() => {
+      throw new Error('localStorage disabled')
+    })
+    expect(checkCommentRateLimit()).toBe(true)
+  })
+})
+
+// ── getItemComments (D9-4) ──────────────────────────────────────────────────
+
+describe('getItemComments', () => {
+  it('returns comments ordered by created_at desc', async () => {
+    const comments = [
+      {
+        id: 'c2',
+        item_id: 'i1',
+        user_id: 'u1',
+        content: 'Great',
+        is_flagged: false,
+        created_at: '2026-01-02',
+      },
+      {
+        id: 'c1',
+        item_id: 'i1',
+        user_id: 'u2',
+        content: 'Nice',
+        is_flagged: false,
+        created_at: '2026-01-01',
+      },
+    ]
+    makeQueryBuilder({ data: comments, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      order: mockOrder,
+    })
+
+    const result = await getItemComments('i1')
+    expect(result).toEqual(comments)
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_comments')
+  })
+
+  it('returns empty array when no comments', async () => {
+    makeQueryBuilder({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      order: mockOrder,
+    })
+
+    const result = await getItemComments('i1')
+    expect(result).toEqual([])
+  })
+
+  it('throws on supabase error', async () => {
+    makeQueryBuilder({ data: null, error: { message: 'DB error' } })
+    supabaseMock.from.mockReturnValue({
+      select: mockSelect,
+      eq: mockEq,
+      order: mockOrder,
+    })
+
+    await expect(getItemComments('i1')).rejects.toMatchObject({ message: 'DB error' })
+  })
+})
+
+// ── postComment (D9-4) ──────────────────────────────────────────────────────
+
+describe('postComment', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('throws when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+    await expect(postComment('i1', 'Hello')).rejects.toThrow('Sign in')
+  })
+
+  it('inserts comment and returns it', async () => {
+    const created = {
+      id: 'c1',
+      item_id: 'i1',
+      user_id: 'uid-1',
+      content: 'Great template',
+      is_flagged: false,
+      created_at: '2026-01-01',
+    }
+    makeQueryBuilder({ data: created, error: null })
+    supabaseMock.from.mockReturnValue({
+      insert: mockInsert,
+      select: mockSelect,
+      single: mockSingle,
+    })
+
+    const result = await postComment('i1', 'Great template')
+    expect(result).toEqual(created)
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_comments')
+  })
+
+  it('rejects empty content', async () => {
+    await expect(postComment('i1', '   ')).rejects.toThrow('between 1 and 2000')
+  })
+
+  it('rejects content over 2000 characters', async () => {
+    const long = 'a'.repeat(2001)
+    await expect(postComment('i1', long)).rejects.toThrow('between 1 and 2000')
+  })
+
+  it('rejects when rate limited', async () => {
+    const now = Date.now()
+    const timestamps = [now - 1000, now - 2000, now - 3000, now - 4000, now - 5000]
+    localStorage.setItem('cs:comment-rate', JSON.stringify(timestamps))
+
+    await expect(postComment('i1', 'Hello')).rejects.toThrow('Too many comments')
+  })
+})
+
+// ── deleteComment (D9-4) ────────────────────────────────────────────────────
+
+describe('deleteComment', () => {
+  it('calls delete on marketplace_comments with comment ID', async () => {
+    const mockDeleteEq = vi.fn().mockResolvedValue({ data: null, error: null })
+    const mockDeleteFn = vi.fn().mockReturnValue({ eq: mockDeleteEq })
+    supabaseMock.from.mockReturnValue({ delete: mockDeleteFn })
+
+    await deleteComment('c1')
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_comments')
+    expect(mockDeleteEq).toHaveBeenCalledWith('id', 'c1')
+  })
+
+  it('throws on supabase error', async () => {
+    const mockDeleteEq = vi
+      .fn()
+      .mockResolvedValue({ data: null, error: { message: 'RLS violation' } })
+    const mockDeleteFn = vi.fn().mockReturnValue({ eq: mockDeleteEq })
+    supabaseMock.from.mockReturnValue({ delete: mockDeleteFn })
+
+    await expect(deleteComment('c1')).rejects.toMatchObject({ message: 'RLS violation' })
+  })
+})
+
+// ── reportComment (D9-4) ────────────────────────────────────────────────────
+
+describe('reportComment', () => {
+  it('throws when not authenticated', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+    await expect(reportComment('c1', 'spam')).rejects.toThrow('Sign in')
+  })
+
+  it('calls update with is_flagged and flag_reason', async () => {
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    const mockUpdateFn = vi.fn().mockReturnValue({ eq: mockEqFn })
+    supabaseMock.from.mockReturnValue({ update: mockUpdateFn })
+
+    await reportComment('c1', 'This is spam')
+    expect(supabaseMock.from).toHaveBeenCalledWith('marketplace_comments')
+    expect(mockUpdateFn).toHaveBeenCalledWith({
+      is_flagged: true,
+      flag_reason: 'This is spam',
+    })
+    expect(mockEqFn).toHaveBeenCalledWith('id', 'c1')
+  })
+
+  it('truncates flag_reason to 500 characters', async () => {
+    const longReason = 'x'.repeat(600)
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    const mockUpdateFn = vi.fn().mockReturnValue({ eq: mockEqFn })
+    supabaseMock.from.mockReturnValue({ update: mockUpdateFn })
+
+    await reportComment('c1', longReason)
+    const passedReason = mockUpdateFn.mock.calls[0][0].flag_reason as string
+    expect(passedReason.length).toBe(500)
+  })
+
+  it('throws on supabase error', async () => {
+    const mockEqFn = vi.fn().mockResolvedValue({ data: null, error: { message: 'Forbidden' } })
+    const mockUpdateFn = vi.fn().mockReturnValue({ eq: mockEqFn })
+    supabaseMock.from.mockReturnValue({ update: mockUpdateFn })
+
+    await expect(reportComment('c1', 'spam')).rejects.toMatchObject({ message: 'Forbidden' })
   })
 })

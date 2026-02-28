@@ -30,6 +30,8 @@ export interface MarketplaceItem {
   downloads_count: number
   /** D9-2: denormalised like count. */
   likes_count: number
+  /** D9-4: denormalised comment count. */
+  comments_count: number
   /** D9-2: discoverable tags. */
   tags: string[]
   is_published: boolean
@@ -568,5 +570,114 @@ export async function unlikeItem(itemId: string): Promise<void> {
     .delete()
     .eq('user_id', user.id)
     .eq('item_id', itemId)
+  if (error) throw error
+}
+
+// ── Comments (D9-4) ───────────────────────────────────────────────────────────
+
+export interface MarketplaceComment {
+  id: string
+  item_id: string
+  user_id: string
+  content: string
+  is_flagged: boolean
+  created_at: string
+}
+
+/** Client-side rate limiting for comment posting. */
+const COMMENT_RATE_KEY = 'cs:comment-rate'
+const COMMENT_RATE_WINDOW_MS = 60_000 // 1 minute
+const COMMENT_RATE_MAX = 5
+
+export function checkCommentRateLimit(): boolean {
+  try {
+    const raw = localStorage.getItem(COMMENT_RATE_KEY)
+    const timestamps: number[] = raw ? JSON.parse(raw) : []
+    const now = Date.now()
+    const recent = timestamps.filter((t) => now - t < COMMENT_RATE_WINDOW_MS)
+    return recent.length < COMMENT_RATE_MAX
+  } catch {
+    return true
+  }
+}
+
+function recordCommentTimestamp(): void {
+  try {
+    const raw = localStorage.getItem(COMMENT_RATE_KEY)
+    const timestamps: number[] = raw ? JSON.parse(raw) : []
+    const now = Date.now()
+    const recent = timestamps.filter((t) => now - t < COMMENT_RATE_WINDOW_MS)
+    recent.push(now)
+    localStorage.setItem(COMMENT_RATE_KEY, JSON.stringify(recent))
+  } catch {
+    // localStorage unavailable — skip
+  }
+}
+
+/**
+ * Fetch all (non-flagged) comments for an item, ordered newest first.
+ */
+export async function getItemComments(itemId: string): Promise<MarketplaceComment[]> {
+  const { data, error } = await supabase
+    .from('marketplace_comments')
+    .select('id,item_id,user_id,content,is_flagged,created_at')
+    .eq('item_id', itemId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as MarketplaceComment[]
+}
+
+/**
+ * Post a comment on an item. Rate-limited client-side (5/min).
+ */
+export async function postComment(itemId: string, content: string): Promise<MarketplaceComment> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in to comment')
+
+  if (!checkCommentRateLimit()) {
+    throw new Error('Too many comments — please wait a moment')
+  }
+
+  const trimmed = content.trim()
+  if (!trimmed || trimmed.length > 2000) {
+    throw new Error('Comment must be between 1 and 2000 characters')
+  }
+
+  const { data, error } = await supabase
+    .from('marketplace_comments')
+    .insert({ item_id: itemId, user_id: user.id, content: trimmed })
+    .select('id,item_id,user_id,content,is_flagged,created_at')
+    .single()
+
+  if (error) throw error
+  recordCommentTimestamp()
+  return data as MarketplaceComment
+}
+
+/**
+ * Delete own comment, or any comment if moderator/author.
+ */
+export async function deleteComment(commentId: string): Promise<void> {
+  const { error } = await supabase.from('marketplace_comments').delete().eq('id', commentId)
+  if (error) throw error
+}
+
+/**
+ * Report a comment by setting is_flagged + flag_reason.
+ */
+export async function reportComment(commentId: string, reason: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in to report comments')
+
+  const { error } = await supabase
+    .from('marketplace_comments')
+    .update({ is_flagged: true, flag_reason: reason.trim().slice(0, 500) })
+    .eq('id', commentId)
+
   if (error) throw error
 }

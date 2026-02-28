@@ -613,7 +613,17 @@
     "sortMostDownloaded": "Most downloaded",
     "sortMostLiked": "Most liked",
     "sortNewestFirst": "Newest first",
-    "filterByTag": "Filter by tag…"
+    "filterByTag": "Filter by tag…",
+    "comments": "Comments",
+    "commentPlaceholder": "Write a comment…",
+    "commentSubmit": "Post",
+    "commentPosting": "Posting…",
+    "commentDelete": "Delete",
+    "commentReport": "Report",
+    "commentRateLimited": "Too many comments — please wait a moment",
+    "noComments": "No comments yet. Be the first to share your thoughts!",
+    "companyLibrary": "Company Library",
+    "companyLibraryEmpty": "No items in your company library yet."
   },
   "orgs": {
     "title": "Organizzazioni",
