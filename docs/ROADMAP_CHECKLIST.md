@@ -375,18 +375,18 @@ Claude MUST:
 
 ## A8 — Performance + scale (500–1000 nodes)
 - [x] P081: Perf harness (generate/load 500/1000-node graphs)
-- [ ] P082: ?perf=1 FPS overlay + perf logs (SHOULD)
+- [x] P082: ?perf=1 FPS overlay + perf logs (SHOULD)
 - [x] P083: Animated edges thresholds + hysteresis + tests
-- [ ] P084: LOD thresholds tuning
+- [x] P084: LOD thresholds tuning
 - [x] P085: WASM init timing logged + regression guard
 - [x] P086: Bundle splitting audit (ensure lazy libs remain lazy)
 - [x] P087: Table limits enforcement + UX
 - [x] P088: Worker resilience (crash → respawn → notice)
 - [ ] P089: Eval scheduling to avoid main-thread stalls (SHOULD)
-- [ ] P090: Lighthouse/perf budget doc + optional CI check (SHOULD)
+- [x] P090: Lighthouse/perf budget doc + optional CI check (SHOULD)
 
 ## A9 — Test suite completion + release hardening
-- [ ] P091: Coverage thresholds (src/lib + src/engine)
+- [x] P091: Coverage thresholds (src/lib + src/engine)
 - [ ] P092: Integration tests: WASM worker snapshot → result
 - [ ] P093: Integration tests: save/load round-trip (SHOULD)
 - [ ] P094: E2E smoke: create project, add blocks, connect, eval, save
