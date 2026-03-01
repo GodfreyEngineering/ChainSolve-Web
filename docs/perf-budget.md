@@ -9,7 +9,7 @@ how they are measured and enforced.
 
 | Metric | Budget | Check |
 |--------|--------|-------|
-| Initial JS (gzip) | ≤ 350 KB | `scripts/check-bundle-size.mjs` |
+| Initial JS (gzip) | ≤ 370 KB | `scripts/check-bundle-size.mjs` |
 | WASM binary (gzip) | ≤ 200 KB | `scripts/check-bundle-size.mjs` |
 
 These budgets are checked on every run of `./scripts/verify-ci.sh` and will

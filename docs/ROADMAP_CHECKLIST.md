@@ -1081,7 +1081,7 @@ Claude MUST:
   - Implement frontend token acquisition + passing `captcha_token` where needed.
   - Acceptance: bots blocked, humans not annoyed, UX clean.
 
-- [ ] E2-3: Email verification + ToS versioning
+- [x] E2-3: Email verification + ToS versioning
   - Store:
     - accepted_terms_version, accepted_terms_at
     - marketing_opt_in, marketing_opt_in_at

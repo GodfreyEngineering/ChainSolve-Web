@@ -54,7 +54,19 @@
     "resend": "E-Mail erneut senden",
     "submitting": "Wird gesendet…",
     "captchaRequired": "Bitte lösen Sie die CAPTCHA-Aufgabe.",
-    "captchaFailed": "CAPTCHA konnte nicht geladen werden. Bitte aktualisieren Sie die Seite."
+    "captchaFailed": "CAPTCHA konnte nicht geladen werden. Bitte aktualisieren Sie die Seite.",
+    "verifyEmailTitle": "E-Mail bestätigen",
+    "verifyEmailSub": "Noch ein Schritt, bevor Sie fortfahren können",
+    "verifyEmailBody": "Wir haben einen Bestätigungslink an <strong>{{email}}</strong> gesendet. Klicken Sie auf den Link in dieser E-Mail, um Ihr Konto zu bestätigen, und aktualisieren Sie dann diese Seite.",
+    "verifyEmailResend": "Bestätigungs-E-Mail erneut senden",
+    "verifyEmailRefresh": "Bestätigt — Seite aktualisieren",
+    "termsTitle": "Nutzungsbedingungen",
+    "termsSub": "Bitte lesen und akzeptieren Sie die Bedingungen",
+    "termsBody": "Wir haben unsere Nutzungsbedingungen aktualisiert (v{{version}}). Bitte überprüfen und akzeptieren Sie sie, um ChainSolve weiter zu nutzen.",
+    "termsLink": "Vollständige Nutzungsbedingungen lesen",
+    "termsAccept": "Ich akzeptiere die Nutzungsbedingungen (v{{version}})",
+    "termsContinue": "Weiter",
+    "termsSaving": "Wird gespeichert…"
   },
   "projects": {
     "title": "Projekte",

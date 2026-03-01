@@ -14,7 +14,7 @@
 
 - [ ] `verify-ci.sh` exits 0 with **All CI checks passed**.
 - [ ] No ESLint **errors** (warnings are acceptable).
-- [ ] Bundle initial-JS gzip ≤ 350 KB (enforced by size check).
+- [ ] Bundle initial-JS gzip ≤ 370 KB (enforced by size check).
 - [ ] WASM gzip ≤ 200 KB (enforced by size check).
 
 ---

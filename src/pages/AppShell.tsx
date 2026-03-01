@@ -48,9 +48,12 @@ import { BRAND } from '../lib/brand'
 import { UpgradeModal } from '../components/UpgradeModal'
 import { getRecentProjects } from '../lib/recentProjects'
 import { getPinnedProjects, togglePinnedProject } from '../lib/pinnedProjects'
+import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 
 type SortMode = 'recent' | 'name' | 'created'
 type FilterTab = 'all' | 'recent' | 'pinned'
+
+const LazyAuthGate = lazy(() => import('../components/AuthGate'))
 
 const LazyFirstRunModal = lazy(() =>
   import('../components/app/FirstRunModal').then((m) => ({ default: m.FirstRunModal })),
@@ -64,6 +67,10 @@ interface Profile {
   plan: Plan
   stripe_customer_id: string | null
   current_period_end: string | null
+  /** E2-3: Semantic version of ToS the user accepted. */
+  accepted_terms_version: string | null
+  /** E2-3: Whether the user opted in to marketing. */
+  marketing_opt_in: boolean
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -288,7 +295,9 @@ export default function AppShell() {
       setUser(session.user)
       supabase
         .from('profiles')
-        .select('id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin')
+        .select(
+          'id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin,accepted_terms_version,marketing_opt_in',
+        )
         .eq('id', session.user.id)
         .maybeSingle()
         .then(({ data, error }) => {
@@ -298,6 +307,27 @@ export default function AppShell() {
         })
     })
   }, [navigate, fetchProjects])
+
+  // E2-3: Handle ToS acceptance from AuthGate
+  const handleTermsAccepted = useCallback(
+    async (version: string) => {
+      // Dynamic import to keep acceptTerms out of the initial bundle
+      const { acceptTerms } = await import('../lib/profilesService')
+      await acceptTerms(version)
+      // Re-fetch profile to reflect the acceptance
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select(
+            'id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin,accepted_terms_version,marketing_opt_in',
+          )
+          .eq('id', user.id)
+          .maybeSingle()
+        if (data) setProfile(data as Profile)
+      }
+    },
+    [user],
+  )
 
   const handleNewProject = async () => {
     const plan = resolveEffectivePlan(profile)
@@ -494,6 +524,27 @@ export default function AppShell() {
         Loading…
       </div>
     )
+  }
+
+  // E2-3: Block access until email is verified and ToS accepted.
+  // AuthGate checks email_confirmed_at and accepted_terms_version internally.
+  if (user && profile) {
+    const gateProfile = { accepted_terms_version: profile.accepted_terms_version ?? null }
+    // AuthGate renders its own gate screens and only passes through when satisfied.
+    // We wrap the entire UI below in AuthGate via an early return.
+    // However, to avoid re-indenting 800+ lines, we check the two conditions
+    // here and short-circuit to the gate screen if either fails.
+    const needsGate =
+      !user.email_confirmed_at || gateProfile.accepted_terms_version !== CURRENT_TERMS_VERSION
+    if (needsGate) {
+      return (
+        <Suspense fallback={null}>
+          <LazyAuthGate user={user} profile={gateProfile} onTermsAccepted={handleTermsAccepted}>
+            {null}
+          </LazyAuthGate>
+        </Suspense>
+      )
+    }
   }
 
   const plan = resolveEffectivePlan(profile)

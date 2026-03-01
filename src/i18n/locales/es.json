@@ -54,7 +54,19 @@
     "resend": "Reenviar correo",
     "submitting": "Enviando…",
     "captchaRequired": "Por favor, completa el desafío CAPTCHA.",
-    "captchaFailed": "No se pudo cargar el CAPTCHA. Actualiza la página e inténtalo de nuevo."
+    "captchaFailed": "No se pudo cargar el CAPTCHA. Actualiza la página e inténtalo de nuevo.",
+    "verifyEmailTitle": "Verifica tu correo",
+    "verifyEmailSub": "Un paso más antes de continuar",
+    "verifyEmailBody": "Enviamos un enlace de verificación a <strong>{{email}}</strong>. Haz clic en el enlace de ese correo para verificar tu cuenta y luego actualiza esta página.",
+    "verifyEmailResend": "Reenviar correo de verificación",
+    "verifyEmailRefresh": "Ya verifiqué — actualizar",
+    "termsTitle": "Términos y Condiciones",
+    "termsSub": "Por favor, revisa y acepta para continuar",
+    "termsBody": "Hemos actualizado nuestros Términos y Condiciones (v{{version}}). Por favor, revísalos y acéptalos para seguir usando ChainSolve.",
+    "termsLink": "Leer los Términos y Condiciones completos",
+    "termsAccept": "Acepto los Términos y Condiciones (v{{version}})",
+    "termsContinue": "Continuar",
+    "termsSaving": "Guardando…"
   },
   "projects": {
     "title": "Proyectos",

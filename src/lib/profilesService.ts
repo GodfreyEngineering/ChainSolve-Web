@@ -21,18 +21,60 @@ export interface Profile {
   is_developer: boolean
   /** E2-6: Moderation tools + admin panels. Set by service_role only. */
   is_admin: boolean
+  /** E2-3: Semantic version of ToS the user has accepted (e.g. '1.0'). */
+  accepted_terms_version: string | null
+  /** E2-3: When the user accepted the current ToS. */
+  accepted_terms_at: string | null
+  /** E2-3: Whether the user opted in to marketing emails. */
+  marketing_opt_in: boolean
+  /** E2-3: When marketing opt-in was last changed. */
+  marketing_opt_in_at: string | null
 }
 
 export async function getProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
     .select(
-      'id,email,full_name,avatar_url,plan,stripe_customer_id,current_period_end,is_developer,is_admin',
+      'id,email,full_name,avatar_url,plan,stripe_customer_id,current_period_end,is_developer,is_admin,accepted_terms_version,accepted_terms_at,marketing_opt_in,marketing_opt_in_at',
     )
     .eq('id', userId)
     .maybeSingle()
   if (error || !data) return null
   return data as Profile
+}
+
+/** E2-3: Record that the user has accepted the given ToS version. */
+export async function acceptTerms(version: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in to accept terms')
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      accepted_terms_version: version,
+      accepted_terms_at: new Date().toISOString(),
+    })
+    .eq('id', user.id)
+  if (error) throw error
+}
+
+/** E2-3: Update the user's marketing opt-in preference. */
+export async function updateMarketingOptIn(optIn: boolean): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in to update preferences')
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      marketing_opt_in: optIn,
+      marketing_opt_in_at: new Date().toISOString(),
+    })
+    .eq('id', user.id)
+  if (error) throw error
 }
 
 /** D12-1: Update the current user's profile display name. */
