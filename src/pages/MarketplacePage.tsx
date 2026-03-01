@@ -36,6 +36,7 @@ import { getProjectCount } from '../lib/projects'
 import { canInstallExploreItem, type Plan } from '../lib/entitlements'
 import { getSession } from '../lib/auth'
 import { BRAND } from '../lib/brand'
+import { getBlockedUsers } from '../lib/blockedUsers'
 
 /** Map category key to i18n label key. */
 const CATEGORY_LABEL_KEYS: Record<string, string> = {
@@ -244,6 +245,9 @@ export default function MarketplacePage() {
 
   // D10-2: org policy flags
   const [orgPolicy, setOrgPolicy] = useState<OrgPolicy | null>(null)
+
+  // D16-3: blocked authors (client-side filter)
+  const [blockedAuthors] = useState(() => getBlockedUsers())
 
   // Fetch plan + project count + orgs on mount
   useEffect(() => {
@@ -654,179 +658,181 @@ export default function MarketplacePage() {
         {/* Items grid — public view */}
         {viewMode === 'public' && !loading && items.length > 0 && (
           <div style={s.grid} data-testid="marketplace-grid">
-            {items.map((item) => {
-              const isInstalled = installedIds.has(item.id)
-              const isInstalling = installingId === item.id
-              const canInstall = canInstallExploreItem(plan, item.category, projectCount)
-              const isLocked = !canInstall && !isInstalled
-              return (
-                <article key={item.id} style={s.card}>
-                  {/* Thumbnail */}
-                  {item.thumbnail_url ? (
-                    <img
-                      src={item.thumbnail_url}
-                      alt={item.name}
-                      style={{
-                        width: '100%',
-                        height: 140,
-                        objectFit: 'cover',
-                        borderBottom: '1px solid var(--border)',
-                      }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: '100%',
-                        height: 80,
-                        background: 'var(--surface2)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 'var(--font-2xl)',
-                        color: 'var(--text-faint)',
-                        borderBottom: '1px solid var(--border)',
-                      }}
-                    >
-                      {item.category === 'template'
-                        ? '📄'
-                        : item.category === 'theme'
-                          ? '🎨'
-                          : item.category === 'block_pack'
-                            ? '📦'
-                            : '🧩'}
-                    </div>
-                  )}
-
-                  {/* Card body */}
-                  <div style={s.cardBody}>
-                    {/* Category badge + plan badge row */}
-                    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                      <span style={s.catBadge(item.category)}>
-                        {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')}
-                      </span>
-                      {isLocked && (
-                        <span
-                          style={{
-                            ...s.catBadge(''),
-                            background: 'rgba(124,58,237,0.15)',
-                            color: '#a78bfa',
-                          }}
-                        >
-                          Pro
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Title + version */}
-                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'baseline' }}>
-                      <a
-                        href={`/explore/items/${item.id}`}
+            {items
+              .filter((item) => !blockedAuthors.has(item.author_id))
+              .map((item) => {
+                const isInstalled = installedIds.has(item.id)
+                const isInstalling = installingId === item.id
+                const canInstall = canInstallExploreItem(plan, item.category, projectCount)
+                const isLocked = !canInstall && !isInstalled
+                return (
+                  <article key={item.id} style={s.card}>
+                    {/* Thumbnail */}
+                    {item.thumbnail_url ? (
+                      <img
+                        src={item.thumbnail_url}
+                        alt={item.name}
                         style={{
-                          fontWeight: 600,
-                          fontSize: 'var(--font-lg)',
-                          textDecoration: 'none',
-                          color: 'inherit',
+                          width: '100%',
+                          height: 140,
+                          objectFit: 'cover',
+                          borderBottom: '1px solid var(--border)',
                         }}
-                      >
-                        {item.name}
-                      </a>
-                      <span
+                      />
+                    ) : (
+                      <div
                         style={{
-                          fontSize: 'var(--font-xs)',
+                          width: '100%',
+                          height: 80,
+                          background: 'var(--surface2)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 'var(--font-2xl)',
                           color: 'var(--text-faint)',
-                          flexShrink: 0,
+                          borderBottom: '1px solid var(--border)',
                         }}
                       >
-                        {t('marketplace.version', { version: item.version })}
-                      </span>
-                    </div>
-
-                    {/* Description */}
-                    {item.description && (
-                      <p
-                        style={{
-                          fontSize: 'var(--font-sm)',
-                          color: 'var(--text-muted)',
-                          margin: 0,
-                          overflow: 'hidden',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {item.description}
-                      </p>
-                    )}
-
-                    {/* Stats row: downloads, likes, date */}
-                    <div style={s.statRow}>
-                      <span>↓ {item.downloads_count}</span>
-                      <span>♡ {item.likes_count ?? 0}</span>
-                      <span>{formatDate(item.updated_at)}</span>
-                    </div>
-
-                    {/* Tags */}
-                    {item.tags && item.tags.length > 0 && (
-                      <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                        {item.tags.slice(0, 4).map((tag) => (
-                          <span key={tag} style={s.tag}>
-                            {tag}
-                          </span>
-                        ))}
+                        {item.category === 'template'
+                          ? '📄'
+                          : item.category === 'theme'
+                            ? '🎨'
+                            : item.category === 'block_pack'
+                              ? '📦'
+                              : '🧩'}
                       </div>
                     )}
 
-                    {/* Like + Install row */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: '0.5rem',
-                        alignItems: 'center',
-                        marginTop: 'auto',
-                      }}
-                    >
-                      <button
-                        onClick={() => void handleToggleLike(item.id)}
+                    {/* Card body */}
+                    <div style={s.cardBody}>
+                      {/* Category badge + plan badge row */}
+                      <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                        <span style={s.catBadge(item.category)}>
+                          {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')}
+                        </span>
+                        {isLocked && (
+                          <span
+                            style={{
+                              ...s.catBadge(''),
+                              background: 'rgba(124,58,237,0.15)',
+                              color: '#a78bfa',
+                            }}
+                          >
+                            Pro
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Title + version */}
+                      <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'baseline' }}>
+                        <a
+                          href={`/explore/items/${item.id}`}
+                          style={{
+                            fontWeight: 600,
+                            fontSize: 'var(--font-lg)',
+                            textDecoration: 'none',
+                            color: 'inherit',
+                          }}
+                        >
+                          {item.name}
+                        </a>
+                        <span
+                          style={{
+                            fontSize: 'var(--font-xs)',
+                            color: 'var(--text-faint)',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {t('marketplace.version', { version: item.version })}
+                        </span>
+                      </div>
+
+                      {/* Description */}
+                      {item.description && (
+                        <p
+                          style={{
+                            fontSize: 'var(--font-sm)',
+                            color: 'var(--text-muted)',
+                            margin: 0,
+                            overflow: 'hidden',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {item.description}
+                        </p>
+                      )}
+
+                      {/* Stats row: downloads, likes, date */}
+                      <div style={s.statRow}>
+                        <span>↓ {item.downloads_count}</span>
+                        <span>♡ {item.likes_count ?? 0}</span>
+                        <span>{formatDate(item.updated_at)}</span>
+                      </div>
+
+                      {/* Tags */}
+                      {item.tags && item.tags.length > 0 && (
+                        <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+                          {item.tags.slice(0, 4).map((tag) => (
+                            <span key={tag} style={s.tag}>
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Like + Install row */}
+                      <div
                         style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          fontSize: 'var(--font-sm)',
-                          color: likedIds.has(item.id) ? 'var(--danger)' : 'var(--text-faint)',
-                          padding: '0.3rem 0',
-                          fontFamily: 'inherit',
+                          display: 'flex',
+                          gap: '0.5rem',
+                          alignItems: 'center',
+                          marginTop: 'auto',
                         }}
-                        aria-label={t('marketplace.toggleLike')}
                       >
-                        {likedIds.has(item.id) ? '\u2665' : '\u2661'} {item.likes_count ?? 0}
-                      </button>
-                      <button
-                        style={{ ...s.installBtn(isInstalled, isInstalling, isLocked), flex: 1 }}
-                        onClick={() => void handleInstall(item.id)}
-                        disabled={isInstalled || isInstalling}
-                        aria-label={
-                          isInstalled
+                        <button
+                          onClick={() => void handleToggleLike(item.id)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: 'var(--font-sm)',
+                            color: likedIds.has(item.id) ? 'var(--danger)' : 'var(--text-faint)',
+                            padding: '0.3rem 0',
+                            fontFamily: 'inherit',
+                          }}
+                          aria-label={t('marketplace.toggleLike')}
+                        >
+                          {likedIds.has(item.id) ? '\u2665' : '\u2661'} {item.likes_count ?? 0}
+                        </button>
+                        <button
+                          style={{ ...s.installBtn(isInstalled, isInstalling, isLocked), flex: 1 }}
+                          onClick={() => void handleInstall(item.id)}
+                          disabled={isInstalled || isInstalling}
+                          aria-label={
+                            isInstalled
+                              ? t('marketplace.installed')
+                              : isLocked
+                                ? t('marketplace.upgradeToInstall')
+                                : t('marketplace.install') + ' ' + item.name
+                          }
+                          data-testid={`install-btn-${item.id}`}
+                        >
+                          {isInstalled
                             ? t('marketplace.installed')
-                            : isLocked
-                              ? t('marketplace.upgradeToInstall')
-                              : t('marketplace.install') + ' ' + item.name
-                        }
-                        data-testid={`install-btn-${item.id}`}
-                      >
-                        {isInstalled
-                          ? t('marketplace.installed')
-                          : isInstalling
-                            ? t('marketplace.installing')
-                            : isLocked
-                              ? t('marketplace.proRequired')
-                              : t('marketplace.install')}
-                      </button>
+                            : isInstalling
+                              ? t('marketplace.installing')
+                              : isLocked
+                                ? t('marketplace.proRequired')
+                                : t('marketplace.install')}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              )
-            })}
+                  </article>
+                )
+              })}
           </div>
         )}
       </main>

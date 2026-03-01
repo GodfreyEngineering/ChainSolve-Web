@@ -698,3 +698,23 @@ export async function reportComment(commentId: string, reason: string): Promise<
 
   if (error) throw error
 }
+
+/**
+ * D16-3: Report a marketplace item for abuse/moderation review.
+ * Inserts a bug report with category 'item_report' for admin triage.
+ */
+export async function reportItem(itemId: string, reason: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in to report items')
+
+  const { error } = await supabase.from('bug_reports').insert({
+    user_id: user.id,
+    title: `Item report: ${itemId}`,
+    description: reason.trim().slice(0, 500),
+    metadata: { type: 'item_report', item_id: itemId },
+  })
+
+  if (error) throw error
+}

@@ -33,6 +33,7 @@ import {
   postComment,
   deleteComment,
   reportComment,
+  reportItem,
 } from './marketplaceService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
@@ -1297,5 +1298,43 @@ describe('reportComment', () => {
     supabaseMock.from.mockReturnValue({ update: mockUpdateFn })
 
     await expect(reportComment('c1', 'spam')).rejects.toMatchObject({ message: 'Forbidden' })
+  })
+})
+
+// ── reportItem (D16-3) ────────────────────────────────────────────────────────
+
+describe('reportItem', () => {
+  it('requires authentication', async () => {
+    const mod = await import('./supabase')
+    ;(mod.supabase.auth.getUser as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: null },
+    })
+    await expect(reportItem('item-1', 'spam')).rejects.toThrow('Sign in')
+  })
+
+  it('inserts a bug report with item_report metadata', async () => {
+    const mockInsertFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({ insert: mockInsertFn })
+
+    await reportItem('item-1', 'This is spam')
+
+    expect(supabaseMock.from).toHaveBeenCalledWith('bug_reports')
+    expect(mockInsertFn).toHaveBeenCalledWith({
+      user_id: 'uid-1',
+      title: 'Item report: item-1',
+      description: 'This is spam',
+      metadata: { type: 'item_report', item_id: 'item-1' },
+    })
+  })
+
+  it('truncates reason to 500 chars', async () => {
+    const mockInsertFn = vi.fn().mockResolvedValue({ data: null, error: null })
+    supabaseMock.from.mockReturnValue({ insert: mockInsertFn })
+
+    const longReason = 'x'.repeat(600)
+    await reportItem('item-1', longReason)
+
+    const passedDesc = mockInsertFn.mock.calls[0][0].description as string
+    expect(passedDesc.length).toBe(500)
   })
 })

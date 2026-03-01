@@ -29,6 +29,7 @@ import {
   postComment,
   deleteComment,
   reportComment,
+  reportItem,
   checkCommentRateLimit,
   type MarketplaceItem,
   type MarketplaceComment,
@@ -40,6 +41,7 @@ import { canInstallExploreItem, type Plan } from '../lib/entitlements'
 import { getSession } from '../lib/auth'
 import { listMyOrgs, getOrgPolicy, type OrgPolicy } from '../lib/orgsService'
 import { ENGINE_CONTRACT_VERSION } from '../lib/engineContractVersion'
+import { isUserBlocked, blockUser as blockUserAction, getBlockedUsers } from '../lib/blockedUsers'
 import { BRAND } from '../lib/brand'
 
 const CATEGORY_LABEL_KEYS: Record<string, string> = {
@@ -362,6 +364,10 @@ export default function ItemDetailPage() {
   // D10-2: org policy
   const [orgPolicy, setOrgPolicy] = useState<OrgPolicy | null>(null)
 
+  // D16-3: moderation
+  const [authorBlocked, setAuthorBlocked] = useState(false)
+  const [itemReported, setItemReported] = useState(false)
+
   useEffect(() => {
     if (!itemId) {
       setNotFound(true)
@@ -383,6 +389,8 @@ export default function ItemDetailPage() {
           setItem(fetched)
           setInstalled(installs.some((p) => p.item_id === itemId))
           setLiked(likes.has(itemId))
+          // D16-3: check if author is blocked
+          setAuthorBlocked(isUserBlocked(fetched.author_id))
         }
         // D9-3: fetch plan + project count; D9-4: fetch comments; D10-2: org policy
         const session = await getSession()
@@ -428,6 +436,13 @@ export default function ItemDetailPage() {
   const minContract = useMemo(() => (item ? getMinContractVersion(item.payload) : null), [item])
   const isCompatible = minContract === null || minContract <= ENGINE_CONTRACT_VERSION
   const changelog = useMemo(() => (item ? getChangelog(item.payload) : null), [item])
+
+  // D16-3: filter comments from blocked users
+  const visibleComments = useMemo(() => {
+    const blocked = getBlockedUsers()
+    if (blocked.size === 0) return comments
+    return comments.filter((c) => !blocked.has(c.user_id))
+  }, [comments])
 
   const handleToggleLike = useCallback(async () => {
     if (!itemId || !item) return
@@ -555,6 +570,31 @@ export default function ItemDetailPage() {
     [navigate],
   )
 
+  // D16-3: report item handler
+  const handleReportItem = useCallback(async () => {
+    if (!itemId) return
+    if (!window.confirm(t('marketplace.reportItemConfirm'))) return
+    try {
+      await reportItem(itemId, 'Reported by user')
+      setItemReported(true)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.toLowerCase().includes('sign in')) {
+        navigate('/login')
+        return
+      }
+      setError(msg)
+    }
+  }, [itemId, t, navigate])
+
+  // D16-3: block author handler
+  const handleBlockAuthor = useCallback(() => {
+    if (!item) return
+    if (!window.confirm(t('marketplace.blockUserConfirm'))) return
+    blockUserAction(item.author_id)
+    setAuthorBlocked(true)
+  }, [item, t])
+
   return (
     <div style={s.page}>
       {/* Nav */}
@@ -583,6 +623,21 @@ export default function ItemDetailPage() {
         {error && (
           <div style={s.errorBanner} role="alert">
             {error}
+          </div>
+        )}
+
+        {/* D16-3: Blocked author notice */}
+        {!loading && item && authorBlocked && (
+          <div
+            style={{
+              ...s.errorBanner,
+              background: 'rgba(245,158,11,0.08)',
+              border: '1px solid rgba(245,158,11,0.25)',
+              color: 'var(--warning)',
+            }}
+            data-testid="blocked-notice"
+          >
+            {t('marketplace.blockedNotice')}
           </div>
         )}
 
@@ -705,6 +760,36 @@ export default function ItemDetailPage() {
                 >
                   {liked ? '\u2665' : '\u2661'} {item.likes_count ?? 0}
                 </button>
+                {/* D16-3: moderation actions */}
+                {currentUserId && currentUserId !== item.author_id && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 'var(--space-2)',
+                      marginTop: 'var(--space-1)',
+                    }}
+                  >
+                    <button
+                      onClick={() => void handleReportItem()}
+                      disabled={itemReported}
+                      style={s.commentAction}
+                      data-testid="report-item-btn"
+                    >
+                      {itemReported
+                        ? t('marketplace.reportItemSuccess')
+                        : t('marketplace.reportItem')}
+                    </button>
+                    {!authorBlocked && (
+                      <button
+                        onClick={handleBlockAuthor}
+                        style={s.commentAction}
+                        data-testid="block-author-btn"
+                      >
+                        {t('marketplace.blockUser')}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -824,7 +909,7 @@ export default function ItemDetailPage() {
             {/* D9-4: Comments section */}
             <section style={s.section} data-testid="comments-section">
               <h2 style={s.sectionTitle}>
-                {t('marketplace.comments')} ({comments.length})
+                {t('marketplace.comments')} ({visibleComments.length})
               </h2>
 
               {/* Comment form */}
@@ -865,7 +950,7 @@ export default function ItemDetailPage() {
               </div>
 
               {/* Comment list */}
-              {comments.length === 0 && (
+              {visibleComments.length === 0 && (
                 <p
                   style={{ fontSize: 'var(--font-sm)', color: 'var(--text-faint)', margin: 0 }}
                   data-testid="no-comments"
@@ -873,7 +958,7 @@ export default function ItemDetailPage() {
                   {t('marketplace.noComments')}
                 </p>
               )}
-              {comments.map((c) => (
+              {visibleComments.map((c) => (
                 <div key={c.id} style={s.commentCard} data-testid="comment-item">
                   <div
                     style={{
