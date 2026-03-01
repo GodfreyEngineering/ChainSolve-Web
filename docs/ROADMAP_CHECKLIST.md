@@ -1208,7 +1208,7 @@ Claude MUST:
     - support scalar, vector, table forms
   - Acceptance: stable expression build for common ops.
 
-- [ ] E6-2: Pretty math rendering + substitution
+- [x] E6-2: Pretty math rendering + substitution
   - Display:
     - symbolic form: `a + b = c`
     - substituted: `1 + 2 = 3`
