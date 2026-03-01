@@ -1192,7 +1192,7 @@ Claude MUST:
     - v4: unit conversion expansions, dimensional analysis helpers
   - Acceptance: ongoing scalable program.
 
-- [ ] E5-5: Category + search quality
+- [x] E5-5: Category + search quality
   - Synonyms, tags, search ranking
   - Acceptance: “I can find anything fast.”
 
