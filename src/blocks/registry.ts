@@ -512,6 +512,52 @@ reg({
   defaultData: { blockType: 'probe', label: 'Probe' },
 })
 
+// ── Annotation blocks (E7-1: non-evaluating visual nodes) ────────────────────
+
+reg({
+  type: 'annotation_text',
+  label: 'Text Label',
+  category: 'annotations',
+  nodeKind: 'csAnnotation',
+  inputs: [],
+  defaultData: {
+    blockType: 'annotation_text',
+    label: 'Text',
+    annotationType: 'text',
+    annotationText: 'Label',
+    annotationColor: '#facc15',
+  },
+})
+
+reg({
+  type: 'annotation_callout',
+  label: 'Callout Box',
+  category: 'annotations',
+  nodeKind: 'csAnnotation',
+  inputs: [],
+  defaultData: {
+    blockType: 'annotation_callout',
+    label: 'Callout',
+    annotationType: 'callout',
+    annotationText: 'Note',
+    annotationColor: '#60a5fa',
+  },
+})
+
+reg({
+  type: 'annotation_highlight',
+  label: 'Highlight Region',
+  category: 'annotations',
+  nodeKind: 'csAnnotation',
+  inputs: [],
+  defaultData: {
+    blockType: 'annotation_highlight',
+    label: 'Highlight',
+    annotationType: 'highlight',
+    annotationColor: '#facc15',
+  },
+})
+
 // ── Block palette (ordered for display) ──────────────────────────────────────
 
 export const CATEGORY_ORDER: BlockCategory[] = [
@@ -548,6 +594,7 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   'constElec',
   'presetMaterials',
   'presetFluids',
+  'annotations',
 ]
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -584,6 +631,7 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   constElec: 'Electrical',
   presetMaterials: 'Material Presets',
   presetFluids: 'Fluid Presets',
+  annotations: 'Annotations',
 }
 
 // ── Library families (D6-4: primary grouping for block library) ──────────────
@@ -646,6 +694,7 @@ export const LIBRARY_FAMILIES: LibraryFamily[] = [
     categories: ['data', 'vectorOps', 'tableOps'],
   },
   { id: 'plots', label: 'Plots', categories: ['plot'] },
+  { id: 'annotations', label: 'Annotations', categories: ['annotations'] },
 ]
 
 // ── Constants catalog for unified Constant node (D7-3) ──────────────────────
@@ -740,7 +789,13 @@ for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {
  * UI-only block types — picker stubs that resolve to a specific engine op
  * when the user makes a selection. They never reach the Rust engine directly.
  */
-const UI_ONLY_BLOCKS = new Set(['constant', 'material'])
+const UI_ONLY_BLOCKS = new Set([
+  'constant',
+  'material',
+  'annotation_text',
+  'annotation_callout',
+  'annotation_highlight',
+])
 
 export function validateCatalog(catalog: CatalogEntry[]): void {
   for (const entry of catalog) {

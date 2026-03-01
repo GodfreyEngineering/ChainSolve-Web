@@ -40,6 +40,7 @@ export type BlockCategory =
   | 'constElec'
   | 'presetMaterials'
   | 'presetFluids'
+  | 'annotations'
 
 /** Which React Flow custom-node renderer to use. */
 export type NodeKind =
@@ -50,6 +51,7 @@ export type NodeKind =
   | 'csPlot'
   | 'csGroup'
   | 'csProbe'
+  | 'csAnnotation'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 
@@ -149,6 +151,14 @@ export interface NodeData extends Record<string, unknown> {
   groupNotes?: string
   /** Whether the group is collapsed — members hidden, proxy handles shown (csGroup nodes only). */
   groupCollapsed?: boolean
+  /** Annotation type discriminator (csAnnotation nodes only). */
+  annotationType?: 'text' | 'callout' | 'highlight'
+  /** Annotation text content (csAnnotation nodes only). */
+  annotationText?: string
+  /** Annotation color — hex string (csAnnotation nodes only). */
+  annotationColor?: string
+  /** Annotation font size in px (csAnnotation text/callout nodes only). */
+  annotationFontSize?: number
 }
 
 export interface BlockDef {

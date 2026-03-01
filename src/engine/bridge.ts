@@ -16,9 +16,9 @@ import { type ConstantsLookup, resolveNodeBindings } from './resolveBindings.ts'
 /**
  * Build an EngineSnapshotV1 from React Flow nodes and edges.
  *
- * Group nodes (blockType === '__group__') are excluded since
- * they are purely visual containers and do not participate in
- * evaluation.
+ * Group nodes (blockType === '__group__') and annotation nodes
+ * (blockType starts with 'annotation_') are excluded since they
+ * are purely visual and do not participate in evaluation.
  */
 export function toEngineSnapshot(
   nodes: Node[],
@@ -26,9 +26,10 @@ export function toEngineSnapshot(
   constants?: ConstantsLookup,
   variables?: VariablesMap,
 ): EngineSnapshotV1 {
-  const evalNodes = nodes.filter(
-    (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
-  )
+  const evalNodes = nodes.filter((n) => {
+    const bt = (n.data as Record<string, unknown>).blockType as string
+    return bt !== '__group__' && !bt.startsWith('annotation_')
+  })
 
   const nodeIds = new Set(evalNodes.map((n) => n.id))
 

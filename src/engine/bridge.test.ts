@@ -208,6 +208,49 @@ describe('toEngineSnapshot — material block mapping (D7-4)', () => {
   })
 })
 
+describe('toEngineSnapshot — annotation node exclusion (E7-1)', () => {
+  it('excludes annotation_text nodes from the snapshot', () => {
+    const nodes = [
+      makeNode('a1', 'annotation_text', { blockType: 'annotation_text', annotationText: 'Label' }),
+      makeNode('n1', 'number', { value: 5 }),
+    ]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes).toHaveLength(1)
+    expect(snap.nodes[0].id).toBe('n1')
+  })
+
+  it('excludes annotation_callout nodes from the snapshot', () => {
+    const nodes = [
+      makeNode('a1', 'annotation_callout', {
+        blockType: 'annotation_callout',
+        annotationText: 'Note',
+      }),
+      makeNode('n1', 'number', { value: 5 }),
+    ]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes).toHaveLength(1)
+  })
+
+  it('excludes annotation_highlight nodes from the snapshot', () => {
+    const nodes = [
+      makeNode('a1', 'annotation_highlight', { blockType: 'annotation_highlight' }),
+      makeNode('n1', 'number', { value: 5 }),
+    ]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes).toHaveLength(1)
+  })
+
+  it('excludes edges connected to annotation nodes', () => {
+    const nodes = [
+      makeNode('n1', 'number'),
+      makeNode('a1', 'annotation_text', { blockType: 'annotation_text' }),
+    ]
+    const edges = [makeEdge('e1', 'n1', 'a1')]
+    const snap = toEngineSnapshot(nodes, edges)
+    expect(snap.edges).toHaveLength(0)
+  })
+})
+
 describe('toEngineSnapshot — multi-node graph', () => {
   it('produces a correct snapshot for physics-101-style graph', () => {
     const nodes = [

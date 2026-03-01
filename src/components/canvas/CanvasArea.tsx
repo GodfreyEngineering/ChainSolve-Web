@@ -96,6 +96,7 @@ const LazyValuePopover = lazy(() =>
   import('./ValuePopover').then((m) => ({ default: m.ValuePopover })),
 )
 import { ProbeNode } from './nodes/ProbeNode'
+import { AnnotationNode } from './nodes/AnnotationNode'
 import { copyValueToClipboard } from '../../engine/valueFormat'
 import {
   computeGraphHealth,
@@ -120,6 +121,7 @@ const NODE_TYPES = {
   csPlot: PlotNode,
   csGroup: GroupNode,
   csProbe: ProbeNode,
+  csAnnotation: AnnotationNode,
 } as const
 
 const EDGE_TYPES = {
