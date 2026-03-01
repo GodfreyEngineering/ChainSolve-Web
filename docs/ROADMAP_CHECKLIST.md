@@ -1124,7 +1124,7 @@ Claude MUST:
   - Must never expose service role key to client.
   - Acceptance: safe admin tooling without foot-guns.
 
-- [ ] E3-2: Test persona bootstrap script (docs + optional SQL)
+- [x] E3-2: Test persona bootstrap script (docs + optional SQL)
   - Provide documented steps to create:
     - free test user
     - pro test user
@@ -1158,7 +1158,7 @@ Claude MUST:
   - Right-click canvas context menu uses same insert system.
   - Acceptance: consistent insert everywhere.
 
-- [ ] E4-3: Fix: light mode library background is dark
+- [x] E4-3: Fix: light mode library background is dark
   - Acceptance: light mode visually correct.
 
 ---
@@ -1166,7 +1166,7 @@ Claude MUST:
 ## E5 — Block Catalog Expansion Program (Excel + engineering calculators)
 > Goal: ChainSolve becomes the “one stop shop” for numerical functions. Strategy matters more than brute force.
 
-- [ ] E5-1: Catalog governance + generator pipeline
+- [x] E5-1: Catalog governance + generator pipeline
   - Create `docs/BLOCK_CATALOG_GOVERNANCE.md`:
     - naming conventions
     - categories taxonomy
@@ -1243,7 +1243,7 @@ Claude MUST:
 ---
 
 ## E8 — Reliability fixes (ghost conflicts, save robustness)
-- [ ] E8-1: Eliminate false “open in another session” warnings
+- [x] E8-1: Eliminate false “open in another session” warnings
   - Root-cause + fix
   - Add regression tests
   - Acceptance: no false conflicts and saves always apply.
