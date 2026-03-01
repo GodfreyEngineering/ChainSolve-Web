@@ -10,6 +10,7 @@ import { DropdownMenu, type MenuEntry } from '../ui/DropdownMenu'
 import type { ConfirmAction } from './ConfirmDialog'
 import { ABOUT_WINDOW_ID } from './AboutModal'
 import { DOCS_WINDOW_ID } from './DocsSearchModal'
+import { AI_COPILOT_WINDOW_ID } from '../../lib/aiCopilot/constants'
 
 const LazyBugReportModal = lazy(() =>
   import('../BugReportModal').then((m) => ({ default: m.BugReportModal })),
@@ -709,7 +710,7 @@ export function AppHeader({
       {
         label: t('menu.buildWithAI'),
         onClick: () => {
-          setLlmBuilderOpen(true)
+          openWin(AI_COPILOT_WINDOW_ID, { width: 520, height: 560 })
           setOpenMenu(null)
         },
       },

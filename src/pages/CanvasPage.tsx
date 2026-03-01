@@ -73,17 +73,11 @@ import { UpgradeModal } from '../components/UpgradeModal'
 import { useEngine } from '../contexts/EngineContext'
 import { useWindowManager } from '../contexts/WindowManagerContext'
 import { THEME_LIBRARY_WINDOW_ID } from '../components/ThemeLibraryWindow'
+import { AI_COPILOT_WINDOW_ID } from '../lib/aiCopilot/constants'
+import type { AiPatchOp } from '../lib/aiCopilot/types'
 import { buildConstantsLookup } from '../engine/resolveBindings'
 import { toEngineSnapshot } from '../engine/bridge'
-import { getCanonicalSnapshot } from '../lib/groups'
-import { stableStringify } from '../lib/pdf/stableStringify'
-import { sha256Hex } from '../lib/pdf/sha256'
-import { computeGraphHealth, formatHealthReport } from '../lib/graphHealth'
-import {
-  buildCanvasAuditSection,
-  buildProjectAuditModel,
-  type ExportOptions,
-} from '../lib/pdf/auditModel'
+import type { ExportOptions } from '../lib/pdf/auditModel'
 import type { CaptureResult } from '../lib/pdf/captureCanvasImage'
 import type { TableExport } from '../lib/xlsx/xlsxModel'
 
@@ -108,6 +102,9 @@ const LazyMaterialWizard = lazy(() =>
 )
 const LazyThemeLibraryWindow = lazy(() =>
   import('../components/ThemeLibraryWindow').then((m) => ({ default: m.ThemeLibraryWindow })),
+)
+const LazyAiCopilotWindow = lazy(() =>
+  import('../components/app/AiCopilotWindow').then((m) => ({ default: m.AiCopilotWindow })),
 )
 
 const EXPORT_SETTLE_MS = 300
@@ -706,6 +703,12 @@ export default function CanvasPage() {
 
       const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } = await import('../lib/build-info')
       const { exportProjectAuditPdf } = await import('../lib/pdf/exportAuditPdf')
+      const { buildCanvasAuditSection, buildProjectAuditModel } =
+        await import('../lib/pdf/auditModel')
+      const { getCanonicalSnapshot } = await import('../lib/groups')
+      const { stableStringify } = await import('../lib/pdf/stableStringify')
+      const { sha256Hex } = await import('../lib/pdf/sha256')
+      const { computeGraphHealth, formatHealthReport } = await import('../lib/graphHealth')
 
       const abort = new AbortController()
       exportAbortRef.current = abort
@@ -721,7 +724,7 @@ export default function CanvasPage() {
         (a, b) => a.position - b.position,
       )
       const currentVariables = useVariablesStore.getState().variables
-      const canvasSections: ReturnType<typeof buildCanvasAuditSection>[] = []
+      const canvasSections: Awaited<ReturnType<typeof buildCanvasAuditSection>>[] = []
       const allHashInputs: string[] = []
 
       try {
@@ -891,6 +894,12 @@ export default function CanvasPage() {
       const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } = await import('../lib/build-info')
       const { exportAuditXlsxProject } = await import('../lib/xlsx/exportAuditXlsxProject')
       const { SAFE_MAX_TABLE_ROWS, SAFE_MAX_TABLE_COLS } = await import('../lib/xlsx/constants')
+      const { buildCanvasAuditSection, buildProjectAuditModel } =
+        await import('../lib/pdf/auditModel')
+      const { getCanonicalSnapshot } = await import('../lib/groups')
+      const { stableStringify } = await import('../lib/pdf/stableStringify')
+      const { sha256Hex } = await import('../lib/pdf/sha256')
+      const { computeGraphHealth, formatHealthReport } = await import('../lib/graphHealth')
 
       const abort = new AbortController()
       exportAbortRef.current = abort
@@ -901,7 +910,7 @@ export default function CanvasPage() {
         (a, b) => a.position - b.position,
       )
       const currentVariables = useVariablesStore.getState().variables
-      const canvasSections: ReturnType<typeof buildCanvasAuditSection>[] = []
+      const canvasSections: Awaited<ReturnType<typeof buildCanvasAuditSection>>[] = []
       const allHashInputs: string[] = []
       const allTables: TableExport[] = []
 
@@ -1209,6 +1218,29 @@ export default function CanvasPage() {
   const importFileRef = useRef<HTMLInputElement>(null)
   const [upgradeCanvasOpen, setUpgradeCanvasOpen] = useState(false)
   const [upgradeExportOpen, setUpgradeExportOpen] = useState(false)
+  const [upgradeAiOpen, setUpgradeAiOpen] = useState(false)
+  const [aiInitialTask, setAiInitialTask] = useState<
+    import('../lib/aiCopilot/types').AiTask | undefined
+  >()
+  const [aiInitialMessage, setAiInitialMessage] = useState<string | undefined>()
+  const [aiDiagnostics, setAiDiagnostics] = useState<
+    { level: string; code: string; message: string; nodeIds?: string[] }[] | undefined
+  >()
+
+  /** Open the AI Copilot with a specific task prefilled. */
+  const openAiWithTask = useCallback(
+    (
+      task: import('../lib/aiCopilot/types').AiTask,
+      message?: string,
+      diags?: { level: string; code: string; message: string; nodeIds?: string[] }[],
+    ) => {
+      setAiInitialTask(task)
+      setAiInitialMessage(message)
+      setAiDiagnostics(diags)
+      openWindow(AI_COPILOT_WINDOW_ID, { width: 520, height: 560 })
+    },
+    [openWindow],
+  )
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [importSummary, setImportSummary] = useState<null | {
     text: string
@@ -1498,6 +1530,10 @@ export default function CanvasPage() {
           onOpenGroups={() => setTemplateManagerOpen(true)}
           onOpenThemes={() => openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })}
           onOpenMaterials={() => setMaterialWizardOpen(true)}
+          onFixWithCopilot={() => openAiWithTask('fix_graph')}
+          onExplainIssues={() => openAiWithTask('explain_node')}
+          onExplainNode={(nodeId) => openAiWithTask('explain_node', nodeId)}
+          onInsertFromPrompt={() => openAiWithTask('chat')}
         />
       </div>
       {/* ── Canvas limit upgrade modal ──────────────────────────────────── */}
@@ -1561,6 +1597,41 @@ export default function CanvasPage() {
           <LazyThemeLibraryWindow plan={plan} />
         </Suspense>
       )}
+      {/* ── AI Copilot window (AI-1) ──────────────────────────────────── */}
+      {isOpen(AI_COPILOT_WINDOW_ID) && (
+        <Suspense fallback={null}>
+          <LazyAiCopilotWindow
+            plan={plan}
+            projectId={projectId}
+            canvasId={activeCanvasId ?? undefined}
+            selectedNodeIds={
+              canvasRef.current
+                ? canvasRef.current
+                    .getSnapshot()
+                    .nodes.filter((n) => n.selected)
+                    .map((n) => n.id)
+                : []
+            }
+            onApplyPatch={async (ops: AiPatchOp[]) => {
+              const snap = canvasRef.current?.getSnapshot()
+              if (!snap) return
+              const { applyPatchOps } = await import('../lib/aiCopilot/patchExecutor')
+              const result = applyPatchOps(ops, snap.nodes, snap.edges, true)
+              canvasRef.current?.setSnapshot(result.nodes, result.edges)
+              handleGraphChange(result.nodes, result.edges)
+            }}
+            onUpgrade={() => setUpgradeAiOpen(true)}
+            initialTask={aiInitialTask}
+            initialMessage={aiInitialMessage}
+            diagnostics={aiDiagnostics}
+          />
+        </Suspense>
+      )}
+      <UpgradeModal
+        open={upgradeAiOpen}
+        onClose={() => setUpgradeAiOpen(false)}
+        reason="ai_locked"
+      />
     </div>
   )
 }

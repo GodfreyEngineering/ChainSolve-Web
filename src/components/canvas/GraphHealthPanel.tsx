@@ -17,9 +17,20 @@ interface GraphHealthPanelProps {
   onClose: () => void
   /** When true, skip outer positioning chrome (rendered inside BottomDock). */
   docked?: boolean
+  /** AI-3: Trigger "Fix with Copilot" workflow. */
+  onFixWithCopilot?: () => void
+  /** AI-3: Trigger "Explain issues" workflow. */
+  onExplainIssues?: () => void
 }
 
-export default function GraphHealthPanel({ nodes, edges, onClose, docked }: GraphHealthPanelProps) {
+export default function GraphHealthPanel({
+  nodes,
+  edges,
+  onClose,
+  docked,
+  onFixWithCopilot,
+  onExplainIssues,
+}: GraphHealthPanelProps) {
   const { t } = useTranslation()
   const [minimized, setMinimized] = useState(false)
 
@@ -82,6 +93,25 @@ export default function GraphHealthPanel({ nodes, edges, onClose, docked }: Grap
             </div>
           ) : (
             <div style={noWarningsStyle}>{'\u2713'} No issues detected</div>
+          )}
+
+          {/* AI-3: Quick actions */}
+          {report.warnings.length > 0 && (onFixWithCopilot || onExplainIssues) && (
+            <div style={aiActionsStyle}>
+              {onFixWithCopilot && (
+                <button style={aiActionBtn} onClick={onFixWithCopilot}>
+                  {t('ai.fixGraph', 'Fix with Copilot')}
+                </button>
+              )}
+              {onExplainIssues && (
+                <button
+                  style={{ ...aiActionBtn, ...aiActionBtnSecondary }}
+                  onClick={onExplainIssues}
+                >
+                  {t('ai.explainNode', 'Explain issues')}
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -212,4 +242,28 @@ const noWarningsStyle: React.CSSProperties = {
   color: '#10b981',
   opacity: 0.7,
   padding: '8px 0',
+}
+
+const aiActionsStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 6,
+  marginTop: 4,
+}
+
+const aiActionBtn: React.CSSProperties = {
+  padding: '4px 10px',
+  fontSize: '0.68rem',
+  fontWeight: 600,
+  fontFamily: 'inherit',
+  border: 'none',
+  borderRadius: 4,
+  cursor: 'pointer',
+  background: 'var(--primary, #1cab80)',
+  color: '#fff',
+}
+
+const aiActionBtnSecondary: React.CSSProperties = {
+  background: 'transparent',
+  border: '1px solid var(--primary, #1cab80)',
+  color: 'var(--primary, #1cab80)',
 }

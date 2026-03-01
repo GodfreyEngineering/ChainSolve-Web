@@ -30,6 +30,8 @@ export interface Entitlements {
   canEditThemes: boolean
   /** D11-4: Whether user can export (PDF/XLSX/.chainsolvejson) and import. */
   canExport: boolean
+  /** AI-1: Whether user can access the AI Copilot. Pro + Enterprise only. */
+  canUseAi: boolean
 }
 
 // ── Entitlement map ──────────────────────────────────────────────────────────
@@ -45,6 +47,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseGroups: false,
     canEditThemes: false,
     canExport: false,
+    canUseAi: false,
   },
   trialing: {
     maxProjects: Infinity,
@@ -56,6 +59,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseGroups: true,
     canEditThemes: true,
     canExport: true,
+    canUseAi: true,
   },
   pro: {
     maxProjects: Infinity,
@@ -67,6 +71,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseGroups: true,
     canEditThemes: true,
     canExport: true,
+    canUseAi: true,
   },
   enterprise: {
     maxProjects: Infinity,
@@ -78,6 +83,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseGroups: true,
     canEditThemes: true,
     canExport: true,
+    canUseAi: true,
   },
   past_due: {
     maxProjects: 1,
@@ -89,6 +95,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseGroups: false,
     canEditThemes: false,
     canExport: false,
+    canUseAi: false,
   },
   canceled: {
     maxProjects: 1,
@@ -100,6 +107,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseGroups: false,
     canEditThemes: false,
     canExport: false,
+    canUseAi: false,
   },
 }
 

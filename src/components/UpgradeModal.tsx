@@ -14,7 +14,7 @@ interface UpgradeModalProps {
   open: boolean
   onClose: () => void
   /** Why the modal was triggered — drives the message shown. */
-  reason: 'project_limit' | 'canvas_limit' | 'feature_locked' | 'export_locked'
+  reason: 'project_limit' | 'canvas_limit' | 'feature_locked' | 'export_locked' | 'ai_locked'
 }
 
 type BillingCycle = 'monthly' | 'annual'
@@ -148,7 +148,9 @@ export function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
         ? t('upgrade.canvasLimitTitle', 'Canvas limit reached')
         : reason === 'export_locked'
           ? t('upgrade.exportLockedTitle', 'Export requires Pro')
-          : t('entitlements.featureLockedTitle')
+          : reason === 'ai_locked'
+            ? t('ai.upgradeTitle')
+            : t('entitlements.featureLockedTitle')
 
   const message =
     reason === 'project_limit'
@@ -160,7 +162,9 @@ export function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
           )
         : reason === 'export_locked'
           ? t('upgrade.exportLockedMsg', 'Export and import are Pro features. Upgrade to unlock.')
-          : t('entitlements.featureLockedMsg')
+          : reason === 'ai_locked'
+            ? t('ai.upgradeBody')
+            : t('entitlements.featureLockedMsg')
 
   const handleCheckout = useCallback(
     async (planKey: PlanKey) => {

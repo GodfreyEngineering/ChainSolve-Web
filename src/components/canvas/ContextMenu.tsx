@@ -46,6 +46,10 @@ interface ContextMenuProps {
   onPaste?: () => void
   onAutoLayout?: () => void
   onInspectEdge?: (edgeId: string) => void
+  /** AI-3: "Explain this node" (plan-only workflow). */
+  onExplainNode?: (nodeId: string) => void
+  /** AI-3: "Insert blocks from prompt…" (add-only patch). */
+  onInsertFromPrompt?: (x: number, y: number) => void
 }
 
 const item: CSSProperties = {
@@ -119,6 +123,8 @@ export function ContextMenu({
   onPaste,
   onAutoLayout,
   onInspectEdge,
+  onExplainNode,
+  onInsertFromPrompt,
 }: ContextMenuProps) {
   const menuStyle: CSSProperties = {
     position: 'fixed',
@@ -214,6 +220,19 @@ export function ContextMenu({
                   }}
                 />
               )}
+            {onExplainNode && (
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon="💡"
+                  label="Explain this node"
+                  onClick={() => {
+                    onExplainNode(target.nodeId)
+                    onClose()
+                  }}
+                />
+              </>
+            )}
             <div style={sep} />
             <MenuItem
               icon="✕"
@@ -371,6 +390,19 @@ export function ContextMenu({
                   onClose()
                 }}
               />
+            )}
+            {onInsertFromPrompt && (
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon="✦"
+                  label="Insert blocks from prompt…"
+                  onClick={() => {
+                    onInsertFromPrompt(target.x, target.y)
+                    onClose()
+                  }}
+                />
+              </>
             )}
           </>
         )}

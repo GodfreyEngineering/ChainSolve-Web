@@ -154,11 +154,23 @@ export interface CanvasAreaProps {
   onOpenThemes?: () => void
   /** Open the Material Wizard. */
   onOpenMaterials?: () => void
+
+  /* ── AI Copilot entrypoints (AI-3) ───────────────────────────────────────── */
+  /** Trigger "Fix with Copilot" from Graph Health panel. */
+  onFixWithCopilot?: () => void
+  /** Trigger "Explain issues" from Graph Health panel. */
+  onExplainIssues?: () => void
+  /** Trigger "Explain this node" from context menu. */
+  onExplainNode?: (nodeId: string) => void
+  /** Trigger "Insert blocks from prompt…" from context menu. */
+  onInsertFromPrompt?: (x: number, y: number) => void
 }
 
 /** Handle exposed by CanvasArea via forwardRef. */
 export interface CanvasAreaHandle {
   getSnapshot: () => { nodes: Node<NodeData>[]; edges: Edge[] }
+  /** AI-1: Replace the canvas state with new nodes/edges (used by AI Copilot patch apply). */
+  setSnapshot: (nodes: Node<NodeData>[], edges: Edge[]) => void
   fitView: () => void
   zoomIn: () => void
   zoomOut: () => void
@@ -383,6 +395,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     onOpenGroups,
     onOpenThemes,
     onOpenMaterials,
+    onFixWithCopilot,
+    onExplainIssues,
+    onExplainNode,
+    onInsertFromPrompt,
   },
   ref,
 ) {
@@ -413,6 +429,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   useImperativeHandle(ref, () => ({
     getSnapshot: () => getCanonicalSnapshot(latestNodes.current, latestEdges.current),
+    setSnapshot: (newNodes: Node<NodeData>[], newEdges: Edge[]) => {
+      // AI-1: Save current state as undo point, then replace
+      historySave({ nodes: latestNodes.current, edges: latestEdges.current })
+      setNodes(newNodes)
+      setEdges(newEdges)
+    },
     fitView: () => fitView({ padding: 0.15, duration: 300 }),
     zoomIn: () => zoomIn({ duration: 200 }),
     zoomOut: () => zoomOut({ duration: 200 }),
@@ -1539,13 +1561,15 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 setHealthPanelVisible(false)
                 setHealthPanelPref(false)
               }}
+              onFixWithCopilot={onFixWithCopilot}
+              onExplainIssues={onExplainIssues}
             />
           </Suspense>
         ),
       })
     }
     return panels
-  }, [debugConsoleVisible, healthPanelVisible, nodes, edges, t])
+  }, [debugConsoleVisible, healthPanelVisible, nodes, edges, t, onFixWithCopilot, onExplainIssues])
 
   return (
     <ComputedContext.Provider value={computed}>
@@ -1836,6 +1860,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   onPaste={readOnly ? undefined : handlePaste}
                   onAutoLayout={readOnly ? undefined : () => handleAutoOrganise('LR')}
                   onInspectEdge={inspectEdge}
+                  onExplainNode={onExplainNode}
+                  onInsertFromPrompt={onInsertFromPrompt}
                 />
               )}
 
