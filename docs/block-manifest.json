@@ -1,0 +1,391 @@
+{
+  "$schema": "block-manifest-schema",
+  "description": "Structured manifest of all blocks — implemented and planned. See BLOCK_CATALOG_GOVERNANCE.md for conventions.",
+  "generatedAt": "2026-03-01",
+  "stats": {
+    "implemented": 203,
+    "planned": 42,
+    "categories": 32
+  },
+  "planned": [
+    {
+      "opId": "math.log",
+      "label": "LOG(value, base)",
+      "category": "math",
+      "priority": "high",
+      "phase": "E5-2",
+      "inputs": [{ "id": "a", "label": "Value" }, { "id": "b", "label": "Base" }],
+      "notes": "Excel LOG equivalent. ln and log10 already exist."
+    },
+    {
+      "opId": "math.sign",
+      "label": "SIGN",
+      "category": "math",
+      "priority": "high",
+      "phase": "E5-2",
+      "inputs": [{ "id": "a", "label": "Value" }],
+      "notes": "Returns -1, 0, or 1."
+    },
+    {
+      "opId": "math.trunc",
+      "label": "TRUNC",
+      "category": "math",
+      "priority": "medium",
+      "phase": "E5-2",
+      "inputs": [{ "id": "a", "label": "Value" }],
+      "notes": "Truncate toward zero. Excel TRUNC equivalent."
+    },
+    {
+      "opId": "math.even",
+      "label": "EVEN",
+      "category": "math",
+      "priority": "low",
+      "phase": "E5-2",
+      "inputs": [{ "id": "a", "label": "Value" }],
+      "notes": "Round up to nearest even integer."
+    },
+    {
+      "opId": "math.odd",
+      "label": "ODD",
+      "category": "math",
+      "priority": "low",
+      "phase": "E5-2",
+      "inputs": [{ "id": "a", "label": "Value" }],
+      "notes": "Round up to nearest odd integer."
+    },
+    {
+      "opId": "math.quotient",
+      "label": "QUOTIENT",
+      "category": "math",
+      "priority": "medium",
+      "phase": "E5-2",
+      "inputs": [{ "id": "a", "label": "Numerator" }, { "id": "b", "label": "Denominator" }],
+      "notes": "Integer part of division. Excel QUOTIENT."
+    },
+    {
+      "opId": "math.sumproduct",
+      "label": "SUMPRODUCT",
+      "category": "vectorOps",
+      "priority": "high",
+      "phase": "E5-2",
+      "inputs": [{ "id": "a", "label": "Vector A" }, { "id": "b", "label": "Vector B" }],
+      "notes": "Dot product of two vectors. Pro only.",
+      "proOnly": true
+    },
+    {
+      "opId": "math.average_weighted",
+      "label": "Weighted Average",
+      "category": "statsDesc",
+      "priority": "high",
+      "phase": "E5-2",
+      "inputs": [{ "id": "c", "label": "Count" }, { "id": "x1", "label": "V1" }, { "id": "x2", "label": "V2" }, { "id": "w1", "label": "W1" }, { "id": "w2", "label": "W2" }],
+      "notes": "Weighted mean with count + value/weight pairs."
+    },
+    {
+      "opId": "stats.desc.percentile",
+      "label": "PERCENTILE",
+      "category": "statsDesc",
+      "priority": "high",
+      "phase": "E5-2",
+      "inputs": [{ "id": "c", "label": "Count" }, { "id": "x1", "label": "V1" }, { "id": "k", "label": "k" }],
+      "notes": "k-th percentile of a data set."
+    },
+    {
+      "opId": "stats.desc.range",
+      "label": "Range",
+      "category": "statsDesc",
+      "priority": "medium",
+      "phase": "E5-2",
+      "inputs": [{ "id": "c", "label": "Count" }, { "id": "x1", "label": "V1" }],
+      "notes": "max - min of a data series."
+    },
+    {
+      "opId": "stats.desc.geometric_mean",
+      "label": "Geometric Mean",
+      "category": "statsDesc",
+      "priority": "medium",
+      "phase": "E5-2",
+      "inputs": [{ "id": "c", "label": "Count" }, { "id": "x1", "label": "V1" }],
+      "notes": "Nth root of product. Common in finance."
+    },
+    {
+      "opId": "stats.desc.harmonic_mean",
+      "label": "Harmonic Mean",
+      "category": "statsDesc",
+      "priority": "low",
+      "phase": "E5-2",
+      "inputs": [{ "id": "c", "label": "Count" }, { "id": "x1", "label": "V1" }],
+      "notes": "Reciprocal of arithmetic mean of reciprocals."
+    },
+    {
+      "opId": "fin.tvm.pmt",
+      "label": "PMT",
+      "category": "finTvm",
+      "priority": "high",
+      "phase": "E5-2",
+      "inputs": [{ "id": "r", "label": "Rate" }, { "id": "n", "label": "Periods" }, { "id": "PV", "label": "PV" }],
+      "notes": "Periodic payment for a loan. Excel PMT."
+    },
+    {
+      "opId": "fin.tvm.fv",
+      "label": "FV",
+      "category": "finTvm",
+      "priority": "high",
+      "phase": "E5-2",
+      "inputs": [{ "id": "r", "label": "Rate" }, { "id": "n", "label": "Periods" }, { "id": "PMT", "label": "PMT" }, { "id": "PV", "label": "PV" }],
+      "notes": "Future value with periodic payments. Excel FV."
+    },
+    {
+      "opId": "fin.tvm.nper",
+      "label": "NPER",
+      "category": "finTvm",
+      "priority": "medium",
+      "phase": "E5-2",
+      "inputs": [{ "id": "r", "label": "Rate" }, { "id": "PMT", "label": "PMT" }, { "id": "PV", "label": "PV" }],
+      "notes": "Number of periods for loan/investment. Excel NPER."
+    },
+    {
+      "opId": "fin.tvm.rate",
+      "label": "RATE",
+      "category": "finTvm",
+      "priority": "medium",
+      "phase": "E5-2",
+      "inputs": [{ "id": "n", "label": "Periods" }, { "id": "PMT", "label": "PMT" }, { "id": "PV", "label": "PV" }, { "id": "FV", "label": "FV" }],
+      "notes": "Interest rate per period. Excel RATE (iterative solver)."
+    },
+    {
+      "opId": "eng.mechanics.momentum",
+      "label": "p = mv",
+      "category": "engMechanics",
+      "priority": "high",
+      "phase": "E5-3",
+      "inputs": [{ "id": "m", "label": "m (kg)" }, { "id": "v", "label": "v (m/s)" }],
+      "notes": "Linear momentum."
+    },
+    {
+      "opId": "eng.mechanics.impulse",
+      "label": "J = Ft",
+      "category": "engMechanics",
+      "priority": "medium",
+      "phase": "E5-3",
+      "inputs": [{ "id": "F", "label": "F (N)" }, { "id": "t", "label": "t (s)" }],
+      "notes": "Impulse = Force × time."
+    },
+    {
+      "opId": "eng.mechanics.friction",
+      "label": "f = μN",
+      "category": "engMechanics",
+      "priority": "high",
+      "phase": "E5-3",
+      "inputs": [{ "id": "mu", "label": "μ" }, { "id": "N", "label": "N (N)" }],
+      "notes": "Coulomb friction force."
+    },
+    {
+      "opId": "eng.mechanics.torque",
+      "label": "τ = Fr sin θ",
+      "category": "engMechanics",
+      "priority": "high",
+      "phase": "E5-3",
+      "inputs": [{ "id": "F", "label": "F (N)" }, { "id": "r", "label": "r (m)" }, { "id": "theta", "label": "θ (rad)" }],
+      "notes": "Torque from force at angle."
+    },
+    {
+      "opId": "eng.thermo.carnot_efficiency",
+      "label": "η_Carnot",
+      "category": "engThermo",
+      "priority": "medium",
+      "phase": "E5-3",
+      "inputs": [{ "id": "Tc", "label": "T_cold (K)" }, { "id": "Th", "label": "T_hot (K)" }],
+      "notes": "Carnot efficiency = 1 - Tc/Th."
+    },
+    {
+      "opId": "eng.thermo.entropy_change",
+      "label": "ΔS = Q/T",
+      "category": "engThermo",
+      "priority": "low",
+      "phase": "E5-3",
+      "inputs": [{ "id": "Q", "label": "Q (J)" }, { "id": "T", "label": "T (K)" }],
+      "notes": "Entropy change for reversible process."
+    },
+    {
+      "opId": "eng.fluids.bernoulli_pressure",
+      "label": "Bernoulli Pressure",
+      "category": "engFluids",
+      "priority": "high",
+      "phase": "E5-3",
+      "inputs": [{ "id": "P1", "label": "P₁ (Pa)" }, { "id": "rho", "label": "ρ (kg/m³)" }, { "id": "v1", "label": "v₁ (m/s)" }, { "id": "v2", "label": "v₂ (m/s)" }],
+      "notes": "Bernoulli equation simplified (same height)."
+    },
+    {
+      "opId": "eng.electrical.capacitance_parallel_plate",
+      "label": "C = εA/d",
+      "category": "engElectrical",
+      "priority": "medium",
+      "phase": "E5-3",
+      "inputs": [{ "id": "eps", "label": "ε (F/m)" }, { "id": "A", "label": "A (m²)" }, { "id": "d", "label": "d (m)" }],
+      "notes": "Parallel plate capacitance."
+    },
+    {
+      "opId": "eng.electrical.inductance_solenoid",
+      "label": "L = μN²A/l",
+      "category": "engElectrical",
+      "priority": "low",
+      "phase": "E5-3",
+      "inputs": [{ "id": "mu", "label": "μ (H/m)" }, { "id": "N", "label": "N (turns)" }, { "id": "A", "label": "A (m²)" }, { "id": "l", "label": "l (m)" }],
+      "notes": "Solenoid inductance."
+    },
+    {
+      "opId": "eng.conversions.pressure_atm_to_pa",
+      "label": "atm → Pa",
+      "category": "engConversions",
+      "priority": "medium",
+      "phase": "E5-3",
+      "inputs": [{ "id": "a", "label": "atm" }],
+      "notes": "1 atm = 101325 Pa."
+    },
+    {
+      "opId": "eng.conversions.pressure_psi_to_pa",
+      "label": "psi → Pa",
+      "category": "engConversions",
+      "priority": "medium",
+      "phase": "E5-3",
+      "inputs": [{ "id": "a", "label": "psi" }],
+      "notes": "1 psi = 6894.76 Pa."
+    },
+    {
+      "opId": "prob.dist.normal_cdf",
+      "label": "Normal CDF",
+      "category": "probDist",
+      "priority": "high",
+      "phase": "E5-4",
+      "inputs": [{ "id": "x", "label": "x" }, { "id": "mu", "label": "μ" }, { "id": "sigma", "label": "σ" }],
+      "notes": "Cumulative distribution function for normal distribution."
+    },
+    {
+      "opId": "prob.dist.normal_inv",
+      "label": "Normal Inverse (NORM.INV)",
+      "category": "probDist",
+      "priority": "high",
+      "phase": "E5-4",
+      "inputs": [{ "id": "p", "label": "Probability" }, { "id": "mu", "label": "μ" }, { "id": "sigma", "label": "σ" }],
+      "notes": "Inverse normal CDF. Excel NORM.INV."
+    },
+    {
+      "opId": "prob.dist.t_cdf",
+      "label": "t-distribution CDF",
+      "category": "probDist",
+      "priority": "medium",
+      "phase": "E5-4",
+      "inputs": [{ "id": "x", "label": "x" }, { "id": "df", "label": "df" }],
+      "notes": "Student's t cumulative distribution."
+    },
+    {
+      "opId": "prob.dist.chi2_cdf",
+      "label": "χ² CDF",
+      "category": "probDist",
+      "priority": "medium",
+      "phase": "E5-4",
+      "inputs": [{ "id": "x", "label": "x" }, { "id": "df", "label": "df" }],
+      "notes": "Chi-squared cumulative distribution."
+    },
+    {
+      "opId": "prob.dist.f_cdf",
+      "label": "F-distribution CDF",
+      "category": "probDist",
+      "priority": "low",
+      "phase": "E5-4",
+      "inputs": [{ "id": "x", "label": "x" }, { "id": "df1", "label": "df₁" }, { "id": "df2", "label": "df₂" }],
+      "notes": "F-distribution cumulative distribution."
+    },
+    {
+      "opId": "stats.rel.r_squared",
+      "label": "R²",
+      "category": "statsRel",
+      "priority": "high",
+      "phase": "E5-4",
+      "inputs": [{ "id": "c", "label": "Count" }, { "id": "x1", "label": "X1" }, { "id": "y1", "label": "Y1" }],
+      "notes": "Coefficient of determination for linear regression."
+    },
+    {
+      "opId": "stats.rel.spearman",
+      "label": "Spearman ρ",
+      "category": "statsRel",
+      "priority": "medium",
+      "phase": "E5-4",
+      "inputs": [{ "id": "c", "label": "Count" }, { "id": "x1", "label": "X1" }, { "id": "y1", "label": "Y1" }],
+      "notes": "Spearman rank correlation coefficient."
+    },
+    {
+      "opId": "prob.comb.multinomial",
+      "label": "Multinomial",
+      "category": "probComb",
+      "priority": "low",
+      "phase": "E5-4",
+      "inputs": [{ "id": "c", "label": "Count" }, { "id": "x1", "label": "n1" }],
+      "notes": "Multinomial coefficient."
+    },
+    {
+      "opId": "util.calc.is_prime",
+      "label": "IS_PRIME",
+      "category": "utilCalc",
+      "priority": "low",
+      "phase": "E5-4",
+      "inputs": [{ "id": "a", "label": "n" }],
+      "notes": "Returns 1 if prime, 0 otherwise."
+    },
+    {
+      "opId": "util.calc.fib",
+      "label": "Fibonacci",
+      "category": "utilCalc",
+      "priority": "low",
+      "phase": "E5-4",
+      "inputs": [{ "id": "a", "label": "n" }],
+      "notes": "nth Fibonacci number."
+    },
+    {
+      "opId": "math.lerp",
+      "label": "LERP",
+      "category": "math",
+      "priority": "medium",
+      "phase": "E5-4",
+      "inputs": [{ "id": "a", "label": "Start" }, { "id": "b", "label": "End" }, { "id": "t", "label": "t" }],
+      "notes": "Linear interpolation: a + t*(b-a)."
+    },
+    {
+      "opId": "math.map_range",
+      "label": "Map Range",
+      "category": "math",
+      "priority": "medium",
+      "phase": "E5-4",
+      "inputs": [{ "id": "val", "label": "Value" }, { "id": "inMin", "label": "In Min" }, { "id": "inMax", "label": "In Max" }, { "id": "outMin", "label": "Out Min" }, { "id": "outMax", "label": "Out Max" }],
+      "notes": "Remap value from one range to another."
+    },
+    {
+      "opId": "eng.sections.I_circle",
+      "label": "I (circle)",
+      "category": "engSections",
+      "priority": "medium",
+      "phase": "E5-3",
+      "inputs": [{ "id": "d", "label": "d (m)" }],
+      "notes": "Second moment of area for solid circle: πd⁴/64."
+    },
+    {
+      "opId": "eng.sections.I_hollow_circle",
+      "label": "I (hollow circle)",
+      "category": "engSections",
+      "priority": "medium",
+      "phase": "E5-3",
+      "inputs": [{ "id": "d_outer", "label": "D (m)" }, { "id": "d_inner", "label": "d (m)" }],
+      "notes": "Second moment of area for hollow circle: π(D⁴-d⁴)/64."
+    },
+    {
+      "opId": "eng.materials.poisson_strain",
+      "label": "ε_lat = -νε",
+      "category": "engMaterials",
+      "priority": "medium",
+      "phase": "E5-3",
+      "inputs": [{ "id": "nu", "label": "ν" }, { "id": "eps", "label": "ε_axial" }],
+      "notes": "Lateral strain from Poisson's ratio."
+    }
+  ]
+}
