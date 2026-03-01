@@ -1201,7 +1201,7 @@ Claude MUST:
 ## E6 — Scientific reporting: equation/notation view (graph → math)
 > Goal: users can select a chain and get proper scientific notation output, with substituted values.
 
-- [ ] E6-1: Expression extraction v1
+- [x] E6-1: Expression extraction v1
   - For a selected output node:
     - trace upstream DAG
     - build expression tree (symbolic-ish)
