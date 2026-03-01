@@ -63,6 +63,12 @@
   "settings": {
     "account": "חשבון"
   },
+  "orgs": {
+    "policyTitle": "מדיניות Explore",
+    "policyExplore": "הפעלת ספריית חברה לחברי הארגון",
+    "policyInstalls": "אפשר לחברים להתקין פריטים מהשוק",
+    "policyComments": "אפשר לחברים לפרסם תגובות על פריטי השוק"
+  },
   "common": {
     "cancel": "ביטול",
     "close": "סגור"

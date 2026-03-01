@@ -740,7 +740,11 @@
     "errorLoad": "Failed to load organizations",
     "errorCreate": "Failed to create organization",
     "errorInvite": "Failed to invite member",
-    "backToOrgs": "Back to organizations"
+    "backToOrgs": "Back to organizations",
+    "policyTitle": "Explore Policies",
+    "policyExplore": "Enable Company Library for members",
+    "policyInstalls": "Allow members to install marketplace items",
+    "policyComments": "Allow members to post comments on marketplace items"
   },
   "auditLog": {
     "title": "Audit Log",

@@ -24,9 +24,12 @@ import {
   removeOrgMember,
   renameOrg,
   deleteOrg,
+  getOrgPolicy,
+  updateOrgPolicy,
   type Org,
   type OrgMember,
   type OrgRole,
+  type OrgPolicy,
 } from '../lib/orgsService'
 import { getCurrentUser } from '../lib/auth'
 
@@ -193,6 +196,10 @@ export default function OrgsPage() {
   const [inviting, setInviting] = useState(false)
   const [inviteError, setInviteError] = useState<string | null>(null)
 
+  // E10-3: org policy state
+  const [orgPolicy, setOrgPolicy] = useState<OrgPolicy | null>(null)
+  const [policyLoading, setPolicyLoading] = useState(false)
+
   // ── Load current user ──────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -234,14 +241,43 @@ export default function OrgsPage() {
     }
   }, [])
 
+  const loadPolicy = useCallback(async (orgId: string) => {
+    setPolicyLoading(true)
+    try {
+      const p = await getOrgPolicy(orgId)
+      setOrgPolicy(p)
+    } catch {
+      setOrgPolicy(null)
+    } finally {
+      setPolicyLoading(false)
+    }
+  }, [])
+
   const handleSelectOrg = useCallback(
     (orgId: string) => {
       setSelectedOrgId(orgId)
       setInviteError(null)
       setInviteUserId('')
+      setOrgPolicy(null)
       void loadMembers(orgId)
+      void loadPolicy(orgId)
     },
-    [loadMembers],
+    [loadMembers, loadPolicy],
+  )
+
+  const handleTogglePolicy = useCallback(
+    async (key: keyof OrgPolicy) => {
+      if (!selectedOrgId || !orgPolicy) return
+      const newVal = !orgPolicy[key]
+      setOrgPolicy((prev) => (prev ? { ...prev, [key]: newVal } : prev))
+      try {
+        await updateOrgPolicy(selectedOrgId, { [key]: newVal })
+      } catch {
+        // Revert on failure
+        setOrgPolicy((prev) => (prev ? { ...prev, [key]: !newVal } : prev))
+      }
+    },
+    [selectedOrgId, orgPolicy],
   )
 
   // ── Create org ────────────────────────────────────────────────────────────
@@ -517,6 +553,45 @@ export default function OrgsPage() {
                   </div>
                 )
               })
+            )}
+          </section>
+        )}
+
+        {/* E10-3: Org policies (owner only) */}
+        {selectedOrg && isOwner && (
+          <section style={s.section} data-testid="org-policy-section">
+            <h2 style={s.h2}>{t('orgs.policyTitle')}</h2>
+            {policyLoading || !orgPolicy ? (
+              <p style={s.muted}>…</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                {(
+                  [
+                    ['policy_explore_enabled', t('orgs.policyExplore')],
+                    ['policy_installs_allowed', t('orgs.policyInstalls')],
+                    ['policy_comments_allowed', t('orgs.policyComments')],
+                  ] as [keyof OrgPolicy, string][]
+                ).map(([key, label]) => (
+                  <label
+                    key={key}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      fontSize: '0.88rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={orgPolicy[key]}
+                      onChange={() => void handleTogglePolicy(key)}
+                      data-testid={`policy-${key}`}
+                    />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </div>
             )}
           </section>
         )}

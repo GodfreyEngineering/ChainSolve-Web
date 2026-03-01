@@ -720,7 +720,11 @@
     "errorLoad": "Impossible de charger les organisations",
     "errorCreate": "Impossible de créer l'organisation",
     "errorInvite": "Impossible d'inviter le membre",
-    "backToOrgs": "Retour aux organisations"
+    "backToOrgs": "Retour aux organisations",
+    "policyTitle": "Politiques Explore",
+    "policyExplore": "Activer la bibliothèque d'entreprise pour les membres",
+    "policyInstalls": "Autoriser les membres à installer des éléments du marketplace",
+    "policyComments": "Autoriser les membres à publier des commentaires sur les éléments du marketplace"
   },
   "auditLog": {
     "title": "Journal d'audit",
