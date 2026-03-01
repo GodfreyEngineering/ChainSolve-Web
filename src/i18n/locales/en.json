@@ -298,7 +298,30 @@
     "displayNameLabel": "Display name",
     "displayNamePlaceholder": "Your name",
     "displayNameEmpty": "Not set",
-    "edit": "Edit"
+    "edit": "Edit",
+    "admin": "Admin",
+    "adminDesc": "Developer tools and danger zone"
+  },
+  "admin": {
+    "dangerZoneTitle": "Danger Zone",
+    "dangerZoneWarning": "These actions are destructive and irreversible. They are available only to developer and admin accounts. Proceed with extreme caution.",
+    "deleteAllTitle": "Delete all user data",
+    "deleteAllDesc": "Permanently delete ALL projects, canvases, and storage files owned by the current user. This cannot be undone.",
+    "deleteAllBtn": "Delete All My Data",
+    "deleteAllSuccess": "Deleted {{count}} project(s) and all associated data.",
+    "deleteProjectTitle": "Delete a project by ID",
+    "deleteProjectDesc": "Permanently delete a single project by its UUID, including all canvases and storage files.",
+    "deleteProjectBtn": "Delete Project",
+    "deleteProjectSuccess": "Project {{id}} deleted successfully.",
+    "projectIdPlaceholder": "Project UUID",
+    "resetCachesTitle": "Reset local caches",
+    "resetCachesDesc": "Clear all ChainSolve localStorage keys: preferences, favourites, MRU, window geometry, and observability session.",
+    "resetCachesBtn": "Reset Caches",
+    "resetCachesSuccess": "Cleared {{count}} local cache key(s).",
+    "confirmLabel": "Type DELETE to unlock destructive actions",
+    "confirmHint": "You must type DELETE exactly to proceed.",
+    "deleting": "Deleting…",
+    "resetting": "Resetting…"
   },
   "ui": {
     "close": "Close",

@@ -290,7 +290,30 @@
     "displayNameLabel": "Nombre para mostrar",
     "displayNamePlaceholder": "Tu nombre",
     "displayNameEmpty": "No establecido",
-    "edit": "Editar"
+    "edit": "Editar",
+    "admin": "Admin",
+    "adminDesc": "Herramientas de desarrollador y zona de peligro"
+  },
+  "admin": {
+    "dangerZoneTitle": "Zona de peligro",
+    "dangerZoneWarning": "Estas acciones son destructivas e irreversibles. Solo están disponibles para cuentas de desarrollador y administrador. Proceda con extrema precaución.",
+    "deleteAllTitle": "Eliminar todos los datos del usuario",
+    "deleteAllDesc": "Eliminar permanentemente TODOS los proyectos, canvas y archivos de almacenamiento del usuario actual. Esta acción no se puede deshacer.",
+    "deleteAllBtn": "Eliminar todos mis datos",
+    "deleteAllSuccess": "Se eliminaron {{count}} proyecto(s) y todos los datos asociados.",
+    "deleteProjectTitle": "Eliminar un proyecto por ID",
+    "deleteProjectDesc": "Eliminar permanentemente un proyecto individual por su UUID, incluyendo todos los canvas y archivos.",
+    "deleteProjectBtn": "Eliminar proyecto",
+    "deleteProjectSuccess": "Proyecto {{id}} eliminado exitosamente.",
+    "projectIdPlaceholder": "UUID del proyecto",
+    "resetCachesTitle": "Restablecer cachés locales",
+    "resetCachesDesc": "Borrar todas las claves de localStorage de ChainSolve: preferencias, favoritos, MRU, geometría de ventanas y sesión de observabilidad.",
+    "resetCachesBtn": "Restablecer cachés",
+    "resetCachesSuccess": "Se borraron {{count}} clave(s) de caché local.",
+    "confirmLabel": "Escriba DELETE para desbloquear acciones destructivas",
+    "confirmHint": "Debe escribir DELETE exactamente para continuar.",
+    "deleting": "Eliminando…",
+    "resetting": "Restableciendo…"
   },
   "ui": {
     "close": "Cerrar",

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
@@ -9,15 +9,20 @@ import { BillingSettings } from './settings/BillingSettings'
 import { PreferencesSettings } from './settings/PreferencesSettings'
 import type { Profile } from '../lib/profilesService'
 
+const LazyAdminDangerZone = lazy(() =>
+  import('./settings/AdminDangerZone').then((m) => ({ default: m.AdminDangerZone })),
+)
+
 export type { Profile }
 
-const TABS = ['profile', 'billing', 'preferences'] as const
-type SettingsTab = (typeof TABS)[number]
+const BASE_TABS: SettingsTab[] = ['profile', 'billing', 'preferences']
+type SettingsTab = 'profile' | 'billing' | 'preferences' | 'admin'
 
 const TAB_ICONS: Record<SettingsTab, string> = {
   profile: '\u{1F464}',
   billing: '\u{1F4B3}',
   preferences: '\u{2699}\uFE0F',
+  admin: '\u{26A0}\uFE0F',
 }
 
 export default function Settings() {
@@ -25,11 +30,16 @@ export default function Settings() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { t } = useTranslation()
 
-  const tab = (searchParams.get('tab') as SettingsTab) || 'profile'
-
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const isAdmin = profile?.is_developer || profile?.is_admin
+  const tabs = useMemo<SettingsTab[]>(
+    () => (isAdmin ? [...BASE_TABS, 'admin'] : BASE_TABS),
+    [isAdmin],
+  )
+  const tab = (searchParams.get('tab') as SettingsTab) || 'profile'
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -84,7 +94,7 @@ export default function Settings() {
         {/* Sidebar */}
         <aside style={sidebarStyle}>
           <h2 style={sidebarTitle}>{t('settings.title')}</h2>
-          {TABS.map((key) => (
+          {tabs.map((key) => (
             <button
               key={key}
               onClick={() => setSearchParams({ tab: key })}
@@ -115,6 +125,11 @@ export default function Settings() {
                   | 'canceled') ?? 'free'
               }
             />
+          )}
+          {tab === 'admin' && isAdmin && (
+            <Suspense fallback={null}>
+              <LazyAdminDangerZone />
+            </Suspense>
           )}
         </main>
       </div>

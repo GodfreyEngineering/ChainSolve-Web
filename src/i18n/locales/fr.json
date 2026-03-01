@@ -290,7 +290,30 @@
     "displayNameLabel": "Nom d'affichage",
     "displayNamePlaceholder": "Votre nom",
     "displayNameEmpty": "Non défini",
-    "edit": "Modifier"
+    "edit": "Modifier",
+    "admin": "Admin",
+    "adminDesc": "Outils développeur et zone de danger"
+  },
+  "admin": {
+    "dangerZoneTitle": "Zone de danger",
+    "dangerZoneWarning": "Ces actions sont destructives et irréversibles. Elles ne sont disponibles que pour les comptes développeur et administrateur. Procédez avec une extrême prudence.",
+    "deleteAllTitle": "Supprimer toutes les données utilisateur",
+    "deleteAllDesc": "Supprimer définitivement TOUS les projets, canvas et fichiers de stockage de l'utilisateur actuel. Cette action est irréversible.",
+    "deleteAllBtn": "Supprimer toutes mes données",
+    "deleteAllSuccess": "{{count}} projet(s) et toutes les données associées supprimés.",
+    "deleteProjectTitle": "Supprimer un projet par ID",
+    "deleteProjectDesc": "Supprimer définitivement un projet par son UUID, y compris tous les canvas et fichiers.",
+    "deleteProjectBtn": "Supprimer le projet",
+    "deleteProjectSuccess": "Projet {{id}} supprimé avec succès.",
+    "projectIdPlaceholder": "UUID du projet",
+    "resetCachesTitle": "Réinitialiser les caches locaux",
+    "resetCachesDesc": "Effacer toutes les clés localStorage de ChainSolve : préférences, favoris, MRU, géométrie des fenêtres et session d'observabilité.",
+    "resetCachesBtn": "Réinitialiser les caches",
+    "resetCachesSuccess": "{{count}} clé(s) de cache local effacée(s).",
+    "confirmLabel": "Tapez DELETE pour débloquer les actions destructives",
+    "confirmHint": "Vous devez taper DELETE exactement pour continuer.",
+    "deleting": "Suppression…",
+    "resetting": "Réinitialisation…"
   },
   "ui": {
     "close": "Fermer",

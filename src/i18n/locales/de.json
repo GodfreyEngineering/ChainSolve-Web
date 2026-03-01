@@ -290,7 +290,30 @@
     "displayNameLabel": "Anzeigename",
     "displayNamePlaceholder": "Ihr Name",
     "displayNameEmpty": "Nicht festgelegt",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "admin": "Admin",
+    "adminDesc": "Entwicklertools und Gefahrenzone"
+  },
+  "admin": {
+    "dangerZoneTitle": "Gefahrenzone",
+    "dangerZoneWarning": "Diese Aktionen sind destruktiv und unwiderruflich. Sie stehen nur Entwickler- und Administratorkonten zur Verfügung. Gehen Sie mit äußerster Vorsicht vor.",
+    "deleteAllTitle": "Alle Benutzerdaten löschen",
+    "deleteAllDesc": "Alle Projekte, Canvas und Speicherdateien des aktuellen Benutzers dauerhaft löschen. Dies kann nicht rückgängig gemacht werden.",
+    "deleteAllBtn": "Alle meine Daten löschen",
+    "deleteAllSuccess": "{{count}} Projekt(e) und alle zugehörigen Daten gelöscht.",
+    "deleteProjectTitle": "Projekt nach ID löschen",
+    "deleteProjectDesc": "Ein einzelnes Projekt dauerhaft anhand seiner UUID löschen, einschließlich aller Canvas und Dateien.",
+    "deleteProjectBtn": "Projekt löschen",
+    "deleteProjectSuccess": "Projekt {{id}} erfolgreich gelöscht.",
+    "projectIdPlaceholder": "Projekt-UUID",
+    "resetCachesTitle": "Lokale Caches zurücksetzen",
+    "resetCachesDesc": "Alle ChainSolve-localStorage-Schlüssel löschen: Einstellungen, Favoriten, MRU, Fenstergeometrie und Observability-Sitzung.",
+    "resetCachesBtn": "Caches zurücksetzen",
+    "resetCachesSuccess": "{{count}} lokale Cache-Schlüssel gelöscht.",
+    "confirmLabel": "Geben Sie DELETE ein, um destruktive Aktionen freizuschalten",
+    "confirmHint": "Sie müssen DELETE genau eingeben, um fortzufahren.",
+    "deleting": "Wird gelöscht…",
+    "resetting": "Wird zurückgesetzt…"
   },
   "ui": {
     "close": "Schließen",

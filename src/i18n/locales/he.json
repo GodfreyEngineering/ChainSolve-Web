@@ -61,7 +61,30 @@
     "commentsCount": "{{count}} תגובות"
   },
   "settings": {
-    "account": "חשבון"
+    "account": "חשבון",
+    "admin": "ניהול",
+    "adminDesc": "כלי מפתחים ואזור מסוכן"
+  },
+  "admin": {
+    "dangerZoneTitle": "אזור מסוכן",
+    "dangerZoneWarning": "פעולות אלו הרסניות ובלתי הפיכות. הן זמינות רק לחשבונות מפתח ומנהל. המשך בזהירות רבה.",
+    "deleteAllTitle": "מחק את כל נתוני המשתמש",
+    "deleteAllDesc": "מחק לצמיתות את כל הפרויקטים, הקנבסים וקבצי האחסון של המשתמש הנוכחי. פעולה זו אינה ניתנת לביטול.",
+    "deleteAllBtn": "מחק את כל הנתונים שלי",
+    "deleteAllSuccess": "נמחקו {{count}} פרויקט(ים) וכל הנתונים המשויכים.",
+    "deleteProjectTitle": "מחק פרויקט לפי מזהה",
+    "deleteProjectDesc": "מחק לצמיתות פרויקט בודד לפי ה-UUID שלו, כולל כל הקנבסים והקבצים.",
+    "deleteProjectBtn": "מחק פרויקט",
+    "deleteProjectSuccess": "פרויקט {{id}} נמחק בהצלחה.",
+    "projectIdPlaceholder": "UUID של הפרויקט",
+    "resetCachesTitle": "אפס מטמון מקומי",
+    "resetCachesDesc": "נקה את כל מפתחות ה-localStorage של ChainSolve: העדפות, מועדפים, MRU, גיאומטריית חלונות וסשן ניטור.",
+    "resetCachesBtn": "אפס מטמון",
+    "resetCachesSuccess": "נוקו {{count}} מפתח(ות) מטמון מקומי.",
+    "confirmLabel": "הקלד DELETE כדי לפתוח פעולות הרסניות",
+    "confirmHint": "עליך להקליד DELETE בדיוק כדי להמשיך.",
+    "deleting": "מוחק…",
+    "resetting": "מאפס…"
   },
   "orgs": {
     "policyTitle": "מדיניות Explore",
