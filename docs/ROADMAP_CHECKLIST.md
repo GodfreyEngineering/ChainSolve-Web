@@ -1235,7 +1235,7 @@ Claude MUST:
   - Persist in canvas JSON.
   - Acceptance: annotations don’t affect evaluation; export renders them.
 
-- [ ] E7-2: Canvas styling tools
+- [x] E7-2: Canvas styling tools
   - Color themes per group/region
   - Snap-to-grid and alignment helpers
   - Acceptance: presentation-grade visuals.
