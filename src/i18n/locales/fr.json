@@ -282,7 +282,14 @@
     "billingPasswordLabel": "Mot de passe",
     "billingVerifyBtn": "Vérifier l'identité",
     "billingAuthFailed": "Mot de passe incorrect. Veuillez réessayer.",
-    "billingOAuthHint": "Vous vous êtes connecté via un fournisseur social. Déconnectez-vous et reconnectez-vous pour accéder à la facturation."
+    "billingOAuthHint": "Vous vous êtes connecté via un fournisseur social. Déconnectez-vous et reconnectez-vous pour accéder à la facturation.",
+    "avatarLabel": "Photo de profil",
+    "avatarUpload": "Importer une image",
+    "avatarUploading": "Importation…",
+    "displayNameLabel": "Nom d'affichage",
+    "displayNamePlaceholder": "Votre nom",
+    "displayNameEmpty": "Non défini",
+    "edit": "Modifier"
   },
   "ui": {
     "close": "Fermer",

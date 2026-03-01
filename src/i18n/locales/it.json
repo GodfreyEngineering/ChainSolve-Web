@@ -282,7 +282,14 @@
     "billingPasswordLabel": "Password",
     "billingVerifyBtn": "Verifica identità",
     "billingAuthFailed": "Password errata. Riprova.",
-    "billingOAuthHint": "Hai effettuato l'accesso con un provider social. Esci e accedi di nuovo per la fatturazione."
+    "billingOAuthHint": "Hai effettuato l'accesso con un provider social. Esci e accedi di nuovo per la fatturazione.",
+    "avatarLabel": "Immagine del profilo",
+    "avatarUpload": "Carica immagine",
+    "avatarUploading": "Caricamento…",
+    "displayNameLabel": "Nome visualizzato",
+    "displayNamePlaceholder": "Il tuo nome",
+    "displayNameEmpty": "Non impostato",
+    "edit": "Modifica"
   },
   "ui": {
     "close": "Chiudi",

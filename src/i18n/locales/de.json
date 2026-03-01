@@ -282,7 +282,14 @@
     "billingPasswordLabel": "Passwort",
     "billingVerifyBtn": "Identität bestätigen",
     "billingAuthFailed": "Falsches Passwort. Bitte versuchen Sie es erneut.",
-    "billingOAuthHint": "Sie haben sich mit einem sozialen Anbieter angemeldet. Melden Sie sich ab und wieder an, um auf die Abrechnung zuzugreifen."
+    "billingOAuthHint": "Sie haben sich mit einem sozialen Anbieter angemeldet. Melden Sie sich ab und wieder an, um auf die Abrechnung zuzugreifen.",
+    "avatarLabel": "Profilbild",
+    "avatarUpload": "Bild hochladen",
+    "avatarUploading": "Wird hochgeladen…",
+    "displayNameLabel": "Anzeigename",
+    "displayNamePlaceholder": "Ihr Name",
+    "displayNameEmpty": "Nicht festgelegt",
+    "edit": "Bearbeiten"
   },
   "ui": {
     "close": "Schließen",

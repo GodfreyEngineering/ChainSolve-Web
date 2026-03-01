@@ -290,7 +290,14 @@
     "billingPasswordLabel": "Password",
     "billingVerifyBtn": "Verify identity",
     "billingAuthFailed": "Incorrect password. Please try again.",
-    "billingOAuthHint": "You signed in with a social provider. Sign out and sign back in to access billing."
+    "billingOAuthHint": "You signed in with a social provider. Sign out and sign back in to access billing.",
+    "avatarLabel": "Profile image",
+    "avatarUpload": "Upload image",
+    "avatarUploading": "Uploading…",
+    "displayNameLabel": "Display name",
+    "displayNamePlaceholder": "Your name",
+    "displayNameEmpty": "Not set",
+    "edit": "Edit"
   },
   "ui": {
     "close": "Close",

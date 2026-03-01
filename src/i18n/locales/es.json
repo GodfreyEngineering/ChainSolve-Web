@@ -282,7 +282,14 @@
     "billingPasswordLabel": "Contraseña",
     "billingVerifyBtn": "Verificar identidad",
     "billingAuthFailed": "Contraseña incorrecta. Inténtalo de nuevo.",
-    "billingOAuthHint": "Iniciaste sesión con un proveedor social. Cierra sesión y vuelve a iniciar para acceder a la facturación."
+    "billingOAuthHint": "Iniciaste sesión con un proveedor social. Cierra sesión y vuelve a iniciar para acceder a la facturación.",
+    "avatarLabel": "Imagen de perfil",
+    "avatarUpload": "Subir imagen",
+    "avatarUploading": "Subiendo…",
+    "displayNameLabel": "Nombre para mostrar",
+    "displayNamePlaceholder": "Tu nombre",
+    "displayNameEmpty": "No establecido",
+    "edit": "Editar"
   },
   "ui": {
     "close": "Cerrar",
