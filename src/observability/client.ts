@@ -136,10 +136,18 @@ function checkDedup(fingerprint: string): boolean {
  * @param ctx     Small safe context: only canvasId, projectId, routeType, etc.
  */
 export function addBreadcrumb(action: string, ctx?: Record<string, string>): void {
+  // E9-2: Redact context values to prevent PII leaking into error reports
+  let safeCtx: Record<string, string> | undefined
+  if (ctx) {
+    safeCtx = {}
+    for (const [k, v] of Object.entries(ctx)) {
+      safeCtx[k] = redactString(typeof v === 'string' ? v : String(v))
+    }
+  }
   _breadcrumbs.push({
     ts: new Date().toISOString(),
     action: action.slice(0, 64),
-    ctx,
+    ctx: safeCtx,
   })
   if (_breadcrumbs.length > OBS_LIMITS.MAX_BREADCRUMBS) {
     _breadcrumbs.shift()

@@ -6,6 +6,7 @@
  */
 
 import { supabase } from './supabase'
+import { redactString } from '../observability/redact'
 import { importProject, type ProjectJSON } from './projects'
 import { addInstalledBlockPack, type BlockPackPayload } from './installedBlockPacksService'
 import {
@@ -693,7 +694,7 @@ export async function reportComment(commentId: string, reason: string): Promise<
 
   const { error } = await supabase
     .from('marketplace_comments')
-    .update({ is_flagged: true, flag_reason: reason.trim().slice(0, 500) })
+    .update({ is_flagged: true, flag_reason: redactString(reason.trim().slice(0, 500)) })
     .eq('id', commentId)
 
   if (error) throw error
@@ -712,7 +713,7 @@ export async function reportItem(itemId: string, reason: string): Promise<void> 
   const { error } = await supabase.from('bug_reports').insert({
     user_id: user.id,
     title: `Item report: ${itemId}`,
-    description: reason.trim().slice(0, 500),
+    description: redactString(reason.trim().slice(0, 500)),
     metadata: { type: 'item_report', item_id: itemId },
   })
 

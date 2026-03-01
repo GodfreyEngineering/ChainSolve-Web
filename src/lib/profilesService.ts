@@ -6,6 +6,7 @@
 
 import { supabase } from './supabase'
 import type { Plan } from './entitlements'
+import { redactString } from '../observability/redact'
 
 export interface Profile {
   id: string
@@ -115,7 +116,7 @@ export async function reportAvatar(targetUserId: string, reason: string): Promis
   const { error } = await supabase.from('avatar_reports').insert({
     reporter_id: user.id,
     target_id: targetUserId,
-    reason: trimmed,
+    reason: redactString(trimmed),
   })
   if (error) {
     if (error.code === '23505') throw new Error('You have already reported this avatar')
