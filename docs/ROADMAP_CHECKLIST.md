@@ -1256,7 +1256,7 @@ Claude MUST:
 ---
 
 ## E9 — CSP + analytics + privacy finalization
-- [ ] E9-1: Decide analytics strategy for app domain
+- [x] E9-1: Decide analytics strategy for app domain
   - If enabled:
     - must be opt-in
     - must be CSP compatible (nonce approach if needed)
