@@ -9,7 +9,7 @@
  * - Drag to canvas
  */
 
-import { useState, useRef, useEffect, useCallback, type DragEvent } from 'react'
+import { useState, useRef, useEffect, useCallback, memo, type DragEvent } from 'react'
 import {
   BLOCK_REGISTRY,
   CATEGORY_ORDER,
@@ -189,7 +189,13 @@ interface BlockItemProps {
   onProBlocked?: () => void
 }
 
-function BlockItem({ def, favs, onToggleFav, entitled, onProBlocked }: BlockItemProps) {
+const BlockItem = memo(function BlockItem({
+  def,
+  favs,
+  onToggleFav,
+  entitled,
+  onProBlocked,
+}: BlockItemProps) {
   const [hovered, setHovered] = useState(false)
   const isFav = favs.has(def.type)
 
@@ -248,7 +254,7 @@ function BlockItem({ def, favs, onToggleFav, entitled, onProBlocked }: BlockItem
       )}
     </div>
   )
-}
+})
 
 // ── TemplateItem ─────────────────────────────────────────────────────────────
 
@@ -259,7 +265,12 @@ interface TemplateItemProps {
   onDelete: () => void
 }
 
-function TemplateItem({ template, onInsert, onRename, onDelete }: TemplateItemProps) {
+const TemplateItem = memo(function TemplateItem({
+  template,
+  onInsert,
+  onRename,
+  onDelete,
+}: TemplateItemProps) {
   const [hovered, setHovered] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const nodeCount = template.payload.nodes?.length ?? 0
@@ -399,7 +410,7 @@ function TemplateItem({ template, onInsert, onRename, onDelete }: TemplateItemPr
       )}
     </div>
   )
-}
+})
 
 // ── BlockLibrary ──────────────────────────────────────────────────────────────
 

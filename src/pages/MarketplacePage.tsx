@@ -17,6 +17,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useDebounce } from '../hooks/useDebounce'
 import {
   listPublishedItems,
   listOrgExploreItems,
@@ -237,6 +238,10 @@ export default function MarketplacePage() {
   const [sort, setSort] = useState<ExploreSortKey>('downloads')
   const [tagFilter, setTagFilter] = useState('')
 
+  // E11-3: debounce text inputs to reduce API calls
+  const debouncedQuery = useDebounce(query, 350)
+  const debouncedTag = useDebounce(tagFilter, 350)
+
   // D10-1: Company Library tab
   const [viewMode, setViewMode] = useState<'public' | 'company'>('public')
   const [myOrgs, setMyOrgs] = useState<Org[]>([])
@@ -283,9 +288,9 @@ export default function MarketplacePage() {
       const [fetched, installs, likes] = await Promise.all([
         listPublishedItems(
           category === 'all' ? undefined : category,
-          query,
+          debouncedQuery,
           sort,
-          tagFilter || undefined,
+          debouncedTag || undefined,
         ),
         getUserInstalls(),
         getUserLikes(),
@@ -298,7 +303,7 @@ export default function MarketplacePage() {
     } finally {
       setLoading(false)
     }
-  }, [category, query, sort, tagFilter])
+  }, [category, debouncedQuery, sort, debouncedTag])
 
   useEffect(() => {
     void fetchItems()
@@ -672,6 +677,7 @@ export default function MarketplacePage() {
                       <img
                         src={item.thumbnail_url}
                         alt={item.name}
+                        loading="lazy"
                         style={{
                           width: '100%',
                           height: 140,
