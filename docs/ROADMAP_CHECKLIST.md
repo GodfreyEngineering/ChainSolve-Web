@@ -987,7 +987,7 @@ Claude MUST:
   - Docs:
     - docs/CSP_PLAYBOOK.md updated with decision and reasoning.
 
-- [ ] E0-3: i18next deprecation warning cleanup
+- [x] E0-3: i18next deprecation warning cleanup
   - Fix initialization to non-deprecated signature and ensure no warnings on boot.
   - Acceptance: no i18next deprecation warnings.
 
@@ -1005,7 +1005,7 @@ Claude MUST:
     - No registry mismatch warnings on boot.
     - Constant/material/probe alignment clarified (documented).
 
-- [ ] E0-5: Remove React Flow attribution link (license-aware)
+- [x] E0-5: Remove React Flow attribution link (license-aware)
   - Use official `proOptions.hideAttribution` if permitted.
   - Add docs note: if used commercially, consider supporting/keeping attribution. :contentReference[oaicite:3]{index=3}
   - Acceptance: no attribution overlay visible.
@@ -1307,5 +1307,196 @@ Claude MUST:
 - [ ] E11-3: Performance + polish pass
   - remove jank, improve LOD, confirm edge stability
   - Acceptance: feels fast and smooth.
+
+---
+
+---
+
+# PHASE F — Full Repo Audit + Professional Housekeeping + Harmony Pass (Final Web App Readiness)
+> Objective: Claude performs a deep, file-by-file audit, then cleans, refactors, and hardens the repo so the web app is cohesive, maintainable, secure, and production-ready.
+
+## Phase F rules (non-negotiable)
+- Every item DONE requires:
+  - `./scripts/verify-ci.sh` PASS
+  - relevant tests updated/added
+  - docs updated + changelog entry where behavior changes
+- CSP must not weaken.
+- Adapter boundary enforced: UI components MUST NOT import Supabase directly.
+- No secrets/PII in logs/exports/tests/templates.
+- Prefer quarantine over deletion when uncertain.
+
+## Phase F philosophy (Claude has authority, but must be disciplined)
+Claude MAY:
+- restructure folders, rename modules, and consolidate duplicated utilities
+- delete dead code *only if proven unused*
+- add missing guardrails, docs, and test harnesses
+Claude MUST:
+- keep commits atomic (1 item = 1 commit)
+- avoid “big bang” refactors without checkpoints
+- keep the app behavior correct and consistent with requirements
+
+---
+
+## F0 — Repo-wide audit (read every file, produce a report, no code changes)
+- [ ] F0-1: Full file-by-file audit + map
+  - Claude must scan:
+    - src/**, crates/**, functions/**, supabase/**, scripts/**, docs/**
+  - Produce `docs/AUDIT/REPO_AUDIT_REPORT.md` including:
+    - directory map and purpose
+    - architectural boundaries (UI, services, adapters, engine worker, exports)
+    - list of “hot zones” (security/CSP, auth, billing, persistence, exports, AI)
+    - list of dead code candidates (with evidence: not imported, not referenced)
+    - list of duplicated logic candidates (hashing, redaction, env parsing, path sanitization)
+    - dependency risk summary (packages with heavy footprint or sensitive supply chain)
+  - Acceptance: report is detailed enough to guide cleanup without guesswork.
+
+- [ ] F0-2: “Repo Hygiene Plan” doc (what will be changed)
+  - Create `docs/AUDIT/REPO_HYGIENE_PLAN.md`:
+    - enumerates cleanup tasks
+    - defines which files will be removed/quarantined
+    - explains any renames/moves
+  - Acceptance: clear plan before edits begin.
+
+---
+
+## F1 — Housekeeping cleanup (safe, mechanical, reduces confusion)
+- [ ] F1-1: Remove/ignore local-only noise and enforce git cleanliness
+  - Ensure `.claude/`, `.dev.vars*`, `.env*` ignored and not tracked. :contentReference[oaicite:3]{index=3}
+  - Ensure git hooks and devcontainer features are consistent (Git LFS present in container).
+  - Acceptance: “fresh container → clean git status” after normal dev actions.
+
+- [ ] F1-2: Normalize docs structure + index
+  - Add/refresh `docs/README.md` as the hub:
+    - links to requirements suite, architecture, security, exports, AI, devcontainer
+  - Move scattered docs into a predictable taxonomy:
+    - docs/AUDIT/
+    - docs/EXPORTS/
+    - docs/SECURITY/
+    - docs/DEV/
+    - docs/PRODUCT/
+  - Acceptance: docs are discoverable and consistently named.
+
+- [ ] F1-3: Scripts sanity and consistency
+  - Ensure `scripts/verify-ci.sh` is the single authoritative gate.
+  - Any “verify-fast” remains optional and clearly described.
+  - Acceptance: no duplicate “CI” scripts drifting apart.
+
+---
+
+## F2 — Architecture hardening and boundary enforcement (prevent regressions)
+- [ ] F2-1: Enforce adapter boundary via lint rules
+  - Add ESLint rules to forbid importing Supabase client directly from UI folders:
+    - use `no-restricted-imports` for patterns like `src/components/**` importing `supabase` modules. :contentReference[oaicite:4]{index=4}
+  - Add allowlist exceptions only in adapter/service layer.
+  - Acceptance: CI fails if UI imports Supabase directly.
+
+- [ ] F2-2: Centralize environment config validation
+  - Implement `src/lib/env.ts` that validates required env vars at startup:
+    - client-safe vars (VITE_*)
+    - server-only vars (Cloudflare context.env)
+  - Document `.dev.vars` usage for local Pages functions. :contentReference[oaicite:5]{index=5}
+  - Acceptance: missing env causes an actionable error (not silent failure).
+
+- [ ] F2-3: Canonical privacy + redaction library
+  - Ensure one canonical redaction utility is used everywhere:
+    - debug export, PDF/Excel/.chainsolvejson, AI usage logs, import reports
+  - Add regression tests: tokens/keys/emails never leak.
+  - Acceptance: no duplicate redaction implementations remain.
+
+---
+
+## F3 — Dependency + bundle + performance hygiene
+- [ ] F3-1: Dependency audit + pruning
+  - Remove unused deps.
+  - Ensure lazy-loaded heavy deps remain lazy (PDF/XLSX/Vega/AI).
+  - Acceptance: build output shows chunks correctly split and no bundle regressions.
+
+- [ ] F3-2: Add “dependency policy” doc
+  - Create `docs/DEV/DEPENDENCIES.md`:
+    - what is allowed, what is discouraged
+    - how to add a new dependency
+    - supply chain checks expectations
+  - Acceptance: future devs can follow policy.
+
+- [ ] F3-3: Performance budget and regression hooks
+  - Ensure bundle-size checks are meaningful and stable.
+  - Add optional perf note: how to run a perf harness and confirm LOD/edges stability.
+  - Acceptance: perf regressions are catchable.
+
+---
+
+## F4 — Security hardening sweep (repo and DB migrations)
+- [ ] F4-1: Supabase migration hygiene pass
+  - Ensure all migrations are idempotent and safe to re-run. :contentReference[oaicite:6]{index=6}
+  - Avoid touching restricted schemas (`auth`, `storage`, `realtime`) beyond supported operations. :contentReference[oaicite:7]{index=7}
+  - Acceptance: clean migration set and documented conventions.
+
+- [ ] F4-2: RLS & policy consolidation pass
+  - Reduce “multiple permissive policies” where possible (merge OR logic).
+  - Ensure tables with RLS enabled have explicit policies (or explicit deny-all).
+  - Acceptance: Supabase advisor warnings reduced/cleared and policies are clear.
+
+- [ ] F4-3: CSP policy + enforcement cleanup
+  - Ensure CSP is:
+    - consistent in headers and documented
+    - no third-party script injections without explicit allowlist decision
+  - Acceptance: no CSP console spam; CSP doc is current.
+
+---
+
+## F5 — UI/UX cohesion pass (harmonize everything end-to-end)
+- [ ] F5-1: UI consistency audit
+  - Identify and fix:
+    - inconsistent window chrome
+    - inconsistent button styles
+    - inconsistent spacing/typography
+    - inconsistent empty states
+  - Acceptance: “one design language” everywhere.
+
+- [ ] F5-2: Navigation + router correctness audit
+  - Ensure every window/dialog that uses navigation hooks is inside Router context.
+  - Acceptance: no `useNavigate()` errors anywhere.
+
+- [ ] F5-3: Panel/dock/window interaction audit
+  - Ensure:
+    - right-side toolbar always visible
+    - bottom dock never hides tools
+    - inspector/profile/settings/docs all behave like proper windows
+  - Acceptance: workstation UX feels complete.
+
+---
+
+## F6 — Catalog/engine registry integrity (zero mismatch)
+- [ ] F6-1: Single source of truth for catalog registration
+  - Fix any mismatches:
+    - TS blocks not in Rust catalog
+    - Rust ops missing TS defaults (UI should still render generically)
+  - Add a CI test that fails on mismatch between TS registry and Rust catalog list.
+  - Acceptance: no “engine won’t evaluate” registry warnings.
+
+- [ ] F6-2: Full block catalog sanity tests
+  - Ensure every block renders, can be instantiated, and evaluates if expected.
+  - Acceptance: smoke tests for block creation + evaluation.
+
+---
+
+## F7 — Release readiness hardening (final polish and “it just works”)
+- [ ] F7-1: Full release dry-run script
+  - Add `docs/DEV/RELEASE_DRY_RUN.md`:
+    - how to run verify-ci, build, deploy preview checks
+    - how to validate CSP, auth flows, exports gating, AI quotas
+  - Acceptance: any team member can do release rehearsal.
+
+- [ ] F7-2: “No unfinished UX” sweep
+  - Remove any “coming soon,” broken buttons, dead menu items.
+  - Acceptance: product feels finished.
+
+- [ ] F7-3: Final repo re-org (optional if needed)
+  - If audit reveals major structural confusion, do a final “libraries” separation:
+    - src/lib (pure logic)
+    - src/services (adapter-facing)
+    - src/ui (components/windows)
+    - src/engine (worker/bridge)
+  - Acceptance: repo is intuitive and scales.
 
 ---
