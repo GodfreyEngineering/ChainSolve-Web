@@ -25,21 +25,36 @@ export async function getSession(): Promise<Session | null> {
 export async function signInWithPassword(
   email: string,
   password: string,
+  captchaToken?: string,
 ): Promise<{ error: AuthError | null }> {
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+    options: captchaToken ? { captchaToken } : undefined,
+  })
   return { error }
 }
 
 export async function signUp(
   email: string,
   password: string,
+  captchaToken?: string,
 ): Promise<{ session: Session | null; error: AuthError | null }> {
-  const { data, error } = await supabase.auth.signUp({ email, password })
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: captchaToken ? { captchaToken } : undefined,
+  })
   return { session: data.session ?? null, error }
 }
 
-export async function resetPasswordForEmail(email: string): Promise<{ error: AuthError | null }> {
-  const { error } = await supabase.auth.resetPasswordForEmail(email)
+export async function resetPasswordForEmail(
+  email: string,
+  captchaToken?: string,
+): Promise<{ error: AuthError | null }> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    captchaToken,
+  })
   return { error }
 }
 

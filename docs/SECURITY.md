@@ -73,12 +73,12 @@ The `Reporting-Endpoints` header maps `csp-endpoint` to the report URL.
 | Directive | Value | Why |
 |-----------|-------|-----|
 | `default-src` | `'self'` | Fallback: only same-origin |
-| `script-src` | `'self' 'wasm-unsafe-eval'` | No inline scripts, no CDN scripts; `'wasm-unsafe-eval'` required for the Rust/WASM engine (see §2.1) |
+| `script-src` | `'self' 'wasm-unsafe-eval' https://challenges.cloudflare.com` | No inline scripts; `'wasm-unsafe-eval'` for WASM engine (§2.1); Turnstile CAPTCHA loader (§5) |
 | `style-src` | `'self' 'unsafe-inline' https://fonts.googleapis.com` | `unsafe-inline` required by React Flow inline styles + Vite CSS injection; Google Fonts for Montserrat/JetBrains Mono |
 | `font-src` | `'self' https://fonts.gstatic.com` | Google Fonts file delivery |
 | `img-src` | `'self' data: blob:` | SVG data URIs, canvas blob exports |
 | `connect-src` | `'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com` | Supabase REST + Realtime, Stripe API |
-| `frame-src` | `https://js.stripe.com` | Stripe Checkout iframe |
+| `frame-src` | `https://js.stripe.com https://challenges.cloudflare.com` | Stripe Checkout iframe; Turnstile managed challenge (§5) |
 | `worker-src` | `'self' blob:` | CSV Web Worker (blob URL) |
 | `object-src` | `'none'` | Block Flash/plugins |
 | `base-uri` | `'self'` | Prevent base tag hijacking |
@@ -330,6 +330,21 @@ inside that script.
 
 The CI check will fail with a `CSP ALLOWLIST VIOLATION` error if an external
 origin appears in the enforced header without a matching allowlist entry.
+
+### Cloudflare Turnstile CAPTCHA (E2-2)
+
+`https://challenges.cloudflare.com` is allowlisted in both `script-src` (JavaScript
+widget loader) and `frame-src` (managed challenge iframe).
+
+**Rationale:** Turnstile provides bot protection on login, signup, and password-reset
+forms. It is a first-party Cloudflare service and does not require `unsafe-eval`.
+
+**Configuration:**
+- Set `VITE_TURNSTILE_SITE_KEY` in the frontend environment to enable the widget.
+- Configure the Turnstile secret key in the Supabase project dashboard
+  (Authentication → Captcha protection).
+- When the site key is absent (local dev), CAPTCHA is disabled and auth works
+  without a token.
 
 ---
 

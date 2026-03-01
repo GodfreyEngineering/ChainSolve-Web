@@ -7,10 +7,12 @@
  *   /reset-password — request password reset email
  */
 
-import { useState, useRef, useEffect, type FormEvent } from 'react'
+import { useState, useRef, useEffect, useCallback, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { signInWithPassword, signUp, resetPasswordForEmail, resendConfirmation } from '../lib/auth'
 import { BRAND } from '../lib/brand'
+import TurnstileWidget from '../components/ui/TurnstileWidget'
+import { isTurnstileEnabled } from '../lib/turnstile'
 
 export type AuthMode = 'login' | 'signup' | 'reset'
 
@@ -37,6 +39,25 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
   // Reset success state
   const [resetSent, setResetSent] = useState(false)
 
+  // Turnstile CAPTCHA token (E2-2)
+  const captchaEnabled = isTurnstileEnabled()
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaError, setCaptchaError] = useState(false)
+
+  const handleCaptchaToken = useCallback((token: string) => {
+    setCaptchaToken(token)
+    setCaptchaError(false)
+  }, [])
+
+  const handleCaptchaError = useCallback(() => {
+    setCaptchaToken(null)
+    setCaptchaError(true)
+  }, [])
+
+  const handleCaptchaExpired = useCallback(() => {
+    setCaptchaToken(null)
+  }, [])
+
   const emailRef = useRef<HTMLInputElement>(null)
 
   // Auto-focus email on mode change
@@ -55,7 +76,15 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
+
+    // Validate CAPTCHA if enabled (E2-2)
+    if (captchaEnabled && !captchaToken) {
+      setError('Please complete the CAPTCHA challenge.')
+      return
+    }
+
     setLoading(true)
+    const token = captchaToken ?? undefined
     try {
       if (mode === 'signup') {
         if (password !== confirmPassword) {
@@ -68,7 +97,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
           setLoading(false)
           return
         }
-        const { session, error: signUpErr } = await signUp(email, password)
+        const { session, error: signUpErr } = await signUp(email, password, token)
         if (signUpErr) throw signUpErr
         if (!session) {
           // Email confirmation required — show confirm prompt.
@@ -78,11 +107,11 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
         // Email confirmation disabled (local dev) — session exists, go straight in.
         navigate('/app')
       } else if (mode === 'reset') {
-        const { error: resetErr } = await resetPasswordForEmail(email)
+        const { error: resetErr } = await resetPasswordForEmail(email, token)
         if (resetErr) throw resetErr
         setResetSent(true)
       } else {
-        const { error: signInErr } = await signInWithPassword(email, password)
+        const { error: signInErr } = await signInWithPassword(email, password, token)
         if (signInErr) throw signInErr
         navigate('/app')
       }
@@ -273,10 +302,24 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
             </div>
           )}
 
+          {captchaEnabled && (
+            <TurnstileWidget
+              onToken={handleCaptchaToken}
+              onError={handleCaptchaError}
+              onExpired={handleCaptchaExpired}
+            />
+          )}
+          {captchaError && (
+            <div style={s.errorBox}>CAPTCHA failed to load. Please refresh and try again.</div>
+          )}
+
           <button
             type="submit"
-            style={{ ...s.btn, ...(loading ? s.btnDisabled : {}) }}
-            disabled={loading}
+            style={{
+              ...s.btn,
+              ...(loading || (captchaEnabled && !captchaToken) ? s.btnDisabled : {}),
+            }}
+            disabled={loading || (captchaEnabled && !captchaToken)}
           >
             {loading
               ? 'Please wait…'

@@ -52,7 +52,9 @@
     "signInLink": "Accedi",
     "emailPending": "Controlla la tua email per il link di conferma.",
     "resend": "Rinvia email",
-    "submitting": "Invio…"
+    "submitting": "Invio…",
+    "captchaRequired": "Completa la verifica CAPTCHA.",
+    "captchaFailed": "Impossibile caricare il CAPTCHA. Aggiorna la pagina e riprova."
   },
   "projects": {
     "title": "Progetti",

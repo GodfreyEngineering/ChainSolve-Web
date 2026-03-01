@@ -1076,7 +1076,7 @@ Claude MUST:
     - robust flow
   - Acceptance: polished UI, no basic/stub forms.
 
-- [ ] E2-2: CAPTCHA integration (Turnstile preferred)
+- [x] E2-2: CAPTCHA integration (Turnstile preferred)
   - Supabase Auth supports captcha providers including Turnstile/hCaptcha via auth config. :contentReference[oaicite:4]{index=4}
   - Implement frontend token acquisition + passing `captcha_token` where needed.
   - Acceptance: bots blocked, humans not annoyed, UX clean.

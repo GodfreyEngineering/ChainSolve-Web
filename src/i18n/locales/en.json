@@ -59,7 +59,9 @@
     "signInLink": "Sign in",
     "emailPending": "Check your email for a confirmation link.",
     "resend": "Resend email",
-    "submitting": "Submitting…"
+    "submitting": "Submitting…",
+    "captchaRequired": "Please complete the CAPTCHA challenge.",
+    "captchaFailed": "CAPTCHA failed to load. Please refresh and try again."
   },
   "projects": {
     "title": "Projects",

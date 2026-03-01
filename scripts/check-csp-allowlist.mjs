@@ -31,6 +31,8 @@ const APPROVED_ORIGINS = [
   // Stripe (API + Checkout iframe)
   'https://api.stripe.com',
   'https://js.stripe.com',
+  // Cloudflare Turnstile CAPTCHA (E2-2: script + widget iframe)
+  'https://challenges.cloudflare.com',
 ]
 
 // ── Keywords that are not external origins ────────────────────────────────────
