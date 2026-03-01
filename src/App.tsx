@@ -93,7 +93,9 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/app" replace />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login initialMode="login" />} />
+        <Route path="/signup" element={<Login initialMode="signup" />} />
+        <Route path="/reset-password" element={<Login initialMode="reset" />} />
         <Route path="/app" element={<AppShell />} />
         <Route path="/canvas" element={<CanvasPage />} />
         <Route path="/canvas/:projectId" element={<CanvasPage />} />

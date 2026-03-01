@@ -37,6 +37,8 @@ const ALLOWLIST = new Set([
   'src/components/canvas/GroupInspector.tsx|Add notes…',
   // AppShell — project card ⋯ button; AppShell does not yet import useTranslation
   'src/pages/AppShell.tsx|Project actions',
+  // Login — auth pages do not yet import useTranslation
+  'src/pages/Login.tsx|Re-enter password',
 ])
 
 // ── Scan ──────────────────────────────────────────────────────────────────────

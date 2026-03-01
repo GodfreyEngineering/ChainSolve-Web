@@ -1,9 +1,325 @@
+/**
+ * Login — E2-1: Auth UI for login, signup, and password reset.
+ *
+ * Supports three modes routed as first-class paths:
+ *   /login          — sign in with email + password
+ *   /signup         — create account with confirm password, T&C, marketing opt-in
+ *   /reset-password — request password reset email
+ */
+
 import { useState, useRef, useEffect, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { useNavigate, Link } from 'react-router-dom'
+import { signInWithPassword, signUp, resetPasswordForEmail, resendConfirmation } from '../lib/auth'
 import { BRAND } from '../lib/brand'
 
-type Mode = 'login' | 'signup'
+export type AuthMode = 'login' | 'signup' | 'reset'
+
+interface LoginProps {
+  initialMode?: AuthMode
+}
+
+export default function Login({ initialMode = 'login' }: LoginProps) {
+  const navigate = useNavigate()
+  const [mode, setMode] = useState<AuthMode>(initialMode)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [acceptTerms, setAcceptTerms] = useState(false)
+  const [marketingOptIn, setMarketingOptIn] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  // Email-confirmation pending state (signUp returned session=null)
+  const [confirmPending, setConfirmPending] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendMsg, setResendMsg] = useState<string | null>(null)
+
+  // Reset success state
+  const [resetSent, setResetSent] = useState(false)
+
+  const emailRef = useRef<HTMLInputElement>(null)
+
+  // Auto-focus email on mode change
+  useEffect(() => {
+    emailRef.current?.focus()
+  }, [mode])
+
+  // Sync mode with initialMode prop when route changes
+  useEffect(() => {
+    setMode(initialMode)
+    setError(null)
+    setResetSent(false)
+    setConfirmPending(false)
+  }, [initialMode])
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+    try {
+      if (mode === 'signup') {
+        if (password !== confirmPassword) {
+          setError('Passwords do not match.')
+          setLoading(false)
+          return
+        }
+        if (!acceptTerms) {
+          setError('You must accept the Terms & Conditions to create an account.')
+          setLoading(false)
+          return
+        }
+        const { session, error: signUpErr } = await signUp(email, password)
+        if (signUpErr) throw signUpErr
+        if (!session) {
+          // Email confirmation required — show confirm prompt.
+          setConfirmPending(true)
+          return
+        }
+        // Email confirmation disabled (local dev) — session exists, go straight in.
+        navigate('/app')
+      } else if (mode === 'reset') {
+        const { error: resetErr } = await resetPasswordForEmail(email)
+        if (resetErr) throw resetErr
+        setResetSent(true)
+      } else {
+        const { error: signInErr } = await signInWithPassword(email, password)
+        if (signInErr) throw signInErr
+        navigate('/app')
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Authentication failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResend = async () => {
+    setResendLoading(true)
+    setResendMsg(null)
+    setError(null)
+    const { error: resendErr } = await resendConfirmation(email)
+    if (resendErr) {
+      setError(resendErr.message)
+    } else {
+      setResendMsg('Confirmation email resent — check your inbox and spam folder.')
+    }
+    setResendLoading(false)
+  }
+
+  // ── Email-confirmation pending view ──────────────────────────────────────────
+
+  if (confirmPending) {
+    return (
+      <div style={s.page}>
+        <div style={s.card}>
+          <h1 style={s.heading}>Check your inbox</h1>
+          <p style={s.sub}>Almost there — one more step</p>
+
+          <div style={s.infoBox}>
+            Account created. We sent a confirmation link to <strong>{email}</strong>. Click the link
+            in that email to activate your account, then return here to sign in.
+          </div>
+
+          {error && <div style={s.errorBox}>{error}</div>}
+          {resendMsg && <div style={s.successBox}>{resendMsg}</div>}
+
+          <button
+            style={{ ...s.btnSecondary, marginTop: 0, ...(resendLoading ? s.btnDisabled : {}) }}
+            disabled={resendLoading}
+            onClick={handleResend}
+          >
+            {resendLoading ? 'Sending…' : 'Resend confirmation email'}
+          </button>
+
+          <Link
+            to="/login"
+            style={{
+              ...s.btnSecondary,
+              display: 'block',
+              textAlign: 'center',
+              textDecoration: 'none',
+            }}
+          >
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Reset sent confirmation view ────────────────────────────────────────────
+
+  if (resetSent) {
+    return (
+      <div style={s.page}>
+        <div style={s.card}>
+          <h1 style={s.heading}>Check your email</h1>
+          <p style={s.sub}>Password reset link sent</p>
+
+          <div style={s.infoBox}>
+            If an account exists for <strong>{email}</strong>, we sent a password reset link. Check
+            your inbox and spam folder.
+          </div>
+
+          <Link
+            to="/login"
+            style={{ ...s.btn, display: 'block', textAlign: 'center', textDecoration: 'none' }}
+          >
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Main auth form ──────────────────────────────────────────────────────────
+
+  return (
+    <div style={s.page}>
+      <div style={s.card}>
+        <div style={s.logoWrap}>
+          <img src={BRAND.logoWideText} alt="ChainSolve" style={s.logo} />
+        </div>
+        <p style={s.sub}>
+          {mode === 'login' && 'Sign in to your account'}
+          {mode === 'signup' && 'Create your account'}
+          {mode === 'reset' && 'Reset your password'}
+        </p>
+
+        {error && <div style={s.errorBox}>{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <label style={s.label} htmlFor="email">
+            Email
+          </label>
+          <input
+            ref={emailRef}
+            id="email"
+            style={s.input}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            autoComplete="email"
+            required
+          />
+
+          {mode !== 'reset' && (
+            <>
+              <label style={s.label} htmlFor="password">
+                Password
+              </label>
+              <input
+                id="password"
+                style={s.input}
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
+                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                required
+                minLength={mode === 'signup' ? 8 : 1}
+              />
+            </>
+          )}
+
+          {mode === 'signup' && (
+            <>
+              <label style={s.label} htmlFor="confirmPassword">
+                Confirm password
+              </label>
+              <input
+                id="confirmPassword"
+                style={s.input}
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+              />
+
+              <label style={s.checkLabel}>
+                <input
+                  type="checkbox"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  style={s.checkbox}
+                />
+                I accept the{' '}
+                <a href="/terms" target="_blank" rel="noopener noreferrer" style={s.link}>
+                  Terms &amp; Conditions
+                </a>
+              </label>
+
+              <label style={s.checkLabel}>
+                <input
+                  type="checkbox"
+                  checked={marketingOptIn}
+                  onChange={(e) => setMarketingOptIn(e.target.checked)}
+                  style={s.checkbox}
+                />
+                Send me product updates and tips (optional)
+              </label>
+            </>
+          )}
+
+          {mode === 'login' && (
+            <div style={s.forgotRow}>
+              <Link to="/reset-password" style={s.forgotLink}>
+                Forgot password?
+              </Link>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            style={{ ...s.btn, ...(loading ? s.btnDisabled : {}) }}
+            disabled={loading}
+          >
+            {loading
+              ? 'Please wait…'
+              : mode === 'login'
+                ? 'Sign in'
+                : mode === 'signup'
+                  ? 'Create account'
+                  : 'Send reset link'}
+          </button>
+        </form>
+
+        <p style={s.toggle}>
+          {mode === 'login' && (
+            <>
+              Don&apos;t have an account?{' '}
+              <Link to="/signup" style={s.toggleLink}>
+                Sign up
+              </Link>
+            </>
+          )}
+          {mode === 'signup' && (
+            <>
+              Already have an account?{' '}
+              <Link to="/login" style={s.toggleLink}>
+                Sign in
+              </Link>
+            </>
+          )}
+          {mode === 'reset' && (
+            <>
+              Remember your password?{' '}
+              <Link to="/login" style={s.toggleLink}>
+                Sign in
+              </Link>
+            </>
+          )}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// ── Styles ──────────────────────────────────────────────────────────────────
 
 const s = {
   page: {
@@ -123,181 +439,37 @@ const s = {
   } as React.CSSProperties,
   toggleLink: {
     color: 'var(--primary)',
-    cursor: 'pointer',
     fontWeight: 600,
     textDecoration: 'underline',
-    background: 'none',
-    border: 'none',
-    padding: 0,
-    font: 'inherit',
   } as React.CSSProperties,
-}
-
-export default function Login() {
-  const navigate = useNavigate()
-  const [mode, setMode] = useState<Mode>('login')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-
-  // Email-confirmation pending state (signUp returned session=null)
-  const [confirmPending, setConfirmPending] = useState(false)
-  const [resendLoading, setResendLoading] = useState(false)
-  const [resendMsg, setResendMsg] = useState<string | null>(null)
-
-  const emailRef = useRef<HTMLInputElement>(null)
-
-  // Auto-focus email on mode change
-  useEffect(() => {
-    emailRef.current?.focus()
-  }, [mode])
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-    try {
-      if (mode === 'signup') {
-        const { data, error: signUpErr } = await supabase.auth.signUp({ email, password })
-        if (signUpErr) throw signUpErr
-        if (!data.session) {
-          // Email confirmation required — do NOT navigate, show confirm prompt instead.
-          setConfirmPending(true)
-          return
-        }
-        // Email confirmation disabled (local dev) — session exists, go straight in.
-      } else {
-        const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password })
-        if (signInErr) throw signInErr
-      }
-      navigate('/app')
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Authentication failed. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleResend = async () => {
-    setResendLoading(true)
-    setResendMsg(null)
-    setError(null)
-    const { error: resendErr } = await supabase.auth.resend({ type: 'signup', email })
-    if (resendErr) {
-      setError(resendErr.message)
-    } else {
-      setResendMsg('Confirmation email resent — check your inbox and spam folder.')
-    }
-    setResendLoading(false)
-  }
-
-  // ── Email-confirmation pending view ──────────────────────────────────────────
-
-  if (confirmPending) {
-    return (
-      <div style={s.page}>
-        <div style={s.card}>
-          <h1 style={s.heading}>Check your inbox</h1>
-          <p style={s.sub}>Almost there — one more step</p>
-
-          <div style={s.infoBox}>
-            Account created. We sent a confirmation link to <strong>{email}</strong>. Click the link
-            in that email to activate your account, then return here to sign in.
-          </div>
-
-          {error && <div style={s.errorBox}>{error}</div>}
-          {resendMsg && <div style={s.successBox}>{resendMsg}</div>}
-
-          <button
-            style={{ ...s.btnSecondary, marginTop: 0, ...(resendLoading ? s.btnDisabled : {}) }}
-            disabled={resendLoading}
-            onClick={handleResend}
-          >
-            {resendLoading ? 'Sending…' : 'Resend confirmation email'}
-          </button>
-
-          <button
-            style={s.btnSecondary}
-            onClick={() => {
-              setConfirmPending(false)
-              setMode('login')
-              setError(null)
-              setResendMsg(null)
-            }}
-          >
-            Back to sign in
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // ── Login / signup view ───────────────────────────────────────────────────────
-
-  return (
-    <div style={s.page}>
-      <div style={s.card}>
-        <div style={s.logoWrap}>
-          <img src={BRAND.logoWideText} alt="ChainSolve" style={s.logo} />
-        </div>
-        <p style={s.sub}>{mode === 'login' ? 'Sign in to your account' : 'Create your account'}</p>
-
-        {error && <div style={s.errorBox}>{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <label style={s.label} htmlFor="email">
-            Email
-          </label>
-          <input
-            ref={emailRef}
-            id="email"
-            style={s.input}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            autoComplete="email"
-            required
-          />
-
-          <label style={s.label} htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            style={s.input}
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-            required
-            minLength={mode === 'signup' ? 8 : 1}
-          />
-
-          <button
-            type="submit"
-            style={{ ...s.btn, ...(loading ? s.btnDisabled : {}) }}
-            disabled={loading}
-          >
-            {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
-          </button>
-        </form>
-
-        <p style={s.toggle}>
-          {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-          <button
-            style={s.toggleLink}
-            onClick={() => {
-              setMode(mode === 'login' ? 'signup' : 'login')
-              setError(null)
-            }}
-          >
-            {mode === 'login' ? 'Sign up' : 'Sign in'}
-          </button>
-        </p>
-      </div>
-    </div>
-  )
+  checkLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.85rem',
+    marginBottom: '0.75rem',
+    cursor: 'pointer',
+  } as React.CSSProperties,
+  checkbox: {
+    accentColor: 'var(--primary)',
+    width: 16,
+    height: 16,
+    cursor: 'pointer',
+    flexShrink: 0,
+  } as React.CSSProperties,
+  link: {
+    color: 'var(--primary)',
+    textDecoration: 'underline',
+  } as React.CSSProperties,
+  forgotRow: {
+    textAlign: 'right' as const,
+    marginTop: '-0.5rem',
+    marginBottom: '0.5rem',
+  } as React.CSSProperties,
+  forgotLink: {
+    color: 'var(--primary)',
+    fontSize: '0.82rem',
+    textDecoration: 'underline',
+    fontWeight: 500,
+  } as React.CSSProperties,
 }
