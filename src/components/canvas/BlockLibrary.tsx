@@ -585,81 +585,92 @@ export function BlockLibrary({
         )}
 
         {/* All blocks by family → category */}
-        {LIBRARY_FAMILIES.filter((fam) => !filterFamily || fam.id === filterFamily).map((fam) => {
-          const familyBlocksRaw = fam.categories.flatMap((cat) =>
-            (GROUPED.get(cat) ?? []).filter((d) => !q || matchesQuery(d, q)),
-          )
-          const familyBlocks = q ? sortByRelevance(familyBlocksRaw, q) : familyBlocksRaw
-          if (familyBlocks.length === 0) return null
-          const familyHasPro = fam.categories.some((c) => PRO_CATEGORIES.has(c))
-          const showSubLabels = fam.categories.length > 1
-          return (
-            <div key={fam.id}>
-              <div style={s.sectionLabel}>
-                {fam.label}
-                {familyHasPro && (
-                  <span
+        {LIBRARY_FAMILIES.filter((fam) => !filterFamily || fam.id === filterFamily).map(
+          (fam, idx) => {
+            const familyBlocksRaw = fam.categories.flatMap((cat) =>
+              (GROUPED.get(cat) ?? []).filter((d) => !q || matchesQuery(d, q)),
+            )
+            const familyBlocks = q ? sortByRelevance(familyBlocksRaw, q) : familyBlocksRaw
+            if (familyBlocks.length === 0) return null
+            const familyHasPro = fam.categories.some((c) => PRO_CATEGORIES.has(c))
+            const showSubLabels = fam.categories.length > 1
+            return (
+              <div key={fam.id}>
+                {idx > 0 && (
+                  <div
                     style={{
-                      marginLeft: 6,
-                      fontSize: '0.55rem',
-                      padding: '1px 4px',
-                      borderRadius: 3,
-                      background: 'var(--primary-dim)',
-                      color: 'var(--primary-text)',
-                      fontWeight: 700,
-                      letterSpacing: '0.05em',
-                      verticalAlign: 'middle',
+                      borderTop: '1px solid var(--border)',
+                      margin: '0.25rem 0.5rem 0',
+                      opacity: 0.5,
                     }}
-                  >
-                    PRO
-                  </span>
+                  />
                 )}
-              </div>
-              {showSubLabels
-                ? fam.categories.map((cat) => {
-                    const blocksRaw = (GROUPED.get(cat) ?? []).filter(
-                      (d) => !q || matchesQuery(d, q),
-                    )
-                    const blocks = q ? sortByRelevance(blocksRaw, q) : blocksRaw
-                    if (blocks.length === 0) return null
-                    return (
-                      <div key={cat}>
-                        <div
-                          style={{
-                            ...s.sectionLabel,
-                            fontSize: '0.58rem',
-                            paddingLeft: '0.9rem',
-                            opacity: 0.6,
-                          }}
-                        >
-                          {CATEGORY_LABELS[cat]}
+                <div style={s.sectionLabel}>
+                  {fam.label}
+                  {familyHasPro && (
+                    <span
+                      style={{
+                        marginLeft: 6,
+                        fontSize: '0.55rem',
+                        padding: '1px 4px',
+                        borderRadius: 3,
+                        background: 'var(--primary-dim)',
+                        color: 'var(--primary-text)',
+                        fontWeight: 700,
+                        letterSpacing: '0.05em',
+                        verticalAlign: 'middle',
+                      }}
+                    >
+                      PRO
+                    </span>
+                  )}
+                </div>
+                {showSubLabels
+                  ? fam.categories.map((cat) => {
+                      const blocksRaw = (GROUPED.get(cat) ?? []).filter(
+                        (d) => !q || matchesQuery(d, q),
+                      )
+                      const blocks = q ? sortByRelevance(blocksRaw, q) : blocksRaw
+                      if (blocks.length === 0) return null
+                      return (
+                        <div key={cat}>
+                          <div
+                            style={{
+                              ...s.sectionLabel,
+                              fontSize: '0.58rem',
+                              paddingLeft: '0.9rem',
+                              opacity: 0.6,
+                            }}
+                          >
+                            {CATEGORY_LABELS[cat]}
+                          </div>
+                          {blocks.map((def) => (
+                            <BlockItem
+                              key={def.type}
+                              def={def}
+                              favs={favs}
+                              onToggleFav={toggleFav}
+                              entitled={isBlockEntitled(def, ent)}
+                              onProBlocked={onProBlocked}
+                            />
+                          ))}
                         </div>
-                        {blocks.map((def) => (
-                          <BlockItem
-                            key={def.type}
-                            def={def}
-                            favs={favs}
-                            onToggleFav={toggleFav}
-                            entitled={isBlockEntitled(def, ent)}
-                            onProBlocked={onProBlocked}
-                          />
-                        ))}
-                      </div>
-                    )
-                  })
-                : familyBlocks.map((def) => (
-                    <BlockItem
-                      key={def.type}
-                      def={def}
-                      favs={favs}
-                      onToggleFav={toggleFav}
-                      entitled={isBlockEntitled(def, ent)}
-                      onProBlocked={onProBlocked}
-                    />
-                  ))}
-            </div>
-          )
-        })}
+                      )
+                    })
+                  : familyBlocks.map((def) => (
+                      <BlockItem
+                        key={def.type}
+                        def={def}
+                        favs={favs}
+                        onToggleFav={toggleFav}
+                        entitled={isBlockEntitled(def, ent)}
+                        onProBlocked={onProBlocked}
+                      />
+                    ))}
+              </div>
+            )
+          },
+        )}
 
         {/* Templates section (Pro only) */}
         {ent.canUseGroups && (

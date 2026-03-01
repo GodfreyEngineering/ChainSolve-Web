@@ -57,7 +57,7 @@ reg({
 reg({
   type: 'variableSource',
   label: 'Variable',
-  category: 'input',
+  category: 'variable',
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'variableSource', label: 'Variable', value: 0 },
@@ -562,6 +562,7 @@ reg({
 
 export const CATEGORY_ORDER: BlockCategory[] = [
   'input',
+  'variable',
   'math',
   'trig',
   'constants',
@@ -599,6 +600,7 @@ export const CATEGORY_ORDER: BlockCategory[] = [
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   input: 'Input',
+  variable: 'Variable',
   math: 'Math',
   trig: 'Trig',
   constants: 'Constants',
@@ -645,6 +647,7 @@ export interface LibraryFamily {
 /** Primary families for the block library sidebar. */
 export const LIBRARY_FAMILIES: LibraryFamily[] = [
   { id: 'inputs', label: 'Inputs', categories: ['input'] },
+  { id: 'variables', label: 'Variables', categories: ['variable'] },
   {
     id: 'constants',
     label: 'Constants',
@@ -690,10 +693,9 @@ export const LIBRARY_FAMILIES: LibraryFamily[] = [
   { id: 'outputs', label: 'Outputs', categories: ['output'] },
   {
     id: 'data',
-    label: 'Data',
-    categories: ['data', 'vectorOps', 'tableOps'],
+    label: 'Data & Plots',
+    categories: ['data', 'vectorOps', 'tableOps', 'plot'],
   },
-  { id: 'plots', label: 'Plots', categories: ['plot'] },
   { id: 'annotations', label: 'Annotations', categories: ['annotations'] },
 ]
 

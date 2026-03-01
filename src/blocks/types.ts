@@ -8,6 +8,7 @@
 
 export type BlockCategory =
   | 'input'
+  | 'variable'
   | 'math'
   | 'trig'
   | 'constants'
