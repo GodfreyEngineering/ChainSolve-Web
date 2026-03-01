@@ -1297,7 +1297,7 @@ Claude MUST:
   - export gating
   - Acceptance: major flows protected by CI.
 
-- [ ] E11-2: Go-live docs v2
+- [x] E11-2: Go-live docs v2
   - deployment checklist
   - CSP checklist
   - Stripe checklist (annual + enterprise)
