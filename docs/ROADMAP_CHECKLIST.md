@@ -837,7 +837,7 @@ Claude MUST:
 ---
 
 ## D13 — Robustness fixes for “ghost conflict” and saving issues
-- [ ] D13-1: Fix false “project open in another session” conflict
+- [x] D13-1: Fix false “project open in another session” conflict
   - Diagnose root cause:
     - stale updated_at
     - background save race
