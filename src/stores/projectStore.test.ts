@@ -170,6 +170,39 @@ describe('conflict scenario', () => {
   })
 })
 
+// ── D13-1: false conflict regression ──────────────────────────────────────────
+
+describe('false conflict regression (D13-1)', () => {
+  it('completeSave after setActiveCanvas keeps dbUpdatedAt in sync', () => {
+    // Simulate: load project → save → setActiveCanvas bumps updated_at
+    const s = useProjectStore.getState()
+    s.beginLoad('p-1', 'Project', 'ts-load', 1, 'ts-c')
+
+    // First save succeeds
+    s.beginSave()
+    s.completeSave('ts-save-1')
+    expect(useProjectStore.getState().dbUpdatedAt).toBe('ts-save-1')
+
+    // Switch canvas: setActiveCanvas returns 'ts-switch' (later than 'ts-save-1').
+    // Caller must call completeSave with the fresh timestamp.
+    s.completeSave('ts-switch')
+    expect(useProjectStore.getState().dbUpdatedAt).toBe('ts-switch')
+
+    // Next save will use 'ts-switch' as knownUpdatedAt — no false conflict
+    expect(useProjectStore.getState().isDirty).toBe(false)
+    expect(useProjectStore.getState().saveStatus).toBe('saved')
+  })
+
+  it('completeSave after renameProject keeps dbUpdatedAt in sync', () => {
+    const s = useProjectStore.getState()
+    s.beginLoad('p-1', 'Project', 'ts-load', 1, 'ts-c')
+
+    // Rename bumps projects.updated_at to 'ts-rename'
+    s.completeSave('ts-rename')
+    expect(useProjectStore.getState().dbUpdatedAt).toBe('ts-rename')
+  })
+})
+
 // ── reset ─────────────────────────────────────────────────────────────────────
 
 describe('reset', () => {

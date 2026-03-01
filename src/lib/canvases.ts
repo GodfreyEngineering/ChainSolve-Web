@@ -183,16 +183,21 @@ export async function deleteCanvas(canvasId: string, projectId: string): Promise
 
 /**
  * Set the active canvas for a project (cross-device persistence).
+ * Returns the new projects.updated_at so callers can keep the
+ * optimistic-lock timestamp in sync and avoid false conflicts.
  */
-export async function setActiveCanvas(projectId: string, canvasId: string): Promise<void> {
+export async function setActiveCanvas(projectId: string, canvasId: string): Promise<string> {
   const session = await requireSession()
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('projects')
     .update({ active_canvas_id: canvasId })
     .eq('id', projectId)
     .eq('owner_id', session.user.id)
+    .select('updated_at')
+    .single()
 
   if (error) throw new Error(`Set active canvas failed: ${error.message}`)
+  return (data as { updated_at: string }).updated_at
 }
 
 /**

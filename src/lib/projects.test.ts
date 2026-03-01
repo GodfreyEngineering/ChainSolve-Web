@@ -135,7 +135,7 @@ function setupDefaultMocks() {
   vi.mocked(CanvasesMod.createCanvas).mockResolvedValue(
     makeCanvasRow('new-c1', 'Sheet 1', 0, NEW_ID),
   )
-  vi.mocked(CanvasesMod.setActiveCanvas).mockResolvedValue(undefined)
+  vi.mocked(CanvasesMod.setActiveCanvas).mockResolvedValue('2025-01-02T00:00:00Z')
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────

@@ -244,7 +244,10 @@ export default function CanvasPage() {
         if (!activeId || !canvasList.find((c) => c.id === activeId)) {
           activeId = canvasList[0]?.id ?? null
           if (activeId) {
-            await setActiveCanvas(projectId!, activeId)
+            // setActiveCanvas bumps projects.updated_at via trigger —
+            // sync the store so the first autosave uses the fresh timestamp.
+            const freshTs = await setActiveCanvas(projectId!, activeId)
+            completeSave(freshTs)
           }
         }
 
@@ -462,12 +465,15 @@ export default function CanvasPage() {
     const current = useProjectStore.getState().projectName
     if (!trimmed || !projectId || trimmed === current) return
     try {
-      await renameProject(projectId, trimmed)
+      // renameProject updates projects.name which bumps projects.updated_at
+      // via trigger — sync the timestamp to avoid false conflicts.
+      const freshUpdatedAt = await renameProject(projectId, trimmed)
       setStoreName(trimmed)
+      completeSave(freshUpdatedAt)
     } catch {
       // Silently revert — the store still holds the old name
     }
-  }, [nameInput, projectId, setStoreName])
+  }, [nameInput, projectId, setStoreName, completeSave])
 
   // ── Conflict resolution ─────────────────────────────────────────────────────
   const handleOverwrite = useCallback(() => {
@@ -550,15 +556,14 @@ export default function CanvasPage() {
         // Load the target canvas graph
         const canvasGraph = await loadCanvasGraph(projectId, canvasId)
         setActiveCanvasId(canvasId)
-        await setActiveCanvas(projectId, canvasId)
+        // setActiveCanvas updates projects.active_canvas_id which bumps
+        // projects.updated_at via trigger. We must capture the fresh timestamp
+        // to keep the optimistic-lock reference in sync and avoid false conflicts.
+        const freshUpdatedAt = await setActiveCanvas(projectId, canvasId)
         setInitNodes(canvasGraph.nodes as Node<NodeData>[])
         setInitEdges(canvasGraph.edges as Edge[])
-        // Force CanvasArea remount by updating the key (via initNodes/initEdges change)
-        // Reset dirty state for new canvas
-        const state = useProjectStore.getState()
-        if (state.dbUpdatedAt) {
-          completeSave(state.dbUpdatedAt)
-        }
+        // Sync store with the DB timestamp (includes the bump from setActiveCanvas)
+        completeSave(freshUpdatedAt)
       } catch (err: unknown) {
         toast(err instanceof Error ? err.message : 'Failed to switch canvas', 'error')
       }
