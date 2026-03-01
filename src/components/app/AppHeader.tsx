@@ -222,7 +222,12 @@ export function AppHeader({
     }
   }, [openMenu])
 
-  const stub = useCallback(() => toast(t('menu.comingSoon'), 'info'), [toast, t])
+  const handleClearCanvas = useCallback(() => {
+    if (!canvasRef.current) return
+    if (!window.confirm(t('menu.clearCanvasConfirm'))) return
+    canvasRef.current.selectAll()
+    canvasRef.current.deleteSelected()
+  }, [canvasRef, t])
 
   const handleExportPdfActive = useCallback(() => {
     setOpenMenu(null)
@@ -640,9 +645,19 @@ export function AppHeader({
           },
         ],
       },
-      { label: t('menu.perfHud'), onClick: stub },
+      {
+        label: t('menu.perfHud'),
+        onClick: () => {
+          const url = new URL(window.location.href)
+          const has = url.searchParams.has('perf')
+          if (has) url.searchParams.delete('perf')
+          else url.searchParams.set('perf', '1')
+          window.history.replaceState(null, '', url.toString())
+          window.location.reload()
+        },
+      },
     ],
-    [t, stub, canvasRef, themeMode, setThemeMode],
+    [t, canvasRef, themeMode, setThemeMode],
   )
 
   const insertItems = useMemo(
@@ -668,10 +683,28 @@ export function AppHeader({
         label: t('menu.autoOrganise'),
         onClick: () => canvasRef.current?.autoOrganise(),
       },
-      { label: t('menu.validateGraph'), onClick: stub },
-      { label: t('menu.clearCanvas'), onClick: stub },
+      {
+        label: t('menu.validateGraph'),
+        onClick: () => {
+          canvasRef.current?.toggleHealthPanel()
+          setOpenMenu(null)
+        },
+      },
+      {
+        label: t('menu.clearCanvas'),
+        onClick: () => {
+          handleClearCanvas()
+          setOpenMenu(null)
+        },
+      },
       { separator: true },
-      { label: t('menu.canvasSettings'), onClick: stub },
+      {
+        label: t('menu.canvasSettings'),
+        onClick: () => {
+          openSettings('preferences')
+          setOpenMenu(null)
+        },
+      },
       { separator: true },
       {
         label: t('menu.buildWithAI'),
@@ -688,7 +721,7 @@ export function AppHeader({
         },
       },
     ],
-    [t, stub, canvasRef],
+    [t, canvasRef, handleClearCanvas, openSettings],
   )
 
   const helpItems = useMemo(
@@ -738,7 +771,7 @@ export function AppHeader({
         },
       },
     ],
-    [t, stub, openWin],
+    [t, openWin],
   )
 
   const menus = useMemo(
@@ -920,16 +953,6 @@ export function AppHeader({
           >
             {t(`plans.${plan}`)}
           </span>
-
-          {/* Notifications (stub) */}
-          <button
-            onClick={stub}
-            title={t('menu.notifications')}
-            aria-label={t('menu.notifications')}
-            style={iconButtonStyle}
-          >
-            &#x1F514;
-          </button>
 
           {/* Settings gear */}
           <button

@@ -414,6 +414,7 @@
     "autoOrganise": "Organizar automáticamente",
     "validateGraph": "Validar grafo",
     "clearCanvas": "Limpiar lienzo",
+    "clearCanvasConfirm": "¿Eliminar todos los bloques y conexiones de este lienzo?",
     "canvasSettings": "Configuración del lienzo",
     "documentation": "Documentación",
     "keyboardShortcuts": "Atajos de teclado",
@@ -421,8 +422,6 @@
     "about": "Acerca de",
     "changelog": "Registro de cambios",
     "contactSupport": "Contactar soporte",
-    "comingSoon": "Próximamente",
-    "notifications": "Notificaciones",
     "menubar": "Menú de la aplicación",
     "buildWithAI": "Construir con IA…",
     "manageTemplates": "Administrar plantillas…"
@@ -587,7 +586,6 @@
     "scratchDesc": "Abrir un lienzo en blanco",
     "template": "Crear desde plantilla",
     "templateDesc": "Elegir un proyecto de inicio",
-    "templateComingSoon": "Plantillas próximamente",
     "import": "Importar proyecto",
     "importDesc": "Cargar un archivo .chainsolvejson"
   },

@@ -423,6 +423,7 @@
     "autoOrganise": "Auto-organise layout",
     "validateGraph": "Validate graph",
     "clearCanvas": "Clear canvas",
+    "clearCanvasConfirm": "Remove all blocks and connections from this canvas?",
     "canvasSettings": "Canvas settings",
     "documentation": "Documentation",
     "keyboardShortcuts": "Keyboard shortcuts",
@@ -430,8 +431,6 @@
     "about": "About",
     "changelog": "Changelog",
     "contactSupport": "Contact support",
-    "comingSoon": "Coming soon",
-    "notifications": "Notifications",
     "menubar": "Application menu",
     "buildWithAI": "Build with AI…",
     "manageTemplates": "Manage Templates…"
@@ -607,7 +606,6 @@
     "scratchDesc": "Open a blank canvas",
     "template": "Create from template",
     "templateDesc": "Choose a starter project",
-    "templateComingSoon": "Templates coming soon",
     "import": "Import project",
     "importDesc": "Load a .chainsolvejson file"
   },

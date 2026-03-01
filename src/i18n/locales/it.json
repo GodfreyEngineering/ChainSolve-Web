@@ -414,6 +414,7 @@
     "autoOrganise": "Organizza automaticamente",
     "validateGraph": "Valida grafo",
     "clearCanvas": "Cancella canvas",
+    "clearCanvasConfirm": "Rimuovere tutti i blocchi e le connessioni da questo canvas?",
     "canvasSettings": "Impostazioni canvas",
     "documentation": "Documentazione",
     "keyboardShortcuts": "Scorciatoie da tastiera",
@@ -421,8 +422,6 @@
     "about": "Informazioni",
     "changelog": "Registro modifiche",
     "contactSupport": "Contatta il supporto",
-    "comingSoon": "Prossimamente",
-    "notifications": "Notifiche",
     "menubar": "Menu dell'applicazione",
     "buildWithAI": "Crea con IA…",
     "manageTemplates": "Gestisci modelli…"
@@ -587,7 +586,6 @@
     "scratchDesc": "Apri un canvas vuoto",
     "template": "Crea da modello",
     "templateDesc": "Scegli un progetto iniziale",
-    "templateComingSoon": "Modelli in arrivo",
     "import": "Importa progetto",
     "importDesc": "Carica un file .chainsolvejson"
   },

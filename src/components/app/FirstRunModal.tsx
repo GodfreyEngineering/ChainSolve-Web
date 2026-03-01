@@ -5,10 +5,17 @@ interface Props {
   open: boolean
   onClose: () => void
   onStartScratch: () => void
+  onBrowseTemplates: () => void
   onImport: () => void
 }
 
-export function FirstRunModal({ open, onClose, onStartScratch, onImport }: Props) {
+export function FirstRunModal({
+  open,
+  onClose,
+  onStartScratch,
+  onBrowseTemplates,
+  onImport,
+}: Props) {
   const { t } = useTranslation()
 
   return (
@@ -25,12 +32,12 @@ export function FirstRunModal({ open, onClose, onStartScratch, onImport }: Props
           </span>
         </button>
 
-        {/* Create from template (stub — P062) */}
-        <button style={{ ...optionBtnStyle, ...optionDisabledStyle }} disabled>
+        {/* Browse templates via Explore */}
+        <button style={optionBtnStyle} onClick={onBrowseTemplates}>
           <span style={optionIconStyle}>⬡</span>
           <span>
             <strong style={optionLabelStyle}>{t('onboarding.template')}</strong>
-            <span style={optionDescStyle}>{t('onboarding.templateComingSoon')}</span>
+            <span style={optionDescStyle}>{t('onboarding.templateDesc')}</span>
           </span>
         </button>
 
@@ -76,11 +83,6 @@ const optionBtnStyle: React.CSSProperties = {
   fontFamily: 'inherit',
   color: 'var(--text)',
   transition: 'background 0.1s',
-}
-
-const optionDisabledStyle: React.CSSProperties = {
-  opacity: 0.45,
-  cursor: 'not-allowed',
 }
 
 const optionIconStyle: React.CSSProperties = {

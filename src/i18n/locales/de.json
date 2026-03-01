@@ -414,6 +414,7 @@
     "autoOrganise": "Automatisch anordnen",
     "validateGraph": "Graph validieren",
     "clearCanvas": "Zeichenfläche leeren",
+    "clearCanvasConfirm": "Alle Blöcke und Verbindungen von dieser Zeichenfläche entfernen?",
     "canvasSettings": "Zeichenflächeneinstellungen",
     "documentation": "Dokumentation",
     "keyboardShortcuts": "Tastaturkürzel",
@@ -421,8 +422,6 @@
     "about": "Über",
     "changelog": "Änderungsprotokoll",
     "contactSupport": "Support kontaktieren",
-    "comingSoon": "Demnächst",
-    "notifications": "Benachrichtigungen",
     "menubar": "Anwendungsmenü",
     "buildWithAI": "Mit KI erstellen…",
     "manageTemplates": "Vorlagen verwalten…"
@@ -587,7 +586,6 @@
     "scratchDesc": "Leere Zeichenfläche öffnen",
     "template": "Aus Vorlage erstellen",
     "templateDesc": "Startprojekt auswählen",
-    "templateComingSoon": "Vorlagen demnächst verfügbar",
     "import": "Projekt importieren",
     "importDesc": "Eine .chainsolvejson-Datei laden"
   },

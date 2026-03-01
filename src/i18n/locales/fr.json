@@ -414,6 +414,7 @@
     "autoOrganise": "Organisation automatique",
     "validateGraph": "Valider le graphe",
     "clearCanvas": "Effacer le canevas",
+    "clearCanvasConfirm": "Supprimer tous les blocs et connexions de ce canevas ?",
     "canvasSettings": "Paramètres du canevas",
     "documentation": "Documentation",
     "keyboardShortcuts": "Raccourcis clavier",
@@ -421,8 +422,6 @@
     "about": "À propos",
     "changelog": "Journal des modifications",
     "contactSupport": "Contacter le support",
-    "comingSoon": "Bientôt disponible",
-    "notifications": "Notifications",
     "menubar": "Menu de l'application",
     "buildWithAI": "Créer avec l'IA…",
     "manageTemplates": "Gérer les modèles…"
@@ -587,7 +586,6 @@
     "scratchDesc": "Ouvrir un canevas vide",
     "template": "Créer depuis un modèle",
     "templateDesc": "Choisir un projet de départ",
-    "templateComingSoon": "Modèles bientôt disponibles",
     "import": "Importer un projet",
     "importDesc": "Charger un fichier .chainsolvejson"
   },

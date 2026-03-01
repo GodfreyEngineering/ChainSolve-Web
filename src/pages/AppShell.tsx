@@ -429,6 +429,11 @@ export default function AppShell() {
     navigate('/canvas')
   }, [dismissFirstRun, navigate])
 
+  const handleFirstRunBrowseTemplates = useCallback(() => {
+    dismissFirstRun()
+    navigate('/explore')
+  }, [dismissFirstRun, navigate])
+
   const handleFirstRunImport = useCallback(() => {
     dismissFirstRun()
     importRef.current?.click()
@@ -529,6 +534,7 @@ export default function AppShell() {
             open
             onClose={dismissFirstRun}
             onStartScratch={handleFirstRunScratch}
+            onBrowseTemplates={handleFirstRunBrowseTemplates}
             onImport={handleFirstRunImport}
           />
         </Suspense>
