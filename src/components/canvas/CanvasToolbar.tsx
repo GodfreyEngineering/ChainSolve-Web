@@ -39,6 +39,8 @@ export interface CanvasToolbarProps {
   onToggleEdgeBadges?: () => void
   healthPanelVisible?: boolean
   onToggleHealthPanel?: () => void
+  bgDotsVisible?: boolean
+  onToggleBgDots?: () => void
 }
 
 /** Width of the toolbar strip in pixels, exported for layout calculations. */
@@ -74,6 +76,8 @@ export function CanvasToolbar({
   onToggleEdgeBadges,
   healthPanelVisible,
   onToggleHealthPanel,
+  bgDotsVisible,
+  onToggleBgDots,
 }: CanvasToolbarProps) {
   const { t } = useTranslation()
   const { zoomIn, zoomOut, zoomTo, fitView } = useReactFlow()
@@ -214,6 +218,18 @@ export function CanvasToolbar({
       >
         {'\ud83d\uddfa'}
       </button>
+
+      {onToggleBgDots && (
+        <button
+          onClick={onToggleBgDots}
+          style={btnStyle(!!bgDotsVisible)}
+          title={t('toolbar.bgDots')}
+          aria-label={t('toolbar.bgDots')}
+          aria-pressed={!!bgDotsVisible}
+        >
+          {'\u2059'}
+        </button>
+      )}
 
       <button
         onClick={onToggleEdgesAnimated}

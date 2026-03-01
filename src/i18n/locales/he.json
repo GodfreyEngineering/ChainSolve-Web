@@ -92,6 +92,10 @@
     "policyInstalls": "אפשר לחברים להתקין פריטים מהשוק",
     "policyComments": "אפשר לחברים לפרסם תגובות על פריטי השוק"
   },
+  "toolbar": {
+    "graphHealth": "סטטוס הגרף",
+    "bgDots": "Background dots"
+  },
   "common": {
     "cancel": "ביטול",
     "close": "סגור"

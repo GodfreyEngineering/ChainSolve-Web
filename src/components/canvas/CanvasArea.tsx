@@ -82,6 +82,7 @@ import { useTranslation } from 'react-i18next'
 import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard } from '../../lib/clipboard'
+import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
 const LazyFindBlockDialog = lazy(() =>
   import('./FindBlockDialog').then((m) => ({ default: m.FindBlockDialog })),
 )
@@ -328,6 +329,27 @@ function getHealthPanelPref(): boolean {
 function setHealthPanelPref(v: boolean) {
   try {
     localStorage.setItem(HEALTH_PANEL_KEY, String(v))
+  } catch {
+    // Ignore — private browsing
+  }
+}
+
+// ── Background dots persistence ──────────────────────────────────────────
+
+const BG_DOTS_KEY = 'chainsolve.bgDots'
+
+function getBgDotsPref(): boolean {
+  try {
+    const v = localStorage.getItem(BG_DOTS_KEY)
+    return v === null ? true : v === 'true'
+  } catch {
+    return true
+  }
+}
+
+function setBgDotsPref(v: boolean) {
+  try {
+    localStorage.setItem(BG_DOTS_KEY, String(v))
   } catch {
     // Ignore — private browsing
   }
@@ -700,6 +722,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   // Health panel state (W12.5)
   const [healthPanelVisible, setHealthPanelVisible] = useState(getHealthPanelPref)
+
+  // Background dots (E7-2)
+  const [bgDotsVisible, setBgDotsVisible] = useState(getBgDotsPref)
 
   // Value popover state (W12.4)
   const [popoverTarget, setPopoverTarget] = useState<{
@@ -1208,6 +1233,24 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     setNodes((nds) => nds.map((n) => ({ ...n, selected: true })))
   }, [setNodes])
 
+  // ── Alignment helpers (E7-2) ──────────────────────────────────────────────
+
+  const alignSelection = useCallback(
+    (op: AlignOp) => {
+      const selected = latestNodes.current.filter((n) => n.selected)
+      const positions = computeAlignment(selected, op)
+      if (positions.size === 0) return
+      doSaveHistory()
+      setNodes((nds) =>
+        nds.map((n) => {
+          const pos = positions.get(n.id)
+          return pos ? { ...n, position: pos } : n
+        }),
+      )
+    },
+    [doSaveHistory, setNodes],
+  )
+
   // ── Find block ──────────────────────────────────────────────────────────
 
   const [findOpen, setFindOpen] = useState(false)
@@ -1687,12 +1730,14 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   maxZoom={4}
                   proOptions={{ hideAttribution: true }}
                 >
-                  <Background
-                    variant={BackgroundVariant.Dots}
-                    gap={24}
-                    size={1}
-                    color="rgba(255,255,255,0.06)"
-                  />
+                  {bgDotsVisible && (
+                    <Background
+                      variant={BackgroundVariant.Dots}
+                      gap={24}
+                      size={1}
+                      color="rgba(255,255,255,0.06)"
+                    />
+                  )}
                   {minimap && (
                     <MiniMap
                       pannable
@@ -1773,6 +1818,13 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   onToggleHealthPanel={() => {
                     setHealthPanelVisible((v) => {
                       setHealthPanelPref(!v)
+                      return !v
+                    })
+                  }}
+                  bgDotsVisible={bgDotsVisible}
+                  onToggleBgDots={() => {
+                    setBgDotsVisible((v) => {
+                      setBgDotsPref(!v)
                       return !v
                     })
                   }}
@@ -1865,6 +1917,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   onInspectEdge={inspectEdge}
                   onExplainNode={onExplainNode}
                   onInsertFromPrompt={onInsertFromPrompt}
+                  onAlignSelection={readOnly ? undefined : alignSelection}
                 />
               )}
 

@@ -8,6 +8,7 @@
 import type { CSSProperties } from 'react'
 import type { Value } from '../../engine/value'
 import { isError } from '../../engine/value'
+import type { AlignOp } from '../../lib/alignmentHelpers'
 
 export type ContextMenuTarget =
   | { kind: 'canvas'; x: number; y: number }
@@ -50,6 +51,8 @@ interface ContextMenuProps {
   onExplainNode?: (nodeId: string) => void
   /** AI-3: "Insert blocks from prompt…" (add-only patch). */
   onInsertFromPrompt?: (x: number, y: number) => void
+  /** E7-2: Alignment helper for multi-selection. */
+  onAlignSelection?: (op: AlignOp) => void
 }
 
 const item: CSSProperties = {
@@ -125,6 +128,7 @@ export function ContextMenu({
   onInspectEdge,
   onExplainNode,
   onInsertFromPrompt,
+  onAlignSelection,
 }: ContextMenuProps) {
   const menuStyle: CSSProperties = {
     position: 'fixed',
@@ -312,6 +316,64 @@ export function ContextMenu({
                 onClose()
               }}
             />
+            {onAlignSelection && (
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon="⫷"
+                  label="Align left"
+                  onClick={() => {
+                    onAlignSelection('align-left')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="⫸"
+                  label="Align right"
+                  onClick={() => {
+                    onAlignSelection('align-right')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="⊤"
+                  label="Align top"
+                  onClick={() => {
+                    onAlignSelection('align-top')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="⊥"
+                  label="Align bottom"
+                  onClick={() => {
+                    onAlignSelection('align-bottom')
+                    onClose()
+                  }}
+                />
+                {target.selectedCount >= 3 && (
+                  <>
+                    <div style={sep} />
+                    <MenuItem
+                      icon="⇔"
+                      label="Distribute horizontal"
+                      onClick={() => {
+                        onAlignSelection('distribute-h')
+                        onClose()
+                      }}
+                    />
+                    <MenuItem
+                      icon="⇕"
+                      label="Distribute vertical"
+                      onClick={() => {
+                        onAlignSelection('distribute-v')
+                        onClose()
+                      }}
+                    />
+                  </>
+                )}
+              </>
+            )}
             <div style={sep} />
             <MenuItem
               icon="✕"
