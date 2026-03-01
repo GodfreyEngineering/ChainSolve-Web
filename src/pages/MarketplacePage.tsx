@@ -63,9 +63,9 @@ function formatDate(iso: string): string {
 const s = {
   page: {
     minHeight: '100vh',
-    background: 'var(--bg, #1a1a1a)',
-    color: 'var(--fg, #F4F4F3)',
-    fontFamily: 'system-ui, sans-serif',
+    background: 'var(--bg)',
+    color: 'var(--text)',
+    fontFamily: 'inherit',
   } satisfies React.CSSProperties,
   nav: {
     display: 'flex',
@@ -73,8 +73,8 @@ const s = {
     justifyContent: 'space-between',
     padding: '0 1.5rem',
     height: 56,
-    borderBottom: '1px solid var(--border, rgba(255,255,255,0.08))',
-    background: 'var(--card-bg, #252525)',
+    borderBottom: '1px solid var(--border)',
+    background: 'var(--card-bg)',
   } satisfies React.CSSProperties,
   body: {
     maxWidth: 1100,
@@ -92,26 +92,35 @@ const s = {
     flex: 1,
     minWidth: 200,
     padding: '0.5rem 0.75rem',
-    borderRadius: 8,
-    border: '1px solid rgba(255,255,255,0.12)',
-    background: 'rgba(0,0,0,0.25)',
-    color: 'var(--fg, #F4F4F3)',
-    fontSize: '0.9rem',
+    borderRadius: 'var(--radius-lg)',
+    border: '1px solid var(--border)',
+    background: 'var(--input-bg)',
+    color: 'var(--text)',
+    fontSize: 'var(--font-md)',
     outline: 'none',
+    fontFamily: 'inherit',
   } satisfies React.CSSProperties,
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-    gap: '1rem',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: '1.25rem',
   } satisfies React.CSSProperties,
   card: {
-    background: 'var(--card-bg, #252525)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 12,
-    padding: '1.25rem',
+    background: 'var(--card-bg)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-xl)',
+    padding: 0,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    overflow: 'hidden',
+    transition: 'box-shadow 0.2s, border-color 0.2s',
+  } satisfies React.CSSProperties,
+  cardBody: {
+    padding: '1rem 1.25rem 1.25rem',
     display: 'flex',
     flexDirection: 'column' as const,
     gap: '0.5rem',
+    flex: 1,
   } satisfies React.CSSProperties,
   categoryRow: {
     display: 'flex',
@@ -121,41 +130,86 @@ const s = {
   } satisfies React.CSSProperties,
   catBtn: (active: boolean): React.CSSProperties => ({
     padding: '0.35rem 0.85rem',
-    borderRadius: 20,
-    border: active ? '1px solid #1CABB0' : '1px solid rgba(255,255,255,0.12)',
-    background: active ? 'rgba(28,171,176,0.15)' : 'transparent',
-    color: active ? '#1CABB0' : 'rgba(244,244,243,0.6)',
+    borderRadius: 'var(--radius-full)',
+    border: active ? '1px solid var(--primary-text)' : '1px solid var(--border)',
+    background: active ? 'var(--primary-dim)' : 'transparent',
+    color: active ? 'var(--primary-text)' : 'var(--text-muted)',
     fontSize: '0.8rem',
     cursor: 'pointer',
     fontFamily: 'inherit',
   }),
+  catBadge: (cat: string): React.CSSProperties => ({
+    display: 'inline-block',
+    padding: '0.12rem 0.5rem',
+    borderRadius: 'var(--radius-full)',
+    fontSize: 'var(--font-xs)',
+    fontWeight: 600,
+    letterSpacing: '0.03em',
+    background:
+      cat === 'template'
+        ? 'var(--primary-dim)'
+        : cat === 'theme'
+          ? 'rgba(139,92,246,0.15)'
+          : cat === 'block_pack'
+            ? 'rgba(34,197,94,0.15)'
+            : 'var(--primary-dim)',
+    color:
+      cat === 'template'
+        ? 'var(--primary-text)'
+        : cat === 'theme'
+          ? '#a78bfa'
+          : cat === 'block_pack'
+            ? 'var(--success)'
+            : 'var(--primary-text)',
+  }),
   installBtn: (installed: boolean, loading: boolean, locked: boolean): React.CSSProperties => ({
     marginTop: 'auto',
-    padding: '0.45rem 1rem',
-    borderRadius: 8,
+    padding: '0.5rem 1rem',
+    borderRadius: 'var(--radius-lg)',
     border: 'none',
     background: installed
       ? 'rgba(74,222,128,0.12)'
       : locked
         ? 'rgba(124,58,237,0.15)'
         : loading
-          ? '#3f3f46'
-          : '#1CABB0',
-    color: installed ? '#4ade80' : locked ? '#a78bfa' : loading ? 'rgba(244,244,243,0.4)' : '#fff',
-    fontSize: '0.82rem',
+          ? 'var(--surface2)'
+          : 'var(--primary)',
+    color: installed
+      ? 'var(--success)'
+      : locked
+        ? '#a78bfa'
+        : loading
+          ? 'var(--text-faint)'
+          : '#fff',
+    fontSize: 'var(--font-sm)',
     fontWeight: 600,
     cursor: installed || loading ? 'default' : 'pointer',
     fontFamily: 'inherit',
   }),
   selectStyle: {
     padding: '0.4rem 0.6rem',
-    borderRadius: 8,
-    border: '1px solid rgba(255,255,255,0.12)',
-    background: 'rgba(0,0,0,0.25)',
-    color: 'var(--fg, #F4F4F3)',
-    fontSize: '0.82rem',
+    borderRadius: 'var(--radius-lg)',
+    border: '1px solid var(--border)',
+    background: 'var(--input-bg)',
+    color: 'var(--text)',
+    fontSize: 'var(--font-sm)',
     outline: 'none',
     fontFamily: 'inherit',
+  } satisfies React.CSSProperties,
+  statRow: {
+    display: 'flex',
+    gap: '0.75rem',
+    alignItems: 'center',
+    fontSize: 'var(--font-xs)',
+    color: 'var(--text-faint)',
+    flexWrap: 'wrap' as const,
+  } satisfies React.CSSProperties,
+  tag: {
+    padding: '0.1rem 0.45rem',
+    borderRadius: 'var(--radius-sm)',
+    fontSize: 'var(--font-xs)',
+    background: 'var(--surface2)',
+    color: 'var(--text-muted)',
   } satisfies React.CSSProperties,
 }
 
@@ -366,7 +420,7 @@ export default function MarketplacePage() {
           <img src={BRAND.logoWideText} alt="ChainSolve" style={{ height: 28 }} />
         </a>
         <span
-          style={{ fontSize: '0.85rem', fontWeight: 600, color: 'rgba(244,244,243,0.7)' }}
+          style={{ fontSize: 'var(--font-sm)', fontWeight: 600, color: 'var(--text-muted)' }}
           aria-current="page"
         >
           {t('marketplace.title')}
@@ -374,13 +428,21 @@ export default function MarketplacePage() {
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <a
             href="/explore/author"
-            style={{ fontSize: '0.82rem', color: 'rgba(244,244,243,0.5)', textDecoration: 'none' }}
+            style={{
+              fontSize: 'var(--font-sm)',
+              color: 'var(--text-muted)',
+              textDecoration: 'none',
+            }}
           >
             {t('marketplace.myItems')}
           </a>
           <a
             href="/app"
-            style={{ fontSize: '0.82rem', color: 'rgba(244,244,243,0.5)', textDecoration: 'none' }}
+            style={{
+              fontSize: 'var(--font-sm)',
+              color: 'var(--text-muted)',
+              textDecoration: 'none',
+            }}
           >
             ← {t('app.name')}
           </a>
@@ -486,10 +548,10 @@ export default function MarketplacePage() {
           <div
             style={{
               padding: '0.75rem 1rem',
-              borderRadius: 8,
+              borderRadius: 'var(--radius-lg)',
               background: 'rgba(239,68,68,0.08)',
               border: '1px solid rgba(239,68,68,0.25)',
-              color: '#f87171',
+              color: 'var(--danger)',
               fontSize: '0.85rem',
               marginBottom: '1rem',
             }}
@@ -557,14 +619,11 @@ export default function MarketplacePage() {
                         {item.description}
                       </p>
                     )}
-                    <div
-                      style={{
-                        fontSize: '0.72rem',
-                        color: 'rgba(244,244,243,0.35)',
-                      }}
-                    >
-                      {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')} ·{' '}
-                      {formatDate(item.updated_at)}
+                    <div style={s.statRow}>
+                      <span style={s.catBadge(item.category)}>
+                        {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')}
+                      </span>
+                      <span>{formatDate(item.updated_at)}</span>
                     </div>
                   </article>
                 ))}
@@ -602,144 +661,169 @@ export default function MarketplacePage() {
               const isLocked = !canInstall && !isInstalled
               return (
                 <article key={item.id} style={s.card}>
-                  {item.thumbnail_url && (
+                  {/* Thumbnail */}
+                  {item.thumbnail_url ? (
                     <img
                       src={item.thumbnail_url}
                       alt={item.name}
                       style={{
                         width: '100%',
-                        height: 120,
+                        height: 140,
                         objectFit: 'cover',
-                        borderRadius: 8,
-                        marginBottom: '0.25rem',
+                        borderBottom: '1px solid var(--border)',
                       }}
                     />
+                  ) : (
+                    <div
+                      style={{
+                        width: '100%',
+                        height: 80,
+                        background: 'var(--surface2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 'var(--font-2xl)',
+                        color: 'var(--text-faint)',
+                        borderBottom: '1px solid var(--border)',
+                      }}
+                    >
+                      {item.category === 'template'
+                        ? '📄'
+                        : item.category === 'theme'
+                          ? '🎨'
+                          : item.category === 'block_pack'
+                            ? '📦'
+                            : '🧩'}
+                    </div>
                   )}
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '0.4rem',
-                      alignItems: 'baseline',
-                    }}
-                  >
-                    <a
-                      href={`/explore/items/${item.id}`}
-                      style={{
-                        fontWeight: 600,
-                        fontSize: '0.95rem',
-                        textDecoration: 'none',
-                        color: 'inherit',
-                      }}
-                    >
-                      {item.name}
-                    </a>
-                    <span
-                      style={{
-                        fontSize: '0.68rem',
-                        color: 'rgba(244,244,243,0.35)',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {t('marketplace.version', { version: item.version })}
-                    </span>
-                  </div>
-                  {item.description && (
-                    <p
-                      style={{
-                        fontSize: '0.8rem',
-                        opacity: 0.55,
-                        margin: 0,
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                      }}
-                    >
-                      {item.description}
-                    </p>
-                  )}
-                  <div
-                    style={{
-                      fontSize: '0.72rem',
-                      color: 'rgba(244,244,243,0.35)',
-                      display: 'flex',
-                      gap: '0.75rem',
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <span>
-                      {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')}
-                    </span>
-                    <span>{t('marketplace.downloads', { count: item.downloads_count })}</span>
-                    <span>{t('marketplace.likes', { count: item.likes_count ?? 0 })}</span>
-                    <span>{formatDate(item.updated_at)}</span>
-                  </div>
-                  {/* Tags */}
-                  {item.tags && item.tags.length > 0 && (
+
+                  {/* Card body */}
+                  <div style={s.cardBody}>
+                    {/* Category badge + plan badge row */}
+                    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                      <span style={s.catBadge(item.category)}>
+                        {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')}
+                      </span>
+                      {isLocked && (
+                        <span
+                          style={{
+                            ...s.catBadge(''),
+                            background: 'rgba(124,58,237,0.15)',
+                            color: '#a78bfa',
+                          }}
+                        >
+                          Pro
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Title + version */}
+                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'baseline' }}>
+                      <a
+                        href={`/explore/items/${item.id}`}
+                        style={{
+                          fontWeight: 600,
+                          fontSize: 'var(--font-lg)',
+                          textDecoration: 'none',
+                          color: 'inherit',
+                        }}
+                      >
+                        {item.name}
+                      </a>
+                      <span
+                        style={{
+                          fontSize: 'var(--font-xs)',
+                          color: 'var(--text-faint)',
+                          flexShrink: 0,
+                        }}
+                      >
+                        {t('marketplace.version', { version: item.version })}
+                      </span>
+                    </div>
+
+                    {/* Description */}
+                    {item.description && (
+                      <p
+                        style={{
+                          fontSize: 'var(--font-sm)',
+                          color: 'var(--text-muted)',
+                          margin: 0,
+                          overflow: 'hidden',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {item.description}
+                      </p>
+                    )}
+
+                    {/* Stats row: downloads, likes, date */}
+                    <div style={s.statRow}>
+                      <span>↓ {item.downloads_count}</span>
+                      <span>♡ {item.likes_count ?? 0}</span>
+                      <span>{formatDate(item.updated_at)}</span>
+                    </div>
+
+                    {/* Tags */}
+                    {item.tags && item.tags.length > 0 && (
+                      <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+                        {item.tags.slice(0, 4).map((tag) => (
+                          <span key={tag} style={s.tag}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Like + Install row */}
                     <div
                       style={{
                         display: 'flex',
-                        gap: '0.3rem',
-                        flexWrap: 'wrap',
+                        gap: '0.5rem',
+                        alignItems: 'center',
+                        marginTop: 'auto',
                       }}
                     >
-                      {item.tags.slice(0, 4).map((tag) => (
-                        <span
-                          key={tag}
-                          style={{
-                            padding: '0.1rem 0.4rem',
-                            borderRadius: 4,
-                            fontSize: '0.62rem',
-                            background: 'rgba(255,255,255,0.06)',
-                            color: 'rgba(244,244,243,0.5)',
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                      <button
+                        onClick={() => void handleToggleLike(item.id)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: 'var(--font-sm)',
+                          color: likedIds.has(item.id) ? 'var(--danger)' : 'var(--text-faint)',
+                          padding: '0.3rem 0',
+                          fontFamily: 'inherit',
+                        }}
+                        aria-label={t('marketplace.toggleLike')}
+                      >
+                        {likedIds.has(item.id) ? '\u2665' : '\u2661'} {item.likes_count ?? 0}
+                      </button>
+                      <button
+                        style={{ ...s.installBtn(isInstalled, isInstalling, isLocked), flex: 1 }}
+                        onClick={() => void handleInstall(item.id)}
+                        disabled={isInstalled || isInstalling}
+                        aria-label={
+                          isInstalled
+                            ? t('marketplace.installed')
+                            : isLocked
+                              ? t('marketplace.upgradeToInstall')
+                              : t('marketplace.install') + ' ' + item.name
+                        }
+                        data-testid={`install-btn-${item.id}`}
+                      >
+                        {isInstalled
+                          ? t('marketplace.installed')
+                          : isInstalling
+                            ? t('marketplace.installing')
+                            : isLocked
+                              ? t('marketplace.proRequired')
+                              : t('marketplace.install')}
+                      </button>
                     </div>
-                  )}
-                  {/* Like button */}
-                  <button
-                    onClick={() => void handleToggleLike(item.id)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '0.78rem',
-                      color: likedIds.has(item.id)
-                        ? 'var(--danger, #ef4444)'
-                        : 'rgba(244,244,243,0.35)',
-                      padding: '0.15rem 0',
-                      fontFamily: 'inherit',
-                      textAlign: 'left',
-                    }}
-                    aria-label={t('marketplace.toggleLike')}
-                  >
-                    {likedIds.has(item.id) ? '\u2665' : '\u2661'} {item.likes_count ?? 0}
-                  </button>
-                  {/* Install / Locked button */}
-                  <button
-                    style={s.installBtn(isInstalled, isInstalling, isLocked)}
-                    onClick={() => void handleInstall(item.id)}
-                    disabled={isInstalled || isInstalling}
-                    aria-label={
-                      isInstalled
-                        ? t('marketplace.installed')
-                        : isLocked
-                          ? t('marketplace.upgradeToInstall')
-                          : t('marketplace.install') + ' ' + item.name
-                    }
-                    data-testid={`install-btn-${item.id}`}
-                  >
-                    {isInstalled
-                      ? t('marketplace.installed')
-                      : isInstalling
-                        ? t('marketplace.installing')
-                        : isLocked
-                          ? t('marketplace.proRequired')
-                          : t('marketplace.install')}
-                  </button>
+                  </div>
                 </article>
               )
             })}
