@@ -85,3 +85,76 @@ export async function reauthenticate(password: string): Promise<{ error: AuthErr
   const { error } = await supabase.auth.signInWithPassword({ email: user.email, password })
   return { error }
 }
+
+// ── MFA / TOTP (E2-4) ──────────────────────────────────────────────────────
+
+export interface MfaFactor {
+  id: string
+  friendly_name?: string
+  factor_type: string
+  status: 'verified' | 'unverified'
+  created_at: string
+  updated_at: string
+}
+
+export interface TotpEnrollment {
+  /** Factor ID — needed for verify/unenroll. */
+  id: string
+  /** otpauth:// URI for manual entry. */
+  uri: string
+  /** Data-URI SVG of the QR code. */
+  qrCode: string
+  /** Base32 secret for manual entry. */
+  secret: string
+}
+
+/** Start TOTP enrolment. Returns QR code and secret for the user. */
+export async function enrollTotp(): Promise<{
+  enrollment: TotpEnrollment | null
+  error: AuthError | null
+}> {
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
+  if (error || !data) return { enrollment: null, error }
+  return {
+    enrollment: {
+      id: data.id,
+      uri: data.totp.uri,
+      qrCode: data.totp.qr_code,
+      secret: data.totp.secret,
+    },
+    error: null,
+  }
+}
+
+/** Verify a TOTP code to complete enrolment or satisfy a login challenge. */
+export async function verifyTotp(
+  factorId: string,
+  code: string,
+): Promise<{ error: AuthError | null }> {
+  const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code })
+  return { error }
+}
+
+/** Remove an enrolled TOTP factor (disable 2FA). */
+export async function unenrollTotp(factorId: string): Promise<{ error: AuthError | null }> {
+  const { error } = await supabase.auth.mfa.unenroll({ factorId })
+  return { error }
+}
+
+/** List all MFA factors for the current user. */
+export async function listMfaFactors(): Promise<{
+  factors: MfaFactor[]
+  error: AuthError | null
+}> {
+  const { data, error } = await supabase.auth.mfa.listFactors()
+  if (error || !data) return { factors: [], error }
+  const factors = (data.totp ?? []).map((f) => ({
+    id: f.id,
+    friendly_name: f.friendly_name ?? undefined,
+    factor_type: f.factor_type,
+    status: f.status as 'verified' | 'unverified',
+    created_at: f.created_at,
+    updated_at: f.updated_at,
+  }))
+  return { factors, error: null }
+}

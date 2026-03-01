@@ -306,7 +306,29 @@
     "displayNameEmpty": "Non impostato",
     "edit": "Modifica",
     "admin": "Admin",
-    "adminDesc": "Strumenti sviluppatore e zona di pericolo"
+    "adminDesc": "Strumenti sviluppatore e zona di pericolo",
+    "security": "Sicurezza",
+    "securityDesc": "Autenticazione a due fattori"
+  },
+  "security": {
+    "title": "Sicurezza dell'account",
+    "totpTitle": "App di autenticazione",
+    "totpDesc": "Usa un'app TOTP per l'autenticazione a due fattori.",
+    "setup": "Configura 2FA",
+    "settingUp": "Configurazione…",
+    "scanQr": "Scansiona questo codice QR con la tua app di autenticazione (es. Google Authenticator, Authy).",
+    "manualEntry": "Non riesci a scansionare? Inserisci il segreto manualmente",
+    "enterCode": "Inserisci il codice a 6 cifre",
+    "verify": "Verifica",
+    "verifying": "Verifica in corso…",
+    "enabled": "Attivato",
+    "disabled": "Disattivato",
+    "disable": "Disattiva",
+    "disabling": "Disattivazione…",
+    "authenticatorApp": "App di autenticazione",
+    "addedOn": "Aggiunto il {{date}}",
+    "enrollError": "Impossibile configurare la 2FA. Riprova.",
+    "cancel": "Annulla"
   },
   "admin": {
     "dangerZoneTitle": "Zona di pericolo",

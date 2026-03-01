@@ -12,16 +12,20 @@ import type { Profile } from '../lib/profilesService'
 const LazyAdminDangerZone = lazy(() =>
   import('./settings/AdminDangerZone').then((m) => ({ default: m.AdminDangerZone })),
 )
+const LazySecuritySettings = lazy(() =>
+  import('./settings/SecuritySettings').then((m) => ({ default: m.SecuritySettings })),
+)
 
 export type { Profile }
 
-const BASE_TABS: SettingsTab[] = ['profile', 'billing', 'preferences']
-type SettingsTab = 'profile' | 'billing' | 'preferences' | 'admin'
+const BASE_TABS: SettingsTab[] = ['profile', 'billing', 'preferences', 'security']
+type SettingsTab = 'profile' | 'billing' | 'preferences' | 'security' | 'admin'
 
 const TAB_ICONS: Record<SettingsTab, string> = {
   profile: '\u{1F464}',
   billing: '\u{1F4B3}',
   preferences: '\u{2699}\uFE0F',
+  security: '\u{1F512}',
   admin: '\u{26A0}\uFE0F',
 }
 
@@ -125,6 +129,11 @@ export default function Settings() {
                   | 'canceled') ?? 'free'
               }
             />
+          )}
+          {tab === 'security' && (
+            <Suspense fallback={null}>
+              <LazySecuritySettings />
+            </Suspense>
           )}
           {tab === 'admin' && isAdmin && (
             <Suspense fallback={null}>

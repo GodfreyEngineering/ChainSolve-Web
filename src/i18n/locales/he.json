@@ -63,7 +63,29 @@
   "settings": {
     "account": "חשבון",
     "admin": "ניהול",
-    "adminDesc": "כלי מפתחים ואזור מסוכן"
+    "adminDesc": "כלי מפתחים ואזור מסוכן",
+    "security": "אבטחה",
+    "securityDesc": "אימות דו-שלבי"
+  },
+  "security": {
+    "title": "אבטחת חשבון",
+    "totpTitle": "אפליקציית אימות",
+    "totpDesc": "השתמש באפליקציית TOTP לאימות דו-שלבי.",
+    "setup": "הגדר 2FA",
+    "settingUp": "מגדיר…",
+    "scanQr": "סרוק את קוד ה-QR באפליקציית האימות שלך (למשל Google Authenticator, Authy).",
+    "manualEntry": "לא מצליח לסרוק? הזן את הסוד ידנית",
+    "enterCode": "הזן את הקוד בן 6 הספרות",
+    "verify": "אימות",
+    "verifying": "מאמת…",
+    "enabled": "מופעל",
+    "disabled": "מושבת",
+    "disable": "השבת",
+    "disabling": "משבית…",
+    "authenticatorApp": "אפליקציית אימות",
+    "addedOn": "נוסף ב-{{date}}",
+    "enrollError": "הגדרת 2FA נכשלה. נסה שוב.",
+    "cancel": "ביטול"
   },
   "admin": {
     "dangerZoneTitle": "אזור מסוכן",

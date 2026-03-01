@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-export type SettingsTab = 'profile' | 'billing' | 'preferences'
+export type SettingsTab = 'profile' | 'billing' | 'preferences' | 'security'
 
 export interface SettingsModalContextValue {
   open: boolean

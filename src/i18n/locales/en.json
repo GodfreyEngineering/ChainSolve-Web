@@ -314,7 +314,29 @@
     "displayNameEmpty": "Not set",
     "edit": "Edit",
     "admin": "Admin",
-    "adminDesc": "Developer tools and danger zone"
+    "adminDesc": "Developer tools and danger zone",
+    "security": "Security",
+    "securityDesc": "Two-factor authentication"
+  },
+  "security": {
+    "title": "Account Security",
+    "totpTitle": "Authenticator app",
+    "totpDesc": "Use a TOTP authenticator app for two-factor authentication.",
+    "setup": "Set up 2FA",
+    "settingUp": "Setting up…",
+    "scanQr": "Scan this QR code with your authenticator app (e.g. Google Authenticator, Authy).",
+    "manualEntry": "Can't scan? Enter this secret manually",
+    "enterCode": "Enter the 6-digit code",
+    "verify": "Verify",
+    "verifying": "Verifying…",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "disable": "Disable",
+    "disabling": "Disabling…",
+    "authenticatorApp": "Authenticator app",
+    "addedOn": "Added on {{date}}",
+    "enrollError": "Failed to set up 2FA. Please try again.",
+    "cancel": "Cancel"
   },
   "admin": {
     "dangerZoneTitle": "Danger Zone",

@@ -7,6 +7,7 @@ import { useSettingsModal } from '../contexts/SettingsModalContext'
 import type { SettingsTab } from '../contexts/SettingsModalContext'
 import { ProfileSettings } from '../pages/settings/ProfileSettings'
 import { PreferencesSettings } from '../pages/settings/PreferencesSettings'
+import { SecuritySettings } from '../pages/settings/SecuritySettings'
 import { BillingAuthGate } from './BillingAuthGate'
 import { AppWindow } from './ui/AppWindow'
 import { SETTINGS_WINDOW_ID } from './SettingsModalProvider'
@@ -30,6 +31,7 @@ const TABS: { key: SettingsTab; icon: string }[] = [
   { key: 'profile', icon: '\u{1F464}' },
   { key: 'billing', icon: '\u{1F4B3}' },
   { key: 'preferences', icon: '\u{2699}\uFE0F' },
+  { key: 'security', icon: '\u{1F512}' },
 ]
 
 export function SettingsModal() {
@@ -114,6 +116,7 @@ export function SettingsModal() {
           {tab === 'profile' && <ProfileSettings user={user} profile={profile} />}
           {tab === 'billing' && <BillingAuthGate profile={profile} />}
           {tab === 'preferences' && <PreferencesSettings plan={resolveEffectivePlan(profile)} />}
+          {tab === 'security' && <SecuritySettings />}
         </main>
       </div>
     </AppWindow>
