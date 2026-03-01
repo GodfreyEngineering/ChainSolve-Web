@@ -1150,7 +1150,7 @@ Claude MUST:
   - Favorites + Recently used
   - Acceptance: dramatically improved discoverability.
 
-- [ ] E4-2: Insert dropdown redesign (mirrors library)
+- [x] E4-2: Insert dropdown redesign (mirrors library)
   - Top categories then drill-down:
     - Inputs → subcategories
     - Functions → subcategories
