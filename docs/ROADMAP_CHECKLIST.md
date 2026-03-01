@@ -1185,7 +1185,7 @@ Claude MUST:
   - Mechanics, fluids, thermo, electrical, materials basics
   - Acceptance: meaningful engineering set.
 
-- [ ] E5-4: Advanced function packs v2–v4 (staged)
+- [x] E5-4: Advanced function packs v2–v4 (staged)
   - Create staged milestones:
     - v2: stats distributions, regression, filters
     - v3: matrix/vector ops
