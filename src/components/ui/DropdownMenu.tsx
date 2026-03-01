@@ -269,7 +269,7 @@ const panelStyle: React.CSSProperties = {
   borderRadius: 8,
   padding: '0.3rem 0',
   zIndex: 100,
-  boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
+  boxShadow: 'var(--shadow-dropdown)',
 }
 
 const submenuPanelStyle: React.CSSProperties = {
@@ -283,7 +283,7 @@ const submenuPanelStyle: React.CSSProperties = {
   borderRadius: 8,
   padding: '0.3rem 0',
   zIndex: 101,
-  boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
+  boxShadow: 'var(--shadow-dropdown)',
 }
 
 function itemStyle(focused: boolean, disabled: boolean): React.CSSProperties {

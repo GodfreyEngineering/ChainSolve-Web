@@ -30,7 +30,7 @@ const sizes: Record<ButtonSize, React.CSSProperties> = {
 const variants: Record<ButtonVariant, React.CSSProperties> = {
   primary: {
     background: 'var(--primary)',
-    color: '#fff',
+    color: 'var(--color-on-primary)',
     border: 'none',
   },
   secondary: {
@@ -41,7 +41,7 @@ const variants: Record<ButtonVariant, React.CSSProperties> = {
   danger: {
     background: 'transparent',
     color: 'var(--danger)',
-    border: '1px solid rgba(239,68,68,0.3)',
+    border: '1px solid var(--danger-dim)',
   },
   ghost: {
     background: 'transparent',

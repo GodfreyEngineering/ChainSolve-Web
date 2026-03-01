@@ -199,7 +199,7 @@ export function AppWindow({
         background: 'var(--card-bg)',
         border: '1px solid var(--border)',
         borderRadius: isMax ? 0 : 12,
-        boxShadow: '0 12px 48px rgba(0,0,0,0.55)',
+        boxShadow: 'var(--shadow-elevated)',
         overflow: 'hidden',
         animation: 'cs-fade-in 0.1s ease',
       }}

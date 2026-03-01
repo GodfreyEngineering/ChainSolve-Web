@@ -13,7 +13,7 @@ const overlayStyle: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
   zIndex: 9000,
-  background: 'rgba(0,0,0,0.6)',
+  background: 'var(--overlay)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

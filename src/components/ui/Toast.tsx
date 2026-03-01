@@ -37,7 +37,7 @@ function toastStyle(variant: ToastVariant): React.CSSProperties {
     padding: '0.65rem 1rem',
     fontSize: '0.85rem',
     color: 'var(--text)',
-    boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+    boxShadow: 'var(--shadow-dropdown)',
     animation: 'cs-slide-up 0.2s ease',
     maxWidth: 360,
   }

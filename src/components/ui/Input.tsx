@@ -36,7 +36,7 @@ const hintStyle: React.CSSProperties = {
 
 const errorStyle: React.CSSProperties = {
   fontSize: '0.75rem',
-  color: '#f87171',
+  color: 'var(--danger-text)',
 }
 
 export function Input({ label, hint, error, style, id, ...rest }: InputProps) {
@@ -50,7 +50,7 @@ export function Input({ label, hint, error, style, id, ...rest }: InputProps) {
       )}
       <input
         id={inputId}
-        style={{ ...inputStyle, ...(error ? { borderColor: '#f87171' } : {}), ...style }}
+        style={{ ...inputStyle, ...(error ? { borderColor: 'var(--danger-text)' } : {}), ...style }}
         {...rest}
       />
       {error && <span style={errorStyle}>{error}</span>}

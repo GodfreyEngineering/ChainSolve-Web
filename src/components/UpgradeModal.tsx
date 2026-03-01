@@ -289,7 +289,7 @@ export function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
           style={{
             margin: '0.5rem 0 0',
             fontSize: '0.82rem',
-            color: '#f87171',
+            color: 'var(--danger-text)',
             background: 'rgba(239,68,68,0.1)',
             padding: '0.5rem 0.75rem',
             borderRadius: 6,

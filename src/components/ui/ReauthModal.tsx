@@ -104,7 +104,7 @@ const inputStyle: React.CSSProperties = {
   padding: '0.55rem 0.75rem',
   borderRadius: 8,
   border: '1px solid var(--border)',
-  background: 'rgba(0,0,0,0.2)',
+  background: 'var(--input-bg)',
   color: 'var(--text)',
   fontSize: '0.95rem',
   outline: 'none',
@@ -114,8 +114,8 @@ const inputStyle: React.CSSProperties = {
 
 const errorStyle: React.CSSProperties = {
   background: 'rgba(239,68,68,0.12)',
-  border: '1px solid rgba(239,68,68,0.3)',
-  color: '#f87171',
+  border: '1px solid var(--danger-dim)',
+  color: 'var(--danger-text)',
   borderRadius: 6,
   padding: '0.5rem 0.7rem',
   fontSize: '0.85rem',

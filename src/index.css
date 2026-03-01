@@ -42,6 +42,23 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-dropdown: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-elevated: 0 12px 48px rgba(0, 0, 0, 0.55);
+
+  /* ── Z-index layers ───────────────────────────────────────────────────── */
+  --z-dropdown: 100;
+  --z-modal: 9000;
+  --z-toast: 9500;
+  --z-dock: 9999;
+
+  /* ── Semantic color tokens ─────────────────────────────────────────────── */
+  --color-on-primary: #fff;
+  --danger-text: #f87171;
+  --danger-dim: rgba(239, 68, 68, 0.3);
+  --overlay: rgba(0, 0, 0, 0.6);
+
+  /* ── Focus ring ───────────────────────────────────────────────────────── */
+  --focus-ring: 2px solid var(--primary);
 
   /* ── Typography scale ───────────────────────────────────────────────────── */
   --font-2xs: 0.55rem;
@@ -96,6 +113,11 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --shadow-dropdown: 0 4px 20px rgba(0, 0, 0, 0.12);
+  --shadow-elevated: 0 12px 48px rgba(0, 0, 0, 0.2);
+
+  --danger-text: #dc2626;
+  --overlay: rgba(0, 0, 0, 0.4);
 
   --node-bg: #ffffff;
   --node-border: rgba(0, 0, 0, 0.12);
