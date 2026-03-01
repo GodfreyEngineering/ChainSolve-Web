@@ -690,7 +690,22 @@
     "companyLibrary": "Company Library",
     "companyLibraryEmpty": "No items in your company library yet.",
     "installsDisabled": "Your organisation has disabled installs.",
-    "commentsDisabled": "Your organisation has disabled comments."
+    "commentsDisabled": "Your organisation has disabled comments.",
+    "whatsIncluded": "What's included",
+    "compatibility": "Compatibility",
+    "requiredEngine": "Required engine version",
+    "yourEngine": "Your engine version",
+    "anyVersion": "Any",
+    "compatible": "Compatible",
+    "incompatible": "Incompatible — update required",
+    "changelog": "Changelog",
+    "initialRelease": "Initial release",
+    "reportItem": "Report this item",
+    "reportItemConfirm": "Are you sure you want to report this item?",
+    "reportItemSuccess": "Item reported. Thank you.",
+    "blockUser": "Block this author",
+    "blockUserConfirm": "Block this author? Their items and comments will be hidden.",
+    "blockedNotice": "This author is blocked."
   },
   "orgs": {
     "title": "Organizations",

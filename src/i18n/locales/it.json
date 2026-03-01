@@ -670,7 +670,22 @@
     "companyLibrary": "Company Library",
     "companyLibraryEmpty": "No items in your company library yet.",
     "installsDisabled": "La tua organizzazione ha disabilitato le installazioni.",
-    "commentsDisabled": "La tua organizzazione ha disabilitato i commenti."
+    "commentsDisabled": "La tua organizzazione ha disabilitato i commenti.",
+    "whatsIncluded": "Cosa include",
+    "compatibility": "Compatibilità",
+    "requiredEngine": "Versione motore richiesta",
+    "yourEngine": "La tua versione motore",
+    "anyVersion": "Qualsiasi",
+    "compatible": "Compatibile",
+    "incompatible": "Incompatibile — aggiornamento richiesto",
+    "changelog": "Registro modifiche",
+    "initialRelease": "Versione iniziale",
+    "reportItem": "Segnala questo articolo",
+    "reportItemConfirm": "Sei sicuro di voler segnalare questo articolo?",
+    "reportItemSuccess": "Articolo segnalato. Grazie.",
+    "blockUser": "Blocca questo autore",
+    "blockUserConfirm": "Bloccare questo autore? I suoi articoli e commenti verranno nascosti.",
+    "blockedNotice": "Questo autore è bloccato."
   },
   "orgs": {
     "title": "Organizzazioni",
