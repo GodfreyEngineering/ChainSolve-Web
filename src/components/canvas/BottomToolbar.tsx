@@ -337,15 +337,15 @@ const barStyle: React.CSSProperties = {
   gap: '0.2rem',
   background: 'var(--card-bg)',
   border: '1px solid var(--border)',
-  borderRadius: 8,
+  borderRadius: 'var(--radius-lg)',
   padding: '0.25rem 0.4rem',
-  boxShadow: '0 2px 12px rgba(0,0,0,0.35)',
+  boxShadow: 'var(--shadow-md)',
 }
 
 function btnStyle(active: boolean): React.CSSProperties {
   return {
     padding: '0.2rem 0.45rem',
-    borderRadius: 5,
+    borderRadius: 'var(--radius-md)',
     border: 'none',
     background: active ? 'var(--primary-dim)' : 'transparent',
     color: active ? 'var(--primary)' : 'var(--text)',

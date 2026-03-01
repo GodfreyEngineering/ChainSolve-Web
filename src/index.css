@@ -2,6 +2,7 @@
 
 /* ── Design tokens ─────────────────────────────────────────────────────────── */
 :root {
+  /* ── Color tokens ───────────────────────────────────────────────────────── */
   --primary: #1cabb0;
   --primary-text: #1cabb0; /* same as --primary in dark theme; overridden in light */
   --primary-dim: rgba(28, 171, 176, 0.15);
@@ -15,11 +16,43 @@
 
   --text: #f4f4f3;
   --text-muted: rgba(244, 244, 243, 0.65); /* raised from 0.5 → 4.5:1 AA on both bg and card-bg */
+  --text-faint: rgba(244, 244, 243, 0.35); /* labels, section headers */
 
   --success: #22c55e;
   --danger: #ef4444;
+  --warning: #f59e0b;
 
-  /* Node-specific tokens (D8-2) */
+  /* ── Spacing scale (4px base) ───────────────────────────────────────────── */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
+
+  /* ── Border radius ──────────────────────────────────────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ────────────────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.5);
+
+  /* ── Typography scale ───────────────────────────────────────────────────── */
+  --font-2xs: 0.55rem;
+  --font-xs: 0.65rem;
+  --font-sm: 0.78rem;
+  --font-md: 0.88rem;
+  --font-lg: 0.95rem;
+  --font-xl: 1.15rem;
+  --font-2xl: 1.8rem;
+
+  /* ── Node-specific tokens (D8-2) ────────────────────────────────────────── */
   --node-bg: #383838;
   --node-border: rgba(255, 255, 255, 0.12);
   --node-header-bg: rgba(28, 171, 176, 0.15);
@@ -57,7 +90,12 @@
 
   --text: #1a1a1a;
   --text-muted: rgba(26, 26, 26, 0.65); /* raised from 0.5 → 4.5:1 AA on bg and card-bg */
+  --text-faint: rgba(26, 26, 26, 0.35);
   --primary-text: #0f7578; /* darker teal: 4.5:1 AA on light bg (--primary #1cabb0 only 2.5:1) */
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.15);
 
   --node-bg: #ffffff;
   --node-border: rgba(0, 0, 0, 0.12);
@@ -127,8 +165,8 @@ textarea:focus {
 .react-flow__controls {
   background: var(--card-bg) !important;
   border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-md) !important;
   overflow: hidden;
   /* Position bottom-right; React Flow's own panel positions are applied via inline style
      so we force right/bottom here. */

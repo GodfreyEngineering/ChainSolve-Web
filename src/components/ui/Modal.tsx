@@ -23,9 +23,9 @@ const overlayStyle: React.CSSProperties = {
 const panelStyle: React.CSSProperties = {
   background: 'var(--card-bg)',
   border: '1px solid var(--border)',
-  borderRadius: 14,
+  borderRadius: 'var(--radius-xl)',
   padding: '1.5rem',
-  boxShadow: '0 12px 48px rgba(0,0,0,0.55)',
+  boxShadow: 'var(--shadow-lg)',
   maxHeight: '85vh',
   overflowY: 'auto',
   animation: 'cs-slide-up 0.2s ease',
@@ -51,7 +51,7 @@ const closeBtn: React.CSSProperties = {
   cursor: 'pointer',
   fontSize: '1.1rem',
   padding: '0.2rem 0.5rem',
-  borderRadius: 6,
+  borderRadius: 'var(--radius-md)',
   lineHeight: 1,
   fontFamily: 'inherit',
 }

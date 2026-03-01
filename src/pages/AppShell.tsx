@@ -99,7 +99,7 @@ function fmtDate(iso: string): string {
 
 const cardStyle: React.CSSProperties = {
   border: '1px solid var(--border)',
-  borderRadius: 12,
+  borderRadius: 'var(--radius-xl)',
   padding: '1.5rem',
   background: 'var(--card-bg)',
   marginBottom: '1.5rem',
@@ -117,15 +117,21 @@ const sectionLabel: React.CSSProperties = {
 const errorBox: React.CSSProperties = {
   background: 'rgba(239,68,68,0.12)',
   border: '1px solid rgba(239,68,68,0.3)',
-  color: '#f87171',
-  borderRadius: 8,
+  color: 'var(--danger)',
+  borderRadius: 'var(--radius-lg)',
   padding: '0.65rem 0.85rem',
   marginBottom: '1rem',
   fontSize: '0.9rem',
 }
 
 function btnBase(extra?: React.CSSProperties): React.CSSProperties {
-  return { fontFamily: 'inherit', cursor: 'pointer', fontSize: '0.9rem', borderRadius: 8, ...extra }
+  return {
+    fontFamily: 'inherit',
+    cursor: 'pointer',
+    fontSize: '0.9rem',
+    borderRadius: 'var(--radius-lg)',
+    ...extra,
+  }
 }
 
 const btnPrimary: React.CSSProperties = btnBase({
@@ -1250,10 +1256,10 @@ function ProjectCard({
               right: 0,
               top: '115%',
               zIndex: 500,
-              background: '#2c2c2c',
-              border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: 8,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.55)',
+              background: 'var(--surface2)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-lg)',
               minWidth: 148,
               overflow: 'hidden',
             }}

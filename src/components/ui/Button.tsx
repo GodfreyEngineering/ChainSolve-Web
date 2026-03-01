@@ -11,7 +11,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const base: React.CSSProperties = {
   fontFamily: 'inherit',
   cursor: 'pointer',
-  borderRadius: 8,
+  borderRadius: 'var(--radius-lg)',
   fontWeight: 600,
   display: 'inline-flex',
   alignItems: 'center',
@@ -40,7 +40,7 @@ const variants: Record<ButtonVariant, React.CSSProperties> = {
   },
   danger: {
     background: 'transparent',
-    color: '#f87171',
+    color: 'var(--danger)',
     border: '1px solid rgba(239,68,68,0.3)',
   },
   ghost: {

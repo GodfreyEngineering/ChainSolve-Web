@@ -21,15 +21,15 @@ const panelStyle: React.CSSProperties = {
   left: 12,
   width: 340,
   maxHeight: 420,
-  background: 'rgba(26,26,26,0.96)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 10,
+  background: 'var(--card-bg)',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-xl)',
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
   zIndex: 50,
   backdropFilter: 'blur(12px)',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+  boxShadow: 'var(--shadow-lg)',
 }
 
 const headerStyle: React.CSSProperties = {
@@ -37,23 +37,23 @@ const headerStyle: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: '0.55rem 0.75rem',
-  borderBottom: '1px solid rgba(255,255,255,0.06)',
+  borderBottom: '1px solid var(--border)',
   flexShrink: 0,
 }
 
 const titleStyle: React.CSSProperties = {
-  fontSize: '0.78rem',
+  fontSize: 'var(--font-sm)',
   fontWeight: 600,
-  color: '#F4F4F3',
+  color: 'var(--text)',
   letterSpacing: '0.02em',
 }
 
 const btnSmall: React.CSSProperties = {
   padding: '0.18rem 0.5rem',
-  border: '1px solid rgba(255,255,255,0.12)',
+  border: '1px solid var(--border)',
   background: 'transparent',
-  color: 'rgba(244,244,243,0.65)',
-  borderRadius: 5,
+  color: 'var(--text-muted)',
+  borderRadius: 'var(--radius-md)',
   cursor: 'pointer',
   fontSize: '0.72rem',
   fontFamily: 'inherit',
@@ -68,8 +68,8 @@ const listStyle: React.CSSProperties = {
 const emptyStyle: React.CSSProperties = {
   padding: '1.5rem 0.75rem',
   textAlign: 'center',
-  color: 'rgba(244,244,243,0.35)',
-  fontSize: '0.78rem',
+  color: 'var(--text-faint)',
+  fontSize: 'var(--font-sm)',
 }
 
 const rowStyle: React.CSSProperties = {
@@ -77,17 +77,17 @@ const rowStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: '0.25rem',
-  borderBottom: '1px solid rgba(255,255,255,0.04)',
+  borderBottom: '1px solid var(--border)',
 }
 
 const inp: React.CSSProperties = {
   width: '100%',
   padding: '0.24rem 0.4rem',
-  borderRadius: 5,
-  border: '1px solid rgba(255,255,255,0.12)',
-  background: 'rgba(0,0,0,0.2)',
-  color: '#F4F4F3',
-  fontSize: '0.78rem',
+  borderRadius: 'var(--radius-md)',
+  border: '1px solid var(--border)',
+  background: 'var(--input-bg)',
+  color: 'var(--text)',
+  fontSize: 'var(--font-sm)',
   fontFamily: 'inherit',
   outline: 'none',
   boxSizing: 'border-box',
@@ -102,7 +102,7 @@ const fieldLabel: React.CSSProperties = {
   fontSize: '0.6rem',
   fontWeight: 700,
   letterSpacing: '0.05em',
-  color: 'rgba(244,244,243,0.4)',
+  color: 'var(--text-faint)',
   textTransform: 'uppercase',
   userSelect: 'none',
 }
@@ -111,12 +111,13 @@ const deleteBtn: React.CSSProperties = {
   padding: '0.1rem 0.35rem',
   border: 'none',
   background: 'transparent',
-  color: 'rgba(239,68,68,0.6)',
+  color: 'var(--danger)',
   cursor: 'pointer',
   fontSize: '0.72rem',
   fontFamily: 'inherit',
-  borderRadius: 4,
+  borderRadius: 'var(--radius-sm)',
   flexShrink: 0,
+  opacity: 0.6,
 }
 
 function VariableRow({ variable }: { variable: ProjectVariable }) {

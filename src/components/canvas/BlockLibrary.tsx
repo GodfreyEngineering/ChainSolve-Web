@@ -121,10 +121,10 @@ const s: StyleMap = {
   },
   sectionLabel: {
     padding: '0.35rem 0.6rem 0.1rem',
-    fontSize: '0.62rem',
+    fontSize: 'var(--font-xs)',
     fontWeight: 700,
     letterSpacing: '0.07em',
-    color: 'rgba(244,244,243,0.35)',
+    color: 'var(--text-faint)',
     textTransform: 'uppercase',
     userSelect: 'none',
   },
@@ -132,9 +132,9 @@ const s: StyleMap = {
     display: 'flex',
     alignItems: 'center',
     padding: '0.28rem 0.6rem',
-    fontSize: '0.78rem',
+    fontSize: 'var(--font-sm)',
     cursor: 'grab',
-    borderRadius: 4,
+    borderRadius: 'var(--radius-sm)',
     margin: '1px 4px',
     userSelect: 'none',
     position: 'relative',
@@ -211,7 +211,7 @@ function BlockItem({ def, favs, onToggleFav, entitled, onProBlocked }: BlockItem
       onMouseLeave={() => setHovered(false)}
       style={{
         ...s.blockItem,
-        background: hovered ? 'rgba(28,171,176,0.12)' : 'transparent',
+        background: hovered ? 'var(--primary-dim)' : 'transparent',
         opacity: entitled ? 1 : 0.45,
         cursor: entitled ? 'grab' : 'pointer',
       }}
@@ -233,7 +233,7 @@ function BlockItem({ def, favs, onToggleFav, entitled, onProBlocked }: BlockItem
         <button
           style={{
             ...s.starBtn,
-            color: isFav ? '#f59e0b' : 'rgba(255,255,255,0.3)',
+            color: isFav ? 'var(--warning)' : 'var(--text-faint)',
           }}
           title={isFav ? 'Remove from favourites' : 'Add to favourites'}
           onClick={(e) => {
@@ -266,7 +266,7 @@ function TemplateItem({ template, onInsert, onRename, onDelete }: TemplateItemPr
     <div
       style={{
         ...s.blockItem,
-        background: hovered ? 'rgba(28,171,176,0.12)' : 'transparent',
+        background: hovered ? 'var(--primary-dim)' : 'transparent',
         cursor: 'pointer',
       }}
       onMouseEnter={() => setHovered(true)}
@@ -300,8 +300,8 @@ function TemplateItem({ template, onInsert, onRename, onDelete }: TemplateItemPr
       </span>
       <span
         style={{
-          fontSize: '0.65rem',
-          color: 'rgba(244,244,243,0.35)',
+          fontSize: 'var(--font-xs)',
+          color: 'var(--text-faint)',
           flexShrink: 0,
         }}
       >
@@ -314,7 +314,7 @@ function TemplateItem({ template, onInsert, onRename, onDelete }: TemplateItemPr
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: 'rgba(255,255,255,0.4)',
+              color: 'var(--text-faint)',
               fontSize: '0.85rem',
               padding: '0 2px',
               fontFamily: 'inherit',
@@ -336,11 +336,11 @@ function TemplateItem({ template, onInsert, onRename, onDelete }: TemplateItemPr
                 top: '100%',
                 background: 'var(--card-bg, #2c2c2c)',
                 border: '1px solid var(--border, rgba(255,255,255,0.12))',
-                borderRadius: 6,
+                borderRadius: 'var(--radius-md)',
                 padding: '0.2rem',
                 zIndex: 100,
                 minWidth: 100,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                boxShadow: 'var(--shadow-lg)',
               }}
             >
               <div
@@ -352,7 +352,7 @@ function TemplateItem({ template, onInsert, onRename, onDelete }: TemplateItemPr
                 }}
                 role="menuitem"
                 onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.background = 'rgba(28,171,176,0.15)'
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'var(--primary-dim)'
                 }}
                 onMouseLeave={(e) => {
                   ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
@@ -374,7 +374,7 @@ function TemplateItem({ template, onInsert, onRename, onDelete }: TemplateItemPr
                   fontSize: '0.75rem',
                   cursor: 'pointer',
                   borderRadius: 3,
-                  color: '#f87171',
+                  color: 'var(--danger)',
                 }}
                 role="menuitem"
                 onMouseEnter={(e) => {
@@ -497,9 +497,9 @@ export function BlockLibrary({
           <button
             style={{
               ...s.catPill,
-              background: !filterFamily ? 'rgba(28,171,176,0.2)' : 'transparent',
-              borderColor: !filterFamily ? '#1CABB0' : undefined,
-              color: !filterFamily ? '#1CABB0' : undefined,
+              background: !filterFamily ? 'var(--primary-dim)' : 'transparent',
+              borderColor: !filterFamily ? 'var(--primary-text)' : undefined,
+              color: !filterFamily ? 'var(--primary-text)' : undefined,
             }}
             onClick={() => setFilterFamily(null)}
           >
@@ -510,9 +510,9 @@ export function BlockLibrary({
               key={fam.id}
               style={{
                 ...s.catPill,
-                background: filterFamily === fam.id ? 'rgba(28,171,176,0.2)' : 'transparent',
-                borderColor: filterFamily === fam.id ? '#1CABB0' : undefined,
-                color: filterFamily === fam.id ? '#1CABB0' : undefined,
+                background: filterFamily === fam.id ? 'var(--primary-dim)' : 'transparent',
+                borderColor: filterFamily === fam.id ? 'var(--primary-text)' : undefined,
+                color: filterFamily === fam.id ? 'var(--primary-text)' : undefined,
               }}
               onClick={() => setFilterFamily(fam.id === filterFamily ? null : fam.id)}
             >
@@ -562,8 +562,8 @@ export function BlockLibrary({
           <div
             style={{
               padding: '0.75rem 0.6rem',
-              fontSize: '0.78rem',
-              color: 'rgba(244,244,243,0.35)',
+              fontSize: 'var(--font-sm)',
+              color: 'var(--text-faint)',
               textAlign: 'center',
             }}
           >
@@ -590,8 +590,8 @@ export function BlockLibrary({
                       fontSize: '0.55rem',
                       padding: '1px 4px',
                       borderRadius: 3,
-                      background: 'rgba(28,171,176,0.15)',
-                      color: '#1CABB0',
+                      background: 'var(--primary-dim)',
+                      color: 'var(--primary-text)',
                       fontWeight: 700,
                       letterSpacing: '0.05em',
                       verticalAlign: 'middle',
@@ -646,7 +646,7 @@ export function BlockLibrary({
 
         {/* Templates section (Pro only) */}
         {ent.canUseGroups && (
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '0.3rem' }}>
+          <div style={{ borderTop: '1px solid var(--border)', marginTop: '0.3rem' }}>
             <div
               style={{
                 ...s.sectionLabel,
@@ -685,7 +685,7 @@ export function BlockLibrary({
                     style={{
                       padding: '0.5rem 0.6rem',
                       fontSize: '0.75rem',
-                      color: 'rgba(244,244,243,0.3)',
+                      color: 'var(--text-faint)',
                     }}
                   >
                     No templates yet.
