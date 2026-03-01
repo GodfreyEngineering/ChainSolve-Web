@@ -16,6 +16,7 @@ import {
   isBlockEntitled,
   canInstallExploreItem,
   canUploadToExplore,
+  resolveEffectivePlan,
   type Plan,
   type Entitlements,
 } from './entitlements'
@@ -292,5 +293,64 @@ describe('canUploadToExplore', () => {
     expect(canUploadToExplore('free')).toBe(false)
     expect(canUploadToExplore('past_due')).toBe(false)
     expect(canUploadToExplore('canceled')).toBe(false)
+  })
+})
+
+// ── resolveEffectivePlan (E2-6) ──────────────────────────────────────────────
+
+describe('resolveEffectivePlan', () => {
+  it('returns "free" for null profile', () => {
+    expect(resolveEffectivePlan(null)).toBe('free')
+  })
+
+  it('returns the profile plan when no developer/admin flags', () => {
+    expect(resolveEffectivePlan({ plan: 'free', is_developer: false, is_admin: false })).toBe(
+      'free',
+    )
+    expect(resolveEffectivePlan({ plan: 'pro', is_developer: false, is_admin: false })).toBe('pro')
+    expect(resolveEffectivePlan({ plan: 'canceled', is_developer: false, is_admin: false })).toBe(
+      'canceled',
+    )
+  })
+
+  it('returns "enterprise" for developer accounts regardless of plan', () => {
+    expect(resolveEffectivePlan({ plan: 'free', is_developer: true, is_admin: false })).toBe(
+      'enterprise',
+    )
+    expect(resolveEffectivePlan({ plan: 'canceled', is_developer: true, is_admin: false })).toBe(
+      'enterprise',
+    )
+  })
+
+  it('returns "enterprise" for admin accounts regardless of plan', () => {
+    expect(resolveEffectivePlan({ plan: 'free', is_developer: false, is_admin: true })).toBe(
+      'enterprise',
+    )
+    expect(resolveEffectivePlan({ plan: 'past_due', is_developer: false, is_admin: true })).toBe(
+      'enterprise',
+    )
+  })
+
+  it('handles missing flags gracefully (defaults to plan)', () => {
+    expect(resolveEffectivePlan({ plan: 'free' })).toBe('free')
+    expect(resolveEffectivePlan({ plan: 'pro' })).toBe('pro')
+  })
+
+  it('developer + admin both set still returns enterprise', () => {
+    expect(resolveEffectivePlan({ plan: 'free', is_developer: true, is_admin: true })).toBe(
+      'enterprise',
+    )
+  })
+
+  it('developer entitlements unlock all features', () => {
+    const plan = resolveEffectivePlan({ plan: 'free', is_developer: true })
+    const ent = getEntitlements(plan)
+    expect(ent.maxProjects).toBe(Infinity)
+    expect(ent.maxCanvases).toBe(Infinity)
+    expect(ent.canUploadCsv).toBe(true)
+    expect(ent.canUseArrays).toBe(true)
+    expect(ent.canUsePlots).toBe(true)
+    expect(ent.canExport).toBe(true)
+    expect(ent.canUseAi).toBe(true)
   })
 })

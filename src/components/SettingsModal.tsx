@@ -2,6 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getSession } from '../lib/auth'
 import { getProfile } from '../lib/profilesService'
+import { resolveEffectivePlan } from '../lib/entitlements'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
 import type { SettingsTab } from '../contexts/SettingsModalContext'
 import { ProfileSettings } from '../pages/settings/ProfileSettings'
@@ -112,19 +113,7 @@ export function SettingsModal() {
         <main style={contentStyle}>
           {tab === 'profile' && <ProfileSettings user={user} profile={profile} />}
           {tab === 'billing' && <BillingAuthGate profile={profile} />}
-          {tab === 'preferences' && (
-            <PreferencesSettings
-              plan={
-                (profile?.plan as
-                  | 'free'
-                  | 'trialing'
-                  | 'pro'
-                  | 'enterprise'
-                  | 'past_due'
-                  | 'canceled') ?? 'free'
-              }
-            />
-          )}
+          {tab === 'preferences' && <PreferencesSettings plan={resolveEffectivePlan(profile)} />}
         </main>
       </div>
     </AppWindow>

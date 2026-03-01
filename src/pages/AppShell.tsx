@@ -40,6 +40,7 @@ import {
   getEntitlements,
   isPro,
   isReadOnly,
+  resolveEffectivePlan,
   showBillingBanner,
   type Plan,
 } from '../lib/entitlements'
@@ -287,7 +288,7 @@ export default function AppShell() {
       setUser(session.user)
       supabase
         .from('profiles')
-        .select('id,email,plan,stripe_customer_id,current_period_end')
+        .select('id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin')
         .eq('id', session.user.id)
         .maybeSingle()
         .then(({ data, error }) => {
@@ -299,7 +300,7 @@ export default function AppShell() {
   }, [navigate, fetchProjects])
 
   const handleNewProject = async () => {
-    const plan = (profile?.plan ?? 'free') as Plan
+    const plan = resolveEffectivePlan(profile)
     if (!canCreateProject(plan, projects.length)) {
       setUpgradeOpen(true)
       return
@@ -331,7 +332,7 @@ export default function AppShell() {
 
   const handleDuplicate = async (proj: ProjectRow) => {
     setMenuOpen(null)
-    const plan = (profile?.plan ?? 'free') as Plan
+    const plan = resolveEffectivePlan(profile)
     if (!canCreateProject(plan, projects.length)) {
       setUpgradeOpen(true)
       return
@@ -364,7 +365,7 @@ export default function AppShell() {
   const handleExport = async (proj: ProjectRow) => {
     setMenuOpen(null)
     // D11-4: Gate export behind canExport
-    const plan = (profile?.plan ?? 'free') as Plan
+    const plan = resolveEffectivePlan(profile)
     if (!getEntitlements(plan).canExport) {
       setUpgradeReason('export_locked')
       setUpgradeOpen(true)
@@ -388,7 +389,7 @@ export default function AppShell() {
     const file = e.target.files?.[0]
     e.target.value = '' // reset so same file can be re-picked
     if (!file) return
-    const plan = (profile?.plan ?? 'free') as Plan
+    const plan = resolveEffectivePlan(profile)
     // D11-4: Gate import behind canExport
     if (!getEntitlements(plan).canExport) {
       setUpgradeReason('export_locked')
@@ -495,7 +496,7 @@ export default function AppShell() {
     )
   }
 
-  const plan = (profile?.plan ?? 'free') as Plan
+  const plan = resolveEffectivePlan(profile)
   const canUpgrade = plan === 'free' || plan === 'canceled'
   const canManage =
     plan === 'trialing' || plan === 'pro' || plan === 'enterprise' || plan === 'past_due'

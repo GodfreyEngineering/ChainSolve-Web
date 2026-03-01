@@ -16,12 +16,18 @@ export interface Profile {
   stripe_customer_id: string | null
   current_period_end: string | null
   created_at?: string
+  /** E2-6: All features unlocked + admin tools + diagnostics. Set by service_role only. */
+  is_developer: boolean
+  /** E2-6: Moderation tools + admin panels. Set by service_role only. */
+  is_admin: boolean
 }
 
 export async function getProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id,email,full_name,avatar_url,plan,stripe_customer_id,current_period_end')
+    .select(
+      'id,email,full_name,avatar_url,plan,stripe_customer_id,current_period_end,is_developer,is_admin',
+    )
     .eq('id', userId)
     .maybeSingle()
   if (error || !data) return null

@@ -60,6 +60,7 @@ import {
   canCreateCanvas,
   showBillingBanner,
   getEntitlements,
+  resolveEffectivePlan,
   type Plan,
 } from '../lib/entitlements'
 import { isPerfHudEnabled } from '../lib/devFlags'
@@ -166,11 +167,14 @@ export default function CanvasPage() {
       if (!session) return
       supabase
         .from('profiles')
-        .select('plan')
+        .select('plan,is_developer,is_admin')
         .eq('id', session.user.id)
         .maybeSingle()
         .then(({ data }) => {
-          if (!cancelled && data?.plan) setPlan(data.plan as Plan)
+          if (!cancelled && data?.plan) {
+            const row = data as { plan: Plan; is_developer?: boolean; is_admin?: boolean }
+            setPlan(resolveEffectivePlan(row))
+          }
         })
     })
     return () => {

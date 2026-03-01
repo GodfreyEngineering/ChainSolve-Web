@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { Button } from '../../components/ui/Button'
 import { isReauthed } from '../../lib/reauth'
 import type { Profile } from '../Settings'
+import { resolveEffectivePlan } from '../../lib/entitlements'
 
 const LazyReauthModal = lazy(() =>
   import('../../components/ui/ReauthModal').then((m) => ({ default: m.ReauthModal })),
@@ -31,7 +32,7 @@ export function BillingSettings({ profile }: Props) {
   const [reauthOpen, setReauthOpen] = useState(false)
   const [pendingEndpoint, setPendingEndpoint] = useState<string | null>(null)
 
-  const plan = (profile?.plan ?? 'free') as Plan
+  const plan = resolveEffectivePlan(profile) as Plan
   const canUpgrade = plan === 'free' || plan === 'canceled'
   const canManage =
     plan === 'trialing' || plan === 'pro' || plan === 'enterprise' || plan === 'past_due'

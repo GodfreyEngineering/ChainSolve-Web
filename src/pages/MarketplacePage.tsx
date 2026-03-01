@@ -33,7 +33,7 @@ import {
 import { listMyOrgs, getOrgPolicy, type Org, type OrgPolicy } from '../lib/orgsService'
 import { getProfile } from '../lib/profilesService'
 import { getProjectCount } from '../lib/projects'
-import { canInstallExploreItem, type Plan } from '../lib/entitlements'
+import { canInstallExploreItem, resolveEffectivePlan, type Plan } from '../lib/entitlements'
 import { getSession } from '../lib/auth'
 import { BRAND } from '../lib/brand'
 import { getBlockedUsers } from '../lib/blockedUsers'
@@ -260,7 +260,7 @@ export default function MarketplacePage() {
           getProjectCount(),
           listMyOrgs(),
         ])
-        if (profile?.plan) setPlan(profile.plan as Plan)
+        if (profile) setPlan(resolveEffectivePlan(profile))
         setProjectCount(count)
         setMyOrgs(orgs)
         // D10-2: fetch policy for first org

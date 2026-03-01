@@ -117,6 +117,22 @@ export function getEntitlements(plan: Plan): Entitlements {
   return ENTITLEMENTS[plan]
 }
 
+/**
+ * E2-6: Resolve the effective plan for a profile, accounting for developer/admin overrides.
+ * Developer and admin accounts are treated as enterprise (all features unlocked).
+ */
+export function resolveEffectivePlan(
+  profile: {
+    plan: Plan
+    is_developer?: boolean
+    is_admin?: boolean
+  } | null,
+): Plan {
+  if (!profile) return 'free'
+  if (profile.is_developer || profile.is_admin) return 'enterprise'
+  return profile.plan
+}
+
 /** True for trialing, pro, or enterprise (full access). */
 export function isPro(plan: Plan): boolean {
   return plan === 'trialing' || plan === 'pro' || plan === 'enterprise'

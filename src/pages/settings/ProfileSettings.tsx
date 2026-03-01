@@ -4,6 +4,7 @@ import { Input } from '../../components/ui/Input'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../../lib/profilesService'
 import { updateDisplayName, uploadAvatar, getAvatarUrl } from '../../lib/profilesService'
+import { resolveEffectivePlan } from '../../lib/entitlements'
 
 interface Props {
   user: User | null
@@ -13,7 +14,7 @@ interface Props {
 
 export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
   const { t } = useTranslation()
-  const plan = profile?.plan ?? 'free'
+  const plan = resolveEffectivePlan(profile)
 
   const memberSince = user?.created_at
     ? new Date(user.created_at).toLocaleDateString('en-GB', {

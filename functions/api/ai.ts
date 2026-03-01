@@ -405,11 +405,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // ── Plan check ────────────────────────────────────────────────────────
     const { data: profile } = await supabaseAdmin
       .from('profiles')
-      .select('id,plan')
+      .select('id,plan,is_developer,is_admin')
       .eq('id', userId)
       .maybeSingle()
 
-    const plan: Plan = (profile?.plan as Plan) ?? 'free'
+    // E2-6: Developer/admin accounts bypass plan restrictions
+    const isDev = !!(profile as Record<string, unknown> | null)?.is_developer
+    const isAdm = !!(profile as Record<string, unknown> | null)?.is_admin
+    const plan: Plan = isDev || isAdm ? 'enterprise' : ((profile?.plan as Plan) ?? 'free')
 
     if (plan === 'free' || plan === 'past_due' || plan === 'canceled') {
       return jsonError('AI Copilot requires a Pro or Enterprise subscription', 402)

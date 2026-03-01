@@ -37,7 +37,7 @@ import {
 import { createCheckoutSession } from '../lib/stripeConnectService'
 import { getProfile } from '../lib/profilesService'
 import { getProjectCount } from '../lib/projects'
-import { canInstallExploreItem, type Plan } from '../lib/entitlements'
+import { canInstallExploreItem, resolveEffectivePlan, type Plan } from '../lib/entitlements'
 import { getSession } from '../lib/auth'
 import { listMyOrgs, getOrgPolicy, type OrgPolicy } from '../lib/orgsService'
 import { ENGINE_CONTRACT_VERSION } from '../lib/engineContractVersion'
@@ -401,7 +401,7 @@ export default function ItemDetailPage() {
             getProjectCount(),
             listMyOrgs(),
           ])
-          if (profile?.plan) setPlan(profile.plan as Plan)
+          if (profile) setPlan(resolveEffectivePlan(profile))
           setProjectCount(count)
           // D10-2: fetch policy for first org
           if (orgs.length > 0) {
