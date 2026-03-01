@@ -77,6 +77,30 @@ VALUES (
   '{"full_name":"Developer"}',
   'authenticated', 'authenticated'
 );
+
+-- Admin account (E2-6)
+INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, aud, role)
+VALUES (
+  'aaaaaaaa-0005-4000-a000-000000000005',
+  'admin@test.chainsolve.local',
+  crypt('TestPassword1!', gen_salt('bf')),
+  now(), now(), now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"full_name":"Admin User"}',
+  'authenticated', 'authenticated'
+);
+
+-- Moderator account (E10-1)
+INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data, aud, role)
+VALUES (
+  'aaaaaaaa-0006-4000-a000-000000000006',
+  'mod@test.chainsolve.local',
+  crypt('TestPassword1!', gen_salt('bf')),
+  now(), now(), now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"full_name":"Moderator"}',
+  'authenticated', 'authenticated'
+);
 ```
 
 ---
@@ -103,13 +127,23 @@ SET plan = 'pro',
     current_period_end = now() + interval '365 days'
 WHERE id = 'aaaaaaaa-0003-4000-a000-000000000003';
 
--- Developer account (pro features unlocked)
+-- Developer account (E2-6: is_developer bypasses plan restrictions)
 UPDATE profiles
-SET plan = 'pro',
-    stripe_customer_id = 'cus_test_dev_001',
-    stripe_subscription_id = 'sub_test_dev_001',
-    current_period_end = now() + interval '3650 days'
+SET plan = 'free',
+    is_developer = true
 WHERE id = 'aaaaaaaa-0004-4000-a000-000000000004';
+
+-- Admin account (E2-6: is_admin bypasses plan restrictions)
+UPDATE profiles
+SET plan = 'free',
+    is_admin = true
+WHERE id = 'aaaaaaaa-0005-4000-a000-000000000005';
+
+-- Moderator account (comment moderation privileges)
+UPDATE profiles
+SET plan = 'free',
+    is_moderator = true
+WHERE id = 'aaaaaaaa-0006-4000-a000-000000000006';
 ```
 
 ---
@@ -146,12 +180,14 @@ WHERE id = 'bbbbbbbb-0001-4000-b000-000000000001';
 
 ## 4. Test Persona Reference
 
-| Persona | Email | Password | Plan | Org | Purpose |
-|---------|-------|----------|------|-----|---------|
-| Free | `free@test.chainsolve.local` | `TestPassword1!` | free | — | Verify gating: 1 project, 2 canvases, no export |
-| Pro | `pro@test.chainsolve.local` | `TestPassword1!` | pro | — | Verify all features unlocked |
-| Enterprise | `enterprise@test.chainsolve.local` | `TestPassword1!` | pro | Acme Engineering | Verify org policy, Explore access |
-| Developer | `dev@test.chainsolve.local` | `TestPassword1!` | pro | — | Admin tools, diagnostics, all features |
+| Persona | Email | Password | Plan | Flags | Org | Purpose |
+|---------|-------|----------|------|-------|-----|---------|
+| Free | `free@test.chainsolve.local` | `TestPassword1!` | free | — | — | Verify gating: 1 project, 2 canvases, no export |
+| Pro | `pro@test.chainsolve.local` | `TestPassword1!` | pro | — | — | Verify all features unlocked |
+| Enterprise | `enterprise@test.chainsolve.local` | `TestPassword1!` | pro | — | Acme Engineering | Verify org policy, Explore access |
+| Developer | `dev@test.chainsolve.local` | `TestPassword1!` | free | `is_developer` | — | Enterprise features via role, diagnostics, admin tools |
+| Admin | `admin@test.chainsolve.local` | `TestPassword1!` | free | `is_admin` | — | Enterprise features via role, moderation + admin panels |
+| Moderator | `mod@test.chainsolve.local` | `TestPassword1!` | free | `is_moderator` | — | Comment moderation, flagged content management |
 
 ### What to Test per Persona
 
@@ -175,11 +211,25 @@ WHERE id = 'bbbbbbbb-0001-4000-b000-000000000001';
 - Audit log entries generated
 - Projects can be scoped to org
 
-**Developer**:
-- All Pro features
+**Developer** (`is_developer = true`):
+- All Pro/Enterprise features unlocked via `resolveEffectivePlan` (E2-6)
+- Plan shows as `free` in DB but effective plan is `enterprise`
 - Diagnostics page accessible (`/diagnostics`)
 - Admin tools available (when E3-1 is implemented)
 - Environment info visible in About window
+
+**Admin** (`is_admin = true`):
+- All Pro/Enterprise features unlocked via `resolveEffectivePlan` (E2-6)
+- Moderation tools + admin panels
+- Can view and manage flagged comments
+- Can resolve/dismiss avatar reports
+
+**Moderator** (`is_moderator = true`):
+- Free plan (no feature upgrades)
+- Can view flagged comments via RLS
+- Can unflag, delete, or update any comment
+- Can delete any comment on any item
+- Cannot access admin panels (no `is_admin` flag)
 
 ---
 
@@ -193,7 +243,9 @@ DELETE FROM profiles WHERE id IN (
   'aaaaaaaa-0001-4000-a000-000000000001',
   'aaaaaaaa-0002-4000-a000-000000000002',
   'aaaaaaaa-0003-4000-a000-000000000003',
-  'aaaaaaaa-0004-4000-a000-000000000004'
+  'aaaaaaaa-0004-4000-a000-000000000004',
+  'aaaaaaaa-0005-4000-a000-000000000005',
+  'aaaaaaaa-0006-4000-a000-000000000006'
 );
 
 DELETE FROM organizations WHERE id = 'bbbbbbbb-0001-4000-b000-000000000001';
@@ -203,7 +255,9 @@ DELETE FROM auth.users WHERE id IN (
   'aaaaaaaa-0001-4000-a000-000000000001',
   'aaaaaaaa-0002-4000-a000-000000000002',
   'aaaaaaaa-0003-4000-a000-000000000003',
-  'aaaaaaaa-0004-4000-a000-000000000004'
+  'aaaaaaaa-0004-4000-a000-000000000004',
+  'aaaaaaaa-0005-4000-a000-000000000005',
+  'aaaaaaaa-0006-4000-a000-000000000006'
 );
 ```
 
@@ -212,6 +266,8 @@ DELETE FROM auth.users WHERE id IN (
 ## 6. Notes
 
 - The `enterprise` plan status exists in TypeScript (`src/lib/entitlements.ts`) but has not yet been added to the PostgreSQL `plan_status` enum. Enterprise users currently use `pro` plan with org membership to distinguish them.
+- Developer and admin accounts use `plan = 'free'` in the DB — `resolveEffectivePlan()` (E2-6) returns `enterprise` when `is_developer` or `is_admin` is true. This ensures the role flags are the sole authority for elevated access, not the plan column.
+- Moderator accounts use `is_moderator = true` for comment/avatar moderation. This flag does NOT grant plan upgrades — moderators on `free` plan still see free-tier limits on their own content.
 - Test passwords use `TestPassword1!` — never use these credentials in production.
 - The `.local` email domain ensures test emails cannot leak to real inboxes.
 - All test user UUIDs use the `aaaaaaaa-000X` pattern for easy identification and cleanup.
