@@ -1276,7 +1276,7 @@ Claude MUST:
   - abuse workflow minimal
   - Acceptance: safe commenting.
 
-- [ ] E10-2: Explore metrics
+- [x] E10-2: Explore metrics
   - downloads, likes, installs
   - privacy-safe (no project content)
   - Acceptance: trustworthy stats.
