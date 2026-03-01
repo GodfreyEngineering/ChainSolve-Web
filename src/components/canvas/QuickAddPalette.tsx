@@ -17,6 +17,7 @@ import {
   BLOCK_REGISTRY,
   CATEGORY_ORDER,
   CATEGORY_LABELS,
+  LIBRARY_FAMILIES,
   type BlockDef,
 } from '../../blocks/registry'
 import { trackBlockUsed, getRecentlyUsed } from './blockLibraryUtils'
@@ -93,15 +94,27 @@ export function QuickAddPalette({
     [recentTypes],
   )
 
-  const groupedBlocks = useMemo<Array<{ category: string; label: string; blocks: BlockDef[] }>>(
+  const groupedBlocks = useMemo<
+    Array<{
+      familyId: string
+      familyLabel: string
+      groups: Array<{ category: string; label: string; blocks: BlockDef[] }>
+    }>
+  >(
     () =>
       isSearching
         ? []
-        : CATEGORY_ORDER.map((cat) => ({
-            category: cat,
-            label: CATEGORY_LABELS[cat] ?? cat,
-            blocks: ALL_BLOCKS.filter((d) => d.category === cat),
-          })).filter((g) => g.blocks.length > 0),
+        : LIBRARY_FAMILIES.map((fam) => ({
+            familyId: fam.id,
+            familyLabel: fam.label,
+            groups: fam.categories
+              .map((cat) => ({
+                category: cat,
+                label: CATEGORY_LABELS[cat] ?? cat,
+                blocks: ALL_BLOCKS.filter((d) => d.category === cat),
+              }))
+              .filter((g) => g.blocks.length > 0),
+          })).filter((f) => f.groups.length > 0),
     [isSearching],
   )
 
@@ -307,25 +320,47 @@ export function QuickAddPalette({
                 </>
               )}
 
-              {groupedBlocks.map(({ category, label, blocks }) => (
-                <div key={category}>
-                  <SectionHeader label={label} />
-                  {blocks.map((def) => {
-                    const idx = navCounter++
-                    const isActive = idx === clampedIdx
-                    const locked = !!def.proOnly && !isBlockEntitled(def, ent)
-                    return (
-                      <BlockRow
-                        key={def.type}
-                        def={def}
-                        isActive={isActive}
-                        locked={locked}
-                        navIdx={idx}
-                        onClick={() => commit(def)}
-                        onMouseEnter={() => setActiveIdx(idx)}
-                      />
-                    )
-                  })}
+              {groupedBlocks.map(({ familyId, familyLabel, groups }) => (
+                <div key={familyId}>
+                  <SectionHeader label={familyLabel} />
+                  {groups.length > 1
+                    ? groups.map(({ category, label, blocks }) => (
+                        <div key={category}>
+                          <SubHeader label={label} />
+                          {blocks.map((def) => {
+                            const idx = navCounter++
+                            const isActive = idx === clampedIdx
+                            const locked = !!def.proOnly && !isBlockEntitled(def, ent)
+                            return (
+                              <BlockRow
+                                key={def.type}
+                                def={def}
+                                isActive={isActive}
+                                locked={locked}
+                                navIdx={idx}
+                                onClick={() => commit(def)}
+                                onMouseEnter={() => setActiveIdx(idx)}
+                              />
+                            )
+                          })}
+                        </div>
+                      ))
+                    : groups[0].blocks.map((def) => {
+                        const idx = navCounter++
+                        const isActive = idx === clampedIdx
+                        const locked = !!def.proOnly && !isBlockEntitled(def, ent)
+                        return (
+                          <BlockRow
+                            key={def.type}
+                            def={def}
+                            isActive={isActive}
+                            locked={locked}
+                            navIdx={idx}
+                            onClick={() => commit(def)}
+                            onMouseEnter={() => setActiveIdx(idx)}
+                          />
+                        )
+                      })}
                 </div>
               ))}
             </>
@@ -342,14 +377,33 @@ function SectionHeader({ label }: { label: string }) {
   return (
     <div
       style={{
-        padding: '0.25rem 0.7rem 0.1rem',
-        fontSize: '0.58rem',
+        padding: '0.3rem 0.7rem 0.1rem',
+        fontSize: '0.6rem',
         fontWeight: 700,
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
-        color: 'rgba(244,244,243,0.3)',
+        color: 'rgba(244,244,243,0.4)',
         userSelect: 'none',
-        marginTop: '0.15rem',
+        marginTop: '0.2rem',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+      }}
+    >
+      {label}
+    </div>
+  )
+}
+
+function SubHeader({ label }: { label: string }) {
+  return (
+    <div
+      style={{
+        padding: '0.15rem 0.7rem 0.05rem 1rem',
+        fontSize: '0.52rem',
+        fontWeight: 600,
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase',
+        color: 'rgba(244,244,243,0.22)',
+        userSelect: 'none',
       }}
     >
       {label}
