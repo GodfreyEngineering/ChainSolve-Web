@@ -650,6 +650,16 @@ registerEngBlocks(reg)
 registerFinStatsBlocks(reg)
 registerConstantsBlocks(reg)
 
+// E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
+import { SEARCH_METADATA } from './blockSearchMetadata'
+for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {
+  const def = BLOCK_REGISTRY.get(opId)
+  if (def) {
+    if (meta.synonyms) def.synonyms = meta.synonyms
+    if (meta.tags) def.tags = meta.tags
+  }
+}
+
 // ── Catalog validation (called after WASM engine boots) ──────────────────────
 
 /**

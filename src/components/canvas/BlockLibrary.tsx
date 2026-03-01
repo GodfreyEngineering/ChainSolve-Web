@@ -32,6 +32,7 @@ import {
   getRecentlyUsed,
   getFavourites,
   toggleFavourite,
+  scoreMatch,
 } from './blockLibraryUtils'
 
 // ── Block grouping ────────────────────────────────────────────────────────────
@@ -45,13 +46,14 @@ function buildGrouped(): Map<BlockCategory, BlockDef[]> {
 
 const GROUPED = buildGrouped()
 
-/** Match query against block label, type, and type keywords (split on . and _). */
+/** E5-5: Ranked match — returns true if block matches query. */
 function matchesQuery(def: BlockDef, q: string): boolean {
-  if (def.label.toLowerCase().includes(q)) return true
-  if (def.type.toLowerCase().includes(q)) return true
-  // Split type into keywords for broader matching (e.g. "power" matches "eng.mechanics.power_work_time")
-  const keywords = def.type.toLowerCase().split(/[._]/)
-  return keywords.some((kw) => kw.includes(q))
+  return scoreMatch(def, q) !== null
+}
+
+/** E5-5: Sort blocks by search relevance (lower score = better match). */
+function sortByRelevance(blocks: BlockDef[], q: string): BlockDef[] {
+  return [...blocks].sort((a, b) => (scoreMatch(a, q) ?? 99) - (scoreMatch(b, q) ?? 99))
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
@@ -573,9 +575,10 @@ export function BlockLibrary({
 
         {/* All blocks by family → category */}
         {LIBRARY_FAMILIES.filter((fam) => !filterFamily || fam.id === filterFamily).map((fam) => {
-          const familyBlocks = fam.categories.flatMap((cat) =>
+          const familyBlocksRaw = fam.categories.flatMap((cat) =>
             (GROUPED.get(cat) ?? []).filter((d) => !q || matchesQuery(d, q)),
           )
+          const familyBlocks = q ? sortByRelevance(familyBlocksRaw, q) : familyBlocksRaw
           if (familyBlocks.length === 0) return null
           const familyHasPro = fam.categories.some((c) => PRO_CATEGORIES.has(c))
           const showSubLabels = fam.categories.length > 1
@@ -603,7 +606,10 @@ export function BlockLibrary({
               </div>
               {showSubLabels
                 ? fam.categories.map((cat) => {
-                    const blocks = (GROUPED.get(cat) ?? []).filter((d) => !q || matchesQuery(d, q))
+                    const blocksRaw = (GROUPED.get(cat) ?? []).filter(
+                      (d) => !q || matchesQuery(d, q),
+                    )
+                    const blocks = q ? sortByRelevance(blocksRaw, q) : blocksRaw
                     if (blocks.length === 0) return null
                     return (
                       <div key={cat}>

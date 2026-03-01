@@ -1,5 +1,7 @@
 /** Shared constants and helpers for BlockLibrary (split out for react-refresh). */
 
+import type { BlockDef } from '../../blocks/types'
+
 export const DRAG_TYPE = 'application/chainsolve-block'
 
 const RECENT_KEY = 'cs:recent'
@@ -47,4 +49,51 @@ export function toggleFavourite(type: string): Set<string> {
   else favs.add(type)
   localStorage.setItem(FAV_KEY, JSON.stringify([...favs]))
   return favs
+}
+
+// ── E5-5: Ranked search scoring ──────────────────────────────────────────────
+
+/**
+ * Score a block against a search query. Lower score = better match.
+ * Returns null if the block does not match at all.
+ *
+ * Scoring tiers:
+ *   1  — exact label match
+ *   2  — exact type match
+ *   5  — label starts with query
+ *  10  — label contains query
+ *  12  — type (opId) contains query
+ *  15  — synonym match
+ *  20  — tag match
+ *  25  — input port label match
+ */
+export function scoreMatch(def: BlockDef, q: string): number | null {
+  const lq = q.toLowerCase()
+  let best: number | null = null
+
+  const tryScore = (s: number) => {
+    if (best === null || s < best) best = s
+  }
+
+  // Exact matches
+  if (def.label.toLowerCase() === lq) tryScore(1)
+  else if (def.type.toLowerCase() === lq) tryScore(2)
+
+  // Label prefix / substring
+  if (def.label.toLowerCase().startsWith(lq)) tryScore(5)
+  else if (def.label.toLowerCase().includes(lq)) tryScore(10)
+
+  // Type (opId) substring — covers type keywords (split on . and _) as well
+  if (def.type.toLowerCase().includes(lq)) tryScore(12)
+
+  // Synonyms
+  if (def.synonyms?.some((s) => s.toLowerCase().includes(lq))) tryScore(15)
+
+  // Tags
+  if (def.tags?.some((t) => t.toLowerCase().includes(lq))) tryScore(20)
+
+  // Input port labels
+  if (def.inputs.some((p) => p.label.toLowerCase().includes(lq))) tryScore(25)
+
+  return best
 }

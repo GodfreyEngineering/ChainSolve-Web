@@ -161,4 +161,8 @@ export interface BlockDef {
   defaultData: NodeData
   /** True for Pro-only blocks (data, vectorOps, tableOps). */
   proOnly?: boolean
+  /** E5-5: Alternative names for search (e.g. ["acceleration"] for F=ma). */
+  synonyms?: string[]
+  /** E5-5: Domain tags for search (e.g. ["mechanics", "dynamics"]). */
+  tags?: string[]
 }
