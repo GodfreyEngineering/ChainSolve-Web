@@ -10,6 +10,8 @@ import {
   buildExpressionTree,
   renderExpressionText,
   renderExpressionSubstituted,
+  renderExpressionLatex,
+  renderEquationText,
 } from './expressionExtractor'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -255,5 +257,88 @@ describe('renderExpressionSubstituted', () => {
     ])
     const tree = buildExpressionTree('sin', nodes, edges, computed)!
     expect(renderExpressionSubstituted(tree)).toBe('sin(1.5)')
+  })
+})
+
+// ── renderExpressionLatex (E6-2) ────────────────────────────────────────────
+
+describe('renderExpressionLatex', () => {
+  it('renders add as infix with cdot-free +', () => {
+    const nodes = [
+      makeNode('n1', 'number', 'A', 3),
+      makeNode('n2', 'number', 'B', 4),
+      makeNode('add', 'add', 'Add'),
+    ]
+    const edges = [makeEdge('e1', 'n1', 'add', 'a'), makeEdge('e2', 'n2', 'add', 'b')]
+    const computed = new Map<string, Value>([
+      ['n1', mkScalar(3)],
+      ['n2', mkScalar(4)],
+      ['add', mkScalar(7)],
+    ])
+    const tree = buildExpressionTree('add', nodes, edges, computed)!
+    expect(renderExpressionLatex(tree, 'symbolic')).toBe('A + B')
+  })
+
+  it('renders division as frac', () => {
+    const nodes = [
+      makeNode('n1', 'number', 'a', 10),
+      makeNode('n2', 'number', 'b', 2),
+      makeNode('div', 'divide', 'Divide'),
+    ]
+    const edges = [makeEdge('e1', 'n1', 'div', 'a'), makeEdge('e2', 'n2', 'div', 'b')]
+    const computed = new Map<string, Value>([
+      ['n1', mkScalar(10)],
+      ['n2', mkScalar(2)],
+      ['div', mkScalar(5)],
+    ])
+    const tree = buildExpressionTree('div', nodes, edges, computed)!
+    expect(renderExpressionLatex(tree, 'symbolic')).toBe('\\frac{a}{b}')
+  })
+
+  it('renders sqrt with radical', () => {
+    const nodes = [makeNode('n1', 'number', 'x', 9), makeNode('sq', 'sqrt', 'Sqrt')]
+    const edges = [makeEdge('e1', 'n1', 'sq', 'a')]
+    const computed = new Map<string, Value>([
+      ['n1', mkScalar(9)],
+      ['sq', mkScalar(3)],
+    ])
+    const tree = buildExpressionTree('sq', nodes, edges, computed)!
+    expect(renderExpressionLatex(tree, 'symbolic')).toBe('\\sqrt{x}')
+  })
+
+  it('renders substituted values in LaTeX', () => {
+    const nodes = [
+      makeNode('n1', 'number', 'A', 3),
+      makeNode('n2', 'number', 'B', 4),
+      makeNode('add', 'add', 'Add'),
+    ]
+    const edges = [makeEdge('e1', 'n1', 'add', 'a'), makeEdge('e2', 'n2', 'add', 'b')]
+    const computed = new Map<string, Value>([
+      ['n1', mkScalar(3)],
+      ['n2', mkScalar(4)],
+      ['add', mkScalar(7)],
+    ])
+    const tree = buildExpressionTree('add', nodes, edges, computed)!
+    expect(renderExpressionLatex(tree, 'substituted')).toBe('3 + 4')
+  })
+})
+
+// ── renderEquationText (E6-2) ───────────────────────────────────────────────
+
+describe('renderEquationText', () => {
+  it('renders label = value', () => {
+    const nodes = [
+      makeNode('n1', 'number', 'A', 3),
+      makeNode('n2', 'number', 'B', 4),
+      makeNode('add', 'add', 'Add'),
+    ]
+    const edges = [makeEdge('e1', 'n1', 'add', 'a'), makeEdge('e2', 'n2', 'add', 'b')]
+    const computed = new Map<string, Value>([
+      ['n1', mkScalar(3)],
+      ['n2', mkScalar(4)],
+      ['add', mkScalar(7)],
+    ])
+    const tree = buildExpressionTree('add', nodes, edges, computed)!
+    expect(renderEquationText(tree)).toBe('(A [3] + B [4]) = 7')
   })
 })

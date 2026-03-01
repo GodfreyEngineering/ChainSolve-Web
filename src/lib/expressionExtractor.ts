@@ -319,6 +319,164 @@ export function renderExpressionSubstituted(expr: ExpressionNode): string {
   return formatNodeValue(expr)
 }
 
+// ── LaTeX rendering ─────────────────────────────────────────────────────────
+
+const LATEX_SYMBOLS: Record<string, string> = {
+  add: '+',
+  subtract: '-',
+  multiply: '\\cdot',
+  power: '^',
+  mod: '\\bmod',
+  sqrt: '\\sqrt',
+  sin: '\\sin',
+  cos: '\\cos',
+  tan: '\\tan',
+  asin: '\\arcsin',
+  acos: '\\arccos',
+  atan: '\\arctan',
+  ln: '\\ln',
+  log10: '\\log_{10}',
+  exp: '\\exp',
+  floor: '\\lfloor',
+  ceil: '\\lceil',
+  round: '\\mathrm{round}',
+  trunc: '\\mathrm{trunc}',
+  sign: '\\mathrm{sign}',
+  min: '\\min',
+  max: '\\max',
+  abs: '\\left|',
+}
+
+/**
+ * Render an expression tree as a LaTeX string.
+ *
+ * @param mode 'symbolic' uses labels, 'substituted' uses values.
+ */
+export function renderExpressionLatex(
+  expr: ExpressionNode,
+  mode: 'symbolic' | 'substituted' = 'symbolic',
+): string {
+  const blockType = expr.opType
+
+  // Source/leaf nodes
+  if (
+    SOURCE_TYPES.has(blockType) ||
+    blockType.startsWith('const.') ||
+    blockType.startsWith('preset.')
+  ) {
+    if (mode === 'substituted') return formatNodeValue(expr)
+    return escapeLatex(expr.label)
+  }
+
+  // Display/probe — transparent
+  if (blockType === 'display' || blockType === 'probe') {
+    const child = expr.inputs['value']
+    return child ? renderExpressionLatex(child, mode) : escapeLatex(expr.label)
+  }
+
+  // Division → frac
+  if (blockType === 'divide' && expr.portOrder.length === 2) {
+    const num = expr.inputs[expr.portOrder[0]]
+    const den = expr.inputs[expr.portOrder[1]]
+    const numStr = num ? renderExpressionLatex(num, mode) : '?'
+    const denStr = den ? renderExpressionLatex(den, mode) : '?'
+    return `\\frac{${numStr}}{${denStr}}`
+  }
+
+  // Power → base^{exp}
+  if (blockType === 'power' && expr.portOrder.length === 2) {
+    const base = expr.inputs[expr.portOrder[0]]
+    const exp = expr.inputs[expr.portOrder[1]]
+    const baseStr = base ? renderExpressionLatex(base, mode) : '?'
+    const expStr = exp ? renderExpressionLatex(exp, mode) : '?'
+    return `{${baseStr}}^{${expStr}}`
+  }
+
+  // Other infix binary ops
+  if (INFIX_OPS.has(blockType) && expr.portOrder.length === 2) {
+    const sym = LATEX_SYMBOLS[blockType] ?? blockType
+    const left = expr.inputs[expr.portOrder[0]]
+    const right = expr.inputs[expr.portOrder[1]]
+    const leftStr = left ? renderExpressionLatex(left, mode) : '?'
+    const rightStr = right ? renderExpressionLatex(right, mode) : '?'
+    return `${leftStr} ${sym} ${rightStr}`
+  }
+
+  // Sqrt → special
+  if (blockType === 'sqrt' && expr.portOrder.length >= 1) {
+    const arg = expr.inputs[expr.portOrder[0]]
+    const argStr = arg ? renderExpressionLatex(arg, mode) : '?'
+    return `\\sqrt{${argStr}}`
+  }
+
+  // Abs → |x|
+  if (blockType === 'abs' && expr.portOrder.length >= 1) {
+    const arg = expr.inputs[expr.portOrder[0]]
+    const argStr = arg ? renderExpressionLatex(arg, mode) : '?'
+    return `\\left|${argStr}\\right|`
+  }
+
+  // Floor/ceil
+  if (blockType === 'floor' && expr.portOrder.length >= 1) {
+    const arg = expr.inputs[expr.portOrder[0]]
+    const argStr = arg ? renderExpressionLatex(arg, mode) : '?'
+    return `\\lfloor ${argStr} \\rfloor`
+  }
+  if (blockType === 'ceil' && expr.portOrder.length >= 1) {
+    const arg = expr.inputs[expr.portOrder[0]]
+    const argStr = arg ? renderExpressionLatex(arg, mode) : '?'
+    return `\\lceil ${argStr} \\rceil`
+  }
+
+  // Other unary function ops
+  if (UNARY_FN_OPS.has(blockType) && expr.portOrder.length >= 1) {
+    const sym = LATEX_SYMBOLS[blockType] ?? `\\mathrm{${escapeLatex(blockType)}}`
+    const arg = expr.inputs[expr.portOrder[0]]
+    const argStr = arg ? renderExpressionLatex(arg, mode) : '?'
+    return `${sym}\\left(${argStr}\\right)`
+  }
+
+  // Generic function call
+  if (expr.portOrder.length > 0) {
+    const args = expr.portOrder
+      .map((port) => {
+        const child = expr.inputs[port]
+        return child ? renderExpressionLatex(child, mode) : '?'
+      })
+      .join(', ')
+    return `\\mathrm{${escapeLatex(expr.label)}}\\left(${args}\\right)`
+  }
+
+  if (mode === 'substituted') return formatNodeValue(expr)
+  return escapeLatex(expr.label)
+}
+
+function escapeLatex(s: string): string {
+  return s.replace(/[_&%$#{}~^\\]/g, (c) => `\\${c}`)
+}
+
+// ── Equation string (label = value) ─────────────────────────────────────────
+
+/**
+ * Render a full equation: symbolic = result (plain text).
+ * Example: `(A + B) = 7`
+ */
+export function renderEquationText(expr: ExpressionNode): string {
+  const sym = renderExpressionText(expr)
+  const val = expr.value ? formatNodeValue({ ...expr, sourceValue: undefined }) : '?'
+  return `${sym} = ${val}`
+}
+
+/**
+ * Render a full equation: symbolic = result (LaTeX).
+ * Example: `A + B = 7`
+ */
+export function renderEquationLatex(expr: ExpressionNode): string {
+  const sym = renderExpressionLatex(expr, 'symbolic')
+  const val = expr.value ? formatNodeValue({ ...expr, sourceValue: undefined }) : '?'
+  return `${sym} = ${val}`
+}
+
 function formatNodeValue(expr: ExpressionNode): string {
   if (expr.sourceValue !== undefined) return String(expr.sourceValue)
   if (!expr.value) return '?'
