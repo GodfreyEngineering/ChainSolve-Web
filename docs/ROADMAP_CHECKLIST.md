@@ -823,7 +823,7 @@ Claude MUST:
 ---
 
 ## D12 — User profile + identity + safety
-- [ ] D12-1: Profile window
+- [x] D12-1: Profile window
   - Display name
   - Profile image upload (stored in uploads bucket or dedicated avatars bucket)
   - Account metadata
