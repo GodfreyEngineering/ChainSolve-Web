@@ -1226,7 +1226,7 @@ Claude MUST:
 ## E7 — Annotations & presentation tools
 > Goal: users can “dress up” graphs for sharing/reporting.
 
-- [ ] E7-1: Annotation layer v1 (non-evaluating)
+- [x] E7-1: Annotation layer v1 (non-evaluating)
   - Add annotation node kinds:
     - text label
     - arrow connector
