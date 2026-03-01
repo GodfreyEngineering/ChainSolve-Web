@@ -88,7 +88,7 @@ const s = {
   section: {
     maxWidth: '900px',
     margin: '0 auto 2rem',
-    background: '#383838',
+    background: 'var(--card-bg)',
     borderRadius: '12px',
     padding: '1.5rem',
   } satisfies React.CSSProperties,

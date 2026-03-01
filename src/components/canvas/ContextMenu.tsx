@@ -131,12 +131,12 @@ export function ContextMenu({
     left: target.x,
     top: target.y,
     zIndex: 1000,
-    background: '#2c2c2c',
-    border: '1px solid rgba(255,255,255,0.12)',
+    background: 'var(--card-bg)',
+    border: '1px solid var(--border)',
     borderRadius: 8,
     padding: '0.3rem',
     minWidth: 160,
-    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+    boxShadow: 'var(--shadow-lg)',
     userSelect: 'none',
   }
 

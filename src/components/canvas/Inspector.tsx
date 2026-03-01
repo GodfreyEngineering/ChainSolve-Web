@@ -94,7 +94,7 @@ export function Inspector({
   const panelStyle: React.CSSProperties = floating
     ? {
         flex: 1,
-        background: '#2c2c2c',
+        background: 'var(--card-bg)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -103,8 +103,8 @@ export function Inspector({
     : {
         width,
         flexShrink: 0,
-        borderLeft: '1px solid rgba(255,255,255,0.08)',
-        background: '#2c2c2c',
+        borderLeft: '1px solid var(--border)',
+        background: 'var(--card-bg)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',

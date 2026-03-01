@@ -143,12 +143,12 @@ const GROUP_HEADER_HEIGHT = 36
 
 const collapsedStyle: React.CSSProperties = {
   minWidth: 180,
-  background: '#383838',
+  background: 'var(--card-bg)',
   border: '2px solid',
   borderRadius: 10,
   fontFamily: "'Montserrat', system-ui, sans-serif",
   fontSize: '0.8rem',
-  color: '#F4F4F3',
+  color: 'var(--text)',
   overflow: 'hidden',
   boxSizing: 'border-box',
 }
@@ -159,7 +159,7 @@ const headerStyle: React.CSSProperties = {
   gap: '0.4rem',
   padding: '0.3rem 0.6rem',
   height: GROUP_HEADER_HEIGHT,
-  borderBottom: '1px solid rgba(255,255,255,0.08)',
+  borderBottom: '1px solid var(--border)',
   cursor: 'grab',
 }
 
@@ -184,7 +184,7 @@ const labelStyle: React.CSSProperties = {
 const badgeStyle: React.CSSProperties = {
   fontSize: '0.65rem',
   fontWeight: 600,
-  color: 'rgba(244,244,243,0.5)',
+  color: 'var(--text-muted)',
   flexShrink: 0,
 }
 
@@ -209,7 +209,7 @@ const proxyRow: React.CSSProperties = {
 
 const proxyLabel: React.CSSProperties = {
   fontSize: '0.7rem',
-  color: 'rgba(244,244,243,0.6)',
+  color: 'var(--text-muted)',
   flex: 1,
   whiteSpace: 'nowrap',
   overflow: 'hidden',
@@ -222,13 +222,13 @@ const proxyDirLabel: React.CSSProperties = {
   top: -8,
   fontSize: '0.55rem',
   fontWeight: 700,
-  color: 'rgba(244,244,243,0.3)',
+  color: 'var(--text-muted)',
   letterSpacing: '0.05em',
 }
 
 const proxyHandleStyle: React.CSSProperties = {
   width: 10,
   height: 10,
-  border: '2px solid #383838',
+  border: '2px solid var(--card-bg)',
   position: 'relative',
 }
