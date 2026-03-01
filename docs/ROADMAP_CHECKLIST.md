@@ -1064,7 +1064,7 @@ Claude MUST:
 ## E2 — Auth & account system v2 (signup/login enterprise-grade)
 > Goal: proper web-app auth: ToS, marketing prefs, captcha, email verification, 2FA, device sessions, re-login rules.
 
-- [ ] E2-1: New Auth UI (login/signup/reset) as first-class routes
+- [x] E2-1: New Auth UI (login/signup/reset) as first-class routes
   - Signup fields:
     - email, password, confirm password
     - accept Terms & Conditions checkbox
