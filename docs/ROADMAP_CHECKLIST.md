@@ -1175,7 +1175,7 @@ Claude MUST:
   - Create a structured manifest file (YAML/JSON) listing blocks to implement and metadata.
   - Acceptance: future block additions are systematic.
 
-- [ ] E5-2: Excel numeric functions coverage v1 (core set)
+- [x] E5-2: Excel numeric functions coverage v1 (core set)
   - Implement a prioritized set first (common + high ROI):
     - rounding, abs, min/max, trig, log/exp, stats basics, combinatorics, financial basics
   - All these premade functions must be Free.
