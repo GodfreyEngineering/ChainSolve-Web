@@ -1248,7 +1248,7 @@ Claude MUST:
   - Add regression tests
   - Acceptance: no false conflicts and saves always apply.
 
-- [ ] E8-2: Save pipeline robustness audit
+- [x] E8-2: Save pipeline robustness audit
   - Ensure sheet add/reorder never silently fails.
   - Ensure conflict handling never leaves app in “can’t save” state.
   - Acceptance: reliable saving under stress.
