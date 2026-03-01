@@ -258,6 +258,7 @@
       "category": "probDist",
       "priority": "high",
       "phase": "E5-4",
+      "subVersion": "v2",
       "inputs": [{ "id": "x", "label": "x" }, { "id": "mu", "label": "μ" }, { "id": "sigma", "label": "σ" }],
       "notes": "Cumulative distribution function for normal distribution."
     },
@@ -267,6 +268,7 @@
       "category": "probDist",
       "priority": "high",
       "phase": "E5-4",
+      "subVersion": "v2",
       "inputs": [{ "id": "p", "label": "Probability" }, { "id": "mu", "label": "μ" }, { "id": "sigma", "label": "σ" }],
       "notes": "Inverse normal CDF. Excel NORM.INV."
     },
@@ -276,6 +278,7 @@
       "category": "probDist",
       "priority": "medium",
       "phase": "E5-4",
+      "subVersion": "v2",
       "inputs": [{ "id": "x", "label": "x" }, { "id": "df", "label": "df" }],
       "notes": "Student's t cumulative distribution."
     },
@@ -285,6 +288,7 @@
       "category": "probDist",
       "priority": "medium",
       "phase": "E5-4",
+      "subVersion": "v2",
       "inputs": [{ "id": "x", "label": "x" }, { "id": "df", "label": "df" }],
       "notes": "Chi-squared cumulative distribution."
     },
@@ -294,6 +298,7 @@
       "category": "probDist",
       "priority": "low",
       "phase": "E5-4",
+      "subVersion": "v2",
       "inputs": [{ "id": "x", "label": "x" }, { "id": "df1", "label": "df₁" }, { "id": "df2", "label": "df₂" }],
       "notes": "F-distribution cumulative distribution."
     },
@@ -303,6 +308,7 @@
       "category": "statsRel",
       "priority": "high",
       "phase": "E5-4",
+      "subVersion": "v2",
       "inputs": [{ "id": "c", "label": "Count" }, { "id": "x1", "label": "X1" }, { "id": "y1", "label": "Y1" }],
       "notes": "Coefficient of determination for linear regression."
     },
@@ -312,6 +318,7 @@
       "category": "statsRel",
       "priority": "medium",
       "phase": "E5-4",
+      "subVersion": "v2",
       "inputs": [{ "id": "c", "label": "Count" }, { "id": "x1", "label": "X1" }, { "id": "y1", "label": "Y1" }],
       "notes": "Spearman rank correlation coefficient."
     },
@@ -321,6 +328,7 @@
       "category": "probComb",
       "priority": "low",
       "phase": "E5-4",
+      "subVersion": "v3",
       "inputs": [{ "id": "c", "label": "Count" }, { "id": "x1", "label": "n1" }],
       "notes": "Multinomial coefficient."
     },
@@ -330,6 +338,7 @@
       "category": "utilCalc",
       "priority": "low",
       "phase": "E5-4",
+      "subVersion": "v4",
       "inputs": [{ "id": "a", "label": "n" }],
       "notes": "Returns 1 if prime, 0 otherwise."
     },
@@ -339,6 +348,7 @@
       "category": "utilCalc",
       "priority": "low",
       "phase": "E5-4",
+      "subVersion": "v4",
       "inputs": [{ "id": "a", "label": "n" }],
       "notes": "nth Fibonacci number."
     },
@@ -348,6 +358,7 @@
       "category": "math",
       "priority": "medium",
       "phase": "E5-4",
+      "subVersion": "v4",
       "inputs": [{ "id": "a", "label": "Start" }, { "id": "b", "label": "End" }, { "id": "t", "label": "t" }],
       "notes": "Linear interpolation: a + t*(b-a)."
     },
@@ -357,6 +368,7 @@
       "category": "math",
       "priority": "medium",
       "phase": "E5-4",
+      "subVersion": "v4",
       "inputs": [{ "id": "val", "label": "Value" }, { "id": "inMin", "label": "In Min" }, { "id": "inMax", "label": "In Max" }, { "id": "outMin", "label": "Out Min" }, { "id": "outMax", "label": "Out Max" }],
       "notes": "Remap value from one range to another."
     },
