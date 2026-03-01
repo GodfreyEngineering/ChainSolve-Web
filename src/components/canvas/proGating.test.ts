@@ -191,7 +191,7 @@ describe('Materials catalog (D7-4)', () => {
     const catalogTypes = new Set(catalog.map((c) => c.type))
     expect(catalogTypes.has('material')).toBe(false)
     expect(catalogTypes.has('preset.materials.steel_rho')).toBe(true)
-    expect(catalogTypes.has('preset.fluids.water_rho')).toBe(true)
+    expect(catalogTypes.has('preset.fluids.water_rho_20c')).toBe(true)
   })
 
   it('catalog does not include physics/math constants', () => {

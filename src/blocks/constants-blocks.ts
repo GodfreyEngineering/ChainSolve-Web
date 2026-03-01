@@ -117,12 +117,12 @@ export function registerConstantsBlocks(register: (def: BlockDef) => void): void
   })
 
   register({
-    type: 'const.physics.F_faraday',
+    type: 'const.physics.F',
     label: 'F (Faraday)',
     category: 'constPhysics',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'const.physics.F_faraday', label: 'F' },
+    defaultData: { blockType: 'const.physics.F', label: 'F' },
   })
 
   register({
@@ -182,30 +182,30 @@ export function registerConstantsBlocks(register: (def: BlockDef) => void): void
   // ── Atmospheric Constants ───────────────────────────────────────────
 
   register({
-    type: 'const.atmos.p0',
+    type: 'const.atmos.p0_pa',
     label: 'p₀ (101 325 Pa)',
     category: 'constAtmos',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'const.atmos.p0', label: 'p₀' },
+    defaultData: { blockType: 'const.atmos.p0_pa', label: 'p₀' },
   })
 
   register({
-    type: 'const.atmos.T0',
+    type: 'const.atmos.t0_k',
     label: 'T₀ (288.15 K)',
     category: 'constAtmos',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'const.atmos.T0', label: 'T₀' },
+    defaultData: { blockType: 'const.atmos.t0_k', label: 'T₀' },
   })
 
   register({
-    type: 'const.atmos.rho_air',
+    type: 'const.atmos.rho_air_sl',
     label: 'ρ_air (1.225 kg/m³)',
     category: 'constAtmos',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'const.atmos.rho_air', label: 'ρ_air' },
+    defaultData: { blockType: 'const.atmos.rho_air_sl', label: 'ρ_air' },
   })
 
   register({
@@ -227,21 +227,21 @@ export function registerConstantsBlocks(register: (def: BlockDef) => void): void
   })
 
   register({
-    type: 'const.atmos.mu_air',
+    type: 'const.atmos.mu_air_20c',
     label: 'μ_air (1.81e-5 Pa·s)',
     category: 'constAtmos',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'const.atmos.mu_air', label: 'μ_air' },
+    defaultData: { blockType: 'const.atmos.mu_air_20c', label: 'μ_air' },
   })
 
   register({
-    type: 'const.atmos.a_air',
+    type: 'const.atmos.a_air_20c',
     label: 'a_air (343 m/s)',
     category: 'constAtmos',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'const.atmos.a_air', label: 'a_air' },
+    defaultData: { blockType: 'const.atmos.a_air_20c', label: 'a_air' },
   })
 
   // ── Thermodynamic Constants ─────────────────────────────────────────
@@ -332,77 +332,77 @@ export function registerConstantsBlocks(register: (def: BlockDef) => void): void
   })
 
   register({
-    type: 'preset.materials.aluminium_rho',
+    type: 'preset.materials.al_rho',
     label: 'Aluminium ρ (2700 kg/m³)',
     category: 'presetMaterials',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'preset.materials.aluminium_rho', label: 'Al ρ' },
+    defaultData: { blockType: 'preset.materials.al_rho', label: 'Al ρ' },
   })
 
   register({
-    type: 'preset.materials.aluminium_E',
+    type: 'preset.materials.al_E',
     label: 'Aluminium E (69 GPa)',
     category: 'presetMaterials',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'preset.materials.aluminium_E', label: 'Al E' },
+    defaultData: { blockType: 'preset.materials.al_E', label: 'Al E' },
   })
 
   register({
-    type: 'preset.materials.aluminium_nu',
+    type: 'preset.materials.al_nu',
     label: 'Aluminium ν (0.33)',
     category: 'presetMaterials',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'preset.materials.aluminium_nu', label: 'Al ν' },
+    defaultData: { blockType: 'preset.materials.al_nu', label: 'Al ν' },
   })
 
   register({
-    type: 'preset.materials.titanium_rho',
+    type: 'preset.materials.ti_rho',
     label: 'Titanium ρ (4507 kg/m³)',
     category: 'presetMaterials',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'preset.materials.titanium_rho', label: 'Ti ρ' },
+    defaultData: { blockType: 'preset.materials.ti_rho', label: 'Ti ρ' },
   })
 
   register({
-    type: 'preset.materials.titanium_E',
+    type: 'preset.materials.ti_E',
     label: 'Titanium E (116 GPa)',
     category: 'presetMaterials',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'preset.materials.titanium_E', label: 'Ti E' },
+    defaultData: { blockType: 'preset.materials.ti_E', label: 'Ti E' },
   })
 
   register({
-    type: 'preset.materials.titanium_nu',
+    type: 'preset.materials.ti_nu',
     label: 'Titanium ν (0.34)',
     category: 'presetMaterials',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'preset.materials.titanium_nu', label: 'Ti ν' },
+    defaultData: { blockType: 'preset.materials.ti_nu', label: 'Ti ν' },
   })
 
   // ── Fluid Presets ───────────────────────────────────────────────────
 
   register({
-    type: 'preset.fluids.water_rho',
+    type: 'preset.fluids.water_rho_20c',
     label: 'Water ρ (998 kg/m³)',
     category: 'presetFluids',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'preset.fluids.water_rho', label: 'Water ρ' },
+    defaultData: { blockType: 'preset.fluids.water_rho_20c', label: 'Water ρ' },
   })
 
   register({
-    type: 'preset.fluids.water_mu',
+    type: 'preset.fluids.water_mu_20c',
     label: 'Water μ (1.002e-3 Pa·s)',
     category: 'presetFluids',
     nodeKind: 'csSource',
     inputs: [],
-    defaultData: { blockType: 'preset.fluids.water_mu', label: 'Water μ' },
+    defaultData: { blockType: 'preset.fluids.water_mu_20c', label: 'Water μ' },
   })
 
   register({

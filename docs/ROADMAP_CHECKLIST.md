@@ -975,7 +975,7 @@ Claude MUST:
     - Preferences navigation works.
     - No regressions to window manager.
 
-- [ ] E0-2: Resolve CSP errors for Cloudflare Insights beacon
+- [x] E0-2: Resolve CSP errors for Cloudflare Insights beacon
   - Current: script load blocked at `https://static.cloudflareinsights.com/beacon.min.js`
   - Decide and implement ONE of:
     A) Disable Cloudflare Insights injection for app domain (preferred for strict CSP + privacy), OR

@@ -657,6 +657,12 @@ registerConstantsBlocks(reg)
  * Logs warnings for any mismatches. Does not replace entries —
  * TS keeps defaultData (Rust doesn't carry UI defaults).
  */
+/**
+ * UI-only block types — picker stubs that resolve to a specific engine op
+ * when the user makes a selection. They never reach the Rust engine directly.
+ */
+const UI_ONLY_BLOCKS = new Set(['constant', 'material'])
+
 export function validateCatalog(catalog: CatalogEntry[]): void {
   for (const entry of catalog) {
     const def = BLOCK_REGISTRY.get(entry.opId)
@@ -665,6 +671,7 @@ export function validateCatalog(catalog: CatalogEntry[]): void {
     }
   }
   for (const [type] of BLOCK_REGISTRY) {
+    if (UI_ONLY_BLOCKS.has(type)) continue
     if (!catalog.some((e) => e.opId === type)) {
       console.warn(
         `[registry] TS block "${type}" is not in the Rust catalog — engine won't evaluate it`,

@@ -176,7 +176,7 @@ fn evaluate_node_inner(
         }
 
         // ── Output (pass-through) ────────────────────────────────
-        "display" => {
+        "display" | "probe" => {
             inputs
                 .get("value")
                 .cloned()
