@@ -845,7 +845,7 @@ Claude MUST:
   - Fix and add regression tests.
   - Acceptance: no false conflicts in normal use.
 
-- [ ] D13-2: Ensure sheet add/delete/reorder always saves correctly
+- [x] D13-2: Ensure sheet add/delete/reorder always saves correctly
   - Confirm DB + storage writes are in sync
   - Add tests for state transitions.
   - Acceptance: changes persist reliably.
