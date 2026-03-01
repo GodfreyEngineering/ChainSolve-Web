@@ -77,7 +77,7 @@ import { saveTemplate as saveTemplateApi } from '../../lib/templates'
 import type { Template } from '../../lib/templates'
 import { AnimatedEdge } from './edges/AnimatedEdge'
 import { CanvasSettingsContext } from '../../contexts/CanvasSettingsContext'
-import { BottomToolbar } from './BottomToolbar'
+import { CanvasToolbar, CANVAS_TOOLBAR_WIDTH } from './CanvasToolbar'
 import { useTranslation } from 'react-i18next'
 import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
 import { useGraphHistory } from '../../hooks/useGraphHistory'
@@ -1452,7 +1452,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       style={{
         position: 'absolute',
         top: 10,
-        right: 10,
+        right: 10 + CANVAS_TOOLBAR_WIDTH + 8,
         zIndex: 10,
         display: 'flex',
         flexDirection: 'column',
@@ -1703,7 +1703,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     />
                   )}
                 </ReactFlow>
-                <BottomToolbar
+                <CanvasToolbar
                   panMode={panMode}
                   locked={locked}
                   snapToGrid={snapToGrid}

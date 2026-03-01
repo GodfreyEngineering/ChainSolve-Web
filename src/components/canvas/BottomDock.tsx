@@ -166,7 +166,7 @@ const dockStyle: React.CSSProperties = {
   position: 'absolute',
   bottom: 0,
   left: 0,
-  right: 0,
+  right: 48, // leave room for vertical CanvasToolbar
   zIndex: 15,
   display: 'flex',
   flexDirection: 'column',

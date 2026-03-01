@@ -1025,7 +1025,7 @@ Claude MUST:
   - Keyboard/focus visible for all.
   - Acceptance: UI primitives replace one-off styling.
 
-- [ ] E1-3: Layout refactor: App Shell “workbench” states
+- [x] E1-3: Layout refactor: App Shell “workbench” states
   - States:
     - No project open (Workbench Home)
     - Project open (Canvas workspace)
