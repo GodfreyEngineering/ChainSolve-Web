@@ -1304,7 +1304,7 @@ Claude MUST:
   - Test persona checklist
   - Acceptance: “anyone can release”.
 
-- [ ] E11-3: Performance + polish pass
+- [x] E11-3: Performance + polish pass
   - remove jank, improve LOD, confirm edge stability
   - Acceptance: feels fast and smooth.
 
