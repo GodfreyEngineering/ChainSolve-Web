@@ -60,10 +60,21 @@ describe('DOCS_INDEX structure', () => {
 
   it('contains entries from expected sections', () => {
     const sections = new Set(DOCS_INDEX.map((e) => e.section))
+    expect(sections.has('Quick guides')).toBe(true)
     expect(sections.has('Getting started')).toBe(true)
     expect(sections.has('Blocks')).toBe(true)
     expect(sections.has('Canvas')).toBe(true)
     expect(sections.has('Export')).toBe(true)
+  })
+
+  it('quick guides section has exactly 4 entries', () => {
+    const guides = DOCS_INDEX.filter((e) => e.section === 'Quick guides')
+    expect(guides.length).toBe(4)
+    const ids = guides.map((e) => e.id)
+    expect(ids).toContain('qg-ten-nodes')
+    expect(ids).toContain('qg-variables')
+    expect(ids).toContain('qg-exports')
+    expect(ids).toContain('qg-explore')
   })
 })
 
@@ -143,5 +154,25 @@ describe('searchDocs', () => {
     const results = searchDocs('template')
     const ids = results.map((r: DocsEntry) => r.id)
     expect(ids).toContain('gs-templates')
+  })
+
+  it('matches "10 nodes" quick guide', () => {
+    const results = searchDocs('10 nodes')
+    const ids = results.map((r: DocsEntry) => r.id)
+    expect(ids).toContain('qg-ten-nodes')
+  })
+
+  it('matches "explore" quick guide and marketplace entry', () => {
+    const results = searchDocs('explore')
+    const ids = results.map((r: DocsEntry) => r.id)
+    expect(ids).toContain('qg-explore')
+  })
+
+  it('matches quick guides by section name', () => {
+    const results = searchDocs('quick guide')
+    expect(results.length).toBe(4)
+    for (const r of results) {
+      expect(r.section).toBe('Quick guides')
+    }
   })
 })

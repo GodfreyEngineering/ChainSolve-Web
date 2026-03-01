@@ -16,6 +16,57 @@ export interface DocsEntry {
 }
 
 export const DOCS_INDEX: DocsEntry[] = [
+  // ── Quick guides ───────────────────────────────────────────────────────
+  {
+    id: 'qg-ten-nodes',
+    section: 'Quick guides',
+    title: '10 nodes in 2 minutes',
+    description:
+      '1) Add two Number blocks. 2) Add an Add block — connect both numbers into it. 3) Add a Multiply block — connect the sum into it, then add a third Number as the multiplier. 4) Add a Display block to see the result. 5) Duplicate this pattern: Subtract → Divide → Display. You now have 10 blocks forming a live calculation chain. Edit any number to see every result update instantly.',
+    keywords: [
+      'quick start',
+      'tutorial',
+      'first',
+      'beginner',
+      'walkthrough',
+      '10 nodes',
+      'two minutes',
+    ],
+  },
+  {
+    id: 'qg-variables',
+    section: 'Quick guides',
+    title: 'Variables & constants',
+    description:
+      'Open the Variables panel (View menu) to create named values. A variable can be bound to any block input — change the variable once and every bound input updates. Set min/max/step to get a slider for interactive exploration. Use constants (gravity, π, e) by typing the name into a Number block.',
+    keywords: [
+      'variable',
+      'constant',
+      'bind',
+      'slider',
+      'named value',
+      'pi',
+      'gravity',
+      'parameter',
+    ],
+  },
+  {
+    id: 'qg-exports',
+    section: 'Quick guides',
+    title: 'Exports (Pro)',
+    description:
+      'Pro users can export their work in three formats: File → Export → Audit PDF for a formatted calculation report, File → Export → Excel for a structured .xlsx workbook with one sheet per canvas, and File → Export → Project for a portable .chainsolvejson backup. Free-tier users can view results on-screen but exports require a Pro subscription.',
+    keywords: ['export', 'pdf', 'excel', 'json', 'pro', 'download', 'report', 'backup'],
+  },
+  {
+    id: 'qg-explore',
+    section: 'Quick guides',
+    title: 'Installing from Explore',
+    description:
+      'Browse the Explore page to find community templates, block packs, and themes. Click an item to see details, then press Install to add it to your project. Templates create a new canvas; block packs add reusable blocks to your library. Check the compatibility badge to ensure the item works with your engine version.',
+    keywords: ['explore', 'marketplace', 'install', 'template', 'block pack', 'theme', 'community'],
+  },
+
   // ── Getting Started ──────────────────────────────────────────────────────
   {
     id: 'gs-overview',
