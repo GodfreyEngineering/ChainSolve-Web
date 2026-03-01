@@ -1039,7 +1039,7 @@ Claude MUST:
     - nothing hidden behind terminal
     - consistent docking UX
 
-- [ ] E1-4: Window Manager v2 polish (if already exists, harden)
+- [x] E1-4: Window Manager v2 polish (if already exists, harden)
   - Windows:
     - draggable/resizable
     - snap to edges
@@ -1049,7 +1049,7 @@ Claude MUST:
   - Convert: Settings, Profile, Docs, Variables, Explore item detail, Upgrade plan window.
   - Acceptance: no “browser popup windows” anywhere.
 
-- [ ] E1-5: Header + account area overhaul
+- [x] E1-5: Header + account area overhaul
   - Top-right avatar opens Account window:
     - profile (display name, avatar)
     - plan badge
@@ -1498,5 +1498,8 @@ Claude MUST:
     - src/ui (components/windows)
     - src/engine (worker/bridge)
   - Acceptance: repo is intuitive and scales.
+
+- [ ] F7-4: final checks
+  - Provide a detailed and thorough idiot-proof list for me to make sure supabase, openai, cloudflare, resend and any other auth or other services are completely setup and all api keys/secrets setup so the repo works flawlessly and professionally.
 
 ---

@@ -235,6 +235,7 @@
     "billingDesc": "Subscription and invoices",
     "preferences": "Preferences",
     "preferencesDesc": "Theme, language, and shortcuts",
+    "account": "Account",
     "emailLabel": "Email address",
     "emailHint": "Contact support to change your email.",
     "userIdLabel": "User ID",

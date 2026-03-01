@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BRAND, CONTACT } from '../../lib/brand'
 import { useProjectStore } from '../../stores/projectStore'
@@ -44,7 +44,7 @@ const LazyTemplateManagerDialog = lazy(() =>
   import('../canvas/TemplateManagerDialog').then((m) => ({ default: m.TemplateManagerDialog })),
 )
 import { CATEGORY_ORDER, CATEGORY_LABELS } from '../../blocks/registry'
-import { getCurrentUser } from '../../lib/auth'
+import { getCurrentUser, signOut } from '../../lib/auth'
 import { getRecentProjects } from '../../lib/recentProjects'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { flattenMenusToActions, type MenuDef } from '../../lib/actions'
@@ -191,6 +191,8 @@ export function AppHeader({
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [llmBuilderOpen, setLlmBuilderOpen] = useState(false)
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const accountRef = useRef<HTMLDivElement>(null)
 
   // Fetch user email once for avatar
   useEffect(() => {
@@ -222,6 +224,23 @@ export function AppHeader({
       document.removeEventListener('click', handler)
     }
   }, [openMenu])
+
+  // Close account dropdown on outside click
+  useEffect(() => {
+    if (!accountOpen) return
+    const handler = (e: MouseEvent) => {
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
+        setAccountOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [accountOpen])
+
+  const handleSignOut = useCallback(() => {
+    setAccountOpen(false)
+    void signOut().then(() => window.location.assign('/login'))
+  }, [])
 
   const handleClearCanvas = useCallback(() => {
     if (!canvasRef.current) return
@@ -947,7 +966,7 @@ export function AppHeader({
               letterSpacing: '0.05em',
               color: PLAN_COLORS[plan] ?? PLAN_COLORS.free,
               padding: '0.15rem 0.4rem',
-              borderRadius: 4,
+              borderRadius: 'var(--radius-sm)',
               border: `1px solid ${PLAN_COLORS[plan] ?? PLAN_COLORS.free}`,
               opacity: 0.8,
             }}
@@ -955,19 +974,80 @@ export function AppHeader({
             {t(`plans.${plan}`)}
           </span>
 
-          {/* Settings gear */}
+          {/* Settings gear → opens Preferences tab */}
           <button
-            onClick={() => openSettings()}
-            title={t('settings.title')}
-            aria-label={t('settings.title')}
+            onClick={() => openSettings('preferences')}
+            title={t('settings.preferences', 'Preferences')}
+            aria-label={t('settings.preferences', 'Preferences')}
             style={iconButtonStyle}
           >
             &#x2699;
           </button>
 
-          {/* User avatar */}
-          <div title={userEmail ?? undefined} style={avatarStyle}>
-            {initials}
+          {/* User avatar + account dropdown */}
+          <div ref={accountRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setAccountOpen((v) => !v)}
+              title={userEmail ?? t('settings.account', 'Account')}
+              aria-label={t('settings.account', 'Account')}
+              aria-haspopup="true"
+              aria-expanded={accountOpen}
+              style={avatarBtnStyle}
+            >
+              {initials}
+            </button>
+
+            {accountOpen && (
+              <div style={accountDropdownStyle}>
+                {/* Email + plan */}
+                <div style={accountHeaderStyle}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>{userEmail ?? ''}</span>
+                  <span
+                    style={{
+                      fontSize: '0.6rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      color: PLAN_COLORS[plan] ?? PLAN_COLORS.free,
+                    }}
+                  >
+                    {t(`plans.${plan}`)}
+                  </span>
+                </div>
+                <div style={accountSepStyle} />
+                <button
+                  style={accountItemStyle}
+                  onClick={() => {
+                    setAccountOpen(false)
+                    openSettings('profile')
+                  }}
+                >
+                  {t('settings.profile', 'Profile')}
+                </button>
+                <button
+                  style={accountItemStyle}
+                  onClick={() => {
+                    setAccountOpen(false)
+                    openSettings('billing')
+                  }}
+                >
+                  {t('settings.billing', 'Billing')}
+                </button>
+                <button
+                  style={accountItemStyle}
+                  onClick={() => {
+                    setAccountOpen(false)
+                    openSettings('preferences')
+                  }}
+                >
+                  {t('settings.preferences', 'Preferences')}
+                </button>
+                <div style={accountSepStyle} />
+                <button style={accountItemStyle} onClick={handleSignOut}>
+                  {t('nav.signOut')}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1125,10 +1205,10 @@ const nameInputStyle: React.CSSProperties = {
 function saveButtonStyle(dirty: boolean): React.CSSProperties {
   return {
     padding: '0.12rem 0.45rem',
-    borderRadius: 4,
-    border: '1px solid rgba(255,255,255,0.12)',
-    background: dirty ? 'rgba(28,171,176,0.15)' : 'transparent',
-    color: dirty ? '#1CABB0' : 'rgba(244,244,243,0.35)',
+    borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--border)',
+    background: dirty ? 'var(--primary-dim)' : 'transparent',
+    color: dirty ? 'var(--primary)' : 'var(--text-faint)',
     cursor: dirty ? 'pointer' : 'default',
     fontSize: '0.68rem',
     fontWeight: 600,
@@ -1143,14 +1223,14 @@ const iconButtonStyle: React.CSSProperties = {
   color: 'var(--text-muted)',
   fontSize: '0.9rem',
   padding: '0.15rem 0.3rem',
-  borderRadius: 4,
+  borderRadius: 'var(--radius-sm)',
   fontFamily: 'inherit',
   lineHeight: 1,
 }
 
-const avatarStyle: React.CSSProperties = {
-  width: 26,
-  height: 26,
+const avatarBtnStyle: React.CSSProperties = {
+  width: 28,
+  height: 28,
   borderRadius: '50%',
   background: 'var(--primary-dim)',
   color: 'var(--primary)',
@@ -1162,6 +1242,51 @@ const avatarStyle: React.CSSProperties = {
   letterSpacing: '0.02em',
   flexShrink: 0,
   userSelect: 'none',
+  border: '1px solid transparent',
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+  padding: 0,
+}
+
+const accountDropdownStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '100%',
+  right: 0,
+  marginTop: 6,
+  minWidth: 200,
+  background: 'var(--card-bg)',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-lg)',
+  padding: '0.3rem 0',
+  boxShadow: 'var(--shadow-dropdown)',
+  zIndex: 100,
+  animation: 'cs-fade-in 0.1s ease',
+}
+
+const accountHeaderStyle: React.CSSProperties = {
+  padding: '0.6rem 0.75rem 0.5rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.15rem',
+}
+
+const accountSepStyle: React.CSSProperties = {
+  height: 1,
+  background: 'var(--border)',
+  margin: '0.2rem 0.5rem',
+}
+
+const accountItemStyle: React.CSSProperties = {
+  display: 'block',
+  width: '100%',
+  padding: '0.4rem 0.75rem',
+  fontSize: '0.8rem',
+  color: 'var(--text)',
+  background: 'transparent',
+  border: 'none',
+  textAlign: 'left',
+  cursor: 'pointer',
+  fontFamily: 'inherit',
 }
 
 const mobileMenuBarStyle: React.CSSProperties = {
@@ -1173,7 +1298,7 @@ const mobileMenuBarStyle: React.CSSProperties = {
 const overflowBtnStyle: React.CSSProperties = {
   background: 'transparent',
   border: '1px solid var(--border)',
-  borderRadius: 6,
+  borderRadius: 'var(--radius-md)',
   color: 'var(--text)',
   fontSize: '1.1rem',
   padding: '0.15rem 0.55rem',

@@ -49,6 +49,9 @@
     "themePlaceholder": "תאר את ערכת הנושא שלך…",
     "actionHistory": "היסטוריה"
   },
+  "settings": {
+    "account": "חשבון"
+  },
   "common": {
     "cancel": "ביטול",
     "close": "סגור"
