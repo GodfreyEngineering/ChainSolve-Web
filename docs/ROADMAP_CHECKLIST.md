@@ -901,19 +901,19 @@ Claude MUST:
 ---
 
 ## D16 — Explore/Sharing quality (marketing-ready)
-- [ ] D16-1: Explore listing cards look premium
+- [x] D16-1: Explore listing cards look premium
   - thumbnail, tags, author badge, plan badge
   - download/like count
   - Acceptance: visually strong for marketing.
 
-- [ ] D16-2: Explore item detail page v2
+- [x] D16-2: Explore item detail page v2
   - Show:
     - what’s included
     - compatibility (engine contract version)
     - changelog per item version
   - Acceptance: user trusts the ecosystem.
 
-- [ ] D16-3: Abuse/moderation controls (minimal)
+- [x] D16-3: Abuse/moderation controls (minimal)
   - report item
   - report comment
   - block user (client-side ignore)
