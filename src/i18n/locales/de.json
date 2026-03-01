@@ -467,7 +467,11 @@
     "debugConsole": "Debug-Konsole",
     "valueBadges": "Wert-Badges",
     "edgeBadges": "Kanten-Badges",
-    "graphHealth": "Graph-Zustand"
+    "graphHealth": "Graph-Zustand",
+    "variables": "Variablen",
+    "groups": "Gruppen",
+    "themes": "Themen",
+    "materials": "Materialien"
   },
   "inspector": {
     "pin": "An aktuellen Knoten anheften",

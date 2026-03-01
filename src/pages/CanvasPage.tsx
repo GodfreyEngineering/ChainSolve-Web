@@ -71,6 +71,8 @@ import { SheetsBar } from '../components/app/SheetsBar'
 import { ConflictBanner } from '../components/app/ConflictBanner'
 import { UpgradeModal } from '../components/UpgradeModal'
 import { useEngine } from '../contexts/EngineContext'
+import { useWindowManager } from '../contexts/WindowManagerContext'
+import { THEME_LIBRARY_WINDOW_ID } from '../components/ThemeLibraryWindow'
 import { buildConstantsLookup } from '../engine/resolveBindings'
 import { toEngineSnapshot } from '../engine/bridge'
 import { getCanonicalSnapshot } from '../lib/groups'
@@ -93,6 +95,20 @@ const LazyImportProjectDialog = lazy(() =>
     default: m.ImportProjectDialog,
   })),
 )
+const LazyVariablesPanel = lazy(() =>
+  import('../components/canvas/VariablesPanel').then((m) => ({ default: m.VariablesPanel })),
+)
+const LazyTemplateManagerDialog = lazy(() =>
+  import('../components/canvas/TemplateManagerDialog').then((m) => ({
+    default: m.TemplateManagerDialog,
+  })),
+)
+const LazyMaterialWizard = lazy(() =>
+  import('../components/canvas/MaterialWizard').then((m) => ({ default: m.MaterialWizard })),
+)
+const LazyThemeLibraryWindow = lazy(() =>
+  import('../components/ThemeLibraryWindow').then((m) => ({ default: m.ThemeLibraryWindow })),
+)
 
 const EXPORT_SETTLE_MS = 300
 const OFFLINE_RETRY_DELAYS = [3_000, 6_000, 12_000, 24_000, 60_000]
@@ -103,6 +119,7 @@ export default function CanvasPage() {
   const { t } = useTranslation()
   const { toast } = useToast()
   const engine = useEngine()
+  const { openWindow, isOpen } = useWindowManager()
 
   // ── Project store selectors ────────────────────────────────────────────────
   const saveStatus = useProjectStore((s) => s.saveStatus)
@@ -194,6 +211,11 @@ export default function CanvasPage() {
     () => buildConstantsLookup(engine.constantValues),
     [engine.constantValues],
   )
+
+  // ── Artifact panel state (D15-3) ──────────────────────────────────────────
+  const [variablesPanelOpen, setVariablesPanelOpen] = useState(false)
+  const [templateManagerOpen, setTemplateManagerOpen] = useState(false)
+  const [materialWizardOpen, setMaterialWizardOpen] = useState(false)
 
   // ── Inline project name editing ────────────────────────────────────────────
   const [nameEditing, setNameEditing] = useState(false)
@@ -1472,6 +1494,10 @@ export default function CanvasPage() {
           onGraphChange={projectId && !readOnly ? handleGraphChange : undefined}
           readOnly={readOnly}
           plan={plan}
+          onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
+          onOpenGroups={() => setTemplateManagerOpen(true)}
+          onOpenThemes={() => openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })}
+          onOpenMaterials={() => setMaterialWizardOpen(true)}
         />
       </div>
       {/* ── Canvas limit upgrade modal ──────────────────────────────────── */}
@@ -1510,6 +1536,29 @@ export default function CanvasPage() {
       {isPerfHudEnabled() && (
         <Suspense fallback={null}>
           <PerfHud />
+        </Suspense>
+      )}
+
+      {/* ── Artifact panels (D15-3) ──────────────────────────────────────── */}
+      <Suspense fallback={null}>
+        <LazyVariablesPanel
+          open={variablesPanelOpen}
+          onClose={() => setVariablesPanelOpen(false)}
+        />
+      </Suspense>
+      {templateManagerOpen && (
+        <Suspense fallback={null}>
+          <LazyTemplateManagerDialog open onClose={() => setTemplateManagerOpen(false)} />
+        </Suspense>
+      )}
+      {materialWizardOpen && (
+        <Suspense fallback={null}>
+          <LazyMaterialWizard open onClose={() => setMaterialWizardOpen(false)} />
+        </Suspense>
+      )}
+      {isOpen(THEME_LIBRARY_WINDOW_ID) && (
+        <Suspense fallback={null}>
+          <LazyThemeLibraryWindow plan={plan} />
         </Suspense>
       )}
     </div>

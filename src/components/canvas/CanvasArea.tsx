@@ -144,6 +144,16 @@ export interface CanvasAreaProps {
   readOnly?: boolean
   /** User's plan for entitlement gating of Pro blocks. */
   plan?: Plan
+
+  /* ── Artifact entrypoints (D15-3) ───────────────────────────────────────── */
+  /** Open the Variables management window/panel. */
+  onOpenVariables?: () => void
+  /** Open the Groups / Templates manager. */
+  onOpenGroups?: () => void
+  /** Open the Theme Library window. */
+  onOpenThemes?: () => void
+  /** Open the Material Wizard. */
+  onOpenMaterials?: () => void
 }
 
 /** Handle exposed by CanvasArea via forwardRef. */
@@ -347,10 +357,10 @@ function makeResizeHandler(
 
 const tbBtn: React.CSSProperties = {
   padding: '0.3rem 0.55rem',
-  borderRadius: 5,
-  border: '1px solid rgba(255,255,255,0.12)',
+  borderRadius: 'var(--radius-md)',
+  border: '1px solid var(--border)',
   background: 'transparent',
-  color: '#F4F4F3',
+  color: 'var(--text)',
   cursor: 'pointer',
   fontSize: '0.72rem',
   fontWeight: 600,
@@ -363,7 +373,17 @@ const tbBtn: React.CSSProperties = {
 // ── Inner canvas (inside ReactFlowProvider) ───────────────────────────────────
 
 const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function CanvasInner(
-  { initialNodes, initialEdges, onGraphChange, readOnly, plan = 'free' },
+  {
+    initialNodes,
+    initialEdges,
+    onGraphChange,
+    readOnly,
+    plan = 'free',
+    onOpenVariables,
+    onOpenGroups,
+    onOpenThemes,
+    onOpenMaterials,
+  },
   ref,
 ) {
   const isMobile = useIsMobile()
@@ -1404,7 +1424,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // ── Mobile panel width ────────────────────────────────────────────────────
   const mobileDrawerWidth = isMobile ? Math.min(280, window.innerWidth * 0.85) : 0
 
-  // ── Toolbar (right-side vertical strip) ──────────────────────────────────
+  // ── Toolbar (right-side vertical strip — artifact entrypoints D15-3) ─────
   const toolbar = (
     <div
       style={{
@@ -1415,84 +1435,64 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         display: 'flex',
         flexDirection: 'column',
         gap: '0.3rem',
-        background: '#383838',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 8,
+        background: 'var(--card-bg)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)',
         padding: '0.35rem',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.4)',
+        boxShadow: 'var(--shadow-md)',
       }}
     >
-      {!readOnly && (
+      {!readOnly && onOpenVariables && (
         <button
-          onClick={() => {
-            setLibVisible((v) => !v)
-            if (isMobile) closeWindow(INSPECTOR_WINDOW_ID)
-          }}
+          onClick={onOpenVariables}
           style={{
             ...tbBtn,
-            background: libVisible ? 'rgba(28,171,176,0.15)' : 'transparent',
-            borderColor: libVisible ? '#1CABB0' : undefined,
-            color: libVisible ? '#1CABB0' : undefined,
             minHeight: isMobile ? 36 : undefined,
             padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
           }}
-          title="Toggle block library"
+          title="Variables"
         >
-          ☰ Blocks
+          𝑥 Variables
         </button>
       )}
 
-      {!isMobile && (
-        <div style={{ width: 1, background: 'rgba(255,255,255,0.1)', margin: '0 0.1rem' }} />
+      {!readOnly && onOpenGroups && (
+        <button
+          onClick={onOpenGroups}
+          style={{
+            ...tbBtn,
+            minHeight: isMobile ? 36 : undefined,
+            padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
+          }}
+          title="Groups & Templates"
+        >
+          ⊞ Groups
+        </button>
       )}
 
-      {!isMobile && (
-        <>
-          <button
-            onClick={() => fitView({ padding: 0.15, duration: 300 })}
-            style={tbBtn}
-            title="Fit view"
-          >
-            ⊡ Fit
-          </button>
-          <button
-            onClick={() => setSnapToGrid((v) => !v)}
-            style={{
-              ...tbBtn,
-              background: snapToGrid ? 'rgba(28,171,176,0.15)' : 'transparent',
-              borderColor: snapToGrid ? '#1CABB0' : undefined,
-              color: snapToGrid ? '#1CABB0' : undefined,
-            }}
-            title="Snap to 16×16 grid"
-          >
-            ⊞ Snap
-          </button>
-          <div style={{ height: 1, background: 'rgba(255,255,255,0.1)', margin: '0.1rem 0' }} />
-        </>
+      {!isMobile && onOpenThemes && (
+        <button
+          onClick={onOpenThemes}
+          style={{
+            ...tbBtn,
+          }}
+          title="Themes"
+        >
+          ◐ Themes
+        </button>
       )}
 
-      <button
-        onClick={() => {
-          if (inspVisible) {
-            setInspectedId(null)
-            closeWindow(INSPECTOR_WINDOW_ID)
-          } else {
-            openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
-          }
-          if (isMobile) setLibVisible(false)
-        }}
-        style={{
-          ...tbBtn,
-          background: inspVisible ? 'rgba(28,171,176,0.15)' : 'transparent',
-          borderColor: inspVisible ? '#1CABB0' : undefined,
-          color: inspVisible ? '#1CABB0' : undefined,
-          minHeight: isMobile ? 36 : undefined,
-          padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
-        }}
-        title="Toggle inspector"
-      >
-        ⊟ Inspector
-      </button>
+      {!isMobile && !readOnly && onOpenMaterials && (
+        <button
+          onClick={onOpenMaterials}
+          style={{
+            ...tbBtn,
+          }}
+          title="Materials"
+        >
+          ◇ Materials
+        </button>
+      )}
     </div>
   )
 

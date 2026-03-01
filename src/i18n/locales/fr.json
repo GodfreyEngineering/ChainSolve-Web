@@ -467,7 +467,11 @@
     "debugConsole": "Console de débogage",
     "valueBadges": "Badges de valeurs",
     "edgeBadges": "Badges de connexions",
-    "graphHealth": "Santé du graphe"
+    "graphHealth": "Santé du graphe",
+    "variables": "Variables",
+    "groups": "Groupes",
+    "themes": "Thèmes",
+    "materials": "Matériaux"
   },
   "inspector": {
     "pin": "Épingler au nœud actuel",

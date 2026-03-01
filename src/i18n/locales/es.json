@@ -467,7 +467,11 @@
     "debugConsole": "Consola de depuración",
     "valueBadges": "Insignias de valor",
     "edgeBadges": "Insignias de arista",
-    "graphHealth": "Estado del grafo"
+    "graphHealth": "Estado del grafo",
+    "variables": "Variables",
+    "groups": "Grupos",
+    "themes": "Temas",
+    "materials": "Materiales"
   },
   "inspector": {
     "pin": "Fijar al nodo actual",

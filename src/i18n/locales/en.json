@@ -487,7 +487,11 @@
     "debugConsole": "Debug console",
     "valueBadges": "Value badges",
     "edgeBadges": "Edge badges",
-    "graphHealth": "Graph health"
+    "graphHealth": "Graph health",
+    "variables": "Variables",
+    "groups": "Groups",
+    "themes": "Themes",
+    "materials": "Materials"
   },
   "inspector": {
     "pin": "Pin to current node",

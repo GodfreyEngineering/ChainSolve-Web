@@ -467,7 +467,11 @@
     "debugConsole": "Console di debug",
     "valueBadges": "Badge di valore",
     "edgeBadges": "Badge di connessione",
-    "graphHealth": "Salute del grafo"
+    "graphHealth": "Salute del grafo",
+    "variables": "Variabili",
+    "groups": "Gruppi",
+    "themes": "Temi",
+    "materials": "Materiali"
   },
   "inspector": {
     "pin": "Fissa al nodo corrente",
