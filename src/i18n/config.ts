@@ -41,10 +41,10 @@ void i18n
       lookupLocalStorage: 'cs:lang',
     },
     // Synchronous init: with all resources pre-bundled (static JSON imports)
-    // i18next resolves synchronously when initImmediate is false.  React
+    // i18next resolves synchronously when initAsync is false.  React
     // therefore renders with the correct locale on the very first pass,
     // eliminating the English flash for non-English users.
-    initImmediate: false,
+    initAsync: false,
   })
 
 // Keep <html lang> and <html dir> in sync when the user changes language.
