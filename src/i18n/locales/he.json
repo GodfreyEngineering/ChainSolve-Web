@@ -49,6 +49,17 @@
     "themePlaceholder": "תאר את ערכת הנושא שלך…",
     "actionHistory": "היסטוריה"
   },
+  "marketplace": {
+    "analyticsToggle": "ניתוחים",
+    "analyticsLoading": "טוען ניתוחים…",
+    "analyticsTotal": "סה״כ אירועים",
+    "analyticsLast30": "30 הימים האחרונים",
+    "analyticsInstalls": "התקנות",
+    "analyticsForks": "הסתעפויות",
+    "analyticsPurchases": "רכישות",
+    "likesCount": "{{count}} לייקים",
+    "commentsCount": "{{count}} תגובות"
+  },
   "settings": {
     "account": "חשבון"
   },

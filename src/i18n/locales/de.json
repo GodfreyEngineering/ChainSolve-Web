@@ -684,7 +684,16 @@
     "reportItemSuccess": "Artikel gemeldet. Vielen Dank.",
     "blockUser": "Diesen Autor blockieren",
     "blockUserConfirm": "Diesen Autor blockieren? Dessen Artikel und Kommentare werden ausgeblendet.",
-    "blockedNotice": "Dieser Autor ist blockiert."
+    "blockedNotice": "Dieser Autor ist blockiert.",
+    "analyticsToggle": "Analysen",
+    "analyticsLoading": "Analysen werden geladen…",
+    "analyticsTotal": "Ereignisse gesamt",
+    "analyticsLast30": "Letzte 30 Tage",
+    "analyticsInstalls": "Installationen",
+    "analyticsForks": "Abspaltungen",
+    "analyticsPurchases": "Käufe",
+    "likesCount": "{{count}} Likes",
+    "commentsCount": "{{count}} Kommentare"
   },
   "orgs": {
     "title": "Organisationen",

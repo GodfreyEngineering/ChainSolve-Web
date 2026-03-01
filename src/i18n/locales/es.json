@@ -684,7 +684,16 @@
     "reportItemSuccess": "Artículo reportado. Gracias.",
     "blockUser": "Bloquear a este autor",
     "blockUserConfirm": "¿Bloquear a este autor? Sus artículos y comentarios serán ocultados.",
-    "blockedNotice": "Este autor está bloqueado."
+    "blockedNotice": "Este autor está bloqueado.",
+    "analyticsToggle": "Analíticas",
+    "analyticsLoading": "Cargando analíticas…",
+    "analyticsTotal": "Eventos totales",
+    "analyticsLast30": "Últimos 30 días",
+    "analyticsInstalls": "Instalaciones",
+    "analyticsForks": "Bifurcaciones",
+    "analyticsPurchases": "Compras",
+    "likesCount": "{{count}} me gusta",
+    "commentsCount": "{{count}} comentarios"
   },
   "orgs": {
     "title": "Organizaciones",

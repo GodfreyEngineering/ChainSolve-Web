@@ -704,7 +704,16 @@
     "reportItemSuccess": "Item reported. Thank you.",
     "blockUser": "Block this author",
     "blockUserConfirm": "Block this author? Their items and comments will be hidden.",
-    "blockedNotice": "This author is blocked."
+    "blockedNotice": "This author is blocked.",
+    "analyticsToggle": "Analytics",
+    "analyticsLoading": "Loading analytics…",
+    "analyticsTotal": "Total events",
+    "analyticsLast30": "Last 30 days",
+    "analyticsInstalls": "Installs",
+    "analyticsForks": "Forks",
+    "analyticsPurchases": "Purchases",
+    "likesCount": "{{count}} likes",
+    "commentsCount": "{{count}} comments"
   },
   "orgs": {
     "title": "Organizations",

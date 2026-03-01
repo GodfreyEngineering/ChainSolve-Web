@@ -19,8 +19,10 @@ import {
   togglePublishItem,
   validateMarketplaceVersion,
   getPublishGate,
+  getItemAnalyticsSummary,
   type MarketplaceItem,
   type MarketplaceCategory,
+  type ItemAnalyticsSummary,
 } from '../lib/marketplaceService'
 import { startConnectOnboarding } from '../lib/stripeConnectService'
 import { BRAND, CONTACT } from '../lib/brand'
@@ -53,7 +55,6 @@ const s = {
     border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: 12,
     padding: '1.25rem',
-    marginBottom: '0.75rem',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -168,6 +169,32 @@ export default function MarketplaceAuthorPage() {
   const [formDescription, setFormDescription] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
+
+  // E10-2: per-item analytics (lazy-loaded on toggle)
+  const [analyticsMap, setAnalyticsMap] = useState<Record<string, ItemAnalyticsSummary>>({})
+  const [analyticsLoading, setAnalyticsLoading] = useState<Record<string, boolean>>({})
+  const [analyticsOpen, setAnalyticsOpen] = useState<Record<string, boolean>>({})
+
+  const handleToggleAnalytics = useCallback(
+    async (itemId: string) => {
+      setAnalyticsOpen((prev) => {
+        const next = { ...prev, [itemId]: !prev[itemId] }
+        return next
+      })
+      // If already loaded or currently loading, just toggle visibility
+      if (analyticsMap[itemId] || analyticsLoading[itemId]) return
+      setAnalyticsLoading((prev) => ({ ...prev, [itemId]: true }))
+      try {
+        const summary = await getItemAnalyticsSummary(itemId)
+        setAnalyticsMap((prev) => ({ ...prev, [itemId]: summary }))
+      } catch {
+        // Silently fail — the UI will just show no data
+      } finally {
+        setAnalyticsLoading((prev) => ({ ...prev, [itemId]: false }))
+      }
+    },
+    [analyticsMap, analyticsLoading],
+  )
 
   const fetchItems = useCallback(async () => {
     setLoading(true)
@@ -510,56 +537,107 @@ export default function MarketplaceAuthorPage() {
 
         {/* Items list */}
         {items.map((item) => (
-          <div key={item.id} style={s.card} data-testid="author-item">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1 }}>
-              <a
-                href={`/explore/items/${item.id}`}
-                style={{
-                  fontWeight: 600,
-                  fontSize: '0.95rem',
-                  textDecoration: 'none',
-                  color: 'inherit',
-                }}
-              >
-                {item.name}
-              </a>
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '0.65rem',
-                  fontSize: '0.75rem',
-                  color: 'rgba(244,244,243,0.4)',
-                  flexWrap: 'wrap',
-                }}
-              >
-                <span>{item.category}</span>
-                <span>{t('marketplace.version', { version: item.version })}</span>
-                <span>{t('marketplace.downloads', { count: item.downloads_count })}</span>
+          <div key={item.id} style={{ marginBottom: '0.75rem' }}>
+            <div style={s.card} data-testid="author-item">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1 }}>
+                <a
+                  href={`/explore/items/${item.id}`}
+                  style={{
+                    fontWeight: 600,
+                    fontSize: '0.95rem',
+                    textDecoration: 'none',
+                    color: 'inherit',
+                  }}
+                >
+                  {item.name}
+                </a>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '0.65rem',
+                    fontSize: '0.75rem',
+                    color: 'rgba(244,244,243,0.4)',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <span>{item.category}</span>
+                  <span>{t('marketplace.version', { version: item.version })}</span>
+                  <span>{t('marketplace.downloads', { count: item.downloads_count })}</span>
+                  <span>{t('marketplace.likesCount', { count: item.likes_count })}</span>
+                  <span>{t('marketplace.commentsCount', { count: item.comments_count })}</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+                <button
+                  style={s.ghostBtn}
+                  onClick={() => void handleToggleAnalytics(item.id)}
+                  data-testid={`analytics-toggle-${item.id}`}
+                >
+                  {t('marketplace.analyticsToggle')}
+                </button>
+                <span
+                  style={s.reviewBadge(item.review_status)}
+                  data-testid={`review-status-${item.id}`}
+                >
+                  {item.review_status === 'approved'
+                    ? t('marketplace.reviewApproved')
+                    : item.review_status === 'rejected'
+                      ? t('marketplace.reviewRejected')
+                      : t('marketplace.reviewPending')}
+                </span>
+                <span style={s.badge(item.is_published)}>
+                  {item.is_published ? t('marketplace.installed') : t('marketplace.draftBadge')}
+                </span>
+                <button
+                  style={s.ghostBtn}
+                  onClick={() => void handleTogglePublish(item)}
+                  data-testid={`toggle-publish-${item.id}`}
+                >
+                  {item.is_published ? t('marketplace.unpublish') : t('marketplace.publish')}
+                </button>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
-              <span
-                style={s.reviewBadge(item.review_status)}
-                data-testid={`review-status-${item.id}`}
+            {/* E10-2: Expandable analytics panel */}
+            {analyticsOpen[item.id] && (
+              <div
+                style={{
+                  background: 'var(--card-bg, #252525)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderTop: 'none',
+                  borderRadius: '0 0 12px 12px',
+                  padding: '0.75rem 1.25rem',
+                  fontSize: '0.8rem',
+                  color: 'rgba(244,244,243,0.6)',
+                }}
+                data-testid={`analytics-panel-${item.id}`}
               >
-                {item.review_status === 'approved'
-                  ? t('marketplace.reviewApproved')
-                  : item.review_status === 'rejected'
-                    ? t('marketplace.reviewRejected')
-                    : t('marketplace.reviewPending')}
-              </span>
-              <span style={s.badge(item.is_published)}>
-                {item.is_published ? t('marketplace.installed') : t('marketplace.draftBadge')}
-              </span>
-              <button
-                style={s.ghostBtn}
-                onClick={() => void handleTogglePublish(item)}
-                data-testid={`toggle-publish-${item.id}`}
-              >
-                {item.is_published ? t('marketplace.unpublish') : t('marketplace.publish')}
-              </button>
-            </div>
+                {analyticsLoading[item.id] ? (
+                  <span>{t('marketplace.analyticsLoading')}</span>
+                ) : analyticsMap[item.id] ? (
+                  <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                    <span>
+                      {t('marketplace.analyticsTotal')}: {analyticsMap[item.id].total}
+                    </span>
+                    <span>
+                      {t('marketplace.analyticsLast30')}: {analyticsMap[item.id].last30Days}
+                    </span>
+                    <span>
+                      {t('marketplace.analyticsInstalls')}: {analyticsMap[item.id].byType.install}
+                    </span>
+                    <span>
+                      {t('marketplace.analyticsForks')}: {analyticsMap[item.id].byType.fork}
+                    </span>
+                    <span>
+                      {t('marketplace.analyticsPurchases')}: {analyticsMap[item.id].byType.purchase}
+                    </span>
+                  </div>
+                ) : (
+                  <span>—</span>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </main>
