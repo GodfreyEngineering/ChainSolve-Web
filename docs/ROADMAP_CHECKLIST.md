@@ -1137,7 +1137,7 @@ Claude MUST:
 ## E4 — Block Library + Insert UX (massive upgrade)
 > Goal: users find blocks instantly; categories make sense; insert menu matches library.
 
-- [ ] E4-1: Block Library IA redesign
+- [x] E4-1: Block Library IA redesign
   - Top: search + filters (category/type)
   - Sections:
     - Inputs (number, slider, table/list)
