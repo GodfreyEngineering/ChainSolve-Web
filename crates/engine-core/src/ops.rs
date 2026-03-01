@@ -474,6 +474,19 @@ fn evaluate_node_inner(
             }
         }
 
+        "eng.mechanics.friction_force" => {
+            // F_friction = μ * N
+            let mu = scalar_or_nan(inputs, "mu");
+            let n = scalar_or_nan(inputs, "N");
+            Value::scalar(mu * n)
+        }
+        "eng.mechanics.impulse" => {
+            // J = F * Δt
+            let f = scalar_or_nan(inputs, "F");
+            let dt = scalar_or_nan(inputs, "dt");
+            Value::scalar(f * dt)
+        }
+
         // ── Engineering → Materials & Strength ───────────────────────
         "eng.materials.stress_F_A" => {
             let f = scalar_or_nan(inputs, "F");
@@ -658,6 +671,13 @@ fn evaluate_node_inner(
                 Value::scalar(f * (l / d) * (rho * v * v / 2.0))
             }
         }
+        "eng.fluids.buoyancy" => {
+            // F_b = ρ * V * g
+            let rho = scalar_or_nan(inputs, "rho");
+            let v = scalar_or_nan(inputs, "V");
+            let g = scalar_or_nan(inputs, "g");
+            Value::scalar(rho * v * g)
+        }
 
         // ── Engineering → Thermo ─────────────────────────────────────
         "eng.thermo.ideal_gas_P" => {
@@ -706,6 +726,23 @@ fn evaluate_node_inner(
             let dt = scalar_or_nan(inputs, "dT");
             Value::scalar(h * a * dt)
         }
+        "eng.thermo.carnot_efficiency" => {
+            // η = 1 - T_cold / T_hot
+            let t_cold = scalar_or_nan(inputs, "T_cold");
+            let t_hot = scalar_or_nan(inputs, "T_hot");
+            if t_hot == 0.0 {
+                Value::error("Carnot: T_hot = 0")
+            } else {
+                Value::scalar(1.0 - t_cold / t_hot)
+            }
+        }
+        "eng.thermo.thermal_expansion" => {
+            // ΔL = α * L * ΔT
+            let alpha = scalar_or_nan(inputs, "alpha");
+            let l = scalar_or_nan(inputs, "L");
+            let dt = scalar_or_nan(inputs, "dT");
+            Value::scalar(alpha * l * dt)
+        }
 
         // ── Engineering → Electrical ─────────────────────────────────
         "eng.elec.ohms_V" => binary_broadcast_ports(inputs, "I", "R", |i, r| i * r),
@@ -722,6 +759,31 @@ fn evaluate_node_inner(
                 Value::error("Power: R = 0")
             } else {
                 Value::scalar(v * v / r)
+            }
+        }
+        "eng.elec.capacitance_Q_V" => {
+            // C = Q / V
+            let q = scalar_or_nan(inputs, "Q");
+            let v = scalar_or_nan(inputs, "V");
+            if v == 0.0 {
+                Value::error("Capacitance: V = 0")
+            } else {
+                Value::scalar(q / v)
+            }
+        }
+        "eng.elec.series_resistance" => {
+            // R_total = R1 + R2
+            binary_broadcast_ports(inputs, "R1", "R2", |r1, r2| r1 + r2)
+        }
+        "eng.elec.parallel_resistance" => {
+            // R_total = (R1 * R2) / (R1 + R2)
+            let r1 = scalar_or_nan(inputs, "R1");
+            let r2 = scalar_or_nan(inputs, "R2");
+            let sum = r1 + r2;
+            if sum == 0.0 {
+                Value::error("Parallel resistance: R1 + R2 = 0")
+            } else {
+                Value::scalar(r1 * r2 / sum)
             }
         }
 
@@ -2121,6 +2183,90 @@ mod tests {
         let inputs = make_inputs(&[("lpm", 60_000.0)]);
         let v = evaluate_node("eng.conv.lpm_to_m3s", &inputs, &HashMap::new());
         assert_eq!(v.as_scalar(), Some(1.0));
+    }
+
+    // ── E5-3: New engineering ops ──────────────────────────────────
+
+    #[test]
+    fn eng_friction_force() {
+        let inputs = make_inputs(&[("mu", 0.3), ("N", 100.0)]);
+        let v = evaluate_node("eng.mechanics.friction_force", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 30.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn eng_impulse() {
+        let inputs = make_inputs(&[("F", 50.0), ("dt", 0.2)]);
+        let v = evaluate_node("eng.mechanics.impulse", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 10.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn eng_buoyancy() {
+        // F = ρ * V * g = 1000 * 0.5 * 9.81 = 4905
+        let inputs = make_inputs(&[("rho", 1000.0), ("V", 0.5), ("g", 9.81)]);
+        let v = evaluate_node("eng.fluids.buoyancy", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 4905.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn eng_carnot_efficiency() {
+        // η = 1 - 300/600 = 0.5
+        let inputs = make_inputs(&[("T_cold", 300.0), ("T_hot", 600.0)]);
+        let v = evaluate_node("eng.thermo.carnot_efficiency", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.5).abs() < 1e-10);
+    }
+
+    #[test]
+    fn eng_carnot_zero_hot() {
+        let inputs = make_inputs(&[("T_cold", 300.0), ("T_hot", 0.0)]);
+        let v = evaluate_node("eng.thermo.carnot_efficiency", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn eng_thermal_expansion() {
+        // ΔL = 12e-6 * 2.0 * 50 = 0.0012
+        let inputs = make_inputs(&[("alpha", 12e-6), ("L", 2.0), ("dT", 50.0)]);
+        let v = evaluate_node("eng.thermo.thermal_expansion", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.0012).abs() < 1e-10);
+    }
+
+    #[test]
+    fn eng_capacitance_q_v() {
+        // C = 0.01 / 5.0 = 0.002
+        let inputs = make_inputs(&[("Q", 0.01), ("V", 5.0)]);
+        let v = evaluate_node("eng.elec.capacitance_Q_V", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 0.002).abs() < 1e-10);
+    }
+
+    #[test]
+    fn eng_capacitance_zero_v() {
+        let inputs = make_inputs(&[("Q", 0.01), ("V", 0.0)]);
+        let v = evaluate_node("eng.elec.capacitance_Q_V", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn eng_series_resistance() {
+        let inputs = make_inputs(&[("R1", 100.0), ("R2", 200.0)]);
+        let v = evaluate_node("eng.elec.series_resistance", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(300.0));
+    }
+
+    #[test]
+    fn eng_parallel_resistance() {
+        // R = (100 * 200) / (100 + 200) = 20000/300 ≈ 66.667
+        let inputs = make_inputs(&[("R1", 100.0), ("R2", 200.0)]);
+        let v = evaluate_node("eng.elec.parallel_resistance", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 200.0 / 3.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn eng_parallel_resistance_zero_sum() {
+        let inputs = make_inputs(&[("R1", 0.0), ("R2", 0.0)]);
+        let v = evaluate_node("eng.elec.parallel_resistance", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
     }
 
     // ── W11b: Finance / Stats / Probability tests ─────────────────

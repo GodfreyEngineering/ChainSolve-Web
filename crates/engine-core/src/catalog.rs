@@ -705,6 +705,22 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![p("m", "m (kg)"), p("v", "v (m/s)"), p("r", "r (m)")],
             pro_only: false,
         },
+        CatalogEntry {
+            op_id: "eng.mechanics.friction_force",
+            label: "F = μN",
+            category: "engMechanics",
+            node_kind: "csOperation",
+            inputs: vec![p("mu", "μ"), p("N", "N (N)")],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "eng.mechanics.impulse",
+            label: "J = FΔt",
+            category: "engMechanics",
+            node_kind: "csOperation",
+            inputs: vec![p("F", "F (N)"), p("dt", "Δt (s)")],
+            pro_only: false,
+        },
         // ── Engineering → Materials & Strength ───────────────────────
         CatalogEntry {
             op_id: "eng.materials.stress_F_A",
@@ -917,6 +933,14 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![p("f", "f"), p("L", "L (m)"), p("D", "D (m)"), p("rho", "\u{03C1} (kg/m\u{00B3})"), p("v", "v (m/s)")],
             pro_only: false,
         },
+        CatalogEntry {
+            op_id: "eng.fluids.buoyancy",
+            label: "F = \u{03C1}Vg",
+            category: "engFluids",
+            node_kind: "csOperation",
+            inputs: vec![p("rho", "\u{03C1} (kg/m\u{00B3})"), p("V", "V (m\u{00B3})"), p("g", "g (m/s\u{00B2})")],
+            pro_only: false,
+        },
         // ── Engineering → Thermo ─────────────────────────────────────
         CatalogEntry {
             op_id: "eng.thermo.ideal_gas_P",
@@ -958,6 +982,22 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![p("h", "h (W/m\u{00B2}\u{00B7}K)"), p("A", "A (m\u{00B2})"), p("dT", "\u{0394}T (K)")],
             pro_only: false,
         },
+        CatalogEntry {
+            op_id: "eng.thermo.carnot_efficiency",
+            label: "\u{03B7} = 1\u{2212}T\u{1D04}/T\u{1D34}",
+            category: "engThermo",
+            node_kind: "csOperation",
+            inputs: vec![p("T_cold", "T\u{1D04}\u{2092}\u{2097}\u{1D48} (K)"), p("T_hot", "T\u{2095}\u{2092}\u{209C} (K)")],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "eng.thermo.thermal_expansion",
+            label: "\u{0394}L = \u{03B1}L\u{0394}T",
+            category: "engThermo",
+            node_kind: "csOperation",
+            inputs: vec![p("alpha", "\u{03B1} (1/K)"), p("L", "L (m)"), p("dT", "\u{0394}T (K)")],
+            pro_only: false,
+        },
         // ── Engineering → Electrical ─────────────────────────────────
         CatalogEntry {
             op_id: "eng.elec.ohms_V",
@@ -989,6 +1029,30 @@ pub fn catalog() -> Vec<CatalogEntry> {
             category: "engElectrical",
             node_kind: "csOperation",
             inputs: vec![p("V", "V (V)"), p("R", "R (\u{03A9})")],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "eng.elec.capacitance_Q_V",
+            label: "C = Q/V",
+            category: "engElectrical",
+            node_kind: "csOperation",
+            inputs: vec![p("Q", "Q (C)"), p("V", "V (V)")],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "eng.elec.series_resistance",
+            label: "R = R\u{2081}+R\u{2082}",
+            category: "engElectrical",
+            node_kind: "csOperation",
+            inputs: vec![p("R1", "R\u{2081} (\u{03A9})"), p("R2", "R\u{2082} (\u{03A9})")],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "eng.elec.parallel_resistance",
+            label: "R\u{2225} = R\u{2081}R\u{2082}/(R\u{2081}+R\u{2082})",
+            category: "engElectrical",
+            node_kind: "csOperation",
+            inputs: vec![p("R1", "R\u{2081} (\u{03A9})"), p("R2", "R\u{2082} (\u{03A9})")],
             pro_only: false,
         },
         // ── Engineering → Conversions ────────────────────────────────
@@ -1816,14 +1880,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 211);
+        assert_eq!(cat.len(), 219);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 211);
+        assert_eq!(parsed.as_array().unwrap().len(), 219);
     }
 
     #[test]
