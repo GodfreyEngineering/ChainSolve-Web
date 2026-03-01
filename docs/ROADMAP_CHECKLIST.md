@@ -991,7 +991,7 @@ Claude MUST:
   - Fix initialization to non-deprecated signature and ensure no warnings on boot.
   - Acceptance: no i18next deprecation warnings.
 
-- [ ] E0-4: Registry/catalog mismatches and missing TS defaults
+- [x] E0-4: Registry/catalog mismatches and missing TS defaults
   - Fix warnings:
     - “Catalog op … has no TS default — UI may not render it”
     - “TS block X not in Rust catalog — engine won’t evaluate it”
