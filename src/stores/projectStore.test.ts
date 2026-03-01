@@ -233,6 +233,39 @@ describe('false conflict regression (E8-1): saveVariables bumps updated_at', () 
   })
 })
 
+// ── E8-2: recoverStuckSave ────────────────────────────────────────────────────
+
+describe('recoverStuckSave', () => {
+  it('transitions from saving to error with timeout message', () => {
+    useProjectStore.getState().beginSave()
+    expect(useProjectStore.getState().saveStatus).toBe('saving')
+    useProjectStore.getState().recoverStuckSave()
+    expect(useProjectStore.getState().saveStatus).toBe('error')
+    expect(useProjectStore.getState().errorMessage).toBe('Save timed out')
+  })
+
+  it('does nothing if not in saving state', () => {
+    useProjectStore.getState().failSave('err')
+    useProjectStore.getState().recoverStuckSave()
+    expect(useProjectStore.getState().saveStatus).toBe('error')
+    expect(useProjectStore.getState().errorMessage).toBe('err')
+  })
+
+  it('does nothing when idle', () => {
+    useProjectStore.getState().recoverStuckSave()
+    expect(useProjectStore.getState().saveStatus).toBe('idle')
+  })
+
+  it('recovery allows subsequent markDirty to clear error', () => {
+    useProjectStore.getState().beginSave()
+    useProjectStore.getState().recoverStuckSave()
+    expect(useProjectStore.getState().saveStatus).toBe('error')
+    useProjectStore.getState().markDirty()
+    expect(useProjectStore.getState().saveStatus).toBe('idle')
+    expect(useProjectStore.getState().isDirty).toBe(true)
+  })
+})
+
 // ── reset ─────────────────────────────────────────────────────────────────────
 
 describe('reset', () => {

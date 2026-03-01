@@ -44,6 +44,8 @@ interface ProjectState {
   queueOffline: () => void
   detectConflict: () => void
   dismissConflict: () => void
+  /** E8-2: Recover from stuck 'saving' state (e.g. unhandled promise rejection). */
+  recoverStuckSave: () => void
   reset: () => void
 }
 
@@ -94,6 +96,11 @@ export const useProjectStore = create<ProjectState>((set) => ({
   detectConflict: () => set({ saveStatus: 'conflict' }),
 
   dismissConflict: () => set({ saveStatus: 'idle', isDirty: true }),
+
+  recoverStuckSave: () =>
+    set((s) =>
+      s.saveStatus === 'saving' ? { saveStatus: 'error', errorMessage: 'Save timed out' } : {},
+    ),
 
   reset: () =>
     set({

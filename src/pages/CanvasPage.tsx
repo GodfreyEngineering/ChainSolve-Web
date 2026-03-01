@@ -132,6 +132,7 @@ export default function CanvasPage() {
   const failSave = useProjectStore((s) => s.failSave)
   const queueOffline = useProjectStore((s) => s.queueOffline)
   const detectConflict = useProjectStore((s) => s.detectConflict)
+  const recoverStuckSave = useProjectStore((s) => s.recoverStuckSave)
   const setStoreName = useProjectStore((s) => s.setProjectName)
   const resetProject = useProjectStore((s) => s.reset)
 
@@ -447,6 +448,13 @@ export default function CanvasPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOnline])
 
+  // ── E8-2: Stuck-save watchdog — recover if save stays in 'saving' too long ─
+  useEffect(() => {
+    if (saveStatus !== 'saving') return
+    const timer = setTimeout(() => recoverStuckSave(), 30_000) // 30 s
+    return () => clearTimeout(timer)
+  }, [saveStatus, recoverStuckSave])
+
   // ── onGraphChange — dirty tracking + debounced autosave ────────────────────
   const handleGraphChange: NonNullable<CanvasAreaProps['onGraphChange']> = useCallback(() => {
     // Suppress dirty/autosave during export canvas switching
@@ -700,6 +708,8 @@ export default function CanvasPage() {
   const handleReorderCanvases = useCallback(
     async (orderedIds: string[]) => {
       if (!projectId) return
+      // E8-2: Save previous state for rollback on failure
+      const prevCanvases = [...canvases]
       // Optimistic local update
       const reordered = orderedIds
         .map((id, i) => {
@@ -711,6 +721,8 @@ export default function CanvasPage() {
       try {
         await reorderCanvases(projectId, orderedIds)
       } catch (err: unknown) {
+        // E8-2: Rollback to previous order on failure
+        setCanvases(prevCanvases)
         toast(err instanceof Error ? err.message : 'Failed to reorder sheets', 'error')
       }
     },
