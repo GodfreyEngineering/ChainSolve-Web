@@ -1217,7 +1217,7 @@ Claude MUST:
     - LaTeX-like string
   - Acceptance: usable in reports immediately.
 
-- [ ] E6-3: PDF integration
+- [x] E6-3: PDF integration
   - Option: include equation blocks in audit PDF (Pro)
   - Acceptance: audit PDFs can include notation sections.
 
