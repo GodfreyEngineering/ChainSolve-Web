@@ -150,6 +150,20 @@ fn evaluate_node_inner(
         "floor" => unary_broadcast(inputs, |x| x.floor()),
         "ceil" => unary_broadcast(inputs, |x| x.ceil()),
         "round" => unary_broadcast(inputs, |x| x.round()),
+        "trunc" => unary_broadcast(inputs, |x| x.trunc()),
+        "sign" => unary_broadcast(inputs, |x| {
+            if x > 0.0 { 1.0 } else if x < 0.0 { -1.0 } else { 0.0 }
+        }),
+        "ln" => unary_broadcast(inputs, |x| x.ln()),
+        "log10" => unary_broadcast(inputs, |x| x.log10()),
+        "exp" => unary_broadcast(inputs, |x| x.exp()),
+        "log_base" => binary_broadcast_ports(inputs, "val", "base", |val, base| val.ln() / base.ln()),
+        "roundn" => {
+            let val = scalar_or_nan(inputs, "val");
+            let digits = scalar_or_nan(inputs, "digits");
+            let factor = 10_f64.powf(digits.round());
+            Value::scalar((val * factor).round() / factor)
+        }
 
         // ── Trig ──────────────────────────────────────────────────
         "sin" => unary_broadcast(inputs, |x| x.sin()),
@@ -1076,6 +1090,15 @@ fn evaluate_node_inner(
                 Value::error("P(n,k): n,k must be non-negative integers")
             } else {
                 Value::scalar(permutation_val(n as u64, k as u64))
+            }
+        }
+        "prob.comb.combination" => {
+            let n = scalar_or_nan(inputs, "n");
+            let k = scalar_or_nan(inputs, "k");
+            if n < 0.0 || k < 0.0 || n != n.floor() || k != k.floor() || k > n {
+                Value::error("C(n,k): n,k must be non-negative integers with k \u{2264} n")
+            } else {
+                Value::scalar(combination(n as u64, k as u64))
             }
         }
 
@@ -2569,6 +2592,107 @@ mod tests {
                 op_id, expected, tol, got,
             );
         }
+    }
+
+    // ── E5-2: Excel numeric functions ──────────────────────────────────────────
+
+    #[test]
+    fn ln_e_is_one() {
+        let inputs = make_inputs(&[("a", std::f64::consts::E)]);
+        let v = evaluate_node("ln", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 1.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn log10_100() {
+        let inputs = make_inputs(&[("a", 100.0)]);
+        let v = evaluate_node("log10", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 2.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn exp_zero_is_one() {
+        let inputs = make_inputs(&[("a", 0.0)]);
+        let v = evaluate_node("exp", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 1.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn exp_one_is_e() {
+        let inputs = make_inputs(&[("a", 1.0)]);
+        let v = evaluate_node("exp", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - std::f64::consts::E).abs() < 1e-10);
+    }
+
+    #[test]
+    fn log_base_8_base_2() {
+        let inputs = make_inputs(&[("val", 8.0), ("base", 2.0)]);
+        let v = evaluate_node("log_base", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 3.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn sign_positive() {
+        let inputs = make_inputs(&[("a", 42.0)]);
+        let v = evaluate_node("sign", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(1.0));
+    }
+
+    #[test]
+    fn sign_negative() {
+        let inputs = make_inputs(&[("a", -7.0)]);
+        let v = evaluate_node("sign", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(-1.0));
+    }
+
+    #[test]
+    fn sign_zero() {
+        let inputs = make_inputs(&[("a", 0.0)]);
+        let v = evaluate_node("sign", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(0.0));
+    }
+
+    #[test]
+    fn trunc_positive() {
+        let inputs = make_inputs(&[("a", 3.7)]);
+        let v = evaluate_node("trunc", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(3.0));
+    }
+
+    #[test]
+    fn trunc_negative() {
+        let inputs = make_inputs(&[("a", -3.7)]);
+        let v = evaluate_node("trunc", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(-3.0));
+    }
+
+    #[test]
+    fn roundn_two_digits() {
+        let inputs = make_inputs(&[("val", 3.14159), ("digits", 2.0)]);
+        let v = evaluate_node("roundn", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 3.14).abs() < 1e-10);
+    }
+
+    #[test]
+    fn roundn_zero_digits() {
+        let inputs = make_inputs(&[("val", 3.7), ("digits", 0.0)]);
+        let v = evaluate_node("roundn", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(4.0));
+    }
+
+    #[test]
+    fn prob_combination() {
+        // C(5,2) = 10
+        let inputs = make_inputs(&[("n", 5.0), ("k", 2.0)]);
+        let v = evaluate_node("prob.comb.combination", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(10.0));
+    }
+
+    #[test]
+    fn prob_combination_k_greater_than_n() {
+        let inputs = make_inputs(&[("n", 3.0), ("k", 5.0)]);
+        let v = evaluate_node("prob.comb.combination", &inputs, &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
     }
 
     #[test]

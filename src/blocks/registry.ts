@@ -262,6 +262,75 @@ reg({
   defaultData: { blockType: 'clamp', label: 'Clamp' },
 })
 
+reg({
+  type: 'trunc',
+  label: 'Trunc',
+  category: 'math',
+  nodeKind: 'csOperation',
+  inputs: [{ id: 'a', label: 'A' }],
+  defaultData: { blockType: 'trunc', label: 'Trunc' },
+})
+
+reg({
+  type: 'sign',
+  label: 'Sign',
+  category: 'math',
+  nodeKind: 'csOperation',
+  inputs: [{ id: 'a', label: 'A' }],
+  defaultData: { blockType: 'sign', label: 'Sign' },
+})
+
+reg({
+  type: 'ln',
+  label: 'Ln',
+  category: 'math',
+  nodeKind: 'csOperation',
+  inputs: [{ id: 'a', label: 'A' }],
+  defaultData: { blockType: 'ln', label: 'Ln' },
+})
+
+reg({
+  type: 'log10',
+  label: 'Log10',
+  category: 'math',
+  nodeKind: 'csOperation',
+  inputs: [{ id: 'a', label: 'A' }],
+  defaultData: { blockType: 'log10', label: 'Log10' },
+})
+
+reg({
+  type: 'exp',
+  label: 'Exp',
+  category: 'math',
+  nodeKind: 'csOperation',
+  inputs: [{ id: 'a', label: 'A' }],
+  defaultData: { blockType: 'exp', label: 'Exp' },
+})
+
+reg({
+  type: 'log_base',
+  label: 'Log (base)',
+  category: 'math',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'val', label: 'Value' },
+    { id: 'base', label: 'Base' },
+  ],
+  defaultData: { blockType: 'log_base', label: 'Log (base)' },
+})
+
+reg({
+  type: 'roundn',
+  label: 'Round N',
+  category: 'math',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'val', label: 'Value' },
+    { id: 'digits', label: 'Digits' },
+  ],
+  defaultData: { blockType: 'roundn', label: 'Round N' },
+})
+
 // ── Trig category ─────────────────────────────────────────────────────────────
 
 reg({

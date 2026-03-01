@@ -193,6 +193,62 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![p("val", "Val"), p("min", "Min"), p("max", "Max")],
             pro_only: false,
         },
+        CatalogEntry {
+            op_id: "trunc",
+            label: "Trunc",
+            category: "math",
+            node_kind: "csOperation",
+            inputs: vec![p("a", "A")],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "sign",
+            label: "Sign",
+            category: "math",
+            node_kind: "csOperation",
+            inputs: vec![p("a", "A")],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "ln",
+            label: "Ln",
+            category: "math",
+            node_kind: "csOperation",
+            inputs: vec![p("a", "A")],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "log10",
+            label: "Log10",
+            category: "math",
+            node_kind: "csOperation",
+            inputs: vec![p("a", "A")],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "exp",
+            label: "Exp",
+            category: "math",
+            node_kind: "csOperation",
+            inputs: vec![p("a", "A")],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "log_base",
+            label: "Log (base)",
+            category: "math",
+            node_kind: "csOperation",
+            inputs: vec![p("val", "Value"), p("base", "Base")],
+            pro_only: false,
+        },
+        CatalogEntry {
+            op_id: "roundn",
+            label: "Round N",
+            category: "math",
+            node_kind: "csOperation",
+            inputs: vec![p("val", "Value"), p("digits", "Digits")],
+            pro_only: false,
+        },
         // ── Trig ─────────────────────────────────────────────────
         CatalogEntry {
             op_id: "sin",
@@ -1270,6 +1326,14 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![p("n", "n"), p("k", "k")],
             pro_only: true,
         },
+        CatalogEntry {
+            op_id: "prob.comb.combination",
+            label: "C(n,k)",
+            category: "probComb",
+            node_kind: "csOperation",
+            inputs: vec![p("n", "n"), p("k", "k")],
+            pro_only: false,
+        },
         // ── Probability → Distributions ────────────────────────────────
         CatalogEntry {
             op_id: "prob.dist.binomial_pmf",
@@ -1752,14 +1816,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 203);
+        assert_eq!(cat.len(), 211);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 203);
+        assert_eq!(parsed.as_array().unwrap().len(), 211);
     }
 
     #[test]
