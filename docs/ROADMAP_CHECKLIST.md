@@ -829,7 +829,7 @@ Claude MUST:
   - Account metadata
   - Acceptance: profile edits persist and show in UI.
 
-- [ ] D12-2: Avatar moderation hooks
+- [x] D12-2: Avatar moderation hooks
   - Report user avatar
   - Admin/moderator review flow (minimal v1)
   - Acceptance: abuse reporting exists.
