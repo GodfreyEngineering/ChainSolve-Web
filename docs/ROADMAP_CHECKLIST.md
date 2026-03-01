@@ -1101,7 +1101,7 @@ Claude MUST:
   - “Remember me” affects session persistence policy client-side.
   - Acceptance: user can revoke sessions and sees clear device list.
 
-- [ ] E2-6: Developer/admin role bootstrap
+- [x] E2-6: Developer/admin role bootstrap
   - Add profile role flags:
     - free/pro/enterprise + developer/admin overrides
   - Developer account (ben.godfrey@chainsolve.co.uk) gets:
