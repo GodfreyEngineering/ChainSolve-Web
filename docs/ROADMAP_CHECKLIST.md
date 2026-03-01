@@ -858,17 +858,17 @@ Claude MUST:
 > - observability_events RLS policy warning
 > - performance advisor multiple permissive policies warnings
 
-- [ ] D14-1: Fix function_search_path_mutable for `public.handle_canvases_updated_at`
+- [x] D14-1: Fix function_search_path_mutable for `public.handle_canvases_updated_at`
   - Create/replace function with explicit `SET search_path = ''` (or safe pinned schema)
   - Fully qualify objects inside function
   - Acceptance: advisor warning cleared.
   - Note: Supabase linter recommends pinning search_path explicitly for security. :contentReference[oaicite:0]{index=0}
 
-- [ ] D14-2: observability_events RLS enabled no policy
+- [x] D14-2: observability_events RLS enabled no policy
   - Add explicit policies (deny-all or correct access)
   - Acceptance: linter warning cleared.
 
-- [ ] D14-3: Consolidate “multiple permissive policies” for performance
+- [x] D14-3: Consolidate “multiple permissive policies” for performance
   - Merge multiple policies for same role/action into one policy with OR logic where possible
   - Targets mentioned:
     - audit_log SELECT
