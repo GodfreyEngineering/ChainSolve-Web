@@ -1181,7 +1181,7 @@ Claude MUST:
   - All these premade functions must be Free.
   - Acceptance: strong baseline, documented list.
 
-- [ ] E5-3: Engineering toolbox coverage v1
+- [x] E5-3: Engineering toolbox coverage v1
   - Mechanics, fluids, thermo, electrical, materials basics
   - Acceptance: meaningful engineering set.
 
