@@ -1015,12 +1015,12 @@ Claude MUST:
 ## E1 — Design system + full UI overhaul (the “premium workstation” foundation)
 > Goal: every pixel feels intentional. No mismatched panels, no inconsistent modals, consistent spacing/typography/colors, and everything is dockable/resizable.
 
-- [ ] E1-1: Define “Design Tokens v1” (CSS variables + TS constants)
+- [x] E1-1: Define “Design Tokens v1” (CSS variables + TS constants)
   - Typography scale, spacing scale, radius, shadows, z-index layers, focus rings.
   - Light/dark token completeness.
   - Acceptance: single source of truth; no hard-coded colors in components.
 
-- [ ] E1-2: Component primitives upgrade
+- [x] E1-2: Component primitives upgrade
   - Buttons, Inputs, Select, Tabs, Menus, Tooltips, Popovers, Dialogs, Toasts.
   - Keyboard/focus visible for all.
   - Acceptance: UI primitives replace one-off styling.
