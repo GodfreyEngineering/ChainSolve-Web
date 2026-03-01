@@ -35,6 +35,7 @@ import {
   listProjects,
   renameProject,
   readProjectRow,
+  readUpdatedAt,
 } from '../lib/projects'
 import {
   listCanvases,
@@ -325,6 +326,19 @@ export default function CanvasPage() {
       beginSave()
 
       try {
+        // E8-1: Conflict check BEFORE any writes.
+        // saveVariables() bumps projects.updated_at, so checking after it
+        // would cause false "open in another session" conflicts.
+        if (!opts?.forceKnownUpdatedAt) {
+          const dbTs = await readUpdatedAt(projectId)
+          if (dbTs && new Date(dbTs) > new Date(knownUpdatedAt)) {
+            conflictServerTs.current = dbTs
+            detectConflict()
+            isSaving.current = false
+            return
+          }
+        }
+
         // W12.2: Save variables if dirty
         const varsState = useVariablesStore.getState()
         if (varsState.isDirty) {
@@ -341,7 +355,7 @@ export default function CanvasPage() {
           markCanvasClean(currentCanvasId)
         }
 
-        // Also save to legacy project.json for backward compat + conflict detection
+        // Save to legacy project.json (skip conflict check — already done above)
         const result = await saveProject(
           projectId,
           state.projectName,
@@ -352,8 +366,12 @@ export default function CanvasPage() {
             formatVersion: state.formatVersion,
             createdAt: state.createdAt ?? new Date().toISOString(),
           },
+          true, // skipConflictCheck: already checked before writes
         )
 
+        // Conflict should not trigger here since we checked above, but
+        // handle it defensively in case of a concurrent write between
+        // our check and the saveProject write.
         if (result.conflict) {
           conflictServerTs.current = result.updatedAt
           detectConflict()

@@ -107,7 +107,7 @@ async function requireSession() {
   return session
 }
 
-async function readUpdatedAt(projectId: string): Promise<string | null> {
+export async function readUpdatedAt(projectId: string): Promise<string | null> {
   const { data } = await supabase.from('projects').select('updated_at').eq('id', projectId).single()
   return (data as { updated_at: string } | null)?.updated_at ?? null
 }
@@ -214,6 +214,11 @@ export async function loadProject(projectId: string): Promise<ProjectJSON> {
  * Returns { conflict: true } when the DB row was updated after we loaded it
  * (indicating a concurrent write from another session). In that case we do
  * NOT overwrite — the caller shows a resolution UI.
+ *
+ * E8-1: When `skipConflictCheck` is true, the optimistic lock comparison is
+ * skipped. The caller (doSave) performs the check before any same-session DB
+ * writes (e.g. saveVariables) that would bump `updated_at` and cause false
+ * conflict detections.
  */
 export async function saveProject(
   projectId: string,
@@ -222,12 +227,15 @@ export async function saveProject(
   edges: unknown[],
   knownUpdatedAt: string,
   prev?: Pick<ProjectJSON, 'createdAt' | 'formatVersion'>,
+  skipConflictCheck?: boolean,
 ): Promise<{ updatedAt: string; conflict: boolean }> {
-  // Optimistic lock check
-  const dbUpdatedAt = await readUpdatedAt(projectId)
-  if (dbUpdatedAt && new Date(dbUpdatedAt) > new Date(knownUpdatedAt)) {
-    dlog.warn('persistence', 'Conflict detected', { projectId })
-    return { updatedAt: dbUpdatedAt, conflict: true }
+  // Optimistic lock check (skipped when caller already checked)
+  if (!skipConflictCheck) {
+    const dbUpdatedAt = await readUpdatedAt(projectId)
+    if (dbUpdatedAt && new Date(dbUpdatedAt) > new Date(knownUpdatedAt)) {
+      dlog.warn('persistence', 'Conflict detected', { projectId })
+      return { updatedAt: dbUpdatedAt, conflict: true }
+    }
   }
 
   // Write — saveProjectJson also stamps storage_key → triggers DB updated_at

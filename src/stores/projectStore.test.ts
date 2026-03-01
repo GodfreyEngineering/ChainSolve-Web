@@ -203,6 +203,36 @@ describe('false conflict regression (D13-1)', () => {
   })
 })
 
+// ── E8-1: saveVariables bump regression ──────────────────────────────────────
+
+describe('false conflict regression (E8-1): saveVariables bumps updated_at', () => {
+  it('completeSave after variable save keeps dbUpdatedAt in sync', () => {
+    // Scenario: doSave saves variables (bumps updated_at to ts-vars),
+    // then saves project.json. The conflict check happens BEFORE variable save,
+    // so the store's dbUpdatedAt must be updated to the fresh timestamp after
+    // all writes succeed.
+    const s = useProjectStore.getState()
+    s.beginLoad('p-1', 'Project', 'ts-load', 1, 'ts-c')
+
+    // First save succeeds
+    s.beginSave()
+    s.completeSave('ts-save-1')
+    expect(useProjectStore.getState().dbUpdatedAt).toBe('ts-save-1')
+
+    // Next save cycle: vars are dirty → saveVariables bumps to 'ts-vars'
+    // → saveProject writes → completeSave with 'ts-after-project-save'
+    s.markDirty()
+    s.beginSave()
+    s.completeSave('ts-after-project-save')
+    expect(useProjectStore.getState().dbUpdatedAt).toBe('ts-after-project-save')
+
+    // Subsequent save should NOT falsely conflict because knownUpdatedAt
+    // was properly updated to 'ts-after-project-save'
+    expect(useProjectStore.getState().isDirty).toBe(false)
+    expect(useProjectStore.getState().saveStatus).toBe('saved')
+  })
+})
+
 // ── reset ─────────────────────────────────────────────────────────────────────
 
 describe('reset', () => {
