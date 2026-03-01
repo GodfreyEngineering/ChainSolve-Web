@@ -11,6 +11,11 @@ import type { Value } from '../../engine/value'
 import type { EngineEvalResult, EngineDiagnostic } from '../../engine/wasm-types'
 import { formatValue } from '../../engine/value'
 import { formatValueFull } from '../../engine/valueFormat'
+import {
+  buildExpressionTree,
+  renderEquationText,
+  renderEquationLatex,
+} from '../expressionExtractor'
 
 // ── Shared types ─────────────────────────────────────────────────────────────
 
@@ -44,6 +49,13 @@ export interface AuditNodeRow {
   valueKind?: string
 }
 
+export interface AuditEquationRow {
+  nodeId: string
+  label: string
+  equationText: string
+  equationLatex: string
+}
+
 // ── Single-canvas model (v1) ─────────────────────────────────────────────────
 
 export interface AuditModel {
@@ -55,6 +67,7 @@ export interface AuditModel {
   diagnosticCounts: { info: number; warning: number; error: number }
   diagnostics: AuditDiagnosticRow[]
   nodeValues: AuditNodeRow[]
+  equations: AuditEquationRow[]
 }
 
 // ── Multi-canvas types (v2) ──────────────────────────────────────────────────
@@ -77,6 +90,7 @@ export interface CanvasAuditSection {
   diagnosticCounts: { info: number; warning: number; error: number }
   diagnostics: AuditDiagnosticRow[]
   nodeValues: AuditNodeRow[]
+  equations: AuditEquationRow[]
   graphImageBytes: Uint8Array | null
   imageError?: string
   captureRung?: string
@@ -134,6 +148,56 @@ function mapNodeValues(nodes: Node[], evalResult: EngineEvalResult): AuditNodeRo
   })
 }
 
+/** Source block types that are leaf nodes (no upstream inputs → no equation). */
+const EQUATION_SKIP_TYPES = new Set([
+  'number',
+  'slider',
+  'variableSource',
+  'constant',
+  'material',
+  'pi',
+  'euler',
+  'tau',
+  'phi',
+  'ln2',
+  'ln10',
+  'sqrt2',
+  'inf',
+  '__group__',
+  'display',
+  'probe',
+])
+
+function mapEquations(
+  nodes: Node[],
+  edges: Edge[],
+  evalResult: EngineEvalResult,
+): AuditEquationRow[] {
+  const computed = new Map<string, Value>(Object.entries(evalResult.values) as [string, Value][])
+  const rows: AuditEquationRow[] = []
+
+  for (const n of nodes) {
+    const data = n.data as Record<string, unknown>
+    const blockType = data.blockType as string
+    if (EQUATION_SKIP_TYPES.has(blockType)) continue
+    if (blockType.startsWith('annotation_')) continue
+    if (blockType.startsWith('const.') || blockType.startsWith('preset.')) continue
+
+    const tree = buildExpressionTree(n.id, nodes, edges, computed)
+    if (!tree || tree.portOrder.length === 0) continue
+
+    const label = (data.label as string) ?? blockType
+    rows.push({
+      nodeId: n.id,
+      label,
+      equationText: renderEquationText(tree),
+      equationLatex: renderEquationLatex(tree),
+    })
+  }
+
+  return rows
+}
+
 function evalNodeCount(nodes: Node[]): number {
   return nodes.filter((n) => (n.data as Record<string, unknown>).blockType !== '__group__').length
 }
@@ -179,6 +243,7 @@ export function buildAuditModel(args: BuildAuditModelArgs): AuditModel {
     diagnosticCounts: countDiagnostics(args.evalResult.diagnostics),
     diagnostics: mapDiagnostics(args.evalResult.diagnostics),
     nodeValues: mapNodeValues(args.nodes, args.evalResult),
+    equations: mapEquations(args.nodes, args.edges, args.evalResult),
   }
 }
 
@@ -212,6 +277,7 @@ export function buildCanvasAuditSection(args: BuildCanvasSectionArgs): CanvasAud
     diagnosticCounts: countDiagnostics(args.evalResult.diagnostics),
     diagnostics: mapDiagnostics(args.evalResult.diagnostics),
     nodeValues: mapNodeValues(args.nodes, args.evalResult),
+    equations: mapEquations(args.nodes, args.edges, args.evalResult),
     graphImageBytes: args.graphImageBytes,
     imageError: args.imageError,
     captureRung: args.captureRung,

@@ -239,6 +239,108 @@ describe('buildAuditModel', () => {
     expect(n1Row.blockType).toBe('number')
     expect(n1Row.label).toBe('Input A')
   })
+
+  it('generates equations for non-source nodes with inputs (E6-3)', () => {
+    const nodes = [
+      {
+        id: 'a',
+        type: 'csSource',
+        position: { x: 0, y: 0 },
+        data: { blockType: 'number', label: 'A', value: 3 },
+      },
+      {
+        id: 'b',
+        type: 'csSource',
+        position: { x: 0, y: 0 },
+        data: { blockType: 'number', label: 'B', value: 4 },
+      },
+      {
+        id: 'add',
+        type: 'csOperation',
+        position: { x: 0, y: 0 },
+        data: { blockType: 'add', label: 'Add' },
+      },
+    ]
+    const edges = [
+      { id: 'e1', source: 'a', sourceHandle: 'out', target: 'add', targetHandle: 'a' },
+      { id: 'e2', source: 'b', sourceHandle: 'out', target: 'add', targetHandle: 'b' },
+    ]
+    const evalResult: EngineEvalResult = {
+      values: {
+        a: { kind: 'scalar', value: 3 },
+        b: { kind: 'scalar', value: 4 },
+        add: { kind: 'scalar', value: 7 },
+      },
+      diagnostics: [],
+      elapsedUs: 100,
+      partial: false,
+    }
+
+    const model = buildAuditModel({
+      projectName: 'Test',
+      projectId: null,
+      exportTimestamp: '2026-02-27T12:00:00Z',
+      buildVersion: '1.0.0',
+      buildSha: 'abc',
+      buildTime: '2026-02-27',
+      buildEnv: 'test',
+      engineVersion: '0.5.0',
+      contractVersion: 3,
+      nodes: nodes as never,
+      edges: edges as never,
+      evalResult,
+      healthSummary: '',
+      snapshotHash: 'deadbeef',
+    })
+
+    // Source nodes (a, b) should not have equations; add should
+    expect(model.equations).toHaveLength(1)
+    expect(model.equations[0].nodeId).toBe('add')
+    expect(model.equations[0].equationText).toBe('(A [3] + B [4]) = 7')
+    expect(model.equations[0].equationLatex).toContain('A + B = 7')
+  })
+
+  it('excludes annotation nodes from equations', () => {
+    const nodes = [
+      {
+        id: 'n1',
+        type: 'csSource',
+        position: { x: 0, y: 0 },
+        data: { blockType: 'number', label: 'X', value: 1 },
+      },
+      {
+        id: 'ann',
+        type: 'csAnnotation',
+        position: { x: 0, y: 0 },
+        data: { blockType: 'annotation_text', label: 'Note' },
+      },
+    ]
+    const evalResult: EngineEvalResult = {
+      values: { n1: { kind: 'scalar', value: 1 } },
+      diagnostics: [],
+      elapsedUs: 50,
+      partial: false,
+    }
+
+    const model = buildAuditModel({
+      projectName: 'Test',
+      projectId: null,
+      exportTimestamp: '2026-02-27T12:00:00Z',
+      buildVersion: '1.0.0',
+      buildSha: 'abc',
+      buildTime: '2026-02-27',
+      buildEnv: 'test',
+      engineVersion: '0.5.0',
+      contractVersion: 3,
+      nodes: nodes as never,
+      edges: [] as never,
+      evalResult,
+      healthSummary: '',
+      snapshotHash: 'deadbeef',
+    })
+
+    expect(model.equations).toHaveLength(0)
+  })
 })
 
 // ── buildCanvasAuditSection ──────────────────────────────────────────────────

@@ -265,6 +265,51 @@ function renderNodeValuesTable(
   }
 }
 
+function renderEquationsSection(
+  pm: PageManager,
+  equations: { nodeId: string; label: string; equationText: string; equationLatex: string }[],
+  fonts: Fonts,
+): void {
+  if (equations.length === 0) return
+
+  pm.drawSectionTitle('Equations', fonts.bold)
+
+  for (const eq of equations) {
+    pm.ensureSpace(LINE_HEIGHT * 3)
+    const rowY = pm.y
+
+    // Label line
+    pm.page.drawText(truncateText(eq.label, fonts.bold, 9, CONTENT_WIDTH), {
+      x: MARGIN,
+      y: rowY,
+      size: 9,
+      font: fonts.bold,
+    })
+    pm.y -= LINE_HEIGHT
+
+    // Equation text
+    pm.page.drawText(truncateText(eq.equationText, fonts.regular, 8, CONTENT_WIDTH - 10), {
+      x: MARGIN + 10,
+      y: pm.y,
+      size: 8,
+      font: fonts.regular,
+    })
+    pm.y -= LINE_HEIGHT
+
+    // LaTeX source
+    pm.page.drawText(
+      truncateText(`LaTeX: ${eq.equationLatex}`, fonts.mono, 7, CONTENT_WIDTH - 10),
+      {
+        x: MARGIN + 10,
+        y: pm.y,
+        size: 7,
+        font: fonts.mono,
+      },
+    )
+    pm.y -= LINE_HEIGHT
+  }
+}
+
 async function renderGraphImage(
   pm: PageManager,
   pdfDoc: PDFDocInstance,
@@ -375,6 +420,10 @@ export async function exportAuditPdf(
   // ── Node Value Table ───────────────────────────────────────────────────────
 
   renderNodeValuesTable(pm, model.nodeValues, fonts)
+
+  // ── Equations (E6-3) ───────────────────────────────────────────────────────
+
+  renderEquationsSection(pm, model.equations, fonts)
 
   // ── Graph Image Page ───────────────────────────────────────────────────────
 
@@ -498,6 +547,9 @@ export async function exportProjectAuditPdf(model: ProjectAuditModel): Promise<v
 
     // Node values table
     renderNodeValuesTable(pm, canvas.nodeValues, fonts)
+
+    // Equations (E6-3)
+    renderEquationsSection(pm, canvas.equations, fonts)
 
     // Graph image
     await renderGraphImage(pm, pdfDoc, canvas.graphImageBytes, fonts, canvas.imageError)
