@@ -922,24 +922,24 @@ Claude MUST:
 ---
 
 ## D17 — Release readiness round (polish + go-live)
-- [ ] D17-1: Ensure nothing says “coming soon”
+- [x] D17-1: Ensure nothing says “coming soon”
   - Remove/finish any placeholders
   - Acceptance: app feels complete.
 
-- [ ] D17-2: Quick guide content inside app
+- [x] D17-2: Quick guide content inside app
   - “10 nodes in 2 minutes”
   - “Variables + constants”
   - “Exports (Pro)”
   - “Explore installs”
   - Acceptance: new users can self-serve.
 
-- [ ] D17-3: Marketing QA checklist doc
+- [x] D17-3: Marketing QA checklist doc
   - screenshots checklist
   - supported browsers
   - common error states and copy
   - Acceptance: ready for public marketing push.
 
-- [ ] D17-4: End-to-end tests for:
+- [x] D17-4: End-to-end tests for:
   - landing -> create project -> add blocks -> save
   - explore browse -> install template (pro)
   - export gating (free blocked, pro allowed)
