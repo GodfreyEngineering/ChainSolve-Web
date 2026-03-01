@@ -1115,7 +1115,7 @@ Claude MUST:
 ## E3 — Data reset + test personas (safe and controlled)
 > You want to wipe test users and create 3 accounts (free/pro/enterprise) + developer account. Do this safely.
 
-- [ ] E3-1: Admin “Danger Zone” window (developer/admin only)
+- [x] E3-1: Admin “Danger Zone” window (developer/admin only)
   - Tools:
     - delete ALL user-owned data for a specific userId
     - delete a project by id
