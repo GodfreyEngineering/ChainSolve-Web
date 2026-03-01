@@ -879,17 +879,17 @@ Claude MUST:
 ---
 
 ## D15 — Premium UI/UX uplift pass (timeless workstation look)
-- [ ] D15-1: Design tokens pass (CSS variables)
+- [x] D15-1: Design tokens pass (CSS variables)
   - Define consistent spacing, radii, shadows, typography scale
   - Apply to: home view, explorer, windows, library, toolbars
   - Acceptance: cohesive premium feel.
 
-- [ ] D15-2: Light mode polish
+- [x] D15-2: Light mode polish
   - Fix library background bug (dark in light mode)
   - Ensure contrast meets standards
   - Acceptance: light mode feels intentional.
 
-- [ ] D15-3: Remove “top toolbar” and replace with project/user artifact entrypoints
+- [x] D15-3: Remove “top toolbar” and replace with project/user artifact entrypoints
   - Replace old top toolbar (blocks/fit/snap/inspector) with:
     - Variables
     - Groups
