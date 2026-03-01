@@ -82,6 +82,30 @@ const resizeHandle: React.CSSProperties = {
   userSelect: 'none',
 }
 
+// ── Snap-to-edges helper ──────────────────────────────────────────────────────
+
+const SNAP_THRESHOLD = 12 // px — distance at which the window snaps to an edge
+
+function snapPosition(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): { x: number; y: number } {
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+
+  // Snap left / right edges
+  if (x < SNAP_THRESHOLD) x = 0
+  else if (x + width > vw - SNAP_THRESHOLD) x = vw - width
+
+  // Snap top / bottom edges
+  if (y < SNAP_THRESHOLD) y = 0
+  else if (y + height > vh - SNAP_THRESHOLD) y = vh - height
+
+  return { x, y }
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 export function AppWindow({
@@ -110,10 +134,10 @@ export function AppWindow({
         y: e.clientY - win.geometry.y,
       }
       const onMove = (me: MouseEvent) => {
-        updateGeometry(windowId, {
-          x: me.clientX - dragOffset.current.x,
-          y: Math.max(0, me.clientY - dragOffset.current.y),
-        })
+        const rawX = me.clientX - dragOffset.current.x
+        const rawY = me.clientY - dragOffset.current.y
+        const snapped = snapPosition(rawX, rawY, win.geometry.width, win.geometry.height)
+        updateGeometry(windowId, snapped)
       }
       const onUp = () => {
         document.removeEventListener('mousemove', onMove)
@@ -137,10 +161,14 @@ export function AppWindow({
       const startY = e.clientY
       const startGeo: WindowGeometry = { ...win.geometry }
       const onMove = (me: MouseEvent) => {
-        updateGeometry(windowId, {
-          width: Math.max(minWidth, startGeo.width + (me.clientX - startX)),
-          height: Math.max(minHeight, startGeo.height + (me.clientY - startY)),
-        })
+        let w = Math.max(minWidth, startGeo.width + (me.clientX - startX))
+        let h = Math.max(minHeight, startGeo.height + (me.clientY - startY))
+        // Snap right/bottom edges to viewport
+        const vw = window.innerWidth
+        const vh = window.innerHeight
+        if (startGeo.x + w > vw - SNAP_THRESHOLD) w = vw - startGeo.x
+        if (startGeo.y + h > vh - SNAP_THRESHOLD) h = vh - startGeo.y
+        updateGeometry(windowId, { width: w, height: h })
       }
       const onUp = () => {
         document.removeEventListener('mousemove', onMove)
