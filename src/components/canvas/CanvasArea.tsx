@@ -1683,6 +1683,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   deleteKeyCode={null}
                   minZoom={0.08}
                   maxZoom={4}
+                  proOptions={{ hideAttribution: true }}
                 >
                   <Background
                     variant={BackgroundVariant.Dots}
