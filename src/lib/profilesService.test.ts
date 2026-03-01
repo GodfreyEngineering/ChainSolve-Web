@@ -9,15 +9,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // ── Supabase mock (hoisted so vi.mock factory can reference them) ─────────────
 
-const { mockUpload, mockCreateSignedUrl, mockUpdate, mockUpdateEq } = vi.hoisted(() => ({
-  mockUpload: vi.fn().mockResolvedValue({ error: null }),
-  mockCreateSignedUrl: vi.fn().mockResolvedValue({
-    data: { signedUrl: 'https://storage.example.com/signed' },
-    error: null,
-  }),
-  mockUpdate: vi.fn(),
-  mockUpdateEq: vi.fn().mockReturnValue({ error: null }),
-}))
+const { mockUpload, mockCreateSignedUrl, mockUpdate, mockUpdateEq, mockInsert, mockOrder } =
+  vi.hoisted(() => ({
+    mockUpload: vi.fn().mockResolvedValue({ error: null }),
+    mockCreateSignedUrl: vi.fn().mockResolvedValue({
+      data: { signedUrl: 'https://storage.example.com/signed' },
+      error: null,
+    }),
+    mockUpdate: vi.fn(),
+    mockUpdateEq: vi.fn().mockReturnValue({ error: null }),
+    mockInsert: vi.fn().mockResolvedValue({ error: null }),
+    mockOrder: vi.fn().mockResolvedValue({ data: [], error: null }),
+  }))
 
 vi.mock('./supabase', () => {
   mockUpdate.mockReturnValue({ eq: mockUpdateEq })
@@ -38,15 +41,17 @@ vi.mock('./supabase', () => {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+            order: mockOrder,
           }),
         }),
         update: mockUpdate,
+        insert: mockInsert,
       }),
     },
   }
 })
 
-import { updateDisplayName, uploadAvatar, getAvatarUrl } from './profilesService'
+import { updateDisplayName, uploadAvatar, getAvatarUrl, reportAvatar } from './profilesService'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -54,6 +59,7 @@ beforeEach(() => {
   mockUpdateEq.mockReturnValue({ error: null })
   mockUpdate.mockReturnValue({ eq: mockUpdateEq })
   mockUpload.mockResolvedValue({ error: null })
+  mockInsert.mockResolvedValue({ error: null })
   mockCreateSignedUrl.mockResolvedValue({
     data: { signedUrl: 'https://storage.example.com/signed' },
     error: null,
@@ -135,5 +141,36 @@ describe('getAvatarUrl', () => {
   it('requests a 1-hour expiry', async () => {
     await getAvatarUrl('user-42/avatar_123.jpg')
     expect(mockCreateSignedUrl).toHaveBeenCalledWith('user-42/avatar_123.jpg', 3600)
+  })
+})
+
+// ── reportAvatar ──────────────────────────────────────────────────────────────
+
+describe('reportAvatar', () => {
+  it('rejects self-reports', async () => {
+    await expect(reportAvatar('user-42', 'Offensive')).rejects.toThrow('Cannot report your own')
+  })
+
+  it('rejects empty reason', async () => {
+    await expect(reportAvatar('other-user', '   ')).rejects.toThrow('reason is required')
+  })
+
+  it('rejects reasons longer than 500 characters', async () => {
+    const longReason = 'x'.repeat(501)
+    await expect(reportAvatar('other-user', longReason)).rejects.toThrow('500 characters')
+  })
+
+  it('submits a valid report', async () => {
+    await reportAvatar('other-user', 'Inappropriate image')
+    expect(mockInsert).toHaveBeenCalledWith({
+      reporter_id: 'user-42',
+      target_id: 'other-user',
+      reason: 'Inappropriate image',
+    })
+  })
+
+  it('wraps unique constraint as duplicate report', async () => {
+    mockInsert.mockResolvedValueOnce({ error: { code: '23505', message: 'unique violation' } })
+    await expect(reportAvatar('other-user', 'Spam')).rejects.toThrow('already reported')
   })
 })

@@ -82,3 +82,84 @@ export async function getAvatarUrl(storagePath: string): Promise<string | null> 
   if (error || !data?.signedUrl) return null
   return data.signedUrl
 }
+
+// ── D12-2: Avatar moderation ──────────────────────────────────────────────────
+
+export interface AvatarReport {
+  id: string
+  reporter_id: string
+  target_id: string
+  reason: string
+  status: 'pending' | 'resolved' | 'dismissed'
+  created_at: string
+}
+
+/** Report another user's avatar. One pending report per reporter/target pair. */
+export async function reportAvatar(targetUserId: string, reason: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in to report an avatar')
+  if (user.id === targetUserId) throw new Error('Cannot report your own avatar')
+
+  const trimmed = reason.trim()
+  if (!trimmed) throw new Error('A reason is required')
+  if (trimmed.length > 500) throw new Error('Reason must be 500 characters or fewer')
+
+  const { error } = await supabase.from('avatar_reports').insert({
+    reporter_id: user.id,
+    target_id: targetUserId,
+    reason: trimmed,
+  })
+  if (error) {
+    if (error.code === '23505') throw new Error('You have already reported this avatar')
+    throw error
+  }
+}
+
+/** Moderator: list pending avatar reports. */
+export async function listPendingAvatarReports(): Promise<AvatarReport[]> {
+  const { data, error } = await supabase
+    .from('avatar_reports')
+    .select('id,reporter_id,target_id,reason,status,created_at')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return (data ?? []) as AvatarReport[]
+}
+
+/** Moderator: resolve a report (removes the offending avatar). */
+export async function resolveAvatarReport(reportId: string, targetUserId: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in required')
+
+  // Remove the offending avatar
+  const { error: clearErr } = await supabase
+    .from('profiles')
+    .update({ avatar_url: null })
+    .eq('id', targetUserId)
+  if (clearErr) throw clearErr
+
+  // Mark report resolved
+  const { error: resolveErr } = await supabase
+    .from('avatar_reports')
+    .update({ status: 'resolved', resolved_by: user.id, resolved_at: new Date().toISOString() })
+    .eq('id', reportId)
+  if (resolveErr) throw resolveErr
+}
+
+/** Moderator: dismiss a report (avatar is fine). */
+export async function dismissAvatarReport(reportId: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Sign in required')
+
+  const { error } = await supabase
+    .from('avatar_reports')
+    .update({ status: 'dismissed', resolved_by: user.id, resolved_at: new Date().toISOString() })
+    .eq('id', reportId)
+  if (error) throw error
+}
