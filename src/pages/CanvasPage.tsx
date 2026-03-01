@@ -313,9 +313,11 @@ export default function CanvasPage() {
           markVariablesClean()
         }
 
-        // Save to per-canvas storage if we have an active canvas
+        // Save to per-canvas storage if the active canvas still exists in the store.
+        // Guard: skip if the canvas was deleted (prevents orphaned storage blobs).
         const currentCanvasId = canvasesState.activeCanvasId
-        if (currentCanvasId) {
+        const canvasExists = canvasesState.canvases.some((c) => c.id === currentCanvasId)
+        if (currentCanvasId && canvasExists) {
           await saveCanvasGraph(projectId, currentCanvasId, snapshot.nodes, snapshot.edges)
           markCanvasClean(currentCanvasId)
         }
