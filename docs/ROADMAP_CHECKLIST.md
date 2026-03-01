@@ -1088,7 +1088,7 @@ Claude MUST:
   - Block access to app until email verified and ToS accepted.
   - Acceptance: compliance-ready.
 
-- [ ] E2-4: 2FA / MFA (TOTP) in Account Security
+- [x] E2-4: 2FA / MFA (TOTP) in Account Security
   - Supabase MFA enroll/challenge/verify exists in supabase-js. :contentReference[oaicite:5]{index=5}
   - Add:
     - enroll TOTP (QR code)
