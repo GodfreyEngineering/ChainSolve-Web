@@ -1264,7 +1264,7 @@ Claude MUST:
     - remove injection sources
   - Acceptance: no CSP noise, privacy aligned.
 
-- [ ] E9-2: Central redaction + privacy scanner coverage expansion
+- [x] E9-2: Central redaction + privacy scanner coverage expansion
   - Ensure any new feature (AI, Explore, comments) uses same redaction rules.
   - Acceptance: no leaks in exports/logs.
 
