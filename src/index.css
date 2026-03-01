@@ -177,10 +177,23 @@ select {
   font-family: inherit;
   color: var(--text);
 }
-input:focus,
-textarea:focus {
-  outline: 2px solid var(--primary);
-  outline-offset: 0;
+
+/* ── Focus-visible ring — keyboard-only focus indicator ─────────────── */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible,
+[role='tab']:focus-visible,
+[role='menuitem']:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+/* Remove default outline for mouse/touch focus */
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+button:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* React Flow overrides */

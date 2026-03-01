@@ -59,7 +59,7 @@ const chromeBtn: React.CSSProperties = {
   cursor: 'pointer',
   fontSize: '0.9rem',
   padding: '0.15rem 0.4rem',
-  borderRadius: 4,
+  borderRadius: 'var(--radius-sm)',
   lineHeight: 1,
   fontFamily: 'inherit',
   display: 'flex',

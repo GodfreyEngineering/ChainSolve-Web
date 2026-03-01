@@ -27,7 +27,7 @@ const selectStyle: React.CSSProperties = {
   fontFamily: 'inherit',
   fontSize: '0.88rem',
   padding: '0.55rem 0.75rem',
-  borderRadius: 8,
+  borderRadius: 'var(--radius-lg)',
   border: '1px solid var(--border)',
   background: 'var(--input-bg)',
   color: 'var(--text)',

@@ -33,7 +33,7 @@ function toastStyle(variant: ToastVariant): React.CSSProperties {
     background: 'var(--card-bg)',
     border: `1px solid ${variantColors[variant]}44`,
     borderLeft: `3px solid ${variantColors[variant]}`,
-    borderRadius: 8,
+    borderRadius: 'var(--radius-lg)',
     padding: '0.65rem 1rem',
     fontSize: '0.85rem',
     color: 'var(--text)',
