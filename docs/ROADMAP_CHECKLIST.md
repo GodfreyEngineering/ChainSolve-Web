@@ -1271,7 +1271,7 @@ Claude MUST:
 ---
 
 ## E10 — Explore ecosystem finishing (community-safe)
-- [ ] E10-1: Comments moderation v1
+- [x] E10-1: Comments moderation v1
   - rate limit, report, delete own
   - abuse workflow minimal
   - Acceptance: safe commenting.
