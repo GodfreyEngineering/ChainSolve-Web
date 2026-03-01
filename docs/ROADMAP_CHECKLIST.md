@@ -1281,7 +1281,7 @@ Claude MUST:
   - privacy-safe (no project content)
   - Acceptance: trustworthy stats.
 
-- [ ] E10-3: Enterprise “company-only Explore” hardening
+- [x] E10-3: Enterprise “company-only Explore” hardening
   - org-only visibility
   - admin policy restricts access
   - Acceptance: enterprise safe.
