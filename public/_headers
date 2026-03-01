@@ -18,6 +18,11 @@
   Cache-Control: public, max-age=86400
 
 # ── Everything else (HTML, SPA routes) — always revalidate ───────────────────
+#
+# NOTE: Cloudflare Web Analytics beacon is INTENTIONALLY NOT allowlisted.
+# If "Web Analytics" is enabled in the Cloudflare dashboard, the injected
+# beacon.min.js will be blocked by CSP and produce console errors.
+# Resolution: disable "Web Analytics" in Cloudflare dashboard → see docs/SECURITY.md §5.
 /*
   Cache-Control: public, max-age=0, must-revalidate
   X-Frame-Options: DENY

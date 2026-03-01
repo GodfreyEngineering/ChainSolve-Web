@@ -947,3 +947,365 @@ Claude MUST:
   - Acceptance: core flows protected.
 
 ---
+
+---
+
+# PHASE E — “Market-ready perfection” (UI overhaul, Auth v2, Admin tooling, Catalog expansion, Reporting)
+> Objective: By end of Phase E, ChainSolve feels like a premium workstation app: flawless UX, enterprise-safe auth, robust permissions, complete block catalog strategy, scientific reporting features, and a clean release pipeline.
+
+## Phase E rules (non-negotiable)
+- Every item is DONE only when:
+  - `./scripts/verify-ci.sh` PASS
+  - tests updated/added (as required)
+  - i18n keys for EN/DE/FR/ES/IT when UI changes
+  - docs + changelog updated
+- CSP must not weaken: no `unsafe-eval`, no inline scripts.
+- Adapter boundary: UI components must not import Supabase directly.
+- Privacy: no prompt storage, no secrets in logs, no PII in exports/tests.
+- Free users: can use all “premade function blocks”, but Pro/Enterprise gate heavy features (imports/exports, plots, tables/CSV, groups, themes, Explore uploads, AI, etc.) per current product direction.
+
+---
+
+## E0 — Stop-the-bleeding fixes (must do first, tight diffs)
+- [x] E0-1: Fix Settings/Preferences crash: `useNavigate()` outside `<Router>`
+  - Root cause: Settings modal/window rendered outside router context or uses navigation hooks in detached subtree.
+  - Fix: move Settings window rendering inside router provider OR refactor to pass navigate callback in from routed component.
+  - Acceptance:
+    - Settings opens with no error in console.
+    - Preferences navigation works.
+    - No regressions to window manager.
+
+- [ ] E0-2: Resolve CSP errors for Cloudflare Insights beacon
+  - Current: script load blocked at `https://static.cloudflareinsights.com/beacon.min.js`
+  - Decide and implement ONE of:
+    A) Disable Cloudflare Insights injection for app domain (preferred for strict CSP + privacy), OR
+    B) Allowlist only what’s needed under CSP without reintroducing unsafe-eval (only if it works), OR
+    C) Use Cloudflare Zaraz CSP support (nonce) if analytics is required, but still keep telemetry opt-in.
+  - Acceptance:
+    - No CSP console spam on app load.
+    - CSP remains strict and documented.
+  - Docs:
+    - docs/CSP_PLAYBOOK.md updated with decision and reasoning.
+
+- [ ] E0-3: i18next deprecation warning cleanup
+  - Fix initialization to non-deprecated signature and ensure no warnings on boot.
+  - Acceptance: no i18next deprecation warnings.
+
+- [ ] E0-4: Registry/catalog mismatches and missing TS defaults
+  - Fix warnings:
+    - “Catalog op … has no TS default — UI may not render it”
+    - “TS block X not in Rust catalog — engine won’t evaluate it”
+  - Target outcome:
+    - UI renders catalog-driven blocks generically even without bespoke TS defaults.
+    - TS-only blocks either:
+      - become pure UI nodes that resolve to engine-supported ops, OR
+      - are removed, OR
+      - are added to Rust catalog properly.
+  - Acceptance:
+    - No registry mismatch warnings on boot.
+    - Constant/material/probe alignment clarified (documented).
+
+- [ ] E0-5: Remove React Flow attribution link (license-aware)
+  - Use official `proOptions.hideAttribution` if permitted.
+  - Add docs note: if used commercially, consider supporting/keeping attribution. :contentReference[oaicite:3]{index=3}
+  - Acceptance: no attribution overlay visible.
+
+---
+
+## E1 — Design system + full UI overhaul (the “premium workstation” foundation)
+> Goal: every pixel feels intentional. No mismatched panels, no inconsistent modals, consistent spacing/typography/colors, and everything is dockable/resizable.
+
+- [ ] E1-1: Define “Design Tokens v1” (CSS variables + TS constants)
+  - Typography scale, spacing scale, radius, shadows, z-index layers, focus rings.
+  - Light/dark token completeness.
+  - Acceptance: single source of truth; no hard-coded colors in components.
+
+- [ ] E1-2: Component primitives upgrade
+  - Buttons, Inputs, Select, Tabs, Menus, Tooltips, Popovers, Dialogs, Toasts.
+  - Keyboard/focus visible for all.
+  - Acceptance: UI primitives replace one-off styling.
+
+- [ ] E1-3: Layout refactor: App Shell “workbench” states
+  - States:
+    - No project open (Workbench Home)
+    - Project open (Canvas workspace)
+  - Panels:
+    - Left dock: Block Library (dockable, resizable, hideable)
+    - Right: ALWAYS visible vertical canvas toolbar (pan/zoom/fit/grid)
+    - Bottom dock: Terminal + Graph Health (minimize/close/tab)
+    - Top: Sheets bar + Project toolbar (project-level windows: variables, groups, imports, themes, materials, custom blocks)
+  - Acceptance:
+    - no panel overlaps
+    - nothing hidden behind terminal
+    - consistent docking UX
+
+- [ ] E1-4: Window Manager v2 polish (if already exists, harden)
+  - Windows:
+    - draggable/resizable
+    - snap to edges
+    - z-order management
+    - minimize/maximize/restore
+    - remembers position per user (optional)
+  - Convert: Settings, Profile, Docs, Variables, Explore item detail, Upgrade plan window.
+  - Acceptance: no “browser popup windows” anywhere.
+
+- [ ] E1-5: Header + account area overhaul
+  - Top-right avatar opens Account window:
+    - profile (display name, avatar)
+    - plan badge
+    - billing/manage plan
+    - security (2FA, devices)
+  - Settings gear becomes “Preferences” window (no crash).
+  - Notifications placeholder removed or implemented.
+  - Acceptance: header is clean and “SaaS premium”.
+
+---
+
+## E2 — Auth & account system v2 (signup/login enterprise-grade)
+> Goal: proper web-app auth: ToS, marketing prefs, captcha, email verification, 2FA, device sessions, re-login rules.
+
+- [ ] E2-1: New Auth UI (login/signup/reset) as first-class routes
+  - Signup fields:
+    - email, password, confirm password
+    - accept Terms & Conditions checkbox
+    - marketing email preference (opt-in)
+  - Login:
+    - remember device checkbox
+    - secure error messaging
+  - Reset password:
+    - robust flow
+  - Acceptance: polished UI, no basic/stub forms.
+
+- [ ] E2-2: CAPTCHA integration (Turnstile preferred)
+  - Supabase Auth supports captcha providers including Turnstile/hCaptcha via auth config. :contentReference[oaicite:4]{index=4}
+  - Implement frontend token acquisition + passing `captcha_token` where needed.
+  - Acceptance: bots blocked, humans not annoyed, UX clean.
+
+- [ ] E2-3: Email verification + ToS versioning
+  - Store:
+    - accepted_terms_version, accepted_terms_at
+    - marketing_opt_in, marketing_opt_in_at
+  - Block access to app until email verified and ToS accepted.
+  - Acceptance: compliance-ready.
+
+- [ ] E2-4: 2FA / MFA (TOTP) in Account Security
+  - Supabase MFA enroll/challenge/verify exists in supabase-js. :contentReference[oaicite:5]{index=5}
+  - Add:
+    - enroll TOTP (QR code)
+    - verify challenge
+    - disable factor
+  - Acceptance: user can enable 2FA, re-login requires it.
+
+- [ ] E2-5: Device sessions + remember-me rules
+  - Show active sessions list (device name, last active, revoke).
+  - “Remember me” affects session persistence policy client-side.
+  - Acceptance: user can revoke sessions and sees clear device list.
+
+- [ ] E2-6: Developer/admin role bootstrap
+  - Add profile role flags:
+    - free/pro/enterprise + developer/admin overrides
+  - Developer account (ben.godfrey@chainsolve.co.uk) gets:
+    - all features unlocked
+    - admin tools (danger zone)
+    - environment diagnostics
+  - Acceptance: dev role works and is server-side enforced.
+
+---
+
+## E3 — Data reset + test personas (safe and controlled)
+> You want to wipe test users and create 3 accounts (free/pro/enterprise) + developer account. Do this safely.
+
+- [ ] E3-1: Admin “Danger Zone” window (developer/admin only)
+  - Tools:
+    - delete ALL user-owned data for a specific userId
+    - delete a project by id
+    - reset local caches (MRU, preferences)
+  - Must require typed confirmation (“DELETE”) + re-auth
+  - Must never expose service role key to client.
+  - Acceptance: safe admin tooling without foot-guns.
+
+- [ ] E3-2: Test persona bootstrap script (docs + optional SQL)
+  - Provide documented steps to create:
+    - free test user
+    - pro test user
+    - enterprise test user (org membership)
+    - developer account
+  - Acceptance: reproducible testing setup.
+
+---
+
+## E4 — Block Library + Insert UX (massive upgrade)
+> Goal: users find blocks instantly; categories make sense; insert menu matches library.
+
+- [ ] E4-1: Block Library IA redesign
+  - Top: search + filters (category/type)
+  - Sections:
+    - Inputs (number, slider, table/list)
+    - Variable (source)
+    - Constant (source)
+    - Material (source)
+    - Functions (categorized)
+    - Outputs
+    - Data/Plots (Pro)
+  - Favorites + Recently used
+  - Acceptance: dramatically improved discoverability.
+
+- [ ] E4-2: Insert dropdown redesign (mirrors library)
+  - Top categories then drill-down:
+    - Inputs → subcategories
+    - Functions → subcategories
+    - Outputs → subcategories
+  - Right-click canvas context menu uses same insert system.
+  - Acceptance: consistent insert everywhere.
+
+- [ ] E4-3: Fix: light mode library background is dark
+  - Acceptance: light mode visually correct.
+
+---
+
+## E5 — Block Catalog Expansion Program (Excel + engineering calculators)
+> Goal: ChainSolve becomes the “one stop shop” for numerical functions. Strategy matters more than brute force.
+
+- [ ] E5-1: Catalog governance + generator pipeline
+  - Create `docs/BLOCK_CATALOG_GOVERNANCE.md`:
+    - naming conventions
+    - categories taxonomy
+    - how to add blocks (Rust + tests + i18n)
+    - versioning + contract changes
+  - Create a structured manifest file (YAML/JSON) listing blocks to implement and metadata.
+  - Acceptance: future block additions are systematic.
+
+- [ ] E5-2: Excel numeric functions coverage v1 (core set)
+  - Implement a prioritized set first (common + high ROI):
+    - rounding, abs, min/max, trig, log/exp, stats basics, combinatorics, financial basics
+  - All these premade functions must be Free.
+  - Acceptance: strong baseline, documented list.
+
+- [ ] E5-3: Engineering toolbox coverage v1
+  - Mechanics, fluids, thermo, electrical, materials basics
+  - Acceptance: meaningful engineering set.
+
+- [ ] E5-4: Advanced function packs v2–v4 (staged)
+  - Create staged milestones:
+    - v2: stats distributions, regression, filters
+    - v3: matrix/vector ops
+    - v4: unit conversion expansions, dimensional analysis helpers
+  - Acceptance: ongoing scalable program.
+
+- [ ] E5-5: Category + search quality
+  - Synonyms, tags, search ranking
+  - Acceptance: “I can find anything fast.”
+
+---
+
+## E6 — Scientific reporting: equation/notation view (graph → math)
+> Goal: users can select a chain and get proper scientific notation output, with substituted values.
+
+- [ ] E6-1: Expression extraction v1
+  - For a selected output node:
+    - trace upstream DAG
+    - build expression tree (symbolic-ish)
+    - support scalar, vector, table forms
+  - Acceptance: stable expression build for common ops.
+
+- [ ] E6-2: Pretty math rendering + substitution
+  - Display:
+    - symbolic form: `a + b = c`
+    - substituted: `1 + 2 = 3`
+  - Copy as:
+    - plain text
+    - LaTeX-like string
+  - Acceptance: usable in reports immediately.
+
+- [ ] E6-3: PDF integration
+  - Option: include equation blocks in audit PDF (Pro)
+  - Acceptance: audit PDFs can include notation sections.
+
+---
+
+## E7 — Annotations & presentation tools
+> Goal: users can “dress up” graphs for sharing/reporting.
+
+- [ ] E7-1: Annotation layer v1 (non-evaluating)
+  - Add annotation node kinds:
+    - text label
+    - arrow connector
+    - callout box
+    - highlight region
+  - Persist in canvas JSON.
+  - Acceptance: annotations don’t affect evaluation; export renders them.
+
+- [ ] E7-2: Canvas styling tools
+  - Color themes per group/region
+  - Snap-to-grid and alignment helpers
+  - Acceptance: presentation-grade visuals.
+
+---
+
+## E8 — Reliability fixes (ghost conflicts, save robustness)
+- [ ] E8-1: Eliminate false “open in another session” warnings
+  - Root-cause + fix
+  - Add regression tests
+  - Acceptance: no false conflicts and saves always apply.
+
+- [ ] E8-2: Save pipeline robustness audit
+  - Ensure sheet add/reorder never silently fails.
+  - Ensure conflict handling never leaves app in “can’t save” state.
+  - Acceptance: reliable saving under stress.
+
+---
+
+## E9 — CSP + analytics + privacy finalization
+- [ ] E9-1: Decide analytics strategy for app domain
+  - If enabled:
+    - must be opt-in
+    - must be CSP compatible (nonce approach if needed)
+  - If disabled:
+    - remove injection sources
+  - Acceptance: no CSP noise, privacy aligned.
+
+- [ ] E9-2: Central redaction + privacy scanner coverage expansion
+  - Ensure any new feature (AI, Explore, comments) uses same redaction rules.
+  - Acceptance: no leaks in exports/logs.
+
+---
+
+## E10 — Explore ecosystem finishing (community-safe)
+- [ ] E10-1: Comments moderation v1
+  - rate limit, report, delete own
+  - abuse workflow minimal
+  - Acceptance: safe commenting.
+
+- [ ] E10-2: Explore metrics
+  - downloads, likes, installs
+  - privacy-safe (no project content)
+  - Acceptance: trustworthy stats.
+
+- [ ] E10-3: Enterprise “company-only Explore” hardening
+  - org-only visibility
+  - admin policy restricts access
+  - Acceptance: enterprise safe.
+
+---
+
+## E11 — Release candidate hardening
+- [ ] E11-1: E2E suite expansion to cover new UX
+  - login/signup, ToS, captcha, 2FA (mock)
+  - workbench home
+  - window manager
+  - insert menu
+  - export gating
+  - Acceptance: major flows protected by CI.
+
+- [ ] E11-2: Go-live docs v2
+  - deployment checklist
+  - CSP checklist
+  - Stripe checklist (annual + enterprise)
+  - Test persona checklist
+  - Acceptance: “anyone can release”.
+
+- [ ] E11-3: Performance + polish pass
+  - remove jank, improve LOD, confirm edge stability
+  - Acceptance: feels fast and smooth.
+
+---

@@ -292,6 +292,28 @@ for the full CSP rationale.
 Until then: **do not enable Cloudflare Web Analytics in the Cloudflare dashboard**
 unless the CSP is updated simultaneously.
 
+### Troubleshooting: CSP console errors for beacon.min.js
+
+If you see console errors like:
+
+```
+Refused to load the script 'https://static.cloudflareinsights.com/beacon.min.js'
+because it violates the following Content Security Policy directive: "script-src 'self' 'wasm-unsafe-eval'"
+```
+
+**Cause:** "Web Analytics" was enabled in the Cloudflare Pages dashboard. Cloudflare
+auto-injects `beacon.min.js` at the edge, but the CSP correctly blocks it.
+
+**Resolution:**
+1. Go to Cloudflare dashboard → Workers & Pages → chainsolve-web → Settings
+2. Navigate to the "Web Analytics" section
+3. Disable "Web Analytics"
+4. Verify the console errors stop on next page load
+
+This is the intended behavior — the CSP is doing its job. Do **not** weaken the CSP
+to accommodate the beacon. If analytics are needed, evaluate Cloudflare Zaraz (which
+supports CSP nonces) or use the existing `observability_events` pipeline.
+
 ### CI enforcement (P050)
 
 `scripts/check-csp-allowlist.mjs` runs as part of `verify-ci.sh` and parses

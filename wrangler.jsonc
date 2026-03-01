@@ -5,5 +5,8 @@
   // Builds and deploys are driven by GitHub Actions (see .github/workflows/ci.yml).
   // Cloudflare's Git-integrated auto-build must be DISABLED in the Dashboard
   // (Workers & Pages → chainsolve-web → Settings → Builds → Disable).
+  //
+  // IMPORTANT: "Web Analytics" must be DISABLED in the Cloudflare dashboard.
+  // The beacon it injects is blocked by CSP. See docs/SECURITY.md §5.
   "compatibility_date": "2026-02-25"
 }
