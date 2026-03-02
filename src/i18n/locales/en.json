@@ -59,6 +59,41 @@
     "revokedMessage": "You have been signed out because your account was signed in on another device. Please sign in again to continue.",
     "signInAgain": "Sign in again"
   },
+  "bugReport": {
+    "title": "Report a Bug",
+    "titleLabel": "Bug title",
+    "titlePlaceholder": "Brief description of the issue",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Steps to reproduce, expected vs actual behavior…",
+    "submit": "Submit Report",
+    "submitting": "Submitting…",
+    "success": "Bug report submitted. Thank you!",
+    "error": "Failed to submit bug report.",
+    "screenshotLabel": "Screenshot (optional)",
+    "attachScreenshot": "Attach a screenshot…",
+    "removeScreenshot": "Remove screenshot",
+    "screenshotHint": "PNG, JPEG, or WebP up to 5 MB.",
+    "screenshotTooLarge": "Screenshot must be under 5 MB.",
+    "screenshotInvalidType": "Only image files are accepted.",
+    "includeDiagnostics": "Include system diagnostics",
+    "diagnosticsHint": "Sends browser, viewport, and app version info. No personal data is included."
+  },
+  "suggestion": {
+    "title": "Suggest a Feature",
+    "categoryLabel": "Category",
+    "cat_feature_request": "Feature request",
+    "cat_block_library": "Block library",
+    "cat_ux_feedback": "UX feedback",
+    "titleLabel": "Summary",
+    "titlePlaceholder": "Brief summary of your suggestion",
+    "descriptionLabel": "Details",
+    "descriptionPlaceholder": "Describe your idea, the problem it solves, or what you would like to see…",
+    "submit": "Submit Suggestion",
+    "submitting": "Submitting…",
+    "success": "Suggestion submitted. Thank you!",
+    "error": "Failed to submit suggestion.",
+    "hint": "All suggestions are reviewed by the team."
+  },
   "auth": {
     "login": "Sign in",
     "signup": "Create account",
@@ -332,7 +367,8 @@
     "admin": "Admin",
     "adminDesc": "Developer tools and danger zone",
     "security": "Security",
-    "securityDesc": "Two-factor authentication"
+    "securityDesc": "Two-factor authentication",
+    "suggest": "Suggest a feature"
   },
   "security": {
     "title": "Account Security",
@@ -585,6 +621,7 @@
     "documentation": "Documentation",
     "keyboardShortcuts": "Keyboard shortcuts",
     "bugReport": "Bug report",
+    "suggest": "Suggest a feature",
     "about": "About",
     "changelog": "Changelog",
     "contactSupport": "Contact support",

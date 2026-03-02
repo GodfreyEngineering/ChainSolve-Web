@@ -16,6 +16,9 @@ import { AI_COPILOT_WINDOW_ID } from '../../lib/aiCopilot/constants'
 const LazyBugReportModal = lazy(() =>
   import('../BugReportModal').then((m) => ({ default: m.BugReportModal })),
 )
+const LazySuggestionModal = lazy(() =>
+  import('../SuggestionModal').then((m) => ({ default: m.SuggestionModal })),
+)
 const LazyAboutWindow = lazy(() => import('./AboutModal').then((m) => ({ default: m.AboutWindow })))
 const LazyConfirmDialog = lazy(() =>
   import('./ConfirmDialog').then((m) => ({ default: m.ConfirmDialog })),
@@ -168,6 +171,7 @@ export function AppHeader({
   const [includeTables, setIncludeTables] = useState(getIncludeTablesPref)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [bugReportOpen, setBugReportOpen] = useState(false)
+  const [suggestionOpen, setSuggestionOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [whatsNewOpen, setWhatsNewOpen] = useState(false)
   const [openDialogOpen, setOpenDialogOpen] = useState(false)
@@ -742,6 +746,13 @@ export function AppHeader({
         },
       },
       {
+        label: t('menu.suggest'),
+        onClick: () => {
+          setSuggestionOpen(true)
+          setOpenMenu(null)
+        },
+      },
+      {
         label: t('menu.changelog'),
         onClick: () => {
           setWhatsNewOpen(true)
@@ -958,6 +969,11 @@ export function AppHeader({
       {bugReportOpen && (
         <Suspense fallback={null}>
           <LazyBugReportModal open onClose={() => setBugReportOpen(false)} />
+        </Suspense>
+      )}
+      {suggestionOpen && (
+        <Suspense fallback={null}>
+          <LazySuggestionModal open onClose={() => setSuggestionOpen(false)} />
         </Suspense>
       )}
       {isWinOpen(ABOUT_WINDOW_ID) && (

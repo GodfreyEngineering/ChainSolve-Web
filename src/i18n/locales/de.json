@@ -52,6 +52,41 @@
     "revokedMessage": "Sie wurden abgemeldet, da Ihr Konto auf einem anderen Gerät angemeldet wurde. Bitte melden Sie sich erneut an, um fortzufahren.",
     "signInAgain": "Erneut anmelden"
   },
+  "bugReport": {
+    "title": "Fehler melden",
+    "titleLabel": "Fehlertitel",
+    "titlePlaceholder": "Kurze Beschreibung des Problems",
+    "descriptionLabel": "Beschreibung",
+    "descriptionPlaceholder": "Schritte zur Reproduktion, erwartetes vs. tatsächliches Verhalten…",
+    "submit": "Bericht senden",
+    "submitting": "Wird gesendet…",
+    "success": "Fehlerbericht gesendet. Vielen Dank!",
+    "error": "Fehlerbericht konnte nicht gesendet werden.",
+    "screenshotLabel": "Screenshot (optional)",
+    "attachScreenshot": "Screenshot anhängen…",
+    "removeScreenshot": "Screenshot entfernen",
+    "screenshotHint": "PNG, JPEG oder WebP bis 5 MB.",
+    "screenshotTooLarge": "Screenshot darf maximal 5 MB groß sein.",
+    "screenshotInvalidType": "Nur Bilddateien werden akzeptiert.",
+    "includeDiagnostics": "Systemdiagnose einschließen",
+    "diagnosticsHint": "Sendet Browser-, Viewport- und App-Versionsinformationen. Keine persönlichen Daten enthalten."
+  },
+  "suggestion": {
+    "title": "Feature vorschlagen",
+    "categoryLabel": "Kategorie",
+    "cat_feature_request": "Funktionswunsch",
+    "cat_block_library": "Block-Bibliothek",
+    "cat_ux_feedback": "UX-Feedback",
+    "titleLabel": "Zusammenfassung",
+    "titlePlaceholder": "Kurze Zusammenfassung Ihres Vorschlags",
+    "descriptionLabel": "Details",
+    "descriptionPlaceholder": "Beschreiben Sie Ihre Idee, das Problem, das sie löst, oder was Sie sich wünschen…",
+    "submit": "Vorschlag senden",
+    "submitting": "Wird gesendet…",
+    "success": "Vorschlag gesendet. Vielen Dank!",
+    "error": "Vorschlag konnte nicht gesendet werden.",
+    "hint": "Alle Vorschläge werden vom Team geprüft."
+  },
   "auth": {
     "login": "Anmelden",
     "signup": "Konto erstellen",
@@ -325,7 +360,8 @@
     "admin": "Admin",
     "adminDesc": "Entwicklertools und Gefahrenzone",
     "security": "Sicherheit",
-    "securityDesc": "Zwei-Faktor-Authentifizierung"
+    "securityDesc": "Zwei-Faktor-Authentifizierung",
+    "suggest": "Feature vorschlagen"
   },
   "security": {
     "title": "Kontosicherheit",
@@ -577,6 +613,7 @@
     "documentation": "Dokumentation",
     "keyboardShortcuts": "Tastaturkürzel",
     "bugReport": "Fehler melden",
+    "suggest": "Feature vorschlagen",
     "about": "Über",
     "changelog": "Änderungsprotokoll",
     "contactSupport": "Support kontaktieren",

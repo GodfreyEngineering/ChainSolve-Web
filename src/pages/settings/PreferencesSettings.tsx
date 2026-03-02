@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button'
 import { SUPPORTED_LANGUAGES } from '../../i18n/config'
 import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../../lib/build-info'
 import { BugReportModal } from '../../components/BugReportModal'
+import { SuggestionModal } from '../../components/SuggestionModal'
 import { UpgradeModal } from '../../components/UpgradeModal'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { ThemeMode } from '../../contexts/ThemeContext'
@@ -33,6 +34,7 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
   const { t, i18n } = useTranslation()
   const { mode, setMode } = useTheme()
   const [bugOpen, setBugOpen] = useState(false)
+  const [suggestionOpen, setSuggestionOpen] = useState(false)
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const prefs = usePreferencesStore()
   const { themes, activeThemeId, activateTheme, deleteTheme } = useCustomThemesStore()
@@ -371,14 +373,18 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
         </div>
       </div>
 
-      {/* ── Bug report ────────────────────────────────────────────────── */}
-      <div style={{ marginTop: '2rem' }}>
+      {/* ── Bug report / suggestion ────────────────────────────────────── */}
+      <div style={{ marginTop: '2rem', display: 'flex', gap: '0.75rem' }}>
         <Button variant="secondary" size="sm" onClick={() => setBugOpen(true)}>
           {t('settings.reportBug')}
+        </Button>
+        <Button variant="secondary" size="sm" onClick={() => setSuggestionOpen(true)}>
+          {t('settings.suggest')}
         </Button>
       </div>
 
       <BugReportModal open={bugOpen} onClose={() => setBugOpen(false)} />
+      <SuggestionModal open={suggestionOpen} onClose={() => setSuggestionOpen(false)} />
       <UpgradeModal
         open={upgradeOpen}
         onClose={() => setUpgradeOpen(false)}

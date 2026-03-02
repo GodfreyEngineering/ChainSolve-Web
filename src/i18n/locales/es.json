@@ -52,6 +52,41 @@
     "revokedMessage": "Se ha cerrado tu sesión porque tu cuenta inició sesión en otro dispositivo. Inicia sesión de nuevo para continuar.",
     "signInAgain": "Iniciar sesión de nuevo"
   },
+  "bugReport": {
+    "title": "Reportar un error",
+    "titleLabel": "Título del error",
+    "titlePlaceholder": "Descripción breve del problema",
+    "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Pasos para reproducir, comportamiento esperado vs real…",
+    "submit": "Enviar reporte",
+    "submitting": "Enviando…",
+    "success": "Reporte de error enviado. ¡Gracias!",
+    "error": "No se pudo enviar el reporte de error.",
+    "screenshotLabel": "Captura de pantalla (opcional)",
+    "attachScreenshot": "Adjuntar captura…",
+    "removeScreenshot": "Eliminar captura",
+    "screenshotHint": "PNG, JPEG o WebP hasta 5 MB.",
+    "screenshotTooLarge": "La captura debe ser menor a 5 MB.",
+    "screenshotInvalidType": "Solo se aceptan archivos de imagen.",
+    "includeDiagnostics": "Incluir diagnósticos del sistema",
+    "diagnosticsHint": "Envía información del navegador, ventana y versión de la app. No se incluyen datos personales."
+  },
+  "suggestion": {
+    "title": "Sugerir una función",
+    "categoryLabel": "Categoría",
+    "cat_feature_request": "Solicitud de función",
+    "cat_block_library": "Biblioteca de bloques",
+    "cat_ux_feedback": "Comentario de UX",
+    "titleLabel": "Resumen",
+    "titlePlaceholder": "Resumen breve de tu sugerencia",
+    "descriptionLabel": "Detalles",
+    "descriptionPlaceholder": "Describe tu idea, el problema que resuelve o lo que te gustaría ver…",
+    "submit": "Enviar sugerencia",
+    "submitting": "Enviando…",
+    "success": "Sugerencia enviada. ¡Gracias!",
+    "error": "No se pudo enviar la sugerencia.",
+    "hint": "Todas las sugerencias son revisadas por el equipo."
+  },
   "auth": {
     "login": "Iniciar sesión",
     "signup": "Crear cuenta",
@@ -325,7 +360,8 @@
     "admin": "Admin",
     "adminDesc": "Herramientas de desarrollador y zona de peligro",
     "security": "Seguridad",
-    "securityDesc": "Autenticación de dos factores"
+    "securityDesc": "Autenticación de dos factores",
+    "suggest": "Sugerir una función"
   },
   "security": {
     "title": "Seguridad de la cuenta",
@@ -577,6 +613,7 @@
     "documentation": "Documentación",
     "keyboardShortcuts": "Atajos de teclado",
     "bugReport": "Reportar error",
+    "suggest": "Sugerir una función",
     "about": "Acerca de",
     "changelog": "Registro de cambios",
     "contactSupport": "Contactar soporte",

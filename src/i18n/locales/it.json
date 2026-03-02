@@ -52,6 +52,41 @@
     "revokedMessage": "Sei stato disconnesso perché il tuo account ha effettuato l'accesso su un altro dispositivo. Accedi di nuovo per continuare.",
     "signInAgain": "Accedi di nuovo"
   },
+  "bugReport": {
+    "title": "Segnala un bug",
+    "titleLabel": "Titolo del bug",
+    "titlePlaceholder": "Breve descrizione del problema",
+    "descriptionLabel": "Descrizione",
+    "descriptionPlaceholder": "Passaggi per riprodurre, comportamento atteso vs effettivo…",
+    "submit": "Invia segnalazione",
+    "submitting": "Invio in corso…",
+    "success": "Segnalazione inviata. Grazie!",
+    "error": "Impossibile inviare la segnalazione.",
+    "screenshotLabel": "Screenshot (facoltativo)",
+    "attachScreenshot": "Allega screenshot…",
+    "removeScreenshot": "Rimuovi screenshot",
+    "screenshotHint": "PNG, JPEG o WebP fino a 5 MB.",
+    "screenshotTooLarge": "Lo screenshot deve essere inferiore a 5 MB.",
+    "screenshotInvalidType": "Sono accettati solo file immagine.",
+    "includeDiagnostics": "Includi diagnostica di sistema",
+    "diagnosticsHint": "Invia informazioni su browser, viewport e versione dell'app. Nessun dato personale incluso."
+  },
+  "suggestion": {
+    "title": "Suggerisci una funzionalità",
+    "categoryLabel": "Categoria",
+    "cat_feature_request": "Richiesta di funzionalità",
+    "cat_block_library": "Libreria blocchi",
+    "cat_ux_feedback": "Feedback UX",
+    "titleLabel": "Riepilogo",
+    "titlePlaceholder": "Riepilogo breve del tuo suggerimento",
+    "descriptionLabel": "Dettagli",
+    "descriptionPlaceholder": "Descrivi la tua idea, il problema che risolve o cosa vorresti vedere…",
+    "submit": "Invia suggerimento",
+    "submitting": "Invio in corso…",
+    "success": "Suggerimento inviato. Grazie!",
+    "error": "Impossibile inviare il suggerimento.",
+    "hint": "Tutti i suggerimenti vengono esaminati dal team."
+  },
   "auth": {
     "login": "Accedi",
     "signup": "Crea un account",
@@ -325,7 +360,8 @@
     "admin": "Admin",
     "adminDesc": "Strumenti sviluppatore e zona di pericolo",
     "security": "Sicurezza",
-    "securityDesc": "Autenticazione a due fattori"
+    "securityDesc": "Autenticazione a due fattori",
+    "suggest": "Suggerisci funzionalità"
   },
   "security": {
     "title": "Sicurezza dell'account",
@@ -577,6 +613,7 @@
     "documentation": "Documentazione",
     "keyboardShortcuts": "Scorciatoie da tastiera",
     "bugReport": "Segnala bug",
+    "suggest": "Suggerisci funzionalità",
     "about": "Informazioni",
     "changelog": "Registro modifiche",
     "contactSupport": "Contatta il supporto",

@@ -52,6 +52,41 @@
     "revokedMessage": "Vous avez été déconnecté car votre compte a été connecté sur un autre appareil. Veuillez vous reconnecter pour continuer.",
     "signInAgain": "Se reconnecter"
   },
+  "bugReport": {
+    "title": "Signaler un bug",
+    "titleLabel": "Titre du bug",
+    "titlePlaceholder": "Description brève du problème",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Étapes pour reproduire, comportement attendu vs observé…",
+    "submit": "Envoyer le rapport",
+    "submitting": "Envoi en cours…",
+    "success": "Rapport de bug envoyé. Merci !",
+    "error": "Impossible d'envoyer le rapport de bug.",
+    "screenshotLabel": "Capture d'écran (facultatif)",
+    "attachScreenshot": "Joindre une capture…",
+    "removeScreenshot": "Supprimer la capture",
+    "screenshotHint": "PNG, JPEG ou WebP jusqu'à 5 Mo.",
+    "screenshotTooLarge": "La capture doit faire moins de 5 Mo.",
+    "screenshotInvalidType": "Seuls les fichiers image sont acceptés.",
+    "includeDiagnostics": "Inclure les diagnostics système",
+    "diagnosticsHint": "Envoie les infos navigateur, fenêtre et version. Aucune donnée personnelle incluse."
+  },
+  "suggestion": {
+    "title": "Suggérer une fonctionnalité",
+    "categoryLabel": "Catégorie",
+    "cat_feature_request": "Demande de fonctionnalité",
+    "cat_block_library": "Bibliothèque de blocs",
+    "cat_ux_feedback": "Retour UX",
+    "titleLabel": "Résumé",
+    "titlePlaceholder": "Résumé bref de votre suggestion",
+    "descriptionLabel": "Détails",
+    "descriptionPlaceholder": "Décrivez votre idée, le problème qu'elle résout ou ce que vous aimeriez voir…",
+    "submit": "Envoyer la suggestion",
+    "submitting": "Envoi en cours…",
+    "success": "Suggestion envoyée. Merci !",
+    "error": "Impossible d'envoyer la suggestion.",
+    "hint": "Toutes les suggestions sont examinées par l'équipe."
+  },
   "auth": {
     "login": "Connexion",
     "signup": "Créer un compte",
@@ -325,7 +360,8 @@
     "admin": "Admin",
     "adminDesc": "Outils développeur et zone de danger",
     "security": "Sécurité",
-    "securityDesc": "Authentification à deux facteurs"
+    "securityDesc": "Authentification à deux facteurs",
+    "suggest": "Suggérer une fonctionnalité"
   },
   "security": {
     "title": "Sécurité du compte",
@@ -577,6 +613,7 @@
     "documentation": "Documentation",
     "keyboardShortcuts": "Raccourcis clavier",
     "bugReport": "Signaler un bug",
+    "suggest": "Suggérer une fonctionnalité",
     "about": "À propos",
     "changelog": "Journal des modifications",
     "contactSupport": "Contacter le support",
