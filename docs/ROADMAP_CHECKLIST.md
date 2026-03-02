@@ -1350,7 +1350,7 @@ Claude MUST:
     - dependency risk summary (packages with heavy footprint or sensitive supply chain)
   - Acceptance: report is detailed enough to guide cleanup without guesswork.
 
-- [ ] F0-2: “Repo Hygiene Plan” doc (what will be changed)
+- [x] F0-2: “Repo Hygiene Plan” doc (what will be changed)
   - Create `docs/AUDIT/REPO_HYGIENE_PLAN.md`:
     - enumerates cleanup tasks
     - defines which files will be removed/quarantined
