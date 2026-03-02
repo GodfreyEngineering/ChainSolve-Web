@@ -667,7 +667,8 @@
     "variables": "Variables",
     "groups": "Grupos",
     "themes": "Temas",
-    "materials": "Materiales"
+    "materials": "Materiales",
+    "annotations": "Insertar anotacion"
   },
   "inspector": {
     "pin": "Fijar al nodo actual",

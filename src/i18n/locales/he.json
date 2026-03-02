@@ -126,7 +126,8 @@
   },
   "toolbar": {
     "graphHealth": "סטטוס הגרף",
-    "bgDots": "Background dots"
+    "bgDots": "Background dots",
+    "annotations": "הוסף הערה"
   },
   "terms": {
     "title": "תנאי שימוש",

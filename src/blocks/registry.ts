@@ -705,10 +705,16 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
         id: 'outDisplay',
         label: 'Display',
         blockTypes: ['display', 'probe'],
-        categories: ['annotations'],
       },
       { id: 'outPublish', label: 'Publish / Subscribe', blockTypes: ['publish', 'subscribe'] },
       { id: 'outGraph', label: 'Graph blocks', categories: ['plot'] },
+    ],
+  },
+  {
+    id: 'annotationTools',
+    label: 'Annotations',
+    subcategories: [
+      { id: 'annotVisual', label: 'Visual annotations', categories: ['annotations'] },
     ],
   },
 ]

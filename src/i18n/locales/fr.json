@@ -667,7 +667,8 @@
     "variables": "Variables",
     "groups": "Groupes",
     "themes": "Thèmes",
-    "materials": "Matériaux"
+    "materials": "Matériaux",
+    "annotations": "Ajouter une annotation"
   },
   "inspector": {
     "pin": "Épingler au nœud actuel",

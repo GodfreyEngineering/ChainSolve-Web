@@ -686,7 +686,8 @@
     "variables": "Variables",
     "groups": "Groups",
     "themes": "Themes",
-    "materials": "Materials"
+    "materials": "Materials",
+    "annotations": "Insert annotation"
   },
   "inspector": {
     "pin": "Pin to current node",

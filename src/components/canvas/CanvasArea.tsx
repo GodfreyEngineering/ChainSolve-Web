@@ -1643,6 +1643,25 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [screenToFlowPosition, setNodes, doSaveHistory],
   )
 
+  // Insert annotation at the center of the viewport (toolbar action, I3-1)
+  const onInsertAnnotationAtCenter = useCallback(
+    (annotationType: string) => {
+      const def = BLOCK_REGISTRY.get(annotationType)
+      if (!def) return
+      const rect = canvasWrapRef.current?.getBoundingClientRect()
+      const cx = rect ? rect.left + rect.width / 2 : window.innerWidth / 2
+      const cy = rect ? rect.top + rect.height / 2 : window.innerHeight / 2
+      const position = screenToFlowPosition({ x: cx, y: cy })
+      const id = `node_${++nodeIdCounter}`
+      doSaveHistory()
+      setNodes((nds) => [
+        ...nds,
+        { id, type: def.nodeKind, position, data: { ...def.defaultData } } as Node<NodeData>,
+      ])
+    },
+    [screenToFlowPosition, setNodes, doSaveHistory],
+  )
+
   // Add block at the canvas position where user right-clicked
   const onAddBlockAtCursor = useCallback(
     (screenX: number, screenY: number) => {
@@ -2001,6 +2020,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         return !v
                       })
                     }}
+                    onInsertAnnotation={onInsertAnnotationAtCenter}
                   />
                   {/* Bottom Dock — always visible with docking handle (G5-2) */}
                   <BottomDock

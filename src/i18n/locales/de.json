@@ -667,7 +667,8 @@
     "variables": "Variablen",
     "groups": "Gruppen",
     "themes": "Themen",
-    "materials": "Materialien"
+    "materials": "Materialien",
+    "annotations": "Anmerkung einfuegen"
   },
   "inspector": {
     "pin": "An aktuellen Knoten anheften",

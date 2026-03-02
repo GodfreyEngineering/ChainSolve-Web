@@ -109,12 +109,13 @@ describe('Variable block separation (D6-3)', () => {
 // ── G3-1: Block taxonomy structure ──────────────────────────────────────────
 
 describe('Block taxonomy structure (G3-1)', () => {
-  it('has exactly 3 main categories', () => {
-    expect(BLOCK_TAXONOMY).toHaveLength(3)
+  it('has exactly 4 main categories', () => {
+    expect(BLOCK_TAXONOMY).toHaveLength(4)
     expect(BLOCK_TAXONOMY.map((m) => m.id)).toEqual([
       'inputBlocks',
       'functionBlocks',
       'outputBlocks',
+      'annotationTools',
     ])
   })
 

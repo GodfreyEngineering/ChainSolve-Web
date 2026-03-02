@@ -667,7 +667,8 @@
     "variables": "Variabili",
     "groups": "Gruppi",
     "themes": "Temi",
-    "materials": "Materiali"
+    "materials": "Materiali",
+    "annotations": "Inserisci annotazione"
   },
   "inspector": {
     "pin": "Fissa al nodo corrente",
