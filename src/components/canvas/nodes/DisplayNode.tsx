@@ -9,6 +9,7 @@ import { useComputed } from '../../../contexts/ComputedContext'
 import { isError, isScalar } from '../../../engine/value'
 import { useFormatValue } from '../../../hooks/useFormatValue'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
+import { getUnitSymbol } from '../../../units/unitSymbols'
 import { NODE_STYLES as s } from './nodeStyles'
 
 function DisplayNodeInner({ id, data, selected }: NodeProps) {
@@ -63,7 +64,14 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
           id="value"
           style={{ ...s.handleLeft, top: '50%', transform: 'translateY(-50%)' }}
         />
-        <span style={displayStyle}>{formatValue(value)}</span>
+        <span style={displayStyle}>
+          {formatValue(value)}
+          {nd.unit && (
+            <span style={{ fontSize: '0.7rem', marginLeft: '0.2rem', opacity: 0.7 }}>
+              {getUnitSymbol(nd.unit)}
+            </span>
+          )}
+        </span>
         {sourceLabel && (
           <span
             style={{

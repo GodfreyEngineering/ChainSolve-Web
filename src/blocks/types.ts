@@ -160,6 +160,8 @@ export interface NodeData extends Record<string, unknown> {
   annotationColor?: string
   /** Annotation font size in px (csAnnotation text/callout nodes only). */
   annotationFontSize?: number
+  /** H1-1: Unit assigned to this node's output. Unit id from unitCatalog. */
+  unit?: string
 }
 
 export interface BlockDef {

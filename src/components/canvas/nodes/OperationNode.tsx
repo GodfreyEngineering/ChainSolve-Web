@@ -24,6 +24,7 @@ import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
 import type { InputBinding } from '../../../blocks/types'
 import { ensureBinding } from '../../../lib/migrateBindings'
 import { ValueEditor } from '../editors/ValueEditor'
+import { getUnitSymbol } from '../../../units/unitSymbols'
 import { NODE_STYLES as s } from './nodeStyles'
 
 function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
@@ -99,6 +100,11 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
             }}
           >
             {formatValue(value)}
+            {nd.unit && (
+              <span style={{ fontSize: '0.6rem', marginLeft: '0.15rem', opacity: 0.7 }}>
+                {getUnitSymbol(nd.unit)}
+              </span>
+            )}
           </span>
         </div>
       </div>

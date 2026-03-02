@@ -1090,6 +1090,36 @@
     "light": "Light",
     "dark": "Dark"
   },
+  "units": {
+    "unit": "Unit",
+    "none": "None",
+    "selectUnit": "Select unit",
+    "search": "Search units…",
+    "noResults": "No units found",
+    "dim": {
+      "length": "Length",
+      "mass": "Mass",
+      "time": "Time",
+      "temperature": "Temperature",
+      "force": "Force",
+      "pressure": "Pressure",
+      "energy": "Energy",
+      "power": "Power",
+      "area": "Area",
+      "volume": "Volume",
+      "velocity": "Velocity",
+      "acceleration": "Acceleration",
+      "density": "Density",
+      "viscosity": "Viscosity",
+      "torque": "Torque",
+      "momentOfInertia": "Moment of inertia",
+      "angle": "Angle",
+      "frequency": "Frequency",
+      "electrical": "Electrical",
+      "ratio": "Ratio",
+      "currency": "Currency"
+    }
+  },
   "common": {
     "cancel": "Cancel",
     "close": "Close",

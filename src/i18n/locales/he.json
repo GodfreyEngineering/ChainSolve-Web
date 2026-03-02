@@ -220,6 +220,36 @@
     "light": "בהיר",
     "dark": "כהה"
   },
+  "units": {
+    "unit": "יחידה",
+    "none": "ללא",
+    "selectUnit": "בחר יחידה",
+    "search": "חפש יחידות…",
+    "noResults": "לא נמצאו יחידות",
+    "dim": {
+      "length": "אורך",
+      "mass": "מסה",
+      "time": "זמן",
+      "temperature": "טמפרטורה",
+      "force": "כוח",
+      "pressure": "לחץ",
+      "energy": "אנרגיה",
+      "power": "הספק",
+      "area": "שטח",
+      "volume": "נפח",
+      "velocity": "מהירות",
+      "acceleration": "תאוצה",
+      "density": "צפיפות",
+      "viscosity": "צמיגות",
+      "torque": "מומנט",
+      "momentOfInertia": "מומנט התמד",
+      "angle": "זווית",
+      "frequency": "תדירות",
+      "electrical": "חשמלי",
+      "ratio": "יחס",
+      "currency": "מטבע"
+    }
+  },
   "common": {
     "cancel": "ביטול",
     "close": "סגור",

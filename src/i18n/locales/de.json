@@ -1071,6 +1071,36 @@
     "light": "Hell",
     "dark": "Dunkel"
   },
+  "units": {
+    "unit": "Einheit",
+    "none": "Keine",
+    "selectUnit": "Einheit auswählen",
+    "search": "Einheiten suchen…",
+    "noResults": "Keine Einheiten gefunden",
+    "dim": {
+      "length": "Länge",
+      "mass": "Masse",
+      "time": "Zeit",
+      "temperature": "Temperatur",
+      "force": "Kraft",
+      "pressure": "Druck",
+      "energy": "Energie",
+      "power": "Leistung",
+      "area": "Fläche",
+      "volume": "Volumen",
+      "velocity": "Geschwindigkeit",
+      "acceleration": "Beschleunigung",
+      "density": "Dichte",
+      "viscosity": "Viskosität",
+      "torque": "Drehmoment",
+      "momentOfInertia": "Flächenträgheitsmoment",
+      "angle": "Winkel",
+      "frequency": "Frequenz",
+      "electrical": "Elektrisch",
+      "ratio": "Verhältnis",
+      "currency": "Währung"
+    }
+  },
   "common": {
     "cancel": "Abbrechen",
     "close": "Schließen",

@@ -1752,7 +1752,7 @@ Claude MUST:
 ---
 
 ## H1 — Unit system v1 (unit-aware blocks everywhere)
-- [ ] H1-1: Units model and UX
+- [x] H1-1: Units model and UX
   - Input blocks and function blocks have unit dropdowns (searchable).
   - Outputs show units.
   - Units can be none.

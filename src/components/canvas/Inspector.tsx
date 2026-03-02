@@ -6,7 +6,8 @@
  * Shows per-port manual value + override toggle for operation nodes.
  */
 
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNodes, useEdges, useReactFlow } from '@xyflow/react'
 import { useComputed } from '../../contexts/ComputedContext'
 import { useEngine } from '../../contexts/EngineContext'
@@ -17,8 +18,13 @@ import type { InputBinding, PlotConfig } from '../../blocks/types'
 import type { TraceEntry } from '../../engine/index.ts'
 import { ensureBinding } from '../../lib/migrateBindings'
 import { ValueEditor } from './editors/ValueEditor'
+import { getUnitSymbol } from '../../units/unitSymbols'
 import { PlotInspector } from './PlotInspector'
 import { GroupInspector } from './GroupInspector'
+
+const LazyUnitPicker = lazy(() =>
+  import('./editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
+)
 
 interface InspectorProps {
   nodeId: string | null
@@ -79,6 +85,7 @@ export function Inspector({
   canUseGroups,
   floating,
 }: InspectorProps) {
+  const { t } = useTranslation()
   const allNodes = useNodes()
   const allEdges = useEdges()
   const { updateNodeData } = useReactFlow()
@@ -346,6 +353,19 @@ export function Inspector({
                 {descriptions[nd.blockType]}
               </div>
             )}
+
+            {/* H1-1: Unit picker — available for source, operation, display, and data nodes */}
+            {def?.nodeKind !== 'csPlot' &&
+              def?.nodeKind !== 'csAnnotation' &&
+              field(
+                t('units.unit'),
+                <Suspense fallback={null}>
+                  <LazyUnitPicker
+                    value={nd.unit as string | undefined}
+                    onChange={(unitId) => update({ unit: unitId })}
+                  />
+                </Suspense>,
+              )}
 
             {/* Number source */}
             {nd.blockType === 'number' &&
@@ -708,6 +728,11 @@ export function Inspector({
                 }}
               >
                 {formatValue(value)}
+                {nd.unit && (
+                  <span style={{ fontSize: '0.8rem', marginLeft: '0.2rem', opacity: 0.7 }}>
+                    {getUnitSymbol(nd.unit)}
+                  </span>
+                )}
               </span>
               <span
                 style={{

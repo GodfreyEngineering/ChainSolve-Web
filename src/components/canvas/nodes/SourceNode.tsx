@@ -16,8 +16,12 @@ import type { NodeData } from '../../../blocks/registry'
 import { useVariablesStore } from '../../../stores/variablesStore'
 import { useCustomMaterialsStore } from '../../../stores/customMaterialsStore'
 import { MATERIAL_PROPERTY_META, type MaterialProperty } from '../../../lib/customMaterials'
+import { getUnitSymbol } from '../../../units/unitSymbols'
 import { NODE_STYLES as s } from './nodeStyles'
 
+const LazyUnitPicker = lazy(() =>
+  import('../editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
+)
 const LazyMaterialWizard = lazy(() =>
   import('../MaterialWizard').then((m) => ({ default: m.MaterialWizard })),
 )
@@ -260,28 +264,59 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
             }}
           >
             {formatValue(value)}
+            {nd.unit && (
+              <span style={{ fontSize: '0.6rem', marginLeft: '0.15rem', opacity: 0.7 }}>
+                {getUnitSymbol(nd.unit)}
+              </span>
+            )}
           </span>
         </div>
       </div>
 
       {isNumber && (
         <div className="cs-node-body" style={s.body}>
-          <input
-            type="number"
-            style={s.numInput}
-            value={nd.value ?? 0}
-            step="any"
-            className="nodrag"
-            onChange={(e) => {
-              const n = parseFloat(e.target.value)
-              if (!isNaN(n)) updateValue(n)
-            }}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+            <input
+              type="number"
+              style={{ ...s.numInput, flex: 1 }}
+              value={nd.value ?? 0}
+              step="any"
+              className="nodrag"
+              onChange={(e) => {
+                const n = parseFloat(e.target.value)
+                if (!isNaN(n)) updateValue(n)
+              }}
+            />
+            <Suspense fallback={null}>
+              <LazyUnitPicker
+                compact
+                value={nd.unit as string | undefined}
+                onChange={(unitId) => updateNodeData(id, { unit: unitId })}
+              />
+            </Suspense>
+          </div>
         </div>
       )}
 
       {isSlider && (
         <div className="cs-node-body" style={s.body}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              marginBottom: '0.15rem',
+            }}
+          >
+            <span style={{ flex: 1 }} />
+            <Suspense fallback={null}>
+              <LazyUnitPicker
+                compact
+                value={nd.unit as string | undefined}
+                onChange={(unitId) => updateNodeData(id, { unit: unitId })}
+              />
+            </Suspense>
+          </div>
           <input
             type="range"
             className="nodrag"
