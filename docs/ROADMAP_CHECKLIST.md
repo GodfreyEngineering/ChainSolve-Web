@@ -1869,7 +1869,7 @@ Claude MUST:
 ---
 
 ## H8 — Roles, licensing, and gating exact rules (formalized)
-- [ ] H8-1: Formalize plans and roles as you specified
+- [x] H8-1: Formalize plans and roles as you specified
   - Free:
     - 1 project
     - grouping allowed
