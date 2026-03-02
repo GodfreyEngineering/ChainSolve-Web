@@ -8,7 +8,8 @@
  * - useEdges() for live connection state without prop-drilling.
  */
 
-import { memo, useCallback, useMemo } from 'react'
+import type { CSSProperties } from 'react'
+import { memo, useCallback, useMemo, lazy, Suspense } from 'react'
 import {
   Handle,
   Position,
@@ -22,10 +23,16 @@ import { useShowValuePopover } from '../../../contexts/ValuePopoverContext'
 import { formatValue } from '../../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
 import type { InputBinding } from '../../../blocks/types'
+import { useTranslation } from 'react-i18next'
 import { ensureBinding } from '../../../lib/migrateBindings'
 import { ValueEditor } from '../editors/ValueEditor'
 import { getUnitSymbol } from '../../../units/unitSymbols'
+import { getConversionFactor, areSameDimension } from '../../../units/unitCompat'
 import { NODE_STYLES as s } from './nodeStyles'
+
+const LazyUnitPicker = lazy(() =>
+  import('../editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
+)
 
 function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const nd = data as NodeData
@@ -33,6 +40,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const allEdges = useEdges()
   const computed = useComputed()
   const showPopover = useShowValuePopover()
+  const { t } = useTranslation()
   const value = computed.get(id)
   const isLocked = draggable === false
 
@@ -82,8 +90,44 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
     [allEdges],
   )
 
+  const isConvert = nd.blockType === 'unit_convert'
+  const fromUnit = (nd.fromUnit as string | undefined) ?? undefined
+  const toUnit = (nd.toUnit as string | undefined) ?? undefined
+
+  const handleFromUnitChange = useCallback(
+    (unitId: string | undefined) => {
+      const factor = unitId && toUnit ? getConversionFactor(unitId, toUnit) : undefined
+      const label =
+        unitId && toUnit ? `${getUnitSymbol(unitId)} -> ${getUnitSymbol(toUnit)}` : 'Unit Convert'
+      updateNodeData(id, {
+        fromUnit: unitId,
+        convFactor: factor ?? 1,
+        label,
+      })
+    },
+    [id, toUnit, updateNodeData],
+  )
+
+  const handleToUnitChange = useCallback(
+    (unitId: string | undefined) => {
+      const factor = fromUnit && unitId ? getConversionFactor(fromUnit, unitId) : undefined
+      const label =
+        fromUnit && unitId
+          ? `${getUnitSymbol(fromUnit)} -> ${getUnitSymbol(unitId)}`
+          : 'Unit Convert'
+      updateNodeData(id, {
+        toUnit: unitId,
+        unit: unitId,
+        convFactor: factor ?? 1,
+        label,
+      })
+    },
+    [id, fromUnit, updateNodeData],
+  )
+
   const ROW_H = 30
-  const bodyH = Math.max(inputs.length * ROW_H, 36)
+  const CONVERT_EXTRA = isConvert ? 58 : 0
+  const bodyH = Math.max(inputs.length * ROW_H, 36) + CONVERT_EXTRA
 
   return (
     <div style={{ ...s.node, ...(selected ? s.nodeSelected : {}) }}>
@@ -200,6 +244,38 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
           )
         })}
 
+        {/* H1-3: Dual unit pickers for unit_convert block */}
+        {isConvert && (
+          <div
+            className="nodrag"
+            style={{
+              position: 'absolute',
+              bottom: 4,
+              left: 8,
+              right: 8,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={convertLabelStyle}>{t('unitConvert.from')}</span>
+              <Suspense fallback={null}>
+                <LazyUnitPicker compact value={fromUnit} onChange={handleFromUnitChange} />
+              </Suspense>
+              {fromUnit && toUnit && !areSameDimension(fromUnit, toUnit) && (
+                <span style={{ fontSize: '0.55rem', color: '#f87171' }}>!</span>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={convertLabelStyle}>{t('unitConvert.to')}</span>
+              <Suspense fallback={null}>
+                <LazyUnitPicker compact value={toUnit} onChange={handleToUnitChange} />
+              </Suspense>
+            </div>
+          </div>
+        )}
+
         {/* Output handle — right edge, vertically centred */}
         <Handle
           type="source"
@@ -210,6 +286,13 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
       </div>
     </div>
   )
+}
+
+const convertLabelStyle: CSSProperties = {
+  fontSize: '0.58rem',
+  color: 'rgba(244,244,243,0.45)',
+  minWidth: 26,
+  textAlign: 'right',
 }
 
 export const OperationNode = memo(OperationNodeInner)

@@ -1102,6 +1102,10 @@
       "currency": "Moneda"
     }
   },
+  "unitConvert": {
+    "from": "De",
+    "to": "A"
+  },
   "common": {
     "cancel": "Cancelar",
     "close": "Cerrar",

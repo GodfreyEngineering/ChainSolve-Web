@@ -251,6 +251,10 @@
       "currency": "מטבע"
     }
   },
+  "unitConvert": {
+    "from": "מ",
+    "to": "ל"
+  },
   "common": {
     "cancel": "ביטול",
     "close": "סגור",

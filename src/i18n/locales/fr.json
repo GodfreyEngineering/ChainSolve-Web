@@ -1102,6 +1102,10 @@
       "currency": "Devise"
     }
   },
+  "unitConvert": {
+    "from": "De",
+    "to": "En"
+  },
   "common": {
     "cancel": "Annuler",
     "close": "Fermer",

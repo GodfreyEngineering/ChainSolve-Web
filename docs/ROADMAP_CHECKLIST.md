@@ -1770,7 +1770,7 @@ Claude MUST:
     - If downstream is an output block, user chooses output unit manually
   - Acceptance: conversion suggestions work, are robust, and never break graph.
 
-- [ ] H1-3: Conversion block (Function Blocks category)
+- [x] H1-3: Conversion block (Function Blocks category)
   - Conversion block uses:
     - input unit dropdown (search)
     - output unit dropdown (search)

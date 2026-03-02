@@ -797,6 +797,15 @@ fn evaluate_node_inner(
         "eng.conv.lpm_to_m3s" => unary_broadcast_port(inputs, "lpm", |v| v / 60_000.0),
         "eng.conv.m3s_to_lpm" => unary_broadcast_port(inputs, "m3s", |v| v * 60_000.0),
 
+        // Generic unit conversion — factor stored in node data by the UI.
+        "unit_convert" => {
+            let factor = data
+                .get("convFactor")
+                .and_then(|v| v.as_f64())
+                .unwrap_or(1.0);
+            unary_broadcast_port(inputs, "value", |v| v * factor)
+        }
+
         // ── Finance → TVM ─────────────────────────────────────────────
         "fin.tvm.simple_interest" => {
             let p = scalar_or_nan(inputs, "P");

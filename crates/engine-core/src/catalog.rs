@@ -1120,6 +1120,14 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![p("m3s", "m\u{00B3}/s")],
             pro_only: false,
         },
+        CatalogEntry {
+            op_id: "unit_convert",
+            label: "Unit Convert",
+            category: "engConversions",
+            node_kind: "csOperation",
+            inputs: vec![p("value", "value")],
+            pro_only: false,
+        },
         // ── Finance → TVM ──────────────────────────────────────────────
         CatalogEntry {
             op_id: "fin.tvm.simple_interest",
@@ -1880,14 +1888,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 219);
+        assert_eq!(cat.len(), 220);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 219);
+        assert_eq!(parsed.as_array().unwrap().len(), 220);
     }
 
     #[test]

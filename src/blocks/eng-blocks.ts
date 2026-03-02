@@ -844,4 +844,14 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     inputs: [{ id: 'm3s', label: 'm³/s' }],
     defaultData: { blockType: 'eng.conv.m3s_to_lpm', label: 'm³/s→L/min' },
   })
+
+  // Generic unit conversion block — user picks input/output units via dropdowns.
+  register({
+    type: 'unit_convert',
+    label: 'Unit Convert',
+    category: 'engConversions',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'value', label: 'value' }],
+    defaultData: { blockType: 'unit_convert', label: 'Unit Convert', convFactor: 1 },
+  })
 }

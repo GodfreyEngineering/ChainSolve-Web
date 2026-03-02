@@ -1102,6 +1102,10 @@
       "currency": "Valuta"
     }
   },
+  "unitConvert": {
+    "from": "Da",
+    "to": "A"
+  },
   "common": {
     "cancel": "Annulla",
     "close": "Chiudi",

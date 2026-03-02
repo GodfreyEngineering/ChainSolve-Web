@@ -1121,6 +1121,10 @@
       "currency": "Currency"
     }
   },
+  "unitConvert": {
+    "from": "From",
+    "to": "To"
+  },
   "common": {
     "cancel": "Cancel",
     "close": "Close",

@@ -303,6 +303,7 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'eng.conv.pa_to_bar': 'Converts pascals to bar. Divides by 100 000.',
   'eng.conv.lpm_to_m3s': 'Converts litres per minute to cubic metres per second.',
   'eng.conv.m3s_to_lpm': 'Converts cubic metres per second to litres per minute.',
+  unit_convert: 'Generic unit conversion. Pick input and output units from any dimension.',
 
   // ── Finance: TVM ──────────────────────────────────────────────────────────
   'fin.tvm.simple_interest': 'Simple interest. I = P*r*t. Principal times rate times time.',
