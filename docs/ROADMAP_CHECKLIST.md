@@ -2001,7 +2001,7 @@ Claude MUST:
 ---
 
 ## I5 — AI becomes the standout feature (advanced workflows)
-- [ ] I5-1: AI can build huge multi-sheet projects and manage materials/custom blocks/groups
+- [x] I5-1: AI can build huge multi-sheet projects and manage materials/custom blocks/groups
   - AI can:
     - create blocks and connect chains correctly
     - organize layouts
