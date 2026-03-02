@@ -1824,7 +1824,7 @@ Claude MUST:
 ---
 
 ## H4 — Constant block unification and constant catalog UX
-- [ ] H4-1: Single Constant block only
+- [x] H4-1: Single Constant block only
   - Dropdown + search across constants.
   - Shows value and description.
   - Acceptance: no atmospheric/math constant blocks remain.
