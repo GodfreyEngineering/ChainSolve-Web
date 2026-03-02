@@ -33,18 +33,21 @@
 | Document | Description |
 |----------|-------------|
 | [SECURITY.md](SECURITY.md) | CORS, CSP (`'wasm-unsafe-eval'`), CSP reporting, security headers, analytics policy |
+| [ENV_SECRETS.md](ENV_SECRETS.md) | Environment variable and secrets management guide |
 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | WASM init failures, placeholder env, common CI failures + local repro steps |
+| [RELEASE.md](RELEASE.md) | Release process, migration attribution, deploy checklist |
 
 ---
 
 ## Architecture decisions
 
-| Document | Decision |
-|----------|---------|
-| [DECISIONS/ADR-0001](DECISIONS/ADR-0001-rust-wasm-engine.md) | Why Rust/WASM in a Worker (not a TS engine) |
-| [DECISIONS/ADR-0002](DECISIONS/ADR-0002-csp-wasm-unsafe-eval.md) | Why `'wasm-unsafe-eval'` and not `'unsafe-eval'` |
-| [DECISIONS/ADR-0003](DECISIONS/ADR-0003-ci-deploy-strategy.md) | Two-build CI/CD strategy with placeholder credentials |
-| [DECISIONS/ADR-0004](DECISIONS/ADR-0004-supabase-rls.md) | Supabase RLS canonicalization (`(select auth.uid())` pattern) |
+| ADR | Title | Status |
+|-----|-------|--------|
+| [ADR-0001](DECISIONS/ADR-0001-rust-wasm-engine.md) | Rust/WASM Worker Engine | Accepted |
+| [ADR-0002](DECISIONS/ADR-0002-csp-wasm-unsafe-eval.md) | CSP `'wasm-unsafe-eval'` | Accepted |
+| [ADR-0003](DECISIONS/ADR-0003-ci-deploy-strategy.md) | CI Two-Build Deploy Strategy | Accepted |
+| [ADR-0004](DECISIONS/ADR-0004-supabase-rls.md) | Supabase RLS Canonicalization | Accepted |
+| [ADR-0005](DECISIONS/ADR-0005-worker-cancellation.md) | Worker Cancellation Strategy | Accepted |
 
 ---
 
@@ -60,15 +63,116 @@
 
 ---
 
+## Exports
+
+| Document | Description |
+|----------|-------------|
+| [CHAINSOLVEJSON_FORMAT.md](CHAINSOLVEJSON_FORMAT.md) | `.chainsolvejson` portable format: schema, hashing, import/export workflow |
+| [PDF_EXPORT.md](PDF_EXPORT.md) | PDF audit report generation: layout, equations, metadata |
+| [EXCEL_EXPORT.md](EXCEL_EXPORT.md) | Excel/XLSX export: sheet layout, styling, data mapping |
+
+---
+
+## AI Copilot
+
+| Document | Description |
+|----------|-------------|
+| [AI_COPILOT.md](AI_COPILOT.md) | AI copilot feature: capabilities, model selection, UI integration |
+| [AI_PRIVACY.md](AI_PRIVACY.md) | AI privacy model: data handling, redaction, opt-out controls |
+| [AI_WORKFLOWS.md](AI_WORKFLOWS.md) | AI-assisted workflows: prompt templates, task dispatch, quota |
+
+---
+
 ## Engine deep-dives
 
 | Document | Description |
 |----------|-------------|
-| [W9_ENGINE.md](W9_ENGINE.md) | Build, debug, add ops, op semantics reference |
-| [W9_2_SCALE.md](W9_2_SCALE.md) | Patch protocol, dirty propagation, incremental evaluation |
+| [W9_ENGINE.md](W9_ENGINE.md) | Rust/WASM engine: build, debug, add ops, op semantics |
+| [W9_2_SCALE.md](W9_2_SCALE.md) | Patch protocol, dirty propagation, incremental eval, dataset registry |
 | [W9_3_CORRECTNESS.md](W9_3_CORRECTNESS.md) | NaN/Error propagation, `ENGINE_CONTRACT_VERSION` policy, golden tests |
 | [W9_4_PERF.md](W9_4_PERF.md) | Performance metrics, `?perf=1` profiling, optimization notes |
 | [W9_5_VERIFICATION.md](W9_5_VERIFICATION.md) | Test strategy, golden fixtures, property tests, smoke vs full e2e |
+
+---
+
+## Block catalog
+
+| Document | Description |
+|----------|-------------|
+| [BLOCK_CATALOG_GOVERNANCE.md](BLOCK_CATALOG_GOVERNANCE.md) | Block catalog governance: adding, deprecating, and versioning ops |
+| [FUNCTION_PACK_STAGING.md](FUNCTION_PACK_STAGING.md) | Function pack staging: block registration, category mapping, entitlements |
+
+---
+
+## Dev environment
+
+| Document | Description |
+|----------|-------------|
+| [DEVCONTAINER.md](DEVCONTAINER.md) | Devcontainer/Codespaces setup: Rust, wasm-pack, post-create script |
+| [TESTING_GOLDENS.md](TESTING_GOLDENS.md) | Golden fixture test system: format, regeneration, adding new fixtures |
+| [TEST_PERSONAS.md](TEST_PERSONAS.md) | Test personas: user profiles for QA and E2E testing scenarios |
+
+---
+
+## Observability
+
+| Document | Description |
+|----------|-------------|
+| [observability/overview.md](observability/overview.md) | Observability architecture: event pipeline, sampling, storage |
+| [observability/csp-reporting.md](observability/csp-reporting.md) | CSP report endpoint: validation, dedup, local testing with Wrangler |
+| [observability/doctor.md](observability/doctor.md) | Client-side health checks and diagnostics |
+| [observability/runbook.md](observability/runbook.md) | Observability runbook: alerts, triage, common issues |
+
+---
+
+## Performance
+
+| Document | Description |
+|----------|-------------|
+| [performance/overview.md](performance/overview.md) | Performance strategy: goals, metrics, tooling |
+| [performance/budgets.md](performance/budgets.md) | Performance budgets: bundle size, LCP, TTI thresholds |
+| [performance/baseline.md](performance/baseline.md) | Baseline measurements and benchmark results |
+| [performance/instrumentation.md](performance/instrumentation.md) | Performance instrumentation: marks, measures, reporting |
+| [performance/memory.md](performance/memory.md) | Memory profiling: WASM heap, JS heap, leak detection |
+| [performance/stress-tests.md](performance/stress-tests.md) | Stress test suite: large graphs, concurrent operations |
+| [performance/runbook.md](performance/runbook.md) | Performance runbook: regression triage and optimization |
+| [perf-budget.md](perf-budget.md) | Bundle size budget thresholds (CI-enforced) |
+
+---
+
+## Enterprise
+
+| Document | Description |
+|----------|-------------|
+| [enterprise/org-billing.md](enterprise/org-billing.md) | Organisation-level billing: team plans, seat management |
+| [enterprise/audit-log-retention.md](enterprise/audit-log-retention.md) | Audit log retention policies and compliance |
+| [enterprise/desktop-policy.md](enterprise/desktop-policy.md) | Desktop app enterprise policies: MDM, auto-update, offline |
+
+---
+
+## Architecture deep-dives
+
+| Document | Description |
+|----------|-------------|
+| [architecture/stripe-connect.md](architecture/stripe-connect.md) | Stripe Connect integration: marketplace payouts, onboarding |
+
+---
+
+## Audit & hygiene
+
+| Document | Description |
+|----------|-------------|
+| [AUDIT/REPO_AUDIT_REPORT.md](AUDIT/REPO_AUDIT_REPORT.md) | Repository audit report: structure, boundaries, hot zones, findings |
+| [AUDIT/REPO_HYGIENE_PLAN.md](AUDIT/REPO_HYGIENE_PLAN.md) | Hygiene plan: prioritized cleanup tasks from audit findings |
+
+---
+
+## Product & marketing
+
+| Document | Description |
+|----------|-------------|
+| [ANALYTICS_STRATEGY.md](ANALYTICS_STRATEGY.md) | Analytics strategy: events, funnels, privacy-first approach |
+| [MARKETING_QA.md](MARKETING_QA.md) | Marketing QA checklist: landing page, SEO, social cards |
 
 ---
 
@@ -310,7 +414,7 @@ targeting `.cs-node-body` and `.cs-node-header-value` classes.
 
 ### Controls
 
-- **BottomToolbar**: animated-edges button (`\u2248`) and LOD button (`\u25e7`)
+- **BottomToolbar**: animated-edges button (`≈`) and LOD button (`◧`)
 - **View menu**: "Toggle animated edges" and "Toggle zoom LOD"
 - **Keyboard**: `Alt+E` (animated edges), `Alt+L` (LOD)
 - **Command Palette**: auto-registered via menu flattening

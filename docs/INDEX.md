@@ -83,6 +83,21 @@ modifying CORS, or reviewing the security posture before a release.
 
 ---
 
+### [ENV_SECRETS.md](ENV_SECRETS.md)
+
+**Purpose:** Environment variable and secrets management.
+
+**Read this when:** You're adding a new env var, configuring secrets for
+CI/CD, or setting up `.dev.vars` for local Pages function development.
+
+**Covers:**
+- Client-safe `VITE_*` variables
+- Server-only variables (Cloudflare context.env)
+- `.dev.vars` usage for local development
+- Secret rotation procedures
+
+---
+
 ### [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 **Purpose:** Concrete diagnosis + fix steps for common failures.
@@ -97,6 +112,20 @@ production is showing a fatal error screen.
 - Common CI failures: format check, typecheck, lint, WASM build, Playwright smoke
 - Engine contract version mismatch (wrong computed values)
 - Database / RLS / Stripe webhook issues
+
+---
+
+### [RELEASE.md](RELEASE.md)
+
+**Purpose:** Release process and deployment checklist.
+
+**Read this when:** You're preparing a release, checking migration
+attribution, or following the deploy checklist.
+
+**Covers:**
+- Release process steps
+- Migration attribution and numbering
+- Deploy verification checklist
 
 ---
 
@@ -116,6 +145,7 @@ you're proposing a change that touches a fundamental design decision.
 | [ADR-0002](DECISIONS/ADR-0002-csp-wasm-unsafe-eval.md) | CSP `'wasm-unsafe-eval'` | Accepted |
 | [ADR-0003](DECISIONS/ADR-0003-ci-deploy-strategy.md) | CI Two-Build Deploy Strategy | Accepted |
 | [ADR-0004](DECISIONS/ADR-0004-supabase-rls.md) | Supabase RLS Canonicalization | Accepted |
+| [ADR-0005](DECISIONS/ADR-0005-worker-cancellation.md) | Worker Cancellation Strategy | Accepted |
 
 ---
 
@@ -173,10 +203,194 @@ and patterns used across the codebase.
 | [GROUPS.md](GROUPS.md) | Block groups + templates: usage, collapse/expand, proxy handles, Pro gating |
 | [PLOTTING.md](PLOTTING.md) | Plot blocks (Vega-Lite): chart types, export, CSP-safe loading, downsampling |
 | [PROJECT_FORMAT.md](PROJECT_FORMAT.md) | `project.json` schema (schemaVersion 3), versioning contract, conflict detection |
+| [UX.md](UX.md) | Canvas UX interaction rules and design decisions |
+
+### Exports
+
+| Document | Purpose |
+|----------|---------|
+| [CHAINSOLVEJSON_FORMAT.md](CHAINSOLVEJSON_FORMAT.md) | `.chainsolvejson` portable format: schema, hashing, import/export workflow |
+| [PDF_EXPORT.md](PDF_EXPORT.md) | PDF audit report generation: layout, equations, metadata |
+| [EXCEL_EXPORT.md](EXCEL_EXPORT.md) | Excel/XLSX export: sheet layout, styling, data mapping |
+
+### AI Copilot
+
+| Document | Purpose |
+|----------|---------|
+| [AI_COPILOT.md](AI_COPILOT.md) | AI copilot feature: capabilities, model selection, UI integration |
+| [AI_PRIVACY.md](AI_PRIVACY.md) | AI privacy model: data handling, redaction, opt-out controls |
+| [AI_WORKFLOWS.md](AI_WORKFLOWS.md) | AI-assisted workflows: prompt templates, task dispatch, quota |
+
+### Block catalog
+
+| Document | Purpose |
+|----------|---------|
+| [BLOCK_CATALOG_GOVERNANCE.md](BLOCK_CATALOG_GOVERNANCE.md) | Block catalog governance: adding, deprecating, and versioning ops |
+| [FUNCTION_PACK_STAGING.md](FUNCTION_PACK_STAGING.md) | Function pack staging: block registration, category mapping, entitlements |
 
 ### Presentation
 
 | Document | Purpose |
 |----------|---------|
 | [BRANDING.md](BRANDING.md) | Brand asset paths, logo variants, theme selection helper |
-| [UX.md](UX.md) | Canvas UX interaction rules and design decisions |
+
+---
+
+## Dev environment
+
+### [DEVCONTAINER.md](DEVCONTAINER.md)
+
+**Purpose:** Devcontainer and GitHub Codespaces configuration.
+
+**Read this when:** You're setting up a Codespace, debugging the post-create
+script, or modifying the dev container image.
+
+**Covers:**
+- Rust/wasm-pack auto-installation
+- Node dependency setup
+- WASM dev build
+- PATH persistence for non-interactive shells
+
+---
+
+### [TESTING_GOLDENS.md](TESTING_GOLDENS.md)
+
+**Purpose:** Golden fixture test system for the Rust engine.
+
+**Read this when:** You're adding a new engine op, updating expected values,
+or debugging a golden test failure.
+
+**Covers:**
+- Fixture JSON format (snapshot, expected, diagnostics, tolerance)
+- How to regenerate expected values (`GOLDEN_UPDATE=1`)
+- Adding new fixtures
+
+---
+
+### [TEST_PERSONAS.md](TEST_PERSONAS.md)
+
+**Purpose:** Test user personas for QA and E2E testing.
+
+**Read this when:** You're writing E2E tests or designing QA scenarios that
+need realistic user profiles.
+
+**Covers:**
+- Persona definitions (roles, plans, usage patterns)
+- Scenario mapping
+
+---
+
+## Observability
+
+### [observability/](observability/)
+
+**Purpose:** Observability architecture and operational runbooks.
+
+**Read this when:** You're working on telemetry, debugging CSP reports, or
+triaging client-side errors.
+
+| Document | Purpose |
+|----------|---------|
+| [observability/overview.md](observability/overview.md) | Architecture: event pipeline, sampling, storage |
+| [observability/csp-reporting.md](observability/csp-reporting.md) | CSP report endpoint: validation, dedup, local Wrangler testing |
+| [observability/doctor.md](observability/doctor.md) | Client-side health checks and diagnostics |
+| [observability/runbook.md](observability/runbook.md) | Operational runbook: alerts, triage, common issues |
+
+---
+
+## Performance
+
+### [performance/](performance/)
+
+**Purpose:** Performance strategy, budgets, instrumentation, and runbooks.
+
+**Read this when:** You're optimising bundle size, profiling memory, or
+investigating a performance regression.
+
+| Document | Purpose |
+|----------|---------|
+| [performance/overview.md](performance/overview.md) | Strategy: goals, metrics, tooling |
+| [performance/budgets.md](performance/budgets.md) | Performance budgets: bundle size, LCP, TTI thresholds |
+| [performance/baseline.md](performance/baseline.md) | Baseline measurements and benchmarks |
+| [performance/instrumentation.md](performance/instrumentation.md) | Marks, measures, reporting |
+| [performance/memory.md](performance/memory.md) | WASM heap, JS heap, leak detection |
+| [performance/stress-tests.md](performance/stress-tests.md) | Large graphs, concurrent operations |
+| [performance/runbook.md](performance/runbook.md) | Regression triage and optimization |
+| [perf-budget.md](perf-budget.md) | Bundle size budget thresholds (CI-enforced) |
+
+---
+
+## Enterprise
+
+### [enterprise/](enterprise/)
+
+**Purpose:** Enterprise-tier features and policies.
+
+**Read this when:** You're working on organisation billing, audit logs, or
+desktop app deployment policies.
+
+| Document | Purpose |
+|----------|---------|
+| [enterprise/org-billing.md](enterprise/org-billing.md) | Organisation-level billing: team plans, seat management |
+| [enterprise/audit-log-retention.md](enterprise/audit-log-retention.md) | Audit log retention policies and compliance |
+| [enterprise/desktop-policy.md](enterprise/desktop-policy.md) | Desktop app enterprise policies: MDM, auto-update, offline |
+
+---
+
+## Architecture deep-dives
+
+| Document | Purpose |
+|----------|---------|
+| [architecture/stripe-connect.md](architecture/stripe-connect.md) | Stripe Connect integration: marketplace payouts, onboarding |
+
+---
+
+## Audit & hygiene
+
+### [AUDIT/](AUDIT/)
+
+**Purpose:** Repository audit findings and cleanup plan.
+
+**Read this when:** You're looking for tech debt to address, reviewing code
+quality, or planning a cleanup sprint.
+
+| Document | Purpose |
+|----------|---------|
+| [AUDIT/REPO_AUDIT_REPORT.md](AUDIT/REPO_AUDIT_REPORT.md) | Full audit: structure, boundaries, hot zones, duplications, findings |
+| [AUDIT/REPO_HYGIENE_PLAN.md](AUDIT/REPO_HYGIENE_PLAN.md) | Prioritized cleanup tasks derived from audit |
+
+---
+
+## Product & marketing
+
+| Document | Purpose |
+|----------|---------|
+| [ANALYTICS_STRATEGY.md](ANALYTICS_STRATEGY.md) | Analytics strategy: events, funnels, privacy-first approach |
+| [MARKETING_QA.md](MARKETING_QA.md) | Marketing QA checklist: landing page, SEO, social cards |
+
+---
+
+## Requirements suite
+
+### [requirements/](requirements/)
+
+**Purpose:** Complete product requirements from vision to non-functional specs.
+
+| Document | Purpose |
+|----------|---------|
+| [requirements/README.md](requirements/README.md) | Requirements suite overview and reading guide |
+| [requirements/01-product-vision.md](requirements/01-product-vision.md) | Product vision, target users, value proposition |
+| [requirements/02-domain-model-and-schema.md](requirements/02-domain-model-and-schema.md) | Domain model, data schema, entity relationships |
+| [requirements/03-web-app-requirements.md](requirements/03-web-app-requirements.md) | Web application functional requirements |
+| [requirements/04-mobile-app-requirements.md](requirements/04-mobile-app-requirements.md) | Mobile application requirements |
+| [requirements/05-desktop-app-requirements.md](requirements/05-desktop-app-requirements.md) | Desktop application requirements |
+| [requirements/06-platform-backend-and-entitlements.md](requirements/06-platform-backend-and-entitlements.md) | Platform backend, entitlements, billing |
+| [requirements/07-nonfunctional-security-and-quality.md](requirements/07-nonfunctional-security-and-quality.md) | Non-functional, security, and quality requirements |
+
+---
+
+## Roadmap
+
+| Document | Purpose |
+|----------|---------|
+| [ROADMAP_CHECKLIST.md](ROADMAP_CHECKLIST.md) | Implementation roadmap: phases, checklist items, progress tracking |
