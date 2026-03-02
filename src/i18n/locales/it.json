@@ -993,7 +993,14 @@
     "analyticsForks": "Biforcazioni",
     "analyticsPurchases": "Acquisti",
     "likesCount": "{{count}} mi piace",
-    "commentsCount": "{{count}} commenti"
+    "commentsCount": "{{count}} commenti",
+    "sourceAll": "Tutto",
+    "sourceOfficial": "Ufficiale",
+    "sourceCommunity": "Community",
+    "sourceEnterprise": "Azienda",
+    "sourceFilterLabel": "Filtro origine",
+    "officialBadge": "Ufficiale",
+    "enterpriseBadge": "Azienda"
   },
   "orgs": {
     "title": "Organizzazioni",

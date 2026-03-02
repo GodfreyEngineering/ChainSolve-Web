@@ -30,6 +30,7 @@ import {
   unlikeItem,
   type MarketplaceItem,
   type ExploreSortKey,
+  type ExploreSource,
 } from '../lib/marketplaceService'
 import { listMyOrgs, getOrgPolicy, type Org, type OrgPolicy } from '../lib/orgsService'
 import { getProfile } from '../lib/profilesService'
@@ -239,6 +240,9 @@ export default function MarketplacePage() {
   const [sort, setSort] = useState<ExploreSortKey>('downloads')
   const [tagFilter, setTagFilter] = useState('')
 
+  // I4-1: source filter (official / community / enterprise)
+  const [source, setSource] = useState<ExploreSource>('all')
+
   // E11-3: debounce text inputs to reduce API calls
   const debouncedQuery = useDebounce(query, 350)
   const debouncedTag = useDebounce(tagFilter, 350)
@@ -292,6 +296,7 @@ export default function MarketplacePage() {
           debouncedQuery,
           sort,
           debouncedTag || undefined,
+          source,
         ),
         getUserInstalls(),
         getUserLikes(),
@@ -304,7 +309,7 @@ export default function MarketplacePage() {
     } finally {
       setLoading(false)
     }
-  }, [category, debouncedQuery, sort, debouncedTag])
+  }, [category, debouncedQuery, sort, debouncedTag, source])
 
   useEffect(() => {
     void fetchItems()
@@ -535,6 +540,31 @@ export default function MarketplacePage() {
           </div>
         )}
 
+        {/* I4-1: Source filter — Official / Community / Enterprise */}
+        {viewMode === 'public' && (
+          <div style={s.categoryRow} role="tablist" aria-label={t('marketplace.sourceFilterLabel')}>
+            {(
+              [
+                { key: 'all', label: t('marketplace.sourceAll') },
+                { key: 'official', label: t('marketplace.sourceOfficial') },
+                { key: 'community', label: t('marketplace.sourceCommunity') },
+                { key: 'enterprise', label: t('marketplace.sourceEnterprise') },
+              ] as const
+            ).map((src) => (
+              <button
+                key={src.key}
+                role="tab"
+                aria-selected={source === src.key}
+                style={s.catBtn(source === src.key)}
+                onClick={() => setSource(src.key)}
+                data-testid={`source-tab-${src.key}`}
+              >
+                {src.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Category filter — public view only */}
         {viewMode === 'public' && (
           <div
@@ -698,28 +728,48 @@ export default function MarketplacePage() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: 'var(--font-2xl)',
+                          fontSize: 'var(--font-sm)',
+                          fontWeight: 600,
+                          letterSpacing: '0.04em',
                           color: 'var(--text-faint)',
                           borderBottom: '1px solid var(--border)',
+                          textTransform: 'uppercase',
                         }}
                       >
-                        {item.category === 'template'
-                          ? '📄'
-                          : item.category === 'theme'
-                            ? '🎨'
-                            : item.category === 'block_pack'
-                              ? '📦'
-                              : '🧩'}
+                        {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')}
                       </div>
                     )}
 
                     {/* Card body */}
                     <div style={s.cardBody}>
-                      {/* Category badge + plan badge row */}
+                      {/* Category badge + official badge + plan badge row */}
                       <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
                         <span style={s.catBadge(item.category)}>
                           {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')}
                         </span>
+                        {item.is_official && (
+                          <span
+                            style={{
+                              ...s.catBadge(''),
+                              background: 'rgba(59,130,246,0.12)',
+                              color: 'var(--primary-text)',
+                            }}
+                            data-testid="official-badge"
+                          >
+                            {t('marketplace.officialBadge')}
+                          </span>
+                        )}
+                        {item.org_id && (
+                          <span
+                            style={{
+                              ...s.catBadge(''),
+                              background: 'rgba(245,158,11,0.12)',
+                              color: 'var(--warning)',
+                            }}
+                          >
+                            {t('marketplace.enterpriseBadge')}
+                          </span>
+                        )}
                         {isLocked && (
                           <span
                             style={{

@@ -44,6 +44,8 @@ export interface MarketplaceItem {
   price_cents: number
   /** D10-1: org-scoped items. NULL = public. */
   org_id: string | null
+  /** I4-1: denormalised from profiles.verified_author. */
+  is_official: boolean
   created_at: string
   updated_at: string
 }
@@ -102,15 +104,19 @@ export function validateMarketplaceVersion(v: string): { ok: boolean; error?: st
 /** Sort options for Explore browse listing. */
 export type ExploreSortKey = 'downloads' | 'likes' | 'newest'
 
+/** I4-1: Source-based filter for Explore browse. */
+export type ExploreSource = 'all' | 'official' | 'community' | 'enterprise'
+
 /**
  * List all published marketplace items, optionally filtered by category,
- * name search query, and/or tag. Supports multiple sort orders.
+ * name search query, tag, and/or source. Supports multiple sort orders.
  */
 export async function listPublishedItems(
   category?: string,
   query?: string,
   sort: ExploreSortKey = 'downloads',
   tag?: string,
+  source: ExploreSource = 'all',
 ): Promise<MarketplaceItem[]> {
   const orderCol =
     sort === 'likes' ? 'likes_count' : sort === 'newest' ? 'created_at' : 'downloads_count'
@@ -124,6 +130,15 @@ export async function listPublishedItems(
   if (category && category !== 'all') q = q.eq('category', category)
   if (query && query.trim()) q = q.ilike('name', `%${query.trim()}%`)
   if (tag && tag.trim()) q = q.contains('tags', [tag.trim()])
+
+  // I4-1: source-based filtering
+  if (source === 'official') {
+    q = q.eq('is_official', true).is('org_id', null)
+  } else if (source === 'community') {
+    q = q.eq('is_official', false).is('org_id', null)
+  } else if (source === 'enterprise') {
+    q = q.not('org_id', 'is', null)
+  }
 
   const { data, error } = await q
   if (error) throw error

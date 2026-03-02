@@ -48,6 +48,8 @@ const mockInsert = vi.fn()
 const mockUpdate = vi.fn()
 const mockSingle = vi.fn()
 const mockContains = vi.fn()
+const mockIs = vi.fn()
+const mockNot = vi.fn()
 
 // Build a chainable query builder
 function makeQueryBuilder(finalResult: { data: unknown; error: unknown }) {
@@ -62,11 +64,15 @@ function makeQueryBuilder(finalResult: { data: unknown; error: unknown }) {
     update: mockUpdate,
     single: mockSingle,
     contains: mockContains,
+    is: mockIs,
+    not: mockNot,
   }
   mockSelect.mockReturnValue(qb)
   mockEq.mockReturnValue(qb)
   mockIlike.mockReturnValue(qb)
   mockContains.mockReturnValue(qb)
+  mockIs.mockReturnValue(qb)
+  mockNot.mockReturnValue(qb)
   mockOrder.mockResolvedValue(finalResult)
   mockMaybeSingle.mockResolvedValue(finalResult)
   mockUpsert.mockResolvedValue(finalResult)
@@ -221,6 +227,74 @@ describe('listPublishedItems', () => {
 
     await listPublishedItems(undefined, undefined, 'downloads', 'physics')
     expect(mockContains).toHaveBeenCalledWith('tags', ['physics'])
+  })
+
+  it('I4-1: filters by source=official (is_official=true, org_id=null)', async () => {
+    const finalResult = { data: [], error: null }
+    const qb = {
+      select: mockSelect,
+      eq: mockEq,
+      ilike: mockIlike,
+      order: mockOrder,
+      contains: mockContains,
+      is: mockIs,
+      not: mockNot,
+    }
+    mockSelect.mockReturnValue(qb)
+    mockEq.mockReturnValue(qb)
+    mockIlike.mockReturnValue(qb)
+    mockOrder.mockReturnValue(qb)
+    mockIs.mockResolvedValue(finalResult)
+    supabaseMock.from.mockReturnValue(qb)
+
+    await listPublishedItems(undefined, undefined, 'downloads', undefined, 'official')
+    expect(mockEq).toHaveBeenCalledWith('is_official', true)
+    expect(mockIs).toHaveBeenCalledWith('org_id', null)
+  })
+
+  it('I4-1: filters by source=community (is_official=false, org_id=null)', async () => {
+    const finalResult = { data: [], error: null }
+    const qb = {
+      select: mockSelect,
+      eq: mockEq,
+      ilike: mockIlike,
+      order: mockOrder,
+      contains: mockContains,
+      is: mockIs,
+      not: mockNot,
+    }
+    mockSelect.mockReturnValue(qb)
+    mockEq.mockReturnValue(qb)
+    mockIlike.mockReturnValue(qb)
+    mockOrder.mockReturnValue(qb)
+    mockIs.mockResolvedValue(finalResult)
+    supabaseMock.from.mockReturnValue(qb)
+
+    await listPublishedItems(undefined, undefined, 'downloads', undefined, 'community')
+    expect(mockEq).toHaveBeenCalledWith('is_official', false)
+    expect(mockIs).toHaveBeenCalledWith('org_id', null)
+  })
+
+  it('I4-1: filters by source=enterprise (org_id not null)', async () => {
+    const finalResult = { data: [], error: null }
+    const qb = {
+      select: mockSelect,
+      eq: mockEq,
+      ilike: mockIlike,
+      order: mockOrder,
+      contains: mockContains,
+      is: mockIs,
+      not: mockNot,
+    }
+    mockSelect.mockReturnValue(qb)
+    mockEq.mockReturnValue(qb)
+    mockIlike.mockReturnValue(qb)
+    mockOrder.mockReturnValue(qb)
+    mockNot.mockResolvedValue(finalResult)
+    supabaseMock.from.mockReturnValue(qb)
+
+    await listPublishedItems(undefined, undefined, 'downloads', undefined, 'enterprise')
+    expect(mockNot).toHaveBeenCalledWith('org_id', 'is', null)
   })
 })
 

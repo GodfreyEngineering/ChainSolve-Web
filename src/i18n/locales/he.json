@@ -60,7 +60,14 @@
     "analyticsForks": "הסתעפויות",
     "analyticsPurchases": "רכישות",
     "likesCount": "{{count}} לייקים",
-    "commentsCount": "{{count}} תגובות"
+    "commentsCount": "{{count}} תגובות",
+    "sourceAll": "הכל",
+    "sourceOfficial": "רשמי",
+    "sourceCommunity": "קהילה",
+    "sourceEnterprise": "ארגון",
+    "sourceFilterLabel": "סינון לפי מקור",
+    "officialBadge": "רשמי",
+    "enterpriseBadge": "ארגון"
   },
   "settings": {
     "account": "חשבון",

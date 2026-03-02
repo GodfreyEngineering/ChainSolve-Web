@@ -1012,7 +1012,14 @@
     "analyticsForks": "Forks",
     "analyticsPurchases": "Purchases",
     "likesCount": "{{count}} likes",
-    "commentsCount": "{{count}} comments"
+    "commentsCount": "{{count}} comments",
+    "sourceAll": "All",
+    "sourceOfficial": "Official",
+    "sourceCommunity": "Community",
+    "sourceEnterprise": "Enterprise",
+    "sourceFilterLabel": "Source filter",
+    "officialBadge": "Official",
+    "enterpriseBadge": "Enterprise"
   },
   "orgs": {
     "title": "Organizations",

@@ -52,14 +52,6 @@ const CATEGORY_LABEL_KEYS: Record<string, string> = {
   custom_block: 'marketplace.categoryCustomBlock',
 }
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  template: '\uD83D\uDCC4',
-  block_pack: '\uD83E\uDDE9',
-  theme: '\uD83C\uDFA8',
-  group: '\uD83D\uDCC2',
-  custom_block: '\u2699\uFE0F',
-}
-
 function formatDate(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString('en-GB', {
@@ -657,11 +649,15 @@ export default function ItemDetailPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '3rem',
+                  fontSize: 'var(--font-lg)',
+                  fontWeight: 600,
+                  letterSpacing: '0.06em',
+                  color: 'var(--text-faint)',
                   marginBottom: 'var(--space-6)',
+                  textTransform: 'uppercase',
                 }}
               >
-                {CATEGORY_EMOJI[item.category] ?? '\uD83D\uDCC4'}
+                {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')}
               </div>
             )}
 
@@ -681,6 +677,37 @@ export default function ItemDetailPage() {
                   <span>
                     {t(CATEGORY_LABEL_KEYS[item.category] ?? 'marketplace.categoryTemplate')}
                   </span>
+                  {item.is_official && (
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '0.1rem 0.5rem',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: 'var(--font-xs)',
+                        fontWeight: 600,
+                        background: 'rgba(59,130,246,0.12)',
+                        color: 'var(--primary-text)',
+                      }}
+                      data-testid="official-badge"
+                    >
+                      {t('marketplace.officialBadge')}
+                    </span>
+                  )}
+                  {item.org_id && (
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '0.1rem 0.5rem',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: 'var(--font-xs)',
+                        fontWeight: 600,
+                        background: 'rgba(245,158,11,0.12)',
+                        color: 'var(--warning)',
+                      }}
+                    >
+                      {t('marketplace.enterpriseBadge')}
+                    </span>
+                  )}
                   <span>{t('marketplace.version', { version: item.version })}</span>
                   <span>{t('marketplace.downloads', { count: item.downloads_count })}</span>
                   <span>{t('marketplace.likes', { count: item.likes_count ?? 0 })}</span>

@@ -993,7 +993,14 @@
     "analyticsForks": "Abspaltungen",
     "analyticsPurchases": "Käufe",
     "likesCount": "{{count}} Likes",
-    "commentsCount": "{{count}} Kommentare"
+    "commentsCount": "{{count}} Kommentare",
+    "sourceAll": "Alle",
+    "sourceOfficial": "Offiziell",
+    "sourceCommunity": "Community",
+    "sourceEnterprise": "Unternehmen",
+    "sourceFilterLabel": "Quellenfilter",
+    "officialBadge": "Offiziell",
+    "enterpriseBadge": "Unternehmen"
   },
   "orgs": {
     "title": "Organisationen",
