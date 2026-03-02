@@ -1637,7 +1637,7 @@ Claude MUST:
 ---
 
 ## G4 — Inspector-first blocks: descriptions, units, and deep editing
-- [ ] G4-1: Inspector becomes the primary editing surface for all blocks
+- [x] G4-1: Inspector becomes the primary editing surface for all blocks
   - Every block has:
     - title, category/subcategory, icon
     - full description of what it does, how it works, use cases
@@ -1674,9 +1674,10 @@ Claude MUST:
     - No duplicate close buttons
     - Toolbar never hidden behind dock
 
-- [ ] G5-3: Right-side toolbar always visible; move pan/zoom from bottom to right
-  - Vertical toolbar always on top and visible.
+- [ ] G5-3: Top of canvas toolbar always visible; move pan/zoom from bottom to right
+  - Horizontal toolbar always on top and visible.
   - Hover animations for icons (CAD-style).
+  - Can be snapped/dragged to right, left or bottom or top of canvas. Auto rotates to horizontal or vertical orientation depending if its on sides of canvas or top/bottom of canvas. (of course horizontal on top and bottom and vertical when on sides)
   - Acceptance: never covered by dock/library.
 
 ---
