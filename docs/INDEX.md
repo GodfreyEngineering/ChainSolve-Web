@@ -294,6 +294,19 @@ health, or wondering why a particular library is (or isn't) used.
 - Supply chain checks (automated and manual)
 - Current dependency inventory
 
+### [DEV/RELEASE_DRY_RUN.md](DEV/RELEASE_DRY_RUN.md)
+
+**Purpose:** Step-by-step release rehearsal playbook.
+
+**Read this when:** You're about to deploy to production and want a
+structured pre-flight checklist.
+
+**Covers:**
+- Local gate (verify-ci.sh), E2E smoke tests
+- Auth, CSP, exports, billing, and AI quota validation
+- CI pipeline monitoring and post-deploy smoke tests
+- Rollback procedures
+
 ---
 
 ## Observability
