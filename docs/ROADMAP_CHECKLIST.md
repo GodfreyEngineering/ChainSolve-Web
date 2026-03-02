@@ -1988,7 +1988,7 @@ Claude MUST:
 ---
 
 ## I4 — Explore ecosystem v2 (social-like discovery)
-- [ ] I4-1: Explore feels like a real ecosystem
+- [x] I4-1: Explore feels like a real ecosystem
   - Categories:
     - ChainSolve official
     - User uploads
