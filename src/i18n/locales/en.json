@@ -336,7 +336,15 @@
     "authenticatorApp": "Authenticator app",
     "addedOn": "Added on {{date}}",
     "enrollError": "Failed to set up 2FA. Please try again.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "sessionsTitle": "Active sessions",
+    "sessionsDesc": "Manage devices that are signed in to your account.",
+    "currentSession": "This device",
+    "lastActive": "Last active: {{date}}",
+    "revoke": "Revoke",
+    "revokeAll": "Revoke all others",
+    "revoking": "Revoking…",
+    "noSessions": "No active sessions found."
   },
   "admin": {
     "dangerZoneTitle": "Danger Zone",

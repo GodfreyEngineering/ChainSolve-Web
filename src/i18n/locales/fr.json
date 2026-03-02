@@ -328,7 +328,15 @@
     "authenticatorApp": "Application d'authentification",
     "addedOn": "Ajouté le {{date}}",
     "enrollError": "Échec de la configuration 2FA. Veuillez réessayer.",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "sessionsTitle": "Sessions actives",
+    "sessionsDesc": "Gérez les appareils connectés à votre compte.",
+    "currentSession": "Cet appareil",
+    "lastActive": "Dernière activité : {{date}}",
+    "revoke": "Révoquer",
+    "revokeAll": "Révoquer les autres",
+    "revoking": "Révocation…",
+    "noSessions": "Aucune session active trouvée."
   },
   "admin": {
     "dangerZoneTitle": "Zone de danger",

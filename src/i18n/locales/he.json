@@ -85,7 +85,15 @@
     "authenticatorApp": "אפליקציית אימות",
     "addedOn": "נוסף ב-{{date}}",
     "enrollError": "הגדרת 2FA נכשלה. נסה שוב.",
-    "cancel": "ביטול"
+    "cancel": "ביטול",
+    "sessionsTitle": "סשנים פעילים",
+    "sessionsDesc": "נהל מכשירים שמחוברים לחשבון שלך.",
+    "currentSession": "מכשיר זה",
+    "lastActive": "פעיל לאחרונה: {{date}}",
+    "revoke": "בטל",
+    "revokeAll": "בטל את כל האחרים",
+    "revoking": "מבטל…",
+    "noSessions": "לא נמצאו סשנים פעילים."
   },
   "admin": {
     "dangerZoneTitle": "אזור מסוכן",

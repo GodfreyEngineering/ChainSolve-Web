@@ -328,7 +328,15 @@
     "authenticatorApp": "Authenticator-App",
     "addedOn": "Hinzugefügt am {{date}}",
     "enrollError": "2FA konnte nicht eingerichtet werden. Bitte versuchen Sie es erneut.",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "sessionsTitle": "Aktive Sitzungen",
+    "sessionsDesc": "Verwalten Sie Geräte, die bei Ihrem Konto angemeldet sind.",
+    "currentSession": "Dieses Gerät",
+    "lastActive": "Zuletzt aktiv: {{date}}",
+    "revoke": "Widerrufen",
+    "revokeAll": "Alle anderen widerrufen",
+    "revoking": "Wird widerrufen…",
+    "noSessions": "Keine aktiven Sitzungen gefunden."
   },
   "admin": {
     "dangerZoneTitle": "Gefahrenzone",

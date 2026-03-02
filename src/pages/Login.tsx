@@ -9,10 +9,18 @@
 
 import { useState, useRef, useEffect, useCallback, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { signInWithPassword, signUp, resetPasswordForEmail, resendConfirmation } from '../lib/auth'
+import {
+  signInWithPassword,
+  signUp,
+  resetPasswordForEmail,
+  resendConfirmation,
+  getSession,
+} from '../lib/auth'
 import { BRAND } from '../lib/brand'
 import TurnstileWidget from '../components/ui/TurnstileWidget'
 import { isTurnstileEnabled } from '../lib/turnstile'
+import { registerSession } from '../lib/sessionService'
+import { getRememberMe, setRememberMe } from '../lib/rememberMe'
 
 export type AuthMode = 'login' | 'signup' | 'reset'
 
@@ -28,6 +36,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [marketingOptIn, setMarketingOptIn] = useState(false)
+  const [rememberMe, setRememberMeState] = useState(getRememberMe)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -105,6 +114,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
           return
         }
         // Email confirmation disabled (local dev) — session exists, go straight in.
+        if (session?.user) await registerSession(session.user.id)
         navigate('/app')
       } else if (mode === 'reset') {
         const { error: resetErr } = await resetPasswordForEmail(email, token)
@@ -113,6 +123,10 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
       } else {
         const { error: signInErr } = await signInWithPassword(email, password, token)
         if (signInErr) throw signInErr
+        setRememberMe(rememberMe)
+        // Register device session (E2-5)
+        const session = await getSession()
+        if (session?.user) await registerSession(session.user.id)
         navigate('/app')
       }
     } catch (err: unknown) {
@@ -296,6 +310,15 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
 
           {mode === 'login' && (
             <div style={s.forgotRow}>
+              <label style={s.rememberLabel}>
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMeState(e.target.checked)}
+                  style={s.checkbox}
+                />
+                Remember me
+              </label>
               <Link to="/reset-password" style={s.forgotLink}>
                 Forgot password?
               </Link>
@@ -505,7 +528,9 @@ const s = {
     textDecoration: 'underline',
   } as React.CSSProperties,
   forgotRow: {
-    textAlign: 'right' as const,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: '-0.5rem',
     marginBottom: '0.5rem',
   } as React.CSSProperties,
@@ -514,5 +539,13 @@ const s = {
     fontSize: '0.82rem',
     textDecoration: 'underline',
     fontWeight: 500,
+  } as React.CSSProperties,
+  rememberLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.4rem',
+    fontSize: '0.82rem',
+    cursor: 'pointer',
+    opacity: 0.8,
   } as React.CSSProperties,
 }

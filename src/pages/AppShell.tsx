@@ -49,6 +49,8 @@ import { UpgradeModal } from '../components/UpgradeModal'
 import { getRecentProjects } from '../lib/recentProjects'
 import { getPinnedProjects, togglePinnedProject } from '../lib/pinnedProjects'
 import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
+import { initRememberMe } from '../lib/rememberMe'
+import { touchSession } from '../lib/sessionService'
 
 type SortMode = 'recent' | 'name' | 'created'
 type FilterTab = 'all' | 'recent' | 'pinned'
@@ -293,6 +295,8 @@ export default function AppShell() {
         return
       }
       setUser(session.user)
+      initRememberMe()
+      void touchSession()
       supabase
         .from('profiles')
         .select(

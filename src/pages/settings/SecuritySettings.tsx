@@ -1,10 +1,11 @@
 /**
- * SecuritySettings — E2-4: Account Security (2FA / MFA).
+ * SecuritySettings — E2-4 + E2-5: Account Security.
  *
  * Allows users to:
  *   - Enrol a TOTP authenticator app (QR code + manual secret)
  *   - Verify the 6-digit code to complete enrolment
  *   - Disable 2FA by unenrolling the factor
+ *   - View and revoke active device sessions
  */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -14,9 +15,17 @@ import {
   verifyTotp,
   unenrollTotp,
   listMfaFactors,
+  getCurrentUser,
   type MfaFactor,
   type TotpEnrollment,
 } from '../../lib/auth'
+import {
+  listSessions,
+  revokeSession,
+  revokeAllOtherSessions,
+  getCurrentSessionId,
+  type UserSession,
+} from '../../lib/sessionService'
 
 export function SecuritySettings() {
   const { t } = useTranslation()
@@ -97,6 +106,52 @@ export function SecuritySettings() {
       await fetchFactors()
     }
     setDisabling(false)
+  }
+
+  // ── Sessions state ─────────────────────────────────────────────────────
+  const [sessions, setSessions] = useState<UserSession[]>([])
+  const [sessionsLoading, setSessionsLoading] = useState(true)
+  const [revoking, setRevoking] = useState(false)
+  const currentSessionId = getCurrentSessionId()
+
+  useEffect(() => {
+    let cancelled = false
+    getCurrentUser().then((user) => {
+      if (cancelled || !user) {
+        setSessionsLoading(false)
+        return
+      }
+      listSessions(user.id).then((s) => {
+        if (!cancelled) setSessions(s)
+        setSessionsLoading(false)
+      })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const handleRevoke = async (sessionId: string) => {
+    setError(null)
+    setRevoking(true)
+    const { error: err } = await revokeSession(sessionId)
+    if (err) setError(err)
+    else setSessions((prev) => prev.filter((s) => s.id !== sessionId))
+    setRevoking(false)
+  }
+
+  const handleRevokeAll = async () => {
+    setError(null)
+    setRevoking(true)
+    const user = await getCurrentUser()
+    if (!user) {
+      setRevoking(false)
+      return
+    }
+    const { error: err } = await revokeAllOtherSessions(user.id)
+    if (err) setError(err)
+    else setSessions((prev) => prev.filter((s) => s.id === currentSessionId))
+    setRevoking(false)
   }
 
   const hasVerifiedFactor = factors.length > 0
@@ -234,6 +289,64 @@ export function SecuritySettings() {
           </div>
         )}
       </div>
+
+      {/* ── Active sessions (E2-5) ────────────────────────────────────────── */}
+      <div style={{ ...cardStyle, marginTop: '1.25rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={fieldLabel}>{t('security.sessionsTitle')}</div>
+            <div style={fieldHint}>{t('security.sessionsDesc')}</div>
+          </div>
+          {sessions.length > 1 && (
+            <button
+              style={{ ...btnDanger, ...(revoking ? btnDisabledStyle : {}) }}
+              disabled={revoking}
+              onClick={handleRevokeAll}
+            >
+              {revoking ? t('security.revoking') : t('security.revokeAll')}
+            </button>
+          )}
+        </div>
+
+        {sessionsLoading ? (
+          <div style={{ opacity: 0.5, marginTop: '1rem', fontSize: '0.85rem' }}>
+            {t('ui.loading')}
+          </div>
+        ) : sessions.length === 0 ? (
+          <div style={{ opacity: 0.5, marginTop: '1rem', fontSize: '0.85rem' }}>
+            {t('security.noSessions')}
+          </div>
+        ) : (
+          <div style={{ marginTop: '1rem' }}>
+            {sessions.map((s) => (
+              <div key={s.id} style={factorRow}>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: '0.9rem' }}>
+                    {s.device_label}
+                    {s.id === currentSessionId && (
+                      <span style={currentBadge}>{t('security.currentSession')}</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>
+                    {t('security.lastActive', {
+                      date: new Date(s.last_active_at).toLocaleString(),
+                    })}
+                  </div>
+                </div>
+                {s.id !== currentSessionId && (
+                  <button
+                    style={{ ...btnDanger, ...(revoking ? btnDisabledStyle : {}) }}
+                    disabled={revoking}
+                    onClick={() => handleRevoke(s.id)}
+                  >
+                    {t('security.revoke')}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -341,3 +454,13 @@ const btnDanger: React.CSSProperties = {
 }
 
 const btnDisabledStyle: React.CSSProperties = { opacity: 0.5, cursor: 'not-allowed' }
+
+const currentBadge: React.CSSProperties = {
+  marginLeft: '0.5rem',
+  padding: '0.1rem 0.5rem',
+  borderRadius: 12,
+  fontSize: '0.72rem',
+  fontWeight: 600,
+  background: 'rgba(28,171,176,0.15)',
+  color: 'var(--primary)',
+}

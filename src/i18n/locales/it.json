@@ -328,7 +328,15 @@
     "authenticatorApp": "App di autenticazione",
     "addedOn": "Aggiunto il {{date}}",
     "enrollError": "Impossibile configurare la 2FA. Riprova.",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "sessionsTitle": "Sessioni attive",
+    "sessionsDesc": "Gestisci i dispositivi connessi al tuo account.",
+    "currentSession": "Questo dispositivo",
+    "lastActive": "Ultima attività: {{date}}",
+    "revoke": "Revoca",
+    "revokeAll": "Revoca le altre",
+    "revoking": "Revoca in corso…",
+    "noSessions": "Nessuna sessione attiva trovata."
   },
   "admin": {
     "dangerZoneTitle": "Zona di pericolo",

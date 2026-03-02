@@ -45,6 +45,8 @@ const LazyTemplateManagerDialog = lazy(() =>
 )
 import { CATEGORY_ORDER, CATEGORY_LABELS } from '../../blocks/registry'
 import { getCurrentUser, signOut } from '../../lib/auth'
+import { removeCurrentSession } from '../../lib/sessionService'
+import { clearReauth } from '../../lib/reauth'
 import { getRecentProjects } from '../../lib/recentProjects'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { flattenMenusToActions, type MenuDef } from '../../lib/actions'
@@ -239,7 +241,10 @@ export function AppHeader({
 
   const handleSignOut = useCallback(() => {
     setAccountOpen(false)
-    void signOut().then(() => window.location.assign('/login'))
+    void removeCurrentSession()
+      .then(() => clearReauth())
+      .then(() => signOut())
+      .then(() => window.location.assign('/login'))
   }, [])
 
   const handleClearCanvas = useCallback(() => {
