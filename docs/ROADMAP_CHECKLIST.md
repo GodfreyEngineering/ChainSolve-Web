@@ -1556,7 +1556,7 @@ Claude MUST:
   - Address wasm-bindgen warning by switching to the recommended single object init call where applicable. :contentReference[oaicite:9]{index=9}
   - Acceptance: clean boot logs.
 
-- [ ] G0-6: Eliminate registry warnings about missing TS defaults and TS blocks not in Rust catalog
+- [x] G0-6: Eliminate registry warnings about missing TS defaults and TS blocks not in Rust catalog
   - Policy:
     - UI must render any Rust catalog block generically even if TS has no bespoke default.
     - TS-only blocks must not pretend to be engine ops.

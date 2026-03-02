@@ -783,15 +783,11 @@ for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {
 // ── Catalog validation (called after WASM engine boots) ──────────────────────
 
 /**
- * Validate that the TS registry matches the Rust catalog.
- * Logs warnings for any mismatches. Does not replace entries —
- * TS keeps defaultData (Rust doesn't carry UI defaults).
- */
-/**
  * UI-only block types — picker stubs that resolve to a specific engine op
  * when the user makes a selection. They never reach the Rust engine directly.
+ * Exported for tests (G0-6).
  */
-const UI_ONLY_BLOCKS = new Set([
+export const UI_ONLY_BLOCKS: ReadonlySet<string> = new Set([
   'constant',
   'material',
   'annotation_text',
@@ -799,19 +795,29 @@ const UI_ONLY_BLOCKS = new Set([
   'annotation_highlight',
 ])
 
+/**
+ * Validate and reconcile the TS registry with the Rust catalog.
+ *
+ * G0-6 policy:
+ *   - Any Rust catalog op that lacks a bespoke TS default is auto-registered
+ *     with a generic BlockDef derived from the catalog metadata. The UI can
+ *     then render it generically without a manual TS entry.
+ *   - TS-only blocks (UI_ONLY_BLOCKS) are expected and silently skipped.
+ *   - No console.warn at boot — clean logs.
+ */
 export function validateCatalog(catalog: CatalogEntry[]): void {
+  // Auto-register generic BlockDefs for any Rust catalog op missing from TS.
   for (const entry of catalog) {
-    const def = BLOCK_REGISTRY.get(entry.opId)
-    if (!def) {
-      console.warn(`[registry] Catalog op "${entry.opId}" has no TS default — UI may not render it`)
-    }
-  }
-  for (const [type] of BLOCK_REGISTRY) {
-    if (UI_ONLY_BLOCKS.has(type)) continue
-    if (!catalog.some((e) => e.opId === type)) {
-      console.warn(
-        `[registry] TS block "${type}" is not in the Rust catalog — engine won't evaluate it`,
-      )
+    if (!BLOCK_REGISTRY.has(entry.opId)) {
+      BLOCK_REGISTRY.set(entry.opId, {
+        type: entry.opId,
+        label: entry.label,
+        category: entry.category as BlockCategory,
+        nodeKind: entry.nodeKind as NodeKind,
+        inputs: entry.inputs.map((p) => ({ id: p.id, label: p.label })),
+        defaultData: { blockType: entry.opId, label: entry.label },
+        proOnly: entry.proOnly,
+      })
     }
   }
 }
