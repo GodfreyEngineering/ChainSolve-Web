@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useWindowManager } from '../../contexts/WindowManagerContext'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -75,6 +76,7 @@ function saveTab(tab: DockTab) {
 
 export function BottomDock({ panels, onClose }: BottomDockProps) {
   const { t } = useTranslation()
+  const { windows } = useWindowManager()
   const [height, setHeight] = useState(loadHeight)
   const [activeTab, setActiveTab] = useState<DockTab>(() => {
     const saved = loadTab()
@@ -117,14 +119,15 @@ export function BottomDock({ panels, onClose }: BottomDockProps) {
     [height],
   )
 
-  // Keyboard: ESC closes dock
+  // Keyboard: ESC closes dock (only when no windows are open —
+  // WindowManagerContext handles Escape for open windows)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape' && windows.every((w) => w.minimized)) onClose()
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
+  }, [onClose, windows])
 
   const activePanel = panels.find((p) => p.id === activeTab)
 
