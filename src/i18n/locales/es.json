@@ -887,6 +887,12 @@
     "themePlaceholder": "Describe tu tema…",
     "actionHistory": "Historial"
   },
+  "terms": {
+    "title": "Términos y Condiciones",
+    "version": "Versión {{version}}",
+    "effectiveDate": "Vigente desde {{date}}",
+    "backToSignIn": "Volver a iniciar sesión"
+  },
   "common": {
     "cancel": "Cancelar",
     "close": "Cerrar"

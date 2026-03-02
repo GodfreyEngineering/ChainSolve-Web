@@ -15,6 +15,9 @@ const MarketplacePage = lazy(() => import('./pages/MarketplacePage'))
 const ItemDetailPage = lazy(() => import('./pages/ItemDetailPage'))
 const MarketplaceAuthorPage = lazy(() => import('./pages/MarketplaceAuthorPage'))
 
+// Lazy-load Terms page (not needed on initial load)
+const TermsPage = lazy(() => import('./pages/TermsPage'))
+
 // Lazy-load org pages (not needed on initial load)
 const OrgsPage = lazy(() => import('./pages/OrgsPage'))
 const AuditLogPage = lazy(() => import('./pages/AuditLogPage'))
@@ -96,6 +99,14 @@ export default function App() {
         <Route path="/login" element={<Login initialMode="login" />} />
         <Route path="/signup" element={<Login initialMode="signup" />} />
         <Route path="/reset-password" element={<Login initialMode="reset" />} />
+        <Route
+          path="/terms"
+          element={
+            <Suspense fallback={null}>
+              <TermsPage />
+            </Suspense>
+          }
+        />
         <Route path="/app" element={<AppShell />} />
         <Route path="/canvas" element={<CanvasPage />} />
         <Route path="/canvas/:projectId" element={<CanvasPage />} />

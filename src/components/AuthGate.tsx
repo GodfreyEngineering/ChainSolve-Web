@@ -111,7 +111,13 @@ function TermsAcceptanceScreen({
     try {
       await onAccept(currentVersion)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to record acceptance. Please retry.')
+      const msg =
+        err instanceof Error
+          ? err.message
+          : typeof err === 'object' && err !== null && 'message' in err
+            ? String((err as { message: unknown }).message)
+            : 'Failed to record acceptance. Please retry.'
+      setError(msg)
     } finally {
       setLoading(false)
     }

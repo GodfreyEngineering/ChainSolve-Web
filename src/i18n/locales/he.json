@@ -126,6 +126,12 @@
     "graphHealth": "סטטוס הגרף",
     "bgDots": "Background dots"
   },
+  "terms": {
+    "title": "תנאי שימוש",
+    "version": "גרסה {{version}}",
+    "effectiveDate": "בתוקף מ-{{date}}",
+    "backToSignIn": "חזרה להתחברות"
+  },
   "common": {
     "cancel": "ביטול",
     "close": "סגור"

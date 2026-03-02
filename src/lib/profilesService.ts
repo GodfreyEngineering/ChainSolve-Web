@@ -50,14 +50,19 @@ export async function acceptTerms(version: string): Promise<void> {
   } = await supabase.auth.getUser()
   if (!user) throw new Error('Sign in to accept terms')
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('profiles')
     .update({
       accepted_terms_version: version,
       accepted_terms_at: new Date().toISOString(),
     })
     .eq('id', user.id)
-  if (error) throw error
+    .select('accepted_terms_version')
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  if (!data) throw new Error('Profile not found. Please sign out and sign back in.')
+  if (data.accepted_terms_version !== version)
+    throw new Error('Acceptance was not recorded. Please retry.')
 }
 
 /** E2-3: Update the user's marketing opt-in preference. */

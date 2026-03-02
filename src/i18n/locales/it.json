@@ -887,6 +887,12 @@
     "themePlaceholder": "Descrivi il tuo tema…",
     "actionHistory": "Cronologia"
   },
+  "terms": {
+    "title": "Termini e Condizioni",
+    "version": "Versione {{version}}",
+    "effectiveDate": "In vigore dal {{date}}",
+    "backToSignIn": "Torna all'accesso"
+  },
   "common": {
     "cancel": "Annulla",
     "close": "Chiudi"

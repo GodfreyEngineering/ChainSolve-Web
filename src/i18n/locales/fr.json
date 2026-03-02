@@ -887,6 +887,12 @@
     "themePlaceholder": "Décrivez votre thème…",
     "actionHistory": "Historique"
   },
+  "terms": {
+    "title": "Conditions Générales",
+    "version": "Version {{version}}",
+    "effectiveDate": "En vigueur le {{date}}",
+    "backToSignIn": "Retour à la connexion"
+  },
   "common": {
     "cancel": "Annuler",
     "close": "Fermer"

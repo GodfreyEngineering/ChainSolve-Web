@@ -907,6 +907,12 @@
     "themePlaceholder": "Describe your theme…",
     "actionHistory": "History"
   },
+  "terms": {
+    "title": "Terms & Conditions",
+    "version": "Version {{version}}",
+    "effectiveDate": "Effective {{date}}",
+    "backToSignIn": "Back to sign in"
+  },
   "common": {
     "cancel": "Cancel",
     "close": "Close"

@@ -887,6 +887,12 @@
     "themePlaceholder": "Beschreiben Sie Ihr Thema…",
     "actionHistory": "Verlauf"
   },
+  "terms": {
+    "title": "Allgemeine Geschäftsbedingungen",
+    "version": "Version {{version}}",
+    "effectiveDate": "Gültig ab {{date}}",
+    "backToSignIn": "Zurück zur Anmeldung"
+  },
   "common": {
     "cancel": "Abbrechen",
     "close": "Schließen"

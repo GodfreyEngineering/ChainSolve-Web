@@ -1523,7 +1523,7 @@ Claude MUST:
 ---
 
 ## G0 — Stability blockers and console noise elimination
-- [ ] G0-1: Fix Terms page blank and acceptance failing (“Failed to record acceptance. Please retry.”)
+- [x] G0-1: Fix Terms page blank and acceptance failing (“Failed to record acceptance. Please retry.”)
   - Root-cause: ensure Terms content loads, acceptance write succeeds, and errors are actionable.
   - Ensure acceptance is recorded server-side and is robust to retries and network failures.
   - Acceptance:
