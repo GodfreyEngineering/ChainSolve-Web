@@ -1025,7 +1025,14 @@
     "paste": "Coller",
     "fitView": "Ajuster la vue",
     "autoLayout": "Disposition auto",
-    "insertFromPrompt": "Insérer des blocs depuis un prompt…"
+    "insertFromPrompt": "Insérer des blocs depuis un prompt…",
+    "insertAnnotation": "Inserer une annotation",
+    "annotText": "Etiquette de texte",
+    "annotCallout": "Encadre de note",
+    "annotHighlight": "Zone surlignee",
+    "annotArrow": "Fleche",
+    "snapGridOn": "Activer l'accrochage a la grille",
+    "snapGridOff": "Desactiver l'accrochage a la grille"
   },
   "errorBoundary": {
     "title": "Quelque chose s'est mal passé",

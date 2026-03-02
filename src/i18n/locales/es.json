@@ -1025,7 +1025,14 @@
     "paste": "Pegar",
     "fitView": "Ajustar vista",
     "autoLayout": "Auto-diseño",
-    "insertFromPrompt": "Insertar bloques desde prompt…"
+    "insertFromPrompt": "Insertar bloques desde prompt…",
+    "insertAnnotation": "Insertar anotacion",
+    "annotText": "Etiqueta de texto",
+    "annotCallout": "Cuadro de nota",
+    "annotHighlight": "Region resaltada",
+    "annotArrow": "Flecha",
+    "snapGridOn": "Activar ajuste a cuadricula",
+    "snapGridOff": "Desactivar ajuste a cuadricula"
   },
   "errorBoundary": {
     "title": "Algo salió mal",

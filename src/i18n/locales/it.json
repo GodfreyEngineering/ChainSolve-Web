@@ -1025,7 +1025,14 @@
     "paste": "Incolla",
     "fitView": "Adatta alla vista",
     "autoLayout": "Layout automatico",
-    "insertFromPrompt": "Inserisci blocchi da prompt…"
+    "insertFromPrompt": "Inserisci blocchi da prompt…",
+    "insertAnnotation": "Inserisci annotazione",
+    "annotText": "Etichetta di testo",
+    "annotCallout": "Casella di nota",
+    "annotHighlight": "Area evidenziata",
+    "annotArrow": "Freccia",
+    "snapGridOn": "Attiva aggancio alla griglia",
+    "snapGridOff": "Disattiva aggancio alla griglia"
   },
   "errorBoundary": {
     "title": "Qualcosa è andato storto",

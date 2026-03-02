@@ -54,6 +54,11 @@ interface ContextMenuProps {
   onInsertFromPrompt?: (x: number, y: number) => void
   /** E7-2: Alignment helper for multi-selection. */
   onAlignSelection?: (op: AlignOp) => void
+  /** G6-1: Insert annotation at cursor position. */
+  onInsertAnnotation?: (x: number, y: number, annotationType: string) => void
+  /** G6-1: Snap-to-grid toggle in context menu. */
+  snapToGrid?: boolean
+  onToggleSnap?: () => void
 }
 
 const item: CSSProperties = {
@@ -71,6 +76,23 @@ const sep: CSSProperties = {
   height: 1,
   background: 'rgba(255,255,255,0.08)',
   margin: '0.2rem 0',
+}
+
+function SubLabel({ label }: { label: string }) {
+  return (
+    <div
+      style={{
+        padding: '0.25rem 0.9rem 0.1rem',
+        fontSize: '0.7rem',
+        fontWeight: 600,
+        color: 'var(--text-muted)',
+        textTransform: 'uppercase',
+        letterSpacing: '0.04em',
+      }}
+    >
+      {label}
+    </div>
+  )
 }
 
 function MenuItem({
@@ -130,6 +152,9 @@ export function ContextMenu({
   onExplainNode,
   onInsertFromPrompt,
   onAlignSelection,
+  onInsertAnnotation,
+  snapToGrid,
+  onToggleSnap,
 }: ContextMenuProps) {
   const { t } = useTranslation()
 
@@ -433,15 +458,56 @@ export function ContextMenu({
                 onClose()
               }}
             />
+            {onInsertAnnotation && (
+              <>
+                <div style={sep} />
+                <SubLabel label={t('contextMenu.insertAnnotation')} />
+                <MenuItem
+                  icon="A"
+                  label={t('contextMenu.annotText')}
+                  onClick={() => {
+                    onInsertAnnotation(target.x, target.y, 'annotation_text')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="▭"
+                  label={t('contextMenu.annotCallout')}
+                  onClick={() => {
+                    onInsertAnnotation(target.x, target.y, 'annotation_callout')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="◻"
+                  label={t('contextMenu.annotHighlight')}
+                  onClick={() => {
+                    onInsertAnnotation(target.x, target.y, 'annotation_highlight')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="→"
+                  label={t('contextMenu.annotArrow')}
+                  onClick={() => {
+                    onInsertAnnotation(target.x, target.y, 'annotation_arrow')
+                    onClose()
+                  }}
+                />
+              </>
+            )}
             {onPaste && (
-              <MenuItem
-                icon="⎗"
-                label={t('contextMenu.paste')}
-                onClick={() => {
-                  onPaste()
-                  onClose()
-                }}
-              />
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon="⎗"
+                  label={t('contextMenu.paste')}
+                  onClick={() => {
+                    onPaste()
+                    onClose()
+                  }}
+                />
+              </>
             )}
             <div style={sep} />
             <MenuItem
@@ -458,6 +524,16 @@ export function ContextMenu({
                 label={t('contextMenu.autoLayout')}
                 onClick={() => {
                   onAutoLayout()
+                  onClose()
+                }}
+              />
+            )}
+            {onToggleSnap && (
+              <MenuItem
+                icon={snapToGrid ? '⊟' : '⊞'}
+                label={snapToGrid ? t('contextMenu.snapGridOff') : t('contextMenu.snapGridOn')}
+                onClick={() => {
+                  onToggleSnap()
                   onClose()
                 }}
               />

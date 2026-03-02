@@ -1450,6 +1450,22 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     ],
   )
 
+  // Insert annotation at the canvas position where user right-clicked (G6-1)
+  const onInsertAnnotation = useCallback(
+    (screenX: number, screenY: number, annotationType: string) => {
+      const def = BLOCK_REGISTRY.get(annotationType)
+      if (!def) return
+      const position = screenToFlowPosition({ x: screenX, y: screenY })
+      const id = `node_${++nodeIdCounter}`
+      doSaveHistory()
+      setNodes((nds) => [
+        ...nds,
+        { id, type: def.nodeKind, position, data: { ...def.defaultData } } as Node<NodeData>,
+      ])
+    },
+    [screenToFlowPosition, setNodes, doSaveHistory],
+  )
+
   // Add block at the canvas position where user right-clicked
   const onAddBlockAtCursor = useCallback(
     (screenX: number, screenY: number) => {
@@ -1890,6 +1906,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   onExplainNode={onExplainNode}
                   onInsertFromPrompt={onInsertFromPrompt}
                   onAlignSelection={readOnly ? undefined : alignSelection}
+                  onInsertAnnotation={readOnly ? undefined : onInsertAnnotation}
+                  snapToGrid={snapToGrid}
+                  onToggleSnap={readOnly ? undefined : () => setSnapToGrid((v) => !v)}
                 />
               )}
 

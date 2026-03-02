@@ -18,6 +18,7 @@ const UI_ONLY_BLOCKS = new Set([
   'annotation_text',
   'annotation_callout',
   'annotation_highlight',
+  'annotation_arrow',
 ])
 
 function extractRustOpIds(): Set<string> {

@@ -1044,7 +1044,14 @@
     "paste": "Paste",
     "fitView": "Fit view",
     "autoLayout": "Auto-layout",
-    "insertFromPrompt": "Insert blocks from prompt…"
+    "insertFromPrompt": "Insert blocks from prompt…",
+    "insertAnnotation": "Insert annotation",
+    "annotText": "Text label",
+    "annotCallout": "Callout box",
+    "annotHighlight": "Highlight region",
+    "annotArrow": "Arrow",
+    "snapGridOn": "Enable snap to grid",
+    "snapGridOff": "Disable snap to grid"
   },
   "errorBoundary": {
     "title": "Something went wrong",

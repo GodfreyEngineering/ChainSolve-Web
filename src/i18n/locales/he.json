@@ -165,7 +165,14 @@
     "paste": "הדבקה",
     "fitView": "התאמת תצוגה",
     "autoLayout": "פריסה אוטומטית",
-    "insertFromPrompt": "הכנסת בלוקים מ-prompt…"
+    "insertFromPrompt": "הכנסת בלוקים מ-prompt…",
+    "insertAnnotation": "הכנסת הערה",
+    "annotText": "תווית טקסט",
+    "annotCallout": "תיבת הערה",
+    "annotHighlight": "אזור מודגש",
+    "annotArrow": "חץ",
+    "snapGridOn": "הפעלת הצמדה לרשת",
+    "snapGridOff": "כיבוי הצמדה לרשת"
   },
   "errorBoundary": {
     "title": "משהו השתבש",

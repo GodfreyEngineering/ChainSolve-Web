@@ -152,6 +152,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   annotation_callout: 'Callout box for notes and explanations. Does not affect computation.',
   annotation_highlight:
     'Colored highlight region to visually group related blocks. Does not affect computation.',
+  annotation_arrow:
+    'Directional arrow for pointing at or connecting visual elements. Does not affect computation.',
 
   // ── Data inputs (Pro) ─────────────────────────────────────────────────────
   vectorInput: 'Enter a list of numbers directly. Used as input to vector operations and plots.',

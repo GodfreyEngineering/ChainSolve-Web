@@ -153,7 +153,7 @@ export interface NodeData extends Record<string, unknown> {
   /** Whether the group is collapsed — members hidden, proxy handles shown (csGroup nodes only). */
   groupCollapsed?: boolean
   /** Annotation type discriminator (csAnnotation nodes only). */
-  annotationType?: 'text' | 'callout' | 'highlight'
+  annotationType?: 'text' | 'callout' | 'highlight' | 'arrow'
   /** Annotation text content (csAnnotation nodes only). */
   annotationText?: string
   /** Annotation color — hex string (csAnnotation nodes only). */

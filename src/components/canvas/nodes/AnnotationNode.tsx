@@ -1,10 +1,11 @@
 /**
  * AnnotationNode — non-evaluating visual annotations on the canvas (E7-1).
  *
- * Supports three annotation types via `data.annotationType`:
+ * Supports four annotation types via `data.annotationType`:
  *   - text: simple text label
  *   - callout: bordered box with text (like a sticky note)
  *   - highlight: colored translucent region
+ *   - arrow: directional arrow indicator (G6-1)
  *
  * These nodes have no input/output handles and are completely excluded
  * from engine evaluation (filtered in bridge.ts).
@@ -23,6 +24,38 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
   const text = nd.annotationText ?? nd.label ?? ''
   const color = nd.annotationColor ?? DEFAULT_COLOR
   const fontSize = nd.annotationFontSize ?? DEFAULT_FONT_SIZE
+
+  if (annotationType === 'arrow') {
+    return (
+      <div
+        style={{
+          ...arrowStyle,
+          color,
+          textShadow: selected ? `0 0 8px ${color}55` : 'none',
+        }}
+      >
+        <svg width="48" height="24" viewBox="0 0 48 24" fill="none">
+          <line
+            x1="0"
+            y1="12"
+            x2="36"
+            y2="12"
+            stroke={color}
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+          <polyline
+            points="32,4 44,12 32,20"
+            fill="none"
+            stroke={color}
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+    )
+  }
 
   if (annotationType === 'highlight') {
     return (
@@ -115,4 +148,13 @@ const calloutBody: React.CSSProperties = {
   padding: '0.5rem 0.7rem',
   lineHeight: 1.45,
   whiteSpace: 'pre-wrap',
+}
+
+const arrowStyle: React.CSSProperties = {
+  cursor: 'grab',
+  userSelect: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '0.15rem',
 }

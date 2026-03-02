@@ -1025,7 +1025,14 @@
     "paste": "Einfügen",
     "fitView": "Ansicht anpassen",
     "autoLayout": "Auto-Layout",
-    "insertFromPrompt": "Blöcke aus Prompt einfügen…"
+    "insertFromPrompt": "Blöcke aus Prompt einfügen…",
+    "insertAnnotation": "Anmerkung einfugen",
+    "annotText": "Textbeschriftung",
+    "annotCallout": "Hinweisfeld",
+    "annotHighlight": "Hervorhebungsbereich",
+    "annotArrow": "Pfeil",
+    "snapGridOn": "Raster-Einrasten aktivieren",
+    "snapGridOff": "Raster-Einrasten deaktivieren"
   },
   "errorBoundary": {
     "title": "Etwas ist schiefgelaufen",

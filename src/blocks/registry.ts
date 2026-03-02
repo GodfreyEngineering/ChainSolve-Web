@@ -558,6 +558,20 @@ reg({
   },
 })
 
+reg({
+  type: 'annotation_arrow',
+  label: 'Arrow',
+  category: 'annotations',
+  nodeKind: 'csAnnotation',
+  inputs: [],
+  defaultData: {
+    blockType: 'annotation_arrow',
+    label: 'Arrow',
+    annotationType: 'arrow',
+    annotationColor: '#f87171',
+  },
+})
+
 // ── Block palette (ordered for display) ──────────────────────────────────────
 
 export const CATEGORY_ORDER: BlockCategory[] = [
@@ -853,6 +867,7 @@ export const UI_ONLY_BLOCKS: ReadonlySet<string> = new Set([
   'annotation_text',
   'annotation_callout',
   'annotation_highlight',
+  'annotation_arrow',
 ])
 
 /**
