@@ -1491,7 +1491,7 @@ Claude MUST:
   - Remove any “coming soon,” broken buttons, dead menu items.
   - Acceptance: product feels finished.
 
-- [ ] F7-3: Final repo re-org (optional if needed)
+- [x] F7-3: Final repo re-org (optional if needed)
   - If audit reveals major structural confusion, do a final “libraries” separation:
     - src/lib (pure logic)
     - src/services (adapter-facing)
