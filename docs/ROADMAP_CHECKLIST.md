@@ -1611,7 +1611,7 @@ Claude MUST:
 ---
 
 ## G3 — Block system IA: 3 main categories and required subcategories
-- [ ] G3-1: Block taxonomy enforced everywhere (Library, Insert, Search, Docs)
+- [x] G3-1: Block taxonomy enforced everywhere (Library, Insert, Search, Docs)
   - Main categories (exact):
     - Input Blocks
     - Function Blocks
