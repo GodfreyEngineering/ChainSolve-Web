@@ -103,7 +103,7 @@ function makeProgressCb(requestId: number, startMs: number) {
 async function initialize() {
   const t0 = performance.now()
   try {
-    await initWasm(wasmUrl)
+    await initWasm({ module_or_path: wasmUrl })
     const initMs = performance.now() - t0
     const catalog = JSON.parse(get_catalog())
     const constantValues = JSON.parse(get_constant_values()) as Record<string, number>

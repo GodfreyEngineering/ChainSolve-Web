@@ -84,11 +84,11 @@ declare module '@engine-wasm/engine_wasm.js' {
   /**
    * Initialize the WASM module.
    * Must be called before any other exported function.
-   * @param input - URL, Response, BufferSource, or WebAssembly.Module for the .wasm file
+   * @param input - Object with module_or_path key pointing to the .wasm file
    */
-  export default function init(
-    input?: string | URL | Request | Response | BufferSource | WebAssembly.Module,
-  ): Promise<void>
+  export default function init(input?: {
+    module_or_path: string | URL | Request | Response | BufferSource | WebAssembly.Module
+  }): Promise<void>
 }
 
 declare module '@engine-wasm/engine_wasm_bg.wasm?url' {

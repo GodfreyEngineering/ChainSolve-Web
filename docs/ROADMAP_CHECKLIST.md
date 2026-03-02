@@ -1551,7 +1551,7 @@ Claude MUST:
     - Resizing library never throws startup error
     - No performance degradation
 
-- [ ] G0-5: Fix i18next init deprecation warning and wasm-bindgen init warning
+- [x] G0-5: Fix i18next init deprecation warning and wasm-bindgen init warning
   - Update init signature to non-deprecated usage.
   - Address wasm-bindgen warning by switching to the recommended single object init call where applicable. :contentReference[oaicite:9]{index=9}
   - Acceptance: clean boot logs.
