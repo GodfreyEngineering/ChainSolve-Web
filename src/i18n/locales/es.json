@@ -166,7 +166,11 @@
     "retryNow": "Reintentar ahora",
     "backOnline": "Conectado — sincronizando cambios",
     "signInToSave": "Inicia sesión para guardar tu trabajo en la nube",
-    "clickToRename": "Clic para renombrar"
+    "clickToRename": "Clic para renombrar",
+    "autosave": "Auto",
+    "autosaveToggle": "Activar/desactivar guardado automatico",
+    "importFile": "Importar",
+    "templates": "Plantillas"
   },
   "blocks": {
     "categoryData": "Datos",

@@ -173,7 +173,11 @@
     "retryNow": "Retry now",
     "backOnline": "Back online — syncing changes",
     "signInToSave": "Sign in to save your work to the cloud",
-    "clickToRename": "Click to rename"
+    "clickToRename": "Click to rename",
+    "autosave": "Auto",
+    "autosaveToggle": "Toggle autosave",
+    "importFile": "Import",
+    "templates": "Templates"
   },
   "blocks": {
     "categoryData": "Data",

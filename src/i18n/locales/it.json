@@ -166,7 +166,11 @@
     "retryNow": "Riprova ora",
     "backOnline": "Di nuovo online — sincronizzazione in corso",
     "signInToSave": "Accedi per salvare il tuo lavoro nel cloud",
-    "clickToRename": "Clicca per rinominare"
+    "clickToRename": "Clicca per rinominare",
+    "autosave": "Auto",
+    "autosaveToggle": "Attiva/disattiva salvataggio automatico",
+    "importFile": "Importa",
+    "templates": "Modelli"
   },
   "blocks": {
     "categoryData": "Dati",

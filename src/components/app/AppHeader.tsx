@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
+import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BRAND, CONTACT } from '../../lib/brand'
+import { CONTACT } from '../../lib/brand'
 import { useProjectStore } from '../../stores/projectStore'
+import { usePreferencesStore } from '../../stores/preferencesStore'
 import { useSettingsModal } from '../../contexts/SettingsModalContext'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { useTheme } from '../../contexts/ThemeContext'
@@ -50,27 +51,13 @@ const LazyTemplateManagerDialog = lazy(() =>
   import('../canvas/TemplateManagerDialog').then((m) => ({ default: m.TemplateManagerDialog })),
 )
 import { CATEGORY_ORDER, CATEGORY_LABELS } from '../../blocks/registry'
-import { getCurrentUser, signOut } from '../../lib/auth'
-import { removeCurrentSession } from '../../lib/sessionService'
-import { clearReauth } from '../../lib/reauth'
 import { getRecentProjects } from '../../lib/recentProjects'
 import { resetOnboarding } from '../../lib/onboardingState'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { flattenMenusToActions, type MenuDef } from '../../lib/actions'
 import { computeSaveStatusLabel } from '../../lib/saveStatusLabel'
 import type { CanvasAreaHandle } from '../canvas/CanvasArea'
-import type { Plan } from '../../lib/entitlements'
 import type { ThemeMode } from '../../contexts/ThemeContext'
-
-// ── Plan badge colors (matches ProfileSettings) ─────────────────────────────
-
-const PLAN_COLORS: Record<string, string> = {
-  free: '#6b7280',
-  trialing: '#3b82f6',
-  pro: '#22c55e',
-  past_due: '#f59e0b',
-  canceled: '#ef4444',
-}
 
 // ── Props ────────────────────────────────────────────────────────────────────
 
@@ -78,7 +65,6 @@ export interface AppHeaderProps {
   projectId: string | undefined
   projectName: string
   readOnly: boolean
-  plan: Plan
   // Name editing
   nameEditing: boolean
   nameInput: string
@@ -92,7 +78,6 @@ export interface AppHeaderProps {
   onNewProject: () => Promise<void>
   onOpenProject: (projectId: string) => Promise<void>
   onSaveAs: (name: string) => Promise<void>
-  onNavigateBack: (e: React.MouseEvent<HTMLAnchorElement>) => void
   canvasRef: React.RefObject<CanvasAreaHandle | null>
   // Export (W14a.3 + W14b.2 + W14c.1) + Import (W14c.2)
   exportInProgress?: boolean
@@ -147,7 +132,6 @@ export function AppHeader({
   projectId,
   projectName,
   readOnly,
-  plan,
   nameEditing,
   nameInput,
   nameInputRef,
@@ -159,7 +143,6 @@ export function AppHeader({
   onNewProject,
   onOpenProject,
   onSaveAs,
-  onNavigateBack,
   canvasRef,
   exportInProgress,
   onExportPdfProject,
@@ -187,7 +170,6 @@ export function AppHeader({
   const [bugReportOpen, setBugReportOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [whatsNewOpen, setWhatsNewOpen] = useState(false)
-  const [userEmail, setUserEmail] = useState<string | null>(null)
   const [openDialogOpen, setOpenDialogOpen] = useState(false)
   const [saveAsOpen, setSaveAsOpen] = useState(false)
   const [saveAsLoading, setSaveAsLoading] = useState(false)
@@ -202,15 +184,8 @@ export function AppHeader({
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false)
   const [tourOpen, setTourOpen] = useState(false)
   const [wizardOpen, setWizardOpen] = useState(false)
-  const [accountOpen, setAccountOpen] = useState(false)
-  const accountRef = useRef<HTMLDivElement>(null)
 
-  // Fetch user email once for avatar
-  useEffect(() => {
-    getCurrentUser().then((user) => {
-      if (user?.email) setUserEmail(user.email)
-    })
-  }, [])
+  const autosaveEnabled = usePreferencesStore((s) => s.autosaveEnabled)
 
   // Close menus on Escape
   useEffect(() => {
@@ -236,25 +211,9 @@ export function AppHeader({
     }
   }, [openMenu])
 
-  // Close account dropdown on outside click
-  useEffect(() => {
-    if (!accountOpen) return
-    const handler = (e: MouseEvent) => {
-      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
-        setAccountOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [accountOpen])
-
-  const handleSignOut = useCallback(() => {
-    setAccountOpen(false)
-    void removeCurrentSession()
-      .then(() => clearReauth())
-      .then(() => signOut())
-      .then(() => window.location.assign('/login'))
-  }, [])
+  const handleToggleAutosave = useCallback(() => {
+    usePreferencesStore.getState().update({ autosaveEnabled: !autosaveEnabled })
+  }, [autosaveEnabled])
 
   const handleClearCanvas = useCallback(() => {
     if (!canvasRef.current) return
@@ -835,17 +794,6 @@ export function AppHeader({
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
-  // ── User avatar initials ────────────────────────────────────────────────────
-
-  const initials = userEmail
-    ? userEmail
-        .split('@')[0]
-        .split(/[._-]/)
-        .slice(0, 2)
-        .map((p) => p[0]?.toUpperCase() ?? '')
-        .join('')
-    : '?'
-
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
@@ -853,16 +801,6 @@ export function AppHeader({
       <div style={headerStyle}>
         {/* ── Left section ─────────────────────────────────────────────────── */}
         <div style={sectionStyle}>
-          <a
-            href="/app"
-            onClick={onNavigateBack}
-            style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-          >
-            <img src={BRAND.logoWideText} alt="ChainSolve" style={{ height: 22 }} />
-          </a>
-
-          <div style={dividerStyle} />
-
           {/* Project name — click to rename */}
           {projectId && !nameEditing && (
             <span
@@ -940,6 +878,23 @@ export function AppHeader({
               {t('menu.save')}
             </button>
           )}
+
+          {/* Autosave toggle */}
+          {projectId && !readOnly && (
+            <label style={autosaveToggleStyle} title={t('canvas.autosaveToggle')}>
+              <input
+                type="checkbox"
+                checked={autosaveEnabled}
+                onChange={handleToggleAutosave}
+                style={{ margin: 0, accentColor: 'var(--primary)' }}
+              />
+              <span
+                style={{ fontSize: '0.65rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}
+              >
+                {t('canvas.autosave')}
+              </span>
+            </label>
+          )}
         </div>
 
         {/* ── Center section: menus (desktop) / overflow (mobile) ──────── */}
@@ -971,98 +926,32 @@ export function AppHeader({
 
         {/* ── Right section ────────────────────────────────────────────────── */}
         <div style={{ ...sectionStyle, justifyContent: 'flex-end' }}>
-          {/* Plan badge */}
-          <span
-            style={{
-              fontSize: '0.65rem',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: PLAN_COLORS[plan] ?? PLAN_COLORS.free,
-              padding: '0.15rem 0.4rem',
-              borderRadius: 'var(--radius-sm)',
-              border: `1px solid ${PLAN_COLORS[plan] ?? PLAN_COLORS.free}`,
-              opacity: 0.8,
-            }}
-          >
-            {t(`plans.${plan}`)}
-          </span>
-
-          {/* Settings gear → opens Preferences tab */}
-          <button
-            onClick={() => openSettings('preferences')}
-            title={t('settings.preferences', 'Preferences')}
-            aria-label={t('settings.preferences', 'Preferences')}
-            style={iconButtonStyle}
-          >
-            &#x2699;
-          </button>
-
-          {/* User avatar + account dropdown */}
-          <div ref={accountRef} style={{ position: 'relative' }}>
+          {/* Import project file */}
+          {onImportChainsolveJson && !readOnly && (
             <button
-              onClick={() => setAccountOpen((v) => !v)}
-              title={userEmail ?? t('settings.account', 'Account')}
-              aria-label={t('settings.account', 'Account')}
-              aria-haspopup="true"
-              aria-expanded={accountOpen}
-              style={avatarBtnStyle}
+              onClick={() => {
+                setOpenMenu(null)
+                onImportChainsolveJson()
+              }}
+              disabled={!!exportInProgress}
+              style={rightActionBtnStyle}
+              title={t('canvas.importFile')}
             >
-              {initials}
+              {t('canvas.importFile')}
             </button>
+          )}
 
-            {accountOpen && (
-              <div style={accountDropdownStyle}>
-                {/* Email + plan */}
-                <div style={accountHeaderStyle}>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>{userEmail ?? ''}</span>
-                  <span
-                    style={{
-                      fontSize: '0.6rem',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.04em',
-                      color: PLAN_COLORS[plan] ?? PLAN_COLORS.free,
-                    }}
-                  >
-                    {t(`plans.${plan}`)}
-                  </span>
-                </div>
-                <div style={accountSepStyle} />
-                <button
-                  style={accountItemStyle}
-                  onClick={() => {
-                    setAccountOpen(false)
-                    openSettings('profile')
-                  }}
-                >
-                  {t('settings.profile', 'Profile')}
-                </button>
-                <button
-                  style={accountItemStyle}
-                  onClick={() => {
-                    setAccountOpen(false)
-                    openSettings('billing')
-                  }}
-                >
-                  {t('settings.billing', 'Billing')}
-                </button>
-                <button
-                  style={accountItemStyle}
-                  onClick={() => {
-                    setAccountOpen(false)
-                    openSettings('preferences')
-                  }}
-                >
-                  {t('settings.preferences', 'Preferences')}
-                </button>
-                <div style={accountSepStyle} />
-                <button style={accountItemStyle} onClick={handleSignOut}>
-                  {t('nav.signOut')}
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Templates / groups */}
+          <button
+            onClick={() => {
+              setTemplateManagerOpen(true)
+              setOpenMenu(null)
+            }}
+            style={rightActionBtnStyle}
+            title={t('canvas.templates')}
+          >
+            {t('canvas.templates')}
+          </button>
         </div>
       </div>
 
@@ -1189,13 +1078,6 @@ const menuBarStyle: React.CSSProperties = {
   flexShrink: 0,
 }
 
-const dividerStyle: React.CSSProperties = {
-  width: 1,
-  height: 16,
-  background: 'var(--border)',
-  flexShrink: 0,
-}
-
 function projectNameStyle(readOnly: boolean): React.CSSProperties {
   return {
     fontWeight: 700,
@@ -1240,77 +1122,25 @@ function saveButtonStyle(dirty: boolean): React.CSSProperties {
   }
 }
 
-const iconButtonStyle: React.CSSProperties = {
-  background: 'transparent',
-  border: 'none',
-  cursor: 'pointer',
-  color: 'var(--text-muted)',
-  fontSize: '0.9rem',
-  padding: '0.15rem 0.3rem',
-  borderRadius: 'var(--radius-sm)',
-  fontFamily: 'inherit',
-  lineHeight: 1,
-}
-
-const avatarBtnStyle: React.CSSProperties = {
-  width: 28,
-  height: 28,
-  borderRadius: '50%',
-  background: 'var(--primary-dim)',
-  color: 'var(--primary)',
+const autosaveToggleStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '0.65rem',
-  fontWeight: 700,
-  letterSpacing: '0.02em',
-  flexShrink: 0,
+  gap: '0.25rem',
+  cursor: 'pointer',
   userSelect: 'none',
-  border: '1px solid transparent',
-  cursor: 'pointer',
-  fontFamily: 'inherit',
-  padding: 0,
 }
 
-const accountDropdownStyle: React.CSSProperties = {
-  position: 'absolute',
-  top: '100%',
-  right: 0,
-  marginTop: 6,
-  minWidth: 200,
-  background: 'var(--card-bg)',
+const rightActionBtnStyle: React.CSSProperties = {
+  padding: '0.15rem 0.5rem',
+  borderRadius: 'var(--radius-sm)',
   border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)',
-  padding: '0.3rem 0',
-  boxShadow: 'var(--shadow-dropdown)',
-  zIndex: 100,
-  animation: 'cs-fade-in 0.1s ease',
-}
-
-const accountHeaderStyle: React.CSSProperties = {
-  padding: '0.6rem 0.75rem 0.5rem',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.15rem',
-}
-
-const accountSepStyle: React.CSSProperties = {
-  height: 1,
-  background: 'var(--border)',
-  margin: '0.2rem 0.5rem',
-}
-
-const accountItemStyle: React.CSSProperties = {
-  display: 'block',
-  width: '100%',
-  padding: '0.4rem 0.75rem',
-  fontSize: '0.8rem',
-  color: 'var(--text)',
   background: 'transparent',
-  border: 'none',
-  textAlign: 'left',
+  color: 'var(--text-muted)',
   cursor: 'pointer',
+  fontSize: '0.68rem',
+  fontWeight: 600,
   fontFamily: 'inherit',
+  whiteSpace: 'nowrap',
 }
 
 const mobileMenuBarStyle: React.CSSProperties = {

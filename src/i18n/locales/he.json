@@ -134,7 +134,11 @@
   },
   "canvas": {
     "signInToSave": "התחבר כדי לשמור את העבודה שלך בענן",
-    "clickToRename": "לחץ לשינוי שם"
+    "clickToRename": "לחץ לשינוי שם",
+    "autosave": "אוטו",
+    "autosaveToggle": "הפעל/כבה שמירה אוטומטית",
+    "importFile": "ייבוא",
+    "templates": "תבניות"
   },
   "contextMenu": {
     "inspect": "בדיקה",

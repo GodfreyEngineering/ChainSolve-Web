@@ -1718,7 +1718,7 @@ Claude MUST:
     - onboarding checklist
   - Acceptance: premium landing.
 
-- [ ] G7-3: Project header under main header when project open
+- [x] G7-3: Project header under main header when project open
   - File/Edit/View/Insert/Tools/Help
   - Right side: import file, imported files directory + editor
   - Groups button (user-profile stored groups)

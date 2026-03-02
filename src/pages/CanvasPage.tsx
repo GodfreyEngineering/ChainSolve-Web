@@ -493,17 +493,6 @@ export default function CanvasPage() {
   }, [projectId, readOnly, doSave])
 
   // ── Route-leave: save before navigating back to /app ──────────────────────
-  const handleBackToProjects = useCallback(
-    async (e: React.MouseEvent<HTMLAnchorElement>) => {
-      e.preventDefault()
-      if (useProjectStore.getState().isDirty && projectId) {
-        await doSave()
-      }
-      navigate('/app')
-    },
-    [projectId, doSave, navigate],
-  )
-
   // ── Inline project name editing ────────────────────────────────────────────
   const startNameEdit = useCallback(() => {
     setNameInput(useProjectStore.getState().projectName)
@@ -1469,7 +1458,6 @@ export default function CanvasPage() {
         projectId={projectId}
         projectName={projectName}
         readOnly={readOnly}
-        plan={plan}
         nameEditing={nameEditing}
         nameInput={nameInput}
         nameInputRef={nameInputRef}
@@ -1481,7 +1469,6 @@ export default function CanvasPage() {
         onNewProject={handleNewProject}
         onOpenProject={handleOpenProject}
         onSaveAs={handleSaveAs}
-        onNavigateBack={handleBackToProjects}
         canvasRef={canvasRef}
         exportInProgress={exportInProgress}
         onExportPdfProject={gatedExportPdf}

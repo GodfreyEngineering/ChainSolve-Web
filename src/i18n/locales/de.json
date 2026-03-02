@@ -166,7 +166,11 @@
     "retryNow": "Jetzt erneut versuchen",
     "backOnline": "Wieder online — Änderungen werden synchronisiert",
     "signInToSave": "Melden Sie sich an, um Ihre Arbeit in der Cloud zu speichern",
-    "clickToRename": "Klicken zum Umbenennen"
+    "clickToRename": "Klicken zum Umbenennen",
+    "autosave": "Auto",
+    "autosaveToggle": "Automatisches Speichern umschalten",
+    "importFile": "Importieren",
+    "templates": "Vorlagen"
   },
   "blocks": {
     "categoryData": "Daten",
