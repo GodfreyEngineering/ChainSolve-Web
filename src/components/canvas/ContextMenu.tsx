@@ -59,6 +59,8 @@ interface ContextMenuProps {
   /** G6-1: Snap-to-grid toggle in context menu. */
   snapToGrid?: boolean
   onToggleSnap?: () => void
+  /** G6-2: Select entire connected chain from a node. */
+  onSelectChain?: (nodeId: string) => void
 }
 
 const item: CSSProperties = {
@@ -155,6 +157,7 @@ export function ContextMenu({
   onInsertAnnotation,
   snapToGrid,
   onToggleSnap,
+  onSelectChain,
 }: ContextMenuProps) {
   const { t } = useTranslation()
 
@@ -254,6 +257,16 @@ export function ContextMenu({
                   }}
                 />
               )}
+            {onSelectChain && (
+              <MenuItem
+                icon="⛓"
+                label={t('contextMenu.selectChain')}
+                onClick={() => {
+                  onSelectChain(target.nodeId)
+                  onClose()
+                }}
+              />
+            )}
             {onExplainNode && (
               <>
                 <div style={sep} />

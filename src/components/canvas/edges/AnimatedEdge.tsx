@@ -39,10 +39,12 @@ function AnimatedEdgeInner({
   markerEnd,
   style,
   source,
+  selected,
 }: EdgeProps) {
   const computed = useComputed()
   const { edgesAnimated, edgeBadgesEnabled } = useCanvasSettings()
   const sourceValue = computed.get(source)
+  const stroke = edgeStroke(sourceValue, edgesAnimated)
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -55,10 +57,17 @@ function AnimatedEdgeInner({
 
   return (
     <>
+      {/* Invisible wider hit area for easier clicking (G6-2) */}
+      <path d={edgePath} fill="none" stroke="transparent" strokeWidth={16} />
       <BaseEdge
         path={edgePath}
         markerEnd={markerEnd}
-        style={{ ...style, stroke: edgeStroke(sourceValue, edgesAnimated) }}
+        style={{
+          ...style,
+          stroke: selected ? 'var(--primary)' : stroke,
+          strokeWidth: selected ? 3 : (style?.strokeWidth ?? 1.5),
+          filter: selected ? `drop-shadow(0 0 4px ${stroke})` : undefined,
+        }}
       />
       {edgeBadgesEnabled && sourceValue !== undefined && (
         <EdgeLabelRenderer>

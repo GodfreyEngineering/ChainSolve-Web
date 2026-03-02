@@ -1005,6 +1005,7 @@
     "copyValue": "Copier la valeur",
     "jumpToSource": "Aller à la source",
     "explainNode": "Expliquer ce noeud",
+    "selectChain": "Selectionner la chaine",
     "deleteNode": "Supprimer le noeud",
     "expand": "Développer",
     "collapse": "Réduire",

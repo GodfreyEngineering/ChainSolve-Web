@@ -1050,6 +1050,31 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [setNodes, doSaveHistory],
   )
 
+  // G6-2: Select all nodes and edges in the connected component of a given node
+  const selectChain = useCallback(
+    (seedId: string) => {
+      const visited = new Set<string>()
+      const queue = [seedId]
+      while (queue.length > 0) {
+        const id = queue.pop()!
+        if (visited.has(id)) continue
+        visited.add(id)
+        for (const e of edges) {
+          if (e.source === id && !visited.has(e.target)) queue.push(e.target)
+          if (e.target === id && !visited.has(e.source)) queue.push(e.source)
+        }
+      }
+      setNodes((nds) => nds.map((n) => ({ ...n, selected: visited.has(n.id) })))
+      setEdges((eds) =>
+        eds.map((e) => ({
+          ...e,
+          selected: visited.has(e.source) && visited.has(e.target),
+        })),
+      )
+    },
+    [edges, setNodes, setEdges],
+  )
+
   const deleteSelected = useCallback(() => {
     doSaveHistory()
     // Delete selected edges
@@ -1909,6 +1934,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   onInsertAnnotation={readOnly ? undefined : onInsertAnnotation}
                   snapToGrid={snapToGrid}
                   onToggleSnap={readOnly ? undefined : () => setSnapToGrid((v) => !v)}
+                  onSelectChain={readOnly ? undefined : selectChain}
                 />
               )}
 

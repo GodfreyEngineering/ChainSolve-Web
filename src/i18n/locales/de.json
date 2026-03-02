@@ -1005,6 +1005,7 @@
     "copyValue": "Wert kopieren",
     "jumpToSource": "Zur Quelle springen",
     "explainNode": "Diesen Knoten erklären",
+    "selectChain": "Kette auswahlen",
     "deleteNode": "Knoten löschen",
     "expand": "Aufklappen",
     "collapse": "Zuklappen",

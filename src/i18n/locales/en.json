@@ -1024,6 +1024,7 @@
     "copyValue": "Copy value",
     "jumpToSource": "Jump to source",
     "explainNode": "Explain this node",
+    "selectChain": "Select chain",
     "deleteNode": "Delete node",
     "expand": "Expand",
     "collapse": "Collapse",

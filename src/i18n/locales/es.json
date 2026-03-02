@@ -1005,6 +1005,7 @@
     "copyValue": "Copiar valor",
     "jumpToSource": "Ir al origen",
     "explainNode": "Explicar este nodo",
+    "selectChain": "Seleccionar cadena",
     "deleteNode": "Eliminar nodo",
     "expand": "Expandir",
     "collapse": "Contraer",
