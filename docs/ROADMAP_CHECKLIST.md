@@ -1096,7 +1096,7 @@ Claude MUST:
     - disable factor
   - Acceptance: user can enable 2FA, re-login requires it.
 
-- [ ] E2-5: Device sessions + remember-me rules
+- [x] E2-5: Device sessions + remember-me rules
   - Show active sessions list (device name, last active, revoke).
   - “Remember me” affects session persistence policy client-side.
   - Acceptance: user can revoke sessions and sees clear device list.
