@@ -1436,7 +1436,7 @@ Claude MUST:
   - Ensure tables with RLS enabled have explicit policies (or explicit deny-all).
   - Acceptance: Supabase advisor warnings reduced/cleared and policies are clear.
 
-- [ ] F4-3: CSP policy + enforcement cleanup
+- [x] F4-3: CSP policy + enforcement cleanup
   - Ensure CSP is:
     - consistent in headers and documented
     - no third-party script injections without explicit allowlist decision
