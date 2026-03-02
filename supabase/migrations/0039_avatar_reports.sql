@@ -7,7 +7,7 @@
 
 -- ── Table ────────────────────────────────────────────────────────────────────
 
-CREATE TABLE public.avatar_reports (
+CREATE TABLE IF NOT EXISTS public.avatar_reports (
   id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   reporter_id uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   target_id   uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -20,7 +20,7 @@ CREATE TABLE public.avatar_reports (
 );
 
 -- One pending report per reporter/target pair (prevent spam).
-CREATE UNIQUE INDEX avatar_reports_pending_uniq
+CREATE UNIQUE INDEX IF NOT EXISTS avatar_reports_pending_uniq
   ON public.avatar_reports (reporter_id, target_id)
   WHERE status = 'pending';
 
@@ -29,18 +29,21 @@ ALTER TABLE public.avatar_reports ENABLE ROW LEVEL SECURITY;
 -- ── RLS policies ─────────────────────────────────────────────────────────────
 
 -- Any authenticated user can create a report.
+DROP POLICY IF EXISTS avatar_reports_insert ON public.avatar_reports;
 CREATE POLICY avatar_reports_insert ON public.avatar_reports
   FOR INSERT
   TO authenticated
   WITH CHECK (reporter_id = (SELECT auth.uid()));
 
 -- Users can see their own reports.
+DROP POLICY IF EXISTS avatar_reports_own_select ON public.avatar_reports;
 CREATE POLICY avatar_reports_own_select ON public.avatar_reports
   FOR SELECT
   TO authenticated
   USING (reporter_id = (SELECT auth.uid()));
 
 -- Moderators can see all reports.
+DROP POLICY IF EXISTS avatar_reports_mod_select ON public.avatar_reports;
 CREATE POLICY avatar_reports_mod_select ON public.avatar_reports
   FOR SELECT
   TO authenticated
@@ -52,6 +55,7 @@ CREATE POLICY avatar_reports_mod_select ON public.avatar_reports
   );
 
 -- Moderators can update reports (resolve/dismiss).
+DROP POLICY IF EXISTS avatar_reports_mod_update ON public.avatar_reports;
 CREATE POLICY avatar_reports_mod_update ON public.avatar_reports
   FOR UPDATE
   TO authenticated
@@ -72,6 +76,7 @@ CREATE POLICY avatar_reports_mod_update ON public.avatar_reports
 -- This leverages the existing profile update mechanism — moderators already
 -- have their own profile update path. We add a specific policy for clearing
 -- another user's avatar_url.
+DROP POLICY IF EXISTS profiles_mod_clear_avatar ON public.profiles;
 CREATE POLICY profiles_mod_clear_avatar ON public.profiles
   FOR UPDATE
   TO authenticated

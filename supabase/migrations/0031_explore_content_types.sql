@@ -32,14 +32,17 @@ CREATE TABLE IF NOT EXISTS public.marketplace_likes (
 ALTER TABLE public.marketplace_likes ENABLE ROW LEVEL SECURITY;
 
 -- Users can see their own likes
+DROP POLICY IF EXISTS "mkt_likes_user_select" ON public.marketplace_likes;
 CREATE POLICY "mkt_likes_user_select" ON public.marketplace_likes
   FOR SELECT USING ((select auth.uid()) = user_id);
 
 -- Users can insert their own likes
+DROP POLICY IF EXISTS "mkt_likes_user_insert" ON public.marketplace_likes;
 CREATE POLICY "mkt_likes_user_insert" ON public.marketplace_likes
   FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
 
 -- Users can delete their own likes
+DROP POLICY IF EXISTS "mkt_likes_user_delete" ON public.marketplace_likes;
 CREATE POLICY "mkt_likes_user_delete" ON public.marketplace_likes
   FOR DELETE USING ((select auth.uid()) = user_id);
 

@@ -208,15 +208,46 @@ npm run test:e2e:smoke      # smoke suite
 
 ## 6. Supabase Migration Conventions
 
+### File naming & ordering
+
 - Files are numbered sequentially: `NNNN_description.sql`
-- Migrations are **append-only** — never edit or delete existing files
-- Use `IF NOT EXISTS` / `IF EXISTS` guards for idempotency where possible
-- Enable RLS immediately: `ALTER TABLE t ENABLE ROW LEVEL SECURITY`
+- Migrations are **append-only** — never edit or delete already-deployed files
+  (pre-deploy idempotency fixes are acceptable during development)
+
+### Idempotency — every statement must be safe to re-run
+
+| Statement | Required guard |
+|-----------|---------------|
+| `CREATE TABLE` | `IF NOT EXISTS` |
+| `CREATE INDEX` / `CREATE UNIQUE INDEX` | `IF NOT EXISTS` |
+| `CREATE FUNCTION` | `CREATE OR REPLACE FUNCTION` |
+| `CREATE TRIGGER` | `DROP TRIGGER IF EXISTS ... ;` before `CREATE TRIGGER` |
+| `CREATE POLICY` | `DROP POLICY IF EXISTS ... ;` before `CREATE POLICY` |
+| `ALTER TABLE ADD COLUMN` | `IF NOT EXISTS` |
+| `DROP TABLE / INDEX / COLUMN` | `IF EXISTS` |
+
+### RLS
+
+- Enable RLS immediately: `ALTER TABLE t ENABLE ROW LEVEL SECURITY;`
 - RLS policies use `(select auth.uid())` (not `auth.uid()`) to avoid
   re-evaluation per row — see [ADR-0004](DECISIONS/ADR-0004-supabase-rls.md)
-- Add a `NOTIFY pgrst, 'reload schema'` at the end of migrations that add
+
+### Schema safety
+
+- Always qualify tables with `public.` (e.g., `public.profiles`)
+- `REFERENCES auth.users(id)` for FKs is a **supported** Supabase operation
+- Do **not** create tables, functions, or triggers inside `auth`, `storage`,
+  or `realtime` schemas — only reference them via supported operations
+- Functions must include `SET search_path = public` to avoid search-path
+  injection (see migration 0037 for the canonical fix pattern)
+
+### Boilerplate
+
+- Wrap multi-statement migrations in `BEGIN; ... COMMIT;`
+- Add `NOTIFY pgrst, 'reload schema';` at the end of migrations that add
   tables, columns, or functions that PostgREST needs to expose
 - Add indexes for all foreign keys (Supabase advisor requirement)
+- Add `COMMENT ON TABLE / COLUMN` for non-obvious fields
 
 ---
 
