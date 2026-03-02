@@ -1536,7 +1536,7 @@ Claude MUST:
   - Ensure any Settings/Account window that uses navigation hooks is inside Router context.
   - Acceptance: Settings and Preferences open reliably.
 
-- [ ] G0-3: Fix CSP noise:
+- [x] G0-3: Fix CSP noise:
   - Cloudflare Insights beacon blocked: decide and implement official resolution:
     - Either disable insights injection for app/login routes, or update policy explicitly and document it. Cloudflare beacon loads from static.cloudflareinsights.com and requires CSP allowlist if used. :contentReference[oaicite:6]{index=6}
   - Fix inline event handler CSP violations:

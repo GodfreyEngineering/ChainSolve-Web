@@ -76,11 +76,16 @@ function showBootError(message: string) {
     '</p>',
     '<p style="opacity:0.4;font-size:0.75rem;margin-top:1rem">',
     'Check browser DevTools (F12 \u2192 Console) for details.</p>',
-    '<button onclick="location.reload()" style="margin-top:1.5rem;padding:0.5rem 1.25rem;',
+    // G0-3: Use id instead of inline onclick to comply with CSP script-src
+    // (inline event handlers are blocked by CSP when unsafe-inline is absent).
+    '<button id="cs-boot-reload" style="margin-top:1.5rem;padding:0.5rem 1.25rem;',
     'border-radius:8px;border:none;background:#646cff;color:#fff;font-weight:600;cursor:pointer">',
     'Reload page</button>',
     '</div></div>',
   ].join('')
+
+  // Attach event listener via addEventListener (CSP-compliant).
+  document.getElementById('cs-boot-reload')?.addEventListener('click', () => location.reload())
 }
 
 window.addEventListener('error', (e) => showBootError(e.message))

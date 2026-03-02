@@ -19,10 +19,13 @@
 
 # ── Everything else (HTML, SPA routes) — always revalidate ───────────────────
 #
-# NOTE: Cloudflare Web Analytics beacon is INTENTIONALLY NOT allowlisted.
-# If "Web Analytics" is enabled in the Cloudflare dashboard, the injected
-# beacon.min.js will be blocked by CSP and produce console errors.
-# Resolution: disable "Web Analytics" in Cloudflare dashboard → see docs/SECURITY.md §5.
+# CLOUDFLARE WEB ANALYTICS — MUST BE DISABLED (G0-3 resolution).
+# The beacon (static.cloudflareinsights.com/beacon.min.js) is NOT
+# allowlisted in script-src. If "Web Analytics" is enabled in the
+# Cloudflare dashboard, the injected script is blocked by CSP.
+# Official resolution: disable "Web Analytics" in Cloudflare Pages
+# dashboard (Speed → Web Analytics → OFF). See docs/SECURITY.md §5
+# and docs/ANALYTICS_STRATEGY.md for rationale.
 /*
   Cache-Control: public, max-age=0, must-revalidate
   X-Frame-Options: DENY

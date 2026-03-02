@@ -294,6 +294,11 @@ for the full CSP rationale.
 Until then: **do not enable Cloudflare Web Analytics in the Cloudflare dashboard**
 unless the CSP is updated simultaneously.
 
+> **G0-3 resolution (Phase G):** This decision is final. The beacon remains
+> blocked. Cloudflare Web Analytics must be disabled in the Pages dashboard
+> (Speed -> Web Analytics -> OFF). Any CSP console noise from the beacon
+> indicates the dashboard setting was re-enabled and must be turned off.
+
 ### Troubleshooting: CSP console errors for beacon.min.js
 
 If you see console errors like:
