@@ -2021,7 +2021,7 @@ Claude MUST:
   - no cheap-looking UI
   - Acceptance: marketing-ready.
 
-- [ ] I6-2: SEO optimized for other countries
+- [x] I6-2: SEO optimized for other countries
   - international metadata strategy
   - localized docs where possible
   - Acceptance: good global SEO structure.
