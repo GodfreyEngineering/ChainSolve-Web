@@ -1,9 +1,74 @@
 /**
- * sessionService.test.ts — Unit tests for device session tracking (E2-5).
+ * sessionService.test.ts — Unit tests for device session tracking (E2-5)
+ * and single-session enforcement (H9-1).
  */
 
-import { describe, it, expect } from 'vitest'
-import { parseDeviceLabel } from './sessionService'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+// ── Supabase mock (hoisted so vi.mock factory can reference them) ────────────
+
+const {
+  mockDelete,
+  mockDeleteEq,
+  mockInsert,
+  mockInsertSelect,
+  mockInsertSelectSingle,
+  mockSelectEq,
+  mockSelectEqMaybeSingle,
+  mockUpdateEq,
+} = vi.hoisted(() => ({
+  mockDelete: vi.fn(),
+  mockDeleteEq: vi.fn(),
+  mockInsert: vi.fn(),
+  mockInsertSelect: vi.fn(),
+  mockInsertSelectSingle: vi.fn(),
+  mockSelectEq: vi.fn(),
+  mockSelectEqMaybeSingle: vi.fn(),
+  mockUpdateEq: vi.fn(),
+}))
+
+vi.mock('./supabase', () => {
+  mockDelete.mockReturnValue({ eq: mockDeleteEq })
+  mockDeleteEq.mockResolvedValue({ error: null })
+  mockInsertSelectSingle.mockResolvedValue({ data: { id: 'new-sess-id' }, error: null })
+  mockInsertSelect.mockReturnValue({ single: mockInsertSelectSingle })
+  mockInsert.mockReturnValue({ select: mockInsertSelect })
+  mockSelectEqMaybeSingle.mockResolvedValue({ data: { id: 'sess-1' }, error: null })
+  mockSelectEq.mockReturnValue({ maybeSingle: mockSelectEqMaybeSingle })
+  mockUpdateEq.mockResolvedValue({ error: null })
+
+  return {
+    supabase: {
+      from: vi.fn().mockReturnValue({
+        delete: mockDelete,
+        insert: mockInsert,
+        select: vi.fn().mockReturnValue({ eq: mockSelectEq }),
+        update: vi.fn().mockReturnValue({ eq: mockUpdateEq }),
+      }),
+    },
+  }
+})
+
+import {
+  parseDeviceLabel,
+  getCurrentSessionId,
+  enforceAndRegisterSession,
+  isSessionValid,
+  SESSION_CHECK_INTERVAL_MS,
+} from './sessionService'
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  localStorage.clear()
+  // Re-set mock chain defaults
+  mockDelete.mockReturnValue({ eq: mockDeleteEq })
+  mockDeleteEq.mockResolvedValue({ error: null })
+  mockInsertSelectSingle.mockResolvedValue({ data: { id: 'new-sess-id' }, error: null })
+  mockInsertSelect.mockReturnValue({ single: mockInsertSelectSingle })
+  mockInsert.mockReturnValue({ select: mockInsertSelect })
+  mockSelectEqMaybeSingle.mockResolvedValue({ data: { id: 'sess-1' }, error: null })
+  mockSelectEq.mockReturnValue({ maybeSingle: mockSelectEqMaybeSingle })
+})
 
 describe('parseDeviceLabel', () => {
   it('detects Chrome on Windows', () => {
@@ -54,5 +119,74 @@ describe('parseDeviceLabel', () => {
 
   it('returns Browser for unknown user agent', () => {
     expect(parseDeviceLabel('SomeBot/1.0')).toBe('Browser')
+  })
+})
+
+// ── H9-1: SESSION_CHECK_INTERVAL_MS ──────────────────────────────────────────
+
+describe('SESSION_CHECK_INTERVAL_MS', () => {
+  it('is 60 seconds', () => {
+    expect(SESSION_CHECK_INTERVAL_MS).toBe(60_000)
+  })
+})
+
+// ── H9-1: getCurrentSessionId ────────────────────────────────────────────────
+
+describe('getCurrentSessionId', () => {
+  it('returns null when no session stored', () => {
+    expect(getCurrentSessionId()).toBeNull()
+  })
+
+  it('returns stored session ID', () => {
+    localStorage.setItem('cs:session_id', 'test-id')
+    expect(getCurrentSessionId()).toBe('test-id')
+  })
+})
+
+// ── H9-1: enforceAndRegisterSession ──────────────────────────────────────────
+
+describe('enforceAndRegisterSession', () => {
+  it('deletes all existing sessions then registers a new one', async () => {
+    const id = await enforceAndRegisterSession('user-1')
+    expect(id).toBe('new-sess-id')
+    // Should have deleted user's sessions first
+    expect(mockDeleteEq).toHaveBeenCalledWith('user_id', 'user-1')
+    // Should have stored the session ID locally
+    expect(localStorage.getItem('cs:session_id')).toBe('new-sess-id')
+  })
+
+  it('returns null when insert fails', async () => {
+    mockInsertSelectSingle.mockResolvedValueOnce({ data: null, error: { message: 'fail' } })
+    const id = await enforceAndRegisterSession('user-1')
+    expect(id).toBeNull()
+  })
+})
+
+// ── H9-1: isSessionValid ────────────────────────────────────────────────────
+
+describe('isSessionValid', () => {
+  it('returns true when no session ID is stored (unauthenticated)', async () => {
+    expect(await isSessionValid()).toBe(true)
+  })
+
+  it('returns true when session record exists in database', async () => {
+    localStorage.setItem('cs:session_id', 'sess-1')
+    mockSelectEqMaybeSingle.mockResolvedValueOnce({ data: { id: 'sess-1' }, error: null })
+    expect(await isSessionValid()).toBe(true)
+  })
+
+  it('returns false when session record has been deleted (revoked)', async () => {
+    localStorage.setItem('cs:session_id', 'sess-1')
+    mockSelectEqMaybeSingle.mockResolvedValueOnce({ data: null, error: null })
+    expect(await isSessionValid()).toBe(false)
+  })
+
+  it('returns true on network error to avoid false lockouts', async () => {
+    localStorage.setItem('cs:session_id', 'sess-1')
+    mockSelectEqMaybeSingle.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'network error' },
+    })
+    expect(await isSessionValid()).toBe(true)
   })
 })

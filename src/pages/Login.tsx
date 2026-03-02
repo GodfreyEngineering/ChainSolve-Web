@@ -19,7 +19,7 @@ import {
 import { BRAND } from '../lib/brand'
 import TurnstileWidget from '../components/ui/TurnstileWidget'
 import { isTurnstileEnabled } from '../lib/turnstile'
-import { registerSession } from '../lib/sessionService'
+import { enforceAndRegisterSession } from '../lib/sessionService'
 import { getRememberMe, setRememberMe } from '../lib/rememberMe'
 
 export type AuthMode = 'login' | 'signup' | 'reset'
@@ -114,7 +114,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
           return
         }
         // Email confirmation disabled (local dev) — session exists, go straight in.
-        if (session?.user) await registerSession(session.user.id)
+        if (session?.user) await enforceAndRegisterSession(session.user.id)
         navigate('/app')
       } else if (mode === 'reset') {
         const { error: resetErr } = await resetPasswordForEmail(email, token)
@@ -124,9 +124,9 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
         const { error: signInErr } = await signInWithPassword(email, password, token)
         if (signInErr) throw signInErr
         setRememberMe(rememberMe)
-        // Register device session (E2-5)
+        // H9-1: Enforce single session — revoke all other sessions, then register this one.
         const session = await getSession()
-        if (session?.user) await registerSession(session.user.id)
+        if (session?.user) await enforceAndRegisterSession(session.user.id)
         navigate('/app')
       }
     } catch (err: unknown) {

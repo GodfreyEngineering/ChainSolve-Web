@@ -1,8 +1,13 @@
 /**
- * sessionService.ts — Device session tracking (E2-5).
+ * sessionService.ts — Device session tracking (E2-5) + single-session enforcement (H9-1).
  *
  * Tracks active browser sessions in a `user_sessions` table so users
  * can view and revoke them from Security settings.
+ *
+ * H9-1: Single-session enforcement — when a user logs in on a new device,
+ * all other sessions are revoked automatically. A periodic check detects
+ * when the current session has been revoked (e.g. by another login) and
+ * triggers a sign-out with clear messaging.
  */
 
 import { supabase } from './supabase'
@@ -108,4 +113,43 @@ export async function removeCurrentSession(): Promise<void> {
   if (!sessionId) return
   await supabase.from('user_sessions').delete().eq('id', sessionId)
   localStorage.removeItem(SESSION_ID_KEY)
+}
+
+// ── H9-1: Single-session enforcement ─────────────────────────────────────────
+
+/** How often (ms) to check if the current session is still valid. */
+export const SESSION_CHECK_INTERVAL_MS = 60_000
+
+/**
+ * Revoke all existing sessions for the user, then register a new one.
+ * Called during login to enforce the single-session policy.
+ * Returns the new session ID.
+ */
+export async function enforceAndRegisterSession(userId: string): Promise<string | null> {
+  // Delete all existing sessions for this user (across all devices)
+  await supabase.from('user_sessions').delete().eq('user_id', userId)
+  // Register the new session for this device
+  return registerSession(userId)
+}
+
+/**
+ * Check whether the current session record still exists in the database.
+ * Returns `true` if the session is still valid, `false` if it has been
+ * revoked (e.g. by another device logging in).
+ *
+ * Returns `true` when no session ID is stored (unauthenticated) to avoid
+ * false positives before login.
+ */
+export async function isSessionValid(): Promise<boolean> {
+  const sessionId = getCurrentSessionId()
+  if (!sessionId) return true // No session to validate
+
+  const { data, error } = await supabase
+    .from('user_sessions')
+    .select('id')
+    .eq('id', sessionId)
+    .maybeSingle()
+
+  if (error) return true // Network error — assume valid to avoid false lockouts
+  return data !== null
 }

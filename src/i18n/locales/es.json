@@ -47,6 +47,11 @@
     "support": "Soporte",
     "generalEnquiries": "Consultas generales"
   },
+  "session": {
+    "revokedTitle": "Sesión finalizada",
+    "revokedMessage": "Se ha cerrado tu sesión porque tu cuenta inició sesión en otro dispositivo. Inicia sesión de nuevo para continuar.",
+    "signInAgain": "Iniciar sesión de nuevo"
+  },
   "auth": {
     "login": "Iniciar sesión",
     "signup": "Crear cuenta",

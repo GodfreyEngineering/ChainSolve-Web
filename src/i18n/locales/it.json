@@ -47,6 +47,11 @@
     "support": "Assistenza",
     "generalEnquiries": "Informazioni generali"
   },
+  "session": {
+    "revokedTitle": "Sessione terminata",
+    "revokedMessage": "Sei stato disconnesso perché il tuo account ha effettuato l'accesso su un altro dispositivo. Accedi di nuovo per continuare.",
+    "signInAgain": "Accedi di nuovo"
+  },
   "auth": {
     "login": "Accedi",
     "signup": "Crea un account",

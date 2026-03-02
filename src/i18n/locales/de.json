@@ -47,6 +47,11 @@
     "support": "Support",
     "generalEnquiries": "Allgemeine Anfragen"
   },
+  "session": {
+    "revokedTitle": "Sitzung beendet",
+    "revokedMessage": "Sie wurden abgemeldet, da Ihr Konto auf einem anderen Gerät angemeldet wurde. Bitte melden Sie sich erneut an, um fortzufahren.",
+    "signInAgain": "Erneut anmelden"
+  },
   "auth": {
     "login": "Anmelden",
     "signup": "Konto erstellen",

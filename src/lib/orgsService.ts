@@ -19,6 +19,8 @@ export interface Org {
   policy_explore_enabled: boolean
   policy_installs_allowed: boolean
   policy_comments_allowed: boolean
+  /** H9-1: single-session enforcement (only one active session per user). */
+  policy_single_session: boolean
   /** D10-3: seat limit. NULL = unlimited. */
   max_seats: number | null
   created_at: string
@@ -36,6 +38,8 @@ export interface OrgPolicy {
   policy_explore_enabled: boolean
   policy_installs_allowed: boolean
   policy_comments_allowed: boolean
+  /** H9-1: single-session enforcement. */
+  policy_single_session: boolean
 }
 
 export interface OrgMember {
@@ -246,7 +250,9 @@ export async function deleteOrg(orgId: string): Promise<void> {
 export async function getOrgPolicy(orgId: string): Promise<OrgPolicy> {
   const { data, error } = await supabase
     .from('organizations')
-    .select('policy_explore_enabled,policy_installs_allowed,policy_comments_allowed')
+    .select(
+      'policy_explore_enabled,policy_installs_allowed,policy_comments_allowed,policy_single_session',
+    )
     .eq('id', orgId)
     .maybeSingle()
 

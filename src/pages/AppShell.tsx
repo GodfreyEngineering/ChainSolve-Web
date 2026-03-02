@@ -57,12 +57,18 @@ import { getRecentProjects } from '../lib/recentProjects'
 import { getPinnedProjects, togglePinnedProject } from '../lib/pinnedProjects'
 import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 import { initRememberMe } from '../lib/rememberMe'
-import { touchSession } from '../lib/sessionService'
+import { touchSession, isSessionValid, SESSION_CHECK_INTERVAL_MS } from '../lib/sessionService'
 
 type SortMode = 'recent' | 'name' | 'created'
 type FilterTab = 'all' | 'recent' | 'pinned'
 
 const LazyAuthGate = lazy(() => import('../components/AuthGate'))
+
+const LazySessionRevokedModal = lazy(() =>
+  import('../components/ui/SessionRevokedModal').then((m) => ({
+    default: m.SessionRevokedModal,
+  })),
+)
 
 const LazyFirstRunModal = lazy(() =>
   import('../components/app/FirstRunModal').then((m) => ({ default: m.FirstRunModal })),
@@ -230,6 +236,9 @@ export default function AppShell() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // H9-1: Session revoked detection
+  const [sessionRevoked, setSessionRevoked] = useState(false)
+
   // Billing
   const [billingLoading, setBillingLoading] = useState(false)
   const [billingError, setBillingError] = useState<string | null>(null)
@@ -341,6 +350,17 @@ export default function AppShell() {
         })
     })
   }, [navigate, fetchProjects])
+
+  // H9-1: Periodically check if the current session is still valid.
+  // If revoked (e.g. user signed in on another device), show the revoked modal.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      void isSessionValid().then((valid) => {
+        if (!valid) setSessionRevoked(true)
+      })
+    }, SESSION_CHECK_INTERVAL_MS)
+    return () => clearInterval(timer)
+  }, [])
 
   // E2-3: Handle ToS acceptance from AuthGate
   const handleTermsAccepted = useCallback(
@@ -606,6 +626,12 @@ export default function AppShell() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* ── H9-1: Session revoked modal ── */}
+      {sessionRevoked && (
+        <Suspense fallback={null}>
+          <LazySessionRevokedModal open />
+        </Suspense>
+      )}
       {/* ── Upgrade modal ── */}
       <UpgradeModal
         open={upgradeOpen}

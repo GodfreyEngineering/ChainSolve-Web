@@ -54,6 +54,11 @@
     "verifying": "Verifying…",
     "wrongPassword": "Incorrect password. Please try again."
   },
+  "session": {
+    "revokedTitle": "Session ended",
+    "revokedMessage": "You have been signed out because your account was signed in on another device. Please sign in again to continue.",
+    "signInAgain": "Sign in again"
+  },
   "auth": {
     "login": "Sign in",
     "signup": "Create account",

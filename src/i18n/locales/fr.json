@@ -47,6 +47,11 @@
     "support": "Assistance",
     "generalEnquiries": "Renseignements généraux"
   },
+  "session": {
+    "revokedTitle": "Session terminée",
+    "revokedMessage": "Vous avez été déconnecté car votre compte a été connecté sur un autre appareil. Veuillez vous reconnecter pour continuer.",
+    "signInAgain": "Se reconnecter"
+  },
   "auth": {
     "login": "Connexion",
     "signup": "Créer un compte",
