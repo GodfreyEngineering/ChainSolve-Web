@@ -581,6 +581,19 @@ export function registerFinStatsBlocks(register: (def: BlockDef) => void): void 
     proOnly: true,
   })
 
+  register({
+    type: 'prob.comb.combination',
+    label: 'C(n,k)',
+    category: 'probComb',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'n', label: 'n' },
+      { id: 'k', label: 'k' },
+    ],
+    defaultData: { blockType: 'prob.comb.combination', label: 'C(n,k)' },
+    proOnly: true,
+  })
+
   // ── Probability → Distributions ──────────────────────────────────
 
   register({

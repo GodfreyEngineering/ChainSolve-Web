@@ -224,6 +224,30 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'eng.mechanics.centripetal_force', label: 'F = mv²/r' },
   })
 
+  register({
+    type: 'eng.mechanics.friction_force',
+    label: 'F = μN',
+    category: 'engMechanics',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'mu', label: 'μ' },
+      { id: 'N', label: 'N (N)' },
+    ],
+    defaultData: { blockType: 'eng.mechanics.friction_force', label: 'F = μN' },
+  })
+
+  register({
+    type: 'eng.mechanics.impulse',
+    label: 'J = FΔt',
+    category: 'engMechanics',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'F', label: 'F (N)' },
+      { id: 'dt', label: 'Δt (s)' },
+    ],
+    defaultData: { blockType: 'eng.mechanics.impulse', label: 'J = FΔt' },
+  })
+
   // ── Materials & Strength ────────────────────────────────────────────
 
   register({
@@ -545,6 +569,19 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'eng.fluids.darcy_weisbach_dp', label: 'Darcy-Weisbach' },
   })
 
+  register({
+    type: 'eng.fluids.buoyancy',
+    label: 'F = ρVg',
+    category: 'engFluids',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'rho', label: 'ρ (kg/m³)' },
+      { id: 'V', label: 'V (m³)' },
+      { id: 'g', label: 'g (m/s²)' },
+    ],
+    defaultData: { blockType: 'eng.fluids.buoyancy', label: 'F = ρVg' },
+  })
+
   // ── Thermo ──────────────────────────────────────────────────────────
 
   register({
@@ -623,6 +660,31 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'eng.thermo.convection_Qdot', label: 'Convection' },
   })
 
+  register({
+    type: 'eng.thermo.carnot_efficiency',
+    label: 'η = 1−Tc/Th',
+    category: 'engThermo',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'T_cold', label: 'T_cold (K)' },
+      { id: 'T_hot', label: 'T_hot (K)' },
+    ],
+    defaultData: { blockType: 'eng.thermo.carnot_efficiency', label: 'η = 1−Tc/Th' },
+  })
+
+  register({
+    type: 'eng.thermo.thermal_expansion',
+    label: 'ΔL = αLΔT',
+    category: 'engThermo',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'alpha', label: 'α (1/K)' },
+      { id: 'L', label: 'L (m)' },
+      { id: 'dT', label: 'ΔT (K)' },
+    ],
+    defaultData: { blockType: 'eng.thermo.thermal_expansion', label: 'ΔL = αLΔT' },
+  })
+
   // ── Electrical ──────────────────────────────────────────────────────
 
   register({
@@ -671,6 +733,42 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'R', label: 'R (Ω)' },
     ],
     defaultData: { blockType: 'eng.elec.power_V2R', label: 'P = V²/R' },
+  })
+
+  register({
+    type: 'eng.elec.capacitance_Q_V',
+    label: 'C = Q/V',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'Q', label: 'Q (C)' },
+      { id: 'V', label: 'V (V)' },
+    ],
+    defaultData: { blockType: 'eng.elec.capacitance_Q_V', label: 'C = Q/V' },
+  })
+
+  register({
+    type: 'eng.elec.series_resistance',
+    label: 'R = R₁+R₂',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'R1', label: 'R₁ (Ω)' },
+      { id: 'R2', label: 'R₂ (Ω)' },
+    ],
+    defaultData: { blockType: 'eng.elec.series_resistance', label: 'R = R₁+R₂' },
+  })
+
+  register({
+    type: 'eng.elec.parallel_resistance',
+    label: 'R∥ = R₁R₂/(R₁+R₂)',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'R1', label: 'R₁ (Ω)' },
+      { id: 'R2', label: 'R₂ (Ω)' },
+    ],
+    defaultData: { blockType: 'eng.elec.parallel_resistance', label: 'R∥ = R₁R₂/(R₁+R₂)' },
   })
 
   // ── Conversions ─────────────────────────────────────────────────────
