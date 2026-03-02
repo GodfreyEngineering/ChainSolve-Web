@@ -6,7 +6,9 @@
   "nav": {
     "signOut": "Déconnexion",
     "settings": "Paramètres",
-    "backToApp": "Retour à l'app"
+    "backToApp": "Retour à l'app",
+    "projects": "Projets",
+    "documentation": "Documentation"
   },
   "home": {
     "title": "Accueil de l'atelier",

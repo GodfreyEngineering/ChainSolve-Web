@@ -6,7 +6,9 @@
   "nav": {
     "signOut": "Esci",
     "settings": "Impostazioni",
-    "backToApp": "Torna all'app"
+    "backToApp": "Torna all'app",
+    "projects": "Progetti",
+    "documentation": "Documentazione"
   },
   "home": {
     "title": "Home dell'area di lavoro",

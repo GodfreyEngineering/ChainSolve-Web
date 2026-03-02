@@ -6,7 +6,9 @@
   "nav": {
     "signOut": "Sign out",
     "settings": "Settings",
-    "backToApp": "Back to app"
+    "backToApp": "Back to app",
+    "projects": "Projects",
+    "documentation": "Documentation"
   },
   "home": {
     "title": "Workbench Home",

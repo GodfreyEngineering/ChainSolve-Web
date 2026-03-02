@@ -6,7 +6,9 @@
   "nav": {
     "signOut": "Cerrar sesión",
     "settings": "Ajustes",
-    "backToApp": "Volver a la app"
+    "backToApp": "Volver a la app",
+    "projects": "Proyectos",
+    "documentation": "Documentacion"
   },
   "home": {
     "title": "Inicio del espacio de trabajo",

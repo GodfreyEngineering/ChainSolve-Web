@@ -17,6 +17,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppHeader } from '../components/app/AppHeader'
+import { MainHeader } from '../components/app/MainHeader'
 import { CONTACT } from '../lib/brand'
 import {
   CanvasArea,
@@ -1461,7 +1462,9 @@ export default function CanvasPage() {
         background: 'var(--bg)',
       }}
     >
-      {/* ── App header ──────────────────────────────────────────────────────── */}
+      {/* G7-1: Main header (always present) */}
+      <MainHeader plan={plan} />
+      {/* ── Project header ──────────────────────────────────────────────────── */}
       <AppHeader
         projectId={projectId}
         projectName={projectName}

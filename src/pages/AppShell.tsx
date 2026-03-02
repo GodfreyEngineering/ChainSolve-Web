@@ -45,7 +45,7 @@ import {
   showBillingBanner,
   type Plan,
 } from '../lib/entitlements'
-import { BRAND } from '../lib/brand'
+import { MainHeader } from '../components/app/MainHeader'
 import { UpgradeModal } from '../components/UpgradeModal'
 import { getRecentProjects } from '../lib/recentProjects'
 import { getPinnedProjects, togglePinnedProject } from '../lib/pinnedProjects'
@@ -165,15 +165,6 @@ const btnSecondary: React.CSSProperties = btnBase({
   background: 'transparent',
   color: 'inherit',
   fontWeight: 500,
-})
-
-const btnDanger: React.CSSProperties = btnBase({
-  padding: '0.5rem 1rem',
-  border: '1px solid rgba(239,68,68,0.3)',
-  background: 'transparent',
-  color: '#f87171',
-  fontWeight: 500,
-  fontSize: '0.85rem',
 })
 
 const btnSmall: React.CSSProperties = {
@@ -519,11 +510,6 @@ export default function AppShell() {
     }
   }
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate('/login')
-  }
-
   // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading) {
@@ -613,54 +599,8 @@ export default function AppShell() {
           <LazyOnboardingOverlay mode="overlay" onClose={() => setTourOpen(false)} />
         </Suspense>
       )}
-      {/* Nav */}
-      <nav
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 1.5rem',
-          height: 56,
-          borderBottom: '1px solid var(--border)',
-          background: 'var(--card-bg)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <a href="/app" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <img src={BRAND.logoWideText} alt="ChainSolve" style={{ height: 28 }} />
-          </a>
-          <a
-            href="/explore"
-            style={{
-              fontSize: '0.85rem',
-              fontWeight: 500,
-              color: 'rgba(244,244,243,0.6)',
-              textDecoration: 'none',
-            }}
-          >
-            {t('home.explore')}
-          </a>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.85rem', opacity: 0.6 }}>{user?.email}</span>
-          <button
-            style={{
-              ...btnSmall,
-              fontSize: '1.1rem',
-              padding: '0.25rem 0.55rem',
-              lineHeight: 1,
-            }}
-            onClick={() => openSettings()}
-            title="Settings"
-            aria-label="Settings"
-          >
-            ⚙
-          </button>
-          <button style={btnDanger} onClick={() => void handleLogout()}>
-            Sign out
-          </button>
-        </div>
-      </nav>
+      {/* G7-1: Main header */}
+      <MainHeader plan={plan} />
 
       {/* ── Billing banners ── */}
       {bannerKind === 'past_due' && (

@@ -6,7 +6,9 @@
   "nav": {
     "signOut": "Abmelden",
     "settings": "Einstellungen",
-    "backToApp": "Zurück zur App"
+    "backToApp": "Zurück zur App",
+    "projects": "Projekte",
+    "documentation": "Dokumentation"
   },
   "home": {
     "title": "Arbeitsbereich-Startseite",
