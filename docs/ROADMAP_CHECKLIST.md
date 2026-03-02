@@ -1365,7 +1365,7 @@ Claude MUST:
   - Ensure git hooks and devcontainer features are consistent (Git LFS present in container).
   - Acceptance: “fresh container → clean git status” after normal dev actions.
 
-- [ ] F1-2: Normalize docs structure + index
+- [x] F1-2: Normalize docs structure + index
   - Add/refresh `docs/README.md` as the hub:
     - links to requirements suite, architecture, security, exports, AI, devcontainer
   - Move scattered docs into a predictable taxonomy:
