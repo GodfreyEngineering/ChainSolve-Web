@@ -1963,7 +1963,7 @@ Claude MUST:
 
 ---
 ## I1-2 — links to docs all over app
-- [ ] I1-2 all over the app add links to the correct line and sections of the docs page to help users, add the links to the tooltip or add an help/info button to all pop up windows etc.Make sure its executed cleanly and very classy and sleek and professional. Like an invisible feature.
+- [x] I1-2 all over the app add links to the correct line and sections of the docs page to help users, add the links to the tooltip or add an help/info button to all pop up windows etc.Make sure its executed cleanly and very classy and sleek and professional. Like an invisible feature.
 
 ---
 ## I2 — Scientific reporting v1: chain-to-notation (math/physics expression)
