@@ -1487,7 +1487,7 @@ Claude MUST:
     - how to validate CSP, auth flows, exports gating, AI quotas
   - Acceptance: any team member can do release rehearsal.
 
-- [ ] F7-2: “No unfinished UX” sweep
+- [x] F7-2: “No unfinished UX” sweep
   - Remove any “coming soon,” broken buttons, dead menu items.
   - Acceptance: product feels finished.
 
