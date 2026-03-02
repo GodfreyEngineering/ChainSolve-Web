@@ -13,26 +13,48 @@ import { Modal } from '../ui/Modal'
 import {
   MATERIAL_PROPERTIES,
   MATERIAL_PROPERTY_META,
+  CUSTOM_MATERIAL_CATEGORIES,
+  CUSTOM_MATERIAL_CATEGORY_LABELS,
   generateMaterialId,
   validateMaterialName,
+  validateMaterialDescription,
   validateMaterialProperties,
   type CustomMaterial,
+  type CustomMaterialCategory,
   type MaterialProperty,
 } from '../../lib/customMaterials'
+import { useTranslation } from 'react-i18next'
 import { useCustomMaterialsStore } from '../../stores/customMaterialsStore'
 
 // ── Base templates ──────────────────────────────────────────────────────────
 
 interface Template {
-  label: string
+  labelKey: string
+  fallback: string
   properties: Partial<Record<MaterialProperty, number>>
+  defaultCategory?: CustomMaterialCategory
 }
 
 const TEMPLATES: Template[] = [
-  { label: 'Blank', properties: {} },
-  { label: 'Steel-like', properties: { rho: 7850, E: 200e9, nu: 0.3, k: 50, cp: 500 } },
-  { label: 'Aluminium-like', properties: { rho: 2700, E: 69e9, nu: 0.33, k: 237, cp: 897 } },
-  { label: 'Fluid (water-like)', properties: { rho: 998, mu: 1.002e-3, k: 0.606, cp: 4182 } },
+  { labelKey: 'materialWizard.tplBlank', fallback: 'Blank', properties: {} },
+  {
+    labelKey: 'materialWizard.tplSteel',
+    fallback: 'Steel-like',
+    properties: { rho: 7850, E: 200e9, nu: 0.3, k: 50, cp: 500 },
+    defaultCategory: 'metal',
+  },
+  {
+    labelKey: 'materialWizard.tplAluminium',
+    fallback: 'Aluminium-like',
+    properties: { rho: 2700, E: 69e9, nu: 0.33, k: 237, cp: 897 },
+    defaultCategory: 'metal',
+  },
+  {
+    labelKey: 'materialWizard.tplFluid',
+    fallback: 'Fluid (water-like)',
+    properties: { rho: 998, mu: 1.002e-3, k: 0.606, cp: 4182 },
+    defaultCategory: 'fluid',
+  },
 ]
 
 // ── Styles ──────────────────────────────────────────────────────────────────
@@ -113,10 +135,15 @@ interface MaterialWizardProps {
 }
 
 export function MaterialWizard({ open, onClose, editMaterial }: MaterialWizardProps) {
+  const { t } = useTranslation()
   const addMaterial = useCustomMaterialsStore((s) => s.addMaterial)
   const updateMaterial = useCustomMaterialsStore((s) => s.updateMaterial)
 
   const [name, setName] = useState(editMaterial?.name ?? '')
+  const [description, setDescription] = useState(editMaterial?.description ?? '')
+  const [category, setCategory] = useState<CustomMaterialCategory>(
+    editMaterial?.category ?? 'other',
+  )
   const [properties, setProperties] = useState<Partial<Record<MaterialProperty, string>>>(
     editMaterial
       ? Object.fromEntries(Object.entries(editMaterial.properties).map(([k, v]) => [k, String(v)]))
@@ -128,6 +155,7 @@ export function MaterialWizard({ open, onClose, editMaterial }: MaterialWizardPr
     setProperties(
       Object.fromEntries(Object.entries(tpl.properties).map(([k, v]) => [k, String(v)])),
     )
+    if (tpl.defaultCategory) setCategory(tpl.defaultCategory)
     setError(null)
   }, [])
 
@@ -139,6 +167,12 @@ export function MaterialWizard({ open, onClose, editMaterial }: MaterialWizardPr
       const nameResult = validateMaterialName(name)
       if (!nameResult.ok) {
         setError(nameResult.error!)
+        return
+      }
+
+      const descResult = validateMaterialDescription(description)
+      if (!descResult.ok) {
+        setError(descResult.error!)
         return
       }
 
@@ -162,21 +196,37 @@ export function MaterialWizard({ open, onClose, editMaterial }: MaterialWizardPr
         return
       }
 
+      const trimmedDesc = description.trim() || undefined
       if (editMaterial) {
-        updateMaterial(editMaterial.id, { name: name.trim(), properties: parsed })
+        updateMaterial(editMaterial.id, {
+          name: name.trim(),
+          description: trimmedDesc,
+          category,
+          properties: parsed,
+        })
       } else {
-        addMaterial({ id: generateMaterialId(), name: name.trim(), properties: parsed })
+        addMaterial({
+          id: generateMaterialId(),
+          name: name.trim(),
+          description: trimmedDesc,
+          category,
+          properties: parsed,
+        })
       }
       onClose()
     },
-    [name, properties, editMaterial, addMaterial, updateMaterial, onClose],
+    [name, description, category, properties, editMaterial, addMaterial, updateMaterial, onClose],
   )
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={editMaterial ? 'Edit Custom Material' : 'Create Custom Material'}
+      title={
+        editMaterial
+          ? t('materialWizard.editTitle', 'Edit Custom Material')
+          : t('materialWizard.createTitle', 'Create Custom Material')
+      }
       width={420}
     >
       <form onSubmit={handleSubmit}>
@@ -186,17 +236,17 @@ export function MaterialWizard({ open, onClose, editMaterial }: MaterialWizardPr
             <div
               style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.3rem', opacity: 0.7 }}
             >
-              Start from template
+              {t('materialWizard.startFromTemplate', 'Start from template')}
             </div>
             <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
               {TEMPLATES.map((tpl) => (
                 <button
-                  key={tpl.label}
+                  key={tpl.labelKey}
                   type="button"
                   style={templateBtn}
                   onClick={() => applyTemplate(tpl)}
                 >
-                  {tpl.label}
+                  {t(tpl.labelKey, tpl.fallback)}
                 </button>
               ))}
             </div>
@@ -213,7 +263,7 @@ export function MaterialWizard({ open, onClose, editMaterial }: MaterialWizardPr
               marginBottom: '0.2rem',
             }}
           >
-            Material name
+            {t('materialWizard.nameLabel', 'Material name')}
           </label>
           <input
             style={{ ...inputStyle, width: '100%' }}
@@ -223,12 +273,64 @@ export function MaterialWizard({ open, onClose, editMaterial }: MaterialWizardPr
           />
         </div>
 
+        {/* Description field */}
+        <div style={{ marginBottom: '0.8rem' }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              marginBottom: '0.2rem',
+            }}
+          >
+            {t('materialWizard.descriptionLabel', 'Description')}
+            <span style={{ fontWeight: 400, opacity: 0.5, marginLeft: '0.3rem' }}>
+              {t('materialWizard.optional', '(optional)')}
+            </span>
+          </label>
+          <input
+            style={{ ...inputStyle, width: '100%' }}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={t('materialWizard.descriptionPlaceholder', 'e.g. Grade 304, annealed')}
+          />
+        </div>
+
+        {/* Category field */}
+        <div style={{ marginBottom: '0.8rem' }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              marginBottom: '0.2rem',
+            }}
+          >
+            {t('materialWizard.categoryLabel', 'Category')}
+          </label>
+          <select
+            style={{
+              ...inputStyle,
+              width: '100%',
+              cursor: 'pointer',
+            }}
+            value={category}
+            onChange={(e) => setCategory(e.target.value as CustomMaterialCategory)}
+          >
+            {CUSTOM_MATERIAL_CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {CUSTOM_MATERIAL_CATEGORY_LABELS[cat]}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Properties table */}
         <div style={{ marginBottom: '0.8rem' }}>
           <div
             style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.3rem', opacity: 0.7 }}
           >
-            Properties
+            {t('materialWizard.propertiesLabel', 'Properties')}
           </div>
           {MATERIAL_PROPERTIES.map((key) => {
             const meta = MATERIAL_PROPERTY_META[key]
@@ -255,10 +357,10 @@ export function MaterialWizard({ open, onClose, editMaterial }: MaterialWizardPr
           style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}
         >
           <button type="button" style={btnSecondary} onClick={onClose}>
-            Cancel
+            {t('materialWizard.cancel', 'Cancel')}
           </button>
           <button type="submit" style={btnPrimary}>
-            {editMaterial ? 'Save' : 'Create'}
+            {editMaterial ? t('materialWizard.save', 'Save') : t('materialWizard.create', 'Create')}
           </button>
         </div>
       </form>

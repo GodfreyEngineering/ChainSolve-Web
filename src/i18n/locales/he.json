@@ -281,5 +281,23 @@
     "cancel": "ביטול",
     "close": "סגור",
     "loading": "טוען…"
+  },
+  "materialWizard": {
+    "createTitle": "יצירת חומר מותאם אישית",
+    "editTitle": "עריכת חומר מותאם אישית",
+    "startFromTemplate": "התחל מתבנית",
+    "nameLabel": "שם החומר",
+    "descriptionLabel": "תיאור",
+    "optional": "(אופציונלי)",
+    "descriptionPlaceholder": "לדוגמה: דרגה 304, מחוסם",
+    "categoryLabel": "קטגוריה",
+    "propertiesLabel": "מאפיינים",
+    "cancel": "ביטול",
+    "save": "שמירה",
+    "create": "יצירה",
+    "tplBlank": "ריק",
+    "tplSteel": "דמוי פלדה",
+    "tplAluminium": "דמוי אלומיניום",
+    "tplFluid": "נוזל (דמוי מים)"
   }
 }

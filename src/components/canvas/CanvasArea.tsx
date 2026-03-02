@@ -78,6 +78,7 @@ import { saveTemplate as saveTemplateApi } from '../../lib/templates'
 import type { Template } from '../../lib/templates'
 import { AnimatedEdge } from './edges/AnimatedEdge'
 import { CanvasSettingsContext } from '../../contexts/CanvasSettingsContext'
+import { PlanContext } from '../../contexts/PlanContext'
 import { CanvasToolbar, CANVAS_TOOLBAR_WIDTH } from './CanvasToolbar'
 import { useTranslation } from 'react-i18next'
 import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
@@ -1732,348 +1733,352 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   )
 
   return (
-    <ComputedContext.Provider value={computed}>
-      <BindingContext.Provider value={bindingCtx}>
-        <CanvasSettingsContext.Provider value={canvasSettings}>
-          <ValuePopoverContext.Provider value={showValuePopover}>
-            {computed.size > 0 && <div data-testid="canvas-computed" style={{ display: 'none' }} />}
-            <div
-              data-edges-animated={effectiveEdgesAnimated ? 'true' : 'false'}
-              data-lod={effectiveLodTier}
-              data-badges={effectiveBadges ? 'true' : 'false'}
-              data-edge-badges={effectiveEdgeBadges ? 'true' : 'false'}
-              style={{
-                display: 'flex',
-                flex: 1,
-                height: '100%',
-                overflow: 'hidden',
-                position: 'relative',
-              }}
-            >
-              {/* Block library panel — desktop: always present with dock handle; mobile: overlay */}
-              {!readOnly && !isMobile && (
-                <BlockLibrary
-                  width={libWidth}
-                  onResizeStart={onLibResizeStart}
-                  plan={plan}
-                  onProBlocked={() => setShowUpgradeModal(true)}
-                  onInsertTemplate={onInsertTemplate}
-                  collapsed={!libVisible}
-                  onToggleCollapsed={() => setLibVisible((v) => !v)}
-                />
+    <PlanContext.Provider value={plan ?? 'free'}>
+      <ComputedContext.Provider value={computed}>
+        <BindingContext.Provider value={bindingCtx}>
+          <CanvasSettingsContext.Provider value={canvasSettings}>
+            <ValuePopoverContext.Provider value={showValuePopover}>
+              {computed.size > 0 && (
+                <div data-testid="canvas-computed" style={{ display: 'none' }} />
               )}
-
-              {/* Canvas */}
               <div
-                ref={canvasWrapRef}
-                style={{ flex: 1, position: 'relative', overflow: 'hidden' }}
-                onDragOver={onDragOver}
-                onDrop={onDrop}
-                onKeyDown={onKeyDown}
-                tabIndex={0}
+                data-edges-animated={effectiveEdgesAnimated ? 'true' : 'false'}
+                data-lod={effectiveLodTier}
+                data-badges={effectiveBadges ? 'true' : 'false'}
+                data-edge-badges={effectiveEdgeBadges ? 'true' : 'false'}
+                style={{
+                  display: 'flex',
+                  flex: 1,
+                  height: '100%',
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}
               >
-                {toolbar}
-                {paused && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 52,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      zIndex: 10,
-                      background: 'var(--card-bg)',
-                      border: '1px solid var(--border)',
-                      borderRadius: 6,
-                      padding: '0.2rem 0.7rem',
-                      fontSize: '0.72rem',
-                      color: 'var(--text-muted)',
-                      boxShadow: '0 1px 6px rgba(0,0,0,0.25)',
-                      pointerEvents: 'none',
-                    }}
-                  >
-                    {'\u23f8'} {t('toolbar.pausedBanner')}
-                  </div>
+                {/* Block library panel — desktop: always present with dock handle; mobile: overlay */}
+                {!readOnly && !isMobile && (
+                  <BlockLibrary
+                    width={libWidth}
+                    onResizeStart={onLibResizeStart}
+                    plan={plan}
+                    onProBlocked={() => setShowUpgradeModal(true)}
+                    onInsertTemplate={onInsertTemplate}
+                    collapsed={!libVisible}
+                    onToggleCollapsed={() => setLibVisible((v) => !v)}
+                  />
                 )}
-                {nodes.length === 0 && !readOnly && (
+
+                {/* Canvas */}
+                <div
+                  ref={canvasWrapRef}
+                  style={{ flex: 1, position: 'relative', overflow: 'hidden' }}
+                  onDragOver={onDragOver}
+                  onDrop={onDrop}
+                  onKeyDown={onKeyDown}
+                  tabIndex={0}
+                >
+                  {toolbar}
+                  {paused && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 52,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 10,
+                        background: 'var(--card-bg)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 6,
+                        padding: '0.2rem 0.7rem',
+                        fontSize: '0.72rem',
+                        color: 'var(--text-muted)',
+                        boxShadow: '0 1px 6px rgba(0,0,0,0.25)',
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      {'\u23f8'} {t('toolbar.pausedBanner')}
+                    </div>
+                  )}
+                  {nodes.length === 0 && !readOnly && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        pointerEvents: 'none',
+                        zIndex: 1,
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontSize: '0.85rem',
+                          color: 'rgba(255,255,255,0.2)',
+                          textAlign: 'center',
+                          lineHeight: 1.6,
+                          userSelect: 'none',
+                        }}
+                      >
+                        {t('canvas.emptyHint')}
+                      </p>
+                    </div>
+                  )}
+                  <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    nodeTypes={NODE_TYPES}
+                    edgeTypes={EDGE_TYPES}
+                    onNodesChange={readOnly ? undefined : onNodesChange}
+                    onEdgesChange={readOnly ? undefined : onEdgesChange}
+                    onConnect={readOnly ? undefined : onConnect}
+                    isValidConnection={isValidConnection}
+                    onNodeDragStart={readOnly ? undefined : onNodeDragStart}
+                    onNodeClick={onNodeClick}
+                    onPaneClick={onPaneClick}
+                    onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
+                    onEdgeContextMenu={readOnly ? undefined : onEdgeContextMenu}
+                    onPaneContextMenu={readOnly ? undefined : onPaneContextMenu}
+                    nodesConnectable={!readOnly && !locked}
+                    nodesDraggable={!readOnly && !locked && !panMode}
+                    elementsSelectable={!readOnly}
+                    panOnDrag={panMode || locked ? [0, 1, 2] : [1, 2]}
+                    snapToGrid={snapToGrid}
+                    snapGrid={[16, 16]}
+                    fitView
+                    fitViewOptions={{ padding: 0.2 }}
+                    deleteKeyCode={null}
+                    minZoom={0.08}
+                    maxZoom={4}
+                    proOptions={{ hideAttribution: true }}
+                  >
+                    {bgDotsVisible && (
+                      <Background
+                        variant={BackgroundVariant.Dots}
+                        gap={24}
+                        size={1}
+                        color="rgba(255,255,255,0.06)"
+                      />
+                    )}
+                    {minimap && (
+                      <MiniMap
+                        pannable
+                        zoomable
+                        style={{ background: 'var(--card-bg)', border: '1px solid var(--border)' }}
+                        nodeColor={(node) =>
+                          node.type === 'csGroup' ? 'var(--primary)' : 'var(--text-muted)'
+                        }
+                        maskColor="rgba(0,0,0,0.15)"
+                      />
+                    )}
+                  </ReactFlow>
+                  <CanvasToolbar
+                    panMode={panMode}
+                    locked={locked}
+                    snapToGrid={snapToGrid}
+                    minimap={minimap}
+                    paused={paused}
+                    inspVisible={inspVisible}
+                    readOnly={!!readOnly}
+                    onTogglePan={() => setPanMode((v) => !v)}
+                    onToggleLock={() => setLocked((v) => !v)}
+                    onToggleSnap={() => setSnapToGrid((v) => !v)}
+                    onToggleMinimap={() => {
+                      setMinimap((v) => {
+                        setMinimapPref(!v)
+                        return !v
+                      })
+                    }}
+                    onTogglePause={() => setPaused((v) => !v)}
+                    onRefresh={() => setEngineKey((k) => k + 1)}
+                    onToggleInspector={() => {
+                      if (inspVisible) {
+                        setInspectedId(null)
+                        closeWindow(INSPECTOR_WINDOW_ID)
+                      } else {
+                        openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
+                      }
+                      if (isMobile) setLibVisible(false)
+                    }}
+                    onAutoOrganise={(shiftKey) => handleAutoOrganise(shiftKey ? 'TB' : 'LR')}
+                    edgesAnimated={edgesAnimated}
+                    lodEnabled={lodEnabled}
+                    onToggleEdgesAnimated={() => {
+                      setEdgesAnimated((v) => {
+                        setEdgesAnimatedPref(!v)
+                        return !v
+                      })
+                    }}
+                    onToggleLod={() => {
+                      setLodEnabled((v) => {
+                        setLodPref(!v)
+                        return !v
+                      })
+                    }}
+                    badgesEnabled={badgesEnabled}
+                    onToggleBadges={() => {
+                      setBadgesEnabled((v) => {
+                        setBadgesPref(!v)
+                        return !v
+                      })
+                    }}
+                    edgeBadgesEnabled={edgeBadgesEnabled}
+                    onToggleEdgeBadges={() => {
+                      setEdgeBadgesEnabled((v) => {
+                        setEdgeBadgesPref(!v)
+                        return !v
+                      })
+                    }}
+                    bgDotsVisible={bgDotsVisible}
+                    onToggleBgDots={() => {
+                      setBgDotsVisible((v) => {
+                        setBgDotsPref(!v)
+                        return !v
+                      })
+                    }}
+                  />
+                  {/* Bottom Dock — always visible with docking handle (G5-2) */}
+                  <BottomDock
+                    panels={dockPanels}
+                    collapsed={dockCollapsed}
+                    onToggleCollapsed={() => setDockCollapsed((v) => !v)}
+                  />
+                </div>
+
+                {/* Floating Inspector window (replaces sidebar + mobile drawer) */}
+                {inspVisible && (
+                  <FloatingInspector
+                    nodeId={inspectedId}
+                    pinned={inspPinned}
+                    onTogglePin={() => setInspPinned((v) => !v)}
+                    onToggleCollapse={toggleGroupCollapse}
+                    onUngroupNode={ungroupNode}
+                    canUseGroups={ent.canUseGroups}
+                  />
+                )}
+
+                {/* ── Mobile overlay drawers ──────────────────────────────────────────── */}
+                {showBackdrop && (
                   <div
                     style={{
                       position: 'absolute',
                       inset: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      pointerEvents: 'none',
-                      zIndex: 1,
+                      background: 'rgba(0,0,0,0.5)',
+                      zIndex: 19,
+                    }}
+                    onClick={() => {
+                      setLibVisible(false)
+                    }}
+                  />
+                )}
+
+                {libVisible && !readOnly && isMobile && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      zIndex: 20,
+                      width: mobileDrawerWidth,
                     }}
                   >
-                    <p
-                      style={{
-                        fontSize: '0.85rem',
-                        color: 'rgba(255,255,255,0.2)',
-                        textAlign: 'center',
-                        lineHeight: 1.6,
-                        userSelect: 'none',
-                      }}
-                    >
-                      {t('canvas.emptyHint')}
-                    </p>
+                    <BlockLibrary
+                      width={mobileDrawerWidth}
+                      onResizeStart={() => {}}
+                      plan={plan}
+                      onProBlocked={() => setShowUpgradeModal(true)}
+                      onInsertTemplate={onInsertTemplate}
+                    />
                   </div>
                 )}
-                <ReactFlow
-                  nodes={nodes}
-                  edges={edges}
-                  nodeTypes={NODE_TYPES}
-                  edgeTypes={EDGE_TYPES}
-                  onNodesChange={readOnly ? undefined : onNodesChange}
-                  onEdgesChange={readOnly ? undefined : onEdgesChange}
-                  onConnect={readOnly ? undefined : onConnect}
-                  isValidConnection={isValidConnection}
-                  onNodeDragStart={readOnly ? undefined : onNodeDragStart}
-                  onNodeClick={onNodeClick}
-                  onPaneClick={onPaneClick}
-                  onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
-                  onEdgeContextMenu={readOnly ? undefined : onEdgeContextMenu}
-                  onPaneContextMenu={readOnly ? undefined : onPaneContextMenu}
-                  nodesConnectable={!readOnly && !locked}
-                  nodesDraggable={!readOnly && !locked && !panMode}
-                  elementsSelectable={!readOnly}
-                  panOnDrag={panMode || locked ? [0, 1, 2] : [1, 2]}
-                  snapToGrid={snapToGrid}
-                  snapGrid={[16, 16]}
-                  fitView
-                  fitViewOptions={{ padding: 0.2 }}
-                  deleteKeyCode={null}
-                  minZoom={0.08}
-                  maxZoom={4}
-                  proOptions={{ hideAttribution: true }}
-                >
-                  {bgDotsVisible && (
-                    <Background
-                      variant={BackgroundVariant.Dots}
-                      gap={24}
-                      size={1}
-                      color="rgba(255,255,255,0.06)"
-                    />
-                  )}
-                  {minimap && (
-                    <MiniMap
-                      pannable
-                      zoomable
-                      style={{ background: 'var(--card-bg)', border: '1px solid var(--border)' }}
-                      nodeColor={(node) =>
-                        node.type === 'csGroup' ? 'var(--primary)' : 'var(--text-muted)'
-                      }
-                      maskColor="rgba(0,0,0,0.15)"
-                    />
-                  )}
-                </ReactFlow>
-                <CanvasToolbar
-                  panMode={panMode}
-                  locked={locked}
-                  snapToGrid={snapToGrid}
-                  minimap={minimap}
-                  paused={paused}
-                  inspVisible={inspVisible}
-                  readOnly={!!readOnly}
-                  onTogglePan={() => setPanMode((v) => !v)}
-                  onToggleLock={() => setLocked((v) => !v)}
-                  onToggleSnap={() => setSnapToGrid((v) => !v)}
-                  onToggleMinimap={() => {
-                    setMinimap((v) => {
-                      setMinimapPref(!v)
-                      return !v
-                    })
-                  }}
-                  onTogglePause={() => setPaused((v) => !v)}
-                  onRefresh={() => setEngineKey((k) => k + 1)}
-                  onToggleInspector={() => {
-                    if (inspVisible) {
-                      setInspectedId(null)
-                      closeWindow(INSPECTOR_WINDOW_ID)
-                    } else {
-                      openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
-                    }
-                    if (isMobile) setLibVisible(false)
-                  }}
-                  onAutoOrganise={(shiftKey) => handleAutoOrganise(shiftKey ? 'TB' : 'LR')}
-                  edgesAnimated={edgesAnimated}
-                  lodEnabled={lodEnabled}
-                  onToggleEdgesAnimated={() => {
-                    setEdgesAnimated((v) => {
-                      setEdgesAnimatedPref(!v)
-                      return !v
-                    })
-                  }}
-                  onToggleLod={() => {
-                    setLodEnabled((v) => {
-                      setLodPref(!v)
-                      return !v
-                    })
-                  }}
-                  badgesEnabled={badgesEnabled}
-                  onToggleBadges={() => {
-                    setBadgesEnabled((v) => {
-                      setBadgesPref(!v)
-                      return !v
-                    })
-                  }}
-                  edgeBadgesEnabled={edgeBadgesEnabled}
-                  onToggleEdgeBadges={() => {
-                    setEdgeBadgesEnabled((v) => {
-                      setEdgeBadgesPref(!v)
-                      return !v
-                    })
-                  }}
-                  bgDotsVisible={bgDotsVisible}
-                  onToggleBgDots={() => {
-                    setBgDotsVisible((v) => {
-                      setBgDotsPref(!v)
-                      return !v
-                    })
-                  }}
-                />
-                {/* Bottom Dock — always visible with docking handle (G5-2) */}
-                <BottomDock
-                  panels={dockPanels}
-                  collapsed={dockCollapsed}
-                  onToggleCollapsed={() => setDockCollapsed((v) => !v)}
-                />
-              </div>
 
-              {/* Floating Inspector window (replaces sidebar + mobile drawer) */}
-              {inspVisible && (
-                <FloatingInspector
-                  nodeId={inspectedId}
-                  pinned={inspPinned}
-                  onTogglePin={() => setInspPinned((v) => !v)}
-                  onToggleCollapse={toggleGroupCollapse}
-                  onUngroupNode={ungroupNode}
-                  canUseGroups={ent.canUseGroups}
-                />
-              )}
-
-              {/* ── Mobile overlay drawers ──────────────────────────────────────────── */}
-              {showBackdrop && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'rgba(0,0,0,0.5)',
-                    zIndex: 19,
-                  }}
-                  onClick={() => {
-                    setLibVisible(false)
-                  }}
-                />
-              )}
-
-              {libVisible && !readOnly && isMobile && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    zIndex: 20,
-                    width: mobileDrawerWidth,
-                  }}
-                >
-                  <BlockLibrary
-                    width={mobileDrawerWidth}
-                    onResizeStart={() => {}}
-                    plan={plan}
-                    onProBlocked={() => setShowUpgradeModal(true)}
-                    onInsertTemplate={onInsertTemplate}
-                  />
-                </div>
-              )}
-
-              {/* Context menu */}
-              {contextMenu && (
-                <ContextMenu
-                  target={contextMenu}
-                  onClose={() => setContextMenu(null)}
-                  onDuplicateNode={duplicateNode}
-                  onDeleteNode={deleteNode}
-                  onDeleteEdge={deleteEdge}
-                  onInspectNode={inspectNode}
-                  onRenameNode={renameNode}
-                  onLockNode={lockNode}
-                  onFitView={() => fitView({ padding: 0.15, duration: 300 })}
-                  onAddBlockAtCursor={onAddBlockAtCursor}
-                  onGroupSelection={groupSelection}
-                  onUngroupNode={ungroupNode}
-                  onToggleCollapse={toggleGroupCollapse}
-                  onDeleteSelected={deleteSelected}
-                  onSaveAsTemplate={saveAsTemplate}
-                  canUseGroups={ent.canUseGroups}
-                  onCopyNodeValue={copyNodeValue}
-                  onJumpToNode={jumpToNode}
-                  computed={computed}
-                  onPaste={readOnly ? undefined : handlePaste}
-                  onAutoLayout={readOnly ? undefined : () => handleAutoOrganise('LR')}
-                  onInspectEdge={inspectEdge}
-                  onInsertConversion={readOnly ? undefined : insertConversion}
-                  onExplainNode={onExplainNode}
-                  onInsertFromPrompt={onInsertFromPrompt}
-                  onAlignSelection={readOnly ? undefined : alignSelection}
-                  onInsertAnnotation={readOnly ? undefined : onInsertAnnotation}
-                  snapToGrid={snapToGrid}
-                  onToggleSnap={readOnly ? undefined : () => setSnapToGrid((v) => !v)}
-                  onSelectChain={readOnly ? undefined : selectChain}
-                />
-              )}
-
-              {/* Quick-add palette */}
-              {quickAdd && (
-                <QuickAddPalette
-                  screenX={quickAdd.screenX}
-                  screenY={quickAdd.screenY}
-                  onAdd={onQuickAddBlock}
-                  onClose={() => setQuickAdd(null)}
-                  plan={plan}
-                  onProBlocked={() => {
-                    setQuickAdd(null)
-                    setShowUpgradeModal(true)
-                  }}
-                />
-              )}
-              {/* Find block dialog */}
-              {findOpen && (
-                <Suspense fallback={null}>
-                  <LazyFindBlockDialog
-                    nodes={nodes}
-                    onFocusNode={focusNode}
-                    onClose={() => setFindOpen(false)}
-                  />
-                </Suspense>
-              )}
-              {/* Upgrade modal for Pro-only blocks */}
-              {showUpgradeModal && (
-                <UpgradeModal
-                  open={showUpgradeModal}
-                  onClose={() => setShowUpgradeModal(false)}
-                  reason="feature_locked"
-                />
-              )}
-              {/* Value popover (W12.4) */}
-              {popoverTarget && (
-                <Suspense fallback={null}>
-                  <LazyValuePopover
-                    nodeId={popoverTarget.nodeId}
-                    x={popoverTarget.x}
-                    y={popoverTarget.y}
-                    computed={computed}
-                    onClose={() => setPopoverTarget(null)}
+                {/* Context menu */}
+                {contextMenu && (
+                  <ContextMenu
+                    target={contextMenu}
+                    onClose={() => setContextMenu(null)}
+                    onDuplicateNode={duplicateNode}
+                    onDeleteNode={deleteNode}
+                    onDeleteEdge={deleteEdge}
+                    onInspectNode={inspectNode}
+                    onRenameNode={renameNode}
+                    onLockNode={lockNode}
+                    onFitView={() => fitView({ padding: 0.15, duration: 300 })}
+                    onAddBlockAtCursor={onAddBlockAtCursor}
+                    onGroupSelection={groupSelection}
+                    onUngroupNode={ungroupNode}
+                    onToggleCollapse={toggleGroupCollapse}
+                    onDeleteSelected={deleteSelected}
+                    onSaveAsTemplate={saveAsTemplate}
+                    canUseGroups={ent.canUseGroups}
+                    onCopyNodeValue={copyNodeValue}
                     onJumpToNode={jumpToNode}
+                    computed={computed}
+                    onPaste={readOnly ? undefined : handlePaste}
+                    onAutoLayout={readOnly ? undefined : () => handleAutoOrganise('LR')}
+                    onInspectEdge={inspectEdge}
+                    onInsertConversion={readOnly ? undefined : insertConversion}
+                    onExplainNode={onExplainNode}
+                    onInsertFromPrompt={onInsertFromPrompt}
+                    onAlignSelection={readOnly ? undefined : alignSelection}
+                    onInsertAnnotation={readOnly ? undefined : onInsertAnnotation}
+                    snapToGrid={snapToGrid}
+                    onToggleSnap={readOnly ? undefined : () => setSnapToGrid((v) => !v)}
+                    onSelectChain={readOnly ? undefined : selectChain}
                   />
-                </Suspense>
-              )}
-            </div>
-          </ValuePopoverContext.Provider>
-        </CanvasSettingsContext.Provider>
-      </BindingContext.Provider>
-    </ComputedContext.Provider>
+                )}
+
+                {/* Quick-add palette */}
+                {quickAdd && (
+                  <QuickAddPalette
+                    screenX={quickAdd.screenX}
+                    screenY={quickAdd.screenY}
+                    onAdd={onQuickAddBlock}
+                    onClose={() => setQuickAdd(null)}
+                    plan={plan}
+                    onProBlocked={() => {
+                      setQuickAdd(null)
+                      setShowUpgradeModal(true)
+                    }}
+                  />
+                )}
+                {/* Find block dialog */}
+                {findOpen && (
+                  <Suspense fallback={null}>
+                    <LazyFindBlockDialog
+                      nodes={nodes}
+                      onFocusNode={focusNode}
+                      onClose={() => setFindOpen(false)}
+                    />
+                  </Suspense>
+                )}
+                {/* Upgrade modal for Pro-only blocks */}
+                {showUpgradeModal && (
+                  <UpgradeModal
+                    open={showUpgradeModal}
+                    onClose={() => setShowUpgradeModal(false)}
+                    reason="feature_locked"
+                  />
+                )}
+                {/* Value popover (W12.4) */}
+                {popoverTarget && (
+                  <Suspense fallback={null}>
+                    <LazyValuePopover
+                      nodeId={popoverTarget.nodeId}
+                      x={popoverTarget.x}
+                      y={popoverTarget.y}
+                      computed={computed}
+                      onClose={() => setPopoverTarget(null)}
+                      onJumpToNode={jumpToNode}
+                    />
+                  </Suspense>
+                )}
+              </div>
+            </ValuePopoverContext.Provider>
+          </CanvasSettingsContext.Provider>
+        </BindingContext.Provider>
+      </ComputedContext.Provider>
+    </PlanContext.Provider>
   )
 })
 

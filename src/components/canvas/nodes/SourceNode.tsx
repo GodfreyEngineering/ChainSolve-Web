@@ -17,6 +17,8 @@ import { useVariablesStore } from '../../../stores/variablesStore'
 import { useCustomMaterialsStore } from '../../../stores/customMaterialsStore'
 import { MATERIAL_PROPERTY_META, type MaterialProperty } from '../../../lib/customMaterials'
 import { getUnitSymbol } from '../../../units/unitSymbols'
+import { usePlan } from '../../../contexts/PlanContext'
+import { getEntitlements } from '../../../lib/entitlements'
 import { NODE_STYLES as s } from './nodeStyles'
 
 const LazyUnitPicker = lazy(() =>
@@ -55,6 +57,8 @@ function MaterialPickerBody({
   updateNodeData: (id: string, data: Partial<NodeData>) => void
 }) {
   const [wizardOpen, setWizardOpen] = useState(false)
+  const plan = usePlan()
+  const canCreate = getEntitlements(plan).canCreateCustomMaterials
   const customMaterials = useCustomMaterialsStore((s) => s.materials)
   const selectedId = (nd.selectedMaterialId as string) ?? ''
 
@@ -161,16 +165,18 @@ function MaterialPickerBody({
           borderRadius: 4,
           border: '1px dashed rgba(255,255,255,0.15)',
           background: 'transparent',
-          color: 'rgba(244,244,243,0.5)',
+          color: canCreate ? 'rgba(244,244,243,0.5)' : 'rgba(244,244,243,0.3)',
           fontSize: '0.65rem',
-          cursor: 'pointer',
+          cursor: canCreate ? 'pointer' : 'not-allowed',
           fontFamily: 'inherit',
+          opacity: canCreate ? 1 : 0.6,
         }}
-        onClick={() => setWizardOpen(true)}
+        onClick={() => canCreate && setWizardOpen(true)}
+        title={canCreate ? undefined : 'Pro feature'}
       >
-        + Create custom...
+        {canCreate ? '+ Create custom...' : '+ Create custom... (Pro)'}
       </button>
-      {wizardOpen && (
+      {wizardOpen && canCreate && (
         <Suspense fallback={null}>
           <LazyMaterialWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />
         </Suspense>

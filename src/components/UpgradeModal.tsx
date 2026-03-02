@@ -13,7 +13,13 @@ interface UpgradeModalProps {
   open: boolean
   onClose: () => void
   /** Why the modal was triggered — drives the message shown. */
-  reason: 'project_limit' | 'canvas_limit' | 'feature_locked' | 'export_locked' | 'ai_locked'
+  reason:
+    | 'project_limit'
+    | 'canvas_limit'
+    | 'feature_locked'
+    | 'export_locked'
+    | 'ai_locked'
+    | 'custom_materials_locked'
 }
 
 type BillingCycle = 'monthly' | 'annual'
@@ -30,6 +36,7 @@ const tierFeatures = {
     { label: 'upgrade.featGroups', included: false },
     { label: 'upgrade.featExport', included: false },
     { label: 'upgrade.featThemes', included: false },
+    { label: 'upgrade.featCustomMaterials', included: false },
   ],
   pro: [
     { label: 'upgrade.featUnlimitedProjects', included: true },
@@ -40,6 +47,7 @@ const tierFeatures = {
     { label: 'upgrade.featGroups', included: true },
     { label: 'upgrade.featExport', included: true },
     { label: 'upgrade.featThemes', included: true },
+    { label: 'upgrade.featCustomMaterials', included: true },
   ],
   enterprise: [
     { label: 'upgrade.featEverythingInPro', included: true },
@@ -148,7 +156,9 @@ export function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
           ? t('upgrade.exportLockedTitle', 'Export requires Pro')
           : reason === 'ai_locked'
             ? t('ai.upgradeTitle')
-            : t('entitlements.featureLockedTitle')
+            : reason === 'custom_materials_locked'
+              ? t('upgrade.customMaterialsLockedTitle', 'Custom materials require Pro')
+              : t('entitlements.featureLockedTitle')
 
   const message =
     reason === 'project_limit'
@@ -162,7 +172,12 @@ export function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
           ? t('upgrade.exportLockedMsg', 'Export and import are Pro features. Upgrade to unlock.')
           : reason === 'ai_locked'
             ? t('ai.upgradeBody')
-            : t('entitlements.featureLockedMsg')
+            : reason === 'custom_materials_locked'
+              ? t(
+                  'upgrade.customMaterialsLockedMsg',
+                  'Custom materials are a Pro feature. Upgrade to create and manage your own materials.',
+                )
+              : t('entitlements.featureLockedMsg')
 
   const handleCheckout = useCallback(async (planKey: PlanKey) => {
     setLoading(true)

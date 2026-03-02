@@ -5,13 +5,17 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
   validateMaterialName,
+  validateMaterialDescription,
   validateMaterialProperties,
   loadCustomMaterials,
   saveCustomMaterials,
   generateMaterialId,
   MAX_MATERIAL_NAME_LENGTH,
+  MAX_MATERIAL_DESC_LENGTH,
   MATERIAL_PROPERTIES,
   MATERIAL_PROPERTY_META,
+  CUSTOM_MATERIAL_CATEGORIES,
+  CUSTOM_MATERIAL_CATEGORY_LABELS,
   type CustomMaterial,
 } from './customMaterials'
 
@@ -39,6 +43,27 @@ describe('validateMaterialName', () => {
 
   it('accepts a name at exact max length', () => {
     expect(validateMaterialName('x'.repeat(MAX_MATERIAL_NAME_LENGTH))).toEqual({ ok: true })
+  })
+})
+
+// ── Description validation ──────────────────────────────────────────────────
+
+describe('validateMaterialDescription', () => {
+  it('accepts an empty description', () => {
+    expect(validateMaterialDescription('')).toEqual({ ok: true })
+  })
+
+  it('accepts a valid description', () => {
+    expect(validateMaterialDescription('Grade 304, annealed')).toEqual({ ok: true })
+  })
+
+  it('rejects a description exceeding max length', () => {
+    const r = validateMaterialDescription('x'.repeat(MAX_MATERIAL_DESC_LENGTH + 1))
+    expect(r.ok).toBe(false)
+  })
+
+  it('accepts a description at exact max length', () => {
+    expect(validateMaterialDescription('x'.repeat(MAX_MATERIAL_DESC_LENGTH))).toEqual({ ok: true })
   })
 })
 
@@ -91,6 +116,23 @@ describe('localStorage CRUD', () => {
     expect(loaded[0].properties.rho).toBe(7800)
   })
 
+  it('round-trips description and category', () => {
+    const materials: CustomMaterial[] = [
+      {
+        id: 'test-2',
+        name: 'Custom Alloy',
+        description: 'Grade 304, annealed',
+        category: 'metal',
+        properties: { rho: 7900 },
+      },
+    ]
+    saveCustomMaterials(materials)
+    const loaded = loadCustomMaterials()
+    expect(loaded).toHaveLength(1)
+    expect(loaded[0].description).toBe('Grade 304, annealed')
+    expect(loaded[0].category).toBe('metal')
+  })
+
   it('loadCustomMaterials handles corrupt data gracefully', () => {
     localStorage.setItem('cs:custom-materials', 'not-json')
     expect(loadCustomMaterials()).toEqual([])
@@ -129,5 +171,19 @@ describe('Material property metadata', () => {
 
   it('has exactly 6 standard properties', () => {
     expect(MATERIAL_PROPERTIES).toHaveLength(6)
+  })
+})
+
+// ── Category metadata ──────────────────────────────────────────────────────
+
+describe('Custom material categories', () => {
+  it('has 6 categories', () => {
+    expect(CUSTOM_MATERIAL_CATEGORIES).toHaveLength(6)
+  })
+
+  it('has a label for every category', () => {
+    for (const cat of CUSTOM_MATERIAL_CATEGORIES) {
+      expect(CUSTOM_MATERIAL_CATEGORY_LABELS[cat]).toBeTruthy()
+    }
   })
 })

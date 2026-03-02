@@ -27,10 +27,36 @@ export const MATERIAL_PROPERTY_META: Record<
 /** Ordered list of property keys for consistent display. */
 export const MATERIAL_PROPERTIES: MaterialProperty[] = ['rho', 'E', 'nu', 'mu', 'k', 'cp']
 
+/** Categories a custom material can belong to. */
+export const CUSTOM_MATERIAL_CATEGORIES = [
+  'metal',
+  'polymer',
+  'ceramic',
+  'composite',
+  'fluid',
+  'other',
+] as const
+
+export type CustomMaterialCategory = (typeof CUSTOM_MATERIAL_CATEGORIES)[number]
+
+/** Human-readable labels for custom material categories. */
+export const CUSTOM_MATERIAL_CATEGORY_LABELS: Record<CustomMaterialCategory, string> = {
+  metal: 'Metals & Alloys',
+  polymer: 'Polymers & Plastics',
+  ceramic: 'Ceramics & Glass',
+  composite: 'Composites',
+  fluid: 'Fluids',
+  other: 'Other',
+}
+
 /** A user-defined custom material. */
 export interface CustomMaterial {
   id: string
   name: string
+  /** Optional description for the material. */
+  description?: string
+  /** Category for grouping (defaults to 'other'). */
+  category?: CustomMaterialCategory
   /** Property values — only defined properties are stored. */
   properties: Partial<Record<MaterialProperty, number>>
 }
@@ -38,11 +64,22 @@ export interface CustomMaterial {
 // ── Validation ───────────────────────────────────────────────────────────────
 
 export const MAX_MATERIAL_NAME_LENGTH = 64
+export const MAX_MATERIAL_DESC_LENGTH = 200
 
 export function validateMaterialName(name: string): { ok: boolean; error?: string } {
   if (!name.trim()) return { ok: false, error: 'Name is required' }
   if (name.length > MAX_MATERIAL_NAME_LENGTH) {
     return { ok: false, error: `Name must not exceed ${MAX_MATERIAL_NAME_LENGTH} characters` }
+  }
+  return { ok: true }
+}
+
+export function validateMaterialDescription(desc: string): { ok: boolean; error?: string } {
+  if (desc.length > MAX_MATERIAL_DESC_LENGTH) {
+    return {
+      ok: false,
+      error: `Description must not exceed ${MAX_MATERIAL_DESC_LENGTH} characters`,
+    }
   }
   return { ok: true }
 }

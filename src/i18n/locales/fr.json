@@ -426,7 +426,28 @@
     "featCompanyLibrary": "Bibliothèque d'entreprise (org uniquement)",
     "featPolicyControls": "Contrôles de politiques admin",
     "featSeatManagement": "Gestion des postes",
-    "featPrioritySupport": "Support prioritaire"
+    "featPrioritySupport": "Support prioritaire",
+    "featCustomMaterials": "Matériaux personnalisés",
+    "customMaterialsLockedTitle": "Les matériaux personnalisés nécessitent Pro",
+    "customMaterialsLockedMsg": "Les matériaux personnalisés sont une fonctionnalité Pro. Passez à Pro pour créer et gérer vos propres matériaux."
+  },
+  "materialWizard": {
+    "createTitle": "Créer un matériau personnalisé",
+    "editTitle": "Modifier le matériau personnalisé",
+    "startFromTemplate": "Partir d'un modèle",
+    "nameLabel": "Nom du matériau",
+    "descriptionLabel": "Description",
+    "optional": "(facultatif)",
+    "descriptionPlaceholder": "p. ex. nuance 304, recuit",
+    "categoryLabel": "Catégorie",
+    "propertiesLabel": "Propriétés",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "create": "Créer",
+    "tplBlank": "Vierge",
+    "tplSteel": "Type acier",
+    "tplAluminium": "Type aluminium",
+    "tplFluid": "Fluide (type eau)"
   },
   "groups": {
     "groupSelection": "Grouper la sélection",

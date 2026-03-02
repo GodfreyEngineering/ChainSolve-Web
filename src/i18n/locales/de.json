@@ -426,7 +426,28 @@
     "featCompanyLibrary": "Firmenbibliothek (nur Org)",
     "featPolicyControls": "Admin-Richtlinienkontrollen",
     "featSeatManagement": "Platzverwaltung",
-    "featPrioritySupport": "Prioritäts-Support"
+    "featPrioritySupport": "Prioritäts-Support",
+    "featCustomMaterials": "Eigene Materialien",
+    "customMaterialsLockedTitle": "Eigene Materialien erfordern Pro",
+    "customMaterialsLockedMsg": "Eigene Materialien sind eine Pro-Funktion. Upgraden Sie, um Ihre eigenen Materialien zu erstellen und zu verwalten."
+  },
+  "materialWizard": {
+    "createTitle": "Eigenes Material erstellen",
+    "editTitle": "Eigenes Material bearbeiten",
+    "startFromTemplate": "Von Vorlage starten",
+    "nameLabel": "Materialname",
+    "descriptionLabel": "Beschreibung",
+    "optional": "(optional)",
+    "descriptionPlaceholder": "z. B. Sorte 304, geglüht",
+    "categoryLabel": "Kategorie",
+    "propertiesLabel": "Eigenschaften",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "create": "Erstellen",
+    "tplBlank": "Leer",
+    "tplSteel": "Stahlartig",
+    "tplAluminium": "Aluminiumartig",
+    "tplFluid": "Flüssigkeit (wasserähnlich)"
   },
   "groups": {
     "groupSelection": "Auswahl gruppieren",

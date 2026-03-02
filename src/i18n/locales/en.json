@@ -434,7 +434,28 @@
     "featCompanyLibrary": "Company Library (org-only)",
     "featPolicyControls": "Admin policy controls",
     "featSeatManagement": "Seat management",
-    "featPrioritySupport": "Priority support"
+    "featPrioritySupport": "Priority support",
+    "featCustomMaterials": "Custom materials",
+    "customMaterialsLockedTitle": "Custom materials require Pro",
+    "customMaterialsLockedMsg": "Custom materials are a Pro feature. Upgrade to create and manage your own materials."
+  },
+  "materialWizard": {
+    "createTitle": "Create Custom Material",
+    "editTitle": "Edit Custom Material",
+    "startFromTemplate": "Start from template",
+    "nameLabel": "Material name",
+    "descriptionLabel": "Description",
+    "optional": "(optional)",
+    "descriptionPlaceholder": "e.g. Grade 304, annealed",
+    "categoryLabel": "Category",
+    "propertiesLabel": "Properties",
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create",
+    "tplBlank": "Blank",
+    "tplSteel": "Steel-like",
+    "tplAluminium": "Aluminium-like",
+    "tplFluid": "Fluid (water-like)"
   },
   "groups": {
     "groupSelection": "Group Selection",
