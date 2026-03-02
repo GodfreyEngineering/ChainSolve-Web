@@ -376,11 +376,18 @@ function makeResizeHandler(
   return (e: MouseEvent) => {
     e.preventDefault()
     const startX = e.clientX
+    let rafId = 0
     const onMove = (me: globalThis.MouseEvent) => {
-      const delta = (me.clientX - startX) * direction
-      setWidth(clamp(startWidth + delta, min, max))
+      // G0-4: Throttle to one layout update per animation frame.
+      // Prevents ResizeObserver loop errors caused by rapid setState → layout → observer churn.
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        const delta = (me.clientX - startX) * direction
+        setWidth(clamp(startWidth + delta, min, max))
+      })
     }
     const onUp = () => {
+      cancelAnimationFrame(rafId)
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
     }

@@ -1545,7 +1545,7 @@ Claude MUST:
     - No CSP violations in console on app and login pages
     - CSP remains strict (no unsafe-inline / unsafe-eval)
 
-- [ ] G0-4: Fix ResizeObserver loop error triggered by resizing Block Library
+- [x] G0-4: Fix ResizeObserver loop error triggered by resizing Block Library
   - Root-cause and fix properly (avoid feedback loops, throttle observer work, rAF wrapper, stable layout settle). :contentReference[oaicite:8]{index=8}
   - Acceptance:
     - Resizing library never throws startup error

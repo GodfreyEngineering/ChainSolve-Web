@@ -258,6 +258,9 @@ function flushQueue(): void {
  * Applies rate limiting, dedup, redaction before sending.
  */
 function captureWindowError(e: ErrorEvent): void {
+  // G0-4: Skip benign ResizeObserver loop errors — spec-level noise, not actionable.
+  if (e.message && e.message.includes('ResizeObserver loop')) return
+
   const msg = truncate(redactString(e.message ?? 'Unknown error'), OBS_LIMITS.MAX_MESSAGE_CHARS)
   const stack =
     e.error instanceof Error

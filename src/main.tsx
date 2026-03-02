@@ -3,8 +3,17 @@ import { StrictMode, useCallback, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './i18n/config'
+import { installResizeObserverErrorSuppressor } from './lib/suppressResizeObserverError'
 import { initObservability } from './observability/client'
 import App from './App.tsx'
+
+// G0-4: Suppress benign ResizeObserver loop errors BEFORE observability
+// installs its error handler, so the noise never reaches error reporting.
+try {
+  installResizeObserverErrorSuppressor()
+} catch {
+  // intentionally swallowed
+}
 
 // Initialise observability early — installs global error handlers.
 // Never throws; failures are silently swallowed so the app always boots.

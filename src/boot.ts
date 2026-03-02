@@ -88,7 +88,11 @@ function showBootError(message: string) {
   document.getElementById('cs-boot-reload')?.addEventListener('click', () => location.reload())
 }
 
-window.addEventListener('error', (e) => showBootError(e.message))
+window.addEventListener('error', (e) => {
+  // G0-4: Ignore benign ResizeObserver loop errors (spec-level noise).
+  if (e.message && e.message.includes('ResizeObserver loop')) return
+  showBootError(e.message)
+})
 window.addEventListener('unhandledrejection', (e) =>
   showBootError((e as PromiseRejectionEvent).reason?.message ?? String(e)),
 )
