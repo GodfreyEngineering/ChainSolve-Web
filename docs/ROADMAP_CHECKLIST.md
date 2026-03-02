@@ -1921,7 +1921,7 @@ Claude MUST:
   - Enterprise admin can configure stricter session policies.
   - Acceptance: behaves predictably and does not cause false “project open elsewhere” bugs.
 
-- [ ] H9-2: Bug report and suggestion system (easy and professional)
+- [x] H9-2: Bug report and suggestion system (easy and professional)
   - In-app bug report window:
     - steps to reproduce
     - screenshot upload optional
