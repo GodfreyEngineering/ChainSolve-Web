@@ -1967,7 +1967,7 @@ Claude MUST:
 
 ---
 ## I2 — Scientific reporting v1: chain-to-notation (math/physics expression)
-- [ ] I2-1: “Inspect chain as notation” feature
+- [x] I2-1: “Inspect chain as notation” feature
   - Select a chain sequence and show:
     - symbolic form: a + b = out
     - substituted: 1 + 2 = 3
