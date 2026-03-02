@@ -292,6 +292,16 @@ button:focus:not(:focus-visible) {
   display: none !important;
 }
 
+/* Sheet tab close button — visible on hover */
+.cs-sheet-tab:hover .cs-sheet-tab-close {
+  opacity: 0.6 !important;
+}
+.cs-sheet-tab-close:hover {
+  opacity: 1 !important;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

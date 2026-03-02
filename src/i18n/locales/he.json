@@ -140,6 +140,21 @@
     "importFile": "ייבוא",
     "templates": "תבניות"
   },
+  "sheets": {
+    "title": "גיליונות",
+    "addSheet": "הוסף גיליון",
+    "rename": "שינוי שם",
+    "duplicate": "שכפול",
+    "delete": "מחיקה",
+    "deleteConfirm": "למחוק גיליון זה? לא ניתן לבטל פעולה זו.",
+    "deleteConfirmInline": "למחוק את \"{{name}}\"? לא ניתן לבטל פעולה זו.",
+    "limitReached": "הגעת למגבלת הגיליונות. שדרג ל-Pro לגיליונות ללא הגבלה.",
+    "cannotDeleteLast": "לא ניתן למחוק את הגיליון האחרון.",
+    "switchConfirmTitle": "שינויים שלא נשמרו",
+    "switchSave": "שמור ועבור",
+    "switchDiscard": "בטל ועבור",
+    "switchCancel": "ביטול"
+  },
   "contextMenu": {
     "inspect": "בדיקה",
     "rename": "שינוי שם…",

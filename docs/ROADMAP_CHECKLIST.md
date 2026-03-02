@@ -1726,7 +1726,7 @@ Claude MUST:
   - Robust duplicate name handling with overwrite warning.
   - Acceptance: matches spec and is reliable.
 
-- [ ] G7-4: Sheets tabs under project header
+- [x] G7-4: Sheets tabs under project header
   - Create, delete (x + context menu), rename, duplicate.
   - Acceptance: Excel-like.
 

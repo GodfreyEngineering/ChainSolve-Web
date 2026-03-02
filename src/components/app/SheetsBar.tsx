@@ -232,6 +232,7 @@ function DesktopSheetsBar({
     ent.maxCanvases === Infinity ? `${canvases.length}` : `${canvases.length} / ${ent.maxCanvases}`
 
   const deleteTargetCanvas = confirmDeleteId ? canvases.find((c) => c.id === confirmDeleteId) : null
+  const canDelete = canvases.length > 1
 
   return (
     <div style={barStyle}>
@@ -247,6 +248,7 @@ function DesktopSheetsBar({
               role="tab"
               aria-selected={isActive}
               draggable={!readOnly && !isEditing}
+              className="cs-sheet-tab"
               style={{
                 ...tabStyle(isActive),
                 ...(isDropTarget ? { borderLeft: '2px solid var(--primary)' } : {}),
@@ -280,7 +282,28 @@ function DesktopSheetsBar({
                   onClick={(e) => e.stopPropagation()}
                 />
               ) : (
-                <span style={tabLabelStyle}>{canvas.name}</span>
+                <>
+                  <span style={tabLabelStyle}>{canvas.name}</span>
+                  {!readOnly && canDelete && (
+                    <button
+                      className="cs-sheet-tab-close"
+                      title={t('sheets.delete')}
+                      aria-label={t('sheets.delete')}
+                      style={tabCloseBtnStyle(isActive)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setConfirmDeleteId(canvas.id)
+                        setContextMenu({
+                          canvasId: canvas.id,
+                          x: e.clientX,
+                          y: e.clientY,
+                        })
+                      }}
+                    >
+                      x
+                    </button>
+                  )}
+                </>
               )}
             </div>
           )
@@ -523,6 +546,29 @@ const tabLabelStyle: React.CSSProperties = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+}
+
+function tabCloseBtnStyle(active: boolean): React.CSSProperties {
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 16,
+    height: 16,
+    border: 'none',
+    background: 'transparent',
+    color: 'var(--text-muted)',
+    fontSize: '0.65rem',
+    fontFamily: 'inherit',
+    cursor: 'pointer',
+    borderRadius: 3,
+    marginLeft: 4,
+    padding: 0,
+    opacity: active ? 0.6 : 0,
+    transition: 'opacity 0.15s, background 0.15s',
+    flexShrink: 0,
+    lineHeight: 1,
+  }
 }
 
 const editInputStyle: React.CSSProperties = {
