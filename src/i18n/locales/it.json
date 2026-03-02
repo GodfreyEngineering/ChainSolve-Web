@@ -494,7 +494,8 @@
     "contactSupport": "Contatta il supporto",
     "menubar": "Menu dell'applicazione",
     "buildWithAI": "Crea con IA…",
-    "manageTemplates": "Gestisci modelli…"
+    "manageTemplates": "Gestisci modelli…",
+    "startTour": "Tour introduttivo"
   },
   "time": {
     "justNow": "proprio ora",
@@ -659,6 +660,65 @@
     "templateDesc": "Scegli un progetto iniziale",
     "import": "Importa progetto",
     "importDesc": "Carica un file .chainsolvejson"
+  },
+  "tour": {
+    "title": "Per iniziare",
+    "progress": "{{done}} di {{total}} passaggi completati",
+    "stepLabel": "Passaggio {{current}} di {{total}}",
+    "dismiss": "Chiudi tour",
+    "prev": "Precedente",
+    "next": "Prossimo passaggio",
+    "markDone": "Segna come fatto e continua",
+    "finish": "Termina il tour",
+    "allDone": "Tutti i passaggi completati",
+    "allDoneDesc": "Hai completato tutti i passaggi introduttivi. Puoi accedere a questo tour in qualsiasi momento dal menu Aiuto.",
+    "steps": {
+      "open_projects": {
+        "short": "Apri progetti",
+        "title": "Apri la finestra dei progetti",
+        "description": "Dalla pagina iniziale, apri la finestra dei progetti per vedere i tuoi progetti salvati e crearne di nuovi. Puoi anche accedere ai Progetti dal menu File."
+      },
+      "create_project": {
+        "short": "Crea progetto",
+        "title": "Crea un nuovo progetto",
+        "description": "Clicca su \"Crea progetto\" per avviare un nuovo progetto salvato, o usa la lavagna temporanea per calcoli rapidi senza salvare. Ogni progetto contiene una o piu pagine."
+      },
+      "add_input": {
+        "short": "Aggiungi input",
+        "title": "Aggiungi un blocco di input",
+        "description": "Fai clic destro sul canvas e scegli Inserisci, o premi / per inserimento rapido. Seleziona un blocco di input come Ingresso numerico o Cursore per fornire valori alla tua catena di calcolo."
+      },
+      "add_function": {
+        "short": "Aggiungi funzione",
+        "title": "Aggiungi un blocco funzione",
+        "description": "Aggiungi un blocco funzione dalla libreria. Le funzioni coprono matematica, ingegneria, finanza e statistica. Sfoglia per categoria o cerca per nome."
+      },
+      "add_output": {
+        "short": "Aggiungi output",
+        "title": "Aggiungi un blocco di output",
+        "description": "Aggiungi un blocco Visualizzazione per vedere il risultato del tuo calcolo. I blocchi di visualizzazione mostrano il valore calcolato e possono includere unita."
+      },
+      "connect_chains": {
+        "short": "Collega catene",
+        "title": "Collega i blocchi con catene",
+        "description": "Trascina da una porta di uscita di un blocco a una porta di ingresso di un altro per creare una catena. Le catene trasportano valori tra i blocchi. Il calcolo viene eseguito automaticamente."
+      },
+      "use_inspector": {
+        "short": "Usa l'ispettore",
+        "title": "Imposta valori e unita nell'ispettore",
+        "description": "Clicca su un blocco per aprire la finestra dell'ispettore. Qui puoi impostare i valori di input, scegliere le unita, visualizzare le descrizioni e verificare l'output calcolato."
+      },
+      "save_project": {
+        "short": "Salva progetto",
+        "title": "Salva il tuo progetto",
+        "description": "Premi Ctrl+S (o Cmd+S su Mac) o usa il menu File per salvare. I progetti vengono salvati nel tuo account e sono disponibili su tutti i dispositivi."
+      },
+      "open_reporting": {
+        "short": "Report (Pro)",
+        "title": "Esporta report e notazione",
+        "description": "Gli utenti Pro possono esportare report PDF ed Excel, visualizzare la notazione scientifica per le catene di calcolo e condividere i risultati. Accedi dal menu File."
+      }
+    }
   },
   "marketplace": {
     "title": "Explore",

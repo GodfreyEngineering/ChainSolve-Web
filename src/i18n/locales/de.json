@@ -494,7 +494,8 @@
     "contactSupport": "Support kontaktieren",
     "menubar": "Anwendungsmenü",
     "buildWithAI": "Mit KI erstellen…",
-    "manageTemplates": "Vorlagen verwalten…"
+    "manageTemplates": "Vorlagen verwalten…",
+    "startTour": "Einfuehrungstour"
   },
   "time": {
     "justNow": "gerade eben",
@@ -659,6 +660,65 @@
     "templateDesc": "Startprojekt auswählen",
     "import": "Projekt importieren",
     "importDesc": "Eine .chainsolvejson-Datei laden"
+  },
+  "tour": {
+    "title": "Erste Schritte",
+    "progress": "{{done}} von {{total}} Schritten abgeschlossen",
+    "stepLabel": "Schritt {{current}} von {{total}}",
+    "dismiss": "Tour schliessen",
+    "prev": "Zurueck",
+    "next": "Naechster Schritt",
+    "markDone": "Erledigt markieren und weiter",
+    "finish": "Tour beenden",
+    "allDone": "Alle Schritte abgeschlossen",
+    "allDoneDesc": "Sie haben alle Einfuehrungsschritte abgeschlossen. Sie koennen diese Tour jederzeit ueber das Hilfe-Menu erneut starten.",
+    "steps": {
+      "open_projects": {
+        "short": "Projekte oeffnen",
+        "title": "Das Projektfenster oeffnen",
+        "description": "Oeffnen Sie von der Startseite aus das Projektfenster, um Ihre gespeicherten Projekte zu sehen und neue zu erstellen. Sie koennen auch ueber das Datei-Menu auf Projekte zugreifen."
+      },
+      "create_project": {
+        "short": "Projekt erstellen",
+        "title": "Ein neues Projekt erstellen",
+        "description": "Klicken Sie auf \"Projekt erstellen\" um ein neues gespeichertes Projekt zu starten, oder verwenden Sie die Skizzen-Leinwand fuer schnelle Berechnungen ohne Speichern. Jedes Projekt enthaelt ein oder mehrere Blaetter."
+      },
+      "add_input": {
+        "short": "Eingabe hinzufuegen",
+        "title": "Einen Eingabeblock hinzufuegen",
+        "description": "Klicken Sie mit der rechten Maustaste auf die Leinwand und waehlen Sie Einfuegen, oder druecken Sie / fuer schnelles Einfuegen. Waehlen Sie einen Eingabeblock wie Zahleneingabe oder Schieberegler, um Werte fuer Ihre Berechnungskette bereitzustellen."
+      },
+      "add_function": {
+        "short": "Funktion hinzufuegen",
+        "title": "Einen Funktionsblock hinzufuegen",
+        "description": "Fuegen Sie einen Funktionsblock aus der Bibliothek hinzu. Funktionen decken Mathematik, Ingenieurwesen, Finanzen und Statistik ab. Durchsuchen Sie nach Kategorie oder suchen Sie nach Name."
+      },
+      "add_output": {
+        "short": "Ausgabe hinzufuegen",
+        "title": "Einen Ausgabeblock hinzufuegen",
+        "description": "Fuegen Sie einen Anzeigeblock hinzu, um das Ergebnis Ihrer Berechnung zu sehen. Anzeigebloecke zeigen den berechneten Wert an und koennen Einheiten enthalten."
+      },
+      "connect_chains": {
+        "short": "Ketten verbinden",
+        "title": "Bloecke mit Ketten verbinden",
+        "description": "Ziehen Sie von einem Ausgangsport eines Blocks zu einem Eingangsport eines anderen, um eine Kette zu erstellen. Ketten uebertragen Werte zwischen Bloecken. Die Berechnung wird automatisch ausgefuehrt."
+      },
+      "use_inspector": {
+        "short": "Inspektor nutzen",
+        "title": "Werte und Einheiten im Inspektor setzen",
+        "description": "Klicken Sie auf einen Block, um das Inspektorfenster zu oeffnen. Hier koennen Sie Eingabewerte setzen, Einheiten waehlen, Beschreibungen ansehen und die berechnete Ausgabe pruefen."
+      },
+      "save_project": {
+        "short": "Projekt speichern",
+        "title": "Ihr Projekt speichern",
+        "description": "Druecken Sie Strg+S (oder Cmd+S auf Mac) oder verwenden Sie das Datei-Menu zum Speichern. Projekte werden in Ihrem Konto gespeichert und sind auf allen Geraeten verfuegbar."
+      },
+      "open_reporting": {
+        "short": "Berichte (Pro)",
+        "title": "Berichte und Notation exportieren",
+        "description": "Pro-Benutzer koennen PDF- und Excel-Berichte exportieren, wissenschaftliche Notation fuer Berechnungsketten anzeigen und Ergebnisse teilen. Zugriff ueber das Datei-Menu."
+      }
+    }
   },
   "marketplace": {
     "title": "Explore",

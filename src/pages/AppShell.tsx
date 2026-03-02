@@ -23,6 +23,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
 import { supabase } from '../lib/supabase'
+import { shouldShowOnboarding } from '../lib/onboardingState'
 import type { User } from '@supabase/supabase-js'
 import {
   listProjects,
@@ -59,6 +60,12 @@ const LazyAuthGate = lazy(() => import('../components/AuthGate'))
 
 const LazyFirstRunModal = lazy(() =>
   import('../components/app/FirstRunModal').then((m) => ({ default: m.FirstRunModal })),
+)
+
+const LazyOnboardingOverlay = lazy(() =>
+  import('../components/app/OnboardingOverlay').then((m) => ({
+    default: m.OnboardingOverlay,
+  })),
 )
 
 const ONBOARDED_KEY = 'cs:onboarded'
@@ -225,6 +232,7 @@ export default function AppShell() {
       return false
     }
   })
+  const [tourOpen, setTourOpen] = useState(false)
 
   const importRef = useRef<HTMLInputElement>(null)
 
@@ -457,6 +465,10 @@ export default function AppShell() {
       // Ignore — private browsing
     }
     setFirstRunOpen(false)
+    // Show the guided tour after closing the welcome dialog
+    if (shouldShowOnboarding()) {
+      setTourOpen(true)
+    }
   }, [])
 
   const handleFirstRunScratch = useCallback(() => {
@@ -593,6 +605,12 @@ export default function AppShell() {
             onBrowseTemplates={handleFirstRunBrowseTemplates}
             onImport={handleFirstRunImport}
           />
+        </Suspense>
+      )}
+      {/* ── Guided tour overlay ── */}
+      {tourOpen && (
+        <Suspense fallback={null}>
+          <LazyOnboardingOverlay mode="overlay" onClose={() => setTourOpen(false)} />
         </Suspense>
       )}
       {/* Nav */}

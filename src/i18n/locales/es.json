@@ -494,7 +494,8 @@
     "contactSupport": "Contactar soporte",
     "menubar": "Menú de la aplicación",
     "buildWithAI": "Construir con IA…",
-    "manageTemplates": "Administrar plantillas…"
+    "manageTemplates": "Administrar plantillas…",
+    "startTour": "Tour de inicio"
   },
   "time": {
     "justNow": "ahora mismo",
@@ -659,6 +660,65 @@
     "templateDesc": "Elegir un proyecto de inicio",
     "import": "Importar proyecto",
     "importDesc": "Cargar un archivo .chainsolvejson"
+  },
+  "tour": {
+    "title": "Primeros pasos",
+    "progress": "{{done}} de {{total}} pasos completados",
+    "stepLabel": "Paso {{current}} de {{total}}",
+    "dismiss": "Cerrar tour",
+    "prev": "Anterior",
+    "next": "Siguiente paso",
+    "markDone": "Marcar hecho y continuar",
+    "finish": "Finalizar tour",
+    "allDone": "Todos los pasos completados",
+    "allDoneDesc": "Has completado todos los pasos de inicio. Puedes acceder a este tour de nuevo desde el menu Ayuda en cualquier momento.",
+    "steps": {
+      "open_projects": {
+        "short": "Abrir proyectos",
+        "title": "Abrir la ventana de proyectos",
+        "description": "Desde la pantalla de inicio, abre la ventana de proyectos para ver tus proyectos guardados y crear nuevos. Tambien puedes acceder a Proyectos desde el menu Archivo."
+      },
+      "create_project": {
+        "short": "Crear proyecto",
+        "title": "Crear un nuevo proyecto",
+        "description": "Haz clic en \"Crear proyecto\" para iniciar un nuevo proyecto guardado, o usa el lienzo temporal para calculos rapidos sin guardar. Cada proyecto contiene una o mas hojas."
+      },
+      "add_input": {
+        "short": "Agregar entrada",
+        "title": "Agregar un bloque de entrada",
+        "description": "Haz clic derecho en el lienzo y elige Insertar, o presiona / para insercion rapida. Selecciona un bloque de entrada como Entrada numerica o Control deslizante para proporcionar valores a tu cadena de calculo."
+      },
+      "add_function": {
+        "short": "Agregar funcion",
+        "title": "Agregar un bloque de funcion",
+        "description": "Agrega un bloque de funcion desde la biblioteca. Las funciones cubren matematicas, ingenieria, finanzas y estadisticas. Busca por categoria o por nombre."
+      },
+      "add_output": {
+        "short": "Agregar salida",
+        "title": "Agregar un bloque de salida",
+        "description": "Agrega un bloque de Visualizacion para ver el resultado de tu calculo. Los bloques de visualizacion muestran el valor calculado y pueden incluir unidades."
+      },
+      "connect_chains": {
+        "short": "Conectar cadenas",
+        "title": "Conectar bloques con cadenas",
+        "description": "Arrastra desde un puerto de salida de un bloque a un puerto de entrada de otro para crear una cadena. Las cadenas llevan valores entre bloques. El calculo se ejecuta automaticamente."
+      },
+      "use_inspector": {
+        "short": "Usar inspector",
+        "title": "Establecer valores y unidades en el inspector",
+        "description": "Haz clic en un bloque para abrir la ventana del inspector. Aqui puedes establecer valores de entrada, elegir unidades, ver descripciones y verificar la salida calculada."
+      },
+      "save_project": {
+        "short": "Guardar proyecto",
+        "title": "Guardar tu proyecto",
+        "description": "Presiona Ctrl+S (o Cmd+S en Mac) o usa el menu Archivo para guardar. Los proyectos se guardan en tu cuenta y estan disponibles en todos los dispositivos."
+      },
+      "open_reporting": {
+        "short": "Reportes (Pro)",
+        "title": "Exportar reportes y notacion",
+        "description": "Los usuarios Pro pueden exportar informes PDF y Excel, ver notacion cientifica para cadenas de calculo y compartir resultados. Accede desde el menu Archivo."
+      }
+    }
   },
   "marketplace": {
     "title": "Explore",

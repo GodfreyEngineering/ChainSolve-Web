@@ -494,7 +494,8 @@
     "contactSupport": "Contacter le support",
     "menubar": "Menu de l'application",
     "buildWithAI": "Créer avec l'IA…",
-    "manageTemplates": "Gérer les modèles…"
+    "manageTemplates": "Gérer les modèles…",
+    "startTour": "Visite guidee"
   },
   "time": {
     "justNow": "à l'instant",
@@ -659,6 +660,65 @@
     "templateDesc": "Choisir un projet de départ",
     "import": "Importer un projet",
     "importDesc": "Charger un fichier .chainsolvejson"
+  },
+  "tour": {
+    "title": "Premiers pas",
+    "progress": "{{done}} sur {{total}} etapes terminees",
+    "stepLabel": "Etape {{current}} sur {{total}}",
+    "dismiss": "Fermer la visite",
+    "prev": "Precedent",
+    "next": "Etape suivante",
+    "markDone": "Marquer fait et continuer",
+    "finish": "Terminer la visite",
+    "allDone": "Toutes les etapes terminees",
+    "allDoneDesc": "Vous avez termine toutes les etapes de demarrage. Vous pouvez acceder a cette visite a tout moment depuis le menu Aide.",
+    "steps": {
+      "open_projects": {
+        "short": "Ouvrir projets",
+        "title": "Ouvrir la fenetre des projets",
+        "description": "Depuis l'accueil, ouvrez la fenetre des projets pour voir vos projets enregistres et en creer de nouveaux. Vous pouvez aussi y acceder depuis le menu Fichier."
+      },
+      "create_project": {
+        "short": "Creer un projet",
+        "title": "Creer un nouveau projet",
+        "description": "Cliquez sur \"Creer un projet\" pour demarrer un nouveau projet enregistre, ou utilisez le canevas brouillon pour des calculs rapides sans enregistrer. Chaque projet contient une ou plusieurs feuilles."
+      },
+      "add_input": {
+        "short": "Ajouter entree",
+        "title": "Ajouter un bloc d'entree",
+        "description": "Faites un clic droit sur le canevas et choisissez Inserer, ou appuyez sur / pour une insertion rapide. Selectionnez un bloc d'entree comme Entree numerique ou Curseur pour fournir des valeurs a votre chaine de calcul."
+      },
+      "add_function": {
+        "short": "Ajouter fonction",
+        "title": "Ajouter un bloc de fonction",
+        "description": "Ajoutez un bloc de fonction depuis la bibliotheque. Les fonctions couvrent les mathematiques, l'ingenierie, la finance et les statistiques. Parcourez par categorie ou recherchez par nom."
+      },
+      "add_output": {
+        "short": "Ajouter sortie",
+        "title": "Ajouter un bloc de sortie",
+        "description": "Ajoutez un bloc Affichage pour voir le resultat de votre calcul. Les blocs d'affichage montrent la valeur calculee et peuvent inclure des unites."
+      },
+      "connect_chains": {
+        "short": "Connecter chaines",
+        "title": "Connecter les blocs avec des chaines",
+        "description": "Glissez d'un port de sortie d'un bloc vers un port d'entree d'un autre pour creer une chaine. Les chaines transportent les valeurs entre les blocs. Le calcul s'execute automatiquement."
+      },
+      "use_inspector": {
+        "short": "Utiliser inspecteur",
+        "title": "Definir les valeurs et unites dans l'inspecteur",
+        "description": "Cliquez sur un bloc pour ouvrir la fenetre de l'inspecteur. Ici vous pouvez definir les valeurs d'entree, choisir les unites, voir les descriptions et verifier la sortie calculee."
+      },
+      "save_project": {
+        "short": "Enregistrer projet",
+        "title": "Enregistrer votre projet",
+        "description": "Appuyez sur Ctrl+S (ou Cmd+S sur Mac) ou utilisez le menu Fichier pour enregistrer. Les projets sont sauvegardes dans votre compte et disponibles sur tous vos appareils."
+      },
+      "open_reporting": {
+        "short": "Rapports (Pro)",
+        "title": "Exporter des rapports et notations",
+        "description": "Les utilisateurs Pro peuvent exporter des rapports PDF et Excel, voir la notation scientifique pour les chaines de calcul et partager les resultats. Accedez-y depuis le menu Fichier."
+      }
+    }
   },
   "marketplace": {
     "title": "Explore",

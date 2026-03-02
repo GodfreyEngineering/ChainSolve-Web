@@ -37,6 +37,7 @@ const CS_LOCAL_KEYS = [
   'cs:prefs',
   'cs:lang',
   'cs:onboarded',
+  'cs:onboarding-checklist',
   'cs:favs',
   'cs:recent',
   'cs:window-geometry',

@@ -18,6 +18,7 @@ describe('resetLocalCaches', () => {
     localStorage.setItem('cs:prefs', '{}')
     localStorage.setItem('cs:lang', 'en')
     localStorage.setItem('cs:onboarded', '1')
+    localStorage.setItem('cs:onboarding-checklist', '{}')
     localStorage.setItem('cs:favs', '[]')
     localStorage.setItem('cs:recent', '[]')
     localStorage.setItem('cs:window-geometry', '{}')
@@ -26,10 +27,11 @@ describe('resetLocalCaches', () => {
 
     const cleared = resetLocalCaches()
 
-    expect(cleared).toBe(8)
+    expect(cleared).toBe(9)
     expect(localStorage.getItem('cs:prefs')).toBeNull()
     expect(localStorage.getItem('cs:lang')).toBeNull()
     expect(localStorage.getItem('cs:onboarded')).toBeNull()
+    expect(localStorage.getItem('cs:onboarding-checklist')).toBeNull()
     expect(localStorage.getItem('cs:favs')).toBeNull()
     expect(localStorage.getItem('cs:recent')).toBeNull()
     expect(localStorage.getItem('cs:window-geometry')).toBeNull()

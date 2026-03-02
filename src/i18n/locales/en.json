@@ -502,7 +502,8 @@
     "contactSupport": "Contact support",
     "menubar": "Application menu",
     "buildWithAI": "Build with AI…",
-    "manageTemplates": "Manage Templates…"
+    "manageTemplates": "Manage Templates…",
+    "startTour": "Getting started tour"
   },
   "time": {
     "justNow": "just now",
@@ -678,6 +679,65 @@
     "templateDesc": "Choose a starter project",
     "import": "Import project",
     "importDesc": "Load a .chainsolvejson file"
+  },
+  "tour": {
+    "title": "Getting Started",
+    "progress": "{{done}} of {{total}} steps completed",
+    "stepLabel": "Step {{current}} of {{total}}",
+    "dismiss": "Close tour",
+    "prev": "Previous",
+    "next": "Next step",
+    "markDone": "Mark done and continue",
+    "finish": "Finish tour",
+    "allDone": "All steps completed",
+    "allDoneDesc": "You have completed all the getting-started steps. You can access this tour again from the Help menu at any time.",
+    "steps": {
+      "open_projects": {
+        "short": "Open Projects",
+        "title": "Open the Projects window",
+        "description": "From the Workbench Home, open the Projects window to see your saved projects and create new ones. You can also access Projects from the File menu."
+      },
+      "create_project": {
+        "short": "Create project",
+        "title": "Create a new project",
+        "description": "Click \"Create Project\" to start a new saved project, or use the scratch canvas for quick calculations without saving. Each project contains one or more sheets."
+      },
+      "add_input": {
+        "short": "Add input block",
+        "title": "Add an input block",
+        "description": "Right-click the canvas and choose Insert, or press / for quick insert. Select an input block such as Number Input or Slider to provide values for your computation chain."
+      },
+      "add_function": {
+        "short": "Add function block",
+        "title": "Add a function block",
+        "description": "Add a function block from the library. Functions cover maths, engineering, finance, and statistics. Browse by category or search by name."
+      },
+      "add_output": {
+        "short": "Add output block",
+        "title": "Add an output block",
+        "description": "Add a Display block to see the result of your computation. Display blocks show the computed value and can include units."
+      },
+      "connect_chains": {
+        "short": "Connect chains",
+        "title": "Connect blocks with chains",
+        "description": "Drag from an output port on one block to an input port on another to create a chain. Chains carry values between blocks. The computation runs automatically."
+      },
+      "use_inspector": {
+        "short": "Use inspector",
+        "title": "Set values and units in the inspector",
+        "description": "Click a block to open the inspector window. Here you can set input values, choose units, view descriptions, and check the computed output."
+      },
+      "save_project": {
+        "short": "Save project",
+        "title": "Save your project",
+        "description": "Press Ctrl+S (or Cmd+S on Mac) or use the File menu to save. Projects are saved to your account and available across devices."
+      },
+      "open_reporting": {
+        "short": "Reporting (Pro)",
+        "title": "Export reports and notation",
+        "description": "Pro users can export PDF and Excel reports, view scientific notation for computation chains, and share results. Access these from the File menu."
+      }
+    }
   },
   "marketplace": {
     "title": "Explore",

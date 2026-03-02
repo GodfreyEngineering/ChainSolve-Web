@@ -37,6 +37,9 @@ const LazyDocsSearchWindow = lazy(() =>
 const LazyWhatsNewModal = lazy(() =>
   import('./WhatsNewModal').then((m) => ({ default: m.WhatsNewModal })),
 )
+const LazyOnboardingOverlay = lazy(() =>
+  import('./OnboardingOverlay').then((m) => ({ default: m.OnboardingOverlay })),
+)
 const LazyLlmGraphBuilderDialog = lazy(() =>
   import('../canvas/LlmGraphBuilderDialog').then((m) => ({ default: m.LlmGraphBuilderDialog })),
 )
@@ -48,6 +51,7 @@ import { getCurrentUser, signOut } from '../../lib/auth'
 import { removeCurrentSession } from '../../lib/sessionService'
 import { clearReauth } from '../../lib/reauth'
 import { getRecentProjects } from '../../lib/recentProjects'
+import { resetOnboarding } from '../../lib/onboardingState'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { flattenMenusToActions, type MenuDef } from '../../lib/actions'
 import { computeSaveStatusLabel } from '../../lib/saveStatusLabel'
@@ -193,6 +197,7 @@ export function AppHeader({
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [llmBuilderOpen, setLlmBuilderOpen] = useState(false)
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false)
+  const [tourOpen, setTourOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
   const accountRef = useRef<HTMLDivElement>(null)
 
@@ -765,6 +770,14 @@ export function AppHeader({
           setOpenMenu(null)
         },
       },
+      {
+        label: t('menu.startTour'),
+        onClick: () => {
+          resetOnboarding()
+          setTourOpen(true)
+          setOpenMenu(null)
+        },
+      },
       { separator: true },
       {
         label: t('menu.bugReport'),
@@ -1084,6 +1097,11 @@ export function AppHeader({
       {whatsNewOpen && (
         <Suspense fallback={null}>
           <LazyWhatsNewModal open onClose={() => setWhatsNewOpen(false)} />
+        </Suspense>
+      )}
+      {tourOpen && (
+        <Suspense fallback={null}>
+          <LazyOnboardingOverlay mode="overlay" onClose={() => setTourOpen(false)} />
         </Suspense>
       )}
       {openDialogOpen && (
