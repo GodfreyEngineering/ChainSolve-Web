@@ -172,15 +172,9 @@ export function redactTags(tags: Record<string, string>): Record<string, string>
 
 /**
  * Compute a SHA-256 hex fingerprint of the input string.
- * Uses Web Crypto (available in browser + Node 18+ + CF Workers).
+ * Delegates to the canonical implementation in pdf/sha256.ts.
  */
-export async function hashString(input: string): Promise<string> {
-  const data = new TextEncoder().encode(input)
-  const buf = await crypto.subtle.digest('SHA-256', data)
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
-}
+export { sha256Hex as hashString } from '../lib/pdf/sha256'
 
 /**
  * Fast synchronous djb2 hash — used for in-process dedup only.
