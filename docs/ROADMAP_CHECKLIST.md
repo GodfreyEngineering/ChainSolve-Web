@@ -1481,7 +1481,7 @@ Claude MUST:
 ---
 
 ## F7 — Release readiness hardening (final polish and “it just works”)
-- [ ] F7-1: Full release dry-run script
+- [x] F7-1: Full release dry-run script
   - Add `docs/DEV/RELEASE_DRY_RUN.md`:
     - how to run verify-ci, build, deploy preview checks
     - how to validate CSP, auth flows, exports gating, AI quotas
