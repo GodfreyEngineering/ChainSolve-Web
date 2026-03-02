@@ -6,7 +6,8 @@
  * (components-only files).
  */
 
-export const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''
+import { TURNSTILE_SITE_KEY } from './env'
+export { TURNSTILE_SITE_KEY }
 
 /** Returns true if a Turnstile site key is configured. */
 export function isTurnstileEnabled(): boolean {

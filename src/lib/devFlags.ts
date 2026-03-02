@@ -5,6 +5,8 @@
  * for production users is effectively zero.
  */
 
+import { DIAGNOSTICS_UI_ENABLED } from './env'
+
 const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
 
 /** Returns true if `?perf=1` is present in the URL. */
@@ -22,7 +24,7 @@ export function isPerfHudEnabled(): boolean {
  */
 export function isDiagnosticsUIEnabled(): boolean {
   if (import.meta.env.DEV) return true
-  if (import.meta.env.VITE_DIAGNOSTICS_UI_ENABLED !== 'true') return false
+  if (!DIAGNOSTICS_UI_ENABLED) return false
   try {
     return typeof window !== 'undefined' && localStorage.getItem('cs_diag') === '1'
   } catch {

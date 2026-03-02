@@ -18,6 +18,8 @@
  *   instructions.
  */
 
+import { LLM_API_KEY } from './env'
+
 /** A node spec from an LLM-generated graph plan. */
 export interface LlmNodeSpec {
   /** Block type from the engine catalog (e.g. "add", "multiply", "number"). */
@@ -80,7 +82,7 @@ export function parseLlmPlan(raw: string): LlmGraphPlan | null {
  * once the key is present.
  */
 export async function buildGraphFromPrompt(prompt: string): Promise<LlmBuildResult> {
-  const apiKey = import.meta.env.VITE_LLM_API_KEY as string | undefined
+  const apiKey = LLM_API_KEY
   if (!apiKey) {
     return { status: 'not_configured' }
   }

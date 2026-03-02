@@ -28,4 +28,12 @@ interface ImportMetaEnv {
   readonly VITE_DIAGNOSTICS_UI_ENABLED?: string
   /** Sampling rate for client events (0.0–1.0). Default: 1.0. */
   readonly VITE_OBS_SAMPLE_RATE?: string
+
+  // ── Turnstile CAPTCHA (E2-2) ──────────────────────────────────────────────
+  /** Turnstile site key. Omit to disable CAPTCHA. */
+  readonly VITE_TURNSTILE_SITE_KEY?: string
+
+  // ── AI Copilot ─────────────────────────────────────────────────────────────
+  /** LLM API key for AI copilot. Omit to disable. */
+  readonly VITE_LLM_API_KEY?: string
 }

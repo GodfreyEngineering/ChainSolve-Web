@@ -32,6 +32,7 @@ import type {
 import { OBS_EVENT_TYPE, OBS_LIMITS } from './types'
 import { redactString, redactUrl, pathOnly, redactTags, makeFingerprint } from './redact'
 import { BUILD_SHA, BUILD_ENV } from '../lib/build-info'
+import { OBS_ENABLED, OBS_SAMPLE_RATE } from '../lib/env'
 
 // ── Configuration ─────────────────────────────────────────────────────────────
 
@@ -97,13 +98,11 @@ function truncate(s: string, max: number): string {
 }
 
 function isEnabled(): boolean {
-  return import.meta.env.VITE_OBS_ENABLED === 'true'
+  return OBS_ENABLED
 }
 
 function sampleRate(): number {
-  const raw = import.meta.env.VITE_OBS_SAMPLE_RATE
-  const n = raw !== undefined ? parseFloat(raw) : 1.0
-  return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 1.0
+  return OBS_SAMPLE_RATE
 }
 
 // ── Rate limiting + dedup ─────────────────────────────────────────────────────

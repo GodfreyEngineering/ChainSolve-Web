@@ -15,6 +15,7 @@
  */
 
 import type { DoctorCheck } from './types'
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../lib/env'
 
 // ── Check runner ──────────────────────────────────────────────────────────────
 
@@ -68,12 +69,11 @@ async function checkStorage(): Promise<string> {
   // We cannot write to storage safely from doctor (it would create real objects).
   // Instead, we check that the Supabase client is reachable by hitting the REST
   // health endpoint (same host as VITE_SUPABASE_URL, /rest/v1/).
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-  if (!supabaseUrl) throw new Error('VITE_SUPABASE_URL not set')
-  const url = `${supabaseUrl}/rest/v1/`
+  if (!SUPABASE_URL) throw new Error('VITE_SUPABASE_URL not set')
+  const url = `${SUPABASE_URL}/rest/v1/`
   const resp = await fetch(url, {
     method: 'GET',
-    headers: { apikey: import.meta.env.VITE_SUPABASE_ANON_KEY ?? '' },
+    headers: { apikey: SUPABASE_ANON_KEY },
     signal: AbortSignal.timeout(5000),
   })
   // Supabase REST returns 200 or 400 for this endpoint; both mean "reachable"
