@@ -1431,7 +1431,7 @@ Claude MUST:
   - Avoid touching restricted schemas (`auth`, `storage`, `realtime`) beyond supported operations. :contentReference[oaicite:7]{index=7}
   - Acceptance: clean migration set and documented conventions.
 
-- [ ] F4-2: RLS & policy consolidation pass
+- [x] F4-2: RLS & policy consolidation pass
   - Reduce “multiple permissive policies” where possible (merge OR logic).
   - Ensure tables with RLS enabled have explicit policies (or explicit deny-all).
   - Acceptance: Supabase advisor warnings reduced/cleared and policies are clear.
