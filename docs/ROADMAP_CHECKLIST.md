@@ -1411,7 +1411,7 @@ Claude MUST:
   - Ensure lazy-loaded heavy deps remain lazy (PDF/XLSX/Vega/AI).
   - Acceptance: build output shows chunks correctly split and no bundle regressions.
 
-- [ ] F3-2: Add “dependency policy” doc
+- [x] F3-2: Add “dependency policy” doc
   - Create `docs/DEV/DEPENDENCIES.md`:
     - what is allowed, what is discouraged
     - how to add a new dependency
