@@ -6,6 +6,7 @@
  */
 
 import type { CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Value } from '../../engine/value'
 import { isError } from '../../engine/value'
 import type { AlignOp } from '../../lib/alignmentHelpers'
@@ -130,6 +131,8 @@ export function ContextMenu({
   onInsertFromPrompt,
   onAlignSelection,
 }: ContextMenuProps) {
+  const { t } = useTranslation()
+
   const menuStyle: CSSProperties = {
     position: 'fixed',
     left: target.x,
@@ -165,7 +168,7 @@ export function ContextMenu({
           <>
             <MenuItem
               icon="⬚"
-              label="Inspect"
+              label={t('contextMenu.inspect')}
               onClick={() => {
                 onInspectNode(target.nodeId)
                 onClose()
@@ -173,7 +176,7 @@ export function ContextMenu({
             />
             <MenuItem
               icon="✎"
-              label="Rename…"
+              label={t('contextMenu.rename')}
               onClick={() => {
                 onRenameNode(target.nodeId)
                 onClose()
@@ -181,7 +184,7 @@ export function ContextMenu({
             />
             <MenuItem
               icon="⧉"
-              label="Duplicate"
+              label={t('contextMenu.duplicate')}
               onClick={() => {
                 onDuplicateNode(target.nodeId)
                 onClose()
@@ -189,8 +192,10 @@ export function ContextMenu({
             />
             <div style={sep} />
             <MenuItem
-              icon={target.isLocked ? '🔓' : '🔒'}
-              label={target.isLocked ? 'Unlock position' : 'Lock position'}
+              icon={target.isLocked ? '⊘' : '⊙'}
+              label={
+                target.isLocked ? t('contextMenu.unlockPosition') : t('contextMenu.lockPosition')
+              }
               onClick={() => {
                 onLockNode(target.nodeId)
                 onClose()
@@ -201,7 +206,7 @@ export function ContextMenu({
                 <div style={sep} />
                 <MenuItem
                   icon="⎘"
-                  label="Copy value"
+                  label={t('contextMenu.copyValue')}
                   onClick={() => {
                     onCopyNodeValue(target.nodeId)
                     onClose()
@@ -217,7 +222,7 @@ export function ContextMenu({
               })() && (
                 <MenuItem
                   icon="⤳"
-                  label="Jump to source"
+                  label={t('contextMenu.jumpToSource')}
                   onClick={() => {
                     onJumpToNode(target.nodeId)
                     onClose()
@@ -228,8 +233,8 @@ export function ContextMenu({
               <>
                 <div style={sep} />
                 <MenuItem
-                  icon="💡"
-                  label="Explain this node"
+                  icon="✦"
+                  label={t('contextMenu.explainNode')}
                   onClick={() => {
                     onExplainNode(target.nodeId)
                     onClose()
@@ -240,7 +245,7 @@ export function ContextMenu({
             <div style={sep} />
             <MenuItem
               icon="✕"
-              label="Delete node"
+              label={t('contextMenu.deleteNode')}
               danger
               onClick={() => {
                 onDeleteNode(target.nodeId)
@@ -254,7 +259,7 @@ export function ContextMenu({
           <>
             <MenuItem
               icon={target.isCollapsed ? '▼' : '▶'}
-              label={target.isCollapsed ? 'Expand' : 'Collapse'}
+              label={target.isCollapsed ? t('contextMenu.expand') : t('contextMenu.collapse')}
               onClick={() => {
                 onToggleCollapse?.(target.nodeId)
                 onClose()
@@ -262,7 +267,7 @@ export function ContextMenu({
             />
             <MenuItem
               icon="✎"
-              label="Rename…"
+              label={t('contextMenu.rename')}
               onClick={() => {
                 onRenameNode(target.nodeId)
                 onClose()
@@ -270,15 +275,15 @@ export function ContextMenu({
             />
             <MenuItem
               icon="⬚"
-              label="Inspect"
+              label={t('contextMenu.inspect')}
               onClick={() => {
                 onInspectNode(target.nodeId)
                 onClose()
               }}
             />
             <MenuItem
-              icon="💾"
-              label="Save as template…"
+              icon="⛁"
+              label={t('contextMenu.saveAsTemplate')}
               onClick={() => {
                 onSaveAsTemplate?.(target.nodeId)
                 onClose()
@@ -287,7 +292,7 @@ export function ContextMenu({
             <div style={sep} />
             <MenuItem
               icon="⊟"
-              label="Ungroup"
+              label={t('contextMenu.ungroup')}
               onClick={() => {
                 onUngroupNode?.(target.nodeId)
                 onClose()
@@ -296,7 +301,7 @@ export function ContextMenu({
             <div style={sep} />
             <MenuItem
               icon="✕"
-              label="Delete group"
+              label={t('contextMenu.deleteGroup')}
               danger
               onClick={() => {
                 onDeleteNode(target.nodeId)
@@ -310,7 +315,11 @@ export function ContextMenu({
           <>
             <MenuItem
               icon="▢"
-              label={canUseGroups ? 'Group selection' : '🔒 Group selection'}
+              label={
+                canUseGroups
+                  ? t('contextMenu.groupSelection')
+                  : `⊘ ${t('contextMenu.groupSelection')}`
+              }
               onClick={() => {
                 onGroupSelection?.()
                 onClose()
@@ -321,7 +330,7 @@ export function ContextMenu({
                 <div style={sep} />
                 <MenuItem
                   icon="⫷"
-                  label="Align left"
+                  label={t('contextMenu.alignLeft')}
                   onClick={() => {
                     onAlignSelection('align-left')
                     onClose()
@@ -329,7 +338,7 @@ export function ContextMenu({
                 />
                 <MenuItem
                   icon="⫸"
-                  label="Align right"
+                  label={t('contextMenu.alignRight')}
                   onClick={() => {
                     onAlignSelection('align-right')
                     onClose()
@@ -337,7 +346,7 @@ export function ContextMenu({
                 />
                 <MenuItem
                   icon="⊤"
-                  label="Align top"
+                  label={t('contextMenu.alignTop')}
                   onClick={() => {
                     onAlignSelection('align-top')
                     onClose()
@@ -345,7 +354,7 @@ export function ContextMenu({
                 />
                 <MenuItem
                   icon="⊥"
-                  label="Align bottom"
+                  label={t('contextMenu.alignBottom')}
                   onClick={() => {
                     onAlignSelection('align-bottom')
                     onClose()
@@ -356,7 +365,7 @@ export function ContextMenu({
                     <div style={sep} />
                     <MenuItem
                       icon="⇔"
-                      label="Distribute horizontal"
+                      label={t('contextMenu.distributeHorizontal')}
                       onClick={() => {
                         onAlignSelection('distribute-h')
                         onClose()
@@ -364,7 +373,7 @@ export function ContextMenu({
                     />
                     <MenuItem
                       icon="⇕"
-                      label="Distribute vertical"
+                      label={t('contextMenu.distributeVertical')}
                       onClick={() => {
                         onAlignSelection('distribute-v')
                         onClose()
@@ -377,7 +386,7 @@ export function ContextMenu({
             <div style={sep} />
             <MenuItem
               icon="✕"
-              label={`Delete ${target.selectedCount} selected`}
+              label={t('contextMenu.deleteSelected', { count: target.selectedCount })}
               danger
               onClick={() => {
                 onDeleteSelected?.()
@@ -393,7 +402,7 @@ export function ContextMenu({
               <>
                 <MenuItem
                   icon="⬚"
-                  label="Inspect connection"
+                  label={t('contextMenu.inspectConnection')}
                   onClick={() => {
                     onInspectEdge(target.edgeId)
                     onClose()
@@ -404,7 +413,7 @@ export function ContextMenu({
             )}
             <MenuItem
               icon="✕"
-              label="Delete connection"
+              label={t('contextMenu.deleteConnection')}
               danger
               onClick={() => {
                 onDeleteEdge(target.edgeId)
@@ -418,7 +427,7 @@ export function ContextMenu({
           <>
             <MenuItem
               icon="+"
-              label="Add block here"
+              label={t('contextMenu.addBlockHere')}
               onClick={() => {
                 onAddBlockAtCursor(target.x, target.y)
                 onClose()
@@ -427,7 +436,7 @@ export function ContextMenu({
             {onPaste && (
               <MenuItem
                 icon="⎗"
-                label="Paste"
+                label={t('contextMenu.paste')}
                 onClick={() => {
                   onPaste()
                   onClose()
@@ -437,7 +446,7 @@ export function ContextMenu({
             <div style={sep} />
             <MenuItem
               icon="⊡"
-              label="Fit view"
+              label={t('contextMenu.fitView')}
               onClick={() => {
                 onFitView()
                 onClose()
@@ -446,7 +455,7 @@ export function ContextMenu({
             {onAutoLayout && (
               <MenuItem
                 icon="⊞"
-                label="Auto-layout"
+                label={t('contextMenu.autoLayout')}
                 onClick={() => {
                   onAutoLayout()
                   onClose()
@@ -458,7 +467,7 @@ export function ContextMenu({
                 <div style={sep} />
                 <MenuItem
                   icon="✦"
-                  label="Insert blocks from prompt…"
+                  label={t('contextMenu.insertFromPrompt')}
                   onClick={() => {
                     onInsertFromPrompt(target.x, target.y)
                     onClose()

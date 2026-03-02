@@ -1,4 +1,5 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react'
+import i18n from '../i18n/config'
 import { captureReactBoundary } from '../observability/client'
 import { CONTACT } from '../lib/brand'
 
@@ -38,15 +39,17 @@ export class ErrorBoundary extends Component<Props, State> {
           }}
         >
           <div style={{ maxWidth: '480px', textAlign: 'center' }}>
-            <h2 style={{ margin: '0 0 0.75rem', color: '#f87171' }}>Something went wrong</h2>
+            <h2 style={{ margin: '0 0 0.75rem', color: '#f87171' }}>
+              {i18n.t('errorBoundary.title')}
+            </h2>
             <p style={{ opacity: 0.6, marginBottom: '1rem', fontSize: '0.9rem' }}>
               {this.state.error.message}
             </p>
             <p style={{ opacity: 0.35, marginBottom: '0.75rem', fontSize: '0.75rem' }}>
-              Check browser DevTools (F12 → Console) for details.
+              {i18n.t('errorBoundary.devToolsHint')}
             </p>
             <p style={{ opacity: 0.35, marginBottom: '1.5rem', fontSize: '0.75rem' }}>
-              Need help?{' '}
+              {i18n.t('errorBoundary.needHelp')}{' '}
               <a
                 href={`mailto:${CONTACT.support}`}
                 style={{ color: 'var(--primary)', textDecoration: 'none' }}
@@ -66,7 +69,7 @@ export class ErrorBoundary extends Component<Props, State> {
               }}
               onClick={() => this.setState({ error: null })}
             >
-              Try again
+              {i18n.t('errorBoundary.tryAgain')}
             </button>
           </div>
         </div>

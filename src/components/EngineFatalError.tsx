@@ -11,6 +11,7 @@
  */
 
 import { useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CONTACT } from '../lib/brand'
 
 interface Props {
@@ -19,6 +20,8 @@ interface Props {
 }
 
 export function EngineFatalError({ error, onRetry }: Props) {
+  const { t } = useTranslation()
+
   // Extract structured error code from the message prefix, e.g. "[WASM_CSP_BLOCKED] …"
   const codeMatch = error.message.match(/^\[([A-Z_]+)\]/)
   const errorCode = codeMatch?.[1] ?? 'WASM_INIT_FAILED'
@@ -46,32 +49,15 @@ export function EngineFatalError({ error, onRetry }: Props) {
   }, [error.message, errorCode])
 
   function getTitle(): string {
-    if (isCspBlocked) return 'Engine blocked by Content Security Policy'
-    if (isContractMismatch) return 'Engine version mismatch — please update'
-    return 'Engine failed to load'
+    if (isCspBlocked) return t('engineError.cspTitle')
+    if (isContractMismatch) return t('engineError.mismatchTitle')
+    return t('engineError.genericTitle')
   }
 
   function getDescription(): string {
-    if (isCspBlocked) {
-      return (
-        'WebAssembly compilation was blocked by the page\u2019s Content Security Policy. ' +
-        'If this is the production site, please contact support \u2014 this is a server ' +
-        'configuration issue. Administrators: add \u2018wasm-unsafe-eval\u2019 to the ' +
-        'script-src CSP directive (see docs/SECURITY.md).'
-      )
-    }
-    if (isContractMismatch) {
-      return (
-        'The compute engine and the app are out of sync. This can happen after an update ' +
-        'if your browser is serving a cached version of the app or the engine. ' +
-        'To fix: (1) clear your browser cache (Ctrl+Shift+Delete / Cmd+Shift+Delete), ' +
-        'then (2) reload the page.'
-      )
-    }
-    return (
-      'The compute engine could not initialize. This may be caused by a browser ' +
-      'extension blocking WebAssembly or a network issue.'
-    )
+    if (isCspBlocked) return t('engineError.cspDescription')
+    if (isContractMismatch) return t('engineError.mismatchDescription')
+    return t('engineError.genericDescription')
   }
 
   return (
@@ -132,7 +118,7 @@ export function EngineFatalError({ error, onRetry }: Props) {
       <p
         style={{ maxWidth: '30rem', marginBottom: '1.5rem', fontSize: '0.82rem', color: '#71717a' }}
       >
-        Need help?{' '}
+        {t('engineError.needHelp')}{' '}
         <a href={`mailto:${CONTACT.support}`} style={{ color: '#93c5fd', textDecoration: 'none' }}>
           {CONTACT.support}
         </a>
@@ -151,7 +137,7 @@ export function EngineFatalError({ error, onRetry }: Props) {
             fontWeight: 500,
           }}
         >
-          Retry
+          {t('engineError.retry')}
         </button>
         <a
           href="/"
@@ -166,7 +152,7 @@ export function EngineFatalError({ error, onRetry }: Props) {
             fontWeight: 500,
           }}
         >
-          Reload page
+          {t('engineError.reloadPage')}
         </a>
         <button
           onClick={handleCopyDiagnostics}
@@ -180,7 +166,7 @@ export function EngineFatalError({ error, onRetry }: Props) {
             fontWeight: 500,
           }}
         >
-          {copied ? 'Copied!' : 'Copy diagnostics'}
+          {copied ? t('engineError.copied') : t('engineError.copyDiagnostics')}
         </button>
       </div>
     </div>

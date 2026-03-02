@@ -166,7 +166,8 @@
     "offlineQueued": "Queued — offline",
     "retryNow": "Retry now",
     "backOnline": "Back online — syncing changes",
-    "signInToSave": "Sign in to save your work to the cloud"
+    "signInToSave": "Sign in to save your work to the cloud",
+    "clickToRename": "Click to rename"
   },
   "blocks": {
     "categoryData": "Data",
@@ -913,8 +914,64 @@
     "effectiveDate": "Effective {{date}}",
     "backToSignIn": "Back to sign in"
   },
+  "contextMenu": {
+    "inspect": "Inspect",
+    "rename": "Rename…",
+    "duplicate": "Duplicate",
+    "lockPosition": "Lock position",
+    "unlockPosition": "Unlock position",
+    "copyValue": "Copy value",
+    "jumpToSource": "Jump to source",
+    "explainNode": "Explain this node",
+    "deleteNode": "Delete node",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "saveAsTemplate": "Save as template…",
+    "ungroup": "Ungroup",
+    "deleteGroup": "Delete group",
+    "groupSelection": "Group selection",
+    "alignLeft": "Align left",
+    "alignRight": "Align right",
+    "alignTop": "Align top",
+    "alignBottom": "Align bottom",
+    "distributeHorizontal": "Distribute horizontal",
+    "distributeVertical": "Distribute vertical",
+    "deleteSelected": "Delete {{count}} selected",
+    "inspectConnection": "Inspect connection",
+    "deleteConnection": "Delete connection",
+    "addBlockHere": "Add block here",
+    "paste": "Paste",
+    "fitView": "Fit view",
+    "autoLayout": "Auto-layout",
+    "insertFromPrompt": "Insert blocks from prompt…"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "devToolsHint": "Check browser DevTools (F12 > Console) for details.",
+    "needHelp": "Need help?",
+    "tryAgain": "Try again"
+  },
+  "engineError": {
+    "cspTitle": "Engine blocked by Content Security Policy",
+    "mismatchTitle": "Engine version mismatch — please update",
+    "genericTitle": "Engine failed to load",
+    "cspDescription": "WebAssembly compilation was blocked by the page's Content Security Policy. If this is the production site, please contact support — this is a server configuration issue.",
+    "mismatchDescription": "The compute engine and the app are out of sync. This can happen after an update if your browser is serving a cached version. Clear your browser cache and reload the page.",
+    "genericDescription": "The compute engine could not initialize. This may be caused by a browser extension blocking WebAssembly or a network issue.",
+    "needHelp": "Need help?",
+    "retry": "Retry",
+    "reloadPage": "Reload page",
+    "copyDiagnostics": "Copy diagnostics",
+    "copied": "Copied!"
+  },
+  "themeOption": {
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
   "common": {
     "cancel": "Cancel",
-    "close": "Close"
+    "close": "Close",
+    "loading": "Loading…"
   }
 }

@@ -654,17 +654,17 @@ export function AppHeader({
         label: t('menu.theme'),
         children: [
           {
-            label: 'System',
+            label: t('themeOption.system'),
             onClick: () => setThemeMode('system' as ThemeMode),
             disabled: themeMode === 'system',
           },
           {
-            label: 'Light',
+            label: t('themeOption.light'),
             onClick: () => setThemeMode('light' as ThemeMode),
             disabled: themeMode === 'light',
           },
           {
-            label: 'Dark',
+            label: t('themeOption.dark'),
             onClick: () => setThemeMode('dark' as ThemeMode),
             disabled: themeMode === 'dark',
           },
@@ -858,7 +858,7 @@ export function AppHeader({
           {projectId && !nameEditing && (
             <span
               onClick={readOnly ? undefined : onStartNameEdit}
-              title={readOnly ? undefined : 'Click to rename'}
+              title={readOnly ? undefined : t('canvas.clickToRename')}
               style={projectNameStyle(readOnly)}
             >
               {projectName}
@@ -879,7 +879,7 @@ export function AppHeader({
           )}
           {!projectId && (
             <span style={{ fontWeight: 600, fontSize: '0.82rem', opacity: 0.4 }}>
-              Scratch canvas
+              {t('canvas.scratch')}
             </span>
           )}
 

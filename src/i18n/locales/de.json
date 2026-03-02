@@ -158,7 +158,9 @@
     "offline": "Offline",
     "offlineQueued": "Ausstehend — offline",
     "retryNow": "Jetzt erneut versuchen",
-    "backOnline": "Wieder online — Änderungen werden synchronisiert"
+    "backOnline": "Wieder online — Änderungen werden synchronisiert",
+    "signInToSave": "Melden Sie sich an, um Ihre Arbeit in der Cloud zu speichern",
+    "clickToRename": "Klicken zum Umbenennen"
   },
   "blocks": {
     "categoryData": "Daten",
@@ -893,8 +895,64 @@
     "effectiveDate": "Gültig ab {{date}}",
     "backToSignIn": "Zurück zur Anmeldung"
   },
+  "contextMenu": {
+    "inspect": "Inspizieren",
+    "rename": "Umbenennen…",
+    "duplicate": "Duplizieren",
+    "lockPosition": "Position sperren",
+    "unlockPosition": "Position entsperren",
+    "copyValue": "Wert kopieren",
+    "jumpToSource": "Zur Quelle springen",
+    "explainNode": "Diesen Knoten erklären",
+    "deleteNode": "Knoten löschen",
+    "expand": "Aufklappen",
+    "collapse": "Zuklappen",
+    "saveAsTemplate": "Als Vorlage speichern…",
+    "ungroup": "Gruppierung aufheben",
+    "deleteGroup": "Gruppe löschen",
+    "groupSelection": "Auswahl gruppieren",
+    "alignLeft": "Links ausrichten",
+    "alignRight": "Rechts ausrichten",
+    "alignTop": "Oben ausrichten",
+    "alignBottom": "Unten ausrichten",
+    "distributeHorizontal": "Horizontal verteilen",
+    "distributeVertical": "Vertikal verteilen",
+    "deleteSelected": "{{count}} ausgewählte löschen",
+    "inspectConnection": "Verbindung inspizieren",
+    "deleteConnection": "Verbindung löschen",
+    "addBlockHere": "Block hier einfügen",
+    "paste": "Einfügen",
+    "fitView": "Ansicht anpassen",
+    "autoLayout": "Auto-Layout",
+    "insertFromPrompt": "Blöcke aus Prompt einfügen…"
+  },
+  "errorBoundary": {
+    "title": "Etwas ist schiefgelaufen",
+    "devToolsHint": "Prüfen Sie die Browser-DevTools (F12 → Konsole) für Details.",
+    "needHelp": "Brauchen Sie Hilfe?",
+    "tryAgain": "Erneut versuchen"
+  },
+  "engineError": {
+    "cspTitle": "Engine durch Content Security Policy blockiert",
+    "mismatchTitle": "Engine-Versionskonflikt — bitte aktualisieren",
+    "genericTitle": "Engine konnte nicht geladen werden",
+    "cspDescription": "Die WebAssembly-Kompilierung wurde durch die Content Security Policy der Seite blockiert. Wenn dies die Produktionsseite ist, kontaktieren Sie bitte den Support — dies ist ein Serverkonfigurationsproblem.",
+    "mismatchDescription": "Die Berechnungs-Engine und die App sind nicht synchron. Dies kann nach einem Update passieren, wenn Ihr Browser eine gecachte Version bereitstellt. Leeren Sie den Browser-Cache und laden Sie die Seite neu.",
+    "genericDescription": "Die Berechnungs-Engine konnte nicht initialisiert werden. Dies kann durch eine Browser-Erweiterung, die WebAssembly blockiert, oder ein Netzwerkproblem verursacht werden.",
+    "needHelp": "Brauchen Sie Hilfe?",
+    "retry": "Erneut versuchen",
+    "reloadPage": "Seite neu laden",
+    "copyDiagnostics": "Diagnose kopieren",
+    "copied": "Kopiert!"
+  },
+  "themeOption": {
+    "system": "System",
+    "light": "Hell",
+    "dark": "Dunkel"
+  },
   "common": {
     "cancel": "Abbrechen",
-    "close": "Schließen"
+    "close": "Schließen",
+    "loading": "Laden…"
   }
 }

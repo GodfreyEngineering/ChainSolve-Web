@@ -158,7 +158,9 @@
     "offline": "Offline",
     "offlineQueued": "In coda — offline",
     "retryNow": "Riprova ora",
-    "backOnline": "Di nuovo online — sincronizzazione in corso"
+    "backOnline": "Di nuovo online — sincronizzazione in corso",
+    "signInToSave": "Accedi per salvare il tuo lavoro nel cloud",
+    "clickToRename": "Clicca per rinominare"
   },
   "blocks": {
     "categoryData": "Dati",
@@ -893,8 +895,64 @@
     "effectiveDate": "In vigore dal {{date}}",
     "backToSignIn": "Torna all'accesso"
   },
+  "contextMenu": {
+    "inspect": "Ispeziona",
+    "rename": "Rinomina…",
+    "duplicate": "Duplica",
+    "lockPosition": "Blocca posizione",
+    "unlockPosition": "Sblocca posizione",
+    "copyValue": "Copia valore",
+    "jumpToSource": "Vai all'origine",
+    "explainNode": "Spiega questo nodo",
+    "deleteNode": "Elimina nodo",
+    "expand": "Espandi",
+    "collapse": "Comprimi",
+    "saveAsTemplate": "Salva come modello…",
+    "ungroup": "Separa gruppo",
+    "deleteGroup": "Elimina gruppo",
+    "groupSelection": "Raggruppa selezione",
+    "alignLeft": "Allinea a sinistra",
+    "alignRight": "Allinea a destra",
+    "alignTop": "Allinea in alto",
+    "alignBottom": "Allinea in basso",
+    "distributeHorizontal": "Distribuisci orizzontalmente",
+    "distributeVertical": "Distribuisci verticalmente",
+    "deleteSelected": "Elimina {{count}} selezionati",
+    "inspectConnection": "Ispeziona connessione",
+    "deleteConnection": "Elimina connessione",
+    "addBlockHere": "Aggiungi blocco qui",
+    "paste": "Incolla",
+    "fitView": "Adatta alla vista",
+    "autoLayout": "Layout automatico",
+    "insertFromPrompt": "Inserisci blocchi da prompt…"
+  },
+  "errorBoundary": {
+    "title": "Qualcosa è andato storto",
+    "devToolsHint": "Controlla gli strumenti per sviluppatori del browser (F12 → Console) per i dettagli.",
+    "needHelp": "Hai bisogno di aiuto?",
+    "tryAgain": "Riprova"
+  },
+  "engineError": {
+    "cspTitle": "Motore bloccato dalla Content Security Policy",
+    "mismatchTitle": "Versione del motore incompatibile — aggiorna",
+    "genericTitle": "Impossibile caricare il motore",
+    "cspDescription": "La compilazione WebAssembly è stata bloccata dalla Content Security Policy della pagina. Se questo è il sito di produzione, contatta il supporto — è un problema di configurazione del server.",
+    "mismatchDescription": "Il motore di calcolo e l'applicazione non sono sincronizzati. Questo può accadere dopo un aggiornamento se il browser serve una versione in cache. Svuota la cache del browser e ricarica la pagina.",
+    "genericDescription": "Il motore di calcolo non è riuscito ad inizializzarsi. Questo potrebbe essere causato da un'estensione del browser che blocca WebAssembly o da un problema di rete.",
+    "needHelp": "Hai bisogno di aiuto?",
+    "retry": "Riprova",
+    "reloadPage": "Ricarica pagina",
+    "copyDiagnostics": "Copia diagnostica",
+    "copied": "Copiato!"
+  },
+  "themeOption": {
+    "system": "Sistema",
+    "light": "Chiaro",
+    "dark": "Scuro"
+  },
   "common": {
     "cancel": "Annulla",
-    "close": "Chiudi"
+    "close": "Chiudi",
+    "loading": "Caricamento…"
   }
 }

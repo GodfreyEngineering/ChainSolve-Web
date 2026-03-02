@@ -158,7 +158,9 @@
     "offline": "Sin conexión",
     "offlineQueued": "En cola — sin conexión",
     "retryNow": "Reintentar ahora",
-    "backOnline": "Conectado — sincronizando cambios"
+    "backOnline": "Conectado — sincronizando cambios",
+    "signInToSave": "Inicia sesión para guardar tu trabajo en la nube",
+    "clickToRename": "Clic para renombrar"
   },
   "blocks": {
     "categoryData": "Datos",
@@ -893,8 +895,64 @@
     "effectiveDate": "Vigente desde {{date}}",
     "backToSignIn": "Volver a iniciar sesión"
   },
+  "contextMenu": {
+    "inspect": "Inspeccionar",
+    "rename": "Renombrar…",
+    "duplicate": "Duplicar",
+    "lockPosition": "Bloquear posición",
+    "unlockPosition": "Desbloquear posición",
+    "copyValue": "Copiar valor",
+    "jumpToSource": "Ir al origen",
+    "explainNode": "Explicar este nodo",
+    "deleteNode": "Eliminar nodo",
+    "expand": "Expandir",
+    "collapse": "Contraer",
+    "saveAsTemplate": "Guardar como plantilla…",
+    "ungroup": "Desagrupar",
+    "deleteGroup": "Eliminar grupo",
+    "groupSelection": "Agrupar selección",
+    "alignLeft": "Alinear a la izquierda",
+    "alignRight": "Alinear a la derecha",
+    "alignTop": "Alinear arriba",
+    "alignBottom": "Alinear abajo",
+    "distributeHorizontal": "Distribuir horizontalmente",
+    "distributeVertical": "Distribuir verticalmente",
+    "deleteSelected": "Eliminar {{count}} seleccionados",
+    "inspectConnection": "Inspeccionar conexión",
+    "deleteConnection": "Eliminar conexión",
+    "addBlockHere": "Añadir bloque aquí",
+    "paste": "Pegar",
+    "fitView": "Ajustar vista",
+    "autoLayout": "Auto-diseño",
+    "insertFromPrompt": "Insertar bloques desde prompt…"
+  },
+  "errorBoundary": {
+    "title": "Algo salió mal",
+    "devToolsHint": "Consulte las DevTools del navegador (F12 → Consola) para más detalles.",
+    "needHelp": "¿Necesita ayuda?",
+    "tryAgain": "Intentar de nuevo"
+  },
+  "engineError": {
+    "cspTitle": "Motor bloqueado por la política de seguridad de contenido",
+    "mismatchTitle": "Versión del motor incompatible — actualice",
+    "genericTitle": "No se pudo cargar el motor",
+    "cspDescription": "La compilación de WebAssembly fue bloqueada por la política de seguridad de contenido de la página. Si este es el sitio de producción, contacte al soporte — es un problema de configuración del servidor.",
+    "mismatchDescription": "El motor de cálculo y la aplicación no están sincronizados. Esto puede ocurrir después de una actualización si el navegador sirve una versión en caché. Borre la caché del navegador y recargue la página.",
+    "genericDescription": "El motor de cálculo no pudo inicializarse. Esto puede deberse a una extensión del navegador que bloquea WebAssembly o un problema de red.",
+    "needHelp": "¿Necesita ayuda?",
+    "retry": "Reintentar",
+    "reloadPage": "Recargar página",
+    "copyDiagnostics": "Copiar diagnósticos",
+    "copied": "¡Copiado!"
+  },
+  "themeOption": {
+    "system": "Sistema",
+    "light": "Claro",
+    "dark": "Oscuro"
+  },
   "common": {
     "cancel": "Cancelar",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "loading": "Cargando…"
   }
 }

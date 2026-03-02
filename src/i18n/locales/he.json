@@ -132,8 +132,68 @@
     "effectiveDate": "בתוקף מ-{{date}}",
     "backToSignIn": "חזרה להתחברות"
   },
+  "canvas": {
+    "signInToSave": "התחבר כדי לשמור את העבודה שלך בענן",
+    "clickToRename": "לחץ לשינוי שם"
+  },
+  "contextMenu": {
+    "inspect": "בדיקה",
+    "rename": "שינוי שם…",
+    "duplicate": "שכפול",
+    "lockPosition": "נעילת מיקום",
+    "unlockPosition": "ביטול נעילת מיקום",
+    "copyValue": "העתקת ערך",
+    "jumpToSource": "מעבר למקור",
+    "explainNode": "הסבר צומת זה",
+    "deleteNode": "מחיקת צומת",
+    "expand": "הרחבה",
+    "collapse": "כיווץ",
+    "saveAsTemplate": "שמירה כתבנית…",
+    "ungroup": "ביטול קיבוץ",
+    "deleteGroup": "מחיקת קבוצה",
+    "groupSelection": "קיבוץ בחירה",
+    "alignLeft": "יישור שמאלה",
+    "alignRight": "יישור ימינה",
+    "alignTop": "יישור למעלה",
+    "alignBottom": "יישור למטה",
+    "distributeHorizontal": "חלוקה אופקית",
+    "distributeVertical": "חלוקה אנכית",
+    "deleteSelected": "מחיקת {{count}} נבחרים",
+    "inspectConnection": "בדיקת חיבור",
+    "deleteConnection": "מחיקת חיבור",
+    "addBlockHere": "הוספת בלוק כאן",
+    "paste": "הדבקה",
+    "fitView": "התאמת תצוגה",
+    "autoLayout": "פריסה אוטומטית",
+    "insertFromPrompt": "הכנסת בלוקים מ-prompt…"
+  },
+  "errorBoundary": {
+    "title": "משהו השתבש",
+    "devToolsHint": "בדוק את כלי המפתחים בדפדפן (F12 → Console) לפרטים.",
+    "needHelp": "צריך עזרה?",
+    "tryAgain": "נסה שוב"
+  },
+  "engineError": {
+    "cspTitle": "המנוע נחסם על ידי מדיניות אבטחת תוכן",
+    "mismatchTitle": "אי-התאמה בגרסת המנוע — נא לעדכן",
+    "genericTitle": "טעינת המנוע נכשלה",
+    "cspDescription": "הידור WebAssembly נחסם על ידי מדיניות אבטחת התוכן של הדף. אם זהו אתר הייצור, פנה לתמיכה — זו בעיית תצורת שרת.",
+    "mismatchDescription": "מנוע החישוב והאפליקציה אינם מסונכרנים. זה יכול לקרות לאחר עדכון אם הדפדפן מגיש גרסה שמורה במטמון. נקה את מטמון הדפדפן וטען מחדש את הדף.",
+    "genericDescription": "מנוע החישוב לא הצליח לאתחל. ייתכן שזה נגרם על ידי תוסף דפדפן שחוסם WebAssembly או בעיית רשת.",
+    "needHelp": "צריך עזרה?",
+    "retry": "נסה שוב",
+    "reloadPage": "טען מחדש",
+    "copyDiagnostics": "העתק אבחון",
+    "copied": "הועתק!"
+  },
+  "themeOption": {
+    "system": "מערכת",
+    "light": "בהיר",
+    "dark": "כהה"
+  },
   "common": {
     "cancel": "ביטול",
-    "close": "סגור"
+    "close": "סגור",
+    "loading": "טוען…"
   }
 }
