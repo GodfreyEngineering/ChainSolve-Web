@@ -43,7 +43,6 @@ const MUST_BE_LAZY = [
   'src/components/app/KeyboardShortcutsModal.tsx',
   'src/components/app/FirstRunModal.tsx',
   'src/components/app/AboutModal.tsx',
-  'src/components/app/BugReportModal.tsx',
   'src/components/BugReportModal.tsx',
   'src/components/app/ConfirmDialog.tsx',
   'src/components/app/OpenProjectDialog.tsx',
