@@ -20,4 +20,31 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  // Adapter boundary: UI components must not import the Supabase client directly.
+  // Use service-layer functions in src/lib/ instead.
+  // Type-only imports (e.g. `import type { User }`) are allowed — no runtime coupling.
+  {
+    files: ['src/components/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['off'],
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '.*/lib/supabase',
+              message:
+                'UI components must not import the Supabase client. Use service-layer functions from src/lib/ instead.',
+            },
+            {
+              regex: '^@supabase/',
+              allowTypeImports: true,
+              message:
+                'UI components must not import Supabase runtime values. Type imports are OK.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ])
