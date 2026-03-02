@@ -1705,7 +1705,7 @@ Claude MUST:
 ---
 
 ## G7 — Header and project header structure (as specified)
-- [ ] G7-1: Main ChainSolve header always present
+- [x] G7-1: Main ChainSolve header always present
   - Left: logo
   - Middle: Explore, Projects, Documentation
   - Right: Settings gear, Account profile, Plan badge
