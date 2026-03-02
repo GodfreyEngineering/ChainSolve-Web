@@ -1426,7 +1426,7 @@ Claude MUST:
 ---
 
 ## F4 — Security hardening sweep (repo and DB migrations)
-- [ ] F4-1: Supabase migration hygiene pass
+- [x] F4-1: Supabase migration hygiene pass
   - Ensure all migrations are idempotent and safe to re-run. :contentReference[oaicite:6]{index=6}
   - Avoid touching restricted schemas (`auth`, `storage`, `realtime`) beyond supported operations. :contentReference[oaicite:7]{index=7}
   - Acceptance: clean migration set and documented conventions.
