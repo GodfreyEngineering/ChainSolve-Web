@@ -34,6 +34,8 @@ export interface Entitlements {
   canUseAi: boolean
   /** H3-2: Whether user can create custom materials. Pro + Enterprise only. */
   canCreateCustomMaterials: boolean
+  /** H5-1: Whether user can create custom function blocks. Pro + Enterprise only. */
+  canCreateCustomFunctions: boolean
 }
 
 // ── Entitlement map ──────────────────────────────────────────────────────────
@@ -51,6 +53,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canExport: false,
     canUseAi: false,
     canCreateCustomMaterials: false,
+    canCreateCustomFunctions: false,
   },
   trialing: {
     maxProjects: Infinity,
@@ -64,6 +67,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canExport: true,
     canUseAi: true,
     canCreateCustomMaterials: true,
+    canCreateCustomFunctions: true,
   },
   pro: {
     maxProjects: Infinity,
@@ -77,6 +81,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canExport: true,
     canUseAi: true,
     canCreateCustomMaterials: true,
+    canCreateCustomFunctions: true,
   },
   enterprise: {
     maxProjects: Infinity,
@@ -90,6 +95,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canExport: true,
     canUseAi: true,
     canCreateCustomMaterials: true,
+    canCreateCustomFunctions: true,
   },
   past_due: {
     maxProjects: 1,
@@ -103,6 +109,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canExport: false,
     canUseAi: false,
     canCreateCustomMaterials: false,
+    canCreateCustomFunctions: false,
   },
   canceled: {
     maxProjects: 1,
@@ -116,6 +123,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canExport: false,
     canUseAi: false,
     canCreateCustomMaterials: false,
+    canCreateCustomFunctions: false,
   },
 }
 

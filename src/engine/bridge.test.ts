@@ -267,6 +267,42 @@ describe('toEngineSnapshot — annotation node exclusion (E7-1)', () => {
   })
 })
 
+describe('toEngineSnapshot — custom function block mapping (H5-1)', () => {
+  it('maps cfb: blockType to math_expr when formula is present', () => {
+    const nodes = [
+      makeNode('f1', 'cfb:cfb_123_abc', {
+        blockType: 'cfb:cfb_123_abc',
+        formula: 'a * b + c',
+        customFunctionId: 'cfb_123_abc',
+      }),
+    ]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes[0].blockType).toBe('math_expr')
+    expect((snap.nodes[0].data as Record<string, unknown>).formula).toBe('a * b + c')
+  })
+
+  it('keeps cfb: blockType when formula is missing', () => {
+    const nodes = [
+      makeNode('f1', 'cfb:cfb_456', {
+        blockType: 'cfb:cfb_456',
+      }),
+    ]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes[0].blockType).toBe('cfb:cfb_456')
+  })
+
+  it('keeps cfb: blockType when formula is not a string', () => {
+    const nodes = [
+      makeNode('f1', 'cfb:cfb_789', {
+        blockType: 'cfb:cfb_789',
+        formula: 42,
+      }),
+    ]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes[0].blockType).toBe('cfb:cfb_789')
+  })
+})
+
 describe('toEngineSnapshot — multi-node graph', () => {
   it('produces a correct snapshot for physics-101-style graph', () => {
     const nodes = [

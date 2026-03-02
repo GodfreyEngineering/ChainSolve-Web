@@ -48,6 +48,7 @@ const VALID_CATEGORIES: BlockCategory[] = [
   'presetMaterials',
   'presetFluids',
   'annotations',
+  'customFunctions',
 ]
 
 const VALID_NODE_KINDS: NodeKind[] = [

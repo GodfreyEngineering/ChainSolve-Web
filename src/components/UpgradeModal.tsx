@@ -20,6 +20,7 @@ interface UpgradeModalProps {
     | 'export_locked'
     | 'ai_locked'
     | 'custom_materials_locked'
+    | 'custom_functions_locked'
 }
 
 type BillingCycle = 'monthly' | 'annual'
@@ -37,6 +38,7 @@ const tierFeatures = {
     { label: 'upgrade.featExport', included: false },
     { label: 'upgrade.featThemes', included: false },
     { label: 'upgrade.featCustomMaterials', included: false },
+    { label: 'upgrade.featCustomFunctions', included: false },
   ],
   pro: [
     { label: 'upgrade.featUnlimitedProjects', included: true },
@@ -48,6 +50,7 @@ const tierFeatures = {
     { label: 'upgrade.featExport', included: true },
     { label: 'upgrade.featThemes', included: true },
     { label: 'upgrade.featCustomMaterials', included: true },
+    { label: 'upgrade.featCustomFunctions', included: true },
   ],
   enterprise: [
     { label: 'upgrade.featEverythingInPro', included: true },
@@ -158,7 +161,9 @@ export function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
             ? t('ai.upgradeTitle')
             : reason === 'custom_materials_locked'
               ? t('upgrade.customMaterialsLockedTitle', 'Custom materials require Pro')
-              : t('entitlements.featureLockedTitle')
+              : reason === 'custom_functions_locked'
+                ? t('upgrade.customFunctionsLockedTitle', 'Custom functions require Pro')
+                : t('entitlements.featureLockedTitle')
 
   const message =
     reason === 'project_limit'
@@ -177,7 +182,12 @@ export function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
                   'upgrade.customMaterialsLockedMsg',
                   'Custom materials are a Pro feature. Upgrade to create and manage your own materials.',
                 )
-              : t('entitlements.featureLockedMsg')
+              : reason === 'custom_functions_locked'
+                ? t(
+                    'upgrade.customFunctionsLockedMsg',
+                    'Custom function blocks are a Pro feature. Upgrade to create reusable formula blocks.',
+                  )
+                : t('entitlements.featureLockedMsg')
 
   const handleCheckout = useCallback(async (planKey: PlanKey) => {
     setLoading(true)

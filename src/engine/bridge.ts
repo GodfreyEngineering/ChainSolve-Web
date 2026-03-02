@@ -63,6 +63,11 @@ export function toEngineSnapshot(
           data = { ...data, value: MATERIAL_VALUES[matId] }
         }
       }
+      // H5-1: Custom function blocks map to 'math_expr' for the Rust engine.
+      // The formula and input values are passed via data.
+      if (blockType.startsWith('cfb:') && typeof data.formula === 'string') {
+        blockType = 'math_expr'
+      }
       // W12.2: resolve inputBindings → manualValues before sending to Rust.
       if (constants && variables && data.inputBindings) {
         const resolved = resolveNodeBindings(

@@ -36,6 +36,7 @@ describe('getEntitlements', () => {
     expect(ent.canEditThemes).toBe(false)
     expect(ent.canExport).toBe(false)
     expect(ent.canCreateCustomMaterials).toBe(false)
+    expect(ent.canCreateCustomFunctions).toBe(false)
   })
 
   it('trialing plan: unlimited projects and canvases, all pro features', () => {
@@ -50,6 +51,7 @@ describe('getEntitlements', () => {
     expect(ent.canEditThemes).toBe(true)
     expect(ent.canExport).toBe(true)
     expect(ent.canCreateCustomMaterials).toBe(true)
+    expect(ent.canCreateCustomFunctions).toBe(true)
   })
 
   it('pro plan: identical to trialing', () => {

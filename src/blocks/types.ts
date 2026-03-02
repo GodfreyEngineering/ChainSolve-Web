@@ -41,6 +41,7 @@ export type BlockCategory =
   | 'presetMaterials'
   | 'presetFluids'
   | 'annotations'
+  | 'customFunctions'
 
 /** Which React Flow custom-node renderer to use. */
 export type NodeKind =

@@ -613,6 +613,7 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   presetMaterials: 'Material Presets',
   presetFluids: 'Fluid Presets',
   annotations: 'Annotations',
+  customFunctions: 'Custom Functions',
 }
 
 // ── Block taxonomy (G3-1: 3 main categories with subcategories) ─────────────
@@ -837,4 +838,58 @@ export function validateCatalog(catalog: CatalogEntry[]): void {
       })
     }
   }
+}
+
+// ── H5-1: Custom function block dynamic registration ────────────────────────
+
+import type { CustomFunction } from '../lib/customFunctions'
+
+/**
+ * Register a custom function as a BlockDef in the registry.
+ * The block type uses the `cfb:` prefix to identify custom functions.
+ */
+export function registerCustomFunction(fn: CustomFunction): void {
+  const blockType = `cfb:${fn.id}`
+  BLOCK_REGISTRY.set(blockType, {
+    type: blockType,
+    label: fn.name,
+    category: 'customFunctions',
+    nodeKind: 'csOperation',
+    inputs: fn.inputs.map((inp) => ({ id: inp.id, label: inp.label })),
+    defaultData: {
+      blockType,
+      label: fn.name,
+      formula: fn.formula,
+      customFunctionId: fn.id,
+    },
+    proOnly: true,
+    description: fn.description ?? `Custom: ${fn.formula}`,
+    tags: [fn.tag],
+  })
+  // Invalidate taxonomy label cache
+  _taxonomyLabels = null
+}
+
+/** Unregister a custom function block from the registry. */
+export function unregisterCustomFunction(fnId: string): void {
+  BLOCK_REGISTRY.delete(`cfb:${fnId}`)
+  _taxonomyLabels = null
+}
+
+/**
+ * Sync the registry with a full list of custom functions.
+ * Removes any stale registrations and adds/updates all current ones.
+ */
+export function syncCustomFunctions(fns: CustomFunction[]): void {
+  // Remove all existing cfb: registrations
+  for (const key of [...BLOCK_REGISTRY.keys()]) {
+    if (key.startsWith('cfb:')) {
+      BLOCK_REGISTRY.delete(key)
+    }
+  }
+  // Re-register all current custom functions
+  for (const fn of fns) {
+    registerCustomFunction(fn)
+  }
+  _taxonomyLabels = null
 }

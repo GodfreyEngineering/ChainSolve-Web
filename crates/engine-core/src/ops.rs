@@ -1153,6 +1153,30 @@ fn evaluate_node_inner(
             unary_broadcast_port(inputs, "pct", |p| p / 100.0)
         }
 
+        // ── H5-1: Custom function expression evaluator ──────────────
+        "math_expr" => {
+            let formula = data
+                .get("formula")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            if formula.is_empty() {
+                return Value::error("Custom function: no formula".to_string());
+            }
+            // Build variable map from scalar inputs
+            let mut vars = std::collections::HashMap::new();
+            for (key, val) in inputs {
+                match val {
+                    Value::Scalar { value: s } => { vars.insert(key.clone(), *s); }
+                    Value::Error { .. } => return val.clone(),
+                    _ => {} // vectors/tables not supported in expressions
+                }
+            }
+            match crate::expr::eval_expr(formula, &vars) {
+                Ok(v) => Value::scalar(v),
+                Err(msg) => Value::error(format!("Custom function: {}", msg)),
+            }
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }

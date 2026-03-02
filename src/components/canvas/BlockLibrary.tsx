@@ -9,11 +9,23 @@
  * - Drag to canvas
  */
 
-import { useState, useRef, useEffect, useCallback, memo, type DragEvent } from 'react'
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  memo,
+  lazy,
+  Suspense,
+  type DragEvent,
+} from 'react'
 import {
   BLOCK_REGISTRY,
   BLOCK_TAXONOMY,
   getSubcategoryBlocks,
+  registerCustomFunction,
+  unregisterCustomFunction,
+  syncCustomFunctions,
   type BlockDef,
 } from '../../blocks/registry'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
@@ -23,6 +35,7 @@ import {
   renameTemplate as renameTemplateApi,
   type Template,
 } from '../../lib/templates'
+import { useCustomFunctionsStore } from '../../stores/customFunctionsStore'
 
 import {
   DRAG_TYPE,
@@ -32,6 +45,10 @@ import {
   toggleFavourite,
   scoreMatch,
 } from './blockLibraryUtils'
+
+const FunctionWizard = lazy(() =>
+  import('./FunctionWizard').then((m) => ({ default: m.FunctionWizard })),
+)
 
 // ── Taxonomy grouping (G3-1) ────────────────────────────────────────────────
 
@@ -413,6 +430,198 @@ const TemplateItem = memo(function TemplateItem({
   )
 })
 
+// ── CustomFnItem (H5-1) ─────────────────────────────────────────────────────
+
+interface CustomFnItemProps {
+  def: BlockDef
+  fn: import('../../lib/customFunctions').CustomFunction
+  favs: Set<string>
+  onToggleFav: (type: string) => void
+  entitled: boolean
+  onProBlocked?: () => void
+  description?: string
+  onEdit: () => void
+  onDuplicate: () => void
+  onDelete: () => void
+}
+
+const CustomFnItem = memo(function CustomFnItem({
+  def,
+  fn,
+  favs,
+  onToggleFav,
+  entitled,
+  onProBlocked,
+  description,
+  onEdit,
+  onDuplicate,
+  onDelete,
+}: CustomFnItemProps) {
+  const [hovered, setHovered] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  const onDragStart = (e: DragEvent<HTMLDivElement>) => {
+    if (!entitled) {
+      e.preventDefault()
+      onProBlocked?.()
+      return
+    }
+    e.dataTransfer.setData(DRAG_TYPE, def.type)
+    e.dataTransfer.effectAllowed = 'copy'
+    trackBlockUsed(def.type)
+  }
+
+  return (
+    <div
+      draggable={entitled}
+      onDragStart={onDragStart}
+      onClick={!entitled ? onProBlocked : undefined}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => {
+        setHovered(false)
+        setMenuOpen(false)
+      }}
+      style={{
+        ...s.blockItem,
+        background: hovered ? 'var(--primary-dim)' : 'transparent',
+        opacity: entitled ? 1 : 0.45,
+        cursor: entitled ? 'grab' : 'pointer',
+      }}
+      title={description ? `${description}\nFormula: ${fn.formula}` : fn.formula}
+    >
+      <span
+        style={{
+          flex: 1,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          paddingRight: hovered ? 40 : 0,
+        }}
+      >
+        {def.label}
+      </span>
+      <span
+        style={{
+          fontSize: '0.6rem',
+          color: 'var(--text-faint)',
+          fontFamily: 'monospace',
+          flexShrink: 0,
+          maxWidth: 60,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {fn.inputs.length}in
+      </span>
+      {hovered && entitled && (
+        <div style={{ position: 'absolute', right: 6, display: 'flex', gap: 2 }}>
+          <button
+            style={{
+              ...s.starBtn,
+              color: favs.has(def.type) ? 'var(--warning)' : 'var(--text-faint)',
+            }}
+            title={favs.has(def.type) ? 'Remove from favourites' : 'Add to favourites'}
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleFav(def.type)
+            }}
+          >
+            {favs.has(def.type) ? '\u2605' : '\u2606'}
+          </button>
+          <button
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--text-faint)',
+              fontSize: '0.85rem',
+              padding: '0 2px',
+              fontFamily: 'inherit',
+              lineHeight: 1,
+            }}
+            title="Function actions"
+            onClick={(e) => {
+              e.stopPropagation()
+              setMenuOpen((p) => !p)
+            }}
+          >
+            {'\u22EF'}
+          </button>
+          {menuOpen && (
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: '100%',
+                background: 'var(--card-bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
+                padding: '0.2rem',
+                zIndex: 100,
+                minWidth: 100,
+                boxShadow: 'var(--shadow-lg)',
+              }}
+            >
+              {[
+                { label: 'Edit...', action: onEdit },
+                { label: 'Duplicate', action: onDuplicate },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  style={{
+                    padding: '0.3rem 0.5rem',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                    borderRadius: 3,
+                  }}
+                  role="menuitem"
+                  onMouseEnter={(e) => {
+                    ;(e.currentTarget as HTMLDivElement).style.background = 'var(--primary-dim)'
+                  }}
+                  onMouseLeave={(e) => {
+                    ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    item.action()
+                    setMenuOpen(false)
+                  }}
+                >
+                  {item.label}
+                </div>
+              ))}
+              <div
+                style={{
+                  padding: '0.3rem 0.5rem',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  borderRadius: 3,
+                  color: 'var(--danger)',
+                }}
+                role="menuitem"
+                onMouseEnter={(e) => {
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'rgba(239,68,68,0.12)'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete()
+                  setMenuOpen(false)
+                }}
+              >
+                Delete
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+})
+
 // ── BlockLibrary ──────────────────────────────────────────────────────────────
 
 interface BlockLibraryProps {
@@ -448,6 +657,19 @@ export function BlockLibrary({
   const [templatesOpen, setTemplatesOpen] = useState(false)
   const [templates, setTemplates] = useState<Template[]>([])
   const [templatesLoaded, setTemplatesLoaded] = useState(false)
+  const [customFnsOpen, setCustomFnsOpen] = useState(false)
+  const [wizardOpen, setWizardOpen] = useState(false)
+  const [editingFn, setEditingFn] = useState<
+    import('../../lib/customFunctions').CustomFunction | undefined
+  >(undefined)
+  const customFunctions = useCustomFunctionsStore((s) => s.functions)
+  const deleteCustomFn = useCustomFunctionsStore((s) => s.deleteFunction)
+  const duplicateCustomFn = useCustomFunctionsStore((s) => s.duplicateFunction)
+
+  // Sync custom functions to block registry on mount and when functions change
+  useEffect(() => {
+    syncCustomFunctions(customFunctions)
+  }, [customFunctions])
 
   // G5-1: Lazy-load block descriptions for hover tooltips
   const [descriptions, setDescriptions] = useState<Record<string, string>>({})
@@ -693,6 +915,153 @@ export function BlockLibrary({
             </div>
           )
         })}
+
+        {/* Custom Functions section (H5-1, Pro only) */}
+        <div style={{ borderTop: '1px solid var(--border)', marginTop: '0.3rem' }}>
+          <div
+            style={{
+              ...s.sectionLabel,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              padding: '0.45rem 0.6rem 0.2rem',
+            }}
+            onClick={() => setCustomFnsOpen((p) => !p)}
+          >
+            <span style={{ fontSize: '0.55rem', opacity: 0.5 }}>
+              {customFnsOpen ? '\u25BC' : '\u25B6'}
+            </span>
+            Custom Functions
+            <span
+              style={{
+                marginLeft: 4,
+                fontSize: '0.55rem',
+                padding: '1px 4px',
+                borderRadius: 3,
+                background: 'rgba(28,171,176,0.15)',
+                color: '#1CABB0',
+                fontWeight: 700,
+                letterSpacing: '0.05em',
+              }}
+            >
+              PRO
+            </span>
+            {customFunctions.length > 0 && (
+              <span
+                style={{
+                  marginLeft: 'auto',
+                  fontSize: '0.6rem',
+                  opacity: 0.5,
+                }}
+              >
+                {customFunctions.length}
+              </span>
+            )}
+          </div>
+          {customFnsOpen && (
+            <div style={{ padding: '0.2rem 0' }}>
+              {customFunctions.length === 0 ? (
+                <div
+                  style={{
+                    padding: '0.5rem 0.6rem',
+                    fontSize: '0.75rem',
+                    color: 'var(--text-faint)',
+                  }}
+                >
+                  No custom functions yet.
+                </div>
+              ) : (
+                customFunctions.map((fn) => {
+                  const blockType = `cfb:${fn.id}`
+                  const def = BLOCK_REGISTRY.get(blockType)
+                  return def ? (
+                    <CustomFnItem
+                      key={fn.id}
+                      def={def}
+                      fn={fn}
+                      favs={favs}
+                      onToggleFav={toggleFav}
+                      entitled={ent.canCreateCustomFunctions}
+                      onProBlocked={onProBlocked}
+                      description={fn.description ?? fn.formula}
+                      onEdit={() => {
+                        setEditingFn(fn)
+                        setWizardOpen(true)
+                      }}
+                      onDuplicate={() => {
+                        const dup = duplicateCustomFn(fn.id)
+                        if (dup) registerCustomFunction(dup)
+                      }}
+                      onDelete={() => {
+                        unregisterCustomFunction(fn.id)
+                        deleteCustomFn(fn.id)
+                      }}
+                    />
+                  ) : null
+                })
+              )}
+              {ent.canCreateCustomFunctions ? (
+                <button
+                  type="button"
+                  style={{
+                    display: 'block',
+                    margin: '0.3rem 0.6rem',
+                    padding: '0.3rem 0.6rem',
+                    fontSize: '0.72rem',
+                    borderRadius: 4,
+                    border: '1px dashed var(--border)',
+                    background: 'transparent',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    width: 'calc(100% - 1.2rem)',
+                  }}
+                  onClick={() => {
+                    setEditingFn(undefined)
+                    setWizardOpen(true)
+                  }}
+                >
+                  + Create custom function
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  style={{
+                    display: 'block',
+                    margin: '0.3rem 0.6rem',
+                    padding: '0.3rem 0.6rem',
+                    fontSize: '0.72rem',
+                    borderRadius: 4,
+                    border: '1px dashed var(--border)',
+                    background: 'transparent',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    opacity: 0.5,
+                    width: 'calc(100% - 1.2rem)',
+                  }}
+                  onClick={onProBlocked}
+                >
+                  + Create custom function (Pro)
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {wizardOpen && (
+          <Suspense fallback={null}>
+            <FunctionWizard
+              open={wizardOpen}
+              onClose={() => {
+                setWizardOpen(false)
+                setEditingFn(undefined)
+              }}
+              editFunction={editingFn}
+            />
+          </Suspense>
+        )}
 
         {/* Templates section (Pro only) */}
         {ent.canUseGroups && (
