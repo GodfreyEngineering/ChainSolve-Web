@@ -1857,7 +1857,7 @@ Claude MUST:
 ---
 
 ## H7 — Publish blocks for cross-sheet linking
-- [ ] H7-1: Publish block v1
+- [x] H7-1: Publish block v1
   - Publish block captures live value from incoming chain.
   - Named output can be referenced by another Publish block instance on same or other sheets.
   - Prevent conflicts:
