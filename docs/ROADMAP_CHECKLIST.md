@@ -1390,7 +1390,7 @@ Claude MUST:
   - Add allowlist exceptions only in adapter/service layer.
   - Acceptance: CI fails if UI imports Supabase directly.
 
-- [ ] F2-2: Centralize environment config validation
+- [x] F2-2: Centralize environment config validation
   - Implement `src/lib/env.ts` that validates required env vars at startup:
     - client-safe vars (VITE_*)
     - server-only vars (Cloudflare context.env)
