@@ -1789,7 +1789,7 @@ Claude MUST:
   - Free users cannot use list input blocks (per your plan rules).
   - Acceptance: list is robust and replaces previous table/array approach.
 
-- [ ] H2-2: List propagation rules in function blocks
+- [x] H2-2: List propagation rules in function blocks
   - Function blocks accept scalar or list inputs.
   - If multiple lists enter a function:
     - output expands for all combinations as specified

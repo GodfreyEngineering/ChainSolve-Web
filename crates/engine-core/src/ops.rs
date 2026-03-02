@@ -1271,17 +1271,17 @@ fn binary_broadcast_ports(
         (Some(Value::Vector { value: vec }), Some(Value::Scalar { value: s })) => Value::Vector {
             value: vec.iter().map(|x| f(*x, *s)).collect(),
         },
-        // Vector ⊕ Vector → same length
+        // Vector ⊕ Vector → element-wise; pad shorter with NaN (H2-2)
         (Some(Value::Vector { value: va }), Some(Value::Vector { value: vb })) => {
-            if va.len() != vb.len() {
-                return Value::error(format!(
-                    "Vector length mismatch: {} vs {}",
-                    va.len(),
-                    vb.len()
-                ));
-            }
+            let len = va.len().max(vb.len());
             Value::Vector {
-                value: va.iter().zip(vb.iter()).map(|(a, b)| f(*a, *b)).collect(),
+                value: (0..len)
+                    .map(|i| {
+                        let a = va.get(i).copied().unwrap_or(f64::NAN);
+                        let b = vb.get(i).copied().unwrap_or(f64::NAN);
+                        f(a, b)
+                    })
+                    .collect(),
             }
         }
 
@@ -1627,12 +1627,134 @@ mod tests {
     }
 
     #[test]
-    fn add_vector_length_mismatch() {
+    fn add_vector_length_mismatch_pads_nan() {
         let mut inputs = HashMap::new();
         inputs.insert("a".into(), Value::Vector { value: vec![1.0, 2.0] });
-        inputs.insert("b".into(), Value::Vector { value: vec![1.0, 2.0, 3.0] });
+        inputs.insert(
+            "b".into(),
+            Value::Vector {
+                value: vec![10.0, 20.0, 30.0],
+            },
+        );
         let v = evaluate_node("add", &inputs, &HashMap::new());
-        assert!(matches!(v, Value::Error { .. }));
+        match v {
+            Value::Vector { value } => {
+                assert_eq!(value.len(), 3);
+                assert!((value[0] - 11.0).abs() < 1e-10);
+                assert!((value[1] - 22.0).abs() < 1e-10);
+                assert!(value[2].is_nan()); // 3rd element: NaN + 30.0 = NaN
+            }
+            other => panic!("expected Vector, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn multiply_vector_length_mismatch_pads_nan() {
+        let mut inputs = HashMap::new();
+        inputs.insert(
+            "a".into(),
+            Value::Vector {
+                value: vec![2.0, 4.0, 6.0],
+            },
+        );
+        inputs.insert("b".into(), Value::Vector { value: vec![3.0] });
+        let v = evaluate_node("multiply", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => {
+                assert_eq!(value.len(), 3);
+                assert!((value[0] - 6.0).abs() < 1e-10);
+                assert!(value[1].is_nan());
+                assert!(value[2].is_nan());
+            }
+            other => panic!("expected Vector, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn vector_same_length_unchanged() {
+        let mut inputs = HashMap::new();
+        inputs.insert(
+            "a".into(),
+            Value::Vector {
+                value: vec![1.0, 2.0, 3.0],
+            },
+        );
+        inputs.insert(
+            "b".into(),
+            Value::Vector {
+                value: vec![10.0, 20.0, 30.0],
+            },
+        );
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => {
+                assert_eq!(value, vec![11.0, 22.0, 33.0]);
+            }
+            other => panic!("expected Vector, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn vector_empty_plus_vector_pads_all_nan() {
+        let mut inputs = HashMap::new();
+        inputs.insert("a".into(), Value::Vector { value: vec![] });
+        inputs.insert(
+            "b".into(),
+            Value::Vector {
+                value: vec![1.0, 2.0],
+            },
+        );
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => {
+                assert_eq!(value.len(), 2);
+                assert!(value[0].is_nan());
+                assert!(value[1].is_nan());
+            }
+            other => panic!("expected Vector, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn vector_both_empty_returns_empty() {
+        let mut inputs = HashMap::new();
+        inputs.insert("a".into(), Value::Vector { value: vec![] });
+        inputs.insert("b".into(), Value::Vector { value: vec![] });
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => {
+                assert!(value.is_empty());
+            }
+            other => panic!("expected Vector, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn subtract_vector_mismatch_pads_nan() {
+        let mut inputs = HashMap::new();
+        inputs.insert(
+            "a".into(),
+            Value::Vector {
+                value: vec![10.0, 20.0, 30.0, 40.0],
+            },
+        );
+        inputs.insert(
+            "b".into(),
+            Value::Vector {
+                value: vec![1.0, 2.0],
+            },
+        );
+        let v = evaluate_node("subtract", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => {
+                assert_eq!(value.len(), 4);
+                assert!((value[0] - 9.0).abs() < 1e-10);
+                assert!((value[1] - 18.0).abs() < 1e-10);
+                assert!(value[2].is_nan());
+                assert!(value[3].is_nan());
+            }
+            other => panic!("expected Vector, got {:?}", other),
+        }
     }
 
     #[test]
