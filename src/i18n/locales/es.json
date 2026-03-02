@@ -998,7 +998,9 @@
     "explainHint": "Selecciona un nodo y haz clic en Enviar para explicarlo.",
     "explainPlaceholder": "Explicar este nodo…",
     "themePlaceholder": "Describe tu tema…",
-    "actionHistory": "Historial"
+    "actionHistory": "Historial",
+    "expandPanel": "Expandir panel IA",
+    "collapsePanel": "Contraer panel IA"
   },
   "terms": {
     "title": "Términos y Condiciones",

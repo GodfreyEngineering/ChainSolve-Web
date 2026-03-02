@@ -998,7 +998,9 @@
     "explainHint": "Wählen Sie einen Knoten aus und klicken Sie auf Senden, um ihn zu erklären.",
     "explainPlaceholder": "Diesen Knoten erklären…",
     "themePlaceholder": "Beschreiben Sie Ihr Thema…",
-    "actionHistory": "Verlauf"
+    "actionHistory": "Verlauf",
+    "expandPanel": "KI-Panel erweitern",
+    "collapsePanel": "KI-Panel einklappen"
   },
   "terms": {
     "title": "Allgemeine Geschäftsbedingungen",

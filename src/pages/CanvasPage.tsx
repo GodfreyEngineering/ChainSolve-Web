@@ -71,6 +71,7 @@ import { useNetworkStatus } from '../hooks/useNetworkStatus'
 import { AutosaveScheduler } from '../lib/autosaveScheduler'
 import { usePreferencesStore } from '../stores/preferencesStore'
 import { SheetsBar } from '../components/app/SheetsBar'
+import { AiDockPanel } from '../components/app/AiDockPanel'
 import { ConflictBanner } from '../components/app/ConflictBanner'
 import { UpgradeModal } from '../components/UpgradeModal'
 import { useEngine } from '../contexts/EngineContext'
@@ -1559,6 +1560,37 @@ export default function CanvasPage() {
           onExplainNode={(nodeId) => openAiWithTask('explain_node', nodeId)}
           onInsertFromPrompt={() => openAiWithTask('chat')}
         />
+        {/* G8-1: AI Copilot docked right panel */}
+        <AiDockPanel open={isOpen(AI_COPILOT_WINDOW_ID)}>
+          <Suspense fallback={null}>
+            <LazyAiCopilotWindow
+              docked
+              plan={plan}
+              projectId={projectId}
+              canvasId={activeCanvasId ?? undefined}
+              selectedNodeIds={
+                canvasRef.current
+                  ? canvasRef.current
+                      .getSnapshot()
+                      .nodes.filter((n) => n.selected)
+                      .map((n) => n.id)
+                  : []
+              }
+              onApplyPatch={async (ops: AiPatchOp[]) => {
+                const snap = canvasRef.current?.getSnapshot()
+                if (!snap) return
+                const { applyPatchOps } = await import('../lib/aiCopilot/patchExecutor')
+                const result = applyPatchOps(ops, snap.nodes, snap.edges, true)
+                canvasRef.current?.setSnapshot(result.nodes, result.edges)
+                handleGraphChange(result.nodes, result.edges)
+              }}
+              onUpgrade={() => setUpgradeAiOpen(true)}
+              initialTask={aiInitialTask}
+              initialMessage={aiInitialMessage}
+              diagnostics={aiDiagnostics}
+            />
+          </Suspense>
+        </AiDockPanel>
       </div>
       {/* ── Canvas limit upgrade modal ──────────────────────────────────── */}
       <UpgradeModal
@@ -1619,36 +1651,6 @@ export default function CanvasPage() {
       {isOpen(THEME_LIBRARY_WINDOW_ID) && (
         <Suspense fallback={null}>
           <LazyThemeLibraryWindow plan={plan} />
-        </Suspense>
-      )}
-      {/* ── AI Copilot window (AI-1) ──────────────────────────────────── */}
-      {isOpen(AI_COPILOT_WINDOW_ID) && (
-        <Suspense fallback={null}>
-          <LazyAiCopilotWindow
-            plan={plan}
-            projectId={projectId}
-            canvasId={activeCanvasId ?? undefined}
-            selectedNodeIds={
-              canvasRef.current
-                ? canvasRef.current
-                    .getSnapshot()
-                    .nodes.filter((n) => n.selected)
-                    .map((n) => n.id)
-                : []
-            }
-            onApplyPatch={async (ops: AiPatchOp[]) => {
-              const snap = canvasRef.current?.getSnapshot()
-              if (!snap) return
-              const { applyPatchOps } = await import('../lib/aiCopilot/patchExecutor')
-              const result = applyPatchOps(ops, snap.nodes, snap.edges, true)
-              canvasRef.current?.setSnapshot(result.nodes, result.edges)
-              handleGraphChange(result.nodes, result.edges)
-            }}
-            onUpgrade={() => setUpgradeAiOpen(true)}
-            initialTask={aiInitialTask}
-            initialMessage={aiInitialMessage}
-            diagnostics={aiDiagnostics}
-          />
         </Suspense>
       )}
       <UpgradeModal

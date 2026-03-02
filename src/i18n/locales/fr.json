@@ -998,7 +998,9 @@
     "explainHint": "Sélectionnez un nœud et cliquez sur Envoyer pour l'expliquer.",
     "explainPlaceholder": "Expliquer ce nœud…",
     "themePlaceholder": "Décrivez votre thème…",
-    "actionHistory": "Historique"
+    "actionHistory": "Historique",
+    "expandPanel": "Ouvrir le panneau IA",
+    "collapsePanel": "Fermer le panneau IA"
   },
   "terms": {
     "title": "Conditions Générales",

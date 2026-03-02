@@ -47,7 +47,9 @@
     "explainHint": "בחר צומת ולחץ שלח כדי להסביר אותו.",
     "explainPlaceholder": "הסבר צומת זה…",
     "themePlaceholder": "תאר את ערכת הנושא שלך…",
-    "actionHistory": "היסטוריה"
+    "actionHistory": "היסטוריה",
+    "expandPanel": "הרחב את לוח ה-AI",
+    "collapsePanel": "כווץ את לוח ה-AI"
   },
   "marketplace": {
     "analyticsToggle": "ניתוחים",

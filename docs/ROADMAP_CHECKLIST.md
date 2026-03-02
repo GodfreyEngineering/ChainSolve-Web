@@ -1733,7 +1733,7 @@ Claude MUST:
 ---
 
 ## G8 — AI window docking (right-side) and UX consistency
-- [ ] G8-1: AI window docks on right like Library and Dock
+- [x] G8-1: AI window docks on right like Library and Dock
   - Collapse/expand handle
   - Resizable width
   - Always visible handle

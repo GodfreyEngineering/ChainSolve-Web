@@ -1017,7 +1017,9 @@
     "explainHint": "Select a node and click Send to explain it.",
     "explainPlaceholder": "Explain this node…",
     "themePlaceholder": "Describe your theme…",
-    "actionHistory": "History"
+    "actionHistory": "History",
+    "expandPanel": "Expand AI panel",
+    "collapsePanel": "Collapse AI panel"
   },
   "terms": {
     "title": "Terms & Conditions",

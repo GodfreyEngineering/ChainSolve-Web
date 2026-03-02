@@ -998,7 +998,9 @@
     "explainHint": "Seleziona un nodo e clicca Invia per spiegarlo.",
     "explainPlaceholder": "Spiega questo nodo…",
     "themePlaceholder": "Descrivi il tuo tema…",
-    "actionHistory": "Cronologia"
+    "actionHistory": "Cronologia",
+    "expandPanel": "Espandi pannello IA",
+    "collapsePanel": "Comprimi pannello IA"
   },
   "terms": {
     "title": "Termini e Condizioni",
