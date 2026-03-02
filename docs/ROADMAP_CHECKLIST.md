@@ -1979,7 +1979,7 @@ Claude MUST:
 ---
 
 ## I3 — Annotations and dress-up (not blocks)
-- [ ] I3-1: Annotation toolset in Insert dropdown and canvas toolbar
+- [x] I3-1: Annotation toolset in Insert dropdown and canvas toolbar
   - Text boxes, arrows, callouts, highlight regions, shapes.
   - Not part of block library.
   - Works with exports (PDF image capture includes annotations).
