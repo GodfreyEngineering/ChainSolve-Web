@@ -49,7 +49,7 @@ export class ErrorBoundary extends Component<Props, State> {
               Need help?{' '}
               <a
                 href={`mailto:${CONTACT.support}`}
-                style={{ color: '#93c5fd', textDecoration: 'none' }}
+                style={{ color: 'var(--primary)', textDecoration: 'none' }}
               >
                 {CONTACT.support}
               </a>
@@ -57,9 +57,9 @@ export class ErrorBoundary extends Component<Props, State> {
             <button
               style={{
                 padding: '0.6rem 1.25rem',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-lg)',
                 border: 'none',
-                background: '#646cff',
+                background: 'var(--primary)',
                 color: '#fff',
                 fontWeight: 600,
                 cursor: 'pointer',

@@ -144,8 +144,8 @@ export function Inspector({
           style={{
             padding: '2rem 1rem',
             textAlign: 'center',
-            color: 'rgba(244,244,243,0.3)',
-            fontSize: '0.82rem',
+            color: 'var(--text-faint)',
+            fontSize: 'var(--font-sm)',
           }}
         >
           Click a block to inspect
