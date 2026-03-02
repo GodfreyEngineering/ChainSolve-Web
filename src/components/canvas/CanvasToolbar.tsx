@@ -465,6 +465,17 @@ export function CanvasToolbar({
       >
         {'\u229f'}
       </button>
+
+      <div style={sep} />
+
+      <button
+        onClick={() => window.open('/docs?section=shortcuts', '_blank', 'noopener')}
+        style={btnStyle(false)}
+        title={t('help.learnMore')}
+        aria-label={t('help.learnMore')}
+      >
+        {'\u24d8'}
+      </button>
     </div>
   )
 }

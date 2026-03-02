@@ -16,6 +16,7 @@ import {
   LOG_SCOPES,
 } from '../../stores/debugConsoleStore'
 import type { LogLevel, LogScope, LogEntry } from '../../stores/debugConsoleStore'
+import { HelpLink } from '../ui/HelpLink'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -108,6 +109,7 @@ export default function DebugConsolePanel({ onClose, docked }: DebugConsolePanel
         <span style={{ fontWeight: 600, fontSize: '0.75rem', opacity: 0.7 }}>
           {t('debugConsole.title', 'Debug Console')}
         </span>
+        <HelpLink section="troubleshooting" />
 
         {/* Level dropdown */}
         <select

@@ -45,6 +45,7 @@ import {
   toggleFavourite,
   scoreMatch,
 } from './blockLibraryUtils'
+import { HelpLink } from '../ui/HelpLink'
 
 const FunctionWizard = lazy(() =>
   import('./FunctionWizard').then((m) => ({ default: m.FunctionWizard })),
@@ -757,6 +758,7 @@ export function BlockLibrary({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
+          <HelpLink section="block-library" />
         </div>
 
         <div style={s.catFilter}>

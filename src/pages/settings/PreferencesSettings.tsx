@@ -15,6 +15,7 @@ import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { THEME_WIZARD_WINDOW_ID } from '../../components/ThemeWizard'
 import { THEME_LIBRARY_WINDOW_ID } from '../../components/ThemeLibraryWindow'
 import { isPro, type Plan } from '../../lib/entitlements'
+import { HelpLink } from '../../components/ui/HelpLink'
 
 const LazyThemeWizard = lazy(() =>
   import('../../components/ThemeWizard').then((m) => ({ default: m.ThemeWizard })),
@@ -73,7 +74,10 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
 
   return (
     <div>
-      <h2 style={headingStyle}>{t('settings.preferences')}</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <h2 style={headingStyle}>{t('settings.preferences')}</h2>
+        <HelpLink section="onboarding" />
+      </div>
 
       <div style={cardStyle}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

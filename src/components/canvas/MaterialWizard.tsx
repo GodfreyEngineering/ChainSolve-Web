@@ -10,6 +10,7 @@
 
 import { useState, useCallback, type FormEvent } from 'react'
 import { Modal } from '../ui/Modal'
+import { HelpLink } from '../ui/HelpLink'
 import {
   MATERIAL_PROPERTIES,
   MATERIAL_PROPERTY_META,
@@ -230,6 +231,9 @@ export function MaterialWizard({ open, onClose, editMaterial }: MaterialWizardPr
       width={420}
     >
       <form onSubmit={handleSubmit}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.3rem' }}>
+          <HelpLink section="materials" />
+        </div>
         {/* Base template picker */}
         {!editMaterial && (
           <div style={{ marginBottom: '0.8rem' }}>

@@ -99,7 +99,14 @@ describe('EngineFatalError uses i18n', () => {
 // ── 4. All locales have the required key sections ────────────────────────────
 
 describe('All locales contain required i18n sections', () => {
-  const requiredSections = ['contextMenu', 'errorBoundary', 'engineError', 'themeOption', 'common']
+  const requiredSections = [
+    'contextMenu',
+    'errorBoundary',
+    'engineError',
+    'themeOption',
+    'help',
+    'common',
+  ]
 
   for (const locale of LOCALES) {
     describe(`locale: ${locale}`, () => {

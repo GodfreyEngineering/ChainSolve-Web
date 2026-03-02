@@ -11,6 +11,7 @@
 
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { HelpLink } from '../ui/HelpLink'
 import { buildGraphFromPrompt } from '../../lib/llmGraphBuilderService'
 import type { LlmGraphPlan } from '../../lib/llmGraphBuilderService'
 
@@ -170,7 +171,10 @@ export function LlmGraphBuilderDialog({ open, onClose }: LlmGraphBuilderDialogPr
   return (
     <div style={s.overlay} onClick={handleClose}>
       <div style={s.dialog} onClick={(e) => e.stopPropagation()}>
-        <h2 style={s.title}>{t('llmBuilder.title')}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <h2 style={s.title}>{t('llmBuilder.title')}</h2>
+          <HelpLink section="ai-assistant" />
+        </div>
         <p style={s.subtitle}>{t('llmBuilder.subtitle')}</p>
 
         <label style={s.label} htmlFor="llm-prompt">

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import type { Node, Edge } from '@xyflow/react'
 import { computeGraphHealth, formatHealthReport } from '../../lib/graphHealth'
 import type { HealthWarning } from '../../lib/graphHealth'
+import { HelpLink } from '../ui/HelpLink'
 
 interface GraphHealthPanelProps {
   nodes: Node[]
@@ -48,6 +49,7 @@ export default function GraphHealthPanel({
         <span style={{ fontWeight: 600, fontSize: '0.75rem', opacity: 0.7 }}>
           {t('graphHealth.title', 'Graph Health')}
         </span>
+        <HelpLink section="troubleshooting" />
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
           <button
             onClick={handleCopy}

@@ -58,6 +58,7 @@ import { getPinnedProjects, togglePinnedProject } from '../lib/pinnedProjects'
 import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 import { initRememberMe } from '../lib/rememberMe'
 import { touchSession, isSessionValid, SESSION_CHECK_INTERVAL_MS } from '../lib/sessionService'
+import { HelpLink } from '../components/ui/HelpLink'
 
 type SortMode = 'recent' | 'name' | 'created'
 type FilterTab = 'all' | 'recent' | 'pinned'
@@ -707,16 +708,19 @@ export default function AppShell() {
       >
         {/* ── Workbench Home header + hero CTAs ── */}
         <div style={{ marginBottom: '1.5rem' }}>
-          <h1
-            style={{
-              margin: 0,
-              fontSize: '1.6rem',
-              fontWeight: 700,
-              letterSpacing: '-0.01em',
-            }}
-          >
-            {t('home.title')}
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: '1.6rem',
+                fontWeight: 700,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {t('home.title')}
+            </h1>
+            <HelpLink section="onboarding" />
+          </div>
           <p
             style={{
               margin: '0.35rem 0 0',

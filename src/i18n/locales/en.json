@@ -1310,6 +1310,9 @@
     "copied": "Copied!",
     "noExpression": "No expression available for this node."
   },
+  "help": {
+    "learnMore": "Learn more"
+  },
   "common": {
     "cancel": "Cancel",
     "close": "Close",

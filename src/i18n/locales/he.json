@@ -290,6 +290,9 @@
     "copied": "!הועתק",
     "noExpression": "אין ביטוי זמין עבור בלוק זה."
   },
+  "help": {
+    "learnMore": "למד עוד"
+  },
   "common": {
     "cancel": "ביטול",
     "close": "סגור",

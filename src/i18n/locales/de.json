@@ -1291,6 +1291,9 @@
     "copied": "Kopiert!",
     "noExpression": "Kein Ausdruck für diesen Block verfügbar."
   },
+  "help": {
+    "learnMore": "Mehr erfahren"
+  },
   "common": {
     "cancel": "Abbrechen",
     "close": "Schließen",

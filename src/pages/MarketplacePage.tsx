@@ -38,6 +38,7 @@ import { canInstallExploreItem, resolveEffectivePlan, type Plan } from '../lib/e
 import { getSession } from '../lib/auth'
 import { BRAND } from '../lib/brand'
 import { getBlockedUsers } from '../lib/blockedUsers'
+import { HelpLink } from '../components/ui/HelpLink'
 
 /** Map category key to i18n label key. */
 const CATEGORY_LABEL_KEYS: Record<string, string> = {
@@ -460,15 +461,18 @@ export default function MarketplacePage() {
 
       {/* Body */}
       <main style={s.body} data-testid="marketplace-page">
-        <h1
-          style={{
-            fontSize: '1.5rem',
-            fontWeight: 700,
-            margin: '0 0 0.35rem',
-          }}
-        >
-          {t('marketplace.title')}
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <h1
+            style={{
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              margin: '0 0 0.35rem',
+            }}
+          >
+            {t('marketplace.title')}
+          </h1>
+          <HelpLink section="explore" />
+        </div>
         <p style={{ margin: '0 0 1.5rem', opacity: 0.5, fontSize: '0.88rem' }}>
           {t('marketplace.subtitle')}
         </p>

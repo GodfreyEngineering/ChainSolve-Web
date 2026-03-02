@@ -17,6 +17,8 @@ import { BLOCK_REGISTRY, getTaxonomyLabels, type NodeData } from '../../blocks/r
 import type { InputBinding, PlotConfig } from '../../blocks/types'
 import type { TraceEntry } from '../../engine/index.ts'
 import { ensureBinding } from '../../lib/migrateBindings'
+import { getDocsSectionForCategory } from '../../lib/docsHelpers'
+import { HelpLink } from '../ui/HelpLink'
 import { ValueEditor } from './editors/ValueEditor'
 import { getUnitSymbol } from '../../units/unitSymbols'
 import { PlotInspector } from './PlotInspector'
@@ -260,6 +262,7 @@ export function Inspector({
               {def?.label ?? nd.blockType}
             </div>
           </div>
+          {def && <HelpLink section={getDocsSectionForCategory(def.category)} />}
           <button
             onClick={onClose}
             style={{

@@ -12,6 +12,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { HelpLink } from '../ui/HelpLink'
 import { listTemplates, deleteTemplate, renameTemplate } from '../../lib/templates'
 import type { Template } from '../../lib/templates'
 
@@ -207,7 +208,10 @@ export function TemplateManagerDialog({ open, onClose }: TemplateManagerDialogPr
   return (
     <div style={s.overlay} onClick={onClose}>
       <div style={s.dialog} onClick={(e) => e.stopPropagation()}>
-        <h2 style={s.title}>{t('templateManager.title')}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <h2 style={s.title}>{t('templateManager.title')}</h2>
+          <HelpLink section="publish" />
+        </div>
         <p style={s.subtitle}>{t('templateManager.subtitle')}</p>
 
         {error && <p style={s.error}>{error}</p>}

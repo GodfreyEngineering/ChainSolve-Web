@@ -9,6 +9,7 @@ import { useRef, useEffect, useCallback, useState, useMemo, memo } from 'react'
 import { useVariablesStore } from '../../stores/variablesStore'
 import type { ProjectVariable } from '../../lib/variables'
 import { useTranslation } from 'react-i18next'
+import { HelpLink } from '../ui/HelpLink'
 
 export interface VariablesPanelProps {
   open: boolean
@@ -494,6 +495,7 @@ export function VariablesPanel({ open, onClose }: VariablesPanelProps) {
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <span style={titleStyle}>{t('variablesPanel.title', 'Variables')}</span>
           <span style={countBadge}>{allCount}</span>
+          <HelpLink section="variables" />
         </div>
         <input
           style={searchInput}

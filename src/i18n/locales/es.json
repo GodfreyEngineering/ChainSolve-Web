@@ -1291,6 +1291,9 @@
     "copied": "¡Copiado!",
     "noExpression": "No hay expresión disponible para este bloque."
   },
+  "help": {
+    "learnMore": "Saber más"
+  },
   "common": {
     "cancel": "Cancelar",
     "close": "Cerrar",
