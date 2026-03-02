@@ -21,6 +21,8 @@ export interface Profile {
   is_developer: boolean
   /** E2-6: Moderation tools + admin panels. Set by service_role only. */
   is_admin: boolean
+  /** H8-1: Verified student — unlocks student plan (same as Pro). Set by service_role only. */
+  is_student: boolean
   /** E2-3: Semantic version of ToS the user has accepted (e.g. '1.0'). */
   accepted_terms_version: string | null
   /** E2-3: When the user accepted the current ToS. */
@@ -35,7 +37,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
     .select(
-      'id,email,full_name,avatar_url,plan,stripe_customer_id,current_period_end,is_developer,is_admin,accepted_terms_version,accepted_terms_at,marketing_opt_in,marketing_opt_in_at',
+      'id,email,full_name,avatar_url,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,accepted_terms_at,marketing_opt_in,marketing_opt_in_at',
     )
     .eq('id', userId)
     .maybeSingle()

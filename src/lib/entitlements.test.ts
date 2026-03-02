@@ -24,7 +24,7 @@ import {
 // ── getEntitlements ────────────────────────────────────────────────────────────
 
 describe('getEntitlements', () => {
-  it('free plan: limited projects and canvases, no pro features', () => {
+  it('free plan: limited projects and canvases, groups+themes allowed, no other pro features', () => {
     const ent = getEntitlements('free')
     expect(ent.maxProjects).toBe(1)
     expect(ent.maxCanvases).toBe(2)
@@ -32,11 +32,14 @@ describe('getEntitlements', () => {
     expect(ent.canUseArrays).toBe(false)
     expect(ent.canUsePlots).toBe(false)
     expect(ent.canUseRules).toBe(false)
-    expect(ent.canUseGroups).toBe(false)
-    expect(ent.canEditThemes).toBe(false)
+    expect(ent.canUseGroups).toBe(true)
+    expect(ent.canEditThemes).toBe(true)
     expect(ent.canExport).toBe(false)
     expect(ent.canCreateCustomMaterials).toBe(false)
     expect(ent.canCreateCustomFunctions).toBe(false)
+    expect(ent.canUseListBlocks).toBe(false)
+    expect(ent.canUseGraphTableOutputs).toBe(false)
+    expect(ent.canImportFiles).toBe(false)
   })
 
   it('trialing plan: unlimited projects and canvases, all pro features', () => {
@@ -52,29 +55,52 @@ describe('getEntitlements', () => {
     expect(ent.canExport).toBe(true)
     expect(ent.canCreateCustomMaterials).toBe(true)
     expect(ent.canCreateCustomFunctions).toBe(true)
+    expect(ent.canUseListBlocks).toBe(true)
+    expect(ent.canUseGraphTableOutputs).toBe(true)
+    expect(ent.canImportFiles).toBe(true)
   })
 
   it('pro plan: identical to trialing', () => {
     expect(getEntitlements('pro')).toEqual(getEntitlements('trialing'))
   })
 
+  it('student plan: identical entitlements to pro', () => {
+    expect(getEntitlements('student')).toEqual(getEntitlements('pro'))
+  })
+
   it('enterprise plan: identical entitlements to pro', () => {
     expect(getEntitlements('enterprise')).toEqual(getEntitlements('pro'))
   })
 
-  it('past_due plan: identical entitlements to free', () => {
-    expect(getEntitlements('past_due')).toEqual(getEntitlements('free'))
+  it('past_due plan: restricted (no groups/themes unlike free)', () => {
+    const ent = getEntitlements('past_due')
+    expect(ent.maxProjects).toBe(1)
+    expect(ent.maxCanvases).toBe(2)
+    expect(ent.canUseGroups).toBe(false)
+    expect(ent.canEditThemes).toBe(false)
+    expect(ent.canExport).toBe(false)
+    expect(ent.canUseListBlocks).toBe(false)
+    expect(ent.canUseGraphTableOutputs).toBe(false)
+    expect(ent.canImportFiles).toBe(false)
   })
 
-  it('canceled plan: identical entitlements to free', () => {
-    expect(getEntitlements('canceled')).toEqual(getEntitlements('free'))
+  it('canceled plan: restricted (no groups/themes unlike free)', () => {
+    const ent = getEntitlements('canceled')
+    expect(ent.maxProjects).toBe(1)
+    expect(ent.maxCanvases).toBe(2)
+    expect(ent.canUseGroups).toBe(false)
+    expect(ent.canEditThemes).toBe(false)
+    expect(ent.canExport).toBe(false)
+    expect(ent.canUseListBlocks).toBe(false)
+    expect(ent.canUseGraphTableOutputs).toBe(false)
+    expect(ent.canImportFiles).toBe(false)
   })
 })
 
 // ── isPro ─────────────────────────────────────────────────────────────────────
 
 describe('isPro', () => {
-  const proCases: Plan[] = ['trialing', 'pro', 'enterprise']
+  const proCases: Plan[] = ['trialing', 'pro', 'student', 'enterprise']
   const nonProCases: Plan[] = ['free', 'past_due', 'canceled']
 
   for (const plan of proCases) {
@@ -101,7 +127,7 @@ describe('isReadOnly', () => {
     expect(isReadOnly('past_due')).toBe(true)
   })
 
-  const writablePlans: Plan[] = ['free', 'trialing', 'pro', 'enterprise']
+  const writablePlans: Plan[] = ['free', 'trialing', 'pro', 'student', 'enterprise']
   for (const plan of writablePlans) {
     it(`returns false for ${plan}`, () => {
       expect(isReadOnly(plan)).toBe(false)
@@ -141,6 +167,11 @@ describe('canCreateProject', () => {
     expect(canCreateProject('pro', 100)).toBe(true)
   })
 
+  it('student: always true (unlimited)', () => {
+    expect(canCreateProject('student', 0)).toBe(true)
+    expect(canCreateProject('student', 100)).toBe(true)
+  })
+
   it('enterprise: always true (unlimited)', () => {
     expect(canCreateProject('enterprise', 0)).toBe(true)
     expect(canCreateProject('enterprise', 100)).toBe(true)
@@ -178,6 +209,11 @@ describe('canCreateCanvas', () => {
     expect(canCreateCanvas('pro', 100)).toBe(true)
   })
 
+  it('student: always true (unlimited)', () => {
+    expect(canCreateCanvas('student', 0)).toBe(true)
+    expect(canCreateCanvas('student', 100)).toBe(true)
+  })
+
   it('enterprise: always true (unlimited)', () => {
     expect(canCreateCanvas('enterprise', 0)).toBe(true)
     expect(canCreateCanvas('enterprise', 100)).toBe(true)
@@ -195,7 +231,7 @@ describe('showBillingBanner', () => {
     expect(showBillingBanner('canceled')).toBe('canceled')
   })
 
-  const noBannerPlans: Plan[] = ['free', 'trialing', 'pro', 'enterprise']
+  const noBannerPlans: Plan[] = ['free', 'trialing', 'pro', 'student', 'enterprise']
   for (const plan of noBannerPlans) {
     it(`returns null for ${plan}`, () => {
       expect(showBillingBanner(plan)).toBeNull()
@@ -238,6 +274,12 @@ describe('isBlockEntitled', () => {
     expect(isBlockEntitled({ proOnly: true, category: 'array' }, trialingEnt)).toBe(true)
   })
 
+  it('student entitlements allow all pro features', () => {
+    const studentEnt = getEntitlements('student')
+    expect(isBlockEntitled({ proOnly: true, category: 'plot' }, studentEnt)).toBe(true)
+    expect(isBlockEntitled({ proOnly: true, category: 'array' }, studentEnt)).toBe(true)
+  })
+
   it('enterprise entitlements allow all pro features', () => {
     const entEnt = getEntitlements('enterprise')
     expect(isBlockEntitled({ proOnly: true, category: 'plot' }, entEnt)).toBe(true)
@@ -248,8 +290,8 @@ describe('isBlockEntitled', () => {
 // ── canInstallExploreItem (D9-3) ─────────────────────────────────────────────
 
 describe('canInstallExploreItem', () => {
-  it('pro/trialing/enterprise can install any category', () => {
-    const proCases: Plan[] = ['pro', 'trialing', 'enterprise']
+  it('pro/trialing/student/enterprise can install any category', () => {
+    const proCases: Plan[] = ['pro', 'trialing', 'student', 'enterprise']
     for (const plan of proCases) {
       expect(canInstallExploreItem(plan, 'template', 0)).toBe(true)
       expect(canInstallExploreItem(plan, 'block_pack', 5)).toBe(true)
@@ -287,9 +329,10 @@ describe('canInstallExploreItem', () => {
 // ── canUploadToExplore (D9-3) ────────────────────────────────────────────────
 
 describe('canUploadToExplore', () => {
-  it('returns true for pro/trialing/enterprise', () => {
+  it('returns true for pro/trialing/student/enterprise', () => {
     expect(canUploadToExplore('pro')).toBe(true)
     expect(canUploadToExplore('trialing')).toBe(true)
+    expect(canUploadToExplore('student')).toBe(true)
     expect(canUploadToExplore('enterprise')).toBe(true)
   })
 
@@ -357,5 +400,43 @@ describe('resolveEffectivePlan', () => {
     expect(ent.canExport).toBe(true)
     expect(ent.canUseAi).toBe(true)
     expect(ent.canCreateCustomMaterials).toBe(true)
+  })
+
+  it('returns "student" for verified student with free plan', () => {
+    expect(
+      resolveEffectivePlan({
+        plan: 'free',
+        is_developer: false,
+        is_admin: false,
+        is_student: true,
+      }),
+    ).toBe('student')
+  })
+
+  it('student flag does not override pro plan', () => {
+    expect(
+      resolveEffectivePlan({ plan: 'pro', is_developer: false, is_admin: false, is_student: true }),
+    ).toBe('pro')
+  })
+
+  it('developer takes precedence over student', () => {
+    expect(resolveEffectivePlan({ plan: 'free', is_developer: true, is_student: true })).toBe(
+      'enterprise',
+    )
+  })
+
+  it('student entitlements unlock all pro features', () => {
+    const plan = resolveEffectivePlan({ plan: 'free', is_student: true })
+    const ent = getEntitlements(plan)
+    expect(ent.maxProjects).toBe(Infinity)
+    expect(ent.maxCanvases).toBe(Infinity)
+    expect(ent.canUploadCsv).toBe(true)
+    expect(ent.canUseAi).toBe(true)
+    expect(ent.canExport).toBe(true)
+    expect(ent.canCreateCustomMaterials).toBe(true)
+    expect(ent.canCreateCustomFunctions).toBe(true)
+    expect(ent.canUseListBlocks).toBe(true)
+    expect(ent.canUseGraphTableOutputs).toBe(true)
+    expect(ent.canImportFiles).toBe(true)
   })
 })

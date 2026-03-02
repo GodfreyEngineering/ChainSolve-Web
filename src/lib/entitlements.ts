@@ -8,7 +8,7 @@
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type Plan = 'free' | 'trialing' | 'pro' | 'enterprise' | 'past_due' | 'canceled'
+export type Plan = 'free' | 'trialing' | 'pro' | 'student' | 'enterprise' | 'past_due' | 'canceled'
 
 /** D11-1: Keys accepted by the checkout endpoint's plan_key parameter. */
 export type PlanKey =
@@ -36,6 +36,12 @@ export interface Entitlements {
   canCreateCustomMaterials: boolean
   /** H5-1: Whether user can create custom function blocks. Pro + Enterprise only. */
   canCreateCustomFunctions: boolean
+  /** H8-1: Whether user can use list input blocks. Pro + Enterprise only. */
+  canUseListBlocks: boolean
+  /** H8-1: Whether user can use graph/table output blocks. Pro + Enterprise only. */
+  canUseGraphTableOutputs: boolean
+  /** H8-1: Whether user can import files into projects. Pro + Enterprise only. */
+  canImportFiles: boolean
 }
 
 // ── Entitlement map ──────────────────────────────────────────────────────────
@@ -48,12 +54,15 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseArrays: false,
     canUsePlots: false,
     canUseRules: false,
-    canUseGroups: false,
-    canEditThemes: false,
+    canUseGroups: true,
+    canEditThemes: true,
     canExport: false,
     canUseAi: false,
     canCreateCustomMaterials: false,
     canCreateCustomFunctions: false,
+    canUseListBlocks: false,
+    canUseGraphTableOutputs: false,
+    canImportFiles: false,
   },
   trialing: {
     maxProjects: Infinity,
@@ -68,6 +77,9 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseAi: true,
     canCreateCustomMaterials: true,
     canCreateCustomFunctions: true,
+    canUseListBlocks: true,
+    canUseGraphTableOutputs: true,
+    canImportFiles: true,
   },
   pro: {
     maxProjects: Infinity,
@@ -82,6 +94,26 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseAi: true,
     canCreateCustomMaterials: true,
     canCreateCustomFunctions: true,
+    canUseListBlocks: true,
+    canUseGraphTableOutputs: true,
+    canImportFiles: true,
+  },
+  student: {
+    maxProjects: Infinity,
+    maxCanvases: Infinity,
+    canUploadCsv: true,
+    canUseArrays: true,
+    canUsePlots: true,
+    canUseRules: true,
+    canUseGroups: true,
+    canEditThemes: true,
+    canExport: true,
+    canUseAi: true,
+    canCreateCustomMaterials: true,
+    canCreateCustomFunctions: true,
+    canUseListBlocks: true,
+    canUseGraphTableOutputs: true,
+    canImportFiles: true,
   },
   enterprise: {
     maxProjects: Infinity,
@@ -96,6 +128,9 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseAi: true,
     canCreateCustomMaterials: true,
     canCreateCustomFunctions: true,
+    canUseListBlocks: true,
+    canUseGraphTableOutputs: true,
+    canImportFiles: true,
   },
   past_due: {
     maxProjects: 1,
@@ -110,6 +145,9 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseAi: false,
     canCreateCustomMaterials: false,
     canCreateCustomFunctions: false,
+    canUseListBlocks: false,
+    canUseGraphTableOutputs: false,
+    canImportFiles: false,
   },
   canceled: {
     maxProjects: 1,
@@ -124,6 +162,9 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseAi: false,
     canCreateCustomMaterials: false,
     canCreateCustomFunctions: false,
+    canUseListBlocks: false,
+    canUseGraphTableOutputs: false,
+    canImportFiles: false,
   },
 }
 
@@ -134,24 +175,28 @@ export function getEntitlements(plan: Plan): Entitlements {
 }
 
 /**
- * E2-6: Resolve the effective plan for a profile, accounting for developer/admin overrides.
+ * E2-6 / H8-1: Resolve the effective plan for a profile, accounting for
+ * developer/admin overrides and student verification.
  * Developer and admin accounts are treated as enterprise (all features unlocked).
+ * Verified students are treated as student plan (same entitlements as pro).
  */
 export function resolveEffectivePlan(
   profile: {
     plan: Plan
     is_developer?: boolean
     is_admin?: boolean
+    is_student?: boolean
   } | null,
 ): Plan {
   if (!profile) return 'free'
   if (profile.is_developer || profile.is_admin) return 'enterprise'
+  if (profile.is_student && profile.plan === 'free') return 'student'
   return profile.plan
 }
 
-/** True for trialing, pro, or enterprise (full access). */
+/** True for trialing, pro, student, or enterprise (full access). */
 export function isPro(plan: Plan): boolean {
-  return plan === 'trialing' || plan === 'pro' || plan === 'enterprise'
+  return plan === 'trialing' || plan === 'pro' || plan === 'student' || plan === 'enterprise'
 }
 
 /** Past-due and canceled users get read-only access to existing projects. */

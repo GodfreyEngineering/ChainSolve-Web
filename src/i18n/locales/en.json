@@ -440,7 +440,10 @@
     "customMaterialsLockedMsg": "Custom materials are a Pro feature. Upgrade to create and manage your own materials.",
     "featCustomFunctions": "Custom function blocks",
     "customFunctionsLockedTitle": "Custom functions require Pro",
-    "customFunctionsLockedMsg": "Custom function blocks are a Pro feature. Upgrade to create reusable formula blocks."
+    "customFunctionsLockedMsg": "Custom function blocks are a Pro feature. Upgrade to create reusable formula blocks.",
+    "featListBlocks": "List input blocks",
+    "featGraphTableOutputs": "Graph & table outputs",
+    "featImportFiles": "Import files into projects"
   },
   "functionWizard": {
     "createTitle": "Create Custom Function",

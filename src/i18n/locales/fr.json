@@ -432,7 +432,10 @@
     "customMaterialsLockedMsg": "Les mat\u00e9riaux personnalis\u00e9s sont une fonctionnalit\u00e9 Pro. Passez \u00e0 Pro pour cr\u00e9er et g\u00e9rer vos propres mat\u00e9riaux.",
     "featCustomFunctions": "Blocs de fonctions personnalis\u00e9es",
     "customFunctionsLockedTitle": "Les fonctions personnalis\u00e9es n\u00e9cessitent Pro",
-    "customFunctionsLockedMsg": "Les blocs de fonctions personnalis\u00e9es sont une fonctionnalit\u00e9 Pro. Passez \u00e0 Pro pour cr\u00e9er des blocs de formules r\u00e9utilisables."
+    "customFunctionsLockedMsg": "Les blocs de fonctions personnalis\u00e9es sont une fonctionnalit\u00e9 Pro. Passez \u00e0 Pro pour cr\u00e9er des blocs de formules r\u00e9utilisables.",
+    "featListBlocks": "Blocs d'entr\u00e9e de listes",
+    "featGraphTableOutputs": "Sorties graphiques & tableaux",
+    "featImportFiles": "Importer des fichiers dans les projets"
   },
   "functionWizard": {
     "createTitle": "Cr\u00e9er une fonction personnalis\u00e9e",

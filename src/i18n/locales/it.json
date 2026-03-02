@@ -432,7 +432,10 @@
     "customMaterialsLockedMsg": "I materiali personalizzati sono una funzione Pro. Aggiorna per creare e gestire i tuoi materiali.",
     "featCustomFunctions": "Blocchi funzione personalizzati",
     "customFunctionsLockedTitle": "Le funzioni personalizzate richiedono Pro",
-    "customFunctionsLockedMsg": "I blocchi funzione personalizzati sono una funzione Pro. Aggiorna per creare blocchi formula riutilizzabili."
+    "customFunctionsLockedMsg": "I blocchi funzione personalizzati sono una funzione Pro. Aggiorna per creare blocchi formula riutilizzabili.",
+    "featListBlocks": "Blocchi di input elenco",
+    "featGraphTableOutputs": "Output grafici e tabelle",
+    "featImportFiles": "Importa file nei progetti"
   },
   "functionWizard": {
     "createTitle": "Crea funzione personalizzata",

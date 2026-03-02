@@ -174,12 +174,17 @@ export default function CanvasPage() {
       if (!session) return
       supabase
         .from('profiles')
-        .select('plan,is_developer,is_admin')
+        .select('plan,is_developer,is_admin,is_student')
         .eq('id', session.user.id)
         .maybeSingle()
         .then(({ data }) => {
           if (!cancelled && data?.plan) {
-            const row = data as { plan: Plan; is_developer?: boolean; is_admin?: boolean }
+            const row = data as {
+              plan: Plan
+              is_developer?: boolean
+              is_admin?: boolean
+              is_student?: boolean
+            }
             setPlan(resolveEffectivePlan(row))
           }
         })

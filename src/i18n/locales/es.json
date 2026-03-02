@@ -432,7 +432,10 @@
     "customMaterialsLockedMsg": "Los materiales personalizados son una funci\u00f3n Pro. Actualice para crear y gestionar sus propios materiales.",
     "featCustomFunctions": "Bloques de funciones personalizadas",
     "customFunctionsLockedTitle": "Las funciones personalizadas requieren Pro",
-    "customFunctionsLockedMsg": "Los bloques de funciones personalizadas son una funci\u00f3n Pro. Actualice para crear bloques de f\u00f3rmulas reutilizables."
+    "customFunctionsLockedMsg": "Los bloques de funciones personalizadas son una funci\u00f3n Pro. Actualice para crear bloques de f\u00f3rmulas reutilizables.",
+    "featListBlocks": "Bloques de entrada de listas",
+    "featGraphTableOutputs": "Salidas de gr\u00e1ficos y tablas",
+    "featImportFiles": "Importar archivos a proyectos"
   },
   "functionWizard": {
     "createTitle": "Crear funci\u00f3n personalizada",

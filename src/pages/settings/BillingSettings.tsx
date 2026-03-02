@@ -4,13 +4,11 @@ import { supabase } from '../../lib/supabase'
 import { Button } from '../../components/ui/Button'
 import { isReauthed } from '../../lib/reauth'
 import type { Profile } from '../../lib/profilesService'
-import { resolveEffectivePlan } from '../../lib/entitlements'
+import { resolveEffectivePlan, type Plan } from '../../lib/entitlements'
 
 const LazyReauthModal = lazy(() =>
   import('../../components/ui/ReauthModal').then((m) => ({ default: m.ReauthModal })),
 )
-
-type Plan = 'free' | 'trialing' | 'pro' | 'enterprise' | 'past_due' | 'canceled'
 
 interface Props {
   profile: Profile | null
@@ -20,6 +18,7 @@ const PLAN_COLORS: Record<Plan, string> = {
   free: '#6b7280',
   trialing: '#3b82f6',
   pro: '#22c55e',
+  student: '#0ea5e9',
   enterprise: '#8b5cf6',
   past_due: '#f59e0b',
   canceled: '#ef4444',

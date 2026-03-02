@@ -432,7 +432,10 @@
     "customMaterialsLockedMsg": "Eigene Materialien sind eine Pro-Funktion. Upgraden Sie, um Ihre eigenen Materialien zu erstellen und zu verwalten.",
     "featCustomFunctions": "Eigene Funktionsbl\u00f6cke",
     "customFunctionsLockedTitle": "Eigene Funktionen erfordern Pro",
-    "customFunctionsLockedMsg": "Eigene Funktionsbl\u00f6cke sind eine Pro-Funktion. Upgraden Sie, um wiederverwendbare Formelbl\u00f6cke zu erstellen."
+    "customFunctionsLockedMsg": "Eigene Funktionsbl\u00f6cke sind eine Pro-Funktion. Upgraden Sie, um wiederverwendbare Formelbl\u00f6cke zu erstellen.",
+    "featListBlocks": "Listen-Eingabebl\u00f6cke",
+    "featGraphTableOutputs": "Diagramm- & Tabellenausgaben",
+    "featImportFiles": "Dateien in Projekte importieren"
   },
   "functionWizard": {
     "createTitle": "Eigene Funktion erstellen",

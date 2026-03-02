@@ -260,9 +260,12 @@ test.describe('Core flow: Export gating (D17-4)', () => {
         canUseArrays: false,
         canUsePlots: false,
         canUseRules: false,
-        canUseGroups: false,
-        canEditThemes: false,
+        canUseGroups: true,
+        canEditThemes: true,
         canExport: false,
+        canUseListBlocks: false,
+        canUseGraphTableOutputs: false,
+        canImportFiles: false,
       }
       return FREE_ENTITLEMENTS
     })
@@ -270,7 +273,7 @@ test.describe('Core flow: Export gating (D17-4)', () => {
     expect(result.canExport).toBe(false)
     expect(result.canUploadCsv).toBe(false)
     expect(result.canUsePlots).toBe(false)
-    expect(result.canUseGroups).toBe(false)
+    expect(result.canUseGroups).toBe(true)
   })
 
   test('Pro plan entitlements allow export', async ({ page }) => {
@@ -288,6 +291,9 @@ test.describe('Core flow: Export gating (D17-4)', () => {
         canUseGroups: true,
         canEditThemes: true,
         canExport: true,
+        canUseListBlocks: true,
+        canUseGraphTableOutputs: true,
+        canImportFiles: true,
       }
       return { canExport: PRO_ENTITLEMENTS.canExport, canUsePlots: PRO_ENTITLEMENTS.canUsePlots }
     })
