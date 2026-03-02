@@ -1832,7 +1832,7 @@ Claude MUST:
 ---
 
 ## H5 — Custom function blocks (wizard + profile-level library)
-- [ ] H5-1: Custom function block creation wizard (Pro only)
+- [x] H5-1: Custom function block creation wizard (Pro only)
   - Wizard fields:
     - name, description
     - inputs/outputs
