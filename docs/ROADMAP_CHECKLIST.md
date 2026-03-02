@@ -1397,7 +1397,7 @@ Claude MUST:
   - Document `.dev.vars` usage for local Pages functions. :contentReference[oaicite:5]{index=5}
   - Acceptance: missing env causes an actionable error (not silent failure).
 
-- [ ] F2-3: Canonical privacy + redaction library
+- [x] F2-3: Canonical privacy + redaction library
   - Ensure one canonical redaction utility is used everywhere:
     - debug export, PDF/Excel/.chainsolvejson, AI usage logs, import reports
   - Add regression tests: tokens/keys/emails never leak.
