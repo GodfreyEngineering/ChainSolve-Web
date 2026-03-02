@@ -1697,7 +1697,7 @@ Claude MUST:
   - Undo/redo works.
   - Acceptance: fast chain cleanup.
 
-- [ ] G6-3: Remove misleading blank-canvas instruction
+- [x] G6-3: Remove misleading blank-canvas instruction
   - Replace “double-click to add” guidance.
   - Use right-click and insert guidance.
   - Acceptance: zero misleading copy.
