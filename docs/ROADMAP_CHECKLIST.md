@@ -1583,7 +1583,7 @@ Claude MUST:
 ---
 
 ## G2 — Interactive onboarding (animated overlay + checklist + wizard)
-- [ ] G2-1: First-login onboarding overlay with animated guided steps
+- [x] G2-1: First-login onboarding overlay with animated guided steps
   - Interactive overlay that walks through:
     1) Open Projects window
     2) Create project (or scratch)
