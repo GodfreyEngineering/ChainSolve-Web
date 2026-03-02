@@ -98,6 +98,28 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Adapter boundary check
+        run: bash scripts/check-adapter-boundary.sh
+
+      - name: CSP third-party allowlist
+        run: node scripts/check-csp-allowlist.mjs
+
+      - name: i18n hardcoded-attribute check
+        run: node scripts/check-i18n-hardcoded.mjs
+
+      - name: i18n missing-key check
+        run: node scripts/check-i18n-keys.mjs
+
+      - name: Billing functions — no stack-trace exposure
+        run: |
+          if grep -n 'err\.stack\|error\.stack' \
+               functions/api/stripe/create-checkout-session.ts \
+               functions/api/stripe/create-portal-session.ts 2>/dev/null | grep -v '^\s*//' ; then
+            echo "::error::Billing function exposes err.stack in response body"
+            exit 1
+          fi
+          echo "No err.stack exposure in billing JSON functions"
+
       - name: WASM export guard
         run: node scripts/check-wasm-exports.mjs
 
@@ -131,6 +153,12 @@ jobs:
         # Fail the build if any bundle exceeds its budget.
         # See scripts/check-bundle-size.mjs for current budgets.
         run: node scripts/check-bundle-size.mjs
+
+      - name: Bundle splits audit (lazy chunks)
+        run: node scripts/check-bundle-splits.mjs
+
+      - name: Performance budget (structural)
+        run: node scripts/check-perf-budget.mjs
 
       - name: Robots meta guard (dist)
         run: node scripts/check-robots-meta.mjs

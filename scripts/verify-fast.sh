@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # verify-fast.sh — Quick local checks (no wasm-pack / cargo required).
 # Use for pre-push sanity. For the full CI-equivalent, run verify-ci.sh.
+#
+# This is a SUBSET of verify-ci.sh. It skips: WASM build, cargo test,
+# vite build, bundle checks, adapter boundary, CSP allowlist, i18n checks,
+# and performance budget. The authoritative gate is verify-ci.sh.
 set -euo pipefail
 
 RED='\033[0;31m'
