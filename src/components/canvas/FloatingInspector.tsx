@@ -63,7 +63,7 @@ export function FloatingInspector({
           }
           aria-label={pinned ? 'Unpin selection' : 'Pin to current node'}
         >
-          {pinned ? '\u{1F4CC}' : '\u{1F4CC}'}
+          {pinned ? '\u25C9' : '\u25CB'}
           <span style={{ marginLeft: 4, fontSize: '0.7rem', opacity: 0.7 }}>
             {pinned
               ? t('inspector.pinned', 'Pinned')

@@ -2015,7 +2015,7 @@ Claude MUST:
 ---
 
 ## I6 — Branding, favicon, SEO, international SEO
-- [ ] I6-1: Full branding pass
+- [x] I6-1: Full branding pass
   - favicons
   - consistent identity across app, docs, explore
   - no cheap-looking UI

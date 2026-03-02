@@ -22,11 +22,11 @@ const BASE_TABS: SettingsTab[] = ['profile', 'billing', 'preferences', 'security
 type SettingsTab = 'profile' | 'billing' | 'preferences' | 'security' | 'admin'
 
 const TAB_ICONS: Record<SettingsTab, string> = {
-  profile: '\u{1F464}',
-  billing: '\u{1F4B3}',
-  preferences: '\u{2699}\uFE0F',
-  security: '\u{1F512}',
-  admin: '\u{26A0}\uFE0F',
+  profile: '\u2302',
+  billing: '\u00A4',
+  preferences: '\u2699',
+  security: '\u2616',
+  admin: '\u26A0',
 }
 
 export default function Settings() {

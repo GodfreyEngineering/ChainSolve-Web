@@ -28,10 +28,10 @@ function getNarrow() {
 
 // ── Tab config ─────────────────────────────────────────────────────────────
 const TABS: { key: SettingsTab; icon: string }[] = [
-  { key: 'profile', icon: '\u{1F464}' },
-  { key: 'billing', icon: '\u{1F4B3}' },
-  { key: 'preferences', icon: '\u{2699}\uFE0F' },
-  { key: 'security', icon: '\u{1F512}' },
+  { key: 'profile', icon: '\u2302' },
+  { key: 'billing', icon: '\u00A4' },
+  { key: 'preferences', icon: '\u2699' },
+  { key: 'security', icon: '\u2616' },
 ]
 
 export function SettingsModal() {

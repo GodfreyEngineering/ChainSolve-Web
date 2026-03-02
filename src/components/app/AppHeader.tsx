@@ -183,6 +183,7 @@ export function AppHeader({
   } | null>(null)
 
   const isMobile = useIsMobile()
+  const [clearCanvasConfirm, setClearCanvasConfirm] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [llmBuilderOpen, setLlmBuilderOpen] = useState(false)
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false)
@@ -221,10 +222,15 @@ export function AppHeader({
 
   const handleClearCanvas = useCallback(() => {
     if (!canvasRef.current) return
-    if (!window.confirm(t('menu.clearCanvasConfirm'))) return
+    setClearCanvasConfirm(true)
+  }, [canvasRef])
+
+  const handleClearCanvasConfirmed = useCallback(() => {
+    setClearCanvasConfirm(false)
+    if (!canvasRef.current) return
     canvasRef.current.selectAll()
     canvasRef.current.deleteSelected()
-  }, [canvasRef, t])
+  }, [canvasRef])
 
   const handleExportPdfActive = useCallback(() => {
     setOpenMenu(null)
@@ -1038,6 +1044,28 @@ export function AppHeader({
             title={t('project.unsavedTitle')}
             message={t('project.unsavedMessage')}
             actions={confirmActions}
+          />
+        </Suspense>
+      )}
+      {clearCanvasConfirm && (
+        <Suspense fallback={null}>
+          <LazyConfirmDialog
+            open
+            onClose={() => setClearCanvasConfirm(false)}
+            title={t('menu.clearCanvas')}
+            message={t('menu.clearCanvasConfirm')}
+            actions={[
+              {
+                label: t('ui.cancel', 'Cancel'),
+                variant: 'muted',
+                onClick: () => setClearCanvasConfirm(false),
+              },
+              {
+                label: t('menu.clearCanvas'),
+                variant: 'danger',
+                onClick: handleClearCanvasConfirmed,
+              },
+            ]}
           />
         </Suspense>
       )}

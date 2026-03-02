@@ -420,7 +420,19 @@ export function AiCopilotWindow({
   if (!canUse) {
     const lockedContent = (
       <div style={s.lockedOverlay}>
-        <div style={{ fontSize: '2rem', opacity: 0.4 }}>&#x1F512;</div>
+        <div
+          style={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            letterSpacing: '0.05em',
+            padding: '0.35rem 0.9rem',
+            borderRadius: 6,
+            border: '1px solid rgba(255,255,255,0.15)',
+            opacity: 0.5,
+          }}
+        >
+          PRO
+        </div>
         <strong>{t('ai.upgradeTitle')}</strong>
         <p style={{ fontSize: '0.84rem', opacity: 0.7, margin: 0 }}>{t('ai.upgradeBody')}</p>
         <button style={s.sendBtn} onClick={onUpgrade}>

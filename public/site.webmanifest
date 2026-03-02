@@ -1,0 +1,26 @@
+{
+  "name": "ChainSolve",
+  "short_name": "ChainSolve",
+  "description": "Scientific node-graph calculator. Build computation chains visually.",
+  "start_url": "/app",
+  "display": "standalone",
+  "theme_color": "#1CABB0",
+  "background_color": "#141414",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/brand/icon-square.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

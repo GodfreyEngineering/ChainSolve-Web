@@ -167,7 +167,7 @@ export function BottomToolbar({
             aria-label={t('toolbar.lockLayout')}
             aria-pressed={locked}
           >
-            {locked ? '\ud83d\udd12' : '\ud83d\udd13'}
+            {locked ? '\u25A0' : '\u25A1'}
           </button>
           <button
             onClick={onToggleSnap}
@@ -199,7 +199,7 @@ export function BottomToolbar({
         aria-label={t('toolbar.minimap')}
         aria-pressed={minimap}
       >
-        {'\ud83d\uddfa'}
+        {'\u2261'}
       </button>
 
       <button

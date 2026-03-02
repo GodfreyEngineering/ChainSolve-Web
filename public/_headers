@@ -17,6 +17,9 @@
 /robots.txt
   Cache-Control: public, max-age=86400
 
+/site.webmanifest
+  Cache-Control: public, max-age=86400
+
 # ── Everything else (HTML, SPA routes) — always revalidate ───────────────────
 #
 # CLOUDFLARE WEB ANALYTICS — MUST BE DISABLED (G0-3 resolution).
