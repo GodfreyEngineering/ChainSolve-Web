@@ -1406,7 +1406,7 @@ Claude MUST:
 ---
 
 ## F3 — Dependency + bundle + performance hygiene
-- [ ] F3-1: Dependency audit + pruning
+- [x] F3-1: Dependency audit + pruning
   - Remove unused deps.
   - Ensure lazy-loaded heavy deps remain lazy (PDF/XLSX/Vega/AI).
   - Acceptance: build output shows chunks correctly split and no bundle regressions.
