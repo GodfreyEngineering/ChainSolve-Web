@@ -378,11 +378,11 @@ forms. It is a first-party Cloudflare service and does not require `unsafe-eval`
 
 ## 7. Row-Level Security (RLS) Audit
 
-> W9 P044 — all tables confirmed 2026-02-27.
+> W9 P044 — all tables confirmed 2026-02-27. F4-2 consolidation pass 2026-03-02.
 
 ### Policy summary
 
-All application tables have RLS enabled. The canonical ownership expression
+All 23 application tables have RLS enabled. The canonical ownership expression
 `(select auth.uid())` is used throughout (not bare `auth.uid()`, which causes
 a per-row function call; the subquery form is evaluated once per query).
 
@@ -396,14 +396,34 @@ a per-row function call; the subquery form is evaluated once per query).
 | `group_templates` | ✓ | SELECT / INSERT / UPDATE / DELETE own | `(select auth.uid()) = user_id` |
 | `bug_reports` | ✓ | INSERT own, SELECT own | `(select auth.uid()) = user_id` |
 | `stripe_events` | ✓ | **None** — service_role only | Webhook receiver; no user access needed |
-| `csp_reports` | ✓ | INSERT only | Browser fire-and-forget; no auth token; service_role writes |
+| `csp_reports` | ✓ | INSERT only | Browser fire-and-forget; service_role writes |
 | `observability_events` | ✓ | Explicit deny-all for authenticated | Service_role writes; no user reads |
+| `marketplace_items` | ✓ | Unified SELECT / author INSERT / unified UPDATE / author DELETE | Consolidated in 0038 |
+| `marketplace_purchases` | ✓ | SELECT own, INSERT own | `(select auth.uid()) = user_id` |
+| `marketplace_likes` | ✓ | SELECT / INSERT / DELETE own | `(select auth.uid()) = user_id` |
+| `marketplace_comments` | ✓ | 7 policies (public read, user CRUD, mod CRUD, flag) | Role-gated via moderator check |
+| `marketplace_install_events` | ✓ | SELECT own, INSERT own | `(select auth.uid()) = user_id` |
+| `organizations` | ✓ | SELECT / INSERT / UPDATE / DELETE member | Via `org_members` join |
+| `org_members` | ✓ | SELECT / INSERT / UPDATE / DELETE | Role-gated (owner/admin) |
+| `audit_log` | ✓ | Unified SELECT (own + org admin), INSERT own | Consolidated in 0038 |
+| `avatar_reports` | ✓ | INSERT own, SELECT own + mod, UPDATE mod | Role-gated via moderator check |
+| `ai_org_policies` | ✓ | SELECT + UPDATE org owner | Owner-only via `org_members` join |
+| `ai_usage_monthly` | ✓ | SELECT own | Service_role inserts |
+| `ai_request_log` | ✓ | SELECT own | Service_role inserts |
+| `user_sessions` | ✓ | SELECT / INSERT / UPDATE / DELETE own | `(select auth.uid()) = user_id` |
 
 ### Canonical migration reference
 
 Migration `0011_rls_perf_canonical.sql` drops and recreates all policies on
 user-owned tables using the `(select auth.uid())` pattern. No bare `auth.uid()`
 calls remain.
+
+### Policy consolidation (0038)
+
+Migration `0038_consolidate_permissive_policies.sql` merged multiple permissive
+SELECT/UPDATE policies into single policies with explicit OR logic:
+- `audit_log`: 2 SELECT → 1 unified SELECT (own OR org-admin)
+- `marketplace_items`: 4 SELECT → 1 unified SELECT; 2 UPDATE → 1 unified UPDATE
 
 ### Intentional no-access tables
 
