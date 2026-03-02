@@ -294,6 +294,14 @@ fn evaluate_node_inner(
             data_point_count(inputs.get("data"))
         }
 
+        // ── List table (terminal, pass-through for UI rendering) ──
+        "listTable" => {
+            inputs
+                .get("data")
+                .cloned()
+                .unwrap_or(Value::error("No data"))
+        }
+
         // ── Engineering → Mechanics ──────────────────────────────────
         "eng.mechanics.v_from_uat" => {
             let u = scalar_or_nan(inputs, "u");
@@ -1594,6 +1602,31 @@ mod tests {
     #[test]
     fn plot_no_data() {
         let v = evaluate_node("histogram", &HashMap::new(), &HashMap::new());
+        match v {
+            Value::Error { message } => assert_eq!(message, "No data"),
+            _ => panic!("Expected Error"),
+        }
+    }
+
+    #[test]
+    fn list_table_passthrough_vector() {
+        let mut inputs = HashMap::new();
+        inputs.insert(
+            "data".into(),
+            Value::Vector {
+                value: vec![1.0, 2.0, 3.0],
+            },
+        );
+        let v = evaluate_node("listTable", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => assert_eq!(value, vec![1.0, 2.0, 3.0]),
+            _ => panic!("Expected Vector passthrough"),
+        }
+    }
+
+    #[test]
+    fn list_table_no_data() {
+        let v = evaluate_node("listTable", &HashMap::new(), &HashMap::new());
         match v {
             Value::Error { message } => assert_eq!(message, "No data"),
             _ => panic!("Expected Error"),

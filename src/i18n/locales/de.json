@@ -1115,6 +1115,19 @@
     "pastePlaceholder": "Zahlen einfuegen (eine pro Zeile, kommagetrennt oder JSON-Array)",
     "pasteNoValid": "Keine gueltigen Zahlen gefunden"
   },
+  "listTable": {
+    "noData": "Keine Daten",
+    "expectList": "Listeneingabe erwartet",
+    "empty": "Leere Liste",
+    "items": "Eintraege",
+    "value": "Wert",
+    "statMin": "Min",
+    "statMax": "Max",
+    "statMean": "Mittel",
+    "statStdDev": "Std Abw",
+    "statSum": "Summe",
+    "statCount": "Anzahl"
+  },
   "common": {
     "cancel": "Abbrechen",
     "close": "Schließen",

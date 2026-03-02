@@ -176,6 +176,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   histogram: 'Histogram chart. Shows the frequency distribution of a data set.',
   barChart: 'Bar chart. Displays categorical data as vertical bars.',
   heatmap: 'Heatmap visualization. Renders a table as a color-coded grid.',
+  listTable:
+    'List table output. Displays list data in a scrollable table with summary statistics (count, min, max, mean, std dev, sum).',
 
   // ── Engineering: Mechanics ────────────────────────────────────────────────
   'eng.mechanics.v_from_uat':

@@ -46,6 +46,7 @@ import { OperationNode } from './nodes/OperationNode'
 import { DisplayNode } from './nodes/DisplayNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
+import { ListTableNode } from './nodes/ListTableNode'
 import { GroupNode } from './nodes/GroupNode'
 import { BlockLibrary } from './BlockLibrary'
 import { DRAG_TYPE } from './blockLibraryUtils'
@@ -121,6 +122,7 @@ const NODE_TYPES = {
   csDisplay: DisplayNode,
   csData: DataNode,
   csPlot: PlotNode,
+  csListTable: ListTableNode,
   csGroup: GroupNode,
   csProbe: ProbeNode,
   csAnnotation: AnnotationNode,

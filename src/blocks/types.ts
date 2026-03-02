@@ -49,6 +49,7 @@ export type NodeKind =
   | 'csDisplay'
   | 'csData'
   | 'csPlot'
+  | 'csListTable'
   | 'csGroup'
   | 'csProbe'
   | 'csAnnotation'

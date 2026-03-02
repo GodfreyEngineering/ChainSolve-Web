@@ -56,6 +56,7 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csDisplay',
   'csData',
   'csPlot',
+  'csListTable',
   'csGroup',
   'csProbe',
   'csAnnotation',

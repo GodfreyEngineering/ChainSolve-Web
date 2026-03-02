@@ -1115,6 +1115,19 @@
     "pastePlaceholder": "Collez des nombres (un par ligne, separes par des virgules ou tableau JSON)",
     "pasteNoValid": "Aucun nombre valide trouve"
   },
+  "listTable": {
+    "noData": "Aucune donnee",
+    "expectList": "Entree de liste attendue",
+    "empty": "Liste vide",
+    "items": "elements",
+    "value": "Valeur",
+    "statMin": "Min",
+    "statMax": "Max",
+    "statMean": "Moy",
+    "statStdDev": "Ec type",
+    "statSum": "Somme",
+    "statCount": "Nombre"
+  },
   "common": {
     "cancel": "Annuler",
     "close": "Fermer",

@@ -1796,7 +1796,7 @@ Claude MUST:
     - propagation remains robust
   - Acceptance: no crashes, predictable results.
 
-- [ ] H2-3: Graph and table outputs for lists (Pro only)
+- [x] H2-3: Graph and table outputs for lists (Pro only)
   - Tables/graphs can filter rows/columns, select data, and display scientific summaries.
   - Free cannot use graph/table output blocks.
   - Acceptance: Pro output tools are powerful and stable.
@@ -2427,5 +2427,248 @@ Claude MUST:
   - command palette improvements
   - tooltips for every major action
   - Acceptance: productivity boost.
+
+---
+
+---
+
+# PHASE M — Full Repo Housekeeping + Professional-Grade Upgrade (ONE checkpoint per run)
+> Objective: Bring the repo up to a new level of professionalism: pristine structure, consistent conventions, clean history, strong guardrails, great documentation, and zero confusing legacy tooling. Claude completes ONE checkpoint per run and treats this as a serious engineering audit and modernization pass.
+
+## Phase M execution rules
+- Claude completes exactly ONE checkpoint per run.
+- DONE means:
+  - `./scripts/verify-ci.sh` PASS
+  - tests updated/added as needed
+  - docs updated where required
+  - commit message uses the checkpoint ID and is written cleanly (no messy auto-generated feel)
+- Prefer quarantine to deletion if uncertain; but remove dead code once proven unused.
+- Remove custom `./CS` GitHub scripts and any other unused/legacy scripts, and update all references.
+- Keep CSP strict. Do not weaken it.
+- Keep adapter boundary intact (UI never imports Supabase directly).
+
+---
+
+## M0 — Full inventory and removal plan (no code changes)
+- [ ] M0-1: Produce a complete “Repo Inventory” report
+  - Add `docs/AUDIT/PHASE_M_INVENTORY.md` that lists:
+    - every top-level directory and its purpose
+    - all scripts, CI workflows, and their owners
+    - all build steps (npm, cargo, wasm-pack, wasm-opt)
+    - all “legacy candidates” (including ./CS scripts) with current references
+  - Acceptance: report is thorough and actionable.
+
+- [ ] M0-2: Produce a “Deletion + Refactor Plan” for Phase M
+  - Add `docs/AUDIT/PHASE_M_PLAN.md` including:
+    - what will be deleted/quarantined
+    - what will be renamed/moved
+    - what guardrails will be added
+    - how to validate changes (verify-ci + smoke checklist)
+  - Acceptance: a consultancy could follow it and agree with it.
+
+---
+
+## M1 — Repo structure modernization (clarity + harmony)
+- [ ] M1-1: Normalize directory layout and naming conventions
+  - Ensure the repo reads like a mature product:
+    - `src/` app code
+    - `functions/` Pages functions
+    - `crates/` Rust
+    - `scripts/` build/verify tools
+    - `docs/` documentation hub
+    - `supabase/` migrations + policies
+  - Add a single authoritative directory map doc: `docs/DEV/DIRECTORY_MAP.md`
+  - Acceptance: new dev understands repo in 5 minutes.
+
+- [ ] M1-2: Clean import boundaries with clear layers
+  - Formalize layers:
+    - UI components
+    - window manager / layout
+    - service layer
+    - adapters
+    - engine bridge/worker
+  - Add `docs/ARCHITECTURE/LAYERS.md`
+  - Acceptance: boundaries are explicit and enforced.
+
+---
+
+## M2 — Remove legacy tooling (including ./CS GitHub scripts)
+- [ ] M2-1: Remove custom ./CS GitHub scripts and any other unused CI helper scripts
+  - Identify:
+    - `./CS*`, `.github/CS*`, `scripts/CS*`, or similarly named internal scripts
+    - unused GitHub Actions, unused shell scripts, unused node scripts
+  - Remove them cleanly:
+    - delete files
+    - remove references in workflows/docs/package.json/scripts
+    - replace with standard equivalents under `scripts/` if needed
+  - Acceptance:
+    - verify-ci still green
+    - no dead references remain (`ripgrep` proof documented in commit)
+
+- [ ] M2-2: Consolidate scripts into a single coherent toolchain
+  - `verify-ci.sh` remains the authoritative gate.
+  - Optional helper scripts are documented, consistent, and minimal.
+  - Acceptance: no duplicate “almost the same” scripts.
+
+---
+
+## M3 — Documentation suite overhaul (professional, complete, and non–AI-written)
+- [ ] M3-1: README + docs hub rewrite (human quality)
+  - Root `README.md`:
+    - what ChainSolve is (1 page)
+    - how to run locally
+    - how to run verify-ci
+    - where docs live
+  - `docs/README.md` becomes documentation hub with curated links.
+
+- [ ] M3-2: Add/refresh standard project docs (top-level)
+  - `CONTRIBUTING.md` (how to contribute)
+  - `CODE_OF_CONDUCT.md`
+  - `SECURITY.md` (high-level security posture and reporting, no sensitive internals)
+  - `SUPPORT.md` (support@chainsolve.co.uk, info@chainsolve.co.uk, bug reporting flow)
+  - `LICENSE` + `THIRD_PARTY_NOTICES.md` (auto-generated in later checkpoint)
+  - Acceptance: repo looks like a real product repo.
+
+- [ ] M3-3: Changelog system (Keep a Changelog)
+  - Add/standardize `CHANGELOG.md` format with `[Unreleased]`, grouped sections. :contentReference[oaicite:6]{index=6}  
+  - Add rules:
+    - no dumping git logs
+    - human-readable change summaries
+  - Acceptance: clean changelog ready for releases.
+
+- [ ] M3-4: Commit message convention (Conventional Commits)
+  - Document in `docs/DEV/COMMITS.md` and optionally enforce.
+  - Add scopes relevant to repo (web, engine, functions, docs, ci, supabase). :contentReference[oaicite:7]{index=7}  
+  - Acceptance: commit history becomes machine- and human-friendly.
+
+---
+
+## M4 — GitHub hygiene for future consultancy audits
+- [ ] M4-1: CODEOWNERS file + review ownership
+  - Add `.github/CODEOWNERS` and document intended owners. :contentReference[oaicite:8]{index=8}  
+  - Acceptance: clear ownership map; future PR review is structured.
+
+- [ ] M4-2: Issue templates and PR template
+  - Add `.github/ISSUE_TEMPLATE/`:
+    - bug report
+    - feature request
+    - block request (new block ideas)
+    - security concern (routes to SECURITY policy)
+  - Add template chooser config. :contentReference[oaicite:9]{index=9}  
+  - Add `PULL_REQUEST_TEMPLATE.md`:
+    - checklist: verify-ci, tests, docs, i18n, CSP, no secrets
+  - Acceptance: incoming contributions become high quality.
+
+- [ ] M4-3: Dependabot configuration
+  - Add `.github/dependabot.yml`:
+    - npm
+    - cargo
+    - github-actions
+  - Acceptance: dependency security is actively maintained.
+
+---
+
+## M5 — Enforce architecture with automated guardrails
+- [ ] M5-1: ESLint import restrictions
+  - Use `no-restricted-imports` to prevent UI importing adapters or Supabase directly. :contentReference[oaicite:10]{index=10}  
+  - Add explicit allowlist for service layer.
+  - Acceptance: boundary violations fail CI.
+
+- [ ] M5-2: File naming and public API rules
+  - Add `docs/DEV/NAMING.md`:
+    - file naming
+    - export conventions
+    - avoid “utils.ts” dumping grounds
+  - Optional: enforce with lint rule or simple script.
+  - Acceptance: codebase becomes predictable.
+
+- [ ] M5-3: Environment config hygiene (Cloudflare + local dev)
+  - Document `.dev.vars` usage and ensure it is ignored (never committed). :contentReference[oaicite:11]{index=11}  
+  - Ensure all secrets only used via `context.env` in Pages Functions.
+  - Acceptance: no secret leaks; dev setup clean.
+
+---
+
+## M6 — CI, build, and release automation polish
+- [ ] M6-1: CI workflow cleanup
+  - Remove redundant workflows.
+  - Ensure verify-ci is always the gate.
+  - Normalize caching strategy (npm + cargo).
+  - Acceptance: CI is fast, deterministic, and readable.
+
+- [ ] M6-2: Release flow scaffold
+  - Add `docs/DEV/RELEASE.md`:
+    - versioning approach
+    - tagging
+    - changelog update process
+    - Cloudflare deploy verification checklist
+  - Acceptance: “release without fear.”
+
+---
+
+## M7 — Test discipline and quality gates
+- [ ] M7-1: Test taxonomy and rules doc
+  - Add `docs/DEV/TESTING.md`:
+    - unit vs integration vs e2e
+    - golden tests policy
+    - determinism rules
+  - Acceptance: tests have a purpose and structure.
+
+- [ ] M7-2: Coverage threshold and reporting
+  - Add coverage thresholds for the high-value directories:
+    - `src/lib`
+    - `src/engine`
+    - `crates/engine-core`
+  - Acceptance: quality doesn’t regress silently.
+
+---
+
+## M8 — Dependency and license compliance (sellable repo posture)
+- [ ] M8-1: Automated third-party notices generation
+  - Generate `THIRD_PARTY_NOTICES.md` from npm + cargo licenses.
+  - Document process and ensure it can be regenerated.
+  - Acceptance: licensing posture visible and auditable.
+
+- [ ] M8-2: Asset provenance rules (icons/fonts/images)
+  - Add `docs/LEGAL/ASSETS.md`:
+    - where icons come from
+    - license rules
+    - attribution rules if required
+  - Acceptance: “safe to sell” stance is documented.
+
+---
+
+## M9 — “No vibe-coded” pass (repo-wide)
+- [ ] M9-1: Copy and style polish sweep (code + UI text + docs)
+  - Remove AI-ish patterns:
+    - overly chatty comments
+    - inconsistent punctuation
+    - decorative characters
+    - emojis
+  - Replace with professional, concise writing.
+  - Acceptance: the repo reads like a human-built product.
+
+- [ ] M9-2: Consistent error messages and help links
+  - Standardize user-facing errors:
+    - always actionable
+    - always i18n’d
+    - always points to correct help/support entry
+  - Acceptance: product feels mature.
+
+---
+
+## M10 — Final “Harmony” validation
+- [ ] M10-1: Full repo lint for dead code and orphan docs
+  - Run a dead-code scan (imports, exports, unused files).
+  - Ensure docs match reality.
+  - Acceptance: no orphan modules; no misleading docs.
+
+- [ ] M10-2: “Fresh clone” reproducibility test
+  - In a fresh Codespace/devcontainer:
+    - `npm ci`
+    - `./scripts/verify-ci.sh`
+    - app boots
+  - Document the exact steps and expected output.
+  - Acceptance: repo is reproducible and professional.
 
 ---

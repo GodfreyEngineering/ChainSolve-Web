@@ -93,4 +93,17 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
       } satisfies PlotConfig,
     },
   })
+
+  register({
+    type: 'listTable',
+    label: 'List Table',
+    category: 'plot',
+    nodeKind: 'csListTable',
+    inputs: [{ id: 'data', label: 'Data' }],
+    proOnly: true,
+    defaultData: {
+      blockType: 'listTable',
+      label: 'List Table',
+    },
+  })
 }

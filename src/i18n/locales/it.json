@@ -1115,6 +1115,19 @@
     "pastePlaceholder": "Incolla numeri (uno per riga, separati da virgole o array JSON)",
     "pasteNoValid": "Nessun numero valido trovato"
   },
+  "listTable": {
+    "noData": "Nessun dato",
+    "expectList": "Input lista previsto",
+    "empty": "Lista vuota",
+    "items": "elementi",
+    "value": "Valore",
+    "statMin": "Min",
+    "statMax": "Max",
+    "statMean": "Media",
+    "statStdDev": "Dev Std",
+    "statSum": "Somma",
+    "statCount": "Conteggio"
+  },
   "common": {
     "cancel": "Annulla",
     "close": "Chiudi",

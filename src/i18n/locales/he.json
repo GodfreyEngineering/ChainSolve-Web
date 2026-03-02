@@ -264,6 +264,19 @@
     "pastePlaceholder": "הדבק מספרים (אחד בשורה, מופרדים בפסיקים או מערך JSON)",
     "pasteNoValid": "לא נמצאו מספרים תקינים"
   },
+  "listTable": {
+    "noData": "אין נתונים",
+    "expectList": "נדרשת קלט רשימה",
+    "empty": "רשימה ריקה",
+    "items": "פריטים",
+    "value": "ערך",
+    "statMin": "מינימום",
+    "statMax": "מקסימום",
+    "statMean": "ממוצע",
+    "statStdDev": "סטיית תקן",
+    "statSum": "סכום",
+    "statCount": "מספר"
+  },
   "common": {
     "cancel": "ביטול",
     "close": "סגור",

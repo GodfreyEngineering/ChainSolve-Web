@@ -1115,6 +1115,19 @@
     "pastePlaceholder": "Pegar numeros (uno por linea, separados por comas o arreglo JSON)",
     "pasteNoValid": "No se encontraron numeros validos"
   },
+  "listTable": {
+    "noData": "Sin datos",
+    "expectList": "Se espera entrada de lista",
+    "empty": "Lista vacia",
+    "items": "elementos",
+    "value": "Valor",
+    "statMin": "Min",
+    "statMax": "Max",
+    "statMean": "Media",
+    "statStdDev": "Desv Est",
+    "statSum": "Suma",
+    "statCount": "Cantidad"
+  },
   "common": {
     "cancel": "Cancelar",
     "close": "Cerrar",
