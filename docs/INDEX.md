@@ -307,6 +307,22 @@ structured pre-flight checklist.
 - CI pipeline monitoring and post-deploy smoke tests
 - Rollback procedures
 
+### [DEV/SERVICE_SETUP_CHECKLIST.md](DEV/SERVICE_SETUP_CHECKLIST.md)
+
+**Purpose:** Idiot-proof service setup checklist for production.
+
+**Read this when:** Setting up a new environment from scratch, or
+verifying that all external services and secrets are properly configured.
+
+**Covers:**
+- Supabase (DB, Auth, Storage, RLS)
+- Stripe (payments, webhooks, Customer Portal, 6 price IDs)
+- Cloudflare Pages (hosting, env vars, deploy credentials)
+- Resend (transactional email via SMTP)
+- GitHub Actions (CI/CD secrets)
+- Optional: Turnstile (CAPTCHA), OpenAI (AI Copilot)
+- Complete env var reference (client + server + CI)
+
 ---
 
 ## Observability

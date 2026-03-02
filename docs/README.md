@@ -113,6 +113,7 @@
 | [TEST_PERSONAS.md](TEST_PERSONAS.md) | Test personas: user profiles for QA and E2E testing scenarios |
 | [DEV/DEPENDENCIES.md](DEV/DEPENDENCIES.md) | Dependency policy: what's allowed, how to add, supply chain checks |
 | [DEV/RELEASE_DRY_RUN.md](DEV/RELEASE_DRY_RUN.md) | Release rehearsal playbook: step-by-step dry-run checklist |
+| [DEV/SERVICE_SETUP_CHECKLIST.md](DEV/SERVICE_SETUP_CHECKLIST.md) | Idiot-proof service setup: Supabase, Stripe, Cloudflare, Resend, OpenAI |
 
 ---
 
