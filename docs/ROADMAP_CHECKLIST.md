@@ -1945,7 +1945,7 @@ Claude MUST:
 ---
 
 ## I1 — Full documentation site at /docs (public and extremely thorough)
-- [ ] I1-1: app.chainsolve.co.uk/docs environment
+- [x] I1-1: app.chainsolve.co.uk/docs environment
   - Extremely thorough docs with subpages:
     - onboarding
     - block library
@@ -1962,7 +1962,10 @@ Claude MUST:
   - Acceptance: docs is real, complete, and helpful.
 
 ---
+## I1-2 — links to docs all over app
+- [ ] I1-2 all over the app add links to the correct line and sections of the docs page to help users, add the links to the tooltip or add an help/info button to all pop up windows etc.Make sure its executed cleanly and very classy and sleek and professional. Like an invisible feature.
 
+---
 ## I2 — Scientific reporting v1: chain-to-notation (math/physics expression)
 - [ ] I2-1: “Inspect chain as notation” feature
   - Select a chain sequence and show:
