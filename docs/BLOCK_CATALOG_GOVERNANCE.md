@@ -67,22 +67,43 @@ Use camelCase with domain prefix:
 
 ## 3. Categories Taxonomy
 
-### Current Hierarchy (32 categories, ~203 ops)
+### Block Taxonomy (G3-1: 3 main categories)
 
 ```
-Inputs           → input (number, slider, variableSource)
-Constants        → constants, constMath, constPhysics, constAtmos, constThermo, constElec
-Materials        → presetMaterials, presetFluids
-Functions
-  Core Math      → math (13 ops), trig (8 ops), logic (6 ops)
-  Engineering    → engMechanics, engMaterials, engSections, engInertia,
-                   engFluids, engThermo, engElectrical, engConversions
-  Finance        → finTvm, finReturns, finDepr
-  Statistics     → statsDesc, statsRel, probComb, probDist
-  Utilities      → utilCalc
-Outputs          → output (display, probe)
-Data (Pro)       → data, vectorOps, tableOps
-Plots (Pro)      → plot
+Input Blocks
+  Standard number input  → number
+  Slider input           → slider
+  Material input         → presetMaterials, presetFluids
+  Constant input         → constants, constMath, constPhysics, constAtmos, constThermo, constElec
+  Variable input         → variable
+  List input             → data (vectorInput, tableInput, csvImport)
+
+Function Blocks
+  Math                   → math (20 ops)
+  Trig                   → trig (9 ops)
+  Logic                  → logic (6 ops)
+  Mechanics              → engMechanics
+  Materials              → engMaterials
+  Sections               → engSections
+  Inertia                → engInertia
+  Fluids                 → engFluids
+  Thermo                 → engThermo
+  Electrical             → engElectrical
+  Conversions            → engConversions
+  TVM                    → finTvm
+  Returns & Risk         → finReturns
+  Depreciation           → finDepr
+  Descriptive Stats      → statsDesc
+  Relationships          → statsRel
+  Combinatorics          → probComb
+  Distributions          → probDist
+  Utilities              → utilCalc
+  Vector Ops             → vectorOps
+  Table Ops              → tableOps
+
+Output Blocks
+  Display                → output, annotations
+  Graph blocks           → plot
 ```
 
 ### Adding a New Category
@@ -90,7 +111,7 @@ Plots (Pro)      → plot
 1. Add the ID to `BlockCategory` union in `src/blocks/types.ts`
 2. Add a label to `CATEGORY_LABELS` in `src/blocks/registry.ts`
 3. Insert in `CATEGORY_ORDER` at the appropriate position
-4. Assign to a `LIBRARY_FAMILIES` group in `src/blocks/registry.ts`
+4. Assign to a `BLOCK_TAXONOMY` subcategory in `src/blocks/registry.ts`
 
 ---
 

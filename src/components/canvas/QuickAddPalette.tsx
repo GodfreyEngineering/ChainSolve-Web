@@ -3,24 +3,20 @@
  *
  * Triggered by "Add block here" in the canvas context menu.
  * Appears at the right-click cursor position, auto-focuses search,
- * and supports keyboard navigation (↑ ↓ Enter ESC).
+ * and supports keyboard navigation (up down Enter ESC).
  *
- * P069 improvements:
- *  - Category name is searched in addition to label and type.
- *  - When no query: recently-used blocks appear first in a dedicated section,
- *    followed by all blocks grouped by category with visible headers.
- *  - When searching: flat results list (unchanged behaviour).
+ * G3-1: Uses BLOCK_TAXONOMY for 3-level grouping (main > sub > blocks).
+ * Search uses ranked scoreMatch for taxonomy-aware results.
  */
 
 import { useState, useEffect, useRef, useMemo, type KeyboardEvent } from 'react'
 import {
   BLOCK_REGISTRY,
-  CATEGORY_ORDER,
-  CATEGORY_LABELS,
-  LIBRARY_FAMILIES,
+  BLOCK_TAXONOMY,
+  getSubcategoryBlocks,
   type BlockDef,
 } from '../../blocks/registry'
-import { trackBlockUsed, getRecentlyUsed } from './blockLibraryUtils'
+import { trackBlockUsed, getRecentlyUsed, scoreMatch } from './blockLibraryUtils'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 
 interface QuickAddPaletteProps {
@@ -38,25 +34,21 @@ interface QuickAddPaletteProps {
 
 // ── Block data ────────────────────────────────────────────────────────────────
 
-/** All blocks ordered by category. */
+/** All blocks ordered by taxonomy. */
 function buildAllBlocks(): BlockDef[] {
-  return CATEGORY_ORDER.flatMap((cat) =>
-    [...BLOCK_REGISTRY.values()].filter((d) => d.category === cat),
+  return BLOCK_TAXONOMY.flatMap((main) =>
+    main.subcategories.flatMap((sub) => getSubcategoryBlocks(sub)),
   )
 }
 
 const ALL_BLOCKS = buildAllBlocks()
 
-/** Flat search: filter by label, type, or category (P069). */
+/** Flat search: filter and rank by scoreMatch (G3-1: taxonomy-aware). */
 function filterBlocks(query: string): BlockDef[] {
   const q = query.trim().toLowerCase()
   if (!q) return ALL_BLOCKS
-  return ALL_BLOCKS.filter(
-    (d) =>
-      d.label.toLowerCase().includes(q) ||
-      d.type.includes(q) ||
-      d.category.toLowerCase().includes(q) ||
-      (CATEGORY_LABELS[d.category] ?? d.category).toLowerCase().includes(q),
+  return ALL_BLOCKS.filter((d) => scoreMatch(d, q) !== null).sort(
+    (a, b) => (scoreMatch(a, q) ?? 99) - (scoreMatch(b, q) ?? 99),
   )
 }
 
@@ -86,7 +78,7 @@ export function QuickAddPalette({
   // When searching: flat filtered list
   const filtered = useMemo(() => (isSearching ? filterBlocks(query) : []), [query, isSearching])
 
-  // When idle: recently-used then grouped by category
+  // When idle: recently-used then grouped by taxonomy
   const recentTypes = useMemo<string[]>(() => (isSearching ? [] : getRecentlyUsed()), [isSearching])
 
   const recentBlocks = useMemo<BlockDef[]>(
@@ -96,25 +88,25 @@ export function QuickAddPalette({
 
   const groupedBlocks = useMemo<
     Array<{
-      familyId: string
-      familyLabel: string
-      groups: Array<{ category: string; label: string; blocks: BlockDef[] }>
+      mainId: string
+      mainLabel: string
+      subs: Array<{ subId: string; subLabel: string; blocks: BlockDef[] }>
     }>
   >(
     () =>
       isSearching
         ? []
-        : LIBRARY_FAMILIES.map((fam) => ({
-            familyId: fam.id,
-            familyLabel: fam.label,
-            groups: fam.categories
-              .map((cat) => ({
-                category: cat,
-                label: CATEGORY_LABELS[cat] ?? cat,
-                blocks: ALL_BLOCKS.filter((d) => d.category === cat),
+        : BLOCK_TAXONOMY.map((main) => ({
+            mainId: main.id,
+            mainLabel: main.label,
+            subs: main.subcategories
+              .map((sub) => ({
+                subId: sub.id,
+                subLabel: sub.label,
+                blocks: getSubcategoryBlocks(sub),
               }))
               .filter((g) => g.blocks.length > 0),
-          })).filter((f) => f.groups.length > 0),
+          })).filter((f) => f.subs.length > 0),
     [isSearching],
   )
 
@@ -231,7 +223,7 @@ export function QuickAddPalette({
               userSelect: 'none',
             }}
           >
-            ↑↓ · ↵ add · ESC
+            {'\u2191\u2193 \u00B7 \u21B5 add \u00B7 ESC'}
           </span>
         </div>
 
@@ -295,7 +287,7 @@ export function QuickAddPalette({
             </>
           )}
 
-          {/* ── Idle: recent + grouped ── */}
+          {/* ── Idle: recent + taxonomy grouped (G3-1) ── */}
           {!isSearching && (
             <>
               {recentBlocks.length > 0 && (
@@ -320,32 +312,13 @@ export function QuickAddPalette({
                 </>
               )}
 
-              {groupedBlocks.map(({ familyId, familyLabel, groups }) => (
-                <div key={familyId}>
-                  <SectionHeader label={familyLabel} />
-                  {groups.length > 1
-                    ? groups.map(({ category, label, blocks }) => (
-                        <div key={category}>
-                          <SubHeader label={label} />
-                          {blocks.map((def) => {
-                            const idx = navCounter++
-                            const isActive = idx === clampedIdx
-                            const locked = !!def.proOnly && !isBlockEntitled(def, ent)
-                            return (
-                              <BlockRow
-                                key={def.type}
-                                def={def}
-                                isActive={isActive}
-                                locked={locked}
-                                navIdx={idx}
-                                onClick={() => commit(def)}
-                                onMouseEnter={() => setActiveIdx(idx)}
-                              />
-                            )
-                          })}
-                        </div>
-                      ))
-                    : groups[0].blocks.map((def) => {
+              {groupedBlocks.map(({ mainId, mainLabel, subs }) => (
+                <div key={mainId}>
+                  <SectionHeader label={mainLabel} />
+                  {subs.map(({ subId, subLabel, blocks }) => (
+                    <div key={subId}>
+                      <SubHeader label={subLabel} />
+                      {blocks.map((def) => {
                         const idx = navCounter++
                         const isActive = idx === clampedIdx
                         const locked = !!def.proOnly && !isBlockEntitled(def, ent)
@@ -361,6 +334,8 @@ export function QuickAddPalette({
                           />
                         )
                       })}
+                    </div>
+                  ))}
                 </div>
               ))}
             </>
@@ -437,7 +412,7 @@ function BlockRow({ def, isActive, locked, navIdx, onClick, onMouseEnter }: Bloc
         opacity: locked ? 0.45 : 1,
       }}
     >
-      {locked && <span style={{ fontSize: '0.65rem', marginRight: 4 }}>🔒</span>}
+      {locked && <span style={{ fontSize: '0.65rem', marginRight: 4 }}>{'\uD83D\uDD12'}</span>}
       {def.label}
     </div>
   )

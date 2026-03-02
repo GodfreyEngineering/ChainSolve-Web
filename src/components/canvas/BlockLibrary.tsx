@@ -12,10 +12,8 @@
 import { useState, useRef, useEffect, useCallback, memo, type DragEvent } from 'react'
 import {
   BLOCK_REGISTRY,
-  CATEGORY_ORDER,
-  CATEGORY_LABELS,
-  LIBRARY_FAMILIES,
-  type BlockCategory,
+  BLOCK_TAXONOMY,
+  getSubcategoryBlocks,
   type BlockDef,
 } from '../../blocks/registry'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
@@ -35,16 +33,20 @@ import {
   scoreMatch,
 } from './blockLibraryUtils'
 
-// ── Block grouping ────────────────────────────────────────────────────────────
+// ── Taxonomy grouping (G3-1) ────────────────────────────────────────────────
 
-function buildGrouped(): Map<BlockCategory, BlockDef[]> {
-  const map = new Map<BlockCategory, BlockDef[]>()
-  for (const cat of CATEGORY_ORDER) map.set(cat, [])
-  for (const def of BLOCK_REGISTRY.values()) map.get(def.category)?.push(def)
+/** Pre-computed map: subcatId -> BlockDef[]. */
+function buildTaxonomyGrouped(): Map<string, BlockDef[]> {
+  const map = new Map<string, BlockDef[]>()
+  for (const main of BLOCK_TAXONOMY) {
+    for (const sub of main.subcategories) {
+      map.set(sub.id, getSubcategoryBlocks(sub))
+    }
+  }
   return map
 }
 
-const GROUPED = buildGrouped()
+const TAXONOMY_GROUPED = buildTaxonomyGrouped()
 
 /** E5-5: Ranked match — returns true if block matches query. */
 function matchesQuery(def: BlockDef, q: string): boolean {
@@ -164,22 +166,6 @@ const s: StyleMap = {
 }
 
 // ── BlockItem ─────────────────────────────────────────────────────────────────
-
-/** Pro-only categories that require specific entitlements. */
-const PRO_CATEGORIES: Set<BlockCategory> = new Set([
-  'data',
-  'vectorOps',
-  'tableOps',
-  'plot',
-  'finTvm',
-  'finReturns',
-  'finDepr',
-  'statsDesc',
-  'statsRel',
-  'probComb',
-  'probDist',
-  'utilCalc',
-])
 
 interface BlockItemProps {
   def: BlockDef
@@ -431,7 +417,7 @@ export function BlockLibrary({
 }: BlockLibraryProps) {
   const ent = getEntitlements(plan)
   const [query, setQuery] = useState('')
-  const [filterFamily, setFilterFamily] = useState<string | null>(null)
+  const [filterMain, setFilterMain] = useState<string | null>(null)
   const [favs, setFavs] = useState<Set<string>>(getFavourites)
   const [recent, setRecent] = useState<string[]>(getRecentlyUsed)
   const searchRef = useRef<HTMLInputElement>(null)
@@ -483,12 +469,15 @@ export function BlockLibrary({
   const recentList = recent
     .map((t) => BLOCK_REGISTRY.get(t))
     .filter((d): d is BlockDef => d !== undefined)
-  const activeFamily = filterFamily ? LIBRARY_FAMILIES.find((f) => f.id === filterFamily) : null
-  const activeCats = new Set(activeFamily ? activeFamily.categories : CATEGORY_ORDER)
+  const taxForFilter = filterMain
+    ? BLOCK_TAXONOMY.filter((m) => m.id === filterMain)
+    : BLOCK_TAXONOMY
   const noBlockResults =
     q.length > 0 &&
-    [...activeCats].every(
-      (cat) => (GROUPED.get(cat) ?? []).filter((d) => matchesQuery(d, q)).length === 0,
+    taxForFilter.every((main) =>
+      main.subcategories.every((sub) =>
+        (TAXONOMY_GROUPED.get(sub.id) ?? []).every((d) => !matchesQuery(d, q)),
+      ),
     )
 
   return (
@@ -510,26 +499,26 @@ export function BlockLibrary({
           <button
             style={{
               ...s.catPill,
-              background: !filterFamily ? 'var(--primary-dim)' : 'transparent',
-              borderColor: !filterFamily ? 'var(--primary-text)' : undefined,
-              color: !filterFamily ? 'var(--primary-text)' : undefined,
+              background: !filterMain ? 'var(--primary-dim)' : 'transparent',
+              borderColor: !filterMain ? 'var(--primary-text)' : undefined,
+              color: !filterMain ? 'var(--primary-text)' : undefined,
             }}
-            onClick={() => setFilterFamily(null)}
+            onClick={() => setFilterMain(null)}
           >
             All
           </button>
-          {LIBRARY_FAMILIES.map((fam) => (
+          {BLOCK_TAXONOMY.map((main) => (
             <button
-              key={fam.id}
+              key={main.id}
               style={{
                 ...s.catPill,
-                background: filterFamily === fam.id ? 'var(--primary-dim)' : 'transparent',
-                borderColor: filterFamily === fam.id ? 'var(--primary-text)' : undefined,
-                color: filterFamily === fam.id ? 'var(--primary-text)' : undefined,
+                background: filterMain === main.id ? 'var(--primary-dim)' : 'transparent',
+                borderColor: filterMain === main.id ? 'var(--primary-text)' : undefined,
+                color: filterMain === main.id ? 'var(--primary-text)' : undefined,
               }}
-              onClick={() => setFilterFamily(fam.id === filterFamily ? null : fam.id)}
+              onClick={() => setFilterMain(main.id === filterMain ? null : main.id)}
             >
-              {fam.label}
+              {main.label}
             </button>
           ))}
         </div>
@@ -584,80 +573,63 @@ export function BlockLibrary({
           </div>
         )}
 
-        {/* All blocks by family → category */}
-        {LIBRARY_FAMILIES.filter((fam) => !filterFamily || fam.id === filterFamily).map(
-          (fam, idx) => {
-            const familyBlocksRaw = fam.categories.flatMap((cat) =>
-              (GROUPED.get(cat) ?? []).filter((d) => !q || matchesQuery(d, q)),
-            )
-            const familyBlocks = q ? sortByRelevance(familyBlocksRaw, q) : familyBlocksRaw
-            if (familyBlocks.length === 0) return null
-            const familyHasPro = fam.categories.some((c) => PRO_CATEGORIES.has(c))
-            const showSubLabels = fam.categories.length > 1
-            return (
-              <div key={fam.id}>
-                {idx > 0 && (
-                  <div
+        {/* All blocks by taxonomy: main category → subcategory (G3-1) */}
+        {taxForFilter.map((main, mainIdx) => {
+          const mainBlocksRaw = main.subcategories.flatMap((sub) =>
+            (TAXONOMY_GROUPED.get(sub.id) ?? []).filter((d) => !q || matchesQuery(d, q)),
+          )
+          if (mainBlocksRaw.length === 0) return null
+          const mainHasPro = mainBlocksRaw.some((d) => d.proOnly)
+          return (
+            <div key={main.id}>
+              {mainIdx > 0 && (
+                <div
+                  style={{
+                    borderTop: '1px solid var(--border)',
+                    margin: '0.25rem 0.5rem 0',
+                    opacity: 0.5,
+                  }}
+                />
+              )}
+              <div style={s.sectionLabel}>
+                {main.label}
+                {mainHasPro && (
+                  <span
                     style={{
-                      borderTop: '1px solid var(--border)',
-                      margin: '0.25rem 0.5rem 0',
-                      opacity: 0.5,
+                      marginLeft: 6,
+                      fontSize: '0.55rem',
+                      padding: '1px 4px',
+                      borderRadius: 3,
+                      background: 'var(--primary-dim)',
+                      color: 'var(--primary-text)',
+                      fontWeight: 700,
+                      letterSpacing: '0.05em',
+                      verticalAlign: 'middle',
                     }}
-                  />
+                  >
+                    PRO
+                  </span>
                 )}
-                <div style={s.sectionLabel}>
-                  {fam.label}
-                  {familyHasPro && (
-                    <span
+              </div>
+              {main.subcategories.map((sub) => {
+                const blocksRaw = (TAXONOMY_GROUPED.get(sub.id) ?? []).filter(
+                  (d) => !q || matchesQuery(d, q),
+                )
+                const blocks = q ? sortByRelevance(blocksRaw, q) : blocksRaw
+                if (blocks.length === 0) return null
+                return (
+                  <div key={sub.id}>
+                    <div
                       style={{
-                        marginLeft: 6,
-                        fontSize: '0.55rem',
-                        padding: '1px 4px',
-                        borderRadius: 3,
-                        background: 'var(--primary-dim)',
-                        color: 'var(--primary-text)',
-                        fontWeight: 700,
-                        letterSpacing: '0.05em',
-                        verticalAlign: 'middle',
+                        ...s.sectionLabel,
+                        fontSize: '0.58rem',
+                        paddingLeft: '0.9rem',
+                        opacity: 0.6,
                       }}
                     >
-                      PRO
-                    </span>
-                  )}
-                </div>
-                {showSubLabels
-                  ? fam.categories.map((cat) => {
-                      const blocksRaw = (GROUPED.get(cat) ?? []).filter(
-                        (d) => !q || matchesQuery(d, q),
-                      )
-                      const blocks = q ? sortByRelevance(blocksRaw, q) : blocksRaw
-                      if (blocks.length === 0) return null
-                      return (
-                        <div key={cat}>
-                          <div
-                            style={{
-                              ...s.sectionLabel,
-                              fontSize: '0.58rem',
-                              paddingLeft: '0.9rem',
-                              opacity: 0.6,
-                            }}
-                          >
-                            {CATEGORY_LABELS[cat]}
-                          </div>
-                          {blocks.map((def) => (
-                            <BlockItem
-                              key={def.type}
-                              def={def}
-                              favs={favs}
-                              onToggleFav={toggleFav}
-                              entitled={isBlockEntitled(def, ent)}
-                              onProBlocked={onProBlocked}
-                            />
-                          ))}
-                        </div>
-                      )
-                    })
-                  : familyBlocks.map((def) => (
+                      {sub.label}
+                    </div>
+                    {blocks.map((def) => (
                       <BlockItem
                         key={def.type}
                         def={def}
@@ -667,10 +639,12 @@ export function BlockLibrary({
                         onProBlocked={onProBlocked}
                       />
                     ))}
-              </div>
-            )
-          },
-        )}
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })}
 
         {/* Templates section (Pro only) */}
         {ent.canUseGroups && (

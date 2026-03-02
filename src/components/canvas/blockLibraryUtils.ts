@@ -1,6 +1,7 @@
 /** Shared constants and helpers for BlockLibrary (split out for react-refresh). */
 
 import type { BlockDef } from '../../blocks/types'
+import { getTaxonomyLabels } from '../../blocks/registry'
 
 export const DRAG_TYPE = 'application/chainsolve-block'
 
@@ -64,7 +65,9 @@ export function toggleFavourite(type: string): Set<string> {
  *  10  — label contains query
  *  12  — type (opId) contains query
  *  15  — synonym match
+ *  18  — taxonomy subcategory label match
  *  20  — tag match
+ *  22  — taxonomy main category label match
  *  25  — input port label match
  */
 export function scoreMatch(def: BlockDef, q: string): number | null {
@@ -88,6 +91,13 @@ export function scoreMatch(def: BlockDef, q: string): number | null {
 
   // Synonyms
   if (def.synonyms?.some((s) => s.toLowerCase().includes(lq))) tryScore(15)
+
+  // G3-1: Taxonomy subcategory and main category labels
+  const taxLabels = getTaxonomyLabels().get(def.type)
+  if (taxLabels) {
+    if (taxLabels.sub.toLowerCase().includes(lq)) tryScore(18)
+    if (taxLabels.main.toLowerCase().includes(lq)) tryScore(22)
+  }
 
   // Tags
   if (def.tags?.some((t) => t.toLowerCase().includes(lq))) tryScore(20)

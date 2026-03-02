@@ -636,68 +636,125 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   annotations: 'Annotations',
 }
 
-// ── Library families (D6-4: primary grouping for block library) ──────────────
+// ── Block taxonomy (G3-1: 3 main categories with subcategories) ─────────────
 
-export interface LibraryFamily {
+export interface TaxonomySubcategory {
   id: string
   label: string
-  categories: BlockCategory[]
+  /** Include all blocks from these BlockCategory values. */
+  categories?: BlockCategory[]
+  /** Include specific blocks by type (when a category spans subcategories). */
+  blockTypes?: string[]
 }
 
-/** Primary families for the block library sidebar. */
-export const LIBRARY_FAMILIES: LibraryFamily[] = [
-  { id: 'inputs', label: 'Inputs', categories: ['input'] },
-  { id: 'variables', label: 'Variables', categories: ['variable'] },
+export interface TaxonomyMainCategory {
+  id: string
+  label: string
+  subcategories: TaxonomySubcategory[]
+}
+
+/** The 3-level block taxonomy: Main Category > Subcategory > Blocks. */
+export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
   {
-    id: 'constants',
-    label: 'Constants',
-    categories: [
-      'constants',
-      'constMath',
-      'constPhysics',
-      'constAtmos',
-      'constThermo',
-      'constElec',
+    id: 'inputBlocks',
+    label: 'Input Blocks',
+    subcategories: [
+      { id: 'inputNumber', label: 'Standard number input', blockTypes: ['number'] },
+      { id: 'inputSlider', label: 'Slider input', blockTypes: ['slider'] },
+      {
+        id: 'inputMaterial',
+        label: 'Material input',
+        categories: ['presetMaterials', 'presetFluids'],
+      },
+      {
+        id: 'inputConstant',
+        label: 'Constant input',
+        categories: [
+          'constants',
+          'constMath',
+          'constPhysics',
+          'constAtmos',
+          'constThermo',
+          'constElec',
+        ],
+      },
+      { id: 'inputVariable', label: 'Variable input', categories: ['variable'] },
+      { id: 'inputList', label: 'List input', categories: ['data'] },
     ],
   },
   {
-    id: 'materials',
-    label: 'Materials',
-    categories: ['presetMaterials', 'presetFluids'],
-  },
-  {
-    id: 'functions',
-    label: 'Functions',
-    categories: [
-      'math',
-      'trig',
-      'logic',
-      'engMechanics',
-      'engMaterials',
-      'engSections',
-      'engInertia',
-      'engFluids',
-      'engThermo',
-      'engElectrical',
-      'engConversions',
-      'finTvm',
-      'finReturns',
-      'finDepr',
-      'statsDesc',
-      'statsRel',
-      'probComb',
-      'probDist',
-      'utilCalc',
+    id: 'functionBlocks',
+    label: 'Function Blocks',
+    subcategories: [
+      { id: 'fnMath', label: 'Math', categories: ['math'] },
+      { id: 'fnTrig', label: 'Trig', categories: ['trig'] },
+      { id: 'fnLogic', label: 'Logic', categories: ['logic'] },
+      { id: 'fnMechanics', label: 'Mechanics', categories: ['engMechanics'] },
+      { id: 'fnMaterials', label: 'Materials', categories: ['engMaterials'] },
+      { id: 'fnSections', label: 'Sections', categories: ['engSections'] },
+      { id: 'fnInertia', label: 'Inertia', categories: ['engInertia'] },
+      { id: 'fnFluids', label: 'Fluids', categories: ['engFluids'] },
+      { id: 'fnThermo', label: 'Thermo', categories: ['engThermo'] },
+      { id: 'fnElectrical', label: 'Electrical', categories: ['engElectrical'] },
+      { id: 'fnConversions', label: 'Conversions', categories: ['engConversions'] },
+      { id: 'fnTvm', label: 'TVM', categories: ['finTvm'] },
+      { id: 'fnReturns', label: 'Returns & Risk', categories: ['finReturns'] },
+      { id: 'fnDepr', label: 'Depreciation', categories: ['finDepr'] },
+      { id: 'fnStatsDesc', label: 'Descriptive Stats', categories: ['statsDesc'] },
+      { id: 'fnStatsRel', label: 'Relationships', categories: ['statsRel'] },
+      { id: 'fnComb', label: 'Combinatorics', categories: ['probComb'] },
+      { id: 'fnDist', label: 'Distributions', categories: ['probDist'] },
+      { id: 'fnUtil', label: 'Utilities', categories: ['utilCalc'] },
+      { id: 'fnVectorOps', label: 'Vector Ops', categories: ['vectorOps'] },
+      { id: 'fnTableOps', label: 'Table Ops', categories: ['tableOps'] },
     ],
   },
-  { id: 'outputs', label: 'Outputs', categories: ['output'] },
   {
-    id: 'data',
-    label: 'Data & Plots',
-    categories: ['data', 'vectorOps', 'tableOps', 'plot'],
+    id: 'outputBlocks',
+    label: 'Output Blocks',
+    subcategories: [
+      { id: 'outDisplay', label: 'Display', categories: ['output', 'annotations'] },
+      { id: 'outGraph', label: 'Graph blocks', categories: ['plot'] },
+    ],
   },
-  { id: 'annotations', label: 'Annotations', categories: ['annotations'] },
 ]
+
+/** Get all blocks matching a taxonomy subcategory definition. */
+export function getSubcategoryBlocks(subcat: TaxonomySubcategory): BlockDef[] {
+  const result: BlockDef[] = []
+  const catSet = new Set(subcat.categories ?? [])
+  const typeSet = new Set(subcat.blockTypes ?? [])
+  for (const def of BLOCK_REGISTRY.values()) {
+    if (typeSet.has(def.type) || catSet.has(def.category)) {
+      result.push(def)
+    }
+  }
+  return result
+}
+
+/** Get all blocks for a main taxonomy category. */
+export function getMainCategoryBlocks(main: TaxonomyMainCategory): BlockDef[] {
+  return main.subcategories.flatMap(getSubcategoryBlocks)
+}
+
+/** Lazily-built reverse map: block type -> { main, sub } taxonomy labels. */
+let _taxonomyLabels: Map<string, { main: string; sub: string }> | null = null
+
+export function getTaxonomyLabels(): Map<string, { main: string; sub: string }> {
+  if (_taxonomyLabels) return _taxonomyLabels
+  const map = new Map<string, { main: string; sub: string }>()
+  for (const main of BLOCK_TAXONOMY) {
+    for (const sub of main.subcategories) {
+      for (const def of getSubcategoryBlocks(sub)) {
+        if (!map.has(def.type)) {
+          map.set(def.type, { main: main.label, sub: sub.label })
+        }
+      }
+    }
+  }
+  _taxonomyLabels = map
+  return map
+}
 
 // ── Constants catalog for unified Constant node (D7-3) ──────────────────────
 

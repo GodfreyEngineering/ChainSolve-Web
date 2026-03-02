@@ -10,7 +10,8 @@ import { describe, it, expect } from 'vitest'
 import {
   BLOCK_REGISTRY,
   CATEGORY_ORDER,
-  LIBRARY_FAMILIES,
+  BLOCK_TAXONOMY,
+  getSubcategoryBlocks,
   getConstantsCatalog,
   getMaterialsCatalog,
 } from '../../blocks/registry'
@@ -106,36 +107,77 @@ describe('Variable block separation (D6-3)', () => {
   })
 })
 
-// ── D6-4: Library families structure ────────────────────────────────────────
+// ── G3-1: Block taxonomy structure ──────────────────────────────────────────
 
-describe('Library families structure (D6-4)', () => {
-  it('LIBRARY_FAMILIES covers all categories in CATEGORY_ORDER', () => {
-    const familyCats = new Set(LIBRARY_FAMILIES.flatMap((f) => f.categories))
-    const missing = CATEGORY_ORDER.filter((c) => !familyCats.has(c))
-    expect(missing, `Categories not in any family:\n${missing.join('\n')}`).toEqual([])
+describe('Block taxonomy structure (G3-1)', () => {
+  it('has exactly 3 main categories', () => {
+    expect(BLOCK_TAXONOMY).toHaveLength(3)
+    expect(BLOCK_TAXONOMY.map((m) => m.id)).toEqual([
+      'inputBlocks',
+      'functionBlocks',
+      'outputBlocks',
+    ])
   })
 
-  it('no category appears in multiple families', () => {
+  it('covers every block in BLOCK_REGISTRY', () => {
+    const coveredTypes = new Set<string>()
+    for (const main of BLOCK_TAXONOMY) {
+      for (const sub of main.subcategories) {
+        for (const def of getSubcategoryBlocks(sub)) {
+          coveredTypes.add(def.type)
+        }
+      }
+    }
+    const missing = [...BLOCK_REGISTRY.keys()].filter((t) => !coveredTypes.has(t))
+    expect(missing, `Blocks not in any taxonomy subcategory:\n${missing.join('\n')}`).toEqual([])
+  })
+
+  it('no block appears in multiple subcategories', () => {
     const seen = new Map<string, string>()
     const dupes: string[] = []
-    for (const fam of LIBRARY_FAMILIES) {
-      for (const cat of fam.categories) {
-        if (seen.has(cat)) dupes.push(`${cat} in both ${seen.get(cat)} and ${fam.id}`)
-        seen.set(cat, fam.id)
+    for (const main of BLOCK_TAXONOMY) {
+      for (const sub of main.subcategories) {
+        for (const def of getSubcategoryBlocks(sub)) {
+          if (seen.has(def.type)) {
+            dupes.push(`${def.type} in both ${seen.get(def.type)} and ${sub.id}`)
+          }
+          seen.set(def.type, sub.id)
+        }
       }
     }
     expect(dupes).toEqual([])
   })
 
-  it('each family has a unique id', () => {
-    const ids = LIBRARY_FAMILIES.map((f) => f.id)
+  it('each subcategory has a unique id', () => {
+    const ids = BLOCK_TAXONOMY.flatMap((m) => m.subcategories.map((s) => s.id))
     expect(new Set(ids).size).toBe(ids.length)
   })
 
-  it('each family has at least one category', () => {
-    for (const fam of LIBRARY_FAMILIES) {
-      expect(fam.categories.length, `${fam.id} has no categories`).toBeGreaterThan(0)
+  it('each subcategory has at least one block', () => {
+    for (const main of BLOCK_TAXONOMY) {
+      for (const sub of main.subcategories) {
+        expect(getSubcategoryBlocks(sub).length, `${sub.id} has no blocks`).toBeGreaterThan(0)
+      }
     }
+  })
+
+  it('Input Blocks has the required subcategories', () => {
+    const input = BLOCK_TAXONOMY.find((m) => m.id === 'inputBlocks')!
+    const subLabels = input.subcategories.map((s) => s.label)
+    expect(subLabels).toEqual([
+      'Standard number input',
+      'Slider input',
+      'Material input',
+      'Constant input',
+      'Variable input',
+      'List input',
+    ])
+  })
+
+  it('Output Blocks has the required subcategories', () => {
+    const output = BLOCK_TAXONOMY.find((m) => m.id === 'outputBlocks')!
+    const subLabels = output.subcategories.map((s) => s.label)
+    expect(subLabels).toEqual(['Display', 'Graph blocks'])
   })
 })
 
