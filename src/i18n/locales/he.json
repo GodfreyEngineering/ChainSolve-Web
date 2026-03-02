@@ -444,5 +444,14 @@
     "secAiAssistant": "עוזר AI",
     "secTroubleshooting": "פתרון בעיות",
     "secShortcuts": "קיצורי מקלדת"
+  },
+  "seo": {
+    "defaultDescription": "מחשבון מדעי מבוסס גרף צמתים. בנה שרשראות חישוב ויזואלית.",
+    "login": { "title": "התחברות — ChainSolve", "description": "התחבר ל-ChainSolve כדי לגשת לפרויקטים ושרשראות החישוב שלך." },
+    "signup": { "title": "יצירת חשבון — ChainSolve", "description": "צור חשבון ChainSolve חינמי והתחל לבנות שרשראות חישוב ויזואלית." },
+    "resetPassword": { "title": "איפוס סיסמה — ChainSolve", "description": "אפס את סיסמת חשבון ChainSolve שלך." },
+    "docs": { "title": "תיעוד — ChainSolve", "description": "למד להשתמש ב-ChainSolve: בלוקים, יחידות, משתנים, חומרים, עוזר AI ועוד." },
+    "explore": { "title": "גלה — ChainSolve", "description": "עיין והתקן תבניות, חבילות בלוקים, ערכות נושא וקבוצות שמשותפות על ידי הקהילה." },
+    "terms": { "title": "תנאי שימוש — ChainSolve", "description": "תנאי השירות ותנאי השימוש של ChainSolve." }
   }
 }

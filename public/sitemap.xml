@@ -1,13 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml"
+>
+  <!-- Landing -->
   <url>
     <loc>https://app.chainsolve.co.uk/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.chainsolve.co.uk/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://app.chainsolve.co.uk/?lang=es" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.chainsolve.co.uk/?lang=fr" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://app.chainsolve.co.uk/?lang=it" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://app.chainsolve.co.uk/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://app.chainsolve.co.uk/?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://app.chainsolve.co.uk/" />
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- Login -->
   <url>
     <loc>https://app.chainsolve.co.uk/login</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.chainsolve.co.uk/login?lang=en" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://app.chainsolve.co.uk/login?lang=es" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.chainsolve.co.uk/login?lang=fr" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://app.chainsolve.co.uk/login?lang=it" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://app.chainsolve.co.uk/login?lang=de" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://app.chainsolve.co.uk/login?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://app.chainsolve.co.uk/login" />
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+
+  <!-- Docs -->
+  <url>
+    <loc>https://app.chainsolve.co.uk/docs</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.chainsolve.co.uk/docs?lang=en" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://app.chainsolve.co.uk/docs?lang=es" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.chainsolve.co.uk/docs?lang=fr" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://app.chainsolve.co.uk/docs?lang=it" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://app.chainsolve.co.uk/docs?lang=de" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://app.chainsolve.co.uk/docs?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://app.chainsolve.co.uk/docs" />
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Explore -->
+  <url>
+    <loc>https://app.chainsolve.co.uk/explore</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.chainsolve.co.uk/explore?lang=en" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://app.chainsolve.co.uk/explore?lang=es" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.chainsolve.co.uk/explore?lang=fr" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://app.chainsolve.co.uk/explore?lang=it" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://app.chainsolve.co.uk/explore?lang=de" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://app.chainsolve.co.uk/explore?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://app.chainsolve.co.uk/explore" />
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Terms -->
+  <url>
+    <loc>https://app.chainsolve.co.uk/terms</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.chainsolve.co.uk/terms?lang=en" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://app.chainsolve.co.uk/terms?lang=es" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.chainsolve.co.uk/terms?lang=fr" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://app.chainsolve.co.uk/terms?lang=it" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://app.chainsolve.co.uk/terms?lang=de" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://app.chainsolve.co.uk/terms?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://app.chainsolve.co.uk/terms" />
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>

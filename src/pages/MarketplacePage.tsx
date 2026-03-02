@@ -38,6 +38,7 @@ import { getProjectCount } from '../lib/projects'
 import { canInstallExploreItem, resolveEffectivePlan, type Plan } from '../lib/entitlements'
 import { getSession } from '../lib/auth'
 import { BRAND } from '../lib/brand'
+import { usePageMeta } from '../lib/seo'
 import { getBlockedUsers } from '../lib/blockedUsers'
 import { HelpLink } from '../components/ui/HelpLink'
 
@@ -222,6 +223,7 @@ const s = {
 export default function MarketplacePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  usePageMeta(t('seo.explore.title'), t('seo.explore.description'))
 
   const [items, setItems] = useState<MarketplaceItem[]>([])
   const [installedIds, setInstalledIds] = useState<Set<string>>(new Set())

@@ -8,10 +8,12 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BRAND, CONTACT } from '../lib/brand'
+import { usePageMeta } from '../lib/seo'
 import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 
 export default function TermsPage() {
   const { t } = useTranslation()
+  usePageMeta(t('seo.terms.title'), t('seo.terms.description'))
   const effectiveDate = '1 March 2025'
 
   return (

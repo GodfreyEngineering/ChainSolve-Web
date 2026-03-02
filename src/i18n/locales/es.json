@@ -1306,5 +1306,14 @@
     "cancel": "Cancelar",
     "close": "Cerrar",
     "loading": "Cargando…"
+  },
+  "seo": {
+    "defaultDescription": "Calculadora científica de grafos de nodos. Construye cadenas de cálculo visualmente.",
+    "login": { "title": "Iniciar sesión — ChainSolve", "description": "Inicia sesión en ChainSolve para acceder a tus proyectos y cadenas de cálculo." },
+    "signup": { "title": "Crear cuenta — ChainSolve", "description": "Crea una cuenta gratuita en ChainSolve y empieza a construir cadenas de cálculo visualmente." },
+    "resetPassword": { "title": "Restablecer contraseña — ChainSolve", "description": "Restablece la contraseña de tu cuenta de ChainSolve." },
+    "docs": { "title": "Documentación — ChainSolve", "description": "Aprende a usar ChainSolve: bloques, unidades, variables, materiales, asistente IA y más." },
+    "explore": { "title": "Explorar — ChainSolve", "description": "Explora e instala plantillas, paquetes de bloques, temas y grupos compartidos por la comunidad." },
+    "terms": { "title": "Términos y condiciones — ChainSolve", "description": "Términos de servicio y condiciones de uso de ChainSolve." }
   }
 }

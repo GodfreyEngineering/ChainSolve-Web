@@ -1306,5 +1306,14 @@
     "cancel": "Annulla",
     "close": "Chiudi",
     "loading": "Caricamento…"
+  },
+  "seo": {
+    "defaultDescription": "Calcolatrice scientifica a grafo di nodi. Costruisci catene di calcolo visivamente.",
+    "login": { "title": "Accedi — ChainSolve", "description": "Accedi a ChainSolve per consultare i tuoi progetti e le catene di calcolo." },
+    "signup": { "title": "Crea account — ChainSolve", "description": "Crea un account ChainSolve gratuito e inizia a costruire catene di calcolo visivamente." },
+    "resetPassword": { "title": "Reimposta password — ChainSolve", "description": "Reimposta la password del tuo account ChainSolve." },
+    "docs": { "title": "Documentazione — ChainSolve", "description": "Impara a usare ChainSolve: blocchi, unità, variabili, materiali, assistente IA e altro." },
+    "explore": { "title": "Esplora — ChainSolve", "description": "Sfoglia e installa modelli, pacchetti di blocchi, temi e gruppi condivisi dalla comunità." },
+    "terms": { "title": "Termini e condizioni — ChainSolve", "description": "Termini di servizio e condizioni d'uso di ChainSolve." }
   }
 }

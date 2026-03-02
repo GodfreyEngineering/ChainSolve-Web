@@ -1306,5 +1306,14 @@
     "cancel": "Abbrechen",
     "close": "Schließen",
     "loading": "Laden…"
+  },
+  "seo": {
+    "defaultDescription": "Wissenschaftlicher Knotengraph-Rechner. Erstellen Sie Berechnungsketten visuell.",
+    "login": { "title": "Anmelden — ChainSolve", "description": "Melden Sie sich bei ChainSolve an, um auf Ihre Projekte und Berechnungsketten zuzugreifen." },
+    "signup": { "title": "Konto erstellen — ChainSolve", "description": "Erstellen Sie ein kostenloses ChainSolve-Konto und beginnen Sie, Berechnungsketten visuell zu erstellen." },
+    "resetPassword": { "title": "Passwort zurücksetzen — ChainSolve", "description": "Setzen Sie das Passwort Ihres ChainSolve-Kontos zurück." },
+    "docs": { "title": "Dokumentation — ChainSolve", "description": "Lernen Sie ChainSolve kennen: Blöcke, Einheiten, Variablen, Materialien, KI-Assistent und mehr." },
+    "explore": { "title": "Entdecken — ChainSolve", "description": "Durchsuchen und installieren Sie Vorlagen, Blockpakete, Themes und Gruppen aus der Community." },
+    "terms": { "title": "Nutzungsbedingungen — ChainSolve", "description": "Nutzungsbedingungen und Geschäftsbedingungen von ChainSolve." }
   }
 }

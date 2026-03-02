@@ -9,6 +9,7 @@
 
 import { useState, useRef, useEffect, useCallback, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   signInWithPassword,
   signUp,
@@ -17,6 +18,7 @@ import {
   getSession,
 } from '../lib/auth'
 import { BRAND } from '../lib/brand'
+import { usePageMeta } from '../lib/seo'
 import TurnstileWidget from '../components/ui/TurnstileWidget'
 import { isTurnstileEnabled } from '../lib/turnstile'
 import { enforceAndRegisterSession } from '../lib/sessionService'
@@ -28,8 +30,15 @@ interface LoginProps {
   initialMode?: AuthMode
 }
 
+const SEO_KEY: Record<AuthMode, string> = {
+  login: 'seo.login',
+  signup: 'seo.signup',
+  reset: 'seo.resetPassword',
+}
+
 export default function Login({ initialMode = 'login' }: LoginProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [mode, setMode] = useState<AuthMode>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -47,6 +56,10 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
 
   // Reset success state
   const [resetSent, setResetSent] = useState(false)
+
+  // Per-page SEO (I6-2)
+  const seoKey = SEO_KEY[mode]
+  usePageMeta(t(`${seoKey}.title`), t(`${seoKey}.description`))
 
   // Turnstile CAPTCHA token (E2-2)
   const captchaEnabled = isTurnstileEnabled()

@@ -1306,5 +1306,14 @@
     "cancel": "Annuler",
     "close": "Fermer",
     "loading": "Chargement…"
+  },
+  "seo": {
+    "defaultDescription": "Calculatrice scientifique en graphe de nœuds. Construisez des chaînes de calcul visuellement.",
+    "login": { "title": "Connexion — ChainSolve", "description": "Connectez-vous à ChainSolve pour accéder à vos projets et chaînes de calcul." },
+    "signup": { "title": "Créer un compte — ChainSolve", "description": "Créez un compte ChainSolve gratuit et commencez à construire des chaînes de calcul visuellement." },
+    "resetPassword": { "title": "Réinitialiser le mot de passe — ChainSolve", "description": "Réinitialisez le mot de passe de votre compte ChainSolve." },
+    "docs": { "title": "Documentation — ChainSolve", "description": "Apprenez à utiliser ChainSolve : blocs, unités, variables, matériaux, assistant IA et plus." },
+    "explore": { "title": "Explorer — ChainSolve", "description": "Parcourez et installez des modèles, packs de blocs, thèmes et groupes partagés par la communauté." },
+    "terms": { "title": "Conditions générales — ChainSolve", "description": "Conditions générales d'utilisation de ChainSolve." }
   }
 }

@@ -10,6 +10,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BRAND } from '../lib/brand'
+import { usePageMeta } from '../lib/seo'
 import { DOCS_CONTENT } from '../docs/docsPageContent'
 
 // ── Section definitions ──────────────────────────────────────────────────────
@@ -100,6 +101,7 @@ export default function DocsPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { t } = useTranslation()
+  usePageMeta(t('seo.docs.title'), t('seo.docs.description'))
   const [search, setSearch] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)

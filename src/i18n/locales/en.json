@@ -1325,5 +1325,14 @@
     "cancel": "Cancel",
     "close": "Close",
     "loading": "Loading…"
+  },
+  "seo": {
+    "defaultDescription": "Scientific node-graph calculator. Build computation chains visually.",
+    "login": { "title": "Sign In — ChainSolve", "description": "Sign in to ChainSolve to access your projects and scientific computation chains." },
+    "signup": { "title": "Create Account — ChainSolve", "description": "Create a free ChainSolve account and start building computation chains visually." },
+    "resetPassword": { "title": "Reset Password — ChainSolve", "description": "Reset your ChainSolve account password." },
+    "docs": { "title": "Documentation — ChainSolve", "description": "Learn how to use ChainSolve: blocks, units, variables, materials, AI assistant, and more." },
+    "explore": { "title": "Explore — ChainSolve", "description": "Browse and install templates, block packs, themes, and groups shared by the community." },
+    "terms": { "title": "Terms & Conditions — ChainSolve", "description": "ChainSolve terms of service and conditions of use." }
   }
 }
