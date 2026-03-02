@@ -1674,7 +1674,7 @@ Claude MUST:
     - No duplicate close buttons
     - Toolbar never hidden behind dock
 
-- [ ] G5-3: Top of canvas toolbar always visible; move pan/zoom from bottom to right
+- [x] G5-3: Top of canvas toolbar always visible; move pan/zoom from bottom to right
   - Horizontal toolbar always on top and visible.
   - Hover animations for icons (CAD-style).
   - Can be snapped/dragged to right, left or bottom or top of canvas. Auto rotates to horizontal or vertical orientation depending if its on sides of canvas or top/bottom of canvas. (of course horizontal on top and bottom and vertical when on sides)
