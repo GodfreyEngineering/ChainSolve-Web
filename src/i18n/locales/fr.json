@@ -1045,7 +1045,8 @@
     "annotHighlight": "Zone surlignee",
     "annotArrow": "Fleche",
     "snapGridOn": "Activer l'accrochage a la grille",
-    "snapGridOff": "Desactiver l'accrochage a la grille"
+    "snapGridOff": "Desactiver l'accrochage a la grille",
+    "insertConversion": "Inserer une conversion"
   },
   "errorBoundary": {
     "title": "Quelque chose s'est mal passé",

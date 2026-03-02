@@ -1045,7 +1045,8 @@
     "annotHighlight": "Area evidenziata",
     "annotArrow": "Freccia",
     "snapGridOn": "Attiva aggancio alla griglia",
-    "snapGridOff": "Disattiva aggancio alla griglia"
+    "snapGridOff": "Disattiva aggancio alla griglia",
+    "insertConversion": "Inserisci conversione"
   },
   "errorBoundary": {
     "title": "Qualcosa è andato storto",

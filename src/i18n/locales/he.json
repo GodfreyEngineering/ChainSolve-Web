@@ -194,7 +194,8 @@
     "annotHighlight": "אזור מודגש",
     "annotArrow": "חץ",
     "snapGridOn": "הפעלת הצמדה לרשת",
-    "snapGridOff": "כיבוי הצמדה לרשת"
+    "snapGridOff": "כיבוי הצמדה לרשת",
+    "insertConversion": "הוספת המרה"
   },
   "errorBoundary": {
     "title": "משהו השתבש",

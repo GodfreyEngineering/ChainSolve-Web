@@ -1759,7 +1759,7 @@ Claude MUST:
   - Unit metadata must persist per node in schema.
   - Acceptance: units selectable and saved consistently.
 
-- [ ] H1-2: Unit mismatch detection and chain-level error UX
+- [x] H1-2: Unit mismatch detection and chain-level error UX
   - If output unit into input expects different unit:
     - show error on the chain
     - prompt to add conversion

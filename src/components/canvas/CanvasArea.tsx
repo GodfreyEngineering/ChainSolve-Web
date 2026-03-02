@@ -110,6 +110,8 @@ import { stableStringify } from '../../lib/pdf/stableStringify'
 import { sha256Hex } from '../../lib/pdf/sha256'
 import { buildAuditModel } from '../../lib/pdf/auditModel'
 import type { CaptureResult } from '../../lib/pdf/captureCanvasImage'
+import { getUnitMismatch } from '../../units/unitCompat'
+import { getUnitSymbol } from '../../units/unitSymbols'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -944,10 +946,29 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [nodes],
   )
 
-  const onEdgeContextMenu = useCallback((e: MouseEvent, edge: Edge) => {
-    e.preventDefault()
-    setContextMenu({ kind: 'edge', x: e.clientX, y: e.clientY, edgeId: edge.id })
-  }, [])
+  const onEdgeContextMenu = useCallback(
+    (e: MouseEvent, edge: Edge) => {
+      e.preventDefault()
+      // H1-2: Detect unit mismatch on the edge for context menu
+      const srcNode = nodes.find((n) => n.id === edge.source)
+      const tgtNode = nodes.find((n) => n.id === edge.target)
+      const srcUnit = (srcNode?.data as NodeData | undefined)?.unit
+      const tgtUnit = (tgtNode?.data as NodeData | undefined)?.unit
+      const mm =
+        srcUnit && tgtUnit && srcUnit !== tgtUnit ? getUnitMismatch(srcUnit, tgtUnit) : null
+      setContextMenu({
+        kind: 'edge',
+        x: e.clientX,
+        y: e.clientY,
+        edgeId: edge.id,
+        unitMismatch:
+          mm && mm.sameDimension
+            ? { sourceUnit: mm.sourceUnit, targetUnit: mm.targetUnit, factor: mm.factor }
+            : undefined,
+      })
+    },
+    [nodes],
+  )
 
   const onPaneContextMenu = useCallback((e: MouseEvent | globalThis.MouseEvent) => {
     e.preventDefault()
@@ -1019,6 +1040,68 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       }
     },
     [openWindow],
+  )
+
+  // H1-2: Insert a multiply-by-factor conversion node between two nodes on an edge
+  const insertConversion = useCallback(
+    (edgeId: string) => {
+      const edge = latestEdges.current.find((e) => e.id === edgeId)
+      if (!edge) return
+
+      const srcNode = latestNodes.current.find((n) => n.id === edge.source)
+      const tgtNode = latestNodes.current.find((n) => n.id === edge.target)
+      if (!srcNode || !tgtNode) return
+
+      const srcUnit = (srcNode.data as NodeData).unit
+      const tgtUnit = (tgtNode.data as NodeData).unit
+      if (!srcUnit || !tgtUnit) return
+
+      const mm = getUnitMismatch(srcUnit, tgtUnit)
+      if (!mm || !mm.sameDimension || mm.factor === undefined) return
+
+      const convId = `node_${++nodeIdCounter}`
+      const midX = (srcNode.position.x + tgtNode.position.x) / 2
+      const midY = (srcNode.position.y + tgtNode.position.y) / 2
+
+      const convLabel = `${getUnitSymbol(srcUnit)}\u2192${getUnitSymbol(tgtUnit)}`
+
+      const convNode: Node<NodeData> = {
+        id: convId,
+        type: 'csOperation',
+        position: { x: midX, y: midY },
+        data: {
+          blockType: 'multiply',
+          label: convLabel,
+          manualValues: { b: mm.factor },
+          unit: tgtUnit,
+        },
+      }
+
+      doSaveHistory()
+
+      // Remove the old edge, add the conversion node, and two new edges
+      setEdges((eds) => {
+        const without = eds.filter((e) => e.id !== edgeId)
+        const newEdge1: Edge = {
+          id: `e_${edge.source}_${convId}`,
+          source: edge.source,
+          sourceHandle: edge.sourceHandle ?? 'out',
+          target: convId,
+          targetHandle: 'a',
+        }
+        const newEdge2: Edge = {
+          id: `e_${convId}_${edge.target}`,
+          source: convId,
+          sourceHandle: 'out',
+          target: edge.target,
+          targetHandle: edge.targetHandle ?? 'value',
+        }
+        return [...without, newEdge1, newEdge2]
+      })
+
+      setNodes((nds) => [...nds, convNode])
+    },
+    [setNodes, setEdges, doSaveHistory],
   )
 
   // Rename: prompt for a new label then update node data directly
@@ -1928,6 +2011,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   onPaste={readOnly ? undefined : handlePaste}
                   onAutoLayout={readOnly ? undefined : () => handleAutoOrganise('LR')}
                   onInspectEdge={inspectEdge}
+                  onInsertConversion={readOnly ? undefined : insertConversion}
                   onExplainNode={onExplainNode}
                   onInsertFromPrompt={onInsertFromPrompt}
                   onAlignSelection={readOnly ? undefined : alignSelection}

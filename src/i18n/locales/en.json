@@ -1064,7 +1064,8 @@
     "annotHighlight": "Highlight region",
     "annotArrow": "Arrow",
     "snapGridOn": "Enable snap to grid",
-    "snapGridOff": "Disable snap to grid"
+    "snapGridOff": "Disable snap to grid",
+    "insertConversion": "Insert conversion"
   },
   "errorBoundary": {
     "title": "Something went wrong",

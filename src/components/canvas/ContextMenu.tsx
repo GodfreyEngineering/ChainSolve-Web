@@ -22,7 +22,18 @@ export type ContextMenuTarget =
       isGroup?: boolean
       isCollapsed?: boolean
     }
-  | { kind: 'edge'; x: number; y: number; edgeId: string }
+  | {
+      kind: 'edge'
+      x: number
+      y: number
+      edgeId: string
+      /** H1-2: Set when edge has a same-dimension unit mismatch. */
+      unitMismatch?: {
+        sourceUnit: string
+        targetUnit: string
+        factor: number | undefined
+      }
+    }
   | { kind: 'selection'; x: number; y: number; selectedCount: number }
 
 interface ContextMenuProps {
@@ -61,6 +72,8 @@ interface ContextMenuProps {
   onToggleSnap?: () => void
   /** G6-2: Select entire connected chain from a node. */
   onSelectChain?: (nodeId: string) => void
+  /** H1-2: Insert a conversion block on a mismatched edge. */
+  onInsertConversion?: (edgeId: string) => void
 }
 
 const item: CSSProperties = {
@@ -158,6 +171,7 @@ export function ContextMenu({
   snapToGrid,
   onToggleSnap,
   onSelectChain,
+  onInsertConversion,
 }: ContextMenuProps) {
   const { t } = useTranslation()
 
@@ -443,6 +457,19 @@ export function ContextMenu({
                   label={t('contextMenu.inspectConnection')}
                   onClick={() => {
                     onInspectEdge(target.edgeId)
+                    onClose()
+                  }}
+                />
+                <div style={sep} />
+              </>
+            )}
+            {onInsertConversion && target.unitMismatch && (
+              <>
+                <MenuItem
+                  icon="⇌"
+                  label={t('contextMenu.insertConversion')}
+                  onClick={() => {
+                    onInsertConversion(target.edgeId)
                     onClose()
                   }}
                 />

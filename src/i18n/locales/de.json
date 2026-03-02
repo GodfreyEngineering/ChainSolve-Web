@@ -1045,7 +1045,8 @@
     "annotHighlight": "Hervorhebungsbereich",
     "annotArrow": "Pfeil",
     "snapGridOn": "Raster-Einrasten aktivieren",
-    "snapGridOff": "Raster-Einrasten deaktivieren"
+    "snapGridOff": "Raster-Einrasten deaktivieren",
+    "insertConversion": "Umrechnung einfuegen"
   },
   "errorBoundary": {
     "title": "Etwas ist schiefgelaufen",
