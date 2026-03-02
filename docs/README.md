@@ -111,6 +111,7 @@
 | [DEVCONTAINER.md](DEVCONTAINER.md) | Devcontainer/Codespaces setup: Rust, wasm-pack, post-create script |
 | [TESTING_GOLDENS.md](TESTING_GOLDENS.md) | Golden fixture test system: format, regeneration, adding new fixtures |
 | [TEST_PERSONAS.md](TEST_PERSONAS.md) | Test personas: user profiles for QA and E2E testing scenarios |
+| [DEV/DEPENDENCIES.md](DEV/DEPENDENCIES.md) | Dependency policy: what's allowed, how to add, supply chain checks |
 
 ---
 

@@ -280,6 +280,22 @@ need realistic user profiles.
 
 ---
 
+### [DEV/DEPENDENCIES.md](DEV/DEPENDENCIES.md)
+
+**Purpose:** Dependency policy for the project.
+
+**Read this when:** You're adding a new npm package, reviewing supply chain
+health, or wondering why a particular library is (or isn't) used.
+
+**Covers:**
+- What is allowed vs discouraged (with rationale)
+- Step-by-step guide to adding a new dependency
+- Lazy-loading requirements for heavy packages
+- Supply chain checks (automated and manual)
+- Current dependency inventory
+
+---
+
 ## Observability
 
 ### [observability/](observability/)
