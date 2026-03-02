@@ -1376,7 +1376,7 @@ Claude MUST:
     - docs/PRODUCT/
   - Acceptance: docs are discoverable and consistently named.
 
-- [ ] F1-3: Scripts sanity and consistency
+- [x] F1-3: Scripts sanity and consistency
   - Ensure `scripts/verify-ci.sh` is the single authoritative gate.
   - Any “verify-fast” remains optional and clearly described.
   - Acceptance: no duplicate “CI” scripts drifting apart.
