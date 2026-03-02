@@ -1136,6 +1136,7 @@
     "jumpToSource": "Zur Quelle springen",
     "explainNode": "Diesen Knoten erklären",
     "selectChain": "Kette auswahlen",
+    "showNotation": "Notation anzeigen",
     "deleteNode": "Knoten löschen",
     "expand": "Aufklappen",
     "collapse": "Zuklappen",
@@ -1277,6 +1278,18 @@
     "secAiAssistant": "KI-Assistent",
     "secTroubleshooting": "Fehlerbehebung",
     "secShortcuts": "Tastaturkürzel"
+  },
+  "expressionPanel": {
+    "title": "Ausdruck",
+    "symbolic": "Symbolisch",
+    "substituted": "Eingesetzt",
+    "equation": "Gleichung",
+    "latex": "LaTeX",
+    "copyText": "Text kopieren",
+    "copySymbolic": "Symbolisch kopieren",
+    "copyEquation": "Gleichung kopieren",
+    "copied": "Kopiert!",
+    "noExpression": "Kein Ausdruck für diesen Block verfügbar."
   },
   "common": {
     "cancel": "Abbrechen",

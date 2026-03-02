@@ -1136,6 +1136,7 @@
     "jumpToSource": "Ir al origen",
     "explainNode": "Explicar este nodo",
     "selectChain": "Seleccionar cadena",
+    "showNotation": "Mostrar notación",
     "deleteNode": "Eliminar nodo",
     "expand": "Expandir",
     "collapse": "Contraer",
@@ -1277,6 +1278,18 @@
     "secAiAssistant": "Asistente de IA",
     "secTroubleshooting": "Solución de problemas",
     "secShortcuts": "Atajos de teclado"
+  },
+  "expressionPanel": {
+    "title": "Expresión",
+    "symbolic": "Simbólica",
+    "substituted": "Sustituida",
+    "equation": "Ecuación",
+    "latex": "LaTeX",
+    "copyText": "Copiar texto",
+    "copySymbolic": "Copiar simbólica",
+    "copyEquation": "Copiar ecuación",
+    "copied": "¡Copiado!",
+    "noExpression": "No hay expresión disponible para este bloque."
   },
   "common": {
     "cancel": "Cancelar",

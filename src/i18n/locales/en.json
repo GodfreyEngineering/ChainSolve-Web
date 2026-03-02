@@ -1155,6 +1155,7 @@
     "jumpToSource": "Jump to source",
     "explainNode": "Explain this node",
     "selectChain": "Select chain",
+    "showNotation": "Show notation",
     "deleteNode": "Delete node",
     "expand": "Expand",
     "collapse": "Collapse",
@@ -1296,6 +1297,18 @@
     "secAiAssistant": "AI Assistant",
     "secTroubleshooting": "Troubleshooting",
     "secShortcuts": "Keyboard Shortcuts"
+  },
+  "expressionPanel": {
+    "title": "Expression",
+    "symbolic": "Symbolic",
+    "substituted": "Substituted",
+    "equation": "Equation",
+    "latex": "LaTeX",
+    "copyText": "Copy text",
+    "copySymbolic": "Copy symbolic",
+    "copyEquation": "Copy equation",
+    "copied": "Copied!",
+    "noExpression": "No expression available for this node."
   },
   "common": {
     "cancel": "Cancel",

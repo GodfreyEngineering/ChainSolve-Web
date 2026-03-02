@@ -167,6 +167,7 @@
     "jumpToSource": "מעבר למקור",
     "explainNode": "הסבר צומת זה",
     "selectChain": "בחירת שרשרת",
+    "showNotation": "הצג סימון",
     "deleteNode": "מחיקת צומת",
     "expand": "הרחבה",
     "collapse": "כיווץ",
@@ -276,6 +277,18 @@
     "statStdDev": "סטיית תקן",
     "statSum": "סכום",
     "statCount": "מספר"
+  },
+  "expressionPanel": {
+    "title": "ביטוי",
+    "symbolic": "סמלי",
+    "substituted": "מוצב",
+    "equation": "משוואה",
+    "latex": "LaTeX",
+    "copyText": "העתק טקסט",
+    "copySymbolic": "העתק סמלי",
+    "copyEquation": "העתק משוואה",
+    "copied": "!הועתק",
+    "noExpression": "אין ביטוי זמין עבור בלוק זה."
   },
   "common": {
     "cancel": "ביטול",

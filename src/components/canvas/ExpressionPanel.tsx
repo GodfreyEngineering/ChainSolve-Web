@@ -6,6 +6,7 @@
  */
 
 import { useMemo, useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Node, Edge } from '@xyflow/react'
 import type { Value } from '../../engine/value'
 import {
@@ -26,6 +27,7 @@ interface ExpressionPanelProps {
 }
 
 export function ExpressionPanel({ nodeId, nodes, edges, computed, onClose }: ExpressionPanelProps) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState<string | null>(null)
 
   const tree = useMemo(
@@ -50,13 +52,13 @@ export function ExpressionPanel({ nodeId, nodes, edges, computed, onClose }: Exp
     return (
       <div style={panelStyle}>
         <div style={headerStyle}>
-          <span style={titleStyle}>Expression</span>
+          <span style={titleStyle}>{t('expressionPanel.title')}</span>
           <button style={closeBtnStyle} onClick={onClose}>
             &times;
           </button>
         </div>
         <div style={bodyStyle}>
-          <span style={emptyStyle}>No expression available for this node.</span>
+          <span style={emptyStyle}>{t('expressionPanel.noExpression')}</span>
         </div>
       </div>
     )
@@ -65,7 +67,7 @@ export function ExpressionPanel({ nodeId, nodes, edges, computed, onClose }: Exp
   return (
     <div style={panelStyle}>
       <div style={headerStyle}>
-        <span style={titleStyle}>Expression</span>
+        <span style={titleStyle}>{t('expressionPanel.title')}</span>
         <button style={closeBtnStyle} onClick={onClose}>
           &times;
         </button>
@@ -73,39 +75,39 @@ export function ExpressionPanel({ nodeId, nodes, edges, computed, onClose }: Exp
       <div style={bodyStyle}>
         {/* Symbolic form */}
         <div style={sectionStyle}>
-          <div style={sectionLabelStyle}>Symbolic</div>
+          <div style={sectionLabelStyle}>{t('expressionPanel.symbolic')}</div>
           <div style={exprBoxStyle}>{symbolic}</div>
           <button
             style={copyBtnStyle}
             onClick={() => copyToClipboard(symbolic!, 'symbolic')}
-            title="Copy as text"
+            title={t('expressionPanel.copyText')}
           >
-            {copied === 'symbolic' ? 'Copied!' : 'Copy text'}
+            {copied === 'symbolic' ? t('expressionPanel.copied') : t('expressionPanel.copyText')}
           </button>
         </div>
 
         {/* Substituted form */}
         <div style={sectionStyle}>
-          <div style={sectionLabelStyle}>Substituted</div>
+          <div style={sectionLabelStyle}>{t('expressionPanel.substituted')}</div>
           <div style={exprBoxStyle}>{substituted}</div>
         </div>
 
         {/* Equation (symbolic = value) */}
         <div style={sectionStyle}>
-          <div style={sectionLabelStyle}>Equation</div>
+          <div style={sectionLabelStyle}>{t('expressionPanel.equation')}</div>
           <div style={exprBoxStyle}>{equation}</div>
           <button
             style={copyBtnStyle}
             onClick={() => copyToClipboard(equation!, 'equation')}
-            title="Copy equation"
+            title={t('expressionPanel.copyEquation')}
           >
-            {copied === 'equation' ? 'Copied!' : 'Copy text'}
+            {copied === 'equation' ? t('expressionPanel.copied') : t('expressionPanel.copyText')}
           </button>
         </div>
 
         {/* LaTeX */}
         <div style={sectionStyle}>
-          <div style={sectionLabelStyle}>LaTeX</div>
+          <div style={sectionLabelStyle}>{t('expressionPanel.latex')}</div>
           <div
             style={{
               ...exprBoxStyle,
@@ -119,16 +121,20 @@ export function ExpressionPanel({ nodeId, nodes, edges, computed, onClose }: Exp
             <button
               style={copyBtnStyle}
               onClick={() => copyToClipboard(latexSym!, 'latex-sym')}
-              title="Copy LaTeX (symbolic)"
+              title={t('expressionPanel.copySymbolic')}
             >
-              {copied === 'latex-sym' ? 'Copied!' : 'Copy symbolic'}
+              {copied === 'latex-sym'
+                ? t('expressionPanel.copied')
+                : t('expressionPanel.copySymbolic')}
             </button>
             <button
               style={copyBtnStyle}
               onClick={() => copyToClipboard(latexEq!, 'latex-eq')}
-              title="Copy LaTeX (equation)"
+              title={t('expressionPanel.copyEquation')}
             >
-              {copied === 'latex-eq' ? 'Copied!' : 'Copy equation'}
+              {copied === 'latex-eq'
+                ? t('expressionPanel.copied')
+                : t('expressionPanel.copyEquation')}
             </button>
           </div>
         </div>

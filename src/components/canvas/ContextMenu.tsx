@@ -74,6 +74,8 @@ interface ContextMenuProps {
   onSelectChain?: (nodeId: string) => void
   /** H1-2: Insert a conversion block on a mismatched edge. */
   onInsertConversion?: (edgeId: string) => void
+  /** I2-1: Show chain-to-notation panel for a node. */
+  onShowNotation?: (nodeId: string) => void
 }
 
 const item: CSSProperties = {
@@ -172,6 +174,7 @@ export function ContextMenu({
   onToggleSnap,
   onSelectChain,
   onInsertConversion,
+  onShowNotation,
 }: ContextMenuProps) {
   const { t } = useTranslation()
 
@@ -277,6 +280,16 @@ export function ContextMenu({
                 label={t('contextMenu.selectChain')}
                 onClick={() => {
                   onSelectChain(target.nodeId)
+                  onClose()
+                }}
+              />
+            )}
+            {onShowNotation && (
+              <MenuItem
+                icon="Σ"
+                label={t('contextMenu.showNotation')}
+                onClick={() => {
+                  onShowNotation(target.nodeId)
                   onClose()
                 }}
               />

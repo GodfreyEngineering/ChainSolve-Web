@@ -53,6 +53,7 @@ import { DRAG_TYPE } from './blockLibraryUtils'
 import { FloatingInspector, INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS } from './FloatingInspector'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
+import { ExpressionPanel } from './ExpressionPanel'
 import { QuickAddPalette } from './QuickAddPalette'
 import { ComputedContext } from '../../contexts/ComputedContext'
 import { BindingContext } from '../../contexts/BindingContext'
@@ -793,6 +794,13 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // Context menu
   const [contextMenu, setContextMenu] = useState<ContextMenuTarget | null>(null)
 
+  // I2-1: Notation panel (chain-to-expression)
+  const [notationTarget, setNotationTarget] = useState<{
+    nodeId: string
+    x: number
+    y: number
+  } | null>(null)
+
   // Quick-add palette (opened from canvas context menu "Add block here")
   const [quickAdd, setQuickAdd] = useState<{
     screenX: number
@@ -923,6 +931,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   const onPaneClick = useCallback(() => {
     if (!inspPinned) setInspectedId(null)
+    setNotationTarget(null)
     if (isMobile) {
       setLibVisible(false)
       closeWindow(INSPECTOR_WINDOW_ID)
@@ -1202,6 +1211,21 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [edges, setNodes, setEdges],
   )
 
+  // I2-1: Open notation panel for a node, positioned near the context menu click
+  const showNotation = useCallback(
+    (nodeId: string) => {
+      const rect = canvasWrapRef.current?.getBoundingClientRect()
+      const cx = contextMenu?.x ?? 0
+      const cy = contextMenu?.y ?? 0
+      setNotationTarget({
+        nodeId,
+        x: cx - (rect?.left ?? 0) + 12,
+        y: cy - (rect?.top ?? 0) + 12,
+      })
+    },
+    [contextMenu],
+  )
+
   const deleteSelected = useCallback(() => {
     doSaveHistory()
     // Delete selected edges
@@ -1460,6 +1484,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       // Escape always works
       if (e.key === 'Escape') {
         setContextMenu(null)
+        setNotationTarget(null)
         setFindOpen(false)
         closeInspector()
         return
@@ -2066,7 +2091,28 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     snapToGrid={snapToGrid}
                     onToggleSnap={readOnly ? undefined : () => setSnapToGrid((v) => !v)}
                     onSelectChain={readOnly ? undefined : selectChain}
+                    onShowNotation={showNotation}
                   />
+                )}
+
+                {/* I2-1: Notation panel */}
+                {notationTarget && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: notationTarget.x,
+                      top: notationTarget.y,
+                      zIndex: 1000,
+                    }}
+                  >
+                    <ExpressionPanel
+                      nodeId={notationTarget.nodeId}
+                      nodes={nodes}
+                      edges={edges}
+                      computed={computed}
+                      onClose={() => setNotationTarget(null)}
+                    />
+                  </div>
                 )}
 
                 {/* Quick-add palette */}

@@ -1136,6 +1136,7 @@
     "jumpToSource": "Aller à la source",
     "explainNode": "Expliquer ce noeud",
     "selectChain": "Selectionner la chaine",
+    "showNotation": "Afficher la notation",
     "deleteNode": "Supprimer le noeud",
     "expand": "Développer",
     "collapse": "Réduire",
@@ -1277,6 +1278,18 @@
     "secAiAssistant": "Assistant IA",
     "secTroubleshooting": "Dépannage",
     "secShortcuts": "Raccourcis clavier"
+  },
+  "expressionPanel": {
+    "title": "Expression",
+    "symbolic": "Symbolique",
+    "substituted": "Substituée",
+    "equation": "Équation",
+    "latex": "LaTeX",
+    "copyText": "Copier le texte",
+    "copySymbolic": "Copier symbolique",
+    "copyEquation": "Copier l'équation",
+    "copied": "Copié !",
+    "noExpression": "Aucune expression disponible pour ce bloc."
   },
   "common": {
     "cancel": "Annuler",

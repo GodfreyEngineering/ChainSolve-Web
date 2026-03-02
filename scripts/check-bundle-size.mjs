@@ -34,7 +34,7 @@ const MANIFEST_PATH = join(DIST, '.vite', 'manifest.json')
 
 const KB = 1024
 const BUDGETS = {
-  initialGzip: 420 * KB, // initial-load JS closure (gzip) — I1-1: +2 KB for docs sidebar i18n keys
+  initialGzip: 422 * KB, // initial-load JS closure (gzip) — I2-1: +2 KB for expression panel i18n
   wasmRaw: 650 * KB, // per-WASM file (raw) — headroom for toolchain variance
   wasmGzip: 200 * KB, // per-WASM file (gzip) — what the CDN actually serves
 }

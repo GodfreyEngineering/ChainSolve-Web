@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest'
 import type { Node, Edge } from '@xyflow/react'
-import { mkScalar } from '../engine/value'
+import { mkScalar, mkVector } from '../engine/value'
 import type { Value } from '../engine/value'
 import {
   buildExpressionTree,
@@ -340,5 +340,48 @@ describe('renderEquationText', () => {
     ])
     const tree = buildExpressionTree('add', nodes, edges, computed)!
     expect(renderEquationText(tree)).toBe('(A [3] + B [4]) = 7')
+  })
+})
+
+// ── Vector expression rendering (I2-1) ──────────────────────────────────────
+
+describe('vector expressions', () => {
+  it('renders substituted vector values in brackets', () => {
+    const nodes = [
+      makeNode('v1', 'number', 'X', undefined as unknown as number),
+      makeNode('v2', 'number', 'Y', undefined as unknown as number),
+      makeNode('add', 'add', 'Add'),
+    ]
+    const edges = [makeEdge('e1', 'v1', 'add', 'a'), makeEdge('e2', 'v2', 'add', 'b')]
+    const computed = new Map<string, Value>([
+      ['v1', mkVector([1, 2, 3])],
+      ['v2', mkVector([4, 5, 6])],
+      ['add', mkVector([5, 7, 9])],
+    ])
+    const tree = buildExpressionTree('add', nodes, edges, computed)!
+    expect(renderExpressionSubstituted(tree)).toBe('([1, 2, 3] + [4, 5, 6])')
+  })
+
+  it('truncates long vectors to 5 elements', () => {
+    const nodes = [makeNode('n1', 'number', 'V', undefined as unknown as number)]
+    const computed = new Map<string, Value>([['n1', mkVector([1, 2, 3, 4, 5, 6, 7])]])
+    const tree = buildExpressionTree('n1', nodes, [], computed)!
+    expect(renderExpressionSubstituted(tree)).toBe('[1, 2, 3, 4, 5, ...]')
+  })
+
+  it('renders equation with vector result', () => {
+    const nodes = [
+      makeNode('a', 'number', 'A', undefined as unknown as number),
+      makeNode('b', 'number', 'B', undefined as unknown as number),
+      makeNode('add', 'add', 'Sum'),
+    ]
+    const edges = [makeEdge('e1', 'a', 'add', 'a'), makeEdge('e2', 'b', 'add', 'b')]
+    const computed = new Map<string, Value>([
+      ['a', mkVector([1, 2])],
+      ['b', mkVector([3, 4])],
+      ['add', mkVector([4, 6])],
+    ])
+    const tree = buildExpressionTree('add', nodes, edges, computed)!
+    expect(renderEquationText(tree)).toBe('(A + B) = [4, 6]')
   })
 })
