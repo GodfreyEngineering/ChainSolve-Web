@@ -1664,7 +1664,7 @@ Claude MUST:
     - No ResizeObserver errors
     - No toggle duplicates in menus
 
-- [ ] G5-2: Bottom Dock (Debug Console + Graph Health) handle behavior
+- [x] G5-2: Bottom Dock (Debug Console + Graph Health) handle behavior
   - Always-visible bottom handle to collapse/expand.
   - Resizable height persists.
   - Keep tabs for Console and Health.
