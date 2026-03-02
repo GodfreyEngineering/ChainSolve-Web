@@ -495,7 +495,8 @@
     "menubar": "Menú de la aplicación",
     "buildWithAI": "Construir con IA…",
     "manageTemplates": "Administrar plantillas…",
-    "startTour": "Tour de inicio"
+    "startTour": "Tour de inicio",
+    "projectWizard": "Asistente de proyecto"
   },
   "time": {
     "justNow": "ahora mismo",
@@ -717,6 +718,50 @@
         "short": "Reportes (Pro)",
         "title": "Exportar reportes y notacion",
         "description": "Los usuarios Pro pueden exportar informes PDF y Excel, ver notacion cientifica para cadenas de calculo y compartir resultados. Accede desde el menu Archivo."
+      }
+    }
+  },
+  "wizard": {
+    "title": "Iniciar un proyecto",
+    "close": "Cerrar",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "finish": "Listo",
+    "tip": "Consejo",
+    "stepLabel": "Paso {{current}} de {{total}}",
+    "steps": {
+      "welcome": {
+        "title": "Construye tu primer proyecto",
+        "description": "Este asistente te guia paso a paso para construir una cadena de calculo desde cero. Elegiras bloques de entrada, agregaras funciones, conectaras salidas y aprenderas a exportar tus resultados."
+      },
+      "pick_inputs": {
+        "title": "Elige tus bloques de entrada",
+        "description": "Los bloques de entrada proporcionan los valores con los que trabaja tu cadena. Las opciones comunes incluyen Entrada numerica, Control deslizante, Variable o Constante.",
+        "tip": "Haz clic derecho en el lienzo y elige Insertar > Bloques de entrada, o presiona / para insercion rapida."
+      },
+      "pick_functions": {
+        "title": "Elige tus bloques de funcion",
+        "description": "Los bloques de funcion realizan calculos con tus entradas. Explora categorias como Matematicas, Ingenieria, Finanzas y Estadisticas en la Biblioteca de bloques.",
+        "tip": "Usa la barra de busqueda en la Biblioteca de bloques para encontrar funciones por nombre."
+      },
+      "pick_outputs": {
+        "title": "Elige tus bloques de salida",
+        "description": "Los bloques de salida muestran los resultados de tu cadena de calculo. Agrega un bloque de Visualizacion para ver un valor unico.",
+        "tip": "Los bloques de Visualizacion muestran automaticamente el valor calculado y pueden incluir una etiqueta de unidad."
+      },
+      "connect": {
+        "title": "Conecta tus bloques con cadenas",
+        "description": "Arrastra desde un puerto de salida a un puerto de entrada de otro bloque para crear una cadena. Las cadenas llevan valores entre bloques. El calculo se ejecuta automaticamente.",
+        "tip": "Si una cadena muestra una advertencia, verifica que los puertos conectados esperan tipos compatibles."
+      },
+      "validate": {
+        "title": "Verifica tus resultados en el inspector",
+        "description": "Haz clic en cualquier bloque para abrir la ventana del Inspector. El inspector muestra los valores actuales, entradas, salidas y advertencias del bloque.",
+        "tip": "Abre el panel de Salud del grafo (menu Ver) para ver un resumen de todos los errores y advertencias."
+      },
+      "report": {
+        "title": "Exporta y comparte tu trabajo",
+        "description": "Guarda tu proyecto con Ctrl+S (Cmd+S en Mac). Los usuarios Pro pueden exportar informes PDF y Excel desde el menu Archivo y compartir resultados con colegas."
       }
     }
   },

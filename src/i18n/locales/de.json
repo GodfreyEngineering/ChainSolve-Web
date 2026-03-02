@@ -495,7 +495,8 @@
     "menubar": "Anwendungsmenü",
     "buildWithAI": "Mit KI erstellen…",
     "manageTemplates": "Vorlagen verwalten…",
-    "startTour": "Einfuehrungstour"
+    "startTour": "Einfuehrungstour",
+    "projectWizard": "Projektassistent"
   },
   "time": {
     "justNow": "gerade eben",
@@ -717,6 +718,50 @@
         "short": "Berichte (Pro)",
         "title": "Berichte und Notation exportieren",
         "description": "Pro-Benutzer koennen PDF- und Excel-Berichte exportieren, wissenschaftliche Notation fuer Berechnungsketten anzeigen und Ergebnisse teilen. Zugriff ueber das Datei-Menu."
+      }
+    }
+  },
+  "wizard": {
+    "title": "Projekt starten",
+    "close": "Schliessen",
+    "prev": "Zurueck",
+    "next": "Weiter",
+    "finish": "Fertig",
+    "tip": "Tipp",
+    "stepLabel": "Schritt {{current}} von {{total}}",
+    "steps": {
+      "welcome": {
+        "title": "Bauen Sie Ihr erstes Projekt",
+        "description": "Dieser Assistent fuehrt Sie Schritt fuer Schritt durch den Aufbau einer Berechnungskette von Grund auf. Sie waehlen Eingabebloecke, fuegen Funktionen hinzu, verbinden Ausgaben und lernen, Ihre Ergebnisse zu exportieren."
+      },
+      "pick_inputs": {
+        "title": "Waehlen Sie Ihre Eingabebloecke",
+        "description": "Eingabebloecke liefern die Werte, mit denen Ihre Kette arbeitet. Haeufige Optionen sind Zahleneingabe, Schieberegler, Variable oder Konstante.",
+        "tip": "Klicken Sie mit der rechten Maustaste auf die Leinwand und waehlen Sie Einfuegen > Eingabebloecke, oder druecken Sie / fuer schnelles Einfuegen."
+      },
+      "pick_functions": {
+        "title": "Waehlen Sie Ihre Funktionsbloecke",
+        "description": "Funktionsbloecke fuehren Berechnungen mit Ihren Eingaben durch. Durchsuchen Sie Kategorien wie Mathematik, Ingenieurwesen, Finanzen und Statistik in der Blockbibliothek.",
+        "tip": "Verwenden Sie die Suchleiste in der Blockbibliothek, um Funktionen nach Name zu finden."
+      },
+      "pick_outputs": {
+        "title": "Waehlen Sie Ihre Ausgabebloecke",
+        "description": "Ausgabebloecke zeigen die Ergebnisse Ihrer Berechnungskette an. Fuegen Sie einen Anzeigeblock hinzu, um einen einzelnen Wert zu sehen.",
+        "tip": "Anzeigebloecke zeigen automatisch den berechneten Wert an und koennen eine Einheitenbezeichnung enthalten."
+      },
+      "connect": {
+        "title": "Verbinden Sie Ihre Bloecke mit Ketten",
+        "description": "Ziehen Sie von einem Ausgangsport zu einem Eingangsport eines anderen Blocks, um eine Kette zu erstellen. Ketten uebertragen Werte zwischen Bloecken. Die Berechnung wird automatisch ausgefuehrt.",
+        "tip": "Wenn eine Kette eine Warnung anzeigt, pruefen Sie, ob die verbundenen Ports kompatible Typen erwarten."
+      },
+      "validate": {
+        "title": "Pruefen Sie Ihre Ergebnisse im Inspektor",
+        "description": "Klicken Sie auf einen beliebigen Block, um das Inspektorfenster zu oeffnen. Der Inspektor zeigt die aktuellen Werte, Eingaben, Ausgaben und Warnungen des Blocks.",
+        "tip": "Oeffnen Sie das Graphen-Gesundheitspanel (Menu Ansicht), um eine Zusammenfassung aller Fehler und Warnungen zu sehen."
+      },
+      "report": {
+        "title": "Exportieren und teilen Sie Ihre Arbeit",
+        "description": "Speichern Sie Ihr Projekt mit Strg+S (Cmd+S auf Mac). Pro-Benutzer koennen PDF- und Excel-Berichte aus dem Datei-Menu exportieren und Ergebnisse mit Kollegen teilen."
       }
     }
   },

@@ -40,6 +40,9 @@ const LazyWhatsNewModal = lazy(() =>
 const LazyOnboardingOverlay = lazy(() =>
   import('./OnboardingOverlay').then((m) => ({ default: m.OnboardingOverlay })),
 )
+const LazyProjectWizard = lazy(() =>
+  import('./ProjectWizard').then((m) => ({ default: m.ProjectWizard })),
+)
 const LazyLlmGraphBuilderDialog = lazy(() =>
   import('../canvas/LlmGraphBuilderDialog').then((m) => ({ default: m.LlmGraphBuilderDialog })),
 )
@@ -198,6 +201,7 @@ export function AppHeader({
   const [llmBuilderOpen, setLlmBuilderOpen] = useState(false)
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false)
   const [tourOpen, setTourOpen] = useState(false)
+  const [wizardOpen, setWizardOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
   const accountRef = useRef<HTMLDivElement>(null)
 
@@ -778,6 +782,13 @@ export function AppHeader({
           setOpenMenu(null)
         },
       },
+      {
+        label: t('menu.projectWizard'),
+        onClick: () => {
+          setWizardOpen(true)
+          setOpenMenu(null)
+        },
+      },
       { separator: true },
       {
         label: t('menu.bugReport'),
@@ -1102,6 +1113,11 @@ export function AppHeader({
       {tourOpen && (
         <Suspense fallback={null}>
           <LazyOnboardingOverlay mode="overlay" onClose={() => setTourOpen(false)} />
+        </Suspense>
+      )}
+      {wizardOpen && (
+        <Suspense fallback={null}>
+          <LazyProjectWizard onClose={() => setWizardOpen(false)} />
         </Suspense>
       )}
       {openDialogOpen && (

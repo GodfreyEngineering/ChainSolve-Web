@@ -503,7 +503,8 @@
     "menubar": "Application menu",
     "buildWithAI": "Build with AI…",
     "manageTemplates": "Manage Templates…",
-    "startTour": "Getting started tour"
+    "startTour": "Getting started tour",
+    "projectWizard": "Start a Project Wizard"
   },
   "time": {
     "justNow": "just now",
@@ -736,6 +737,50 @@
         "short": "Reporting (Pro)",
         "title": "Export reports and notation",
         "description": "Pro users can export PDF and Excel reports, view scientific notation for computation chains, and share results. Access these from the File menu."
+      }
+    }
+  },
+  "wizard": {
+    "title": "Start a Project",
+    "close": "Close",
+    "prev": "Previous",
+    "next": "Next",
+    "finish": "Done",
+    "tip": "Tip",
+    "stepLabel": "Step {{current}} of {{total}}",
+    "steps": {
+      "welcome": {
+        "title": "Build your first project",
+        "description": "This wizard walks you through building a computation chain from scratch. You will pick input blocks, add functions, connect outputs, and learn how to export your results. Each step explains what to do and where to find the tools you need."
+      },
+      "pick_inputs": {
+        "title": "Pick your input blocks",
+        "description": "Input blocks provide the values your chain works with. Common choices include Number Input (type a value), Slider (drag to set a value), Variable (reference a saved variable), or Constant (physics and maths constants).",
+        "tip": "Right-click the canvas and choose Insert > Input Blocks, or press / for quick insert. You can also drag blocks from the Block Library on the left."
+      },
+      "pick_functions": {
+        "title": "Pick your function blocks",
+        "description": "Function blocks perform calculations on your inputs. Browse categories such as Math, Engineering, Finance, and Statistics in the Block Library. Each function shows its formula and expected inputs.",
+        "tip": "Use the search bar in the Block Library to find functions by name. For example, search for \"power\" to find the power/work/time function."
+      },
+      "pick_outputs": {
+        "title": "Pick your output blocks",
+        "description": "Output blocks display the results of your computation chain. Add a Display block to see a single value, or use a Graph block (Pro) to visualise data series.",
+        "tip": "Display blocks automatically show the computed value and can include a unit label. You can add multiple displays to show intermediate results."
+      },
+      "connect": {
+        "title": "Connect your blocks with chains",
+        "description": "Drag from an output port (right side of a block) to an input port (left side of another block) to create a chain. Chains carry values between blocks. The computation runs automatically whenever an input changes.",
+        "tip": "If a chain shows a warning, check that the connected ports expect compatible types. You can delete a chain by clicking it and pressing Delete."
+      },
+      "validate": {
+        "title": "Check your results in the inspector",
+        "description": "Click any block to open the Inspector window. The inspector shows the block's current values, inputs, outputs, and any warnings. Use it to set input values, change units, and verify your computation produces the expected results.",
+        "tip": "Open the Graph Health panel (View menu) to see a summary of all errors and warnings across your entire canvas."
+      },
+      "report": {
+        "title": "Export and share your work",
+        "description": "Save your project with Ctrl+S (Cmd+S on Mac). Pro users can export PDF and Excel reports from the File menu, view scientific notation for computation chains, and share results with colleagues. Free users can save and reopen projects at any time."
       }
     }
   },

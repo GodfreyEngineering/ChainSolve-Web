@@ -495,7 +495,8 @@
     "menubar": "Menu de l'application",
     "buildWithAI": "Créer avec l'IA…",
     "manageTemplates": "Gérer les modèles…",
-    "startTour": "Visite guidee"
+    "startTour": "Visite guidee",
+    "projectWizard": "Assistant de projet"
   },
   "time": {
     "justNow": "à l'instant",
@@ -717,6 +718,50 @@
         "short": "Rapports (Pro)",
         "title": "Exporter des rapports et notations",
         "description": "Les utilisateurs Pro peuvent exporter des rapports PDF et Excel, voir la notation scientifique pour les chaines de calcul et partager les resultats. Accedez-y depuis le menu Fichier."
+      }
+    }
+  },
+  "wizard": {
+    "title": "Demarrer un projet",
+    "close": "Fermer",
+    "prev": "Precedent",
+    "next": "Suivant",
+    "finish": "Termine",
+    "tip": "Conseil",
+    "stepLabel": "Etape {{current}} sur {{total}}",
+    "steps": {
+      "welcome": {
+        "title": "Construisez votre premier projet",
+        "description": "Cet assistant vous guide pas a pas pour construire une chaine de calcul depuis zero. Vous choisirez des blocs d'entree, ajouterez des fonctions, connecterez des sorties et apprendrez a exporter vos resultats."
+      },
+      "pick_inputs": {
+        "title": "Choisissez vos blocs d'entree",
+        "description": "Les blocs d'entree fournissent les valeurs avec lesquelles votre chaine travaille. Les choix courants incluent Entree numerique, Curseur, Variable ou Constante.",
+        "tip": "Faites un clic droit sur le canevas et choisissez Inserer > Blocs d'entree, ou appuyez sur / pour une insertion rapide."
+      },
+      "pick_functions": {
+        "title": "Choisissez vos blocs de fonction",
+        "description": "Les blocs de fonction effectuent des calculs sur vos entrees. Parcourez des categories comme Mathematiques, Ingenierie, Finance et Statistiques dans la Bibliotheque de blocs.",
+        "tip": "Utilisez la barre de recherche dans la Bibliotheque de blocs pour trouver des fonctions par nom."
+      },
+      "pick_outputs": {
+        "title": "Choisissez vos blocs de sortie",
+        "description": "Les blocs de sortie affichent les resultats de votre chaine de calcul. Ajoutez un bloc Affichage pour voir une valeur unique.",
+        "tip": "Les blocs Affichage montrent automatiquement la valeur calculee et peuvent inclure une etiquette d'unite."
+      },
+      "connect": {
+        "title": "Connectez vos blocs avec des chaines",
+        "description": "Glissez d'un port de sortie vers un port d'entree d'un autre bloc pour creer une chaine. Les chaines transportent les valeurs entre les blocs. Le calcul s'execute automatiquement.",
+        "tip": "Si une chaine affiche un avertissement, verifiez que les ports connectes attendent des types compatibles."
+      },
+      "validate": {
+        "title": "Verifiez vos resultats dans l'inspecteur",
+        "description": "Cliquez sur n'importe quel bloc pour ouvrir la fenetre de l'Inspecteur. L'inspecteur montre les valeurs actuelles, les entrees, les sorties et les avertissements du bloc.",
+        "tip": "Ouvrez le panneau Sante du graphe (menu Affichage) pour voir un resume de toutes les erreurs et avertissements."
+      },
+      "report": {
+        "title": "Exportez et partagez votre travail",
+        "description": "Enregistrez votre projet avec Ctrl+S (Cmd+S sur Mac). Les utilisateurs Pro peuvent exporter des rapports PDF et Excel depuis le menu Fichier et partager les resultats avec leurs collegues."
       }
     }
   },

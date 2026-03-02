@@ -495,7 +495,8 @@
     "menubar": "Menu dell'applicazione",
     "buildWithAI": "Crea con IA…",
     "manageTemplates": "Gestisci modelli…",
-    "startTour": "Tour introduttivo"
+    "startTour": "Tour introduttivo",
+    "projectWizard": "Assistente progetto"
   },
   "time": {
     "justNow": "proprio ora",
@@ -717,6 +718,50 @@
         "short": "Report (Pro)",
         "title": "Esporta report e notazione",
         "description": "Gli utenti Pro possono esportare report PDF ed Excel, visualizzare la notazione scientifica per le catene di calcolo e condividere i risultati. Accedi dal menu File."
+      }
+    }
+  },
+  "wizard": {
+    "title": "Avvia un progetto",
+    "close": "Chiudi",
+    "prev": "Precedente",
+    "next": "Avanti",
+    "finish": "Fatto",
+    "tip": "Suggerimento",
+    "stepLabel": "Passaggio {{current}} di {{total}}",
+    "steps": {
+      "welcome": {
+        "title": "Costruisci il tuo primo progetto",
+        "description": "Questo assistente ti guida passo dopo passo nella costruzione di una catena di calcolo da zero. Sceglierai blocchi di input, aggiungerai funzioni, collegherai le uscite e imparerai a esportare i tuoi risultati."
+      },
+      "pick_inputs": {
+        "title": "Scegli i tuoi blocchi di input",
+        "description": "I blocchi di input forniscono i valori con cui lavora la tua catena. Le opzioni comuni includono Ingresso numerico, Cursore, Variabile o Costante.",
+        "tip": "Fai clic destro sul canvas e scegli Inserisci > Blocchi di input, o premi / per inserimento rapido."
+      },
+      "pick_functions": {
+        "title": "Scegli i tuoi blocchi funzione",
+        "description": "I blocchi funzione eseguono calcoli sui tuoi input. Sfoglia categorie come Matematica, Ingegneria, Finanza e Statistica nella Libreria blocchi.",
+        "tip": "Usa la barra di ricerca nella Libreria blocchi per trovare funzioni per nome."
+      },
+      "pick_outputs": {
+        "title": "Scegli i tuoi blocchi di output",
+        "description": "I blocchi di output mostrano i risultati della tua catena di calcolo. Aggiungi un blocco Visualizzazione per vedere un singolo valore.",
+        "tip": "I blocchi Visualizzazione mostrano automaticamente il valore calcolato e possono includere un'etichetta di unita."
+      },
+      "connect": {
+        "title": "Collega i tuoi blocchi con catene",
+        "description": "Trascina da una porta di uscita a una porta di ingresso di un altro blocco per creare una catena. Le catene trasportano valori tra i blocchi. Il calcolo viene eseguito automaticamente.",
+        "tip": "Se una catena mostra un avviso, verifica che le porte collegate si aspettino tipi compatibili."
+      },
+      "validate": {
+        "title": "Verifica i risultati nell'ispettore",
+        "description": "Clicca su qualsiasi blocco per aprire la finestra dell'Ispettore. L'ispettore mostra i valori attuali, gli input, gli output e gli avvisi del blocco.",
+        "tip": "Apri il pannello Salute del grafo (menu Visualizza) per vedere un riepilogo di tutti gli errori e avvisi."
+      },
+      "report": {
+        "title": "Esporta e condividi il tuo lavoro",
+        "description": "Salva il tuo progetto con Ctrl+S (Cmd+S su Mac). Gli utenti Pro possono esportare report PDF ed Excel dal menu File e condividere i risultati con i colleghi."
       }
     }
   },
