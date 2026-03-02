@@ -1683,7 +1683,7 @@ Claude MUST:
 ---
 
 ## G6 — Canvas UX: context menus, chain selection, and annotations entrypoints
-- [ ] G6-1: Right-click canvas context menu (fully done)
+- [x] G6-1: Right-click canvas context menu (fully done)
   - Insert blocks (by category drill-down)
   - Insert annotations (text box, arrow, callout, highlight)
   - Paste
