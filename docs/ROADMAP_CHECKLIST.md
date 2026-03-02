@@ -1453,7 +1453,7 @@ Claude MUST:
     - inconsistent empty states
   - Acceptance: “one design language” everywhere.
 
-- [ ] F5-2: Navigation + router correctness audit
+- [x] F5-2: Navigation + router correctness audit
   - Ensure every window/dialog that uses navigation hooks is inside Router context.
   - Acceptance: no `useNavigate()` errors anywhere.
 
