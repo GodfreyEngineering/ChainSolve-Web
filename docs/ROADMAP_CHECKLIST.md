@@ -1467,7 +1467,7 @@ Claude MUST:
 ---
 
 ## F6 — Catalog/engine registry integrity (zero mismatch)
-- [ ] F6-1: Single source of truth for catalog registration
+- [x] F6-1: Single source of truth for catalog registration
   - Fix any mismatches:
     - TS blocks not in Rust catalog
     - Rust ops missing TS defaults (UI should still render generically)
