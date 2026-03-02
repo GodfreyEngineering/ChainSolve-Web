@@ -1601,7 +1601,7 @@ Claude MUST:
     - No conflict with CSP
     - Works on mobile and small screens
 
-- [ ] G2-2: Help menu “Start a Project Wizard”
+- [x] G2-2: Help menu “Start a Project Wizard”
   - Wizard guides user step-by-step:
     - pick input blocks, function blocks, output blocks
     - connect and validate
