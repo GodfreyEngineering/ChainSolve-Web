@@ -10,10 +10,15 @@ how they are measured and enforced.
 | Metric | Budget | Check |
 |--------|--------|-------|
 | Initial JS (gzip) | ≤ 370 KB | `scripts/check-bundle-size.mjs` |
+| WASM binary (raw) | ≤ 650 KB | `scripts/check-bundle-size.mjs` |
 | WASM binary (gzip) | ≤ 200 KB | `scripts/check-bundle-size.mjs` |
+| Lazy chunks (min) | ≥ 10 | `scripts/check-perf-budget.mjs` |
+| Initial JS files (max) | ≤ 6 | `scripts/check-perf-budget.mjs` |
+| WASM gzip ratio | ≤ 70% | `scripts/check-perf-budget.mjs` |
+| Named lazy splits | allowlist | `scripts/check-bundle-splits.mjs` |
 
-These budgets are checked on every run of `./scripts/verify-ci.sh` and will
-fail the build if exceeded.
+All three check scripts run in `./scripts/verify-ci.sh` and
+`.github/workflows/ci.yml`. A build fails if any budget is exceeded.
 
 ---
 
@@ -125,11 +130,32 @@ npx lighthouse http://localhost:5173 --view --preset=desktop
 npx lighthouse http://localhost:5173 --view
 ```
 
+### Canvas rendering features (LOD + animated edges)
+
+LOD (Level of Detail) and animated edges are performance-sensitive features.
+To verify they don't regress:
+
+1. Open a canvas with 50+ nodes at `http://localhost:5173/canvas`
+2. Append `?perf=1` to enable the HUD
+3. Toggle LOD on (Alt+L) — verify FPS stays ≥ 30 while zooming in/out
+4. Toggle animated edges on (Alt+E) — verify FPS stays ≥ 30 on idle canvas
+5. With 400+ edges, animated edges should auto-disable (check `CanvasSettingsContext`)
+
+The LOD system uses CSS-only visibility (`data-lod` attribute) and does not
+re-render React components — performance impact is minimal. Animated edges
+use CSS `stroke-dashoffset` animation which the browser GPU-accelerates.
+
 ### Bundle size check
 
 ```bash
 # After a production build:
 node scripts/check-bundle-size.mjs
+
+# Structural budget (lazy chunks, initial file count, WASM ratio):
+node scripts/check-perf-budget.mjs
+
+# Lazy-split allowlist (named components stay in separate chunks):
+node scripts/check-bundle-splits.mjs
 ```
 
 ---
