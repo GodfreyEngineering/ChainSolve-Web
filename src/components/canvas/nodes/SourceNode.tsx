@@ -12,6 +12,7 @@ import { useComputed } from '../../../contexts/ComputedContext'
 import { useShowValuePopover } from '../../../contexts/ValuePopoverContext'
 import { formatValue } from '../../../engine/value'
 import { CATEGORY_LABELS, getConstantsCatalog, getMaterialsCatalog } from '../../../blocks/registry'
+import { CONSTANTS_CATALOG } from '../../../blocks/constantsCatalog'
 import type { NodeData } from '../../../blocks/registry'
 import { useVariablesStore } from '../../../stores/variablesStore'
 import { useCustomMaterialsStore } from '../../../stores/customMaterialsStore'
@@ -212,28 +213,22 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
   const isEditable =
     isSlider || isNumber || isVariableSource || isConstantPicker || isMaterialPicker
 
-  // D7-3/D7-4: Catalog grouping helper for unified picker nodes
-  const groupCatalog = useCallback(
-    (catalog: { type: string; label: string; category: string }[]) => {
-      const grouped = new Map<string, typeof catalog>()
-      for (const entry of catalog) {
-        const group = grouped.get(entry.category) ?? []
-        group.push(entry)
-        grouped.set(entry.category, group)
-      }
-      return Array.from(grouped.entries()).map(([cat, entries]) => ({
-        category: cat,
-        label: CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ?? cat,
-        entries,
-      }))
-    },
-    [],
-  )
-
-  const constantsCatalog = useMemo(
-    () => (isConstantPicker ? groupCatalog(getConstantsCatalog()) : []),
-    [isConstantPicker, groupCatalog],
-  )
+  const constantsCatalog = useMemo(() => {
+    if (!isConstantPicker) return []
+    const catalog = getConstantsCatalog()
+    const descMap = new Map(CONSTANTS_CATALOG.map((c) => [c.type, c.description]))
+    const grouped = new Map<string, { type: string; label: string; description: string }[]>()
+    for (const entry of catalog) {
+      const group = grouped.get(entry.category) ?? []
+      group.push({ ...entry, description: descMap.get(entry.type) ?? '' })
+      grouped.set(entry.category, group)
+    }
+    return Array.from(grouped.entries()).map(([cat, entries]) => ({
+      category: cat,
+      label: CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] ?? cat,
+      entries,
+    }))
+  }, [isConstantPicker])
 
   const materialsCatalog = useMemo(() => {
     if (!isMaterialPicker) return []
@@ -441,13 +436,31 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
             {constantsCatalog.map((group) => (
               <optgroup key={group.category} label={group.label}>
                 {group.entries.map((c) => (
-                  <option key={c.type} value={c.type}>
+                  <option key={c.type} value={c.type} title={c.description}>
                     {c.label}
                   </option>
                 ))}
               </optgroup>
             ))}
           </select>
+          {nd.selectedConstantId &&
+            (() => {
+              const sel = constantsCatalog
+                .flatMap((g) => g.entries)
+                .find((c) => c.type === nd.selectedConstantId)
+              return sel?.description ? (
+                <div
+                  style={{
+                    fontSize: '0.6rem',
+                    color: 'rgba(244,244,243,0.5)',
+                    marginTop: '0.2rem',
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {sel.description}
+                </div>
+              ) : null
+            })()}
         </div>
       )}
 

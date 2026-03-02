@@ -15,74 +15,12 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   variableSource:
     'Reference a named variable defined in the Variables panel. Output updates when the variable value changes.',
 
-  // ── Constants (core) ──────────────────────────────────────────────────────
-  pi: "Mathematical constant pi (3.14159...). Ratio of a circle's circumference to its diameter.",
-  euler:
-    "Euler's number e (2.71828...). Base of natural logarithms, used in exponential growth and calculus.",
-  tau: 'Tau (6.28318...), equal to 2pi. Represents one full turn in radians.',
-  phi: 'Golden ratio phi (1.61803...). Appears in geometry, art, architecture, and natural growth patterns.',
+  // ── Constants ────────────────────────────────────────────────────────────
   constant:
     'Unified constant picker. Search and select from the full catalog of math, physics, and engineering constants.',
   material:
     'Unified material picker. Search and select density, modulus, or viscosity values for common engineering materials and fluids.',
-
-  // ── Math constants ────────────────────────────────────────────────────────
-  'const.math.sqrt2': 'Square root of 2 (1.41421...). Diagonal of a unit square.',
-  'const.math.ln2': 'Natural logarithm of 2 (0.69315...). Used in doubling-time calculations.',
-  'const.math.ln10':
-    'Natural logarithm of 10 (2.30259...). Converts between natural and common logarithms.',
-
-  // ── Physics constants ─────────────────────────────────────────────────────
-  'const.physics.g0':
-    'Standard gravitational acceleration (9.80665 m/s2). Used in weight and free-fall calculations.',
-  'const.physics.R_molar':
-    'Universal gas constant R (8.314 J/mol K). Relates pressure, volume, temperature, and amount of gas.',
-  'const.physics.c':
-    'Speed of light in vacuum (299 792 458 m/s). Fundamental constant of special relativity.',
-  'const.physics.h': 'Planck constant (6.626e-34 J s). Relates photon energy to frequency.',
-  'const.physics.hbar':
-    'Reduced Planck constant h-bar (1.055e-34 J s). Equal to h/(2pi), used in quantum mechanics.',
-  'const.physics.kB':
-    'Boltzmann constant (1.381e-23 J/K). Relates temperature to average particle kinetic energy.',
-  'const.physics.Na':
-    "Avogadro's number (6.022e23 mol-1). Number of particles in one mole of substance.",
-  'const.physics.qe':
-    'Elementary charge (1.602e-19 C). Magnitude of electric charge on one electron or proton.',
-  'const.physics.F':
-    'Faraday constant (96 485 C/mol). Charge per mole of electrons, used in electrochemistry.',
-  'const.physics.me':
-    'Electron rest mass (9.109e-31 kg). Used in atomic and particle physics calculations.',
-  'const.physics.mp': 'Proton rest mass (1.673e-27 kg). About 1836 times the electron mass.',
-  'const.physics.G':
-    'Gravitational constant (6.674e-11 N m2/kg2). Governs the strength of gravitational attraction.',
-  'const.physics.mu0':
-    'Vacuum permeability (1.257e-6 H/m). Magnetic constant used in electromagnetism.',
-  'const.physics.eps0':
-    'Vacuum permittivity (8.854e-12 F/m). Electric constant used in electrostatics.',
-  'const.physics.sigma_sb':
-    'Stefan-Boltzmann constant (5.670e-8 W/m2 K4). Relates blackbody radiation to temperature.',
-
-  // ── Atmospheric constants ─────────────────────────────────────────────────
-  'const.atmos.p0_pa': 'Standard atmospheric pressure at sea level (101 325 Pa).',
-  'const.atmos.t0_k': 'ISA sea-level temperature (288.15 K = 15 C).',
-  'const.atmos.rho_air_sl': 'Air density at sea level, standard conditions (1.225 kg/m3).',
-  'const.atmos.gamma_air':
-    'Ratio of specific heats for air (1.4). Used in compressible flow and acoustics.',
-  'const.atmos.R_air': 'Specific gas constant for dry air (287.05 J/kg K).',
-  'const.atmos.mu_air_20c': 'Dynamic viscosity of air at 20 C (1.81e-5 Pa s).',
-  'const.atmos.a_air_20c': 'Speed of sound in air at 20 C (343 m/s).',
-
-  // ── Thermodynamic constants ───────────────────────────────────────────────
-  'const.thermo.cp_air': 'Specific heat capacity of air at constant pressure (1005 J/kg K).',
-  'const.thermo.cv_air': 'Specific heat capacity of air at constant volume (718 J/kg K).',
-  'const.thermo.k_air': 'Thermal conductivity of air at 20 C (0.026 W/m K).',
-  'const.thermo.k_water': 'Thermal conductivity of water at 25 C (0.606 W/m K).',
-
-  // ── Electrical constants ──────────────────────────────────────────────────
-  'const.elec.rho_copper':
-    'Electrical resistivity of copper at 20 C (1.68e-8 ohm m). Benchmark conductor.',
-  'const.elec.rho_aluminium': 'Electrical resistivity of aluminium at 20 C (2.65e-8 ohm m).',
-
+  // H4-1: Individual constant descriptions removed — unified Constant picker.
   // H3-1: Material/fluid preset descriptions removed — unified Material node.
 
   // ── Math operations ───────────────────────────────────────────────────────

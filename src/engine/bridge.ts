@@ -13,6 +13,7 @@ import type { VariablesMap } from '../lib/variables.ts'
 import type { EngineSnapshotV1 } from './wasm-types.ts'
 import { type ConstantsLookup, resolveNodeBindings } from './resolveBindings.ts'
 import { MATERIAL_VALUES } from '../blocks/materialCatalog.ts'
+import { CONSTANT_VALUES } from '../blocks/constantsCatalog.ts'
 
 /**
  * Build an EngineSnapshotV1 from React Flow nodes and edges.
@@ -39,10 +40,17 @@ export function toEngineSnapshot(
     nodes: evalNodes.map((n) => {
       let data = n.data as Record<string, unknown>
       // W12.4: Probe maps to display for the engine (no Rust changes needed).
-      // D7-3: Unified constant block maps to the selected constant's op ID.
+      // H4-1: Unified constant block resolves to 'number' with the looked-up
+      // value. No Rust catalog entries needed for new constants.
       let blockType = (data.blockType === 'probe' ? 'display' : data.blockType) as string
       if (blockType === 'constant' && typeof data.selectedConstantId === 'string') {
-        blockType = data.selectedConstantId
+        const constId = data.selectedConstantId
+        if (constId in CONSTANT_VALUES) {
+          blockType = 'number'
+          data = { ...data, value: CONSTANT_VALUES[constId] }
+        } else {
+          blockType = constId
+        }
       }
       // H3-1: Unified material block resolves all presets and custom materials
       // to 'number' with the looked-up value. No Rust catalog entries needed.

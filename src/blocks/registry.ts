@@ -13,6 +13,7 @@
 
 import type { BlockCategory, NodeKind, BlockDef } from './types'
 import type { CatalogEntry } from '../engine/wasm-types'
+import { CONSTANTS_CATALOG } from './constantsCatalog'
 import { MATERIAL_CATALOG } from './materialCatalog'
 
 // Re-export types so existing `import { ... } from '../../blocks/registry'` still works.
@@ -65,44 +66,9 @@ reg({
 })
 
 // ── Constants category ────────────────────────────────────────────────────────
+// H4-1: Individual constant blocks (pi, euler, tau, phi, const.*) removed.
+// All constants accessed via the unified Constant picker backed by constantsCatalog.ts.
 
-reg({
-  type: 'pi',
-  label: 'Pi (π)',
-  category: 'constants',
-  nodeKind: 'csSource',
-  inputs: [],
-  defaultData: { blockType: 'pi', label: 'π' },
-})
-
-reg({
-  type: 'euler',
-  label: 'E (e)',
-  category: 'constants',
-  nodeKind: 'csSource',
-  inputs: [],
-  defaultData: { blockType: 'euler', label: 'e' },
-})
-
-reg({
-  type: 'tau',
-  label: 'Tau (τ)',
-  category: 'constants',
-  nodeKind: 'csSource',
-  inputs: [],
-  defaultData: { blockType: 'tau', label: 'τ' },
-})
-
-reg({
-  type: 'phi',
-  label: 'Phi (φ)',
-  category: 'constants',
-  nodeKind: 'csSource',
-  inputs: [],
-  defaultData: { blockType: 'phi', label: 'φ' },
-})
-
-// D7-3: Unified constant picker — one block to search all constants
 reg({
   type: 'constant',
   label: 'Constant',
@@ -678,14 +644,7 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
       {
         id: 'inputConstant',
         label: 'Constant input',
-        categories: [
-          'constants',
-          'constMath',
-          'constPhysics',
-          'constAtmos',
-          'constThermo',
-          'constElec',
-        ],
+        blockTypes: ['constant'],
       },
       { id: 'inputVariable', label: 'Variable input', categories: ['variable'] },
       { id: 'inputList', label: 'List input', categories: ['data'] },
@@ -766,16 +725,6 @@ export function getTaxonomyLabels(): Map<string, { main: string; sub: string }> 
 
 // ── Constants catalog for unified Constant node (D7-3) ──────────────────────
 
-/** Categories that contain physical/math constants (not material presets). */
-const CONSTANT_CATEGORIES: ReadonlySet<BlockCategory> = new Set([
-  'constants',
-  'constMath',
-  'constPhysics',
-  'constAtmos',
-  'constThermo',
-  'constElec',
-])
-
 export interface ConstantCatalogEntry {
   type: string
   label: string
@@ -783,18 +732,16 @@ export interface ConstantCatalogEntry {
 }
 
 /**
- * Returns the list of all constant block types that can be selected
- * in the unified Constant node. Excludes material/fluid presets
- * (handled by the unified Material node in D7-4).
+ * Returns the list of all constant entries that can be selected
+ * in the unified Constant node. H4-1: reads from standalone
+ * constantsCatalog instead of individual block registrations.
  */
 export function getConstantsCatalog(): ConstantCatalogEntry[] {
-  const entries: ConstantCatalogEntry[] = []
-  for (const [, def] of BLOCK_REGISTRY) {
-    if (CONSTANT_CATEGORIES.has(def.category) && def.type !== 'constant') {
-      entries.push({ type: def.type, label: def.label, category: def.category })
-    }
-  }
-  return entries
+  return CONSTANTS_CATALOG.map((c) => ({
+    type: c.type,
+    label: c.label,
+    category: c.category,
+  }))
 }
 
 // ── Materials catalog for unified Material node (D7-4) ──────────────────────

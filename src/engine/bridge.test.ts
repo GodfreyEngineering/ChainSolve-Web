@@ -146,8 +146,8 @@ describe('toEngineSnapshot — edges', () => {
   })
 })
 
-describe('toEngineSnapshot — constant block mapping (D7-3)', () => {
-  it('maps constant blockType to selectedConstantId', () => {
+describe('toEngineSnapshot — constant block mapping (D7-3 / H4-1)', () => {
+  it('maps constant blockType to "number" with value from catalog', () => {
     const nodes = [
       makeNode('c1', 'constant', {
         blockType: 'constant',
@@ -155,7 +155,21 @@ describe('toEngineSnapshot — constant block mapping (D7-3)', () => {
       }),
     ]
     const snap = toEngineSnapshot(nodes, [])
-    expect(snap.nodes[0].blockType).toBe('const.physics.g0')
+    // H4-1: bridge resolves known constants to 'number' with looked-up value
+    expect(snap.nodes[0].blockType).toBe('number')
+    expect((snap.nodes[0].data as Record<string, unknown>).value).toBe(9.80665)
+  })
+
+  it('falls back to selectedConstantId as blockType for unknown constants', () => {
+    const nodes = [
+      makeNode('c1', 'constant', {
+        blockType: 'constant',
+        selectedConstantId: 'legacy.unknown',
+      }),
+    ]
+    const snap = toEngineSnapshot(nodes, [])
+    // Unknown constants pass through for backward compat with Rust ops.rs
+    expect(snap.nodes[0].blockType).toBe('legacy.unknown')
   })
 
   it('keeps blockType as "constant" when no selectedConstantId', () => {

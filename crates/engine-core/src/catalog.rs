@@ -55,39 +55,9 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![],
             pro_only: false,
         },
-        // ── Constants ────────────────────────────────────────────
-        CatalogEntry {
-            op_id: "pi",
-            label: "Pi (\u{03C0})",
-            category: "constants",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "euler",
-            label: "E (e)",
-            category: "constants",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "tau",
-            label: "Tau (\u{03C4})",
-            category: "constants",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "phi",
-            label: "Phi (\u{03C6})",
-            category: "constants",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
+        // H4-1: Core constant catalog entries (pi, euler, tau, phi) removed.
+        // The unified Constant picker resolves selections in the TS bridge layer.
+        // Rust eval handlers remain in ops.rs for backward compatibility.
         // ── Math ─────────────────────────────────────────────────
         CatalogEntry {
             op_id: "add",
@@ -1415,259 +1385,9 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![p("pct", "%")],
             pro_only: true,
         },
-        // ── W11c: Constants → Math ─────────────────────────────────
-        CatalogEntry {
-            op_id: "const.math.sqrt2",
-            label: "\u{221A}2",
-            category: "constMath",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.math.ln2",
-            label: "ln(2)",
-            category: "constMath",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.math.ln10",
-            label: "ln(10)",
-            category: "constMath",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        // ── W11c: Constants → Physics ──────────────────────────────
-        CatalogEntry {
-            op_id: "const.physics.g0",
-            label: "g\u{2080} (m/s\u{00B2})",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.R_molar",
-            label: "R (J/mol\u{00B7}K)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.c",
-            label: "c (m/s)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.h",
-            label: "h (J\u{00B7}s)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.hbar",
-            label: "\u{0127} (J\u{00B7}s)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.kB",
-            label: "k\u{0042} (J/K)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.Na",
-            label: "N\u{0041} (1/mol)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.qe",
-            label: "e (C)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.F",
-            label: "F (C/mol)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.me",
-            label: "m\u{2091} (kg)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.mp",
-            label: "m\u{209A} (kg)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.G",
-            label: "G (m\u{00B3}/kg/s\u{00B2})",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.mu0",
-            label: "\u{03BC}\u{2080} (H/m)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.eps0",
-            label: "\u{03B5}\u{2080} (F/m)",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.physics.sigma_sb",
-            label: "\u{03C3}\u{209B}\u{209C} (W/m\u{00B2}/K\u{2074})",
-            category: "constPhysics",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        // ── W11c: Constants → Atmosphere ───────────────────────────
-        CatalogEntry {
-            op_id: "const.atmos.p0_pa",
-            label: "p\u{2080} (Pa)",
-            category: "constAtmos",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.atmos.t0_k",
-            label: "T\u{2080} ISA (K)",
-            category: "constAtmos",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.atmos.rho_air_sl",
-            label: "\u{03C1} air SL (kg/m\u{00B3})",
-            category: "constAtmos",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.atmos.gamma_air",
-            label: "\u{03B3} air",
-            category: "constAtmos",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.atmos.R_air",
-            label: "R air (J/kg/K)",
-            category: "constAtmos",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.atmos.mu_air_20c",
-            label: "\u{03BC} air (Pa\u{00B7}s)",
-            category: "constAtmos",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.atmos.a_air_20c",
-            label: "a air (m/s)",
-            category: "constAtmos",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        // ── W11c: Constants → Thermo ──────────────────────────────
-        CatalogEntry {
-            op_id: "const.thermo.cp_air",
-            label: "c\u{209A} air (J/kg/K)",
-            category: "constThermo",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.thermo.cv_air",
-            label: "c\u{1D65} air (J/kg/K)",
-            category: "constThermo",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.thermo.k_air",
-            label: "k air (W/m/K)",
-            category: "constThermo",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.thermo.k_water",
-            label: "k water (W/m/K)",
-            category: "constThermo",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        // ── W11c: Constants → Electrical ──────────────────────────
-        CatalogEntry {
-            op_id: "const.elec.rho_copper",
-            label: "\u{03C1} copper (\u{03A9}\u{00B7}m)",
-            category: "constElec",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "const.elec.rho_aluminium",
-            label: "\u{03C1} aluminium (\u{03A9}\u{00B7}m)",
-            category: "constElec",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
+        // H4-1: Individual constant catalog entries removed.
+        // The unified Constant picker resolves selections in the TS bridge layer.
+        // Rust eval handlers remain in ops.rs for backward compatibility.
         // H3-1: Material/fluid preset catalog entries removed.
         // The unified Material node resolves presets in the TS bridge layer.
         // Rust eval handlers remain in ops.rs for backward compatibility.
@@ -1736,14 +1456,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 201);
+        assert_eq!(cat.len(), 166);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 201);
+        assert_eq!(parsed.as_array().unwrap().len(), 166);
     }
 
     #[test]
@@ -1763,7 +1483,7 @@ mod tests {
     fn known_ops_present() {
         let cat = catalog();
         let ids: Vec<&str> = cat.iter().map(|e| e.op_id).collect();
-        for expected in &["add", "sin", "vectorSum", "xyPlot", "display", "eng.mechanics.force_ma", "eng.elec.ohms_V", "fin.tvm.compound_fv", "stats.desc.mean", "prob.dist.binomial_pmf", "const.physics.g0", "unit_convert"] {
+        for expected in &["add", "sin", "vectorSum", "xyPlot", "display", "eng.mechanics.force_ma", "eng.elec.ohms_V", "fin.tvm.compound_fv", "stats.desc.mean", "prob.dist.binomial_pmf", "unit_convert"] {
             assert!(ids.contains(expected), "Missing op: {}", expected);
         }
     }
