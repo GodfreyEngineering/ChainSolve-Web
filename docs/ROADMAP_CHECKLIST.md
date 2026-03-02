@@ -1652,7 +1652,7 @@ Claude MUST:
 ---
 
 ## G5 — Docking behavior overhaul: Block Library and Bottom Dock with always-visible handles
-- [ ] G5-1: Block Library docking handle
+- [x] G5-1: Block Library docking handle
   - Always-visible handle on edge to collapse/expand.
   - Animated arrow on hover.
   - Resizable width persists.
