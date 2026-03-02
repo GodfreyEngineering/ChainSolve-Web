@@ -1813,7 +1813,7 @@ Claude MUST:
   - Inspector allows editing properties.
   - Acceptance: no old material preset blocks remain.
 
-- [ ] H3-2: Custom materials (Pro only)
+- [x] H3-2: Custom materials (Pro only)
   - Wizard to create custom material:
     - name, description, category
     - many properties
