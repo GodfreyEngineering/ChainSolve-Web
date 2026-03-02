@@ -1499,7 +1499,7 @@ Claude MUST:
     - src/engine (worker/bridge)
   - Acceptance: repo is intuitive and scales.
 
-- [ ] F7-4: final checks
+- [x] F7-4: final checks
   - Provide a detailed and thorough idiot-proof list for me to make sure supabase, openai, cloudflare, resend and any other auth or other services are completely setup and all api keys/secrets setup so the repo works flawlessly and professionally.
 
 ---
