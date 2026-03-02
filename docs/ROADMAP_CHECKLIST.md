@@ -1913,7 +1913,7 @@ Claude MUST:
 ---
 
 ## H9 — Security and session rules (one device/session enforcement)
-- [ ] H9-1: Single-session enforcement option
+- [x] H9-1: Single-session enforcement option
   - “All files saved to a user profile which can only be logged into on one device/browser/tab”
   - Implement policy:
     - when new session starts, revoke old session or block new one
