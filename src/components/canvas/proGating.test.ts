@@ -249,3 +249,34 @@ describe('Materials catalog (D7-4)', () => {
     expect(catalog.length).toBeGreaterThanOrEqual(10)
   })
 })
+
+// ── G4-1: Block descriptions ─────────────────────────────────────────────────
+
+import { BLOCK_DESCRIPTIONS } from '../../blocks/blockDescriptions'
+
+describe('Block descriptions (G4-1)', () => {
+  /** Blocks that are UI-only stubs and don't need descriptions. */
+  const DESCRIPTION_EXEMPT = new Set(['__group__'])
+
+  it('every block in the registry has a non-empty description', () => {
+    const missing: string[] = []
+    for (const type of BLOCK_REGISTRY.keys()) {
+      if (DESCRIPTION_EXEMPT.has(type)) continue
+      const desc = BLOCK_DESCRIPTIONS[type]
+      if (!desc || desc.trim().length === 0) {
+        missing.push(type)
+      }
+    }
+    expect(missing, `Blocks missing description:\\n${missing.join('\\n')}`).toEqual([])
+  })
+
+  it('no description exceeds 200 characters', () => {
+    const long: string[] = []
+    for (const [type, desc] of Object.entries(BLOCK_DESCRIPTIONS)) {
+      if (desc.length > 200) {
+        long.push(`${type} (${desc.length} chars)`)
+      }
+    }
+    expect(long, `Descriptions too long:\\n${long.join('\\n')}`).toEqual([])
+  })
+})

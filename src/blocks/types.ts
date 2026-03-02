@@ -176,4 +176,6 @@ export interface BlockDef {
   synonyms?: string[]
   /** E5-5: Domain tags for search (e.g. ["mechanics", "dynamics"]). */
   tags?: string[]
+  /** G4-1: Human-readable description shown in the Inspector panel. */
+  description?: string
 }

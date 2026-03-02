@@ -6,13 +6,13 @@
  * Shows per-port manual value + override toggle for operation nodes.
  */
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNodes, useEdges, useReactFlow } from '@xyflow/react'
 import { useComputed } from '../../contexts/ComputedContext'
 import { useEngine } from '../../contexts/EngineContext'
-import { isError, isScalar } from '../../engine/value'
+import { isError, isScalar, type Value } from '../../engine/value'
 import { useFormatValue } from '../../hooks/useFormatValue'
-import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
+import { BLOCK_REGISTRY, getTaxonomyLabels, type NodeData } from '../../blocks/registry'
 import type { InputBinding, PlotConfig } from '../../blocks/types'
 import type { TraceEntry } from '../../engine/index.ts'
 import { ensureBinding } from '../../lib/migrateBindings'
@@ -61,6 +61,14 @@ const fieldLabel: React.CSSProperties = {
   userSelect: 'none',
 }
 
+/** Extract a human-readable error message from a Value (G4-1 validation). */
+function extractErrorMessage(v: Value | undefined): string | null {
+  if (!v) return null
+  if (isError(v)) return v.message
+  if (isScalar(v) && isNaN(v.value)) return 'Result is NaN (not a number)'
+  return null
+}
+
 export function Inspector({
   nodeId,
   width,
@@ -80,6 +88,12 @@ export function Inspector({
   const formatValue = useFormatValue()
   const node = nodeId ? (allNodes.find((n) => n.id === nodeId) ?? null) : null
   const nd = node?.data as NodeData | undefined
+
+  // G4-1: Lazy-load block descriptions to avoid bloating the initial bundle
+  const [descriptions, setDescriptions] = useState<Record<string, string>>({})
+  useEffect(() => {
+    import('../../blocks/blockDescriptions').then((m) => setDescriptions(m.BLOCK_DESCRIPTIONS))
+  }, [])
 
   // ESC closes inspector (only when not floating — AppWindow handles ESC)
   useEffect(() => {
@@ -286,6 +300,29 @@ export function Inspector({
           />
         ) : (
           <>
+            {/* Category breadcrumb (G4-1) */}
+            {def &&
+              (() => {
+                const taxLabels = getTaxonomyLabels().get(def.type)
+                if (!taxLabels) return null
+                return (
+                  <div style={{ marginBottom: '0.5rem' }}>
+                    <span
+                      style={{
+                        fontSize: '0.62rem',
+                        color: 'rgba(244,244,243,0.3)',
+                        letterSpacing: '0.04em',
+                        userSelect: 'none',
+                      }}
+                    >
+                      {taxLabels.main}
+                      {' \u203A '}
+                      {taxLabels.sub}
+                    </span>
+                  </div>
+                )
+              })()}
+
             {/* Label */}
             {field(
               'Label',
@@ -294,6 +331,20 @@ export function Inspector({
                 value={nd.label}
                 onChange={(e) => update({ label: e.target.value })}
               />,
+            )}
+
+            {/* Description (G4-1) */}
+            {descriptions[nd.blockType] && (
+              <div
+                style={{
+                  marginBottom: '0.7rem',
+                  fontSize: '0.72rem',
+                  lineHeight: 1.45,
+                  color: 'rgba(244,244,243,0.5)',
+                }}
+              >
+                {descriptions[nd.blockType]}
+              </div>
             )}
 
             {/* Number source */}
@@ -611,6 +662,29 @@ export function Inspector({
                     inputValue={inputValue}
                     onUpdate={(patch) => update({ plotConfig: { ...plotConfig, ...patch } })}
                   />
+                )
+              })()}
+
+            {/* Validation warning (G4-1) */}
+            {isErrVal &&
+              (() => {
+                const errMsg = extractErrorMessage(value)
+                if (!errMsg) return null
+                return (
+                  <div
+                    style={{
+                      marginBottom: '0.5rem',
+                      padding: '0.35rem 0.5rem',
+                      background: 'rgba(239,68,68,0.08)',
+                      border: '1px solid rgba(239,68,68,0.2)',
+                      borderRadius: 6,
+                      fontSize: '0.7rem',
+                      color: '#f87171',
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {errMsg}
+                  </div>
                 )
               })()}
 

@@ -837,6 +837,9 @@ for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {
   }
 }
 
+// G4-1: Block descriptions live in blockDescriptions.ts and are imported
+// directly by consumers (Inspector) to avoid bloating the initial bundle.
+
 // ── Catalog validation (called after WASM engine boots) ──────────────────────
 
 /**
