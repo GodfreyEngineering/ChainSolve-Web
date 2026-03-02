@@ -1847,7 +1847,7 @@ Claude MUST:
 ---
 
 ## H6 — Variables (project-level, multi-sheet, improved UX)
-- [ ] H6-1: Variables improved UX
+- [x] H6-1: Variables improved UX
   - Variable input block more intuitive.
   - Variables saved per project, available on all sheets.
   - Manage variables in a project variables window (table-like).
