@@ -1384,7 +1384,7 @@ Claude MUST:
 ---
 
 ## F2 — Architecture hardening and boundary enforcement (prevent regressions)
-- [ ] F2-1: Enforce adapter boundary via lint rules
+- [x] F2-1: Enforce adapter boundary via lint rules
   - Add ESLint rules to forbid importing Supabase client directly from UI folders:
     - use `no-restricted-imports` for patterns like `src/components/**` importing `supabase` modules. :contentReference[oaicite:4]{index=4}
   - Add allowlist exceptions only in adapter/service layer.
