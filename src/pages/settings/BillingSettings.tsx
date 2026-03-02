@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../../lib/supabase'
 import { Button } from '../../components/ui/Button'
 import { isReauthed } from '../../lib/reauth'
-import type { Profile } from '../Settings'
+import type { Profile } from '../../lib/profilesService'
 import { resolveEffectivePlan } from '../../lib/entitlements'
 
 const LazyReauthModal = lazy(() =>

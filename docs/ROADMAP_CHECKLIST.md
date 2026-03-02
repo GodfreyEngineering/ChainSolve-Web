@@ -1532,7 +1532,7 @@ Claude MUST:
     - No repeated failure loops
     - No console errors for this flow
 
-- [ ] G0-2: Fix Settings crash: useNavigate outside Router (if still present)
+- [x] G0-2: Fix Settings crash: useNavigate outside Router (if still present)
   - Ensure any Settings/Account window that uses navigation hooks is inside Router context.
   - Acceptance: Settings and Preferences open reliably.
 

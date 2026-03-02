@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import AppShell from './pages/AppShell'
 import CanvasPage from './pages/CanvasPage'
@@ -93,80 +93,78 @@ function BillingCancel() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/app" replace />} />
-        <Route path="/login" element={<Login initialMode="login" />} />
-        <Route path="/signup" element={<Login initialMode="signup" />} />
-        <Route path="/reset-password" element={<Login initialMode="reset" />} />
+    <Routes>
+      <Route path="/" element={<Navigate to="/app" replace />} />
+      <Route path="/login" element={<Login initialMode="login" />} />
+      <Route path="/signup" element={<Login initialMode="signup" />} />
+      <Route path="/reset-password" element={<Login initialMode="reset" />} />
+      <Route
+        path="/terms"
+        element={
+          <Suspense fallback={null}>
+            <TermsPage />
+          </Suspense>
+        }
+      />
+      <Route path="/app" element={<AppShell />} />
+      <Route path="/canvas" element={<CanvasPage />} />
+      <Route path="/canvas/:projectId" element={<CanvasPage />} />
+      <Route path="/settings" element={<SettingsRedirect />} />
+      <Route path="/billing/success" element={<BillingSuccess />} />
+      <Route path="/billing/cancel" element={<BillingCancel />} />
+      <Route
+        path="/explore"
+        element={
+          <Suspense fallback={null}>
+            <MarketplacePage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/explore/items/:itemId"
+        element={
+          <Suspense fallback={null}>
+            <ItemDetailPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/explore/author"
+        element={
+          <Suspense fallback={null}>
+            <MarketplaceAuthorPage />
+          </Suspense>
+        }
+      />
+      {/* Legacy marketplace routes redirect to explore */}
+      <Route path="/marketplace" element={<Navigate to="/explore" replace />} />
+      <Route path="/marketplace/*" element={<Navigate to="/explore" replace />} />
+      <Route
+        path="/orgs"
+        element={
+          <Suspense fallback={null}>
+            <OrgsPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/audit-log"
+        element={
+          <Suspense fallback={null}>
+            <AuditLogPage />
+          </Suspense>
+        }
+      />
+      {isDiagnosticsUIEnabled() && (
         <Route
-          path="/terms"
+          path="/diagnostics"
           element={
             <Suspense fallback={null}>
-              <TermsPage />
+              <DiagnosticsPage />
             </Suspense>
           }
         />
-        <Route path="/app" element={<AppShell />} />
-        <Route path="/canvas" element={<CanvasPage />} />
-        <Route path="/canvas/:projectId" element={<CanvasPage />} />
-        <Route path="/settings" element={<SettingsRedirect />} />
-        <Route path="/billing/success" element={<BillingSuccess />} />
-        <Route path="/billing/cancel" element={<BillingCancel />} />
-        <Route
-          path="/explore"
-          element={
-            <Suspense fallback={null}>
-              <MarketplacePage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/explore/items/:itemId"
-          element={
-            <Suspense fallback={null}>
-              <ItemDetailPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/explore/author"
-          element={
-            <Suspense fallback={null}>
-              <MarketplaceAuthorPage />
-            </Suspense>
-          }
-        />
-        {/* Legacy marketplace routes redirect to explore */}
-        <Route path="/marketplace" element={<Navigate to="/explore" replace />} />
-        <Route path="/marketplace/*" element={<Navigate to="/explore" replace />} />
-        <Route
-          path="/orgs"
-          element={
-            <Suspense fallback={null}>
-              <OrgsPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/audit-log"
-          element={
-            <Suspense fallback={null}>
-              <AuditLogPage />
-            </Suspense>
-          }
-        />
-        {isDiagnosticsUIEnabled() && (
-          <Route
-            path="/diagnostics"
-            element={
-              <Suspense fallback={null}>
-                <DiagnosticsPage />
-              </Suspense>
-            }
-          />
-        )}
-      </Routes>
-    </BrowserRouter>
+      )}
+    </Routes>
   )
 }
