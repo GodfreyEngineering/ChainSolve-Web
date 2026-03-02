@@ -1445,7 +1445,7 @@ Claude MUST:
 ---
 
 ## F5 — UI/UX cohesion pass (harmonize everything end-to-end)
-- [ ] F5-1: UI consistency audit
+- [x] F5-1: UI consistency audit
   - Identify and fix:
     - inconsistent window chrome
     - inconsistent button styles
@@ -1501,5 +1501,562 @@ Claude MUST:
 
 - [x] F7-4: final checks
   - Provide a detailed and thorough idiot-proof list for me to make sure supabase, openai, cloudflare, resend and any other auth or other services are completely setup and all api keys/secrets setup so the repo works flawlessly and professionally.
+
+---
+
+---
+
+# PHASE G — UX, Onboarding, Blocks, Docking, Microcopy (one checkpoint at a time)
+> Objective: Make the app idiot-proof, professional, and workstation-grade. This phase focuses on UI/UX fundamentals and correctness before deeper scientific features. Claude should complete ONE checkpoint per run.
+
+## Phase G execution rules (non-negotiable)
+- Claude completes exactly ONE checkpoint per run.
+- DONE requires:
+  - `./scripts/verify-ci.sh` PASS
+  - tests updated/added
+  - i18n updates for EN/DE/FR/ES/IT
+  - docs updates and changelog notes
+- No emojis anywhere. No “AI-written” vibe. Use simple English. Avoid long dash punctuation in UI copy.
+- Rename “edges” to “chains” everywhere user-facing (menus, tooltips, docs, inspector labels).
+- Keep CSP strict. Do not add unsafe-inline or unsafe-eval. Fix violations by code changes, not CSP weakening. :contentReference[oaicite:5]{index=5}
+
+---
+
+## G0 — Stability blockers and console noise elimination
+- [ ] G0-1: Fix Terms page blank and acceptance failing (“Failed to record acceptance. Please retry.”)
+  - Root-cause: ensure Terms content loads, acceptance write succeeds, and errors are actionable.
+  - Ensure acceptance is recorded server-side and is robust to retries and network failures.
+  - Acceptance:
+    - Terms content visible
+    - Accept works
+    - No repeated failure loops
+    - No console errors for this flow
+
+- [ ] G0-2: Fix Settings crash: useNavigate outside Router (if still present)
+  - Ensure any Settings/Account window that uses navigation hooks is inside Router context.
+  - Acceptance: Settings and Preferences open reliably.
+
+- [ ] G0-3: Fix CSP noise:
+  - Cloudflare Insights beacon blocked: decide and implement official resolution:
+    - Either disable insights injection for app/login routes, or update policy explicitly and document it. Cloudflare beacon loads from static.cloudflareinsights.com and requires CSP allowlist if used. :contentReference[oaicite:6]{index=6}
+  - Fix inline event handler CSP violations:
+    - Remove inline handlers; use addEventListener. :contentReference[oaicite:7]{index=7}
+  - Acceptance:
+    - No CSP violations in console on app and login pages
+    - CSP remains strict (no unsafe-inline / unsafe-eval)
+
+- [ ] G0-4: Fix ResizeObserver loop error triggered by resizing Block Library
+  - Root-cause and fix properly (avoid feedback loops, throttle observer work, rAF wrapper, stable layout settle). :contentReference[oaicite:8]{index=8}
+  - Acceptance:
+    - Resizing library never throws startup error
+    - No performance degradation
+
+- [ ] G0-5: Fix i18next init deprecation warning and wasm-bindgen init warning
+  - Update init signature to non-deprecated usage.
+  - Address wasm-bindgen warning by switching to the recommended single object init call where applicable. :contentReference[oaicite:9]{index=9}
+  - Acceptance: clean boot logs.
+
+- [ ] G0-6: Eliminate registry warnings about missing TS defaults and TS blocks not in Rust catalog
+  - Policy:
+    - UI must render any Rust catalog block generically even if TS has no bespoke default.
+    - TS-only blocks must not pretend to be engine ops.
+  - Acceptance: no “[registry] … no TS default” and no “TS block not in Rust catalog” warnings.
+
+---
+
+## G1 — Copy and microcopy pass for idiot-proof UI (every menu and popup)
+- [ ] G1-1: Full microcopy upgrade sweep
+  - Every menu item and popup must have clear explanation text:
+    - File/Edit/View/Insert/Tools/Help
+    - Exports/imports gating messages
+    - Errors and empty states
+    - Tooltips and “What does this do?” hints
+  - Add consistent help patterns:
+    - A short description under titles
+    - “Learn more” links to docs (in-app window)
+  - Acceptance:
+    - No sparse or ambiguous UI text
+    - No emojis
+    - Simple English
+    - Fully i18n’d
+
+---
+
+## G2 — Interactive onboarding (animated overlay + checklist + wizard)
+- [ ] G2-1: First-login onboarding overlay with animated guided steps
+  - Interactive overlay that walks through:
+    1) Open Projects window
+    2) Create project (or scratch)
+    3) Add an input block
+    4) Add a function block
+    5) Add an output block
+    6) Connect chains
+    7) Use inspector to set value and units
+    8) Save project
+    9) Open reporting (PDF/notation) (Pro gated)
+  - Onboarding includes a checklist that persists until complete.
+  - Must disappear when checklist complete but accessible later from Help.
+  - Acceptance:
+    - Works for new users
+    - No conflict with CSP
+    - Works on mobile and small screens
+
+- [ ] G2-2: Help menu “Start a Project Wizard”
+  - Wizard guides user step-by-step:
+    - pick input blocks, function blocks, output blocks
+    - connect and validate
+    - show how to report/export
+  - Acceptance: wizard works and feels professional.
+
+---
+
+## G3 — Block system IA: 3 main categories and required subcategories
+- [ ] G3-1: Block taxonomy enforced everywhere (Library, Insert, Search, Docs)
+  - Main categories (exact):
+    - Input Blocks
+    - Function Blocks
+    - Output Blocks
+  - Input subcategories (exact):
+    - Standard number input
+    - Slider input
+    - Material input
+    - Constant input
+    - Variable input
+    - List input
+  - Function subcategories:
+    - all function categories for hundreds of blocks
+    - custom function blocks
+  - Output subcategories (exact):
+    - Display
+    - Graph blocks
+  - Acceptance:
+    - Library and Insert match exactly
+    - No leftover old categories
+    - Search respects categories/subcategories
+
+---
+
+## G4 — Inspector-first blocks: descriptions, units, and deep editing
+- [ ] G4-1: Inspector becomes the primary editing surface for all blocks
+  - Every block has:
+    - title, category/subcategory, icon
+    - full description of what it does, how it works, use cases
+    - unit dropdown for inputs and outputs where relevant
+    - validation and warnings
+  - Display block shows unit of output.
+  - Acceptance:
+    - Every block has meaningful description text
+    - Units appear consistently
+    - No blocks feel “mystery meat”
+
+---
+
+## G5 — Docking behavior overhaul: Block Library and Bottom Dock with always-visible handles
+- [ ] G5-1: Block Library docking handle
+  - Always-visible handle on edge to collapse/expand.
+  - Animated arrow on hover.
+  - Resizable width persists.
+  - Remove library toggle from toolbar and View menu (unneeded).
+  - Block hover bubble: description + “Drag onto canvas”.
+  - Favorites and Recent sections kept; star animation when favoriting.
+  - Acceptance:
+    - Smooth collapse/expand
+    - No ResizeObserver errors
+    - No toggle duplicates in menus
+
+- [ ] G5-2: Bottom Dock (Debug Console + Graph Health) handle behavior
+  - Always-visible bottom handle to collapse/expand.
+  - Resizable height persists.
+  - Keep tabs for Console and Health.
+  - Remove toggle/hide from toolbar and View menu.
+  - Acceptance:
+    - Correct behavior
+    - No duplicate close buttons
+    - Toolbar never hidden behind dock
+
+- [ ] G5-3: Right-side toolbar always visible; move pan/zoom from bottom to right
+  - Vertical toolbar always on top and visible.
+  - Hover animations for icons (CAD-style).
+  - Acceptance: never covered by dock/library.
+
+---
+
+## G6 — Canvas UX: context menus, chain selection, and annotations entrypoints
+- [ ] G6-1: Right-click canvas context menu (fully done)
+  - Insert blocks (by category drill-down)
+  - Insert annotations (text box, arrow, callout, highlight)
+  - Paste
+  - Fit view
+  - Snap/grid controls
+  - Acceptance: context menu exists and feels professional.
+
+- [ ] G6-2: Chains selection and delete
+  - Clicking a chain selects it.
+  - Delete key removes it.
+  - Undo/redo works.
+  - Acceptance: fast chain cleanup.
+
+- [ ] G6-3: Remove misleading blank-canvas instruction
+  - Replace “double-click to add” guidance.
+  - Use right-click and insert guidance.
+  - Acceptance: zero misleading copy.
+
+---
+
+## G7 — Header and project header structure (as specified)
+- [ ] G7-1: Main ChainSolve header always present
+  - Left: logo
+  - Middle: Explore, Projects, Documentation
+  - Right: Settings gear, Account profile, Plan badge
+  - Acceptance: stable, professional, consistent.
+
+- [ ] G7-2: /app landing view (no project open)
+  - Just main header plus landing content:
+    - get started options
+    - profile stats
+    - onboarding checklist
+  - Acceptance: premium landing.
+
+- [ ] G7-3: Project header under main header when project open
+  - File/Edit/View/Insert/Tools/Help
+  - Right side: import file, imported files directory + editor
+  - Groups button (user-profile stored groups)
+  - Left side: project name (double click rename), last saved, save button, autosave toggle
+  - Robust duplicate name handling with overwrite warning.
+  - Acceptance: matches spec and is reliable.
+
+- [ ] G7-4: Sheets tabs under project header
+  - Create, delete (x + context menu), rename, duplicate.
+  - Acceptance: Excel-like.
+
+---
+
+## G8 — AI window docking (right-side) and UX consistency
+- [ ] G8-1: AI window docks on right like Library and Dock
+  - Collapse/expand handle
+  - Resizable width
+  - Always visible handle
+  - Acceptance: consistent workstation layout.
+
+---
+
+# PHASE H — Units, Materials, Custom Blocks, Lists, Cross-sheet Publish, Roles and Security (one checkpoint at a time)
+> Objective: Make ChainSolve scientifically correct and enterprise-ready: unit-aware, conversion-smart, materials correct, lists replace tables/arrays, robust roles and restrictions, publish blocks across sheets, Explore ecosystem structure, and strong security.
+
+## Phase H execution rules
+- One checkpoint per Claude run.
+- Strict plan gating per your rules.
+- All features for Pro and Free visible, same UI, locked for Free where needed.
+
+---
+
+## H1 — Unit system v1 (unit-aware blocks everywhere)
+- [ ] H1-1: Units model and UX
+  - Input blocks and function blocks have unit dropdowns (searchable).
+  - Outputs show units.
+  - Units can be none.
+  - Unit metadata must persist per node in schema.
+  - Acceptance: units selectable and saved consistently.
+
+- [ ] H1-2: Unit mismatch detection and chain-level error UX
+  - If output unit into input expects different unit:
+    - show error on the chain
+    - prompt to add conversion
+    - click adds conversion function block automatically
+  - Must be smart:
+    - Prefill input unit from upstream
+    - Prefill output unit from downstream if connected to another block
+    - If downstream is an output block, user chooses output unit manually
+  - Acceptance: conversion suggestions work, are robust, and never break graph.
+
+- [ ] H1-3: Conversion block (Function Blocks category)
+  - Conversion block uses:
+    - input unit dropdown (search)
+    - output unit dropdown (search)
+  - Works with scalar and list inputs.
+  - Acceptance: conversion is first-class and reliable.
+
+---
+
+## H2 — Lists replace tables/arrays (scientific list workflow)
+- [ ] H2-1: Remove tables and array blocks; replace with List input blocks only
+  - List is 1xN column.
+  - Inspector supports paste from Excel/CSV/web:
+    - smart parsing
+    - robust validation
+    - quick clear/reset
+  - Free users cannot use list input blocks (per your plan rules).
+  - Acceptance: list is robust and replaces previous table/array approach.
+
+- [ ] H2-2: List propagation rules in function blocks
+  - Function blocks accept scalar or list inputs.
+  - If multiple lists enter a function:
+    - output expands for all combinations as specified
+    - propagation remains robust
+  - Acceptance: no crashes, predictable results.
+
+- [ ] H2-3: Graph and table outputs for lists (Pro only)
+  - Tables/graphs can filter rows/columns, select data, and display scientific summaries.
+  - Free cannot use graph/table output blocks.
+  - Acceptance: Pro output tools are powerful and stable.
+
+---
+
+## H3 — Material block unification and custom materials (profile-level)
+- [ ] H3-1: Single Material block only
+  - Dropdown with hundreds of accurate materials:
+    - categories
+    - proper scientific naming and descriptions
+    - standards-friendly
+  - Searchable dropdown.
+  - Inspector allows editing properties.
+  - Acceptance: no old material preset blocks remain.
+
+- [ ] H3-2: Custom materials (Pro only)
+  - Wizard to create custom material:
+    - name, description, category
+    - many properties
+    - validation
+  - Custom materials saved to user profile and appear in all projects.
+  - Acceptance: custom materials persist and are reusable.
+
+---
+
+## H4 — Constant block unification and constant catalog UX
+- [ ] H4-1: Single Constant block only
+  - Dropdown + search across constants.
+  - Shows value and description.
+  - Acceptance: no atmospheric/math constant blocks remain.
+
+---
+
+## H5 — Custom function blocks (wizard + profile-level library)
+- [ ] H5-1: Custom function block creation wizard (Pro only)
+  - Wizard fields:
+    - name, description
+    - inputs/outputs
+    - default unit
+    - categories/tags
+  - After creation, editable in Inspector.
+  - Saved to user profile.
+  - Duplicable, editable, deletable from Block Library.
+  - Free cannot create custom function blocks.
+  - Acceptance: custom blocks are first-class and robust.
+
+---
+
+## H6 — Variables (project-level, multi-sheet, improved UX)
+- [ ] H6-1: Variables improved UX
+  - Variable input block more intuitive.
+  - Variables saved per project, available on all sheets.
+  - Manage variables in a project variables window (table-like).
+  - Bulk update values and units.
+  - Acceptance: variables support large projects with hundreds of references.
+
+---
+
+## H7 — Publish blocks for cross-sheet linking
+- [ ] H7-1: Publish block v1
+  - Publish block captures live value from incoming chain.
+  - Named output can be referenced by another Publish block instance on same or other sheets.
+  - Prevent conflicts:
+    - cannot have two publish instances with same name but different inputs
+    - enforce uniqueness and correctness
+  - Dropdown to select published outputs.
+  - Acceptance: cross-sheet value reuse is robust and idiot-proof.
+
+---
+
+## H8 — Roles, licensing, and gating exact rules (formalized)
+- [ ] H8-1: Formalize plans and roles as you specified
+  - Free:
+    - 1 project
+    - grouping allowed
+    - no AI
+    - 2 sheets max
+    - no import/export projects
+    - can browse Explore and download to profile but limited by 1 project rule
+    - can use theme editor
+    - all preinstalled function blocks
+    - cannot use list input blocks
+    - cannot use graph/table outputs
+    - can use publish blocks
+    - cannot import files into project
+    - cannot create custom function blocks
+    - cannot create custom materials
+  - Pro:
+    - AI within token limit
+    - unlimited projects
+    - can import files into projects
+    - unlimited sheets
+    - custom function blocks
+    - custom materials
+  - Student:
+    - all Pro features, uni verification required
+  - Enterprise:
+    - enterprise AI with org-only knowledge and memory of org data only
+    - enterprise Explore areas (org-only visibility)
+    - other enterprise features
+  - Enterprise admin:
+    - manage org Explore
+    - org defaults for settings/theme
+    - feature locks per member
+    - manage roles, member details, seats
+    - enterprise features that make it clearly better than Pro accounts
+  - Developer:
+    - ben.godfrey@chainsolve.co.uk
+    - all features + dev tools
+    - manage app, submit, test, admin tooling
+  - Acceptance: gating enforced server-side and client-side with lock UI.
+
+---
+
+## H9 — Security and session rules (one device/session enforcement)
+- [ ] H9-1: Single-session enforcement option
+  - “All files saved to a user profile which can only be logged into on one device/browser/tab”
+  - Implement policy:
+    - when new session starts, revoke old session or block new one
+    - show clear messaging
+  - Enterprise admin can configure stricter session policies.
+  - Acceptance: behaves predictably and does not cause false “project open elsewhere” bugs.
+
+- [ ] H9-2: Bug report and suggestion system (easy and professional)
+  - In-app bug report window:
+    - steps to reproduce
+    - screenshot upload optional
+    - attach non-sensitive diagnostics (redacted)
+  - Suggestion window:
+    - feature requests
+    - block library additions
+    - UX feedback
+  - Acceptance: users can report without friction.
+
+---
+
+# PHASE I — Documentation, Scientific Reporting, Explore Ecosystem, Brand, SEO, Future Platform Readiness (one checkpoint at a time)
+> Objective: Make the product complete for public launch: full docs portal, scientific reporting features, Explore ecosystem, AI power workflows, branding/SEO, and repo readiness for future desktop/mobile without starting those apps yet.
+
+## Phase I execution rules
+- One checkpoint per Claude run.
+- Keep docs public-safe: no security internals, no architecture details that enable cloning the app.
+- Keep docs still useful for contributors through internal docs in repo (private-level detail can exist in repo docs, but the public docs page must exclude sensitive internal details).
+
+---
+
+## I1 — Full documentation site at /docs (public and extremely thorough)
+- [ ] I1-1: app.chainsolve.co.uk/docs environment
+  - Extremely thorough docs with subpages:
+    - onboarding
+    - block library
+    - every block type and category
+    - units and conversions
+    - variables and materials
+    - publish blocks
+    - Explore usage
+    - exports and reports
+    - AI assistant
+    - troubleshooting
+  - Must be easy to navigate and searchable.
+  - Public-safe: do not include code-level instructions or security-sensitive implementation details.
+  - Acceptance: docs is real, complete, and helpful.
+
+---
+
+## I2 — Scientific reporting v1: chain-to-notation (math/physics expression)
+- [ ] I2-1: “Inspect chain as notation” feature
+  - Select a chain sequence and show:
+    - symbolic form: a + b = out
+    - substituted: 1 + 2 = 3
+  - Works for lists too:
+    - [A] + [B] = [Output]
+  - Exportable for scientific reports.
+  - Acceptance: robust and useful for real reporting.
+
+---
+
+## I3 — Annotations and dress-up (not blocks)
+- [ ] I3-1: Annotation toolset in Insert dropdown and canvas toolbar
+  - Text boxes, arrows, callouts, highlight regions, shapes.
+  - Not part of block library.
+  - Works with exports (PDF image capture includes annotations).
+  - Acceptance: presentation-ready graphs.
+
+---
+
+## I4 — Explore ecosystem v2 (social-like discovery)
+- [ ] I4-1: Explore feels like a real ecosystem
+  - Categories:
+    - ChainSolve official
+    - User uploads
+    - Enterprise org uploads
+  - Search, sort, most liked, most downloaded.
+  - Upload/download UX is excellent.
+  - Comments moderated.
+  - Acceptance: Explore is compelling and safe.
+
+---
+
+## I5 — AI becomes the standout feature (advanced workflows)
+- [ ] I5-1: AI can build huge multi-sheet projects and manage materials/custom blocks/groups
+  - AI can:
+    - create blocks and connect chains correctly
+    - organize layouts
+    - create materials and custom blocks properly
+    - create groups
+    - read CSV file input (Pro) and build scientific models
+  - Must prompt user permission for high-impact changes.
+  - Must support plan/edit/bypass modes (already built) and apply best practices.
+  - Acceptance: AI can create large models reliably and safely.
+
+---
+
+## I6 — Branding, favicon, SEO, international SEO
+- [ ] I6-1: Full branding pass
+  - favicons
+  - consistent identity across app, docs, explore
+  - no cheap-looking UI
+  - Acceptance: marketing-ready.
+
+- [ ] I6-2: SEO optimized for other countries
+  - international metadata strategy
+  - localized docs where possible
+  - Acceptance: good global SEO structure.
+
+---
+
+## I7 — Student licenses (uni verification)
+- [ ] I7-1: Student license flow
+  - University email verification and strict eligibility.
+  - Student gets Pro features but free.
+  - Acceptance: enforceable and robust.
+
+---
+
+## I8 — Enterprise differentiators (make it irresistible)
+- [ ] I8-1: Enterprise features brainstorm and implementation plan
+  - Admin policy defaults for org users
+  - Feature locks
+  - Org-only Explore
+  - Seat management and onboarding
+  - Security expectations: audit log, retention, admin controls
+  - Acceptance: clear reasons to buy Enterprise instead of many Pro accounts.
+
+---
+
+## I9 — Future platform readiness (single repo, shared core)
+- [ ] I9-1: Prepare repo layout for future desktop/mobile without building them now
+  - Shared packages folder structure
+  - Platform flags
+  - Keep web app stable
+  - Acceptance: future work can start cleanly later.
+
+---
+
+## I10 — Housekeeping to remove AI-written feel
+- [ ] I10-1: Human-quality polish pass
+  - Remove AI-ish copy patterns
+  - Ensure consistent tone, simple English
+  - Ensure code style consistent and professional
+  - Acceptance: repo and UI look like a human-built product.
 
 ---
