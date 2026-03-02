@@ -605,6 +605,10 @@ export function AiCopilotWindow({
                 {op.op === 'setInputBinding' && `~ bind ${op.nodeId}:${op.portId}`}
                 {op.op === 'createVariable' && `+ var "${op.variable.name}"`}
                 {op.op === 'updateVariable' && `~ var ${op.varId}`}
+                {op.op === 'createMaterial' && `+ material "${op.material.name}"`}
+                {op.op === 'createCustomFunction' && `+ function "${op.fn.name}"`}
+                {op.op === 'createGroup' &&
+                  `+ group "${op.label ?? 'Group'}" (${op.nodeIds.length} nodes)`}
               </div>
             ))}
           </div>

@@ -162,6 +162,86 @@ describe('applyPatchOps', () => {
     expect(data.inputBindings?.a).toEqual({ kind: 'literal', value: 7 })
   })
 
+  it('accepts createMaterial with valid spec', () => {
+    const ops: AiPatchOp[] = [
+      {
+        op: 'createMaterial',
+        material: { name: 'Steel', properties: { rho: 7850, E: 200e9 } },
+      },
+    ]
+    const result = applyPatchOps(ops, [], [], true)
+    expect(result.appliedCount).toBe(1)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('rejects createMaterial without name', () => {
+    const ops: AiPatchOp[] = [
+      {
+        op: 'createMaterial',
+        material: { name: '', properties: { rho: 7850 } },
+      },
+    ]
+    const result = applyPatchOps(ops, [], [], true)
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].message).toContain('Missing material name')
+  })
+
+  it('accepts createCustomFunction with valid spec', () => {
+    const ops: AiPatchOp[] = [
+      {
+        op: 'createCustomFunction',
+        fn: {
+          name: 'Area',
+          formula: 'pi * r^2',
+          inputs: [{ id: 'r', label: 'Radius' }],
+        },
+      },
+    ]
+    const result = applyPatchOps(ops, [], [], true)
+    expect(result.appliedCount).toBe(1)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('rejects createCustomFunction without formula', () => {
+    const ops: AiPatchOp[] = [
+      {
+        op: 'createCustomFunction',
+        fn: {
+          name: 'Broken',
+          formula: '',
+          inputs: [{ id: 'x', label: 'X' }],
+        },
+      },
+    ]
+    const result = applyPatchOps(ops, [], [], true)
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].message).toContain('Missing function name, formula')
+  })
+
+  it('accepts createGroup with valid nodeIds', () => {
+    const nodes = [makeNode('n1'), makeNode('n2'), makeNode('n3')]
+    const ops: AiPatchOp[] = [{ op: 'createGroup', nodeIds: ['n1', 'n2'], label: 'Inputs' }]
+    const result = applyPatchOps(ops, nodes, [], true)
+    expect(result.appliedCount).toBe(1)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('rejects createGroup with fewer than 2 nodeIds', () => {
+    const nodes = [makeNode('n1')]
+    const ops: AiPatchOp[] = [{ op: 'createGroup', nodeIds: ['n1'] }]
+    const result = applyPatchOps(ops, nodes, [], true)
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].message).toContain('at least 2')
+  })
+
+  it('rejects createGroup with missing nodes', () => {
+    const nodes = [makeNode('n1'), makeNode('n2')]
+    const ops: AiPatchOp[] = [{ op: 'createGroup', nodeIds: ['n1', 'missing_node'] }]
+    const result = applyPatchOps(ops, nodes, [], true)
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].message).toContain('Nodes not found')
+  })
+
   it('applies multiple ops in sequence', () => {
     const ops: AiPatchOp[] = [
       { op: 'addNode', node: { id: 'n1', blockType: 'number', label: 'A' } },

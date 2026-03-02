@@ -245,6 +245,54 @@ export function applyPatchOps(
         break
       }
 
+      case 'createMaterial': {
+        // Material ops are handled by the caller (customMaterials CRUD).
+        if (!op.material?.name || !op.material?.properties) {
+          errors.push({ opIndex: i, op: op.op, message: 'Missing material name or properties' })
+          break
+        }
+        appliedCount++
+        break
+      }
+
+      case 'createCustomFunction': {
+        // Custom function ops are handled by the caller (customFunctions CRUD).
+        if (!op.fn?.name || !op.fn?.formula || !Array.isArray(op.fn?.inputs)) {
+          errors.push({
+            opIndex: i,
+            op: op.op,
+            message: 'Missing function name, formula, or inputs',
+          })
+          break
+        }
+        appliedCount++
+        break
+      }
+
+      case 'createGroup': {
+        // Group ops are handled by the caller (groups.createGroup).
+        if (!Array.isArray(op.nodeIds) || op.nodeIds.length < 2) {
+          errors.push({
+            opIndex: i,
+            op: op.op,
+            message: 'createGroup requires at least 2 nodeIds',
+          })
+          break
+        }
+        // Verify all referenced nodes exist
+        const missing = op.nodeIds.filter((nid) => !nodes.some((n) => n.id === nid))
+        if (missing.length > 0) {
+          errors.push({
+            opIndex: i,
+            op: op.op,
+            message: `Nodes not found: ${missing.join(', ')}`,
+          })
+          break
+        }
+        appliedCount++
+        break
+      }
+
       default: {
         errors.push({ opIndex: i, op: (op as { op: string }).op, message: 'Unknown op type' })
       }

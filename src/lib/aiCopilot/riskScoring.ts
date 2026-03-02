@@ -59,6 +59,20 @@ export function assessRisk(ops: AiPatchOp[]): RiskAssessment {
     reasons.push(`${varOps.length} variable mutation(s)`)
   }
 
+  // MEDIUM: material / custom function / group creation (side-effect mutations)
+  const materialOps = ops.filter((o) => o.op === 'createMaterial')
+  const fnOps = ops.filter((o) => o.op === 'createCustomFunction')
+  const groupOps = ops.filter((o) => o.op === 'createGroup')
+  const sideEffectCount = materialOps.length + fnOps.length + groupOps.length
+  if (sideEffectCount > 0) {
+    if (level === 'low') level = 'medium'
+    const parts: string[] = []
+    if (materialOps.length > 0) parts.push(`${materialOps.length} material(s)`)
+    if (fnOps.length > 0) parts.push(`${fnOps.length} custom function(s)`)
+    if (groupOps.length > 0) parts.push(`${groupOps.length} group(s)`)
+    reasons.push(`Creates ${parts.join(', ')}`)
+  }
+
   if (reasons.length === 0) {
     reasons.push(`${ops.length} operation(s)`)
   }

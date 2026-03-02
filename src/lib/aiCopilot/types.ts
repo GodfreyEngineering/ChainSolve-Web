@@ -26,6 +26,9 @@ export type AiPatchOp =
   | { op: 'setInputBinding'; nodeId: string; portId: string; binding: AiInputBinding }
   | { op: 'createVariable'; variable: AiVariableSpec }
   | { op: 'updateVariable'; varId: string; patch: Partial<AiVariableSpec> }
+  | { op: 'createMaterial'; material: AiMaterialSpec }
+  | { op: 'createCustomFunction'; fn: AiCustomFunctionSpec }
+  | { op: 'createGroup'; nodeIds: string[]; label?: string; color?: string }
 
 export interface AiNodeSpec {
   id: string
@@ -54,6 +57,23 @@ export interface AiVariableSpec {
   value: number
   unit?: string
   description?: string
+}
+
+/** Spec for creating a custom material via AI. */
+export interface AiMaterialSpec {
+  name: string
+  description?: string
+  category?: string
+  properties: Record<string, number>
+}
+
+/** Spec for creating a custom function block via AI. */
+export interface AiCustomFunctionSpec {
+  name: string
+  description?: string
+  tag?: string
+  inputs: { id: string; label: string }[]
+  formula: string
 }
 
 // ── Risk scoring ────────────────────────────────────────────────────────────

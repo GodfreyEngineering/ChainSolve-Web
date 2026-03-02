@@ -80,7 +80,25 @@ STATS: stats.desc.mean(c,x1..x6), stats.desc.stddev(c,x1..x6), stats.rel.linreg_
 
 Port naming: binary ops use a,b. All blocks output via "out" handle.
 Edge sourceHandle is always "out". targetHandle is the port id (e.g. "a", "b", "value").
-Node IDs: use "ai_node_1", "ai_node_2", etc. Edge IDs: use "ai_edge_1", etc.`
+Node IDs: use "ai_node_1", "ai_node_2", etc. Edge IDs: use "ai_edge_1", etc.
+
+ADVANCED OPS (beyond addNode/addEdge/removeNode/removeEdge/updateNodeData/setInputBinding/createVariable/updateVariable):
+
+createMaterial: Create a custom material saved in the user's browser.
+  { "op": "createMaterial", "material": { "name": "Ti-6Al-4V", "description": "Titanium alloy", "category": "metal", "properties": { "rho": 4430, "E": 113.8e9, "nu": 0.342 } } }
+  Categories: metal, polymer, ceramic, composite, fluid, other.
+  Properties: rho (density kg/m3), E (Young's modulus Pa), nu (Poisson's ratio), mu (dynamic viscosity Pa·s), k (thermal conductivity W/m·K), cp (specific heat J/kg·K). Include only relevant properties.
+
+createCustomFunction: Create a reusable custom function block.
+  { "op": "createCustomFunction", "fn": { "name": "Cylinder Volume", "description": "V = pi*r^2*h", "tag": "engineering", "inputs": [{ "id": "r", "label": "Radius" }, { "id": "h", "label": "Height" }], "formula": "pi * r^2 * h" } }
+  Tags: math, physics, engineering, finance, statistics, other.
+  Formula uses input IDs as variables. Max 8 inputs.
+
+createGroup: Organize existing nodes into a visual group.
+  { "op": "createGroup", "nodeIds": ["ai_node_1", "ai_node_2"], "label": "Input Parameters", "color": "#1CABB0" }
+  Requires at least 2 existing node IDs. Use groups to organize large layouts logically.
+
+CSV nodes: When the canvas contains "csv" blockType nodes, they load tabular data from uploaded CSV files. You can reference CSV column values via edges from csv nodes. When building scientific models from data, connect csv column outputs to computation chains.`
 
 // ── System prompts per task ─────────────────────────────────────────────────
 
@@ -194,6 +212,9 @@ Required JSON response:
   - plan: describe steps only, patch.ops should be empty.
   - edit: propose ops for user review.
   - bypass: propose ops for auto-apply (user still confirms high-risk).
+- For large projects: organize related nodes into groups using createGroup ops.
+- When the user asks about materials or material properties, use createMaterial to define them.
+- When the user asks for a reusable formula or function, use createCustomFunction.
 
 Required JSON response schema:
 {
@@ -207,7 +228,10 @@ Required JSON response schema:
       { "op": "addEdge", "edge": { "id": "ai_edge_1", "source": "ai_node_1", "sourceHandle": "out", "target": "ai_node_2", "targetHandle": "a" } },
       { "op": "updateNodeData", "nodeId": "existing_id", "data": { "value": 42 } },
       { "op": "removeNode", "nodeId": "existing_id" },
-      { "op": "removeEdge", "edgeId": "existing_id" }
+      { "op": "removeEdge", "edgeId": "existing_id" },
+      { "op": "createMaterial", "material": { "name": "...", "category": "metal", "properties": { "rho": 7850, "E": 200e9 } } },
+      { "op": "createCustomFunction", "fn": { "name": "...", "tag": "engineering", "inputs": [{ "id": "x", "label": "X" }], "formula": "x^2" } },
+      { "op": "createGroup", "nodeIds": ["ai_node_1", "ai_node_2"], "label": "Inputs", "color": "#1CABB0" }
     ]
   }
 }`

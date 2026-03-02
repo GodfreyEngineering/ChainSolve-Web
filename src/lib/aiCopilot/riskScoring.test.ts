@@ -67,6 +67,37 @@ describe('assessRisk', () => {
     const result = assessRisk(ops)
     expect(result.level).toBe('medium')
   })
+
+  it('returns medium for createMaterial', () => {
+    const ops: AiPatchOp[] = [
+      {
+        op: 'createMaterial',
+        material: { name: 'Steel', properties: { rho: 7850 } },
+      },
+    ]
+    const result = assessRisk(ops)
+    expect(result.level).toBe('medium')
+    expect(result.reasons.some((r) => r.includes('material'))).toBe(true)
+  })
+
+  it('returns medium for createCustomFunction', () => {
+    const ops: AiPatchOp[] = [
+      {
+        op: 'createCustomFunction',
+        fn: { name: 'Area', formula: 'pi*r^2', inputs: [{ id: 'r', label: 'Radius' }] },
+      },
+    ]
+    const result = assessRisk(ops)
+    expect(result.level).toBe('medium')
+    expect(result.reasons.some((r) => r.includes('custom function'))).toBe(true)
+  })
+
+  it('returns medium for createGroup', () => {
+    const ops: AiPatchOp[] = [{ op: 'createGroup', nodeIds: ['n1', 'n2'], label: 'Inputs' }]
+    const result = assessRisk(ops)
+    expect(result.level).toBe('medium')
+    expect(result.reasons.some((r) => r.includes('group'))).toBe(true)
+  })
 })
 
 describe('requiresConfirmation', () => {
