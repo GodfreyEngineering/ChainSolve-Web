@@ -1457,7 +1457,7 @@ Claude MUST:
   - Ensure every window/dialog that uses navigation hooks is inside Router context.
   - Acceptance: no `useNavigate()` errors anywhere.
 
-- [ ] F5-3: Panel/dock/window interaction audit
+- [x] F5-3: Panel/dock/window interaction audit
   - Ensure:
     - right-side toolbar always visible
     - bottom dock never hides tools
