@@ -1338,7 +1338,7 @@ Claude MUST:
 ---
 
 ## F0 — Repo-wide audit (read every file, produce a report, no code changes)
-- [ ] F0-1: Full file-by-file audit + map
+- [x] F0-1: Full file-by-file audit + map
   - Claude must scan:
     - src/**, crates/**, functions/**, supabase/**, scripts/**, docs/**
   - Produce `docs/AUDIT/REPO_AUDIT_REPORT.md` including:
