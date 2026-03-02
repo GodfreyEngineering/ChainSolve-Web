@@ -190,11 +190,21 @@ fn evaluate_node_inner(
         }
 
         // ── Output (pass-through) ────────────────────────────────
-        "display" | "probe" => {
+        // H7-1: "publish" is a pass-through like display/probe.
+        "display" | "probe" | "publish" => {
             inputs
                 .get("value")
                 .cloned()
                 .unwrap_or(Value::scalar(f64::NAN))
+        }
+
+        // H7-1: "subscribe" reads the resolved value from node data (TS bridge injects it).
+        "subscribe" => {
+            let v = data
+                .get("value")
+                .and_then(|v| v.as_f64())
+                .unwrap_or(f64::NAN);
+            Value::scalar(v)
         }
 
         // ── Data blocks (0 inputs, read from node data or dataset registry) ────

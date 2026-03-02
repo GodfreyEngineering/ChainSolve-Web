@@ -53,6 +53,8 @@ export type NodeKind =
   | 'csListTable'
   | 'csGroup'
   | 'csProbe'
+  | 'csPublish'
+  | 'csSubscribe'
   | 'csAnnotation'
 
 // ── Plot configuration types ────────────────────────────────────────────────
@@ -163,6 +165,10 @@ export interface NodeData extends Record<string, unknown> {
   annotationFontSize?: number
   /** H1-1: Unit assigned to this node's output. Unit id from unitCatalog. */
   unit?: string
+  /** H7-1: Channel name for publish blocks (csPublish nodes only). */
+  publishChannelName?: string
+  /** H7-1: Channel name subscribed to (csSubscribe nodes only). */
+  subscribeChannelName?: string
 }
 
 export interface BlockDef {

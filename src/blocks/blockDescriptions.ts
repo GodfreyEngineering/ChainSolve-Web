@@ -290,4 +290,10 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   // ── Utilities ─────────────────────────────────────────────────────────────
   'util.round.to_dp': 'Rounds a value to a specified number of decimal places.',
   'util.pct.to_decimal': 'Converts a percentage to a decimal. Output = input / 100.',
+
+  // ── Publish / Subscribe (H7-1) ──────────────────────────────────────────
+  publish:
+    'Publishes its input value under a named channel. Subscribe blocks on any sheet can read from this channel.',
+  subscribe:
+    'Reads the latest value from a named publish channel. Use to share values across sheets.',
 }

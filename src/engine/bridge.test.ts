@@ -303,6 +303,56 @@ describe('toEngineSnapshot — custom function block mapping (H5-1)', () => {
   })
 })
 
+describe('toEngineSnapshot — subscribe block mapping (H7-1)', () => {
+  it('injects published value into subscribe node data', () => {
+    const nodes = [
+      makeNode('s1', 'subscribe', {
+        blockType: 'subscribe',
+        subscribeChannelName: 'velocity',
+      }),
+    ]
+    const published = { velocity: 42 }
+    const snap = toEngineSnapshot(nodes, [], undefined, undefined, published)
+    expect(snap.nodes[0].blockType).toBe('subscribe')
+    expect((snap.nodes[0].data as Record<string, unknown>).value).toBe(42)
+  })
+
+  it('does not inject when channel name is missing', () => {
+    const nodes = [
+      makeNode('s1', 'subscribe', {
+        blockType: 'subscribe',
+        subscribeChannelName: '',
+      }),
+    ]
+    const published = { velocity: 42 }
+    const snap = toEngineSnapshot(nodes, [], undefined, undefined, published)
+    expect((snap.nodes[0].data as Record<string, unknown>).value).toBeUndefined()
+  })
+
+  it('does not inject when channel is not published', () => {
+    const nodes = [
+      makeNode('s1', 'subscribe', {
+        blockType: 'subscribe',
+        subscribeChannelName: 'missing',
+      }),
+    ]
+    const published = { velocity: 42 }
+    const snap = toEngineSnapshot(nodes, [], undefined, undefined, published)
+    expect((snap.nodes[0].data as Record<string, unknown>).value).toBeUndefined()
+  })
+
+  it('does not inject when publishedOutputs is undefined', () => {
+    const nodes = [
+      makeNode('s1', 'subscribe', {
+        blockType: 'subscribe',
+        subscribeChannelName: 'velocity',
+      }),
+    ]
+    const snap = toEngineSnapshot(nodes, [])
+    expect((snap.nodes[0].data as Record<string, unknown>).value).toBeUndefined()
+  })
+})
+
 describe('toEngineSnapshot — multi-node graph', () => {
   it('produces a correct snapshot for physics-101-style graph', () => {
     const nodes = [

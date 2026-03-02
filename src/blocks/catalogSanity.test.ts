@@ -60,6 +60,8 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csListTable',
   'csGroup',
   'csProbe',
+  'csPublish',
+  'csSubscribe',
   'csAnnotation',
 ]
 

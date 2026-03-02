@@ -27,6 +27,8 @@ export function toEngineSnapshot(
   edges: Edge[],
   constants?: ConstantsLookup,
   variables?: VariablesMap,
+  /** H7-1: Published channel values for subscribe block resolution. */
+  publishedOutputs?: Record<string, number>,
 ): EngineSnapshotV1 {
   const evalNodes = nodes.filter((n) => {
     const bt = (n.data as Record<string, unknown>).blockType as string
@@ -67,6 +69,17 @@ export function toEngineSnapshot(
       // The formula and input values are passed via data.
       if (blockType.startsWith('cfb:') && typeof data.formula === 'string') {
         blockType = 'math_expr'
+      }
+      // H7-1: Subscribe blocks inject the published channel value into data.
+      if (
+        blockType === 'subscribe' &&
+        typeof data.subscribeChannelName === 'string' &&
+        publishedOutputs
+      ) {
+        const pubVal = publishedOutputs[data.subscribeChannelName]
+        if (pubVal !== undefined) {
+          data = { ...data, value: pubVal }
+        }
       }
       // W12.2: resolve inputBindings → manualValues before sending to Rust.
       if (constants && variables && data.inputBindings) {

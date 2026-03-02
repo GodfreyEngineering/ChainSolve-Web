@@ -167,3 +167,101 @@ fn load_snapshot_replaces_cached_values_for_same_node_ids() {
         "load_snapshot must replace cached values, not return stale results"
     );
 }
+
+// ── Publish / Subscribe ops (H7-1) ─────────────────────────────────────────
+
+fn publish_node(id: &str, channel: &str) -> NodeDef {
+    let mut data = HashMap::new();
+    data.insert(
+        "publishChannelName".to_string(),
+        serde_json::json!(channel),
+    );
+    NodeDef {
+        id: id.to_string(),
+        block_type: "publish".to_string(),
+        data,
+    }
+}
+
+fn subscribe_node(id: &str, value: f64) -> NodeDef {
+    let mut data = HashMap::new();
+    data.insert("value".to_string(), serde_json::json!(value));
+    NodeDef {
+        id: id.to_string(),
+        block_type: "subscribe".to_string(),
+        data,
+    }
+}
+
+/// Publish is a pass-through: it outputs whatever its input is.
+#[test]
+fn publish_is_passthrough() {
+    let snap = EngineSnapshotV1 {
+        version: 1,
+        nodes: vec![num_node("n1", 42.0), publish_node("pub", "velocity")],
+        edges: vec![edge("e1", "n1", "out", "pub", "value")],
+    };
+    let result = run(&serde_json::to_string(&snap).unwrap()).unwrap();
+    assert_eq!(scalar_value(&result.values, "pub"), 42.0);
+}
+
+/// Publish with no input returns NaN.
+#[test]
+fn publish_no_input_returns_nan() {
+    let snap = EngineSnapshotV1 {
+        version: 1,
+        nodes: vec![publish_node("pub", "velocity")],
+        edges: vec![],
+    };
+    let result = run(&serde_json::to_string(&snap).unwrap()).unwrap();
+    let v = scalar_value(&result.values, "pub");
+    assert!(v.is_nan(), "publish with no input should be NaN");
+}
+
+/// Subscribe reads its value from data (injected by TS bridge).
+#[test]
+fn subscribe_reads_injected_value() {
+    let snap = EngineSnapshotV1 {
+        version: 1,
+        nodes: vec![subscribe_node("sub", 99.0)],
+        edges: vec![],
+    };
+    let result = run(&serde_json::to_string(&snap).unwrap()).unwrap();
+    assert_eq!(scalar_value(&result.values, "sub"), 99.0);
+}
+
+/// Subscribe with no value in data returns NaN.
+#[test]
+fn subscribe_no_value_returns_nan() {
+    let snap = EngineSnapshotV1 {
+        version: 1,
+        nodes: vec![NodeDef {
+            id: "sub".to_string(),
+            block_type: "subscribe".to_string(),
+            data: HashMap::new(),
+        }],
+        edges: vec![],
+    };
+    let result = run(&serde_json::to_string(&snap).unwrap()).unwrap();
+    let v = scalar_value(&result.values, "sub");
+    assert!(v.is_nan(), "subscribe with no data.value should be NaN");
+}
+
+/// End-to-end: subscribe → add chain.
+#[test]
+fn subscribe_feeds_downstream() {
+    let snap = EngineSnapshotV1 {
+        version: 1,
+        nodes: vec![
+            subscribe_node("sub", 10.0),
+            num_node("n1", 5.0),
+            add_node("sum"),
+        ],
+        edges: vec![
+            edge("e1", "sub", "out", "sum", "a"),
+            edge("e2", "n1", "out", "sum", "b"),
+        ],
+    };
+    let result = run(&serde_json::to_string(&snap).unwrap()).unwrap();
+    assert_eq!(scalar_value(&result.values, "sum"), 15.0);
+}

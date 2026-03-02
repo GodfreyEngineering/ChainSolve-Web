@@ -53,6 +53,7 @@ import {
 import { useProjectStore } from '../stores/projectStore'
 import { useCanvasesStore } from '../stores/canvasesStore'
 import { useVariablesStore } from '../stores/variablesStore'
+import { usePublishedOutputsStore } from '../stores/publishedOutputsStore'
 import { saveVariables } from '../lib/variablesService'
 import { supabase } from '../lib/supabase'
 import {
@@ -155,6 +156,9 @@ export default function CanvasPage() {
   const resetVariables = useVariablesStore((s) => s.reset)
   const markVariablesClean = useVariablesStore((s) => s.markClean)
 
+  // ── Published outputs store (H7-1) ──────────────────────────────────────
+  const resetPublishedOutputs = usePublishedOutputsStore((s) => s.reset)
+
   // ── Network status ─────────────────────────────────────────────────────────
   const { isOnline } = useNetworkStatus()
 
@@ -232,6 +236,7 @@ export default function CanvasPage() {
     resetProject()
     resetCanvases()
     resetVariables()
+    resetPublishedOutputs()
     conflictServerTs.current = null
 
     if (!projectId) {
@@ -1545,6 +1550,7 @@ export default function CanvasPage() {
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
         <CanvasArea
           ref={canvasRef}
+          canvasId={activeCanvasId ?? undefined}
           key={activeCanvasId ?? projectId ?? 'scratch'}
           initialNodes={initNodes ?? INITIAL_NODES}
           initialEdges={initEdges ?? INITIAL_EDGES}

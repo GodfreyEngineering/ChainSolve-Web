@@ -503,6 +503,12 @@
     "emptyHint": "Click \"+ Add\" to create one.",
     "noResults": "No variables match your search."
   },
+  "publishSubscribe": {
+    "channelPlaceholder": "Channel name",
+    "setChannel": "Set a channel name",
+    "selectChannel": "-- Select channel --",
+    "channelNotFound": "Channel not found"
+  },
   "groups": {
     "groupSelection": "Group Selection",
     "ungroup": "Ungroup",

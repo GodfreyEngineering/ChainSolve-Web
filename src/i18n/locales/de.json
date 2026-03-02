@@ -495,6 +495,12 @@
     "emptyHint": "Klicken Sie auf \"+ Hinzuf\u00fcgen\".",
     "noResults": "Keine Variablen gefunden."
   },
+  "publishSubscribe": {
+    "channelPlaceholder": "Kanalname",
+    "setChannel": "Kanalname festlegen",
+    "selectChannel": "-- Kanal auswählen --",
+    "channelNotFound": "Kanal nicht gefunden"
+  },
   "groups": {
     "groupSelection": "Auswahl gruppieren",
     "ungroup": "Gruppierung aufheben",

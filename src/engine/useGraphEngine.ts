@@ -68,6 +68,8 @@ export function useGraphEngine(
   constants?: ConstantsLookup,
   /** W12.2: Project variables for binding resolution. */
   variables?: VariablesMap,
+  /** H7-1: Published channel values for subscribe block resolution. */
+  publishedOutputs?: Record<string, number>,
 ): GraphEngineResult {
   const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
   const [isPartial, setIsPartial] = useState(false)
@@ -100,7 +102,7 @@ export function useGraphEngine(
       // First render: load full snapshot into persistent engine graph.
       snapshotLoaded.current = true
       const reqId = ++pendingRef.current
-      const snapshot = toEngineSnapshot(nodes, edges, constants, variables)
+      const snapshot = toEngineSnapshot(nodes, edges, constants, variables, publishedOutputs)
       dlog.debug('engine', 'Snapshot eval started', {
         nodeCount: nodes.length,
         edgeCount: edges.length,
@@ -243,7 +245,7 @@ export function useGraphEngine(
 
     prevNodesRef.current = nodes
     prevEdgesRef.current = edges
-  }, [nodes, edges, engine, options, refreshKey, paused, constants, variables])
+  }, [nodes, edges, engine, options, refreshKey, paused, constants, variables, publishedOutputs])
 
   return { computed, isPartial }
 }

@@ -62,6 +62,7 @@ import { buildConstantsLookup } from '../../engine/resolveBindings'
 import { computeEffectiveEdgesAnimated } from '../../engine/edgesAnimGate'
 import { computeLodTier, type LodTier as LodTierGate } from '../../engine/lodGate'
 import { useVariablesStore } from '../../stores/variablesStore'
+import { usePublishedOutputsStore } from '../../stores/publishedOutputsStore'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 import { UpgradeModal } from '../UpgradeModal'
@@ -98,6 +99,8 @@ const LazyValuePopover = lazy(() =>
   import('./ValuePopover').then((m) => ({ default: m.ValuePopover })),
 )
 import { ProbeNode } from './nodes/ProbeNode'
+import { PublishNode } from './nodes/PublishNode'
+import { SubscribeNode } from './nodes/SubscribeNode'
 import { AnnotationNode } from './nodes/AnnotationNode'
 import { copyValueToClipboard } from '../../engine/valueFormat'
 import {
@@ -126,6 +129,8 @@ const NODE_TYPES = {
   csListTable: ListTableNode,
   csGroup: GroupNode,
   csProbe: ProbeNode,
+  csPublish: PublishNode,
+  csSubscribe: SubscribeNode,
   csAnnotation: AnnotationNode,
 } as const
 
@@ -138,6 +143,8 @@ let nodeIdCounter = 100
 // ── Public props interface ─────────────────────────────────────────────────────
 
 export interface CanvasAreaProps {
+  /** H7-1: Canvas ID for publish/subscribe cross-sheet value sharing. */
+  canvasId?: string
   /** Nodes to hydrate on mount. When not provided, uses the built-in demo graph. */
   initialNodes?: Node<NodeData>[]
   /** Edges to hydrate on mount. When not provided, uses the built-in demo graph. */
@@ -401,6 +408,7 @@ const tbBtn: React.CSSProperties = {
 
 const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function CanvasInner(
   {
+    canvasId,
     initialNodes,
     initialEdges,
     onGraphChange,
@@ -810,6 +818,17 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [constantsLookup, engine.catalog],
   )
 
+  // H7-1: Read published outputs for subscribe block resolution.
+  // Flatten to channelName → number for the bridge.
+  const publishedChannels = usePublishedOutputsStore((st) => st.channels)
+  const publishedOutputs = useMemo(() => {
+    const map: Record<string, number> = {}
+    for (const [name, ch] of Object.entries(publishedChannels)) {
+      map[name] = ch.value
+    }
+    return map
+  }, [publishedChannels])
+
   const { computed } = useGraphEngine(
     nodes,
     edges,
@@ -819,7 +838,29 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     paused,
     constantsLookup,
     variables,
+    publishedOutputs,
   )
+
+  // H7-1: After engine eval, update published outputs store with publish block values.
+  const updateFromCanvas = usePublishedOutputsStore((st) => st.updateFromCanvas)
+  useEffect(() => {
+    if (!canvasId || computed.size === 0) return
+    const entries: { channelName: string; value: number; sourceNodeId: string }[] = []
+    for (const n of nodes) {
+      const nd = n.data as NodeData
+      if (nd.blockType === 'publish' && nd.publishChannelName) {
+        const val = computed.get(n.id)
+        if (val && val.kind === 'scalar') {
+          entries.push({
+            channelName: nd.publishChannelName,
+            value: val.value,
+            sourceNodeId: n.id,
+          })
+        }
+      }
+    }
+    updateFromCanvas(canvasId, entries)
+  }, [canvasId, computed, nodes, updateFromCanvas])
 
   // ── Auto-organise layout ──────────────────────────────────────────────────
 

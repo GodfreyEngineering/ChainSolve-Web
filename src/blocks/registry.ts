@@ -479,6 +479,26 @@ reg({
   defaultData: { blockType: 'probe', label: 'Probe' },
 })
 
+// ── H7-1: Publish / Subscribe blocks (cross-sheet value sharing) ─────────────
+
+reg({
+  type: 'publish',
+  label: 'Publish',
+  category: 'output',
+  nodeKind: 'csPublish',
+  inputs: [{ id: 'value', label: 'Value' }],
+  defaultData: { blockType: 'publish', label: 'Publish', publishChannelName: '' },
+})
+
+reg({
+  type: 'subscribe',
+  label: 'Subscribe',
+  category: 'input',
+  nodeKind: 'csSubscribe',
+  inputs: [],
+  defaultData: { blockType: 'subscribe', label: 'Subscribe', subscribeChannelName: '' },
+})
+
 // ── Annotation blocks (E7-1: non-evaluating visual nodes) ────────────────────
 
 reg({
@@ -681,7 +701,13 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
     id: 'outputBlocks',
     label: 'Output Blocks',
     subcategories: [
-      { id: 'outDisplay', label: 'Display', categories: ['output', 'annotations'] },
+      {
+        id: 'outDisplay',
+        label: 'Display',
+        blockTypes: ['display', 'probe'],
+        categories: ['annotations'],
+      },
+      { id: 'outPublish', label: 'Publish / Subscribe', blockTypes: ['publish', 'subscribe'] },
       { id: 'outGraph', label: 'Graph blocks', categories: ['plot'] },
     ],
   },

@@ -176,7 +176,7 @@ describe('Block taxonomy structure (G3-1)', () => {
   it('Output Blocks has the required subcategories', () => {
     const output = BLOCK_TAXONOMY.find((m) => m.id === 'outputBlocks')!
     const subLabels = output.subcategories.map((s) => s.label)
-    expect(subLabels).toEqual(['Display', 'Graph blocks'])
+    expect(subLabels).toEqual(['Display', 'Publish / Subscribe', 'Graph blocks'])
   })
 })
 

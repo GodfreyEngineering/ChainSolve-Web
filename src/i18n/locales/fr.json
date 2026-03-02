@@ -495,6 +495,12 @@
     "emptyHint": "Cliquez sur \"+ Ajouter\" pour en cr\u00e9er une.",
     "noResults": "Aucune variable ne correspond."
   },
+  "publishSubscribe": {
+    "channelPlaceholder": "Nom du canal",
+    "setChannel": "Definir un nom de canal",
+    "selectChannel": "-- Choisir un canal --",
+    "channelNotFound": "Canal introuvable"
+  },
   "groups": {
     "groupSelection": "Grouper la sélection",
     "ungroup": "Dégrouper",
