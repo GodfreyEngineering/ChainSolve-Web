@@ -1565,7 +1565,7 @@ Claude MUST:
 ---
 
 ## G1 — Copy and microcopy pass for idiot-proof UI (every menu and popup)
-- [ ] G1-1: Full microcopy upgrade sweep
+- [x] G1-1: Full microcopy upgrade sweep
   - Every menu item and popup must have clear explanation text:
     - File/Edit/View/Insert/Tools/Help
     - Exports/imports gating messages
