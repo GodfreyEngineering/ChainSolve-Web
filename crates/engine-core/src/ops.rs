@@ -213,10 +213,7 @@ fn evaluate_node_inner(
                 None => Value::Vector { value: vec![] },
             }
         }
-        "tableInput" => read_table_from_data(data, false),
-        "csvImport" => read_table_from_data(data, true),
-
-        // ── Vector ops ──────────────────────────────────────────
+        // ── Vector / List ops ────────────────────────────────────
         "vectorLength" => match require_vector(inputs, "vec", "Length") {
             Ok(v) => Value::scalar(v.len() as f64),
             Err(e) => e,
@@ -291,104 +288,6 @@ fn evaluate_node_inner(
             }
             Err(e) => e,
         },
-
-        // ── Table ops ───────────────────────────────────────────
-        "tableFilter" => match require_table(inputs, "table", "Filter") {
-            Ok((cols, rows)) => {
-                let ci = scalar_or_nan(inputs, "col").floor() as i64;
-                let threshold = scalar_or_nan(inputs, "threshold");
-                if ci < 0 || ci as usize >= cols.len() {
-                    Value::error("Filter: column index out of range")
-                } else if threshold.is_nan() {
-                    Value::error("Filter: expected threshold")
-                } else {
-                    let ci = ci as usize;
-                    let filtered: Vec<Vec<f64>> = rows.iter()
-                        .filter(|row| row.get(ci).copied().unwrap_or(f64::NAN) > threshold)
-                        .cloned()
-                        .collect();
-                    Value::Table { columns: cols.clone(), rows: filtered }
-                }
-            }
-            Err(e) => e,
-        },
-        "tableSort" => match require_table(inputs, "table", "Sort") {
-            Ok((cols, rows)) => {
-                let ci = scalar_or_nan(inputs, "col").floor() as i64;
-                if ci < 0 || ci as usize >= cols.len() {
-                    Value::error("Sort: column index out of range")
-                } else {
-                    let ci = ci as usize;
-                    let mut sorted = rows.clone();
-                    sorted.sort_by(|a, b| {
-                        let va = a.get(ci).copied().unwrap_or(0.0);
-                        let vb = b.get(ci).copied().unwrap_or(0.0);
-                        va.partial_cmp(&vb).unwrap_or(std::cmp::Ordering::Equal)
-                    });
-                    Value::Table { columns: cols.clone(), rows: sorted }
-                }
-            }
-            Err(e) => e,
-        },
-        "tableColumn" => match require_table(inputs, "table", "Column") {
-            Ok((cols, rows)) => {
-                let ci = scalar_or_nan(inputs, "col").floor() as i64;
-                if ci < 0 || ci as usize >= cols.len() {
-                    Value::error("Column: column index out of range")
-                } else {
-                    let ci = ci as usize;
-                    let values: Vec<f64> = rows.iter()
-                        .map(|row| row.get(ci).copied().unwrap_or(f64::NAN))
-                        .collect();
-                    Value::Vector { value: values }
-                }
-            }
-            Err(e) => e,
-        },
-        "tableAddColumn" => match require_table(inputs, "table", "AddColumn") {
-            Ok((cols, rows)) => match require_vector(inputs, "vec", "AddColumn") {
-                Ok(vec) => {
-                    let col_name = format!("Col{}", cols.len() + 1);
-                    let mut new_cols = cols.clone();
-                    new_cols.push(col_name);
-                    let max_len = rows.len().max(vec.len());
-                    let mut new_rows: Vec<Vec<f64>> = Vec::with_capacity(max_len);
-                    for i in 0..max_len {
-                        let mut row = if i < rows.len() {
-                            rows[i].clone()
-                        } else {
-                            vec![f64::NAN; cols.len()]
-                        };
-                        row.push(if i < vec.len() { vec[i] } else { f64::NAN });
-                        new_rows.push(row);
-                    }
-                    Value::Table { columns: new_cols, rows: new_rows }
-                }
-                Err(e) => e,
-            },
-            Err(e) => e,
-        },
-        "tableJoin" => {
-            let a = require_table(inputs, "a", "Join");
-            let b = require_table(inputs, "b", "Join");
-            match (a, b) {
-                (Ok((ca, ra)), Ok((cb, rb))) => {
-                    let mut new_cols = ca.clone();
-                    new_cols.extend(cb.iter().cloned());
-                    let max_len = ra.len().max(rb.len());
-                    let mut new_rows: Vec<Vec<f64>> = Vec::with_capacity(max_len);
-                    for i in 0..max_len {
-                        let row_a = if i < ra.len() { ra[i].clone() } else { vec![f64::NAN; ca.len()] };
-                        let row_b = if i < rb.len() { rb[i].clone() } else { vec![f64::NAN; cb.len()] };
-                        let mut row = row_a;
-                        row.extend(row_b);
-                        new_rows.push(row);
-                    }
-                    Value::Table { columns: new_cols, rows: new_rows }
-                }
-                (Err(e), _) | (_, Err(e)) => e,
-            }
-        }
 
         // ── Plot blocks (terminal, return point count) ──────────
         "xyPlot" | "histogram" | "barChart" | "heatmap" => {
@@ -1489,55 +1388,6 @@ fn require_vector<'a>(
     }
 }
 
-fn require_table<'a>(
-    inputs: &'a HashMap<String, Value>,
-    port: &str,
-    name: &str,
-) -> Result<(&'a Vec<String>, &'a Vec<Vec<f64>>), Value> {
-    match inputs.get(port) {
-        Some(Value::Table { columns, rows }) => Ok((columns, rows)),
-        Some(_) => Err(Value::error(format!("{}: expected table", name))),
-        None => Err(Value::error(format!("{}: no input", name))),
-    }
-}
-
-fn read_table_from_data(data: &HashMap<String, serde_json::Value>, require: bool) -> Value {
-    let td = data.get("tableData");
-    match td {
-        Some(td) => {
-            let columns: Vec<String> = td
-                .get("columns")
-                .and_then(|c| c.as_array())
-                .map(|arr| arr.iter().filter_map(|v| v.as_str().map(String::from)).collect())
-                .unwrap_or_else(|| vec!["A".to_string()]);
-            let rows: Vec<Vec<f64>> = td
-                .get("rows")
-                .and_then(|r| r.as_array())
-                .map(|arr| {
-                    arr.iter()
-                        .filter_map(|row| {
-                            row.as_array().map(|r| {
-                                r.iter().map(|v| v.as_f64().unwrap_or(f64::NAN)).collect()
-                            })
-                        })
-                        .collect()
-                })
-                .unwrap_or_default();
-            Value::Table { columns, rows }
-        }
-        None => {
-            if require {
-                Value::error("No CSV loaded")
-            } else {
-                Value::Table {
-                    columns: vec!["A".to_string()],
-                    rows: vec![],
-                }
-            }
-        }
-    }
-}
-
 // ── W11b helpers ─────────────────────────────────────────────────
 
 /// Port names for fixed-slot stats blocks (X1..X6).
@@ -1704,15 +1554,6 @@ mod tests {
     }
 
     #[test]
-    fn csv_import_no_data() {
-        let v = evaluate_node("csvImport", &HashMap::new(), &HashMap::new());
-        match v {
-            Value::Error { message } => assert_eq!(message, "No CSV loaded"),
-            _ => panic!("Expected Error"),
-        }
-    }
-
-    #[test]
     fn vector_sum_block() {
         let mut inputs: HashMap<String, Value> = HashMap::new();
         inputs.insert("vec".into(), Value::Vector { value: vec![1.0, 2.0, 3.0, 4.0] });
@@ -1738,41 +1579,6 @@ mod tests {
         let v = evaluate_node("vectorSort", &inputs, &HashMap::new());
         match v {
             Value::Vector { value } => assert_eq!(value, vec![1.0, 2.0, 3.0]),
-            _ => panic!("Expected Vector"),
-        }
-    }
-
-    #[test]
-    fn table_filter_block() {
-        let mut inputs: HashMap<String, Value> = HashMap::new();
-        inputs.insert("table".into(), Value::Table {
-            columns: vec!["A".into()],
-            rows: vec![vec![1.0], vec![5.0], vec![3.0], vec![7.0]],
-        });
-        inputs.insert("col".into(), Value::scalar(0.0));
-        inputs.insert("threshold".into(), Value::scalar(3.0));
-        let v = evaluate_node("tableFilter", &inputs, &HashMap::new());
-        match v {
-            Value::Table { rows, .. } => {
-                assert_eq!(rows.len(), 2); // 5 and 7
-                assert_eq!(rows[0], vec![5.0]);
-                assert_eq!(rows[1], vec![7.0]);
-            }
-            _ => panic!("Expected Table"),
-        }
-    }
-
-    #[test]
-    fn table_column_block() {
-        let mut inputs: HashMap<String, Value> = HashMap::new();
-        inputs.insert("table".into(), Value::Table {
-            columns: vec!["A".into(), "B".into()],
-            rows: vec![vec![1.0, 10.0], vec![2.0, 20.0]],
-        });
-        inputs.insert("col".into(), Value::scalar(1.0));
-        let v = evaluate_node("tableColumn", &inputs, &HashMap::new());
-        match v {
-            Value::Vector { value } => assert_eq!(value, vec![10.0, 20.0]),
             _ => panic!("Expected Vector"),
         }
     }

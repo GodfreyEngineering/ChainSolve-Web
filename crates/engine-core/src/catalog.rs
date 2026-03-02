@@ -391,96 +391,80 @@ pub fn catalog() -> Vec<CatalogEntry> {
         // ── Data (Pro) ───────────────────────────────────────────
         CatalogEntry {
             op_id: "vectorInput",
-            label: "Vector Input",
+            label: "List Input",
             category: "data",
             node_kind: "csData",
             inputs: vec![],
             pro_only: true,
         },
-        CatalogEntry {
-            op_id: "tableInput",
-            label: "Table Input",
-            category: "data",
-            node_kind: "csData",
-            inputs: vec![],
-            pro_only: true,
-        },
-        CatalogEntry {
-            op_id: "csvImport",
-            label: "CSV Import",
-            category: "data",
-            node_kind: "csData",
-            inputs: vec![],
-            pro_only: true,
-        },
-        // ── Vector Ops (Pro) ─────────────────────────────────────
+        // ── List Ops (Pro) ──────────────────────────────────────
         CatalogEntry {
             op_id: "vectorLength",
-            label: "Vec Length",
+            label: "List Length",
             category: "vectorOps",
             node_kind: "csOperation",
-            inputs: vec![p("vec", "Vec")],
+            inputs: vec![p("vec", "List")],
             pro_only: true,
         },
         CatalogEntry {
             op_id: "vectorSum",
-            label: "Vec Sum",
+            label: "List Sum",
             category: "vectorOps",
             node_kind: "csOperation",
-            inputs: vec![p("vec", "Vec")],
+            inputs: vec![p("vec", "List")],
             pro_only: true,
         },
         CatalogEntry {
             op_id: "vectorMean",
-            label: "Vec Mean",
+            label: "List Mean",
             category: "vectorOps",
             node_kind: "csOperation",
-            inputs: vec![p("vec", "Vec")],
+            inputs: vec![p("vec", "List")],
             pro_only: true,
         },
         CatalogEntry {
             op_id: "vectorMin",
-            label: "Vec Min",
+            label: "List Min",
             category: "vectorOps",
             node_kind: "csOperation",
-            inputs: vec![p("vec", "Vec")],
+            inputs: vec![p("vec", "List")],
             pro_only: true,
         },
         CatalogEntry {
             op_id: "vectorMax",
-            label: "Vec Max",
+            label: "List Max",
             category: "vectorOps",
             node_kind: "csOperation",
-            inputs: vec![p("vec", "Vec")],
+            inputs: vec![p("vec", "List")],
             pro_only: true,
         },
         CatalogEntry {
             op_id: "vectorSort",
-            label: "Vec Sort",
+            label: "List Sort",
             category: "vectorOps",
             node_kind: "csOperation",
-            inputs: vec![p("vec", "Vec")],
+            inputs: vec![p("vec", "List")],
             pro_only: true,
         },
         CatalogEntry {
             op_id: "vectorReverse",
-            label: "Vec Reverse",
+            label: "List Reverse",
             category: "vectorOps",
             node_kind: "csOperation",
-            inputs: vec![p("vec", "Vec")],
+            inputs: vec![p("vec", "List")],
             pro_only: true,
         },
         CatalogEntry {
             op_id: "vectorSlice",
-            label: "Vec Slice",
+            label: "List Slice",
             category: "vectorOps",
             node_kind: "csOperation",
-            inputs: vec![p("vec", "Vec"), p("start", "Start"), p("end", "End")],
+            inputs: vec![p("vec", "List"), p("start", "Start"), p("end", "End")],
             pro_only: true,
         },
         CatalogEntry {
             op_id: "vectorConcat",
-            label: "Vec Concat",
+            label: "List Concat",
             category: "vectorOps",
             node_kind: "csOperation",
             inputs: vec![p("a", "A"), p("b", "B")],
@@ -488,51 +472,10 @@ pub fn catalog() -> Vec<CatalogEntry> {
         },
         CatalogEntry {
             op_id: "vectorMap",
-            label: "Vec \u{00D7} Scalar",
+            label: "List \u{00D7} Scalar",
             category: "vectorOps",
             node_kind: "csOperation",
-            inputs: vec![p("vec", "Vec"), p("scalar", "Scalar")],
-            pro_only: true,
-        },
-        // ── Table Ops (Pro) ──────────────────────────────────────
-        CatalogEntry {
-            op_id: "tableFilter",
-            label: "Table Filter",
-            category: "tableOps",
-            node_kind: "csOperation",
-            inputs: vec![p("table", "Table"), p("col", "Col #"), p("threshold", "Threshold")],
-            pro_only: true,
-        },
-        CatalogEntry {
-            op_id: "tableSort",
-            label: "Table Sort",
-            category: "tableOps",
-            node_kind: "csOperation",
-            inputs: vec![p("table", "Table"), p("col", "Col #")],
-            pro_only: true,
-        },
-        CatalogEntry {
-            op_id: "tableColumn",
-            label: "Table Column",
-            category: "tableOps",
-            node_kind: "csOperation",
-            inputs: vec![p("table", "Table"), p("col", "Col #")],
-            pro_only: true,
-        },
-        CatalogEntry {
-            op_id: "tableAddColumn",
-            label: "Add Column",
-            category: "tableOps",
-            node_kind: "csOperation",
-            inputs: vec![p("table", "Table"), p("vec", "Vec")],
-            pro_only: true,
-        },
-        CatalogEntry {
-            op_id: "tableJoin",
-            label: "Table Join",
-            category: "tableOps",
-            node_kind: "csOperation",
-            inputs: vec![p("a", "Table A"), p("b", "Table B")],
+            inputs: vec![p("vec", "List"), p("scalar", "Scalar")],
             pro_only: true,
         },
         // ── Plot (Pro) ───────────────────────────────────────────
@@ -1888,14 +1831,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 220);
+        assert_eq!(cat.len(), 213);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 220);
+        assert_eq!(parsed.as_array().unwrap().len(), 213);
     }
 
     #[test]
@@ -1915,7 +1858,7 @@ mod tests {
     fn known_ops_present() {
         let cat = catalog();
         let ids: Vec<&str> = cat.iter().map(|e| e.op_id).collect();
-        for expected in &["add", "sin", "vectorSum", "tableFilter", "xyPlot", "display", "eng.mechanics.force_ma", "eng.elec.ohms_V", "fin.tvm.compound_fv", "stats.desc.mean", "prob.dist.binomial_pmf", "const.physics.g0", "preset.materials.steel_E"] {
+        for expected in &["add", "sin", "vectorSum", "xyPlot", "display", "eng.mechanics.force_ma", "eng.elec.ohms_V", "fin.tvm.compound_fv", "stats.desc.mean", "prob.dist.binomial_pmf", "const.physics.g0", "preset.materials.steel_E", "unit_convert"] {
             assert!(ids.contains(expected), "Missing op: {}", expected);
         }
     }

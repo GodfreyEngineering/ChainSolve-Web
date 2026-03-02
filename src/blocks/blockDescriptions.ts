@@ -156,28 +156,20 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Directional arrow for pointing at or connecting visual elements. Does not affect computation.',
 
   // ── Data inputs (Pro) ─────────────────────────────────────────────────────
-  vectorInput: 'Enter a list of numbers directly. Used as input to vector operations and plots.',
-  tableInput: 'Enter tabular data with named columns. Used with table operations and plots.',
-  csvImport: 'Import data from a CSV file. Uploads and parses the file into a table.',
+  vectorInput:
+    'Enter a list of numbers directly. Paste from Excel, CSV, or type values. Used as input to list operations and plots.',
 
-  // ── Vector operations (Pro) ───────────────────────────────────────────────
-  vectorLength: 'Returns the number of elements in a vector.',
-  vectorSum: 'Sums all elements of a vector.',
-  vectorMean: 'Computes the arithmetic mean of all elements in a vector.',
-  vectorMin: 'Returns the minimum value in a vector.',
-  vectorMax: 'Returns the maximum value in a vector.',
-  vectorSort: 'Sorts a vector in ascending order.',
-  vectorReverse: 'Reverses the order of elements in a vector.',
-  vectorSlice: 'Extracts a sub-vector from Start to End index (0-based).',
-  vectorConcat: 'Concatenates two vectors into one.',
-  vectorMap: 'Multiplies every element of a vector by a scalar.',
-
-  // ── Table operations (Pro) ────────────────────────────────────────────────
-  tableFilter: 'Filters table rows where the value in column Col exceeds Threshold.',
-  tableSort: 'Sorts table rows by the values in column Col.',
-  tableColumn: 'Extracts a single column from a table as a vector.',
-  tableAddColumn: 'Appends a vector as a new column to a table.',
-  tableJoin: 'Joins two tables side by side (horizontal concatenation).',
+  // ── List operations (Pro) ───────────────────────────────────────────────
+  vectorLength: 'Returns the number of elements in a list.',
+  vectorSum: 'Sums all elements of a list.',
+  vectorMean: 'Computes the arithmetic mean of all elements in a list.',
+  vectorMin: 'Returns the minimum value in a list.',
+  vectorMax: 'Returns the maximum value in a list.',
+  vectorSort: 'Sorts a list in ascending order.',
+  vectorReverse: 'Reverses the order of elements in a list.',
+  vectorSlice: 'Extracts a sub-list from Start to End index (0-based).',
+  vectorConcat: 'Concatenates two lists into one.',
+  vectorMap: 'Multiplies every element of a list by a scalar.',
 
   // ── Plot blocks (Pro) ─────────────────────────────────────────────────────
   xyPlot: 'XY line or scatter plot. Connect vector or table data to visualize trends.',

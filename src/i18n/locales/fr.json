@@ -1106,6 +1106,15 @@
     "from": "De",
     "to": "En"
   },
+  "listEditor": {
+    "addItem": "Ajouter",
+    "removeItem": "Supprimer",
+    "paste": "Coller",
+    "clear": "Effacer",
+    "apply": "Appliquer",
+    "pastePlaceholder": "Collez des nombres (un par ligne, separes par des virgules ou tableau JSON)",
+    "pasteNoValid": "Aucun nombre valide trouve"
+  },
   "common": {
     "cancel": "Annuler",
     "close": "Fermer",

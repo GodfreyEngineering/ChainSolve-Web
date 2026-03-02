@@ -1106,6 +1106,15 @@
     "from": "Von",
     "to": "Nach"
   },
+  "listEditor": {
+    "addItem": "Eintrag hinzufuegen",
+    "removeItem": "Entfernen",
+    "paste": "Einfuegen",
+    "clear": "Leeren",
+    "apply": "Anwenden",
+    "pastePlaceholder": "Zahlen einfuegen (eine pro Zeile, kommagetrennt oder JSON-Array)",
+    "pasteNoValid": "Keine gueltigen Zahlen gefunden"
+  },
   "common": {
     "cancel": "Abbrechen",
     "close": "Schließen",

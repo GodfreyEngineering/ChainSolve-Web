@@ -1125,6 +1125,15 @@
     "from": "From",
     "to": "To"
   },
+  "listEditor": {
+    "addItem": "Add item",
+    "removeItem": "Remove",
+    "paste": "Paste",
+    "clear": "Clear",
+    "apply": "Apply",
+    "pastePlaceholder": "Paste numbers (one per line, comma-separated, or JSON array)",
+    "pasteNoValid": "No valid numbers found"
+  },
   "common": {
     "cancel": "Cancel",
     "close": "Close",

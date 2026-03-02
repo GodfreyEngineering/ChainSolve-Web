@@ -21,7 +21,6 @@ import { getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 const PRO_CATEGORIES = new Set([
   'data',
   'vectorOps',
-  'tableOps',
   'plot',
   'finTvm',
   'finReturns',

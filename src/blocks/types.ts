@@ -16,7 +16,6 @@ export type BlockCategory =
   | 'output'
   | 'data'
   | 'vectorOps'
-  | 'tableOps'
   | 'plot'
   | 'engMechanics'
   | 'engMaterials'
@@ -172,7 +171,7 @@ export interface BlockDef {
   nodeKind: NodeKind
   inputs: PortDef[]
   defaultData: NodeData
-  /** True for Pro-only blocks (data, vectorOps, tableOps). */
+  /** True for Pro-only blocks (data, vectorOps). */
   proOnly?: boolean
   /** E5-5: Alternative names for search (e.g. ["acceleration"] for F=ma). */
   synonyms?: string[]

@@ -255,6 +255,15 @@
     "from": "מ",
     "to": "ל"
   },
+  "listEditor": {
+    "addItem": "הוספה",
+    "removeItem": "הסרה",
+    "paste": "הדבקה",
+    "clear": "ניקוי",
+    "apply": "החל",
+    "pastePlaceholder": "הדבק מספרים (אחד בשורה, מופרדים בפסיקים או מערך JSON)",
+    "pasteNoValid": "לא נמצאו מספרים תקינים"
+  },
   "common": {
     "cancel": "ביטול",
     "close": "סגור",

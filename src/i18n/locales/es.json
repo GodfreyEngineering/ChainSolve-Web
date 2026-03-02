@@ -1106,6 +1106,15 @@
     "from": "De",
     "to": "A"
   },
+  "listEditor": {
+    "addItem": "Agregar",
+    "removeItem": "Eliminar",
+    "paste": "Pegar",
+    "clear": "Limpiar",
+    "apply": "Aplicar",
+    "pastePlaceholder": "Pegar numeros (uno por linea, separados por comas o arreglo JSON)",
+    "pasteNoValid": "No se encontraron numeros validos"
+  },
   "common": {
     "cancel": "Cancelar",
     "close": "Cerrar",

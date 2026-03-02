@@ -1780,7 +1780,7 @@ Claude MUST:
 ---
 
 ## H2 — Lists replace tables/arrays (scientific list workflow)
-- [ ] H2-1: Remove tables and array blocks; replace with List input blocks only
+- [x] H2-1: Remove tables and array blocks; replace with List input blocks only
   - List is 1xN column.
   - Inspector supports paste from Excel/CSV/web:
     - smart parsing
@@ -2059,5 +2059,373 @@ Claude MUST:
   - Ensure consistent tone, simple English
   - Ensure code style consistent and professional
   - Acceptance: repo and UI look like a human-built product.
+
+---
+
+---
+
+# PHASE J — Auth/Profiles v3 + Roles/Plans polish + First-class identity (ONE checkpoint per run)
+> Objective: Start from a fresh Supabase state and implement a truly professional signup/login/profile system with strong roles, safe public identity, and premium plan presentation. Claude completes ONE checkpoint per run.
+
+## Phase J execution rules
+- ONE checkpoint per run.
+- DONE requires: verify-ci PASS + tests + i18n + docs/changelog.
+- No emojis. Simple English. No AI-ish tone.
+- Offensive display name/avatar prevention: block + report workflow (no “trust user input”).
+- Plan UI must be identical for Free/Pro/Enterprise, with Pro/Enterprise features visible but locked for Free.
+
+---
+
+## J0 — Supabase schema re-baseline for fresh auth
+- [ ] J0-1: Define the “fresh state” user data model (profiles/preferences/roles) and migrate cleanly
+  - Create/verify core tables (or refactor existing):
+    - profiles (public identity + plan state snapshot fields)
+    - user_preferences (locale/region/theme defaults, UI/layout defaults)
+    - user_terms_acceptance (terms version + timestamp + ip/device metadata)
+    - user_marketing_prefs (opt-in + timestamp)
+    - user_devices (remembered devices + last_active + revoke)
+    - user_reports (reports for offensive names/avatars/comments)
+    - roles/permissions tables (developer, enterprise_admin, etc.)
+  - Must be designed so it is safe and scalable (no hacks).
+  - Acceptance:
+    - All tables have RLS enabled with explicit policies.
+    - Insert hooks create default profile + preferences on signup.
+    - verify-ci PASS
+
+---
+
+## J1 — Professional signup flow (multi-step, first-run defaults)
+- [ ] J1-1: Signup wizard (multi-step) with full profile creation
+  - On signup collect:
+    - email + password
+    - display name
+    - profile picture upload (optional)
+    - locale/language + region
+    - marketing email preference (opt-in)
+    - accept Terms + Privacy
+  - Validate display name:
+    - length, allowed characters
+    - forbidden words list + similarity checks (basic)
+  - Avatar safety:
+    - allow upload
+    - “report avatar” flow added (moderation queue)
+  - Acceptance:
+    - New user ends signup with complete profile + preferences saved.
+    - No blank profiles.
+    - All user-facing text i18n’d.
+
+- [ ] J1-2: Captcha integration on signup/login/reset
+  - Implement captcha (Turnstile or hCaptcha) in a CSP-safe way.
+  - Ensure captcha works without weakening CSP.
+  - Acceptance:
+    - Bots blocked.
+    - Humans not blocked.
+    - No CSP violations.
+
+- [ ] J1-3: Email verification + ToS acceptance gating (robust)
+  - Terms page must render properly (no blank).
+  - Acceptance record must never fail silently.
+  - User cannot enter app until email verified + terms accepted.
+  - Acceptance:
+    - Terms page visible
+    - “I accept” succeeds reliably
+    - Clear retry behavior on network issues
+
+- [ ] J1-4: 2FA/MFA optional setup during onboarding
+  - Add “Set up 2FA now” step (skip allowed).
+  - Use Supabase MFA enroll/challenge/verify flows. :contentReference[oaicite:2]{index=2}
+  - Acceptance:
+    - User can enroll TOTP
+    - Subsequent re-login respects 2FA
+
+---
+
+## J2 — Account vs ChainSolve settings separation (and password-protected billing)
+- [ ] J2-1: Split Account Settings vs ChainSolve Settings into separate windows
+  - Account Settings (security-sensitive):
+    - billing/plan management
+    - password change / re-auth
+    - email change
+    - 2FA management
+    - device sessions + revoke
+    - public profile: display name + avatar
+  - ChainSolve Settings (workbench preferences):
+    - canvas settings, blocks settings, performance settings
+    - decimals, formatting, autosave defaults, etc.
+  - Acceptance:
+    - Account settings require re-auth for billing/personal details.
+    - ChainSolve settings do not.
+
+---
+
+## J3 — Roles and plan levels (formal + enforceable + test personas)
+- [ ] J3-1: Formalize roles exactly as described + add developer role for ben.godfrey@chainsolve.co.uk
+  - Free / Pro / Student / Enterprise / Enterprise Admin / Developer
+  - Developer overrides all restrictions + dev tools.
+  - Enterprise admin controls badge display rules and role prefix/suffix for org.
+  - Acceptance:
+    - Roles enforced server-side (not cosmetic).
+    - Easy to test each role.
+
+- [ ] J3-2: Plan badge redesign (visual polish + rules)
+  - Free badge: grey/white, boring; display name not bold
+  - Pro badge: gold, shiny animated; display name bold
+  - Enterprise badge: clean premium; display name premium; role prefix/suffix controlled by enterprise admin
+  - Acceptance:
+    - Same UI for all plans; only locked features differ.
+    - Badge behavior matches requirements.
+
+---
+
+## J4 — “Fresh landing” user experience and loading polish
+- [ ] J4-1: 1000x better loading animation system (app + route transitions)
+  - Premium loading screen:
+    - deterministic, fast, lightweight
+    - no external scripts
+  - Route-level skeletons:
+    - auth screens
+    - app landing
+    - project open
+  - Acceptance:
+    - feels premium
+    - no layout jank
+    - no CSP issues
+
+- [ ] J4-2: App landing (/app) for signed-in user with no project open
+  - Main header + helpful dashboard:
+    - projects, explore, docs, onboarding checklist
+    - profile stats and quick actions
+  - Acceptance:
+    - user can do meaningful actions without opening a project
+
+---
+
+# PHASE K — Workbench power UX: Multi-sheet windowing, hide/show blocks, responsive layouts, console power (ONE checkpoint per run)
+> Objective: Make the canvas/workbench operate like a true workstation app: multi-sheet tiling, docking, quick workflows, and a user-friendly console.
+
+## Phase K execution rules
+- ONE checkpoint per run.
+- Robustness > speed. Must be fluid and predictable.
+
+---
+
+## K0 — Project header ergonomics and shortcuts
+- [ ] K0-1: Add undo/redo icons + open + save-as buttons in project header (top left near save)
+  - Must look neat, compact, and consistent with icon style.
+  - Add tooltips and shortcuts list.
+  - Acceptance:
+    - buttons work
+    - undo/redo consistent
+    - i18n complete
+
+---
+
+## K1 — Multi-sheet windowing system (fullscreen vs tiled)
+- [ ] K1-1: Implement “Sheet View Modes”
+  - Modes:
+    - Default: fullscreen active sheet (today)
+    - Tiled Vertical
+    - Tiled Horizontal
+  - Windows support:
+    - minimize/hide/maximize
+    - drag + snap left/right
+    - resize
+  - Copy/paste blocks across sheets in multi-view
+  - Drag a block to another sheet:
+    - block moves
+    - its chains disconnect cleanly
+  - Acceptance:
+    - robust layout
+    - no save conflicts
+    - performance acceptable with many nodes
+
+- [ ] K1-2: Multi-sheet selection/copy semantics
+  - Copy/paste preserves internal chains within selection
+  - Paste into other sheet remaps ids properly
+  - Acceptance:
+    - no id collisions
+    - undo/redo works
+
+---
+
+## K2 — Hide/show blocks (CATIA-style)
+- [ ] K2-1: Hide selected blocks with Spacebar + toolbar toggle
+  - Spacebar hides selected block(s) (if selection exists)
+  - Add canvas toolbar toggle “Hidden View” (show/hide hidden blocks)
+  - Must not break existing pan behavior; resolve conflict cleanly:
+    - Pan uses Space+Drag; hide uses Space press when selection exists and no drag.
+  - Acceptance:
+    - reliable, intuitive
+    - no accidental hide while panning
+
+---
+
+## K3 — Responsive UI: landscape workstation + portrait/mobile-first adaptations
+- [ ] K3-1: Adaptive layout system for portrait/mobile without feeling like a squished desktop
+  - Landscape: full workstation layout
+  - Portrait: smart collapse into dropdowns/drawers
+  - Ensure all core actions reachable:
+    - projects, explore, docs, settings, account
+    - insert blocks and manage sheets
+  - Acceptance:
+    - usable on phone-like portrait
+    - looks intentional, not broken
+
+---
+
+## K4 — Terminal/Console becomes a user tool, not dev clutter
+- [ ] K4-1: Upgrade console UX to be helpful and teach users
+  - Features:
+    - searchable logs
+    - “Explain this error” link (opens help window)
+    - “Copy error report” (redacted)
+    - action buttons for common fixes (e.g., open settings, open docs)
+    - per-project filter presets
+  - Acceptance:
+    - users can actually use it
+    - no duplicated close/minimize weirdness
+
+- [ ] K4-2: Console guidance for scientific workflows
+  - When user hits:
+    - unit mismatch
+    - missing input binding
+    - invalid list data
+  - Console provides:
+    - plain language explanation
+    - suggested next step
+  - Acceptance:
+    - improves UX
+    - no spam
+
+---
+
+## K5 — Content safety: “offensive content” prevention hooks
+- [ ] K5-1: Offensive display name/avatar enforcement and reporting
+  - Block obvious offensive names at entry
+  - Add reporting flow for:
+    - display names
+    - avatars
+    - explore comments/items
+  - Minimal moderation tooling for Developer role
+  - Acceptance:
+    - safe defaults
+    - auditable actions
+
+---
+
+# PHASE L — Legal/compliance readiness, branding/SEO, “sellable product” checks, and reliability hardening (ONE checkpoint per run)
+> Objective: Make the repo and app ready to sell: licensing clarity, attribution compliance, polished branding and SEO, and operational readiness.
+
+## Phase L execution rules
+- ONE checkpoint per run.
+- No claims of “guaranteed non-infringing”; implement a professional process and evidence.
+
+---
+
+## L0 — Legal/compliance readiness process (repo-level)
+- [ ] L0-1: Third-party license inventory + NOTICE generation (automated)
+  - Add tooling to generate:
+    - THIRD_PARTY_NOTICES.md
+    - dependency license list (npm + cargo)
+    - asset license list (icons/fonts/images)
+  - Add “no unlicensed assets” policy doc.
+  - Acceptance:
+    - reproducible license report generated in CI
+
+- [ ] L0-2: React Flow / XYFlow licensing compliance review
+  - Ensure your usage complies (especially if hiding attribution).
+  - Document whether you keep attribution or use pro licensing path.
+  - Acceptance:
+    - documented compliance stance
+    - no accidental license breach
+
+- [ ] L0-3: “Patent/workflow” risk process (non-legal, engineering process)
+  - Add doc checklist:
+    - avoid copying exact UI patterns from proprietary apps
+    - document inspiration sources
+    - novelty log for “patentable” features (publish blocks, AI workflows, etc.)
+    - schedule professional legal review before enterprise launch
+  - Acceptance:
+    - professional audit trail exists
+
+---
+
+## L1 — Branding, legalese, and footer compliance
+- [ ] L1-1: Footer legal + contact info across app + docs
+  - Footer includes:
+    - © notice
+    - Registered in England & Wales
+    - Company No: 16845827
+    - Contact: support@chainsolve.co.uk and info@chainsolve.co.uk
+    - Link to Terms/Privacy
+  - Pull the baseline company details from godfreyengineering.com footer. :contentReference[oaicite:3]{index=3}
+  - Acceptance:
+    - consistent across app
+    - terms/privacy accessible
+    - no blank pages
+
+- [ ] L1-2: Terms/Privacy pages fully working and robust
+  - Ensure acceptance recording never fails silently.
+  - Acceptance: no “Failed to record acceptance” regressions.
+
+---
+
+## L2 — SEO, favicon, and international SEO readiness
+- [ ] L2-1: Favicon and full app metadata polish
+  - favicon set
+  - Open Graph images
+  - consistent brand identity
+  - Acceptance: polished and correct.
+
+- [ ] L2-2: SEO for multiple countries
+  - hreflang strategy for docs pages
+  - localized docs scaffolding
+  - Acceptance: international SEO baseline.
+
+---
+
+## L3 — Sellable product readiness: stability and “single-session” correctness
+- [ ] L3-1: “Single device/browser/tab session” policy (if enabled)
+  - Implement robustly with clear UX
+  - Must not trigger false “another session” warnings
+  - Acceptance:
+    - predictable session behavior
+    - no save lockouts
+
+- [ ] L3-2: Full operational readiness checklist for consultancy audit
+  - Add docs:
+    - how to audit the repo
+    - how to run tests
+    - how to review security posture (public-safe)
+  - Acceptance:
+    - repo looks human-built and professional
+    - no “vibe-coded” artifacts
+
+---
+
+## L4 — Next-level extras (nice-to-haves that move the needle)
+- [ ] L4-1: “Scratch canvas” workflow perfected
+  - Start without naming
+  - Save as project anytime
+  - No nags unless leaving with unsaved changes
+  - Acceptance: frictionless.
+
+- [ ] L4-2: Pro-grade project file manager
+  - folder-like organization
+  - duplicate/move/rename
+  - bulk operations
+  - Acceptance: feels like a workstation.
+
+- [ ] L4-3: Bug report + suggestion UX (fast, professional)
+  - attach redacted logs
+  - attach screenshot
+  - categorize (bug vs suggestion vs block request)
+  - Acceptance: effortless feedback loop.
+
+- [ ] L4-4: “Power user workflows” polish
+  - keyboard shortcuts coverage pass
+  - command palette improvements
+  - tooltips for every major action
+  - Acceptance: productivity boost.
 
 ---
