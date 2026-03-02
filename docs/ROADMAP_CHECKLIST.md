@@ -1360,7 +1360,7 @@ Claude MUST:
 ---
 
 ## F1 — Housekeeping cleanup (safe, mechanical, reduces confusion)
-- [ ] F1-1: Remove/ignore local-only noise and enforce git cleanliness
+- [x] F1-1: Remove/ignore local-only noise and enforce git cleanliness
   - Ensure `.claude/`, `.dev.vars*`, `.env*` ignored and not tracked. :contentReference[oaicite:3]{index=3}
   - Ensure git hooks and devcontainer features are consistent (Git LFS present in container).
   - Acceptance: “fresh container → clean git status” after normal dev actions.
