@@ -1418,7 +1418,7 @@ Claude MUST:
     - supply chain checks expectations
   - Acceptance: future devs can follow policy.
 
-- [ ] F3-3: Performance budget and regression hooks
+- [x] F3-3: Performance budget and regression hooks
   - Ensure bundle-size checks are meaningful and stable.
   - Add optional perf note: how to run a perf harness and confirm LOD/edges stability.
   - Acceptance: perf regressions are catchable.
