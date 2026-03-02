@@ -29,14 +29,10 @@ export interface CanvasToolbarProps {
   lodEnabled: boolean
   onToggleEdgesAnimated: () => void
   onToggleLod: () => void
-  debugConsoleVisible?: boolean
-  onToggleDebugConsole?: () => void
   badgesEnabled?: boolean
   onToggleBadges?: () => void
   edgeBadgesEnabled?: boolean
   onToggleEdgeBadges?: () => void
-  healthPanelVisible?: boolean
-  onToggleHealthPanel?: () => void
   bgDotsVisible?: boolean
   onToggleBgDots?: () => void
 }
@@ -64,14 +60,10 @@ export function CanvasToolbar({
   lodEnabled,
   onToggleEdgesAnimated,
   onToggleLod,
-  debugConsoleVisible,
-  onToggleDebugConsole,
   badgesEnabled,
   onToggleBadges,
   edgeBadgesEnabled,
   onToggleEdgeBadges,
-  healthPanelVisible,
-  onToggleHealthPanel,
   bgDotsVisible,
   onToggleBgDots,
 }: CanvasToolbarProps) {
@@ -271,18 +263,6 @@ export function CanvasToolbar({
         </button>
       )}
 
-      {onToggleHealthPanel && (
-        <button
-          onClick={onToggleHealthPanel}
-          style={btnStyle(!!healthPanelVisible)}
-          title={t('toolbar.graphHealth')}
-          aria-label={t('toolbar.graphHealth')}
-          aria-pressed={!!healthPanelVisible}
-        >
-          {'\u2695'}
-        </button>
-      )}
-
       <div style={sepStyle} />
 
       {/* ── Engine ── */}
@@ -317,18 +297,6 @@ export function CanvasToolbar({
       >
         {'\u229f'}
       </button>
-
-      {onToggleDebugConsole && (
-        <button
-          onClick={onToggleDebugConsole}
-          style={btnStyle(!!debugConsoleVisible)}
-          title={t('toolbar.debugConsole')}
-          aria-label={t('toolbar.debugConsole')}
-          aria-pressed={!!debugConsoleVisible}
-        >
-          {'\u2261'}
-        </button>
-      )}
     </div>
   )
 }

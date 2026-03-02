@@ -645,17 +645,6 @@ export function AppHeader({
       },
       { separator: true },
       {
-        label: t('menu.toggleDebugConsole'),
-        shortcut: 'Ctrl+Shift+D',
-        onClick: () => canvasRef.current?.toggleDebugConsole(),
-      },
-      {
-        label: t('menu.toggleGraphHealth'),
-        shortcut: 'Ctrl+Shift+H',
-        onClick: () => canvasRef.current?.toggleHealthPanel(),
-      },
-      { separator: true },
-      {
         label: t('menu.theme'),
         children: [
           {

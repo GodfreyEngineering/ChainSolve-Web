@@ -91,7 +91,6 @@ const LazyGraphHealthPanel = lazy(() => import('./GraphHealthPanel'))
 import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import { useDebugConsoleStore } from '../../stores/debugConsoleStore'
 import { ValuePopoverContext, type ShowValuePopover } from '../../contexts/ValuePopoverContext'
 const LazyValuePopover = lazy(() =>
   import('./ValuePopover').then((m) => ({ default: m.ValuePopover })),
@@ -314,26 +313,6 @@ function setEdgeBadgesPref(v: boolean) {
   }
 }
 
-// ── Health panel persistence ────────────────────────────────────────────────
-
-const HEALTH_PANEL_KEY = 'chainsolve.healthPanel'
-
-function getHealthPanelPref(): boolean {
-  try {
-    return localStorage.getItem(HEALTH_PANEL_KEY) === 'true'
-  } catch {
-    return false
-  }
-}
-
-function setHealthPanelPref(v: boolean) {
-  try {
-    localStorage.setItem(HEALTH_PANEL_KEY, String(v))
-  } catch {
-    // Ignore — private browsing
-  }
-}
-
 // ── Background dots persistence ──────────────────────────────────────────
 
 const BG_DOTS_KEY = 'chainsolve.bgDots'
@@ -435,7 +414,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 ) {
   const isMobile = useIsMobile()
   const ent = getEntitlements(plan)
-  const debugConsoleVisible = useDebugConsoleStore((s) => s.visible)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(
     initialNodes ?? INITIAL_NODES,
@@ -509,7 +487,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         return !v
       })
     },
-    toggleDebugConsole: () => useDebugConsoleStore.getState().toggleVisible(),
+    toggleDebugConsole: () => setDockCollapsed(false),
     toggleBadges: () => {
       setBadgesEnabled((v) => {
         setBadgesPref(!v)
@@ -522,12 +500,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         return !v
       })
     },
-    toggleHealthPanel: () => {
-      setHealthPanelVisible((v) => {
-        setHealthPanelPref(!v)
-        return !v
-      })
-    },
+    toggleHealthPanel: () => setDockCollapsed(false),
     exportPdfAudit: async () => {
       const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } =
         await import('../../lib/build-info')
@@ -735,8 +708,21 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const [badgesEnabled, setBadgesEnabled] = useState(getBadgesPref)
   const [edgeBadgesEnabled, setEdgeBadgesEnabled] = useState(getEdgeBadgesPref)
 
-  // Health panel state (W12.5)
-  const [healthPanelVisible, setHealthPanelVisible] = useState(getHealthPanelPref)
+  // G5-2: Bottom dock collapsed state (persisted)
+  const [dockCollapsed, setDockCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('cs:dockCollapsed') === 'true'
+    } catch {
+      return true
+    }
+  })
+  useEffect(() => {
+    try {
+      localStorage.setItem('cs:dockCollapsed', String(dockCollapsed))
+    } catch {
+      // ignore
+    }
+  }, [dockCollapsed])
 
   // Background dots (E7-2)
   const [bgDotsVisible, setBgDotsVisible] = useState(getBgDotsPref)
@@ -1410,10 +1396,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         })
       }
 
-      // Ctrl+Shift+D: Toggle debug console
+      // Ctrl+Shift+D: Toggle bottom dock
       if (ctrl && e.shiftKey && e.key === 'D') {
         e.preventDefault()
-        useDebugConsoleStore.getState().toggleVisible()
+        setDockCollapsed((v) => !v)
       }
 
       // Ctrl+Shift+B: Toggle value badges
@@ -1441,13 +1427,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         if (selectedGroup) toggleGroupCollapse(selectedGroup.id)
       }
 
-      // Ctrl+Shift+H: Toggle graph health panel (W12.5)
+      // Ctrl+Shift+H: Toggle bottom dock
       if (ctrl && e.shiftKey && e.key === 'H') {
         e.preventDefault()
-        setHealthPanelVisible((v) => {
-          setHealthPanelPref(!v)
-          return !v
-        })
+        setDockCollapsed((v) => !v)
       }
     },
     [
@@ -1590,25 +1573,19 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [effectiveEdgesAnimated, effectiveBadges, effectiveEdgeBadges],
   )
 
-  // ── Bottom dock panels ──────────────────────────────────────────────────
-  const dockPanels = useMemo<DockPanel[]>(() => {
-    const panels: DockPanel[] = []
-    if (debugConsoleVisible) {
-      panels.push({
+  // ── Bottom dock panels (G5-2: always both tabs) ────────────────────────
+  const dockPanels = useMemo<DockPanel[]>(
+    () => [
+      {
         id: 'console' as DockTab,
         label: t('debugConsole.title', 'Debug Console'),
         content: (
           <Suspense fallback={null}>
-            <LazyDebugConsolePanel
-              docked
-              onClose={() => useDebugConsoleStore.getState().setVisible(false)}
-            />
+            <LazyDebugConsolePanel docked />
           </Suspense>
         ),
-      })
-    }
-    if (healthPanelVisible) {
-      panels.push({
+      },
+      {
         id: 'health' as DockTab,
         label: t('toolbar.graphHealth', 'Graph Health'),
         content: (
@@ -1617,19 +1594,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               docked
               nodes={nodes}
               edges={edges}
-              onClose={() => {
-                setHealthPanelVisible(false)
-                setHealthPanelPref(false)
-              }}
+              onClose={() => setDockCollapsed(true)}
               onFixWithCopilot={onFixWithCopilot}
               onExplainIssues={onExplainIssues}
             />
           </Suspense>
         ),
-      })
-    }
-    return panels
-  }, [debugConsoleVisible, healthPanelVisible, nodes, edges, t, onFixWithCopilot, onExplainIssues])
+      },
+    ],
+    [nodes, edges, t, onFixWithCopilot, onExplainIssues],
+  )
 
   return (
     <ComputedContext.Provider value={computed}>
@@ -1810,8 +1784,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                       return !v
                     })
                   }}
-                  debugConsoleVisible={debugConsoleVisible}
-                  onToggleDebugConsole={() => useDebugConsoleStore.getState().toggleVisible()}
                   badgesEnabled={badgesEnabled}
                   onToggleBadges={() => {
                     setBadgesEnabled((v) => {
@@ -1826,13 +1798,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                       return !v
                     })
                   }}
-                  healthPanelVisible={healthPanelVisible}
-                  onToggleHealthPanel={() => {
-                    setHealthPanelVisible((v) => {
-                      setHealthPanelPref(!v)
-                      return !v
-                    })
-                  }}
                   bgDotsVisible={bgDotsVisible}
                   onToggleBgDots={() => {
                     setBgDotsVisible((v) => {
@@ -1841,17 +1806,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     })
                   }}
                 />
-                {/* Bottom Dock — tabbed panel container */}
-                {(debugConsoleVisible || healthPanelVisible) && (
-                  <BottomDock
-                    panels={dockPanels}
-                    onClose={() => {
-                      useDebugConsoleStore.getState().setVisible(false)
-                      setHealthPanelVisible(false)
-                      setHealthPanelPref(false)
-                    }}
-                  />
-                )}
+                {/* Bottom Dock — always visible with docking handle (G5-2) */}
+                <BottomDock
+                  panels={dockPanels}
+                  collapsed={dockCollapsed}
+                  onToggleCollapsed={() => setDockCollapsed((v) => !v)}
+                />
               </div>
 
               {/* Floating Inspector window (replaces sidebar + mobile drawer) */}

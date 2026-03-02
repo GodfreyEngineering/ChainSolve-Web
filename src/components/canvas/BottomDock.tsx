@@ -7,7 +7,6 @@
  */
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -22,7 +21,10 @@ export interface DockPanel {
 
 interface BottomDockProps {
   panels: DockPanel[]
-  onClose: () => void
+  /** G5-2: Whether the dock is collapsed to a thin handle. */
+  collapsed?: boolean
+  /** G5-2: Toggle collapsed state. */
+  onToggleCollapsed?: () => void
 }
 
 // ── Persistence helpers ──────────────────────────────────────────────────
@@ -74,17 +76,19 @@ function saveTab(tab: DockTab) {
 
 // ── Component ──────────────────────────────────────────────────────────────
 
-export function BottomDock({ panels, onClose }: BottomDockProps) {
-  const { t } = useTranslation()
+/** Height of the collapsed bottom dock handle bar. */
+export const COLLAPSED_DOCK_HEIGHT = 24
+
+export function BottomDock({ panels, collapsed = false, onToggleCollapsed }: BottomDockProps) {
   const { windows } = useWindowManager()
   const [height, setHeight] = useState(loadHeight)
   const [activeTab, setActiveTab] = useState<DockTab>(() => {
     const saved = loadTab()
-    // Fallback to first available panel if saved tab is not present
     if (panels.some((p) => p.id === saved)) return saved
     return panels[0]?.id ?? 'console'
   })
   const dragRef = useRef<{ startY: number; startH: number } | null>(null)
+  const [handleHovered, setHandleHovered] = useState(false)
 
   // Persist tab changes
   const switchTab = useCallback((tab: DockTab) => {
@@ -119,22 +123,58 @@ export function BottomDock({ panels, onClose }: BottomDockProps) {
     [height],
   )
 
-  // Keyboard: ESC closes dock (only when no windows are open —
-  // WindowManagerContext handles Escape for open windows)
+  // Keyboard: ESC collapses dock (only when no windows are open)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && windows.every((w) => w.minimized)) onClose()
+      if (e.key === 'Escape' && !collapsed && windows.every((w) => w.minimized)) {
+        onToggleCollapsed?.()
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [onClose, windows])
+  }, [onToggleCollapsed, windows, collapsed])
 
   const activePanel = panels.find((p) => p.id === activeTab)
 
+  // G5-2: Collapsed — thin handle bar with chevron
+  if (collapsed) {
+    return (
+      <div
+        style={{
+          ...dockStyle,
+          height: COLLAPSED_DOCK_HEIGHT,
+          cursor: 'pointer',
+          justifyContent: 'center',
+        }}
+        onClick={onToggleCollapsed}
+        onMouseEnter={() => setHandleHovered(true)}
+        onMouseLeave={() => setHandleHovered(false)}
+        title="Expand dock"
+      >
+        <span
+          style={{
+            fontSize: '0.65rem',
+            color: handleHovered ? 'var(--primary)' : 'var(--text-faint)',
+            transition: 'color 0.15s ease, transform 0.2s ease',
+            transform: handleHovered ? 'translateY(-1px)' : 'translateY(0)',
+            userSelect: 'none',
+          }}
+        >
+          {'\u2303'}
+        </span>
+      </div>
+    )
+  }
+
   return (
     <div style={{ ...dockStyle, height }}>
-      {/* Resize handle */}
-      <div style={resizeHandleStyle} onMouseDown={onResizeStart} />
+      {/* Resize handle + double-click collapse */}
+      <div
+        style={resizeHandleStyle}
+        onMouseDown={onResizeStart}
+        onDoubleClick={onToggleCollapsed}
+        title="Drag to resize, double-click to collapse"
+      />
 
       {/* Tab bar */}
       <div style={tabBarStyle}>
@@ -152,9 +192,6 @@ export function BottomDock({ panels, onClose }: BottomDockProps) {
             </button>
           ))}
         </div>
-        <button onClick={onClose} style={closeBtnStyle} title={t('common.close', 'Close')}>
-          {'\u2715'}
-        </button>
       </div>
 
       {/* Panel content */}
@@ -216,17 +253,6 @@ const tabBtnActiveStyle: React.CSSProperties = {
   opacity: 1,
   borderBottomColor: '#1CABB0',
   color: '#1CABB0',
-}
-
-const closeBtnStyle: React.CSSProperties = {
-  background: 'transparent',
-  border: 'none',
-  color: 'var(--text, #f4f4f3)',
-  cursor: 'pointer',
-  fontSize: '0.68rem',
-  padding: '2px 6px',
-  opacity: 0.5,
-  fontFamily: 'inherit',
 }
 
 const contentStyle: React.CSSProperties = {
