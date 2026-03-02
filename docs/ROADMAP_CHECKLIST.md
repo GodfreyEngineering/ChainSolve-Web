@@ -1289,7 +1289,7 @@ Claude MUST:
 ---
 
 ## E11 — Release candidate hardening
-- [ ] E11-1: E2E suite expansion to cover new UX
+- [x] E11-1: E2E suite expansion to cover new UX
   - login/signup, ToS, captcha, 2FA (mock)
   - workbench home
   - window manager
