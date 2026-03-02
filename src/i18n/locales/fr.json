@@ -37,7 +37,11 @@
     "filterRecent": "Récents",
     "filterPinned": "Épinglés",
     "noPinned": "Aucun projet épinglé. Cliquez sur l'étoile pour épingler un projet ici.",
-    "noRecent": "Aucun projet ouvert récemment."
+    "noRecent": "Aucun projet ouvert récemment.",
+    "onboarding": "Pour commencer",
+    "statProjects": "Projets",
+    "statPlan": "Forfait",
+    "statMemberSince": "Membre depuis"
   },
   "contact": {
     "support": "Assistance",

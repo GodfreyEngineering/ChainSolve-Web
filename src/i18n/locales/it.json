@@ -37,7 +37,11 @@
     "filterRecent": "Recenti",
     "filterPinned": "Fissati",
     "noPinned": "Nessun progetto fissato. Contrassegna un progetto con la stella per fissarlo qui.",
-    "noRecent": "Nessun progetto aperto di recente."
+    "noRecent": "Nessun progetto aperto di recente.",
+    "onboarding": "Per iniziare",
+    "statProjects": "Progetti",
+    "statPlan": "Piano",
+    "statMemberSince": "Membro dal"
   },
   "contact": {
     "support": "Assistenza",

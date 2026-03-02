@@ -37,7 +37,11 @@
     "filterRecent": "Kürzlich",
     "filterPinned": "Angeheftet",
     "noPinned": "Keine angehefteten Projekte. Markieren Sie ein Projekt mit einem Stern.",
-    "noRecent": "Keine kürzlich geöffneten Projekte."
+    "noRecent": "Keine kürzlich geöffneten Projekte.",
+    "onboarding": "Erste Schritte",
+    "statProjects": "Projekte",
+    "statPlan": "Plan",
+    "statMemberSince": "Mitglied seit"
   },
   "contact": {
     "support": "Support",

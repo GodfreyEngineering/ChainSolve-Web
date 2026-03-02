@@ -37,7 +37,11 @@
     "filterRecent": "Recent",
     "filterPinned": "Pinned",
     "noPinned": "No pinned projects. Star a project to pin it here.",
-    "noRecent": "No recently opened projects."
+    "noRecent": "No recently opened projects.",
+    "onboarding": "Getting Started",
+    "statProjects": "Projects",
+    "statPlan": "Plan",
+    "statMemberSince": "Member since"
   },
   "contact": {
     "support": "Support",

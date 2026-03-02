@@ -23,7 +23,13 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
 import { supabase } from '../lib/supabase'
-import { shouldShowOnboarding } from '../lib/onboardingState'
+import {
+  shouldShowOnboarding,
+  getOnboardingState,
+  ONBOARDING_STEPS,
+  completedCount,
+  allCompleted,
+} from '../lib/onboardingState'
 import type { User } from '@supabase/supabase-js'
 import {
   listProjects,
@@ -129,6 +135,29 @@ const sectionLabel: React.CSSProperties = {
   opacity: 0.5,
   textTransform: 'uppercase',
   letterSpacing: '0.05em',
+}
+
+const statCardStyle: React.CSSProperties = {
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-lg)',
+  padding: '1rem',
+  background: 'var(--card-bg)',
+  textAlign: 'center',
+}
+
+const statValueStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '1.1rem',
+  fontWeight: 700,
+  marginBottom: '0.2rem',
+}
+
+const statLabelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '0.72rem',
+  opacity: 0.45,
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
 }
 
 const errorBox: React.CSSProperties = {
@@ -744,6 +773,98 @@ export default function AppShell() {
               </div>
             </div>
           </button>
+        </div>
+
+        {/* ── G7-2: Onboarding checklist ── */}
+        {!allCompleted(getOnboardingState()) && (
+          <div style={cardStyle}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '0.6rem',
+              }}
+            >
+              <p style={{ ...sectionLabel, margin: 0 }}>
+                {t('home.onboarding', 'Getting Started')}
+              </p>
+              <span
+                style={{ fontSize: '0.75rem', opacity: 0.5, fontVariantNumeric: 'tabular-nums' }}
+              >
+                {completedCount(getOnboardingState())}/{ONBOARDING_STEPS.length}
+              </span>
+            </div>
+            <div
+              style={{
+                height: 4,
+                borderRadius: 2,
+                background: 'rgba(255,255,255,0.08)',
+                overflow: 'hidden',
+                marginBottom: '0.75rem',
+              }}
+            >
+              <div
+                style={{
+                  height: '100%',
+                  width: `${(completedCount(getOnboardingState()) / ONBOARDING_STEPS.length) * 100}%`,
+                  background: 'var(--primary)',
+                  borderRadius: 2,
+                  transition: 'width 0.3s ease',
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+              {ONBOARDING_STEPS.map((step) => {
+                const done = !!getOnboardingState().completed[step]
+                return (
+                  <span
+                    key={step}
+                    style={{
+                      fontSize: '0.72rem',
+                      padding: '0.2rem 0.5rem',
+                      borderRadius: 4,
+                      background: done ? 'rgba(28,171,176,0.15)' : 'rgba(255,255,255,0.05)',
+                      color: done ? 'var(--primary)' : 'rgba(255,255,255,0.35)',
+                      textDecoration: done ? 'line-through' : 'none',
+                    }}
+                  >
+                    {t(`onboarding.steps.${step}`, step.replace(/_/g, ' '))}
+                  </span>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── G7-2: Profile stats row ── */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+            gap: '0.75rem',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <div style={statCardStyle}>
+            <span style={statValueStyle}>{projects.length}</span>
+            <span style={statLabelStyle}>{t('home.statProjects', 'Projects')}</span>
+          </div>
+          <div style={statCardStyle}>
+            <span style={statValueStyle}>{PLAN_LABELS[plan]}</span>
+            <span style={statLabelStyle}>{t('home.statPlan', 'Plan')}</span>
+          </div>
+          <div style={statCardStyle}>
+            <span style={statValueStyle}>
+              {user?.created_at
+                ? new Date(user.created_at).toLocaleDateString(undefined, {
+                    month: 'short',
+                    year: 'numeric',
+                  })
+                : '—'}
+            </span>
+            <span style={statLabelStyle}>{t('home.statMemberSince', 'Member since')}</span>
+          </div>
         </div>
 
         {/* ── Subscription card ── */}
