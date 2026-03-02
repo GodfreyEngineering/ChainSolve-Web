@@ -1,11 +1,14 @@
 /**
- * CanvasToolbar — vertical toolbar anchored to the right edge of the canvas.
+ * CanvasToolbar — draggable toolbar that snaps to any edge of the canvas.
+ *
+ * G5-3: Always visible, auto-rotates horizontal/vertical based on snap edge,
+ * draggable to top/right/bottom/left. Hover animations on icons (CAD-style).
  *
  * Contains canvas interaction tools (pan, zoom, fit, snap, lock),
- * view toggles (minimap, edges, LOD, badges, health),
- * engine controls (pause, refresh), and panel toggles.
+ * view toggles (minimap, edges, LOD, badges),
+ * engine controls (pause, refresh), and inspector toggle.
  */
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useReactFlow, useViewport } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 
@@ -37,8 +40,103 @@ export interface CanvasToolbarProps {
   onToggleBgDots?: () => void
 }
 
-/** Width of the toolbar strip in pixels, exported for layout calculations. */
+/** Width/height of the toolbar strip in pixels, exported for layout calculations. */
 export const CANVAS_TOOLBAR_WIDTH = 40
+
+// ── Snap position persistence ─────────────────────────────────────────────
+
+type SnapEdge = 'top' | 'right' | 'bottom' | 'left'
+const SNAP_KEY = 'cs:toolbarSnap'
+
+function loadSnap(): SnapEdge {
+  try {
+    const v = localStorage.getItem(SNAP_KEY) as SnapEdge | null
+    if (v === 'top' || v === 'right' || v === 'bottom' || v === 'left') return v
+  } catch {
+    // ignore
+  }
+  return 'top'
+}
+
+function saveSnap(edge: SnapEdge) {
+  try {
+    localStorage.setItem(SNAP_KEY, edge)
+  } catch {
+    // ignore
+  }
+}
+
+// ── Snap-edge style computation ───────────────────────────────────────────
+
+function isHorizontal(edge: SnapEdge): boolean {
+  return edge === 'top' || edge === 'bottom'
+}
+
+function computeBarStyle(edge: SnapEdge): React.CSSProperties {
+  const horiz = isHorizontal(edge)
+  const base: React.CSSProperties = {
+    position: 'absolute',
+    zIndex: 16,
+    display: 'flex',
+    flexDirection: horiz ? 'row' : 'column',
+    alignItems: 'center',
+    gap: '0.15rem',
+    background: 'var(--card-bg)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-lg)',
+    padding: horiz ? '0.25rem 0.35rem' : '0.35rem 0.25rem',
+    boxShadow: 'var(--shadow-md)',
+    cursor: 'grab',
+    userSelect: 'none',
+    transition: 'top 0.2s ease, right 0.2s ease, bottom 0.2s ease, left 0.2s ease',
+  }
+  if (horiz) {
+    base.maxWidth = 'calc(100% - 24px)'
+    base.overflowX = 'auto'
+    base.overflowY = 'hidden'
+  } else {
+    base.maxHeight = 'calc(100% - 24px)'
+    base.overflowY = 'auto'
+    base.overflowX = 'hidden'
+  }
+  // Position on the chosen edge, centered along the other axis
+  switch (edge) {
+    case 'top':
+      base.top = 8
+      base.left = '50%'
+      base.transform = 'translateX(-50%)'
+      break
+    case 'bottom':
+      base.bottom = 8
+      base.left = '50%'
+      base.transform = 'translateX(-50%)'
+      break
+    case 'left':
+      base.left = 8
+      base.top = '50%'
+      base.transform = 'translateY(-50%)'
+      break
+    case 'right':
+      base.right = 8
+      base.top = '50%'
+      base.transform = 'translateY(-50%)'
+      break
+  }
+  return base
+}
+
+function computeSepStyle(edge: SnapEdge): React.CSSProperties {
+  const horiz = isHorizontal(edge)
+  return {
+    width: horiz ? 1 : 18,
+    height: horiz ? 18 : 1,
+    background: 'var(--border)',
+    margin: horiz ? '0 0.1rem' : '0.1rem 0',
+    flexShrink: 0,
+  }
+}
+
+// ── Component ─────────────────────────────────────────────────────────────
 
 export function CanvasToolbar({
   panMode,
@@ -71,6 +169,14 @@ export function CanvasToolbar({
   const { zoomIn, zoomOut, zoomTo, fitView } = useReactFlow()
   const { zoom } = useViewport()
   const [editingZoom, setEditingZoom] = useState<string | null>(null)
+  const [snapEdge, setSnapEdge] = useState<SnapEdge>(loadSnap)
+  const [dragging, setDragging] = useState(false)
+  const barRef = useRef<HTMLDivElement>(null)
+
+  // Persist snap edge
+  useEffect(() => {
+    saveSnap(snapEdge)
+  }, [snapEdge])
 
   const handleZoomInputKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -92,10 +198,72 @@ export function CanvasToolbar({
     setEditingZoom(null)
   }, [])
 
+  // Drag to reposition — on mouseup, snap to nearest edge
+  const onBarMouseDown = useCallback((e: React.MouseEvent) => {
+    // Only initiate drag on the bar background, not on buttons/inputs
+    if ((e.target as HTMLElement).closest('button, input')) return
+    e.preventDefault()
+    setDragging(true)
+
+    const parent = barRef.current?.parentElement
+    if (!parent) return
+    const rect = parent.getBoundingClientRect()
+
+    const onMove = () => {
+      // Nothing to do during move — we snap on up
+    }
+    const onUp = (me: globalThis.MouseEvent) => {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+      setDragging(false)
+
+      // Determine which edge the mouse is closest to
+      const x = me.clientX - rect.left
+      const y = me.clientY - rect.top
+      const dTop = y
+      const dBottom = rect.height - y
+      const dLeft = x
+      const dRight = rect.width - x
+      const min = Math.min(dTop, dBottom, dLeft, dRight)
+
+      if (min === dTop) setSnapEdge('top')
+      else if (min === dBottom) setSnapEdge('bottom')
+      else if (min === dLeft) setSnapEdge('left')
+      else setSnapEdge('right')
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }, [])
+
   const pct = `${Math.round(zoom * 100)}%`
+  const horiz = isHorizontal(snapEdge)
+  const sep = computeSepStyle(snapEdge)
 
   return (
-    <div style={barStyle} role="toolbar" aria-label={t('toolbar.label')}>
+    <div
+      ref={barRef}
+      style={{
+        ...computeBarStyle(snapEdge),
+        cursor: dragging ? 'grabbing' : 'grab',
+      }}
+      role="toolbar"
+      aria-label={t('toolbar.label')}
+      onMouseDown={onBarMouseDown}
+      data-cs-toolbar
+    >
+      {/* G5-3: Hover animation styles */}
+      <style>{`
+        [data-cs-toolbar] button {
+          transition: transform 0.12s ease, background 0.1s ease;
+        }
+        [data-cs-toolbar] button:hover {
+          transform: scale(1.15);
+        }
+        [data-cs-toolbar] button:active {
+          transform: scale(0.95);
+        }
+      `}</style>
+
       {/* ── Canvas tools ── */}
       {!readOnly && (
         <button
@@ -109,7 +277,7 @@ export function CanvasToolbar({
         </button>
       )}
 
-      <div style={sepStyle} />
+      <div style={sep} />
 
       {/* Zoom controls */}
       <button
@@ -129,13 +297,13 @@ export function CanvasToolbar({
           onChange={(e) => setEditingZoom(e.target.value)}
           onKeyDown={handleZoomInputKeyDown}
           onBlur={handleZoomInputBlur}
-          style={zoomInputStyle}
+          style={horiz ? { ...zoomInputStyle, width: 36 } : zoomInputStyle}
           aria-label={t('toolbar.zoomLevel')}
         />
       ) : (
         <button
           onClick={() => setEditingZoom(String(Math.round(zoom * 100)))}
-          style={zoomDisplayStyle}
+          style={horiz ? { ...zoomDisplayStyle, width: 36 } : zoomDisplayStyle}
           title={t('toolbar.zoomLevel')}
           aria-label={t('toolbar.zoomLevel')}
         >
@@ -164,7 +332,7 @@ export function CanvasToolbar({
       {/* ── Layout ── */}
       {!readOnly && (
         <>
-          <div style={sepStyle} />
+          <div style={sep} />
           <button
             onClick={onToggleLock}
             style={btnStyle(locked)}
@@ -194,7 +362,7 @@ export function CanvasToolbar({
         </>
       )}
 
-      <div style={sepStyle} />
+      <div style={sep} />
 
       {/* ── View ── */}
       <button
@@ -263,7 +431,7 @@ export function CanvasToolbar({
         </button>
       )}
 
-      <div style={sepStyle} />
+      <div style={sep} />
 
       {/* ── Engine ── */}
       <button
@@ -285,9 +453,9 @@ export function CanvasToolbar({
         {'\u21bb'}
       </button>
 
-      <div style={sepStyle} />
+      <div style={sep} />
 
-      {/* ── Panels (G5-1: library toggle removed — now has own docking handle) ── */}
+      {/* ── Panels ── */}
       <button
         onClick={onToggleInspector}
         style={btnStyle(inspVisible)}
@@ -302,26 +470,6 @@ export function CanvasToolbar({
 }
 
 // ── Styles ───────────────────────────────────────────────────────────────────
-
-const barStyle: React.CSSProperties = {
-  position: 'absolute',
-  right: 8,
-  top: '50%',
-  transform: 'translateY(-50%)',
-  zIndex: 16,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: '0.15rem',
-  background: 'var(--card-bg)',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)',
-  padding: '0.35rem 0.25rem',
-  boxShadow: 'var(--shadow-md)',
-  maxHeight: 'calc(100% - 24px)',
-  overflowY: 'auto',
-  overflowX: 'hidden',
-}
 
 function btnStyle(active: boolean): React.CSSProperties {
   return {
@@ -370,12 +518,4 @@ const zoomInputStyle: React.CSSProperties = {
   fontSize: '0.62rem',
   textAlign: 'center' as const,
   outline: 'none',
-}
-
-const sepStyle: React.CSSProperties = {
-  width: 18,
-  height: 1,
-  background: 'var(--border)',
-  margin: '0.1rem 0',
-  flexShrink: 0,
 }
