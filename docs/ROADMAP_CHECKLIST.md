@@ -1711,7 +1711,7 @@ Claude MUST:
   - Right: Settings gear, Account profile, Plan badge
   - Acceptance: stable, professional, consistent.
 
-- [ ] G7-2: /app landing view (no project open)
+- [x] G7-2: /app landing view (no project open)
   - Just main header plus landing content:
     - get started options
     - profile stats
