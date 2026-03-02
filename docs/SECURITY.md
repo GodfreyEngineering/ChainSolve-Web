@@ -55,6 +55,8 @@ curl -s -D- \
 
 ## 2. Content Security Policy (CSP)
 
+> F4-3 audit 2026-03-02: headers consistent, doc current, no console spam.
+
 ### Current state
 
 Both headers are set in `public/_headers` for all routes (`/*`):
