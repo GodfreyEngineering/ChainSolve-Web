@@ -322,5 +322,25 @@
     "cancel": "\u05d1\u05d9\u05d8\u05d5\u05dc",
     "save": "\u05e9\u05de\u05d9\u05e8\u05d4",
     "create": "\u05d9\u05e6\u05d9\u05e8\u05d4"
+  },
+  "variablesPanel": {
+    "title": "\u05de\u05e9\u05ea\u05e0\u05d9\u05dd",
+    "search": "\u05d7\u05d9\u05e4\u05d5\u05e9...",
+    "add": "\u05d4\u05d5\u05e1\u05e3",
+    "colName": "\u05e9\u05dd",
+    "colValue": "\u05e2\u05e8\u05da",
+    "colUnit": "\u05d9\u05d7\u05d9\u05d3\u05d4",
+    "colDescription": "\u05ea\u05d9\u05d0\u05d5\u05e8",
+    "selectAll": "\u05d1\u05d7\u05e8 \u05d4\u05db\u05dc",
+    "selected": "\u05e0\u05d1\u05d7\u05e8\u05d5",
+    "setValues": "\u05e7\u05d1\u05e2 \u05e2\u05e8\u05da",
+    "setUnits": "\u05e7\u05d1\u05e2 \u05d9\u05d7\u05d9\u05d3\u05d4",
+    "apply": "\u05d4\u05d7\u05dc",
+    "deleteSelected": "\u05de\u05d7\u05e7",
+    "unitPlaceholder": "\u05d9\u05d7\u05d9\u05d3\u05d4",
+    "valuePlaceholder": "0",
+    "empty": "\u05d0\u05d9\u05df \u05de\u05e9\u05ea\u05e0\u05d9\u05dd \u05e2\u05d3\u05d9\u05d9\u05df.",
+    "emptyHint": "\u05dc\u05d7\u05e5 \u05e2\u05dc \"+ \u05d4\u05d5\u05e1\u05e3\" \u05dc\u05d9\u05e6\u05d9\u05e8\u05d4.",
+    "noResults": "\u05dc\u05d0 \u05e0\u05de\u05e6\u05d0\u05d5 \u05de\u05e9\u05ea\u05e0\u05d9\u05dd \u05ea\u05d5\u05d0\u05de\u05d9\u05dd."
   }
 }

@@ -384,7 +384,24 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
             }}
             value={varId ?? ''}
             onChange={(e) => {
-              const selectedVarId = e.target.value || undefined
+              const val = e.target.value
+              if (val === '__create__') {
+                const newId = crypto.randomUUID()
+                const count = Object.keys(variables).length
+                const newVar = {
+                  id: newId,
+                  name: `var${count + 1}`,
+                  value: 0,
+                }
+                useVariablesStore.getState().setVariable(newVar)
+                updateNodeData(id, {
+                  varId: newId,
+                  value: 0,
+                  label: newVar.name,
+                })
+                return
+              }
+              const selectedVarId = val || undefined
               const selectedVar = selectedVarId ? variables[selectedVarId] : undefined
               updateNodeData(id, {
                 varId: selectedVarId,
@@ -396,11 +413,41 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
             <option value="">Select variable...</option>
             {Object.values(variables).map((v) => (
               <option key={v.id} value={v.id}>
-                {v.name} = {v.value}
-                {v.unit ? ` ${v.unit}` : ''}
+                {v.name}
+                {v.unit ? ` (${v.unit})` : ''}
               </option>
             ))}
+            <option value="__create__">+ New variable</option>
           </select>
+          {boundVar && (
+            <div
+              style={{
+                marginTop: '0.25rem',
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '0.25rem',
+                padding: '0.15rem 0.3rem',
+                borderRadius: 4,
+                background: 'rgba(28,171,176,0.08)',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: '#93c5fd',
+                }}
+              >
+                {boundVar.value}
+              </span>
+              {boundVar.unit && (
+                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                  {boundVar.unit}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
 

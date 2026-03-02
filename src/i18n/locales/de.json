@@ -473,7 +473,27 @@
     "tplBlank": "Leer",
     "tplSteel": "Stahlartig",
     "tplAluminium": "Aluminiumartig",
-    "tplFluid": "Flüssigkeit (wasserähnlich)"
+    "tplFluid": "Fl\u00fcssigkeit (wasser\u00e4hnlich)"
+  },
+  "variablesPanel": {
+    "title": "Variablen",
+    "search": "Suchen...",
+    "add": "Hinzuf\u00fcgen",
+    "colName": "Name",
+    "colValue": "Wert",
+    "colUnit": "Einheit",
+    "colDescription": "Beschreibung",
+    "selectAll": "Alle ausw\u00e4hlen",
+    "selected": "ausgew\u00e4hlt",
+    "setValues": "Wert setzen",
+    "setUnits": "Einheit setzen",
+    "apply": "Anwenden",
+    "deleteSelected": "L\u00f6schen",
+    "unitPlaceholder": "Einheit",
+    "valuePlaceholder": "0",
+    "empty": "Noch keine Variablen.",
+    "emptyHint": "Klicken Sie auf \"+ Hinzuf\u00fcgen\".",
+    "noResults": "Keine Variablen gefunden."
   },
   "groups": {
     "groupSelection": "Auswahl gruppieren",

@@ -475,6 +475,26 @@
     "tplAluminium": "Type aluminium",
     "tplFluid": "Fluide (type eau)"
   },
+  "variablesPanel": {
+    "title": "Variables",
+    "search": "Rechercher...",
+    "add": "Ajouter",
+    "colName": "Nom",
+    "colValue": "Valeur",
+    "colUnit": "Unit\u00e9",
+    "colDescription": "Description",
+    "selectAll": "Tout s\u00e9lectionner",
+    "selected": "s\u00e9lectionn\u00e9(s)",
+    "setValues": "D\u00e9finir la valeur",
+    "setUnits": "D\u00e9finir l'unit\u00e9",
+    "apply": "Appliquer",
+    "deleteSelected": "Supprimer",
+    "unitPlaceholder": "unit\u00e9",
+    "valuePlaceholder": "0",
+    "empty": "Aucune variable pour le moment.",
+    "emptyHint": "Cliquez sur \"+ Ajouter\" pour en cr\u00e9er une.",
+    "noResults": "Aucune variable ne correspond."
+  },
   "groups": {
     "groupSelection": "Grouper la sélection",
     "ungroup": "Dégrouper",

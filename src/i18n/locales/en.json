@@ -483,6 +483,26 @@
     "tplAluminium": "Aluminium-like",
     "tplFluid": "Fluid (water-like)"
   },
+  "variablesPanel": {
+    "title": "Variables",
+    "search": "Search...",
+    "add": "Add",
+    "colName": "Name",
+    "colValue": "Value",
+    "colUnit": "Unit",
+    "colDescription": "Description",
+    "selectAll": "Select all",
+    "selected": "selected",
+    "setValues": "Set value",
+    "setUnits": "Set unit",
+    "apply": "Apply",
+    "deleteSelected": "Delete",
+    "unitPlaceholder": "unit",
+    "valuePlaceholder": "0",
+    "empty": "No variables yet.",
+    "emptyHint": "Click \"+ Add\" to create one.",
+    "noResults": "No variables match your search."
+  },
   "groups": {
     "groupSelection": "Group Selection",
     "ungroup": "Ungroup",
