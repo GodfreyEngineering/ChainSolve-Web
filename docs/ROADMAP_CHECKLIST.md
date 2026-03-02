@@ -1691,7 +1691,7 @@ Claude MUST:
   - Snap/grid controls
   - Acceptance: context menu exists and feels professional.
 
-- [ ] G6-2: Chains selection and delete
+- [x] G6-2: Chains selection and delete
   - Clicking a chain selects it.
   - Delete key removes it.
   - Undo/redo works.
