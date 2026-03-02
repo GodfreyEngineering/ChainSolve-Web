@@ -13,6 +13,7 @@
 
 import type { BlockCategory, NodeKind, BlockDef } from './types'
 import type { CatalogEntry } from '../engine/wasm-types'
+import { MATERIAL_CATALOG } from './materialCatalog'
 
 // Re-export types so existing `import { ... } from '../../blocks/registry'` still works.
 export type { BlockCategory, NodeKind, PortDef, NodeData, BlockDef } from './types'
@@ -673,11 +674,7 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
     subcategories: [
       { id: 'inputNumber', label: 'Standard number input', blockTypes: ['number'] },
       { id: 'inputSlider', label: 'Slider input', blockTypes: ['slider'] },
-      {
-        id: 'inputMaterial',
-        label: 'Material input',
-        categories: ['presetMaterials', 'presetFluids'],
-      },
+      { id: 'inputMaterial', label: 'Material input', blockTypes: ['material'] },
       {
         id: 'inputConstant',
         label: 'Constant input',
@@ -802,21 +799,22 @@ export function getConstantsCatalog(): ConstantCatalogEntry[] {
 
 // ── Materials catalog for unified Material node (D7-4) ──────────────────────
 
-/** Categories that contain material and fluid presets. */
-const MATERIAL_CATEGORIES: ReadonlySet<BlockCategory> = new Set(['presetMaterials', 'presetFluids'])
+export interface MaterialsCatalogEntry extends ConstantCatalogEntry {
+  subcategory: string
+}
 
 /**
- * Returns the list of all material/fluid preset block types that can be
- * selected in the unified Material node.
+ * Returns the list of all material/fluid preset entries that can be
+ * selected in the unified Material node. H3-1: reads from standalone
+ * materialCatalog instead of individual block registrations.
  */
-export function getMaterialsCatalog(): ConstantCatalogEntry[] {
-  const entries: ConstantCatalogEntry[] = []
-  for (const [, def] of BLOCK_REGISTRY) {
-    if (MATERIAL_CATEGORIES.has(def.category) && def.type !== 'material') {
-      entries.push({ type: def.type, label: def.label, category: def.category })
-    }
-  }
-  return entries
+export function getMaterialsCatalog(): MaterialsCatalogEntry[] {
+  return MATERIAL_CATALOG.map((m) => ({
+    type: m.type,
+    label: m.label,
+    category: m.category,
+    subcategory: m.subcategory,
+  }))
 }
 
 // ── Pro-only block registration (no circular imports) ────────────────────────

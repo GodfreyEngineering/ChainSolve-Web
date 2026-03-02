@@ -1668,112 +1668,9 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![],
             pro_only: false,
         },
-        // ── W11c: Presets → Materials (typical) ───────────────────
-        CatalogEntry {
-            op_id: "preset.materials.steel_rho",
-            label: "\u{03C1} steel (kg/m\u{00B3})",
-            category: "presetMaterials",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "preset.materials.steel_E",
-            label: "E steel (Pa)",
-            category: "presetMaterials",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "preset.materials.steel_nu",
-            label: "\u{03BD} steel",
-            category: "presetMaterials",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "preset.materials.al_rho",
-            label: "\u{03C1} aluminium (kg/m\u{00B3})",
-            category: "presetMaterials",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "preset.materials.al_E",
-            label: "E aluminium (Pa)",
-            category: "presetMaterials",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "preset.materials.al_nu",
-            label: "\u{03BD} aluminium",
-            category: "presetMaterials",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "preset.materials.ti_rho",
-            label: "\u{03C1} titanium (kg/m\u{00B3})",
-            category: "presetMaterials",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "preset.materials.ti_E",
-            label: "E titanium (Pa)",
-            category: "presetMaterials",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "preset.materials.ti_nu",
-            label: "\u{03BD} titanium",
-            category: "presetMaterials",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        // ── W11c: Presets → Fluids (typical) ──────────────────────
-        CatalogEntry {
-            op_id: "preset.fluids.water_rho_20c",
-            label: "\u{03C1} water (kg/m\u{00B3})",
-            category: "presetFluids",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "preset.fluids.water_mu_20c",
-            label: "\u{03BC} water (Pa\u{00B7}s)",
-            category: "presetFluids",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "preset.fluids.gasoline_rho",
-            label: "\u{03C1} gasoline (kg/m\u{00B3})",
-            category: "presetFluids",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
-        CatalogEntry {
-            op_id: "preset.fluids.diesel_rho",
-            label: "\u{03C1} diesel (kg/m\u{00B3})",
-            category: "presetFluids",
-            node_kind: "csSource",
-            inputs: vec![],
-            pro_only: false,
-        },
+        // H3-1: Material/fluid preset catalog entries removed.
+        // The unified Material node resolves presets in the TS bridge layer.
+        // Rust eval handlers remain in ops.rs for backward compatibility.
     ]
 }
 
@@ -1839,14 +1736,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 214);
+        assert_eq!(cat.len(), 201);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 214);
+        assert_eq!(parsed.as_array().unwrap().len(), 201);
     }
 
     #[test]
@@ -1866,7 +1763,7 @@ mod tests {
     fn known_ops_present() {
         let cat = catalog();
         let ids: Vec<&str> = cat.iter().map(|e| e.op_id).collect();
-        for expected in &["add", "sin", "vectorSum", "xyPlot", "display", "eng.mechanics.force_ma", "eng.elec.ohms_V", "fin.tvm.compound_fv", "stats.desc.mean", "prob.dist.binomial_pmf", "const.physics.g0", "preset.materials.steel_E", "unit_convert"] {
+        for expected in &["add", "sin", "vectorSum", "xyPlot", "display", "eng.mechanics.force_ma", "eng.elec.ohms_V", "fin.tvm.compound_fv", "stats.desc.mean", "prob.dist.binomial_pmf", "const.physics.g0", "unit_convert"] {
             assert!(ids.contains(expected), "Missing op: {}", expected);
         }
     }

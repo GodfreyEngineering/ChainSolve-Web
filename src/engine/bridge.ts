@@ -12,6 +12,7 @@ import type { InputBinding } from '../blocks/types.ts'
 import type { VariablesMap } from '../lib/variables.ts'
 import type { EngineSnapshotV1 } from './wasm-types.ts'
 import { type ConstantsLookup, resolveNodeBindings } from './resolveBindings.ts'
+import { MATERIAL_VALUES } from '../blocks/materialCatalog.ts'
 
 /**
  * Build an EngineSnapshotV1 from React Flow nodes and edges.
@@ -36,20 +37,22 @@ export function toEngineSnapshot(
   return {
     version: 1,
     nodes: evalNodes.map((n) => {
-      const data = n.data as Record<string, unknown>
+      let data = n.data as Record<string, unknown>
       // W12.4: Probe maps to display for the engine (no Rust changes needed).
       // D7-3: Unified constant block maps to the selected constant's op ID.
       let blockType = (data.blockType === 'probe' ? 'display' : data.blockType) as string
       if (blockType === 'constant' && typeof data.selectedConstantId === 'string') {
         blockType = data.selectedConstantId
       }
-      // D7-4: Unified material block maps to the selected material preset's op ID.
-      // D7-5: Custom materials (custom:*) map to 'number' — value stored in node data.
+      // H3-1: Unified material block resolves all presets and custom materials
+      // to 'number' with the looked-up value. No Rust catalog entries needed.
       if (blockType === 'material' && typeof data.selectedMaterialId === 'string') {
-        if (data.selectedMaterialId.startsWith('custom:')) {
-          blockType = 'number'
-        } else {
-          blockType = data.selectedMaterialId
+        const matId = data.selectedMaterialId
+        blockType = 'number'
+        if (matId.startsWith('custom:')) {
+          // Custom materials: value already set by SourceNode sync
+        } else if (matId in MATERIAL_VALUES) {
+          data = { ...data, value: MATERIAL_VALUES[matId] }
         }
       }
       // W12.2: resolve inputBindings → manualValues before sending to Rust.

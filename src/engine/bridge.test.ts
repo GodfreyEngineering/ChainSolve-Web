@@ -171,8 +171,8 @@ describe('toEngineSnapshot — constant block mapping (D7-3)', () => {
   })
 })
 
-describe('toEngineSnapshot — material block mapping (D7-4)', () => {
-  it('maps material blockType to selectedMaterialId', () => {
+describe('toEngineSnapshot — material block mapping (D7-4 / H3-1)', () => {
+  it('maps material blockType to "number" with value from catalog', () => {
     const nodes = [
       makeNode('m1', 'material', {
         blockType: 'material',
@@ -180,7 +180,9 @@ describe('toEngineSnapshot — material block mapping (D7-4)', () => {
       }),
     ]
     const snap = toEngineSnapshot(nodes, [])
-    expect(snap.nodes[0].blockType).toBe('preset.materials.steel_rho')
+    // H3-1: bridge resolves all presets to 'number' with looked-up value
+    expect(snap.nodes[0].blockType).toBe('number')
+    expect((snap.nodes[0].data as Record<string, unknown>).value).toBe(7850)
   })
 
   it('keeps blockType as "material" when no selectedMaterialId', () => {

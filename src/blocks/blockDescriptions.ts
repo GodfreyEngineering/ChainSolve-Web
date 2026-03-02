@@ -83,22 +83,7 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Electrical resistivity of copper at 20 C (1.68e-8 ohm m). Benchmark conductor.',
   'const.elec.rho_aluminium': 'Electrical resistivity of aluminium at 20 C (2.65e-8 ohm m).',
 
-  // ── Material presets ──────────────────────────────────────────────────────
-  'preset.materials.steel_rho': 'Density of structural steel (7850 kg/m3).',
-  'preset.materials.steel_E': "Young's modulus of structural steel (200 GPa).",
-  'preset.materials.steel_nu': "Poisson's ratio of structural steel (0.30).",
-  'preset.materials.al_rho': 'Density of aluminium alloy (2700 kg/m3).',
-  'preset.materials.al_E': "Young's modulus of aluminium alloy (69 GPa).",
-  'preset.materials.al_nu': "Poisson's ratio of aluminium alloy (0.33).",
-  'preset.materials.ti_rho': 'Density of titanium alloy (4507 kg/m3).',
-  'preset.materials.ti_E': "Young's modulus of titanium alloy (116 GPa).",
-  'preset.materials.ti_nu': "Poisson's ratio of titanium alloy (0.34).",
-
-  // ── Fluid presets ─────────────────────────────────────────────────────────
-  'preset.fluids.water_rho_20c': 'Density of water at 20 C (998 kg/m3).',
-  'preset.fluids.water_mu_20c': 'Dynamic viscosity of water at 20 C (1.002e-3 Pa s).',
-  'preset.fluids.gasoline_rho': 'Density of gasoline (750 kg/m3).',
-  'preset.fluids.diesel_rho': 'Density of diesel fuel (832 kg/m3).',
+  // H3-1: Material/fluid preset descriptions removed — unified Material node.
 
   // ── Math operations ───────────────────────────────────────────────────────
   add: 'Adds two numbers. Output = A + B.',

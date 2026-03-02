@@ -1,8 +1,11 @@
 /**
- * constants-blocks.ts — Constants & Presets block pack (W11c).
+ * constants-blocks.ts — Constants block pack (W11c).
  *
- * 44 source blocks across 7 categories: Math Constants, Physics,
- * Atmospheric, Thermodynamic, Electrical, Material Presets, Fluid Presets.
+ * 31 source blocks across 5 categories: Math Constants, Physics,
+ * Atmospheric, Thermodynamic, Electrical.
+ *
+ * Material/fluid presets are handled by the unified Material node (H3-1)
+ * via materialCatalog.ts and no longer registered as individual blocks.
  *
  * All blocks are FREE (not Pro-only). Each is a zero-input source
  * that outputs a single scalar constant evaluated by the Rust/WASM engine.
@@ -302,124 +305,7 @@ export function registerConstantsBlocks(register: (def: BlockDef) => void): void
     defaultData: { blockType: 'const.elec.rho_aluminium', label: 'ρ_Al' },
   })
 
-  // ── Material Presets ────────────────────────────────────────────────
-
-  register({
-    type: 'preset.materials.steel_rho',
-    label: 'Steel ρ (7850 kg/m³)',
-    category: 'presetMaterials',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.materials.steel_rho', label: 'Steel ρ' },
-  })
-
-  register({
-    type: 'preset.materials.steel_E',
-    label: 'Steel E (200 GPa)',
-    category: 'presetMaterials',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.materials.steel_E', label: 'Steel E' },
-  })
-
-  register({
-    type: 'preset.materials.steel_nu',
-    label: 'Steel ν (0.30)',
-    category: 'presetMaterials',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.materials.steel_nu', label: 'Steel ν' },
-  })
-
-  register({
-    type: 'preset.materials.al_rho',
-    label: 'Aluminium ρ (2700 kg/m³)',
-    category: 'presetMaterials',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.materials.al_rho', label: 'Al ρ' },
-  })
-
-  register({
-    type: 'preset.materials.al_E',
-    label: 'Aluminium E (69 GPa)',
-    category: 'presetMaterials',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.materials.al_E', label: 'Al E' },
-  })
-
-  register({
-    type: 'preset.materials.al_nu',
-    label: 'Aluminium ν (0.33)',
-    category: 'presetMaterials',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.materials.al_nu', label: 'Al ν' },
-  })
-
-  register({
-    type: 'preset.materials.ti_rho',
-    label: 'Titanium ρ (4507 kg/m³)',
-    category: 'presetMaterials',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.materials.ti_rho', label: 'Ti ρ' },
-  })
-
-  register({
-    type: 'preset.materials.ti_E',
-    label: 'Titanium E (116 GPa)',
-    category: 'presetMaterials',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.materials.ti_E', label: 'Ti E' },
-  })
-
-  register({
-    type: 'preset.materials.ti_nu',
-    label: 'Titanium ν (0.34)',
-    category: 'presetMaterials',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.materials.ti_nu', label: 'Ti ν' },
-  })
-
-  // ── Fluid Presets ───────────────────────────────────────────────────
-
-  register({
-    type: 'preset.fluids.water_rho_20c',
-    label: 'Water ρ (998 kg/m³)',
-    category: 'presetFluids',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.fluids.water_rho_20c', label: 'Water ρ' },
-  })
-
-  register({
-    type: 'preset.fluids.water_mu_20c',
-    label: 'Water μ (1.002e-3 Pa·s)',
-    category: 'presetFluids',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.fluids.water_mu_20c', label: 'Water μ' },
-  })
-
-  register({
-    type: 'preset.fluids.gasoline_rho',
-    label: 'Gasoline ρ (750 kg/m³)',
-    category: 'presetFluids',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.fluids.gasoline_rho', label: 'Gasoline ρ' },
-  })
-
-  register({
-    type: 'preset.fluids.diesel_rho',
-    label: 'Diesel ρ (832 kg/m³)',
-    category: 'presetFluids',
-    nodeKind: 'csSource',
-    inputs: [],
-    defaultData: { blockType: 'preset.fluids.diesel_rho', label: 'Diesel ρ' },
-  })
+  // H3-1: Material/fluid presets removed — now handled by unified Material
+  // node via materialCatalog.ts. Legacy Rust eval handlers remain for
+  // backward compatibility with old saved projects.
 }

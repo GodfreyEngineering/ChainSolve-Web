@@ -229,10 +229,21 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
     [isConstantPicker, groupCatalog],
   )
 
-  const materialsCatalog = useMemo(
-    () => (isMaterialPicker ? groupCatalog(getMaterialsCatalog()) : []),
-    [isMaterialPicker, groupCatalog],
-  )
+  const materialsCatalog = useMemo(() => {
+    if (!isMaterialPicker) return []
+    const catalog = getMaterialsCatalog()
+    const grouped = new Map<string, { type: string; label: string }[]>()
+    for (const entry of catalog) {
+      const group = grouped.get(entry.subcategory) ?? []
+      group.push({ type: entry.type, label: entry.label })
+      grouped.set(entry.subcategory, group)
+    }
+    return Array.from(grouped.entries()).map(([sub, entries]) => ({
+      category: sub,
+      label: sub,
+      entries,
+    }))
+  }, [isMaterialPicker])
 
   // W12.2: variableSource — sync variable value → node value
   const variables = useVariablesStore((s) => s.variables)

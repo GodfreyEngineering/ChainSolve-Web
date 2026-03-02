@@ -216,9 +216,9 @@ describe('Constants catalog (D7-3)', () => {
   })
 })
 
-// ── D7-4: Unified Material node catalog ─────────────────────────────────────
+// ── D7-4 / H3-1: Unified Material node catalog ─────────────────────────────
 
-describe('Materials catalog (D7-4)', () => {
+describe('Materials catalog (D7-4 / H3-1)', () => {
   it('unified material block is registered', () => {
     const def = BLOCK_REGISTRY.get('material')
     expect(def).toBeDefined()
@@ -227,12 +227,23 @@ describe('Materials catalog (D7-4)', () => {
     expect(def!.inputs).toEqual([])
   })
 
-  it('catalog contains all material/fluid presets except the unified one', () => {
+  it('catalog does not include the unified material block itself', () => {
     const catalog = getMaterialsCatalog()
     const catalogTypes = new Set(catalog.map((c) => c.type))
     expect(catalogTypes.has('material')).toBe(false)
-    expect(catalogTypes.has('preset.materials.steel_rho')).toBe(true)
-    expect(catalogTypes.has('preset.fluids.water_rho_20c')).toBe(true)
+  })
+
+  it('catalog contains expected material/fluid entries', () => {
+    const catalog = getMaterialsCatalog()
+    const catalogTypes = new Set(catalog.map((c) => c.type))
+    // Structural steels
+    expect(catalogTypes.has('preset.materials.steel_mild.rho')).toBe(true)
+    expect(catalogTypes.has('preset.materials.steel_mild.E')).toBe(true)
+    // Aluminium alloys
+    expect(catalogTypes.has('preset.materials.al_6061_t6.rho')).toBe(true)
+    // Fluids
+    expect(catalogTypes.has('preset.fluids.water_20c.rho')).toBe(true)
+    expect(catalogTypes.has('preset.fluids.water_20c.mu')).toBe(true)
   })
 
   it('catalog does not include physics/math constants', () => {
@@ -243,9 +254,15 @@ describe('Materials catalog (D7-4)', () => {
     expect(constTypes).toEqual([])
   })
 
-  it('catalog has at least 10 entries', () => {
+  it('catalog has at least 100 entries (H3-1 expanded)', () => {
     const catalog = getMaterialsCatalog()
-    expect(catalog.length).toBeGreaterThanOrEqual(10)
+    expect(catalog.length).toBeGreaterThanOrEqual(100)
+  })
+
+  it('every entry has a subcategory', () => {
+    const catalog = getMaterialsCatalog()
+    const missing = catalog.filter((c) => !c.subcategory || c.subcategory.trim().length === 0)
+    expect(missing).toEqual([])
   })
 })
 
