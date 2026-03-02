@@ -1474,7 +1474,7 @@ Claude MUST:
   - Add a CI test that fails on mismatch between TS registry and Rust catalog list.
   - Acceptance: no “engine won’t evaluate” registry warnings.
 
-- [ ] F6-2: Full block catalog sanity tests
+- [x] F6-2: Full block catalog sanity tests
   - Ensure every block renders, can be instantiated, and evaluates if expected.
   - Acceptance: smoke tests for block creation + evaluation.
 
