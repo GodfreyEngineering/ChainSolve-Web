@@ -690,8 +690,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     },
   }))
 
-  // Panel widths + visibility
-  const [libWidth, setLibWidth] = useState(200)
+  // Panel widths + visibility (G5-1: persist width to localStorage)
+  const [libWidth, setLibWidth] = useState(() => {
+    const saved = localStorage.getItem('cs:libWidth')
+    return saved ? Math.max(160, Math.min(420, Number(saved) || 200)) : 200
+  })
   const [libVisible, setLibVisible] = useState(() => !isMobile)
 
   // Inspector state (open on click, not selection)
@@ -699,6 +702,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const [inspPinned, setInspPinned] = useState(false)
   const { openWindow, closeWindow, isOpen: isWinOpen } = useWindowManager()
   const inspVisible = isWinOpen(INSPECTOR_WINDOW_ID)
+
+  // G5-1: Persist libWidth to localStorage
+  useEffect(() => {
+    localStorage.setItem('cs:libWidth', String(libWidth))
+  }, [libWidth])
 
   // Auto-close panels when switching to mobile
   useEffect(() => {
@@ -1642,14 +1650,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 position: 'relative',
               }}
             >
-              {/* Block library panel — desktop inline, mobile overlay */}
-              {libVisible && !readOnly && !isMobile && (
+              {/* Block library panel — desktop: always present with dock handle; mobile: overlay */}
+              {!readOnly && !isMobile && (
                 <BlockLibrary
                   width={libWidth}
                   onResizeStart={onLibResizeStart}
                   plan={plan}
                   onProBlocked={() => setShowUpgradeModal(true)}
                   onInsertTemplate={onInsertTemplate}
+                  collapsed={!libVisible}
+                  onToggleCollapsed={() => setLibVisible((v) => !v)}
                 />
               )}
 
@@ -1763,7 +1773,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   snapToGrid={snapToGrid}
                   minimap={minimap}
                   paused={paused}
-                  libVisible={libVisible}
                   inspVisible={inspVisible}
                   readOnly={!!readOnly}
                   onTogglePan={() => setPanMode((v) => !v)}
@@ -1777,10 +1786,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   }}
                   onTogglePause={() => setPaused((v) => !v)}
                   onRefresh={() => setEngineKey((k) => k + 1)}
-                  onToggleLibrary={() => {
-                    setLibVisible((v) => !v)
-                    if (isMobile) closeWindow(INSPECTOR_WINDOW_ID)
-                  }}
                   onToggleInspector={() => {
                     if (inspVisible) {
                       setInspectedId(null)

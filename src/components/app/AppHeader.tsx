@@ -616,10 +616,6 @@ export function AppHeader({
       },
       { separator: true },
       {
-        label: t('menu.toggleLibrary'),
-        onClick: () => canvasRef.current?.toggleLibrary(),
-      },
-      {
         label: t('menu.toggleInspector'),
         onClick: () => canvasRef.current?.toggleInspector(),
       },

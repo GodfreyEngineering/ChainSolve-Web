@@ -173,6 +173,10 @@ interface BlockItemProps {
   onToggleFav: (type: string) => void
   entitled: boolean
   onProBlocked?: () => void
+  /** G5-1: Description text for hover tooltip. */
+  description?: string
+  /** G5-1: Whether this block's star is currently animating. */
+  starAnimating?: boolean
 }
 
 const BlockItem = memo(function BlockItem({
@@ -181,6 +185,8 @@ const BlockItem = memo(function BlockItem({
   onToggleFav,
   entitled,
   onProBlocked,
+  description,
+  starAnimating,
 }: BlockItemProps) {
   const [hovered, setHovered] = useState(false)
   const isFav = favs.has(def.type)
@@ -196,6 +202,13 @@ const BlockItem = memo(function BlockItem({
     trackBlockUsed(def.type)
   }
 
+  // G5-1: Build tooltip text: description + drag hint
+  const tooltipText = entitled
+    ? description
+      ? `${description}\nDrag onto canvas`
+      : `Drag onto canvas`
+    : `${def.label} (Pro)`
+
   return (
     <div
       draggable={entitled}
@@ -209,7 +222,7 @@ const BlockItem = memo(function BlockItem({
         opacity: entitled ? 1 : 0.45,
         cursor: entitled ? 'grab' : 'pointer',
       }}
-      title={entitled ? `Drag to add ${def.label}` : `${def.label} (Pro)`}
+      title={tooltipText}
     >
       {!entitled && <span style={{ fontSize: '0.65rem', marginRight: 4, opacity: 0.6 }}>🔒</span>}
       <span
@@ -228,6 +241,8 @@ const BlockItem = memo(function BlockItem({
           style={{
             ...s.starBtn,
             color: isFav ? 'var(--warning)' : 'var(--text-faint)',
+            transition: 'transform 0.15s ease',
+            transform: starAnimating ? 'scale(1.5)' : 'scale(1)',
           }}
           title={isFav ? 'Remove from favourites' : 'Add to favourites'}
           onClick={(e) => {
@@ -235,7 +250,7 @@ const BlockItem = memo(function BlockItem({
             onToggleFav(def.type)
           }}
         >
-          {isFav ? '★' : '☆'}
+          {isFav ? '\u2605' : '\u2606'}
         </button>
       )}
     </div>
@@ -406,7 +421,14 @@ interface BlockLibraryProps {
   plan?: Plan
   onProBlocked?: () => void
   onInsertTemplate?: (template: Template) => void
+  /** G5-1: When true, panel is collapsed to a thin handle strip. */
+  collapsed?: boolean
+  /** G5-1: Toggle collapsed state. */
+  onToggleCollapsed?: () => void
 }
+
+/** Width of the collapsed docking handle strip. */
+export const COLLAPSED_HANDLE_WIDTH = 18
 
 export function BlockLibrary({
   width,
@@ -414,6 +436,8 @@ export function BlockLibrary({
   plan = 'free',
   onProBlocked,
   onInsertTemplate,
+  collapsed = false,
+  onToggleCollapsed,
 }: BlockLibraryProps) {
   const ent = getEntitlements(plan)
   const [query, setQuery] = useState('')
@@ -425,11 +449,24 @@ export function BlockLibrary({
   const [templates, setTemplates] = useState<Template[]>([])
   const [templatesLoaded, setTemplatesLoaded] = useState(false)
 
+  // G5-1: Lazy-load block descriptions for hover tooltips
+  const [descriptions, setDescriptions] = useState<Record<string, string>>({})
+  useEffect(() => {
+    import('../../blocks/blockDescriptions').then((m) => setDescriptions(m.BLOCK_DESCRIPTIONS))
+  }, [])
+
   // Refresh recent list when panel is focused (user may have added blocks)
   const refreshRecent = useCallback(() => setRecent(getRecentlyUsed()), [])
 
+  // G5-1: Track which block was just favorited for star animation
+  const [animatingFav, setAnimatingFav] = useState<string | null>(null)
   const toggleFav = useCallback((type: string) => {
-    setFavs(toggleFavourite(type))
+    const next = toggleFavourite(type)
+    setFavs(next)
+    if (next.has(type)) {
+      setAnimatingFav(type)
+      setTimeout(() => setAnimatingFav(null), 400)
+    }
   }, [])
 
   // Load templates lazily on first expand
@@ -479,6 +516,11 @@ export function BlockLibrary({
         (TAXONOMY_GROUPED.get(sub.id) ?? []).every((d) => !matchesQuery(d, q)),
       ),
     )
+
+  // G5-1: Collapsed docking handle
+  if (collapsed) {
+    return <DockHandle side="expand" onClick={onToggleCollapsed} />
+  }
 
   return (
     <div style={{ ...s.panel, width: px(width) }} onFocus={refreshRecent}>
@@ -537,6 +579,8 @@ export function BlockLibrary({
                 onToggleFav={toggleFav}
                 entitled={isBlockEntitled(def, ent)}
                 onProBlocked={onProBlocked}
+                description={descriptions[def.type]}
+                starAnimating={animatingFav === def.type}
               />
             ))}
           </div>
@@ -554,6 +598,8 @@ export function BlockLibrary({
                 onToggleFav={toggleFav}
                 entitled={isBlockEntitled(def, ent)}
                 onProBlocked={onProBlocked}
+                description={descriptions[def.type]}
+                starAnimating={animatingFav === def.type}
               />
             ))}
           </div>
@@ -637,6 +683,8 @@ export function BlockLibrary({
                         onToggleFav={toggleFav}
                         entitled={isBlockEntitled(def, ent)}
                         onProBlocked={onProBlocked}
+                        description={descriptions[def.type]}
+                        starAnimating={animatingFav === def.type}
                       />
                     ))}
                   </div>
@@ -715,8 +763,76 @@ export function BlockLibrary({
         )}
       </div>
 
-      {/* Resize handle */}
-      <div style={s.resizeHandle} onMouseDown={onResizeStart} />
+      {/* G5-1: Docking handle (resize + collapse) */}
+      <DockHandle side="collapse" onClick={onToggleCollapsed} onResizeStart={onResizeStart} />
+    </div>
+  )
+}
+
+// ── DockHandle (G5-1) ───────────────────────────────────────────────────────
+
+interface DockHandleProps {
+  /** 'expand' = collapsed state (arrow pointing right), 'collapse' = expanded state (arrow pointing left). */
+  side: 'expand' | 'collapse'
+  onClick?: () => void
+  onResizeStart?: (e: React.MouseEvent) => void
+}
+
+function DockHandle({ side, onClick, onResizeStart }: DockHandleProps) {
+  const [hovered, setHovered] = useState(false)
+  const isExpand = side === 'expand'
+  // Chevron: right-pointing when collapsed (expand), left-pointing when expanded (collapse)
+  const chevron = isExpand ? '\u203A' : '\u2039'
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        ...(isExpand
+          ? {
+              width: COLLAPSED_HANDLE_WIDTH,
+              height: '100%',
+              borderRight: '1px solid var(--border)',
+              background: hovered ? 'var(--primary-dim)' : 'var(--card-bg)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              transition: 'background 0.15s ease',
+            }
+          : {
+              position: 'absolute' as const,
+              right: -3,
+              top: 0,
+              bottom: 0,
+              width: 8,
+              cursor: 'ew-resize',
+              zIndex: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }),
+      }}
+      onClick={isExpand ? onClick : undefined}
+      onMouseDown={!isExpand ? onResizeStart : undefined}
+      onDoubleClick={!isExpand ? onClick : undefined}
+      title={isExpand ? 'Expand block library' : 'Drag to resize, double-click to collapse'}
+    >
+      <span
+        style={{
+          fontSize: isExpand ? '1rem' : '0.7rem',
+          color: hovered ? 'var(--primary)' : 'var(--text-faint)',
+          transition: 'color 0.15s ease, transform 0.2s ease',
+          transform: hovered ? `translateX(${isExpand ? '2px' : '-1px'})` : 'translateX(0)',
+          lineHeight: 1,
+          userSelect: 'none',
+          pointerEvents: 'none',
+        }}
+      >
+        {chevron}
+      </span>
     </div>
   )
 }

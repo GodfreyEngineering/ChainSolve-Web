@@ -15,7 +15,6 @@ export interface CanvasToolbarProps {
   snapToGrid: boolean
   minimap: boolean
   paused: boolean
-  libVisible: boolean
   inspVisible: boolean
   readOnly: boolean
   onTogglePan: () => void
@@ -24,7 +23,6 @@ export interface CanvasToolbarProps {
   onToggleMinimap: () => void
   onTogglePause: () => void
   onRefresh: () => void
-  onToggleLibrary: () => void
   onToggleInspector: () => void
   onAutoOrganise: (shiftKey: boolean) => void
   edgesAnimated: boolean
@@ -52,7 +50,6 @@ export function CanvasToolbar({
   snapToGrid,
   minimap,
   paused,
-  libVisible,
   inspVisible,
   readOnly,
   onTogglePan,
@@ -61,7 +58,6 @@ export function CanvasToolbar({
   onToggleMinimap,
   onTogglePause,
   onRefresh,
-  onToggleLibrary,
   onToggleInspector,
   onAutoOrganise,
   edgesAnimated,
@@ -311,19 +307,7 @@ export function CanvasToolbar({
 
       <div style={sepStyle} />
 
-      {/* ── Panels ── */}
-      {!readOnly && (
-        <button
-          onClick={onToggleLibrary}
-          style={btnStyle(libVisible)}
-          title={t('toolbar.library')}
-          aria-label={t('toolbar.library')}
-          aria-pressed={libVisible}
-        >
-          {'\u2630'}
-        </button>
-      )}
-
+      {/* ── Panels (G5-1: library toggle removed — now has own docking handle) ── */}
       <button
         onClick={onToggleInspector}
         style={btnStyle(inspVisible)}
