@@ -2242,7 +2242,7 @@ Claude MUST:
     - no save conflicts
     - performance acceptable with many nodes
 
-- [ ] K1-2: Multi-sheet selection/copy semantics
+- [x] K1-2: Multi-sheet selection/copy semantics
   - Copy/paste preserves internal chains within selection
   - Paste into other sheet remaps ids properly
   - Acceptance:
