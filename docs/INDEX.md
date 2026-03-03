@@ -83,6 +83,23 @@ modifying CORS, or reviewing the security posture before a release.
 
 ---
 
+### [IP_RISK_PROCESS.md](IP_RISK_PROCESS.md)
+
+**Purpose:** Engineering-level IP hygiene, design originality tracking,
+and novelty log.
+
+**Read this when:** You're designing a feature that resembles a
+competitor's workflow, adding a novel algorithm, or preparing for an
+enterprise launch or funding round.
+
+**Covers:**
+- Design originality checklist (before shipping major features)
+- Inspiration sources log (what we drew from, how we differ)
+- Novelty log (potentially distinctive features)
+- Professional legal review schedule
+
+---
+
 ### [ENV_SECRETS.md](ENV_SECRETS.md)
 
 **Purpose:** Environment variable and secrets management.
