@@ -2181,7 +2181,7 @@ Claude MUST:
 ---
 
 ## J4 — “Fresh landing” user experience and loading polish
-- [ ] J4-1: 1000x better loading animation system (app + route transitions)
+- [x] J4-1: 1000x better loading animation system (app + route transitions)
   - Premium loading screen:
     - deterministic, fast, lightweight
     - no external scripts
