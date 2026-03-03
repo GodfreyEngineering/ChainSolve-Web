@@ -2388,7 +2388,7 @@ Claude MUST:
 ---
 
 ## L3 — Sellable product readiness: stability and “single-session” correctness
-- [ ] L3-1: “Single device/browser/tab session” policy (if enabled)
+- [x] L3-1: “Single device/browser/tab session” policy (if enabled)
   - Implement robustly with clear UX
   - Must not trigger false “another session” warnings
   - Acceptance:
