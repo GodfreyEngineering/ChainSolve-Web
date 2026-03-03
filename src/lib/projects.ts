@@ -45,6 +45,7 @@ export interface ProjectRow {
   description: string | null
   storage_key: string | null
   active_canvas_id: string | null
+  folder: string | null
   created_at: string
   updated_at: string
 }
@@ -79,7 +80,7 @@ export interface ProjectJSON {
 // ── Private helpers ───────────────────────────────────────────────────────────
 
 const SELECT_COLS =
-  'id,owner_id,name,description,storage_key,active_canvas_id,created_at,updated_at'
+  'id,owner_id,name,description,storage_key,active_canvas_id,folder,created_at,updated_at'
 
 function buildJson(
   projectId: string,
@@ -167,16 +168,20 @@ export async function getProjectCount(): Promise<number> {
 }
 
 /** Create a new project row + empty project.json in storage. */
-export async function createProject(name: string): Promise<ProjectRow> {
+export async function createProject(name: string, folder?: string | null): Promise<ProjectRow> {
   const session = await requireSession()
   const projectId = crypto.randomUUID()
   const storageKey = `${session.user.id}/${projectId}/project.json`
 
-  const { data, error } = await supabase
-    .from('projects')
-    .insert({ id: projectId, owner_id: session.user.id, name, storage_key: storageKey })
-    .select(SELECT_COLS)
-    .single()
+  const row: Record<string, unknown> = {
+    id: projectId,
+    owner_id: session.user.id,
+    name,
+    storage_key: storageKey,
+  }
+  if (folder) row.folder = folder
+
+  const { data, error } = await supabase.from('projects').insert(row).select(SELECT_COLS).single()
 
   if (error || !data) throw new Error(error?.message ?? 'Failed to create project')
   const proj = data as ProjectRow
@@ -415,4 +420,46 @@ export async function importProject(json: ProjectJSON, overrideName?: string): P
 
   const updated = await readUpdatedAt(proj.id)
   return { ...proj, updated_at: updated ?? proj.updated_at }
+}
+
+// ── L4-2: Folder + bulk operations ──────────────────────────────────────────
+
+/** Move a project to a folder. Pass null to move back to root. */
+export async function moveToFolder(projectId: string, folder: string | null): Promise<void> {
+  const { error } = await supabase.from('projects').update({ folder }).eq('id', projectId)
+  if (error) throw new Error(`Move to folder failed: ${error.message}`)
+}
+
+/** Move multiple projects to a folder in one go. */
+export async function bulkMoveToFolder(projectIds: string[], folder: string | null): Promise<void> {
+  if (projectIds.length === 0) return
+  const { error } = await supabase.from('projects').update({ folder }).in('id', projectIds)
+  if (error) throw new Error(`Bulk move failed: ${error.message}`)
+}
+
+/** Delete multiple projects. Storage cleanup is best-effort per project. */
+export async function bulkDeleteProjects(projectIds: string[]): Promise<void> {
+  for (const id of projectIds) {
+    await deleteProject(id)
+  }
+}
+
+/**
+ * Return distinct folder names for the current user's projects.
+ * Returns a sorted array of non-null folder strings.
+ */
+export async function listFolders(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('folder')
+    .not('folder', 'is', null)
+    .order('folder', { ascending: true })
+
+  if (error) throw new Error(`Failed to list folders: ${error.message}`)
+  const seen = new Set<string>()
+  for (const row of data ?? []) {
+    const f = (row as { folder: string }).folder
+    if (f) seen.add(f)
+  }
+  return [...seen].sort((a, b) => a.localeCompare(b))
 }

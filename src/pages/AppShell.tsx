@@ -38,6 +38,10 @@ import {
   duplicateProject,
   loadProject,
   importProject,
+  moveToFolder,
+  bulkMoveToFolder,
+  bulkDeleteProjects,
+  listFolders,
   type ProjectRow,
   type ProjectJSON,
 } from '../lib/projects'
@@ -209,6 +213,21 @@ const btnSmallPrimary: React.CSSProperties = {
 }
 const btnDisabled: React.CSSProperties = { opacity: 0.55, cursor: 'not-allowed' }
 
+function folderPillStyle(active: boolean): React.CSSProperties {
+  return {
+    padding: '0.25rem 0.6rem',
+    border: 'none',
+    borderRadius: 12,
+    background: active ? 'rgba(28,171,176,0.15)' : 'rgba(244,244,243,0.06)',
+    color: active ? 'rgba(28,171,176,1)' : 'rgba(244,244,243,0.5)',
+    fontFamily: 'inherit',
+    fontSize: '0.72rem',
+    fontWeight: active ? 600 : 400,
+    cursor: 'pointer',
+    transition: 'background 0.15s, color 0.15s',
+  }
+}
+
 type GuideAction = 'scratch' | 'settings' | 'explore' | 'import' | 'docs'
 
 const GUIDE_LINKS: { key: string; icon: string; action: GuideAction }[] = [
@@ -250,6 +269,11 @@ export default function AppShell() {
   const [sortMode, setSortMode] = useState<SortMode>('recent')
   const [filterTab, setFilterTab] = useState<FilterTab>('all')
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => getPinnedProjects())
+  // L4-2: Folder organization + multi-select
+  const [folders, setFolders] = useState<string[]>([])
+  const [folderFilter, setFolderFilter] = useState<string | null>(null)
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [firstRunOpen, setFirstRunOpen] = useState(() => {
     try {
       return !localStorage.getItem(ONBOARDED_KEY)
@@ -270,7 +294,9 @@ export default function AppShell() {
     setProjLoading(true)
     setProjError(null)
     try {
-      setProjects(await listProjects())
+      const [projList, folderList] = await Promise.all([listProjects(), listFolders()])
+      setProjects(projList)
+      setFolders(folderList)
     } catch (err: unknown) {
       setProjError(err instanceof Error ? err.message : 'Failed to load projects')
     } finally {
@@ -284,6 +310,16 @@ export default function AppShell() {
 
   const filteredProjects = useMemo(() => {
     let list = projects
+
+    // L4-2: Apply folder filter
+    if (folderFilter !== null) {
+      if (folderFilter === '') {
+        // '' means root/uncategorized
+        list = list.filter((p) => !p.folder)
+      } else {
+        list = list.filter((p) => p.folder === folderFilter)
+      }
+    }
 
     // Apply filter tab
     if (filterTab === 'pinned') {
@@ -320,7 +356,7 @@ export default function AppShell() {
       return sorted
     }
     return list
-  }, [projects, searchQuery, sortMode, filterTab, pinnedIds])
+  }, [projects, searchQuery, sortMode, filterTab, pinnedIds, folderFilter])
 
   // ── Auth ──────────────────────────────────────────────────────────────────
 
@@ -471,6 +507,109 @@ export default function AppShell() {
     } catch (err: unknown) {
       setProjError(err instanceof Error ? err.message : 'Export failed')
     }
+  }
+
+  // ── L4-2: Folder operations ──────────────────────────────────────────────
+
+  const handleMoveToFolder = async (proj: ProjectRow) => {
+    setMenuOpen(null)
+    const name = window.prompt(t('projects.promptFolderName'), proj.folder ?? '')
+    if (name === null) return // cancelled
+    try {
+      await moveToFolder(proj.id, name.trim() || null)
+      void fetchProjects()
+    } catch (err: unknown) {
+      setProjError(err instanceof Error ? err.message : 'Move failed')
+    }
+  }
+
+  const handleRemoveFromFolder = async (proj: ProjectRow) => {
+    setMenuOpen(null)
+    try {
+      await moveToFolder(proj.id, null)
+      void fetchProjects()
+    } catch (err: unknown) {
+      setProjError(err instanceof Error ? err.message : 'Move failed')
+    }
+  }
+
+  // ── L4-2: Multi-select + bulk operations ────────────────────────────────
+
+  const toggleSelect = useCallback((projectId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(projectId)) next.delete(projectId)
+      else next.add(projectId)
+      return next
+    })
+  }, [])
+
+  const handleSelectAll = useCallback(() => {
+    setSelectedIds(new Set(filteredProjects.map((p) => p.id)))
+  }, [filteredProjects])
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedIds(new Set())
+  }, [])
+
+  const exitSelectMode = useCallback(() => {
+    setSelectMode(false)
+    setSelectedIds(new Set())
+  }, [])
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return
+    if (!window.confirm(t('projects.bulkDeleteConfirm', { count: selectedIds.size }))) return
+    try {
+      await bulkDeleteProjects([...selectedIds])
+      setSelectedIds(new Set())
+      setSelectMode(false)
+      void fetchProjects()
+    } catch (err: unknown) {
+      setProjError(err instanceof Error ? err.message : 'Bulk delete failed')
+    }
+  }
+
+  const handleBulkMove = async () => {
+    if (selectedIds.size === 0) return
+    const name = window.prompt(t('projects.promptFolderName'), '')
+    if (name === null) return
+    try {
+      await bulkMoveToFolder([...selectedIds], name.trim() || null)
+      setSelectedIds(new Set())
+      setSelectMode(false)
+      void fetchProjects()
+    } catch (err: unknown) {
+      setProjError(err instanceof Error ? err.message : 'Bulk move failed')
+    }
+  }
+
+  const handleBulkExport = async () => {
+    if (selectedIds.size === 0) return
+    const plan = resolveEffectivePlan(profile)
+    if (!getEntitlements(plan).canExport) {
+      setUpgradeReason('export_locked')
+      setUpgradeOpen(true)
+      return
+    }
+    for (const id of selectedIds) {
+      const proj = projects.find((p) => p.id === id)
+      if (!proj) continue
+      try {
+        const pj = await loadProject(proj.id)
+        const blob = new Blob([JSON.stringify(pj, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${proj.name.replace(/[^a-z0-9]/gi, '_')}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+      } catch {
+        // best-effort per project
+      }
+    }
+    setSelectedIds(new Set())
+    setSelectMode(false)
   }
 
   const handleImportFile = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -985,6 +1124,14 @@ export default function AppShell() {
                 style={{ display: 'none' }}
                 onChange={(e) => void handleImportFile(e)}
               />
+              {projects.length > 1 && (
+                <button
+                  style={btnSmall}
+                  onClick={selectMode ? exitSelectMode : () => setSelectMode(true)}
+                >
+                  {selectMode ? t('projects.exitSelectMode') : t('projects.selectMode')}
+                </button>
+              )}
               <button
                 style={{ ...btnSmall, ...(readOnly ? btnDisabled : {}) }}
                 disabled={readOnly}
@@ -1063,6 +1210,81 @@ export default function AppShell() {
             </div>
           )}
 
+          {/* ── L4-2: Folder pills ── */}
+          {folders.length > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                gap: '0.3rem',
+                marginBottom: '0.75rem',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+              }}
+            >
+              <button
+                onClick={() => setFolderFilter(null)}
+                style={folderPillStyle(folderFilter === null)}
+              >
+                {t('projects.allFolders')}
+              </button>
+              <button
+                onClick={() => setFolderFilter('')}
+                style={folderPillStyle(folderFilter === '')}
+              >
+                {t('projects.folderRoot')}
+              </button>
+              {folders.map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFolderFilter(f)}
+                  style={folderPillStyle(folderFilter === f)}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* ── L4-2: Bulk action bar ── */}
+          {selectMode && selectedIds.size > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                gap: '0.5rem',
+                marginBottom: '0.75rem',
+                padding: '0.5rem 0.75rem',
+                borderRadius: 8,
+                background: 'rgba(28,171,176,0.08)',
+                border: '1px solid rgba(28,171,176,0.25)',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+              }}
+            >
+              <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>
+                {t('projects.selected', { count: selectedIds.size })}
+              </span>
+              <button style={btnSmall} onClick={() => void handleBulkMove()}>
+                {t('projects.bulkMove')}
+              </button>
+              <button style={btnSmall} onClick={() => void handleBulkExport()}>
+                {t('projects.bulkExport')}
+              </button>
+              <button
+                style={{ ...btnSmall, color: '#f87171', borderColor: 'rgba(248,113,113,0.3)' }}
+                onClick={() => void handleBulkDelete()}
+              >
+                {t('projects.bulkDelete')}
+              </button>
+              <span style={{ flex: 1 }} />
+              <button style={btnSmall} onClick={handleSelectAll}>
+                {t('projects.selectAll')}
+              </button>
+              <button style={btnSmall} onClick={handleDeselectAll}>
+                {t('projects.deselectAll')}
+              </button>
+            </div>
+          )}
+
           {/* ── Search + sort controls ── */}
           {projects.length > 0 && (
             <div
@@ -1110,6 +1332,18 @@ export default function AppShell() {
                   <option value="created">{t('home.sortCreated')}</option>
                 </select>
               )}
+              {/* L4-2: Select mode toggle */}
+              <button
+                style={{
+                  ...btnSmall,
+                  ...(selectMode
+                    ? { background: 'rgba(28,171,176,0.15)', borderColor: 'rgba(28,171,176,0.4)' }
+                    : {}),
+                }}
+                onClick={selectMode ? exitSelectMode : () => setSelectMode(true)}
+              >
+                {selectMode ? t('projects.exitSelectMode') : t('projects.selectMode')}
+              </button>
             </div>
           )}
 
@@ -1132,7 +1366,9 @@ export default function AppShell() {
                   ? t('home.noPinned')
                   : filterTab === 'recent'
                     ? t('home.noRecent')
-                    : t('home.noSearchResults')}
+                    : folderFilter !== null
+                      ? t('home.noFolderProjects')
+                      : t('home.noSearchResults')}
               </p>
             </div>
           ) : (
@@ -1158,6 +1394,11 @@ export default function AppShell() {
                   onDuplicate={() => void handleDuplicate(proj)}
                   onDelete={() => void handleDelete(proj)}
                   onExport={() => void handleExport(proj)}
+                  onMoveToFolder={() => void handleMoveToFolder(proj)}
+                  onRemoveFromFolder={() => void handleRemoveFromFolder(proj)}
+                  selectMode={selectMode}
+                  selected={selectedIds.has(proj.id)}
+                  onToggleSelect={() => toggleSelect(proj.id)}
                 />
               ))}
             </div>
@@ -1284,14 +1525,13 @@ interface ProjectCardProps {
   onDuplicate: () => void
   onDelete: () => void
   onExport: () => void
+  // L4-2: Folder + multi-select
+  onMoveToFolder: () => void
+  onRemoveFromFolder: () => void
+  selectMode: boolean
+  selected: boolean
+  onToggleSelect: () => void
 }
-
-const menuActions = [
-  { key: 'rename', label: 'Rename…' },
-  { key: 'duplicate', label: 'Duplicate' },
-  { key: 'export', label: 'Export .json' },
-  { key: 'delete', label: 'Delete', danger: true },
-] as const
 
 function ProjectCard({
   project,
@@ -1305,7 +1545,13 @@ function ProjectCard({
   onDuplicate,
   onDelete,
   onExport,
+  onMoveToFolder,
+  onRemoveFromFolder,
+  selectMode,
+  selected,
+  onToggleSelect,
 }: ProjectCardProps) {
+  const { t } = useTranslation()
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown when clicking outside
@@ -1320,7 +1566,26 @@ function ProjectCard({
     return () => document.removeEventListener('mousedown', handler)
   }, [menuOpen, onCloseMenu])
 
-  const handleAction = (key: (typeof menuActions)[number]['key']) => {
+  type MenuAction =
+    | 'rename'
+    | 'duplicate'
+    | 'export'
+    | 'moveToFolder'
+    | 'removeFromFolder'
+    | 'delete'
+
+  const menuItems: { key: MenuAction; label: string; danger?: boolean }[] = [
+    { key: 'rename', label: t('projects.rename') },
+    { key: 'duplicate', label: t('projects.duplicate') },
+    { key: 'moveToFolder', label: t('projects.moveToFolder') },
+    ...(project.folder
+      ? [{ key: 'removeFromFolder' as const, label: t('projects.removeFromFolder') }]
+      : []),
+    { key: 'export', label: t('projects.export') },
+    { key: 'delete', label: t('projects.delete'), danger: true },
+  ]
+
+  const handleAction = (key: MenuAction) => {
     onCloseMenu()
     switch (key) {
       case 'rename':
@@ -1329,6 +1594,10 @@ function ProjectCard({
         return onDuplicate()
       case 'export':
         return onExport()
+      case 'moveToFolder':
+        return onMoveToFolder()
+      case 'removeFromFolder':
+        return onRemoveFromFolder()
       case 'delete':
         return onDelete()
     }
@@ -1336,23 +1605,61 @@ function ProjectCard({
 
   return (
     <div
-      onClick={onOpen}
+      onClick={selectMode ? onToggleSelect : onOpen}
       style={{
-        border: '1px solid var(--border)',
+        border: selected ? '1px solid rgba(28,171,176,0.6)' : '1px solid var(--border)',
         borderRadius: 10,
-        background: '#252525',
+        background: selected ? 'rgba(28,171,176,0.06)' : '#252525',
         padding: '0.85rem 1rem',
         cursor: 'pointer',
         position: 'relative',
-        transition: 'border-color 0.15s',
+        transition: 'border-color 0.15s, background 0.15s',
       }}
       onMouseOver={(e) => {
-        ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(28,171,176,0.4)'
+        if (!selected) {
+          ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(28,171,176,0.4)'
+        }
       }}
       onMouseOut={(e) => {
-        ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'
+        if (!selected) {
+          ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'
+        }
       }}
     >
+      {/* L4-2: Checkbox in select mode */}
+      {selectMode && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '0.5rem',
+            left: '0.5rem',
+            zIndex: 2,
+          }}
+          onClick={(e) => {
+            e.stopPropagation()
+            onToggleSelect()
+          }}
+        >
+          <span
+            style={{
+              display: 'inline-block',
+              width: 16,
+              height: 16,
+              borderRadius: 3,
+              border: selected ? '2px solid var(--primary)' : '2px solid rgba(244,244,243,0.3)',
+              background: selected ? 'var(--primary)' : 'transparent',
+              textAlign: 'center',
+              lineHeight: '12px',
+              fontSize: '0.65rem',
+              color: '#fff',
+              cursor: 'pointer',
+            }}
+          >
+            {selected ? '\u2713' : ''}
+          </span>
+        </div>
+      )}
+
       {/* Icon + pin */}
       <div
         style={{
@@ -1401,6 +1708,22 @@ function ProjectCard({
         {project.name}
       </div>
 
+      {/* L4-2: Folder badge */}
+      {project.folder && (
+        <div
+          style={{
+            fontSize: '0.68rem',
+            color: 'rgba(28,171,176,0.8)',
+            marginBottom: '0.15rem',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {project.folder}
+        </div>
+      )}
+
       {/* Updated time */}
       <div style={{ fontSize: '0.72rem', opacity: 0.4 }}>{fmtDate(project.updated_at)}</div>
 
@@ -1447,7 +1770,7 @@ function ProjectCard({
               overflow: 'hidden',
             }}
           >
-            {menuActions.map((item) => (
+            {menuItems.map((item) => (
               <button
                 key={item.key}
                 onClick={() => handleAction(item.key)}
