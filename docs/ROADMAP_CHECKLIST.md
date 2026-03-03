@@ -2224,7 +2224,7 @@ Claude MUST:
 ---
 
 ## K1 — Multi-sheet windowing system (fullscreen vs tiled)
-- [ ] K1-1: Implement “Sheet View Modes”
+- [x] K1-1: Implement “Sheet View Modes”
   - Modes:
     - Default: fullscreen active sheet (today)
     - Tiled Vertical
