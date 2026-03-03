@@ -142,4 +142,43 @@ describe('validateDisplayName', () => {
   it('trims whitespace before validation', () => {
     expect(validateDisplayName('  Alice  ')).toEqual({ ok: true })
   })
+
+  // ── K5-1: Offensive display name enforcement ─────────────────────────────
+
+  it('rejects names with "admin" embedded in compound word', () => {
+    expect(validateDisplayName('SuperAdmin')).toEqual({ ok: false, error: 'displayNameForbidden' })
+  })
+
+  it('rejects "chainsolvesupport" variant without separator', () => {
+    expect(validateDisplayName('ChainSolveSupport')).toEqual({
+      ok: false,
+      error: 'displayNameForbidden',
+    })
+  })
+
+  it('rejects "buy_now" spam pattern', () => {
+    expect(validateDisplayName('Buy Now')).toEqual({ ok: false, error: 'displayNameForbidden' })
+  })
+
+  it('rejects "free_money" spam pattern', () => {
+    expect(validateDisplayName('Free Money')).toEqual({ ok: false, error: 'displayNameForbidden' })
+  })
+
+  it('rejects "click_here" spam pattern', () => {
+    expect(validateDisplayName('Click Here')).toEqual({ ok: false, error: 'displayNameForbidden' })
+  })
+
+  it('allows legitimate names that contain partial forbidden words', () => {
+    // "official" is forbidden, but "Officer" should be fine since normalization
+    // converts to officer_ which does not contain "official"
+    expect(validateDisplayName('Officer')).toEqual({ ok: true })
+  })
+
+  it('rejects "anonymous" placeholder', () => {
+    expect(validateDisplayName('Anonymous')).toEqual({ ok: false, error: 'displayNameForbidden' })
+  })
+
+  it('rejects "test_user" placeholder', () => {
+    expect(validateDisplayName('Test User')).toEqual({ ok: false, error: 'displayNameForbidden' })
+  })
 })

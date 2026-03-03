@@ -15,17 +15,21 @@ const LazyAdminDangerZone = lazy(() =>
 const LazySecuritySettings = lazy(() =>
   import('./settings/SecuritySettings').then((m) => ({ default: m.SecuritySettings })),
 )
+const LazyModerationPanel = lazy(() =>
+  import('./settings/ModerationPanel').then((m) => ({ default: m.ModerationPanel })),
+)
 
 export type { Profile }
 
 const BASE_TABS: SettingsTab[] = ['profile', 'billing', 'preferences', 'security']
-type SettingsTab = 'profile' | 'billing' | 'preferences' | 'security' | 'admin'
+type SettingsTab = 'profile' | 'billing' | 'preferences' | 'security' | 'moderation' | 'admin'
 
 const TAB_ICONS: Record<SettingsTab, string> = {
   profile: '\u2302',
   billing: '\u00A4',
   preferences: '\u2699',
   security: '\u2616',
+  moderation: '\u2691',
   admin: '\u26A0',
 }
 
@@ -40,7 +44,7 @@ export default function Settings() {
 
   const isAdmin = profile?.is_developer || profile?.is_admin
   const tabs = useMemo<SettingsTab[]>(
-    () => (isAdmin ? [...BASE_TABS, 'admin'] : BASE_TABS),
+    () => (isAdmin ? [...BASE_TABS, 'moderation', 'admin'] : BASE_TABS),
     [isAdmin],
   )
   const tab = (searchParams.get('tab') as SettingsTab) || 'profile'
@@ -135,6 +139,11 @@ export default function Settings() {
           {tab === 'security' && (
             <Suspense fallback={null}>
               <LazySecuritySettings />
+            </Suspense>
+          )}
+          {tab === 'moderation' && isAdmin && (
+            <Suspense fallback={null}>
+              <LazyModerationPanel />
             </Suspense>
           )}
           {tab === 'admin' && isAdmin && (

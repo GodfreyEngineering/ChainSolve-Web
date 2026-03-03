@@ -397,6 +397,8 @@
     "edit": "Editar",
     "admin": "Admin",
     "adminDesc": "Herramientas de desarrollador y zona de peligro",
+    "moderation": "Moderación",
+    "moderationDesc": "Revisar y gestionar informes de contenido",
     "security": "Seguridad",
     "securityDesc": "Autenticación de dos factores",
     "suggest": "Sugerir una función"
@@ -1456,5 +1458,35 @@
     "displayNameControlChars": "El nombre para mostrar contiene caracteres no válidos.",
     "displayNameInvalidChars": "El nombre para mostrar contiene caracteres no permitidos.",
     "displayNameForbidden": "Este nombre para mostrar no está permitido."
+  },
+  "report": {
+    "title": "Reportar contenido",
+    "description": "Describa por qué este(a) {{type}} debería ser revisado(a) por un moderador.",
+    "reasonPlaceholder": "Explique el problema (obligatorio)…",
+    "reasonRequired": "Se requiere una razón.",
+    "reasonTooLong": "La razón no puede superar los 1000 caracteres.",
+    "submit": "Enviar reporte",
+    "submitting": "Enviando…",
+    "success": "Reporte enviado. Un moderador lo revisará.",
+    "type_display_name": "nombre para mostrar",
+    "type_avatar": "avatar",
+    "type_comment": "comentario",
+    "type_marketplace_item": "artículo"
+  },
+  "moderation": {
+    "title": "Moderación de contenido",
+    "description": "Revise los reportes pendientes de los usuarios. Resuelva para tomar acción o descarte si no se necesita acción.",
+    "noReports": "No hay reportes pendientes.",
+    "targetId": "ID del objetivo",
+    "reporter": "Reportador",
+    "reason": "Razón",
+    "resolve": "Resolver",
+    "dismiss": "Descartar",
+    "processing": "Procesando…",
+    "pendingCount": "{{count}} reporte(s) pendiente(s)",
+    "typeDisplayName": "Nombre para mostrar",
+    "typeAvatar": "Avatar",
+    "typeComment": "Comentario",
+    "typeMarketplaceItem": "Artículo del marketplace"
   }
 }

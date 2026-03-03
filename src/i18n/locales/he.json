@@ -605,5 +605,35 @@
     "free": "חינם",
     "past_due": "באיחור",
     "canceled": "מבוטל"
+  },
+  "report": {
+    "title": "דווח על תוכן",
+    "description": "תאר מדוע {{type}} זה צריך להיבדק על ידי מנחה.",
+    "reasonPlaceholder": "תאר את הבעיה (חובה)…",
+    "reasonRequired": "נדרשת סיבה.",
+    "reasonTooLong": "הסיבה לא יכולה לעלות על 1000 תווים.",
+    "submit": "שלח דיווח",
+    "submitting": "שולח…",
+    "success": "הדיווח נשלח. מנחה יבדוק אותו.",
+    "type_display_name": "שם תצוגה",
+    "type_avatar": "תמונת פרופיל",
+    "type_comment": "תגובה",
+    "type_marketplace_item": "פריט"
+  },
+  "moderation": {
+    "title": "ניהול תוכן",
+    "description": "סקירת דיווחים ממתינים מהמשתמשים. פתור כדי לפעול או דחה אם לא נדרשת פעולה.",
+    "noReports": "אין דיווחים ממתינים.",
+    "targetId": "מזהה יעד",
+    "reporter": "מדווח",
+    "reason": "סיבה",
+    "resolve": "פתור",
+    "dismiss": "דחה",
+    "processing": "מעבד…",
+    "pendingCount": "{{count}} דיווח(ים) ממתינים",
+    "typeDisplayName": "שם תצוגה",
+    "typeAvatar": "תמונת פרופיל",
+    "typeComment": "תגובה",
+    "typeMarketplaceItem": "פריט מרקטפלייס"
   }
 }

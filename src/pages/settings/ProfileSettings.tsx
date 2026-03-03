@@ -4,6 +4,7 @@ import { Input } from '../../components/ui/Input'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../../lib/profilesService'
 import { updateDisplayName, uploadAvatar, getAvatarUrl } from '../../lib/profilesService'
+import { validateDisplayName } from '../../lib/validateDisplayName'
 import { resolveEffectivePlan } from '../../lib/entitlements'
 import { PlanBadge } from '../../components/ui/PlanBadge'
 import { displayNameStyle } from '../../lib/planStyles'
@@ -37,8 +38,16 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
   }, [profile?.full_name])
 
   const handleSaveName = useCallback(async () => {
-    setNameSaving(true)
     setNameError(null)
+    // K5-1: validate display name before saving
+    if (displayName.trim()) {
+      const v = validateDisplayName(displayName)
+      if (!v.ok) {
+        setNameError(t(`signupWizard.${v.error}`, v.error ?? 'Invalid name'))
+        return
+      }
+    }
+    setNameSaving(true)
     try {
       await updateDisplayName(displayName)
       setNameEditing(false)
@@ -48,7 +57,7 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
     } finally {
       setNameSaving(false)
     }
-  }, [displayName, onProfileUpdated])
+  }, [displayName, onProfileUpdated, t])
 
   // ── Avatar upload ─────────────────────────────────────────────────────────
   const fileRef = useRef<HTMLInputElement>(null)

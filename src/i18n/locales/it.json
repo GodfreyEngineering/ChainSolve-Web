@@ -397,6 +397,8 @@
     "edit": "Modifica",
     "admin": "Admin",
     "adminDesc": "Strumenti sviluppatore e zona di pericolo",
+    "moderation": "Moderazione",
+    "moderationDesc": "Esaminare e gestire le segnalazioni",
     "security": "Sicurezza",
     "securityDesc": "Autenticazione a due fattori",
     "suggest": "Suggerisci funzionalità"
@@ -1456,5 +1458,35 @@
     "displayNameControlChars": "Il nome visualizzato contiene caratteri non validi.",
     "displayNameInvalidChars": "Il nome visualizzato contiene caratteri non consentiti.",
     "displayNameForbidden": "Questo nome visualizzato non è consentito."
+  },
+  "report": {
+    "title": "Segnala contenuto",
+    "description": "Descrivi perché questo(a) {{type}} dovrebbe essere esaminato(a) da un moderatore.",
+    "reasonPlaceholder": "Descrivi il problema (obbligatorio)…",
+    "reasonRequired": "Un motivo è obbligatorio.",
+    "reasonTooLong": "Il motivo non può superare i 1000 caratteri.",
+    "submit": "Invia segnalazione",
+    "submitting": "Invio in corso…",
+    "success": "Segnalazione inviata. Un moderatore la esaminerà.",
+    "type_display_name": "nome visualizzato",
+    "type_avatar": "avatar",
+    "type_comment": "commento",
+    "type_marketplace_item": "articolo"
+  },
+  "moderation": {
+    "title": "Moderazione contenuti",
+    "description": "Esamina le segnalazioni in sospeso degli utenti. Risolvi per intervenire o archivia se non è necessaria alcuna azione.",
+    "noReports": "Nessuna segnalazione in sospeso.",
+    "targetId": "ID obiettivo",
+    "reporter": "Segnalatore",
+    "reason": "Motivo",
+    "resolve": "Risolvi",
+    "dismiss": "Archivia",
+    "processing": "Elaborazione…",
+    "pendingCount": "{{count}} segnalazione(i) in sospeso",
+    "typeDisplayName": "Nome visualizzato",
+    "typeAvatar": "Avatar",
+    "typeComment": "Commento",
+    "typeMarketplaceItem": "Articolo del marketplace"
   }
 }

@@ -397,6 +397,8 @@
     "edit": "Bearbeiten",
     "admin": "Admin",
     "adminDesc": "Entwicklertools und Gefahrenzone",
+    "moderation": "Moderation",
+    "moderationDesc": "Inhaltsmeldungen prüfen und bearbeiten",
     "security": "Sicherheit",
     "securityDesc": "Zwei-Faktor-Authentifizierung",
     "suggest": "Feature vorschlagen"
@@ -1456,5 +1458,35 @@
       "title": "Nutzungsbedingungen — ChainSolve",
       "description": "Nutzungsbedingungen und Geschäftsbedingungen von ChainSolve."
     }
+  },
+  "report": {
+    "title": "Inhalt melden",
+    "description": "Beschreiben Sie, warum diese(r) {{type}} von einem Moderator geprüft werden sollte.",
+    "reasonPlaceholder": "Beschreiben Sie das Problem (erforderlich)…",
+    "reasonRequired": "Eine Begründung ist erforderlich.",
+    "reasonTooLong": "Die Begründung darf maximal 1000 Zeichen lang sein.",
+    "submit": "Meldung absenden",
+    "submitting": "Wird gesendet…",
+    "success": "Meldung eingereicht. Ein Moderator wird sie prüfen.",
+    "type_display_name": "Anzeigename",
+    "type_avatar": "Avatar",
+    "type_comment": "Kommentar",
+    "type_marketplace_item": "Artikel"
+  },
+  "moderation": {
+    "title": "Inhaltsmoderation",
+    "description": "Offene Meldungen von Nutzern prüfen. Lösen, um Maßnahmen zu ergreifen, oder ablehnen, wenn keine Maßnahme nötig ist.",
+    "noReports": "Keine offenen Meldungen.",
+    "targetId": "Ziel-ID",
+    "reporter": "Melder",
+    "reason": "Begründung",
+    "resolve": "Lösen",
+    "dismiss": "Ablehnen",
+    "processing": "Wird verarbeitet…",
+    "pendingCount": "{{count}} offene Meldung(en)",
+    "typeDisplayName": "Anzeigename",
+    "typeAvatar": "Avatar",
+    "typeComment": "Kommentar",
+    "typeMarketplaceItem": "Marktplatz-Artikel"
   }
 }

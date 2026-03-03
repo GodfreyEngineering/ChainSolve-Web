@@ -28,8 +28,6 @@ import {
   getItemComments,
   postComment,
   deleteComment,
-  reportComment,
-  reportItem,
   checkCommentRateLimit,
   type MarketplaceItem,
   type MarketplaceComment,
@@ -42,6 +40,8 @@ import { getSession } from '../lib/auth'
 import { listMyOrgs, getOrgPolicy, type OrgPolicy } from '../lib/orgsService'
 import { ENGINE_CONTRACT_VERSION } from '../lib/engineContractVersion'
 import { isUserBlocked, blockUser as blockUserAction, getBlockedUsers } from '../lib/blockedUsers'
+import { ReportModal } from '../components/ui/ReportModal'
+import type { ReportTargetType } from '../lib/userReportsService'
 import { BRAND } from '../lib/brand'
 
 const CATEGORY_LABEL_KEYS: Record<string, string> = {
@@ -360,6 +360,13 @@ export default function ItemDetailPage() {
   const [authorBlocked, setAuthorBlocked] = useState(false)
   const [itemReported, setItemReported] = useState(false)
 
+  // K5-1: report modal state
+  const [reportModalOpen, setReportModalOpen] = useState(false)
+  const [reportTarget, setReportTarget] = useState<{
+    type: ReportTargetType
+    id: string
+  } | null>(null)
+
   useEffect(() => {
     if (!itemId) {
       setNotFound(true)
@@ -545,39 +552,18 @@ export default function ItemDetailPage() {
     }
   }, [])
 
-  const handleReportComment = useCallback(
-    async (commentId: string) => {
-      try {
-        await reportComment(commentId, 'Reported by user')
-        setComments((prev) => prev.filter((c) => c.id !== commentId))
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err)
-        if (msg.toLowerCase().includes('sign in')) {
-          navigate('/login')
-          return
-        }
-        setCommentError(msg)
-      }
-    },
-    [navigate],
-  )
+  // K5-1: open report modal for a comment
+  const handleReportComment = useCallback((commentId: string) => {
+    setReportTarget({ type: 'comment', id: commentId })
+    setReportModalOpen(true)
+  }, [])
 
-  // D16-3: report item handler
-  const handleReportItem = useCallback(async () => {
+  // K5-1: open report modal for an item
+  const handleReportItem = useCallback(() => {
     if (!itemId) return
-    if (!window.confirm(t('marketplace.reportItemConfirm'))) return
-    try {
-      await reportItem(itemId, 'Reported by user')
-      setItemReported(true)
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err)
-      if (msg.toLowerCase().includes('sign in')) {
-        navigate('/login')
-        return
-      }
-      setError(msg)
-    }
-  }, [itemId, t, navigate])
+    setReportTarget({ type: 'marketplace_item', id: itemId })
+    setReportModalOpen(true)
+  }, [itemId])
 
   // D16-3: block author handler
   const handleBlockAuthor = useCallback(() => {
@@ -1033,6 +1019,25 @@ export default function ItemDetailPage() {
           </article>
         )}
       </main>
+
+      {/* K5-1: Report modal */}
+      {reportTarget && (
+        <ReportModal
+          open={reportModalOpen}
+          onClose={() => {
+            setReportModalOpen(false)
+            setReportTarget(null)
+          }}
+          targetType={reportTarget.type}
+          targetId={reportTarget.id}
+          onReported={() => {
+            if (reportTarget.type === 'marketplace_item') setItemReported(true)
+            if (reportTarget.type === 'comment') {
+              setComments((prev) => prev.filter((c) => c.id !== reportTarget.id))
+            }
+          }}
+        />
+      )}
     </div>
   )
 }

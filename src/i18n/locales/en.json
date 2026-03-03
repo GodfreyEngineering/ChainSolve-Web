@@ -404,6 +404,8 @@
     "edit": "Edit",
     "admin": "Admin",
     "adminDesc": "Developer tools and danger zone",
+    "moderation": "Moderation",
+    "moderationDesc": "Review and act on content reports",
     "security": "Security",
     "securityDesc": "Two-factor authentication",
     "suggest": "Suggest a feature"
@@ -1475,5 +1477,35 @@
     "displayNameControlChars": "Display name contains invalid characters.",
     "displayNameInvalidChars": "Display name contains disallowed characters.",
     "displayNameForbidden": "This display name is not allowed."
+  },
+  "report": {
+    "title": "Report content",
+    "description": "Describe why this {{type}} should be reviewed by a moderator.",
+    "reasonPlaceholder": "Explain the issue (required)…",
+    "reasonRequired": "A reason is required.",
+    "reasonTooLong": "Reason must be 1000 characters or fewer.",
+    "submit": "Submit report",
+    "submitting": "Submitting…",
+    "success": "Report submitted. A moderator will review it.",
+    "type_display_name": "display name",
+    "type_avatar": "avatar",
+    "type_comment": "comment",
+    "type_marketplace_item": "item"
+  },
+  "moderation": {
+    "title": "Content Moderation",
+    "description": "Review pending reports submitted by users. Resolve to take action or dismiss if no action is needed.",
+    "noReports": "No pending reports.",
+    "targetId": "Target ID",
+    "reporter": "Reporter",
+    "reason": "Reason",
+    "resolve": "Resolve",
+    "dismiss": "Dismiss",
+    "processing": "Processing…",
+    "pendingCount": "{{count}} pending report(s)",
+    "typeDisplayName": "Display name",
+    "typeAvatar": "Avatar",
+    "typeComment": "Comment",
+    "typeMarketplaceItem": "Marketplace item"
   }
 }

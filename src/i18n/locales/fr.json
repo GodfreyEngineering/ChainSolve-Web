@@ -397,6 +397,8 @@
     "edit": "Modifier",
     "admin": "Admin",
     "adminDesc": "Outils développeur et zone de danger",
+    "moderation": "Modération",
+    "moderationDesc": "Examiner et traiter les signalements",
     "security": "Sécurité",
     "securityDesc": "Authentification à deux facteurs",
     "suggest": "Suggérer une fonctionnalité"
@@ -1456,5 +1458,35 @@
     "displayNameControlChars": "Le nom d'affichage contient des caractères non valides.",
     "displayNameInvalidChars": "Le nom d'affichage contient des caractères non autorisés.",
     "displayNameForbidden": "Ce nom d'affichage n'est pas autorisé."
+  },
+  "report": {
+    "title": "Signaler un contenu",
+    "description": "Expliquez pourquoi ce(tte) {{type}} devrait être examiné(e) par un modérateur.",
+    "reasonPlaceholder": "Décrivez le problème (obligatoire)…",
+    "reasonRequired": "Une raison est requise.",
+    "reasonTooLong": "La raison ne peut pas dépasser 1000 caractères.",
+    "submit": "Envoyer le signalement",
+    "submitting": "Envoi en cours…",
+    "success": "Signalement envoyé. Un modérateur l'examinera.",
+    "type_display_name": "nom d'affichage",
+    "type_avatar": "avatar",
+    "type_comment": "commentaire",
+    "type_marketplace_item": "article"
+  },
+  "moderation": {
+    "title": "Modération de contenu",
+    "description": "Examiner les signalements en attente. Résoudre pour agir ou rejeter si aucune action n'est nécessaire.",
+    "noReports": "Aucun signalement en attente.",
+    "targetId": "ID cible",
+    "reporter": "Signaleur",
+    "reason": "Raison",
+    "resolve": "Résoudre",
+    "dismiss": "Rejeter",
+    "processing": "Traitement…",
+    "pendingCount": "{{count}} signalement(s) en attente",
+    "typeDisplayName": "Nom d'affichage",
+    "typeAvatar": "Avatar",
+    "typeComment": "Commentaire",
+    "typeMarketplaceItem": "Article du marketplace"
   }
 }
