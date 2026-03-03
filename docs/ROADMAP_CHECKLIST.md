@@ -2395,7 +2395,7 @@ Claude MUST:
     - predictable session behavior
     - no save lockouts
 
-- [ ] L3-2: Full operational readiness checklist for consultancy audit
+- [x] L3-2: Full operational readiness checklist for consultancy audit
   - Add docs:
     - how to audit the repo
     - how to run tests
