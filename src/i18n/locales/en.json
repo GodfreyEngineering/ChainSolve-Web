@@ -1048,10 +1048,21 @@
     "errorCreate": "Failed to create organization",
     "errorInvite": "Failed to invite member",
     "backToOrgs": "Back to organizations",
-    "policyTitle": "Explore Policies",
+    "policyTitle": "Organization Policies",
     "policyExplore": "Enable Company Library for members",
     "policyInstalls": "Allow members to install marketplace items",
-    "policyComments": "Allow members to post comments on marketplace items"
+    "policyComments": "Allow members to post comments on marketplace items",
+    "policySingleSession": "Enforce single active session per user",
+    "policyAi": "Allow AI-assisted features",
+    "policyExport": "Allow project export",
+    "policyCustomFns": "Allow custom function creation",
+    "policyRetention": "Audit log retention",
+    "retentionIndefinite": "Indefinite",
+    "retentionDays": "{{count}} days",
+    "seatTitle": "Seat Management",
+    "seatUsage": "{{used}} of {{max}} seats used",
+    "seatUnlimited": "unlimited",
+    "seatLimitReached": "Seat limit reached"
   },
   "auditLog": {
     "title": "Audit Log",

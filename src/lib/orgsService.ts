@@ -21,6 +21,12 @@ export interface Org {
   policy_comments_allowed: boolean
   /** H9-1: single-session enforcement (only one active session per user). */
   policy_single_session: boolean
+  /** I8-1: enterprise feature locks. */
+  policy_ai_enabled: boolean
+  policy_export_enabled: boolean
+  policy_custom_fns_enabled: boolean
+  /** I8-1: audit log retention in days (null = indefinite). */
+  policy_data_retention_days: number | null
   /** D10-3: seat limit. NULL = unlimited. */
   max_seats: number | null
   created_at: string
@@ -33,13 +39,19 @@ export interface OrgSeatUsage {
   max: number | null
 }
 
-/** D10-2: subset of Org fields for policy checks. */
+/** D10-2 + I8-1: subset of Org fields for policy checks. */
 export interface OrgPolicy {
   policy_explore_enabled: boolean
   policy_installs_allowed: boolean
   policy_comments_allowed: boolean
   /** H9-1: single-session enforcement. */
   policy_single_session: boolean
+  /** I8-1: enterprise feature locks. */
+  policy_ai_enabled: boolean
+  policy_export_enabled: boolean
+  policy_custom_fns_enabled: boolean
+  /** I8-1: audit log retention in days (null = indefinite). */
+  policy_data_retention_days: number | null
 }
 
 export interface OrgMember {
@@ -251,7 +263,7 @@ export async function getOrgPolicy(orgId: string): Promise<OrgPolicy> {
   const { data, error } = await supabase
     .from('organizations')
     .select(
-      'policy_explore_enabled,policy_installs_allowed,policy_comments_allowed,policy_single_session',
+      'policy_explore_enabled,policy_installs_allowed,policy_comments_allowed,policy_single_session,policy_ai_enabled,policy_export_enabled,policy_custom_fns_enabled,policy_data_retention_days',
     )
     .eq('id', orgId)
     .maybeSingle()

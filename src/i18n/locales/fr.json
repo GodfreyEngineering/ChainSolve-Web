@@ -1029,10 +1029,21 @@
     "errorCreate": "Impossible de créer l'organisation",
     "errorInvite": "Impossible d'inviter le membre",
     "backToOrgs": "Retour aux organisations",
-    "policyTitle": "Politiques Explore",
+    "policyTitle": "Politiques de l'organisation",
     "policyExplore": "Activer la bibliothèque d'entreprise pour les membres",
     "policyInstalls": "Autoriser les membres à installer des éléments du marketplace",
-    "policyComments": "Autoriser les membres à publier des commentaires sur les éléments du marketplace"
+    "policyComments": "Autoriser les membres à publier des commentaires sur les éléments du marketplace",
+    "policySingleSession": "Imposer une session active unique par utilisateur",
+    "policyAi": "Autoriser les fonctionnalités assistées par IA",
+    "policyExport": "Autoriser l'export de projets",
+    "policyCustomFns": "Autoriser la création de fonctions personnalisées",
+    "policyRetention": "Conservation du journal d'audit",
+    "retentionIndefinite": "Indéfinie",
+    "retentionDays": "{{count}} jours",
+    "seatTitle": "Gestion des places",
+    "seatUsage": "{{used}} sur {{max}} places utilisées",
+    "seatUnlimited": "illimité",
+    "seatLimitReached": "Limite de places atteinte"
   },
   "auditLog": {
     "title": "Journal d'audit",

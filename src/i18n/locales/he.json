@@ -126,10 +126,21 @@
     "resetting": "מאפס…"
   },
   "orgs": {
-    "policyTitle": "מדיניות Explore",
+    "policyTitle": "מדיניות הארגון",
     "policyExplore": "הפעלת ספריית חברה לחברי הארגון",
     "policyInstalls": "אפשר לחברים להתקין פריטים מהשוק",
-    "policyComments": "אפשר לחברים לפרסם תגובות על פריטי השוק"
+    "policyComments": "אפשר לחברים לפרסם תגובות על פריטי השוק",
+    "policySingleSession": "אכיפת הפעלה פעילה אחת למשתמש",
+    "policyAi": "אפשר תכונות בסיוע בינה מלאכותית",
+    "policyExport": "אפשר ייצוא פרויקטים",
+    "policyCustomFns": "אפשר יצירת פונקציות מותאמות אישית",
+    "policyRetention": "שמירת יומן ביקורת",
+    "retentionIndefinite": "ללא הגבלה",
+    "retentionDays": "{{count}} ימים",
+    "seatTitle": "ניהול מקומות",
+    "seatUsage": "{{used}} מתוך {{max}} מקומות בשימוש",
+    "seatUnlimited": "ללא הגבלה",
+    "seatLimitReached": "הגעת למגבלת המקומות"
   },
   "toolbar": {
     "graphHealth": "סטטוס הגרף",

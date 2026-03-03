@@ -123,11 +123,21 @@ export const SESSION_CHECK_INTERVAL_MS = 60_000
 /**
  * Revoke all existing sessions for the user, then register a new one.
  * Called during login to enforce the single-session policy.
+ *
+ * I8-1: when `singleSessionRequired` is true (org policy), all existing
+ * sessions are revoked before registering the new one.  When false, the
+ * new session is registered without revoking others.
+ *
  * Returns the new session ID.
  */
-export async function enforceAndRegisterSession(userId: string): Promise<string | null> {
-  // Delete all existing sessions for this user (across all devices)
-  await supabase.from('user_sessions').delete().eq('user_id', userId)
+export async function enforceAndRegisterSession(
+  userId: string,
+  singleSessionRequired = true,
+): Promise<string | null> {
+  if (singleSessionRequired) {
+    // Delete all existing sessions for this user (across all devices)
+    await supabase.from('user_sessions').delete().eq('user_id', userId)
+  }
   // Register the new session for this device
   return registerSession(userId)
 }

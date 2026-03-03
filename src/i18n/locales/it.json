@@ -1029,10 +1029,21 @@
     "errorCreate": "Impossibile creare l'organizzazione",
     "errorInvite": "Impossibile invitare il membro",
     "backToOrgs": "Torna alle organizzazioni",
-    "policyTitle": "Politiche Explore",
+    "policyTitle": "Politiche dell'organizzazione",
     "policyExplore": "Abilita la libreria aziendale per i membri",
     "policyInstalls": "Consenti ai membri di installare elementi del marketplace",
-    "policyComments": "Consenti ai membri di pubblicare commenti sugli elementi del marketplace"
+    "policyComments": "Consenti ai membri di pubblicare commenti sugli elementi del marketplace",
+    "policySingleSession": "Imponi una sessione attiva per utente",
+    "policyAi": "Consenti funzionalità assistite dall'IA",
+    "policyExport": "Consenti l'esportazione dei progetti",
+    "policyCustomFns": "Consenti la creazione di funzioni personalizzate",
+    "policyRetention": "Conservazione del registro di audit",
+    "retentionIndefinite": "Illimitata",
+    "retentionDays": "{{count}} giorni",
+    "seatTitle": "Gestione posti",
+    "seatUsage": "{{used}} di {{max}} posti utilizzati",
+    "seatUnlimited": "illimitato",
+    "seatLimitReached": "Limite posti raggiunto"
   },
   "auditLog": {
     "title": "Registro di audit",

@@ -1029,10 +1029,21 @@
     "errorCreate": "Organisation konnte nicht erstellt werden",
     "errorInvite": "Mitglied konnte nicht eingeladen werden",
     "backToOrgs": "Zurück zu Organisationen",
-    "policyTitle": "Explore-Richtlinien",
+    "policyTitle": "Organisationsrichtlinien",
     "policyExplore": "Unternehmensbibliothek für Mitglieder aktivieren",
     "policyInstalls": "Mitgliedern die Installation von Marketplace-Elementen erlauben",
-    "policyComments": "Mitgliedern das Kommentieren von Marketplace-Elementen erlauben"
+    "policyComments": "Mitgliedern das Kommentieren von Marketplace-Elementen erlauben",
+    "policySingleSession": "Einzelsitzung pro Benutzer erzwingen",
+    "policyAi": "KI-gestützte Funktionen erlauben",
+    "policyExport": "Projektexport erlauben",
+    "policyCustomFns": "Erstellung benutzerdefinierter Funktionen erlauben",
+    "policyRetention": "Aufbewahrung des Audit-Protokolls",
+    "retentionIndefinite": "Unbegrenzt",
+    "retentionDays": "{{count}} Tage",
+    "seatTitle": "Platzverwaltung",
+    "seatUsage": "{{used}} von {{max}} Plätzen belegt",
+    "seatUnlimited": "unbegrenzt",
+    "seatLimitReached": "Platzlimit erreicht"
   },
   "auditLog": {
     "title": "Audit-Protokoll",

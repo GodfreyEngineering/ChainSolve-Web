@@ -26,10 +26,12 @@ import {
   deleteOrg,
   getOrgPolicy,
   updateOrgPolicy,
+  getOrgSeatUsage,
   type Org,
   type OrgMember,
   type OrgRole,
   type OrgPolicy,
+  type OrgSeatUsage,
 } from '../lib/orgsService'
 import { getCurrentUser } from '../lib/auth'
 
@@ -200,6 +202,9 @@ export default function OrgsPage() {
   const [orgPolicy, setOrgPolicy] = useState<OrgPolicy | null>(null)
   const [policyLoading, setPolicyLoading] = useState(false)
 
+  // I8-1: seat usage state
+  const [seatUsage, setSeatUsage] = useState<OrgSeatUsage | null>(null)
+
   // ── Load current user ──────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -244,10 +249,12 @@ export default function OrgsPage() {
   const loadPolicy = useCallback(async (orgId: string) => {
     setPolicyLoading(true)
     try {
-      const p = await getOrgPolicy(orgId)
+      const [p, seats] = await Promise.all([getOrgPolicy(orgId), getOrgSeatUsage(orgId)])
       setOrgPolicy(p)
+      setSeatUsage(seats)
     } catch {
       setOrgPolicy(null)
+      setSeatUsage(null)
     } finally {
       setPolicyLoading(false)
     }
@@ -268,13 +275,28 @@ export default function OrgsPage() {
   const handleTogglePolicy = useCallback(
     async (key: keyof OrgPolicy) => {
       if (!selectedOrgId || !orgPolicy) return
-      const newVal = !orgPolicy[key]
+      const cur = orgPolicy[key]
+      if (typeof cur !== 'boolean') return
+      const newVal = !cur
       setOrgPolicy((prev) => (prev ? { ...prev, [key]: newVal } : prev))
       try {
-        await updateOrgPolicy(selectedOrgId, { [key]: newVal })
+        await updateOrgPolicy(selectedOrgId, { [key]: newVal } as Partial<OrgPolicy>)
       } catch {
-        // Revert on failure
         setOrgPolicy((prev) => (prev ? { ...prev, [key]: !newVal } : prev))
+      }
+    },
+    [selectedOrgId, orgPolicy],
+  )
+
+  const handleRetentionChange = useCallback(
+    async (days: number | null) => {
+      if (!selectedOrgId || !orgPolicy) return
+      const prev = orgPolicy.policy_data_retention_days
+      setOrgPolicy((p) => (p ? { ...p, policy_data_retention_days: days } : p))
+      try {
+        await updateOrgPolicy(selectedOrgId, { policy_data_retention_days: days })
+      } catch {
+        setOrgPolicy((p) => (p ? { ...p, policy_data_retention_days: prev } : p))
       }
     },
     [selectedOrgId, orgPolicy],
@@ -557,7 +579,25 @@ export default function OrgsPage() {
           </section>
         )}
 
-        {/* E10-3: Org policies (owner only) */}
+        {/* Seat usage (owner/admin visible) */}
+        {selectedOrg && seatUsage && (
+          <section style={s.section} data-testid="seat-usage-section">
+            <h2 style={s.h2}>{t('orgs.seatTitle')}</h2>
+            <p style={{ fontSize: '0.9rem', margin: 0 }}>
+              {t('orgs.seatUsage', {
+                used: seatUsage.used,
+                max: seatUsage.max ?? t('orgs.seatUnlimited'),
+              })}
+            </p>
+            {seatUsage.max !== null && seatUsage.used >= seatUsage.max && (
+              <p style={{ color: '#f59e0b', fontSize: '0.82rem', marginTop: '0.5rem' }}>
+                {t('orgs.seatLimitReached')}
+              </p>
+            )}
+          </section>
+        )}
+
+        {/* Org policies (owner only) */}
         {selectedOrg && isOwner && (
           <section style={s.section} data-testid="org-policy-section">
             <h2 style={s.h2}>{t('orgs.policyTitle')}</h2>
@@ -570,6 +610,10 @@ export default function OrgsPage() {
                     ['policy_explore_enabled', t('orgs.policyExplore')],
                     ['policy_installs_allowed', t('orgs.policyInstalls')],
                     ['policy_comments_allowed', t('orgs.policyComments')],
+                    ['policy_single_session', t('orgs.policySingleSession')],
+                    ['policy_ai_enabled', t('orgs.policyAi')],
+                    ['policy_export_enabled', t('orgs.policyExport')],
+                    ['policy_custom_fns_enabled', t('orgs.policyCustomFns')],
                   ] as [keyof OrgPolicy, string][]
                 ).map(([key, label]) => (
                   <label
@@ -584,13 +628,35 @@ export default function OrgsPage() {
                   >
                     <input
                       type="checkbox"
-                      checked={orgPolicy[key]}
+                      checked={Boolean(orgPolicy[key])}
                       onChange={() => void handleTogglePolicy(key)}
                       data-testid={`policy-${key}`}
                     />
                     <span>{label}</span>
                   </label>
                 ))}
+
+                {/* Data retention */}
+                <div style={{ marginTop: '0.75rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.88rem', marginBottom: '0.35rem' }}>
+                    {t('orgs.policyRetention')}
+                  </label>
+                  <select
+                    style={s.select}
+                    value={orgPolicy.policy_data_retention_days ?? 'indefinite'}
+                    onChange={(e) => {
+                      const v = e.target.value
+                      void handleRetentionChange(v === 'indefinite' ? null : Number(v))
+                    }}
+                    data-testid="policy-retention"
+                  >
+                    <option value="indefinite">{t('orgs.retentionIndefinite')}</option>
+                    <option value="30">{t('orgs.retentionDays', { count: 30 })}</option>
+                    <option value="90">{t('orgs.retentionDays', { count: 90 })}</option>
+                    <option value="180">{t('orgs.retentionDays', { count: 180 })}</option>
+                    <option value="365">{t('orgs.retentionDays', { count: 365 })}</option>
+                  </select>
+                </div>
               </div>
             )}
           </section>
