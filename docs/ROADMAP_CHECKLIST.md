@@ -2407,7 +2407,7 @@ Claude MUST:
 ---
 
 ## L4 — Next-level extras (nice-to-haves that move the needle)
-- [ ] L4-1: “Scratch canvas” workflow perfected
+- [x] L4-1: “Scratch canvas” workflow perfected
   - Start without naming
   - Save as project anytime
   - No nags unless leaving with unsaved changes
