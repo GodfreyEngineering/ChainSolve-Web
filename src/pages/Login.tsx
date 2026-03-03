@@ -8,7 +8,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback, type FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   signInWithPassword,
@@ -22,7 +22,7 @@ import {
 import { MfaChallengeScreen } from '../components/app/MfaChallengeScreen'
 import { BRAND } from '../lib/brand'
 import { LegalFooter } from '../components/ui/LegalFooter'
-import { usePageMeta } from '../lib/seo'
+import { usePageMeta, useHreflang } from '../lib/seo'
 import TurnstileWidget from '../components/ui/TurnstileWidget'
 import { isTurnstileEnabled } from '../lib/turnstile'
 import { enforceAndRegisterSession } from '../lib/sessionService'
@@ -42,6 +42,7 @@ const SEO_KEY: Record<AuthMode, string> = {
 
 export default function Login({ initialMode = 'login' }: LoginProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { t } = useTranslation()
   const [mode, setMode] = useState<AuthMode>(initialMode)
   const [email, setEmail] = useState('')
@@ -64,9 +65,10 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
   // J1-4: MFA challenge state (shown when user has TOTP enrolled)
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
 
-  // Per-page SEO (I6-2)
+  // Per-page SEO (I6-2, L2-2)
   const seoKey = SEO_KEY[mode]
   usePageMeta(t(`${seoKey}.title`), t(`${seoKey}.description`))
+  useHreflang(location.pathname)
 
   // Turnstile CAPTCHA token (E2-2)
   const captchaEnabled = isTurnstileEnabled()

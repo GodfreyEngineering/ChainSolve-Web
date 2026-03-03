@@ -9,11 +9,12 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BRAND, CONTACT, COMPANY } from '../lib/brand'
 import { LegalFooter } from '../components/ui/LegalFooter'
-import { usePageMeta } from '../lib/seo'
+import { usePageMeta, useHreflang } from '../lib/seo'
 
 export default function PrivacyPage() {
   const { t } = useTranslation()
   usePageMeta(t('seo.privacy.title'), t('seo.privacy.description'))
+  useHreflang('/privacy')
   const effectiveDate = '1 March 2025'
 
   return (

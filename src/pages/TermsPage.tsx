@@ -9,12 +9,13 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BRAND, CONTACT } from '../lib/brand'
 import { LegalFooter } from '../components/ui/LegalFooter'
-import { usePageMeta } from '../lib/seo'
+import { usePageMeta, useHreflang } from '../lib/seo'
 import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 
 export default function TermsPage() {
   const { t } = useTranslation()
   usePageMeta(t('seo.terms.title'), t('seo.terms.description'))
+  useHreflang('/terms')
   const effectiveDate = '1 March 2025'
 
   return (

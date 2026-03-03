@@ -11,8 +11,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BRAND } from '../lib/brand'
 import { LegalFooter } from '../components/ui/LegalFooter'
-import { usePageMeta } from '../lib/seo'
-import { DOCS_CONTENT } from '../docs/docsPageContent'
+import { usePageMeta, useHreflang } from '../lib/seo'
+import i18n from '../i18n/config'
+import { getDocsContentSync } from '../docs/docsContentLoader'
 
 // ── Section definitions ──────────────────────────────────────────────────────
 
@@ -103,6 +104,7 @@ export default function DocsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { t } = useTranslation()
   usePageMeta(t('seo.docs.title'), t('seo.docs.description'))
+  useHreflang('/docs')
   const [search, setSearch] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -287,9 +289,9 @@ function DocsContent({ section }: { section: DocsSection }) {
 
 // ── Content accessor ─────────────────────────────────────────────────────────
 
-/** Read a body-text key from the lazy-loaded content module. */
+/** Read a body-text key from the locale-aware content map. */
 function c(section: string, key: string): string {
-  return DOCS_CONTENT[section]?.[key] ?? key
+  return getDocsContentSync(i18n.language)[section]?.[key] ?? key
 }
 
 // ── Shared helpers ───────────────────────────────────────────────────────────
