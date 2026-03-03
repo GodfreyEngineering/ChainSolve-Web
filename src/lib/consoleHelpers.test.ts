@@ -82,6 +82,88 @@ describe('getErrorExplanation', () => {
     const result = getErrorExplanation(makeEntry({ msg: 'Something happened', level: 'error' }))
     expect(result).toBeNull()
   })
+
+  // K4-2: Scientific workflow guidance tests
+  it('explains type broadcast mismatch', () => {
+    const result = getErrorExplanation(makeEntry({ msg: 'Cannot broadcast vector with table' }))
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('vector')
+    expect(result!.explanation).toContain('table')
+    expect(result!.docsSection).toBe('block-data')
+  })
+
+  it('explains expected vector errors', () => {
+    const result = getErrorExplanation(makeEntry({ msg: 'Mean: expected vector' }))
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('Mean')
+    expect(result!.explanation).toContain('vector')
+  })
+
+  it('explains empty vector errors', () => {
+    const result = getErrorExplanation(makeEntry({ msg: 'Mean: empty vector' }))
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('Mean')
+    expect(result!.explanation).toContain('empty')
+  })
+
+  it('explains no input errors', () => {
+    const result = getErrorExplanation(makeEntry({ msg: 'Sort: no input' }))
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('Sort')
+    expect(result!.explanation).toContain('not receiving')
+  })
+
+  it('explains probability domain errors', () => {
+    const result = getErrorExplanation(makeEntry({ msg: 'Binomial PMF: p must be in [0,1]' }))
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('probability')
+    expect(result!.docsSection).toBe('block-stats')
+  })
+
+  it('explains positive domain errors', () => {
+    const result = getErrorExplanation(makeEntry({ msg: 'Exponential PDF: λ must be > 0' }))
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('positive')
+  })
+
+  it('explains non-negative integer requirements', () => {
+    const result = getErrorExplanation(
+      makeEntry({ msg: 'C(n,k): n,k must be non-negative integers with k ≤ n' }),
+    )
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('integer')
+  })
+
+  it('explains discriminant < 0', () => {
+    const result = getErrorExplanation(makeEntry({ msg: 'v²: discriminant < 0' }))
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('discriminant')
+    expect(result!.explanation).toContain('complex')
+  })
+
+  it('explains no formula in custom function', () => {
+    const result = getErrorExplanation(makeEntry({ msg: 'Custom function: no formula' }))
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('formula')
+  })
+
+  it('explains unknown block type', () => {
+    const result = getErrorExplanation(makeEntry({ msg: 'Unknown block type: my_custom_block' }))
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('my_custom_block')
+  })
+
+  it('explains expected vector or table', () => {
+    const result = getErrorExplanation(makeEntry({ msg: 'Expected vector or table' }))
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('vector or table')
+  })
+
+  it('explains map scalar multiplier error', () => {
+    const result = getErrorExplanation(makeEntry({ msg: 'Map: expected scalar multiplier' }))
+    expect(result).not.toBeNull()
+    expect(result!.explanation).toContain('Map')
+  })
 })
 
 describe('formatErrorReport', () => {

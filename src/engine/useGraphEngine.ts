@@ -50,6 +50,37 @@ function toValueMap(values: Record<string, unknown>): Map<string, Value> {
   return map
 }
 
+/** K4-2: Maximum node errors to log per eval to avoid flooding the console. */
+const MAX_NODE_ERRORS_PER_EVAL = 10
+
+/**
+ * K4-2: Log individual node error messages to the debug console.
+ * Deduplicates by nodeId+message so the same error is only logged once
+ * until the error clears (node produces a non-error value).
+ */
+function logNodeErrors(values: Record<string, unknown>, seenErrors: Set<string>) {
+  let logged = 0
+  const stillActive = new Set<string>()
+
+  for (const [id, val] of Object.entries(values)) {
+    const v = val as Value
+    if (v?.kind === 'error') {
+      const key = `${id}:${v.message}`
+      stillActive.add(key)
+      if (!seenErrors.has(key) && logged < MAX_NODE_ERRORS_PER_EVAL) {
+        seenErrors.add(key)
+        dlog.warn('engine', v.message, { nodeId: id })
+        logged++
+      }
+    } else {
+      // Clear any previously-seen errors for this node (error resolved)
+      for (const k of seenErrors) {
+        if (k.startsWith(`${id}:`)) seenErrors.delete(k)
+      }
+    }
+  }
+}
+
 export interface GraphEngineResult {
   computed: ReadonlyMap<string, Value>
   isPartial: boolean
@@ -81,6 +112,8 @@ export function useGraphEngine(
   const pendingRef = useRef(0) // Coalescing counter: skip stale results.
   // Debounce timer for data-only patches (see PATCH_DEBOUNCE_MS).
   const patchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // K4-2: Track already-logged node errors to avoid console spam.
+  const seenErrorsRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     // When refreshKey changes, force a full snapshot re-evaluation.
@@ -124,6 +157,9 @@ export function useGraphEngine(
           errorCount: snapshotErrors.length,
           ...(snapshotErrors.length > 0 ? { errorNodeIds: snapshotErrors.slice(0, 5) } : {}),
         })
+        // K4-2: Log individual node error messages for console guidance.
+        seenErrorsRef.current.clear()
+        logNodeErrors(result.values, seenErrorsRef.current)
         const health = computeGraphHealth(nodes, edges)
         dlog.info('engine', 'Graph health', {
           nodeCount: health.nodeCount,
@@ -187,6 +223,8 @@ export function useGraphEngine(
               errorCount: patchErrors.length,
               ...(patchErrors.length > 0 ? { errorNodeIds: patchErrors.slice(0, 5) } : {}),
             })
+            // K4-2: Log individual node error messages for console guidance.
+            logNodeErrors(result.changedValues, seenErrorsRef.current)
             setIsPartial(result.partial ?? false)
             // MERGE changed values into existing map (not replace).
             setComputed((prev) => {
