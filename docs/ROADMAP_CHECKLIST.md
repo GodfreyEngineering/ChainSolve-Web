@@ -2460,7 +2460,7 @@ Claude MUST:
 - [x] M1-1: Remove custom `./CS` scripts + any unused CI/helper scripts
   - delete files + remove all references (workflows/docs/package scripts)
   - prove with `rg`/`find` evidence in commit notes
-- [ ] M1-2: Consolidate scripts
+- [x] M1-2: Consolidate scripts
   - `./scripts/verify-ci.sh` is the single gate
   - optional helpers documented and minimal
 
