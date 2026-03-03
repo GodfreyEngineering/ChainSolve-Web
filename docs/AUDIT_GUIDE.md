@@ -163,7 +163,7 @@ Expected runtime: 3-4 minutes on a modern machine.
 |------|---------------|----------------|
 | Secrets | `.env.example`, `docs/ENV_SECRETS.md` | No real keys committed; `.env` is in `.gitignore` |
 | Database schema | `supabase/migrations/` | Migrations are numbered, idempotent, reviewed |
-| RLS policies | `supabase/migrations/0011_*`, `0044_*` | Every table has RLS enabled; `(select auth.uid())` form |
+| RLS policies | `supabase/migrations_archive/0011_*`, `0044_*` | Every table has RLS enabled; `(select auth.uid())` form |
 | Auth flows | `src/lib/auth.ts` | Thin wrappers; no raw SQL or token manipulation |
 | Payment logic | `functions/api/stripe/` | Webhook signature verification; no amount manipulation client-side |
 | CSP headers | `public/_headers` | No `unsafe-eval`; only `wasm-unsafe-eval` |

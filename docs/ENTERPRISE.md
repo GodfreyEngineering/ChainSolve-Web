@@ -70,4 +70,4 @@ Effective entitlements used by UI components
 - `src/lib/orgsService.ts` -- organization CRUD and policy queries
 - `src/lib/sessionService.ts` -- single-session enforcement
 - `src/pages/OrgsPage.tsx` -- admin UI for policies and seats
-- `supabase/migrations/0051_enterprise_policies.sql` -- schema migration
+- `supabase/migrations_archive/0051_enterprise_policies.sql` -- schema migration

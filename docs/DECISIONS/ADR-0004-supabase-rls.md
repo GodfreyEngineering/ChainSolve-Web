@@ -129,6 +129,6 @@ can only access objects in their own folder.
 
 ## See also
 
-- `supabase/migrations/0011_rls_perf_canonical.sql` — canonical policy migration
+- `supabase/migrations_archive/0011_rls_perf_canonical.sql` — canonical policy migration
 - [Supabase RLS performance guide](https://supabase.com/docs/guides/database/postgres/row-level-security#call-functions-with-select)
 - `docs/CONVENTIONS.md §6` — migration naming and RLS conventions

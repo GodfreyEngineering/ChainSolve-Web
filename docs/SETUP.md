@@ -304,8 +304,12 @@ ALTER TABLE projects       ADD COLUMN IF NOT EXISTS storage_key TEXT;
 ALTER TABLE project_assets ADD COLUMN IF NOT EXISTS kind TEXT;
 ```
 
-Run `supabase/migrations/0002_storage_columns.sql` in **Supabase → SQL Editor**
+Run `supabase/migrations_archive/0002_storage_columns.sql` in **Supabase → SQL Editor**
 after running `0001_init.sql`.
+
+> **Note:** For fresh installs, use the baseline migration at
+> `supabase/migrations/0001_baseline_schema.sql` instead — it already
+> includes these columns.
 
 ### Column mapping (storage.ts ↔ DB)
 

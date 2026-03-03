@@ -68,8 +68,8 @@ Full walkthrough: [CONVENTIONS.md §Adding a new block op](CONVENTIONS.md#adding
 | Stripe checkout session | `functions/api/stripe/create-checkout-session.ts` |
 | Stripe customer portal | `functions/api/stripe/create-portal-session.ts` |
 | Stripe webhook (subscription sync) | `functions/api/stripe/webhook.ts` |
-| DB enforcement trigger | `supabase/migrations/0006_entitlements_enforcement.sql` |
-| Storage RLS for paid plans | `supabase/migrations/0006_entitlements_enforcement.sql` |
+| DB enforcement trigger | `supabase/migrations_archive/0006_entitlements_enforcement.sql` |
+| Storage RLS for paid plans | `supabase/migrations_archive/0006_entitlements_enforcement.sql` |
 
 ---
 
@@ -87,7 +87,7 @@ Full walkthrough: [CONVENTIONS.md §Adding a new block op](CONVENTIONS.md#adding
 
 ## "I want to add a new DB table"
 
-1. Create `supabase/migrations/NNNN_description.sql` (next number in sequence).
+1. Add the table to `supabase/migrations/0001_baseline_schema.sql` (the single baseline migration).
 2. Enable RLS: `ALTER TABLE ... ENABLE ROW LEVEL SECURITY`.
 3. Write policies using the `(select auth.uid())` pattern (not `auth.uid()` —
    see [ADR-0004](DECISIONS/ADR-0004-supabase-rls.md) for why).
@@ -154,7 +154,7 @@ src/engine/index.ts  createEngine()
 | Canvas UI | `src/components/canvas/` | `src/contexts/` |
 | Auth + data | `src/lib/supabase.ts`, `src/lib/projects.ts`, `src/lib/storage.ts` | `src/stores/` |
 | Billing | `functions/api/stripe/`, `src/lib/entitlements.ts` | `src/pages/settings/BillingSettings.tsx` |
-| Database schema | `supabase/migrations/` | — |
+| Database schema | `supabase/migrations/0001_baseline_schema.sql` | — |
 | Security headers | `public/_headers` | `functions/api/_middleware.ts` |
 | i18n | `src/i18n/` | — |
 | CI / deploy | `.github/workflows/ci.yml`, `.github/workflows/e2e-full.yml` | `wrangler.jsonc` |
@@ -184,7 +184,7 @@ src/engine/index.ts  createEngine()
 | `src/i18n/` | i18next config + locale JSON files (en/es/fr/de/it) |
 | `src/assets/` | Brand SVGs; no raster images committed |
 | `functions/` | Cloudflare Workers API routes (Stripe, health, CSP report) |
-| `supabase/migrations/` | Append-only SQL migrations; never edit existing files |
+| `supabase/migrations/` | Baseline schema (`0001_baseline_schema.sql`); archived iteratives in `migrations_archive/` |
 | `docs/` | Human-readable specs, ADRs, guides |
 | `e2e/` | Playwright end-to-end tests |
 | `perf/` | Performance graph generators for stress testing |
@@ -232,7 +232,7 @@ These files have disproportionate blast radius. Changes need explicit review:
 | `crates/engine-core/src/eval.rs` | Core evaluation logic; bugs are silent and affect all users |
 | `src/engine/wasm-types.ts` | Worker protocol; schema mismatches cause silent hangs |
 | `src/lib/supabase.ts` | Boot-time validation; misconfiguration causes prod outages |
-| `supabase/migrations/` | Append-only; editing existing files corrupts deployed DBs |
+| `supabase/migrations/0001_baseline_schema.sql` | Single source of truth for fresh DB setup |
 | `src/lib/pdf/stableStringify.ts` | Determinism contract; changes break golden test hashes |
 | `src/lib/pdf/sha256.ts` | CSP-safe crypto; must stay on Web Crypto API |
 | `src/observability/redact.ts` | Privacy guarantees; weakening allows secret leakage |

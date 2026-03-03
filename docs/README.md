@@ -365,7 +365,7 @@ projects bucket:
 
 **Key files:**
 
-- Migration SQL: `supabase/migrations/0014_multi_canvas.sql`
+- Migration SQL: `supabase/migrations_archive/0014_multi_canvas.sql`
 - Storage helpers: `src/lib/canvasStorage.ts`
 - Schema V4 + migration: `src/lib/canvasSchema.ts`
 - CRUD operations: `src/lib/canvases.ts`
@@ -535,7 +535,7 @@ Project-level scalar variables are stored as JSONB on the `projects` table (`var
 
 - **Store**: `src/stores/variablesStore.ts` (Zustand)
 - **Service**: `src/lib/variablesService.ts`
-- **Migration**: `supabase/migrations/0015_project_variables.sql`
+- **Migration**: `supabase/migrations_archive/0015_project_variables.sql`
 - **Types**: `src/lib/variables.ts`
 
 ### ValueEditor

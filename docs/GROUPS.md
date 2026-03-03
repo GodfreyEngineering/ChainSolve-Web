@@ -137,7 +137,7 @@ This ensures saved files always have direct node-to-node edges.
 - `src/lib/groups.ts` — group operations (pure functions)
 - `src/components/canvas/GroupInspector.tsx` — group property panel
 - `src/lib/templates.ts` — template CRUD (Supabase)
-- `supabase/migrations/0010_group_templates.sql` — templates table + RLS
+- `supabase/migrations_archive/0010_group_templates.sql` — templates table + RLS
 
 **Modified:**
 - `src/blocks/types.ts` — NodeKind + NodeData group fields

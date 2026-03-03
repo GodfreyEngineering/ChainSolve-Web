@@ -131,7 +131,7 @@ The Rust/WASM engine runs in a Web Worker (`src/engine/worker.ts`). Communicatio
 | `src/lib/storage.ts` | MEDIUM | 50 MB upload limit, path validation |
 | `src/lib/validateStoragePath.ts` | HIGH | Prevents directory traversal |
 | `src/lib/canvasStorage.ts` | MEDIUM | Auto-save with conflict detection |
-| `supabase/migrations/0011_rls_perf_canonical.sql` | HIGH | Canonical RLS form for 6 tables |
+| `supabase/migrations_archive/0011_rls_perf_canonical.sql` | HIGH | Canonical RLS form for 6 tables |
 
 ### Exports
 
