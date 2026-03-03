@@ -2419,7 +2419,7 @@ Claude MUST:
   - bulk operations
   - Acceptance: feels like a workstation.
 
-- [ ] L4-3: Bug report + suggestion UX (fast, professional)
+- [x] L4-3: Bug report + suggestion UX (fast, professional)
   - attach redacted logs
   - attach screenshot
   - categorize (bug vs suggestion vs block request)
