@@ -33,6 +33,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
   deleted_count INTEGER := 0;
+  batch_count   INTEGER;
   org_rec RECORD;
 BEGIN
   FOR org_rec IN
@@ -44,7 +45,8 @@ BEGIN
     DELETE FROM public.audit_log
     WHERE org_id = org_rec.id
       AND created_at < (NOW() - (org_rec.policy_data_retention_days || ' days')::INTERVAL);
-    GET DIAGNOSTICS deleted_count = deleted_count + ROW_COUNT;
+    GET DIAGNOSTICS batch_count = ROW_COUNT;
+    deleted_count := deleted_count + batch_count;
   END LOOP;
   RETURN deleted_count;
 END;

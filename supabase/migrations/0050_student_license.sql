@@ -10,8 +10,20 @@
 
 -- ── 1. Extend plan_status enum ──────────────────────────────────────
 
-ALTER TYPE plan_status ADD VALUE IF NOT EXISTS 'student';
-ALTER TYPE plan_status ADD VALUE IF NOT EXISTS 'enterprise';
+-- Create the enum if it was never created (e.g. 0001_init ran in a
+-- different schema context), then add the new values.
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'plan_status') THEN
+    CREATE TYPE public.plan_status AS ENUM (
+      'free', 'trialing', 'pro', 'past_due', 'canceled'
+    );
+  END IF;
+END
+$$;
+
+ALTER TYPE public.plan_status ADD VALUE IF NOT EXISTS 'student';
+ALTER TYPE public.plan_status ADD VALUE IF NOT EXISTS 'enterprise';
 
 -- ── 2. Add student columns to profiles ──────────────────────────────
 

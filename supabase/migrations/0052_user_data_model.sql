@@ -29,14 +29,17 @@ COMMENT ON TABLE public.user_preferences IS 'Per-user UI/locale preferences. One
 
 ALTER TABLE public.user_preferences ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS user_preferences_select_own ON public.user_preferences;
 CREATE POLICY user_preferences_select_own ON public.user_preferences
   FOR SELECT TO authenticated
   USING (user_id = (select auth.uid()));
 
+DROP POLICY IF EXISTS user_preferences_insert_own ON public.user_preferences;
 CREATE POLICY user_preferences_insert_own ON public.user_preferences
   FOR INSERT TO authenticated
   WITH CHECK (user_id = (select auth.uid()));
 
+DROP POLICY IF EXISTS user_preferences_update_own ON public.user_preferences;
 CREATE POLICY user_preferences_update_own ON public.user_preferences
   FOR UPDATE TO authenticated
   USING (user_id = (select auth.uid()))
@@ -61,11 +64,13 @@ CREATE INDEX IF NOT EXISTS idx_user_terms_log_user
 ALTER TABLE public.user_terms_log ENABLE ROW LEVEL SECURITY;
 
 -- Users can read their own acceptance history.
+DROP POLICY IF EXISTS user_terms_log_select_own ON public.user_terms_log;
 CREATE POLICY user_terms_log_select_own ON public.user_terms_log
   FOR SELECT TO authenticated
   USING (user_id = (select auth.uid()));
 
 -- Users can insert their own acceptance records.
+DROP POLICY IF EXISTS user_terms_log_insert_own ON public.user_terms_log;
 CREATE POLICY user_terms_log_insert_own ON public.user_terms_log
   FOR INSERT TO authenticated
   WITH CHECK (user_id = (select auth.uid()));
@@ -102,16 +107,19 @@ CREATE INDEX IF NOT EXISTS idx_user_reports_target
 ALTER TABLE public.user_reports ENABLE ROW LEVEL SECURITY;
 
 -- Users can insert reports (but not for themselves — enforced in app code).
+DROP POLICY IF EXISTS user_reports_insert_own ON public.user_reports;
 CREATE POLICY user_reports_insert_own ON public.user_reports
   FOR INSERT TO authenticated
   WITH CHECK (reporter_id = (select auth.uid()));
 
 -- Users can view their own reports.
+DROP POLICY IF EXISTS user_reports_select_own ON public.user_reports;
 CREATE POLICY user_reports_select_own ON public.user_reports
   FOR SELECT TO authenticated
   USING (reporter_id = (select auth.uid()));
 
 -- Moderators/admins can view all pending reports.
+DROP POLICY IF EXISTS user_reports_select_mod ON public.user_reports;
 CREATE POLICY user_reports_select_mod ON public.user_reports
   FOR SELECT TO authenticated
   USING (
@@ -123,6 +131,7 @@ CREATE POLICY user_reports_select_mod ON public.user_reports
   );
 
 -- Moderators/admins can update report status.
+DROP POLICY IF EXISTS user_reports_update_mod ON public.user_reports;
 CREATE POLICY user_reports_update_mod ON public.user_reports
   FOR UPDATE TO authenticated
   USING (
