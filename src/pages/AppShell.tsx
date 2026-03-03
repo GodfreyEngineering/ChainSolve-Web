@@ -60,6 +60,7 @@ import { initRememberMe } from '../lib/rememberMe'
 import { touchSession, isSessionValid, SESSION_CHECK_INTERVAL_MS } from '../lib/sessionService'
 import { HelpLink } from '../components/ui/HelpLink'
 import { PlanBadge } from '../components/ui/PlanBadge'
+import { LoadingScreen } from '../components/ui/LoadingScreen'
 import { listMfaFactors } from '../lib/auth'
 
 type SortMode = 'recent' | 'name' | 'created'
@@ -590,19 +591,7 @@ export default function AppShell() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading) {
-    return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: 0.5,
-        }}
-      >
-        Loading…
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   // E2-3: Block access until email is verified and ToS accepted.

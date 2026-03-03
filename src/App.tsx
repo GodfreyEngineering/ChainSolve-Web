@@ -5,6 +5,7 @@ import AppShell from './pages/AppShell'
 import CanvasPage from './pages/CanvasPage'
 import { SettingsRedirect } from './components/SettingsRedirect'
 import { isDiagnosticsUIEnabled } from './lib/devFlags'
+import { RouteSkeleton } from './components/ui/RouteSkeleton'
 
 // Lazy-load diagnostics page so it is not included in the main bundle for
 // production users unless VITE_DIAGNOSTICS_UI_ENABLED=true.
@@ -104,7 +105,7 @@ export default function App() {
       <Route
         path="/terms"
         element={
-          <Suspense fallback={null}>
+          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
             <TermsPage />
           </Suspense>
         }
@@ -118,7 +119,7 @@ export default function App() {
       <Route
         path="/explore"
         element={
-          <Suspense fallback={null}>
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
             <MarketplacePage />
           </Suspense>
         }
@@ -126,7 +127,7 @@ export default function App() {
       <Route
         path="/explore/items/:itemId"
         element={
-          <Suspense fallback={null}>
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
             <ItemDetailPage />
           </Suspense>
         }
@@ -134,7 +135,7 @@ export default function App() {
       <Route
         path="/explore/author"
         element={
-          <Suspense fallback={null}>
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
             <MarketplaceAuthorPage />
           </Suspense>
         }
@@ -142,7 +143,7 @@ export default function App() {
       <Route
         path="/docs"
         element={
-          <Suspense fallback={null}>
+          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
             <DocsPage />
           </Suspense>
         }
@@ -153,7 +154,7 @@ export default function App() {
       <Route
         path="/orgs"
         element={
-          <Suspense fallback={null}>
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
             <OrgsPage />
           </Suspense>
         }
@@ -161,7 +162,7 @@ export default function App() {
       <Route
         path="/audit-log"
         element={
-          <Suspense fallback={null}>
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
             <AuditLogPage />
           </Suspense>
         }
@@ -170,7 +171,7 @@ export default function App() {
         <Route
           path="/diagnostics"
           element={
-            <Suspense fallback={null}>
+            <Suspense fallback={<RouteSkeleton variant="page" />}>
               <DiagnosticsPage />
             </Suspense>
           }

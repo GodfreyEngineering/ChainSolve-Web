@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { AppHeader } from '../components/app/AppHeader'
 import { MainHeader } from '../components/app/MainHeader'
 import { CONTACT } from '../lib/brand'
+import { LoadingScreen } from '../components/ui/LoadingScreen'
 import {
   CanvasArea,
   type CanvasAreaProps,
@@ -1427,19 +1428,7 @@ export default function CanvasPage() {
 
   // ── Loading / error screens ────────────────────────────────────────────────
   if (loadPhase === 'loading') {
-    return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: 0.5,
-        }}
-      >
-        Loading project…
-      </div>
-    )
+    return <LoadingScreen message={t('canvas.loadingProject', 'Loading project')} />
   }
 
   if (loadPhase === 'error') {

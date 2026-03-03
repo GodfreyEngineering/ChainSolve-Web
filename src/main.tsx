@@ -41,6 +41,7 @@ import { EngineContext } from './contexts/EngineContext.ts'
 import { createEngine, type EngineAPI } from './engine/index.ts'
 import { validateCatalog } from './blocks/registry'
 import { BrowserRouter } from 'react-router-dom'
+import { LoadingScreen } from './components/ui/LoadingScreen.tsx'
 
 function Root() {
   const [engine, setEngine] = useState<EngineAPI | null>(null)
@@ -87,6 +88,8 @@ function Root() {
       <div data-testid="react-mounted" style={{ display: 'none' }} />
 
       {error && <EngineFatalError error={error} onRetry={handleRetry} />}
+
+      {!error && !engine && <LoadingScreen />}
 
       <BrowserRouter>
         <WindowManagerProvider>

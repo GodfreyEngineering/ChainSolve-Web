@@ -359,6 +359,25 @@ button:focus:not(:focus-visible) {
   }
 }
 
+/* ── Loading skeleton shimmer — J4-1 ─────────────────────────────────────── */
+@keyframes cs-skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+@keyframes cs-logo-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 /* ── Plan badge shimmer — J3-2 ───────────────────────────────────────────── */
 @keyframes cs-badge-shimmer {
   0% {
