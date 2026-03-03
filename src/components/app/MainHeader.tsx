@@ -16,16 +16,10 @@ import { getCurrentUser, signOut } from '../../lib/auth'
 import { removeCurrentSession } from '../../lib/sessionService'
 import { clearReauth } from '../../lib/reauth'
 import type { Plan } from '../../lib/entitlements'
+import { PlanBadge } from '../ui/PlanBadge'
+import { displayNameStyle } from '../../lib/planStyles'
 
 export const MAIN_HEADER_HEIGHT = 40
-
-const PLAN_COLORS: Record<string, string> = {
-  free: '#6b7280',
-  trialing: '#3b82f6',
-  pro: '#22c55e',
-  past_due: '#f59e0b',
-  canceled: '#ef4444',
-}
 
 interface MainHeaderProps {
   plan: Plan
@@ -125,21 +119,7 @@ export function MainHeader({ plan }: MainHeaderProps) {
       {/* ── Right: Plan badge, Settings, Avatar ── */}
       <div style={rightStyle}>
         {/* Plan badge */}
-        <span
-          style={{
-            fontSize: '0.6rem',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            color: PLAN_COLORS[plan] ?? PLAN_COLORS.free,
-            padding: '0.1rem 0.35rem',
-            borderRadius: 'var(--radius-sm)',
-            border: `1px solid ${PLAN_COLORS[plan] ?? PLAN_COLORS.free}`,
-            opacity: 0.8,
-          }}
-        >
-          {t(`plans.${plan}`)}
-        </span>
+        <PlanBadge plan={plan} variant="compact" />
 
         {/* Settings gear */}
         <button
@@ -167,18 +147,10 @@ export function MainHeader({ plan }: MainHeaderProps) {
           {accountOpen && (
             <div style={dropdownStyle}>
               <div style={dropdownHeaderStyle}>
-                <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>{userEmail ?? ''}</span>
-                <span
-                  style={{
-                    fontSize: '0.58rem',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    color: PLAN_COLORS[plan] ?? PLAN_COLORS.free,
-                  }}
-                >
-                  {t(`plans.${plan}`)}
+                <span style={{ fontSize: '0.78rem', ...displayNameStyle(plan) }}>
+                  {userEmail ?? ''}
                 </span>
+                <PlanBadge plan={plan} variant="compact" style={{ border: 'none', padding: 0 }} />
               </div>
               <div style={dropdownSepStyle} />
               <button

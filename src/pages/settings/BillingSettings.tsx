@@ -6,6 +6,7 @@ import { isReauthed } from '../../lib/reauth'
 import type { Profile } from '../../lib/profilesService'
 import { resolveEffectivePlan, type Plan } from '../../lib/entitlements'
 import { isUniversityEmail, isValidEmailFormat } from '../../lib/studentVerification'
+import { PlanBadge } from '../../components/ui/PlanBadge'
 
 const LazyReauthModal = lazy(() =>
   import('../../components/ui/ReauthModal').then((m) => ({ default: m.ReauthModal })),
@@ -13,16 +14,6 @@ const LazyReauthModal = lazy(() =>
 
 interface Props {
   profile: Profile | null
-}
-
-const PLAN_COLORS: Record<Plan, string> = {
-  free: '#6b7280',
-  trialing: '#3b82f6',
-  pro: '#22c55e',
-  student: '#0ea5e9',
-  enterprise: '#8b5cf6',
-  past_due: '#f59e0b',
-  canceled: '#ef4444',
 }
 
 export function BillingSettings({ profile }: Props) {
@@ -212,7 +203,7 @@ export function BillingSettings({ profile }: Props) {
             <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
               <div style={fieldCol}>
                 <span style={fieldLabel}>{t('billing.currentPlan')}</span>
-                <span style={planBadgeStyle(plan)}>{t(`plans.${plan}`)}</span>
+                <PlanBadge plan={plan} />
               </div>
               {periodEnd && (
                 <div style={fieldCol}>
@@ -401,18 +392,4 @@ const inputStyle: React.CSSProperties = {
   fontSize: '0.9rem',
   flex: '1 1 240px',
   maxWidth: 360,
-}
-
-function planBadgeStyle(plan: Plan): React.CSSProperties {
-  const color = PLAN_COLORS[plan]
-  return {
-    display: 'inline-block',
-    padding: '0.25rem 0.75rem',
-    borderRadius: 999,
-    fontSize: '0.8rem',
-    fontWeight: 700,
-    background: `${color}22`,
-    color,
-    border: `1px solid ${color}44`,
-  }
 }

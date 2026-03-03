@@ -359,6 +359,16 @@ button:focus:not(:focus-visible) {
   }
 }
 
+/* ── Plan badge shimmer — J3-2 ───────────────────────────────────────────── */
+@keyframes cs-badge-shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 200%;
+  }
+}
+
 /* ── prefers-reduced-motion — P075 ───────────────────────────────────────── */
 /* Collapse all CSS animations/transitions to near-instant so that            */
 /* cs-fade-in, cs-slide-up, and any future keyframes are inert for users     */

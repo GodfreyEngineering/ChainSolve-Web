@@ -59,6 +59,7 @@ import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 import { initRememberMe } from '../lib/rememberMe'
 import { touchSession, isSessionValid, SESSION_CHECK_INTERVAL_MS } from '../lib/sessionService'
 import { HelpLink } from '../components/ui/HelpLink'
+import { PlanBadge } from '../components/ui/PlanBadge'
 import { listMfaFactors } from '../lib/auth'
 
 type SortMode = 'recent' | 'name' | 'created'
@@ -106,26 +107,6 @@ interface Profile {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-const PLAN_LABELS: Record<Plan, string> = {
-  free: 'Free',
-  trialing: 'Trial',
-  pro: 'Pro',
-  student: 'Student',
-  enterprise: 'Enterprise',
-  past_due: 'Past Due',
-  canceled: 'Canceled',
-}
-
-const PLAN_COLORS: Record<Plan, string> = {
-  free: '#6b7280',
-  trialing: '#3b82f6',
-  pro: '#22c55e',
-  student: '#0ea5e9',
-  enterprise: '#8b5cf6',
-  past_due: '#f59e0b',
-  canceled: '#ef4444',
-}
 
 function fmtDate(iso: string): string {
   const d = new Date(iso)
@@ -943,7 +924,7 @@ export default function AppShell() {
             <span style={statLabelStyle}>{t('home.statProjects', 'Projects')}</span>
           </div>
           <div style={statCardStyle}>
-            <span style={statValueStyle}>{PLAN_LABELS[plan]}</span>
+            <PlanBadge plan={plan} variant="compact" />
             <span style={statLabelStyle}>{t('home.statPlan', 'Plan')}</span>
           </div>
           <div style={statCardStyle}>
@@ -975,20 +956,7 @@ export default function AppShell() {
             <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                 <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Current plan</span>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: 999,
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    background: PLAN_COLORS[plan] + '22',
-                    color: PLAN_COLORS[plan],
-                    border: `1px solid ${PLAN_COLORS[plan]}44`,
-                  }}
-                >
-                  {PLAN_LABELS[plan]}
-                </span>
+                <PlanBadge plan={plan} />
               </div>
               {periodEnd && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>

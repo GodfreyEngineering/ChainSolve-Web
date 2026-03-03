@@ -5,6 +5,8 @@ import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../../lib/profilesService'
 import { updateDisplayName, uploadAvatar, getAvatarUrl } from '../../lib/profilesService'
 import { resolveEffectivePlan } from '../../lib/entitlements'
+import { PlanBadge } from '../../components/ui/PlanBadge'
+import { displayNameStyle } from '../../lib/planStyles'
 
 interface Props {
   user: User | null
@@ -182,7 +184,13 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
               </div>
             ) : (
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.88rem', opacity: displayName ? 1 : 0.4 }}>
+                <span
+                  style={{
+                    fontSize: '0.88rem',
+                    opacity: displayName ? 1 : 0.4,
+                    ...displayNameStyle(plan),
+                  }}
+                >
                   {displayName || t('settings.displayNameEmpty', 'Not set')}
                 </span>
                 <button style={smallBtn} onClick={() => setNameEditing(true)}>
@@ -224,7 +232,7 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
           {/* Plan badge */}
           <div style={fieldStyle}>
             <span style={fieldLabel}>{t('settings.planLabel')}</span>
-            <span style={planBadgeStyle(plan)}>{t(`plans.${plan}`)}</span>
+            <PlanBadge plan={plan} />
           </div>
         </div>
       </div>
@@ -298,28 +306,4 @@ const nameInput: React.CSSProperties = {
 const errorText: React.CSSProperties = {
   fontSize: '0.78rem',
   color: '#f87171',
-}
-
-const PLAN_COLORS: Record<string, string> = {
-  free: '#6b7280',
-  trialing: '#3b82f6',
-  pro: '#22c55e',
-  enterprise: '#8b5cf6',
-  past_due: '#f59e0b',
-  canceled: '#ef4444',
-}
-
-function planBadgeStyle(plan: string): React.CSSProperties {
-  const color = PLAN_COLORS[plan] ?? '#6b7280'
-  return {
-    display: 'inline-block',
-    padding: '0.25rem 0.75rem',
-    borderRadius: 999,
-    fontSize: '0.8rem',
-    fontWeight: 700,
-    background: `${color}22`,
-    color,
-    border: `1px solid ${color}44`,
-    width: 'fit-content',
-  }
 }
