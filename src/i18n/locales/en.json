@@ -731,7 +731,9 @@
     "groups": "Groups",
     "themes": "Themes",
     "materials": "Materials",
-    "annotations": "Insert annotation"
+    "annotations": "Insert annotation",
+    "hiddenView": "Toggle hidden blocks view",
+    "showAllHidden": "Show all hidden blocks"
   },
   "inspector": {
     "pin": "Pin to current node",
@@ -1254,7 +1256,10 @@
     "annotArrow": "Arrow",
     "snapGridOn": "Enable snap to grid",
     "snapGridOff": "Disable snap to grid",
-    "insertConversion": "Insert conversion"
+    "insertConversion": "Insert conversion",
+    "hideSelected": "Hide selected",
+    "hideNode": "Hide",
+    "showAllHidden": "Show all hidden"
   },
   "errorBoundary": {
     "title": "Something went wrong",

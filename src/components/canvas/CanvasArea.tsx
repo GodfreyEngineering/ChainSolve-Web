@@ -218,6 +218,9 @@ export interface CanvasAreaHandle {
   exportPdfAudit: () => Promise<void>
   exportXlsxAuditActive: () => Promise<void>
   captureViewportImage: (signal?: AbortSignal) => Promise<CaptureResult>
+  hideSelected: () => void
+  showAllHidden: () => void
+  toggleHiddenView: () => void
 }
 
 // ── Minimap persistence ──────────────────────────────────────────────────────
@@ -519,6 +522,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       })
     },
     toggleHealthPanel: () => setDockCollapsed(false),
+    hideSelected: hideSelectedNodes,
+    showAllHidden: showAllHiddenNodes,
+    toggleHiddenView: () => setHiddenViewMode((v) => !v),
     exportPdfAudit: async () => {
       const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } =
         await import('../../lib/build-info')
@@ -744,6 +750,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   // Background dots (E7-2)
   const [bgDotsVisible, setBgDotsVisible] = useState(getBgDotsPref)
+
+  // K2-1: Hidden view mode — when true, hidden nodes are shown semi-transparent
+  const [hiddenViewMode, setHiddenViewMode] = useState(false)
+  // Track whether Space key triggered a drag (pan) to avoid accidental hide
+  const spaceHeldRef = useRef(false)
+  const spaceDraggedRef = useRef(false)
 
   // Value popover state (W12.4)
   const [popoverTarget, setPopoverTarget] = useState<{
@@ -1256,6 +1268,35 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     })
   }, [setNodes, setEdges, inspectedId, doSaveHistory])
 
+  // ── K2-1: Hide/show blocks ─────────────────────────────────────────────────
+
+  const hideSelectedNodes = useCallback(() => {
+    const selected = nodes.filter((n) => n.selected)
+    if (selected.length === 0) return
+    doSaveHistory()
+    const selectedIds = new Set(selected.map((n) => n.id))
+    setNodes((nds) =>
+      nds.map((n) => (selectedIds.has(n.id) ? { ...n, hidden: true, selected: false } : n)),
+    )
+    // Also hide edges connected to hidden nodes
+    setEdges((eds) =>
+      eds.map((e) =>
+        selectedIds.has(e.source) || selectedIds.has(e.target) ? { ...e, hidden: true } : e,
+      ),
+    )
+  }, [nodes, doSaveHistory, setNodes, setEdges])
+
+  const showAllHiddenNodes = useCallback(() => {
+    const hasHidden = nodes.some((n) => n.hidden)
+    if (!hasHidden) return
+    doSaveHistory()
+    setNodes((nds) => nds.map((n) => (n.hidden ? { ...n, hidden: false } : n)))
+    // Restore edges: unhide edges whose both endpoints are now visible
+    setEdges((eds) => eds.map((e) => (e.hidden ? { ...e, hidden: false } : e)))
+  }, [nodes, doSaveHistory, setNodes, setEdges])
+
+  const hasHiddenNodes = useMemo(() => nodes.some((n) => n.hidden), [nodes])
+
   // ── Group operations ──────────────────────────────────────────────────────
   const groupSelection = useCallback(() => {
     if (!ent.canUseGroups) {
@@ -1613,6 +1654,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         e.preventDefault()
         setDockCollapsed((v) => !v)
       }
+
+      // K2-1: Space key down — mark held (hide happens on keyUp if no drag occurred)
+      if (e.key === ' ' && !ctrl && !e.altKey && !e.shiftKey && !readOnly) {
+        spaceHeldRef.current = true
+        spaceDraggedRef.current = false
+      }
     },
     [
       readOnly,
@@ -1630,6 +1677,30 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       nodes,
     ],
   )
+
+  // K2-1: Space key up — hide selected if no drag occurred during Space hold
+  const onKeyUp = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === ' ' && spaceHeldRef.current) {
+        spaceHeldRef.current = false
+        if (!spaceDraggedRef.current && !readOnly) {
+          const hasSelection = nodes.some((n) => n.selected)
+          if (hasSelection) {
+            hideSelectedNodes()
+          }
+        }
+        spaceDraggedRef.current = false
+      }
+    },
+    [readOnly, nodes, hideSelectedNodes],
+  )
+
+  // K2-1: Detect drag start during Space hold to distinguish pan from hide
+  const onMoveStart = useCallback(() => {
+    if (spaceHeldRef.current) {
+      spaceDraggedRef.current = true
+    }
+  }, [])
 
   // Insert annotation at the canvas position where user right-clicked (G6-1)
   const onInsertAnnotation = useCallback(
@@ -1704,6 +1775,27 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   // ── Mobile panel width ────────────────────────────────────────────────────
   const mobileDrawerWidth = isMobile ? Math.min(280, window.innerWidth * 0.85) : 0
+
+  // K2-1: In hidden-view mode, reveal hidden nodes as ghosts (opacity 0.3)
+  const displayedNodes = useMemo(() => {
+    if (!hiddenViewMode) return nodes
+    return nodes.map((n) =>
+      n.hidden
+        ? {
+            ...n,
+            hidden: false,
+            style: { ...n.style, opacity: 0.3, pointerEvents: 'none' as const },
+          }
+        : n,
+    )
+  }, [nodes, hiddenViewMode])
+
+  const displayedEdges = useMemo(() => {
+    if (!hiddenViewMode) return edges
+    return edges.map((e) =>
+      e.hidden ? { ...e, hidden: false, style: { ...e.style, opacity: 0.15 } } : e,
+    )
+  }, [edges, hiddenViewMode])
 
   // ── Toolbar (right-side vertical strip — artifact entrypoints D15-3) ─────
   const toolbar = (
@@ -1863,6 +1955,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   onDragOver={onDragOver}
                   onDrop={onDrop}
                   onKeyDown={onKeyDown}
+                  onKeyUp={onKeyUp}
                   tabIndex={0}
                 >
                   {toolbar}
@@ -1913,8 +2006,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     </div>
                   )}
                   <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
+                    nodes={displayedNodes}
+                    edges={displayedEdges}
                     nodeTypes={NODE_TYPES}
                     edgeTypes={EDGE_TYPES}
                     onNodesChange={readOnly ? undefined : onNodesChange}
@@ -1942,6 +2035,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     snapGrid={[16, 16]}
                     fitView
                     fitViewOptions={{ padding: 0.2 }}
+                    onMoveStart={onMoveStart}
                     deleteKeyCode={null}
                     minZoom={0.08}
                     maxZoom={4}
@@ -2032,6 +2126,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                       })
                     }}
                     onInsertAnnotation={onInsertAnnotationAtCenter}
+                    hiddenViewMode={hiddenViewMode}
+                    onToggleHiddenView={() => setHiddenViewMode((v) => !v)}
+                    hasHiddenNodes={hasHiddenNodes}
+                    onShowAllHidden={showAllHiddenNodes}
                   />
                   {/* Bottom Dock — always visible with docking handle (G5-2) */}
                   <BottomDock
@@ -2123,6 +2221,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     onToggleSnap={readOnly ? undefined : () => setSnapToGrid((v) => !v)}
                     onSelectChain={readOnly ? undefined : selectChain}
                     onShowNotation={showNotation}
+                    onHideSelected={readOnly ? undefined : hideSelectedNodes}
+                    onShowAllHidden={readOnly ? undefined : showAllHiddenNodes}
+                    hasHiddenNodes={hasHiddenNodes}
                   />
                 )}
 

@@ -176,7 +176,9 @@
   "toolbar": {
     "graphHealth": "סטטוס הגרף",
     "bgDots": "Background dots",
-    "annotations": "הוסף הערה"
+    "annotations": "הוסף הערה",
+    "hiddenView": "הצג בלוקים מוסתרים",
+    "showAllHidden": "הצג את כל הבלוקים המוסתרים"
   },
   "terms": {
     "title": "תנאי שימוש",
@@ -254,7 +256,10 @@
     "annotArrow": "חץ",
     "snapGridOn": "הפעלת הצמדה לרשת",
     "snapGridOff": "כיבוי הצמדה לרשת",
-    "insertConversion": "הוספת המרה"
+    "insertConversion": "הוספת המרה",
+    "hideSelected": "הסתר נבחרים",
+    "hideNode": "הסתר",
+    "showAllHidden": "הצג את כל המוסתרים"
   },
   "errorBoundary": {
     "title": "משהו השתבש",

@@ -712,7 +712,9 @@
     "groups": "Groupes",
     "themes": "Thèmes",
     "materials": "Matériaux",
-    "annotations": "Ajouter une annotation"
+    "annotations": "Ajouter une annotation",
+    "hiddenView": "Afficher les blocs masques",
+    "showAllHidden": "Afficher tous les blocs masques"
   },
   "inspector": {
     "pin": "Épingler au nœud actuel",
@@ -1235,7 +1237,10 @@
     "annotArrow": "Fleche",
     "snapGridOn": "Activer l'accrochage a la grille",
     "snapGridOff": "Desactiver l'accrochage a la grille",
-    "insertConversion": "Inserer une conversion"
+    "insertConversion": "Inserer une conversion",
+    "hideSelected": "Masquer la selection",
+    "hideNode": "Masquer",
+    "showAllHidden": "Afficher tous les masques"
   },
   "errorBoundary": {
     "title": "Quelque chose s'est mal passé",

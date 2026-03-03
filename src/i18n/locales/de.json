@@ -712,7 +712,9 @@
     "groups": "Gruppen",
     "themes": "Themen",
     "materials": "Materialien",
-    "annotations": "Anmerkung einfuegen"
+    "annotations": "Anmerkung einfuegen",
+    "hiddenView": "Ausgeblendete Bloecke anzeigen",
+    "showAllHidden": "Alle ausgeblendeten Bloecke anzeigen"
   },
   "inspector": {
     "pin": "An aktuellen Knoten anheften",
@@ -1235,7 +1237,10 @@
     "annotArrow": "Pfeil",
     "snapGridOn": "Raster-Einrasten aktivieren",
     "snapGridOff": "Raster-Einrasten deaktivieren",
-    "insertConversion": "Umrechnung einfuegen"
+    "insertConversion": "Umrechnung einfuegen",
+    "hideSelected": "Auswahl ausblenden",
+    "hideNode": "Ausblenden",
+    "showAllHidden": "Alle ausgeblendeten anzeigen"
   },
   "errorBoundary": {
     "title": "Etwas ist schiefgelaufen",

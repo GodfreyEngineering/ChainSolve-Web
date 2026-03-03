@@ -76,6 +76,12 @@ interface ContextMenuProps {
   onInsertConversion?: (edgeId: string) => void
   /** I2-1: Show chain-to-notation panel for a node. */
   onShowNotation?: (nodeId: string) => void
+  /** K2-1: Hide selected blocks. */
+  onHideSelected?: () => void
+  /** K2-1: Show all hidden blocks. */
+  onShowAllHidden?: () => void
+  /** K2-1: True when hidden blocks exist. */
+  hasHiddenNodes?: boolean
 }
 
 const item: CSSProperties = {
@@ -175,6 +181,9 @@ export function ContextMenu({
   onSelectChain,
   onInsertConversion,
   onShowNotation,
+  onHideSelected,
+  onShowAllHidden,
+  hasHiddenNodes,
 }: ContextMenuProps) {
   const { t } = useTranslation()
 
@@ -302,6 +311,19 @@ export function ContextMenu({
                   label={t('contextMenu.explainNode')}
                   onClick={() => {
                     onExplainNode(target.nodeId)
+                    onClose()
+                  }}
+                />
+              </>
+            )}
+            {onHideSelected && (
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon="◌"
+                  label={t('contextMenu.hideNode')}
+                  onClick={() => {
+                    onHideSelected()
                     onClose()
                   }}
                 />
@@ -448,6 +470,19 @@ export function ContextMenu({
                 )}
               </>
             )}
+            {onHideSelected && (
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon="◌"
+                  label={t('contextMenu.hideSelected')}
+                  onClick={() => {
+                    onHideSelected()
+                    onClose()
+                  }}
+                />
+              </>
+            )}
             <div style={sep} />
             <MenuItem
               icon="✕"
@@ -590,6 +625,19 @@ export function ContextMenu({
                   onClose()
                 }}
               />
+            )}
+            {onShowAllHidden && hasHiddenNodes && (
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon="◉"
+                  label={t('contextMenu.showAllHidden')}
+                  onClick={() => {
+                    onShowAllHidden()
+                    onClose()
+                  }}
+                />
+              </>
             )}
             {onInsertFromPrompt && (
               <>

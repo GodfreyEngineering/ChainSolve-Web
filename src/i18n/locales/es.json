@@ -712,7 +712,9 @@
     "groups": "Grupos",
     "themes": "Temas",
     "materials": "Materiales",
-    "annotations": "Insertar anotacion"
+    "annotations": "Insertar anotacion",
+    "hiddenView": "Mostrar bloques ocultos",
+    "showAllHidden": "Mostrar todos los bloques ocultos"
   },
   "inspector": {
     "pin": "Fijar al nodo actual",
@@ -1235,7 +1237,10 @@
     "annotArrow": "Flecha",
     "snapGridOn": "Activar ajuste a cuadricula",
     "snapGridOff": "Desactivar ajuste a cuadricula",
-    "insertConversion": "Insertar conversion"
+    "insertConversion": "Insertar conversion",
+    "hideSelected": "Ocultar seleccionados",
+    "hideNode": "Ocultar",
+    "showAllHidden": "Mostrar todos los ocultos"
   },
   "errorBoundary": {
     "title": "Algo salió mal",

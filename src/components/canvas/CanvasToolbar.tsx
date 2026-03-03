@@ -40,6 +40,13 @@ export interface CanvasToolbarProps {
   onToggleBgDots?: () => void
   /** I3-1: Insert annotation at viewport center. */
   onInsertAnnotation?: (annotationType: string) => void
+  /** K2-1: Toggle hidden-view mode (show hidden blocks as ghosts). */
+  hiddenViewMode?: boolean
+  onToggleHiddenView?: () => void
+  /** K2-1: True when any node is hidden. */
+  hasHiddenNodes?: boolean
+  /** K2-1: Show all hidden blocks. */
+  onShowAllHidden?: () => void
 }
 
 /** Width/height of the toolbar strip in pixels, exported for layout calculations. */
@@ -167,6 +174,10 @@ export function CanvasToolbar({
   bgDotsVisible,
   onToggleBgDots,
   onInsertAnnotation,
+  hiddenViewMode,
+  onToggleHiddenView,
+  hasHiddenNodes,
+  onShowAllHidden,
 }: CanvasToolbarProps) {
   const { t } = useTranslation()
   const { zoomIn, zoomOut, zoomTo, fitView } = useReactFlow()
@@ -453,6 +464,30 @@ export function CanvasToolbar({
           aria-pressed={!!edgeBadgesEnabled}
         >
           {'\u22ef'}
+        </button>
+      )}
+
+      {/* K2-1: Hidden view toggle */}
+      {onToggleHiddenView && hasHiddenNodes && (
+        <button
+          onClick={onToggleHiddenView}
+          style={btnStyle(!!hiddenViewMode)}
+          title={t('toolbar.hiddenView')}
+          aria-label={t('toolbar.hiddenView')}
+          aria-pressed={!!hiddenViewMode}
+        >
+          {hiddenViewMode ? '\u25c9' : '\u25ce'}
+        </button>
+      )}
+
+      {onShowAllHidden && hasHiddenNodes && !readOnly && (
+        <button
+          onClick={onShowAllHidden}
+          style={btnStyle(false)}
+          title={t('toolbar.showAllHidden')}
+          aria-label={t('toolbar.showAllHidden')}
+        >
+          {'\u29c3'}
         </button>
       )}
 
