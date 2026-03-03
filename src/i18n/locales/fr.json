@@ -760,7 +760,15 @@
     "clear": "Effacer",
     "exportTxt": "Exporter .txt",
     "exportJson": "Exporter .json",
-    "noLogs": "Aucune entrée de journal"
+    "noLogs": "Aucune entrée de journal",
+    "copyReport": "Copier le rapport d'erreur",
+    "report": "Rapport",
+    "copied": "Copié",
+    "explain": "Expliquer",
+    "copyEntry": "Copier l'entrée",
+    "explanationLabel": "Explication :",
+    "suggestionLabel": "Correction suggérée :",
+    "openDocs": "Ouvrir la documentation"
   },
   "graphHealth": {
     "title": "Santé du graphe",

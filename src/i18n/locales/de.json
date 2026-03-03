@@ -760,7 +760,15 @@
     "clear": "Leeren",
     "exportTxt": ".txt exportieren",
     "exportJson": ".json exportieren",
-    "noLogs": "Keine Protokolleinträge"
+    "noLogs": "Keine Protokolleinträge",
+    "copyReport": "Fehlerbericht kopieren",
+    "report": "Bericht",
+    "copied": "Kopiert",
+    "explain": "Erklären",
+    "copyEntry": "Eintrag kopieren",
+    "explanationLabel": "Erklärung:",
+    "suggestionLabel": "Vorgeschlagene Lösung:",
+    "openDocs": "Dokumentation öffnen"
   },
   "graphHealth": {
     "title": "Graph-Zustand",

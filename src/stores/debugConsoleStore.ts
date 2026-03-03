@@ -110,6 +110,34 @@ function saveScopes(scopes: Set<LogScope>) {
   }
 }
 
+// ── Per-project filter presets (K4-1) ─────────────────────────────────────────
+
+const PRESET_PREFIX = 'chainsolve.debugConsole.preset'
+
+export interface FilterPreset {
+  minLevel: LogLevel
+  scopes: LogScope[]
+  search: string
+}
+
+function loadProjectPreset(projectId: string): FilterPreset | null {
+  try {
+    const raw = localStorage.getItem(`${PRESET_PREFIX}.${projectId}`)
+    if (raw) return JSON.parse(raw) as FilterPreset
+  } catch {
+    /* ignore */
+  }
+  return null
+}
+
+function saveProjectPreset(projectId: string, preset: FilterPreset) {
+  try {
+    localStorage.setItem(`${PRESET_PREFIX}.${projectId}`, JSON.stringify(preset))
+  } catch {
+    /* private browsing */
+  }
+}
+
 // ── Store ──────────────────────────────────────────────────────────────────────
 
 const MAX_ENTRIES = 2000
@@ -127,6 +155,9 @@ interface DebugConsoleState {
   paused: boolean
   search: string
 
+  // Per-project preset tracking
+  activeProjectId: string | null
+
   // Actions
   add: (level: LogLevel, scope: LogScope, msg: string, meta?: Record<string, unknown>) => void
   clear: () => void
@@ -137,6 +168,10 @@ interface DebugConsoleState {
   setAutoScroll: (v: boolean) => void
   setPaused: (v: boolean) => void
   setSearch: (q: string) => void
+  /** K4-1: Load filter preset for a project (called when project opens). */
+  applyProjectPreset: (projectId: string | null) => void
+  /** K4-1: Save current filters as a preset for the active project. */
+  persistProjectPreset: () => void
 }
 
 export const useDebugConsoleStore = create<DebugConsoleState>((set, get) => ({
@@ -149,6 +184,7 @@ export const useDebugConsoleStore = create<DebugConsoleState>((set, get) => ({
   autoScroll: loadBool('autoScroll', true),
   paused: false,
   search: '',
+  activeProjectId: null,
 
   add: (level, scope, msg, meta) => {
     if (get().paused) return
@@ -203,6 +239,50 @@ export const useDebugConsoleStore = create<DebugConsoleState>((set, get) => ({
   setPaused: (v) => set({ paused: v }),
 
   setSearch: (q) => set({ search: q }),
+
+  applyProjectPreset: (projectId) => {
+    // Save current filters for the outgoing project
+    const s = get()
+    if (s.activeProjectId) {
+      saveProjectPreset(s.activeProjectId, {
+        minLevel: s.minLevel,
+        scopes: [...s.enabledScopes],
+        search: s.search,
+      })
+    }
+
+    if (!projectId) {
+      set({ activeProjectId: null })
+      return
+    }
+
+    // Load preset for the incoming project
+    const preset = loadProjectPreset(projectId)
+    if (preset) {
+      const scopes = new Set(
+        preset.scopes.filter((sc): sc is LogScope => LOG_SCOPES.includes(sc as LogScope)),
+      )
+      const level = LOG_LEVELS.includes(preset.minLevel) ? preset.minLevel : 'warn'
+      set({
+        activeProjectId: projectId,
+        minLevel: level,
+        enabledScopes: scopes,
+        search: preset.search ?? '',
+      })
+    } else {
+      set({ activeProjectId: projectId })
+    }
+  },
+
+  persistProjectPreset: () => {
+    const s = get()
+    if (!s.activeProjectId) return
+    saveProjectPreset(s.activeProjectId, {
+      minLevel: s.minLevel,
+      scopes: [...s.enabledScopes],
+      search: s.search,
+    })
+  },
 }))
 
 // ── Selectors ──────────────────────────────────────────────────────────────────

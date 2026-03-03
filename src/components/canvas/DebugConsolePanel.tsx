@@ -1,8 +1,8 @@
 /**
  * DebugConsolePanel — Bottom panel showing structured log entries.
  *
- * Renders inside CanvasArea's canvas-wrap div (absolute-positioned at the
- * bottom). All state lives in debugConsoleStore.
+ * K4-1: Upgraded with error explanations, copy error report, action
+ * buttons for common fixes, and per-project filter presets.
  */
 
 import { useRef, useEffect, useCallback, useMemo, useState } from 'react'
@@ -16,6 +16,8 @@ import {
   LOG_SCOPES,
 } from '../../stores/debugConsoleStore'
 import type { LogLevel, LogScope, LogEntry } from '../../stores/debugConsoleStore'
+import { useProjectStore } from '../../stores/projectStore'
+import { getErrorExplanation, formatErrorReport } from '../../lib/consoleHelpers'
 import { HelpLink } from '../ui/HelpLink'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -65,6 +67,8 @@ export default function DebugConsolePanel({ onClose, docked }: DebugConsolePanel
   const { t } = useTranslation()
   const listRef = useRef<HTMLDivElement>(null)
   const [minimized, setMinimized] = useState(false)
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
+  const [copiedReport, setCopiedReport] = useState(false)
 
   const entries = useDebugConsoleStore((s) => s.entries)
   const minLevel = useDebugConsoleStore((s) => s.minLevel)
@@ -79,6 +83,20 @@ export default function DebugConsolePanel({ onClose, docked }: DebugConsolePanel
   const setPaused = useDebugConsoleStore((s) => s.setPaused)
   const setAutoScroll = useDebugConsoleStore((s) => s.setAutoScroll)
   const clear = useDebugConsoleStore((s) => s.clear)
+  const applyProjectPreset = useDebugConsoleStore((s) => s.applyProjectPreset)
+  const persistProjectPreset = useDebugConsoleStore((s) => s.persistProjectPreset)
+
+  const projectId = useProjectStore((s) => s.projectId)
+
+  // K4-1: Load per-project filter preset when project changes
+  useEffect(() => {
+    applyProjectPreset(projectId)
+  }, [projectId, applyProjectPreset])
+
+  // K4-1: Auto-persist filter changes for the active project
+  useEffect(() => {
+    persistProjectPreset()
+  }, [minLevel, enabledScopes, search, persistProjectPreset])
 
   const filtered = useMemo(
     () => filterEntries(entries, minLevel, enabledScopes, search),
@@ -101,6 +119,27 @@ export default function DebugConsolePanel({ onClose, docked }: DebugConsolePanel
     const ts = new Date().toISOString().replace(/[:.]/g, '-')
     downloadFile(exportJson(filtered), `chainsolve-debug-${ts}.json`, 'application/json')
   }, [filtered])
+
+  const handleCopyReport = useCallback(() => {
+    const report = formatErrorReport(filtered)
+    navigator.clipboard.writeText(report).then(() => {
+      setCopiedReport(true)
+      setTimeout(() => setCopiedReport(false), 2000)
+    })
+  }, [filtered])
+
+  const toggleExpanded = useCallback((id: number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  const handleOpenDocs = useCallback((section: string) => {
+    window.open(`/docs?section=${section}`, '_blank', 'noopener')
+  }, [])
 
   return (
     <div style={docked ? dockedStyle : minimized ? { ...panelStyle, height: 'auto' } : panelStyle}>
@@ -144,7 +183,7 @@ export default function DebugConsolePanel({ onClose, docked }: DebugConsolePanel
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={t('debugConsole.search', 'Filter…')}
+          placeholder={t('debugConsole.search', 'Filter...')}
           style={searchStyle}
         />
 
@@ -165,6 +204,13 @@ export default function DebugConsolePanel({ onClose, docked }: DebugConsolePanel
         </button>
         <button onClick={clear} style={ctrlBtn(false)} title={t('debugConsole.clear', 'Clear')}>
           {'\u2715'}
+        </button>
+        <button
+          onClick={handleCopyReport}
+          style={ctrlBtn(copiedReport)}
+          title={t('debugConsole.copyReport', 'Copy error report')}
+        >
+          {copiedReport ? t('debugConsole.copied', 'Copied') : t('debugConsole.report', 'Report')}
         </button>
         <button
           onClick={handleExportTxt}
@@ -215,7 +261,15 @@ export default function DebugConsolePanel({ onClose, docked }: DebugConsolePanel
               {t('debugConsole.noLogs', 'No log entries')}
             </div>
           ) : (
-            filtered.map((e) => <Row key={e.id} entry={e} />)
+            filtered.map((e) => (
+              <Row
+                key={e.id}
+                entry={e}
+                expanded={expandedIds.has(e.id)}
+                onToggleExpand={toggleExpanded}
+                onOpenDocs={handleOpenDocs}
+              />
+            ))
           )}
         </div>
       )}
@@ -225,15 +279,87 @@ export default function DebugConsolePanel({ onClose, docked }: DebugConsolePanel
 
 // ── Row ────────────────────────────────────────────────────────────────────────
 
-function Row({ entry }: { entry: LogEntry }) {
+interface RowProps {
+  entry: LogEntry
+  expanded: boolean
+  onToggleExpand: (id: number) => void
+  onOpenDocs: (section: string) => void
+}
+
+function Row({ entry, expanded, onToggleExpand, onOpenDocs }: RowProps) {
+  const { t } = useTranslation()
+  const explanation = useMemo(() => getErrorExplanation(entry), [entry])
+  const hasExplanation = explanation !== null
+
+  const handleCopyEntry = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      const ts = new Date(entry.ts).toISOString().slice(11, 23)
+      const meta = entry.meta ? ` ${JSON.stringify(entry.meta)}` : ''
+      const text = `[${ts}] ${entry.level.toUpperCase()} [${entry.scope}] ${entry.msg}${meta}`
+      navigator.clipboard.writeText(text)
+    },
+    [entry],
+  )
+
   return (
-    <div style={rowStyle(entry.level)}>
-      <span style={tsStyle}>{formatTs(entry.ts)}</span>
-      <span style={levelBadge(entry.level)}>{entry.level.toUpperCase().padEnd(5)}</span>
-      <span style={scopeBadge(entry.scope)}>{entry.scope}</span>
-      <span style={msgStyle}>{entry.msg}</span>
-      {entry.meta && <span style={metaStyle}>{JSON.stringify(entry.meta)}</span>}
-    </div>
+    <>
+      <div style={rowStyle(entry.level)}>
+        <span style={tsStyle}>{formatTs(entry.ts)}</span>
+        <span style={levelBadge(entry.level)}>{entry.level.toUpperCase().padEnd(5)}</span>
+        <span style={scopeBadge(entry.scope)}>{entry.scope}</span>
+        <span style={msgStyle}>{entry.msg}</span>
+        {entry.meta && <span style={metaStyle}>{JSON.stringify(entry.meta)}</span>}
+
+        {/* Row actions */}
+        <span style={rowActionsStyle}>
+          {hasExplanation && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggleExpand(entry.id)
+              }}
+              style={rowActionBtn(expanded)}
+              title={t('debugConsole.explain', 'Explain this')}
+            >
+              ?
+            </button>
+          )}
+          <button
+            onClick={handleCopyEntry}
+            style={rowActionBtn(false)}
+            title={t('debugConsole.copyEntry', 'Copy entry')}
+          >
+            {'\u2398'}
+          </button>
+        </span>
+      </div>
+
+      {/* Expanded explanation */}
+      {expanded && explanation && (
+        <div style={explanationStyle}>
+          <div style={{ marginBottom: 4 }}>
+            <strong>{t('debugConsole.explanationLabel', 'Explanation:')}</strong>{' '}
+            {explanation.explanation}
+          </div>
+          <div style={{ marginBottom: 4 }}>
+            <strong>{t('debugConsole.suggestionLabel', 'Suggested fix:')}</strong>{' '}
+            {explanation.suggestion}
+          </div>
+          {explanation.docsSection && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onOpenDocs(explanation.docsSection!)
+              }}
+              style={actionLinkStyle}
+            >
+              {t('debugConsole.openDocs', 'Open docs')}
+            </button>
+          )}
+        </div>
+      )}
+    </>
   )
 }
 
@@ -381,4 +507,47 @@ const metaStyle: React.CSSProperties = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   flexShrink: 0,
+}
+
+const rowActionsStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 2,
+  flexShrink: 0,
+  marginLeft: 4,
+}
+
+function rowActionBtn(active: boolean): React.CSSProperties {
+  return {
+    background: active ? 'rgba(28,171,176,0.2)' : 'transparent',
+    color: active ? 'var(--primary, #1cabb0)' : 'var(--text-muted, #888)',
+    border: 'none',
+    borderRadius: 2,
+    cursor: 'pointer',
+    fontSize: '0.62rem',
+    padding: '0 3px',
+    fontFamily: 'inherit',
+    lineHeight: 1.4,
+    opacity: active ? 1 : 0.5,
+  }
+}
+
+const explanationStyle: React.CSSProperties = {
+  padding: '6px 8px 6px 130px',
+  background: 'rgba(28,171,176,0.06)',
+  borderBottom: '1px solid rgba(28,171,176,0.15)',
+  fontSize: '0.68rem',
+  lineHeight: 1.5,
+  color: 'var(--text, #f4f4f3)',
+}
+
+const actionLinkStyle: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+  color: 'var(--primary, #1cabb0)',
+  cursor: 'pointer',
+  fontSize: '0.66rem',
+  padding: 0,
+  fontFamily: 'inherit',
+  textDecoration: 'underline',
+  opacity: 0.85,
 }

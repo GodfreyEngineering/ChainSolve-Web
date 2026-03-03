@@ -186,6 +186,26 @@
     "hiddenView": "הצג בלוקים מוסתרים",
     "showAllHidden": "הצג את כל הבלוקים המוסתרים"
   },
+  "debugConsole": {
+    "title": "מסוף ניפוי שגיאות",
+    "logLevel": "רמת רישום",
+    "search": "סנן...",
+    "pause": "השהה",
+    "resume": "המשך",
+    "autoScroll": "גלילה אוטומטית",
+    "clear": "נקה",
+    "exportTxt": "ייצוא .txt",
+    "exportJson": "ייצוא .json",
+    "noLogs": "אין רשומות",
+    "copyReport": "העתק דוח שגיאות",
+    "report": "דוח",
+    "copied": "הועתק",
+    "explain": "הסבר",
+    "copyEntry": "העתק רשומה",
+    "explanationLabel": "הסבר:",
+    "suggestionLabel": "תיקון מוצע:",
+    "openDocs": "פתח תיעוד"
+  },
   "terms": {
     "title": "תנאי שימוש",
     "version": "גרסה {{version}}",

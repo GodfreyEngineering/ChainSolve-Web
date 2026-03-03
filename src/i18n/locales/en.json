@@ -757,7 +757,15 @@
     "clear": "Clear",
     "exportTxt": "Export .txt",
     "exportJson": "Export .json",
-    "noLogs": "No log entries"
+    "noLogs": "No log entries",
+    "copyReport": "Copy error report",
+    "report": "Report",
+    "copied": "Copied",
+    "explain": "Explain this",
+    "copyEntry": "Copy entry",
+    "explanationLabel": "Explanation:",
+    "suggestionLabel": "Suggested fix:",
+    "openDocs": "Open docs"
   },
   "graphHealth": {
     "title": "Graph Health",
