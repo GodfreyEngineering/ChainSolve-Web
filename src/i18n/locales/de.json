@@ -132,7 +132,8 @@
     "termsSub": "Bitte lesen und akzeptieren Sie die Bedingungen",
     "termsBody": "Wir haben unsere Nutzungsbedingungen aktualisiert (v{{version}}). Bitte überprüfen und akzeptieren Sie sie, um ChainSolve weiter zu nutzen.",
     "termsLink": "Vollständige Nutzungsbedingungen lesen",
-    "termsAccept": "Ich akzeptiere die Nutzungsbedingungen (v{{version}})",
+    "privacyLink": "Datenschutzrichtlinie lesen",
+    "termsAccept": "Ich akzeptiere die Nutzungsbedingungen und Datenschutzrichtlinie (v{{version}})",
     "termsContinue": "Weiter",
     "termsSaving": "Wird gespeichert…",
     "termsRetry": "Akzeptierung konnte nicht gespeichert werden. Bitte erneut versuchen."
@@ -1457,6 +1458,10 @@
     "terms": {
       "title": "Nutzungsbedingungen — ChainSolve",
       "description": "Nutzungsbedingungen und Geschäftsbedingungen von ChainSolve."
+    },
+    "privacy": {
+      "title": "Datenschutzrichtlinie — ChainSolve",
+      "description": "Wie ChainSolve Ihre Daten erhebt, verwendet und schützt."
     }
   },
   "report": {
@@ -1492,6 +1497,21 @@
   "footer": {
     "registered": "Registriert in {{jurisdiction}}",
     "companyNo": "Firmennr. {{number}}",
-    "terms": "AGB & Datenschutz"
+    "termsLink": "AGB",
+    "privacyLink": "Datenschutz"
+  },
+  "privacy": {
+    "title": "Datenschutzrichtlinie",
+    "viewTerms": "Allgemeine Geschäftsbedingungen anzeigen",
+    "s1Title": "Einleitung",
+    "s2Title": "Welche Daten wir erheben",
+    "s3Title": "Wie wir Ihre Daten verwenden",
+    "s4Title": "Drittanbieter",
+    "s5Title": "Datensicherheit",
+    "s6Title": "Datenaufbewahrung",
+    "s7Title": "Ihre Rechte",
+    "s8Title": "Kinder",
+    "s9Title": "Änderungen dieser Richtlinie",
+    "s10Title": "Kontakt"
   }
 }

@@ -14,6 +14,7 @@ import { updateDisplayName, uploadAvatar } from '../../lib/profilesService'
 import { acceptTerms, updateMarketingOptIn } from '../../lib/profilesService'
 import { updateUserPreferences } from '../../lib/userPreferencesService'
 import { logTermsAcceptance } from '../../lib/userTermsService'
+import { CURRENT_TERMS_VERSION } from '../../lib/termsVersion'
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -25,8 +26,6 @@ const SUPPORTED_LOCALES = [
   { code: 'it', label: 'Italiano' },
   { code: 'he', label: '\u05E2\u05D1\u05E8\u05D9\u05EA' },
 ] as const
-
-const TERMS_VERSION = '1.0'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -134,9 +133,9 @@ export function SignupWizard({ open, onComplete }: Props) {
       }
 
       // 5. Accept terms + log in audit table
-      await acceptTerms(TERMS_VERSION)
+      await acceptTerms(CURRENT_TERMS_VERSION)
       try {
-        await logTermsAcceptance(TERMS_VERSION)
+        await logTermsAcceptance(CURRENT_TERMS_VERSION)
       } catch {
         // Best-effort audit log; don't block signup completion.
       }

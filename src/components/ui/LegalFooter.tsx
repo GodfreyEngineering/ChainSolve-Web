@@ -41,7 +41,13 @@ export function LegalFooter() {
           |
         </span>
         <Link to="/terms" style={linkStyle}>
-          {t('footer.terms')}
+          {t('footer.termsLink')}
+        </Link>
+        <span style={sepStyle} aria-hidden="true">
+          |
+        </span>
+        <Link to="/privacy" style={linkStyle}>
+          {t('footer.privacyLink')}
         </Link>
       </div>
     </footer>

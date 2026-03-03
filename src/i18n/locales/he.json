@@ -566,6 +566,10 @@
     "terms": {
       "title": "תנאי שימוש — ChainSolve",
       "description": "תנאי השירות ותנאי השימוש של ChainSolve."
+    },
+    "privacy": {
+      "title": "מדיניות פרטיות — ChainSolve",
+      "description": "כיצד ChainSolve אוספת, משתמשת ומגינה על הנתונים שלך."
     }
   },
   "signupWizard": {
@@ -639,6 +643,21 @@
   "footer": {
     "registered": "רשומה ב{{jurisdiction}}",
     "companyNo": "מס' חברה {{number}}",
-    "terms": "תנאים ופרטיות"
+    "termsLink": "תנאים",
+    "privacyLink": "פרטיות"
+  },
+  "privacy": {
+    "title": "מדיניות פרטיות",
+    "viewTerms": "הצג תנאים והגבלות",
+    "s1Title": "מבוא",
+    "s2Title": "נתונים שאנו אוספים",
+    "s3Title": "כיצד אנו משתמשים בנתונים שלך",
+    "s4Title": "שירותי צד שלישי",
+    "s5Title": "אבטחת נתונים",
+    "s6Title": "שמירת נתונים",
+    "s7Title": "הזכויות שלך",
+    "s8Title": "ילדים",
+    "s9Title": "שינויים במדיניות זו",
+    "s10Title": "יצירת קשר"
   }
 }

@@ -139,7 +139,8 @@
     "termsSub": "Please review and accept to continue",
     "termsBody": "We've updated our Terms & Conditions (v{{version}}). Please review them and accept to continue using ChainSolve.",
     "termsLink": "Read the full Terms & Conditions",
-    "termsAccept": "I accept the Terms & Conditions (v{{version}})",
+    "privacyLink": "Read the Privacy Policy",
+    "termsAccept": "I accept the Terms & Conditions and Privacy Policy (v{{version}})",
     "termsContinue": "Continue",
     "termsSaving": "Saving…",
     "termsRetry": "Failed to record acceptance. Please retry."
@@ -1449,6 +1450,10 @@
     "terms": {
       "title": "Terms & Conditions — ChainSolve",
       "description": "ChainSolve terms of service and conditions of use."
+    },
+    "privacy": {
+      "title": "Privacy Policy — ChainSolve",
+      "description": "How ChainSolve collects, uses, and protects your data."
     }
   },
   "signupWizard": {
@@ -1511,6 +1516,21 @@
   "footer": {
     "registered": "Registered in {{jurisdiction}}",
     "companyNo": "Company No. {{number}}",
-    "terms": "Terms & Privacy"
+    "termsLink": "Terms",
+    "privacyLink": "Privacy"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "viewTerms": "View Terms & Conditions",
+    "s1Title": "Introduction",
+    "s2Title": "Data We Collect",
+    "s3Title": "How We Use Your Data",
+    "s4Title": "Third-Party Services",
+    "s5Title": "Data Security",
+    "s6Title": "Data Retention",
+    "s7Title": "Your Rights",
+    "s8Title": "Children",
+    "s9Title": "Changes to This Policy",
+    "s10Title": "Contact"
   }
 }

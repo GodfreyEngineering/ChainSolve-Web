@@ -132,7 +132,8 @@
     "termsSub": "Por favor, revisa y acepta para continuar",
     "termsBody": "Hemos actualizado nuestros Términos y Condiciones (v{{version}}). Por favor, revísalos y acéptalos para seguir usando ChainSolve.",
     "termsLink": "Leer los Términos y Condiciones completos",
-    "termsAccept": "Acepto los Términos y Condiciones (v{{version}})",
+    "privacyLink": "Leer la Política de privacidad",
+    "termsAccept": "Acepto los Términos y Condiciones y la Política de privacidad (v{{version}})",
     "termsContinue": "Continuar",
     "termsSaving": "Guardando…",
     "termsRetry": "No se pudo registrar la aceptación. Inténtalo de nuevo."
@@ -1430,6 +1431,10 @@
     "terms": {
       "title": "Términos y condiciones — ChainSolve",
       "description": "Términos de servicio y condiciones de uso de ChainSolve."
+    },
+    "privacy": {
+      "title": "Política de privacidad — ChainSolve",
+      "description": "Cómo ChainSolve recopila, usa y protege sus datos."
     }
   },
   "signupWizard": {
@@ -1492,6 +1497,21 @@
   "footer": {
     "registered": "Registrada en {{jurisdiction}}",
     "companyNo": "N.º de empresa {{number}}",
-    "terms": "Términos y Privacidad"
+    "termsLink": "Términos",
+    "privacyLink": "Privacidad"
+  },
+  "privacy": {
+    "title": "Política de privacidad",
+    "viewTerms": "Ver términos y condiciones",
+    "s1Title": "Introducción",
+    "s2Title": "Datos que recopilamos",
+    "s3Title": "Cómo usamos sus datos",
+    "s4Title": "Servicios de terceros",
+    "s5Title": "Seguridad de los datos",
+    "s6Title": "Retención de datos",
+    "s7Title": "Sus derechos",
+    "s8Title": "Menores",
+    "s9Title": "Cambios en esta política",
+    "s10Title": "Contacto"
   }
 }

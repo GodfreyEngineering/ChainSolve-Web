@@ -132,7 +132,8 @@
     "termsSub": "Veuillez lire et accepter pour continuer",
     "termsBody": "Nous avons mis à jour nos Conditions Générales (v{{version}}). Veuillez les consulter et les accepter pour continuer à utiliser ChainSolve.",
     "termsLink": "Lire les Conditions Générales complètes",
-    "termsAccept": "J'accepte les Conditions Générales (v{{version}})",
+    "privacyLink": "Lire la Politique de confidentialité",
+    "termsAccept": "J'accepte les Conditions Générales et la Politique de confidentialité (v{{version}})",
     "termsContinue": "Continuer",
     "termsSaving": "Enregistrement…",
     "termsRetry": "L'acceptation n'a pas pu être enregistrée. Veuillez réessayer."
@@ -1430,6 +1431,10 @@
     "terms": {
       "title": "Conditions générales — ChainSolve",
       "description": "Conditions générales d'utilisation de ChainSolve."
+    },
+    "privacy": {
+      "title": "Politique de confidentialité — ChainSolve",
+      "description": "Comment ChainSolve collecte, utilise et protège vos données."
     }
   },
   "signupWizard": {
@@ -1492,6 +1497,21 @@
   "footer": {
     "registered": "Enregistrée en {{jurisdiction}}",
     "companyNo": "N° de société {{number}}",
-    "terms": "Conditions & Confidentialité"
+    "termsLink": "Conditions",
+    "privacyLink": "Confidentialité"
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "viewTerms": "Voir les conditions générales",
+    "s1Title": "Introduction",
+    "s2Title": "Données collectées",
+    "s3Title": "Utilisation de vos données",
+    "s4Title": "Services tiers",
+    "s5Title": "Sécurité des données",
+    "s6Title": "Conservation des données",
+    "s7Title": "Vos droits",
+    "s8Title": "Enfants",
+    "s9Title": "Modifications de cette politique",
+    "s10Title": "Contact"
   }
 }

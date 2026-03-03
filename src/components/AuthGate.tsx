@@ -138,9 +138,17 @@ function TermsAcceptanceScreen({
           href="/terms"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ ...s.link, display: 'block', marginBottom: '1rem' }}
+          style={{ ...s.link, display: 'block', marginBottom: '0.5rem' }}
         >
           {t('auth.termsLink')}
+        </a>
+        <a
+          href="/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ ...s.link, display: 'block', marginBottom: '1rem' }}
+        >
+          {t('auth.privacyLink')}
         </a>
 
         {error && <div style={s.errorBox}>{error}</div>}

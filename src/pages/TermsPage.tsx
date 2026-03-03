@@ -102,10 +102,14 @@ export default function TermsPage() {
           <section style={s.section}>
             <h2 style={s.heading}>7. Data and Privacy</h2>
             <p style={s.para}>
-              Your use of the Service is also governed by our Privacy Policy. We collect only the
-              data necessary to provide the Service. Your project data is stored securely and is not
-              shared with third parties except as required to operate the Service (e.g. cloud
-              hosting providers). You may export or delete your data at any time.
+              Your use of the Service is also governed by our{' '}
+              <Link to="/privacy" style={s.link}>
+                Privacy Policy
+              </Link>
+              . We collect only the data necessary to provide the Service. Your project data is
+              stored securely and is not shared with third parties except as required to operate the
+              Service (e.g. cloud hosting providers). You may export or delete your data at any
+              time.
             </p>
           </section>
 

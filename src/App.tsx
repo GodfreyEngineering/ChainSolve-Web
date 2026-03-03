@@ -16,8 +16,9 @@ const MarketplacePage = lazy(() => import('./pages/MarketplacePage'))
 const ItemDetailPage = lazy(() => import('./pages/ItemDetailPage'))
 const MarketplaceAuthorPage = lazy(() => import('./pages/MarketplaceAuthorPage'))
 
-// Lazy-load Terms page (not needed on initial load)
+// Lazy-load Terms and Privacy pages (not needed on initial load)
 const TermsPage = lazy(() => import('./pages/TermsPage'))
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 
 // Lazy-load docs page (public, not needed on initial load)
 const DocsPage = lazy(() => import('./pages/DocsPage'))
@@ -107,6 +108,14 @@ export default function App() {
         element={
           <Suspense fallback={<RouteSkeleton variant="minimal" />}>
             <TermsPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/privacy"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+            <PrivacyPage />
           </Suspense>
         }
       />
