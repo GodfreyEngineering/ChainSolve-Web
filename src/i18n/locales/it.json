@@ -157,6 +157,17 @@
     "past_due": "Pagamento in ritardo",
     "canceled": "Annullato"
   },
+  "roles": {
+    "developer": "Sviluppatore",
+    "enterprise_admin": "Admin Enterprise",
+    "admin": "Admin",
+    "enterprise": "Enterprise",
+    "pro": "Pro",
+    "student": "Studente",
+    "free": "Gratuito",
+    "past_due": "Scaduto",
+    "canceled": "Annullato"
+  },
   "project": {
     "openProject": "Apri progetto",
     "saveAs": "Salva con nome",

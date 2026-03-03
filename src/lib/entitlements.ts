@@ -4,11 +4,38 @@
  * Pure functions that map a user's `plan_status` to concrete limits.
  * No side effects, no Supabase calls — this module is imported by
  * both the project browser (AppShell) and the canvas editor.
+ *
+ * J3-1: Formal role hierarchy (separate from billing plan):
+ *   developer       — is_developer flag; all features + dev tools
+ *   enterprise_admin — is_admin + enterprise plan; org management
+ *   admin           — is_admin flag; moderation tools
+ *   enterprise      — enterprise billing plan
+ *   pro             — pro or trialing billing plan
+ *   student         — verified student (free plan + is_student)
+ *   free            — default
+ *   past_due        — payment overdue, read-only
+ *   canceled        — subscription canceled, read-only
  */
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export type Plan = 'free' | 'trialing' | 'pro' | 'student' | 'enterprise' | 'past_due' | 'canceled'
+
+/**
+ * J3-1: Formal role representing the user's authority level.
+ * Unlike Plan (billing status), Role determines the user's effective
+ * permissions and UI treatment.
+ */
+export type Role =
+  | 'developer'
+  | 'enterprise_admin'
+  | 'admin'
+  | 'enterprise'
+  | 'pro'
+  | 'student'
+  | 'free'
+  | 'past_due'
+  | 'canceled'
 
 /** D11-1: Keys accepted by the checkout endpoint's plan_key parameter. */
 export type PlanKey =
@@ -192,6 +219,47 @@ export function resolveEffectivePlan(
   if (profile.is_developer || profile.is_admin) return 'enterprise'
   if (profile.is_student && profile.plan === 'free') return 'student'
   return profile.plan
+}
+
+// ── J3-1: Role helpers ────────────────────────────────────────────────────────
+
+interface ProfileLike {
+  plan: Plan
+  is_developer?: boolean
+  is_admin?: boolean
+  is_student?: boolean
+}
+
+/**
+ * J3-1: Resolve the user's formal role from their profile flags.
+ * Role is distinct from Plan — it represents the user's authority level.
+ */
+export function resolveRole(profile: ProfileLike | null): Role {
+  if (!profile) return 'free'
+  if (profile.is_developer) return 'developer'
+  if (profile.is_admin && profile.plan === 'enterprise') return 'enterprise_admin'
+  if (profile.is_admin) return 'admin'
+  if (profile.plan === 'enterprise') return 'enterprise'
+  if (profile.plan === 'trialing' || profile.plan === 'pro') return 'pro'
+  if (profile.is_student && profile.plan === 'free') return 'student'
+  if (profile.plan === 'past_due') return 'past_due'
+  if (profile.plan === 'canceled') return 'canceled'
+  return 'free'
+}
+
+/** J3-1: True if the user has the developer flag (all features + dev tools). */
+export function isDeveloper(profile: ProfileLike | null): boolean {
+  return !!profile?.is_developer
+}
+
+/** J3-1: True if the user has the admin flag (moderation tools). */
+export function isAdmin(profile: ProfileLike | null): boolean {
+  return !!profile?.is_admin || !!profile?.is_developer
+}
+
+/** J3-1: True if the user is an enterprise admin (admin + enterprise plan). */
+export function isEnterpriseAdmin(profile: ProfileLike | null): boolean {
+  return !!profile?.is_admin && profile?.plan === 'enterprise'
 }
 
 /** True for trialing, pro, student, or enterprise (full access). */

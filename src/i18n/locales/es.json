@@ -157,6 +157,17 @@
     "past_due": "Pago pendiente",
     "canceled": "Cancelado"
   },
+  "roles": {
+    "developer": "Desarrollador",
+    "enterprise_admin": "Admin Enterprise",
+    "admin": "Admin",
+    "enterprise": "Enterprise",
+    "pro": "Pro",
+    "student": "Estudiante",
+    "free": "Gratis",
+    "past_due": "Vencido",
+    "canceled": "Cancelado"
+  },
   "project": {
     "openProject": "Abrir proyecto",
     "saveAs": "Guardar como",

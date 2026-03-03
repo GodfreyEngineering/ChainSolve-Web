@@ -521,5 +521,16 @@
     "displayNameControlChars": "שם התצוגה מכיל תווים לא חוקיים.",
     "displayNameInvalidChars": "שם התצוגה מכיל תווים שאינם מותרים.",
     "displayNameForbidden": "שם תצוגה זה אינו מותר."
+  },
+  "roles": {
+    "developer": "מפתח",
+    "enterprise_admin": "מנהל ארגוני",
+    "admin": "מנהל",
+    "enterprise": "Enterprise",
+    "pro": "Pro",
+    "student": "סטודנט",
+    "free": "חינם",
+    "past_due": "באיחור",
+    "canceled": "מבוטל"
   }
 }

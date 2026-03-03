@@ -164,6 +164,17 @@
     "past_due": "Past Due",
     "canceled": "Canceled"
   },
+  "roles": {
+    "developer": "Developer",
+    "enterprise_admin": "Enterprise Admin",
+    "admin": "Admin",
+    "enterprise": "Enterprise",
+    "pro": "Pro",
+    "student": "Student",
+    "free": "Free",
+    "past_due": "Past Due",
+    "canceled": "Canceled"
+  },
   "project": {
     "openProject": "Open project",
     "saveAs": "Save as",

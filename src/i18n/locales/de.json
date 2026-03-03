@@ -157,6 +157,17 @@
     "past_due": "Überfällig",
     "canceled": "Gekündigt"
   },
+  "roles": {
+    "developer": "Entwickler",
+    "enterprise_admin": "Enterprise-Admin",
+    "admin": "Admin",
+    "enterprise": "Enterprise",
+    "pro": "Pro",
+    "student": "Student",
+    "free": "Kostenlos",
+    "past_due": "Uberfällig",
+    "canceled": "Gekündigt"
+  },
   "project": {
     "openProject": "Projekt öffnen",
     "saveAs": "Speichern unter",

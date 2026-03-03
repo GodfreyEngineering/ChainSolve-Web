@@ -17,7 +17,12 @@ import {
   canInstallExploreItem,
   canUploadToExplore,
   resolveEffectivePlan,
+  resolveRole,
+  isDeveloper,
+  isAdmin,
+  isEnterpriseAdmin,
   type Plan,
+  type Role,
   type Entitlements,
 } from './entitlements'
 
@@ -438,5 +443,171 @@ describe('resolveEffectivePlan', () => {
     expect(ent.canUseListBlocks).toBe(true)
     expect(ent.canUseGraphTableOutputs).toBe(true)
     expect(ent.canImportFiles).toBe(true)
+  })
+})
+
+// ── resolveRole (J3-1) ──────────────────────────────────────────────────────
+
+describe('resolveRole', () => {
+  it('returns "free" for null profile', () => {
+    expect(resolveRole(null)).toBe('free')
+  })
+
+  it('returns "developer" for is_developer regardless of plan', () => {
+    expect(resolveRole({ plan: 'free', is_developer: true })).toBe('developer')
+    expect(resolveRole({ plan: 'pro', is_developer: true })).toBe('developer')
+    expect(resolveRole({ plan: 'enterprise', is_developer: true })).toBe('developer')
+    expect(resolveRole({ plan: 'canceled', is_developer: true })).toBe('developer')
+  })
+
+  it('returns "enterprise_admin" for is_admin + enterprise plan', () => {
+    expect(resolveRole({ plan: 'enterprise', is_admin: true })).toBe('enterprise_admin')
+  })
+
+  it('returns "admin" for is_admin without enterprise plan', () => {
+    expect(resolveRole({ plan: 'free', is_admin: true })).toBe('admin')
+    expect(resolveRole({ plan: 'pro', is_admin: true })).toBe('admin')
+  })
+
+  it('returns "enterprise" for enterprise plan without admin', () => {
+    expect(resolveRole({ plan: 'enterprise' })).toBe('enterprise')
+    expect(resolveRole({ plan: 'enterprise', is_admin: false })).toBe('enterprise')
+  })
+
+  it('returns "pro" for pro and trialing plans', () => {
+    expect(resolveRole({ plan: 'pro' })).toBe('pro')
+    expect(resolveRole({ plan: 'trialing' })).toBe('pro')
+  })
+
+  it('returns "student" for verified student with free plan', () => {
+    expect(resolveRole({ plan: 'free', is_student: true })).toBe('student')
+  })
+
+  it('returns "free" for plain free plan', () => {
+    expect(resolveRole({ plan: 'free' })).toBe('free')
+  })
+
+  it('returns "past_due" for past_due plan', () => {
+    expect(resolveRole({ plan: 'past_due' })).toBe('past_due')
+  })
+
+  it('returns "canceled" for canceled plan', () => {
+    expect(resolveRole({ plan: 'canceled' })).toBe('canceled')
+  })
+
+  it('developer takes precedence over admin', () => {
+    expect(resolveRole({ plan: 'enterprise', is_developer: true, is_admin: true })).toBe(
+      'developer',
+    )
+  })
+
+  it('developer takes precedence over student', () => {
+    expect(resolveRole({ plan: 'free', is_developer: true, is_student: true })).toBe('developer')
+  })
+
+  it('all roles are valid Role type values', () => {
+    const allRoles: Role[] = [
+      'developer',
+      'enterprise_admin',
+      'admin',
+      'enterprise',
+      'pro',
+      'student',
+      'free',
+      'past_due',
+      'canceled',
+    ]
+    expect(allRoles).toHaveLength(9)
+  })
+})
+
+// ── isDeveloper (J3-1) ──────────────────────────────────────────────────────
+
+describe('isDeveloper', () => {
+  it('returns true for is_developer=true', () => {
+    expect(isDeveloper({ plan: 'free', is_developer: true })).toBe(true)
+  })
+
+  it('returns false for is_developer=false or missing', () => {
+    expect(isDeveloper({ plan: 'free', is_developer: false })).toBe(false)
+    expect(isDeveloper({ plan: 'free' })).toBe(false)
+    expect(isDeveloper(null)).toBe(false)
+  })
+
+  it('returns false for admin-only accounts', () => {
+    expect(isDeveloper({ plan: 'enterprise', is_admin: true, is_developer: false })).toBe(false)
+  })
+})
+
+// ── isAdmin (J3-1) ──────────────────────────────────────────────────────────
+
+describe('isAdmin', () => {
+  it('returns true for is_admin=true', () => {
+    expect(isAdmin({ plan: 'free', is_admin: true })).toBe(true)
+  })
+
+  it('returns true for is_developer=true (developers are admins)', () => {
+    expect(isAdmin({ plan: 'free', is_developer: true })).toBe(true)
+  })
+
+  it('returns false for regular users', () => {
+    expect(isAdmin({ plan: 'free' })).toBe(false)
+    expect(isAdmin({ plan: 'pro' })).toBe(false)
+    expect(isAdmin(null)).toBe(false)
+  })
+})
+
+// ── isEnterpriseAdmin (J3-1) ────────────────────────────────────────────────
+
+describe('isEnterpriseAdmin', () => {
+  it('returns true for is_admin + enterprise plan', () => {
+    expect(isEnterpriseAdmin({ plan: 'enterprise', is_admin: true })).toBe(true)
+  })
+
+  it('returns false for is_admin without enterprise plan', () => {
+    expect(isEnterpriseAdmin({ plan: 'free', is_admin: true })).toBe(false)
+    expect(isEnterpriseAdmin({ plan: 'pro', is_admin: true })).toBe(false)
+  })
+
+  it('returns false for enterprise without admin', () => {
+    expect(isEnterpriseAdmin({ plan: 'enterprise' })).toBe(false)
+    expect(isEnterpriseAdmin({ plan: 'enterprise', is_admin: false })).toBe(false)
+  })
+
+  it('returns false for null profile', () => {
+    expect(isEnterpriseAdmin(null)).toBe(false)
+  })
+})
+
+// ── Role i18n keys (J3-1) ───────────────────────────────────────────────────
+
+describe('Role i18n keys', () => {
+  it('en.json has all role labels', async () => {
+    const en = (await import('../i18n/locales/en.json')).default
+    const roles = en.roles as Record<string, string>
+    expect(roles).toBeDefined()
+    const expected: Role[] = [
+      'developer',
+      'enterprise_admin',
+      'admin',
+      'enterprise',
+      'pro',
+      'student',
+      'free',
+      'past_due',
+      'canceled',
+    ]
+    for (const key of expected) {
+      expect(roles[key], `missing roles.${key}`).toBeTruthy()
+    }
+  })
+
+  it('all locales have roles section', async () => {
+    const locales = ['de', 'fr', 'es', 'it', 'he'] as const
+    for (const locale of locales) {
+      const mod = await import(`../i18n/locales/${locale}.json`)
+      const json = mod.default as Record<string, unknown>
+      expect(json.roles, `${locale}.json missing roles section`).toBeDefined()
+    }
   })
 })
