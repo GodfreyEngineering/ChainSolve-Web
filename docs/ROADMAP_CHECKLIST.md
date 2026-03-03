@@ -2080,7 +2080,7 @@ Claude MUST:
 ---
 
 ## J0 — Supabase schema re-baseline for fresh auth
-- [ ] J0-1: Define the “fresh state” user data model (profiles/preferences/roles) and migrate cleanly
+- [x] J0-1: Define the “fresh state” user data model (profiles/preferences/roles) and migrate cleanly
   - Create/verify core tables (or refactor existing):
     - profiles (public identity + plan state snapshot fields)
     - user_preferences (locale/region/theme defaults, UI/layout defaults)
