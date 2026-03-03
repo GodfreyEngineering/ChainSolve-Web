@@ -2288,7 +2288,7 @@ Claude MUST:
     - users can actually use it
     - no duplicated close/minimize weirdness
 
-- [ ] K4-2: Console guidance for scientific workflows
+- [x] K4-2: Console guidance for scientific workflows
   - When user hits:
     - unit mismatch
     - missing input binding
