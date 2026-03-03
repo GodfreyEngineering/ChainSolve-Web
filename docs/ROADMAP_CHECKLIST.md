@@ -2342,7 +2342,7 @@ Claude MUST:
     - documented compliance stance
     - no accidental license breach
 
-- [ ] L0-3: “Patent/workflow” risk process (non-legal, engineering process)
+- [x] L0-3: “Patent/workflow” risk process (non-legal, engineering process)
   - Add doc checklist:
     - avoid copying exact UI patterns from proprietary apps
     - document inspiration sources
@@ -2354,7 +2354,7 @@ Claude MUST:
 ---
 
 ## L1 — Branding, legalese, and footer compliance
-- [ ] L1-1: Footer legal + contact info across app + docs
+- [ ] L1-1: Very thin Footer legal + contact info across app + docs
   - Footer includes:
     - © notice
     - Registered in England & Wales
