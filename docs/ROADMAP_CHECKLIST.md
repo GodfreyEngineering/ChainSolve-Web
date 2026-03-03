@@ -2326,7 +2326,7 @@ Claude MUST:
 ---
 
 ## L0 — Legal/compliance readiness process (repo-level)
-- [ ] L0-1: Third-party license inventory + NOTICE generation (automated)
+- [x] L0-1: Third-party license inventory + NOTICE generation (automated)
   - Add tooling to generate:
     - THIRD_PARTY_NOTICES.md
     - dependency license list (npm + cargo)
