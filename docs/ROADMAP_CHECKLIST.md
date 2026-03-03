@@ -2162,7 +2162,7 @@ Claude MUST:
 ---
 
 ## J3 — Roles and plan levels (formal + enforceable + test personas)
-- [ ] J3-1: Formalize roles exactly as described + add developer role for ben.godfrey@chainsolve.co.uk
+- [x] J3-1: Formalize roles exactly as described + add developer role for ben.godfrey@chainsolve.co.uk
   - Free / Pro / Student / Enterprise / Enterprise Admin / Developer
   - Developer overrides all restrictions + dev tools.
   - Enterprise admin controls badge display rules and role prefix/suffix for org.
