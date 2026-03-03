@@ -2048,7 +2048,7 @@ Claude MUST:
 ---
 
 ## I9 — Future platform readiness (single repo, shared core)
-- [ ] I9-1: Prepare repo layout for future desktop/mobile without building them now
+- [x] I9-1: Prepare repo layout for future desktop/mobile without building them now
   - Shared packages folder structure
   - Platform flags
   - Keep web app stable
