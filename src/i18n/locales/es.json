@@ -1488,5 +1488,10 @@
     "typeAvatar": "Avatar",
     "typeComment": "Comentario",
     "typeMarketplaceItem": "Artículo del marketplace"
+  },
+  "footer": {
+    "registered": "Registrada en {{jurisdiction}}",
+    "companyNo": "N.º de empresa {{number}}",
+    "terms": "Términos y Privacidad"
   }
 }

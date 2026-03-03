@@ -41,6 +41,7 @@ import { BRAND } from '../lib/brand'
 import { usePageMeta } from '../lib/seo'
 import { getBlockedUsers } from '../lib/blockedUsers'
 import { HelpLink } from '../components/ui/HelpLink'
+import { LegalFooter } from '../components/ui/LegalFooter'
 
 /** Map category key to i18n label key. */
 const CATEGORY_LABEL_KEYS: Record<string, string> = {
@@ -898,6 +899,7 @@ export default function MarketplacePage() {
           </div>
         )}
       </main>
+      <LegalFooter />
     </div>
   )
 }

@@ -58,6 +58,7 @@ import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 import { initRememberMe } from '../lib/rememberMe'
 import { touchSession, isSessionValid, SESSION_CHECK_INTERVAL_MS } from '../lib/sessionService'
 import { HelpLink } from '../components/ui/HelpLink'
+import { LegalFooter } from '../components/ui/LegalFooter'
 import { PlanBadge } from '../components/ui/PlanBadge'
 import { LoadingScreen } from '../components/ui/LoadingScreen'
 import { listMfaFactors } from '../lib/auth'
@@ -1288,6 +1289,7 @@ export default function AppShell() {
           </button>
         </div>
       </main>
+      <LegalFooter />
     </div>
   )
 }

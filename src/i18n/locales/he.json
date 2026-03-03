@@ -635,5 +635,10 @@
     "typeAvatar": "תמונת פרופיל",
     "typeComment": "תגובה",
     "typeMarketplaceItem": "פריט מרקטפלייס"
+  },
+  "footer": {
+    "registered": "רשומה ב{{jurisdiction}}",
+    "companyNo": "מס' חברה {{number}}",
+    "terms": "תנאים ופרטיות"
   }
 }

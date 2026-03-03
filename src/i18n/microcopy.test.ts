@@ -109,6 +109,7 @@ describe('All locales contain required i18n sections', () => {
     'debugConsole',
     'report',
     'moderation',
+    'footer',
   ]
 
   for (const locale of LOCALES) {

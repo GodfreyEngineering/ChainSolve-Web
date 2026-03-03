@@ -34,6 +34,7 @@ import {
   type OrgSeatUsage,
 } from '../lib/orgsService'
 import { getCurrentUser } from '../lib/auth'
+import { LegalFooter } from '../components/ui/LegalFooter'
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
 
@@ -662,6 +663,7 @@ export default function OrgsPage() {
           </section>
         )}
       </div>
+      <LegalFooter />
     </div>
   )
 }

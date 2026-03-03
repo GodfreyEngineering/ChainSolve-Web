@@ -10,6 +10,7 @@ import { useState, useMemo, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BRAND } from '../lib/brand'
+import { LegalFooter } from '../components/ui/LegalFooter'
 import { usePageMeta } from '../lib/seo'
 import { DOCS_CONTENT } from '../docs/docsPageContent'
 
@@ -224,6 +225,7 @@ export default function DocsPage() {
           </div>
         </main>
       </div>
+      <LegalFooter />
     </div>
   )
 }

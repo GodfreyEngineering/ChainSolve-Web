@@ -26,6 +26,7 @@ import {
 } from '../lib/marketplaceService'
 import { startConnectOnboarding } from '../lib/stripeConnectService'
 import { BRAND, CONTACT } from '../lib/brand'
+import { LegalFooter } from '../components/ui/LegalFooter'
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
 
@@ -641,6 +642,7 @@ export default function MarketplaceAuthorPage() {
           </div>
         ))}
       </main>
+      <LegalFooter />
     </div>
   )
 }

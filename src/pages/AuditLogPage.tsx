@@ -14,6 +14,7 @@ import { getAuditLog, type AuditLogEntry } from '../lib/auditLogService'
 import { getProfile } from '../lib/profilesService'
 import { getCurrentUser } from '../lib/auth'
 import { isPro } from '../lib/entitlements'
+import { LegalFooter } from '../components/ui/LegalFooter'
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
 
@@ -309,6 +310,7 @@ export default function AuditLogPage() {
           </div>
         )}
       </div>
+      <LegalFooter />
     </div>
   )
 }

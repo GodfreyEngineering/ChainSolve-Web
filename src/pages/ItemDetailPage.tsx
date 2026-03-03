@@ -43,6 +43,7 @@ import { isUserBlocked, blockUser as blockUserAction, getBlockedUsers } from '..
 import { ReportModal } from '../components/ui/ReportModal'
 import type { ReportTargetType } from '../lib/userReportsService'
 import { BRAND } from '../lib/brand'
+import { LegalFooter } from '../components/ui/LegalFooter'
 
 const CATEGORY_LABEL_KEYS: Record<string, string> = {
   template: 'marketplace.categoryTemplate',
@@ -1038,6 +1039,7 @@ export default function ItemDetailPage() {
           }}
         />
       )}
+      <LegalFooter />
     </div>
   )
 }

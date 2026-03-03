@@ -28,6 +28,7 @@ import type { DoctorCheck } from '../observability/types'
 import type { ObsEvent } from '../observability/types'
 import type { EngineAPI, TraceEntry } from '../engine/index.ts'
 import { HelpLink } from '../components/ui/HelpLink'
+import { LegalFooter } from '../components/ui/LegalFooter'
 
 // ── Trace helpers (P036) ──────────────────────────────────────────────────────
 
@@ -370,6 +371,7 @@ export default function DiagnosticsPage() {
           events. It does NOT contain dataset contents, user-entered values, or secrets.
         </p>
       </section>
+      <LegalFooter />
     </div>
   )
 }

@@ -21,6 +21,7 @@ import {
 } from '../lib/auth'
 import { MfaChallengeScreen } from '../components/app/MfaChallengeScreen'
 import { BRAND } from '../lib/brand'
+import { LegalFooter } from '../components/ui/LegalFooter'
 import { usePageMeta } from '../lib/seo'
 import TurnstileWidget from '../components/ui/TurnstileWidget'
 import { isTurnstileEnabled } from '../lib/turnstile'
@@ -271,169 +272,172 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
   // ── Main auth form ──────────────────────────────────────────────────────────
 
   return (
-    <div style={s.page}>
-      <div style={s.card}>
-        <div style={s.logoWrap}>
-          <img src={BRAND.logoWideText} alt="ChainSolve" style={s.logo} />
-        </div>
-        <p style={s.sub}>
-          {mode === 'login' && 'Sign in to your account'}
-          {mode === 'signup' && 'Create your account'}
-          {mode === 'reset' && 'Reset your password'}
-        </p>
+    <div style={s.pageWrap}>
+      <div style={s.page}>
+        <div style={s.card}>
+          <div style={s.logoWrap}>
+            <img src={BRAND.logoWideText} alt="ChainSolve" style={s.logo} />
+          </div>
+          <p style={s.sub}>
+            {mode === 'login' && 'Sign in to your account'}
+            {mode === 'signup' && 'Create your account'}
+            {mode === 'reset' && 'Reset your password'}
+          </p>
 
-        {error && <div style={s.errorBox}>{error}</div>}
+          {error && <div style={s.errorBox}>{error}</div>}
 
-        <form onSubmit={handleSubmit}>
-          <label style={s.label} htmlFor="email">
-            Email
-          </label>
-          <input
-            ref={emailRef}
-            id="email"
-            style={s.input}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            autoComplete="email"
-            required
-          />
-
-          {mode !== 'reset' && (
-            <>
-              <label style={s.label} htmlFor="password">
-                Password
-              </label>
-              <input
-                id="password"
-                style={s.input}
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
-                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                required
-                minLength={mode === 'signup' ? 8 : 1}
-              />
-            </>
-          )}
-
-          {mode === 'signup' && (
-            <>
-              <label style={s.label} htmlFor="confirmPassword">
-                Confirm password
-              </label>
-              <input
-                id="confirmPassword"
-                style={s.input}
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter password"
-                autoComplete="new-password"
-                required
-                minLength={8}
-              />
-
-              <label style={s.checkLabel}>
-                <input
-                  type="checkbox"
-                  checked={acceptTerms}
-                  onChange={(e) => setAcceptTerms(e.target.checked)}
-                  style={s.checkbox}
-                />
-                I accept the{' '}
-                <a href="/terms" target="_blank" rel="noopener noreferrer" style={s.link}>
-                  Terms &amp; Conditions
-                </a>
-              </label>
-
-              <label style={s.checkLabel}>
-                <input
-                  type="checkbox"
-                  checked={marketingOptIn}
-                  onChange={(e) => setMarketingOptIn(e.target.checked)}
-                  style={s.checkbox}
-                />
-                Send me product updates and tips (optional)
-              </label>
-            </>
-          )}
-
-          {mode === 'login' && (
-            <div style={s.forgotRow}>
-              <label style={s.rememberLabel}>
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMeState(e.target.checked)}
-                  style={s.checkbox}
-                />
-                Remember me
-              </label>
-              <Link to="/reset-password" style={s.forgotLink}>
-                Forgot password?
-              </Link>
-            </div>
-          )}
-
-          {captchaEnabled && (
-            <TurnstileWidget
-              onToken={handleCaptchaToken}
-              onError={handleCaptchaError}
-              onExpired={handleCaptchaExpired}
+          <form onSubmit={handleSubmit}>
+            <label style={s.label} htmlFor="email">
+              Email
+            </label>
+            <input
+              ref={emailRef}
+              id="email"
+              style={s.input}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              autoComplete="email"
+              required
             />
-          )}
-          {captchaError && (
-            <div style={s.errorBox}>CAPTCHA failed to load. Please refresh and try again.</div>
-          )}
 
-          <button
-            type="submit"
-            style={{
-              ...s.btn,
-              ...(loading || (captchaEnabled && !captchaToken) ? s.btnDisabled : {}),
-            }}
-            disabled={loading || (captchaEnabled && !captchaToken)}
-          >
-            {loading
-              ? 'Please wait…'
-              : mode === 'login'
-                ? 'Sign in'
-                : mode === 'signup'
-                  ? 'Create account'
-                  : 'Send reset link'}
-          </button>
-        </form>
+            {mode !== 'reset' && (
+              <>
+                <label style={s.label} htmlFor="password">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  style={s.input}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
+                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                  required
+                  minLength={mode === 'signup' ? 8 : 1}
+                />
+              </>
+            )}
 
-        <p style={s.toggle}>
-          {mode === 'login' && (
-            <>
-              Don&apos;t have an account?{' '}
-              <Link to="/signup" style={s.toggleLink}>
-                Sign up
-              </Link>
-            </>
-          )}
-          {mode === 'signup' && (
-            <>
-              Already have an account?{' '}
-              <Link to="/login" style={s.toggleLink}>
-                Sign in
-              </Link>
-            </>
-          )}
-          {mode === 'reset' && (
-            <>
-              Remember your password?{' '}
-              <Link to="/login" style={s.toggleLink}>
-                Sign in
-              </Link>
-            </>
-          )}
-        </p>
+            {mode === 'signup' && (
+              <>
+                <label style={s.label} htmlFor="confirmPassword">
+                  Confirm password
+                </label>
+                <input
+                  id="confirmPassword"
+                  style={s.input}
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter password"
+                  autoComplete="new-password"
+                  required
+                  minLength={8}
+                />
+
+                <label style={s.checkLabel}>
+                  <input
+                    type="checkbox"
+                    checked={acceptTerms}
+                    onChange={(e) => setAcceptTerms(e.target.checked)}
+                    style={s.checkbox}
+                  />
+                  I accept the{' '}
+                  <a href="/terms" target="_blank" rel="noopener noreferrer" style={s.link}>
+                    Terms &amp; Conditions
+                  </a>
+                </label>
+
+                <label style={s.checkLabel}>
+                  <input
+                    type="checkbox"
+                    checked={marketingOptIn}
+                    onChange={(e) => setMarketingOptIn(e.target.checked)}
+                    style={s.checkbox}
+                  />
+                  Send me product updates and tips (optional)
+                </label>
+              </>
+            )}
+
+            {mode === 'login' && (
+              <div style={s.forgotRow}>
+                <label style={s.rememberLabel}>
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMeState(e.target.checked)}
+                    style={s.checkbox}
+                  />
+                  Remember me
+                </label>
+                <Link to="/reset-password" style={s.forgotLink}>
+                  Forgot password?
+                </Link>
+              </div>
+            )}
+
+            {captchaEnabled && (
+              <TurnstileWidget
+                onToken={handleCaptchaToken}
+                onError={handleCaptchaError}
+                onExpired={handleCaptchaExpired}
+              />
+            )}
+            {captchaError && (
+              <div style={s.errorBox}>CAPTCHA failed to load. Please refresh and try again.</div>
+            )}
+
+            <button
+              type="submit"
+              style={{
+                ...s.btn,
+                ...(loading || (captchaEnabled && !captchaToken) ? s.btnDisabled : {}),
+              }}
+              disabled={loading || (captchaEnabled && !captchaToken)}
+            >
+              {loading
+                ? 'Please wait…'
+                : mode === 'login'
+                  ? 'Sign in'
+                  : mode === 'signup'
+                    ? 'Create account'
+                    : 'Send reset link'}
+            </button>
+          </form>
+
+          <p style={s.toggle}>
+            {mode === 'login' && (
+              <>
+                Don&apos;t have an account?{' '}
+                <Link to="/signup" style={s.toggleLink}>
+                  Sign up
+                </Link>
+              </>
+            )}
+            {mode === 'signup' && (
+              <>
+                Already have an account?{' '}
+                <Link to="/login" style={s.toggleLink}>
+                  Sign in
+                </Link>
+              </>
+            )}
+            {mode === 'reset' && (
+              <>
+                Remember your password?{' '}
+                <Link to="/login" style={s.toggleLink}>
+                  Sign in
+                </Link>
+              </>
+            )}
+          </p>
+        </div>
       </div>
+      <LegalFooter />
     </div>
   )
 }
@@ -441,8 +445,13 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
 // ── Styles ──────────────────────────────────────────────────────────────────
 
 const s = {
-  page: {
+  pageWrap: {
     minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+  } as React.CSSProperties,
+  page: {
+    flex: 1,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

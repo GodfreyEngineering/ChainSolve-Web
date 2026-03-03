@@ -1488,5 +1488,10 @@
     "typeAvatar": "Avatar",
     "typeComment": "Kommentar",
     "typeMarketplaceItem": "Marktplatz-Artikel"
+  },
+  "footer": {
+    "registered": "Registriert in {{jurisdiction}}",
+    "companyNo": "Firmennr. {{number}}",
+    "terms": "AGB & Datenschutz"
   }
 }

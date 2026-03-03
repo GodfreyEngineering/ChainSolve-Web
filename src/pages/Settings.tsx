@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { BRAND } from '../lib/brand'
+import { LegalFooter } from '../components/ui/LegalFooter'
 import type { User } from '@supabase/supabase-js'
 import { ProfileSettings } from './settings/ProfileSettings'
 import { BillingSettings } from './settings/BillingSettings'
@@ -153,6 +154,7 @@ export default function Settings() {
           )}
         </main>
       </div>
+      <LegalFooter />
     </div>
   )
 }

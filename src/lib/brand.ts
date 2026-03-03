@@ -32,6 +32,13 @@ export const CONTACT = {
   info: 'info@chainsolve.co.uk',
 } as const
 
+/** Company legal details for footer and legal pages. */
+export const COMPANY = {
+  name: 'Godfrey Engineering Ltd',
+  jurisdiction: 'England & Wales',
+  companyNumber: '16845827',
+} as const
+
 /** Logo appropriate for the current theme (currently always dark). */
 export function chooseLogoForTheme(): string {
   // Both light/dark use the same logo-wide-text for now.
