@@ -2449,7 +2449,7 @@ Claude MUST:
 ---
 
 ## M0 — Audit + plan (docs only)
-- [ ] M0-1: Write `docs/AUDIT/PHASE_M_INVENTORY.md`
+- [x] M0-1: Write `docs/AUDIT/PHASE_M_INVENTORY.md`
   - repo map + hot zones + dead code candidates + duplicated helpers
 - [ ] M0-2: Write `docs/AUDIT/PHASE_M_PLAN.md`
   - what will be deleted/moved + validation steps
