@@ -2503,7 +2503,7 @@ Claude MUST:
 ---
 
 ## M5 — GitHub hygiene for future audits
-- [ ] M5-1: Add CODEOWNERS + PR template + issue templates
+- [x] M5-1: Add CODEOWNERS + PR template + issue templates
 - [ ] M5-2: Add Dependabot for npm/cargo/actions
 
 ---
