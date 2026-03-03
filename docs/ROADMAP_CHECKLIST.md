@@ -2277,7 +2277,7 @@ Claude MUST:
 ---
 
 ## K4 — Terminal/Console becomes a user tool, not dev clutter
-- [ ] K4-1: Upgrade console UX to be helpful and teach users
+- [x] K4-1: Upgrade console UX to be helpful and teach users
   - Features:
     - searchable logs
     - “Explain this error” link (opens help window)
