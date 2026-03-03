@@ -220,6 +220,12 @@ export default function CanvasPage() {
   const [initNodes, setInitNodes] = useState<Node<NodeData>[] | undefined>()
   const [initEdges, setInitEdges] = useState<Edge[] | undefined>()
 
+  // ── L4-1: Scratch mode state ──────────────────────────────────────────────
+  /** Tracks whether the user has modified the scratch canvas (for beforeunload). */
+  const scratchDirtyRef = useRef(false)
+  /** Bridges Ctrl+S in scratch mode → AppHeader Save-As dialog. */
+  const [saveAsRequested, setSaveAsRequested] = useState(false)
+
   // ── Autosave / conflict refs ───────────────────────────────────────────────
   // doSaveRef holds the latest doSave callback so the scheduler can call it
   // without needing to be recreated when doSave's deps change.
@@ -271,6 +277,7 @@ export default function CanvasPage() {
     resetVariables()
     resetPublishedOutputs()
     conflictServerTs.current = null
+    scratchDirtyRef.current = false
 
     if (!projectId) {
       setLoadPhase('ready')
@@ -524,23 +531,33 @@ export default function CanvasPage() {
     }
   }, [markDirty, markCanvasDirty, readOnly])
 
+  // L4-1: Lightweight graph change handler for scratch mode (tracks hasContent).
+  const handleScratchGraphChange: NonNullable<CanvasAreaProps['onGraphChange']> =
+    useCallback(() => {
+      scratchDirtyRef.current = true
+    }, [])
+
   // ── Flush save on tab close / refresh (best-effort) ────────────────────────
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (!useProjectStore.getState().isDirty || !projectId) return
-      void doSave()
+      // L4-1: Also warn when leaving scratch canvas with unsaved content
+      const projectDirty = useProjectStore.getState().isDirty && !!projectId
+      const scratchDirty = !projectId && scratchDirtyRef.current
+      if (!projectDirty && !scratchDirty) return
+      if (projectDirty) void doSave()
       e.preventDefault()
     }
     window.addEventListener('beforeunload', handler)
     return () => window.removeEventListener('beforeunload', handler)
   }, [projectId, doSave])
 
-  // ── Ctrl+S / Cmd+S → immediate save ────────────────────────────────────────
+  // ── Ctrl+S / Cmd+S → immediate save or Save-As in scratch mode ────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault()
         if (projectId && !readOnly) void doSave()
+        else if (!projectId && !readOnly) setSaveAsRequested(true)
       }
     }
     window.addEventListener('keydown', handler)
@@ -1707,6 +1724,8 @@ export default function CanvasPage() {
           if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
           void doSave()
         }}
+        saveAsRequested={saveAsRequested}
+        onSaveAsRequestHandled={() => setSaveAsRequested(false)}
       />
 
       {/* ── Read-only / billing banner ────────────────────────────────────── */}
@@ -1798,7 +1817,9 @@ export default function CanvasPage() {
                 key={activeCanvasId}
                 initialNodes={initNodes ?? INITIAL_NODES}
                 initialEdges={initEdges ?? INITIAL_EDGES}
-                onGraphChange={projectId && !readOnly ? handleGraphChange : undefined}
+                onGraphChange={
+                  !readOnly ? (projectId ? handleGraphChange : handleScratchGraphChange) : undefined
+                }
                 readOnly={readOnly}
                 plan={plan}
                 onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
@@ -1821,7 +1842,13 @@ export default function CanvasPage() {
                 key={secondaryCanvasId}
                 initialNodes={secondaryNodes}
                 initialEdges={secondaryEdges}
-                onGraphChange={projectId && !readOnly ? handleSecondaryGraphChange : undefined}
+                onGraphChange={
+                  !readOnly
+                    ? projectId
+                      ? handleSecondaryGraphChange
+                      : handleScratchGraphChange
+                    : undefined
+                }
                 readOnly={readOnly}
                 plan={plan}
                 onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
@@ -1846,7 +1873,9 @@ export default function CanvasPage() {
             key={activeCanvasId ?? projectId ?? 'scratch'}
             initialNodes={initNodes ?? INITIAL_NODES}
             initialEdges={initEdges ?? INITIAL_EDGES}
-            onGraphChange={projectId && !readOnly ? handleGraphChange : undefined}
+            onGraphChange={
+              !readOnly ? (projectId ? handleGraphChange : handleScratchGraphChange) : undefined
+            }
             readOnly={readOnly}
             plan={plan}
             onOpenVariables={() => setVariablesPanelOpen((v) => !v)}

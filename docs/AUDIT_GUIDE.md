@@ -97,7 +97,7 @@ npm run wasm:build:dev              # compile Rust to WASM (debug mode, faster)
 ./scripts/verify-ci.sh
 ```
 
-This runs 20 checks in sequence.  Every check must pass before code is
+This runs 25 checks in sequence.  Every check must pass before code is
 merged.  The checks are:
 
 | # | Check | What it verifies |
@@ -115,21 +115,23 @@ merged.  The checks are:
 | 11 | i18n missing-key check | All i18n keys used in code exist in locale files |
 | 12 | Billing stack-trace guard | Billing functions do not leak stack traces |
 | 13 | WASM build (release) | Rust compiles to WASM without errors |
-| 14 | WASM optimise | wasm-opt shrinks the binary |
+| 14 | WASM optimise (pkg) | wasm-opt shrinks the binary |
 | 15 | WASM export guard | Only expected symbols are exported |
 | 16 | TypeScript typecheck (app) | Zero type errors in the frontend |
 | 17 | TypeScript typecheck (functions) | Zero type errors in backend functions |
 | 18 | Unit tests (vitest) | All TypeScript unit tests pass |
 | 19 | Rust tests | All Rust unit and integration tests pass |
 | 20 | Vite build | Production bundle builds successfully |
+| 21 | WASM optimise (dist) | wasm-opt applied to the final dist binary |
 
-After the build, three more structural checks run:
+After the build, four more structural checks run:
 
 | # | Check | What it verifies |
 |---|-------|------------------|
-| 21 | Bundle size | Total JS stays within budget |
-| 22 | Lazy chunks audit | Minimum number of code-split chunks exist |
-| 23 | Performance budget | WASM gzip ratio and initial JS file count |
+| 22 | Bundle size | Total JS and WASM stay within budget |
+| 23 | Bundle splits | Lazy components remain in separate chunks |
+| 24 | Performance budget | WASM gzip ratio, lazy chunk count, initial JS file count |
+| 25 | Robots meta guard (dist) | `noindex` meta tag survives the production build |
 
 Expected runtime: 3-4 minutes on a modern machine.
 
@@ -240,10 +242,10 @@ CI=true npx playwright test --project=smoke --repeat-each=5
 
 | Layer | Framework | Approximate count | Location |
 |-------|-----------|--------------------|----------|
-| TS unit | vitest | 200+ tests | `src/**/*.test.ts` |
-| Rust unit | cargo test | 100+ tests | `crates/engine-core/src/` |
-| Rust integration | cargo test | 50+ tests | `crates/engine-core/tests/` |
-| Golden fixtures | cargo test | 20+ fixtures | `crates/engine-core/tests/fixtures/` |
+| TS unit | vitest | 3200+ tests (120 files) | `src/**/*.test.ts` |
+| Rust unit | cargo test | 200+ tests | `crates/engine-core/src/` |
+| Rust integration | cargo test | 65+ tests | `crates/engine-core/tests/` |
+| Golden fixtures | cargo test | 19 fixtures | `crates/engine-core/tests/fixtures/` |
 | Property tests | proptest | 64 cases/test | `crates/engine-core/tests/properties.rs` |
 | E2E smoke | Playwright | 10+ scenarios | `e2e/` |
 

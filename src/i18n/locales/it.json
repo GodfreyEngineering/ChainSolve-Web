@@ -243,6 +243,8 @@
     "retryNow": "Riprova ora",
     "backOnline": "Di nuovo online — sincronizzazione in corso",
     "signInToSave": "Accedi per salvare il tuo lavoro nel cloud",
+    "saveTooltip": "Salva ora (Ctrl+S)",
+    "saveAsTooltip": "Salva come progetto (Ctrl+S)",
     "clickToRename": "Clicca per rinominare",
     "autosave": "Auto",
     "autosaveToggle": "Attiva/disattiva salvataggio automatico",

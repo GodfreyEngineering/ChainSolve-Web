@@ -92,6 +92,9 @@ export interface AppHeaderProps {
   /** Network status — drives offline badge and offline-queued retry action. */
   isOnline?: boolean
   onRetryOffline?: () => void
+  /** L4-1: External trigger to open Save-As dialog (e.g. Ctrl+S in scratch mode). */
+  saveAsRequested?: boolean
+  onSaveAsRequestHandled?: () => void
 }
 
 const INCLUDE_IMAGES_KEY = 'cs:pdfExportIncludeImages'
@@ -155,6 +158,8 @@ export function AppHeader({
   onCancelExport,
   isOnline = true,
   onRetryOffline,
+  saveAsRequested,
+  onSaveAsRequestHandled,
 }: AppHeaderProps) {
   const { t } = useTranslation()
   const { toast } = useToast()
@@ -192,6 +197,14 @@ export function AppHeader({
   const [wizardOpen, setWizardOpen] = useState(false)
 
   const autosaveEnabled = usePreferencesStore((s) => s.autosaveEnabled)
+
+  // L4-1: Open Save-As dialog when requested externally (Ctrl+S in scratch mode)
+  useEffect(() => {
+    if (saveAsRequested) {
+      setSaveAsOpen(true)
+      onSaveAsRequestHandled?.()
+    }
+  }, [saveAsRequested, onSaveAsRequestHandled])
 
   // Close menus on Escape
   useEffect(() => {
@@ -408,10 +421,15 @@ export function AppHeader({
       },
       { separator: true },
       {
-        label: t('menu.save'),
+        label: projectId ? t('menu.save') : t('menu.saveAs'),
         shortcut: 'Ctrl+S',
-        disabled: readOnly || !isDirty,
-        onClick: () => void onSave(),
+        disabled: projectId ? readOnly || !isDirty : readOnly,
+        onClick: projectId
+          ? () => void onSave()
+          : () => {
+              setOpenMenu(null)
+              setSaveAsOpen(true)
+            },
       },
       {
         label: t('menu.saveAs'),
@@ -885,15 +903,15 @@ export function AppHeader({
             </span>
           )}
 
-          {/* Save button */}
-          {projectId && !readOnly && (
+          {/* Save button — L4-1: shows "Save As" in scratch mode */}
+          {!readOnly && (
             <button
-              onClick={onSave}
-              disabled={!isDirty || saveStatus === 'saving'}
-              style={saveButtonStyle(isDirty)}
-              title="Save now (Ctrl+S)"
+              onClick={projectId ? onSave : () => setSaveAsOpen(true)}
+              disabled={projectId ? !isDirty || saveStatus === 'saving' : false}
+              style={saveButtonStyle(projectId ? isDirty : true)}
+              title={projectId ? t('canvas.saveTooltip') : t('canvas.saveAsTooltip')}
             >
-              {t('menu.save')}
+              {projectId ? t('menu.save') : t('menu.saveAs')}
             </button>
           )}
 

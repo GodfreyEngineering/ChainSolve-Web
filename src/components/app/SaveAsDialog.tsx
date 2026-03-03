@@ -36,7 +36,10 @@ function SaveAsDialogInner({
   saving,
 }: Omit<SaveAsDialogProps, 'open'>) {
   const { t } = useTranslation()
-  const [name, setName] = useState(`${currentName} (copy)`)
+  // L4-1: In scratch mode, currentName is 'Untitled' — suggest a clean default.
+  const [name, setName] = useState(
+    currentName === 'Untitled' ? 'Untitled project' : `${currentName} (copy)`,
+  )
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {

@@ -243,6 +243,8 @@
     "retryNow": "Reintentar ahora",
     "backOnline": "Conectado — sincronizando cambios",
     "signInToSave": "Inicia sesión para guardar tu trabajo en la nube",
+    "saveTooltip": "Guardar ahora (Ctrl+S)",
+    "saveAsTooltip": "Guardar como proyecto (Ctrl+S)",
     "clickToRename": "Clic para renombrar",
     "autosave": "Auto",
     "autosaveToggle": "Activar/desactivar guardado automatico",

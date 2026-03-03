@@ -33,7 +33,6 @@ import {
 import type { User } from '@supabase/supabase-js'
 import {
   listProjects,
-  createProject,
   renameProject,
   deleteProject,
   duplicateProject,
@@ -401,23 +400,10 @@ export default function AppShell() {
     }
   }, [user])
 
-  const handleNewProject = async () => {
-    const plan = resolveEffectivePlan(profile)
-    if (!canCreateProject(plan, projects.length)) {
-      setUpgradeOpen(true)
-      return
-    }
-    const name = window.prompt('Project name:', 'Untitled project')
-    if (!name?.trim()) return
-    setProjLoading(true)
-    setProjError(null)
-    try {
-      const proj = await createProject(name.trim())
-      navigate(`/canvas/${proj.id}`)
-    } catch (err: unknown) {
-      setProjError(err instanceof Error ? err.message : 'Failed to create project')
-      setProjLoading(false)
-    }
+  const handleNewProject = () => {
+    // L4-1: Start without naming — navigate to scratch canvas.
+    // The user can save as a project anytime via Ctrl+S / File → Save.
+    navigate('/canvas')
   }
 
   const handleRename = async (proj: ProjectRow) => {

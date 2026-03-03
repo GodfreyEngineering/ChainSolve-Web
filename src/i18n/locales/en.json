@@ -250,6 +250,8 @@
     "retryNow": "Retry now",
     "backOnline": "Back online — syncing changes",
     "signInToSave": "Sign in to save your work to the cloud",
+    "saveTooltip": "Save now (Ctrl+S)",
+    "saveAsTooltip": "Save as project (Ctrl+S)",
     "clickToRename": "Click to rename",
     "autosave": "Auto",
     "autosaveToggle": "Toggle autosave",
