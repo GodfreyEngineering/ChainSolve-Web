@@ -72,4 +72,18 @@
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+
+  <!-- Privacy -->
+  <url>
+    <loc>https://app.chainsolve.co.uk/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.chainsolve.co.uk/privacy?lang=en" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://app.chainsolve.co.uk/privacy?lang=es" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.chainsolve.co.uk/privacy?lang=fr" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://app.chainsolve.co.uk/privacy?lang=it" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://app.chainsolve.co.uk/privacy?lang=de" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://app.chainsolve.co.uk/privacy?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://app.chainsolve.co.uk/privacy" />
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
 </urlset>
