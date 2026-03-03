@@ -2486,7 +2486,7 @@ Claude MUST:
 - [x] M3-1: Rewrite root README + docs hub
   - root `README.md`: what it is, how to run, verify-ci, env setup
   - `docs/README.md`: links to requirements/architecture/security/exports/AI
-- [ ] M3-2: Add standard repo docs
+- [x] M3-2: Add standard repo docs
   - `CONTRIBUTING.md`, `SECURITY.md`, `SUPPORT.md`
   - `CHANGELOG.md` (Keep a Changelog format)
 
