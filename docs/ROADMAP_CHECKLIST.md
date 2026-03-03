@@ -2474,7 +2474,7 @@ Claude MUST:
     - idempotent where feasible
   - Add `docs/DEV/SUPABASE_BOOTSTRAP.md`:
     - “new Supabase project → run baseline → set secrets → done”
-- [ ] M2-2: Archive old iterative migrations cleanly
+- [x] M2-2: Archive old iterative migrations cleanly
   - Move existing `supabase/migrations/00xx_*.sql` into:
     - `supabase/migrations_archive/` (kept for history/reference)
   - Add a note: archive is not applied to new projects
