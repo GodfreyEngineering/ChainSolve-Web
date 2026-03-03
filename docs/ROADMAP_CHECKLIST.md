@@ -2264,7 +2264,7 @@ Claude MUST:
 ---
 
 ## K3 — Responsive UI: landscape workstation + portrait/mobile-first adaptations
-- [ ] K3-1: Adaptive layout system for portrait/mobile without feeling like a squished desktop
+- [x] K3-1: Adaptive layout system for portrait/mobile without feeling like a squished desktop
   - Landscape: full workstation layout
   - Portrait: smart collapse into dropdowns/drawers
   - Ensure all core actions reachable:
