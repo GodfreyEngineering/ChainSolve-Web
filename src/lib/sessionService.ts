@@ -1,13 +1,13 @@
 /**
- * sessionService.ts — Device session tracking (E2-5) + single-session enforcement (H9-1).
+ * sessionService.ts — Device session tracking (E2-5) + single-session enforcement (H9-1, L3-1).
  *
  * Tracks active browser sessions in a `user_sessions` table so users
  * can view and revoke them from Security settings.
  *
- * H9-1: Single-session enforcement — when a user logs in on a new device,
- * all other sessions are revoked automatically. A periodic check detects
- * when the current session has been revoked (e.g. by another login) and
- * triggers a sign-out with clear messaging.
+ * H9-1 / L3-1: Single-session enforcement is opt-in.  It is activated
+ * only when the user's organization has `policy_single_session = true`.
+ * Non-org users default to multi-session (no revocation on login).
+ * `isSingleSessionRequired` checks the org policy at login time.
  */
 
 import { supabase } from './supabase'
@@ -115,24 +115,23 @@ export async function removeCurrentSession(): Promise<void> {
   localStorage.removeItem(SESSION_ID_KEY)
 }
 
-// ── H9-1: Single-session enforcement ─────────────────────────────────────────
+// ── H9-1 / L3-1: Single-session enforcement ─────────────────────────────────
 
 /** How often (ms) to check if the current session is still valid. */
 export const SESSION_CHECK_INTERVAL_MS = 60_000
 
 /**
- * Revoke all existing sessions for the user, then register a new one.
- * Called during login to enforce the single-session policy.
+ * Register a new session, optionally revoking all others first.
  *
- * I8-1: when `singleSessionRequired` is true (org policy), all existing
- * sessions are revoked before registering the new one.  When false, the
- * new session is registered without revoking others.
+ * L3-1: defaults to `false` (multi-session).  Single-session enforcement
+ * is only activated when the caller passes `true`, which happens when
+ * the user's org has `policy_single_session = true`.
  *
  * Returns the new session ID.
  */
 export async function enforceAndRegisterSession(
   userId: string,
-  singleSessionRequired = true,
+  singleSessionRequired = false,
 ): Promise<string | null> {
   if (singleSessionRequired) {
     // Delete all existing sessions for this user (across all devices)
@@ -140,6 +139,34 @@ export async function enforceAndRegisterSession(
   }
   // Register the new session for this device
   return registerSession(userId)
+}
+
+/**
+ * L3-1: Check whether single-session enforcement is required for a user.
+ *
+ * Looks up the user's org membership and returns the org's
+ * `policy_single_session` flag.  Returns `false` when the user has
+ * no org, the query fails, or the policy is not set.
+ */
+export async function isSingleSessionRequired(userId: string): Promise<boolean> {
+  // Find the user's org (if any) via org_members
+  const { data: membership, error: memErr } = await supabase
+    .from('org_members')
+    .select('org_id')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (memErr || !membership) return false
+
+  // Fetch the org's single-session policy
+  const { data: org, error: orgErr } = await supabase
+    .from('organizations')
+    .select('policy_single_session')
+    .eq('id', membership.org_id)
+    .maybeSingle()
+
+  if (orgErr || !org) return false
+  return org.policy_single_session === true
 }
 
 /**

@@ -25,7 +25,7 @@ import { LegalFooter } from '../components/ui/LegalFooter'
 import { usePageMeta, useHreflang } from '../lib/seo'
 import TurnstileWidget from '../components/ui/TurnstileWidget'
 import { isTurnstileEnabled } from '../lib/turnstile'
-import { enforceAndRegisterSession } from '../lib/sessionService'
+import { enforceAndRegisterSession, isSingleSessionRequired } from '../lib/sessionService'
 import { getRememberMe, setRememberMe } from '../lib/rememberMe'
 
 export type AuthMode = 'login' | 'signup' | 'reset'
@@ -136,7 +136,10 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
           return
         }
         // Email confirmation disabled (local dev) — session exists, go straight in.
-        if (session?.user) await enforceAndRegisterSession(session.user.id)
+        if (session?.user) {
+          const singleRequired = await isSingleSessionRequired(session.user.id)
+          await enforceAndRegisterSession(session.user.id, singleRequired)
+        }
         navigate('/app')
       } else if (mode === 'reset') {
         const { error: resetErr } = await resetPasswordForEmail(email, token)
@@ -155,9 +158,12 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
           return
         }
         // No MFA — proceed directly.
-        // H9-1: Enforce single session — revoke all other sessions, then register this one.
+        // L3-1: Check org policy before deciding whether to revoke other sessions.
         const session = await getSession()
-        if (session?.user) await enforceAndRegisterSession(session.user.id)
+        if (session?.user) {
+          const singleRequired = await isSingleSessionRequired(session.user.id)
+          await enforceAndRegisterSession(session.user.id, singleRequired)
+        }
         navigate('/app')
       }
     } catch (err: unknown) {
@@ -183,7 +189,10 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
   // J1-4: MFA challenge verified → enforce session + navigate
   const handleMfaVerified = useCallback(async () => {
     const session = await getSession()
-    if (session?.user) await enforceAndRegisterSession(session.user.id)
+    if (session?.user) {
+      const singleRequired = await isSingleSessionRequired(session.user.id)
+      await enforceAndRegisterSession(session.user.id, singleRequired)
+    }
     navigate('/app')
   }, [navigate])
 

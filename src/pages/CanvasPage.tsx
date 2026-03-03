@@ -66,7 +66,7 @@ import {
   resolveEffectivePlan,
   type Plan,
 } from '../lib/entitlements'
-import { isSessionValid, SESSION_CHECK_INTERVAL_MS } from '../lib/sessionService'
+import { useSessionGuard } from '../hooks/useSessionGuard'
 import { isPerfHudEnabled } from '../lib/devFlags'
 import { addRecentProject, removeRecentProject } from '../lib/recentProjects'
 import { useToast } from '../components/ui/useToast'
@@ -178,7 +178,8 @@ export default function CanvasPage() {
   // ── Plan awareness + auth state ────────────────────────────────────────────
   const [plan, setPlan] = useState<Plan>('free')
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
-  const [sessionRevoked, setSessionRevoked] = useState(false)
+  // L3-1: Session revoked detection (poll + BroadcastChannel + visibility)
+  const { sessionRevoked } = useSessionGuard()
 
   useEffect(() => {
     let cancelled = false
@@ -206,17 +207,6 @@ export default function CanvasPage() {
     return () => {
       cancelled = true
     }
-  }, [])
-
-  // H9-1: Periodically check if the current session is still valid.
-  // If revoked (e.g. user signed in on another device), show the revoked modal.
-  useEffect(() => {
-    const timer = setInterval(() => {
-      void isSessionValid().then((valid) => {
-        if (!valid) setSessionRevoked(true)
-      })
-    }, SESSION_CHECK_INTERVAL_MS)
-    return () => clearInterval(timer)
   }, [])
 
   const readOnly = isReadOnly(plan) && !!projectId

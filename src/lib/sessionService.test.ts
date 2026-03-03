@@ -1,6 +1,6 @@
 /**
  * sessionService.test.ts — Unit tests for device session tracking (E2-5)
- * and single-session enforcement (H9-1).
+ * and single-session enforcement (H9-1, L3-1).
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -16,6 +16,10 @@ const {
   mockSelectEq,
   mockSelectEqMaybeSingle,
   mockUpdateEq,
+  mockFrom,
+  // L3-1: org_members + organizations table mocks
+  mockOrgMembersSelectEqMaybeSingle,
+  mockOrgsSelectEqMaybeSingle,
 } = vi.hoisted(() => ({
   mockDelete: vi.fn(),
   mockDeleteEq: vi.fn(),
@@ -25,6 +29,9 @@ const {
   mockSelectEq: vi.fn(),
   mockSelectEqMaybeSingle: vi.fn(),
   mockUpdateEq: vi.fn(),
+  mockFrom: vi.fn(),
+  mockOrgMembersSelectEqMaybeSingle: vi.fn(),
+  mockOrgsSelectEqMaybeSingle: vi.fn(),
 }))
 
 vi.mock('./supabase', () => {
@@ -36,23 +43,47 @@ vi.mock('./supabase', () => {
   mockSelectEqMaybeSingle.mockResolvedValue({ data: { id: 'sess-1' }, error: null })
   mockSelectEq.mockReturnValue({ maybeSingle: mockSelectEqMaybeSingle })
   mockUpdateEq.mockResolvedValue({ error: null })
+  mockOrgMembersSelectEqMaybeSingle.mockResolvedValue({ data: null, error: null })
+  mockOrgsSelectEqMaybeSingle.mockResolvedValue({ data: null, error: null })
 
-  return {
-    supabase: {
-      from: vi.fn().mockReturnValue({
-        delete: mockDelete,
-        insert: mockInsert,
-        select: vi.fn().mockReturnValue({ eq: mockSelectEq }),
-        update: vi.fn().mockReturnValue({ eq: mockUpdateEq }),
-      }),
-    },
+  // Return different mock chains depending on the table name
+  const userSessionsTable = {
+    delete: mockDelete,
+    insert: mockInsert,
+    select: vi.fn().mockReturnValue({ eq: mockSelectEq }),
+    update: vi.fn().mockReturnValue({ eq: mockUpdateEq }),
   }
+
+  mockFrom.mockImplementation((table: string) => {
+    if (table === 'org_members') {
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: mockOrgMembersSelectEqMaybeSingle,
+          }),
+        }),
+      }
+    }
+    if (table === 'organizations') {
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: mockOrgsSelectEqMaybeSingle,
+          }),
+        }),
+      }
+    }
+    return userSessionsTable
+  })
+
+  return { supabase: { from: mockFrom } }
 })
 
 import {
   parseDeviceLabel,
   getCurrentSessionId,
   enforceAndRegisterSession,
+  isSingleSessionRequired,
   isSessionValid,
   SESSION_CHECK_INTERVAL_MS,
 } from './sessionService'
@@ -68,6 +99,9 @@ beforeEach(() => {
   mockInsert.mockReturnValue({ select: mockInsertSelect })
   mockSelectEqMaybeSingle.mockResolvedValue({ data: { id: 'sess-1' }, error: null })
   mockSelectEq.mockReturnValue({ maybeSingle: mockSelectEqMaybeSingle })
+  // L3-1: reset org mocks
+  mockOrgMembersSelectEqMaybeSingle.mockResolvedValue({ data: null, error: null })
+  mockOrgsSelectEqMaybeSingle.mockResolvedValue({ data: null, error: null })
 })
 
 describe('parseDeviceLabel', () => {
@@ -143,16 +177,30 @@ describe('getCurrentSessionId', () => {
   })
 })
 
-// ── H9-1: enforceAndRegisterSession ──────────────────────────────────────────
+// ── L3-1: enforceAndRegisterSession ─────────────────────────────────────────
 
 describe('enforceAndRegisterSession', () => {
-  it('deletes all existing sessions then registers a new one', async () => {
+  it('defaults to multi-session (no deletion)', async () => {
     const id = await enforceAndRegisterSession('user-1')
+    expect(id).toBe('new-sess-id')
+    // Should NOT have deleted existing sessions (default = false)
+    expect(mockDeleteEq).not.toHaveBeenCalled()
+    // Should have stored the session ID locally
+    expect(localStorage.getItem('cs:session_id')).toBe('new-sess-id')
+  })
+
+  it('deletes all existing sessions when singleSessionRequired = true', async () => {
+    const id = await enforceAndRegisterSession('user-1', true)
     expect(id).toBe('new-sess-id')
     // Should have deleted user's sessions first
     expect(mockDeleteEq).toHaveBeenCalledWith('user_id', 'user-1')
-    // Should have stored the session ID locally
     expect(localStorage.getItem('cs:session_id')).toBe('new-sess-id')
+  })
+
+  it('skips deletion when singleSessionRequired = false', async () => {
+    const id = await enforceAndRegisterSession('user-1', false)
+    expect(id).toBe('new-sess-id')
+    expect(mockDeleteEq).not.toHaveBeenCalled()
   })
 
   it('returns null when insert fails', async () => {
@@ -188,5 +236,58 @@ describe('isSessionValid', () => {
       error: { message: 'network error' },
     })
     expect(await isSessionValid()).toBe(true)
+  })
+})
+
+// ── L3-1: isSingleSessionRequired ───────────────────────────────────────────
+
+describe('isSingleSessionRequired', () => {
+  it('returns false when user has no org membership', async () => {
+    mockOrgMembersSelectEqMaybeSingle.mockResolvedValueOnce({ data: null, error: null })
+    expect(await isSingleSessionRequired('user-1')).toBe(false)
+  })
+
+  it('returns false when org_members query fails', async () => {
+    mockOrgMembersSelectEqMaybeSingle.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'RLS denied' },
+    })
+    expect(await isSingleSessionRequired('user-1')).toBe(false)
+  })
+
+  it('returns false when org has policy_single_session = false', async () => {
+    mockOrgMembersSelectEqMaybeSingle.mockResolvedValueOnce({
+      data: { org_id: 'org-1' },
+      error: null,
+    })
+    mockOrgsSelectEqMaybeSingle.mockResolvedValueOnce({
+      data: { policy_single_session: false },
+      error: null,
+    })
+    expect(await isSingleSessionRequired('user-1')).toBe(false)
+  })
+
+  it('returns true when org has policy_single_session = true', async () => {
+    mockOrgMembersSelectEqMaybeSingle.mockResolvedValueOnce({
+      data: { org_id: 'org-1' },
+      error: null,
+    })
+    mockOrgsSelectEqMaybeSingle.mockResolvedValueOnce({
+      data: { policy_single_session: true },
+      error: null,
+    })
+    expect(await isSingleSessionRequired('user-1')).toBe(true)
+  })
+
+  it('returns false when organizations query fails', async () => {
+    mockOrgMembersSelectEqMaybeSingle.mockResolvedValueOnce({
+      data: { org_id: 'org-1' },
+      error: null,
+    })
+    mockOrgsSelectEqMaybeSingle.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'network error' },
+    })
+    expect(await isSingleSessionRequired('user-1')).toBe(false)
   })
 })
