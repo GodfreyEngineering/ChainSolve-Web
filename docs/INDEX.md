@@ -419,7 +419,7 @@ the security posture.
 
 **Covers:**
 - Repository structure walkthrough and key design decisions
-- Full CI gate (20 checks) with purpose of each
+- Full CI gate (25 checks) with purpose of each
 - Test execution commands for every layer (TS unit, Rust, golden, property, E2E)
 - Security posture review (CSP, RLS, ACL, auth, secrets -- public-safe)
 - Operational readiness checklist
