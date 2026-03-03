@@ -2125,7 +2125,7 @@ Claude MUST:
     - Humans not blocked.
     - No CSP violations.
 
-- [ ] J1-3: Email verification + ToS acceptance gating (robust)
+- [x] J1-3: Email verification + ToS acceptance gating (robust)
   - Terms page must render properly (no blank).
   - Acceptance record must never fail silently.
   - User cannot enter app until email verified + terms accepted.
