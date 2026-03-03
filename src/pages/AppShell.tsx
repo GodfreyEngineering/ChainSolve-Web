@@ -734,6 +734,7 @@ export default function AppShell() {
       )}
 
       <main
+        className="cs-page-content"
         style={{ flex: 1, padding: '2rem 1.5rem', maxWidth: 960, width: '100%', margin: '0 auto' }}
       >
         {/* ── Workbench Home header + hero CTAs ── */}
@@ -1159,6 +1160,7 @@ export default function AppShell() {
             </div>
           ) : (
             <div
+              className="cs-projects-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',

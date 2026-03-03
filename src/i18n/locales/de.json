@@ -10,6 +10,12 @@
     "projects": "Projekte",
     "documentation": "Dokumentation"
   },
+  "mobileNav": {
+    "menu": "Menue",
+    "file": "Datei",
+    "canvas": "Leinwand",
+    "navigate": "Navigation"
+  },
   "home": {
     "title": "Arbeitsbereich-Startseite",
     "welcome": "Willkommen bei ChainSolve",

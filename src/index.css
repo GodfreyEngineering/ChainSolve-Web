@@ -339,6 +339,30 @@ button:focus:not(:focus-visible) {
   }
 }
 
+/* ── K3-1: Portrait / narrow viewport ─────────────────────────────────────── */
+@media (max-width: 599px) {
+  /* Compact spacing for phone-width */
+  .cs-page-content {
+    padding: 1rem 0.75rem !important;
+  }
+  .cs-page-content h1 {
+    font-size: 1.2rem !important;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 1023px) {
+  /* Responsive project grid for portrait tablets and phones */
+  .cs-projects-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  /* Tighter header padding in portrait */
+  .cs-app-header {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
 /* ── Animations ───────────────────────────────────────────────────────────── */
 @keyframes cs-fade-in {
   from {

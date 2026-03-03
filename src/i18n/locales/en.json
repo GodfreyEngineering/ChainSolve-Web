@@ -10,6 +10,12 @@
     "projects": "Projects",
     "documentation": "Documentation"
   },
+  "mobileNav": {
+    "menu": "Menu",
+    "file": "File",
+    "canvas": "Canvas",
+    "navigate": "Navigate"
+  },
   "home": {
     "title": "Workbench Home",
     "welcome": "Welcome to ChainSolve",

@@ -80,6 +80,18 @@ function saveGeometryCache(cache: Record<string, WindowGeometry>) {
 
 const DEFAULT_GEO: WindowGeometry = { x: 120, y: 80, width: 480, height: 400 }
 
+/** K3-1: Clamp geometry so the window fits inside the current viewport. */
+function clampGeoToViewport(geo: WindowGeometry): WindowGeometry {
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1280
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 800
+  const margin = 4 // px breathing room
+  const w = Math.max(200, Math.min(geo.width, vw - margin * 2))
+  const h = Math.max(140, Math.min(geo.height, vh - margin * 2))
+  const x = Math.max(margin, Math.min(geo.x, vw - w - margin))
+  const y = Math.max(margin, Math.min(geo.y, vh - h - margin))
+  return { x, y, width: w, height: h }
+}
+
 // ── Context ──────────────────────────────────────────────────────────────────
 
 const WindowManagerContext = createContext<WindowManagerContextValue>({
@@ -150,7 +162,8 @@ export function WindowManagerProvider({ children }: { children: ReactNode }) {
       }
       const z = ++nextZ.current
       const persisted = geoCache.current[id]
-      const geo: WindowGeometry = persisted ?? { ...DEFAULT_GEO, ...defaults }
+      const raw: WindowGeometry = persisted ?? { ...DEFAULT_GEO, ...defaults }
+      const geo = clampGeoToViewport(raw)
       return [...prev, { id, zIndex: z, minimized: false, maximized: false, geometry: geo }]
     })
   }, [])
@@ -190,6 +203,32 @@ export function WindowManagerProvider({ children }: { children: ReactNode }) {
         return { ...w, geometry: next }
       }),
     )
+  }, [])
+
+  // K3-1: Re-clamp all open windows when viewport shrinks (orientation change, resize)
+  useEffect(() => {
+    const handler = () => {
+      setWindows((prev) => {
+        let changed = false
+        const next = prev.map((w) => {
+          if (w.maximized) return w
+          const clamped = clampGeoToViewport(w.geometry)
+          if (
+            clamped.x === w.geometry.x &&
+            clamped.y === w.geometry.y &&
+            clamped.width === w.geometry.width &&
+            clamped.height === w.geometry.height
+          )
+            return w
+          changed = true
+          geoCache.current[w.id] = clamped
+          return { ...w, geometry: clamped }
+        })
+        return changed ? next : prev
+      })
+    }
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
   }, [])
 
   const isOpen = useCallback((id: string) => windows.some((w) => w.id === id), [windows])

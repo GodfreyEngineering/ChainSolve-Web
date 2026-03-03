@@ -183,6 +183,7 @@ export function AppHeader({
   } | null>(null)
 
   const isMobile = useIsMobile()
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
   const [clearCanvasConfirm, setClearCanvasConfirm] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [llmBuilderOpen, setLlmBuilderOpen] = useState(false)
@@ -896,69 +897,77 @@ export function AppHeader({
             </button>
           )}
 
-          {/* K0-1: Undo / Redo / Open / Save As buttons */}
-          <span style={headerDividerStyle} />
-          <button
-            onClick={() => canvasRef.current?.undo()}
-            disabled={readOnly}
-            style={{
-              ...headerIconBtnStyle(readOnly),
-              fontSize: '0.82rem',
-              padding: '0.1rem 0.3rem',
-            }}
-            title={`${t('menu.undo')} (Ctrl+Z)`}
-            aria-label={t('menu.undo')}
-          >
-            {'\u21B6'}
-          </button>
-          <button
-            onClick={() => canvasRef.current?.redo()}
-            disabled={readOnly}
-            style={{
-              ...headerIconBtnStyle(readOnly),
-              fontSize: '0.82rem',
-              padding: '0.1rem 0.3rem',
-            }}
-            title={`${t('menu.redo')} (Ctrl+Shift+Z)`}
-            aria-label={t('menu.redo')}
-          >
-            {'\u21B7'}
-          </button>
-          <span style={headerDividerStyle} />
-          <button
-            onClick={() => setOpenDialogOpen(true)}
-            style={headerIconBtnStyle(false)}
-            title={`${t('menu.open')} (Ctrl+O)`}
-            aria-label={t('menu.open')}
-          >
-            {t('menu.open')}
-          </button>
-          {!readOnly && (
-            <button
-              onClick={() => setSaveAsOpen(true)}
-              style={headerIconBtnStyle(false)}
-              title={t('menu.saveAs')}
-              aria-label={t('menu.saveAs')}
-            >
-              {t('menu.saveAs')}
-            </button>
-          )}
-
-          {/* Autosave toggle */}
-          {projectId && !readOnly && (
-            <label style={autosaveToggleStyle} title={t('canvas.autosaveToggle')}>
-              <input
-                type="checkbox"
-                checked={autosaveEnabled}
-                onChange={handleToggleAutosave}
-                style={{ margin: 0, accentColor: 'var(--primary)' }}
-              />
-              <span
-                style={{ fontSize: '0.65rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}
+          {/* K0-1: Undo / Redo / Open / Save As buttons (desktop only) */}
+          {!isMobile && (
+            <>
+              <span style={headerDividerStyle} />
+              <button
+                onClick={() => canvasRef.current?.undo()}
+                disabled={readOnly}
+                style={{
+                  ...headerIconBtnStyle(readOnly),
+                  fontSize: '0.82rem',
+                  padding: '0.1rem 0.3rem',
+                }}
+                title={`${t('menu.undo')} (Ctrl+Z)`}
+                aria-label={t('menu.undo')}
               >
-                {t('canvas.autosave')}
-              </span>
-            </label>
+                {'\u21B6'}
+              </button>
+              <button
+                onClick={() => canvasRef.current?.redo()}
+                disabled={readOnly}
+                style={{
+                  ...headerIconBtnStyle(readOnly),
+                  fontSize: '0.82rem',
+                  padding: '0.1rem 0.3rem',
+                }}
+                title={`${t('menu.redo')} (Ctrl+Shift+Z)`}
+                aria-label={t('menu.redo')}
+              >
+                {'\u21B7'}
+              </button>
+              <span style={headerDividerStyle} />
+              <button
+                onClick={() => setOpenDialogOpen(true)}
+                style={headerIconBtnStyle(false)}
+                title={`${t('menu.open')} (Ctrl+O)`}
+                aria-label={t('menu.open')}
+              >
+                {t('menu.open')}
+              </button>
+              {!readOnly && (
+                <button
+                  onClick={() => setSaveAsOpen(true)}
+                  style={headerIconBtnStyle(false)}
+                  title={t('menu.saveAs')}
+                  aria-label={t('menu.saveAs')}
+                >
+                  {t('menu.saveAs')}
+                </button>
+              )}
+
+              {/* Autosave toggle */}
+              {projectId && !readOnly && (
+                <label style={autosaveToggleStyle} title={t('canvas.autosaveToggle')}>
+                  <input
+                    type="checkbox"
+                    checked={autosaveEnabled}
+                    onChange={handleToggleAutosave}
+                    style={{ margin: 0, accentColor: 'var(--primary)' }}
+                  />
+                  <span
+                    style={{
+                      fontSize: '0.65rem',
+                      color: 'var(--text-muted)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t('canvas.autosave')}
+                  </span>
+                </label>
+              )}
+            </>
           )}
         </div>
 
@@ -979,46 +988,187 @@ export function AppHeader({
         ) : (
           <div style={mobileMenuBarStyle}>
             <button
-              onClick={() => setPaletteOpen(true)}
+              onClick={() => setMobileDrawerOpen((v) => !v)}
               style={overflowBtnStyle}
-              aria-label={t('commandPalette.title')}
-              title={t('commandPalette.title')}
+              aria-label={t('mobileNav.menu')}
+              title={t('mobileNav.menu')}
+              aria-expanded={mobileDrawerOpen}
             >
-              &#x22EF;
+              {mobileDrawerOpen ? '\u2715' : '\u2630'}
             </button>
           </div>
         )}
 
-        {/* ── Right section ────────────────────────────────────────────────── */}
-        <div style={{ ...sectionStyle, justifyContent: 'flex-end' }}>
-          {/* Import project file */}
-          {onImportChainsolveJson && !readOnly && (
+        {/* ── Right section (hidden on mobile — actions in drawer) ──────── */}
+        {!isMobile && (
+          <div style={{ ...sectionStyle, justifyContent: 'flex-end' }}>
+            {/* Import project file */}
+            {onImportChainsolveJson && !readOnly && (
+              <button
+                onClick={() => {
+                  setOpenMenu(null)
+                  onImportChainsolveJson()
+                }}
+                disabled={!!exportInProgress}
+                style={rightActionBtnStyle}
+                title={t('canvas.importFile')}
+              >
+                {t('canvas.importFile')}
+              </button>
+            )}
+
+            {/* Templates / groups */}
             <button
               onClick={() => {
+                setTemplateManagerOpen(true)
                 setOpenMenu(null)
-                onImportChainsolveJson()
               }}
-              disabled={!!exportInProgress}
               style={rightActionBtnStyle}
-              title={t('canvas.importFile')}
+              title={t('canvas.templates')}
             >
-              {t('canvas.importFile')}
+              {t('canvas.templates')}
             </button>
-          )}
-
-          {/* Templates / groups */}
-          <button
-            onClick={() => {
-              setTemplateManagerOpen(true)
-              setOpenMenu(null)
-            }}
-            style={rightActionBtnStyle}
-            title={t('canvas.templates')}
-          >
-            {t('canvas.templates')}
-          </button>
-        </div>
+          </div>
+        )}
       </div>
+
+      {/* K3-1: Mobile navigation drawer */}
+      {isMobile && mobileDrawerOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              top: 40,
+              background: 'rgba(0,0,0,0.4)',
+              zIndex: 49,
+            }}
+            onClick={() => setMobileDrawerOpen(false)}
+          />
+          {/* Drawer panel */}
+          <nav
+            style={{
+              position: 'fixed',
+              top: 40,
+              right: 0,
+              bottom: 0,
+              width: Math.min(280, window.innerWidth * 0.85),
+              background: 'var(--card-bg)',
+              borderLeft: '1px solid var(--border)',
+              zIndex: 50,
+              overflowY: 'auto',
+              padding: '0.5rem 0',
+              animation: 'cs-fade-in 0.12s ease-out',
+            }}
+            aria-label={t('mobileNav.menu')}
+          >
+            {/* File actions */}
+            <MobileDrawerSection label={t('mobileNav.file')}>
+              <MobileDrawerItem
+                label={t('menu.undo')}
+                icon={'\u21B6'}
+                onClick={() => {
+                  canvasRef.current?.undo()
+                  setMobileDrawerOpen(false)
+                }}
+              />
+              <MobileDrawerItem
+                label={t('menu.redo')}
+                icon={'\u21B7'}
+                onClick={() => {
+                  canvasRef.current?.redo()
+                  setMobileDrawerOpen(false)
+                }}
+              />
+              <MobileDrawerItem
+                label={t('menu.open')}
+                icon={'\u2750'}
+                onClick={() => {
+                  setOpenDialogOpen(true)
+                  setMobileDrawerOpen(false)
+                }}
+              />
+              {!readOnly && (
+                <MobileDrawerItem
+                  label={t('menu.saveAs')}
+                  icon={'\u2913'}
+                  onClick={() => {
+                    setSaveAsOpen(true)
+                    setMobileDrawerOpen(false)
+                  }}
+                />
+              )}
+              {onImportChainsolveJson && !readOnly && (
+                <MobileDrawerItem
+                  label={t('canvas.importFile')}
+                  icon={'\u21e5'}
+                  onClick={() => {
+                    onImportChainsolveJson()
+                    setMobileDrawerOpen(false)
+                  }}
+                />
+              )}
+            </MobileDrawerSection>
+
+            {/* Canvas tools */}
+            <MobileDrawerSection label={t('mobileNav.canvas')}>
+              <MobileDrawerItem
+                label={t('canvas.templates')}
+                icon={'\u26a1'}
+                onClick={() => {
+                  setTemplateManagerOpen(true)
+                  setMobileDrawerOpen(false)
+                }}
+              />
+              <MobileDrawerItem
+                label={t('commandPalette.title')}
+                icon={'\u2315'}
+                onClick={() => {
+                  setPaletteOpen(true)
+                  setMobileDrawerOpen(false)
+                }}
+              />
+            </MobileDrawerSection>
+
+            {/* Navigation */}
+            <MobileDrawerSection label={t('mobileNav.navigate')}>
+              <MobileDrawerItem
+                label={t('nav.projects')}
+                icon={'\u2302'}
+                onClick={() => {
+                  window.location.href = '/'
+                  setMobileDrawerOpen(false)
+                }}
+              />
+              <MobileDrawerItem
+                label={t('home.explore')}
+                icon={'\u2609'}
+                onClick={() => {
+                  window.location.href = '/explore'
+                  setMobileDrawerOpen(false)
+                }}
+              />
+              <MobileDrawerItem
+                label={t('nav.documentation')}
+                icon={'\u2139'}
+                onClick={() => {
+                  window.open('/docs', '_blank', 'noopener')
+                  setMobileDrawerOpen(false)
+                }}
+              />
+              <MobileDrawerItem
+                label={t('nav.settings')}
+                icon={'\u2699'}
+                onClick={() => {
+                  openSettings()
+                  setMobileDrawerOpen(false)
+                }}
+              />
+            </MobileDrawerSection>
+          </nav>
+        </>
+      )}
 
       {bugReportOpen && (
         <Suspense fallback={null}>
@@ -1277,4 +1427,62 @@ const overflowBtnStyle: React.CSSProperties = {
   fontFamily: 'inherit',
   lineHeight: 1,
   letterSpacing: '0.1em',
+}
+
+// ── K3-1: Mobile drawer helpers ──────────────────────────────────────────────
+
+function MobileDrawerSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: '0.25rem' }}>
+      <div
+        style={{
+          padding: '0.35rem 0.75rem 0.2rem',
+          fontSize: '0.62rem',
+          fontWeight: 700,
+          color: 'var(--text-faint)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.06em',
+        }}
+      >
+        {label}
+      </div>
+      {children}
+    </div>
+  )
+}
+
+function MobileDrawerItem({
+  label,
+  icon,
+  onClick,
+}: {
+  label: string
+  icon: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.6rem',
+        width: '100%',
+        padding: '0.55rem 0.75rem',
+        border: 'none',
+        background: 'transparent',
+        color: 'var(--text)',
+        fontSize: '0.78rem',
+        fontWeight: 500,
+        fontFamily: 'inherit',
+        cursor: 'pointer',
+        textAlign: 'left',
+      }}
+    >
+      <span style={{ width: 18, textAlign: 'center', opacity: 0.5, fontSize: '0.82rem' }}>
+        {icon}
+      </span>
+      {label}
+    </button>
+  )
 }

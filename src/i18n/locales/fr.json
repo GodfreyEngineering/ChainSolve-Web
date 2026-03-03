@@ -10,6 +10,12 @@
     "projects": "Projets",
     "documentation": "Documentation"
   },
+  "mobileNav": {
+    "menu": "Menu",
+    "file": "Fichier",
+    "canvas": "Canevas",
+    "navigate": "Naviguer"
+  },
   "home": {
     "title": "Accueil de l'atelier",
     "welcome": "Bienvenue sur ChainSolve",
