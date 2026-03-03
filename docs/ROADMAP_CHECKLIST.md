@@ -2374,7 +2374,7 @@ Claude MUST:
 ---
 
 ## L2 — SEO, favicon, and international SEO readiness
-- [ ] L2-1: Favicon and full app metadata polish
+- [x] L2-1: Favicon and full app metadata polish
   - favicon set
   - Open Graph images
   - consistent brand identity
