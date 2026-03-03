@@ -2515,7 +2515,7 @@ Claude MUST:
     - `./scripts/verify-ci.sh`
     - app boots
   - Document in `docs/DEV/FRESH_CLONE.md`
-- [ ] M6-2: “No vibe-coded” polish sweep
+- [x] M6-2: “No vibe-coded” polish sweep
   - remove chatty comments, weird punctuation, emojis
   - make copy consistent and professional
 
