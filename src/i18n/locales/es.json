@@ -105,6 +105,8 @@
     "verifyEmailSub": "Un paso más antes de continuar",
     "verifyEmailBody": "Enviamos un enlace de verificación a <strong>{{email}}</strong>. Haz clic en el enlace de ese correo para verificar tu cuenta y luego actualiza esta página.",
     "verifyEmailResend": "Reenviar correo de verificación",
+    "verifyEmailSending": "Enviando…",
+    "verifyEmailResent": "Correo de confirmación reenviado — revisa tu bandeja de entrada y la carpeta de spam.",
     "verifyEmailRefresh": "Ya verifiqué — actualizar",
     "termsTitle": "Términos y Condiciones",
     "termsSub": "Por favor, revisa y acepta para continuar",
@@ -112,7 +114,8 @@
     "termsLink": "Leer los Términos y Condiciones completos",
     "termsAccept": "Acepto los Términos y Condiciones (v{{version}})",
     "termsContinue": "Continuar",
-    "termsSaving": "Guardando…"
+    "termsSaving": "Guardando…",
+    "termsRetry": "No se pudo registrar la aceptación. Inténtalo de nuevo."
   },
   "projects": {
     "title": "Proyectos",

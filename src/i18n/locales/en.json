@@ -112,6 +112,8 @@
     "verifyEmailSub": "One more step before you can continue",
     "verifyEmailBody": "We sent a verification link to <strong>{{email}}</strong>. Click the link in that email to verify your account, then refresh this page.",
     "verifyEmailResend": "Resend verification email",
+    "verifyEmailSending": "Sending…",
+    "verifyEmailResent": "Confirmation email resent — check your inbox and spam folder.",
     "verifyEmailRefresh": "I've verified — refresh",
     "termsTitle": "Terms & Conditions",
     "termsSub": "Please review and accept to continue",
@@ -119,7 +121,8 @@
     "termsLink": "Read the full Terms & Conditions",
     "termsAccept": "I accept the Terms & Conditions (v{{version}})",
     "termsContinue": "Continue",
-    "termsSaving": "Saving…"
+    "termsSaving": "Saving…",
+    "termsRetry": "Failed to record acceptance. Please retry."
   },
   "projects": {
     "title": "Projects",

@@ -1,5 +1,5 @@
 /**
- * AuthGate — E2-3: Email verification + ToS acceptance gate.
+ * AuthGate — E2-3 / J1-3: Email verification + ToS acceptance gate.
  *
  * Blocks access to the app until:
  *   1. The user's email is verified (email_confirmed_at is set)
@@ -9,6 +9,7 @@
  */
 
 import { useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { User } from '@supabase/supabase-js'
 import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 import { resendConfirmation } from '../lib/auth'
@@ -45,6 +46,7 @@ export default function AuthGate({ user, profile, onTermsAccepted, children }: A
 // ── Email verification screen ────────────────────────────────────────────────
 
 function EmailVerificationScreen({ email }: { email: string }) {
+  const { t } = useTranslation()
   const [resendLoading, setResendLoading] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -57,7 +59,7 @@ function EmailVerificationScreen({ email }: { email: string }) {
     if (resendErr) {
       setError(resendErr.message)
     } else {
-      setMsg('Confirmation email resent — check your inbox and spam folder.')
+      setMsg(t('auth.verifyEmailResent'))
     }
     setResendLoading(false)
   }
@@ -65,13 +67,13 @@ function EmailVerificationScreen({ email }: { email: string }) {
   return (
     <div style={s.page}>
       <div style={s.card}>
-        <h1 style={s.heading}>Verify your email</h1>
-        <p style={s.sub}>One more step before you can continue</p>
+        <h1 style={s.heading}>{t('auth.verifyEmailTitle')}</h1>
+        <p style={s.sub}>{t('auth.verifyEmailSub')}</p>
 
-        <div style={s.infoBox}>
-          We sent a verification link to <strong>{email}</strong>. Click the link in that email to
-          verify your account, then refresh this page.
-        </div>
+        <div
+          style={s.infoBox}
+          dangerouslySetInnerHTML={{ __html: t('auth.verifyEmailBody', { email }) }}
+        />
 
         {error && <div style={s.errorBox}>{error}</div>}
         {msg && <div style={s.successBox}>{msg}</div>}
@@ -81,11 +83,11 @@ function EmailVerificationScreen({ email }: { email: string }) {
           disabled={resendLoading}
           onClick={handleResend}
         >
-          {resendLoading ? 'Sending…' : 'Resend verification email'}
+          {resendLoading ? t('auth.verifyEmailSending') : t('auth.verifyEmailResend')}
         </button>
 
         <button style={s.btnSecondary} onClick={() => window.location.reload()}>
-          I've verified — refresh
+          {t('auth.verifyEmailRefresh')}
         </button>
       </div>
     </div>
@@ -101,6 +103,7 @@ function TermsAcceptanceScreen({
   currentVersion: string
   onAccept: (version: string) => Promise<void>
 }) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [checked, setChecked] = useState(false)
@@ -116,7 +119,7 @@ function TermsAcceptanceScreen({
           ? err.message
           : typeof err === 'object' && err !== null && 'message' in err
             ? String((err as { message: unknown }).message)
-            : 'Failed to record acceptance. Please retry.'
+            : t('auth.termsRetry')
       setError(msg)
     } finally {
       setLoading(false)
@@ -126,13 +129,10 @@ function TermsAcceptanceScreen({
   return (
     <div style={s.page}>
       <div style={s.card}>
-        <h1 style={s.heading}>Terms & Conditions</h1>
-        <p style={s.sub}>Please review and accept to continue</p>
+        <h1 style={s.heading}>{t('auth.termsTitle')}</h1>
+        <p style={s.sub}>{t('auth.termsSub')}</p>
 
-        <div style={s.infoBox}>
-          We've updated our Terms &amp; Conditions (v{currentVersion}). Please review them and
-          accept to continue using ChainSolve.
-        </div>
+        <div style={s.infoBox}>{t('auth.termsBody', { version: currentVersion })}</div>
 
         <a
           href="/terms"
@@ -140,7 +140,7 @@ function TermsAcceptanceScreen({
           rel="noopener noreferrer"
           style={{ ...s.link, display: 'block', marginBottom: '1rem' }}
         >
-          Read the full Terms &amp; Conditions
+          {t('auth.termsLink')}
         </a>
 
         {error && <div style={s.errorBox}>{error}</div>}
@@ -152,7 +152,7 @@ function TermsAcceptanceScreen({
             onChange={(e) => setChecked(e.target.checked)}
             style={s.checkbox}
           />
-          I accept the Terms &amp; Conditions (v{currentVersion})
+          {t('auth.termsAccept', { version: currentVersion })}
         </label>
 
         <button
@@ -160,7 +160,7 @@ function TermsAcceptanceScreen({
           disabled={loading || !checked}
           onClick={handleAccept}
         >
-          {loading ? 'Saving…' : 'Continue'}
+          {loading ? t('auth.termsSaving') : t('auth.termsContinue')}
         </button>
       </div>
     </div>

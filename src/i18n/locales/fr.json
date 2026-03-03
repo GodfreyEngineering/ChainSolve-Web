@@ -105,6 +105,8 @@
     "verifyEmailSub": "Encore une étape avant de continuer",
     "verifyEmailBody": "Nous avons envoyé un lien de vérification à <strong>{{email}}</strong>. Cliquez sur le lien dans cet e-mail pour vérifier votre compte, puis actualisez cette page.",
     "verifyEmailResend": "Renvoyer l'e-mail de vérification",
+    "verifyEmailSending": "Envoi…",
+    "verifyEmailResent": "E-mail de confirmation renvoyé — vérifiez votre boîte de réception et vos spams.",
     "verifyEmailRefresh": "Vérifié — actualiser",
     "termsTitle": "Conditions Générales",
     "termsSub": "Veuillez lire et accepter pour continuer",
@@ -112,7 +114,8 @@
     "termsLink": "Lire les Conditions Générales complètes",
     "termsAccept": "J'accepte les Conditions Générales (v{{version}})",
     "termsContinue": "Continuer",
-    "termsSaving": "Enregistrement…"
+    "termsSaving": "Enregistrement…",
+    "termsRetry": "L'acceptation n'a pas pu être enregistrée. Veuillez réessayer."
   },
   "projects": {
     "title": "Projets",

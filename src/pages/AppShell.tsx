@@ -369,12 +369,19 @@ export default function AppShell() {
     return () => clearInterval(timer)
   }, [])
 
-  // E2-3: Handle ToS acceptance from AuthGate
+  // E2-3 / J1-3: Handle ToS acceptance from AuthGate
   const handleTermsAccepted = useCallback(
     async (version: string) => {
       // Dynamic import to keep acceptTerms out of the initial bundle
       const { acceptTerms } = await import('../lib/profilesService')
       await acceptTerms(version)
+      // Best-effort audit log (J1-3: acceptance must not fail silently)
+      try {
+        const { logTermsAcceptance } = await import('../lib/userTermsService')
+        await logTermsAcceptance(version)
+      } catch {
+        // Audit log is best-effort; profile acceptance is the source of truth.
+      }
       // Re-fetch profile to reflect the acceptance
       if (user) {
         const { data } = await supabase

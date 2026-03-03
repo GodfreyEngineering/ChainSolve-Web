@@ -105,6 +105,8 @@
     "verifyEmailSub": "Noch ein Schritt, bevor Sie fortfahren können",
     "verifyEmailBody": "Wir haben einen Bestätigungslink an <strong>{{email}}</strong> gesendet. Klicken Sie auf den Link in dieser E-Mail, um Ihr Konto zu bestätigen, und aktualisieren Sie dann diese Seite.",
     "verifyEmailResend": "Bestätigungs-E-Mail erneut senden",
+    "verifyEmailSending": "Wird gesendet…",
+    "verifyEmailResent": "Bestätigungs-E-Mail erneut gesendet — prüfen Sie Ihren Posteingang und Spam-Ordner.",
     "verifyEmailRefresh": "Bestätigt — Seite aktualisieren",
     "termsTitle": "Nutzungsbedingungen",
     "termsSub": "Bitte lesen und akzeptieren Sie die Bedingungen",
@@ -112,7 +114,8 @@
     "termsLink": "Vollständige Nutzungsbedingungen lesen",
     "termsAccept": "Ich akzeptiere die Nutzungsbedingungen (v{{version}})",
     "termsContinue": "Weiter",
-    "termsSaving": "Wird gespeichert…"
+    "termsSaving": "Wird gespeichert…",
+    "termsRetry": "Akzeptierung konnte nicht gespeichert werden. Bitte erneut versuchen."
   },
   "projects": {
     "title": "Projekte",
