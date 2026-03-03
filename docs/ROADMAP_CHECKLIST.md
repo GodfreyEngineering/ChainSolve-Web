@@ -2029,7 +2029,7 @@ Claude MUST:
 ---
 
 ## I7 — Student licenses (uni verification)
-- [ ] I7-1: Student license flow
+- [x] I7-1: Student license flow
   - University email verification and strict eligibility.
   - Student gets Pro features but free.
   - Acceptance: enforceable and robust.
