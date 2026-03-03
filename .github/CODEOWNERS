@@ -1,0 +1,14 @@
+# CODEOWNERS — require review from core team for critical paths.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default: Chief Engineer reviews all PRs
+* @GodfreyEngineering
+
+# Rust engine — requires engine-owner review
+crates/ @GodfreyEngineering
+
+# Security-sensitive paths
+public/_headers @GodfreyEngineering
+functions/ @GodfreyEngineering
+supabase/ @GodfreyEngineering
+.github/workflows/ @GodfreyEngineering
