@@ -2134,7 +2134,7 @@ Claude MUST:
     - “I accept” succeeds reliably
     - Clear retry behavior on network issues
 
-- [ ] J1-4: 2FA/MFA optional setup during onboarding
+- [x] J1-4: 2FA/MFA optional setup during onboarding
   - Add “Set up 2FA now” step (skip allowed).
   - Use Supabase MFA enroll/challenge/verify flows. :contentReference[oaicite:2]{index=2}
   - Acceptance:
