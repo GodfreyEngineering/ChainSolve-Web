@@ -409,6 +409,21 @@ desktop app deployment policies.
 
 ## Audit & hygiene
 
+### [AUDIT_GUIDE.md](AUDIT_GUIDE.md)
+
+**Purpose:** Operational readiness guide for external consultancy audits.
+
+**Read this when:** An auditor or new engineer needs a single document
+covering how to verify code quality, run every test layer, and review
+the security posture.
+
+**Covers:**
+- Repository structure walkthrough and key design decisions
+- Full CI gate (20 checks) with purpose of each
+- Test execution commands for every layer (TS unit, Rust, golden, property, E2E)
+- Security posture review (CSP, RLS, ACL, auth, secrets -- public-safe)
+- Operational readiness checklist
+
 ### [AUDIT/](AUDIT/)
 
 **Purpose:** Repository audit findings and cleanup plan.

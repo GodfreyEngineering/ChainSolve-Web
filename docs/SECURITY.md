@@ -522,3 +522,11 @@ ORDER BY b.name, p.operation;
 
 Expected: each bucket has 4 policies (SELECT / INSERT / UPDATE / DELETE), all
 containing `(storage.foldername(name))[1] = auth.uid()::text`.
+
+---
+
+## 9. Audit guide
+
+For a comprehensive operational readiness audit -- including how to run
+every test layer and a full security posture checklist -- see
+[AUDIT_GUIDE.md](AUDIT_GUIDE.md).
