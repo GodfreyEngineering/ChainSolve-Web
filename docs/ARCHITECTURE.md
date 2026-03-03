@@ -412,3 +412,29 @@ UI gating:
 | W10 | Planned | Branching/rules for conditional flows (Pro) |
 | W11 | Planned | Custom blocks editor (Pro) |
 | W12 | Planned | Project/file browser with folders, search, tags |
+
+---
+
+## Platform Readiness (I9-1)
+
+The repo is structured so future desktop (Tauri) and mobile (Capacitor)
+targets can be added without restructuring the web app.
+
+```
+packages/
+  shared/     Platform-agnostic code candidates (placeholder — not yet extracted)
+  desktop/    Future Tauri shell (placeholder)
+  mobile/     Future Capacitor shell (placeholder)
+```
+
+**Platform flags** (`src/lib/platform.ts`) provide compile-time constants:
+
+| Flag | Web | Desktop | Mobile |
+| --- | --- | --- | --- |
+| `IS_WEB` | `true` | `false` | `false` |
+| `IS_DESKTOP` | `false` | `true` | `false` |
+| `IS_MOBILE` | `false` | `false` | `true` |
+
+Helper functions (`supportsNativeFs()`, `supportsPushNotifications()`,
+`isWebview()`) let feature code branch without importing platform SDKs.
+Dead-code elimination removes unused branches in each build target.
