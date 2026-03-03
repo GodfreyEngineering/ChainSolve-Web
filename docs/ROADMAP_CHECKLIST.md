@@ -2354,7 +2354,7 @@ Claude MUST:
 ---
 
 ## L1 — Branding, legalese, and footer compliance
-- [ ] L1-1: Very thin Footer legal + contact info across app + docs
+- [x] L1-1: Very thin Footer legal + contact info across app + docs
   - Footer includes:
     - © notice
     - Registered in England & Wales
