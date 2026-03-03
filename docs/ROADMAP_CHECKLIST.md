@@ -2457,7 +2457,7 @@ Claude MUST:
 ---
 
 ## M1 — Remove legacy/unused tooling (including ./CS)
-- [ ] M1-1: Remove custom `./CS` scripts + any unused CI/helper scripts
+- [x] M1-1: Remove custom `./CS` scripts + any unused CI/helper scripts
   - delete files + remove all references (workflows/docs/package scripts)
   - prove with `rg`/`find` evidence in commit notes
 - [ ] M1-2: Consolidate scripts
