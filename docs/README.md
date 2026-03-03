@@ -113,6 +113,7 @@
 | [DEV/DEPENDENCIES.md](DEV/DEPENDENCIES.md) | Dependency policy: what's allowed, how to add, supply chain checks |
 | [DEV/RELEASE_DRY_RUN.md](DEV/RELEASE_DRY_RUN.md) | Release rehearsal playbook: step-by-step dry-run checklist |
 | [DEV/SERVICE_SETUP_CHECKLIST.md](DEV/SERVICE_SETUP_CHECKLIST.md) | Idiot-proof service setup: Supabase, Stripe, Cloudflare, Resend, OpenAI |
+| [DEV/SUPABASE_BOOTSTRAP.md](DEV/SUPABASE_BOOTSTRAP.md) | Fresh Supabase project setup: baseline migration, secrets, verification |
 
 ---
 
