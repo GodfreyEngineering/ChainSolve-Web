@@ -291,6 +291,8 @@
   },
   "settings": {
     "title": "Einstellungen",
+    "accountTitle": "Kontoeinstellungen",
+    "appTitle": "ChainSolve-Einstellungen",
     "profile": "Profil",
     "profileDesc": "Kontoinformationen verwalten",
     "billing": "Abrechnung",

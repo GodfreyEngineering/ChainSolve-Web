@@ -70,6 +70,9 @@
     "enterpriseBadge": "ארגון"
   },
   "settings": {
+    "title": "הגדרות",
+    "accountTitle": "הגדרות חשבון",
+    "appTitle": "הגדרות ChainSolve",
     "account": "חשבון",
     "admin": "ניהול",
     "adminDesc": "כלי מפתחים ואזור מסוכן",

@@ -291,6 +291,8 @@
   },
   "settings": {
     "title": "Paramètres",
+    "accountTitle": "Parametres du compte",
+    "appTitle": "Parametres ChainSolve",
     "profile": "Profil",
     "profileDesc": "Gérez vos informations de compte",
     "billing": "Facturation",

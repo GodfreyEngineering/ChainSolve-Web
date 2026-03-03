@@ -203,6 +203,16 @@ export function MainHeader({ plan }: MainHeaderProps) {
                 style={dropdownItemStyle}
                 onClick={() => {
                   setAccountOpen(false)
+                  openSettings('security')
+                }}
+              >
+                {t('settings.security', 'Security')}
+              </button>
+              <div style={dropdownSepStyle} />
+              <button
+                style={dropdownItemStyle}
+                onClick={() => {
+                  setAccountOpen(false)
                   openSettings('preferences')
                 }}
               >

@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
 import type { SettingsTab } from '../contexts/SettingsModalContext'
 
-const VALID_TABS = new Set<string>(['profile', 'billing', 'preferences'])
+const VALID_TABS = new Set<string>(['profile', 'billing', 'preferences', 'security'])
 
 export function SettingsRedirect() {
   const navigate = useNavigate()

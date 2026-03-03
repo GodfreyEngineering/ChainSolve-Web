@@ -1,39 +1,73 @@
 import { useState, useMemo, useCallback, lazy, Suspense, type ReactNode } from 'react'
-import { SettingsModalContext, type SettingsTab } from '../contexts/SettingsModalContext'
+import {
+  SettingsModalContext,
+  isAccountTab,
+  type SettingsTab,
+  type AccountTab,
+} from '../contexts/SettingsModalContext'
 import { useWindowManager } from '../contexts/WindowManagerContext'
 
-export const SETTINGS_WINDOW_ID = 'settings'
+/** J2-1: Two separate window IDs for account vs app settings. */
+export const ACCOUNT_SETTINGS_WINDOW_ID = 'account-settings'
+export const APP_SETTINGS_WINDOW_ID = 'app-settings'
+
+/** @deprecated Use ACCOUNT_SETTINGS_WINDOW_ID or APP_SETTINGS_WINDOW_ID. */
+export const SETTINGS_WINDOW_ID = ACCOUNT_SETTINGS_WINDOW_ID
 
 const LazySettingsModal = lazy(() =>
   import('./SettingsModal').then((m) => ({ default: m.SettingsModal })),
 )
 
 export function SettingsModalProvider({ children }: { children: ReactNode }) {
-  const [tab, setTab] = useState<SettingsTab>('profile')
+  const [accountTab, setAccountTab] = useState<AccountTab>('profile')
   const { openWindow, closeWindow, isOpen } = useWindowManager()
-  const open = isOpen(SETTINGS_WINDOW_ID)
+
+  const accountOpen = isOpen(ACCOUNT_SETTINGS_WINDOW_ID)
+  const appOpen = isOpen(APP_SETTINGS_WINDOW_ID)
 
   const openSettings = useCallback(
-    (t?: SettingsTab) => {
-      if (t) setTab(t)
-      openWindow(SETTINGS_WINDOW_ID, { width: 720, height: 520 })
+    (tab?: SettingsTab) => {
+      if (tab && isAccountTab(tab)) {
+        setAccountTab(tab)
+        openWindow(ACCOUNT_SETTINGS_WINDOW_ID, { width: 720, height: 520 })
+      } else {
+        // Default to app settings for 'preferences' or no tab specified
+        openWindow(APP_SETTINGS_WINDOW_ID, { width: 720, height: 520 })
+      }
     },
     [openWindow],
   )
 
-  const closeSettings = useCallback(() => closeWindow(SETTINGS_WINDOW_ID), [closeWindow])
+  const closeAccountSettings = useCallback(
+    () => closeWindow(ACCOUNT_SETTINGS_WINDOW_ID),
+    [closeWindow],
+  )
+  const closeAppSettings = useCallback(() => closeWindow(APP_SETTINGS_WINDOW_ID), [closeWindow])
 
   const value = useMemo(
-    () => ({ open, tab, openSettings, closeSettings, setTab }),
-    [open, tab, openSettings, closeSettings],
+    () => ({
+      openSettings,
+      accountOpen,
+      accountTab,
+      setAccountTab,
+      closeAccountSettings,
+      appOpen,
+      closeAppSettings,
+    }),
+    [openSettings, accountOpen, accountTab, closeAccountSettings, appOpen, closeAppSettings],
   )
 
   return (
     <SettingsModalContext.Provider value={value}>
       {children}
-      {open && (
+      {accountOpen && (
         <Suspense fallback={null}>
-          <LazySettingsModal />
+          <LazySettingsModal kind="account" />
+        </Suspense>
+      )}
+      {appOpen && (
+        <Suspense fallback={null}>
+          <LazySettingsModal kind="app" />
         </Suspense>
       )}
     </SettingsModalContext.Provider>

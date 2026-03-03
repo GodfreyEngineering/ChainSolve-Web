@@ -298,6 +298,8 @@
   },
   "settings": {
     "title": "Settings",
+    "accountTitle": "Account Settings",
+    "appTitle": "ChainSolve Settings",
     "profile": "Profile",
     "profileDesc": "Manage your account information",
     "billing": "Billing",

@@ -4,15 +4,18 @@ import { getSession } from '../lib/auth'
 import { getProfile } from '../lib/profilesService'
 import { resolveEffectivePlan } from '../lib/entitlements'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
-import type { SettingsTab } from '../contexts/SettingsModalContext'
+import type { AccountTab } from '../contexts/SettingsModalContext'
 import { ProfileSettings } from '../pages/settings/ProfileSettings'
 import { PreferencesSettings } from '../pages/settings/PreferencesSettings'
 import { SecuritySettings } from '../pages/settings/SecuritySettings'
 import { BillingAuthGate } from './BillingAuthGate'
 import { AppWindow } from './ui/AppWindow'
-import { SETTINGS_WINDOW_ID } from './SettingsModalProvider'
+import { ACCOUNT_SETTINGS_WINDOW_ID, APP_SETTINGS_WINDOW_ID } from './SettingsModalProvider'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../lib/profilesService'
+
+/** J2-1: Which settings window to render. */
+export type SettingsKind = 'account' | 'app'
 
 // ── Mobile breakpoint ──────────────────────────────────────────────────────
 const mql = typeof window !== 'undefined' ? window.matchMedia('(max-width: 639px)') : null
@@ -26,25 +29,40 @@ function getNarrow() {
   return mql?.matches ?? false
 }
 
-// ── Tab config ─────────────────────────────────────────────────────────────
-const TABS: { key: SettingsTab; icon: string }[] = [
+// ── Tab configs per kind ────────────────────────────────────────────────────
+const ACCOUNT_TABS: { key: AccountTab; icon: string }[] = [
   { key: 'profile', icon: '\u2302' },
   { key: 'billing', icon: '\u00A4' },
-  { key: 'preferences', icon: '\u2699' },
   { key: 'security', icon: '\u2616' },
 ]
 
-export function SettingsModal() {
-  const { open, tab, closeSettings, setTab } = useSettingsModal()
+interface Props {
+  kind: SettingsKind
+}
+
+export function SettingsModal({ kind }: Props) {
+  const {
+    accountOpen,
+    appOpen,
+    accountTab,
+    setAccountTab,
+    closeAccountSettings,
+    closeAppSettings,
+  } = useSettingsModal()
   const { t } = useTranslation()
   const narrow = useSyncExternalStore(subscribeNarrow, getNarrow)
+
+  const isOpen = kind === 'account' ? accountOpen : appOpen
+  const windowId = kind === 'account' ? ACCOUNT_SETTINGS_WINDOW_ID : APP_SETTINGS_WINDOW_ID
+  const title = kind === 'account' ? t('settings.accountTitle') : t('settings.appTitle')
+  const closeHandler = kind === 'account' ? closeAccountSettings : closeAppSettings
 
   // ── Data loading ───────────────────────────────────────────────────────
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
 
   useEffect(() => {
-    if (!open) return
+    if (!isOpen) return
     getSession().then((session) => {
       if (!session) return
       setUser(session.user)
@@ -52,10 +70,85 @@ export function SettingsModal() {
         if (data) setProfile(data)
       })
     })
-  }, [open])
+  }, [isOpen])
 
+  // ── Account Settings window ─────────────────────────────────────────────
+  if (kind === 'account') {
+    return (
+      <AppWindow windowId={windowId} title={title} minWidth={400}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: narrow ? 'column' : 'row',
+            height: '100%',
+          }}
+        >
+          {/* Sidebar / tab bar */}
+          <nav
+            style={
+              narrow
+                ? {
+                    display: 'flex',
+                    gap: '0.25rem',
+                    borderBottom: '1px solid var(--border)',
+                    padding: '0.5rem 0.75rem',
+                    flexShrink: 0,
+                  }
+                : sidebarStyle
+            }
+          >
+            {!narrow && (
+              <div style={sidebarHeader}>
+                <h2 style={sidebarTitle}>{title}</h2>
+                <button onClick={closeHandler} style={closeBtnStyle} aria-label="Close">
+                  ✕
+                </button>
+              </div>
+            )}
+            {ACCOUNT_TABS.map(({ key, icon }) => (
+              <button
+                key={key}
+                onClick={() => setAccountTab(key)}
+                style={
+                  narrow ? narrowTabStyle(accountTab === key) : tabBtnStyle(accountTab === key)
+                }
+              >
+                <span style={{ fontSize: narrow ? '1rem' : '0.95rem' }}>{icon}</span>
+                {!narrow && (
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: accountTab === key ? 600 : 400 }}>
+                      {t(`settings.${key}`)}
+                    </div>
+                    <div style={tabDescStyle}>{t(`settings.${key}Desc`)}</div>
+                  </div>
+                )}
+              </button>
+            ))}
+            {narrow && (
+              <button
+                onClick={closeHandler}
+                style={{ ...narrowTabStyle(false), marginLeft: 'auto' }}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            )}
+          </nav>
+
+          {/* Content */}
+          <main style={contentStyle}>
+            {accountTab === 'profile' && <ProfileSettings user={user} profile={profile} />}
+            {accountTab === 'billing' && <BillingAuthGate profile={profile} />}
+            {accountTab === 'security' && <SecuritySettings />}
+          </main>
+        </div>
+      </AppWindow>
+    )
+  }
+
+  // ── App Settings window ─────────────────────────────────────────────────
   return (
-    <AppWindow windowId={SETTINGS_WINDOW_ID} title={t('settings.title')} minWidth={400}>
+    <AppWindow windowId={windowId} title={title} minWidth={400}>
       <div
         style={{
           display: 'flex',
@@ -63,7 +156,7 @@ export function SettingsModal() {
           height: '100%',
         }}
       >
-        {/* ── Sidebar / tab bar ────────────────────────────────────────── */}
+        {/* Sidebar */}
         <nav
           style={
             narrow
@@ -79,30 +172,24 @@ export function SettingsModal() {
         >
           {!narrow && (
             <div style={sidebarHeader}>
-              <h2 style={sidebarTitle}>{t('settings.title')}</h2>
-              <button onClick={closeSettings} style={closeBtnStyle} aria-label="Close">
+              <h2 style={sidebarTitle}>{title}</h2>
+              <button onClick={closeHandler} style={closeBtnStyle} aria-label="Close">
                 ✕
               </button>
             </div>
           )}
-          {TABS.map(({ key, icon }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              style={narrow ? narrowTabStyle(tab === key) : tabBtnStyle(tab === key)}
-            >
-              <span style={{ fontSize: narrow ? '1rem' : '0.95rem' }}>{icon}</span>
-              {!narrow && (
-                <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontWeight: tab === key ? 600 : 400 }}>{t(`settings.${key}`)}</div>
-                  <div style={tabDescStyle}>{t(`settings.${key}Desc`)}</div>
-                </div>
-              )}
-            </button>
-          ))}
+          <button style={narrow ? narrowTabStyle(true) : tabBtnStyle(true)}>
+            <span style={{ fontSize: narrow ? '1rem' : '0.95rem' }}>{'\u2699'}</span>
+            {!narrow && (
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: 600 }}>{t('settings.preferences')}</div>
+                <div style={tabDescStyle}>{t('settings.preferencesDesc')}</div>
+              </div>
+            )}
+          </button>
           {narrow && (
             <button
-              onClick={closeSettings}
+              onClick={closeHandler}
               style={{ ...narrowTabStyle(false), marginLeft: 'auto' }}
               aria-label="Close"
             >
@@ -111,12 +198,9 @@ export function SettingsModal() {
           )}
         </nav>
 
-        {/* ── Content ──────────────────────────────────────────────────── */}
+        {/* Content */}
         <main style={contentStyle}>
-          {tab === 'profile' && <ProfileSettings user={user} profile={profile} />}
-          {tab === 'billing' && <BillingAuthGate profile={profile} />}
-          {tab === 'preferences' && <PreferencesSettings plan={resolveEffectivePlan(profile)} />}
-          {tab === 'security' && <SecuritySettings />}
+          <PreferencesSettings plan={resolveEffectivePlan(profile)} />
         </main>
       </div>
     </AppWindow>
