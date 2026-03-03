@@ -1361,5 +1361,32 @@
     "docs": { "title": "Documentation — ChainSolve", "description": "Learn how to use ChainSolve: blocks, units, variables, materials, AI assistant, and more." },
     "explore": { "title": "Explore — ChainSolve", "description": "Browse and install templates, block packs, themes, and groups shared by the community." },
     "terms": { "title": "Terms & Conditions — ChainSolve", "description": "ChainSolve terms of service and conditions of use." }
+  },
+  "signupWizard": {
+    "title": "Complete your profile",
+    "stepOf": "Step {{current}} of {{total}}",
+    "profileDesc": "Choose a display name and optional avatar.",
+    "displayNameLabel": "Display name",
+    "displayNamePlaceholder": "e.g. Jane Smith",
+    "avatarLabel": "Avatar (optional)",
+    "errorAvatarType": "Please select an image file.",
+    "errorAvatarSize": "Image must be under 2 MB.",
+    "preferencesDesc": "Set your language and region.",
+    "localeLabel": "Language",
+    "regionLabel": "Region",
+    "regionPlaceholder": "e.g. Europe",
+    "confirmDesc": "Review your details before finishing.",
+    "marketingOptIn": "Send me product updates and tips",
+    "next": "Next",
+    "back": "Back",
+    "finish": "Finish",
+    "saving": "Saving…",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "displayNameRequired": "Display name is required.",
+    "displayNameTooShort": "Display name must be at least 2 characters.",
+    "displayNameTooLong": "Display name must be at most 100 characters.",
+    "displayNameControlChars": "Display name contains invalid characters.",
+    "displayNameInvalidChars": "Display name contains disallowed characters.",
+    "displayNameForbidden": "This display name is not allowed."
   }
 }

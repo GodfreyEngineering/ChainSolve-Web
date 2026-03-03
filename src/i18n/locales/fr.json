@@ -1342,5 +1342,32 @@
     "docs": { "title": "Documentation — ChainSolve", "description": "Apprenez à utiliser ChainSolve : blocs, unités, variables, matériaux, assistant IA et plus." },
     "explore": { "title": "Explorer — ChainSolve", "description": "Parcourez et installez des modèles, packs de blocs, thèmes et groupes partagés par la communauté." },
     "terms": { "title": "Conditions générales — ChainSolve", "description": "Conditions générales d'utilisation de ChainSolve." }
+  },
+  "signupWizard": {
+    "title": "Compléter votre profil",
+    "stepOf": "Étape {{current}} sur {{total}}",
+    "profileDesc": "Choisissez un nom d'affichage et un avatar facultatif.",
+    "displayNameLabel": "Nom d'affichage",
+    "displayNamePlaceholder": "p. ex. Marie Dupont",
+    "avatarLabel": "Avatar (facultatif)",
+    "errorAvatarType": "Veuillez sélectionner un fichier image.",
+    "errorAvatarSize": "L'image ne doit pas dépasser 2 Mo.",
+    "preferencesDesc": "Définissez votre langue et votre région.",
+    "localeLabel": "Langue",
+    "regionLabel": "Région",
+    "regionPlaceholder": "p. ex. Europe",
+    "confirmDesc": "Vérifiez vos informations avant de terminer.",
+    "marketingOptIn": "Recevoir les mises à jour produit et les conseils",
+    "next": "Suivant",
+    "back": "Retour",
+    "finish": "Terminer",
+    "saving": "Enregistrement…",
+    "errorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+    "displayNameRequired": "Le nom d'affichage est requis.",
+    "displayNameTooShort": "Le nom d'affichage doit contenir au moins 2 caractères.",
+    "displayNameTooLong": "Le nom d'affichage ne peut pas dépasser 100 caractères.",
+    "displayNameControlChars": "Le nom d'affichage contient des caractères non valides.",
+    "displayNameInvalidChars": "Le nom d'affichage contient des caractères non autorisés.",
+    "displayNameForbidden": "Ce nom d'affichage n'est pas autorisé."
   }
 }

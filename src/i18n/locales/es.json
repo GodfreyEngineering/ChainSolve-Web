@@ -1342,5 +1342,32 @@
     "docs": { "title": "Documentación — ChainSolve", "description": "Aprende a usar ChainSolve: bloques, unidades, variables, materiales, asistente IA y más." },
     "explore": { "title": "Explorar — ChainSolve", "description": "Explora e instala plantillas, paquetes de bloques, temas y grupos compartidos por la comunidad." },
     "terms": { "title": "Términos y condiciones — ChainSolve", "description": "Términos de servicio y condiciones de uso de ChainSolve." }
+  },
+  "signupWizard": {
+    "title": "Completar perfil",
+    "stepOf": "Paso {{current}} de {{total}}",
+    "profileDesc": "Elige un nombre para mostrar y un avatar opcional.",
+    "displayNameLabel": "Nombre para mostrar",
+    "displayNamePlaceholder": "p. ej. María García",
+    "avatarLabel": "Avatar (opcional)",
+    "errorAvatarType": "Selecciona un archivo de imagen.",
+    "errorAvatarSize": "La imagen no debe superar los 2 MB.",
+    "preferencesDesc": "Establece tu idioma y región.",
+    "localeLabel": "Idioma",
+    "regionLabel": "Región",
+    "regionPlaceholder": "p. ej. Europa",
+    "confirmDesc": "Revisa tus datos antes de finalizar.",
+    "marketingOptIn": "Recibir novedades del producto y consejos",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "finish": "Finalizar",
+    "saving": "Guardando…",
+    "errorGeneric": "Algo salió mal. Inténtalo de nuevo.",
+    "displayNameRequired": "El nombre para mostrar es obligatorio.",
+    "displayNameTooShort": "El nombre para mostrar debe tener al menos 2 caracteres.",
+    "displayNameTooLong": "El nombre para mostrar no puede superar los 100 caracteres.",
+    "displayNameControlChars": "El nombre para mostrar contiene caracteres no válidos.",
+    "displayNameInvalidChars": "El nombre para mostrar contiene caracteres no permitidos.",
+    "displayNameForbidden": "Este nombre para mostrar no está permitido."
   }
 }

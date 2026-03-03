@@ -479,5 +479,32 @@
     "docs": { "title": "תיעוד — ChainSolve", "description": "למד להשתמש ב-ChainSolve: בלוקים, יחידות, משתנים, חומרים, עוזר AI ועוד." },
     "explore": { "title": "גלה — ChainSolve", "description": "עיין והתקן תבניות, חבילות בלוקים, ערכות נושא וקבוצות שמשותפות על ידי הקהילה." },
     "terms": { "title": "תנאי שימוש — ChainSolve", "description": "תנאי השירות ותנאי השימוש של ChainSolve." }
+  },
+  "signupWizard": {
+    "title": "השלמת הפרופיל",
+    "stepOf": "שלב {{current}} מתוך {{total}}",
+    "profileDesc": "בחרו שם תצוגה ותמונת פרופיל (אופציונלי).",
+    "displayNameLabel": "שם תצוגה",
+    "displayNamePlaceholder": "למשל ישראל ישראלי",
+    "avatarLabel": "תמונת פרופיל (אופציונלי)",
+    "errorAvatarType": "יש לבחור קובץ תמונה.",
+    "errorAvatarSize": "התמונה חייבת להיות עד 2 MB.",
+    "preferencesDesc": "הגדירו שפה ואזור.",
+    "localeLabel": "שפה",
+    "regionLabel": "אזור",
+    "regionPlaceholder": "למשל אירופה",
+    "confirmDesc": "בדקו את הפרטים לפני סיום.",
+    "marketingOptIn": "שלחו לי עדכוני מוצר וטיפים",
+    "next": "הבא",
+    "back": "חזרה",
+    "finish": "סיום",
+    "saving": "שומר…",
+    "errorGeneric": "משהו השתבש. נסו שוב.",
+    "displayNameRequired": "שם תצוגה נדרש.",
+    "displayNameTooShort": "שם תצוגה חייב להכיל לפחות 2 תווים.",
+    "displayNameTooLong": "שם תצוגה יכול להכיל עד 100 תווים.",
+    "displayNameControlChars": "שם התצוגה מכיל תווים לא חוקיים.",
+    "displayNameInvalidChars": "שם התצוגה מכיל תווים שאינם מותרים.",
+    "displayNameForbidden": "שם תצוגה זה אינו מותר."
   }
 }

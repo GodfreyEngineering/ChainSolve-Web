@@ -71,6 +71,10 @@ const LazySessionRevokedModal = lazy(() =>
   })),
 )
 
+const LazySignupWizard = lazy(() =>
+  import('../components/app/SignupWizard').then((m) => ({ default: m.SignupWizard })),
+)
+
 const LazyFirstRunModal = lazy(() =>
   import('../components/app/FirstRunModal').then((m) => ({ default: m.FirstRunModal })),
 )
@@ -86,6 +90,7 @@ const ONBOARDED_KEY = 'cs:onboarded'
 interface Profile {
   id: string
   email: string | null
+  full_name: string | null
   plan: Plan
   stripe_customer_id: string | null
   current_period_end: string | null
@@ -265,6 +270,7 @@ export default function AppShell() {
     }
   })
   const [tourOpen, setTourOpen] = useState(false)
+  const [wizardDismissed, setWizardDismissed] = useState(false)
 
   const importRef = useRef<HTMLInputElement>(null)
 
@@ -340,7 +346,7 @@ export default function AppShell() {
       supabase
         .from('profiles')
         .select(
-          'id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,marketing_opt_in',
+          'id,email,full_name,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,marketing_opt_in',
         )
         .eq('id', session.user.id)
         .maybeSingle()
@@ -374,7 +380,7 @@ export default function AppShell() {
         const { data } = await supabase
           .from('profiles')
           .select(
-            'id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,marketing_opt_in',
+            'id,email,full_name,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,marketing_opt_in',
           )
           .eq('id', user.id)
           .maybeSingle()
@@ -383,6 +389,21 @@ export default function AppShell() {
     },
     [user],
   )
+
+  // J1-1: After signup wizard completes, re-fetch profile and dismiss.
+  const handleWizardComplete = useCallback(async () => {
+    setWizardDismissed(true)
+    if (user) {
+      const { data } = await supabase
+        .from('profiles')
+        .select(
+          'id,email,full_name,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,marketing_opt_in',
+        )
+        .eq('id', user.id)
+        .maybeSingle()
+      if (data) setProfile(data as Profile)
+    }
+  }, [user])
 
   const handleNewProject = async () => {
     const plan = resolveEffectivePlan(profile)
@@ -639,6 +660,12 @@ export default function AppShell() {
         onClose={() => setUpgradeOpen(false)}
         reason={upgradeReason}
       />
+      {/* ── J1-1: Post-signup profile wizard ── */}
+      {!loading && profile && !profile.full_name && !wizardDismissed && (
+        <Suspense fallback={null}>
+          <LazySignupWizard open onComplete={handleWizardComplete} />
+        </Suspense>
+      )}
       {/* ── First-run onboarding modal ── */}
       {firstRunOpen && !loading && (
         <Suspense fallback={null}>
