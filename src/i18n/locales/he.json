@@ -445,6 +445,21 @@
     "secTroubleshooting": "פתרון בעיות",
     "secShortcuts": "קיצורי מקלדת"
   },
+  "student": {
+    "title": "רישיון סטודנט",
+    "description": "אמת את כתובת הדוא\"ל האוניברסיטאית שלך כדי לפתוח תכונות Pro בחינם למשך שנה.",
+    "emailPlaceholder": "you@university.edu",
+    "verify": "שלח קוד",
+    "codePlaceholder": "קוד בן 6 ספרות",
+    "confirm": "אישור",
+    "codeSent": "קוד אימות נשלח לכתובת הדוא\"ל האוניברסיטאית שלך.",
+    "verified": "רישיון סטודנט הופעל.",
+    "verifiedReload": "רישיון סטודנט הופעל. טען מחדש את הדף כדי לראות את התוכנית המעודכנת.",
+    "activeLabel": "רישיון הסטודנט שלך פעיל. יש לך גישה מלאה לתכונות Pro.",
+    "errorInvalidEmail": "נא להזין כתובת דוא\"ל תקינה.",
+    "errorNotUniversity": "כתובת זו אינה נראית ככתובת דוא\"ל אוניברסיטאית.",
+    "errorInvalidCode": "נא להזין את הקוד בן 6 הספרות שנשלח לדוא\"ל שלך."
+  },
   "seo": {
     "defaultDescription": "מחשבון מדעי מבוסס גרף צמתים. בנה שרשראות חישוב ויזואלית.",
     "login": { "title": "התחברות — ChainSolve", "description": "התחבר ל-ChainSolve כדי לגשת לפרויקטים ושרשראות החישוב שלך." },

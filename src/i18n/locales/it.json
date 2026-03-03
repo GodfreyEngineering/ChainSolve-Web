@@ -149,6 +149,7 @@
     "free": "Gratuito",
     "trialing": "Prova",
     "pro": "Pro",
+    "student": "Studente",
     "enterprise": "Enterprise",
     "past_due": "Pagamento in ritardo",
     "canceled": "Annullato"
@@ -1306,6 +1307,21 @@
     "cancel": "Annulla",
     "close": "Chiudi",
     "loading": "Caricamento…"
+  },
+  "student": {
+    "title": "Licenza studente",
+    "description": "Verifica la tua email universitaria per sbloccare le funzioni Pro gratuitamente per un anno.",
+    "emailPlaceholder": "tu@universita.edu",
+    "verify": "Invia codice",
+    "codePlaceholder": "Codice a 6 cifre",
+    "confirm": "Conferma",
+    "codeSent": "Un codice di verifica \u00e8 stato inviato alla tua email universitaria.",
+    "verified": "Licenza studente attivata.",
+    "verifiedReload": "Licenza studente attivata. Ricarica la pagina per vedere il piano aggiornato.",
+    "activeLabel": "La tua licenza studente \u00e8 attiva. Hai accesso completo alle funzioni Pro.",
+    "errorInvalidEmail": "Inserisci un indirizzo email valido.",
+    "errorNotUniversity": "Questo non sembra essere un indirizzo email universitario.",
+    "errorInvalidCode": "Inserisci il codice a 6 cifre inviato alla tua email."
   },
   "seo": {
     "defaultDescription": "Calcolatrice scientifica a grafo di nodi. Costruisci catene di calcolo visivamente.",

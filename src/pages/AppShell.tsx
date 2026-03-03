@@ -340,7 +340,7 @@ export default function AppShell() {
       supabase
         .from('profiles')
         .select(
-          'id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin,accepted_terms_version,marketing_opt_in',
+          'id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,marketing_opt_in',
         )
         .eq('id', session.user.id)
         .maybeSingle()
@@ -374,7 +374,7 @@ export default function AppShell() {
         const { data } = await supabase
           .from('profiles')
           .select(
-            'id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin,accepted_terms_version,marketing_opt_in',
+            'id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,marketing_opt_in',
           )
           .eq('id', user.id)
           .maybeSingle()

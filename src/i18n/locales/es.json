@@ -149,6 +149,7 @@
     "free": "Gratis",
     "trialing": "Prueba",
     "pro": "Pro",
+    "student": "Estudiante",
     "enterprise": "Enterprise",
     "past_due": "Pago pendiente",
     "canceled": "Cancelado"
@@ -1306,6 +1307,21 @@
     "cancel": "Cancelar",
     "close": "Cerrar",
     "loading": "Cargando…"
+  },
+  "student": {
+    "title": "Licencia de estudiante",
+    "description": "Verifica tu correo universitario para desbloquear las funciones Pro sin coste durante un a\u00f1o.",
+    "emailPlaceholder": "tu@universidad.edu",
+    "verify": "Enviar c\u00f3digo",
+    "codePlaceholder": "C\u00f3digo de 6 d\u00edgitos",
+    "confirm": "Confirmar",
+    "codeSent": "Se ha enviado un c\u00f3digo de verificaci\u00f3n a tu correo universitario.",
+    "verified": "Licencia de estudiante activada.",
+    "verifiedReload": "Licencia de estudiante activada. Recarga la p\u00e1gina para ver tu plan actualizado.",
+    "activeLabel": "Tu licencia de estudiante est\u00e1 activa. Tienes acceso completo a las funciones Pro.",
+    "errorInvalidEmail": "Introduce una direcci\u00f3n de correo v\u00e1lida.",
+    "errorNotUniversity": "Este correo no parece ser de una universidad.",
+    "errorInvalidCode": "Introduce el c\u00f3digo de 6 d\u00edgitos enviado a tu correo."
   },
   "seo": {
     "defaultDescription": "Calculadora científica de grafos de nodos. Construye cadenas de cálculo visualmente.",

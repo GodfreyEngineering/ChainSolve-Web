@@ -54,7 +54,9 @@ export default function Settings() {
       setUser(session.user)
       supabase
         .from('profiles')
-        .select('id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin')
+        .select(
+          'id,email,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student',
+        )
         .eq('id', session.user.id)
         .maybeSingle()
         .then(({ data, error }) => {

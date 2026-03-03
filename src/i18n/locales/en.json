@@ -156,6 +156,7 @@
     "free": "Free",
     "trialing": "Trial",
     "pro": "Pro",
+    "student": "Student",
     "enterprise": "Enterprise",
     "past_due": "Past Due",
     "canceled": "Canceled"
@@ -1325,6 +1326,21 @@
     "cancel": "Cancel",
     "close": "Close",
     "loading": "Loading…"
+  },
+  "student": {
+    "title": "Student Licence",
+    "description": "Verify your university email to unlock Pro features at no cost for one year.",
+    "emailPlaceholder": "you@university.edu",
+    "verify": "Send Code",
+    "codePlaceholder": "6-digit code",
+    "confirm": "Confirm",
+    "codeSent": "A verification code has been sent to your university email.",
+    "verified": "Student licence activated.",
+    "verifiedReload": "Student licence activated. Reload the page to see your updated plan.",
+    "activeLabel": "Your student licence is active. You have full access to Pro features.",
+    "errorInvalidEmail": "Please enter a valid email address.",
+    "errorNotUniversity": "This does not appear to be a university email address.",
+    "errorInvalidCode": "Please enter the 6-digit code sent to your email."
   },
   "seo": {
     "defaultDescription": "Scientific node-graph calculator. Build computation chains visually.",

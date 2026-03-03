@@ -149,6 +149,7 @@
     "free": "Gratuit",
     "trialing": "Essai",
     "pro": "Pro",
+    "student": "Etudiant",
     "enterprise": "Enterprise",
     "past_due": "Paiement en retard",
     "canceled": "Annulé"
@@ -1306,6 +1307,21 @@
     "cancel": "Annuler",
     "close": "Fermer",
     "loading": "Chargement…"
+  },
+  "student": {
+    "title": "Licence \u00e9tudiante",
+    "description": "V\u00e9rifiez votre adresse e-mail universitaire pour d\u00e9bloquer les fonctions Pro gratuitement pendant un an.",
+    "emailPlaceholder": "vous@universite.edu",
+    "verify": "Envoyer le code",
+    "codePlaceholder": "Code \u00e0 6 chiffres",
+    "confirm": "Confirmer",
+    "codeSent": "Un code de v\u00e9rification a \u00e9t\u00e9 envoy\u00e9 \u00e0 votre adresse universitaire.",
+    "verified": "Licence \u00e9tudiante activ\u00e9e.",
+    "verifiedReload": "Licence \u00e9tudiante activ\u00e9e. Rechargez la page pour voir votre plan mis \u00e0 jour.",
+    "activeLabel": "Votre licence \u00e9tudiante est active. Vous avez acc\u00e8s \u00e0 toutes les fonctions Pro.",
+    "errorInvalidEmail": "Veuillez entrer une adresse e-mail valide.",
+    "errorNotUniversity": "Cette adresse ne semble pas \u00eatre une adresse universitaire.",
+    "errorInvalidCode": "Veuillez entrer le code \u00e0 6 chiffres envoy\u00e9 \u00e0 votre adresse."
   },
   "seo": {
     "defaultDescription": "Calculatrice scientifique en graphe de nœuds. Construisez des chaînes de calcul visuellement.",

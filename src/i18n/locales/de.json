@@ -149,6 +149,7 @@
     "free": "Kostenlos",
     "trialing": "Testphase",
     "pro": "Pro",
+    "student": "Student",
     "enterprise": "Enterprise",
     "past_due": "Überfällig",
     "canceled": "Gekündigt"
@@ -1306,6 +1307,21 @@
     "cancel": "Abbrechen",
     "close": "Schließen",
     "loading": "Laden…"
+  },
+  "student": {
+    "title": "Studentenlizenz",
+    "description": "Verifizieren Sie Ihre Universit\u00e4ts-E-Mail, um Pro-Funktionen ein Jahr lang kostenlos freizuschalten.",
+    "emailPlaceholder": "du@universitaet.edu",
+    "verify": "Code senden",
+    "codePlaceholder": "6-stelliger Code",
+    "confirm": "Best\u00e4tigen",
+    "codeSent": "Ein Verifizierungscode wurde an Ihre Universit\u00e4ts-E-Mail gesendet.",
+    "verified": "Studentenlizenz aktiviert.",
+    "verifiedReload": "Studentenlizenz aktiviert. Laden Sie die Seite neu, um Ihren aktualisierten Plan zu sehen.",
+    "activeLabel": "Ihre Studentenlizenz ist aktiv. Sie haben vollen Zugang zu den Pro-Funktionen.",
+    "errorInvalidEmail": "Bitte geben Sie eine g\u00fcltige E-Mail-Adresse ein.",
+    "errorNotUniversity": "Dies scheint keine Universit\u00e4ts-E-Mail-Adresse zu sein.",
+    "errorInvalidCode": "Bitte geben Sie den 6-stelligen Code ein, der an Ihre E-Mail gesendet wurde."
   },
   "seo": {
     "defaultDescription": "Wissenschaftlicher Knotengraph-Rechner. Erstellen Sie Berechnungsketten visuell.",
