@@ -2425,7 +2425,7 @@ Claude MUST:
   - categorize (bug vs suggestion vs block request)
   - Acceptance: effortless feedback loop.
 
-- [ ] L4-4: “Power user workflows” polish
+- [x] L4-4: “Power user workflows” polish
   - keyboard shortcuts coverage pass
   - command palette improvements
   - tooltips for every major action
