@@ -2509,7 +2509,7 @@ Claude MUST:
 ---
 
 ## M6 — Final reproducibility proof
-- [ ] M6-1: Fresh clone test
+- [x] M6-1: Fresh clone test
   - In a new Codespace/devcontainer:
     - `npm ci`
     - `./scripts/verify-ci.sh`
