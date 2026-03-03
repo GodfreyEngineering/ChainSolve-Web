@@ -38,7 +38,9 @@ function BillingSuccess() {
       }}
     >
       <div style={{ textAlign: 'center', maxWidth: '400px', padding: '2rem' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }} aria-hidden="true">
+          {'\u2713'}
+        </div>
         <h1 style={{ margin: '0 0 0.5rem' }}>You&apos;re all set!</h1>
         <p style={{ opacity: 0.6, margin: '0 0 1.5rem' }}>
           Your subscription is now active. It may take a few seconds to reflect in your account.
