@@ -529,6 +529,26 @@
     "error": "לא ניתן לשלוח את ההצעה.",
     "hint": "כל ההצעות נבדקות על ידי הצוות."
   },
+  "feedback": {
+    "title": "שלח משוב",
+    "type_bug": "דיווח על באג",
+    "type_suggestion": "הצעה",
+    "type_block_request": "בקשת בלוק",
+    "titleLabel": "כותרת",
+    "titlePlaceholder_bug": "תיאור קצר של הבעיה",
+    "titlePlaceholder_suggestion": "סיכום קצר של הרעיון שלך",
+    "titlePlaceholder_block_request": "שם הבלוק או הפעולה",
+    "descriptionLabel": "תיאור",
+    "descriptionPlaceholder_bug": "צעדים לשחזור, התנהגות צפויה מול בפועל…",
+    "descriptionPlaceholder_suggestion": "תאר את הרעיון שלך, הבעיה שהוא פותר…",
+    "descriptionPlaceholder_block_request": "תאר את הבלוק, הקלטים/פלטים ומקרה השימוש…",
+    "includeDiagnostics": "כלול אבחון ולוגים של המנוע",
+    "diagnosticsHint": "מצרף מידע על הדפדפן, חלון התצוגה, אבחון המנוע ולוגי הערכה אחרונים. ללא מידע אישי.",
+    "submit": "שלח",
+    "submitting": "שולח…",
+    "success": "המשוב נשלח. תודה!",
+    "error": "לא ניתן לשלוח את המשוב."
+  },
   "docsPage": {
     "title": "תיעוד",
     "searchPlaceholder": "חיפוש בסעיפים…",

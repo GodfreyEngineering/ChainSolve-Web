@@ -13,11 +13,8 @@ import { ABOUT_WINDOW_ID } from './AboutModal'
 import { DOCS_WINDOW_ID } from './DocsSearchModal'
 import { AI_COPILOT_WINDOW_ID } from '../../lib/aiCopilot/constants'
 
-const LazyBugReportModal = lazy(() =>
-  import('../BugReportModal').then((m) => ({ default: m.BugReportModal })),
-)
-const LazySuggestionModal = lazy(() =>
-  import('../SuggestionModal').then((m) => ({ default: m.SuggestionModal })),
+const LazyFeedbackModal = lazy(() =>
+  import('../FeedbackModal').then((m) => ({ default: m.FeedbackModal })),
 )
 const LazyAboutWindow = lazy(() => import('./AboutModal').then((m) => ({ default: m.AboutWindow })))
 const LazyConfirmDialog = lazy(() =>
@@ -175,8 +172,8 @@ export function AppHeader({
   const [includeImages, setIncludeImages] = useState(getIncludeImagesPref)
   const [includeTables, setIncludeTables] = useState(getIncludeTablesPref)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
-  const [bugReportOpen, setBugReportOpen] = useState(false)
-  const [suggestionOpen, setSuggestionOpen] = useState(false)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [feedbackType, setFeedbackType] = useState<'bug' | 'suggestion' | 'block_request'>('bug')
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [whatsNewOpen, setWhatsNewOpen] = useState(false)
   const [openDialogOpen, setOpenDialogOpen] = useState(false)
@@ -764,16 +761,10 @@ export function AppHeader({
       },
       { separator: true },
       {
-        label: t('menu.bugReport'),
+        label: t('menu.feedback'),
         onClick: () => {
-          setBugReportOpen(true)
-          setOpenMenu(null)
-        },
-      },
-      {
-        label: t('menu.suggest'),
-        onClick: () => {
-          setSuggestionOpen(true)
+          setFeedbackType('bug')
+          setFeedbackOpen(true)
           setOpenMenu(null)
         },
       },
@@ -1188,14 +1179,13 @@ export function AppHeader({
         </>
       )}
 
-      {bugReportOpen && (
+      {feedbackOpen && (
         <Suspense fallback={null}>
-          <LazyBugReportModal open onClose={() => setBugReportOpen(false)} />
-        </Suspense>
-      )}
-      {suggestionOpen && (
-        <Suspense fallback={null}>
-          <LazySuggestionModal open onClose={() => setSuggestionOpen(false)} />
+          <LazyFeedbackModal
+            open
+            onClose={() => setFeedbackOpen(false)}
+            initialType={feedbackType}
+          />
         </Suspense>
       )}
       {isWinOpen(ABOUT_WINDOW_ID) && (
