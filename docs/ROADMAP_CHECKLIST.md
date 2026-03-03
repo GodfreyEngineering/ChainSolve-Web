@@ -2194,7 +2194,7 @@ Claude MUST:
     - no layout jank
     - no CSP issues
 
-- [ ] J4-2: App landing (/app) for signed-in user with no project open
+- [x] J4-2: App landing (/app) for signed-in user with no project open
   - Main header + helpful dashboard:
     - projects, explore, docs, onboarding checklist
     - profile stats and quick actions
