@@ -2413,7 +2413,7 @@ Claude MUST:
   - No nags unless leaving with unsaved changes
   - Acceptance: frictionless.
 
-- [ ] L4-2: Pro-grade project file manager
+- [x] L4-2: Pro-grade project file manager
   - folder-like organization
   - duplicate/move/rename
   - bulk operations
