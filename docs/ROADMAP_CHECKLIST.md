@@ -2213,7 +2213,7 @@ Claude MUST:
 ---
 
 ## K0 — Project header ergonomics and shortcuts
-- [ ] K0-1: Add undo/redo icons + open + save-as buttons in project header (top left near save)
+- [x] K0-1: Add undo/redo icons + open + save-as buttons in project header (top left near save)
   - Must look neat, compact, and consistent with icon style.
   - Add tooltips and shortcuts list.
   - Acceptance:
