@@ -41,7 +41,21 @@
     "onboarding": "Getting Started",
     "statProjects": "Projects",
     "statPlan": "Plan",
-    "statMemberSince": "Member since"
+    "statMemberSince": "Member since",
+    "guideDocs": "Documentation",
+    "docs": "Documentation",
+    "docsDesc": "Guides, block reference, and keyboard shortcuts.",
+    "docsCta": "Open Docs",
+    "subscription": "Subscription",
+    "currentPlan": "Current plan",
+    "trialEnds": "Trial ends",
+    "renews": "Renews",
+    "trialExpired": "Your trial has expired. Upgrade to keep full access.",
+    "trialEndsIn": "Your trial ends in {{count}} day. Upgrade to keep full access.",
+    "trialEndsIn_other": "Your trial ends in {{count}} days. Upgrade to keep full access.",
+    "upgrade": "Upgrade \u2014 \u00a310/mo",
+    "manageBilling": "Manage billing",
+    "redirecting": "Redirecting\u2026"
   },
   "contact": {
     "support": "Support",

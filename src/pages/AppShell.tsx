@@ -45,7 +45,6 @@ import {
 import {
   canCreateProject,
   getEntitlements,
-  isPro,
   isReadOnly,
   resolveEffectivePlan,
   showBillingBanner,
@@ -209,13 +208,14 @@ const btnSmallPrimary: React.CSSProperties = {
 }
 const btnDisabled: React.CSSProperties = { opacity: 0.55, cursor: 'not-allowed' }
 
-type GuideAction = 'scratch' | 'settings' | 'explore' | 'import'
+type GuideAction = 'scratch' | 'settings' | 'explore' | 'import' | 'docs'
 
 const GUIDE_LINKS: { key: string; icon: string; action: GuideAction }[] = [
-  { key: 'home.guideScratch', icon: '⟁', action: 'scratch' },
-  { key: 'home.guideSettings', icon: '⚙', action: 'settings' },
-  { key: 'home.guideExplore', icon: '◈', action: 'explore' },
-  { key: 'home.guideImport', icon: '↥', action: 'import' },
+  { key: 'home.guideScratch', icon: '\u27C1', action: 'scratch' },
+  { key: 'home.guideDocs', icon: '\u2139', action: 'docs' },
+  { key: 'home.guideExplore', icon: '\u25C8', action: 'explore' },
+  { key: 'home.guideSettings', icon: '\u2699', action: 'settings' },
+  { key: 'home.guideImport', icon: '\u21A5', action: 'import' },
 ]
 
 // ── AppShell component ────────────────────────────────────────────────────────
@@ -728,8 +728,8 @@ export default function AppShell() {
           }}
         >
           {trialDaysLeft <= 0
-            ? 'Your trial has expired. Upgrade to keep full access.'
-            : `Your trial ends in ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'}. Upgrade to keep full access.`}
+            ? t('home.trialExpired')
+            : t('home.trialEndsIn', { count: trialDaysLeft })}
         </div>
       )}
 
@@ -931,7 +931,7 @@ export default function AppShell() {
 
         {/* ── Subscription card ── */}
         <div style={cardStyle}>
-          <p style={sectionLabel}>Subscription</p>
+          <p style={sectionLabel}>{t('home.subscription')}</p>
           {billingError && <div style={errorBox}>{billingError}</div>}
           <div
             style={{
@@ -944,13 +944,13 @@ export default function AppShell() {
           >
             <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Current plan</span>
+                <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>{t('home.currentPlan')}</span>
                 <PlanBadge plan={plan} />
               </div>
               {periodEnd && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                   <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>
-                    {plan === 'trialing' ? 'Trial ends' : 'Renews'}
+                    {plan === 'trialing' ? t('home.trialEnds') : t('home.renews')}
                   </span>
                   <span style={{ fontWeight: 500 }}>{periodEnd}</span>
                 </div>
@@ -963,7 +963,7 @@ export default function AppShell() {
                   disabled={billingLoading}
                   onClick={() => void callBillingApi('/api/stripe/create-checkout-session')}
                 >
-                  {billingLoading ? 'Redirecting…' : 'Upgrade — £10/mo'}
+                  {billingLoading ? t('home.redirecting') : t('home.upgrade')}
                 </button>
               )}
               {canManage && (
@@ -972,7 +972,7 @@ export default function AppShell() {
                   disabled={billingLoading}
                   onClick={() => void callBillingApi('/api/stripe/create-portal-session')}
                 >
-                  {billingLoading ? 'Redirecting…' : 'Manage billing'}
+                  {billingLoading ? t('home.redirecting') : t('home.manageBilling')}
                 </button>
               )}
             </div>
@@ -1224,6 +1224,9 @@ export default function AppShell() {
                     case 'explore':
                       navigate('/explore')
                       break
+                    case 'docs':
+                      navigate('/docs')
+                      break
                     case 'import':
                       importRef.current?.click()
                       break
@@ -1258,19 +1261,29 @@ export default function AppShell() {
             <p style={{ ...sectionLabel, margin: '0 0 0.35rem' }}>{t('home.explore')}</p>
             <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.6 }}>{t('home.exploreDesc')}</p>
           </div>
-          {isPro(plan) ? (
-            <button style={btnSecondary} onClick={() => navigate('/explore')}>
-              {t('home.exploreCta')}
-            </button>
-          ) : (
-            <button
-              style={{ ...btnSecondary, opacity: 0.65, cursor: 'not-allowed' }}
-              disabled
-              title={t('home.exploreLocked')}
-            >
-              {t('home.exploreLocked')}
-            </button>
-          )}
+          <button style={btnSecondary} onClick={() => navigate('/explore')}>
+            {t('home.exploreCta')}
+          </button>
+        </div>
+
+        {/* ── Documentation CTA ── */}
+        <div
+          style={{
+            ...cardStyle,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+          }}
+        >
+          <div>
+            <p style={{ ...sectionLabel, margin: '0 0 0.35rem' }}>{t('home.docs')}</p>
+            <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.6 }}>{t('home.docsDesc')}</p>
+          </div>
+          <button style={btnSecondary} onClick={() => navigate('/docs')}>
+            {t('home.docsCta')}
+          </button>
         </div>
       </main>
     </div>

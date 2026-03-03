@@ -41,7 +41,21 @@
     "onboarding": "Per iniziare",
     "statProjects": "Progetti",
     "statPlan": "Piano",
-    "statMemberSince": "Membro dal"
+    "statMemberSince": "Membro dal",
+    "guideDocs": "Documentazione",
+    "docs": "Documentazione",
+    "docsDesc": "Guide, riferimento blocchi e scorciatoie da tastiera.",
+    "docsCta": "Apri Docs",
+    "subscription": "Abbonamento",
+    "currentPlan": "Piano attuale",
+    "trialEnds": "Fine prova",
+    "renews": "Rinnovo",
+    "trialExpired": "La tua prova \u00e8 scaduta. Aggiorna per mantenere l'accesso completo.",
+    "trialEndsIn": "La tua prova termina tra {{count}} giorno. Aggiorna per mantenere l'accesso.",
+    "trialEndsIn_other": "La tua prova termina tra {{count}} giorni. Aggiorna per mantenere l'accesso.",
+    "upgrade": "Aggiorna \u2014 \u00a310/mese",
+    "manageBilling": "Gestisci fatturazione",
+    "redirecting": "Reindirizzamento\u2026"
   },
   "contact": {
     "support": "Assistenza",

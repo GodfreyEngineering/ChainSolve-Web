@@ -41,7 +41,21 @@
     "onboarding": "Erste Schritte",
     "statProjects": "Projekte",
     "statPlan": "Plan",
-    "statMemberSince": "Mitglied seit"
+    "statMemberSince": "Mitglied seit",
+    "guideDocs": "Dokumentation",
+    "docs": "Dokumentation",
+    "docsDesc": "Anleitungen, Block-Referenz und Tastenkombinationen.",
+    "docsCta": "Docs \u00f6ffnen",
+    "subscription": "Abonnement",
+    "currentPlan": "Aktueller Plan",
+    "trialEnds": "Testphase endet",
+    "renews": "Verl\u00e4ngert sich",
+    "trialExpired": "Ihre Testphase ist abgelaufen. Upgraden Sie, um vollen Zugang zu behalten.",
+    "trialEndsIn": "Ihre Testphase endet in {{count}} Tag. Upgraden Sie, um vollen Zugang zu behalten.",
+    "trialEndsIn_other": "Ihre Testphase endet in {{count}} Tagen. Upgraden Sie, um vollen Zugang zu behalten.",
+    "upgrade": "Upgrade \u2014 \u00a310/Mo.",
+    "manageBilling": "Abrechnung verwalten",
+    "redirecting": "Weiterleitung\u2026"
   },
   "contact": {
     "support": "Support",

@@ -41,7 +41,21 @@
     "onboarding": "Pour commencer",
     "statProjects": "Projets",
     "statPlan": "Forfait",
-    "statMemberSince": "Membre depuis"
+    "statMemberSince": "Membre depuis",
+    "guideDocs": "Documentation",
+    "docs": "Documentation",
+    "docsDesc": "Guides, r\u00e9f\u00e9rence des blocs et raccourcis clavier.",
+    "docsCta": "Ouvrir la doc",
+    "subscription": "Abonnement",
+    "currentPlan": "Forfait actuel",
+    "trialEnds": "Fin de l'essai",
+    "renews": "Renouvellement",
+    "trialExpired": "Votre essai a expir\u00e9. Passez \u00e0 la version sup\u00e9rieure pour conserver l'acc\u00e8s.",
+    "trialEndsIn": "Votre essai se termine dans {{count}} jour. Passez \u00e0 la version sup\u00e9rieure.",
+    "trialEndsIn_other": "Votre essai se termine dans {{count}} jours. Passez \u00e0 la version sup\u00e9rieure.",
+    "upgrade": "Passer au Pro \u2014 \u00a310/mois",
+    "manageBilling": "G\u00e9rer la facturation",
+    "redirecting": "Redirection\u2026"
   },
   "contact": {
     "support": "Assistance",
