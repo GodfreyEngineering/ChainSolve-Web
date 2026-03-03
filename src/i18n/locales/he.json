@@ -212,6 +212,15 @@
     "seatUnlimited": "ללא הגבלה",
     "seatLimitReached": "הגעת למגבלת המקומות"
   },
+  "shortcuts": {
+    "global": "כללי",
+    "canvas": "קנבס",
+    "groupSelected": "קבץ נבחרים",
+    "ungroupSelected": "פרק קבוצה",
+    "toggleDock": "הצג/הסתר פאנל תחתון",
+    "collapseGroup": "כווץ/הרחב קבוצה",
+    "hideSelected": "הסתר/הצג נבחרים"
+  },
   "toolbar": {
     "graphHealth": "סטטוס הגרף",
     "bgDots": "Background dots",

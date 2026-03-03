@@ -507,7 +507,12 @@ export function VariablesPanel({ open, onClose }: VariablesPanelProps) {
           <button style={btnSmall} onClick={handleAdd}>
             + {t('variablesPanel.add', 'Add')}
           </button>
-          <button style={{ ...btnSmall, border: 'none' }} onClick={onClose}>
+          <button
+            style={{ ...btnSmall, border: 'none' }}
+            onClick={onClose}
+            title={t('ui.close')}
+            aria-label={t('ui.close')}
+          >
             &times;
           </button>
         </div>

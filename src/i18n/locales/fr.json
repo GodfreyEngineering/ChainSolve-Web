@@ -729,7 +729,13 @@
     "hint": "↑↓ naviguer · ↵ exécuter · ESC fermer"
   },
   "shortcuts": {
-    "global": "Global"
+    "global": "Global",
+    "canvas": "Canevas",
+    "groupSelected": "Grouper la selection",
+    "ungroupSelected": "Degrouper la selection",
+    "toggleDock": "Basculer le panneau inferieur",
+    "collapseGroup": "Replier/deplier le groupe",
+    "hideSelected": "Masquer/afficher la selection"
   },
   "toolbar": {
     "label": "Barre d'outils du canevas",

@@ -28,8 +28,52 @@ export function KeyboardShortcutsModal({ open, onClose, actions }: Props) {
       },
     ]
 
+    const canvasGroup = t('shortcuts.canvas')
+    const canvasActions: PaletteAction[] = [
+      {
+        id: 'canvas:group',
+        label: t('shortcuts.groupSelected'),
+        group: canvasGroup,
+        shortcut: 'Ctrl+G',
+        disabled: false,
+        execute: () => {},
+      },
+      {
+        id: 'canvas:ungroup',
+        label: t('shortcuts.ungroupSelected'),
+        group: canvasGroup,
+        shortcut: 'Ctrl+Shift+G',
+        disabled: false,
+        execute: () => {},
+      },
+      {
+        id: 'canvas:toggleDock',
+        label: t('shortcuts.toggleDock'),
+        group: canvasGroup,
+        shortcut: 'Ctrl+Shift+D',
+        disabled: false,
+        execute: () => {},
+      },
+      {
+        id: 'canvas:collapseGroup',
+        label: t('shortcuts.collapseGroup'),
+        group: canvasGroup,
+        shortcut: 'Ctrl+Alt+G',
+        disabled: false,
+        execute: () => {},
+      },
+      {
+        id: 'canvas:hideSelected',
+        label: t('shortcuts.hideSelected'),
+        group: canvasGroup,
+        shortcut: 'Space',
+        disabled: false,
+        execute: () => {},
+      },
+    ]
+
     const withShortcut = actions.filter((a) => a.shortcut)
-    const all = [...globalActions, ...withShortcut]
+    const all = [...globalActions, ...canvasActions, ...withShortcut]
 
     const map = new Map<string, PaletteAction[]>()
     for (const a of all) {

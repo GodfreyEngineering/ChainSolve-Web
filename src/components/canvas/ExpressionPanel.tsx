@@ -55,7 +55,12 @@ export function ExpressionPanel({ nodeId, nodes, edges, computed, onClose }: Exp
         <div style={headerStyle}>
           <span style={titleStyle}>{t('expressionPanel.title')}</span>
           <HelpLink section="exports" style={{ marginLeft: 'auto', marginRight: 4 }} />
-          <button style={closeBtnStyle} onClick={onClose}>
+          <button
+            style={closeBtnStyle}
+            onClick={onClose}
+            title={t('ui.close')}
+            aria-label={t('ui.close')}
+          >
             &times;
           </button>
         </div>
@@ -71,7 +76,12 @@ export function ExpressionPanel({ nodeId, nodes, edges, computed, onClose }: Exp
       <div style={headerStyle}>
         <span style={titleStyle}>{t('expressionPanel.title')}</span>
         <HelpLink section="exports" style={{ marginLeft: 'auto', marginRight: 4 }} />
-        <button style={closeBtnStyle} onClick={onClose}>
+        <button
+          style={closeBtnStyle}
+          onClick={onClose}
+          title={t('ui.close')}
+          aria-label={t('ui.close')}
+        >
           &times;
         </button>
       </div>

@@ -748,7 +748,13 @@
     "hint": "↑↓ navigate · ↵ execute · ESC close"
   },
   "shortcuts": {
-    "global": "Global"
+    "global": "Global",
+    "canvas": "Canvas",
+    "groupSelected": "Group selected",
+    "ungroupSelected": "Ungroup selected",
+    "toggleDock": "Toggle bottom dock",
+    "collapseGroup": "Collapse/expand group",
+    "hideSelected": "Hide/show selected"
   },
   "toolbar": {
     "label": "Canvas toolbar",

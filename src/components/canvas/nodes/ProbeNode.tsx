@@ -215,10 +215,15 @@ function ProbeNodeInner({ id, data, selected }: NodeProps) {
           borderTop: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        <button className="nodrag" onClick={handleCopy} style={footerBtn}>
+        <button
+          className="nodrag"
+          onClick={handleCopy}
+          style={footerBtn}
+          title="Copy value to clipboard"
+        >
           Copy
         </button>
-        <button className="nodrag" onClick={handleCopyJson} style={footerBtn}>
+        <button className="nodrag" onClick={handleCopyJson} style={footerBtn} title="Copy as JSON">
           JSON
         </button>
       </div>

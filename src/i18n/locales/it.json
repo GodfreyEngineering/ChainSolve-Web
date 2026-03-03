@@ -729,7 +729,13 @@
     "hint": "↑↓ navigare · ↵ eseguire · ESC chiudere"
   },
   "shortcuts": {
-    "global": "Globale"
+    "global": "Globale",
+    "canvas": "Canvas",
+    "groupSelected": "Raggruppa selezione",
+    "ungroupSelected": "Separa gruppo",
+    "toggleDock": "Attiva/disattiva pannello inferiore",
+    "collapseGroup": "Comprimi/espandi gruppo",
+    "hideSelected": "Nascondi/mostra selezione"
   },
   "toolbar": {
     "label": "Barra degli strumenti del canvas",

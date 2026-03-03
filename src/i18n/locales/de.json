@@ -729,7 +729,13 @@
     "hint": "↑↓ navigieren · ↵ ausführen · ESC schließen"
   },
   "shortcuts": {
-    "global": "Global"
+    "global": "Global",
+    "canvas": "Zeichenfläche",
+    "groupSelected": "Auswahl gruppieren",
+    "ungroupSelected": "Gruppierung aufheben",
+    "toggleDock": "Unteres Dock umschalten",
+    "collapseGroup": "Gruppe ein-/ausklappen",
+    "hideSelected": "Auswahl ein-/ausblenden"
   },
   "toolbar": {
     "label": "Zeichenflächen-Symbolleiste",

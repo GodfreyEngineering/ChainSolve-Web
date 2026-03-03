@@ -729,7 +729,13 @@
     "hint": "↑↓ navegar · ↵ ejecutar · ESC cerrar"
   },
   "shortcuts": {
-    "global": "Global"
+    "global": "Global",
+    "canvas": "Lienzo",
+    "groupSelected": "Agrupar seleccion",
+    "ungroupSelected": "Desagrupar seleccion",
+    "toggleDock": "Alternar panel inferior",
+    "collapseGroup": "Contraer/expandir grupo",
+    "hideSelected": "Ocultar/mostrar seleccion"
   },
   "toolbar": {
     "label": "Barra de herramientas del lienzo",

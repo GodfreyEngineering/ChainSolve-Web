@@ -408,9 +408,10 @@ export function AppHeader({
         : [{ label: t('project.noRecent'), disabled: true, onClick: () => {} }]
 
     return [
-      { label: t('menu.newProject'), onClick: handleNewProject },
+      { label: t('menu.newProject'), shortcut: 'Ctrl+N', onClick: handleNewProject },
       {
         label: t('menu.open'),
+        shortcut: 'Ctrl+O',
         onClick: () => {
           setOpenMenu(null)
           setOpenDialogOpen(true)
@@ -430,6 +431,7 @@ export function AppHeader({
       },
       {
         label: t('menu.saveAs'),
+        shortcut: 'Ctrl+Shift+S',
         disabled: readOnly,
         onClick: () => {
           setOpenMenu(null)
@@ -812,14 +814,24 @@ export function AppHeader({
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      const mod = e.ctrlKey || e.metaKey
+      if (mod && e.key === 'k') {
         e.preventDefault()
         setPaletteOpen((prev) => !prev)
+      } else if (mod && e.key === 'n' && !e.shiftKey) {
+        e.preventDefault()
+        handleNewProject()
+      } else if (mod && e.key === 'o' && !e.shiftKey) {
+        e.preventDefault()
+        setOpenDialogOpen(true)
+      } else if (mod && e.shiftKey && e.key === 'S') {
+        e.preventDefault()
+        if (!readOnly) setSaveAsOpen(true)
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [])
+  }, [handleNewProject, readOnly])
 
   // ── Render ──────────────────────────────────────────────────────────────────
 

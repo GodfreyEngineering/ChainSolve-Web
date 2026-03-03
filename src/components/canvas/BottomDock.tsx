@@ -183,6 +183,8 @@ export function BottomDock({ panels, collapsed = false, onToggleCollapsed }: Bot
             <button
               key={panel.id}
               onClick={() => switchTab(panel.id)}
+              title={panel.label}
+              aria-label={panel.label}
               style={{
                 ...tabBtnStyle,
                 ...(panel.id === activeTab ? tabBtnActiveStyle : {}),
