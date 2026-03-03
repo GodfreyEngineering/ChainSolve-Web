@@ -2467,7 +2467,7 @@ Claude MUST:
 ---
 
 ## M2 — Supabase migrations: “baseline schema” for blank projects
-- [ ] M2-1: Create a single baseline migration for fresh Supabase installs
+- [x] M2-1: Create a single baseline migration for fresh Supabase installs
   - New file: `supabase/migrations/0001_baseline_schema.sql`
   - Contains everything required for a blank project:
     - all tables, indexes, triggers, functions, RLS policies, storage bucket policy notes (as applicable)
