@@ -2037,7 +2037,7 @@ Claude MUST:
 ---
 
 ## I8 — Enterprise differentiators (make it irresistible)
-- [ ] I8-1: Enterprise features brainstorm and implementation plan
+- [x] I8-1: Enterprise features brainstorm and implementation plan
   - Admin policy defaults for org users
   - Feature locks
   - Org-only Explore
