@@ -2170,7 +2170,7 @@ Claude MUST:
     - Roles enforced server-side (not cosmetic).
     - Easy to test each role.
 
-- [ ] J3-2: Plan badge redesign (visual polish + rules)
+- [x] J3-2: Plan badge redesign (visual polish + rules)
   - Free badge: grey/white, boring; display name not bold
   - Pro badge: gold, shiny animated; display name bold
   - Enterprise badge: clean premium; display name premium; role prefix/suffix controlled by enterprise admin
