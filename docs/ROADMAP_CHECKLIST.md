@@ -2493,7 +2493,7 @@ Claude MUST:
 ---
 
 ## M4 — Guardrails (prevent regressions)
-- [ ] M4-1: Enforce adapter boundary via lint
+- [x] M4-1: Enforce adapter boundary via lint
   - ESLint `no-restricted-imports` blocks Supabase imports in UI folders
 - [ ] M4-2: Centralize env validation
   - `src/lib/env.ts` validates required client env
