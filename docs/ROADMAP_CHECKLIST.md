@@ -2367,7 +2367,7 @@ Claude MUST:
     - terms/privacy accessible
     - no blank pages
 
-- [ ] L1-2: Terms/Privacy pages fully working and robust
+- [x] L1-2: Terms/Privacy pages fully working and robust
   - Ensure acceptance recording never fails silently.
   - Acceptance: no “Failed to record acceptance” regressions.
 
