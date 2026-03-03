@@ -896,6 +896,54 @@ export function AppHeader({
             </button>
           )}
 
+          {/* K0-1: Undo / Redo / Open / Save As buttons */}
+          <span style={headerDividerStyle} />
+          <button
+            onClick={() => canvasRef.current?.undo()}
+            disabled={readOnly}
+            style={{
+              ...headerIconBtnStyle(readOnly),
+              fontSize: '0.82rem',
+              padding: '0.1rem 0.3rem',
+            }}
+            title={`${t('menu.undo')} (Ctrl+Z)`}
+            aria-label={t('menu.undo')}
+          >
+            {'\u21B6'}
+          </button>
+          <button
+            onClick={() => canvasRef.current?.redo()}
+            disabled={readOnly}
+            style={{
+              ...headerIconBtnStyle(readOnly),
+              fontSize: '0.82rem',
+              padding: '0.1rem 0.3rem',
+            }}
+            title={`${t('menu.redo')} (Ctrl+Shift+Z)`}
+            aria-label={t('menu.redo')}
+          >
+            {'\u21B7'}
+          </button>
+          <span style={headerDividerStyle} />
+          <button
+            onClick={() => setOpenDialogOpen(true)}
+            style={headerIconBtnStyle(false)}
+            title={`${t('menu.open')} (Ctrl+O)`}
+            aria-label={t('menu.open')}
+          >
+            {t('menu.open')}
+          </button>
+          {!readOnly && (
+            <button
+              onClick={() => setSaveAsOpen(true)}
+              style={headerIconBtnStyle(false)}
+              title={t('menu.saveAs')}
+              aria-label={t('menu.saveAs')}
+            >
+              {t('menu.saveAs')}
+            </button>
+          )}
+
           {/* Autosave toggle */}
           {projectId && !readOnly && (
             <label style={autosaveToggleStyle} title={t('canvas.autosaveToggle')}>
@@ -1163,6 +1211,31 @@ function saveButtonStyle(dirty: boolean): React.CSSProperties {
     fontSize: '0.68rem',
     fontWeight: 600,
     fontFamily: 'inherit',
+  }
+}
+
+const headerDividerStyle: React.CSSProperties = {
+  width: 1,
+  height: 16,
+  background: 'var(--border)',
+  flexShrink: 0,
+}
+
+function headerIconBtnStyle(disabled: boolean): React.CSSProperties {
+  return {
+    padding: '0.12rem 0.45rem',
+    borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--border)',
+    background: 'transparent',
+    color: disabled ? 'var(--text-faint)' : 'var(--text-muted)',
+    cursor: disabled ? 'default' : 'pointer',
+    fontSize: '0.68rem',
+    fontWeight: 600,
+    lineHeight: 1,
+    fontFamily: 'inherit',
+    opacity: disabled ? 0.4 : 1,
+    transition: 'color 0.12s, border-color 0.12s',
+    whiteSpace: 'nowrap',
   }
 }
 
