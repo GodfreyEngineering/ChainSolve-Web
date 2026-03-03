@@ -2117,7 +2117,7 @@ Claude MUST:
     - No blank profiles.
     - All user-facing text i18n’d.
 
-- [ ] J1-2: Captcha integration on signup/login/reset
+- [x] J1-2: Captcha integration on signup/login/reset
   - Implement captcha (Turnstile or hCaptcha) in a CSP-safe way.
   - Ensure captcha works without weakening CSP.
   - Acceptance:
