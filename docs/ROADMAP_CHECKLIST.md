@@ -2380,7 +2380,7 @@ Claude MUST:
   - consistent brand identity
   - Acceptance: polished and correct.
 
-- [ ] L2-2: SEO for multiple countries
+- [x] L2-2: SEO for multiple countries
   - hreflang strategy for docs pages
   - localized docs scaffolding
   - Acceptance: international SEO baseline.
