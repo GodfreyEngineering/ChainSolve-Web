@@ -2098,7 +2098,7 @@ Claude MUST:
 ---
 
 ## J1 — Professional signup flow (multi-step, first-run defaults)
-- [ ] J1-1: Signup wizard (multi-step) with full profile creation
+- [x] J1-1: Signup wizard (multi-step) with full profile creation
   - On signup collect:
     - email + password
     - display name
