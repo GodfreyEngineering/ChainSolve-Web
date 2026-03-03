@@ -2483,7 +2483,7 @@ Claude MUST:
 ---
 
 ## M3 — Repo structure + docs hub (professional and human)
-- [ ] M3-1: Rewrite root README + docs hub
+- [x] M3-1: Rewrite root README + docs hub
   - root `README.md`: what it is, how to run, verify-ci, env setup
   - `docs/README.md`: links to requirements/architecture/security/exports/AI
 - [ ] M3-2: Add standard repo docs
