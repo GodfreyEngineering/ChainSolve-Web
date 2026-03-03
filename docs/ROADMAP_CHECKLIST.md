@@ -2303,7 +2303,7 @@ Claude MUST:
 ---
 
 ## K5 — Content safety: “offensive content” prevention hooks
-- [ ] K5-1: Offensive display name/avatar enforcement and reporting
+- [x] K5-1: Offensive display name/avatar enforcement and reporting
   - Block obvious offensive names at entry
   - Add reporting flow for:
     - display names
