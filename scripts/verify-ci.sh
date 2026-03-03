@@ -71,6 +71,10 @@ section "npm audit (zero vulnerabilities)"
 npm audit --audit-level=high || fail "npm audit"
 pass "npm audit"
 
+section "License inventory check"
+node scripts/generate-licenses.mjs --check || fail "license inventory"
+pass "license inventory"
+
 section "Prettier format check"
 npm run format:check || fail "prettier"
 pass "prettier"
