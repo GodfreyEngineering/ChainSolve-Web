@@ -2144,7 +2144,7 @@ Claude MUST:
 ---
 
 ## J2 — Account vs ChainSolve settings separation (and password-protected billing)
-- [ ] J2-1: Split Account Settings vs ChainSolve Settings into separate windows
+- [x] J2-1: Split Account Settings vs ChainSolve Settings into separate windows
   - Account Settings (security-sensitive):
     - billing/plan management
     - password change / re-auth
