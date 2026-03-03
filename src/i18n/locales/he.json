@@ -27,7 +27,7 @@
     "confirmDestructive": "זה כולל שינויים הרסניים. להחיל בכל זאת?",
     "confirmMedium": "זה כולל שינויים בסיכון בינוני. לבדוק ולהחיל?",
     "upgradeTitle": "שדרג ל-Pro",
-    "upgradeBody": "עוזר ה-AI הוא תכונת Pro. שדרג כדי לפתוח בניית גרפים בעזרת AI.",
+    "upgradeBody": "עוזר ה-AI דורש תוכנית Pro.",
     "quickActions": "צ׳אט",
     "fixGraph": "תקן עם Copilot",
     "explainNode": "הסבר",
@@ -120,7 +120,7 @@
     "resetCachesDesc": "נקה את כל מפתחות ה-localStorage של ChainSolve: העדפות, מועדפים, MRU, גיאומטריית חלונות וסשן ניטור.",
     "resetCachesBtn": "אפס מטמון",
     "resetCachesSuccess": "נוקו {{count}} מפתח(ות) מטמון מקומי.",
-    "confirmLabel": "הקלד DELETE כדי לפתוח פעולות הרסניות",
+    "confirmLabel": "הקלד DELETE כדי להפעיל פעולות הרסניות",
     "confirmHint": "עליך להקליד DELETE בדיוק כדי להמשיך.",
     "deleting": "מוחק…",
     "resetting": "מאפס…"
@@ -234,7 +234,7 @@
     "retry": "נסה שוב",
     "reloadPage": "טען מחדש",
     "copyDiagnostics": "העתק אבחון",
-    "copied": "הועתק!"
+    "copied": "הועתק"
   },
   "themeOption": {
     "system": "מערכת",
@@ -306,7 +306,7 @@
     "copyText": "העתק טקסט",
     "copySymbolic": "העתק סמלי",
     "copyEquation": "העתק משוואה",
-    "copied": "!הועתק",
+    "copied": "הועתק",
     "noExpression": "אין ביטוי זמין עבור בלוק זה."
   },
   "help": {
@@ -397,7 +397,7 @@
     "descriptionPlaceholder": "צעדים לשחזור, התנהגות צפויה מול ממשית…",
     "submit": "שלח דיווח",
     "submitting": "שולח…",
-    "success": "דיווח התקלה נשלח. תודה!",
+    "success": "דיווח התקלה נשלח.",
     "error": "לא ניתן לשלוח את הדיווח.",
     "screenshotLabel": "צילום מסך (אופציונלי)",
     "attachScreenshot": "צרף צילום מסך…",
@@ -420,7 +420,7 @@
     "descriptionPlaceholder": "תאר את הרעיון, הבעיה שהוא פותר או מה שהיית רוצה לראות…",
     "submit": "שלח הצעה",
     "submitting": "שולח…",
-    "success": "ההצעה נשלחה. תודה!",
+    "success": "ההצעה נשלחה.",
     "error": "לא ניתן לשלוח את ההצעה.",
     "hint": "כל ההצעות נבדקות על ידי הצוות."
   },
@@ -458,7 +458,7 @@
   },
   "student": {
     "title": "רישיון סטודנט",
-    "description": "אמת את כתובת הדוא\"ל האוניברסיטאית שלך כדי לפתוח תכונות Pro בחינם למשך שנה.",
+    "description": "אמת את כתובת הדוא\"ל האוניברסיטאית שלך כדי לקבל תכונות Pro בחינם למשך שנה.",
     "emailPlaceholder": "you@university.edu",
     "verify": "שלח קוד",
     "codePlaceholder": "קוד בן 6 ספרות",

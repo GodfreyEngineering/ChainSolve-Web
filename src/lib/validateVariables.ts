@@ -23,12 +23,7 @@ export interface VariablesValidationResult {
   errors: string[]
 }
 
-/**
- * Validate a `VariablesMap` value (typically parsed from JSONB).
- *
- * Does not throw; returns `{ ok, errors }` so callers can decide how to
- * handle invalid data (log + reset, or surface to the user).
- */
+/** Validate a `VariablesMap` value (typically parsed from JSONB). */
 export function validateVariablesMap(vars: unknown): VariablesValidationResult {
   const errors: string[] = []
 

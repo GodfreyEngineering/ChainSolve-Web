@@ -1,9 +1,8 @@
 /**
  * Context Pack Minimizer (AI-3).
  *
- * Takes a graph + optional selection/diagnostics and returns the minimal
- * subgraph needed for a Copilot request. Strips unnecessary fields and
- * limits hop depth to keep token usage low and preserve privacy.
+ * Extracts the minimal subgraph needed for a Copilot request.
+ * Strips unnecessary fields and limits hop depth.
  */
 
 import type { Node, Edge } from '@xyflow/react'

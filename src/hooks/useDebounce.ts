@@ -1,8 +1,4 @@
-/**
- * useDebounce — returns a debounced copy of a value.
- *
- * E11-3: Used to debounce search inputs to avoid excessive API calls.
- */
+/** Debounce a value by `delayMs`. Used for search inputs (E11-3). */
 
 import { useState, useEffect } from 'react'
 

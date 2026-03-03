@@ -1,7 +1,6 @@
 # ChainSolve — Documentation
 
-> For a comprehensive doc index with purpose, audience, and content guide for
-> each document, see **[INDEX.md](INDEX.md)**.
+> See **[INDEX.md](INDEX.md)** for a guide to all docs.
 >
 > For first-time setup see [SETUP.md](SETUP.md).
 > For contributor workflow see [CONTRIBUTING.md](../CONTRIBUTING.md).

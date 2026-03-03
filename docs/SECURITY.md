@@ -270,11 +270,9 @@ Cloudflare Pages offers opt-in Web Analytics, which injects a JavaScript beacon
 (`beacon.min.js` from `static.cloudflareinsights.com`) into every page.
 **This feature is intentionally disabled** on ChainSolve.
 
-**Reason:** Enabling the beacon would require adding `static.cloudflareinsights.com`
-to `script-src` and `connect-src` in the Content Security Policy.  This weakens
-the CSP by allowing a third-party script and additional outbound connections that
-are not necessary for the application to function.  See `docs/DECISIONS/ADR-0002-csp-wasm-unsafe-eval.md`
-for the full CSP rationale.
+**Reason:** Enabling the beacon requires adding `static.cloudflareinsights.com`
+to `script-src` and `connect-src`, weakening CSP with an unnecessary third-party
+script.  See `docs/DECISIONS/ADR-0002-csp-wasm-unsafe-eval.md` for full rationale.
 
 **If Cloudflare Web Analytics is ever enabled:**
 

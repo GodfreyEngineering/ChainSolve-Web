@@ -15,13 +15,7 @@ export const MAX_TABLE_INPUT_ROWS = 10_000
 /** Maximum number of columns a TableInput node may hold. */
 export const MAX_TABLE_INPUT_COLS = 50
 
-/**
- * Clamp columns and rows to the declared limits.
- *
- * Returns the (possibly trimmed) data plus a flag indicating whether any
- * trimming occurred.  Safe to call on already-valid data — returns the
- * original arrays untouched when no trimming is needed.
- */
+/** Clamp columns and rows to the declared limits. Returns trimmed flag. */
 export function enforceTableLimits(
   columns: string[],
   rows: number[][],

@@ -1,8 +1,7 @@
 /**
  * canvasesStore.test.ts — Unit tests for multi-canvas sheet state (D13-2).
  *
- * Verifies state transitions for add, remove, reorder, and dirty tracking
- * to ensure sheet operations are robust.
+ * Covers add, remove, reorder, and dirty tracking.
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'

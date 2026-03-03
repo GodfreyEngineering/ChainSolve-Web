@@ -1,15 +1,11 @@
 # Enterprise Security Expectations
 
-This document describes the security model for ChainSolve organizations
-with enterprise policies enabled. It is intended for org administrators and
-security auditors.
-
 ## Policy Philosophy
 
-Organization policies can only **restrict** capabilities, never **grant**
-them. A free-tier user inside an enterprise org with `policy_ai_enabled=true`
-still cannot use AI -- their personal plan must also allow it. Policies
-act as an additional AND gate on top of plan-level entitlements.
+Organization policies **restrict** capabilities; they never grant them.
+A free user in an enterprise org with `policy_ai_enabled=true` still
+cannot use AI -- their plan must also allow it. Org policy is AND'd
+with plan entitlements.
 
 ## Policy Flags
 

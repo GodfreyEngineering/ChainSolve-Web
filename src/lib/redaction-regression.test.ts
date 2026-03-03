@@ -106,7 +106,7 @@ describe('Redaction regression: redactObject never leaks', () => {
   })
 })
 
-// ── isSecretKey: comprehensive key detection ─────────────────────────────────
+// ── isSecretKey: key detection ────────────────────────────────────────────────
 
 describe('Redaction regression: isSecretKey catches all patterns', () => {
   const SECRET_KEYS = [
