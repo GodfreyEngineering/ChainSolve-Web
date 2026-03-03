@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { canCreateCanvas, getEntitlements, type Plan } from '../../lib/entitlements'
 import type { CanvasRow } from '../../lib/canvases'
+import type { ViewMode } from '../../stores/canvasesStore'
 
 // ── Props ───────────────────────────────────────────────────────────────────
 
@@ -24,6 +25,10 @@ export interface SheetsBarProps {
   onDeleteCanvas: (canvasId: string) => void
   onDuplicateCanvas: (canvasId: string) => void
   onReorderCanvases?: (orderedIds: string[]) => void
+  /** K1-1: Current view mode. */
+  viewMode?: ViewMode
+  /** K1-1: Callback to change the view mode. */
+  onSetViewMode?: (mode: ViewMode) => void
 }
 
 // ── Component ───────────────────────────────────────────────────────────────
@@ -39,6 +44,8 @@ export function SheetsBar({
   onDeleteCanvas,
   onDuplicateCanvas,
   onReorderCanvases,
+  viewMode,
+  onSetViewMode,
 }: SheetsBarProps) {
   const isMobile = useIsMobile()
 
@@ -67,6 +74,8 @@ export function SheetsBar({
       onDeleteCanvas={onDeleteCanvas}
       onDuplicateCanvas={onDuplicateCanvas}
       onReorderCanvases={onReorderCanvases}
+      viewMode={viewMode}
+      onSetViewMode={onSetViewMode}
     />
   )
 }
@@ -84,6 +93,8 @@ function DesktopSheetsBar({
   onDeleteCanvas,
   onDuplicateCanvas,
   onReorderCanvases,
+  viewMode = 'fullscreen',
+  onSetViewMode,
 }: SheetsBarProps) {
   const { t } = useTranslation()
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -319,6 +330,32 @@ function DesktopSheetsBar({
           +
         </button>
       </div>
+      {/* K1-1: View mode toggle (only when >=2 sheets) */}
+      {canvases.length >= 2 && onSetViewMode && (
+        <div style={viewModeGroupStyle}>
+          <ViewModeBtn
+            active={viewMode === 'fullscreen'}
+            title={t('sheets.viewFullscreen')}
+            onClick={() => onSetViewMode('fullscreen')}
+          >
+            <ViewIconFullscreen />
+          </ViewModeBtn>
+          <ViewModeBtn
+            active={viewMode === 'tiled-h'}
+            title={t('sheets.viewTiledH')}
+            onClick={() => onSetViewMode('tiled-h')}
+          >
+            <ViewIconTiledH />
+          </ViewModeBtn>
+          <ViewModeBtn
+            active={viewMode === 'tiled-v'}
+            title={t('sheets.viewTiledV')}
+            onClick={() => onSetViewMode('tiled-v')}
+          >
+            <ViewIconTiledV />
+          </ViewModeBtn>
+        </div>
+      )}
       <span style={canvasCounterStyle}>{canvasCountLabel}</span>
 
       {/* Context menu */}
@@ -488,7 +525,105 @@ function MobileSheetsBar({
   )
 }
 
+// ── K1-1: View mode toggle button + mini layout icons ──────────────────────
+
+function ViewModeBtn({
+  active,
+  title,
+  onClick,
+  children,
+}: {
+  active: boolean
+  title: string
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button title={title} onClick={onClick} style={viewModeBtnStyle(active)}>
+      {children}
+    </button>
+  )
+}
+
+/** Single rectangle — fullscreen layout. */
+function ViewIconFullscreen() {
+  return (
+    <div
+      style={{
+        width: 12,
+        height: 9,
+        border: '1.5px solid currentColor',
+        borderRadius: 1,
+      }}
+    />
+  )
+}
+
+/** Two rectangles side-by-side — tiled horizontal. */
+function ViewIconTiledH() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        width: 12,
+        height: 9,
+        border: '1.5px solid currentColor',
+        borderRadius: 1,
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{ flex: 1, borderRight: '1px solid currentColor' }} />
+      <div style={{ flex: 1 }} />
+    </div>
+  )
+}
+
+/** Two rectangles stacked — tiled vertical. */
+function ViewIconTiledV() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: 12,
+        height: 9,
+        border: '1.5px solid currentColor',
+        borderRadius: 1,
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{ flex: 1, borderBottom: '1px solid currentColor' }} />
+      <div style={{ flex: 1 }} />
+    </div>
+  )
+}
+
 // ── Styles ──────────────────────────────────────────────────────────────────
+
+const viewModeGroupStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 1,
+  marginLeft: 'auto',
+  paddingRight: 4,
+  flexShrink: 0,
+}
+
+function viewModeBtnStyle(active: boolean): React.CSSProperties {
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 22,
+    height: 22,
+    border: 'none',
+    background: active ? 'var(--primary-dim)' : 'transparent',
+    color: active ? 'var(--primary)' : 'var(--text-muted)',
+    cursor: 'pointer',
+    borderRadius: 4,
+    padding: 0,
+    transition: 'color 0.15s, background 0.15s',
+  }
+}
 
 const canvasCounterStyle: React.CSSProperties = {
   fontSize: '0.72rem',

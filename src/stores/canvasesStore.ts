@@ -9,6 +9,8 @@
 import { create } from 'zustand'
 import type { CanvasRow } from '../lib/canvases'
 
+export type ViewMode = 'fullscreen' | 'tiled-v' | 'tiled-h'
+
 export interface CanvasesState {
   /** All canvases for the current project, sorted by position. */
   canvases: CanvasRow[]
@@ -18,6 +20,10 @@ export interface CanvasesState {
   dirtyCanvasIds: Set<string>
   /** True while the canvases list is loading. */
   loading: boolean
+  /** K1-1: Current sheet view mode (fullscreen, tiled vertical, tiled horizontal). */
+  viewMode: ViewMode
+  /** K1-1: Canvas ID shown in the secondary tiled pane (null = not set). */
+  secondaryCanvasId: string | null
 
   // ── Actions ───────────────────────────────────────────────────────────────
   setCanvases: (canvases: CanvasRow[]) => void
@@ -28,6 +34,8 @@ export interface CanvasesState {
   markCanvasDirty: (canvasId: string) => void
   markCanvasClean: (canvasId: string) => void
   setLoading: (loading: boolean) => void
+  setViewMode: (mode: ViewMode) => void
+  setSecondaryCanvasId: (id: string | null) => void
   reset: () => void
 }
 
@@ -36,6 +44,8 @@ export const useCanvasesStore = create<CanvasesState>((set) => ({
   activeCanvasId: null,
   dirtyCanvasIds: new Set(),
   loading: false,
+  viewMode: 'fullscreen',
+  secondaryCanvasId: null,
 
   setCanvases: (canvases) => set({ canvases }),
 
@@ -79,11 +89,17 @@ export const useCanvasesStore = create<CanvasesState>((set) => ({
 
   setLoading: (loading) => set({ loading }),
 
+  setViewMode: (mode) => set({ viewMode: mode }),
+
+  setSecondaryCanvasId: (id) => set({ secondaryCanvasId: id }),
+
   reset: () =>
     set({
       canvases: [],
       activeCanvasId: null,
       dirtyCanvasIds: new Set(),
       loading: false,
+      viewMode: 'fullscreen',
+      secondaryCanvasId: null,
     }),
 }))

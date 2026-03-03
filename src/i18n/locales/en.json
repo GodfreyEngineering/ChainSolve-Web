@@ -776,7 +776,14 @@
     "switchConfirmTitle": "Unsaved changes",
     "switchSave": "Save & switch",
     "switchDiscard": "Discard & switch",
-    "switchCancel": "Cancel"
+    "switchCancel": "Cancel",
+    "viewFullscreen": "Fullscreen",
+    "viewTiledH": "Tiled horizontal",
+    "viewTiledV": "Tiled vertical",
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "restore": "Restore",
+    "closePane": "Close pane"
   },
   "pdfExport": {
     "generating": "Generating PDF…",

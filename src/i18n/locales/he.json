@@ -206,7 +206,14 @@
     "switchConfirmTitle": "שינויים שלא נשמרו",
     "switchSave": "שמור ועבור",
     "switchDiscard": "בטל ועבור",
-    "switchCancel": "ביטול"
+    "switchCancel": "ביטול",
+    "viewFullscreen": "מסך מלא",
+    "viewTiledH": "פריסה אופקית",
+    "viewTiledV": "פריסה אנכית",
+    "minimize": "מזער",
+    "maximize": "הגדל",
+    "restore": "שחזר",
+    "closePane": "סגור חלונית"
   },
   "contextMenu": {
     "inspect": "בדיקה",

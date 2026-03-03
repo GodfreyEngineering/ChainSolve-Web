@@ -733,7 +733,14 @@
     "switchConfirmTitle": "Ungespeicherte Änderungen",
     "switchSave": "Speichern & wechseln",
     "switchDiscard": "Verwerfen & wechseln",
-    "switchCancel": "Abbrechen"
+    "switchCancel": "Abbrechen",
+    "viewFullscreen": "Vollbild",
+    "viewTiledH": "Horizontal gekachelt",
+    "viewTiledV": "Vertikal gekachelt",
+    "minimize": "Minimieren",
+    "maximize": "Maximieren",
+    "restore": "Wiederherstellen",
+    "closePane": "Bereich schließen"
   },
   "debugConsole": {
     "title": "Debug-Konsole",

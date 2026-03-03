@@ -733,7 +733,14 @@
     "switchConfirmTitle": "Modifications non enregistrées",
     "switchSave": "Enregistrer et basculer",
     "switchDiscard": "Abandonner et basculer",
-    "switchCancel": "Annuler"
+    "switchCancel": "Annuler",
+    "viewFullscreen": "Plein écran",
+    "viewTiledH": "Mosaïque horizontale",
+    "viewTiledV": "Mosaïque verticale",
+    "minimize": "Réduire",
+    "maximize": "Agrandir",
+    "restore": "Restaurer",
+    "closePane": "Fermer le volet"
   },
   "debugConsole": {
     "title": "Console de débogage",

@@ -733,7 +733,14 @@
     "switchConfirmTitle": "Modifiche non salvate",
     "switchSave": "Salva e cambia",
     "switchDiscard": "Scarta e cambia",
-    "switchCancel": "Annulla"
+    "switchCancel": "Annulla",
+    "viewFullscreen": "Schermo intero",
+    "viewTiledH": "Affiancato orizzontale",
+    "viewTiledV": "Affiancato verticale",
+    "minimize": "Riduci",
+    "maximize": "Ingrandisci",
+    "restore": "Ripristina",
+    "closePane": "Chiudi pannello"
   },
   "debugConsole": {
     "title": "Console di debug",

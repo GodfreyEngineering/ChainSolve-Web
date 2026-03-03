@@ -179,6 +179,9 @@ export interface CanvasAreaProps {
   onExplainNode?: (nodeId: string) => void
   /** Trigger "Insert blocks from prompt…" from context menu. */
   onInsertFromPrompt?: (x: number, y: number) => void
+
+  /** K1-1: Fired when a node drag ends — used for cross-sheet transfer detection. */
+  onNodeDragStop?: (event: React.MouseEvent, node: { id: string }) => void
 }
 
 /** Handle exposed by CanvasArea via forwardRef. */
@@ -423,6 +426,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     onExplainIssues,
     onExplainNode,
     onInsertFromPrompt,
+    onNodeDragStop: onNodeDragStopProp,
   },
   ref,
 ) {
@@ -1918,6 +1922,13 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     onConnect={readOnly ? undefined : onConnect}
                     isValidConnection={isValidConnection}
                     onNodeDragStart={readOnly ? undefined : onNodeDragStart}
+                    onNodeDragStop={
+                      readOnly
+                        ? undefined
+                        : onNodeDragStopProp
+                          ? (event, node) => onNodeDragStopProp(event, node)
+                          : undefined
+                    }
                     onNodeClick={onNodeClick}
                     onPaneClick={onPaneClick}
                     onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}

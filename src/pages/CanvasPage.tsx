@@ -74,6 +74,7 @@ import { useNetworkStatus } from '../hooks/useNetworkStatus'
 import { AutosaveScheduler } from '../lib/autosaveScheduler'
 import { usePreferencesStore } from '../stores/preferencesStore'
 import { SheetsBar } from '../components/app/SheetsBar'
+import { TiledCanvasLayout } from '../components/canvas/TiledCanvasLayout'
 import { AiDockPanel } from '../components/app/AiDockPanel'
 import { ConflictBanner } from '../components/app/ConflictBanner'
 import { UpgradeModal } from '../components/UpgradeModal'
@@ -157,6 +158,10 @@ export default function CanvasPage() {
   const updateCanvasInStore = useCanvasesStore((s) => s.updateCanvas)
   const markCanvasDirty = useCanvasesStore((s) => s.markCanvasDirty)
   const markCanvasClean = useCanvasesStore((s) => s.markCanvasClean)
+  const viewMode = useCanvasesStore((s) => s.viewMode)
+  const secondaryCanvasId = useCanvasesStore((s) => s.secondaryCanvasId)
+  const setViewMode = useCanvasesStore((s) => s.setViewMode)
+  const setSecondaryCanvasId = useCanvasesStore((s) => s.setSecondaryCanvasId)
   const resetCanvases = useCanvasesStore((s) => s.reset)
 
   // ── Variables store selectors ──────────────────────────────────────────────
@@ -235,6 +240,19 @@ export default function CanvasPage() {
   const conflictServerTs = useRef<string | null>(null)
   const offlineRetryTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const offlineRetryCount = useRef(0)
+
+  // ── K1-1: Secondary canvas state for tiled mode ──────────────────────────
+  const secondaryCanvasRef = useRef<CanvasAreaHandle>(null)
+  const [secondaryNodes, setSecondaryNodes] = useState<Node<NodeData>[]>([])
+  const [secondaryEdges, setSecondaryEdges] = useState<Edge[]>([])
+  const [focusedCanvasId, setFocusedCanvasId] = useState<string | null>(null)
+  const primaryPaneRef = useRef<HTMLDivElement>(null)
+  const secondaryPaneRef = useRef<HTMLDivElement>(null)
+
+  // K1-1: Track pane states (minimize/maximize) by canvas ID
+  const [paneStates, setPaneStates] = useState<
+    Record<string, 'normal' | 'minimized' | 'maximized'>
+  >({})
 
   // ── Export state ──────────────────────────────────────────────────────────
   const exportingRef = useRef(false)
@@ -390,6 +408,22 @@ export default function CanvasPage() {
         if (currentCanvasId && canvasExists) {
           await saveCanvasGraph(projectId, currentCanvasId, snapshot.nodes, snapshot.edges)
           markCanvasClean(currentCanvasId)
+        }
+
+        // K1-1: Also save secondary canvas if in tiled mode and dirty
+        const secId = canvasesState.secondaryCanvasId
+        if (
+          canvasesState.viewMode !== 'fullscreen' &&
+          secId &&
+          canvasesState.dirtyCanvasIds.has(secId) &&
+          secondaryCanvasRef.current
+        ) {
+          const secSnap = secondaryCanvasRef.current.getSnapshot()
+          const secExists = canvasesState.canvases.some((c) => c.id === secId)
+          if (secExists) {
+            await saveCanvasGraph(projectId, secId, secSnap.nodes, secSnap.edges)
+            markCanvasClean(secId)
+          }
         }
 
         // Save to legacy project.json (skip conflict check — already done above)
@@ -748,6 +782,189 @@ export default function CanvasPage() {
       }
     },
     [projectId, canvases, setCanvases, toast],
+  )
+
+  // ── K1-1: Tiled view mode handlers ─────────────────────────────────────────
+
+  // Load secondary canvas graph when entering tiled mode or switching secondary sheet
+  useEffect(() => {
+    if (viewMode === 'fullscreen' || !secondaryCanvasId || !projectId) return
+    let cancelled = false
+    void loadCanvasGraph(projectId, secondaryCanvasId).then((graph) => {
+      if (cancelled) return
+      setSecondaryNodes((graph.nodes ?? []) as Node<NodeData>[])
+      setSecondaryEdges((graph.edges ?? []) as Edge[])
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [viewMode, secondaryCanvasId, projectId])
+
+  // When the active canvas changes, set focused pane if not already set
+  useEffect(() => {
+    if (activeCanvasId && !focusedCanvasId) {
+      setFocusedCanvasId(activeCanvasId)
+    }
+  }, [activeCanvasId, focusedCanvasId])
+
+  const handleSetViewMode = useCallback(
+    (mode: import('../stores/canvasesStore').ViewMode) => {
+      if (mode === viewMode) return
+
+      // Save secondary pane before exiting tiled mode
+      if (mode === 'fullscreen' && viewMode !== 'fullscreen' && secondaryCanvasId && projectId) {
+        const snap = secondaryCanvasRef.current?.getSnapshot()
+        if (snap) {
+          void saveCanvasGraph(projectId, secondaryCanvasId, snap.nodes, snap.edges)
+          markCanvasClean(secondaryCanvasId)
+        }
+      }
+
+      setViewMode(mode)
+      setPaneStates({})
+
+      // When entering tiled mode, auto-pick secondary canvas
+      if (mode !== 'fullscreen' && !secondaryCanvasId) {
+        const other = canvases.find((c) => c.id !== activeCanvasId)
+        if (other) setSecondaryCanvasId(other.id)
+      }
+    },
+    [
+      viewMode,
+      secondaryCanvasId,
+      projectId,
+      activeCanvasId,
+      canvases,
+      setViewMode,
+      setSecondaryCanvasId,
+      markCanvasClean,
+    ],
+  )
+
+  const handleSecondaryGraphChange: NonNullable<CanvasAreaProps['onGraphChange']> =
+    useCallback(() => {
+      if (exportingRef.current) return
+      markDirty()
+      const secId = useCanvasesStore.getState().secondaryCanvasId
+      if (secId) markCanvasDirty(secId)
+      if (!readOnly && usePreferencesStore.getState().autosaveEnabled) {
+        autosaveScheduler.current.schedule()
+      }
+    }, [markDirty, markCanvasDirty, readOnly])
+
+  const handleToggleMinimize = useCallback((canvasId: string) => {
+    setPaneStates((prev) => ({
+      ...prev,
+      [canvasId]: prev[canvasId] === 'minimized' ? 'normal' : 'minimized',
+    }))
+  }, [])
+
+  const handleToggleMaximize = useCallback((canvasId: string) => {
+    setPaneStates((prev) => ({
+      ...prev,
+      [canvasId]: prev[canvasId] === 'maximized' ? 'normal' : 'maximized',
+    }))
+  }, [])
+
+  const handleClosePane = useCallback(() => {
+    // Exit tiled mode → fullscreen on the focused canvas
+    if (focusedCanvasId && focusedCanvasId !== activeCanvasId) {
+      // If user was focused on secondary, switch active to it
+      void handleSwitchCanvas(focusedCanvasId)
+    }
+    handleSetViewMode('fullscreen')
+  }, [focusedCanvasId, activeCanvasId, handleSwitchCanvas, handleSetViewMode])
+
+  // K1-1: Cross-sheet node transfer (drag block from one pane to another)
+  const handleNodeDragStop = useCallback(
+    (sourceCanvasId: string) => (event: React.MouseEvent) => {
+      if (viewMode === 'fullscreen') return
+
+      // Determine which pane the mouse landed in
+      const targetCanvasId = sourceCanvasId === activeCanvasId ? secondaryCanvasId : activeCanvasId
+      if (!targetCanvasId) return
+
+      const targetPaneEl =
+        sourceCanvasId === activeCanvasId ? secondaryPaneRef.current : primaryPaneRef.current
+      if (!targetPaneEl) return
+
+      const rect = targetPaneEl.getBoundingClientRect()
+      const { clientX, clientY } = event
+      const inTarget =
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
+      if (!inTarget) return
+
+      // Get source and target refs
+      const sourceRef = sourceCanvasId === activeCanvasId ? canvasRef : secondaryCanvasRef
+      const targetRef = sourceCanvasId === activeCanvasId ? secondaryCanvasRef : canvasRef
+      if (!sourceRef.current || !targetRef.current) return
+
+      const sourceSnap = sourceRef.current.getSnapshot()
+      const targetSnap = targetRef.current.getSnapshot()
+
+      // Transfer selected nodes
+      const selectedNodes = sourceSnap.nodes.filter((n) => n.selected)
+      if (selectedNodes.length === 0) return
+
+      const nodeIdSet = new Set(selectedNodes.map((n) => n.id))
+
+      // Internal edges (both endpoints in transfer set) move with nodes
+      const internalEdges = sourceSnap.edges.filter(
+        (e) => nodeIdSet.has(e.source) && nodeIdSet.has(e.target),
+      )
+
+      // Remove transferred nodes and all connected edges from source
+      const remainingNodes = sourceSnap.nodes.filter((n) => !nodeIdSet.has(n.id))
+      const remainingEdges = sourceSnap.edges.filter(
+        (e) => !nodeIdSet.has(e.source) && !nodeIdSet.has(e.target),
+      )
+
+      // Remap IDs to avoid collisions in target
+      const existingTargetIds = new Set(targetSnap.nodes.map((n) => n.id))
+      let nextId = Math.max(0, ...targetSnap.nodes.map((n) => parseInt(n.id) || 0)) + 1
+      const idMap = new Map<string, string>()
+      for (const n of selectedNodes) {
+        if (existingTargetIds.has(n.id)) {
+          let newId = String(nextId++)
+          while (existingTargetIds.has(newId)) newId = String(nextId++)
+          idMap.set(n.id, newId)
+          existingTargetIds.add(newId)
+        } else {
+          idMap.set(n.id, n.id)
+        }
+      }
+
+      const remappedNodes = selectedNodes.map((n) => ({
+        ...n,
+        id: idMap.get(n.id) ?? n.id,
+        selected: false,
+      }))
+
+      let edgeCounter = 0
+      const remappedEdges = internalEdges.map((e) => ({
+        ...e,
+        id: `transfer_${Date.now()}_${++edgeCounter}`,
+        source: idMap.get(e.source) ?? e.source,
+        target: idMap.get(e.target) ?? e.target,
+      }))
+
+      sourceRef.current.setSnapshot(remainingNodes, remainingEdges)
+      targetRef.current.setSnapshot(
+        [...targetSnap.nodes, ...remappedNodes],
+        [...targetSnap.edges, ...remappedEdges],
+      )
+
+      // Mark both dirty
+      markCanvasDirty(sourceCanvasId)
+      markCanvasDirty(targetCanvasId)
+      if (usePreferencesStore.getState().autosaveEnabled) {
+        autosaveScheduler.current.schedule()
+      }
+    },
+    [viewMode, activeCanvasId, secondaryCanvasId, markCanvasDirty],
   )
 
   // ── Export all-sheets orchestrator ─────────────────────────────────────────
@@ -1556,29 +1773,102 @@ export default function CanvasPage() {
           onDeleteCanvas={handleDeleteCanvas}
           onDuplicateCanvas={handleDuplicateCanvas}
           onReorderCanvases={readOnly ? undefined : handleReorderCanvases}
+          viewMode={viewMode}
+          onSetViewMode={handleSetViewMode}
         />
       )}
 
       {/* ── Canvas ─────────────────────────────────────────────────────────── */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
-        <CanvasArea
-          ref={canvasRef}
-          canvasId={activeCanvasId ?? undefined}
-          key={activeCanvasId ?? projectId ?? 'scratch'}
-          initialNodes={initNodes ?? INITIAL_NODES}
-          initialEdges={initEdges ?? INITIAL_EDGES}
-          onGraphChange={projectId && !readOnly ? handleGraphChange : undefined}
-          readOnly={readOnly}
-          plan={plan}
-          onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
-          onOpenGroups={() => setTemplateManagerOpen(true)}
-          onOpenThemes={() => openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })}
-          onOpenMaterials={() => setMaterialWizardOpen(true)}
-          onFixWithCopilot={() => openAiWithTask('fix_graph')}
-          onExplainIssues={() => openAiWithTask('explain_node')}
-          onExplainNode={(nodeId) => openAiWithTask('explain_node', nodeId)}
-          onInsertFromPrompt={() => openAiWithTask('chat')}
-        />
+        {viewMode !== 'fullscreen' && secondaryCanvasId && activeCanvasId ? (
+          /* K1-1: Tiled layout with two canvas panes */
+          <TiledCanvasLayout
+            direction={viewMode === 'tiled-h' ? 'horizontal' : 'vertical'}
+            primaryPane={{
+              canvasId: activeCanvasId,
+              name: canvases.find((c) => c.id === activeCanvasId)?.name ?? '',
+              state: paneStates[activeCanvasId] ?? 'normal',
+            }}
+            secondaryPane={{
+              canvasId: secondaryCanvasId,
+              name: canvases.find((c) => c.id === secondaryCanvasId)?.name ?? '',
+              state: paneStates[secondaryCanvasId] ?? 'normal',
+            }}
+            focusedCanvasId={focusedCanvasId}
+            onFocusPane={setFocusedCanvasId}
+            onToggleMinimize={handleToggleMinimize}
+            onToggleMaximize={handleToggleMaximize}
+            onClosePane={handleClosePane}
+            primaryPaneRef={primaryPaneRef}
+            secondaryPaneRef={secondaryPaneRef}
+            primaryContent={
+              <CanvasArea
+                ref={canvasRef}
+                canvasId={activeCanvasId}
+                key={activeCanvasId}
+                initialNodes={initNodes ?? INITIAL_NODES}
+                initialEdges={initEdges ?? INITIAL_EDGES}
+                onGraphChange={projectId && !readOnly ? handleGraphChange : undefined}
+                readOnly={readOnly}
+                plan={plan}
+                onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
+                onOpenGroups={() => setTemplateManagerOpen(true)}
+                onOpenThemes={() =>
+                  openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })
+                }
+                onOpenMaterials={() => setMaterialWizardOpen(true)}
+                onFixWithCopilot={() => openAiWithTask('fix_graph')}
+                onExplainIssues={() => openAiWithTask('explain_node')}
+                onExplainNode={(nodeId) => openAiWithTask('explain_node', nodeId)}
+                onInsertFromPrompt={() => openAiWithTask('chat')}
+                onNodeDragStop={handleNodeDragStop(activeCanvasId)}
+              />
+            }
+            secondaryContent={
+              <CanvasArea
+                ref={secondaryCanvasRef}
+                canvasId={secondaryCanvasId}
+                key={secondaryCanvasId}
+                initialNodes={secondaryNodes}
+                initialEdges={secondaryEdges}
+                onGraphChange={projectId && !readOnly ? handleSecondaryGraphChange : undefined}
+                readOnly={readOnly}
+                plan={plan}
+                onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
+                onOpenGroups={() => setTemplateManagerOpen(true)}
+                onOpenThemes={() =>
+                  openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })
+                }
+                onOpenMaterials={() => setMaterialWizardOpen(true)}
+                onFixWithCopilot={() => openAiWithTask('fix_graph')}
+                onExplainIssues={() => openAiWithTask('explain_node')}
+                onExplainNode={(nodeId) => openAiWithTask('explain_node', nodeId)}
+                onInsertFromPrompt={() => openAiWithTask('chat')}
+                onNodeDragStop={handleNodeDragStop(secondaryCanvasId)}
+              />
+            }
+          />
+        ) : (
+          /* Fullscreen: single canvas pane */
+          <CanvasArea
+            ref={canvasRef}
+            canvasId={activeCanvasId ?? undefined}
+            key={activeCanvasId ?? projectId ?? 'scratch'}
+            initialNodes={initNodes ?? INITIAL_NODES}
+            initialEdges={initEdges ?? INITIAL_EDGES}
+            onGraphChange={projectId && !readOnly ? handleGraphChange : undefined}
+            readOnly={readOnly}
+            plan={plan}
+            onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
+            onOpenGroups={() => setTemplateManagerOpen(true)}
+            onOpenThemes={() => openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })}
+            onOpenMaterials={() => setMaterialWizardOpen(true)}
+            onFixWithCopilot={() => openAiWithTask('fix_graph')}
+            onExplainIssues={() => openAiWithTask('explain_node')}
+            onExplainNode={(nodeId) => openAiWithTask('explain_node', nodeId)}
+            onInsertFromPrompt={() => openAiWithTask('chat')}
+          />
+        )}
         {/* G8-1: AI Copilot docked right panel */}
         <AiDockPanel open={isOpen(AI_COPILOT_WINDOW_ID)}>
           <Suspense fallback={null}>

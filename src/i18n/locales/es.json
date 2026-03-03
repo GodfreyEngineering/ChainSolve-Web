@@ -733,7 +733,14 @@
     "switchConfirmTitle": "Cambios sin guardar",
     "switchSave": "Guardar y cambiar",
     "switchDiscard": "Descartar y cambiar",
-    "switchCancel": "Cancelar"
+    "switchCancel": "Cancelar",
+    "viewFullscreen": "Pantalla completa",
+    "viewTiledH": "Mosaico horizontal",
+    "viewTiledV": "Mosaico vertical",
+    "minimize": "Minimizar",
+    "maximize": "Maximizar",
+    "restore": "Restaurar",
+    "closePane": "Cerrar panel"
   },
   "debugConsole": {
     "title": "Consola de depuración",
