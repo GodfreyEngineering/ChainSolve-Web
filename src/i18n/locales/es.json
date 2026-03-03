@@ -395,6 +395,18 @@
     "revoking": "Revocando…",
     "noSessions": "No se encontraron sesiones activas."
   },
+  "mfa": {
+    "challengeTitle": "Autenticación de dos factores",
+    "challengeSub": "Ingrese su código de verificación",
+    "challengeBody": "Abra su aplicación de autenticación e ingrese el código de 6 dígitos para completar el inicio de sesión.",
+    "verifyError": "La verificación falló. Por favor, inténtelo de nuevo.",
+    "backToLogin": "Volver al inicio de sesión",
+    "setupTitle": "Proteja su cuenta",
+    "setupDesc": "Agregue la autenticación de dos factores para una capa adicional de seguridad. Puede configurar esto más tarde en Configuración.",
+    "skipForNow": "Omitir por ahora",
+    "setupSuccess": "La autenticación de dos factores está ahora habilitada. Su cuenta es más segura.",
+    "continue": "Continuar"
+  },
   "admin": {
     "dangerZoneTitle": "Zona de peligro",
     "dangerZoneWarning": "Estas acciones son destructivas e irreversibles. Solo están disponibles para cuentas de desarrollador y administrador. Proceda con extrema precaución.",

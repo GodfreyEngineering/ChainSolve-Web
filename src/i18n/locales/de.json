@@ -395,6 +395,18 @@
     "revoking": "Wird widerrufen…",
     "noSessions": "Keine aktiven Sitzungen gefunden."
   },
+  "mfa": {
+    "challengeTitle": "Zwei-Faktor-Authentifizierung",
+    "challengeSub": "Bestätigungscode eingeben",
+    "challengeBody": "Öffnen Sie Ihre Authenticator-App und geben Sie den 6-stelligen Code ein, um die Anmeldung abzuschließen.",
+    "verifyError": "Verifizierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "backToLogin": "Zurück zur Anmeldung",
+    "setupTitle": "Konto sichern",
+    "setupDesc": "Fügen Sie die Zwei-Faktor-Authentifizierung für zusätzliche Sicherheit hinzu. Sie können dies später in den Einstellungen einrichten.",
+    "skipForNow": "Vorerst überspringen",
+    "setupSuccess": "Die Zwei-Faktor-Authentifizierung ist jetzt aktiviert. Ihr Konto ist sicherer.",
+    "continue": "Weiter"
+  },
   "admin": {
     "dangerZoneTitle": "Gefahrenzone",
     "dangerZoneWarning": "Diese Aktionen sind destruktiv und unwiderruflich. Sie stehen nur Entwickler- und Administratorkonten zur Verfügung. Gehen Sie mit äußerster Vorsicht vor.",

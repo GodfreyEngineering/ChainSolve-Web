@@ -395,6 +395,18 @@
     "revoking": "Révocation…",
     "noSessions": "Aucune session active trouvée."
   },
+  "mfa": {
+    "challengeTitle": "Authentification à deux facteurs",
+    "challengeSub": "Entrez votre code de vérification",
+    "challengeBody": "Ouvrez votre application d'authentification et entrez le code à 6 chiffres pour terminer la connexion.",
+    "verifyError": "La vérification a échoué. Veuillez réessayer.",
+    "backToLogin": "Retour à la connexion",
+    "setupTitle": "Sécurisez votre compte",
+    "setupDesc": "Ajoutez l'authentification à deux facteurs pour une couche de sécurité supplémentaire. Vous pouvez configurer cela plus tard dans les Paramètres.",
+    "skipForNow": "Passer pour l'instant",
+    "setupSuccess": "L'authentification à deux facteurs est maintenant activée. Votre compte est plus sécurisé.",
+    "continue": "Continuer"
+  },
   "admin": {
     "dangerZoneTitle": "Zone de danger",
     "dangerZoneWarning": "Ces actions sont destructives et irréversibles. Elles ne sont disponibles que pour les comptes développeur et administrateur. Procédez avec une extrême prudence.",

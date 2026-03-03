@@ -402,6 +402,18 @@
     "revoking": "Revoking…",
     "noSessions": "No active sessions found."
   },
+  "mfa": {
+    "challengeTitle": "Two-factor authentication",
+    "challengeSub": "Enter your verification code",
+    "challengeBody": "Open your authenticator app and enter the 6-digit code to complete sign-in.",
+    "verifyError": "Verification failed. Please try again.",
+    "backToLogin": "Back to sign in",
+    "setupTitle": "Secure your account",
+    "setupDesc": "Add two-factor authentication for an extra layer of security. You can set this up later in Settings.",
+    "skipForNow": "Skip for now",
+    "setupSuccess": "Two-factor authentication is now enabled. Your account is more secure.",
+    "continue": "Continue"
+  },
   "admin": {
     "dangerZoneTitle": "Danger Zone",
     "dangerZoneWarning": "These actions are destructive and irreversible. They are available only to developer and admin accounts. Proceed with extreme caution.",

@@ -395,6 +395,18 @@
     "revoking": "Revoca in corso…",
     "noSessions": "Nessuna sessione attiva trovata."
   },
+  "mfa": {
+    "challengeTitle": "Autenticazione a due fattori",
+    "challengeSub": "Inserisci il codice di verifica",
+    "challengeBody": "Apri la tua app di autenticazione e inserisci il codice a 6 cifre per completare l'accesso.",
+    "verifyError": "Verifica fallita. Per favore riprova.",
+    "backToLogin": "Torna all'accesso",
+    "setupTitle": "Proteggi il tuo account",
+    "setupDesc": "Aggiungi l'autenticazione a due fattori per un ulteriore livello di sicurezza. Puoi configurarla in seguito nelle Impostazioni.",
+    "skipForNow": "Salta per ora",
+    "setupSuccess": "L'autenticazione a due fattori è ora attiva. Il tuo account è più sicuro.",
+    "continue": "Continua"
+  },
   "admin": {
     "dangerZoneTitle": "Zona di pericolo",
     "dangerZoneWarning": "Queste azioni sono distruttive e irreversibili. Sono disponibili solo per gli account sviluppatore e amministratore. Procedere con estrema cautela.",

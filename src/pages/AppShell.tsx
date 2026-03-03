@@ -59,6 +59,7 @@ import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 import { initRememberMe } from '../lib/rememberMe'
 import { touchSession, isSessionValid, SESSION_CHECK_INTERVAL_MS } from '../lib/sessionService'
 import { HelpLink } from '../components/ui/HelpLink'
+import { listMfaFactors } from '../lib/auth'
 
 type SortMode = 'recent' | 'name' | 'created'
 type FilterTab = 'all' | 'recent' | 'pinned'
@@ -73,6 +74,10 @@ const LazySessionRevokedModal = lazy(() =>
 
 const LazySignupWizard = lazy(() =>
   import('../components/app/SignupWizard').then((m) => ({ default: m.SignupWizard })),
+)
+
+const LazyMfaSetupPrompt = lazy(() =>
+  import('../components/app/MfaSetupPrompt').then((m) => ({ default: m.MfaSetupPrompt })),
 )
 
 const LazyFirstRunModal = lazy(() =>
@@ -271,6 +276,8 @@ export default function AppShell() {
   })
   const [tourOpen, setTourOpen] = useState(false)
   const [wizardDismissed, setWizardDismissed] = useState(false)
+  const [mfaPromptDismissed, setMfaPromptDismissed] = useState(false)
+  const [hasMfaFactor, setHasMfaFactor] = useState<boolean | null>(null)
 
   const importRef = useRef<HTMLInputElement>(null)
 
@@ -398,6 +405,7 @@ export default function AppShell() {
   )
 
   // J1-1: After signup wizard completes, re-fetch profile and dismiss.
+  // J1-4: Also check whether the user already has MFA enrolled.
   const handleWizardComplete = useCallback(async () => {
     setWizardDismissed(true)
     if (user) {
@@ -409,6 +417,14 @@ export default function AppShell() {
         .eq('id', user.id)
         .maybeSingle()
       if (data) setProfile(data as Profile)
+    }
+    // J1-4: Check MFA factors — if none enrolled, show setup prompt.
+    try {
+      const { factors } = await listMfaFactors()
+      const verified = factors.filter((f) => f.status === 'verified')
+      setHasMfaFactor(verified.length > 0)
+    } catch {
+      setHasMfaFactor(true) // On error, skip the prompt
     }
   }, [user])
 
@@ -671,6 +687,16 @@ export default function AppShell() {
       {!loading && profile && !profile.full_name && !wizardDismissed && (
         <Suspense fallback={null}>
           <LazySignupWizard open onComplete={handleWizardComplete} />
+        </Suspense>
+      )}
+      {/* ── J1-4: Optional MFA setup after signup wizard ── */}
+      {wizardDismissed && hasMfaFactor === false && !mfaPromptDismissed && (
+        <Suspense fallback={null}>
+          <LazyMfaSetupPrompt
+            open
+            onComplete={() => setMfaPromptDismissed(true)}
+            onSkip={() => setMfaPromptDismissed(true)}
+          />
         </Suspense>
       )}
       {/* ── First-run onboarding modal ── */}

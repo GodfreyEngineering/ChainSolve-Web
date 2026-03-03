@@ -16,7 +16,10 @@ import {
   resetPasswordForEmail,
   resendConfirmation,
   getSession,
+  listMfaFactors,
+  signOut,
 } from '../lib/auth'
+import { MfaChallengeScreen } from '../components/app/MfaChallengeScreen'
 import { BRAND } from '../lib/brand'
 import { usePageMeta } from '../lib/seo'
 import TurnstileWidget from '../components/ui/TurnstileWidget'
@@ -56,6 +59,9 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
 
   // Reset success state
   const [resetSent, setResetSent] = useState(false)
+
+  // J1-4: MFA challenge state (shown when user has TOTP enrolled)
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
 
   // Per-page SEO (I6-2)
   const seoKey = SEO_KEY[mode]
@@ -137,6 +143,15 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
         const { error: signInErr } = await signInWithPassword(email, password, token)
         if (signInErr) throw signInErr
         setRememberMe(rememberMe)
+        // J1-4: Check for enrolled MFA factors before completing login.
+        const { factors } = await listMfaFactors()
+        const verified = factors.filter((f) => f.status === 'verified')
+        if (verified.length > 0) {
+          // User has MFA — show challenge screen instead of navigating.
+          setMfaFactorId(verified[0].id)
+          return
+        }
+        // No MFA — proceed directly.
         // H9-1: Enforce single session — revoke all other sessions, then register this one.
         const session = await getSession()
         if (session?.user) await enforceAndRegisterSession(session.user.id)
@@ -160,6 +175,31 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
       setResendMsg('Confirmation email resent — check your inbox and spam folder.')
     }
     setResendLoading(false)
+  }
+
+  // J1-4: MFA challenge verified → enforce session + navigate
+  const handleMfaVerified = useCallback(async () => {
+    const session = await getSession()
+    if (session?.user) await enforceAndRegisterSession(session.user.id)
+    navigate('/app')
+  }, [navigate])
+
+  // J1-4: MFA challenge cancelled → sign out + reset state
+  const handleMfaCancel = useCallback(async () => {
+    setMfaFactorId(null)
+    await signOut()
+  }, [])
+
+  // ── J1-4: MFA challenge view ──────────────────────────────────────────────
+
+  if (mfaFactorId) {
+    return (
+      <MfaChallengeScreen
+        factorId={mfaFactorId}
+        onVerified={() => void handleMfaVerified()}
+        onCancel={() => void handleMfaCancel()}
+      />
+    )
   }
 
   // ── Email-confirmation pending view ──────────────────────────────────────────
