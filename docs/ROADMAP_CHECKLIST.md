@@ -2252,7 +2252,7 @@ Claude MUST:
 ---
 
 ## K2 — Hide/show blocks (CATIA-style)
-- [ ] K2-1: Hide selected blocks with Spacebar + toolbar toggle
+- [x] K2-1: Hide selected blocks with Spacebar + toolbar toggle
   - Spacebar hides selected block(s) (if selection exists)
   - Add canvas toolbar toggle “Hidden View” (show/hide hidden blocks)
   - Must not break existing pan behavior; resolve conflict cleanly:
