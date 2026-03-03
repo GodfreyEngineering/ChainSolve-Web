@@ -16,6 +16,7 @@ interface ClipboardPayload {
 
 let clipboardData: ClipboardPayload | null = null
 let pasteCounter = 0
+let edgeIdCounter = 0
 
 /**
  * Copy selected nodes and edges between them to the internal clipboard.
@@ -69,10 +70,9 @@ export function pasteFromClipboard(): { nodes: Node<NodeData>[]; edges: Edge[] }
   })
 
   // Create new edges with remapped source/target
-  let edgeCounter = 0
   const edges: Edge[] = clipboardData.edges.map((e) => ({
     ...e,
-    id: `edge_${Date.now()}_${++edgeCounter}`,
+    id: `edge_${Date.now()}_${++edgeIdCounter}`,
     source: idMap.get(e.source) ?? e.source,
     target: idMap.get(e.target) ?? e.target,
   }))
