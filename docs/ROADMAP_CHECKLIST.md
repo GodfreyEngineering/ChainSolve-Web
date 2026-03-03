@@ -2335,7 +2335,7 @@ Claude MUST:
   - Acceptance:
     - reproducible license report generated in CI
 
-- [ ] L0-2: React Flow / XYFlow licensing compliance review
+- [x] L0-2: React Flow / XYFlow licensing compliance review
   - Ensure your usage complies (especially if hiding attribution).
   - Document whether you keep attribution or use pro licensing path.
   - Acceptance:
