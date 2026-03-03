@@ -117,8 +117,9 @@ functions/
       create-checkout-session.ts   POST /api/stripe/create-checkout-session
       create-portal-session.ts     POST /api/stripe/create-portal-session
       webhook.ts                   POST /api/stripe/webhook (Stripe events)
-    security/
-      csp-report.ts              POST /api/security/csp-report — CSP violation receiver (W8)
+    report/
+      csp.ts                     POST /api/report/csp — CSP violation receiver
+      client.ts                  POST /api/report/client — client observability events
   tsconfig.json   Separate tsconfig for @cloudflare/workers-types
 
 supabase/

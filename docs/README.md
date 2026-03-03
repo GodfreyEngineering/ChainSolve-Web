@@ -301,15 +301,9 @@
 - Theme-safe: all palette styling uses CSS variables (`--card-bg`, `--border`, `--text`, `--primary-dim`)
 - i18n: `commandPalette.*` namespace (title, placeholder, noResults, hint) in all 5 locales
 
-**Dev CLI (`cs`):**
-- Single executable: `./cs <command>` — no installation needed
-- Commands: `new`, `test`, `push`, `ship`, `hotfix`, `help`
-- Workflow: `./cs test` → `./cs push "W10.x: description"` → `./cs ship`
-- Safety: refuses to commit/push to main without `--allow-main`
-- `cs test` runs typecheck + lint (quick); `cs test --full` adds unit tests + build
-- `cs push` stages all, commits, pushes, suggests PR creation
-- `cs ship` creates/reuses PR, squash-merges, deletes branch, updates local main
-- `cs hotfix <name>` creates `hotfix/<name>-YYYYMMDD` branch from main
+**CI gate:**
+- Single script: `./scripts/verify-ci.sh` — runs prettier, eslint, adapter-boundary, wasm-pack, tsc, vitest, cargo test, vite build, bundle size checks
+- Quick verification: `./scripts/verify-fast.sh` (no WASM/cargo)
 
 ---
 
