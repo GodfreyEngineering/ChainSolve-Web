@@ -52,6 +52,7 @@ vi.mock('./canvases', () => ({
 import {
   listProjects,
   createProject,
+  createProjectFromTemplate,
   duplicateProject,
   moveToFolder,
   bulkMoveToFolder,
@@ -521,5 +522,38 @@ describe('listFolders', () => {
     const { chain } = _from
     chain.order.mockResolvedValueOnce({ data: null, error: { message: 'db error' } })
     await expect(listFolders()).rejects.toThrow('Failed to list folders')
+  })
+})
+
+// ── V2-025: createProjectFromTemplate ──────────────────────────────────────
+
+describe('createProjectFromTemplate', () => {
+  it('throws for unknown template id', async () => {
+    await expect(createProjectFromTemplate('nonexistent')).rejects.toThrow('Unknown template')
+  })
+
+  it('creates a project from a known template', async () => {
+    const { chain } = _from
+    _single.mockReset()
+    _single.mockResolvedValueOnce({
+      data: {
+        id: 'tmpl-proj',
+        owner_id: 'user-1',
+        name: 'Physics 101',
+        description: null,
+        storage_key: 'user-1/tmpl-proj/project.json',
+        active_canvas_id: null,
+        folder: null,
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
+      },
+      error: null,
+    })
+    // readUpdatedAt
+    _single.mockResolvedValueOnce({ data: { updated_at: '2025-01-01T00:00:01Z' } })
+
+    const proj = await createProjectFromTemplate('physics-101')
+    expect(proj.name).toBe('Physics 101')
+    expect(chain.insert).toHaveBeenCalledWith(expect.objectContaining({ name: 'Physics 101' }))
   })
 })

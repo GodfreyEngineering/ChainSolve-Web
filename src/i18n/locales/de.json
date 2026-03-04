@@ -54,17 +54,17 @@
     "guideDocs": "Dokumentation",
     "docs": "Dokumentation",
     "docsDesc": "Anleitungen, Block-Referenz und Tastenkombinationen.",
-    "docsCta": "Docs \u00f6ffnen",
+    "docsCta": "Docs öffnen",
     "subscription": "Abonnement",
     "currentPlan": "Aktueller Plan",
     "trialEnds": "Testphase endet",
-    "renews": "Verl\u00e4ngert sich",
+    "renews": "Verlängert sich",
     "trialExpired": "Ihre Testphase ist abgelaufen. Upgraden Sie, um vollen Zugang zu behalten.",
     "trialEndsIn": "Ihre Testphase endet in {{count}} Tag. Upgraden Sie, um vollen Zugang zu behalten.",
     "trialEndsIn_other": "Ihre Testphase endet in {{count}} Tagen. Upgraden Sie, um vollen Zugang zu behalten.",
-    "upgrade": "Upgrade \u2014 \u00a310/Mo.",
+    "upgrade": "Upgrade — £10/Mo.",
     "manageBilling": "Abrechnung verwalten",
-    "redirecting": "Weiterleitung\u2026"
+    "redirecting": "Weiterleitung…"
   },
   "contact": {
     "support": "Support",
@@ -919,7 +919,8 @@
     "template": "Aus Vorlage erstellen",
     "templateDesc": "Startprojekt auswählen",
     "import": "Projekt importieren",
-    "importDesc": "Eine .chainsolvejson-Datei laden"
+    "importDesc": "Eine .chainsolvejson-Datei laden",
+    "standardTemplates": "Standardvorlagen"
   },
   "tour": {
     "title": "Erste Schritte",
@@ -1134,7 +1135,9 @@
     "sourceEnterprise": "Unternehmen",
     "sourceFilterLabel": "Quellenfilter",
     "officialBadge": "Offiziell",
-    "enterpriseBadge": "Unternehmen"
+    "enterpriseBadge": "Unternehmen",
+    "standardTemplates": "Standardvorlagen",
+    "useTemplate": "Vorlage verwenden"
   },
   "orgs": {
     "title": "Organisationen",
@@ -1458,17 +1461,17 @@
   },
   "student": {
     "title": "Studentenlizenz",
-    "description": "Verifizieren Sie Ihre Universit\u00e4ts-E-Mail, um Pro-Funktionen ein Jahr lang kostenlos zu erhalten.",
+    "description": "Verifizieren Sie Ihre Universitäts-E-Mail, um Pro-Funktionen ein Jahr lang kostenlos zu erhalten.",
     "emailPlaceholder": "du@universitaet.edu",
     "verify": "Code senden",
     "codePlaceholder": "6-stelliger Code",
-    "confirm": "Best\u00e4tigen",
-    "codeSent": "Ein Verifizierungscode wurde an Ihre Universit\u00e4ts-E-Mail gesendet.",
+    "confirm": "Bestätigen",
+    "codeSent": "Ein Verifizierungscode wurde an Ihre Universitäts-E-Mail gesendet.",
     "verified": "Studentenlizenz aktiviert.",
     "verifiedReload": "Studentenlizenz aktiviert. Laden Sie die Seite neu, um Ihren aktualisierten Plan zu sehen.",
     "activeLabel": "Ihre Studentenlizenz ist aktiv. Sie haben vollen Zugang zu den Pro-Funktionen.",
-    "errorInvalidEmail": "Bitte geben Sie eine g\u00fcltige E-Mail-Adresse ein.",
-    "errorNotUniversity": "Dies scheint keine Universit\u00e4ts-E-Mail-Adresse zu sein.",
+    "errorInvalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+    "errorNotUniversity": "Dies scheint keine Universitäts-E-Mail-Adresse zu sein.",
     "errorInvalidCode": "Bitte geben Sie den 6-stelligen Code ein, der an Ihre E-Mail gesendet wurde."
   },
   "signupWizard": {

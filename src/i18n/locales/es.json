@@ -51,20 +51,20 @@
     "statProjects": "Proyectos",
     "statPlan": "Plan",
     "statMemberSince": "Miembro desde",
-    "guideDocs": "Documentaci\u00f3n",
-    "docs": "Documentaci\u00f3n",
-    "docsDesc": "Gu\u00edas, referencia de bloques y atajos de teclado.",
+    "guideDocs": "Documentación",
+    "docs": "Documentación",
+    "docsDesc": "Guías, referencia de bloques y atajos de teclado.",
     "docsCta": "Abrir Docs",
-    "subscription": "Suscripci\u00f3n",
+    "subscription": "Suscripción",
     "currentPlan": "Plan actual",
     "trialEnds": "Fin de prueba",
     "renews": "Se renueva",
     "trialExpired": "Tu prueba ha expirado. Actualiza para mantener el acceso completo.",
-    "trialEndsIn": "Tu prueba termina en {{count}} d\u00eda. Actualiza para mantener el acceso.",
-    "trialEndsIn_other": "Tu prueba termina en {{count}} d\u00edas. Actualiza para mantener el acceso.",
-    "upgrade": "Actualizar \u2014 \u00a310/mes",
-    "manageBilling": "Gestionar facturaci\u00f3n",
-    "redirecting": "Redirigiendo\u2026"
+    "trialEndsIn": "Tu prueba termina en {{count}} día. Actualiza para mantener el acceso.",
+    "trialEndsIn_other": "Tu prueba termina en {{count}} días. Actualiza para mantener el acceso.",
+    "upgrade": "Actualizar — £10/mes",
+    "manageBilling": "Gestionar facturación",
+    "redirecting": "Redirigiendo…"
   },
   "contact": {
     "support": "Soporte",
@@ -919,7 +919,8 @@
     "template": "Crear desde plantilla",
     "templateDesc": "Elegir un proyecto de inicio",
     "import": "Importar proyecto",
-    "importDesc": "Cargar un archivo .chainsolvejson"
+    "importDesc": "Cargar un archivo .chainsolvejson",
+    "standardTemplates": "Plantillas estandar"
   },
   "tour": {
     "title": "Primeros pasos",
@@ -1134,7 +1135,9 @@
     "sourceEnterprise": "Empresa",
     "sourceFilterLabel": "Filtro de origen",
     "officialBadge": "Oficial",
-    "enterpriseBadge": "Empresa"
+    "enterpriseBadge": "Empresa",
+    "standardTemplates": "Plantillas estandar",
+    "useTemplate": "Usar plantilla"
   },
   "orgs": {
     "title": "Organizaciones",
@@ -1458,18 +1461,18 @@
   },
   "student": {
     "title": "Licencia de estudiante",
-    "description": "Verifica tu correo universitario para obtener las funciones Pro sin coste durante un a\u00f1o.",
+    "description": "Verifica tu correo universitario para obtener las funciones Pro sin coste durante un año.",
     "emailPlaceholder": "tu@universidad.edu",
-    "verify": "Enviar c\u00f3digo",
-    "codePlaceholder": "C\u00f3digo de 6 d\u00edgitos",
+    "verify": "Enviar código",
+    "codePlaceholder": "Código de 6 dígitos",
     "confirm": "Confirmar",
-    "codeSent": "Se ha enviado un c\u00f3digo de verificaci\u00f3n a tu correo universitario.",
+    "codeSent": "Se ha enviado un código de verificación a tu correo universitario.",
     "verified": "Licencia de estudiante activada.",
-    "verifiedReload": "Licencia de estudiante activada. Recarga la p\u00e1gina para ver tu plan actualizado.",
-    "activeLabel": "Tu licencia de estudiante est\u00e1 activa. Tienes acceso completo a las funciones Pro.",
-    "errorInvalidEmail": "Introduce una direcci\u00f3n de correo v\u00e1lida.",
+    "verifiedReload": "Licencia de estudiante activada. Recarga la página para ver tu plan actualizado.",
+    "activeLabel": "Tu licencia de estudiante está activa. Tienes acceso completo a las funciones Pro.",
+    "errorInvalidEmail": "Introduce una dirección de correo válida.",
     "errorNotUniversity": "Este correo no parece ser de una universidad.",
-    "errorInvalidCode": "Introduce el c\u00f3digo de 6 d\u00edgitos enviado a tu correo."
+    "errorInvalidCode": "Introduce el código de 6 dígitos enviado a tu correo."
   },
   "seo": {
     "defaultDescription": "Calculadora científica de grafos de nodos. Construye cadenas de cálculo visualmente.",

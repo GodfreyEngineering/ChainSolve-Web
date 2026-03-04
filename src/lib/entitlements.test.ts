@@ -292,7 +292,7 @@ describe('isBlockEntitled', () => {
   })
 })
 
-// ── canInstallExploreItem (D9-3) ─────────────────────────────────────────────
+// ── canInstallExploreItem (V2-025) ───────────────────────────────────────────
 
 describe('canInstallExploreItem', () => {
   it('pro/trialing/student/enterprise can install any category', () => {
@@ -306,16 +306,8 @@ describe('canInstallExploreItem', () => {
     }
   })
 
-  it('free can install template when projectCount < maxProjects', () => {
-    expect(canInstallExploreItem('free', 'template', 0)).toBe(true)
-  })
-
-  it('free cannot install template when projectCount >= maxProjects', () => {
-    expect(canInstallExploreItem('free', 'template', 1)).toBe(false)
-    expect(canInstallExploreItem('free', 'template', 5)).toBe(false)
-  })
-
-  it('free cannot install non-template categories', () => {
+  it('free cannot install anything from Explore (browse only)', () => {
+    expect(canInstallExploreItem('free', 'template', 0)).toBe(false)
     expect(canInstallExploreItem('free', 'block_pack', 0)).toBe(false)
     expect(canInstallExploreItem('free', 'theme', 0)).toBe(false)
     expect(canInstallExploreItem('free', 'group', 0)).toBe(false)

@@ -642,7 +642,7 @@ Claude should treat this as the “source of truth” for the current environmen
 
 **Done (2026-03-04):** Renamed all user-facing “template” wording to “saved group” across 6 locales (EN/DE/ES/FR/IT/HE). Updated i18n keys (groups.saveAsTemplate->saveAsGroup, templateManager values, menu.manageSavedGroups, contextMenu.saveAsGroup, blockLibrary.insertSavedGroup). Fixed hardcoded strings in BlockLibrary.tsx, CanvasArea.tsx. Internal code identifiers (function names, DB table) unchanged. verify-ci.sh green.
 
-## V2-025 — Define “Project templates” correctly (standard + imported)
+## V2-025 — Define “Project templates” correctly (standard + imported) [x]
 **Requirement:**
 - Standard templates shipped with ChainSolve (separate from user project directory)
 - Imported templates come from Explore
@@ -654,6 +654,8 @@ Claude should treat this as the “source of truth” for the current environmen
 - Make import rules enforce plan gating.
 **Acceptance:**
 - Templates are cleanly separated from user projects and groups.
+
+**Done (2026-03-04):** Surfaced 3 built-in standard templates (Physics 101, Finance 101, Stats 101) in FirstRunModal and Explore page “Standard Templates” section. Added createProjectFromTemplate() in projects.ts. Tightened canInstallExploreItem() so free users cannot install from Explore (browse only). Added “Use Template” button + “Standard Templates” heading with i18n in all 6 locales. Tests updated (entitlements, projects, templates). verify-ci.sh green.
 
 ---
 

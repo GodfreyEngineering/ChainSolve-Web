@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { TEMPLATES } from '../../templates/index'
 import { Modal } from '../ui/Modal'
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
   onStartScratch: () => void
   onBrowseTemplates: () => void
   onImport: () => void
+  onSelectTemplate: (templateId: string) => void
 }
 
 export function FirstRunModal({
@@ -15,6 +17,7 @@ export function FirstRunModal({
   onStartScratch,
   onBrowseTemplates,
   onImport,
+  onSelectTemplate,
 }: Props) {
   const { t } = useTranslation()
 
@@ -32,7 +35,25 @@ export function FirstRunModal({
           </span>
         </button>
 
-        {/* Browse templates via Explore */}
+        {/* Standard templates */}
+        <div>
+          <div style={sectionLabelStyle}>{t('onboarding.standardTemplates')}</div>
+          {TEMPLATES.map((tmpl) => (
+            <button
+              key={tmpl.id}
+              style={templateBtnStyle}
+              onClick={() => onSelectTemplate(tmpl.id)}
+            >
+              <span style={templateIconStyle}>⬡</span>
+              <span>
+                <strong style={optionLabelStyle}>{tmpl.name}</strong>
+                <span style={optionDescStyle}>{tmpl.description}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Browse Explore */}
         <button style={optionBtnStyle} onClick={onBrowseTemplates}>
           <span style={optionIconStyle}>⬡</span>
           <span>
@@ -104,4 +125,24 @@ const optionDescStyle: React.CSSProperties = {
   display: 'block',
   fontSize: '0.78rem',
   opacity: 0.6,
+}
+
+const sectionLabelStyle: React.CSSProperties = {
+  fontSize: '0.72rem',
+  fontWeight: 600,
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  opacity: 0.5,
+  marginBottom: '0.4rem',
+}
+
+const templateBtnStyle: React.CSSProperties = {
+  ...optionBtnStyle,
+  padding: '0.65rem 1rem',
+  marginBottom: '0.35rem',
+}
+
+const templateIconStyle: React.CSSProperties = {
+  ...optionIconStyle,
+  fontSize: '1rem',
 }

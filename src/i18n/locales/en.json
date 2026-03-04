@@ -938,7 +938,8 @@
     "template": "Create from template",
     "templateDesc": "Choose a starter project",
     "import": "Import project",
-    "importDesc": "Load a .chainsolvejson file"
+    "importDesc": "Load a .chainsolvejson file",
+    "standardTemplates": "Standard Templates"
   },
   "tour": {
     "title": "Getting Started",
@@ -1153,7 +1154,9 @@
     "sourceEnterprise": "Enterprise",
     "sourceFilterLabel": "Source filter",
     "officialBadge": "Official",
-    "enterpriseBadge": "Enterprise"
+    "enterpriseBadge": "Enterprise",
+    "standardTemplates": "Standard Templates",
+    "useTemplate": "Use Template"
   },
   "orgs": {
     "title": "Organizations",

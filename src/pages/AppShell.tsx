@@ -39,6 +39,7 @@ import {
   duplicateProject,
   loadProject,
   importProject,
+  createProjectFromTemplate,
   moveToFolder,
   bulkMoveToFolder,
   bulkDeleteProjects,
@@ -658,6 +659,16 @@ export default function AppShell() {
     importRef.current?.click()
   }, [dismissFirstRun])
 
+  const handleFirstRunTemplate = useCallback(
+    (templateId: string) => {
+      dismissFirstRun()
+      createProjectFromTemplate(templateId)
+        .then((proj) => navigate(`/canvas/${proj.id}`))
+        .catch(() => navigate('/canvas'))
+    },
+    [dismissFirstRun, navigate],
+  )
+
   // ── Billing ───────────────────────────────────────────────────────────────
 
   const callBillingApi = async (endpoint: string) => {
@@ -781,6 +792,7 @@ export default function AppShell() {
             onStartScratch={handleFirstRunScratch}
             onBrowseTemplates={handleFirstRunBrowseTemplates}
             onImport={handleFirstRunImport}
+            onSelectTemplate={handleFirstRunTemplate}
           />
         </Suspense>
       )}

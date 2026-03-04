@@ -194,6 +194,37 @@ export async function createProject(name: string, folder?: string | null): Promi
   return { ...proj, updated_at: updated ?? proj.updated_at }
 }
 
+/**
+ * Create a new project pre-populated from a built-in template.
+ * Calls the template's buildGraph factory, then persists the result.
+ */
+export async function createProjectFromTemplate(templateId: string): Promise<ProjectRow> {
+  const { TEMPLATES } = await import('../templates/index')
+  const tmpl = TEMPLATES.find((t) => t.id === templateId)
+  if (!tmpl) throw new Error(`Unknown template: ${templateId}`)
+
+  const session = await requireSession()
+  const projectId = crypto.randomUUID()
+  const canvasId = crypto.randomUUID()
+  const storageKey = `${session.user.id}/${projectId}/project.json`
+
+  const { data, error } = await supabase
+    .from('projects')
+    .insert({ id: projectId, owner_id: session.user.id, name: tmpl.name, storage_key: storageKey })
+    .select(SELECT_COLS)
+    .single()
+
+  if (error || !data) throw new Error(error?.message ?? 'Failed to create project')
+  const proj = data as ProjectRow
+
+  const canvas = tmpl.buildGraph(canvasId, projectId)
+  const pj = buildJson(proj.id, tmpl.name, canvas.nodes, canvas.edges)
+  await saveProjectJson(proj.id, pj)
+
+  const updated = await readUpdatedAt(proj.id)
+  return { ...proj, updated_at: updated ?? proj.updated_at }
+}
+
 /** Load and parse the project.json from storage. Accepts V1 and V2 transparently. */
 export async function loadProject(projectId: string): Promise<ProjectJSON> {
   dlog.debug('persistence', 'Loading project', { projectId })

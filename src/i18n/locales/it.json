@@ -919,7 +919,8 @@
     "template": "Crea da modello",
     "templateDesc": "Scegli un progetto iniziale",
     "import": "Importa progetto",
-    "importDesc": "Carica un file .chainsolvejson"
+    "importDesc": "Carica un file .chainsolvejson",
+    "standardTemplates": "Modelli standard"
   },
   "tour": {
     "title": "Per iniziare",
@@ -1134,7 +1135,9 @@
     "sourceEnterprise": "Azienda",
     "sourceFilterLabel": "Filtro origine",
     "officialBadge": "Ufficiale",
-    "enterpriseBadge": "Azienda"
+    "enterpriseBadge": "Azienda",
+    "standardTemplates": "Modelli standard",
+    "useTemplate": "Usa modello"
   },
   "orgs": {
     "title": "Organizzazioni",

@@ -34,12 +34,13 @@ import {
 } from '../lib/marketplaceService'
 import { listMyOrgs, getOrgPolicy, type Org, type OrgPolicy } from '../lib/orgsService'
 import { getProfile } from '../lib/profilesService'
-import { getProjectCount } from '../lib/projects'
+import { getProjectCount, createProjectFromTemplate } from '../lib/projects'
 import { canInstallExploreItem, resolveEffectivePlan, type Plan } from '../lib/entitlements'
 import { getSession } from '../lib/auth'
 import { BRAND } from '../lib/brand'
 import { usePageMeta, useHreflang } from '../lib/seo'
 import { getBlockedUsers } from '../lib/blockedUsers'
+import { TEMPLATES } from '../templates/index'
 import { HelpLink } from '../components/ui/HelpLink'
 import { LegalFooter } from '../components/ui/LegalFooter'
 
@@ -695,6 +696,83 @@ export default function MarketplacePage() {
             data-testid="marketplace-empty"
           >
             {t('marketplace.noResults')}
+          </div>
+        )}
+
+        {/* Standard templates — shown on All or Template tabs */}
+        {viewMode === 'public' && !loading && (category === '' || category === 'template') && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h3
+              style={{
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                opacity: 0.55,
+                marginBottom: '0.6rem',
+              }}
+            >
+              {t('marketplace.standardTemplates')}
+            </h3>
+            <div style={s.grid}>
+              {TEMPLATES.map((tmpl) => (
+                <article key={tmpl.id} style={s.card}>
+                  <div
+                    style={{
+                      width: '100%',
+                      height: 90,
+                      background: 'linear-gradient(135deg,var(--primary-dim),var(--surface-hover))',
+                      borderBottom: '1px solid var(--border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.6rem',
+                    }}
+                  >
+                    ⬡
+                  </div>
+                  <div style={s.cardBody}>
+                    <span style={s.catBadge('template')}>{t('marketplace.categoryTemplate')}</span>
+                    <div style={{ fontWeight: 600, fontSize: 'var(--font-lg)' }}>{tmpl.name}</div>
+                    <p
+                      style={{
+                        fontSize: 'var(--font-sm)',
+                        color: 'var(--text-faint)',
+                        margin: '0.3rem 0',
+                      }}
+                    >
+                      {tmpl.description}
+                    </p>
+                    <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+                      {tmpl.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          style={{
+                            fontSize: 'var(--font-xs)',
+                            padding: '0.1rem 0.4rem',
+                            borderRadius: 'var(--radius-full)',
+                            background: 'var(--surface-hover)',
+                            color: 'var(--text-faint)',
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <button
+                      style={s.installBtn(false, false, false)}
+                      onClick={() => {
+                        createProjectFromTemplate(tmpl.id)
+                          .then((proj) => navigate(`/canvas/${proj.id}`))
+                          .catch(() => navigate('/canvas'))
+                      }}
+                    >
+                      {t('marketplace.useTemplate')}
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         )}
 

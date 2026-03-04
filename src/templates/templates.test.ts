@@ -29,6 +29,24 @@ type AnyEdge = {
   targetHandle?: string
 }
 
+describe('TEMPLATES registry', () => {
+  it('has exactly 3 standard templates', () => {
+    expect(TEMPLATES).toHaveLength(3)
+  })
+
+  it('every template has a unique id', () => {
+    const ids = TEMPLATES.map((t) => t.id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('includes physics-101, finance-101, stats-101', () => {
+    const ids = TEMPLATES.map((t) => t.id)
+    expect(ids).toContain('physics-101')
+    expect(ids).toContain('finance-101')
+    expect(ids).toContain('stats-101')
+  })
+})
+
 describe('Sample templates', () => {
   for (const tmpl of TEMPLATES) {
     describe(tmpl.id, () => {
