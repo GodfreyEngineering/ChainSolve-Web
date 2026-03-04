@@ -651,7 +651,7 @@ $$;
 -- ── 3g. Rate limit + org policy enforcement ──────────────────────────────────
 
 CREATE OR REPLACE FUNCTION public.enforce_comment_rate_limit()
-RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE
   recent_count int;
 BEGIN
@@ -666,7 +666,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.enforce_org_install_policy()
-RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
   IF EXISTS (
     SELECT 1 FROM public.org_members om
@@ -680,7 +680,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.enforce_org_comment_policy()
-RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
   IF EXISTS (
     SELECT 1 FROM public.org_members om
@@ -696,7 +696,7 @@ $$;
 -- ── 3h. Audit log retention cleanup ──────────────────────────────────────────
 
 CREATE OR REPLACE FUNCTION public.cleanup_expired_audit_logs()
-RETURNS integer LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS integer LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE
   deleted_count integer := 0;
   batch_count   integer;

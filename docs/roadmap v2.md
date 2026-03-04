@@ -236,14 +236,21 @@ Claude should treat this as the “source of truth” for the current environmen
 
 # Phase V2-B — Supabase harmony (policies, functions, performance lints)
 
-## V2-007 — Fix `function_search_path_mutable` warnings (5 functions)
-**Problem:** multiple functions flagged.  
+## V2-007 — Fix `function_search_path_mutable` warnings (5 functions) [x]
+**Problem:** multiple functions flagged.
 **Work:**
 - Update each flagged function to set a fixed `search_path` (e.g., `SET search_path = public`) in the function definition.
 - Confirm behavior unchanged.
 **Acceptance:**
 - Supabase security advisor warning cleared for those functions
 - Migration SQL delivered.
+
+**Changelog (2026-03-04):**
+- 1 of 5 functions (`handle_canvases_updated_at`) already had `SET search_path = public` in baseline.
+- Added migration `supabase/migrations/0003_fix_function_search_path.sql` — recreates the other 4 functions (`enforce_comment_rate_limit`, `enforce_org_install_policy`, `enforce_org_comment_policy`, `cleanup_expired_audit_logs`) with `SET search_path = public` added to the `SECURITY DEFINER` declaration.
+- Updated baseline `0001_baseline_schema.sql` so fresh deployments also get the fix.
+- Added `src/supabaseMigrations.test.ts` with 4 tests: scans each migration file for `SECURITY DEFINER` without `SET search_path` (skips SQL comments), plus verifies all 5 functions are present in baseline with the clause.
+- To apply: run `supabase db push` or apply migration 0003 manually via Supabase Dashboard SQL Editor.
 
 ## V2-008 — Add RLS policies for `observability_events` (RLS enabled, no policy)
 **Problem:** linter warns; currently table has data.  
