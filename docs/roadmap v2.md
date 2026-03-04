@@ -173,8 +173,8 @@ Claude should treat this as the “source of truth” for the current environmen
 - Added 2 E2E tests in `e2e/workbench-ux.spec.ts`: (1) `/settings` route redirects to `/app` without useNavigate crash, (2) opening settings on `/canvas` does not crash.
 
 
-## V2-004 — CSP noise + Cloudflare Insights beacon
-**Problem:** console shows blocked script `static.cloudflareinsights.com/beacon.min.js` due to CSP.  
+## V2-004 — CSP noise + Cloudflare Insights beacon [x]
+**Problem:** console shows blocked script `static.cloudflareinsights.com/beacon.min.js` due to CSP.
 **Work:**
 - Decide: remove beacon injection entirely (preferred for strict CSP), or explicitly allow it in a controlled way.
 - Ensure CSP remains tight and intentional (no broad allowances).
@@ -182,6 +182,13 @@ Claude should treat this as the “source of truth” for the current environmen
 **Acceptance:**
 - No CSP beacon errors on `/login`, `/terms`, `/app`
 - No regressions to existing CSP posture.
+
+**Changelog (2026-03-04):**
+- Decision: Beacon stays blocked (G0-3 resolution already in place). The beacon is NOT in the CSP allowlist, and the Cloudflare Dashboard "Web Analytics" setting must be OFF. This was already implemented, documented (SECURITY.md, ANALYTICS_STRATEGY.md, ADR-0002), and tested (csp.test.ts).
+- Removed the redundant `Content-Security-Policy-Report-Only` header from `public/_headers`. It was identical to the enforced CSP, causing duplicate violation reports with no diagnostic value.
+- Added CSP test: "no redundant Report-Only when identical to enforced" in `src/csp.test.ts`.
+- Updated 6 doc files to remove references to the now-removed Report-Only header: SECURITY.md (sections 2, 4, 5, 6), SETUP.md, REPO_MAP.md, RELEASE_DRY_RUN.md, csp-reporting.md, runbook.md.
+- Dashboard action required: Ensure "Web Analytics" is OFF in Cloudflare Pages dashboard (Speed -> Web Analytics -> OFF). If it's already off, no console errors will appear.
 
 ## V2-005 — Developer plan identity + badge correctness (single source of truth)
 **Problem:** developer account shows Free on `/app` but Enterprise on canvas; theme editor blocked.  

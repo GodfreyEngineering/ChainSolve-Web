@@ -114,11 +114,10 @@ Use Option A for end-to-end testing.
 ### Verifying CSP headers
 
 ```bash
-# Check that both CSP headers and Reporting-Endpoints are present
+# Check that CSP header and Reporting-Endpoints are present
 curl -sI http://localhost:8788/app | grep -iE 'content-security|reporting'
 # Expected output includes:
 #   content-security-policy: …; report-uri /api/report/csp; report-to csp-endpoint
-#   content-security-policy-report-only: …; report-uri /api/report/csp; …
 #   reporting-endpoints: csp-endpoint="/api/report/csp"
 ```
 

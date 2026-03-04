@@ -102,7 +102,7 @@ Full walkthrough: [CONVENTIONS.md §Adding a new block op](CONVENTIONS.md#adding
 
 Files to edit:
 
-- `public/_headers` — the actual deployed headers (both enforced + report-only lines)
+- `public/_headers` — the actual deployed headers (enforced CSP + security headers)
 
 Read [SECURITY.md §2](SECURITY.md#2-content-security-policy-csp) before changing
 anything.  The `'wasm-unsafe-eval'` directive in `script-src` is load-bearing

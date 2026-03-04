@@ -500,7 +500,7 @@ Run through this checklist after any change to the save/load pipeline.
 - [ ] CSP report endpoint receiving: `curl -X POST .../api/report/csp` returns 204, row in `csp_reports`
 - [ ] OPTIONS preflight: `curl -X OPTIONS -H "Origin: https://app.chainsolve.co.uk" .../api/stripe/create-checkout-session` returns 204 with `Access-Control-Allow-Origin`
 - [ ] No wildcard CORS: grep codebase for `Access-Control-Allow-Origin: *` returns nothing
-- [ ] CSP headers present: document response includes both `Content-Security-Policy` and `Content-Security-Policy-Report-Only` with `report-uri`
+- [ ] CSP headers present: document response includes `Content-Security-Policy` with `report-uri`
 - [ ] Security headers: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `HSTS`, `Referrer-Policy` all present
 
 ---

@@ -59,16 +59,21 @@ curl -s -D- \
 
 ### Current state
 
-Both headers are set in `public/_headers` for all routes (`/*`):
+The enforced CSP header is set in `public/_headers` for all routes (`/*`):
 
 | Header | Purpose |
 |--------|---------|
-| `Content-Security-Policy` | **Enforced** — blocks violations and reports them |
-| `Content-Security-Policy-Report-Only` | **Report-only** — identical baseline policy, edit to test stricter rules |
+| `Content-Security-Policy` | **Enforced** -- blocks violations and reports them |
 
-Both include `report-uri /api/report/csp; report-to csp-endpoint`.
-
+The enforced header includes `report-uri /api/report/csp; report-to csp-endpoint`.
 The `Reporting-Endpoints` header maps `csp-endpoint` to the report URL.
+
+**V2-004**: The redundant `Content-Security-Policy-Report-Only` header was
+removed. It was identical to the enforced CSP, causing duplicate violation
+reports with no diagnostic benefit. To test a stricter policy in the future,
+temporarily add a `Content-Security-Policy-Report-Only` header with the
+tighter directives, observe reports for 24-48 hours, then promote to enforced
+(see Rollout plan below).
 
 ### Policy directives
 
@@ -122,12 +127,14 @@ versions are a subset of our supported range.
 
 ---
 
-### Rollout plan: Report-Only → Enforce
+### Rollout plan: testing stricter CSP via Report-Only
 
-1. **Current**: Enforced CSP + identical Report-Only with reporting.
-2. **To tighten**: Edit ONLY the `Content-Security-Policy-Report-Only` header
-   (e.g., remove `'unsafe-inline'` from `style-src`, or drop a connect-src host).
-3. **Deploy** and wait 24–48 hours. Check the `observability_events` table for violations:
+To test a stricter CSP before enforcing it:
+
+1. **Add** a `Content-Security-Policy-Report-Only` header in `public/_headers`
+   with the tighter directives (e.g., remove `'unsafe-inline'` from `style-src`).
+   Keep the enforced `Content-Security-Policy` unchanged.
+2. **Deploy** and wait 24-48 hours. Check the `observability_events` table for violations:
 
    ```sql
    SELECT payload->>'effectiveDirective' AS violated_directive,
@@ -140,16 +147,16 @@ versions are a subset of our supported range.
    ORDER BY count DESC;
    ```
 
-4. **If zero reports**: Copy the Report-Only policy to the enforced
-   `Content-Security-Policy` header and redeploy.
-5. **If reports exist**: Investigate each violation. Adjust the policy or fix
-   the code, then return to step 2.
+3. **If zero reports**: Copy the Report-Only policy to the enforced
+   `Content-Security-Policy` header, remove the Report-Only header, and redeploy.
+4. **If reports exist**: Investigate each violation. Adjust the policy or fix
+   the code, then return to step 1.
 
 ### Inspecting violations in DevTools
 
 1. Open Chrome DevTools → **Console**
-2. CSP violations appear as `[Report Only]` warnings (for Report-Only)
-   or errors (for enforced)
+2. CSP violations appear as errors (for enforced) or `[Report Only]` warnings
+   (if a Report-Only header is temporarily present for testing)
 3. Open **Network** tab → filter by `csp-report` to see the POST requests
    to the report endpoint
 
@@ -237,7 +244,6 @@ All set in `public/_headers` under the `/*` catch-all.
 | `X-XSS-Protection` | `0` | Disabled — modern CSP is the protection; the legacy XSS filter can cause issues |
 | `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` | Force HTTPS for 2 years, all subdomains, eligible for HSTS preload |
 | `Content-Security-Policy` | *(see §2)* | Enforced CSP with reporting |
-| `Content-Security-Policy-Report-Only` | *(see §2)* | Report-only baseline for testing |
 | `Reporting-Endpoints` | `csp-endpoint="/api/report/csp"` | Maps report-to group to URL |
 
 ### Why X-XSS-Protection is set to 0
@@ -284,8 +290,7 @@ script.  See `docs/DECISIONS/ADR-0002-csp-wasm-unsafe-eval.md` for full rational
    ```
    https://cloudflareinsights.com
    ```
-3. Update both the enforced `Content-Security-Policy` and the
-   `Content-Security-Policy-Report-Only` lines (they must stay in sync).
+3. Update the enforced `Content-Security-Policy` header in `public/_headers`.
 4. Verify no new CSP violations appear in `csp_reports` after deploy.
 5. Update this section to document the trade-off.
 
@@ -330,7 +335,7 @@ inside that script.
 
 1. Add the origin to `APPROVED_ORIGINS` in `scripts/check-csp-allowlist.mjs`
    with a comment explaining the rationale.
-2. Add it to `public/_headers` (both enforced CSP and Report-Only).
+2. Add it to the enforced `Content-Security-Policy` in `public/_headers`.
 3. Document the trade-off in this section (§5).
 
 The CI check will fail with a `CSP ALLOWLIST VIOLATION` error if an external
@@ -365,8 +370,7 @@ forms. It is a first-party Cloudflare service and does not require `unsafe-eval`
 - [ ] **CSP report endpoint**: Run the curl test from §3 → verify `204` and
       row appears in `observability_events` table with `event_type = 'csp_violation'`
 - [ ] **CSP headers**: In DevTools → Network → click the document request →
-      Response Headers should show both `Content-Security-Policy` and
-      `Content-Security-Policy-Report-Only` with `report-uri`
+      Response Headers should show `Content-Security-Policy` with `report-uri`
 - [ ] **Reporting-Endpoints**: Same response should include
       `Reporting-Endpoints: csp-endpoint="/api/report/csp"`
 - [ ] **Stripe webhook**: Send a test webhook from Stripe Dashboard →

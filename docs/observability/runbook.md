@@ -91,8 +91,7 @@ curl -sI https://app.chainsolve.co.uk/ | grep -i 'content-security\|reporting'
 
 Expected output includes:
 - `content-security-policy: … 'wasm-unsafe-eval' … report-uri /api/report/csp`
-- `content-security-policy-report-only: … report-uri /api/report/csp`
-- `reporting-endpoints: default="/api/report/csp"`
+- `reporting-endpoints: csp-endpoint="/api/report/csp"`
 
 ---
 

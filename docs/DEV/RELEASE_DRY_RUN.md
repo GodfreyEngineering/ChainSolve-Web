@@ -79,7 +79,7 @@ Verify headers:
 
 ```bash
 curl -sI https://app.chainsolve.co.uk | grep -i content-security-policy
-# Both Content-Security-Policy and Content-Security-Policy-Report-Only present
+# Content-Security-Policy header present with report-uri
 ```
 
 ---

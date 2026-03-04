@@ -65,4 +65,32 @@ describe('CSP: _headers consistency', () => {
   it('CSP report-uri points to /api/report/csp', () => {
     expect(publicHeaders).toContain('report-uri /api/report/csp')
   })
+
+  it('no redundant Content-Security-Policy-Report-Only identical to enforced (V2-004)', () => {
+    // A Report-Only header identical to the enforced CSP doubles violation reports
+    // with no benefit. Report-Only should only exist when testing a DIFFERENT
+    // (stricter) policy before promoting it to enforced.
+    const lines = publicHeaders.split('\n')
+    const enforcedLine = lines.find(
+      (l) =>
+        l.includes('Content-Security-Policy:') &&
+        !l.includes('Report-Only') &&
+        !l.trim().startsWith('#'),
+    )
+    const reportOnlyLine = lines.find(
+      (l) => l.includes('Content-Security-Policy-Report-Only:') && !l.trim().startsWith('#'),
+    )
+    if (enforcedLine && reportOnlyLine) {
+      // Extract directives (everything after the header name)
+      const enforcedDirectives = enforcedLine.split('Content-Security-Policy:')[1]?.trim()
+      const reportOnlyDirectives = reportOnlyLine
+        .split('Content-Security-Policy-Report-Only:')[1]
+        ?.trim()
+      expect(
+        enforcedDirectives,
+        'Report-Only CSP is identical to enforced CSP — remove it to avoid duplicate reports',
+      ).not.toBe(reportOnlyDirectives)
+    }
+    // If no Report-Only exists, that's the expected state (V2-004 removed it)
+  })
 })
