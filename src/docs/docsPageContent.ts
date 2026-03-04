@@ -6,8 +6,6 @@
  * Sidebar labels remain in the locale files for i18n.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 export interface DocsSectionContent {
   [key: string]: string
 }

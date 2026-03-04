@@ -9,7 +9,6 @@
  * is lazy-loaded by UnitPicker when the dropdown opens.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 const S: Record<string, string> = {
   um: '\u00B5m',
   tonne: 't',

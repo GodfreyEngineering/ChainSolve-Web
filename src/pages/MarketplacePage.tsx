@@ -378,7 +378,7 @@ export default function MarketplacePage() {
         setInstallingId(null)
       }
     },
-    [installedIds, installingId, navigate, items, plan, projectCount, t],
+    [installedIds, installingId, navigate, items, plan, projectCount, t, orgPolicy],
   )
 
   const handleToggleLike = useCallback(

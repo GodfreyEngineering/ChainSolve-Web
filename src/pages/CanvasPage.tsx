@@ -651,7 +651,7 @@ export default function CanvasPage() {
         throw err
       }
     },
-    [projectId, navigate, toast],
+    [projectId, navigate, toast, isAuthenticated, t],
   )
 
   // ── Sheet / canvas operations ──────────────────────────────────────────────
@@ -699,7 +699,7 @@ export default function CanvasPage() {
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : 'Failed to create sheet', 'error')
     }
-  }, [projectId, plan, canvases.length, toast, t, addCanvasToStore, handleSwitchCanvas])
+  }, [projectId, plan, canvases.length, toast, addCanvasToStore, handleSwitchCanvas])
 
   const handleRenameCanvas = useCallback(
     async (canvasId: string, newName: string) => {
@@ -764,7 +764,7 @@ export default function CanvasPage() {
         toast(err instanceof Error ? err.message : 'Failed to duplicate sheet', 'error')
       }
     },
-    [projectId, plan, canvases, toast, t, addCanvasToStore, handleSwitchCanvas],
+    [projectId, plan, canvases, toast, addCanvasToStore, handleSwitchCanvas],
   )
 
   const handleReorderCanvases = useCallback(

@@ -727,7 +727,7 @@ export function AppHeader({
         },
       },
     ],
-    [t, canvasRef, handleClearCanvas, openSettings],
+    [t, canvasRef, handleClearCanvas, openSettings, openWin],
   )
 
   const helpItems = useMemo(
