@@ -835,33 +835,30 @@ CREATE POLICY profiles_select_own ON public.profiles
   FOR SELECT TO authenticated
   USING (id = (select auth.uid()));
 
--- Users can update own profile, but cannot self-promote role flags.
-CREATE POLICY profiles_update_own ON public.profiles
-  FOR UPDATE TO authenticated
-  USING (id = (select auth.uid()))
-  WITH CHECK (
-    id = (select auth.uid())
-    AND is_developer IS NOT DISTINCT FROM (
-      SELECT p.is_developer FROM public.profiles p WHERE p.id = (select auth.uid())
-    )
-    AND is_admin IS NOT DISTINCT FROM (
-      SELECT p.is_admin FROM public.profiles p WHERE p.id = (select auth.uid())
-    )
-    AND is_student IS NOT DISTINCT FROM (
-      SELECT p.is_student FROM public.profiles p WHERE p.id = (select auth.uid())
-    )
-  );
-
--- Moderators can update any profile (e.g. clear offending avatars).
-CREATE POLICY profiles_mod_clear_avatar ON public.profiles
+-- Users can update own profile (no self-promote) OR moderator can update any.
+CREATE POLICY profiles_update ON public.profiles
   FOR UPDATE TO authenticated
   USING (
-    EXISTS (
+    id = (select auth.uid())
+    OR EXISTS (
       SELECT 1 FROM public.profiles p
       WHERE p.id = (select auth.uid()) AND p.is_moderator = true
     )
   )
   WITH CHECK (
+    (
+      id = (select auth.uid())
+      AND is_developer IS NOT DISTINCT FROM (
+        SELECT p.is_developer FROM public.profiles p WHERE p.id = (select auth.uid())
+      )
+      AND is_admin IS NOT DISTINCT FROM (
+        SELECT p.is_admin FROM public.profiles p WHERE p.id = (select auth.uid())
+      )
+      AND is_student IS NOT DISTINCT FROM (
+        SELECT p.is_student FROM public.profiles p WHERE p.id = (select auth.uid())
+      )
+    )
+    OR
     EXISTS (
       SELECT 1 FROM public.profiles p
       WHERE p.id = (select auth.uid()) AND p.is_moderator = true
@@ -1068,24 +1065,21 @@ CREATE POLICY mkt_purchases_user_insert ON public.marketplace_purchases
 
 -- ── 6n. marketplace_install_events ───────────────────────────────────────────
 
-CREATE POLICY mie_user_select ON public.marketplace_install_events
-  FOR SELECT TO authenticated
-  USING (user_id = (select auth.uid()));
-
-CREATE POLICY mie_user_insert ON public.marketplace_install_events
-  FOR INSERT TO authenticated
-  WITH CHECK (user_id = (select auth.uid()));
-
--- Authors can view install events for their items (analytics).
-CREATE POLICY mie_author_select ON public.marketplace_install_events
+-- Own events or author of installed item (analytics).
+CREATE POLICY mie_select ON public.marketplace_install_events
   FOR SELECT TO authenticated
   USING (
-    EXISTS (
+    user_id = (select auth.uid())
+    OR EXISTS (
       SELECT 1 FROM public.marketplace_items mi
       WHERE mi.id = marketplace_install_events.item_id
         AND mi.author_id = (select auth.uid())
     )
   );
+
+CREATE POLICY mie_user_insert ON public.marketplace_install_events
+  FOR INSERT TO authenticated
+  WITH CHECK (user_id = (select auth.uid()));
 
 -- ── 6o. marketplace_likes ────────────────────────────────────────────────────
 
@@ -1100,12 +1094,11 @@ CREATE POLICY mkt_likes_user_delete ON public.marketplace_likes
 
 -- ── 6p. marketplace_comments ─────────────────────────────────────────────────
 
-CREATE POLICY mkt_comments_public_read ON public.marketplace_comments
-  FOR SELECT USING (is_flagged = false);
-
-CREATE POLICY mkt_comments_mod_read ON public.marketplace_comments
+-- Non-flagged visible to all; flagged visible to moderators only.
+CREATE POLICY mkt_comments_select ON public.marketplace_comments
   FOR SELECT USING (
-    EXISTS (
+    is_flagged = false
+    OR EXISTS (
       SELECT 1 FROM public.profiles
       WHERE id = (select auth.uid()) AND is_moderator = true
     )
@@ -1114,32 +1107,28 @@ CREATE POLICY mkt_comments_mod_read ON public.marketplace_comments
 CREATE POLICY mkt_comments_user_insert ON public.marketplace_comments
   FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
 
-CREATE POLICY mkt_comments_user_delete ON public.marketplace_comments
-  FOR DELETE USING ((select auth.uid()) = user_id);
-
-CREATE POLICY mkt_comments_user_flag ON public.marketplace_comments
-  FOR UPDATE USING ((select auth.uid()) IS NOT NULL)
-  WITH CHECK (is_flagged = true);
-
-CREATE POLICY mkt_comments_mod_update ON public.marketplace_comments
+-- Any authenticated user can flag (is_flagged=true); moderators can do any update.
+CREATE POLICY mkt_comments_update ON public.marketplace_comments
   FOR UPDATE USING (
-    EXISTS (
+    (select auth.uid()) IS NOT NULL
+  )
+  WITH CHECK (
+    is_flagged = true
+    OR EXISTS (
       SELECT 1 FROM public.profiles
       WHERE id = (select auth.uid()) AND is_moderator = true
     )
   );
 
-CREATE POLICY mkt_comments_mod_delete ON public.marketplace_comments
+-- Own comment, moderator, or item author can delete.
+CREATE POLICY mkt_comments_delete ON public.marketplace_comments
   FOR DELETE USING (
-    EXISTS (
+    (select auth.uid()) = user_id
+    OR EXISTS (
       SELECT 1 FROM public.profiles
       WHERE id = (select auth.uid()) AND is_moderator = true
     )
-  );
-
-CREATE POLICY mkt_comments_author_delete ON public.marketplace_comments
-  FOR DELETE USING (
-    EXISTS (
+    OR EXISTS (
       SELECT 1 FROM public.marketplace_items
       WHERE id = marketplace_comments.item_id
         AND author_id = (select auth.uid())
@@ -1152,14 +1141,12 @@ CREATE POLICY avatar_reports_insert ON public.avatar_reports
   FOR INSERT TO authenticated
   WITH CHECK (reporter_id = (select auth.uid()));
 
-CREATE POLICY avatar_reports_own_select ON public.avatar_reports
-  FOR SELECT TO authenticated
-  USING (reporter_id = (select auth.uid()));
-
-CREATE POLICY avatar_reports_mod_select ON public.avatar_reports
+-- Own reports or moderator can view all.
+CREATE POLICY avatar_reports_select ON public.avatar_reports
   FOR SELECT TO authenticated
   USING (
-    EXISTS (
+    reporter_id = (select auth.uid())
+    OR EXISTS (
       SELECT 1 FROM public.profiles
       WHERE id = (select auth.uid()) AND is_moderator = true
     )
@@ -1367,14 +1354,12 @@ CREATE POLICY user_reports_insert_own ON public.user_reports
   FOR INSERT TO authenticated
   WITH CHECK (reporter_id = (select auth.uid()));
 
-CREATE POLICY user_reports_select_own ON public.user_reports
-  FOR SELECT TO authenticated
-  USING (reporter_id = (select auth.uid()));
-
-CREATE POLICY user_reports_select_mod ON public.user_reports
+-- Own reports or admin/developer can view all.
+CREATE POLICY user_reports_select ON public.user_reports
   FOR SELECT TO authenticated
   USING (
-    EXISTS (
+    reporter_id = (select auth.uid())
+    OR EXISTS (
       SELECT 1 FROM public.profiles
       WHERE id = (select auth.uid())
         AND (is_admin = true OR is_developer = true)

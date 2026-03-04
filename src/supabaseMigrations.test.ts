@@ -1,9 +1,10 @@
 /**
- * supabaseMigrations.test.ts — V2-007, V2-008
+ * supabaseMigrations.test.ts — V2-007, V2-008, V2-009
  *
  * Structural tests for Supabase migration SQL files.
  * - All SECURITY DEFINER functions must pin search_path (V2-007).
  * - Service-role-only tables must have explicit deny-all policies (V2-008).
+ * - No duplicate permissive policies per table+action in baseline (V2-009).
  */
 
 import { describe, it, expect } from 'vitest'
@@ -76,6 +77,51 @@ describe('Supabase baseline: service-role-only tables have deny-all policies', (
         's',
       )
       expect(pattern.test(baseline), `${table} must have a deny-all policy`).toBe(true)
+    })
+  }
+})
+
+// ── V2-009: No duplicate permissive policies per table+action in baseline ──
+
+describe('Supabase baseline: no duplicate permissive policies per table+action (V2-009)', () => {
+  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline_schema.sql'), 'utf-8')
+
+  // Extract all CREATE POLICY statements: policy name, table, action
+  const policyPattern =
+    /CREATE POLICY\s+(\S+)\s+ON\s+public\.(\S+)\s+FOR\s+(SELECT|INSERT|UPDATE|DELETE|ALL)/gi
+  const policies: Array<{ name: string; table: string; action: string }> = []
+  let match: RegExpExecArray | null
+  while ((match = policyPattern.exec(baseline)) !== null) {
+    policies.push({ name: match[1], table: match[2], action: match[3].toUpperCase() })
+  }
+
+  // Tables that had the advisor warning — must have at most 1 policy per action
+  const CHECKED_TABLES = [
+    'marketplace_comments',
+    'avatar_reports',
+    'marketplace_install_events',
+    'profiles',
+    'user_reports',
+  ] as const
+
+  for (const table of CHECKED_TABLES) {
+    it(`${table} has at most one policy per action`, () => {
+      const tablePolicies = policies.filter((p) => p.table === table)
+      const actionCounts = new Map<string, string[]>()
+      for (const p of tablePolicies) {
+        const actions = p.action === 'ALL' ? ['SELECT', 'INSERT', 'UPDATE', 'DELETE'] : [p.action]
+        for (const a of actions) {
+          const existing = actionCounts.get(a) ?? []
+          existing.push(p.name)
+          actionCounts.set(a, existing)
+        }
+      }
+      for (const [action, names] of actionCounts) {
+        expect(
+          names.length,
+          `${table} has ${names.length} permissive policies for ${action}: ${names.join(', ')}`,
+        ).toBeLessThanOrEqual(1)
+      }
     })
   }
 })

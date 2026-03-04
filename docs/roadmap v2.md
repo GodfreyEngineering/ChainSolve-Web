@@ -270,8 +270,8 @@ Claude should treat this as the “source of truth” for the current environmen
 - Extended `src/supabaseMigrations.test.ts` with 2 new tests verifying both tables have deny-all policies in baseline.
 - To apply: run `supabase db push` or execute migration 0004 via Supabase Dashboard SQL Editor.
 
-## V2-009 — Reduce multiple permissive policies (performance advisor)
-**Problem:** many tables have multiple permissive policies for same role/action.  
+## V2-009 — Reduce multiple permissive policies (performance advisor) [x]
+**Problem:** many tables have multiple permissive policies for same role/action.
 **Work:**
 - Consolidate policies per table/action/role where safe:
   - marketplace_comments
@@ -283,6 +283,20 @@ Claude should treat this as the “source of truth” for the current environmen
 **Acceptance:**
 - Performance advisor warnings reduced/cleared
 - No access regressions (add SQL tests or targeted queries if you have a test harness).
+
+**Changelog (2026-03-04):**
+- Consolidated 7 sets of duplicate permissive policies across 5 tables, reducing total policy count from 21 to 14 while preserving identical access semantics:
+  - `profiles` UPDATE: 2 policies (own + moderator) merged into `profiles_update` with OR
+  - `marketplace_comments` SELECT: 2 (public + mod) merged into `mkt_comments_select`
+  - `marketplace_comments` UPDATE: 2 (user-flag + mod) merged into `mkt_comments_update`
+  - `marketplace_comments` DELETE: 3 (user + mod + author) merged into `mkt_comments_delete`
+  - `avatar_reports` SELECT: 2 (own + mod) merged into `avatar_reports_select`
+  - `marketplace_install_events` SELECT: 2 (user + author) merged into `mie_select`
+  - `user_reports` SELECT: 2 (own + mod) merged into `user_reports_select`
+- Added migration `supabase/migrations/0005_consolidate_permissive_policies.sql` — drops old policies and creates consolidated replacements in a transaction.
+- Updated baseline `0001_baseline_schema.sql` to use consolidated policies for fresh deployments.
+- Extended `src/supabaseMigrations.test.ts` with 5 tests (one per table) verifying at most 1 policy per action.
+- To apply: run `supabase db push` or execute migration 0005 via Supabase Dashboard SQL Editor.
 
 ## V2-010 — Add missing indexes for **public** foreign keys flagged as unindexed
 **Problem:** unindexed FKs flagged for public tables.  
