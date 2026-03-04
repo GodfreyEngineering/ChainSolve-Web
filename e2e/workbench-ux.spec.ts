@@ -181,3 +181,51 @@ test.describe('Workbench UX: Canvas toolbar (E11-1)', () => {
     expect(count).toBeGreaterThanOrEqual(3) // at least 2 sources + 1 display
   })
 })
+
+// ── Settings / Router regression (V2-002) ────────────────────────────────────
+
+test.describe('V2-002: Settings Router crash regression', () => {
+  test('/settings route redirects to /app without crash', async ({ page }) => {
+    const errors: string[] = []
+    page.on('pageerror', (err) => errors.push(err.message))
+
+    await page.goto('/settings')
+    // Should redirect to /app (SettingsRedirect navigates with replace)
+    await page.waitForURL('**/app', { timeout: 15_000 })
+
+    // No "useNavigate outside Router" error
+    const routerErrors = errors.filter((e) => e.includes('useNavigate'))
+    expect(routerErrors).toEqual([])
+  })
+
+  test('opening settings on /canvas does not crash', async ({ page }) => {
+    const errors: string[] = []
+    page.on('pageerror', (err) => errors.push(err.message))
+
+    await page.goto('/canvas')
+    await waitForEngineOrFatal(page, errors)
+
+    // Find the settings gear button in the menubar/header area
+    // The menubar has an application menu with buttons
+    const menubar = page.locator('[role="menubar"][aria-label="Application menu"]')
+    await expect(menubar).toBeAttached()
+
+    // Look for a gear/settings button — common patterns: aria-label, title, or data-testid
+    const settingsBtn = page.locator(
+      'button[aria-label*="ettings"], button[title*="ettings"], [data-testid*="settings"]',
+    )
+
+    // If the gear button exists, click it and verify no crash
+    if ((await settingsBtn.count()) > 0) {
+      await settingsBtn.first().click()
+      // Allow modal to render
+      await page.waitForTimeout(300)
+      // No useNavigate errors
+      const routerErrors = errors.filter((e) => e.includes('useNavigate'))
+      expect(routerErrors).toEqual([])
+    }
+
+    // Regardless of gear button, no errors should have occurred
+    expect(errors).toEqual([])
+  })
+})

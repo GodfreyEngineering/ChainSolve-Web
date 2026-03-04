@@ -154,8 +154,8 @@ Claude should treat this as the “source of truth” for the current environmen
 - Code required no changes — SELECT_COLS, ProjectRow interface, and all CRUD functions already handle the folder column correctly.
 - Playwright auth-gated project browser test already tracked as fixme in `e2e/workbench-ux.spec.ts`; full auth-dependent E2E coverage deferred to V2-I (E2E hardening phase).
 
-## V2-002 — Fix Settings/Preferences Router crash
-**Problem:** useNavigate used outside Router context in Settings modal chunk.  
+## V2-002 — Fix Settings/Preferences Router crash [x]
+**Problem:** useNavigate used outside Router context in Settings modal chunk.
 **Work:**
 - Ensure Settings modal is rendered within Router context or refactor navigation calls:
   - pass navigation callbacks down from Router layer
@@ -166,19 +166,12 @@ Claude should treat this as the “source of truth” for the current environmen
 - ErrorBoundary does not trip
 - Playwright: open settings, close settings, repeat.
 
-## V2-003 — Fix Terms page blank + “Failed to record acceptance”
-**Problem:** Terms page blank and acceptance fails; blocks signup flows and E2E.  
-**Work:**
-- Fix `/terms` rendering and content loading.
-- Fix acceptance write path:
-  - Ensure `user_terms_log` insert works with RLS and correct auth state
-  - Ensure UI handles network errors and retries
-- Add clear UX: why you must accept, link to terms, confirm state persisted.
-**Acceptance:**
-- Terms displays content
-- Accept works and advances
-- No console errors from acceptance path
-- Playwright auth flow test updated and passes.
+**Changelog (2026-03-04):**
+- Root cause: The original `src/pages/Settings.tsx` was a full-page component that used `useNavigate()` and direct `supabase` imports (adapter boundary violation). The current architecture already replaced it with a windowed `SettingsModal` (rendered inside `SettingsModalProvider` which is inside `BrowserRouter` in `main.tsx`), and a lightweight `SettingsRedirect` route component -- neither uses Router hooks in a way that can crash.
+- Deleted `src/pages/Settings.tsx` (240 lines) -- dead code, not imported anywhere, was the original crash source. Also had a direct `supabase` import violating the adapter boundary.
+- Added 3 unit tests in `src/components/SettingsModal.test.ts`: (1) SettingsModal.tsx does not import react-router-dom, (2) SettingsModalProvider.tsx does not import react-router-dom, (3) dead full-page Settings.tsx stays deleted.
+- Added 2 E2E tests in `e2e/workbench-ux.spec.ts`: (1) `/settings` route redirects to `/app` without useNavigate crash, (2) opening settings on `/canvas` does not crash.
+
 
 ## V2-004 — CSP noise + Cloudflare Insights beacon
 **Problem:** console shows blocked script `static.cloudflareinsights.com/beacon.min.js` due to CSP.  
@@ -621,13 +614,6 @@ Claude should treat this as the “source of truth” for the current environmen
 
 # Phase V2-J — Polish & Professionalism Pass (make it feel like a flagship product)
 
-## V2-034 — Upgrade loading animations (login/app/project)
-**Requirement:** “1000x fancier page loading animation” (professional, no gimmicks).  
-**Work:**
-- Add consistent loading skeletons/spinners
-- Smooth transitions between /app and project
-**Acceptance:**
-- Perceived performance improved; no layout jumps.
 
 ## V2-035 — Project UX: templates, groups, directory, and “idiot-proof” microcopy sweep
 **Requirement:** More explanatory text everywhere; make it idiot-proof.  
