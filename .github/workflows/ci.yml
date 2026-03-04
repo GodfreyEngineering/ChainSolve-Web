@@ -76,7 +76,7 @@ jobs:
       - name: Build WASM
         run: wasm-pack build crates/engine-wasm --target web --release
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -195,7 +195,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -267,7 +267,7 @@ jobs:
         # Checkout is required so the `functions/` directory is present.
         # Wrangler compiles Pages Functions at deploy time using its own bundler.
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
