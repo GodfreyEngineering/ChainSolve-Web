@@ -302,6 +302,84 @@ button:focus:not(:focus-visible) {
   color: #ef4444;
 }
 
+/* ── Main header nav links ─────────────────────────────────────────────────── */
+.cs-nav-link {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-md);
+  background: transparent;
+  transition:
+    color 0.15s,
+    background 0.15s,
+    box-shadow 0.2s;
+}
+.cs-nav-link:hover {
+  color: var(--primary);
+  background: var(--primary-dim);
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+.cs-nav-link[data-active='true'] {
+  color: var(--primary);
+  background: var(--primary-dim);
+}
+.cs-header-icon-btn {
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.65;
+  transition:
+    opacity 0.15s,
+    box-shadow 0.2s;
+}
+.cs-header-icon-btn:hover {
+  opacity: 1;
+  box-shadow: 0 0 6px var(--primary-glow);
+}
+.cs-header-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--primary-dim);
+  color: var(--primary);
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: box-shadow 0.2s;
+}
+.cs-header-avatar:hover {
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+.cs-header-dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.cs-header-dropdown-item:hover {
+  background: var(--primary-dim);
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

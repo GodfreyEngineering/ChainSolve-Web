@@ -1,9 +1,9 @@
 /**
- * MainHeader — shared top-level navigation header (G7-1).
+ * MainHeader — shared top-level navigation header (G7-1, V2-013).
  *
  * Always present on authenticated pages. Contains:
  *   Left:   Logo (link to /app)
- *   Middle: Explore, Projects, Documentation links
+ *   Middle: Home (/app), Explore (/explore), Documentation (/docs)
  *   Right:  Plan badge, Settings gear, User avatar/dropdown
  */
 
@@ -64,16 +64,18 @@ export function MainHeader({ plan }: MainHeaderProps) {
     return location.pathname === path || location.pathname.startsWith(path + '/')
   }
 
+  const navClick = (e: React.MouseEvent, to: string) => {
+    e.preventDefault()
+    navigate(to)
+  }
+
   return (
     <header style={headerStyle}>
       {/* ── Left: Logo ── */}
       <div style={leftStyle}>
         <a
           href="/app"
-          onClick={(e) => {
-            e.preventDefault()
-            navigate('/app')
-          }}
+          onClick={(e) => navClick(e, '/app')}
           style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
         >
           <img src={BRAND.logoWideText} alt="ChainSolve" style={{ height: 22 }} />
@@ -83,34 +85,26 @@ export function MainHeader({ plan }: MainHeaderProps) {
       {/* ── Middle: Navigation links ── */}
       <nav style={navStyle}>
         <a
+          href="/app"
+          onClick={(e) => navClick(e, '/app')}
+          className="cs-nav-link"
+          data-active={isActive('/app')}
+        >
+          {t('nav.home', 'Home')}
+        </a>
+        <a
           href="/explore"
-          onClick={(e) => {
-            e.preventDefault()
-            navigate('/explore')
-          }}
-          style={navLinkStyle(isActive('/explore'))}
+          onClick={(e) => navClick(e, '/explore')}
+          className="cs-nav-link"
+          data-active={isActive('/explore')}
         >
           {t('home.explore')}
         </a>
         <a
-          href="/app"
-          onClick={(e) => {
-            e.preventDefault()
-            navigate('/app')
-          }}
-          style={navLinkStyle(isActive('/app'))}
-        >
-          {t('nav.projects', 'Projects')}
-        </a>
-        <a
           href="/docs"
-          onClick={(e) => {
-            e.preventDefault()
-            // Documentation opens in the current page's docs window or navigates
-            navigate('/app')
-            // TODO: open docs modal when available globally
-          }}
-          style={navLinkStyle(false)}
+          onClick={(e) => navClick(e, '/docs')}
+          className="cs-nav-link"
+          data-active={isActive('/docs')}
         >
           {t('nav.documentation', 'Documentation')}
         </a>
@@ -118,28 +112,25 @@ export function MainHeader({ plan }: MainHeaderProps) {
 
       {/* ── Right: Plan badge, Settings, Avatar ── */}
       <div style={rightStyle}>
-        {/* Plan badge */}
         <PlanBadge plan={plan} variant="compact" />
 
-        {/* Settings gear */}
         <button
+          className="cs-header-icon-btn"
           onClick={() => openSettings('preferences')}
           title={t('nav.settings')}
           aria-label={t('nav.settings')}
-          style={iconBtnStyle}
         >
           &#x2699;
         </button>
 
-        {/* User avatar + dropdown */}
         <div ref={accountRef} style={{ position: 'relative' }}>
           <button
+            className="cs-header-avatar"
             onClick={() => setAccountOpen((v) => !v)}
             title={userEmail ?? t('settings.account', 'Account')}
             aria-label={t('settings.account', 'Account')}
             aria-haspopup="true"
             aria-expanded={accountOpen}
-            style={avatarStyle}
           >
             {initials}
           </button>
@@ -154,7 +145,7 @@ export function MainHeader({ plan }: MainHeaderProps) {
               </div>
               <div style={dropdownSepStyle} />
               <button
-                style={dropdownItemStyle}
+                className="cs-header-dropdown-item"
                 onClick={() => {
                   setAccountOpen(false)
                   openSettings('profile')
@@ -163,7 +154,7 @@ export function MainHeader({ plan }: MainHeaderProps) {
                 {t('settings.profile', 'Profile')}
               </button>
               <button
-                style={dropdownItemStyle}
+                className="cs-header-dropdown-item"
                 onClick={() => {
                   setAccountOpen(false)
                   openSettings('billing')
@@ -172,7 +163,7 @@ export function MainHeader({ plan }: MainHeaderProps) {
                 {t('settings.billing', 'Billing')}
               </button>
               <button
-                style={dropdownItemStyle}
+                className="cs-header-dropdown-item"
                 onClick={() => {
                   setAccountOpen(false)
                   openSettings('security')
@@ -182,7 +173,7 @@ export function MainHeader({ plan }: MainHeaderProps) {
               </button>
               <div style={dropdownSepStyle} />
               <button
-                style={dropdownItemStyle}
+                className="cs-header-dropdown-item"
                 onClick={() => {
                   setAccountOpen(false)
                   openSettings('preferences')
@@ -191,7 +182,7 @@ export function MainHeader({ plan }: MainHeaderProps) {
                 {t('settings.preferences', 'Preferences')}
               </button>
               <div style={dropdownSepStyle} />
-              <button style={dropdownItemStyle} onClick={handleSignOut}>
+              <button className="cs-header-dropdown-item" onClick={handleSignOut}>
                 {t('nav.signOut')}
               </button>
             </div>
@@ -229,52 +220,11 @@ const navStyle: React.CSSProperties = {
   justifyContent: 'center',
 }
 
-function navLinkStyle(active: boolean): React.CSSProperties {
-  return {
-    fontSize: '0.78rem',
-    fontWeight: 500,
-    color: active ? 'var(--primary)' : 'rgba(244,244,243,0.55)',
-    textDecoration: 'none',
-    padding: '0.25rem 0.6rem',
-    borderRadius: 'var(--radius-md)',
-    background: active ? 'var(--primary-dim)' : 'transparent',
-    transition: 'color 0.15s, background 0.15s',
-  }
-}
-
 const rightStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   gap: '0.5rem',
   flexShrink: 0,
-}
-
-const iconBtnStyle: React.CSSProperties = {
-  padding: '0.2rem 0.4rem',
-  borderRadius: 'var(--radius-md)',
-  border: 'none',
-  background: 'transparent',
-  color: 'var(--text)',
-  cursor: 'pointer',
-  fontSize: '1rem',
-  lineHeight: 1,
-  opacity: 0.65,
-}
-
-const avatarStyle: React.CSSProperties = {
-  width: 26,
-  height: 26,
-  borderRadius: '50%',
-  border: '1px solid var(--border)',
-  background: 'var(--primary-dim)',
-  color: 'var(--primary)',
-  fontSize: '0.6rem',
-  fontWeight: 700,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  cursor: 'pointer',
-  letterSpacing: '0.02em',
 }
 
 const dropdownStyle: React.CSSProperties = {
@@ -301,18 +251,4 @@ const dropdownSepStyle: React.CSSProperties = {
   height: 1,
   background: 'var(--border)',
   margin: '0.2rem 0',
-}
-
-const dropdownItemStyle: React.CSSProperties = {
-  display: 'block',
-  width: '100%',
-  textAlign: 'left',
-  padding: '0.4rem 0.7rem',
-  fontSize: '0.8rem',
-  border: 'none',
-  borderRadius: 4,
-  background: 'transparent',
-  color: 'var(--text)',
-  cursor: 'pointer',
-  fontFamily: 'inherit',
 }

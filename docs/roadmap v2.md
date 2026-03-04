@@ -344,8 +344,8 @@ Claude should treat this as the “source of truth” for the current environmen
 
 # Phase V2-C — UI architecture rebuild (layout, docking, zones, robustness)
 
-## V2-012 — Introduce proper semantic page structure (fix `<main>` landmark)
-**Problem:** E2E fails: missing `<main>` or role=main.  
+## V2-012 — Introduce proper semantic page structure (fix `<main>` landmark) [x]
+**Problem:** E2E fails: missing `<main>` or role=main.
 **Work:**
 - Refactor top-level layout to include:
   - `<header>` (ChainSolve main header)
@@ -356,8 +356,14 @@ Claude should treat this as the “source of truth” for the current environmen
 - `e2e/a11y.spec.ts` main landmark test passes
 - No layout regressions.
 
-## V2-013 — Main header rebuild: Home / Explore / Documentation + top-right account/settings
-**Goal:** Upgrade header and make it consistent and professional.  
+**Changelog (2026-03-04):**
+- Login.tsx: Changed outermost `<div>` to `<main>` in all 4 return paths (MFA challenge, confirm-pending, reset-sent, main auth form).
+- CanvasPage.tsx: Changed outermost `<div>` to `<main>` in all 3 return paths (loading, error, main editor).
+- All routes now have a `<main>` landmark element for accessibility compliance.
+- verify-ci.sh: all checks pass (3626 tests, 201 Rust tests, build OK).
+
+## V2-013 — Main header rebuild: Home / Explore / Documentation + top-right account/settings [x]
+**Goal:** Upgrade header and make it consistent and professional.
 **Work:**
 - Main header includes:
   - Left: ChainSolve logo
@@ -367,6 +373,17 @@ Claude should treat this as the “source of truth” for the current environmen
 **Acceptance:**
 - Header consistent on /login? (decide), /terms, /app, project pages
 - Buttons work, no router errors.
+
+**Changelog (2026-03-04):**
+- MainHeader.tsx: Rebuilt nav with Home (/app), Explore (/explore), Documentation (/docs) links.
+- Fixed Documentation link (was broken, navigated to /app instead of /docs). Removed TODO comment.
+- Replaced inline styles with CSS classes for hover effects: `.cs-nav-link`, `.cs-header-icon-btn`, `.cs-header-avatar`, `.cs-header-dropdown-item`.
+- Added glow hover effects using `--primary-glow` (box-shadow on hover for nav links, gear icon, avatar).
+- Dropdown items now have hover highlight via `.cs-header-dropdown-item:hover`.
+- Active nav state uses `data-active` attribute instead of inline style.
+- i18n: Added `nav.home` key in EN/DE/ES/FR/IT.
+- Login page intentionally has no MainHeader (auth-only page).
+- verify-ci.sh: all checks pass (3626 tests, 201 Rust tests, build OK).
 
 ## V2-014 — Project header rebuild (menus + project identity + save controls)
 **Goal:** “Project mode” header under main header.  

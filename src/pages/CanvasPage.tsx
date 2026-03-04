@@ -1646,12 +1646,16 @@ export default function CanvasPage() {
 
   // ── Loading / error screens ────────────────────────────────────────────────
   if (loadPhase === 'loading') {
-    return <LoadingScreen message={t('canvas.loadingProject', 'Loading project')} />
+    return (
+      <main>
+        <LoadingScreen message={t('canvas.loadingProject', 'Loading project')} />
+      </main>
+    )
   }
 
   if (loadPhase === 'error') {
     return (
-      <div
+      <main
         style={{
           minHeight: '100vh',
           display: 'flex',
@@ -1674,12 +1678,12 @@ export default function CanvasPage() {
             {CONTACT.support}
           </a>
         </p>
-      </div>
+      </main>
     )
   }
 
   return (
-    <div
+    <main
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -1986,6 +1990,6 @@ export default function CanvasPage() {
           <LazySessionRevokedModal open />
         </Suspense>
       )}
-    </div>
+    </main>
   )
 }

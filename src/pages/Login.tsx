@@ -206,11 +206,13 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
 
   if (mfaFactorId) {
     return (
-      <MfaChallengeScreen
-        factorId={mfaFactorId}
-        onVerified={() => void handleMfaVerified()}
-        onCancel={() => void handleMfaCancel()}
-      />
+      <main>
+        <MfaChallengeScreen
+          factorId={mfaFactorId}
+          onVerified={() => void handleMfaVerified()}
+          onCancel={() => void handleMfaCancel()}
+        />
+      </main>
     )
   }
 
@@ -218,7 +220,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
 
   if (confirmPending) {
     return (
-      <div style={s.page}>
+      <main style={s.page}>
         <div style={s.card}>
           <h1 style={s.heading}>Check your inbox</h1>
           <p style={s.sub}>Almost there — one more step</p>
@@ -251,7 +253,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
             Back to sign in
           </Link>
         </div>
-      </div>
+      </main>
     )
   }
 
@@ -259,7 +261,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
 
   if (resetSent) {
     return (
-      <div style={s.page}>
+      <main style={s.page}>
         <div style={s.card}>
           <h1 style={s.heading}>Check your email</h1>
           <p style={s.sub}>Password reset link sent</p>
@@ -276,14 +278,14 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
             Back to sign in
           </Link>
         </div>
-      </div>
+      </main>
     )
   }
 
   // ── Main auth form ──────────────────────────────────────────────────────────
 
   return (
-    <div style={s.pageWrap}>
+    <main style={s.pageWrap}>
       <div style={s.page}>
         <div style={s.card}>
           <div style={s.logoWrap}>
@@ -449,7 +451,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
         </div>
       </div>
       <LegalFooter />
-    </div>
+    </main>
   )
 }
 
