@@ -780,6 +780,13 @@
     "pinned": "Angeheftet",
     "followSelection": "Auswahl folgen"
   },
+  "annotation": {
+    "text": "Text",
+    "color": "Farbe",
+    "fontSize": "Schriftgroesse",
+    "bold": "Fett",
+    "italic": "Kursiv"
+  },
   "blockLibrary": {
     "dragHint": "Auf die Leinwand ziehen",
     "proOnly": "Pro",
@@ -1309,6 +1316,7 @@
     "annotCallout": "Hinweisfeld",
     "annotHighlight": "Hervorhebungsbereich",
     "annotArrow": "Pfeil",
+    "annotLeader": "Hinweislinie",
     "snapGridOn": "Raster-Einrasten aktivieren",
     "snapGridOff": "Raster-Einrasten deaktivieren",
     "insertConversion": "Umrechnung einfuegen",

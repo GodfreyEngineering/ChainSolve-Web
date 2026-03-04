@@ -571,7 +571,7 @@ Claude should treat this as the “source of truth” for the current environmen
 - No code changes required — acceptance criteria already satisfied.
 - All CI checks pass.
 
-## V2-022 — Remove annotation “blocks” and implement real annotation tools (non-block)
+## V2-022 — Remove annotation “blocks” and implement real annotation tools (non-block) [x]
 **Goal:** annotations behave like CAD annotations:
 - text boxes, arrows, shapes
 - leaders that can link to blocks/chains/groups
@@ -587,6 +587,22 @@ Claude should treat this as the “source of truth” for the current environmen
 - Annotations are powerful and stable
 - Not treated as blocks
 - Persisted per sheet.
+
+### Changelog (2026-03-04)
+- Created `src/annotations/annotationRegistry.ts` — standalone registry with 5 annotation types (text, callout, highlight, arrow, leader), fully decoupled from BLOCK_REGISTRY.
+- Removed 4 annotation `reg()` calls from `registry.ts`, removed from `UI_ONLY_BLOCKS`, `CATEGORY_ORDER`, `CATEGORY_LABELS`.
+- Removed `'annotations'` from `BlockCategory` union in `types.ts`.
+- Removed annotation entries from `blockDescriptions.ts` and `docsHelpers.ts`.
+- Extended `NodeData` with `annotationBold`, `annotationItalic` flags and `'leader'` annotation type.
+- Updated `AnnotationNode.tsx`: bold/italic rendering for text/callout, new leader type with ReactFlow source Handle for connecting to blocks via edges.
+- Created `AnnotationInspector.tsx`: text, color (8 presets + custom), font size, bold/italic toggles.
+- Updated `Inspector.tsx`: annotation nodes get dedicated AnnotationInspector panel (no unit picker, no port list).
+- Updated `CanvasArea.tsx`: insertion uses `ANNOTATION_REGISTRY` instead of `BLOCK_REGISTRY`; exposed `insertAnnotationAtCenter` on `CanvasAreaHandle`.
+- Updated `AppHeader.tsx`: Insert menu annotation items now directly insert annotations (were stubs calling `openLibraryWithFilter(null)`); added leader item.
+- Updated `CanvasToolbar.tsx` and `ContextMenu.tsx`: added leader annotation button/item.
+- Updated tests: `catalogSync.test.ts`, `catalogSanity.test.ts`, `proGating.test.ts` — removed annotation exemptions. New `annotationRegistry.test.ts` with 6 structural tests.
+- Added i18n keys: `contextMenu.annotLeader` + `annotation.*` section (text, color, fontSize, bold, italic) in EN/DE/ES/FR/IT/HE.
+- All CI checks pass.
 
 ## V2-023 — Rename “edges” to “chains” across UI
 **Goal:** consistent terminology.  

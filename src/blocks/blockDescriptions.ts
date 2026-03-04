@@ -69,14 +69,6 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   display:
     'Shows a computed value prominently on the canvas. Connect any output to see its result.',
 
-  // ── Annotations ───────────────────────────────────────────────────────────
-  annotation_text: 'Floating text label for annotating the canvas. Does not affect computation.',
-  annotation_callout: 'Callout box for notes and explanations. Does not affect computation.',
-  annotation_highlight:
-    'Colored highlight region to visually group related blocks. Does not affect computation.',
-  annotation_arrow:
-    'Directional arrow for pointing at or connecting visual elements. Does not affect computation.',
-
   // ── Data inputs (Pro) ─────────────────────────────────────────────────────
   vectorInput:
     'Enter a list of numbers directly. Paste from Excel, CSV, or type values. Used as input to list operations and plots.',

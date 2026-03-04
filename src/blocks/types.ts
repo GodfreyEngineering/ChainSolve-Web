@@ -40,7 +40,6 @@ export type BlockCategory =
   | 'constElec'
   | 'presetMaterials'
   | 'presetFluids'
-  | 'annotations'
   | 'customFunctions'
 
 /** Which React Flow custom-node renderer to use. */
@@ -155,13 +154,17 @@ export interface NodeData extends Record<string, unknown> {
   /** Whether the group is collapsed — members hidden, proxy handles shown (csGroup nodes only). */
   groupCollapsed?: boolean
   /** Annotation type discriminator (csAnnotation nodes only). */
-  annotationType?: 'text' | 'callout' | 'highlight' | 'arrow'
+  annotationType?: 'text' | 'callout' | 'highlight' | 'arrow' | 'leader'
   /** Annotation text content (csAnnotation nodes only). */
   annotationText?: string
   /** Annotation color — hex string (csAnnotation nodes only). */
   annotationColor?: string
-  /** Annotation font size in px (csAnnotation text/callout nodes only). */
+  /** Annotation font size in px (csAnnotation text/callout/leader nodes only). */
   annotationFontSize?: number
+  /** Annotation bold flag (csAnnotation text/callout/leader nodes only). */
+  annotationBold?: boolean
+  /** Annotation italic flag (csAnnotation text/callout/leader nodes only). */
+  annotationItalic?: boolean
   /** H1-1: Unit assigned to this node's output. Unit id from unitCatalog. */
   unit?: string
   /** H7-1: Channel name for publish blocks (csPublish nodes only). */

@@ -780,6 +780,13 @@
     "pinned": "Fijado",
     "followSelection": "Siguiendo selección"
   },
+  "annotation": {
+    "text": "Texto",
+    "color": "Color",
+    "fontSize": "Tamano de fuente",
+    "bold": "Negrita",
+    "italic": "Cursiva"
+  },
   "blockLibrary": {
     "dragHint": "Arrastrar al lienzo",
     "proOnly": "Pro",
@@ -1309,6 +1316,7 @@
     "annotCallout": "Cuadro de nota",
     "annotHighlight": "Region resaltada",
     "annotArrow": "Flecha",
+    "annotLeader": "Linea guia",
     "snapGridOn": "Activar ajuste a cuadricula",
     "snapGridOff": "Desactivar ajuste a cuadricula",
     "insertConversion": "Insertar conversion",

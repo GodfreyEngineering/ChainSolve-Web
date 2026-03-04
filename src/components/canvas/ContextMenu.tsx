@@ -582,6 +582,14 @@ export function ContextMenu({
                     onClose()
                   }}
                 />
+                <MenuItem
+                  icon={'\u21e5'}
+                  label={t('contextMenu.annotLeader')}
+                  onClick={() => {
+                    onInsertAnnotation(target.x, target.y, 'annotation_leader')
+                    onClose()
+                  }}
+                />
               </>
             )}
             {onPaste && (

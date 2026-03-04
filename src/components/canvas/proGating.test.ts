@@ -118,9 +118,8 @@ describe('Block taxonomy structure (G3-1)', () => {
     ])
   })
 
-  /** Annotation blocks are excluded from the block library taxonomy (V2-018)
-   *  but remain in the registry for toolbar/context-menu insertion. */
-  const TAXONOMY_EXEMPT_CATEGORIES = new Set(['annotations'])
+  /** Annotation tools are no longer in BLOCK_REGISTRY (V2-022). */
+  const TAXONOMY_EXEMPT_CATEGORIES = new Set<string>()
 
   it('covers every non-annotation block in BLOCK_REGISTRY', () => {
     const coveredTypes = new Set<string>()

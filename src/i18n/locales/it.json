@@ -780,6 +780,13 @@
     "pinned": "Fissato",
     "followSelection": "Segue la selezione"
   },
+  "annotation": {
+    "text": "Testo",
+    "color": "Colore",
+    "fontSize": "Dimensione carattere",
+    "bold": "Grassetto",
+    "italic": "Corsivo"
+  },
   "blockLibrary": {
     "dragHint": "Trascina sulla tela",
     "proOnly": "Pro",
@@ -1309,6 +1316,7 @@
     "annotCallout": "Casella di nota",
     "annotHighlight": "Area evidenziata",
     "annotArrow": "Freccia",
+    "annotLeader": "Linea guida",
     "snapGridOn": "Attiva aggancio alla griglia",
     "snapGridOff": "Disattiva aggancio alla griglia",
     "insertConversion": "Inserisci conversione",

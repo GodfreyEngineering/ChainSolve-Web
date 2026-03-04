@@ -780,6 +780,13 @@
     "pinned": "Épinglé",
     "followSelection": "Suit la sélection"
   },
+  "annotation": {
+    "text": "Texte",
+    "color": "Couleur",
+    "fontSize": "Taille de police",
+    "bold": "Gras",
+    "italic": "Italique"
+  },
   "blockLibrary": {
     "dragHint": "Glisser sur le canevas",
     "proOnly": "Pro",
@@ -1309,6 +1316,7 @@
     "annotCallout": "Encadre de note",
     "annotHighlight": "Zone surlignee",
     "annotArrow": "Fleche",
+    "annotLeader": "Ligne de repere",
     "snapGridOn": "Activer l'accrochage a la grille",
     "snapGridOff": "Desactiver l'accrochage a la grille",
     "insertConversion": "Inserer une conversion",

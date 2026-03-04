@@ -39,7 +39,6 @@ const CATEGORY_TO_DOCS: Record<BlockCategory, DocsSection> = {
   constElec: 'block-constants',
   presetMaterials: 'materials',
   presetFluids: 'materials',
-  annotations: 'block-annotations',
   customFunctions: 'block-library',
 }
 

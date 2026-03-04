@@ -799,6 +799,13 @@
     "pinned": "Pinned",
     "followSelection": "Following selection"
   },
+  "annotation": {
+    "text": "Text",
+    "color": "Color",
+    "fontSize": "Font size",
+    "bold": "Bold",
+    "italic": "Italic"
+  },
   "blockLibrary": {
     "dragHint": "Drag onto canvas",
     "proOnly": "Pro",
@@ -1328,6 +1335,7 @@
     "annotCallout": "Callout box",
     "annotHighlight": "Highlight region",
     "annotArrow": "Arrow",
+    "annotLeader": "Leader label",
     "snapGridOn": "Enable snap to grid",
     "snapGridOff": "Disable snap to grid",
     "insertConversion": "Insert conversion",

@@ -65,6 +65,7 @@ import { computeLodTier, type LodTier as LodTierGate } from '../../engine/lodGat
 import { useVariablesStore } from '../../stores/variablesStore'
 import { usePublishedOutputsStore } from '../../stores/publishedOutputsStore'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
+import { ANNOTATION_REGISTRY } from '../../annotations/annotationRegistry'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 import { UpgradeModal } from '../UpgradeModal'
 import {
@@ -223,6 +224,8 @@ export interface CanvasAreaHandle {
   toggleHiddenView: () => void
   /** Open the block library with a main-category filter pre-selected. */
   openLibraryWithFilter: (mainCategoryId: string | null) => void
+  /** Insert an annotation at the viewport center (used by AppHeader Insert menu). */
+  insertAnnotationAtCenter: (annotationType: string) => void
 }
 
 // ── Minimap persistence ──────────────────────────────────────────────────────
@@ -531,6 +534,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       setLibFilterMain(mainCategoryId)
       setLibVisible(true)
     },
+    insertAnnotationAtCenter: onInsertAnnotationAtCenter,
     exportPdfAudit: async () => {
       const { exportAuditPdf } = await import('../../lib/pdf/exportAuditPdf')
       const { captureCanvasImage } = await import('../../lib/pdf/captureCanvasImage')
@@ -1714,14 +1718,14 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // Insert annotation at the canvas position where user right-clicked (G6-1)
   const onInsertAnnotation = useCallback(
     (screenX: number, screenY: number, annotationType: string) => {
-      const def = BLOCK_REGISTRY.get(annotationType)
-      if (!def) return
+      const aDef = ANNOTATION_REGISTRY.get(annotationType)
+      if (!aDef) return
       const position = screenToFlowPosition({ x: screenX, y: screenY })
       const id = `node_${++nodeIdCounter}`
       doSaveHistory()
       setNodes((nds) => [
         ...nds,
-        { id, type: def.nodeKind, position, data: { ...def.defaultData } } as Node<NodeData>,
+        { id, type: 'csAnnotation', position, data: { ...aDef.defaultData } } as Node<NodeData>,
       ])
     },
     [screenToFlowPosition, setNodes, doSaveHistory],
@@ -1730,8 +1734,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // Insert annotation at the center of the viewport (toolbar action, I3-1)
   const onInsertAnnotationAtCenter = useCallback(
     (annotationType: string) => {
-      const def = BLOCK_REGISTRY.get(annotationType)
-      if (!def) return
+      const aDef = ANNOTATION_REGISTRY.get(annotationType)
+      if (!aDef) return
       const rect = canvasWrapRef.current?.getBoundingClientRect()
       const cx = rect ? rect.left + rect.width / 2 : window.innerWidth / 2
       const cy = rect ? rect.top + rect.height / 2 : window.innerHeight / 2
@@ -1740,7 +1744,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       doSaveHistory()
       setNodes((nds) => [
         ...nds,
-        { id, type: def.nodeKind, position, data: { ...def.defaultData } } as Node<NodeData>,
+        { id, type: 'csAnnotation', position, data: { ...aDef.defaultData } } as Node<NodeData>,
       ])
     },
     [screenToFlowPosition, setNodes, doSaveHistory],

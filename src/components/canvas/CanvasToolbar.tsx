@@ -558,6 +558,10 @@ export function CanvasToolbar({
                   <span style={annotIconStyle}>{'\u2192'}</span>
                   {t('contextMenu.annotArrow')}
                 </button>
+                <button style={annotItemStyle} onClick={() => insertAnnot('annotation_leader')}>
+                  <span style={annotIconStyle}>{'\u21e5'}</span>
+                  {t('contextMenu.annotLeader')}
+                </button>
               </div>
             )}
           </div>

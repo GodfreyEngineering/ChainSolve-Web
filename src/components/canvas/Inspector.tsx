@@ -23,6 +23,7 @@ import { ValueEditor } from './editors/ValueEditor'
 import { getUnitSymbol } from '../../units/unitSymbols'
 import { PlotInspector } from './PlotInspector'
 import { GroupInspector } from './GroupInspector'
+import { AnnotationInspector } from './nodes/AnnotationInspector'
 
 const LazyUnitPicker = lazy(() =>
   import('./editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
@@ -191,6 +192,7 @@ export function Inspector({
   }
 
   const isGroup = nd.blockType === '__group__'
+  const isAnnotation = nd.annotationType !== undefined
   const def = BLOCK_REGISTRY.get(nd.blockType)
   const value = computed.get(node.id)
   const manualValues = (nd.manualValues ?? {}) as Record<string, number>
@@ -308,6 +310,8 @@ export function Inspector({
             onUngroup={() => onUngroupNode?.(node.id)}
             readOnly={!canUseGroups}
           />
+        ) : isAnnotation ? (
+          <AnnotationInspector data={nd} onUpdate={update} />
         ) : (
           <>
             {/* Category breadcrumb (G4-1) */}
@@ -359,7 +363,6 @@ export function Inspector({
 
             {/* H1-1: Unit picker — available for source, operation, display, and data nodes */}
             {def?.nodeKind !== 'csPlot' &&
-              def?.nodeKind !== 'csAnnotation' &&
               field(
                 t('units.unit'),
                 <Suspense fallback={null}>

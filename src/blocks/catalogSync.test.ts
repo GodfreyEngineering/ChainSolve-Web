@@ -3,7 +3,7 @@
  *
  * Reads Rust catalog op_ids from catalog.rs source and compares against
  * the TS BLOCK_REGISTRY. Fails if either side has ops the other lacks
- * (excluding UI-only blocks like constant, material, annotations).
+ * (excluding UI-only blocks like constant, material).
  */
 
 import { describe, it, expect } from 'vitest'
@@ -12,14 +12,7 @@ import { resolve } from 'path'
 import { BLOCK_REGISTRY } from './registry'
 
 // UI-only blocks have no Rust op — excluded from the sync check.
-const UI_ONLY_BLOCKS = new Set([
-  'constant',
-  'material',
-  'annotation_text',
-  'annotation_callout',
-  'annotation_highlight',
-  'annotation_arrow',
-])
+const UI_ONLY_BLOCKS = new Set(['constant', 'material'])
 
 function extractRustOpIds(): Set<string> {
   const catalogSrc = readFileSync(

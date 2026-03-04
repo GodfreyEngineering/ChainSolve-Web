@@ -674,25 +674,29 @@ export function AppHeader({
         onClick: () => canvasRef.current?.openLibraryWithFilter(main.id),
       })),
     }))
-    // Annotations (removed from taxonomy in V2-018, but still insertable)
+    // Annotations — non-block visual tools (V2-022)
     const annotationEntry: MenuEntry = {
       label: t('menu.insertAnnotations'),
       children: [
         {
           label: t('contextMenu.annotText'),
-          onClick: () => canvasRef.current?.openLibraryWithFilter(null),
+          onClick: () => canvasRef.current?.insertAnnotationAtCenter('annotation_text'),
         },
         {
           label: t('contextMenu.annotCallout'),
-          onClick: () => canvasRef.current?.openLibraryWithFilter(null),
+          onClick: () => canvasRef.current?.insertAnnotationAtCenter('annotation_callout'),
         },
         {
           label: t('contextMenu.annotHighlight'),
-          onClick: () => canvasRef.current?.openLibraryWithFilter(null),
+          onClick: () => canvasRef.current?.insertAnnotationAtCenter('annotation_highlight'),
         },
         {
           label: t('contextMenu.annotArrow'),
-          onClick: () => canvasRef.current?.openLibraryWithFilter(null),
+          onClick: () => canvasRef.current?.insertAnnotationAtCenter('annotation_arrow'),
+        },
+        {
+          label: t('contextMenu.annotLeader'),
+          onClick: () => canvasRef.current?.insertAnnotationAtCenter('annotation_leader'),
         },
       ],
     }

@@ -1,17 +1,19 @@
 /**
- * AnnotationNode — non-evaluating visual annotations on the canvas (E7-1).
+ * AnnotationNode — non-evaluating visual annotations on the canvas (V2-022).
  *
- * Supports four annotation types via `data.annotationType`:
+ * Supports five annotation types via `data.annotationType`:
  *   - text: simple text label
  *   - callout: bordered box with text (like a sticky note)
  *   - highlight: colored translucent region
- *   - arrow: directional arrow indicator (G6-1)
+ *   - arrow: directional arrow indicator
+ *   - leader: text label with a source handle for connecting to blocks
  *
- * These nodes have no input/output handles and are completely excluded
- * from engine evaluation (filtered in bridge.ts).
+ * These nodes have no block-system registration and are completely excluded
+ * from engine evaluation (filtered in bridge.ts by the `annotation_` prefix).
  */
 
 import { memo } from 'react'
+import { Handle, Position } from '@xyflow/react'
 import type { NodeProps, Node } from '@xyflow/react'
 import type { NodeData } from '../../../blocks/types'
 
@@ -24,6 +26,11 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
   const text = nd.annotationText ?? nd.label ?? ''
   const color = nd.annotationColor ?? DEFAULT_COLOR
   const fontSize = nd.annotationFontSize ?? DEFAULT_FONT_SIZE
+  const bold = nd.annotationBold ?? false
+  const italic = nd.annotationItalic ?? false
+
+  const fontWeight = bold ? 700 : 600
+  const fontStyle = italic ? ('italic' as const) : ('normal' as const)
 
   if (annotationType === 'arrow') {
     return (
@@ -90,10 +97,36 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
           style={{
             ...calloutBody,
             fontSize,
+            fontWeight,
+            fontStyle,
           }}
         >
           {text}
         </div>
+      </div>
+    )
+  }
+
+  if (annotationType === 'leader') {
+    return (
+      <div
+        style={{
+          ...textStyle,
+          fontSize,
+          fontWeight,
+          fontStyle,
+          color: color,
+          textShadow: selected ? `0 0 8px ${color}55` : 'none',
+          position: 'relative',
+        }}
+      >
+        {text}
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="leader-out"
+          style={leaderHandleStyle(color)}
+        />
       </div>
     )
   }
@@ -104,6 +137,8 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
       style={{
         ...textStyle,
         fontSize,
+        fontWeight,
+        fontStyle,
         color: color,
         textShadow: selected ? `0 0 8px ${color}55` : 'none',
       }}
@@ -157,4 +192,14 @@ const arrowStyle: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
   padding: '0.15rem',
+}
+
+function leaderHandleStyle(color: string): React.CSSProperties {
+  return {
+    background: color,
+    width: 8,
+    height: 8,
+    border: '2px solid var(--card-bg, #1e1e1e)',
+    borderRadius: '50%',
+  }
 }

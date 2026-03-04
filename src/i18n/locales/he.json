@@ -228,6 +228,13 @@
     "hiddenView": "הצג בלוקים מוסתרים",
     "showAllHidden": "הצג את כל הבלוקים המוסתרים"
   },
+  "annotation": {
+    "text": "טקסט",
+    "color": "צבע",
+    "fontSize": "גודל גופן",
+    "bold": "מודגש",
+    "italic": "נטוי"
+  },
   "debugConsole": {
     "title": "מסוף ניפוי שגיאות",
     "logLevel": "רמת רישום",
@@ -324,6 +331,7 @@
     "annotCallout": "תיבת הערה",
     "annotHighlight": "אזור מודגש",
     "annotArrow": "חץ",
+    "annotLeader": "קו הובלה",
     "snapGridOn": "הפעלת הצמדה לרשת",
     "snapGridOff": "כיבוי הצמדה לרשת",
     "insertConversion": "הוספת המרה",

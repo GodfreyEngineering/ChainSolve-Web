@@ -47,7 +47,6 @@ const VALID_CATEGORIES: BlockCategory[] = [
   'constElec',
   'presetMaterials',
   'presetFluids',
-  'annotations',
   'customFunctions',
 ]
 

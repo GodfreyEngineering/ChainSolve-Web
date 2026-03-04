@@ -490,66 +490,6 @@ reg({
   defaultData: { blockType: 'subscribe', label: 'Subscribe', subscribeChannelName: '' },
 })
 
-// ── Annotation blocks (E7-1: non-evaluating visual nodes) ────────────────────
-
-reg({
-  type: 'annotation_text',
-  label: 'Text Label',
-  category: 'annotations',
-  nodeKind: 'csAnnotation',
-  inputs: [],
-  defaultData: {
-    blockType: 'annotation_text',
-    label: 'Text',
-    annotationType: 'text',
-    annotationText: 'Label',
-    annotationColor: '#facc15',
-  },
-})
-
-reg({
-  type: 'annotation_callout',
-  label: 'Callout Box',
-  category: 'annotations',
-  nodeKind: 'csAnnotation',
-  inputs: [],
-  defaultData: {
-    blockType: 'annotation_callout',
-    label: 'Callout',
-    annotationType: 'callout',
-    annotationText: 'Note',
-    annotationColor: '#60a5fa',
-  },
-})
-
-reg({
-  type: 'annotation_highlight',
-  label: 'Highlight Region',
-  category: 'annotations',
-  nodeKind: 'csAnnotation',
-  inputs: [],
-  defaultData: {
-    blockType: 'annotation_highlight',
-    label: 'Highlight',
-    annotationType: 'highlight',
-    annotationColor: '#facc15',
-  },
-})
-
-reg({
-  type: 'annotation_arrow',
-  label: 'Arrow',
-  category: 'annotations',
-  nodeKind: 'csAnnotation',
-  inputs: [],
-  defaultData: {
-    blockType: 'annotation_arrow',
-    label: 'Arrow',
-    annotationType: 'arrow',
-    annotationColor: '#f87171',
-  },
-})
-
 // ── Block palette (ordered for display) ──────────────────────────────────────
 
 export const CATEGORY_ORDER: BlockCategory[] = [
@@ -586,7 +526,6 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   'constElec',
   'presetMaterials',
   'presetFluids',
-  'annotations',
 ]
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -623,7 +562,6 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   constElec: 'Electrical',
   presetMaterials: 'Material Presets',
   presetFluids: 'Fluid Presets',
-  annotations: 'Annotations',
   customFunctions: 'Custom Functions',
 }
 
@@ -820,14 +758,7 @@ for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {
  * when the user makes a selection. They never reach the Rust engine directly.
  * Exported for tests (G0-6).
  */
-export const UI_ONLY_BLOCKS: ReadonlySet<string> = new Set([
-  'constant',
-  'material',
-  'annotation_text',
-  'annotation_callout',
-  'annotation_highlight',
-  'annotation_arrow',
-])
+export const UI_ONLY_BLOCKS: ReadonlySet<string> = new Set(['constant', 'material'])
 
 /**
  * Validate and reconcile the TS registry with the Rust catalog.
