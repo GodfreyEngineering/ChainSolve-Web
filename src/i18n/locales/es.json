@@ -284,6 +284,7 @@
     "saveTooltip": "Guardar ahora (Ctrl+S)",
     "saveAsTooltip": "Guardar como proyecto (Ctrl+S)",
     "clickToRename": "Clic para renombrar",
+    "doubleClickToRename": "Doble clic para renombrar",
     "autosave": "Auto",
     "autosaveToggle": "Activar/desactivar guardado automatico",
     "importFile": "Importar",
@@ -1560,5 +1561,12 @@
     "s8Title": "Menores",
     "s9Title": "Cambios en esta política",
     "s10Title": "Contacto"
+  },
+  "dock": {
+    "expandLibrary": "Expandir biblioteca de bloques",
+    "collapseLibrary": "Contraer biblioteca de bloques",
+    "expandDock": "Expandir panel",
+    "collapseDock": "Contraer panel",
+    "dragToResize": "Arrastrar para redimensionar"
   }
 }

@@ -291,6 +291,7 @@
     "saveTooltip": "Save now (Ctrl+S)",
     "saveAsTooltip": "Save as project (Ctrl+S)",
     "clickToRename": "Click to rename",
+    "doubleClickToRename": "Double-click to rename",
     "autosave": "Auto",
     "autosaveToggle": "Toggle autosave",
     "importFile": "Import",
@@ -1579,5 +1580,12 @@
     "s8Title": "Children",
     "s9Title": "Changes to This Policy",
     "s10Title": "Contact"
+  },
+  "dock": {
+    "expandLibrary": "Expand block library",
+    "collapseLibrary": "Collapse block library",
+    "expandDock": "Expand dock",
+    "collapseDock": "Collapse dock",
+    "dragToResize": "Drag to resize"
   }
 }

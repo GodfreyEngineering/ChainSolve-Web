@@ -284,6 +284,7 @@
     "saveTooltip": "Salva ora (Ctrl+S)",
     "saveAsTooltip": "Salva come progetto (Ctrl+S)",
     "clickToRename": "Clicca per rinominare",
+    "doubleClickToRename": "Doppio clic per rinominare",
     "autosave": "Auto",
     "autosaveToggle": "Attiva/disattiva salvataggio automatico",
     "importFile": "Importa",
@@ -1560,5 +1561,12 @@
     "s8Title": "Minori",
     "s9Title": "Modifiche a questa informativa",
     "s10Title": "Contatto"
+  },
+  "dock": {
+    "expandLibrary": "Espandi libreria blocchi",
+    "collapseLibrary": "Comprimi libreria blocchi",
+    "expandDock": "Espandi pannello",
+    "collapseDock": "Comprimi pannello",
+    "dragToResize": "Trascina per ridimensionare"
   }
 }

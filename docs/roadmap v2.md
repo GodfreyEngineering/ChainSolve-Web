@@ -385,8 +385,8 @@ Claude should treat this as the “source of truth” for the current environmen
 - Login page intentionally has no MainHeader (auth-only page).
 - verify-ci.sh: all checks pass (3626 tests, 201 Rust tests, build OK).
 
-## V2-014 — Project header rebuild (menus + project identity + save controls)
-**Goal:** “Project mode” header under main header.  
+## V2-014 — Project header rebuild (menus + project identity + save controls) [x]
+**Goal:** “Project mode” header under main header.
 **Work:**
 - Add project header when project open:
   - left: project name (rename on double click), last saved time, Save button, autosave toggle
@@ -397,7 +397,18 @@ Claude should treat this as the “source of truth” for the current environmen
 - UX is coherent and stable
 - No overlap with panels; responsive.
 
-## V2-015 — Docking system overhaul (Block Library / Debug+Health / AI)
+**Changelog (2026-03-04):**
+- Rebuilt AppHeader.tsx with CSS classes replacing all inline styles for hover support.
+- Layout: left (project identity + save controls + undo/redo + open/save-as + autosave), center (File/Edit/View/Insert/Tools/Help menus), right (Import + Templates action buttons).
+- Changed project name from click-to-rename to double-click-to-rename for less accidental renames.
+- Added CSS classes in index.css: `.cs-project-header`, `.cs-project-name` (with hover underline + readonly state), `.cs-project-btn` (with glow hover + save variant + disabled state), `.cs-project-icon-btn` (undo/redo with glow hover), `.cs-project-divider`, `.cs-mobile-drawer-btn` (with hover highlight).
+- Removed 9 inline style functions/constants replaced by CSS classes: `headerStyle`, `projectNameStyle()`, `saveButtonStyle()`, `headerDividerStyle`, `headerIconBtnStyle()`, `rightActionBtnStyle`, `overflowBtnStyle`.
+- Mobile drawer items now use `.cs-mobile-drawer-btn` class with hover effect. Mobile drawer uses `nav.home` (aligned with V2-013).
+- i18n: Added `canvas.doubleClickToRename` in EN/DE/ES/FR/IT. Updated microcopy test to match.
+- Header height reduced from 40px to 36px for a slimmer project bar under the 40px main header.
+- verify-ci.sh: all checks pass (3626 tests, build OK).
+
+## V2-015 — Docking system overhaul (Block Library / Debug+Health / AI) [x]
 **Problems:**
 - Dock buttons require double click; confusing.
 - Bottom panel not spanning; gap near AI.
@@ -413,6 +424,19 @@ Claude should treat this as the “source of truth” for the current environmen
 - Smooth animations
 - No ResizeObserver crash
 - Layout always usable on different viewport sizes.
+
+**Changelog (2026-03-04):**
+- Fixed double-click requirement across all 3 dock panels. All panels now use single-click collapse buttons separate from resize handles:
+  - BlockLibrary DockHandle: added dedicated `.cs-dock-collapse-btn` in top-right corner (single-click). Resize handle is now drag-only.
+  - BottomDock: added collapse chevron button in tab bar (single-click). Resize handle on top edge is now drag-only.
+  - AiDockPanel: same pattern — dedicated collapse button in top-left, resize handle is drag-only.
+- When collapsed, all panels expand on single click (unchanged — already worked).
+- Added CSS classes for consistent dock styling: `.cs-dock-handle` (expand handles with hover highlight), `.cs-dock-handle-chevron` (animated chevron), `.cs-dock-collapse-btn` (collapse buttons with hover color), `.cs-dock-tab` (tab buttons with active state via `data-active`), `.cs-dock-resize-handle` (with directional variants via `data-direction`).
+- BottomDock: removed hardcoded `right: 48px`, now uses `rightInset` prop (CanvasArea passes `CANVAS_TOOLBAR_WIDTH + 8`). This fixes potential gaps when toolbar width changes.
+- BottomDock: added RAF throttling to resize handler (requestAnimationFrame) to prevent ResizeObserver loop errors during rapid drag.
+- Removed 5 inline style objects replaced by CSS classes: `resizeHandleStyle`, `tabBtnStyle`, `tabBtnActiveStyle` from BottomDock; hover state management from DockHandle/AiDockHandle.
+- i18n: Added `dock.*` keys (expandLibrary, collapseLibrary, expandDock, collapseDock, dragToResize) in EN/DE/ES/FR/IT. All dock title attributes now use `t()`.
+- verify-ci.sh: all checks pass (3626 tests, build OK).
 
 ## V2-016 — Inspector behavior: open only on double click; improve window UX
 **Problems:**

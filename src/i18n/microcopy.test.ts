@@ -164,7 +164,7 @@ describe('AppHeader theme labels use i18n', () => {
     expect(src).toContain("t('canvas.scratch')")
   })
 
-  it('uses t() for click-to-rename tooltip', () => {
-    expect(src).toContain("t('canvas.clickToRename')")
+  it('uses t() for double-click-to-rename tooltip', () => {
+    expect(src).toContain("t('canvas.doubleClickToRename')")
   })
 })

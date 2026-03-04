@@ -836,15 +836,16 @@ export function AppHeader({
 
   return (
     <>
-      <div style={headerStyle}>
-        {/* ── Left section ─────────────────────────────────────────────────── */}
+      <div className="cs-project-header">
+        {/* ── Left: project identity + save controls ───────────────────── */}
         <div style={sectionStyle}>
-          {/* Project name — click to rename */}
+          {/* Project name — double-click to rename */}
           {projectId && !nameEditing && (
             <span
-              onClick={readOnly ? undefined : onStartNameEdit}
-              title={readOnly ? undefined : t('canvas.clickToRename')}
-              style={projectNameStyle(readOnly)}
+              className="cs-project-name"
+              data-readonly={readOnly}
+              onDoubleClick={readOnly ? undefined : onStartNameEdit}
+              title={readOnly ? undefined : t('canvas.doubleClickToRename')}
             >
               {projectName}
             </span>
@@ -869,19 +870,7 @@ export function AppHeader({
           )}
 
           {/* Offline indicator */}
-          {!isOnline && (
-            <span
-              title={t('canvas.offline')}
-              style={{
-                fontSize: '0.68rem',
-                color: '#ef4444',
-                fontWeight: 600,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              ⚡ {t('canvas.offline')}
-            </span>
-          )}
+          {!isOnline && <span style={offlineStyle}>{t('canvas.offline')}</span>}
 
           {/* Save status badge */}
           {statusLabel && (
@@ -905,52 +894,45 @@ export function AppHeader({
             </span>
           )}
 
-          {/* Save button — L4-1: shows "Save As" in scratch mode */}
+          {/* Save button */}
           {!readOnly && (
             <button
+              className="cs-project-btn"
+              data-variant={projectId ? (isDirty ? 'save' : undefined) : 'save'}
               onClick={projectId ? onSave : () => setSaveAsOpen(true)}
               disabled={projectId ? !isDirty || saveStatus === 'saving' : false}
-              style={saveButtonStyle(projectId ? isDirty : true)}
               title={projectId ? t('canvas.saveTooltip') : t('canvas.saveAsTooltip')}
             >
               {projectId ? t('menu.save') : t('menu.saveAs')}
             </button>
           )}
 
-          {/* K0-1: Undo / Redo / Open / Save As buttons (desktop only) */}
+          {/* Undo / Redo / Open / Save As (desktop only) */}
           {!isMobile && (
             <>
-              <span style={headerDividerStyle} />
+              <span className="cs-project-divider" />
               <button
+                className="cs-project-icon-btn"
                 onClick={() => canvasRef.current?.undo()}
                 disabled={readOnly}
-                style={{
-                  ...headerIconBtnStyle(readOnly),
-                  fontSize: '0.82rem',
-                  padding: '0.1rem 0.3rem',
-                }}
                 title={`${t('menu.undo')} (Ctrl+Z)`}
                 aria-label={t('menu.undo')}
               >
                 {'\u21B6'}
               </button>
               <button
+                className="cs-project-icon-btn"
                 onClick={() => canvasRef.current?.redo()}
                 disabled={readOnly}
-                style={{
-                  ...headerIconBtnStyle(readOnly),
-                  fontSize: '0.82rem',
-                  padding: '0.1rem 0.3rem',
-                }}
                 title={`${t('menu.redo')} (Ctrl+Shift+Z)`}
                 aria-label={t('menu.redo')}
               >
                 {'\u21B7'}
               </button>
-              <span style={headerDividerStyle} />
+              <span className="cs-project-divider" />
               <button
+                className="cs-project-btn"
                 onClick={() => setOpenDialogOpen(true)}
-                style={headerIconBtnStyle(false)}
                 title={`${t('menu.open')} (Ctrl+O)`}
                 aria-label={t('menu.open')}
               >
@@ -958,8 +940,8 @@ export function AppHeader({
               </button>
               {!readOnly && (
                 <button
+                  className="cs-project-btn"
                   onClick={() => setSaveAsOpen(true)}
-                  style={headerIconBtnStyle(false)}
                   title={t('menu.saveAs')}
                   aria-label={t('menu.saveAs')}
                 >
@@ -976,22 +958,14 @@ export function AppHeader({
                     onChange={handleToggleAutosave}
                     style={{ margin: 0, accentColor: 'var(--primary)' }}
                   />
-                  <span
-                    style={{
-                      fontSize: '0.65rem',
-                      color: 'var(--text-muted)',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {t('canvas.autosave')}
-                  </span>
+                  <span style={autosaveLabelStyle}>{t('canvas.autosave')}</span>
                 </label>
               )}
             </>
           )}
         </div>
 
-        {/* ── Center section: menus (desktop) / overflow (mobile) ──────── */}
+        {/* ── Center: menus (desktop) / overflow (mobile) ──────────────── */}
         {!isMobile ? (
           <div role="menubar" aria-label={t('menu.menubar')} style={menuBarStyle}>
             {menus.map((m) => (
@@ -1009,7 +983,8 @@ export function AppHeader({
           <div style={mobileMenuBarStyle}>
             <button
               onClick={() => setMobileDrawerOpen((v) => !v)}
-              style={overflowBtnStyle}
+              className="cs-project-btn"
+              style={{ fontSize: '1.1rem', padding: '0.15rem 0.55rem', letterSpacing: '0.1em' }}
               aria-label={t('mobileNav.menu')}
               title={t('mobileNav.menu')}
               aria-expanded={mobileDrawerOpen}
@@ -1019,31 +994,29 @@ export function AppHeader({
           </div>
         )}
 
-        {/* ── Right section (hidden on mobile — actions in drawer) ──────── */}
+        {/* ── Right: action cluster (desktop only) ─────────────────────── */}
         {!isMobile && (
           <div style={{ ...sectionStyle, justifyContent: 'flex-end' }}>
-            {/* Import project file */}
             {onImportChainsolveJson && !readOnly && (
               <button
+                className="cs-project-btn"
                 onClick={() => {
                   setOpenMenu(null)
                   onImportChainsolveJson()
                 }}
                 disabled={!!exportInProgress}
-                style={rightActionBtnStyle}
                 title={t('canvas.importFile')}
               >
                 {t('canvas.importFile')}
               </button>
             )}
 
-            {/* Templates / groups */}
             <button
+              className="cs-project-btn"
               onClick={() => {
                 setTemplateManagerOpen(true)
                 setOpenMenu(null)
               }}
-              style={rightActionBtnStyle}
               title={t('canvas.templates')}
             >
               {t('canvas.templates')}
@@ -1055,35 +1028,14 @@ export function AppHeader({
       {/* K3-1: Mobile navigation drawer */}
       {isMobile && mobileDrawerOpen && (
         <>
-          {/* Backdrop */}
-          <div
-            style={{
-              position: 'fixed',
-              inset: 0,
-              top: 40,
-              background: 'rgba(0,0,0,0.4)',
-              zIndex: 49,
-            }}
-            onClick={() => setMobileDrawerOpen(false)}
-          />
-          {/* Drawer panel */}
+          <div style={mobileBackdropStyle} onClick={() => setMobileDrawerOpen(false)} />
           <nav
             style={{
-              position: 'fixed',
-              top: 40,
-              right: 0,
-              bottom: 0,
+              ...mobileDrawerStyle,
               width: Math.min(280, window.innerWidth * 0.85),
-              background: 'var(--card-bg)',
-              borderLeft: '1px solid var(--border)',
-              zIndex: 50,
-              overflowY: 'auto',
-              padding: '0.5rem 0',
-              animation: 'cs-fade-in 0.12s ease-out',
             }}
             aria-label={t('mobileNav.menu')}
           >
-            {/* File actions */}
             <MobileDrawerSection label={t('mobileNav.file')}>
               <MobileDrawerItem
                 label={t('menu.undo')}
@@ -1131,7 +1083,6 @@ export function AppHeader({
               )}
             </MobileDrawerSection>
 
-            {/* Canvas tools */}
             <MobileDrawerSection label={t('mobileNav.canvas')}>
               <MobileDrawerItem
                 label={t('canvas.templates')}
@@ -1151,10 +1102,9 @@ export function AppHeader({
               />
             </MobileDrawerSection>
 
-            {/* Navigation */}
             <MobileDrawerSection label={t('mobileNav.navigate')}>
               <MobileDrawerItem
-                label={t('nav.projects')}
+                label={t('nav.home', 'Home')}
                 icon={'\u2302'}
                 onClick={() => {
                   window.location.href = '/'
@@ -1313,17 +1263,6 @@ function fmtTime(d: Date): string {
 
 // ── Styles ──────────────────────────────────────────────────────────────────
 
-const headerStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  height: 40,
-  padding: '0 0.75rem',
-  borderBottom: '1px solid var(--border)',
-  background: 'var(--card-bg)',
-  flexShrink: 0,
-  gap: '0.5rem',
-}
-
 const sectionStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -1339,25 +1278,9 @@ const menuBarStyle: React.CSSProperties = {
   flexShrink: 0,
 }
 
-function projectNameStyle(readOnly: boolean): React.CSSProperties {
-  return {
-    fontWeight: 700,
-    fontSize: '0.85rem',
-    letterSpacing: '-0.3px',
-    cursor: readOnly ? 'default' : 'text',
-    borderBottom: '1px solid transparent',
-    userSelect: 'none',
-    paddingBottom: 1,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    maxWidth: 200,
-  }
-}
-
 const nameInputStyle: React.CSSProperties = {
   fontWeight: 700,
-  fontSize: '0.85rem',
+  fontSize: '0.82rem',
   letterSpacing: '-0.3px',
   background: 'transparent',
   border: 'none',
@@ -1369,43 +1292,11 @@ const nameInputStyle: React.CSSProperties = {
   fontFamily: 'inherit',
 }
 
-function saveButtonStyle(dirty: boolean): React.CSSProperties {
-  return {
-    padding: '0.12rem 0.45rem',
-    borderRadius: 'var(--radius-sm)',
-    border: '1px solid var(--border)',
-    background: dirty ? 'var(--primary-dim)' : 'transparent',
-    color: dirty ? 'var(--primary)' : 'var(--text-faint)',
-    cursor: dirty ? 'pointer' : 'default',
-    fontSize: '0.68rem',
-    fontWeight: 600,
-    fontFamily: 'inherit',
-  }
-}
-
-const headerDividerStyle: React.CSSProperties = {
-  width: 1,
-  height: 16,
-  background: 'var(--border)',
-  flexShrink: 0,
-}
-
-function headerIconBtnStyle(disabled: boolean): React.CSSProperties {
-  return {
-    padding: '0.12rem 0.45rem',
-    borderRadius: 'var(--radius-sm)',
-    border: '1px solid var(--border)',
-    background: 'transparent',
-    color: disabled ? 'var(--text-faint)' : 'var(--text-muted)',
-    cursor: disabled ? 'default' : 'pointer',
-    fontSize: '0.68rem',
-    fontWeight: 600,
-    lineHeight: 1,
-    fontFamily: 'inherit',
-    opacity: disabled ? 0.4 : 1,
-    transition: 'color 0.12s, border-color 0.12s',
-    whiteSpace: 'nowrap',
-  }
+const offlineStyle: React.CSSProperties = {
+  fontSize: '0.68rem',
+  color: '#ef4444',
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
 }
 
 const autosaveToggleStyle: React.CSSProperties = {
@@ -1416,16 +1307,9 @@ const autosaveToggleStyle: React.CSSProperties = {
   userSelect: 'none',
 }
 
-const rightActionBtnStyle: React.CSSProperties = {
-  padding: '0.15rem 0.5rem',
-  borderRadius: 'var(--radius-sm)',
-  border: '1px solid var(--border)',
-  background: 'transparent',
+const autosaveLabelStyle: React.CSSProperties = {
+  fontSize: '0.65rem',
   color: 'var(--text-muted)',
-  cursor: 'pointer',
-  fontSize: '0.68rem',
-  fontWeight: 600,
-  fontFamily: 'inherit',
   whiteSpace: 'nowrap',
 }
 
@@ -1435,36 +1319,42 @@ const mobileMenuBarStyle: React.CSSProperties = {
   flexShrink: 0,
 }
 
-const overflowBtnStyle: React.CSSProperties = {
-  background: 'transparent',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-md)',
-  color: 'var(--text)',
-  fontSize: '1.1rem',
-  padding: '0.15rem 0.55rem',
-  cursor: 'pointer',
-  fontFamily: 'inherit',
-  lineHeight: 1,
-  letterSpacing: '0.1em',
+const mobileBackdropStyle: React.CSSProperties = {
+  position: 'fixed',
+  inset: 0,
+  top: 40,
+  background: 'rgba(0,0,0,0.4)',
+  zIndex: 49,
 }
 
-// ── K3-1: Mobile drawer helpers ──────────────────────────────────────────────
+const mobileDrawerStyle: React.CSSProperties = {
+  position: 'fixed',
+  top: 40,
+  right: 0,
+  bottom: 0,
+  background: 'var(--card-bg)',
+  borderLeft: '1px solid var(--border)',
+  zIndex: 50,
+  overflowY: 'auto',
+  padding: '0.5rem 0',
+  animation: 'cs-fade-in 0.12s ease-out',
+}
+
+const drawerSectionHeaderStyle: React.CSSProperties = {
+  padding: '0.35rem 0.75rem 0.2rem',
+  fontSize: '0.62rem',
+  fontWeight: 700,
+  color: 'var(--text-faint)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+}
+
+// ── Mobile drawer helpers ────────────────────────────────────────────────────
 
 function MobileDrawerSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: '0.25rem' }}>
-      <div
-        style={{
-          padding: '0.35rem 0.75rem 0.2rem',
-          fontSize: '0.62rem',
-          fontWeight: 700,
-          color: 'var(--text-faint)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-        }}
-      >
-        {label}
-      </div>
+      <div style={drawerSectionHeaderStyle}>{label}</div>
       {children}
     </div>
   )
@@ -1480,24 +1370,7 @@ function MobileDrawerItem({
   onClick: () => void
 }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.6rem',
-        width: '100%',
-        padding: '0.55rem 0.75rem',
-        border: 'none',
-        background: 'transparent',
-        color: 'var(--text)',
-        fontSize: '0.78rem',
-        fontWeight: 500,
-        fontFamily: 'inherit',
-        cursor: 'pointer',
-        textAlign: 'left',
-      }}
-    >
+    <button className="cs-mobile-drawer-btn" onClick={onClick}>
       <span style={{ width: 18, textAlign: 'center', opacity: 0.5, fontSize: '0.82rem' }}>
         {icon}
       </span>

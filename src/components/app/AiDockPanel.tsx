@@ -142,62 +142,48 @@ interface AiDockHandleProps {
 }
 
 function AiDockHandle({ side, onClick, onResizeStart, title }: AiDockHandleProps) {
-  const [hovered, setHovered] = useState(false)
+  const { t } = useTranslation()
   const isExpand = side === 'expand'
-  // Left-pointing chevron when collapsed (expand opens panel to the left)
-  // Right-pointing chevron when expanded (collapse hides panel to the right)
-  const chevron = isExpand ? '\u2039' : '\u203A'
 
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        ...(isExpand
-          ? {
-              width: HANDLE_WIDTH,
-              height: '100%',
-              borderLeft: '1px solid var(--border)',
-              background: hovered ? 'var(--primary-dim)' : 'var(--card-bg)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              transition: 'background 0.15s ease',
-            }
-          : {
-              position: 'absolute' as const,
-              left: -3,
-              top: 0,
-              bottom: 0,
-              width: 8,
-              cursor: 'ew-resize',
-              zIndex: 10,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }),
-      }}
-      onClick={isExpand ? onClick : undefined}
-      onMouseDown={!isExpand ? onResizeStart : undefined}
-      onDoubleClick={!isExpand ? onClick : undefined}
-      title={title}
-    >
-      <span
+  if (isExpand) {
+    // Collapsed — single-click to expand
+    return (
+      <div
+        className="cs-dock-handle"
         style={{
-          fontSize: isExpand ? '1rem' : '0.7rem',
-          color: hovered ? 'var(--primary)' : 'var(--text-faint)',
-          transition: 'color 0.15s ease, transform 0.2s ease',
-          transform: hovered ? `translateX(${isExpand ? '-2px' : '1px'})` : 'translateX(0)',
-          lineHeight: 1,
-          userSelect: 'none',
-          pointerEvents: 'none',
+          width: HANDLE_WIDTH,
+          height: '100%',
+          borderLeft: '1px solid var(--border)',
+          background: 'var(--card-bg)',
         }}
+        onClick={onClick}
+        title={title}
       >
-        {chevron}
-      </span>
-    </div>
+        <span className="cs-dock-handle-chevron" style={{ fontSize: '1rem' }}>
+          {'\u2039'}
+        </span>
+      </div>
+    )
+  }
+
+  // Expanded — resize handle (drag) + collapse button (single-click)
+  return (
+    <>
+      <div
+        className="cs-dock-resize-handle"
+        data-direction="horizontal-left"
+        onMouseDown={onResizeStart}
+        title={t('dock.dragToResize')}
+      />
+      <button
+        className="cs-dock-collapse-btn"
+        onClick={onClick}
+        title={title}
+        style={{ position: 'absolute', left: 2, top: 4, zIndex: 11 }}
+      >
+        {'\u203A'}
+      </button>
+    </>
   )
 }
 

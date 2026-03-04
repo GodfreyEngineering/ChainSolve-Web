@@ -2132,6 +2132,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     panels={dockPanels}
                     collapsed={dockCollapsed}
                     onToggleCollapsed={() => setDockCollapsed((v) => !v)}
+                    rightInset={CANVAS_TOOLBAR_WIDTH + 8}
                   />
                 </div>
 

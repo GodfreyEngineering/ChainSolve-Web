@@ -284,6 +284,7 @@
     "saveTooltip": "Jetzt speichern (Strg+S)",
     "saveAsTooltip": "Als Projekt speichern (Strg+S)",
     "clickToRename": "Klicken zum Umbenennen",
+    "doubleClickToRename": "Doppelklick zum Umbenennen",
     "autosave": "Auto",
     "autosaveToggle": "Automatisches Speichern umschalten",
     "importFile": "Importieren",
@@ -1560,5 +1561,12 @@
     "s8Title": "Kinder",
     "s9Title": "Änderungen dieser Richtlinie",
     "s10Title": "Kontakt"
+  },
+  "dock": {
+    "expandLibrary": "Blockbibliothek einblenden",
+    "collapseLibrary": "Blockbibliothek ausblenden",
+    "expandDock": "Dock einblenden",
+    "collapseDock": "Dock ausblenden",
+    "dragToResize": "Ziehen zum Anpassen"
   }
 }

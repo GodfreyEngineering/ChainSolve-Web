@@ -380,6 +380,229 @@ button:focus:not(:focus-visible) {
   background: var(--primary-dim);
 }
 
+/* ── Project header (AppHeader) ────────────────────────────────────────────── */
+.cs-project-header {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--card-bg);
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+.cs-project-name {
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: -0.3px;
+  cursor: text;
+  border-bottom: 1px solid transparent;
+  user-select: none;
+  padding-bottom: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+  transition: border-color 0.15s;
+}
+.cs-project-name:hover {
+  border-bottom-color: var(--text-faint);
+}
+.cs-project-name[data-readonly='true'] {
+  cursor: default;
+}
+.cs-project-name[data-readonly='true']:hover {
+  border-bottom-color: transparent;
+}
+.cs-project-btn {
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1;
+  font-family: inherit;
+  white-space: nowrap;
+  transition:
+    color 0.12s,
+    border-color 0.12s,
+    background 0.12s,
+    box-shadow 0.2s;
+}
+.cs-project-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 6px var(--primary-glow);
+}
+.cs-project-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  box-shadow: none;
+}
+.cs-project-btn:disabled:hover {
+  color: var(--text-muted);
+  border-color: var(--border);
+  box-shadow: none;
+}
+.cs-project-btn[data-variant='save'] {
+  background: var(--primary-dim);
+  color: var(--primary);
+}
+.cs-project-btn[data-variant='save']:disabled {
+  background: transparent;
+  color: var(--text-faint);
+}
+.cs-project-icon-btn {
+  padding: 0.1rem 0.3rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  line-height: 1;
+  font-family: inherit;
+  transition:
+    color 0.12s,
+    border-color 0.12s,
+    box-shadow 0.2s;
+}
+.cs-project-icon-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 6px var(--primary-glow);
+}
+.cs-project-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.cs-project-icon-btn:disabled:hover {
+  color: var(--text-muted);
+  border-color: var(--border);
+  box-shadow: none;
+}
+.cs-project-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.cs-mobile-drawer-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.cs-mobile-drawer-btn:hover {
+  background: var(--primary-dim);
+}
+
+/* ── Dock panels ──────────────────────────────────────────────────────────── */
+.cs-dock-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+.cs-dock-handle:hover {
+  background: var(--primary-dim);
+}
+.cs-dock-handle-chevron {
+  color: var(--text-faint);
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  transition:
+    color 0.15s ease,
+    transform 0.2s ease;
+}
+.cs-dock-handle:hover .cs-dock-handle-chevron {
+  color: var(--primary);
+}
+.cs-dock-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  padding: 0 4px;
+  font-size: 0.72rem;
+  line-height: 1;
+  transition:
+    color 0.15s,
+    transform 0.2s;
+}
+.cs-dock-collapse-btn:hover {
+  color: var(--primary);
+}
+.cs-dock-tab {
+  padding: 4px 10px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text);
+  opacity: 0.5;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-family: inherit;
+  font-weight: 500;
+  transition:
+    opacity 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+.cs-dock-tab:hover {
+  opacity: 0.75;
+}
+.cs-dock-tab[data-active='true'] {
+  opacity: 1;
+  border-bottom-color: var(--primary);
+  color: var(--primary);
+}
+.cs-dock-resize-handle {
+  position: absolute;
+  z-index: 1;
+}
+.cs-dock-resize-handle[data-direction='vertical'] {
+  top: -3px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: ns-resize;
+}
+.cs-dock-resize-handle[data-direction='horizontal-left'] {
+  left: -3px;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: ew-resize;
+}
+.cs-dock-resize-handle[data-direction='horizontal-right'] {
+  right: -3px;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: ew-resize;
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
@@ -435,7 +658,7 @@ button:focus:not(:focus-visible) {
     gap: 0.75rem !important;
   }
   /* Tighter header padding in portrait */
-  .cs-app-header {
+  .cs-project-header {
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
   }

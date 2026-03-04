@@ -284,6 +284,7 @@
     "saveTooltip": "Enregistrer maintenant (Ctrl+S)",
     "saveAsTooltip": "Enregistrer comme projet (Ctrl+S)",
     "clickToRename": "Cliquer pour renommer",
+    "doubleClickToRename": "Double-cliquer pour renommer",
     "autosave": "Auto",
     "autosaveToggle": "Activer/desactiver la sauvegarde automatique",
     "importFile": "Importer",
@@ -1560,5 +1561,12 @@
     "s8Title": "Enfants",
     "s9Title": "Modifications de cette politique",
     "s10Title": "Contact"
+  },
+  "dock": {
+    "expandLibrary": "Afficher la bibliotheque de blocs",
+    "collapseLibrary": "Masquer la bibliotheque de blocs",
+    "expandDock": "Afficher le panneau",
+    "collapseDock": "Masquer le panneau",
+    "dragToResize": "Glisser pour redimensionner"
   }
 }

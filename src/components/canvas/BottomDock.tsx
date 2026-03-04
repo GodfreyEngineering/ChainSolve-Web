@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -25,6 +26,8 @@ interface BottomDockProps {
   collapsed?: boolean
   /** G5-2: Toggle collapsed state. */
   onToggleCollapsed?: () => void
+  /** Right inset in px (leaves room for vertical toolbar). */
+  rightInset?: number
 }
 
 // ── Persistence helpers ──────────────────────────────────────────────────
@@ -79,7 +82,13 @@ function saveTab(tab: DockTab) {
 /** Height of the collapsed bottom dock handle bar. */
 export const COLLAPSED_DOCK_HEIGHT = 24
 
-export function BottomDock({ panels, collapsed = false, onToggleCollapsed }: BottomDockProps) {
+export function BottomDock({
+  panels,
+  collapsed = false,
+  onToggleCollapsed,
+  rightInset = 48,
+}: BottomDockProps) {
+  const { t } = useTranslation()
   const { windows } = useWindowManager()
   const [height, setHeight] = useState(loadHeight)
   const [activeTab, setActiveTab] = useState<DockTab>(() => {
@@ -88,7 +97,7 @@ export function BottomDock({ panels, collapsed = false, onToggleCollapsed }: Bot
     return panels[0]?.id ?? 'console'
   })
   const dragRef = useRef<{ startY: number; startH: number } | null>(null)
-  const [handleHovered, setHandleHovered] = useState(false)
+  const rafId = useRef(0)
 
   // Persist tab changes
   const switchTab = useCallback((tab: DockTab) => {
@@ -96,7 +105,7 @@ export function BottomDock({ panels, collapsed = false, onToggleCollapsed }: Bot
     saveTab(tab)
   }, [])
 
-  // Resize via drag on top edge
+  // Resize via drag on top edge — RAF throttled to prevent ResizeObserver loops
   const onResizeStart = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
@@ -104,11 +113,16 @@ export function BottomDock({ panels, collapsed = false, onToggleCollapsed }: Bot
 
       const onMove = (me: MouseEvent) => {
         if (!dragRef.current) return
-        const delta = dragRef.current.startY - me.clientY
-        const next = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, dragRef.current.startH + delta))
-        setHeight(next)
+        cancelAnimationFrame(rafId.current)
+        rafId.current = requestAnimationFrame(() => {
+          if (!dragRef.current) return
+          const delta = dragRef.current.startY - me.clientY
+          const next = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, dragRef.current.startH + delta))
+          setHeight(next)
+        })
       }
       const onUp = () => {
+        cancelAnimationFrame(rafId.current)
         document.removeEventListener('mousemove', onMove)
         document.removeEventListener('mouseup', onUp)
         setHeight((h) => {
@@ -135,31 +149,25 @@ export function BottomDock({ panels, collapsed = false, onToggleCollapsed }: Bot
   }, [onToggleCollapsed, windows, collapsed])
 
   const activePanel = panels.find((p) => p.id === activeTab)
+  const dockPositionStyle: React.CSSProperties = {
+    ...dockStyle,
+    right: rightInset,
+  }
 
-  // G5-2: Collapsed — thin handle bar with chevron
+  // G5-2: Collapsed — thin handle bar with chevron (single-click to expand)
   if (collapsed) {
     return (
       <div
+        className="cs-dock-handle"
         style={{
-          ...dockStyle,
+          ...dockPositionStyle,
           height: COLLAPSED_DOCK_HEIGHT,
-          cursor: 'pointer',
           justifyContent: 'center',
         }}
         onClick={onToggleCollapsed}
-        onMouseEnter={() => setHandleHovered(true)}
-        onMouseLeave={() => setHandleHovered(false)}
-        title="Expand dock"
+        title={t('dock.expandDock')}
       >
-        <span
-          style={{
-            fontSize: '0.65rem',
-            color: handleHovered ? 'var(--primary)' : 'var(--text-faint)',
-            transition: 'color 0.15s ease, transform 0.2s ease',
-            transform: handleHovered ? 'translateY(-1px)' : 'translateY(0)',
-            userSelect: 'none',
-          }}
-        >
+        <span className="cs-dock-handle-chevron" style={{ fontSize: '0.65rem' }}>
           {'\u2303'}
         </span>
       </div>
@@ -167,33 +175,40 @@ export function BottomDock({ panels, collapsed = false, onToggleCollapsed }: Bot
   }
 
   return (
-    <div style={{ ...dockStyle, height }}>
-      {/* Resize handle + double-click collapse */}
+    <div style={{ ...dockPositionStyle, height }}>
+      {/* Resize handle (drag only — no double-click needed) */}
       <div
-        style={resizeHandleStyle}
+        className="cs-dock-resize-handle"
+        data-direction="vertical"
         onMouseDown={onResizeStart}
-        onDoubleClick={onToggleCollapsed}
-        title="Drag to resize, double-click to collapse"
+        title={t('dock.dragToResize')}
       />
 
-      {/* Tab bar */}
+      {/* Tab bar with collapse button */}
       <div style={tabBarStyle}>
         <div style={{ display: 'flex', gap: 2, flex: 1 }}>
           {panels.map((panel) => (
             <button
               key={panel.id}
+              className="cs-dock-tab"
+              data-active={panel.id === activeTab}
               onClick={() => switchTab(panel.id)}
               title={panel.label}
               aria-label={panel.label}
-              style={{
-                ...tabBtnStyle,
-                ...(panel.id === activeTab ? tabBtnActiveStyle : {}),
-              }}
             >
               {panel.label}
             </button>
           ))}
         </div>
+        {/* Single-click collapse button */}
+        <button
+          className="cs-dock-collapse-btn"
+          onClick={onToggleCollapsed}
+          title={t('dock.collapseDock')}
+          aria-label={t('dock.collapseDock')}
+        >
+          {'\u2304'}
+        </button>
       </div>
 
       {/* Panel content */}
@@ -208,7 +223,6 @@ const dockStyle: React.CSSProperties = {
   position: 'absolute',
   bottom: 0,
   left: 0,
-  right: 48, // leave room for vertical CanvasToolbar
   zIndex: 15,
   display: 'flex',
   flexDirection: 'column',
@@ -219,16 +233,6 @@ const dockStyle: React.CSSProperties = {
   color: 'var(--text, #f4f4f3)',
 }
 
-const resizeHandleStyle: React.CSSProperties = {
-  position: 'absolute',
-  top: -3,
-  left: 0,
-  right: 0,
-  height: 6,
-  cursor: 'ns-resize',
-  zIndex: 1,
-}
-
 const tabBarStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -236,25 +240,6 @@ const tabBarStyle: React.CSSProperties = {
   borderBottom: '1px solid var(--border, #333)',
   flexShrink: 0,
   height: 28,
-}
-
-const tabBtnStyle: React.CSSProperties = {
-  padding: '4px 10px',
-  border: 'none',
-  borderBottom: '2px solid transparent',
-  background: 'transparent',
-  color: 'var(--text, #f4f4f3)',
-  opacity: 0.5,
-  cursor: 'pointer',
-  fontSize: '0.72rem',
-  fontFamily: 'inherit',
-  fontWeight: 500,
-}
-
-const tabBtnActiveStyle: React.CSSProperties = {
-  opacity: 1,
-  borderBottomColor: '#1CABB0',
-  color: '#1CABB0',
 }
 
 const contentStyle: React.CSSProperties = {
