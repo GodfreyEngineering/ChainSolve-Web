@@ -52,7 +52,6 @@ export type NodeKind =
   | 'csPlot'
   | 'csListTable'
   | 'csGroup'
-  | 'csProbe'
   | 'csPublish'
   | 'csSubscribe'
   | 'csAnnotation'

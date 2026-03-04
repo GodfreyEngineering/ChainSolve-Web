@@ -470,15 +470,6 @@ reg({
   defaultData: { blockType: 'display', label: 'Display' },
 })
 
-reg({
-  type: 'probe',
-  label: 'Probe',
-  category: 'output',
-  nodeKind: 'csProbe',
-  inputs: [{ id: 'value', label: 'Value' }],
-  defaultData: { blockType: 'probe', label: 'Probe' },
-})
-
 // ── H7-1: Publish / Subscribe blocks (cross-sheet value sharing) ─────────────
 
 reg({
@@ -704,7 +695,7 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
       {
         id: 'outDisplay',
         label: 'Display',
-        blockTypes: ['display', 'probe'],
+        blockTypes: ['display'],
       },
       { id: 'outPublish', label: 'Publish / Subscribe', blockTypes: ['publish', 'subscribe'] },
       { id: 'outGraph', label: 'Graph blocks', categories: ['plot'] },

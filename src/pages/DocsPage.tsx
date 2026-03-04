@@ -512,7 +512,6 @@ function BlockOutputSection() {
       <H1>{t('docsPage.secBlockOutput')}</H1>
       <P>{c('blockOutput', 'intro')}</P>
       <BlockRef name="Display" desc={c('blockOutput', 'display')} />
-      <BlockRef name="Probe" desc={c('blockOutput', 'probe')} />
     </>
   )
 }

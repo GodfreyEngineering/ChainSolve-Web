@@ -99,7 +99,6 @@ import { ValuePopoverContext, type ShowValuePopover } from '../../contexts/Value
 const LazyValuePopover = lazy(() =>
   import('./ValuePopover').then((m) => ({ default: m.ValuePopover })),
 )
-import { ProbeNode } from './nodes/ProbeNode'
 import { PublishNode } from './nodes/PublishNode'
 import { SubscribeNode } from './nodes/SubscribeNode'
 import { AnnotationNode } from './nodes/AnnotationNode'
@@ -129,7 +128,7 @@ const NODE_TYPES = {
   csPlot: PlotNode,
   csListTable: ListTableNode,
   csGroup: GroupNode,
-  csProbe: ProbeNode,
+  csProbe: DisplayNode, // V2-006: Probe removed; legacy nodes render as Display
   csPublish: PublishNode,
   csSubscribe: SubscribeNode,
   csAnnotation: AnnotationNode,

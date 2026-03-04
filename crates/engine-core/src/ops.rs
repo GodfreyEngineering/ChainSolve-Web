@@ -190,7 +190,8 @@ fn evaluate_node_inner(
         }
 
         // ── Output (pass-through) ────────────────────────────────
-        // H7-1: "publish" is a pass-through like display/probe.
+        // H7-1: "publish" is a pass-through like display.
+        // V2-006: "probe" removed from UI but kept here for backward compat.
         "display" | "probe" | "publish" => {
             inputs
                 .get("value")

@@ -68,7 +68,6 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   // ── Output ────────────────────────────────────────────────────────────────
   display:
     'Shows a computed value prominently on the canvas. Connect any output to see its result.',
-  probe: 'Lightweight debug output. Shows the value inline without the full display chrome.',
 
   // ── Annotations ───────────────────────────────────────────────────────────
   annotation_text: 'Floating text label for annotating the canvas. Does not affect computation.',

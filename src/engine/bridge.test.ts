@@ -69,10 +69,10 @@ describe('toEngineSnapshot — basic', () => {
   })
 })
 
-describe('toEngineSnapshot — probe → display mapping', () => {
-  it('maps probe blockType to display', () => {
+describe('toEngineSnapshot — probe → display mapping (V2-006 backward compat)', () => {
+  it('remaps legacy probe blockType to display', () => {
     const nodes = [makeNode('p1', 'probe', { blockType: 'probe' })]
-    // blockType in data is 'probe'; toEngineSnapshot should remap it
+    // V2-006: probe removed from UI but legacy graphs may still contain it
     const snap = toEngineSnapshot(nodes, [])
     expect(snap.nodes[0].blockType).toBe('display')
   })

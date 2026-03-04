@@ -168,15 +168,6 @@ describe('Tooltip completeness (L4-4)', () => {
     expect(src).toContain('title={panel.label}')
     expect(src).toContain('aria-label={panel.label}')
   })
-
-  it('ProbeNode copy buttons have title tooltips', () => {
-    const src = fs.readFileSync(
-      path.resolve(__dirname, 'canvas', 'nodes', 'ProbeNode.tsx'),
-      'utf-8',
-    )
-    expect(src).toContain('title="Copy value to clipboard"')
-    expect(src).toContain('title="Copy as JSON"')
-  })
 })
 
 // ── 5. i18n key completeness for shortcuts ──────────────────────────────────

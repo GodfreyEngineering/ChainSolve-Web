@@ -205,5 +205,4 @@ export const SEARCH_METADATA: Record<string, SearchMeta> = {
 
   // ── Output ──────────────────────────────────────────────────────────────────
   display: { synonyms: ['result', 'answer', 'show', 'output'], tags: ['output'] },
-  probe: { synonyms: ['debug', 'inspect', 'watch'], tags: ['output', 'debug'] },
 }

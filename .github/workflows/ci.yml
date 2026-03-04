@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 # Cancel in-progress runs on the same ref so new pushes don't queue behind stale jobs.
 concurrency:
   group: ci-${{ github.ref }}

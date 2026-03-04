@@ -71,7 +71,7 @@ CONSTANTS: pi, euler, tau, phi
 MATH: add(a,b), subtract(a,b), multiply(a,b), divide(a,b), negate(a), abs(a), sqrt(a), power(base,exp), floor(a), ceil(a), round(a), mod(a,b), clamp(val,min,max)
 TRIG: sin(a), cos(a), tan(a), asin(a), acos(a), atan(a), atan2(y,x), degToRad(deg), radToDeg(rad)
 LOGIC: greater(a,b), less(a,b), equal(a,b), ifthenelse(cond,then,else), max(a,b), min(a,b)
-OUTPUT: display(value), probe(value)
+OUTPUT: display(value)
 ENG.MECHANICS: eng.mechanics.hooke(F,k), eng.mechanics.power_work_time(W,t), eng.mechanics.kinetic_energy(m,v), eng.mechanics.potential_energy(m,g,h), eng.mechanics.momentum(m,v)
 ENG.FLUIDS: eng.fluids.reynolds(rho,v,D,mu), eng.fluids.bernoulli_pressure(rho,v,h), eng.fluids.flow_rate(A,v)
 ENG.SECTIONS: eng.sections.bending_stress(M,y,I), eng.sections.area_annulus(d_inner,d_outer)

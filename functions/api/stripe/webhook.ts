@@ -21,6 +21,17 @@
  * Env vars required: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
  *                    SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  */
+/**
+ * GET /api/stripe/webhook
+ *
+ * Health-check endpoint.  Stripe CLI / monitoring can hit this to confirm the
+ * handler is deployed and reachable before sending real events.
+ * Returns 200 { ok: true, handler: "stripe-webhook" }.
+ */
+export const onRequestGet: PagesFunction = async () => {
+  return Response.json({ ok: true, handler: 'stripe-webhook' })
+}
+
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { mapStatusToPlan, resolveEnterprise, resolveEnterpriseSeatCount } from './_lib'

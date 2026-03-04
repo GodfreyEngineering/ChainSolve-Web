@@ -1,7 +1,7 @@
 /**
  * expressionExtractor.ts — E6-1: Build an expression tree from a canvas DAG.
  *
- * Given a target node (typically a display/probe), walk upstream through
+ * Given a target node (typically a display), walk upstream through
  * edges to build a symbolic expression tree. Each tree node holds:
  *   - the op type and label
  *   - computed value (scalar/vector/table/error)

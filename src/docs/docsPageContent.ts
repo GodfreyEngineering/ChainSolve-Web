@@ -55,7 +55,7 @@ export const DOCS_CONTENT: DocsContentMap = {
     catStats: 'Statistics and Probability',
     catStatsDesc: 'Descriptive stats, relationships, combinatorics, distributions.',
     catOutput: 'Output',
-    catOutputDesc: 'Display and Probe blocks to visualise results.',
+    catOutputDesc: 'Display blocks to visualise results.',
     addingTitle: 'Adding blocks to the canvas',
     addingBody:
       'Open the block library from the Insert menu, the sidebar button, or by double-clicking an empty area of the canvas. Search by name or browse by category. Click a block to place it, or drag it to a specific position.',
@@ -125,7 +125,6 @@ export const DOCS_CONTENT: DocsContentMap = {
   blockOutput: {
     intro: 'Output blocks display computed results on the canvas.',
     display: 'Shows a computed value with full formatting. Supports scalars, vectors, and tables.',
-    probe: 'Lightweight inline readout without the full display frame.',
   },
 
   blockEng: {

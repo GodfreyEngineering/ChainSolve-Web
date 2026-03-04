@@ -205,8 +205,8 @@ Claude should treat this as the “source of truth” for the current environmen
 - Developer can access theme editor and all gated features
 - Add Playwright: login developer, assert badge and feature access.
 
-## V2-006 — Remove or fix Probe block (crash: toPrecision null)
-**Problem:** probe exists, unknown purpose, crashes app.  
+## V2-006 — Remove or fix Probe block (crash: toPrecision null) [x]
+**Problem:** probe exists, unknown purpose, crashes app.
 **Work:**
 - Remove from library and from any registries OR fully fix it and clarify purpose.
 - If removed: ensure no tests depend on it and no references remain.
@@ -214,6 +214,15 @@ Claude should treat this as the “source of truth” for the current environmen
 - Dragging display blocks never crashes
 - No probe block appears anywhere
 - Unit test coverage for display rendering on null/undefined values.
+
+**Changelog (2026-03-04):**
+- Decision: Remove probe block entirely from UI. Users cannot create new probe blocks.
+- Deleted `src/components/canvas/nodes/ProbeNode.tsx` component.
+- Removed probe registration from `src/blocks/registry.ts` and `csProbe` from `NodeKind` type union.
+- Removed probe from: block descriptions, search metadata, docs page content, AI catalog, taxonomy subcategory.
+- Removed probe from Rust catalog (`crates/engine-core/src/catalog.rs`, count 168 to 167).
+- Backward compatibility preserved: legacy saved projects containing probe blocks still evaluate correctly (bridge remaps probe to display; Rust ops.rs still handles "probe" as pass-through; expression extractor still treats probe like display; CanvasArea maps csProbe to DisplayNode; auditModel skip-list retains "probe").
+- Updated tests: bridge.test.ts (marked as backward compat), catalogSanity.test.ts (removed csProbe from valid kinds), powerUserWorkflows.test.ts (removed ProbeNode copy button test).
 
 ---
 
@@ -596,14 +605,17 @@ Claude should treat this as the “source of truth” for the current environmen
 - Full Playwright `--project=full` passes (or at minimum the previously failing tests pass, with evidence).
 - No new flakes introduced.
 
-## V2-033 — GitHub Actions hardening: add explicit permissions block
-**Problem:** workflow warns missing `permissions`.  
+## V2-033 — GitHub Actions hardening: add explicit permissions block [x]
+**Problem:** workflow warns missing `permissions`.
 **Work:**
 - Add minimal permissions, e.g.:
   - `permissions: { contents: read }`
 - Ensure deploy job still works.
 **Acceptance:**
 - Code scanning warning cleared.
+
+**Changelog (2026-03-04):**
+- Added `permissions: { contents: read }` to all three workflows: `ci.yml`, `e2e-full.yml`, `perf.yml`.
 
 ---
 
@@ -633,6 +645,22 @@ Claude should treat this as the “source of truth” for the current environmen
 - Ensure docking handles and toolbars feel premium
 **Acceptance:**
 - UI looks consistent and intentionally designed.
+
+## V2-037 — Dependabot grouping + Stripe webhook stabilization [x]
+**Problem:** (A) Dependabot creates too many individual PRs — noisy. (B) Stripe webhook 404 — Dashboard URL pointed at nonexistent Supabase Edge Function; actual handler is a Cloudflare Pages Function.
+**Work:**
+- (A) Configure Dependabot grouping: npm patch+minor grouped, Cargo all grouped, GH Actions all grouped. Create `docs/DEV/DEPENDENCY_POLICY.md`.
+- (B) Document correct Stripe webhook URL (`POST /api/stripe/webhook`). Add GET health-check handler. Create `docs/DEV/STRIPE_WEBHOOK.md` with deployment/troubleshooting guide.
+**Acceptance:**
+- Dependabot produces at most 3 PRs per weekly cycle (1 npm grouped, 1 cargo grouped, 1 GHA grouped) plus up to 5 individual npm major PRs.
+- `GET /api/stripe/webhook` returns 200 `{ ok: true, handler: "stripe-webhook" }`.
+- Stripe webhook docs clearly state correct URL and root cause of 404.
+
+**Changelog (2026-03-04):**
+- Rewrote `.github/dependabot.yml` with grouping strategy (npm-patch-minor, cargo-all, gha-all). Created `docs/DEV/DEPENDENCY_POLICY.md` documenting rationale.
+- Added GET health-check handler to `functions/api/stripe/webhook.ts`.
+- Created `docs/DEV/STRIPE_WEBHOOK.md` with correct endpoint URL, required env vars, Dashboard configuration steps, 404 root cause explanation, and local testing guide.
+- Root cause of Stripe 404: Dashboard was configured to send events to `https://<project>.supabase.co/functions/v1/stripe-webhook` — this URL does not exist. The actual handler is at `https://app.chainsolve.co.uk/api/stripe/webhook` (Cloudflare Pages Function). User must update the endpoint URL in Stripe Dashboard.
 
 ---
 

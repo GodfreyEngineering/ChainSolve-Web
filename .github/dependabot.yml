@@ -1,6 +1,16 @@
+# Dependabot v2 — dependency update policy.
+#
+# Policy:
+#   - npm patch+minor updates: grouped into 1 weekly PR (low risk).
+#   - npm major updates: individual PRs, limited to 3 open at a time.
+#   - GitHub Actions: grouped into 1 weekly PR.
+#   - Cargo: grouped into 1 weekly PR.
+#
+# See docs/DEV/DEPENDENCY_POLICY.md for the rationale.
+
 version: 2
 updates:
-  # npm dependencies
+  # ── npm dependencies ──────────────────────────────────────────────────────
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -10,9 +20,16 @@ updates:
       - "GodfreyEngineering"
     labels:
       - "dependencies"
-    open-pull-requests-limit: 10
+      - "npm"
+    open-pull-requests-limit: 5
+    groups:
+      npm-patch-minor:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
 
-  # Rust / Cargo dependencies
+  # ── Rust / Cargo dependencies ─────────────────────────────────────────────
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
@@ -22,9 +39,17 @@ updates:
       - "GodfreyEngineering"
     labels:
       - "dependencies"
-    open-pull-requests-limit: 5
+      - "rust"
+    open-pull-requests-limit: 3
+    groups:
+      cargo-all:
+        applies-to: version-updates
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
 
-  # GitHub Actions
+  # ── GitHub Actions ────────────────────────────────────────────────────────
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -34,4 +59,10 @@ updates:
       - "GodfreyEngineering"
     labels:
       - "dependencies"
-    open-pull-requests-limit: 5
+      - "github-actions"
+    open-pull-requests-limit: 3
+    groups:
+      gha-all:
+        applies-to: version-updates
+        patterns:
+          - "*"

@@ -350,14 +350,6 @@ pub fn catalog() -> Vec<CatalogEntry> {
             inputs: vec![p("value", "Value")],
             pro_only: false,
         },
-        CatalogEntry {
-            op_id: "probe",
-            label: "Probe",
-            category: "output",
-            node_kind: "csProbe",
-            inputs: vec![p("value", "Value")],
-            pro_only: false,
-        },
         // H7-1: Publish block captures incoming value under a named channel.
         CatalogEntry {
             op_id: "publish",
@@ -1474,14 +1466,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 168);
+        assert_eq!(cat.len(), 167);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 168);
+        assert_eq!(parsed.as_array().unwrap().len(), 167);
     }
 
     #[test]

@@ -41,7 +41,7 @@ export function toEngineSnapshot(
     version: 1,
     nodes: evalNodes.map((n) => {
       let data = n.data as Record<string, unknown>
-      // W12.4: Probe maps to display for the engine (no Rust changes needed).
+      // V2-006: Probe removed from UI; legacy graphs still remap to display.
       // H4-1: Unified constant block resolves to 'number' with the looked-up
       // value. No Rust catalog entries needed for new constants.
       let blockType = (data.blockType === 'probe' ? 'display' : data.blockType) as string
