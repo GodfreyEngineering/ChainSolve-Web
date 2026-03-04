@@ -670,6 +670,9 @@ export default function CanvasPage() {
     async (canvasId: string) => {
       if (!projectId || canvasId === activeCanvasId) return
 
+      // Cancel any pending autosave for the current canvas — we save explicitly below
+      autosaveScheduler.current.cancel()
+
       // Save current canvas if dirty before switching
       if (useProjectStore.getState().isDirty) {
         await doSave()
@@ -678,13 +681,16 @@ export default function CanvasPage() {
       try {
         // Load the target canvas graph
         const canvasGraph = await loadCanvasGraph(projectId, canvasId)
-        setActiveCanvasId(canvasId)
         // setActiveCanvas updates projects.active_canvas_id which bumps
         // projects.updated_at via trigger. We must capture the fresh timestamp
         // to keep the optimistic-lock reference in sync and avoid false conflicts.
         const freshUpdatedAt = await setActiveCanvas(projectId, canvasId)
+        // Set init data BEFORE changing activeCanvasId so that when CanvasArea
+        // remounts (key={activeCanvasId}), it picks up the correct graph data
+        // in a single render batch — preventing a flash of stale data.
         setInitNodes(canvasGraph.nodes as Node<NodeData>[])
         setInitEdges(canvasGraph.edges as Edge[])
+        setActiveCanvasId(canvasId)
         // Sync store with the DB timestamp (includes the bump from setActiveCanvas)
         completeSave(freshUpdatedAt)
       } catch (err: unknown) {

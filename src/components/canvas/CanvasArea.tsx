@@ -690,7 +690,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   })
   const [libVisible, setLibVisible] = useState(() => !isMobile)
 
-  // Inspector state (open on click, not selection)
+  // Inspector state (select on click, open on double-click)
   const [inspectedId, setInspectedId] = useState<string | null>(null)
   const [inspPinned, setInspPinned] = useState(false)
   const { openWindow, closeWindow, isOpen: isWinOpen } = useWindowManager()
@@ -930,12 +930,18 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [setEdges, doSaveHistory],
   )
 
-  // ── Inspector: open on node body click, NOT on drag ────────────────────────
+  // ── Inspector: single-click selects, double-click opens inspector ───────────
   const onNodeClick = useCallback(
     (_: MouseEvent, node: Node) => {
       if (!inspPinned) setInspectedId(node.id)
+    },
+    [inspPinned],
+  )
+
+  const onNodeDoubleClick = useCallback(
+    (_: MouseEvent, node: Node) => {
+      if (!inspPinned) setInspectedId(node.id)
       openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
-      // On mobile, close library when opening inspector
       if (isMobile) setLibVisible(false)
     },
     [isMobile, inspPinned, openWindow],
@@ -2019,6 +2025,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                           : undefined
                     }
                     onNodeClick={onNodeClick}
+                    onNodeDoubleClick={onNodeDoubleClick}
                     onPaneClick={onPaneClick}
                     onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
                     onEdgeContextMenu={readOnly ? undefined : onEdgeContextMenu}

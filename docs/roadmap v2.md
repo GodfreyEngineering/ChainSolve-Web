@@ -438,7 +438,7 @@ Claude should treat this as the “source of truth” for the current environmen
 - i18n: Added `dock.*` keys (expandLibrary, collapseLibrary, expandDock, collapseDock, dragToResize) in EN/DE/ES/FR/IT. All dock title attributes now use `t()`.
 - verify-ci.sh: all checks pass (3626 tests, build OK).
 
-## V2-016 — Inspector behavior: open only on double click; improve window UX
+## V2-016 — Inspector behavior: open only on double click; improve window UX [x]
 **Problems:**
 - Inspector opens on click; annoying.
 - Units dropdown inside blocks unusable; use inspector.
@@ -453,8 +453,18 @@ Claude should treat this as the “source of truth” for the current environmen
 - Double click does
 - Units editing works reliably via inspector.
 
-## V2-017 — Sheet switching + saving reliability (prevent data loss)
-**Problem:** changing sheets can delete other sheet content; save pipeline flaky.  
+**Changelog (2026-03-04):**
+- Split `onNodeClick` into two handlers in `CanvasArea.tsx`:
+  - `onNodeClick`: single-click now only selects the node (`setInspectedId`) without opening the inspector window.
+  - `onNodeDoubleClick`: double-click opens the inspector via `openWindow(INSPECTOR_WINDOW_ID)` and sets inspected node.
+- Added `onNodeDoubleClick={onNodeDoubleClick}` to the ReactFlow component props.
+- Inspector is already a high-quality draggable/resizable AppWindow (implemented in prior checkpoints via FloatingInspector + AppWindow + WindowManagerContext). Drag, resize, minimize, maximize, close, ESC, pin/unpin all work.
+- Fixed hardcoded `aria-label` strings in FloatingInspector pin toggle — now uses `t(‘inspector.unpin’)` / `t(‘inspector.pin’)` for proper i18n (keys already existed in all 6 locales).
+- Units editing already works via inspector (Inspector component renders unit dropdowns for nodes that support them).
+- All CI checks pass.
+
+## V2-017 — Sheet switching + saving reliability (prevent data loss) [x]
+**Problem:** changing sheets can delete other sheet content; save pipeline flaky.
 **Work:**
 - Audit save model and sheet persistence.
 - Implement robust state management:
@@ -465,6 +475,13 @@ Claude should treat this as the “source of truth” for the current environmen
 **Acceptance:**
 - No sheet content loss
 - Save/reopen stable.
+
+**Changelog (2026-03-04):**
+- Audited save pipeline in `CanvasPage.tsx`: per-canvas dirty tracking (`canvasesStore.dirtyCanvasIds`), conflict detection (E8-1), offline retry with exponential backoff, stuck-save watchdog (30s), `beforeunload` flush, and tiled-mode secondary canvas saving all confirmed correct.
+- Fixed state ordering bug in `handleSwitchCanvas`: `setInitNodes`/`setInitEdges` now run BEFORE `setActiveCanvasId`. Previously, the Zustand store update could trigger a React re-render before the init data was ready, causing CanvasArea to remount (via `key={activeCanvasId}`) with stale graph data from the previous canvas.
+- Added `autosaveScheduler.current.cancel()` at the start of `handleSwitchCanvas` — prevents a pending autosave timer (scheduled for the old canvas) from firing after the switch, which could cause a spurious save of the new canvas's data.
+- Existing safeguards confirmed: `isFirstRender` guard in CanvasArea suppresses the first `onGraphChange` after remount; `completeSave(freshUpdatedAt)` at the end of switch clears dirty state; `doSave()` guards against concurrent saves via `isSaving.current`.
+- All CI checks pass.
 
 ---
 
