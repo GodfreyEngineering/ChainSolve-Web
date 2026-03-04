@@ -740,7 +740,7 @@ export function AppHeader({
         },
       },
       {
-        label: t('menu.manageTemplates'),
+        label: t('menu.manageSavedGroups'),
         onClick: () => {
           setTemplateManagerOpen(true)
           setOpenMenu(null)

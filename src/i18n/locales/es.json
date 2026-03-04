@@ -651,15 +651,15 @@
     "members": "Miembros",
     "memberCount": "{{count}} nodos",
     "deleteGroup": "Eliminar grupo",
-    "saveAsTemplate": "Guardar como plantilla…",
-    "templateName": "Nombre de la plantilla:",
-    "templates": "Plantillas",
-    "noTemplates": "Aún no hay plantillas",
-    "noTemplatesHint": "Guarda un grupo como plantilla.",
-    "insertTemplate": "Insertar",
-    "deleteTemplate": "Eliminar plantilla",
-    "renameTemplate": "Renombrar plantilla…",
-    "templateSaved": "Plantilla guardada",
+    "saveAsGroup": "Guardar como grupo…",
+    "savedGroupName": "Nombre del grupo:",
+    "savedGroups": "Grupos guardados",
+    "noSavedGroups": "Aun no hay grupos guardados",
+    "noSavedGroupsHint": "Guarda un grupo para reutilizarlo.",
+    "insertSavedGroup": "Insertar",
+    "deleteSavedGroup": "Eliminar grupo guardado",
+    "renameSavedGroup": "Renombrar grupo guardado…",
+    "groupSaved": "Grupo guardado",
     "proRequired": "Requiere Pro",
     "minSelection": "Selecciona 2+ nodos para agrupar"
   },
@@ -715,7 +715,7 @@
     "contactSupport": "Contactar soporte",
     "menubar": "Menú de la aplicación",
     "buildWithAI": "Construir con IA…",
-    "manageTemplates": "Administrar plantillas…",
+    "manageSavedGroups": "Administrar grupos guardados…",
     "startTour": "Tour de inicio",
     "projectWizard": "Asistente de proyecto"
   },
@@ -793,7 +793,7 @@
     "addFavourite": "Agregar a favoritos",
     "removeFavourite": "Quitar de favoritos",
     "formula": "Fórmula",
-    "insertTemplate": "Insertar \"{{name}}\" ({{count}} nodos)"
+    "insertSavedGroup": "Insertar \"{{name}}\" ({{count}} nodos)"
   },
   "sheets": {
     "title": "Hojas",
@@ -1209,17 +1209,17 @@
     "notConfiguredBody": "Establece VITE_LLM_API_KEY en tu archivo .env para habilitar la construcción asistida por IA."
   },
   "templateManager": {
-    "title": "Administrar plantillas",
-    "subtitle": "Renombra o elimina tus plantillas de grupos reutilizables.",
-    "empty": "No hay plantillas guardadas. Guarda un grupo como plantilla para verlo aquí.",
-    "loading": "Cargando plantillas…",
+    "title": "Administrar grupos guardados",
+    "subtitle": "Renombra o elimina tus grupos guardados reutilizables.",
+    "empty": "No hay grupos guardados. Guarda un grupo para verlo aqui.",
+    "loading": "Cargando grupos guardados…",
     "rename": "Renombrar",
     "confirmRename": "Confirmar nombre",
     "delete": "Eliminar",
-    "deleteConfirm": "¿Eliminar esta plantilla? Esta acción no se puede deshacer.",
-    "errorLoad": "Error al cargar las plantillas.",
-    "errorRename": "Error al renombrar la plantilla.",
-    "errorDelete": "Error al eliminar la plantilla."
+    "deleteConfirm": "¿Eliminar este grupo guardado? Esta accion no se puede deshacer.",
+    "errorLoad": "Error al cargar los grupos guardados.",
+    "errorRename": "Error al renombrar el grupo guardado.",
+    "errorDelete": "Error al eliminar el grupo guardado."
   },
   "ai": {
     "title": "Copiloto IA",
@@ -1293,7 +1293,7 @@
     "deleteNode": "Eliminar nodo",
     "expand": "Expandir",
     "collapse": "Contraer",
-    "saveAsTemplate": "Guardar como plantilla…",
+    "saveAsGroup": "Guardar como grupo…",
     "ungroup": "Desagrupar",
     "deleteGroup": "Eliminar grupo",
     "groupSelection": "Agrupar selección",

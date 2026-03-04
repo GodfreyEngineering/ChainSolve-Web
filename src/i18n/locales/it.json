@@ -59,12 +59,12 @@
     "currentPlan": "Piano attuale",
     "trialEnds": "Fine prova",
     "renews": "Rinnovo",
-    "trialExpired": "La tua prova \u00e8 scaduta. Aggiorna per mantenere l'accesso completo.",
+    "trialExpired": "La tua prova è scaduta. Aggiorna per mantenere l'accesso completo.",
     "trialEndsIn": "La tua prova termina tra {{count}} giorno. Aggiorna per mantenere l'accesso.",
     "trialEndsIn_other": "La tua prova termina tra {{count}} giorni. Aggiorna per mantenere l'accesso.",
-    "upgrade": "Aggiorna \u2014 \u00a310/mese",
+    "upgrade": "Aggiorna — £10/mese",
     "manageBilling": "Gestisci fatturazione",
-    "redirecting": "Reindirizzamento\u2026"
+    "redirecting": "Reindirizzamento…"
   },
   "contact": {
     "support": "Assistenza",
@@ -651,15 +651,15 @@
     "members": "Membri",
     "memberCount": "{{count}} nodi",
     "deleteGroup": "Elimina gruppo",
-    "saveAsTemplate": "Salva come modello…",
-    "templateName": "Nome del modello:",
-    "templates": "Modelli",
-    "noTemplates": "Nessun modello ancora",
-    "noTemplatesHint": "Salva un gruppo come modello.",
-    "insertTemplate": "Inserisci",
-    "deleteTemplate": "Elimina modello",
-    "renameTemplate": "Rinomina modello…",
-    "templateSaved": "Modello salvato",
+    "saveAsGroup": "Salva come gruppo…",
+    "savedGroupName": "Nome del gruppo:",
+    "savedGroups": "Gruppi salvati",
+    "noSavedGroups": "Nessun gruppo salvato",
+    "noSavedGroupsHint": "Salva un gruppo per riutilizzarlo.",
+    "insertSavedGroup": "Inserisci",
+    "deleteSavedGroup": "Elimina gruppo salvato",
+    "renameSavedGroup": "Rinomina gruppo salvato…",
+    "groupSaved": "Gruppo salvato",
     "proRequired": "Pro richiesto",
     "minSelection": "Seleziona 2+ nodi per raggruppare"
   },
@@ -715,7 +715,7 @@
     "contactSupport": "Contatta il supporto",
     "menubar": "Menu dell'applicazione",
     "buildWithAI": "Crea con IA…",
-    "manageTemplates": "Gestisci modelli…",
+    "manageSavedGroups": "Gestisci gruppi salvati…",
     "startTour": "Tour introduttivo",
     "projectWizard": "Assistente progetto"
   },
@@ -793,7 +793,7 @@
     "addFavourite": "Aggiungi ai preferiti",
     "removeFavourite": "Rimuovi dai preferiti",
     "formula": "Formula",
-    "insertTemplate": "Inserisci \"{{name}}\" ({{count}} nodi)"
+    "insertSavedGroup": "Inserisci \"{{name}}\" ({{count}} nodi)"
   },
   "sheets": {
     "title": "Fogli",
@@ -1209,17 +1209,17 @@
     "notConfiguredBody": "Imposta VITE_LLM_API_KEY nel tuo file .env per abilitare la creazione assistita dall'IA."
   },
   "templateManager": {
-    "title": "Gestisci modelli",
-    "subtitle": "Rinomina o elimina i tuoi modelli di gruppo riutilizzabili.",
-    "empty": "Nessun modello salvato. Salva un gruppo come modello per vederlo qui.",
-    "loading": "Caricamento modelli…",
+    "title": "Gestisci gruppi salvati",
+    "subtitle": "Rinomina o elimina i tuoi gruppi salvati riutilizzabili.",
+    "empty": "Nessun gruppo salvato. Salva un gruppo per vederlo qui.",
+    "loading": "Caricamento gruppi salvati…",
     "rename": "Rinomina",
     "confirmRename": "Conferma rinomina",
     "delete": "Elimina",
-    "deleteConfirm": "Eliminare questo modello? Questa azione non può essere annullata.",
-    "errorLoad": "Impossibile caricare i modelli.",
-    "errorRename": "Impossibile rinominare il modello.",
-    "errorDelete": "Impossibile eliminare il modello."
+    "deleteConfirm": "Eliminare questo gruppo salvato? Questa azione non può essere annullata.",
+    "errorLoad": "Impossibile caricare i gruppi salvati.",
+    "errorRename": "Impossibile rinominare il gruppo salvato.",
+    "errorDelete": "Impossibile eliminare il gruppo salvato."
   },
   "ai": {
     "title": "Copilota IA",
@@ -1293,7 +1293,7 @@
     "deleteNode": "Elimina nodo",
     "expand": "Espandi",
     "collapse": "Comprimi",
-    "saveAsTemplate": "Salva come modello…",
+    "saveAsGroup": "Salva come gruppo…",
     "ungroup": "Separa gruppo",
     "deleteGroup": "Elimina gruppo",
     "groupSelection": "Raggruppa selezione",
@@ -1463,10 +1463,10 @@
     "verify": "Invia codice",
     "codePlaceholder": "Codice a 6 cifre",
     "confirm": "Conferma",
-    "codeSent": "Un codice di verifica \u00e8 stato inviato alla tua email universitaria.",
+    "codeSent": "Un codice di verifica è stato inviato alla tua email universitaria.",
     "verified": "Licenza studente attivata.",
     "verifiedReload": "Licenza studente attivata. Ricarica la pagina per vedere il piano aggiornato.",
-    "activeLabel": "La tua licenza studente \u00e8 attiva. Hai accesso completo alle funzioni Pro.",
+    "activeLabel": "La tua licenza studente è attiva. Hai accesso completo alle funzioni Pro.",
     "errorInvalidEmail": "Inserisci un indirizzo email valido.",
     "errorNotUniversity": "Questo non sembra essere un indirizzo email universitario.",
     "errorInvalidCode": "Inserisci il codice a 6 cifre inviato alla tua email."

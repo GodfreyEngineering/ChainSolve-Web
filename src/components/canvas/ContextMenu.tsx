@@ -370,7 +370,7 @@ export function ContextMenu({
             />
             <MenuItem
               icon="⛁"
-              label={t('contextMenu.saveAsTemplate')}
+              label={t('contextMenu.saveAsGroup')}
               onClick={() => {
                 onSaveAsTemplate?.(target.nodeId)
                 onClose()

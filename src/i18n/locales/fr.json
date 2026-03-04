@@ -651,15 +651,15 @@
     "members": "Membres",
     "memberCount": "{{count}} nœuds",
     "deleteGroup": "Supprimer le groupe",
-    "saveAsTemplate": "Enregistrer comme modèle…",
-    "templateName": "Nom du modèle :",
-    "templates": "Modèles",
-    "noTemplates": "Aucun modèle pour le moment",
-    "noTemplatesHint": "Enregistrez un groupe comme modèle.",
-    "insertTemplate": "Insérer",
-    "deleteTemplate": "Supprimer le modèle",
-    "renameTemplate": "Renommer le modèle…",
-    "templateSaved": "Modèle enregistré",
+    "saveAsGroup": "Enregistrer comme groupe…",
+    "savedGroupName": "Nom du groupe :",
+    "savedGroups": "Groupes enregistres",
+    "noSavedGroups": "Aucun groupe enregistre",
+    "noSavedGroupsHint": "Enregistrez un groupe pour le reutiliser.",
+    "insertSavedGroup": "Inserer",
+    "deleteSavedGroup": "Supprimer le groupe",
+    "renameSavedGroup": "Renommer le groupe…",
+    "groupSaved": "Groupe enregistre",
     "proRequired": "Pro requis",
     "minSelection": "Sélectionnez 2+ nœuds pour grouper"
   },
@@ -715,7 +715,7 @@
     "contactSupport": "Contacter le support",
     "menubar": "Menu de l'application",
     "buildWithAI": "Créer avec l'IA…",
-    "manageTemplates": "Gérer les modèles…",
+    "manageSavedGroups": "Gerer les groupes enregistres…",
     "startTour": "Visite guidee",
     "projectWizard": "Assistant de projet"
   },
@@ -793,7 +793,7 @@
     "addFavourite": "Ajouter aux favoris",
     "removeFavourite": "Retirer des favoris",
     "formula": "Formule",
-    "insertTemplate": "Insérer \"{{name}}\" ({{count}} blocs)"
+    "insertSavedGroup": "Inserer \"{{name}}\" ({{count}} blocs)"
   },
   "sheets": {
     "title": "Feuilles",
@@ -1209,17 +1209,17 @@
     "notConfiguredBody": "Définissez VITE_LLM_API_KEY dans votre fichier .env pour activer la construction assistée par IA."
   },
   "templateManager": {
-    "title": "Gérer les modèles",
-    "subtitle": "Renommez ou supprimez vos modèles de groupes réutilisables.",
-    "empty": "Aucun modèle enregistré. Sauvegardez un groupe comme modèle pour le voir ici.",
-    "loading": "Chargement des modèles…",
+    "title": "Gérer les groupes enregistrés",
+    "subtitle": "Renommez ou supprimez vos groupes enregistrés réutilisables.",
+    "empty": "Aucun groupe enregistré. Sauvegardez un groupe pour le voir ici.",
+    "loading": "Chargement des groupes enregistrés…",
     "rename": "Renommer",
     "confirmRename": "Confirmer le renommage",
     "delete": "Supprimer",
-    "deleteConfirm": "Supprimer ce modèle ? Cette action est irréversible.",
-    "errorLoad": "Impossible de charger les modèles.",
-    "errorRename": "Impossible de renommer le modèle.",
-    "errorDelete": "Impossible de supprimer le modèle."
+    "deleteConfirm": "Supprimer ce groupe ? Cette action est irréversible.",
+    "errorLoad": "Impossible de charger les groupes enregistrés.",
+    "errorRename": "Impossible de renommer le groupe enregistré.",
+    "errorDelete": "Impossible de supprimer le groupe enregistré."
   },
   "ai": {
     "title": "Copilote IA",
@@ -1293,7 +1293,7 @@
     "deleteNode": "Supprimer le noeud",
     "expand": "Développer",
     "collapse": "Réduire",
-    "saveAsTemplate": "Enregistrer comme modèle…",
+    "saveAsGroup": "Enregistrer comme groupe…",
     "ungroup": "Dégrouper",
     "deleteGroup": "Supprimer le groupe",
     "groupSelection": "Grouper la sélection",

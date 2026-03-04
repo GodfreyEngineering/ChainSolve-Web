@@ -316,7 +316,7 @@ const TemplateItem = memo(function TemplateItem({
         setMenuOpen(false)
       }}
       onClick={onInsert}
-      data-tooltip={t('blockLibrary.insertTemplate', {
+      data-tooltip={t('blockLibrary.insertSavedGroup', {
         name: template.name,
         count: nodeCount,
       })}
@@ -364,7 +364,7 @@ const TemplateItem = memo(function TemplateItem({
               fontFamily: 'inherit',
               lineHeight: 1,
             }}
-            title="Template actions"
+            title="Saved group actions"
             onClick={(e) => {
               e.stopPropagation()
               setMenuOpen((p) => !p)
@@ -403,7 +403,7 @@ const TemplateItem = memo(function TemplateItem({
                 }}
                 onClick={(e) => {
                   e.stopPropagation()
-                  const name = window.prompt('Rename template:', template.name)
+                  const name = window.prompt('Rename saved group:', template.name)
                   if (name?.trim()) {
                     onRename(name.trim())
                     setMenuOpen(false)
@@ -1083,7 +1083,7 @@ export function BlockLibrary({
               }}
             >
               <span style={{ fontSize: '0.55rem', opacity: 0.5 }}>{templatesOpen ? '▼' : '▶'}</span>
-              Templates
+              Saved groups
               <span className="cs-pro-badge">PRO</span>
             </div>
             {templatesOpen && (
@@ -1096,9 +1096,11 @@ export function BlockLibrary({
                       color: 'var(--text-faint)',
                     }}
                   >
-                    No templates yet.
+                    No saved groups yet.
                     <br />
-                    <span style={{ fontSize: '0.68rem' }}>Save a group as template.</span>
+                    <span style={{ fontSize: '0.68rem' }}>
+                      Save a group for reuse across projects.
+                    </span>
                   </div>
                 ) : (
                   templates.map((t) => (

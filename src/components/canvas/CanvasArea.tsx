@@ -1377,7 +1377,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       const group = nodes.find((n) => n.id === groupId)
       if (!group) return
       const nd = group.data as NodeData
-      const name = window.prompt('Template name:', nd.label)
+      const name = window.prompt('Saved group name:', nd.label)
       if (!name?.trim()) return
       const memberNodes = nodes.filter((n) => n.parentId === groupId)
       const memberIds = new Set(memberNodes.map((n) => n.id))
@@ -1850,7 +1850,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             minHeight: isMobile ? 36 : undefined,
             padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
           }}
-          title="Groups & Templates"
+          title="Groups & Saved Groups"
         >
           ⊞ Groups
         </button>

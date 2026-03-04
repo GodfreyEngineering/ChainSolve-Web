@@ -659,15 +659,15 @@
     "members": "Members",
     "memberCount": "{{count}} nodes",
     "deleteGroup": "Delete group",
-    "saveAsTemplate": "Save as template…",
-    "templateName": "Template name:",
-    "templates": "Templates",
-    "noTemplates": "No templates yet",
-    "noTemplatesHint": "Save a group as template.",
-    "insertTemplate": "Insert",
-    "deleteTemplate": "Delete template",
-    "renameTemplate": "Rename template…",
-    "templateSaved": "Template saved",
+    "saveAsGroup": "Save as reusable group…",
+    "savedGroupName": "Saved group name:",
+    "savedGroups": "Saved groups",
+    "noSavedGroups": "No saved groups yet",
+    "noSavedGroupsHint": "Save a group for reuse across projects.",
+    "insertSavedGroup": "Insert",
+    "deleteSavedGroup": "Delete saved group",
+    "renameSavedGroup": "Rename saved group…",
+    "groupSaved": "Group saved",
     "proRequired": "Pro required",
     "minSelection": "Select 2+ nodes to group"
   },
@@ -723,7 +723,7 @@
     "contactSupport": "Contact support",
     "menubar": "Application menu",
     "buildWithAI": "Build with AI…",
-    "manageTemplates": "Manage Templates…",
+    "manageSavedGroups": "Manage Saved Groups…",
     "startTour": "Getting started tour",
     "projectWizard": "Start a Project Wizard"
   },
@@ -812,7 +812,7 @@
     "addFavourite": "Add to favourites",
     "removeFavourite": "Remove from favourites",
     "formula": "Formula",
-    "insertTemplate": "Insert \"{{name}}\" ({{count}} nodes)"
+    "insertSavedGroup": "Insert \"{{name}}\" ({{count}} nodes)"
   },
   "debugConsole": {
     "title": "Debug Console",
@@ -1228,17 +1228,17 @@
     "notConfiguredBody": "Set VITE_LLM_API_KEY in your .env file to enable AI-assisted graph building."
   },
   "templateManager": {
-    "title": "Manage Templates",
-    "subtitle": "Rename or delete your saved reusable group templates.",
-    "empty": "No templates saved yet. Save a group as a template to see it here.",
-    "loading": "Loading templates…",
+    "title": "Manage Saved Groups",
+    "subtitle": "Rename or delete your saved reusable groups.",
+    "empty": "No saved groups yet. Save a group to see it here.",
+    "loading": "Loading saved groups…",
     "rename": "Rename",
     "confirmRename": "Confirm rename",
     "delete": "Delete",
-    "deleteConfirm": "Delete this template? This cannot be undone.",
-    "errorLoad": "Failed to load templates.",
-    "errorRename": "Failed to rename template.",
-    "errorDelete": "Failed to delete template."
+    "deleteConfirm": "Delete this saved group? This cannot be undone.",
+    "errorLoad": "Failed to load saved groups.",
+    "errorRename": "Failed to rename saved group.",
+    "errorDelete": "Failed to delete saved group."
   },
   "ai": {
     "title": "AI Copilot",
@@ -1312,7 +1312,7 @@
     "deleteNode": "Delete node",
     "expand": "Expand",
     "collapse": "Collapse",
-    "saveAsTemplate": "Save as template…",
+    "saveAsGroup": "Save as reusable group…",
     "ungroup": "Ungroup",
     "deleteGroup": "Delete group",
     "groupSelection": "Group selection",

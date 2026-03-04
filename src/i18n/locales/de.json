@@ -651,15 +651,15 @@
     "members": "Mitglieder",
     "memberCount": "{{count}} Knoten",
     "deleteGroup": "Gruppe löschen",
-    "saveAsTemplate": "Als Vorlage speichern…",
-    "templateName": "Vorlagenname:",
-    "templates": "Vorlagen",
-    "noTemplates": "Noch keine Vorlagen",
-    "noTemplatesHint": "Speichern Sie eine Gruppe als Vorlage.",
-    "insertTemplate": "Einfügen",
-    "deleteTemplate": "Vorlage löschen",
-    "renameTemplate": "Vorlage umbenennen…",
-    "templateSaved": "Vorlage gespeichert",
+    "saveAsGroup": "Als Gruppe speichern…",
+    "savedGroupName": "Gruppenname:",
+    "savedGroups": "Gespeicherte Gruppen",
+    "noSavedGroups": "Noch keine gespeicherten Gruppen",
+    "noSavedGroupsHint": "Speichern Sie eine Gruppe zur Wiederverwendung.",
+    "insertSavedGroup": "Einfügen",
+    "deleteSavedGroup": "Gespeicherte Gruppe löschen",
+    "renameSavedGroup": "Gespeicherte Gruppe umbenennen…",
+    "groupSaved": "Gruppe gespeichert",
     "proRequired": "Pro erforderlich",
     "minSelection": "Wählen Sie 2+ Knoten zum Gruppieren"
   },
@@ -715,7 +715,7 @@
     "contactSupport": "Support kontaktieren",
     "menubar": "Anwendungsmenü",
     "buildWithAI": "Mit KI erstellen…",
-    "manageTemplates": "Vorlagen verwalten…",
+    "manageSavedGroups": "Gespeicherte Gruppen verwalten…",
     "startTour": "Einfuehrungstour",
     "projectWizard": "Projektassistent"
   },
@@ -793,7 +793,7 @@
     "addFavourite": "Zu Favoriten hinzufügen",
     "removeFavourite": "Aus Favoriten entfernen",
     "formula": "Formel",
-    "insertTemplate": "\"{{name}}\" einfügen ({{count}} Blöcke)"
+    "insertSavedGroup": "\"{{name}}\" einfügen ({{count}} Blöcke)"
   },
   "sheets": {
     "title": "Blätter",
@@ -1209,17 +1209,17 @@
     "notConfiguredBody": "Setze VITE_LLM_API_KEY in deiner .env-Datei, um KI-gestützte Graphenerstellung zu aktivieren."
   },
   "templateManager": {
-    "title": "Vorlagen verwalten",
-    "subtitle": "Benenne wiederverwendbare Gruppenvorlagen um oder lösche sie.",
-    "empty": "Noch keine Vorlagen gespeichert. Speichere eine Gruppe als Vorlage, um sie hier zu sehen.",
-    "loading": "Vorlagen werden geladen…",
+    "title": "Gespeicherte Gruppen verwalten",
+    "subtitle": "Benenne gespeicherte Gruppen um oder lösche sie.",
+    "empty": "Noch keine Gruppen gespeichert. Speichere eine Gruppe, um sie hier zu sehen.",
+    "loading": "Gespeicherte Gruppen werden geladen…",
     "rename": "Umbenennen",
     "confirmRename": "Umbenennung bestätigen",
     "delete": "Löschen",
-    "deleteConfirm": "Diese Vorlage löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
-    "errorLoad": "Vorlagen konnten nicht geladen werden.",
-    "errorRename": "Vorlage konnte nicht umbenannt werden.",
-    "errorDelete": "Vorlage konnte nicht gelöscht werden."
+    "deleteConfirm": "Diese Gruppe löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "errorLoad": "Gruppen konnten nicht geladen werden.",
+    "errorRename": "Gruppe konnte nicht umbenannt werden.",
+    "errorDelete": "Gruppe konnte nicht gelöscht werden."
   },
   "ai": {
     "title": "KI-Copilot",
@@ -1293,7 +1293,7 @@
     "deleteNode": "Knoten löschen",
     "expand": "Aufklappen",
     "collapse": "Zuklappen",
-    "saveAsTemplate": "Als Vorlage speichern…",
+    "saveAsGroup": "Als Gruppe speichern…",
     "ungroup": "Gruppierung aufheben",
     "deleteGroup": "Gruppe löschen",
     "groupSelection": "Auswahl gruppieren",

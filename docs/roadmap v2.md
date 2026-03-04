@@ -628,7 +628,7 @@ Claude should treat this as the “source of truth” for the current environmen
 
 # Phase V2-E — Groups vs Templates separation (clean model, clean UX)
 
-## V2-024 — Define “Groups” feature correctly (user reusable groups)
+## V2-024 — Define “Groups” feature correctly (user reusable groups) [x]
 **Requirement:**
 - Users can select blocks + chains and save as a group
 - Group shows overall inputs/outputs
@@ -639,6 +639,8 @@ Claude should treat this as the “source of truth” for the current environmen
 **Acceptance:**
 - Groups workflow works end-to-end
 - No “templates” wording used for groups.
+
+**Done (2026-03-04):** Renamed all user-facing “template” wording to “saved group” across 6 locales (EN/DE/ES/FR/IT/HE). Updated i18n keys (groups.saveAsTemplate->saveAsGroup, templateManager values, menu.manageSavedGroups, contextMenu.saveAsGroup, blockLibrary.insertSavedGroup). Fixed hardcoded strings in BlockLibrary.tsx, CanvasArea.tsx. Internal code identifiers (function names, DB table) unchanged. verify-ci.sh green.
 
 ## V2-025 — Define “Project templates” correctly (standard + imported)
 **Requirement:**
