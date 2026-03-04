@@ -548,7 +548,7 @@ Claude should treat this as the “source of truth” for the current environmen
 - Added `blockLibrary.*` i18n keys in EN/DE/ES/FR/IT.
 - All CI checks pass.
 
-## V2-021 — Fix missing TS defaults / catalog mismatch logs
+## V2-021 — Fix missing TS defaults / catalog mismatch logs [x]
 **Problem:** runtime logs show:
 - “Catalog op … has no TS default — UI may not render it”
 - “TS block … not in Rust catalog — engine won’t evaluate it”
@@ -561,6 +561,15 @@ Claude should treat this as the “source of truth” for the current environmen
 **Acceptance:**
 - No registry mismatch logs in console
 - Blocks render + evaluate correctly.
+
+### Changelog (2026-03-04)
+- Verified: already fully resolved by G0-6 policy (prior work).
+- `validateCatalog` silently auto-registers any Rust op missing from TS — no console.warn/error by design.
+- `UI_ONLY_BLOCKS` set exempts TS-only blocks (constant, material, 4 annotation types) from Rust-side checks.
+- Bidirectional sync enforced by `registry.test.ts` (every TS block has Rust counterpart and vice versa).
+- `catalogSync.test.ts` confirms runtime catalog validation produces zero warnings.
+- No code changes required — acceptance criteria already satisfied.
+- All CI checks pass.
 
 ## V2-022 — Remove annotation “blocks” and implement real annotation tools (non-block)
 **Goal:** annotations behave like CAD annotations:
