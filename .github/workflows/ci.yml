@@ -203,7 +203,7 @@ jobs:
       - run: npm ci
 
       - name: Download dist artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
@@ -278,7 +278,7 @@ jobs:
 
       - name: Download WASM pkg artifact
         # Reuse the WASM compiled by node_checks — no need to re-run wasm-pack.
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: wasm-pkg
           path: crates/engine-wasm/pkg
