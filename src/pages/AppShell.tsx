@@ -31,6 +31,7 @@ import {
   allCompleted,
 } from '../lib/onboardingState'
 import type { User } from '@supabase/supabase-js'
+import type { Profile } from '../lib/profilesService'
 import {
   listProjects,
   renameProject,
@@ -51,7 +52,6 @@ import {
   isReadOnly,
   resolveEffectivePlan,
   showBillingBanner,
-  type Plan,
 } from '../lib/entitlements'
 import { MainHeader } from '../components/app/MainHeader'
 import { UpgradeModal } from '../components/UpgradeModal'
@@ -97,19 +97,6 @@ const LazyOnboardingOverlay = lazy(() =>
 )
 
 const ONBOARDED_KEY = 'cs:onboarded'
-
-interface Profile {
-  id: string
-  email: string | null
-  full_name: string | null
-  plan: Plan
-  stripe_customer_id: string | null
-  current_period_end: string | null
-  /** E2-3: Semantic version of ToS the user accepted. */
-  accepted_terms_version: string | null
-  /** E2-3: Whether the user opted in to marketing. */
-  marketing_opt_in: boolean
-}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

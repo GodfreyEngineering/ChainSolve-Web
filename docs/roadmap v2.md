@@ -190,20 +190,28 @@ Claude should treat this as the “source of truth” for the current environmen
 - Updated 6 doc files to remove references to the now-removed Report-Only header: SECURITY.md (sections 2, 4, 5, 6), SETUP.md, REPO_MAP.md, RELEASE_DRY_RUN.md, csp-reporting.md, runbook.md.
 - Dashboard action required: Ensure "Web Analytics" is OFF in Cloudflare Pages dashboard (Speed -> Web Analytics -> OFF). If it's already off, no console errors will appear.
 
-## V2-005 — Developer plan identity + badge correctness (single source of truth)
-**Problem:** developer account shows Free on `/app` but Enterprise on canvas; theme editor blocked.  
+## V2-005 — Developer plan identity + badge correctness (single source of truth) [x]
+**Problem:** developer account shows Free on `/app` but Enterprise on canvas; theme editor blocked.
 **Work:**
 - Define and implement a unified “license/role resolver” used everywhere:
   - developer
   - enterprise (and role)
   - pro
   - free
+  - student
 - Ensure developer (`ben.godfrey@chainsolve.co.uk`) resolves as developer consistently.
 - Fix any gating checks so developer bypasses feature locks appropriately.
 **Acceptance:**
 - Developer badge shows consistently on all pages
 - Developer can access theme editor and all gated features
 - Add Playwright: login developer, assert badge and feature access.
+
+**Changelog (2026-03-04):**
+- Root cause: `AppShell.tsx` had a local `Profile` interface missing `is_developer`, `is_admin`, `is_student`. The Supabase query fetched these fields correctly, but the `as Profile` type assertion used the incomplete local type. While the JS runtime object retained the fields (making behavior accidentally correct), the type mismatch was a latent bug that would surface if the profile object were ever reconstructed or serialized.
+- Replaced the local `Profile` interface with the canonical import from `src/lib/profilesService.ts`, which includes all developer/admin/student flags.
+- Removed the now-unused `type Plan` import from entitlements (ESLint caught it).
+- Audited all 6 `resolveEffectivePlan` call sites: CanvasPage (inline type, correct), SettingsModal (canonical Profile via getProfile, correct), ProfileSettings/BillingSettings (canonical Profile prop, correct), MarketplacePage/ItemDetailPage (canonical Profile via getProfile, correct).
+- Added `src/pages/AppShell.test.ts` with 2 structural regression tests: imports Profile from profilesService (not local), and query fetches all developer flags.
 
 ## V2-006 — Remove or fix Probe block (crash: toPrecision null) [x]
 **Problem:** probe exists, unknown purpose, crashes app.
