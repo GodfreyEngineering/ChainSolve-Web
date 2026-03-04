@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # ── Rust + WASM ──────────────────────────────────────────────────────
       - uses: dtolnay/rust-toolchain@stable
@@ -45,7 +45,7 @@ jobs:
         run: wasm-pack build crates/engine-wasm --target web --release
 
       # ── Node ─────────────────────────────────────────────────────────────
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -67,7 +67,7 @@ jobs:
 
       # ── Playwright ───────────────────────────────────────────────────────
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
@@ -85,7 +85,7 @@ jobs:
       # the workflow finishes.
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-full-report-${{ github.run_id }}
           path: |
