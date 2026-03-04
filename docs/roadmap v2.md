@@ -1,0 +1,647 @@
+# ChainSolve Roadmap v2 — UI/UX Rebuild + Supabase Harmony + Stability
+**Last updated:** 2026-03-04  
+**Scope:** This roadmap v2 is based **only** on the requirements, bugs, Supabase snapshot, and CI logs provided in the most recent message (no prior context).  
+**Goal:** Bring the repo + Supabase + deployed web app to a **polished, robust, professional** state with a major UI/UX uplift, strong i18n coverage, and green CI/E2E.
+
+---
+
+## How we’ll run this with Claude (workflow contract)
+
+### Operating mode
+- **One checkpoint per Claude run** (unless the checkpoint explicitly says “micro-fix bundle”).
+- Claude must treat each checkpoint as “ship-quality”: refactor freely if needed, not minimal edits.
+- No emojis anywhere in UI text, docs, commits, or comments.
+
+### Definition of DONE (per checkpoint)
+A checkpoint is DONE only when:
+1) The feature/bug is fully implemented and behaves correctly in the app (manual sanity).  
+2) Unit tests updated/added where appropriate.  
+3) Playwright tests updated/added where appropriate.  
+4) CI scripts pass locally (**at minimum**: typecheck + lint + unit + build; and any relevant e2e project if practical).  
+5) If Supabase changes are required: Claude outputs **migration SQL** (or a migration file if repo uses Supabase migrations), plus notes for applying it safely.
+
+### Copy/paste prompt template for each checkpoint (you can reuse)
+> **Claude:** Implement checkpoint **V2-XXX** from `ROADMAP_V2.md`.  
+> Requirements:  
+> - Fix the issue completely (not minimal).  
+> - Keep UX professional (no emojis), add clear microcopy/tooltips where needed.  
+> - Update i18n keys (EN/DE/FR/ES/IT) for any user-facing text.  
+> - Add/adjust unit tests and Playwright tests as needed.  
+> - Ensure CI is green: run the relevant scripts and report results.  
+> - If Supabase schema/policies are affected: output the SQL migration and explain exactly how to apply it.  
+> Deliverable: summary, file-by-file change list, tests run + results, and suggested commit message.
+
+---
+
+## Current Supabase baseline (as provided)
+Claude should treat this as the “source of truth” for the current environment.
+
+### Public tables (approx rows)
+- ai_org_policies (0)
+- ai_request_log (2)
+- ai_usage_monthly (1)
+- audit_log (0)
+- avatar_reports (0)
+- bug_reports (0)
+- canvases (1)
+- csp_reports (0)
+- fs_items (0)
+- group_templates (0)
+- marketplace_comments (0)
+- marketplace_install_events (0)
+- marketplace_items (0)
+- marketplace_likes (0)
+- marketplace_purchases (0)
+- observability_events (88)
+- org_members (0)
+- organizations (0)
+- profiles (1)
+- project_assets (0)
+- projects (1)
+- stripe_events (0)
+- student_verifications (0)
+- suggestions (0)
+- user_preferences (1)
+- user_reports (0)
+- user_sessions (4)
+- user_terms_log (0)
+
+### Storage buckets
+- `marketplace` (public)
+- `projects` (private)
+- `uploads` (private)
+
+### Known runtime errors and regressions (must fix)
+- `/app` project directory: **“Failed to list projects: column projects.folder does not exist”**
+- Saving “Save as”: same missing column error
+- Settings gear -> Preferences error: **useNavigate() may be used only in the context of a <Router>**
+- `/login` and `/terms`: Cloudflare Insights beacon blocked by CSP, plus Terms acceptance failing
+- Developer account `ben.godfrey@chainsolve.co.uk` badge/plan inconsistent: `/app` shows Free; canvas shows Enterprise
+- Theme editor blocked on developer account
+- Probe block exists and crashes: **toPrecision null**
+- Block library resize triggers: **ResizeObserver loop completed with undelivered notifications**
+- Dock controls need double click; poor UX; bottom panel doesn’t span correctly; gap near AI panel
+- Inspector opens too aggressively (should open only on double click)
+- Sheet switching + saving is flaky and can lose content
+- Units editor dropdown inside blocks is unusable; inspector should be primary editor
+- Block library: “Pro” badge shown everywhere; annotations wrongly appear as blocks
+- Insert dropdown too long; needs drill-down hierarchy
+- Canvas toolbar needs full redesign, rename edges->chains, move toggles into settings, fix dots visibility/scale
+- Docs page not mature enough
+- AI panel needs full redesign and simplification (chat-only; mode dropdown only: bypass/edit/plan)
+
+### Supabase advisor findings (must address)
+**Security:**
+- `function_search_path_mutable` warnings for:
+  - handle_canvases_updated_at
+  - cleanup_expired_audit_logs
+  - enforce_org_install_policy
+  - enforce_org_comment_policy
+  - enforce_comment_rate_limit
+- `observability_events`: RLS enabled but **no policies**
+
+**Performance:**
+- multiple permissive policies warnings (notably marketplace_comments, avatar_reports, marketplace_install_events, profiles, user_reports)
+- unindexed foreign keys (public.* tables and many stripe.* tables)
+- unused indexes flagged (some may be fine for future; decide deliberately)
+- Auth DB connection strategy advisory (absolute connections)
+
+### CI / GitHub issues to fix
+- Full E2E suite failing (8 tests failing) — see “E2E Fix Phase” below
+- Workflow warning: missing `permissions:` block for GITHUB_TOKEN (at least `{ contents: read }`)
+
+---
+
+## Roadmap Structure (v2)
+- **Phase V2-A:** Stop-the-bleeding (routing, auth pages, Terms, CSP noise, critical DB mismatch)
+- **Phase V2-B:** Supabase harmony (schema + policies + performance lints)
+- **Phase V2-C:** UI architecture rebuild (headers, layout zones, docking system, inspector behavior)
+- **Phase V2-D:** Block system + library overhaul (categories, gating badges, tooltips, i18n for block metadata)
+- **Phase V2-E:** Templates vs Groups separation (and remove confusion)
+- **Phase V2-F:** Settings + Theme Editor mega-upgrade (developer access, full component naming coverage)
+- **Phase V2-G:** AI panel redesign (chat-only, modes only)
+- **Phase V2-H:** Docs + i18n maturity (docs site structure, i18n completeness)
+- **Phase V2-I:** E2E / CI hardening and closures (fix failing tests + add missing coverage)
+- **Phase V2-J:** “Polish & Professionalism Pass” (no vibe-coded feel, consistent microcopy, animations, loading UX)
+
+> **Important:** Each checkpoint below is intended to be completed **one at a time**.
+
+---
+
+# Phase V2-A — Stop-the-bleeding (critical runtime blockers)
+
+## V2-001 — Fix projects “folder” mismatch (DB <-> app) [x]
+**Problem:** app queries `projects.folder` but column does not exist; breaks listing and saving.
+**Work:**
+- Decide canonical “project directory” model.
+  - Either: (A) add `projects.folder` and implement folders there, or (B) remove dependency and use `fs_items` as the directory tree (preferred long-term because fs_items exists).
+- Implement chosen approach across:
+  - project list query
+  - “Save as”
+  - project directory UI
+- Add migration SQL if schema changes.
+**Acceptance:**
+- `/app` lists projects without errors.
+- Create project, Save, Save As all work.
+- No references to non-existent columns remain.
+- Add Playwright coverage for listing + Save As.
+**Deliverables:** SQL if needed + updated queries + tests.
+
+**Changelog (2026-03-04):**
+- Decision: Option (A) — keep `projects.folder` column. The code already fully implements folder-based organization (listFolders, moveToFolder, bulkMoveToFolder, folder filtering in AppShell). The column exists in the consolidated baseline migration (0001) but was missing from production databases provisioned before consolidation.
+- Added migration `supabase/migrations/0002_add_projects_folder.sql` — idempotent `ALTER TABLE ADD COLUMN IF NOT EXISTS folder text`.
+- Added unit tests for `listProjects` (folder field included in results, error message on missing column) and `createProject` (folder passed/omitted correctly) in `src/lib/projects.test.ts`.
+- Code required no changes — SELECT_COLS, ProjectRow interface, and all CRUD functions already handle the folder column correctly.
+- Playwright auth-gated project browser test already tracked as fixme in `e2e/workbench-ux.spec.ts`; full auth-dependent E2E coverage deferred to V2-I (E2E hardening phase).
+
+## V2-002 — Fix Settings/Preferences Router crash
+**Problem:** useNavigate used outside Router context in Settings modal chunk.  
+**Work:**
+- Ensure Settings modal is rendered within Router context or refactor navigation calls:
+  - pass navigation callbacks down from Router layer
+  - or wrap modal route properly (no hacks)
+- Add regression test (unit or e2e) that Settings opens on `/app` and `/canvas/...` without throwing.
+**Acceptance:**
+- No “useNavigate()…” crash
+- ErrorBoundary does not trip
+- Playwright: open settings, close settings, repeat.
+
+## V2-003 — Fix Terms page blank + “Failed to record acceptance”
+**Problem:** Terms page blank and acceptance fails; blocks signup flows and E2E.  
+**Work:**
+- Fix `/terms` rendering and content loading.
+- Fix acceptance write path:
+  - Ensure `user_terms_log` insert works with RLS and correct auth state
+  - Ensure UI handles network errors and retries
+- Add clear UX: why you must accept, link to terms, confirm state persisted.
+**Acceptance:**
+- Terms displays content
+- Accept works and advances
+- No console errors from acceptance path
+- Playwright auth flow test updated and passes.
+
+## V2-004 — CSP noise + Cloudflare Insights beacon
+**Problem:** console shows blocked script `static.cloudflareinsights.com/beacon.min.js` due to CSP.  
+**Work:**
+- Decide: remove beacon injection entirely (preferred for strict CSP), or explicitly allow it in a controlled way.
+- Ensure CSP remains tight and intentional (no broad allowances).
+- Remove report-only contradictions if present.
+**Acceptance:**
+- No CSP beacon errors on `/login`, `/terms`, `/app`
+- No regressions to existing CSP posture.
+
+## V2-005 — Developer plan identity + badge correctness (single source of truth)
+**Problem:** developer account shows Free on `/app` but Enterprise on canvas; theme editor blocked.  
+**Work:**
+- Define and implement a unified “license/role resolver” used everywhere:
+  - developer
+  - enterprise (and role)
+  - pro
+  - free
+- Ensure developer (`ben.godfrey@chainsolve.co.uk`) resolves as developer consistently.
+- Fix any gating checks so developer bypasses feature locks appropriately.
+**Acceptance:**
+- Developer badge shows consistently on all pages
+- Developer can access theme editor and all gated features
+- Add Playwright: login developer, assert badge and feature access.
+
+## V2-006 — Remove or fix Probe block (crash: toPrecision null)
+**Problem:** probe exists, unknown purpose, crashes app.  
+**Work:**
+- Remove from library and from any registries OR fully fix it and clarify purpose.
+- If removed: ensure no tests depend on it and no references remain.
+**Acceptance:**
+- Dragging display blocks never crashes
+- No probe block appears anywhere
+- Unit test coverage for display rendering on null/undefined values.
+
+---
+
+# Phase V2-B — Supabase harmony (policies, functions, performance lints)
+
+## V2-007 — Fix `function_search_path_mutable` warnings (5 functions)
+**Problem:** multiple functions flagged.  
+**Work:**
+- Update each flagged function to set a fixed `search_path` (e.g., `SET search_path = public`) in the function definition.
+- Confirm behavior unchanged.
+**Acceptance:**
+- Supabase security advisor warning cleared for those functions
+- Migration SQL delivered.
+
+## V2-008 — Add RLS policies for `observability_events` (RLS enabled, no policy)
+**Problem:** linter warns; currently table has data.  
+**Work:**
+- Decide intended use:
+  - If internal-only: deny all access to external roles.
+  - Or user-owned: allow per-user read/insert only.
+- Implement explicit policies accordingly.
+**Acceptance:**
+- Linter warning cleared
+- No unintended data exposure.
+
+## V2-009 — Reduce multiple permissive policies (performance advisor)
+**Problem:** many tables have multiple permissive policies for same role/action.  
+**Work:**
+- Consolidate policies per table/action/role where safe:
+  - marketplace_comments
+  - avatar_reports
+  - marketplace_install_events
+  - profiles
+  - user_reports
+- Preserve identical semantics while reducing evaluation overhead.
+**Acceptance:**
+- Performance advisor warnings reduced/cleared
+- No access regressions (add SQL tests or targeted queries if you have a test harness).
+
+## V2-010 — Add missing indexes for **public** foreign keys flagged as unindexed
+**Problem:** unindexed FKs flagged for public tables.  
+**Work:**
+- Add covering indexes for the flagged public FKs (do not blindly index stripe-managed schema unless intentional).
+**Acceptance:**
+- Performance advisor warnings for public tables reduced/cleared
+- Migrations included.
+
+## V2-011 — Storage policies sanity + “projects/uploads” gating correctness
+**Goal:** confirm storage rules align with product intent and don’t create weird edge bugs.  
+**Work:**
+- Review current storage policies:
+  - `projects` bucket depends on `user_can_write_projects(auth.uid())`
+  - `uploads` bucket depends on `user_has_active_plan(auth.uid())`
+- Ensure Free gating matches product rules described in this roadmap v2.
+**Acceptance:**
+- Free users cannot upload/import files into projects
+- Pro/dev can
+- Policies + UI align (no confusing failure states).
+
+---
+
+# Phase V2-C — UI architecture rebuild (layout, docking, zones, robustness)
+
+## V2-012 — Introduce proper semantic page structure (fix `<main>` landmark)
+**Problem:** E2E fails: missing `<main>` or role=main.  
+**Work:**
+- Refactor top-level layout to include:
+  - `<header>` (ChainSolve main header)
+  - `<main>` (page content)
+  - optional `<footer>`
+- Ensure all routes satisfy this.
+**Acceptance:**
+- `e2e/a11y.spec.ts` main landmark test passes
+- No layout regressions.
+
+## V2-013 — Main header rebuild: Home / Explore / Documentation + top-right account/settings
+**Goal:** Upgrade header and make it consistent and professional.  
+**Work:**
+- Main header includes:
+  - Left: ChainSolve logo
+  - Center: Home (/app), Explore, Documentation
+  - Right: Settings gear + account icon + plan badge
+- Upgrade styling (glow hover effects, clean, timeless).
+**Acceptance:**
+- Header consistent on /login? (decide), /terms, /app, project pages
+- Buttons work, no router errors.
+
+## V2-014 — Project header rebuild (menus + project identity + save controls)
+**Goal:** “Project mode” header under main header.  
+**Work:**
+- Add project header when project open:
+  - left: project name (rename on double click), last saved time, Save button, autosave toggle
+  - menus: File/Edit/View/Insert/Tools/Help
+  - right cluster: imports, imported files, groups button, variables/materials/themes access moved here (remove old toolbar on graph)
+- Add undo/redo icons and open/save-as near save.
+**Acceptance:**
+- UX is coherent and stable
+- No overlap with panels; responsive.
+
+## V2-015 — Docking system overhaul (Block Library / Debug+Health / AI)
+**Problems:**
+- Dock buttons require double click; confusing.
+- Bottom panel not spanning; gap near AI.
+- Need consistent collapse handles and resizing.
+**Work:**
+- Implement a unified docking framework:
+  - Left: Block Library dockable + resizable + collapse handle always visible
+  - Bottom: single bottom dock with tabs (Debug Console / Graph Health), collapse handle, resizable height
+  - Right: AI panel dockable, collapsed by default, no gap; bottom dock spans full width minus right dock when expanded
+- Fix ResizeObserver loop error on resizing.
+**Acceptance:**
+- Single click toggles work
+- Smooth animations
+- No ResizeObserver crash
+- Layout always usable on different viewport sizes.
+
+## V2-016 — Inspector behavior: open only on double click; improve window UX
+**Problems:**
+- Inspector opens on click; annoying.
+- Units dropdown inside blocks unusable; use inspector.
+**Work:**
+- Change behavior:
+  - single click selects
+  - double click opens inspector
+- Make inspector a high-quality draggable/resizable in-app window
+- Ensure most edits happen through inspector; inline edits only for “quick” fields.
+**Acceptance:**
+- Clicking blocks doesn’t open inspector
+- Double click does
+- Units editing works reliably via inspector.
+
+## V2-017 — Sheet switching + saving reliability (prevent data loss)
+**Problem:** changing sheets can delete other sheet content; save pipeline flaky.  
+**Work:**
+- Audit save model and sheet persistence.
+- Implement robust state management:
+  - explicit dirty tracking per sheet
+  - no destructive resets on navigation
+  - strong autosave/manual save semantics
+- Add regression tests: create 2 sheets, modify both, switch back/forth, refresh, reopen project.
+**Acceptance:**
+- No sheet content loss
+- Save/reopen stable.
+
+---
+
+# Phase V2-D — Block system + library overhaul (categories, gating badges, tooltips, i18n)
+
+## V2-018 — Block Library taxonomy rebuild + Pro badge correctness
+**Problems:**
+- Pro badge shown on every header.
+- Annotation category incorrectly in block library.
+**Work:**
+- Block library must be cleanly organized and searchable.
+- Only show Pro badge on truly gated categories/blocks.
+- Remove annotations from block library entirely.
+**Acceptance:**
+- Library has correct categories
+- Pro badges accurate.
+
+## V2-019 — Insert menu redesign: drill-down categories (Input / Function / Output / Annotations)
+**Problem:** Insert dropdown too long.  
+**Work:**
+- Insert menu shows only:
+  - Input
+  - Function
+  - Output
+  - Annotations
+- Each opens a nested submenu for subcategories and items.
+**Acceptance:**
+- Insert menu is fast and usable
+- No giant list.
+
+## V2-020 — Block hover tooltips + professional microcopy
+**Goal:** hovering a block in library shows a bubble with description and “Drag onto canvas”.  
+**Work:**
+- Add block metadata: name, description, category, gating.
+- Tooltip uses i18n keys.
+**Acceptance:**
+- Tooltips appear consistently
+- No emojis
+- i18n updated.
+
+## V2-021 — Fix missing TS defaults / catalog mismatch logs
+**Problem:** runtime logs show:
+- “Catalog op … has no TS default — UI may not render it”
+- “TS block … not in Rust catalog — engine won’t evaluate it”
+**Work:**
+- Align TS registry with Rust engine catalog:
+  - Remove dead TS ops
+  - Add missing TS defaults for ops in engine
+  - Add missing engine ops required by UI (or remove UI blocks)
+- Specifically reconcile: constants/material-related ops listed in console.
+**Acceptance:**
+- No registry mismatch logs in console
+- Blocks render + evaluate correctly.
+
+## V2-022 — Remove annotation “blocks” and implement real annotation tools (non-block)
+**Goal:** annotations behave like CAD annotations:
+- text boxes, arrows, shapes
+- leaders that can link to blocks/chains/groups
+- formatting (bold/italic/font size)
+- context menu and properties
+**Work:**
+- Build annotation system as canvas overlay layer (not part of engine graph)
+- Add annotation entry points:
+  - Insert > Annotations
+  - Canvas toolbar “insert text”
+- Add context menu editing.
+**Acceptance:**
+- Annotations are powerful and stable
+- Not treated as blocks
+- Persisted per sheet.
+
+## V2-023 — Rename “edges” to “chains” across UI
+**Goal:** consistent terminology.  
+**Work:**
+- Replace user-facing “edge(s)” with “chain(s)” everywhere:
+  - labels
+  - tooltips
+  - settings
+  - menus
+**Acceptance:**
+- No user-facing “edge” remains where it refers to connections.
+
+---
+
+# Phase V2-E — Groups vs Templates separation (clean model, clean UX)
+
+## V2-024 — Define “Groups” feature correctly (user reusable groups)
+**Requirement:**
+- Users can select blocks + chains and save as a group
+- Group shows overall inputs/outputs
+- Groups saved to user profile and reusable in other projects
+**Work:**
+- Ensure groups are not conflated with templates anywhere
+- Build a proper “Groups directory” UI: list, rename, duplicate, delete
+**Acceptance:**
+- Groups workflow works end-to-end
+- No “templates” wording used for groups.
+
+## V2-025 — Define “Project templates” correctly (standard + imported)
+**Requirement:**
+- Standard templates shipped with ChainSolve (separate from user project directory)
+- Imported templates come from Explore
+- Free users can browse Explore but **cannot import/download**
+**Work:**
+- Create template browser UI split into:
+  - Standard templates
+  - Imported templates
+- Make import rules enforce plan gating.
+**Acceptance:**
+- Templates are cleanly separated from user projects and groups.
+
+---
+
+# Phase V2-F — Settings + Theme Editor mega-upgrade
+
+## V2-026 — Fix developer access to Theme Editor + unify gating rules
+**Problem:** theme editor blocked on developer account.  
+**Work:**
+- Ensure developer bypasses locks
+- Ensure UI still displays locked features for non-eligible plans
+**Acceptance:**
+- Developer can open and use theme editor on all pages.
+
+## V2-027 — Settings overhaul: categories + deep customization
+**Requirement:**
+- Settings should be expansive and categorized:
+  - Canvas settings
+  - Block settings
+  - Values and units
+  - Performance
+  - Theme/customize
+  - Additional categories as needed
+**Work:**
+- Rebuild Settings UI as a professional multi-page in-app window.
+- Add clean microcopy explaining each setting.
+**Acceptance:**
+- Settings feels “premium app quality”
+- No router errors
+- i18n coverage.
+
+## V2-028 — Theme Editor “component naming coverage” + glass theme baseline
+**Requirements:**
+- Every visible UI component must have a good name so it can be themed
+- Provide a strong default: “glass panels + glowing accents” theme
+- Montserrat font; monospace for formulas/equations
+**Work:**
+- Create a theme token map covering:
+  - headers
+  - panels
+  - dock handles
+  - block cards
+  - toolbars
+  - tooltips
+  - buttons / badges
+  - etc.
+- Ensure everything in UI uses tokens, not hard-coded colors.
+**Acceptance:**
+- Theme editor changes visibly apply across the app
+- Tokens are comprehensive and well named.
+
+---
+
+# Phase V2-G — AI panel redesign (chat-only, pro/dev gating)
+
+## V2-029 — AI panel simplification + “ChatGPT/Codex-style” UI
+**Requirements:**
+- Remove modes: chat/fix/explain/template/theme
+- Keep only:
+  - chat window
+  - mode dropdown: bypass / edit / plan
+- Remove “scope” option
+- Improve prompt input and response rendering (clear, professional)
+**Work:**
+- Rebuild AI panel UI with:
+  - conversation list (optional)
+  - one active chat
+  - good message styling
+  - clear status + errors
+- Ensure panel is docked/collapsed by default and integrates with docking framework.
+**Acceptance:**
+- AI panel feels premium and stable
+- No extra modes
+- Mode dropdown works.
+
+---
+
+# Phase V2-H — Docs + i18n maturity
+
+## V2-030 — Documentation site rebuild: left nav + deep pages
+**Requirement:**
+- Docs should have a left nav panel with contents and sections
+- Pages must be thorough and easy to navigate
+**Work:**
+- Create a docs structure with:
+  - Getting started
+  - UI overview
+  - Blocks (input/function/output)
+  - Chains
+  - Units
+  - Projects and saving
+  - Groups
+  - Templates
+  - Explore
+  - AI assistant
+  - Settings + themes
+  - Troubleshooting
+**Acceptance:**
+- Docs are meaningfully improved and navigable.
+
+## V2-031 — i18n completeness pass (blocks + settings + all UI strings)
+**Requirement:**
+- All block names and settings and everything must be translatable and present in all languages
+**Work:**
+- Ensure no hardcoded user-facing strings remain
+- Add missing keys for EN/DE/FR/ES/IT
+**Acceptance:**
+- Language switching shows translated UI
+- No “missing key” warnings.
+
+---
+
+# Phase V2-I — E2E / CI hardening (fix current failures + prevent regressions)
+
+## V2-032 — Fix current Playwright failures (bundle)
+**Failures listed (must resolve):**
+1) a11y: missing `<main>`
+2) auth: strict locator conflict for “Terms & Conditions”
+3) csvImport missing in engine catalog (2 tests)
+4) plot smoke: vectorInput → xyPlot returns error
+5) variables incremental updates: changedValues.double undefined
+6) wasm-engine catalog missing “pi”
+7) wasm-engine correctness: vector length mismatch should error but returns vector
+**Work:**
+- Implement fixes in app/engine/tests as needed.
+- Update tests to be robust (avoid ambiguous locators).
+**Acceptance:**
+- Full Playwright `--project=full` passes (or at minimum the previously failing tests pass, with evidence).
+- No new flakes introduced.
+
+## V2-033 — GitHub Actions hardening: add explicit permissions block
+**Problem:** workflow warns missing `permissions`.  
+**Work:**
+- Add minimal permissions, e.g.:
+  - `permissions: { contents: read }`
+- Ensure deploy job still works.
+**Acceptance:**
+- Code scanning warning cleared.
+
+---
+
+# Phase V2-J — Polish & Professionalism Pass (make it feel like a flagship product)
+
+## V2-034 — Upgrade loading animations (login/app/project)
+**Requirement:** “1000x fancier page loading animation” (professional, no gimmicks).  
+**Work:**
+- Add consistent loading skeletons/spinners
+- Smooth transitions between /app and project
+**Acceptance:**
+- Perceived performance improved; no layout jumps.
+
+## V2-035 — Project UX: templates, groups, directory, and “idiot-proof” microcopy sweep
+**Requirement:** More explanatory text everywhere; make it idiot-proof.  
+**Work:**
+- Review every menu/popup and improve descriptions
+- Add tooltips, helper text, and empty state copy
+**Acceptance:**
+- App feels self-explanatory without being cluttered.
+
+## V2-036 — Visual uplift pass: glow hovers, consistent iconography, no broken controls
+**Requirement:** “Upgrade 10000x” aesthetic; CAD-like icons; hover animations; no emojis.  
+**Work:**
+- Replace or standardize icons
+- Add tasteful hover animations
+- Ensure docking handles and toolbars feel premium
+**Acceptance:**
+- UI looks consistent and intentionally designed.
+
+---
+
+## Notes for Claude (must follow throughout v2)
+- Keep Supabase aligned with code: no phantom columns or stale assumptions.
+- Do not leave “half-finished” UI. If you touch a component, finish it to a professional standard.
+- When you change any user-facing wording: update i18n across EN/DE/FR/ES/IT.
+- When you change any significant UX behavior: add/adjust Playwright coverage.
+- Reduce console noise aggressively (especially registry mismatch logs and CSP spam).
+- Maintain a clean, human-looking codebase: clear naming, consistent structure, no “vibe-coded” feel.
+
+---

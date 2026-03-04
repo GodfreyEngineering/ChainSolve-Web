@@ -50,6 +50,8 @@ vi.mock('./canvases', () => ({
 // ── Imports after mocks ───────────────────────────────────────────────────────
 
 import {
+  listProjects,
+  createProject,
   duplicateProject,
   moveToFolder,
   bulkMoveToFolder,
@@ -145,6 +147,125 @@ function setupDefaultMocks() {
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
+
+// ── V2-001: listProjects + createProject (folder column coverage) ────────────
+
+describe('listProjects', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    setupDefaultMocks()
+  })
+
+  it('returns projects including folder field', async () => {
+    const { chain } = _from
+    chain.order.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'p1',
+          owner_id: 'user-1',
+          name: 'My Project',
+          description: null,
+          storage_key: 'user-1/p1/project.json',
+          active_canvas_id: null,
+          folder: 'Work',
+          created_at: '2025-01-01T00:00:00Z',
+          updated_at: '2025-01-01T00:00:00Z',
+        },
+        {
+          id: 'p2',
+          owner_id: 'user-1',
+          name: 'Scratch',
+          description: null,
+          storage_key: null,
+          active_canvas_id: null,
+          folder: null,
+          created_at: '2025-01-02T00:00:00Z',
+          updated_at: '2025-01-02T00:00:00Z',
+        },
+      ],
+      error: null,
+    })
+
+    const projects = await listProjects()
+    expect(projects).toHaveLength(2)
+    expect(projects[0].folder).toBe('Work')
+    expect(projects[1].folder).toBeNull()
+  })
+
+  it('throws with descriptive message on error', async () => {
+    const { chain } = _from
+    chain.order.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'column projects.folder does not exist' },
+    })
+
+    await expect(listProjects()).rejects.toThrow(
+      'Failed to list projects: column projects.folder does not exist',
+    )
+  })
+})
+
+describe('createProject', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    setupDefaultMocks()
+  })
+
+  it('creates a project with folder when provided', async () => {
+    const { chain } = _from
+    // insert → select → single
+    _single.mockReset()
+    _single.mockResolvedValueOnce({
+      data: {
+        id: 'new-proj',
+        owner_id: 'user-1',
+        name: 'Test',
+        description: null,
+        storage_key: 'user-1/new-proj/project.json',
+        active_canvas_id: null,
+        folder: 'Engineering',
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
+      },
+      error: null,
+    })
+    // readUpdatedAt
+    _single.mockResolvedValueOnce({ data: { updated_at: '2025-01-01T00:00:01Z' } })
+
+    const proj = await createProject('Test', 'Engineering')
+    expect(proj.folder).toBe('Engineering')
+    expect(chain.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Test', folder: 'Engineering' }),
+    )
+  })
+
+  it('creates a project without folder when not provided', async () => {
+    const { chain } = _from
+    _single.mockReset()
+    _single.mockResolvedValueOnce({
+      data: {
+        id: 'new-proj',
+        owner_id: 'user-1',
+        name: 'Test',
+        description: null,
+        storage_key: 'user-1/new-proj/project.json',
+        active_canvas_id: null,
+        folder: null,
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
+      },
+      error: null,
+    })
+    _single.mockResolvedValueOnce({ data: { updated_at: '2025-01-01T00:00:01Z' } })
+
+    const proj = await createProject('Test')
+    expect(proj.folder).toBeNull()
+    // Should NOT include folder key in insert payload when omitted
+    expect(chain.insert).toHaveBeenCalledWith(
+      expect.not.objectContaining({ folder: expect.anything() }),
+    )
+  })
+})
 
 describe('duplicateProject — no canvases / no assets', () => {
   beforeEach(() => {
