@@ -1,8 +1,9 @@
 /**
- * migrations.test.ts — V2-007
+ * supabaseMigrations.test.ts — V2-007, V2-008
  *
  * Structural tests for Supabase migration SQL files.
- * Ensures all SECURITY DEFINER functions pin search_path (Supabase advisor rule).
+ * - All SECURITY DEFINER functions must pin search_path (V2-007).
+ * - Service-role-only tables must have explicit deny-all policies (V2-008).
  */
 
 import { describe, it, expect } from 'vitest'
@@ -59,4 +60,22 @@ describe('Supabase migrations: SECURITY DEFINER functions must SET search_path',
       expect(pattern.test(baseline), `${fn} must have SET search_path = public`).toBe(true)
     }
   })
+})
+
+// ── V2-008: Service-role-only tables must have deny-all policies ─────────
+
+describe('Supabase baseline: service-role-only tables have deny-all policies', () => {
+  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline_schema.sql'), 'utf-8')
+
+  const SERVICE_TABLES = ['observability_events', 'stripe_events'] as const
+
+  for (const table of SERVICE_TABLES) {
+    it(`${table} has deny-all policy in baseline`, () => {
+      const pattern = new RegExp(
+        `CREATE POLICY \\S+ ON public\\.${table}\\s+FOR ALL TO authenticated\\s+USING \\(false\\) WITH CHECK \\(false\\)`,
+        's',
+      )
+      expect(pattern.test(baseline), `${table} must have a deny-all policy`).toBe(true)
+    })
+  }
 })

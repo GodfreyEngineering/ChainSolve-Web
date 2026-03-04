@@ -998,9 +998,12 @@ CREATE POLICY obs_events_deny_all ON public.observability_events
   FOR ALL TO authenticated
   USING (false) WITH CHECK (false);
 
--- ── 6k. stripe_events ────────────────────────────────────────────────────────
--- No user policies. RLS enabled + zero policies = no authenticated access.
--- service_role bypasses RLS entirely.
+-- ── 6k. stripe_events (deny-all for authenticated) ─────────────────────────
+-- Written exclusively by service_role. Deny-all silences advisor warnings.
+
+CREATE POLICY stripe_events_deny_all ON public.stripe_events
+  FOR ALL TO authenticated
+  USING (false) WITH CHECK (false);
 
 -- ── 6l. marketplace_items ────────────────────────────────────────────────────
 -- Consolidated SELECT: public browse + author + org member visibility.

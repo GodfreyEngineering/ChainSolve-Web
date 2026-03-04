@@ -252,8 +252,8 @@ Claude should treat this as the “source of truth” for the current environmen
 - Added `src/supabaseMigrations.test.ts` with 4 tests: scans each migration file for `SECURITY DEFINER` without `SET search_path` (skips SQL comments), plus verifies all 5 functions are present in baseline with the clause.
 - To apply: run `supabase db push` or apply migration 0003 manually via Supabase Dashboard SQL Editor.
 
-## V2-008 — Add RLS policies for `observability_events` (RLS enabled, no policy)
-**Problem:** linter warns; currently table has data.  
+## V2-008 — Add RLS policies for `observability_events` (RLS enabled, no policy) [x]
+**Problem:** linter warns; currently table has data.
 **Work:**
 - Decide intended use:
   - If internal-only: deny all access to external roles.
@@ -262,6 +262,13 @@ Claude should treat this as the “source of truth” for the current environmen
 **Acceptance:**
 - Linter warning cleared
 - No unintended data exposure.
+
+**Changelog (2026-03-04):**
+- Decision: internal-only. Both `observability_events` and `stripe_events` are written exclusively by `service_role` (from `/api/report/csp`, `/api/report/client`, `/api/stripe/webhook`). No authenticated user should read or write these tables directly.
+- The baseline already had `obs_events_deny_all` for `observability_events` but production databases provisioned before consolidation were missing it. Also added `stripe_events_deny_all` to baseline for the same reason.
+- Added migration `supabase/migrations/0004_deny_all_service_tables.sql` — idempotent (checks `pg_policies` before creating). Adds deny-all policies for both `observability_events` and `stripe_events`.
+- Extended `src/supabaseMigrations.test.ts` with 2 new tests verifying both tables have deny-all policies in baseline.
+- To apply: run `supabase db push` or execute migration 0004 via Supabase Dashboard SQL Editor.
 
 ## V2-009 — Reduce multiple permissive policies (performance advisor)
 **Problem:** many tables have multiple permissive policies for same role/action.  
