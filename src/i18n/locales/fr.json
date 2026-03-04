@@ -780,6 +780,14 @@
     "pinned": "Épinglé",
     "followSelection": "Suit la sélection"
   },
+  "blockLibrary": {
+    "dragHint": "Glisser sur le canevas",
+    "proOnly": "Pro",
+    "addFavourite": "Ajouter aux favoris",
+    "removeFavourite": "Retirer des favoris",
+    "formula": "Formule",
+    "insertTemplate": "Insérer \"{{name}}\" ({{count}} blocs)"
+  },
   "sheets": {
     "title": "Feuilles",
     "addSheet": "Ajouter une feuille",

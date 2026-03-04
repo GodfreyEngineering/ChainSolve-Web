@@ -780,6 +780,14 @@
     "pinned": "Fissato",
     "followSelection": "Segue la selezione"
   },
+  "blockLibrary": {
+    "dragHint": "Trascina sulla tela",
+    "proOnly": "Pro",
+    "addFavourite": "Aggiungi ai preferiti",
+    "removeFavourite": "Rimuovi dai preferiti",
+    "formula": "Formula",
+    "insertTemplate": "Inserisci \"{{name}}\" ({{count}} nodi)"
+  },
   "sheets": {
     "title": "Fogli",
     "addSheet": "Aggiungi foglio",

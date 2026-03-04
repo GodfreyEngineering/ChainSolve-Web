@@ -780,6 +780,14 @@
     "pinned": "Angeheftet",
     "followSelection": "Auswahl folgen"
   },
+  "blockLibrary": {
+    "dragHint": "Auf die Leinwand ziehen",
+    "proOnly": "Pro",
+    "addFavourite": "Zu Favoriten hinzufügen",
+    "removeFavourite": "Aus Favoriten entfernen",
+    "formula": "Formel",
+    "insertTemplate": "\"{{name}}\" einfügen ({{count}} Blöcke)"
+  },
   "sheets": {
     "title": "Blätter",
     "addSheet": "Blatt hinzufügen",

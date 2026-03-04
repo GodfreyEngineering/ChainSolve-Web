@@ -616,6 +616,39 @@ button:focus:not(:focus-visible) {
   vertical-align: middle;
 }
 
+/* Block tooltip (V2-020) — CSS-only styled tooltip via data-tooltip attr */
+.cs-block-tooltip {
+  position: relative;
+}
+.cs-block-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 6px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: var(--card-bg, #1e1e1e);
+  border: 1px solid var(--border, #333);
+  color: var(--text, #f4f4f3);
+  font-size: 0.68rem;
+  line-height: 1.35;
+  white-space: pre-line;
+  max-width: 220px;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease 0.35s;
+}
+.cs-block-tooltip:hover::after {
+  opacity: 1;
+}
+.cs-block-tooltip[data-tooltip='']::after,
+.cs-block-tooltip:not([data-tooltip])::after {
+  display: none;
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

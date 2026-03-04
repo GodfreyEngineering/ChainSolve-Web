@@ -529,8 +529,8 @@ Claude should treat this as the “source of truth” for the current environmen
 - All CI checks pass (3626 tests, full build).
 - No giant list.
 
-## V2-020 — Block hover tooltips + professional microcopy
-**Goal:** hovering a block in library shows a bubble with description and “Drag onto canvas”.  
+## V2-020 — Block hover tooltips + professional microcopy [x]
+**Goal:** hovering a block in library shows a bubble with description and “Drag onto canvas”.
 **Work:**
 - Add block metadata: name, description, category, gating.
 - Tooltip uses i18n keys.
@@ -538,6 +538,15 @@ Claude should treat this as the “source of truth” for the current environmen
 - Tooltips appear consistently
 - No emojis
 - i18n updated.
+
+**Changelog (2026-03-04):**
+- Added `.cs-block-tooltip` CSS class — styled tooltip bubble via `data-tooltip` attribute + `::after` pseudo-element. Appears right of block item with 350ms delay, dark themed, max-width 220px, multi-line.
+- Replaced native `title` with `data-tooltip` + `className=”cs-block-tooltip”` on BlockItem, CustomFnItem, TemplateItem.
+- Replaced lock emoji on Pro-gated blocks with `.cs-pro-badge` “PRO” text badge (no emojis).
+- All tooltip text uses i18n keys via new `blockLibrary.*` section: `dragHint`, `proOnly`, `addFavourite`, `removeFavourite`, `formula`, `insertTemplate`.
+- Added `useTranslation()` to BlockItem, CustomFnItem, TemplateItem sub-components.
+- Added `blockLibrary.*` i18n keys in EN/DE/ES/FR/IT.
+- All CI checks pass.
 
 ## V2-021 — Fix missing TS defaults / catalog mismatch logs
 **Problem:** runtime logs show:

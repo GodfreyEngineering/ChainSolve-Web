@@ -780,6 +780,14 @@
     "pinned": "Fijado",
     "followSelection": "Siguiendo selección"
   },
+  "blockLibrary": {
+    "dragHint": "Arrastrar al lienzo",
+    "proOnly": "Pro",
+    "addFavourite": "Agregar a favoritos",
+    "removeFavourite": "Quitar de favoritos",
+    "formula": "Fórmula",
+    "insertTemplate": "Insertar \"{{name}}\" ({{count}} nodos)"
+  },
   "sheets": {
     "title": "Hojas",
     "addSheet": "Añadir hoja",

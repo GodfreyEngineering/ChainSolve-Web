@@ -799,6 +799,14 @@
     "pinned": "Pinned",
     "followSelection": "Following selection"
   },
+  "blockLibrary": {
+    "dragHint": "Drag onto canvas",
+    "proOnly": "Pro",
+    "addFavourite": "Add to favourites",
+    "removeFavourite": "Remove from favourites",
+    "formula": "Formula",
+    "insertTemplate": "Insert \"{{name}}\" ({{count}} nodes)"
+  },
   "debugConsole": {
     "title": "Debug Console",
     "logLevel": "Log level",

@@ -207,6 +207,7 @@ const BlockItem = memo(function BlockItem({
   description,
   starAnimating,
 }: BlockItemProps) {
+  const { t } = useTranslation()
   const [hovered, setHovered] = useState(false)
   const isFav = favs.has(def.type)
 
@@ -221,15 +222,16 @@ const BlockItem = memo(function BlockItem({
     trackBlockUsed(def.type)
   }
 
-  // G5-1: Build tooltip text: description + drag hint
+  // V2-020: Build tooltip text: description + drag hint (i18n)
   const tooltipText = entitled
     ? description
-      ? `${description}\nDrag onto canvas`
-      : `Drag onto canvas`
-    : `${def.label} (Pro)`
+      ? `${description}\n${t('blockLibrary.dragHint')}`
+      : t('blockLibrary.dragHint')
+    : `${def.label} (${t('blockLibrary.proOnly')})`
 
   return (
     <div
+      className="cs-block-tooltip"
       draggable={entitled}
       onDragStart={onDragStart}
       onClick={!entitled ? onProBlocked : undefined}
@@ -241,9 +243,13 @@ const BlockItem = memo(function BlockItem({
         opacity: entitled ? 1 : 0.45,
         cursor: entitled ? 'grab' : 'pointer',
       }}
-      title={tooltipText}
+      data-tooltip={tooltipText}
     >
-      {!entitled && <span style={{ fontSize: '0.65rem', marginRight: 4, opacity: 0.6 }}>🔒</span>}
+      {!entitled && (
+        <span className="cs-pro-badge" style={{ marginRight: 4, marginLeft: 0 }}>
+          PRO
+        </span>
+      )}
       <span
         style={{
           flex: 1,
@@ -263,7 +269,7 @@ const BlockItem = memo(function BlockItem({
             transition: 'transform 0.15s ease',
             transform: starAnimating ? 'scale(1.5)' : 'scale(1)',
           }}
-          title={isFav ? 'Remove from favourites' : 'Add to favourites'}
+          title={isFav ? t('blockLibrary.removeFavourite') : t('blockLibrary.addFavourite')}
           onClick={(e) => {
             e.stopPropagation()
             onToggleFav(def.type)
@@ -291,12 +297,14 @@ const TemplateItem = memo(function TemplateItem({
   onRename,
   onDelete,
 }: TemplateItemProps) {
+  const { t } = useTranslation()
   const [hovered, setHovered] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const nodeCount = template.payload.nodes?.length ?? 0
 
   return (
     <div
+      className="cs-block-tooltip"
       style={{
         ...s.blockItem,
         background: hovered ? 'var(--primary-dim)' : 'transparent',
@@ -308,7 +316,10 @@ const TemplateItem = memo(function TemplateItem({
         setMenuOpen(false)
       }}
       onClick={onInsert}
-      title={`Insert "${template.name}" (${nodeCount} nodes)`}
+      data-tooltip={t('blockLibrary.insertTemplate', {
+        name: template.name,
+        count: nodeCount,
+      })}
     >
       <span
         style={{
@@ -459,6 +470,7 @@ const CustomFnItem = memo(function CustomFnItem({
   onDuplicate,
   onDelete,
 }: CustomFnItemProps) {
+  const { t } = useTranslation()
   const [hovered, setHovered] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -473,8 +485,13 @@ const CustomFnItem = memo(function CustomFnItem({
     trackBlockUsed(def.type)
   }
 
+  const tooltipText = description
+    ? `${description}\n${t('blockLibrary.formula')}: ${fn.formula}`
+    : fn.formula
+
   return (
     <div
+      className="cs-block-tooltip"
       draggable={entitled}
       onDragStart={onDragStart}
       onClick={!entitled ? onProBlocked : undefined}
@@ -489,7 +506,7 @@ const CustomFnItem = memo(function CustomFnItem({
         opacity: entitled ? 1 : 0.45,
         cursor: entitled ? 'grab' : 'pointer',
       }}
-      title={description ? `${description}\nFormula: ${fn.formula}` : fn.formula}
+      data-tooltip={tooltipText}
     >
       <span
         style={{
@@ -523,7 +540,11 @@ const CustomFnItem = memo(function CustomFnItem({
               ...s.starBtn,
               color: favs.has(def.type) ? 'var(--warning)' : 'var(--text-faint)',
             }}
-            title={favs.has(def.type) ? 'Remove from favourites' : 'Add to favourites'}
+            title={
+              favs.has(def.type)
+                ? t('blockLibrary.removeFavourite')
+                : t('blockLibrary.addFavourite')
+            }
             onClick={(e) => {
               e.stopPropagation()
               onToggleFav(def.type)
