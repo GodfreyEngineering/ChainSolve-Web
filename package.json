@@ -35,7 +35,7 @@
     "check:wasm-exports": "node scripts/check-wasm-exports.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.97.0",
+    "@supabase/supabase-js": "^2.98.0",
     "@types/dagre": "^0.7.54",
     "@xyflow/react": "^12.10.1",
     "dagre": "^0.8.5",
