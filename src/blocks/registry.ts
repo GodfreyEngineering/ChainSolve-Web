@@ -701,13 +701,6 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
       { id: 'outGraph', label: 'Graph blocks', categories: ['plot'] },
     ],
   },
-  {
-    id: 'annotationTools',
-    label: 'Annotations',
-    subcategories: [
-      { id: 'annotVisual', label: 'Visual annotations', categories: ['annotations'] },
-    ],
-  },
 ]
 
 /** Get all blocks matching a taxonomy subcategory definition. */

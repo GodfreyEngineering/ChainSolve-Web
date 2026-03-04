@@ -850,7 +850,6 @@ export function BlockLibrary({
             (TAXONOMY_GROUPED.get(sub.id) ?? []).filter((d) => !q || matchesQuery(d, q)),
           )
           if (mainBlocksRaw.length === 0) return null
-          const mainHasPro = mainBlocksRaw.some((d) => d.proOnly)
           return (
             <div key={main.id}>
               {mainIdx > 0 && (
@@ -862,32 +861,14 @@ export function BlockLibrary({
                   }}
                 />
               )}
-              <div style={s.sectionLabel}>
-                {main.label}
-                {mainHasPro && (
-                  <span
-                    style={{
-                      marginLeft: 6,
-                      fontSize: '0.55rem',
-                      padding: '1px 4px',
-                      borderRadius: 3,
-                      background: 'var(--primary-dim)',
-                      color: 'var(--primary-text)',
-                      fontWeight: 700,
-                      letterSpacing: '0.05em',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    PRO
-                  </span>
-                )}
-              </div>
+              <div style={s.sectionLabel}>{main.label}</div>
               {main.subcategories.map((sub) => {
                 const blocksRaw = (TAXONOMY_GROUPED.get(sub.id) ?? []).filter(
                   (d) => !q || matchesQuery(d, q),
                 )
                 const blocks = q ? sortByRelevance(blocksRaw, q) : blocksRaw
                 if (blocks.length === 0) return null
+                const subHasPro = blocks.some((d) => d.proOnly)
                 return (
                   <div key={sub.id}>
                     <div
@@ -899,6 +880,7 @@ export function BlockLibrary({
                       }}
                     >
                       {sub.label}
+                      {subHasPro && <span className="cs-pro-badge">PRO</span>}
                     </div>
                     {blocks.map((def) => (
                       <BlockItem
@@ -936,20 +918,7 @@ export function BlockLibrary({
               {customFnsOpen ? '\u25BC' : '\u25B6'}
             </span>
             Custom Functions
-            <span
-              style={{
-                marginLeft: 4,
-                fontSize: '0.55rem',
-                padding: '1px 4px',
-                borderRadius: 3,
-                background: 'rgba(28,171,176,0.15)',
-                color: '#1CABB0',
-                fontWeight: 700,
-                letterSpacing: '0.05em',
-              }}
-            >
-              PRO
-            </span>
+            <span className="cs-pro-badge">PRO</span>
             {customFunctions.length > 0 && (
               <span
                 style={{
@@ -1085,20 +1054,7 @@ export function BlockLibrary({
             >
               <span style={{ fontSize: '0.55rem', opacity: 0.5 }}>{templatesOpen ? '▼' : '▶'}</span>
               Templates
-              <span
-                style={{
-                  marginLeft: 4,
-                  fontSize: '0.55rem',
-                  padding: '1px 4px',
-                  borderRadius: 3,
-                  background: 'rgba(28,171,176,0.15)',
-                  color: '#1CABB0',
-                  fontWeight: 700,
-                  letterSpacing: '0.05em',
-                }}
-              >
-                PRO
-              </span>
+              <span className="cs-pro-badge">PRO</span>
             </div>
             {templatesOpen && (
               <div style={{ padding: '0.2rem 0' }}>

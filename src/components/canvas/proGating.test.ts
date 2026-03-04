@@ -109,17 +109,20 @@ describe('Variable block separation (D6-3)', () => {
 // ── G3-1: Block taxonomy structure ──────────────────────────────────────────
 
 describe('Block taxonomy structure (G3-1)', () => {
-  it('has exactly 4 main categories', () => {
-    expect(BLOCK_TAXONOMY).toHaveLength(4)
+  it('has exactly 3 main categories (annotations excluded from library)', () => {
+    expect(BLOCK_TAXONOMY).toHaveLength(3)
     expect(BLOCK_TAXONOMY.map((m) => m.id)).toEqual([
       'inputBlocks',
       'functionBlocks',
       'outputBlocks',
-      'annotationTools',
     ])
   })
 
-  it('covers every block in BLOCK_REGISTRY', () => {
+  /** Annotation blocks are excluded from the block library taxonomy (V2-018)
+   *  but remain in the registry for toolbar/context-menu insertion. */
+  const TAXONOMY_EXEMPT_CATEGORIES = new Set(['annotations'])
+
+  it('covers every non-annotation block in BLOCK_REGISTRY', () => {
     const coveredTypes = new Set<string>()
     for (const main of BLOCK_TAXONOMY) {
       for (const sub of main.subcategories) {
@@ -128,7 +131,10 @@ describe('Block taxonomy structure (G3-1)', () => {
         }
       }
     }
-    const missing = [...BLOCK_REGISTRY.keys()].filter((t) => !coveredTypes.has(t))
+    const missing = [...BLOCK_REGISTRY.values()]
+      .filter((d) => !TAXONOMY_EXEMPT_CATEGORIES.has(d.category))
+      .map((d) => d.type)
+      .filter((t) => !coveredTypes.has(t))
     expect(missing, `Blocks not in any taxonomy subcategory:\n${missing.join('\n')}`).toEqual([])
   })
 

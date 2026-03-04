@@ -603,6 +603,19 @@ button:focus:not(:focus-visible) {
   cursor: ew-resize;
 }
 
+/* Pro badge (block library, section headers) */
+.cs-pro-badge {
+  margin-left: 4px;
+  font-size: 0.55rem;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--primary-dim, rgba(28, 171, 176, 0.15));
+  color: var(--primary, #1cabb0);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  vertical-align: middle;
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

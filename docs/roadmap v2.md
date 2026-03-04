@@ -487,7 +487,7 @@ Claude should treat this as the “source of truth” for the current environmen
 
 # Phase V2-D — Block system + library overhaul (categories, gating badges, tooltips, i18n)
 
-## V2-018 — Block Library taxonomy rebuild + Pro badge correctness
+## V2-018 — Block Library taxonomy rebuild + Pro badge correctness [x]
 **Problems:**
 - Pro badge shown on every header.
 - Annotation category incorrectly in block library.
@@ -498,6 +498,13 @@ Claude should treat this as the “source of truth” for the current environmen
 **Acceptance:**
 - Library has correct categories
 - Pro badges accurate.
+
+**Changelog (2026-03-04):**
+- Moved PRO badge from main category headers to subcategory headers. Previously `mainHasPro` checked if ANY block in the entire main category was Pro, causing PRO to appear on "Input Blocks" (because List Input is Pro), "Function Blocks" (many Pro subcategories), and "Output Blocks" (because Graph blocks are Pro) — 3 out of 4 headers. Now each subcategory header checks `subHasPro` independently, so only subcategories like "List input", "Mechanics", "TVM", "Graph blocks" etc. show PRO.
+- Removed `annotationTools` from `BLOCK_TAXONOMY` in `registry.ts`. Annotation blocks (text, callout, highlight, arrow) are no longer shown in the Block Library panel. They remain in the registry and are still accessible via the canvas toolbar and context menu.
+- Extracted inline PRO badge styles into `.cs-pro-badge` CSS class in `index.css`. Applied to subcategory headers, Custom Functions section, and Templates section.
+- Updated `proGating.test.ts`: taxonomy now expects 3 main categories (not 4), and the "covers every block" test excludes annotation-category blocks.
+- All CI checks pass (26 proGating tests pass).
 
 ## V2-019 — Insert menu redesign: drill-down categories (Input / Function / Output / Annotations)
 **Problem:** Insert dropdown too long.  
