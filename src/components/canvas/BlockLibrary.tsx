@@ -636,6 +636,8 @@ interface BlockLibraryProps {
   collapsed?: boolean
   /** G5-1: Toggle collapsed state. */
   onToggleCollapsed?: () => void
+  /** V2-019: Pre-select a main category filter from outside (e.g. Insert menu). */
+  filterMainOverride?: string | null
 }
 
 /** Width of the collapsed docking handle strip. */
@@ -649,10 +651,17 @@ export function BlockLibrary({
   onInsertTemplate,
   collapsed = false,
   onToggleCollapsed,
+  filterMainOverride,
 }: BlockLibraryProps) {
   const ent = getEntitlements(plan)
   const [query, setQuery] = useState('')
   const [filterMain, setFilterMain] = useState<string | null>(null)
+
+  // V2-019: Sync external filter override (e.g. from Insert menu)
+  useEffect(() => {
+    if (filterMainOverride !== undefined) setFilterMain(filterMainOverride)
+  }, [filterMainOverride])
+
   const [favs, setFavs] = useState<Set<string>>(getFavourites)
   const [recent, setRecent] = useState<string[]>(getRecentlyUsed)
   const searchRef = useRef<HTMLInputElement>(null)

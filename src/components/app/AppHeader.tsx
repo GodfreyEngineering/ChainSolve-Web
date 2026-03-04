@@ -49,7 +49,7 @@ const LazyLlmGraphBuilderDialog = lazy(() =>
 const LazyTemplateManagerDialog = lazy(() =>
   import('../canvas/TemplateManagerDialog').then((m) => ({ default: m.TemplateManagerDialog })),
 )
-import { CATEGORY_ORDER, CATEGORY_LABELS } from '../../blocks/registry'
+import { BLOCK_TAXONOMY } from '../../blocks/registry'
 import { getRecentProjects } from '../../lib/recentProjects'
 import { resetOnboarding } from '../../lib/onboardingState'
 import { useIsMobile } from '../../hooks/useIsMobile'
@@ -665,22 +665,39 @@ export function AppHeader({
     [t, canvasRef, themeMode, setThemeMode],
   )
 
-  const insertItems = useMemo(
-    (): MenuEntry[] =>
-      CATEGORY_ORDER.map((cat) => ({
-        label: CATEGORY_LABELS[cat],
-        children: [
-          {
-            label: `Open library \u2192 ${CATEGORY_LABELS[cat]}`,
-            onClick: () => {
-              canvasRef.current?.toggleLibrary()
-              // Toggle opens the library; category search is a future enhancement
-            },
-          },
-        ],
+  const insertItems = useMemo((): MenuEntry[] => {
+    // V2-019: Drill-down categories from BLOCK_TAXONOMY
+    const taxonomyEntries: MenuEntry[] = BLOCK_TAXONOMY.map((main) => ({
+      label: main.label,
+      children: main.subcategories.map((sub) => ({
+        label: sub.label,
+        onClick: () => canvasRef.current?.openLibraryWithFilter(main.id),
       })),
-    [canvasRef],
-  )
+    }))
+    // Annotations (removed from taxonomy in V2-018, but still insertable)
+    const annotationEntry: MenuEntry = {
+      label: t('menu.insertAnnotations'),
+      children: [
+        {
+          label: t('contextMenu.annotText'),
+          onClick: () => canvasRef.current?.openLibraryWithFilter(null),
+        },
+        {
+          label: t('contextMenu.annotCallout'),
+          onClick: () => canvasRef.current?.openLibraryWithFilter(null),
+        },
+        {
+          label: t('contextMenu.annotHighlight'),
+          onClick: () => canvasRef.current?.openLibraryWithFilter(null),
+        },
+        {
+          label: t('contextMenu.annotArrow'),
+          onClick: () => canvasRef.current?.openLibraryWithFilter(null),
+        },
+      ],
+    }
+    return [...taxonomyEntries, { separator: true as const }, annotationEntry]
+  }, [canvasRef, t])
 
   const toolsItems = useMemo(
     (): MenuEntry[] => [

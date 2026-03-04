@@ -221,6 +221,8 @@ export interface CanvasAreaHandle {
   hideSelected: () => void
   showAllHidden: () => void
   toggleHiddenView: () => void
+  /** Open the block library with a main-category filter pre-selected. */
+  openLibraryWithFilter: (mainCategoryId: string | null) => void
 }
 
 // ── Minimap persistence ──────────────────────────────────────────────────────
@@ -525,6 +527,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     hideSelected: hideSelectedNodes,
     showAllHidden: showAllHiddenNodes,
     toggleHiddenView: () => setHiddenViewMode((v) => !v),
+    openLibraryWithFilter: (mainCategoryId: string | null) => {
+      setLibFilterMain(mainCategoryId)
+      setLibVisible(true)
+    },
     exportPdfAudit: async () => {
       const { exportAuditPdf } = await import('../../lib/pdf/exportAuditPdf')
       const { captureCanvasImage } = await import('../../lib/pdf/captureCanvasImage')
@@ -689,6 +695,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     return saved ? Math.max(160, Math.min(420, Number(saved) || 200)) : 200
   })
   const [libVisible, setLibVisible] = useState(() => !isMobile)
+  const [libFilterMain, setLibFilterMain] = useState<string | null>(null)
 
   // Inspector state (select on click, open on double-click)
   const [inspectedId, setInspectedId] = useState<string | null>(null)
@@ -1947,6 +1954,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     onInsertTemplate={onInsertTemplate}
                     collapsed={!libVisible}
                     onToggleCollapsed={() => setLibVisible((v) => !v)}
+                    filterMainOverride={libFilterMain}
                   />
                 )}
 
@@ -2187,6 +2195,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                       plan={plan}
                       onProBlocked={() => setShowUpgradeModal(true)}
                       onInsertTemplate={onInsertTemplate}
+                      filterMainOverride={libFilterMain}
                     />
                   </div>
                 )}

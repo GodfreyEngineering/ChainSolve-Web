@@ -506,8 +506,8 @@ Claude should treat this as the “source of truth” for the current environmen
 - Updated `proGating.test.ts`: taxonomy now expects 3 main categories (not 4), and the "covers every block" test excludes annotation-category blocks.
 - All CI checks pass (26 proGating tests pass).
 
-## V2-019 — Insert menu redesign: drill-down categories (Input / Function / Output / Annotations)
-**Problem:** Insert dropdown too long.  
+## V2-019 — Insert menu redesign: drill-down categories (Input / Function / Output / Annotations) [x]
+**Problem:** Insert dropdown too long.
 **Work:**
 - Insert menu shows only:
   - Input
@@ -517,6 +517,16 @@ Claude should treat this as the “source of truth” for the current environmen
 - Each opens a nested submenu for subcategories and items.
 **Acceptance:**
 - Insert menu is fast and usable
+
+**Changelog (2026-03-04):**
+- Rewrote `insertItems` in `AppHeader.tsx` to use `BLOCK_TAXONOMY` instead of flat `CATEGORY_ORDER`. Previously showed 33+ flat category entries with "Open library" stubs. Now shows 3 main categories (Input Blocks, Function Blocks, Output Blocks) + Annotations separator, each with subcategory drill-down children.
+- Replaced `CATEGORY_ORDER`/`CATEGORY_LABELS` import with `BLOCK_TAXONOMY` in AppHeader.
+- Added `openLibraryWithFilter(mainCategoryId)` to `CanvasAreaHandle` — opens the block library with a pre-selected main category filter. Wired through new `libFilterMain` state in CanvasArea.
+- Added `filterMainOverride` prop to `BlockLibrary` component — syncs external filter selection via `useEffect`. Passed from both desktop and mobile BlockLibrary instances.
+- Clicking any subcategory in the Insert menu opens the library filtered to that main category.
+- Annotations submenu uses existing `contextMenu.annot*` i18n keys; opens library unfiltered.
+- Added `menu.insertAnnotations` i18n key in EN/DE/ES/FR/IT.
+- All CI checks pass (3626 tests, full build).
 - No giant list.
 
 ## V2-020 — Block hover tooltips + professional microcopy
