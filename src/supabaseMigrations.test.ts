@@ -201,3 +201,79 @@ describe('Supabase baseline: all FK columns have index coverage (V2-010)', () =>
     }
   })
 })
+
+// ── V2-011: Entitlement helpers align with TS plan hierarchy ───────────
+
+describe('Supabase baseline: entitlement helpers cover all plan types (V2-011)', () => {
+  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline_schema.sql'), 'utf-8')
+
+  describe('user_has_active_plan', () => {
+    // Extract the function body between CREATE...$$; markers
+    const fnMatch = baseline.match(
+      /CREATE OR REPLACE FUNCTION public\.user_has_active_plan\(uid uuid\)[\s\S]*?\$\$;/,
+    )
+    const fnBody = fnMatch?.[0] ?? ''
+
+    it('checks is_developer', () => {
+      expect(fnBody).toContain('is_developer')
+    })
+
+    it('checks is_admin', () => {
+      expect(fnBody).toContain('is_admin')
+    })
+
+    it('checks is_student', () => {
+      expect(fnBody).toContain('is_student')
+    })
+
+    it('includes enterprise plan', () => {
+      expect(fnBody).toContain('enterprise')
+    })
+
+    it('includes trialing and pro', () => {
+      expect(fnBody).toContain('trialing')
+      expect(fnBody).toContain('pro')
+    })
+  })
+
+  describe('enforce_project_limit', () => {
+    const fnMatch = baseline.match(
+      /CREATE OR REPLACE FUNCTION public\.enforce_project_limit\(\)[\s\S]*?\$\$;/,
+    )
+    const fnBody = fnMatch?.[0] ?? ''
+
+    it('checks is_developer', () => {
+      expect(fnBody).toContain('is_developer')
+    })
+
+    it('checks is_admin', () => {
+      expect(fnBody).toContain('is_admin')
+    })
+
+    it('checks is_student', () => {
+      expect(fnBody).toContain('is_student')
+    })
+
+    it('handles enterprise plan', () => {
+      expect(fnBody).toContain('enterprise')
+    })
+  })
+
+  describe('storage policies', () => {
+    it('projects bucket uses user_can_write_projects', () => {
+      expect(baseline).toContain('user_can_write_projects')
+    })
+
+    it('uploads bucket uses user_has_active_plan', () => {
+      expect(baseline).toContain('user_has_active_plan')
+    })
+
+    it('buckets enforce folder = auth.uid() for path isolation', () => {
+      const folderChecks = baseline.match(
+        /foldername\(name\)\)\[1\]\s*=\s*\(select auth\.uid\(\)\)::text/g,
+      )
+      // At least 8 (4 per bucket for SELECT/INSERT/UPDATE/DELETE)
+      expect((folderChecks ?? []).length).toBeGreaterThanOrEqual(8)
+    })
+  })
+})

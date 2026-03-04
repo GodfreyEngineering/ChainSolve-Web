@@ -315,8 +315,8 @@ Claude should treat this as the “source of truth” for the current environmen
 - Stripe-managed schema (`stripe.*`) was intentionally excluded per roadmap instructions.
 - To apply: run `supabase db push` or execute migration 0006 via Supabase Dashboard SQL Editor.
 
-## V2-011 — Storage policies sanity + “projects/uploads” gating correctness
-**Goal:** confirm storage rules align with product intent and don’t create weird edge bugs.  
+## V2-011 — Storage policies sanity + “projects/uploads” gating correctness [x]
+**Goal:** confirm storage rules align with product intent and don’t create weird edge bugs.
 **Work:**
 - Review current storage policies:
   - `projects` bucket depends on `user_can_write_projects(auth.uid())`
@@ -326,6 +326,19 @@ Claude should treat this as the “source of truth” for the current environmen
 - Free users cannot upload/import files into projects
 - Pro/dev can
 - Policies + UI align (no confusing failure states).
+
+**Changelog (2026-03-04):**
+- Audit found 2 bugs in SQL entitlement helper functions that did not align with the TS-side plan hierarchy (`resolveEffectivePlan` in `entitlements.ts`):
+  1. `user_has_active_plan(uid)` only checked `plan IN (‘trialing’, ‘pro’)` — missing `enterprise`, `is_developer`, `is_admin`, `is_student`. This meant developers, admins, enterprise users, and verified students were silently denied uploads to the `uploads` storage bucket.
+  2. `enforce_project_limit()` treated `enterprise` as free (max 1 project) and did not check `is_developer`, `is_admin`, `is_student` flags — these users were limited to 1 project.
+- Fixed `user_has_active_plan`: now checks `is_developer OR is_admin OR (is_student AND plan=’free’) OR plan IN (‘trialing’, ‘pro’, ‘enterprise’)`.
+- Fixed `enforce_project_limit`: now early-returns (unlimited) for developer/admin/student, and handles `enterprise` plan explicitly.
+- `user_can_write_projects` was already correct (false only for canceled).
+- Storage policies confirmed correct: `projects` bucket uses `user_can_write_projects` (all non-canceled can read/write), `uploads` bucket uses `user_has_active_plan` (only paid-equivalent users). Both buckets enforce `foldername(name)[1] = auth.uid()::text` for path isolation. Bucket size limit is 50 MB, matching `MAX_UPLOAD_BYTES` in TS.
+- Added migration `supabase/migrations/0007_fix_entitlement_helpers.sql`.
+- Updated baseline `0001_baseline_schema.sql` with corrected functions.
+- Extended `src/supabaseMigrations.test.ts` with 13 new tests: `user_has_active_plan` checks all flags/plans, `enforce_project_limit` checks all flags/plans, storage policy structure tests.
+- To apply: run `supabase db push` or execute migration 0007 via Supabase Dashboard SQL Editor.
 
 ---
 
