@@ -1,10 +1,11 @@
 /**
- * supabaseMigrations.test.ts — V2-007, V2-008, V2-009
+ * supabaseMigrations.test.ts — V2-007, V2-008, V2-009, V2-010
  *
  * Structural tests for Supabase migration SQL files.
  * - All SECURITY DEFINER functions must pin search_path (V2-007).
  * - Service-role-only tables must have explicit deny-all policies (V2-008).
  * - No duplicate permissive policies per table+action in baseline (V2-009).
+ * - All foreign key columns have index coverage (V2-010).
  */
 
 import { describe, it, expect } from 'vitest'
@@ -124,4 +125,79 @@ describe('Supabase baseline: no duplicate permissive policies per table+action (
       }
     })
   }
+})
+
+// ── V2-010: All FK columns have index coverage in baseline ─────────────
+
+describe('Supabase baseline: all FK columns have index coverage (V2-010)', () => {
+  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline_schema.sql'), 'utf-8')
+
+  // Extract FK columns from inline column definitions
+  const fkPattern = /^\s+(\w+)\s+\w+.*?REFERENCES\s+(?:public\.)?(\w+)\s*\(/gim
+  const fks: Array<{ table: string; column: string }> = []
+
+  // Determine which table each FK belongs to
+  const tablePattern = /CREATE TABLE IF NOT EXISTS public\.(\w+)/gi
+  const tableStarts: Array<{ table: string; pos: number }> = []
+  let tm: RegExpExecArray | null
+  while ((tm = tablePattern.exec(baseline)) !== null) {
+    tableStarts.push({ table: tm[1], pos: tm.index })
+  }
+
+  let fm: RegExpExecArray | null
+  while ((fm = fkPattern.exec(baseline)) !== null) {
+    const pos = fm.index
+    const line = fm[0]
+    let table = 'unknown'
+    for (const ts of tableStarts) {
+      if (ts.pos <= pos) table = ts.table
+      else break
+    }
+    // Skip primary key columns (auto-indexed by PK constraint)
+    if (fm[1] === 'id' || /PRIMARY KEY/i.test(line)) continue
+    fks.push({ table, column: fm[1] })
+  }
+
+  // Extract all index definitions — get table and leading column
+  const idxPattern =
+    /CREATE (?:UNIQUE )?INDEX IF NOT EXISTS \S+\s+ON public\.(\w+)(?:\s+USING \w+\s*)?\((\w+)/gi
+  const indexedColumns = new Set<string>()
+  let im: RegExpExecArray | null
+  while ((im = idxPattern.exec(baseline)) !== null) {
+    indexedColumns.add(`${im[1]}.${im[2]}`)
+  }
+
+  it('all FK columns are covered by an index (leading column)', () => {
+    const missing: string[] = []
+    for (const fk of fks) {
+      const key = `${fk.table}.${fk.column}`
+      if (!indexedColumns.has(key)) {
+        missing.push(key)
+      }
+    }
+    expect(missing, `FK columns without index coverage:\n  ${missing.join('\n  ')}`).toHaveLength(0)
+  })
+
+  it('V2-010 indexes are present', () => {
+    const v2010Indexes = [
+      'organizations.owner_id',
+      'org_members.org_id',
+      'org_members.user_id',
+      'org_members.invited_by',
+      'csp_reports.user_id',
+      'marketplace_likes.user_id',
+      'marketplace_likes.item_id',
+      'avatar_reports.reporter_id',
+      'avatar_reports.target_id',
+      'avatar_reports.resolved_by',
+      'ai_usage_monthly.org_id',
+      'ai_request_log.org_id',
+      'user_reports.reporter_id',
+      'user_reports.resolved_by',
+      'student_verifications.user_id',
+    ]
+    for (const key of v2010Indexes) {
+      expect(indexedColumns.has(key), `${key} must have an index`).toBe(true)
+    }
+  })
 })

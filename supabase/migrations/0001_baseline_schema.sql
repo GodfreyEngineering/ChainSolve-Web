@@ -1398,6 +1398,14 @@ CREATE POLICY student_verif_select_own ON public.student_verifications
 -- profiles
 CREATE INDEX IF NOT EXISTS idx_profiles_stripe_customer ON public.profiles(stripe_customer_id);
 
+-- organizations
+CREATE INDEX IF NOT EXISTS idx_organizations_owner       ON public.organizations(owner_id);
+
+-- org_members
+CREATE INDEX IF NOT EXISTS idx_org_members_org           ON public.org_members(org_id);
+CREATE INDEX IF NOT EXISTS idx_org_members_user          ON public.org_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_org_members_invited_by    ON public.org_members(invited_by) WHERE invited_by IS NOT NULL;
+
 -- projects
 CREATE INDEX IF NOT EXISTS idx_projects_owner_id        ON public.projects(owner_id);
 CREATE INDEX IF NOT EXISTS idx_projects_owner_updated    ON public.projects(owner_id, updated_at DESC);
@@ -1433,6 +1441,7 @@ CREATE INDEX IF NOT EXISTS idx_group_templates_owner     ON public.group_templat
 
 -- csp_reports
 CREATE INDEX IF NOT EXISTS idx_csp_reports_created       ON public.csp_reports(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_csp_reports_user          ON public.csp_reports(user_id) WHERE user_id IS NOT NULL;
 
 -- observability_events
 CREATE INDEX IF NOT EXISTS idx_obs_events_created        ON public.observability_events(created_at DESC);
@@ -1458,11 +1467,18 @@ CREATE INDEX IF NOT EXISTS idx_mkt_purchases_item        ON public.marketplace_p
 CREATE INDEX IF NOT EXISTS idx_mkt_events_item           ON public.marketplace_install_events(item_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_mkt_events_user           ON public.marketplace_install_events(user_id, created_at DESC) WHERE user_id IS NOT NULL;
 
+-- marketplace_likes
+CREATE INDEX IF NOT EXISTS idx_mkt_likes_user            ON public.marketplace_likes(user_id);
+CREATE INDEX IF NOT EXISTS idx_mkt_likes_item            ON public.marketplace_likes(item_id);
+
 -- marketplace_comments
 CREATE INDEX IF NOT EXISTS idx_mkt_comments_item         ON public.marketplace_comments(item_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_mkt_comments_user         ON public.marketplace_comments(user_id);
 
 -- avatar_reports
+CREATE INDEX IF NOT EXISTS idx_avatar_reports_reporter    ON public.avatar_reports(reporter_id);
+CREATE INDEX IF NOT EXISTS idx_avatar_reports_target      ON public.avatar_reports(target_id);
+CREATE INDEX IF NOT EXISTS idx_avatar_reports_resolved_by ON public.avatar_reports(resolved_by) WHERE resolved_by IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS avatar_reports_pending_uniq ON public.avatar_reports(reporter_id, target_id) WHERE status = 'pending';
 
 -- audit_log
@@ -1471,7 +1487,9 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_org_id          ON public.audit_log(org
 
 -- AI tables
 CREATE INDEX IF NOT EXISTS idx_ai_usage_monthly_owner_period  ON public.ai_usage_monthly(owner_id, period_start);
+CREATE INDEX IF NOT EXISTS idx_ai_usage_monthly_org           ON public.ai_usage_monthly(org_id) WHERE org_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_ai_request_log_owner_created   ON public.ai_request_log(owner_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_request_log_org             ON public.ai_request_log(org_id) WHERE org_id IS NOT NULL;
 
 -- user_sessions
 CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id     ON public.user_sessions(user_id);
@@ -1480,8 +1498,13 @@ CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id     ON public.user_sessions
 CREATE INDEX IF NOT EXISTS idx_user_terms_log_user       ON public.user_terms_log(user_id, accepted_at DESC);
 
 -- user_reports
+CREATE INDEX IF NOT EXISTS idx_user_reports_reporter     ON public.user_reports(reporter_id);
+CREATE INDEX IF NOT EXISTS idx_user_reports_resolved_by  ON public.user_reports(resolved_by) WHERE resolved_by IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_user_reports_status       ON public.user_reports(status) WHERE status = 'pending';
 CREATE INDEX IF NOT EXISTS idx_user_reports_target       ON public.user_reports(target_type, target_id);
+
+-- student_verifications
+CREATE INDEX IF NOT EXISTS idx_student_verifications_user ON public.student_verifications(user_id);
 
 
 -- ═══════════════════════════════════════════════════════════════════════════════

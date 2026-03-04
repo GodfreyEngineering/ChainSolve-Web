@@ -298,13 +298,22 @@ Claude should treat this as the “source of truth” for the current environmen
 - Extended `src/supabaseMigrations.test.ts` with 5 tests (one per table) verifying at most 1 policy per action.
 - To apply: run `supabase db push` or execute migration 0005 via Supabase Dashboard SQL Editor.
 
-## V2-010 — Add missing indexes for **public** foreign keys flagged as unindexed
-**Problem:** unindexed FKs flagged for public tables.  
+## V2-010 — Add missing indexes for **public** foreign keys flagged as unindexed [x]
+**Problem:** unindexed FKs flagged for public tables.
 **Work:**
 - Add covering indexes for the flagged public FKs (do not blindly index stripe-managed schema unless intentional).
 **Acceptance:**
 - Performance advisor warnings for public tables reduced/cleared
 - Migrations included.
+
+**Changelog (2026-03-04):**
+- Audited all 45 FK columns across 28 public tables against existing indexes (composite indexes count if FK is leading column, PKs are auto-indexed).
+- Identified 15 FK columns with zero index coverage across 9 tables: organizations, org_members, csp_reports, marketplace_likes, avatar_reports, ai_usage_monthly, ai_request_log, user_reports, student_verifications.
+- Added migration `supabase/migrations/0006_index_unindexed_fks.sql` — 15 `CREATE INDEX IF NOT EXISTS` statements. Nullable FK columns use partial indexes (`WHERE col IS NOT NULL`) to save space.
+- Updated baseline `0001_baseline_schema.sql` with all 15 new indexes for fresh deployments.
+- Extended `src/supabaseMigrations.test.ts` with 2 new tests: (1) verifies every FK column in baseline has index coverage (leading column), (2) verifies all 15 V2-010 indexes are present.
+- Stripe-managed schema (`stripe.*`) was intentionally excluded per roadmap instructions.
+- To apply: run `supabase db push` or execute migration 0006 via Supabase Dashboard SQL Editor.
 
 ## V2-011 — Storage policies sanity + “projects/uploads” gating correctness
 **Goal:** confirm storage rules align with product intent and don’t create weird edge bugs.  
