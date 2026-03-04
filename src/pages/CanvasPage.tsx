@@ -80,12 +80,22 @@ import { ConflictBanner } from '../components/app/ConflictBanner'
 import { UpgradeModal } from '../components/UpgradeModal'
 import { useEngine } from '../contexts/EngineContext'
 import { useWindowManager } from '../contexts/WindowManagerContext'
-import { THEME_LIBRARY_WINDOW_ID } from '../components/ThemeLibraryWindow'
+import { THEME_LIBRARY_WINDOW_ID } from '../components/windowIds'
 import { AI_COPILOT_WINDOW_ID } from '../lib/aiCopilot/constants'
 import type { AiPatchOp } from '../lib/aiCopilot/types'
 import { buildConstantsLookup } from '../engine/resolveBindings'
 import { toEngineSnapshot } from '../engine/bridge'
-import type { ExportOptions } from '../lib/pdf/auditModel'
+import {
+  buildCanvasAuditSection,
+  buildProjectAuditModel,
+  type ExportOptions,
+} from '../lib/pdf/auditModel'
+import { getCanonicalSnapshot } from '../lib/groups'
+import { stableStringify } from '../lib/pdf/stableStringify'
+import { sha256Hex } from '../lib/pdf/sha256'
+import { computeGraphHealth, formatHealthReport } from '../lib/graphHealth'
+import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../lib/build-info'
+import { listProjectAssets, downloadAssetBytes } from '../lib/storage'
 import type { CaptureResult } from '../lib/pdf/captureCanvasImage'
 import type { TableExport } from '../lib/xlsx/xlsxModel'
 
@@ -980,14 +990,7 @@ export default function CanvasPage() {
     async (opts: { includeImages: boolean }) => {
       if (!projectId || exportingRef.current) return
 
-      const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } = await import('../lib/build-info')
       const { exportProjectAuditPdf } = await import('../lib/pdf/exportAuditPdf')
-      const { buildCanvasAuditSection, buildProjectAuditModel } =
-        await import('../lib/pdf/auditModel')
-      const { getCanonicalSnapshot } = await import('../lib/groups')
-      const { stableStringify } = await import('../lib/pdf/stableStringify')
-      const { sha256Hex } = await import('../lib/pdf/sha256')
-      const { computeGraphHealth, formatHealthReport } = await import('../lib/graphHealth')
 
       const abort = new AbortController()
       exportAbortRef.current = abort
@@ -1170,15 +1173,8 @@ export default function CanvasPage() {
     async (opts: { includeTables: boolean }) => {
       if (!projectId || exportingRef.current) return
 
-      const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } = await import('../lib/build-info')
       const { exportAuditXlsxProject } = await import('../lib/xlsx/exportAuditXlsxProject')
       const { SAFE_MAX_TABLE_ROWS, SAFE_MAX_TABLE_COLS } = await import('../lib/xlsx/constants')
-      const { buildCanvasAuditSection, buildProjectAuditModel } =
-        await import('../lib/pdf/auditModel')
-      const { getCanonicalSnapshot } = await import('../lib/groups')
-      const { stableStringify } = await import('../lib/pdf/stableStringify')
-      const { sha256Hex } = await import('../lib/pdf/sha256')
-      const { computeGraphHealth, formatHealthReport } = await import('../lib/graphHealth')
 
       const abort = new AbortController()
       exportAbortRef.current = abort
@@ -1344,7 +1340,6 @@ export default function CanvasPage() {
   const handleExportChainsolveJson = useCallback(async () => {
     if (!projectId || exportingRef.current) return
 
-    const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } = await import('../lib/build-info')
     const { exportChainsolveJsonProject } =
       await import('../lib/chainsolvejson/exportChainsolveJson')
 
@@ -1421,7 +1416,6 @@ export default function CanvasPage() {
       }
 
       // Load project assets from DB and embed/reference them
-      const { listProjectAssets, downloadAssetBytes } = await import('../lib/storage')
       const { buildEmbeddedAsset, buildReferencedAsset, EMBED_SIZE_LIMIT } =
         await import('../lib/chainsolvejson/model')
 

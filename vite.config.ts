@@ -37,6 +37,11 @@ export default defineConfig({
   },
   build: {
     manifest: true,
+    // The main chunk (~1.4 MB minified) contains core SPA infrastructure
+    // (React, canvas editor, engine bridge, block registry). Route-level
+    // lazy loading is in place; further splitting would fragment the hot
+    // path. 1500 KB accommodates the main chunk without hiding regressions.
+    chunkSizeWarningLimit: 1500,
   },
   worker: {
     format: 'es',

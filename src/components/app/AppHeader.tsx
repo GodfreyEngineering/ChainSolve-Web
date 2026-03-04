@@ -9,8 +9,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { useToast } from '../ui/useToast'
 import { DropdownMenu, type MenuEntry } from '../ui/DropdownMenu'
 import type { ConfirmAction } from './ConfirmDialog'
-import { ABOUT_WINDOW_ID } from './AboutModal'
-import { DOCS_WINDOW_ID } from './DocsSearchModal'
+import { ABOUT_WINDOW_ID, DOCS_WINDOW_ID } from '../windowIds'
 import { AI_COPILOT_WINDOW_ID } from '../../lib/aiCopilot/constants'
 
 const LazyFeedbackModal = lazy(() =>

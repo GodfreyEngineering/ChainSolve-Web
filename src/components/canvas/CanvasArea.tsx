@@ -108,6 +108,7 @@ import {
   formatHealthReport,
   getCrossingEdgesForGroup,
 } from '../../lib/graphHealth'
+import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../../lib/build-info'
 import { useToast } from '../ui/useToast'
 import { useProjectStore } from '../../stores/projectStore'
 import { toEngineSnapshot } from '../../engine/bridge'
@@ -525,8 +526,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     showAllHidden: showAllHiddenNodes,
     toggleHiddenView: () => setHiddenViewMode((v) => !v),
     exportPdfAudit: async () => {
-      const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } =
-        await import('../../lib/build-info')
       const { exportAuditPdf } = await import('../../lib/pdf/exportAuditPdf')
       const { captureCanvasImage } = await import('../../lib/pdf/captureCanvasImage')
 
@@ -603,8 +602,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     },
 
     exportXlsxAuditActive: async () => {
-      const { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } =
-        await import('../../lib/build-info')
       const { exportAuditXlsx } = await import('../../lib/xlsx/exportAuditXlsx')
 
       const projectName = useProjectStore.getState().projectName

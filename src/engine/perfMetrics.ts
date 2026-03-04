@@ -5,6 +5,8 @@
  * React 19's `useSyncExternalStore`. Zero dependencies, zero React imports.
  */
 
+import { getRecentMeasures } from '../perf/marks'
+
 export interface PerfSnapshot {
   lastEvalMs: number
   nodesEvaluated: number
@@ -57,11 +59,9 @@ export function subscribePerfMetrics(fn: () => void): () => void {
 /**
  * Export recent User Timing measures for diagnostics bundles.
  * Returns at most 20 entries to keep the payload small.
- * Lazily imports marks.ts to avoid loading perf infrastructure in workers.
  */
 export async function userTimingExport(): Promise<
   ReadonlyArray<{ name: string; durationMs: number; startTime: number }>
 > {
-  const { getRecentMeasures } = await import('../perf/marks.ts')
   return getRecentMeasures().slice(-20)
 }

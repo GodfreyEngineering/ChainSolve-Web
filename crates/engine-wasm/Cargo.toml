@@ -2,6 +2,10 @@
 name = "engine-wasm"
 version = "0.1.0"
 edition = "2021"
+description = "ChainSolve WASM bindings for the graph evaluation engine"
+repository = "https://github.com/ChainSolve/ChainSolve-Web"
+license = "LicenseRef-Proprietary"
+publish = false
 
 [lib]
 crate-type = ["cdylib", "rlib"]

@@ -105,8 +105,8 @@ describe('PreferencesSettings uses unified FeedbackModal', () => {
     'utf-8',
   )
 
-  it('imports FeedbackModal', () => {
-    expect(src).toContain("import { FeedbackModal } from '../../components/FeedbackModal'")
+  it('lazy-imports FeedbackModal', () => {
+    expect(src).toContain("import('../../components/FeedbackModal')")
   })
 
   it('does not import legacy BugReportModal', () => {

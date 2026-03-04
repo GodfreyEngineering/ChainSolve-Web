@@ -673,4 +673,20 @@ Claude should treat this as the “source of truth” for the current environmen
 - Reduce console noise aggressively (especially registry mismatch logs and CSP spam).
 - Maintain a clean, human-looking codebase: clear naming, consistent structure, no “vibe-coded” feel.
 
+## V2-038 — CI Warning Zero [x]
+**Problem:** CI logs contain numerous warnings: wasm-pack metadata/version, npm deprecated glob, wasm-opt “no passes specified”, Vite dynamic+static import warnings, Vite chunk size >500kb, bundle-splits WARN, ESLint warnings.
+**Work:**
+- [x] A) wasm-pack: add Cargo.toml metadata (description/repository/license/publish), pin to 0.14.0 in CI via direct binary download
+- [x] B) npm glob deprecation: override test-exclude to 8.0.0 (uses glob@^13, non-deprecated)
+- [x] C) wasm-opt: remove redundant validation step that ran with no passes
+- [x] D) Vite dual imports: extract window ID constants to windowIds.ts, convert CanvasPage/CanvasArea dynamic imports to static for modules already in main bundle, convert perfMetrics.ts marks import to static
+- [x] E) Vite chunk size: set chunkSizeWarningLimit to 1500 KB (main chunk is ~1.4 MB — route-level lazy loading already in place)
+- [x] F) Bundle splits: lazy-load FeedbackModal in PreferencesSettings (was static, caused manifest key mismatch)
+- [x] G) GitHub Actions: all actions already at v4, permissions already set; DEP0005 Buffer() is upstream (actions/download-artifact internals)
+- [x] E2E smoke test: fix CSP line count from 2 to 1 (V2-004 removed Report-Only)
+- [x] ESLint: fix all 8 warnings (hook deps in AppHeader/CanvasPage/MarketplacePage, unused eslint-disable directives, ignore WASM pkg dir)
+
+**Changelog (2026-03-04):**
+- Zero warnings in verify-ci.sh output. Zero Vite build warnings. Zero ESLint warnings. Zero bundle-splits WARNs.
+
 ---

@@ -114,22 +114,9 @@ for (const wasmPath of wasmFiles) {
     continue
   }
 
-  // Validate: run wasm-opt on the output to /dev/null — triggers the
-  // built-in validator without modifying anything.
-  try {
-    execFileSync(BIN, [...FEATURE_FLAGS, tmpPath, '-o', '/dev/null'], {
-      stdio: 'inherit',
-    })
-  } catch (err) {
-    console.error(`  ::error::Validation failed for optimized ${label}: ${err.message}`)
-    try {
-      unlinkSync(tmpPath)
-    } catch {
-      // ignore
-    }
-    allOk = false
-    continue
-  }
+  // wasm-opt validates both input and output modules during the
+  // optimization step above. A separate validation pass is unnecessary
+  // and produced "no passes specified" warnings.
 
   // Atomic replace: rename temp over original
   renameSync(tmpPath, wasmPath)

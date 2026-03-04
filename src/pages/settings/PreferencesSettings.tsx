@@ -4,15 +4,16 @@ import { Select } from '../../components/ui/Select'
 import { Button } from '../../components/ui/Button'
 import { SUPPORTED_LANGUAGES } from '../../i18n/config'
 import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../../lib/build-info'
-import { FeedbackModal } from '../../components/FeedbackModal'
+const LazyFeedbackModal = lazy(() =>
+  import('../../components/FeedbackModal').then((m) => ({ default: m.FeedbackModal })),
+)
 import { UpgradeModal } from '../../components/UpgradeModal'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { ThemeMode } from '../../contexts/ThemeContext'
 import { usePreferencesStore } from '../../stores/preferencesStore'
 import { useCustomThemesStore } from '../../stores/customThemesStore'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
-import { THEME_WIZARD_WINDOW_ID } from '../../components/ThemeWizard'
-import { THEME_LIBRARY_WINDOW_ID } from '../../components/ThemeLibraryWindow'
+import { THEME_WIZARD_WINDOW_ID, THEME_LIBRARY_WINDOW_ID } from '../../components/windowIds'
 import { isPro, type Plan } from '../../lib/entitlements'
 import { HelpLink } from '../../components/ui/HelpLink'
 
@@ -400,11 +401,15 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
         </Button>
       </div>
 
-      <FeedbackModal
-        open={feedbackOpen}
-        onClose={() => setFeedbackOpen(false)}
-        initialType={feedbackType}
-      />
+      <Suspense fallback={null}>
+        {feedbackOpen && (
+          <LazyFeedbackModal
+            open={feedbackOpen}
+            onClose={() => setFeedbackOpen(false)}
+            initialType={feedbackType}
+          />
+        )}
+      </Suspense>
       <UpgradeModal
         open={upgradeOpen}
         onClose={() => setUpgradeOpen(false)}
