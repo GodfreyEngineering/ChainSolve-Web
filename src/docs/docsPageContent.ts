@@ -20,7 +20,7 @@ export const DOCS_CONTENT: DocsContentMap = {
       'Welcome to ChainSolve. This guide covers everything you need to go from zero to a working calculation chain.',
     whatIsTitle: 'What is ChainSolve?',
     whatIsBody:
-      'ChainSolve is a visual calculation engine for engineers, scientists, and students. Instead of writing formulas in cells, you connect blocks on a canvas. Each block does one thing — a number, an operation, a display — and values flow through edges in real time. Change any input and every downstream result updates instantly.',
+      'ChainSolve is a visual calculation engine for engineers, scientists, and students. Instead of writing formulas in cells, you connect blocks on a canvas. Each block does one thing — a number, an operation, a display — and values flow through chains in real time. Change any input and every downstream result updates instantly.',
     firstCanvasTitle: 'Creating your first canvas',
     step1: 'Open a project or click Scratch Canvas on the home page.',
     step2: 'Open the block library from the Insert menu or the sidebar.',
@@ -30,7 +30,7 @@ export const DOCS_CONTENT: DocsContentMap = {
       'Add a Display block and connect the operation output to it. The result appears immediately.',
     connectingTitle: 'Connecting blocks',
     connectingBody:
-      'Drag from an output port (right side) to an input port (left side) to create an edge. Values propagate automatically through edges. You can disconnect an edge by selecting it and pressing Delete.',
+      'Drag from an output port (right side) to an input port (left side) to create a chain. Values propagate automatically through chains. You can disconnect a chain by selecting it and pressing Delete.',
     savingTitle: 'Saving your work',
     savingBody:
       'Projects auto-save every few seconds. You can also press Ctrl+S (Cmd+S on Mac) to save immediately. Scratch canvases are stored locally in your browser and are not saved to the cloud.',
@@ -349,7 +349,7 @@ export const DOCS_CONTENT: DocsContentMap = {
     undo: 'Undo the last action',
     redo: 'Redo the last undone action',
     palette: 'Open the command palette',
-    delete: 'Delete selected blocks or edges',
+    delete: 'Delete selected blocks or chains',
     canvasTitle: 'Canvas',
     group: 'Group selected blocks (Pro)',
     duplicate: 'Duplicate selected blocks',
@@ -366,7 +366,7 @@ export const DOCS_CONTENT: DocsContentMap = {
       'NaN (Not a Number) appears when an operation produces an undefined result, such as dividing zero by zero or taking the square root of a negative number. Check your inputs and ensure they are within the valid domain for the operation.',
     cycleTitle: 'Cycle detected',
     cycleBody:
-      'The engine does not allow circular dependencies. If you see a cycle error, trace back from the highlighted blocks and remove the edge that creates the loop.',
+      'The engine does not allow circular dependencies. If you see a cycle error, trace back from the highlighted blocks and remove the chain that creates the loop.',
     slowTitle: 'Slow evaluation',
     slowBody:
       'Large canvases with many blocks may take longer to evaluate. Try splitting complex chains across multiple canvases. The engine evaluates incrementally, so only changed paths are recomputed.',

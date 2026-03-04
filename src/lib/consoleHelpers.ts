@@ -76,7 +76,7 @@ const RULES: PatternRule[] = [
       explanation:
         'A cycle was detected in the graph. Blocks form a circular dependency where outputs feed back into their own inputs.',
       suggestion:
-        'Break the cycle by removing or redirecting one of the edges that creates the loop. Check the Graph Health tab for details.',
+        'Break the cycle by removing or redirecting one of the chains that creates the loop. Check the Graph Health tab for details.',
       docsSection: 'troubleshooting',
     }),
   },
@@ -116,7 +116,7 @@ const RULES: PatternRule[] = [
     explain: () => ({
       explanation: 'One or more required inputs are not connected.',
       suggestion:
-        'Open the block inspector to see which inputs need connections, then draw edges from output ports to the missing inputs.',
+        'Open the block inspector to see which inputs need connections, then draw chains from output ports to the missing inputs.',
       docsSection: 'troubleshooting',
       actionType: 'variables',
     }),
@@ -198,7 +198,7 @@ const RULES: PatternRule[] = [
       const match = msg.match(/^(.+?):\s*no input/i)
       const op = match?.[1] ?? 'This block'
       return {
-        explanation: `${op} has a required input port that is not receiving any data. This usually means an edge is missing or the upstream block has no output.`,
+        explanation: `${op} has a required input port that is not receiving any data. This usually means a chain is missing or the upstream block has no output.`,
         suggestion: `Connect the required input port to an upstream block that provides the expected data type.`,
         docsSection: 'troubleshooting',
         actionType: 'variables',

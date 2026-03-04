@@ -610,10 +610,10 @@ export function AiCopilotWindow({
             {pendingOps.map((op, i) => (
               <div key={i} style={{ opacity: 0.8 }}>
                 {op.op === 'addNode' && `+ ${op.node.blockType} "${op.node.label ?? op.node.id}"`}
-                {op.op === 'addEdge' && `+ edge ${op.edge.source} \u2192 ${op.edge.target}`}
+                {op.op === 'addEdge' && `+ chain ${op.edge.source} \u2192 ${op.edge.target}`}
                 {op.op === 'updateNodeData' && `~ update ${op.nodeId}`}
                 {op.op === 'removeNode' && `- remove node ${op.nodeId}`}
-                {op.op === 'removeEdge' && `- remove edge ${op.edgeId}`}
+                {op.op === 'removeEdge' && `- remove chain ${op.edgeId}`}
                 {op.op === 'setInputBinding' && `~ bind ${op.nodeId}:${op.portId}`}
                 {op.op === 'createVariable' && `+ var "${op.variable.name}"`}
                 {op.op === 'updateVariable' && `~ var ${op.varId}`}

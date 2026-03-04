@@ -89,8 +89,8 @@ export const DOCS_INDEX: DocsEntry[] = [
     section: 'Getting started',
     title: 'Connecting blocks',
     description:
-      'Drag from an output port (right side of a block) to an input port (left side). A live edge appears and values update immediately.',
-    keywords: ['connect', 'edge', 'wire', 'port', 'link', 'drag'],
+      'Drag from an output port (right side of a block) to an input port (left side). A live chain appears and values update immediately.',
+    keywords: ['connect', 'chain', 'wire', 'port', 'link', 'drag'],
   },
   {
     id: 'gs-templates',
@@ -213,9 +213,9 @@ export const DOCS_INDEX: DocsEntry[] = [
   {
     id: 'canvas-delete',
     section: 'Canvas',
-    title: 'Deleting blocks and edges',
+    title: 'Deleting blocks and chains',
     description:
-      'Select a block or edge and press Delete or Backspace. Hold Ctrl to multi-select and delete several at once.',
+      'Select a block or chain and press Delete or Backspace. Hold Ctrl to multi-select and delete several at once.',
     keywords: ['delete', 'remove', 'backspace', 'erase', 'clear'],
   },
   {

@@ -299,7 +299,7 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
               style={checkboxStyle}
             />
             <div>
-              <span style={checkLabelStyle}>Animated edges</span>
+              <span style={checkLabelStyle}>Animated chains</span>
               <span style={checkHintStyle}>Show flowing animation on connections</span>
             </div>
           </label>

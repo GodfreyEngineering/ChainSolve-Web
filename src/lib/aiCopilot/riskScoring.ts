@@ -31,7 +31,7 @@ export function assessRisk(ops: AiPatchOp[]): RiskAssessment {
   const totalRemovals = removeNodeOps.length + removeEdgeOps.length
   if (totalRemovals > HIGH_REMOVE_THRESHOLD) {
     level = 'high'
-    reasons.push(`Removes ${totalRemovals} nodes/edges`)
+    reasons.push(`Removes ${totalRemovals} nodes/chains`)
   }
 
   // HIGH: any removeNode (destructive)

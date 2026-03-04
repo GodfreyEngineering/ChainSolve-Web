@@ -604,8 +604,8 @@ Claude should treat this as the “source of truth” for the current environmen
 - Added i18n keys: `contextMenu.annotLeader` + `annotation.*` section (text, color, fontSize, bold, italic) in EN/DE/ES/FR/IT/HE.
 - All CI checks pass.
 
-## V2-023 — Rename “edges” to “chains” across UI
-**Goal:** consistent terminology.  
+## V2-023 — Rename “edges” to “chains” across UI [x]
+**Goal:** consistent terminology.
 **Work:**
 - Replace user-facing “edge(s)” with “chain(s)” everywhere:
   - labels
@@ -614,6 +614,15 @@ Claude should treat this as the “source of truth” for the current environmen
   - menus
 **Acceptance:**
 - No user-facing “edge” remains where it refers to connections.
+
+### Changelog (2026-03-04)
+- Renamed 8 i18n values in EN: collapseCrossingWarn, toggleAnimatedEdges, toggleEdgeBadges, animatedEdges, edgeBadges, graphHealth.edges, graphHealth.crossingEdges, llmBuilder.edgeCount.
+- Renamed equivalent values in DE (Kante->Kette), ES (arista/borde->cadena), FR (arete/connexion->chaine), IT (arco/connessione->catena).
+- Fixed hardcoded strings: PreferencesSettings.tsx (“Animated chains”), customThemes.ts (“Chain stroke”, “Chains & Borders”), AiCopilotWindow.tsx (“+ chain”, “- remove chain”), riskScoring.ts (“nodes/chains”).
+- Updated in-app docs: docsPageContent.ts (4 occurrences), docsIndex.ts (4 occurrences) — all “edge(s)” replaced with “chain(s)”.
+- Updated consoleHelpers.ts diagnostic messages (3 occurrences).
+- Internal code identifiers (variable names, ReactFlow Edge type, CSS vars) left unchanged — only user-facing text renamed.
+- All CI checks pass.
 
 ---
 

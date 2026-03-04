@@ -46,8 +46,8 @@ export const THEME_VARIABLE_META: ThemeVarMeta[] = [
   { cssVar: '--handle-input', label: 'Input handle', category: 'node' },
   { cssVar: '--handle-output', label: 'Output handle', category: 'node' },
 
-  // Edge
-  { cssVar: '--edge-color', label: 'Edge stroke', category: 'edge' },
+  // Chain
+  { cssVar: '--edge-color', label: 'Chain stroke', category: 'edge' },
   { cssVar: '--border', label: 'Border', category: 'edge' },
 ]
 
@@ -56,7 +56,7 @@ export const THEME_CATEGORY_LABELS: Record<ThemeVarCategory, string> = {
   text: 'Text',
   accent: 'Accent Colors',
   node: 'Nodes',
-  edge: 'Edges & Borders',
+  edge: 'Chains & Borders',
 }
 
 /** A user-created custom theme. */
