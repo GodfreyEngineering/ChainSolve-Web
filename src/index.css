@@ -67,6 +67,10 @@
   --menu-hover: rgba(28, 171, 176, 0.15);
   --menu-danger-hover: rgba(239, 68, 68, 0.15);
 
+  /* ── Transition durations (V2-036) ────────────────────────────────────── */
+  --transition-fast: 0.1s ease;
+  --transition-normal: 0.15s ease;
+
   /* ── Focus ring ───────────────────────────────────────────────────────── */
   --focus-ring: 2px solid var(--primary);
 
@@ -600,6 +604,10 @@ button:focus:not(:focus-visible) {
 .cs-dock-resize-handle {
   position: absolute;
   z-index: 1;
+  transition: background var(--transition-normal);
+}
+.cs-dock-resize-handle:hover {
+  background: var(--primary-dim);
 }
 .cs-dock-resize-handle[data-direction='vertical'] {
   top: -3px;
@@ -621,6 +629,44 @@ button:focus:not(:focus-visible) {
   bottom: 0;
   width: 8px;
   cursor: ew-resize;
+}
+
+/* ── Chrome buttons (window title bar) — V2-036 ──────────────────────── */
+.cs-chrome-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+}
+.cs-chrome-btn:hover {
+  background: var(--primary-dim);
+  color: var(--primary);
+}
+.cs-chrome-btn:active {
+  background: var(--primary-glow);
+}
+.cs-chrome-btn[data-variant='close']:hover {
+  background: var(--danger-dim);
+  color: var(--danger-text);
+}
+
+/* ── Window resize grip — V2-036 ─────────────────────────────────────── */
+.cs-resize-grip {
+  transition: opacity var(--transition-normal);
+}
+.cs-resize-grip:hover {
+  opacity: 0.7 !important;
 }
 
 /* Pro badge (block library, section headers) */

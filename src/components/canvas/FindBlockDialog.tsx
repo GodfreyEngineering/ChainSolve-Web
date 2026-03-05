@@ -87,6 +87,7 @@ export function FindBlockDialog({ nodes, onFocusNode, onClose }: FindBlockDialog
           flexDirection: 'column',
           overflow: 'hidden',
           fontFamily: "'Montserrat', system-ui, sans-serif",
+          animation: 'cs-slide-up 0.12s ease-out',
         }}
         onClick={(e) => e.stopPropagation()}
       >

@@ -93,6 +93,7 @@ const item: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   gap: '0.5rem',
+  transition: 'background 0.1s ease',
 }
 
 const sep: CSSProperties = {
@@ -199,6 +200,7 @@ export function ContextMenu({
     minWidth: 160,
     boxShadow: 'var(--shadow-lg)',
     userSelect: 'none',
+    animation: 'cs-slide-up 0.12s ease-out',
   }
 
   return (

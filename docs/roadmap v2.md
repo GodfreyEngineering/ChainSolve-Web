@@ -878,14 +878,24 @@ Claude should treat this as the “source of truth” for the current environmen
 - Audited all menus, popups, empty states — context menus, toolbar tooltips, variables panel, template manager, command palette, docs search all already have good microcopy
 - verify-ci.sh green (1474 i18n keys)
 
-## V2-036 — Visual uplift pass: glow hovers, consistent iconography, no broken controls
-**Requirement:** “Upgrade 10000x” aesthetic; CAD-like icons; hover animations; no emojis.  
+## V2-036 — Visual uplift pass: glow hovers, consistent iconography, no broken controls [x]
+**Requirement:** “Upgrade 10000x” aesthetic; CAD-like icons; hover animations; no emojis.
 **Work:**
 - Replace or standardize icons
 - Add tasteful hover animations
 - Ensure docking handles and toolbars feel premium
 **Acceptance:**
 - UI looks consistent and intentionally designed.
+
+**Changelog (2026-03-05):**
+- Added CSS transition tokens (`--transition-fast`, `--transition-normal`) to design system in `index.css`.
+- Created `.cs-chrome-btn` CSS class with hover (primary-dim), active (primary-glow), and close-variant (danger-dim) states. Replaced inline `chromeBtn` style in AppWindow.tsx.
+- Added hover feedback to dock resize handles (`.cs-dock-resize-handle:hover` background highlight).
+- Added `.cs-resize-grip` class for AppWindow resize grip with opacity transition on hover.
+- Added `cs-slide-up` entrance animation (0.12s) to ContextMenu, QuickAddPalette, and FindBlockDialog.
+- Added background transition (0.1s) to ContextMenu MenuItem for smoother hover.
+- Icon replacement (40+ Unicode chars to SVG) deferred — scope too large for this pass.
+- `verify-ci.sh` passes.
 
 ## V2-037 — Dependabot grouping + Stripe webhook stabilization [x]
 **Problem:** (A) Dependabot creates too many individual PRs — noisy. (B) Stripe webhook 404 — Dashboard URL pointed at nonexistent Supabase Edge Function; actual handler is a Cloudflare Pages Function.

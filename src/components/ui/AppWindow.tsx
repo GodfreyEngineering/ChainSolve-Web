@@ -53,20 +53,7 @@ const chromeTitle: React.CSSProperties = {
   pointerEvents: 'none',
 }
 
-const chromeBtn: React.CSSProperties = {
-  background: 'transparent',
-  border: 'none',
-  color: 'var(--text-muted)',
-  cursor: 'pointer',
-  fontSize: '0.9rem',
-  padding: '0.15rem 0.4rem',
-  borderRadius: 'var(--radius-sm)',
-  lineHeight: 1,
-  fontFamily: 'inherit',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}
+/* chromeBtn style removed — now uses .cs-chrome-btn CSS class (V2-036) */
 
 const resizeHandle: React.CSSProperties = {
   position: 'absolute',
@@ -81,6 +68,7 @@ const resizeHandle: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
   userSelect: 'none',
+  transition: 'opacity 0.15s ease',
 }
 
 // ── Snap-to-edges helper ──────────────────────────────────────────────────────
@@ -246,7 +234,7 @@ export function AppWindow({
         <span style={chromeTitle}>{title}</span>
         <div style={{ display: 'flex', gap: '0.15rem' }}>
           <button
-            style={chromeBtn}
+            className="cs-chrome-btn"
             onClick={() => toggleMinimize(windowId)}
             title={t('ui.minimize')}
             aria-label={t('ui.minimize')}
@@ -254,7 +242,7 @@ export function AppWindow({
             —
           </button>
           <button
-            style={chromeBtn}
+            className="cs-chrome-btn"
             onClick={() => toggleMaximize(windowId)}
             title={isMax ? t('ui.restore') : t('ui.maximize')}
             aria-label={isMax ? t('ui.restore') : t('ui.maximize')}
@@ -262,7 +250,8 @@ export function AppWindow({
             {isMax ? '◻' : '□'}
           </button>
           <button
-            style={chromeBtn}
+            className="cs-chrome-btn"
+            data-variant="close"
             onClick={() => closeWindow(windowId)}
             title={t('ui.close')}
             aria-label={t('ui.close')}
@@ -277,7 +266,7 @@ export function AppWindow({
 
       {/* ── Resize handle (bottom-right) ── */}
       {!isMax && (
-        <div style={resizeHandle} onMouseDown={onResizeStart}>
+        <div className="cs-resize-grip" style={resizeHandle} onMouseDown={onResizeStart}>
           ⋱
         </div>
       )}
