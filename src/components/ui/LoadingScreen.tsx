@@ -37,9 +37,11 @@ const messageStyle: React.CSSProperties = {
 
 export function LoadingScreen({ message }: LoadingScreenProps) {
   return (
-    <div style={containerStyle} role="status" aria-label={message ?? 'Loading'}>
-      <img src={BRAND.logoWideText} alt="" style={logoStyle} />
-      {message && <span style={messageStyle}>{message}</span>}
-    </div>
+    <main>
+      <div style={containerStyle} role="status" aria-label={message ?? 'Loading'}>
+        <img src={BRAND.logoWideText} alt="" style={logoStyle} />
+        {message && <span style={messageStyle}>{message}</span>}
+      </div>
+    </main>
   )
 }

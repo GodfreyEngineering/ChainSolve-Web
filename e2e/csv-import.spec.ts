@@ -18,7 +18,10 @@ import { waitForEngineOrFatal } from './helpers'
 // ── CSV block exists in engine catalog ────────────────────────────────────────
 
 test.describe('CSV import — engine catalog (P097)', () => {
-  test('csvImport block is present in the engine catalog', async ({ page }) => {
+  // H2-1: csvImport was removed from the catalog — tables replaced by vector input blocks.
+  // The engine still evaluates csvImport for backward-compat snapshots, but it is not
+  // advertised in the catalog. These tests verify the block is absent.
+  test('csvImport block is NOT in the engine catalog (H2-1 removal)', async ({ page }) => {
     await page.goto('/canvas')
     await waitForEngineOrFatal(page)
 
@@ -29,23 +32,7 @@ test.describe('CSV import — engine catalog (P097)', () => {
       return engine.catalog.some((e) => e.opId === 'csvImport')
     })
 
-    expect(hasCsv).toBe(true)
-  })
-
-  test('csvImport block is listed in catalog with correct opId', async ({ page }) => {
-    await page.goto('/canvas')
-    await waitForEngineOrFatal(page)
-
-    const entry = await page.evaluate(() => {
-      const engine = (window as Record<string, unknown>).__chainsolve_engine as {
-        catalog: { opId: string; category: string }[]
-      }
-      return engine.catalog.find((e) => e.opId === 'csvImport') ?? null
-    })
-
-    const csvEntry = entry as { opId: string; category: string } | null
-    expect(csvEntry).not.toBeNull()
-    expect(csvEntry?.opId).toBe('csvImport')
+    expect(hasCsv).toBe(false)
   })
 })
 

@@ -39,14 +39,14 @@ test.describe('Variables and bindings — engine API (P096)', () => {
     expect(r.values.mul).toEqual({ kind: 'scalar', value: 15 })
   })
 
-  test('setInput provides slider-style incremental updates', async ({ page }) => {
+  test('applyPatch provides slider-style incremental updates', async ({ page }) => {
     await page.goto('/canvas')
     await waitForEngineOrFatal(page)
 
     const results = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         loadSnapshot: (snap: unknown) => Promise<unknown>
-        setInput: (nodeId: string, portId: string, value: number) => Promise<unknown>
+        applyPatch: (ops: unknown[]) => Promise<unknown>
       }
 
       await engine.loadSnapshot({
@@ -60,13 +60,15 @@ test.describe('Variables and bindings — engine API (P096)', () => {
         ],
       })
 
-      // Simulate slider interaction by calling setInput multiple times
-      const r1 = (await engine.setInput('n', 'value', 5)) as {
-        changedValues: Record<string, { kind: string; value: number }>
-      }
-      const r2 = (await engine.setInput('n', 'value', 10)) as {
-        changedValues: Record<string, { kind: string; value: number }>
-      }
+      // Simulate slider interaction via updateNodeData patches
+      const r1 = (await engine.applyPatch([
+        { op: 'updateNodeData', nodeId: 'n', data: { value: 5 } },
+      ])) as { changedValues: Record<string, { kind: string; value: number }> }
+
+      const r2 = (await engine.applyPatch([
+        { op: 'updateNodeData', nodeId: 'n', data: { value: 10 } },
+      ])) as { changedValues: Record<string, { kind: string; value: number }> }
+
       return { r1, r2 }
     })
 

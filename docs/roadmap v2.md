@@ -818,7 +818,7 @@ Claude should treat this as the “source of truth” for the current environmen
 
 # Phase V2-I — E2E / CI hardening (fix current failures + prevent regressions)
 
-## V2-032 — Fix current Playwright failures (bundle)
+## V2-032 — Fix current Playwright failures (bundle) ✅ 2026-03-05
 **Failures listed (must resolve):**
 1) a11y: missing `<main>`
 2) auth: strict locator conflict for “Terms & Conditions”
@@ -833,6 +833,16 @@ Claude should treat this as the “source of truth” for the current environmen
 **Acceptance:**
 - Full Playwright `--project=full` passes (or at minimum the previously failing tests pass, with evidence).
 - No new flakes introduced.
+
+**Done (2026-03-05):**
+- (1) Wrapped `LoadingScreen` in `<main>` so landmark exists before engine loads
+- (2) Changed auth-flows test to use `a[href=”/terms”]` locator instead of ambiguous `text=Terms & Conditions`
+- (3) Updated csv-import.spec.ts: csvImport removed from catalog (H2-1), test now verifies absence
+- (4) Fixed plot-smoke test: xyPlot has single `data` input port, not `x`/`y`; updated edges + assertions
+- (5) Fixed variables test: replaced `setInput` (sets manualValues, wrong for number blocks) with `applyPatch(updateNodeData)`
+- (6) Removed `pi` and `euler` from wasm-engine catalog expectations (H4-1: moved to Constant picker)
+- (7) Updated vector length mismatch test: engine pads shorter vector with NaN (H2-2), not error
+- verify-ci.sh green
 
 ## V2-033 — GitHub Actions hardening: add explicit permissions block [x]
 **Problem:** workflow warns missing `permissions`.

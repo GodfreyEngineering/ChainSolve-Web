@@ -113,12 +113,12 @@ test.describe('WASM engine — catalog & handshake (W9.1)', () => {
       return engine.catalog.map((e) => e.opId)
     })
 
-    // Core scalar ops
-    for (const op of ['add', 'subtract', 'multiply', 'divide', 'sin', 'cos', 'pi', 'euler']) {
+    // Core scalar ops (H4-1: pi/euler removed from catalog — accessed via Constant picker)
+    for (const op of ['add', 'subtract', 'multiply', 'divide', 'sin', 'cos']) {
       expect(opIds).toContain(op)
     }
-    // Data + vector + table + plot (Pro ops)
-    for (const op of ['vectorInput', 'vectorSum', 'tableFilter', 'xyPlot', 'csvImport']) {
+    // Data + vector + table + plot (Pro ops; H2-1: csvImport removed)
+    for (const op of ['vectorInput', 'vectorSum', 'tableFilter', 'xyPlot']) {
       expect(opIds).toContain(op)
     }
   })
@@ -366,7 +366,7 @@ test.describe('WASM engine — correctness contract (W9.3)', () => {
     expect(r.values.add.value).toEqual([11, 12, 13])
   })
 
-  test('vector length mismatch produces error', async ({ enginePage: page }) => {
+  test('vector length mismatch pads shorter with NaN (H2-2)', async ({ enginePage: page }) => {
     const result = await page.evaluate(async () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         evaluateGraph: (s: unknown) => Promise<unknown>
@@ -386,9 +386,15 @@ test.describe('WASM engine — correctness contract (W9.3)', () => {
       })
     })
 
-    const r = result as { values: Record<string, { kind: string; message?: string }> }
-    expect(r.values.add.kind).toBe('error')
-    expect(r.values.add.message).toContain('length')
+    const r = result as {
+      values: Record<string, { kind: string; value?: number[] }>
+    }
+    // H2-2: mismatched vector lengths pad shorter with NaN instead of erroring.
+    expect(r.values.add.kind).toBe('vector')
+    expect(r.values.add.value).toHaveLength(3)
+    expect(r.values.add.value![0]).toBe(5) // 1 + 4
+    expect(r.values.add.value![1]).toBe(7) // 2 + 5
+    expect(r.values.add.value![2]).toBeNaN() // 3 + NaN
   })
 
   test('unary broadcast: sin of vector', async ({ enginePage: page }) => {

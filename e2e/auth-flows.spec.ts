@@ -76,7 +76,8 @@ test.describe('Auth flows: Signup page (E11-1)', () => {
 
   test('signup page has Terms & Conditions checkbox', async ({ page }) => {
     await page.goto('/signup')
-    await expect(page.locator('text=Terms & Conditions')).toBeVisible()
+    // Use a link-specific locator to avoid conflict between checkbox label and link text.
+    await expect(page.locator('a[href="/terms"]')).toBeVisible()
   })
 
   test('signup page has marketing opt-in checkbox', async ({ page }) => {

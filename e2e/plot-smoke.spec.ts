@@ -72,26 +72,26 @@ test.describe('Plot smoke (P098)', () => {
       const engine = (window as Record<string, unknown>).__chainsolve_engine as {
         evaluateGraph: (snap: unknown) => Promise<unknown>
       }
+      // xyPlot has a single 'data' input port (plot-blocks.ts).
       return engine.evaluateGraph({
         version: 1,
         nodes: [
-          { id: 'xs', blockType: 'vectorInput', data: { vectorData: [1, 2, 3, 4, 5] } },
-          { id: 'ys', blockType: 'vectorInput', data: { vectorData: [1, 4, 9, 16, 25] } },
+          { id: 'vec', blockType: 'vectorInput', data: { vectorData: [1, 2, 3, 4, 5] } },
           { id: 'plot', blockType: 'xyPlot', data: {} },
         ],
         edges: [
-          { id: 'e1', source: 'xs', sourceHandle: 'out', target: 'plot', targetHandle: 'x' },
-          { id: 'e2', source: 'ys', sourceHandle: 'out', target: 'plot', targetHandle: 'y' },
+          { id: 'e1', source: 'vec', sourceHandle: 'out', target: 'plot', targetHandle: 'data' },
         ],
       })
     })
 
     const r = result as {
-      values: Record<string, { kind: string }>
+      values: Record<string, { kind: string; value?: number }>
       diagnostics: unknown[]
     }
     expect(r.values.plot).toBeDefined()
-    expect(r.values.plot.kind).not.toBe('error')
+    expect(r.values.plot.kind).toBe('scalar') // data_point_count returns scalar
+    expect(r.values.plot.value).toBe(5) // 5 data points
     expect(r.diagnostics).toEqual([])
   })
 
