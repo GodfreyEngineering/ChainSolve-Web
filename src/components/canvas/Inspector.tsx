@@ -8,6 +8,7 @@
 
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { MousePointer } from 'lucide-react'
 import { useNodes, useEdges, useReactFlow } from '@xyflow/react'
 import { useComputed } from '../../contexts/ComputedContext'
 import { useEngine } from '../../contexts/EngineContext'
@@ -172,6 +173,7 @@ export function Inspector({
             fontSize: 'var(--font-sm)',
           }}
         >
+          <MousePointer size={24} style={{ opacity: 0.3, marginBottom: 8 }} />
           <div>{t('inspector.empty')}</div>
           <div
             style={{

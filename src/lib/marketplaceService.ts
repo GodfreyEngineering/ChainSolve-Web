@@ -255,7 +255,7 @@ export async function recordInstall(itemId: string): Promise<void> {
  * 1. Fetches the item (including its payload).
  * 2. Calls importProject() to create a new project from the template snapshot.
  * 3. Records the install in marketplace_purchases.
- * 4. Returns the new project ID so the caller can navigate to /canvas/:id.
+ * 4. Returns the new project ID so the caller can navigate to /app/:id.
  *
  * Throws if the user is unauthenticated, the item is not found, the category
  * is not 'template', or the payload is missing.

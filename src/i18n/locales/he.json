@@ -63,7 +63,13 @@
     "manageBilling": "ניהול חיוב",
     "redirecting": "מפנה…",
     "filterFolder": "{{name}}",
-    "noFolderProjects": "אין פרויקטים בתיקייה זו."
+    "noFolderProjects": "אין פרויקטים בתיקייה זו.",
+    "renamePrompt": "שנה שם פרויקט:",
+    "confirmDelete": "למחוק את \"{{name}}\"?",
+    "importProject": "ייבוא",
+    "loadingProjects": "טוען...",
+    "noProjectsTitle": "אין פרויקטים עדיין",
+    "noProjectsHint": "צור אחד כדי להתחיל"
   },
   "projects": {
     "title": "פרויקטים",
@@ -829,5 +835,30 @@
   "dock": {
     "library": "ספרייה",
     "console": "קונסולה"
+  },
+  "sidebar": {
+    "projects": "פרויקטים",
+    "explore": "חקור",
+    "recent": "אחרונים",
+    "collapse": "כווץ סרגל צד",
+    "expand": "הרחב סרגל צד",
+    "noRecent": "אין פרויקטים אחרונים",
+    "noRecentHint": "פרויקטים שתפתח יופיעו כאן",
+    "projectsCount": "פרויקטים",
+    "exploreTitle": "חקור תבניות",
+    "exploreDesc": "עיין בתבניות קהילתיות, שרשראות מוכנות ופרויקטים משותפים.",
+    "openExplore": "פתח חקירה"
+  },
+  "welcome": {
+    "title": "ברוכים הבאים למרחב העבודה שלך",
+    "subtitle": "פתח פרויקט מסרגל הצד או התחל משהו חדש.",
+    "newProject": "פרויקט חדש",
+    "newProjectDesc": "התחל פרויקט חדש",
+    "scratchCanvas": "לוח מהיר",
+    "scratchDesc": "חישובים מהירים, ללא שמירה",
+    "browseTemplates": "עיין בתבניות",
+    "browseDesc": "תבניות קהילתיות",
+    "importProject": "ייבא פרויקט",
+    "importDesc": "מקובץ chainsolvejson."
   }
 }

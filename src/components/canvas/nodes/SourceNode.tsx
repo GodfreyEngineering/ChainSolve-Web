@@ -23,6 +23,7 @@ import { getEntitlements } from '../../../lib/entitlements'
 import { NODE_STYLES as s } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
+import { useValueFlash } from '../../../hooks/useValueFlash'
 
 const LazyUnitPicker = lazy(() =>
   import('../editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
@@ -199,6 +200,7 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
   const computed = useComputed()
   const showPopover = useShowValuePopover()
   const value = computed.get(id)
+  const flashing = useValueFlash(value)
   const isLocked = draggable === false
 
   const updateVarValue = useVariablesStore((s) => s.updateValue)
@@ -287,7 +289,7 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
           {isLocked && <span style={{ fontSize: '0.6rem', lineHeight: 1, opacity: 0.7 }}>🔒</span>}
           <span
-            className="cs-node-header-value cs-value-badge nodrag"
+            className={`cs-node-header-value cs-value-badge nodrag${flashing ? ' cs-flashing' : ''}`}
             style={{ ...s.headerValue, color: typeColor, cursor: 'pointer' }}
             onClick={(e) => {
               e.stopPropagation()

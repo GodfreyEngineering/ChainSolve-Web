@@ -1,8 +1,8 @@
 /**
  * CanvasPage — full-page canvas editor with multi-canvas "Sheets" (W10.7).
  *
- * Route: /canvas/:projectId   (project mode — autosaved to Supabase storage)
- *        /canvas              (scratch mode — no persistence)
+ * Route: /app/:projectId       (project mode — autosaved to Supabase storage)
+ *        /app                 (scratch mode via WorkspacePage — no persistence)
  *
  * Lifecycle:
  *   1. Mount → load project row + canvases list from DB.
@@ -621,7 +621,7 @@ export default function CanvasPage() {
         return
       }
       const proj = await createProject('Untitled project')
-      navigate(`/canvas/${proj.id}`)
+      navigate(`/app/${proj.id}`)
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : 'Failed to create project', 'error')
     }
@@ -629,7 +629,7 @@ export default function CanvasPage() {
 
   const handleOpenProject = useCallback(
     async (id: string) => {
-      navigate(`/canvas/${id}`)
+      navigate(`/app/${id}`)
     },
     [navigate],
   )
@@ -640,7 +640,7 @@ export default function CanvasPage() {
         if (projectId) {
           const proj = await duplicateProject(projectId, name)
           addRecentProject(proj.id, proj.name)
-          navigate(`/canvas/${proj.id}`)
+          navigate(`/app/${proj.id}`)
         } else {
           // Scratch canvas → create new project with current graph.
           // Require authentication — prompt login if not signed in.
@@ -657,7 +657,7 @@ export default function CanvasPage() {
             createdAt: proj.created_at,
           })
           addRecentProject(proj.id, proj.name)
-          navigate(`/canvas/${proj.id}`)
+          navigate(`/app/${proj.id}`)
         }
       } catch (err: unknown) {
         toast(err instanceof Error ? err.message : 'Failed to save copy', 'error')
@@ -1586,7 +1586,7 @@ export default function CanvasPage() {
 
       if (result.ok && result.projectId) {
         toast(t('importProject.success'), 'success')
-        navigate(`/canvas/${result.projectId}`)
+        navigate(`/app/${result.projectId}`)
       } else {
         toast(t('importProject.failed'), 'error')
         const { downloadImportReport } = await import('../lib/chainsolvejson/import/report')

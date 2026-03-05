@@ -64,7 +64,13 @@
     "trialEndsIn_other": "La tua prova termina tra {{count}} giorni. Aggiorna per mantenere l'accesso.",
     "upgrade": "Aggiorna — £10/mese",
     "manageBilling": "Gestisci fatturazione",
-    "redirecting": "Reindirizzamento…"
+    "redirecting": "Reindirizzamento…",
+    "renamePrompt": "Rinomina progetto:",
+    "confirmDelete": "Eliminare \"{{name}}\"?",
+    "importProject": "Importa",
+    "loadingProjects": "Caricamento...",
+    "noProjectsTitle": "Nessun progetto",
+    "noProjectsHint": "Creane uno per iniziare"
   },
   "contact": {
     "support": "Assistenza",
@@ -1666,5 +1672,30 @@
     "dragToResize": "Trascina per ridimensionare",
     "library": "Libreria",
     "console": "Console"
+  },
+  "sidebar": {
+    "projects": "Progetti",
+    "explore": "Esplora",
+    "recent": "Recenti",
+    "collapse": "Chiudi barra laterale",
+    "expand": "Apri barra laterale",
+    "noRecent": "Nessun progetto recente",
+    "noRecentHint": "I progetti che apri appariranno qui",
+    "projectsCount": "progetti",
+    "exploreTitle": "Esplora modelli",
+    "exploreDesc": "Sfoglia modelli della community, catene predefinite e progetti condivisi.",
+    "openExplore": "Apri Esplora"
+  },
+  "welcome": {
+    "title": "Benvenuto nel tuo spazio di lavoro",
+    "subtitle": "Apri un progetto dalla barra laterale o inizia qualcosa di nuovo.",
+    "newProject": "Nuovo progetto",
+    "newProjectDesc": "Inizia un progetto nuovo",
+    "scratchCanvas": "Tela rapida",
+    "scratchDesc": "Calcoli veloci, senza salvare",
+    "browseTemplates": "Sfoglia modelli",
+    "browseDesc": "Modelli della community",
+    "importProject": "Importa progetto",
+    "importDesc": "Da file .chainsolvejson"
   }
 }

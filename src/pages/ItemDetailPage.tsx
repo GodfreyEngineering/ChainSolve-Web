@@ -493,7 +493,7 @@ export default function ItemDetailPage() {
         // Fork the template into the user's projects, then navigate there
         const projectId = await forkTemplate(itemId)
         setProjectCount((c) => c + 1)
-        navigate(`/canvas/${projectId}`)
+        navigate(`/app/${projectId}`)
         return
       }
       if (item?.category === 'block_pack') {

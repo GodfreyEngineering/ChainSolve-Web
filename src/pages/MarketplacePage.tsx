@@ -359,7 +359,7 @@ export default function MarketplacePage() {
         if (item.category === 'template') {
           const projectId = await forkTemplate(itemId)
           setProjectCount((c) => c + 1)
-          navigate(`/canvas/${projectId}`)
+          navigate(`/app/${projectId}`)
           return
         }
         if (item.category === 'block_pack') {
@@ -763,8 +763,8 @@ export default function MarketplacePage() {
                       style={s.installBtn(false, false, false)}
                       onClick={() => {
                         createProjectFromTemplate(tmpl.id)
-                          .then((proj) => navigate(`/canvas/${proj.id}`))
-                          .catch(() => navigate('/canvas'))
+                          .then((proj) => navigate(`/app/${proj.id}`))
+                          .catch(() => navigate('/app'))
                       }}
                     >
                       {t('marketplace.useTemplate')}

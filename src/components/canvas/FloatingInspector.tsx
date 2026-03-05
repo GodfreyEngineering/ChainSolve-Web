@@ -7,8 +7,10 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppWindow } from '../ui/AppWindow'
+import { BottomSheet } from '../ui/BottomSheet'
 import { Inspector } from './Inspector'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 export const INSPECTOR_WINDOW_ID = 'inspector'
 const DEFAULT_GEOMETRY = { width: 320, height: 500 }
@@ -31,6 +33,7 @@ export function FloatingInspector({
   canUseGroups,
 }: FloatingInspectorProps) {
   const { t } = useTranslation()
+  const isMobile = useIsMobile()
   const { closeWindow } = useWindowManager()
   const [, setDummy] = useState(0)
 
@@ -41,6 +44,65 @@ export function FloatingInspector({
   // Force a re-render when user interacts (keeps content fresh)
   const noop = useCallback(() => setDummy((v) => v + 1), [])
 
+  const pinBar = (
+    <div style={pinBarStyle}>
+      <button
+        onClick={onTogglePin}
+        style={{
+          ...pinBtnStyle,
+          color: pinned ? 'var(--warning)' : 'rgba(244,244,243,0.4)',
+        }}
+        title={
+          pinned
+            ? t('inspector.unpin', 'Unpin selection')
+            : t('inspector.pin', 'Pin to current node')
+        }
+        aria-label={
+          pinned
+            ? t('inspector.unpin', 'Unpin selection')
+            : t('inspector.pin', 'Pin to current node')
+        }
+      >
+        {pinned ? '\u25C9' : '\u25CB'}
+        <span style={{ marginLeft: 4, fontSize: '0.7rem', opacity: 0.7 }}>
+          {pinned
+            ? t('inspector.pinned', 'Pinned')
+            : t('inspector.followSelection', 'Following selection')}
+        </span>
+      </button>
+    </div>
+  )
+
+  const inspectorContent = (
+    <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <Inspector
+        nodeId={nodeId}
+        width={0}
+        onClose={handleClose}
+        onResizeStart={noop}
+        onToggleCollapse={onToggleCollapse}
+        onUngroupNode={onUngroupNode}
+        canUseGroups={canUseGroups}
+        floating
+      />
+    </div>
+  )
+
+  // Mobile: render in a BottomSheet instead of floating AppWindow
+  if (isMobile) {
+    return (
+      <BottomSheet
+        open
+        onClose={handleClose}
+        title={t('toolbar.inspector', 'Inspector')}
+        height="half"
+      >
+        {pinBar}
+        {inspectorContent}
+      </BottomSheet>
+    )
+  }
+
   return (
     <AppWindow
       windowId={INSPECTOR_WINDOW_ID}
@@ -48,47 +110,8 @@ export function FloatingInspector({
       minWidth={260}
       minHeight={280}
     >
-      {/* Pin toggle bar */}
-      <div style={pinBarStyle}>
-        <button
-          onClick={onTogglePin}
-          style={{
-            ...pinBtnStyle,
-            color: pinned ? 'var(--warning)' : 'rgba(244,244,243,0.4)',
-          }}
-          title={
-            pinned
-              ? t('inspector.unpin', 'Unpin selection')
-              : t('inspector.pin', 'Pin to current node')
-          }
-          aria-label={
-            pinned
-              ? t('inspector.unpin', 'Unpin selection')
-              : t('inspector.pin', 'Pin to current node')
-          }
-        >
-          {pinned ? '\u25C9' : '\u25CB'}
-          <span style={{ marginLeft: 4, fontSize: '0.7rem', opacity: 0.7 }}>
-            {pinned
-              ? t('inspector.pinned', 'Pinned')
-              : t('inspector.followSelection', 'Following selection')}
-          </span>
-        </button>
-      </div>
-
-      {/* Reuse existing Inspector — pass width=0 since AppWindow handles sizing */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <Inspector
-          nodeId={nodeId}
-          width={0}
-          onClose={handleClose}
-          onResizeStart={noop}
-          onToggleCollapse={onToggleCollapse}
-          onUngroupNode={onUngroupNode}
-          canUseGroups={canUseGroups}
-          floating
-        />
-      </div>
+      {pinBar}
+      {inspectorContent}
     </AppWindow>
   )
 }

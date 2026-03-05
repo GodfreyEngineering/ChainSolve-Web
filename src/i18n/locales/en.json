@@ -64,7 +64,13 @@
     "trialEndsIn_other": "Your trial ends in {{count}} days. Upgrade to keep full access.",
     "upgrade": "Upgrade — £10/mo",
     "manageBilling": "Manage billing",
-    "redirecting": "Redirecting…"
+    "redirecting": "Redirecting…",
+    "renamePrompt": "Rename project:",
+    "confirmDelete": "Delete \"{{name}}\"?",
+    "importProject": "Import",
+    "loadingProjects": "Loading...",
+    "noProjectsTitle": "No projects yet",
+    "noProjectsHint": "Create one to get started"
   },
   "contact": {
     "support": "Support",
@@ -1685,5 +1691,30 @@
     "dragToResize": "Drag to resize",
     "library": "Library",
     "console": "Console"
+  },
+  "sidebar": {
+    "projects": "Projects",
+    "explore": "Explore",
+    "recent": "Recent",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "noRecent": "No recent projects",
+    "noRecentHint": "Projects you open will appear here",
+    "projectsCount": "projects",
+    "exploreTitle": "Explore Templates",
+    "exploreDesc": "Browse community templates, ready-made chains, and shared projects.",
+    "openExplore": "Open Explore"
+  },
+  "welcome": {
+    "title": "Welcome to your workspace",
+    "subtitle": "Open a project from the sidebar, or start something new.",
+    "newProject": "New Project",
+    "newProjectDesc": "Start a fresh project",
+    "scratchCanvas": "Scratch Canvas",
+    "scratchDesc": "Quick calculations, no save",
+    "browseTemplates": "Browse Templates",
+    "browseDesc": "Community templates",
+    "importProject": "Import Project",
+    "importDesc": "From .chainsolvejson file"
   }
 }

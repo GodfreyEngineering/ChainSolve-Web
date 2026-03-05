@@ -355,6 +355,9 @@ button:focus:not(:focus-visible) {
 [data-badges='false'] .cs-value-badge {
   display: none !important;
 }
+.cs-value-badge.cs-flashing {
+  animation: cs-value-flash 0.3s ease-out;
+}
 
 /* ── Edge badges — value labels on wires ─────────────────────────────────── */
 [data-edge-badges='false'] .cs-edge-badge {
@@ -792,6 +795,37 @@ button:focus:not(:focus-visible) {
   }
 }
 
+/* ── V3-UI Phase 6: Mobile responsiveness ──────────────────────────────── */
+@media (max-width: 899px) {
+  /* 6.4: Force toolbar to bottom on mobile */
+  [data-cs-toolbar] {
+    bottom: 8px !important;
+    top: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    flex-direction: row !important;
+    max-width: calc(100% - 16px) !important;
+    overflow-x: auto !important;
+  }
+  /* 6.5: Larger touch targets for toolbar buttons on mobile */
+  [data-cs-toolbar] button {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  /* 6.5: Larger ReactFlow handles on mobile */
+  .react-flow__handle {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  /* 6.5: Larger node inline inputs on mobile */
+  .cs-node-input {
+    min-height: 36px !important;
+    padding: 6px 8px !important;
+    font-size: 0.82rem !important;
+  }
+}
+
 /* ── Animations ───────────────────────────────────────────────────────────── */
 @keyframes cs-fade-in {
   from {
@@ -903,6 +937,30 @@ button:focus:not(:focus-visible) {
   box-shadow:
     inset 0 8px 6px -6px rgba(0, 0, 0, 0.2),
     inset 0 -8px 6px -6px rgba(0, 0, 0, 0.2);
+}
+
+/* ── V3-UI Phase 7: Node entrance animation ────────────────────────────── */
+.react-flow__node[data-entering='true'] {
+  animation: cs-scale-in 0.2s ease-out;
+}
+
+/* ── V3-UI Phase 7: Button micro-interactions ──────────────────────────── */
+.cs-btn:active,
+button.cs-press:active {
+  transform: scale(0.97);
+}
+[data-cs-toolbar] button:hover {
+  box-shadow: 0 0 8px var(--primary-glow, rgba(28, 171, 176, 0.3));
+}
+
+/* ── V3-UI Phase 7: Focus-visible ring ─────────────────────────────────── */
+button:focus-visible,
+[role='button']:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 /* ── Plan badge shimmer — J3-2 ───────────────────────────────────────────── */

@@ -64,7 +64,13 @@
     "trialEndsIn_other": "Ihre Testphase endet in {{count}} Tagen. Upgraden Sie, um vollen Zugang zu behalten.",
     "upgrade": "Upgrade — £10/Mo.",
     "manageBilling": "Abrechnung verwalten",
-    "redirecting": "Weiterleitung…"
+    "redirecting": "Weiterleitung…",
+    "renamePrompt": "Projekt umbenennen:",
+    "confirmDelete": "\"{{name}}\" löschen?",
+    "importProject": "Importieren",
+    "loadingProjects": "Laden...",
+    "noProjectsTitle": "Noch keine Projekte",
+    "noProjectsHint": "Erstelle eines, um loszulegen"
   },
   "contact": {
     "support": "Support",
@@ -1666,5 +1672,30 @@
     "dragToResize": "Ziehen zum Anpassen",
     "library": "Bibliothek",
     "console": "Konsole"
+  },
+  "sidebar": {
+    "projects": "Projekte",
+    "explore": "Entdecken",
+    "recent": "Kürzlich",
+    "collapse": "Seitenleiste einklappen",
+    "expand": "Seitenleiste ausklappen",
+    "noRecent": "Keine kürzlichen Projekte",
+    "noRecentHint": "Projekte, die du öffnest, werden hier angezeigt",
+    "projectsCount": "Projekte",
+    "exploreTitle": "Vorlagen entdecken",
+    "exploreDesc": "Durchsuche Community-Vorlagen, vorgefertigte Ketten und geteilte Projekte.",
+    "openExplore": "Entdecken öffnen"
+  },
+  "welcome": {
+    "title": "Willkommen in deinem Arbeitsbereich",
+    "subtitle": "Öffne ein Projekt aus der Seitenleiste oder starte etwas Neues.",
+    "newProject": "Neues Projekt",
+    "newProjectDesc": "Ein neues Projekt starten",
+    "scratchCanvas": "Schnelle Leinwand",
+    "scratchDesc": "Schnelle Berechnungen, ohne Speichern",
+    "browseTemplates": "Vorlagen durchsuchen",
+    "browseDesc": "Community-Vorlagen",
+    "importProject": "Projekt importieren",
+    "importDesc": "Aus .chainsolvejson-Datei"
   }
 }

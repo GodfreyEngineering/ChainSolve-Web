@@ -64,7 +64,13 @@
     "trialEndsIn_other": "Tu prueba termina en {{count}} días. Actualiza para mantener el acceso.",
     "upgrade": "Actualizar — £10/mes",
     "manageBilling": "Gestionar facturación",
-    "redirecting": "Redirigiendo…"
+    "redirecting": "Redirigiendo…",
+    "renamePrompt": "Renombrar proyecto:",
+    "confirmDelete": "¿Eliminar \"{{name}}\"?",
+    "importProject": "Importar",
+    "loadingProjects": "Cargando...",
+    "noProjectsTitle": "Sin proyectos aún",
+    "noProjectsHint": "Crea uno para empezar"
   },
   "contact": {
     "support": "Soporte",
@@ -1666,5 +1672,30 @@
     "dragToResize": "Arrastrar para redimensionar",
     "library": "Biblioteca",
     "console": "Consola"
+  },
+  "sidebar": {
+    "projects": "Proyectos",
+    "explore": "Explorar",
+    "recent": "Recientes",
+    "collapse": "Cerrar barra lateral",
+    "expand": "Abrir barra lateral",
+    "noRecent": "Sin proyectos recientes",
+    "noRecentHint": "Los proyectos que abras aparecerán aquí",
+    "projectsCount": "proyectos",
+    "exploreTitle": "Explorar plantillas",
+    "exploreDesc": "Navega plantillas de la comunidad, cadenas predefinidas y proyectos compartidos.",
+    "openExplore": "Abrir Explorar"
+  },
+  "welcome": {
+    "title": "Bienvenido a tu espacio de trabajo",
+    "subtitle": "Abre un proyecto desde la barra lateral o comienza algo nuevo.",
+    "newProject": "Nuevo proyecto",
+    "newProjectDesc": "Comienza un proyecto nuevo",
+    "scratchCanvas": "Lienzo rápido",
+    "scratchDesc": "Cálculos rápidos, sin guardar",
+    "browseTemplates": "Explorar plantillas",
+    "browseDesc": "Plantillas de la comunidad",
+    "importProject": "Importar proyecto",
+    "importDesc": "Desde archivo .chainsolvejson"
   }
 }

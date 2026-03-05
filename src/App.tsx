@@ -1,11 +1,15 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import Login from './pages/Login'
-import AppShell from './pages/AppShell'
-import CanvasPage from './pages/CanvasPage'
 import { SettingsRedirect } from './components/SettingsRedirect'
 import { isDiagnosticsUIEnabled } from './lib/devFlags'
 import { RouteSkeleton } from './components/ui/RouteSkeleton'
+
+// Lazy-load WorkspacePage (unified single-page workspace)
+const WorkspacePage = lazy(() => import('./pages/WorkspacePage'))
+
+// CanvasPage still used for legacy /canvas scratch route
+const CanvasPage = lazy(() => import('./pages/CanvasPage'))
 
 // Lazy-load diagnostics page so it is not included in the main bundle for
 // production users unless VITE_DIAGNOSTICS_UI_ENABLED=true.
@@ -98,6 +102,11 @@ function BillingCancel() {
   )
 }
 
+function CanvasRedirect() {
+  const { projectId } = useParams<{ projectId: string }>()
+  return <Navigate to={`/app/${projectId}`} replace />
+}
+
 export default function App() {
   return (
     <Routes>
@@ -121,9 +130,33 @@ export default function App() {
           </Suspense>
         }
       />
-      <Route path="/app" element={<AppShell />} />
-      <Route path="/canvas" element={<CanvasPage />} />
-      <Route path="/canvas/:projectId" element={<CanvasPage />} />
+      <Route
+        path="/app"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
+            <WorkspacePage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/app/:projectId"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
+            <WorkspacePage />
+          </Suspense>
+        }
+      />
+      {/* Legacy scratch canvas — kept for backward compat + e2e tests */}
+      <Route
+        path="/canvas"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
+            <CanvasPage />
+          </Suspense>
+        }
+      />
+      {/* Legacy project canvas routes redirect to workspace */}
+      <Route path="/canvas/:projectId" element={<CanvasRedirect />} />
       <Route path="/settings" element={<SettingsRedirect />} />
       <Route path="/billing/success" element={<BillingSuccess />} />
       <Route path="/billing/cancel" element={<BillingCancel />} />

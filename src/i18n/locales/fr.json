@@ -64,7 +64,13 @@
     "trialEndsIn_other": "Votre essai se termine dans {{count}} jours. Passez à la version supérieure.",
     "upgrade": "Passer au Pro — £10/mois",
     "manageBilling": "Gérer la facturation",
-    "redirecting": "Redirection…"
+    "redirecting": "Redirection…",
+    "renamePrompt": "Renommer le projet :",
+    "confirmDelete": "Supprimer \"{{name}}\" ?",
+    "importProject": "Importer",
+    "loadingProjects": "Chargement...",
+    "noProjectsTitle": "Aucun projet",
+    "noProjectsHint": "Créez-en un pour commencer"
   },
   "contact": {
     "support": "Assistance",
@@ -1666,5 +1672,30 @@
     "dragToResize": "Glisser pour redimensionner",
     "library": "Bibliothèque",
     "console": "Console"
+  },
+  "sidebar": {
+    "projects": "Projets",
+    "explore": "Explorer",
+    "recent": "Récents",
+    "collapse": "Réduire le panneau latéral",
+    "expand": "Ouvrir le panneau latéral",
+    "noRecent": "Aucun projet récent",
+    "noRecentHint": "Les projets que vous ouvrez apparaîtront ici",
+    "projectsCount": "projets",
+    "exploreTitle": "Explorer les modèles",
+    "exploreDesc": "Parcourez les modèles communautaires, chaînes prêtes à l'emploi et projets partagés.",
+    "openExplore": "Ouvrir Explorer"
+  },
+  "welcome": {
+    "title": "Bienvenue dans votre espace de travail",
+    "subtitle": "Ouvrez un projet depuis le panneau latéral ou commencez quelque chose de nouveau.",
+    "newProject": "Nouveau projet",
+    "newProjectDesc": "Démarrer un nouveau projet",
+    "scratchCanvas": "Canevas rapide",
+    "scratchDesc": "Calculs rapides, sans sauvegarde",
+    "browseTemplates": "Parcourir les modèles",
+    "browseDesc": "Modèles communautaires",
+    "importProject": "Importer un projet",
+    "importDesc": "Depuis un fichier .chainsolvejson"
   }
 }

@@ -31,6 +31,7 @@ import { getConversionFactor, areSameDimension } from '../../../units/unitCompat
 import { NODE_STYLES as s } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
+import { useValueFlash } from '../../../hooks/useValueFlash'
 
 const LazyUnitPicker = lazy(() =>
   import('../editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
@@ -44,6 +45,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const showPopover = useShowValuePopover()
   const { t } = useTranslation()
   const value = computed.get(id)
+  const flashing = useValueFlash(value)
   const isLocked = draggable === false
 
   const def = BLOCK_REGISTRY.get(nd.blockType)
@@ -167,7 +169,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
             />
           )}
           <span
-            className="cs-node-header-value cs-value-badge nodrag"
+            className={`cs-node-header-value cs-value-badge nodrag${flashing ? ' cs-flashing' : ''}`}
             style={{ ...s.headerValue, color: typeColor, cursor: 'pointer' }}
             onClick={(e) => {
               e.stopPropagation()

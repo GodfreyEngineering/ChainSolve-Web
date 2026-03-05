@@ -98,6 +98,7 @@ const LazyGraphHealthPanel = lazy(() => import('./GraphHealthPanel'))
 import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { BottomSheet } from '../ui/BottomSheet'
 import { ValuePopoverContext, type ShowValuePopover } from '../../contexts/ValuePopoverContext'
 const LazyValuePopover = lazy(() =>
   import('./ValuePopover').then((m) => ({ default: m.ValuePopover })),
@@ -1876,8 +1877,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     </div>
   )
 
-  // ── Drawer backdrop (mobile only — for library drawer) ─────────────────────
-  const showBackdrop = isMobile && libVisible
+  // ── Drawer backdrop (mobile only — BottomSheet handles its own overlay) ────
+  const showBackdrop = false
 
   const canvasSettings = useMemo(
     () => ({
@@ -2190,16 +2191,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   />
                 )}
 
-                {libVisible && !readOnly && isMobile && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      bottom: 0,
-                      zIndex: 20,
-                      width: mobileDrawerWidth,
-                    }}
+                {!readOnly && isMobile && (
+                  <BottomSheet
+                    open={libVisible}
+                    onClose={() => setLibVisible(false)}
+                    title={t('dock.library', 'Library')}
+                    height="full"
                   >
                     <BlockLibrary
                       width={mobileDrawerWidth}
@@ -2209,7 +2206,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                       onInsertTemplate={onInsertTemplate}
                       filterMainOverride={libFilterMain}
                     />
-                  </div>
+                  </BottomSheet>
                 )}
 
                 {/* Context menu */}
