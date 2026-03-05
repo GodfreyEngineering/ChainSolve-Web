@@ -253,7 +253,8 @@
     "bgDots": "Background dots",
     "annotations": "הוסף הערה",
     "hiddenView": "הצג בלוקים מוסתרים",
-    "showAllHidden": "הצג את כל הבלוקים המוסתרים"
+    "showAllHidden": "הצג את כל הבלוקים המוסתרים",
+    "noMatchesHint": "נסה מילות מפתח אחרות."
   },
   "annotation": {
     "text": "טקסט",
@@ -816,6 +817,13 @@
     "favourites": "מועדפים",
     "recent": "אחרונים",
     "customFunctions": "פונקציות מותאמות",
-    "noCustomFunctions": "אין עדיין פונקציות מותאמות."
+    "noCustomFunctions": "אין עדיין פונקציות מותאמות.",
+    "searchPlaceholder": "חפש…  (\"/\" למיקוד)",
+    "noMatches": "אין בלוקים תואמים ל-“{{query}}”",
+    "noMatchesHint": "נסה מילות מפתח אחרות או נקה את הסינון."
+  },
+  "inspector": {
+    "empty": "לחץ על בלוק כדי לבדוק",
+    "emptyHint": "או לחץ ימני על הקנבס כדי להוסיף אחד."
   }
 }

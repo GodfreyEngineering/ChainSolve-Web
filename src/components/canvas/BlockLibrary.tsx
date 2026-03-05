@@ -786,7 +786,7 @@ export function BlockLibrary({
             ref={searchRef}
             style={s.search}
             type="search"
-            placeholder='Search…  ("/" to focus)'
+            placeholder={t('blockLibrary.searchPlaceholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -871,7 +871,10 @@ export function BlockLibrary({
               textAlign: 'center',
             }}
           >
-            No blocks match &ldquo;{query}&rdquo;
+            <div>{t('blockLibrary.noMatches', { query })}</div>
+            <div style={{ marginTop: '0.25rem', fontSize: '0.7rem', opacity: 0.6 }}>
+              {t('blockLibrary.noMatchesHint')}
+            </div>
           </div>
         )}
 

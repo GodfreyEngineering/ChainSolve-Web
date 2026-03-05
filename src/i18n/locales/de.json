@@ -841,13 +841,16 @@
     "materials": "Materialien",
     "annotations": "Anmerkung einfuegen",
     "hiddenView": "Ausgeblendete Bloecke anzeigen",
-    "showAllHidden": "Alle ausgeblendeten Bloecke anzeigen"
+    "showAllHidden": "Alle ausgeblendeten Bloecke anzeigen",
+    "noMatchesHint": "Versuchen Sie andere Suchbegriffe."
   },
   "inspector": {
     "pin": "An aktuellen Knoten anheften",
     "unpin": "Auswahl lösen",
     "pinned": "Angeheftet",
-    "followSelection": "Auswahl folgen"
+    "followSelection": "Auswahl folgen",
+    "empty": "Klicken Sie auf einen Block",
+    "emptyHint": "Oder rechtsklicken, um einen einzufügen."
   },
   "annotation": {
     "text": "Text",
@@ -867,7 +870,10 @@
     "favourites": "Favoriten",
     "recent": "Kürzlich",
     "customFunctions": "Eigene Funktionen",
-    "noCustomFunctions": "Noch keine eigenen Funktionen."
+    "noCustomFunctions": "Noch keine eigenen Funktionen.",
+    "searchPlaceholder": "Suchen…  (\"/\" zum Fokussieren)",
+    "noMatches": "Keine Blöcke für „{{query}}“",
+    "noMatchesHint": "Versuchen Sie andere Suchbegriffe oder entfernen Sie den Filter."
   },
   "sheets": {
     "title": "Blätter",

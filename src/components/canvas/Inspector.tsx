@@ -172,7 +172,16 @@ export function Inspector({
             fontSize: 'var(--font-sm)',
           }}
         >
-          Click a block to inspect
+          <div>{t('inspector.empty')}</div>
+          <div
+            style={{
+              marginTop: '0.35rem',
+              fontSize: '0.72rem',
+              opacity: 0.6,
+            }}
+          >
+            {t('inspector.emptyHint')}
+          </div>
         </div>
         {!floating && (
           <div

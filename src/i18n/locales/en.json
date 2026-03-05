@@ -860,13 +860,16 @@
     "materials": "Materials",
     "annotations": "Insert annotation",
     "hiddenView": "Toggle hidden blocks view",
-    "showAllHidden": "Show all hidden blocks"
+    "showAllHidden": "Show all hidden blocks",
+    "noMatchesHint": "Try different keywords."
   },
   "inspector": {
     "pin": "Pin to current node",
     "unpin": "Unpin selection",
     "pinned": "Pinned",
-    "followSelection": "Following selection"
+    "followSelection": "Following selection",
+    "empty": "Click a block to inspect",
+    "emptyHint": "Or right-click the canvas to insert one."
   },
   "annotation": {
     "text": "Text",
@@ -886,7 +889,10 @@
     "favourites": "Favourites",
     "recent": "Recent",
     "customFunctions": "Custom Functions",
-    "noCustomFunctions": "No custom functions yet."
+    "noCustomFunctions": "No custom functions yet.",
+    "searchPlaceholder": "Search…  (\"/\" to focus)",
+    "noMatches": "No blocks match “{{query}}”",
+    "noMatchesHint": "Try different keywords or clear the filter."
   },
   "debugConsole": {
     "title": "Debug Console",

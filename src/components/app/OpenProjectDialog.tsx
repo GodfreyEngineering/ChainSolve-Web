@@ -124,7 +124,7 @@ export function OpenProjectDialog({ open, onClose, onSelect }: OpenProjectDialog
           border: '1px solid var(--border)',
         }}
       >
-        {loading && <div style={emptyStyle}>Loading…</div>}
+        {loading && <div style={emptyStyle}>{t('projects.loading')}</div>}
         {!loading && error && (
           <div style={emptyStyle}>
             <span>{t('project.loadError')}</span>

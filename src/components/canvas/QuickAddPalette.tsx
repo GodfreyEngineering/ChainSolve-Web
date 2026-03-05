@@ -267,7 +267,12 @@ export function QuickAddPalette({
           {isSearching && (
             <>
               {filtered.length === 0 ? (
-                <div style={emptyStyle}>{t('toolbar.noMatches')}</div>
+                <div style={emptyStyle}>
+                  <div>{t('toolbar.noMatches')}</div>
+                  <div style={{ marginTop: '0.25rem', fontSize: '0.7rem', opacity: 0.6 }}>
+                    {t('toolbar.noMatchesHint')}
+                  </div>
+                </div>
               ) : (
                 filtered.map((def) => {
                   const idx = navCounter++

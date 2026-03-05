@@ -841,13 +841,16 @@
     "materials": "Materiales",
     "annotations": "Insertar anotacion",
     "hiddenView": "Mostrar bloques ocultos",
-    "showAllHidden": "Mostrar todos los bloques ocultos"
+    "showAllHidden": "Mostrar todos los bloques ocultos",
+    "noMatchesHint": "Prueba con otras palabras clave."
   },
   "inspector": {
     "pin": "Fijar al nodo actual",
     "unpin": "Desfijar selección",
     "pinned": "Fijado",
-    "followSelection": "Siguiendo selección"
+    "followSelection": "Siguiendo selección",
+    "empty": "Haz clic en un bloque para inspeccionar",
+    "emptyHint": "O haz clic derecho en el lienzo para insertar uno."
   },
   "annotation": {
     "text": "Texto",
@@ -867,7 +870,10 @@
     "favourites": "Favoritos",
     "recent": "Recientes",
     "customFunctions": "Funciones personalizadas",
-    "noCustomFunctions": "Aún no hay funciones personalizadas."
+    "noCustomFunctions": "Aún no hay funciones personalizadas.",
+    "searchPlaceholder": "Buscar…  (\"/\" para enfocar)",
+    "noMatches": "Ningún bloque coincide con «{{query}}»",
+    "noMatchesHint": "Prueba con otras palabras clave o borra el filtro."
   },
   "sheets": {
     "title": "Hojas",

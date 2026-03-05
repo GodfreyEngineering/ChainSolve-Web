@@ -861,13 +861,22 @@ Claude should treat this as the “source of truth” for the current environmen
 # Phase V2-J — Polish & Professionalism Pass (make it feel like a flagship product)
 
 
-## V2-035 — Project UX: templates, groups, directory, and “idiot-proof” microcopy sweep
-**Requirement:** More explanatory text everywhere; make it idiot-proof.  
+## V2-035 — Project UX: templates, groups, directory, and “idiot-proof” microcopy sweep ✅ 2026-03-05
+**Requirement:** More explanatory text everywhere; make it idiot-proof.
 **Work:**
 - Review every menu/popup and improve descriptions
 - Add tooltips, helper text, and empty state copy
 **Acceptance:**
 - App feels self-explanatory without being cluttered.
+
+**Done (2026-03-05):**
+- Inspector empty state: i18n'd + added secondary hint (“Or right-click the canvas to insert one.”)
+- BlockLibrary: i18n'd search placeholder + no-match message with query interpolation + hint (“Try different keywords or clear the filter.”)
+- OpenProjectDialog: i18n'd hardcoded “Loading...” text
+- QuickAddPalette: added hint below “No blocks match” (“Try different keywords.”)
+- Added 7 new i18n keys (inspector.empty, inspector.emptyHint, blockLibrary.searchPlaceholder, blockLibrary.noMatches, blockLibrary.noMatchesHint, toolbar.noMatchesHint) across 6 locales
+- Audited all menus, popups, empty states — context menus, toolbar tooltips, variables panel, template manager, command palette, docs search all already have good microcopy
+- verify-ci.sh green (1474 i18n keys)
 
 ## V2-036 — Visual uplift pass: glow hovers, consistent iconography, no broken controls
 **Requirement:** “Upgrade 10000x” aesthetic; CAD-like icons; hover animations; no emojis.  

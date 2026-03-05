@@ -841,13 +841,16 @@
     "materials": "Matériaux",
     "annotations": "Ajouter une annotation",
     "hiddenView": "Afficher les blocs masques",
-    "showAllHidden": "Afficher tous les blocs masques"
+    "showAllHidden": "Afficher tous les blocs masques",
+    "noMatchesHint": "Essayez d’autres mots-clés."
   },
   "inspector": {
     "pin": "Épingler au nœud actuel",
     "unpin": "Détacher la sélection",
     "pinned": "Épinglé",
-    "followSelection": "Suit la sélection"
+    "followSelection": "Suit la sélection",
+    "empty": "Cliquez sur un bloc pour l'inspecter",
+    "emptyHint": "Ou cliquez droit sur le canevas pour en insérer un."
   },
   "annotation": {
     "text": "Texte",
@@ -867,7 +870,10 @@
     "favourites": "Favoris",
     "recent": "Récents",
     "customFunctions": "Fonctions personnalisées",
-    "noCustomFunctions": "Aucune fonction personnalisée."
+    "noCustomFunctions": "Aucune fonction personnalisée.",
+    "searchPlaceholder": "Rechercher…  (\"/\" pour focus)",
+    "noMatches": "Aucun bloc ne correspond à « {{query}} »",
+    "noMatchesHint": "Essayez d’autres mots-clés ou effacez le filtre."
   },
   "sheets": {
     "title": "Feuilles",

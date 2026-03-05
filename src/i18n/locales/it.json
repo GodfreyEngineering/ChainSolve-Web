@@ -841,13 +841,16 @@
     "materials": "Materiali",
     "annotations": "Inserisci annotazione",
     "hiddenView": "Mostra blocchi nascosti",
-    "showAllHidden": "Mostra tutti i blocchi nascosti"
+    "showAllHidden": "Mostra tutti i blocchi nascosti",
+    "noMatchesHint": "Prova con altre parole chiave."
   },
   "inspector": {
     "pin": "Fissa al nodo corrente",
     "unpin": "Sgancia la selezione",
     "pinned": "Fissato",
-    "followSelection": "Segue la selezione"
+    "followSelection": "Segue la selezione",
+    "empty": "Clicca su un blocco per ispezionarlo",
+    "emptyHint": "Oppure clicca destro sul canvas per inserirne uno."
   },
   "annotation": {
     "text": "Testo",
@@ -867,7 +870,10 @@
     "favourites": "Preferiti",
     "recent": "Recenti",
     "customFunctions": "Funzioni personalizzate",
-    "noCustomFunctions": "Nessuna funzione personalizzata."
+    "noCustomFunctions": "Nessuna funzione personalizzata.",
+    "searchPlaceholder": "Cerca…  (\"/\" per focus)",
+    "noMatches": "Nessun blocco corrisponde a “{{query}}”",
+    "noMatchesHint": "Prova con altre parole chiave o cancella il filtro."
   },
   "sheets": {
     "title": "Fogli",
