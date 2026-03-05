@@ -374,7 +374,7 @@ const primaryBtnStyle: CSSProperties = {
   fontSize: '0.9rem',
   fontWeight: 600,
   background: 'var(--color-primary, #2563eb)',
-  color: '#fff',
+  color: 'var(--color-on-primary)',
   border: 'none',
   borderRadius: 6,
   cursor: 'pointer',

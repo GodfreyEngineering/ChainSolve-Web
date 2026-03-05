@@ -78,7 +78,9 @@ export function EngineFatalError({ error, onRetry }: Props) {
         textAlign: 'center',
       }}
     >
-      <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#f87171' }}>{getTitle()}</h2>
+      <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--danger-text)' }}>
+        {getTitle()}
+      </h2>
 
       {/* Short error code badge */}
       <div style={{ marginBottom: '1rem' }}>
@@ -130,7 +132,7 @@ export function EngineFatalError({ error, onRetry }: Props) {
           style={{
             padding: '0.5rem 1.25rem',
             backgroundColor: '#3b82f6',
-            color: '#fff',
+            color: 'var(--color-on-primary)',
             border: 'none',
             borderRadius: '0.375rem',
             cursor: 'pointer',

@@ -35,11 +35,11 @@ export class ErrorBoundary extends Component<Props, State> {
             justifyContent: 'center',
             padding: '2rem',
             background: '#1a1a1a',
-            color: '#F4F4F3',
+            color: 'var(--text)',
           }}
         >
           <div style={{ maxWidth: '480px', textAlign: 'center' }}>
-            <h2 style={{ margin: '0 0 0.75rem', color: '#f87171' }}>
+            <h2 style={{ margin: '0 0 0.75rem', color: 'var(--danger-text)' }}>
               {i18n.t('errorBoundary.title')}
             </h2>
             <p style={{ opacity: 0.6, marginBottom: '1rem', fontSize: '0.9rem' }}>
@@ -63,7 +63,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 borderRadius: 'var(--radius-lg)',
                 border: 'none',
                 background: 'var(--primary)',
-                color: '#fff',
+                color: 'var(--color-on-primary)',
                 fontWeight: 600,
                 cursor: 'pointer',
               }}

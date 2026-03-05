@@ -107,7 +107,12 @@ function MaterialPickerBody({
     <div className="cs-node-body" style={s.body}>
       {parsed && !customMat && (
         <div
-          style={{ fontSize: '0.6rem', color: '#f87171', marginBottom: '0.2rem', fontWeight: 600 }}
+          style={{
+            fontSize: '0.6rem',
+            color: 'var(--danger-text)',
+            marginBottom: '0.2rem',
+            fontWeight: 600,
+          }}
         >
           Custom material deleted
         </div>
@@ -360,7 +365,7 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
             <div
               style={{
                 fontSize: '0.6rem',
-                color: '#f87171',
+                color: 'var(--danger-text)',
                 marginBottom: '0.2rem',
                 fontWeight: 600,
               }}

@@ -129,7 +129,7 @@ function confirmBtnStyle(disabled: boolean): React.CSSProperties {
     cursor: disabled ? 'default' : 'pointer',
     fontFamily: 'inherit',
     background: disabled ? 'rgba(28,171,176,0.3)' : 'var(--primary)',
-    color: '#fff',
+    color: 'var(--color-on-primary)',
     border: 'none',
     opacity: disabled ? 0.6 : 1,
   }

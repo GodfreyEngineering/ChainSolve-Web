@@ -47,7 +47,7 @@ const inp: React.CSSProperties = {
   borderRadius: 6,
   border: '1px solid rgba(255,255,255,0.12)',
   background: 'rgba(0,0,0,0.2)',
-  color: '#F4F4F3',
+  color: 'var(--text)',
   fontSize: '0.8rem',
   fontFamily: 'inherit',
   outline: 'none',
@@ -413,7 +413,13 @@ export function Inspector({
                       }}
                     >
                       <span>{nd.min ?? 0}</span>
-                      <span style={{ fontFamily: 'monospace', color: '#1CABB0', fontWeight: 700 }}>
+                      <span
+                        style={{
+                          fontFamily: 'monospace',
+                          color: 'var(--primary)',
+                          fontWeight: 700,
+                        }}
+                      >
                         {nd.value ?? 0}
                       </span>
                       <span>{nd.max ?? 100}</span>
@@ -492,7 +498,7 @@ export function Inspector({
                             flex: 1,
                             fontSize: '0.75rem',
                             fontFamily: 'monospace',
-                            color: '#1CABB0',
+                            color: 'var(--primary)',
                             padding: '0.28rem 0.45rem',
                           }}
                         >
@@ -509,9 +515,9 @@ export function Inspector({
                             padding: 0,
                             flexShrink: 0,
                             background: override ? 'rgba(28,171,176,0.15)' : 'transparent',
-                            border: `1px solid ${override ? '#1CABB0' : 'rgba(255,255,255,0.15)'}`,
+                            border: `1px solid ${override ? 'var(--primary)' : 'rgba(255,255,255,0.15)'}`,
                             borderRadius: 4,
-                            color: override ? '#1CABB0' : 'rgba(255,255,255,0.35)',
+                            color: override ? 'var(--primary)' : 'rgba(255,255,255,0.35)',
                             cursor: 'pointer',
                             fontSize: '0.72rem',
                             fontFamily: 'inherit',
@@ -590,7 +596,7 @@ export function Inspector({
                           <span
                             style={{
                               fontFamily: 'monospace',
-                              color: '#1CABB0',
+                              color: 'var(--primary)',
                               flexShrink: 0,
                             }}
                           >
@@ -663,7 +669,7 @@ export function Inspector({
                     }}
                   >
                     <span style={{ color: 'rgba(244,244,243,0.35)' }}>out</span>
-                    <span style={{ fontFamily: 'monospace', color: '#1CABB0' }}>
+                    <span style={{ fontFamily: 'monospace', color: 'var(--primary)' }}>
                       {summariseValue(entry.output)}
                     </span>
                   </div>
@@ -705,7 +711,7 @@ export function Inspector({
                       border: '1px solid rgba(239,68,68,0.2)',
                       borderRadius: 6,
                       fontSize: '0.7rem',
-                      color: '#f87171',
+                      color: 'var(--danger-text)',
                       lineHeight: 1.4,
                     }}
                   >
@@ -730,7 +736,7 @@ export function Inspector({
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: '1.4rem',
                   fontWeight: 700,
-                  color: isErrVal || isInfVal ? '#f87171' : '#1CABB0',
+                  color: isErrVal || isInfVal ? 'var(--danger-text)' : 'var(--primary)',
                 }}
               >
                 {formatValue(value)}

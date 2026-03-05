@@ -13,7 +13,7 @@ import { Handle, Position, useNodes, type NodeProps, type Node } from '@xyflow/r
 import type { NodeData } from '../../../blocks/types'
 import type { ProxyHandle } from '../../../lib/groups'
 
-const DEFAULT_COLOR = '#1CABB0'
+const DEFAULT_COLOR = 'var(--primary)'
 
 function GroupNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
   const nd = data as NodeData
@@ -81,7 +81,7 @@ function GroupNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
                     id={h.id}
                     style={{
                       ...proxyHandleStyle,
-                      background: '#22c55e',
+                      background: 'var(--success)',
                       top: 'auto',
                     }}
                   />

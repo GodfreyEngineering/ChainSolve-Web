@@ -78,7 +78,7 @@ const searchInputStyle: React.CSSProperties = {
   border: 'none',
   borderBottom: '1px solid rgba(255,255,255,0.08)',
   background: 'transparent',
-  color: '#F4F4F3',
+  color: 'var(--text)',
   fontSize: '0.75rem',
   fontFamily: 'inherit',
   outline: 'none',
@@ -177,12 +177,12 @@ export function ValueEditor({ binding, onChange, compact, override }: ValueEdito
     borderRadius: compact ? 4 : 5,
     border: '1px solid rgba(255,255,255,0.12)',
     background: 'rgba(0,0,0,0.2)',
-    color: '#F4F4F3',
+    color: 'var(--text)',
     fontSize: compact ? '0.65rem' : '0.78rem',
     fontFamily: "'JetBrains Mono', monospace",
     outline: 'none',
     boxSizing: 'border-box' as const,
-    ...(override ? { borderColor: 'rgba(28,171,176,0.5)', color: '#1CABB0' } : {}),
+    ...(override ? { borderColor: 'rgba(28,171,176,0.5)', color: 'var(--primary)' } : {}),
   }
 
   // Filter catalog entries for the picker
@@ -289,7 +289,7 @@ export function ValueEditor({ binding, onChange, compact, override }: ValueEdito
           />
           <div style={{ flex: 1, overflowY: 'auto' }}>
             {/* Literal option */}
-            <div style={{ ...listItemStyle, color: '#F4F4F3' }} onMouseDown={switchToLiteral}>
+            <div style={{ ...listItemStyle, color: 'var(--text)' }} onMouseDown={switchToLiteral}>
               Literal value
             </div>
 

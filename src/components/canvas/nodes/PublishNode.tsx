@@ -74,7 +74,7 @@ function PublishNodeInner({ id, data, selected }: NodeProps) {
           <div
             style={{
               fontSize: '0.62rem',
-              color: '#f59e0b',
+              color: 'var(--warning)',
               fontStyle: 'italic',
             }}
           >

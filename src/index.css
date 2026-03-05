@@ -55,7 +55,17 @@
   --color-on-primary: #fff;
   --danger-text: #f87171;
   --danger-dim: rgba(239, 68, 68, 0.3);
+  --warning-dim: rgba(245, 158, 11, 0.15);
   --overlay: rgba(0, 0, 0, 0.6);
+
+  /* ── UI component tokens (V2-028) ────────────────────────────────────── */
+  --toolbar-bg: #2c2c2c;
+  --tooltip-bg: #252525;
+  --tooltip-text: #f4f4f3;
+  --badge-bg: rgba(28, 171, 176, 0.15);
+  --separator: rgba(255, 255, 255, 0.08);
+  --menu-hover: rgba(28, 171, 176, 0.15);
+  --menu-danger-hover: rgba(239, 68, 68, 0.15);
 
   /* ── Focus ring ───────────────────────────────────────────────────────── */
   --focus-ring: 2px solid var(--primary);
@@ -117,7 +127,17 @@
   --shadow-elevated: 0 12px 48px rgba(0, 0, 0, 0.2);
 
   --danger-text: #dc2626;
+  --danger-dim: rgba(239, 68, 68, 0.15);
+  --warning-dim: rgba(245, 158, 11, 0.1);
   --overlay: rgba(0, 0, 0, 0.4);
+
+  --toolbar-bg: #eaeae9;
+  --tooltip-bg: #1a1a1a;
+  --tooltip-text: #f4f4f3;
+  --badge-bg: rgba(28, 171, 176, 0.1);
+  --separator: rgba(0, 0, 0, 0.08);
+  --menu-hover: rgba(28, 171, 176, 0.1);
+  --menu-danger-hover: rgba(239, 68, 68, 0.1);
 
   --node-bg: #ffffff;
   --node-border: rgba(0, 0, 0, 0.12);

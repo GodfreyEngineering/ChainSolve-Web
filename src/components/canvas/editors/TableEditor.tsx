@@ -134,7 +134,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
     flexShrink: 0,
     background: 'rgba(0,0,0,0.25)',
     border: '1px solid rgba(255,255,255,0.08)',
-    color: '#F4F4F3',
+    color: 'var(--text)',
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '0.65rem',
     padding: '2px 4px',
@@ -181,7 +181,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
                   background: '#555',
                   border: 'none',
                   borderRadius: '50%',
-                  color: '#F4F4F3',
+                  color: 'var(--text)',
                   cursor: 'pointer',
                   fontSize: '0.5rem',
                   lineHeight: 1,
@@ -206,7 +206,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
             background: 'rgba(28,171,176,0.12)',
             border: '1px solid rgba(28,171,176,0.2)',
             borderRadius: 3,
-            color: '#1CABB0',
+            color: 'var(--primary)',
             cursor: 'pointer',
             fontSize: '0.65rem',
             flexShrink: 0,
@@ -310,7 +310,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
             background: 'rgba(28,171,176,0.12)',
             border: '1px solid rgba(28,171,176,0.25)',
             borderRadius: 4,
-            color: '#1CABB0',
+            color: 'var(--primary)',
             cursor: 'pointer',
             fontSize: '0.68rem',
             fontWeight: 600,
@@ -355,7 +355,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
             <div
               style={{
                 fontSize: '0.62rem',
-                color: '#f59e0b',
+                color: 'var(--warning)',
                 background: 'rgba(245,158,11,0.08)',
                 border: '1px solid rgba(245,158,11,0.2)',
                 borderRadius: 3,
@@ -375,7 +375,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#f59e0b',
+                  color: 'var(--warning)',
                   cursor: 'pointer',
                   fontSize: '0.6rem',
                   padding: '0 2px',
@@ -386,12 +386,12 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
             </div>
           )}
           {rows.length >= MAX_TABLE_INPUT_ROWS && (
-            <span style={{ fontSize: '0.62rem', color: '#f59e0b' }}>
+            <span style={{ fontSize: '0.62rem', color: 'var(--warning)' }}>
               Row limit reached ({MAX_TABLE_INPUT_ROWS.toLocaleString()})
             </span>
           )}
           {columns.length >= MAX_TABLE_INPUT_COLS && (
-            <span style={{ fontSize: '0.62rem', color: '#f59e0b' }}>
+            <span style={{ fontSize: '0.62rem', color: 'var(--warning)' }}>
               Column limit reached ({MAX_TABLE_INPUT_COLS})
             </span>
           )}

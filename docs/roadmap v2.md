@@ -720,6 +720,14 @@ Claude should treat this as the “source of truth” for the current environmen
 - Theme editor changes visibly apply across the app
 - Tokens are comprehensive and well named.
 
+**Status: DONE** (2026-03-05)
+- Added 7 new UI component CSS tokens: --toolbar-bg, --tooltip-bg, --tooltip-text, --badge-bg, --separator, --menu-hover, --menu-danger-hover (+ --warning-dim)
+- Extended THEME_VARIABLE_META with new 'ui' category (9 entries covering toolbar, tooltip, badge, separator, menu hover, overlay, danger dim)
+- Added "Glass Panels" built-in preset: translucent rgba backgrounds, sky-blue accent, glowing borders
+- Replaced ~120 hard-coded color values across 30+ components with CSS token references
+- Fonts: Montserrat (UI) + JetBrains Mono (code/values) already in place
+- verify-ci.sh: all checks pass
+
 ---
 
 # Phase V2-G — AI panel redesign (chat-only, pro/dev gating)

@@ -124,7 +124,7 @@ const s = {
     fontFamily: 'inherit',
   } satisfies React.CSSProperties,
   error: {
-    color: '#ef4444',
+    color: 'var(--danger)',
     fontSize: '0.82rem',
     marginBottom: '0.5rem',
   },
@@ -278,7 +278,7 @@ export function TemplateManagerDialog({ open, onClose }: TemplateManagerDialogPr
                         ✎
                       </button>
                       <button
-                        style={{ ...s.iconBtn, color: isDeleting ? '#ef4444' : undefined }}
+                        style={{ ...s.iconBtn, color: isDeleting ? 'var(--danger)' : undefined }}
                         onClick={() => void confirmDelete(tmpl.id)}
                         disabled={isDeleting}
                         title={t('templateManager.delete')}

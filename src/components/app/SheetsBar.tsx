@@ -419,7 +419,7 @@ function CtxItem({
       role="menuitem"
       style={{
         ...contextItemStyle,
-        color: disabled ? 'var(--text-muted)' : danger ? '#ef4444' : 'var(--text)',
+        color: disabled ? 'var(--text-muted)' : danger ? 'var(--danger)' : 'var(--text)',
         cursor: disabled ? 'default' : 'pointer',
         opacity: disabled ? 0.4 : 1,
       }}
@@ -774,8 +774,8 @@ const confirmDeleteBtnStyle: React.CSSProperties = {
   fontFamily: 'inherit',
   border: 'none',
   borderRadius: 4,
-  background: '#ef4444',
-  color: '#fff',
+  background: 'var(--danger)',
+  color: 'var(--color-on-primary)',
   cursor: 'pointer',
 }
 

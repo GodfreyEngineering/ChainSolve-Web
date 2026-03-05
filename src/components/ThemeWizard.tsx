@@ -237,6 +237,7 @@ function ThemeWizardInner({ editTheme }: { editTheme?: CustomTheme }) {
       background: [],
       text: [],
       accent: [],
+      ui: [],
       node: [],
       edge: [],
     }

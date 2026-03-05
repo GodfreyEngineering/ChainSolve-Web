@@ -24,7 +24,7 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
     value !== undefined && (isError(value) || (isScalar(value) && isNaN(value.value)))
   const displayStyle: React.CSSProperties = {
     ...s.displayValue,
-    ...(isErrVal ? { color: '#f87171', opacity: 0.7 } : {}),
+    ...(isErrVal ? { color: 'var(--danger-text)', opacity: 0.7 } : {}),
   }
 
   // G4-1: Derive a source label from the connected upstream block

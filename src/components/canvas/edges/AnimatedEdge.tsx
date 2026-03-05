@@ -25,8 +25,8 @@ import type { NodeData } from '../../../blocks/types'
 const KIND_COLORS: Record<string, string> = {
   scalar: '#14b8a6',
   vector: '#a78bfa',
-  table: '#f59e0b',
-  error: '#ef4444',
+  table: 'var(--warning)',
+  error: 'var(--danger)',
 }
 
 function edgeStroke(v: Value | undefined, animated: boolean): string {
@@ -70,7 +70,7 @@ function AnimatedEdgeInner({
   const effectiveStroke = mismatch
     ? mismatch.sameDimension
       ? '#fbbf24' // amber — same dimension, convertible
-      : '#f87171' // red — different dimensions, incompatible
+      : 'var(--danger-text)' // red — different dimensions, incompatible
     : selected
       ? 'var(--primary)'
       : stroke

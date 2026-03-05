@@ -115,7 +115,7 @@ export function CsvPicker({ nodeId, data }: CsvPickerProps) {
         <div
           style={{
             fontSize: '0.68rem',
-            color: '#1CABB0',
+            color: 'var(--primary)',
             fontFamily: "'JetBrains Mono', monospace",
           }}
         >
@@ -130,7 +130,7 @@ export function CsvPicker({ nodeId, data }: CsvPickerProps) {
       )}
 
       {status === 'error' && errorMsg && (
-        <div style={{ fontSize: '0.65rem', color: '#f87171' }}>{errorMsg}</div>
+        <div style={{ fontSize: '0.65rem', color: 'var(--danger-text)' }}>{errorMsg}</div>
       )}
 
       <button
@@ -142,7 +142,7 @@ export function CsvPicker({ nodeId, data }: CsvPickerProps) {
           background: 'rgba(28,171,176,0.12)',
           border: '1px solid rgba(28,171,176,0.25)',
           borderRadius: 4,
-          color: '#1CABB0',
+          color: 'var(--primary)',
           cursor: status === 'parsing' ? 'not-allowed' : 'pointer',
           fontSize: '0.68rem',
           fontWeight: 600,

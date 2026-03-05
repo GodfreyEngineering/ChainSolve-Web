@@ -113,7 +113,7 @@ const inputStyle: React.CSSProperties = {
 }
 
 const errorStyle: React.CSSProperties = {
-  background: 'rgba(239,68,68,0.12)',
+  background: 'var(--menu-danger-hover)',
   border: '1px solid var(--danger-dim)',
   color: 'var(--danger-text)',
   borderRadius: 'var(--radius-md)',

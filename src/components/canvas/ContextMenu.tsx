@@ -97,7 +97,7 @@ const item: CSSProperties = {
 
 const sep: CSSProperties = {
   height: 1,
-  background: 'rgba(255,255,255,0.08)',
+  background: 'var(--separator)',
   margin: '0.2rem 0',
 }
 
@@ -136,15 +136,15 @@ function MenuItem({
       onClick={onClick}
       onMouseEnter={(e) => {
         ;(e.currentTarget as HTMLDivElement).style.background = danger
-          ? 'rgba(239,68,68,0.15)'
-          : 'rgba(28,171,176,0.15)'
+          ? 'var(--menu-danger-hover)'
+          : 'var(--menu-hover)'
       }}
       onMouseLeave={(e) => {
         ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
       }}
     >
       {icon && <span style={{ opacity: 0.6, fontSize: '0.9rem', width: 16 }}>{icon}</span>}
-      <span style={{ color: danger ? '#f87171' : undefined }}>{label}</span>
+      <span style={{ color: danger ? 'var(--danger-text)' : undefined }}>{label}</span>
     </div>
   )
 }

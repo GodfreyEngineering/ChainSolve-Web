@@ -1315,7 +1315,7 @@ const nameInputStyle: React.CSSProperties = {
 
 const offlineStyle: React.CSSProperties = {
   fontSize: '0.68rem',
-  color: '#ef4444',
+  color: 'var(--danger)',
   fontWeight: 600,
   whiteSpace: 'nowrap',
 }
@@ -1344,7 +1344,7 @@ const mobileBackdropStyle: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
   top: 40,
-  background: 'rgba(0,0,0,0.4)',
+  background: 'var(--overlay)',
   zIndex: 49,
 }
 

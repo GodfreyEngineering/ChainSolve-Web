@@ -184,7 +184,7 @@ const btnStyle: CSSProperties = {
   borderRadius: 'var(--radius-lg)',
   border: 'none',
   background: 'var(--primary)',
-  color: '#fff',
+  color: 'var(--color-on-primary)',
   fontWeight: 700,
   fontSize: '1rem',
   cursor: 'pointer',

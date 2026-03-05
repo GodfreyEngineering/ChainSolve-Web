@@ -92,7 +92,7 @@ export function UnitPicker({ value, onChange, compact }: UnitPickerProps) {
             borderRadius: 4,
             border: `1px solid ${value ? 'rgba(28,171,176,0.3)' : 'rgba(255,255,255,0.12)'}`,
             background: value ? 'rgba(28,171,176,0.08)' : 'rgba(0,0,0,0.15)',
-            color: value ? '#1CABB0' : 'rgba(244,244,243,0.35)',
+            color: value ? 'var(--primary)' : 'rgba(244,244,243,0.35)',
             fontSize: '0.62rem',
             fontFamily: 'inherit',
             cursor: 'pointer',
@@ -227,7 +227,7 @@ function UnitDropdown({
             borderRadius: 4,
             border: '1px solid rgba(255,255,255,0.12)',
             background: 'rgba(0,0,0,0.25)',
-            color: '#F4F4F3',
+            color: 'var(--text)',
             fontSize: '0.72rem',
             fontFamily: 'inherit',
             outline: 'none',
@@ -249,7 +249,7 @@ function UnitDropdown({
           onClick={() => onChange(undefined)}
           style={{
             ...optionStyle,
-            color: !value ? '#1CABB0' : 'rgba(244,244,243,0.5)',
+            color: !value ? 'var(--primary)' : 'rgba(244,244,243,0.5)',
             fontStyle: 'italic',
           }}
         >
@@ -266,7 +266,7 @@ function UnitDropdown({
                 onClick={() => onChange(u.id)}
                 style={{
                   ...optionStyle,
-                  color: value === u.id ? '#1CABB0' : '#F4F4F3',
+                  color: value === u.id ? 'var(--primary)' : 'var(--text)',
                   background: value === u.id ? 'rgba(28,171,176,0.1)' : undefined,
                   fontWeight: value === u.id ? 600 : 400,
                 }}
@@ -308,7 +308,7 @@ const optionStyle: React.CSSProperties = {
   padding: '0.22rem 0.6rem',
   border: 'none',
   background: 'none',
-  color: '#F4F4F3',
+  color: 'var(--text)',
   fontSize: '0.72rem',
   fontFamily: 'inherit',
   cursor: 'pointer',

@@ -72,8 +72,8 @@ const s = {
     padding: '0.5rem 1.2rem',
     borderRadius: 8,
     border: 'none',
-    background: '#1CABB0',
-    color: '#fff',
+    background: 'var(--primary)',
+    color: 'var(--color-on-primary)',
     fontWeight: 600,
     fontSize: '0.88rem',
     cursor: 'pointer',
@@ -101,7 +101,12 @@ const s = {
           ? 'rgba(34,197,94,0.1)'
           : 'rgba(239,68,68,0.1)',
     border: `1px solid ${variant === 'info' ? 'rgba(28,171,176,0.3)' : variant === 'success' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
-    color: variant === 'info' ? '#1CABB0' : variant === 'success' ? '#22c55e' : '#ef4444',
+    color:
+      variant === 'info'
+        ? 'var(--primary)'
+        : variant === 'success'
+          ? 'var(--success)'
+          : 'var(--danger)',
   }),
   planSummary: {
     borderRadius: 8,

@@ -140,7 +140,7 @@ const charCount: React.CSSProperties = {
 
 const errorText: React.CSSProperties = {
   fontSize: '0.82rem',
-  color: '#f87171',
+  color: 'var(--danger-text)',
   marginTop: '0.5rem',
 }
 
@@ -162,7 +162,7 @@ const btnStyle: React.CSSProperties = {
   borderRadius: 8,
   border: 'none',
   background: 'var(--primary)',
-  color: '#fff',
+  color: 'var(--color-on-primary)',
   fontWeight: 600,
   fontSize: '0.85rem',
   cursor: 'pointer',

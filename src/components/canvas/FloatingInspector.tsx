@@ -54,7 +54,7 @@ export function FloatingInspector({
           onClick={onTogglePin}
           style={{
             ...pinBtnStyle,
-            color: pinned ? '#f59e0b' : 'rgba(244,244,243,0.4)',
+            color: pinned ? 'var(--warning)' : 'rgba(244,244,243,0.4)',
           }}
           title={
             pinned

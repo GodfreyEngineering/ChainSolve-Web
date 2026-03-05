@@ -422,7 +422,7 @@ const TemplateItem = memo(function TemplateItem({
                 }}
                 role="menuitem"
                 onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.background = 'rgba(239,68,68,0.12)'
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'var(--menu-danger-hover)'
                 }}
                 onMouseLeave={(e) => {
                   ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
@@ -624,7 +624,7 @@ const CustomFnItem = memo(function CustomFnItem({
                 }}
                 role="menuitem"
                 onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.background = 'rgba(239,68,68,0.12)'
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'var(--menu-danger-hover)'
                 }}
                 onMouseLeave={(e) => {
                   ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'

@@ -115,7 +115,9 @@ export default function PlotExpandModal({ value, config, label, onClose }: PlotE
   return (
     <Modal open onClose={onClose} title={label} width={modalWidth}>
       {error ? (
-        <div style={{ color: '#f87171', padding: '1rem', textAlign: 'center' }}>{error}</div>
+        <div style={{ color: 'var(--danger-text)', padding: '1rem', textAlign: 'center' }}>
+          {error}
+        </div>
       ) : (
         <>
           <div

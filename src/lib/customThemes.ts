@@ -10,7 +10,7 @@ import { sanitizeThemeVariables } from './marketplaceThemeService'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-export type ThemeVarCategory = 'background' | 'text' | 'accent' | 'node' | 'edge'
+export type ThemeVarCategory = 'background' | 'text' | 'accent' | 'ui' | 'node' | 'edge'
 
 export interface ThemeVarMeta {
   label: string
@@ -38,6 +38,17 @@ export const THEME_VARIABLE_META: ThemeVarMeta[] = [
   { cssVar: '--success', label: 'Success / output', category: 'accent' },
   { cssVar: '--danger', label: 'Danger / error', category: 'accent' },
 
+  // UI components
+  { cssVar: '--toolbar-bg', label: 'Toolbar background', category: 'ui' },
+  { cssVar: '--tooltip-bg', label: 'Tooltip background', category: 'ui' },
+  { cssVar: '--tooltip-text', label: 'Tooltip text', category: 'ui' },
+  { cssVar: '--badge-bg', label: 'Badge background', category: 'ui' },
+  { cssVar: '--separator', label: 'Separator line', category: 'ui' },
+  { cssVar: '--menu-hover', label: 'Menu item hover', category: 'ui' },
+  { cssVar: '--menu-danger-hover', label: 'Danger menu hover', category: 'ui' },
+  { cssVar: '--overlay', label: 'Modal overlay', category: 'ui' },
+  { cssVar: '--danger-dim', label: 'Danger background', category: 'ui' },
+
   // Node-specific (new variables added to index.css)
   { cssVar: '--node-bg', label: 'Node background', category: 'node' },
   { cssVar: '--node-border', label: 'Node border', category: 'node' },
@@ -55,6 +66,7 @@ export const THEME_CATEGORY_LABELS: Record<ThemeVarCategory, string> = {
   background: 'Backgrounds',
   text: 'Text',
   accent: 'Accent Colors',
+  ui: 'UI Components',
   node: 'Nodes',
   edge: 'Chains & Borders',
 }
@@ -85,6 +97,15 @@ export const DARK_DEFAULTS: Record<string, string> = {
   '--primary-glow': 'rgba(28,171,176,0.35)',
   '--success': '#22c55e',
   '--danger': '#ef4444',
+  '--toolbar-bg': '#2c2c2c',
+  '--tooltip-bg': '#252525',
+  '--tooltip-text': '#f4f4f3',
+  '--badge-bg': 'rgba(28,171,176,0.15)',
+  '--separator': 'rgba(255,255,255,0.08)',
+  '--menu-hover': 'rgba(28,171,176,0.15)',
+  '--menu-danger-hover': 'rgba(239,68,68,0.15)',
+  '--overlay': 'rgba(0,0,0,0.6)',
+  '--danger-dim': 'rgba(239,68,68,0.3)',
   '--node-bg': '#383838',
   '--node-border': 'rgba(255,255,255,0.12)',
   '--node-header-bg': 'rgba(28,171,176,0.15)',
@@ -107,6 +128,15 @@ export const LIGHT_DEFAULTS: Record<string, string> = {
   '--primary-glow': 'rgba(28,171,176,0.35)',
   '--success': '#22c55e',
   '--danger': '#ef4444',
+  '--toolbar-bg': '#eaeae9',
+  '--tooltip-bg': '#1a1a1a',
+  '--tooltip-text': '#f4f4f3',
+  '--badge-bg': 'rgba(28,171,176,0.1)',
+  '--separator': 'rgba(0,0,0,0.08)',
+  '--menu-hover': 'rgba(28,171,176,0.1)',
+  '--menu-danger-hover': 'rgba(239,68,68,0.1)',
+  '--overlay': 'rgba(0,0,0,0.4)',
+  '--danger-dim': 'rgba(239,68,68,0.15)',
   '--node-bg': '#ffffff',
   '--node-border': 'rgba(0,0,0,0.12)',
   '--node-header-bg': 'rgba(28,171,176,0.12)',
@@ -180,6 +210,34 @@ export const BUILT_IN_PRESETS: {
       '--node-selected-border': '#22c55e',
       '--handle-input': '#22c55e',
       '--edge-color': '#22c55e',
+    },
+  },
+  {
+    name: 'Glass Panels',
+    baseMode: 'dark',
+    variables: {
+      '--bg': '#0d1117',
+      '--card-bg': 'rgba(30,40,55,0.75)',
+      '--surface2': 'rgba(22,30,42,0.8)',
+      '--input-bg': 'rgba(15,20,30,0.9)',
+      '--primary': '#38bdf8',
+      '--primary-dim': 'rgba(56,189,248,0.12)',
+      '--primary-glow': 'rgba(56,189,248,0.4)',
+      '--success': '#34d399',
+      '--toolbar-bg': 'rgba(22,30,42,0.7)',
+      '--tooltip-bg': 'rgba(15,20,30,0.95)',
+      '--badge-bg': 'rgba(56,189,248,0.12)',
+      '--separator': 'rgba(56,189,248,0.08)',
+      '--menu-hover': 'rgba(56,189,248,0.12)',
+      '--overlay': 'rgba(0,0,0,0.7)',
+      '--node-bg': 'rgba(30,40,55,0.8)',
+      '--node-border': 'rgba(56,189,248,0.15)',
+      '--node-header-bg': 'rgba(56,189,248,0.1)',
+      '--node-selected-border': '#38bdf8',
+      '--handle-input': '#38bdf8',
+      '--handle-output': '#34d399',
+      '--edge-color': '#38bdf8',
+      '--border': 'rgba(56,189,248,0.1)',
     },
   },
   {

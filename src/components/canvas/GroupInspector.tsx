@@ -35,7 +35,7 @@ const inp: React.CSSProperties = {
   borderRadius: 6,
   border: '1px solid rgba(255,255,255,0.12)',
   background: 'rgba(0,0,0,0.2)',
-  color: '#F4F4F3',
+  color: 'var(--text)',
   fontSize: '0.8rem',
   fontFamily: 'inherit',
   outline: 'none',
@@ -59,7 +59,7 @@ const actionBtn: React.CSSProperties = {
   borderRadius: 6,
   border: '1px solid rgba(255,255,255,0.12)',
   background: 'rgba(255,255,255,0.04)',
-  color: '#F4F4F3',
+  color: 'var(--text)',
   fontSize: '0.78rem',
   fontFamily: 'inherit',
   cursor: 'pointer',
@@ -210,7 +210,11 @@ export function GroupInspector({
         </button>
         {!readOnly && (
           <button
-            style={{ ...actionBtn, color: '#f87171', borderColor: 'rgba(239,68,68,0.25)' }}
+            style={{
+              ...actionBtn,
+              color: 'var(--danger-text)',
+              borderColor: 'rgba(239,68,68,0.25)',
+            }}
             onClick={onUngroup}
             title="Dissolve group and release members"
           >

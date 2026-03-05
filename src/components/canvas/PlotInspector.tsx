@@ -38,7 +38,7 @@ const inp: React.CSSProperties = {
   borderRadius: 6,
   border: '1px solid rgba(255,255,255,0.12)',
   background: 'rgba(0,0,0,0.2)',
-  color: '#F4F4F3',
+  color: 'var(--text)',
   fontSize: '0.8rem',
   fontFamily: 'inherit',
   outline: 'none',
@@ -193,7 +193,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
             type="checkbox"
             checked={config.showGrid ?? true}
             onChange={(e) => onUpdate({ showGrid: e.target.checked })}
-            style={{ accentColor: '#1CABB0' }}
+            style={{ accentColor: 'var(--primary)' }}
           />
           Show grid
         </label>
@@ -202,7 +202,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
             type="checkbox"
             checked={config.showLegend ?? false}
             onChange={(e) => onUpdate({ showLegend: e.target.checked })}
-            style={{ accentColor: '#1CABB0' }}
+            style={{ accentColor: 'var(--primary)' }}
           />
           Show legend
         </label>
@@ -211,7 +211,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
             type="checkbox"
             checked={config.showBranding ?? false}
             onChange={(e) => onUpdate({ showBranding: e.target.checked })}
-            style={{ accentColor: '#1CABB0' }}
+            style={{ accentColor: 'var(--primary)' }}
           />
           Include branding in export
         </label>
@@ -242,7 +242,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
             step={100}
             value={config.maxPoints ?? 2000}
             onChange={(e) => onUpdate({ maxPoints: Number(e.target.value) })}
-            style={{ width: '100%', accentColor: '#1CABB0' }}
+            style={{ width: '100%', accentColor: 'var(--primary)' }}
           />,
         )}
 
@@ -257,7 +257,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
             step={1}
             value={config.binCount ?? 30}
             onChange={(e) => onUpdate({ binCount: Number(e.target.value) })}
-            style={{ width: '100%', accentColor: '#1CABB0' }}
+            style={{ width: '100%', accentColor: 'var(--primary)' }}
           />,
         )}
 

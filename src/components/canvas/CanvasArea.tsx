@@ -2188,7 +2188,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     style={{
                       position: 'absolute',
                       inset: 0,
-                      background: 'rgba(0,0,0,0.5)',
+                      background: 'var(--overlay)',
                       zIndex: 19,
                     }}
                     onClick={() => {

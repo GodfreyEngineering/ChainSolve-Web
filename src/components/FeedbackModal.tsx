@@ -345,7 +345,7 @@ const removeButtonStyle: React.CSSProperties = {
   top: 4,
   right: 4,
   background: 'rgba(0,0,0,0.6)',
-  color: '#fff',
+  color: 'var(--color-on-primary)',
   border: 'none',
   borderRadius: '50%',
   width: 22,

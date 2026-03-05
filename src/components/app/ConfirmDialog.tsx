@@ -33,12 +33,17 @@ const btnBase: React.CSSProperties = {
 function btnStyle(variant: ConfirmAction['variant']): React.CSSProperties {
   switch (variant) {
     case 'primary':
-      return { ...btnBase, background: 'var(--primary)', color: '#fff', border: 'none' }
+      return {
+        ...btnBase,
+        background: 'var(--primary)',
+        color: 'var(--color-on-primary)',
+        border: 'none',
+      }
     case 'danger':
       return {
         ...btnBase,
         background: 'transparent',
-        color: '#ef4444',
+        color: 'var(--danger)',
         border: '1px solid #ef4444',
       }
     default:

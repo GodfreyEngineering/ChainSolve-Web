@@ -36,7 +36,7 @@ export function SessionRevokedModal({ open }: SessionRevokedModalProps) {
           borderRadius: 8,
           border: 'none',
           background: 'var(--primary)',
-          color: '#fff',
+          color: 'var(--color-on-primary)',
           fontWeight: 700,
           fontSize: '0.9rem',
           cursor: 'pointer',

@@ -204,7 +204,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
                 <span
                   style={{
                     fontSize: '0.68rem',
-                    color: '#1CABB0',
+                    color: 'var(--primary)',
                     opacity: 0.6,
                     fontFamily: 'monospace',
                     flexShrink: 0,
@@ -226,9 +226,9 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
                     marginLeft: 2,
                     flexShrink: 0,
                     background: override ? 'rgba(28,171,176,0.2)' : 'transparent',
-                    border: `1px solid ${override ? '#1CABB0' : 'rgba(255,255,255,0.15)'}`,
+                    border: `1px solid ${override ? 'var(--primary)' : 'rgba(255,255,255,0.15)'}`,
                     borderRadius: 3,
-                    color: override ? '#1CABB0' : 'rgba(255,255,255,0.35)',
+                    color: override ? 'var(--primary)' : 'rgba(255,255,255,0.35)',
                     cursor: 'pointer',
                     fontSize: '0.6rem',
                     lineHeight: 1,
@@ -264,7 +264,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
                 <LazyUnitPicker compact value={fromUnit} onChange={handleFromUnitChange} />
               </Suspense>
               {fromUnit && toUnit && !areSameDimension(fromUnit, toUnit) && (
-                <span style={{ fontSize: '0.55rem', color: '#f87171' }}>!</span>
+                <span style={{ fontSize: '0.55rem', color: 'var(--danger-text)' }}>!</span>
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>

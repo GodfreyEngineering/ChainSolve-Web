@@ -49,7 +49,7 @@ const btnPrimary: React.CSSProperties = {
   borderRadius: 6,
   border: 'none',
   background: 'var(--primary)',
-  color: '#fff',
+  color: 'var(--color-on-primary)',
   fontWeight: 600,
   fontSize: '0.85rem',
   cursor: 'pointer',
@@ -68,7 +68,7 @@ const btnSecondary: React.CSSProperties = {
 }
 
 const errorText: React.CSSProperties = {
-  color: '#f87171',
+  color: 'var(--danger-text)',
   fontSize: '0.75rem',
   marginTop: '0.3rem',
 }

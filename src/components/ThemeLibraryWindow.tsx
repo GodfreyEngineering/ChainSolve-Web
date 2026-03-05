@@ -198,7 +198,7 @@ const errorBannerStyle: React.CSSProperties = {
   borderRadius: 8,
   background: 'rgba(239,68,68,0.08)',
   border: '1px solid rgba(239,68,68,0.25)',
-  color: '#f87171',
+  color: 'var(--danger-text)',
   fontSize: '0.82rem',
 }
 

@@ -100,7 +100,7 @@ export function VectorEditor({ values, onChange }: VectorEditorProps) {
             background: 'rgba(0,0,0,0.25)',
             border: '1px solid rgba(255,255,255,0.12)',
             borderRadius: 4,
-            color: '#F4F4F3',
+            color: 'var(--text)',
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: '0.68rem',
             padding: '4px 6px',
@@ -109,7 +109,9 @@ export function VectorEditor({ values, onChange }: VectorEditorProps) {
             boxSizing: 'border-box',
           }}
         />
-        {pasteError && <span style={{ fontSize: '0.6rem', color: '#f87171' }}>{pasteError}</span>}
+        {pasteError && (
+          <span style={{ fontSize: '0.6rem', color: 'var(--danger-text)' }}>{pasteError}</span>
+        )}
         <div style={{ display: 'flex', gap: 4 }}>
           <button className="nodrag" onClick={applyPaste} style={actionBtnStyle}>
             {t('listEditor.apply')}
@@ -210,7 +212,7 @@ export function VectorEditor({ values, onChange }: VectorEditorProps) {
               ...actionBtnStyle,
               background: 'transparent',
               borderColor: 'rgba(248,113,113,0.2)',
-              color: '#f87171',
+              color: 'var(--danger-text)',
             }}
           >
             {t('listEditor.clear')}
@@ -235,7 +237,7 @@ const inputStyle: React.CSSProperties = {
   background: 'rgba(0,0,0,0.25)',
   border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: 3,
-  color: '#F4F4F3',
+  color: 'var(--text)',
   fontFamily: "'JetBrains Mono', monospace",
   fontSize: '0.7rem',
   padding: '2px 4px',
@@ -264,7 +266,7 @@ const actionBtnStyle: React.CSSProperties = {
   background: 'rgba(28,171,176,0.12)',
   border: '1px solid rgba(28,171,176,0.25)',
   borderRadius: 4,
-  color: '#1CABB0',
+  color: 'var(--primary)',
   cursor: 'pointer',
   fontSize: '0.68rem',
   fontWeight: 600,

@@ -182,7 +182,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
               style={{
                 textAlign: 'center',
                 padding: '1.5rem 0.5rem',
-                color: '#f87171',
+                color: 'var(--danger-text)',
                 fontSize: '0.75rem',
               }}
             >
@@ -231,7 +231,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
                 background: 'rgba(0,0,0,0.5)',
                 border: '1px solid rgba(255,255,255,0.15)',
                 borderRadius: 4,
-                color: '#F4F4F3',
+                color: 'var(--text)',
                 cursor: 'pointer',
                 padding: '2px 6px',
                 fontSize: '0.65rem',

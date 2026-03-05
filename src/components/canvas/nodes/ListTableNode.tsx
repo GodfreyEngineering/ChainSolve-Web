@@ -78,7 +78,7 @@ const idxCellStyle: React.CSSProperties = {
 
 const valCellStyle: React.CSSProperties = {
   ...cellStyle,
-  color: '#F4F4F3',
+  color: 'var(--text)',
   flex: 1,
   textAlign: 'right',
 }
@@ -156,7 +156,7 @@ function ListTableNodeInner({ id, data, selected }: NodeProps) {
         {errorMsg && (
           <div
             style={{
-              color: '#f87171',
+              color: 'var(--danger-text)',
               fontSize: '0.7rem',
               textAlign: 'center',
               padding: '0.5rem 0',
@@ -217,7 +217,7 @@ function ListTableNodeInner({ id, data, selected }: NodeProps) {
                       <span
                         style={{
                           ...valCellStyle,
-                          ...(isNaN(v) ? { color: '#f87171', opacity: 0.7 } : {}),
+                          ...(isNaN(v) ? { color: 'var(--danger-text)', opacity: 0.7 } : {}),
                         }}
                       >
                         {fmtNum(v)}

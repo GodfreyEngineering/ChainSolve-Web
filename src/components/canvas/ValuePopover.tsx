@@ -53,8 +53,8 @@ export function ValuePopover({ nodeId, x, y, computed, onClose, onJumpToNode }: 
   const kindColors: Record<string, string> = {
     scalar: '#14b8a6',
     vector: '#a78bfa',
-    table: '#f59e0b',
-    error: '#ef4444',
+    table: 'var(--warning)',
+    error: 'var(--danger)',
     unknown: 'var(--text-muted)',
   }
 
@@ -74,7 +74,7 @@ export function ValuePopover({ nodeId, x, y, computed, onClose, onJumpToNode }: 
         maxWidth: 320,
         boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
         fontSize: '0.78rem',
-        color: '#F4F4F3',
+        color: 'var(--text)',
         animation: 'cs-fade-in 0.1s ease-out',
       }}
     >
@@ -100,7 +100,7 @@ export function ValuePopover({ nodeId, x, y, computed, onClose, onJumpToNode }: 
         style={{
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: '0.82rem',
-          color: '#1CABB0',
+          color: 'var(--primary)',
           fontWeight: 600,
           wordBreak: 'break-all',
           marginBottom: '0.2rem',
@@ -149,7 +149,7 @@ export function ValuePopover({ nodeId, x, y, computed, onClose, onJumpToNode }: 
         </button>
         {hasError && onJumpToNode && (
           <button
-            style={{ ...btnStyle, color: '#f87171', borderColor: 'rgba(239,68,68,0.3)' }}
+            style={{ ...btnStyle, color: 'var(--danger-text)', borderColor: 'rgba(239,68,68,0.3)' }}
             onClick={() => {
               onJumpToNode(nodeId)
               onClose()

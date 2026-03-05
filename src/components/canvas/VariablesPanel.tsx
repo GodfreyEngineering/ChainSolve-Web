@@ -217,7 +217,7 @@ const VariableRow = memo(function VariableRow({
         type="checkbox"
         checked={selected}
         onChange={() => onToggleSelect(variable.id)}
-        style={{ width: 14, height: 14, cursor: 'pointer', accentColor: '#1CABB0' }}
+        style={{ width: 14, height: 14, cursor: 'pointer', accentColor: 'var(--primary)' }}
       />
       <input
         style={{
@@ -564,7 +564,7 @@ export function VariablesPanel({ open, onClose }: VariablesPanelProps) {
           type="checkbox"
           checked={allVisibleSelected}
           onChange={toggleSelectAll}
-          style={{ width: 14, height: 14, cursor: 'pointer', accentColor: '#1CABB0' }}
+          style={{ width: 14, height: 14, cursor: 'pointer', accentColor: 'var(--primary)' }}
           title={t('variablesPanel.selectAll', 'Select all')}
         />
         <span style={colHeader} onClick={() => handleSort('name')}>

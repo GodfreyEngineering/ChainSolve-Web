@@ -142,7 +142,7 @@ function WarningRow({
   t: (key: string, opts?: Record<string, unknown>) => string
 }) {
   const icon = warning.severity === 'warn' ? '\u26a0' : '\u2139'
-  const color = warning.severity === 'warn' ? '#f59e0b' : '#3b82f6'
+  const color = warning.severity === 'warn' ? 'var(--warning)' : '#3b82f6'
   const msg = warning.detail ? t(warning.key, { count: Number(warning.detail) }) : t(warning.key)
   return (
     <div style={warningRowStyle}>
@@ -261,7 +261,7 @@ const aiActionBtn: React.CSSProperties = {
   borderRadius: 4,
   cursor: 'pointer',
   background: 'var(--primary, #1cab80)',
-  color: '#fff',
+  color: 'var(--color-on-primary)',
 }
 
 const aiActionBtnSecondary: React.CSSProperties = {

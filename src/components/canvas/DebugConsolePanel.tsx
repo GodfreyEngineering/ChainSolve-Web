@@ -38,8 +38,8 @@ function downloadFile(content: string, filename: string, mime: string) {
 }
 
 const LEVEL_COLORS: Record<LogLevel, string> = {
-  error: '#ef4444',
-  warn: '#f59e0b',
+  error: 'var(--danger)',
+  warn: 'var(--warning)',
   info: '#3b82f6',
   debug: '#8b5cf6',
   trace: '#6b7280',
@@ -49,7 +49,7 @@ const SCOPE_COLORS: Record<LogScope, string> = {
   engine: '#14b8a6',
   bindings: '#a78bfa',
   variables: '#3b82f6',
-  persistence: '#f59e0b',
+  persistence: 'var(--warning)',
   network: '#10b981',
   perf: '#ec4899',
   ui: '#6b7280',

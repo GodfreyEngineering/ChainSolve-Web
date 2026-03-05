@@ -78,7 +78,7 @@ const s = {
     borderRadius: 5,
     border: 'none',
     background: active ? 'rgba(28,171,176,0.2)' : 'transparent',
-    color: active ? '#1CABB0' : 'rgba(244,244,243,0.5)',
+    color: active ? 'var(--primary)' : 'rgba(244,244,243,0.5)',
     fontSize: '0.72rem',
     fontWeight: 600,
     cursor: 'pointer',
@@ -130,8 +130,8 @@ const s = {
     padding: '0.35rem 0.9rem',
     borderRadius: 8,
     border: 'none',
-    background: '#1CABB0',
-    color: '#fff',
+    background: 'var(--primary)',
+    color: 'var(--color-on-primary)',
     fontWeight: 600,
     fontSize: '0.82rem',
     cursor: 'pointer',
@@ -166,7 +166,8 @@ const s = {
         : level === 'medium'
           ? 'rgba(245,158,11,0.15)'
           : 'rgba(34,197,94,0.15)',
-    color: level === 'high' ? '#ef4444' : level === 'medium' ? '#f59e0b' : '#22c55e',
+    color:
+      level === 'high' ? 'var(--danger)' : level === 'medium' ? 'var(--warning)' : 'var(--success)',
     border: `1px solid ${level === 'high' ? 'rgba(239,68,68,0.3)' : level === 'medium' ? 'rgba(245,158,11,0.3)' : 'rgba(34,197,94,0.3)'}`,
   }),
   applyRow: {
@@ -510,7 +511,7 @@ export function AiCopilotWindow({
               style={{
                 height: '100%',
                 width: `${Math.min(100, (tokensRemaining / 200000) * 100)}%`,
-                background: tokensRemaining < 20000 ? '#ef4444' : '#1CABB0',
+                background: tokensRemaining < 20000 ? 'var(--danger)' : 'var(--primary)',
                 borderRadius: 2,
               }}
             />
@@ -562,7 +563,7 @@ export function AiCopilotWindow({
                   </div>
                 )}
                 {msg.explanation.diagnostics && msg.explanation.diagnostics.length > 0 && (
-                  <div style={{ marginTop: '0.2rem', color: '#f59e0b' }}>
+                  <div style={{ marginTop: '0.2rem', color: 'var(--warning)' }}>
                     {msg.explanation.diagnostics.map((d, j) => (
                       <div key={j}>
                         [{d.level}] {d.message}

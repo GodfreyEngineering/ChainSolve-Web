@@ -57,7 +57,7 @@ const btnPrimary: React.CSSProperties = {
   borderRadius: 8,
   border: 'none',
   background: 'var(--accent)',
-  color: '#fff',
+  color: 'var(--color-on-primary)',
   fontWeight: 600,
   cursor: 'pointer',
   fontSize: '0.88rem',
@@ -131,7 +131,7 @@ export function ImportProjectDialog({
 
       {hasErrors && (
         <div style={errorListStyle}>
-          <div style={{ fontWeight: 600, marginBottom: '0.3rem', color: '#ef4444' }}>
+          <div style={{ fontWeight: 600, marginBottom: '0.3rem', color: 'var(--danger)' }}>
             {t('importProject.validationErrors', { count: validation.errors.length })}
           </div>
           {validation.errors.map((e, i) => (
@@ -144,7 +144,7 @@ export function ImportProjectDialog({
 
       {hasWarnings && (
         <div style={warningListStyle}>
-          <div style={{ fontWeight: 600, marginBottom: '0.3rem', color: '#f59e0b' }}>
+          <div style={{ fontWeight: 600, marginBottom: '0.3rem', color: 'var(--warning)' }}>
             {t('importProject.warnings', { count: validation!.warnings.length })}
           </div>
           {validation!.warnings.map((w, i) => (
