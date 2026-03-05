@@ -661,13 +661,15 @@ Claude should treat this as the “source of truth” for the current environmen
 
 # Phase V2-F — Settings + Theme Editor mega-upgrade
 
-## V2-026 — Fix developer access to Theme Editor + unify gating rules
-**Problem:** theme editor blocked on developer account.  
+## V2-026 — Fix developer access to Theme Editor + unify gating rules [x]
+**Problem:** theme editor blocked on developer account.
 **Work:**
 - Ensure developer bypasses locks
 - Ensure UI still displays locked features for non-eligible plans
 **Acceptance:**
 - Developer can open and use theme editor on all pages.
+
+**Done (2026-03-05):** Replaced isPro(plan) gating in PreferencesSettings with getEntitlements(plan).canEditThemes — now correctly uses the entitlements matrix (free: true, past_due/canceled: false). Added Theme Wizard (full editor) access from CanvasPage toolbar via "Edit" button, gated by canEditThemes. Developer bypass already works via resolveEffectivePlan -> enterprise -> canEditThemes=true. Added V2-026 test in entitlements.test.ts verifying canEditThemes for free, past_due, canceled, and developer. verify-ci.sh green.
 
 ## V2-027 — Settings overhaul: categories + deep customization
 **Requirement:**

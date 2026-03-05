@@ -168,6 +168,8 @@ export interface CanvasAreaProps {
   onOpenGroups?: () => void
   /** Open the Theme Library window. */
   onOpenThemes?: () => void
+  /** Open the Theme Wizard (full editor). */
+  onOpenThemeEditor?: () => void
   /** Open the Material Wizard. */
   onOpenMaterials?: () => void
 
@@ -429,6 +431,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     onOpenVariables,
     onOpenGroups,
     onOpenThemes,
+    onOpenThemeEditor,
     onOpenMaterials,
     onFixWithCopilot,
     onExplainIssues,
@@ -1865,6 +1868,18 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           title="Themes"
         >
           ◐ Themes
+        </button>
+      )}
+
+      {!isMobile && onOpenThemeEditor && (
+        <button
+          onClick={onOpenThemeEditor}
+          style={{
+            ...tbBtn,
+          }}
+          title="Edit theme"
+        >
+          ◑ Edit
         </button>
       )}
 

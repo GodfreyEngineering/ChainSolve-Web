@@ -14,7 +14,7 @@ import { usePreferencesStore } from '../../stores/preferencesStore'
 import { useCustomThemesStore } from '../../stores/customThemesStore'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { THEME_WIZARD_WINDOW_ID, THEME_LIBRARY_WINDOW_ID } from '../../components/windowIds'
-import { isPro, type Plan } from '../../lib/entitlements'
+import { getEntitlements, type Plan } from '../../lib/entitlements'
 import { HelpLink } from '../../components/ui/HelpLink'
 
 const LazyThemeWizard = lazy(() =>
@@ -42,7 +42,7 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
   const { openWindow, isOpen } = useWindowManager()
   const wizardOpen = isOpen(THEME_WIZARD_WINDOW_ID)
   const libraryOpen = isOpen(THEME_LIBRARY_WINDOW_ID)
-  const pro = isPro(plan)
+  const canTheme = getEntitlements(plan).canEditThemes
 
   const buildDate = (() => {
     try {
@@ -57,7 +57,7 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
   })()
 
   const handleOpenWizard = () => {
-    if (!pro) {
+    if (!canTheme) {
       setUpgradeOpen(true)
       return
     }
@@ -65,7 +65,7 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
   }
 
   const handleOpenLibrary = () => {
-    if (!pro) {
+    if (!canTheme) {
       setUpgradeOpen(true)
       return
     }
@@ -105,7 +105,7 @@ export function PreferencesSettings({ plan = 'free' }: Props) {
       {/* ── Theme wizard (Pro) ──────────────────────────────────────────── */}
       <h2 style={{ ...headingStyle, marginTop: '2rem' }}>
         {t('settings.themeWizardTitle')}
-        {!pro && <span style={proBadgeStyle}>PRO</span>}
+        {!canTheme && <span style={proBadgeStyle}>PRO</span>}
       </h2>
 
       <div style={cardStyle}>

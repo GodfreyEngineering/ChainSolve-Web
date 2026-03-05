@@ -397,6 +397,18 @@ describe('resolveEffectivePlan', () => {
     expect(ent.canExport).toBe(true)
     expect(ent.canUseAi).toBe(true)
     expect(ent.canCreateCustomMaterials).toBe(true)
+    expect(ent.canEditThemes).toBe(true)
+  })
+
+  it('V2-026: canEditThemes uses entitlements, not isPro', () => {
+    // Free users can edit themes (canEditThemes = true for free plan)
+    expect(getEntitlements('free').canEditThemes).toBe(true)
+    // past_due and canceled cannot
+    expect(getEntitlements('past_due').canEditThemes).toBe(false)
+    expect(getEntitlements('canceled').canEditThemes).toBe(false)
+    // Developer (enterprise) can
+    const devPlan = resolveEffectivePlan({ plan: 'free', is_developer: true })
+    expect(getEntitlements(devPlan).canEditThemes).toBe(true)
   })
 
   it('returns "student" for verified student with free plan', () => {

@@ -80,7 +80,7 @@ import { ConflictBanner } from '../components/app/ConflictBanner'
 import { UpgradeModal } from '../components/UpgradeModal'
 import { useEngine } from '../contexts/EngineContext'
 import { useWindowManager } from '../contexts/WindowManagerContext'
-import { THEME_LIBRARY_WINDOW_ID } from '../components/windowIds'
+import { THEME_LIBRARY_WINDOW_ID, THEME_WIZARD_WINDOW_ID } from '../components/windowIds'
 import { AI_COPILOT_WINDOW_ID } from '../lib/aiCopilot/constants'
 import type { AiPatchOp } from '../lib/aiCopilot/types'
 import { buildConstantsLookup } from '../engine/resolveBindings'
@@ -120,6 +120,9 @@ const LazyMaterialWizard = lazy(() =>
 )
 const LazyThemeLibraryWindow = lazy(() =>
   import('../components/ThemeLibraryWindow').then((m) => ({ default: m.ThemeLibraryWindow })),
+)
+const LazyThemeWizard = lazy(() =>
+  import('../components/ThemeWizard').then((m) => ({ default: m.ThemeWizard })),
 )
 const LazyAiCopilotWindow = lazy(() =>
   import('../components/app/AiCopilotWindow').then((m) => ({ default: m.AiCopilotWindow })),
@@ -1831,6 +1834,11 @@ export default function CanvasPage() {
                 onOpenThemes={() =>
                   openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })
                 }
+                onOpenThemeEditor={
+                  getEntitlements(plan).canEditThemes
+                    ? () => openWindow(THEME_WIZARD_WINDOW_ID, { width: 900, height: 600 })
+                    : undefined
+                }
                 onOpenMaterials={() => setMaterialWizardOpen(true)}
                 onFixWithCopilot={() => openAiWithTask('fix_graph')}
                 onExplainIssues={() => openAiWithTask('explain_node')}
@@ -1860,6 +1868,11 @@ export default function CanvasPage() {
                 onOpenThemes={() =>
                   openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })
                 }
+                onOpenThemeEditor={
+                  getEntitlements(plan).canEditThemes
+                    ? () => openWindow(THEME_WIZARD_WINDOW_ID, { width: 900, height: 600 })
+                    : undefined
+                }
                 onOpenMaterials={() => setMaterialWizardOpen(true)}
                 onFixWithCopilot={() => openAiWithTask('fix_graph')}
                 onExplainIssues={() => openAiWithTask('explain_node')}
@@ -1885,6 +1898,11 @@ export default function CanvasPage() {
             onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
             onOpenGroups={() => setTemplateManagerOpen(true)}
             onOpenThemes={() => openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })}
+            onOpenThemeEditor={
+              getEntitlements(plan).canEditThemes
+                ? () => openWindow(THEME_WIZARD_WINDOW_ID, { width: 900, height: 600 })
+                : undefined
+            }
             onOpenMaterials={() => setMaterialWizardOpen(true)}
             onFixWithCopilot={() => openAiWithTask('fix_graph')}
             onExplainIssues={() => openAiWithTask('explain_node')}
@@ -1983,6 +2001,11 @@ export default function CanvasPage() {
       {isOpen(THEME_LIBRARY_WINDOW_ID) && (
         <Suspense fallback={null}>
           <LazyThemeLibraryWindow plan={plan} />
+        </Suspense>
+      )}
+      {isOpen(THEME_WIZARD_WINDOW_ID) && (
+        <Suspense fallback={null}>
+          <LazyThemeWizard />
         </Suspense>
       )}
       <UpgradeModal
