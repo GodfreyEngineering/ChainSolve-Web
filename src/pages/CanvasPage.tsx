@@ -1501,24 +1501,12 @@ export default function CanvasPage() {
   const [upgradeCanvasOpen, setUpgradeCanvasOpen] = useState(false)
   const [upgradeExportOpen, setUpgradeExportOpen] = useState(false)
   const [upgradeAiOpen, setUpgradeAiOpen] = useState(false)
-  const [aiInitialTask, setAiInitialTask] = useState<
-    import('../lib/aiCopilot/types').AiTask | undefined
-  >()
   const [aiInitialMessage, setAiInitialMessage] = useState<string | undefined>()
-  const [aiDiagnostics, setAiDiagnostics] = useState<
-    { level: string; code: string; message: string; nodeIds?: string[] }[] | undefined
-  >()
 
-  /** Open the AI Copilot with a specific task prefilled. */
-  const openAiWithTask = useCallback(
-    (
-      task: import('../lib/aiCopilot/types').AiTask,
-      message?: string,
-      diags?: { level: string; code: string; message: string; nodeIds?: string[] }[],
-    ) => {
-      setAiInitialTask(task)
+  /** Open the AI Copilot panel, optionally prefilling a message. */
+  const openAiPanel = useCallback(
+    (message?: string) => {
       setAiInitialMessage(message)
-      setAiDiagnostics(diags)
       openWindow(AI_COPILOT_WINDOW_ID, { width: 520, height: 560 })
     },
     [openWindow],
@@ -1840,10 +1828,10 @@ export default function CanvasPage() {
                     : undefined
                 }
                 onOpenMaterials={() => setMaterialWizardOpen(true)}
-                onFixWithCopilot={() => openAiWithTask('fix_graph')}
-                onExplainIssues={() => openAiWithTask('explain_node')}
-                onExplainNode={(nodeId) => openAiWithTask('explain_node', nodeId)}
-                onInsertFromPrompt={() => openAiWithTask('chat')}
+                onFixWithCopilot={() => openAiPanel()}
+                onExplainIssues={() => openAiPanel()}
+                onExplainNode={(nodeId) => openAiPanel(`Explain node ${nodeId}`)}
+                onInsertFromPrompt={() => openAiPanel()}
                 onNodeDragStop={handleNodeDragStop(activeCanvasId)}
               />
             }
@@ -1874,10 +1862,10 @@ export default function CanvasPage() {
                     : undefined
                 }
                 onOpenMaterials={() => setMaterialWizardOpen(true)}
-                onFixWithCopilot={() => openAiWithTask('fix_graph')}
-                onExplainIssues={() => openAiWithTask('explain_node')}
-                onExplainNode={(nodeId) => openAiWithTask('explain_node', nodeId)}
-                onInsertFromPrompt={() => openAiWithTask('chat')}
+                onFixWithCopilot={() => openAiPanel()}
+                onExplainIssues={() => openAiPanel()}
+                onExplainNode={(nodeId) => openAiPanel(`Explain node ${nodeId}`)}
+                onInsertFromPrompt={() => openAiPanel()}
                 onNodeDragStop={handleNodeDragStop(secondaryCanvasId)}
               />
             }
@@ -1904,10 +1892,10 @@ export default function CanvasPage() {
                 : undefined
             }
             onOpenMaterials={() => setMaterialWizardOpen(true)}
-            onFixWithCopilot={() => openAiWithTask('fix_graph')}
-            onExplainIssues={() => openAiWithTask('explain_node')}
-            onExplainNode={(nodeId) => openAiWithTask('explain_node', nodeId)}
-            onInsertFromPrompt={() => openAiWithTask('chat')}
+            onFixWithCopilot={() => openAiPanel()}
+            onExplainIssues={() => openAiPanel()}
+            onExplainNode={(nodeId) => openAiPanel(`Explain node ${nodeId}`)}
+            onInsertFromPrompt={() => openAiPanel()}
           />
         )}
         {/* G8-1: AI Copilot docked right panel */}
@@ -1935,9 +1923,7 @@ export default function CanvasPage() {
                 handleGraphChange(result.nodes, result.edges)
               }}
               onUpgrade={() => setUpgradeAiOpen(true)}
-              initialTask={aiInitialTask}
               initialMessage={aiInitialMessage}
-              diagnostics={aiDiagnostics}
             />
           </Suspense>
         </AiDockPanel>

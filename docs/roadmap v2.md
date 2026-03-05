@@ -732,7 +732,7 @@ Claude should treat this as the “source of truth” for the current environmen
 
 # Phase V2-G — AI panel redesign (chat-only, pro/dev gating)
 
-## V2-029 — AI panel simplification + “ChatGPT/Codex-style” UI
+## V2-029 — AI panel simplification + “ChatGPT/Codex-style” UI ✅ 2026-03-05
 **Requirements:**
 - Remove modes: chat/fix/explain/template/theme
 - Keep only:
@@ -751,6 +751,18 @@ Claude should treat this as the “source of truth” for the current environmen
 - AI panel feels premium and stable
 - No extra modes
 - Mode dropdown works.
+**Changelog (2026-03-05):**
+- Removed 5-task tab bar (chat/fix/explain/template/theme) from AiCopilotWindow
+- Removed scope dropdown (active_canvas/selection) — always uses active_canvas
+- Removed explanation box rendering and task-dependent placeholders
+- Simplified SendCopilotOptions: removed scope/task params, hardcoded to chat/active_canvas
+- Simplified ChatMessage/ActionHistoryEntry types (removed task/explanation fields)
+- Removed initialTask and diagnostics props from AiCopilotWindowProps
+- Simplified CanvasPage openAiWithTask → openAiPanel (optional message prefill)
+- Removed 10 unused i18n keys across 6 locales
+- Mode dropdown (Plan/Edit/Bypass) preserved
+- Panel docking and existing integration points unchanged
+- verify-ci.sh PASS
 
 ---
 

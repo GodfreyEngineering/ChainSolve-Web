@@ -18,14 +18,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppWindow } from '../ui/AppWindow'
-import type {
-  AiMode,
-  AiScope,
-  AiTask,
-  AiPatchOp,
-  AiExplanation,
-  RiskAssessment,
-} from '../../lib/aiCopilot/types'
+import type { AiMode, AiPatchOp, RiskAssessment } from '../../lib/aiCopilot/types'
 import { assessRisk, requiresConfirmation } from '../../lib/aiCopilot/riskScoring'
 import { sendCopilotRequest } from '../../lib/aiCopilot/aiService'
 import type { Plan } from '../../lib/entitlements'
@@ -65,26 +58,6 @@ const s = {
     flexShrink: 0,
     width: 40,
   },
-  tabBar: {
-    display: 'flex',
-    gap: 2,
-    background: 'rgba(255,255,255,0.04)',
-    borderRadius: 6,
-    padding: 2,
-  },
-  tab: (active: boolean): React.CSSProperties => ({
-    flex: 1,
-    padding: '0.3rem 0.4rem',
-    borderRadius: 5,
-    border: 'none',
-    background: active ? 'rgba(28,171,176,0.2)' : 'transparent',
-    color: active ? 'var(--primary)' : 'rgba(244,244,243,0.5)',
-    fontSize: '0.72rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    textAlign: 'center' as const,
-  }),
   transcript: {
     flex: 1,
     overflowY: 'auto' as const,
@@ -209,14 +182,6 @@ const s = {
     background: 'rgba(255,255,255,0.1)',
     overflow: 'hidden' as const,
   },
-  explanationBox: {
-    padding: '0.4rem 0.6rem',
-    borderRadius: 6,
-    background: 'rgba(28,171,176,0.08)',
-    border: '1px solid rgba(28,171,176,0.2)',
-    fontSize: '0.78rem',
-    lineHeight: 1.5,
-  },
 }
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -227,12 +192,9 @@ interface ChatMessage {
   patchOps?: AiPatchOp[]
   risk?: RiskAssessment
   assumptions?: string[]
-  explanation?: AiExplanation
-  task?: AiTask
 }
 
 interface ActionHistoryEntry {
-  task: AiTask
   summary: string
   opsCount: number
   timestamp: number
@@ -247,12 +209,8 @@ export interface AiCopilotWindowProps {
   selectedNodeIds: string[]
   onApplyPatch: (ops: AiPatchOp[], summary: string) => void
   onUpgrade: () => void
-  /** AI-3: Prefill a task when opened from a quick action. */
-  initialTask?: AiTask
-  /** AI-3: Prefill the user message. */
+  /** Prefill the user message. */
   initialMessage?: string
-  /** AI-3: Diagnostics from Graph Health for fix_graph task. */
-  diagnostics?: { level: string; code: string; message: string; nodeIds?: string[] }[]
   /** G8-1: When true, render content directly without AppWindow wrapper (for docked mode). */
   docked?: boolean
 }
@@ -266,17 +224,11 @@ export function AiCopilotWindow({
   selectedNodeIds,
   onApplyPatch,
   onUpgrade,
-  initialTask,
   initialMessage,
-  diagnostics,
   docked = false,
 }: AiCopilotWindowProps) {
   const { t } = useTranslation()
   const [mode, setMode] = useState<AiMode>('edit')
-  const [scope, setScope] = useState<AiScope>(
-    selectedNodeIds.length > 0 ? 'selection' : 'active_canvas',
-  )
-  const [task, setTask] = useState<AiTask>(initialTask ?? 'chat')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState(initialMessage ?? '')
   const [loading, setLoading] = useState(false)
@@ -298,15 +250,12 @@ export function AiCopilotWindow({
     }, 50)
   }, [])
 
-  // Determine effective mode per task
-  const effectiveMode = task === 'explain_node' || task === 'generate_template' ? 'plan' : mode
-
   const handleSend = useCallback(async () => {
     const trimmed = input.trim()
     if (!trimmed || loading || !projectId || !canvasId) return
 
     setInput('')
-    setMessages((prev) => [...prev, { role: 'user', content: trimmed, task }])
+    setMessages((prev) => [...prev, { role: 'user', content: trimmed }])
     setLoading(true)
     setPendingOps(null)
     setPendingRisk(null)
@@ -314,14 +263,11 @@ export function AiCopilotWindow({
 
     try {
       const response = await sendCopilotRequest({
-        mode: effectiveMode,
-        scope,
-        task,
+        mode,
         userMessage: trimmed,
         projectId,
         canvasId,
         selectedNodeIds,
-        diagnostics,
       })
 
       const ops = response.patchOps ?? []
@@ -337,15 +283,12 @@ export function AiCopilotWindow({
         patchOps: ops,
         risk,
         assumptions: response.assumptions,
-        explanation: response.explanation,
-        task,
       }
       setMessages((prev) => [...prev, aiMsg])
 
       // Track in history
       setHistory((prev) => [
         {
-          task,
           summary: response.message.slice(0, 80),
           opsCount: ops.length,
           timestamp: Date.now(),
@@ -353,10 +296,10 @@ export function AiCopilotWindow({
         ...prev.slice(0, 19),
       ])
 
-      if (ops.length > 0 && effectiveMode !== 'plan') {
+      if (ops.length > 0 && mode !== 'plan') {
         const needsConfirm = requiresConfirmation(
           risk.level,
-          effectiveMode === 'bypass' ? 'bypass' : 'edit',
+          mode === 'bypass' ? 'bypass' : 'edit',
           isEnterprise,
         )
         if (!needsConfirm) {
@@ -380,11 +323,8 @@ export function AiCopilotWindow({
     loading,
     projectId,
     canvasId,
-    effectiveMode,
-    scope,
-    task,
+    mode,
     selectedNodeIds,
-    diagnostics,
     isEnterprise,
     onApplyPatch,
     scrollToBottom,
@@ -456,49 +396,13 @@ export function AiCopilotWindow({
 
   const mainContent = (
     <div style={s.container}>
-      {/* Task tabs */}
-      <div style={s.tabBar}>
-        <button style={s.tab(task === 'chat')} onClick={() => setTask('chat')}>
-          {t('ai.quickActions', 'Chat')}
-        </button>
-        <button style={s.tab(task === 'fix_graph')} onClick={() => setTask('fix_graph')}>
-          {t('ai.fixGraph', 'Fix')}
-        </button>
-        <button style={s.tab(task === 'explain_node')} onClick={() => setTask('explain_node')}>
-          {t('ai.explainNode', 'Explain')}
-        </button>
-        <button
-          style={s.tab(task === 'generate_template')}
-          onClick={() => setTask('generate_template')}
-        >
-          {t('ai.generateTemplate', 'Template')}
-        </button>
-        <button style={s.tab(task === 'generate_theme')} onClick={() => setTask('generate_theme')}>
-          {t('ai.generateTheme', 'Theme')}
-        </button>
-      </div>
-
-      {/* Mode + Scope selectors */}
+      {/* Mode selector */}
       <div style={s.row}>
         <span style={s.label}>Mode</span>
-        <select
-          style={s.select}
-          value={effectiveMode}
-          onChange={(e) => setMode(e.target.value as AiMode)}
-          disabled={task === 'explain_node' || task === 'generate_template'}
-        >
+        <select style={s.select} value={mode} onChange={(e) => setMode(e.target.value as AiMode)}>
           <option value="plan">{t('ai.modePlan')}</option>
           <option value="edit">{t('ai.modeEdit')}</option>
           {isEnterprise && <option value="bypass">{t('ai.modeBypass')}</option>}
-        </select>
-        <span style={s.label}>Scope</span>
-        <select
-          style={s.select}
-          value={scope}
-          onChange={(e) => setScope(e.target.value as AiScope)}
-        >
-          <option value="active_canvas">{t('ai.scopeActive')}</option>
-          <option value="selection">{t('ai.scopeSelection')}</option>
         </select>
       </div>
 
@@ -524,11 +428,7 @@ export function AiCopilotWindow({
       <div ref={transcriptRef} style={s.transcript}>
         {messages.length === 0 && (
           <div style={{ opacity: 0.4, textAlign: 'center', padding: '1rem 0', fontSize: '0.8rem' }}>
-            {task === 'fix_graph'
-              ? t('ai.fixGraphHint', 'Describe the issues to fix or click Send to auto-fix.')
-              : task === 'explain_node'
-                ? t('ai.explainHint', 'Select a node and click Send to explain it.')
-                : t('ai.promptPlaceholder')}
+            {t('ai.promptPlaceholder')}
           </div>
         )}
         {messages.map((msg, i) => (
@@ -537,40 +437,6 @@ export function AiCopilotWindow({
             {msg.assumptions && msg.assumptions.length > 0 && (
               <div style={{ marginTop: '0.3rem', opacity: 0.6, fontSize: '0.75rem' }}>
                 <strong>{t('ai.assumptions')}:</strong> {msg.assumptions.join('; ')}
-              </div>
-            )}
-            {/* Explanation display (AI-3) */}
-            {msg.explanation && (
-              <div style={{ ...s.explanationBox, marginTop: '0.4rem' }}>
-                {msg.explanation.block && (
-                  <div>
-                    <strong>{msg.explanation.block.type}</strong>:{' '}
-                    {msg.explanation.block.whatItDoes}
-                  </div>
-                )}
-                {msg.explanation.bindings && msg.explanation.bindings.length > 0 && (
-                  <div style={{ marginTop: '0.3rem' }}>
-                    <strong>Inputs:</strong>{' '}
-                    {msg.explanation.bindings
-                      .map((b) => `${b.portId}=${b.value ?? b.source}`)
-                      .join(', ')}
-                  </div>
-                )}
-                {msg.explanation.upstream && msg.explanation.upstream.length > 0 && (
-                  <div style={{ marginTop: '0.2rem', opacity: 0.7 }}>
-                    Upstream:{' '}
-                    {msg.explanation.upstream.map((u) => u.label || u.blockType).join(' → ')}
-                  </div>
-                )}
-                {msg.explanation.diagnostics && msg.explanation.diagnostics.length > 0 && (
-                  <div style={{ marginTop: '0.2rem', color: 'var(--warning)' }}>
-                    {msg.explanation.diagnostics.map((d, j) => (
-                      <div key={j}>
-                        [{d.level}] {d.message}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
             {msg.risk && msg.patchOps && msg.patchOps.length > 0 && (
@@ -655,15 +521,7 @@ export function AiCopilotWindow({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={
-            task === 'fix_graph'
-              ? t('ai.fixGraphPlaceholder', 'Fix issues in my graph…')
-              : task === 'explain_node'
-                ? t('ai.explainPlaceholder', 'Explain this node…')
-                : task === 'generate_theme'
-                  ? t('ai.themePlaceholder', 'Describe your theme…')
-                  : t('ai.promptPlaceholder')
-          }
+          placeholder={t('ai.promptPlaceholder')}
           disabled={loading}
           maxLength={4000}
           rows={2}
@@ -689,7 +547,7 @@ export function AiCopilotWindow({
                 key={i}
                 style={{ padding: '0.15rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
               >
-                [{h.task}] {h.summary}
+                {h.summary}
                 {h.opsCount > 0 && ` (${h.opsCount} ops)`}
               </div>
             ))}

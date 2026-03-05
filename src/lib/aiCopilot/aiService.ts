@@ -6,12 +6,10 @@
  */
 
 import { getSession } from '../auth'
-import type { AiApiRequest, AiApiResponse, AiApiError, AiMode, AiScope, AiTask } from './types'
+import type { AiApiRequest, AiApiResponse, AiApiError, AiMode } from './types'
 
 export interface SendCopilotOptions {
   mode: AiMode
-  scope: AiScope
-  task?: AiTask
   userMessage: string
   projectId: string
   canvasId: string
@@ -33,8 +31,8 @@ export async function sendCopilotRequest(opts: SendCopilotOptions): Promise<AiAp
 
   const body: AiApiRequest = {
     mode: opts.mode,
-    scope: opts.scope,
-    task: opts.task ?? 'chat',
+    scope: 'active_canvas',
+    task: 'chat',
     userMessage: opts.userMessage,
     projectId: opts.projectId,
     canvasId: opts.canvasId,
