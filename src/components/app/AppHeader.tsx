@@ -727,7 +727,7 @@ export function AppHeader({
       {
         label: t('menu.canvasSettings'),
         onClick: () => {
-          openSettings('preferences')
+          openSettings('general')
           setOpenMenu(null)
         },
       },

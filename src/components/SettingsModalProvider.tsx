@@ -4,6 +4,7 @@ import {
   isAccountTab,
   type SettingsTab,
   type AccountTab,
+  type AppTab,
 } from '../contexts/SettingsModalContext'
 import { useWindowManager } from '../contexts/WindowManagerContext'
 
@@ -20,6 +21,7 @@ const LazySettingsModal = lazy(() =>
 
 export function SettingsModalProvider({ children }: { children: ReactNode }) {
   const [accountTab, setAccountTab] = useState<AccountTab>('profile')
+  const [appTab, setAppTab] = useState<AppTab>('general')
   const { openWindow, closeWindow, isOpen } = useWindowManager()
 
   const accountOpen = isOpen(ACCOUNT_SETTINGS_WINDOW_ID)
@@ -31,7 +33,7 @@ export function SettingsModalProvider({ children }: { children: ReactNode }) {
         setAccountTab(tab)
         openWindow(ACCOUNT_SETTINGS_WINDOW_ID, { width: 720, height: 520 })
       } else {
-        // Default to app settings for 'preferences' or no tab specified
+        if (tab) setAppTab(tab as AppTab)
         openWindow(APP_SETTINGS_WINDOW_ID, { width: 720, height: 520 })
       }
     },
@@ -52,9 +54,19 @@ export function SettingsModalProvider({ children }: { children: ReactNode }) {
       setAccountTab,
       closeAccountSettings,
       appOpen,
+      appTab,
+      setAppTab,
       closeAppSettings,
     }),
-    [openSettings, accountOpen, accountTab, closeAccountSettings, appOpen, closeAppSettings],
+    [
+      openSettings,
+      accountOpen,
+      accountTab,
+      closeAccountSettings,
+      appOpen,
+      appTab,
+      closeAppSettings,
+    ],
   )
 
   return (

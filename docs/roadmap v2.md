@@ -688,6 +688,18 @@ Claude should treat this as the “source of truth” for the current environmen
 - No router errors
 - i18n coverage.
 
+**Status: DONE** (2026-03-05)
+- Expanded AppTab from single 'preferences' to 5 categories: General, Canvas, Values & Units, Performance, Theme
+- Added appTab state + setAppTab to SettingsModalContext and SettingsModalProvider
+- SettingsModal now renders a 5-tab sidebar (APP_TABS) for App Settings, mirroring Account Settings pattern
+- Split PreferencesSettings into tab-conditional sections with dedicated content per category
+- i18n'd all ~30 hardcoded English strings (autosave, decimal places, snap to grid, etc.)
+- Added 36 new i18n keys across all 6 locales (EN/DE/ES/FR/IT/HE)
+- Updated all openSettings('preferences') call sites to openSettings('general')
+- Updated SettingsRedirect VALID_TABS to include all new tab names
+- Updated SettingsModal.test.ts for new tab values
+- verify-ci.sh: all checks pass
+
 ## V2-028 — Theme Editor “component naming coverage” + glass theme baseline
 **Requirements:**
 - Every visible UI component must have a good name so it can be themed

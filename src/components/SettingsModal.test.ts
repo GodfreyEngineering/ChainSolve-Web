@@ -19,7 +19,11 @@ describe('SettingsModalContext', () => {
     expect(isAccountTab('profile')).toBe(true)
     expect(isAccountTab('billing')).toBe(true)
     expect(isAccountTab('security')).toBe(true)
-    expect(isAccountTab('preferences')).toBe(false)
+    expect(isAccountTab('general')).toBe(false)
+    expect(isAccountTab('canvas')).toBe(false)
+    expect(isAccountTab('values')).toBe(false)
+    expect(isAccountTab('performance')).toBe(false)
+    expect(isAccountTab('theme')).toBe(false)
   })
 
   it('exports AccountTab and AppTab types (via SettingsTab union)', async () => {

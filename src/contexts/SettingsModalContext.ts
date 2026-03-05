@@ -4,7 +4,7 @@ import { createContext, useContext } from 'react'
 export type AccountTab = 'profile' | 'billing' | 'security'
 
 /** J2-1: App Settings tabs (workbench preferences). */
-export type AppTab = 'preferences'
+export type AppTab = 'general' | 'canvas' | 'values' | 'performance' | 'theme'
 
 /** Union kept for backward compatibility with openSettings(tab). */
 export type SettingsTab = AccountTab | AppTab
@@ -21,6 +21,8 @@ export interface SettingsModalContextValue {
 
   // App Settings window
   appOpen: boolean
+  appTab: AppTab
+  setAppTab: (tab: AppTab) => void
   closeAppSettings: () => void
 }
 
@@ -38,6 +40,8 @@ export const SettingsModalContext = createContext<SettingsModalContextValue>({
   setAccountTab: () => {},
   closeAccountSettings: () => {},
   appOpen: false,
+  appTab: 'general',
+  setAppTab: () => {},
   closeAppSettings: () => {},
 })
 

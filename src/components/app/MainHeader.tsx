@@ -116,7 +116,7 @@ export function MainHeader({ plan }: MainHeaderProps) {
 
         <button
           className="cs-header-icon-btn"
-          onClick={() => openSettings('preferences')}
+          onClick={() => openSettings('general')}
           title={t('nav.settings')}
           aria-label={t('nav.settings')}
         >
@@ -176,7 +176,7 @@ export function MainHeader({ plan }: MainHeaderProps) {
                 className="cs-header-dropdown-item"
                 onClick={() => {
                   setAccountOpen(false)
-                  openSettings('preferences')
+                  openSettings('general')
                 }}
               >
                 {t('settings.preferences', 'Preferences')}

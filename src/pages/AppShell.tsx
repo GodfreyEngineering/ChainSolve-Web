@@ -1438,7 +1438,7 @@ export default function AppShell() {
                       navigate('/canvas')
                       break
                     case 'settings':
-                      openSettings('preferences')
+                      openSettings('general')
                       break
                     case 'explore':
                       navigate('/explore')

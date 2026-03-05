@@ -4,7 +4,7 @@ import { getSession } from '../lib/auth'
 import { getProfile } from '../lib/profilesService'
 import { resolveEffectivePlan } from '../lib/entitlements'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
-import type { AccountTab } from '../contexts/SettingsModalContext'
+import type { AccountTab, AppTab } from '../contexts/SettingsModalContext'
 import { ProfileSettings } from '../pages/settings/ProfileSettings'
 import { PreferencesSettings } from '../pages/settings/PreferencesSettings'
 import { SecuritySettings } from '../pages/settings/SecuritySettings'
@@ -36,6 +36,14 @@ const ACCOUNT_TABS: { key: AccountTab; icon: string }[] = [
   { key: 'security', icon: '\u2616' },
 ]
 
+const APP_TABS: { key: AppTab; icon: string }[] = [
+  { key: 'general', icon: '\u2699' },
+  { key: 'canvas', icon: '\u25A6' },
+  { key: 'values', icon: '#' },
+  { key: 'performance', icon: '\u26A1' },
+  { key: 'theme', icon: '\u25D1' },
+]
+
 interface Props {
   kind: SettingsKind
 }
@@ -47,6 +55,8 @@ export function SettingsModal({ kind }: Props) {
     accountTab,
     setAccountTab,
     closeAccountSettings,
+    appTab,
+    setAppTab,
     closeAppSettings,
   } = useSettingsModal()
   const { t } = useTranslation()
@@ -178,15 +188,23 @@ export function SettingsModal({ kind }: Props) {
               </button>
             </div>
           )}
-          <button style={narrow ? narrowTabStyle(true) : tabBtnStyle(true)}>
-            <span style={{ fontSize: narrow ? '1rem' : '0.95rem' }}>{'\u2699'}</span>
-            {!narrow && (
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontWeight: 600 }}>{t('settings.preferences')}</div>
-                <div style={tabDescStyle}>{t('settings.preferencesDesc')}</div>
-              </div>
-            )}
-          </button>
+          {APP_TABS.map(({ key, icon }) => (
+            <button
+              key={key}
+              onClick={() => setAppTab(key)}
+              style={narrow ? narrowTabStyle(appTab === key) : tabBtnStyle(appTab === key)}
+            >
+              <span style={{ fontSize: narrow ? '1rem' : '0.95rem' }}>{icon}</span>
+              {!narrow && (
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontWeight: appTab === key ? 600 : 400 }}>
+                    {t(`settings.tab_${key}`)}
+                  </div>
+                  <div style={tabDescStyle}>{t(`settings.tab_${key}Desc`)}</div>
+                </div>
+              )}
+            </button>
+          ))}
           {narrow && (
             <button
               onClick={closeHandler}
@@ -200,7 +218,7 @@ export function SettingsModal({ kind }: Props) {
 
         {/* Content */}
         <main style={contentStyle}>
-          <PreferencesSettings plan={resolveEffectivePlan(profile)} />
+          <PreferencesSettings plan={resolveEffectivePlan(profile)} tab={appTab} />
         </main>
       </div>
     </AppWindow>
