@@ -164,7 +164,7 @@ const textStyle: React.CSSProperties = {
 
 const calloutStyle: React.CSSProperties = {
   minWidth: 120,
-  background: 'var(--card-bg)',
+  background: 'var(--surface-2)',
   border: '2px solid',
   borderRadius: 10,
   fontFamily: "'Montserrat', system-ui, sans-serif",
@@ -199,7 +199,7 @@ function leaderHandleStyle(color: string): React.CSSProperties {
     background: color,
     width: 8,
     height: 8,
-    border: '2px solid var(--card-bg, #1e1e1e)',
+    border: '2px solid var(--surface-2)',
     borderRadius: '50%',
   }
 }

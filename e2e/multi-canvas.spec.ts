@@ -3,12 +3,12 @@
  *
  * E2E tests for multi-canvas (Sheets) feature.
  *
- * Scratch canvas (/canvas, no projectId):
+ * Scratch canvas (/app?scratch=1, no projectId):
  *  - Canvas area is present
  *  - No project-level sheets bar in scratch mode (no persisted canvases)
- *  - URL is /canvas (not /canvas/:id)
+ *  - URL is /app?scratch=1 (not /app/:projectId)
  *
- * Project mode (/canvas/:projectId, requires auth):
+ * Project mode (/app/:projectId, requires auth):
  *  - SheetsBar renders with canvas tabs
  *  - Clicking a tab switches the active canvas
  *  - New canvas can be created via the + button
@@ -24,23 +24,23 @@ import { waitForCanvasOrFatal } from './helpers'
 // ── Scratch canvas ─────────────────────────────────────────────────────────────
 
 test.describe('Multi-canvas — scratch mode (P095)', () => {
-  test('scratch canvas URL is /canvas without project ID', async ({ page }) => {
-    await page.goto('/canvas')
+  test('scratch canvas URL is /app?scratch=1 without project ID', async ({ page }) => {
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
-    expect(page.url()).toContain('/canvas')
-    // In scratch mode there is no /canvas/:id segment
+    expect(page.url()).toContain('/app')
+    // In scratch mode there is no /app/:projectId segment
     const url = new URL(page.url())
-    expect(url.pathname).toBe('/canvas')
+    expect(url.pathname).toBe('/app')
   })
 
   test('React Flow canvas area renders in scratch mode', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
     await expect(page.locator('.react-flow__renderer')).toBeAttached()
   })
 
   test('canvas-computed sentinel appears after first evaluation', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
     // canvas-computed is set in CanvasArea after the first eval cycle completes
     await expect(page.locator('[data-testid="canvas-computed"]')).toBeAttached()
@@ -50,10 +50,10 @@ test.describe('Multi-canvas — scratch mode (P095)', () => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
     // Navigate away and back — should not crash
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
     await page.goto('/')
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
     expect(errors).toEqual([])
   })
@@ -62,7 +62,7 @@ test.describe('Multi-canvas — scratch mode (P095)', () => {
 // ── Project mode (requires auth) ──────────────────────────────────────────────
 
 test.fixme('sheets bar renders with canvas tab in project mode (requires auth)', async () => {
-  // await page.goto('/canvas/<project-id>')
+  // await page.goto('/app/<project-id>')
   // await waitForCanvasOrFatal(page)
   // await expect(page.locator('[role="tab"]').first()).toBeVisible()
 })

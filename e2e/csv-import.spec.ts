@@ -22,7 +22,7 @@ test.describe('CSV import — engine catalog (P097)', () => {
   // The engine still evaluates csvImport for backward-compat snapshots, but it is not
   // advertised in the catalog. These tests verify the block is absent.
   test('csvImport block is NOT in the engine catalog (H2-1 removal)', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const hasCsv = await page.evaluate(() => {
@@ -53,7 +53,7 @@ test.describe('CSV import — upload size limits (P097)', () => {
       })
     })
 
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     // Verify the mock intercepts upload attempts
@@ -74,7 +74,7 @@ test.describe('CSV import — upload size limits (P097)', () => {
     // We verify the constant indirectly by checking that any upload
     // larger than 50 MB is rejected client-side.
     // The actual constant (50 * 1024 * 1024) is tested in storage.test.ts.
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     // The app loads without error — verifies storage module is correctly bundled
@@ -85,7 +85,7 @@ test.describe('CSV import — upload size limits (P097)', () => {
 // ── CSV import UI (require auth + Pro plan) ───────────────────────────────────
 
 test.fixme('CSV block appears in block library under "Data" category (needs auth)', async () => {
-  // 1. Navigate to /canvas (or /canvas/:projectId with Pro plan)
+  // 1. Navigate to /app?scratch=1 (or /app/:projectId with Pro plan)
   // 2. Find block library panel
   // 3. Verify "CSV Import" block is visible in the Data category (Pro badge shown)
   // 4. Non-Pro users see a lock icon on the block

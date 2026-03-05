@@ -197,7 +197,7 @@ export const BUILT_IN_PRESETS: {
     baseMode: 'dark',
     variables: {
       '--bg': '#0f172a',
-      '--card-bg': '#1e293b',
+      '--surface-2': '#1e293b',
       '--surface2': '#1a2332',
       '--input-bg': '#0f172a',
       '--primary': '#3b82f6',
@@ -216,7 +216,7 @@ export const BUILT_IN_PRESETS: {
     baseMode: 'dark',
     variables: {
       '--bg': '#1c1210',
-      '--card-bg': '#2d1f1a',
+      '--surface-2': '#2d1f1a',
       '--surface2': '#251815',
       '--input-bg': '#1c1210',
       '--primary': '#f97316',
@@ -236,7 +236,7 @@ export const BUILT_IN_PRESETS: {
     baseMode: 'dark',
     variables: {
       '--bg': '#0c1a0c',
-      '--card-bg': '#1a2e1a',
+      '--surface-2': '#1a2e1a',
       '--surface2': '#142414',
       '--input-bg': '#0c1a0c',
       '--primary': '#22c55e',
@@ -255,7 +255,7 @@ export const BUILT_IN_PRESETS: {
     baseMode: 'dark',
     variables: {
       '--bg': '#0d1117',
-      '--card-bg': 'rgba(30,40,55,0.75)',
+      '--surface-2': 'rgba(30,40,55,0.75)',
       '--surface2': 'rgba(22,30,42,0.8)',
       '--input-bg': 'rgba(15,20,30,0.9)',
       '--primary': '#38bdf8',
@@ -283,7 +283,7 @@ export const BUILT_IN_PRESETS: {
     baseMode: 'light',
     variables: {
       '--bg': '#fafaf9',
-      '--card-bg': '#ffffff',
+      '--surface-2': '#ffffff',
       '--surface2': '#f5f5f4',
       '--input-bg': '#ffffff',
       '--primary': '#0d9488',

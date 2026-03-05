@@ -1095,7 +1095,7 @@ const navStyle: React.CSSProperties = {
   padding: '0 1.5rem',
   height: 56,
   borderBottom: '1px solid var(--border)',
-  background: 'var(--card-bg)',
+  background: 'var(--surface-2)',
 }
 
 const backBtnStyle: React.CSSProperties = {
@@ -1276,7 +1276,7 @@ const kbdStyle: React.CSSProperties = {
   padding: '0.15rem 0.45rem',
   borderRadius: 4,
   border: '1px solid var(--border)',
-  background: 'var(--card-bg)',
+  background: 'var(--surface-2)',
   fontFamily: 'inherit',
   fontSize: '0.78rem',
   fontWeight: 600,

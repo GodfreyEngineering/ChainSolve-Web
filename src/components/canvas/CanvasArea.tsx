@@ -1976,7 +1976,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         left: '50%',
                         transform: 'translateX(-50%)',
                         zIndex: 10,
-                        background: 'var(--card-bg)',
+                        background: 'var(--surface-2)',
                         border: '1px solid var(--border)',
                         borderRadius: 6,
                         padding: '0.2rem 0.7rem',

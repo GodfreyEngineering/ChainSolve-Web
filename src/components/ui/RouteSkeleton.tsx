@@ -54,7 +54,7 @@ function PageSkeleton() {
         style={{
           height: 40,
           borderBottom: '1px solid var(--border)',
-          background: 'var(--card-bg)',
+          background: 'var(--surface-2)',
           display: 'flex',
           alignItems: 'center',
           padding: '0 1rem',
@@ -106,7 +106,7 @@ function CanvasSkeleton() {
         style={{
           height: 36,
           borderBottom: '1px solid var(--border)',
-          background: 'var(--card-bg)',
+          background: 'var(--surface-2)',
           display: 'flex',
           alignItems: 'center',
           padding: '0 0.75rem',
@@ -130,7 +130,7 @@ function CanvasSkeleton() {
             width: 320,
             height: 36,
             borderRadius: 10,
-            background: 'var(--card-bg)',
+            background: 'var(--surface-2)',
             border: '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
@@ -152,7 +152,7 @@ function CanvasSkeleton() {
         style={{
           height: 32,
           borderTop: '1px solid var(--border)',
-          background: 'var(--card-bg)',
+          background: 'var(--surface-2)',
           display: 'flex',
           alignItems: 'center',
           padding: '0 0.75rem',

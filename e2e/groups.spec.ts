@@ -13,7 +13,7 @@ test.describe('Groups smoke tests', () => {
   })
 
   test('canvas route loads with #root', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await expect(page.locator('#root')).toBeAttached()
   })
 })

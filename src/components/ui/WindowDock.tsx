@@ -25,7 +25,7 @@ const tabStyle: React.CSSProperties = {
   fontWeight: 500,
   borderRadius: 'var(--radius-md)',
   border: '1px solid var(--border)',
-  background: 'var(--card-bg)',
+  background: 'var(--surface-1)',
   color: 'inherit',
   cursor: 'pointer',
   fontFamily: 'inherit',

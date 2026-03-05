@@ -79,7 +79,7 @@ export function FindBlockDialog({ nodes, onFocusNode, onClose }: FindBlockDialog
           zIndex: 1002,
           width: 260,
           maxHeight: 340,
-          background: 'var(--card-bg)',
+          background: 'var(--surface-2)',
           border: '1px solid var(--border)',
           borderRadius: 10,
           boxShadow: '0 16px 48px rgba(0,0,0,0.65)',

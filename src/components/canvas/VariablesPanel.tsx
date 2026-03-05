@@ -27,7 +27,7 @@ const panelStyle: React.CSSProperties = {
   left: 12,
   width: 560,
   maxHeight: 520,
-  background: 'var(--card-bg)',
+  background: 'var(--surface-1)',
   border: '1px solid var(--border)',
   borderRadius: 'var(--radius-xl)',
   display: 'flex',

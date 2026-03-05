@@ -114,21 +114,21 @@ describe('meetsAA / meetsAALarge', () => {
 //
 //  Dark theme tokens
 //    --bg:        #1a1a1a
-//    --card-bg:   #383838
+//    --surface-2:   #383838
 //    --text:      #f4f4f3
 //    --text-muted rgba(244,244,243, 0.65) on --bg
-//    --text-muted rgba(244,244,243, 0.65) on --card-bg
+//    --text-muted rgba(244,244,243, 0.65) on --surface-2
 //    --primary:   #1cabb0 on --bg
-//    --primary:   #1cabb0 on --card-bg
+//    --primary:   #1cabb0 on --surface-2
 //
 //  Light theme tokens
 //    --bg:        #f5f5f4
-//    --card-bg:   #ffffff
+//    --surface-2:   #ffffff
 //    --text:      #1a1a1a
 //    --text-muted rgba(26,26,26, 0.65) on --bg
-//    --text-muted rgba(26,26,26, 0.65) on --card-bg
+//    --text-muted rgba(26,26,26, 0.65) on --surface-2
 //    --primary-text: #0f7578 on --bg
-//    --primary-text: #0f7578 on --card-bg
+//    --primary-text: #0f7578 on --surface-2
 
 describe('Design token AA compliance (P074)', () => {
   // ── Dark theme ──────────────────────────────────────────────────────────────
@@ -141,7 +141,7 @@ describe('Design token AA compliance (P074)', () => {
     expect(ratio).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('dark: --text on --card-bg ≥ 4.5:1', () => {
+  it('dark: --text on --surface-2 ≥ 4.5:1', () => {
     const ratio = hexContrast(DARK_TEXT, DARK_CARD)
     expect(ratio).toBeGreaterThanOrEqual(4.5)
   })
@@ -151,7 +151,7 @@ describe('Design token AA compliance (P074)', () => {
     expect(ratio).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('dark: --text-muted (0.65) on --card-bg ≥ 4.5:1', () => {
+  it('dark: --text-muted (0.65) on --surface-2 ≥ 4.5:1', () => {
     const ratio = alphaHexContrast(DARK_TEXT, 0.65, DARK_CARD)
     expect(ratio).toBeGreaterThanOrEqual(4.5)
   })
@@ -162,7 +162,7 @@ describe('Design token AA compliance (P074)', () => {
     expect(ratio).toBeGreaterThanOrEqual(3.0)
   })
 
-  it('dark: --primary (#1cabb0) on --card-bg ≥ 3.0:1 (large/UI text)', () => {
+  it('dark: --primary (#1cabb0) on --surface-2 ≥ 3.0:1 (large/UI text)', () => {
     const ratio = hexContrast('#1cabb0', DARK_CARD)
     expect(ratio).toBeGreaterThanOrEqual(3.0)
   })
@@ -178,7 +178,7 @@ describe('Design token AA compliance (P074)', () => {
     expect(ratio).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('light: --text on --card-bg ≥ 4.5:1', () => {
+  it('light: --text on --surface-2 ≥ 4.5:1', () => {
     const ratio = hexContrast(LIGHT_TEXT, LIGHT_CARD)
     expect(ratio).toBeGreaterThanOrEqual(4.5)
   })
@@ -188,7 +188,7 @@ describe('Design token AA compliance (P074)', () => {
     expect(ratio).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('light: --text-muted (0.65) on --card-bg ≥ 4.5:1', () => {
+  it('light: --text-muted (0.65) on --surface-2 ≥ 4.5:1', () => {
     const ratio = alphaHexContrast(LIGHT_TEXT, 0.65, LIGHT_CARD)
     expect(ratio).toBeGreaterThanOrEqual(4.5)
   })
@@ -198,7 +198,7 @@ describe('Design token AA compliance (P074)', () => {
     expect(ratio).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('light: --primary-text (#0f7578) on --card-bg ≥ 4.5:1', () => {
+  it('light: --primary-text (#0f7578) on --surface-2 ≥ 4.5:1', () => {
     const ratio = hexContrast(LIGHT_PRIMARY_TEXT, LIGHT_CARD)
     expect(ratio).toBeGreaterThanOrEqual(4.5)
   })

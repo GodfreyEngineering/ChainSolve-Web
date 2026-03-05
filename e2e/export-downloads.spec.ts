@@ -24,7 +24,7 @@ import { waitForEngineOrFatal } from './helpers'
 
 test.describe('Export downloads — menu accessibility (P099)', () => {
   test('File menu is accessible in the application menubar', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     // The application menubar contains a "File" menu
@@ -33,7 +33,7 @@ test.describe('Export downloads — menu accessibility (P099)', () => {
   })
 
   test('application menubar has expected menu items visible', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     // Menu items in the menubar are rendered as buttons
@@ -63,7 +63,7 @@ test.describe('Export downloads — route mocking (P099)', () => {
       })
     })
 
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     // Verify the mock is in place (canvas loads without errors)

@@ -208,7 +208,7 @@ const headerStyle: React.CSSProperties = {
   height: WORKSPACE_TOOLBAR_HEIGHT,
   padding: '0 0.6rem',
   borderBottom: '1px solid var(--border)',
-  background: 'var(--surface-1, var(--card-bg))',
+  background: 'var(--surface-1)',
   flexShrink: 0,
   gap: '0.5rem',
 }
@@ -248,7 +248,7 @@ const dropdownStyle: React.CSSProperties = {
   right: 0,
   top: 30,
   zIndex: 100,
-  background: 'var(--surface-2, var(--card-bg))',
+  background: 'var(--surface-2)',
   border: '1px solid var(--border)',
   borderRadius: 8,
   padding: '0.3rem',

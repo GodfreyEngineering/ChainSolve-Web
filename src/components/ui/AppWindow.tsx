@@ -214,7 +214,7 @@ export function AppWindow({
         ...pos,
         display: 'flex',
         flexDirection: 'column',
-        background: 'var(--card-bg)',
+        background: 'var(--surface-2)',
         border: '1px solid var(--border)',
         borderRadius: isMax ? 0 : 12,
         boxShadow: 'var(--shadow-elevated)',

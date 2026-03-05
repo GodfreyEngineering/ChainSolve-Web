@@ -679,7 +679,7 @@ function annotDropStyle(edge: SnapEdge): React.CSSProperties {
   const base: React.CSSProperties = {
     position: 'absolute',
     zIndex: 100,
-    background: 'var(--card-bg)',
+    background: 'var(--surface-1)',
     border: '1px solid var(--border)',
     borderRadius: 'var(--radius-md)',
     padding: '0.25rem',

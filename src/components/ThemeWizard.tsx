@@ -31,7 +31,7 @@ export const THEME_WIZARD_WINDOW_ID = 'theme-wizard'
 
 function SamplePreview({ variables }: { variables: Record<string, string> }) {
   const bg = variables['--bg'] ?? '#1a1a1a'
-  const cardBg = variables['--node-bg'] ?? variables['--card-bg'] ?? '#383838'
+  const cardBg = variables['--node-bg'] ?? variables['--surface-2'] ?? '#383838'
   const headerBg = variables['--node-header-bg'] ?? 'rgba(28,171,176,0.15)'
   const border = variables['--node-border'] ?? 'rgba(255,255,255,0.12)'
   const primary = variables['--primary'] ?? '#1cabb0'

@@ -467,7 +467,7 @@ const s = {
     padding: '1rem',
   } as React.CSSProperties,
   card: {
-    background: 'var(--card-bg)',
+    background: 'var(--surface-2)',
     border: '1px solid var(--border)',
     borderRadius: '12px',
     padding: '2.5rem',

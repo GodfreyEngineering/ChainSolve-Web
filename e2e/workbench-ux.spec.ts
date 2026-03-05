@@ -7,7 +7,7 @@
  *   - Insert menu / block library (search, categories, drag availability)
  *   - Canvas toolbar controls (zoom, fit, toggles)
  *
- * Tests that require no auth use the scratch /canvas route.
+ * Tests that require no auth use the scratch /app?scratch=1 route.
  * Tests that require auth are marked test.fixme.
  */
 
@@ -36,7 +36,7 @@ test.describe('Workbench UX: Home page (E11-1)', () => {
 
 test.describe('Workbench UX: Window manager (E11-1)', () => {
   test('canvas renders with window manager infrastructure', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
 
     // WindowManagerProvider wraps the app — verify the canvas area loaded
@@ -44,7 +44,7 @@ test.describe('Workbench UX: Window manager (E11-1)', () => {
   })
 
   test('inspector toggle button is present in toolbar', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
 
     // The canvas toolbar has an Inspector toggle
@@ -56,7 +56,7 @@ test.describe('Workbench UX: Window manager (E11-1)', () => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
 
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page, errors)
 
     // Press Escape when no floating windows are open
@@ -69,7 +69,7 @@ test.describe('Workbench UX: Window manager (E11-1)', () => {
   })
 
   test('application menubar has clickable menu items', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const menubar = page.locator('[role="menubar"][aria-label="Application menu"]')
@@ -86,7 +86,7 @@ test.describe('Workbench UX: Window manager (E11-1)', () => {
 
 test.describe('Workbench UX: Block library / Insert menu (E11-1)', () => {
   test('block library search input is rendered', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
 
     const search = page.locator('input[type="search"]').first()
@@ -94,7 +94,7 @@ test.describe('Workbench UX: Block library / Insert menu (E11-1)', () => {
   })
 
   test('block library shows categories or block items', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
 
     // Block library should have at least one draggable block entry
@@ -105,7 +105,7 @@ test.describe('Workbench UX: Block library / Insert menu (E11-1)', () => {
   })
 
   test('block library search filters results', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
 
     const search = page.locator('input[type="search"]').first()
@@ -118,7 +118,7 @@ test.describe('Workbench UX: Block library / Insert menu (E11-1)', () => {
   })
 
   test('clearing search restores full block list', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
 
     const search = page.locator('input[type="search"]').first()
@@ -145,7 +145,7 @@ test.describe('Workbench UX: Block library / Insert menu (E11-1)', () => {
 
 test.describe('Workbench UX: Canvas toolbar (E11-1)', () => {
   test('canvas toolbar has zoom controls', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
 
     // Toolbar should be present
@@ -157,7 +157,7 @@ test.describe('Workbench UX: Canvas toolbar (E11-1)', () => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
 
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page, errors)
 
     // Find all buttons in the toolbar
@@ -172,7 +172,7 @@ test.describe('Workbench UX: Canvas toolbar (E11-1)', () => {
   })
 
   test('multiple node types render in starter graph', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
 
     // The starter graph has source nodes and a display node
@@ -202,7 +202,7 @@ test.describe('V2-002: Settings Router crash regression', () => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
 
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page, errors)
 
     // Find the settings gear button in the menubar/header area

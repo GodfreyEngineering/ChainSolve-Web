@@ -170,7 +170,7 @@ function AiDockHandle({ side, onClick, onResizeStart, title }: AiDockHandleProps
             width: HANDLE_WIDTH,
             height: '100%',
             borderLeft: '1px solid var(--border)',
-            background: 'var(--surface-1, var(--card-bg))',
+            background: 'var(--surface-1)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -228,7 +228,7 @@ const panelStyle: React.CSSProperties = {
   height: '100%',
   position: 'relative',
   borderLeft: '1px solid var(--border)',
-  background: 'var(--surface-1, var(--card-bg))',
+  background: 'var(--surface-1)',
   transition: 'width var(--transition-panel, 0.25s cubic-bezier(0.16, 1, 0.3, 1))',
 }
 

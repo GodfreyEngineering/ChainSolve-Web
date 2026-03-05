@@ -188,7 +188,7 @@ const cardStyle: React.CSSProperties = {
   borderRadius: 10,
   padding: '1rem',
   marginBottom: '0.75rem',
-  background: 'var(--card-bg)',
+  background: 'var(--surface-2)',
 }
 
 const cardHeader: React.CSSProperties = {

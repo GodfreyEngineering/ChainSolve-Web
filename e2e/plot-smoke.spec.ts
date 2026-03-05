@@ -20,7 +20,7 @@ test.describe('Plot smoke (P098)', () => {
   test('canvas loads without errors (plot lazy modules)', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page, errors)
     expect(errors).toEqual([])
   })
@@ -37,7 +37,7 @@ test.describe('Plot smoke (P098)', () => {
         cspErrors.push(text)
       }
     })
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
     expect(cspErrors).toEqual([])
   })
@@ -48,7 +48,7 @@ test.describe('Plot smoke (P098)', () => {
   })
 
   test('xyPlot and histogram blocks exist in engine catalog', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const plotOps = await page.evaluate(() => {
@@ -65,7 +65,7 @@ test.describe('Plot smoke (P098)', () => {
   })
 
   test('engine evaluates vectorInput → xyPlot without error', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const result = await page.evaluate(async () => {
@@ -96,7 +96,7 @@ test.describe('Plot smoke (P098)', () => {
   })
 
   test('engine evaluates vectorInput → histogram without error', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const result = await page.evaluate(async () => {

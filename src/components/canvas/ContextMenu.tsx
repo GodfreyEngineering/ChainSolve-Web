@@ -193,7 +193,7 @@ export function ContextMenu({
     left: target.x,
     top: target.y,
     zIndex: 1000,
-    background: 'var(--card-bg)',
+    background: 'var(--surface-2)',
     border: '1px solid var(--border)',
     borderRadius: 8,
     padding: '0.3rem',

@@ -145,7 +145,7 @@ const kbdStyle: React.CSSProperties = {
   padding: '0.15rem 0.45rem',
   borderRadius: 5,
   border: '1px solid var(--border)',
-  background: 'var(--card-bg)',
+  background: 'var(--surface-2)',
   fontFamily: "'JetBrains Mono', monospace",
   fontSize: '0.75rem',
   color: 'var(--text)',

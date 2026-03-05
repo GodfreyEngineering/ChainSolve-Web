@@ -32,7 +32,7 @@ const s = {
     padding: '0 1.5rem',
     height: 56,
     borderBottom: '1px solid rgba(255,255,255,0.08)',
-    background: 'var(--card-bg, #252525)',
+    background: 'var(--surface-2)',
   } satisfies React.CSSProperties,
   body: {
     maxWidth: 1000,
@@ -40,7 +40,7 @@ const s = {
     padding: '2rem 1.5rem',
   } satisfies React.CSSProperties,
   card: {
-    background: 'var(--card-bg, #252525)',
+    background: 'var(--surface-2)',
     border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: 12,
     padding: '1.25rem',

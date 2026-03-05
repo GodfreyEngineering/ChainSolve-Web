@@ -374,7 +374,7 @@ const panelStyle: React.CSSProperties = {
   zIndex: 15,
   display: 'flex',
   flexDirection: 'column',
-  background: 'var(--card-bg, #1e1e1e)',
+  background: 'var(--surface-1)',
   borderTop: '1px solid var(--border, #333)',
   fontFamily: 'ui-monospace, "Cascadia Code", "Fira Code", monospace',
   fontSize: '0.72rem',

@@ -139,7 +139,7 @@ const cardStyle: React.CSSProperties = {
   padding: '1.2rem 1rem',
   border: '1px solid var(--border)',
   borderRadius: 'var(--radius-xl)',
-  background: 'var(--surface-2, var(--card-bg))',
+  background: 'var(--surface-2)',
   cursor: 'pointer',
   fontFamily: 'inherit',
   color: 'inherit',
@@ -148,7 +148,7 @@ const cardStyle: React.CSSProperties = {
 
 const cardPrimaryStyle: React.CSSProperties = {
   borderColor: 'var(--primary)',
-  background: 'color-mix(in srgb, var(--primary) 5%, var(--surface-2, var(--card-bg)))',
+  background: 'color-mix(in srgb, var(--primary) 5%, var(--surface-2))',
 }
 
 const cardLabelStyle: React.CSSProperties = {

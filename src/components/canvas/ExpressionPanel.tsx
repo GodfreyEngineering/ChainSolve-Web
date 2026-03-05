@@ -159,7 +159,7 @@ export function ExpressionPanel({ nodeId, nodes, edges, computed, onClose }: Exp
 // ── Styles ──────────────────────────────────────────────────────────────────
 
 const panelStyle: React.CSSProperties = {
-  background: 'var(--card-bg)',
+  background: 'var(--surface-1)',
   border: '1px solid var(--border)',
   borderRadius: 10,
   boxShadow: 'var(--shadow-lg)',

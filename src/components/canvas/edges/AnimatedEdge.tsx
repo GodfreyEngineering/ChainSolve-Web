@@ -136,7 +136,7 @@ function AnimatedEdgeInner({
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: '0.6rem',
               color: 'var(--text)',
-              background: 'var(--card-bg)',
+              background: 'var(--surface-2)',
               border: '1px solid var(--border)',
               borderRadius: 3,
               padding: '0.05rem 0.3rem',

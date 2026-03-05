@@ -188,7 +188,7 @@ const panelStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
-  background: 'var(--surface-1, var(--card-bg))',
+  background: 'var(--surface-1)',
   borderRight: '1px solid var(--border)',
   flexShrink: 0,
   position: 'relative',

@@ -22,11 +22,13 @@ const overlayStyle: React.CSSProperties = {
 }
 
 const panelStyle: React.CSSProperties = {
-  background: 'var(--card-bg)',
-  border: '1px solid var(--border)',
+  background: 'var(--glass-bg)',
+  backdropFilter: 'blur(var(--glass-blur))',
+  WebkitBackdropFilter: 'blur(var(--glass-blur))',
+  border: '1px solid var(--glass-border)',
   borderRadius: 'var(--radius-xl)',
   padding: '1.5rem',
-  boxShadow: 'var(--shadow-lg)',
+  boxShadow: 'var(--shadow-elevated)',
   maxHeight: '85vh',
   overflowY: 'auto',
   animation: 'cs-slide-up 0.2s ease',

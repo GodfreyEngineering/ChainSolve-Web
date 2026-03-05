@@ -159,7 +159,7 @@ const GROUP_HEADER_HEIGHT = 36
 
 const collapsedStyle: React.CSSProperties = {
   minWidth: 180,
-  background: 'var(--card-bg)',
+  background: 'var(--surface-2)',
   border: '2px solid',
   borderRadius: 10,
   fontFamily: "'Montserrat', system-ui, sans-serif",
@@ -245,6 +245,6 @@ const proxyDirLabel: React.CSSProperties = {
 const proxyHandleStyle: React.CSSProperties = {
   width: 10,
   height: 10,
-  border: '2px solid var(--card-bg)',
+  border: '2px solid var(--surface-2)',
   position: 'relative',
 }

@@ -1136,7 +1136,7 @@ export function AppHeader({
                 label={t('home.explore')}
                 icon={'\u2609'}
                 onClick={() => {
-                  window.location.href = '/explore'
+                  window.location.href = '/app?tab=explore'
                   setMobileDrawerOpen(false)
                 }}
               />
@@ -1353,7 +1353,7 @@ const mobileDrawerStyle: React.CSSProperties = {
   top: 40,
   right: 0,
   bottom: 0,
-  background: 'var(--card-bg)',
+  background: 'var(--surface-1)',
   borderLeft: '1px solid var(--border)',
   zIndex: 50,
   overflowY: 'auto',

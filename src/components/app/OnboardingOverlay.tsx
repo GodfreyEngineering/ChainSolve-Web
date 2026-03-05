@@ -203,7 +203,7 @@ const overlayStyle: React.CSSProperties = {
 }
 
 const panelStyle: React.CSSProperties = {
-  background: 'var(--card-bg)',
+  background: 'var(--surface-2)',
   border: '1px solid var(--border)',
   borderRadius: 'var(--radius-xl)',
   padding: '1.5rem',

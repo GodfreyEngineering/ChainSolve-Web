@@ -30,7 +30,7 @@ const variantColors: Record<ToastVariant, string> = {
 function toastStyle(variant: ToastVariant): React.CSSProperties {
   return {
     pointerEvents: 'auto',
-    background: 'var(--card-bg)',
+    background: 'var(--surface-2)',
     border: `1px solid ${variantColors[variant]}44`,
     borderLeft: `3px solid ${variantColors[variant]}`,
     borderRadius: 'var(--radius-lg)',

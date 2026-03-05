@@ -55,7 +55,7 @@ test.describe('Core flow: Landing → canvas → blocks → evaluate (D17-4)', (
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
 
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page, errors)
     expect(errors).toEqual([])
 
@@ -66,7 +66,7 @@ test.describe('Core flow: Landing → canvas → blocks → evaluate (D17-4)', (
   })
 
   test('engine API: build chain of 5 blocks and verify result', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const result = await page.evaluate(async () => {
@@ -98,7 +98,7 @@ test.describe('Core flow: Landing → canvas → blocks → evaluate (D17-4)', (
   })
 
   test('engine API: load snapshot then patch — incremental eval works', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const result = await page.evaluate(async () => {
@@ -248,7 +248,7 @@ test.describe('Core flow: Explore browse → install template (D17-4)', () => {
 
 test.describe('Core flow: Export gating (D17-4)', () => {
   test('Free plan entitlements block export', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const result = await page.evaluate(() => {
@@ -277,7 +277,7 @@ test.describe('Core flow: Export gating (D17-4)', () => {
   })
 
   test('Pro plan entitlements allow export', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const result = await page.evaluate(() => {

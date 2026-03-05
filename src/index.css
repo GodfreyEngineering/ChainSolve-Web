@@ -18,8 +18,7 @@
   --surface-2: #2e2e2e; /* cards, nodes, elevated */
   --surface-3: #383838; /* interactive hover, inputs */
 
-  /* Legacy aliases — point to surface layers for backward compat */
-  --card-bg: var(--surface-2);
+  /* Legacy alias — kept only for third-party React Flow overrides */
   --surface2: var(--surface-1);
 
   /* ── Node-type semantic colors (V3-UI) ──────────────────────────────────── */
@@ -154,7 +153,6 @@
   --surface-2: #f8f8f7;
   --surface-3: #eaeae9;
 
-  --card-bg: var(--surface-2);
   --surface2: var(--surface-1);
 
   --node-color-source: #7c3aed;
@@ -271,7 +269,7 @@ button:focus:not(:focus-visible) {
 
 /* React Flow overrides */
 .react-flow__controls {
-  background: var(--card-bg) !important;
+  background: var(--surface-2) !important;
   border: 1px solid var(--border) !important;
   border-radius: var(--radius-lg) !important;
   box-shadow: var(--shadow-md) !important;
@@ -463,7 +461,7 @@ button:focus:not(:focus-visible) {
   height: 36px;
   padding: 0 0.75rem;
   border-bottom: 1px solid var(--border);
-  background: var(--card-bg);
+  background: var(--surface-1);
   flex-shrink: 0;
   gap: 0.5rem;
 }

@@ -183,7 +183,7 @@ export function QuickAddPalette({
           zIndex: 1002,
           width: PALETTE_W,
           maxHeight: PALETTE_H,
-          background: 'var(--card-bg)',
+          background: 'var(--surface-2)',
           border: '1px solid var(--border)',
           borderRadius: 10,
           boxShadow: 'var(--shadow-lg)',

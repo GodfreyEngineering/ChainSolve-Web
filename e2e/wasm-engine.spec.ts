@@ -6,7 +6,7 @@
  * subsequent tests reuse the same Chromium context and the already-compiled WASM
  * module — no repeated cold-compilation cost.
  *
- * The single UI test that navigates to /canvas uses the default `page` fixture so
+ * The single UI test that navigates to /app?scratch=1 uses the default `page` fixture so
  * it gets its own isolated browser context and does not corrupt shared state.
  */
 
@@ -182,12 +182,12 @@ test.describe('WASM engine — catalog & handshake (W9.1)', () => {
     expect(r.values.n2).toEqual({ kind: 'scalar', value: 100 })
   })
 
-  // Canvas UI test: needs to navigate to /canvas, so it uses a fresh default page
+  // Canvas UI test: needs to navigate to /app?scratch=1, so it uses a fresh default page
   // to avoid corrupting the shared enginePage state.
   baseTest(
     'starter graph renders "7" in display node on canvas',
     async ({ page }) => {
-      await page.goto('/canvas')
+      await page.goto('/app?scratch=1')
       await waitForCanvasOrFatal(page)
 
       // The display node should show the value 7 (from 3 + 4 starter graph)

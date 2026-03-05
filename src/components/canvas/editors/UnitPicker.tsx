@@ -204,7 +204,7 @@ function UnitDropdown({
         width: compact ? 200 : '100%',
         minWidth: 180,
         maxHeight: 260,
-        background: 'var(--card-bg, #1a1a2e)',
+        background: 'var(--surface-2)',
         border: '1px solid var(--border, rgba(255,255,255,0.1))',
         borderRadius: 8,
         boxShadow: '0 8px 24px rgba(0,0,0,0.5)',

@@ -2,7 +2,7 @@
  * canvas-smoke.spec.ts — P094
  *
  * E2E smoke tests for the scratch canvas (no auth required).
- * Route: /canvas  — loads INITIAL_NODES/INITIAL_EDGES (starter 3+4 graph).
+ * Route: /app?scratch=1  — loads INITIAL_NODES/INITIAL_EDGES (starter 3+4 graph).
  *
  * Covers:
  *  - Canvas page loads without errors
@@ -27,27 +27,27 @@ test.describe('Canvas smoke (P094)', () => {
   test('scratch canvas loads without console errors', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', (err) => errors.push(err.message))
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page, errors)
     expect(errors).toEqual([])
   })
 
   test('block library panel is visible with search input', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
     // BlockLibrary renders an input[type="search"] for filtering blocks
     await expect(page.locator('input[type="search"]').first()).toBeVisible()
   })
 
   test('React Flow canvas container renders', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
     // React Flow always renders a .react-flow__renderer once mounted
     await expect(page.locator('.react-flow__renderer')).toBeAttached()
   })
 
   test('starter graph has at least one display node showing "7"', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
     const display = page.locator('.react-flow__node-csDisplay')
     await expect(display.first()).toBeVisible()
@@ -55,13 +55,13 @@ test.describe('Canvas smoke (P094)', () => {
   })
 
   test('bottom toolbar is rendered with canvas-toolbar role', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForCanvasOrFatal(page)
     await expect(page.locator('[role="toolbar"][aria-label="Canvas toolbar"]')).toBeAttached()
   })
 
   test('application menubar is rendered', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
     await expect(page.locator('[role="menubar"][aria-label="Application menu"]')).toBeAttached()
   })
@@ -71,7 +71,7 @@ test.describe('Canvas smoke (P094)', () => {
 
 test.describe('Canvas engine API via scratch canvas (P094)', () => {
   test('evaluates add(10, 20) = 30 via engine API', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const result = await page.evaluate(async () => {
@@ -97,7 +97,7 @@ test.describe('Canvas engine API via scratch canvas (P094)', () => {
   })
 
   test('evaluates multiply(6, 7) = 42 via engine API', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const result = await page.evaluate(async () => {
@@ -123,7 +123,7 @@ test.describe('Canvas engine API via scratch canvas (P094)', () => {
   })
 
   test('incremental patch correctly updates eval after node value change', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const result = await page.evaluate(async () => {

@@ -18,7 +18,7 @@ import { waitForEngineOrFatal } from './helpers'
 
 test.describe('Variables and bindings — engine API (P096)', () => {
   test('manual values act as variable inputs for disconnected ports', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const result = await page.evaluate(async () => {
@@ -40,7 +40,7 @@ test.describe('Variables and bindings — engine API (P096)', () => {
   })
 
   test('applyPatch provides slider-style incremental updates', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const results = await page.evaluate(async () => {
@@ -81,7 +81,7 @@ test.describe('Variables and bindings — engine API (P096)', () => {
   })
 
   test('portOverrides prevent edge values from overriding manual inputs', async ({ page }) => {
-    await page.goto('/canvas')
+    await page.goto('/app?scratch=1')
     await waitForEngineOrFatal(page)
 
     const result = await page.evaluate(async () => {

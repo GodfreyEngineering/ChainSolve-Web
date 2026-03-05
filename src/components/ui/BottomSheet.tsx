@@ -24,7 +24,7 @@ const sheetBase: CSSProperties = {
   left: 0,
   right: 0,
   zIndex: 'var(--z-modal, 9000)' as unknown as number,
-  background: 'var(--surface-1, var(--card-bg))',
+  background: 'var(--surface-1)',
   borderTopLeftRadius: 16,
   borderTopRightRadius: 16,
   boxShadow: '0 -4px 24px rgba(0,0,0,0.3)',

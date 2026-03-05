@@ -319,7 +319,7 @@ const barStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   gap: '0.2rem',
-  background: 'var(--card-bg)',
+  background: 'var(--surface-1)',
   border: '1px solid var(--border)',
   borderRadius: 'var(--radius-lg)',
   padding: '0.25rem 0.4rem',

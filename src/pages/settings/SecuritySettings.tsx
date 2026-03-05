@@ -363,7 +363,7 @@ const cardStyle: React.CSSProperties = {
   border: '1px solid var(--border)',
   borderRadius: 12,
   padding: '1.5rem',
-  background: 'var(--card-bg)',
+  background: 'var(--surface-2)',
 }
 
 const fieldLabel: React.CSSProperties = {
