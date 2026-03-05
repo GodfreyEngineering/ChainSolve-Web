@@ -1697,5 +1697,18 @@
     "browseDesc": "Plantillas de la comunidad",
     "importProject": "Importar proyecto",
     "importDesc": "Desde archivo .chainsolvejson"
+  },
+  "explore": {
+    "searchPlaceholder": "Buscar en el mercado...",
+    "sortPopular": "Popular",
+    "sortNewest": "Más recientes",
+    "sortLiked": "Más gustados",
+    "noResults": "No hay elementos que coincidan con tu búsqueda",
+    "empty": "Aún no hay elementos publicados",
+    "back": "Volver",
+    "notFound": "Elemento no encontrado",
+    "useTemplate": "Usar plantilla",
+    "install": "Instalar",
+    "installing": "Instalando..."
   }
 }

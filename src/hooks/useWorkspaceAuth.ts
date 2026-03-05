@@ -2,7 +2,7 @@
  * useWorkspaceAuth — shared auth/profile/plan state for the workspace.
  *
  * Extracts the authentication, profile fetch, and plan resolution logic
- * that was previously duplicated between AppShell and CanvasPage.
+ * that was previously duplicated across page components.
  */
 
 import { useCallback, useEffect, useState } from 'react'

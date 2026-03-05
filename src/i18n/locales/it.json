@@ -1697,5 +1697,18 @@
     "browseDesc": "Modelli della community",
     "importProject": "Importa progetto",
     "importDesc": "Da file .chainsolvejson"
+  },
+  "explore": {
+    "searchPlaceholder": "Cerca nel marketplace...",
+    "sortPopular": "Popolare",
+    "sortNewest": "Più recenti",
+    "sortLiked": "Più apprezzati",
+    "noResults": "Nessun elemento corrisponde alla ricerca",
+    "empty": "Nessun elemento pubblicato",
+    "back": "Indietro",
+    "notFound": "Elemento non trovato",
+    "useTemplate": "Usa modello",
+    "install": "Installa",
+    "installing": "Installazione..."
   }
 }

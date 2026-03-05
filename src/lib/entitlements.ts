@@ -3,7 +3,7 @@
  *
  * Pure functions that map a user's `plan_status` to concrete limits.
  * No side effects, no Supabase calls — this module is imported by
- * both the project browser (AppShell) and the canvas editor.
+ * both the workspace and the canvas editor.
  *
  * J3-1: Formal role hierarchy (separate from billing plan):
  *   developer       — is_developer flag; all features + dev tools

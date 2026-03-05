@@ -1697,5 +1697,18 @@
     "browseDesc": "Community-Vorlagen",
     "importProject": "Projekt importieren",
     "importDesc": "Aus .chainsolvejson-Datei"
+  },
+  "explore": {
+    "searchPlaceholder": "Marktplatz durchsuchen...",
+    "sortPopular": "Beliebt",
+    "sortNewest": "Neueste",
+    "sortLiked": "Am meisten gemocht",
+    "noResults": "Keine Elemente entsprechen Ihrer Suche",
+    "empty": "Noch keine veröffentlichten Elemente",
+    "back": "Zurück",
+    "notFound": "Element nicht gefunden",
+    "useTemplate": "Vorlage verwenden",
+    "install": "Installieren",
+    "installing": "Wird installiert..."
   }
 }

@@ -36,7 +36,7 @@ function makeProject(id: string, name: string, folder: string | null): MinimalPr
   return { id, name, folder }
 }
 
-// Extracted folder filtering logic (mirrors AppShell.tsx filteredProjects memo)
+// Extracted folder filtering logic (mirrors ProjectsPanel filteredProjects)
 function filterByFolder(projects: MinimalProject[], folderFilter: string | null): MinimalProject[] {
   if (folderFilter === null) return projects
   if (folderFilter === '') return projects.filter((p) => !p.folder)
@@ -191,46 +191,4 @@ describe('i18n keys for project manager (L4-2)', () => {
       })
     }
   }
-})
-
-// ── 5. AppShell contains L4-2 UI markers ────────────────────────────────────
-
-describe('AppShell contains L4-2 folder/bulk UI', () => {
-  const src = fs.readFileSync(path.resolve(__dirname, 'AppShell.tsx'), 'utf-8')
-
-  it('defines folderPillStyle helper', () => {
-    expect(src).toContain('function folderPillStyle')
-  })
-
-  it('renders folder pills section', () => {
-    expect(src).toContain("t('projects.allFolders')")
-    expect(src).toContain("t('projects.folderRoot')")
-  })
-
-  it('renders bulk action bar', () => {
-    expect(src).toContain("t('projects.bulkDelete')")
-    expect(src).toContain("t('projects.bulkMove')")
-    expect(src).toContain("t('projects.bulkExport')")
-  })
-
-  it('renders select mode toggle', () => {
-    expect(src).toContain("t('projects.selectMode')")
-    expect(src).toContain("t('projects.exitSelectMode')")
-  })
-
-  it('uses menuItems (not menuActions) in ProjectCard', () => {
-    expect(src).toContain('menuItems.map')
-    expect(src).not.toContain('menuActions.map')
-  })
-
-  it('passes folder operation props to ProjectCard', () => {
-    expect(src).toContain('onMoveToFolder')
-    expect(src).toContain('onRemoveFromFolder')
-    expect(src).toContain('onToggleSelect')
-  })
-
-  it('fetches folders in parallel with projects', () => {
-    expect(src).toContain('listFolders()')
-    expect(src).toContain('Promise.all')
-  })
 })

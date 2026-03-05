@@ -47,7 +47,7 @@ export function usePageMeta(title: string, description?: string): void {
 /**
  * Inject per-route hreflang <link> tags and a canonical <link> tag.
  * Call from every public-facing page component (DocsPage, TermsPage,
- * PrivacyPage, MarketplacePage, Login).
+ * PrivacyPage, Login).
  *
  * On mount, creates (or updates) link elements for each supported
  * language plus x-default and canonical.  On unmount, removes the

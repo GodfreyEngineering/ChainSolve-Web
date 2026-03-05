@@ -1,10 +1,10 @@
 /**
- * WorkspacePage — unified single-page workspace (V3-UI Phase 5).
+ * WorkspacePage — unified single-page workspace (V3-UI).
  *
  * Composes:
  *   - WorkspaceToolbar (36px top bar)
  *   - LeftSidebar (collapsible, 320px default)
- *   - Main area: CanvasPage (when projectId present) or WelcomeCanvas (empty state)
+ *   - Main area: CanvasPage (project or scratch) or WelcomeCanvas (empty state)
  *
  * Auth flow:
  *   1. Loading → LoadingScreen
@@ -13,10 +13,15 @@
  *   4. Needs MFA prompt → MfaSetupPrompt
  *   5. First run → FirstRunModal
  *   6. Normal workspace view
+ *
+ * Scratch mode:
+ *   - Activated via "Scratch Canvas" action or ?scratch=1 query param
+ *   - Loads CanvasPage embedded with no projectId
+ *   - URL stays at /app
  */
 
-import { lazy, Suspense, useCallback, useRef, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useWorkspaceAuth } from '../hooks/useWorkspaceAuth'
 import { WorkspaceToolbar } from '../components/app/WorkspaceToolbar'
 import { LeftSidebar } from '../components/app/LeftSidebar'
@@ -49,10 +54,21 @@ const ONBOARDED_KEY = 'cs:onboarded'
 
 export default function WorkspacePage() {
   const { projectId } = useParams<{ projectId?: string }>()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const auth = useWorkspaceAuth()
   const { open: sidebarOpen, toggle: toggleSidebar, setActiveTab } = useSidebarStore()
   const importRef = useRef<HTMLInputElement>(null)
+
+  // Scratch mode: activated by ?scratch=1 param or user action
+  const [scratchMode, setScratchMode] = useState(() => searchParams.get('scratch') === '1')
+
+  // Auto-open sidebar to Explore tab if ?tab=explore is in the URL
+  useEffect(() => {
+    if (searchParams.get('tab') === 'explore') {
+      setActiveTab('explore')
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [firstRunOpen, setFirstRunOpen] = useState(() => {
     try {
@@ -62,20 +78,23 @@ export default function WorkspacePage() {
     }
   })
 
+  const showCanvas = !!projectId || scratchMode
+
   const handleOpenProject = useCallback(
     (id: string) => {
+      setScratchMode(false)
       navigate(`/app/${id}`)
     },
     [navigate],
   )
 
   const handleNewProject = useCallback(() => {
-    navigate('/canvas')
-  }, [navigate])
+    setScratchMode(true)
+  }, [])
 
   const handleOpenScratch = useCallback(() => {
-    navigate('/canvas')
-  }, [navigate])
+    setScratchMode(true)
+  }, [])
 
   const handleOpenExplore = useCallback(() => {
     setActiveTab('explore')
@@ -205,9 +224,9 @@ export default function WorkspacePage() {
 
         {/* Canvas area or welcome */}
         <div style={canvasAreaStyle}>
-          {projectId ? (
+          {showCanvas ? (
             <Suspense fallback={<LoadingScreen />}>
-              <CanvasPage />
+              <CanvasPage embedded />
             </Suspense>
           ) : (
             <WelcomeCanvas

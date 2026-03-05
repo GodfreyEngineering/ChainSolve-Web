@@ -1,8 +1,8 @@
 /**
  * useSessionGuard — L3-1: Robust session validity monitoring.
  *
- * Replaces the duplicated session-polling logic in AppShell and
- * CanvasPage with a single hook that:
+ * Centralised session-polling logic used by WorkspacePage and
+ * CanvasPage. Single hook that:
  *
  *   1. Polls `isSessionValid()` every SESSION_CHECK_INTERVAL_MS.
  *   2. Checks immediately when the tab regains visibility

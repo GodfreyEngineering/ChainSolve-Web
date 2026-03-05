@@ -1716,5 +1716,18 @@
     "browseDesc": "Community templates",
     "importProject": "Import Project",
     "importDesc": "From .chainsolvejson file"
+  },
+  "explore": {
+    "searchPlaceholder": "Search marketplace...",
+    "sortPopular": "Popular",
+    "sortNewest": "Newest",
+    "sortLiked": "Most liked",
+    "noResults": "No items match your search",
+    "empty": "No published items yet",
+    "back": "Back",
+    "notFound": "Item not found",
+    "useTemplate": "Use Template",
+    "install": "Install",
+    "installing": "Installing..."
   }
 }

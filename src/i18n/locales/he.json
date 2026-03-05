@@ -860,5 +860,18 @@
     "browseDesc": "תבניות קהילתיות",
     "importProject": "ייבא פרויקט",
     "importDesc": "מקובץ chainsolvejson."
+  },
+  "explore": {
+    "searchPlaceholder": "חיפוש בשוק...",
+    "sortPopular": "פופולרי",
+    "sortNewest": "חדש ביותר",
+    "sortLiked": "הכי אהוב",
+    "noResults": "אין פריטים התואמים לחיפוש שלך",
+    "empty": "אין עדיין פריטים מפורסמים",
+    "back": "חזרה",
+    "notFound": "הפריט לא נמצא",
+    "useTemplate": "השתמש בתבנית",
+    "install": "התקן",
+    "installing": "מתקין..."
   }
 }

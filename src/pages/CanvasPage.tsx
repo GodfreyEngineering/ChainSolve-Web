@@ -17,7 +17,6 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AppHeader } from '../components/app/AppHeader'
-import { MainHeader } from '../components/app/MainHeader'
 import { CONTACT } from '../lib/brand'
 import { LoadingScreen } from '../components/ui/LoadingScreen'
 import {
@@ -137,7 +136,12 @@ const LazySessionRevokedModal = lazy(() =>
 const EXPORT_SETTLE_MS = 300
 const OFFLINE_RETRY_DELAYS = [3_000, 6_000, 12_000, 24_000, 60_000]
 
-export default function CanvasPage() {
+interface CanvasPageProps {
+  /** When true, skip rendering AppHeader (WorkspacePage provides the shell). */
+  embedded?: boolean
+}
+
+export default function CanvasPage({ embedded }: CanvasPageProps = {}) {
   const { projectId } = useParams<{ projectId?: string }>()
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -1684,44 +1688,44 @@ export default function CanvasPage() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
+        height: embedded ? '100%' : '100vh',
         overflow: 'hidden',
         background: 'var(--bg)',
       }}
     >
-      {/* G7-1: Main header (always present) */}
-      <MainHeader plan={plan} />
-      {/* ── Project header ──────────────────────────────────────────────────── */}
-      <AppHeader
-        projectId={projectId}
-        projectName={projectName}
-        readOnly={readOnly}
-        nameEditing={nameEditing}
-        nameInput={nameInput}
-        nameInputRef={nameInputRef}
-        onStartNameEdit={startNameEdit}
-        onNameInputChange={setNameInput}
-        onCommitNameEdit={() => void commitNameEdit()}
-        onCancelNameEdit={() => setNameEditing(false)}
-        onSave={doSave}
-        onNewProject={handleNewProject}
-        onOpenProject={handleOpenProject}
-        onSaveAs={handleSaveAs}
-        canvasRef={canvasRef}
-        exportInProgress={exportInProgress}
-        onExportPdfProject={gatedExportPdf}
-        onCancelExport={handleCancelExport}
-        onExportExcelProject={gatedExportExcel}
-        onExportChainsolveJson={gatedExportJson}
-        onImportChainsolveJson={gatedImportJson}
-        isOnline={isOnline}
-        onRetryOffline={() => {
-          if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
-          void doSave()
-        }}
-        saveAsRequested={saveAsRequested}
-        onSaveAsRequestHandled={() => setSaveAsRequested(false)}
-      />
+      {/* Project header (hidden when embedded in WorkspacePage) */}
+      {!embedded && (
+        <AppHeader
+          projectId={projectId}
+          projectName={projectName}
+          readOnly={readOnly}
+          nameEditing={nameEditing}
+          nameInput={nameInput}
+          nameInputRef={nameInputRef}
+          onStartNameEdit={startNameEdit}
+          onNameInputChange={setNameInput}
+          onCommitNameEdit={() => void commitNameEdit()}
+          onCancelNameEdit={() => setNameEditing(false)}
+          onSave={doSave}
+          onNewProject={handleNewProject}
+          onOpenProject={handleOpenProject}
+          onSaveAs={handleSaveAs}
+          canvasRef={canvasRef}
+          exportInProgress={exportInProgress}
+          onExportPdfProject={gatedExportPdf}
+          onCancelExport={handleCancelExport}
+          onExportExcelProject={gatedExportExcel}
+          onExportChainsolveJson={gatedExportJson}
+          onImportChainsolveJson={gatedImportJson}
+          isOnline={isOnline}
+          onRetryOffline={() => {
+            if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
+            void doSave()
+          }}
+          saveAsRequested={saveAsRequested}
+          onSaveAsRequestHandled={() => setSaveAsRequested(false)}
+        />
+      )}
 
       {/* ── Read-only / billing banner ────────────────────────────────────── */}
       {readOnly && (
