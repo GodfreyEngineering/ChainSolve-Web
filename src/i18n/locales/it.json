@@ -1461,7 +1461,13 @@
     "secExports": "Esportazioni e report",
     "secAiAssistant": "Assistente AI",
     "secTroubleshooting": "Risoluzione problemi",
-    "secShortcuts": "Scorciatoie da tastiera"
+    "secShortcuts": "Scorciatoie da tastiera",
+    "secUiOverview": "Panoramica dell'interfaccia",
+    "secChains": "Catene",
+    "secProjects": "Progetti e salvataggio",
+    "secGroups": "Gruppi",
+    "secSavedGroups": "Gruppi salvati",
+    "secSettingsThemes": "Impostazioni e temi"
   },
   "expressionPanel": {
     "title": "Espressione",

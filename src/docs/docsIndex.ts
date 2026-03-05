@@ -312,6 +312,86 @@ export const DOCS_INDEX: DocsEntry[] = [
       'New accounts get a free trial of Pro features. After the trial, Pro features require a paid subscription.',
     keywords: ['trial', 'trialing', 'free trial', 'subscription'],
   },
+
+  // ── UI & navigation ──────────────────────────────────────────────────────
+  {
+    id: 'ui-overview',
+    section: 'Getting started',
+    title: 'UI overview',
+    description:
+      'Tour of the ChainSolve interface: header bar, canvas, toolbar, inspector panel, side panels, and floating windows.',
+    keywords: ['ui', 'interface', 'toolbar', 'inspector', 'panel', 'window', 'layout', 'overview'],
+  },
+  {
+    id: 'chains',
+    section: 'Canvas',
+    title: 'Chains (connections)',
+    description:
+      'Chains connect block outputs to inputs. Values flow downstream automatically. Supports multiple outputs, animated flow, and incremental evaluation.',
+    keywords: [
+      'chain',
+      'connection',
+      'edge',
+      'wire',
+      'link',
+      'data flow',
+      'connect',
+      'disconnect',
+      'animated',
+    ],
+  },
+  {
+    id: 'projects',
+    section: 'Getting started',
+    title: 'Projects and saving',
+    description:
+      'Create projects, auto-save, multi-sheet canvases (Pro), import/export .chainsolvejson files, and scratch canvases.',
+    keywords: [
+      'project',
+      'save',
+      'auto-save',
+      'sheet',
+      'canvas',
+      'import',
+      'export',
+      'scratch',
+      'delete',
+    ],
+  },
+  {
+    id: 'groups',
+    section: 'Canvas',
+    title: 'Groups',
+    description:
+      'Visually group related blocks on the canvas. Create, edit, move, and colour groups. Pro feature.',
+    keywords: ['group', 'organise', 'organize', 'colour', 'color', 'label', 'select'],
+  },
+  {
+    id: 'saved-groups',
+    section: 'Canvas',
+    title: 'Saved groups (templates)',
+    description:
+      'Save groups of blocks as reusable templates. Insert, manage, and share saved groups across projects.',
+    keywords: ['template', 'saved group', 'reuse', 'insert', 'share', 'publish'],
+  },
+  {
+    id: 'settings-themes',
+    section: 'Settings',
+    title: 'Settings and themes',
+    description:
+      'Account settings (profile, billing, security) and app settings (general, canvas, values, performance, themes). Theme Wizard for custom colour schemes.',
+    keywords: [
+      'settings',
+      'theme',
+      'dark mode',
+      'light mode',
+      'wizard',
+      'colour',
+      'color',
+      'preset',
+      'preferences',
+    ],
+  },
 ]
 
 // ── Search ────────────────────────────────────────────────────────────────────

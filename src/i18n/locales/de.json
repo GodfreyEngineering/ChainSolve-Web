@@ -1461,7 +1461,13 @@
     "secExports": "Exporte und Berichte",
     "secAiAssistant": "KI-Assistent",
     "secTroubleshooting": "Fehlerbehebung",
-    "secShortcuts": "Tastaturkürzel"
+    "secShortcuts": "Tastaturkürzel",
+    "secUiOverview": "UI-Uebersicht",
+    "secChains": "Ketten",
+    "secProjects": "Projekte & Speichern",
+    "secGroups": "Gruppen",
+    "secSavedGroups": "Gespeicherte Gruppen",
+    "secSettingsThemes": "Einstellungen & Themes"
   },
   "expressionPanel": {
     "title": "Ausdruck",

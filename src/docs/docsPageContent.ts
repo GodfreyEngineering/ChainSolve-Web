@@ -15,6 +15,29 @@ export interface DocsContentMap {
 }
 
 export const DOCS_CONTENT: DocsContentMap = {
+  uiOverview: {
+    intro:
+      'ChainSolve has a streamlined interface designed around the canvas. Here is a tour of the main areas you will interact with.',
+    headerTitle: 'Header bar',
+    headerBody:
+      'The top bar shows the project name, undo/redo buttons, the Insert menu for adding blocks, and the Tools menu for AI assistant, exports, and publishing. On the right side you will find the settings gear and your account avatar.',
+    canvasTitle: 'Canvas',
+    canvasBody:
+      'The canvas is the main workspace. It displays blocks and the chains that connect them. You can pan by dragging on empty space, zoom with the scroll wheel, and select blocks by clicking or drawing a selection rectangle. Double-click an empty area to open the block library.',
+    toolbarTitle: 'Canvas toolbar',
+    toolbarBody:
+      'The toolbar at the bottom of the canvas provides quick actions: zoom controls, fit-to-view, auto-layout, undo/redo, and toggle buttons for the variables panel, graph health, and AI assistant.',
+    inspectorTitle: 'Inspector panel',
+    inspectorBody:
+      'Click a block to open the inspector on the right side. The inspector shows the block name, its input and output ports, current values, unit assignments, and any applicable settings. You can rename blocks, change units, and edit input bindings directly from the inspector.',
+    panelsTitle: 'Side panels',
+    panelsBody:
+      'Several features open as collapsible side panels: the Variables panel, the Graph Health panel, and the AI Copilot. These panels dock to the edges of the canvas and can be opened or closed from the toolbar.',
+    windowsTitle: 'Floating windows',
+    windowsBody:
+      'Larger tools such as the Theme Wizard, Block Library, and Settings open as draggable floating windows. You can move, resize, and close them independently.',
+  },
+
   onboarding: {
     intro:
       'Welcome to ChainSolve. This guide covers everything you need to go from zero to a working calculation chain.',
@@ -241,6 +264,29 @@ export const DOCS_CONTENT: DocsContentMap = {
     arrow: 'Directional arrow for pointing at or connecting visual elements.',
   },
 
+  chains: {
+    intro:
+      'Chains are the connections between blocks. They carry values from one block to another and define the flow of computation across your canvas.',
+    createTitle: 'Creating a chain',
+    createBody:
+      'Drag from an output port (right side of a block) to an input port (left side of another block). A chain line appears while dragging. Release over a compatible port to complete the connection. The downstream block recalculates immediately.',
+    deleteTitle: 'Deleting a chain',
+    deleteBody:
+      'Click a chain to select it (it highlights), then press Delete or Backspace. You can also right-click a chain and choose Remove from the context menu.',
+    dataFlowTitle: 'Data flow',
+    dataFlowBody:
+      'Values propagate downstream automatically. When you change an input, the engine re-evaluates only the affected path. This incremental evaluation keeps large canvases responsive.',
+    typesTitle: 'Port compatibility',
+    typesBody:
+      'Output ports produce either scalar (single number) or vector (list) values. Input ports accept the same type. Connecting mismatched types shows a warning. The engine does not allow circular connections (cycles).',
+    multiTitle: 'Multiple connections',
+    multiBody:
+      'An output port can feed into many input ports simultaneously. However, each input port accepts only one incoming chain. Connecting a second chain to an occupied input replaces the previous connection.',
+    animatedTitle: 'Animated chains',
+    animatedBody:
+      'You can enable animated chain flow in Settings > Canvas. When enabled, a subtle animation shows the direction values travel along each chain.',
+  },
+
   units: {
     intro:
       'ChainSolve supports physical units on any numeric value. Assign a unit to a block output and the engine automatically converts when units differ across a connection.',
@@ -283,6 +329,62 @@ export const DOCS_CONTENT: DocsContentMap = {
     fluidsTitle: 'Fluid presets',
     fluidsBody:
       'Built-in fluid definitions for water, air, oil, and other common fluids. Properties include density, dynamic viscosity, and kinematic viscosity at standard conditions.',
+  },
+
+  projects: {
+    intro:
+      'Projects are the top-level containers for your work. Each project contains one or more canvases, shared variables, and settings.',
+    createTitle: 'Creating a project',
+    createBody:
+      'Click New Project on the home page or use File > New Project from the menu. Give it a name (up to 100 characters) and it opens in a fresh canvas.',
+    scratchTitle: 'Scratch canvas',
+    scratchBody:
+      'If you just want to experiment without creating a project, use the Scratch Canvas. Scratch canvases are stored in your browser only and are not synced to the cloud. They are ideal for quick calculations and prototyping.',
+    savingTitle: 'Saving',
+    savingBody:
+      'Projects auto-save every few seconds. You can also press Ctrl+S (Cmd+S on Mac) to save immediately. A small indicator in the toolbar shows the save status. If auto-save fails due to a network issue, you will see a warning.',
+    sheetsTitle: 'Multi-sheet canvases',
+    sheetsBody:
+      'Pro users can add multiple canvases (sheets) to a single project. Use the sheet tab bar at the bottom of the canvas to switch between them. Variables are shared across all sheets in a project.',
+    importExportTitle: 'Import and export',
+    importExportBody:
+      'Use File > Export > Project to save a .chainsolvejson file. This portable format includes all canvases, variables, and settings. You can import it into any account using File > Import.',
+    deleteTitle: 'Deleting a project',
+    deleteBody:
+      'Delete a project from the home page by clicking the menu on its card and selecting Delete. This action is permanent and cannot be undone.',
+  },
+
+  groups: {
+    intro: 'Groups let you visually organise related blocks on the canvas. They are a Pro feature.',
+    createTitle: 'Creating a group',
+    createBody:
+      'Select two or more blocks, then right-click and choose Group Selection, or press Ctrl+G (Cmd+G on Mac). The selected blocks are enclosed in a coloured region with a label.',
+    editTitle: 'Editing a group',
+    editBody:
+      'Click the group header to rename it. Right-click the group to change its colour or ungroup (dissolve) it. You can also drag blocks in or out of a group.',
+    moveTitle: 'Moving groups',
+    moveBody:
+      'Drag the group header to move the entire group and all its blocks together. Individual blocks inside a group can still be repositioned independently.',
+    nestedTitle: 'Nested groups',
+    nestedBody:
+      'Groups cannot be nested. If you need hierarchical organisation, use separate groups with clear labels and position them near each other.',
+  },
+
+  savedGroups: {
+    intro:
+      'Saved groups (templates) let you save a group of blocks and their connections for reuse across projects.',
+    saveTitle: 'Saving a group',
+    saveBody:
+      'Right-click a group and select Save as Template, or open the Saved Groups manager from the toolbar. Give it a descriptive name. The template stores the block types, positions, connections, and input values.',
+    insertTitle: 'Inserting a saved group',
+    insertBody:
+      'Open the Saved Groups manager and click a template to insert it onto the current canvas. The blocks appear at the centre of the viewport. You can then move and connect them as needed.',
+    manageTitle: 'Managing saved groups',
+    manageBody:
+      'The Saved Groups manager lists all your templates. You can rename, delete, or duplicate them. Templates are stored per account and available across all projects.',
+    shareTitle: 'Sharing templates',
+    shareBody:
+      'To share a template with other users, publish it to Explore. See the Publish section for details.',
   },
 
   publish: {
@@ -328,17 +430,52 @@ export const DOCS_CONTENT: DocsContentMap = {
     tip: 'Tip: The project file format is versioned. Older files can always be opened by newer versions of ChainSolve.',
   },
 
+  settingsThemes: {
+    intro:
+      'ChainSolve settings are split into Account Settings (profile, billing, security) and App Settings (general preferences, canvas behaviour, display values, performance, and themes).',
+    accountTitle: 'Account settings',
+    accountBody:
+      'Profile: change your display name and avatar. Billing: manage your subscription, view invoices, and upgrade or downgrade. Security: change your password and manage sessions.',
+    generalTitle: 'General',
+    generalBody:
+      'Language selection, auto-save toggle and delay, and default export format. Changes apply immediately across all open projects.',
+    canvasTitle: 'Canvas',
+    canvasBody:
+      'Snap-to-grid toggle and animated chains toggle. Snap-to-grid aligns blocks to a grid when you move them, which helps keep layouts tidy.',
+    valuesTitle: 'Values',
+    valuesBody:
+      'Decimal places (auto or fixed 0-12), scientific notation threshold, and thousands separator. These settings affect how numeric results are displayed in blocks and the inspector.',
+    perfTitle: 'Performance',
+    perfBody:
+      'Level-of-detail rendering: when enabled, the engine simplifies block rendering when you are zoomed out far, improving frame rate on large canvases.',
+    themeTitle: 'Themes',
+    themeBody:
+      'Switch between dark and light mode. Open the Theme Wizard to customise colours, or install community themes from Explore. Custom themes override individual CSS variables on top of the base dark or light mode.',
+    wizardTitle: 'Theme Wizard',
+    wizardBody:
+      'The Theme Wizard (Pro) lets you edit every colour token in the UI: backgrounds, text, accents, nodes, chains, and more. Start from a built-in preset (Midnight Blue, Warm Sunset, Forest Green, Glass Panels, Clean Paper) or create your own from scratch. Save your theme and optionally publish it to Explore.',
+  },
+
   ai: {
     intro:
-      'The AI assistant helps you build and understand calculation chains using natural language.',
+      'The AI assistant helps you build and modify calculation chains using natural language. It is available on Pro and Enterprise plans.',
     openTitle: 'Opening the assistant',
     openBody:
-      'Click the AI button in the canvas toolbar, or use Tools > Build with AI from the menu. The assistant opens in a side panel.',
+      'Click the AI button in the canvas toolbar, or use Tools > Build with AI from the menu. The assistant opens in a docked side panel.',
+    modeTitle: 'Mode selector',
+    modeBody:
+      'Choose a mode from the dropdown at the top of the panel. Plan mode shows proposed changes without applying them. Edit mode applies changes automatically (with confirmation for risky operations). Bypass mode (Enterprise only) applies changes without confirmation.',
+    chatTitle: 'Chat interface',
+    chatBody:
+      'Type your request in the message box and press Enter or click Send. The assistant responds with a message and, when appropriate, proposes patch operations to add, modify, or remove blocks and chains. You can review proposed changes before applying them.',
     capabilitiesTitle: 'What the assistant can do',
     cap1: "Generate blocks and connections from a text description (e.g. 'calculate beam deflection for a simply supported beam').",
-    cap2: 'Explain what a selected chain of blocks computes and why.',
-    cap3: 'Suggest improvements or alternative approaches to your calculation.',
+    cap2: 'Modify existing blocks: update values, rename, reconnect, or remove.',
+    cap3: 'Create variables, custom materials, and custom function blocks.',
     cap4: 'Answer questions about engineering formulas, units, and best practices.',
+    privacyTitle: 'Privacy',
+    privacyBody:
+      'Your prompts are sent to the AI provider for processing but are not stored. The assistant never accesses other projects or user data beyond the current canvas.',
     tip: 'Tip: Be specific in your prompts. Include the relevant variables, units, and constraints for the best results.',
   },
 

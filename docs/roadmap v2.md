@@ -768,7 +768,7 @@ Claude should treat this as the “source of truth” for the current environmen
 
 # Phase V2-H — Docs + i18n maturity
 
-## V2-030 — Documentation site rebuild: left nav + deep pages
+## V2-030 — Documentation site rebuild: left nav + deep pages ✅ 2026-03-05
 **Requirement:**
 - Docs should have a left nav panel with contents and sections
 - Pages must be thorough and easy to navigate
@@ -788,6 +788,15 @@ Claude should treat this as the “source of truth” for the current environmen
   - Troubleshooting
 **Acceptance:**
 - Docs are meaningfully improved and navigable.
+**Changelog (2026-03-05):**
+- Added 6 new docs sections: UI Overview, Chains, Projects & Saving, Groups, Saved Groups, Settings & Themes
+- Sidebar now has 28 sections in 4 groups (was 22)
+- Added deep content for all new sections in docsPageContent.ts (~120 new content keys)
+- Updated AI assistant section to reflect V2-029 simplified chat-only panel (mode selector, chat interface, privacy)
+- Added section renderers for all 6 new sections in DocsPage.tsx
+- Added 6 new i18n sidebar labels across 6 locales (en/de/fr/es/it/he)
+- Added 6 new searchable entries in docsIndex.ts
+- verify-ci.sh PASS
 
 ## V2-031 — i18n completeness pass (blocks + settings + all UI strings)
 **Requirement:**

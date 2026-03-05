@@ -622,7 +622,13 @@
     "secExports": "ייצוא ודוחות",
     "secAiAssistant": "עוזר AI",
     "secTroubleshooting": "פתרון בעיות",
-    "secShortcuts": "קיצורי מקלדת"
+    "secShortcuts": "קיצורי מקלדת",
+    "secUiOverview": "סקירת ממשק",
+    "secChains": "שרשראות",
+    "secProjects": "פרויקטים ושמירה",
+    "secGroups": "קבוצות",
+    "secSavedGroups": "קבוצות שמורות",
+    "secSettingsThemes": "הגדרות וערכות נושא"
   },
   "student": {
     "title": "רישיון סטודנט",

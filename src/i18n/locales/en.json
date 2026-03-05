@@ -1480,7 +1480,13 @@
     "secExports": "Exports and Reports",
     "secAiAssistant": "AI Assistant",
     "secTroubleshooting": "Troubleshooting",
-    "secShortcuts": "Keyboard Shortcuts"
+    "secShortcuts": "Keyboard Shortcuts",
+    "secUiOverview": "UI Overview",
+    "secChains": "Chains",
+    "secProjects": "Projects & Saving",
+    "secGroups": "Groups",
+    "secSavedGroups": "Saved Groups",
+    "secSettingsThemes": "Settings & Themes"
   },
   "expressionPanel": {
     "title": "Expression",

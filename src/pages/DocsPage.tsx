@@ -19,6 +19,7 @@ import { getDocsContentSync } from '../docs/docsContentLoader'
 
 export type DocsSection =
   | 'onboarding'
+  | 'ui-overview'
   | 'block-library'
   | 'block-input'
   | 'block-math'
@@ -32,12 +33,17 @@ export type DocsSection =
   | 'block-plot'
   | 'block-constants'
   | 'block-annotations'
+  | 'chains'
   | 'units'
   | 'variables'
   | 'materials'
+  | 'projects'
+  | 'groups'
+  | 'saved-groups'
   | 'publish'
   | 'explore'
   | 'exports'
+  | 'settings-themes'
   | 'ai-assistant'
   | 'troubleshooting'
   | 'shortcuts'
@@ -53,7 +59,10 @@ function useSidebarGroups(): SidebarGroup[] {
     () => [
       {
         label: t('docsPage.groupGettingStarted'),
-        items: [{ id: 'onboarding' as DocsSection, label: t('docsPage.secOnboarding') }],
+        items: [
+          { id: 'onboarding' as DocsSection, label: t('docsPage.secOnboarding') },
+          { id: 'ui-overview' as DocsSection, label: t('docsPage.secUiOverview') },
+        ],
       },
       {
         label: t('docsPage.groupBlocks'),
@@ -76,12 +85,17 @@ function useSidebarGroups(): SidebarGroup[] {
       {
         label: t('docsPage.groupFeatures'),
         items: [
+          { id: 'chains' as DocsSection, label: t('docsPage.secChains') },
           { id: 'units' as DocsSection, label: t('docsPage.secUnits') },
           { id: 'variables' as DocsSection, label: t('docsPage.secVariables') },
           { id: 'materials' as DocsSection, label: t('docsPage.secMaterials') },
+          { id: 'projects' as DocsSection, label: t('docsPage.secProjects') },
+          { id: 'groups' as DocsSection, label: t('docsPage.secGroups') },
+          { id: 'saved-groups' as DocsSection, label: t('docsPage.secSavedGroups') },
           { id: 'publish' as DocsSection, label: t('docsPage.secPublish') },
           { id: 'explore' as DocsSection, label: t('docsPage.secExplore') },
           { id: 'exports' as DocsSection, label: t('docsPage.secExports') },
+          { id: 'settings-themes' as DocsSection, label: t('docsPage.secSettingsThemes') },
           { id: 'ai-assistant' as DocsSection, label: t('docsPage.secAiAssistant') },
         ],
       },
@@ -238,6 +252,8 @@ function DocsContent({ section }: { section: DocsSection }) {
   switch (section) {
     case 'onboarding':
       return <OnboardingSection />
+    case 'ui-overview':
+      return <UiOverviewSection />
     case 'block-library':
       return <BlockLibrarySection />
     case 'block-input':
@@ -264,18 +280,28 @@ function DocsContent({ section }: { section: DocsSection }) {
       return <BlockConstantsSection />
     case 'block-annotations':
       return <BlockAnnotationsSection />
+    case 'chains':
+      return <ChainsSection />
     case 'units':
       return <UnitsSection />
     case 'variables':
       return <VariablesSection />
     case 'materials':
       return <MaterialsSection />
+    case 'projects':
+      return <ProjectsSection />
+    case 'groups':
+      return <GroupsSection />
+    case 'saved-groups':
+      return <SavedGroupsSection />
     case 'publish':
       return <PublishSection />
     case 'explore':
       return <ExploreSection />
     case 'exports':
       return <ExportsSection />
+    case 'settings-themes':
+      return <SettingsThemesSection />
     case 'ai-assistant':
       return <AiAssistantSection />
     case 'troubleshooting':
@@ -373,6 +399,34 @@ function OnboardingSection() {
       <P>{c('onboarding', 'savingBody')}</P>
 
       <Tip>{c('onboarding', 'tip')}</Tip>
+    </>
+  )
+}
+
+function UiOverviewSection() {
+  const { t } = useTranslation()
+  return (
+    <>
+      <H1>{t('docsPage.secUiOverview')}</H1>
+      <P>{c('uiOverview', 'intro')}</P>
+
+      <H2>{c('uiOverview', 'headerTitle')}</H2>
+      <P>{c('uiOverview', 'headerBody')}</P>
+
+      <H2>{c('uiOverview', 'canvasTitle')}</H2>
+      <P>{c('uiOverview', 'canvasBody')}</P>
+
+      <H2>{c('uiOverview', 'toolbarTitle')}</H2>
+      <P>{c('uiOverview', 'toolbarBody')}</P>
+
+      <H2>{c('uiOverview', 'inspectorTitle')}</H2>
+      <P>{c('uiOverview', 'inspectorBody')}</P>
+
+      <H2>{c('uiOverview', 'panelsTitle')}</H2>
+      <P>{c('uiOverview', 'panelsBody')}</P>
+
+      <H2>{c('uiOverview', 'windowsTitle')}</H2>
+      <P>{c('uiOverview', 'windowsBody')}</P>
     </>
   )
 }
@@ -679,6 +733,34 @@ function BlockAnnotationsSection() {
   )
 }
 
+function ChainsSection() {
+  const { t } = useTranslation()
+  return (
+    <>
+      <H1>{t('docsPage.secChains')}</H1>
+      <P>{c('chains', 'intro')}</P>
+
+      <H2>{c('chains', 'createTitle')}</H2>
+      <P>{c('chains', 'createBody')}</P>
+
+      <H2>{c('chains', 'deleteTitle')}</H2>
+      <P>{c('chains', 'deleteBody')}</P>
+
+      <H2>{c('chains', 'dataFlowTitle')}</H2>
+      <P>{c('chains', 'dataFlowBody')}</P>
+
+      <H2>{c('chains', 'typesTitle')}</H2>
+      <P>{c('chains', 'typesBody')}</P>
+
+      <H2>{c('chains', 'multiTitle')}</H2>
+      <P>{c('chains', 'multiBody')}</P>
+
+      <H2>{c('chains', 'animatedTitle')}</H2>
+      <P>{c('chains', 'animatedBody')}</P>
+    </>
+  )
+}
+
 function UnitsSection() {
   const { t } = useTranslation()
   return (
@@ -736,6 +818,82 @@ function MaterialsSection() {
 
       <H2>{c('materials', 'fluidsTitle')}</H2>
       <P>{c('materials', 'fluidsBody')}</P>
+    </>
+  )
+}
+
+function ProjectsSection() {
+  const { t } = useTranslation()
+  return (
+    <>
+      <H1>{t('docsPage.secProjects')}</H1>
+      <P>{c('projects', 'intro')}</P>
+
+      <H2>{c('projects', 'createTitle')}</H2>
+      <P>{c('projects', 'createBody')}</P>
+
+      <H2>{c('projects', 'scratchTitle')}</H2>
+      <P>{c('projects', 'scratchBody')}</P>
+
+      <H2>{c('projects', 'savingTitle')}</H2>
+      <P>{c('projects', 'savingBody')}</P>
+
+      <H2>{c('projects', 'sheetsTitle')}</H2>
+      <P>
+        {c('projects', 'sheetsBody')} <ProBadge />
+      </P>
+
+      <H2>{c('projects', 'importExportTitle')}</H2>
+      <P>{c('projects', 'importExportBody')}</P>
+
+      <H2>{c('projects', 'deleteTitle')}</H2>
+      <P>{c('projects', 'deleteBody')}</P>
+    </>
+  )
+}
+
+function GroupsSection() {
+  const { t } = useTranslation()
+  return (
+    <>
+      <H1>{t('docsPage.secGroups')}</H1>
+      <P>
+        {c('groups', 'intro')} <ProBadge />
+      </P>
+
+      <H2>{c('groups', 'createTitle')}</H2>
+      <P>{c('groups', 'createBody')}</P>
+
+      <H2>{c('groups', 'editTitle')}</H2>
+      <P>{c('groups', 'editBody')}</P>
+
+      <H2>{c('groups', 'moveTitle')}</H2>
+      <P>{c('groups', 'moveBody')}</P>
+
+      <H2>{c('groups', 'nestedTitle')}</H2>
+      <P>{c('groups', 'nestedBody')}</P>
+    </>
+  )
+}
+
+function SavedGroupsSection() {
+  const { t } = useTranslation()
+  return (
+    <>
+      <H1>{t('docsPage.secSavedGroups')}</H1>
+      <P>{c('savedGroups', 'intro')}</P>
+
+      <H2>{c('savedGroups', 'saveTitle')}</H2>
+      <P>{c('savedGroups', 'saveBody')}</P>
+
+      <H2>{c('savedGroups', 'insertTitle')}</H2>
+      <P>{c('savedGroups', 'insertBody')}</P>
+
+      <H2>{c('savedGroups', 'manageTitle')}</H2>
+      <P>{c('savedGroups', 'manageBody')}</P>
+
+      <H2>{c('savedGroups', 'shareTitle')}</H2>
+      <P>{c('savedGroups', 'shareBody')}</P>
     </>
   )
 }
@@ -803,6 +961,37 @@ function ExportsSection() {
   )
 }
 
+function SettingsThemesSection() {
+  const { t } = useTranslation()
+  return (
+    <>
+      <H1>{t('docsPage.secSettingsThemes')}</H1>
+      <P>{c('settingsThemes', 'intro')}</P>
+
+      <H2>{c('settingsThemes', 'accountTitle')}</H2>
+      <P>{c('settingsThemes', 'accountBody')}</P>
+
+      <H2>{c('settingsThemes', 'generalTitle')}</H2>
+      <P>{c('settingsThemes', 'generalBody')}</P>
+
+      <H2>{c('settingsThemes', 'canvasTitle')}</H2>
+      <P>{c('settingsThemes', 'canvasBody')}</P>
+
+      <H2>{c('settingsThemes', 'valuesTitle')}</H2>
+      <P>{c('settingsThemes', 'valuesBody')}</P>
+
+      <H2>{c('settingsThemes', 'perfTitle')}</H2>
+      <P>{c('settingsThemes', 'perfBody')}</P>
+
+      <H2>{c('settingsThemes', 'themeTitle')}</H2>
+      <P>{c('settingsThemes', 'themeBody')}</P>
+
+      <H2>{c('settingsThemes', 'wizardTitle')}</H2>
+      <P>{c('settingsThemes', 'wizardBody')}</P>
+    </>
+  )
+}
+
 function AiAssistantSection() {
   const { t } = useTranslation()
   return (
@@ -813,6 +1002,12 @@ function AiAssistantSection() {
       <H2>{c('ai', 'openTitle')}</H2>
       <P>{c('ai', 'openBody')}</P>
 
+      <H2>{c('ai', 'modeTitle')}</H2>
+      <P>{c('ai', 'modeBody')}</P>
+
+      <H2>{c('ai', 'chatTitle')}</H2>
+      <P>{c('ai', 'chatBody')}</P>
+
       <H2>{c('ai', 'capabilitiesTitle')}</H2>
       <Ul>
         <Li>{c('ai', 'cap1')}</Li>
@@ -820,6 +1015,9 @@ function AiAssistantSection() {
         <Li>{c('ai', 'cap3')}</Li>
         <Li>{c('ai', 'cap4')}</Li>
       </Ul>
+
+      <H2>{c('ai', 'privacyTitle')}</H2>
+      <P>{c('ai', 'privacyBody')}</P>
 
       <Tip>{c('ai', 'tip')}</Tip>
     </>
