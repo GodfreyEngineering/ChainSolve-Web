@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { useFocusTrap } from '../../hooks/useFocusTrap'
 
@@ -61,6 +62,7 @@ export function Modal({ open, onClose, title, children, width = 440 }: ModalProp
   const titleId = useId()
   useFocusTrap(panelRef, open)
 
+  const { t } = useTranslation()
   useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
@@ -88,7 +90,7 @@ export function Modal({ open, onClose, title, children, width = 440 }: ModalProp
             <h2 id={titleId} style={titleStyle}>
               {title}
             </h2>
-            <button style={closeBtn} onClick={onClose} aria-label="Close">
+            <button style={closeBtn} onClick={onClose} aria-label={t('ui.close')}>
               ✕
             </button>
           </div>

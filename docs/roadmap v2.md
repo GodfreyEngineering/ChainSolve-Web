@@ -1,5 +1,5 @@
 # ChainSolve Roadmap v2 — UI/UX Rebuild + Supabase Harmony + Stability
-**Last updated:** 2026-03-04  
+**Last updated:** 2026-03-05  
 **Scope:** This roadmap v2 is based **only** on the requirements, bugs, Supabase snapshot, and CI logs provided in the most recent message (no prior context).  
 **Goal:** Bring the repo + Supabase + deployed web app to a **polished, robust, professional** state with a major UI/UX uplift, strong i18n coverage, and green CI/E2E.
 
@@ -798,7 +798,7 @@ Claude should treat this as the “source of truth” for the current environmen
 - Added 6 new searchable entries in docsIndex.ts
 - verify-ci.sh PASS
 
-## V2-031 — i18n completeness pass (blocks + settings + all UI strings)
+## V2-031 — i18n completeness pass (blocks + settings + all UI strings) ✅ 2026-03-05
 **Requirement:**
 - All block names and settings and everything must be translatable and present in all languages
 **Work:**
@@ -807,6 +807,12 @@ Claude should treat this as the “source of truth” for the current environmen
 **Acceptance:**
 - Language switching shows translated UI
 - No “missing key” warnings.
+
+**Done (2026-03-05):**
+- Wired 14 components with `useTranslation` + `t()` calls: PlotInspector, GroupInspector, AppWindow, Modal, ValuePopover, PlotExpandModal, PlotNode, CanvasArea, BlockLibrary, QuickAddPalette, Inspector, VariablesPanel, SettingsModal, Login
+- Login.tsx: replaced ~30 hardcoded English strings with i18n keys (error messages, form labels, placeholders, button text, confirmation views, reset flow)
+- Added ~50 new i18n keys across 7 namespaces (auth, plot, groups, ui, blockLibrary, settings) in all 6 locales (EN/DE/ES/FR/IT/HE)
+- verify-ci.sh green (all checks pass including i18n missing-key check: 1467 keys)
 
 ---
 

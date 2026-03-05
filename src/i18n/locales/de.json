@@ -159,7 +159,31 @@
     "termsAccept": "Ich akzeptiere die Nutzungsbedingungen und Datenschutzrichtlinie (v{{version}})",
     "termsContinue": "Weiter",
     "termsSaving": "Wird gespeichert…",
-    "termsRetry": "Akzeptierung konnte nicht gespeichert werden. Bitte erneut versuchen."
+    "termsRetry": "Akzeptierung konnte nicht gespeichert werden. Bitte erneut versuchen.",
+    "signInTitle": "Melden Sie sich an",
+    "signUpTitle": "Erstellen Sie Ihr Konto",
+    "resetTitle": "Passwort zurücksetzen",
+    "confirmPassword": "Passwort bestätigen",
+    "confirmPasswordPlaceholder": "Passwort erneut eingeben",
+    "passwordPlaceholderSignup": "Mindestens 8 Zeichen",
+    "emailPlaceholder": "du@beispiel.de",
+    "termsAcceptShort": "Ich akzeptiere die",
+    "marketingOptIn": "Produktneuigkeiten und Tipps senden (optional)",
+    "rememberMe": "Angemeldet bleiben",
+    "forgotPassword": "Passwort vergessen?",
+    "resetSendLink": "Link senden",
+    "pleaseWait": "Bitte warten…",
+    "checkInbox": "Prüfen Sie Ihren Posteingang",
+    "checkInboxSub": "Fast geschafft — noch ein Schritt",
+    "checkInboxBody": "Konto erstellt. Wir haben einen Bestätigungslink an <strong>{{email}}</strong> gesendet. Klicken Sie auf den Link, um Ihr Konto zu aktivieren.",
+    "backToSignIn": "Zurück zur Anmeldung",
+    "checkEmail": "Prüfen Sie Ihre E-Mail",
+    "resetLinkSent": "Link zum Zurücksetzen gesendet",
+    "resetLinkBody": "Falls ein Konto für <strong>{{email}}</strong> existiert, haben wir einen Link gesendet. Prüfen Sie Ihren Posteingang und Spam-Ordner.",
+    "passwordsMismatch": "Passwörter stimmen nicht überein.",
+    "termsRequired": "Sie müssen die AGB akzeptieren, um ein Konto zu erstellen.",
+    "authFailed": "Authentifizierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "rememberPassword": "Passwort wieder eingefallen?"
   },
   "projects": {
     "title": "Projekte",
@@ -361,7 +385,9 @@
     "expand": "Vergrößern",
     "downsampled": "Heruntergesampelt",
     "branding": "Branding in Export einschließen",
-    "brandingCaption": "Erstellt mit ChainSolve"
+    "brandingCaption": "Erstellt mit ChainSolve",
+    "xAxisPlaceholder": "X-Achse",
+    "yAxisPlaceholder": "Y-Achse"
   },
   "settings": {
     "title": "Einstellungen",
@@ -545,7 +571,14 @@
     "cancel": "Abbrechen",
     "confirm": "Bestätigen",
     "search": "Suchen…",
-    "loading": "Laden…"
+    "loading": "Laden…",
+    "minimize": "Minimieren",
+    "maximize": "Maximieren",
+    "restore": "Wiederherstellen",
+    "copy": "Kopieren",
+    "copyJson": "JSON kopieren",
+    "jump": "Zum Knoten springen",
+    "edit": "Bearbeiten"
   },
   "entitlements": {
     "projectLimitTitle": "Projektlimit erreicht",
@@ -695,7 +728,9 @@
     "renameSavedGroup": "Gespeicherte Gruppe umbenennen…",
     "groupSaved": "Gruppe gespeichert",
     "proRequired": "Pro erforderlich",
-    "minSelection": "Wählen Sie 2+ Knoten zum Gruppieren"
+    "minSelection": "Wählen Sie 2+ Knoten zum Gruppieren",
+    "name": "Name",
+    "noMembers": "Keine Mitglieder"
   },
   "menu": {
     "file": "Datei",
@@ -827,7 +862,12 @@
     "addFavourite": "Zu Favoriten hinzufügen",
     "removeFavourite": "Aus Favoriten entfernen",
     "formula": "Formel",
-    "insertSavedGroup": "\"{{name}}\" einfügen ({{count}} Blöcke)"
+    "insertSavedGroup": "\"{{name}}\" einfügen ({{count}} Blöcke)",
+    "all": "Alle",
+    "favourites": "Favoriten",
+    "recent": "Kürzlich",
+    "customFunctions": "Eigene Funktionen",
+    "noCustomFunctions": "Noch keine eigenen Funktionen."
   },
   "sheets": {
     "title": "Blätter",

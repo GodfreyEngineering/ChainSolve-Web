@@ -158,7 +158,8 @@
     "thousandsSep": "מפריד אלפים",
     "thousandsSepHint": "הצג פסיקים במספרים גדולים (1,000,000)",
     "lodRendering": "רנדרינג לפי רמת פירוט",
-    "lodRenderingHint": "פשט צמתים בזום נמוך לביצועים טובים יותר"
+    "lodRenderingHint": "פשט צמתים בזום נמוך לביצועים טובים יותר",
+    "editTheme": "ערוך ערכת נושא"
   },
   "security": {
     "title": "אבטחת חשבון",
@@ -763,5 +764,58 @@
     "s8Title": "ילדים",
     "s9Title": "שינויים במדיניות זו",
     "s10Title": "יצירת קשר"
+  },
+  "auth": {
+    "signInTitle": "התחבר לחשבונך",
+    "signUpTitle": "צור את חשבונך",
+    "resetTitle": "אפס את הסיסמה",
+    "confirmPassword": "אשר סיסמה",
+    "confirmPasswordPlaceholder": "הזן סיסמה שוב",
+    "passwordPlaceholderSignup": "לפחות 8 תווים",
+    "emailPlaceholder": "you@example.com",
+    "termsAcceptShort": "אני מקבל את",
+    "marketingOptIn": "שלחו לי עדכונים וטיפים (אופציונלי)",
+    "rememberMe": "זכור אותי",
+    "forgotPassword": "שכחת סיסמה?",
+    "resetSendLink": "שלח קישור",
+    "pleaseWait": "אנא המתן…",
+    "checkInbox": "בדוק את תיבת הדואר",
+    "checkInboxSub": "כמעט שם — עוד צעד אחד",
+    "checkInboxBody": "החשבון נוצר. שלחנו קישור אימות ל-<strong>{{email}}</strong>. לחץ על הקישור כדי להפעיל את חשבונך.",
+    "backToSignIn": "חזרה להתחברות",
+    "checkEmail": "בדוק את הדוא\"ל שלך",
+    "resetLinkSent": "קישור איפוס נשלח",
+    "resetLinkBody": "אם קיים חשבון עבור <strong>{{email}}</strong>, שלחנו קישור. בדוק את תיבת הדואר ותיקיית הספאם.",
+    "passwordsMismatch": "הסיסמאות אינן תואמות.",
+    "termsRequired": "עליך לקבל את התנאים וההגבלות כדי ליצור חשבון.",
+    "authFailed": "האימות נכשל. אנא נסה שוב.",
+    "rememberPassword": "נזכרת בסיסמה?"
+  },
+  "plot": {
+    "xAxisPlaceholder": "ציר X",
+    "yAxisPlaceholder": "ציר Y",
+    "exportSvg": "ייצוא SVG",
+    "exportPng": "ייצוא PNG",
+    "expand": "הרחב תרשים"
+  },
+  "groups": {
+    "name": "שם",
+    "noMembers": "אין חברים"
+  },
+  "ui": {
+    "minimize": "מזער",
+    "maximize": "הגדל",
+    "restore": "שחזר",
+    "copy": "העתק",
+    "copyJson": "העתק JSON",
+    "jump": "קפוץ לצומת",
+    "edit": "ערוך"
+  },
+  "blockLibrary": {
+    "all": "הכל",
+    "favourites": "מועדפים",
+    "recent": "אחרונים",
+    "customFunctions": "פונקציות מותאמות",
+    "noCustomFunctions": "אין עדיין פונקציות מותאמות."
   }
 }

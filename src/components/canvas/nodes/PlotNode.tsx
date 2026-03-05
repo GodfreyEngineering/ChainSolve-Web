@@ -6,6 +6,7 @@
  * Supports expand-to-modal and export.
  */
 
+import { useTranslation } from 'react-i18next'
 import { memo, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Handle, Position, useEdges, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
@@ -32,6 +33,7 @@ function PlotExpandModalLazy(props: {
 }
 
 function PlotNodeInner({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation()
   const nd = data as NodeData
   const config = useMemo(
     () => (nd.plotConfig ?? { chartType: 'xyLine' as const }) as PlotConfig,
@@ -237,7 +239,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
                 fontSize: '0.65rem',
                 zIndex: 2,
               }}
-              title="Expand chart"
+              title={t('plot.expand')}
             >
               ⤢
             </button>

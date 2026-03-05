@@ -159,7 +159,31 @@
     "termsAccept": "Acepto los Términos y Condiciones y la Política de privacidad (v{{version}})",
     "termsContinue": "Continuar",
     "termsSaving": "Guardando…",
-    "termsRetry": "No se pudo registrar la aceptación. Inténtalo de nuevo."
+    "termsRetry": "No se pudo registrar la aceptación. Inténtalo de nuevo.",
+    "signInTitle": "Inicia sesión en tu cuenta",
+    "signUpTitle": "Crea tu cuenta",
+    "resetTitle": "Restablece tu contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "confirmPasswordPlaceholder": "Vuelve a introducir la contraseña",
+    "passwordPlaceholderSignup": "Al menos 8 caracteres",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "termsAcceptShort": "Acepto los",
+    "marketingOptIn": "Enviarme novedades y consejos (opcional)",
+    "rememberMe": "Recuérdame",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "resetSendLink": "Enviar enlace",
+    "pleaseWait": "Por favor espera…",
+    "checkInbox": "Revisa tu bandeja de entrada",
+    "checkInboxSub": "Casi listo — un paso más",
+    "checkInboxBody": "Cuenta creada. Enviamos un enlace de confirmación a <strong>{{email}}</strong>. Haz clic en el enlace para activar tu cuenta.",
+    "backToSignIn": "Volver a iniciar sesión",
+    "checkEmail": "Revisa tu correo",
+    "resetLinkSent": "Enlace de restablecimiento enviado",
+    "resetLinkBody": "Si existe una cuenta para <strong>{{email}}</strong>, enviamos un enlace. Revisa tu bandeja de entrada y carpeta de spam.",
+    "passwordsMismatch": "Las contraseñas no coinciden.",
+    "termsRequired": "Debes aceptar los Términos y Condiciones para crear una cuenta.",
+    "authFailed": "Error de autenticación. Inténtalo de nuevo.",
+    "rememberPassword": "¿Recuerdas tu contraseña?"
   },
   "projects": {
     "title": "Proyectos",
@@ -361,7 +385,9 @@
     "expand": "Expandir",
     "downsampled": "Submuestreado",
     "branding": "Incluir marca en exportación",
-    "brandingCaption": "Generado por ChainSolve"
+    "brandingCaption": "Generado por ChainSolve",
+    "xAxisPlaceholder": "Eje X",
+    "yAxisPlaceholder": "Eje Y"
   },
   "settings": {
     "title": "Ajustes",
@@ -545,7 +571,14 @@
     "cancel": "Cancelar",
     "confirm": "Confirmar",
     "search": "Buscar…",
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "minimize": "Minimizar",
+    "maximize": "Maximizar",
+    "restore": "Restaurar",
+    "copy": "Copiar",
+    "copyJson": "Copiar JSON",
+    "jump": "Ir al nodo",
+    "edit": "Editar"
   },
   "entitlements": {
     "projectLimitTitle": "Límite de proyectos alcanzado",
@@ -695,7 +728,9 @@
     "renameSavedGroup": "Renombrar grupo guardado…",
     "groupSaved": "Grupo guardado",
     "proRequired": "Requiere Pro",
-    "minSelection": "Selecciona 2+ nodos para agrupar"
+    "minSelection": "Selecciona 2+ nodos para agrupar",
+    "name": "Nombre",
+    "noMembers": "Sin miembros"
   },
   "menu": {
     "file": "Archivo",
@@ -827,7 +862,12 @@
     "addFavourite": "Agregar a favoritos",
     "removeFavourite": "Quitar de favoritos",
     "formula": "Fórmula",
-    "insertSavedGroup": "Insertar \"{{name}}\" ({{count}} nodos)"
+    "insertSavedGroup": "Insertar \"{{name}}\" ({{count}} nodos)",
+    "all": "Todos",
+    "favourites": "Favoritos",
+    "recent": "Recientes",
+    "customFunctions": "Funciones personalizadas",
+    "noCustomFunctions": "Aún no hay funciones personalizadas."
   },
   "sheets": {
     "title": "Hojas",

@@ -7,6 +7,7 @@
  */
 
 import { useNodes } from '@xyflow/react'
+import { useTranslation } from 'react-i18next'
 import type { NodeData } from '../../blocks/types'
 
 const COLOR_PRESETS = [
@@ -77,6 +78,7 @@ export function GroupInspector({
   onUngroup,
   readOnly,
 }: GroupInspectorProps) {
+  const { t } = useTranslation()
   const allNodes = useNodes()
   const members = allNodes.filter((n) => n.parentId === groupId)
   const color = data.groupColor ?? '#1CABB0'
@@ -93,7 +95,7 @@ export function GroupInspector({
     <>
       {/* Name */}
       {field(
-        'Name',
+        t('groups.name'),
         <input
           style={inp}
           value={data.label}
@@ -104,7 +106,7 @@ export function GroupInspector({
 
       {/* Color */}
       {field(
-        'Color',
+        t('groups.color'),
         <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', alignItems: 'center' }}>
           {COLOR_PRESETS.map((c) => (
             <button
@@ -145,11 +147,11 @@ export function GroupInspector({
 
       {/* Notes */}
       {field(
-        'Notes',
+        t('groups.notes'),
         <textarea
           style={{ ...inp, minHeight: 60, resize: 'vertical' }}
           value={data.groupNotes ?? ''}
-          placeholder="Add notes…"
+          placeholder={t('groups.notesPlaceholder')}
           onChange={(e) => !readOnly && onUpdate({ groupNotes: e.target.value })}
           readOnly={readOnly}
         />,
@@ -157,7 +159,7 @@ export function GroupInspector({
 
       {/* Members */}
       {field(
-        `Members (${members.length})`,
+        `${t('groups.members')} (${members.length})`,
         <div
           style={{
             maxHeight: 120,
@@ -168,7 +170,9 @@ export function GroupInspector({
           }}
         >
           {members.length === 0 ? (
-            <span style={{ color: 'rgba(244,244,243,0.3)', fontSize: '0.75rem' }}>No members</span>
+            <span style={{ color: 'rgba(244,244,243,0.3)', fontSize: '0.75rem' }}>
+              {t('groups.noMembers')}
+            </span>
           ) : (
             members.map((m) => (
               <div
@@ -203,10 +207,10 @@ export function GroupInspector({
         <button
           style={actionBtn}
           onClick={onCollapse}
-          title={collapsed ? 'Expand group' : 'Collapse group'}
+          title={collapsed ? t('groups.expand') : t('groups.collapse')}
         >
           <span style={{ opacity: 0.6, fontSize: '0.85rem' }}>{collapsed ? '▼' : '▶'}</span>
-          {collapsed ? 'Expand' : 'Collapse'}
+          {collapsed ? t('groups.expand') : t('groups.collapse')}
         </button>
         {!readOnly && (
           <button
@@ -216,10 +220,10 @@ export function GroupInspector({
               borderColor: 'rgba(239,68,68,0.25)',
             }}
             onClick={onUngroup}
-            title="Dissolve group and release members"
+            title={t('groups.ungroup')}
           >
             <span style={{ opacity: 0.6, fontSize: '0.85rem' }}>⊟</span>
-            Ungroup
+            {t('groups.ungroup')}
           </button>
         )}
       </div>

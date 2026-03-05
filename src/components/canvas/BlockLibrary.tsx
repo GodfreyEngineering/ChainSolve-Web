@@ -674,6 +674,7 @@ export function BlockLibrary({
   onToggleCollapsed,
   filterMainOverride,
 }: BlockLibraryProps) {
+  const { t } = useTranslation()
   const ent = getEntitlements(plan)
   const [query, setQuery] = useState('')
   const [filterMain, setFilterMain] = useState<string | null>(null)
@@ -802,7 +803,7 @@ export function BlockLibrary({
             }}
             onClick={() => setFilterMain(null)}
           >
-            All
+            {t('blockLibrary.all')}
           </button>
           {BLOCK_TAXONOMY.map((main) => (
             <button
@@ -825,7 +826,7 @@ export function BlockLibrary({
         {/* Favourites section */}
         {!q && favList.length > 0 && (
           <div>
-            <div style={s.sectionLabel}>Favourites</div>
+            <div style={s.sectionLabel}>{t('blockLibrary.favourites')}</div>
             {favList.map((def) => (
               <BlockItem
                 key={def.type}
@@ -844,7 +845,7 @@ export function BlockLibrary({
         {/* Recently used section */}
         {!q && recentList.length > 0 && (
           <div>
-            <div style={s.sectionLabel}>Recent</div>
+            <div style={s.sectionLabel}>{t('blockLibrary.recent')}</div>
             {recentList.map((def) => (
               <BlockItem
                 key={def.type}
@@ -947,7 +948,7 @@ export function BlockLibrary({
             <span style={{ fontSize: '0.55rem', opacity: 0.5 }}>
               {customFnsOpen ? '\u25BC' : '\u25B6'}
             </span>
-            Custom Functions
+            {t('blockLibrary.customFunctions')}
             <span className="cs-pro-badge">PRO</span>
             {customFunctions.length > 0 && (
               <span
@@ -971,7 +972,7 @@ export function BlockLibrary({
                     color: 'var(--text-faint)',
                   }}
                 >
-                  No custom functions yet.
+                  {t('blockLibrary.noCustomFunctions')}
                 </div>
               ) : (
                 customFunctions.map((fn) => {

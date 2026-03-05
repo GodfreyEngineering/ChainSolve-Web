@@ -110,7 +110,7 @@ export function SettingsModal({ kind }: Props) {
             {!narrow && (
               <div style={sidebarHeader}>
                 <h2 style={sidebarTitle}>{title}</h2>
-                <button onClick={closeHandler} style={closeBtnStyle} aria-label="Close">
+                <button onClick={closeHandler} style={closeBtnStyle} aria-label={t('ui.close')}>
                   ✕
                 </button>
               </div>
@@ -138,7 +138,7 @@ export function SettingsModal({ kind }: Props) {
               <button
                 onClick={closeHandler}
                 style={{ ...narrowTabStyle(false), marginLeft: 'auto' }}
-                aria-label="Close"
+                aria-label={t('ui.close')}
               >
                 ✕
               </button>
@@ -183,7 +183,7 @@ export function SettingsModal({ kind }: Props) {
           {!narrow && (
             <div style={sidebarHeader}>
               <h2 style={sidebarTitle}>{title}</h2>
-              <button onClick={closeHandler} style={closeBtnStyle} aria-label="Close">
+              <button onClick={closeHandler} style={closeBtnStyle} aria-label={t('ui.close')}>
                 ✕
               </button>
             </div>
@@ -209,7 +209,7 @@ export function SettingsModal({ kind }: Props) {
             <button
               onClick={closeHandler}
               style={{ ...narrowTabStyle(false), marginLeft: 'auto' }}
-              aria-label="Close"
+              aria-label={t('ui.close')}
             >
               ✕
             </button>

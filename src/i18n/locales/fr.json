@@ -159,7 +159,31 @@
     "termsAccept": "J'accepte les Conditions Générales et la Politique de confidentialité (v{{version}})",
     "termsContinue": "Continuer",
     "termsSaving": "Enregistrement…",
-    "termsRetry": "L'acceptation n'a pas pu être enregistrée. Veuillez réessayer."
+    "termsRetry": "L'acceptation n'a pas pu être enregistrée. Veuillez réessayer.",
+    "signInTitle": "Connectez-vous à votre compte",
+    "signUpTitle": "Créez votre compte",
+    "resetTitle": "Réinitialiser votre mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "confirmPasswordPlaceholder": "Saisir à nouveau le mot de passe",
+    "passwordPlaceholderSignup": "Au moins 8 caractères",
+    "emailPlaceholder": "vous@exemple.fr",
+    "termsAcceptShort": "J'accepte les",
+    "marketingOptIn": "M'envoyer des mises à jour et astuces (facultatif)",
+    "rememberMe": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetSendLink": "Envoyer le lien",
+    "pleaseWait": "Veuillez patienter…",
+    "checkInbox": "Vérifiez votre boîte de réception",
+    "checkInboxSub": "Presque terminé — une dernière étape",
+    "checkInboxBody": "Compte créé. Nous avons envoyé un lien de confirmation à <strong>{{email}}</strong>. Cliquez sur le lien pour activer votre compte.",
+    "backToSignIn": "Retour à la connexion",
+    "checkEmail": "Vérifiez votre email",
+    "resetLinkSent": "Lien de réinitialisation envoyé",
+    "resetLinkBody": "Si un compte existe pour <strong>{{email}}</strong>, nous avons envoyé un lien. Vérifiez votre boîte de réception et vos spams.",
+    "passwordsMismatch": "Les mots de passe ne correspondent pas.",
+    "termsRequired": "Vous devez accepter les Conditions d'utilisation pour créer un compte.",
+    "authFailed": "Échec de l'authentification. Veuillez réessayer.",
+    "rememberPassword": "Vous vous souvenez de votre mot de passe ?"
   },
   "projects": {
     "title": "Projets",
@@ -361,7 +385,9 @@
     "expand": "Agrandir",
     "downsampled": "Sous-échantillonné",
     "branding": "Inclure la marque dans l'export",
-    "brandingCaption": "Généré par ChainSolve"
+    "brandingCaption": "Généré par ChainSolve",
+    "xAxisPlaceholder": "Axe X",
+    "yAxisPlaceholder": "Axe Y"
   },
   "settings": {
     "title": "Paramètres",
@@ -545,7 +571,14 @@
     "cancel": "Annuler",
     "confirm": "Confirmer",
     "search": "Rechercher…",
-    "loading": "Chargement…"
+    "loading": "Chargement…",
+    "minimize": "Réduire",
+    "maximize": "Agrandir",
+    "restore": "Restaurer",
+    "copy": "Copier",
+    "copyJson": "Copier JSON",
+    "jump": "Aller au nœud",
+    "edit": "Modifier"
   },
   "entitlements": {
     "projectLimitTitle": "Limite de projets atteinte",
@@ -695,7 +728,9 @@
     "renameSavedGroup": "Renommer le groupe…",
     "groupSaved": "Groupe enregistre",
     "proRequired": "Pro requis",
-    "minSelection": "Sélectionnez 2+ nœuds pour grouper"
+    "minSelection": "Sélectionnez 2+ nœuds pour grouper",
+    "name": "Nom",
+    "noMembers": "Aucun membre"
   },
   "menu": {
     "file": "Fichier",
@@ -827,7 +862,12 @@
     "addFavourite": "Ajouter aux favoris",
     "removeFavourite": "Retirer des favoris",
     "formula": "Formule",
-    "insertSavedGroup": "Inserer \"{{name}}\" ({{count}} blocs)"
+    "insertSavedGroup": "Inserer \"{{name}}\" ({{count}} blocs)",
+    "all": "Tout",
+    "favourites": "Favoris",
+    "recent": "Récents",
+    "customFunctions": "Fonctions personnalisées",
+    "noCustomFunctions": "Aucune fonction personnalisée."
   },
   "sheets": {
     "title": "Feuilles",

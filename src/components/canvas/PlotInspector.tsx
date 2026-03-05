@@ -5,6 +5,7 @@
  * All changes applied via onUpdate() → merges into data.plotConfig.
  */
 
+import { useTranslation } from 'react-i18next'
 import type {
   PlotConfig,
   ChartType,
@@ -62,6 +63,7 @@ const checkRow: React.CSSProperties = {
 }
 
 export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorProps) {
+  const { t } = useTranslation()
   const columns: string[] =
     inputValue && isTable(inputValue) ? [...(inputValue.columns as string[])] : []
 
@@ -82,80 +84,80 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
           color: 'rgba(28,171,176,0.6)',
         }}
       >
-        Plot Settings
+        {t('plot.settings')}
       </span>
 
       {/* Chart Type */}
       {field(
-        'Chart Type',
+        t('plot.chartType'),
         <select
           value={config.chartType}
           onChange={(e) => onUpdate({ chartType: e.target.value as ChartType })}
           style={selectStyle}
         >
-          <option value="xyLine">Line</option>
-          <option value="xyScatter">Scatter</option>
-          <option value="histogram">Histogram</option>
-          <option value="bar">Bar</option>
-          <option value="heatmap">Heatmap</option>
+          <option value="xyLine">{t('plot.chartLine')}</option>
+          <option value="xyScatter">{t('plot.chartScatter')}</option>
+          <option value="histogram">{t('plot.chartHistogram')}</option>
+          <option value="bar">{t('plot.chartBar')}</option>
+          <option value="heatmap">{t('plot.chartHeatmap')}</option>
         </select>,
       )}
 
       {/* Theme Preset */}
       {field(
-        'Theme',
+        t('plot.theme'),
         <select
           value={config.themePreset ?? 'paper-single'}
           onChange={(e) => onUpdate({ themePreset: e.target.value as PlotThemePreset })}
           style={selectStyle}
         >
-          <option value="paper-single">Paper (single col)</option>
-          <option value="paper-double">Paper (double col)</option>
-          <option value="presentation">Presentation 16:9</option>
-          <option value="report">Report (A4)</option>
+          <option value="paper-single">{t('plot.themePaperSingle')}</option>
+          <option value="paper-double">{t('plot.themePaperDouble')}</option>
+          <option value="presentation">{t('plot.themePresentation')}</option>
+          <option value="report">{t('plot.themeReport')}</option>
         </select>,
       )}
 
       {/* Title */}
       {field(
-        'Title',
+        t('plot.title'),
         <input
           style={inp}
           value={config.title ?? ''}
           onChange={(e) => onUpdate({ title: e.target.value || undefined })}
-          placeholder="Chart title..."
+          placeholder={t('plot.titlePlaceholder')}
         />,
       )}
 
       {/* Subtitle */}
       {field(
-        'Subtitle',
+        t('plot.subtitle'),
         <input
           style={inp}
           value={config.subtitle ?? ''}
           onChange={(e) => onUpdate({ subtitle: e.target.value || undefined })}
-          placeholder="Subtitle..."
+          placeholder={t('plot.subtitlePlaceholder')}
         />,
       )}
 
       {/* Axis Labels */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
         {field(
-          'X Label',
+          t('plot.xLabel'),
           <input
             style={inp}
             value={config.xLabel ?? ''}
             onChange={(e) => onUpdate({ xLabel: e.target.value || undefined })}
-            placeholder="X axis"
+            placeholder={t('plot.xAxisPlaceholder')}
           />,
         )}
         {field(
-          'Y Label',
+          t('plot.yLabel'),
           <input
             style={inp}
             value={config.yLabel ?? ''}
             onChange={(e) => onUpdate({ yLabel: e.target.value || undefined })}
-            placeholder="Y axis"
+            placeholder={t('plot.yAxisPlaceholder')}
           />,
         )}
       </div>
@@ -163,25 +165,25 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
       {/* Scales */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
         {field(
-          'X Scale',
+          t('plot.xScale'),
           <select
             value={config.xScale ?? 'linear'}
             onChange={(e) => onUpdate({ xScale: e.target.value as ScaleType })}
             style={selectStyle}
           >
-            <option value="linear">Linear</option>
-            <option value="log">Log</option>
+            <option value="linear">{t('plot.linear')}</option>
+            <option value="log">{t('plot.log')}</option>
           </select>,
         )}
         {field(
-          'Y Scale',
+          t('plot.yScale'),
           <select
             value={config.yScale ?? 'linear'}
             onChange={(e) => onUpdate({ yScale: e.target.value as ScaleType })}
             style={selectStyle}
           >
-            <option value="linear">Linear</option>
-            <option value="log">Log</option>
+            <option value="linear">{t('plot.linear')}</option>
+            <option value="log">{t('plot.log')}</option>
           </select>,
         )}
       </div>
@@ -195,7 +197,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
             onChange={(e) => onUpdate({ showGrid: e.target.checked })}
             style={{ accentColor: 'var(--primary)' }}
           />
-          Show grid
+          {t('plot.showGrid')}
         </label>
         <label style={checkRow}>
           <input
@@ -204,7 +206,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
             onChange={(e) => onUpdate({ showLegend: e.target.checked })}
             style={{ accentColor: 'var(--primary)' }}
           />
-          Show legend
+          {t('plot.showLegend')}
         </label>
         <label style={checkRow}>
           <input
@@ -213,28 +215,28 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
             onChange={(e) => onUpdate({ showBranding: e.target.checked })}
             style={{ accentColor: 'var(--primary)' }}
           />
-          Include branding in export
+          {t('plot.branding')}
         </label>
       </div>
 
       {/* Legend Position (only if legend shown) */}
       {config.showLegend &&
         field(
-          'Legend Position',
+          t('plot.legendPosition'),
           <select
             value={config.legendPosition ?? 'right'}
             onChange={(e) => onUpdate({ legendPosition: e.target.value as LegendPosition })}
             style={selectStyle}
           >
-            <option value="right">Right</option>
-            <option value="bottom">Bottom</option>
+            <option value="right">{t('plot.legendRight')}</option>
+            <option value="bottom">{t('plot.legendBottom')}</option>
           </select>,
         )}
 
       {/* Max Points (line/scatter only) */}
       {(config.chartType === 'xyLine' || config.chartType === 'xyScatter') &&
         field(
-          `Max Points (${config.maxPoints ?? 2000})`,
+          `${t('plot.maxPoints')} (${config.maxPoints ?? 2000})`,
           <input
             type="range"
             min={100}
@@ -249,7 +251,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
       {/* Bin Count (histogram only) */}
       {config.chartType === 'histogram' &&
         field(
-          `Bins (${config.binCount ?? 30})`,
+          `${t('plot.bins')} (${config.binCount ?? 30})`,
           <input
             type="range"
             min={5}
@@ -265,7 +267,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
       {columns.length > 0 && (
         <>
           {field(
-            'X Column',
+            t('plot.xColumn'),
             <select
               value={config.xColumn ?? columns[0]}
               onChange={(e) => onUpdate({ xColumn: e.target.value })}
@@ -281,7 +283,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
 
           {config.chartType !== 'histogram' &&
             field(
-              'Y Column(s)',
+              t('plot.yColumns'),
               <select
                 value={config.yColumns?.[0] ?? columns[1] ?? columns[0]}
                 onChange={(e) => onUpdate({ yColumns: [e.target.value] })}

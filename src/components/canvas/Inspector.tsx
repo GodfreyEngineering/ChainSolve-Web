@@ -276,7 +276,7 @@ export function Inspector({
               padding: '0 0.2rem',
               lineHeight: 1,
             }}
-            title="Close (ESC)"
+            title={`${t('ui.close')} (ESC)`}
           >
             ✕
           </button>

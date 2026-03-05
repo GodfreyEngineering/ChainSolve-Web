@@ -1839,9 +1839,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             minHeight: isMobile ? 36 : undefined,
             padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
           }}
-          title="Variables"
+          title={t('toolbar.variables')}
         >
-          𝑥 Variables
+          𝑥 {t('toolbar.variables')}
         </button>
       )}
 
@@ -1853,9 +1853,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             minHeight: isMobile ? 36 : undefined,
             padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
           }}
-          title="Groups & Saved Groups"
+          title={t('toolbar.groups')}
         >
-          ⊞ Groups
+          ⊞ {t('toolbar.groups')}
         </button>
       )}
 
@@ -1865,9 +1865,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           style={{
             ...tbBtn,
           }}
-          title="Themes"
+          title={t('toolbar.themes')}
         >
-          ◐ Themes
+          ◐ {t('toolbar.themes')}
         </button>
       )}
 
@@ -1877,9 +1877,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           style={{
             ...tbBtn,
           }}
-          title="Edit theme"
+          title={t('settings.editTheme')}
         >
-          ◑ Edit
+          ◑ {t('ui.edit')}
         </button>
       )}
 
@@ -1889,9 +1889,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           style={{
             ...tbBtn,
           }}
-          title="Materials"
+          title={t('toolbar.materials')}
         >
-          ◇ Materials
+          ◇ {t('toolbar.materials')}
         </button>
       )}
     </div>

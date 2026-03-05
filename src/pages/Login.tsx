@@ -110,7 +110,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
 
     // Validate CAPTCHA if enabled (E2-2)
     if (captchaEnabled && !captchaToken) {
-      setError('Please complete the CAPTCHA challenge.')
+      setError(t('auth.captchaRequired'))
       return
     }
 
@@ -119,12 +119,12 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
     try {
       if (mode === 'signup') {
         if (password !== confirmPassword) {
-          setError('Passwords do not match.')
+          setError(t('auth.passwordsMismatch'))
           setLoading(false)
           return
         }
         if (!acceptTerms) {
-          setError('You must accept the Terms & Conditions to create an account.')
+          setError(t('auth.termsRequired'))
           setLoading(false)
           return
         }
@@ -167,7 +167,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
         navigate('/app')
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Authentication failed. Please try again.')
+      setError(err instanceof Error ? err.message : t('auth.authFailed'))
     } finally {
       setLoading(false)
     }
@@ -181,7 +181,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
     if (resendErr) {
       setError(resendErr.message)
     } else {
-      setResendMsg('Confirmation email resent — check your inbox and spam folder.')
+      setResendMsg(t('auth.verifyEmailResent'))
     }
     setResendLoading(false)
   }
@@ -222,12 +222,11 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
     return (
       <main style={s.page}>
         <div style={s.card}>
-          <h1 style={s.heading}>Check your inbox</h1>
-          <p style={s.sub}>Almost there — one more step</p>
+          <h1 style={s.heading}>{t('auth.checkInbox')}</h1>
+          <p style={s.sub}>{t('auth.checkInboxSub')}</p>
 
           <div style={s.infoBox}>
-            Account created. We sent a confirmation link to <strong>{email}</strong>. Click the link
-            in that email to activate your account, then return here to sign in.
+            <span dangerouslySetInnerHTML={{ __html: t('auth.checkInboxBody', { email }) }} />
           </div>
 
           {error && <div style={s.errorBox}>{error}</div>}
@@ -238,7 +237,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
             disabled={resendLoading}
             onClick={handleResend}
           >
-            {resendLoading ? 'Sending…' : 'Resend confirmation email'}
+            {resendLoading ? t('auth.verifyEmailSending') : t('auth.verifyEmailResend')}
           </button>
 
           <Link
@@ -250,7 +249,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
               textDecoration: 'none',
             }}
           >
-            Back to sign in
+            {t('auth.backToSignIn')}
           </Link>
         </div>
       </main>
@@ -263,19 +262,18 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
     return (
       <main style={s.page}>
         <div style={s.card}>
-          <h1 style={s.heading}>Check your email</h1>
-          <p style={s.sub}>Password reset link sent</p>
+          <h1 style={s.heading}>{t('auth.checkEmail')}</h1>
+          <p style={s.sub}>{t('auth.resetLinkSent')}</p>
 
           <div style={s.infoBox}>
-            If an account exists for <strong>{email}</strong>, we sent a password reset link. Check
-            your inbox and spam folder.
+            <span dangerouslySetInnerHTML={{ __html: t('auth.resetLinkBody', { email }) }} />
           </div>
 
           <Link
             to="/login"
             style={{ ...s.btn, display: 'block', textAlign: 'center', textDecoration: 'none' }}
           >
-            Back to sign in
+            {t('auth.backToSignIn')}
           </Link>
         </div>
       </main>
@@ -292,16 +290,16 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
             <img src={BRAND.logoWideText} alt="ChainSolve" style={s.logo} />
           </div>
           <p style={s.sub}>
-            {mode === 'login' && 'Sign in to your account'}
-            {mode === 'signup' && 'Create your account'}
-            {mode === 'reset' && 'Reset your password'}
+            {mode === 'login' && t('auth.signInTitle')}
+            {mode === 'signup' && t('auth.signUpTitle')}
+            {mode === 'reset' && t('auth.resetTitle')}
           </p>
 
           {error && <div style={s.errorBox}>{error}</div>}
 
           <form onSubmit={handleSubmit}>
             <label style={s.label} htmlFor="email">
-              Email
+              {t('auth.email')}
             </label>
             <input
               ref={emailRef}
@@ -310,7 +308,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder={t('auth.emailPlaceholder')}
               autoComplete="email"
               required
             />
@@ -318,7 +316,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
             {mode !== 'reset' && (
               <>
                 <label style={s.label} htmlFor="password">
-                  Password
+                  {t('auth.password')}
                 </label>
                 <input
                   id="password"
@@ -326,7 +324,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
+                  placeholder={mode === 'signup' ? t('auth.passwordPlaceholderSignup') : '••••••••'}
                   autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                   required
                   minLength={mode === 'signup' ? 8 : 1}
@@ -337,7 +335,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
             {mode === 'signup' && (
               <>
                 <label style={s.label} htmlFor="confirmPassword">
-                  Confirm password
+                  {t('auth.confirmPassword')}
                 </label>
                 <input
                   id="confirmPassword"
@@ -345,7 +343,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-enter password"
+                  placeholder={t('auth.confirmPasswordPlaceholder')}
                   autoComplete="new-password"
                   required
                   minLength={8}
@@ -358,9 +356,9 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
                     onChange={(e) => setAcceptTerms(e.target.checked)}
                     style={s.checkbox}
                   />
-                  I accept the{' '}
+                  {t('auth.termsAcceptShort')}{' '}
                   <a href="/terms" target="_blank" rel="noopener noreferrer" style={s.link}>
-                    Terms &amp; Conditions
+                    {t('auth.termsTitle')}
                   </a>
                 </label>
 
@@ -371,7 +369,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
                     onChange={(e) => setMarketingOptIn(e.target.checked)}
                     style={s.checkbox}
                   />
-                  Send me product updates and tips (optional)
+                  {t('auth.marketingOptIn')}
                 </label>
               </>
             )}
@@ -385,10 +383,10 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
                     onChange={(e) => setRememberMeState(e.target.checked)}
                     style={s.checkbox}
                   />
-                  Remember me
+                  {t('auth.rememberMe')}
                 </label>
                 <Link to="/reset-password" style={s.forgotLink}>
-                  Forgot password?
+                  {t('auth.forgotPassword')}
                 </Link>
               </div>
             )}
@@ -400,9 +398,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
                 onExpired={handleCaptchaExpired}
               />
             )}
-            {captchaError && (
-              <div style={s.errorBox}>CAPTCHA failed to load. Please refresh and try again.</div>
-            )}
+            {captchaError && <div style={s.errorBox}>{t('auth.captchaFailed')}</div>}
 
             <button
               type="submit"
@@ -413,37 +409,37 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
               disabled={loading || (captchaEnabled && !captchaToken)}
             >
               {loading
-                ? 'Please wait…'
+                ? t('auth.pleaseWait')
                 : mode === 'login'
-                  ? 'Sign in'
+                  ? t('auth.login')
                   : mode === 'signup'
-                    ? 'Create account'
-                    : 'Send reset link'}
+                    ? t('auth.signup')
+                    : t('auth.resetSendLink')}
             </button>
           </form>
 
           <p style={s.toggle}>
             {mode === 'login' && (
               <>
-                Don&apos;t have an account?{' '}
+                {t('auth.noAccount')}{' '}
                 <Link to="/signup" style={s.toggleLink}>
-                  Sign up
+                  {t('auth.signUpLink')}
                 </Link>
               </>
             )}
             {mode === 'signup' && (
               <>
-                Already have an account?{' '}
+                {t('auth.hasAccount')}{' '}
                 <Link to="/login" style={s.toggleLink}>
-                  Sign in
+                  {t('auth.signInLink')}
                 </Link>
               </>
             )}
             {mode === 'reset' && (
               <>
-                Remember your password?{' '}
+                {t('auth.rememberPassword')}{' '}
                 <Link to="/login" style={s.toggleLink}>
-                  Sign in
+                  {t('auth.signInLink')}
                 </Link>
               </>
             )}

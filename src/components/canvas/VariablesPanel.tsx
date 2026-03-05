@@ -192,6 +192,7 @@ const VariableRow = memo(function VariableRow({
   selected,
   onToggleSelect,
 }: VariableRowProps) {
+  const { t } = useTranslation()
   const updateValue = useVariablesStore((s) => s.updateValue)
   const renameVariable = useVariablesStore((s) => s.renameVariable)
   const removeVariable = useVariablesStore((s) => s.removeVariable)
@@ -229,7 +230,7 @@ const VariableRow = memo(function VariableRow({
         onChange={(e) => renameVariable(variable.id, e.target.value)}
         onFocus={() => setFocusedField('name')}
         onBlur={() => setFocusedField(null)}
-        placeholder="name"
+        placeholder={t('variablesPanel.colName').toLowerCase()}
       />
       <input
         type="number"
@@ -273,7 +274,7 @@ const VariableRow = memo(function VariableRow({
       <button
         style={{ ...deleteBtn, opacity: hovered ? 0.8 : 0.3 }}
         onClick={() => removeVariable(variable.id)}
-        title="Delete variable"
+        title={t('variablesPanel.deleteSelected')}
       >
         &times;
       </button>

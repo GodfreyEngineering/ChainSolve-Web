@@ -9,6 +9,7 @@
  * Search uses ranked scoreMatch for taxonomy-aware results.
  */
 
+import { useTranslation } from 'react-i18next'
 import { useState, useEffect, useRef, useMemo, type KeyboardEvent } from 'react'
 import {
   BLOCK_REGISTRY,
@@ -63,6 +64,7 @@ export function QuickAddPalette({
   onProBlocked,
 }: QuickAddPaletteProps) {
   const ent = getEntitlements(plan)
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [activeIdx, setActiveIdx] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -243,7 +245,7 @@ export function QuickAddPalette({
               setActiveIdx(0)
             }}
             onKeyDown={onKeyDown}
-            placeholder="Filter blocks…"
+            placeholder={t('toolbar.findPlaceholder')}
             style={{
               width: '100%',
               background: 'rgba(0,0,0,0.3)',
@@ -265,7 +267,7 @@ export function QuickAddPalette({
           {isSearching && (
             <>
               {filtered.length === 0 ? (
-                <div style={emptyStyle}>No blocks match</div>
+                <div style={emptyStyle}>{t('toolbar.noMatches')}</div>
               ) : (
                 filtered.map((def) => {
                   const idx = navCounter++

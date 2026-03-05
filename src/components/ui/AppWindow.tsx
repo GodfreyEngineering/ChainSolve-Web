@@ -11,6 +11,7 @@
  *  - Focus trap inside the window panel
  */
 import { useCallback, useEffect, useRef, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useWindowManager, type WindowGeometry } from '../../contexts/WindowManagerContext'
 
 export interface AppWindowProps {
@@ -115,6 +116,7 @@ export function AppWindow({
   minHeight = 200,
   children,
 }: AppWindowProps) {
+  const { t } = useTranslation()
   const { windows, closeWindow, focusWindow, toggleMinimize, toggleMaximize, updateGeometry } =
     useWindowManager()
 
@@ -246,24 +248,24 @@ export function AppWindow({
           <button
             style={chromeBtn}
             onClick={() => toggleMinimize(windowId)}
-            title="Minimize"
-            aria-label="Minimize"
+            title={t('ui.minimize')}
+            aria-label={t('ui.minimize')}
           >
             —
           </button>
           <button
             style={chromeBtn}
             onClick={() => toggleMaximize(windowId)}
-            title={isMax ? 'Restore' : 'Maximize'}
-            aria-label={isMax ? 'Restore' : 'Maximize'}
+            title={isMax ? t('ui.restore') : t('ui.maximize')}
+            aria-label={isMax ? t('ui.restore') : t('ui.maximize')}
           >
             {isMax ? '◻' : '□'}
           </button>
           <button
             style={chromeBtn}
             onClick={() => closeWindow(windowId)}
-            title="Close"
-            aria-label="Close"
+            title={t('ui.close')}
+            aria-label={t('ui.close')}
           >
             ✕
           </button>

@@ -159,7 +159,31 @@
     "termsAccept": "Accetto i Termini e Condizioni e l'Informativa sulla privacy (v{{version}})",
     "termsContinue": "Continua",
     "termsSaving": "Salvataggio…",
-    "termsRetry": "Impossibile registrare l'accettazione. Riprova."
+    "termsRetry": "Impossibile registrare l'accettazione. Riprova.",
+    "signInTitle": "Accedi al tuo account",
+    "signUpTitle": "Crea il tuo account",
+    "resetTitle": "Reimposta la password",
+    "confirmPassword": "Conferma password",
+    "confirmPasswordPlaceholder": "Reinserisci la password",
+    "passwordPlaceholderSignup": "Almeno 8 caratteri",
+    "emailPlaceholder": "tu@esempio.com",
+    "termsAcceptShort": "Accetto i",
+    "marketingOptIn": "Inviami aggiornamenti e suggerimenti (facoltativo)",
+    "rememberMe": "Ricordami",
+    "forgotPassword": "Password dimenticata?",
+    "resetSendLink": "Invia link",
+    "pleaseWait": "Attendere…",
+    "checkInbox": "Controlla la posta in arrivo",
+    "checkInboxSub": "Quasi fatto — un ultimo passaggio",
+    "checkInboxBody": "Account creato. Abbiamo inviato un link di conferma a <strong>{{email}}</strong>. Clicca il link per attivare il tuo account.",
+    "backToSignIn": "Torna all'accesso",
+    "checkEmail": "Controlla la tua email",
+    "resetLinkSent": "Link di reimpostazione inviato",
+    "resetLinkBody": "Se esiste un account per <strong>{{email}}</strong>, abbiamo inviato un link. Controlla la posta in arrivo e lo spam.",
+    "passwordsMismatch": "Le password non corrispondono.",
+    "termsRequired": "Devi accettare i Termini e Condizioni per creare un account.",
+    "authFailed": "Autenticazione fallita. Riprova.",
+    "rememberPassword": "Ricordi la password?"
   },
   "projects": {
     "title": "Progetti",
@@ -361,7 +385,9 @@
     "expand": "Espandi",
     "downsampled": "Sottocampionato",
     "branding": "Includi marchio nell'esportazione",
-    "brandingCaption": "Generato da ChainSolve"
+    "brandingCaption": "Generato da ChainSolve",
+    "xAxisPlaceholder": "Asse X",
+    "yAxisPlaceholder": "Asse Y"
   },
   "settings": {
     "title": "Impostazioni",
@@ -545,7 +571,14 @@
     "cancel": "Annulla",
     "confirm": "Conferma",
     "search": "Cerca…",
-    "loading": "Caricamento…"
+    "loading": "Caricamento…",
+    "minimize": "Riduci",
+    "maximize": "Ingrandisci",
+    "restore": "Ripristina",
+    "copy": "Copia",
+    "copyJson": "Copia JSON",
+    "jump": "Vai al nodo",
+    "edit": "Modifica"
   },
   "entitlements": {
     "projectLimitTitle": "Limite progetti raggiunto",
@@ -695,7 +728,9 @@
     "renameSavedGroup": "Rinomina gruppo salvato…",
     "groupSaved": "Gruppo salvato",
     "proRequired": "Pro richiesto",
-    "minSelection": "Seleziona 2+ nodi per raggruppare"
+    "minSelection": "Seleziona 2+ nodi per raggruppare",
+    "name": "Nome",
+    "noMembers": "Nessun membro"
   },
   "menu": {
     "file": "File",
@@ -827,7 +862,12 @@
     "addFavourite": "Aggiungi ai preferiti",
     "removeFavourite": "Rimuovi dai preferiti",
     "formula": "Formula",
-    "insertSavedGroup": "Inserisci \"{{name}}\" ({{count}} nodi)"
+    "insertSavedGroup": "Inserisci \"{{name}}\" ({{count}} nodi)",
+    "all": "Tutti",
+    "favourites": "Preferiti",
+    "recent": "Recenti",
+    "customFunctions": "Funzioni personalizzate",
+    "noCustomFunctions": "Nessuna funzione personalizzata."
   },
   "sheets": {
     "title": "Fogli",
