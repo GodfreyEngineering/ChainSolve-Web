@@ -1,41 +1,59 @@
 /**
  * Shared inline styles for all custom canvas node types.
  *
- * D8-2: Refactored to use CSS custom properties so themes can override
- * node colours via the theme wizard.
+ * D8-2: Uses CSS custom properties so themes can override node colours.
+ * V3-UI: Redesigned with larger nodes, type-colored accents, improved
+ *        handles, and layered shadows for a premium feel.
  */
 
 import type { CSSProperties } from 'react'
 
-const HANDLE_SIZE = 10
+export const HANDLE_SIZE = 12
 
 export const NODE_STYLES = {
   node: {
-    minWidth: 168,
-    maxWidth: 240,
+    minWidth: 190,
+    maxWidth: 280,
     background: 'var(--node-bg)',
-    border: '1px solid var(--node-border)',
-    borderRadius: 10,
-    boxShadow: '0 3px 12px rgba(0,0,0,0.4)',
+    border: '1.5px solid var(--node-border)',
+    borderRadius: 12,
+    boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.2)',
     fontFamily: "'Montserrat', system-ui, sans-serif",
     fontSize: '0.8rem',
     color: 'var(--text)',
     overflow: 'hidden',
+    transition: 'box-shadow 0.15s ease, border-color 0.15s ease',
   } as CSSProperties,
 
   nodeSelected: {
-    border: '1px solid var(--node-selected-border)',
-    boxShadow: '0 0 0 2px var(--primary-glow), 0 3px 12px rgba(0,0,0,0.4)',
+    border: '2px solid var(--node-selected-border)',
+    boxShadow:
+      '0 0 0 2px var(--primary-glow), 0 1px 3px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.2)',
   } as CSSProperties,
 
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '0.32rem 0.6rem',
+    padding: '0.4rem 0.65rem',
     background: 'var(--node-header-bg)',
     borderBottom: '1px solid var(--node-border)',
     gap: '0.5rem',
+    minHeight: 32,
+  } as CSSProperties,
+
+  headerLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.35rem',
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+  } as CSSProperties,
+
+  headerIcon: {
+    flexShrink: 0,
+    opacity: 0.7,
   } as CSSProperties,
 
   headerLabel: {
@@ -57,16 +75,16 @@ export const NODE_STYLES = {
   } as CSSProperties,
 
   body: {
-    padding: '0.45rem 0.6rem',
+    padding: '0.45rem 0.65rem',
   } as CSSProperties,
 
   portRow: {
     display: 'flex',
     alignItems: 'center',
     position: 'relative' as const,
-    padding: '0.18rem 0',
-    minHeight: 24,
-    gap: '0.3rem',
+    padding: '0.2rem 0',
+    minHeight: 26,
+    gap: '0.35rem',
   } as CSSProperties,
 
   portLabel: {
@@ -80,31 +98,39 @@ export const NODE_STYLES = {
     textOverflow: 'ellipsis',
   } as CSSProperties,
 
+  /** Inline input for port values (wider than before for usability) */
   inlineInput: {
-    width: 60,
+    width: 72,
     flexShrink: 0,
-    background: 'rgba(0,0,0,0.25)',
+    background: 'rgba(0,0,0,0.2)',
     border: '1px solid var(--node-border)',
-    borderRadius: 4,
+    borderRadius: 5,
     color: 'var(--text)',
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '0.72rem',
-    padding: '0.1rem 0.3rem',
+    padding: '0.15rem 0.35rem',
     outline: 'none',
     textAlign: 'right' as const,
+    transition: 'border-color 0.15s ease',
+  } as CSSProperties,
+
+  inlineInputFocus: {
+    borderColor: 'var(--primary)',
+    boxShadow: '0 0 0 1px var(--primary-dim)',
   } as CSSProperties,
 
   numInput: {
     width: '100%',
-    background: 'rgba(0,0,0,0.2)',
+    background: 'rgba(0,0,0,0.15)',
     border: '1px solid var(--node-border)',
     borderRadius: 6,
     color: 'var(--text)',
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: '0.82rem',
-    padding: '0.22rem 0.4rem',
+    padding: '0.25rem 0.4rem',
     outline: 'none',
     boxSizing: 'border-box' as const,
+    transition: 'border-color 0.15s ease',
   } as CSSProperties,
 
   constValue: {
@@ -119,7 +145,7 @@ export const NODE_STYLES = {
     fontSize: '1.3rem',
     fontWeight: 700,
     textAlign: 'center' as const,
-    padding: '0.2rem 0',
+    padding: '0.3rem 0',
     color: 'var(--primary)',
   } as CSSProperties,
 
@@ -129,14 +155,18 @@ export const NODE_STYLES = {
     height: HANDLE_SIZE,
     background: 'var(--handle-input)',
     border: '2px solid var(--node-bg)',
+    borderRadius: '50%',
+    transition: 'transform 0.1s ease',
   } as CSSProperties,
 
   handleLeftDisconnected: {
     left: -(HANDLE_SIZE / 2),
     width: HANDLE_SIZE,
     height: HANDLE_SIZE,
-    background: '#555',
-    border: '2px solid var(--node-bg)',
+    background: 'var(--surface-3, #555)',
+    border: '2px dashed var(--text-faint)',
+    borderRadius: '50%',
+    transition: 'transform 0.1s ease',
   } as CSSProperties,
 
   handleRight: {
@@ -145,5 +175,30 @@ export const NODE_STYLES = {
     height: HANDLE_SIZE,
     background: 'var(--handle-output)',
     border: '2px solid var(--node-bg)',
+    borderRadius: '50%',
+    transition: 'transform 0.1s ease',
+  } as CSSProperties,
+
+  /** Error footer shown below node body when value is an error */
+  errorFooter: {
+    fontSize: 'var(--font-xs)',
+    color: 'var(--danger-text)',
+    background: 'var(--danger-dim)',
+    padding: '0.2rem 0.65rem',
+    whiteSpace: 'nowrap' as const,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    borderTop: '1px solid rgba(239,68,68,0.2)',
+  } as CSSProperties,
+
+  /** Port value badge (read-only display of incoming value) */
+  portValueBadge: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '0.68rem',
+    color: 'var(--text-faint)',
+    flexShrink: 0,
+    padding: '0 0.25rem',
+    borderRadius: 3,
+    background: 'rgba(0,0,0,0.1)',
   } as CSSProperties,
 }

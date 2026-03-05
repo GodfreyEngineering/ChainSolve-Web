@@ -9,6 +9,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
+import { ChevronUp, ChevronDown, Terminal } from 'lucide-react'
+import { Tooltip } from '../ui/Tooltip'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -80,13 +82,13 @@ function saveTab(tab: DockTab) {
 // ── Component ──────────────────────────────────────────────────────────────
 
 /** Height of the collapsed bottom dock handle bar. */
-export const COLLAPSED_DOCK_HEIGHT = 24
+export const COLLAPSED_DOCK_HEIGHT = 32
 
 export function BottomDock({
   panels,
   collapsed = false,
   onToggleCollapsed,
-  rightInset = 48,
+  rightInset = 0,
 }: BottomDockProps) {
   const { t } = useTranslation()
   const { windows } = useWindowManager()
@@ -154,23 +156,35 @@ export function BottomDock({
     right: rightInset,
   }
 
-  // G5-2: Collapsed — thin handle bar with chevron (single-click to expand)
+  // G5-2: Collapsed — thin handle bar with icon + label (single-click to expand)
   if (collapsed) {
     return (
-      <div
-        className="cs-dock-handle"
-        style={{
-          ...dockPositionStyle,
-          height: COLLAPSED_DOCK_HEIGHT,
-          justifyContent: 'center',
-        }}
-        onClick={onToggleCollapsed}
-        title={t('dock.expandDock')}
-      >
-        <span className="cs-dock-handle-chevron" style={{ fontSize: '0.65rem' }}>
-          {'\u2303'}
-        </span>
-      </div>
+      <Tooltip content={t('dock.expandDock')} side="top" display="block">
+        <div
+          className="cs-dock-handle"
+          style={{
+            ...dockPositionStyle,
+            height: COLLAPSED_DOCK_HEIGHT,
+            justifyContent: 'center',
+            gap: 6,
+          }}
+          onClick={onToggleCollapsed}
+        >
+          <Terminal size={12} style={{ color: 'var(--text-faint)' }} />
+          <span
+            style={{
+              fontSize: '0.6rem',
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              color: 'var(--text-faint)',
+              userSelect: 'none',
+            }}
+          >
+            {t('dock.console')}
+          </span>
+          <ChevronUp size={14} className="cs-dock-handle-chevron" />
+        </div>
+      </Tooltip>
     )
   }
 
@@ -201,14 +215,15 @@ export function BottomDock({
           ))}
         </div>
         {/* Single-click collapse button */}
-        <button
-          className="cs-dock-collapse-btn"
-          onClick={onToggleCollapsed}
-          title={t('dock.collapseDock')}
-          aria-label={t('dock.collapseDock')}
-        >
-          {'\u2304'}
-        </button>
+        <Tooltip content={t('dock.collapseDock')} side="top">
+          <button
+            className="cs-dock-collapse-btn"
+            onClick={onToggleCollapsed}
+            aria-label={t('dock.collapseDock')}
+          >
+            <ChevronDown size={14} />
+          </button>
+        </Tooltip>
       </div>
 
       {/* Panel content */}
@@ -226,11 +241,12 @@ const dockStyle: React.CSSProperties = {
   zIndex: 15,
   display: 'flex',
   flexDirection: 'column',
-  background: 'var(--card-bg, #1e1e1e)',
+  background: 'var(--surface-1, var(--card-bg, #1e1e1e))',
   borderTop: '1px solid var(--border, #333)',
   fontFamily: 'ui-monospace, "Cascadia Code", "Fira Code", monospace',
   fontSize: '0.72rem',
   color: 'var(--text, #f4f4f3)',
+  transition: 'height var(--transition-panel, 0.25s cubic-bezier(0.16, 1, 0.3, 1))',
 }
 
 const tabBarStyle: React.CSSProperties = {

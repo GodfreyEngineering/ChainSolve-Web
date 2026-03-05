@@ -29,6 +29,8 @@ import { ValueEditor } from '../editors/ValueEditor'
 import { getUnitSymbol } from '../../../units/unitSymbols'
 import { getConversionFactor, areSameDimension } from '../../../units/unitCompat'
 import { NODE_STYLES as s } from './nodeStyles'
+import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
+import { Icon } from '../../ui/Icon'
 
 const LazyUnitPicker = lazy(() =>
   import('../editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
@@ -129,15 +131,44 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const CONVERT_EXTRA = isConvert ? 58 : 0
   const bodyH = Math.max(inputs.length * ROW_H, 36) + CONVERT_EXTRA
 
+  const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
+  const TypeIcon = getNodeTypeIcon(nd.blockType)
+  const isError =
+    value !== undefined &&
+    typeof value === 'object' &&
+    value !== null &&
+    'Err' in (value as unknown as Record<string, unknown>)
+  const errorMsg = isError ? String((value as unknown as Record<string, unknown>).Err ?? '') : ''
+
   return (
-    <div style={{ ...s.node, ...(selected ? s.nodeSelected : {}) }}>
-      <div style={s.header}>
-        <span style={s.headerLabel}>{nd.label}</span>
+    <div style={{ ...s.node, ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}) }}>
+      <div
+        style={{
+          ...s.header,
+          borderBottom: `2px solid color-mix(in srgb, ${typeColor} 30%, transparent)`,
+          background: `linear-gradient(to right, color-mix(in srgb, ${typeColor} 6%, transparent), transparent)`,
+        }}
+      >
+        <div style={s.headerLeft}>
+          <Icon icon={TypeIcon} size={14} style={{ ...s.headerIcon, color: typeColor }} />
+          <span style={s.headerLabel}>{nd.label}</span>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
           {isLocked && <span style={{ fontSize: '0.6rem', lineHeight: 1, opacity: 0.7 }}>🔒</span>}
+          {isError && (
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: 'var(--danger)',
+                flexShrink: 0,
+              }}
+            />
+          )}
           <span
             className="cs-node-header-value cs-value-badge nodrag"
-            style={{ ...s.headerValue, cursor: 'pointer' }}
+            style={{ ...s.headerValue, color: typeColor, cursor: 'pointer' }}
             onClick={(e) => {
               e.stopPropagation()
               showPopover(id, e.clientX, e.clientY)
@@ -284,6 +315,11 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
           style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
         />
       </div>
+      {isError && errorMsg && (
+        <div style={s.errorFooter} title={errorMsg}>
+          {errorMsg}
+        </div>
+      )}
     </div>
   )
 }

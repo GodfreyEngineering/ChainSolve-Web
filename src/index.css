@@ -9,10 +9,31 @@
   --primary-glow: rgba(28, 171, 176, 0.35);
 
   --bg: #1a1a1a;
-  --card-bg: #383838;
-  --surface2: #2c2c2c;
   --border: rgba(255, 255, 255, 0.1);
   --input-bg: #252525;
+
+  /* ── Layered surface depth (V3-UI) ─────────────────────────────────────── */
+  --surface-0: #1a1a1a; /* canvas / deepest background */
+  --surface-1: #242424; /* panels, sidebars */
+  --surface-2: #2e2e2e; /* cards, nodes, elevated */
+  --surface-3: #383838; /* interactive hover, inputs */
+
+  /* Legacy aliases — point to surface layers for backward compat */
+  --card-bg: var(--surface-2);
+  --surface2: var(--surface-1);
+
+  /* ── Node-type semantic colors (V3-UI) ──────────────────────────────────── */
+  --node-color-source: #a78bfa; /* violet — inputs/constants */
+  --node-color-operation: #1cabb0; /* teal — math/ops (brand) */
+  --node-color-display: #06b6d4; /* cyan — output/display */
+  --node-color-data: #f59e0b; /* amber — data/CSV */
+  --node-color-plot: #10b981; /* emerald — visualization */
+  --node-color-group: #8b5cf6; /* purple — groups */
+
+  /* ── Glassmorphism tokens (V3-UI) ──────────────────────────────────────── */
+  --glass-bg: rgba(36, 36, 36, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-blur: 12px;
 
   --text: #f4f4f3;
   --text-muted: rgba(244, 244, 243, 0.65); /* raised from 0.5 → 4.5:1 AA on both bg and card-bg */
@@ -46,10 +67,12 @@
   --shadow-elevated: 0 12px 48px rgba(0, 0, 0, 0.55);
 
   /* ── Z-index layers ───────────────────────────────────────────────────── */
+  --z-sidebar: 50;
   --z-dropdown: 100;
   --z-modal: 9000;
   --z-toast: 9500;
   --z-dock: 9999;
+  --z-tooltip: 10000;
 
   /* ── Semantic color tokens ─────────────────────────────────────────────── */
   --color-on-primary: #fff;
@@ -59,7 +82,7 @@
   --overlay: rgba(0, 0, 0, 0.6);
 
   /* ── UI component tokens (V2-028) ────────────────────────────────────── */
-  --toolbar-bg: #2c2c2c;
+  --toolbar-bg: var(--surface-1);
   --tooltip-bg: #252525;
   --tooltip-text: #f4f4f3;
   --badge-bg: rgba(28, 171, 176, 0.15);
@@ -67,9 +90,18 @@
   --menu-hover: rgba(28, 171, 176, 0.15);
   --menu-danger-hover: rgba(239, 68, 68, 0.15);
 
-  /* ── Transition durations (V2-036) ────────────────────────────────────── */
+  /* ── Transition durations (V2-036 + V3-UI) ───────────────────────────── */
   --transition-fast: 0.1s ease;
   --transition-normal: 0.15s ease;
+  --transition-panel: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-sidebar: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-drawer: 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  --transition-tooltip: 0.12s ease;
+  --transition-button: 0.1s ease;
+
+  /* ── Easing curves (V3-UI) ─────────────────────────────────────────── */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ── Focus ring ───────────────────────────────────────────────────────── */
   --focus-ring: 2px solid var(--primary);
@@ -83,8 +115,8 @@
   --font-xl: 1.15rem;
   --font-2xl: 1.8rem;
 
-  /* ── Node-specific tokens (D8-2) ────────────────────────────────────────── */
-  --node-bg: #383838;
+  /* ── Node-specific tokens (D8-2 + V3-UI) ──────────────────────────────── */
+  --node-bg: var(--surface-2);
   --node-border: rgba(255, 255, 255, 0.12);
   --node-header-bg: rgba(28, 171, 176, 0.15);
   --node-selected-border: #1cabb0;
@@ -114,10 +146,27 @@
 /* ── Light theme ───────────────────────────────────────────────────────────── */
 :root[data-theme='light'] {
   --bg: #f5f5f4;
-  --card-bg: #ffffff;
-  --surface2: #eaeae9;
   --border: rgba(0, 0, 0, 0.12);
   --input-bg: #ffffff;
+
+  --surface-0: #f5f5f4;
+  --surface-1: #ffffff;
+  --surface-2: #f8f8f7;
+  --surface-3: #eaeae9;
+
+  --card-bg: var(--surface-2);
+  --surface2: var(--surface-1);
+
+  --node-color-source: #7c3aed;
+  --node-color-operation: #0f7578;
+  --node-color-display: #0891b2;
+  --node-color-data: #d97706;
+  --node-color-plot: #059669;
+  --node-color-group: #6d28d9;
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-blur: 12px;
 
   --text: #1a1a1a;
   --text-muted: rgba(26, 26, 26, 0.65); /* raised from 0.5 → 4.5:1 AA on bg and card-bg */
@@ -135,7 +184,7 @@
   --warning-dim: rgba(245, 158, 11, 0.1);
   --overlay: rgba(0, 0, 0, 0.4);
 
-  --toolbar-bg: #eaeae9;
+  --toolbar-bg: var(--surface-1);
   --tooltip-bg: #1a1a1a;
   --tooltip-text: #f4f4f3;
   --badge-bg: rgba(28, 171, 176, 0.1);
@@ -143,7 +192,7 @@
   --menu-hover: rgba(28, 171, 176, 0.1);
   --menu-danger-hover: rgba(239, 68, 68, 0.1);
 
-  --node-bg: #ffffff;
+  --node-bg: var(--surface-2);
   --node-border: rgba(0, 0, 0, 0.12);
   --node-header-bg: rgba(28, 171, 176, 0.12);
   --node-selected-border: #0f7578;
@@ -682,39 +731,6 @@ button:focus:not(:focus-visible) {
   vertical-align: middle;
 }
 
-/* Block tooltip (V2-020) — CSS-only styled tooltip via data-tooltip attr */
-.cs-block-tooltip {
-  position: relative;
-}
-.cs-block-tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-left: 6px;
-  padding: 5px 8px;
-  border-radius: 4px;
-  background: var(--card-bg, #1e1e1e);
-  border: 1px solid var(--border, #333);
-  color: var(--text, #f4f4f3);
-  font-size: 0.68rem;
-  line-height: 1.35;
-  white-space: pre-line;
-  max-width: 220px;
-  z-index: 100;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s ease 0.35s;
-}
-.cs-block-tooltip:hover::after {
-  opacity: 1;
-}
-.cs-block-tooltip[data-tooltip='']::after,
-.cs-block-tooltip:not([data-tooltip])::after {
-  display: none;
-}
-
 /* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
@@ -813,6 +829,80 @@ button:focus:not(:focus-visible) {
   50% {
     opacity: 0.7;
   }
+}
+
+/* ── V3-UI slide/scale animations ─────────────────────────────────────── */
+@keyframes cs-slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes cs-slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes cs-slide-in-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes cs-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes cs-value-flash {
+  0% {
+    background: var(--primary-dim);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+/* ── V3-UI micro-interaction utilities ───────────────────────────────── */
+.cs-press {
+  transition: transform var(--transition-button);
+}
+.cs-press:active {
+  transform: scale(0.96);
+}
+.cs-hover-lift {
+  transition:
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+.cs-hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── V3-UI scroll shadows ────────────────────────────────────────────── */
+.cs-scroll-shadow-top {
+  box-shadow: inset 0 8px 6px -6px rgba(0, 0, 0, 0.2);
+}
+.cs-scroll-shadow-bottom {
+  box-shadow: inset 0 -8px 6px -6px rgba(0, 0, 0, 0.2);
+}
+.cs-scroll-shadow-both {
+  box-shadow:
+    inset 0 8px 6px -6px rgba(0, 0, 0, 0.2),
+    inset 0 -8px 6px -6px rgba(0, 0, 0, 0.2);
 }
 
 /* ── Plan badge shimmer — J3-2 ───────────────────────────────────────────── */

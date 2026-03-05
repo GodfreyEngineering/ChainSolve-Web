@@ -84,6 +84,8 @@ import { CanvasSettingsContext } from '../../contexts/CanvasSettingsContext'
 import { PlanContext } from '../../contexts/PlanContext'
 import { CanvasToolbar, CANVAS_TOOLBAR_WIDTH } from './CanvasToolbar'
 import { useTranslation } from 'react-i18next'
+import { Variable, Palette, Paintbrush, Gem } from 'lucide-react'
+import { Tooltip } from '../ui/Tooltip'
 import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard } from '../../lib/clipboard'
@@ -429,7 +431,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     readOnly,
     plan = 'free',
     onOpenVariables,
-    onOpenGroups,
     onOpenThemes,
     onOpenThemeEditor,
     onOpenMaterials,
@@ -1824,75 +1825,53 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         display: 'flex',
         flexDirection: 'column',
         gap: '0.3rem',
-        background: 'var(--card-bg)',
-        border: '1px solid var(--border)',
+        background: 'var(--glass-bg)',
+        backdropFilter: 'blur(var(--glass-blur))',
+        WebkitBackdropFilter: 'blur(var(--glass-blur))',
+        border: '1px solid var(--glass-border)',
         borderRadius: 'var(--radius-lg)',
         padding: '0.35rem',
         boxShadow: 'var(--shadow-md)',
       }}
     >
       {!readOnly && onOpenVariables && (
-        <button
-          onClick={onOpenVariables}
-          style={{
-            ...tbBtn,
-            minHeight: isMobile ? 36 : undefined,
-            padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
-          }}
-          title={t('toolbar.variables')}
-        >
-          𝑥 {t('toolbar.variables')}
-        </button>
-      )}
-
-      {!readOnly && onOpenGroups && (
-        <button
-          onClick={onOpenGroups}
-          style={{
-            ...tbBtn,
-            minHeight: isMobile ? 36 : undefined,
-            padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
-          }}
-          title={t('toolbar.groups')}
-        >
-          ⊞ {t('toolbar.groups')}
-        </button>
+        <Tooltip content={t('toolbar.variables')} side="left">
+          <button
+            onClick={onOpenVariables}
+            style={{
+              ...tbBtn,
+              minHeight: isMobile ? 36 : undefined,
+              padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
+            }}
+            aria-label={t('toolbar.variables')}
+          >
+            <Variable size={16} />
+          </button>
+        </Tooltip>
       )}
 
       {!isMobile && onOpenThemes && (
-        <button
-          onClick={onOpenThemes}
-          style={{
-            ...tbBtn,
-          }}
-          title={t('toolbar.themes')}
-        >
-          ◐ {t('toolbar.themes')}
-        </button>
+        <Tooltip content={t('toolbar.themes')} side="left">
+          <button onClick={onOpenThemes} style={tbBtn} aria-label={t('toolbar.themes')}>
+            <Palette size={16} />
+          </button>
+        </Tooltip>
       )}
 
       {!isMobile && onOpenThemeEditor && (
-        <button
-          onClick={onOpenThemeEditor}
-          style={{
-            ...tbBtn,
-          }}
-          title={t('settings.editTheme')}
-        >
-          ◑ {t('ui.edit')}
-        </button>
+        <Tooltip content={t('settings.editTheme')} side="left">
+          <button onClick={onOpenThemeEditor} style={tbBtn} aria-label={t('settings.editTheme')}>
+            <Paintbrush size={16} />
+          </button>
+        </Tooltip>
       )}
 
       {!isMobile && !readOnly && onOpenMaterials && (
-        <button
-          onClick={onOpenMaterials}
-          style={{
-            ...tbBtn,
-          }}
-          title={t('toolbar.materials')}
-        >
-          ◇ {t('toolbar.materials')}
-        </button>
+        <Tooltip content={t('toolbar.materials')} side="left">
+          <button onClick={onOpenMaterials} style={tbBtn} aria-label={t('toolbar.materials')}>
+            <Gem size={16} />
+          </button>
+        </Tooltip>
       )}
     </div>
   )
@@ -2072,18 +2051,32 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     proOptions={{ hideAttribution: true }}
                   >
                     {bgDotsVisible && (
-                      <Background
-                        variant={BackgroundVariant.Dots}
-                        gap={24}
-                        size={1}
-                        color="rgba(255,255,255,0.06)"
-                      />
+                      <>
+                        <Background
+                          id="grid-minor"
+                          variant={BackgroundVariant.Dots}
+                          gap={20}
+                          size={1.5}
+                          color="rgba(255,255,255,0.08)"
+                        />
+                        <Background
+                          id="grid-major"
+                          variant={BackgroundVariant.Dots}
+                          gap={100}
+                          size={2}
+                          color="rgba(255,255,255,0.04)"
+                        />
+                      </>
                     )}
                     {minimap && (
                       <MiniMap
                         pannable
                         zoomable
-                        style={{ background: 'var(--card-bg)', border: '1px solid var(--border)' }}
+                        style={{
+                          background: 'var(--surface-1)',
+                          border: '1px solid var(--border)',
+                          zIndex: 20,
+                        }}
                         nodeColor={(node) =>
                           node.type === 'csGroup' ? 'var(--primary)' : 'var(--text-muted)'
                         }

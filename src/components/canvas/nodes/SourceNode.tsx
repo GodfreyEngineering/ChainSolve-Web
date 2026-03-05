@@ -21,6 +21,8 @@ import { getUnitSymbol } from '../../../units/unitSymbols'
 import { usePlan } from '../../../contexts/PlanContext'
 import { getEntitlements } from '../../../lib/entitlements'
 import { NODE_STYLES as s } from './nodeStyles'
+import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
+import { Icon } from '../../ui/Icon'
 
 const LazyUnitPicker = lazy(() =>
   import('../editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
@@ -266,15 +268,27 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
     }
   }, [isVariableSource, varId, boundVar, nd.value, id, updateNodeData])
 
+  const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
+  const TypeIcon = getNodeTypeIcon(nd.blockType)
+
   return (
-    <div style={{ ...s.node, ...(selected ? s.nodeSelected : {}) }}>
-      <div style={s.header}>
-        <span style={s.headerLabel}>{nd.label}</span>
+    <div style={{ ...s.node, ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}) }}>
+      <div
+        style={{
+          ...s.header,
+          borderBottom: `2px solid color-mix(in srgb, ${typeColor} 30%, transparent)`,
+          background: `linear-gradient(to right, color-mix(in srgb, ${typeColor} 6%, transparent), transparent)`,
+        }}
+      >
+        <div style={s.headerLeft}>
+          <Icon icon={TypeIcon} size={14} style={{ ...s.headerIcon, color: typeColor }} />
+          <span style={s.headerLabel}>{nd.label}</span>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
           {isLocked && <span style={{ fontSize: '0.6rem', lineHeight: 1, opacity: 0.7 }}>🔒</span>}
           <span
             className="cs-node-header-value cs-value-badge nodrag"
-            style={{ ...s.headerValue, cursor: 'pointer' }}
+            style={{ ...s.headerValue, color: typeColor, cursor: 'pointer' }}
             onClick={(e) => {
               e.stopPropagation()
               showPopover(id, e.clientX, e.clientY)

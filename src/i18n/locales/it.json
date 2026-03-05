@@ -1663,6 +1663,8 @@
     "collapseLibrary": "Comprimi libreria blocchi",
     "expandDock": "Espandi pannello",
     "collapseDock": "Comprimi pannello",
-    "dragToResize": "Trascina per ridimensionare"
+    "dragToResize": "Trascina per ridimensionare",
+    "library": "Libreria",
+    "console": "Console"
   }
 }

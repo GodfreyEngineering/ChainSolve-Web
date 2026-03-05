@@ -14,6 +14,8 @@ import { formatValue } from '../../../engine/value'
 import type { Value } from '../../../engine/value'
 import type { NodeData, PlotConfig } from '../../../blocks/types'
 import { NODE_STYLES as s } from './nodeStyles'
+import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
+import { Icon } from '../../ui/Icon'
 import { loadVega, type VegaAPI } from '../../../lib/vega-loader'
 import { buildInlineSpec, type SpecResult } from '../../../lib/plot-spec'
 
@@ -143,6 +145,9 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
     }
   }, [])
 
+  const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
+  const TypeIcon = getNodeTypeIcon(nd.blockType)
+
   const onExpand = useCallback(() => setExpandOpen(true), [setExpandOpen])
 
   return (
@@ -152,11 +157,20 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
           ...s.node,
           minWidth: 320,
           maxWidth: 420,
-          ...(selected ? {} : {}),
+          ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
         }}
       >
-        <div style={s.header}>
-          <span style={s.headerLabel}>{nd.label}</span>
+        <div
+          style={{
+            ...s.header,
+            borderBottom: `2px solid color-mix(in srgb, ${typeColor} 30%, transparent)`,
+            background: `linear-gradient(to right, color-mix(in srgb, ${typeColor} 6%, transparent), transparent)`,
+          }}
+        >
+          <div style={s.headerLeft}>
+            <Icon icon={TypeIcon} size={14} style={{ ...s.headerIcon, color: typeColor }} />
+            <span style={s.headerLabel}>{nd.label}</span>
+          </div>
           <span className="cs-node-header-value" style={s.headerValue}>
             {formatValue(headerValue)}
           </span>

@@ -46,7 +46,9 @@ import {
   toggleFavourite,
   scoreMatch,
 } from './blockLibraryUtils'
+import { ChevronLeft, ChevronRight, Library } from 'lucide-react'
 import { HelpLink } from '../ui/HelpLink'
+import { Tooltip } from '../ui/Tooltip'
 
 const FunctionWizard = lazy(() =>
   import('./FunctionWizard').then((m) => ({ default: m.FunctionWizard })),
@@ -90,7 +92,7 @@ const s: StyleMap = {
     borderRight: '1px solid var(--border)',
     background: 'var(--card-bg)',
     height: '100%',
-    transition: 'width 0.2s ease',
+    transition: 'width var(--transition-panel, 0.25s cubic-bezier(0.16, 1, 0.3, 1))',
     position: 'relative',
   },
   topBar: {
@@ -230,55 +232,55 @@ const BlockItem = memo(function BlockItem({
     : `${def.label} (${t('blockLibrary.proOnly')})`
 
   return (
-    <div
-      className="cs-block-tooltip"
-      draggable={entitled}
-      onDragStart={onDragStart}
-      onClick={!entitled ? onProBlocked : undefined}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        ...s.blockItem,
-        background: hovered ? 'var(--primary-dim)' : 'transparent',
-        opacity: entitled ? 1 : 0.45,
-        cursor: entitled ? 'grab' : 'pointer',
-      }}
-      data-tooltip={tooltipText}
-    >
-      {!entitled && (
-        <span className="cs-pro-badge" style={{ marginRight: 4, marginLeft: 0 }}>
-          PRO
-        </span>
-      )}
-      <span
+    <Tooltip content={tooltipText} side="right" display="block">
+      <div
+        draggable={entitled}
+        onDragStart={onDragStart}
+        onClick={!entitled ? onProBlocked : undefined}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         style={{
-          flex: 1,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          paddingRight: hovered ? 20 : 0,
+          ...s.blockItem,
+          background: hovered ? 'var(--primary-dim)' : 'transparent',
+          opacity: entitled ? 1 : 0.45,
+          cursor: entitled ? 'grab' : 'pointer',
         }}
       >
-        {def.label}
-      </span>
-      {hovered && entitled && (
-        <button
+        {!entitled && (
+          <span className="cs-pro-badge" style={{ marginRight: 4, marginLeft: 0 }}>
+            PRO
+          </span>
+        )}
+        <span
           style={{
-            ...s.starBtn,
-            color: isFav ? 'var(--warning)' : 'var(--text-faint)',
-            transition: 'transform 0.15s ease',
-            transform: starAnimating ? 'scale(1.5)' : 'scale(1)',
-          }}
-          title={isFav ? t('blockLibrary.removeFavourite') : t('blockLibrary.addFavourite')}
-          onClick={(e) => {
-            e.stopPropagation()
-            onToggleFav(def.type)
+            flex: 1,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            paddingRight: hovered ? 20 : 0,
           }}
         >
-          {isFav ? '\u2605' : '\u2606'}
-        </button>
-      )}
-    </div>
+          {def.label}
+        </span>
+        {hovered && entitled && (
+          <button
+            style={{
+              ...s.starBtn,
+              color: isFav ? 'var(--warning)' : 'var(--text-faint)',
+              transition: 'transform 0.15s ease',
+              transform: starAnimating ? 'scale(1.5)' : 'scale(1)',
+            }}
+            title={isFav ? t('blockLibrary.removeFavourite') : t('blockLibrary.addFavourite')}
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleFav(def.type)
+            }}
+          >
+            {isFav ? '\u2605' : '\u2606'}
+          </button>
+        )}
+      </div>
+    </Tooltip>
   )
 })
 
@@ -303,143 +305,148 @@ const TemplateItem = memo(function TemplateItem({
   const nodeCount = template.payload.nodes?.length ?? 0
 
   return (
-    <div
-      className="cs-block-tooltip"
-      style={{
-        ...s.blockItem,
-        background: hovered ? 'var(--primary-dim)' : 'transparent',
-        cursor: 'pointer',
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => {
-        setHovered(false)
-        setMenuOpen(false)
-      }}
-      onClick={onInsert}
-      data-tooltip={t('blockLibrary.insertSavedGroup', {
+    <Tooltip
+      content={t('blockLibrary.insertSavedGroup', {
         name: template.name,
         count: nodeCount,
       })}
+      side="right"
+      display="block"
     >
-      <span
+      <div
         style={{
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          background: template.color,
-          flexShrink: 0,
-          marginRight: 4,
+          ...s.blockItem,
+          background: hovered ? 'var(--primary-dim)' : 'transparent',
+          cursor: 'pointer',
         }}
-      />
-      <span
-        style={{
-          flex: 1,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          paddingRight: hovered ? 24 : 0,
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => {
+          setHovered(false)
+          setMenuOpen(false)
         }}
+        onClick={onInsert}
       >
-        {template.name}
-      </span>
-      <span
-        style={{
-          fontSize: 'var(--font-xs)',
-          color: 'var(--text-faint)',
-          flexShrink: 0,
-        }}
-      >
-        {nodeCount}n
-      </span>
-      {hovered && (
-        <div style={{ position: 'absolute', right: 6 }}>
-          <button
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--text-faint)',
-              fontSize: '0.85rem',
-              padding: '0 2px',
-              fontFamily: 'inherit',
-              lineHeight: 1,
-            }}
-            title="Saved group actions"
-            onClick={(e) => {
-              e.stopPropagation()
-              setMenuOpen((p) => !p)
-            }}
-          >
-            ⋯
-          </button>
-          {menuOpen && (
-            <div
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: template.color,
+            flexShrink: 0,
+            marginRight: 4,
+          }}
+        />
+        <span
+          style={{
+            flex: 1,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            paddingRight: hovered ? 24 : 0,
+          }}
+        >
+          {template.name}
+        </span>
+        <span
+          style={{
+            fontSize: 'var(--font-xs)',
+            color: 'var(--text-faint)',
+            flexShrink: 0,
+          }}
+        >
+          {nodeCount}n
+        </span>
+        {hovered && (
+          <div style={{ position: 'absolute', right: 6 }}>
+            <button
               style={{
-                position: 'absolute',
-                right: 0,
-                top: '100%',
-                background: 'var(--card-bg)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-md)',
-                padding: '0.2rem',
-                zIndex: 100,
-                minWidth: 100,
-                boxShadow: 'var(--shadow-lg)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--text-faint)',
+                fontSize: '0.85rem',
+                padding: '0 2px',
+                fontFamily: 'inherit',
+                lineHeight: 1,
+              }}
+              title="Saved group actions"
+              onClick={(e) => {
+                e.stopPropagation()
+                setMenuOpen((p) => !p)
               }}
             >
+              ⋯
+            </button>
+            {menuOpen && (
               <div
                 style={{
-                  padding: '0.3rem 0.5rem',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  borderRadius: 3,
+                  position: 'absolute',
+                  right: 0,
+                  top: '100%',
+                  background: 'var(--card-bg)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.2rem',
+                  zIndex: 100,
+                  minWidth: 100,
+                  boxShadow: 'var(--shadow-lg)',
                 }}
-                role="menuitem"
-                onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.background = 'var(--primary-dim)'
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
-                }}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  const name = window.prompt('Rename saved group:', template.name)
-                  if (name?.trim()) {
-                    onRename(name.trim())
+              >
+                <div
+                  style={{
+                    padding: '0.3rem 0.5rem',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                    borderRadius: 3,
+                  }}
+                  role="menuitem"
+                  onMouseEnter={(e) => {
+                    ;(e.currentTarget as HTMLDivElement).style.background = 'var(--primary-dim)'
+                  }}
+                  onMouseLeave={(e) => {
+                    ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const name = window.prompt('Rename saved group:', template.name)
+                    if (name?.trim()) {
+                      onRename(name.trim())
+                      setMenuOpen(false)
+                    }
+                  }}
+                >
+                  Rename…
+                </div>
+                <div
+                  style={{
+                    padding: '0.3rem 0.5rem',
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                    borderRadius: 3,
+                    color: 'var(--danger)',
+                  }}
+                  role="menuitem"
+                  onMouseEnter={(e) => {
+                    ;(e.currentTarget as HTMLDivElement).style.background =
+                      'var(--menu-danger-hover)'
+                  }}
+                  onMouseLeave={(e) => {
+                    ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete()
                     setMenuOpen(false)
-                  }
-                }}
-              >
-                Rename…
+                  }}
+                >
+                  Delete
+                </div>
               </div>
-              <div
-                style={{
-                  padding: '0.3rem 0.5rem',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  borderRadius: 3,
-                  color: 'var(--danger)',
-                }}
-                role="menuitem"
-                onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.background = 'var(--menu-danger-hover)'
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
-                }}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onDelete()
-                  setMenuOpen(false)
-                }}
-              >
-                Delete
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Tooltip>
   )
 })
 
@@ -490,158 +497,159 @@ const CustomFnItem = memo(function CustomFnItem({
     : fn.formula
 
   return (
-    <div
-      className="cs-block-tooltip"
-      draggable={entitled}
-      onDragStart={onDragStart}
-      onClick={!entitled ? onProBlocked : undefined}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => {
-        setHovered(false)
-        setMenuOpen(false)
-      }}
-      style={{
-        ...s.blockItem,
-        background: hovered ? 'var(--primary-dim)' : 'transparent',
-        opacity: entitled ? 1 : 0.45,
-        cursor: entitled ? 'grab' : 'pointer',
-      }}
-      data-tooltip={tooltipText}
-    >
-      <span
+    <Tooltip content={tooltipText} side="right" display="block">
+      <div
+        draggable={entitled}
+        onDragStart={onDragStart}
+        onClick={!entitled ? onProBlocked : undefined}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => {
+          setHovered(false)
+          setMenuOpen(false)
+        }}
         style={{
-          flex: 1,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          paddingRight: hovered ? 40 : 0,
+          ...s.blockItem,
+          background: hovered ? 'var(--primary-dim)' : 'transparent',
+          opacity: entitled ? 1 : 0.45,
+          cursor: entitled ? 'grab' : 'pointer',
         }}
       >
-        {def.label}
-      </span>
-      <span
-        style={{
-          fontSize: '0.6rem',
-          color: 'var(--text-faint)',
-          fontFamily: 'monospace',
-          flexShrink: 0,
-          maxWidth: 60,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {fn.inputs.length}in
-      </span>
-      {hovered && entitled && (
-        <div style={{ position: 'absolute', right: 6, display: 'flex', gap: 2 }}>
-          <button
-            style={{
-              ...s.starBtn,
-              color: favs.has(def.type) ? 'var(--warning)' : 'var(--text-faint)',
-            }}
-            title={
-              favs.has(def.type)
-                ? t('blockLibrary.removeFavourite')
-                : t('blockLibrary.addFavourite')
-            }
-            onClick={(e) => {
-              e.stopPropagation()
-              onToggleFav(def.type)
-            }}
-          >
-            {favs.has(def.type) ? '\u2605' : '\u2606'}
-          </button>
-          <button
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--text-faint)',
-              fontSize: '0.85rem',
-              padding: '0 2px',
-              fontFamily: 'inherit',
-              lineHeight: 1,
-            }}
-            title="Function actions"
-            onClick={(e) => {
-              e.stopPropagation()
-              setMenuOpen((p) => !p)
-            }}
-          >
-            {'\u22EF'}
-          </button>
-          {menuOpen && (
-            <div
+        <span
+          style={{
+            flex: 1,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            paddingRight: hovered ? 40 : 0,
+          }}
+        >
+          {def.label}
+        </span>
+        <span
+          style={{
+            fontSize: '0.6rem',
+            color: 'var(--text-faint)',
+            fontFamily: 'monospace',
+            flexShrink: 0,
+            maxWidth: 60,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {fn.inputs.length}in
+        </span>
+        {hovered && entitled && (
+          <div style={{ position: 'absolute', right: 6, display: 'flex', gap: 2 }}>
+            <button
               style={{
-                position: 'absolute',
-                right: 0,
-                top: '100%',
-                background: 'var(--card-bg)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-md)',
-                padding: '0.2rem',
-                zIndex: 100,
-                minWidth: 100,
-                boxShadow: 'var(--shadow-lg)',
+                ...s.starBtn,
+                color: favs.has(def.type) ? 'var(--warning)' : 'var(--text-faint)',
+              }}
+              title={
+                favs.has(def.type)
+                  ? t('blockLibrary.removeFavourite')
+                  : t('blockLibrary.addFavourite')
+              }
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggleFav(def.type)
               }}
             >
-              {[
-                { label: 'Edit...', action: onEdit },
-                { label: 'Duplicate', action: onDuplicate },
-              ].map((item) => (
+              {favs.has(def.type) ? '\u2605' : '\u2606'}
+            </button>
+            <button
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--text-faint)',
+                fontSize: '0.85rem',
+                padding: '0 2px',
+                fontFamily: 'inherit',
+                lineHeight: 1,
+              }}
+              title="Function actions"
+              onClick={(e) => {
+                e.stopPropagation()
+                setMenuOpen((p) => !p)
+              }}
+            >
+              {'\u22EF'}
+            </button>
+            {menuOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '100%',
+                  background: 'var(--card-bg)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.2rem',
+                  zIndex: 100,
+                  minWidth: 100,
+                  boxShadow: 'var(--shadow-lg)',
+                }}
+              >
+                {[
+                  { label: 'Edit...', action: onEdit },
+                  { label: 'Duplicate', action: onDuplicate },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    style={{
+                      padding: '0.3rem 0.5rem',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                      borderRadius: 3,
+                    }}
+                    role="menuitem"
+                    onMouseEnter={(e) => {
+                      ;(e.currentTarget as HTMLDivElement).style.background = 'var(--primary-dim)'
+                    }}
+                    onMouseLeave={(e) => {
+                      ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      item.action()
+                      setMenuOpen(false)
+                    }}
+                  >
+                    {item.label}
+                  </div>
+                ))}
                 <div
-                  key={item.label}
                   style={{
                     padding: '0.3rem 0.5rem',
                     fontSize: '0.75rem',
                     cursor: 'pointer',
                     borderRadius: 3,
+                    color: 'var(--danger)',
                   }}
                   role="menuitem"
                   onMouseEnter={(e) => {
-                    ;(e.currentTarget as HTMLDivElement).style.background = 'var(--primary-dim)'
+                    ;(e.currentTarget as HTMLDivElement).style.background =
+                      'var(--menu-danger-hover)'
                   }}
                   onMouseLeave={(e) => {
                     ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
                   }}
                   onClick={(e) => {
                     e.stopPropagation()
-                    item.action()
+                    onDelete()
                     setMenuOpen(false)
                   }}
                 >
-                  {item.label}
+                  Delete
                 </div>
-              ))}
-              <div
-                style={{
-                  padding: '0.3rem 0.5rem',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  borderRadius: 3,
-                  color: 'var(--danger)',
-                }}
-                role="menuitem"
-                onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.background = 'var(--menu-danger-hover)'
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
-                }}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onDelete()
-                  setMenuOpen(false)
-                }}
-              >
-                Delete
               </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Tooltip>
   )
 })
 
@@ -662,7 +670,7 @@ interface BlockLibraryProps {
 }
 
 /** Width of the collapsed docking handle strip. */
-export const COLLAPSED_HANDLE_WIDTH = 18
+export const COLLAPSED_HANDLE_WIDTH = 28
 
 export function BlockLibrary({
   width,
@@ -1147,23 +1155,40 @@ function DockHandle({ side, onClick, onResizeStart }: DockHandleProps) {
   const isExpand = side === 'expand'
 
   if (isExpand) {
-    // Collapsed — single-click to expand
+    // Collapsed — single-click to expand, shows icon + rotated "Library" label
     return (
-      <div
-        className="cs-dock-handle"
-        style={{
-          width: COLLAPSED_HANDLE_WIDTH,
-          height: '100%',
-          borderRight: '1px solid var(--border)',
-          background: 'var(--card-bg)',
-        }}
-        onClick={onClick}
-        title={t('dock.expandLibrary')}
-      >
-        <span className="cs-dock-handle-chevron" style={{ fontSize: '1rem' }}>
-          {'\u203A'}
-        </span>
-      </div>
+      <Tooltip content={t('dock.expandLibrary')} side="right">
+        <div
+          className="cs-dock-handle"
+          style={{
+            width: COLLAPSED_HANDLE_WIDTH,
+            height: '100%',
+            borderRight: '1px solid var(--border)',
+            background: 'var(--surface-1, var(--card-bg))',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 8,
+            paddingTop: 10,
+          }}
+          onClick={onClick}
+        >
+          <Library size={14} style={{ color: 'var(--text-faint)', flexShrink: 0 }} />
+          <ChevronRight size={14} style={{ color: 'var(--text-faint)', flexShrink: 0 }} />
+          <span
+            style={{
+              writingMode: 'vertical-rl',
+              fontSize: '0.6rem',
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              color: 'var(--text-faint)',
+              userSelect: 'none',
+            }}
+          >
+            {t('dock.library')}
+          </span>
+        </div>
+      </Tooltip>
     )
   }
 
@@ -1176,14 +1201,15 @@ function DockHandle({ side, onClick, onResizeStart }: DockHandleProps) {
         onMouseDown={onResizeStart}
         title={t('dock.dragToResize')}
       />
-      <button
-        className="cs-dock-collapse-btn"
-        onClick={onClick}
-        title={t('dock.collapseLibrary')}
-        style={{ position: 'absolute', right: 2, top: 4, zIndex: 11 }}
-      >
-        {'\u2039'}
-      </button>
+      <Tooltip content={t('dock.collapseLibrary')} side="right">
+        <button
+          className="cs-dock-collapse-btn"
+          onClick={onClick}
+          style={{ position: 'absolute', right: 2, top: 4, zIndex: 11 }}
+        >
+          <ChevronLeft size={12} />
+        </button>
+      </Tooltip>
     </>
   )
 }

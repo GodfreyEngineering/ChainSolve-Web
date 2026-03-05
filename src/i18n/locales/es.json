@@ -1663,6 +1663,8 @@
     "collapseLibrary": "Contraer biblioteca de bloques",
     "expandDock": "Expandir panel",
     "collapseDock": "Contraer panel",
-    "dragToResize": "Arrastrar para redimensionar"
+    "dragToResize": "Arrastrar para redimensionar",
+    "library": "Biblioteca",
+    "console": "Consola"
   }
 }

@@ -1663,6 +1663,8 @@
     "collapseLibrary": "Masquer la bibliotheque de blocs",
     "expandDock": "Afficher le panneau",
     "collapseDock": "Masquer le panneau",
-    "dragToResize": "Glisser pour redimensionner"
+    "dragToResize": "Glisser pour redimensionner",
+    "library": "Bibliothèque",
+    "console": "Console"
   }
 }

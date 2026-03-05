@@ -12,12 +12,16 @@ import { memo, useCallback } from 'react'
 import { Handle, Position, useNodes, type NodeProps, type Node } from '@xyflow/react'
 import type { NodeData } from '../../../blocks/types'
 import type { ProxyHandle } from '../../../lib/groups'
+import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
+import { Icon } from '../../ui/Icon'
 
 const DEFAULT_COLOR = 'var(--primary)'
 
 function GroupNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
   const nd = data as NodeData
   const color = nd.groupColor ?? DEFAULT_COLOR
+  const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
+  const TypeIcon = getNodeTypeIcon(nd.blockType)
   const collapsed = nd.groupCollapsed ?? false
   const proxyHandles = ((nd as Record<string, unknown>).__proxyHandles ?? []) as ProxyHandle[]
 
@@ -35,14 +39,25 @@ function GroupNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
         onDoubleClick={onDoubleClick}
         style={{
           ...collapsedStyle,
-          borderColor: selected ? color : `${color}88`,
+          borderColor: selected ? typeColor : `${color}88`,
           boxShadow: selected
             ? `0 0 0 2px ${color}55, 0 3px 12px rgba(0,0,0,0.4)`
             : '0 3px 12px rgba(0,0,0,0.4)',
         }}
       >
         {/* Header */}
-        <div style={{ ...headerStyle, background: `${color}33` }}>
+        <div
+          style={{
+            ...headerStyle,
+            background: `linear-gradient(to right, color-mix(in srgb, ${typeColor} 6%, transparent), ${color}33)`,
+            borderBottom: `2px solid color-mix(in srgb, ${typeColor} 30%, transparent)`,
+          }}
+        >
+          <Icon
+            icon={TypeIcon}
+            size={14}
+            style={{ flexShrink: 0, opacity: 0.7, color: typeColor }}
+          />
           <span style={{ ...colorDot, background: color }} />
           <span style={labelStyle}>{nd.label}</span>
           <span style={badgeStyle}>{memberCount}n</span>
@@ -102,7 +117,7 @@ function GroupNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
         width: '100%',
         height: '100%',
         borderRadius: 12,
-        border: `2px ${selected ? 'solid' : 'dashed'} ${selected ? color : `${color}66`}`,
+        border: `2px ${selected ? 'solid' : 'dashed'} ${selected ? typeColor : `${color}66`}`,
         background: `${color}0A`,
         boxShadow: selected
           ? `0 0 0 2px ${color}35, 0 3px 12px rgba(0,0,0,0.2)`
@@ -119,13 +134,14 @@ function GroupNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
           gap: '0.4rem',
           padding: '0.3rem 0.6rem',
           height: GROUP_HEADER_HEIGHT,
-          borderBottom: `1px solid ${color}33`,
-          background: `${color}15`,
+          borderBottom: `2px solid color-mix(in srgb, ${typeColor} 30%, transparent)`,
+          background: `linear-gradient(to right, color-mix(in srgb, ${typeColor} 6%, transparent), ${color}15)`,
           borderTopLeftRadius: 10,
           borderTopRightRadius: 10,
           cursor: 'grab',
         }}
       >
+        <Icon icon={TypeIcon} size={14} style={{ flexShrink: 0, opacity: 0.7, color: typeColor }} />
         <span style={{ ...colorDot, background: color }} />
         <span style={labelStyle}>{nd.label}</span>
         <span style={badgeStyle}>{memberCount}n</span>

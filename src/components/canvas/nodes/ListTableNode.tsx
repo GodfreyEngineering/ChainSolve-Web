@@ -14,6 +14,8 @@ import { useComputed } from '../../../contexts/ComputedContext'
 import { isVector, isError } from '../../../engine/value'
 import type { NodeData } from '../../../blocks/types'
 import { NODE_STYLES as s } from './nodeStyles'
+import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
+import { Icon } from '../../ui/Icon'
 
 const ROW_H = 22
 const MAX_VISIBLE_H = 180
@@ -102,6 +104,9 @@ function ListTableNodeInner({ id, data, selected }: NodeProps) {
   const value = computed.get(id)
   const { t } = useTranslation()
 
+  const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
+  const TypeIcon = getNodeTypeIcon(nd.blockType)
+
   const [scrollTop, setScrollTop] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -135,9 +140,25 @@ function ListTableNodeInner({ id, data, selected }: NodeProps) {
     : 0
 
   return (
-    <div style={{ ...s.node, minWidth: 180, maxWidth: 280, ...(selected ? s.nodeSelected : {}) }}>
-      <div style={s.header}>
-        <span style={s.headerLabel}>{nd.label}</span>
+    <div
+      style={{
+        ...s.node,
+        minWidth: 180,
+        maxWidth: 280,
+        ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
+      }}
+    >
+      <div
+        style={{
+          ...s.header,
+          borderBottom: `2px solid color-mix(in srgb, ${typeColor} 30%, transparent)`,
+          background: `linear-gradient(to right, color-mix(in srgb, ${typeColor} 6%, transparent), transparent)`,
+        }}
+      >
+        <div style={s.headerLeft}>
+          <Icon icon={TypeIcon} size={14} style={{ ...s.headerIcon, color: typeColor }} />
+          <span style={s.headerLabel}>{nd.label}</span>
+        </div>
         {stats && (
           <span style={s.headerValue}>
             {stats.count} {t('listTable.items')}

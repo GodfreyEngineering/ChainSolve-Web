@@ -11,6 +11,8 @@ import { useFormatValue } from '../../../hooks/useFormatValue'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
 import { getUnitSymbol } from '../../../units/unitSymbols'
 import { NODE_STYLES as s } from './nodeStyles'
+import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
+import { Icon } from '../../ui/Icon'
 
 function DisplayNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
@@ -38,10 +40,28 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
     return srcDef?.label ?? srcData?.label ?? null
   }, [edges, nodes, id])
 
+  const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
+  const TypeIcon = getNodeTypeIcon(nd.blockType)
+
   return (
-    <div style={{ ...s.node, minWidth: 140, ...(selected ? s.nodeSelected : {}) }}>
-      <div style={s.header}>
-        <span style={s.headerLabel}>{nd.label}</span>
+    <div
+      style={{
+        ...s.node,
+        minWidth: 140,
+        ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
+      }}
+    >
+      <div
+        style={{
+          ...s.header,
+          borderBottom: `2px solid color-mix(in srgb, ${typeColor} 30%, transparent)`,
+          background: `linear-gradient(to right, color-mix(in srgb, ${typeColor} 6%, transparent), transparent)`,
+        }}
+      >
+        <div style={s.headerLeft}>
+          <Icon icon={TypeIcon} size={14} style={{ ...s.headerIcon, color: typeColor }} />
+          <span style={s.headerLabel}>{nd.label}</span>
+        </div>
       </div>
 
       <div

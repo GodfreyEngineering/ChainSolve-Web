@@ -10,7 +10,15 @@ import { sanitizeThemeVariables } from './marketplaceThemeService'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-export type ThemeVarCategory = 'background' | 'text' | 'accent' | 'ui' | 'node' | 'edge'
+export type ThemeVarCategory =
+  | 'background'
+  | 'surface'
+  | 'text'
+  | 'accent'
+  | 'ui'
+  | 'node'
+  | 'nodeType'
+  | 'edge'
 
 export interface ThemeVarMeta {
   label: string
@@ -23,9 +31,13 @@ export interface ThemeVarMeta {
 export const THEME_VARIABLE_META: ThemeVarMeta[] = [
   // Backgrounds
   { cssVar: '--bg', label: 'Background', category: 'background' },
-  { cssVar: '--card-bg', label: 'Card / panel', category: 'background' },
-  { cssVar: '--surface2', label: 'Secondary surface', category: 'background' },
   { cssVar: '--input-bg', label: 'Input background', category: 'background' },
+
+  // Surfaces (V3-UI depth layers)
+  { cssVar: '--surface-0', label: 'Canvas background', category: 'surface' },
+  { cssVar: '--surface-1', label: 'Panel / sidebar', category: 'surface' },
+  { cssVar: '--surface-2', label: 'Card / elevated', category: 'surface' },
+  { cssVar: '--surface-3', label: 'Hover / input', category: 'surface' },
 
   // Text
   { cssVar: '--text', label: 'Primary text', category: 'text' },
@@ -57,6 +69,14 @@ export const THEME_VARIABLE_META: ThemeVarMeta[] = [
   { cssVar: '--handle-input', label: 'Input handle', category: 'node' },
   { cssVar: '--handle-output', label: 'Output handle', category: 'node' },
 
+  // Node-type semantic colors (V3-UI)
+  { cssVar: '--node-color-source', label: 'Source nodes', category: 'nodeType' },
+  { cssVar: '--node-color-operation', label: 'Operation nodes', category: 'nodeType' },
+  { cssVar: '--node-color-display', label: 'Display nodes', category: 'nodeType' },
+  { cssVar: '--node-color-data', label: 'Data nodes', category: 'nodeType' },
+  { cssVar: '--node-color-plot', label: 'Plot nodes', category: 'nodeType' },
+  { cssVar: '--node-color-group', label: 'Group nodes', category: 'nodeType' },
+
   // Chain
   { cssVar: '--edge-color', label: 'Chain stroke', category: 'edge' },
   { cssVar: '--border', label: 'Border', category: 'edge' },
@@ -64,10 +84,12 @@ export const THEME_VARIABLE_META: ThemeVarMeta[] = [
 
 export const THEME_CATEGORY_LABELS: Record<ThemeVarCategory, string> = {
   background: 'Backgrounds',
+  surface: 'Surfaces',
   text: 'Text',
   accent: 'Accent Colors',
   ui: 'UI Components',
   node: 'Nodes',
+  nodeType: 'Node Types',
   edge: 'Chains & Borders',
 }
 
@@ -87,9 +109,11 @@ export interface CustomTheme {
 
 export const DARK_DEFAULTS: Record<string, string> = {
   '--bg': '#1a1a1a',
-  '--card-bg': '#383838',
-  '--surface2': '#2c2c2c',
   '--input-bg': '#252525',
+  '--surface-0': '#1a1a1a',
+  '--surface-1': '#242424',
+  '--surface-2': '#2e2e2e',
+  '--surface-3': '#383838',
   '--text': '#f4f4f3',
   '--text-muted': 'rgba(244,244,243,0.65)',
   '--primary': '#1cabb0',
@@ -106,21 +130,29 @@ export const DARK_DEFAULTS: Record<string, string> = {
   '--menu-danger-hover': 'rgba(239,68,68,0.15)',
   '--overlay': 'rgba(0,0,0,0.6)',
   '--danger-dim': 'rgba(239,68,68,0.3)',
-  '--node-bg': '#383838',
+  '--node-bg': '#2e2e2e',
   '--node-border': 'rgba(255,255,255,0.12)',
   '--node-header-bg': 'rgba(28,171,176,0.15)',
   '--node-selected-border': '#1cabb0',
   '--handle-input': '#1cabb0',
   '--handle-output': '#22c55e',
+  '--node-color-source': '#a78bfa',
+  '--node-color-operation': '#1cabb0',
+  '--node-color-display': '#06b6d4',
+  '--node-color-data': '#f59e0b',
+  '--node-color-plot': '#10b981',
+  '--node-color-group': '#8b5cf6',
   '--edge-color': '#1cabb0',
   '--border': 'rgba(255,255,255,0.1)',
 }
 
 export const LIGHT_DEFAULTS: Record<string, string> = {
   '--bg': '#f5f5f4',
-  '--card-bg': '#ffffff',
-  '--surface2': '#eaeae9',
   '--input-bg': '#ffffff',
+  '--surface-0': '#f5f5f4',
+  '--surface-1': '#ffffff',
+  '--surface-2': '#f8f8f7',
+  '--surface-3': '#eaeae9',
   '--text': '#1a1a1a',
   '--text-muted': 'rgba(26,26,26,0.65)',
   '--primary': '#1cabb0',
@@ -137,12 +169,18 @@ export const LIGHT_DEFAULTS: Record<string, string> = {
   '--menu-danger-hover': 'rgba(239,68,68,0.1)',
   '--overlay': 'rgba(0,0,0,0.4)',
   '--danger-dim': 'rgba(239,68,68,0.15)',
-  '--node-bg': '#ffffff',
+  '--node-bg': '#f8f8f7',
   '--node-border': 'rgba(0,0,0,0.12)',
   '--node-header-bg': 'rgba(28,171,176,0.12)',
   '--node-selected-border': '#0f7578',
   '--handle-input': '#0f7578',
   '--handle-output': '#16a34a',
+  '--node-color-source': '#7c3aed',
+  '--node-color-operation': '#0f7578',
+  '--node-color-display': '#0891b2',
+  '--node-color-data': '#d97706',
+  '--node-color-plot': '#059669',
+  '--node-color-group': '#6d28d9',
   '--edge-color': '#0f7578',
   '--border': 'rgba(0,0,0,0.12)',
 }

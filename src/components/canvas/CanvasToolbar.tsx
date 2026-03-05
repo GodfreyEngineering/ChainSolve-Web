@@ -11,6 +11,32 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useReactFlow, useViewport } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
+import { Tooltip } from '../ui/Tooltip'
+import {
+  Hand,
+  ZoomOut,
+  ZoomIn,
+  Maximize,
+  Lock,
+  Unlock,
+  Grid3x3,
+  Zap,
+  Map,
+  Circle,
+  Waves,
+  Layers,
+  Tag,
+  Tags,
+  Pause,
+  Play,
+  RefreshCw,
+  PanelRight,
+  Pencil,
+  HelpCircle,
+  Eye,
+  EyeOff,
+  ScanEye,
+} from 'lucide-react'
 
 export interface CanvasToolbarProps {
   panMode: boolean
@@ -90,8 +116,10 @@ function computeBarStyle(edge: SnapEdge): React.CSSProperties {
     flexDirection: horiz ? 'row' : 'column',
     alignItems: 'center',
     gap: '0.15rem',
-    background: 'var(--card-bg)',
-    border: '1px solid var(--border)',
+    background: 'var(--glass-bg)',
+    backdropFilter: 'blur(var(--glass-blur))',
+    WebkitBackdropFilter: 'blur(var(--glass-blur))',
+    border: '1px solid var(--glass-border)',
     borderRadius: 'var(--radius-lg)',
     padding: horiz ? '0.25rem 0.35rem' : '0.35rem 0.25rem',
     boxShadow: 'var(--shadow-md)',
@@ -274,6 +302,15 @@ export function CanvasToolbar({
   const pct = `${Math.round(zoom * 100)}%`
   const horiz = isHorizontal(snapEdge)
   const sep = computeSepStyle(snapEdge)
+  // Tooltip should appear on the opposite side of the snap edge
+  const tipSide: 'top' | 'right' | 'bottom' | 'left' =
+    snapEdge === 'top'
+      ? 'bottom'
+      : snapEdge === 'bottom'
+        ? 'top'
+        : snapEdge === 'left'
+          ? 'right'
+          : 'left'
 
   return (
     <div
@@ -293,7 +330,7 @@ export function CanvasToolbar({
           transition: transform 0.12s ease, background 0.1s ease;
         }
         [data-cs-toolbar] button:hover {
-          transform: scale(1.15);
+          transform: scale(1.08);
         }
         [data-cs-toolbar] button:active {
           transform: scale(0.95);
@@ -302,28 +339,30 @@ export function CanvasToolbar({
 
       {/* ── Canvas tools ── */}
       {!readOnly && (
-        <button
-          onClick={onTogglePan}
-          style={btnStyle(panMode)}
-          title={t('toolbar.panMode')}
-          aria-label={t('toolbar.panMode')}
-          aria-pressed={panMode}
-        >
-          {'\u270b'}
-        </button>
+        <Tooltip content={t('toolbar.panMode')} side={tipSide}>
+          <button
+            onClick={onTogglePan}
+            style={btnStyle(panMode)}
+            aria-label={t('toolbar.panMode')}
+            aria-pressed={panMode}
+          >
+            <Hand size={16} />
+          </button>
+        </Tooltip>
       )}
 
       <div style={sep} />
 
       {/* Zoom controls */}
-      <button
-        onClick={() => zoomOut({ duration: 200 })}
-        style={btnStyle(false)}
-        title={t('toolbar.zoomOut')}
-        aria-label={t('toolbar.zoomOut')}
-      >
-        {'\u2212'}
-      </button>
+      <Tooltip content={t('toolbar.zoomOut')} side={tipSide}>
+        <button
+          onClick={() => zoomOut({ duration: 200 })}
+          style={btnStyle(false)}
+          aria-label={t('toolbar.zoomOut')}
+        >
+          <ZoomOut size={16} />
+        </button>
+      </Tooltip>
 
       {editingZoom !== null ? (
         <input
@@ -347,199 +386,212 @@ export function CanvasToolbar({
         </button>
       )}
 
-      <button
-        onClick={() => zoomIn({ duration: 200 })}
-        style={btnStyle(false)}
-        title={t('toolbar.zoomIn')}
-        aria-label={t('toolbar.zoomIn')}
-      >
-        +
-      </button>
+      <Tooltip content={t('toolbar.zoomIn')} side={tipSide}>
+        <button
+          onClick={() => zoomIn({ duration: 200 })}
+          style={btnStyle(false)}
+          aria-label={t('toolbar.zoomIn')}
+        >
+          <ZoomIn size={16} />
+        </button>
+      </Tooltip>
 
-      <button
-        onClick={() => fitView({ padding: 0.15, duration: 300 })}
-        style={btnStyle(false)}
-        title={t('toolbar.fitView')}
-        aria-label={t('toolbar.fitView')}
-      >
-        {'\u2b13'}
-      </button>
+      <Tooltip content={t('toolbar.fitView')} side={tipSide}>
+        <button
+          onClick={() => fitView({ padding: 0.15, duration: 300 })}
+          style={btnStyle(false)}
+          aria-label={t('toolbar.fitView')}
+        >
+          <Maximize size={16} />
+        </button>
+      </Tooltip>
 
       {/* ── Layout ── */}
       {!readOnly && (
         <>
           <div style={sep} />
-          <button
-            onClick={onToggleLock}
-            style={btnStyle(locked)}
-            title={t('toolbar.lockLayout')}
-            aria-label={t('toolbar.lockLayout')}
-            aria-pressed={locked}
-          >
-            {locked ? '\u25A0' : '\u25A1'}
-          </button>
-          <button
-            onClick={onToggleSnap}
-            style={btnStyle(snapToGrid)}
-            title={t('toolbar.snapGrid')}
-            aria-label={t('toolbar.snapGrid')}
-            aria-pressed={snapToGrid}
-          >
-            {'\u229e'}
-          </button>
-          <button
-            onClick={(e) => onAutoOrganise(e.shiftKey)}
-            style={btnStyle(false)}
-            title={t('toolbar.autoOrganise')}
-            aria-label={t('toolbar.autoOrganise')}
-          >
-            {'\u26a1'}
-          </button>
+          <Tooltip content={t('toolbar.lockLayout')} side={tipSide}>
+            <button
+              onClick={onToggleLock}
+              style={btnStyle(locked)}
+              aria-label={t('toolbar.lockLayout')}
+              aria-pressed={locked}
+            >
+              {locked ? <Lock size={16} /> : <Unlock size={16} />}
+            </button>
+          </Tooltip>
+          <Tooltip content={t('toolbar.snapGrid')} side={tipSide}>
+            <button
+              onClick={onToggleSnap}
+              style={btnStyle(snapToGrid)}
+              aria-label={t('toolbar.snapGrid')}
+              aria-pressed={snapToGrid}
+            >
+              <Grid3x3 size={16} />
+            </button>
+          </Tooltip>
+          <Tooltip content={t('toolbar.autoOrganise')} side={tipSide}>
+            <button
+              onClick={(e) => onAutoOrganise(e.shiftKey)}
+              style={btnStyle(false)}
+              aria-label={t('toolbar.autoOrganise')}
+            >
+              <Zap size={16} />
+            </button>
+          </Tooltip>
         </>
       )}
 
       <div style={sep} />
 
       {/* ── View ── */}
-      <button
-        onClick={onToggleMinimap}
-        style={btnStyle(minimap)}
-        title={t('toolbar.minimap')}
-        aria-label={t('toolbar.minimap')}
-        aria-pressed={minimap}
-      >
-        {'\u2261'}
-      </button>
+      <Tooltip content={t('toolbar.minimap')} side={tipSide}>
+        <button
+          onClick={onToggleMinimap}
+          style={btnStyle(minimap)}
+          aria-label={t('toolbar.minimap')}
+          aria-pressed={minimap}
+        >
+          <Map size={16} />
+        </button>
+      </Tooltip>
 
       {onToggleBgDots && (
-        <button
-          onClick={onToggleBgDots}
-          style={btnStyle(!!bgDotsVisible)}
-          title={t('toolbar.bgDots')}
-          aria-label={t('toolbar.bgDots')}
-          aria-pressed={!!bgDotsVisible}
-        >
-          {'\u2059'}
-        </button>
+        <Tooltip content={t('toolbar.bgDots')} side={tipSide}>
+          <button
+            onClick={onToggleBgDots}
+            style={btnStyle(!!bgDotsVisible)}
+            aria-label={t('toolbar.bgDots')}
+            aria-pressed={!!bgDotsVisible}
+          >
+            <Circle size={16} />
+          </button>
+        </Tooltip>
       )}
 
-      <button
-        onClick={onToggleEdgesAnimated}
-        style={btnStyle(edgesAnimated)}
-        title={t('toolbar.animatedEdges')}
-        aria-label={t('toolbar.animatedEdges')}
-        aria-pressed={edgesAnimated}
-      >
-        {'\u2248'}
-      </button>
+      <Tooltip content={t('toolbar.animatedEdges')} side={tipSide}>
+        <button
+          onClick={onToggleEdgesAnimated}
+          style={btnStyle(edgesAnimated)}
+          aria-label={t('toolbar.animatedEdges')}
+          aria-pressed={edgesAnimated}
+        >
+          <Waves size={16} />
+        </button>
+      </Tooltip>
 
-      <button
-        onClick={onToggleLod}
-        style={btnStyle(lodEnabled)}
-        title={t('toolbar.lod')}
-        aria-label={t('toolbar.lod')}
-        aria-pressed={lodEnabled}
-      >
-        {'\u25e7'}
-      </button>
+      <Tooltip content={t('toolbar.lod')} side={tipSide}>
+        <button
+          onClick={onToggleLod}
+          style={btnStyle(lodEnabled)}
+          aria-label={t('toolbar.lod')}
+          aria-pressed={lodEnabled}
+        >
+          <Layers size={16} />
+        </button>
+      </Tooltip>
 
       {onToggleBadges && (
-        <button
-          onClick={onToggleBadges}
-          style={btnStyle(!!badgesEnabled)}
-          title={t('toolbar.valueBadges')}
-          aria-label={t('toolbar.valueBadges')}
-          aria-pressed={!!badgesEnabled}
-        >
-          {'\u2b1a'}
-        </button>
+        <Tooltip content={t('toolbar.valueBadges')} side={tipSide}>
+          <button
+            onClick={onToggleBadges}
+            style={btnStyle(!!badgesEnabled)}
+            aria-label={t('toolbar.valueBadges')}
+            aria-pressed={!!badgesEnabled}
+          >
+            <Tag size={16} />
+          </button>
+        </Tooltip>
       )}
 
       {onToggleEdgeBadges && (
-        <button
-          onClick={onToggleEdgeBadges}
-          style={btnStyle(!!edgeBadgesEnabled)}
-          title={t('toolbar.edgeBadges')}
-          aria-label={t('toolbar.edgeBadges')}
-          aria-pressed={!!edgeBadgesEnabled}
-        >
-          {'\u22ef'}
-        </button>
+        <Tooltip content={t('toolbar.edgeBadges')} side={tipSide}>
+          <button
+            onClick={onToggleEdgeBadges}
+            style={btnStyle(!!edgeBadgesEnabled)}
+            aria-label={t('toolbar.edgeBadges')}
+            aria-pressed={!!edgeBadgesEnabled}
+          >
+            <Tags size={16} />
+          </button>
+        </Tooltip>
       )}
 
       {/* K2-1: Hidden view toggle */}
       {onToggleHiddenView && hasHiddenNodes && (
-        <button
-          onClick={onToggleHiddenView}
-          style={btnStyle(!!hiddenViewMode)}
-          title={t('toolbar.hiddenView')}
-          aria-label={t('toolbar.hiddenView')}
-          aria-pressed={!!hiddenViewMode}
-        >
-          {hiddenViewMode ? '\u25c9' : '\u25ce'}
-        </button>
+        <Tooltip content={t('toolbar.hiddenView')} side={tipSide}>
+          <button
+            onClick={onToggleHiddenView}
+            style={btnStyle(!!hiddenViewMode)}
+            aria-label={t('toolbar.hiddenView')}
+            aria-pressed={!!hiddenViewMode}
+          >
+            {hiddenViewMode ? <Eye size={16} /> : <EyeOff size={16} />}
+          </button>
+        </Tooltip>
       )}
 
       {onShowAllHidden && hasHiddenNodes && !readOnly && (
-        <button
-          onClick={onShowAllHidden}
-          style={btnStyle(false)}
-          title={t('toolbar.showAllHidden')}
-          aria-label={t('toolbar.showAllHidden')}
-        >
-          {'\u29c3'}
-        </button>
+        <Tooltip content={t('toolbar.showAllHidden')} side={tipSide}>
+          <button
+            onClick={onShowAllHidden}
+            style={btnStyle(false)}
+            aria-label={t('toolbar.showAllHidden')}
+          >
+            <ScanEye size={16} />
+          </button>
+        </Tooltip>
       )}
 
       <div style={sep} />
 
       {/* ── Engine ── */}
-      <button
-        onClick={onTogglePause}
-        style={btnStyle(paused)}
-        title={paused ? t('toolbar.resumeEval') : t('toolbar.pauseEval')}
-        aria-label={paused ? t('toolbar.resumeEval') : t('toolbar.pauseEval')}
-        aria-pressed={paused}
-      >
-        {paused ? '\u25b6' : '\u23f8'}
-      </button>
+      <Tooltip content={paused ? t('toolbar.resumeEval') : t('toolbar.pauseEval')} side={tipSide}>
+        <button
+          onClick={onTogglePause}
+          style={btnStyle(paused)}
+          aria-label={paused ? t('toolbar.resumeEval') : t('toolbar.pauseEval')}
+          aria-pressed={paused}
+        >
+          {paused ? <Play size={16} /> : <Pause size={16} />}
+        </button>
+      </Tooltip>
 
-      <button
-        onClick={onRefresh}
-        style={btnStyle(false)}
-        title={t('toolbar.refresh')}
-        aria-label={t('toolbar.refresh')}
-      >
-        {'\u21bb'}
-      </button>
+      <Tooltip content={t('toolbar.refresh')} side={tipSide}>
+        <button onClick={onRefresh} style={btnStyle(false)} aria-label={t('toolbar.refresh')}>
+          <RefreshCw size={16} />
+        </button>
+      </Tooltip>
 
       <div style={sep} />
 
       {/* ── Panels ── */}
-      <button
-        onClick={onToggleInspector}
-        style={btnStyle(inspVisible)}
-        title={t('toolbar.inspector')}
-        aria-label={t('toolbar.inspector')}
-        aria-pressed={inspVisible}
-      >
-        {'\u229f'}
-      </button>
+      <Tooltip content={t('toolbar.inspector')} side={tipSide}>
+        <button
+          onClick={onToggleInspector}
+          style={btnStyle(inspVisible)}
+          aria-label={t('toolbar.inspector')}
+          aria-pressed={inspVisible}
+        >
+          <PanelRight size={16} />
+        </button>
+      </Tooltip>
 
       {/* ── Annotations (I3-1) ── */}
       {!readOnly && onInsertAnnotation && (
         <>
           <div style={sep} />
           <div ref={annotRef} style={{ position: 'relative', flexShrink: 0 }}>
-            <button
-              onClick={() => setAnnotOpen((v) => !v)}
-              style={btnStyle(annotOpen)}
-              title={t('toolbar.annotations')}
-              aria-label={t('toolbar.annotations')}
-              aria-expanded={annotOpen}
-            >
-              {'\u270d'}
-            </button>
+            <Tooltip content={t('toolbar.annotations')} side={tipSide}>
+              <button
+                onClick={() => setAnnotOpen((v) => !v)}
+                style={btnStyle(annotOpen)}
+                aria-label={t('toolbar.annotations')}
+                aria-expanded={annotOpen}
+              >
+                <Pencil size={16} />
+              </button>
+            </Tooltip>
             {annotOpen && (
               <div style={annotDropStyle(snapEdge)}>
                 <button style={annotItemStyle} onClick={() => insertAnnot('annotation_text')}>
@@ -570,14 +622,15 @@ export function CanvasToolbar({
 
       <div style={sep} />
 
-      <button
-        onClick={() => window.open('/docs?section=shortcuts', '_blank', 'noopener')}
-        style={btnStyle(false)}
-        title={t('help.learnMore')}
-        aria-label={t('help.learnMore')}
-      >
-        {'\u24d8'}
-      </button>
+      <Tooltip content={t('help.learnMore')} side={tipSide}>
+        <button
+          onClick={() => window.open('/docs?section=shortcuts', '_blank', 'noopener')}
+          style={btnStyle(false)}
+          aria-label={t('help.learnMore')}
+        >
+          <HelpCircle size={16} />
+        </button>
+      </Tooltip>
     </div>
   )
 }
@@ -596,8 +649,8 @@ function btnStyle(active: boolean): React.CSSProperties {
     fontWeight: 500,
     fontFamily: 'inherit',
     lineHeight: 1.2,
-    width: 28,
-    height: 28,
+    width: 34,
+    height: 34,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

@@ -13,6 +13,8 @@ import { useFormatValue } from '../../../hooks/useFormatValue'
 import { usePublishedOutputsStore } from '../../../stores/publishedOutputsStore'
 import type { NodeData } from '../../../blocks/registry'
 import { NODE_STYLES as s } from './nodeStyles'
+import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
+import { Icon } from '../../ui/Icon'
 
 function SubscribeNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
@@ -22,6 +24,9 @@ function SubscribeNodeInner({ id, data, selected }: NodeProps) {
   const { updateNodeData } = useReactFlow()
   const { t } = useTranslation()
   const channels = usePublishedOutputsStore((st) => st.channels)
+
+  const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
+  const TypeIcon = getNodeTypeIcon(nd.blockType)
 
   const channelName = nd.subscribeChannelName ?? ''
   const channelNames = Object.keys(channels).sort()
@@ -34,9 +39,24 @@ function SubscribeNodeInner({ id, data, selected }: NodeProps) {
   )
 
   return (
-    <div style={{ ...s.node, minWidth: 160, ...(selected ? s.nodeSelected : {}) }}>
-      <div style={{ ...s.header, background: 'rgba(59,130,246,0.15)' }}>
-        <span style={s.headerLabel}>{nd.label}</span>
+    <div
+      style={{
+        ...s.node,
+        minWidth: 160,
+        ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
+      }}
+    >
+      <div
+        style={{
+          ...s.header,
+          borderBottom: `2px solid color-mix(in srgb, ${typeColor} 30%, transparent)`,
+          background: `linear-gradient(to right, color-mix(in srgb, ${typeColor} 6%, transparent), transparent)`,
+        }}
+      >
+        <div style={s.headerLeft}>
+          <Icon icon={TypeIcon} size={14} style={{ ...s.headerIcon, color: typeColor }} />
+          <span style={s.headerLabel}>{nd.label}</span>
+        </div>
         <span style={s.headerValue}>{formatValue(value)}</span>
       </div>
 

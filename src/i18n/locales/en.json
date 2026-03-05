@@ -1682,6 +1682,8 @@
     "collapseLibrary": "Collapse block library",
     "expandDock": "Expand dock",
     "collapseDock": "Collapse dock",
-    "dragToResize": "Drag to resize"
+    "dragToResize": "Drag to resize",
+    "library": "Library",
+    "console": "Console"
   }
 }

@@ -34,7 +34,7 @@ const MANIFEST_PATH = join(DIST, '.vite', 'manifest.json')
 
 const KB = 1024
 const BUDGETS = {
-  initialGzip: 450 * KB, // initial-load JS closure (gzip) — K1-1: +16 KB for tiled view mode system
+  initialGzip: 470 * KB, // initial-load JS closure (gzip) — V3-UI: +20 KB for lucide-react icon system
   wasmRaw: 650 * KB, // per-WASM file (raw) — headroom for toolchain variance
   wasmGzip: 200 * KB, // per-WASM file (gzip) — what the CDN actually serves
 }

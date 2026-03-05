@@ -240,6 +240,8 @@ function ThemeWizardInner({ editTheme }: { editTheme?: CustomTheme }) {
       ui: [],
       node: [],
       edge: [],
+      surface: [],
+      nodeType: [],
     }
     for (const meta of THEME_VARIABLE_META) {
       groups[meta.category].push(meta)
