@@ -29,6 +29,7 @@ import { WelcomeCanvas } from '../components/canvas/WelcomeCanvas'
 import { LoadingScreen } from '../components/ui/LoadingScreen'
 import { useSidebarStore } from '../stores/sidebarStore'
 import { importProject, type ProjectJSON } from '../lib/projects'
+import type { CanvasControls } from './CanvasPage'
 
 // Lazy-load heavy components
 const LazyAuthGate = lazy(() => import('../components/AuthGate'))
@@ -59,6 +60,9 @@ export default function WorkspacePage() {
   const auth = useWorkspaceAuth()
   const { open: sidebarOpen, toggle: toggleSidebar, setActiveTab } = useSidebarStore()
   const importRef = useRef<HTMLInputElement>(null)
+
+  // Canvas controls exposed by embedded CanvasPage (Phase M)
+  const [canvasControls, setCanvasControls] = useState<CanvasControls | null>(null)
 
   // Scratch mode: activated by ?scratch=1 param or user action
   const [scratchMode, setScratchMode] = useState(() => searchParams.get('scratch') === '1')
@@ -210,7 +214,8 @@ export default function WorkspacePage() {
         plan={auth.plan}
         sidebarOpen={sidebarOpen}
         onToggleSidebar={toggleSidebar}
-        projectName={null}
+        projectName={canvasControls?.projectName ?? null}
+        canvasControls={canvasControls}
       />
 
       {/* Main content area */}
@@ -226,7 +231,7 @@ export default function WorkspacePage() {
         <div style={canvasAreaStyle}>
           {showCanvas ? (
             <Suspense fallback={<LoadingScreen />}>
-              <CanvasPage embedded />
+              <CanvasPage embedded onControlsReady={setCanvasControls} />
             </Suspense>
           ) : (
             <WelcomeCanvas

@@ -136,12 +136,28 @@ const LazySessionRevokedModal = lazy(() =>
 const EXPORT_SETTLE_MS = 300
 const OFFLINE_RETRY_DELAYS = [3_000, 6_000, 12_000, 24_000, 60_000]
 
+/** Controls exposed by CanvasPage to the parent WorkspacePage toolbar. */
+export interface CanvasControls {
+  projectName: string | null
+  saveStatus: string
+  isDirty: boolean
+  autosaveEnabled: boolean
+  save: () => void
+  saveAs: (name: string) => Promise<void>
+  undo: () => void
+  redo: () => void
+  startNameEdit: () => void
+  toggleAutosave: () => void
+}
+
 interface CanvasPageProps {
   /** When true, skip rendering AppHeader (WorkspacePage provides the shell). */
   embedded?: boolean
+  /** Callback fired when canvas controls are ready or updated (embedded mode). */
+  onControlsReady?: (controls: CanvasControls | null) => void
 }
 
-export default function CanvasPage({ embedded }: CanvasPageProps = {}) {
+export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProps = {}) {
   const { projectId } = useParams<{ projectId?: string }>()
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -153,6 +169,9 @@ export default function CanvasPage({ embedded }: CanvasPageProps = {}) {
   const saveStatus = useProjectStore((s) => s.saveStatus)
   const lastSavedAt = useProjectStore((s) => s.lastSavedAt)
   const projectName = useProjectStore((s) => s.projectName)
+  const isDirty = useProjectStore((s) => s.isDirty)
+  const autosaveEnabled = usePreferencesStore((s) => s.autosaveEnabled)
+  const updatePrefs = usePreferencesStore((s) => s.update)
 
   const beginLoad = useProjectStore((s) => s.beginLoad)
   const markDirty = useProjectStore((s) => s.markDirty)
@@ -671,6 +690,35 @@ export default function CanvasPage({ embedded }: CanvasPageProps = {}) {
     },
     [projectId, navigate, toast, isAuthenticated, t],
   )
+
+  // ── Publish controls to parent (Phase M) ────────────────────────────────────
+  useEffect(() => {
+    if (!embedded || !onControlsReady) return
+    onControlsReady({
+      projectName: projectName ?? null,
+      saveStatus,
+      isDirty,
+      autosaveEnabled,
+      save: () => void doSave(),
+      saveAs: handleSaveAs,
+      undo: () => canvasRef.current?.undo(),
+      redo: () => canvasRef.current?.redo(),
+      startNameEdit,
+      toggleAutosave: () => updatePrefs({ autosaveEnabled: !autosaveEnabled }),
+    })
+    return () => onControlsReady(null)
+  }, [
+    embedded,
+    onControlsReady,
+    projectName,
+    saveStatus,
+    isDirty,
+    autosaveEnabled,
+    doSave,
+    handleSaveAs,
+    startNameEdit,
+    updatePrefs,
+  ])
 
   // ── Sheet / canvas operations ──────────────────────────────────────────────
 

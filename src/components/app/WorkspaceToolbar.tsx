@@ -10,7 +10,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { PanelLeft, PanelLeftClose, BookOpen, Settings, LogOut } from 'lucide-react'
+import {
+  PanelLeft,
+  PanelLeftClose,
+  BookOpen,
+  Settings,
+  LogOut,
+  Save,
+  Undo2,
+  Redo2,
+} from 'lucide-react'
+import type { CanvasControls } from '../../pages/CanvasPage'
 import { BRAND } from '../../lib/brand'
 import { useSettingsModal } from '../../contexts/SettingsModalContext'
 import { getCurrentUser, signOut } from '../../lib/auth'
@@ -30,6 +40,8 @@ interface WorkspaceToolbarProps {
   onToggleSidebar: () => void
   /** Name of the currently open project (null = no project). */
   projectName?: string | null
+  /** Canvas controls exposed by CanvasPage in embedded mode. */
+  canvasControls?: CanvasControls | null
 }
 
 export function WorkspaceToolbar({
@@ -37,6 +49,7 @@ export function WorkspaceToolbar({
   sidebarOpen,
   onToggleSidebar,
   projectName,
+  canvasControls,
 }: WorkspaceToolbarProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -44,7 +57,8 @@ export function WorkspaceToolbar({
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [accountOpen, setAccountOpen] = useState(false)
   const accountRef = useRef<HTMLDivElement>(null)
-  const shortcutLabel = navigator.platform?.includes('Mac') ? '⌘B' : 'Ctrl+B'
+  const isMac = navigator.platform?.includes('Mac')
+  const shortcutLabel = isMac ? '⌘B' : 'Ctrl+B'
 
   useEffect(() => {
     getCurrentUser().then((u) => setUserEmail(u?.email ?? null))
@@ -96,11 +110,85 @@ export function WorkspaceToolbar({
         </a>
       </div>
 
-      {/* ── Center: Project name ── */}
+      {/* ── Center: Project controls ── */}
       <div style={centerStyle}>
-        {projectName && (
+        {canvasControls ? (
+          <div style={projectControlsStyle}>
+            {/* Undo / Redo */}
+            <Tooltip content={t('menu.undo')} side="bottom" shortcut={isMac ? '⌘Z' : 'Ctrl+Z'}>
+              <button
+                className="cs-header-icon-btn"
+                onClick={canvasControls.undo}
+                style={iconBtn}
+                aria-label={t('menu.undo')}
+              >
+                <Icon icon={Undo2} size={14} />
+              </button>
+            </Tooltip>
+            <Tooltip
+              content={t('menu.redo')}
+              side="bottom"
+              shortcut={isMac ? '⌘⇧Z' : 'Ctrl+Shift+Z'}
+            >
+              <button
+                className="cs-header-icon-btn"
+                onClick={canvasControls.redo}
+                style={iconBtn}
+                aria-label={t('menu.redo')}
+              >
+                <Icon icon={Redo2} size={14} />
+              </button>
+            </Tooltip>
+
+            <div style={thinSepStyle} />
+
+            {/* Project name (click to rename) */}
+            <Tooltip content={t('canvas.clickToRename')} side="bottom">
+              <button
+                className="cs-header-icon-btn"
+                onClick={canvasControls.startNameEdit}
+                style={projectNameBtn}
+              >
+                {canvasControls.projectName || t('canvas.untitled', 'Untitled')}
+              </button>
+            </Tooltip>
+
+            <div style={thinSepStyle} />
+
+            {/* Save */}
+            <Tooltip
+              content={t('canvas.saveTooltip')}
+              side="bottom"
+              shortcut={isMac ? '⌘S' : 'Ctrl+S'}
+            >
+              <button
+                className="cs-header-icon-btn"
+                onClick={canvasControls.save}
+                style={{ ...iconBtn, position: 'relative' }}
+                aria-label={t('menu.save')}
+              >
+                <Icon icon={Save} size={14} />
+                {canvasControls.isDirty && <span style={dirtyDotStyle} />}
+              </button>
+            </Tooltip>
+
+            {/* Autosave toggle */}
+            <Tooltip content={t('canvas.autosaveToggle')} side="bottom">
+              <button
+                className="cs-header-icon-btn"
+                onClick={canvasControls.toggleAutosave}
+                style={{
+                  ...autosaveBtn,
+                  color: canvasControls.autosaveEnabled ? 'var(--primary)' : 'var(--text-faint)',
+                }}
+              >
+                {t('canvas.autosave')}
+              </button>
+            </Tooltip>
+          </div>
+        ) : projectName ? (
           <span style={{ fontSize: '0.78rem', fontWeight: 500, opacity: 0.8 }}>{projectName}</span>
-        )}
+        ) : null}
       </div>
 
       {/* ── Right: Plan badge, Docs, Settings, Avatar ── */}
@@ -267,4 +355,48 @@ const sepStyle: React.CSSProperties = {
   height: 1,
   background: 'var(--border)',
   margin: '0.2rem 0',
+}
+
+const projectControlsStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.2rem',
+}
+
+const thinSepStyle: React.CSSProperties = {
+  width: 1,
+  height: 16,
+  background: 'var(--border)',
+  margin: '0 0.15rem',
+  flexShrink: 0,
+}
+
+const projectNameBtn: React.CSSProperties = {
+  height: 28,
+  padding: '0 0.5rem',
+  fontSize: '0.75rem',
+  fontWeight: 500,
+  color: 'var(--text)',
+  whiteSpace: 'nowrap',
+  maxWidth: 200,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+}
+
+const dirtyDotStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: 4,
+  right: 4,
+  width: 5,
+  height: 5,
+  borderRadius: '50%',
+  background: 'var(--primary)',
+}
+
+const autosaveBtn: React.CSSProperties = {
+  height: 28,
+  padding: '0 0.35rem',
+  fontSize: '0.62rem',
+  fontWeight: 600,
+  letterSpacing: '0.02em',
 }
