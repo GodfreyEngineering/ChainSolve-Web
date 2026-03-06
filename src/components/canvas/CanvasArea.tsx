@@ -84,6 +84,7 @@ import { CanvasSettingsContext } from '../../contexts/CanvasSettingsContext'
 import { PlanContext } from '../../contexts/PlanContext'
 import { CanvasToolbar } from './CanvasToolbar'
 import { ArtifactToolbar } from './ArtifactToolbar'
+import { MinimapWrapper } from './MinimapWrapper'
 import { useTranslation } from 'react-i18next'
 import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
 import { useGraphHistory } from '../../hooks/useGraphHistory'
@@ -1998,22 +1999,24 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         />
                       </>
                     )}
-                    {minimap && (
+                  </ReactFlow>
+                  {minimap && (
+                    <MinimapWrapper>
                       <MiniMap
                         pannable
                         zoomable
                         style={{
+                          position: 'relative',
                           background: 'var(--surface-1)',
                           border: '1px solid var(--border)',
-                          zIndex: 20,
                         }}
                         nodeColor={(node) =>
                           node.type === 'csGroup' ? 'var(--primary)' : 'var(--text-muted)'
                         }
                         maskColor="rgba(0,0,0,0.15)"
                       />
-                    )}
-                  </ReactFlow>
+                    </MinimapWrapper>
+                  )}
                   <CanvasToolbar
                     panMode={panMode}
                     locked={locked}
