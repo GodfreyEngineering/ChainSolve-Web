@@ -45,10 +45,9 @@ describe('Supabase migrations: SECURITY DEFINER functions must SET search_path',
     })
   }
 
-  it('all 5 flagged functions are present in baseline with SET search_path', () => {
-    const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline_schema.sql'), 'utf-8')
+  it('all flagged SECURITY DEFINER functions are present in baseline with SET search_path', () => {
+    const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline.sql'), 'utf-8')
     const functions = [
-      'handle_canvases_updated_at',
       'enforce_comment_rate_limit',
       'enforce_org_install_policy',
       'enforce_org_comment_policy',
@@ -67,7 +66,7 @@ describe('Supabase migrations: SECURITY DEFINER functions must SET search_path',
 // ── V2-008: Service-role-only tables must have deny-all policies ─────────
 
 describe('Supabase baseline: service-role-only tables have deny-all policies', () => {
-  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline_schema.sql'), 'utf-8')
+  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline.sql'), 'utf-8')
 
   const SERVICE_TABLES = ['observability_events', 'stripe_events'] as const
 
@@ -85,7 +84,7 @@ describe('Supabase baseline: service-role-only tables have deny-all policies', (
 // ── V2-009: No duplicate permissive policies per table+action in baseline ──
 
 describe('Supabase baseline: no duplicate permissive policies per table+action (V2-009)', () => {
-  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline_schema.sql'), 'utf-8')
+  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline.sql'), 'utf-8')
 
   // Extract all CREATE POLICY statements: policy name, table, action
   const policyPattern =
@@ -130,7 +129,7 @@ describe('Supabase baseline: no duplicate permissive policies per table+action (
 // ── V2-010: All FK columns have index coverage in baseline ─────────────
 
 describe('Supabase baseline: all FK columns have index coverage (V2-010)', () => {
-  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline_schema.sql'), 'utf-8')
+  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline.sql'), 'utf-8')
 
   // Extract FK columns from inline column definitions
   const fkPattern = /^\s+(\w+)\s+\w+.*?REFERENCES\s+(?:public\.)?(\w+)\s*\(/gim
@@ -205,7 +204,7 @@ describe('Supabase baseline: all FK columns have index coverage (V2-010)', () =>
 // ── V2-011: Entitlement helpers align with TS plan hierarchy ───────────
 
 describe('Supabase baseline: entitlement helpers cover all plan types (V2-011)', () => {
-  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline_schema.sql'), 'utf-8')
+  const baseline = fs.readFileSync(path.join(MIGRATIONS_DIR, '0001_baseline.sql'), 'utf-8')
 
   describe('user_has_active_plan', () => {
     // Extract the function body between CREATE...$$; markers

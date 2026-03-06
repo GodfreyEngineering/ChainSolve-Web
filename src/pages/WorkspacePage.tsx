@@ -172,6 +172,15 @@ export default function WorkspacePage() {
     )
   }
 
+  // Signup wizard gate: blocks app until onboarding is complete
+  if (auth.needsWizard) {
+    return (
+      <Suspense fallback={null}>
+        <LazySignupWizard open onComplete={auth.handleWizardComplete} />
+      </Suspense>
+    )
+  }
+
   // ── Render ─────────────────────────────────────────────────────────
 
   return (
@@ -180,13 +189,6 @@ export default function WorkspacePage() {
       {auth.sessionRevoked && (
         <Suspense fallback={null}>
           <LazySessionRevokedModal open />
-        </Suspense>
-      )}
-
-      {/* Signup wizard */}
-      {auth.needsWizard && (
-        <Suspense fallback={null}>
-          <LazySignupWizard open onComplete={auth.handleWizardComplete} />
         </Suspense>
       )}
 

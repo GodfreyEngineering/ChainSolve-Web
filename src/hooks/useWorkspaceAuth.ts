@@ -23,7 +23,7 @@ import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 import { listMfaFactors } from '../lib/auth'
 
 const PROFILE_COLS =
-  'id,email,full_name,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,marketing_opt_in'
+  'id,email,full_name,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,marketing_opt_in,onboarding_completed_at'
 
 export interface WorkspaceAuthState {
   user: User | null
@@ -117,6 +117,8 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
 
   const handleWizardComplete = useCallback(async () => {
     setWizardDismissed(true)
+    const { markOnboardingComplete } = await import('../lib/profilesService')
+    await markOnboardingComplete()
     await refreshProfile()
     try {
       const { factors } = await listMfaFactors()
@@ -132,7 +134,7 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
     !!user &&
     !!profile &&
     (!user.email_confirmed_at || profile.accepted_terms_version !== CURRENT_TERMS_VERSION)
-  const needsWizard = !loading && !!profile && !profile.full_name && !wizardDismissed
+  const needsWizard = !loading && !!profile && !profile.onboarding_completed_at && !wizardDismissed
 
   return {
     user,

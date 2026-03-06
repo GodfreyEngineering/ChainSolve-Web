@@ -33,6 +33,8 @@ export interface Profile {
   marketing_opt_in: boolean
   /** E2-3: When marketing opt-in was last changed. */
   marketing_opt_in_at: string | null
+  /** Phase 2: When the signup wizard was completed. Null = incomplete. */
+  onboarding_completed_at: string | null
 }
 
 // ── Profile cache (1-minute TTL) ──────────────────────────────────────────────
@@ -57,7 +59,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
     .select(
-      'id,email,full_name,avatar_url,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,accepted_terms_at,marketing_opt_in,marketing_opt_in_at',
+      'id,email,full_name,avatar_url,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,accepted_terms_at,marketing_opt_in,marketing_opt_in_at,onboarding_completed_at',
     )
     .eq('id', userId)
     .maybeSingle()
@@ -105,6 +107,21 @@ export async function updateMarketingOptIn(optIn: boolean): Promise<void> {
       marketing_opt_in: optIn,
       marketing_opt_in_at: new Date().toISOString(),
     })
+    .eq('id', user.id)
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  invalidateProfileCache()
+}
+
+/** Phase 2: Mark the signup wizard as completed. */
+export async function markOnboardingComplete(): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to complete onboarding')
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ onboarding_completed_at: new Date().toISOString() })
     .eq('id', user.id)
   if (error) throw new ServiceError('DB_ERROR', error.message, true)
   invalidateProfileCache()

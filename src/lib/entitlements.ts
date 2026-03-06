@@ -228,7 +228,7 @@ export function getEntitlements(plan: Plan): Entitlements {
 
 /**
  * Known developer emails — client-side fallback when the DB trigger
- * (0009_restore_developer.sql) hasn't been applied to the live instance.
+ * (fn_auto_developer_flag trigger in 0001_baseline.sql) hasn't been applied.
  * These emails always resolve to the 'developer' plan.
  */
 const DEVELOPER_EMAILS: ReadonlySet<string> = new Set(['ben.godfrey@chainsolve.co.uk'])

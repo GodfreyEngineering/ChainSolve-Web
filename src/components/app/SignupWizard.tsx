@@ -1,14 +1,19 @@
 /**
- * SignupWizard.tsx — Post-signup profile completion wizard (J1-1).
+ * SignupWizard.tsx — Full-page post-signup profile completion wizard.
  *
- * A multi-step modal that collects display name, avatar, locale,
- * region, and marketing preference. Shown once after signup when the
- * user's profile has no full_name set.
+ * A multi-step full-page flow that collects display name, avatar, locale,
+ * region, plan selection, and marketing preference. Blocks app access until
+ * completed (onboarding_completed_at is set in profiles).
+ *
+ * Steps:
+ *   1. Display name + avatar upload
+ *   2. Locale + region
+ *   3. Plan selection (placeholder — expanded in Phase 3)
+ *   4. Confirmation + marketing opt-in
  */
 
 import { useState, useCallback, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Modal } from '../ui/Modal'
 import { validateDisplayName } from '../../lib/validateDisplayName'
 import { updateDisplayName, uploadAvatar } from '../../lib/profilesService'
 import { acceptTerms, updateMarketingOptIn } from '../../lib/profilesService'
@@ -27,9 +32,16 @@ const SUPPORTED_LOCALES = [
   { code: 'he', label: '\u05E2\u05D1\u05E8\u05D9\u05EA' },
 ] as const
 
+const PLAN_OPTIONS = [
+  { id: 'free', labelKey: 'signupWizard.planFree', descKey: 'signupWizard.planFreeDesc' },
+  { id: 'pro', labelKey: 'signupWizard.planPro', descKey: 'signupWizard.planProDesc' },
+  { id: 'student', labelKey: 'signupWizard.planStudent', descKey: 'signupWizard.planStudentDesc' },
+] as const
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type Step = 'profile' | 'preferences' | 'confirm'
+type Step = 'profile' | 'preferences' | 'plan' | 'confirm'
+const STEPS: Step[] = ['profile', 'preferences', 'plan', 'confirm']
 
 interface Props {
   open: boolean
@@ -54,7 +66,10 @@ export function SignupWizard({ open, onComplete }: Props) {
   const [locale, setLocale] = useState(i18n.language?.split('-')[0] ?? 'en')
   const [region, setRegion] = useState('')
 
-  // Step 3: confirm
+  // Step 3: plan
+  const [selectedPlan, setSelectedPlan] = useState<string>('free')
+
+  // Step 4: confirm
   const [marketingOptIn, setMarketingOptIn] = useState(false)
 
   // ── Avatar file handler ─────────────────────────────────────────────────
@@ -82,30 +97,24 @@ export function SignupWizard({ open, onComplete }: Props) {
 
   // ── Step navigation ─────────────────────────────────────────────────────
 
-  const goToPreferences = useCallback(() => {
+  const goNext = useCallback(() => {
     setError('')
-    const result = validateDisplayName(displayName)
-    if (!result.ok) {
-      setError(t(`signupWizard.${result.error}`))
-      return
+    if (step === 'profile') {
+      const result = validateDisplayName(displayName)
+      if (!result.ok) {
+        setError(t(`signupWizard.${result.error}`))
+        return
+      }
     }
-    setStep('preferences')
-  }, [displayName, t])
+    const idx = STEPS.indexOf(step)
+    if (idx < STEPS.length - 1) setStep(STEPS[idx + 1])
+  }, [step, displayName, t])
 
-  const goToConfirm = useCallback(() => {
+  const goBack = useCallback(() => {
     setError('')
-    setStep('confirm')
-  }, [])
-
-  const goBackToProfile = useCallback(() => {
-    setError('')
-    setStep('profile')
-  }, [])
-
-  const goBackToPreferences = useCallback(() => {
-    setError('')
-    setStep('preferences')
-  }, [])
+    const idx = STEPS.indexOf(step)
+    if (idx > 0) setStep(STEPS[idx - 1])
+  }, [step])
 
   // ── Final submit ────────────────────────────────────────────────────────
 
@@ -143,6 +152,8 @@ export function SignupWizard({ open, onComplete }: Props) {
       // 6. Marketing opt-in
       await updateMarketingOptIn(marketingOptIn)
 
+      // 7. Plan choice is informational for now (Stripe checkout in Phase 3)
+
       onComplete()
     } catch (err) {
       setError(err instanceof Error ? err.message : t('signupWizard.errorGeneric'))
@@ -151,179 +162,298 @@ export function SignupWizard({ open, onComplete }: Props) {
     }
   }, [displayName, avatarFile, locale, region, marketingOptIn, i18n, t, onComplete])
 
-  // ── Step indicator ──────────────────────────────────────────────────────
+  if (!open) return null
 
-  const stepNumber = step === 'profile' ? 1 : step === 'preferences' ? 2 : 3
+  const stepIndex = STEPS.indexOf(step)
+  const stepNumber = stepIndex + 1
+
+  // ── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <Modal open={open} onClose={() => {}} title={t('signupWizard.title')} width={480}>
-      {/* Step indicator */}
-      <div style={stepIndicatorStyle}>
-        {[1, 2, 3].map((n) => (
-          <div
-            key={n}
-            style={{
-              ...stepDotStyle,
-              background: n <= stepNumber ? 'var(--color-primary, #2563eb)' : '#ccc',
-            }}
-          />
-        ))}
-        <span style={stepLabelStyle}>
-          {t('signupWizard.stepOf', { current: stepNumber, total: 3 })}
-        </span>
-      </div>
+    <div style={pageStyle}>
+      <div style={cardStyle}>
+        <h1 style={headingStyle}>{t('signupWizard.title')}</h1>
+        <p style={subStyle}>{t('signupWizard.subtitle')}</p>
 
-      {/* Error display */}
-      {error && <p style={errorStyle}>{error}</p>}
+        {/* Step indicator */}
+        <div style={stepBarStyle}>
+          {STEPS.map((s, i) => (
+            <div key={s} style={stepItemStyle}>
+              <div
+                style={{
+                  ...stepDotStyle,
+                  background:
+                    i < stepIndex
+                      ? 'var(--primary, #1cab b0)'
+                      : i === stepIndex
+                        ? 'var(--primary, #1cabb0)'
+                        : 'var(--border, #ccc)',
+                  opacity: i < stepIndex ? 0.5 : 1,
+                }}
+              />
+              {i < STEPS.length - 1 && (
+                <div
+                  style={{
+                    ...stepLineStyle,
+                    background: i < stepIndex ? 'var(--primary, #1cabb0)' : 'var(--border, #ccc)',
+                    opacity: i < stepIndex ? 0.5 : 0.3,
+                  }}
+                />
+              )}
+            </div>
+          ))}
+          <span style={stepLabelStyle}>
+            {t('signupWizard.stepOf', { current: stepNumber, total: STEPS.length })}
+          </span>
+        </div>
 
-      {/* ── Step 1: Profile ─────────────────────────────────────────────── */}
-      {step === 'profile' && (
-        <div>
-          <p style={descStyle}>{t('signupWizard.profileDesc')}</p>
+        {/* Error display */}
+        {error && <p style={errorBoxStyle}>{error}</p>}
 
-          <label style={labelStyle}>{t('signupWizard.displayNameLabel')}</label>
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => {
-              setDisplayName(e.target.value)
-              setError('')
-            }}
-            placeholder={t('signupWizard.displayNamePlaceholder')}
-            maxLength={100}
-            style={inputStyle}
-            autoFocus
-          />
+        {/* ── Step 1: Profile ─────────────────────────────────────── */}
+        {step === 'profile' && (
+          <div>
+            <p style={descStyle}>{t('signupWizard.profileDesc')}</p>
 
-          <label style={{ ...labelStyle, marginTop: '1rem' }}>
-            {t('signupWizard.avatarLabel')}
-          </label>
-          <div style={avatarRowStyle}>
-            {avatarPreview && <img src={avatarPreview} alt="" style={avatarImgStyle} />}
+            <label style={labelStyle}>{t('signupWizard.displayNameLabel')}</label>
             <input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              style={fileInputStyle}
+              type="text"
+              value={displayName}
+              onChange={(e) => {
+                setDisplayName(e.target.value)
+                setError('')
+              }}
+              placeholder={t('signupWizard.displayNamePlaceholder')}
+              maxLength={100}
+              style={inputStyle}
+              autoFocus
             />
-          </div>
 
-          <div style={btnRowStyle}>
-            <button onClick={goToPreferences} style={primaryBtnStyle}>
-              {t('signupWizard.next')}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Step 2: Preferences ─────────────────────────────────────────── */}
-      {step === 'preferences' && (
-        <div>
-          <p style={descStyle}>{t('signupWizard.preferencesDesc')}</p>
-
-          <label style={labelStyle}>{t('signupWizard.localeLabel')}</label>
-          <select value={locale} onChange={(e) => setLocale(e.target.value)} style={inputStyle}>
-            {SUPPORTED_LOCALES.map((l) => (
-              <option key={l.code} value={l.code}>
-                {l.label}
-              </option>
-            ))}
-          </select>
-
-          <label style={{ ...labelStyle, marginTop: '1rem' }}>
-            {t('signupWizard.regionLabel')}
-          </label>
-          <input
-            type="text"
-            value={region}
-            onChange={(e) => setRegion(e.target.value)}
-            placeholder={t('signupWizard.regionPlaceholder')}
-            maxLength={50}
-            style={inputStyle}
-          />
-
-          <div style={btnRowStyle}>
-            <button onClick={goBackToProfile} style={secondaryBtnStyle}>
-              {t('signupWizard.back')}
-            </button>
-            <button onClick={goToConfirm} style={primaryBtnStyle}>
-              {t('signupWizard.next')}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Step 3: Confirm ─────────────────────────────────────────────── */}
-      {step === 'confirm' && (
-        <div>
-          <p style={descStyle}>{t('signupWizard.confirmDesc')}</p>
-
-          <div style={summaryStyle}>
-            <div style={summaryRowStyle}>
-              <span style={summaryLabelStyle}>{t('signupWizard.displayNameLabel')}</span>
-              <span>{displayName.trim()}</span>
+            <label style={{ ...labelStyle, marginTop: '1.25rem' }}>
+              {t('signupWizard.avatarLabel')}
+            </label>
+            <div style={avatarRowStyle}>
+              {avatarPreview && <img src={avatarPreview} alt="" style={avatarImgStyle} />}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                style={fileInputStyle}
+              />
             </div>
-            <div style={summaryRowStyle}>
-              <span style={summaryLabelStyle}>{t('signupWizard.localeLabel')}</span>
-              <span>{SUPPORTED_LOCALES.find((l) => l.code === locale)?.label ?? locale}</span>
+
+            <div style={btnRowStyle}>
+              <span />
+              <button onClick={goNext} style={primaryBtnStyle}>
+                {t('signupWizard.next')}
+              </button>
             </div>
-            {region.trim() && (
+          </div>
+        )}
+
+        {/* ── Step 2: Preferences ─────────────────────────────────── */}
+        {step === 'preferences' && (
+          <div>
+            <p style={descStyle}>{t('signupWizard.preferencesDesc')}</p>
+
+            <label style={labelStyle}>{t('signupWizard.localeLabel')}</label>
+            <select value={locale} onChange={(e) => setLocale(e.target.value)} style={inputStyle}>
+              {SUPPORTED_LOCALES.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+
+            <label style={{ ...labelStyle, marginTop: '1.25rem' }}>
+              {t('signupWizard.regionLabel')}
+            </label>
+            <input
+              type="text"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              placeholder={t('signupWizard.regionPlaceholder')}
+              maxLength={50}
+              style={inputStyle}
+            />
+
+            <div style={btnRowStyle}>
+              <button onClick={goBack} style={secondaryBtnStyle}>
+                {t('signupWizard.back')}
+              </button>
+              <button onClick={goNext} style={primaryBtnStyle}>
+                {t('signupWizard.next')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Step 3: Plan selection ──────────────────────────────── */}
+        {step === 'plan' && (
+          <div>
+            <p style={descStyle}>{t('signupWizard.planDesc')}</p>
+
+            <div style={planGridStyle}>
+              {PLAN_OPTIONS.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setSelectedPlan(p.id)}
+                  style={{
+                    ...planCardStyle,
+                    borderColor:
+                      selectedPlan === p.id ? 'var(--primary, #1cabb0)' : 'var(--border, #e5e7eb)',
+                    background:
+                      selectedPlan === p.id ? 'rgba(28,171,176,0.06)' : 'var(--surface-2, #f9fafb)',
+                  }}
+                >
+                  <span style={planNameStyle}>{t(p.labelKey)}</span>
+                  <span style={planDescStyle}>{t(p.descKey)}</span>
+                </button>
+              ))}
+            </div>
+
+            <p style={planNoteStyle}>{t('signupWizard.planNote')}</p>
+
+            <div style={btnRowStyle}>
+              <button onClick={goBack} style={secondaryBtnStyle}>
+                {t('signupWizard.back')}
+              </button>
+              <button onClick={goNext} style={primaryBtnStyle}>
+                {t('signupWizard.next')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Step 4: Confirm ─────────────────────────────────────── */}
+        {step === 'confirm' && (
+          <div>
+            <p style={descStyle}>{t('signupWizard.confirmDesc')}</p>
+
+            <div style={summaryStyle}>
               <div style={summaryRowStyle}>
-                <span style={summaryLabelStyle}>{t('signupWizard.regionLabel')}</span>
-                <span>{region.trim()}</span>
+                <span style={summaryLabelStyle}>{t('signupWizard.displayNameLabel')}</span>
+                <span>{displayName.trim()}</span>
               </div>
-            )}
-          </div>
+              <div style={summaryRowStyle}>
+                <span style={summaryLabelStyle}>{t('signupWizard.localeLabel')}</span>
+                <span>{SUPPORTED_LOCALES.find((l) => l.code === locale)?.label ?? locale}</span>
+              </div>
+              {region.trim() && (
+                <div style={summaryRowStyle}>
+                  <span style={summaryLabelStyle}>{t('signupWizard.regionLabel')}</span>
+                  <span>{region.trim()}</span>
+                </div>
+              )}
+              <div style={summaryRowStyle}>
+                <span style={summaryLabelStyle}>{t('signupWizard.planLabel')}</span>
+                <span>
+                  {t(
+                    PLAN_OPTIONS.find((p) => p.id === selectedPlan)?.labelKey ??
+                      'signupWizard.planFree',
+                  )}
+                </span>
+              </div>
+            </div>
 
-          <label style={checkboxLabelStyle}>
-            <input
-              type="checkbox"
-              checked={marketingOptIn}
-              onChange={(e) => setMarketingOptIn(e.target.checked)}
-            />
-            {t('signupWizard.marketingOptIn')}
-          </label>
+            <label style={checkboxLabelStyle}>
+              <input
+                type="checkbox"
+                checked={marketingOptIn}
+                onChange={(e) => setMarketingOptIn(e.target.checked)}
+                style={checkboxStyle}
+              />
+              {t('signupWizard.marketingOptIn')}
+            </label>
 
-          <div style={btnRowStyle}>
-            <button onClick={goBackToPreferences} style={secondaryBtnStyle} disabled={submitting}>
-              {t('signupWizard.back')}
-            </button>
-            <button onClick={handleFinish} style={primaryBtnStyle} disabled={submitting}>
-              {submitting ? t('signupWizard.saving') : t('signupWizard.finish')}
-            </button>
+            <div style={btnRowStyle}>
+              <button onClick={goBack} style={secondaryBtnStyle} disabled={submitting}>
+                {t('signupWizard.back')}
+              </button>
+              <button onClick={handleFinish} style={primaryBtnStyle} disabled={submitting}>
+                {submitting ? t('signupWizard.saving') : t('signupWizard.finish')}
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-    </Modal>
+        )}
+      </div>
+    </div>
   )
 }
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
-const stepIndicatorStyle: CSSProperties = {
+const pageStyle: CSSProperties = {
+  minHeight: '100vh',
   display: 'flex',
   alignItems: 'center',
-  gap: '0.5rem',
-  marginBottom: '1rem',
+  justifyContent: 'center',
+  padding: '1rem',
+  background: 'var(--surface-1, #fff)',
+}
+
+const cardStyle: CSSProperties = {
+  background: 'var(--surface-2, #f9fafb)',
+  border: '1px solid var(--border, #e5e7eb)',
+  borderRadius: 'var(--radius-xl, 16px)',
+  padding: '2.5rem',
+  width: '100%',
+  maxWidth: '520px',
+  animation: 'cs-fade-in 0.4s ease',
+}
+
+const headingStyle: CSSProperties = {
+  margin: '0 0 0.25rem',
+  fontSize: '1.5rem',
+  fontWeight: 700,
+  textAlign: 'center',
+}
+
+const subStyle: CSSProperties = {
+  margin: '0 0 1.5rem',
+  opacity: 0.6,
+  fontSize: '0.9rem',
+  textAlign: 'center',
+}
+
+const stepBarStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 0,
+  marginBottom: '1.5rem',
+  justifyContent: 'center',
+}
+
+const stepItemStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
 }
 
 const stepDotStyle: CSSProperties = {
-  width: 10,
-  height: 10,
+  width: 12,
+  height: 12,
   borderRadius: '50%',
+  transition: 'background 0.2s',
+  flexShrink: 0,
+}
+
+const stepLineStyle: CSSProperties = {
+  width: 40,
+  height: 2,
   transition: 'background 0.2s',
 }
 
 const stepLabelStyle: CSSProperties = {
   fontSize: '0.8rem',
-  color: '#888',
-  marginLeft: '0.5rem',
+  color: 'var(--text-muted, #888)',
+  marginLeft: '0.75rem',
+  whiteSpace: 'nowrap',
 }
 
 const descStyle: CSSProperties = {
-  margin: '0 0 1rem 0',
+  margin: '0 0 1.25rem 0',
   fontSize: '0.9rem',
-  color: '#555',
+  color: 'var(--text-secondary, #555)',
   lineHeight: 1.5,
 }
 
@@ -332,16 +462,19 @@ const labelStyle: CSSProperties = {
   fontSize: '0.85rem',
   fontWeight: 600,
   marginBottom: '0.35rem',
-  color: '#333',
+  color: 'var(--text-primary, #333)',
 }
 
 const inputStyle: CSSProperties = {
   width: '100%',
-  padding: '0.5rem 0.75rem',
+  padding: '0.6rem 0.75rem',
   fontSize: '0.9rem',
-  border: '1px solid #ccc',
-  borderRadius: 6,
+  border: '1px solid var(--border, #ccc)',
+  borderRadius: 'var(--radius-lg, 8px)',
   boxSizing: 'border-box',
+  background: 'var(--surface-1, #fff)',
+  color: 'inherit',
+  fontFamily: 'inherit',
 }
 
 const avatarRowStyle: CSSProperties = {
@@ -351,11 +484,11 @@ const avatarRowStyle: CSSProperties = {
 }
 
 const avatarImgStyle: CSSProperties = {
-  width: 48,
-  height: 48,
+  width: 52,
+  height: 52,
   borderRadius: '50%',
   objectFit: 'cover',
-  border: '1px solid #ddd',
+  border: '2px solid var(--border, #ddd)',
 }
 
 const fileInputStyle: CSSProperties = {
@@ -364,61 +497,103 @@ const fileInputStyle: CSSProperties = {
 
 const btnRowStyle: CSSProperties = {
   display: 'flex',
-  justifyContent: 'flex-end',
-  gap: '0.5rem',
-  marginTop: '1.5rem',
+  justifyContent: 'space-between',
+  gap: '0.75rem',
+  marginTop: '2rem',
 }
 
 const primaryBtnStyle: CSSProperties = {
-  padding: '0.5rem 1.25rem',
-  fontSize: '0.9rem',
+  padding: '0.65rem 1.5rem',
+  fontSize: '0.95rem',
   fontWeight: 600,
-  background: 'var(--color-primary, #2563eb)',
-  color: 'var(--color-on-primary)',
+  background: 'var(--primary, #1cabb0)',
+  color: 'var(--color-on-primary, #fff)',
   border: 'none',
-  borderRadius: 6,
+  borderRadius: 'var(--radius-lg, 8px)',
   cursor: 'pointer',
+  fontFamily: 'inherit',
+  letterSpacing: '0.02em',
 }
 
 const secondaryBtnStyle: CSSProperties = {
-  padding: '0.5rem 1.25rem',
-  fontSize: '0.9rem',
+  padding: '0.65rem 1.5rem',
+  fontSize: '0.95rem',
   fontWeight: 500,
   background: 'transparent',
-  color: '#555',
-  border: '1px solid #ccc',
-  borderRadius: 6,
+  color: 'var(--text-secondary, #555)',
+  border: '1px solid var(--border, #ccc)',
+  borderRadius: 'var(--radius-lg, 8px)',
   cursor: 'pointer',
+  fontFamily: 'inherit',
 }
 
-const errorStyle: CSSProperties = {
-  padding: '0.5rem 0.75rem',
+const errorBoxStyle: CSSProperties = {
+  padding: '0.6rem 0.85rem',
   margin: '0 0 1rem 0',
   fontSize: '0.85rem',
-  color: '#b91c1c',
-  background: '#fef2f2',
-  border: '1px solid #fca5a5',
-  borderRadius: 6,
+  color: 'var(--danger-text, #b91c1c)',
+  background: 'var(--danger-dim, #fef2f2)',
+  border: '1px solid rgba(239,68,68,0.35)',
+  borderRadius: 'var(--radius-lg, 8px)',
+}
+
+const planGridStyle: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.75rem',
+  marginBottom: '0.75rem',
+}
+
+const planCardStyle: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  padding: '1rem 1.25rem',
+  borderRadius: 'var(--radius-lg, 8px)',
+  border: '2px solid var(--border, #e5e7eb)',
+  cursor: 'pointer',
+  transition: 'border-color 0.15s, background 0.15s',
+  textAlign: 'left',
+  fontFamily: 'inherit',
+}
+
+const planNameStyle: CSSProperties = {
+  fontWeight: 700,
+  fontSize: '1rem',
+  marginBottom: '0.2rem',
+}
+
+const planDescStyle: CSSProperties = {
+  fontSize: '0.85rem',
+  color: 'var(--text-secondary, #666)',
+  lineHeight: 1.4,
+}
+
+const planNoteStyle: CSSProperties = {
+  fontSize: '0.8rem',
+  color: 'var(--text-muted, #888)',
+  fontStyle: 'italic',
+  marginBottom: '0',
 }
 
 const summaryStyle: CSSProperties = {
-  background: '#f9fafb',
-  border: '1px solid #e5e7eb',
-  borderRadius: 8,
+  background: 'var(--surface-1, #f9fafb)',
+  border: '1px solid var(--border, #e5e7eb)',
+  borderRadius: 'var(--radius-lg, 8px)',
   padding: '0.75rem 1rem',
-  marginBottom: '1rem',
+  marginBottom: '1.25rem',
 }
 
 const summaryRowStyle: CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
-  padding: '0.25rem 0',
+  padding: '0.3rem 0',
   fontSize: '0.9rem',
 }
 
 const summaryLabelStyle: CSSProperties = {
   fontWeight: 600,
-  color: '#555',
+  color: 'var(--text-secondary, #555)',
 }
 
 const checkboxLabelStyle: CSSProperties = {
@@ -428,4 +603,12 @@ const checkboxLabelStyle: CSSProperties = {
   fontSize: '0.85rem',
   cursor: 'pointer',
   marginBottom: '0.5rem',
+}
+
+const checkboxStyle: CSSProperties = {
+  accentColor: 'var(--primary, #1cabb0)',
+  width: 16,
+  height: 16,
+  cursor: 'pointer',
+  flexShrink: 0,
 }
