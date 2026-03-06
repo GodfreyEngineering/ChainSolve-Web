@@ -786,7 +786,7 @@ export function BlockLibrary({
   }
 
   return (
-    <div style={{ ...s.panel, width: px(width) }} onFocus={refreshRecent}>
+    <div data-tour="block-library" style={{ ...s.panel, width: px(width) }} onFocus={refreshRecent}>
       {/* Search + category filter */}
       <div style={s.topBar}>
         <div style={s.searchRow}>

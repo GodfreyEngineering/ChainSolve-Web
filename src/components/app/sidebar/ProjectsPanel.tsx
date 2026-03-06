@@ -145,6 +145,7 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
         <div style={{ display: 'flex', gap: 4 }}>
           <Tooltip content={t('home.createProject', 'New project')} side="bottom">
             <button
+              data-tour="btn-new-project"
               style={actionBtnStyle}
               onClick={onNewProject}
               disabled={!allowCreate}

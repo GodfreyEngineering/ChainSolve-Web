@@ -164,6 +164,7 @@ export function WorkspaceToolbar({
               shortcut={isMac ? '⌘S' : 'Ctrl+S'}
             >
               <button
+                data-tour="btn-save"
                 className="cs-header-icon-btn"
                 onClick={canvasControls.save}
                 style={{ ...iconBtn, position: 'relative' }}

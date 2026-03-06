@@ -1,16 +1,20 @@
 /**
- * OnboardingOverlay — guided walkthrough for new users.
+ * OnboardingOverlay — spotlight-driven guided tutorial for new users.
  *
- * Shows a step-by-step panel that walks users through the core workflow:
- * creating a project, adding blocks, connecting chains, inspecting values,
- * saving, and using reporting features.
+ * Shows a step-by-step spotlight tour that highlights UI elements
+ * via data-tour attributes. Each step displays a tooltip with title,
+ * description, and navigation buttons.
  *
- * The overlay includes a persistent checklist that tracks progress across
- * sessions. Users can dismiss it and reopen from the Help menu.
+ * Features:
+ *   - Spotlight cutout around target element (via OnboardingSpotlight)
+ *   - Falls back to centered tooltip if target not found
+ *   - "Skip tutorial" always available
+ *   - Progress persisted via onboardingState (localStorage)
+ *   - Accessible from Help menu ("Start tour")
  *
- * This component can be rendered in two modes:
- *   1. "overlay" — full-screen backdrop + centered panel (first login)
- *   2. "panel" — just the panel, for embedding (Help menu "Start tour")
+ * Modes:
+ *   - "overlay" — full spotlight tour (first login or Help menu restart)
+ *   - "panel" — compact checklist panel (for embedding in sidebar)
  */
 
 import { useCallback, useMemo, useState } from 'react'
@@ -22,6 +26,20 @@ import {
   completeStep,
   dismissOnboarding,
 } from '../../lib/onboardingState'
+import { OnboardingSpotlight } from './OnboardingSpotlight'
+
+/** Map step IDs to the data-tour attribute on the target UI element. */
+const STEP_TARGETS: Record<OnboardingStepId, string> = {
+  open_projects: 'sidebar-projects',
+  create_project: 'btn-new-project',
+  add_input: 'block-library',
+  add_function: 'block-library',
+  add_output: 'block-library',
+  connect_chains: 'canvas-area',
+  use_inspector: 'inspector-panel',
+  save_project: 'btn-save',
+  open_reporting: 'menu-file',
+}
 
 export interface OnboardingOverlayProps {
   /** Whether to show the full overlay backdrop or just the panel. */
@@ -34,7 +52,6 @@ export function OnboardingOverlay({ mode, onClose }: OnboardingOverlayProps) {
   const { t } = useTranslation()
   const [state, setState] = useState(getOnboardingState)
   const [activeStep, setActiveStep] = useState<number>(() => {
-    // Start at the first uncompleted step
     const idx = ONBOARDING_STEPS.findIndex((id) => !state.completed[id])
     return idx >= 0 ? idx : 0
   })
@@ -53,7 +70,6 @@ export function OnboardingOverlay({ mode, onClose }: OnboardingOverlayProps) {
   }, [])
 
   const handleNext = useCallback(() => {
-    // Mark current step completed and advance
     handleComplete(currentStepId)
     if (activeStep < totalSteps - 1) {
       setActiveStep(activeStep + 1)
@@ -70,43 +86,32 @@ export function OnboardingOverlay({ mode, onClose }: OnboardingOverlayProps) {
   }, [onClose])
 
   const handleFinish = useCallback(() => {
-    // Mark last step and close
     handleComplete(currentStepId)
     dismissOnboarding()
     onClose()
   }, [handleComplete, currentStepId, onClose])
 
-  const stepTitle = t(`tour.steps.${currentStepId}.title`)
-  const stepDesc = t(`tour.steps.${currentStepId}.description`)
+  // ── Panel mode: compact checklist ───────────────────────────────────────
 
-  const panel = (
-    <div style={panelStyle}>
-      {/* Header */}
-      <div style={headerStyle}>
-        <div>
-          <h2 style={titleStyle}>{t('tour.title')}</h2>
-          <p style={subtitleStyle}>
-            {t('tour.progress', { done: completedSteps, total: totalSteps })}
-          </p>
+  if (mode === 'panel') {
+    return (
+      <div style={panelStyle}>
+        <div style={panelHeaderStyle}>
+          <div>
+            <h2 style={panelTitleStyle}>{t('tour.title')}</h2>
+            <p style={panelSubtitleStyle}>
+              {t('tour.progress', { done: completedSteps, total: totalSteps })}
+            </p>
+          </div>
+          <button style={closeBtnStyle} onClick={handleDismiss} aria-label={t('tour.dismiss')}>
+            ✕
+          </button>
         </div>
-        <button style={closeBtnStyle} onClick={handleDismiss} aria-label={t('tour.dismiss')}>
-          ✕
-        </button>
-      </div>
 
-      {/* Progress bar */}
-      <div style={progressTrackStyle}>
-        <div
-          style={{
-            ...progressFillStyle,
-            width: `${(completedSteps / totalSteps) * 100}%`,
-          }}
-        />
-      </div>
+        <div style={progressTrackStyle}>
+          <div style={{ ...progressFillStyle, width: `${(completedSteps / totalSteps) * 100}%` }} />
+        </div>
 
-      {/* Checklist sidebar + active step content */}
-      <div style={bodyStyle}>
-        {/* Checklist (left) */}
         <div style={checklistStyle}>
           {ONBOARDING_STEPS.map((id, idx) => {
             const done = !!state.completed[id]
@@ -122,51 +127,123 @@ export function OnboardingOverlay({ mode, onClose }: OnboardingOverlayProps) {
                 onClick={() => setActiveStep(idx)}
                 aria-current={active ? 'step' : undefined}
               >
-                <span style={checkboxStyle}>{done ? '\u2713' : `${idx + 1}`}</span>
+                <span style={checkIconStyle}>{done ? '\u2713' : `${idx + 1}`}</span>
                 <span style={checklistLabelStyle}>{t(`tour.steps.${id}.short`)}</span>
               </button>
             )
           })}
         </div>
 
-        {/* Step content (right) */}
-        <div style={stepContentStyle}>
-          {allDone ? (
-            <div style={doneContentStyle}>
-              <div style={doneIconStyle}>{'\u2713'}</div>
-              <h3 style={stepTitleStyle}>{t('tour.allDone')}</h3>
-              <p style={stepDescStyle}>{t('tour.allDoneDesc')}</p>
+        {!allDone && (
+          <div style={panelContentStyle}>
+            <div style={stepBadgeStyle}>
+              {t('tour.stepLabel', { current: activeStep + 1, total: totalSteps })}
             </div>
-          ) : (
-            <>
-              <div style={stepBadgeStyle}>
-                {t('tour.stepLabel', { current: activeStep + 1, total: totalSteps })}
-              </div>
-              <h3 style={stepTitleStyle}>{stepTitle}</h3>
-              <p style={stepDescStyle}>{stepDesc}</p>
-            </>
-          )}
+            <h3 style={stepTitleStyle}>{t(`tour.steps.${currentStepId}.title`)}</h3>
+            <p style={stepDescStyle}>{t(`tour.steps.${currentStepId}.description`)}</p>
+          </div>
+        )}
+
+        {allDone && (
+          <div style={doneContentStyle}>
+            <div style={doneIconStyle}>{'\u2713'}</div>
+            <h3 style={stepTitleStyle}>{t('tour.allDone')}</h3>
+            <p style={stepDescStyle}>{t('tour.allDoneDesc')}</p>
+          </div>
+        )}
+
+        <div style={footerStyle}>
+          <button style={skipBtnStyle} onClick={handleDismiss}>
+            {t('tour.dismiss')}
+          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {activeStep > 0 && !allDone && (
+              <button style={secondaryBtnStyle} onClick={handlePrev}>
+                {t('tour.prev')}
+              </button>
+            )}
+            {allDone ? (
+              <button style={primaryBtnStyle} onClick={handleFinish}>
+                {t('tour.finish')}
+              </button>
+            ) : activeStep < totalSteps - 1 ? (
+              <button style={primaryBtnStyle} onClick={handleNext}>
+                {state.completed[currentStepId] ? t('tour.next') : t('tour.markDone')}
+              </button>
+            ) : (
+              <button style={primaryBtnStyle} onClick={handleFinish}>
+                {t('tour.finish')}
+              </button>
+            )}
+          </div>
         </div>
       </div>
+    )
+  }
 
-      {/* Footer buttons */}
-      <div style={footerStyle}>
+  // ── Overlay mode: spotlight tour ────────────────────────────────────────
+
+  if (allDone) {
+    // Show completion screen
+    return (
+      <div style={overlayBackdropStyle} role="dialog" aria-modal="true">
+        <div style={completionCardStyle}>
+          <div style={doneIconStyle}>{'\u2713'}</div>
+          <h2 style={completionTitleStyle}>{t('tour.allDone')}</h2>
+          <p style={completionDescStyle}>{t('tour.allDoneDesc')}</p>
+          <button style={primaryBtnStyle} onClick={handleFinish}>
+            {t('tour.finish')}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const targetId = STEP_TARGETS[currentStepId]
+
+  return (
+    <OnboardingSpotlight targetId={targetId} open onBackdropClick={handleDismiss}>
+      {/* Step badge */}
+      <div style={spotlightBadgeStyle}>
+        {t('tour.stepLabel', { current: activeStep + 1, total: totalSteps })}
+      </div>
+
+      {/* Progress dots */}
+      <div style={dotsRowStyle}>
+        {ONBOARDING_STEPS.map((_, i) => (
+          <div
+            key={i}
+            style={{
+              ...dotStyle,
+              background:
+                i < activeStep
+                  ? 'var(--primary, #1cabb0)'
+                  : i === activeStep
+                    ? 'var(--primary, #1cabb0)'
+                    : 'var(--border, #ccc)',
+              opacity: i < activeStep ? 0.4 : 1,
+            }}
+          />
+        ))}
+      </div>
+
+      <h3 style={spotlightTitleStyle}>{t(`tour.steps.${currentStepId}.title`)}</h3>
+      <p style={spotlightDescStyle}>{t(`tour.steps.${currentStepId}.description`)}</p>
+
+      {/* Navigation */}
+      <div style={spotlightFooterStyle}>
         <button style={skipBtnStyle} onClick={handleDismiss}>
           {t('tour.dismiss')}
         </button>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {activeStep > 0 && !allDone && (
+          {activeStep > 0 && (
             <button style={secondaryBtnStyle} onClick={handlePrev}>
               {t('tour.prev')}
             </button>
           )}
-          {allDone ? (
-            <button style={primaryBtnStyle} onClick={handleFinish}>
-              {t('tour.finish')}
-            </button>
-          ) : activeStep < totalSteps - 1 ? (
+          {activeStep < totalSteps - 1 ? (
             <button style={primaryBtnStyle} onClick={handleNext}>
-              {state.completed[currentStepId] ? t('tour.next') : t('tour.markDone')}
+              {t('tour.next')}
             </button>
           ) : (
             <button style={primaryBtnStyle} onClick={handleFinish}>
@@ -175,26 +252,17 @@ export function OnboardingOverlay({ mode, onClose }: OnboardingOverlayProps) {
           )}
         </div>
       </div>
-    </div>
-  )
-
-  if (mode === 'panel') return panel
-
-  // Overlay mode — full backdrop
-  return (
-    <div style={overlayStyle} role="dialog" aria-modal="true" aria-label={t('tour.title')}>
-      {panel}
-    </div>
+    </OnboardingSpotlight>
   )
 }
 
 // ── Styles ──────────────────────────────────────────────────────────────────
 
-const overlayStyle: React.CSSProperties = {
+const overlayBackdropStyle: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
   zIndex: 9000,
-  background: 'var(--overlay)',
+  background: 'var(--overlay, rgba(0,0,0,0.5))',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -215,20 +283,20 @@ const panelStyle: React.CSSProperties = {
   animation: 'cs-slide-up 0.2s ease',
 }
 
-const headerStyle: React.CSSProperties = {
+const panelHeaderStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'flex-start',
   marginBottom: '0.75rem',
 }
 
-const titleStyle: React.CSSProperties = {
+const panelTitleStyle: React.CSSProperties = {
   margin: 0,
   fontSize: '1.1rem',
   fontWeight: 700,
 }
 
-const subtitleStyle: React.CSSProperties = {
+const panelSubtitleStyle: React.CSSProperties = {
   margin: '0.25rem 0 0',
   fontSize: '0.8rem',
   opacity: 0.55,
@@ -261,18 +329,11 @@ const progressFillStyle: React.CSSProperties = {
   transition: 'width 0.3s ease',
 }
 
-const bodyStyle: React.CSSProperties = {
-  display: 'flex',
-  gap: '1.25rem',
-  minHeight: 200,
-}
-
 const checklistStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: '0.25rem',
-  width: 200,
-  flexShrink: 0,
+  marginBottom: '1rem',
 }
 
 const checklistItemStyle: React.CSSProperties = {
@@ -300,7 +361,7 @@ const checklistItemDoneStyle: React.CSSProperties = {
   opacity: 0.55,
 }
 
-const checkboxStyle: React.CSSProperties = {
+const checkIconStyle: React.CSSProperties = {
   width: 20,
   height: 20,
   borderRadius: '50%',
@@ -320,11 +381,7 @@ const checklistLabelStyle: React.CSSProperties = {
   whiteSpace: 'nowrap',
 }
 
-const stepContentStyle: React.CSSProperties = {
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
+const panelContentStyle: React.CSSProperties = {
   padding: '0.5rem 0',
 }
 
@@ -411,4 +468,70 @@ const primaryBtnStyle: React.CSSProperties = {
   padding: '0.45rem 1rem',
   borderRadius: 'var(--radius-md)',
   fontWeight: 600,
+}
+
+// Spotlight-specific styles
+
+const spotlightBadgeStyle: React.CSSProperties = {
+  fontSize: '0.7rem',
+  fontWeight: 600,
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  color: 'var(--primary)',
+  marginBottom: '0.25rem',
+}
+
+const dotsRowStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: '0.3rem',
+  marginBottom: '0.75rem',
+}
+
+const dotStyle: React.CSSProperties = {
+  width: 6,
+  height: 6,
+  borderRadius: '50%',
+  transition: 'background 0.2s',
+}
+
+const spotlightTitleStyle: React.CSSProperties = {
+  margin: '0 0 0.35rem',
+  fontSize: '0.95rem',
+  fontWeight: 700,
+}
+
+const spotlightDescStyle: React.CSSProperties = {
+  margin: '0 0 1rem',
+  fontSize: '0.82rem',
+  lineHeight: 1.55,
+  opacity: 0.75,
+}
+
+const spotlightFooterStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+}
+
+const completionCardStyle: React.CSSProperties = {
+  background: 'var(--surface-2)',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-xl)',
+  padding: '2.5rem',
+  textAlign: 'center',
+  maxWidth: 400,
+  animation: 'cs-slide-up 0.2s ease',
+}
+
+const completionTitleStyle: React.CSSProperties = {
+  margin: '0 0 0.5rem',
+  fontSize: '1.25rem',
+  fontWeight: 700,
+}
+
+const completionDescStyle: React.CSSProperties = {
+  margin: '0 0 1.5rem',
+  fontSize: '0.88rem',
+  lineHeight: 1.6,
+  opacity: 0.7,
 }

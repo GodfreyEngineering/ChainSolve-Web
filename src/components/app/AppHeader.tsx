@@ -990,14 +990,15 @@ export function AppHeader({
         {!isMobile ? (
           <div role="menubar" aria-label={t('menu.menubar')} style={menuBarStyle}>
             {menus.map((m) => (
-              <DropdownMenu
-                key={m.id}
-                label={m.label}
-                items={m.items}
-                open={openMenu === m.id}
-                onOpenChange={(isOpen) => setOpenMenu(isOpen ? m.id : null)}
-                onHoverTrigger={openMenu ? () => setOpenMenu(m.id) : undefined}
-              />
+              <span key={m.id} {...(m.id === 'file' ? { 'data-tour': 'menu-file' } : {})}>
+                <DropdownMenu
+                  label={m.label}
+                  items={m.items}
+                  open={openMenu === m.id}
+                  onOpenChange={(isOpen) => setOpenMenu(isOpen ? m.id : null)}
+                  onHoverTrigger={openMenu ? () => setOpenMenu(m.id) : undefined}
+                />
+              </span>
             ))}
           </div>
         ) : (

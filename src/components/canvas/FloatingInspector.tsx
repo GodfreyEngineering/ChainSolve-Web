@@ -104,15 +104,17 @@ export function FloatingInspector({
   }
 
   return (
-    <AppWindow
-      windowId={INSPECTOR_WINDOW_ID}
-      title={t('toolbar.inspector', 'Inspector')}
-      minWidth={260}
-      minHeight={280}
-    >
-      {pinBar}
-      {inspectorContent}
-    </AppWindow>
+    <div data-tour="inspector-panel" style={{ display: 'contents' }}>
+      <AppWindow
+        windowId={INSPECTOR_WINDOW_ID}
+        title={t('toolbar.inspector', 'Inspector')}
+        minWidth={260}
+        minHeight={280}
+      >
+        {pinBar}
+        {inspectorContent}
+      </AppWindow>
+    </div>
   )
 }
 

@@ -1888,6 +1888,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 {/* Canvas */}
                 <div
                   ref={canvasWrapRef}
+                  data-tour="canvas-area"
                   style={{ flex: 1, position: 'relative', overflow: 'hidden' }}
                   onDragOver={onDragOver}
                   onDrop={onDrop}

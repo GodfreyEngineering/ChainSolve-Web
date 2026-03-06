@@ -104,7 +104,7 @@ export function LeftSidebar({ plan, onOpenProject, onNewProject }: LeftSidebarPr
   ]
 
   const sidebarContent = (
-    <div style={{ ...panelStyle, width: isMobile ? '100%' : width }}>
+    <div data-tour="sidebar-projects" style={{ ...panelStyle, width: isMobile ? '100%' : width }}>
       {/* Tab bar */}
       <div style={tabBarStyle}>
         {tabs.map((tab) => (
