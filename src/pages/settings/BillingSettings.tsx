@@ -7,6 +7,7 @@ import type { Profile } from '../../lib/profilesService'
 import { resolveEffectivePlan, type Plan } from '../../lib/entitlements'
 import { isUniversityEmail, isValidEmailFormat } from '../../lib/studentVerification'
 import { PlanBadge } from '../../components/ui/PlanBadge'
+import { PlanComparisonCard } from '../../components/app/PlanComparisonCard'
 
 const LazyReauthModal = lazy(() =>
   import('../../components/ui/ReauthModal').then((m) => ({ default: m.ReauthModal })),
@@ -236,6 +237,12 @@ export function BillingSettings({ profile }: Props) {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Plan comparison */}
+        <div style={{ marginTop: '2rem' }}>
+          <h3 style={subHeadingStyle}>{t('billing.comparePlans')}</h3>
+          <PlanComparisonCard currentPlan={plan} showCheckout compact />
         </div>
 
         {/* Student verification section */}

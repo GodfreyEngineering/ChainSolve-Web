@@ -20,6 +20,7 @@ import { acceptTerms, updateMarketingOptIn } from '../../lib/profilesService'
 import { updateUserPreferences } from '../../lib/userPreferencesService'
 import { logTermsAcceptance } from '../../lib/userTermsService'
 import { CURRENT_TERMS_VERSION } from '../../lib/termsVersion'
+import { PlanComparisonCard } from './PlanComparisonCard'
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -30,12 +31,6 @@ const SUPPORTED_LOCALES = [
   { code: 'es', label: 'Espa\u00f1ol' },
   { code: 'it', label: 'Italiano' },
   { code: 'he', label: '\u05E2\u05D1\u05E8\u05D9\u05EA' },
-] as const
-
-const PLAN_OPTIONS = [
-  { id: 'free', labelKey: 'signupWizard.planFree', descKey: 'signupWizard.planFreeDesc' },
-  { id: 'pro', labelKey: 'signupWizard.planPro', descKey: 'signupWizard.planProDesc' },
-  { id: 'student', labelKey: 'signupWizard.planStudent', descKey: 'signupWizard.planStudentDesc' },
 ] as const
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -293,24 +288,11 @@ export function SignupWizard({ open, onComplete }: Props) {
           <div>
             <p style={descStyle}>{t('signupWizard.planDesc')}</p>
 
-            <div style={planGridStyle}>
-              {PLAN_OPTIONS.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setSelectedPlan(p.id)}
-                  style={{
-                    ...planCardStyle,
-                    borderColor:
-                      selectedPlan === p.id ? 'var(--primary, #1cabb0)' : 'var(--border, #e5e7eb)',
-                    background:
-                      selectedPlan === p.id ? 'rgba(28,171,176,0.06)' : 'var(--surface-2, #f9fafb)',
-                  }}
-                >
-                  <span style={planNameStyle}>{t(p.labelKey)}</span>
-                  <span style={planDescStyle}>{t(p.descKey)}</span>
-                </button>
-              ))}
-            </div>
+            <PlanComparisonCard
+              compact
+              onSelectPlan={setSelectedPlan}
+              selectedPlan={selectedPlan}
+            />
 
             <p style={planNoteStyle}>{t('signupWizard.planNote')}</p>
 
@@ -347,12 +329,7 @@ export function SignupWizard({ open, onComplete }: Props) {
               )}
               <div style={summaryRowStyle}>
                 <span style={summaryLabelStyle}>{t('signupWizard.planLabel')}</span>
-                <span>
-                  {t(
-                    PLAN_OPTIONS.find((p) => p.id === selectedPlan)?.labelKey ??
-                      'signupWizard.planFree',
-                  )}
-                </span>
+                <span>{t(`plans.${selectedPlan}`)}</span>
               </div>
             </div>
 
@@ -398,7 +375,7 @@ const cardStyle: CSSProperties = {
   borderRadius: 'var(--radius-xl, 16px)',
   padding: '2.5rem',
   width: '100%',
-  maxWidth: '520px',
+  maxWidth: '860px',
   animation: 'cs-fade-in 0.4s ease',
 }
 
@@ -535,38 +512,6 @@ const errorBoxStyle: CSSProperties = {
   background: 'var(--danger-dim, #fef2f2)',
   border: '1px solid rgba(239,68,68,0.35)',
   borderRadius: 'var(--radius-lg, 8px)',
-}
-
-const planGridStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.75rem',
-  marginBottom: '0.75rem',
-}
-
-const planCardStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  padding: '1rem 1.25rem',
-  borderRadius: 'var(--radius-lg, 8px)',
-  border: '2px solid var(--border, #e5e7eb)',
-  cursor: 'pointer',
-  transition: 'border-color 0.15s, background 0.15s',
-  textAlign: 'left',
-  fontFamily: 'inherit',
-}
-
-const planNameStyle: CSSProperties = {
-  fontWeight: 700,
-  fontSize: '1rem',
-  marginBottom: '0.2rem',
-}
-
-const planDescStyle: CSSProperties = {
-  fontSize: '0.85rem',
-  color: 'var(--text-secondary, #666)',
-  lineHeight: 1.4,
 }
 
 const planNoteStyle: CSSProperties = {
