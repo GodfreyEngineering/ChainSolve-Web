@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Clock } from 'lucide-react'
-import { getRecentProjects } from '../../../lib/recentProjects'
+import { getRecentProjects, removeRecentProject } from '../../../lib/recentProjects'
 import { listProjects, type ProjectRow } from '../../../lib/projects'
 import { Icon } from '../../ui/Icon'
 
@@ -15,7 +15,7 @@ interface RecentPanelProps {
 
 export function RecentPanel({ onOpenProject }: RecentPanelProps) {
   const { t } = useTranslation()
-  const [recentIds] = useState<string[]>(() => getRecentProjects().map((r) => r.id))
+  const [recentIds, setRecentIds] = useState<string[]>(() => getRecentProjects().map((r) => r.id))
   const [projects, setProjects] = useState<Map<string, ProjectRow>>(new Map())
   const [loading, setLoading] = useState(true)
 
@@ -25,6 +25,14 @@ export function RecentPanel({ onOpenProject }: RecentPanelProps) {
         const map = new Map<string, ProjectRow>()
         for (const r of rows) map.set(r.id, r)
         setProjects(map)
+
+        // Prune stale entries that no longer exist in DB
+        const currentIds = getRecentProjects().map((r) => r.id)
+        const staleIds = currentIds.filter((id) => !map.has(id))
+        if (staleIds.length > 0) {
+          for (const id of staleIds) removeRecentProject(id)
+          setRecentIds(getRecentProjects().map((r) => r.id))
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false))

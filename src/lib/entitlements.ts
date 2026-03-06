@@ -227,6 +227,13 @@ export function getEntitlements(plan: Plan): Entitlements {
 }
 
 /**
+ * Known developer emails — client-side fallback when the DB trigger
+ * (0009_restore_developer.sql) hasn't been applied to the live instance.
+ * These emails always resolve to the 'developer' plan.
+ */
+const DEVELOPER_EMAILS: ReadonlySet<string> = new Set(['ben.godfrey@chainsolve.co.uk'])
+
+/**
  * E2-6 / H8-1: Resolve the effective plan for a profile, accounting for
  * developer/admin overrides and student verification.
  * Developer and admin accounts are treated as enterprise (all features unlocked).
@@ -235,6 +242,7 @@ export function getEntitlements(plan: Plan): Entitlements {
 export function resolveEffectivePlan(
   profile: {
     plan: Plan
+    email?: string | null
     is_developer?: boolean
     is_admin?: boolean
     is_student?: boolean
@@ -242,6 +250,8 @@ export function resolveEffectivePlan(
 ): Plan {
   if (!profile) return 'free'
   if (profile.is_developer) return 'developer'
+  // Client-side fallback: treat known dev emails as developer even if DB flag is missing
+  if (profile.email && DEVELOPER_EMAILS.has(profile.email.toLowerCase())) return 'developer'
   if (profile.is_admin) return 'enterprise'
   if (profile.is_student && profile.plan === 'free') return 'student'
   return profile.plan
@@ -251,9 +261,17 @@ export function resolveEffectivePlan(
 
 interface ProfileLike {
   plan: Plan
+  email?: string | null
   is_developer?: boolean
   is_admin?: boolean
   is_student?: boolean
+}
+
+/** True if the profile should be treated as developer (DB flag or email fallback). */
+function isEffectiveDeveloper(profile: ProfileLike): boolean {
+  if (profile.is_developer) return true
+  if (profile.email && DEVELOPER_EMAILS.has(profile.email.toLowerCase())) return true
+  return false
 }
 
 /**
@@ -262,7 +280,7 @@ interface ProfileLike {
  */
 export function resolveRole(profile: ProfileLike | null): Role {
   if (!profile) return 'free'
-  if (profile.is_developer) return 'developer'
+  if (isEffectiveDeveloper(profile)) return 'developer'
   if (profile.is_admin && profile.plan === 'enterprise') return 'enterprise_admin'
   if (profile.is_admin) return 'admin'
   if (profile.plan === 'enterprise') return 'enterprise'
@@ -273,9 +291,10 @@ export function resolveRole(profile: ProfileLike | null): Role {
   return 'free'
 }
 
-/** J3-1: True if the user has the developer flag (all features + dev tools). */
+/** J3-1: True if the user has the developer flag or known dev email. */
 export function isDeveloper(profile: ProfileLike | null): boolean {
-  return !!profile?.is_developer
+  if (!profile) return false
+  return isEffectiveDeveloper(profile)
 }
 
 /** J3-1: True if the user has the admin flag (moderation tools). */

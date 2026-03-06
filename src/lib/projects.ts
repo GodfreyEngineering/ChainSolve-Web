@@ -167,7 +167,7 @@ export async function getProjectCount(): Promise<number> {
   return count ?? 0
 }
 
-/** Create a new project row + empty project.json in storage. */
+/** Create a new project row + empty project.json in storage + first canvas. */
 export async function createProject(name: string, folder?: string | null): Promise<ProjectRow> {
   const session = await requireSession()
   const projectId = crypto.randomUUID()
@@ -188,6 +188,10 @@ export async function createProject(name: string, folder?: string | null): Promi
 
   const pj = buildJson(proj.id, name, [], [])
   await saveProjectJson(proj.id, pj)
+
+  // Create the first canvas so SheetsBar shows immediately on load
+  const canvas = await createCanvas(proj.id, 'Sheet 1')
+  await setActiveCanvas(proj.id, canvas.id)
 
   // Re-read to get the updated_at set by the storage_key stamp
   const updated = await readUpdatedAt(proj.id)
@@ -217,9 +221,16 @@ export async function createProjectFromTemplate(templateId: string): Promise<Pro
   if (error || !data) throw new Error(error?.message ?? 'Failed to create project')
   const proj = data as ProjectRow
 
-  const canvas = tmpl.buildGraph(canvasId, projectId)
-  const pj = buildJson(proj.id, tmpl.name, canvas.nodes, canvas.edges)
+  const graph = tmpl.buildGraph(canvasId, projectId)
+  const pj = buildJson(proj.id, tmpl.name, graph.nodes, graph.edges)
   await saveProjectJson(proj.id, pj)
+
+  // Create the first canvas with the template graph
+  const canvasRow = await createCanvas(proj.id, 'Sheet 1', {
+    nodes: graph.nodes,
+    edges: graph.edges,
+  })
+  await setActiveCanvas(proj.id, canvasRow.id)
 
   const updated = await readUpdatedAt(proj.id)
   return { ...proj, updated_at: updated ?? proj.updated_at }
@@ -438,16 +449,24 @@ export async function importProject(json: ProjectJSON, overrideName?: string): P
   if (error || !data) throw new Error(error?.message ?? 'Failed to create project row')
   const proj = data as ProjectRow
 
+  const graphData = json.graph ?? { nodes: [], edges: [] }
   const pj: ProjectJSON = {
     schemaVersion: SCHEMA_VERSION,
     formatVersion: (json.formatVersion ?? 0) + 1,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     project: { id: proj.id, name },
-    graph: json.graph ?? { nodes: [], edges: [] },
+    graph: graphData,
     blockVersions: json.blockVersions ?? {},
   }
   await saveProjectJson(proj.id, pj)
+
+  // Create the first canvas with the imported graph
+  const canvasRow = await createCanvas(proj.id, 'Sheet 1', {
+    nodes: graphData.nodes,
+    edges: graphData.edges,
+  })
+  await setActiveCanvas(proj.id, canvasRow.id)
 
   const updated = await readUpdatedAt(proj.id)
   return { ...proj, updated_at: updated ?? proj.updated_at }

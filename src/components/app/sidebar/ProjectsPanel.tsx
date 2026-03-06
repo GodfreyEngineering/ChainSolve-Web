@@ -18,6 +18,7 @@ import {
 } from '../../../lib/projects'
 import { canCreateProject, getEntitlements, type Plan } from '../../../lib/entitlements'
 import { getPinnedProjects, togglePinnedProject } from '../../../lib/pinnedProjects'
+import { removeRecentProject } from '../../../lib/recentProjects'
 import { Icon } from '../../ui/Icon'
 import { Tooltip } from '../../ui/Tooltip'
 
@@ -116,6 +117,7 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
       if (!window.confirm(t('home.confirmDelete', 'Delete "{{name}}"?', { name: proj.name })))
         return
       await deleteProject(proj.id)
+      removeRecentProject(proj.id)
       fetchProjects()
     },
     [t, fetchProjects],

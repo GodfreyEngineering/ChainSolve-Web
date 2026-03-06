@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../lib/profilesService'
-import { resolveEffectivePlan, type Plan } from '../lib/entitlements'
+import { resolveEffectivePlan, isDeveloper, type Plan } from '../lib/entitlements'
 import { initRememberMe } from '../lib/rememberMe'
 import {
   getCurrentSessionId,
@@ -60,7 +60,7 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
   const [hasMfaFactor, setHasMfaFactor] = useState<boolean | null>(null)
 
   // Skip session polling for developer accounts — they should never be locked out
-  const { sessionRevoked } = useSessionGuard({ skip: !!profile?.is_developer })
+  const { sessionRevoked } = useSessionGuard({ skip: isDeveloper(profile) })
 
   const refreshProfile = useCallback(async () => {
     if (!user) return

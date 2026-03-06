@@ -28,7 +28,9 @@ import { LeftSidebar } from '../components/app/LeftSidebar'
 import { WelcomeCanvas } from '../components/canvas/WelcomeCanvas'
 import { LoadingScreen } from '../components/ui/LoadingScreen'
 import { useSidebarStore } from '../stores/sidebarStore'
-import { importProject, type ProjectJSON } from '../lib/projects'
+import { createProject, listProjects, importProject, type ProjectJSON } from '../lib/projects'
+import { canCreateProject } from '../lib/entitlements'
+import { useToast } from '../components/ui/useToast'
 import type { CanvasControls } from './CanvasPage'
 
 // Lazy-load heavy components
@@ -59,6 +61,7 @@ export default function WorkspacePage() {
   const navigate = useNavigate()
   const auth = useWorkspaceAuth()
   const { open: sidebarOpen, toggle: toggleSidebar, setActiveTab } = useSidebarStore()
+  const { toast } = useToast()
   const importRef = useRef<HTMLInputElement>(null)
 
   // Canvas controls exposed by embedded CanvasPage (Phase M)
@@ -92,9 +95,20 @@ export default function WorkspacePage() {
     [navigate],
   )
 
-  const handleNewProject = useCallback(() => {
-    setScratchMode(true)
-  }, [])
+  const handleNewProject = useCallback(async () => {
+    try {
+      const projects = await listProjects()
+      if (!canCreateProject(auth.plan, projects.length)) {
+        toast('Project limit reached. Upgrade to create more.', 'error')
+        return
+      }
+      const proj = await createProject('Untitled project')
+      setScratchMode(false)
+      navigate(`/app/${proj.id}`)
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : 'Failed to create project', 'error')
+    }
+  }, [auth.plan, navigate, toast])
 
   const handleOpenScratch = useCallback(() => {
     setScratchMode(true)

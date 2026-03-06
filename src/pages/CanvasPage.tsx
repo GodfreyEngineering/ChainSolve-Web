@@ -226,12 +226,13 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       if (!session) return
       supabase
         .from('profiles')
-        .select('plan,is_developer,is_admin,is_student')
+        .select('email,plan,is_developer,is_admin,is_student')
         .eq('id', session.user.id)
         .maybeSingle()
         .then(({ data }) => {
           if (!cancelled && data?.plan) {
             const row = data as {
+              email?: string | null
               plan: Plan
               is_developer?: boolean
               is_admin?: boolean
@@ -307,8 +308,29 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const [nameInput, setNameInput] = useState('')
   const nameInputRef = useRef<HTMLInputElement>(null)
 
+  // ── Flush pending autosave before navigating away (beforeunload) ──────────
+  useEffect(() => {
+    const handler = () => {
+      // Best-effort flush: cancel the debounce and fire save immediately.
+      // navigator.sendBeacon is not suitable for complex saves, so we rely on
+      // the autosave scheduler being recent enough (2s debounce).
+      if (autosaveScheduler.current.hasPending()) {
+        autosaveScheduler.current.cancel()
+        void doSaveRef.current()
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [])
+
   // ── Load project + canvases on mount ───────────────────────────────────────
   useEffect(() => {
+    // Flush any pending autosave from the previous project before resetting
+    if (autosaveScheduler.current.hasPending()) {
+      autosaveScheduler.current.cancel()
+      void doSaveRef.current()
+    }
+
     resetProject()
     resetCanvases()
     resetVariables()
@@ -324,10 +346,14 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     setLoadPhase('loading')
     setLoadError(null)
 
+    // Guard against stale async updates when projectId changes mid-load
+    let cancelled = false
+
     async function load() {
       try {
         // 1. Load project row + legacy project.json in parallel
         const [row, pj] = await Promise.all([readProjectRow(projectId!), loadProject(projectId!)])
+        if (cancelled) return
 
         const dbUpdatedAt = row?.updated_at ?? pj.updatedAt
         const dbName = row?.name ?? pj.project.name
@@ -339,11 +365,13 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
         // 2. Load canvases list
         let canvasList = await listCanvases(projectId!)
+        if (cancelled) return
 
         // 3. If no canvases exist, migrate legacy V3 graph
         if (canvasList.length === 0) {
           await migrateProjectToMultiCanvas(projectId!, pj.graph.nodes, pj.graph.edges)
           canvasList = await listCanvases(projectId!)
+          if (cancelled) return
         }
 
         setCanvases(canvasList)
@@ -353,9 +381,8 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         if (!activeId || !canvasList.find((c) => c.id === activeId)) {
           activeId = canvasList[0]?.id ?? null
           if (activeId) {
-            // setActiveCanvas bumps projects.updated_at via trigger —
-            // sync the store so the first autosave uses the fresh timestamp.
             const freshTs = await setActiveCanvas(projectId!, activeId)
+            if (cancelled) return
             completeSave(freshTs)
           }
         }
@@ -365,6 +392,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
           // 5. Load active canvas graph
           const canvasGraph = await loadCanvasGraph(projectId!, activeId)
+          if (cancelled) return
           setInitNodes(canvasGraph.nodes as Node<NodeData>[])
           setInitEdges(canvasGraph.edges as Edge[])
         } else {
@@ -374,6 +402,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
         setLoadPhase('ready')
       } catch (err: unknown) {
+        if (cancelled) return
         const msg = err instanceof Error ? err.message : 'Failed to load project'
         // Remove stale MRU entry when the project no longer exists
         if (projectId && /not found/i.test(msg)) {
@@ -385,6 +414,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     }
 
     void load()
+    return () => {
+      cancelled = true
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId])
 
