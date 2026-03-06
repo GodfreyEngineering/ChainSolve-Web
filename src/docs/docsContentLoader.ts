@@ -16,6 +16,8 @@
 
 import { DOCS_CONTENT, type DocsContentMap } from './docsPageContent'
 
+export type { DocsContentMap }
+
 /**
  * Registry of lazy loaders for translated docs content.
  *

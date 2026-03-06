@@ -322,7 +322,15 @@
     "autosaveToggle": "Automatisches Speichern umschalten",
     "untitled": "Unbenannt",
     "importFile": "Importieren",
-    "templates": "Vorlagen"
+    "templates": "Vorlagen",
+    "removeColumn": "Spalte entfernen",
+    "removeRow": "Zeile entfernen",
+    "importCsv": "CSV-Datei importieren",
+    "bindToConstVar": "An Konstante oder Variable binden",
+    "searchConstVar": "Konstanten und Variablen suchen...",
+    "literalValue": "Literalwert",
+    "savedGroupActions": "Gespeicherte Gruppenaktionen",
+    "functionActions": "Funktionsaktionen"
   },
   "blocks": {
     "categoryData": "Daten",
@@ -604,7 +612,8 @@
     "upgradeFeature4": "Diagramm-Visualisierungen",
     "upgradeCta": "Upgraden — 10£/Monat",
     "upgradeFeature5": "Blockgruppen & Vorlagen",
-    "canceledNoCreate": "Gekündigte Konten können keine neuen Projekte erstellen."
+    "canceledNoCreate": "Gekündigte Konten können keine neuen Projekte erstellen.",
+    "upgradeFeature6": "Unbegrenzte Canvas-Blaetter"
   },
   "upgrade": {
     "monthly": "Monatlich",
@@ -1558,7 +1567,13 @@
     "secProjects": "Projekte & Speichern",
     "secGroups": "Gruppen",
     "secSavedGroups": "Gespeicherte Gruppen",
-    "secSettingsThemes": "Einstellungen & Themes"
+    "secSettingsThemes": "Einstellungen & Themes",
+    "onThisPage": "Auf dieser Seite",
+    "wasHelpful": "War diese Seite hilfreich?",
+    "yes": "Ja",
+    "no": "Nein",
+    "thanksFeedback": "Danke fuer Ihr Feedback!",
+    "materialTableTitle": "Haeufige Materialien"
   },
   "expressionPanel": {
     "title": "Ausdruck",
@@ -1759,5 +1774,23 @@
     "useTemplate": "Vorlage verwenden",
     "install": "Installieren",
     "installing": "Wird installiert..."
+  },
+  "reauth": {
+    "title": "Passwort bestaetigen",
+    "description": "Bitte geben Sie aus Sicherheitsgruenden Ihr Passwort erneut ein, um mit den Abrechnungsaenderungen fortzufahren.",
+    "confirm": "Bestaetigen",
+    "verifying": "Wird ueberprueft...",
+    "wrongPassword": "Falsches Passwort. Bitte versuchen Sie es erneut."
+  },
+  "whatsNew": {
+    "title": "Neuigkeiten",
+    "version": "v{{version}}"
+  },
+  "docs": {
+    "title": "Dokumentation",
+    "searchPlaceholder": "Dokumentation durchsuchen...",
+    "results": "Suchergebnisse",
+    "noResults": "Keine Ergebnisse fuer \"{{query}}\"",
+    "browseHint": "Alle Themen durchsuchen oder tippen Sie, um zu suchen."
   }
 }

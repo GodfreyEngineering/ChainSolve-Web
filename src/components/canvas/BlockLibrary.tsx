@@ -369,7 +369,7 @@ const TemplateItem = memo(function TemplateItem({
                 fontFamily: 'inherit',
                 lineHeight: 1,
               }}
-              title="Saved group actions"
+              title={t('canvas.savedGroupActions')}
               onClick={(e) => {
                 e.stopPropagation()
                 setMenuOpen((p) => !p)
@@ -569,7 +569,7 @@ const CustomFnItem = memo(function CustomFnItem({
                 fontFamily: 'inherit',
                 lineHeight: 1,
               }}
-              title="Function actions"
+              title={t('canvas.functionActions')}
               onClick={(e) => {
                 e.stopPropagation()
                 setMenuOpen((p) => !p)

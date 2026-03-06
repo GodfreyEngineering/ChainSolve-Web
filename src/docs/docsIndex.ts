@@ -176,6 +176,84 @@ export const DOCS_INDEX: DocsEntry[] = [
     keywords: ['vector', 'array', 'list', 'sequence', 'sum vector', 'sort'],
   },
 
+  {
+    id: 'block-annotations',
+    section: 'Blocks',
+    title: 'Annotation blocks',
+    description:
+      'Add non-computational blocks to document your canvas. Text blocks display rich text notes, Callout blocks highlight important information with colour-coded borders, Highlight blocks draw a coloured background behind a region, and Arrow blocks point between elements for visual clarity. Annotations do not affect calculations.',
+    keywords: [
+      'annotation',
+      'text',
+      'callout',
+      'highlight',
+      'arrow',
+      'note',
+      'label',
+      'comment',
+      'documentation',
+    ],
+  },
+  {
+    id: 'block-constants',
+    section: 'Blocks',
+    title: 'Constant blocks',
+    description:
+      'Insert commonly used constants directly into your canvas. Math constants include π, e, and the golden ratio. Physics constants include gravity (g), speed of light (c), and Boltzmann constant. Atmospheric constants include sea-level pressure, air density, and lapse rate. Electrical constants include vacuum permittivity and permeability.',
+    keywords: [
+      'constant',
+      'pi',
+      'gravity',
+      'speed of light',
+      'boltzmann',
+      'atmospheric',
+      'electrical',
+      'permittivity',
+      'golden ratio',
+    ],
+  },
+
+  // ── Units ──────────────────────────────────────────────────────────────
+  {
+    id: 'units-overview',
+    section: 'Units',
+    title: 'Dimension support & automatic conversion',
+    description:
+      'ChainSolve tracks physical dimensions (length, mass, time, etc.) through chains. When two blocks use compatible units the engine converts automatically — for example, connecting a result in metres to an input expecting centimetres. Hover over a port to see its current unit. Use the unit picker on Number blocks to set or override units.',
+    keywords: [
+      'units',
+      'dimensions',
+      'conversion',
+      'metres',
+      'feet',
+      'SI',
+      'imperial',
+      'unit picker',
+      'automatic',
+    ],
+  },
+
+  // ── Materials ─────────────────────────────────────────────────────────
+  {
+    id: 'materials-overview',
+    section: 'Materials',
+    title: 'Material presets & custom materials',
+    description:
+      "Use built-in material presets (steel, aluminium, concrete, water, air, etc.) or define custom materials with your own density, Young's modulus, thermal conductivity, and other properties. Fluid properties (viscosity, specific heat) are also available for fluids blocks. Select a material from the sidebar or create one in Project → Materials.",
+    keywords: [
+      'material',
+      'preset',
+      'custom',
+      'density',
+      'steel',
+      'aluminium',
+      'concrete',
+      'fluid',
+      'viscosity',
+      'properties',
+    ],
+  },
+
   // ── Variables ────────────────────────────────────────────────────────────
   {
     id: 'var-overview',
@@ -295,6 +373,46 @@ export const DOCS_INDEX: DocsEntry[] = [
     keywords: ['shortcut', 'keyboard', 'hotkey', 'binding', 'all shortcuts'],
   },
 
+  // ── AI assistant ────────────────────────────────────────────────────────
+  {
+    id: 'ai-overview',
+    section: 'AI assistant',
+    title: 'AI copilot — plan & edit modes',
+    description:
+      'The AI assistant helps you build and refine calculation chains. In Plan mode it suggests which blocks and connections to add based on your goal. In Edit mode it can modify existing blocks, rewire chains, and fix errors. Open the assistant from the toolbar or press Ctrl+Shift+A. The AI never modifies your canvas without confirmation.',
+    keywords: [
+      'ai',
+      'copilot',
+      'assistant',
+      'plan mode',
+      'edit mode',
+      'suggest',
+      'automate',
+      'help',
+      'smart',
+    ],
+  },
+
+  // ── Publishing ────────────────────────────────────────────────────────
+  {
+    id: 'publish-overview',
+    section: 'Publishing',
+    title: 'Publish to Explore',
+    description:
+      'Share your work with the community by publishing canvases, block packs, or themes to Explore. Go to File → Publish, add a title and description, then submit for review. The review process typically takes 1–2 business days. Once approved, your item appears on the Explore page and other users can install it.',
+    keywords: [
+      'publish',
+      'explore',
+      'share',
+      'community',
+      'review',
+      'submit',
+      'marketplace',
+      'public',
+      'approve',
+    ],
+  },
+
   // ── Billing ──────────────────────────────────────────────────────────────
   {
     id: 'billing-plans',
@@ -311,6 +429,49 @@ export const DOCS_INDEX: DocsEntry[] = [
     description:
       'New accounts get a free trial of Pro features. After the trial, Pro features require a paid subscription.',
     keywords: ['trial', 'trialing', 'free trial', 'subscription'],
+  },
+
+  {
+    id: 'billing-compare',
+    section: 'Billing & plans',
+    title: 'Plan comparison — Free, Pro, Student & Enterprise',
+    description:
+      'Free: 1 project, 2 canvases, basic blocks. Pro: unlimited projects and canvases, CSV import, vectors, plots, groups, exports, and priority support. Student: Pro features at a discounted rate with a valid .edu email. Enterprise: custom limits, SSO, audit logs, dedicated support, and on-premise deployment options. Compare plans at Settings → Billing.',
+    keywords: [
+      'compare',
+      'free',
+      'pro',
+      'student',
+      'enterprise',
+      'plan',
+      'pricing',
+      'features',
+      'sso',
+      'edu',
+      'discount',
+    ],
+  },
+
+  // ── Troubleshooting ───────────────────────────────────────────────────
+  {
+    id: 'trouble-overview',
+    section: 'Troubleshooting',
+    title: 'Common issues — NaN, cycles, slow eval, save errors',
+    description:
+      'NaN results usually mean a missing or invalid input — check that all ports are connected and values are finite. Cycle detected errors appear when blocks form a loop; break the loop by removing one connection. Slow evaluation can be caused by very large vectors or deeply nested chains — try splitting into smaller canvases. Save errors are often caused by network interruptions; check your connection and retry. Use View → Validate graph for a full diagnostic report.',
+    keywords: [
+      'troubleshoot',
+      'nan',
+      'cycle',
+      'loop',
+      'slow',
+      'performance',
+      'save error',
+      'network',
+      'debug',
+      'fix',
+      'broken',
+    ],
   },
 
   // ── UI & navigation ──────────────────────────────────────────────────────
@@ -373,6 +534,46 @@ export const DOCS_INDEX: DocsEntry[] = [
     description:
       'Save groups of blocks as reusable templates. Insert, manage, and share saved groups across projects.',
     keywords: ['template', 'saved group', 'reuse', 'insert', 'share', 'publish'],
+  },
+  // ── Saved groups ────────────────────────────────────────────────────────
+  {
+    id: 'saved-groups-overview',
+    section: 'Saved groups',
+    title: 'Save, insert & manage group templates',
+    description:
+      'Select a group of blocks and use Edit → Save as Template to store it for reuse. Saved groups appear in the Insert menu under Templates → My Groups. You can rename, delete, or re-save a group at any time. Share saved groups with teammates by publishing them to Explore or exporting the project file.',
+    keywords: [
+      'saved group',
+      'template',
+      'reuse',
+      'insert',
+      'manage',
+      'rename',
+      'delete',
+      'share',
+      'my groups',
+    ],
+  },
+
+  // ── Settings ──────────────────────────────────────────────────────────
+  {
+    id: 'settings-overview',
+    section: 'Settings',
+    title: 'Account, canvas & display settings',
+    description:
+      'Access settings from the gear icon or Settings menu. Account settings let you update your profile, email, and password. Canvas settings control grid snap, default zoom, and auto-save interval. Display settings adjust number formatting, decimal places, and scientific notation. The Theme Wizard lets you create and preview custom colour schemes for light and dark modes.',
+    keywords: [
+      'account',
+      'profile',
+      'canvas settings',
+      'display',
+      'formatting',
+      'decimal',
+      'scientific notation',
+      'theme wizard',
+      'grid snap',
+      'zoom',
+    ],
   },
   {
     id: 'settings-themes',

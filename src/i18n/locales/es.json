@@ -322,7 +322,15 @@
     "autosaveToggle": "Activar/desactivar guardado automatico",
     "untitled": "Sin título",
     "importFile": "Importar",
-    "templates": "Plantillas"
+    "templates": "Plantillas",
+    "removeColumn": "Eliminar columna",
+    "removeRow": "Eliminar fila",
+    "importCsv": "Importar archivo CSV",
+    "bindToConstVar": "Vincular a constante o variable",
+    "searchConstVar": "Buscar constantes y variables...",
+    "literalValue": "Valor literal",
+    "savedGroupActions": "Acciones del grupo guardado",
+    "functionActions": "Acciones de la funcion"
   },
   "blocks": {
     "categoryData": "Datos",
@@ -604,7 +612,8 @@
     "upgradeFeature4": "Visualizaciones de gráficos",
     "upgradeCta": "Mejorar — £10/mes",
     "upgradeFeature5": "Grupos de bloques y plantillas",
-    "canceledNoCreate": "Las cuentas canceladas no pueden crear nuevos proyectos."
+    "canceledNoCreate": "Las cuentas canceladas no pueden crear nuevos proyectos.",
+    "upgradeFeature6": "Hojas de lienzo ilimitadas"
   },
   "upgrade": {
     "monthly": "Mensual",
@@ -1558,7 +1567,13 @@
     "secProjects": "Proyectos y guardado",
     "secGroups": "Grupos",
     "secSavedGroups": "Grupos guardados",
-    "secSettingsThemes": "Ajustes y temas"
+    "secSettingsThemes": "Ajustes y temas",
+    "onThisPage": "En esta pagina",
+    "wasHelpful": "Le resulto util esta pagina?",
+    "yes": "Si",
+    "no": "No",
+    "thanksFeedback": "Gracias por sus comentarios!",
+    "materialTableTitle": "Materiales comunes"
   },
   "expressionPanel": {
     "title": "Expresión",
@@ -1759,5 +1774,23 @@
     "useTemplate": "Usar plantilla",
     "install": "Instalar",
     "installing": "Instalando..."
+  },
+  "reauth": {
+    "title": "Confirme su contrasena",
+    "description": "Por seguridad, vuelva a introducir su contrasena para continuar con los cambios de facturacion.",
+    "confirm": "Confirmar",
+    "verifying": "Verificando...",
+    "wrongPassword": "Contrasena incorrecta. Intentelo de nuevo."
+  },
+  "whatsNew": {
+    "title": "Novedades",
+    "version": "v{{version}}"
+  },
+  "docs": {
+    "title": "Documentacion",
+    "searchPlaceholder": "Buscar en la documentacion...",
+    "results": "Resultados de busqueda",
+    "noResults": "Sin resultados para \"{{query}}\"",
+    "browseHint": "Explorar todos los temas o escriba para buscar."
   }
 }

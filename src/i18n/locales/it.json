@@ -322,7 +322,15 @@
     "autosaveToggle": "Attiva/disattiva salvataggio automatico",
     "untitled": "Senza titolo",
     "importFile": "Importa",
-    "templates": "Modelli"
+    "templates": "Modelli",
+    "removeColumn": "Rimuovi colonna",
+    "removeRow": "Rimuovi riga",
+    "importCsv": "Importa file CSV",
+    "bindToConstVar": "Collega a costante o variabile",
+    "searchConstVar": "Cerca costanti e variabili...",
+    "literalValue": "Valore letterale",
+    "savedGroupActions": "Azioni gruppo salvato",
+    "functionActions": "Azioni funzione"
   },
   "blocks": {
     "categoryData": "Dati",
@@ -604,7 +612,8 @@
     "upgradeFeature4": "Visualizzazioni grafiche",
     "upgradeCta": "Aggiorna — £10/mese",
     "upgradeFeature5": "Gruppi di blocchi e modelli",
-    "canceledNoCreate": "Gli account annullati non possono creare nuovi progetti."
+    "canceledNoCreate": "Gli account annullati non possono creare nuovi progetti.",
+    "upgradeFeature6": "Fogli canvas illimitati"
   },
   "upgrade": {
     "monthly": "Mensile",
@@ -1558,7 +1567,13 @@
     "secProjects": "Progetti e salvataggio",
     "secGroups": "Gruppi",
     "secSavedGroups": "Gruppi salvati",
-    "secSettingsThemes": "Impostazioni e temi"
+    "secSettingsThemes": "Impostazioni e temi",
+    "onThisPage": "In questa pagina",
+    "wasHelpful": "Questa pagina ti e stata utile?",
+    "yes": "Si",
+    "no": "No",
+    "thanksFeedback": "Grazie per il tuo feedback!",
+    "materialTableTitle": "Materiali comuni"
   },
   "expressionPanel": {
     "title": "Espressione",
@@ -1759,5 +1774,23 @@
     "useTemplate": "Usa modello",
     "install": "Installa",
     "installing": "Installazione..."
+  },
+  "reauth": {
+    "title": "Conferma la tua password",
+    "description": "Per sicurezza, reinserisci la tua password per continuare con le modifiche alla fatturazione.",
+    "confirm": "Conferma",
+    "verifying": "Verifica in corso...",
+    "wrongPassword": "Password errata. Riprova."
+  },
+  "whatsNew": {
+    "title": "Novita",
+    "version": "v{{version}}"
+  },
+  "docs": {
+    "title": "Documentazione",
+    "searchPlaceholder": "Cerca nella documentazione...",
+    "results": "Risultati della ricerca",
+    "noResults": "Nessun risultato per \"{{query}}\"",
+    "browseHint": "Sfoglia tutti gli argomenti o digita per cercare."
   }
 }

@@ -322,7 +322,15 @@
     "autosaveToggle": "Activer/desactiver la sauvegarde automatique",
     "untitled": "Sans titre",
     "importFile": "Importer",
-    "templates": "Modeles"
+    "templates": "Modeles",
+    "removeColumn": "Supprimer la colonne",
+    "removeRow": "Supprimer la ligne",
+    "importCsv": "Importer un fichier CSV",
+    "bindToConstVar": "Lier a une constante ou variable",
+    "searchConstVar": "Rechercher constantes et variables...",
+    "literalValue": "Valeur litterale",
+    "savedGroupActions": "Actions du groupe enregistre",
+    "functionActions": "Actions de la fonction"
   },
   "blocks": {
     "categoryData": "Données",
@@ -604,7 +612,8 @@
     "upgradeFeature4": "Visualisations graphiques",
     "upgradeCta": "Améliorer — 10£/mois",
     "upgradeFeature5": "Groupes de blocs et modèles",
-    "canceledNoCreate": "Les comptes annulés ne peuvent pas créer de nouveaux projets."
+    "canceledNoCreate": "Les comptes annulés ne peuvent pas créer de nouveaux projets.",
+    "upgradeFeature6": "Feuilles de canevas illimitees"
   },
   "upgrade": {
     "monthly": "Mensuel",
@@ -1558,7 +1567,13 @@
     "secProjects": "Projets et sauvegarde",
     "secGroups": "Groupes",
     "secSavedGroups": "Groupes enregistres",
-    "secSettingsThemes": "Parametres et themes"
+    "secSettingsThemes": "Parametres et themes",
+    "onThisPage": "Sur cette page",
+    "wasHelpful": "Cette page vous a-t-elle ete utile ?",
+    "yes": "Oui",
+    "no": "Non",
+    "thanksFeedback": "Merci pour votre retour !",
+    "materialTableTitle": "Materiaux courants"
   },
   "expressionPanel": {
     "title": "Expression",
@@ -1759,5 +1774,23 @@
     "useTemplate": "Utiliser le modèle",
     "install": "Installer",
     "installing": "Installation..."
+  },
+  "reauth": {
+    "title": "Confirmez votre mot de passe",
+    "description": "Pour des raisons de securite, veuillez ressaisir votre mot de passe pour continuer.",
+    "confirm": "Confirmer",
+    "verifying": "Verification...",
+    "wrongPassword": "Mot de passe incorrect. Veuillez reessayer."
+  },
+  "whatsNew": {
+    "title": "Nouveautes",
+    "version": "v{{version}}"
+  },
+  "docs": {
+    "title": "Documentation",
+    "searchPlaceholder": "Rechercher dans la documentation...",
+    "results": "Resultats de recherche",
+    "noResults": "Aucun resultat pour \"{{query}}\"",
+    "browseHint": "Parcourir tous les sujets ou tapez pour rechercher."
   }
 }

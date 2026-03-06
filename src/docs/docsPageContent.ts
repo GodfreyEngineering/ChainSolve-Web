@@ -159,14 +159,52 @@ export const DOCS_CONTENT: DocsContentMap = {
     hooke: "Hooke's law for springs: F = k * x.",
     sectionsTitle: 'Structural Sections',
     sectionsBody:
-      'Second moment of area, bending stress, section modulus, and related cross-section calculations for rectangular, circular, and annular profiles.',
+      'Cross-section property calculations for structural analysis. Includes Second Moment of Area for rectangular, circular, and annular profiles (used in deflection and buckling analysis), Bending Stress (sigma = M * y / I, the fundamental flexure formula), Section Modulus (S = I / y, linking moment capacity to geometry), and Area of Annulus (the cross-sectional area of a hollow circular section). These blocks accept geometric dimensions as inputs and produce the corresponding section property as output.',
+    secondMomentRect:
+      'Second Moment of Area — Rectangular section: I = b * h^3 / 12, where b is the width and h is the height of the rectangle. Used to assess bending stiffness and deflection of rectangular beams.',
+    secondMomentCirc:
+      'Second Moment of Area — Circular section: I = pi * d^4 / 64, where d is the diameter. Used for solid circular shafts and columns.',
+    secondMomentAnnular:
+      'Second Moment of Area — Annular (hollow circular) section: I = pi * (d_outer^4 - d_inner^4) / 64. Used for pipes, tubes, and hollow shafts. Returns an error if d_inner > d_outer.',
+    bendingStress:
+      'Bending Stress: sigma = M * y / I, where M is the bending moment, y is the distance from the neutral axis, and I is the second moment of area. Returns an error if I = 0. This is the fundamental flexure formula used in beam design.',
+    sectionModulus:
+      'Section Modulus: S = I / y, where I is the second moment of area and y is the extreme fibre distance. The section modulus simplifies bending stress checks to sigma = M / S.',
+    areaAnnulus:
+      'Area of Annulus: A = pi / 4 * (d_outer^2 - d_inner^2). Computes the cross-sectional area of a hollow circular section. Returns an error if d_inner > d_outer.',
     fluidsTitle: 'Fluids',
-    fluidsBody: "Reynolds number, Bernoulli's equation, pipe flow, and viscosity calculations.",
+    fluidsBody:
+      "Fluid dynamics blocks for pipe flow, open-channel flow, and aerodynamics calculations. Includes Reynolds Number (Re = rho * v * D / mu, the key dimensionless ratio for flow regime classification), Bernoulli's Equation (relating pressure, velocity, and elevation along a streamline), Pipe Head Loss (Darcy-Weisbach friction losses in pipe systems), and Flow Rate (Q = A * v, volumetric flow from cross-section and velocity).",
+    reynolds:
+      'Reynolds Number: Re = rho * v * D / mu, where rho is the fluid density, v is the velocity, D is the characteristic length (e.g. pipe diameter), and mu is the dynamic viscosity. Re < 2300 indicates laminar flow; Re > 4000 indicates turbulent flow. Returns an error if mu = 0.',
+    bernoulli:
+      "Bernoulli's Equation: P1 + 0.5 * rho * v1^2 + rho * g * h1 = P2 + 0.5 * rho * v2^2 + rho * g * h2. Relates pressure, velocity, and elevation between two points along a streamline in an ideal (inviscid, incompressible) flow.",
+    pipeHeadLoss:
+      'Pipe Head Loss (Darcy-Weisbach): h_f = f * (L / D) * (v^2 / (2 * g)), where f is the Darcy friction factor, L is the pipe length, D is the pipe diameter, v is the flow velocity, and g is gravitational acceleration. Used for sizing pumps and estimating pressure drop in pipe networks.',
+    flowRate:
+      'Volumetric Flow Rate: Q = A * v, where A is the cross-sectional area and v is the average flow velocity. Connect an area block (e.g. Area of Annulus or a manual input) to compute discharge.',
     thermoTitle: 'Thermodynamics',
-    thermoBody: 'Ideal gas law, heat transfer (conduction, convection), and thermal expansion.',
+    thermoBody:
+      "Thermodynamics and heat transfer blocks. Includes the Ideal Gas Law (PV = nRT, relating pressure, volume, temperature, and amount of substance), Fourier Conduction (Q = k * A * dT / L, steady-state heat conduction through a slab), Convective Heat Transfer (Q = h * A * dT, Newton's law of cooling for convection), and Linear Thermal Expansion (dL = alpha * L * dT, dimensional change due to temperature).",
+    idealGas:
+      'Ideal Gas Law: PV = nRT, where P is absolute pressure, V is volume, n is the amount of substance in moles, R is the universal gas constant (8.314 J/mol*K), and T is absolute temperature in Kelvin. Solve for any one variable by supplying the other four.',
+    fourierConduction:
+      'Fourier Conduction: Q = k * A * dT / L, where k is the thermal conductivity of the material, A is the cross-sectional area perpendicular to heat flow, dT is the temperature difference across the slab, and L is the thickness. Returns an error if L = 0. Used for steady-state conduction through walls, insulation, and flat plates.',
+    convection:
+      "Convective Heat Transfer (Newton's Law of Cooling): Q = h * A * dT, where h is the convective heat transfer coefficient, A is the surface area, and dT is the temperature difference between the surface and the surrounding fluid. Typical h values: natural convection in air 5-25 W/m^2*K, forced convection in air 25-250 W/m^2*K, forced convection in water 50-20000 W/m^2*K.",
+    thermalExpansion:
+      'Linear Thermal Expansion: dL = alpha * L * dT, where alpha is the coefficient of linear thermal expansion, L is the original length, and dT is the temperature change. Use this to estimate dimensional changes in structural elements, piping, and rails due to temperature variation.',
     electricalTitle: 'Electrical',
     electricalBody:
-      "Ohm's law, power dissipation, series and parallel resistance, and capacitance.",
+      "Electrical circuit analysis blocks. Includes Ohm's Law (V = I * R, the fundamental relationship between voltage, current, and resistance), Power Dissipation (P = I^2 * R or equivalently P = V^2 / R), Series Resistance (R_total = R1 + R2 + ... + Rn), and Parallel Resistance (1/R_total = 1/R1 + 1/R2 + ... + 1/Rn). These blocks can be chained together to model simple DC circuits.",
+    ohmsLaw:
+      "Ohm's Law: V = I * R, where V is voltage in volts, I is current in amperes, and R is resistance in ohms. This block can solve for any one of the three quantities given the other two. The foundational relationship for all resistive circuit analysis.",
+    powerDissipation:
+      'Power Dissipation: P = I^2 * R (from current and resistance) or equivalently P = V^2 / R (from voltage and resistance) or P = V * I (from voltage and current). Computes the electrical power consumed or dissipated by a resistive element. Result is in watts.',
+    seriesResistance:
+      'Series Resistance: R_total = R1 + R2. When resistors are connected end-to-end (in series), their resistances simply add. The same current flows through all resistors, and the total voltage drop is the sum of individual drops.',
+    parallelResistance:
+      'Parallel Resistance: R_total = (R1 * R2) / (R1 + R2) for two resistors. When resistors are connected across the same two nodes (in parallel), the combined resistance is always less than the smallest individual resistor. Returns an error if R1 + R2 = 0.',
     conversionsTitle: 'Unit Conversions',
     conversionsBody:
       'Dedicated blocks for temperature, pressure, length, and other common engineering unit conversions.',
@@ -182,11 +220,22 @@ export const DOCS_CONTENT: DocsContentMap = {
     npv: 'Net present value of a series of cash flows at a discount rate.',
     irr: 'Internal rate of return — the discount rate at which NPV equals zero.',
     annuityPv: 'Present value of an annuity (equal periodic payments).',
+    annuityFv:
+      'Future Value of an Annuity: FV = PMT * ((1 + r)^n - 1) / r, where PMT is the periodic payment, r is the interest rate per period, and n is the number of periods. Computes how much a series of equal periodic deposits will grow to over time with compound interest.',
     rule72: 'Estimates the number of periods to double an investment: 72 / r.',
+    perpetuity:
+      'Present Value of a Perpetuity: PV = PMT / r, where PMT is the constant periodic payment and r is the discount rate per period. A perpetuity is an annuity that continues indefinitely. Returns an error if r = 0.',
     returnsTitle: 'Returns and Risk',
     returnsBody: 'CAGR, Sharpe ratio, and other performance metrics for portfolio analysis.',
+    cagr: 'Compound Annual Growth Rate: CAGR = (FV / PV)^(1/n) - 1, where FV is the final value, PV is the initial value, and n is the number of years. Measures the mean annual growth rate of an investment over a specified period longer than one year. Returns an error if PV = 0 or n = 0.',
+    sharpeRatio:
+      'Sharpe Ratio: S = (R_p - R_f) / sigma_p, where R_p is the portfolio return, R_f is the risk-free rate, and sigma_p is the standard deviation of the portfolio return. A higher Sharpe ratio indicates better risk-adjusted performance. Returns an error if sigma_p = 0.',
     deprTitle: 'Depreciation',
     deprBody: 'Straight-line and declining-balance depreciation methods.',
+    straightLineDepr:
+      'Straight-Line Depreciation: D = (Cost - Salvage) / Life, where Cost is the initial asset cost, Salvage is the estimated residual value, and Life is the useful life in years. Produces equal depreciation expense each period. Returns an error if Life = 0.',
+    decliningBalanceDepr:
+      'Declining-Balance Depreciation: D_year = Rate * Book_Value, where Rate is the depreciation rate (e.g. 2/Life for double-declining) and Book_Value is the remaining book value at the start of the period. Produces higher depreciation in early years, decreasing over time. Commonly used as double-declining balance (200% DB) or 150% DB.',
   },
 
   blockStats: {
@@ -194,16 +243,35 @@ export const DOCS_CONTENT: DocsContentMap = {
       'Statistics blocks cover descriptive statistics, regression, correlation, combinatorics, and probability distributions.',
     descTitle: 'Descriptive Statistics',
     descBody:
-      'Summary statistics for a set of data points. Connect up to 6 values (x1 through x6) and a count.',
+      'Summary statistics for a set of data points. Connect up to 6 values (x1 through x6) and a count (c). The count parameter tells the block how many of the x-inputs to use. For example, setting c = 3 uses x1, x2, and x3. All descriptive blocks follow this convention. These blocks handle edge cases gracefully: a single data point returns that value as the mean and zero as the standard deviation.',
     mean: 'Arithmetic mean of the input values.',
     stddev: 'Standard deviation (population).',
     median: 'Middle value when sorted.',
     variance: 'Variance (population).',
     relTitle: 'Relationships',
-    relBody: 'Linear regression slope and intercept, Pearson correlation, and covariance.',
+    relBody:
+      'Blocks for analysing relationships between two variables. Connect paired data as x1..x6 and y1..y6 with a count c. These blocks require at least 2 data points and return an error for degenerate cases such as zero variance in X.',
+    linregSlope:
+      'Linear Regression Slope: the slope (m) of the best-fit line y = m * x + b, computed via ordinary least squares. Inputs are paired data points x1..x6 and y1..y6 with count c. Returns an error if variance in X is zero (all X values identical).',
+    linregIntercept:
+      'Linear Regression Intercept: the y-intercept (b) of the best-fit line y = m * x + b. Computed alongside the slope via ordinary least squares. Same inputs and error conditions as the slope block.',
+    pearsonCorr:
+      'Pearson Correlation Coefficient: r = cov(X, Y) / (sigma_X * sigma_Y). Measures the strength and direction of the linear relationship between two variables. Returns a value between -1 and 1. Returns an error if either variable has zero variance.',
+    covariance:
+      'Covariance: cov(X, Y) = sum((xi - mean_X) * (yi - mean_Y)) / n. Measures how two variables change together. Positive covariance indicates they tend to increase together; negative indicates an inverse relationship.',
     probTitle: 'Probability and Combinatorics',
     probBody:
-      'Permutations, combinations, factorial, and standard probability distributions (normal, binomial).',
+      'Blocks for counting arrangements, computing factorials, and evaluating probability distributions. Useful for reliability engineering, quality control, and statistical hypothesis testing.',
+    factorial:
+      'Factorial: n! = n * (n-1) * ... * 1. Computes the factorial of a non-negative integer. Returns an error for negative inputs. Used as a building block for permutations and combinations.',
+    permutation:
+      'Permutation: P(n, r) = n! / (n - r)!. The number of ordered arrangements of r items chosen from n distinct items. Returns an error if r > n or if either value is negative.',
+    combination:
+      'Combination: C(n, r) = n! / (r! * (n - r)!). The number of unordered selections of r items from n distinct items (also called "n choose r"). Returns an error if r > n or if either value is negative.',
+    normalCdf:
+      'Normal CDF: computes the cumulative distribution function of the standard normal distribution (mean = 0, sigma = 1) at a given z-value. Returns the probability P(Z <= z). Use with a z-score input to find tail probabilities for hypothesis testing and confidence intervals.',
+    binomialPmf:
+      'Binomial PMF: P(X = k) = C(n, k) * p^k * (1 - p)^(n - k), where n is the number of trials, k is the number of successes, and p is the probability of success on each trial. Returns the probability of exactly k successes. Returns an error if p is outside [0, 1] or k > n.',
   },
 
   blockData: {
@@ -240,19 +308,20 @@ export const DOCS_CONTENT: DocsContentMap = {
     intro:
       'Constant blocks provide reference values from math, physics, and engineering. Use the unified Constant picker to search by name or symbol.',
     mathTitle: 'Math Constants',
-    mathBody: "Pi, Euler's number (e), golden ratio, and other fundamental mathematical constants.",
+    mathBody:
+      "Pi (3.14159265...), Euler's number e (2.71828182...), Golden ratio phi (1.61803398...), and Square root of 2 (1.41421356...). These are the fundamental mathematical constants used across all branches of science and engineering.",
     physicsTitle: 'Physics Constants',
     physicsBody:
-      "Speed of light, gravitational constant, Planck's constant, Boltzmann constant, and more.",
+      "Speed of light c (299 792 458 m/s), Gravitational constant G (6.674e-11 N*m^2/kg^2), Planck's constant h (6.626e-34 J*s), Boltzmann constant k_B (1.381e-23 J/K), and Avogadro's number N_A (6.022e23 mol^-1). All values follow the latest CODATA recommended values.",
     atmoTitle: 'Atmospheric Constants',
     atmoBody:
-      'Standard atmospheric pressure, sea-level temperature, and air density at standard conditions.',
+      'Standard atmosphere (101 325 Pa), Sea-level temperature (288.15 K / 15 degC), and Air density at STP (1.225 kg/m^3). These are the International Standard Atmosphere (ISA) reference conditions used in aerospace, meteorology, and general engineering calculations.',
     thermoTitle: 'Thermodynamic Constants',
     thermoBody:
-      'Universal gas constant, Stefan-Boltzmann constant, and related thermodynamic reference values.',
+      'Universal gas constant R (8.314 J/mol*K), and Stefan-Boltzmann constant sigma (5.670e-8 W/m^2*K^4). R appears in the Ideal Gas Law and many thermodynamic relations. The Stefan-Boltzmann constant governs total radiant heat emission from a black body.',
     elecTitle: 'Electrical Constants',
     elecBody:
-      'Vacuum permittivity, vacuum permeability, electron charge, and other electromagnetic constants.',
+      'Vacuum permittivity e0 (8.854e-12 F/m), Vacuum permeability mu0 (1.257e-6 H/m), and Elementary charge e (1.602e-19 C). These electromagnetic constants are essential for capacitor design, inductor calculations, and semiconductor physics.',
   },
 
   blockAnnot: {
@@ -299,6 +368,26 @@ export const DOCS_CONTENT: DocsContentMap = {
     dimensionsTitle: 'Supported dimensions',
     dimensionsBody:
       'Length, mass, time, temperature, force, pressure, energy, power, velocity, acceleration, density, dynamic viscosity, kinematic viscosity, torque, frequency, angle, area, volume, and electric current.',
+    dimensionTable:
+      'Length: metre (m) — also: km, cm, mm, in, ft, yd, mi\n' +
+      'Mass: kilogram (kg) — also: g, mg, lb, oz, tonne\n' +
+      'Time: second (s) — also: ms, min, h, day\n' +
+      'Temperature: kelvin (K) — also: degC, degF, degR\n' +
+      'Force: newton (N) — also: kN, lbf, kgf, dyn\n' +
+      'Pressure: pascal (Pa) — also: kPa, MPa, bar, atm, psi, mmHg, torr\n' +
+      'Energy: joule (J) — also: kJ, MJ, cal, kcal, kWh, BTU, eV\n' +
+      'Power: watt (W) — also: kW, MW, hp, BTU/h\n' +
+      'Velocity: metre per second (m/s) — also: km/h, mph, ft/s, knot\n' +
+      'Acceleration: metre per second squared (m/s^2) — also: ft/s^2, g0\n' +
+      'Density: kilogram per cubic metre (kg/m^3) — also: g/cm^3, g/L, lb/ft^3\n' +
+      'Dynamic viscosity: pascal second (Pa*s) — also: mPa*s, cP, P\n' +
+      'Kinematic viscosity: square metre per second (m^2/s) — also: cSt, St, mm^2/s\n' +
+      'Torque: newton metre (N*m) — also: kN*m, lbf*ft, lbf*in\n' +
+      'Frequency: hertz (Hz) — also: kHz, MHz, GHz, rpm\n' +
+      'Angle: radian (rad) — also: deg, arcmin, arcsec, rev\n' +
+      'Area: square metre (m^2) — also: cm^2, mm^2, km^2, ft^2, in^2, acre, hectare\n' +
+      'Volume: cubic metre (m^3) — also: L, mL, cm^3, ft^3, in^3, gal (US), gal (UK)\n' +
+      'Electric current: ampere (A) — also: mA, uA, kA',
     tip: 'Tip: Units are optional. If you do not assign a unit, the value is treated as dimensionless.',
   },
 
@@ -323,6 +412,30 @@ export const DOCS_CONTENT: DocsContentMap = {
     presetsTitle: 'Material presets',
     presetsBody:
       "Select from built-in materials such as steel, aluminium, copper, concrete, and wood. Each material provides density, Young's modulus, yield strength, and thermal conductivity where applicable.",
+    categoriesBody:
+      'Materials are organised into categories: Steels, Aluminium alloys, Other metals, Non-metals, and Fluids. Use the category filter in the material picker to narrow the list quickly.',
+    steelTable:
+      'Structural Steel (S275): rho = 7850 kg/m^3, E = 200 GPa, sigma_y = 275 MPa, k = 50 W/m*K\n' +
+      'Stainless Steel (304): rho = 8000 kg/m^3, E = 193 GPa, sigma_y = 215 MPa, k = 16 W/m*K\n' +
+      'Stainless Steel (316): rho = 8000 kg/m^3, E = 193 GPa, sigma_y = 205 MPa, k = 14 W/m*K\n' +
+      'High-Strength Steel (S355): rho = 7850 kg/m^3, E = 210 GPa, sigma_y = 355 MPa, k = 50 W/m*K',
+    aluminiumTable:
+      'Aluminium 6061-T6: rho = 2700 kg/m^3, E = 68.9 GPa, sigma_y = 276 MPa, k = 167 W/m*K\n' +
+      'Aluminium 7075-T6: rho = 2810 kg/m^3, E = 71.7 GPa, sigma_y = 503 MPa, k = 130 W/m*K\n' +
+      'Aluminium 2024-T3: rho = 2780 kg/m^3, E = 73.1 GPa, sigma_y = 345 MPa, k = 121 W/m*K',
+    otherMetalsTable:
+      'Copper (C11000, annealed): rho = 8960 kg/m^3, E = 117 GPa, sigma_y = 69 MPa, k = 391 W/m*K\n' +
+      'Brass (C26000): rho = 8530 kg/m^3, E = 110 GPa, sigma_y = 200 MPa, k = 120 W/m*K\n' +
+      'Titanium (Ti-6Al-4V): rho = 4430 kg/m^3, E = 114 GPa, sigma_y = 880 MPa, k = 6.7 W/m*K',
+    nonMetalsTable:
+      'Concrete (C30/37): rho = 2400 kg/m^3, E = 33 GPa, compressive strength = 30 MPa, k = 1.7 W/m*K\n' +
+      'Wood (Douglas Fir, along grain): rho = 530 kg/m^3, E = 12.4 GPa, sigma_y = 50 MPa, k = 0.12 W/m*K\n' +
+      'Glass (soda-lime): rho = 2500 kg/m^3, E = 72 GPa, tensile strength = 45 MPa, k = 1.0 W/m*K\n' +
+      'HDPE: rho = 960 kg/m^3, E = 1.1 GPa, sigma_y = 26 MPa, k = 0.50 W/m*K',
+    fluidTable:
+      'Water (20 degC): rho = 998 kg/m^3, mu = 1.002e-3 Pa*s, nu = 1.004e-6 m^2/s, c_p = 4182 J/kg*K\n' +
+      'Air (20 degC, 1 atm): rho = 1.204 kg/m^3, mu = 1.825e-5 Pa*s, nu = 1.516e-5 m^2/s, c_p = 1005 J/kg*K\n' +
+      'SAE 30 Oil (40 degC): rho = 876 kg/m^3, mu = 0.10 Pa*s, nu = 1.14e-4 m^2/s',
     customTitle: 'Custom materials',
     customBody:
       'Create custom material definitions with your own property values. Custom materials are saved to your project and can be reused across canvases.',
@@ -487,6 +600,8 @@ export const DOCS_CONTENT: DocsContentMap = {
     redo: 'Redo the last undone action',
     palette: 'Open the command palette',
     delete: 'Delete selected blocks or chains',
+    escape:
+      'Deselect all blocks and chains, close any open popover or modal, or cancel the current drag operation.',
     canvasTitle: 'Canvas',
     group: 'Group selected blocks (Pro)',
     duplicate: 'Duplicate selected blocks',
@@ -494,6 +609,17 @@ export const DOCS_CONTENT: DocsContentMap = {
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
     fitView: 'Fit canvas to view',
+    openLibrary:
+      'Open the block library panel. Also available by double-clicking an empty area of the canvas.',
+    openVariables: 'Open or close the Variables side panel.',
+    openAi: 'Open or close the AI assistant side panel (Pro and Enterprise plans).',
+    openHelp: 'Open the help and documentation panel.',
+    toggleMinimap:
+      "Toggle the minimap overlay in the bottom-right corner of the canvas. The minimap shows a bird's-eye view of the entire canvas with a viewport indicator.",
+    alignLeft:
+      "Align all selected blocks to the leftmost block's x-coordinate. Requires two or more selected blocks.",
+    alignTop:
+      "Align all selected blocks to the topmost block's y-coordinate. Requires two or more selected blocks.",
   },
 
   trouble: {
@@ -513,6 +639,18 @@ export const DOCS_CONTENT: DocsContentMap = {
     proTitle: 'Pro features locked',
     proBody:
       'Blocks marked with Pro (plots, lists, CSV import, groups) require an active Pro subscription. Upgrade from Settings > Billing.',
+    unitsTitle: 'Unit mismatch warnings',
+    unitsBody:
+      'A unit mismatch warning appears when you connect two blocks with incompatible dimensions (e.g. a mass output to a length input). The engine cannot convert between unrelated dimensions. To resolve: open the unit picker on the source or target block and assign compatible units, or remove the unit assignment entirely if the value is dimensionless. If you see unexpected conversion factors, verify that both blocks are assigned to the correct dimension and unit.',
+    offlineTitle: 'Offline / network issues',
+    offlineBody:
+      'ChainSolve runs its calculation engine entirely in your browser, so computations continue to work offline. However, saving to the cloud, loading projects, and AI features require an internet connection. If you lose connectivity: your work is cached locally and will sync automatically when the connection is restored. A yellow banner appears at the top of the canvas when the app detects you are offline. If saving repeatedly fails after reconnecting, try refreshing the page.',
+    importTitle: 'Import file errors',
+    importBody:
+      'If importing a .chainsolvejson file fails, check the following: (1) the file is valid JSON — open it in a text editor and look for syntax errors; (2) the file was exported from ChainSolve (third-party JSON files are not supported); (3) the file version is compatible — very old export formats may require updating ChainSolve first. For CSV imports, ensure the file is UTF-8 encoded, uses commas as delimiters, and does not exceed the 50 MB size limit.',
+    browserTitle: 'Browser compatibility',
+    browserBody:
+      'ChainSolve requires a modern browser with WebAssembly support. Supported browsers: Chrome 90+, Firefox 90+, Safari 15+, Edge 90+. If you experience rendering glitches or missing features: (1) update your browser to the latest version; (2) disable browser extensions that modify page content (ad blockers, dark-mode extensions); (3) ensure hardware acceleration is enabled in your browser settings. Internet Explorer is not supported.',
     contactTitle: 'Contact support',
     contactBody:
       'If you cannot resolve an issue, use Help > Bug Report to send a detailed report including screenshots and diagnostics. You can also email support directly.',

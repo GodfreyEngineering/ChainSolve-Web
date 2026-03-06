@@ -12,6 +12,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { InputBinding } from '../../../blocks/types'
 import { useBindingContext } from '../../../contexts/BindingContext'
 import { useVariablesStore } from '../../../stores/variablesStore'
@@ -107,6 +108,7 @@ const sectionLabel: React.CSSProperties = {
 // ── Component ───────────────────────────────────────────────────────────
 
 export function ValueEditor({ binding, onChange, compact, override }: ValueEditorProps) {
+  const { t } = useTranslation()
   const { constants, catalog } = useBindingContext()
   const variables = useVariablesStore((s) => s.variables)
   const [popoverOpen, setPopoverOpen] = useState(false)
@@ -244,7 +246,7 @@ export function ValueEditor({ binding, onChange, compact, override }: ValueEdito
               justifyContent: 'center',
               lineHeight: 1,
             }}
-            title="Bind to constant or variable"
+            title={t('canvas.bindToConstVar')}
           >
             &#8943;
           </button>
@@ -285,12 +287,12 @@ export function ValueEditor({ binding, onChange, compact, override }: ValueEdito
             style={searchInputStyle}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search constants & variables..."
+            placeholder={t('canvas.searchConstVar')}
           />
           <div style={{ flex: 1, overflowY: 'auto' }}>
             {/* Literal option */}
             <div style={{ ...listItemStyle, color: 'var(--text)' }} onMouseDown={switchToLiteral}>
-              Literal value
+              {t('canvas.literalValue')}
             </div>
 
             {/* Variables */}

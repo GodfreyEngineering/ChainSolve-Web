@@ -9,6 +9,7 @@
  */
 
 import { useState, useRef, useCallback, type ChangeEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   MAX_TABLE_INPUT_ROWS,
   MAX_TABLE_INPUT_COLS,
@@ -27,6 +28,7 @@ interface TableEditorProps {
 }
 
 export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
+  const { t } = useTranslation()
   const [scrollTop, setScrollTop] = useState(0)
   const bodyRef = useRef<HTMLDivElement>(null)
 
@@ -189,7 +191,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
-                title="Remove column"
+                title={t('canvas.removeColumn')}
               >
                 ✕
               </button>
@@ -211,7 +213,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
             fontSize: '0.65rem',
             flexShrink: 0,
           }}
-          title="Add column"
+          title={t('canvas.addColumn')}
         >
           +
         </button>
@@ -275,7 +277,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
                 <button
                   className="nodrag"
                   onClick={() => removeRow(ri)}
-                  title="Remove row"
+                  title={t('canvas.removeRow')}
                   style={{
                     width: 16,
                     height: 16,
@@ -317,7 +319,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
             fontFamily: 'inherit',
           }}
         >
-          + Add row
+          + {t('canvas.addRow')}
         </button>
         <button
           className="nodrag"
@@ -333,7 +335,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
             fontWeight: 600,
             fontFamily: 'inherit',
           }}
-          title="Import CSV file"
+          title={t('canvas.importCsv')}
         >
           CSV
         </button>
