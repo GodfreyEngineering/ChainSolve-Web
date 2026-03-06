@@ -9,15 +9,39 @@
  */
 
 import { supabase } from './supabase'
+import { ServiceError, isRetryableError } from './errors'
 
-// ── Private helper ──────────────────────────────────────────────────────────
+// ── Private helpers ─────────────────────────────────────────────────────────
 
 async function requireSession() {
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  if (!session) throw new Error('Not authenticated')
+  if (!session) throw new ServiceError('NOT_AUTHENTICATED', 'Not authenticated')
   return session
+}
+
+const UPLOAD_RETRY_DELAYS = [1000, 2000]
+
+async function uploadBlobWithRetry(key: string, blob: Blob): Promise<void> {
+  let lastError: unknown
+  for (let attempt = 0; attempt <= UPLOAD_RETRY_DELAYS.length; attempt++) {
+    try {
+      const { error } = await supabase.storage
+        .from('projects')
+        .upload(key, blob, { upsert: true, contentType: 'application/json' })
+      if (error) throw new ServiceError('STORAGE_ERROR', error.message, true)
+      return
+    } catch (err) {
+      lastError = err
+      if (attempt < UPLOAD_RETRY_DELAYS.length && isRetryableError(err)) {
+        await new Promise((r) => setTimeout(r, UPLOAD_RETRY_DELAYS[attempt]))
+        continue
+      }
+      throw err
+    }
+  }
+  throw lastError
 }
 
 function canvasKey(userId: string, projectId: string, canvasId: string): string {
@@ -40,11 +64,7 @@ export async function uploadCanvasGraph(
   const key = canvasKey(ownerId, projectId, canvasId)
   const blob = new Blob([JSON.stringify(json)], { type: 'application/json' })
 
-  const { error } = await supabase.storage
-    .from('projects')
-    .upload(key, blob, { upsert: true, contentType: 'application/json' })
-
-  if (error) throw new Error(`Canvas upload failed: ${error.message}`)
+  await uploadBlobWithRetry(key, blob)
 }
 
 /**
@@ -66,7 +86,7 @@ export async function downloadCanvasGraph(
     if (error.message.includes('not found') || error.message.includes('404')) {
       return null
     }
-    throw new Error(`Canvas download failed: ${error.message}`)
+    throw new ServiceError('STORAGE_ERROR', `Canvas download failed: ${error.message}`, true)
   }
   if (!data) return null
 
@@ -89,7 +109,7 @@ export async function deleteCanvasGraph(
 
   // Ignore "not found" — file may already be gone
   if (error && !error.message.includes('not found') && !error.message.includes('404')) {
-    throw new Error(`Canvas delete failed: ${error.message}`)
+    throw new ServiceError('STORAGE_ERROR', `Canvas delete failed: ${error.message}`, true)
   }
 }
 

@@ -7,6 +7,7 @@
 
 import { supabase } from './supabase'
 import { redactString } from '../observability/redact'
+import { ServiceError } from './errors'
 import { importProject, type ProjectJSON } from './projects'
 import { addInstalledBlockPack, type BlockPackPayload } from './installedBlockPacksService'
 import {
@@ -141,7 +142,7 @@ export async function listPublishedItems(
   }
 
   const { data, error } = await q
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
   return (data ?? []) as MarketplaceItem[]
 }
 
@@ -156,7 +157,7 @@ export async function listOrgExploreItems(orgId: string): Promise<MarketplaceIte
     .eq('org_id', orgId)
     .order('created_at', { ascending: false })
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
   return (data ?? []) as MarketplaceItem[]
 }
 
@@ -171,7 +172,7 @@ export async function getItem(itemId: string): Promise<MarketplaceItem | null> {
     .eq('is_published', true)
     .maybeSingle()
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
   return data as MarketplaceItem | null
 }
 
@@ -208,7 +209,7 @@ export async function getItemAnalyticsSummary(itemId: string): Promise<ItemAnaly
     .select('event_type, created_at')
     .eq('item_id', itemId)
 
-  if (error) throw new Error(error.message)
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 
   const events = (data ?? []) as Array<{ event_type: string; created_at: string }>
 
@@ -231,7 +232,7 @@ export async function recordInstall(itemId: string): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to install marketplace items')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to install marketplace items')
 
   const { error } = await supabase
     .from('marketplace_purchases')
@@ -239,7 +240,7 @@ export async function recordInstall(itemId: string): Promise<void> {
       { user_id: user.id, item_id: itemId },
       { onConflict: 'user_id,item_id', ignoreDuplicates: true },
     )
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 
   // Best-effort audit event
   try {
@@ -264,7 +265,7 @@ export async function forkTemplate(itemId: string): Promise<string> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to install marketplace items')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to install marketplace items')
 
   const { data: item, error: fetchErr } = await supabase
     .from('marketplace_items')
@@ -273,10 +274,11 @@ export async function forkTemplate(itemId: string): Promise<string> {
     .eq('is_published', true)
     .maybeSingle()
 
-  if (fetchErr) throw fetchErr
-  if (!item) throw new Error('Marketplace item not found')
-  if (item.category !== 'template') throw new Error('Item is not a project template')
-  if (!item.payload) throw new Error('Template has no project data attached')
+  if (fetchErr) throw new ServiceError('DB_ERROR', fetchErr.message, true)
+  if (!item) throw new ServiceError('DB_ERROR', 'Marketplace item not found')
+  if (item.category !== 'template')
+    throw new ServiceError('DB_ERROR', 'Item is not a project template')
+  if (!item.payload) throw new ServiceError('DB_ERROR', 'Template has no project data attached')
 
   // P118: contract version compatibility check
   const payloadMeta = item.payload as { minContractVersion?: number } | null
@@ -284,7 +286,8 @@ export async function forkTemplate(itemId: string): Promise<string> {
     typeof payloadMeta?.minContractVersion === 'number' &&
     payloadMeta.minContractVersion > ENGINE_CONTRACT_VERSION
   ) {
-    throw new Error(
+    throw new ServiceError(
+      'DB_ERROR',
       `This template requires engine contract version ${payloadMeta.minContractVersion}, ` +
         `but this app supports up to v${ENGINE_CONTRACT_VERSION}. Please update ChainSolve.`,
     )
@@ -315,7 +318,7 @@ export async function getUserInstalls(): Promise<MarketplacePurchase[]> {
     .select('*')
     .order('installed_at', { ascending: false })
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
   return (data ?? []) as MarketplacePurchase[]
 }
 
@@ -334,7 +337,7 @@ export async function installBlockPack(itemId: string): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to install marketplace items')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to install marketplace items')
 
   const { data: item, error: fetchErr } = await supabase
     .from('marketplace_items')
@@ -343,14 +346,14 @@ export async function installBlockPack(itemId: string): Promise<void> {
     .eq('is_published', true)
     .maybeSingle()
 
-  if (fetchErr) throw fetchErr
-  if (!item) throw new Error('Marketplace item not found')
-  if (item.category !== 'block_pack') throw new Error('Item is not a block pack')
-  if (!item.payload) throw new Error('Block pack has no definitions attached')
+  if (fetchErr) throw new ServiceError('DB_ERROR', fetchErr.message, true)
+  if (!item) throw new ServiceError('DB_ERROR', 'Marketplace item not found')
+  if (item.category !== 'block_pack') throw new ServiceError('DB_ERROR', 'Item is not a block pack')
+  if (!item.payload) throw new ServiceError('DB_ERROR', 'Block pack has no definitions attached')
 
   const payload = item.payload as BlockPackPayload
   if (!Array.isArray(payload.defs) || payload.defs.length === 0) {
-    throw new Error('Block pack payload is missing or empty')
+    throw new ServiceError('DB_ERROR', 'Block pack payload is missing or empty')
   }
 
   // P118: contract version compatibility check
@@ -358,7 +361,8 @@ export async function installBlockPack(itemId: string): Promise<void> {
     typeof payload.minContractVersion === 'number' &&
     payload.minContractVersion > ENGINE_CONTRACT_VERSION
   ) {
-    throw new Error(
+    throw new ServiceError(
+      'DB_ERROR',
       `This block pack requires engine contract version ${payload.minContractVersion}, ` +
         `but this app supports up to v${ENGINE_CONTRACT_VERSION}. Please update ChainSolve.`,
     )
@@ -383,7 +387,7 @@ export async function installTheme(itemId: string): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to install marketplace items')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to install marketplace items')
 
   const { data: item, error: fetchErr } = await supabase
     .from('marketplace_items')
@@ -392,19 +396,19 @@ export async function installTheme(itemId: string): Promise<void> {
     .eq('is_published', true)
     .maybeSingle()
 
-  if (fetchErr) throw fetchErr
-  if (!item) throw new Error('Marketplace item not found')
-  if (item.category !== 'theme') throw new Error('Item is not a theme')
-  if (!item.payload) throw new Error('Theme has no variables attached')
+  if (fetchErr) throw new ServiceError('DB_ERROR', fetchErr.message, true)
+  if (!item) throw new ServiceError('DB_ERROR', 'Marketplace item not found')
+  if (item.category !== 'theme') throw new ServiceError('DB_ERROR', 'Item is not a theme')
+  if (!item.payload) throw new ServiceError('DB_ERROR', 'Theme has no variables attached')
 
   const payload = item.payload as MarketplaceThemePayload
   if (!payload.variables || typeof payload.variables !== 'object') {
-    throw new Error('Theme payload is missing variables')
+    throw new ServiceError('DB_ERROR', 'Theme payload is missing variables')
   }
 
   const variables = sanitizeThemeVariables(payload.variables)
   if (Object.keys(variables).length === 0) {
-    throw new Error('Theme has no valid CSS variable definitions')
+    throw new ServiceError('DB_ERROR', 'Theme has no valid CSS variable definitions')
   }
 
   installMarketplaceTheme(itemId, item.name as string, variables)
@@ -428,7 +432,7 @@ export async function isVerifiedAuthor(): Promise<boolean> {
     .select('verified_author')
     .eq('id', user.id)
     .maybeSingle()
-  if (error) throw new Error(error.message)
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 
   return (data as { verified_author: boolean } | null)?.verified_author ?? false
 }
@@ -455,7 +459,7 @@ export async function getPublishGate(): Promise<PublishGate> {
     .select('verified_author, stripe_onboarded')
     .eq('id', user.id)
     .maybeSingle()
-  if (error) throw new Error(error.message)
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 
   const profile = data as { verified_author: boolean; stripe_onboarded: boolean } | null
   return {
@@ -482,7 +486,7 @@ export async function listAuthorItems(): Promise<MarketplaceItem[]> {
     .eq('author_id', user.id)
     .order('created_at', { ascending: false })
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
   return (data ?? []) as MarketplaceItem[]
 }
 
@@ -494,7 +498,7 @@ export async function createAuthorItem(input: AuthorItemInput): Promise<Marketpl
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to create marketplace items')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to create marketplace items')
 
   const { data, error } = await supabase
     .from('marketplace_items')
@@ -511,7 +515,7 @@ export async function createAuthorItem(input: AuthorItemInput): Promise<Marketpl
     .select('*')
     .single()
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
   return data as MarketplaceItem
 }
 
@@ -522,7 +526,7 @@ export async function createAuthorItem(input: AuthorItemInput): Promise<Marketpl
 export async function updateItemPayload(itemId: string, payload: unknown): Promise<void> {
   const { error } = await supabase.from('marketplace_items').update({ payload }).eq('id', itemId)
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 }
 
 /**
@@ -534,7 +538,7 @@ export async function togglePublishItem(itemId: string, published: boolean): Pro
     .update({ is_published: published })
     .eq('id', itemId)
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 }
 
 /**
@@ -550,7 +554,7 @@ export async function setReviewStatus(itemId: string, status: ReviewStatus): Pro
     .update({ review_status: status })
     .eq('id', itemId)
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 }
 
 // ── Likes (D9-2) ─────────────────────────────────────────────────────────────
@@ -566,7 +570,7 @@ export async function getUserLikes(): Promise<Set<string>> {
   if (!session) return new Set()
 
   const { data, error } = await supabase.from('marketplace_likes').select('item_id')
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
   return new Set((data ?? []).map((r: { item_id: string }) => r.item_id))
 }
 
@@ -578,7 +582,7 @@ export async function likeItem(itemId: string): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to like items')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to like items')
 
   const { error } = await supabase
     .from('marketplace_likes')
@@ -586,7 +590,7 @@ export async function likeItem(itemId: string): Promise<void> {
       { user_id: user.id, item_id: itemId },
       { onConflict: 'user_id,item_id', ignoreDuplicates: true },
     )
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 }
 
 /**
@@ -596,14 +600,14 @@ export async function unlikeItem(itemId: string): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to unlike items')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to unlike items')
 
   const { error } = await supabase
     .from('marketplace_likes')
     .delete()
     .eq('user_id', user.id)
     .eq('item_id', itemId)
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 }
 
 // ── Comments (D9-4) ───────────────────────────────────────────────────────────
@@ -657,7 +661,7 @@ export async function getItemComments(itemId: string): Promise<MarketplaceCommen
     .eq('item_id', itemId)
     .order('created_at', { ascending: false })
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
   return (data ?? []) as MarketplaceComment[]
 }
 
@@ -668,15 +672,15 @@ export async function postComment(itemId: string, content: string): Promise<Mark
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to comment')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to comment')
 
   if (!checkCommentRateLimit()) {
-    throw new Error('Too many comments — please wait a moment')
+    throw new ServiceError('DB_ERROR', 'Too many comments — please wait a moment')
   }
 
   const trimmed = content.trim()
   if (!trimmed || trimmed.length > 2000) {
-    throw new Error('Comment must be between 1 and 2000 characters')
+    throw new ServiceError('INVALID_PROJECT_NAME', 'Comment must be between 1 and 2000 characters')
   }
 
   const { data, error } = await supabase
@@ -685,7 +689,7 @@ export async function postComment(itemId: string, content: string): Promise<Mark
     .select('id,item_id,user_id,content,is_flagged,created_at')
     .single()
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
   recordCommentTimestamp()
   return data as MarketplaceComment
 }
@@ -695,7 +699,7 @@ export async function postComment(itemId: string, content: string): Promise<Mark
  */
 export async function deleteComment(commentId: string): Promise<void> {
   const { error } = await supabase.from('marketplace_comments').delete().eq('id', commentId)
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 }
 
 /**
@@ -705,14 +709,14 @@ export async function reportComment(commentId: string, reason: string): Promise<
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to report comments')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to report comments')
 
   const { error } = await supabase
     .from('marketplace_comments')
     .update({ is_flagged: true, flag_reason: redactString(reason.trim().slice(0, 500)) })
     .eq('id', commentId)
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 }
 
 /**
@@ -723,7 +727,7 @@ export async function reportItem(itemId: string, reason: string): Promise<void> 
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to report items')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to report items')
 
   const { error } = await supabase.from('bug_reports').insert({
     user_id: user.id,
@@ -732,5 +736,5 @@ export async function reportItem(itemId: string, reason: string): Promise<void> 
     metadata: { type: 'item_report', item_id: itemId },
   })
 
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 }

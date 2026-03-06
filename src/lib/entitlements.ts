@@ -350,6 +350,16 @@ export function canCreateProject(plan: Plan, currentCount: number): boolean {
   return currentCount < getEntitlements(plan).maxProjects
 }
 
+/**
+ * Whether a free user at their project limit can still use scratch canvas.
+ * Returns true when the user has hit their project limit but can still
+ * work in an unsaved scratch canvas.
+ */
+export function isAtProjectLimit(plan: Plan, currentCount: number): boolean {
+  if (isPro(plan)) return false
+  return currentCount >= getEntitlements(plan).maxProjects
+}
+
 /** Whether the user is allowed to create a new canvas in a project. */
 export function canCreateCanvas(plan: Plan, currentCount: number): boolean {
   if (plan === 'past_due' || plan === 'canceled') return false

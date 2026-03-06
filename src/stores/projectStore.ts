@@ -24,6 +24,8 @@ interface ProjectState {
 
   // ── Save lifecycle ────────────────────────────────────────────────────────
   saveStatus: SaveStatus
+  /** 0.0–1.0 progress through the multi-step save pipeline. */
+  saveProgress: number
   errorMessage: string | null
   lastSavedAt: Date | null
   isDirty: boolean
@@ -38,6 +40,7 @@ interface ProjectState {
   ) => void
   setProjectName: (name: string) => void
   markDirty: () => void
+  setSaveProgress: (n: number) => void
   beginSave: () => void
   completeSave: (dbUpdatedAt: string) => void
   failSave: (err: string) => void
@@ -56,6 +59,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   formatVersion: 0,
   createdAt: null,
   saveStatus: 'idle',
+  saveProgress: 0,
   errorMessage: null,
   lastSavedAt: null,
   isDirty: false,
@@ -68,6 +72,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       formatVersion,
       createdAt,
       saveStatus: 'idle',
+      saveProgress: 0,
       errorMessage: null,
       lastSavedAt: null,
       isDirty: false,
@@ -83,10 +88,18 @@ export const useProjectStore = create<ProjectState>((set) => ({
         s.saveStatus === 'error' || s.saveStatus === 'offline-queued' ? 'idle' : s.saveStatus,
     })),
 
-  beginSave: () => set({ saveStatus: 'saving', errorMessage: null }),
+  setSaveProgress: (n) => set({ saveProgress: n }),
+
+  beginSave: () => set({ saveStatus: 'saving', saveProgress: 0, errorMessage: null }),
 
   completeSave: (dbUpdatedAt) =>
-    set({ saveStatus: 'saved', dbUpdatedAt, lastSavedAt: new Date(), isDirty: false }),
+    set({
+      saveStatus: 'saved',
+      saveProgress: 1,
+      dbUpdatedAt,
+      lastSavedAt: new Date(),
+      isDirty: false,
+    }),
 
   failSave: (err) => set({ saveStatus: 'error', errorMessage: err }),
 
@@ -110,6 +123,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
       formatVersion: 0,
       createdAt: null,
       saveStatus: 'idle',
+      saveProgress: 0,
       errorMessage: null,
       lastSavedAt: null,
       isDirty: false,

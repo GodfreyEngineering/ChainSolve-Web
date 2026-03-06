@@ -308,6 +308,7 @@
     "unsaved": "Non salvato",
     "lastSaved": "Salvato: {{time}} · {{target}}",
     "offline": "Offline",
+    "projectSaved": "Progetto salvato",
     "offlineQueued": "In coda — offline",
     "retryNow": "Riprova ora",
     "backOnline": "Di nuovo online — sincronizzazione in corso",

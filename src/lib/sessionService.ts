@@ -137,8 +137,42 @@ export async function enforceAndRegisterSession(
     // Delete all existing sessions for this user (across all devices)
     await supabase.from('user_sessions').delete().eq('user_id', userId)
   }
+
+  // Best-effort: clean up stale sessions and cap at 10 active
+  try {
+    await cleanupStaleSessions(userId)
+  } catch {
+    // Cleanup failures must not block login
+  }
+
   // Register the new session for this device
   return registerSession(userId)
+}
+
+const STALE_SESSION_DAYS = 90
+const MAX_ACTIVE_SESSIONS = 10
+
+/**
+ * Delete sessions older than 90 days, and cap active sessions at 10
+ * (deleting the oldest if exceeded). Best-effort — errors are swallowed.
+ */
+async function cleanupStaleSessions(userId: string): Promise<void> {
+  const cutoff = new Date(Date.now() - STALE_SESSION_DAYS * 24 * 60 * 60 * 1000).toISOString()
+
+  // Delete stale sessions (older than 90 days)
+  await supabase.from('user_sessions').delete().eq('user_id', userId).lt('last_active_at', cutoff)
+
+  // Cap at MAX_ACTIVE_SESSIONS — fetch all, delete oldest if over limit
+  const { data } = await supabase
+    .from('user_sessions')
+    .select('id,last_active_at')
+    .eq('user_id', userId)
+    .order('last_active_at', { ascending: false })
+
+  if (data && data.length > MAX_ACTIVE_SESSIONS) {
+    const toDelete = data.slice(MAX_ACTIVE_SESSIONS).map((s: { id: string }) => s.id)
+    await supabase.from('user_sessions').delete().in('id', toDelete)
+  }
 }
 
 /**

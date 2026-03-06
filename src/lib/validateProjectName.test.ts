@@ -91,6 +91,52 @@ describe('validateProjectName', () => {
     expect(result.error).toMatch(/control/)
   })
 
+  // ── Filesystem-unsafe character cases ─────────────────────────────────────
+
+  it('rejects names with forward slash', () => {
+    const result = validateProjectName('path/name')
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/[/\\]/)
+  })
+
+  it('rejects names with backslash', () => {
+    const result = validateProjectName('path\\name')
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/[/\\]/)
+  })
+
+  it('rejects names with colon', () => {
+    const result = validateProjectName('C:project')
+    expect(result.ok).toBe(false)
+  })
+
+  it('rejects names with asterisk', () => {
+    const result = validateProjectName('project*v2')
+    expect(result.ok).toBe(false)
+  })
+
+  it('rejects names with question mark', () => {
+    const result = validateProjectName('project?')
+    expect(result.ok).toBe(false)
+  })
+
+  it('rejects names with double quotes', () => {
+    const result = validateProjectName('my "project"')
+    expect(result.ok).toBe(false)
+  })
+
+  it('rejects names with angle brackets', () => {
+    expect(validateProjectName('project<1>').ok).toBe(false)
+  })
+
+  it('rejects names with pipe', () => {
+    expect(validateProjectName('a|b').ok).toBe(false)
+  })
+
+  it('accepts names with dashes, underscores, dots, parens', () => {
+    expect(validateProjectName('my-project_v2.1 (copy)').ok).toBe(true)
+  })
+
   // ── Type cases ─────────────────────────────────────────────────────────────
 
   it('rejects non-string inputs', () => {

@@ -308,6 +308,7 @@
     "unsaved": "Sin guardar",
     "lastSaved": "Guardado: {{time}} · {{target}}",
     "offline": "Sin conexión",
+    "projectSaved": "Proyecto guardado",
     "offlineQueued": "En cola — sin conexión",
     "retryNow": "Reintentar ahora",
     "backOnline": "Conectado — sincronizando cambios",

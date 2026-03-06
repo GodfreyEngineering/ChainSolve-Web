@@ -7,6 +7,8 @@
 import { supabase } from './supabase'
 import type { Plan } from './entitlements'
 import { redactString } from '../observability/redact'
+import { ServiceError } from './errors'
+import { validateProjectName } from './validateProjectName'
 
 export interface Profile {
   id: string
@@ -33,7 +35,25 @@ export interface Profile {
   marketing_opt_in_at: string | null
 }
 
+// ── Profile cache (1-minute TTL) ──────────────────────────────────────────────
+
+let _profileCache: { profile: Profile; fetchedAt: number; userId: string } | null = null
+const PROFILE_CACHE_TTL_MS = 60_000
+
+/** Invalidate the cached profile (call on sign-out or after mutations). */
+export function invalidateProfileCache(): void {
+  _profileCache = null
+}
+
 export async function getProfile(userId: string): Promise<Profile | null> {
+  if (
+    _profileCache &&
+    _profileCache.userId === userId &&
+    Date.now() - _profileCache.fetchedAt < PROFILE_CACHE_TTL_MS
+  ) {
+    return _profileCache.profile
+  }
+
   const { data, error } = await supabase
     .from('profiles')
     .select(
@@ -42,7 +62,10 @@ export async function getProfile(userId: string): Promise<Profile | null> {
     .eq('id', userId)
     .maybeSingle()
   if (error || !data) return null
-  return data as Profile
+
+  const profile = data as Profile
+  _profileCache = { profile, fetchedAt: Date.now(), userId }
+  return profile
 }
 
 /** E2-3: Record that the user has accepted the given ToS version. */
@@ -50,7 +73,7 @@ export async function acceptTerms(version: string): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to accept terms')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to accept terms')
 
   const { data, error } = await supabase
     .from('profiles')
@@ -61,10 +84,12 @@ export async function acceptTerms(version: string): Promise<void> {
     .eq('id', user.id)
     .select('accepted_terms_version')
     .maybeSingle()
-  if (error) throw new Error(error.message)
-  if (!data) throw new Error('Profile not found. Please sign out and sign back in.')
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  if (!data)
+    throw new ServiceError('DB_ERROR', 'Profile not found. Please sign out and sign back in.')
   if (data.accepted_terms_version !== version)
-    throw new Error('Acceptance was not recorded. Please retry.')
+    throw new ServiceError('DB_ERROR', 'Acceptance was not recorded. Please retry.', true)
+  invalidateProfileCache()
 }
 
 /** E2-3: Update the user's marketing opt-in preference. */
@@ -72,7 +97,7 @@ export async function updateMarketingOptIn(optIn: boolean): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to update preferences')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to update preferences')
 
   const { error } = await supabase
     .from('profiles')
@@ -81,7 +106,8 @@ export async function updateMarketingOptIn(optIn: boolean): Promise<void> {
       marketing_opt_in_at: new Date().toISOString(),
     })
     .eq('id', user.id)
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  invalidateProfileCache()
 }
 
 /** D12-1: Update the current user's profile display name. */
@@ -89,16 +115,20 @@ export async function updateDisplayName(name: string): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to update your profile')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to update your profile')
 
   const trimmed = name.trim()
-  if (trimmed.length > 100) throw new Error('Display name must be 100 characters or fewer')
+  if (trimmed) {
+    const validation = validateProjectName(trimmed)
+    if (!validation.ok) throw new ServiceError('INVALID_PROJECT_NAME', validation.error!)
+  }
 
   const { error } = await supabase
     .from('profiles')
     .update({ full_name: trimmed || null })
     .eq('id', user.id)
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  invalidateProfileCache()
 }
 
 /** D12-1: Upload a profile avatar image. Max 2 MB, image/* only. */
@@ -108,11 +138,15 @@ export async function uploadAvatar(file: File): Promise<string> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to upload an avatar')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to upload an avatar')
 
-  if (!file.type.startsWith('image/')) throw new Error('Only image files are allowed for avatars')
+  if (!file.type.startsWith('image/'))
+    throw new ServiceError('FILE_TOO_LARGE', 'Only image files are allowed for avatars')
   if (file.size > MAX_AVATAR_BYTES)
-    throw new Error(`Avatar must be under ${MAX_AVATAR_BYTES / 1024 / 1024} MB`)
+    throw new ServiceError(
+      'FILE_TOO_LARGE',
+      `Avatar must be under ${MAX_AVATAR_BYTES / 1024 / 1024} MB`,
+    )
 
   const ext = file.name.split('.').pop() ?? 'jpg'
   const storagePath = `${user.id}/avatar_${Date.now()}.${ext}`
@@ -120,14 +154,15 @@ export async function uploadAvatar(file: File): Promise<string> {
   const { error: uploadErr } = await supabase.storage
     .from('uploads')
     .upload(storagePath, file, { upsert: true, contentType: file.type })
-  if (uploadErr) throw uploadErr
+  if (uploadErr) throw new ServiceError('STORAGE_ERROR', uploadErr.message, true)
 
   // Save path (not signed URL) to profile — signed URL is generated on read
   const { error: updateErr } = await supabase
     .from('profiles')
     .update({ avatar_url: storagePath })
     .eq('id', user.id)
-  if (updateErr) throw updateErr
+  if (updateErr) throw new ServiceError('DB_ERROR', updateErr.message, true)
+  invalidateProfileCache()
 
   return storagePath
 }
@@ -155,12 +190,14 @@ export async function reportAvatar(targetUserId: string, reason: string): Promis
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to report an avatar')
-  if (user.id === targetUserId) throw new Error('Cannot report your own avatar')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to report an avatar')
+  if (user.id === targetUserId)
+    throw new ServiceError('INVALID_PROJECT_NAME', 'Cannot report your own avatar')
 
   const trimmed = reason.trim()
-  if (!trimmed) throw new Error('A reason is required')
-  if (trimmed.length > 500) throw new Error('Reason must be 500 characters or fewer')
+  if (!trimmed) throw new ServiceError('INVALID_PROJECT_NAME', 'A reason is required')
+  if (trimmed.length > 500)
+    throw new ServiceError('INVALID_PROJECT_NAME', 'Reason must be 500 characters or fewer')
 
   const { error } = await supabase.from('avatar_reports').insert({
     reporter_id: user.id,
@@ -168,8 +205,9 @@ export async function reportAvatar(targetUserId: string, reason: string): Promis
     reason: redactString(trimmed),
   })
   if (error) {
-    if (error.code === '23505') throw new Error('You have already reported this avatar')
-    throw error
+    if (error.code === '23505')
+      throw new ServiceError('DB_ERROR', 'You have already reported this avatar')
+    throw new ServiceError('DB_ERROR', error.message, true)
   }
 }
 
@@ -180,7 +218,7 @@ export async function listPendingAvatarReports(): Promise<AvatarReport[]> {
     .select('id,reporter_id,target_id,reason,status,created_at')
     .eq('status', 'pending')
     .order('created_at', { ascending: true })
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
   return (data ?? []) as AvatarReport[]
 }
 
@@ -189,21 +227,21 @@ export async function resolveAvatarReport(reportId: string, targetUserId: string
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in required')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in required')
 
   // Remove the offending avatar
   const { error: clearErr } = await supabase
     .from('profiles')
     .update({ avatar_url: null })
     .eq('id', targetUserId)
-  if (clearErr) throw clearErr
+  if (clearErr) throw new ServiceError('DB_ERROR', clearErr.message, true)
 
   // Mark report resolved
   const { error: resolveErr } = await supabase
     .from('avatar_reports')
     .update({ status: 'resolved', resolved_by: user.id, resolved_at: new Date().toISOString() })
     .eq('id', reportId)
-  if (resolveErr) throw resolveErr
+  if (resolveErr) throw new ServiceError('DB_ERROR', resolveErr.message, true)
 }
 
 /** Moderator: dismiss a report (avatar is fine). */
@@ -211,11 +249,11 @@ export async function dismissAvatarReport(reportId: string): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in required')
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in required')
 
   const { error } = await supabase
     .from('avatar_reports')
     .update({ status: 'dismissed', resolved_by: user.id, resolved_at: new Date().toISOString() })
     .eq('id', reportId)
-  if (error) throw error
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
 }

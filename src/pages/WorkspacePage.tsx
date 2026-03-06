@@ -29,7 +29,7 @@ import { WelcomeCanvas } from '../components/canvas/WelcomeCanvas'
 import { LoadingScreen } from '../components/ui/LoadingScreen'
 import { useSidebarStore } from '../stores/sidebarStore'
 import { createProject, listProjects, importProject, type ProjectJSON } from '../lib/projects'
-import { canCreateProject } from '../lib/entitlements'
+import { canCreateProject, isAtProjectLimit } from '../lib/entitlements'
 import { useToast } from '../components/ui/useToast'
 import type { CanvasControls } from './CanvasPage'
 
@@ -99,6 +99,14 @@ export default function WorkspacePage() {
     try {
       const projects = await listProjects()
       if (!canCreateProject(auth.plan, projects.length)) {
+        if (isAtProjectLimit(auth.plan, projects.length)) {
+          toast(
+            'Free plan allows 1 project. Opening scratch canvas — delete your project or upgrade to save.',
+            'info',
+          )
+          setScratchMode(true)
+          return
+        }
         toast('Project limit reached. Upgrade to create more.', 'error')
         return
       }

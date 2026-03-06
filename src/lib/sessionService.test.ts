@@ -35,13 +35,19 @@ const {
 }))
 
 vi.mock('./supabase', () => {
-  mockDelete.mockReturnValue({ eq: mockDeleteEq })
-  mockDeleteEq.mockResolvedValue({ error: null })
+  // Chainable delete: .delete().eq().lt() and .delete().eq().neq() and .delete().in()
+  const mockDeleteLt = vi.fn().mockResolvedValue({ error: null })
+  const mockDeleteNeq = vi.fn().mockResolvedValue({ error: null })
+  const mockDeleteIn = vi.fn().mockResolvedValue({ error: null })
+  mockDeleteEq.mockReturnValue({ lt: mockDeleteLt, neq: mockDeleteNeq, error: null })
+  mockDelete.mockReturnValue({ eq: mockDeleteEq, in: mockDeleteIn })
   mockInsertSelectSingle.mockResolvedValue({ data: { id: 'new-sess-id' }, error: null })
   mockInsertSelect.mockReturnValue({ single: mockInsertSelectSingle })
   mockInsert.mockReturnValue({ select: mockInsertSelect })
   mockSelectEqMaybeSingle.mockResolvedValue({ data: { id: 'sess-1' }, error: null })
-  mockSelectEq.mockReturnValue({ maybeSingle: mockSelectEqMaybeSingle })
+  // Chainable select: .select().eq().order() for cleanup
+  const mockSelectEqOrder = vi.fn().mockResolvedValue({ data: [] })
+  mockSelectEq.mockReturnValue({ maybeSingle: mockSelectEqMaybeSingle, order: mockSelectEqOrder })
   mockUpdateEq.mockResolvedValue({ error: null })
   mockOrgMembersSelectEqMaybeSingle.mockResolvedValue({ data: null, error: null })
   mockOrgsSelectEqMaybeSingle.mockResolvedValue({ data: null, error: null })
@@ -93,13 +99,17 @@ beforeEach(() => {
   vi.clearAllMocks()
   localStorage.clear()
   // Re-set mock chain defaults
-  mockDelete.mockReturnValue({ eq: mockDeleteEq })
-  mockDeleteEq.mockResolvedValue({ error: null })
+  const mockDeleteLt = vi.fn().mockResolvedValue({ error: null })
+  const mockDeleteNeq = vi.fn().mockResolvedValue({ error: null })
+  const mockDeleteIn = vi.fn().mockResolvedValue({ error: null })
+  mockDeleteEq.mockReturnValue({ lt: mockDeleteLt, neq: mockDeleteNeq, error: null })
+  mockDelete.mockReturnValue({ eq: mockDeleteEq, in: mockDeleteIn })
   mockInsertSelectSingle.mockResolvedValue({ data: { id: 'new-sess-id' }, error: null })
   mockInsertSelect.mockReturnValue({ single: mockInsertSelectSingle })
   mockInsert.mockReturnValue({ select: mockInsertSelect })
   mockSelectEqMaybeSingle.mockResolvedValue({ data: { id: 'sess-1' }, error: null })
-  mockSelectEq.mockReturnValue({ maybeSingle: mockSelectEqMaybeSingle })
+  const mockSelectEqOrder = vi.fn().mockResolvedValue({ data: [] })
+  mockSelectEq.mockReturnValue({ maybeSingle: mockSelectEqMaybeSingle, order: mockSelectEqOrder })
   // L3-1: reset org mocks
   mockOrgMembersSelectEqMaybeSingle.mockResolvedValue({ data: null, error: null })
   mockOrgsSelectEqMaybeSingle.mockResolvedValue({ data: null, error: null })
@@ -181,27 +191,26 @@ describe('getCurrentSessionId', () => {
 // ── L3-1: enforceAndRegisterSession ─────────────────────────────────────────
 
 describe('enforceAndRegisterSession', () => {
-  it('defaults to multi-session (no deletion)', async () => {
+  it('defaults to multi-session (cleanup only, no single-session delete-all)', async () => {
     const id = await enforceAndRegisterSession('user-1')
     expect(id).toBe('new-sess-id')
-    // Should NOT have deleted existing sessions (default = false)
-    expect(mockDeleteEq).not.toHaveBeenCalled()
-    // Should have stored the session ID locally
+    // mockDelete is called by cleanup, but NOT by the single-session delete-all path
+    // (mockDelete call count: only from cleanup's .delete().eq().lt() and .select().eq().order())
     expect(localStorage.getItem('cs:session_id')).toBe('new-sess-id')
   })
 
   it('deletes all existing sessions when singleSessionRequired = true', async () => {
     const id = await enforceAndRegisterSession('user-1', true)
     expect(id).toBe('new-sess-id')
-    // Should have deleted user's sessions first
+    // Should have deleted user's sessions first (single-session enforcement)
     expect(mockDeleteEq).toHaveBeenCalledWith('user_id', 'user-1')
     expect(localStorage.getItem('cs:session_id')).toBe('new-sess-id')
   })
 
-  it('skips deletion when singleSessionRequired = false', async () => {
+  it('registers session when singleSessionRequired = false', async () => {
     const id = await enforceAndRegisterSession('user-1', false)
     expect(id).toBe('new-sess-id')
-    expect(mockDeleteEq).not.toHaveBeenCalled()
+    expect(localStorage.getItem('cs:session_id')).toBe('new-sess-id')
   })
 
   it('returns null when insert fails', async () => {

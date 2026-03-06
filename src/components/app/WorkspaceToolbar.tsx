@@ -21,7 +21,9 @@ import {
   Redo2,
 } from 'lucide-react'
 import type { CanvasControls } from '../../pages/CanvasPage'
+import type { SaveStatus } from '../../stores/projectStore'
 import { BRAND } from '../../lib/brand'
+import { SaveProgressBar } from '../ui/SaveProgressBar'
 import { useSettingsModal } from '../../contexts/SettingsModalContext'
 import { getCurrentUser, signOut } from '../../lib/auth'
 import { removeCurrentSession } from '../../lib/sessionService'
@@ -284,6 +286,14 @@ export function WorkspaceToolbar({
           )}
         </div>
       </div>
+
+      {/* Save progress bar — thin animated strip at the bottom of the toolbar */}
+      {canvasControls && (
+        <SaveProgressBar
+          progress={canvasControls.saveProgress}
+          status={canvasControls.saveStatus as SaveStatus}
+        />
+      )}
     </header>
   )
 }
@@ -291,6 +301,7 @@ export function WorkspaceToolbar({
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const headerStyle: React.CSSProperties = {
+  position: 'relative',
   display: 'flex',
   alignItems: 'center',
   height: WORKSPACE_TOOLBAR_HEIGHT,

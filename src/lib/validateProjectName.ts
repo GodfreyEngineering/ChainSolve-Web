@@ -5,6 +5,7 @@
  *   - Must be a non-empty string after trimming
  *   - Max 100 characters (post-trim)
  *   - No control characters (ASCII 0x00–0x1F or 0x7F)
+ *   - No filesystem-unsafe characters: / \ : * ? " < > |
  *
  * Used by SaveAsDialog and CanvasPage inline rename before persisting to DB.
  */
@@ -20,6 +21,9 @@ export interface ProjectNameValidation {
 /** Matches any ASCII control character (U+0000–U+001F, U+007F). */
 // eslint-disable-next-line no-control-regex
 const CONTROL_CHARS = /[\x00-\x1F\x7F]/
+
+/** Characters unsafe for filenames on Windows/macOS/Linux. */
+const UNSAFE_FILENAME_CHARS = /[/\\:*?"<>|]/
 
 /**
  * Validate a project name string.
@@ -49,6 +53,13 @@ export function validateProjectName(name: unknown): ProjectNameValidation {
 
   if (CONTROL_CHARS.test(trimmed)) {
     return { ok: false, error: 'project name must not contain control characters' }
+  }
+
+  if (UNSAFE_FILENAME_CHARS.test(trimmed)) {
+    return {
+      ok: false,
+      error: 'project name must not contain / \\ : * ? " < > or |',
+    }
   }
 
   return { ok: true }

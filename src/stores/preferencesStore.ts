@@ -32,7 +32,7 @@ export interface UserPreferences {
 // ── Defaults ─────────────────────────────────────────────────────────────────
 
 const DEFAULTS: UserPreferences = {
-  autosaveEnabled: false, // D8-1: OFF by default
+  autosaveEnabled: true,
   autosaveDelayMs: 2000,
 
   decimalPlaces: -1, // auto

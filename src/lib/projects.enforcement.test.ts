@@ -17,7 +17,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const _single = vi.hoisted(() => vi.fn())
 const _from = vi.hoisted(() => {
   const chain: Record<string, ReturnType<typeof vi.fn>> = {}
-  for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order']) {
+  for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order', 'like']) {
     chain[m] = vi.fn(() => chain)
   }
   chain['single'] = _single
@@ -62,7 +62,7 @@ function setupSession() {
   _getSession.mockResolvedValue({ data: { session: SESSION } })
   // Reinitialise chain mocks
   const { chain, fromFn } = _from
-  for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order']) {
+  for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order', 'like']) {
     chain[m].mockReturnValue(chain)
   }
   fromFn.mockReturnValue(chain)
@@ -77,10 +77,10 @@ describe('createProject — DB trigger enforcement', () => {
   })
 
   it('surfaces "Project limit reached" when the trigger rejects the INSERT', async () => {
-    // Simulate the Postgres trigger RAISE EXCEPTION message
+    // Simulate the Postgres trigger RAISE EXCEPTION message (CS_PROJECT_LIMIT prefix)
     _single.mockResolvedValueOnce({
       data: null,
-      error: { message: 'Project limit reached' },
+      error: { message: 'CS_PROJECT_LIMIT: Free plan allows 1 project(s).' },
     })
 
     await expect(createProject('My project')).rejects.toThrow('Project limit reached')
@@ -113,7 +113,7 @@ describe('createCanvas — DB error surfacing', () => {
   it('surfaces the Supabase error when canvas INSERT fails', async () => {
     // listCanvases() uses from().select().eq().order() — mock to return empty list
     const { chain, fromFn } = _from
-    for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order']) {
+    for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order', 'like']) {
       chain[m].mockReturnValue(chain)
     }
     fromFn.mockReturnValue(chain)
@@ -132,7 +132,7 @@ describe('createCanvas — DB error surfacing', () => {
 
   it('surfaces a fallback message when canvas INSERT returns no error object', async () => {
     const { chain, fromFn } = _from
-    for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order']) {
+    for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order', 'like']) {
       chain[m].mockReturnValue(chain)
     }
     fromFn.mockReturnValue(chain)

@@ -16,7 +16,7 @@ import type { ProjectAsset } from './storage'
 const _single = vi.hoisted(() => vi.fn())
 const _from = vi.hoisted(() => {
   const chain: Record<string, ReturnType<typeof vi.fn>> = {}
-  for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order', 'in', 'not']) {
+  for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order', 'in', 'not', 'like']) {
     chain[m] = vi.fn(() => chain)
   }
   chain['single'] = _single
@@ -95,7 +95,7 @@ function makeCanvasRow(id: string, name: string, pos: number, projectId: string)
 function setupDefaultMocks() {
   // Re-initialise the chain return values (vi.resetAllMocks clears them)
   const { chain, fromFn } = _from
-  for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order', 'in', 'not']) {
+  for (const m of ['select', 'insert', 'update', 'delete', 'eq', 'order', 'in', 'not', 'like']) {
     chain[m].mockReturnValue(chain)
   }
   fromFn.mockReturnValue(chain)

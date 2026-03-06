@@ -308,6 +308,7 @@
     "unsaved": "Non enregistré",
     "lastSaved": "Enregistré : {{time}} · {{target}}",
     "offline": "Hors ligne",
+    "projectSaved": "Projet enregistré",
     "offlineQueued": "En file d'attente — hors ligne",
     "retryNow": "Réessayer maintenant",
     "backOnline": "Reconnecté — synchronisation en cours",

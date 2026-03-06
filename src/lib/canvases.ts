@@ -17,6 +17,8 @@ import {
   parseCanvasJson,
   type CanvasJSON,
 } from './canvasSchema'
+import { ServiceError } from './errors'
+import { validateProjectName } from './validateProjectName'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -39,8 +41,15 @@ async function requireSession() {
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  if (!session) throw new Error('Not authenticated')
+  if (!session) throw new ServiceError('NOT_AUTHENTICATED', 'Not authenticated')
   return session
+}
+
+function assertValidCanvasName(name: string): void {
+  const result = validateProjectName(name)
+  if (!result.ok) {
+    throw new ServiceError('INVALID_PROJECT_NAME', result.error!)
+  }
 }
 
 // ── Exported operations ─────────────────────────────────────────────────────
@@ -55,7 +64,7 @@ export async function listCanvases(projectId: string): Promise<CanvasRow[]> {
     .eq('project_id', projectId)
     .order('position', { ascending: true })
 
-  if (error) throw new Error(`Failed to list canvases: ${error.message}`)
+  if (error) throw new ServiceError('DB_ERROR', `Failed to list canvases: ${error.message}`, true)
   return (data ?? []) as CanvasRow[]
 }
 
@@ -69,6 +78,7 @@ export async function createCanvas(
   name: string,
   opts?: { nodes?: unknown[]; edges?: unknown[] },
 ): Promise<CanvasRow> {
+  assertValidCanvasName(name)
   const session = await requireSession()
   const userId = session.user.id
   const canvasId = crypto.randomUUID()
@@ -99,7 +109,8 @@ export async function createCanvas(
     .select(CANVAS_SELECT)
     .single()
 
-  if (error || !data) throw new Error(error?.message ?? 'Failed to create canvas')
+  if (error || !data)
+    throw new ServiceError('DB_ERROR', error?.message ?? 'Failed to create canvas', true)
   const row = data as CanvasRow
 
   // If first canvas, set as active
@@ -114,9 +125,10 @@ export async function createCanvas(
  * Rename a canvas.
  */
 export async function renameCanvas(canvasId: string, name: string): Promise<void> {
+  assertValidCanvasName(name)
   const { error } = await supabase.from('canvases').update({ name }).eq('id', canvasId)
 
-  if (error) throw new Error(`Rename canvas failed: ${error.message}`)
+  if (error) throw new ServiceError('DB_ERROR', `Rename canvas failed: ${error.message}`, true)
 }
 
 /**
@@ -140,7 +152,7 @@ export async function reorderCanvases(
       .eq('id', orderedCanvasIds[i])
       .eq('owner_id', userId)
 
-    if (error) throw new Error(`Reorder phase 1 failed: ${error.message}`)
+    if (error) throw new ServiceError('DB_ERROR', `Reorder phase 1 failed: ${error.message}`, true)
   }
 
   // Phase 2: set final positions
@@ -152,7 +164,7 @@ export async function reorderCanvases(
       .eq('project_id', projectId)
       .eq('owner_id', userId)
 
-    if (error) throw new Error(`Reorder phase 2 failed: ${error.message}`)
+    if (error) throw new ServiceError('DB_ERROR', `Reorder phase 2 failed: ${error.message}`, true)
   }
 }
 
@@ -178,7 +190,7 @@ export async function deleteCanvas(canvasId: string, projectId: string): Promise
     .eq('id', canvasId)
     .eq('owner_id', userId)
 
-  if (error) throw new Error(`Delete canvas failed: ${error.message}`)
+  if (error) throw new ServiceError('DB_ERROR', `Delete canvas failed: ${error.message}`, true)
 }
 
 /**
@@ -196,7 +208,7 @@ export async function setActiveCanvas(projectId: string, canvasId: string): Prom
     .select('updated_at')
     .single()
 
-  if (error) throw new Error(`Set active canvas failed: ${error.message}`)
+  if (error) throw new ServiceError('DB_ERROR', `Set active canvas failed: ${error.message}`, true)
   return (data as { updated_at: string }).updated_at
 }
 
@@ -210,7 +222,7 @@ export async function getActiveCanvasId(projectId: string): Promise<string | nul
     .eq('id', projectId)
     .single()
 
-  if (error) throw new Error(`Read active canvas failed: ${error.message}`)
+  if (error) throw new ServiceError('DB_ERROR', `Read active canvas failed: ${error.message}`, true)
   return (data as { active_canvas_id: string | null })?.active_canvas_id ?? null
 }
 
@@ -271,6 +283,7 @@ export async function duplicateCanvas(
   sourceCanvasId: string,
   newName: string,
 ): Promise<CanvasRow> {
+  assertValidCanvasName(newName)
   const graph = await loadCanvasGraph(projectId, sourceCanvasId)
   return createCanvas(projectId, newName, {
     nodes: graph.nodes,

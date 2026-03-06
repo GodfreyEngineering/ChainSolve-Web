@@ -315,6 +315,7 @@
     "unsaved": "Unsaved",
     "lastSaved": "Last saved: {{time}} · {{target}}",
     "offline": "Offline",
+    "projectSaved": "Project saved",
     "offlineQueued": "Queued — offline",
     "retryNow": "Retry now",
     "backOnline": "Back online — syncing changes",

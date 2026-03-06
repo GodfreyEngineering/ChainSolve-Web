@@ -31,6 +31,7 @@ import type { ExportAsset } from '../lib/chainsolvejson/model'
 import {
   loadProject,
   saveProject,
+  saveProjectWithRetry,
   createProject,
   duplicateProject,
   listProjects,
@@ -140,6 +141,7 @@ const OFFLINE_RETRY_DELAYS = [3_000, 6_000, 12_000, 24_000, 60_000]
 export interface CanvasControls {
   projectName: string | null
   saveStatus: string
+  saveProgress: number
   isDirty: boolean
   autosaveEnabled: boolean
   save: () => void
@@ -167,6 +169,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
   // ── Project store selectors ────────────────────────────────────────────────
   const saveStatus = useProjectStore((s) => s.saveStatus)
+  const saveProgress = useProjectStore((s) => s.saveProgress)
   const lastSavedAt = useProjectStore((s) => s.lastSavedAt)
   const projectName = useProjectStore((s) => s.projectName)
   const isDirty = useProjectStore((s) => s.isDirty)
@@ -175,6 +178,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
   const beginLoad = useProjectStore((s) => s.beginLoad)
   const markDirty = useProjectStore((s) => s.markDirty)
+  const setSaveProgress = useProjectStore((s) => s.setSaveProgress)
   const beginSave = useProjectStore((s) => s.beginSave)
   const completeSave = useProjectStore((s) => s.completeSave)
   const failSave = useProjectStore((s) => s.failSave)
@@ -432,7 +436,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   // ── Core save function ──────────────────────────────────────────────────────
   // Saves to both per-canvas storage and project-level conflict detection.
   const doSave = useCallback(
-    async (opts?: { forceKnownUpdatedAt?: string }) => {
+    async (opts?: { forceKnownUpdatedAt?: string; manual?: boolean }) => {
       if (!projectId || isSaving.current) return
 
       const snapshot = canvasRef.current?.getSnapshot()
@@ -445,6 +449,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
       isSaving.current = true
       beginSave()
+      setSaveProgress(0.1)
 
       try {
         // E8-1: Conflict check BEFORE any writes.
@@ -459,6 +464,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
             return
           }
         }
+        setSaveProgress(0.3)
 
         // W12.2: Save variables if dirty
         const varsState = useVariablesStore.getState()
@@ -475,6 +481,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           await saveCanvasGraph(projectId, currentCanvasId, snapshot.nodes, snapshot.edges)
           markCanvasClean(currentCanvasId)
         }
+        setSaveProgress(0.5)
 
         // K1-1: Also save secondary canvas if in tiled mode and dirty
         const secId = canvasesState.secondaryCanvasId
@@ -491,9 +498,10 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
             markCanvasClean(secId)
           }
         }
+        setSaveProgress(0.7)
 
-        // Save to legacy project.json (skip conflict check — already done above)
-        const result = await saveProject(
+        // Save to project.json with automatic retry on transient errors
+        const result = await saveProjectWithRetry(
           projectId,
           state.projectName,
           snapshot.nodes,
@@ -505,6 +513,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           },
           true, // skipConflictCheck: already checked before writes
         )
+        setSaveProgress(0.9)
 
         // Conflict should not trigger here since we checked above, but
         // handle it defensively in case of a concurrent write between
@@ -518,6 +527,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
           offlineRetryCount.current = 0
           completeSave(result.updatedAt)
+          if (opts?.manual) {
+            toast(t('canvas.projectSaved', 'Project saved'), 'success')
+          }
         }
       } catch (err: unknown) {
         if (!navigator.onLine) {
@@ -554,6 +566,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     },
     [
       projectId,
+      setSaveProgress,
       beginSave,
       completeSave,
       failSave,
@@ -625,7 +638,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault()
-        if (projectId && !readOnly) void doSave()
+        if (projectId && !readOnly) void doSave({ manual: true })
         else if (!projectId && !readOnly) setSaveAsRequested(true)
       }
     }
@@ -729,9 +742,10 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     onControlsReady({
       projectName: projectName ?? null,
       saveStatus,
+      saveProgress,
       isDirty,
       autosaveEnabled,
-      save: () => void doSave(),
+      save: () => void doSave({ manual: true }),
       saveAs: handleSaveAs,
       undo: () => canvasRef.current?.undo(),
       redo: () => canvasRef.current?.redo(),
@@ -744,6 +758,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     onControlsReady,
     projectName,
     saveStatus,
+    saveProgress,
     isDirty,
     autosaveEnabled,
     doSave,

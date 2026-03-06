@@ -7,6 +7,7 @@
 
 import { supabase } from './supabase'
 import type { AuthError, Session, User } from '@supabase/supabase-js'
+import { invalidateProfileCache } from './profilesService'
 
 export async function getCurrentUser(): Promise<User | null> {
   const {
@@ -64,6 +65,7 @@ export async function resendConfirmation(email: string): Promise<{ error: AuthEr
 }
 
 export async function signOut(): Promise<void> {
+  invalidateProfileCache()
   await supabase.auth.signOut()
 }
 

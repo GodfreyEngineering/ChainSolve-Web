@@ -18,6 +18,7 @@
 
 import { supabase } from './supabase'
 import { assertSafeStoragePath } from './validateStoragePath'
+import { ServiceError, isRetryableError } from './errors'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -51,8 +52,37 @@ async function requireSession() {
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  if (!session) throw new Error('You must be logged in to access storage.')
+  if (!session)
+    throw new ServiceError('NOT_AUTHENTICATED', 'You must be logged in to access storage.')
   return session
+}
+
+const UPLOAD_RETRY_DELAYS = [1000, 2000]
+
+async function uploadWithRetry(
+  bucket: string,
+  key: string,
+  body: Blob | Uint8Array | File,
+  opts?: { upsert?: boolean; contentType?: string },
+): Promise<void> {
+  let lastError: unknown
+  for (let attempt = 0; attempt <= UPLOAD_RETRY_DELAYS.length; attempt++) {
+    try {
+      const { error } = await supabase.storage
+        .from(bucket)
+        .upload(key, body, { upsert: opts?.upsert, contentType: opts?.contentType })
+      if (error) throw new ServiceError('STORAGE_ERROR', error.message, true)
+      return
+    } catch (err) {
+      lastError = err
+      if (attempt < UPLOAD_RETRY_DELAYS.length && isRetryableError(err)) {
+        await new Promise((r) => setTimeout(r, UPLOAD_RETRY_DELAYS[attempt]))
+        continue
+      }
+      throw err
+    }
+  }
+  throw lastError
 }
 
 /** Replace any character that is not alphanumeric, dot, dash, or underscore. */
@@ -74,11 +104,7 @@ export async function saveProjectJson(projectId: string, projectJson: unknown): 
 
   const blob = new Blob([JSON.stringify(projectJson)], { type: 'application/json' })
 
-  const { error: uploadErr } = await supabase.storage
-    .from('projects')
-    .upload(key, blob, { upsert: true, contentType: 'application/json' })
-
-  if (uploadErr) throw new Error(`Storage upload failed: ${uploadErr.message}`)
+  await uploadWithRetry('projects', key, blob, { upsert: true, contentType: 'application/json' })
 
   const { error: dbErr } = await supabase
     .from('projects')
@@ -86,7 +112,8 @@ export async function saveProjectJson(projectId: string, projectJson: unknown): 
     .eq('id', projectId)
     .eq('owner_id', userId) // projects table uses owner_id, not user_id
 
-  if (dbErr) throw new Error(`DB update (storage_key) failed: ${dbErr.message}`)
+  if (dbErr)
+    throw new ServiceError('DB_ERROR', `DB update (storage_key) failed: ${dbErr.message}`, true)
 }
 
 /**
@@ -99,8 +126,9 @@ export async function loadProjectJson(projectId: string): Promise<unknown> {
   const key = `${userId}/${projectId}/project.json`
 
   const { data, error } = await supabase.storage.from('projects').download(key)
-  if (error) throw new Error(`Storage download failed: ${error.message}`)
-  if (!data) throw new Error('Storage returned no data')
+  if (error)
+    throw new ServiceError('STORAGE_ERROR', `Storage download failed: ${error.message}`, true)
+  if (!data) throw new ServiceError('STORAGE_ERROR', 'Storage returned no data', true)
 
   return JSON.parse(await data.text())
 }
@@ -115,7 +143,8 @@ export async function loadProjectJson(projectId: string): Promise<unknown> {
  */
 export async function uploadCsv(projectId: string, file: File): Promise<{ storage_key: string }> {
   if (file.size > MAX_UPLOAD_BYTES) {
-    throw new Error(
+    throw new ServiceError(
+      'FILE_TOO_LARGE',
       `File is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is ${MAX_UPLOAD_BYTES / 1024 / 1024} MB.`,
     )
   }
@@ -126,9 +155,7 @@ export async function uploadCsv(projectId: string, file: File): Promise<{ storag
   const safe = sanitiseFilename(file.name)
   const key = `${userId}/${projectId}/uploads/${Date.now()}_${safe}`
 
-  const { error: uploadErr } = await supabase.storage.from('uploads').upload(key, file) // no upsert: timestamps keep each upload unique
-
-  if (uploadErr) throw new Error(`CSV upload failed: ${uploadErr.message}`)
+  await uploadWithRetry('uploads', key, file)
 
   const { error: dbErr } = await supabase.from('project_assets').insert({
     project_id: projectId,
@@ -140,7 +167,8 @@ export async function uploadCsv(projectId: string, file: File): Promise<{ storag
     size: file.size, // bytes
   })
 
-  if (dbErr) throw new Error(`project_assets insert failed: ${dbErr.message}`)
+  if (dbErr)
+    throw new ServiceError('DB_ERROR', `project_assets insert failed: ${dbErr.message}`, true)
 
   return { storage_key: key }
 }
@@ -162,7 +190,7 @@ export async function listProjectAssets(projectId: string): Promise<ProjectAsset
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
-  if (error) throw new Error(`Failed to list assets: ${error.message}`)
+  if (error) throw new ServiceError('DB_ERROR', `Failed to list assets: ${error.message}`, true)
   return (data ?? []) as ProjectAsset[]
 }
 
@@ -186,8 +214,9 @@ export async function getSignedDownloadUrl(
     .from(bucket)
     .createSignedUrl(storage_key, expiresSeconds)
 
-  if (error) throw new Error(`Signed URL creation failed: ${error.message}`)
-  if (!data?.signedUrl) throw new Error('No signed URL returned')
+  if (error)
+    throw new ServiceError('STORAGE_ERROR', `Signed URL creation failed: ${error.message}`, true)
+  if (!data?.signedUrl) throw new ServiceError('STORAGE_ERROR', 'No signed URL returned')
 
   return data.signedUrl
 }
@@ -206,8 +235,9 @@ export async function downloadAssetBytes(
   await requireSession()
 
   const { data, error } = await supabase.storage.from(bucket).download(storagePath)
-  if (error) throw new Error(`Asset download failed: ${error.message}`)
-  if (!data) throw new Error('Asset download returned no data')
+  if (error)
+    throw new ServiceError('STORAGE_ERROR', `Asset download failed: ${error.message}`, true)
+  if (!data) throw new ServiceError('STORAGE_ERROR', 'Asset download returned no data', true)
 
   return new Uint8Array(await data.arrayBuffer())
 }
@@ -228,7 +258,8 @@ export async function uploadAssetBytes(
   kind: string,
 ): Promise<{ storage_key: string }> {
   if (bytes.length > MAX_UPLOAD_BYTES) {
-    throw new Error(
+    throw new ServiceError(
+      'FILE_TOO_LARGE',
       `Asset is too large (${(bytes.length / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is ${MAX_UPLOAD_BYTES / 1024 / 1024} MB.`,
     )
   }
@@ -239,11 +270,7 @@ export async function uploadAssetBytes(
   const safe = sanitiseFilename(name)
   const key = `${userId}/${projectId}/uploads/${Date.now()}_${safe}`
 
-  const { error: uploadErr } = await supabase.storage
-    .from('uploads')
-    .upload(key, bytes, { contentType: mimeType })
-
-  if (uploadErr) throw new Error(`Asset upload failed: ${uploadErr.message}`)
+  await uploadWithRetry('uploads', key, bytes, { contentType: mimeType })
 
   const { error: dbErr } = await supabase.from('project_assets').insert({
     project_id: projectId,
@@ -256,7 +283,8 @@ export async function uploadAssetBytes(
     sha256,
   })
 
-  if (dbErr) throw new Error(`project_assets insert failed: ${dbErr.message}`)
+  if (dbErr)
+    throw new ServiceError('DB_ERROR', `project_assets insert failed: ${dbErr.message}`, true)
 
   return { storage_key: key }
 }

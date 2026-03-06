@@ -24,6 +24,8 @@ import {
 } from './storage'
 import { listCanvases, loadCanvasGraph, createCanvas, setActiveCanvas } from './canvases'
 import { dlog } from '../observability/debugLog'
+import { ServiceError, isRetryableError } from './errors'
+import { validateProjectName } from './validateProjectName'
 
 // ── Schema versioning ─────────────────────────────────────────────────────────
 
@@ -104,8 +106,52 @@ async function requireSession() {
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  if (!session) throw new Error('Not authenticated')
+  if (!session) throw new ServiceError('NOT_AUTHENTICATED', 'Not authenticated')
   return session
+}
+
+/** Map a Supabase error to a ServiceError with the appropriate code. */
+function mapDbError(msg: string, context: string): ServiceError {
+  if (msg.includes('projects_owner_name_unique')) {
+    return new ServiceError('DUPLICATE_PROJECT_NAME', 'A project with that name already exists')
+  }
+  if (msg.includes('CS_PROJECT_LIMIT')) {
+    return new ServiceError(
+      'PROJECT_LIMIT_REACHED',
+      'Project limit reached. Delete an existing project or upgrade to Pro.',
+    )
+  }
+  if (msg.includes('projects_name_safe') || msg.includes('projects_name_length')) {
+    return new ServiceError('INVALID_PROJECT_NAME', 'Project name contains invalid characters')
+  }
+  return new ServiceError('DB_ERROR', `${context}: ${msg}`, false)
+}
+
+function assertValidName(name: string): void {
+  const v = validateProjectName(name)
+  if (!v.ok) throw new ServiceError('INVALID_PROJECT_NAME', v.error ?? 'Invalid project name')
+}
+
+/**
+ * Find a unique project name for the current user.
+ * If "My Project" is taken, tries "My Project (2)", "My Project (3)", etc.
+ */
+export async function resolveUniqueName(desiredName: string): Promise<string> {
+  const session = await requireSession()
+  const { data } = await supabase
+    .from('projects')
+    .select('name')
+    .eq('owner_id', session.user.id)
+    .like('name', `${desiredName}%`)
+
+  const existing = new Set((data ?? []).map((r: { name: string }) => r.name))
+  if (!existing.has(desiredName)) return desiredName
+
+  for (let i = 2; i <= 100; i++) {
+    const candidate = `${desiredName} (${i})`
+    if (!existing.has(candidate)) return candidate
+  }
+  return `${desiredName} (${crypto.randomUUID().slice(0, 8)})`
 }
 
 export async function readUpdatedAt(projectId: string): Promise<string | null> {
@@ -169,21 +215,24 @@ export async function getProjectCount(): Promise<number> {
 
 /** Create a new project row + empty project.json in storage + first canvas. */
 export async function createProject(name: string, folder?: string | null): Promise<ProjectRow> {
+  assertValidName(name)
   const session = await requireSession()
+  const uniqueName = await resolveUniqueName(name.trim())
   const projectId = crypto.randomUUID()
   const storageKey = `${session.user.id}/${projectId}/project.json`
 
   const row: Record<string, unknown> = {
     id: projectId,
     owner_id: session.user.id,
-    name,
+    name: uniqueName,
     storage_key: storageKey,
   }
   if (folder) row.folder = folder
 
   const { data, error } = await supabase.from('projects').insert(row).select(SELECT_COLS).single()
 
-  if (error || !data) throw new Error(error?.message ?? 'Failed to create project')
+  if (error) throw mapDbError(error.message, 'Failed to create project')
+  if (!data) throw new ServiceError('DB_ERROR', 'Failed to create project')
   const proj = data as ProjectRow
 
   const pj = buildJson(proj.id, name, [], [])
@@ -208,21 +257,28 @@ export async function createProjectFromTemplate(templateId: string): Promise<Pro
   if (!tmpl) throw new Error(`Unknown template: ${templateId}`)
 
   const session = await requireSession()
+  const uniqueName = await resolveUniqueName(tmpl.name)
   const projectId = crypto.randomUUID()
   const canvasId = crypto.randomUUID()
   const storageKey = `${session.user.id}/${projectId}/project.json`
 
   const { data, error } = await supabase
     .from('projects')
-    .insert({ id: projectId, owner_id: session.user.id, name: tmpl.name, storage_key: storageKey })
+    .insert({
+      id: projectId,
+      owner_id: session.user.id,
+      name: uniqueName,
+      storage_key: storageKey,
+    })
     .select(SELECT_COLS)
     .single()
 
-  if (error || !data) throw new Error(error?.message ?? 'Failed to create project')
+  if (error) throw mapDbError(error.message, 'Failed to create project')
+  if (!data) throw new ServiceError('DB_ERROR', 'Failed to create project')
   const proj = data as ProjectRow
 
   const graph = tmpl.buildGraph(canvasId, projectId)
-  const pj = buildJson(proj.id, tmpl.name, graph.nodes, graph.edges)
+  const pj = buildJson(proj.id, uniqueName, graph.nodes, graph.edges)
   await saveProjectJson(proj.id, pj)
 
   // Create the first canvas with the template graph
@@ -296,14 +352,15 @@ export async function saveProject(
 
 /** Rename a project row. Returns the new DB updated_at. */
 export async function renameProject(projectId: string, name: string): Promise<string> {
+  assertValidName(name)
   const { data, error } = await supabase
     .from('projects')
-    .update({ name })
+    .update({ name: name.trim() })
     .eq('id', projectId)
     .select('updated_at')
     .single()
 
-  if (error) throw new Error(`Rename failed: ${error.message}`)
+  if (error) throw mapDbError(error.message, 'Rename failed')
   return (data as { updated_at: string }).updated_at
 }
 
@@ -359,7 +416,9 @@ export async function deleteProject(projectId: string): Promise<void> {
 
 /** Create a new project that is a copy of the source project's graph + variables + canvases + assets. */
 export async function duplicateProject(sourceId: string, newName: string): Promise<ProjectRow> {
+  assertValidName(newName)
   const session = await requireSession()
+  const uniqueName = await resolveUniqueName(newName.trim())
   const projectId = crypto.randomUUID()
   const storageKey = `${session.user.id}/${projectId}/project.json`
 
@@ -372,14 +431,15 @@ export async function duplicateProject(sourceId: string, newName: string): Promi
     .insert({
       id: projectId,
       owner_id: session.user.id,
-      name: newName,
+      name: uniqueName,
       storage_key: storageKey,
       variables: srcVariables,
     })
     .select(SELECT_COLS)
     .single()
 
-  if (error || !data) throw new Error(error?.message ?? 'Failed to create project row')
+  if (error) throw mapDbError(error.message, 'Failed to create project row')
+  if (!data) throw new ServiceError('DB_ERROR', 'Failed to create project row')
   const newProj = data as ProjectRow
 
   let srcGraph: { nodes: unknown[]; edges: unknown[] } = { nodes: [], edges: [] }
@@ -435,8 +495,10 @@ export async function importProject(json: ProjectJSON, overrideName?: string): P
     throw new Error(`Cannot import: unsupported schemaVersion ${String(json.schemaVersion)}`)
   }
 
-  const name = overrideName ?? json.project?.name ?? 'Imported Project'
+  const rawName = overrideName ?? json.project?.name ?? 'Imported Project'
+  assertValidName(rawName)
   const session = await requireSession()
+  const name = await resolveUniqueName(rawName.trim())
   const projectId = crypto.randomUUID()
   const storageKey = `${session.user.id}/${projectId}/project.json`
 
@@ -446,7 +508,8 @@ export async function importProject(json: ProjectJSON, overrideName?: string): P
     .select(SELECT_COLS)
     .single()
 
-  if (error || !data) throw new Error(error?.message ?? 'Failed to create project row')
+  if (error) throw mapDbError(error.message, 'Failed to create project row')
+  if (!data) throw new ServiceError('DB_ERROR', 'Failed to create project row')
   const proj = data as ProjectRow
 
   const graphData = json.graph ?? { nodes: [], edges: [] }
@@ -470,6 +533,35 @@ export async function importProject(json: ProjectJSON, overrideName?: string): P
 
   const updated = await readUpdatedAt(proj.id)
   return { ...proj, updated_at: updated ?? proj.updated_at }
+}
+
+// ── Save with retry ─────────────────────────────────────────────────────────
+
+const RETRY_DELAYS = [1000, 2000, 4000]
+
+/**
+ * Save with automatic retry for transient failures.
+ * Retries up to 3 times with exponential backoff (1s, 2s, 4s).
+ * Non-retryable errors (conflicts, auth) are thrown immediately.
+ */
+export async function saveProjectWithRetry(
+  ...args: Parameters<typeof saveProject>
+): Promise<ReturnType<typeof saveProject>> {
+  let lastError: unknown
+  for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+    try {
+      return await saveProject(...args)
+    } catch (err) {
+      lastError = err
+      if (err instanceof ServiceError && err.code === 'SAVE_CONFLICT') throw err
+      if (attempt < RETRY_DELAYS.length && isRetryableError(err)) {
+        await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]))
+        continue
+      }
+      throw err
+    }
+  }
+  throw lastError
 }
 
 // ── L4-2: Folder + bulk operations ──────────────────────────────────────────

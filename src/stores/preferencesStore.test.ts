@@ -12,8 +12,8 @@ describe('preferencesStore', () => {
     usePreferencesStore.getState().reset()
   })
 
-  it('has autosave disabled by default', () => {
-    expect(usePreferencesStore.getState().autosaveEnabled).toBe(false)
+  it('has autosave enabled by default', () => {
+    expect(usePreferencesStore.getState().autosaveEnabled).toBe(true)
   })
 
   it('has auto decimal places by default', () => {
@@ -58,18 +58,18 @@ describe('preferencesStore', () => {
     const state = usePreferencesStore.getState()
     expect(state.decimalPlaces).toBe(3)
     expect(state.thousandsSeparator).toBe(true)
-    expect(state.autosaveEnabled).toBe(false) // unchanged
+    expect(state.autosaveEnabled).toBe(true) // unchanged
   })
 
   it('reset() restores all defaults', () => {
     usePreferencesStore.getState().update({
-      autosaveEnabled: true,
+      autosaveEnabled: false,
       decimalPlaces: 4,
       thousandsSeparator: true,
     })
     usePreferencesStore.getState().reset()
     const state = usePreferencesStore.getState()
-    expect(state.autosaveEnabled).toBe(false)
+    expect(state.autosaveEnabled).toBe(true)
     expect(state.decimalPlaces).toBe(-1)
     expect(state.thousandsSeparator).toBe(false)
   })
