@@ -15,6 +15,7 @@ export const PLAN_COLORS: Record<Plan, string> = {
   pro: '#d4a017',
   student: '#0ea5e9',
   enterprise: '#8b5cf6',
+  developer: '#10b981',
   past_due: '#f59e0b',
   canceled: '#ef4444',
 }
@@ -31,7 +32,7 @@ export function displayNameStyle(plan: Plan): React.CSSProperties {
   if (plan === 'pro') {
     return { fontWeight: 700 }
   }
-  if (plan === 'enterprise') {
+  if (plan === 'enterprise' || plan === 'developer') {
     return { fontWeight: 700, letterSpacing: '0.02em' }
   }
   return { fontWeight: 400 }

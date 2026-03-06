@@ -243,6 +243,7 @@
     "pro": "Pro",
     "student": "Etudiant",
     "enterprise": "Enterprise",
+    "developer": "Développeur",
     "past_due": "Paiement en retard",
     "canceled": "Annulé"
   },

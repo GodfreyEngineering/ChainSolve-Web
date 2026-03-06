@@ -12,7 +12,12 @@ import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../lib/profilesService'
 import { resolveEffectivePlan, type Plan } from '../lib/entitlements'
 import { initRememberMe } from '../lib/rememberMe'
-import { touchSession } from '../lib/sessionService'
+import {
+  getCurrentSessionId,
+  registerSession,
+  resetSessionFailures,
+  touchSession,
+} from '../lib/sessionService'
 import { useSessionGuard } from './useSessionGuard'
 import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 import { listMfaFactors } from '../lib/auth'
@@ -54,7 +59,8 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
   const [mfaPromptDismissed, setMfaPromptDismissed] = useState(false)
   const [hasMfaFactor, setHasMfaFactor] = useState<boolean | null>(null)
 
-  const { sessionRevoked } = useSessionGuard()
+  // Skip session polling for developer accounts — they should never be locked out
+  const { sessionRevoked } = useSessionGuard({ skip: !!profile?.is_developer })
 
   const refreshProfile = useCallback(async () => {
     if (!user) return
@@ -75,7 +81,13 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
       }
       setUser(session.user)
       initRememberMe()
-      void touchSession()
+      // Ensure session record exists (handles DB wipe / stale localStorage)
+      if (!getCurrentSessionId()) {
+        resetSessionFailures()
+        void registerSession(session.user.id)
+      } else {
+        void touchSession()
+      }
       supabase
         .from('profiles')
         .select(PROFILE_COLS)

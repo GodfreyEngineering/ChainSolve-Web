@@ -19,7 +19,15 @@
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type Plan = 'free' | 'trialing' | 'pro' | 'student' | 'enterprise' | 'past_due' | 'canceled'
+export type Plan =
+  | 'free'
+  | 'trialing'
+  | 'pro'
+  | 'student'
+  | 'enterprise'
+  | 'developer'
+  | 'past_due'
+  | 'canceled'
 
 /**
  * J3-1: Formal role representing the user's authority level.
@@ -159,6 +167,23 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseGraphTableOutputs: true,
     canImportFiles: true,
   },
+  developer: {
+    maxProjects: Infinity,
+    maxCanvases: Infinity,
+    canUploadCsv: true,
+    canUseArrays: true,
+    canUsePlots: true,
+    canUseRules: true,
+    canUseGroups: true,
+    canEditThemes: true,
+    canExport: true,
+    canUseAi: true,
+    canCreateCustomMaterials: true,
+    canCreateCustomFunctions: true,
+    canUseListBlocks: true,
+    canUseGraphTableOutputs: true,
+    canImportFiles: true,
+  },
   past_due: {
     maxProjects: 1,
     maxCanvases: 2,
@@ -216,7 +241,8 @@ export function resolveEffectivePlan(
   } | null,
 ): Plan {
   if (!profile) return 'free'
-  if (profile.is_developer || profile.is_admin) return 'enterprise'
+  if (profile.is_developer) return 'developer'
+  if (profile.is_admin) return 'enterprise'
   if (profile.is_student && profile.plan === 'free') return 'student'
   return profile.plan
 }
@@ -264,7 +290,13 @@ export function isEnterpriseAdmin(profile: ProfileLike | null): boolean {
 
 /** True for trialing, pro, student, or enterprise (full access). */
 export function isPro(plan: Plan): boolean {
-  return plan === 'trialing' || plan === 'pro' || plan === 'student' || plan === 'enterprise'
+  return (
+    plan === 'trialing' ||
+    plan === 'pro' ||
+    plan === 'student' ||
+    plan === 'enterprise' ||
+    plan === 'developer'
+  )
 }
 
 /** Past-due and canceled users get read-only access to existing projects. */

@@ -196,7 +196,8 @@ export default function CanvasPage({ embedded }: CanvasPageProps = {}) {
   const [plan, setPlan] = useState<Plan>('free')
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   // L3-1: Session revoked detection (poll + BroadcastChannel + visibility)
-  const { sessionRevoked } = useSessionGuard()
+  // Skip when embedded (WorkspacePage handles session guard) or for developers
+  const { sessionRevoked } = useSessionGuard({ skip: embedded })
 
   useEffect(() => {
     let cancelled = false

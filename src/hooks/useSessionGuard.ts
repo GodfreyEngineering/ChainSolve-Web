@@ -19,12 +19,15 @@ import { useEffect, useRef, useState } from 'react'
 import { isSessionValid, SESSION_CHECK_INTERVAL_MS } from '../lib/sessionService'
 import { broadcastSessionRevoked, onSessionRevoked } from '../lib/sessionBroadcast'
 
-export function useSessionGuard(): { sessionRevoked: boolean } {
+export function useSessionGuard(opts?: { skip?: boolean }): { sessionRevoked: boolean } {
+  const skip = opts?.skip ?? false
   const [sessionRevoked, setSessionRevoked] = useState(false)
   // Ref to prevent duplicate broadcasts / checks after already revoked.
   const revokedRef = useRef(false)
 
   useEffect(() => {
+    // Developer accounts or explicit skip: never poll session validity
+    if (skip) return
     function markRevoked() {
       if (revokedRef.current) return
       revokedRef.current = true
@@ -59,7 +62,7 @@ export function useSessionGuard(): { sessionRevoked: boolean } {
       document.removeEventListener('visibilitychange', onVisibilityChange)
       unsub()
     }
-  }, [])
+  }, [skip])
 
   return { sessionRevoked }
 }

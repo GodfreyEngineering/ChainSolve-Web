@@ -85,6 +85,7 @@ import {
   enforceAndRegisterSession,
   isSingleSessionRequired,
   isSessionValid,
+  resetSessionFailures,
   SESSION_CHECK_INTERVAL_MS,
 } from './sessionService'
 
@@ -213,6 +214,10 @@ describe('enforceAndRegisterSession', () => {
 // ── H9-1: isSessionValid ────────────────────────────────────────────────────
 
 describe('isSessionValid', () => {
+  beforeEach(() => {
+    resetSessionFailures()
+  })
+
   it('returns true when no session ID is stored (unauthenticated)', async () => {
     expect(await isSessionValid()).toBe(true)
   })
@@ -223,10 +228,28 @@ describe('isSessionValid', () => {
     expect(await isSessionValid()).toBe(true)
   })
 
-  it('returns false when session record has been deleted (revoked)', async () => {
+  it('returns true on first failure (consecutive-failure grace period)', async () => {
     localStorage.setItem('cs:session_id', 'sess-1')
     mockSelectEqMaybeSingle.mockResolvedValueOnce({ data: null, error: null })
-    expect(await isSessionValid()).toBe(false)
+    expect(await isSessionValid()).toBe(true)
+  })
+
+  it('returns false after 3 consecutive failures (confirmed revocation)', async () => {
+    localStorage.setItem('cs:session_id', 'sess-1')
+    mockSelectEqMaybeSingle.mockResolvedValue({ data: null, error: null })
+    expect(await isSessionValid()).toBe(true) // failure 1
+    expect(await isSessionValid()).toBe(true) // failure 2
+    expect(await isSessionValid()).toBe(false) // failure 3 → revoked
+  })
+
+  it('resets failure counter when session is found again', async () => {
+    localStorage.setItem('cs:session_id', 'sess-1')
+    mockSelectEqMaybeSingle.mockResolvedValueOnce({ data: null, error: null })
+    expect(await isSessionValid()).toBe(true) // failure 1
+    mockSelectEqMaybeSingle.mockResolvedValueOnce({ data: { id: 'sess-1' }, error: null })
+    expect(await isSessionValid()).toBe(true) // success → resets counter
+    mockSelectEqMaybeSingle.mockResolvedValueOnce({ data: null, error: null })
+    expect(await isSessionValid()).toBe(true) // failure 1 again (counter was reset)
   })
 
   it('returns true on network error to avoid false lockouts', async () => {

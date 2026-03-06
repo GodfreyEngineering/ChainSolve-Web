@@ -250,6 +250,7 @@
     "pro": "Pro",
     "student": "Student",
     "enterprise": "Enterprise",
+    "developer": "Developer",
     "past_due": "Past Due",
     "canceled": "Canceled"
   },

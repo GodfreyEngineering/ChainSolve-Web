@@ -63,6 +63,16 @@ function badgeStyle(plan: Plan): React.CSSProperties {
     }
   }
 
+  if (plan === 'developer') {
+    return {
+      ...base,
+      background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.25))',
+      border: `1px solid ${color}55`,
+      boxShadow: `0 0 8px ${color}33`,
+      letterSpacing: '0.03em',
+    }
+  }
+
   return base
 }
 
@@ -99,6 +109,15 @@ function compactStyle(plan: Plan): React.CSSProperties {
     }
   }
 
+  if (plan === 'developer') {
+    return {
+      ...base,
+      opacity: 1,
+      boxShadow: `0 0 6px ${color}44`,
+      letterSpacing: '0.06em',
+    }
+  }
+
   return base
 }
 
@@ -124,7 +143,7 @@ export function PlanBadge({ plan, variant = 'badge', style }: PlanBadgeProps) {
   return (
     <span style={{ ...s, ...style }}>
       {t(`plans.${plan}`)}
-      {plan === 'pro' && <span style={shimmerOverlay} />}
+      {(plan === 'pro' || plan === 'developer') && <span style={shimmerOverlay} />}
     </span>
   )
 }

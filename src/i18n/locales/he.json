@@ -711,6 +711,16 @@
     "displayNameInvalidChars": "שם התצוגה מכיל תווים שאינם מותרים.",
     "displayNameForbidden": "שם תצוגה זה אינו מותר."
   },
+  "plans": {
+    "free": "חינם",
+    "trialing": "ניסיון",
+    "pro": "Pro",
+    "student": "סטודנט",
+    "enterprise": "Enterprise",
+    "developer": "מפתח",
+    "past_due": "באיחור",
+    "canceled": "מבוטל"
+  },
   "roles": {
     "developer": "מפתח",
     "enterprise_admin": "מנהל ארגוני",

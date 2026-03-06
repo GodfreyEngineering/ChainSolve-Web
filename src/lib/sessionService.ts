@@ -170,12 +170,24 @@ export async function isSingleSessionRequired(userId: string): Promise<boolean> 
 }
 
 /**
+ * Track consecutive validation failures to avoid false revocations.
+ * A single failed check (e.g. transient DB issue, table truncated) should
+ * not immediately revoke — require 3 consecutive failures.
+ */
+let consecutiveFailures = 0
+const MAX_FAILURES_BEFORE_REVOKE = 3
+
+/**
  * Check whether the current session record still exists in the database.
  * Returns `true` if the session is still valid, `false` if it has been
  * revoked (e.g. by another device logging in).
  *
  * Returns `true` when no session ID is stored (unauthenticated) to avoid
  * false positives before login.
+ *
+ * Uses a consecutive-failure window: the session is only considered revoked
+ * after MAX_FAILURES_BEFORE_REVOKE consecutive "not found" results, which
+ * guards against transient DB issues and table wipes.
  */
 export async function isSessionValid(): Promise<boolean> {
   const sessionId = getCurrentSessionId()
@@ -187,6 +199,29 @@ export async function isSessionValid(): Promise<boolean> {
     .eq('id', sessionId)
     .maybeSingle()
 
-  if (error) return true // Network error — assume valid to avoid false lockouts
-  return data !== null
+  if (error) {
+    // Network error — assume valid to avoid false lockouts, reset counter
+    consecutiveFailures = 0
+    return true
+  }
+
+  if (data !== null) {
+    // Session found — valid, reset counter
+    consecutiveFailures = 0
+    return true
+  }
+
+  // Session not found — increment failure counter
+  consecutiveFailures++
+  if (consecutiveFailures >= MAX_FAILURES_BEFORE_REVOKE) {
+    return false // Confirmed revocation
+  }
+
+  // Not enough consecutive failures yet — try re-registering
+  return true
+}
+
+/** Reset the failure counter (e.g. after fresh login or session registration). */
+export function resetSessionFailures(): void {
+  consecutiveFailures = 0
 }

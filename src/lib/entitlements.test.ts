@@ -77,6 +77,10 @@ describe('getEntitlements', () => {
     expect(getEntitlements('enterprise')).toEqual(getEntitlements('pro'))
   })
 
+  it('developer plan: identical entitlements to pro', () => {
+    expect(getEntitlements('developer')).toEqual(getEntitlements('pro'))
+  })
+
   it('past_due plan: restricted (no groups/themes unlike free)', () => {
     const ent = getEntitlements('past_due')
     expect(ent.maxProjects).toBe(1)
@@ -105,7 +109,7 @@ describe('getEntitlements', () => {
 // ── isPro ─────────────────────────────────────────────────────────────────────
 
 describe('isPro', () => {
-  const proCases: Plan[] = ['trialing', 'pro', 'student', 'enterprise']
+  const proCases: Plan[] = ['trialing', 'pro', 'student', 'enterprise', 'developer']
   const nonProCases: Plan[] = ['free', 'past_due', 'canceled']
 
   for (const plan of proCases) {
@@ -132,7 +136,7 @@ describe('isReadOnly', () => {
     expect(isReadOnly('past_due')).toBe(true)
   })
 
-  const writablePlans: Plan[] = ['free', 'trialing', 'pro', 'student', 'enterprise']
+  const writablePlans: Plan[] = ['free', 'trialing', 'pro', 'student', 'enterprise', 'developer']
   for (const plan of writablePlans) {
     it(`returns false for ${plan}`, () => {
       expect(isReadOnly(plan)).toBe(false)
@@ -181,6 +185,11 @@ describe('canCreateProject', () => {
     expect(canCreateProject('enterprise', 0)).toBe(true)
     expect(canCreateProject('enterprise', 100)).toBe(true)
   })
+
+  it('developer: always true (unlimited)', () => {
+    expect(canCreateProject('developer', 0)).toBe(true)
+    expect(canCreateProject('developer', 100)).toBe(true)
+  })
 })
 
 // ── canCreateCanvas ────────────────────────────────────────────────────────────
@@ -223,6 +232,11 @@ describe('canCreateCanvas', () => {
     expect(canCreateCanvas('enterprise', 0)).toBe(true)
     expect(canCreateCanvas('enterprise', 100)).toBe(true)
   })
+
+  it('developer: always true (unlimited)', () => {
+    expect(canCreateCanvas('developer', 0)).toBe(true)
+    expect(canCreateCanvas('developer', 100)).toBe(true)
+  })
 })
 
 // ── showBillingBanner ──────────────────────────────────────────────────────────
@@ -236,7 +250,7 @@ describe('showBillingBanner', () => {
     expect(showBillingBanner('canceled')).toBe('canceled')
   })
 
-  const noBannerPlans: Plan[] = ['free', 'trialing', 'pro', 'student', 'enterprise']
+  const noBannerPlans: Plan[] = ['free', 'trialing', 'pro', 'student', 'enterprise', 'developer']
   for (const plan of noBannerPlans) {
     it(`returns null for ${plan}`, () => {
       expect(showBillingBanner(plan)).toBeNull()
@@ -290,13 +304,19 @@ describe('isBlockEntitled', () => {
     expect(isBlockEntitled({ proOnly: true, category: 'plot' }, entEnt)).toBe(true)
     expect(isBlockEntitled({ proOnly: true, category: 'array' }, entEnt)).toBe(true)
   })
+
+  it('developer entitlements allow all pro features', () => {
+    const devEnt = getEntitlements('developer')
+    expect(isBlockEntitled({ proOnly: true, category: 'plot' }, devEnt)).toBe(true)
+    expect(isBlockEntitled({ proOnly: true, category: 'array' }, devEnt)).toBe(true)
+  })
 })
 
 // ── canInstallExploreItem (V2-025) ───────────────────────────────────────────
 
 describe('canInstallExploreItem', () => {
   it('pro/trialing/student/enterprise can install any category', () => {
-    const proCases: Plan[] = ['pro', 'trialing', 'student', 'enterprise']
+    const proCases: Plan[] = ['pro', 'trialing', 'student', 'enterprise', 'developer']
     for (const plan of proCases) {
       expect(canInstallExploreItem(plan, 'template', 0)).toBe(true)
       expect(canInstallExploreItem(plan, 'block_pack', 5)).toBe(true)
@@ -331,6 +351,7 @@ describe('canUploadToExplore', () => {
     expect(canUploadToExplore('trialing')).toBe(true)
     expect(canUploadToExplore('student')).toBe(true)
     expect(canUploadToExplore('enterprise')).toBe(true)
+    expect(canUploadToExplore('developer')).toBe(true)
   })
 
   it('returns false for free/past_due/canceled', () => {
@@ -357,12 +378,12 @@ describe('resolveEffectivePlan', () => {
     )
   })
 
-  it('returns "enterprise" for developer accounts regardless of plan', () => {
+  it('returns "developer" for developer accounts regardless of plan', () => {
     expect(resolveEffectivePlan({ plan: 'free', is_developer: true, is_admin: false })).toBe(
-      'enterprise',
+      'developer',
     )
     expect(resolveEffectivePlan({ plan: 'canceled', is_developer: true, is_admin: false })).toBe(
-      'enterprise',
+      'developer',
     )
   })
 
@@ -380,9 +401,9 @@ describe('resolveEffectivePlan', () => {
     expect(resolveEffectivePlan({ plan: 'pro' })).toBe('pro')
   })
 
-  it('developer + admin both set still returns enterprise', () => {
+  it('developer + admin both set still returns developer (developer takes precedence)', () => {
     expect(resolveEffectivePlan({ plan: 'free', is_developer: true, is_admin: true })).toBe(
-      'enterprise',
+      'developer',
     )
   })
 
@@ -430,7 +451,7 @@ describe('resolveEffectivePlan', () => {
 
   it('developer takes precedence over student', () => {
     expect(resolveEffectivePlan({ plan: 'free', is_developer: true, is_student: true })).toBe(
-      'enterprise',
+      'developer',
     )
   })
 
