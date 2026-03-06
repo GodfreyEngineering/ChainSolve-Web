@@ -16,8 +16,3 @@ export interface ProjectVariable {
 
 /** Map of varId → ProjectVariable. Stored as JSONB on the projects table. */
 export type VariablesMap = Record<string, ProjectVariable>
-
-/** Resolve a variable value by ID. Returns undefined if not found. */
-export function resolveVariable(variables: VariablesMap, varId: string): number | undefined {
-  return variables[varId]?.value
-}

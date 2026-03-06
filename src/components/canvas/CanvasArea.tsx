@@ -168,10 +168,6 @@ export interface CanvasAreaProps {
   onOpenVariables?: () => void
   /** Open the Groups / Templates manager. */
   onOpenGroups?: () => void
-  /** Open the Theme Library window. */
-  onOpenThemes?: () => void
-  /** Open the Theme Wizard (full editor). */
-  onOpenThemeEditor?: () => void
   /** Open the Material Wizard. */
   onOpenMaterials?: () => void
 

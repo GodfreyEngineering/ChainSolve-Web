@@ -1872,14 +1872,6 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                 plan={plan}
                 onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
                 onOpenGroups={() => setTemplateManagerOpen(true)}
-                onOpenThemes={() =>
-                  openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })
-                }
-                onOpenThemeEditor={
-                  getEntitlements(plan).canEditThemes
-                    ? () => openWindow(THEME_WIZARD_WINDOW_ID, { width: 900, height: 600 })
-                    : undefined
-                }
                 onOpenMaterials={() => setMaterialWizardOpen(true)}
                 onFixWithCopilot={() => openAiPanel()}
                 onExplainIssues={() => openAiPanel()}
@@ -1906,14 +1898,6 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                 plan={plan}
                 onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
                 onOpenGroups={() => setTemplateManagerOpen(true)}
-                onOpenThemes={() =>
-                  openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })
-                }
-                onOpenThemeEditor={
-                  getEntitlements(plan).canEditThemes
-                    ? () => openWindow(THEME_WIZARD_WINDOW_ID, { width: 900, height: 600 })
-                    : undefined
-                }
                 onOpenMaterials={() => setMaterialWizardOpen(true)}
                 onFixWithCopilot={() => openAiPanel()}
                 onExplainIssues={() => openAiPanel()}
@@ -1938,12 +1922,6 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
             plan={plan}
             onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
             onOpenGroups={() => setTemplateManagerOpen(true)}
-            onOpenThemes={() => openWindow(THEME_LIBRARY_WINDOW_ID, { width: 560, height: 480 })}
-            onOpenThemeEditor={
-              getEntitlements(plan).canEditThemes
-                ? () => openWindow(THEME_WIZARD_WINDOW_ID, { width: 900, height: 600 })
-                : undefined
-            }
             onOpenMaterials={() => setMaterialWizardOpen(true)}
             onFixWithCopilot={() => openAiPanel()}
             onExplainIssues={() => openAiPanel()}
