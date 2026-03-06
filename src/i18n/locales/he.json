@@ -1401,6 +1401,7 @@
     "categoryTableOps": "Table Ops",
     "vectorInput": "Vector Input",
     "tableInput": "Table Input",
+    "table_extract_col": "Table Column",
     "csvImport": "CSV Import",
     "vectorLength": "Vector Length",
     "vectorSum": "Vector Sum",

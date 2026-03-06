@@ -23,6 +23,7 @@ const VALID_CATEGORIES: BlockCategory[] = [
   'output',
   'data',
   'vectorOps',
+  'tableOps',
   'plot',
   'engMechanics',
   'engMaterials',

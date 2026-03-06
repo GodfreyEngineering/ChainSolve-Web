@@ -224,6 +224,60 @@ fn evaluate_node_inner(
                 None => Value::Vector { value: vec![] },
             }
         }
+        "tableInput" => {
+            // Read table data from node data: { columns: [...], rows: [[...], ...] }
+            match data.get("tableData") {
+                Some(td) => {
+                    let columns: Vec<String> = td
+                        .get("columns")
+                        .and_then(|c| c.as_array())
+                        .map(|arr| {
+                            arr.iter()
+                                .filter_map(|v| v.as_str().map(String::from))
+                                .collect()
+                        })
+                        .unwrap_or_default();
+                    let rows: Vec<Vec<f64>> = td
+                        .get("rows")
+                        .and_then(|r| r.as_array())
+                        .map(|arr| {
+                            arr.iter()
+                                .filter_map(|row| {
+                                    row.as_array().map(|cells| {
+                                        cells.iter().map(|c| c.as_f64().unwrap_or(0.0)).collect()
+                                    })
+                                })
+                                .collect()
+                        })
+                        .unwrap_or_default();
+                    Value::Table { columns, rows }
+                }
+                None => Value::Table {
+                    columns: vec![],
+                    rows: vec![],
+                },
+            }
+        }
+        "table_extract_col" => {
+            // Extract a column vector from a table by index
+            match inputs.get("table") {
+                Some(Value::Table { columns: _, rows }) => {
+                    let idx = match inputs.get("index") {
+                        Some(v) => v.as_scalar().unwrap_or(0.0) as usize,
+                        None => 0,
+                    };
+                    let col: Vec<f64> = rows
+                        .iter()
+                        .map(|row| row.get(idx).copied().unwrap_or(0.0))
+                        .collect();
+                    Value::Vector { value: col }
+                }
+                Some(Value::Error { message }) => Value::Error {
+                    message: message.clone(),
+                },
+                _ => Value::error("Table Column: expected table input"),
+            }
+        }
         // ── Vector / List ops ────────────────────────────────────
         "vectorLength" => match require_vector(inputs, "vec", "Length") {
             Ok(v) => Value::scalar(v.len() as f64),
@@ -1594,6 +1648,76 @@ mod tests {
             Value::Vector { value } => assert_eq!(value, vec![1.0, 2.0, 3.0]),
             _ => panic!("Expected Vector"),
         }
+    }
+
+    #[test]
+    fn table_input_block() {
+        let mut data = HashMap::new();
+        data.insert(
+            "tableData".into(),
+            serde_json::json!({
+                "columns": ["A", "B"],
+                "rows": [[1.0, 4.0], [2.0, 5.0], [3.0, 6.0]]
+            }),
+        );
+        let v = evaluate_node("tableInput", &HashMap::new(), &data);
+        match v {
+            Value::Table { columns, rows } => {
+                assert_eq!(columns, vec!["A", "B"]);
+                assert_eq!(rows.len(), 3);
+                assert_eq!(rows[0], vec![1.0, 4.0]);
+            }
+            _ => panic!("Expected Table, got {:?}", v),
+        }
+    }
+
+    #[test]
+    fn table_input_empty() {
+        let v = evaluate_node("tableInput", &HashMap::new(), &HashMap::new());
+        match v {
+            Value::Table { columns, rows } => {
+                assert!(columns.is_empty());
+                assert!(rows.is_empty());
+            }
+            _ => panic!("Expected empty Table"),
+        }
+    }
+
+    #[test]
+    fn table_extract_col_block() {
+        let table = Value::Table {
+            columns: vec!["X".into(), "Y".into()],
+            rows: vec![vec![10.0, 20.0], vec![30.0, 40.0]],
+        };
+        let mut inputs: HashMap<String, Value> = HashMap::new();
+        inputs.insert("table".into(), table);
+        inputs.insert("index".into(), Value::scalar(1.0));
+        let v = evaluate_node("table_extract_col", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => assert_eq!(value, vec![20.0, 40.0]),
+            _ => panic!("Expected Vector, got {:?}", v),
+        }
+    }
+
+    #[test]
+    fn table_extract_col_default_index() {
+        let table = Value::Table {
+            columns: vec!["A".into()],
+            rows: vec![vec![7.0], vec![8.0]],
+        };
+        let mut inputs: HashMap<String, Value> = HashMap::new();
+        inputs.insert("table".into(), table);
+        let v = evaluate_node("table_extract_col", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => assert_eq!(value, vec![7.0, 8.0]),
+            _ => panic!("Expected Vector"),
+        }
+    }
+
+    #[test]
+    fn table_extract_col_no_table() {
+        let v = evaluate_node("table_extract_col", &HashMap::new(), &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
     }
 
     #[test]

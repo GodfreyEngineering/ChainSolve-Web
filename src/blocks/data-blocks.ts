@@ -11,14 +11,14 @@ import type { BlockDef } from './types'
 export function registerDataBlocks(register: (def: BlockDef) => void): void {
   register({
     type: 'vectorInput',
-    label: 'List Input',
+    label: 'Array Input',
     category: 'data',
     nodeKind: 'csData',
     inputs: [],
     proOnly: true,
     defaultData: {
       blockType: 'vectorInput',
-      label: 'List',
+      label: 'Array',
       vectorData: [],
     },
   })

@@ -15,6 +15,7 @@ const CATEGORY_TO_DOCS: Record<BlockCategory, DocsSection> = {
   output: 'block-output',
   data: 'block-data',
   vectorOps: 'block-data',
+  tableOps: 'block-data',
   plot: 'block-plot',
   engMechanics: 'block-engineering',
   engMaterials: 'block-engineering',

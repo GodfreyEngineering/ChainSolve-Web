@@ -71,7 +71,11 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
 
   // ── Data inputs (Pro) ─────────────────────────────────────────────────────
   vectorInput:
-    'Enter a list of numbers directly. Paste from Excel, CSV, or type values. Used as input to list operations and plots.',
+    'Enter an array of numbers directly. Paste from Excel, CSV, or type values. Used as input to array/list operations and plots.',
+  tableInput:
+    'Spreadsheet-style table input with named columns. Each column is a separate output port. Import from CSV or type values directly.',
+  table_extract_col:
+    'Extracts a single column from a table as an array. Connect a Table Input and specify the column index (0-based).',
 
   // ── List operations (Pro) ───────────────────────────────────────────────
   vectorLength: 'Returns the number of elements in a list.',

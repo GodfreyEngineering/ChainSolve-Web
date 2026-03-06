@@ -16,6 +16,7 @@ export type BlockCategory =
   | 'output'
   | 'data'
   | 'vectorOps'
+  | 'tableOps'
   | 'plot'
   | 'engMechanics'
   | 'engMaterials'

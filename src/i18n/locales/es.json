@@ -338,6 +338,7 @@
     "categoryTableOps": "Ops. de Tabla",
     "vectorInput": "Entrada de Vector",
     "tableInput": "Entrada de Tabla",
+    "table_extract_col": "Columna de Tabla",
     "csvImport": "Importar CSV",
     "vectorLength": "Longitud de Vector",
     "vectorSum": "Suma de Vector",

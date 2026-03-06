@@ -502,6 +502,7 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   'output',
   'data',
   'vectorOps',
+  'tableOps',
   'plot',
   'engMechanics',
   'engMaterials',
@@ -538,6 +539,7 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   output: 'Output',
   data: 'Data',
   vectorOps: 'List Ops',
+  tableOps: 'Table Ops',
   plot: 'Plot',
   engMechanics: 'Mechanics',
   engMaterials: 'Materials',
@@ -624,6 +626,7 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
       { id: 'fnDist', label: 'Distributions', categories: ['probDist'] },
       { id: 'fnUtil', label: 'Utilities', categories: ['utilCalc'] },
       { id: 'fnVectorOps', label: 'List Ops', categories: ['vectorOps'] },
+      { id: 'fnTableOps', label: 'Table Ops', categories: ['tableOps'] },
     ],
   },
   {

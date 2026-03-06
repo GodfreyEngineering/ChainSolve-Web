@@ -371,10 +371,26 @@ pub fn catalog() -> Vec<CatalogEntry> {
         // ── Data (Pro) ───────────────────────────────────────────
         CatalogEntry {
             op_id: "vectorInput",
-            label: "List Input",
+            label: "Array Input",
             category: "data",
             node_kind: "csData",
             inputs: vec![],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "tableInput",
+            label: "Table Input",
+            category: "data",
+            node_kind: "csData",
+            inputs: vec![],
+            pro_only: true,
+        },
+        CatalogEntry {
+            op_id: "table_extract_col",
+            label: "Table Column",
+            category: "tableOps",
+            node_kind: "csOperation",
+            inputs: vec![p("table", "Table"), p("index", "Column Index")],
             pro_only: true,
         },
         // ── List Ops (Pro) ──────────────────────────────────────
@@ -1466,14 +1482,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 167);
+        assert_eq!(cat.len(), 169);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 167);
+        assert_eq!(parsed.as_array().unwrap().len(), 169);
     }
 
     #[test]

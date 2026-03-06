@@ -1,8 +1,9 @@
 /**
  * DataNode — for data input blocks (csData kind):
- *   List Input (vectorInput)
+ *   Array Input (vectorInput) — single vector output
+ *   Table Input (tableInput)  — per-column vector outputs
  *
- * Single output handle on the right.
+ * Output handles on the right.
  */
 
 import { memo, useCallback } from 'react'
@@ -14,12 +15,14 @@ import { NODE_STYLES as s } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
 import { VectorEditor } from '../editors/VectorEditor'
+import { TableEditor } from '../editors/TableEditor'
 
 function DataNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
   const { updateNodeData } = useReactFlow()
   const computed = useComputed()
   const value = computed.get(id)
+  const isTable = nd.blockType === 'tableInput'
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
   const TypeIcon = getNodeTypeIcon(nd.blockType)
@@ -29,12 +32,22 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
     [id, updateNodeData],
   )
 
+  const onTableChange = useCallback(
+    (columns: string[], rows: number[][]) => updateNodeData(id, { tableData: { columns, rows } }),
+    [id, updateNodeData],
+  )
+
+  const tableData = (nd.tableData as { columns: string[]; rows: number[][] } | undefined) ?? {
+    columns: ['A', 'B'],
+    rows: [[0, 0]],
+  }
+
   return (
     <div
       style={{
         ...s.node,
-        minWidth: 200,
-        maxWidth: 320,
+        minWidth: isTable ? 260 : 200,
+        maxWidth: isTable ? 480 : 320,
         ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
       }}
     >
@@ -55,18 +68,38 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
       </div>
 
       <div className="cs-node-body" style={s.body}>
-        <VectorEditor
-          values={(nd.vectorData as number[] | undefined) ?? []}
-          onChange={onVectorChange}
-        />
+        {isTable ? (
+          <TableEditor columns={tableData.columns} rows={tableData.rows} onChange={onTableChange} />
+        ) : (
+          <VectorEditor
+            values={(nd.vectorData as number[] | undefined) ?? []}
+            onChange={onVectorChange}
+          />
+        )}
       </div>
 
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="out"
-        style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
-      />
+      {isTable ? (
+        tableData.columns.map((col, ci) => (
+          <Handle
+            key={col}
+            type="source"
+            position={Position.Right}
+            id={`col_${ci}`}
+            style={{
+              ...s.handleRight,
+              top: `${((ci + 1) / (tableData.columns.length + 1)) * 100}%`,
+            }}
+            title={col}
+          />
+        ))
+      ) : (
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="out"
+          style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
+        />
+      )}
     </div>
   )
 }

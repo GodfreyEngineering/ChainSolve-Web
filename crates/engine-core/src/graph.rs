@@ -288,8 +288,22 @@ impl EngineGraph {
             // Gather input values from edges.
             let mut node_inputs: HashMap<String, Value> = HashMap::new();
             if let Some(in_edges) = self.in_adj.get(node_id) {
-                for (_eid, src_id, _src_handle, tgt_handle) in in_edges {
+                for (_eid, src_id, src_handle, tgt_handle) in in_edges {
                     if let Some(val) = self.values.get(src_id) {
+                        // Table column handles: col_0, col_1, ...
+                        if src_handle.starts_with("col_") {
+                            if let Value::Table { columns: _, rows } = val {
+                                if let Ok(idx) = src_handle[4..].parse::<usize>() {
+                                    let col: Vec<f64> = rows
+                                        .iter()
+                                        .map(|row| row.get(idx).copied().unwrap_or(0.0))
+                                        .collect();
+                                    node_inputs
+                                        .insert(tgt_handle.clone(), Value::Vector { value: col });
+                                    continue;
+                                }
+                            }
+                        }
                         node_inputs.insert(tgt_handle.clone(), val.clone());
                     }
                 }

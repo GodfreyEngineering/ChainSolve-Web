@@ -119,8 +119,22 @@ pub fn evaluate(snapshot: &EngineSnapshotV1) -> EvalResult {
         // Gather input values for this node.
         let mut node_inputs: HashMap<String, Value> = HashMap::new();
         if let Some(edges) = in_edges.get(node_id) {
-            for &(src_id, _src_handle, tgt_handle) in edges {
+            for &(src_id, src_handle, tgt_handle) in edges {
                 if let Some(val) = values.get(src_id) {
+                    // Table column handles: col_0, col_1, ...
+                    if src_handle.starts_with("col_") {
+                        if let Value::Table { columns: _, rows } = val {
+                            if let Ok(idx) = src_handle[4..].parse::<usize>() {
+                                let col: Vec<f64> = rows
+                                    .iter()
+                                    .map(|row| row.get(idx).copied().unwrap_or(0.0))
+                                    .collect();
+                                node_inputs
+                                    .insert(tgt_handle.to_string(), Value::Vector { value: col });
+                                continue;
+                            }
+                        }
+                    }
                     node_inputs.insert(tgt_handle.to_string(), val.clone());
                 }
             }
