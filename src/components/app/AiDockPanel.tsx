@@ -32,7 +32,9 @@ function readPersistedWidth(): number {
 
 function readPersistedCollapsed(): boolean {
   try {
-    return localStorage.getItem(STORAGE_COLLAPSED_KEY) === 'true'
+    const v = localStorage.getItem(STORAGE_COLLAPSED_KEY)
+    // Default to collapsed (true) when no preference saved
+    return v === null ? true : v === 'true'
   } catch {
     return true
   }
@@ -56,11 +58,16 @@ function persistCollapsed(v: boolean) {
 
 interface AiDockPanelProps {
   children: ReactNode
-  /** Whether the panel is open (AI window is active). */
+  /** Whether the AI content is active (lazy-loaded). Panel handle is always visible. */
   open: boolean
+  /** Called when the user clicks the expand handle to activate the AI panel. */
+  onRequestOpen?: () => void
 }
 
-export function AiDockPanel({ children, open }: AiDockPanelProps) {
+/** Width of the collapsed AI dock handle strip. */
+export const AI_DOCK_HANDLE_WIDTH = HANDLE_WIDTH
+
+export function AiDockPanel({ children, open, onRequestOpen }: AiDockPanelProps) {
   const { t } = useTranslation()
   const [width, setWidth] = useState(readPersistedWidth)
   const [collapsed, setCollapsed] = useState(readPersistedCollapsed)
@@ -75,6 +82,11 @@ export function AiDockPanel({ children, open }: AiDockPanelProps) {
       return next
     })
   }, [])
+
+  const handleExpandClick = useCallback(() => {
+    if (!open) onRequestOpen?.()
+    toggleCollapsed()
+  }, [open, onRequestOpen, toggleCollapsed])
 
   const onResizeStart = useCallback(
     (e: React.MouseEvent) => {
@@ -115,19 +127,17 @@ export function AiDockPanel({ children, open }: AiDockPanelProps) {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'A') {
         e.preventDefault()
+        if (collapsed && !open) onRequestOpen?.()
         toggleCollapsed()
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [toggleCollapsed])
+  }, [toggleCollapsed, collapsed, open, onRequestOpen])
 
-  // When panel is not open at all, render nothing
-  if (!open) return null
-
-  // Collapsed handle
+  // Collapsed handle — always visible
   if (collapsed) {
-    return <AiDockHandle side="expand" onClick={toggleCollapsed} title={t('ai.expandPanel')} />
+    return <AiDockHandle side="expand" onClick={handleExpandClick} title={t('ai.expandPanel')} />
   }
 
   // Expanded panel
@@ -141,7 +151,31 @@ export function AiDockPanel({ children, open }: AiDockPanelProps) {
         title={t('ai.collapsePanel')}
       />
       {/* Panel content */}
-      <div style={contentStyle}>{children}</div>
+      <div style={contentStyle}>{open ? children : <AiPlaceholder />}</div>
+    </div>
+  )
+}
+
+/** Placeholder shown when AI panel is expanded but content not yet loaded. */
+function AiPlaceholder() {
+  const { t } = useTranslation()
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        gap: 8,
+        color: 'var(--text-faint)',
+        fontSize: '0.78rem',
+        padding: '1rem',
+        textAlign: 'center',
+      }}
+    >
+      <Sparkles size={20} style={{ opacity: 0.4 }} />
+      <span>{t('ai.title', 'AI Copilot')}</span>
     </div>
   )
 }

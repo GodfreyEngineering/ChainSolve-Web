@@ -1903,8 +1903,11 @@ export default function CanvasPage({ embedded }: CanvasPageProps = {}) {
             onInsertFromPrompt={() => openAiPanel()}
           />
         )}
-        {/* G8-1: AI Copilot docked right panel */}
-        <AiDockPanel open={isOpen(AI_COPILOT_WINDOW_ID)}>
+        {/* G8-1: AI Copilot docked right panel — always visible, collapsed by default */}
+        <AiDockPanel
+          open={isOpen(AI_COPILOT_WINDOW_ID)}
+          onRequestOpen={() => openWindow(AI_COPILOT_WINDOW_ID, { width: 520, height: 560 })}
+        >
           <Suspense fallback={null}>
             <LazyAiCopilotWindow
               docked

@@ -260,7 +260,10 @@
     "annotations": "הוסף הערה",
     "hiddenView": "הצג בלוקים מוסתרים",
     "showAllHidden": "הצג את כל הבלוקים המוסתרים",
-    "noMatchesHint": "נסה מילות מפתח אחרות."
+    "noMatchesHint": "נסה מילות מפתח אחרות.",
+    "variables": "משתנים",
+    "materials": "חומרים",
+    "groups": "קבוצות"
   },
   "annotation": {
     "text": "טקסט",

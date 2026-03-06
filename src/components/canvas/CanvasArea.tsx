@@ -82,10 +82,9 @@ import type { Template } from '../../lib/templates'
 import { AnimatedEdge } from './edges/AnimatedEdge'
 import { CanvasSettingsContext } from '../../contexts/CanvasSettingsContext'
 import { PlanContext } from '../../contexts/PlanContext'
-import { CanvasToolbar, CANVAS_TOOLBAR_WIDTH } from './CanvasToolbar'
+import { CanvasToolbar } from './CanvasToolbar'
+import { ArtifactToolbar } from './ArtifactToolbar'
 import { useTranslation } from 'react-i18next'
-import { Variable, Palette, Paintbrush, Gem } from 'lucide-react'
-import { Tooltip } from '../ui/Tooltip'
 import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard } from '../../lib/clipboard'
@@ -404,23 +403,6 @@ function makeResizeHandler(
   }
 }
 
-// ── Toolbar button style ──────────────────────────────────────────────────────
-
-const tbBtn: React.CSSProperties = {
-  padding: '0.3rem 0.55rem',
-  borderRadius: 'var(--radius-md)',
-  border: '1px solid var(--border)',
-  background: 'transparent',
-  color: 'var(--text)',
-  cursor: 'pointer',
-  fontSize: '0.72rem',
-  fontWeight: 600,
-  fontFamily: 'inherit',
-  letterSpacing: '0.02em',
-  textAlign: 'left',
-  whiteSpace: 'nowrap',
-}
-
 // ── Inner canvas (inside ReactFlowProvider) ───────────────────────────────────
 
 const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function CanvasInner(
@@ -432,8 +414,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     readOnly,
     plan = 'free',
     onOpenVariables,
-    onOpenThemes,
-    onOpenThemeEditor,
+    onOpenGroups,
     onOpenMaterials,
     onFixWithCopilot,
     onExplainIssues,
@@ -744,10 +725,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const [badgesEnabled, setBadgesEnabled] = useState(getBadgesPref)
   const [edgeBadgesEnabled, setEdgeBadgesEnabled] = useState(getEdgeBadgesPref)
 
-  // G5-2: Bottom dock collapsed state (persisted)
+  // G5-2: Bottom dock collapsed state (persisted, default collapsed)
   const [dockCollapsed, setDockCollapsed] = useState(() => {
     try {
-      return localStorage.getItem('cs:dockCollapsed') === 'true'
+      const v = localStorage.getItem('cs:dockCollapsed')
+      // Default to collapsed when no preference saved
+      return v === null ? true : v === 'true'
     } catch {
       return true
     }
@@ -1815,66 +1798,15 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     )
   }, [edges, hiddenViewMode])
 
-  // ── Toolbar (right-side vertical strip — artifact entrypoints D15-3) ─────
+  // ── Artifact toolbar (Variables, Materials, Groups — snap to 8 positions) ──
   const toolbar = (
-    <div
-      style={{
-        position: 'absolute',
-        top: 10,
-        right: 10 + CANVAS_TOOLBAR_WIDTH + 8,
-        zIndex: 10,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.3rem',
-        background: 'var(--glass-bg)',
-        backdropFilter: 'blur(var(--glass-blur))',
-        WebkitBackdropFilter: 'blur(var(--glass-blur))',
-        border: '1px solid var(--glass-border)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '0.35rem',
-        boxShadow: 'var(--shadow-md)',
-      }}
-    >
-      {!readOnly && onOpenVariables && (
-        <Tooltip content={t('toolbar.variables')} side="left">
-          <button
-            onClick={onOpenVariables}
-            style={{
-              ...tbBtn,
-              minHeight: isMobile ? 36 : undefined,
-              padding: isMobile ? '0.3rem 0.65rem' : tbBtn.padding,
-            }}
-            aria-label={t('toolbar.variables')}
-          >
-            <Variable size={16} />
-          </button>
-        </Tooltip>
-      )}
-
-      {!isMobile && onOpenThemes && (
-        <Tooltip content={t('toolbar.themes')} side="left">
-          <button onClick={onOpenThemes} style={tbBtn} aria-label={t('toolbar.themes')}>
-            <Palette size={16} />
-          </button>
-        </Tooltip>
-      )}
-
-      {!isMobile && onOpenThemeEditor && (
-        <Tooltip content={t('settings.editTheme')} side="left">
-          <button onClick={onOpenThemeEditor} style={tbBtn} aria-label={t('settings.editTheme')}>
-            <Paintbrush size={16} />
-          </button>
-        </Tooltip>
-      )}
-
-      {!isMobile && !readOnly && onOpenMaterials && (
-        <Tooltip content={t('toolbar.materials')} side="left">
-          <button onClick={onOpenMaterials} style={tbBtn} aria-label={t('toolbar.materials')}>
-            <Gem size={16} />
-          </button>
-        </Tooltip>
-      )}
-    </div>
+    <ArtifactToolbar
+      onOpenVariables={onOpenVariables}
+      onOpenMaterials={onOpenMaterials}
+      onOpenGroups={onOpenGroups}
+      readOnly={readOnly}
+      isMobile={isMobile}
+    />
   )
 
   // ── Drawer backdrop (mobile only — BottomSheet handles its own overlay) ────
@@ -2160,7 +2092,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     panels={dockPanels}
                     collapsed={dockCollapsed}
                     onToggleCollapsed={() => setDockCollapsed((v) => !v)}
-                    rightInset={CANVAS_TOOLBAR_WIDTH + 8}
                   />
                 </div>
 

@@ -654,10 +654,20 @@ button:focus:not(:focus-visible) {
 .cs-dock-resize-handle {
   position: absolute;
   z-index: 1;
-  transition: background var(--transition-normal);
+  transition: background 0.2s ease;
+}
+.cs-dock-resize-handle::after {
+  content: '';
+  position: absolute;
+  border-radius: 1px;
+  background: transparent;
+  transition: background 0.2s ease;
 }
 .cs-dock-resize-handle:hover {
-  background: var(--primary-dim);
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+}
+.cs-dock-resize-handle:hover::after {
+  background: var(--primary);
 }
 .cs-dock-resize-handle[data-direction='vertical'] {
   top: -3px;
@@ -666,6 +676,12 @@ button:focus:not(:focus-visible) {
   height: 6px;
   cursor: ns-resize;
 }
+.cs-dock-resize-handle[data-direction='vertical']::after {
+  left: 20%;
+  right: 20%;
+  top: 2px;
+  height: 2px;
+}
 .cs-dock-resize-handle[data-direction='horizontal-left'] {
   left: -3px;
   top: 0;
@@ -673,12 +689,31 @@ button:focus:not(:focus-visible) {
   width: 8px;
   cursor: ew-resize;
 }
+.cs-dock-resize-handle[data-direction='horizontal-left']::after {
+  top: 20%;
+  bottom: 20%;
+  left: 3px;
+  width: 2px;
+}
 .cs-dock-resize-handle[data-direction='horizontal-right'] {
   right: -3px;
   top: 0;
   bottom: 0;
   width: 8px;
   cursor: ew-resize;
+}
+.cs-dock-resize-handle[data-direction='horizontal-right']::after {
+  top: 20%;
+  bottom: 20%;
+  right: 3px;
+  width: 2px;
+}
+/* Chevron rotation on collapse handles */
+.cs-dock-collapse-btn svg {
+  transition: transform 0.2s ease;
+}
+.cs-dock-collapse-btn:hover svg {
+  transform: scale(1.2);
 }
 
 /* ── Chrome buttons (window title bar) — V2-036 ──────────────────────── */
