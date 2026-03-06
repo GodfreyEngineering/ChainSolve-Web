@@ -106,6 +106,7 @@ const LazyValuePopover = lazy(() =>
 import { PublishNode } from './nodes/PublishNode'
 import { SubscribeNode } from './nodes/SubscribeNode'
 import { AnnotationNode } from './nodes/AnnotationNode'
+import { MaterialNode } from './nodes/MaterialNode'
 import { copyValueToClipboard } from '../../engine/valueFormat'
 import {
   computeGraphHealth,
@@ -137,6 +138,7 @@ const NODE_TYPES = {
   csPublish: PublishNode,
   csSubscribe: SubscribeNode,
   csAnnotation: AnnotationNode,
+  csMaterial: MaterialNode,
 } as const
 
 const EDGE_TYPES = {

@@ -47,10 +47,16 @@ describe('Pro feature gating', () => {
     ).toEqual([])
   })
 
-  it('no Free-category block has proOnly: true', () => {
+  it('no Free-category block has proOnly: true (except known Pro upgrades)', () => {
+    // material_full is a Pro upgrade of the Free material block, same category
+    const KNOWN_PRO_IN_FREE_CATEGORY = new Set(['material_full'])
     const wrongly: string[] = []
     for (const def of BLOCK_REGISTRY.values()) {
-      if (!PRO_CATEGORIES.has(def.category) && def.proOnly) {
+      if (
+        !PRO_CATEGORIES.has(def.category) &&
+        def.proOnly &&
+        !KNOWN_PRO_IN_FREE_CATEGORY.has(def.type)
+      ) {
         wrongly.push(`${def.type} (category: ${def.category})`)
       }
     }

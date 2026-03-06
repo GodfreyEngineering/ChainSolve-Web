@@ -135,6 +135,17 @@ pub fn evaluate(snapshot: &EngineSnapshotV1) -> EvalResult {
                             }
                         }
                     }
+                    // Material property handles: prop_rho, prop_E, ...
+                    if src_handle.starts_with("prop_") {
+                        if let Value::Table { columns, rows } = val {
+                            let prop_name = &src_handle[5..];
+                            if let Some(idx) = columns.iter().position(|c| c == prop_name) {
+                                let v = rows.first().and_then(|r| r.get(idx).copied()).unwrap_or(0.0);
+                                node_inputs.insert(tgt_handle.to_string(), Value::scalar(v));
+                                continue;
+                            }
+                        }
+                    }
                     node_inputs.insert(tgt_handle.to_string(), val.clone());
                 }
             }

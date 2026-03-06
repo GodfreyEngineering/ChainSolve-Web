@@ -278,6 +278,35 @@ fn evaluate_node_inner(
                 _ => Value::error("Table Column: expected table input"),
             }
         }
+        "material_full" => {
+            // Phase 10: Multi-output material block.
+            // Reads materialProperties from node data → returns Table with
+            // property names as columns and a single row of values.
+            // Output handles use prop_<key> naming (resolved in eval.rs/graph.rs).
+            match data.get("materialProperties") {
+                Some(mp) if mp.is_object() => {
+                    let obj = mp.as_object().unwrap();
+                    let mut columns: Vec<String> = Vec::new();
+                    let mut values: Vec<f64> = Vec::new();
+                    // Canonical order: rho, E, nu, k, cp, sigma_y, mu
+                    for key in &["rho", "E", "nu", "k", "cp", "sigma_y", "mu"] {
+                        if let Some(v) = obj.get(*key) {
+                            columns.push(key.to_string());
+                            values.push(v.as_f64().unwrap_or(0.0));
+                        }
+                    }
+                    if columns.is_empty() {
+                        Value::error("Material: no properties selected")
+                    } else {
+                        Value::Table {
+                            columns,
+                            rows: vec![values],
+                        }
+                    }
+                }
+                _ => Value::error("Material: no material selected"),
+            }
+        }
         // ── Vector / List ops ────────────────────────────────────
         "vectorLength" => match require_vector(inputs, "vec", "Length") {
             Ok(v) => Value::scalar(v.len() as f64),
@@ -1718,6 +1747,55 @@ mod tests {
     fn table_extract_col_no_table() {
         let v = evaluate_node("table_extract_col", &HashMap::new(), &HashMap::new());
         assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn material_full_basic() {
+        let mut data = HashMap::new();
+        data.insert(
+            "materialProperties".into(),
+            serde_json::json!({ "rho": 7850.0, "E": 200e9, "nu": 0.26 }),
+        );
+        let v = evaluate_node("material_full", &HashMap::new(), &data);
+        match v {
+            Value::Table { columns, rows } => {
+                assert_eq!(columns, vec!["rho", "E", "nu"]);
+                assert_eq!(rows.len(), 1);
+                assert_eq!(rows[0], vec![7850.0, 200e9, 0.26]);
+            }
+            _ => panic!("Expected Table, got {:?}", v),
+        }
+    }
+
+    #[test]
+    fn material_full_no_selection() {
+        let v = evaluate_node("material_full", &HashMap::new(), &HashMap::new());
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn material_full_empty_properties() {
+        let mut data = HashMap::new();
+        data.insert("materialProperties".into(), serde_json::json!({}));
+        let v = evaluate_node("material_full", &HashMap::new(), &data);
+        assert!(matches!(v, Value::Error { .. }));
+    }
+
+    #[test]
+    fn material_full_canonical_order() {
+        // Properties should be in canonical order regardless of insertion order
+        let mut data = HashMap::new();
+        data.insert(
+            "materialProperties".into(),
+            serde_json::json!({ "mu": 1.0e-3, "rho": 998.0, "k": 0.6, "cp": 4182.0 }),
+        );
+        let v = evaluate_node("material_full", &HashMap::new(), &data);
+        match v {
+            Value::Table { columns, .. } => {
+                assert_eq!(columns, vec!["rho", "k", "cp", "mu"]);
+            }
+            _ => panic!("Expected Table"),
+        }
     }
 
     #[test]

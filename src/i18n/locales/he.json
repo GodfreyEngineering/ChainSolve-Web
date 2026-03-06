@@ -595,6 +595,7 @@
     "importCsv": "ייבא קובץ CSV",
     "bindToConstVar": "קשר לקבוע או משתנה",
     "searchConstVar": "חפש קבועים ומשתנים...",
+    "materialSearchPlaceholder": "חיפוש חומרים...",
     "literalValue": "ערך מילולי",
     "savedGroupActions": "פעולות קבוצה שמורה",
     "functionActions": "פעולות פונקציה"
@@ -1402,6 +1403,7 @@
     "vectorInput": "Vector Input",
     "tableInput": "Table Input",
     "table_extract_col": "Table Column",
+    "material_full": "חומר (מלא)",
     "csvImport": "CSV Import",
     "vectorLength": "Vector Length",
     "vectorSum": "Vector Sum",

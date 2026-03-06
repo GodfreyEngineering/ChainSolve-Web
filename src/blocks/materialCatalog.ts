@@ -19,6 +19,20 @@ export interface MaterialCatalogEntry {
   subcategory: string
 }
 
+/** Full material entry for the multi-output Material Full block (Phase 10). */
+export interface MaterialFullEntry {
+  /** Material prefix, e.g. "preset.materials.steel_mild" */
+  prefix: string
+  /** Human-readable name, e.g. "Mild Steel (ASTM A36)" */
+  name: string
+  /** Solid or fluid */
+  kind: 'solid' | 'fluid'
+  /** Subcategory for grouping in the picker */
+  subcategory: string
+  /** All property values for this material */
+  properties: Record<string, number>
+}
+
 // Helper to build entries for a material with multiple properties.
 function mat(
   prefix: string,
@@ -53,15 +67,21 @@ function fluid(
 /** Map of material type → scalar value, used for Rust engine evaluation. */
 export const MATERIAL_VALUES: Record<string, number> = {}
 
+/** Full material data for multi-output Material Full block (Phase 10). */
+const _fullEntries: MaterialFullEntry[] = []
+
 function matWithValues(
   prefix: string,
   name: string,
   subcategory: string,
   props: Record<string, { label: string; value: number }>,
 ): MaterialCatalogEntry[] {
+  const propValues: Record<string, number> = {}
   for (const [key, { value }] of Object.entries(props)) {
     MATERIAL_VALUES[`${prefix}.${key}`] = value
+    propValues[key] = value
   }
+  _fullEntries.push({ prefix, name, kind: 'solid', subcategory, properties: propValues })
   return mat(prefix, name, subcategory, props)
 }
 
@@ -71,9 +91,12 @@ function fluidWithValues(
   subcategory: string,
   props: Record<string, { label: string; value: number }>,
 ): MaterialCatalogEntry[] {
+  const propValues: Record<string, number> = {}
   for (const [key, { value }] of Object.entries(props)) {
     MATERIAL_VALUES[`${prefix}.${key}`] = value
+    propValues[key] = value
   }
+  _fullEntries.push({ prefix, name, kind: 'fluid', subcategory, properties: propValues })
   return fluid(prefix, name, subcategory, props)
 }
 
@@ -666,3 +689,20 @@ export const MATERIAL_CATALOG: MaterialCatalogEntry[] = [
   ...NATURAL,
   ...FLUIDS,
 ]
+
+/** Full material data for multi-output Material Full block (Phase 10). */
+export const MATERIAL_FULL_DATA: readonly MaterialFullEntry[] = _fullEntries
+
+/** Property metadata for display in MaterialNode. */
+export const PROPERTY_META: Record<string, { label: string; unit: string }> = {
+  rho: { label: 'ρ (Density)', unit: 'kg/m³' },
+  E: { label: "E (Young's Modulus)", unit: 'Pa' },
+  nu: { label: "ν (Poisson's Ratio)", unit: '—' },
+  k: { label: 'k (Thermal Cond.)', unit: 'W/m·K' },
+  cp: { label: 'cp (Specific Heat)', unit: 'J/kg·K' },
+  sigma_y: { label: 'σy (Yield Strength)', unit: 'Pa' },
+  mu: { label: 'μ (Viscosity)', unit: 'Pa·s' },
+}
+
+/** Canonical order for property output handles. */
+export const PROPERTY_ORDER = ['rho', 'E', 'nu', 'k', 'cp', 'sigma_y', 'mu'] as const

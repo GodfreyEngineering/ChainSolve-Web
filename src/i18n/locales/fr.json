@@ -328,6 +328,7 @@
     "importCsv": "Importer un fichier CSV",
     "bindToConstVar": "Lier a une constante ou variable",
     "searchConstVar": "Rechercher constantes et variables...",
+    "materialSearchPlaceholder": "Rechercher des matériaux...",
     "literalValue": "Valeur litterale",
     "savedGroupActions": "Actions du groupe enregistre",
     "functionActions": "Actions de la fonction"
@@ -339,6 +340,7 @@
     "vectorInput": "Entrée Vecteur",
     "tableInput": "Entrée Table",
     "table_extract_col": "Colonne de Table",
+    "material_full": "Matériau (Complet)",
     "csvImport": "Import CSV",
     "vectorLength": "Longueur du Vecteur",
     "vectorSum": "Somme du Vecteur",

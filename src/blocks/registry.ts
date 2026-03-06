@@ -78,7 +78,7 @@ reg({
   defaultData: { blockType: 'constant', label: 'Constant' },
 })
 
-// D7-4: Unified material/fluid picker
+// D7-4: Unified material/fluid picker (single-output, legacy)
 reg({
   type: 'material',
   label: 'Material',
@@ -86,6 +86,17 @@ reg({
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'material', label: 'Material' },
+})
+
+// Phase 10: Multi-output material block — all properties as separate outputs
+reg({
+  type: 'material_full',
+  label: 'Material (Full)',
+  category: 'presetMaterials',
+  nodeKind: 'csMaterial',
+  inputs: [],
+  proOnly: true,
+  defaultData: { blockType: 'material_full', label: 'Material' },
 })
 
 // ── Math category ─────────────────────────────────────────────────────────────
@@ -592,7 +603,7 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
     subcategories: [
       { id: 'inputNumber', label: 'Standard number input', blockTypes: ['number'] },
       { id: 'inputSlider', label: 'Slider input', blockTypes: ['slider'] },
-      { id: 'inputMaterial', label: 'Material input', blockTypes: ['material'] },
+      { id: 'inputMaterial', label: 'Material input', blockTypes: ['material', 'material_full'] },
       {
         id: 'inputConstant',
         label: 'Constant input',

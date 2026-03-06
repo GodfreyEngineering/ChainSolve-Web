@@ -20,6 +20,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Unified constant picker. Search and select from the full catalog of math, physics, and engineering constants.',
   material:
     'Unified material picker. Search and select density, modulus, or viscosity values for common engineering materials and fluids.',
+  material_full:
+    'Multi-output material block. Select a material and get all its properties (density, modulus, conductivity, etc.) as separate outputs.',
   // H4-1: Individual constant descriptions removed — unified Constant picker.
   // H3-1: Material/fluid preset descriptions removed — unified Material node.
 
