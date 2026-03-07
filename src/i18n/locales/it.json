@@ -1871,7 +1871,10 @@
     "projectLimitReached": "Limite progetti raggiunto. Aggiorna per crearne di più.",
     "createFailed": "Impossibile creare il progetto",
     "importSuccess": "Progetto importato",
-    "importFailed": "Impossibile importare il progetto"
+    "importFailed": "Impossibile importare il progetto",
+    "settingUp": "Configurazione dell'account\u2026",
+    "settingUpHint": "Di solito ci vuole un momento. Aggiorna la pagina.",
+    "refresh": "Aggiorna"
   },
   "welcome": {
     "title": "Benvenuto nel tuo spazio di lavoro",

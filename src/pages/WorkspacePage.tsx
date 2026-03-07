@@ -202,11 +202,25 @@ export default function WorkspacePage() {
   if (!auth.profile && auth.user) {
     return (
       <div style={profileFallbackStyle}>
-        <h2>Setting up your account&hellip;</h2>
-        <p>This usually takes a moment. Please refresh the page.</p>
-        <button onClick={() => window.location.reload()} style={refreshBtnStyle}>
-          Refresh
-        </button>
+        <h2>{t('workspace.settingUp', 'Setting up your account\u2026')}</h2>
+        <p>
+          {t('workspace.settingUpHint', 'This usually takes a moment. Please refresh the page.')}
+        </p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => window.location.reload()} style={refreshBtnStyle}>
+            {t('workspace.refresh', 'Refresh')}
+          </button>
+          <button
+            onClick={async () => {
+              const { signOut: doSignOut } = await import('../lib/auth')
+              await doSignOut()
+              navigate('/login')
+            }}
+            style={refreshBtnStyle}
+          >
+            {t('nav.signOut', 'Sign out')}
+          </button>
+        </div>
       </div>
     )
   }

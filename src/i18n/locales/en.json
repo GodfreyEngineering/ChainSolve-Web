@@ -1897,7 +1897,10 @@
     "projectLimitReached": "Project limit reached. Upgrade to create more.",
     "createFailed": "Failed to create project",
     "importSuccess": "Project imported",
-    "importFailed": "Failed to import project"
+    "importFailed": "Failed to import project",
+    "settingUp": "Setting up your account\u2026",
+    "settingUpHint": "This usually takes a moment. Please refresh the page.",
+    "refresh": "Refresh"
   },
   "welcome": {
     "title": "Welcome to your workspace",

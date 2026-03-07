@@ -1871,7 +1871,10 @@
     "projectLimitReached": "Projektlimit erreicht. Upgraden Sie, um mehr zu erstellen.",
     "createFailed": "Projekt konnte nicht erstellt werden",
     "importSuccess": "Projekt importiert",
-    "importFailed": "Projekt konnte nicht importiert werden"
+    "importFailed": "Projekt konnte nicht importiert werden",
+    "settingUp": "Konto wird eingerichtet\u2026",
+    "settingUpHint": "Dies dauert normalerweise einen Moment. Bitte laden Sie die Seite neu.",
+    "refresh": "Aktualisieren"
   },
   "welcome": {
     "title": "Willkommen in deinem Arbeitsbereich",

@@ -92,7 +92,7 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
       // runs asynchronously. On first signup the row may not exist yet when
       // this query fires. Retry with exponential backoff to avoid the race.
       const RETRY_DELAYS = [200, 400, 800, 1600, 3200]
-      async function fetchProfileWithRetry(userId: string) {
+      async function fetchProfileWithRetry(userId: string, email: string | undefined) {
         for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
           const { data, error } = await supabase
             .from('profiles')
@@ -108,11 +108,30 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
             await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]))
           }
         }
-        // All retries exhausted — profile is still null.
-        // setLoading(false) so the UI can show a fallback state.
+        // All retries exhausted — profile trigger likely never fired.
+        // Attempt to create the profile row as a last resort.
+        try {
+          const { error: insertErr } = await supabase
+            .from('profiles')
+            .insert({ id: userId, email: email ?? null })
+          if (!insertErr) {
+            const { data } = await supabase
+              .from('profiles')
+              .select(PROFILE_COLS)
+              .eq('id', userId)
+              .maybeSingle()
+            if (data) {
+              setProfile(data as Profile)
+              setLoading(false)
+              return
+            }
+          }
+        } catch {
+          // Insert blocked by RLS or other error — fall through to fallback UI
+        }
         setLoading(false)
       }
-      void fetchProfileWithRetry(session.user.id)
+      void fetchProfileWithRetry(session.user.id, session.user.email)
     })
   }, [navigate])
 
