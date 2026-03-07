@@ -559,7 +559,13 @@
     "color": "צבע",
     "fontSize": "גודל גופן",
     "bold": "מודגש",
-    "italic": "נטוי"
+    "italic": "נטוי",
+    "alignLeft": "Align left",
+    "alignCenter": "Align center",
+    "alignRight": "Align right",
+    "width": "Width",
+    "height": "Height",
+    "zOrder": "Layer order"
   },
   "debugConsole": {
     "title": "מסוף ניפוי שגיאות",
@@ -720,7 +726,12 @@
     "insertConversion": "הוספת המרה",
     "hideSelected": "הסתר נבחרים",
     "hideNode": "הסתר",
-    "showAllHidden": "הצג את כל המוסתרים"
+    "showAllHidden": "הצג את כל המוסתרים",
+    "zOrder": "Layer order",
+    "bringToFront": "Bring to front",
+    "sendToBack": "Send to back",
+    "bringForward": "Bring forward",
+    "sendBackward": "Send backward"
   },
   "errorBoundary": {
     "title": "משהו השתבש",

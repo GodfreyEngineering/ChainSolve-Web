@@ -913,7 +913,7 @@ Claude MUST:
 
 ## V3-5 — Annotations Overhaul: PowerPoint-like
 
-- [ ] V3-5.1: Resize Handles + Z-ordering
+- [x] V3-5.1: Resize Handles + Z-ordering
   - 8-point resize handles via ReactFlow NodeResizer
   - Z-ordering with Bring to Front / Send to Back context menu
 

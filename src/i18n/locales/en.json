@@ -981,7 +981,13 @@
     "color": "Color",
     "fontSize": "Font size",
     "bold": "Bold",
-    "italic": "Italic"
+    "italic": "Italic",
+    "alignLeft": "Align left",
+    "alignCenter": "Align center",
+    "alignRight": "Align right",
+    "width": "Width",
+    "height": "Height",
+    "zOrder": "Layer order"
   },
   "blockLibrary": {
     "dragHint": "Drag onto canvas",
@@ -1527,7 +1533,12 @@
     "insertConversion": "Insert conversion",
     "hideSelected": "Hide selected",
     "hideNode": "Hide",
-    "showAllHidden": "Show all hidden"
+    "showAllHidden": "Show all hidden",
+    "zOrder": "Layer order",
+    "bringToFront": "Bring to front",
+    "sendToBack": "Send to back",
+    "bringForward": "Bring forward",
+    "sendBackward": "Send backward"
   },
   "errorBoundary": {
     "title": "Something went wrong",

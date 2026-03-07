@@ -167,6 +167,14 @@ export interface NodeData extends Record<string, unknown> {
   annotationBold?: boolean
   /** Annotation italic flag (csAnnotation text/callout/leader nodes only). */
   annotationItalic?: boolean
+  /** V3-5.1: Annotation text alignment (csAnnotation text/callout/leader). */
+  annotationTextAlign?: 'left' | 'center' | 'right'
+  /** V3-5.1: Annotation explicit width in pixels (csAnnotation resizable). */
+  annotationWidth?: number
+  /** V3-5.1: Annotation explicit height in pixels (csAnnotation resizable). */
+  annotationHeight?: number
+  /** V3-5.1: Z-index layer for annotation ordering. Higher = in front. */
+  annotationZIndex?: number
   /** H1-1: Unit assigned to this node's output. Unit id from unitCatalog. */
   unit?: string
   /** H7-1: Channel name for publish blocks (csPublish nodes only). */

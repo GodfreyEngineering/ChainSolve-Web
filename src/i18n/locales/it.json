@@ -963,7 +963,13 @@
     "color": "Colore",
     "fontSize": "Dimensione carattere",
     "bold": "Grassetto",
-    "italic": "Corsivo"
+    "italic": "Corsivo",
+    "alignLeft": "Allinea a sinistra",
+    "alignCenter": "Centra",
+    "alignRight": "Allinea a destra",
+    "width": "Larghezza",
+    "height": "Altezza",
+    "zOrder": "Ordine livelli"
   },
   "blockLibrary": {
     "dragHint": "Trascina sulla tela",
@@ -1509,7 +1515,12 @@
     "insertConversion": "Inserisci conversione",
     "hideSelected": "Nascondi selezionati",
     "hideNode": "Nascondi",
-    "showAllHidden": "Mostra tutti i nascosti"
+    "showAllHidden": "Mostra tutti i nascosti",
+    "zOrder": "Ordine livelli",
+    "bringToFront": "Porta in primo piano",
+    "sendToBack": "Porta in secondo piano",
+    "bringForward": "Porta avanti",
+    "sendBackward": "Porta indietro"
   },
   "errorBoundary": {
     "title": "Qualcosa è andato storto",

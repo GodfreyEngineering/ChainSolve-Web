@@ -1,5 +1,5 @@
 /**
- * AnnotationNode — non-evaluating visual annotations on the canvas (V2-022).
+ * AnnotationNode -- V3-5.1 non-evaluating visual annotations on the canvas.
  *
  * Supports five annotation types via `data.annotationType`:
  *   - text: simple text label
@@ -8,12 +8,18 @@
  *   - arrow: directional arrow indicator
  *   - leader: text label with a source handle for connecting to blocks
  *
+ * V3-5.1 enhancements:
+ *   - 8-point resize handles via ReactFlow `NodeResizer`
+ *   - Width/height stored in NodeData (annotationWidth/annotationHeight)
+ *   - Z-ordering via annotationZIndex (rendered via zIndex on the wrapper)
+ *   - Text alignment support (left/center/right)
+ *
  * These nodes have no block-system registration and are completely excluded
  * from engine evaluation (filtered in bridge.ts by the `annotation_` prefix).
  */
 
 import { memo } from 'react'
-import { Handle, Position } from '@xyflow/react'
+import { Handle, Position, NodeResizer } from '@xyflow/react'
 import type { NodeProps, Node } from '@xyflow/react'
 import type { NodeData } from '../../../blocks/types'
 
@@ -28,9 +34,32 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
   const fontSize = nd.annotationFontSize ?? DEFAULT_FONT_SIZE
   const bold = nd.annotationBold ?? false
   const italic = nd.annotationItalic ?? false
+  const textAlign = nd.annotationTextAlign ?? 'left'
+  const w = nd.annotationWidth
+  const h = nd.annotationHeight
 
   const fontWeight = bold ? 700 : 600
   const fontStyle = italic ? ('italic' as const) : ('normal' as const)
+
+  // Resizable types get NodeResizer handles
+  const isResizable =
+    annotationType === 'highlight' || annotationType === 'callout' || annotationType === 'text'
+
+  const resizerEl = isResizable && selected && (
+    <NodeResizer
+      minWidth={40}
+      minHeight={24}
+      isVisible={selected}
+      lineStyle={{ borderColor: color, borderWidth: 1 }}
+      handleStyle={{
+        width: 8,
+        height: 8,
+        borderRadius: 2,
+        background: color,
+        border: '1px solid var(--surface-2)',
+      }}
+    />
+  )
 
   if (annotationType === 'arrow') {
     return (
@@ -68,8 +97,8 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
     return (
       <div
         style={{
-          width: '100%',
-          height: '100%',
+          width: w ?? '100%',
+          height: h ?? '100%',
           minWidth: 80,
           minHeight: 40,
           borderRadius: 8,
@@ -77,7 +106,9 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
           border: `2px ${selected ? 'solid' : 'dashed'} ${color}66`,
           boxSizing: 'border-box',
         }}
-      />
+      >
+        {resizerEl}
+      </div>
     )
   }
 
@@ -86,12 +117,15 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
       <div
         style={{
           ...calloutStyle,
+          width: w,
+          height: h,
           borderColor: selected ? color : `${color}88`,
           boxShadow: selected
             ? `0 0 0 2px ${color}44, 0 2px 8px rgba(0,0,0,0.25)`
             : '0 2px 8px rgba(0,0,0,0.15)',
         }}
       >
+        {resizerEl}
         <div style={{ ...calloutAccent, background: color }} />
         <div
           style={{
@@ -99,6 +133,7 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
             fontSize,
             fontWeight,
             fontStyle,
+            textAlign,
           }}
         >
           {text}
@@ -115,6 +150,7 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
           fontSize,
           fontWeight,
           fontStyle,
+          textAlign,
           color: color,
           textShadow: selected ? `0 0 8px ${color}55` : 'none',
           position: 'relative',
@@ -139,10 +175,15 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
         fontSize,
         fontWeight,
         fontStyle,
+        textAlign,
         color: color,
         textShadow: selected ? `0 0 8px ${color}55` : 'none',
+        width: w,
+        height: h,
+        minWidth: w ? undefined : 'auto',
       }}
     >
+      {resizerEl}
       {text}
     </div>
   )

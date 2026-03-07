@@ -963,7 +963,13 @@
     "color": "Color",
     "fontSize": "Tamano de fuente",
     "bold": "Negrita",
-    "italic": "Cursiva"
+    "italic": "Cursiva",
+    "alignLeft": "Alinear a la izquierda",
+    "alignCenter": "Centrar",
+    "alignRight": "Alinear a la derecha",
+    "width": "Ancho",
+    "height": "Alto",
+    "zOrder": "Orden de capas"
   },
   "blockLibrary": {
     "dragHint": "Arrastrar al lienzo",
@@ -1509,7 +1515,12 @@
     "insertConversion": "Insertar conversion",
     "hideSelected": "Ocultar seleccionados",
     "hideNode": "Ocultar",
-    "showAllHidden": "Mostrar todos los ocultos"
+    "showAllHidden": "Mostrar todos los ocultos",
+    "zOrder": "Orden de capas",
+    "bringToFront": "Traer al frente",
+    "sendToBack": "Enviar al fondo",
+    "bringForward": "Traer adelante",
+    "sendBackward": "Enviar atras"
   },
   "errorBoundary": {
     "title": "Algo salió mal",

@@ -1,8 +1,9 @@
 /**
- * AnnotationInspector — property panel for annotation nodes (V2-022).
+ * AnnotationInspector -- V3-5.1 property panel for annotation nodes.
  *
  * Shown inside the Inspector when the selected node has an annotationType.
- * Provides controls for text, color, font size, bold, and italic.
+ * Provides controls for text, color, font size, bold/italic, text alignment,
+ * explicit width/height, and z-order buttons.
  */
 
 import { useTranslation } from 'react-i18next'
@@ -22,14 +23,20 @@ const COLOR_PRESETS = [
 interface Props {
   data: NodeData
   onUpdate: (patch: Partial<NodeData>) => void
+  onZOrder?: (op: 'front' | 'back' | 'forward' | 'backward') => void
 }
 
-export function AnnotationInspector({ data, onUpdate }: Props) {
+export function AnnotationInspector({ data, onUpdate, onZOrder }: Props) {
   const { t } = useTranslation()
   const hasText =
     data.annotationType === 'text' ||
     data.annotationType === 'callout' ||
     data.annotationType === 'leader'
+
+  const isResizable =
+    data.annotationType === 'highlight' ||
+    data.annotationType === 'callout' ||
+    data.annotationType === 'text'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
@@ -88,7 +95,7 @@ export function AnnotationInspector({ data, onUpdate }: Props) {
         </Field>
       )}
 
-      {/* Bold / Italic toggles */}
+      {/* Bold / Italic / Alignment toggles */}
       {hasText && (
         <div style={{ display: 'flex', gap: 6 }}>
           <button
@@ -117,7 +124,98 @@ export function AnnotationInspector({ data, onUpdate }: Props) {
           >
             I
           </button>
+          <div style={{ width: 1, background: 'var(--border)', margin: '0 2px' }} />
+          {(['left', 'center', 'right'] as const).map((align) => (
+            <button
+              key={align}
+              style={{
+                ...toggleStyle,
+                background:
+                  (data.annotationTextAlign ?? 'left') === align
+                    ? 'var(--primary)'
+                    : 'var(--surface-hover)',
+              }}
+              onClick={() => onUpdate({ annotationTextAlign: align })}
+              title={t(`annotation.align${align.charAt(0).toUpperCase() + align.slice(1)}`)}
+              aria-label={align}
+              aria-pressed={(data.annotationTextAlign ?? 'left') === align}
+            >
+              {align === 'left' ? '\u2190' : align === 'center' ? '\u2194' : '\u2192'}
+            </button>
+          ))}
         </div>
+      )}
+
+      {/* Width / Height */}
+      {isResizable && (
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Field label={t('annotation.width')}>
+            <input
+              type="number"
+              style={numInputStyle}
+              min={40}
+              max={2000}
+              step={10}
+              value={data.annotationWidth ?? ''}
+              placeholder="auto"
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10)
+                onUpdate({ annotationWidth: isNaN(v) ? undefined : Math.max(40, v) })
+              }}
+            />
+          </Field>
+          <Field label={t('annotation.height')}>
+            <input
+              type="number"
+              style={numInputStyle}
+              min={24}
+              max={2000}
+              step={10}
+              value={data.annotationHeight ?? ''}
+              placeholder="auto"
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10)
+                onUpdate({ annotationHeight: isNaN(v) ? undefined : Math.max(24, v) })
+              }}
+            />
+          </Field>
+        </div>
+      )}
+
+      {/* Z-order */}
+      {onZOrder && (
+        <Field label={t('annotation.zOrder')}>
+          <div style={{ display: 'flex', gap: 4 }}>
+            <button
+              style={toggleStyle}
+              onClick={() => onZOrder('front')}
+              title={t('contextMenu.bringToFront')}
+            >
+              {'\u21c8'}
+            </button>
+            <button
+              style={toggleStyle}
+              onClick={() => onZOrder('forward')}
+              title={t('contextMenu.bringForward')}
+            >
+              {'\u2191'}
+            </button>
+            <button
+              style={toggleStyle}
+              onClick={() => onZOrder('backward')}
+              title={t('contextMenu.sendBackward')}
+            >
+              {'\u2193'}
+            </button>
+            <button
+              style={toggleStyle}
+              onClick={() => onZOrder('back')}
+              title={t('contextMenu.sendToBack')}
+            >
+              {'\u21ca'}
+            </button>
+          </div>
+        </Field>
       )}
     </div>
   )

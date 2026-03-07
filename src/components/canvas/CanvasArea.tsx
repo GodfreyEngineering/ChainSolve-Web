@@ -1052,6 +1052,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           isLocked: node.draggable === false,
           isGroup: node.type === 'csGroup',
           isCollapsed: !!(node.data as NodeData).groupCollapsed,
+          isAnnotation: node.type === 'csAnnotation',
         })
       }
     },
@@ -1891,6 +1892,36 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [screenToFlowPosition, setNodes, doSaveHistory],
   )
 
+  // V3-5.1: Z-order annotation nodes
+  const onAnnotationZOrder = useCallback(
+    (nodeId: string, op: 'front' | 'back' | 'forward' | 'backward') => {
+      doSaveHistory()
+      setNodes((nds) => {
+        // Collect annotation z-indices
+        const annots = nds.filter((n) => n.type === 'csAnnotation')
+        const zValues = annots.map((n) => (n.data as NodeData).annotationZIndex ?? 0)
+        const maxZ = zValues.length > 0 ? Math.max(...zValues) : 0
+        const minZ = zValues.length > 0 ? Math.min(...zValues) : 0
+
+        return nds.map((n) => {
+          if (n.id !== nodeId) return n
+          const cur = (n.data as NodeData).annotationZIndex ?? 0
+          let newZ = cur
+          if (op === 'front') newZ = maxZ + 1
+          else if (op === 'back') newZ = minZ - 1
+          else if (op === 'forward') newZ = cur + 1
+          else if (op === 'backward') newZ = cur - 1
+          return {
+            ...n,
+            zIndex: newZ,
+            data: { ...n.data, annotationZIndex: newZ },
+          }
+        })
+      })
+    },
+    [setNodes, doSaveHistory],
+  )
+
   // Add block at the canvas position where user right-clicked
   const onAddBlockAtCursor = useCallback(
     (screenX: number, screenY: number) => {
@@ -2358,6 +2389,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     onHideSelected={readOnly ? undefined : hideSelectedNodes}
                     onShowAllHidden={readOnly ? undefined : showAllHiddenNodes}
                     hasHiddenNodes={hasHiddenNodes}
+                    onAnnotationZOrder={readOnly ? undefined : onAnnotationZOrder}
                   />
                 )}
 

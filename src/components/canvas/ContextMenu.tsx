@@ -21,6 +21,7 @@ export type ContextMenuTarget =
       isLocked: boolean
       isGroup?: boolean
       isCollapsed?: boolean
+      isAnnotation?: boolean
     }
   | {
       kind: 'edge'
@@ -83,6 +84,8 @@ interface ContextMenuProps {
   onShowAllHidden?: () => void
   /** K2-1: True when hidden blocks exist. */
   hasHiddenNodes?: boolean
+  /** V3-5.1: Z-order annotation (bring to front / send to back). */
+  onAnnotationZOrder?: (nodeId: string, op: 'front' | 'back' | 'forward' | 'backward') => void
 }
 
 const item: CSSProperties = {
@@ -187,6 +190,7 @@ export function ContextMenu({
   onHideSelected,
   onShowAllHidden,
   hasHiddenNodes,
+  onAnnotationZOrder,
 }: ContextMenuProps) {
   const { t } = useTranslation()
 
@@ -315,6 +319,44 @@ export function ContextMenu({
                   label={t('contextMenu.explainNode')}
                   onClick={() => {
                     onExplainNode(target.nodeId)
+                    onClose()
+                  }}
+                />
+              </>
+            )}
+            {target.isAnnotation && onAnnotationZOrder && (
+              <>
+                <div style={sep} />
+                <SubLabel label={t('contextMenu.zOrder')} />
+                <MenuItem
+                  icon="⬆"
+                  label={t('contextMenu.bringToFront')}
+                  onClick={() => {
+                    onAnnotationZOrder(target.nodeId, 'front')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="⬇"
+                  label={t('contextMenu.sendToBack')}
+                  onClick={() => {
+                    onAnnotationZOrder(target.nodeId, 'back')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="↑"
+                  label={t('contextMenu.bringForward')}
+                  onClick={() => {
+                    onAnnotationZOrder(target.nodeId, 'forward')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="↓"
+                  label={t('contextMenu.sendBackward')}
+                  onClick={() => {
+                    onAnnotationZOrder(target.nodeId, 'backward')
                     onClose()
                   }}
                 />

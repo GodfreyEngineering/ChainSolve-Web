@@ -963,7 +963,13 @@
     "color": "Couleur",
     "fontSize": "Taille de police",
     "bold": "Gras",
-    "italic": "Italique"
+    "italic": "Italique",
+    "alignLeft": "Aligner a gauche",
+    "alignCenter": "Centrer",
+    "alignRight": "Aligner a droite",
+    "width": "Largeur",
+    "height": "Hauteur",
+    "zOrder": "Ordre des calques"
   },
   "blockLibrary": {
     "dragHint": "Glisser sur le canevas",
@@ -1509,7 +1515,12 @@
     "insertConversion": "Inserer une conversion",
     "hideSelected": "Masquer la selection",
     "hideNode": "Masquer",
-    "showAllHidden": "Afficher tous les masques"
+    "showAllHidden": "Afficher tous les masques",
+    "zOrder": "Ordre des calques",
+    "bringToFront": "Mettre au premier plan",
+    "sendToBack": "Mettre en arriere-plan",
+    "bringForward": "Avancer d'un plan",
+    "sendBackward": "Reculer d'un plan"
   },
   "errorBoundary": {
     "title": "Quelque chose s'est mal passé",
