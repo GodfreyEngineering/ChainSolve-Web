@@ -746,6 +746,20 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // Background dots (E7-2)
   const [bgDotsVisible, setBgDotsVisible] = useState(getBgDotsPref)
 
+  // Grid dot colors from CSS variables (theme-aware)
+  const gridMinorColor = useMemo(() => {
+    const v = getComputedStyle(document.documentElement)
+      .getPropertyValue('--grid-minor-color')
+      .trim()
+    return v || 'rgba(255,255,255,0.18)'
+  }, [bgDotsVisible]) // eslint-disable-line react-hooks/exhaustive-deps
+  const gridMajorColor = useMemo(() => {
+    const v = getComputedStyle(document.documentElement)
+      .getPropertyValue('--grid-major-color')
+      .trim()
+    return v || 'rgba(255,255,255,0.10)'
+  }, [bgDotsVisible]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // K2-1: Hidden view mode — when true, hidden nodes are shown semi-transparent
   const [hiddenViewMode, setHiddenViewMode] = useState(false)
   // Track whether Space key triggered a drag (pan) to avoid accidental hide
@@ -2096,14 +2110,14 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                           variant={BackgroundVariant.Dots}
                           gap={20}
                           size={1.5}
-                          color="rgba(255,255,255,0.08)"
+                          color={gridMinorColor}
                         />
                         <Background
                           id="grid-major"
                           variant={BackgroundVariant.Dots}
                           gap={100}
                           size={2}
-                          color="rgba(255,255,255,0.04)"
+                          color={gridMajorColor}
                         />
                       </>
                     )}

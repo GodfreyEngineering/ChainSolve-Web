@@ -33,6 +33,10 @@ export const THEME_VARIABLE_META: ThemeVarMeta[] = [
   { cssVar: '--bg', label: 'Background', category: 'background' },
   { cssVar: '--input-bg', label: 'Input background', category: 'background' },
 
+  // Canvas grid
+  { cssVar: '--grid-minor-color', label: 'Grid dots (minor)', category: 'background' },
+  { cssVar: '--grid-major-color', label: 'Grid dots (major)', category: 'background' },
+
   // Surfaces (V3-UI depth layers)
   { cssVar: '--surface-0', label: 'Canvas background', category: 'surface' },
   { cssVar: '--surface-1', label: 'Panel / sidebar', category: 'surface' },
@@ -110,6 +114,8 @@ export interface CustomTheme {
 export const DARK_DEFAULTS: Record<string, string> = {
   '--bg': '#1a1a1a',
   '--input-bg': '#252525',
+  '--grid-minor-color': 'rgba(255,255,255,0.18)',
+  '--grid-major-color': 'rgba(255,255,255,0.10)',
   '--surface-0': '#1a1a1a',
   '--surface-1': '#242424',
   '--surface-2': '#2e2e2e',
@@ -183,6 +189,8 @@ export const LIGHT_DEFAULTS: Record<string, string> = {
   '--node-color-group': '#6d28d9',
   '--edge-color': '#0f7578',
   '--border': 'rgba(0,0,0,0.12)',
+  '--grid-minor-color': 'rgba(0,0,0,0.12)',
+  '--grid-major-color': 'rgba(0,0,0,0.06)',
 }
 
 // ── Built-in presets (starting points) ───────────────────────────────────────
