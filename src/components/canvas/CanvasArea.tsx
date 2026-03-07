@@ -694,6 +694,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const { openWindow, closeWindow, isOpen: isWinOpen } = useWindowManager()
   const inspVisible = isWinOpen(INSPECTOR_WINDOW_ID)
 
+  // V3-2.3: Sync inspected node ID to shared store for RightSidebar.
+  const setSharedInspectedId = useStatusBarStore((s) => s.setInspectedNodeId)
+  useEffect(() => {
+    setSharedInspectedId(inspectedId)
+  }, [inspectedId, setSharedInspectedId])
+
   // G5-1: Persist libWidth to localStorage
   useEffect(() => {
     localStorage.setItem('cs:libWidth', String(libWidth))
