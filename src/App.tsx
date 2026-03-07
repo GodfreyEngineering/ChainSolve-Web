@@ -23,9 +23,12 @@ const DocsPage = lazy(() => import('./pages/DocsPage'))
 const OrgsPage = lazy(() => import('./pages/OrgsPage'))
 const AuditLogPage = lazy(() => import('./pages/AuditLogPage'))
 
-// Lazy-load explore page (V3-7.1)
+// Lazy-load explore page (V3-7.1) + item detail page (V3-7.3)
 const ExplorePage = lazy(() =>
   import('./pages/ExplorePage').then((m) => ({ default: m.ExplorePage })),
+)
+const ExploreItemPage = lazy(() =>
+  import('./pages/ExploreItemPage').then((m) => ({ default: m.ExploreItemPage })),
 )
 
 function BillingSuccess() {
@@ -246,7 +249,7 @@ export default function App() {
         path="/explore/:itemId"
         element={
           <Suspense fallback={<RouteSkeleton variant="page" />}>
-            <ExplorePage />
+            <ExploreItemPage />
           </Suspense>
         }
       />

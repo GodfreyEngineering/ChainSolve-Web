@@ -1903,6 +1903,17 @@
     "collNewThisWeek": "Nuevos esta semana",
     "collMostLiked": "Más gustados"
   },
+  "exploreItemPage": {
+    "downloads": "descargas",
+    "likes": "me gusta",
+    "comments": "comentarios",
+    "commentsTitle": "Comentarios",
+    "commentPlaceholder": "Escribe un comentario...",
+    "noComments": "Aún no hay comentarios. ¡Sé el primero!",
+    "published": "Publicado",
+    "like": "Me gusta",
+    "unlike": "Ya no me gusta"
+  },
   "reauth": {
     "title": "Confirme su contrasena",
     "description": "Por seguridad, vuelva a introducir su contrasena para continuar con los cambios de facturacion.",

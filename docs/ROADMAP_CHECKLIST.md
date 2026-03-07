@@ -943,7 +943,7 @@ Claude MUST:
 - [x] V3-7.2: Collections + Featured Sections
   - `marketplace_collections` table, hero carousel, auto-generated collections
 
-- [ ] V3-7.3: Item Detail Page + Screenshots
+- [x] V3-7.3: Item Detail Page + Screenshots
   - Screenshot gallery with lightbox, version history, tags, comments
 
 - [ ] V3-7.4: Advanced Search + Filters

@@ -1459,6 +1459,17 @@
     "collNewThisWeek": "New This Week",
     "collMostLiked": "Most Liked"
   },
+  "exploreItemPage": {
+    "downloads": "הורדות",
+    "likes": "לייקים",
+    "comments": "תגובות",
+    "commentsTitle": "תגובות",
+    "commentPlaceholder": "כתוב תגובה...",
+    "noComments": ".אין תגובות עדיין. היה הראשון",
+    "published": "פורסם",
+    "like": "אהבתי",
+    "unlike": "הסר אהבתי"
+  },
   "app": {
     "name": "ChainSolve",
     "tagline": "Scientific node-graph calculator"

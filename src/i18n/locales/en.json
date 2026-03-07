@@ -1929,6 +1929,17 @@
     "collNewThisWeek": "New This Week",
     "collMostLiked": "Most Liked"
   },
+  "exploreItemPage": {
+    "downloads": "downloads",
+    "likes": "likes",
+    "comments": "comments",
+    "commentsTitle": "Comments",
+    "commentPlaceholder": "Write a comment...",
+    "noComments": "No comments yet. Be the first!",
+    "published": "Published",
+    "like": "Like",
+    "unlike": "Unlike"
+  },
   "panels": {
     "view": "View",
     "leftSidebar": "Left Sidebar",

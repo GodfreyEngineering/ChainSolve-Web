@@ -1903,6 +1903,17 @@
     "collNewThisWeek": "Novità della settimana",
     "collMostLiked": "Più apprezzati"
   },
+  "exploreItemPage": {
+    "downloads": "download",
+    "likes": "mi piace",
+    "comments": "commenti",
+    "commentsTitle": "Commenti",
+    "commentPlaceholder": "Scrivi un commento...",
+    "noComments": "Nessun commento ancora. Sii il primo!",
+    "published": "Pubblicato",
+    "like": "Mi piace",
+    "unlike": "Non mi piace più"
+  },
   "reauth": {
     "title": "Conferma la tua password",
     "description": "Per sicurezza, reinserisci la tua password per continuare con le modifiche alla fatturazione.",

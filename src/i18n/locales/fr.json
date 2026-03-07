@@ -1903,6 +1903,17 @@
     "collNewThisWeek": "Nouveautés de la semaine",
     "collMostLiked": "Les plus aimés"
   },
+  "exploreItemPage": {
+    "downloads": "téléchargements",
+    "likes": "j'aime",
+    "comments": "commentaires",
+    "commentsTitle": "Commentaires",
+    "commentPlaceholder": "Écrire un commentaire...",
+    "noComments": "Aucun commentaire pour le moment. Soyez le premier !",
+    "published": "Publié",
+    "like": "J'aime",
+    "unlike": "Je n'aime plus"
+  },
   "reauth": {
     "title": "Confirmez votre mot de passe",
     "description": "Pour des raisons de securite, veuillez ressaisir votre mot de passe pour continuer.",
