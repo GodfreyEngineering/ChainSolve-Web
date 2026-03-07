@@ -931,7 +931,7 @@ Claude MUST:
   - Modal with format selector (PDF/XLSX/JSON), format-specific options
   - Scope: active canvas / all canvases, "Remember preferences"
 
-- [ ] V3-6.2: Export Enhancements
+- [x] V3-6.2: Export Enhancements
   - PDF canvas screenshot embed, progress in StatusBar
   - Export history, toast on completion
 

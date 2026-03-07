@@ -936,7 +936,8 @@
     "export": "Export",
     "exporting": "Exporting…",
     "cancel": "Cancel export",
-    "close": "Close"
+    "close": "Close",
+    "recentExports": "Recent exports"
   },
   "commandPalette": {
     "title": "Command Palette",

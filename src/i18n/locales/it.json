@@ -918,7 +918,8 @@
     "export": "Esporta",
     "exporting": "Esportazione…",
     "cancel": "Annulla esportazione",
-    "close": "Chiudi"
+    "close": "Chiudi",
+    "recentExports": "Esportazioni recenti"
   },
   "commandPalette": {
     "title": "Tavolozza comandi",

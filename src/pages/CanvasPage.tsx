@@ -98,6 +98,7 @@ import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../lib/build-in
 import { listProjectAssets, downloadAssetBytes } from '../lib/storage'
 import type { CaptureResult } from '../lib/pdf/captureCanvasImage'
 import type { TableExport } from '../lib/xlsx/xlsxModel'
+import { useStatusBarStore } from '../stores/statusBarStore'
 
 const PerfHud = lazy(() =>
   import('../components/PerfHud.tsx').then((m) => ({ default: m.PerfHud })),
@@ -1105,6 +1106,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       exportAbortRef.current = abort
       exportingRef.current = true
       setExportInProgress(true)
+      useStatusBarStore.getState().setExportProgress(t('pdfExport.generating'))
 
       // Save original state to restore at end
       const origCanvasId = useCanvasesStore.getState().activeCanvasId
@@ -1126,7 +1128,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           }
 
           const row = canvasRows[i]
-          toast(t('pdfExport.progress', { current: i + 1, total: canvasRows.length }), 'info')
+          const progressMsg = t('pdfExport.progress', { current: i + 1, total: canvasRows.length })
+          toast(progressMsg, 'info')
+          useStatusBarStore.getState().setExportProgress(progressMsg)
 
           const isActive = row.id === origCanvasId
 
@@ -1251,6 +1255,10 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
         await exportProjectAuditPdf(model)
         toast(t('pdfExport.success'), 'success')
+        useStatusBarStore.getState().addExportHistory({
+          format: 'PDF',
+          name: useProjectStore.getState().projectName,
+        })
       } catch (err: unknown) {
         if (!abort.signal.aborted) {
           console.error('[pdf-export-project]', err)
@@ -1267,6 +1275,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         exportingRef.current = false
         exportAbortRef.current = null
         setExportInProgress(false)
+        useStatusBarStore.getState().setExportProgress(null)
       }
     },
     [projectId, initNodes, initEdges, setActiveCanvasId, engine, constantsLookup, toast, t],
@@ -1289,6 +1298,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       exportAbortRef.current = abort
       exportingRef.current = true
       setExportInProgress(true)
+      useStatusBarStore.getState().setExportProgress(t('excelExport.generating'))
 
       const canvasRows = [...useCanvasesStore.getState().canvases].sort(
         (a, b) => a.position - b.position,
@@ -1306,7 +1316,12 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           }
 
           const row = canvasRows[i]
-          toast(t('excelExport.progress', { current: i + 1, total: canvasRows.length }), 'info')
+          const xlsxProgressMsg = t('excelExport.progress', {
+            current: i + 1,
+            total: canvasRows.length,
+          })
+          toast(xlsxProgressMsg, 'info')
+          useStatusBarStore.getState().setExportProgress(xlsxProgressMsg)
 
           const origCanvasId = useCanvasesStore.getState().activeCanvasId
           const isActive = row.id === origCanvasId
@@ -1430,6 +1445,10 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
         await exportAuditXlsxProject(model, currentVariables, allTables)
         toast(t('excelExport.success'), 'success')
+        useStatusBarStore.getState().addExportHistory({
+          format: 'XLSX',
+          name: useProjectStore.getState().projectName,
+        })
       } catch (err: unknown) {
         if (!abort.signal.aborted) {
           console.error('[xlsx-export-project]', err)
@@ -1439,6 +1458,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         exportingRef.current = false
         exportAbortRef.current = null
         setExportInProgress(false)
+        useStatusBarStore.getState().setExportProgress(null)
       }
     },
     [projectId, engine, constantsLookup, toast, t],

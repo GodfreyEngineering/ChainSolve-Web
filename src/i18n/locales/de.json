@@ -918,7 +918,8 @@
     "export": "Exportieren",
     "exporting": "Exportiere…",
     "cancel": "Export abbrechen",
-    "close": "Schließen"
+    "close": "Schließen",
+    "recentExports": "Letzte Exporte"
   },
   "commandPalette": {
     "title": "Befehlspalette",

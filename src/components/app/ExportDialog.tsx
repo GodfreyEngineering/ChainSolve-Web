@@ -8,6 +8,7 @@
 
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useStatusBarStore } from '../../stores/statusBarStore'
 
 export type ExportFormat = 'pdf' | 'xlsx' | 'json'
 export type ExportScope = 'active' | 'project'
@@ -73,6 +74,7 @@ export function ExportDialog({
 }: ExportDialogProps) {
   const { t } = useTranslation()
   const [prefs, setPrefs] = useState<ExportPrefs>(loadPrefs)
+  const exportHistory = useStatusBarStore((s) => s.exportHistory)
 
   const update = useCallback((patch: Partial<ExportPrefs>) => {
     setPrefs((prev) => {
@@ -210,12 +212,36 @@ export function ExportDialog({
             {exportInProgress ? t('exportDialog.exporting') : t('exportDialog.export')}
           </button>
         </div>
+
+        {/* Export history */}
+        {exportHistory.length > 0 && (
+          <div style={{ marginTop: 16, borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+            <div style={fieldLabel}>{t('exportDialog.recentExports')}</div>
+            {exportHistory.map((entry, i) => (
+              <div key={i} style={historyRow}>
+                <span style={{ fontWeight: 600 }}>{entry.format}</span>
+                <span style={{ color: 'var(--text-muted)' }}>{entry.name}</span>
+                <span style={{ color: 'var(--text-muted)', marginLeft: 'auto' }}>
+                  {fmtRelTime(entry.timestamp)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmtRelTime(ts: number): string {
+  const diff = Math.floor((Date.now() - ts) / 1000)
+  if (diff < 60) return 'just now'
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  return `${Math.floor(diff / 86400)}d ago`
+}
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -320,4 +346,11 @@ const cancelBtn: React.CSSProperties = {
   background: 'transparent',
   color: 'var(--error)',
   border: '1px solid var(--error)',
+}
+
+const historyRow: React.CSSProperties = {
+  display: 'flex',
+  gap: 8,
+  fontSize: '0.78rem',
+  padding: '3px 0',
 }

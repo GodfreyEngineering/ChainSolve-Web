@@ -29,6 +29,8 @@ export function StatusBar() {
   const zoomPercent = useStatusBarStore((s) => s.zoomPercent)
   const snapToGrid = useStatusBarStore((s) => s.snapToGrid)
 
+  const exportProgress = useStatusBarStore((s) => s.exportProgress)
+
   const canvases = useCanvasesStore((s) => s.canvases)
   const activeCanvasId = useCanvasesStore((s) => s.activeCanvasId)
   const activeSheetName = canvases.find((c) => c.id === activeCanvasId)?.name ?? null
@@ -56,6 +58,12 @@ export function StatusBar() {
           {edgeCount} {t('statusBar.edges')}
         </span>
       </div>
+      {exportProgress && (
+        <div className="statusbar-center">
+          <Loader2 size={12} className="statusbar-spin" />
+          <span className="statusbar-item">{exportProgress}</span>
+        </div>
+      )}
       <div className="statusbar-right">
         <span className="statusbar-item">{zoomPercent}%</span>
         <span className="statusbar-sep" aria-hidden="true" />
