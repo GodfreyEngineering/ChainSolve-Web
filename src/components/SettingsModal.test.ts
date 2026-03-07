@@ -20,10 +20,11 @@ describe('SettingsModalContext', () => {
     expect(isAccountTab('billing')).toBe(true)
     expect(isAccountTab('security')).toBe(true)
     expect(isAccountTab('general')).toBe(false)
-    expect(isAccountTab('canvas')).toBe(false)
-    expect(isAccountTab('values')).toBe(false)
-    expect(isAccountTab('performance')).toBe(false)
-    expect(isAccountTab('theme')).toBe(false)
+    expect(isAccountTab('appearance')).toBe(false)
+    expect(isAccountTab('editor')).toBe(false)
+    expect(isAccountTab('formatting')).toBe(false)
+    expect(isAccountTab('export')).toBe(false)
+    expect(isAccountTab('shortcuts')).toBe(false)
   })
 
   it('exports AccountTab and AppTab types (via SettingsTab union)', async () => {

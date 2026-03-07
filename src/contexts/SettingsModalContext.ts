@@ -4,7 +4,7 @@ import { createContext, useContext } from 'react'
 export type AccountTab = 'profile' | 'billing' | 'security'
 
 /** J2-1: App Settings tabs (workbench preferences). */
-export type AppTab = 'general' | 'canvas' | 'values' | 'performance' | 'theme'
+export type AppTab = 'general' | 'appearance' | 'editor' | 'formatting' | 'export' | 'shortcuts'
 
 /** Union kept for backward compatibility with openSettings(tab). */
 export type SettingsTab = AccountTab | AppTab

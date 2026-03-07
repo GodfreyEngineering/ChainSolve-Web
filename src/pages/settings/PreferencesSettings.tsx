@@ -17,6 +17,10 @@ import { THEME_WIZARD_WINDOW_ID, THEME_LIBRARY_WINDOW_ID } from '../../component
 import { getEntitlements, type Plan } from '../../lib/entitlements'
 import { HelpLink } from '../../components/ui/HelpLink'
 import type { AppTab } from '../../contexts/SettingsModalContext'
+import { EditorSettings } from './EditorSettings'
+import { FormattingSettings } from './FormattingSettings'
+import { ExportSettings } from './ExportSettings'
+import { KeyboardShortcutsSettings } from './KeyboardShortcutsSettings'
 
 const LazyThemeWizard = lazy(() =>
   import('../../components/ThemeWizard').then((m) => ({ default: m.ThemeWizard })),
@@ -82,7 +86,7 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
       </div>
       <p style={sectionDescStyle}>{t(`settings.tab_${tab}Desc`)}</p>
 
-      {/* ── General ──────────────────────────────────────────────────────── */}
+      {/* General */}
       {tab === 'general' && (
         <>
           <div style={cardStyle}>
@@ -126,36 +130,6 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
                   onChange={(e) => prefs.update({ autosaveDelayMs: parseInt(e.target.value) })}
                 />
               )}
-            </div>
-          </div>
-
-          <h3 style={subheadingStyle}>{t('settings.exportTitle')}</h3>
-          <div style={cardStyle}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <Select
-                label={t('settings.exportFormat')}
-                options={[
-                  { value: 'pdf', label: 'PDF' },
-                  { value: 'xlsx', label: 'Excel (XLSX)' },
-                ]}
-                value={prefs.defaultExportFormat}
-                onChange={(e) =>
-                  prefs.update({ defaultExportFormat: e.target.value as 'pdf' | 'xlsx' })
-                }
-              />
-
-              <label style={checkRowStyle}>
-                <input
-                  type="checkbox"
-                  checked={prefs.exportIncludeImages}
-                  onChange={(e) => prefs.update({ exportIncludeImages: e.target.checked })}
-                  style={checkboxStyle}
-                />
-                <div>
-                  <span style={checkLabelStyle}>{t('settings.exportImages')}</span>
-                  <span style={checkHintStyle}>{t('settings.exportImagesHint')}</span>
-                </div>
-              </label>
             </div>
           </div>
 
@@ -208,114 +182,8 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
         </>
       )}
 
-      {/* ── Canvas ───────────────────────────────────────────────────────── */}
-      {tab === 'canvas' && (
-        <div style={cardStyle}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-            <label style={checkRowStyle}>
-              <input
-                type="checkbox"
-                checked={prefs.defaultSnapToGrid}
-                onChange={(e) => prefs.update({ defaultSnapToGrid: e.target.checked })}
-                style={checkboxStyle}
-              />
-              <div>
-                <span style={checkLabelStyle}>{t('settings.snapToGrid')}</span>
-                <span style={checkHintStyle}>{t('settings.snapToGridHint')}</span>
-              </div>
-            </label>
-
-            <label style={checkRowStyle}>
-              <input
-                type="checkbox"
-                checked={prefs.defaultEdgeAnimation}
-                onChange={(e) => prefs.update({ defaultEdgeAnimation: e.target.checked })}
-                style={checkboxStyle}
-              />
-              <div>
-                <span style={checkLabelStyle}>{t('settings.animatedChains')}</span>
-                <span style={checkHintStyle}>{t('settings.animatedChainsHint')}</span>
-              </div>
-            </label>
-          </div>
-        </div>
-      )}
-
-      {/* ── Values & Units ───────────────────────────────────────────────── */}
-      {tab === 'values' && (
-        <div style={cardStyle}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <Select
-              label={t('settings.decimalPlaces')}
-              hint={t('settings.decimalPlacesHint')}
-              options={[
-                { value: '-1', label: t('settings.decimalAuto') },
-                { value: '0', label: '0' },
-                { value: '1', label: '1' },
-                { value: '2', label: '2' },
-                { value: '3', label: '3' },
-                { value: '4', label: '4' },
-                { value: '6', label: '6' },
-                { value: '8', label: '8' },
-              ]}
-              value={String(prefs.decimalPlaces)}
-              onChange={(e) => prefs.update({ decimalPlaces: parseInt(e.target.value) })}
-            />
-
-            <Select
-              label={t('settings.sciNotation')}
-              hint={t('settings.sciNotationHint')}
-              options={[
-                { value: '1000', label: '1,000' },
-                { value: '10000', label: '10,000' },
-                { value: '100000', label: '100,000' },
-                { value: '1000000', label: t('settings.sciDefault') },
-                { value: '1000000000', label: '1,000,000,000' },
-              ]}
-              value={String(prefs.scientificNotationThreshold)}
-              onChange={(e) =>
-                prefs.update({ scientificNotationThreshold: parseFloat(e.target.value) })
-              }
-            />
-
-            <label style={checkRowStyle}>
-              <input
-                type="checkbox"
-                checked={prefs.thousandsSeparator}
-                onChange={(e) => prefs.update({ thousandsSeparator: e.target.checked })}
-                style={checkboxStyle}
-              />
-              <div>
-                <span style={checkLabelStyle}>{t('settings.thousandsSep')}</span>
-                <span style={checkHintStyle}>{t('settings.thousandsSepHint')}</span>
-              </div>
-            </label>
-          </div>
-        </div>
-      )}
-
-      {/* ── Performance ──────────────────────────────────────────────────── */}
-      {tab === 'performance' && (
-        <div style={cardStyle}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-            <label style={checkRowStyle}>
-              <input
-                type="checkbox"
-                checked={prefs.defaultLod}
-                onChange={(e) => prefs.update({ defaultLod: e.target.checked })}
-                style={checkboxStyle}
-              />
-              <div>
-                <span style={checkLabelStyle}>{t('settings.lodRendering')}</span>
-                <span style={checkHintStyle}>{t('settings.lodRenderingHint')}</span>
-              </div>
-            </label>
-          </div>
-        </div>
-      )}
-
-      {/* ── Theme ────────────────────────────────────────────────────────── */}
-      {tab === 'theme' && (
+      {/* Appearance (theme) */}
+      {tab === 'appearance' && (
         <>
           <div style={cardStyle}>
             <Select
@@ -414,7 +282,43 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
         </>
       )}
 
-      {/* ── Modals (always mounted) ──────────────────────────────────────── */}
+      {/* Editor (canvas defaults) */}
+      {tab === 'editor' && (
+        <EditorSettings
+          cardStyle={cardStyle}
+          checkRowStyle={checkRowStyle}
+          checkboxStyle={checkboxStyle}
+          checkLabelStyle={checkLabelStyle}
+          checkHintStyle={checkHintStyle}
+        />
+      )}
+
+      {/* Formatting (numeric display) */}
+      {tab === 'formatting' && (
+        <FormattingSettings
+          cardStyle={cardStyle}
+          checkRowStyle={checkRowStyle}
+          checkboxStyle={checkboxStyle}
+          checkLabelStyle={checkLabelStyle}
+          checkHintStyle={checkHintStyle}
+        />
+      )}
+
+      {/* Export */}
+      {tab === 'export' && (
+        <ExportSettings
+          cardStyle={cardStyle}
+          checkRowStyle={checkRowStyle}
+          checkboxStyle={checkboxStyle}
+          checkLabelStyle={checkLabelStyle}
+          checkHintStyle={checkHintStyle}
+        />
+      )}
+
+      {/* Keyboard Shortcuts */}
+      {tab === 'shortcuts' && <KeyboardShortcutsSettings cardStyle={cardStyle} />}
+
+      {/* Modals (always mounted) */}
       <Suspense fallback={null}>
         {feedbackOpen && (
           <LazyFeedbackModal

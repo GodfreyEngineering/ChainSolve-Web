@@ -19,14 +19,18 @@ export interface UserPreferences {
   scientificNotationThreshold: number // abs value above this uses sci notation
   thousandsSeparator: boolean
 
-  // Canvas defaults
+  // Canvas / Editor defaults
   defaultSnapToGrid: boolean
   defaultEdgeAnimation: boolean
   defaultLod: boolean
+  defaultZoom: number // initial zoom percent for new canvases
+  showGrid: boolean // show grid dots on canvas
 
   // Export defaults
   exportIncludeImages: boolean
   defaultExportFormat: 'pdf' | 'xlsx'
+  exportIncludeAnnotations: boolean
+  exportPageSize: 'a4' | 'letter'
 }
 
 // ── Defaults ─────────────────────────────────────────────────────────────────
@@ -42,9 +46,13 @@ const DEFAULTS: UserPreferences = {
   defaultSnapToGrid: false,
   defaultEdgeAnimation: true,
   defaultLod: true,
+  defaultZoom: 100,
+  showGrid: true,
 
   exportIncludeImages: true,
   defaultExportFormat: 'pdf',
+  exportIncludeAnnotations: true,
+  exportPageSize: 'a4',
 }
 
 // ── localStorage persistence ─────────────────────────────────────────────────

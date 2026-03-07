@@ -38,10 +38,11 @@ const ACCOUNT_TABS: { key: AccountTab; icon: string }[] = [
 
 const APP_TABS: { key: AppTab; icon: string }[] = [
   { key: 'general', icon: '\u2699' },
-  { key: 'canvas', icon: '\u25A6' },
-  { key: 'values', icon: '#' },
-  { key: 'performance', icon: '\u26A1' },
-  { key: 'theme', icon: '\u25D1' },
+  { key: 'appearance', icon: '\u25D1' },
+  { key: 'editor', icon: '\u25A6' },
+  { key: 'formatting', icon: '#' },
+  { key: 'export', icon: '\u21E9' },
+  { key: 'shortcuts', icon: '\u2328' },
 ]
 
 interface Props {
