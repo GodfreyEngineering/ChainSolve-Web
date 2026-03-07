@@ -1,0 +1,125 @@
+-- 0004_advisor_perf_triage.sql
+-- Addresses Supabase Performance Advisor suggestions (March 2026 audit).
+-- All statements are idempotent — safe to run on fresh or existing databases.
+--
+-- ═══════════════════════════════════════════════════════════════════════════
+-- CATEGORY 1: stripe.* unindexed foreign keys (23 items) — NOT ACTIONABLE
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- The `stripe` schema is managed by the Supabase Stripe extension.
+-- We do not own these tables and must not create indexes on them.
+-- These warnings are expected and can be safely ignored:
+--
+--   stripe._managed_webhooks  (fk_managed_webhooks_account)
+--   stripe.active_entitlements (fk_active_entitlements_account)
+--   stripe.charges            (fk_charges_account)
+--   stripe.checkout_sessions  (fk_checkout_sessions_account)
+--   stripe.checkout_session_line_items (fk_checkout_session_line_items_account)
+--   stripe.credit_notes       (fk_credit_notes_account)
+--   stripe.customers          (fk_customers_account)
+--   stripe.disputes           (fk_disputes_account)
+--   stripe.early_fraud_warnings (fk_early_fraud_warnings_account)
+--   stripe.features           (fk_features_account)
+--   stripe.invoices           (fk_invoices_account)
+--   stripe.payment_intents    (fk_payment_intents_account)
+--   stripe.payment_methods    (fk_payment_methods_account)
+--   stripe.plans              (fk_plans_account)
+--   stripe.prices             (fk_prices_account)
+--   stripe.products           (fk_products_account)
+--   stripe.refunds            (fk_refunds_account)
+--   stripe.reviews            (fk_reviews_account)
+--   stripe.setup_intents      (fk_setup_intents_account)
+--   stripe.subscription_items (fk_subscription_items_account)
+--   stripe.subscription_schedules (fk_subscription_schedules_account)
+--   stripe.subscriptions      (fk_subscriptions_account)
+--   stripe.tax_ids            (fk_tax_ids_account)
+--
+-- If Supabase adds these indexes upstream in a future extension version,
+-- the warnings will resolve automatically.
+--
+-- ═══════════════════════════════════════════════════════════════════════════
+-- CATEGORY 2: stripe.* unused indexes (2 items) — NOT ACTIONABLE
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+--   stripe._managed_webhooks: stripe_managed_webhooks_status_idx
+--   stripe._managed_webhooks: stripe_managed_webhooks_enabled_idx
+--
+-- Same as above — managed by Supabase Stripe extension. Do not drop.
+--
+-- ═══════════════════════════════════════════════════════════════════════════
+-- CATEGORY 3: public.* genuinely redundant indexes — DROP
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- These single-column indexes are fully covered by existing composite
+-- indexes that share the same leading column. PostgreSQL can satisfy
+-- queries on the leading column using the composite index, making the
+-- standalone index pure write overhead.
+
+-- 3a. idx_projects_owner_id(owner_id) is redundant.
+--     Covered by idx_projects_owner_updated(owner_id, updated_at DESC).
+DROP INDEX IF EXISTS public.idx_projects_owner_id;
+
+-- 3b. idx_canvases_project_id(project_id) is redundant.
+--     Covered by idx_canvases_project_position(project_id, position).
+DROP INDEX IF EXISTS public.idx_canvases_project_id;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- CATEGORY 4: public.* low-selectivity boolean indexes — DROP
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- Boolean columns have at most 2 distinct values. A B-tree index on a
+-- boolean provides negligible selectivity and is almost never chosen by
+-- the query planner over a sequential scan (especially on small tables).
+-- Our queries on marketplace_items already filter by is_published in
+-- combination with other columns that have their own indexes.
+
+-- 4a. idx_mkt_items_published(is_published) — drop standalone boolean index.
+--     Queries use listPublishedItems() which also applies category/sort/tag
+--     filters, making sequential scan + filter more efficient than this index.
+DROP INDEX IF EXISTS public.idx_mkt_items_published;
+
+-- 4b. idx_mkt_items_official(is_official) WHERE is_published = true — drop.
+--     Same reasoning: boolean with partial index on another boolean.
+--     The source filter in listPublishedItems handles this client-side or
+--     via the is_official column directly.
+DROP INDEX IF EXISTS public.idx_mkt_items_official;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- CATEGORY 5: public.* unused indexes — KEEP (pre-launch expected)
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- All remaining "unused index" warnings are for indexes that support
+-- deliberate query patterns but show zero usage because the application
+-- has no users yet. These will be exercised in production:
+--
+--   idx_user_terms_log_user          — user_terms_log lookups
+--   user_reports_unique_pending      — dedup constraint for pending reports
+--   idx_user_reports_status          — admin queue filtering
+--   idx_user_reports_target          — lookup by target_type + target_id
+--   idx_user_reports_reporter        — lookup by reporter
+--   idx_user_reports_resolved_by     — admin audit trail
+--   idx_project_assets_kind          — asset type filtering
+--   idx_organizations_owner          — org ownership lookups
+--   idx_org_members_org              — org membership queries
+--   idx_org_members_invited_by       — invitation audit trail
+--   idx_csp_reports_user             — CSP reports by user
+--   idx_csp_reports_created          — CSP reports chronological
+--   idx_mkt_likes_item               — like counts per item
+--   idx_ai_usage_monthly_org         — org AI usage lookups
+--   idx_ai_request_log_org           — org AI request log
+--   idx_student_verifications_user   — student verification lookups
+--   idx_bug_reports_created          — bug reports chronological
+--   idx_fs_items_parent_id           — filesystem tree traversal
+--   idx_canvases_project_position    — canvas ordering within projects
+--   idx_obs_events_created           — observability chronological
+--   idx_obs_events_type              — event type + time filtering
+--   idx_obs_events_session           — session-based event grouping
+--   idx_obs_events_fingerprint       — dedup lookups
+--   idx_marketplace_collections_position — collection ordering
+--   idx_projects_active_canvas       — active canvas lookups
+--   idx_mkt_items_downloads          — sort by popularity
+--   idx_mkt_purchases_item           — purchase lookups by item
+--   idx_mkt_events_item              — install event analytics
+--
+-- Do NOT drop these. Re-evaluate after the application has production
+-- traffic and pg_stat_user_indexes shows actual scan counts.

@@ -1471,14 +1471,14 @@ CREATE INDEX IF NOT EXISTS idx_org_members_user          ON public.org_members(u
 CREATE INDEX IF NOT EXISTS idx_org_members_invited_by    ON public.org_members(invited_by) WHERE invited_by IS NOT NULL;
 
 -- projects
-CREATE INDEX IF NOT EXISTS idx_projects_owner_id         ON public.projects(owner_id);
+-- Note: idx_projects_owner_id removed in 0004 — redundant (covered by owner_updated composite)
 CREATE INDEX IF NOT EXISTS idx_projects_owner_updated     ON public.projects(owner_id, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_projects_active_canvas     ON public.projects(active_canvas_id) WHERE active_canvas_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_projects_org_id            ON public.projects(org_id) WHERE org_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_projects_owner_folder      ON public.projects(owner_id, folder) WHERE folder IS NOT NULL;
 
 -- canvases
-CREATE INDEX IF NOT EXISTS idx_canvases_project_id        ON public.canvases(project_id);
+-- Note: idx_canvases_project_id removed in 0004 — redundant (covered by project_position composite)
 CREATE INDEX IF NOT EXISTS idx_canvases_owner_project     ON public.canvases(owner_id, project_id);
 CREATE INDEX IF NOT EXISTS idx_canvases_project_position  ON public.canvases(project_id, position);
 
@@ -1517,12 +1517,11 @@ CREATE INDEX IF NOT EXISTS idx_obs_events_fingerprint     ON public.observabilit
 
 -- marketplace_items
 CREATE INDEX IF NOT EXISTS idx_mkt_items_author           ON public.marketplace_items(author_id);
-CREATE INDEX IF NOT EXISTS idx_mkt_items_published        ON public.marketplace_items(is_published);
+-- Note: idx_mkt_items_published and idx_mkt_items_official removed in 0004 — low-selectivity boolean indexes
 CREATE INDEX IF NOT EXISTS idx_mkt_items_category         ON public.marketplace_items(category);
 CREATE INDEX IF NOT EXISTS idx_mkt_items_downloads        ON public.marketplace_items(downloads_count DESC);
 CREATE INDEX IF NOT EXISTS idx_mkt_items_tags             ON public.marketplace_items USING GIN (tags);
 CREATE INDEX IF NOT EXISTS idx_mkt_items_org              ON public.marketplace_items(org_id);
-CREATE INDEX IF NOT EXISTS idx_mkt_items_official         ON public.marketplace_items(is_official) WHERE is_published = true;
 
 -- marketplace_purchases
 CREATE INDEX IF NOT EXISTS idx_mkt_purchases_user         ON public.marketplace_purchases(user_id);

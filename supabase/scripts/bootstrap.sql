@@ -991,12 +991,10 @@ CREATE INDEX IF NOT EXISTS idx_organizations_owner ON public.organizations(owner
 CREATE INDEX IF NOT EXISTS idx_org_members_org ON public.org_members(org_id);
 CREATE INDEX IF NOT EXISTS idx_org_members_user ON public.org_members(user_id);
 CREATE INDEX IF NOT EXISTS idx_org_members_invited_by ON public.org_members(invited_by) WHERE invited_by IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_projects_owner_id ON public.projects(owner_id);
 CREATE INDEX IF NOT EXISTS idx_projects_owner_updated ON public.projects(owner_id, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_projects_active_canvas ON public.projects(active_canvas_id) WHERE active_canvas_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_projects_org_id ON public.projects(org_id) WHERE org_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_projects_owner_folder ON public.projects(owner_id, folder) WHERE folder IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_canvases_project_id ON public.canvases(project_id);
 CREATE INDEX IF NOT EXISTS idx_canvases_owner_project ON public.canvases(owner_id, project_id);
 CREATE INDEX IF NOT EXISTS idx_canvases_project_position ON public.canvases(project_id, position);
 CREATE INDEX IF NOT EXISTS idx_fs_items_project_id ON public.fs_items(project_id);
@@ -1019,12 +1017,10 @@ CREATE INDEX IF NOT EXISTS idx_obs_events_session ON public.observability_events
 CREATE INDEX IF NOT EXISTS idx_obs_events_user ON public.observability_events(user_id, created_at DESC) WHERE user_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_obs_events_fingerprint ON public.observability_events(fingerprint, created_at DESC) WHERE fingerprint IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_mkt_items_author ON public.marketplace_items(author_id);
-CREATE INDEX IF NOT EXISTS idx_mkt_items_published ON public.marketplace_items(is_published);
 CREATE INDEX IF NOT EXISTS idx_mkt_items_category ON public.marketplace_items(category);
 CREATE INDEX IF NOT EXISTS idx_mkt_items_downloads ON public.marketplace_items(downloads_count DESC);
 CREATE INDEX IF NOT EXISTS idx_mkt_items_tags ON public.marketplace_items USING GIN (tags);
 CREATE INDEX IF NOT EXISTS idx_mkt_items_org ON public.marketplace_items(org_id);
-CREATE INDEX IF NOT EXISTS idx_mkt_items_official ON public.marketplace_items(is_official) WHERE is_published = true;
 CREATE INDEX IF NOT EXISTS idx_mkt_purchases_user ON public.marketplace_purchases(user_id);
 CREATE INDEX IF NOT EXISTS idx_mkt_purchases_item ON public.marketplace_purchases(item_id);
 CREATE INDEX IF NOT EXISTS idx_mkt_events_item ON public.marketplace_install_events(item_id, created_at DESC);

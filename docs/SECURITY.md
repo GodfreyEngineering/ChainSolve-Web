@@ -441,6 +441,34 @@ Migration `0002_advisor_fixes.sql` resolves all Supabase Advisor warnings:
 
 All statements are idempotent — safe to run on fresh or existing databases.
 
+### Performance advisor triage (0004)
+
+Migration `0004_advisor_perf_triage.sql` addresses all Supabase Performance
+Advisor suggestions from the March 2026 audit:
+
+1. **stripe.* unindexed foreign keys (23 items)** — NOT ACTIONABLE.
+   The `stripe` schema is managed by the Supabase Stripe extension. We do not
+   own these tables and must not create indexes on them. These warnings will
+   resolve if Supabase adds indexes in a future extension version.
+
+2. **stripe.* unused indexes (2 items)** — NOT ACTIONABLE. Same rationale.
+
+3. **Redundant single-column indexes (2 dropped)**:
+   - `idx_projects_owner_id` — redundant; covered by composite
+     `idx_projects_owner_updated(owner_id, updated_at DESC)`.
+   - `idx_canvases_project_id` — redundant; covered by composite
+     `idx_canvases_project_position(project_id, position)`.
+
+4. **Low-selectivity boolean indexes (2 dropped)**:
+   - `idx_mkt_items_published(is_published)` — boolean with ~2 distinct values;
+     query planner prefers sequential scan.
+   - `idx_mkt_items_official(is_official) WHERE is_published = true` — same.
+
+5. **Pre-launch unused indexes (28+ items)** — KEPT. All remaining "unused
+   index" warnings are expected because the application has zero users.
+   These indexes support deliberate query patterns and will be exercised in
+   production. Re-evaluate after launch using `pg_stat_user_indexes`.
+
 ### Policy consolidation (0038)
 
 Migration `0038_consolidate_permissive_policies.sql` merged multiple permissive
