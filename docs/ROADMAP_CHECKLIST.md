@@ -902,12 +902,12 @@ Claude MUST:
 
 ## V3-4 — Theme Editor Overhaul
 
-- [ ] V3-4.1: Live Preview with Click-to-Edit
+- [x] V3-4.1: Live Preview with Click-to-Edit
   - Mini-canvas preview with sample nodes, toolbar, sidebar, bottom dock
   - Click element in preview to scroll to matching color editor
   - Search/filter variables, "Modified" badge, "Reset to default" per-variable
 
-- [ ] V3-4.2: Theme Import/Export + Gallery
+- [x] V3-4.2: Theme Import/Export + Gallery
   - Download/upload `.chainsolve-theme.json`
   - Preview thumbnails per theme, Duplicate/Export buttons
 

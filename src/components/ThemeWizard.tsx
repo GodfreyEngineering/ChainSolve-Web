@@ -1,13 +1,15 @@
 /**
- * ThemeWizard.tsx — D8-2 full theme editor with live preview.
+ * ThemeWizard.tsx -- V3-4.1 full theme editor with enhanced live preview.
  *
- * Opens as an AppWindow via the WindowManager.  Left pane shows a live
- * sample graph preview; right pane has grouped color editors.
+ * Opens as an AppWindow via the WindowManager. Left pane shows a live
+ * mini-canvas preview (ThemePreview) with click-to-edit; right pane has
+ * grouped color editors with search/filter, "Modified" badges, and
+ * per-variable reset buttons.
  *
  * Pro-only: gating is enforced at the call site (PreferencesSettings).
  */
 
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppWindow } from './ui/AppWindow'
 import { Button } from './ui/Button'
@@ -24,126 +26,9 @@ import {
   type CustomTheme,
 } from '../lib/customThemes'
 import { useTheme } from '../contexts/ThemeContext'
+import { ThemePreview } from './ThemePreview'
 
 export const THEME_WIZARD_WINDOW_ID = 'theme-wizard'
-
-// ── Sample graph SVG for live preview ────────────────────────────────────────
-
-function SamplePreview({ variables }: { variables: Record<string, string> }) {
-  const bg = variables['--bg'] ?? '#1a1a1a'
-  const cardBg = variables['--node-bg'] ?? variables['--surface-2'] ?? '#383838'
-  const headerBg = variables['--node-header-bg'] ?? 'rgba(28,171,176,0.15)'
-  const border = variables['--node-border'] ?? 'rgba(255,255,255,0.12)'
-  const primary = variables['--primary'] ?? '#1cabb0'
-  const text = variables['--text'] ?? '#f4f4f3'
-  const textMuted = variables['--text-muted'] ?? 'rgba(244,244,243,0.65)'
-  const handleIn = variables['--handle-input'] ?? primary
-  const handleOut = variables['--handle-output'] ?? variables['--success'] ?? '#22c55e'
-  const edgeColor = variables['--edge-color'] ?? primary
-  const selectedBorder = variables['--node-selected-border'] ?? primary
-
-  return (
-    <svg
-      viewBox="0 0 400 280"
-      style={{ width: '100%', height: '100%', borderRadius: 8 }}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Canvas background */}
-      <rect width="400" height="280" fill={bg} rx="8" />
-
-      {/* Grid dots */}
-      {Array.from({ length: 10 }, (_, i) =>
-        Array.from({ length: 7 }, (_, j) => (
-          <circle
-            key={`${i}-${j}`}
-            cx={20 + i * 40}
-            cy={20 + j * 40}
-            r="1"
-            fill={textMuted}
-            opacity="0.3"
-          />
-        )),
-      )}
-
-      {/* Edge: Node A → Node B */}
-      <path
-        d={`M 165 100 C 220 100 230 170 285 170`}
-        fill="none"
-        stroke={edgeColor}
-        strokeWidth="2"
-        opacity="0.7"
-      />
-
-      {/* Node A (source) */}
-      <g>
-        <rect x="40" y="70" width="130" height="60" rx="8" fill={cardBg} stroke={border} />
-        <rect x="40" y="70" width="130" height="22" rx="8" fill={headerBg} />
-        <rect x="40" y="84" width="130" height="1" fill={border} />
-        <text x="52" y="86" fontSize="8" fontWeight="700" fill={text} fontFamily="sans-serif">
-          NUMBER
-        </text>
-        <text x="148" y="86" fontSize="8" fill={primary} fontFamily="monospace" textAnchor="end">
-          42
-        </text>
-        <text x="52" y="112" fontSize="8" fill={textMuted} fontFamily="sans-serif">
-          value
-        </text>
-        <text x="148" y="112" fontSize="9" fill={primary} fontFamily="monospace" textAnchor="end">
-          42
-        </text>
-        {/* Output handle */}
-        <circle cx="170" cy="100" r="5" fill={handleOut} stroke={cardBg} strokeWidth="2" />
-      </g>
-
-      {/* Node B (selected) */}
-      <g>
-        <rect
-          x="280"
-          y="140"
-          width="100"
-          height="70"
-          rx="8"
-          fill={cardBg}
-          stroke={selectedBorder}
-          strokeWidth="1.5"
-        />
-        <rect x="280" y="140" width="100" height="22" rx="8" fill={headerBg} />
-        <rect x="280" y="154" width="100" height="1" fill={border} />
-        <text x="292" y="156" fontSize="8" fontWeight="700" fill={text} fontFamily="sans-serif">
-          DISPLAY
-        </text>
-        <text
-          x="330"
-          y="186"
-          fontSize="14"
-          fontWeight="700"
-          fill={primary}
-          fontFamily="monospace"
-          textAnchor="middle"
-        >
-          42
-        </text>
-        {/* Input handle */}
-        <circle cx="280" cy="170" r="5" fill={handleIn} stroke={cardBg} strokeWidth="2" />
-      </g>
-
-      {/* Node C (small, bottom-left) */}
-      <g>
-        <rect x="60" y="190" width="110" height="50" rx="8" fill={cardBg} stroke={border} />
-        <rect x="60" y="190" width="110" height="22" rx="8" fill={headerBg} />
-        <rect x="60" y="204" width="110" height="1" fill={border} />
-        <text x="72" y="206" fontSize="8" fontWeight="700" fill={text} fontFamily="sans-serif">
-          ADD
-        </text>
-        <text x="72" y="226" fontSize="7" fill={textMuted} fontFamily="sans-serif">
-          a, b
-        </text>
-        <circle cx="60" cy="215" r="4" fill={handleIn} stroke={cardBg} strokeWidth="2" />
-        <circle cx="170" cy="215" r="4" fill={handleOut} stroke={cardBg} strokeWidth="2" />
-      </g>
-    </svg>
-  )
-}
 
 // ── Color picker row ─────────────────────────────────────────────────────────
 
@@ -151,22 +36,39 @@ function ColorRow({
   label,
   cssVar,
   value,
+  isModified,
+  isHighlighted,
   onChange,
+  onReset,
 }: {
   label: string
   cssVar: string
   value: string
+  isModified: boolean
+  isHighlighted: boolean
   onChange: (cssVar: string, val: string) => void
+  onReset: (cssVar: string) => void
 }) {
-  // For rgba() values, show a text input; for hex, show color picker
   const isHex = /^#[0-9a-fA-F]{3,8}$/.test(value)
   return (
-    <div style={colorRowStyle}>
+    <div
+      style={{
+        ...colorRowStyle,
+        background: isHighlighted ? 'rgba(28,171,176,0.12)' : undefined,
+        borderLeft: isHighlighted ? '2px solid var(--primary)' : '2px solid transparent',
+        paddingLeft: isHighlighted ? '0.4rem' : '0.3rem',
+        transition: 'background 0.2s, border-left 0.2s',
+      }}
+      data-css-var={cssVar}
+    >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: '0.78rem', fontWeight: 500 }}>{label}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 500 }}>{label}</span>
+          {isModified && <span style={modifiedBadgeStyle}>Modified</span>}
+        </div>
         <div style={{ fontSize: '0.65rem', opacity: 0.4, fontFamily: 'monospace' }}>{cssVar}</div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
         {isHex && (
           <input
             type="color"
@@ -188,6 +90,16 @@ function ColorRow({
           onChange={(e) => onChange(cssVar, e.target.value)}
           style={colorTextInputStyle}
         />
+        {isModified && (
+          <button
+            onClick={() => onReset(cssVar)}
+            style={resetBtnStyle}
+            title="Reset to default"
+            aria-label={`Reset ${cssVar}`}
+          >
+            x
+          </button>
+        )}
       </div>
     </div>
   )
@@ -210,6 +122,14 @@ function ThemeWizardInner({ editTheme }: { editTheme?: CustomTheme }) {
     return { ...defaults }
   })
   const [nameError, setNameError] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [highlightedVar, setHighlightedVar] = useState<string | null>(null)
+  const editorRef = useRef<HTMLDivElement>(null)
+
+  const currentDefaults = useMemo(
+    () => (baseMode === 'light' ? LIGHT_DEFAULTS : DARK_DEFAULTS),
+    [baseMode],
+  )
 
   const switchBaseMode = useCallback(
     (next: 'dark' | 'light') => {
@@ -225,12 +145,37 @@ function ThemeWizardInner({ editTheme }: { editTheme?: CustomTheme }) {
     setVariables((prev) => ({ ...prev, [cssVar]: value }))
   }, [])
 
+  const handleReset = useCallback(
+    (cssVar: string) => {
+      setVariables((prev) => ({ ...prev, [cssVar]: currentDefaults[cssVar] ?? '' }))
+    },
+    [currentDefaults],
+  )
+
   const handlePreset = useCallback((preset: (typeof BUILT_IN_PRESETS)[number]) => {
     const base = preset.baseMode === 'light' ? LIGHT_DEFAULTS : DARK_DEFAULTS
     setBaseMode(preset.baseMode)
     setName(preset.name)
     setVariables({ ...base, ...preset.variables })
   }, [])
+
+  // Click-to-edit: scroll to and highlight variable row
+  const handlePreviewClick = useCallback((cssVar: string) => {
+    setHighlightedVar(cssVar)
+    setSearch('') // Clear search so the variable is visible
+    // Scroll to the row after render
+    requestAnimationFrame(() => {
+      const el = editorRef.current?.querySelector(`[data-css-var="${cssVar}"]`)
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }, [])
+
+  // Clear highlight after 3 seconds
+  useEffect(() => {
+    if (!highlightedVar) return
+    const timer = setTimeout(() => setHighlightedVar(null), 3000)
+    return () => clearTimeout(timer)
+  }, [highlightedVar])
 
   const grouped = useMemo(() => {
     const groups: Record<ThemeVarCategory, typeof THEME_VARIABLE_META> = {
@@ -243,11 +188,27 @@ function ThemeWizardInner({ editTheme }: { editTheme?: CustomTheme }) {
       surface: [],
       nodeType: [],
     }
+    const lowerSearch = search.toLowerCase()
     for (const meta of THEME_VARIABLE_META) {
+      if (
+        lowerSearch &&
+        !meta.label.toLowerCase().includes(lowerSearch) &&
+        !meta.cssVar.toLowerCase().includes(lowerSearch)
+      ) {
+        continue
+      }
       groups[meta.category].push(meta)
     }
     return groups
-  }, [])
+  }, [search])
+
+  const modifiedCount = useMemo(() => {
+    let count = 0
+    for (const meta of THEME_VARIABLE_META) {
+      if (variables[meta.cssVar] !== currentDefaults[meta.cssVar]) count++
+    }
+    return count
+  }, [variables, currentDefaults])
 
   const handleSave = useCallback(() => {
     const v = validateThemeName(name)
@@ -279,12 +240,19 @@ function ThemeWizardInner({ editTheme }: { editTheme?: CustomTheme }) {
       title={editTheme ? t('settings.editTheme') : t('settings.themeWizardTitle')}
     >
       <div style={wizardLayoutStyle}>
-        {/* ── Left: live preview ──────────────────────────────────────── */}
+        {/* -- Left: live preview ---------------------------------- */}
         <div style={previewPaneStyle}>
           <div style={{ fontSize: '0.78rem', fontWeight: 600, marginBottom: '0.5rem' }}>
             {t('settings.themePreview')}
           </div>
-          <SamplePreview variables={variables} />
+          <p style={{ margin: '0 0 0.5rem', fontSize: '0.7rem', opacity: 0.45 }}>
+            {t('settings.themeClickHint')}
+          </p>
+          <ThemePreview
+            variables={variables}
+            onClickVar={handlePreviewClick}
+            highlightedVar={highlightedVar}
+          />
 
           {/* Presets */}
           <div style={{ marginTop: '0.75rem' }}>
@@ -313,10 +281,10 @@ function ThemeWizardInner({ editTheme }: { editTheme?: CustomTheme }) {
           </div>
         </div>
 
-        {/* ── Right: editor ──────────────────────────────────────────── */}
+        {/* -- Right: editor --------------------------------------- */}
         <div style={editorPaneStyle}>
           {/* Name + base mode */}
-          <div style={{ marginBottom: '1rem' }}>
+          <div style={{ marginBottom: '0.75rem' }}>
             <label
               style={{
                 display: 'block',
@@ -370,23 +338,45 @@ function ThemeWizardInner({ editTheme }: { editTheme?: CustomTheme }) {
             </div>
           </div>
 
+          {/* Search / filter */}
+          <div
+            style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}
+          >
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('settings.themeSearchPlaceholder')}
+              style={searchInputStyle}
+            />
+            {modifiedCount > 0 && (
+              <span style={modifiedCountStyle}>
+                {modifiedCount} {t('settings.themeModified')}
+              </span>
+            )}
+          </div>
+
           {/* Color groups */}
-          <div style={{ flex: 1, overflow: 'auto' }}>
+          <div ref={editorRef} style={{ flex: 1, overflow: 'auto' }}>
             {(Object.entries(grouped) as [ThemeVarCategory, typeof THEME_VARIABLE_META][]).map(
-              ([cat, metas]) => (
-                <div key={cat} style={{ marginBottom: '1rem' }}>
-                  <div style={categoryHeadingStyle}>{THEME_CATEGORY_LABELS[cat]}</div>
-                  {metas.map((m) => (
-                    <ColorRow
-                      key={m.cssVar}
-                      label={m.label}
-                      cssVar={m.cssVar}
-                      value={variables[m.cssVar] ?? ''}
-                      onChange={handleVarChange}
-                    />
-                  ))}
-                </div>
-              ),
+              ([cat, metas]) =>
+                metas.length > 0 && (
+                  <div key={cat} style={{ marginBottom: '1rem' }}>
+                    <div style={categoryHeadingStyle}>{THEME_CATEGORY_LABELS[cat]}</div>
+                    {metas.map((m) => (
+                      <ColorRow
+                        key={m.cssVar}
+                        label={m.label}
+                        cssVar={m.cssVar}
+                        value={variables[m.cssVar] ?? ''}
+                        isModified={variables[m.cssVar] !== currentDefaults[m.cssVar]}
+                        isHighlighted={highlightedVar === m.cssVar}
+                        onChange={handleVarChange}
+                        onReset={handleReset}
+                      />
+                    ))}
+                  </div>
+                ),
             )}
           </div>
 
@@ -429,7 +419,7 @@ const wizardLayoutStyle: React.CSSProperties = {
 }
 
 const previewPaneStyle: React.CSSProperties = {
-  flex: '0 0 340px',
+  flex: '0 0 380px',
   display: 'flex',
   flexDirection: 'column',
   borderRight: '1px solid var(--border)',
@@ -447,12 +437,13 @@ const colorRowStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  padding: '0.3rem 0',
+  padding: '0.3rem 0.3rem',
   gap: '0.5rem',
+  borderRadius: 4,
 }
 
 const colorTextInputStyle: React.CSSProperties = {
-  width: 120,
+  width: 110,
   background: 'var(--input-bg)',
   border: '1px solid var(--border)',
   borderRadius: 4,
@@ -469,6 +460,17 @@ const nameInputStyle: React.CSSProperties = {
   borderRadius: 6,
   padding: '0.4rem 0.6rem',
   fontSize: '0.85rem',
+  color: 'var(--text)',
+  boxSizing: 'border-box',
+}
+
+const searchInputStyle: React.CSSProperties = {
+  flex: 1,
+  background: 'var(--input-bg)',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  padding: '0.35rem 0.6rem',
+  fontSize: '0.78rem',
   color: 'var(--text)',
   boxSizing: 'border-box',
 }
@@ -501,4 +503,39 @@ const presetBtnStyle: React.CSSProperties = {
   fontSize: '0.7rem',
   cursor: 'pointer',
   fontFamily: 'inherit',
+}
+
+const modifiedBadgeStyle: React.CSSProperties = {
+  display: 'inline-block',
+  padding: '0 0.3rem',
+  borderRadius: 3,
+  fontSize: '0.58rem',
+  fontWeight: 700,
+  background: 'rgba(251,191,36,0.15)',
+  color: '#fbbf24',
+  lineHeight: '1.4',
+}
+
+const modifiedCountStyle: React.CSSProperties = {
+  fontSize: '0.7rem',
+  fontWeight: 600,
+  color: '#fbbf24',
+  whiteSpace: 'nowrap',
+  flexShrink: 0,
+}
+
+const resetBtnStyle: React.CSSProperties = {
+  width: 20,
+  height: 20,
+  borderRadius: 4,
+  border: '1px solid var(--border)',
+  background: 'var(--surface-3)',
+  color: 'var(--text-muted)',
+  fontSize: '0.65rem',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 0,
+  fontFamily: 'sans-serif',
 }

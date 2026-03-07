@@ -402,3 +402,74 @@ export function applyPersistedCustomTheme(): void {
   const theme = themes.find((t) => t.id === id)
   if (theme) applyThemeVariables(theme.variables)
 }
+
+// ── V3-4.2: Theme import / export ─────────────────────────────────────────
+
+/** Serialisation format for .chainsolve-theme.json files. */
+export interface ThemeExportPayload {
+  formatVersion: 1
+  name: string
+  baseMode: 'dark' | 'light'
+  variables: Record<string, string>
+}
+
+/** Export a CustomTheme as a downloadable JSON file. */
+export function exportThemeToFile(theme: CustomTheme): void {
+  const payload: ThemeExportPayload = {
+    formatVersion: 1,
+    name: theme.name,
+    baseMode: theme.baseMode,
+    variables: { ...theme.variables },
+  }
+  const json = JSON.stringify(payload, null, 2)
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${theme.name.replace(/[^a-zA-Z0-9_-]/g, '_')}.chainsolve-theme.json`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+/**
+ * Validate and parse a theme import JSON string.
+ * Returns the parsed payload or an error message.
+ */
+export function parseThemeImport(
+  json: string,
+): { ok: true; payload: ThemeExportPayload } | { ok: false; error: string } {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(json)
+  } catch {
+    return { ok: false, error: 'Invalid JSON' }
+  }
+  if (typeof parsed !== 'object' || parsed === null) {
+    return { ok: false, error: 'Invalid theme format' }
+  }
+  const obj = parsed as Record<string, unknown>
+  if (obj.formatVersion !== 1) {
+    return { ok: false, error: 'Unsupported theme format version' }
+  }
+  if (typeof obj.name !== 'string' || obj.name.trim().length === 0) {
+    return { ok: false, error: 'Theme name is required' }
+  }
+  if (obj.baseMode !== 'dark' && obj.baseMode !== 'light') {
+    return { ok: false, error: 'baseMode must be "dark" or "light"' }
+  }
+  if (typeof obj.variables !== 'object' || obj.variables === null) {
+    return { ok: false, error: 'variables must be an object' }
+  }
+  const sanitized = sanitizeThemeVariables(obj.variables as Record<string, string>)
+  return {
+    ok: true,
+    payload: {
+      formatVersion: 1,
+      name: String(obj.name).trim().slice(0, 64),
+      baseMode: obj.baseMode as 'dark' | 'light',
+      variables: sanitized,
+    },
+  }
+}
