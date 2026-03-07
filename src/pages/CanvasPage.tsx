@@ -400,6 +400,19 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           if (cancelled) return
           setInitNodes(canvasGraph.nodes as Node<NodeData>[])
           setInitEdges(canvasGraph.edges as Edge[])
+
+          // Warn if canvas loaded empty but legacy project.json had content —
+          // indicates a storage persistence issue.
+          if (
+            canvasGraph.nodes.length === 0 &&
+            canvasGraph.edges.length === 0 &&
+            pj.graph.nodes.length > 0
+          ) {
+            toast(
+              t('canvas.loadedEmptyWarning', 'Canvas loaded empty — the saved data may be missing'),
+              'error',
+            )
+          }
         } else {
           setInitNodes([])
           setInitEdges([])
@@ -559,7 +572,12 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           // Network is up but save failed — clear retry state and report error
           if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
           offlineRetryCount.current = 0
-          failSave(err instanceof Error ? err.message : 'Save failed')
+          const errMsg = err instanceof Error ? err.message : 'Save failed'
+          failSave(errMsg)
+          toast(t('canvas.saveFailed', 'Save failed — your changes may not be saved'), 'error', {
+            label: t('canvas.retryNow'),
+            onClick: () => void doSave(),
+          })
         }
       } finally {
         isSaving.current = false
@@ -777,9 +795,20 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       // Cancel any pending autosave for the current canvas — we save explicitly below
       autosaveScheduler.current.cancel()
 
-      // Save current canvas if dirty before switching
-      if (useProjectStore.getState().isDirty) {
-        await doSave()
+      // Save current canvas if dirty before switching — abort on failure to prevent data loss
+      const canvasIsDirty =
+        useProjectStore.getState().isDirty ||
+        useCanvasesStore.getState().dirtyCanvasIds.has(activeCanvasId ?? '')
+      if (canvasIsDirty) {
+        try {
+          await doSave()
+        } catch {
+          toast(
+            t('canvas.saveBeforeSwitchFailed', 'Could not save current sheet. Please try again.'),
+            'error',
+          )
+          return
+        }
       }
 
       try {
@@ -801,7 +830,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         toast(err instanceof Error ? err.message : 'Failed to switch canvas', 'error')
       }
     },
-    [projectId, activeCanvasId, doSave, setActiveCanvasId, completeSave, toast],
+    [projectId, activeCanvasId, doSave, setActiveCanvasId, completeSave, toast, t],
   )
 
   const handleCreateCanvas = useCallback(async () => {

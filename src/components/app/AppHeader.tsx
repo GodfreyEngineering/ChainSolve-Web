@@ -292,6 +292,7 @@ export function AppHeader({
     projectName,
     fmtTime,
     t,
+    errorMessage,
   )
 
   // ── Menu definitions ────────────────────────────────────────────────────────

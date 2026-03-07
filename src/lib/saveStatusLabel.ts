@@ -30,9 +30,10 @@ export interface SaveStatusLabel {
  * @param lastSavedAt Timestamp of the last successful save, or null.
  * @param isDirty     Whether there are unsaved local changes.
  * @param projectId   Current project ID; null means scratch (no badge shown).
- * @param projectName Human-readable project name (included in the tooltip).
- * @param fmtTime     Formatter that converts a Date to a short "HH:MM" string.
- * @param t           i18next translation function.
+ * @param projectName  Human-readable project name (included in the tooltip).
+ * @param fmtTime      Formatter that converts a Date to a short "HH:MM" string.
+ * @param t            i18next translation function.
+ * @param errorMessage Optional error message from the last failed save.
  * @returns A badge descriptor, or null if no badge should be shown.
  */
 export function computeSaveStatusLabel(
@@ -43,6 +44,7 @@ export function computeSaveStatusLabel(
   projectName: string,
   fmtTime: (d: Date) => string,
   t: (key: string, opts?: Record<string, string>) => string,
+  errorMessage?: string | null,
 ): SaveStatusLabel | null {
   if (!projectId) return null
 
@@ -65,7 +67,12 @@ export function computeSaveStatusLabel(
       return { text: `\u26a0 ${t('canvas.conflict')}`, color: '#f59e0b' }
 
     case 'error':
-      return { text: `\u26a0 ${t('canvas.error')}`, color: '#ef4444', clickable: true }
+      return {
+        text: `\u26a0 ${t('canvas.error')}`,
+        color: '#ef4444',
+        clickable: true,
+        tooltip: errorMessage ? t('canvas.saveErrorDetail', { error: errorMessage }) : undefined,
+      }
 
     case 'offline-queued':
       return { text: `\u23f3 ${t('canvas.offlineQueued')}`, color: '#f59e0b', clickable: true }

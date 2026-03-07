@@ -10,6 +10,7 @@ const I18N_STUBS: Record<string, string> = {
   'canvas.offlineQueued': 'Queued — offline',
   'canvas.unsaved': 'Unsaved',
   'canvas.lastSaved': 'Last saved: {{time}} · {{target}}',
+  'canvas.saveErrorDetail': 'Save error: {{error}}. Click to retry.',
 }
 
 function t(key: string, opts?: Record<string, string>): string {
@@ -123,6 +124,34 @@ describe('computeSaveStatusLabel — error', () => {
     expect(label!.text).toContain('Error')
     expect(label!.color).toBe('#ef4444')
     expect(label!.clickable).toBe(true)
+  })
+
+  it('includes error detail in tooltip when errorMessage is provided', () => {
+    const label = computeSaveStatusLabel(
+      'error',
+      null,
+      false,
+      PROJECT_ID,
+      PROJECT_NAME,
+      fmtTime,
+      t,
+      'Network timeout',
+    )
+    expect(label!.tooltip).toBe('Save error: Network timeout. Click to retry.')
+  })
+
+  it('has no tooltip when errorMessage is null', () => {
+    const label = computeSaveStatusLabel(
+      'error',
+      null,
+      false,
+      PROJECT_ID,
+      PROJECT_NAME,
+      fmtTime,
+      t,
+      null,
+    )
+    expect(label!.tooltip).toBeUndefined()
   })
 })
 
