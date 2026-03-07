@@ -977,6 +977,10 @@
     "arrowStartMarker": "Anfangsmarkierung",
     "arrowEndMarker": "Endmarkierung"
   },
+  "annotationToolbar": {
+    "decreaseFont": "Schriftgröße verringern",
+    "increaseFont": "Schriftgröße erhöhen"
+  },
   "blockLibrary": {
     "dragHint": "Auf die Leinwand ziehen",
     "proOnly": "Pro",

@@ -573,6 +573,10 @@
     "arrowStartMarker": "Start marker",
     "arrowEndMarker": "End marker"
   },
+  "annotationToolbar": {
+    "decreaseFont": "הקטן גודל גופן",
+    "increaseFont": "הגדל גודל גופן"
+  },
   "debugConsole": {
     "title": "מסוף ניפוי שגיאות",
     "logLevel": "רמת רישום",

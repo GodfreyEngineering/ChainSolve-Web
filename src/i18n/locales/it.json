@@ -977,6 +977,10 @@
     "arrowStartMarker": "Marcatore inizio",
     "arrowEndMarker": "Marcatore fine"
   },
+  "annotationToolbar": {
+    "decreaseFont": "Riduci dimensione carattere",
+    "increaseFont": "Aumenta dimensione carattere"
+  },
   "blockLibrary": {
     "dragHint": "Trascina sulla tela",
     "proOnly": "Pro",

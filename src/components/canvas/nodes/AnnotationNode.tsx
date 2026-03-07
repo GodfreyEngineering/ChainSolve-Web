@@ -1,30 +1,23 @@
 /**
- * AnnotationNode -- V3-5.2 non-evaluating visual annotations on the canvas.
+ * AnnotationNode -- V3-5.3 non-evaluating visual annotations on the canvas.
  *
  * Supports annotation types via `data.annotationType`:
- *   - text: simple text label
- *   - callout: bordered box with text (like a sticky note)
- *   - highlight: colored translucent region
- *   - arrow: directional arrow indicator (configurable markers/dash/thickness)
- *   - leader: text label with a source handle for connecting to blocks
- *   - rectangle: filled rectangle shape
- *   - ellipse: filled ellipse shape
- *   - diamond: filled diamond/rhombus shape
- *   - rounded_rectangle: filled rounded rectangle shape
+ *   - text, callout, highlight, arrow, leader
+ *   - rectangle, ellipse, diamond, rounded_rectangle (V3-5.2 shapes)
  *
- * These nodes have no block-system registration and are completely excluded
- * from engine evaluation (filtered in bridge.ts by the `annotation_` prefix).
+ * V3-5.3: Double-click text/callout/leader to enter inline edit mode.
+ * Click outside (blur) commits the edit.
  */
 
-import { memo } from 'react'
-import { Handle, Position, NodeResizer } from '@xyflow/react'
+import { memo, useCallback, useRef, useState } from 'react'
+import { Handle, Position, NodeResizer, useReactFlow } from '@xyflow/react'
 import type { NodeProps, Node } from '@xyflow/react'
 import type { NodeData } from '../../../blocks/types'
 
 const DEFAULT_COLOR = '#facc15'
 const DEFAULT_FONT_SIZE = 14
 
-function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
+function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
   const nd = data as NodeData
   const annotationType = nd.annotationType ?? 'text'
   const text = nd.annotationText ?? nd.label ?? ''
@@ -40,6 +33,52 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
 
   const fontWeight = bold ? 700 : 600
   const fontStyle = italic ? ('italic' as const) : ('normal' as const)
+
+  const [editing, setEditing] = useState(false)
+  const editRef = useRef<HTMLDivElement>(null)
+  const { updateNodeData } = useReactFlow()
+
+  const hasText =
+    annotationType === 'text' || annotationType === 'callout' || annotationType === 'leader'
+
+  const handleDoubleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!hasText) return
+      e.stopPropagation()
+      setEditing(true)
+      requestAnimationFrame(() => {
+        if (editRef.current) {
+          editRef.current.focus()
+          // Select all text
+          const sel = window.getSelection()
+          const range = document.createRange()
+          range.selectNodeContents(editRef.current)
+          sel?.removeAllRanges()
+          sel?.addRange(range)
+        }
+      })
+    },
+    [hasText],
+  )
+
+  const commitEdit = useCallback(() => {
+    if (!editing) return
+    const newText = editRef.current?.innerText ?? text
+    setEditing(false)
+    updateNodeData(id, { annotationText: newText })
+  }, [editing, text, id, updateNodeData])
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setEditing(false)
+      } else if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault()
+        commitEdit()
+      }
+    },
+    [commitEdit],
+  )
 
   const isResizable =
     annotationType === 'highlight' ||
@@ -66,7 +105,28 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
     />
   )
 
-  // ── Arrow (V3-5.2 enhanced) ──────────────────────────────────────────────
+  /** Inline-editable text element. */
+  const editableText = editing ? (
+    <div
+      ref={editRef}
+      contentEditable
+      suppressContentEditableWarning
+      onBlur={commitEdit}
+      onKeyDown={handleKeyDown}
+      style={{
+        outline: 'none',
+        minWidth: 20,
+        cursor: 'text',
+        borderBottom: `1px solid ${color}88`,
+      }}
+    >
+      {text}
+    </div>
+  ) : (
+    <span>{text}</span>
+  )
+
+  // ── Arrow ──────────────────────────────────────────────────────────────────
   if (annotationType === 'arrow') {
     const thickness = nd.annotationArrowThickness ?? 3
     const dash = nd.annotationArrowDash ?? 'solid'
@@ -79,23 +139,16 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
           ? `${thickness} ${thickness * 1.5}`
           : undefined
 
-    const markerId = (type: string, pos: 'start' | 'end') =>
+    const mid = (type: string, pos: 'start' | 'end') =>
       `arrow-${type}-${pos}-${color.replace('#', '')}`
 
     return (
-      <div
-        style={{
-          ...arrowStyle,
-          color,
-          textShadow: selected ? `0 0 8px ${color}55` : 'none',
-        }}
-      >
+      <div style={{ ...arrowStyle, color, textShadow: selected ? `0 0 8px ${color}55` : 'none' }}>
         <svg width="80" height="32" viewBox="0 0 80 32" fill="none" overflow="visible">
           <defs>
-            {/* Arrowhead markers */}
             {endMarker === 'arrowhead' && (
               <marker
-                id={markerId('arrowhead', 'end')}
+                id={mid('arrowhead', 'end')}
                 markerWidth="8"
                 markerHeight="8"
                 refX="7"
@@ -113,7 +166,7 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
             )}
             {endMarker === 'dot' && (
               <marker
-                id={markerId('dot', 'end')}
+                id={mid('dot', 'end')}
                 markerWidth="8"
                 markerHeight="8"
                 refX="4"
@@ -125,7 +178,7 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
             )}
             {endMarker === 'square' && (
               <marker
-                id={markerId('square', 'end')}
+                id={mid('square', 'end')}
                 markerWidth="8"
                 markerHeight="8"
                 refX="4"
@@ -137,7 +190,7 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
             )}
             {startMarker === 'arrowhead' && (
               <marker
-                id={markerId('arrowhead', 'start')}
+                id={mid('arrowhead', 'start')}
                 markerWidth="8"
                 markerHeight="8"
                 refX="1"
@@ -155,7 +208,7 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
             )}
             {startMarker === 'dot' && (
               <marker
-                id={markerId('dot', 'start')}
+                id={mid('dot', 'start')}
                 markerWidth="8"
                 markerHeight="8"
                 refX="4"
@@ -167,7 +220,7 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
             )}
             {startMarker === 'square' && (
               <marker
-                id={markerId('square', 'start')}
+                id={mid('square', 'start')}
                 markerWidth="8"
                 markerHeight="8"
                 refX="4"
@@ -187,10 +240,8 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
             strokeWidth={thickness}
             strokeLinecap="round"
             strokeDasharray={dashArray}
-            markerStart={
-              startMarker !== 'none' ? `url(#${markerId(startMarker, 'start')})` : undefined
-            }
-            markerEnd={endMarker !== 'none' ? `url(#${markerId(endMarker, 'end')})` : undefined}
+            markerStart={startMarker !== 'none' ? `url(#${mid(startMarker, 'start')})` : undefined}
+            markerEnd={endMarker !== 'none' ? `url(#${mid(endMarker, 'end')})` : undefined}
           />
         </svg>
       </div>
@@ -230,10 +281,13 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
             ? `0 0 0 2px ${color}44, 0 2px 8px rgba(0,0,0,0.25)`
             : '0 2px 8px rgba(0,0,0,0.15)',
         }}
+        onDoubleClick={handleDoubleClick}
       >
         {resizerEl}
         <div style={{ ...calloutAccent, background: color }} />
-        <div style={{ ...calloutBody, fontSize, fontWeight, fontStyle, textAlign }}>{text}</div>
+        <div style={{ ...calloutBody, fontSize, fontWeight, fontStyle, textAlign }}>
+          {editableText}
+        </div>
       </div>
     )
   }
@@ -252,8 +306,9 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
           textShadow: selected ? `0 0 8px ${color}55` : 'none',
           position: 'relative',
         }}
+        onDoubleClick={handleDoubleClick}
       >
-        {text}
+        {editableText}
         <Handle
           type="source"
           position={Position.Right}
@@ -264,7 +319,7 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
     )
   }
 
-  // ── Shape primitives (V3-5.2) ──────────────────────────────────────────────
+  // ── Shape primitives ───────────────────────────────────────────────────────
   if (
     annotationType === 'rectangle' ||
     annotationType === 'ellipse' ||
@@ -358,9 +413,10 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
         height: h,
         minWidth: w ? undefined : 'auto',
       }}
+      onDoubleClick={handleDoubleClick}
     >
       {resizerEl}
-      {text}
+      {editableText}
     </div>
   )
 }

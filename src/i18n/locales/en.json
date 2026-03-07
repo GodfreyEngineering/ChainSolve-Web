@@ -995,6 +995,10 @@
     "arrowStartMarker": "Start marker",
     "arrowEndMarker": "End marker"
   },
+  "annotationToolbar": {
+    "decreaseFont": "Decrease font size",
+    "increaseFont": "Increase font size"
+  },
   "blockLibrary": {
     "dragHint": "Drag onto canvas",
     "proOnly": "Pro",

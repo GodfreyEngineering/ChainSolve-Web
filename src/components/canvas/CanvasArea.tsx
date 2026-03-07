@@ -109,6 +109,7 @@ const LazyValuePopover = lazy(() =>
 import { PublishNode } from './nodes/PublishNode'
 import { SubscribeNode } from './nodes/SubscribeNode'
 import { AnnotationNode } from './nodes/AnnotationNode'
+import { AnnotationToolbar } from './AnnotationToolbar'
 import { MaterialNode } from './nodes/MaterialNode'
 import { copyValueToClipboard } from '../../engine/valueFormat'
 import {
@@ -863,7 +864,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   } | null>(null)
 
   const canvasWrapRef = useRef<HTMLDivElement>(null)
-  const { screenToFlowPosition, fitView, zoomIn, zoomOut } = useReactFlow()
+  const { screenToFlowPosition, fitView, zoomIn, zoomOut, getNode } = useReactFlow()
 
   // ── Computed values (incremental via WASM engine) ──────────────────────────
   const engine = useEngine()
@@ -2292,6 +2293,17 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     collapsed={dockCollapsed}
                     onToggleCollapsed={() => setDockCollapsed((v) => !v)}
                   />
+                  {/* V3-5.3: Floating annotation toolbar on annotation selection */}
+                  {inspectedId &&
+                    (() => {
+                      const n = getNode(inspectedId)
+                      return n?.type === 'csAnnotation' ? (
+                        <AnnotationToolbar
+                          nodeId={inspectedId}
+                          onZOrder={readOnly ? undefined : onAnnotationZOrder}
+                        />
+                      ) : null
+                    })()}
                 </div>
 
                 {/* Floating Inspector window (replaces sidebar + mobile drawer) */}

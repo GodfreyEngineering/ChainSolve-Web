@@ -977,6 +977,10 @@
     "arrowStartMarker": "Marqueur de debut",
     "arrowEndMarker": "Marqueur de fin"
   },
+  "annotationToolbar": {
+    "decreaseFont": "Réduire la taille de police",
+    "increaseFont": "Augmenter la taille de police"
+  },
   "blockLibrary": {
     "dragHint": "Glisser sur le canevas",
     "proOnly": "Pro",

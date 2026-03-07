@@ -921,7 +921,7 @@ Claude MUST:
   - Shapes: rectangle, ellipse, diamond, rounded_rectangle
   - Arrow: configurable markers, thickness, dash patterns
 
-- [ ] V3-5.3: Inline Text Editing + Annotation Toolbar
+- [x] V3-5.3: Inline Text Editing + Annotation Toolbar
   - Double-click for inline edit, floating toolbar on selection
   - Multi-select alignment, Annotations section in mini toolbar
 
