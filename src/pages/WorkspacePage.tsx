@@ -28,6 +28,7 @@ import { LeftSidebar } from '../components/app/LeftSidebar'
 import { WelcomeCanvas } from '../components/canvas/WelcomeCanvas'
 import { LoadingScreen } from '../components/ui/LoadingScreen'
 import { useSidebarStore } from '../stores/sidebarStore'
+import { StatusBar } from '../components/app/StatusBar'
 import { createProject, listProjects, importProject, type ProjectJSON } from '../lib/projects'
 import { canCreateProject, isAtProjectLimit } from '../lib/entitlements'
 import { useToast } from '../components/ui/useToast'
@@ -267,6 +268,9 @@ export default function WorkspacePage() {
           )}
         </div>
       </div>
+
+      {/* Status bar */}
+      <StatusBar />
     </div>
   )
 }

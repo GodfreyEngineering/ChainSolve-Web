@@ -1809,5 +1809,13 @@
     "results": "Suchergebnisse",
     "noResults": "Keine Ergebnisse fuer \"{{query}}\"",
     "browseHint": "Alle Themen durchsuchen oder tippen Sie, um zu suchen."
+  },
+  "statusBar": {
+    "nodes": "Knoten",
+    "edges": "Kanten",
+    "engineIdle": "Bereit",
+    "engineComputing": "Berechnung",
+    "engineError": "Fehler",
+    "snapToGrid": "Am Raster einrasten"
   }
 }

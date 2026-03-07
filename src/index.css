@@ -1109,3 +1109,56 @@ select:focus-visible,
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Status Bar (V3-2.1) ─────────────────────────────────────────────────── */
+.statusbar {
+  height: 22px;
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  background: var(--surface-1);
+  border-top: 1px solid var(--separator);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.statusbar-left,
+.statusbar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusbar-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.statusbar-sep {
+  width: 1px;
+  height: 12px;
+  background: var(--separator);
+}
+
+.statusbar-sheet-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes statusbar-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.statusbar-spin {
+  animation: statusbar-spin 1s linear infinite;
+}

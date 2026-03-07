@@ -21,6 +21,7 @@ import { updatePerfMetrics } from './perfMetrics.ts'
 import { perfMark, perfMeasure } from '../perf/marks.ts'
 import { dlog } from '../observability/debugLog.ts'
 import { computeGraphHealth } from '../lib/graphHealth.ts'
+import { useStatusBarStore } from '../stores/statusBarStore.ts'
 
 const perfEnabled = isPerfHudEnabled()
 
@@ -104,6 +105,7 @@ export function useGraphEngine(
 ): GraphEngineResult {
   const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
   const [isPartial, setIsPartial] = useState(false)
+  const setEngineStatus = useStatusBarStore((s) => s.setEngineStatus)
   const prevNodesRef = useRef<Node[]>([])
   const prevEdgesRef = useRef<Edge[]>([])
   const snapshotLoaded = useRef(false)
@@ -142,6 +144,7 @@ export function useGraphEngine(
       })
       const t0 = perfEnabled ? performance.now() : 0
       perfMark('cs:eval:start')
+      setEngineStatus('computing')
       engine.loadSnapshot(snapshot, options).then((result) => {
         if (reqId !== pendingRef.current) return
         perfMeasure('cs:eval:snapshot', 'cs:eval:start')
@@ -185,6 +188,7 @@ export function useGraphEngine(
             })
           })
         }
+        setEngineStatus('idle')
       })
     } else {
       // Subsequent renders: diff and apply patch.
@@ -204,6 +208,7 @@ export function useGraphEngine(
         dlog.debug('engine', 'Patch eval started', { opCount: opsToSend.length })
         const t0 = perfEnabled ? performance.now() : 0
         perfMark('cs:eval:start')
+        setEngineStatus('computing')
         // Apply 300 ms interactive time budget so large evals return partial
         // results quickly rather than blocking the worker. Callers can override
         // by passing a higher timeBudgetMs in `options`.
@@ -255,9 +260,11 @@ export function useGraphEngine(
                 })
               })
             }
+            setEngineStatus('idle')
           })
           .catch((err: unknown) => {
             dlog.warn('engine', 'Eval interrupted', { error: String(err) })
+            setEngineStatus('error')
           })
       }
 

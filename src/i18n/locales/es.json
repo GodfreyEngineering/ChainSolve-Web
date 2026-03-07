@@ -1809,5 +1809,13 @@
     "results": "Resultados de busqueda",
     "noResults": "Sin resultados para \"{{query}}\"",
     "browseHint": "Explorar todos los temas o escriba para buscar."
+  },
+  "statusBar": {
+    "nodes": "nodos",
+    "edges": "aristas",
+    "engineIdle": "Inactivo",
+    "engineComputing": "Calculando",
+    "engineError": "Error",
+    "snapToGrid": "Ajustar a cuadricula"
   }
 }

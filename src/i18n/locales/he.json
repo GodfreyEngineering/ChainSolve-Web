@@ -1809,5 +1809,13 @@
     "errorLoad": "Failed to load saved groups.",
     "errorRename": "Failed to rename saved group.",
     "errorDelete": "Failed to delete saved group."
+  },
+  "statusBar": {
+    "nodes": "צמתים",
+    "edges": "קשתות",
+    "engineIdle": "מוכן",
+    "engineComputing": "מחשב",
+    "engineError": "שגיאה",
+    "snapToGrid": "הצמד לרשת"
   }
 }

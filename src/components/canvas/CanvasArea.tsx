@@ -117,6 +117,7 @@ import {
 import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../../lib/build-info'
 import { useToast } from '../ui/useToast'
 import { useProjectStore } from '../../stores/projectStore'
+import { useStatusBarStore } from '../../stores/statusBarStore'
 import { toEngineSnapshot } from '../../engine/bridge'
 import { stableStringify } from '../../lib/pdf/stableStringify'
 import { sha256Hex } from '../../lib/pdf/sha256'
@@ -794,11 +795,30 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const effectiveEdgeBadges = edgeBadgesEnabled && edges.length <= 200
 
   // Track zoom for LOD tier calculation (hysteresis via computeLodTier — P084).
+  const setZoomPercent = useStatusBarStore((s) => s.setZoomPercent)
   useOnViewportChange({
-    onChange: useCallback(({ zoom }: { zoom: number }) => {
-      setLodTier((prev) => computeLodTier(zoom, prev))
-    }, []),
+    onChange: useCallback(
+      ({ zoom }: { zoom: number }) => {
+        setLodTier((prev) => computeLodTier(zoom, prev))
+        setZoomPercent(Math.round(zoom * 100))
+      },
+      [setZoomPercent],
+    ),
   })
+
+  // V3-2.1: Sync node/edge counts and snap state to status bar store.
+  const setStatusNodeCount = useStatusBarStore((s) => s.setNodeCount)
+  const setStatusEdgeCount = useStatusBarStore((s) => s.setEdgeCount)
+  const setStatusSnap = useStatusBarStore((s) => s.setSnapToGrid)
+  useEffect(() => {
+    setStatusNodeCount(nodes.length)
+  }, [nodes.length, setStatusNodeCount])
+  useEffect(() => {
+    setStatusEdgeCount(edges.length)
+  }, [edges.length, setStatusEdgeCount])
+  useEffect(() => {
+    setStatusSnap(snapToGrid)
+  }, [snapToGrid, setStatusSnap])
 
   const { t } = useTranslation()
   const { toast } = useToast()

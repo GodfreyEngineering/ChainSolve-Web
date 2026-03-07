@@ -1809,5 +1809,13 @@
     "useTemplate": "Use Template",
     "install": "Install",
     "installing": "Installing..."
+  },
+  "statusBar": {
+    "nodes": "nodes",
+    "edges": "edges",
+    "engineIdle": "Idle",
+    "engineComputing": "Computing",
+    "engineError": "Error",
+    "snapToGrid": "Snap to grid"
   }
 }
