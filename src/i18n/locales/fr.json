@@ -1567,7 +1567,8 @@
     "title": "Quelque chose s'est mal passé",
     "devToolsHint": "Consultez les DevTools du navigateur (F12 → Console) pour plus de détails.",
     "needHelp": "Besoin d'aide ?",
-    "tryAgain": "Réessayer"
+    "tryAgain": "Réessayer",
+    "panelCrashed": "{{name}} a planté"
   },
   "engineError": {
     "cspTitle": "Moteur bloqué par la politique de sécurité du contenu",
@@ -1761,6 +1762,7 @@
     "displayNameLabel": "Nom d'affichage",
     "displayNamePlaceholder": "p. ex. Marie Dupont",
     "avatarLabel": "Avatar (facultatif)",
+    "avatarPreviewAlt": "Aperçu de l'avatar",
     "errorAvatarType": "Veuillez sélectionner un fichier image.",
     "errorAvatarSize": "L'image ne doit pas dépasser 2 Mo.",
     "preferencesDesc": "Définissez votre langue et votre région.",

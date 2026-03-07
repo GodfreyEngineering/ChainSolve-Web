@@ -1567,7 +1567,8 @@
     "title": "Qualcosa è andato storto",
     "devToolsHint": "Controlla gli strumenti per sviluppatori del browser (F12 → Console) per i dettagli.",
     "needHelp": "Hai bisogno di aiuto?",
-    "tryAgain": "Riprova"
+    "tryAgain": "Riprova",
+    "panelCrashed": "{{name}} si è bloccato"
   },
   "engineError": {
     "cspTitle": "Motore bloccato dalla Content Security Policy",
@@ -1761,6 +1762,7 @@
     "displayNameLabel": "Nome visualizzato",
     "displayNamePlaceholder": "es. Marco Rossi",
     "avatarLabel": "Avatar (facoltativo)",
+    "avatarPreviewAlt": "Anteprima dell'avatar",
     "errorAvatarType": "Seleziona un file immagine.",
     "errorAvatarSize": "L'immagine non deve superare i 2 MB.",
     "preferencesDesc": "Imposta la lingua e la regione.",

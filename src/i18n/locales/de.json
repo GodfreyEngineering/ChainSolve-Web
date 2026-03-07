@@ -1567,7 +1567,8 @@
     "title": "Etwas ist schiefgelaufen",
     "devToolsHint": "Prüfen Sie die Browser-DevTools (F12 → Konsole) für Details.",
     "needHelp": "Brauchen Sie Hilfe?",
-    "tryAgain": "Erneut versuchen"
+    "tryAgain": "Erneut versuchen",
+    "panelCrashed": "{{name}} ist abgestürzt"
   },
   "engineError": {
     "cspTitle": "Engine durch Content Security Policy blockiert",
@@ -1730,6 +1731,7 @@
     "displayNameLabel": "Anzeigename",
     "displayNamePlaceholder": "z. B. Max Mustermann",
     "avatarLabel": "Profilbild (optional)",
+    "avatarPreviewAlt": "Profilbild-Vorschau",
     "errorAvatarType": "Bitte wählen Sie eine Bilddatei.",
     "errorAvatarSize": "Das Bild darf maximal 2 MB groß sein.",
     "preferencesDesc": "Legen Sie Sprache und Region fest.",

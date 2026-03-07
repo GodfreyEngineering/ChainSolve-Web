@@ -228,12 +228,19 @@ export function SignupWizard({ open, onComplete }: Props) {
               {t('signupWizard.avatarLabel')}
             </label>
             <div style={avatarRowStyle}>
-              {avatarPreview && <img src={avatarPreview} alt="" style={avatarImgStyle} />}
+              {avatarPreview && (
+                <img
+                  src={avatarPreview}
+                  alt={t('signupWizard.avatarPreviewAlt', 'Avatar preview')}
+                  style={avatarImgStyle}
+                />
+              )}
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleAvatarChange}
                 style={fileInputStyle}
+                aria-label={t('signupWizard.avatarLabel')}
               />
             </div>
 

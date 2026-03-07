@@ -756,7 +756,8 @@
     "title": "משהו השתבש",
     "devToolsHint": "בדוק את כלי המפתחים בדפדפן (F12 → Console) לפרטים.",
     "needHelp": "צריך עזרה?",
-    "tryAgain": "נסה שוב"
+    "tryAgain": "נסה שוב",
+    "panelCrashed": "{{name}} קרס"
   },
   "engineError": {
     "cspTitle": "המנוע נחסם על ידי מדיניות אבטחת תוכן",
@@ -1077,6 +1078,7 @@
     "displayNameLabel": "שם תצוגה",
     "displayNamePlaceholder": "למשל ישראל ישראלי",
     "avatarLabel": "תמונת פרופיל (אופציונלי)",
+    "avatarPreviewAlt": "תצוגה מקדימה של תמונת הפרופיל",
     "errorAvatarType": "יש לבחור קובץ תמונה.",
     "errorAvatarSize": "התמונה חייבת להיות עד 2 MB.",
     "preferencesDesc": "הגדירו שפה ואזור.",

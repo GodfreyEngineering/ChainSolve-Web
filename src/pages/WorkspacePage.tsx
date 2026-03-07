@@ -35,6 +35,7 @@ import { useStatusBarStore } from '../stores/statusBarStore'
 import { createProject, listProjects, importProject, type ProjectJSON } from '../lib/projects'
 import { canCreateProject, isAtProjectLimit } from '../lib/entitlements'
 import { useToast } from '../components/ui/useToast'
+import { PanelErrorBoundary } from '../components/ErrorBoundary'
 import type { CanvasControls } from './CanvasPage'
 
 // Lazy-load heavy components
@@ -272,38 +273,44 @@ export default function WorkspacePage() {
       />
 
       {/* Toolbar */}
-      <WorkspaceToolbar
-        plan={auth.plan}
-        sidebarOpen={sidebarOpen}
-        onToggleSidebar={toggleSidebar}
-        projectName={canvasControls?.projectName ?? null}
-        canvasControls={canvasControls}
-      />
+      <PanelErrorBoundary name="Toolbar">
+        <WorkspaceToolbar
+          plan={auth.plan}
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={toggleSidebar}
+          projectName={canvasControls?.projectName ?? null}
+          canvasControls={canvasControls}
+        />
+      </PanelErrorBoundary>
 
       {/* Main content area */}
       <div style={mainStyle}>
         {/* Left sidebar */}
-        <LeftSidebar
-          plan={auth.plan}
-          onOpenProject={handleOpenProject}
-          onNewProject={handleNewProject}
-        />
+        <PanelErrorBoundary name="Sidebar">
+          <LeftSidebar
+            plan={auth.plan}
+            onOpenProject={handleOpenProject}
+            onNewProject={handleNewProject}
+          />
+        </PanelErrorBoundary>
 
         {/* Canvas area or welcome */}
-        <div style={canvasAreaStyle}>
-          {showCanvas ? (
-            <Suspense fallback={<LoadingScreen />}>
-              <CanvasPage embedded onControlsReady={setCanvasControls} />
-            </Suspense>
-          ) : (
-            <WelcomeCanvas
-              onNewProject={handleNewProject}
-              onOpenScratch={handleOpenScratch}
-              onOpenExplore={handleOpenExplore}
-              onImport={handleImport}
-              onOpenProject={handleOpenProject}
-            />
-          )}
+        <div id="cs-main-content" style={canvasAreaStyle}>
+          <PanelErrorBoundary name="Canvas">
+            {showCanvas ? (
+              <Suspense fallback={<LoadingScreen />}>
+                <CanvasPage embedded onControlsReady={setCanvasControls} />
+              </Suspense>
+            ) : (
+              <WelcomeCanvas
+                onNewProject={handleNewProject}
+                onOpenScratch={handleOpenScratch}
+                onOpenExplore={handleOpenExplore}
+                onImport={handleImport}
+                onOpenProject={handleOpenProject}
+              />
+            )}
+          </PanelErrorBoundary>
         </div>
 
         {/* Right sidebar (docked Inspector) */}

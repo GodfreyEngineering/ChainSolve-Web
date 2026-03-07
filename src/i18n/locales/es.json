@@ -1567,7 +1567,8 @@
     "title": "Algo salió mal",
     "devToolsHint": "Consulte las DevTools del navegador (F12 → Consola) para más detalles.",
     "needHelp": "¿Necesita ayuda?",
-    "tryAgain": "Intentar de nuevo"
+    "tryAgain": "Intentar de nuevo",
+    "panelCrashed": "{{name}} falló"
   },
   "engineError": {
     "cspTitle": "Motor bloqueado por la política de seguridad de contenido",
@@ -1761,6 +1762,7 @@
     "displayNameLabel": "Nombre para mostrar",
     "displayNamePlaceholder": "p. ej. María García",
     "avatarLabel": "Avatar (opcional)",
+    "avatarPreviewAlt": "Vista previa del avatar",
     "errorAvatarType": "Selecciona un archivo de imagen.",
     "errorAvatarSize": "La imagen no debe superar los 2 MB.",
     "preferencesDesc": "Establece tu idioma y región.",

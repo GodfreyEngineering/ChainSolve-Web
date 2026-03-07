@@ -1585,7 +1585,8 @@
     "title": "Something went wrong",
     "devToolsHint": "Check browser DevTools (F12 > Console) for details.",
     "needHelp": "Need help?",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "panelCrashed": "{{name}} crashed"
   },
   "engineError": {
     "cspTitle": "Engine blocked by Content Security Policy",
@@ -1779,6 +1780,7 @@
     "displayNameLabel": "Display name",
     "displayNamePlaceholder": "e.g. Jane Smith",
     "avatarLabel": "Avatar (optional)",
+    "avatarPreviewAlt": "Avatar preview",
     "errorAvatarType": "Please select an image file.",
     "errorAvatarSize": "Image must be under 2 MB.",
     "preferencesDesc": "Set your language and region.",
