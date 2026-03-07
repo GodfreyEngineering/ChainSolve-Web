@@ -1900,7 +1900,9 @@
     "browseTemplates": "Browse Templates",
     "browseDesc": "Community templates",
     "importProject": "Import Project",
-    "importDesc": "From .chainsolvejson file"
+    "importDesc": "From .chainsolvejson file",
+    "recentProjects": "Recent Projects",
+    "openProject": "Open {{name}}"
   },
   "explore": {
     "searchPlaceholder": "Search marketplace...",

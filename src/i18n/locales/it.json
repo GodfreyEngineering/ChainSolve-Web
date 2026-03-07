@@ -1874,7 +1874,9 @@
     "browseTemplates": "Sfoglia modelli",
     "browseDesc": "Modelli della community",
     "importProject": "Importa progetto",
-    "importDesc": "Da file .chainsolvejson"
+    "importDesc": "Da file .chainsolvejson",
+    "recentProjects": "Progetti recenti",
+    "openProject": "Apri {{name}}"
   },
   "explore": {
     "searchPlaceholder": "Cerca nel marketplace...",

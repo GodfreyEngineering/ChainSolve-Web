@@ -1874,7 +1874,9 @@
     "browseTemplates": "Vorlagen durchsuchen",
     "browseDesc": "Community-Vorlagen",
     "importProject": "Projekt importieren",
-    "importDesc": "Aus .chainsolvejson-Datei"
+    "importDesc": "Aus .chainsolvejson-Datei",
+    "recentProjects": "Letzte Projekte",
+    "openProject": "{{name}} öffnen"
   },
   "explore": {
     "searchPlaceholder": "Marktplatz durchsuchen...",

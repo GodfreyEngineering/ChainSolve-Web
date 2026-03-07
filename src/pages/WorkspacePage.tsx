@@ -280,6 +280,7 @@ export default function WorkspacePage() {
               onOpenScratch={handleOpenScratch}
               onOpenExplore={handleOpenExplore}
               onImport={handleImport}
+              onOpenProject={handleOpenProject}
             />
           )}
         </div>

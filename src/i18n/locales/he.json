@@ -1430,7 +1430,9 @@
     "browseTemplates": "עיין בתבניות",
     "browseDesc": "תבניות קהילתיות",
     "importProject": "ייבא פרויקט",
-    "importDesc": "מקובץ chainsolvejson."
+    "importDesc": "מקובץ chainsolvejson.",
+    "recentProjects": "פרויקטים אחרונים",
+    "openProject": "פתח {{name}}"
   },
   "explore": {
     "searchPlaceholder": "חיפוש בשוק...",

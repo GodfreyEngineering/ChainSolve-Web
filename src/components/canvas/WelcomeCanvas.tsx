@@ -8,12 +8,14 @@ import { useTranslation } from 'react-i18next'
 import { Plus, FileDown, Compass, Pencil } from 'lucide-react'
 import { BRAND } from '../../lib/brand'
 import { Icon } from '../ui/Icon'
+import { RecentProjectsGrid } from './RecentProjectsGrid'
 
 interface WelcomeCanvasProps {
   onNewProject: () => void
   onOpenScratch: () => void
   onOpenExplore: () => void
   onImport: () => void
+  onOpenProject: (id: string) => void
 }
 
 export function WelcomeCanvas({
@@ -21,6 +23,7 @@ export function WelcomeCanvas({
   onOpenScratch,
   onOpenExplore,
   onImport,
+  onOpenProject,
 }: WelcomeCanvasProps) {
   const { t } = useTranslation()
 
@@ -75,6 +78,7 @@ export function WelcomeCanvas({
               }}
               onClick={a.onClick}
               className="cs-hover-lift"
+              aria-label={a.label}
             >
               <Icon
                 icon={a.icon}
@@ -86,6 +90,8 @@ export function WelcomeCanvas({
             </button>
           ))}
         </div>
+
+        <RecentProjectsGrid onOpenProject={onOpenProject} />
       </div>
     </div>
   )

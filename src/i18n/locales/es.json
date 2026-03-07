@@ -1874,7 +1874,9 @@
     "browseTemplates": "Explorar plantillas",
     "browseDesc": "Plantillas de la comunidad",
     "importProject": "Importar proyecto",
-    "importDesc": "Desde archivo .chainsolvejson"
+    "importDesc": "Desde archivo .chainsolvejson",
+    "recentProjects": "Proyectos recientes",
+    "openProject": "Abrir {{name}}"
   },
   "explore": {
     "searchPlaceholder": "Buscar en el mercado...",
