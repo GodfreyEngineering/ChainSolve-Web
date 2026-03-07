@@ -90,7 +90,7 @@ describe('signUp', () => {
     expect(mockSignUp).toHaveBeenCalledWith({
       email: 'a@b.com',
       password: 'pw',
-      options: undefined,
+      options: {},
     })
   })
 
@@ -103,6 +103,24 @@ describe('signUp', () => {
       email: 'a@b.com',
       password: 'pw',
       options: { captchaToken: 'tok-456' },
+    })
+  })
+
+  it('passes terms and marketing metadata when provided', async () => {
+    mockSignUp.mockResolvedValue({ data: { session: null }, error: null })
+    await signUp('a@b.com', 'pw', undefined, {
+      acceptedTermsVersion: '1.0',
+      marketingOptIn: true,
+    })
+    expect(mockSignUp).toHaveBeenCalledWith({
+      email: 'a@b.com',
+      password: 'pw',
+      options: {
+        data: {
+          accepted_terms_version: '1.0',
+          marketing_opt_in: true,
+        },
+      },
     })
   })
 })

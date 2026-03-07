@@ -1758,6 +1758,10 @@
     "title": "Completar perfil",
     "subtitle": "Unos pasos rápidos para configurar tu espacio de trabajo.",
     "stepOf": "Paso {{current}} de {{total}}",
+    "stepProfile": "Perfil",
+    "stepPreferences": "Preferencias",
+    "stepPlan": "Plan",
+    "stepConfirm": "Confirmar",
     "profileDesc": "Elige un nombre para mostrar y un avatar opcional.",
     "displayNameLabel": "Nombre para mostrar",
     "displayNamePlaceholder": "p. ej. María García",
@@ -1874,7 +1878,8 @@
     "importFailed": "No se pudo importar el proyecto",
     "settingUp": "Configurando tu cuenta\u2026",
     "settingUpHint": "Esto suele tardar un momento. Por favor, actualiza la p\u00e1gina.",
-    "refresh": "Actualizar"
+    "refresh": "Actualizar",
+    "tryAgain": "Intentar de nuevo"
   },
   "welcome": {
     "title": "Bienvenido a tu espacio de trabajo",

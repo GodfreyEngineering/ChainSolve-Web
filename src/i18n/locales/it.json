@@ -1758,6 +1758,10 @@
     "title": "Completa il tuo profilo",
     "subtitle": "Alcuni rapidi passaggi per configurare il tuo spazio di lavoro.",
     "stepOf": "Passaggio {{current}} di {{total}}",
+    "stepProfile": "Profilo",
+    "stepPreferences": "Preferenze",
+    "stepPlan": "Piano",
+    "stepConfirm": "Conferma",
     "profileDesc": "Scegli un nome visualizzato e un avatar facoltativo.",
     "displayNameLabel": "Nome visualizzato",
     "displayNamePlaceholder": "es. Marco Rossi",
@@ -1874,7 +1878,8 @@
     "importFailed": "Impossibile importare il progetto",
     "settingUp": "Configurazione dell'account\u2026",
     "settingUpHint": "Di solito ci vuole un momento. Aggiorna la pagina.",
-    "refresh": "Aggiorna"
+    "refresh": "Aggiorna",
+    "tryAgain": "Riprova"
   },
   "welcome": {
     "title": "Benvenuto nel tuo spazio di lavoro",

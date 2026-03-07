@@ -36,15 +36,31 @@ export async function signInWithPassword(
   return { error }
 }
 
+export interface SignUpMetadata {
+  acceptedTermsVersion?: string
+  marketingOptIn?: boolean
+}
+
 export async function signUp(
   email: string,
   password: string,
   captchaToken?: string,
+  metadata?: SignUpMetadata,
 ): Promise<{ session: Session | null; error: AuthError | null }> {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: captchaToken ? { captchaToken } : undefined,
+    options: {
+      ...(captchaToken ? { captchaToken } : {}),
+      ...(metadata
+        ? {
+            data: {
+              accepted_terms_version: metadata.acceptedTermsVersion,
+              marketing_opt_in: metadata.marketingOptIn ?? false,
+            },
+          }
+        : {}),
+    },
   })
   return { session: data.session ?? null, error }
 }

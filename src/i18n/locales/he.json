@@ -1074,6 +1074,10 @@
     "title": "השלמת הפרופיל",
     "subtitle": "כמה שלבים קצרים להגדרת סביבת העבודה שלך.",
     "stepOf": "שלב {{current}} מתוך {{total}}",
+    "stepProfile": "פרופיל",
+    "stepPreferences": "העדפות",
+    "stepPlan": "תוכנית",
+    "stepConfirm": "אישור",
     "profileDesc": "בחרו שם תצוגה ותמונת פרופיל (אופציונלי).",
     "displayNameLabel": "שם תצוגה",
     "displayNamePlaceholder": "למשל ישראל ישראלי",
@@ -1430,7 +1434,8 @@
     "importFailed": "לא ניתן לייבא פרויקט",
     "settingUp": "מגדיר את החשבון שלך\u2026",
     "settingUpHint": "זה בדרך כלל לוקח רגע. אנא רענן את הדף.",
-    "refresh": "רענן"
+    "refresh": "רענן",
+    "tryAgain": "נסה שוב"
   },
   "welcome": {
     "title": "ברוכים הבאים למרחב העבודה שלך",

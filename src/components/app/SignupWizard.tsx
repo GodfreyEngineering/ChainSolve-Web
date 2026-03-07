@@ -15,11 +15,8 @@
 import { useState, useCallback, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { validateDisplayName } from '../../lib/validateDisplayName'
-import { updateDisplayName, uploadAvatar } from '../../lib/profilesService'
-import { acceptTerms, updateMarketingOptIn } from '../../lib/profilesService'
+import { updateDisplayName, uploadAvatar, updateMarketingOptIn } from '../../lib/profilesService'
 import { updateUserPreferences } from '../../lib/userPreferencesService'
-import { logTermsAcceptance } from '../../lib/userTermsService'
-import { CURRENT_TERMS_VERSION } from '../../lib/termsVersion'
 import { PlanComparisonCard } from './PlanComparisonCard'
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -37,6 +34,12 @@ const SUPPORTED_LOCALES = [
 
 type Step = 'profile' | 'preferences' | 'plan' | 'confirm'
 const STEPS: Step[] = ['profile', 'preferences', 'plan', 'confirm']
+const STEP_I18N: Record<Step, string> = {
+  profile: 'signupWizard.stepProfile',
+  preferences: 'signupWizard.stepPreferences',
+  plan: 'signupWizard.stepPlan',
+  confirm: 'signupWizard.stepConfirm',
+}
 
 interface Props {
   open: boolean
@@ -136,18 +139,10 @@ export function SignupWizard({ open, onComplete }: Props) {
         await i18n.changeLanguage(locale)
       }
 
-      // 5. Accept terms + log in audit table
-      await acceptTerms(CURRENT_TERMS_VERSION)
-      try {
-        await logTermsAcceptance(CURRENT_TERMS_VERSION)
-      } catch {
-        // Best-effort audit log; don't block signup completion.
-      }
-
-      // 6. Marketing opt-in
+      // 5. Marketing opt-in (terms already accepted at signup time)
       await updateMarketingOptIn(marketingOptIn)
 
-      // 7. Plan choice is informational for now (Stripe checkout in Phase 3)
+      // 6. Plan choice is informational for now (Stripe checkout in Phase 3)
 
       onComplete()
     } catch (err) {
@@ -160,7 +155,6 @@ export function SignupWizard({ open, onComplete }: Props) {
   if (!open) return null
 
   const stepIndex = STEPS.indexOf(step)
-  const stepNumber = stepIndex + 1
 
   // ── Render ──────────────────────────────────────────────────────────────
 
@@ -174,18 +168,24 @@ export function SignupWizard({ open, onComplete }: Props) {
         <div style={stepBarStyle}>
           {STEPS.map((s, i) => (
             <div key={s} style={stepItemStyle}>
-              <div
-                style={{
-                  ...stepDotStyle,
-                  background:
-                    i < stepIndex
-                      ? 'var(--primary, #1cab b0)'
-                      : i === stepIndex
-                        ? 'var(--primary, #1cabb0)'
-                        : 'var(--border, #ccc)',
-                  opacity: i < stepIndex ? 0.5 : 1,
-                }}
-              />
+              <div style={stepDotGroupStyle}>
+                <div
+                  style={{
+                    ...stepDotStyle,
+                    background: i <= stepIndex ? 'var(--primary, #1cabb0)' : 'var(--border, #ccc)',
+                    opacity: i < stepIndex ? 0.5 : 1,
+                  }}
+                />
+                <span
+                  style={{
+                    ...stepTextStyle,
+                    color: i === stepIndex ? 'var(--primary, #1cabb0)' : 'var(--text-muted, #888)',
+                    fontWeight: i === stepIndex ? 600 : 400,
+                  }}
+                >
+                  {t(STEP_I18N[s])}
+                </span>
+              </div>
               {i < STEPS.length - 1 && (
                 <div
                   style={{
@@ -197,169 +197,170 @@ export function SignupWizard({ open, onComplete }: Props) {
               )}
             </div>
           ))}
-          <span style={stepLabelStyle}>
-            {t('signupWizard.stepOf', { current: stepNumber, total: STEPS.length })}
-          </span>
         </div>
 
         {/* Error display */}
         {error && <p style={errorBoxStyle}>{error}</p>}
 
-        {/* ── Step 1: Profile ─────────────────────────────────────── */}
-        {step === 'profile' && (
-          <div>
-            <p style={descStyle}>{t('signupWizard.profileDesc')}</p>
+        {/* Step content with slide-in transition */}
+        <div key={step} className="cs-wizard-step">
+          {/* ── Step 1: Profile ─────────────────────────────────────── */}
+          {step === 'profile' && (
+            <div>
+              <p style={descStyle}>{t('signupWizard.profileDesc')}</p>
 
-            <label style={labelStyle}>{t('signupWizard.displayNameLabel')}</label>
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => {
-                setDisplayName(e.target.value)
-                setError('')
-              }}
-              placeholder={t('signupWizard.displayNamePlaceholder')}
-              maxLength={100}
-              style={inputStyle}
-              autoFocus
-            />
+              <label style={labelStyle}>{t('signupWizard.displayNameLabel')}</label>
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => {
+                  setDisplayName(e.target.value)
+                  setError('')
+                }}
+                placeholder={t('signupWizard.displayNamePlaceholder')}
+                maxLength={100}
+                style={inputStyle}
+                autoFocus
+              />
 
-            <label style={{ ...labelStyle, marginTop: '1.25rem' }}>
-              {t('signupWizard.avatarLabel')}
-            </label>
-            <div style={avatarRowStyle}>
-              {avatarPreview && (
-                <img
-                  src={avatarPreview}
-                  alt={t('signupWizard.avatarPreviewAlt', 'Avatar preview')}
-                  style={avatarImgStyle}
+              <label style={{ ...labelStyle, marginTop: '1.25rem' }}>
+                {t('signupWizard.avatarLabel')}
+              </label>
+              <div style={avatarRowStyle}>
+                {avatarPreview && (
+                  <img
+                    src={avatarPreview}
+                    alt={t('signupWizard.avatarPreviewAlt', 'Avatar preview')}
+                    style={avatarImgStyle}
+                  />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  style={fileInputStyle}
+                  aria-label={t('signupWizard.avatarLabel')}
                 />
-              )}
+              </div>
+
+              <div style={btnRowStyle}>
+                <span />
+                <button onClick={goNext} style={primaryBtnStyle}>
+                  {t('signupWizard.next')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── Step 2: Preferences ─────────────────────────────────── */}
+          {step === 'preferences' && (
+            <div>
+              <p style={descStyle}>{t('signupWizard.preferencesDesc')}</p>
+
+              <label style={labelStyle}>{t('signupWizard.localeLabel')}</label>
+              <select value={locale} onChange={(e) => setLocale(e.target.value)} style={inputStyle}>
+                {SUPPORTED_LOCALES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+
+              <label style={{ ...labelStyle, marginTop: '1.25rem' }}>
+                {t('signupWizard.regionLabel')}
+              </label>
               <input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                style={fileInputStyle}
-                aria-label={t('signupWizard.avatarLabel')}
+                type="text"
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                placeholder={t('signupWizard.regionPlaceholder')}
+                maxLength={50}
+                style={inputStyle}
               />
-            </div>
 
-            <div style={btnRowStyle}>
-              <span />
-              <button onClick={goNext} style={primaryBtnStyle}>
-                {t('signupWizard.next')}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── Step 2: Preferences ─────────────────────────────────── */}
-        {step === 'preferences' && (
-          <div>
-            <p style={descStyle}>{t('signupWizard.preferencesDesc')}</p>
-
-            <label style={labelStyle}>{t('signupWizard.localeLabel')}</label>
-            <select value={locale} onChange={(e) => setLocale(e.target.value)} style={inputStyle}>
-              {SUPPORTED_LOCALES.map((l) => (
-                <option key={l.code} value={l.code}>
-                  {l.label}
-                </option>
-              ))}
-            </select>
-
-            <label style={{ ...labelStyle, marginTop: '1.25rem' }}>
-              {t('signupWizard.regionLabel')}
-            </label>
-            <input
-              type="text"
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              placeholder={t('signupWizard.regionPlaceholder')}
-              maxLength={50}
-              style={inputStyle}
-            />
-
-            <div style={btnRowStyle}>
-              <button onClick={goBack} style={secondaryBtnStyle}>
-                {t('signupWizard.back')}
-              </button>
-              <button onClick={goNext} style={primaryBtnStyle}>
-                {t('signupWizard.next')}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── Step 3: Plan selection ──────────────────────────────── */}
-        {step === 'plan' && (
-          <div>
-            <p style={descStyle}>{t('signupWizard.planDesc')}</p>
-
-            <PlanComparisonCard
-              compact
-              onSelectPlan={setSelectedPlan}
-              selectedPlan={selectedPlan}
-            />
-
-            <p style={planNoteStyle}>{t('signupWizard.planNote')}</p>
-
-            <div style={btnRowStyle}>
-              <button onClick={goBack} style={secondaryBtnStyle}>
-                {t('signupWizard.back')}
-              </button>
-              <button onClick={goNext} style={primaryBtnStyle}>
-                {t('signupWizard.next')}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── Step 4: Confirm ─────────────────────────────────────── */}
-        {step === 'confirm' && (
-          <div>
-            <p style={descStyle}>{t('signupWizard.confirmDesc')}</p>
-
-            <div style={summaryStyle}>
-              <div style={summaryRowStyle}>
-                <span style={summaryLabelStyle}>{t('signupWizard.displayNameLabel')}</span>
-                <span>{displayName.trim()}</span>
+              <div style={btnRowStyle}>
+                <button onClick={goBack} style={secondaryBtnStyle}>
+                  {t('signupWizard.back')}
+                </button>
+                <button onClick={goNext} style={primaryBtnStyle}>
+                  {t('signupWizard.next')}
+                </button>
               </div>
-              <div style={summaryRowStyle}>
-                <span style={summaryLabelStyle}>{t('signupWizard.localeLabel')}</span>
-                <span>{SUPPORTED_LOCALES.find((l) => l.code === locale)?.label ?? locale}</span>
+            </div>
+          )}
+
+          {/* ── Step 3: Plan selection ──────────────────────────────── */}
+          {step === 'plan' && (
+            <div>
+              <p style={descStyle}>{t('signupWizard.planDesc')}</p>
+
+              <PlanComparisonCard
+                compact
+                onSelectPlan={setSelectedPlan}
+                selectedPlan={selectedPlan}
+              />
+
+              <p style={planNoteStyle}>{t('signupWizard.planNote')}</p>
+
+              <div style={btnRowStyle}>
+                <button onClick={goBack} style={secondaryBtnStyle}>
+                  {t('signupWizard.back')}
+                </button>
+                <button onClick={goNext} style={primaryBtnStyle}>
+                  {t('signupWizard.next')}
+                </button>
               </div>
-              {region.trim() && (
+            </div>
+          )}
+
+          {/* ── Step 4: Confirm ─────────────────────────────────────── */}
+          {step === 'confirm' && (
+            <div style={{ minHeight: 200 }}>
+              <p style={descStyle}>{t('signupWizard.confirmDesc')}</p>
+
+              <div style={summaryStyle}>
                 <div style={summaryRowStyle}>
-                  <span style={summaryLabelStyle}>{t('signupWizard.regionLabel')}</span>
-                  <span>{region.trim()}</span>
+                  <span style={summaryLabelStyle}>{t('signupWizard.displayNameLabel')}</span>
+                  <span>{displayName.trim()}</span>
                 </div>
-              )}
-              <div style={summaryRowStyle}>
-                <span style={summaryLabelStyle}>{t('signupWizard.planLabel')}</span>
-                <span>{t(`plans.${selectedPlan}`)}</span>
+                <div style={summaryRowStyle}>
+                  <span style={summaryLabelStyle}>{t('signupWizard.localeLabel')}</span>
+                  <span>{SUPPORTED_LOCALES.find((l) => l.code === locale)?.label ?? locale}</span>
+                </div>
+                {region.trim() && (
+                  <div style={summaryRowStyle}>
+                    <span style={summaryLabelStyle}>{t('signupWizard.regionLabel')}</span>
+                    <span>{region.trim()}</span>
+                  </div>
+                )}
+                <div style={summaryRowStyle}>
+                  <span style={summaryLabelStyle}>{t('signupWizard.planLabel')}</span>
+                  <span>{t(`plans.${selectedPlan}`)}</span>
+                </div>
+              </div>
+
+              <label style={checkboxLabelStyle}>
+                <input
+                  type="checkbox"
+                  checked={marketingOptIn}
+                  onChange={(e) => setMarketingOptIn(e.target.checked)}
+                  style={checkboxStyle}
+                />
+                {t('signupWizard.marketingOptIn')}
+              </label>
+
+              <div style={btnRowStyle}>
+                <button onClick={goBack} style={secondaryBtnStyle} disabled={submitting}>
+                  {t('signupWizard.back')}
+                </button>
+                <button onClick={handleFinish} style={primaryBtnStyle} disabled={submitting}>
+                  {submitting ? t('signupWizard.saving') : t('signupWizard.finish')}
+                </button>
               </div>
             </div>
-
-            <label style={checkboxLabelStyle}>
-              <input
-                type="checkbox"
-                checked={marketingOptIn}
-                onChange={(e) => setMarketingOptIn(e.target.checked)}
-                style={checkboxStyle}
-              />
-              {t('signupWizard.marketingOptIn')}
-            </label>
-
-            <div style={btnRowStyle}>
-              <button onClick={goBack} style={secondaryBtnStyle} disabled={submitting}>
-                {t('signupWizard.back')}
-              </button>
-              <button onClick={handleFinish} style={primaryBtnStyle} disabled={submitting}>
-                {submitting ? t('signupWizard.saving') : t('signupWizard.finish')}
-              </button>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
+        {/* end cs-wizard-step */}
       </div>
     </div>
   )
@@ -427,11 +428,17 @@ const stepLineStyle: CSSProperties = {
   transition: 'background 0.2s',
 }
 
-const stepLabelStyle: CSSProperties = {
-  fontSize: '0.8rem',
-  color: 'var(--text-muted, #888)',
-  marginLeft: '0.75rem',
+const stepDotGroupStyle: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '0.3rem',
+}
+
+const stepTextStyle: CSSProperties = {
+  fontSize: '0.7rem',
   whiteSpace: 'nowrap',
+  letterSpacing: '0.02em',
 }
 
 const descStyle: CSSProperties = {

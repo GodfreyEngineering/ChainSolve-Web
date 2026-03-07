@@ -21,6 +21,7 @@ import {
 } from '../lib/auth'
 import { MfaChallengeScreen } from '../components/app/MfaChallengeScreen'
 import { BRAND } from '../lib/brand'
+import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 import { LegalFooter } from '../components/ui/LegalFooter'
 import { usePageMeta, useHreflang } from '../lib/seo'
 import TurnstileWidget from '../components/ui/TurnstileWidget'
@@ -128,7 +129,10 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
           setLoading(false)
           return
         }
-        const { session, error: signUpErr } = await signUp(email, password, token)
+        const { session, error: signUpErr } = await signUp(email, password, token, {
+          acceptedTermsVersion: CURRENT_TERMS_VERSION,
+          marketingOptIn,
+        })
         if (signUpErr) throw signUpErr
         if (!session) {
           // Email confirmation required — show confirm prompt.

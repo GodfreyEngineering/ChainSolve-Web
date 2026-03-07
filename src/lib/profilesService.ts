@@ -47,6 +47,13 @@ export function invalidateProfileCache(): void {
   _profileCache = null
 }
 
+/** Safety-net: create the caller's profile row if the signup trigger failed. */
+export async function ensureProfile(): Promise<void> {
+  const { error } = await supabase.rpc('ensure_profile')
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  invalidateProfileCache()
+}
+
 export async function getProfile(userId: string): Promise<Profile | null> {
   if (
     _profileCache &&

@@ -1727,6 +1727,10 @@
     "title": "Profil vervollständigen",
     "subtitle": "Ein paar kurze Schritte, um Ihren Arbeitsbereich einzurichten.",
     "stepOf": "Schritt {{current}} von {{total}}",
+    "stepProfile": "Profil",
+    "stepPreferences": "Einstellungen",
+    "stepPlan": "Plan",
+    "stepConfirm": "Bestätigen",
     "profileDesc": "Wählen Sie einen Anzeigenamen und ein optionales Profilbild.",
     "displayNameLabel": "Anzeigename",
     "displayNamePlaceholder": "z. B. Max Mustermann",
@@ -1874,7 +1878,8 @@
     "importFailed": "Projekt konnte nicht importiert werden",
     "settingUp": "Konto wird eingerichtet\u2026",
     "settingUpHint": "Dies dauert normalerweise einen Moment. Bitte laden Sie die Seite neu.",
-    "refresh": "Aktualisieren"
+    "refresh": "Aktualisieren",
+    "tryAgain": "Erneut versuchen"
   },
   "welcome": {
     "title": "Willkommen in deinem Arbeitsbereich",

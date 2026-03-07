@@ -1095,6 +1095,21 @@ select:focus-visible,
 
 /* ── prefers-reduced-motion — P075 ───────────────────────────────────────── */
 /* Collapse all CSS animations/transitions to near-instant so that            */
+/* Wizard step transition */
+@keyframes cs-wizard-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.cs-wizard-step {
+  animation: cs-wizard-slide-in 0.25s ease-out;
+}
+
 /* cs-fade-in, cs-slide-up, and any future keyframes are inert for users     */
 /* who have requested reduced motion in their OS accessibility settings.      */
 /* The edge-flow @media rule above (animation: none) remains in place as a   */

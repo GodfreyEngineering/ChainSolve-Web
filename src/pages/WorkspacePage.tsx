@@ -200,6 +200,17 @@ export default function WorkspacePage() {
 
   // Profile-null fallback: profile trigger hasn't fired after all retries
   if (!auth.profile && auth.user) {
+    const handleRetryProfile = async () => {
+      try {
+        const { ensureProfile } = await import('../lib/profilesService')
+        await ensureProfile()
+        await auth.refreshProfile()
+        // If profile is still null after refresh, a page reload picks up any DB delay
+        if (!auth.profile) window.location.reload()
+      } catch {
+        window.location.reload()
+      }
+    }
     return (
       <div style={profileFallbackStyle}>
         <h2>{t('workspace.settingUp', 'Setting up your account\u2026')}</h2>
@@ -207,8 +218,8 @@ export default function WorkspacePage() {
           {t('workspace.settingUpHint', 'This usually takes a moment. Please refresh the page.')}
         </p>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => window.location.reload()} style={refreshBtnStyle}>
-            {t('workspace.refresh', 'Refresh')}
+          <button onClick={handleRetryProfile} style={refreshBtnStyle}>
+            {t('workspace.tryAgain', 'Try again')}
           </button>
           <button
             onClick={async () => {

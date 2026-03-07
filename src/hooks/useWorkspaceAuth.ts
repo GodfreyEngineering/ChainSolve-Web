@@ -113,15 +113,19 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
         try {
           const { error: rpcErr } = await supabase.rpc('ensure_profile')
           if (!rpcErr) {
-            const { data } = await supabase
-              .from('profiles')
-              .select(PROFILE_COLS)
-              .eq('id', userId)
-              .maybeSingle()
-            if (data) {
-              setProfile(data as Profile)
-              setLoading(false)
-              return
+            // Try twice — connection pooling can delay visibility of the new row
+            for (let r = 0; r < 2; r++) {
+              const { data } = await supabase
+                .from('profiles')
+                .select(PROFILE_COLS)
+                .eq('id', userId)
+                .maybeSingle()
+              if (data) {
+                setProfile(data as Profile)
+                setLoading(false)
+                return
+              }
+              if (r === 0) await new Promise((w) => setTimeout(w, 500))
             }
           }
         } catch {

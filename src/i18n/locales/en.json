@@ -1776,6 +1776,10 @@
     "title": "Complete your profile",
     "subtitle": "A few quick steps to set up your workspace.",
     "stepOf": "Step {{current}} of {{total}}",
+    "stepProfile": "Profile",
+    "stepPreferences": "Preferences",
+    "stepPlan": "Plan",
+    "stepConfirm": "Confirm",
     "profileDesc": "Choose a display name and optional avatar.",
     "displayNameLabel": "Display name",
     "displayNamePlaceholder": "e.g. Jane Smith",
@@ -1900,7 +1904,8 @@
     "importFailed": "Failed to import project",
     "settingUp": "Setting up your account\u2026",
     "settingUpHint": "This usually takes a moment. Please refresh the page.",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "tryAgain": "Try again"
   },
   "welcome": {
     "title": "Welcome to your workspace",

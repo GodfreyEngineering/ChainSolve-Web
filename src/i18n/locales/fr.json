@@ -1758,6 +1758,10 @@
     "title": "Compléter votre profil",
     "subtitle": "Quelques étapes rapides pour configurer votre espace de travail.",
     "stepOf": "Étape {{current}} sur {{total}}",
+    "stepProfile": "Profil",
+    "stepPreferences": "Préférences",
+    "stepPlan": "Plan",
+    "stepConfirm": "Confirmer",
     "profileDesc": "Choisissez un nom d'affichage et un avatar facultatif.",
     "displayNameLabel": "Nom d'affichage",
     "displayNamePlaceholder": "p. ex. Marie Dupont",
@@ -1874,7 +1878,8 @@
     "importFailed": "Impossible d'importer le projet",
     "settingUp": "Configuration de votre compte\u2026",
     "settingUpHint": "Cela prend g\u00e9n\u00e9ralement un instant. Veuillez rafra\u00eechir la page.",
-    "refresh": "Rafra\u00eechir"
+    "refresh": "Rafra\u00eechir",
+    "tryAgain": "Réessayer"
   },
   "welcome": {
     "title": "Bienvenue dans votre espace de travail",
