@@ -1470,6 +1470,19 @@
     "like": "אהבתי",
     "unlike": "הסר אהבתי"
   },
+  "exploreFilters": {
+    "title": "סינון",
+    "clearAll": "נקה הכל",
+    "source": "מקור",
+    "source_all": "הכל",
+    "source_official": "רשמי",
+    "source_community": "קהילה",
+    "source_enterprise": "ארגוני",
+    "categories": "קטגוריות",
+    "minRating": "דירוג מינימלי",
+    "any": "כלשהו",
+    "tags": "תגיות"
+  },
   "app": {
     "name": "ChainSolve",
     "tagline": "Scientific node-graph calculator"

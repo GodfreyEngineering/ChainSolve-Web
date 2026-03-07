@@ -1914,6 +1914,19 @@
     "like": "J'aime",
     "unlike": "Je n'aime plus"
   },
+  "exploreFilters": {
+    "title": "Filtres",
+    "clearAll": "Tout effacer",
+    "source": "Source",
+    "source_all": "Tous",
+    "source_official": "Officiel",
+    "source_community": "Communauté",
+    "source_enterprise": "Entreprise",
+    "categories": "Catégories",
+    "minRating": "Note minimale",
+    "any": "Tout",
+    "tags": "Tags"
+  },
   "reauth": {
     "title": "Confirmez votre mot de passe",
     "description": "Pour des raisons de securite, veuillez ressaisir votre mot de passe pour continuer.",

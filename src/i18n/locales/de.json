@@ -1914,6 +1914,19 @@
     "like": "Gefällt mir",
     "unlike": "Gefällt mir nicht mehr"
   },
+  "exploreFilters": {
+    "title": "Filter",
+    "clearAll": "Alle löschen",
+    "source": "Quelle",
+    "source_all": "Alle",
+    "source_official": "Offiziell",
+    "source_community": "Community",
+    "source_enterprise": "Unternehmen",
+    "categories": "Kategorien",
+    "minRating": "Mindestbewertung",
+    "any": "Alle",
+    "tags": "Tags"
+  },
   "reauth": {
     "title": "Passwort bestaetigen",
     "description": "Bitte geben Sie aus Sicherheitsgruenden Ihr Passwort erneut ein, um mit den Abrechnungsaenderungen fortzufahren.",

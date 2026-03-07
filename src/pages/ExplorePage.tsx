@@ -4,29 +4,25 @@
  * Route: /explore
  *
  * Responsive grid of ExploreCards with hero banner, category nav bar,
- * search, and sort controls. Links to ExploreItemPage for detail views.
+ * search, sort controls, filter sidebar (V3-7.4), tag pills,
+ * and loading skeletons. Links to ExploreItemPage for detail views.
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { ExploreCard } from '../components/explore/ExploreCard'
+import { ExploreFilters, type ExploreFilterState } from '../components/explore/ExploreFilters'
+import { Skeleton } from '../components/ui/Skeleton'
 import {
   listPublishedItems,
   getAutoCollections,
   type MarketplaceItem,
   type MarketplaceCategory,
   type ExploreSortKey,
+  type ExploreSource,
 } from '../lib/marketplaceService'
-
-const CATEGORIES: Array<{ key: MarketplaceCategory | 'all'; labelKey: string }> = [
-  { key: 'all', labelKey: 'explore.catAll' },
-  { key: 'template', labelKey: 'explore.catTemplate' },
-  { key: 'block_pack', labelKey: 'explore.catBlockPack' },
-  { key: 'theme', labelKey: 'explore.catTheme' },
-  { key: 'group', labelKey: 'explore.catGroup' },
-]
 
 const SORT_OPTIONS: Array<{ key: ExploreSortKey; labelKey: string }> = [
   { key: 'downloads', labelKey: 'explore.sortPopular' },
@@ -34,18 +30,21 @@ const SORT_OPTIONS: Array<{ key: ExploreSortKey; labelKey: string }> = [
   { key: 'likes', labelKey: 'explore.sortLiked' },
 ]
 
+/** Number of skeleton cards to show while loading. */
+const SKELETON_COUNT = 8
+
 export function ExplorePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const initialCat = (searchParams.get('category') as MarketplaceCategory) || 'all'
   const initialSort = (searchParams.get('sort') as ExploreSortKey) || 'downloads'
   const initialQuery = searchParams.get('q') || ''
+  const initialTag = searchParams.get('tag') || null
+  const initialSource = (searchParams.get('source') as ExploreSource) || 'all'
 
   const [items, setItems] = useState<MarketplaceItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [category, setCategory] = useState<MarketplaceCategory | 'all'>(initialCat)
   const [sort, setSort] = useState<ExploreSortKey>(initialSort)
   const [query, setQuery] = useState(initialQuery)
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
@@ -53,6 +52,12 @@ export function ExplorePage() {
   const [collections, setCollections] = useState<
     Array<{ name: string; labelKey: string; items: MarketplaceItem[] }>
   >([])
+  const [filters, setFilters] = useState<ExploreFilterState>({
+    categories: new Set(),
+    source: initialSource,
+    tag: initialTag,
+    minRating: 0,
+  })
 
   // Load auto-collections once
   useEffect(() => {
@@ -70,18 +75,12 @@ export function ExplorePage() {
   // Update URL params
   useEffect(() => {
     const p = new URLSearchParams()
-    if (category !== 'all') p.set('category', category)
     if (sort !== 'downloads') p.set('sort', sort)
     if (debouncedQuery) p.set('q', debouncedQuery)
+    if (filters.tag) p.set('tag', filters.tag)
+    if (filters.source !== 'all') p.set('source', filters.source)
     setSearchParams(p, { replace: true })
-  }, [category, sort, debouncedQuery, setSearchParams])
-
-  // Trigger loading on dependency change
-  const handleCategoryChange = useCallback((c: MarketplaceCategory | 'all') => {
-    setCategory(c)
-    setLoading(true)
-    setFetchSeq((s) => s + 1)
-  }, [])
+  }, [sort, debouncedQuery, filters.tag, filters.source, setSearchParams])
 
   const handleSortChange = useCallback((s: ExploreSortKey) => {
     setSort(s)
@@ -89,13 +88,39 @@ export function ExplorePage() {
     setFetchSeq((seq) => seq + 1)
   }, [])
 
+  const handleFiltersChange = useCallback((next: ExploreFilterState) => {
+    setFilters(next)
+    setLoading(true)
+    setFetchSeq((seq) => seq + 1)
+  }, [])
+
   // Fetch items
   useEffect(() => {
     let cancelled = false
-    const cat = category === 'all' ? undefined : category
-    listPublishedItems(cat, debouncedQuery || undefined, sort)
+    // Use the first selected category, or undefined for all
+    const catArr = Array.from(filters.categories)
+    const cat: string | undefined = catArr.length === 1 ? catArr[0] : undefined
+    listPublishedItems(
+      cat,
+      debouncedQuery || undefined,
+      sort,
+      filters.tag ?? undefined,
+      filters.source,
+    )
       .then((data) => {
-        if (!cancelled) setItems(data)
+        if (!cancelled) {
+          // Client-side multi-category filter when more than one category selected
+          let filtered = data
+          if (catArr.length > 1) {
+            const catSet = filters.categories
+            filtered = data.filter((item) => catSet.has(item.category as MarketplaceCategory))
+          }
+          // Client-side min rating filter (comments_count as proxy)
+          if (filters.minRating > 0) {
+            filtered = filtered.filter((item) => item.comments_count >= filters.minRating)
+          }
+          setItems(filtered)
+        }
       })
       .catch((err) => {
         console.error('[explore]', err)
@@ -116,6 +141,20 @@ export function ExplorePage() {
     },
     [navigate],
   )
+
+  // Collect unique tags from loaded items + collections for the tag cloud
+  const availableTags = useMemo(() => {
+    const tagSet = new Set<string>()
+    for (const item of items) {
+      for (const tag of item.tags) tagSet.add(tag)
+    }
+    for (const coll of collections) {
+      for (const item of coll.items) {
+        for (const tag of item.tags) tagSet.add(tag)
+      }
+    }
+    return Array.from(tagSet).sort()
+  }, [items, collections])
 
   return (
     <div style={page}>
@@ -142,23 +181,6 @@ export function ExplorePage() {
           ))}
         </div>
       )}
-
-      {/* Category nav */}
-      <nav style={catNav}>
-        {CATEGORIES.map((c) => (
-          <button
-            key={c.key}
-            style={{
-              ...catBtn,
-              background: category === c.key ? 'var(--primary)' : 'var(--surface-hover)',
-              color: category === c.key ? '#fff' : 'var(--text)',
-            }}
-            onClick={() => handleCategoryChange(c.key)}
-          >
-            {t(c.labelKey)}
-          </button>
-        ))}
-      </nav>
 
       {/* Search + Sort bar */}
       <div style={toolbar}>
@@ -189,18 +211,39 @@ export function ExplorePage() {
         </div>
       </div>
 
-      {/* Grid */}
-      {loading ? (
-        <div style={emptyState}>{t('explorePage.loading')}</div>
-      ) : items.length === 0 ? (
-        <div style={emptyState}>{t('explore.noResults')}</div>
-      ) : (
-        <div style={grid}>
-          {items.map((item) => (
-            <ExploreCard key={item.id} item={item} onClick={() => handleItemClick(item.id)} />
-          ))}
+      {/* Content area: filters sidebar + grid */}
+      <div style={contentArea}>
+        <ExploreFilters
+          filters={filters}
+          availableTags={availableTags}
+          onChange={handleFiltersChange}
+        />
+
+        <div style={gridCol}>
+          {loading ? (
+            <div style={grid}>
+              {Array.from({ length: SKELETON_COUNT }, (_, i) => (
+                <div key={i} style={skeletonCard}>
+                  <Skeleton height={120} style={{ borderRadius: '10px 10px 0 0' }} />
+                  <div style={skeletonBody}>
+                    <Skeleton width="70%" height={14} />
+                    <Skeleton width="90%" height={10} style={{ marginTop: 6 }} />
+                    <Skeleton width="60%" height={10} style={{ marginTop: 4 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : items.length === 0 ? (
+            <div style={emptyState}>{t('explore.noResults')}</div>
+          ) : (
+            <div style={grid}>
+              {items.map((item) => (
+                <ExploreCard key={item.id} item={item} onClick={() => handleItemClick(item.id)} />
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -231,23 +274,6 @@ const heroSub: React.CSSProperties = {
   fontSize: '1rem',
   color: 'var(--text-muted)',
   margin: '0.5rem 0 0',
-}
-
-const catNav: React.CSSProperties = {
-  display: 'flex',
-  gap: 6,
-  padding: '1rem 2rem 0',
-  flexWrap: 'wrap',
-}
-
-const catBtn: React.CSSProperties = {
-  padding: '0.4rem 1rem',
-  borderRadius: 20,
-  border: '1px solid var(--border)',
-  fontSize: '0.82rem',
-  fontWeight: 600,
-  cursor: 'pointer',
-  fontFamily: "'Montserrat', system-ui, sans-serif",
 }
 
 const toolbar: React.CSSProperties = {
@@ -296,11 +322,22 @@ const sortBtn: React.CSSProperties = {
   fontFamily: "'Montserrat', system-ui, sans-serif",
 }
 
+const contentArea: React.CSSProperties = {
+  display: 'flex',
+  gap: 20,
+  padding: '0 2rem 3rem',
+  alignItems: 'flex-start',
+}
+
+const gridCol: React.CSSProperties = {
+  flex: 1,
+  minWidth: 0,
+}
+
 const grid: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
   gap: 16,
-  padding: '1rem 2rem 3rem',
 }
 
 const emptyState: React.CSSProperties = {
@@ -335,4 +372,15 @@ const collCard: React.CSSProperties = {
   minWidth: 220,
   maxWidth: 260,
   flexShrink: 0,
+}
+
+const skeletonCard: React.CSSProperties = {
+  background: 'var(--surface-2)',
+  border: '1px solid var(--border)',
+  borderRadius: 10,
+  overflow: 'hidden',
+}
+
+const skeletonBody: React.CSSProperties = {
+  padding: '0.6rem 0.75rem',
 }

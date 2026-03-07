@@ -946,7 +946,7 @@ Claude MUST:
 - [x] V3-7.3: Item Detail Page + Screenshots
   - Screenshot gallery with lightbox, version history, tags, comments
 
-- [ ] V3-7.4: Advanced Search + Filters
+- [x] V3-7.4: Advanced Search + Filters
   - Full-text search, filter sidebar, tag cloud, infinite scroll, URL-driven filters
 
 ---

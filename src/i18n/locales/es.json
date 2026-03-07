@@ -1914,6 +1914,19 @@
     "like": "Me gusta",
     "unlike": "Ya no me gusta"
   },
+  "exploreFilters": {
+    "title": "Filtros",
+    "clearAll": "Borrar todo",
+    "source": "Origen",
+    "source_all": "Todos",
+    "source_official": "Oficial",
+    "source_community": "Comunidad",
+    "source_enterprise": "Empresa",
+    "categories": "Categorías",
+    "minRating": "Calificación mínima",
+    "any": "Cualquiera",
+    "tags": "Etiquetas"
+  },
   "reauth": {
     "title": "Confirme su contrasena",
     "description": "Por seguridad, vuelva a introducir su contrasena para continuar con los cambios de facturacion.",

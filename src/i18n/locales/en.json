@@ -1940,6 +1940,19 @@
     "like": "Like",
     "unlike": "Unlike"
   },
+  "exploreFilters": {
+    "title": "Filters",
+    "clearAll": "Clear all",
+    "source": "Source",
+    "source_all": "All",
+    "source_official": "Official",
+    "source_community": "Community",
+    "source_enterprise": "Enterprise",
+    "categories": "Categories",
+    "minRating": "Min Rating",
+    "any": "Any",
+    "tags": "Tags"
+  },
   "panels": {
     "view": "View",
     "leftSidebar": "Left Sidebar",
