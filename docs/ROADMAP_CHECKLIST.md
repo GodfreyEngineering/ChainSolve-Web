@@ -863,26 +863,26 @@ Claude MUST:
   - CSS vars `--grid-minor-color` / `--grid-major-color` for dark + light themes
   - CanvasArea reads grid colors from CSS vars; registered in THEME_VARIABLE_META
 
-- [ ] V3-1.2: Repo Housekeeping + Docs Update
+- [x] V3-1.2: Repo Housekeeping + Docs Update
   - Update SECURITY.md to reflect advisor fixes
   - Update ROADMAP_CHECKLIST.md with V3 phases
   - Verify bootstrap.sql consistency
 
 ## V3-2 — VS Code-like Panel System + Status Bar
 
-- [ ] V3-2.1: Status Bar
+- [x] V3-2.1: Status Bar
   - 22px fixed bar: engine status, node/edge count, zoom %, snap, sheet name, language
 
-- [ ] V3-2.2: Panel Layout Manager
+- [x] V3-2.2: Panel Layout Manager
   - PanelLayoutContext: left sidebar, right sidebar, bottom panel, main area
   - Resizable, collapsible, persisted dimensions
   - View menu with panel visibility toggles
 
-- [ ] V3-2.3: Right Sidebar + Dockable Inspector
+- [x] V3-2.3: Right Sidebar + Dockable Inspector
   - Inspector docks into right sidebar or floats via toggle
   - Resizable width, persisted, Ctrl+J toggles
 
-- [ ] V3-2.4: Bottom Panel Tabs Expansion
+- [x] V3-2.4: Bottom Panel Tabs Expansion
   - New tabs: Output (engine eval summary), Problems (graph diagnostics)
   - Bottom panel sits above StatusBar
 
