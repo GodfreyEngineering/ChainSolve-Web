@@ -19,6 +19,8 @@ import {
   Save,
   Undo2,
   Redo2,
+  Eye,
+  Check,
 } from 'lucide-react'
 import type { CanvasControls } from '../../pages/CanvasPage'
 import type { SaveStatus } from '../../stores/projectStore'
@@ -28,6 +30,7 @@ import { useSettingsModal } from '../../contexts/SettingsModalContext'
 import { getCurrentUser, signOut } from '../../lib/auth'
 import { removeCurrentSession } from '../../lib/sessionService'
 import { clearReauth } from '../../lib/reauth'
+import { usePanelLayout } from '../../contexts/PanelLayoutContext'
 import type { Plan } from '../../lib/entitlements'
 import { PlanBadge } from '../ui/PlanBadge'
 import { Tooltip } from '../ui/Tooltip'
@@ -56,9 +59,12 @@ export function WorkspaceToolbar({
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { openSettings } = useSettingsModal()
+  const panelLayout = usePanelLayout()
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [accountOpen, setAccountOpen] = useState(false)
+  const [viewMenuOpen, setViewMenuOpen] = useState(false)
   const accountRef = useRef<HTMLDivElement>(null)
+  const viewMenuRef = useRef<HTMLDivElement>(null)
   const isMac = navigator.platform?.includes('Mac')
   const shortcutLabel = isMac ? '⌘B' : 'Ctrl+B'
 
@@ -76,6 +82,17 @@ export function WorkspaceToolbar({
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [accountOpen])
+
+  useEffect(() => {
+    if (!viewMenuOpen) return
+    const handler = (e: globalThis.MouseEvent) => {
+      if (viewMenuRef.current && !viewMenuRef.current.contains(e.target as Node)) {
+        setViewMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [viewMenuOpen])
 
   const handleSignOut = useCallback(async () => {
     setAccountOpen(false)
@@ -209,6 +226,49 @@ export function WorkspaceToolbar({
           </button>
         </Tooltip>
 
+        <div ref={viewMenuRef} style={{ position: 'relative' }}>
+          <Tooltip content={t('panels.view')} side="bottom">
+            <button
+              className="cs-header-icon-btn"
+              onClick={() => setViewMenuOpen((v) => !v)}
+              style={iconBtn}
+              aria-label={t('panels.view')}
+              aria-haspopup="true"
+              aria-expanded={viewMenuOpen}
+            >
+              <Icon icon={Eye} size={15} />
+            </button>
+          </Tooltip>
+          {viewMenuOpen && (
+            <div style={dropdownStyle}>
+              <ViewMenuItem
+                label={t('panels.leftSidebar')}
+                checked={sidebarOpen}
+                onClick={() => {
+                  onToggleSidebar()
+                  setViewMenuOpen(false)
+                }}
+              />
+              <ViewMenuItem
+                label={t('panels.rightSidebar')}
+                checked={panelLayout.rightOpen}
+                onClick={() => {
+                  panelLayout.toggleRight()
+                  setViewMenuOpen(false)
+                }}
+              />
+              <ViewMenuItem
+                label={t('panels.bottomPanel')}
+                checked={panelLayout.bottomOpen}
+                onClick={() => {
+                  panelLayout.toggleBottom()
+                  setViewMenuOpen(false)
+                }}
+              />
+            </div>
+          )}
+        </div>
+
         <Tooltip content={t('nav.settings')} side="bottom">
           <button
             className="cs-header-icon-btn"
@@ -299,7 +359,32 @@ export function WorkspaceToolbar({
   )
 }
 
+function ViewMenuItem({
+  label,
+  checked,
+  onClick,
+}: {
+  label: string
+  checked: boolean
+  onClick: () => void
+}) {
+  return (
+    <button className="cs-header-dropdown-item" onClick={onClick} style={viewMenuItemStyle}>
+      <span style={{ width: 16, display: 'inline-flex', justifyContent: 'center' }}>
+        {checked && <Check size={12} />}
+      </span>
+      {label}
+    </button>
+  )
+}
+
 // ── Styles ────────────────────────────────────────────────────────────────────
+
+const viewMenuItemStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.4rem',
+}
 
 const headerStyle: React.CSSProperties = {
   position: 'relative',

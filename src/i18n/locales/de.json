@@ -1817,5 +1817,11 @@
     "engineComputing": "Berechnung",
     "engineError": "Fehler",
     "snapToGrid": "Am Raster einrasten"
+  },
+  "panels": {
+    "view": "Ansicht",
+    "leftSidebar": "Linke Seitenleiste",
+    "rightSidebar": "Rechte Seitenleiste",
+    "bottomPanel": "Unteres Panel"
   }
 }

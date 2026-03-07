@@ -290,7 +290,18 @@ export function useGraphEngine(
 
     prevNodesRef.current = nodes
     prevEdgesRef.current = edges
-  }, [nodes, edges, engine, options, refreshKey, paused, constants, variables, publishedOutputs])
+  }, [
+    nodes,
+    edges,
+    engine,
+    options,
+    refreshKey,
+    paused,
+    constants,
+    variables,
+    publishedOutputs,
+    setEngineStatus,
+  ])
 
   return { computed, isPartial }
 }

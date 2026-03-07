@@ -1817,5 +1817,11 @@
     "engineComputing": "Calcul",
     "engineError": "Erreur",
     "snapToGrid": "Aligner sur la grille"
+  },
+  "panels": {
+    "view": "Affichage",
+    "leftSidebar": "Barre laterale gauche",
+    "rightSidebar": "Barre laterale droite",
+    "bottomPanel": "Panneau inferieur"
   }
 }

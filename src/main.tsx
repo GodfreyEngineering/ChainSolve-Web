@@ -36,6 +36,7 @@ import { ToastProvider } from './components/ui/Toast.tsx'
 import { EngineFatalError } from './components/EngineFatalError.tsx'
 import { SettingsModalProvider } from './components/SettingsModalProvider.tsx'
 import { WindowManagerProvider } from './contexts/WindowManagerContext.tsx'
+import { PanelLayoutProvider } from './contexts/PanelLayoutContext.tsx'
 import { WindowDock } from './components/ui/WindowDock.tsx'
 import { EngineContext } from './contexts/EngineContext.ts'
 import { createEngine, type EngineAPI } from './engine/index.ts'
@@ -98,16 +99,18 @@ function Root() {
 
       <BrowserRouter>
         <WindowManagerProvider>
-          <SettingsModalProvider>
-            {engine && (
-              <EngineContext.Provider value={engine}>
-                {/* Boot ladder rung 4: WASM engine is ready. */}
-                <div data-testid="engine-ready" style={{ display: 'none' }} />
-                <App />
-              </EngineContext.Provider>
-            )}
-          </SettingsModalProvider>
-          <WindowDock />
+          <PanelLayoutProvider>
+            <SettingsModalProvider>
+              {engine && (
+                <EngineContext.Provider value={engine}>
+                  {/* Boot ladder rung 4: WASM engine is ready. */}
+                  <div data-testid="engine-ready" style={{ display: 'none' }} />
+                  <App />
+                </EngineContext.Provider>
+              )}
+            </SettingsModalProvider>
+            <WindowDock />
+          </PanelLayoutProvider>
         </WindowManagerProvider>
       </BrowserRouter>
     </>

@@ -1817,5 +1817,11 @@
     "engineComputing": "מחשב",
     "engineError": "שגיאה",
     "snapToGrid": "הצמד לרשת"
+  },
+  "panels": {
+    "view": "תצוגה",
+    "leftSidebar": "סרגל צד שמאלי",
+    "rightSidebar": "סרגל צד ימני",
+    "bottomPanel": "פאנל תחתון"
   }
 }

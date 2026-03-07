@@ -1817,5 +1817,11 @@
     "engineComputing": "Calculando",
     "engineError": "Error",
     "snapToGrid": "Ajustar a cuadricula"
+  },
+  "panels": {
+    "view": "Vista",
+    "leftSidebar": "Barra lateral izquierda",
+    "rightSidebar": "Barra lateral derecha",
+    "bottomPanel": "Panel inferior"
   }
 }
