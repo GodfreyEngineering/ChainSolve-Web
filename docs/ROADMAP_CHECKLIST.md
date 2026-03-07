@@ -852,6 +852,105 @@ Claude MUST:
 
 ---
 
+# V3 — VS Code-Level UI & Platform Upgrades
+
+> All V2 phases (P030-P150) and Phase D complete. No users yet — breaking changes are free.
+
+## V3-1 — Supabase Fixes + Canvas Grid + Housekeeping
+
+- [x] V3-1.1: Supabase Advisor Fixes + Canvas Grid Contrast
+  - Migration `0002_advisor_fixes.sql`: drop stale function, duplicate policies, duplicate index
+  - CSS vars `--grid-minor-color` / `--grid-major-color` for dark + light themes
+  - CanvasArea reads grid colors from CSS vars; registered in THEME_VARIABLE_META
+
+- [ ] V3-1.2: Repo Housekeeping + Docs Update
+  - Update SECURITY.md to reflect advisor fixes
+  - Update ROADMAP_CHECKLIST.md with V3 phases
+  - Verify bootstrap.sql consistency
+
+## V3-2 — VS Code-like Panel System + Status Bar
+
+- [ ] V3-2.1: Status Bar
+  - 22px fixed bar: engine status, node/edge count, zoom %, snap, sheet name, language
+
+- [ ] V3-2.2: Panel Layout Manager
+  - PanelLayoutContext: left sidebar, right sidebar, bottom panel, main area
+  - Resizable, collapsible, persisted dimensions
+  - View menu with panel visibility toggles
+
+- [ ] V3-2.3: Right Sidebar + Dockable Inspector
+  - Inspector docks into right sidebar or floats via toggle
+  - Resizable width, persisted, Ctrl+J toggles
+
+- [ ] V3-2.4: Bottom Panel Tabs Expansion
+  - New tabs: Output (engine eval summary), Problems (graph diagnostics)
+  - Bottom panel sits above StatusBar
+
+## V3-3 — Settings Mega-Expansion
+
+- [ ] V3-3.1: Settings Architecture + New Categories
+  - General, Appearance, Editor, Formatting, Export, Keyboard Shortcuts
+  - Each category as own component under `src/pages/settings/`
+
+- [ ] V3-3.2: Developer Settings + Plan Switcher
+  - Visible when `is_developer === true`
+  - Plan override dropdown, engine debug toggle, feature flags viewer, performance settings
+
+- [ ] V3-3.3: Organization + Admin Settings
+  - Org tab for members; owner/admin can edit org policies
+  - Member management with invite link and role badges
+
+## V3-4 — Theme Editor Overhaul
+
+- [ ] V3-4.1: Live Preview with Click-to-Edit
+  - Mini-canvas preview with sample nodes, toolbar, sidebar, bottom dock
+  - Click element in preview to scroll to matching color editor
+  - Search/filter variables, "Modified" badge, "Reset to default" per-variable
+
+- [ ] V3-4.2: Theme Import/Export + Gallery
+  - Download/upload `.chainsolve-theme.json`
+  - Preview thumbnails per theme, Duplicate/Export buttons
+
+## V3-5 — Annotations Overhaul: PowerPoint-like
+
+- [ ] V3-5.1: Resize Handles + Z-ordering
+  - 8-point resize handles via ReactFlow NodeResizer
+  - Z-ordering with Bring to Front / Send to Back context menu
+
+- [ ] V3-5.2: New Shape Types + Arrow Improvements
+  - Shapes: rectangle, ellipse, diamond, rounded_rectangle
+  - Arrow: configurable markers, thickness, dash patterns
+
+- [ ] V3-5.3: Inline Text Editing + Annotation Toolbar
+  - Double-click for inline edit, floating toolbar on selection
+  - Multi-select alignment, Annotations section in mini toolbar
+
+## V3-6 — Export Improvements
+
+- [ ] V3-6.1: Export Settings Dialog
+  - Modal with format selector (PDF/XLSX/JSON), format-specific options
+  - Scope: active canvas / all canvases, "Remember preferences"
+
+- [ ] V3-6.2: Export Enhancements
+  - PDF canvas screenshot embed, progress in StatusBar
+  - Export history, toast on completion
+
+## V3-7 — Explore Page: MakerWorld Quality
+
+- [ ] V3-7.1: Explore Page Layout
+  - Dedicated `/explore` route with hero banner, category nav, responsive card grid
+
+- [ ] V3-7.2: Collections + Featured Sections
+  - `marketplace_collections` table, hero carousel, auto-generated collections
+
+- [ ] V3-7.3: Item Detail Page + Screenshots
+  - Screenshot gallery with lightbox, version history, tags, comments
+
+- [ ] V3-7.4: Advanced Search + Filters
+  - Full-text search, filter sidebar, tag cloud, infinite scroll, URL-driven filters
+
+---
+
 ## D14 — Supabase advisor fixes (security + performance)
 > Implement migrations to resolve:
 > - function_search_path_mutable warning

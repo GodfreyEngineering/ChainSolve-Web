@@ -427,6 +427,20 @@ Migration `0011_rls_perf_canonical.sql` drops and recreates all policies on
 user-owned tables using the `(select auth.uid())` pattern. No bare `auth.uid()`
 calls remain.
 
+### Advisor fixes (0002)
+
+Migration `0002_advisor_fixes.sql` resolves all Supabase Advisor warnings:
+
+1. **Security**: Drops stale `handle_canvases_updated_at()` function (missing
+   `SET search_path`). Replaced by `trigger_set_updated_at()` which has it.
+2. **Performance**: Drops duplicate `profiles` UPDATE policy if orphaned.
+3. **Performance**: Drops duplicate `stripe_events` deny-all policy
+   (`stripe_events_no_access`); keeps `stripe_events_deny_all`.
+4. **Performance**: Drops duplicate index `idx_project_assets_project`;
+   keeps `idx_project_assets_project_id`.
+
+All statements are idempotent — safe to run on fresh or existing databases.
+
 ### Policy consolidation (0038)
 
 Migration `0038_consolidate_permissive_policies.sql` merged multiple permissive
