@@ -21,6 +21,8 @@ import { EditorSettings } from './EditorSettings'
 import { FormattingSettings } from './FormattingSettings'
 import { ExportSettings } from './ExportSettings'
 import { KeyboardShortcutsSettings } from './KeyboardShortcutsSettings'
+import { DeveloperSettings } from './DeveloperSettings'
+import type { Profile } from '../../lib/profilesService'
 
 const LazyThemeWizard = lazy(() =>
   import('../../components/ThemeWizard').then((m) => ({ default: m.ThemeWizard })),
@@ -35,6 +37,7 @@ const LazyThemeLibraryWindow = lazy(() =>
 interface Props {
   plan?: Plan
   tab?: AppTab
+  profile?: Profile | null
 }
 
 export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
@@ -317,6 +320,18 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
 
       {/* Keyboard Shortcuts */}
       {tab === 'shortcuts' && <KeyboardShortcutsSettings cardStyle={cardStyle} />}
+
+      {/* Developer (visible only for developer profiles) */}
+      {tab === 'developer' && (
+        <DeveloperSettings
+          cardStyle={cardStyle}
+          subheadingStyle={subheadingStyle}
+          checkRowStyle={checkRowStyle}
+          checkboxStyle={checkboxStyle}
+          checkLabelStyle={checkLabelStyle}
+          checkHintStyle={checkHintStyle}
+        />
+      )}
 
       {/* Modals (always mounted) */}
       <Suspense fallback={null}>

@@ -557,7 +557,15 @@
     "shortcutUndo": "Undo",
     "shortcutRedo": "Redo",
     "shortcutDelete": "Delete selected",
-    "shortcutSelectAll": "Select all"
+    "shortcutSelectAll": "Select all",
+    "tab_developer": "Developer",
+    "tab_developerDesc": "Plan simulation, engine debug, and diagnostics",
+    "devPlanSwitcher": "Simulate plan",
+    "devPlanSwitcherHint": "Override entitlements to test plan-gated features",
+    "devActiveEntitlements": "Active entitlements",
+    "devEngineDebug": "Engine Debug",
+    "devDiagnostics": "Diagnostics",
+    "devClearOverride": "Clear plan override"
   },
   "security": {
     "title": "Account Security",

@@ -550,7 +550,15 @@
     "shortcutUndo": "Annulla",
     "shortcutRedo": "Ripristina",
     "shortcutDelete": "Elimina selezione",
-    "shortcutSelectAll": "Seleziona tutto"
+    "shortcutSelectAll": "Seleziona tutto",
+    "tab_developer": "Sviluppatore",
+    "tab_developerDesc": "Simulazione piano, debug del motore e diagnostica",
+    "devPlanSwitcher": "Simula piano",
+    "devPlanSwitcherHint": "Sovrascrivi i permessi per testare le funzionalità legate al piano",
+    "devActiveEntitlements": "Permessi attivi",
+    "devEngineDebug": "Debug del motore",
+    "devDiagnostics": "Diagnostica",
+    "devClearOverride": "Cancella sovrascrittura piano"
   },
   "security": {
     "title": "Sicurezza dell'account",

@@ -550,7 +550,15 @@
     "shortcutUndo": "Deshacer",
     "shortcutRedo": "Rehacer",
     "shortcutDelete": "Eliminar seleccion",
-    "shortcutSelectAll": "Seleccionar todo"
+    "shortcutSelectAll": "Seleccionar todo",
+    "tab_developer": "Desarrollador",
+    "tab_developerDesc": "Simulación de plan, depuración del motor y diagnósticos",
+    "devPlanSwitcher": "Simular plan",
+    "devPlanSwitcherHint": "Anular permisos para probar funciones restringidas por plan",
+    "devActiveEntitlements": "Permisos activos",
+    "devEngineDebug": "Depuración del motor",
+    "devDiagnostics": "Diagnósticos",
+    "devClearOverride": "Borrar anulación de plan"
   },
   "security": {
     "title": "Seguridad de la cuenta",

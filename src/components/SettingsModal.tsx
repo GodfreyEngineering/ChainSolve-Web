@@ -1,8 +1,8 @@
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getSession } from '../lib/auth'
 import { getProfile } from '../lib/profilesService'
-import { resolveEffectivePlan } from '../lib/entitlements'
+import { resolveEffectivePlan, isDeveloper } from '../lib/entitlements'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
 import type { AccountTab, AppTab } from '../contexts/SettingsModalContext'
 import { ProfileSettings } from '../pages/settings/ProfileSettings'
@@ -36,13 +36,14 @@ const ACCOUNT_TABS: { key: AccountTab; icon: string }[] = [
   { key: 'security', icon: '\u2616' },
 ]
 
-const APP_TABS: { key: AppTab; icon: string }[] = [
+const APP_TABS_BASE: { key: AppTab; icon: string; devOnly?: boolean }[] = [
   { key: 'general', icon: '\u2699' },
   { key: 'appearance', icon: '\u25D1' },
   { key: 'editor', icon: '\u25A6' },
   { key: 'formatting', icon: '#' },
   { key: 'export', icon: '\u21E9' },
   { key: 'shortcuts', icon: '\u2328' },
+  { key: 'developer', icon: '\u{1F6E0}', devOnly: true },
 ]
 
 interface Props {
@@ -82,6 +83,12 @@ export function SettingsModal({ kind }: Props) {
       })
     })
   }, [isOpen])
+
+  // V3-3.2: Filter app tabs — show developer tab only for developers
+  const appTabs = useMemo(() => {
+    const showDev = isDeveloper(profile)
+    return APP_TABS_BASE.filter((tab) => !tab.devOnly || showDev)
+  }, [profile])
 
   // ── Account Settings window ─────────────────────────────────────────────
   if (kind === 'account') {
@@ -189,7 +196,7 @@ export function SettingsModal({ kind }: Props) {
               </button>
             </div>
           )}
-          {APP_TABS.map(({ key, icon }) => (
+          {appTabs.map(({ key, icon }) => (
             <button
               key={key}
               onClick={() => setAppTab(key)}
@@ -219,7 +226,11 @@ export function SettingsModal({ kind }: Props) {
 
         {/* Content */}
         <main style={contentStyle}>
-          <PreferencesSettings plan={resolveEffectivePlan(profile)} tab={appTab} />
+          <PreferencesSettings
+            plan={resolveEffectivePlan(profile)}
+            tab={appTab}
+            profile={profile}
+          />
         </main>
       </div>
     </AppWindow>

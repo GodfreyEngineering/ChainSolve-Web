@@ -222,7 +222,41 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+/**
+ * V3-3.2: localStorage key for developer plan override.
+ * When set by a developer user, getEntitlements() returns entitlements
+ * for the overridden plan instead of the actual one.
+ */
+const DEV_PLAN_OVERRIDE_KEY = 'cs:devPlanOverride'
+
+export function getDevPlanOverride(): Plan | null {
+  try {
+    const v = localStorage.getItem(DEV_PLAN_OVERRIDE_KEY)
+    if (v && v in ENTITLEMENTS) return v as Plan
+  } catch {
+    // ignore
+  }
+  return null
+}
+
+export function setDevPlanOverride(plan: Plan | null): void {
+  try {
+    if (plan) {
+      localStorage.setItem(DEV_PLAN_OVERRIDE_KEY, plan)
+    } else {
+      localStorage.removeItem(DEV_PLAN_OVERRIDE_KEY)
+    }
+  } catch {
+    // ignore
+  }
+}
+
 export function getEntitlements(plan: Plan): Entitlements {
+  // V3-3.2: Developer plan override — only effective when actual plan is 'developer'
+  if (plan === 'developer') {
+    const override = getDevPlanOverride()
+    if (override) return ENTITLEMENTS[override]
+  }
   return ENTITLEMENTS[plan]
 }
 

@@ -550,7 +550,15 @@
     "shortcutUndo": "Rueckgaengig",
     "shortcutRedo": "Wiederholen",
     "shortcutDelete": "Auswahl loeschen",
-    "shortcutSelectAll": "Alles auswaehlen"
+    "shortcutSelectAll": "Alles auswaehlen",
+    "tab_developer": "Entwickler",
+    "tab_developerDesc": "Plansimulation, Engine-Debug und Diagnose",
+    "devPlanSwitcher": "Plan simulieren",
+    "devPlanSwitcherHint": "Berechtigungen überschreiben, um plangebundene Funktionen zu testen",
+    "devActiveEntitlements": "Aktive Berechtigungen",
+    "devEngineDebug": "Engine-Debug",
+    "devDiagnostics": "Diagnose",
+    "devClearOverride": "Planüberschreibung löschen"
   },
   "security": {
     "title": "Kontosicherheit",

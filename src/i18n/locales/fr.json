@@ -550,7 +550,15 @@
     "shortcutUndo": "Annuler",
     "shortcutRedo": "Rétablir",
     "shortcutDelete": "Supprimer la sélection",
-    "shortcutSelectAll": "Tout sélectionner"
+    "shortcutSelectAll": "Tout sélectionner",
+    "tab_developer": "Développeur",
+    "tab_developerDesc": "Simulation de plan, débogage du moteur et diagnostics",
+    "devPlanSwitcher": "Simuler un plan",
+    "devPlanSwitcherHint": "Remplacer les droits pour tester les fonctionnalités liées au plan",
+    "devActiveEntitlements": "Droits actifs",
+    "devEngineDebug": "Débogage du moteur",
+    "devDiagnostics": "Diagnostics",
+    "devClearOverride": "Effacer le remplacement de plan"
   },
   "security": {
     "title": "Sécurité du compte",

@@ -25,6 +25,7 @@ describe('SettingsModalContext', () => {
     expect(isAccountTab('formatting')).toBe(false)
     expect(isAccountTab('export')).toBe(false)
     expect(isAccountTab('shortcuts')).toBe(false)
+    expect(isAccountTab('developer')).toBe(false)
   })
 
   it('exports AccountTab and AppTab types (via SettingsTab union)', async () => {
