@@ -176,6 +176,19 @@ export default function WorkspacePage() {
     )
   }
 
+  // Profile-null fallback: profile trigger hasn't fired after all retries
+  if (!auth.profile && auth.user) {
+    return (
+      <div style={profileFallbackStyle}>
+        <h2>Setting up your account&hellip;</h2>
+        <p>This usually takes a moment. Please refresh the page.</p>
+        <button onClick={() => window.location.reload()} style={refreshBtnStyle}>
+          Refresh
+        </button>
+      </div>
+    )
+  }
+
   // Signup wizard gate: blocks app until onboarding is complete
   if (auth.needsWizard) {
     return (
@@ -301,4 +314,27 @@ const canvasAreaStyle: React.CSSProperties = {
   minWidth: 0,
   display: 'flex',
   flexDirection: 'column',
+}
+
+const profileFallbackStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: '100vh',
+  gap: 12,
+  fontFamily: "'Montserrat', system-ui, sans-serif",
+  color: 'var(--text)',
+  background: 'var(--bg)',
+}
+
+const refreshBtnStyle: React.CSSProperties = {
+  padding: '0.5rem 1.5rem',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  background: 'var(--surface-2)',
+  color: 'var(--text)',
+  cursor: 'pointer',
+  fontFamily: "'Montserrat', system-ui, sans-serif",
+  fontSize: '0.85rem',
 }

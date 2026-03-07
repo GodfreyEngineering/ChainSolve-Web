@@ -88,15 +88,31 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
       } else {
         void touchSession()
       }
-      supabase
-        .from('profiles')
-        .select(PROFILE_COLS)
-        .eq('id', session.user.id)
-        .maybeSingle()
-        .then(({ data, error }) => {
-          if (!error && data) setProfile(data as Profile)
-          setLoading(false)
-        })
+      // Profile row is created by the handle_new_user() DB trigger, which
+      // runs asynchronously. On first signup the row may not exist yet when
+      // this query fires. Retry with exponential backoff to avoid the race.
+      const RETRY_DELAYS = [200, 400, 800, 1600, 3200]
+      async function fetchProfileWithRetry(userId: string) {
+        for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select(PROFILE_COLS)
+            .eq('id', userId)
+            .maybeSingle()
+          if (!error && data) {
+            setProfile(data as Profile)
+            setLoading(false)
+            return
+          }
+          if (attempt < RETRY_DELAYS.length) {
+            await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]))
+          }
+        }
+        // All retries exhausted — profile is still null.
+        // setLoading(false) so the UI can show a fallback state.
+        setLoading(false)
+      }
+      void fetchProfileWithRetry(session.user.id)
     })
   }, [navigate])
 
