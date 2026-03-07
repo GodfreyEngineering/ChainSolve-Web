@@ -1770,7 +1770,17 @@
     "collapseDock": "Collapse dock",
     "dragToResize": "Drag to resize",
     "library": "Library",
-    "console": "Console"
+    "console": "Console",
+    "output": "Output",
+    "problems": "Problems"
+  },
+  "output": {
+    "engineStatus": "Engine"
+  },
+  "problems": {
+    "noProblems": "No problems detected",
+    "problem": "problem",
+    "problems": "problems"
   },
   "sidebar": {
     "projects": "Projects",

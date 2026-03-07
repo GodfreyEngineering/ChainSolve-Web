@@ -96,6 +96,8 @@ const LazyFindBlockDialog = lazy(() =>
 )
 const LazyDebugConsolePanel = lazy(() => import('./DebugConsolePanel'))
 const LazyGraphHealthPanel = lazy(() => import('./GraphHealthPanel'))
+const LazyOutputPanel = lazy(() => import('./OutputPanel'))
+const LazyProblemsPanel = lazy(() => import('./ProblemsPanel'))
 import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
@@ -1997,6 +1999,24 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               onFixWithCopilot={onFixWithCopilot}
               onExplainIssues={onExplainIssues}
             />
+          </Suspense>
+        ),
+      },
+      {
+        id: 'output' as DockTab,
+        label: t('dock.output', 'Output'),
+        content: (
+          <Suspense fallback={null}>
+            <LazyOutputPanel />
+          </Suspense>
+        ),
+      },
+      {
+        id: 'problems' as DockTab,
+        label: t('dock.problems', 'Problems'),
+        content: (
+          <Suspense fallback={null}>
+            <LazyProblemsPanel />
           </Suspense>
         ),
       },

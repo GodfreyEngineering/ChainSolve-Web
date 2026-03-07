@@ -1752,7 +1752,9 @@
     "collapseDock": "Dock ausblenden",
     "dragToResize": "Ziehen zum Anpassen",
     "library": "Bibliothek",
-    "console": "Konsole"
+    "console": "Konsole",
+    "output": "Ausgabe",
+    "problems": "Probleme"
   },
   "sidebar": {
     "projects": "Projekte",
@@ -1823,5 +1825,13 @@
     "leftSidebar": "Linke Seitenleiste",
     "rightSidebar": "Rechte Seitenleiste",
     "bottomPanel": "Unteres Panel"
+  },
+  "output": {
+    "engineStatus": "Engine"
+  },
+  "problems": {
+    "noProblems": "Keine Probleme erkannt",
+    "problem": "Problem",
+    "problems": "Probleme"
   }
 }

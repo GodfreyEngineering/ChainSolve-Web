@@ -14,7 +14,7 @@ import { Tooltip } from '../ui/Tooltip'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-export type DockTab = 'console' | 'health'
+export type DockTab = 'console' | 'health' | 'output' | 'problems'
 
 export interface DockPanel {
   id: DockTab
@@ -64,7 +64,7 @@ function saveHeight(h: number) {
 function loadTab(): DockTab {
   try {
     const v = localStorage.getItem(TAB_KEY)
-    if (v === 'console' || v === 'health') return v
+    if (v === 'console' || v === 'health' || v === 'output' || v === 'problems') return v
   } catch {
     // ignore
   }

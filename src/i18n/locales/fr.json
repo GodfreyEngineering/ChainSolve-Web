@@ -1752,7 +1752,9 @@
     "collapseDock": "Masquer le panneau",
     "dragToResize": "Glisser pour redimensionner",
     "library": "Bibliothèque",
-    "console": "Console"
+    "console": "Console",
+    "output": "Sortie",
+    "problems": "Problemes"
   },
   "sidebar": {
     "projects": "Projets",
@@ -1823,5 +1825,13 @@
     "leftSidebar": "Barre laterale gauche",
     "rightSidebar": "Barre laterale droite",
     "bottomPanel": "Panneau inferieur"
+  },
+  "output": {
+    "engineStatus": "Moteur"
+  },
+  "problems": {
+    "noProblems": "Aucun probleme detecte",
+    "problem": "probleme",
+    "problems": "problemes"
   }
 }
