@@ -927,7 +927,7 @@ Claude MUST:
 
 ## V3-6 — Export Improvements
 
-- [ ] V3-6.1: Export Settings Dialog
+- [x] V3-6.1: Export Settings Dialog
   - Modal with format selector (PDF/XLSX/JSON), format-specific options
   - Scope: active canvas / all canvases, "Remember preferences"
 

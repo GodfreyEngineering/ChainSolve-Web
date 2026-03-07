@@ -57,6 +57,7 @@ import { flattenMenusToActions, type MenuDef } from '../../lib/actions'
 import { computeSaveStatusLabel } from '../../lib/saveStatusLabel'
 import type { CanvasAreaHandle } from '../canvas/CanvasArea'
 import type { ThemeMode } from '../../contexts/ThemeContext'
+import { ExportDialog } from './ExportDialog'
 
 // ── Props ────────────────────────────────────────────────────────────────────
 
@@ -91,43 +92,6 @@ export interface AppHeaderProps {
   /** L4-1: External trigger to open Save-As dialog (e.g. Ctrl+S in scratch mode). */
   saveAsRequested?: boolean
   onSaveAsRequestHandled?: () => void
-}
-
-const INCLUDE_IMAGES_KEY = 'cs:pdfExportIncludeImages'
-const INCLUDE_TABLES_KEY = 'cs:xlsxExportIncludeTables'
-
-function getIncludeImagesPref(): boolean {
-  try {
-    const v = localStorage.getItem(INCLUDE_IMAGES_KEY)
-    return v === null ? true : v === 'true'
-  } catch {
-    return true
-  }
-}
-
-function setIncludeImagesPref(v: boolean) {
-  try {
-    localStorage.setItem(INCLUDE_IMAGES_KEY, String(v))
-  } catch {
-    // Ignore — private browsing
-  }
-}
-
-function getIncludeTablesPref(): boolean {
-  try {
-    const v = localStorage.getItem(INCLUDE_TABLES_KEY)
-    return v === null ? true : v === 'true'
-  } catch {
-    return true
-  }
-}
-
-function setIncludeTablesPref(v: boolean) {
-  try {
-    localStorage.setItem(INCLUDE_TABLES_KEY, String(v))
-  } catch {
-    // Ignore — private browsing
-  }
 }
 
 export function AppHeader({
@@ -168,8 +132,6 @@ export function AppHeader({
   const lastSavedAt = useProjectStore((s) => s.lastSavedAt)
   const errorMessage = useProjectStore((s) => s.errorMessage)
 
-  const [includeImages, setIncludeImages] = useState(getIncludeImagesPref)
-  const [includeTables, setIncludeTables] = useState(getIncludeTablesPref)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [feedbackType, setFeedbackType] = useState<'bug' | 'suggestion' | 'block_request'>('bug')
@@ -191,6 +153,7 @@ export function AppHeader({
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false)
   const [tourOpen, setTourOpen] = useState(false)
   const [wizardOpen, setWizardOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
 
   const autosaveEnabled = usePreferencesStore((s) => s.autosaveEnabled)
 
@@ -241,70 +204,6 @@ export function AppHeader({
     canvasRef.current.selectAll()
     canvasRef.current.deleteSelected()
   }, [canvasRef])
-
-  const handleExportPdfActive = useCallback(() => {
-    setOpenMenu(null)
-    toast(t('pdfExport.generating'), 'info')
-    canvasRef.current
-      ?.exportPdfAudit()
-      .then(() => toast(t('pdfExport.success'), 'success'))
-      .catch((err: unknown) => {
-        console.error('[pdf-export]', err)
-        toast(t('pdfExport.failed'), 'error')
-      })
-  }, [canvasRef, toast, t])
-
-  const handleExportPdfAll = useCallback(() => {
-    setOpenMenu(null)
-    if (onExportPdfProject) {
-      toast(t('pdfExport.generatingAll'), 'info')
-      onExportPdfProject({ includeImages })
-    }
-  }, [onExportPdfProject, includeImages, toast, t])
-
-  const handleExportExcelActive = useCallback(() => {
-    setOpenMenu(null)
-    toast(t('excelExport.generating'), 'info')
-    canvasRef.current
-      ?.exportXlsxAuditActive()
-      .then(() => toast(t('excelExport.success'), 'success'))
-      .catch((err: unknown) => {
-        console.error('[xlsx-export]', err)
-        toast(t('excelExport.failed'), 'error')
-      })
-  }, [canvasRef, toast, t])
-
-  const handleToggleIncludeImages = useCallback(() => {
-    setIncludeImages((v) => {
-      const next = !v
-      setIncludeImagesPref(next)
-      return next
-    })
-  }, [])
-
-  const handleExportExcelAll = useCallback(() => {
-    setOpenMenu(null)
-    if (onExportExcelProject) {
-      toast(t('excelExport.generatingAll'), 'info')
-      onExportExcelProject({ includeTables })
-    }
-  }, [onExportExcelProject, includeTables, toast, t])
-
-  const handleToggleIncludeTables = useCallback(() => {
-    setIncludeTables((v) => {
-      const next = !v
-      setIncludeTablesPref(next)
-      return next
-    })
-  }, [])
-
-  const handleExportChainsolveJson = useCallback(() => {
-    setOpenMenu(null)
-    if (onExportChainsolveJson) {
-      toast(t('chainsolveJsonExport.generating'), 'info')
-      onExportChainsolveJson()
-    }
-  }, [onExportChainsolveJson, toast, t])
 
   // ── File menu handlers ──────────────────────────────────────────────────────
 
@@ -447,67 +346,11 @@ export function AppHeader({
         disabled: readOnly || !!exportInProgress,
       },
       {
-        label: t('menu.exportPdf'),
-        children: [
-          {
-            label: t('pdfExport.scope.active'),
-            onClick: handleExportPdfActive,
-            disabled: !!exportInProgress,
-          },
-          {
-            label: t('pdfExport.scope.project'),
-            onClick: handleExportPdfAll,
-            disabled: !projectId || !!exportInProgress,
-          },
-          { separator: true },
-          {
-            label: includeImages ? t('pdfExport.includeImages') : t('pdfExport.skipImages'),
-            onClick: handleToggleIncludeImages,
-          },
-          ...(exportInProgress
-            ? [
-                { separator: true } as const,
-                {
-                  label: t('pdfExport.cancelExport'),
-                  onClick: () => onCancelExport?.(),
-                },
-              ]
-            : []),
-        ],
-      },
-      {
-        label: t('menu.exportExcel'),
-        children: [
-          {
-            label: t('excelExport.scope.active'),
-            onClick: handleExportExcelActive,
-            disabled: !!exportInProgress,
-          },
-          {
-            label: t('excelExport.scope.project'),
-            onClick: handleExportExcelAll,
-            disabled: !projectId || !!exportInProgress,
-          },
-          { separator: true },
-          {
-            label: includeTables ? t('excelExport.includeTables') : t('excelExport.skipTables'),
-            onClick: handleToggleIncludeTables,
-          },
-          ...(exportInProgress
-            ? [
-                { separator: true } as const,
-                {
-                  label: t('pdfExport.cancelExport'),
-                  onClick: () => onCancelExport?.(),
-                },
-              ]
-            : []),
-        ],
-      },
-      {
-        label: t('menu.exportProject'),
-        onClick: handleExportChainsolveJson,
-        disabled: !projectId || !!exportInProgress,
+        label: t('menu.export'),
+        onClick: () => {
+          setOpenMenu(null)
+          setExportDialogOpen(true)
+        },
       },
       { separator: true },
       { label: t('menu.recentProjects'), children: recentChildren },
@@ -520,18 +363,8 @@ export function AppHeader({
     projectId,
     handleNewProject,
     handleSelectProject,
-    handleExportPdfActive,
-    handleExportPdfAll,
-    handleExportExcelActive,
-    handleExportExcelAll,
-    handleExportChainsolveJson,
     onImportChainsolveJson,
-    handleToggleIncludeImages,
-    handleToggleIncludeTables,
-    includeImages,
-    includeTables,
     exportInProgress,
-    onCancelExport,
   ])
 
   const editItems = useMemo(
@@ -1273,6 +1106,49 @@ export function AppHeader({
           <LazyTemplateManagerDialog open onClose={() => setTemplateManagerOpen(false)} />
         </Suspense>
       )}
+      <ExportDialog
+        open={exportDialogOpen}
+        onClose={() => setExportDialogOpen(false)}
+        hasProject={!!projectId}
+        exportInProgress={!!exportInProgress}
+        onExportPdf={({ includeImages: incImg, scope }) => {
+          if (scope === 'active') {
+            toast(t('pdfExport.generating'), 'info')
+            canvasRef.current
+              ?.exportPdfAudit()
+              .then(() => toast(t('pdfExport.success'), 'success'))
+              .catch((err: unknown) => {
+                console.error('[pdf-export]', err)
+                toast(t('pdfExport.failed'), 'error')
+              })
+          } else if (onExportPdfProject) {
+            toast(t('pdfExport.generatingAll'), 'info')
+            onExportPdfProject({ includeImages: incImg })
+          }
+        }}
+        onExportXlsx={({ includeTables: incTbl, scope }) => {
+          if (scope === 'active') {
+            toast(t('excelExport.generating'), 'info')
+            canvasRef.current
+              ?.exportXlsxAuditActive()
+              .then(() => toast(t('excelExport.success'), 'success'))
+              .catch((err: unknown) => {
+                console.error('[xlsx-export]', err)
+                toast(t('excelExport.failed'), 'error')
+              })
+          } else if (onExportExcelProject) {
+            toast(t('excelExport.generatingAll'), 'info')
+            onExportExcelProject({ includeTables: incTbl })
+          }
+        }}
+        onExportJson={() => {
+          if (onExportChainsolveJson) {
+            toast(t('chainsolveJsonExport.generating'), 'info')
+            onExportChainsolveJson()
+          }
+        }}
+        onCancelExport={onCancelExport}
+      />
     </>
   )
 }
