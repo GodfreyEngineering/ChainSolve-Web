@@ -492,7 +492,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         const currentCanvasId = canvasesState.activeCanvasId
         const canvasExists = canvasesState.canvases.some((c) => c.id === currentCanvasId)
         if (currentCanvasId && canvasExists) {
-          await saveCanvasGraph(projectId, currentCanvasId, snapshot.nodes, snapshot.edges)
+          await saveCanvasGraph(projectId, currentCanvasId, snapshot.nodes, snapshot.edges, {
+            verify: opts?.manual,
+          })
           markCanvasClean(currentCanvasId)
         }
         setSaveProgress(0.5)
@@ -840,7 +842,15 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       return
     }
     try {
-      const name = `Sheet ${canvases.length + 1}`
+      // Auto-increment name to avoid duplicates
+      const existingNames = new Set(canvases.map((c) => c.name.toLowerCase()))
+      let name = `Sheet ${canvases.length + 1}`
+      if (existingNames.has(name.toLowerCase())) {
+        for (let i = canvases.length + 2; i <= canvases.length + 100; i++) {
+          name = `Sheet ${i}`
+          if (!existingNames.has(name.toLowerCase())) break
+        }
+      }
       const row = await createCanvas(projectId, name)
       addCanvasToStore(row)
       // Switch to new canvas
@@ -852,14 +862,15 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
   const handleRenameCanvas = useCallback(
     async (canvasId: string, newName: string) => {
+      if (!projectId) return
       try {
-        await renameCanvas(canvasId, newName)
+        await renameCanvas(canvasId, projectId, newName)
         updateCanvasInStore(canvasId, { name: newName })
       } catch (err: unknown) {
         toast(err instanceof Error ? err.message : 'Failed to rename sheet', 'error')
       }
     },
-    [updateCanvasInStore, toast],
+    [projectId, updateCanvasInStore, toast],
   )
 
   const handleDeleteCanvas = useCallback(

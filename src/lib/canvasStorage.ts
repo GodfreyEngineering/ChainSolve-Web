@@ -94,6 +94,28 @@ export async function downloadCanvasGraph(
 }
 
 /**
+ * Verify that a canvas graph was successfully persisted to storage by
+ * downloading the file and checking its node count matches expectations.
+ * Used only on manual saves (Ctrl+S) to avoid doubling reads on autosave.
+ */
+export async function verifyCanvasGraph(
+  ownerId: string,
+  projectId: string,
+  canvasId: string,
+  expectedNodeCount: number,
+): Promise<boolean> {
+  try {
+    const raw = await downloadCanvasGraph(ownerId, projectId, canvasId)
+    if (!raw) return false
+    const obj = raw as Record<string, unknown>
+    const nodes = obj.nodes as unknown[] | undefined
+    return Array.isArray(nodes) && nodes.length === expectedNodeCount
+  } catch {
+    return false
+  }
+}
+
+/**
  * Delete a canvas graph JSON from storage.
  * Best-effort: does not throw if the file is already gone.
  */

@@ -10,7 +10,12 @@
  */
 
 import { supabase } from './supabase'
-import { uploadCanvasGraph, downloadCanvasGraph, deleteCanvasGraph } from './canvasStorage'
+import {
+  uploadCanvasGraph,
+  downloadCanvasGraph,
+  deleteCanvasGraph,
+  verifyCanvasGraph,
+} from './canvasStorage'
 import {
   buildCanvasJson,
   buildCanvasJsonFromGraph,
@@ -52,6 +57,24 @@ function assertValidCanvasName(name: string): void {
   }
 }
 
+/**
+ * Throw if `name` clashes (case-insensitive) with an existing canvas in the list.
+ * Pass `excludeId` when renaming so the canvas can keep its own name.
+ */
+export function assertUniqueCanvasName(
+  name: string,
+  existingCanvases: CanvasRow[],
+  excludeId?: string,
+): void {
+  const normalized = name.trim().toLowerCase()
+  const duplicate = existingCanvases.find(
+    (c) => c.name.trim().toLowerCase() === normalized && c.id !== excludeId,
+  )
+  if (duplicate) {
+    throw new ServiceError('DUPLICATE_PROJECT_NAME', `A sheet named "${name}" already exists`)
+  }
+}
+
 // ── Exported operations ─────────────────────────────────────────────────────
 
 /**
@@ -84,8 +107,9 @@ export async function createCanvas(
   const canvasId = crypto.randomUUID()
   const storagePath = `${userId}/${projectId}/canvases/${canvasId}.json`
 
-  // Determine next position
+  // Determine next position + check uniqueness
   const existing = await listCanvases(projectId)
+  assertUniqueCanvasName(name, existing)
   const nextPosition = existing.length > 0 ? Math.max(...existing.map((c) => c.position)) + 1 : 0
 
   // Upload graph JSON
@@ -122,10 +146,17 @@ export async function createCanvas(
 }
 
 /**
- * Rename a canvas.
+ * Rename a canvas. Validates name format and uniqueness within the project.
  */
-export async function renameCanvas(canvasId: string, name: string): Promise<void> {
+export async function renameCanvas(
+  canvasId: string,
+  projectId: string,
+  name: string,
+): Promise<void> {
   assertValidCanvasName(name)
+  const existing = await listCanvases(projectId)
+  assertUniqueCanvasName(name, existing, canvasId)
+
   const { error } = await supabase.from('canvases').update({ name }).eq('id', canvasId)
 
   if (error) throw new ServiceError('DB_ERROR', `Rename canvas failed: ${error.message}`, true)
@@ -239,17 +270,31 @@ export async function loadCanvasGraph(projectId: string, canvasId: string): Prom
 
 /**
  * Save a canvas graph JSON to storage.
+ * Pass `{ verify: true }` to read-back the file and confirm persistence
+ * (recommended for manual saves, not for every autosave).
  */
 export async function saveCanvasGraph(
   projectId: string,
   canvasId: string,
   nodes: unknown[],
   edges: unknown[],
+  opts?: { verify?: boolean },
 ): Promise<void> {
   const session = await requireSession()
   const userId = session.user.id
   const json = buildCanvasJsonFromGraph(canvasId, projectId, nodes, edges)
   await uploadCanvasGraph(userId, projectId, canvasId, json)
+
+  if (opts?.verify) {
+    const ok = await verifyCanvasGraph(userId, projectId, canvasId, nodes.length)
+    if (!ok) {
+      throw new ServiceError(
+        'STORAGE_ERROR',
+        'Save verification failed: data did not persist',
+        true,
+      )
+    }
+  }
 }
 
 /**
