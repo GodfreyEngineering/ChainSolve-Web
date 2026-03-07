@@ -226,48 +226,50 @@ export function WorkspaceToolbar({
           </button>
         </Tooltip>
 
-        <div ref={viewMenuRef} style={{ position: 'relative' }}>
-          <Tooltip content={t('panels.view')} side="bottom">
-            <button
-              className="cs-header-icon-btn"
-              onClick={() => setViewMenuOpen((v) => !v)}
-              style={iconBtn}
-              aria-label={t('panels.view')}
-              aria-haspopup="true"
-              aria-expanded={viewMenuOpen}
-            >
-              <Icon icon={Eye} size={15} />
-            </button>
-          </Tooltip>
-          {viewMenuOpen && (
-            <div style={dropdownStyle}>
-              <ViewMenuItem
-                label={t('panels.leftSidebar')}
-                checked={sidebarOpen}
-                onClick={() => {
-                  onToggleSidebar()
-                  setViewMenuOpen(false)
-                }}
-              />
-              <ViewMenuItem
-                label={t('panels.rightSidebar')}
-                checked={panelLayout.rightOpen}
-                onClick={() => {
-                  panelLayout.toggleRight()
-                  setViewMenuOpen(false)
-                }}
-              />
-              <ViewMenuItem
-                label={t('panels.bottomPanel')}
-                checked={panelLayout.bottomOpen}
-                onClick={() => {
-                  panelLayout.toggleBottom()
-                  setViewMenuOpen(false)
-                }}
-              />
-            </div>
-          )}
-        </div>
+        {canvasControls && (
+          <div ref={viewMenuRef} style={{ position: 'relative' }}>
+            <Tooltip content={t('panels.view')} side="bottom">
+              <button
+                className="cs-header-icon-btn"
+                onClick={() => setViewMenuOpen((v) => !v)}
+                style={iconBtn}
+                aria-label={t('panels.view')}
+                aria-haspopup="true"
+                aria-expanded={viewMenuOpen}
+              >
+                <Icon icon={Eye} size={15} />
+              </button>
+            </Tooltip>
+            {viewMenuOpen && (
+              <div style={dropdownStyle}>
+                <ViewMenuItem
+                  label={t('panels.leftSidebar')}
+                  checked={sidebarOpen}
+                  onClick={() => {
+                    onToggleSidebar()
+                    setViewMenuOpen(false)
+                  }}
+                />
+                <ViewMenuItem
+                  label={t('panels.rightSidebar')}
+                  checked={panelLayout.rightOpen}
+                  onClick={() => {
+                    panelLayout.toggleRight()
+                    setViewMenuOpen(false)
+                  }}
+                />
+                <ViewMenuItem
+                  label={t('panels.bottomPanel')}
+                  checked={panelLayout.bottomOpen}
+                  onClick={() => {
+                    panelLayout.toggleBottom()
+                    setViewMenuOpen(false)
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         <Tooltip content={t('nav.settings')} side="bottom">
           <button

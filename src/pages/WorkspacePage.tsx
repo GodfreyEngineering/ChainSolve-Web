@@ -313,8 +313,8 @@ export default function WorkspacePage() {
           </PanelErrorBoundary>
         </div>
 
-        {/* Right sidebar (docked Inspector) */}
-        <RightSidebar selectedNodeId={inspectedNodeId} />
+        {/* Right sidebar (docked Inspector) — only when a canvas is active */}
+        {showCanvas && <RightSidebar selectedNodeId={inspectedNodeId} />}
       </div>
 
       {/* Status bar */}
