@@ -6,6 +6,8 @@ type ButtonSize = 'sm' | 'md' | 'lg'
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
   size?: ButtonSize
+  /** Show a spinner and disable the button while an async operation is in progress. */
+  loading?: boolean
 }
 
 const base: React.CSSProperties = {
@@ -50,24 +52,41 @@ const variants: Record<ButtonVariant, React.CSSProperties> = {
   },
 }
 
+const spinnerStyle: React.CSSProperties = {
+  width: '1em',
+  height: '1em',
+  border: '2px solid currentColor',
+  borderTopColor: 'transparent',
+  borderRadius: '50%',
+  animation: 'cs-button-spin 0.6s linear infinite',
+  flexShrink: 0,
+}
+
 export function Button({
   variant = 'primary',
   size = 'md',
   disabled,
+  loading,
   style,
+  children,
   ...rest
 }: ButtonProps) {
+  const isDisabled = disabled || loading
   return (
     <button
       {...rest}
-      disabled={disabled}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
       style={{
         ...base,
         ...sizes[size],
         ...variants[variant],
-        ...(disabled ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
+        ...(isDisabled ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
         ...style,
       }}
-    />
+    >
+      {loading && <span style={spinnerStyle} aria-hidden="true" />}
+      {children}
+    </button>
   )
 }

@@ -313,12 +313,12 @@ fn evaluate_node_inner(
             Err(e) => e,
         },
         "vectorSum" => match require_vector(inputs, "vec", "Sum") {
-            Ok(v) => Value::scalar(v.iter().sum()),
+            Ok(v) => Value::scalar(kahan_sum(v.iter().copied())),
             Err(e) => e,
         },
         "vectorMean" => match require_vector(inputs, "vec", "Mean") {
             Ok(v) if v.is_empty() => Value::error("Mean: empty vector"),
-            Ok(v) => Value::scalar(v.iter().sum::<f64>() / v.len() as f64),
+            Ok(v) => Value::scalar(kahan_sum(v.iter().copied()) / v.len() as f64),
             Err(e) => e,
         },
         "vectorMin" => match require_vector(inputs, "vec", "Min") {
@@ -959,11 +959,11 @@ fn evaluate_node_inner(
             let count = validated_count(inputs, 2);
             let xs = collect_values(inputs, &X_PORTS, count);
             let ys = collect_values(inputs, &Y_PORTS, count);
-            let w_sum: f64 = ys.iter().sum();
+            let w_sum = kahan_sum(ys.iter().copied());
             if w_sum == 0.0 {
                 Value::error("Weighted avg: weights sum to 0")
             } else {
-                let wval: f64 = xs.iter().zip(ys.iter()).map(|(x, w)| x * w).sum();
+                let wval = kahan_sum(xs.iter().zip(ys.iter()).map(|(x, w)| x * w));
                 Value::scalar(wval / w_sum)
             }
         }
@@ -974,11 +974,11 @@ fn evaluate_node_inner(
             let s1 = scalar_or_nan(inputs, "s1");
             let s2 = scalar_or_nan(inputs, "s2");
             let rho = scalar_or_nan(inputs, "rho");
-            Value::scalar(
-                w1 * w1 * s1 * s1
-                + w2 * w2 * s2 * s2
-                + 2.0 * w1 * w2 * rho * s1 * s2,
-            )
+            // mul_add: fused multiply-add for reduced rounding
+            let t1 = (w1 * s1).powi(2);
+            let t2 = (w2 * s2).powi(2);
+            let cross = 2.0 * w1 * w2 * rho * s1 * s2;
+            Value::scalar(t1 + t2 + cross)
         }
 
         // ── Finance → Depreciation ────────────────────────────────────
@@ -1012,8 +1012,7 @@ fn evaluate_node_inner(
         "stats.desc.mean" => {
             let count = validated_count(inputs, 1);
             let xs = collect_values(inputs, &X_PORTS, count);
-            let sum: f64 = xs.iter().sum();
-            Value::scalar(sum / count as f64)
+            Value::scalar(kahan_sum(xs.iter().copied()) / count as f64)
         }
         "stats.desc.median" => {
             let count = validated_count(inputs, 1);
@@ -1052,22 +1051,22 @@ fn evaluate_node_inner(
             let count = validated_count(inputs, 2);
             let xs = collect_values(inputs, &X_PORTS, count);
             let n = count as f64;
-            let mean = xs.iter().sum::<f64>() / n;
-            let var = xs.iter().map(|x| (x - mean) * (x - mean)).sum::<f64>() / n;
+            let mean = kahan_sum(xs.iter().copied()) / n;
+            let var = kahan_sum(xs.iter().map(|x| (x - mean) * (x - mean))) / n;
             Value::scalar(var)
         }
         "stats.desc.stddev" => {
             let count = validated_count(inputs, 2);
             let xs = collect_values(inputs, &X_PORTS, count);
             let n = count as f64;
-            let mean = xs.iter().sum::<f64>() / n;
-            let var = xs.iter().map(|x| (x - mean) * (x - mean)).sum::<f64>() / n;
+            let mean = kahan_sum(xs.iter().copied()) / n;
+            let var = kahan_sum(xs.iter().map(|x| (x - mean) * (x - mean))) / n;
             Value::scalar(var.sqrt())
         }
         "stats.desc.sum" => {
             let count = validated_count(inputs, 1);
             let xs = collect_values(inputs, &X_PORTS, count);
-            Value::scalar(xs.iter().sum())
+            Value::scalar(kahan_sum(xs.iter().copied()))
         }
         "stats.desc.geo_mean" => {
             let count = validated_count(inputs, 1);
@@ -1075,7 +1074,7 @@ fn evaluate_node_inner(
             if xs.iter().any(|&x| x <= 0.0) {
                 Value::error("Geo mean: all values must be > 0")
             } else {
-                let log_sum: f64 = xs.iter().map(|x| x.ln()).sum();
+                let log_sum = kahan_sum(xs.iter().map(|x| x.ln()));
                 Value::scalar((log_sum / count as f64).exp())
             }
         }
@@ -1096,9 +1095,9 @@ fn evaluate_node_inner(
             let xs = collect_values(inputs, &X_PORTS, count);
             let ys = collect_values(inputs, &Y_PORTS, count);
             let n = count as f64;
-            let mx = xs.iter().sum::<f64>() / n;
-            let my = ys.iter().sum::<f64>() / n;
-            let cov = xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my)).sum::<f64>() / n;
+            let mx = kahan_sum(xs.iter().copied()) / n;
+            let my = kahan_sum(ys.iter().copied()) / n;
+            let cov = kahan_sum(xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my))) / n;
             Value::scalar(cov)
         }
         "stats.rel.correlation" => {
@@ -1106,11 +1105,11 @@ fn evaluate_node_inner(
             let xs = collect_values(inputs, &X_PORTS, count);
             let ys = collect_values(inputs, &Y_PORTS, count);
             let n = count as f64;
-            let mx = xs.iter().sum::<f64>() / n;
-            let my = ys.iter().sum::<f64>() / n;
-            let cov: f64 = xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my)).sum::<f64>() / n;
-            let sx = (xs.iter().map(|x| (x - mx).powi(2)).sum::<f64>() / n).sqrt();
-            let sy = (ys.iter().map(|y| (y - my).powi(2)).sum::<f64>() / n).sqrt();
+            let mx = kahan_sum(xs.iter().copied()) / n;
+            let my = kahan_sum(ys.iter().copied()) / n;
+            let cov = kahan_sum(xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my))) / n;
+            let sx = (kahan_sum(xs.iter().map(|x| (x - mx).powi(2))) / n).sqrt();
+            let sy = (kahan_sum(ys.iter().map(|y| (y - my).powi(2))) / n).sqrt();
             if sx == 0.0 || sy == 0.0 {
                 Value::error("Correlation: zero variance")
             } else {
@@ -1122,10 +1121,10 @@ fn evaluate_node_inner(
             let xs = collect_values(inputs, &X_PORTS, count);
             let ys = collect_values(inputs, &Y_PORTS, count);
             let n = count as f64;
-            let mx = xs.iter().sum::<f64>() / n;
-            let my = ys.iter().sum::<f64>() / n;
-            let num: f64 = xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my)).sum();
-            let den: f64 = xs.iter().map(|x| (x - mx).powi(2)).sum();
+            let mx = kahan_sum(xs.iter().copied()) / n;
+            let my = kahan_sum(ys.iter().copied()) / n;
+            let num = kahan_sum(xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my)));
+            let den = kahan_sum(xs.iter().map(|x| (x - mx).powi(2)));
             if den == 0.0 {
                 Value::error("LinReg slope: zero variance in X")
             } else {
@@ -1137,15 +1136,15 @@ fn evaluate_node_inner(
             let xs = collect_values(inputs, &X_PORTS, count);
             let ys = collect_values(inputs, &Y_PORTS, count);
             let n = count as f64;
-            let mx = xs.iter().sum::<f64>() / n;
-            let my = ys.iter().sum::<f64>() / n;
-            let num: f64 = xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my)).sum();
-            let den: f64 = xs.iter().map(|x| (x - mx).powi(2)).sum();
+            let mx = kahan_sum(xs.iter().copied()) / n;
+            let my = kahan_sum(ys.iter().copied()) / n;
+            let num = kahan_sum(xs.iter().zip(ys.iter()).map(|(x, y)| (x - mx) * (y - my)));
+            let den = kahan_sum(xs.iter().map(|x| (x - mx).powi(2)));
             if den == 0.0 {
                 Value::error("LinReg intercept: zero variance in X")
             } else {
                 let slope = num / den;
-                Value::scalar(my - slope * mx)
+                Value::scalar(my.mul_add(1.0, -(slope * mx)))
             }
         }
 
@@ -1522,6 +1521,22 @@ const X_PORTS: [&str; 6] = ["x1", "x2", "x3", "x4", "x5", "x6"];
 const Y_PORTS: [&str; 6] = ["y1", "y2", "y3", "y4", "y5", "y6"];
 /// Port names for cash-flow slots (CF0..CF5).
 const CF_PORTS: [&str; 6] = ["cf0", "cf1", "cf2", "cf3", "cf4", "cf5"];
+
+// ── Phase 14: Kahan compensated summation ────────────────────────────────────
+
+/// Kahan compensated summation — reduces floating-point rounding errors
+/// when summing many f64 values by tracking a running compensation term.
+fn kahan_sum(iter: impl Iterator<Item = f64>) -> f64 {
+    let mut sum = 0.0_f64;
+    let mut comp = 0.0_f64; // running compensation for lost low-order bits
+    for x in iter {
+        let y = x - comp;
+        let t = sum + y;
+        comp = (t - sum) - y;
+        sum = t;
+    }
+    sum
+}
 
 /// Read the `c` (count) port, clamp to [min_c..6], return as usize.
 fn validated_count(inputs: &HashMap<String, Value>, min_c: usize) -> usize {

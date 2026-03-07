@@ -73,6 +73,7 @@ import {
   ungroupNodes,
   collapseGroup,
   expandGroup,
+  autoResizeGroup,
   getCanonicalSnapshot,
   insertTemplate,
   type TemplatePayload,
@@ -1044,6 +1045,80 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     setContextMenu({ kind: 'canvas', x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY })
   }, [])
 
+  // ── Long-press context menu for touch devices ─────────────────────────────
+  useEffect(() => {
+    const el = canvasWrapRef.current
+    if (!el || readOnly) return
+
+    let timer: ReturnType<typeof setTimeout> | null = null
+    let startPos: { x: number; y: number } | null = null
+    let fired = false
+
+    function findNodeId(target: EventTarget | null): string | null {
+      let node = target as HTMLElement | null
+      while (node && node !== el) {
+        if (node.classList?.contains('react-flow__node')) {
+          return node.dataset.id ?? null
+        }
+        node = node.parentElement
+      }
+      return null
+    }
+
+    function onStart(e: TouchEvent) {
+      if (e.touches.length !== 1) return
+      const touch = e.touches[0]
+      startPos = { x: touch.clientX, y: touch.clientY }
+      fired = false
+      const nodeId = findNodeId(e.target)
+      timer = setTimeout(() => {
+        fired = true
+        if (nodeId) {
+          const n = nodes.find((nd) => nd.id === nodeId)
+          if (n) {
+            onNodeContextMenu(
+              {
+                clientX: startPos!.x,
+                clientY: startPos!.y,
+                preventDefault: () => {},
+              } as unknown as MouseEvent,
+              n as Node,
+            )
+          }
+        } else {
+          setContextMenu({ kind: 'canvas', x: startPos!.x, y: startPos!.y })
+        }
+      }, 500)
+    }
+
+    function onMove(e: TouchEvent) {
+      if (!startPos || !timer) return
+      const t = e.touches[0]
+      if (Math.abs(t.clientX - startPos.x) > 10 || Math.abs(t.clientY - startPos.y) > 10) {
+        clearTimeout(timer)
+        timer = null
+      }
+    }
+
+    function onEnd(e: TouchEvent) {
+      if (timer) {
+        clearTimeout(timer)
+        timer = null
+      }
+      if (fired) e.preventDefault()
+    }
+
+    el.addEventListener('touchstart', onStart, { passive: true })
+    el.addEventListener('touchmove', onMove, { passive: true })
+    el.addEventListener('touchend', onEnd)
+    return () => {
+      if (timer) clearTimeout(timer)
+      el.removeEventListener('touchstart', onStart)
+      el.removeEventListener('touchmove', onMove)
+      el.removeEventListener('touchend', onEnd)
+    }
+  }, [readOnly, nodes, onNodeContextMenu])
+
   // ── Context menu actions ────────────────────────────────────────────────────
   const duplicateNode = useCallback(
     (nodeId: string) => {
@@ -1358,6 +1433,22 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [nodes, edges, setNodes, setEdges, doSaveHistory, toast, t],
   )
 
+  // Phase 11: Auto-resize group to fit member nodes
+  const resizeGroupToFit = useCallback(
+    (groupId: string) => {
+      const resized = autoResizeGroup(groupId, nodes)
+      if (!resized) return
+      doSaveHistory()
+      setNodes((nds) =>
+        nds.map((n) => {
+          if (n.id !== resized.id) return n
+          return { ...n, position: resized.position, style: resized.style }
+        }),
+      )
+    },
+    [nodes, setNodes, doSaveHistory],
+  )
+
   const saveAsTemplate = useCallback(
     (groupId: string) => {
       if (!ent.canUseGroups) return
@@ -1518,6 +1609,27 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const onNodeDragStart = useCallback(() => {
     doSaveHistory()
   }, [doSaveHistory])
+
+  // Phase 11: Auto-resize parent group when a member is dragged
+  const onNodeDragStop = useCallback(
+    (event: React.MouseEvent, node: { id: string }) => {
+      onNodeDragStopProp?.(event, node)
+      // Find the dragged node's parentId to auto-resize its group
+      const dragged = nodes.find((n) => n.id === node.id)
+      if (dragged?.parentId) {
+        const resized = autoResizeGroup(dragged.parentId, nodes)
+        if (resized) {
+          setNodes((nds) =>
+            nds.map((n) => {
+              if (n.id !== resized.id) return n
+              return { ...n, position: resized.position, style: resized.style }
+            }),
+          )
+        }
+      }
+    },
+    [nodes, setNodes, onNodeDragStopProp],
+  )
 
   // ── Keyboard shortcuts ─────────────────────────────────────────────────
   const onKeyDown = useCallback(
@@ -1956,13 +2068,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     onConnect={readOnly ? undefined : onConnect}
                     isValidConnection={isValidConnection}
                     onNodeDragStart={readOnly ? undefined : onNodeDragStart}
-                    onNodeDragStop={
-                      readOnly
-                        ? undefined
-                        : onNodeDragStopProp
-                          ? (event, node) => onNodeDragStopProp(event, node)
-                          : undefined
-                    }
+                    onNodeDragStop={readOnly ? undefined : onNodeDragStop}
                     onNodeClick={onNodeClick}
                     onNodeDoubleClick={onNodeDoubleClick}
                     onPaneClick={onPaneClick}
@@ -2124,6 +2230,18 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   />
                 )}
 
+                {/* Phase 12: Floating action button for quick-add on mobile */}
+                {!readOnly && isMobile && !libVisible && (
+                  <button
+                    className="cs-mobile-fab"
+                    onClick={() => setLibVisible(true)}
+                    aria-label={t('canvas.mobileFabAdd')}
+                    title={t('canvas.mobileFabAdd')}
+                  >
+                    +
+                  </button>
+                )}
+
                 {!readOnly && isMobile && (
                   <BottomSheet
                     open={libVisible}
@@ -2158,6 +2276,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     onGroupSelection={groupSelection}
                     onUngroupNode={ungroupNode}
                     onToggleCollapse={toggleGroupCollapse}
+                    onAutoResizeGroup={resizeGroupToFit}
                     onDeleteSelected={deleteSelected}
                     onSaveAsTemplate={saveAsTemplate}
                     canUseGroups={ent.canUseGroups}

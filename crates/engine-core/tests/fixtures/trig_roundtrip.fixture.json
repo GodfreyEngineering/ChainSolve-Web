@@ -103,6 +103,10 @@
     ]
   },
   "expected": {
+    "acos_cos10": {
+      "kind": "scalar",
+      "value": 0.9999999999999999
+    },
     "asin_sin05": {
       "kind": "scalar",
       "value": 0.5
@@ -110,10 +114,6 @@
     "atan_tan07": {
       "kind": "scalar",
       "value": 0.7
-    },
-    "acos_cos10": {
-      "kind": "scalar",
-      "value": 0.9999999999999999
     }
   },
   "diagnostics": [],

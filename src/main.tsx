@@ -81,6 +81,11 @@ function Root() {
 
   return (
     <>
+      {/* Phase 13: Skip-to-content for keyboard accessibility */}
+      <a href="#cs-main-content" className="cs-skip-link">
+        Skip to content
+      </a>
+
       {/* Boot ladder rung 3: React has rendered at least once.
           Present from the very first render (even before engine loads),
           so e2e helpers can distinguish "React never mounted" from

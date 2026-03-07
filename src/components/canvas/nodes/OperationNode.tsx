@@ -32,6 +32,7 @@ import { NODE_STYLES as s } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
 import { useValueFlash } from '../../../hooks/useValueFlash'
+import { getPortUnitHint } from '../../../blocks/portUnitHints'
 
 const LazyUnitPicker = lazy(() =>
   import('../editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
@@ -224,7 +225,23 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
                 }}
               />
 
-              <span style={s.portLabel}>{port.label}</span>
+              <span style={s.portLabel}>
+                {port.label}
+                {(() => {
+                  const hint = getPortUnitHint(nd.blockType, port.id)
+                  return hint ? (
+                    <span
+                      style={{
+                        fontSize: '0.58rem',
+                        color: 'var(--text-faint)',
+                        marginLeft: '0.2rem',
+                      }}
+                    >
+                      {hint}
+                    </span>
+                  ) : null
+                })()}
+              </span>
 
               {showInput ? (
                 <ValueEditor
@@ -251,7 +268,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
                 <button
                   className="nodrag"
                   onClick={() => toggleOverride(port.id)}
-                  title={override ? 'Use connected value' : 'Override with manual value'}
+                  title={override ? t('canvas.useConnectedValue') : t('canvas.overrideWithManual')}
                   style={{
                     width: 16,
                     height: 16,

@@ -112,6 +112,44 @@ function ScratchRedirect() {
   return <Navigate to={`/app?scratch=1${qs ? `&${qs}` : ''}`} replace />
 }
 
+/** Catch-all 404 page for unmatched routes */
+function NotFoundPage() {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--bg)',
+        color: 'var(--text)',
+      }}
+    >
+      <div style={{ textAlign: 'center', maxWidth: 400, padding: '2rem' }}>
+        <div style={{ fontSize: '4rem', marginBottom: '0.5rem', opacity: 0.3 }}>404</div>
+        <h1 style={{ margin: '0 0 0.5rem', fontSize: '1.4rem' }}>Page not found</h1>
+        <p style={{ opacity: 0.6, margin: '0 0 1.5rem', fontSize: '0.9rem' }}>
+          The page you&apos;re looking for doesn&apos;t exist or has been moved.
+        </p>
+        <a
+          href="/app"
+          style={{
+            display: 'inline-block',
+            padding: '0.65rem 1.5rem',
+            background: 'var(--primary)',
+            color: 'var(--color-on-primary)',
+            borderRadius: '8px',
+            fontWeight: 600,
+            textDecoration: 'none',
+          }}
+        >
+          Go to app
+        </a>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   return (
     <Routes>
@@ -195,6 +233,8 @@ export default function App() {
       <Route path="/explore/*" element={<ExploreRedirect />} />
       <Route path="/marketplace" element={<ExploreRedirect />} />
       <Route path="/marketplace/*" element={<ExploreRedirect />} />
+      {/* Catch-all 404 */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

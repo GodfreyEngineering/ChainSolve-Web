@@ -12,8 +12,8 @@ let nextId = 1
 
 const containerStyle: React.CSSProperties = {
   position: 'fixed',
-  bottom: 20,
-  right: 20,
+  bottom: 'max(20px, env(safe-area-inset-bottom, 0px))',
+  right: 'max(20px, env(safe-area-inset-right, 0px))',
   zIndex: 9500,
   display: 'flex',
   flexDirection: 'column',

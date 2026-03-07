@@ -50,6 +50,7 @@ interface ContextMenuProps {
   onGroupSelection?: () => void
   onUngroupNode?: (nodeId: string) => void
   onToggleCollapse?: (nodeId: string) => void
+  onAutoResizeGroup?: (nodeId: string) => void
   onDeleteSelected?: () => void
   onSaveAsTemplate?: (nodeId: string) => void
   canUseGroups?: boolean
@@ -164,6 +165,7 @@ export function ContextMenu({
   onGroupSelection,
   onUngroupNode,
   onToggleCollapse,
+  onAutoResizeGroup,
   onDeleteSelected,
   onSaveAsTemplate,
   canUseGroups,
@@ -384,6 +386,14 @@ export function ContextMenu({
               label={t('contextMenu.ungroup')}
               onClick={() => {
                 onUngroupNode?.(target.nodeId)
+                onClose()
+              }}
+            />
+            <MenuItem
+              icon="⤢"
+              label={t('contextMenu.autoResize')}
+              onClick={() => {
+                onAutoResizeGroup?.(target.nodeId)
                 onClose()
               }}
             />

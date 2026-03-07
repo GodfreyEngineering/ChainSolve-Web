@@ -134,9 +134,13 @@
     ]
   },
   "expected": {
-    "sin0": {
+    "cos_pi": {
       "kind": "scalar",
-      "value": 0.0
+      "value": -1.0
+    },
+    "tan_pi4": {
+      "kind": "scalar",
+      "value": 0.9999999999999999
     },
     "sin_pi2": {
       "kind": "scalar",
@@ -146,13 +150,9 @@
       "kind": "scalar",
       "value": 1.0
     },
-    "cos_pi": {
+    "sin0": {
       "kind": "scalar",
-      "value": -1.0
-    },
-    "tan_pi4": {
-      "kind": "scalar",
-      "value": 0.9999999999999999
+      "value": 0.0
     }
   },
   "diagnostics": [],

@@ -296,6 +296,7 @@
     "keepMine": "Keep mine (overwrite)",
     "reload": "Reload from server",
     "emptyHint": "Right-click the canvas to insert a block, press / for quick insert, or open the block library.",
+    "mobileFabAdd": "Add block",
     "findPlaceholder": "Search nodes…",
     "findHint": "↑↓ navigate · ↵ focus · ESC",
     "noMatches": "No blocks match",
@@ -338,7 +339,16 @@
     "autosaveToggle": "Toggle autosave",
     "untitled": "Untitled",
     "importFile": "Import",
-    "templates": "Templates"
+    "templates": "Templates",
+    "noCsvLoaded": "No CSV loaded",
+    "inputValues": "Input values",
+    "traceLabel": "Trace",
+    "useConnectedValue": "Use connected value",
+    "overrideWithManual": "Override with manual value",
+    "manualOverrideTooltip": "Manual override (connected to upstream)",
+    "manualValueTooltip": "Manual value",
+    "createCustomMaterial": "+ Create custom...",
+    "createCustomMaterialPro": "+ Create custom... (Pro)"
   },
   "blocks": {
     "categoryData": "Data",
@@ -606,7 +616,8 @@
     "copy": "Copy",
     "copyJson": "Copy JSON",
     "jump": "Jump to node",
-    "edit": "Edit"
+    "edit": "Edit",
+    "expand": "Expand"
   },
   "entitlements": {
     "projectLimitTitle": "Project limit reached",
@@ -925,7 +936,8 @@
     "pinned": "Pinned",
     "followSelection": "Following selection",
     "empty": "Click a block to inspect",
-    "emptyHint": "Or right-click the canvas to insert one."
+    "emptyHint": "Or right-click the canvas to insert one.",
+    "inputsLabel": "Inputs"
   },
   "annotation": {
     "text": "Text",
@@ -1419,7 +1431,8 @@
     "disabledByOrg": "AI Copilot is disabled by your organization.",
     "actionHistory": "History",
     "expandPanel": "Expand AI panel",
-    "collapsePanel": "Collapse AI panel"
+    "collapsePanel": "Collapse AI panel",
+    "modeLabel": "Mode"
   },
   "terms": {
     "title": "Terms & Conditions",
@@ -1443,6 +1456,7 @@
     "collapse": "Collapse",
     "saveAsGroup": "Save as reusable group…",
     "ungroup": "Ungroup",
+    "autoResize": "Auto-resize to fit",
     "deleteGroup": "Delete group",
     "groupSelection": "Group selection",
     "alignLeft": "Align left",

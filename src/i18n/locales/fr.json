@@ -289,6 +289,7 @@
     "keepMine": "Garder ma version",
     "reload": "Recharger depuis le serveur",
     "emptyHint": "Clic droit sur le canevas pour insérer un bloc, appuyez sur / pour l'insertion rapide, ou ouvrez la bibliothèque de blocs.",
+    "mobileFabAdd": "Ajouter un bloc",
     "findPlaceholder": "Rechercher des nœuds…",
     "findHint": "↑↓ naviguer · ↵ focus · ESC",
     "noMatches": "Aucun bloc trouvé",
@@ -331,7 +332,16 @@
     "materialSearchPlaceholder": "Rechercher des matériaux...",
     "literalValue": "Valeur litterale",
     "savedGroupActions": "Actions du groupe enregistre",
-    "functionActions": "Actions de la fonction"
+    "functionActions": "Actions de la fonction",
+    "noCsvLoaded": "Aucun CSV chargé",
+    "inputValues": "Valeurs d'entrée",
+    "traceLabel": "Trace",
+    "useConnectedValue": "Utiliser la valeur connectée",
+    "overrideWithManual": "Remplacer par une valeur manuelle",
+    "manualOverrideTooltip": "Remplacement manuel (connecté en amont)",
+    "manualValueTooltip": "Valeur manuelle",
+    "createCustomMaterial": "+ Créer personnalisé...",
+    "createCustomMaterialPro": "+ Créer personnalisé... (Pro)"
   },
   "blocks": {
     "categoryData": "Données",
@@ -599,7 +609,8 @@
     "copy": "Copier",
     "copyJson": "Copier JSON",
     "jump": "Aller au nœud",
-    "edit": "Modifier"
+    "edit": "Modifier",
+    "expand": "Développer"
   },
   "entitlements": {
     "projectLimitTitle": "Limite de projets atteinte",
@@ -907,7 +918,8 @@
     "pinned": "Épinglé",
     "followSelection": "Suit la sélection",
     "empty": "Cliquez sur un bloc pour l'inspecter",
-    "emptyHint": "Ou cliquez droit sur le canevas pour en insérer un."
+    "emptyHint": "Ou cliquez droit sur le canevas pour en insérer un.",
+    "inputsLabel": "Entrées"
   },
   "annotation": {
     "text": "Texte",
@@ -1401,7 +1413,8 @@
     "disabledByOrg": "Le Copilote IA est désactivé par votre organisation.",
     "actionHistory": "Historique",
     "expandPanel": "Ouvrir le panneau IA",
-    "collapsePanel": "Fermer le panneau IA"
+    "collapsePanel": "Fermer le panneau IA",
+    "modeLabel": "Mode"
   },
   "terms": {
     "title": "Conditions Générales",
@@ -1425,6 +1438,7 @@
     "collapse": "Réduire",
     "saveAsGroup": "Enregistrer comme groupe…",
     "ungroup": "Dégrouper",
+    "autoResize": "Redimensionner automatiquement",
     "deleteGroup": "Supprimer le groupe",
     "groupSelection": "Grouper la sélection",
     "alignLeft": "Aligner à gauche",

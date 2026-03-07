@@ -289,6 +289,7 @@
     "keepMine": "Mantener mi versión",
     "reload": "Recargar del servidor",
     "emptyHint": "Haz clic derecho en el lienzo para insertar un bloque, pulsa / para inserción rápida, o abre la biblioteca de bloques.",
+    "mobileFabAdd": "Añadir bloque",
     "findPlaceholder": "Buscar nodos…",
     "findHint": "↑↓ navegar · ↵ enfocar · ESC",
     "noMatches": "No se encontraron bloques",
@@ -331,7 +332,16 @@
     "materialSearchPlaceholder": "Buscar materiales...",
     "literalValue": "Valor literal",
     "savedGroupActions": "Acciones del grupo guardado",
-    "functionActions": "Acciones de la funcion"
+    "functionActions": "Acciones de la funcion",
+    "noCsvLoaded": "Sin CSV cargado",
+    "inputValues": "Valores de entrada",
+    "traceLabel": "Traza",
+    "useConnectedValue": "Usar valor conectado",
+    "overrideWithManual": "Reemplazar con valor manual",
+    "manualOverrideTooltip": "Reemplazo manual (conectado aguas arriba)",
+    "manualValueTooltip": "Valor manual",
+    "createCustomMaterial": "+ Crear personalizado...",
+    "createCustomMaterialPro": "+ Crear personalizado... (Pro)"
   },
   "blocks": {
     "categoryData": "Datos",
@@ -599,7 +609,8 @@
     "copy": "Copiar",
     "copyJson": "Copiar JSON",
     "jump": "Ir al nodo",
-    "edit": "Editar"
+    "edit": "Editar",
+    "expand": "Expandir"
   },
   "entitlements": {
     "projectLimitTitle": "Límite de proyectos alcanzado",
@@ -907,7 +918,8 @@
     "pinned": "Fijado",
     "followSelection": "Siguiendo selección",
     "empty": "Haz clic en un bloque para inspeccionar",
-    "emptyHint": "O haz clic derecho en el lienzo para insertar uno."
+    "emptyHint": "O haz clic derecho en el lienzo para insertar uno.",
+    "inputsLabel": "Entradas"
   },
   "annotation": {
     "text": "Texto",
@@ -1401,7 +1413,8 @@
     "disabledByOrg": "El Copiloto IA está deshabilitado por tu organización.",
     "actionHistory": "Historial",
     "expandPanel": "Expandir panel IA",
-    "collapsePanel": "Contraer panel IA"
+    "collapsePanel": "Contraer panel IA",
+    "modeLabel": "Modo"
   },
   "terms": {
     "title": "Términos y Condiciones",
@@ -1425,6 +1438,7 @@
     "collapse": "Contraer",
     "saveAsGroup": "Guardar como grupo…",
     "ungroup": "Desagrupar",
+    "autoResize": "Redimensionar automáticamente",
     "deleteGroup": "Eliminar grupo",
     "groupSelection": "Agrupar selección",
     "alignLeft": "Alinear a la izquierda",

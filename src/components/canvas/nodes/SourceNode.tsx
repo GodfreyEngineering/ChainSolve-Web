@@ -7,6 +7,7 @@
  */
 
 import { memo, useCallback, useEffect, useMemo, useState, lazy, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
 import { useShowValuePopover } from '../../../contexts/ValuePopoverContext'
@@ -61,6 +62,7 @@ function MaterialPickerBody({
   updateNodeData: (id: string, data: Partial<NodeData>) => void
 }) {
   const [wizardOpen, setWizardOpen] = useState(false)
+  const { t } = useTranslation()
   const plan = usePlan()
   const canCreate = getEntitlements(plan).canCreateCustomMaterials
   const customMaterials = useCustomMaterialsStore((s) => s.materials)
@@ -181,9 +183,9 @@ function MaterialPickerBody({
           opacity: canCreate ? 1 : 0.6,
         }}
         onClick={() => canCreate && setWizardOpen(true)}
-        title={canCreate ? undefined : 'Pro feature'}
+        title={canCreate ? undefined : t('entitlements.featureLockedTitle')}
       >
-        {canCreate ? '+ Create custom...' : '+ Create custom... (Pro)'}
+        {canCreate ? t('canvas.createCustomMaterial') : t('canvas.createCustomMaterialPro')}
       </button>
       {wizardOpen && canCreate && (
         <Suspense fallback={null}>
@@ -265,10 +267,14 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
     if (varId && !boundVar) {
       // Variable was deleted — set value to NaN to surface error
       if (nd.value === nd.value) updateNodeData(id, { value: NaN })
-    } else if (boundVar !== undefined && boundVar.value !== nd.value) {
-      updateNodeData(id, { value: boundVar.value })
+    } else if (boundVar !== undefined) {
+      // Phase 11: Sync both value and name (rename propagation)
+      const updates: Partial<NodeData> = {}
+      if (boundVar.value !== nd.value) updates.value = boundVar.value
+      if (boundVar.name !== nd.label) updates.label = boundVar.name
+      if (Object.keys(updates).length > 0) updateNodeData(id, updates)
     }
-  }, [isVariableSource, varId, boundVar, nd.value, id, updateNodeData])
+  }, [isVariableSource, varId, boundVar, nd.value, nd.label, id, updateNodeData])
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
   const TypeIcon = getNodeTypeIcon(nd.blockType)

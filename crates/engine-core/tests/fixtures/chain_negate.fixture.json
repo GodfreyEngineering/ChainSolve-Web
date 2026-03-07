@@ -53,21 +53,21 @@
     ]
   },
   "expected": {
-    "n3": {
+    "n2": {
       "kind": "scalar",
-      "value": -5.0
-    },
-    "n1": {
-      "kind": "scalar",
-      "value": -5.0
+      "value": 5.0
     },
     "n0": {
       "kind": "scalar",
       "value": 5.0
     },
-    "n2": {
+    "n1": {
       "kind": "scalar",
-      "value": 5.0
+      "value": -5.0
+    },
+    "n3": {
+      "kind": "scalar",
+      "value": -5.0
     }
   },
   "diagnostics": [],

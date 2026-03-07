@@ -225,7 +225,7 @@ export function ValueEditor({ binding, onChange, compact, override }: ValueEdito
               const v = parseFloat(e.target.value)
               if (!isNaN(v)) onChange({ kind: 'literal', value: v, raw: e.target.value })
             }}
-            title={override ? 'Manual override (connected to upstream)' : 'Manual value'}
+            title={override ? t('canvas.manualOverrideTooltip') : t('canvas.manualValueTooltip')}
           />
           <button
             className={compact ? 'nodrag' : undefined}
@@ -298,7 +298,7 @@ export function ValueEditor({ binding, onChange, compact, override }: ValueEdito
             {/* Variables */}
             {varEntries.length > 0 && (
               <>
-                <div style={sectionLabel}>Variables</div>
+                <div style={sectionLabel}>{t('variablesPanel.title')}</div>
                 {varEntries.map((v) => (
                   <div
                     key={v.id}
@@ -339,7 +339,7 @@ export function ValueEditor({ binding, onChange, compact, override }: ValueEdito
             {/* Constants */}
             {constEntries.length > 0 && (
               <>
-                <div style={sectionLabel}>Constants</div>
+                <div style={sectionLabel}>{t('docsPage.secBlockConstants')}</div>
                 {constEntries.slice(0, 50).map((entry) => (
                   <div
                     key={entry.opId}

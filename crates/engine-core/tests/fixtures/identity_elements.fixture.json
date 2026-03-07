@@ -88,15 +88,15 @@
     ]
   },
   "expected": {
-    "mul1": {
-      "kind": "scalar",
-      "value": 42.0
-    },
     "add0": {
       "kind": "scalar",
       "value": 42.0
     },
     "pow1": {
+      "kind": "scalar",
+      "value": 42.0
+    },
+    "mul1": {
       "kind": "scalar",
       "value": 42.0
     }

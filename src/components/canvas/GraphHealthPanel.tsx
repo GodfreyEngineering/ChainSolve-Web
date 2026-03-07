@@ -61,8 +61,8 @@ export default function GraphHealthPanel({
           <button
             onClick={() => setMinimized((v) => !v)}
             style={ctrlBtn}
-            title={minimized ? 'Expand' : 'Minimize'}
-            aria-label={minimized ? 'Expand' : 'Minimize'}
+            title={minimized ? t('ui.expand') : t('ui.minimize')}
+            aria-label={minimized ? t('ui.expand') : t('ui.minimize')}
           >
             {minimized ? '\u25b3' : '\u25bd'}
           </button>

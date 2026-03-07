@@ -1781,6 +1781,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
   return (
     <main
+      id="cs-main-content"
       style={{
         display: 'flex',
         flexDirection: 'column',

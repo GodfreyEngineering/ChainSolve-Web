@@ -289,6 +289,7 @@
     "keepMine": "Meine Version behalten",
     "reload": "Vom Server neu laden",
     "emptyHint": "Rechtsklick auf die Leinwand, um einen Block einzufügen, / für Schnelleinfügung drücken, oder die Blockbibliothek öffnen.",
+    "mobileFabAdd": "Block hinzufügen",
     "findPlaceholder": "Knoten suchen…",
     "findHint": "↑↓ navigieren · ↵ Fokus · ESC",
     "noMatches": "Keine Blöcke gefunden",
@@ -331,7 +332,16 @@
     "materialSearchPlaceholder": "Materialien durchsuchen...",
     "literalValue": "Literalwert",
     "savedGroupActions": "Gespeicherte Gruppenaktionen",
-    "functionActions": "Funktionsaktionen"
+    "functionActions": "Funktionsaktionen",
+    "noCsvLoaded": "Keine CSV geladen",
+    "inputValues": "Eingabewerte",
+    "traceLabel": "Ablaufverfolgung",
+    "useConnectedValue": "Verbundenen Wert verwenden",
+    "overrideWithManual": "Mit manuellem Wert überschreiben",
+    "manualOverrideTooltip": "Manuelle Überschreibung (mit Upstream verbunden)",
+    "manualValueTooltip": "Manueller Wert",
+    "createCustomMaterial": "+ Eigenes erstellen...",
+    "createCustomMaterialPro": "+ Eigenes erstellen... (Pro)"
   },
   "blocks": {
     "categoryData": "Daten",
@@ -599,7 +609,8 @@
     "copy": "Kopieren",
     "copyJson": "JSON kopieren",
     "jump": "Zum Knoten springen",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "expand": "Erweitern"
   },
   "entitlements": {
     "projectLimitTitle": "Projektlimit erreicht",
@@ -907,7 +918,8 @@
     "pinned": "Angeheftet",
     "followSelection": "Auswahl folgen",
     "empty": "Klicken Sie auf einen Block",
-    "emptyHint": "Oder rechtsklicken, um einen einzufügen."
+    "emptyHint": "Oder rechtsklicken, um einen einzufügen.",
+    "inputsLabel": "Eingaben"
   },
   "annotation": {
     "text": "Text",
@@ -1401,7 +1413,8 @@
     "disabledByOrg": "Der KI-Copilot ist von Ihrer Organisation deaktiviert.",
     "actionHistory": "Verlauf",
     "expandPanel": "KI-Panel erweitern",
-    "collapsePanel": "KI-Panel einklappen"
+    "collapsePanel": "KI-Panel einklappen",
+    "modeLabel": "Modus"
   },
   "terms": {
     "title": "Allgemeine Geschäftsbedingungen",
@@ -1425,6 +1438,7 @@
     "collapse": "Zuklappen",
     "saveAsGroup": "Als Gruppe speichern…",
     "ungroup": "Gruppierung aufheben",
+    "autoResize": "Größe automatisch anpassen",
     "deleteGroup": "Gruppe löschen",
     "groupSelection": "Auswahl gruppieren",
     "alignLeft": "Links ausrichten",

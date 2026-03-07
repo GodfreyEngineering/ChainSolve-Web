@@ -122,11 +122,15 @@ export function CsvPicker({ nodeId, data }: CsvPickerProps) {
           {data.csvStoragePath ?? 'CSV'}: {td.rows.length} rows, {td.columns.length} cols
         </div>
       ) : (
-        <div style={{ fontSize: '0.68rem', color: 'rgba(244,244,243,0.35)' }}>No CSV loaded</div>
+        <div style={{ fontSize: '0.68rem', color: 'rgba(244,244,243,0.35)' }}>
+          {t('canvas.noCsvLoaded')}
+        </div>
       )}
 
       {status === 'parsing' && (
-        <div style={{ fontSize: '0.65rem', color: 'rgba(244,244,243,0.5)' }}>Parsing...</div>
+        <div style={{ fontSize: '0.65rem', color: 'rgba(244,244,243,0.5)' }}>
+          {t('canvas.csvParsing')}
+        </div>
       )}
 
       {status === 'error' && errorMsg && (
@@ -150,7 +154,7 @@ export function CsvPicker({ nodeId, data }: CsvPickerProps) {
           opacity: status === 'parsing' ? 0.5 : 1,
         }}
       >
-        Choose CSV
+        {t('canvas.chooseCsv')}
       </button>
     </div>
   )

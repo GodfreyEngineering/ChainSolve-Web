@@ -466,7 +466,7 @@ export function Inspector({
             {/* Per-port inputs (operation nodes) */}
             {def && def.inputs.length > 0 && (
               <div style={{ marginBottom: '0.7rem' }}>
-                <span style={fieldLabel}>Inputs</span>
+                <span style={fieldLabel}>{t('inspector.inputsLabel')}</span>
                 {def.inputs.map((port) => {
                   const connected = isPortConnected(port.id)
                   const override = portOverrides[port.id] === true
@@ -519,7 +519,11 @@ export function Inspector({
                       {connected && (
                         <button
                           onClick={() => toggleOverride(port.id)}
-                          title={override ? 'Use connected value' : 'Override with manual value'}
+                          title={
+                            override
+                              ? t('canvas.useConnectedValue')
+                              : t('canvas.overrideWithManual')
+                          }
                           style={{
                             width: 22,
                             height: 22,
@@ -557,7 +561,7 @@ export function Inspector({
                 if (connectedPorts.length === 0) return null
                 return (
                   <div style={{ marginBottom: '0.7rem' }}>
-                    <span style={fieldLabel}>Input values</span>
+                    <span style={fieldLabel}>{t('canvas.inputValues')}</span>
                     {connectedPorts.map((port) => {
                       const edge = allEdges.find(
                         (e) => e.target === node.id && e.targetHandle === port.id,
@@ -636,7 +640,7 @@ export function Inspector({
 
               return (
                 <div style={{ marginBottom: '0.7rem' }}>
-                  <span style={fieldLabel}>Trace</span>
+                  <span style={fieldLabel}>{t('canvas.traceLabel')}</span>
                   {Object.entries(entry.inputs).map(([portId, summary]) => (
                     <div
                       key={portId}

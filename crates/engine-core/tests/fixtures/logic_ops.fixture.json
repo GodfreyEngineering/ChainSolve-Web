@@ -199,17 +199,21 @@
     ]
   },
   "expected": {
+    "eq_t": {
+      "kind": "scalar",
+      "value": 1.0
+    },
     "atan2_n": {
       "kind": "scalar",
       "value": 0.7853981633974483
     },
-    "eq_f": {
-      "kind": "scalar",
-      "value": 0.0
-    },
     "ite_t": {
       "kind": "scalar",
       "value": 7.0
+    },
+    "ite_f": {
+      "kind": "scalar",
+      "value": 2.0
     },
     "gt": {
       "kind": "scalar",
@@ -219,13 +223,9 @@
       "kind": "scalar",
       "value": 1.0
     },
-    "eq_t": {
+    "eq_f": {
       "kind": "scalar",
-      "value": 1.0
-    },
-    "ite_f": {
-      "kind": "scalar",
-      "value": 2.0
+      "value": 0.0
     }
   },
   "diagnostics": [],

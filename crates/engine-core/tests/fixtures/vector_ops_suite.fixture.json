@@ -107,14 +107,18 @@
     ]
   },
   "expected": {
-    "rev": {
+    "len": {
+      "kind": "scalar",
+      "value": 5.0
+    },
+    "sort": {
       "kind": "vector",
       "value": [
-        5.0,
         1.0,
+        1.0,
+        3.0,
         4.0,
-        1.0,
-        3.0
+        5.0
       ]
     },
     "max": {
@@ -129,23 +133,19 @@
       "kind": "scalar",
       "value": 2.8
     },
+    "rev": {
+      "kind": "vector",
+      "value": [
+        5.0,
+        1.0,
+        4.0,
+        1.0,
+        3.0
+      ]
+    },
     "min": {
       "kind": "scalar",
       "value": 1.0
-    },
-    "len": {
-      "kind": "scalar",
-      "value": 5.0
-    },
-    "sort": {
-      "kind": "vector",
-      "value": [
-        1.0,
-        1.0,
-        3.0,
-        4.0,
-        5.0
-      ]
     }
   },
   "diagnostics": [],

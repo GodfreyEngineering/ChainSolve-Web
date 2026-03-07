@@ -398,7 +398,7 @@ export function AiCopilotWindow({
     <div style={s.container}>
       {/* Mode selector */}
       <div style={s.row}>
-        <span style={s.label}>Mode</span>
+        <span style={s.label}>{t('ai.modeLabel')}</span>
         <select style={s.select} value={mode} onChange={(e) => setMode(e.target.value as AiMode)}>
           <option value="plan">{t('ai.modePlan')}</option>
           <option value="edit">{t('ai.modeEdit')}</option>

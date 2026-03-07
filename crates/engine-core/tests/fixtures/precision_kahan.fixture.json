@@ -1,0 +1,165 @@
+{
+  "name": "precision_kahan",
+  "description": "Phase 14: Kahan compensated summation — tests precision in reduction ops. stats.desc.sum(1e15, 1, -1e15) = 1.0 via Kahan. vectorSum([1e16, 1, -1e16]) = 0.0 (ULP at 1e16 = 2, beyond single-pass Kahan recovery).",
+  "contractVersion": 1,
+  "snapshot": {
+    "version": 1,
+    "nodes": [
+      {
+        "id": "vec1",
+        "blockType": "vectorInput",
+        "data": {
+          "vectorData": [
+            1e+16,
+            1.0,
+            -1e+16
+          ]
+        }
+      },
+      {
+        "id": "sum1",
+        "blockType": "vectorSum",
+        "data": {}
+      },
+      {
+        "id": "mean_node",
+        "blockType": "stats.desc.mean",
+        "data": {}
+      },
+      {
+        "id": "x1_src",
+        "blockType": "number",
+        "data": {
+          "value": 1000000000000000.0
+        }
+      },
+      {
+        "id": "x2_src",
+        "blockType": "number",
+        "data": {
+          "value": 1.0
+        }
+      },
+      {
+        "id": "x3_src",
+        "blockType": "number",
+        "data": {
+          "value": -1000000000000000.0
+        }
+      },
+      {
+        "id": "c3_src",
+        "blockType": "number",
+        "data": {
+          "value": 3.0
+        }
+      },
+      {
+        "id": "sum_node",
+        "blockType": "stats.desc.sum",
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "source": "vec1",
+        "sourceHandle": "out",
+        "target": "sum1",
+        "targetHandle": "vec"
+      },
+      {
+        "id": "e2",
+        "source": "x1_src",
+        "sourceHandle": "out",
+        "target": "mean_node",
+        "targetHandle": "x1"
+      },
+      {
+        "id": "e3",
+        "source": "x2_src",
+        "sourceHandle": "out",
+        "target": "mean_node",
+        "targetHandle": "x2"
+      },
+      {
+        "id": "e4",
+        "source": "x3_src",
+        "sourceHandle": "out",
+        "target": "mean_node",
+        "targetHandle": "x3"
+      },
+      {
+        "id": "e5",
+        "source": "x1_src",
+        "sourceHandle": "out",
+        "target": "sum_node",
+        "targetHandle": "x1"
+      },
+      {
+        "id": "e6",
+        "source": "x2_src",
+        "sourceHandle": "out",
+        "target": "sum_node",
+        "targetHandle": "x2"
+      },
+      {
+        "id": "e7",
+        "source": "x3_src",
+        "sourceHandle": "out",
+        "target": "sum_node",
+        "targetHandle": "x3"
+      },
+      {
+        "id": "e8",
+        "source": "c3_src",
+        "sourceHandle": "out",
+        "target": "mean_node",
+        "targetHandle": "c"
+      },
+      {
+        "id": "e9",
+        "source": "c3_src",
+        "sourceHandle": "out",
+        "target": "sum_node",
+        "targetHandle": "c"
+      }
+    ]
+  },
+  "expected": {
+    "sum_node": {
+      "kind": "scalar",
+      "value": 1.0
+    },
+    "x2_src": {
+      "kind": "scalar",
+      "value": 1.0
+    },
+    "x3_src": {
+      "kind": "scalar",
+      "value": -1000000000000000.0
+    },
+    "sum1": {
+      "kind": "scalar",
+      "value": 0.0
+    },
+    "x1_src": {
+      "kind": "scalar",
+      "value": 1000000000000000.0
+    },
+    "vec1": {
+      "kind": "vector",
+      "value": [
+        1e+16,
+        1.0,
+        -1e+16
+      ]
+    },
+    "mean_node": {
+      "kind": "scalar",
+      "value": 0.3333333333333333
+    }
+  },
+  "diagnostics": [],
+  "tolerance": null
+}

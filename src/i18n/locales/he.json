@@ -39,7 +39,8 @@
     "disabledByOrg": "עוזר ה-AI מושבת על ידי הארגון שלך.",
     "actionHistory": "היסטוריה",
     "expandPanel": "הרחב את לוח ה-AI",
-    "collapsePanel": "כווץ את לוח ה-AI"
+    "collapsePanel": "כווץ את לוח ה-AI",
+    "modeLabel": "מצב"
   },
   "mobileNav": {
     "menu": "תפריט",
@@ -565,6 +566,7 @@
     "keepMine": "Keep mine (overwrite)",
     "reload": "Reload from server",
     "emptyHint": "Right-click the canvas to insert a block, press / for quick insert, or open the block library.",
+    "mobileFabAdd": "הוסף בלוק",
     "findPlaceholder": "Search nodes…",
     "findHint": "↑↓ navigate · ↵ focus · ESC",
     "noMatches": "No blocks match",
@@ -598,7 +600,16 @@
     "materialSearchPlaceholder": "חיפוש חומרים...",
     "literalValue": "ערך מילולי",
     "savedGroupActions": "פעולות קבוצה שמורה",
-    "functionActions": "פעולות פונקציה"
+    "functionActions": "פעולות פונקציה",
+    "noCsvLoaded": "לא נטען CSV",
+    "inputValues": "ערכי קלט",
+    "traceLabel": "מעקב",
+    "useConnectedValue": "השתמש בערך מחובר",
+    "overrideWithManual": "דרוס עם ערך ידני",
+    "manualOverrideTooltip": "דריסה ידנית (מחובר למעלה)",
+    "manualValueTooltip": "ערך ידני",
+    "createCustomMaterial": "+ צור מותאם אישית...",
+    "createCustomMaterialPro": "+ צור מותאם אישית... (Pro)"
   },
   "sheets": {
     "title": "גיליונות",
@@ -638,6 +649,7 @@
     "collapse": "כיווץ",
     "saveAsGroup": "שמירה כתבנית…",
     "ungroup": "ביטול קיבוץ",
+    "autoResize": "שינוי גודל אוטומטי",
     "deleteGroup": "מחיקת קבוצה",
     "groupSelection": "קיבוץ בחירה",
     "alignLeft": "יישור שמאלה",
@@ -1283,7 +1295,8 @@
     "cancel": "ביטול",
     "confirm": "אישור",
     "search": "Search…",
-    "loading": "טוען..."
+    "loading": "טוען...",
+    "expand": "הרחב"
   },
   "blockLibrary": {
     "all": "הכל",
@@ -1307,7 +1320,8 @@
     "pin": "Pin to current node",
     "unpin": "Unpin selection",
     "pinned": "Pinned",
-    "followSelection": "Following selection"
+    "followSelection": "Following selection",
+    "inputsLabel": "קלטים"
   },
   "dock": {
     "library": "ספרייה",

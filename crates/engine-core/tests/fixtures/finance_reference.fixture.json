@@ -163,10 +163,6 @@
     ]
   },
   "expected": {
-    "cfv_err": {
-      "kind": "error",
-      "message": "Compound FV: n = 0"
-    },
     "rule72": {
       "kind": "scalar",
       "value": 12.0
@@ -174,6 +170,10 @@
     "simp_int": {
       "kind": "scalar",
       "value": 50.0
+    },
+    "cfv_err": {
+      "kind": "error",
+      "message": "Compound FV: n = 0"
     },
     "comp_fv": {
       "kind": "scalar",

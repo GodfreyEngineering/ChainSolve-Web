@@ -289,6 +289,7 @@
     "keepMine": "Mantieni la mia versione",
     "reload": "Ricarica dal server",
     "emptyHint": "Clic destro sulla tela per inserire un blocco, premi / per inserimento rapido, o apri la libreria dei blocchi.",
+    "mobileFabAdd": "Aggiungi blocco",
     "findPlaceholder": "Cerca nodi…",
     "findHint": "↑↓ naviga · ↵ metti a fuoco · ESC",
     "noMatches": "Nessun blocco trovato",
@@ -331,7 +332,16 @@
     "materialSearchPlaceholder": "Cerca materiali...",
     "literalValue": "Valore letterale",
     "savedGroupActions": "Azioni gruppo salvato",
-    "functionActions": "Azioni funzione"
+    "functionActions": "Azioni funzione",
+    "noCsvLoaded": "Nessun CSV caricato",
+    "inputValues": "Valori di ingresso",
+    "traceLabel": "Traccia",
+    "useConnectedValue": "Usa valore collegato",
+    "overrideWithManual": "Sostituisci con valore manuale",
+    "manualOverrideTooltip": "Override manuale (collegato a monte)",
+    "manualValueTooltip": "Valore manuale",
+    "createCustomMaterial": "+ Crea personalizzato...",
+    "createCustomMaterialPro": "+ Crea personalizzato... (Pro)"
   },
   "blocks": {
     "categoryData": "Dati",
@@ -599,7 +609,8 @@
     "copy": "Copia",
     "copyJson": "Copia JSON",
     "jump": "Vai al nodo",
-    "edit": "Modifica"
+    "edit": "Modifica",
+    "expand": "Espandi"
   },
   "entitlements": {
     "projectLimitTitle": "Limite progetti raggiunto",
@@ -907,7 +918,8 @@
     "pinned": "Fissato",
     "followSelection": "Segue la selezione",
     "empty": "Clicca su un blocco per ispezionarlo",
-    "emptyHint": "Oppure clicca destro sul canvas per inserirne uno."
+    "emptyHint": "Oppure clicca destro sul canvas per inserirne uno.",
+    "inputsLabel": "Ingressi"
   },
   "annotation": {
     "text": "Testo",
@@ -1401,7 +1413,8 @@
     "disabledByOrg": "Il Copilota IA è disabilitato dalla tua organizzazione.",
     "actionHistory": "Cronologia",
     "expandPanel": "Espandi pannello IA",
-    "collapsePanel": "Comprimi pannello IA"
+    "collapsePanel": "Comprimi pannello IA",
+    "modeLabel": "Modalità"
   },
   "terms": {
     "title": "Termini e Condizioni",
@@ -1425,6 +1438,7 @@
     "collapse": "Comprimi",
     "saveAsGroup": "Salva come gruppo…",
     "ungroup": "Separa gruppo",
+    "autoResize": "Ridimensiona automaticamente",
     "deleteGroup": "Elimina gruppo",
     "groupSelection": "Raggruppa selezione",
     "alignLeft": "Allinea a sinistra",

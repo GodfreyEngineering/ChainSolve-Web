@@ -44,25 +44,13 @@
     "edges": []
   },
   "expected": {
-    "tau": {
-      "kind": "scalar",
-      "value": 6.283185307179586
-    },
-    "pi": {
-      "kind": "scalar",
-      "value": 3.141592653589793
-    },
     "ln10": {
       "kind": "scalar",
       "value": 2.302585092994046
     },
-    "phi": {
+    "pi": {
       "kind": "scalar",
-      "value": 1.618033988749895
-    },
-    "euler": {
-      "kind": "scalar",
-      "value": 2.718281828459045
+      "value": 3.141592653589793
     },
     "sqrt2": {
       "kind": "scalar",
@@ -71,6 +59,18 @@
     "ln2": {
       "kind": "scalar",
       "value": 0.6931471805599453
+    },
+    "phi": {
+      "kind": "scalar",
+      "value": 1.618033988749895
+    },
+    "tau": {
+      "kind": "scalar",
+      "value": 6.283185307179586
+    },
+    "euler": {
+      "kind": "scalar",
+      "value": 2.718281828459045
     }
   },
   "diagnostics": [],

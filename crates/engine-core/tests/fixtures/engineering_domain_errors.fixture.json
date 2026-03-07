@@ -184,6 +184,14 @@
     ]
   },
   "expected": {
+    "annulus_err": {
+      "kind": "error",
+      "message": "Annulus: d_inner > d_outer"
+    },
+    "reynolds_err": {
+      "kind": "error",
+      "message": "Reynolds: μ = 0"
+    },
     "power_err": {
       "kind": "error",
       "message": "Power: t = 0"
@@ -191,14 +199,6 @@
     "bending_err": {
       "kind": "error",
       "message": "Bending stress: I = 0"
-    },
-    "reynolds_err": {
-      "kind": "error",
-      "message": "Reynolds: μ = 0"
-    },
-    "annulus_err": {
-      "kind": "error",
-      "message": "Annulus: d_inner > d_outer"
     }
   },
   "diagnostics": [],

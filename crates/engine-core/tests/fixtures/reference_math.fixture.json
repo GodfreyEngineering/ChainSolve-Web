@@ -105,9 +105,9 @@
     ]
   },
   "expected": {
-    "fl": {
+    "sqrt2": {
       "kind": "scalar",
-      "value": 3.0
+      "value": 1.4142135623730951
     },
     "abs7": {
       "kind": "scalar",
@@ -117,13 +117,13 @@
       "kind": "scalar",
       "value": 4.0
     },
-    "sqrt2": {
-      "kind": "scalar",
-      "value": 1.4142135623730951
-    },
     "rn": {
       "kind": "scalar",
       "value": 4.0
+    },
+    "fl": {
+      "kind": "scalar",
+      "value": 3.0
     }
   },
   "diagnostics": [],

@@ -233,21 +233,21 @@
     ]
   },
   "expected": {
-    "mean_n": {
-      "kind": "scalar",
-      "value": 20.0
-    },
     "slope_n": {
       "kind": "scalar",
       "value": 2.0
+    },
+    "std_n": {
+      "kind": "scalar",
+      "value": 8.16496580927726
     },
     "icpt_n": {
       "kind": "scalar",
       "value": 0.0
     },
-    "std_n": {
+    "mean_n": {
       "kind": "scalar",
-      "value": 8.16496580927726
+      "value": 20.0
     }
   },
   "diagnostics": [],
