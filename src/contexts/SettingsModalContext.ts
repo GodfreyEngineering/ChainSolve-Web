@@ -11,6 +11,7 @@ export type AppTab =
   | 'formatting'
   | 'export'
   | 'shortcuts'
+  | 'organization'
   | 'developer'
 
 /** Union kept for backward compatibility with openSettings(tab). */

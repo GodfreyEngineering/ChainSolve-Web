@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getSession } from '../lib/auth'
 import { getProfile } from '../lib/profilesService'
+import { listMyOrgs } from '../lib/orgsService'
 import { resolveEffectivePlan, isDeveloper } from '../lib/entitlements'
 import { useSettingsModal } from '../contexts/SettingsModalContext'
 import type { AccountTab, AppTab } from '../contexts/SettingsModalContext'
@@ -36,13 +37,14 @@ const ACCOUNT_TABS: { key: AccountTab; icon: string }[] = [
   { key: 'security', icon: '\u2616' },
 ]
 
-const APP_TABS_BASE: { key: AppTab; icon: string; devOnly?: boolean }[] = [
+const APP_TABS_BASE: { key: AppTab; icon: string; devOnly?: boolean; orgOnly?: boolean }[] = [
   { key: 'general', icon: '\u2699' },
   { key: 'appearance', icon: '\u25D1' },
   { key: 'editor', icon: '\u25A6' },
   { key: 'formatting', icon: '#' },
   { key: 'export', icon: '\u21E9' },
   { key: 'shortcuts', icon: '\u2328' },
+  { key: 'organization', icon: '\u{1F3E2}', orgOnly: true },
   { key: 'developer', icon: '\u{1F6E0}', devOnly: true },
 ]
 
@@ -72,6 +74,7 @@ export function SettingsModal({ kind }: Props) {
   // ── Data loading ───────────────────────────────────────────────────────
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [hasOrg, setHasOrg] = useState(false)
 
   useEffect(() => {
     if (!isOpen) return
@@ -81,14 +84,21 @@ export function SettingsModal({ kind }: Props) {
       getProfile(session.user.id).then((data) => {
         if (data) setProfile(data)
       })
+      listMyOrgs()
+        .then((orgs) => setHasOrg(orgs.length > 0))
+        .catch(() => setHasOrg(false))
     })
   }, [isOpen])
 
-  // V3-3.2: Filter app tabs — show developer tab only for developers
+  // V3-3.2/3.3: Filter app tabs — conditionally show developer + organization
   const appTabs = useMemo(() => {
     const showDev = isDeveloper(profile)
-    return APP_TABS_BASE.filter((tab) => !tab.devOnly || showDev)
-  }, [profile])
+    return APP_TABS_BASE.filter((tab) => {
+      if (tab.devOnly && !showDev) return false
+      if (tab.orgOnly && !hasOrg) return false
+      return true
+    })
+  }, [profile, hasOrg])
 
   // ── Account Settings window ─────────────────────────────────────────────
   if (kind === 'account') {

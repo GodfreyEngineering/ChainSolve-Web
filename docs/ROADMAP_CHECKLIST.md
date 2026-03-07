@@ -888,15 +888,15 @@ Claude MUST:
 
 ## V3-3 — Settings Mega-Expansion
 
-- [ ] V3-3.1: Settings Architecture + New Categories
+- [x] V3-3.1: Settings Architecture + New Categories
   - General, Appearance, Editor, Formatting, Export, Keyboard Shortcuts
   - Each category as own component under `src/pages/settings/`
 
-- [ ] V3-3.2: Developer Settings + Plan Switcher
+- [x] V3-3.2: Developer Settings + Plan Switcher
   - Visible when `is_developer === true`
   - Plan override dropdown, engine debug toggle, feature flags viewer, performance settings
 
-- [ ] V3-3.3: Organization + Admin Settings
+- [x] V3-3.3: Organization + Admin Settings
   - Org tab for members; owner/admin can edit org policies
   - Member management with invite link and role badges
 

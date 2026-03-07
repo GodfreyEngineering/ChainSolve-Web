@@ -22,6 +22,7 @@ import { FormattingSettings } from './FormattingSettings'
 import { ExportSettings } from './ExportSettings'
 import { KeyboardShortcutsSettings } from './KeyboardShortcutsSettings'
 import { DeveloperSettings } from './DeveloperSettings'
+import { OrgSettings } from './OrgSettings'
 import type { Profile } from '../../lib/profilesService'
 
 const LazyThemeWizard = lazy(() =>
@@ -320,6 +321,18 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
 
       {/* Keyboard Shortcuts */}
       {tab === 'shortcuts' && <KeyboardShortcutsSettings cardStyle={cardStyle} />}
+
+      {/* Organization */}
+      {tab === 'organization' && (
+        <OrgSettings
+          cardStyle={cardStyle}
+          subheadingStyle={subheadingStyle}
+          checkRowStyle={checkRowStyle}
+          checkboxStyle={checkboxStyle}
+          checkLabelStyle={checkLabelStyle}
+          checkHintStyle={checkHintStyle}
+        />
+      )}
 
       {/* Developer (visible only for developer profiles) */}
       {tab === 'developer' && (
