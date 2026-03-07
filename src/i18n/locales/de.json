@@ -1898,7 +1898,10 @@
   "explorePage": {
     "heroTitle": "Entdecken",
     "heroSub": "Durchsuchen Sie Vorlagen, Block-Pakete, Themes und Gruppen der Community.",
-    "loading": "Laden..."
+    "loading": "Laden...",
+    "collMostPopular": "Am beliebtesten",
+    "collNewThisWeek": "Neu diese Woche",
+    "collMostLiked": "Meistgeliked"
   },
   "reauth": {
     "title": "Passwort bestaetigen",

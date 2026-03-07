@@ -14,6 +14,7 @@ import { Search } from 'lucide-react'
 import { ExploreCard } from '../components/explore/ExploreCard'
 import {
   listPublishedItems,
+  getAutoCollections,
   type MarketplaceItem,
   type MarketplaceCategory,
   type ExploreSortKey,
@@ -49,6 +50,16 @@ export function ExplorePage() {
   const [query, setQuery] = useState(initialQuery)
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
   const [fetchSeq, setFetchSeq] = useState(0)
+  const [collections, setCollections] = useState<
+    Array<{ name: string; labelKey: string; items: MarketplaceItem[] }>
+  >([])
+
+  // Load auto-collections once
+  useEffect(() => {
+    getAutoCollections()
+      .then(setCollections)
+      .catch((err) => console.error('[explore-collections]', err))
+  }, [])
 
   // Debounce search input
   useEffect(() => {
@@ -113,6 +124,24 @@ export function ExplorePage() {
         <h1 style={heroTitle}>{t('explorePage.heroTitle')}</h1>
         <p style={heroSub}>{t('explorePage.heroSub')}</p>
       </div>
+
+      {/* Featured collections (V3-7.2) */}
+      {collections.length > 0 && (
+        <div style={collectionsWrap}>
+          {collections.map((coll) => (
+            <section key={coll.labelKey} style={collSection}>
+              <h2 style={collTitle}>{t(coll.labelKey)}</h2>
+              <div style={collScroll}>
+                {coll.items.map((item) => (
+                  <div key={item.id} style={collCard}>
+                    <ExploreCard item={item} onClick={() => handleItemClick(item.id)} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
 
       {/* Category nav */}
       <nav style={catNav}>
@@ -279,4 +308,31 @@ const emptyState: React.CSSProperties = {
   padding: '4rem 2rem',
   color: 'var(--text-muted)',
   fontSize: '0.95rem',
+}
+
+const collectionsWrap: React.CSSProperties = {
+  padding: '1rem 2rem 0',
+}
+
+const collSection: React.CSSProperties = {
+  marginBottom: '1.5rem',
+}
+
+const collTitle: React.CSSProperties = {
+  fontSize: '1.1rem',
+  fontWeight: 700,
+  margin: '0 0 0.6rem',
+}
+
+const collScroll: React.CSSProperties = {
+  display: 'flex',
+  gap: 14,
+  overflowX: 'auto',
+  paddingBottom: 8,
+}
+
+const collCard: React.CSSProperties = {
+  minWidth: 220,
+  maxWidth: 260,
+  flexShrink: 0,
 }

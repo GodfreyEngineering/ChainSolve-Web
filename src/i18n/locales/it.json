@@ -1898,7 +1898,10 @@
   "explorePage": {
     "heroTitle": "Esplora",
     "heroSub": "Sfoglia modelli, pacchetti di blocchi, temi e gruppi condivisi dalla comunità.",
-    "loading": "Caricamento..."
+    "loading": "Caricamento...",
+    "collMostPopular": "Più popolari",
+    "collNewThisWeek": "Novità della settimana",
+    "collMostLiked": "Più apprezzati"
   },
   "reauth": {
     "title": "Conferma la tua password",

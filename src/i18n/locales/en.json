@@ -1924,7 +1924,10 @@
   "explorePage": {
     "heroTitle": "Explore",
     "heroSub": "Browse templates, block packs, themes, and groups shared by the community.",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "collMostPopular": "Most Popular",
+    "collNewThisWeek": "New This Week",
+    "collMostLiked": "Most Liked"
   },
   "panels": {
     "view": "View",

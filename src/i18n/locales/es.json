@@ -1898,7 +1898,10 @@
   "explorePage": {
     "heroTitle": "Explorar",
     "heroSub": "Explore plantillas, paquetes de bloques, temas y grupos compartidos por la comunidad.",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "collMostPopular": "Más populares",
+    "collNewThisWeek": "Nuevos esta semana",
+    "collMostLiked": "Más gustados"
   },
   "reauth": {
     "title": "Confirme su contrasena",

@@ -1898,7 +1898,10 @@
   "explorePage": {
     "heroTitle": "Explorer",
     "heroSub": "Parcourez les modèles, packs de blocs, thèmes et groupes partagés par la communauté.",
-    "loading": "Chargement..."
+    "loading": "Chargement...",
+    "collMostPopular": "Les plus populaires",
+    "collNewThisWeek": "Nouveautés de la semaine",
+    "collMostLiked": "Les plus aimés"
   },
   "reauth": {
     "title": "Confirmez votre mot de passe",

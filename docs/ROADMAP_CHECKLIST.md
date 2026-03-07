@@ -940,7 +940,7 @@ Claude MUST:
 - [x] V3-7.1: Explore Page Layout
   - Dedicated `/explore` route with hero banner, category nav, responsive card grid
 
-- [ ] V3-7.2: Collections + Featured Sections
+- [x] V3-7.2: Collections + Featured Sections
   - `marketplace_collections` table, hero carousel, auto-generated collections
 
 - [ ] V3-7.3: Item Detail Page + Screenshots

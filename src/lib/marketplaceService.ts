@@ -21,6 +21,19 @@ import { ENGINE_CONTRACT_VERSION } from './engineContractVersion'
 
 export type MarketplaceCategory = 'template' | 'block_pack' | 'theme' | 'group' | 'custom_block'
 
+/** V3-7.2: Curated collection of marketplace items. */
+export interface MarketplaceCollection {
+  id: string
+  name: string
+  description: string | null
+  cover_image_url: string | null
+  item_ids: string[]
+  position: number
+  is_featured: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface MarketplaceItem {
   id: string
   author_id: string
@@ -737,4 +750,61 @@ export async function reportItem(itemId: string, reason: string): Promise<void> 
   })
 
   if (error) throw new ServiceError('DB_ERROR', error.message, true)
+}
+
+// ── Collections (V3-7.2) ─────────────────────────────────────────────────────
+
+/** List all marketplace collections, ordered by position. */
+export async function listCollections(): Promise<MarketplaceCollection[]> {
+  const { data, error } = await supabase
+    .from('marketplace_collections')
+    .select('*')
+    .order('position', { ascending: true })
+
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  return (data ?? []) as MarketplaceCollection[]
+}
+
+/** Get a single collection by ID. */
+export async function getCollection(collectionId: string): Promise<MarketplaceCollection | null> {
+  const { data, error } = await supabase
+    .from('marketplace_collections')
+    .select('*')
+    .eq('id', collectionId)
+    .maybeSingle()
+
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  return data as MarketplaceCollection | null
+}
+
+/** List featured collections (is_featured = true). */
+export async function listFeaturedCollections(): Promise<MarketplaceCollection[]> {
+  const { data, error } = await supabase
+    .from('marketplace_collections')
+    .select('*')
+    .eq('is_featured', true)
+    .order('position', { ascending: true })
+
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  return (data ?? []) as MarketplaceCollection[]
+}
+
+/**
+ * Auto-generated collections based on marketplace_items data.
+ * These don't require the marketplace_collections table — computed client-side.
+ */
+export async function getAutoCollections(): Promise<
+  Array<{ name: string; labelKey: string; items: MarketplaceItem[] }>
+> {
+  const [popular, newest, liked] = await Promise.all([
+    listPublishedItems(undefined, undefined, 'downloads'),
+    listPublishedItems(undefined, undefined, 'newest'),
+    listPublishedItems(undefined, undefined, 'likes'),
+  ])
+
+  return [
+    { name: 'Most Popular', labelKey: 'explorePage.collMostPopular', items: popular.slice(0, 8) },
+    { name: 'New This Week', labelKey: 'explorePage.collNewThisWeek', items: newest.slice(0, 8) },
+    { name: 'Most Liked', labelKey: 'explorePage.collMostLiked', items: liked.slice(0, 8) },
+  ]
 }
