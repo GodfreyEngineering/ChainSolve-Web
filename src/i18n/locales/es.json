@@ -1883,7 +1883,22 @@
     "notFound": "Elemento no encontrado",
     "useTemplate": "Usar plantilla",
     "install": "Instalar",
-    "installing": "Instalando..."
+    "installing": "Instalando...",
+    "catAll": "Todos",
+    "catTemplate": "Plantillas",
+    "catBlockPack": "Paquetes de bloques",
+    "catTheme": "Temas",
+    "catGroup": "Grupos",
+    "category_template": "Plantilla",
+    "category_block_pack": "Paquete de bloques",
+    "category_theme": "Tema",
+    "category_group": "Grupo",
+    "category_custom_block": "Bloque personalizado"
+  },
+  "explorePage": {
+    "heroTitle": "Explorar",
+    "heroSub": "Explore plantillas, paquetes de bloques, temas y grupos compartidos por la comunidad.",
+    "loading": "Cargando..."
   },
   "reauth": {
     "title": "Confirme su contrasena",

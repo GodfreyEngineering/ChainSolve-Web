@@ -23,6 +23,11 @@ const DocsPage = lazy(() => import('./pages/DocsPage'))
 const OrgsPage = lazy(() => import('./pages/OrgsPage'))
 const AuditLogPage = lazy(() => import('./pages/AuditLogPage'))
 
+// Lazy-load explore page (V3-7.1)
+const ExplorePage = lazy(() =>
+  import('./pages/ExplorePage').then((m) => ({ default: m.ExplorePage })),
+)
+
 function BillingSuccess() {
   return (
     <div
@@ -229,8 +234,22 @@ export default function App() {
       {/* Legacy redirects */}
       <Route path="/canvas" element={<ScratchRedirect />} />
       <Route path="/canvas/:projectId" element={<CanvasRedirect />} />
-      <Route path="/explore" element={<ExploreRedirect />} />
-      <Route path="/explore/*" element={<ExploreRedirect />} />
+      <Route
+        path="/explore"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
+            <ExplorePage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/explore/:itemId"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
+            <ExplorePage />
+          </Suspense>
+        }
+      />
       <Route path="/marketplace" element={<ExploreRedirect />} />
       <Route path="/marketplace/*" element={<ExploreRedirect />} />
       {/* Catch-all 404 */}

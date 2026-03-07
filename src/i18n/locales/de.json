@@ -1883,7 +1883,22 @@
     "notFound": "Element nicht gefunden",
     "useTemplate": "Vorlage verwenden",
     "install": "Installieren",
-    "installing": "Wird installiert..."
+    "installing": "Wird installiert...",
+    "catAll": "Alle",
+    "catTemplate": "Vorlagen",
+    "catBlockPack": "Block-Pakete",
+    "catTheme": "Themes",
+    "catGroup": "Gruppen",
+    "category_template": "Vorlage",
+    "category_block_pack": "Block-Paket",
+    "category_theme": "Theme",
+    "category_group": "Gruppe",
+    "category_custom_block": "Benutzerdefinierter Block"
+  },
+  "explorePage": {
+    "heroTitle": "Entdecken",
+    "heroSub": "Durchsuchen Sie Vorlagen, Block-Pakete, Themes und Gruppen der Community.",
+    "loading": "Laden..."
   },
   "reauth": {
     "title": "Passwort bestaetigen",

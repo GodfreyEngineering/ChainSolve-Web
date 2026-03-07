@@ -1909,7 +1909,22 @@
     "notFound": "Item not found",
     "useTemplate": "Use Template",
     "install": "Install",
-    "installing": "Installing..."
+    "installing": "Installing...",
+    "catAll": "All",
+    "catTemplate": "Templates",
+    "catBlockPack": "Block Packs",
+    "catTheme": "Themes",
+    "catGroup": "Groups",
+    "category_template": "Template",
+    "category_block_pack": "Block Pack",
+    "category_theme": "Theme",
+    "category_group": "Group",
+    "category_custom_block": "Custom Block"
+  },
+  "explorePage": {
+    "heroTitle": "Explore",
+    "heroSub": "Browse templates, block packs, themes, and groups shared by the community.",
+    "loading": "Loading..."
   },
   "panels": {
     "view": "View",

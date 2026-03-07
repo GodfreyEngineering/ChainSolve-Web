@@ -937,7 +937,7 @@ Claude MUST:
 
 ## V3-7 — Explore Page: MakerWorld Quality
 
-- [ ] V3-7.1: Explore Page Layout
+- [x] V3-7.1: Explore Page Layout
   - Dedicated `/explore` route with hero banner, category nav, responsive card grid
 
 - [ ] V3-7.2: Collections + Featured Sections

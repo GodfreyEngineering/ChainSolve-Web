@@ -1883,7 +1883,22 @@
     "notFound": "Elemento non trovato",
     "useTemplate": "Usa modello",
     "install": "Installa",
-    "installing": "Installazione..."
+    "installing": "Installazione...",
+    "catAll": "Tutti",
+    "catTemplate": "Modelli",
+    "catBlockPack": "Pacchetti di blocchi",
+    "catTheme": "Temi",
+    "catGroup": "Gruppi",
+    "category_template": "Modello",
+    "category_block_pack": "Pacchetto di blocchi",
+    "category_theme": "Tema",
+    "category_group": "Gruppo",
+    "category_custom_block": "Blocco personalizzato"
+  },
+  "explorePage": {
+    "heroTitle": "Esplora",
+    "heroSub": "Sfoglia modelli, pacchetti di blocchi, temi e gruppi condivisi dalla comunità.",
+    "loading": "Caricamento..."
   },
   "reauth": {
     "title": "Conferma la tua password",
