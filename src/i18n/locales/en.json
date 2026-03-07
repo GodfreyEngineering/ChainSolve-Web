@@ -987,7 +987,13 @@
     "alignRight": "Align right",
     "width": "Width",
     "height": "Height",
-    "zOrder": "Layer order"
+    "zOrder": "Layer order",
+    "borderWidth": "Border width",
+    "fillColor": "Fill colour",
+    "arrowThickness": "Thickness",
+    "arrowDash": "Line style",
+    "arrowStartMarker": "Start marker",
+    "arrowEndMarker": "End marker"
   },
   "blockLibrary": {
     "dragHint": "Drag onto canvas",
@@ -1538,7 +1544,12 @@
     "bringToFront": "Bring to front",
     "sendToBack": "Send to back",
     "bringForward": "Bring forward",
-    "sendBackward": "Send backward"
+    "sendBackward": "Send backward",
+    "insertShape": "Insert shape",
+    "annotRectangle": "Rectangle",
+    "annotEllipse": "Ellipse",
+    "annotDiamond": "Diamond",
+    "annotRoundedRect": "Rounded rectangle"
   },
   "errorBoundary": {
     "title": "Something went wrong",

@@ -969,7 +969,13 @@
     "alignRight": "Rechts ausrichten",
     "width": "Breite",
     "height": "Hoehe",
-    "zOrder": "Ebenenreihenfolge"
+    "zOrder": "Ebenenreihenfolge",
+    "borderWidth": "Rahmenbreite",
+    "fillColor": "Fuellfarbe",
+    "arrowThickness": "Staerke",
+    "arrowDash": "Linienstil",
+    "arrowStartMarker": "Anfangsmarkierung",
+    "arrowEndMarker": "Endmarkierung"
   },
   "blockLibrary": {
     "dragHint": "Auf die Leinwand ziehen",
@@ -1520,7 +1526,12 @@
     "bringToFront": "In den Vordergrund",
     "sendToBack": "In den Hintergrund",
     "bringForward": "Eine Ebene nach vorne",
-    "sendBackward": "Eine Ebene nach hinten"
+    "sendBackward": "Eine Ebene nach hinten",
+    "insertShape": "Form einfuegen",
+    "annotRectangle": "Rechteck",
+    "annotEllipse": "Ellipse",
+    "annotDiamond": "Raute",
+    "annotRoundedRect": "Abgerundetes Rechteck"
   },
   "errorBoundary": {
     "title": "Etwas ist schiefgelaufen",

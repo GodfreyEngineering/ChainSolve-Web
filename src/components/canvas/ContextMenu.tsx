@@ -644,6 +644,40 @@ export function ContextMenu({
                     onClose()
                   }}
                 />
+                <div style={sep} />
+                <SubLabel label={t('contextMenu.insertShape')} />
+                <MenuItem
+                  icon="▭"
+                  label={t('contextMenu.annotRectangle')}
+                  onClick={() => {
+                    onInsertAnnotation(target.x, target.y, 'annotation_rectangle')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="⬭"
+                  label={t('contextMenu.annotEllipse')}
+                  onClick={() => {
+                    onInsertAnnotation(target.x, target.y, 'annotation_ellipse')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="◇"
+                  label={t('contextMenu.annotDiamond')}
+                  onClick={() => {
+                    onInsertAnnotation(target.x, target.y, 'annotation_diamond')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="▢"
+                  label={t('contextMenu.annotRoundedRect')}
+                  onClick={() => {
+                    onInsertAnnotation(target.x, target.y, 'annotation_rounded_rectangle')
+                    onClose()
+                  }}
+                />
               </>
             )}
             {onPaste && (

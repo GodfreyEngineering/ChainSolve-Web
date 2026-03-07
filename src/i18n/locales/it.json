@@ -969,7 +969,13 @@
     "alignRight": "Allinea a destra",
     "width": "Larghezza",
     "height": "Altezza",
-    "zOrder": "Ordine livelli"
+    "zOrder": "Ordine livelli",
+    "borderWidth": "Larghezza bordo",
+    "fillColor": "Colore di riempimento",
+    "arrowThickness": "Spessore",
+    "arrowDash": "Stile linea",
+    "arrowStartMarker": "Marcatore inizio",
+    "arrowEndMarker": "Marcatore fine"
   },
   "blockLibrary": {
     "dragHint": "Trascina sulla tela",
@@ -1520,7 +1526,12 @@
     "bringToFront": "Porta in primo piano",
     "sendToBack": "Porta in secondo piano",
     "bringForward": "Porta avanti",
-    "sendBackward": "Porta indietro"
+    "sendBackward": "Porta indietro",
+    "insertShape": "Inserisci forma",
+    "annotRectangle": "Rettangolo",
+    "annotEllipse": "Ellisse",
+    "annotDiamond": "Rombo",
+    "annotRoundedRect": "Rettangolo arrotondato"
   },
   "errorBoundary": {
     "title": "Qualcosa è andato storto",

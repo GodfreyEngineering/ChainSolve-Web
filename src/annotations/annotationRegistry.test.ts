@@ -6,8 +6,8 @@ import { describe, it, expect } from 'vitest'
 import { ANNOTATION_REGISTRY } from './annotationRegistry'
 
 describe('ANNOTATION_REGISTRY', () => {
-  it('has 5 entries', () => {
-    expect(ANNOTATION_REGISTRY.size).toBe(5)
+  it('has 9 entries', () => {
+    expect(ANNOTATION_REGISTRY.size).toBe(9)
   })
 
   it('every entry has a blockType starting with annotation_', () => {

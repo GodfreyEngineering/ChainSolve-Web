@@ -917,7 +917,7 @@ Claude MUST:
   - 8-point resize handles via ReactFlow NodeResizer
   - Z-ordering with Bring to Front / Send to Back context menu
 
-- [ ] V3-5.2: New Shape Types + Arrow Improvements
+- [x] V3-5.2: New Shape Types + Arrow Improvements
   - Shapes: rectangle, ellipse, diamond, rounded_rectangle
   - Arrow: configurable markers, thickness, dash patterns
 

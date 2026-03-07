@@ -36,7 +36,19 @@ export function AnnotationInspector({ data, onUpdate, onZOrder }: Props) {
   const isResizable =
     data.annotationType === 'highlight' ||
     data.annotationType === 'callout' ||
-    data.annotationType === 'text'
+    data.annotationType === 'text' ||
+    data.annotationType === 'rectangle' ||
+    data.annotationType === 'ellipse' ||
+    data.annotationType === 'diamond' ||
+    data.annotationType === 'rounded_rectangle'
+
+  const isShape =
+    data.annotationType === 'rectangle' ||
+    data.annotationType === 'ellipse' ||
+    data.annotationType === 'diamond' ||
+    data.annotationType === 'rounded_rectangle'
+
+  const isArrow = data.annotationType === 'arrow'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
@@ -180,6 +192,133 @@ export function AnnotationInspector({ data, onUpdate, onZOrder }: Props) {
             />
           </Field>
         </div>
+      )}
+
+      {/* Shape properties (V3-5.2) */}
+      {isShape && (
+        <>
+          <Field label={t('annotation.borderWidth')}>
+            <input
+              type="number"
+              style={numInputStyle}
+              min={0}
+              max={12}
+              step={1}
+              value={data.annotationBorderWidth ?? 2}
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10)
+                if (!isNaN(v) && v >= 0 && v <= 12) onUpdate({ annotationBorderWidth: v })
+              }}
+            />
+          </Field>
+          <Field label={t('annotation.fillColor')}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <input
+                type="color"
+                style={colorInputStyle}
+                value={
+                  data.annotationFillColor?.startsWith('#')
+                    ? data.annotationFillColor
+                    : (data.annotationColor ?? '#60a5fa')
+                }
+                onChange={(e) => onUpdate({ annotationFillColor: e.target.value + '20' })}
+              />
+              <input
+                type="text"
+                style={{ ...numInputStyle, width: 100 }}
+                value={data.annotationFillColor ?? ''}
+                onChange={(e) => onUpdate({ annotationFillColor: e.target.value })}
+                placeholder="rgba(…)"
+              />
+            </div>
+          </Field>
+        </>
+      )}
+
+      {/* Arrow properties (V3-5.2) */}
+      {isArrow && (
+        <>
+          <Field label={t('annotation.arrowThickness')}>
+            <input
+              type="number"
+              style={numInputStyle}
+              min={1}
+              max={12}
+              step={1}
+              value={data.annotationArrowThickness ?? 3}
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10)
+                if (!isNaN(v) && v >= 1 && v <= 12) onUpdate({ annotationArrowThickness: v })
+              }}
+            />
+          </Field>
+          <Field label={t('annotation.arrowDash')}>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {(['solid', 'dashed', 'dotted'] as const).map((d) => (
+                <button
+                  key={d}
+                  style={{
+                    ...toggleStyle,
+                    background:
+                      (data.annotationArrowDash ?? 'solid') === d
+                        ? 'var(--primary)'
+                        : 'var(--surface-hover)',
+                    fontSize: '0.65rem',
+                    width: 'auto',
+                    padding: '0 6px',
+                  }}
+                  onClick={() => onUpdate({ annotationArrowDash: d })}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </Field>
+          <Field label={t('annotation.arrowStartMarker')}>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {(['none', 'arrowhead', 'dot', 'square'] as const).map((m) => (
+                <button
+                  key={m}
+                  style={{
+                    ...toggleStyle,
+                    background:
+                      (data.annotationArrowStart ?? 'none') === m
+                        ? 'var(--primary)'
+                        : 'var(--surface-hover)',
+                    fontSize: '0.6rem',
+                    width: 'auto',
+                    padding: '0 5px',
+                  }}
+                  onClick={() => onUpdate({ annotationArrowStart: m })}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          </Field>
+          <Field label={t('annotation.arrowEndMarker')}>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {(['none', 'arrowhead', 'dot', 'square'] as const).map((m) => (
+                <button
+                  key={m}
+                  style={{
+                    ...toggleStyle,
+                    background:
+                      (data.annotationArrowEnd ?? 'arrowhead') === m
+                        ? 'var(--primary)'
+                        : 'var(--surface-hover)',
+                    fontSize: '0.6rem',
+                    width: 'auto',
+                    padding: '0 5px',
+                  }}
+                  onClick={() => onUpdate({ annotationArrowEnd: m })}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          </Field>
+        </>
       )}
 
       {/* Z-order */}

@@ -969,7 +969,13 @@
     "alignRight": "Aligner a droite",
     "width": "Largeur",
     "height": "Hauteur",
-    "zOrder": "Ordre des calques"
+    "zOrder": "Ordre des calques",
+    "borderWidth": "Epaisseur du bord",
+    "fillColor": "Couleur de remplissage",
+    "arrowThickness": "Epaisseur",
+    "arrowDash": "Style de ligne",
+    "arrowStartMarker": "Marqueur de debut",
+    "arrowEndMarker": "Marqueur de fin"
   },
   "blockLibrary": {
     "dragHint": "Glisser sur le canevas",
@@ -1520,7 +1526,12 @@
     "bringToFront": "Mettre au premier plan",
     "sendToBack": "Mettre en arriere-plan",
     "bringForward": "Avancer d'un plan",
-    "sendBackward": "Reculer d'un plan"
+    "sendBackward": "Reculer d'un plan",
+    "insertShape": "Inserer une forme",
+    "annotRectangle": "Rectangle",
+    "annotEllipse": "Ellipse",
+    "annotDiamond": "Losange",
+    "annotRoundedRect": "Rectangle arrondi"
   },
   "errorBoundary": {
     "title": "Quelque chose s'est mal passé",

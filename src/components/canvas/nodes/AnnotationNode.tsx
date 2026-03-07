@@ -1,18 +1,16 @@
 /**
- * AnnotationNode -- V3-5.1 non-evaluating visual annotations on the canvas.
+ * AnnotationNode -- V3-5.2 non-evaluating visual annotations on the canvas.
  *
- * Supports five annotation types via `data.annotationType`:
+ * Supports annotation types via `data.annotationType`:
  *   - text: simple text label
  *   - callout: bordered box with text (like a sticky note)
  *   - highlight: colored translucent region
- *   - arrow: directional arrow indicator
+ *   - arrow: directional arrow indicator (configurable markers/dash/thickness)
  *   - leader: text label with a source handle for connecting to blocks
- *
- * V3-5.1 enhancements:
- *   - 8-point resize handles via ReactFlow `NodeResizer`
- *   - Width/height stored in NodeData (annotationWidth/annotationHeight)
- *   - Z-ordering via annotationZIndex (rendered via zIndex on the wrapper)
- *   - Text alignment support (left/center/right)
+ *   - rectangle: filled rectangle shape
+ *   - ellipse: filled ellipse shape
+ *   - diamond: filled diamond/rhombus shape
+ *   - rounded_rectangle: filled rounded rectangle shape
  *
  * These nodes have no block-system registration and are completely excluded
  * from engine evaluation (filtered in bridge.ts by the `annotation_` prefix).
@@ -23,7 +21,7 @@ import { Handle, Position, NodeResizer } from '@xyflow/react'
 import type { NodeProps, Node } from '@xyflow/react'
 import type { NodeData } from '../../../blocks/types'
 
-const DEFAULT_COLOR = '#facc15' // warm yellow
+const DEFAULT_COLOR = '#facc15'
 const DEFAULT_FONT_SIZE = 14
 
 function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
@@ -37,13 +35,20 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
   const textAlign = nd.annotationTextAlign ?? 'left'
   const w = nd.annotationWidth
   const h = nd.annotationHeight
+  const borderWidth = nd.annotationBorderWidth ?? 2
+  const fillColor = nd.annotationFillColor ?? `${color}20`
 
   const fontWeight = bold ? 700 : 600
   const fontStyle = italic ? ('italic' as const) : ('normal' as const)
 
-  // Resizable types get NodeResizer handles
   const isResizable =
-    annotationType === 'highlight' || annotationType === 'callout' || annotationType === 'text'
+    annotationType === 'highlight' ||
+    annotationType === 'callout' ||
+    annotationType === 'text' ||
+    annotationType === 'rectangle' ||
+    annotationType === 'ellipse' ||
+    annotationType === 'diamond' ||
+    annotationType === 'rounded_rectangle'
 
   const resizerEl = isResizable && selected && (
     <NodeResizer
@@ -61,7 +66,22 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
     />
   )
 
+  // ── Arrow (V3-5.2 enhanced) ──────────────────────────────────────────────
   if (annotationType === 'arrow') {
+    const thickness = nd.annotationArrowThickness ?? 3
+    const dash = nd.annotationArrowDash ?? 'solid'
+    const startMarker = nd.annotationArrowStart ?? 'none'
+    const endMarker = nd.annotationArrowEnd ?? 'arrowhead'
+    const dashArray =
+      dash === 'dashed'
+        ? `${thickness * 3} ${thickness * 2}`
+        : dash === 'dotted'
+          ? `${thickness} ${thickness * 1.5}`
+          : undefined
+
+    const markerId = (type: string, pos: 'start' | 'end') =>
+      `arrow-${type}-${pos}-${color.replace('#', '')}`
+
     return (
       <div
         style={{
@@ -70,29 +90,114 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
           textShadow: selected ? `0 0 8px ${color}55` : 'none',
         }}
       >
-        <svg width="48" height="24" viewBox="0 0 48 24" fill="none">
+        <svg width="80" height="32" viewBox="0 0 80 32" fill="none" overflow="visible">
+          <defs>
+            {/* Arrowhead markers */}
+            {endMarker === 'arrowhead' && (
+              <marker
+                id={markerId('arrowhead', 'end')}
+                markerWidth="8"
+                markerHeight="8"
+                refX="7"
+                refY="4"
+                orient="auto"
+              >
+                <polyline
+                  points="1,1 7,4 1,7"
+                  fill="none"
+                  stroke={color}
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+              </marker>
+            )}
+            {endMarker === 'dot' && (
+              <marker
+                id={markerId('dot', 'end')}
+                markerWidth="8"
+                markerHeight="8"
+                refX="4"
+                refY="4"
+                orient="auto"
+              >
+                <circle cx="4" cy="4" r="3" fill={color} />
+              </marker>
+            )}
+            {endMarker === 'square' && (
+              <marker
+                id={markerId('square', 'end')}
+                markerWidth="8"
+                markerHeight="8"
+                refX="4"
+                refY="4"
+                orient="auto"
+              >
+                <rect x="1" y="1" width="6" height="6" fill={color} />
+              </marker>
+            )}
+            {startMarker === 'arrowhead' && (
+              <marker
+                id={markerId('arrowhead', 'start')}
+                markerWidth="8"
+                markerHeight="8"
+                refX="1"
+                refY="4"
+                orient="auto"
+              >
+                <polyline
+                  points="7,1 1,4 7,7"
+                  fill="none"
+                  stroke={color}
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+              </marker>
+            )}
+            {startMarker === 'dot' && (
+              <marker
+                id={markerId('dot', 'start')}
+                markerWidth="8"
+                markerHeight="8"
+                refX="4"
+                refY="4"
+                orient="auto"
+              >
+                <circle cx="4" cy="4" r="3" fill={color} />
+              </marker>
+            )}
+            {startMarker === 'square' && (
+              <marker
+                id={markerId('square', 'start')}
+                markerWidth="8"
+                markerHeight="8"
+                refX="4"
+                refY="4"
+                orient="auto"
+              >
+                <rect x="1" y="1" width="6" height="6" fill={color} />
+              </marker>
+            )}
+          </defs>
           <line
-            x1="0"
-            y1="12"
-            x2="36"
-            y2="12"
+            x1="4"
+            y1="16"
+            x2="72"
+            y2="16"
             stroke={color}
-            strokeWidth="3"
+            strokeWidth={thickness}
             strokeLinecap="round"
-          />
-          <polyline
-            points="32,4 44,12 32,20"
-            fill="none"
-            stroke={color}
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            strokeDasharray={dashArray}
+            markerStart={
+              startMarker !== 'none' ? `url(#${markerId(startMarker, 'start')})` : undefined
+            }
+            markerEnd={endMarker !== 'none' ? `url(#${markerId(endMarker, 'end')})` : undefined}
           />
         </svg>
       </div>
     )
   }
 
+  // ── Highlight ──────────────────────────────────────────────────────────────
   if (annotationType === 'highlight') {
     return (
       <div
@@ -112,6 +217,7 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
     )
   }
 
+  // ── Callout ────────────────────────────────────────────────────────────────
   if (annotationType === 'callout') {
     return (
       <div
@@ -127,21 +233,12 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
       >
         {resizerEl}
         <div style={{ ...calloutAccent, background: color }} />
-        <div
-          style={{
-            ...calloutBody,
-            fontSize,
-            fontWeight,
-            fontStyle,
-            textAlign,
-          }}
-        >
-          {text}
-        </div>
+        <div style={{ ...calloutBody, fontSize, fontWeight, fontStyle, textAlign }}>{text}</div>
       </div>
     )
   }
 
+  // ── Leader ─────────────────────────────────────────────────────────────────
   if (annotationType === 'leader') {
     return (
       <div
@@ -151,7 +248,7 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
           fontWeight,
           fontStyle,
           textAlign,
-          color: color,
+          color,
           textShadow: selected ? `0 0 8px ${color}55` : 'none',
           position: 'relative',
         }}
@@ -167,7 +264,86 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
     )
   }
 
-  // Default: text label
+  // ── Shape primitives (V3-5.2) ──────────────────────────────────────────────
+  if (
+    annotationType === 'rectangle' ||
+    annotationType === 'ellipse' ||
+    annotationType === 'diamond' ||
+    annotationType === 'rounded_rectangle'
+  ) {
+    const shapeW = w ?? 120
+    const shapeH = h ?? 80
+    const selBorder = selected ? `0 0 0 2px ${color}44` : 'none'
+
+    return (
+      <div
+        style={{
+          width: shapeW,
+          height: shapeH,
+          position: 'relative',
+          boxShadow: selBorder,
+          borderRadius:
+            annotationType === 'ellipse' ? '50%' : annotationType === 'rounded_rectangle' ? 12 : 0,
+        }}
+      >
+        {resizerEl}
+        <svg
+          width="100%"
+          height="100%"
+          viewBox={`0 0 ${shapeW} ${shapeH}`}
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ position: 'absolute', top: 0, left: 0 }}
+        >
+          {annotationType === 'rectangle' && (
+            <rect
+              x={borderWidth / 2}
+              y={borderWidth / 2}
+              width={shapeW - borderWidth}
+              height={shapeH - borderWidth}
+              fill={fillColor}
+              stroke={color}
+              strokeWidth={borderWidth}
+            />
+          )}
+          {annotationType === 'rounded_rectangle' && (
+            <rect
+              x={borderWidth / 2}
+              y={borderWidth / 2}
+              width={shapeW - borderWidth}
+              height={shapeH - borderWidth}
+              rx={12}
+              ry={12}
+              fill={fillColor}
+              stroke={color}
+              strokeWidth={borderWidth}
+            />
+          )}
+          {annotationType === 'ellipse' && (
+            <ellipse
+              cx={shapeW / 2}
+              cy={shapeH / 2}
+              rx={shapeW / 2 - borderWidth / 2}
+              ry={shapeH / 2 - borderWidth / 2}
+              fill={fillColor}
+              stroke={color}
+              strokeWidth={borderWidth}
+            />
+          )}
+          {annotationType === 'diamond' && (
+            <polygon
+              points={`${shapeW / 2},${borderWidth} ${shapeW - borderWidth},${shapeH / 2} ${shapeW / 2},${shapeH - borderWidth} ${borderWidth},${shapeH / 2}`}
+              fill={fillColor}
+              stroke={color}
+              strokeWidth={borderWidth}
+              strokeLinejoin="round"
+            />
+          )}
+        </svg>
+      </div>
+    )
+  }
+
+  // ── Default: text label ────────────────────────────────────────────────────
   return (
     <div
       style={{
@@ -176,7 +352,7 @@ function AnnotationNodeInner({ data, selected }: NodeProps<Node<NodeData>>) {
         fontWeight,
         fontStyle,
         textAlign,
-        color: color,
+        color,
         textShadow: selected ? `0 0 8px ${color}55` : 'none',
         width: w,
         height: h,

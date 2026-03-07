@@ -969,7 +969,13 @@
     "alignRight": "Alinear a la derecha",
     "width": "Ancho",
     "height": "Alto",
-    "zOrder": "Orden de capas"
+    "zOrder": "Orden de capas",
+    "borderWidth": "Ancho del borde",
+    "fillColor": "Color de relleno",
+    "arrowThickness": "Grosor",
+    "arrowDash": "Estilo de linea",
+    "arrowStartMarker": "Marcador de inicio",
+    "arrowEndMarker": "Marcador de fin"
   },
   "blockLibrary": {
     "dragHint": "Arrastrar al lienzo",
@@ -1520,7 +1526,12 @@
     "bringToFront": "Traer al frente",
     "sendToBack": "Enviar al fondo",
     "bringForward": "Traer adelante",
-    "sendBackward": "Enviar atras"
+    "sendBackward": "Enviar atras",
+    "insertShape": "Insertar forma",
+    "annotRectangle": "Rectangulo",
+    "annotEllipse": "Elipse",
+    "annotDiamond": "Rombo",
+    "annotRoundedRect": "Rectangulo redondeado"
   },
   "errorBoundary": {
     "title": "Algo salió mal",

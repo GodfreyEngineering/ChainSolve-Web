@@ -156,7 +156,16 @@ export interface NodeData extends Record<string, unknown> {
   /** Whether the group is collapsed — members hidden, proxy handles shown (csGroup nodes only). */
   groupCollapsed?: boolean
   /** Annotation type discriminator (csAnnotation nodes only). */
-  annotationType?: 'text' | 'callout' | 'highlight' | 'arrow' | 'leader'
+  annotationType?:
+    | 'text'
+    | 'callout'
+    | 'highlight'
+    | 'arrow'
+    | 'leader'
+    | 'rectangle'
+    | 'ellipse'
+    | 'diamond'
+    | 'rounded_rectangle'
   /** Annotation text content (csAnnotation nodes only). */
   annotationText?: string
   /** Annotation color — hex string (csAnnotation nodes only). */
@@ -175,6 +184,18 @@ export interface NodeData extends Record<string, unknown> {
   annotationHeight?: number
   /** V3-5.1: Z-index layer for annotation ordering. Higher = in front. */
   annotationZIndex?: number
+  /** V3-5.2: Shape border width in px (shape annotations). */
+  annotationBorderWidth?: number
+  /** V3-5.2: Shape fill color (shape annotations). */
+  annotationFillColor?: string
+  /** V3-5.2: Arrow start marker. */
+  annotationArrowStart?: 'none' | 'arrowhead' | 'dot' | 'square'
+  /** V3-5.2: Arrow end marker. */
+  annotationArrowEnd?: 'none' | 'arrowhead' | 'dot' | 'square'
+  /** V3-5.2: Arrow line thickness. */
+  annotationArrowThickness?: number
+  /** V3-5.2: Arrow dash pattern. */
+  annotationArrowDash?: 'solid' | 'dashed' | 'dotted'
   /** H1-1: Unit assigned to this node's output. Unit id from unitCatalog. */
   unit?: string
   /** H7-1: Channel name for publish blocks (csPublish nodes only). */
