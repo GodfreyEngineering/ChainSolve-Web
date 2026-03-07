@@ -21,6 +21,7 @@
  */
 
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useWorkspaceAuth } from '../hooks/useWorkspaceAuth'
 import { WorkspaceToolbar } from '../components/app/WorkspaceToolbar'
@@ -65,6 +66,7 @@ export default function WorkspacePage() {
   const auth = useWorkspaceAuth()
   const { open: sidebarOpen, toggle: toggleSidebar, setActiveTab } = useSidebarStore()
   const { toast } = useToast()
+  const { t } = useTranslation()
   const inspectedNodeId = useStatusBarStore((s) => s.inspectedNodeId)
   const importRef = useRef<HTMLInputElement>(null)
 
@@ -105,22 +107,33 @@ export default function WorkspacePage() {
       if (!canCreateProject(auth.plan, projects.length)) {
         if (isAtProjectLimit(auth.plan, projects.length)) {
           toast(
-            'Free plan allows 1 project. Opening scratch canvas — delete your project or upgrade to save.',
+            t(
+              'workspace.freePlanLimit',
+              'Free plan allows 1 project. Opening scratch canvas — delete your project or upgrade to save.',
+            ),
             'info',
           )
           setScratchMode(true)
           return
         }
-        toast('Project limit reached. Upgrade to create more.', 'error')
+        toast(
+          t('workspace.projectLimitReached', 'Project limit reached. Upgrade to create more.'),
+          'error',
+        )
         return
       }
       const proj = await createProject('Untitled project')
       setScratchMode(false)
       navigate(`/app/${proj.id}`)
     } catch (err: unknown) {
-      toast(err instanceof Error ? err.message : 'Failed to create project', 'error')
+      toast(
+        err instanceof Error
+          ? err.message
+          : t('workspace.createFailed', 'Failed to create project'),
+        'error',
+      )
     }
-  }, [auth.plan, navigate, toast])
+  }, [auth.plan, navigate, toast, t])
 
   const handleOpenScratch = useCallback(() => {
     setScratchMode(true)
@@ -143,13 +156,21 @@ export default function WorkspacePage() {
         const text = await file.text()
         const json = JSON.parse(text) as ProjectJSON
         const result = await importProject(json)
-        if (result?.id) navigate(`/app/${result.id}`)
-      } catch {
-        // Import error
+        if (result?.id) {
+          toast(t('workspace.importSuccess', 'Project imported'), 'success')
+          navigate(`/app/${result.id}`)
+        }
+      } catch (err: unknown) {
+        toast(
+          err instanceof Error
+            ? err.message
+            : t('workspace.importFailed', 'Failed to import project'),
+          'error',
+        )
       }
       if (importRef.current) importRef.current.value = ''
     },
-    [navigate],
+    [navigate, toast, t],
   )
 
   // ── Auth guards ────────────────────────────────────────────────────

@@ -1864,6 +1864,13 @@
     "exploreDesc": "Navega plantillas de la comunidad, cadenas predefinidas y proyectos compartidos.",
     "openExplore": "Abrir Explorar"
   },
+  "workspace": {
+    "freePlanLimit": "El plan gratuito permite 1 proyecto. Abriendo canvas temporal — elimine su proyecto o actualice para guardar.",
+    "projectLimitReached": "Límite de proyectos alcanzado. Actualice para crear más.",
+    "createFailed": "No se pudo crear el proyecto",
+    "importSuccess": "Proyecto importado",
+    "importFailed": "No se pudo importar el proyecto"
+  },
   "welcome": {
     "title": "Bienvenido a tu espacio de trabajo",
     "subtitle": "Abre un proyecto desde la barra lateral o comienza algo nuevo.",

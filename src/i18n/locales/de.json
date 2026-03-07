@@ -1864,6 +1864,13 @@
     "exploreDesc": "Durchsuche Community-Vorlagen, vorgefertigte Ketten und geteilte Projekte.",
     "openExplore": "Entdecken öffnen"
   },
+  "workspace": {
+    "freePlanLimit": "Kostenloser Plan erlaubt 1 Projekt. Scratch-Canvas wird geöffnet — löschen Sie Ihr Projekt oder upgraden Sie.",
+    "projectLimitReached": "Projektlimit erreicht. Upgraden Sie, um mehr zu erstellen.",
+    "createFailed": "Projekt konnte nicht erstellt werden",
+    "importSuccess": "Projekt importiert",
+    "importFailed": "Projekt konnte nicht importiert werden"
+  },
   "welcome": {
     "title": "Willkommen in deinem Arbeitsbereich",
     "subtitle": "Öffne ein Projekt aus der Seitenleiste oder starte etwas Neues.",

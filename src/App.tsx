@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import Login from './pages/Login'
 import { SettingsRedirect } from './components/SettingsRedirect'
@@ -32,6 +33,7 @@ const ExploreItemPage = lazy(() =>
 )
 
 function BillingSuccess() {
+  const { t } = useTranslation()
   return (
     <div
       style={{
@@ -45,10 +47,8 @@ function BillingSuccess() {
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }} aria-hidden="true">
           {'\u2713'}
         </div>
-        <h1 style={{ margin: '0 0 0.5rem' }}>You&apos;re all set!</h1>
-        <p style={{ opacity: 0.6, margin: '0 0 1.5rem' }}>
-          Your subscription is now active. It may take a few seconds to reflect in your account.
-        </p>
+        <h1 style={{ margin: '0 0 0.5rem' }}>{t('billing.successTitle')}</h1>
+        <p style={{ opacity: 0.6, margin: '0 0 1.5rem' }}>{t('billing.successMsg')}</p>
         <a
           href="/app"
           style={{
@@ -61,7 +61,7 @@ function BillingSuccess() {
             textDecoration: 'none',
           }}
         >
-          Go to app
+          {t('billing.goToApp')}
         </a>
       </div>
     </div>
@@ -69,6 +69,7 @@ function BillingSuccess() {
 }
 
 function BillingCancel() {
+  const { t } = useTranslation()
   return (
     <div
       style={{
@@ -79,10 +80,8 @@ function BillingCancel() {
       }}
     >
       <div style={{ textAlign: 'center', maxWidth: '400px', padding: '2rem' }}>
-        <h1 style={{ margin: '0 0 0.5rem' }}>Checkout cancelled</h1>
-        <p style={{ opacity: 0.6, margin: '0 0 1.5rem' }}>
-          No charge was made. You can upgrade any time from your account.
-        </p>
+        <h1 style={{ margin: '0 0 0.5rem' }}>{t('billing.cancelTitle')}</h1>
+        <p style={{ opacity: 0.6, margin: '0 0 1.5rem' }}>{t('billing.cancelMsg')}</p>
         <a
           href="/app"
           style={{
@@ -95,7 +94,7 @@ function BillingCancel() {
             color: 'inherit',
           }}
         >
-          Back to app
+          {t('billing.backToApp')}
         </a>
       </div>
     </div>
