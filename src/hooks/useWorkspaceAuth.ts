@@ -65,15 +65,37 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
   // Skip session polling for developer accounts — they should never be locked out
   const { sessionRevoked } = useSessionGuard({ skip: isDeveloper(profile) })
 
+  /**
+   * Fetch profile via the get_my_profile RPC (SECURITY DEFINER — bypasses RLS).
+   * Creates the profile row if it doesn't exist yet.
+   * Returns the profile or null if the RPC is not available.
+   */
+  const fetchProfileViaRpc = useCallback(async (): Promise<Profile | null> => {
+    const { data, error } = await supabase.rpc('get_my_profile')
+    if (error) {
+      console.error('[auth] get_my_profile RPC failed:', error.message, error)
+      return null
+    }
+    if (data && typeof data === 'object') return data as Profile
+    return null
+  }, [])
+
   const refreshProfile = useCallback(async () => {
     if (!user) return
+    // Try direct SELECT first (fast path when RLS is working)
     const { data } = await supabase
       .from('profiles')
       .select(PROFILE_COLS)
       .eq('id', user.id)
       .maybeSingle()
-    if (data) setProfile(data as Profile)
-  }, [user])
+    if (data) {
+      setProfile(data as Profile)
+      return
+    }
+    // Fall back to RPC (bypasses RLS)
+    const rpcProfile = await fetchProfileViaRpc()
+    if (rpcProfile) setProfile(rpcProfile)
+  }, [user, fetchProfileViaRpc])
 
   // Initial auth + profile fetch
   useEffect(() => {
@@ -112,68 +134,56 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
         void touchSession()
       }
 
-      // 3. Fetch profile with retry (trigger may be async on first signup)
-      await fetchProfileWithRetry(validatedUser.id)
+      // 3. Fetch profile — try direct SELECT first, then RPC fallback
+      await fetchProfile(validatedUser.id)
     }
 
-    async function fetchProfileWithRetry(userId: string) {
-      const RETRY_DELAYS = [300, 600, 1200, 2400]
-      for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select(PROFILE_COLS)
-          .eq('id', userId)
-          .maybeSingle()
-        if (!error && data) {
-          setProfile(data as Profile)
-          setLoading(false)
-          return
-        }
-        if (error) {
-          console.error(`[auth] profile fetch attempt ${attempt}:`, error.message, error)
-        }
-        if (attempt < RETRY_DELAYS.length) {
-          await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]))
-        }
+    async function fetchProfile(userId: string) {
+      // Fast path: direct SELECT (works when RLS SELECT policy is correct)
+      const { data: directData } = await supabase
+        .from('profiles')
+        .select(PROFILE_COLS)
+        .eq('id', userId)
+        .maybeSingle()
+      if (directData) {
+        setProfile(directData as Profile)
+        setLoading(false)
+        return
       }
 
-      // All retries exhausted — profile trigger likely never fired.
-      // Call the ensure_profile RPC (SECURITY DEFINER) to create the row.
-      console.warn('[auth] profile not found after retries, calling ensure_profile RPC')
-      try {
-        const { error: rpcErr } = await supabase.rpc('ensure_profile')
-        if (rpcErr) {
-          console.error('[auth] ensure_profile RPC failed:', rpcErr.message, rpcErr)
-          setProfileError(`ensure_profile RPC: ${rpcErr.message}`)
-          setLoading(false)
-          return
-        }
-        // RPC succeeded — try to read the newly created row
-        for (let r = 0; r < 3; r++) {
-          if (r > 0) await new Promise((w) => setTimeout(w, 600))
-          const { data } = await supabase
-            .from('profiles')
-            .select(PROFILE_COLS)
-            .eq('id', userId)
-            .maybeSingle()
-          if (data) {
-            setProfile(data as Profile)
-            setLoading(false)
-            return
-          }
-        }
-        console.error('[auth] profile still not readable after ensure_profile succeeded')
-        setProfileError('Profile row created but not readable — check RLS SELECT policy')
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err)
-        console.error('[auth] ensure_profile exception:', msg)
-        setProfileError(`ensure_profile exception: ${msg}`)
+      // Direct SELECT failed (RLS blocking or profile not created yet).
+      // Wait briefly for the trigger, then try again.
+      await new Promise((r) => setTimeout(r, 500))
+      const { data: retryData } = await supabase
+        .from('profiles')
+        .select(PROFILE_COLS)
+        .eq('id', userId)
+        .maybeSingle()
+      if (retryData) {
+        setProfile(retryData as Profile)
+        setLoading(false)
+        return
       }
+
+      // Fall back to get_my_profile RPC — SECURITY DEFINER, bypasses RLS,
+      // and creates the profile if missing.
+      console.warn('[auth] direct SELECT failed, falling back to get_my_profile RPC')
+      const rpcProfile = await fetchProfileViaRpc()
+      if (rpcProfile) {
+        setProfile(rpcProfile)
+        setLoading(false)
+        return
+      }
+
+      // RPC also failed — set error for display
+      setProfileError(
+        'Could not load profile. Run migration 0007 (get_my_profile RPC) in Supabase SQL Editor.',
+      )
       setLoading(false)
     }
 
     void init()
-  }, [navigate])
+  }, [navigate, fetchProfileViaRpc])
 
   const handleTermsAccepted = useCallback(
     async (version: string) => {

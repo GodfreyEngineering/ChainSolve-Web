@@ -54,6 +54,21 @@ export async function ensureProfile(): Promise<void> {
   invalidateProfileCache()
 }
 
+/**
+ * Get the caller's profile via SECURITY DEFINER RPC (bypasses RLS).
+ * Also creates the profile row if it doesn't exist.
+ */
+export async function getMyProfile(): Promise<Profile | null> {
+  const { data, error } = await supabase.rpc('get_my_profile')
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  if (data && typeof data === 'object') {
+    const profile = data as Profile
+    _profileCache = { profile, fetchedAt: Date.now(), userId: profile.id }
+    return profile
+  }
+  return null
+}
+
 export async function getProfile(userId: string): Promise<Profile | null> {
   if (
     _profileCache &&

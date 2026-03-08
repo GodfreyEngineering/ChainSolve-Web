@@ -32,7 +32,6 @@ import { useSidebarStore } from '../stores/sidebarStore'
 import { StatusBar } from '../components/app/StatusBar'
 import { RightSidebar } from '../components/app/RightSidebar'
 import { useStatusBarStore } from '../stores/statusBarStore'
-import type { Profile } from '../lib/profilesService'
 import { createProject, listProjects, importProject, type ProjectJSON } from '../lib/projects'
 import { canCreateProject, isAtProjectLimit } from '../lib/entitlements'
 import { useToast } from '../components/ui/useToast'
@@ -65,12 +64,10 @@ const ONBOARDED_KEY = 'cs:onboarded'
 function ProfileFallback({
   error,
   refreshProfile,
-  profile,
   onSignOut,
 }: {
   error: string | null
   refreshProfile: () => Promise<void>
-  profile: Profile | null
   onSignOut: () => Promise<void>
 }) {
   const { t } = useTranslation()
@@ -81,17 +78,18 @@ function ProfileFallback({
     setRetrying(true)
     setRetryError(null)
     try {
-      const { ensureProfile } = await import('../lib/profilesService')
-      await ensureProfile()
-      await refreshProfile()
-      // If profile still null after refresh, reload to pick up any DB delay
-      if (!profile) {
-        await new Promise((r) => setTimeout(r, 500))
-        window.location.reload()
+      // Use get_my_profile RPC which bypasses RLS and creates profile if missing
+      const { getMyProfile } = await import('../lib/profilesService')
+      const result = await getMyProfile()
+      if (result) {
+        // Profile loaded via RPC — refresh parent state and reload
+        await refreshProfile()
       }
+      // Reload regardless to restart the auth flow cleanly
+      window.location.reload()
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      console.error('[auth] retry ensureProfile failed:', msg)
+      console.error('[auth] retry getMyProfile failed:', msg)
       setRetryError(msg)
       setRetrying(false)
     }
@@ -264,7 +262,6 @@ export default function WorkspacePage() {
       <ProfileFallback
         error={auth.profileError}
         refreshProfile={auth.refreshProfile}
-        profile={auth.profile}
         onSignOut={async () => {
           const { signOut: doSignOut } = await import('../lib/auth')
           await doSignOut()
