@@ -57,6 +57,7 @@ export async function ensureProfile(): Promise<void> {
 /**
  * Get the caller's profile via SECURITY DEFINER RPC (bypasses RLS).
  * Also creates the profile row if it doesn't exist.
+ * @deprecated Use getOrCreateProfile() instead (migration 0008).
  */
 export async function getMyProfile(): Promise<Profile | null> {
   const { data, error } = await supabase.rpc('get_my_profile')
@@ -67,6 +68,83 @@ export async function getMyProfile(): Promise<Profile | null> {
     return profile
   }
   return null
+}
+
+// ── V6 RPC-based functions (bypass RLS, migration 0008) ─────────────────────
+
+/**
+ * Get or create the caller's profile via SECURITY DEFINER RPC.
+ * This is the primary profile fetch for the auth flow — bypasses RLS entirely.
+ */
+export async function getOrCreateProfile(): Promise<Profile> {
+  const { data, error } = await supabase.rpc('get_or_create_profile')
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  if (!data || typeof data !== 'object') {
+    throw new ServiceError('DB_ERROR', 'get_or_create_profile returned empty result')
+  }
+  const profile = data as Profile
+  _profileCache = { profile, fetchedAt: Date.now(), userId: profile.id }
+  return profile
+}
+
+/** Accept ToS via RPC (bypasses RLS UPDATE policy). */
+export async function acceptTermsViaRpc(version: string): Promise<void> {
+  const { error } = await supabase.rpc('accept_my_terms', { p_version: version })
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  invalidateProfileCache()
+}
+
+/** Mark onboarding complete via RPC (bypasses RLS UPDATE policy). */
+export async function markOnboardingCompleteViaRpc(): Promise<void> {
+  const { error } = await supabase.rpc('complete_my_onboarding')
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  invalidateProfileCache()
+}
+
+/** Update display name and/or avatar URL via RPC (bypasses RLS UPDATE policy). */
+export async function updateProfileViaRpc(
+  fullName: string | null,
+  avatarUrl: string | null,
+): Promise<void> {
+  const { error } = await supabase.rpc('update_my_profile', {
+    p_full_name: fullName,
+    p_avatar_url: avatarUrl,
+  })
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  invalidateProfileCache()
+}
+
+/** Update marketing opt-in via RPC (bypasses RLS UPDATE policy). */
+export async function updateMarketingOptInViaRpc(optIn: boolean): Promise<void> {
+  const { error } = await supabase.rpc('update_my_marketing', { p_opt_in: optIn })
+  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  invalidateProfileCache()
+}
+
+/** Upload avatar file to storage only (no profile table update). Returns storage path. */
+export async function uploadAvatarFileOnly(file: File): Promise<string> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to upload an avatar')
+
+  if (!file.type.startsWith('image/'))
+    throw new ServiceError('FILE_TOO_LARGE', 'Only image files are allowed for avatars')
+  if (file.size > MAX_AVATAR_BYTES)
+    throw new ServiceError(
+      'FILE_TOO_LARGE',
+      `Avatar must be under ${MAX_AVATAR_BYTES / 1024 / 1024} MB`,
+    )
+
+  const ext = file.name.split('.').pop() ?? 'jpg'
+  const storagePath = `${user.id}/avatar_${Date.now()}.${ext}`
+
+  const { error: uploadErr } = await supabase.storage
+    .from('uploads')
+    .upload(storagePath, file, { upsert: true, contentType: file.type })
+  if (uploadErr) throw new ServiceError('STORAGE_ERROR', uploadErr.message, true)
+
+  return storagePath
 }
 
 export async function getProfile(userId: string): Promise<Profile | null> {

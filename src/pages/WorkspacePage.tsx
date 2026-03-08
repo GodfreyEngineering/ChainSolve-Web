@@ -78,18 +78,12 @@ function ProfileFallback({
     setRetrying(true)
     setRetryError(null)
     try {
-      // Use get_my_profile RPC which bypasses RLS and creates profile if missing
-      const { getMyProfile } = await import('../lib/profilesService')
-      const result = await getMyProfile()
-      if (result) {
-        // Profile loaded via RPC — refresh parent state and reload
-        await refreshProfile()
-      }
-      // Reload regardless to restart the auth flow cleanly
+      await refreshProfile()
+      // Reload to restart the auth flow cleanly
       window.location.reload()
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      console.error('[auth] retry getMyProfile failed:', msg)
+      console.error('[auth] profile retry failed:', msg)
       setRetryError(msg)
       setRetrying(false)
     }

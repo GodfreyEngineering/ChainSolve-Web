@@ -15,7 +15,11 @@
 import { useState, useCallback, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { validateDisplayName } from '../../lib/validateDisplayName'
-import { updateDisplayName, uploadAvatar, updateMarketingOptIn } from '../../lib/profilesService'
+import {
+  updateProfileViaRpc,
+  uploadAvatarFileOnly,
+  updateMarketingOptInViaRpc,
+} from '../../lib/profilesService'
 import { updateUserPreferences } from '../../lib/userPreferencesService'
 import { PlanComparisonCard } from './PlanComparisonCard'
 
@@ -120,15 +124,16 @@ export function SignupWizard({ open, onComplete }: Props) {
     setSubmitting(true)
     setError('')
     try {
-      // 1. Save display name
-      await updateDisplayName(displayName.trim())
+      // 1. Save display name via RPC (bypasses RLS)
+      await updateProfileViaRpc(displayName.trim() || null, null)
 
-      // 2. Upload avatar (optional)
+      // 2. Upload avatar (optional) — storage upload + profile update via RPC
       if (avatarFile) {
-        await uploadAvatar(avatarFile)
+        const storagePath = await uploadAvatarFileOnly(avatarFile)
+        await updateProfileViaRpc(null, storagePath)
       }
 
-      // 3. Save preferences (locale, region)
+      // 3. Save preferences (locale, region — separate table, unaffected by RLS)
       await updateUserPreferences({
         locale,
         region: region.trim() || null,
@@ -139,8 +144,8 @@ export function SignupWizard({ open, onComplete }: Props) {
         await i18n.changeLanguage(locale)
       }
 
-      // 5. Marketing opt-in (terms already accepted at signup time)
-      await updateMarketingOptIn(marketingOptIn)
+      // 5. Marketing opt-in via RPC (bypasses RLS)
+      await updateMarketingOptInViaRpc(marketingOptIn)
 
       // 6. Plan choice is informational for now (Stripe checkout in Phase 3)
 

@@ -1,8 +1,8 @@
 /**
  * useWorkspaceAuth — shared auth/profile/plan state for the workspace.
  *
- * Extracts the authentication, profile fetch, and plan resolution logic
- * that was previously duplicated across page components.
+ * V6: All profile operations use SECURITY DEFINER RPCs (migration 0008)
+ * to bypass RLS entirely. No direct table SELECT in the auth-critical path.
  */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -21,9 +21,6 @@ import {
 import { useSessionGuard } from './useSessionGuard'
 import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 import { listMfaFactors } from '../lib/auth'
-
-const PROFILE_COLS =
-  'id,email,full_name,plan,stripe_customer_id,current_period_end,is_developer,is_admin,is_student,accepted_terms_version,marketing_opt_in,onboarding_completed_at'
 
 export interface WorkspaceAuthState {
   user: User | null
@@ -65,37 +62,16 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
   // Skip session polling for developer accounts — they should never be locked out
   const { sessionRevoked } = useSessionGuard({ skip: isDeveloper(profile) })
 
-  /**
-   * Fetch profile via the get_my_profile RPC (SECURITY DEFINER — bypasses RLS).
-   * Creates the profile row if it doesn't exist yet.
-   * Returns the profile or null if the RPC is not available.
-   */
-  const fetchProfileViaRpc = useCallback(async (): Promise<Profile | null> => {
-    const { data, error } = await supabase.rpc('get_my_profile')
-    if (error) {
-      console.error('[auth] get_my_profile RPC failed:', error.message, error)
-      return null
-    }
-    if (data && typeof data === 'object') return data as Profile
-    return null
-  }, [])
-
   const refreshProfile = useCallback(async () => {
     if (!user) return
-    // Try direct SELECT first (fast path when RLS is working)
-    const { data } = await supabase
-      .from('profiles')
-      .select(PROFILE_COLS)
-      .eq('id', user.id)
-      .maybeSingle()
-    if (data) {
-      setProfile(data as Profile)
-      return
+    try {
+      const { getOrCreateProfile } = await import('../lib/profilesService')
+      const p = await getOrCreateProfile()
+      setProfile(p)
+    } catch {
+      // Silent fail on refresh — profile was already loaded
     }
-    // Fall back to RPC (bypasses RLS)
-    const rpcProfile = await fetchProfileViaRpc()
-    if (rpcProfile) setProfile(rpcProfile)
-  }, [user, fetchProfileViaRpc])
+  }, [user])
 
   // Initial auth + profile fetch
   useEffect(() => {
@@ -134,61 +110,29 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
         void touchSession()
       }
 
-      // 3. Fetch profile — try direct SELECT first, then RPC fallback
-      await fetchProfile(validatedUser.id)
-    }
-
-    async function fetchProfile(userId: string) {
-      // Fast path: direct SELECT (works when RLS SELECT policy is correct)
-      const { data: directData } = await supabase
-        .from('profiles')
-        .select(PROFILE_COLS)
-        .eq('id', userId)
-        .maybeSingle()
-      if (directData) {
-        setProfile(directData as Profile)
-        setLoading(false)
-        return
+      // 3. Fetch profile via RPC — one call, no retries, bypasses RLS
+      try {
+        const { getOrCreateProfile } = await import('../lib/profilesService')
+        const p = await getOrCreateProfile()
+        setProfile(p)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        console.error('[auth] getOrCreateProfile failed:', msg)
+        setProfileError(
+          `Could not load profile: ${msg}. ` +
+            'Ensure migration 0008 has been run in Supabase SQL Editor.',
+        )
       }
-
-      // Direct SELECT failed (RLS blocking or profile not created yet).
-      // Wait briefly for the trigger, then try again.
-      await new Promise((r) => setTimeout(r, 500))
-      const { data: retryData } = await supabase
-        .from('profiles')
-        .select(PROFILE_COLS)
-        .eq('id', userId)
-        .maybeSingle()
-      if (retryData) {
-        setProfile(retryData as Profile)
-        setLoading(false)
-        return
-      }
-
-      // Fall back to get_my_profile RPC — SECURITY DEFINER, bypasses RLS,
-      // and creates the profile if missing.
-      console.warn('[auth] direct SELECT failed, falling back to get_my_profile RPC')
-      const rpcProfile = await fetchProfileViaRpc()
-      if (rpcProfile) {
-        setProfile(rpcProfile)
-        setLoading(false)
-        return
-      }
-
-      // RPC also failed — set error for display
-      setProfileError(
-        'Could not load profile. Run migration 0007 (get_my_profile RPC) in Supabase SQL Editor.',
-      )
       setLoading(false)
     }
 
     void init()
-  }, [navigate, fetchProfileViaRpc])
+  }, [navigate])
 
   const handleTermsAccepted = useCallback(
     async (version: string) => {
-      const { acceptTerms } = await import('../lib/profilesService')
-      await acceptTerms(version)
+      const { acceptTermsViaRpc } = await import('../lib/profilesService')
+      await acceptTermsViaRpc(version)
       try {
         const { logTermsAcceptance } = await import('../lib/userTermsService')
         await logTermsAcceptance(version)
@@ -202,8 +146,8 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
 
   const handleWizardComplete = useCallback(async () => {
     setWizardDismissed(true)
-    const { markOnboardingComplete } = await import('../lib/profilesService')
-    await markOnboardingComplete()
+    const { markOnboardingCompleteViaRpc } = await import('../lib/profilesService')
+    await markOnboardingCompleteViaRpc()
     await refreshProfile()
     try {
       const { factors } = await listMfaFactors()
