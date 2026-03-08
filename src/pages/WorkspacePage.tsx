@@ -32,6 +32,7 @@ import { useSidebarStore } from '../stores/sidebarStore'
 import { StatusBar } from '../components/app/StatusBar'
 import { RightSidebar } from '../components/app/RightSidebar'
 import { useStatusBarStore } from '../stores/statusBarStore'
+import type { Profile } from '../lib/profilesService'
 import { createProject, listProjects, importProject, type ProjectJSON } from '../lib/projects'
 import { canCreateProject, isAtProjectLimit } from '../lib/entitlements'
 import { useToast } from '../components/ui/useToast'
@@ -59,6 +60,65 @@ const LazyFirstRunModal = lazy(() =>
 const CanvasPage = lazy(() => import('./CanvasPage'))
 
 const ONBOARDED_KEY = 'cs:onboarded'
+
+/** Shown when profile row is missing after all retries. Shows actual error for diagnosis. */
+function ProfileFallback({
+  error,
+  refreshProfile,
+  profile,
+  onSignOut,
+}: {
+  error: string | null
+  refreshProfile: () => Promise<void>
+  profile: Profile | null
+  onSignOut: () => Promise<void>
+}) {
+  const { t } = useTranslation()
+  const [retrying, setRetrying] = useState(false)
+  const [retryError, setRetryError] = useState<string | null>(null)
+
+  const handleRetry = async () => {
+    setRetrying(true)
+    setRetryError(null)
+    try {
+      const { ensureProfile } = await import('../lib/profilesService')
+      await ensureProfile()
+      await refreshProfile()
+      // If profile still null after refresh, reload to pick up any DB delay
+      if (!profile) {
+        await new Promise((r) => setTimeout(r, 500))
+        window.location.reload()
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('[auth] retry ensureProfile failed:', msg)
+      setRetryError(msg)
+      setRetrying(false)
+    }
+  }
+
+  const displayError = retryError || error
+
+  return (
+    <div style={profileFallbackStyle}>
+      <h2>{t('workspace.settingUp', 'Setting up your account\u2026')}</h2>
+      <p>{t('workspace.settingUpHint', 'This usually takes a moment. Please refresh the page.')}</p>
+      {displayError && (
+        <div style={profileErrorStyle}>
+          <strong>Error:</strong> {displayError}
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={handleRetry} disabled={retrying} style={refreshBtnStyle}>
+          {retrying ? 'Retrying\u2026' : t('workspace.tryAgain', 'Try again')}
+        </button>
+        <button onClick={onSignOut} style={refreshBtnStyle}>
+          {t('nav.signOut', 'Sign out')}
+        </button>
+      </div>
+    </div>
+  )
+}
 
 export default function WorkspacePage() {
   const { projectId } = useParams<{ projectId?: string }>()
@@ -200,39 +260,17 @@ export default function WorkspacePage() {
 
   // Profile-null fallback: profile trigger hasn't fired after all retries
   if (!auth.profile && auth.user) {
-    const handleRetryProfile = async () => {
-      try {
-        const { ensureProfile } = await import('../lib/profilesService')
-        await ensureProfile()
-        await auth.refreshProfile()
-        // If profile is still null after refresh, a page reload picks up any DB delay
-        if (!auth.profile) window.location.reload()
-      } catch {
-        window.location.reload()
-      }
-    }
     return (
-      <div style={profileFallbackStyle}>
-        <h2>{t('workspace.settingUp', 'Setting up your account\u2026')}</h2>
-        <p>
-          {t('workspace.settingUpHint', 'This usually takes a moment. Please refresh the page.')}
-        </p>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={handleRetryProfile} style={refreshBtnStyle}>
-            {t('workspace.tryAgain', 'Try again')}
-          </button>
-          <button
-            onClick={async () => {
-              const { signOut: doSignOut } = await import('../lib/auth')
-              await doSignOut()
-              navigate('/login')
-            }}
-            style={refreshBtnStyle}
-          >
-            {t('nav.signOut', 'Sign out')}
-          </button>
-        </div>
-      </div>
+      <ProfileFallback
+        error={auth.profileError}
+        refreshProfile={auth.refreshProfile}
+        profile={auth.profile}
+        onSignOut={async () => {
+          const { signOut: doSignOut } = await import('../lib/auth')
+          await doSignOut()
+          navigate('/login')
+        }}
+      />
     )
   }
 
@@ -391,4 +429,16 @@ const refreshBtnStyle: React.CSSProperties = {
   cursor: 'pointer',
   fontFamily: "'Montserrat', system-ui, sans-serif",
   fontSize: '0.85rem',
+}
+
+const profileErrorStyle: React.CSSProperties = {
+  background: 'rgba(239,68,68,0.1)',
+  border: '1px solid rgba(239,68,68,0.35)',
+  color: '#f87171',
+  borderRadius: 8,
+  padding: '0.65rem 0.85rem',
+  fontSize: '0.82rem',
+  maxWidth: 480,
+  wordBreak: 'break-word',
+  lineHeight: 1.45,
 }

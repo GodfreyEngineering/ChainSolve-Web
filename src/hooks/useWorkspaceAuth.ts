@@ -38,6 +38,8 @@ export interface WorkspaceAuthState {
   wizardDismissed: boolean
   mfaPromptDismissed: boolean
   hasMfaFactor: boolean | null
+  /** Error message if profile creation/fetch failed. */
+  profileError: string | null
   /** Refetch the profile from the database. */
   refreshProfile: () => Promise<void>
   /** Called when the signup wizard completes. */
@@ -55,6 +57,7 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [profileError, setProfileError] = useState<string | null>(null)
   const [wizardDismissed, setWizardDismissed] = useState(false)
   const [mfaPromptDismissed, setMfaPromptDismissed] = useState(false)
   const [hasMfaFactor, setHasMfaFactor] = useState<boolean | null>(null)
@@ -74,67 +77,102 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
 
   // Initial auth + profile fetch
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    async function init() {
+      // 1. Get cached session
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       if (!session) {
         navigate('/login')
         return
       }
-      setUser(session.user)
+
+      // 2. Validate session server-side. getSession() returns a cached JWT
+      //    that may be stale (e.g. user was deleted and recreated). getUser()
+      //    makes a real API call to verify the token.
+      const {
+        data: { user: validatedUser },
+        error: userErr,
+      } = await supabase.auth.getUser()
+      if (userErr || !validatedUser) {
+        console.warn('[auth] session invalid — signing out:', userErr?.message)
+        await supabase.auth.signOut()
+        navigate('/login')
+        return
+      }
+
+      setUser(validatedUser)
       initRememberMe()
+
       // Ensure session record exists (handles DB wipe / stale localStorage)
       if (!getCurrentSessionId()) {
         resetSessionFailures()
-        void registerSession(session.user.id)
+        void registerSession(validatedUser.id)
       } else {
         void touchSession()
       }
-      // Profile row is created by the handle_new_user() DB trigger, which
-      // runs asynchronously. On first signup the row may not exist yet when
-      // this query fires. Retry with exponential backoff to avoid the race.
-      const RETRY_DELAYS = [200, 400, 800, 1600, 3200]
-      async function fetchProfileWithRetry(userId: string) {
-        for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
-          const { data, error } = await supabase
+
+      // 3. Fetch profile with retry (trigger may be async on first signup)
+      await fetchProfileWithRetry(validatedUser.id)
+    }
+
+    async function fetchProfileWithRetry(userId: string) {
+      const RETRY_DELAYS = [300, 600, 1200, 2400]
+      for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select(PROFILE_COLS)
+          .eq('id', userId)
+          .maybeSingle()
+        if (!error && data) {
+          setProfile(data as Profile)
+          setLoading(false)
+          return
+        }
+        if (error) {
+          console.error(`[auth] profile fetch attempt ${attempt}:`, error.message, error)
+        }
+        if (attempt < RETRY_DELAYS.length) {
+          await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]))
+        }
+      }
+
+      // All retries exhausted — profile trigger likely never fired.
+      // Call the ensure_profile RPC (SECURITY DEFINER) to create the row.
+      console.warn('[auth] profile not found after retries, calling ensure_profile RPC')
+      try {
+        const { error: rpcErr } = await supabase.rpc('ensure_profile')
+        if (rpcErr) {
+          console.error('[auth] ensure_profile RPC failed:', rpcErr.message, rpcErr)
+          setProfileError(`ensure_profile RPC: ${rpcErr.message}`)
+          setLoading(false)
+          return
+        }
+        // RPC succeeded — try to read the newly created row
+        for (let r = 0; r < 3; r++) {
+          if (r > 0) await new Promise((w) => setTimeout(w, 600))
+          const { data } = await supabase
             .from('profiles')
             .select(PROFILE_COLS)
             .eq('id', userId)
             .maybeSingle()
-          if (!error && data) {
+          if (data) {
             setProfile(data as Profile)
             setLoading(false)
             return
           }
-          if (attempt < RETRY_DELAYS.length) {
-            await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]))
-          }
         }
-        // All retries exhausted — profile trigger likely never fired.
-        // Call the ensure_profile RPC (SECURITY DEFINER) to create the row.
-        try {
-          const { error: rpcErr } = await supabase.rpc('ensure_profile')
-          if (!rpcErr) {
-            // Try twice — connection pooling can delay visibility of the new row
-            for (let r = 0; r < 2; r++) {
-              const { data } = await supabase
-                .from('profiles')
-                .select(PROFILE_COLS)
-                .eq('id', userId)
-                .maybeSingle()
-              if (data) {
-                setProfile(data as Profile)
-                setLoading(false)
-                return
-              }
-              if (r === 0) await new Promise((w) => setTimeout(w, 500))
-            }
-          }
-        } catch {
-          // RPC not available or other error — fall through to fallback UI
-        }
-        setLoading(false)
+        console.error('[auth] profile still not readable after ensure_profile succeeded')
+        setProfileError('Profile row created but not readable — check RLS SELECT policy')
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        console.error('[auth] ensure_profile exception:', msg)
+        setProfileError(`ensure_profile exception: ${msg}`)
       }
-      void fetchProfileWithRetry(session.user.id)
-    })
+      setLoading(false)
+    }
+
+    void init()
   }, [navigate])
 
   const handleTermsAccepted = useCallback(
@@ -179,6 +217,7 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
     plan,
     loading,
     sessionRevoked,
+    profileError,
     needsGate,
     needsWizard,
     wizardDismissed,
