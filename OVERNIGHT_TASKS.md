@@ -368,7 +368,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[SEC-04] Input sanitization audit** — Audit all user inputs stored or displayed. No XSS via innerHTML (search for all `dangerouslySetInnerHTML` usages — only allowed for sanitized KaTeX output). No SQL injection (Supabase client uses parameterized queries — verify). No `eval` on project JSON load. CSV content sanitized before display. Verify: `npm run lint` passes; manual XSS attempt in annotation text is escaped.
 
-- [ ] **[SEC-05] Dependency audit** — `npm audit --audit-level=high` exits 0. Fix or pin-override all high/critical findings. Add to CI. Verify: CI npm audit step passes.
+- [x] **[SEC-05] Dependency audit** — `npm audit --audit-level=high` exits 0. Fix or pin-override all high/critical findings. Add to CI. Verify: CI npm audit step passes.
 
 ---
 
