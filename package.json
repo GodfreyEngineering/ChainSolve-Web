@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",
+    "@tanstack/react-virtual": "^3.13.21",
     "@types/dagre": "^0.7.54",
     "@types/katex": "^0.16.8",
     "@xyflow/react": "^12.10.1",
