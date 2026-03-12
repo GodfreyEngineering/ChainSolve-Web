@@ -32,7 +32,8 @@
     "test:coverage": "vitest run --coverage",
     "verify:fast": "bash scripts/verify-fast.sh",
     "verify:ci": "bash scripts/verify-ci.sh",
-    "check:wasm-exports": "node scripts/check-wasm-exports.mjs"
+    "check:wasm-exports": "node scripts/check-wasm-exports.mjs",
+    "doctor": "node scripts/doctor.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",

@@ -346,7 +346,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 ## TIER 16 — DEVELOPER EXPERIENCE & CI/CD
 
-- [ ] **[DEV-01] One-command dev setup script** — Add `scripts/setup.sh` (bash): installs rustup if missing, installs wasm-pack, runs `npm ci`, runs `wasm:build:dev`, copies `.env.example` to `.env` (if not exists). Add `npm run doctor` that verifies all deps and reports status. Update `docs/DEV/FRESH_CLONE.md`. Verify: `bash scripts/setup.sh && npm run dev` works on a fresh machine.
+- [x] **[DEV-01] One-command dev setup script** — Add `scripts/setup.sh` (bash): installs rustup if missing, installs wasm-pack, runs `npm ci`, runs `wasm:build:dev`, copies `.env.example` to `.env` (if not exists). Add `npm run doctor` that verifies all deps and reports status. Update `docs/DEV/FRESH_CLONE.md`. Verify: `bash scripts/setup.sh && npm run dev` works on a fresh machine.
 
 - [ ] **[DEV-02] WASM hot reload for development** — Vite plugin that watches `crates/**/*.rs` with chokidar. On change: runs `npm run wasm:build:dev` then triggers Vite's HMR. Shows "Rebuilding WASM..." toast in the browser. Verify: change a Rust op → browser auto-reloads with new WASM in < 45 seconds.
 
