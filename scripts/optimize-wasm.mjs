@@ -63,18 +63,24 @@ if (wasmFiles.length === 0) {
 }
 
 // ── Feature flags + optimization flags ───────────────────────────
-// Rust/wasm-bindgen output uses bulk-memory (memory.fill, memory.copy)
-// and nontrapping-float-to-int (trunc_sat). These must be enabled
-// explicitly or wasm-opt's validator rejects the module.
+// ENG-09: Use -O3 (speed-optimised) instead of -Oz (size-optimised).
+// Performance is the primary pillar; up to 800 KB raw / 250 KB gzip is
+// acceptable (bundle budgets updated in CLAUDE.md accordingly).
+//
+// Rust/wasm-bindgen output uses bulk-memory (memory.fill, memory.copy),
+// nontrapping-float-to-int (trunc_sat), mutable-globals, and SIMD128.
+// These must be enabled or wasm-opt's validator rejects the module.
 
 const FEATURE_FLAGS = [
   '--enable-bulk-memory',
   '--enable-nontrapping-float-to-int',
   '--enable-bulk-memory-opt',
+  '--enable-mutable-globals',
+  '--enable-simd',
 ]
 
 const OPT_FLAGS = [
-  '-Oz',
+  '-O3',            // Speed-optimised (vs -Oz for size). ENG-09.
   '--strip-debug',
   '--strip-producers',
   '--vacuum',

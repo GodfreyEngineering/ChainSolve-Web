@@ -35,8 +35,8 @@ const MANIFEST_PATH = join(DIST, '.vite', 'manifest.json')
 const KB = 1024
 const BUDGETS = {
   initialGzip: 470 * KB, // initial-load JS closure (gzip) — V3-UI: +20 KB for lucide-react icon system
-  wasmRaw: 650 * KB, // per-WASM file (raw) — headroom for toolchain variance
-  wasmGzip: 200 * KB, // per-WASM file (gzip) — what the CDN actually serves
+  wasmRaw: 800 * KB, // per-WASM file (raw) — ENG-09: -O3 speed build is larger than -Oz
+  wasmGzip: 250 * KB, // per-WASM file (gzip) — ENG-09: updated for speed build
 }
 
 // ── Helpers ───────────────────────────────────────────────────────
