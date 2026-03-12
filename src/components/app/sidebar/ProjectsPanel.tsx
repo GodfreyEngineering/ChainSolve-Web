@@ -210,12 +210,33 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
           <div style={emptyStyle}>{t('home.loadingProjects', 'Loading...')}</div>
         )}
         {!loading && projects.length === 0 && (
-          <div style={emptyStyle}>
-            <div style={{ fontSize: '1.5rem', marginBottom: 4 }}>📁</div>
-            <div>{t('home.noProjectsTitle', 'No projects yet')}</div>
-            <div style={{ fontSize: '0.68rem', opacity: 0.5, marginTop: 2 }}>
-              {t('home.noProjectsHint', 'Create one to get started')}
+          <div style={{ ...emptyStyle, gap: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ fontSize: '2rem', opacity: 0.35 }}>📁</div>
+            <div style={{ fontWeight: 600, opacity: 0.6 }}>
+              {t('home.noProjectsTitle', 'No projects yet')}
             </div>
+            <div style={{ fontSize: '0.68rem', opacity: 0.4 }}>
+              {t('home.noProjectsHint', 'Create your first project to get started')}
+            </div>
+            {canCreateProject(plan, 0) && (
+              <button
+                style={{
+                  marginTop: '0.3rem',
+                  padding: '0.4rem 1rem',
+                  borderRadius: 8,
+                  background: 'var(--primary)',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                }}
+                onClick={onNewProject}
+              >
+                + {t('home.createFirstProject', 'Create project')}
+              </button>
+            )}
           </div>
         )}
         {filtered.map(({ project: proj, matchIndices }) => (

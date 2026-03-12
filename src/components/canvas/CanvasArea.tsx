@@ -2165,17 +2165,77 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         zIndex: 1,
                       }}
                     >
-                      <p
+                      <div
                         style={{
-                          fontSize: '0.85rem',
-                          color: 'rgba(255,255,255,0.2)',
-                          textAlign: 'center',
-                          lineHeight: 1.6,
+                          pointerEvents: 'auto',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '0.6rem',
                           userSelect: 'none',
+                          textAlign: 'center',
+                          padding: '2rem',
+                          borderRadius: 16,
+                          background: 'rgba(255,255,255,0.025)',
+                          border: '1px solid rgba(255,255,255,0.06)',
+                          maxWidth: 320,
                         }}
                       >
-                        {t('canvas.emptyHint')}
-                      </p>
+                        <div style={{ fontSize: '2.2rem', opacity: 0.3, lineHeight: 1 }}>⬡</div>
+                        <div
+                          style={{
+                            fontSize: '1rem',
+                            fontWeight: 700,
+                            color: 'rgba(255,255,255,0.35)',
+                            letterSpacing: '0.01em',
+                          }}
+                        >
+                          {t('canvas.emptyTitle', 'Start building')}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: '0.75rem',
+                            color: 'rgba(255,255,255,0.18)',
+                            lineHeight: 1.7,
+                          }}
+                        >
+                          {t('canvas.emptyHint')}
+                        </div>
+                        <button
+                          style={{
+                            marginTop: '0.3rem',
+                            padding: '0.45rem 1.2rem',
+                            borderRadius: 8,
+                            background: 'var(--primary)',
+                            border: 'none',
+                            color: '#fff',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            opacity: 0.85,
+                            transition: 'opacity 0.15s',
+                          }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.85' }}
+                          onClick={() => {
+                            const cx = window.innerWidth / 2
+                            const cy = window.innerHeight / 2
+                            const fp = screenToFlowPosition({ x: cx, y: cy })
+                            setQuickAdd({ screenX: cx, screenY: cy - 60, flowX: fp.x, flowY: fp.y })
+                          }}
+                        >
+                          + {t('canvas.emptyAddBlock', 'Add first block')}
+                        </button>
+                        <div
+                          style={{
+                            fontSize: '0.65rem',
+                            color: 'rgba(255,255,255,0.12)',
+                          }}
+                        >
+                          {t('canvas.emptyOrDoubleClick', 'or double-click anywhere on the canvas')}
+                        </div>
+                      </div>
                     </div>
                   )}
                   <ReactFlow
