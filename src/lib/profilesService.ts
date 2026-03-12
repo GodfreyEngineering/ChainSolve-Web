@@ -315,29 +315,34 @@ export async function saveDisplayName(name: string): Promise<void> {
   invalidateProfileCache()
 }
 
-/** D12-1: Upload a profile avatar image. Max 2 MB, image/* only. */
+/** D12-1 / ACCT-05: Upload a profile avatar image. Max 2 MB, JPEG/PNG/WebP only. */
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024
+const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
+/**
+ * Upload a pre-processed avatar File (should be 256×256 JPEG from resizeAndCropToSquare).
+ * Validates MIME type and file size, uploads to storage, updates profile.avatar_url.
+ */
 export async function uploadAvatar(file: File): Promise<string> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to upload an avatar')
 
-  if (!file.type.startsWith('image/'))
-    throw new ServiceError('FILE_TOO_LARGE', 'Only image files are allowed for avatars')
+  if (!ALLOWED_AVATAR_TYPES.has(file.type))
+    throw new ServiceError('INVALID_FILE', 'Avatar must be a JPEG, PNG, or WebP image.')
   if (file.size > MAX_AVATAR_BYTES)
     throw new ServiceError(
       'FILE_TOO_LARGE',
       `Avatar must be under ${MAX_AVATAR_BYTES / 1024 / 1024} MB`,
     )
 
-  const ext = file.name.split('.').pop() ?? 'jpg'
-  const storagePath = `${user.id}/avatar_${Date.now()}.${ext}`
+  // Always store as JPEG after resize (file.name already ends in .jpg from resizeAndCropToSquare)
+  const storagePath = `${user.id}/avatar.jpg`
 
   const { error: uploadErr } = await supabase.storage
     .from('uploads')
-    .upload(storagePath, file, { upsert: true, contentType: file.type })
+    .upload(storagePath, file, { upsert: true, contentType: 'image/jpeg' })
   if (uploadErr) throw new ServiceError('STORAGE_ERROR', uploadErr.message, true)
 
   // Save path (not signed URL) to profile — signed URL is generated on read

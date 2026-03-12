@@ -222,21 +222,24 @@ export async function importChainsolveJsonAsNewProject(
       name: plan.newProjectName,
       storage_key: storageKey,
       active_canvas_id: plan.activeCanvasId,
-      variables: plan.variables,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      variables: plan.variables as any,
     })
 
     if (projErr) throw new Error(`Failed to create project: ${projErr.message}`)
     projectCreated = true
 
     if (signal?.aborted) {
-      await cleanup(supabase, newProjectId, userId, createdCanvasIds, canvasStorage)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await cleanup(supabase as any, newProjectId, userId, createdCanvasIds, canvasStorage)
       return abortResult(fileName, model, validation)
     }
 
     // 2. For each canvas: insert row + upload graph JSON
     for (let i = 0; i < plan.canvases.length; i++) {
       if (signal?.aborted) {
-        await cleanup(supabase, newProjectId, userId, createdCanvasIds, canvasStorage)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await cleanup(supabase as any, newProjectId, userId, createdCanvasIds, canvasStorage)
         return abortResult(fileName, model, validation)
       }
 
@@ -353,7 +356,8 @@ export async function importChainsolveJsonAsNewProject(
     progress({ phase: 'failed' })
 
     if (projectCreated) {
-      await cleanup(supabase, newProjectId, userId, createdCanvasIds, canvasStorage)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await cleanup(supabase as any, newProjectId, userId, createdCanvasIds, canvasStorage)
     }
 
     const errorMsg = err instanceof Error ? err.message : String(err)

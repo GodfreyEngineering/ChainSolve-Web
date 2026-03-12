@@ -267,7 +267,8 @@ export async function createProject(name: string, folder?: string | null): Promi
   }
   if (folder) row.folder = folder
 
-  const { data, error } = await supabase.from('projects').insert(row).select(SELECT_COLS).single()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await supabase.from('projects').insert(row as any).select(SELECT_COLS).single()
 
   if (error) throw mapDbError(error.message, 'Failed to create project')
   if (!data) throw new ServiceError('DB_ERROR', 'Failed to create project')

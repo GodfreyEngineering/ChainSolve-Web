@@ -26,6 +26,7 @@ export default {
    * Scheduled handler — runs once per day at 06:00 UTC.
    * Cron schedule configured in wrangler.toml: "0 6 * * *"
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async scheduled(_event: ScheduledEvent, env: Env, _ctx: ExecutionContext): Promise<void> {
     const baseUrl = env.APP_BASE_URL?.replace(/\/$/, "");
     if (!baseUrl) {

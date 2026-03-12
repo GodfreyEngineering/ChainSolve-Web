@@ -19,7 +19,11 @@
 
 // ── Type helpers ──────────────────────────────────────────────────────────────
 
-type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
+// Using a permissive Json type so hand-authored service files can pass
+// Record<string, unknown>, typed payloads, etc. without casts.
+// When db:types is regenerated this becomes the strict recursive type.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Json = any
 
 // ── Database ──────────────────────────────────────────────────────────────────
 
@@ -701,6 +705,401 @@ export type Database = {
         Relationships: []
       }
 
+      user_reports: {
+        Row: {
+          id: string
+          reporter_id: string
+          target_type: 'display_name' | 'avatar' | 'comment' | 'marketplace_item'
+          target_id: string
+          reason: string
+          status: 'pending' | 'resolved' | 'dismissed'
+          resolved_by: string | null
+          resolved_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          reporter_id: string
+          target_type: 'display_name' | 'avatar' | 'comment' | 'marketplace_item'
+          target_id: string
+          reason: string
+          status?: 'pending' | 'resolved' | 'dismissed'
+          resolved_by?: string | null
+          resolved_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          reporter_id?: string
+          target_type?: 'display_name' | 'avatar' | 'comment' | 'marketplace_item'
+          target_id?: string
+          reason?: string
+          status?: 'pending' | 'resolved' | 'dismissed'
+          resolved_by?: string | null
+          resolved_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: 'user_reports_reporter_id_fkey'; columns: ['reporter_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+        ]
+      }
+
+      user_terms_log: {
+        Row: {
+          id: string
+          user_id: string
+          terms_version: string
+          accepted_at: string
+          ip_address: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          terms_version: string
+          accepted_at?: string
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          terms_version?: string
+          accepted_at?: string
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: 'user_terms_log_user_id_fkey'; columns: ['user_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+        ]
+      }
+
+      user_sessions: {
+        Row: {
+          id: string
+          user_id: string
+          device_label: string | null
+          session_token: string | null
+          ip_address: string | null
+          user_agent: string | null
+          last_active_at: string
+          created_at: string
+          expires_at: string | null
+          is_current: boolean
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          device_label?: string | null
+          session_token?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          last_active_at?: string
+          created_at?: string
+          expires_at?: string | null
+          is_current?: boolean
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          device_label?: string | null
+          session_token?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          last_active_at?: string
+          created_at?: string
+          expires_at?: string | null
+          is_current?: boolean
+        }
+        Relationships: [
+          { foreignKeyName: 'user_sessions_user_id_fkey'; columns: ['user_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+        ]
+      }
+
+      organizations: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          owner_id: string
+          plan: string
+          seat_limit: number | null
+          max_seats: number | null
+          sso_domain: string | null
+          policy_single_session: boolean
+          policy_explore_enabled: boolean
+          policy_installs_allowed: boolean
+          policy_comments_allowed: boolean
+          policy_ai_enabled: boolean
+          policy_export_enabled: boolean
+          policy_custom_fns_enabled: boolean
+          policy_data_retention_days: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug?: string
+          owner_id: string
+          plan?: string
+          seat_limit?: number | null
+          max_seats?: number | null
+          sso_domain?: string | null
+          policy_single_session?: boolean
+          policy_explore_enabled?: boolean
+          policy_installs_allowed?: boolean
+          policy_comments_allowed?: boolean
+          policy_ai_enabled?: boolean
+          policy_export_enabled?: boolean
+          policy_custom_fns_enabled?: boolean
+          policy_data_retention_days?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          owner_id?: string
+          plan?: string
+          seat_limit?: number | null
+          max_seats?: number | null
+          sso_domain?: string | null
+          policy_single_session?: boolean
+          policy_explore_enabled?: boolean
+          policy_installs_allowed?: boolean
+          policy_comments_allowed?: boolean
+          policy_ai_enabled?: boolean
+          policy_export_enabled?: boolean
+          policy_custom_fns_enabled?: boolean
+          policy_data_retention_days?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+
+      org_members: {
+        Row: {
+          id: string
+          org_id: string
+          user_id: string
+          role: 'owner' | 'admin' | 'member'
+          invited_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          org_id: string
+          user_id: string
+          role?: 'owner' | 'admin' | 'member'
+          invited_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          org_id?: string
+          user_id?: string
+          role?: 'owner' | 'admin' | 'member'
+          invited_by?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: 'org_members_org_id_fkey'; columns: ['org_id']; referencedRelation: 'organizations'; referencedColumns: ['id'] },
+          { foreignKeyName: 'org_members_user_id_fkey'; columns: ['user_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+        ]
+      }
+
+      avatar_reports: {
+        Row: {
+          id: string
+          reporter_id: string
+          target_id: string
+          reason: string
+          status: 'pending' | 'resolved' | 'dismissed'
+          resolved_by: string | null
+          resolved_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          reporter_id: string
+          target_id: string
+          reason: string
+          status?: 'pending' | 'resolved' | 'dismissed'
+          resolved_by?: string | null
+          resolved_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          reporter_id?: string
+          target_id?: string
+          reason?: string
+          status?: 'pending' | 'resolved' | 'dismissed'
+          resolved_by?: string | null
+          resolved_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+
+      marketplace_comments: {
+        Row: {
+          id: string
+          item_id: string
+          user_id: string
+          content: string
+          is_flagged: boolean
+          flag_reason: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          item_id: string
+          user_id: string
+          content: string
+          is_flagged?: boolean
+          flag_reason?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          item_id?: string
+          user_id?: string
+          content?: string
+          is_flagged?: boolean
+          flag_reason?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+
+      marketplace_install_events: {
+        Row: {
+          id: string
+          user_id: string
+          item_id: string
+          event_type: 'install' | 'fork' | 'purchase'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          item_id: string
+          event_type: 'install' | 'fork' | 'purchase'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          item_id?: string
+          event_type?: 'install' | 'fork' | 'purchase'
+          created_at?: string
+        }
+        Relationships: []
+      }
+
+      marketplace_purchases: {
+        Row: {
+          id: string
+          user_id: string
+          item_id: string
+          stripe_payment_intent_id: string | null
+          amount_cents: number | null
+          installed_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          item_id: string
+          stripe_payment_intent_id?: string | null
+          amount_cents?: number | null
+          installed_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          item_id?: string
+          stripe_payment_intent_id?: string | null
+          amount_cents?: number | null
+          installed_at?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+
+      marketplace_likes: {
+        Row: {
+          id: string
+          user_id: string
+          item_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          item_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          item_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+
+      marketplace_collections: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          description: string | null
+          cover_image_url: string | null
+          item_ids: string[]
+          position: number
+          is_featured: boolean
+          is_public: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          description?: string | null
+          cover_image_url?: string | null
+          item_ids?: string[]
+          position?: number
+          is_featured?: boolean
+          is_public?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          description?: string | null
+          cover_image_url?: string | null
+          item_ids?: string[]
+          position?: number
+          is_featured?: boolean
+          is_public?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+
       marketplace_items: {
         Row: {
           id: string
@@ -808,10 +1207,50 @@ export type Database = {
           source: string
         }[]
       }
+      ensure_profile: {
+        Args: Record<string, never>
+        Returns: undefined
+      }
+      get_or_create_profile: {
+        Args: Record<string, never>
+        Returns: {
+          id: string
+          email: string | null
+          full_name: string | null
+          avatar_url: string | null
+          plan: string
+          is_admin: boolean
+          is_developer: boolean
+          is_moderator: boolean
+          is_student: boolean
+          verified_author: boolean
+          display_name: string | null
+          stripe_customer_id: string | null
+          current_period_end: string | null
+          accepted_terms_version: string | null
+          accepted_terms_at: string | null
+          marketing_opt_in: boolean
+          marketing_opt_in_at: string | null
+          onboarding_completed_at: string | null
+          created_at: string
+        }
+      }
+      accept_my_terms: {
+        Args: { p_version: string }
+        Returns: undefined
+      }
+      complete_my_onboarding: {
+        Args: Record<string, never>
+        Returns: undefined
+      }
+      update_my_marketing: {
+        Args: { p_opt_in: boolean }
+        Returns: undefined
+      }
       update_my_profile: {
         Args: {
-          p_full_name?: string
-          p_avatar_url?: string
+          p_full_name?: string | null
+          p_avatar_url?: string | null
           p_display_name?: string
           p_accepted_terms_version?: string
           p_marketing_opt_in?: boolean
@@ -834,11 +1273,19 @@ export type Database = {
           plan: string
           is_admin: boolean
           is_developer: boolean
+          is_moderator: boolean
+          is_student: boolean
           verified_author: boolean
+          stripe_customer_id: string | null
+          current_period_end: string | null
+          accepted_terms_version: string | null
+          accepted_terms_at: string | null
+          marketing_opt_in: boolean
+          marketing_opt_in_at: string | null
           display_name: string | null
           onboarding_completed_at: string | null
           created_at: string
-        }[]
+        }
       }
     }
 

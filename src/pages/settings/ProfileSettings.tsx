@@ -11,6 +11,11 @@ import {
   saveDisplayName,
   validateDisplayNameFormat,
 } from '../../lib/profilesService'
+import {
+  resizeAndCropToSquare,
+  validateAvatarMimeType,
+  createPreviewUrl,
+} from '../../lib/imageResize'
 import { validateDisplayName } from '../../lib/validateDisplayName'
 import { resolveEffectivePlan } from '../../lib/entitlements'
 import { PlanBadge } from '../../components/ui/PlanBadge'
@@ -141,11 +146,14 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
     }
   }, [handle, onProfileUpdated])
 
-  // ── Avatar upload ─────────────────────────────────────────────────────────
+  // ── Avatar upload (ACCT-05) ──────────────────────────────────────────────
   const fileRef = useRef<HTMLInputElement>(null)
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null)
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [avatarError, setAvatarError] = useState<string | null>(null)
+  // Preview state: file is resized/cropped but not yet uploaded
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (!profile?.avatar_url) {
@@ -161,26 +169,68 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
     }
   }, [profile?.avatar_url])
 
-  const handleAvatarChange = useCallback(
+  // Revoke preview blob URL on unmount or when preview changes
+  useEffect(() => {
+    return () => {
+      if (pendingPreviewUrl) URL.revokeObjectURL(pendingPreviewUrl)
+    }
+  }, [pendingPreviewUrl])
+
+  const handleAvatarFileSelect = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       e.target.value = ''
       if (!file) return
-      setAvatarUploading(true)
       setAvatarError(null)
+
+      // Validate MIME type before processing
+      const mimeError = validateAvatarMimeType(file)
+      if (mimeError) {
+        setAvatarError(mimeError)
+        return
+      }
+
       try {
-        const path = await uploadAvatar(file)
-        const url = await getAvatarUrl(path)
-        setAvatarSrc(url)
-        onProfileUpdated?.()
+        // Resize and center-crop to 256×256
+        const resized = await resizeAndCropToSquare(file, 256)
+        // Revoke previous preview URL
+        if (pendingPreviewUrl) URL.revokeObjectURL(pendingPreviewUrl)
+        const previewUrl = createPreviewUrl(resized)
+        setPendingFile(resized)
+        setPendingPreviewUrl(previewUrl)
       } catch (err: unknown) {
-        setAvatarError(err instanceof Error ? err.message : 'Upload failed')
-      } finally {
-        setAvatarUploading(false)
+        setAvatarError(err instanceof Error ? err.message : 'Failed to process image')
       }
     },
-    [onProfileUpdated],
+    [pendingPreviewUrl],
   )
+
+  const handleAvatarConfirm = useCallback(async () => {
+    if (!pendingFile) return
+    setAvatarUploading(true)
+    setAvatarError(null)
+    try {
+      const path = await uploadAvatar(pendingFile)
+      const url = await getAvatarUrl(path)
+      setAvatarSrc(url)
+      // Clean up preview
+      if (pendingPreviewUrl) URL.revokeObjectURL(pendingPreviewUrl)
+      setPendingFile(null)
+      setPendingPreviewUrl(null)
+      onProfileUpdated?.()
+    } catch (err: unknown) {
+      setAvatarError(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setAvatarUploading(false)
+    }
+  }, [pendingFile, pendingPreviewUrl, onProfileUpdated])
+
+  const handleAvatarCancel = useCallback(() => {
+    if (pendingPreviewUrl) URL.revokeObjectURL(pendingPreviewUrl)
+    setPendingFile(null)
+    setPendingPreviewUrl(null)
+    setAvatarError(null)
+  }, [pendingPreviewUrl])
 
   return (
     <div>
@@ -193,9 +243,9 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
             <span style={fieldLabel}>{t('settings.avatarLabel', 'Profile image')}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={avatarCircle}>
-                {avatarSrc ? (
+                {(pendingPreviewUrl ?? avatarSrc) ? (
                   <img
-                    src={avatarSrc}
+                    src={pendingPreviewUrl ?? avatarSrc!}
                     alt="Avatar"
                     style={{
                       width: '100%',
@@ -210,21 +260,40 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
                   </span>
                 )}
               </div>
-              <button
-                style={smallBtn}
-                disabled={avatarUploading}
-                onClick={() => fileRef.current?.click()}
-              >
-                {avatarUploading
-                  ? t('settings.avatarUploading', 'Uploading\u2026')
-                  : t('settings.avatarUpload', 'Upload image')}
-              </button>
+              {pendingFile ? (
+                <>
+                  <button
+                    style={smallBtn}
+                    disabled={avatarUploading}
+                    onClick={() => void handleAvatarConfirm()}
+                  >
+                    {avatarUploading
+                      ? t('settings.avatarUploading', 'Uploading\u2026')
+                      : t('settings.avatarConfirm', 'Save photo')}
+                  </button>
+                  <button
+                    style={{ ...smallBtn, background: 'transparent', border: '1px solid var(--border)', color: 'inherit' }}
+                    disabled={avatarUploading}
+                    onClick={handleAvatarCancel}
+                  >
+                    {t('settings.cancel', 'Cancel')}
+                  </button>
+                </>
+              ) : (
+                <button
+                  style={smallBtn}
+                  disabled={avatarUploading}
+                  onClick={() => fileRef.current?.click()}
+                >
+                  {t('settings.avatarUpload', 'Upload image')}
+                </button>
+              )}
               <input
                 ref={fileRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 style={{ display: 'none' }}
-                onChange={(e) => void handleAvatarChange(e)}
+                onChange={(e) => void handleAvatarFileSelect(e)}
               />
             </div>
             {avatarError && <span style={errorText}>{avatarError}</span>}

@@ -18,6 +18,7 @@ export type ErrorCode =
   | 'DB_ERROR'
   | 'READ_ONLY_PLAN'
   | 'FILE_TOO_LARGE'
+  | 'INVALID_FILE'
 
 export class ServiceError extends Error {
   readonly code: ErrorCode

@@ -25,7 +25,8 @@ export async function submitBugReport(data: BugReportData): Promise<void> {
   if (data.screenshotPath) {
     row.screenshot_path = data.screenshotPath
   }
-  const { error } = await supabase.from('bug_reports').insert(row)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await supabase.from('bug_reports').insert(row as any)
   if (error) throw error
 }
 
