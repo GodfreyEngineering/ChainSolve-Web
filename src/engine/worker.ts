@@ -31,12 +31,20 @@ import type {
   WorkerResponse,
   EngineEvalResult,
   EngineErrorResult,
+  EngineValue,
   IncrementalEvalResult,
   EvalOptions,
+  BinaryResultScalars,
 } from './wasm-types.ts'
 
-function post(msg: WorkerResponse) {
-  self.postMessage(msg)
+function post(msg: WorkerResponse, transfer?: Transferable[]) {
+  if (transfer && transfer.length > 0) {
+    // Use options form for DedicatedWorkerGlobalScope compatibility
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(self as any).postMessage(msg, transfer)
+  } else {
+    self.postMessage(msg)
+  }
 }
 
 function postError(requestId: number, code: string, err: unknown) {
@@ -50,11 +58,56 @@ function postError(requestId: number, code: string, err: unknown) {
   })
 }
 
+// ── ENG-03: Binary scalar encoding ───────────────────────────────────────────
+
+/**
+ * Encode a values map into binary format for transfer.
+ * Scalar values → Float64Array (Transferable).
+ * Non-scalar values → left in the nonScalars object (structured-cloned).
+ */
+function encodeScalars(values: Record<string, EngineValue>): BinaryResultScalars {
+  const nodeIds: string[] = []
+  const scalarValues: number[] = []
+  const nonScalars: Record<string, EngineValue> = {}
+
+  for (const [nodeId, val] of Object.entries(values)) {
+    if (val.kind === 'scalar') {
+      nodeIds.push(nodeId)
+      scalarValues.push(val.value)
+    } else {
+      nonScalars[nodeId] = val
+    }
+  }
+
+  return {
+    nodeIds,
+    scalars: new Float64Array(scalarValues),
+    nonScalars,
+  }
+}
+
 /** Parse a JSON result that may be an EvalResult or an error object. */
 function parseFullResult(raw: string, requestId: number): void {
   const parsed: EngineEvalResult | EngineErrorResult = JSON.parse(raw)
   if ('error' in parsed) {
     post({ type: 'error', requestId, error: parsed.error })
+    return
+  }
+
+  // ENG-03: if no trace (trace adds complexity), use binary format for scalars.
+  if (!parsed.trace) {
+    const scalars = encodeScalars(parsed.values)
+    post(
+      {
+        type: 'result-binary',
+        requestId,
+        scalars,
+        diagnostics: parsed.diagnostics,
+        elapsedUs: parsed.elapsedUs,
+        partial: parsed.partial,
+      },
+      [scalars.scalars.buffer],
+    )
   } else {
     post({ type: 'result', requestId, result: parsed })
   }
@@ -65,6 +118,25 @@ function parseIncrementalResult(raw: string, requestId: number): void {
   const parsed: IncrementalEvalResult | EngineErrorResult = JSON.parse(raw)
   if ('error' in parsed) {
     post({ type: 'error', requestId, error: parsed.error })
+    return
+  }
+
+  // ENG-03: if no trace, use binary format for changed scalar values.
+  if (!parsed.trace) {
+    const scalars = encodeScalars(parsed.changedValues)
+    post(
+      {
+        type: 'incremental-binary',
+        requestId,
+        scalars,
+        diagnostics: parsed.diagnostics,
+        elapsedUs: parsed.elapsedUs,
+        evaluatedCount: parsed.evaluatedCount,
+        totalCount: parsed.totalCount,
+        partial: parsed.partial,
+      },
+      [scalars.scalars.buffer],
+    )
   } else {
     post({ type: 'incremental', requestId, result: parsed })
   }

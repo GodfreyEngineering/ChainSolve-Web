@@ -29,6 +29,40 @@ import type {
   WorkerResponse,
 } from './wasm-types.ts'
 
+// ── ENG-03: Binary result decoding ───────────────────────────────────────────
+
+/** Reconstruct EngineEvalResult from a binary-format result-binary message. */
+function decodeBinaryFullResult(msg: Extract<WorkerResponse, { type: 'result-binary' }>): EngineEvalResult {
+  const values: EngineEvalResult['values'] = { ...msg.scalars.nonScalars }
+  const { nodeIds, scalars } = msg.scalars
+  for (let i = 0; i < nodeIds.length; i++) {
+    values[nodeIds[i]] = { kind: 'scalar', value: scalars[i] }
+  }
+  return {
+    values,
+    diagnostics: msg.diagnostics,
+    elapsedUs: msg.elapsedUs,
+    partial: msg.partial,
+  }
+}
+
+/** Reconstruct IncrementalEvalResult from a binary-format incremental-binary message. */
+function decodeBinaryIncrementalResult(msg: Extract<WorkerResponse, { type: 'incremental-binary' }>): IncrementalEvalResult {
+  const changedValues: IncrementalEvalResult['changedValues'] = { ...msg.scalars.nonScalars }
+  const { nodeIds, scalars } = msg.scalars
+  for (let i = 0; i < nodeIds.length; i++) {
+    changedValues[nodeIds[i]] = { kind: 'scalar', value: scalars[i] }
+  }
+  return {
+    changedValues,
+    diagnostics: msg.diagnostics,
+    elapsedUs: msg.elapsedUs,
+    evaluatedCount: msg.evaluatedCount,
+    totalCount: msg.totalCount,
+    partial: msg.partial,
+  }
+}
+
 export type {
   EngineSnapshotV1,
   EngineEvalResult,
@@ -256,7 +290,13 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
         return
       }
 
-      if (msg.type === 'result' || msg.type === 'incremental' || msg.type === 'error') {
+      if (
+        msg.type === 'result' ||
+        msg.type === 'incremental' ||
+        msg.type === 'result-binary' ||
+        msg.type === 'incremental-binary' ||
+        msg.type === 'error'
+      ) {
         clearWatchdog()
         const p = pending.get(msg.requestId)
         if (!p) return
@@ -270,6 +310,12 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
         } else if (msg.type === 'incremental' && p.kind === 'incremental') {
           if (msg.result.trace) lastTrace = msg.result.trace
           p.resolve(msg.result)
+        } else if (msg.type === 'result-binary' && p.kind === 'full') {
+          // ENG-03: decode binary scalar result back into EngineEvalResult
+          p.resolve(decodeBinaryFullResult(msg))
+        } else if (msg.type === 'incremental-binary' && p.kind === 'incremental') {
+          // ENG-03: decode binary incremental result back into IncrementalEvalResult
+          p.resolve(decodeBinaryIncrementalResult(msg))
         }
       }
     })

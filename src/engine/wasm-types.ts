@@ -147,6 +147,24 @@ export interface EngineStats {
   datasetTotalBytes: number
 }
 
+// ── Binary result format (ENG-03) ────────────────────────────────
+//
+// For scalar-heavy graphs, the worker encodes all scalar values as a
+// Float64Array (Transferable — zero-copy) plus a parallel nodeIds string[].
+// Non-scalar values (vectors, tables, errors) are still JSON-cloned but
+// are typically absent for all-scalar graphs.
+//
+// This avoids structured-cloning 1000+ { kind: 'scalar', value: N } objects.
+
+export interface BinaryResultScalars {
+  /** Ordered nodeIds whose values are in `scalars`. */
+  nodeIds: string[]
+  /** Scalar values, one per nodeId. Transferred as Transferable (zero-copy). */
+  scalars: Float64Array
+  /** Any non-scalar values (vectors, tables, errors). */
+  nonScalars: Record<string, EngineValue>
+}
+
 /** Messages sent from worker → main thread. */
 export type WorkerResponse =
   | {
@@ -161,6 +179,26 @@ export type WorkerResponse =
     }
   | { type: 'result'; requestId: number; result: EngineEvalResult }
   | { type: 'incremental'; requestId: number; result: IncrementalEvalResult }
+  | {
+      /** ENG-03: binary-encoded scalar result (Float64Array Transferable). */
+      type: 'result-binary'
+      requestId: number
+      scalars: BinaryResultScalars
+      diagnostics: EngineDiagnostic[]
+      elapsedUs: number
+      partial?: boolean
+    }
+  | {
+      /** ENG-03: binary-encoded incremental scalar result. */
+      type: 'incremental-binary'
+      requestId: number
+      scalars: BinaryResultScalars
+      diagnostics: EngineDiagnostic[]
+      elapsedUs: number
+      evaluatedCount: number
+      totalCount: number
+      partial?: boolean
+    }
   | { type: 'error'; requestId: number; error: { code: string; message: string } }
   | { type: 'init-error'; error: { code: string; message: string } }
   | {
