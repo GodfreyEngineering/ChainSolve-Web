@@ -244,7 +244,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[PROJ-02] Autosave reliability: queue + retry + feedback** — Exponential backoff retry (1s, 2s, 4s, max 3 attempts). Persistent toast on failure: "Auto-save failed — click to save manually." "Last saved: N min ago" in status bar. `beforeunload` dialog if dirty. Verify: go offline, make changes, reconnect → auto-save succeeds.
 
-- [ ] **[PROJ-03] Project load: robust with fallback** — Wrap load sequence in structured try/catch. Missing canvas storage JSON → empty canvas with yellow warning banner (not crash). Recovery screen with Retry and Project Manager buttons. Log errors to `observability_events`. Verify: corrupt canvas JSON → project opens with warning; other canvases intact.
+- [x] **[PROJ-03] Project load: robust with fallback** — Canvas storage errors fall back to empty canvas + amber warning banner (not crash). Error screen has Retry button + Project Manager link. Observability breadcrumbs + captureReactBoundary for both error paths. Verify: corrupt canvas JSON → project opens with warning; other canvases intact.
 
 - [ ] **[PROJ-04] Project folders: full UI** — Sidebar tree with expandable folder nodes. Drag project onto folder to move. Right-click folder: Rename, Delete (move contents to root), New Project Here. "Unfiled" section for `folder = NULL`. "New Folder" button. Verify: create folder → drag projects in → persists across sessions.
 

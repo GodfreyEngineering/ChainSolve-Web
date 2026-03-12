@@ -2,6 +2,7 @@
  * ProjectsPanel — sidebar tab showing the user's projects.
  *
  * Compact list view of projects with search, create, and open actions.
+ * PROJ-05: Fuzzy search with match highlighting.
  */
 
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
@@ -59,17 +60,29 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
   const allowCreate = canCreateProject(plan, projects.length)
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    let list = projects
+    const q = query.trim()
+    // Build list with fuzzy match results
+    type Scored = { project: ProjectRow; score: number; matchIndices: number[] }
+    let scored: Scored[]
     if (q) {
-      list = list.filter((p) => p.name.toLowerCase().includes(q))
+      scored = projects
+        .map((p) => {
+          const m = fuzzyMatch(q, p.name)
+          return m ? { project: p, score: m.score, matchIndices: m.indices } : null
+        })
+        .filter((x): x is Scored => x !== null)
+    } else {
+      scored = projects.map((p) => ({ project: p, score: 1, matchIndices: [] }))
     }
-    // Sort: pinned first, then by updated_at desc
-    return [...list].sort((a, b) => {
-      const ap = pinnedIds.has(a.id) ? 0 : 1
-      const bp = pinnedIds.has(b.id) ? 0 : 1
+    // Sort: pinned first, then by fuzzy score desc (when querying), then by updated_at desc
+    return scored.sort((a, b) => {
+      const ap = pinnedIds.has(a.project.id) ? 0 : 1
+      const bp = pinnedIds.has(b.project.id) ? 0 : 1
       if (ap !== bp) return ap - bp
-      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      if (q && a.score !== b.score) return b.score - a.score
+      return (
+        new Date(b.project.updated_at).getTime() - new Date(a.project.updated_at).getTime()
+      )
     })
   }, [projects, query, pinnedIds])
 
@@ -194,11 +207,12 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
             </div>
           </div>
         )}
-        {filtered.map((proj) => (
+        {filtered.map(({ project: proj, matchIndices }) => (
           <ProjectRow
             key={proj.id}
             project={proj}
             pinned={pinnedIds.has(proj.id)}
+            matchIndices={matchIndices}
             menuOpen={menuOpen === proj.id}
             onOpen={() => onOpenProject(proj.id)}
             onMenuToggle={() => setMenuOpen(menuOpen === proj.id ? null : proj.id)}
@@ -218,6 +232,7 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
 interface ProjectRowProps {
   project: import('../../../lib/projects').ProjectRow
   pinned: boolean
+  matchIndices: number[]
   menuOpen: boolean
   onOpen: () => void
   onMenuToggle: () => void
@@ -230,6 +245,7 @@ interface ProjectRowProps {
 function ProjectRow({
   project,
   pinned,
+  matchIndices,
   menuOpen,
   onOpen,
   onMenuToggle,
@@ -256,7 +272,9 @@ function ProjectRow({
       {pinned && (
         <span style={{ fontSize: '0.6rem', color: 'var(--warning)', flexShrink: 0 }}>★</span>
       )}
-      <span style={rowNameStyle}>{project.name}</span>
+      <span style={rowNameStyle}>
+        <HighlightedName name={project.name} indices={matchIndices} />
+      </span>
       <span style={rowDateStyle}>{fmtDate(project.updated_at)}</span>
       {hovered && (
         <div style={{ position: 'relative' }}>
@@ -324,6 +342,77 @@ function ProjectRow({
       )}
     </div>
   )
+}
+
+/**
+ * Fuzzy match `query` against `target` (case-insensitive).
+ * Returns matched character indices + a score, or null if no match.
+ * Higher score = better match (consecutive runs score higher).
+ */
+function fuzzyMatch(query: string, target: string): { score: number; indices: number[] } | null {
+  if (!query) return { score: 1, indices: [] }
+  const q = query.toLowerCase()
+  const t = target.toLowerCase()
+  const indices: number[] = []
+  let qi = 0
+  let ti = 0
+  while (qi < q.length && ti < t.length) {
+    if (q[qi] === t[ti]) {
+      indices.push(ti)
+      qi++
+    }
+    ti++
+  }
+  if (qi < q.length) return null // not all query chars matched
+  // Score: bonus for consecutive runs and prefix match
+  let score = 1
+  let run = 1
+  for (let i = 1; i < indices.length; i++) {
+    if (indices[i] === indices[i - 1] + 1) {
+      run++
+      score += run // consecutive chars score higher
+    } else {
+      run = 1
+    }
+  }
+  if (indices[0] === 0) score += 10 // prefix match bonus
+  return { score, indices }
+}
+
+/**
+ * Render a project name with fuzzy-matched characters highlighted.
+ */
+function HighlightedName({
+  name,
+  indices,
+}: {
+  name: string
+  indices: number[]
+}) {
+  if (indices.length === 0) return <>{name}</>
+  const set = new Set(indices)
+  const parts: React.ReactNode[] = []
+  let i = 0
+  while (i < name.length) {
+    if (set.has(i)) {
+      // Collect consecutive highlighted chars
+      let j = i
+      while (j < name.length && set.has(j)) j++
+      parts.push(
+        <span key={i} style={{ color: 'var(--primary)', fontWeight: 600 }}>
+          {name.slice(i, j)}
+        </span>,
+      )
+      i = j
+    } else {
+      // Collect non-highlighted chars
+      let j = i
+      while (j < name.length && !set.has(j)) j++
+      parts.push(<span key={i}>{name.slice(i, j)}</span>)
+      i = j
+    }
+  }
+  return <>{parts}</>
 }
 
 function fmtDate(iso: string): string {
