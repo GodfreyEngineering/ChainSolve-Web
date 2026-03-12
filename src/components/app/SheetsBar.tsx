@@ -277,7 +277,7 @@ function DesktopSheetsBar({
   const canDelete = canvases.length > 1
 
   return (
-    <div style={barStyle}>
+    <div style={barStyle} data-tour="sheets-bar">
       <div style={tabsContainerStyle}>
         {canvases.map((canvas) => {
           const isActive = canvas.id === activeCanvasId

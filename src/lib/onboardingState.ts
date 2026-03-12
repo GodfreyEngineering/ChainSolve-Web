@@ -19,6 +19,12 @@ export const ONBOARDING_STEPS = [
   'use_inspector',
   'save_project',
   'open_reporting',
+  // UX-23: additional steps — appended to preserve existing user progress
+  'table_input',
+  'problems_panel',
+  'variables_panel',
+  'sheets_tabs',
+  'ai_copilot',
 ] as const
 
 export type OnboardingStepId = (typeof ONBOARDING_STEPS)[number]

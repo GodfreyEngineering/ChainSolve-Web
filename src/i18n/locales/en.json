@@ -1224,6 +1224,31 @@
         "short": "Reporting (Pro)",
         "title": "Export reports and notation",
         "description": "Pro users can export PDF and Excel reports, view scientific notation for computation chains, and share results. Access these from the File menu."
+      },
+      "table_input": {
+        "short": "Table Input",
+        "title": "Import and work with tables",
+        "description": "The Table Input block lets you enter or import tabular data (e.g. from CSV). Each column can be connected to downstream blocks or plotted directly. Find it in the Data category of the block library."
+      },
+      "problems_panel": {
+        "short": "Problems panel",
+        "title": "View errors and warnings",
+        "description": "The Problems panel (bottom dock) lists all errors and warnings in your canvas — from divide-by-zero to disconnected ports. Click any problem to jump to the affected block."
+      },
+      "variables_panel": {
+        "short": "Variables panel",
+        "title": "Manage named variables",
+        "description": "The Variables panel lets you create named variables (like x = 3.14) and bind them to Number or Slider blocks. Change a variable once and every bound block updates automatically."
+      },
+      "sheets_tabs": {
+        "short": "Sheets tabs",
+        "title": "Work across multiple sheets",
+        "description": "Each project can have multiple Sheets (canvases). Use the Sheets bar to switch between them, add new ones, or rename and reorder them. Sheets share the same Variables."
+      },
+      "ai_copilot": {
+        "short": "AI Copilot",
+        "title": "Get help from the AI Copilot",
+        "description": "The AI Copilot panel (right side) can suggest block chains from natural language, explain your graph, find errors, and more. Click the Sparkles icon or press Ctrl+Shift+A to open it."
       }
     }
   },

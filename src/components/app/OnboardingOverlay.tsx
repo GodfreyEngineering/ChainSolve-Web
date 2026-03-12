@@ -39,6 +39,12 @@ const STEP_TARGETS: Record<OnboardingStepId, string> = {
   use_inspector: 'inspector-panel',
   save_project: 'btn-save',
   open_reporting: 'menu-file',
+  // UX-23: new steps
+  table_input: 'block-library',
+  problems_panel: 'problems-panel',
+  variables_panel: 'variables-panel',
+  sheets_tabs: 'sheets-bar',
+  ai_copilot: 'ai-copilot',
 }
 
 export interface OnboardingOverlayProps {

@@ -831,7 +831,7 @@ export function VariablesPanel({ open, onClose }: VariablesPanelProps) {
   )
 
   return (
-    <div ref={panelRef} style={panelStyle}>
+    <div ref={panelRef} style={panelStyle} data-tour="variables-panel">
       {/* Header */}
       <div style={headerStyle}>
         <div style={{ display: 'flex', alignItems: 'center' }}>

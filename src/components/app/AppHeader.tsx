@@ -165,6 +165,13 @@ export function AppHeader({
     }
   }, [saveAsRequested, onSaveAsRequestHandled])
 
+  // UX-23: Listen for tour restart event dispatched from Settings
+  useEffect(() => {
+    const handler = () => setTourOpen(true)
+    window.addEventListener('cs:restart-tour', handler)
+    return () => window.removeEventListener('cs:restart-tour', handler)
+  }, [])
+
   // Close menus on Escape
   useEffect(() => {
     if (!openMenu) return

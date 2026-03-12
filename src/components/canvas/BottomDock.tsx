@@ -214,6 +214,7 @@ export function BottomDock({
               key={panel.id}
               className="cs-dock-tab"
               data-active={panel.id === activeTab}
+              data-tour={panel.id === 'problems' ? 'problems-panel' : undefined}
               onClick={() => switchTab(panel.id)}
               title={panel.label}
               aria-label={panel.label}

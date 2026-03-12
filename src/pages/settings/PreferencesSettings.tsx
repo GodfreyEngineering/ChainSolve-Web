@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Select } from '../../components/ui/Select'
 import { Button } from '../../components/ui/Button'
 import { SUPPORTED_LANGUAGES } from '../../i18n/config'
+import { resetOnboarding } from '../../lib/onboardingState'
 import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../../lib/build-info'
 const LazyFeedbackModal = lazy(() =>
   import('../../components/FeedbackModal').then((m) => ({ default: m.FeedbackModal })),
@@ -161,7 +162,7 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
           </div>
 
           {/* Feedback */}
-          <div style={{ marginTop: '2rem', display: 'flex', gap: '0.75rem' }}>
+          <div style={{ marginTop: '2rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <Button
               variant="secondary"
               size="sm"
@@ -181,6 +182,17 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
               }}
             >
               {t('settings.suggest')}
+            </Button>
+            {/* UX-23: Tour restart from Settings */}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                resetOnboarding()
+                window.dispatchEvent(new CustomEvent('cs:restart-tour'))
+              }}
+            >
+              {t('settings.restartTour', 'Restart tutorial')}
             </Button>
           </div>
         </>

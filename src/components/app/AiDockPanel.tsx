@@ -142,7 +142,7 @@ export function AiDockPanel({ children, open, onRequestOpen }: AiDockPanelProps)
 
   // Expanded panel
   return (
-    <div style={{ ...panelStyle, width }}>
+    <div style={{ ...panelStyle, width }} data-tour="ai-copilot">
       {/* Resize handle on left edge */}
       <AiDockHandle
         side="collapse"
