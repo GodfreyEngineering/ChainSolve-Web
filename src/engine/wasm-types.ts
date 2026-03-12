@@ -135,7 +135,12 @@ export type WorkerRequest =
       portId: string
       value: number
     }
-  | { type: 'registerDataset'; datasetId: string; buffer: ArrayBuffer }
+  | {
+      type: 'registerDataset'
+      datasetId: string
+      /** ArrayBuffer (transferred) or SharedArrayBuffer (zero-copy, ENG-02). */
+      buffer: ArrayBuffer | SharedArrayBuffer
+    }
   | { type: 'releaseDataset'; datasetId: string }
   | { type: 'cancel'; requestId: number }
   | { type: 'getStats'; requestId: number }

@@ -472,14 +472,26 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
     },
 
     registerDataset(id, data) {
-      const buffer = data.buffer.slice(
-        data.byteOffset,
-        data.byteOffset + data.byteLength,
-      ) as ArrayBuffer
-      worker.postMessage(
-        { type: 'registerDataset', datasetId: id, buffer } satisfies WorkerRequest,
-        [buffer],
-      )
+      // ENG-02: When the page is cross-origin isolated (COOP+COEP headers set),
+      // SharedArrayBuffer is available and enables zero-copy transfer — the main
+      // thread and worker share the same memory without copying or transferring.
+      // Fallback: copy-then-transfer ArrayBuffer (original path).
+      if (typeof SharedArrayBuffer !== 'undefined' && crossOriginIsolated) {
+        const sab = new SharedArrayBuffer(data.byteLength)
+        new Float64Array(sab).set(new Float64Array(data.buffer, data.byteOffset, data.length))
+        worker.postMessage(
+          { type: 'registerDataset', datasetId: id, buffer: sab } satisfies WorkerRequest,
+        )
+      } else {
+        const buffer = data.buffer.slice(
+          data.byteOffset,
+          data.byteOffset + data.byteLength,
+        ) as ArrayBuffer
+        worker.postMessage(
+          { type: 'registerDataset', datasetId: id, buffer } satisfies WorkerRequest,
+          [buffer],
+        )
+      }
     },
 
     releaseDataset(id) {

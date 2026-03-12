@@ -49,6 +49,11 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=(), bluetooth=()
   X-XSS-Protection: 0
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  # ENG-02: COOP/COEP enable SharedArrayBuffer for zero-copy dataset transfer.
+  # require-corp enforces that all embedded cross-origin resources must opt in
+  # via their own CORP header. Stripe, Cloudflare, and Google Fonts all do so.
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
   # 'wasm-unsafe-eval' permits WebAssembly.instantiateStreaming() in the Rust/WASM
   # engine worker without enabling arbitrary eval(). See docs/SECURITY.md §2.
   # CSP reports route to /api/report/csp (W9.8 observability pipeline).
