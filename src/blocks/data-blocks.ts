@@ -1,25 +1,17 @@
 /**
  * data-blocks.ts — Data input blocks (Pro only).
  *
- * List Input — uses the csData node kind, produces a 1xN vector.
- * Evaluation is handled by the Rust/WASM engine.
- * Exports a registration function called by registry.ts (no circular imports).
+ * BUG-13: vectorInput removed — Table Input (tableInput) is now the sole data
+ * input block, registered in table-blocks.ts. Old vectorInput nodes in saved
+ * projects are transparently migrated to tableInput by canvasSchema.ts.
+ *
+ * This module is kept as a no-op export to avoid import breakage.
+ * Callers: registry.ts → registerDataBlocks.
  */
 
 import type { BlockDef } from './types'
 
-export function registerDataBlocks(register: (def: BlockDef) => void): void {
-  register({
-    type: 'vectorInput',
-    label: 'Array Input',
-    category: 'data',
-    nodeKind: 'csData',
-    inputs: [],
-    proOnly: true,
-    defaultData: {
-      blockType: 'vectorInput',
-      label: 'Array',
-      vectorData: [],
-    },
-  })
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function registerDataBlocks(_register: (def: BlockDef) => void): void {
+  // No-op: vectorInput removed. tableInput is registered in table-blocks.ts.
 }

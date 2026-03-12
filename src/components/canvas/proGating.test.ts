@@ -48,8 +48,8 @@ describe('Pro feature gating', () => {
   })
 
   it('no Free-category block has proOnly: true (except known Pro upgrades)', () => {
-    // material_full is a Pro upgrade of the Free material block, same category
-    const KNOWN_PRO_IN_FREE_CATEGORY = new Set(['material_full'])
+    // BUG-12: material (unified full) is Pro-only but lives in presetMaterials (free category)
+    const KNOWN_PRO_IN_FREE_CATEGORY = new Set(['material'])
     const wrongly: string[] = []
     for (const def of BLOCK_REGISTRY.values()) {
       if (
@@ -233,9 +233,11 @@ describe('Constants catalog (D7-3)', () => {
 
 describe('Materials catalog (D7-4 / H3-1)', () => {
   it('unified material block is registered', () => {
+    // BUG-12: 'material' now maps to csMaterial (full multi-output block).
+    // Old simple csSource material block removed; material_full renamed to 'material'.
     const def = BLOCK_REGISTRY.get('material')
     expect(def).toBeDefined()
-    expect(def!.nodeKind).toBe('csSource')
+    expect(def!.nodeKind).toBe('csMaterial')
     expect(def!.category).toBe('presetMaterials')
     expect(def!.inputs).toEqual([])
   })

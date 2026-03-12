@@ -281,10 +281,17 @@ describe('duplicateProject — no canvases / no assets', () => {
     expect(proj.updated_at).toBe('2025-01-02T00:00:00Z')
   })
 
-  it('does not call createCanvas when source has no canvases', async () => {
+  it('creates a legacy Sheet 1 canvas when source has no canvases (BUG-05 fallback)', async () => {
+    // BUG-05: legacy projects with no canvas rows fall back to creating one
+    // 'Sheet 1' canvas from the monolithic srcGraph stored in project.json.
     await duplicateProject(SRC_ID, NEW_NAME)
-    expect(CanvasesMod.createCanvas).not.toHaveBeenCalled()
-    expect(CanvasesMod.setActiveCanvas).not.toHaveBeenCalled()
+    expect(CanvasesMod.createCanvas).toHaveBeenCalledOnce()
+    expect(CanvasesMod.createCanvas).toHaveBeenCalledWith(
+      NEW_ID,
+      'Sheet 1',
+      expect.objectContaining({ nodes: expect.any(Array), edges: expect.any(Array) }),
+    )
+    expect(CanvasesMod.setActiveCanvas).toHaveBeenCalledOnce()
   })
 
   it('does not download or upload assets when source has no assets', async () => {

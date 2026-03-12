@@ -137,6 +137,84 @@ export function buildCanvasJsonFromGraph(
   }
 }
 
+// ── Node-level migrations (applied after V4 load) ───────────────────────────
+
+/**
+ * Migrate individual nodes within a V4 canvas:
+ *
+ * BUG-12: Old simple 'material' (csSource) → full material (csMaterial).
+ *   Old nodes: type='csSource', data.blockType='material'
+ *   New nodes: type='csMaterial', data.blockType='material'
+ *   (Registry no longer has a csSource entry for blockType='material';
+ *    'material' now maps to csMaterial from the renamed material_full block.)
+ *
+ * BUG-13: 'vectorInput' → 'tableInput' with a single 'Value' column.
+ *   Old nodes: type='csData', data.blockType='vectorInput', data.vectorData=number[]
+ *   New nodes: type='csData', data.blockType='tableInput',
+ *              data.tableData={ columns:['Value'], rows:[[v], [v], ...] }
+ *   Edges from the old 'out' handle are remapped to 'col_0'.
+ */
+function migrateCanvasNodes(canvas: CanvasJSON): CanvasJSON {
+  const vectorInputIds = new Set<string>()
+  let nodesMutated = false
+
+  const nodes = canvas.nodes.map((node) => {
+    const n = node as Record<string, unknown>
+    const data = (n.data as Record<string, unknown>) ?? {}
+    const blockType = data.blockType as string | undefined
+
+    // BUG-12: simple material (csSource) → full material (csMaterial).
+    // Also update blockType from 'material' to 'material_full' to match the Rust op.
+    if (blockType === 'material' && n.type === 'csSource') {
+      nodesMutated = true
+      return { ...n, type: 'csMaterial', data: { ...data, blockType: 'material_full' } }
+    }
+
+    // BUG-13: vectorInput → tableInput (single-column)
+    if (blockType === 'vectorInput') {
+      nodesMutated = true
+      const nodeId = n.id as string | undefined
+      if (nodeId) vectorInputIds.add(nodeId)
+      const vectorData = (data.vectorData as number[] | undefined) ?? []
+      const { vectorData: _v, ...restData } = data
+      void _v // intentionally unused
+      return {
+        ...n,
+        type: 'csData',
+        data: {
+          ...restData,
+          blockType: 'tableInput',
+          label: (data.label as string | undefined) ?? 'Table',
+          tableData: {
+            columns: ['Value'],
+            rows: vectorData.map((v) => [v]),
+          },
+        },
+      }
+    }
+
+    return node
+  })
+
+  // BUG-13: remap edges from vectorInput's 'out' handle → tableInput's 'col_0'
+  let edgesMutated = false
+  const edges = canvas.edges.map((edge) => {
+    const e = edge as Record<string, unknown>
+    if (
+      typeof e.source === 'string' &&
+      vectorInputIds.has(e.source) &&
+      e.sourceHandle === 'out'
+    ) {
+      edgesMutated = true
+      return { ...e, sourceHandle: 'col_0' }
+    }
+    return edge
+  })
+
+  if (!nodesMutated && !edgesMutated) return canvas
+  return { ...canvas, nodes, edges }
+}
+
 // ── V3 → V4 Migration ──────────────────────────────────────────────────────
 
 /**
@@ -190,9 +268,10 @@ export function parseCanvasJson(raw: unknown, canvasId: string, projectId: strin
       console.warn('[canvas] Invalid V4 canvas JSON — using empty canvas. Errors:', result.errors)
       return buildCanvasJson(canvasId, projectId)
     }
-    return obj as unknown as CanvasJSON
+    return migrateCanvasNodes(obj as unknown as CanvasJSON)
   }
 
   // Legacy format encountered in storage — migrate transparently
-  return migrateV3toV4(raw, canvasId, projectId)
+  const v4 = migrateV3toV4(raw, canvasId, projectId)
+  return migrateCanvasNodes(v4)
 }

@@ -78,20 +78,14 @@ reg({
   defaultData: { blockType: 'constant', label: 'Constant' },
 })
 
-// D7-4: Unified material/fluid picker (single-output, legacy)
+// BUG-12: Single unified Material block (multi-output, formerly material_full).
+// TS type key is 'material' (block library entry), but the Rust op is 'material_full'
+// (stored as data.blockType). 'material' is in UI_ONLY_BLOCKS because its TS type key
+// differs from the Rust op name. Old simple 'material' (csSource) is migrated via
+// canvasSchema.ts: type→csMaterial, data.blockType→'material_full'.
 reg({
   type: 'material',
   label: 'Material',
-  category: 'presetMaterials',
-  nodeKind: 'csSource',
-  inputs: [],
-  defaultData: { blockType: 'material', label: 'Material' },
-})
-
-// Phase 10: Multi-output material block — all properties as separate outputs
-reg({
-  type: 'material_full',
-  label: 'Material (Full)',
   category: 'presetMaterials',
   nodeKind: 'csMaterial',
   inputs: [],
@@ -603,7 +597,7 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
     subcategories: [
       { id: 'inputNumber', label: 'Standard number input', blockTypes: ['number'] },
       { id: 'inputSlider', label: 'Slider input', blockTypes: ['slider'] },
-      { id: 'inputMaterial', label: 'Material input', blockTypes: ['material', 'material_full'] },
+      { id: 'inputMaterial', label: 'Material input', blockTypes: ['material'] },
       {
         id: 'inputConstant',
         label: 'Constant input',
@@ -772,6 +766,9 @@ for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {
  * when the user makes a selection. They never reach the Rust engine directly.
  * Exported for tests (G0-6).
  */
+// 'constant' and 'material' are UI-only in the sense that their TS registry type
+// key ('constant', 'material') does not correspond to a Rust op with the same name.
+// The actual Rust ops for material are named 'material_full' (stored in data.blockType).
 export const UI_ONLY_BLOCKS: ReadonlySet<string> = new Set(['constant', 'material'])
 
 /**

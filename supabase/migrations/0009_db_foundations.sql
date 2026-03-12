@@ -65,8 +65,7 @@ CREATE POLICY assets_delete_own ON public.project_assets
 CREATE OR REPLACE FUNCTION public.delete_my_account()
 RETURNS jsonb
 LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
+SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
   _uid        uuid := auth.uid();
@@ -192,8 +191,7 @@ CREATE UNIQUE INDEX profiles_display_name_ci
 CREATE OR REPLACE FUNCTION public.check_display_name_available(p_name text)
 RETURNS boolean
 LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
+SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
   IF auth.uid() IS NULL THEN
@@ -239,8 +237,7 @@ CREATE OR REPLACE FUNCTION public.save_project_metadata(
 )
 RETURNS TABLE(updated_at timestamptz, conflict boolean)
 LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
+SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
   _current_updated_at timestamptz;
@@ -568,9 +565,7 @@ ON CONFLICT (id) DO UPDATE SET
 CREATE OR REPLACE FUNCTION public.get_constant(p_id text)
 RETURNS public.math_constants
 LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
+STABLE SECURITY DEFINER SET search_path = public
 AS $$
   SELECT * FROM public.math_constants WHERE id = p_id;
 $$;
@@ -679,8 +674,7 @@ CREATE INDEX IF NOT EXISTS idx_snapshots_project_canvas
 CREATE OR REPLACE FUNCTION public.enforce_snapshot_limit()
 RETURNS trigger
 LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
+SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
   _excess_count int;

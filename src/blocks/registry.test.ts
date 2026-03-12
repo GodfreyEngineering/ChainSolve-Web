@@ -116,6 +116,12 @@ describe('UI-only blocks', () => {
 
 // ── Every TS registry entry (non-UI-only) has a Rust catalog counterpart ────
 
+// Deprecated Rust ops: remain in catalog.rs for backward compat with existing
+// WASM builds but no longer exposed in the TS registry.
+// BUG-12: material_full renamed → 'material' (csMaterial nodeKind).
+// BUG-13: vectorInput removed; migrated to tableInput on project load.
+const DEPRECATED_RUST_OPS = new Set(['material_full', 'vectorInput'])
+
 describe('TS / Rust catalog alignment', () => {
   const catalogSrc = fs.readFileSync(
     path.resolve(__dirname, '..', '..', 'crates', 'engine-core', 'src', 'catalog.rs'),
@@ -137,6 +143,7 @@ describe('TS / Rust catalog alignment', () => {
   it('every Rust catalog op has a TS registry entry', () => {
     const missingFromTs: string[] = []
     for (const opId of rustOpIds) {
+      if (DEPRECATED_RUST_OPS.has(opId)) continue
       if (!BLOCK_REGISTRY.has(opId)) {
         missingFromTs.push(opId)
       }

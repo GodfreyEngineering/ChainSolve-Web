@@ -91,7 +91,10 @@ describe('Block catalog sanity (F6-2)', () => {
       })
 
       it('defaultData.blockType matches registry key', () => {
-        expect(def.defaultData.blockType).toBe(type)
+        // 'material' uses blockType='material_full' to match the Rust op name (BUG-12).
+        const BLOCKTYPE_EXCEPTIONS: Record<string, string> = { material: 'material_full' }
+        const expected = BLOCKTYPE_EXCEPTIONS[type] ?? type
+        expect(def.defaultData.blockType).toBe(expected)
       })
 
       it('defaultData.label is a non-empty string', () => {

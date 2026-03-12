@@ -3,7 +3,7 @@
  *
  * Reads Rust catalog op_ids from catalog.rs source and compares against
  * the TS BLOCK_REGISTRY. Fails if either side has ops the other lacks
- * (excluding UI-only blocks like constant, material).
+ * (excluding UI-only blocks like constant, and deprecated Rust ops).
  */
 
 import { describe, it, expect } from 'vitest'
@@ -13,6 +13,11 @@ import { BLOCK_REGISTRY } from './registry'
 
 // UI-only blocks have no Rust op — excluded from the sync check.
 const UI_ONLY_BLOCKS = new Set(['constant', 'material'])
+
+// Deprecated Rust ops: still in catalog.rs for backward compat but removed
+// from the TS registry. BUG-12: material_full renamed → 'material'.
+// BUG-13: vectorInput removed; projects migrate to tableInput on load.
+const DEPRECATED_RUST_OPS = new Set(['material_full', 'vectorInput'])
 
 function extractRustOpIds(): Set<string> {
   const catalogSrc = readFileSync(
@@ -33,6 +38,8 @@ describe('Catalog ↔ Registry sync (F6-1)', () => {
   for (const [type] of BLOCK_REGISTRY) {
     if (!UI_ONLY_BLOCKS.has(type)) tsOps.add(type)
   }
+  // Active Rust ops: exclude deprecated ones removed from TS registry
+  const activeRustOps = new Set([...rustOps].filter((op) => !DEPRECATED_RUST_OPS.has(op)))
 
   it('Rust catalog has ops', () => {
     expect(rustOps.size).toBeGreaterThan(100)
@@ -43,7 +50,7 @@ describe('Catalog ↔ Registry sync (F6-1)', () => {
   })
 
   it('every Rust op has a TS block definition', () => {
-    const missingInTs = [...rustOps].filter((op) => !tsOps.has(op))
+    const missingInTs = [...activeRustOps].filter((op) => !tsOps.has(op))
     expect(missingInTs).toEqual([])
   })
 
@@ -53,6 +60,6 @@ describe('Catalog ↔ Registry sync (F6-1)', () => {
   })
 
   it('counts match', () => {
-    expect(tsOps.size).toBe(rustOps.size)
+    expect(tsOps.size).toBe(activeRustOps.size)
   })
 })
