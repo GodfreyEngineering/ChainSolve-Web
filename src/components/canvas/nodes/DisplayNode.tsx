@@ -1,9 +1,14 @@
 /**
  * DisplayNode — output block that shows the computed value prominently.
  * Has one target handle (left) and no source handle.
+ *
+ * SCI-16: Right-click the value area → context menu with copy options:
+ *   "Copy (full precision)" — 17 significant digits
+ *   "Copy (scientific notation)" — toExponential(15)
+ *   "Copy with unit" — formatted value + unit symbol
  */
 
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState, useEffect, useRef } from 'react'
 import { Handle, Position, useEdges, useNodes, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
 import { isError, isScalar } from '../../../engine/value'
@@ -14,6 +19,11 @@ import { NODE_STYLES as s } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
 
+interface CopyMenu {
+  x: number
+  y: number
+}
+
 function DisplayNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
   const computed = useComputed()
@@ -21,6 +31,8 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
   const formatValue = useFormatValue()
   const edges = useEdges()
   const nodes = useNodes()
+  const [copyMenu, setCopyMenu] = useState<CopyMenu | null>(null)
+  const menuRef = useRef<HTMLDivElement | null>(null)
 
   const isErrVal =
     value !== undefined && (isError(value) || (isScalar(value) && isNaN(value.value)))
@@ -48,6 +60,33 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
     : selected
       ? { ...s.nodeSelected, borderColor: typeColor }
       : {}
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!copyMenu) return
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setCopyMenu(null)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [copyMenu])
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (!isScalar(value as never)) return // only show menu for scalar values
+    e.preventDefault()
+    e.stopPropagation()
+    setCopyMenu({ x: e.clientX, y: e.clientY })
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).catch(() => {})
+    setCopyMenu(null)
+  }
+
+  const scalarValue = value && isScalar(value) ? value.value : null
+  const unitSymbol = nd.unit ? getUnitSymbol(nd.unit) : ''
 
   return (
     <div
@@ -90,11 +129,16 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
           id="value"
           style={{ ...s.handleLeft, top: '50%', transform: 'translateY(-50%)' }}
         />
-        <span style={displayStyle}>
+        {/* SCI-16: Right-click for copy menu */}
+        <span
+          style={{ ...displayStyle, cursor: scalarValue !== null ? 'context-menu' : undefined }}
+          className="nodrag"
+          onContextMenu={handleContextMenu}
+        >
           {formatValue(value)}
           {nd.unit && (
             <span style={{ fontSize: '0.7rem', marginLeft: '0.2rem', opacity: 0.7 }}>
-              {getUnitSymbol(nd.unit)}
+              {unitSymbol}
             </span>
           )}
         </span>
@@ -115,8 +159,72 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
           </span>
         )}
       </div>
+
+      {/* SCI-16: Copy context menu rendered as a fixed portal-like overlay */}
+      {copyMenu && scalarValue !== null && (
+        <div
+          ref={menuRef}
+          style={{
+            position: 'fixed',
+            left: copyMenu.x,
+            top: copyMenu.y,
+            zIndex: 9999,
+            background: 'var(--surface-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+            boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
+            padding: '4px 0',
+            minWidth: 210,
+            fontSize: '0.8rem',
+          }}
+        >
+          {[
+            {
+              label: 'Copy (full precision)',
+              value: scalarValue.toPrecision(17),
+            },
+            {
+              label: 'Copy (scientific notation)',
+              value: scalarValue.toExponential(15),
+            },
+            ...(unitSymbol
+              ? [
+                  {
+                    label: 'Copy with unit',
+                    value: `${scalarValue.toPrecision(17)} ${unitSymbol}`,
+                  },
+                ]
+              : []),
+          ].map((item) => (
+            <button
+              key={item.label}
+              style={menuItemStyle}
+              onClick={() => copyToClipboard(item.value)}
+            >
+              {item.label}
+              <span style={{ fontSize: '0.65rem', opacity: 0.45, marginLeft: 8, fontFamily: 'monospace' }}>
+                {item.value.length > 22 ? item.value.slice(0, 20) + '…' : item.value}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
+}
+
+const menuItemStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  width: '100%',
+  padding: '6px 14px',
+  background: 'transparent',
+  border: 'none',
+  color: 'var(--text)',
+  cursor: 'pointer',
+  textAlign: 'left',
+  fontSize: '0.8rem',
+  gap: 4,
 }
 
 export const DisplayNode = memo(DisplayNodeInner)

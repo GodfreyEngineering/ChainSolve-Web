@@ -130,7 +130,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[SCI-15] Optimization block** — `Optimizer` block: config `variable_id`, `method` (golden_section_1d / brent_1d / nelder_mead_1d), `lower_bound`, `upper_bound`, `tolerance`, `max_iterations`, `objective` (minimize/maximize). "Run" button (not auto-eval) triggers optimization loop in worker. Outputs: `optimal_input`, `optimal_output`, `iterations`, `converged`. Store in `simulation_runs`. Bump `ENGINE_CONTRACT_VERSION`. Verify: optimize `sin(x)` over [0, 2π] for minimum → `optimal_input ≈ 4.712` (3π/2), converged = 1.
 
-- [ ] **[SCI-16] Copy value with full precision** — Right-click any Display block or computed value badge → context menu: "Copy (full precision)" copies the f64 as 17 significant digits string; "Copy (scientific notation)"; "Copy with unit". Verify: Display showing "3.14" → copy full precision → clipboard has "3.141592653589793".
+- [x] **[SCI-16] Copy value with full precision** — Right-click any Display block or computed value badge → context menu: "Copy (full precision)" copies the f64 as 17 significant digits string; "Copy (scientific notation)"; "Copy with unit". Verify: Display showing "3.14" → copy full precision → clipboard has "3.141592653589793".
 
 ---
 
