@@ -14,6 +14,8 @@ export interface Profile {
   id: string
   email: string | null
   full_name: string | null
+  /** Unique handle/username: ^[a-zA-Z0-9_-]{3,50}$ (DB-04) */
+  display_name: string | null
   avatar_url: string | null
   plan: Plan
   stripe_customer_id: string | null
@@ -245,6 +247,71 @@ export async function updateDisplayName(name: string): Promise<void> {
     .update({ full_name: trimmed || null })
     .eq('id', user.id)
   if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  invalidateProfileCache()
+}
+
+// ── ACCT-06: Display name (unique handle, DB-04) ──────────────────────────────
+
+const DISPLAY_NAME_PATTERN = /^[a-zA-Z0-9_-]{3,50}$/
+
+/** Validate display name format client-side (matches DB-04 CHECK constraint). */
+export function validateDisplayNameFormat(name: string): string | null {
+  if (!name) return null // empty = clear (allowed)
+  if (!DISPLAY_NAME_PATTERN.test(name)) {
+    return 'Must be 3–50 characters: letters, numbers, _ or -'
+  }
+  return null
+}
+
+/**
+ * Check whether a display name is available via the check_display_name_available RPC.
+ * Returns true if available, false if taken, null if the RPC call failed.
+ */
+export async function checkDisplayNameAvailable(name: string): Promise<boolean | null> {
+  if (!DISPLAY_NAME_PATTERN.test(name)) return null
+  try {
+    const { data, error } = await supabase.rpc('check_display_name_available', {
+      p_name: name,
+    })
+    if (error) return null
+    return data === true
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Save a unique display name to the caller's profile.
+ * Throws with message "already taken" if the unique constraint fires.
+ */
+export async function saveDisplayName(name: string): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new ServiceError('NOT_AUTHENTICATED', 'Sign in to update your profile')
+
+  const trimmed = name.trim()
+  if (trimmed) {
+    const formatError = validateDisplayNameFormat(trimmed)
+    if (formatError) throw new ServiceError('INVALID_PROJECT_NAME', formatError)
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ display_name: trimmed || null })
+    .eq('id', user.id)
+
+  if (error) {
+    // Unique constraint violation → friendly message
+    if (error.code === '23505') {
+      throw new ServiceError('DB_ERROR', 'That display name is already taken')
+    }
+    // Check constraint violation (pattern mismatch)
+    if (error.code === '23514') {
+      throw new ServiceError('DB_ERROR', 'Must be 3–50 characters: letters, numbers, _ or -')
+    }
+    throw new ServiceError('DB_ERROR', error.message, true)
+  }
   invalidateProfileCache()
 }
 

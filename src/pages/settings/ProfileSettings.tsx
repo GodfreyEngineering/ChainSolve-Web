@@ -3,7 +3,14 @@ import { useTranslation } from 'react-i18next'
 import { Input } from '../../components/ui/Input'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../../lib/profilesService'
-import { updateDisplayName, uploadAvatar, getAvatarUrl } from '../../lib/profilesService'
+import {
+  updateDisplayName,
+  uploadAvatar,
+  getAvatarUrl,
+  checkDisplayNameAvailable,
+  saveDisplayName,
+  validateDisplayNameFormat,
+} from '../../lib/profilesService'
 import { validateDisplayName } from '../../lib/validateDisplayName'
 import { resolveEffectivePlan } from '../../lib/entitlements'
 import { PlanBadge } from '../../components/ui/PlanBadge'
@@ -58,6 +65,81 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
       setNameSaving(false)
     }
   }, [displayName, onProfileUpdated, t])
+
+  // ── Unique handle (display_name) ──────────────────────────────────────────
+  const [handle, setHandle] = useState(profile?.display_name ?? '')
+  const [handleEditing, setHandleEditing] = useState(false)
+  const [handleSaving, setHandleSaving] = useState(false)
+  const [handleError, setHandleError] = useState<string | null>(null)
+  const [handleAvailable, setHandleAvailable] = useState<boolean | null>(null)
+  const [handleChecking, setHandleChecking] = useState(false)
+  const handleCheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    setHandle(profile?.display_name ?? '')
+  }, [profile?.display_name])
+
+  const handleCheckAvailability = useCallback(
+    async (name: string) => {
+      const trimmed = name.trim()
+      if (!trimmed) {
+        setHandleAvailable(null)
+        return
+      }
+      const formatErr = validateDisplayNameFormat(trimmed)
+      if (formatErr) {
+        setHandleAvailable(null)
+        return
+      }
+      // Don't check if it's the current saved value
+      if (trimmed === (profile?.display_name ?? '')) {
+        setHandleAvailable(null)
+        return
+      }
+      setHandleChecking(true)
+      const available = await checkDisplayNameAvailable(trimmed)
+      setHandleChecking(false)
+      setHandleAvailable(available)
+    },
+    [profile?.display_name],
+  )
+
+  const handleHandleChange = useCallback(
+    (value: string) => {
+      setHandle(value)
+      setHandleError(null)
+      setHandleAvailable(null)
+      if (handleCheckTimerRef.current) clearTimeout(handleCheckTimerRef.current)
+      handleCheckTimerRef.current = setTimeout(() => {
+        void handleCheckAvailability(value)
+      }, 500)
+    },
+    [handleCheckAvailability],
+  )
+
+  const handleSaveHandle = useCallback(async () => {
+    setHandleError(null)
+    const trimmed = handle.trim()
+    if (trimmed) {
+      const formatErr = validateDisplayNameFormat(trimmed)
+      if (formatErr) {
+        setHandleError(formatErr)
+        return
+      }
+    }
+    setHandleSaving(true)
+    try {
+      await saveDisplayName(trimmed)
+      setHandleEditing(false)
+      setHandleAvailable(null)
+      onProfileUpdated?.()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to save'
+      setHandleError(msg.includes('already taken') ? 'That handle is already taken' : msg)
+    } finally {
+      setHandleSaving(false)
+    }
+  }, [handle, onProfileUpdated])
 
   // ── Avatar upload ─────────────────────────────────────────────────────────
   const fileRef = useRef<HTMLInputElement>(null)
@@ -208,6 +290,100 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
               </div>
             )}
             {nameError && <span style={errorText}>{nameError}</span>}
+          </div>
+
+          {/* Unique handle (display_name) — ACCT-06 */}
+          <div style={fieldStyle}>
+            <span style={fieldLabel}>{t('settings.handleLabel', 'Unique handle')}</span>
+            <span style={{ fontSize: '0.72rem', opacity: 0.5, marginBottom: 2 }}>
+              {t(
+                'settings.handleHint',
+                'Letters, numbers, _ or - · 3–50 characters · must be unique',
+              )}
+            </span>
+            {handleEditing ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <div style={{ position: 'relative', flex: 1 }}>
+                    <input
+                      style={nameInput}
+                      value={handle}
+                      onChange={(e) => handleHandleChange(e.target.value)}
+                      placeholder="e.g. engineer_42"
+                      maxLength={50}
+                      disabled={handleSaving}
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') void handleSaveHandle()
+                        if (e.key === 'Escape') {
+                          setHandle(profile?.display_name ?? '')
+                          setHandleEditing(false)
+                          setHandleError(null)
+                          setHandleAvailable(null)
+                        }
+                      }}
+                    />
+                  </div>
+                  <button
+                    style={smallBtn}
+                    onClick={() => void handleSaveHandle()}
+                    disabled={handleSaving}
+                  >
+                    {handleSaving ? '\u2026' : t('settings.save', 'Save')}
+                  </button>
+                  <button
+                    style={{
+                      ...smallBtn,
+                      background: 'transparent',
+                      border: '1px solid var(--border)',
+                    }}
+                    onClick={() => {
+                      setHandle(profile?.display_name ?? '')
+                      setHandleEditing(false)
+                      setHandleError(null)
+                      setHandleAvailable(null)
+                    }}
+                  >
+                    {t('settings.cancel', 'Cancel')}
+                  </button>
+                </div>
+                {/* Availability indicator */}
+                {handle.trim() && !handleError && (
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      color: handleChecking
+                        ? 'rgba(244,244,243,0.4)'
+                        : handleAvailable === true
+                          ? 'var(--success, #34d399)'
+                          : handleAvailable === false
+                            ? '#f87171'
+                            : 'rgba(244,244,243,0.4)',
+                    }}
+                  >
+                    {handleChecking
+                      ? 'Checking\u2026'
+                      : handleAvailable === true
+                        ? '\u2713 Available'
+                        : handleAvailable === false
+                          ? '\u2717 Already taken'
+                          : validateDisplayNameFormat(handle.trim())
+                            ? validateDisplayNameFormat(handle.trim())
+                            : null}
+                  </span>
+                )}
+                {handleError && <span style={errorText}>{handleError}</span>}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.88rem', opacity: handle ? 1 : 0.4 }}>
+                  {handle ? `@${handle}` : t('settings.handleEmpty', 'Not set')}
+                </span>
+                <button style={smallBtn} onClick={() => setHandleEditing(true)}>
+                  {t('settings.edit', 'Edit')}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Email (read-only) */}

@@ -10,7 +10,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 ## TIER 0 — SCHEMA RESET & FRESH START
 *Full authority to wipe dev data and start clean. Do this first.*
 
-- [BLOCKED: Docker not running locally; no supabase CLI login. Apply 0009_db_foundations.sql manually via Supabase Dashboard SQL Editor.] **[RESET-01] Wipe dev Supabase and apply clean consolidated migration** — Run `supabase db reset` to wipe all data and re-apply migrations from scratch. This eliminates accumulated drift between archived migrations and the consolidated baseline. After reset, verify with `supabase db diff` that the live schema exactly matches the migration files. After reset, re-sign up fresh. Verify: `supabase db diff` returns no differences; a fresh signup creates a complete profile row with all expected columns.
+- [X] **[RESET-01] Wipe dev Supabase and apply clean consolidated migration** — Run `supabase db reset` to wipe all data and re-apply migrations from scratch. This eliminates accumulated drift between archived migrations and the consolidated baseline. After reset, verify with `supabase db diff` that the live schema exactly matches the migration files. After reset, re-sign up fresh. Verify: `supabase db diff` returns no differences; a fresh signup creates a complete profile row with all expected columns.
 
 - [x] **[RESET-02] Consolidate all active migrations into one clean baseline** — Created 0009_db_foundations.sql covering DB-01 through DB-12 additions. Existing 0001-0008 remain (append-only). Apply via Supabase Dashboard. — The current state has `0001` through `0008` active migrations. Consolidate them into a single `0001_baseline.sql` that represents the full desired schema including all fixes from the tasks below. Archive the individual migration files to `supabase/migrations_archive/`. The new consolidated baseline must be fully idempotent, self-contained, and annotated section-by-section. Renumber remaining migrations starting from `0002`. Verify: a fresh `supabase db reset` on a clean project produces a working app with zero errors.
 
@@ -270,7 +270,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[ACCT-05] Avatar upload: resize and crop** — Max 2MB, JPEG/PNG/WebP (validate MIME). Auto-crop to square and resize to 256×256 via HTML canvas. Preview before confirm. Store at `avatars/{userId}/avatar.{ext}` with upsert. Update `profiles.avatar_url`. Verify: 5MB PNG → resized to 256×256 before upload; displayed immediately.
 
-- [ ] **[ACCT-06] Display name editor with availability check** — ProfileSettings: display name field with live RPC check on blur. Show "✓ Available" / "✗ Already taken". Client-side pattern validation (^[a-zA-Z0-9_-]{3,50}$). Save → catch unique constraint → show "already taken" (not generic error). Verify: duplicate name shows error; update succeeds with unique name.
+- [x] **[ACCT-06] Display name editor with availability check** — ProfileSettings: display name field with live RPC check on blur. Show "✓ Available" / "✗ Already taken". Client-side pattern validation (^[a-zA-Z0-9_-]{3,50}$). Save → catch unique constraint → show "already taken" (not generic error). Verify: duplicate name shows error; update succeeds with unique name.
 
 - [ ] **[ACCT-07] 2FA: polished flow** — Complete `MfaSetupPrompt.tsx` and `MfaChallengeScreen.tsx`. Add: backup codes download (10 single-use codes) on 2FA enable. "2FA enabled" badge in SecuritySettings. "Disable 2FA" requires re-authentication. Verify: enable 2FA → login → TOTP challenge; backup code works to sign in.
 
