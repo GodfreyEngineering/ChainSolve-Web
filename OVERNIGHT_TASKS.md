@@ -366,7 +366,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[SEC-03] Storage bucket RLS: uploads bucket** — Confirm `uploads` bucket has RLS: users can only read/write under their own `{userId}/` prefix. Add migration if missing. Verify: user A cannot access user B's uploaded CSV via crafted path.
 
-- [ ] **[SEC-04] Input sanitization audit** — Audit all user inputs stored or displayed. No XSS via innerHTML (search for all `dangerouslySetInnerHTML` usages — only allowed for sanitized KaTeX output). No SQL injection (Supabase client uses parameterized queries — verify). No `eval` on project JSON load. CSV content sanitized before display. Verify: `npm run lint` passes; manual XSS attempt in annotation text is escaped.
+- [x] **[SEC-04] Input sanitization audit** — Audit all user inputs stored or displayed. No XSS via innerHTML (search for all `dangerouslySetInnerHTML` usages — only allowed for sanitized KaTeX output). No SQL injection (Supabase client uses parameterized queries — verify). No `eval` on project JSON load. CSV content sanitized before display. Verify: `npm run lint` passes; manual XSS attempt in annotation text is escaped.
 
 - [ ] **[SEC-05] Dependency audit** — `npm audit --audit-level=high` exits 0. Fix or pin-override all high/critical findings. Add to CI. Verify: CI npm audit step passes.
 
