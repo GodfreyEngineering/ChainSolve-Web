@@ -109,7 +109,9 @@ cargo run -p engine-core --bin update_goldens
 
 ## Property-Based Tests
 
-`tests/properties.rs` uses [proptest](https://crates.io/crates/proptest) to verify invariants across random inputs (256 cases per property by default).
+`crates/engine-core/src/tests/proptest_properties.rs` (wired via `src/tests/mod.rs`) uses [proptest](https://crates.io/crates/proptest) to verify invariants across random inputs (256 cases per property by default).
+
+In addition, `tests/properties.rs` contains the original external property test suite.
 
 ### Properties tested (18 total)
 

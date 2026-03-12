@@ -6,7 +6,7 @@ W9.3 establishes the **correctness contract** for the ChainSolve compute engine:
 deterministic broadcasting, NaN/precision policies, an audit trace for debugging,
 and progress/cancellation for long-running graphs.
 
-**Contract version**: `1` (accessible at `engine.contractVersion`). Bumped when
+**Contract version**: `3` (accessible at `engine.contractVersion`). Bumped when
 correctness-affecting behavior changes.
 
 ---
@@ -201,7 +201,7 @@ correctness-affecting changes to engine behavior.
 
 - Accessible at `engine.contractVersion` after engine init
 - Included in the worker handshake `ready` message
-- Current version: **1** (W9.3 baseline)
+- Current version: **3** (bumped for new Value types: Text, Complex, Matrix, Interval; and SCI-06 angle unit preference)
 
 Bump criteria:
 - Changes to broadcasting rules

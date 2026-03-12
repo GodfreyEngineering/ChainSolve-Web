@@ -1,6 +1,6 @@
 # ChainSolve — Architecture
 
-> Updated at each milestone. Current: **W9.6 (Repo Housekeeping)**
+> Updated at each milestone. Current: **Overnight Run (new block categories, Value types, engine improvements)**
 
 ---
 
@@ -30,11 +30,33 @@ src/
   boot.ts         True bootloader (no static imports): catches import-time TDZ/module errors (W5.2)
   blocks/         Block definitions and registry
     types.ts      Shared types: BlockCategory, NodeKind, PortDef, NodeData, BlockDef (W5.2)
-    registry.ts   All block types, categories, port definitions, evaluate fns
+    registry.ts   Master block registry — all block packs registered here
     data-blocks.ts    Data input blocks: vectorInput, tableInput, csvImport (W5)
     vector-blocks.ts  Vector operation blocks: length, sum, mean, min, max, sort, etc. (W5)
     table-blocks.ts   Table operation blocks: filter, sort, column, addColumn, join (W5)
     plot-blocks.ts    Plot blocks: xyPlot, histogram, barChart, heatmap (W6, Pro-only)
+    complex-blocks.ts   Complex number operations (new)
+    matrix-blocks.ts    Matrix operations: det, inv, solve, transpose (new)
+    signal-blocks.ts    FFT and signal processing (new)
+    interval-blocks.ts  Interval arithmetic (new)
+    text-blocks.ts      Text/string blocks (new)
+    chem-blocks.ts      Chemical engineering blocks (new)
+    struct-blocks.ts    Structural engineering blocks (new)
+    aero-blocks.ts      Aerospace blocks (new)
+    ctrl-blocks.ts      Control systems blocks (new)
+    bio-blocks.ts       Life sciences blocks (new)
+    fin-options-blocks.ts  Finance options blocks (new)
+    date-blocks.ts      Date/time blocks (new)
+    lookup-blocks.ts    Lookup table blocks (new)
+    dist-blocks.ts      Statistical distribution blocks (new)
+    eng-blocks.ts       Engineering utility blocks (new)
+    fin-stats-blocks.ts Financial statistics blocks (new)
+    constants-blocks.ts    CODATA 2022 physical constants (new)
+    constantsCatalog.ts    Searchable constants catalog (new)
+    materialCatalog.ts     Material property presets (new)
+    portUnitHints.ts       Unit hints for port display (new)
+    blockDescriptions.ts   Long-form block descriptions for help panel (new)
+    blockSearchMetadata.ts Block search aliases and tags (new)
   components/
     canvas/       Canvas UI components
       nodes/      Custom React Flow node renderers (SourceNode, OperationNode, DisplayNode, DataNode, PlotNode, GroupNode)
@@ -247,7 +269,26 @@ RLS policy: `(storage.foldername(name))[1] = auth.uid()::text`
 |---|---|
 | Plot | XY Plot (line/scatter), Histogram, Bar Chart, Heatmap |
 
-### Value type system (W5)
+**New block categories (Overnight run, Pro-only)**
+
+| Category | Description |
+|---|---|
+| `complex` | Complex number arithmetic: add, subtract, multiply, divide, magnitude, phase, conjugate, polar↔rect conversion |
+| `matrix` | Matrix operations: determinant, inverse, linear solve (Ax=b), transpose, eigenvalues |
+| `signal` | Signal processing: FFT, inverse FFT |
+| `interval` | Interval arithmetic: add, subtract, multiply, divide, intersect, union, width, midpoint |
+| `text` | Text manipulation and string operations |
+| `chem` | Chemical engineering: ideal gas law, Antoine VP, Raoult's law, Arrhenius rate, CSTR conversion, enthalpy |
+| `structural` | Structural engineering: beam deflection (simply supported + cantilever), stress, moment of inertia |
+| `aerospace` | Aerospace: drag, dynamic pressure, escape velocity, Hohmann transfer delta-v |
+| `controlSystems` | Control systems: PID, step response, transfer functions |
+| `lifeSci` | Life sciences: pharmacokinetics, growth models |
+| `finOptions` | Finance options: Black-Scholes pricing, Greeks |
+| `dateTime` | Date/time arithmetic and formatting |
+| `lookup` | 1-D and 2-D lookup table interpolation |
+| `dist` | Statistical distributions: PDF/CDF for Normal, t, Chi², F, Binomial |
+
+### Value type system
 
 The engine uses a polymorphic `Value` type (`src/engine/value.ts`):
 
@@ -257,8 +298,12 @@ The engine uses a polymorphic `Value` type (`src/engine/value.ts`):
 | `vector` | `{ kind: 'vector', value: number[] }` | `[N items]` |
 | `table` | `{ kind: 'table', columns: string[], rows: number[][] }` | `R×C table` |
 | `error` | `{ kind: 'error', message: string }` | Error text |
+| `interval` | `{ kind: 'interval', lo: number, hi: number }` | `[lo, hi]` |
+| `text` | `{ kind: 'text', value: string }` | String content |
+| `complex` | `{ kind: 'complex', re: number, im: number }` | `a + bi` |
+| `matrix` | `{ kind: 'matrix', rows: number, cols: number, data: number[] }` | `M×N matrix` |
 
-Existing scalar blocks use the `wrapScalarEvaluate()` adapter — their registration code is unchanged.
+The Rust engine (`crates/engine-core/src/types.rs`) mirrors these variants as `Value::Scalar`, `Value::Vector`, `Value::Table`, `Value::Error`, `Value::Interval`, `Value::Text`, `Value::Complex`, `Value::Matrix`.
 
 ### Block registration pattern (W5.2)
 
@@ -410,6 +455,7 @@ UI gating:
 | W9.5.4 | ✅ Done | CSP fix for WASM: `'wasm-unsafe-eval'` in `script-src`, `WASM_CSP_BLOCKED` error code, `EngineFatalError` rewrite, `_headers` smoke test |
 | W9.5.5 | ✅ Done | Production guardrails: strict `CONFIG_INVALID` in `supabase.ts`, CI secret validation + bundle grep, `GET /api/health` endpoint |
 | W9.6 | ✅ Done | Repo housekeeping: `.editorconfig`, `.vscode/`, `TROUBLESHOOTING.md`, architecture doc updates, e2e-full build fix |
+| Overnight | ✅ Done | 40+ new block categories (complex, matrix, signal, interval, text, chem, struct, aero, ctrl, bio, fin-options, date, dist, lookup); new Value types (Text, Interval, Complex, Matrix); ENGINE_CONTRACT_VERSION=3; ENG-04 worker pool; ENG-05 value hash pruning; ENG-08 incremental topo sort; ENG-09 wasm-opt speed build; 5 new Criterion benchmarks; proptest property tests; DB foundations (DB-01 through DB-12); 15+ UX bug fixes |
 | W10 | Planned | Branching/rules for conditional flows (Pro) |
 | W11 | Planned | Custom blocks editor (Pro) |
 | W12 | Planned | Project/file browser with folders, search, tags |

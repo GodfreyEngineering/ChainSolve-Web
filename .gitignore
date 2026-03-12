@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node
 node_modules
 dist
 dist-ssr
@@ -16,20 +17,30 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
-.idea
-.DS_Store
+!.vscode/launch.json
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-.env*
-!.env.example
-.dev.vars*
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
 
-# Rust / WASM
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+.dev.vars
+.dev.vars.*
+!.env.example
+
+# Rust / WASM build artifacts
 /target
+crates/engine-wasm/pkg/
 
 # Local Claude settings
 .claude/
@@ -39,9 +50,17 @@ test-results/
 playwright-report/
 coverage/
 
+# Storybook
+storybook-static/
+
 # Scratch / CI debug output files
 fmt_out.txt
 tsc_out.txt
 tsc_out2.txt
 lint_out.txt
 lint_out2.txt
+out.txt
+*.out.txt
+
+# wasm-pack intermediate output
+crates/engine-wasm/pkg/

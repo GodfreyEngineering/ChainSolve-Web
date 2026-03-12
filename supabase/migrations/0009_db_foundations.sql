@@ -1,6 +1,6 @@
 -- ============================================================
 -- 0009_db_foundations.sql
--- ChainSolve — DB Foundations (OVERNIGHT_TASKS DB-01 through DB-12)
+-- ChainSolve — DB Foundations (docs/OVERNIGHT_TASKS.md DB-01 through DB-12)
 --
 -- Apply with:
 --   supabase db push            (remote)

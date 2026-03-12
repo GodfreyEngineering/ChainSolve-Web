@@ -82,7 +82,7 @@ The Perf HUD automatically queries these after each evaluation cycle.
 
 | File | Purpose |
 |---|---|
-| `crates/engine-core/benches/engine_benchmarks.rs` | Criterion benchmarks |
+| `crates/engine-core/benches/engine_benchmarks.rs` | Criterion benchmarks (10 total: 5 original + 5 new from ENG-10) |
 | `crates/engine-core/tests/perf_smoke.rs` | Perf regression guards |
 | `crates/engine-core/src/graph.rs` | `dataset_count()`, `dataset_total_bytes()` |
 | `crates/engine-wasm/src/lib.rs` | WASM exports for introspection |
@@ -91,3 +91,15 @@ The Perf HUD automatically queries these after each evaluation cycle.
 | `src/lib/devFlags.ts` | `isPerfHudEnabled()` — `?perf=1` detection |
 | `src/components/PerfHud.tsx` | Dev overlay component |
 | `src/pages/CanvasPage.tsx` | Lazy PerfHud wiring |
+
+## Criterion Benchmark Suite (ENG-10)
+
+The benchmark suite in `crates/engine-core/benches/engine_benchmarks.rs` includes:
+
+| Benchmark | What it measures |
+|---|---|
+| `bench_1000_node_linear_chain` | Full eval of 1000-node linear chain |
+| `bench_1000_node_diamond_dag` | Fan-out/fan-in: 1 source → 500 negate → 250 paired add |
+| `bench_incremental_patch_2000_node` | `UpdateNodeData` patch on 2000-node graph (incremental, O(1) topo sort) |
+| `bench_large_vector_eval` | 10k-element vector through sum/mean/min/max pipeline |
+| `bench_10_sheet_project` | 10 × 200-node disconnected chains (multi-sheet simulation) |

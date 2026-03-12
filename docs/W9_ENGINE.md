@@ -28,7 +28,7 @@ passes it to the WASM `evaluate()` function, and deserializes the result.
 
 | Crate | Path | Purpose |
 |-------|------|---------|
-| `engine-core` | `crates/engine-core/` | Pure Rust: types, validation, evaluation, ops. No web/wasm deps. |
+| `engine-core` | `crates/engine-core/` | Pure Rust: types (Scalar/Vector/Table/Interval/Text/Complex/Matrix), validation, evaluation, 150+ ops. No web/wasm deps. |
 | `engine-wasm` | `crates/engine-wasm/` | wasm-bindgen wrapper. Thin JSON boundary over engine-core. |
 
 ### TS integration files
@@ -190,6 +190,10 @@ type Value =
   | { kind: 'vector'; value: number[] }
   | { kind: 'table'; columns: string[]; rows: number[][] }
   | { kind: 'error'; message: string }
+  | { kind: 'interval'; lo: number; hi: number }
+  | { kind: 'text'; value: string }
+  | { kind: 'complex'; re: number; im: number }
+  | { kind: 'matrix'; rows: number; cols: number; data: number[] }
 
 interface Diagnostic {
   nodeId?: string
@@ -213,7 +217,7 @@ registry against the Rust catalog and logs warnings for any drift.
 
 ```javascript
 // DevTools console:
-window.__chainsolve_engine.catalog       // array of 57+ entries
+window.__chainsolve_engine.catalog       // array of 150+ entries
 window.__chainsolve_engine.engineVersion // e.g. "0.1.0"
 ```
 
@@ -274,7 +278,7 @@ Completed in W9.3:
 
 - **Broadcasting**: All unary/binary math/trig/logic ops broadcast across Scalar, Vector, and Table values
 - **NaN canonicalization**: All op outputs normalized (NaN → canonical NaN, -0 → +0)
-- **Contract version**: `engine.contractVersion` (currently `1`) included in worker handshake
+- **Contract version**: `engine.contractVersion` (currently `3`) included in worker handshake
 - **Audit trace**: Optional `{ trace: true }` returns per-node `TraceEntry[]` with input/output summaries
 - **Progress events**: `engine.onProgress(handler)` fires per-node during evaluation
 - **Time budget**: `{ timeBudgetMs: N }` cooperatively aborts evaluation, sets `partial: true`
@@ -283,3 +287,26 @@ Completed in W9.3:
 - Worker protocol v3: `progress` messages, `cancel` handler, `contractVersion` in handshake
 
 See [W9_3_CORRECTNESS.md](W9_3_CORRECTNESS.md) for full correctness contract details.
+
+## Post-W9.3 changes (Overnight run — new Value types, ops, and engine improvements)
+
+Completed after W9.3:
+
+- **New Value types**: `Value::Text { value: String }`, `Value::Interval { lo, hi }`, `Value::Complex { re, im }`, `Value::Matrix { rows, cols, data }` added to `crates/engine-core/src/types.rs`
+- **40+ new block categories**: complex, matrix, signal (FFT), interval, text, lookup, chem, struct, aero, ctrl, bio, fin-options, date, dist — all wired through Rust ops
+- **New Rust ops**:
+  - FFT and inverse FFT (signal processing)
+  - Complex arithmetic (add, subtract, multiply, divide, magnitude, phase, conjugate, polar↔rect)
+  - Matrix operations: determinant, inverse, linear solve (Ax=b), transpose, eigenvalues
+  - Interval arithmetic: add, subtract, multiply, divide, intersect, union, width, midpoint
+  - Numerical methods: trapezoidal integration, differentiation, root finding (bisection), interpolation (linear/cubic)
+  - Lookup tables (1-D and 2-D)
+  - Trig ops with angle unit preference (deg/rad) — SCI-06
+  - CODATA 2022 physical constants (pi to 50dp, e, NA, kB, c, h, ħ, etc.)
+- **ENG-05**: Value hash pruning — downstream nodes are skipped when a table/vector output is unchanged (FxHash of raw f64 bytes)
+- **ENG-08**: Incremental topological sort — `AddNode` is O(1) (appends directly to `topo_order`); full topo rebuild only on `RemoveNode`, `AddEdge`, `RemoveEdge`
+- **ENG-04**: Worker pool (`src/engine/workerPool.ts`) — each canvas gets a dedicated WASM Web Worker; LRU eviction; pool size `min(hardwareConcurrency - 1, 4)`
+- **ENG-09**: wasm-opt build switched from `-Oz` (size) to `-O3` (speed); WASM budget updated to 800 KB raw / 250 KB gzip
+- **Criterion benchmarks expanded**: 5 new benchmarks added — 1000-node linear chain, 1000-node diamond DAG, incremental patch on 2000-node graph, large vector eval (10k elements), 10-sheet project simulation
+- **Proptest property tests**: `crates/engine-core/src/tests/proptest_properties.rs` — determinism, incremental consistency, no-panic on random ops
+- **ENGINE_CONTRACT_VERSION** bumped to **3** (in `crates/engine-core/src/catalog.rs`)
