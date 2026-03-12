@@ -292,7 +292,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[PREC-01] Precision mode selector in Settings** — Settings already has Number display mode (auto/decimal/sig_figs/scientific) + decimal places (up to 15 "high precision"), sig figs (2–10), and scientific notation threshold. Extended decimal places options to include 10, 12, 15 (high precision). The existing granular controls cover all PREC-01 requirements. Persist via preferencesStore → cs:prefs. Verify: select "Significant figures" + 6 → sig-fig display; select "Fixed decimal" + 15 → 15dp display.
 
-- [ ] **[PREC-02] Per-node display precision override** — Inspector for Display/Plot nodes: "Display precision" toggle overriding global for this node. Options: "Global", "Integer", "2dp", "4dp", "8dp", "15dp", "Scientific", "Sig figs (N)". Persist in `node.data.displayPrecision`. Verify: global is 6 sig figs; one node overridden to 15dp → shows 15dp for that node only.
+- [x] **[PREC-02] Per-node display precision override** — Inspector for Display nodes: "Display precision" selector (Global/Integer/2dp/4dp/8dp/15dp/Scientific/Sig figs 3/Sig figs 6). Stored in `node.data.displayPrecision`. DisplayNode applies override by calling rawFormatValue with precisionToOpts() merged with global separator prefs. Verify: global is 6 sig figs; one node overridden to 15dp → shows 15dp for that node only.
 
 - [ ] **[PREC-03] Constants picker: full-precision display** — In constants picker modal: show each constant with full f64 value and (in scientific mode) the extended-precision string from `math_constants` table. Show CODATA uncertainty. Show SI unit. Group by category. Verify: selecting "Avogadro's number" shows `6.02214076e23 ± 0.00000002e23 mol⁻¹`.
 

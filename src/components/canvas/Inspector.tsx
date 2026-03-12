@@ -358,6 +358,27 @@ export function Inspector({
               />,
             )}
 
+            {/* PREC-02: Per-node display precision override (Display nodes only) */}
+            {def?.nodeKind === 'csDisplay' &&
+              field(
+                'Display precision',
+                <select
+                  style={{ ...inp, cursor: 'pointer' }}
+                  value={nd.displayPrecision ?? 'global'}
+                  onChange={(e) => update({ displayPrecision: e.target.value })}
+                >
+                  <option value="global">Global (use settings)</option>
+                  <option value="integer">Integer (0 dp)</option>
+                  <option value="2dp">2 decimal places</option>
+                  <option value="4dp">4 decimal places</option>
+                  <option value="8dp">8 decimal places</option>
+                  <option value="15dp">15 decimal places</option>
+                  <option value="scientific">Scientific notation</option>
+                  <option value="sig_figs_3">3 significant figures</option>
+                  <option value="sig_figs_6">6 significant figures</option>
+                </select>,
+              )}
+
             {/* Description (G4-1) */}
             {descriptions[nd.blockType] && (
               <div

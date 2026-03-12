@@ -204,6 +204,12 @@ export interface NodeData extends Record<string, unknown> {
   subscribeChannelName?: string
   /** UX-14: User-chosen accent color for this node (hex string). Tints node background. */
   userColor?: string
+  /**
+   * PREC-02: Per-node display precision override for Display nodes.
+   * Values: 'global' | 'integer' | '2dp' | '4dp' | '8dp' | '15dp' | 'scientific' | 'sig_figs_3' | 'sig_figs_6'
+   * 'global' (or undefined) uses global preferences.
+   */
+  displayPrecision?: string
 }
 
 export interface BlockDef {

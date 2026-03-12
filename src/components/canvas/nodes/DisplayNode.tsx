@@ -11,8 +11,10 @@
 import { memo, useMemo, useState, useEffect, useRef } from 'react'
 import { Handle, Position, useEdges, useNodes, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
-import { isError, isScalar } from '../../../engine/value'
+import { isError, isScalar, formatValue as rawFormatValue } from '../../../engine/value'
+import type { FormatOptions } from '../../../engine/value'
 import { useFormatValue } from '../../../hooks/useFormatValue'
+import { usePreferencesStore } from '../../../stores/preferencesStore'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
 import { getUnitSymbol } from '../../../units/unitSymbols'
 import { NODE_STYLES as s, userColorBg } from './nodeStyles'
@@ -24,11 +26,40 @@ interface CopyMenu {
   y: number
 }
 
+/** PREC-02: Converts a displayPrecision string to FormatOptions overrides. */
+function precisionToOpts(displayPrecision: string | undefined): FormatOptions | null {
+  if (!displayPrecision || displayPrecision === 'global') return null
+  switch (displayPrecision) {
+    case 'integer': return { numberDisplayMode: 'decimal', decimalPlaces: 0 }
+    case '2dp': return { numberDisplayMode: 'decimal', decimalPlaces: 2 }
+    case '4dp': return { numberDisplayMode: 'decimal', decimalPlaces: 4 }
+    case '8dp': return { numberDisplayMode: 'decimal', decimalPlaces: 8 }
+    case '15dp': return { numberDisplayMode: 'decimal', decimalPlaces: 15 }
+    case 'scientific': return { numberDisplayMode: 'scientific', decimalPlaces: 4 }
+    case 'sig_figs_3': return { numberDisplayMode: 'sig_figs', sigFigs: 3 }
+    case 'sig_figs_6': return { numberDisplayMode: 'sig_figs', sigFigs: 6 }
+    default: return null
+  }
+}
+
 function DisplayNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
   const computed = useComputed()
   const value = computed.get(id)
-  const formatValue = useFormatValue()
+  const globalFormatValue = useFormatValue()
+  const prefs = usePreferencesStore()
+
+  // PREC-02: if this node has a per-node precision override, apply it
+  const precOpts = precisionToOpts(nd.displayPrecision)
+  const formatValue = precOpts
+    ? (v: Parameters<typeof globalFormatValue>[0]) =>
+        rawFormatValue(v, undefined, {
+          decimalSeparator: prefs.decimalSeparator,
+          thousandsSeparator: prefs.thousandsSeparator,
+          thousandsSeparatorChar: prefs.thousandsSeparatorChar,
+          ...precOpts,
+        })
+    : globalFormatValue
   const edges = useEdges()
   const nodes = useNodes()
   const [copyMenu, setCopyMenu] = useState<CopyMenu | null>(null)
