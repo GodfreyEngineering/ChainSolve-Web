@@ -85,6 +85,36 @@ export async function signOut(): Promise<void> {
   await supabase.auth.signOut()
 }
 
+// ── Account deletion (ACCT-01) ───────────────────────────────────────────────
+
+/**
+ * Permanently delete the current user's account.
+ * Calls POST /api/account/delete which cancels Stripe, purges storage,
+ * deletes all DB rows, then removes the auth.users entry.
+ *
+ * On success: caller should sign out and redirect to the homepage.
+ */
+export async function deleteMyAccount(): Promise<{ error: string | null }> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) return { error: 'Not signed in' }
+
+  try {
+    const resp = await fetch('/api/account/delete', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+    if (!resp.ok) {
+      const body = (await resp.json().catch(() => ({}))) as { error?: string }
+      return { error: body.error ?? `Server error ${resp.status}` }
+    }
+    return { error: null }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Network error' }
+  }
+}
+
 export async function refreshSession(): Promise<{
   session: Session | null
   error: AuthError | null

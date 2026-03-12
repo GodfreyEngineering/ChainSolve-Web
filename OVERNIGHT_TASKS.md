@@ -260,7 +260,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 ## TIER 10 — ACCOUNT MANAGEMENT
 
-- [ ] **[ACCT-01] Account deletion flow** — Danger Zone tab in Settings. "Delete Account" → confirmation dialog ("Type DELETE") → 2-step (what's deleted + Stripe cancellation). Service: `deleteMyAccount()` in `src/lib/auth.ts` calling Cloudflare Function `POST /api/account/delete` which: (a) cancels Stripe subscription, (b) lists and purges all storage paths under `{userId}/`, (c) calls `delete_my_account()` RPC, (d) calls `supabase.auth.admin.deleteUser(userId)`. Redirects to homepage with confirmation toast. Verify: full deletion removes auth.users row, all project rows, all storage files.
+- [x] **[ACCT-01] Account deletion flow** — Danger Zone tab in Settings. "Delete Account" → confirmation dialog ("Type DELETE") → 2-step (what's deleted + Stripe cancellation). Service: `deleteMyAccount()` in `src/lib/auth.ts` calling Cloudflare Function `POST /api/account/delete` which: (a) cancels Stripe subscription, (b) lists and purges all storage paths under `{userId}/`, (c) calls `delete_my_account()` RPC, (d) calls `supabase.auth.admin.deleteUser(userId)`. Redirects to homepage with confirmation toast. Verify: full deletion removes auth.users row, all project rows, all storage files.
 
 - [ ] **[ACCT-02] Active sessions management** — SecuritySettings: list active sessions (device/browser from user-agent, last active time, current session badge). "Sign out all other sessions" via `supabase.auth.signOut({ scope: 'others' })`. Verify: signing out other sessions invalidates their refresh tokens.
 
@@ -268,7 +268,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[ACCT-04] Password change** — Require current password re-auth via `signInWithPassword`. Then `updateUser({ password })`. Enforce min 8 chars + 1 number. Show strength indicator (very weak/weak/fair/strong/very strong). Verify: weak password rejected with specific feedback.
 
-- [ ] **[ACCT-05] Avatar upload: resize and crop** — Max 2MB, JPEG/PNG/WebP (validate MIME). Auto-crop to square and resize to 256×256 via HTML canvas. Preview before confirm. Store at `avatars/{userId}/avatar.{ext}` with upsert. Update `profiles.avatar_url`. Verify: 5MB PNG → resized to 256×256 before upload; displayed immediately.
+- [x] **[ACCT-05] Avatar upload: resize and crop** — Max 2MB, JPEG/PNG/WebP (validate MIME). Auto-crop to square and resize to 256×256 via HTML canvas. Preview before confirm. Store at `avatars/{userId}/avatar.{ext}` with upsert. Update `profiles.avatar_url`. Verify: 5MB PNG → resized to 256×256 before upload; displayed immediately.
 
 - [x] **[ACCT-06] Display name editor with availability check** — ProfileSettings: display name field with live RPC check on blur. Show "✓ Available" / "✗ Already taken". Client-side pattern validation (^[a-zA-Z0-9_-]{3,50}$). Save → catch unique constraint → show "already taken" (not generic error). Verify: duplicate name shows error; update succeeds with unique name.
 
