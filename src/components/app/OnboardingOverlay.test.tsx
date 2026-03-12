@@ -76,8 +76,9 @@ describe('Onboarding tour workflow', () => {
   })
 
   it('step identifiers are stable and have expected count', () => {
-    expect(ONBOARDING_STEPS).toHaveLength(9)
+    expect(ONBOARDING_STEPS).toHaveLength(14)
     expect(ONBOARDING_STEPS[0]).toBe('open_projects')
     expect(ONBOARDING_STEPS[8]).toBe('open_reporting')
+    expect(ONBOARDING_STEPS[13]).toBe('ai_copilot')
   })
 })

@@ -221,18 +221,19 @@ describe('buildHealthSheet', () => {
 // ── buildAuditWorkbook ───────────────────────────────────────────────────────
 
 describe('buildAuditWorkbook', () => {
-  it('produces 5 sheets with correct names', () => {
+  it('produces 5 fixed sheets + linked blocks sheet', () => {
     const model = makeModel()
     const wb = buildAuditWorkbook(model, fakeVariables)
-    expect(wb.sheets).toHaveLength(5)
+    expect(wb.sheets).toHaveLength(6)
     expect(wb.sheetNames).toEqual([
       'Summary',
       'Variables',
       'Node Values',
       'Diagnostics',
       'Graph Health',
+      'Linked Blocks',
     ])
-    expect(wb.columns).toHaveLength(5)
+    expect(wb.columns).toHaveLength(6)
   })
 
   it('each sheet has data with at least a header row', () => {
@@ -506,12 +507,13 @@ describe('buildTableSheet', () => {
 // ── buildProjectWorkbook ────────────────────────────────────────────────────
 
 describe('buildProjectWorkbook', () => {
-  it('produces 6 fixed sheets + table sheets', () => {
+  it('produces 6 fixed sheets + linked sheets + table sheets', () => {
     const model = makeProjectModel()
     const wb = buildProjectWorkbook(model, fakeVariables, [fakeTable])
-    expect(wb.sheets).toHaveLength(7) // 6 fixed + 1 table
-    expect(wb.sheetNames).toHaveLength(7)
-    expect(wb.columns).toHaveLength(7)
+    // 6 fixed + 2 L_ linked (one per canvas) + 1 table = 9
+    expect(wb.sheets).toHaveLength(9)
+    expect(wb.sheetNames).toHaveLength(9)
+    expect(wb.columns).toHaveLength(9)
   })
 
   it('has correct fixed sheet names', () => {
@@ -530,21 +532,23 @@ describe('buildProjectWorkbook', () => {
   it('table sheet names use T_{pos}_{label} pattern', () => {
     const model = makeProjectModel()
     const wb = buildProjectWorkbook(model, fakeVariables, [fakeTable])
-    expect(wb.sheetNames[6]).toBe('T_1_My Table')
+    // 6 fixed + 2 L_ linked sheets → table starts at index 8
+    expect(wb.sheetNames[8]).toBe('T_1_My Table')
   })
 
   it('deduplicates table sheet names', () => {
     const model = makeProjectModel()
     const table2: TableExport = { ...fakeTable, nodeId: 'n-tbl2' }
     const wb = buildProjectWorkbook(model, fakeVariables, [fakeTable, table2])
-    expect(wb.sheetNames[6]).toBe('T_1_My Table')
-    expect(wb.sheetNames[7]).toBe('T_1_My Table (2)')
+    expect(wb.sheetNames[8]).toBe('T_1_My Table')
+    expect(wb.sheetNames[9]).toBe('T_1_My Table (2)')
   })
 
   it('works with zero tables', () => {
     const model = makeProjectModel()
     const wb = buildProjectWorkbook(model, fakeVariables, [])
-    expect(wb.sheets).toHaveLength(6)
-    expect(wb.sheetNames).toHaveLength(6)
+    // 6 fixed + 2 L_ linked sheets (one per canvas with n1/n2 nodes)
+    expect(wb.sheets).toHaveLength(8)
+    expect(wb.sheetNames).toHaveLength(8)
   })
 })

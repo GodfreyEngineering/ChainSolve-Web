@@ -12,6 +12,7 @@ import type {
   AuditModel,
   AuditDiagnosticRow,
   AuditNodeRow,
+  AuditLinkedBlockRow,
   CanvasAuditSection,
   ProjectAuditModel,
 } from '../pdf/auditModel'
@@ -166,11 +167,19 @@ export function buildAuditWorkbook(
   const diags = buildDiagnosticsSheet(model.diagnostics)
   const health = buildHealthSheet(model.healthSummary)
 
-  return {
-    sheets: [summary.data, vars.data, nodeVals.data, diags.data, health.data],
-    sheetNames: ['Summary', 'Variables', 'Node Values', 'Diagnostics', 'Graph Health'],
-    columns: [summary.columns, vars.columns, nodeVals.columns, diags.columns, health.columns],
+  const sheets: SheetData[] = [summary.data, vars.data, nodeVals.data, diags.data, health.data]
+  const sheetNames: string[] = ['Summary', 'Variables', 'Node Values', 'Diagnostics', 'Graph Health']
+  const columns: Columns[] = [summary.columns, vars.columns, nodeVals.columns, diags.columns, health.columns]
+
+  // ADV-07: live-linked sheet
+  if (model.linkedBlocks.length > 0) {
+    const linked = buildLinkedCanvasSheet(model.linkedBlocks, model.meta.projectName)
+    sheets.push(linked.data)
+    sheetNames.push('Linked Blocks')
+    columns.push(linked.columns)
   }
+
+  return { sheets, sheetNames, columns }
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -411,6 +420,139 @@ export function buildTableSheet(table: TableExport): { data: SheetData; columns:
   return { data: rows, columns }
 }
 
+// ── Live-linked canvas sheet (ADV-07) ────────────────────────────────────────
+
+/** Maps blockType to an Excel formula generator. Inputs are column-F cell refs e.g. "F3". */
+const EXCEL_FORMULA: Record<string, (ins: string[]) => string> = {
+  add: (ins) => `=${ins.join('+')}`,
+  subtract: (ins) => `=${ins[0] ?? '0'}-${ins[1] ?? '0'}`,
+  multiply: (ins) => `=${ins.join('*')}`,
+  divide: (ins) => `=${ins[0] ?? '0'}/${ins[1] ?? '1'}`,
+  power: (ins) => `=${ins[0] ?? '0'}^${ins[1] ?? '1'}`,
+  negate: (ins) => `=-${ins[0] ?? '0'}`,
+  sqrt: (ins) => `=SQRT(${ins[0] ?? '0'})`,
+  abs: (ins) => `=ABS(${ins[0] ?? '0'})`,
+  floor: (ins) => `=FLOOR(${ins[0] ?? '0'},1)`,
+  ceil: (ins) => `=CEILING(${ins[0] ?? '0'},1)`,
+  round: (ins) => `=ROUND(${ins[0] ?? '0'},0)`,
+  sin: (ins) => `=SIN(${ins[0] ?? '0'})`,
+  cos: (ins) => `=COS(${ins[0] ?? '0'})`,
+  tan: (ins) => `=TAN(${ins[0] ?? '0'})`,
+  asin: (ins) => `=ASIN(${ins[0] ?? '0'})`,
+  acos: (ins) => `=ACOS(${ins[0] ?? '0'})`,
+  atan: (ins) => `=ATAN(${ins[0] ?? '0'})`,
+  atan2: (ins) => `=ATAN2(${ins[1] ?? '0'},${ins[0] ?? '0'})`,
+  exp: (ins) => `=EXP(${ins[0] ?? '0'})`,
+  ln: (ins) => `=LN(${ins[0] ?? '0'})`,
+  log10: (ins) => `=LOG10(${ins[0] ?? '0'})`,
+  log2: (ins) => `=LOG(${ins[0] ?? '0'},2)`,
+  min: (ins) => `=MIN(${ins.join(',')})`,
+  max: (ins) => `=MAX(${ins.join(',')})`,
+  mod: (ins) => `=MOD(${ins[0] ?? '0'},${ins[1] ?? '1'})`,
+  percentOf: (ins) => `=${ins[0] ?? '0'}*${ins[1] ?? '0'}/100`,
+  reciprocal: (ins) => `=1/${ins[0] ?? '1'}`,
+  sign: (ins) => `=SIGN(${ins[0] ?? '0'})`,
+}
+
+/** Category → background colour (ARGB hex without #). */
+const CATEGORY_COLOUR: Record<string, string> = {
+  Source: 'FFF0F9FF',  // sky blue tint
+  Constant: 'FFF0FFF4', // green tint
+  Arithmetic: 'FFFFF7ED', // orange tint
+  Trigonometry: 'FFFDF4FF', // purple tint
+  Logarithm: 'FFFDF4FF',
+  Statistics: 'FFFFFBEB', // amber tint
+  Finance: 'FFECFDF5', // emerald tint
+  Output: 'FFF8FAFC', // neutral
+  Plot: 'FFF8FAFC',
+  Data: 'FFEFF6FF', // blue tint
+  Operation: 'FFF9FAFB',
+  Annotation: 'FFFEF9C3', // yellow tint
+}
+
+/** The column letter that holds output values / formulas (1-indexed column 5 = E). */
+const OUTPUT_COL = 'E'
+
+export function buildLinkedCanvasSheet(
+  linkedBlocks: AuditLinkedBlockRow[],
+  canvasName: string,
+): { data: SheetData; columns: Columns } {
+  // First pass: assign row numbers (1-indexed, data starts at row 3 after 2 header rows)
+  const nodeToRow = new Map<string, number>()
+  linkedBlocks.forEach((b, i) => nodeToRow.set(b.nodeId, i + 3))
+
+  const rows: SheetData = []
+
+  // Title row
+  rows.push([
+    {
+      type: String as StringConstructor,
+      value: `Sheet: ${canvasName}`,
+      fontWeight: 'bold' as const,
+      span: 5,
+    },
+  ])
+
+  // Column header row
+  rows.push(headerRow(['Label', 'Block Type', 'Category', 'Literal Input', OUTPUT_COL + ' Output / Formula']))
+
+  // Data rows
+  for (const block of linkedBlocks) {
+    const rowIdx = nodeToRow.get(block.nodeId)!
+    const catColour = CATEGORY_COLOUR[block.category] ?? 'FFF9FAFB'
+    const style = {
+      backgroundColor: `#${catColour.slice(2)}` as string,
+    }
+
+    let outputCell: Row[number]
+
+    if (block.isSource && block.literalValue !== undefined) {
+      // Source node: output references the literal input cell (column D)
+      outputCell = {
+        type: String as StringConstructor,
+        value: `=D${rowIdx}`,
+        ...style,
+      }
+    } else {
+      // Try to generate Excel formula from input row references
+      const inputRefs = block.inputNodeIds
+        .map((id) => nodeToRow.get(id))
+        .filter((r): r is number => r !== undefined)
+        .map((r) => `${OUTPUT_COL}${r}`)
+
+      const formulaGen = EXCEL_FORMULA[block.blockType]
+      if (formulaGen && inputRefs.length > 0) {
+        outputCell = {
+          type: String as StringConstructor,
+          value: formulaGen(inputRefs),
+          ...style,
+        }
+      } else {
+        // Fallback: literal computed value
+        const numVal = parseFloat(block.outputValue)
+        outputCell = isNaN(numVal)
+          ? { type: String as StringConstructor, value: capCell(block.outputValue), ...style }
+          : { type: Number as NumberConstructor, value: numVal, ...style }
+      }
+    }
+
+    rows.push([
+      { type: String as StringConstructor, value: block.label, ...style },
+      { type: String as StringConstructor, value: block.blockType, ...style },
+      { type: String as StringConstructor, value: block.category, ...style },
+      block.isSource && block.literalValue !== undefined
+        ? { type: Number as NumberConstructor, value: block.literalValue, ...style }
+        : { type: String as StringConstructor, value: '', ...style },
+      outputCell,
+    ])
+  }
+
+  return {
+    data: rows,
+    columns: [{ width: 22 }, { width: 18 }, { width: 14 }, { width: 16 }, { width: 28 }],
+  }
+}
+
 // ── Project workbook assembly ────────────────────────────────────────────────
 
 export function buildProjectWorkbook(
@@ -449,6 +591,16 @@ export function buildProjectWorkbook(
     diags.columns,
     health.columns,
   ]
+
+  // Per-canvas linked sheets (ADV-07)
+  for (const canvas of model.canvases) {
+    if (canvas.linkedBlocks.length > 0) {
+      const linked = buildLinkedCanvasSheet(canvas.linkedBlocks, canvas.canvasName)
+      sheets.push(linked.data)
+      rawNames.push(sanitizeSheetName(`L_${canvas.position}_${canvas.canvasName}`))
+      cols.push(linked.columns)
+    }
+  }
 
   // Table worksheets
   for (const table of tables) {

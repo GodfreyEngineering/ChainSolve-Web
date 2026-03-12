@@ -35,6 +35,24 @@ export interface AuditAnnotationRow {
   text: string
 }
 
+/** One row per block — used by the live-linked XLSX sheet (ADV-07). */
+export interface AuditLinkedBlockRow {
+  nodeId: string
+  label: string
+  blockType: string
+  category: string
+  /** True for Number/Slider/const nodes that hold a literal value. */
+  isSource: boolean
+  /** Set for source nodes. */
+  literalValue?: number
+  /** Input node IDs in port order (in0, in1, …). */
+  inputNodeIds: string[]
+  /** Computed output as a display string. */
+  outputValue: string
+  /** Human-readable equation (from renderEquationText). */
+  formulaText: string
+}
+
 export interface AuditMeta {
   projectName: string
   projectId: string | null
@@ -86,6 +104,7 @@ export interface AuditModel {
   equations: AuditEquationRow[]
   variables: AuditVariableRow[]
   annotations: AuditAnnotationRow[]
+  linkedBlocks: AuditLinkedBlockRow[]
 }
 
 // ── Multi-canvas types (v2) ──────────────────────────────────────────────────
@@ -110,6 +129,7 @@ export interface CanvasAuditSection {
   nodeValues: AuditNodeRow[]
   equations: AuditEquationRow[]
   annotations: AuditAnnotationRow[]
+  linkedBlocks: AuditLinkedBlockRow[]
   graphImageBytes: Uint8Array | null
   imageError?: string
   captureRung?: string
@@ -245,6 +265,125 @@ function mapAnnotations(nodes: Node[]): AuditAnnotationRow[] {
     .filter((r) => r.text.trim().length > 0)
 }
 
+// ── Source block types (literal value nodes) ──────────────────────────────────
+
+const SOURCE_BLOCK_TYPES = new Set([
+  'number',
+  'slider',
+  'variableSource',
+  'constant',
+  'pi',
+  'euler',
+  'tau',
+  'phi',
+  'ln2',
+  'ln10',
+  'sqrt2',
+  'inf',
+])
+
+// ── Block → display category ──────────────────────────────────────────────────
+
+function blockCategory(blockType: string): string {
+  if (SOURCE_BLOCK_TYPES.has(blockType)) return 'Source'
+  if (blockType.startsWith('annotation_')) return 'Annotation'
+  if (blockType.startsWith('const.physics') || blockType.startsWith('const.')) return 'Constant'
+  if (
+    blockType === 'sin' ||
+    blockType === 'cos' ||
+    blockType === 'tan' ||
+    blockType === 'asin' ||
+    blockType === 'acos' ||
+    blockType === 'atan' ||
+    blockType === 'atan2'
+  )
+    return 'Trigonometry'
+  if (blockType === 'exp' || blockType === 'ln' || blockType === 'log10' || blockType === 'log2')
+    return 'Logarithm'
+  if (
+    blockType === 'add' ||
+    blockType === 'subtract' ||
+    blockType === 'multiply' ||
+    blockType === 'divide' ||
+    blockType === 'power' ||
+    blockType === 'sqrt' ||
+    blockType === 'abs' ||
+    blockType === 'negate' ||
+    blockType === 'mod'
+  )
+    return 'Arithmetic'
+  if (blockType.startsWith('stats.') || blockType === 'mean' || blockType === 'stddev')
+    return 'Statistics'
+  if (blockType.startsWith('fin.') || blockType === 'npv' || blockType === 'irr')
+    return 'Finance'
+  if (blockType === 'display' || blockType === 'probe') return 'Output'
+  if (blockType === 'plot' || blockType === 'histogram') return 'Plot'
+  if (blockType === 'tableInput' || blockType === 'csvImport') return 'Data'
+  return 'Operation'
+}
+
+function mapLinkedBlocks(
+  nodes: Node[],
+  edges: Edge[],
+  evalResult: EngineEvalResult,
+): AuditLinkedBlockRow[] {
+  const computed = new Map<string, Value>(Object.entries(evalResult.values) as [string, Value][])
+
+  // Build target → ordered source IDs (by targetHandle in0, in1, in2…)
+  const inEdges = new Map<string, { srcId: string; portIndex: number }[]>()
+  for (const e of edges) {
+    if (!inEdges.has(e.target)) inEdges.set(e.target, [])
+    const portIndex = e.targetHandle ? parseInt(e.targetHandle.replace('in', ''), 10) || 0 : 0
+    inEdges.get(e.target)!.push({ srcId: e.source, portIndex })
+  }
+  // Sort each node's inputs by port index
+  for (const arr of inEdges.values()) {
+    arr.sort((a, b) => a.portIndex - b.portIndex)
+  }
+
+  const evalNodes = nodes.filter(
+    (n) =>
+      (n.data as Record<string, unknown>).blockType !== '__group__' &&
+      !(n.data as Record<string, unknown>).blockType
+        ?.toString()
+        .startsWith('annotation_'),
+  )
+
+  return evalNodes.map((n) => {
+    const data = n.data as Record<string, unknown>
+    const blockType = data.blockType as string
+    const label = (data.label as string) ?? blockType
+    const isSource = SOURCE_BLOCK_TYPES.has(blockType)
+    const raw = computed.get(n.id)
+    const outputValue = raw ? formatValue(raw) : ''
+    const literalValue =
+      isSource && raw?.kind === 'scalar' ? (raw as { value: number }).value : undefined
+
+    const inputs = (inEdges.get(n.id) ?? []).map((e) => e.srcId)
+
+    // Build formula text from expression tree
+    let formulaText = ''
+    if (!isSource) {
+      const tree = buildExpressionTree(n.id, nodes, edges, computed)
+      if (tree && tree.portOrder.length > 0) {
+        formulaText = renderEquationText(tree)
+      }
+    }
+
+    return {
+      nodeId: n.id,
+      label,
+      blockType,
+      category: blockCategory(blockType),
+      isSource,
+      literalValue,
+      inputNodeIds: inputs,
+      outputValue,
+      formulaText,
+    }
+  })
+}
+
 function evalNodeCount(nodes: Node[]): number {
   return nodes.filter((n) => (n.data as Record<string, unknown>).blockType !== '__group__').length
 }
@@ -294,6 +433,7 @@ export function buildAuditModel(args: BuildAuditModelArgs): AuditModel {
     equations: mapEquations(args.nodes, args.edges, args.evalResult),
     variables: args.variables ? mapVariables(args.variables) : [],
     annotations: mapAnnotations(args.nodes),
+    linkedBlocks: mapLinkedBlocks(args.nodes, args.edges, args.evalResult),
   }
 }
 
@@ -329,6 +469,7 @@ export function buildCanvasAuditSection(args: BuildCanvasSectionArgs): CanvasAud
     nodeValues: mapNodeValues(args.nodes, args.evalResult),
     equations: mapEquations(args.nodes, args.edges, args.evalResult),
     annotations: mapAnnotations(args.nodes),
+    linkedBlocks: mapLinkedBlocks(args.nodes, args.edges, args.evalResult),
     graphImageBytes: args.graphImageBytes,
     imageError: args.imageError,
     captureRung: args.captureRung,
