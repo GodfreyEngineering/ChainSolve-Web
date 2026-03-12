@@ -248,7 +248,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[PROJ-04] Project folders: full UI** — Sidebar tree with expandable folder nodes. Drag project onto folder to move. Right-click folder: Rename, Delete (move contents to root), New Project Here. "Unfiled" section for `folder = NULL`. "New Folder" button. Verify: create folder → drag projects in → persists across sessions.
 
-- [ ] **[PROJ-05] Project search** — Search input at top of Projects panel. Instant fuzzy matching on project names. Highlight matched text. Ignores folder structure (searches all). Verify: type "beam" → shows all projects with "beam" in name.
+- [x] **[PROJ-05] Project search** — Upgraded existing search to true fuzzy matching (sequential char match with scoring) + HighlightedName renders matched chars in primary color. Sorted by score when querying; pinned projects still appear first. Verify: type "beam" → shows all projects with "beam" in name; matched chars highlighted.
 
 - [ ] **[PROJ-06] Project import/export robustness** — Validate JSON against JSON Schema before accepting. Handle missing/extra fields. Migrate old schema versions. Embedded assets round-trip correctly. Version compatibility warning for newer schema versions. Progress indicator for large imports. Verify: export → import on different account → all blocks and data intact.
 
