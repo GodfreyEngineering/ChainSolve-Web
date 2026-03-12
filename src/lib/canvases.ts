@@ -222,6 +222,22 @@ export async function deleteCanvas(canvasId: string, projectId: string): Promise
     .eq('owner_id', userId)
 
   if (error) throw new ServiceError('DB_ERROR', `Delete canvas failed: ${error.message}`, true)
+
+  // Re-number remaining canvases to fill the position gap (0, 1, 2, …)
+  const { data: remaining, error: listErr } = await supabase
+    .from('canvases')
+    .select('id')
+    .eq('project_id', projectId)
+    .eq('owner_id', userId)
+    .order('position', { ascending: true })
+
+  if (listErr) return // best-effort: gap in positions is cosmetic
+  if (remaining && remaining.length > 0) {
+    const ids = (remaining as { id: string }[]).map((c) => c.id)
+    await reorderCanvases(projectId, ids).catch(() => {
+      // best-effort renumber; gap is cosmetic
+    })
+  }
 }
 
 /**
