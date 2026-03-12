@@ -58,6 +58,7 @@ import { QuickAddPalette } from './QuickAddPalette'
 import { ComputedContext } from '../../contexts/ComputedContext'
 import { BindingContext } from '../../contexts/BindingContext'
 import { useEngine } from '../../contexts/EngineContext'
+import { useCanvasEngine } from '../../hooks/useCanvasEngine'
 import { useGraphEngine } from '../../engine/useGraphEngine'
 import { buildConstantsLookup } from '../../engine/resolveBindings'
 import { computeEffectiveEdgesAnimated } from '../../engine/edgesAnimGate'
@@ -928,17 +929,21 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   }, [])
 
   // ── Computed values (incremental via WASM engine) ──────────────────────────
-  const engine = useEngine()
+  // ENG-04: primary engine provides catalog/constants; canvas-specific pool
+  // engine handles evaluation so multiple canvases evaluate in parallel.
+  const primaryEngine = useEngine()
+  const { engine, engineSwitchCount } = useCanvasEngine(canvasId, primaryEngine)
   const variables = useVariablesStore((s) => s.variables)
 
-  // W12.2: Build constants lookup + binding context from engine catalog
+  // W12.2: Build constants lookup + binding context from primary engine catalog
+  // (catalog is identical across all pool workers).
   const constantsLookup = useMemo(
-    () => buildConstantsLookup(engine.constantValues),
-    [engine.constantValues],
+    () => buildConstantsLookup(primaryEngine.constantValues),
+    [primaryEngine.constantValues],
   )
   const bindingCtx = useMemo(
-    () => ({ constants: constantsLookup, catalog: engine.catalog }),
-    [constantsLookup, engine.catalog],
+    () => ({ constants: constantsLookup, catalog: primaryEngine.catalog }),
+    [constantsLookup, primaryEngine.catalog],
   )
 
   // H7-1: Read published outputs for subscribe block resolution.
@@ -952,12 +957,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     return map
   }, [publishedChannels])
 
+  // ENG-04: when the engine switches (primary → dedicated), force a full
+  // snapshot reload so the dedicated worker gets the current graph state.
+  const combinedEngineKey = engineKey + engineSwitchCount
+
   const { computed } = useGraphEngine(
     nodes,
     edges,
     engine,
     undefined,
-    engineKey,
+    combinedEngineKey,
     paused,
     constantsLookup,
     variables,

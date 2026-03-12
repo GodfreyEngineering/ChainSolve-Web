@@ -39,31 +39,39 @@ import { WindowManagerProvider } from './contexts/WindowManagerContext.tsx'
 import { PanelLayoutProvider } from './contexts/PanelLayoutContext.tsx'
 import { WindowDock } from './components/ui/WindowDock.tsx'
 import { EngineContext } from './contexts/EngineContext.ts'
+import { WorkerPoolContext } from './contexts/WorkerPoolContext.ts'
 import { createEngine, type EngineAPI } from './engine/index.ts'
+import { createWorkerPool, type WorkerPoolAPI } from './engine/workerPool.ts'
 import { validateCatalog } from './blocks/registry'
 import { BrowserRouter } from 'react-router-dom'
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx'
 
 function Root() {
   const [engine, setEngine] = useState<EngineAPI | null>(null)
+  const [pool, setPool] = useState<WorkerPoolAPI | null>(null)
   const [error, setError] = useState<Error | null>(null)
   const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     let cancelled = false
+    // Create a new pool on each retry; dispose old one if it exists.
+    const newPool = createWorkerPool()
 
     createEngine()
       .then((eng) => {
         if (cancelled) {
           eng.dispose()
+          newPool.dispose()
           return
         }
         validateCatalog(eng.catalog)
         ;(window as unknown as Record<string, unknown>).__chainsolve_engine = eng
         console.info('[engine] WASM engine ready, version:', eng.engineVersion)
         setEngine(eng)
+        setPool(newPool)
       })
       .catch((err: unknown) => {
+        newPool.dispose()
         if (!cancelled) {
           setError(err instanceof Error ? err : new Error(String(err)))
         }
@@ -77,6 +85,7 @@ function Root() {
   const handleRetry = useCallback(() => {
     setError(null)
     setEngine(null)
+    setPool(null)
     setRetryCount((c) => c + 1)
   }, [])
 
@@ -101,11 +110,13 @@ function Root() {
         <WindowManagerProvider>
           <PanelLayoutProvider>
             <SettingsModalProvider>
-              {engine && (
+              {engine && pool && (
                 <EngineContext.Provider value={engine}>
-                  {/* Boot ladder rung 4: WASM engine is ready. */}
-                  <div data-testid="engine-ready" style={{ display: 'none' }} />
-                  <App />
+                  <WorkerPoolContext.Provider value={pool}>
+                    {/* Boot ladder rung 4: WASM engine is ready. */}
+                    <div data-testid="engine-ready" style={{ display: 'none' }} />
+                    <App />
+                  </WorkerPoolContext.Provider>
                 </EngineContext.Provider>
               )}
             </SettingsModalProvider>
