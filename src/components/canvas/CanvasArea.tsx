@@ -99,6 +99,9 @@ const LazyDebugConsolePanel = lazy(() => import('./DebugConsolePanel'))
 const LazyGraphHealthPanel = lazy(() => import('./GraphHealthPanel'))
 const LazyOutputPanel = lazy(() => import('./OutputPanel'))
 const LazyProblemsPanel = lazy(() => import('./ProblemsPanel'))
+const LazyHistoryPanel = lazy(() =>
+  import('./HistoryPanel').then((m) => ({ default: m.HistoryPanel })),
+)
 import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
@@ -440,7 +443,13 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // ── Graph history (undo/redo) ───────────────────────────────────────────────
   const history = useGraphHistory(50)
 
-  const { save: historySave, undo: historyUndo, redo: historyRedo } = history
+  const {
+    save: historySave,
+    undo: historyUndo,
+    redo: historyRedo,
+    stackEntries,
+    restoreToIndex: historyRestoreToIndex,
+  } = history
 
   const doSaveHistory = useCallback(() => {
     historySave({ nodes: latestNodes.current, edges: latestEdges.current })
@@ -1658,6 +1667,20 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     setEdges(next.edges)
   }, [historyRedo, setNodes, setEdges])
 
+  /** UX-10: Restore to a specific history entry (displayIdx 0 = most recent). */
+  const handleRestoreHistory = useCallback(
+    (displayIdx: number) => {
+      const target = historyRestoreToIndex(
+        displayIdx,
+        { nodes: latestNodes.current, edges: latestEdges.current },
+      )
+      if (!target) return
+      setNodes(target.nodes)
+      setEdges(target.edges)
+    },
+    [historyRestoreToIndex, setNodes, setEdges],
+  )
+
   // ── Clipboard handlers ──────────────────────────────────────────────────
 
   const handleCopy = useCallback(() => {
@@ -2301,8 +2324,22 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           </Suspense>
         ),
       },
+      {
+        id: 'history' as DockTab,
+        label: t('dock.history', 'History'),
+        content: (
+          <Suspense fallback={null}>
+            <LazyHistoryPanel
+              entries={stackEntries}
+              currentNodeCount={nodes.length}
+              currentEdgeCount={edges.length}
+              onRestore={handleRestoreHistory}
+            />
+          </Suspense>
+        ),
+      },
     ],
-    [nodes, edges, t, onFixWithCopilot, onExplainIssues],
+    [nodes, edges, t, onFixWithCopilot, onExplainIssues, stackEntries, handleRestoreHistory],
   )
 
   return (
