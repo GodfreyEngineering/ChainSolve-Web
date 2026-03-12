@@ -99,6 +99,7 @@ import { computeGraphHealth, formatHealthReport } from '../lib/graphHealth'
 import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../lib/build-info'
 import { listProjectAssets, downloadAssetBytes } from '../lib/storage'
 import { addBreadcrumb, captureReactBoundary } from '../observability/client'
+import { startTiming } from '../observability/rum'
 import { validateProjectName } from '../lib/validateProjectName'
 import type { CaptureResult } from '../lib/pdf/captureCanvasImage'
 import type { TableExport } from '../lib/xlsx/xlsxModel'
@@ -365,6 +366,8 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     // Guard against stale async updates when projectId changes mid-load
     let cancelled = false
 
+    const stopProjectOpenTimer = startTiming('project_open', { projectId: projectId! })
+
     async function load() {
       try {
         addBreadcrumb('canvas_load_start', { projectId: projectId! })
@@ -463,9 +466,11 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           setInitEdges([])
         }
 
+        stopProjectOpenTimer()
         setLoadPhase('ready')
       } catch (err: unknown) {
         if (cancelled) return
+        stopProjectOpenTimer()
         const msg = err instanceof Error ? err.message : 'Failed to load project'
         // Remove stale MRU entry when the project no longer exists
         if (projectId && /not found/i.test(msg)) {
@@ -518,6 +523,8 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       isSaving.current = true
       beginSave()
       setSaveProgress(0.1)
+
+      const stopSaveTimer = startTiming('save', { projectId })
 
       try {
         // E8-1: Conflict check BEFORE any writes.
@@ -596,12 +603,14 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           // Clear offline retry state on successful save
           if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
           offlineRetryCount.current = 0
+          stopSaveTimer()
           completeSave(result.updatedAt)
           if (opts?.manual) {
             toast(t('canvas.projectSaved', 'Project saved'), 'success')
           }
         }
       } catch (err: unknown) {
+        stopSaveTimer()
         if (!navigator.onLine) {
           // Offline — queue for retry using exponential backoff
           queueOffline()

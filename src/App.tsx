@@ -9,6 +9,11 @@ import { RouteSkeleton } from './components/ui/RouteSkeleton'
 // Lazy-load WorkspacePage (unified single-page workspace)
 const WorkspacePage = lazy(() => import('./pages/WorkspacePage'))
 
+// Lazy-load admin metrics page (OBS-01)
+const MetricsPage = lazy(() =>
+  import('./pages/MetricsPage').then((m) => ({ default: m.MetricsPage })),
+)
+
 // Lazy-load diagnostics page so it is not included in the main bundle for
 // production users unless VITE_DIAGNOSTICS_UI_ENABLED=true.
 const DiagnosticsPage = lazy(() => import('./pages/DiagnosticsPage'))
@@ -233,6 +238,15 @@ export default function App() {
           }
         />
       )}
+      {/* OBS-01: Admin metrics dashboard (is_admin guard enforced by CF Function) */}
+      <Route
+        path="/admin/metrics"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
+            <MetricsPage />
+          </Suspense>
+        }
+      />
       {/* Legacy redirects */}
       <Route path="/canvas" element={<ScratchRedirect />} />
       <Route path="/canvas/:projectId" element={<CanvasRedirect />} />

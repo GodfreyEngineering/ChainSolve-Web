@@ -26,6 +26,7 @@ export const OBS_EVENT_TYPE = {
   DOCTOR_RESULT: 'doctor_result',
   SERVER_ERROR: 'server_error',
   WEB_VITALS: 'web_vitals',
+  RUM_TIMING: 'rum_timing',
 } as const
 
 export type ObsEventType = (typeof OBS_EVENT_TYPE)[keyof typeof OBS_EVENT_TYPE]
@@ -106,6 +107,20 @@ export interface WebVitalsPayload {
   navigation_type: string
 }
 
+/** RUM timing event payload (OBS-01). */
+export interface RumTimingPayload {
+  /** Short label identifying what was timed, e.g. 'project_open', 'save', 'engine_eval' */
+  event_name: string
+  /** Duration in milliseconds */
+  duration_ms: number
+  /** Optional: project ID (UUID prefix only — not full ID for privacy) */
+  project_ref?: string
+  /** Optional: canvas ID (UUID prefix only) */
+  canvas_ref?: string
+  /** Optional: additional integer context (e.g. node count) */
+  count?: number
+}
+
 export type ObsPayload =
   | ClientErrorPayload
   | ClientRejectionPayload
@@ -115,6 +130,7 @@ export type ObsPayload =
   | DoctorResultPayload
   | ServerErrorPayload
   | WebVitalsPayload
+  | RumTimingPayload
 
 // ── Breadcrumb (action log) ───────────────────────────────────────────────────
 

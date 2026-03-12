@@ -374,7 +374,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 ## TIER 18 — OBSERVABILITY & MONITORING
 
-- [ ] **[OBS-01] Real user monitoring (RUM)** — Instrument with timing: time to interactive canvas, save latency, project open latency, engine eval latency. Send to `observability_events` via Cloudflare Function. Simple admin dashboard at `/admin/metrics` (is_admin users only) showing P50/P95 over last 7 days. Verify: opening a project → load latency event in `observability_events`.
+- [x] **[OBS-01] Real user monitoring (RUM)** — Instrument with timing: time to interactive canvas, save latency, project open latency, engine eval latency. Send to `observability_events` via Cloudflare Function. Simple admin dashboard at `/admin/metrics` (is_admin users only) showing P50/P95 over last 7 days. Verify: opening a project → load latency event in `observability_events`.
 
 - [ ] **[OBS-02] Engine performance telemetry** — After each engine eval, record in `observability_events`: `eval_time_us`, `node_count`, `edge_count`, `dirty_node_count`, `is_partial`. Summary only (not graph contents). Used to identify slow graphs. Verify: evaluating a 50-node graph → telemetry event in DB.
 
