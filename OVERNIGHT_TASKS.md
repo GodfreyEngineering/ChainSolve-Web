@@ -312,7 +312,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[UI-PERF-05] Bundle splitting: tighten to 300KB gzip** — Run `npm run perf:bundle`. Identify large eager chunks. Ensure lazy-loaded: vega-lite, exceljs, AI Copilot components, Settings modal, KaTeX, full block descriptions. Update `check-bundle-size.mjs` budget: 300KB gzip initial JS (down from 350KB). Verify: Chrome DevTools shows initial JS < 300KB; vega-lite loads only when a plot node is first on canvas.
 
-- [ ] **[UI-PERF-06] Web Vitals monitoring** — Add `web-vitals` library. Track LCP, CLS, INP on every page load. Send to `observability_events` via `POST /api/observability/vitals` Cloudflare Function. Verify: after page load, `observability_events` contains LCP, CLS, INP values.
+- [x] **[UI-PERF-06] Web Vitals monitoring** — Add `web-vitals` library. Track LCP, CLS, INP on every page load. Send to `observability_events` via `POST /api/observability/vitals` Cloudflare Function. Verify: after page load, `observability_events` contains LCP, CLS, INP values.
 
 ---
 

@@ -25,6 +25,7 @@ export const OBS_EVENT_TYPE = {
   ENGINE_DIAGNOSTICS: 'engine_diagnostics',
   DOCTOR_RESULT: 'doctor_result',
   SERVER_ERROR: 'server_error',
+  WEB_VITALS: 'web_vitals',
 } as const
 
 export type ObsEventType = (typeof OBS_EVENT_TYPE)[keyof typeof OBS_EVENT_TYPE]
@@ -94,6 +95,17 @@ export interface ServerErrorPayload {
   statusCode: number
 }
 
+export interface WebVitalsPayload {
+  /** Metric name: LCP, CLS, INP */
+  metric_name: string
+  /** Metric value (ms for LCP/INP, unitless 0–1 for CLS) */
+  value: number
+  /** Performance rating */
+  rating: 'good' | 'needs-improvement' | 'poor'
+  /** Navigation type that triggered this page load */
+  navigation_type: string
+}
+
 export type ObsPayload =
   | ClientErrorPayload
   | ClientRejectionPayload
@@ -102,6 +114,7 @@ export type ObsPayload =
   | EngineDiagnosticsPayload
   | DoctorResultPayload
   | ServerErrorPayload
+  | WebVitalsPayload
 
 // ── Breadcrumb (action log) ───────────────────────────────────────────────────
 

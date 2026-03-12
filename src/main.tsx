@@ -47,6 +47,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx'
 import { OfflineBanner } from './components/OfflineBanner.tsx'
 import { registerServiceWorker, captureInstallPrompt } from './lib/serviceWorker.ts'
+import { initWebVitals } from './observability/webVitals.ts'
 
 // UI-PERF-04: Register service worker for offline support and asset caching.
 // registerServiceWorker is safe to call regardless of SW support — it exits
@@ -55,6 +56,8 @@ registerServiceWorker().catch(() => {})
 // Capture the browser's beforeinstallprompt so the app can show a custom
 // "Add to Home Screen" / PWA install button at a convenient moment.
 captureInstallPrompt()
+// UI-PERF-06: Track Core Web Vitals (LCP, CLS, INP). Gated by OBS_ENABLED.
+initWebVitals()
 
 function Root() {
   const [engine, setEngine] = useState<EngineAPI | null>(null)
