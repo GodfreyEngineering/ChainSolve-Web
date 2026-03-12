@@ -230,7 +230,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[ADV-04] Node comments** — Right-click node → "Add comment" → text input → saves to `node_comments` table. Node shows a small comment bubble badge (count). Click badge → comment thread popover (show all comments, resolve button, reply). Comments visible to owner only (for now). Verify: add comment → save → reopen → comment persists on node.
 
-- [ ] **[ADV-05] Graph health panel: expand** — Expand `GraphHealthPanel.tsx`: real-time gauge "Graph health: 98%". List disconnected nodes (no inputs or outputs) as warnings. List error nodes. Show critical path (longest chain). Node count, edge count, eval time per node (top 10 slowest nodes). "Auto-fix" suggestions. Verify: introduce cycle → health panel shows "CYCLE DETECTED" with cycle path.
+- [x] **[ADV-05] Graph health panel: expand** — Expand `GraphHealthPanel.tsx`: real-time gauge "Graph health: 98%". List disconnected nodes (no inputs or outputs) as warnings. List error nodes. Show critical path (longest chain). Node count, edge count, eval time per node (top 10 slowest nodes). "Auto-fix" suggestions. Verify: introduce cycle → health panel shows "CYCLE DETECTED" with cycle path.
 
 - [ ] **[ADV-06] PDF export: full calculation report** — Enhance `src/lib/pdf/`: cover page (project name, date, user, engine version hash). Canvas screenshot per sheet. Variable table. Value table (block label → output + unit). Annotation text as section headings. LaTeX rendering for formula annotations via KaTeX. Digital hash (SHA-256 of project JSON + timestamp). A4/Letter/A3 page size option. Page numbers. Verify: export 5-block project → PDF has cover, canvas screenshot, value table, hash.
 

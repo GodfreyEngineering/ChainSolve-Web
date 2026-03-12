@@ -1204,7 +1204,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   // ── Export all-sheets orchestrator ─────────────────────────────────────────
 
   const handleExportAllSheets = useCallback(
-    async (opts: { includeImages: boolean }) => {
+    async (opts: { includeImages: boolean; pageSize?: string }) => {
       if (!projectId || exportingRef.current) return
 
       const { exportProjectAuditPdf } = await import('../lib/pdf/exportAuditPdf')
@@ -1357,10 +1357,12 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           activeCanvasId: origCanvasId,
           projectHash,
           canvases: canvasSections,
+          variables: currentVariables,
           exportOptions,
+          pageSize: (opts.pageSize as 'A4' | 'Letter' | 'A3' | undefined) ?? 'A4',
         })
 
-        await exportProjectAuditPdf(model)
+        await exportProjectAuditPdf(model, model.pageSize)
         toast(t('pdfExport.success'), 'success')
         useStatusBarStore.getState().addExportHistory({
           format: 'PDF',
@@ -1831,7 +1833,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const ent = getEntitlements(plan)
 
   const gatedExportPdf = useCallback(
-    (opts: { includeImages: boolean }) => {
+    (opts: { includeImages: boolean; pageSize?: string }) => {
       if (!ent.canExport) {
         setUpgradeExportOpen(true)
         return

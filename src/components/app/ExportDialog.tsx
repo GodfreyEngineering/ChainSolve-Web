@@ -15,12 +15,15 @@ export type ExportScope = 'active' | 'project'
 
 const LS_KEY = 'cs:exportPrefs'
 
+export type PdfPageSizeOption = 'A4' | 'Letter' | 'A3'
+
 interface ExportPrefs {
   format: ExportFormat
   scope: ExportScope
   includeImages: boolean
   includeTables: boolean
   includeAnnotations: boolean
+  pageSize: PdfPageSizeOption
   remember: boolean
 }
 
@@ -30,6 +33,7 @@ const DEFAULTS: ExportPrefs = {
   includeImages: true,
   includeTables: true,
   includeAnnotations: true,
+  pageSize: 'A4',
   remember: true,
 }
 
@@ -56,7 +60,7 @@ export interface ExportDialogProps {
   onClose: () => void
   hasProject: boolean
   exportInProgress?: boolean
-  onExportPdf: (opts: { includeImages: boolean; scope: ExportScope }) => void
+  onExportPdf: (opts: { includeImages: boolean; scope: ExportScope; pageSize: PdfPageSizeOption }) => void
   onExportXlsx: (opts: { includeTables: boolean; scope: ExportScope }) => void
   onExportJson: () => void
   onCancelExport?: () => void
@@ -89,7 +93,7 @@ export function ExportDialog({
 
     switch (prefs.format) {
       case 'pdf':
-        onExportPdf({ includeImages: prefs.includeImages, scope: prefs.scope })
+        onExportPdf({ includeImages: prefs.includeImages, scope: prefs.scope, pageSize: prefs.pageSize })
         break
       case 'xlsx':
         onExportXlsx({ includeTables: prefs.includeTables, scope: prefs.scope })
@@ -172,6 +176,22 @@ export function ExportDialog({
               />
               {t('exportDialog.includeAnnotations')}
             </label>
+            <div style={{ marginTop: 8 }}>
+              <div style={{ ...fieldLabel, marginBottom: 4 }}>{t('exportDialog.pageSize', 'Page size')}</div>
+              <div style={radioGroup}>
+                {(['A4', 'Letter', 'A3'] as const).map((ps) => (
+                  <label key={ps} style={radioLabel}>
+                    <input
+                      type="radio"
+                      name="exportPageSize"
+                      checked={prefs.pageSize === ps}
+                      onChange={() => update({ pageSize: ps })}
+                    />
+                    {ps}
+                  </label>
+                ))}
+              </div>
+            </div>
           </Field>
         )}
 

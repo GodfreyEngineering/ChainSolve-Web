@@ -81,7 +81,7 @@ export interface AppHeaderProps {
   canvasRef: React.RefObject<CanvasAreaHandle | null>
   // Export (W14a.3 + W14b.2 + W14c.1) + Import (W14c.2)
   exportInProgress?: boolean
-  onExportPdfProject?: (opts: { includeImages: boolean }) => void
+  onExportPdfProject?: (opts: { includeImages: boolean; pageSize?: string }) => void
   onExportExcelProject?: (opts: { includeTables: boolean }) => void
   onExportChainsolveJson?: () => void
   onImportChainsolveJson?: () => void
@@ -1129,7 +1129,7 @@ export function AppHeader({
         onClose={() => setExportDialogOpen(false)}
         hasProject={!!projectId}
         exportInProgress={!!exportInProgress}
-        onExportPdf={({ includeImages: incImg, scope }) => {
+        onExportPdf={({ includeImages: incImg, scope, pageSize }) => {
           if (scope === 'active') {
             toast(t('pdfExport.generating'), 'info')
             canvasRef.current
@@ -1141,7 +1141,7 @@ export function AppHeader({
               })
           } else if (onExportPdfProject) {
             toast(t('pdfExport.generatingAll'), 'info')
-            onExportPdfProject({ includeImages: incImg })
+            onExportPdfProject({ includeImages: incImg, pageSize })
           }
         }}
         onExportXlsx={({ includeTables: incTbl, scope }) => {

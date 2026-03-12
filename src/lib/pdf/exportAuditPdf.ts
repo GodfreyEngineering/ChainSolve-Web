@@ -8,7 +8,7 @@
 
 import type { PDFFont, PDFPage } from '../pdf-loader'
 import { loadPdfLib } from '../pdf-loader'
-import type { AuditModel, ProjectAuditModel } from './auditModel'
+import type { AuditModel, ProjectAuditModel, AuditVariableRow, AuditAnnotationRow, PdfPageSize } from './auditModel'
 import { downloadBlob, safeName, formatTimestampForFilename } from '../export-file-utils'
 
 /** pdf-lib rgb return type — avoids re-exporting the enum-based Color union. */
@@ -20,6 +20,12 @@ type PDFDocInstance = Awaited<
 >
 
 // ── Constants ────────────────────────────────────────────────────────────────
+
+const PAGE_SIZES: Record<PdfPageSize, [number, number]> = {
+  A4: [595.28, 841.89],
+  Letter: [612, 792],
+  A3: [841.89, 1190.55],
+}
 
 const A4_WIDTH = 595.28
 const A4_HEIGHT = 841.89
@@ -59,7 +65,9 @@ function createPageManager(
   footerFont: PDFFont,
   projectName: string,
   buildSha?: string,
+  pageSize?: PdfPageSize,
 ): PageManager {
+  const [pageWidth, pageHeight] = PAGE_SIZES[pageSize ?? 'A4']
   let pageNumber = 0
 
   function addFooter(p: PDFPage) {
@@ -74,13 +82,13 @@ function createPageManager(
   }
 
   function newPage(): PDFPage {
-    const p = doc.addPage([A4_WIDTH, A4_HEIGHT])
+    const p = doc.addPage([pageWidth, pageHeight])
     addFooter(p)
     return p
   }
 
   let page = newPage()
-  let y = A4_HEIGHT - MARGIN
+  let y = pageHeight - MARGIN
 
   const mgr: PageManager = {
     get page() {
@@ -99,13 +107,13 @@ function createPageManager(
     ensureSpace(needed: number) {
       if (y - needed < FOOTER_Y + 20) {
         page = newPage()
-        y = A4_HEIGHT - MARGIN
+        y = pageHeight - MARGIN
       }
     },
 
     forceNewPage() {
       page = newPage()
-      y = A4_HEIGHT - MARGIN
+      y = pageHeight - MARGIN
     },
 
     drawText(text: string, opts) {
@@ -265,6 +273,73 @@ function renderNodeValuesTable(
   }
 }
 
+function renderVariablesSection(
+  pm: PageManager,
+  variables: AuditVariableRow[],
+  fonts: Fonts,
+): void {
+  if (variables.length === 0) return
+
+  pm.drawSectionTitle('Variables', fonts.bold)
+
+  // Header
+  pm.ensureSpace(LINE_HEIGHT)
+  const hY = pm.y
+  pm.page.drawText('Name', { x: MARGIN, y: hY, size: 8, font: fonts.bold })
+  pm.page.drawText('Value', { x: MARGIN + 120, y: hY, size: 8, font: fonts.bold })
+  pm.page.drawText('Unit', { x: MARGIN + 200, y: hY, size: 8, font: fonts.bold })
+  pm.page.drawText('Description', { x: MARGIN + 260, y: hY, size: 8, font: fonts.bold })
+  pm.y -= LINE_HEIGHT
+
+  for (const v of variables) {
+    pm.ensureSpace(LINE_HEIGHT)
+    const rY = pm.y
+    pm.page.drawText(truncateText(v.name, fonts.regular, 8, 110), { x: MARGIN, y: rY, size: 8, font: fonts.regular })
+    pm.page.drawText(truncateText(v.value, fonts.mono, 8, 70), { x: MARGIN + 120, y: rY, size: 8, font: fonts.mono })
+    pm.page.drawText(truncateText(v.unit ?? '', fonts.regular, 8, 50), { x: MARGIN + 200, y: rY, size: 8, font: fonts.regular })
+    pm.page.drawText(truncateText(v.description ?? '', fonts.regular, 7, CONTENT_WIDTH - 270), { x: MARGIN + 260, y: rY, size: 7, font: fonts.regular })
+    pm.y -= LINE_HEIGHT
+  }
+}
+
+function renderAnnotationsSection(
+  pm: PageManager,
+  annotations: AuditAnnotationRow[],
+  fonts: Fonts,
+): void {
+  if (annotations.length === 0) return
+
+  pm.drawSectionTitle('Annotations', fonts.bold)
+
+  for (const ann of annotations) {
+    pm.ensureSpace(LINE_HEIGHT * 2)
+    const typeLabel = ann.annotationType.charAt(0).toUpperCase() + ann.annotationType.slice(1)
+    pm.page.drawText(`[${typeLabel}]`, { x: MARGIN, y: pm.y, size: 8, font: fonts.bold })
+    pm.y -= LINE_HEIGHT
+
+    // Wrap text at ~80 chars for readability
+    const words = ann.text.split(/\s+/)
+    let line = ''
+    for (const word of words) {
+      const candidate = line ? `${line} ${word}` : word
+      if (candidate.length > 90) {
+        pm.ensureSpace(LINE_HEIGHT)
+        pm.page.drawText(truncateText(line, fonts.regular, 8, CONTENT_WIDTH - 10), { x: MARGIN + 10, y: pm.y, size: 8, font: fonts.regular })
+        pm.y -= LINE_HEIGHT
+        line = word
+      } else {
+        line = candidate
+      }
+    }
+    if (line) {
+      pm.ensureSpace(LINE_HEIGHT)
+      pm.page.drawText(truncateText(line, fonts.regular, 8, CONTENT_WIDTH - 10), { x: MARGIN + 10, y: pm.y, size: 8, font: fonts.regular })
+      pm.y -= LINE_HEIGHT
+    }
+    pm.y -= 4
+  }
+}
+
 function renderEquationsSection(
   pm: PageManager,
   equations: { nodeId: string; label: string; equationText: string; equationLatex: string }[],
@@ -413,6 +488,14 @@ export async function exportAuditPdf(
     fontBold,
   )
 
+  // ── Variables ──────────────────────────────────────────────────────────────
+
+  renderVariablesSection(pm, model.variables, fonts)
+
+  // ── Annotations ────────────────────────────────────────────────────────────
+
+  renderAnnotationsSection(pm, model.annotations, fonts)
+
   // ── Diagnostics Table ──────────────────────────────────────────────────────
 
   renderDiagnosticsTable(pm, model.diagnostics, fonts, rgb)
@@ -443,7 +526,7 @@ export async function exportAuditPdf(
 
 // ── Project-level export (v2, multi-canvas with TOC) ─────────────────────────
 
-export async function exportProjectAuditPdf(model: ProjectAuditModel): Promise<void> {
+export async function exportProjectAuditPdf(model: ProjectAuditModel, pageSize?: PdfPageSize): Promise<void> {
   const { PDFDocument, StandardFonts, rgb } = await loadPdfLib()
 
   const doc = PDFDocument.create()
@@ -454,7 +537,8 @@ export async function exportProjectAuditPdf(model: ProjectAuditModel): Promise<v
   ])
 
   const pdfDoc = await doc
-  const pm = createPageManager(pdfDoc, fontRegular, model.meta.projectName, model.meta.buildSha)
+  const effectivePageSize = pageSize ?? model.pageSize ?? 'A4'
+  const pm = createPageManager(pdfDoc, fontRegular, model.meta.projectName, model.meta.buildSha, effectivePageSize)
   const fonts: Fonts = { regular: fontRegular, bold: fontBold, mono: fontMono }
 
   // ── Cover Page ─────────────────────────────────────────────────────────────
@@ -477,6 +561,7 @@ export async function exportProjectAuditPdf(model: ProjectAuditModel): Promise<v
   pm.drawKeyValue('Total canvases', String(model.meta.totalCanvases), fontRegular, fontBold)
   pm.drawKeyValue('Total nodes', String(model.meta.nodeCount), fontRegular, fontBold)
   pm.drawKeyValue('Total edges', String(model.meta.edgeCount), fontRegular, fontBold)
+  pm.drawKeyValue('Page size', effectivePageSize, fontRegular, fontBold)
   if (model.exportOptions) {
     pm.drawKeyValue(
       'Images',
@@ -490,6 +575,10 @@ export async function exportProjectAuditPdf(model: ProjectAuditModel): Promise<v
 
   pm.drawSectionTitle('Project Hash (SHA-256)', fontBold)
   pm.drawText(model.projectHash, { font: fontMono, size: 8 })
+
+  // ── Project Variables ──────────────────────────────────────────────────────
+
+  renderVariablesSection(pm, model.variables, fonts)
 
   // ── TOC placeholder pages ──────────────────────────────────────────────────
   // We reserve TOC pages now, then fill them after we know final page numbers.
@@ -541,6 +630,9 @@ export async function exportProjectAuditPdf(model: ProjectAuditModel): Promise<v
       fontRegular,
       fontBold,
     )
+
+    // Annotations
+    renderAnnotationsSection(pm, canvas.annotations, fonts)
 
     // Diagnostics table
     renderDiagnosticsTable(pm, canvas.diagnostics, fonts, rgb)

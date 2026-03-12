@@ -16,8 +16,24 @@ import {
   renderEquationText,
   renderEquationLatex,
 } from '../expressionExtractor'
+import type { VariablesMap } from '../variables'
 
 // ── Shared types ─────────────────────────────────────────────────────────────
+
+export type PdfPageSize = 'A4' | 'Letter' | 'A3'
+
+export interface AuditVariableRow {
+  name: string
+  value: string
+  unit?: string
+  description?: string
+}
+
+export interface AuditAnnotationRow {
+  nodeId: string
+  annotationType: string
+  text: string
+}
 
 export interface AuditMeta {
   projectName: string
@@ -68,6 +84,8 @@ export interface AuditModel {
   diagnostics: AuditDiagnosticRow[]
   nodeValues: AuditNodeRow[]
   equations: AuditEquationRow[]
+  variables: AuditVariableRow[]
+  annotations: AuditAnnotationRow[]
 }
 
 // ── Multi-canvas types (v2) ──────────────────────────────────────────────────
@@ -91,6 +109,7 @@ export interface CanvasAuditSection {
   diagnostics: AuditDiagnosticRow[]
   nodeValues: AuditNodeRow[]
   equations: AuditEquationRow[]
+  annotations: AuditAnnotationRow[]
   graphImageBytes: Uint8Array | null
   imageError?: string
   captureRung?: string
@@ -104,7 +123,9 @@ export interface ProjectAuditModel {
   }
   projectHash: string
   canvases: CanvasAuditSection[]
+  variables: AuditVariableRow[]
   exportOptions?: ExportOptions
+  pageSize?: PdfPageSize
 }
 
 // ── Shared helpers ───────────────────────────────────────────────────────────
@@ -198,6 +219,32 @@ function mapEquations(
   return rows
 }
 
+function mapVariables(variables: VariablesMap): AuditVariableRow[] {
+  return Object.values(variables).map((v) => ({
+    name: v.name,
+    value: String(v.value),
+    unit: v.unit,
+    description: v.description,
+  }))
+}
+
+function mapAnnotations(nodes: Node[]): AuditAnnotationRow[] {
+  return nodes
+    .filter((n) => {
+      const blockType = (n.data as Record<string, unknown>).blockType as string
+      return typeof blockType === 'string' && blockType.startsWith('annotation_')
+    })
+    .map((n) => {
+      const data = n.data as Record<string, unknown>
+      return {
+        nodeId: n.id,
+        annotationType: (data.blockType as string).replace('annotation_', ''),
+        text: typeof data.annotationText === 'string' ? data.annotationText : '',
+      }
+    })
+    .filter((r) => r.text.trim().length > 0)
+}
+
 function evalNodeCount(nodes: Node[]): number {
   return nodes.filter((n) => (n.data as Record<string, unknown>).blockType !== '__group__').length
 }
@@ -219,6 +266,7 @@ export interface BuildAuditModelArgs {
   evalResult: EngineEvalResult
   healthSummary: string
   snapshotHash: string
+  variables?: VariablesMap
 }
 
 export function buildAuditModel(args: BuildAuditModelArgs): AuditModel {
@@ -244,6 +292,8 @@ export function buildAuditModel(args: BuildAuditModelArgs): AuditModel {
     diagnostics: mapDiagnostics(args.evalResult.diagnostics),
     nodeValues: mapNodeValues(args.nodes, args.evalResult),
     equations: mapEquations(args.nodes, args.edges, args.evalResult),
+    variables: args.variables ? mapVariables(args.variables) : [],
+    annotations: mapAnnotations(args.nodes),
   }
 }
 
@@ -278,6 +328,7 @@ export function buildCanvasAuditSection(args: BuildCanvasSectionArgs): CanvasAud
     diagnostics: mapDiagnostics(args.evalResult.diagnostics),
     nodeValues: mapNodeValues(args.nodes, args.evalResult),
     equations: mapEquations(args.nodes, args.edges, args.evalResult),
+    annotations: mapAnnotations(args.nodes),
     graphImageBytes: args.graphImageBytes,
     imageError: args.imageError,
     captureRung: args.captureRung,
@@ -299,7 +350,9 @@ export interface BuildProjectAuditModelArgs {
   activeCanvasId: string | null
   projectHash: string
   canvases: CanvasAuditSection[]
+  variables?: VariablesMap
   exportOptions?: ExportOptions
+  pageSize?: PdfPageSize
 }
 
 export function buildProjectAuditModel(args: BuildProjectAuditModelArgs): ProjectAuditModel {
@@ -325,6 +378,8 @@ export function buildProjectAuditModel(args: BuildProjectAuditModelArgs): Projec
     },
     projectHash: args.projectHash,
     canvases: [...args.canvases].sort((a, b) => a.position - b.position),
+    variables: args.variables ? mapVariables(args.variables) : [],
     exportOptions: args.exportOptions,
+    pageSize: args.pageSize,
   }
 }
