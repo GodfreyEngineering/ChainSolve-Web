@@ -1,0 +1,51 @@
+# supabase/config.toml
+# ChainSolve Web — Supabase project configuration
+# Project: zjgfosqtnlhlfgpohnnu (app.chainsolve.co.uk)
+#
+# Usage:
+#   supabase login
+#   supabase link --project-ref zjgfosqtnlhlfgpohnnu
+#   supabase db push          # Apply pending migrations to remote
+#   supabase db diff          # Preview what would be applied
+#   supabase db lint          # Run advisory linter against remote schema
+#   supabase migration list   # Compare local vs remote migration history
+#
+# NOTE: This config intentionally omits local Docker stack settings.
+# ChainSolve uses the hosted Supabase project directly (no local Docker).
+
+project_id = "zjgfosqtnlhlfgpohnnu"
+
+[db]
+port = 54322
+shadow_port = 54320
+
+[api]
+enabled = false
+port = 54321
+
+[studio]
+enabled = false
+port = 54323
+
+[inbucket]
+enabled = false
+port = 54324
+
+[storage]
+enabled = false
+
+[auth]
+enabled = false
+site_url = "https://app.chainsolve.co.uk"
+additional_redirect_urls = ["https://app.chainsolve.co.uk", "http://localhost:5173"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
+
+[analytics]
+enabled = false

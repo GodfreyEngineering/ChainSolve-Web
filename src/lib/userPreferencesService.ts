@@ -40,21 +40,25 @@ export async function getUserPreferences(): Promise<UserPreferences | null> {
   return data as UserPreferences | null
 }
 
-/** Update one or more preference fields for the current user. */
+/**
+ * Update one or more preference fields for the current user.
+ * Uses the upsert_my_preferences RPC (migration 0011) so the preferences row
+ * is created if somehow missing (edge case: users created before the
+ * handle_new_user trigger was deployed).
+ */
 export async function updateUserPreferences(
   patch: Partial<
     Pick<UserPreferences, 'locale' | 'theme' | 'region' | 'editor_layout' | 'sidebar_collapsed'>
   >,
 ): Promise<void> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error('Sign in to update preferences')
+  const params: Record<string, unknown> = {}
+  if ('locale' in patch) params.p_locale = patch.locale
+  if ('theme' in patch) params.p_theme = patch.theme
+  if ('region' in patch) params.p_region = patch.region
+  if ('editor_layout' in patch) params.p_editor_layout = patch.editor_layout
+  if ('sidebar_collapsed' in patch) params.p_sidebar_collapsed = patch.sidebar_collapsed
 
-  const { error } = await supabase
-    .from('user_preferences')
-    .update({ ...patch, updated_at: new Date().toISOString() })
-    .eq('user_id', user.id)
+  const { error } = await supabase.rpc('upsert_my_preferences', params)
 
   if (error) {
     console.error('[userPreferencesService] updateUserPreferences failed', {
@@ -62,6 +66,7 @@ export async function updateUserPreferences(
       code: error.code,
       message: error.message,
       details: error.details,
+      hint: error.hint,
     })
     throw error
   }
