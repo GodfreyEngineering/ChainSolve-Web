@@ -33,7 +33,8 @@
     "verify:fast": "bash scripts/verify-fast.sh",
     "verify:ci": "bash scripts/verify-ci.sh",
     "check:wasm-exports": "node scripts/check-wasm-exports.mjs",
-    "doctor": "node scripts/doctor.mjs"
+    "doctor": "node scripts/doctor.mjs",
+    "db:types": "supabase gen types typescript --local > src/lib/database.types.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",

@@ -350,7 +350,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[DEV-02] WASM hot reload for development** — Vite plugin that watches `crates/**/*.rs` with chokidar. On change: runs `npm run wasm:build:dev` then triggers Vite's HMR. Shows "Rebuilding WASM..." toast in the browser. Verify: change a Rust op → browser auto-reloads with new WASM in < 45 seconds.
 
-- [ ] **[DEV-03] Supabase TypeScript types: auto-generated** — Add `npm run db:types` script: `supabase gen types typescript --local > src/lib/database.types.ts`. Wire into dev workflow docs: run after every migration. Use generated types in `src/lib/supabase.ts` to type the Supabase client (`createClient<Database>`). Catches DB-TS type mismatches at compile time. Verify: renaming a column in migration → `npm run typecheck` fails until types are regenerated.
+- [x] **[DEV-03] Supabase TypeScript types: auto-generated** — Add `npm run db:types` script: `supabase gen types typescript --local > src/lib/database.types.ts`. Wire into dev workflow docs: run after every migration. Use generated types in `src/lib/supabase.ts` to type the Supabase client (`createClient<Database>`). Catches DB-TS type mismatches at compile time. Verify: renaming a column in migration → `npm run typecheck` fails until types are regenerated.
 
 - [ ] **[DEV-04] Error tracking: Sentry integration** — Add Sentry in `src/main.tsx` with `VITE_SENTRY_DSN`. Capture: uncaught exceptions, unhandled promise rejections, engine crashes, save failures. Add `VITE_SENTRY_DSN` to `.env.example` and secrets. Filter known-noisy errors (cancelled fetch, expected auth refresh). Verify: throw a test error in production → visible in Sentry dashboard within 60 seconds.
 

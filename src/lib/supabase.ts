@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './env'
+import type { Database } from './database.types'
 
 // env.ts runs validateClientEnv() on import — placeholder credentials are
 // rejected in production builds before we reach this point.
@@ -7,7 +8,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from './env'
 const PLACEHOLDER_URL = 'https://placeholder.supabase.co'
 const PLACEHOLDER_KEY = 'placeholder'
 
-export const supabase = createClient(
+export const supabase = createClient<Database>(
   SUPABASE_URL || PLACEHOLDER_URL,
   SUPABASE_ANON_KEY || PLACEHOLDER_KEY,
   {
