@@ -960,6 +960,13 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // snapshot reload so the dedicated worker gets the current graph state.
   const combinedEngineKey = engineKey + engineSwitchCount
 
+  // OBS-02: project ID for engine eval telemetry (read from store, not prop).
+  const telemetryProjectId = useProjectStore((s) => s.projectId ?? undefined)
+  const engineTelemetryOpts = useMemo(
+    () => ({ projectId: telemetryProjectId, canvasId }),
+    [telemetryProjectId, canvasId],
+  )
+
   const { computed, computedStore } = useGraphEngine(
     nodes,
     edges,
@@ -970,6 +977,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     constantsLookup,
     variables,
     publishedOutputs,
+    engineTelemetryOpts,
   )
 
   // H7-1: After engine eval, update published outputs store with publish block values.

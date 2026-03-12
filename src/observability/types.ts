@@ -27,6 +27,7 @@ export const OBS_EVENT_TYPE = {
   SERVER_ERROR: 'server_error',
   WEB_VITALS: 'web_vitals',
   RUM_TIMING: 'rum_timing',
+  ENGINE_EVAL: 'engine_eval',
 } as const
 
 export type ObsEventType = (typeof OBS_EVENT_TYPE)[keyof typeof OBS_EVENT_TYPE]
@@ -107,6 +108,26 @@ export interface WebVitalsPayload {
   navigation_type: string
 }
 
+/** Engine evaluation telemetry payload (OBS-02). */
+export interface EngineEvalPayload {
+  /** Engine elapsed time in microseconds */
+  eval_time_us: number
+  /** Total nodes in graph at eval time */
+  node_count: number
+  /** Total edges in graph at eval time */
+  edge_count: number
+  /** Nodes actually evaluated (≤ node_count for incremental evals) */
+  dirty_node_count: number
+  /** Whether eval hit the time budget and returned partial results */
+  is_partial: boolean
+  /** 'snapshot' for full loads, 'patch' for incremental evals */
+  eval_kind: 'snapshot' | 'patch'
+  /** Optional: project ID (UUID prefix only) */
+  project_ref?: string
+  /** Optional: canvas ID (UUID prefix only) */
+  canvas_ref?: string
+}
+
 /** RUM timing event payload (OBS-01). */
 export interface RumTimingPayload {
   /** Short label identifying what was timed, e.g. 'project_open', 'save', 'engine_eval' */
@@ -131,6 +152,7 @@ export type ObsPayload =
   | ServerErrorPayload
   | WebVitalsPayload
   | RumTimingPayload
+  | EngineEvalPayload
 
 // ── Breadcrumb (action log) ───────────────────────────────────────────────────
 

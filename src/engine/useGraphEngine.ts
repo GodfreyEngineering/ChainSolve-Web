@@ -20,6 +20,7 @@ import { isPerfHudEnabled } from '../lib/devFlags.ts'
 import { updatePerfMetrics } from './perfMetrics.ts'
 import { perfMark, perfMeasure } from '../perf/marks.ts'
 import { dlog } from '../observability/debugLog.ts'
+import { recordEngineEval } from '../observability/engineTelemetry.ts'
 import { computeGraphHealth } from '../lib/graphHealth.ts'
 import { useStatusBarStore } from '../stores/statusBarStore.ts'
 import { ComputedStore } from '../contexts/ComputedStore.ts'
@@ -96,6 +97,8 @@ export function useGraphEngine(
   variables?: VariablesMap,
   /** H7-1: Published channel values for subscribe block resolution. */
   publishedOutputs?: Record<string, number>,
+  /** OBS-02: project/canvas IDs for engine eval telemetry. */
+  telemetryOpts?: { projectId?: string; canvasId?: string },
 ): GraphEngineResult {
   const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
   const [isPartial, setIsPartial] = useState(false)
@@ -185,6 +188,15 @@ export function useGraphEngine(
             })
           })
         }
+        recordEngineEval(
+          'snapshot',
+          result.elapsedUs,
+          nodes.length,
+          edges.length,
+          Object.keys(result.values).length,
+          result.partial ?? false,
+          telemetryOpts,
+        )
         setEngineStatus('idle')
       })
     } else {
@@ -249,6 +261,15 @@ export function useGraphEngine(
                 })
               })
             }
+            recordEngineEval(
+              'patch',
+              result.elapsedUs,
+              result.totalCount,
+              edges.length,
+              result.evaluatedCount,
+              result.partial ?? false,
+              telemetryOpts,
+            )
             setEngineStatus('idle')
           })
           .catch((err: unknown) => {
@@ -291,6 +312,7 @@ export function useGraphEngine(
     publishedOutputs,
     setEngineStatus,
     store,
+    telemetryOpts,
   ])
 
   return { computed, isPartial, computedStore: store }
