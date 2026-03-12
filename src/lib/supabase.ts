@@ -14,6 +14,23 @@ export const supabase = createClient(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
+      detectSessionInUrl: true,
     },
   },
 )
+
+// BUG-07: Graceful session expiry recovery.
+// When the refresh token is invalid/expired, sign out and redirect to login
+// with a ?session_expired=true flag so the login page can show a friendly message.
+supabase.auth.onAuthStateChange((event) => {
+  if ((event as string) === 'TOKEN_REFRESH_FAILED') {
+    // Only redirect if we're not already on an auth page
+    const path = window.location.pathname
+    const isAuthPage = path === '/login' || path === '/signup' || path === '/reset-password'
+    if (!isAuthPage) {
+      supabase.auth.signOut().finally(() => {
+        window.location.href = '/login?session_expired=true'
+      })
+    }
+  }
+})

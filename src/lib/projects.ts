@@ -183,15 +183,54 @@ export async function readProjectRow(projectId: string): Promise<{
   return { ...row, variables: row.variables ?? {} }
 }
 
+/**
+ * Silently delete ghost projects: rows with no storage_key created > 10 min ago.
+ * These are left by failed duplication/import operations. Best-effort — never throws.
+ * BUG-06
+ */
+async function cleanupGhostProjects(): Promise<void> {
+  try {
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
+    const { data } = await supabase
+      .from('projects')
+      .select('id')
+      .is('storage_key', null)
+      .lt('created_at', tenMinutesAgo)
+
+    if (data && data.length > 0) {
+      for (const ghost of data) {
+        try {
+          await supabase.from('projects').delete().eq('id', ghost.id)
+          dlog.info('persistence', 'Cleaned up ghost project', { projectId: ghost.id })
+        } catch {
+          // ignore per-item errors
+        }
+      }
+    }
+  } catch {
+    // Never crash the app for cleanup errors
+  }
+}
+
 /** Return all projects for the current user, newest first. */
 export async function listProjects(): Promise<ProjectRow[]> {
+  // BUG-06: Clean up ghost projects from failed duplications (fire-and-forget)
+  cleanupGhostProjects().catch(() => {})
+
   const { data, error } = await supabase
     .from('projects')
     .select(SELECT_COLS)
     .order('updated_at', { ascending: false })
 
   if (error) throw new Error(`Failed to list projects: ${error.message}`)
-  return (data ?? []) as ProjectRow[]
+
+  // Deduplicate by id as a defensive measure (should never happen but just in case)
+  const seen = new Set<string>()
+  return ((data ?? []) as ProjectRow[]).filter((p) => {
+    if (seen.has(p.id)) return false
+    seen.add(p.id)
+    return true
+  })
 }
 
 /**
@@ -414,7 +453,13 @@ export async function deleteProject(projectId: string): Promise<void> {
   if (error) throw new Error(`Delete failed: ${error.message}`)
 }
 
-/** Create a new project that is a copy of the source project's graph + variables + canvases + assets. */
+/**
+ * Create a new project that is a copy of the source project's graph + variables + canvases + assets.
+ *
+ * BUG-05 fixes:
+ * - Full rollback (deleteProject) if any step fails after the DB row is created.
+ * - Legacy projects with no canvas rows: fall back to the monolithic project.json graph.
+ */
 export async function duplicateProject(sourceId: string, newName: string): Promise<ProjectRow> {
   assertValidName(newName)
   const session = await requireSession()
@@ -442,44 +487,74 @@ export async function duplicateProject(sourceId: string, newName: string): Promi
   if (!data) throw new ServiceError('DB_ERROR', 'Failed to create project row')
   const newProj = data as ProjectRow
 
-  let srcGraph: { nodes: unknown[]; edges: unknown[] } = { nodes: [], edges: [] }
+  // Rollback helper: delete the project row if anything goes wrong
+  const rollback = async () => {
+    try {
+      await deleteProject(newProj.id)
+    } catch {
+      // Best-effort — log but don't mask the original error
+      dlog.error('persistence', 'Rollback failed for duplicate', { projectId: newProj.id })
+    }
+  }
+
   try {
-    const src = await loadProject(sourceId)
-    srcGraph = src.graph
-  } catch {
-    // If source has no storage file, start empty (tolerated)
-  }
+    let srcGraph: { nodes: unknown[]; edges: unknown[] } = { nodes: [], edges: [] }
+    try {
+      const src = await loadProject(sourceId)
+      srcGraph = src.graph
+    } catch {
+      // If source has no storage file, start empty (tolerated)
+    }
 
-  const pj = buildJson(newProj.id, newName, srcGraph.nodes, srcGraph.edges)
-  await saveProjectJson(newProj.id, pj)
+    const pj = buildJson(newProj.id, newName, srcGraph.nodes, srcGraph.edges)
+    await saveProjectJson(newProj.id, pj)
 
-  // Copy canvases (rows + per-canvas storage JSON)
-  const sourceCanvases = await listCanvases(sourceId)
-  let firstNewCanvasId: string | null = null
-  for (const canvas of sourceCanvases) {
-    const graph = await loadCanvasGraph(sourceId, canvas.id)
-    const newCanvas = await createCanvas(newProj.id, canvas.name, {
-      nodes: graph.nodes,
-      edges: graph.edges,
-    })
-    if (firstNewCanvasId === null) firstNewCanvasId = newCanvas.id
-  }
-  if (firstNewCanvasId) {
-    await setActiveCanvas(newProj.id, firstNewCanvasId)
-  }
+    // Copy canvases (rows + per-canvas storage JSON)
+    const sourceCanvases = await listCanvases(sourceId)
+    let firstNewCanvasId: string | null = null
 
-  // Copy project assets (metadata + bytes)
-  const srcAssets = await listProjectAssets(sourceId)
-  for (const asset of srcAssets) {
-    const bytes = await downloadAssetBytes(asset.storage_path)
-    await uploadAssetBytes(
-      newProj.id,
-      asset.name,
-      asset.mime_type ?? 'application/octet-stream',
-      bytes,
-      asset.sha256,
-      asset.kind ?? 'csv',
-    )
+    if (sourceCanvases.length > 0) {
+      // Modern project: copy each canvas
+      for (const canvas of sourceCanvases) {
+        const graph = await loadCanvasGraph(sourceId, canvas.id)
+        const newCanvas = await createCanvas(newProj.id, canvas.name, {
+          nodes: graph.nodes,
+          edges: graph.edges,
+        })
+        if (firstNewCanvasId === null) firstNewCanvasId = newCanvas.id
+      }
+    } else {
+      // Legacy project: no canvas rows — create one canvas from the monolithic project.json graph
+      dlog.info('persistence', 'Legacy project detected during duplication — using project.json graph', {
+        sourceId,
+      })
+      const newCanvas = await createCanvas(newProj.id, 'Sheet 1', {
+        nodes: srcGraph.nodes,
+        edges: srcGraph.edges,
+      })
+      firstNewCanvasId = newCanvas.id
+    }
+
+    if (firstNewCanvasId) {
+      await setActiveCanvas(newProj.id, firstNewCanvasId)
+    }
+
+    // Copy project assets (metadata + bytes)
+    const srcAssets = await listProjectAssets(sourceId)
+    for (const asset of srcAssets) {
+      const bytes = await downloadAssetBytes(asset.storage_path)
+      await uploadAssetBytes(
+        newProj.id,
+        asset.name,
+        asset.mime_type ?? 'application/octet-stream',
+        bytes,
+        asset.sha256,
+        asset.kind ?? 'csv',
+      )
+    }
+  } catch (err) {
+    await rollback()
+    throw err
   }
 
   const updated = await readUpdatedAt(newProj.id)

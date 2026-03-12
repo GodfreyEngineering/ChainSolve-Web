@@ -8,7 +8,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback, type FormEvent } from 'react'
-import { useNavigate, useLocation, Link } from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   signInWithPassword,
@@ -44,6 +44,8 @@ const SEO_KEY: Record<AuthMode, string> = {
 export default function Login({ initialMode = 'login' }: LoginProps) {
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const sessionExpired = searchParams.get('session_expired') === 'true'
   const { t } = useTranslation()
   const [mode, setMode] = useState<AuthMode>(initialMode)
   const [email, setEmail] = useState('')
@@ -298,6 +300,24 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
             {mode === 'signup' && t('auth.signUpTitle')}
             {mode === 'reset' && t('auth.resetTitle')}
           </p>
+
+          {/* BUG-07: Session expired banner */}
+          {sessionExpired && (
+            <div
+              style={{
+                padding: '0.6rem 0.75rem',
+                borderRadius: 6,
+                background: 'rgba(59, 130, 246, 0.12)',
+                border: '1px solid rgba(59, 130, 246, 0.4)',
+                color: '#93c5fd',
+                fontSize: '0.78rem',
+                marginBottom: '0.75rem',
+                lineHeight: 1.5,
+              }}
+            >
+              {t('auth.sessionExpired', 'Your session expired — please sign in again.')}
+            </div>
+          )}
 
           {error && <div style={s.errorBox}>{error}</div>}
 
