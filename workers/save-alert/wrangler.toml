@@ -1,0 +1,10 @@
+name = "chainsolve-save-alert"
+main = "index.ts"
+compatibility_date = "2024-01-01"
+
+[triggers]
+crons = ["0 6 * * *"]
+
+# Required secrets (set via `wrangler secret put <NAME>`):
+#   APP_BASE_URL  — e.g. https://app.chainsolve.co.uk
+#   ADMIN_API_KEY — Bearer token for the admin account calling /api/admin/save-alert-check

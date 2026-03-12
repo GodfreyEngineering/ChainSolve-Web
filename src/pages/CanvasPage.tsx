@@ -99,7 +99,7 @@ import { computeGraphHealth, formatHealthReport } from '../lib/graphHealth'
 import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../lib/build-info'
 import { listProjectAssets, downloadAssetBytes } from '../lib/storage'
 import { addBreadcrumb, captureReactBoundary } from '../observability/client'
-import { startTiming } from '../observability/rum'
+import { startTiming, recordTiming } from '../observability/rum'
 import { validateProjectName } from '../lib/validateProjectName'
 import type { CaptureResult } from '../lib/pdf/captureCanvasImage'
 import type { TableExport } from '../lib/xlsx/xlsxModel'
@@ -525,6 +525,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       setSaveProgress(0.1)
 
       const stopSaveTimer = startTiming('save', { projectId })
+      const saveStartMs = performance.now()
 
       try {
         // E8-1: Conflict check BEFORE any writes.
@@ -638,6 +639,8 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
           offlineRetryCount.current = 0
           const errMsg = err instanceof Error ? err.message : 'Save failed'
+          // OBS-03: Record save failure for failure rate monitoring.
+          recordTiming('save_failure', performance.now() - saveStartMs, { projectId })
           failSave(errMsg)
           toast(t('canvas.saveFailed', 'Save failed — your changes may not be saved'), 'error', {
             label: t('canvas.retryNow'),

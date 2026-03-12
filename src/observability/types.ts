@@ -28,6 +28,7 @@ export const OBS_EVENT_TYPE = {
   WEB_VITALS: 'web_vitals',
   RUM_TIMING: 'rum_timing',
   ENGINE_EVAL: 'engine_eval',
+  ADMIN_ALERT: 'admin_alert',
 } as const
 
 export type ObsEventType = (typeof OBS_EVENT_TYPE)[keyof typeof OBS_EVENT_TYPE]

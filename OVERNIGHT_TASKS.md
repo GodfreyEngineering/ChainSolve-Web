@@ -378,7 +378,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[OBS-02] Engine performance telemetry** — After each engine eval, record in `observability_events`: `eval_time_us`, `node_count`, `edge_count`, `dirty_node_count`, `is_partial`. Summary only (not graph contents). Used to identify slow graphs. Verify: evaluating a 50-node graph → telemetry event in DB.
 
-- [ ] **[OBS-03] Save failure rate monitoring** — Track save failures in `observability_events`. Alert (email to admin) if failure rate exceeds 1% over a 5-minute window via a Cloudflare Worker cron (daily check). Verify: simulating save failures → alert logic works when queried.
+- [x] **[OBS-03] Save failure rate monitoring** — Track save failures in `observability_events`. Alert (email to admin) if failure rate exceeds 1% over a 5-minute window via a Cloudflare Worker cron (daily check). Verify: simulating save failures → alert logic works when queried.
 
 ---
 

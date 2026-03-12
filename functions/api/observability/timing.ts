@@ -29,6 +29,7 @@ const ALLOWED_ORIGINS: readonly string[] = [
 const ALLOWED_EVENTS = new Set([
   "project_open",
   "save",
+  "save_failure",
   "engine_eval",
   "canvas_switch",
 ]);

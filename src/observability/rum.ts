@@ -25,7 +25,7 @@ const SESSION_KEY = 'cs_obs_session_v1'
 
 // ── Known event names ─────────────────────────────────────────────────────────
 
-export type RumEventName = 'project_open' | 'save' | 'engine_eval' | 'canvas_switch'
+export type RumEventName = 'project_open' | 'save' | 'save_failure' | 'engine_eval' | 'canvas_switch'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
