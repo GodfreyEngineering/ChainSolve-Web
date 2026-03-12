@@ -9,7 +9,7 @@
 import { useTranslation } from 'react-i18next'
 import { memo, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Handle, Position, useEdges, useReactFlow, type NodeProps } from '@xyflow/react'
-import { useComputed } from '../../../contexts/ComputedContext'
+import { useComputedValue } from '../../../contexts/ComputedContext'
 import { formatValue } from '../../../engine/value'
 import type { Value } from '../../../engine/value'
 import type { NodeData, PlotConfig } from '../../../blocks/types'
@@ -42,14 +42,14 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
     () => (nd.plotConfig ?? { chartType: 'xyLine' as const }) as PlotConfig,
     [nd.plotConfig],
   )
-  const computed = useComputed()
   const edges = useEdges()
   const { updateNodeData } = useReactFlow()
 
   // Find the value connected to this node's 'data' input
   const inputEdge = edges.find((e) => e.target === id && e.targetHandle === 'data')
-  const inputValue = inputEdge ? computed.get(inputEdge.source) : undefined
-  const headerValue = computed.get(id)
+  const inputSourceId = inputEdge?.source ?? ''
+  const inputValue = useComputedValue(inputSourceId)
+  const headerValue = useComputedValue(id)
 
   // Config patcher
   const updateConfig = useCallback(

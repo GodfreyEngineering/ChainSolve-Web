@@ -8,7 +8,7 @@
 
 import { memo, useCallback } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
-import { useComputed } from '../../../contexts/ComputedContext'
+import { useComputedValue } from '../../../contexts/ComputedContext'
 import { formatValue } from '../../../engine/value'
 import type { NodeData } from '../../../blocks/registry'
 import { NODE_STYLES as s } from './nodeStyles'
@@ -20,8 +20,7 @@ import { TableEditor } from '../editors/TableEditor'
 function DataNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
   const { updateNodeData } = useReactFlow()
-  const computed = useComputed()
-  const value = computed.get(id)
+  const value = useComputedValue(id)
   const isTable = nd.blockType === 'tableInput'
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`

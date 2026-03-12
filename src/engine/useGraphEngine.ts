@@ -22,6 +22,7 @@ import { perfMark, perfMeasure } from '../perf/marks.ts'
 import { dlog } from '../observability/debugLog.ts'
 import { computeGraphHealth } from '../lib/graphHealth.ts'
 import { useStatusBarStore } from '../stores/statusBarStore.ts'
+import { ComputedStore } from '../contexts/ComputedStore.ts'
 
 const perfEnabled = isPerfHudEnabled()
 
@@ -42,14 +43,6 @@ export function hasStructuralChange(ops: PatchOp[]): boolean {
   return ops.some((op) => op.op !== 'updateNodeData')
 }
 
-/** Convert a Record<string, EngineValue> into a Map<string, Value>. */
-function toValueMap(values: Record<string, unknown>): Map<string, Value> {
-  const map = new Map<string, Value>()
-  for (const [id, val] of Object.entries(values)) {
-    map.set(id, val as Value)
-  }
-  return map
-}
 
 /** K4-2: Maximum node errors to log per eval to avoid flooding the console. */
 const MAX_NODE_ERRORS_PER_EVAL = 10
@@ -85,6 +78,7 @@ function logNodeErrors(values: Record<string, unknown>, seenErrors: Set<string>)
 export interface GraphEngineResult {
   computed: ReadonlyMap<string, Value>
   isPartial: boolean
+  computedStore: ComputedStore
 }
 
 export function useGraphEngine(
@@ -105,6 +99,8 @@ export function useGraphEngine(
 ): GraphEngineResult {
   const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
   const [isPartial, setIsPartial] = useState(false)
+  // UI-PERF-02: per-node subscription store — stable instance for the hook's lifetime
+  const [store] = useState(() => new ComputedStore())
   const setEngineStatus = useStatusBarStore((s) => s.setEngineStatus)
   const prevNodesRef = useRef<Node[]>([])
   const prevEdgesRef = useRef<Edge[]>([])
@@ -148,7 +144,8 @@ export function useGraphEngine(
       engine.loadSnapshot(snapshot, options).then((result) => {
         if (reqId !== pendingRef.current) return
         perfMeasure('cs:eval:snapshot', 'cs:eval:start')
-        setComputed(toValueMap(result.values))
+        store.load(result.values)
+        setComputed(store.getAll())
         setIsPartial(result.partial ?? false)
         const snapshotErrors = Object.keys(result.values).filter(
           (id) => (result.values[id] as Value)?.kind === 'error',
@@ -232,19 +229,11 @@ export function useGraphEngine(
             logNodeErrors(result.changedValues, seenErrorsRef.current)
             setIsPartial(result.partial ?? false)
             // MERGE changed values into existing map (not replace).
-            setComputed((prev) => {
-              const next = new Map(prev)
-              for (const [id, val] of Object.entries(result.changedValues)) {
-                next.set(id, val as Value)
-              }
-              // Remove values for nodes that were removed.
-              for (const op of opsToSend) {
-                if (op.op === 'removeNode') {
-                  next.delete(op.nodeId)
-                }
-              }
-              return next
-            })
+            const removedNodeIds = opsToSend
+              .filter((op) => op.op === 'removeNode')
+              .map((op) => (op as { op: 'removeNode'; nodeId: string }).nodeId)
+            store.update(result.changedValues, removedNodeIds.length > 0 ? removedNodeIds : undefined)
+            setComputed(store.getAll())
             if (perfEnabled) {
               updatePerfMetrics({
                 lastEvalMs: result.elapsedUs / 1000,
@@ -301,7 +290,8 @@ export function useGraphEngine(
     variables,
     publishedOutputs,
     setEngineStatus,
+    store,
   ])
 
-  return { computed, isPartial }
+  return { computed, isPartial, computedStore: store }
 }

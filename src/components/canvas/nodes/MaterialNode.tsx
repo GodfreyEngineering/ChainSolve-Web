@@ -8,7 +8,7 @@
 import { memo, useCallback, useMemo, useState } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { useComputed } from '../../../contexts/ComputedContext'
+import { useComputedValue } from '../../../contexts/ComputedContext'
 import type { NodeData } from '../../../blocks/registry'
 import {
   MATERIAL_FULL_DATA,
@@ -26,8 +26,7 @@ const ROW_H = 26
 function MaterialNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
   const { updateNodeData } = useReactFlow()
-  const computed = useComputed()
-  const value = computed.get(id)
+  const value = useComputedValue(id)
 
   const { t } = useTranslation()
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`

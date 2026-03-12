@@ -9,7 +9,7 @@
 import { memo, useCallback } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { useComputed } from '../../../contexts/ComputedContext'
+import { useComputedValue } from '../../../contexts/ComputedContext'
 import { useFormatValue } from '../../../hooks/useFormatValue'
 import type { NodeData } from '../../../blocks/registry'
 import { NODE_STYLES as s } from './nodeStyles'
@@ -18,8 +18,7 @@ import { Icon } from '../../ui/Icon'
 
 function PublishNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
-  const computed = useComputed()
-  const value = computed.get(id)
+  const value = useComputedValue(id)
   const formatValue = useFormatValue()
   const { updateNodeData } = useReactFlow()
   const { t } = useTranslation()

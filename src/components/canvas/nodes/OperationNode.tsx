@@ -18,7 +18,7 @@ import {
   type NodeProps,
   type IsValidConnection,
 } from '@xyflow/react'
-import { useComputed } from '../../../contexts/ComputedContext'
+import { useComputedValue } from '../../../contexts/ComputedContext'
 import { useShowValuePopover } from '../../../contexts/ValuePopoverContext'
 import { formatValue, isError } from '../../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
@@ -42,10 +42,9 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const nd = data as NodeData
   const { updateNodeData } = useReactFlow()
   const allEdges = useEdges()
-  const computed = useComputed()
+  const value = useComputedValue(id)
   const showPopover = useShowValuePopover()
   const { t } = useTranslation()
-  const value = computed.get(id)
   const flashing = useValueFlash(value)
   const isLocked = draggable === false
 

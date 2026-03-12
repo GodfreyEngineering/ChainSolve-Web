@@ -10,7 +10,7 @@
 
 import { memo, useMemo, useState, useEffect, useRef } from 'react'
 import { Handle, Position, useEdges, useNodes, type NodeProps } from '@xyflow/react'
-import { useComputed } from '../../../contexts/ComputedContext'
+import { useComputedValue } from '../../../contexts/ComputedContext'
 import { isError, isScalar, formatValue as rawFormatValue } from '../../../engine/value'
 import type { FormatOptions } from '../../../engine/value'
 import { useFormatValue } from '../../../hooks/useFormatValue'
@@ -44,8 +44,7 @@ function precisionToOpts(displayPrecision: string | undefined): FormatOptions | 
 
 function DisplayNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
-  const computed = useComputed()
-  const value = computed.get(id)
+  const value = useComputedValue(id)
   const globalFormatValue = useFormatValue()
   const prefs = usePreferencesStore()
 

@@ -304,7 +304,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[UI-PERF-01] Canvas LOD for 1000+ node graphs** — At zoom < 0.5: nodes are colored rectangles (label only, no handles, no values). At zoom < 0.3: tiny dots with category color. At zoom < 0.15: dots only. Edges at high LOD: thin lines, no animation. Edge animation only when zoom > 0.6. All node components use `React.memo`. `ComputedContext` updates do not re-render off-screen nodes. Verify: 2000-node canvas pans at 60fps; zooming in restores full fidelity.
 
-- [ ] **[UI-PERF-02] React Flow: stable node/edge array references** — Audit `CanvasArea.tsx`: `nodes` and `edges` arrays passed to `<ReactFlow>` must be stable references (memoized). Values flow through `ComputedContext`, not through node data. Adding a value in a source block must not re-render all 1000 nodes. Verify with React DevTools Profiler: value update causes O(1) renders (only the changed node + its dependents), not O(N).
+- [x] **[UI-PERF-02] React Flow: stable node/edge array references** — Audit `CanvasArea.tsx`: `nodes` and `edges` arrays passed to `<ReactFlow>` must be stable references (memoized). Values flow through `ComputedContext`, not through node data. Adding a value in a source block must not re-render all 1000 nodes. Verify with React DevTools Profiler: value update causes O(1) renders (only the changed node + its dependents), not O(N).
 
 - [ ] **[UI-PERF-03] Viewport culling for ultra-large graphs** — For graphs > 500 nodes: compare each node position+size against current viewport (from `useViewport()`). Nodes outside viewport are replaced with null in the render list (or use React Flow's built-in virtualization). Verify: 2000-node canvas where 50 visible → ~50 node DOM elements in DevTools Elements panel.
 

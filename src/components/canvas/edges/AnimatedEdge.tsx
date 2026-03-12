@@ -14,7 +14,7 @@
 
 import { memo, useMemo } from 'react'
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, useNodes, type EdgeProps } from '@xyflow/react'
-import { useComputed } from '../../../contexts/ComputedContext'
+import { useComputedValue } from '../../../contexts/ComputedContext'
 import { useCanvasSettings } from '../../../contexts/CanvasSettingsContext'
 import { formatValue } from '../../../engine/value'
 import type { Value } from '../../../engine/value'
@@ -60,9 +60,8 @@ function AnimatedEdgeInner({
   target,
   selected,
 }: EdgeProps) {
-  const computed = useComputed()
+  const sourceValue = useComputedValue(source)
   const { edgesAnimated, edgeBadgesEnabled } = useCanvasSettings()
-  const sourceValue = computed.get(source)
   const mismatch = useEdgeUnitMismatch(source, target)
   const stroke = edgeStroke(sourceValue, edgesAnimated)
   const allNodes = useNodes()

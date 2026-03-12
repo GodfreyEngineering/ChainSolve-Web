@@ -9,7 +9,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
-import { useComputed } from '../../../contexts/ComputedContext'
+import { useComputedValue } from '../../../contexts/ComputedContext'
 import { useShowValuePopover } from '../../../contexts/ValuePopoverContext'
 import { formatValue } from '../../../engine/value'
 import { CATEGORY_LABELS, getConstantsCatalog, getMaterialsCatalog } from '../../../blocks/registry'
@@ -392,9 +392,8 @@ function NumberInputBody({
 function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
   const nd = data as NodeData
   const { updateNodeData } = useReactFlow()
-  const computed = useComputed()
+  const value = useComputedValue(id)
   const showPopover = useShowValuePopover()
-  const value = computed.get(id)
   const flashing = useValueFlash(value)
   const isLocked = draggable === false
 

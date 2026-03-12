@@ -10,7 +10,7 @@
 import { memo, useMemo, useCallback, useRef, useState } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { useComputed } from '../../../contexts/ComputedContext'
+import { useComputedValue } from '../../../contexts/ComputedContext'
 import { isVector, isError } from '../../../engine/value'
 import type { NodeData } from '../../../blocks/types'
 import { NODE_STYLES as s } from './nodeStyles'
@@ -100,8 +100,7 @@ const statValueStyle: React.CSSProperties = {
 
 function ListTableNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
-  const computed = useComputed()
-  const value = computed.get(id)
+  const value = useComputedValue(id)
   const { t } = useTranslation()
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`

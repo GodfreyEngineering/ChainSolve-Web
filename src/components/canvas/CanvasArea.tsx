@@ -55,7 +55,7 @@ import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
 import { ExpressionPanel } from './ExpressionPanel'
 import { QuickAddPalette } from './QuickAddPalette'
-import { ComputedContext } from '../../contexts/ComputedContext'
+import { ComputedContext, ComputedStoreContext } from '../../contexts/ComputedContext'
 import { BindingContext } from '../../contexts/BindingContext'
 import { useEngine } from '../../contexts/EngineContext'
 import { useCanvasEngine } from '../../hooks/useCanvasEngine'
@@ -961,7 +961,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // snapshot reload so the dedicated worker gets the current graph state.
   const combinedEngineKey = engineKey + engineSwitchCount
 
-  const { computed } = useGraphEngine(
+  const { computed, computedStore } = useGraphEngine(
     nodes,
     edges,
     engine,
@@ -2499,6 +2499,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   return (
     <PlanContext.Provider value={plan ?? 'free'}>
+      <ComputedStoreContext.Provider value={computedStore}>
       <ComputedContext.Provider value={computed}>
         <BindingContext.Provider value={bindingCtx}>
           <CanvasSettingsContext.Provider value={canvasSettings}>
@@ -3135,6 +3136,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           </CanvasSettingsContext.Provider>
         </BindingContext.Provider>
       </ComputedContext.Provider>
+      </ComputedStoreContext.Provider>
     </PlanContext.Provider>
   )
 })
