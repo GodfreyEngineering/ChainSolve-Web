@@ -84,6 +84,25 @@ CI=true npx playwright test --project=smoke --repeat-each=5
 - Protocol: snapshot load on first render, then incremental patches. Watchdog restarts worker after 5 s hang.
 - `ENGINE_CONTRACT_VERSION` in `crates/engine-core/src/catalog.rs` versions the evaluation contract.
 
+### Worker pool (ENG-04)
+
+Each open canvas gets a dedicated WASM Web Worker from the pool (`src/engine/workerPool.ts`). Pool size is `min(navigator.hardwareConcurrency - 1, 4)`, minimum 1.
+
+- `src/engine/workerPool.ts` — LRU pool; `acquireEngine(canvasId)` / `releaseCanvas(canvasId)` / `evictCanvas(canvasId)`
+- `src/contexts/WorkerPoolContext.ts` — React context exposing the pool
+- `src/hooks/useCanvasEngine.ts` — per-canvas hook; falls back to global primary engine while dedicated engine initialises
+- `CanvasArea.tsx` uses `combinedEngineKey = engineKey + engineSwitchCount` so `useGraphEngine` reloads its snapshot when the primary → dedicated engine transition happens
+
+The **primary engine** (global singleton, always ready) handles the first render of every canvas. Once the pool gives back a dedicated engine, `engineSwitchCount` increments and a full snapshot reload fires.
+
+### Dataset transfer (ENG-02)
+
+`registerDataset()` in `src/engine/index.ts` detects `crossOriginIsolated` at runtime:
+- **COOP+COEP active** → allocates a `SharedArrayBuffer` and writes the Float64 data once, zero-copy to the worker.
+- **Not isolated** → copies data into a plain `ArrayBuffer` and *transfers* it (structured-clone transfer, still zero-copy but one-way).
+
+The required COOP/COEP response headers live in `public/_headers` (see Hard Invariant #5 below).
+
 ### Block system
 
 Blocks are defined in `src/blocks/` as metadata (`BlockDef`) with port schemas — no evaluation. The Rust engine owns all computation. `src/blocks/registry.ts` is the master registry.
@@ -110,6 +129,14 @@ Both `Content-Security-Policy` lines in `public/_headers` must include `'wasm-un
 ### 4. Migrations are append-only
 `supabase/migrations/` is a numbered, append-only history. Never edit or delete an existing migration file. Create a new numbered migration to fix a past one.
 
+### 5. COOP+COEP headers must stay in `public/_headers`
+The `/*` section in `public/_headers` must include:
+```
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+Without these, `crossOriginIsolated` is `false`, `SharedArrayBuffer` is unavailable, and dataset transfer falls back to ArrayBuffer copy. Never remove them.
+
 ## CI structure
 
 | Trigger | Jobs |
@@ -124,11 +151,11 @@ Playwright does **not** run on PRs — only after merge to `main`, as a pre-cond
 
 | Metric | Budget |
 |--------|--------|
-| Initial JS (gzip) | 350 KB |
+| Initial JS (gzip) | 300 KB |
 | WASM (raw) | 800 KB |
 | WASM (gzip) | 250 KB |
 
-WASM budgets updated (ENG-09): switched wasm-opt from `-Oz` (size) to `-O3` (speed). Larger binary is acceptable for better runtime performance.
+JS budget tightened (UI-PERF-05 target): use `React.lazy()` for heavy components (Settings, block descriptions, vega-lite, KaTeX, AI Copilot, exceljs). WASM budgets updated (ENG-09): switched wasm-opt from `-Oz` (size) to `-O3` (speed). Larger binary is acceptable for better runtime performance.
 
 Use `React.lazy()` to keep new components out of the initial load. Run `npm run perf:bundle` after a build to check locally.
 

@@ -384,19 +384,19 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 ## TIER 19 — DOCUMENTATION
 
-- [ ] **[DOCS-01] Update CLAUDE.md** — After all changes: update CI table (remove nightly schedule, add workflow_dispatch note). Update bundle budget (300KB). Document worker pool, new engine contract version, new Rust ops domains. Verify: CLAUDE.md accurately reflects current state.
+- [x] **[DOCS-01] Update CLAUDE.md** — After all changes: update CI table (remove nightly schedule, add workflow_dispatch note). Update bundle budget (300KB). Document worker pool, new engine contract version, new Rust ops domains. Verify: CLAUDE.md accurately reflects current state.
 
 - [ ] **[DOCS-02] In-app docs: all new block categories** — Add documentation pages for: Chemical Engineering, Structural, Aerospace, Control Systems, Life Sciences, Finance-Options, Statistical Distributions, FFT/Signal Processing, Numerical Methods, Parametric Sweep, Monte Carlo, Optimizer, Complex Numbers, Matrix Operations. Each page: block list, inputs/outputs, formula, worked example. Verify: searching any new block name in docs search returns the relevant page.
 
 - [ ] **[DOCS-03] User guide: getting started** — Complete "Getting Started" in-app guide: "Your first chain" (5 steps), "Using variables for parametric studies", "Working with tables and data", "Reading and tracing errors", "Using the parametric sweep for optimization", "Exporting your calculation". With annotated screenshots. Verify: new user can follow guide and get a result in < 5 minutes.
 
-- [ ] **[DOCS-04] ADRs for this run's decisions** — Add ADR-0006 (WASM SIMD), ADR-0007 (SharedArrayBuffer), ADR-0008 (parallel canvas workers), ADR-0009 (interval arithmetic), ADR-0010 (complex numbers), ADR-0011 (matrix operations via faer), ADR-0012 (parametric sweep in worker), ADR-0013 (value equality hashing for incremental pruning). Verify: each major architectural decision has an ADR with Context/Decision/Consequences.
+- [x] **[DOCS-04] ADRs for this run's decisions** — Add ADR-0006 (WASM SIMD), ADR-0007 (SharedArrayBuffer), ADR-0008 (parallel canvas workers), ADR-0009 (interval arithmetic), ADR-0010 (complex numbers), ADR-0011 (matrix operations via faer), ADR-0012 (parametric sweep in worker), ADR-0013 (value equality hashing for incremental pruning). Verify: each major architectural decision has an ADR with Context/Decision/Consequences.
 
 ---
 
 ## TIER 20 — ACCESSIBILITY & I18N
 
-- [ ] **[A11Y-01] Keyboard accessibility: all modals trap focus** — All modals: focus trap (Tab cycles within), `aria-modal="true"`, `role="dialog"`, Escape closes, focus returns to trigger. Verify: Settings modal → Tab → cycles within; Escape closes; focus returns to Settings button.
+- [x] **[A11Y-01] Keyboard accessibility: all modals trap focus** — All modals: focus trap (Tab cycles within), `aria-modal="true"`, `role="dialog"`, Escape closes, focus returns to trigger. Verify: Settings modal → Tab → cycles within; Escape closes; focus returns to Settings button.
 
 - [ ] **[A11Y-02] Canvas block nodes: screen reader labels** — All node components have `aria-label` (e.g. "Sine block, input 1.57, output 1.0"). Edges have `title` with source→target description. Verify: screen reader announces block type and value correctly.
 
