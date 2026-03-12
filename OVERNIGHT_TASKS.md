@@ -252,7 +252,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[PROJ-06] Project import/export robustness** — Validate JSON against JSON Schema before accepting. Handle missing/extra fields. Migrate old schema versions. Embedded assets round-trip correctly. Version compatibility warning for newer schema versions. Progress indicator for large imports. Verify: export → import on different account → all blocks and data intact.
 
-- [ ] **[PROJ-07] Canvas duplication** — Right-click canvas tab → "Duplicate Canvas" → new canvas at end with "(copy)" suffix, copying all nodes and edges. Verify: duplicate a canvas → new tab with identical content.
+- [x] **[PROJ-07] Canvas duplication** — Right-click canvas tab → "Duplicate Canvas" → new canvas at end with "(copy)" suffix, copying all nodes and edges. Verify: duplicate a canvas → new tab with identical content.
 
 - [ ] **[PROJ-08] Name validation: consistent throughout** — All places where project, canvas, variable, folder names are entered: max length, no control chars, trim, no consecutive spaces, clear duplicate-name errors. Client-side validation mirrors DB constraints exactly. Verify: space-only name rejected everywhere; duplicate names show specific "already taken" error.
 
