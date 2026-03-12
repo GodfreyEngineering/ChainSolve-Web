@@ -610,6 +610,22 @@ export function ContextMenu({
                     onClose()
                   }}
                 />
+                <MenuItem
+                  icon="⊞"
+                  label={t('contextMenu.centerHorizontal', 'Center horizontally')}
+                  onClick={() => {
+                    onAlignSelection('center-h')
+                    onClose()
+                  }}
+                />
+                <MenuItem
+                  icon="⊟"
+                  label={t('contextMenu.centerVertical', 'Center vertically')}
+                  onClick={() => {
+                    onAlignSelection('center-v')
+                    onClose()
+                  }}
+                />
                 {target.selectedCount >= 3 && (
                   <>
                     <div style={sep} />

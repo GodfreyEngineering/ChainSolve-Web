@@ -25,6 +25,8 @@ export type AlignOp =
   | 'align-right'
   | 'align-top'
   | 'align-bottom'
+  | 'center-h'
+  | 'center-v'
   | 'distribute-h'
   | 'distribute-v'
 
@@ -67,6 +69,22 @@ export function computeAlignment(
       const maxBottom = Math.max(...selected.map((n) => n.position.y + getH(n)))
       for (const n of selected) {
         result.set(n.id, { x: n.position.x, y: maxBottom - getH(n) })
+      }
+      break
+    }
+    case 'center-h': {
+      const avgCenterX =
+        selected.reduce((sum, n) => sum + n.position.x + getW(n) / 2, 0) / selected.length
+      for (const n of selected) {
+        result.set(n.id, { x: avgCenterX - getW(n) / 2, y: n.position.y })
+      }
+      break
+    }
+    case 'center-v': {
+      const avgCenterY =
+        selected.reduce((sum, n) => sum + n.position.y + getH(n) / 2, 0) / selected.length
+      for (const n of selected) {
+        result.set(n.id, { x: n.position.x, y: avgCenterY - getH(n) / 2 })
       }
       break
     }

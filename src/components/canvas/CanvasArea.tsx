@@ -89,7 +89,7 @@ import { MinimapWrapper } from './MinimapWrapper'
 import { useTranslation } from 'react-i18next'
 import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
 import { useGraphHistory } from '../../hooks/useGraphHistory'
-import { copyToClipboard, pasteFromClipboard } from '../../lib/clipboard'
+import { copyToClipboard, pasteFromClipboard, pasteFromSystemClipboard } from '../../lib/clipboard'
 import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
 import { CommandPalette, type PaletteCommand } from './CommandPalette'
 const LazyFindBlockDialog = lazy(() =>
@@ -1655,14 +1655,27 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   }, [handleCopy, deleteSelected])
 
   const handlePaste = useCallback(() => {
-    const result = pasteFromClipboard()
-    if (!result) return
-    doSaveHistory()
-    setNodes((nds) => [
-      ...nds.map((n) => (n.selected ? { ...n, selected: false } : n)),
-      ...result.nodes,
-    ])
-    setEdges((eds) => [...eds, ...result.edges])
+    // Try in-memory clipboard first; fall back to system clipboard for cross-tab paste
+    const inMemory = pasteFromClipboard()
+    if (inMemory) {
+      doSaveHistory()
+      setNodes((nds) => [
+        ...nds.map((n) => (n.selected ? { ...n, selected: false } : n)),
+        ...inMemory.nodes,
+      ])
+      setEdges((eds) => [...eds, ...inMemory.edges])
+      return
+    }
+    // UX-04: Try system clipboard for cross-tab paste
+    pasteFromSystemClipboard().then((sys) => {
+      if (!sys) return
+      doSaveHistory()
+      setNodes((nds) => [
+        ...nds.map((n) => (n.selected ? { ...n, selected: false } : n)),
+        ...sys.nodes,
+      ])
+      setEdges((eds) => [...eds, ...sys.edges])
+    }).catch(() => {})
   }, [doSaveHistory, setNodes, setEdges])
 
   // ── Select all ──────────────────────────────────────────────────────────

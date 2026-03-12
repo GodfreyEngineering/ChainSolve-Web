@@ -18,6 +18,9 @@ let clipboardData: ClipboardPayload | null = null
 let pasteCounter = 0
 let edgeIdCounter = 0
 
+/** UX-04: Marker field for cross-tab identification of ChainSolve clipboard payloads. */
+const PAYLOAD_MARKER = '__cs_clipboard__' as const
+
 /**
  * Copy selected nodes and edges between them to the internal clipboard.
  * Also attempts a best-effort write to the system clipboard.
@@ -33,11 +36,28 @@ export function copyToClipboard(selectedNodes: Node<NodeData>[], allEdges: Edge[
   clipboardData = { nodes: selectedNodes, edges: internalEdges }
   pasteCounter = 0
 
-  // Best-effort system clipboard write
+  // Write to system clipboard with marker for cross-tab identification
   try {
-    navigator.clipboard?.writeText(JSON.stringify(clipboardData)).catch(() => {})
+    const payload = { [PAYLOAD_MARKER]: true, ...clipboardData }
+    navigator.clipboard?.writeText(JSON.stringify(payload)).catch(() => {})
   } catch {
     // Clipboard API not available
+  }
+}
+
+/**
+ * UX-04: Try to read ChainSolve clipboard JSON from the system clipboard.
+ * Falls back to null on permission failure or invalid JSON.
+ */
+export async function pasteFromSystemClipboard(): Promise<ClipboardPayload | null> {
+  try {
+    const text = await navigator.clipboard?.readText()
+    if (!text) return null
+    const obj = JSON.parse(text) as Record<string, unknown>
+    if (!obj[PAYLOAD_MARKER] || !Array.isArray(obj.nodes)) return null
+    return { nodes: obj.nodes as Node<NodeData>[], edges: (obj.edges as Edge[]) ?? [] }
+  } catch {
+    return null
   }
 }
 
