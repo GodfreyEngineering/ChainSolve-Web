@@ -279,6 +279,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const conflictServerTs = useRef<string | null>(null)
   const offlineRetryTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const offlineRetryCount = useRef(0)
+  // BUG-10: tracks which canvasId is currently being loaded so rapid tab
+  // switching discards out-of-order resolved promises.
+  const loadingCanvasRef = useRef<string | null>(null)
 
   // ── K1-1: Secondary canvas state for tiled mode ──────────────────────────
   const secondaryCanvasRef = useRef<CanvasAreaHandle>(null)
@@ -813,13 +816,18 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         }
       }
 
+      // Record which canvas we are loading — rapid switching will cancel stale resolves
+      loadingCanvasRef.current = canvasId
       try {
         // Load the target canvas graph
         const canvasGraph = await loadCanvasGraph(projectId, canvasId)
+        // Discard result if the user switched to a different tab while loading
+        if (loadingCanvasRef.current !== canvasId) return
         // setActiveCanvas updates projects.active_canvas_id which bumps
         // projects.updated_at via trigger. We must capture the fresh timestamp
         // to keep the optimistic-lock reference in sync and avoid false conflicts.
         const freshUpdatedAt = await setActiveCanvas(projectId, canvasId)
+        if (loadingCanvasRef.current !== canvasId) return
         // Set init data BEFORE changing activeCanvasId so that when CanvasArea
         // remounts (key={activeCanvasId}), it picks up the correct graph data
         // in a single render batch — preventing a flash of stale data.
@@ -829,7 +837,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         // Sync store with the DB timestamp (includes the bump from setActiveCanvas)
         completeSave(freshUpdatedAt)
       } catch (err: unknown) {
-        toast(err instanceof Error ? err.message : 'Failed to switch canvas', 'error')
+        if (loadingCanvasRef.current === canvasId) {
+          toast(err instanceof Error ? err.message : 'Failed to switch canvas', 'error')
+        }
       }
     },
     [projectId, activeCanvasId, doSave, setActiveCanvasId, completeSave, toast, t],
