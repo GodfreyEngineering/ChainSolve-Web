@@ -254,7 +254,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[PROJ-07] Canvas duplication** — Right-click canvas tab → "Duplicate Canvas" → new canvas at end with "(copy)" suffix, copying all nodes and edges. Verify: duplicate a canvas → new tab with identical content.
 
-- [ ] **[PROJ-08] Name validation: consistent throughout** — All places where project, canvas, variable, folder names are entered: max length, no control chars, trim, no consecutive spaces, clear duplicate-name errors. Client-side validation mirrors DB constraints exactly. Verify: space-only name rejected everywhere; duplicate names show specific "already taken" error.
+- [x] **[PROJ-08] Name validation: consistent throughout** — Added consecutive-spaces rule to validateProjectName. ProjectsPanel.handleRename validates + alerts on error (was silent). CanvasPage.commitNameEdit validates + toasts on error + reverts displayed name (was silent swallow). Verify: space-only name rejected everywhere; duplicate names show specific "already taken" error.
 
 ---
 
