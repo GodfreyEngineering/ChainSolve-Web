@@ -91,6 +91,7 @@ import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard } from '../../lib/clipboard'
 import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
+import { CommandPalette, type PaletteCommand } from './CommandPalette'
 const LazyFindBlockDialog = lazy(() =>
   import('./FindBlockDialog').then((m) => ({ default: m.FindBlockDialog })),
 )
@@ -1694,6 +1695,46 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // UX-09: IDs of nodes matching the current search query (null = no active search)
   const [searchMatchIds, setSearchMatchIds] = useState<string[] | null>(null)
 
+  // UX-03: Command palette
+  const [paletteOpen, setPaletteOpen] = useState(false)
+
+  // UX-03: Build the commands list for the palette
+  const paletteCommands = useMemo<PaletteCommand[]>(() => {
+    if (readOnly) return []
+    const cmds: PaletteCommand[] = [
+      { id: 'undo', kind: 'action', label: 'Undo', hint: 'Reverse the last change', kbd: 'Ctrl+Z', icon: '↩', onExecute: handleUndo },
+      { id: 'redo', kind: 'action', label: 'Redo', hint: 'Re-apply the last undone change', kbd: 'Ctrl+Shift+Z', icon: '↪', onExecute: handleRedo },
+      { id: 'fitView', kind: 'action', label: 'Fit view', hint: 'Zoom to show all nodes', kbd: 'Ctrl+Shift+F', icon: '⊡', onExecute: () => fitView({ padding: 0.15, duration: 300 }) },
+      { id: 'selectAll', kind: 'action', label: 'Select all', hint: 'Select all nodes', kbd: 'Ctrl+A', icon: '▣', onExecute: selectAll },
+      { id: 'deleteSelected', kind: 'action', label: 'Delete selected', hint: 'Delete selected nodes and edges', kbd: 'Del', icon: '✕', onExecute: deleteSelected },
+      { id: 'copy', kind: 'action', label: 'Copy', hint: 'Copy selected nodes to clipboard', kbd: 'Ctrl+C', icon: '⎘', onExecute: handleCopy },
+      { id: 'paste', kind: 'action', label: 'Paste', hint: 'Paste nodes from clipboard', kbd: 'Ctrl+V', icon: '⎗', onExecute: handlePaste },
+      { id: 'autoLayout', kind: 'action', label: 'Auto-layout', hint: 'Arrange nodes in a clean hierarchy', icon: '⊞', onExecute: () => handleAutoOrganise('LR') },
+      { id: 'toggleLibrary', kind: 'action', label: 'Toggle block library', hint: 'Show or hide the block library panel', icon: '⊟', onExecute: () => setLibVisible((v) => !v) },
+      { id: 'toggleSnap', kind: 'action', label: 'Toggle snap to grid', hint: 'Enable or disable snap to grid', icon: '⊞', onExecute: () => setSnapToGrid((v) => !v) },
+      { id: 'toggleMinimap', kind: 'action', label: 'Toggle minimap', hint: 'Show or hide the minimap', icon: '⊟', onExecute: () => { setMinimap((v) => { setMinimapPref(!v); return !v }) } },
+      { id: 'findBlock', kind: 'action', label: 'Find block', hint: 'Search and navigate to a block by label', kbd: 'Ctrl+F', icon: '⌕', onExecute: () => setFindOpen(true) },
+      { id: 'groupSelection', kind: 'action', label: 'Group selection', hint: 'Wrap selected nodes in a group', kbd: 'Ctrl+G', icon: '▢', onExecute: groupSelection },
+    ]
+    return cmds
+  }, [readOnly, handleUndo, handleRedo, fitView, selectAll, deleteSelected, handleCopy, handlePaste, handleAutoOrganise, groupSelection])
+
+  // UX-03: Node labels for navigation search
+  const paletteNodeLabels = useMemo(() => {
+    return nodes
+      .filter((n) => n.data?.label && !n.hidden)
+      .map((n) => ({
+        id: n.id,
+        label: (n.data as NodeData).label,
+        onJump: () => {
+          setNodes((nds) => nds.map((nd) => ({ ...nd, selected: nd.id === n.id })))
+          requestAnimationFrame(() => {
+            fitView({ nodes: [{ id: n.id }], padding: 0.5, duration: 400 })
+          })
+        },
+      }))
+  }, [nodes, setNodes, fitView])
+
   const focusNode = useCallback(
     (nodeId: string) => {
       setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === nodeId })))
@@ -1777,14 +1818,22 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         setContextMenu(null)
         setNotationTarget(null)
         setFindOpen(false)
+        setPaletteOpen(false)
         closeInspector()
+        return
+      }
+
+      const ctrl = e.ctrlKey || e.metaKey
+
+      // Ctrl+K: command palette (works even in input fields)
+      if (ctrl && e.key === 'k') {
+        e.preventDefault()
+        setPaletteOpen(true)
         return
       }
 
       // Skip shortcuts when typing in form fields
       if (isInput) return
-
-      const ctrl = e.ctrlKey || e.metaKey
 
       // Delete / Backspace
       if ((e.key === 'Delete' || e.key === 'Backspace') && !readOnly) {
@@ -2704,6 +2753,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     reason="feature_locked"
                   />
                 )}
+                {/* UX-03: Command palette */}
+                {paletteOpen && (
+                  <CommandPalette
+                    commands={paletteCommands}
+                    nodeLabels={paletteNodeLabels}
+                    onClose={() => setPaletteOpen(false)}
+                    onInsertBlock={insertBlockAtCenter}
+                  />
+                )}
+
                 {/* Value popover (W12.4) */}
                 {popoverTarget && (
                   <Suspense fallback={null}>
