@@ -10,7 +10,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 
 const _getUser = vi.hoisted(() => vi.fn())
 const _maybeSingle = vi.hoisted(() => vi.fn())
-const _updateResult = vi.hoisted(() => vi.fn())
+const _rpc = vi.hoisted(() => vi.fn())
 
 const _from = vi.hoisted(() => {
   const chain: Record<string, ReturnType<typeof vi.fn>> = {}
@@ -19,17 +19,14 @@ const _from = vi.hoisted(() => {
     chain[m] = vi.fn(() => chain)
   }
   chain['maybeSingle'] = _maybeSingle
-  // update() returns a separate chain where eq() resolves
-  const updateChain: Record<string, ReturnType<typeof vi.fn>> = {}
-  updateChain['eq'] = _updateResult
-  chain['update'] = vi.fn(() => updateChain)
-  return { fromFn: vi.fn(() => chain), chain, updateChain }
+  return { fromFn: vi.fn(() => chain), chain }
 })
 
 vi.mock('./supabase', () => ({
   supabase: {
     auth: { getUser: _getUser },
     from: _from.fromFn,
+    rpc: _rpc,
   },
 }))
 
@@ -106,59 +103,66 @@ describe('getUserPreferences', () => {
 describe('updateUserPreferences', () => {
   beforeEach(() => {
     vi.resetAllMocks()
-    _from.fromFn.mockReturnValue(_from.chain)
-    _from.chain.update.mockReturnValue(_from.updateChain)
-    _from.updateChain.eq.mockResolvedValue({ error: null })
+    _rpc.mockResolvedValue({ error: null })
   })
 
-  it('throws when user is not signed in', async () => {
-    setupNoUser()
-    await expect(updateUserPreferences({ locale: 'fr' })).rejects.toThrow('Sign in to update')
-    expect(_from.fromFn).not.toHaveBeenCalled()
-  })
-
-  it('calls supabase update with the patch and updated_at', async () => {
-    setupUser()
+  it('calls upsert_my_preferences rpc with mapped params', async () => {
     await updateUserPreferences({ locale: 'fr', theme: 'light' })
-
-    expect(_from.fromFn).toHaveBeenCalledWith('user_preferences')
-    expect(_from.chain.update).toHaveBeenCalledWith(
-      expect.objectContaining({ locale: 'fr', theme: 'light', updated_at: expect.any(String) }),
-    )
-    expect(_from.updateChain.eq).toHaveBeenCalledWith('user_id', USER.id)
+    expect(_rpc).toHaveBeenCalledWith('upsert_my_preferences', {
+      p_locale: 'fr',
+      p_theme: 'light',
+    })
   })
 
-  it('includes updated_at as a valid ISO timestamp', async () => {
-    setupUser()
+  it('includes only the fields present in the patch', async () => {
     await updateUserPreferences({ sidebar_collapsed: true })
-
-    const updateArg = _from.chain.update.mock.calls[0][0] as Record<string, unknown>
-    expect(() => new Date(updateArg['updated_at'] as string)).not.toThrow()
-    const ts = new Date(updateArg['updated_at'] as string)
-    expect(ts.getTime()).toBeGreaterThan(0)
+    expect(_rpc).toHaveBeenCalledWith('upsert_my_preferences', {
+      p_sidebar_collapsed: true,
+    })
   })
 
-  it('throws when DB returns an error', async () => {
-    setupUser()
-    _from.updateChain.eq.mockResolvedValueOnce({ error: { message: 'update failed' } })
+  it('throws when rpc returns an error', async () => {
+    _rpc.mockResolvedValueOnce({ error: { message: 'update failed' } })
     await expect(updateUserPreferences({ region: 'us' })).rejects.toMatchObject({
       message: 'update failed',
     })
   })
 
+  it('throws when rpc returns an auth error (not authenticated)', async () => {
+    _rpc.mockResolvedValueOnce({ error: { message: 'Not authenticated' } })
+    await expect(updateUserPreferences({ locale: 'fr' })).rejects.toMatchObject({
+      message: 'Not authenticated',
+    })
+  })
+
   it('can update a single field (sidebar_collapsed)', async () => {
-    setupUser()
     await updateUserPreferences({ sidebar_collapsed: false })
-    expect(_from.chain.update).toHaveBeenCalledWith(
-      expect.objectContaining({ sidebar_collapsed: false }),
-    )
+    expect(_rpc).toHaveBeenCalledWith('upsert_my_preferences', {
+      p_sidebar_collapsed: false,
+    })
   })
 
   it('can update editor_layout', async () => {
-    setupUser()
     await updateUserPreferences({ editor_layout: 'compact' })
-    expect(_from.chain.update).toHaveBeenCalledWith(
-      expect.objectContaining({ editor_layout: 'compact' }),
-    )
+    expect(_rpc).toHaveBeenCalledWith('upsert_my_preferences', {
+      p_editor_layout: 'compact',
+    })
+  })
+
+  it('maps all fields correctly when all are provided', async () => {
+    await updateUserPreferences({
+      locale: 'de',
+      theme: 'dark',
+      region: 'eu',
+      editor_layout: 'wide',
+      sidebar_collapsed: false,
+    })
+    expect(_rpc).toHaveBeenCalledWith('upsert_my_preferences', {
+      p_locale: 'de',
+      p_theme: 'dark',
+      p_region: 'eu',
+      p_editor_layout: 'wide',
+      p_sidebar_collapsed: false,
+    })
   })
 })
