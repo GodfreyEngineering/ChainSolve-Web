@@ -25,6 +25,7 @@ import { getUnitSymbol } from '../../units/unitSymbols'
 import { PlotInspector } from './PlotInspector'
 import { GroupInspector } from './GroupInspector'
 import { AnnotationInspector } from './nodes/AnnotationInspector'
+import { buildExpressionTree, renderExpressionText } from '../../lib/expressionExtractor'
 
 const LazyUnitPicker = lazy(() =>
   import('./editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
@@ -105,6 +106,15 @@ export function Inspector({
   useEffect(() => {
     import('../../blocks/blockDescriptions').then((m) => setDescriptions(m.BLOCK_DESCRIPTIONS))
   }, [])
+
+  // UX-08: What-if explorer state — tracks active temporary override per node
+  const [whatIfState, setWhatIfState] = useState<{
+    nodeId: string
+    portId: string
+    value: number
+  } | null>(null)
+  // Derived: only active when the current node matches
+  const whatIfActive = whatIfState?.nodeId === nodeId ? whatIfState : null
 
   // ESC closes inspector (only when not floating — AppWindow handles ESC)
   useEffect(() => {
@@ -393,6 +403,44 @@ export function Inspector({
               </div>
             )}
 
+            {/* UX-08: Formula expression — symbolic form for operation nodes */}
+            {def?.nodeKind === 'csOperation' &&
+              (() => {
+                try {
+                  const tree = buildExpressionTree(
+                    node.id,
+                    allNodes as Parameters<typeof buildExpressionTree>[1],
+                    allEdges,
+                    computed,
+                  )
+                  if (!tree) return null
+                  const exprText = renderExpressionText(tree)
+                  if (!exprText || exprText === nd.blockType || exprText === nd.label) return null
+                  return (
+                    <div style={{ marginBottom: '0.7rem' }}>
+                      <span style={fieldLabel}>Formula</span>
+                      <div
+                        style={{
+                          padding: '0.35rem 0.5rem',
+                          background: 'rgba(28,171,176,0.06)',
+                          border: '1px solid rgba(28,171,176,0.15)',
+                          borderRadius: 6,
+                          fontFamily: 'ui-monospace, "Cascadia Code", monospace',
+                          fontSize: '0.78rem',
+                          color: 'var(--text-muted)',
+                          lineHeight: 1.5,
+                          wordBreak: 'break-all',
+                        }}
+                      >
+                        = {exprText}
+                      </div>
+                    </div>
+                  )
+                } catch {
+                  return null
+                }
+              })()}
+
             {/* H1-1: Unit picker — available for source, operation, display, and data nodes */}
             {def?.nodeKind !== 'csPlot' &&
               field(
@@ -645,6 +693,168 @@ export function Inspector({
                 )
               })()}
 
+            {/* UX-08: Downstream chain — which nodes consume this output */}
+            {(() => {
+              const downEdges = allEdges.filter((e) => e.source === node.id)
+              if (downEdges.length === 0) return null
+              const seen = new Set<string>()
+              const downstream = downEdges
+                .map((e) => allNodes.find((n) => n.id === e.target))
+                .filter((n): n is NonNullable<typeof n> => {
+                  if (!n || seen.has(n.id)) return false
+                  seen.add(n.id)
+                  return true
+                })
+              if (downstream.length === 0) return null
+              return (
+                <div style={{ marginBottom: '0.7rem' }}>
+                  <span style={fieldLabel}>Feeding into</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                    {downstream.map((n) => (
+                      <span
+                        key={n.id}
+                        style={{
+                          fontSize: '0.7rem',
+                          padding: '0.15rem 0.45rem',
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: 4,
+                          color: 'var(--text-muted)',
+                        }}
+                      >
+                        → {(n.data as NodeData).label || (n.data as NodeData).blockType}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* UX-08: What-if explorer — slider to temporarily override a connected input */}
+            {def && def.inputs.length > 0 && nodeId &&
+              (() => {
+                const scalarConnected = def.inputs.filter((port) => {
+                  if (!allEdges.some((e) => e.target === node.id && e.targetHandle === port.id))
+                    return false
+                  const edge = allEdges.find(
+                    (e) => e.target === node.id && e.targetHandle === port.id,
+                  )
+                  const val = edge ? computed.get(edge.source) : undefined
+                  return val !== undefined && isScalar(val) && isFinite(val.value)
+                })
+                if (scalarConnected.length === 0) return null
+                return (
+                  <div style={{ marginBottom: '0.7rem' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        marginBottom: '0.35rem',
+                      }}
+                    >
+                      <span style={fieldLabel}>What-if</span>
+                      {whatIfActive && (
+                        <button
+                          onClick={() => {
+                            if (portOverrides[whatIfActive.portId]) {
+                              toggleOverride(whatIfActive.portId)
+                            }
+                            setWhatIfState(null)
+                          }}
+                          style={{
+                            fontSize: '0.6rem',
+                            padding: '1px 6px',
+                            background: 'transparent',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            borderRadius: 3,
+                            color: 'rgba(244,244,243,0.5)',
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                          }}
+                        >
+                          Reset
+                        </button>
+                      )}
+                    </div>
+                    {scalarConnected.map((port) => {
+                      const edge = allEdges.find(
+                        (e) => e.target === node.id && e.targetHandle === port.id,
+                      )!
+                      const srcVal = computed.get(edge.source)!
+                      const connectedNum = isScalar(srcVal) ? srcVal.value : 0
+                      const isActive = whatIfActive?.portId === port.id
+                      const absVal = Math.abs(connectedNum) || 1
+                      const sliderMin = connectedNum - absVal * 2
+                      const sliderMax = connectedNum + absVal * 2
+                      return (
+                        <div key={port.id} style={{ marginBottom: '0.35rem' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.3rem',
+                              fontSize: '0.72rem',
+                              marginBottom: isActive ? '0.2rem' : 0,
+                            }}
+                          >
+                            <span style={{ color: 'rgba(244,244,243,0.5)', flexShrink: 0 }}>
+                              {port.label}
+                            </span>
+                            {!isActive ? (
+                              <button
+                                onClick={() => {
+                                  setWhatIfState({ nodeId: nodeId, portId: port.id, value: connectedNum })
+                                  if (!portOverrides[port.id]) toggleOverride(port.id)
+                                  updateBinding(port.id, { kind: 'literal', value: connectedNum })
+                                }}
+                                style={{
+                                  fontSize: '0.6rem',
+                                  padding: '1px 6px',
+                                  background: 'transparent',
+                                  border: '1px solid rgba(28,171,176,0.4)',
+                                  borderRadius: 3,
+                                  color: 'var(--primary)',
+                                  cursor: 'pointer',
+                                  fontFamily: 'inherit',
+                                }}
+                              >
+                                Try →
+                              </button>
+                            ) : (
+                              <span
+                                style={{
+                                  fontFamily: 'monospace',
+                                  color: 'var(--primary)',
+                                  marginLeft: 'auto',
+                                }}
+                              >
+                                {whatIfActive.value.toPrecision(5)}
+                              </span>
+                            )}
+                          </div>
+                          {isActive && (
+                            <input
+                              type="range"
+                              min={sliderMin}
+                              max={sliderMax}
+                              step={(sliderMax - sliderMin) / 200}
+                              value={whatIfActive.value}
+                              style={{ width: '100%', accentColor: 'var(--primary)' }}
+                              onChange={(e) => {
+                                const v = parseFloat(e.target.value)
+                                setWhatIfState({ nodeId: nodeId, portId: port.id, value: v })
+                                updateBinding(port.id, { kind: 'literal', value: v })
+                              }}
+                            />
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+
             {/* Trace timing — show if trace mode captured data for this node */}
             {(() => {
               const traceData: TraceEntry[] | null = engine.getLastTrace()
@@ -730,6 +940,70 @@ export function Inspector({
                     inputValue={inputValue}
                     onUpdate={(patch) => update({ plotConfig: { ...plotConfig, ...patch } })}
                   />
+                )
+              })()}
+
+            {/* UX-08: Predictive warnings based on current input values */}
+            {def &&
+              (() => {
+                const warnings: string[] = []
+                // Division by zero
+                if (nd.blockType === 'divide' || nd.blockType === 'modulo') {
+                  const denomEdge = allEdges.find(
+                    (e) => e.target === node.id && e.targetHandle === 'B',
+                  )
+                  const denomVal = denomEdge ? computed.get(denomEdge.source) : undefined
+                  if (denomVal && isScalar(denomVal) && Math.abs(denomVal.value) < 1e-10) {
+                    warnings.push('Divisor is near zero — result may be ±Infinity')
+                  }
+                }
+                // Log of non-positive
+                if (['log', 'log10', 'ln'].includes(nd.blockType)) {
+                  const inEdge = allEdges.find(
+                    (e) =>
+                      e.target === node.id &&
+                      (e.targetHandle === 'A' || e.targetHandle === 'x' || e.targetHandle === 'in'),
+                  )
+                  const inVal = inEdge ? computed.get(inEdge.source) : undefined
+                  if (inVal && isScalar(inVal) && inVal.value <= 0) {
+                    warnings.push(
+                      `Log input is ${inVal.value < 0 ? 'negative' : 'zero'} — result is NaN`,
+                    )
+                  }
+                }
+                // Sqrt of negative
+                if (nd.blockType === 'sqrt') {
+                  const inEdge = allEdges.find((e) => e.target === node.id)
+                  const inVal = inEdge ? computed.get(inEdge.source) : undefined
+                  if (inVal && isScalar(inVal) && inVal.value < 0) {
+                    warnings.push('Input is negative — sqrt returns NaN for real inputs')
+                  }
+                }
+                // Infinity in output
+                if (isInfVal) {
+                  warnings.push('Output is Infinity — check for unbounded computation')
+                }
+                if (warnings.length === 0) return null
+                return (
+                  <>
+                    {warnings.map((w, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          marginBottom: '0.35rem',
+                          padding: '0.3rem 0.5rem',
+                          background: 'rgba(251,191,36,0.07)',
+                          border: '1px solid rgba(251,191,36,0.25)',
+                          borderRadius: 6,
+                          fontSize: '0.7rem',
+                          color: '#fbbf24',
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        ⚠ {w}
+                      </div>
+                    ))}
+                  </>
                 )
               })()}
 
