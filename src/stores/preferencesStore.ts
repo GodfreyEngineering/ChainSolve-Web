@@ -14,10 +14,23 @@ export interface UserPreferences {
   autosaveEnabled: boolean
   autosaveDelayMs: number
 
-  // Numeric formatting
-  decimalPlaces: number // -1 = auto (smart precision)
-  scientificNotationThreshold: number // abs value above this uses sci notation
+  // Numeric formatting (SCI-02, SCI-05, SCI-07)
+  /** SCI-05: how numbers are displayed. */
+  numberDisplayMode: 'auto' | 'decimal' | 'sig_figs' | 'scientific'
+  /** Decimal places; used in 'decimal' and 'auto' modes (-1 = smart). */
+  decimalPlaces: number
+  /** SCI-05: significant figures count, used when numberDisplayMode === 'sig_figs'. */
+  sigFigs: number
+  /** Abs value above this uses scientific notation in 'auto' mode. */
+  scientificNotationThreshold: number
+  /** Show thousands separator. */
   thousandsSeparator: boolean
+  /** SCI-07: thousands separator character. */
+  thousandsSeparatorChar: 'comma' | 'period' | 'space' | 'underscore' | 'apostrophe'
+  /** SCI-07: decimal separator character. */
+  decimalSeparator: '.' | ','
+  /** SCI-02: substitute high-precision digits for π, e, φ, √2. */
+  highPrecisionConstants: boolean
 
   // Canvas / Editor defaults
   defaultSnapToGrid: boolean
@@ -39,9 +52,14 @@ const DEFAULTS: UserPreferences = {
   autosaveEnabled: true,
   autosaveDelayMs: 2000,
 
+  numberDisplayMode: 'auto',
   decimalPlaces: -1, // auto
+  sigFigs: 4,
   scientificNotationThreshold: 1e6,
   thousandsSeparator: false,
+  thousandsSeparatorChar: 'comma',
+  decimalSeparator: '.',
+  highPrecisionConstants: false,
 
   defaultSnapToGrid: false,
   defaultEdgeAnimation: true,

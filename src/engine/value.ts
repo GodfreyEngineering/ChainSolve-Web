@@ -89,7 +89,7 @@ export function extractScalar(v: Value | null): number | null {
  *                the decimal separator and grouping match the user's language.
  *                Omit (or pass undefined) for locale-neutral output (exports).
  */
-/** D8-1: Optional formatting preferences for numeric display. */
+/** D8-1 / SCI-02 / SCI-05 / SCI-07: Optional formatting preferences for numeric display. */
 export interface FormatOptions {
   /** Number of decimal places. -1 = auto (smart precision). Default: -1. */
   decimalPlaces?: number
@@ -97,6 +97,28 @@ export interface FormatOptions {
   scientificNotationThreshold?: number
   /** Whether to add thousands separators. Default: false. */
   thousandsSeparator?: boolean
+  /** SCI-07: thousands separator character (used when thousandsSeparator is true). */
+  thousandsSeparatorChar?: 'comma' | 'period' | 'space' | 'underscore' | 'apostrophe'
+  /** SCI-07: decimal separator character. */
+  decimalSeparator?: '.' | ','
+  /** SCI-05: number display mode. */
+  numberDisplayMode?: 'auto' | 'decimal' | 'sig_figs' | 'scientific'
+  /** SCI-05: significant figures count (used when numberDisplayMode === 'sig_figs'). */
+  sigFigs?: number
+  /**
+   * SCI-02: Optional callback to look up a high-precision string for a scalar.
+   * Provided by useFormatValue when the user has highPrecisionConstants enabled.
+   * Returns null if the value does not match a known constant.
+   */
+  highPrecisionLookup?: (n: number, decimalPlaces: number) => string | null
+}
+
+const THOUSANDS_SEP_CHARS: Record<string, string> = {
+  comma: ',',
+  period: '.',
+  space: '\u2009', // thin space
+  underscore: '_',
+  apostrophe: "'",
 }
 
 export function formatValue(v: Value | undefined, locale?: string, opts?: FormatOptions): string {
@@ -108,30 +130,65 @@ export function formatValue(v: Value | undefined, locale?: string, opts?: Format
       if (!isFinite(n)) return n > 0 ? '+\u221E' : '\u2212\u221E'
       const abs = Math.abs(n)
       if (abs === 0) return '0'
-      const sciThreshold = opts?.scientificNotationThreshold ?? 1e6
-      // Scientific notation for large/small values
-      if (abs >= sciThreshold || (abs > 0 && abs < 1e-3)) {
-        const dp = opts?.decimalPlaces
-        return n.toExponential(dp !== undefined && dp >= 0 ? dp : 4)
+
+      const mode = opts?.numberDisplayMode ?? 'auto'
+      const decSep = opts?.decimalSeparator ?? '.'
+      const thouSep = opts?.thousandsSeparator ? (THOUSANDS_SEP_CHARS[opts.thousandsSeparatorChar ?? 'comma'] ?? ',') : null
+
+      // SCI-02: high-precision constant substitution (callback provided by useFormatValue)
+      if (opts?.highPrecisionLookup) {
+        const hpResult = opts.highPrecisionLookup(n, opts.decimalPlaces ?? -1)
+        if (hpResult !== null) {
+          return applySeparators(hpResult, decSep, thouSep)
+        }
       }
+
+      // SCI-05: significant figures mode
+      if (mode === 'sig_figs') {
+        const sf = opts?.sigFigs ?? 4
+        const formatted = formatSigFigs(n, sf)
+        return applySeparators(formatted, decSep, thouSep)
+      }
+
+      // SCI-05: always scientific notation
+      if (mode === 'scientific') {
+        const dp = opts?.decimalPlaces
+        const formatted = n.toExponential(dp !== undefined && dp >= 0 ? dp : 4)
+        return applySeparators(formatted, decSep, thouSep)
+      }
+
+      const sciThreshold = opts?.scientificNotationThreshold ?? 1e6
+      // Scientific notation for large/small values (auto or decimal mode)
+      if (mode !== 'decimal' && (abs >= sciThreshold || (abs > 0 && abs < 1e-3))) {
+        const dp = opts?.decimalPlaces
+        const formatted = n.toExponential(dp !== undefined && dp >= 0 ? dp : 4)
+        return applySeparators(formatted, decSep, thouSep)
+      }
+
       // Fixed decimal places mode
       if (opts?.decimalPlaces !== undefined && opts.decimalPlaces >= 0) {
         const formatted = n.toFixed(opts.decimalPlaces)
-        if (opts.thousandsSeparator) return addThousandsSep(formatted)
-        return formatted
+        return applySeparators(formatted, decSep, thouSep)
       }
-      // Auto precision mode
-      if (opts?.thousandsSeparator || locale) {
+
+      // Auto precision mode: use Intl.NumberFormat or toPrecision(6)
+      if (thouSep !== null || locale) {
         try {
           const intlOpts: Intl.NumberFormatOptions = { maximumSignificantDigits: 6 }
-          if (opts?.thousandsSeparator) intlOpts.useGrouping = true
-          else intlOpts.useGrouping = false
-          return new Intl.NumberFormat(locale ?? 'en', intlOpts).format(n)
+          intlOpts.useGrouping = thouSep !== null
+          const str = new Intl.NumberFormat(locale ?? 'en', intlOpts).format(n)
+          // Apply custom separators on top of Intl output if requested
+          if (decSep !== '.' || (thouSep !== null && thouSep !== ',')) {
+            return applySeparators(str.replace(/,/g, '\uE000').replace(/\./g, '\uE001').replace(/\uE000/g, thouSep ?? ',').replace(/\uE001/g, decSep), decSep, null)
+          }
+          return str
         } catch {
           // Unknown locale tag — fall through to default formatting.
         }
       }
-      return parseFloat(n.toPrecision(6)).toString()
+
+      const raw = parseFloat(n.toPrecision(6)).toString()
+      return applySeparators(raw, decSep, thouSep)
     }
     case 'vector':
       if (v.value.length === 0) return '[empty]'
@@ -144,9 +201,35 @@ export function formatValue(v: Value | undefined, locale?: string, opts?: Format
   }
 }
 
-/** Add commas as thousands separators to a fixed-point string. */
-function addThousandsSep(s: string): string {
-  const [intPart, decPart] = s.split('.')
-  const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  return decPart !== undefined ? `${withCommas}.${decPart}` : withCommas
+/** SCI-05: Format a number to N significant figures. */
+function formatSigFigs(n: number, sf: number): string {
+  if (sf <= 0) return n.toString()
+  // toPrecision handles sig figs correctly
+  return parseFloat(n.toPrecision(sf)).toString()
 }
+
+/**
+ * SCI-07: Apply decimal and thousands separators to a formatted number string.
+ * Works on fixed-point strings (e.g. "1234.56"). Skips scientific notation exponents.
+ */
+function applySeparators(s: string, decSep: '.' | ',', thouSep: string | null): string {
+  // Don't apply separators inside scientific notation exponent
+  const eIdx = s.indexOf('e')
+  const mantissa = eIdx >= 0 ? s.slice(0, eIdx) : s
+  const exponent = eIdx >= 0 ? s.slice(eIdx) : ''
+
+  const parts = mantissa.split('.')
+  let intPart = parts[0]
+  const decPart = parts[1]
+
+  if (thouSep !== null && thouSep !== '') {
+    intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, thouSep)
+  }
+
+  let result = intPart
+  if (decPart !== undefined) {
+    result += decSep + decPart
+  }
+  return result + exponent
+}
+
