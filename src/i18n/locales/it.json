@@ -345,7 +345,8 @@
     "manualOverrideTooltip": "Override manuale (collegato a monte)",
     "manualValueTooltip": "Valore manuale",
     "createCustomMaterial": "+ Crea personalizzato...",
-    "createCustomMaterialPro": "+ Crea personalizzato... (Pro)"
+    "createCustomMaterialPro": "+ Crea personalizzato... (Pro)",
+    "formulaBarPlaceholder": "e.g. 2*pi or sqrt(2)"
   },
   "blocks": {
     "categoryData": "Dati",

@@ -345,7 +345,8 @@
     "manualOverrideTooltip": "Reemplazo manual (conectado aguas arriba)",
     "manualValueTooltip": "Valor manual",
     "createCustomMaterial": "+ Crear personalizado...",
-    "createCustomMaterialPro": "+ Crear personalizado... (Pro)"
+    "createCustomMaterialPro": "+ Crear personalizado... (Pro)",
+    "formulaBarPlaceholder": "e.g. 2*pi or sqrt(2)"
   },
   "blocks": {
     "categoryData": "Datos",

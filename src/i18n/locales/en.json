@@ -352,7 +352,8 @@
     "manualOverrideTooltip": "Manual override (connected to upstream)",
     "manualValueTooltip": "Manual value",
     "createCustomMaterial": "+ Create custom...",
-    "createCustomMaterialPro": "+ Create custom... (Pro)"
+    "createCustomMaterialPro": "+ Create custom... (Pro)",
+    "formulaBarPlaceholder": "e.g. 2*pi or sqrt(2)"
   },
   "blocks": {
     "categoryData": "Data",

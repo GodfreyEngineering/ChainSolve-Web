@@ -402,7 +402,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[A11Y-03] Color contrast compliance** — All text/background combos meet WCAG AA. Run `axe-playwright` in E2E suite. Fix violations in theme CSS variables. Verify: axe-playwright reports zero violations on workspace.
 
-- [ ] **[I18N-01] Audit all new hardcoded strings** — Run `node scripts/check-i18n-hardcoded.mjs`. Fix all flagged strings in new components. Add keys to `en.json`. Stub other locale files with English fallback. Verify: CI i18n check passes.
+- [x] **[I18N-01] Audit all new hardcoded strings** — Run `node scripts/check-i18n-hardcoded.mjs`. Fix all flagged strings in new components. Add keys to `en.json`. Stub other locale files with English fallback. Verify: CI i18n check passes.
 
 ---
 

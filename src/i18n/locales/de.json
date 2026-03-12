@@ -345,7 +345,8 @@
     "manualOverrideTooltip": "Manuelle Überschreibung (mit Upstream verbunden)",
     "manualValueTooltip": "Manueller Wert",
     "createCustomMaterial": "+ Eigenes erstellen...",
-    "createCustomMaterialPro": "+ Eigenes erstellen... (Pro)"
+    "createCustomMaterialPro": "+ Eigenes erstellen... (Pro)",
+    "formulaBarPlaceholder": "e.g. 2*pi or sqrt(2)"
   },
   "blocks": {
     "categoryData": "Daten",

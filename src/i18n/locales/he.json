@@ -672,7 +672,8 @@
     "manualOverrideTooltip": "דריסה ידנית (מחובר למעלה)",
     "manualValueTooltip": "ערך ידני",
     "createCustomMaterial": "+ צור מותאם אישית...",
-    "createCustomMaterialPro": "+ צור מותאם אישית... (Pro)"
+    "createCustomMaterialPro": "+ צור מותאם אישית... (Pro)",
+    "formulaBarPlaceholder": "e.g. 2*pi or sqrt(2)"
   },
   "sheets": {
     "title": "גיליונות",

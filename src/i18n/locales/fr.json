@@ -345,7 +345,8 @@
     "manualOverrideTooltip": "Remplacement manuel (connecté en amont)",
     "manualValueTooltip": "Valeur manuelle",
     "createCustomMaterial": "+ Créer personnalisé...",
-    "createCustomMaterialPro": "+ Créer personnalisé... (Pro)"
+    "createCustomMaterialPro": "+ Créer personnalisé... (Pro)",
+    "formulaBarPlaceholder": "e.g. 2*pi or sqrt(2)"
   },
   "blocks": {
     "categoryData": "Données",

@@ -180,7 +180,7 @@ export function FormulaBar({ nodeId, node, computedValue, onCommit }: FormulaBar
               cancel()
             }
           }}
-          placeholder="e.g. 2*pi or sqrt(2)"
+          placeholder={t('canvas.formulaBarPlaceholder')}
           style={{
             flex: 1,
             background: 'transparent',
