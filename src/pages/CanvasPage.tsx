@@ -201,6 +201,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const updateCanvasInStore = useCanvasesStore((s) => s.updateCanvas)
   const markCanvasDirty = useCanvasesStore((s) => s.markCanvasDirty)
   const markCanvasClean = useCanvasesStore((s) => s.markCanvasClean)
+  const dirtyCanvasIds = useCanvasesStore((s) => s.dirtyCanvasIds)
   const viewMode = useCanvasesStore((s) => s.viewMode)
   const secondaryCanvasId = useCanvasesStore((s) => s.secondaryCanvasId)
   const setViewMode = useCanvasesStore((s) => s.setViewMode)
@@ -2091,6 +2092,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           onDeleteCanvas={handleDeleteCanvas}
           onDuplicateCanvas={handleDuplicateCanvas}
           onReorderCanvases={readOnly ? undefined : handleReorderCanvases}
+          dirtyCanvasIds={dirtyCanvasIds}
           viewMode={viewMode}
           onSetViewMode={handleSetViewMode}
         />

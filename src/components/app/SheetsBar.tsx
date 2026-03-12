@@ -25,6 +25,8 @@ export interface SheetsBarProps {
   onDeleteCanvas: (canvasId: string) => void
   onDuplicateCanvas: (canvasId: string) => void
   onReorderCanvases?: (orderedIds: string[]) => void
+  /** UX-07: Set of canvas IDs with unsaved changes — shows dirty dot indicator. */
+  dirtyCanvasIds?: Set<string>
   /** K1-1: Current view mode. */
   viewMode?: ViewMode
   /** K1-1: Callback to change the view mode. */
@@ -44,6 +46,7 @@ export function SheetsBar({
   onDeleteCanvas,
   onDuplicateCanvas,
   onReorderCanvases,
+  dirtyCanvasIds,
   viewMode,
   onSetViewMode,
 }: SheetsBarProps) {
@@ -74,6 +77,7 @@ export function SheetsBar({
       onDeleteCanvas={onDeleteCanvas}
       onDuplicateCanvas={onDuplicateCanvas}
       onReorderCanvases={onReorderCanvases}
+      dirtyCanvasIds={dirtyCanvasIds}
       viewMode={viewMode}
       onSetViewMode={onSetViewMode}
     />
@@ -93,6 +97,7 @@ function DesktopSheetsBar({
   onDeleteCanvas,
   onDuplicateCanvas,
   onReorderCanvases,
+  dirtyCanvasIds,
   viewMode = 'fullscreen',
   onSetViewMode,
 }: SheetsBarProps) {
@@ -192,6 +197,32 @@ function DesktopSheetsBar({
     setConfirmDeleteId(null)
     onDuplicateCanvas(id)
   }, [contextMenu, onDuplicateCanvas])
+
+  // UX-07: Move to position
+  const [moveTargetId, setMoveTargetId] = useState<string | null>(null)
+  const [movePosition, setMovePosition] = useState('')
+
+  const handleMoveToPosition = useCallback(() => {
+    if (!contextMenu) return
+    setMoveTargetId(contextMenu.canvasId)
+    const current = canvases.findIndex((c) => c.id === contextMenu.canvasId)
+    setMovePosition(String(current + 1))
+    setContextMenu(null)
+    setConfirmDeleteId(null)
+  }, [contextMenu, canvases])
+
+  const commitMoveToPosition = useCallback(() => {
+    if (!moveTargetId || !onReorderCanvases) { setMoveTargetId(null); return }
+    const pos = parseInt(movePosition, 10)
+    if (isNaN(pos) || pos < 1 || pos > canvases.length) { setMoveTargetId(null); return }
+    const ids = canvases.map((c) => c.id)
+    const fromIdx = ids.indexOf(moveTargetId)
+    if (fromIdx === -1) { setMoveTargetId(null); return }
+    ids.splice(fromIdx, 1)
+    ids.splice(pos - 1, 0, moveTargetId)
+    onReorderCanvases(ids)
+    setMoveTargetId(null)
+  }, [moveTargetId, movePosition, canvases, onReorderCanvases])
 
   // ── Drag-and-drop reorder ──────────────────────────────────────────────
   const handleDragStart = useCallback((e: React.DragEvent, canvasId: string) => {
@@ -294,6 +325,22 @@ function DesktopSheetsBar({
                 />
               ) : (
                 <>
+                  {/* UX-07: dirty indicator dot */}
+                  {dirtyCanvasIds?.has(canvas.id) && (
+                    <span
+                      title={t('sheets.unsavedChanges', 'Unsaved changes')}
+                      style={{
+                        display: 'inline-block',
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        background: 'var(--primary)',
+                        marginRight: 4,
+                        flexShrink: 0,
+                        opacity: 0.8,
+                      }}
+                    />
+                  )}
                   <span style={tabLabelStyle}>{canvas.name}</span>
                   {!readOnly && canDelete && (
                     <button
@@ -358,6 +405,98 @@ function DesktopSheetsBar({
       )}
       <span style={canvasCounterStyle}>{canvasCountLabel}</span>
 
+      {/* UX-07: Move to Position inline mini-dialog */}
+      {moveTargetId && (() => {
+        const mvCanvas = canvases.find((c) => c.id === moveTargetId)
+        return (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(0,0,0,0.35)',
+            }}
+            onClick={() => setMoveTargetId(null)}
+          >
+            <div
+              style={{
+                background: 'var(--surface-1)',
+                border: '1px solid var(--border)',
+                borderRadius: 10,
+                padding: '1rem 1.25rem',
+                minWidth: 280,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.6rem' }}>
+                {t('sheets.moveDialogTitle', 'Move "{{name}}" to position', { name: mvCanvas?.name ?? '' })}
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input
+                  type="number"
+                  min={1}
+                  max={canvases.length}
+                  value={movePosition}
+                  onChange={(e) => setMovePosition(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitMoveToPosition()
+                    if (e.key === 'Escape') setMoveTargetId(null)
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '0.3rem 0.5rem',
+                    borderRadius: 5,
+                    border: '1px solid var(--border)',
+                    background: 'var(--input-bg)',
+                    color: 'var(--text)',
+                    fontSize: '0.85rem',
+                    outline: 'none',
+                  }}
+                  autoFocus
+                />
+                <button
+                  onClick={commitMoveToPosition}
+                  style={{
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: 5,
+                    border: 'none',
+                    background: 'var(--primary)',
+                    color: 'var(--color-on-primary)',
+                    cursor: 'pointer',
+                    fontSize: '0.82rem',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {t('sheets.move', 'Move')}
+                </button>
+                <button
+                  onClick={() => setMoveTargetId(null)}
+                  style={{
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: 5,
+                    border: '1px solid var(--border)',
+                    background: 'transparent',
+                    color: 'var(--text)',
+                    cursor: 'pointer',
+                    fontSize: '0.82rem',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {t('common.cancel', 'Cancel')}
+                </button>
+              </div>
+              <div style={{ marginTop: '0.4rem', fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                {t('sheets.moveDialogHint', '1 to {{max}}', { max: canvases.length })}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Context menu */}
       {contextMenu && (
         <div ref={contextRef} style={contextMenuStyle(contextMenu.x, contextMenu.y)}>
@@ -387,6 +526,12 @@ function DesktopSheetsBar({
                 onClick={() => startRename(contextMenu.canvasId)}
               />
               <CtxItem label={t('sheets.duplicate')} onClick={handleDuplicateFromMenu} />
+              {onReorderCanvases && canvases.length > 1 && (
+                <CtxItem
+                  label={t('sheets.moveToPosition', 'Move to position\u2026')}
+                  onClick={handleMoveToPosition}
+                />
+              )}
               <div style={contextSeparatorStyle} role="separator" />
               <CtxItem
                 label={t('sheets.delete')}
