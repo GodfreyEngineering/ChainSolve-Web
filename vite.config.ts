@@ -52,10 +52,11 @@ export default defineConfig({
   },
   build: {
     manifest: true,
-    // The main chunk (~1.4 MB minified) contains core SPA infrastructure
-    // (React, canvas editor, engine bridge, block registry). Route-level
-    // lazy loading is in place; further splitting would fragment the hot
-    // path. 1500 KB accommodates the main chunk without hiding regressions.
+    // The main chunk contains core SPA infrastructure (React, router,
+    // engine bridge). The block registry and all domain block files are
+    // loaded as a lazy chunk (dynamic import in main.tsx) to stay under the
+    // initial JS budget. 1500 KB guards against accidental hoisting.
+    // UI-PERF-05: block registry lazy-loaded post engine-init.
     chunkSizeWarningLimit: 1500,
   },
   worker: {

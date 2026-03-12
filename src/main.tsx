@@ -68,7 +68,6 @@ import { EngineContext } from './contexts/EngineContext.ts'
 import { WorkerPoolContext } from './contexts/WorkerPoolContext.ts'
 import { createEngine, type EngineAPI } from './engine/index.ts'
 import { createWorkerPool, type WorkerPoolAPI } from './engine/workerPool.ts'
-import { validateCatalog } from './blocks/registry'
 import { BrowserRouter } from 'react-router-dom'
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx'
 import { OfflineBanner } from './components/OfflineBanner.tsx'
@@ -98,12 +97,16 @@ function Root() {
     const newPool = createWorkerPool()
 
     createEngine()
-      .then((eng) => {
+      .then(async (eng) => {
         if (cancelled) {
           eng.dispose()
           newPool.dispose()
           return
         }
+        // UI-PERF-05: Load the block registry lazily so it is excluded from the
+        // initial JS bundle. The registry + all domain block files load here,
+        // in parallel with WASM init, only after the engine is ready.
+        const { validateCatalog } = await import('./blocks/registry')
         validateCatalog(eng.catalog)
         ;(window as unknown as Record<string, unknown>).__chainsolve_engine = eng
         console.info('[engine] WASM engine ready, version:', eng.engineVersion)

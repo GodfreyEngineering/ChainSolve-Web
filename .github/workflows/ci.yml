@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+# Opt into Node.js 24 for all GitHub Actions runners (suppresses Node 20 deprecation warnings).
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 # Cancel in-progress runs on the same ref so new pushes don't queue behind stale jobs.
 concurrency:
   group: ci-${{ github.ref }}
