@@ -100,6 +100,14 @@ interface ContextMenuProps {
   onAnnotationZOrder?: (nodeId: string, op: 'front' | 'back' | 'forward' | 'backward') => void
   /** UX-14: Set user accent color for a node (null clears it). */
   onSetNodeColor?: (nodeId: string, color: string | null) => void
+  /** UX-15: Disconnect all edges connected to this node. */
+  onDisconnectNode?: (nodeId: string) => void
+  /** UX-15: Reset node data to its block's defaultData. */
+  onResetNodeToDefault?: (nodeId: string) => void
+  /** UX-15: Insert a Display probe node on an edge (mid-edge). */
+  onAddProbeNode?: (edgeId: string) => void
+  /** UX-15: Select all nodes on the canvas. */
+  onSelectAll?: () => void
 }
 
 const item: CSSProperties = {
@@ -206,6 +214,10 @@ export function ContextMenu({
   hasHiddenNodes,
   onAnnotationZOrder,
   onSetNodeColor,
+  onDisconnectNode,
+  onResetNodeToDefault,
+  onAddProbeNode,
+  onSelectAll,
 }: ContextMenuProps) {
   const { t } = useTranslation()
 
@@ -449,6 +461,29 @@ export function ContextMenu({
                 />
               </>
             )}
+            {onResetNodeToDefault && (
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon="↺"
+                  label={t('contextMenu.resetToDefault', 'Reset to default')}
+                  onClick={() => {
+                    onResetNodeToDefault(target.nodeId)
+                    onClose()
+                  }}
+                />
+              </>
+            )}
+            {onDisconnectNode && (
+              <MenuItem
+                icon="⤫"
+                label={t('contextMenu.disconnectAll', 'Disconnect all edges')}
+                onClick={() => {
+                  onDisconnectNode(target.nodeId)
+                  onClose()
+                }}
+              />
+            )}
             <div style={sep} />
             <MenuItem
               icon="✕"
@@ -652,6 +687,20 @@ export function ContextMenu({
                 <div style={sep} />
               </>
             )}
+            {onAddProbeNode && (
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon="⊡"
+                  label={t('contextMenu.addProbeNode', 'Add probe display')}
+                  onClick={() => {
+                    onAddProbeNode(target.edgeId)
+                    onClose()
+                  }}
+                />
+              </>
+            )}
+            <div style={sep} />
             <MenuItem
               icon="✕"
               label={t('contextMenu.deleteConnection')}
@@ -762,6 +811,19 @@ export function ContextMenu({
                   label={t('contextMenu.paste')}
                   onClick={() => {
                     onPaste()
+                    onClose()
+                  }}
+                />
+              </>
+            )}
+            {onSelectAll && (
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon="▣"
+                  label={t('contextMenu.selectAll', 'Select all')}
+                  onClick={() => {
+                    onSelectAll()
                     onClose()
                   }}
                 />

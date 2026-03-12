@@ -1295,6 +1295,43 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [setNodes, setEdges, doSaveHistory],
   )
 
+  // UX-15: Insert a Display probe node tapped off the edge source (non-destructive — original edge preserved)
+  const addProbeNode = useCallback(
+    (edgeId: string) => {
+      const edge = latestEdges.current.find((e) => e.id === edgeId)
+      if (!edge) return
+
+      const srcNode = latestNodes.current.find((n) => n.id === edge.source)
+      const tgtNode = latestNodes.current.find((n) => n.id === edge.target)
+      if (!srcNode || !tgtNode) return
+
+      const probeId = `node_${++nodeIdCounter}`
+      // Position the probe below the midpoint of the edge
+      const midX = (srcNode.position.x + tgtNode.position.x) / 2
+      const midY = (srcNode.position.y + tgtNode.position.y) / 2 + 60
+
+      const probeNode: Node<NodeData> = {
+        id: probeId,
+        type: 'csDisplay',
+        position: { x: midX, y: midY },
+        data: { blockType: 'display', label: 'Probe' },
+      }
+
+      const probeEdge: Edge = {
+        id: `e_${edge.source}_${probeId}`,
+        source: edge.source,
+        sourceHandle: edge.sourceHandle ?? 'out',
+        target: probeId,
+        targetHandle: 'value',
+      }
+
+      doSaveHistory()
+      setNodes((nds) => [...nds, probeNode])
+      setEdges((eds) => [...eds, probeEdge])
+    },
+    [setNodes, setEdges, doSaveHistory],
+  )
+
   // Rename: prompt for a new label then update node data directly
   const renameNode = useCallback(
     (nodeId: string) => {
@@ -1334,6 +1371,31 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             ? { ...n, data: { ...n.data, userColor: color ?? undefined } }
             : n,
         ),
+      )
+    },
+    [setNodes, doSaveHistory],
+  )
+
+  // UX-15: Disconnect all edges connected to a node
+  const disconnectNode = useCallback(
+    (nodeId: string) => {
+      doSaveHistory()
+      setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId))
+    },
+    [setEdges, doSaveHistory],
+  )
+
+  // UX-15: Reset a node's data to its block's defaultData (preserves label)
+  const resetNodeToDefault = useCallback(
+    (nodeId: string) => {
+      doSaveHistory()
+      setNodes((nds) =>
+        nds.map((n) => {
+          if (n.id !== nodeId) return n
+          const def = BLOCK_REGISTRY.get((n.data as NodeData).blockType)
+          if (!def) return n
+          return { ...n, data: { ...def.defaultData, label: (n.data as NodeData).label } }
+        }),
       )
     },
     [setNodes, doSaveHistory],
@@ -2548,6 +2610,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     hasHiddenNodes={hasHiddenNodes}
                     onAnnotationZOrder={readOnly ? undefined : onAnnotationZOrder}
                     onSetNodeColor={readOnly ? undefined : setNodeColor}
+                    onDisconnectNode={readOnly ? undefined : disconnectNode}
+                    onResetNodeToDefault={readOnly ? undefined : resetNodeToDefault}
+                    onAddProbeNode={readOnly ? undefined : addProbeNode}
+                    onSelectAll={selectAll}
                   />
                 )}
 
