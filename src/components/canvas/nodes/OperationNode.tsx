@@ -20,7 +20,7 @@ import {
 } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
 import { useShowValuePopover } from '../../../contexts/ValuePopoverContext'
-import { formatValue } from '../../../engine/value'
+import { formatValue, isError } from '../../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
 import type { InputBinding } from '../../../blocks/types'
 import { useTranslation } from 'react-i18next'
@@ -136,15 +136,17 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
   const TypeIcon = getNodeTypeIcon(nd.blockType)
-  const isError =
-    value !== undefined &&
-    typeof value === 'object' &&
-    value !== null &&
-    'Err' in (value as unknown as Record<string, unknown>)
-  const errorMsg = isError ? String((value as unknown as Record<string, unknown>).Err ?? '') : ''
+  const isErr = value !== undefined && isError(value)
+  const errorMsg = isErr ? value.message : ''
+
+  const borderOverride = isErr
+    ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 1px var(--danger)' }
+    : selected
+      ? { ...s.nodeSelected, borderColor: typeColor }
+      : {}
 
   return (
-    <div style={{ ...s.node, ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}) }}>
+    <div style={{ ...s.node, ...borderOverride }}>
       <div
         style={{
           ...s.header,
@@ -158,7 +160,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
           {isLocked && <span style={{ fontSize: '0.6rem', lineHeight: 1, opacity: 0.7 }}>🔒</span>}
-          {isError && (
+          {isErr && (
             <span
               style={{
                 width: 6,
@@ -334,7 +336,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
           style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
         />
       </div>
-      {isError && errorMsg && (
+      {isErr && errorMsg && (
         <div style={s.errorFooter} title={errorMsg}>
           {errorMsg}
         </div>

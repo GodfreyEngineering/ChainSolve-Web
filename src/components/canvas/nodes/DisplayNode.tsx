@@ -43,12 +43,18 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
   const TypeIcon = getNodeTypeIcon(nd.blockType)
 
+  const borderOverride = isErrVal
+    ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 1px var(--danger)' }
+    : selected
+      ? { ...s.nodeSelected, borderColor: typeColor }
+      : {}
+
   return (
     <div
       style={{
         ...s.node,
         minWidth: 140,
-        ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
+        ...borderOverride,
       }}
     >
       <div
