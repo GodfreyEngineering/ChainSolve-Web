@@ -42,6 +42,8 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
     rows: [[0, 0]],
   }
 
+  const ariaLabel = `${nd.label} data block, output: ${formatValue(value)}`
+
   return (
     <div
       style={{
@@ -50,6 +52,8 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
         maxWidth: isTable ? 480 : 320,
         ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
       }}
+      role="group"
+      aria-label={ariaLabel}
     >
       <div
         style={{

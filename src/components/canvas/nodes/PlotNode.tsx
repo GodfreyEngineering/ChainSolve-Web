@@ -178,6 +178,8 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
           maxWidth: 420,
           ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
         }}
+        role="group"
+        aria-label={`${nd.label} plot block`}
       >
         <div
           style={{

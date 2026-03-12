@@ -139,6 +139,10 @@ function ListTableNodeInner({ id, data, selected }: NodeProps) {
     ? Math.min(values.length, Math.ceil((scrollTop + visibleH) / ROW_H) + OVERSCAN)
     : 0
 
+  const ariaLabel = values
+    ? `${nd.label} list, ${values.length} values`
+    : `${nd.label} list block`
+
   return (
     <div
       style={{
@@ -147,6 +151,8 @@ function ListTableNodeInner({ id, data, selected }: NodeProps) {
         maxWidth: 280,
         ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
       }}
+      role="group"
+      aria-label={ariaLabel}
     >
       <div
         style={{

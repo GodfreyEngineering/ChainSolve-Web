@@ -398,7 +398,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[A11Y-01] Keyboard accessibility: all modals trap focus** — All modals: focus trap (Tab cycles within), `aria-modal="true"`, `role="dialog"`, Escape closes, focus returns to trigger. Verify: Settings modal → Tab → cycles within; Escape closes; focus returns to Settings button.
 
-- [ ] **[A11Y-02] Canvas block nodes: screen reader labels** — All node components have `aria-label` (e.g. "Sine block, input 1.57, output 1.0"). Edges have `title` with source→target description. Verify: screen reader announces block type and value correctly.
+- [x] **[A11Y-02] Canvas block nodes: screen reader labels** — All node components have `aria-label` (e.g. "Sine block, input 1.57, output 1.0"). Edges have `title` with source→target description. Verify: screen reader announces block type and value correctly.
 
 - [ ] **[A11Y-03] Color contrast compliance** — All text/background combos meet WCAG AA. Run `axe-playwright` in E2E suite. Fix violations in theme CSS variables. Verify: axe-playwright reports zero violations on workspace.
 

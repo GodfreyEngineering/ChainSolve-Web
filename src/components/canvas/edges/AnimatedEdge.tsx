@@ -65,6 +65,14 @@ function AnimatedEdgeInner({
   const sourceValue = computed.get(source)
   const mismatch = useEdgeUnitMismatch(source, target)
   const stroke = edgeStroke(sourceValue, edgesAnimated)
+  const allNodes = useNodes()
+  const edgeTitle = useMemo(() => {
+    const srcNode = allNodes.find((n) => n.id === source)
+    const tgtNode = allNodes.find((n) => n.id === target)
+    const srcLabel = (srcNode?.data as NodeData | undefined)?.label ?? source
+    const tgtLabel = (tgtNode?.data as NodeData | undefined)?.label ?? target
+    return `${srcLabel} \u2192 ${tgtLabel}`
+  }, [allNodes, source, target])
 
   // H1-2: Override stroke colour when there is a unit mismatch
   const effectiveStroke = mismatch
@@ -86,6 +94,8 @@ function AnimatedEdgeInner({
 
   return (
     <>
+      {/* A11Y-02: title element for screen readers */}
+      <title>{edgeTitle}</title>
       {/* Invisible wider hit area for easier clicking (G6-2) */}
       <path d={edgePath} fill="none" stroke="transparent" strokeWidth={16} />
       <BaseEdge

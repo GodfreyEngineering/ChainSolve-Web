@@ -119,6 +119,8 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
   const scalarValue = value && isScalar(value) ? value.value : null
   const unitSymbol = nd.unit ? getUnitSymbol(nd.unit) : ''
 
+  const ariaLabel = `${nd.label} display, value: ${formatValue(value)}`
+
   return (
     <div
       style={{
@@ -127,6 +129,8 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
         ...userColorBg(nd.userColor),
         ...borderOverride,
       }}
+      role="group"
+      aria-label={ariaLabel}
     >
       <div
         style={{

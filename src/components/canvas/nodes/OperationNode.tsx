@@ -145,8 +145,14 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
       ? { ...s.nodeSelected, borderColor: typeColor }
       : {}
 
+  const ariaLabel = `${nd.label} block, output: ${formatValue(value)}`
+
   return (
-    <div style={{ ...s.node, ...userColorBg(nd.userColor), ...borderOverride }}>
+    <div
+      style={{ ...s.node, ...userColorBg(nd.userColor), ...borderOverride }}
+      role="group"
+      aria-label={ariaLabel}
+    >
       <div
         style={{
           ...s.header,

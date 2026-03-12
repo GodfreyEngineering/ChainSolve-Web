@@ -472,8 +472,14 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
   const TypeIcon = getNodeTypeIcon(nd.blockType)
 
+  const ariaLabel = `${nd.label} block, output: ${formatValue(value)}`
+
   return (
-    <div style={{ ...s.node, ...userColorBg(nd.userColor), ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}) }}>
+    <div
+      style={{ ...s.node, ...userColorBg(nd.userColor), ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}) }}
+      role="group"
+      aria-label={ariaLabel}
+    >
       <div
         style={{
           ...s.header,

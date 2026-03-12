@@ -107,6 +107,8 @@ function MaterialNodeInner({ id, data, selected }: NodeProps) {
         maxWidth: 340,
         ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
       }}
+      role="group"
+      aria-label={`${nd.label} material block, output: ${formatValue(value)}`}
     >
       {/* Header */}
       <div
