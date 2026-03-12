@@ -137,6 +137,24 @@ describe('validateProjectName', () => {
     expect(validateProjectName('my-project_v2.1 (copy)').ok).toBe(true)
   })
 
+  // ── Consecutive whitespace cases (PROJ-08) ─────────────────────────────────
+
+  it('rejects names with consecutive spaces', () => {
+    const result = validateProjectName('Project  Name')
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/consecutive/)
+  })
+
+  it('rejects names with three consecutive spaces', () => {
+    const result = validateProjectName('Project   Name')
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/consecutive/)
+  })
+
+  it('accepts names with a single space between words', () => {
+    expect(validateProjectName('Project Name').ok).toBe(true)
+  })
+
   // ── Type cases ─────────────────────────────────────────────────────────────
 
   it('rejects non-string inputs', () => {

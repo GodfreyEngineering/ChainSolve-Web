@@ -17,6 +17,7 @@ import {
   type ProjectRow,
   type ProjectJSON,
 } from '../../../lib/projects'
+import { validateProjectName } from '../../../lib/validateProjectName'
 import { canCreateProject, getEntitlements, type Plan } from '../../../lib/entitlements'
 import { getPinnedProjects, togglePinnedProject } from '../../../lib/pinnedProjects'
 import { removeRecentProject } from '../../../lib/recentProjects'
@@ -109,8 +110,18 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
       setMenuOpen(null)
       const next = window.prompt(t('home.renamePrompt', 'Rename project:'), proj.name)
       if (!next?.trim() || next.trim() === proj.name) return
-      await renameProject(proj.id, next.trim())
-      fetchProjects()
+      const validation = validateProjectName(next.trim())
+      if (!validation.ok) {
+        window.alert(validation.error)
+        return
+      }
+      try {
+        await renameProject(proj.id, next.trim())
+        fetchProjects()
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Rename failed'
+        window.alert(msg)
+      }
     },
     [t, fetchProjects],
   )

@@ -97,6 +97,7 @@ import { computeGraphHealth, formatHealthReport } from '../lib/graphHealth'
 import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../lib/build-info'
 import { listProjectAssets, downloadAssetBytes } from '../lib/storage'
 import { addBreadcrumb, captureReactBoundary } from '../observability/client'
+import { validateProjectName } from '../lib/validateProjectName'
 import type { CaptureResult } from '../lib/pdf/captureCanvasImage'
 import type { TableExport } from '../lib/xlsx/xlsxModel'
 import { useStatusBarStore } from '../stores/statusBarStore'
@@ -730,16 +731,24 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     const trimmed = nameInput.trim()
     const current = useProjectStore.getState().projectName
     if (!trimmed || !projectId || trimmed === current) return
+    const validation = validateProjectName(trimmed)
+    if (!validation.ok) {
+      toast(validation.error ?? t('canvas.invalidProjectName', 'Invalid project name'), 'error')
+      return
+    }
     try {
       // renameProject updates projects.name which bumps projects.updated_at
       // via trigger — sync the timestamp to avoid false conflicts.
       const freshUpdatedAt = await renameProject(projectId, trimmed)
       setStoreName(trimmed)
       completeSave(freshUpdatedAt)
-    } catch {
-      // Silently revert — the store still holds the old name
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Rename failed'
+      toast(msg, 'error')
+      // Revert displayed name to what's in the store
+      setNameInput(useProjectStore.getState().projectName)
     }
-  }, [nameInput, projectId, setStoreName, completeSave])
+  }, [nameInput, projectId, setStoreName, completeSave, toast, t])
 
   // ── Conflict resolution ─────────────────────────────────────────────────────
   const handleOverwrite = useCallback(() => {

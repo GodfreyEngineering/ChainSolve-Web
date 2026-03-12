@@ -6,6 +6,7 @@
  *   - Max 100 characters (post-trim)
  *   - No control characters (ASCII 0x00–0x1F or 0x7F)
  *   - No filesystem-unsafe characters: / \ : * ? " < > |
+ *   - No consecutive whitespace characters (PROJ-08)
  *
  * Used by SaveAsDialog and CanvasPage inline rename before persisting to DB.
  */
@@ -24,6 +25,9 @@ const CONTROL_CHARS = /[\x00-\x1F\x7F]/
 
 /** Characters unsafe for filenames on Windows/macOS/Linux. */
 const UNSAFE_FILENAME_CHARS = /[/\\:*?"<>|]/
+
+/** Consecutive whitespace (two or more). */
+const CONSECUTIVE_WHITESPACE = /\s{2,}/
 
 /**
  * Validate a project name string.
@@ -60,6 +64,10 @@ export function validateProjectName(name: unknown): ProjectNameValidation {
       ok: false,
       error: 'project name must not contain / \\ : * ? " < > or |',
     }
+  }
+
+  if (CONSECUTIVE_WHITESPACE.test(trimmed)) {
+    return { ok: false, error: 'project name must not contain consecutive spaces' }
   }
 
   return { ok: true }
