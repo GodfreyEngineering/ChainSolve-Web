@@ -96,6 +96,7 @@ import { sha256Hex } from '../lib/pdf/sha256'
 import { computeGraphHealth, formatHealthReport } from '../lib/graphHealth'
 import { BUILD_VERSION, BUILD_SHA, BUILD_TIME, BUILD_ENV } from '../lib/build-info'
 import { listProjectAssets, downloadAssetBytes } from '../lib/storage'
+import { addBreadcrumb, captureReactBoundary } from '../observability/client'
 import type { CaptureResult } from '../lib/pdf/captureCanvasImage'
 import type { TableExport } from '../lib/xlsx/xlsxModel'
 import { useStatusBarStore } from '../stores/statusBarStore'
@@ -260,6 +261,8 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     projectId ? 'loading' : 'ready',
   )
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [canvasLoadWarning, setCanvasLoadWarning] = useState<string | null>(null)
+  const [loadRetryCount, setLoadRetryCount] = useState(0)
   const [initNodes, setInitNodes] = useState<Node<NodeData>[] | undefined>()
   const [initEdges, setInitEdges] = useState<Edge[] | undefined>()
 
@@ -353,12 +356,15 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
     setLoadPhase('loading')
     setLoadError(null)
+    setCanvasLoadWarning(null)
 
     // Guard against stale async updates when projectId changes mid-load
     let cancelled = false
 
     async function load() {
       try {
+        addBreadcrumb('canvas_load_start', { projectId: projectId! })
+
         // 1. Load project row + legacy project.json in parallel
         const [row, pj] = await Promise.all([readProjectRow(projectId!), loadProject(projectId!)])
         if (cancelled) return
@@ -398,22 +404,54 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         if (activeId) {
           setActiveCanvasId(activeId)
 
-          // 5. Load active canvas graph
-          const canvasGraph = await loadCanvasGraph(projectId!, activeId)
-          if (cancelled) return
-          setInitNodes(canvasGraph.nodes as Node<NodeData>[])
-          setInitEdges(canvasGraph.edges as Edge[])
+          // 5. Load active canvas graph — isolated try/catch so a corrupt or
+          //    missing canvas file degrades gracefully to an empty canvas rather
+          //    than crashing the entire project load.
+          try {
+            const canvasGraph = await loadCanvasGraph(projectId!, activeId)
+            if (cancelled) return
+            setInitNodes(canvasGraph.nodes as Node<NodeData>[])
+            setInitEdges(canvasGraph.edges as Edge[])
 
-          // Warn if canvas loaded empty but legacy project.json had content —
-          // indicates a storage persistence issue.
-          if (
-            canvasGraph.nodes.length === 0 &&
-            canvasGraph.edges.length === 0 &&
-            pj.graph.nodes.length > 0
-          ) {
-            toast(
-              t('canvas.loadedEmptyWarning', 'Canvas loaded empty — the saved data may be missing'),
-              'error',
+            // Warn if canvas loaded empty but legacy project.json had content —
+            // indicates a storage persistence issue.
+            if (
+              canvasGraph.nodes.length === 0 &&
+              canvasGraph.edges.length === 0 &&
+              pj.graph.nodes.length > 0
+            ) {
+              setCanvasLoadWarning(
+                t('canvas.loadedEmptyWarning', 'Canvas loaded empty — the saved data may be missing'),
+              )
+            } else {
+              addBreadcrumb('canvas_load_success', {
+                projectId: projectId!,
+                canvasId: activeId,
+                nodeCount: String(canvasGraph.nodes.length),
+              })
+            }
+          } catch (canvasErr: unknown) {
+            if (cancelled) return
+            const canvasMsg =
+              canvasErr instanceof Error ? canvasErr.message : 'Canvas data could not be loaded'
+            // Log to observability pipeline
+            captureReactBoundary(
+              canvasErr instanceof Error ? canvasErr : new Error(canvasMsg),
+              `canvas_load projectId=${projectId!} canvasId=${activeId}`,
+            )
+            addBreadcrumb('canvas_load_error', {
+              projectId: projectId!,
+              canvasId: activeId,
+              error: canvasMsg.slice(0, 120),
+            })
+            // Fall back to empty canvas — other canvases remain accessible
+            setInitNodes([])
+            setInitEdges([])
+            setCanvasLoadWarning(
+              t(
+                'canvas.canvasLoadFailed',
+                'Canvas data could not be loaded — starting with an empty canvas. Other sheets are unaffected.',
+              ),
             )
           }
         } else {
@@ -429,6 +467,15 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         if (projectId && /not found/i.test(msg)) {
           removeRecentProject(projectId)
         }
+        // Log to observability pipeline
+        captureReactBoundary(
+          err instanceof Error ? err : new Error(msg),
+          `project_load projectId=${projectId!}`,
+        )
+        addBreadcrumb('project_load_error', {
+          projectId: projectId!,
+          error: msg.slice(0, 120),
+        })
         setLoadError(msg)
         setLoadPhase('error')
       }
@@ -439,7 +486,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId])
+  }, [projectId, loadRetryCount])
 
   // Cleanup debounce timer on unmount
   useEffect(() => {
@@ -1829,22 +1876,75 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '1rem',
+          gap: '1.25rem',
+          padding: '2rem',
         }}
       >
-        <p style={{ color: '#ef4444', margin: 0 }}>{loadError}</p>
-        <a href="/app" style={{ opacity: 0.6, fontSize: '0.85rem', color: 'inherit' }}>
-          ← Back to projects
-        </a>
-        <p style={{ opacity: 0.35, fontSize: '0.75rem', margin: 0 }}>
-          Need help?{' '}
-          <a
-            href={`mailto:${CONTACT.support}`}
-            style={{ color: '#93c5fd', textDecoration: 'none' }}
-          >
-            {CONTACT.support}
-          </a>
-        </p>
+        <div
+          style={{
+            maxWidth: 480,
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '1rem',
+          }}
+        >
+          <div style={{ fontSize: '2.5rem', lineHeight: 1 }}>⚠</div>
+          <p style={{ color: '#ef4444', margin: 0, fontSize: '0.95rem', fontWeight: 500 }}>
+            {loadError}
+          </p>
+          <p style={{ color: 'rgba(244,244,243,0.5)', margin: 0, fontSize: '0.8rem' }}>
+            {t(
+              'canvas.loadErrorHint',
+              'This may be a temporary network issue. Try reloading the project.',
+            )}
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <button
+              onClick={() => setLoadRetryCount((c) => c + 1)}
+              style={{
+                padding: '0.45rem 1.1rem',
+                background: 'var(--primary)',
+                border: 'none',
+                borderRadius: 7,
+                color: '#fff',
+                fontFamily: 'inherit',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                fontWeight: 500,
+              }}
+            >
+              {t('canvas.retryLoad', 'Retry')}
+            </button>
+            <a
+              href="/app"
+              style={{
+                padding: '0.45rem 1.1rem',
+                background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: 7,
+                color: 'rgba(244,244,243,0.7)',
+                fontFamily: 'inherit',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                textDecoration: 'none',
+                display: 'inline-block',
+              }}
+            >
+              {t('canvas.goToProjectManager', 'Project Manager')}
+            </a>
+          </div>
+          <p style={{ opacity: 0.35, fontSize: '0.75rem', margin: 0 }}>
+            {t('canvas.needHelp', 'Need help?')}{' '}
+            <a
+              href={`mailto:${CONTACT.support}`}
+              style={{ color: '#93c5fd', textDecoration: 'none' }}
+            >
+              {CONTACT.support}
+            </a>
+          </p>
+        </div>
       </main>
     )
   }
@@ -1933,6 +2033,40 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           onKeepMine={handleOverwrite}
           onReload={handleReload}
         />
+      )}
+
+      {/* ── Canvas load warning banner (PROJ-03) ─────────────────────────── */}
+      {canvasLoadWarning && (
+        <div
+          style={{
+            background: 'rgba(245,158,11,0.1)',
+            borderBottom: '1px solid rgba(245,158,11,0.3)',
+            padding: '0.45rem 1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            fontSize: '0.82rem',
+            color: '#fbbf24',
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ flex: 1 }}>{canvasLoadWarning}</span>
+          <button
+            onClick={() => setCanvasLoadWarning(null)}
+            style={{
+              padding: '0.2rem 0.6rem',
+              border: '1px solid rgba(245,158,11,0.3)',
+              background: 'transparent',
+              color: '#fbbf24',
+              borderRadius: 5,
+              cursor: 'pointer',
+              fontSize: '0.78rem',
+              fontFamily: 'inherit',
+            }}
+          >
+            {t('canvas.dismiss', 'Dismiss')}
+          </button>
+        </div>
       )}
 
       {/* ── Sheets tab bar ────────────────────────────────────────────────── */}
