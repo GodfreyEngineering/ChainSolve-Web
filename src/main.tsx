@@ -45,6 +45,16 @@ import { createWorkerPool, type WorkerPoolAPI } from './engine/workerPool.ts'
 import { validateCatalog } from './blocks/registry'
 import { BrowserRouter } from 'react-router-dom'
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx'
+import { OfflineBanner } from './components/OfflineBanner.tsx'
+import { registerServiceWorker, captureInstallPrompt } from './lib/serviceWorker.ts'
+
+// UI-PERF-04: Register service worker for offline support and asset caching.
+// registerServiceWorker is safe to call regardless of SW support — it exits
+// early on unsupported environments (HTTP, older browsers).
+registerServiceWorker().catch(() => {})
+// Capture the browser's beforeinstallprompt so the app can show a custom
+// "Add to Home Screen" / PWA install button at a convenient moment.
+captureInstallPrompt()
 
 function Root() {
   const [engine, setEngine] = useState<EngineAPI | null>(null)
@@ -91,6 +101,10 @@ function Root() {
 
   return (
     <>
+      {/* UI-PERF-04: Persistent offline banner — visible when browser is offline or
+          a save was queued while offline. */}
+      <OfflineBanner />
+
       {/* Phase 13: Skip-to-content for keyboard accessibility */}
       <a href="#cs-main-content" className="cs-skip-link">
         Skip to content
