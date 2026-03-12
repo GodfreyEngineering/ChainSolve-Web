@@ -101,6 +101,24 @@ export function FormattingSettings({
         </div>
       </div>
 
+      {/* PREC-04: Trailing zeros */}
+      {(mode === 'decimal' || mode === 'scientific') && (
+        <div style={cardStyle}>
+          <label style={checkRowStyle}>
+            <input
+              type="checkbox"
+              checked={prefs.trailingZeros}
+              onChange={(e) => prefs.update({ trailingZeros: e.target.checked })}
+              style={checkboxStyle}
+            />
+            <div>
+              <span style={checkLabelStyle}>{t('settings.trailingZeros', 'Show trailing zeros')}</span>
+              <span style={checkHintStyle}>{t('settings.trailingZerosHint', 'Show 1.50 instead of 1.5 in fixed-decimal mode.')}</span>
+            </div>
+          </label>
+        </div>
+      )}
+
       {/* SCI-07: Separators */}
       <div style={cardStyle}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -146,6 +164,20 @@ export function FormattingSettings({
               }
             />
           )}
+
+          {/* PREC-04: Negative style */}
+          <Select
+            label={t('settings.negativeStyle', 'Negative number style')}
+            hint={t('settings.negativeStyleHint', 'How negative values are displayed.')}
+            options={[
+              { value: 'minus', label: t('settings.negMinus', 'Minus sign (−1.5)') },
+              { value: 'parens', label: t('settings.negParens', 'Parentheses ((1.5))') },
+            ]}
+            value={prefs.negativeStyle}
+            onChange={(e) =>
+              prefs.update({ negativeStyle: e.target.value as 'minus' | 'parens' })
+            }
+          />
         </div>
       </div>
 

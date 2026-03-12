@@ -39,6 +39,8 @@ export function useFormatValue(): (v: Value | undefined) => string {
     thousandsSeparator: prefs.thousandsSeparator,
     thousandsSeparatorChar: prefs.thousandsSeparatorChar,
     decimalSeparator: prefs.decimalSeparator,
+    negativeStyle: prefs.negativeStyle,
+    trailingZeros: prefs.trailingZeros,
     ...(prefs.highPrecisionConstants ? { highPrecisionLookup } : {}),
   }
 
@@ -54,6 +56,8 @@ export function useFormatValue(): (v: Value | undefined) => string {
       prefs.thousandsSeparator,
       prefs.thousandsSeparatorChar,
       prefs.decimalSeparator,
+      prefs.negativeStyle,
+      prefs.trailingZeros,
       prefs.highPrecisionConstants,
       highPrecisionLookup,
     ],

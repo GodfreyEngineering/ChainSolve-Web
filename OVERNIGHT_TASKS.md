@@ -294,9 +294,9 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[PREC-02] Per-node display precision override** — Inspector for Display nodes: "Display precision" selector (Global/Integer/2dp/4dp/8dp/15dp/Scientific/Sig figs 3/Sig figs 6). Stored in `node.data.displayPrecision`. DisplayNode applies override by calling rawFormatValue with precisionToOpts() merged with global separator prefs. Verify: global is 6 sig figs; one node overridden to 15dp → shows 15dp for that node only.
 
-- [ ] **[PREC-03] Constants picker: full-precision display** — In constants picker modal: show each constant with full f64 value and (in scientific mode) the extended-precision string from `math_constants` table. Show CODATA uncertainty. Show SI unit. Group by category. Verify: selecting "Avogadro's number" shows `6.02214076e23 ± 0.00000002e23 mol⁻¹`.
+- [x] **[PREC-03] Constants picker: full-precision display** — Added `symbol`, `unit`, `uncertainty`, `source` fields to `ConstantEntry`. Populated all physics constants with SI units, CODATA 2022 uncertainty, and source citation. Updated constants picker in SourceNode to show: full f64 value (toPrecision(17)) with symbol + unit, description, and uncertainty ± source. Verify: select Avogadro's number → shows full precision "6.0221407600000002e+23 mol⁻¹ ± exact • SI 2019".
 
-- [ ] **[PREC-04] Number format: European locale support** — Settings → Preferences: decimal separator (. or ,), thousands separator (comma/period/space/underscore/apostrophe/none), negative style (-1.5 or (1.5)), trailing zeros (on/off). All in `user_preferences`. Verify: European format → "1.234,567" displays correctly in all value displays.
+- [x] **[PREC-04] Number format: European locale support** — Added `negativeStyle` ('minus'|'parens') and `trailingZeros` (bool) to UserPreferences + FormatOptions. Implemented in formatValue with postProcess() helper (trailing zero stripping + parens notation). Exposed in FormattingSettings: "Negative number style" select + "Show trailing zeros" checkbox (only in decimal/scientific modes). Passed through useFormatValue. Verify: parens style → (1.5); trailing zeros off + 2dp → "1.5" not "1.50"; European format (comma decimal + period thousands) → "1.234,567".
 
 ---
 

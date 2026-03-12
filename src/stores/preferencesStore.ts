@@ -31,6 +31,10 @@ export interface UserPreferences {
   decimalSeparator: '.' | ','
   /** SCI-02: substitute high-precision digits for π, e, φ, √2. */
   highPrecisionConstants: boolean
+  /** PREC-04: negative number style. 'minus' = -1.5, 'parens' = (1.5). */
+  negativeStyle: 'minus' | 'parens'
+  /** PREC-04: show trailing zeros in fixed-decimal mode. e.g. 1.50 vs 1.5. */
+  trailingZeros: boolean
 
   // Canvas / Editor defaults
   defaultSnapToGrid: boolean
@@ -60,6 +64,8 @@ const DEFAULTS: UserPreferences = {
   thousandsSeparatorChar: 'comma',
   decimalSeparator: '.',
   highPrecisionConstants: false,
+  negativeStyle: 'minus',
+  trailingZeros: false,
 
   defaultSnapToGrid: false,
   defaultEdgeAnimation: true,

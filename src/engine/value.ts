@@ -111,6 +111,10 @@ export interface FormatOptions {
    * Returns null if the value does not match a known constant.
    */
   highPrecisionLookup?: (n: number, decimalPlaces: number) => string | null
+  /** PREC-04: Negative number display style. 'minus' (default) = -1.5, 'parens' = (1.5). */
+  negativeStyle?: 'minus' | 'parens'
+  /** PREC-04: Show trailing zeros in fixed-decimal mode. E.g. 1.50 vs 1.5. Default: false. */
+  trailingZeros?: boolean
 }
 
 const THOUSANDS_SEP_CHARS: Record<string, string> = {
@@ -134,12 +138,32 @@ export function formatValue(v: Value | undefined, locale?: string, opts?: Format
       const mode = opts?.numberDisplayMode ?? 'auto'
       const decSep = opts?.decimalSeparator ?? '.'
       const thouSep = opts?.thousandsSeparator ? (THOUSANDS_SEP_CHARS[opts.thousandsSeparatorChar ?? 'comma'] ?? ',') : null
+      const negStyle = opts?.negativeStyle ?? 'minus'
+      const keepTrailingZeros = opts?.trailingZeros ?? false
+
+      // PREC-04: post-process helper to apply negative style + trailing zero stripping
+      const postProcess = (s: string): string => {
+        // Strip trailing zeros in fixed-decimal when trailingZeros is off
+        let result = s
+        if (!keepTrailingZeros && !result.includes('e') && !result.includes('E')) {
+          const decChar = decSep
+          if (result.includes(decChar)) {
+            result = result.replace(new RegExp(`(\\${decChar}\\d*[1-9])0+$`), '$1')
+                          .replace(new RegExp(`\\${decChar}0+$`), '')
+          }
+        }
+        // Apply negative style
+        if (negStyle === 'parens' && result.startsWith('-')) {
+          result = `(${result.slice(1)})`
+        }
+        return result
+      }
 
       // SCI-02: high-precision constant substitution (callback provided by useFormatValue)
       if (opts?.highPrecisionLookup) {
         const hpResult = opts.highPrecisionLookup(n, opts.decimalPlaces ?? -1)
         if (hpResult !== null) {
-          return applySeparators(hpResult, decSep, thouSep)
+          return postProcess(applySeparators(hpResult, decSep, thouSep))
         }
       }
 
@@ -147,14 +171,14 @@ export function formatValue(v: Value | undefined, locale?: string, opts?: Format
       if (mode === 'sig_figs') {
         const sf = opts?.sigFigs ?? 4
         const formatted = formatSigFigs(n, sf)
-        return applySeparators(formatted, decSep, thouSep)
+        return postProcess(applySeparators(formatted, decSep, thouSep))
       }
 
       // SCI-05: always scientific notation
       if (mode === 'scientific') {
         const dp = opts?.decimalPlaces
         const formatted = n.toExponential(dp !== undefined && dp >= 0 ? dp : 4)
-        return applySeparators(formatted, decSep, thouSep)
+        return postProcess(applySeparators(formatted, decSep, thouSep))
       }
 
       const sciThreshold = opts?.scientificNotationThreshold ?? 1e6
@@ -162,13 +186,13 @@ export function formatValue(v: Value | undefined, locale?: string, opts?: Format
       if (mode !== 'decimal' && (abs >= sciThreshold || (abs > 0 && abs < 1e-3))) {
         const dp = opts?.decimalPlaces
         const formatted = n.toExponential(dp !== undefined && dp >= 0 ? dp : 4)
-        return applySeparators(formatted, decSep, thouSep)
+        return postProcess(applySeparators(formatted, decSep, thouSep))
       }
 
       // Fixed decimal places mode
       if (opts?.decimalPlaces !== undefined && opts.decimalPlaces >= 0) {
         const formatted = n.toFixed(opts.decimalPlaces)
-        return applySeparators(formatted, decSep, thouSep)
+        return postProcess(applySeparators(formatted, decSep, thouSep))
       }
 
       // Auto precision mode: use Intl.NumberFormat or toPrecision(6)
@@ -179,16 +203,16 @@ export function formatValue(v: Value | undefined, locale?: string, opts?: Format
           const str = new Intl.NumberFormat(locale ?? 'en', intlOpts).format(n)
           // Apply custom separators on top of Intl output if requested
           if (decSep !== '.' || (thouSep !== null && thouSep !== ',')) {
-            return applySeparators(str.replace(/,/g, '\uE000').replace(/\./g, '\uE001').replace(/\uE000/g, thouSep ?? ',').replace(/\uE001/g, decSep), decSep, null)
+            return postProcess(applySeparators(str.replace(/,/g, '\uE000').replace(/\./g, '\uE001').replace(/\uE000/g, thouSep ?? ',').replace(/\uE001/g, decSep), decSep, null))
           }
-          return str
+          return postProcess(str)
         } catch {
           // Unknown locale tag — fall through to default formatting.
         }
       }
 
       const raw = parseFloat(n.toPrecision(6)).toString()
-      return applySeparators(raw, decSep, thouSep)
+      return postProcess(applySeparators(raw, decSep, thouSep))
     }
     case 'vector':
       if (v.value.length === 0) return '[empty]'
