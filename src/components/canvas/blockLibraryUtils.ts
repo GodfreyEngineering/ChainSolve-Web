@@ -52,6 +52,34 @@ export function toggleFavourite(type: string): Set<string> {
   return favs
 }
 
+// ── UX-13: Pinned blocks (Quick Access) ───────────────────────────────────────
+
+const PIN_KEY = 'cs:pinned'
+export const MAX_PINNED_BLOCKS = 12
+
+/** Returns the ordered list of pinned block types (most recently pinned first). */
+export function getPinnedBlocks(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(PIN_KEY) ?? '[]') as string[]
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Toggle the pinned state for a block type.
+ * Pinned list is capped at MAX_PINNED_BLOCKS (oldest dropped).
+ * Returns the updated ordered list.
+ */
+export function togglePinnedBlock(type: string): string[] {
+  const current = getPinnedBlocks()
+  const next = current.includes(type)
+    ? current.filter((t) => t !== type)
+    : [type, ...current].slice(0, MAX_PINNED_BLOCKS)
+  localStorage.setItem(PIN_KEY, JSON.stringify(next))
+  return next
+}
+
 // ── E5-5: Ranked search scoring ──────────────────────────────────────────────
 
 /**

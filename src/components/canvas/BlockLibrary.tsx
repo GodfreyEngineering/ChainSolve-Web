@@ -45,6 +45,8 @@ import {
   getFavourites,
   toggleFavourite,
   scoreMatch,
+  getPinnedBlocks,
+  togglePinnedBlock,
 } from './blockLibraryUtils'
 import { ChevronLeft, ChevronRight, Library } from 'lucide-react'
 import { HelpLink } from '../ui/HelpLink'
@@ -198,6 +200,10 @@ interface BlockItemProps {
   description?: string
   /** G5-1: Whether this block's star is currently animating. */
   starAnimating?: boolean
+  /** UX-13: Whether this block is pinned to Quick Access. */
+  isPinned?: boolean
+  /** UX-13: Toggle pin state for this block. */
+  onTogglePin?: (type: string) => void
 }
 
 const BlockItem = memo(function BlockItem({
@@ -208,6 +214,8 @@ const BlockItem = memo(function BlockItem({
   onProBlocked,
   description,
   starAnimating,
+  isPinned,
+  onTogglePin,
 }: BlockItemProps) {
   const { t } = useTranslation()
   const [hovered, setHovered] = useState(false)
@@ -257,11 +265,28 @@ const BlockItem = memo(function BlockItem({
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            paddingRight: hovered ? 20 : 0,
+            paddingRight: hovered ? (onTogglePin ? 38 : 20) : 0,
           }}
         >
           {def.label}
         </span>
+        {hovered && entitled && onTogglePin && (
+          <button
+            style={{
+              ...s.starBtn,
+              right: 24,
+              color: isPinned ? 'var(--primary)' : 'var(--text-faint)',
+              fontSize: '0.7rem',
+            }}
+            title={isPinned ? t('blockLibrary.unpin', 'Unpin from Quick Access') : t('blockLibrary.pin', 'Pin to Quick Access')}
+            onClick={(e) => {
+              e.stopPropagation()
+              onTogglePin(def.type)
+            }}
+          >
+            📌
+          </button>
+        )}
         {hovered && entitled && (
           <button
             style={{
@@ -694,6 +719,7 @@ export function BlockLibrary({
 
   const [favs, setFavs] = useState<Set<string>>(getFavourites)
   const [recent, setRecent] = useState<string[]>(getRecentlyUsed)
+  const [pinned, setPinned] = useState<string[]>(getPinnedBlocks)
   const searchRef = useRef<HTMLInputElement>(null)
   const [templatesOpen, setTemplatesOpen] = useState(false)
   const [templates, setTemplates] = useState<Template[]>([])
@@ -720,6 +746,11 @@ export function BlockLibrary({
 
   // Refresh recent list when panel is focused (user may have added blocks)
   const refreshRecent = useCallback(() => setRecent(getRecentlyUsed()), [])
+
+  // UX-13: Toggle pin state
+  const togglePin = useCallback((type: string) => {
+    setPinned(togglePinnedBlock(type))
+  }, [])
 
   // G5-1: Track which block was just favorited for star animation
   const [animatingFav, setAnimatingFav] = useState<string | null>(null)
@@ -765,6 +796,9 @@ export function BlockLibrary({
   }, [])
 
   const q = query.trim().toLowerCase()
+  const pinnedList = pinned
+    .map((type) => BLOCK_REGISTRY.get(type))
+    .filter((d): d is BlockDef => d !== undefined)
   const favList = [...BLOCK_REGISTRY.values()].filter((d) => favs.has(d.type))
   const recentList = recent
     .map((t) => BLOCK_REGISTRY.get(t))
@@ -831,6 +865,27 @@ export function BlockLibrary({
       </div>
 
       <div style={s.scroll}>
+        {/* UX-13: Quick Access (pinned blocks) section */}
+        {!q && pinnedList.length > 0 && (
+          <div>
+            <div style={s.sectionLabel}>{t('blockLibrary.quickAccess', 'Quick Access')}</div>
+            {pinnedList.map((def) => (
+              <BlockItem
+                key={def.type}
+                def={def}
+                favs={favs}
+                onToggleFav={toggleFav}
+                entitled={isBlockEntitled(def, ent)}
+                onProBlocked={onProBlocked}
+                description={descriptions[def.type]}
+                starAnimating={animatingFav === def.type}
+                isPinned={pinned.includes(def.type)}
+                onTogglePin={togglePin}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Favourites section */}
         {!q && favList.length > 0 && (
           <div>
@@ -845,6 +900,8 @@ export function BlockLibrary({
                 onProBlocked={onProBlocked}
                 description={descriptions[def.type]}
                 starAnimating={animatingFav === def.type}
+                isPinned={pinned.includes(def.type)}
+                onTogglePin={togglePin}
               />
             ))}
           </div>
@@ -864,6 +921,8 @@ export function BlockLibrary({
                 onProBlocked={onProBlocked}
                 description={descriptions[def.type]}
                 starAnimating={animatingFav === def.type}
+                isPinned={pinned.includes(def.type)}
+                onTogglePin={togglePin}
               />
             ))}
           </div>
@@ -934,6 +993,8 @@ export function BlockLibrary({
                         onProBlocked={onProBlocked}
                         description={descriptions[def.type]}
                         starAnimating={animatingFav === def.type}
+                        isPinned={pinned.includes(def.type)}
+                        onTogglePin={togglePin}
                       />
                     ))}
                   </div>

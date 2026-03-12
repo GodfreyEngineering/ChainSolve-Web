@@ -17,7 +17,7 @@ import {
   getSubcategoryBlocks,
   type BlockDef,
 } from '../../blocks/registry'
-import { trackBlockUsed, getRecentlyUsed, scoreMatch } from './blockLibraryUtils'
+import { trackBlockUsed, getRecentlyUsed, scoreMatch, getPinnedBlocks } from './blockLibraryUtils'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
 
 interface QuickAddPaletteProps {
@@ -80,7 +80,17 @@ export function QuickAddPalette({
   // When searching: flat filtered list
   const filtered = useMemo(() => (isSearching ? filterBlocks(query) : []), [query, isSearching])
 
-  // When idle: recently-used then grouped by taxonomy
+  // When idle: pinned, recently-used then grouped by taxonomy
+  const pinnedBlocks = useMemo<BlockDef[]>(
+    () =>
+      isSearching
+        ? []
+        : getPinnedBlocks()
+            .map((type) => BLOCK_REGISTRY.get(type))
+            .filter((d): d is BlockDef => !!d),
+    [isSearching],
+  )
+
   const recentTypes = useMemo<string[]>(() => (isSearching ? [] : getRecentlyUsed()), [isSearching])
 
   const recentBlocks = useMemo<BlockDef[]>(
@@ -115,8 +125,8 @@ export function QuickAddPalette({
   // Flat list for keyboard navigation
   const navBlocks = useMemo<BlockDef[]>(() => {
     if (isSearching) return filtered
-    return [...recentBlocks, ...ALL_BLOCKS]
-  }, [isSearching, filtered, recentBlocks])
+    return [...pinnedBlocks, ...recentBlocks, ...ALL_BLOCKS]
+  }, [isSearching, filtered, pinnedBlocks, recentBlocks])
 
   const clampedIdx = Math.min(activeIdx, Math.max(0, navBlocks.length - 1))
 
@@ -295,9 +305,31 @@ export function QuickAddPalette({
             </>
           )}
 
-          {/* ── Idle: recent + taxonomy grouped (G3-1) ── */}
+          {/* ── Idle: pinned + recent + taxonomy grouped (G3-1) ── */}
           {!isSearching && (
             <>
+              {pinnedBlocks.length > 0 && (
+                <>
+                  <SectionHeader label={t('blockLibrary.quickAccess', 'Quick Access')} />
+                  {pinnedBlocks.map((def) => {
+                    const idx = navCounter++
+                    const isActive = idx === clampedIdx
+                    const locked = !!def.proOnly && !isBlockEntitled(def, ent)
+                    return (
+                      <BlockRow
+                        key={`pinned-${def.type}`}
+                        def={def}
+                        isActive={isActive}
+                        locked={locked}
+                        navIdx={idx}
+                        onClick={() => commit(def)}
+                        onMouseEnter={() => setActiveIdx(idx)}
+                      />
+                    )
+                  })}
+                </>
+              )}
+
               {recentBlocks.length > 0 && (
                 <>
                   <SectionHeader label="Recently used" />
