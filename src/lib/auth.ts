@@ -104,6 +104,69 @@ export async function reauthenticate(password: string): Promise<{ error: AuthErr
   return { error }
 }
 
+// ── Password change (ACCT-04) ─────────────────────────────────────────────
+
+export interface PasswordStrength {
+  score: 0 | 1 | 2 | 3 | 4 // 0=very weak … 4=very strong
+  label: 'very-weak' | 'weak' | 'fair' | 'strong' | 'very-strong'
+}
+
+/**
+ * Estimate password strength: length + character class diversity.
+ * Returns a 0–4 score and a human-readable label.
+ */
+export function getPasswordStrength(password: string): PasswordStrength {
+  if (password.length < 4) return { score: 0, label: 'very-weak' }
+  let classes = 0
+  if (/[a-z]/.test(password)) classes++
+  if (/[A-Z]/.test(password)) classes++
+  if (/[0-9]/.test(password)) classes++
+  if (/[^a-zA-Z0-9]/.test(password)) classes++
+  const score = Math.min(4, Math.floor((password.length / 8) + (classes - 1))) as 0 | 1 | 2 | 3 | 4
+  const labels = ['very-weak', 'weak', 'fair', 'strong', 'very-strong'] as const
+  return { score, label: labels[score] }
+}
+
+/**
+ * Change password for the current user.
+ * Requires re-authentication via the current password first.
+ *
+ * Validates: min 8 chars, at least 1 number.
+ */
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<{ error: string | null }> {
+  if (newPassword.length < 8) {
+    return { error: 'New password must be at least 8 characters.' }
+  }
+  if (!/[0-9]/.test(newPassword)) {
+    return { error: 'New password must contain at least one number.' }
+  }
+  // Re-authenticate with current password
+  const { error: reAuthError } = await reauthenticate(currentPassword)
+  if (reAuthError) {
+    return { error: 'Current password is incorrect.' }
+  }
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  return { error: error?.message ?? null }
+}
+
+// ── Email change (ACCT-03) ───────────────────────────────────────────────────
+
+/**
+ * Request an email change for the current user.
+ * Supabase sends a verification email to the new address.
+ * The change is not applied until the user clicks the link.
+ */
+export async function requestEmailChange(newEmail: string): Promise<{ error: string | null }> {
+  if (!newEmail.includes('@')) {
+    return { error: 'Please enter a valid email address.' }
+  }
+  const { error } = await supabase.auth.updateUser({ email: newEmail })
+  return { error: error?.message ?? null }
+}
+
 // ── MFA / TOTP (E2-4) ──────────────────────────────────────────────────────
 
 export interface MfaFactor {

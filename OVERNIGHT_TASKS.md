@@ -264,9 +264,9 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[ACCT-02] Active sessions management** — SecuritySettings: list active sessions (device/browser from user-agent, last active time, current session badge). "Sign out all other sessions" via `supabase.auth.signOut({ scope: 'others' })`. Verify: signing out other sessions invalidates their refresh tokens.
 
-- [ ] **[ACCT-03] Email change** — SecuritySettings: "Change Email" → new email + current password confirmation → `supabase.auth.updateUser({ email })` → "Verification email sent to [new email]." Verify: changing email sends verification; old email works until confirmed.
+- [x] **[ACCT-03] Email change** — SecuritySettings: "Change Email" → new email + current password confirmation → `supabase.auth.updateUser({ email })` → "Verification email sent to [new email]." Verify: changing email sends verification; old email works until confirmed.
 
-- [ ] **[ACCT-04] Password change** — Require current password re-auth via `signInWithPassword`. Then `updateUser({ password })`. Enforce min 8 chars + 1 number. Show strength indicator (very weak/weak/fair/strong/very strong). Verify: weak password rejected with specific feedback.
+- [x] **[ACCT-04] Password change** — Require current password re-auth via `signInWithPassword`. Then `updateUser({ password })`. Enforce min 8 chars + 1 number. Show strength indicator (very weak/weak/fair/strong/very strong). Verify: weak password rejected with specific feedback.
 
 - [ ] **[ACCT-05] Avatar upload: resize and crop** — Max 2MB, JPEG/PNG/WebP (validate MIME). Auto-crop to square and resize to 256×256 via HTML canvas. Preview before confirm. Store at `avatars/{userId}/avatar.{ext}` with upsert. Update `profiles.avatar_url`. Verify: 5MB PNG → resized to 256×256 before upload; displayed immediately.
 

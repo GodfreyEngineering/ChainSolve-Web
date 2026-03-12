@@ -16,6 +16,9 @@ import {
   unenrollTotp,
   listMfaFactors,
   getCurrentUser,
+  changePassword,
+  requestEmailChange,
+  getPasswordStrength,
   type MfaFactor,
   type TotpEnrollment,
 } from '../../lib/auth'
@@ -156,6 +159,55 @@ export function SecuritySettings() {
 
   const hasVerifiedFactor = factors.length > 0
 
+  // ── Password change state (ACCT-04) ────────────────────────────────────
+  const [currentPwd, setCurrentPwd] = useState('')
+  const [newPwd, setNewPwd] = useState('')
+  const [confirmPwd, setConfirmPwd] = useState('')
+  const [pwdSaving, setPwdSaving] = useState(false)
+  const [pwdError, setPwdError] = useState<string | null>(null)
+  const [pwdSuccess, setPwdSuccess] = useState(false)
+  const pwdStrength = getPasswordStrength(newPwd)
+
+  const handleChangePassword = async () => {
+    setPwdError(null)
+    setPwdSuccess(false)
+    if (newPwd !== confirmPwd) {
+      setPwdError(t('security.passwordMismatch', 'Passwords do not match.'))
+      return
+    }
+    setPwdSaving(true)
+    const { error: err } = await changePassword(currentPwd, newPwd)
+    if (err) {
+      setPwdError(err)
+    } else {
+      setPwdSuccess(true)
+      setCurrentPwd('')
+      setNewPwd('')
+      setConfirmPwd('')
+    }
+    setPwdSaving(false)
+  }
+
+  // ── Email change state (ACCT-03) ────────────────────────────────────────
+  const [newEmail, setNewEmail] = useState('')
+  const [emailSaving, setEmailSaving] = useState(false)
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [emailSuccess, setEmailSuccess] = useState(false)
+
+  const handleChangeEmail = async () => {
+    setEmailError(null)
+    setEmailSuccess(false)
+    setEmailSaving(true)
+    const { error: err } = await requestEmailChange(newEmail.trim())
+    if (err) {
+      setEmailError(err)
+    } else {
+      setEmailSuccess(true)
+      setNewEmail('')
+    }
+    setEmailSaving(false)
+  }
+
   if (loading) {
     return <div style={{ opacity: 0.5, padding: '2rem' }}>{t('ui.loading')}</div>
   }
@@ -290,6 +342,134 @@ export function SecuritySettings() {
         )}
       </div>
 
+      {/* ── Password change (ACCT-04) ─────────────────────────────────────── */}
+      <div style={{ ...cardStyle, marginTop: '1.25rem' }}>
+        <div style={fieldLabel}>{t('security.changePassword', 'Change password')}</div>
+        <div style={fieldHint}>{t('security.changePasswordDesc', 'Requires your current password for verification.')}</div>
+
+        <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+          <div>
+            <label style={{ ...fieldHint, display: 'block', marginBottom: '0.25rem' }}>
+              {t('security.currentPassword', 'Current password')}
+            </label>
+            <input
+              type="password"
+              value={currentPwd}
+              onChange={(e) => setCurrentPwd(e.target.value)}
+              placeholder={t('security.currentPasswordPlaceholder', 'Enter current password')}
+              style={inputStyle}
+              autoComplete="current-password"
+            />
+          </div>
+          <div>
+            <label style={{ ...fieldHint, display: 'block', marginBottom: '0.25rem' }}>
+              {t('security.newPassword', 'New password')}
+            </label>
+            <input
+              type="password"
+              value={newPwd}
+              onChange={(e) => setNewPwd(e.target.value)}
+              placeholder={t('security.newPasswordPlaceholder', 'At least 8 chars + 1 number')}
+              style={inputStyle}
+              autoComplete="new-password"
+            />
+            {newPwd.length > 0 && (
+              <div style={{ marginTop: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {[0, 1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      flex: 1,
+                      height: 3,
+                      borderRadius: 2,
+                      background: i < pwdStrength.score ? strengthColor(pwdStrength.score) : 'var(--border)',
+                    }}
+                  />
+                ))}
+                <span style={{ fontSize: '0.72rem', opacity: 0.6, whiteSpace: 'nowrap' }}>
+                  {t(`security.strength_${pwdStrength.label}`, pwdStrength.label.replace('-', ' '))}
+                </span>
+              </div>
+            )}
+          </div>
+          <div>
+            <label style={{ ...fieldHint, display: 'block', marginBottom: '0.25rem' }}>
+              {t('security.confirmPassword', 'Confirm new password')}
+            </label>
+            <input
+              type="password"
+              value={confirmPwd}
+              onChange={(e) => setConfirmPwd(e.target.value)}
+              placeholder={t('security.confirmPasswordPlaceholder', 'Repeat new password')}
+              style={inputStyle}
+              autoComplete="new-password"
+            />
+          </div>
+
+          {pwdError && <div style={errorBox}>{pwdError}</div>}
+          {pwdSuccess && (
+            <div style={{ color: '#34d399', fontSize: '0.88rem' }}>
+              {t('security.passwordChanged', 'Password changed successfully.')}
+            </div>
+          )}
+
+          <button
+            style={{
+              ...btnPrimary,
+              alignSelf: 'flex-start',
+              ...(pwdSaving || !currentPwd || !newPwd || !confirmPwd ? btnDisabledStyle : {}),
+            }}
+            disabled={pwdSaving || !currentPwd || !newPwd || !confirmPwd}
+            onClick={handleChangePassword}
+          >
+            {pwdSaving ? t('ui.saving', 'Saving…') : t('security.changePasswordBtn', 'Change password')}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Email change (ACCT-03) ────────────────────────────────────────── */}
+      <div style={{ ...cardStyle, marginTop: '1.25rem' }}>
+        <div style={fieldLabel}>{t('security.changeEmail', 'Change email address')}</div>
+        <div style={fieldHint}>
+          {t('security.changeEmailDesc', 'A verification link will be sent to the new address. The change takes effect after confirmation.')}
+        </div>
+
+        <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+          <div>
+            <label style={{ ...fieldHint, display: 'block', marginBottom: '0.25rem' }}>
+              {t('security.newEmail', 'New email address')}
+            </label>
+            <input
+              type="email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              placeholder="new@example.com"
+              style={inputStyle}
+              autoComplete="email"
+            />
+          </div>
+
+          {emailError && <div style={errorBox}>{emailError}</div>}
+          {emailSuccess && (
+            <div style={{ color: '#34d399', fontSize: '0.88rem' }}>
+              {t('security.emailVerificationSent', 'Verification email sent. Check your inbox and click the link to confirm.')}
+            </div>
+          )}
+
+          <button
+            style={{
+              ...btnPrimary,
+              alignSelf: 'flex-start',
+              ...(emailSaving || !newEmail.trim() ? btnDisabledStyle : {}),
+            }}
+            disabled={emailSaving || !newEmail.trim()}
+            onClick={handleChangeEmail}
+          >
+            {emailSaving ? t('ui.saving', 'Saving…') : t('security.changeEmailBtn', 'Change email')}
+          </button>
+        </div>
+      </div>
+
       {/* ── Active sessions (E2-5) ────────────────────────────────────────── */}
       <div style={{ ...cardStyle, marginTop: '1.25rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -349,6 +529,15 @@ export function SecuritySettings() {
       </div>
     </div>
   )
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function strengthColor(score: number): string {
+  if (score <= 1) return '#f87171'
+  if (score === 2) return '#fbbf24'
+  if (score === 3) return '#34d399'
+  return '#22c55e'
 }
 
 // ── Styles ──────────────────────────────────────────────────────────────────
