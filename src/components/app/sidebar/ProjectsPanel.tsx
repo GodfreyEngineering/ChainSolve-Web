@@ -14,8 +14,8 @@ import {
   deleteProject,
   duplicateProject,
   importProject,
+  validateProjectJSON,
   type ProjectRow,
-  type ProjectJSON,
 } from '../../../lib/projects'
 import { validateProjectName } from '../../../lib/validateProjectName'
 import { canCreateProject, getEntitlements, type Plan } from '../../../lib/entitlements'
@@ -37,6 +37,7 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
   const [query, setQuery] = useState('')
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => getPinnedProjects())
   const [menuOpen, setMenuOpen] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
   const importRef = useRef<HTMLInputElement>(null)
 
   const fetchProjects = useCallback(async () => {
@@ -91,18 +92,46 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       if (!file) return
+      setImporting(true)
       try {
         const text = await file.text()
-        const json = JSON.parse(text) as ProjectJSON
-        await importProject(json)
+        let raw: unknown
+        try {
+          raw = JSON.parse(text)
+        } catch {
+          window.alert(t('home.importErrorInvalidJson', 'Import failed: not a valid JSON file.'))
+          return
+        }
+        const validation = validateProjectJSON(raw)
+        if (!validation.ok) {
+          window.alert(
+            t('home.importErrorValidation', 'Import failed: {{error}}', {
+              error: validation.error,
+            }),
+          )
+          return
+        }
+        if (validation.warnings.length > 0) {
+          const proceed = window.confirm(
+            t(
+              'home.importWarnings',
+              'Import warnings:\n\n{{warnings}}\n\nContinue anyway?',
+              { warnings: validation.warnings.join('\n') },
+            ),
+          )
+          if (!proceed) return
+        }
+        await importProject(validation.json)
         fetchProjects()
-      } catch {
-        // Import error
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        window.alert(t('home.importErrorFailed', 'Import failed: {{error}}', { error: msg }))
+      } finally {
+        setImporting(false)
+        if (importRef.current) importRef.current.value = ''
       }
-      // Reset input so same file can be re-imported
-      if (importRef.current) importRef.current.value = ''
     },
-    [fetchProjects],
+    [fetchProjects, t],
   )
 
   const handleRename = useCallback(
@@ -180,11 +209,15 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
           </Tooltip>
           <Tooltip content={t('home.importProject', 'Import')} side="bottom">
             <button
-              style={actionBtnStyle}
-              onClick={() => importRef.current?.click()}
+              style={{ ...actionBtnStyle, opacity: importing ? 0.5 : undefined }}
+              onClick={() => !importing && importRef.current?.click()}
               aria-label={t('home.importProject')}
+              disabled={importing}
             >
               <Icon icon={Upload} size={14} />
+              {importing && (
+                <span style={{ fontSize: '0.6rem', marginLeft: 2, opacity: 0.8 }}>⟳</span>
+              )}
             </button>
           </Tooltip>
           <input

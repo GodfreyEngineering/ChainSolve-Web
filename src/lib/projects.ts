@@ -584,6 +584,88 @@ export async function duplicateProject(sourceId: string, newName: string): Promi
   return { ...newProj, updated_at: updated ?? newProj.updated_at }
 }
 
+/** Result of validateProjectJSON — ok or a structured error. */
+export type ProjectJSONValidation =
+  | { ok: true; json: ProjectJSON; warnings: string[] }
+  | { ok: false; error: string }
+
+/**
+ * PROJ-06: Validate and normalise an unknown JSON blob as a ProjectJSON.
+ *
+ * - Checks required top-level fields.
+ * - Warns (does not fail) on future schemaVersion so older clients can still import.
+ * - Fills in missing optional fields with safe defaults.
+ * - Returns structured warnings for the UI to display.
+ */
+export function validateProjectJSON(raw: unknown): ProjectJSONValidation {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return { ok: false, error: 'Not a valid project file (expected a JSON object)' }
+  }
+  const obj = raw as Record<string, unknown>
+
+  // schemaVersion
+  const sv = obj.schemaVersion
+  if (typeof sv !== 'number') {
+    return { ok: false, error: 'Missing or invalid schemaVersion field' }
+  }
+  if (sv < 1) {
+    return { ok: false, error: `Unrecognised schemaVersion ${sv}` }
+  }
+
+  // project.name
+  const project = obj.project as Record<string, unknown> | undefined
+  if (!project || typeof project.name !== 'string' || !project.name.trim()) {
+    return { ok: false, error: 'Missing project.name field' }
+  }
+
+  // graph
+  const graph = obj.graph as Record<string, unknown> | undefined
+  if (!graph) {
+    return { ok: false, error: 'Missing graph field' }
+  }
+
+  const warnings: string[] = []
+
+  // Future schema warning
+  if (sv > SCHEMA_VERSION) {
+    warnings.push(
+      `This file uses schemaVersion ${sv} which is newer than this version supports (${SCHEMA_VERSION}). ` +
+        `Some features may not load correctly.`,
+    )
+  }
+
+  // Normalise optional fields
+  const normalised: ProjectJSON = {
+    schemaVersion: Math.min(sv, SCHEMA_VERSION) as 1 | 2 | 3,
+    formatVersion: typeof obj.formatVersion === 'number' ? obj.formatVersion : 0,
+    createdAt: typeof obj.createdAt === 'string' ? obj.createdAt : new Date().toISOString(),
+    updatedAt: typeof obj.updatedAt === 'string' ? obj.updatedAt : new Date().toISOString(),
+    project: {
+      id: typeof project.id === 'string' ? project.id : crypto.randomUUID(),
+      name: (project.name as string).trim(),
+    },
+    graph: {
+      nodes: Array.isArray(graph.nodes) ? graph.nodes : [],
+      edges: Array.isArray(graph.edges) ? graph.edges : [],
+    },
+    blockVersions:
+      graph.blockVersions && typeof graph.blockVersions === 'object' && !Array.isArray(graph.blockVersions)
+        ? (graph.blockVersions as Record<string, string>)
+        : typeof obj.blockVersions === 'object' && !Array.isArray(obj.blockVersions) && obj.blockVersions !== null
+          ? (obj.blockVersions as Record<string, string>)
+          : {},
+  }
+
+  if (!Array.isArray(graph.nodes)) {
+    warnings.push('graph.nodes was missing or invalid — importing with empty node list')
+  }
+  if (!Array.isArray(graph.edges)) {
+    warnings.push('graph.edges was missing or invalid — importing with empty edge list')
+  }
+
+  return { ok: true, json: normalised, warnings }
+}
+
 /**
  * Import a parsed project.json blob as a new project.
  * Validates schemaVersion and rebinds IDs to a fresh DB row.
