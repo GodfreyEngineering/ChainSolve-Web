@@ -155,6 +155,8 @@ export interface NodeData extends Record<string, unknown> {
   groupNotes?: string
   /** Whether the group is collapsed — members hidden, proxy handles shown (csGroup nodes only). */
   groupCollapsed?: boolean
+  /** UX-21: Whether the group is locked — visual indicator, prevents accidental member edits. */
+  groupLocked?: boolean
   /** Annotation type discriminator (csAnnotation nodes only). */
   annotationType?:
     | 'text'
