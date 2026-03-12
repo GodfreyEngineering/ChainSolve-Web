@@ -11,6 +11,7 @@
 
 import {
   useState,
+  useMemo,
   useRef,
   useEffect,
   useCallback,
@@ -55,6 +56,14 @@ import { Tooltip } from '../ui/Tooltip'
 const FunctionWizard = lazy(() =>
   import('./FunctionWizard').then((m) => ({ default: m.FunctionWizard })),
 )
+
+// ── UX-02: Taxonomy category icons ───────────────────────────────────────────
+
+const TAXONOMY_ICONS: Record<string, string> = {
+  inputBlocks: '⌨',
+  functionBlocks: '⚙',
+  outputBlocks: '⊡',
+}
 
 // ── Taxonomy grouping (G3-1) ────────────────────────────────────────────────
 
@@ -204,6 +213,10 @@ interface BlockItemProps {
   isPinned?: boolean
   /** UX-13: Toggle pin state for this block. */
   onTogglePin?: (type: string) => void
+  /** UX-02: Keyboard-focused (highlighted via arrow keys). */
+  keyFocused?: boolean
+  /** UX-02: Insert block at canvas center (double-click or Enter). */
+  onInsertBlock?: (type: string) => void
 }
 
 const BlockItem = memo(function BlockItem({
@@ -216,10 +229,13 @@ const BlockItem = memo(function BlockItem({
   starAnimating,
   isPinned,
   onTogglePin,
+  keyFocused,
+  onInsertBlock,
 }: BlockItemProps) {
   const { t } = useTranslation()
   const [hovered, setHovered] = useState(false)
   const isFav = favs.has(def.type)
+  const showExpanded = (hovered || keyFocused) && entitled && description
 
   const onDragStart = (e: DragEvent<HTMLDivElement>) => {
     if (!entitled) {
@@ -232,28 +248,31 @@ const BlockItem = memo(function BlockItem({
     trackBlockUsed(def.type)
   }
 
-  // V2-020: Build tooltip text: description + drag hint (i18n)
-  const tooltipText = entitled
-    ? description
-      ? `${description}\n${t('blockLibrary.dragHint')}`
-      : t('blockLibrary.dragHint')
-    : `${def.label} (${t('blockLibrary.proOnly')})`
-
   return (
-    <Tooltip content={tooltipText} side="right" display="block">
-      <div
-        draggable={entitled}
-        onDragStart={onDragStart}
-        onClick={!entitled ? onProBlocked : undefined}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={{
-          ...s.blockItem,
-          background: hovered ? 'var(--primary-dim)' : 'transparent',
-          opacity: entitled ? 1 : 0.45,
-          cursor: entitled ? 'grab' : 'pointer',
-        }}
-      >
+    <div
+      draggable={entitled}
+      onDragStart={onDragStart}
+      onClick={!entitled ? onProBlocked : undefined}
+      onDoubleClick={entitled && onInsertBlock ? () => { trackBlockUsed(def.type); onInsertBlock(def.type) } : undefined}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      title={entitled ? undefined : `${def.label} (${t('blockLibrary.proOnly')})`}
+      style={{
+        ...s.blockItem,
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        background: keyFocused
+          ? 'var(--primary-dim)'
+          : hovered
+            ? 'var(--primary-dim)'
+            : 'transparent',
+        outline: keyFocused ? '1px solid var(--primary)' : undefined,
+        opacity: entitled ? 1 : 0.45,
+        cursor: entitled ? 'grab' : 'pointer',
+        padding: showExpanded ? '0.28rem 0.6rem 0.35rem' : '0.28rem 0.6rem',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
         {!entitled && (
           <span className="cs-pro-badge" style={{ marginRight: 4, marginLeft: 0 }}>
             PRO
@@ -274,7 +293,7 @@ const BlockItem = memo(function BlockItem({
           <button
             style={{
               ...s.starBtn,
-              right: 24,
+              position: 'static',
               color: isPinned ? 'var(--primary)' : 'var(--text-faint)',
               fontSize: '0.7rem',
             }}
@@ -291,6 +310,7 @@ const BlockItem = memo(function BlockItem({
           <button
             style={{
               ...s.starBtn,
+              position: 'static',
               color: isFav ? 'var(--warning)' : 'var(--text-faint)',
               transition: 'transform 0.15s ease',
               transform: starAnimating ? 'scale(1.5)' : 'scale(1)',
@@ -305,7 +325,53 @@ const BlockItem = memo(function BlockItem({
           </button>
         )}
       </div>
-    </Tooltip>
+      {/* UX-02: Inline expanded preview */}
+      {showExpanded && (
+        <div style={{ marginTop: '0.25rem', pointerEvents: 'none' }}>
+          <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+            {description}
+          </div>
+          {def.inputs.length > 0 && (
+            <div
+              style={{
+                marginTop: '0.2rem',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.2rem',
+              }}
+            >
+              {def.inputs.map((p) => (
+                <span
+                  key={p.id}
+                  style={{
+                    fontSize: '0.6rem',
+                    padding: '0.05rem 0.3rem',
+                    borderRadius: 3,
+                    background: 'rgba(28,171,176,0.12)',
+                    color: 'var(--primary-text)',
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  {p.label}
+                </span>
+              ))}
+            </div>
+          )}
+          {onInsertBlock && (
+            <div
+              style={{
+                marginTop: '0.2rem',
+                fontSize: '0.6rem',
+                color: 'var(--text-faint)',
+                fontStyle: 'italic',
+              }}
+            >
+              Double-click to add · Drag to place
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 })
 
@@ -692,6 +758,8 @@ interface BlockLibraryProps {
   onToggleCollapsed?: () => void
   /** V2-019: Pre-select a main category filter from outside (e.g. Insert menu). */
   filterMainOverride?: string | null
+  /** UX-02: Called when user double-clicks a block or presses Enter with keyboard selection. */
+  onInsertBlock?: (blockType: string) => void
 }
 
 /** Width of the collapsed docking handle strip. */
@@ -706,6 +774,7 @@ export function BlockLibrary({
   collapsed = false,
   onToggleCollapsed,
   filterMainOverride,
+  onInsertBlock,
 }: BlockLibraryProps) {
   const { t } = useTranslation()
   const ent = getEntitlements(plan)
@@ -814,6 +883,38 @@ export function BlockLibrary({
       ),
     )
 
+  // UX-02: Keyboard navigation — flat ordered list of all visible entitled blocks
+  const [keyIndex, setKeyIndex] = useState<number>(-1)
+  const visibleBlockTypes: string[] = useMemo(() => {
+    const seen = new Set<string>()
+    const result: string[] = []
+    const addBlock = (def: BlockDef) => {
+      if (!seen.has(def.type) && isBlockEntitled(def, ent)) {
+        seen.add(def.type)
+        result.push(def.type)
+      }
+    }
+    if (!q) {
+      pinnedList.forEach(addBlock)
+      favList.forEach(addBlock)
+      recentList.forEach(addBlock)
+    }
+    for (const main of taxForFilter) {
+      for (const sub of main.subcategories) {
+        const blocks = TAXONOMY_GROUPED.get(sub.id) ?? []
+        const filtered = q ? sortByRelevance(blocks.filter((d) => matchesQuery(d, q)), q) : blocks
+        filtered.forEach(addBlock)
+      }
+    }
+    return result
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, filterMain, pinned, favList, recentList, ent])
+
+  // Reset keyboard selection when query or filter changes
+  useEffect(() => { setKeyIndex(-1) }, [q, filterMain])
+
+  const keyFocusedType = keyIndex >= 0 ? (visibleBlockTypes[keyIndex] ?? null) : null
+
   // G5-1: Collapsed docking handle
   if (collapsed) {
     return <DockHandle side="expand" onClick={onToggleCollapsed} />
@@ -830,7 +931,22 @@ export function BlockLibrary({
             type="search"
             placeholder={t('blockLibrary.searchPlaceholder')}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); setKeyIndex(-1) }}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowDown') {
+                e.preventDefault()
+                setKeyIndex((i) => Math.min(i + 1, visibleBlockTypes.length - 1))
+              } else if (e.key === 'ArrowUp') {
+                e.preventDefault()
+                setKeyIndex((i) => Math.max(i - 1, -1))
+              } else if (e.key === 'Enter' && keyIndex >= 0 && onInsertBlock) {
+                const type = visibleBlockTypes[keyIndex]
+                if (type) { trackBlockUsed(type); onInsertBlock(type) }
+              } else if (e.key === 'Escape') {
+                setKeyIndex(-1)
+                searchRef.current?.blur()
+              }
+            }}
           />
           <HelpLink section="block-library" />
         </div>
@@ -858,6 +974,9 @@ export function BlockLibrary({
               }}
               onClick={() => setFilterMain(main.id === filterMain ? null : main.id)}
             >
+              {TAXONOMY_ICONS[main.id] && (
+                <span style={{ marginRight: '0.2rem' }}>{TAXONOMY_ICONS[main.id]}</span>
+              )}
               {main.label}
             </button>
           ))}
@@ -881,6 +1000,8 @@ export function BlockLibrary({
                 starAnimating={animatingFav === def.type}
                 isPinned={pinned.includes(def.type)}
                 onTogglePin={togglePin}
+                keyFocused={def.type === keyFocusedType}
+                onInsertBlock={onInsertBlock}
               />
             ))}
           </div>
@@ -902,6 +1023,8 @@ export function BlockLibrary({
                 starAnimating={animatingFav === def.type}
                 isPinned={pinned.includes(def.type)}
                 onTogglePin={togglePin}
+                keyFocused={def.type === keyFocusedType}
+                onInsertBlock={onInsertBlock}
               />
             ))}
           </div>
@@ -923,6 +1046,8 @@ export function BlockLibrary({
                 starAnimating={animatingFav === def.type}
                 isPinned={pinned.includes(def.type)}
                 onTogglePin={togglePin}
+                keyFocused={def.type === keyFocusedType}
+                onInsertBlock={onInsertBlock}
               />
             ))}
           </div>

@@ -2099,6 +2099,30 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [quickAdd, setNodes, doSaveHistory],
   )
 
+  // UX-02: Insert a block at the canvas viewport center (keyboard/double-click from library)
+  const insertBlockAtCenter = useCallback(
+    (blockType: string) => {
+      const def = BLOCK_REGISTRY.get(blockType)
+      if (!def) return
+      const rect = canvasWrapRef.current?.getBoundingClientRect()
+      const screenX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2
+      const screenY = rect ? rect.top + rect.height / 2 : window.innerHeight / 2
+      const pos = screenToFlowPosition({ x: screenX, y: screenY })
+      const id = `node_${++nodeIdCounter}`
+      doSaveHistory()
+      setNodes((nds) => [
+        ...nds,
+        {
+          id,
+          type: def.nodeKind,
+          position: pos,
+          data: { ...def.defaultData },
+        } as Node<NodeData>,
+      ])
+    },
+    [screenToFlowPosition, setNodes, doSaveHistory],
+  )
+
   // ── Panel resize start handlers ─────────────────────────────────────────────
   const onLibResizeStart = useCallback(
     (e: React.MouseEvent) => makeResizeHandler(libWidth, setLibWidth, 1)(e),
@@ -2235,6 +2259,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     collapsed={!libVisible}
                     onToggleCollapsed={() => setLibVisible((v) => !v)}
                     filterMainOverride={libFilterMain}
+                    onInsertBlock={insertBlockAtCenter}
                   />
                 )}
 
@@ -2566,6 +2591,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                       onProBlocked={() => setShowUpgradeModal(true)}
                       onInsertTemplate={onInsertTemplate}
                       filterMainOverride={libFilterMain}
+                      onInsertBlock={insertBlockAtCenter}
                     />
                   </BottomSheet>
                 )}
