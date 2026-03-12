@@ -5,6 +5,8 @@
  *   type-to-edit, copy/paste (tab/comma-separated), right-click context menus,
  *   column resize, row/col count, non-numeric validation with red cell + tooltip.
  * TBL-02: @tanstack/react-virtual for > 100 rows (renders only visible rows).
+ * TBL-04: CSV import improvements — preview panel, column type toggles,
+ *   auto-detect pipe delimiter, Worker-based parse with progress bar.
  */
 
 import { useState, useRef, useCallback, useEffect, type ChangeEvent, type KeyboardEvent } from 'react'
@@ -15,7 +17,7 @@ import {
   MAX_TABLE_INPUT_COLS,
   enforceTableLimits,
 } from '../../../lib/tableConstants'
-import { parsePastedText } from './parsePastedText'
+import { parsePastedGrid } from './parsePastedText'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -67,6 +69,21 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
   // CSV import
   const fileRef = useRef<HTMLInputElement>(null)
   const [csvTruncated, setCsvTruncated] = useState(false)
+  const [csvImportProgress, setCsvImportProgress] = useState<number | null>(null)
+  const csvWorkerRef = useRef<Worker | null>(null)
+
+  // CSV preview state — shown before user confirms import
+  const [csvPreview, setCsvPreview] = useState<{
+    fileName: string
+    columns: string[]
+    previewRows: string[][]
+    totalRows: number
+    sep: string
+    /** true = include column in import; false = skip */
+    includeCols: boolean[]
+    /** raw file text, held until user confirms */
+    text: string
+  } | null>(null)
 
   // Keep colWidths in sync when columns change
   useEffect(() => {
@@ -204,7 +221,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
       const text = e.clipboardData.getData('text')
       if (!text) return
       e.preventDefault()
-      const parsed = parsePastedText(text)
+      const parsed = parsePastedGrid(text)
       if (parsed.length === 0) return
 
       const nextRows = rows.map((r) => [...r])
@@ -305,41 +322,98 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
 
   // ── CSV import ─────────────────────────────────────────────────────────────
 
+  /** Step 1: file selected → parse preview (fast, sync-in-worker) then show panel. */
   const handleCsvImport = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       if (!file) return
+      e.target.value = ''
       const reader = new FileReader()
       reader.onload = () => {
         const text = reader.result as string
-        const lines = text.split(/\r?\n/).filter((l) => l.trim())
-        if (lines.length === 0) return
-        // Auto-detect delimiter
-        const firstLine = lines[0]
-        const delim = firstLine.includes('\t') ? '\t' : firstLine.includes(';') ? ';' : ','
-        const header = firstLine.split(delim).map((h) => h.trim().replace(/^"|"$/g, ''))
-        const dataRows: number[][] = []
-        // Auto-detect header row: if first row is all non-numeric, use as header
-        const isHeader = header.every((h) => isNaN(parseFloat(h)))
-        const startLine = isHeader ? 1 : 0
-        const effectiveHeader = isHeader ? header : header.map((_, i) => `Col${i + 1}`)
-        for (let i = startLine; i < lines.length; i++) {
-          const cells = lines[i].split(delim).map((c) => {
-            const v = parseFloat(c.trim().replace(/^"|"$/g, ''))
-            return isNaN(v) ? 0 : v
-          })
-          while (cells.length < effectiveHeader.length) cells.push(0)
-          dataRows.push(cells.slice(0, effectiveHeader.length))
+        // Use csv-worker in preview mode so we don't block the main thread
+        const worker = new Worker(new URL('../../../engine/csv-worker.ts', import.meta.url), {
+          type: 'module',
+        })
+        worker.onmessage = (ev: MessageEvent) => {
+          worker.terminate()
+          const msg = ev.data as { ok: boolean; mode?: string; columns?: string[]; previewRows?: string[][]; totalRows?: number; sep?: string; error?: string }
+          if (msg.ok && msg.mode === 'preview') {
+            setCsvPreview({
+              fileName: file.name,
+              columns: msg.columns ?? [],
+              previewRows: msg.previewRows ?? [],
+              totalRows: msg.totalRows ?? 0,
+              sep: msg.sep ?? ',',
+              includeCols: (msg.columns ?? []).map(() => true),
+              text,
+            })
+          }
         }
-        const { columns: c, rows: r, truncated } = enforceTableLimits(effectiveHeader, dataRows)
+        worker.onerror = () => worker.terminate()
+        worker.postMessage({ mode: 'preview', text })
+      }
+      reader.readAsText(file)
+    },
+    [],
+  )
+
+  /** Step 2: user confirmed preview → run full parse in Worker with progress. */
+  const confirmCsvImport = useCallback(() => {
+    if (!csvPreview) return
+    const { text, includeCols, columns: previewCols } = csvPreview
+
+    // Terminate any existing worker
+    csvWorkerRef.current?.terminate()
+    setCsvImportProgress(0)
+    setCsvPreview(null)
+
+    const worker = new Worker(new URL('../../../engine/csv-worker.ts', import.meta.url), {
+      type: 'module',
+    })
+    csvWorkerRef.current = worker
+
+    worker.onmessage = (ev: MessageEvent) => {
+      const msg = ev.data as
+        | { progress: number }
+        | { ok: true; mode: 'full'; columns: string[]; rows: number[][] }
+        | { ok: false; error: string }
+
+      if ('progress' in msg) {
+        setCsvImportProgress(msg.progress)
+        return
+      }
+
+      worker.terminate()
+      csvWorkerRef.current = null
+      setCsvImportProgress(null)
+
+      if (msg.ok) {
+        // Replace NaN (non-numeric cells) with 0
+        const cleanRows = msg.rows.map((row) => row.map((v) => (isNaN(v) ? 0 : v)))
+        const { columns: c, rows: r, truncated } = enforceTableLimits(msg.columns, cleanRows)
         setCsvTruncated(truncated)
         onChange(c, r)
       }
-      reader.readAsText(file)
-      e.target.value = ''
-    },
-    [onChange],
-  )
+    }
+
+    worker.onerror = () => {
+      worker.terminate()
+      csvWorkerRef.current = null
+      setCsvImportProgress(null)
+    }
+
+    // Only pass includeCols if any column is excluded — avoids needless filtering
+    const hasExclusion = includeCols.some((v) => !v)
+    const resolvedIncludeCols = hasExclusion
+      ? includeCols.slice(0, previewCols.length)
+      : undefined
+
+    worker.postMessage({ mode: 'full', text, includeCols: resolvedIncludeCols })
+  }, [csvPreview, onChange])
+
+  // Cleanup csv worker on unmount
+  useEffect(() => () => { csvWorkerRef.current?.terminate() }, [])
 
   // ── Context menu ───────────────────────────────────────────────────────────
 
@@ -544,6 +618,119 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
         </div>
       </div>
 
+      {/* CSV preview panel */}
+      {csvPreview && (
+        <div style={csvPreviewPanelStyle}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--primary)' }}>
+              {csvPreview.fileName} — {csvPreview.totalRows.toLocaleString()} rows
+            </span>
+            <button
+              className="nodrag"
+              onClick={() => setCsvPreview(null)}
+              style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '0.7rem' }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Column toggles */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
+            {csvPreview.columns.map((col, ci) => (
+              <label
+                key={ci}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 2,
+                  fontSize: '0.6rem', color: csvPreview.includeCols[ci] ? 'var(--primary)' : 'var(--text-faint)',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={csvPreview.includeCols[ci]}
+                  onChange={(e) => {
+                    const next = [...csvPreview.includeCols]
+                    next[ci] = e.target.checked
+                    setCsvPreview((p) => p ? { ...p, includeCols: next } : p)
+                  }}
+                  style={{ cursor: 'pointer' }}
+                />
+                {col}
+              </label>
+            ))}
+          </div>
+
+          {/* 5-row preview table */}
+          <div style={{ overflowX: 'auto', marginBottom: 6 }}>
+            <table style={{ borderCollapse: 'collapse', fontSize: '0.58rem', width: '100%' }}>
+              <thead>
+                <tr>
+                  {csvPreview.columns.map((col, ci) => (
+                    <th
+                      key={ci}
+                      style={{
+                        padding: '1px 4px',
+                        background: 'rgba(28,171,176,0.12)',
+                        color: csvPreview.includeCols[ci] ? 'var(--primary)' : 'var(--text-faint)',
+                        fontWeight: 600,
+                        textAlign: 'left',
+                        whiteSpace: 'nowrap',
+                        opacity: csvPreview.includeCols[ci] ? 1 : 0.4,
+                      }}
+                    >
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {csvPreview.previewRows.map((row, ri) => (
+                  <tr key={ri}>
+                    {row.map((cell, ci) => (
+                      <td
+                        key={ci}
+                        style={{
+                          padding: '1px 4px',
+                          borderBottom: '1px solid rgba(255,255,255,0.05)',
+                          color: 'var(--text-secondary)',
+                          opacity: csvPreview.includeCols[ci] ? 1 : 0.3,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {csvPreview.totalRows > csvPreview.previewRows.length && (
+              <div style={{ fontSize: '0.55rem', color: 'var(--text-faint)', marginTop: 2, textAlign: 'right' }}>
+                +{(csvPreview.totalRows - csvPreview.previewRows.length).toLocaleString()} more rows…
+              </div>
+            )}
+          </div>
+
+          <button className="nodrag" onClick={confirmCsvImport} style={csvImportConfirmBtnStyle}>
+            {t('canvas.importCsvConfirm', 'Import {{n}} rows', { n: csvPreview.totalRows.toLocaleString() })}
+          </button>
+        </div>
+      )}
+
+      {/* CSV parse progress bar */}
+      {csvImportProgress !== null && (
+        <div style={{ height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 2, overflow: 'hidden' }}>
+          <div
+            style={{
+              height: '100%',
+              width: `${Math.round(csvImportProgress * 100)}%`,
+              background: 'var(--primary)',
+              transition: 'width 0.15s ease',
+            }}
+          />
+        </div>
+      )}
+
       {/* Footer: add row + CSV import */}
       <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
         <button className="nodrag" onClick={addRow} style={addRowBtnStyle}>
@@ -552,21 +739,22 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
         <button
           className="nodrag"
           onClick={() => fileRef.current?.click()}
-          style={csvBtnStyle}
+          disabled={csvImportProgress !== null}
+          style={{ ...csvBtnStyle, opacity: csvImportProgress !== null ? 0.5 : 1 }}
           title={t('canvas.importCsv', 'Import CSV')}
         >
-          CSV
+          {rows.length > 0 ? t('canvas.reimportCsv', 'Re-import') : 'CSV'}
         </button>
         <input
           ref={fileRef}
           type="file"
-          accept=".csv,text/csv"
+          accept=".csv,.tsv,.txt"
           style={{ display: 'none' }}
           onChange={handleCsvImport}
         />
         {rows.length > 0 && (
           <span style={{ fontSize: '0.6rem', color: 'var(--text-faint)', marginLeft: 'auto' }}>
-            {t('table.rowCount', '{{count}} rows', { count: rows.length })}
+            {rows.length.toLocaleString()} × {columns.length}
           </span>
         )}
       </div>
@@ -784,5 +972,25 @@ const contextMenuItemStyle: React.CSSProperties = {
   fontSize: '0.78rem',
   textAlign: 'left',
   cursor: 'pointer',
+  fontFamily: 'inherit',
+}
+
+const csvPreviewPanelStyle: React.CSSProperties = {
+  background: 'rgba(28,171,176,0.06)',
+  border: '1px solid rgba(28,171,176,0.2)',
+  borderRadius: 6,
+  padding: '6px 8px',
+}
+
+const csvImportConfirmBtnStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '4px 8px',
+  background: 'rgba(28,171,176,0.18)',
+  border: '1px solid rgba(28,171,176,0.4)',
+  borderRadius: 4,
+  color: 'var(--primary)',
+  cursor: 'pointer',
+  fontSize: '0.68rem',
+  fontWeight: 700,
   fontFamily: 'inherit',
 }

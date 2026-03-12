@@ -63,7 +63,9 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
           <span style={s.headerLabel}>{nd.label}</span>
         </div>
         <span className="cs-node-header-value" style={s.headerValue}>
-          {formatValue(value)}
+          {isTable
+            ? `${tableData.rows.length.toLocaleString()} × ${tableData.columns.length}`
+            : formatValue(value)}
         </span>
       </div>
 

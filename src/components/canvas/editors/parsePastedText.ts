@@ -52,3 +52,28 @@ export function parsePastedText(text: string): {
   }
   return { values, errors }
 }
+
+/**
+ * Parse pasted text as a 2-D grid of numbers for spreadsheet paste (TBL-01).
+ *
+ * Rows split by newlines, columns split by tabs (or commas if no tabs).
+ * Each cell is a number or null (non-numeric → null = keep existing value).
+ */
+export function parsePastedGrid(text: string): (number | null)[][] {
+  const lines = text
+    .trim()
+    .split(/\r?\n/)
+    .filter((l) => l.length > 0)
+  if (lines.length === 0) return []
+
+  // Detect cell separator: prefer tab, fall back to comma
+  const sep = lines[0].includes('\t') ? '\t' : ','
+
+  return lines.map((line) =>
+    line.split(sep).map((cell) => {
+      const cleaned = cell.trim().replace(/^["']+|["']+$/g, '')
+      const n = Number(cleaned)
+      return cleaned !== '' && isFinite(n) ? n : null
+    }),
+  )
+}
