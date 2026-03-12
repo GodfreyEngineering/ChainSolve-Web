@@ -93,6 +93,7 @@ import { copyToClipboard, pasteFromClipboard, pasteFromSystemClipboard } from '.
 import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
 import { parseCSVToTableData } from '../../lib/csvParser'
 import { CommandPalette, type PaletteCommand } from './CommandPalette'
+import { FormulaBar } from './FormulaBar'
 const LazyFindBlockDialog = lazy(() =>
   import('./FindBlockDialog').then((m) => ({ default: m.FindBlockDialog })),
 )
@@ -239,6 +240,26 @@ export interface CanvasAreaHandle {
   openLibraryWithFilter: (mainCategoryId: string | null) => void
   /** Insert an annotation at the viewport center (used by AppHeader Insert menu). */
   insertAnnotationAtCenter: (annotationType: string) => void
+}
+
+// ── Formula bar persistence ──────────────────────────────────────────────────
+
+const FORMULA_BAR_KEY = 'cs:formulaBar'
+
+function getFormulaBarPref(): boolean {
+  try {
+    return localStorage.getItem(FORMULA_BAR_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+function setFormulaBarPref(v: boolean) {
+  try {
+    localStorage.setItem(FORMULA_BAR_KEY, String(v))
+  } catch {
+    // ignore
+  }
 }
 
 // ── Minimap persistence ──────────────────────────────────────────────────────
@@ -729,6 +750,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   // Snap-to-grid
   const [snapToGrid, setSnapToGrid] = useState(false)
+
+  // Formula bar (UX-16)
+  const [formulaBarVisible, setFormulaBarVisible] = useState(getFormulaBarPref)
 
   // Bottom toolbar state
   const [panMode, setPanMode] = useState(false)
@@ -1710,6 +1734,19 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     setEdges(next.edges)
   }, [historyRedo, setNodes, setEdges])
 
+  /** UX-16: Commit a new numeric value from the formula bar. */
+  const handleFormulaCommit = useCallback(
+    (nodeId: string, value: number) => {
+      doSaveHistory()
+      setNodes((nds) =>
+        nds.map((n) =>
+          n.id === nodeId ? { ...n, data: { ...(n.data as NodeData), value } } : n,
+        ),
+      )
+    },
+    [doSaveHistory, setNodes],
+  )
+
   /** UX-10: Restore to a specific history entry (displayIdx 0 = most recent). */
   const handleRestoreHistory = useCallback(
     (displayIdx: number) => {
@@ -1809,6 +1846,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       { id: 'toggleLibrary', kind: 'action', label: 'Toggle block library', hint: 'Show or hide the block library panel', icon: '⊟', onExecute: () => setLibVisible((v) => !v) },
       { id: 'toggleSnap', kind: 'action', label: 'Toggle snap to grid', hint: 'Enable or disable snap to grid', icon: '⊞', onExecute: () => setSnapToGrid((v) => !v) },
       { id: 'toggleMinimap', kind: 'action', label: 'Toggle minimap', hint: 'Show or hide the minimap', icon: '⊟', onExecute: () => { setMinimap((v) => { setMinimapPref(!v); return !v }) } },
+      { id: 'toggleFormulaBar', kind: 'action', label: 'Toggle formula bar', hint: 'Show or hide the formula/expression bar', kbd: 'Ctrl+Shift+F', icon: '=', onExecute: () => { setFormulaBarVisible((v) => { setFormulaBarPref(!v); return !v }) } },
       { id: 'findBlock', kind: 'action', label: 'Find block', hint: 'Search and navigate to a block by label', kbd: 'Ctrl+F', icon: '⌕', onExecute: () => setFindOpen(true) },
       { id: 'groupSelection', kind: 'action', label: 'Group selection', hint: 'Wrap selected nodes in a group', kbd: 'Ctrl+G', icon: '▢', onExecute: groupSelection },
     ]
@@ -1925,6 +1963,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       if (ctrl && e.key === 'k') {
         e.preventDefault()
         setPaletteOpen(true)
+        return
+      }
+
+      // Ctrl+Shift+F: toggle formula bar (UX-16)
+      if (ctrl && e.shiftKey && e.key === 'F') {
+        e.preventDefault()
+        setFormulaBarVisible((v) => {
+          setFormulaBarPref(!v)
+          return !v
+        })
         return
       }
 
@@ -2434,6 +2482,17 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   tabIndex={0}
                 >
                   {toolbar}
+
+                  {/* UX-16: Formula bar (Ctrl+Shift+F to toggle) */}
+                  {!readOnly && formulaBarVisible && (
+                    <FormulaBar
+                      nodeId={inspectedId}
+                      node={inspectedId ? (nodes.find((n) => n.id === inspectedId) ?? null) : null}
+                      computedValue={inspectedId ? computed.get(inspectedId) : undefined}
+                      onCommit={handleFormulaCommit}
+                    />
+                  )}
+
                   {paused && (
                     <div
                       style={{
