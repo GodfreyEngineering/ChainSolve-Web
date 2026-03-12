@@ -2,7 +2,10 @@
  * FindBlockDialog — lightweight floating search for canvas nodes.
  *
  * Filters by node label and block type. Arrow keys navigate, Enter
- * selects and zooms to the node, Escape closes.
+ * cycles to the next match with smooth pan+zoom, Escape closes.
+ *
+ * UX-09: Calls onMatchesChange(ids) whenever the match set changes so the
+ * parent can dim non-matching nodes. Enter cycles through all matches.
  */
 
 import { useState, useEffect, useRef, type KeyboardEvent } from 'react'
@@ -14,11 +17,18 @@ interface FindBlockDialogProps {
   nodes: Node<NodeData>[]
   onFocusNode: (nodeId: string) => void
   onClose: () => void
+  /** Called with current match IDs so the parent can dim non-matching nodes. */
+  onMatchesChange?: (matchIds: string[]) => void
 }
 
-const MAX_RESULTS = 10
+const MAX_RESULTS = 50 // Show more results now that we have dimming
 
-export function FindBlockDialog({ nodes, onFocusNode, onClose }: FindBlockDialogProps) {
+export function FindBlockDialog({
+  nodes,
+  onFocusNode,
+  onClose,
+  onMatchesChange,
+}: FindBlockDialogProps) {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [activeIdx, setActiveIdx] = useState(0)
@@ -36,10 +46,23 @@ export function FindBlockDialog({ nodes, onFocusNode, onClose }: FindBlockDialog
           (n.data as NodeData).label?.toLowerCase().includes(q) ||
           (n.data as NodeData).blockType?.toLowerCase().includes(q),
       )
-    : nodes
+    : []
 
   const results = filtered.slice(0, MAX_RESULTS)
-  const clampedIdx = Math.min(activeIdx, Math.max(0, results.length - 1))
+  const clampedIdx = results.length > 0 ? Math.min(activeIdx, results.length - 1) : 0
+
+  // Notify parent whenever query changes so it can update dimming
+  useEffect(() => {
+    onMatchesChange?.(results.map((n) => n.id))
+    setActiveIdx(0)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q])
+
+  // Clear matches when dialog closes
+  useEffect(() => {
+    return () => onMatchesChange?.([])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     const list = listRef.current
@@ -60,8 +83,13 @@ export function FindBlockDialog({ nodes, onFocusNode, onClose }: FindBlockDialog
       setActiveIdx((i) => Math.max(i - 1, 0))
     } else if (e.key === 'Enter') {
       e.preventDefault()
+      if (results.length === 0) return
+      // Focus current match, then advance index to cycle on next Enter
       const node = results[clampedIdx]
-      if (node) onFocusNode(node.id)
+      if (node) {
+        onFocusNode(node.id)
+        setActiveIdx((i) => (i + 1) % results.length)
+      }
     }
   }
 
@@ -77,8 +105,8 @@ export function FindBlockDialog({ nodes, onFocusNode, onClose }: FindBlockDialog
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 1002,
-          width: 260,
-          maxHeight: 340,
+          width: 300,
+          maxHeight: 360,
           background: 'var(--surface-2)',
           border: '1px solid var(--border)',
           borderRadius: 10,
@@ -123,7 +151,11 @@ export function FindBlockDialog({ nodes, onFocusNode, onClose }: FindBlockDialog
               opacity: 0.6,
             }}
           >
-            {t('canvas.findHint')}
+            {results.length > 0
+              ? t('canvas.findMatchCount', '{{count}} matches — Enter to cycle', {
+                  count: results.length,
+                })
+              : t('canvas.findHint')}
           </span>
         </div>
 
@@ -161,7 +193,7 @@ export function FindBlockDialog({ nodes, onFocusNode, onClose }: FindBlockDialog
 
         {/* Results */}
         <div ref={listRef} style={{ overflowY: 'auto', flex: 1, paddingBottom: '0.2rem' }}>
-          {results.length === 0 ? (
+          {q && results.length === 0 ? (
             <div
               style={{
                 padding: '1.2rem',
@@ -173,14 +205,17 @@ export function FindBlockDialog({ nodes, onFocusNode, onClose }: FindBlockDialog
             >
               {t('canvas.noMatches')}
             </div>
-          ) : (
+          ) : q ? (
             results.map((node, i) => {
               const isActive = i === clampedIdx
               const nd = node.data as NodeData
               return (
                 <div
                   key={node.id}
-                  onClick={() => onFocusNode(node.id)}
+                  onClick={() => {
+                    onFocusNode(node.id)
+                    setActiveIdx((i + 1) % results.length)
+                  }}
                   onMouseEnter={() => setActiveIdx(i)}
                   style={{
                     padding: '0.3rem 0.7rem',
@@ -214,6 +249,18 @@ export function FindBlockDialog({ nodes, onFocusNode, onClose }: FindBlockDialog
                 </div>
               )
             })
+          ) : (
+            <div
+              style={{
+                padding: '1.2rem',
+                textAlign: 'center',
+                fontSize: '0.78rem',
+                color: 'var(--text-muted)',
+                opacity: 0.4,
+              }}
+            >
+              {t('canvas.findTypeToDim', 'Type to search and dim non-matching nodes')}
+            </div>
           )}
         </div>
       </div>

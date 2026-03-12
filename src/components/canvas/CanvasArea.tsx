@@ -1614,17 +1614,27 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // ── Find block ──────────────────────────────────────────────────────────
 
   const [findOpen, setFindOpen] = useState(false)
+  // UX-09: IDs of nodes matching the current search query (null = no active search)
+  const [searchMatchIds, setSearchMatchIds] = useState<string[] | null>(null)
 
   const focusNode = useCallback(
     (nodeId: string) => {
       setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === nodeId })))
-      setFindOpen(false)
       requestAnimationFrame(() => {
         fitView({ nodes: [{ id: nodeId }], padding: 0.5, duration: 400 })
       })
     },
     [setNodes, fitView],
   )
+
+  const handleFindClose = useCallback(() => {
+    setFindOpen(false)
+    setSearchMatchIds(null)
+  }, [])
+
+  const handleMatchesChange = useCallback((ids: string[]) => {
+    setSearchMatchIds(ids.length > 0 ? ids : null)
+  }, [])
 
   // ── Value popover + context actions (W12.4) ─────────────────────────────
 
@@ -2449,9 +2459,18 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     <LazyFindBlockDialog
                       nodes={nodes}
                       onFocusNode={focusNode}
-                      onClose={() => setFindOpen(false)}
+                      onClose={handleFindClose}
+                      onMatchesChange={handleMatchesChange}
                     />
                   </Suspense>
+                )}
+                {/* UX-09: Dim non-matching nodes when search is active */}
+                {searchMatchIds !== null && (
+                  <style>{`
+                    .react-flow__node { opacity: 0.18 !important; transition: opacity 0.12s; }
+                    ${searchMatchIds.map((id) => `.react-flow__node[data-id="${CSS.escape(id)}"]`).join(',\n')}
+                    { opacity: 1 !important; }
+                  `}</style>
                 )}
                 {/* Upgrade modal for Pro-only blocks */}
                 {showUpgradeModal && (
