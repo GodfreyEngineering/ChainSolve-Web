@@ -633,21 +633,43 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
           </select>
           {nd.selectedConstantId &&
             (() => {
-              const sel = constantsCatalog
-                .flatMap((g) => g.entries)
-                .find((c) => c.type === nd.selectedConstantId)
-              return sel?.description ? (
+              const catEntry = CONSTANTS_CATALOG.find((c) => c.type === nd.selectedConstantId)
+              if (!catEntry) return null
+              const fullPrecision = catEntry.value.toPrecision(17)
+              return (
                 <div
                   style={{
                     fontSize: '0.6rem',
                     color: 'rgba(244,244,243,0.5)',
-                    marginTop: '0.2rem',
-                    lineHeight: 1.3,
+                    marginTop: '0.25rem',
+                    lineHeight: 1.45,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.1rem',
                   }}
                 >
-                  {sel.description}
+                  {/* PREC-03: Full f64 value */}
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      color: 'var(--primary)',
+                      fontSize: '0.62rem',
+                    }}
+                  >
+                    {catEntry.symbol ? `${catEntry.symbol} = ` : ''}{fullPrecision}
+                    {catEntry.unit ? ` ${catEntry.unit}` : ''}
+                  </span>
+                  {catEntry.description && (
+                    <span>{catEntry.description}</span>
+                  )}
+                  {/* PREC-03: Uncertainty and source */}
+                  <span style={{ opacity: 0.7 }}>
+                    {catEntry.uncertainty ? `\u00B1 ${catEntry.uncertainty}` : ''}
+                    {catEntry.uncertainty && catEntry.source ? ' \u2022 ' : ''}
+                    {catEntry.source ?? ''}
+                  </span>
                 </div>
-              ) : null
+              )
             })()}
         </div>
       )}
