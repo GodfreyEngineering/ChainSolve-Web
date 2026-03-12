@@ -867,7 +867,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   } | null>(null)
 
   const canvasWrapRef = useRef<HTMLDivElement>(null)
-  const { screenToFlowPosition, fitView, zoomIn, zoomOut, getNode } = useReactFlow()
+  const { screenToFlowPosition, fitView, zoomIn, zoomOut, zoomTo, getNode } = useReactFlow()
 
   // ── Computed values (incremental via WASM engine) ──────────────────────────
   const engine = useEngine()
@@ -1839,6 +1839,57 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         setDockCollapsed((v) => !v)
       }
 
+      // UX-20: Ctrl+= or Ctrl++ zoom in
+      if (ctrl && (e.key === '=' || e.key === '+')) {
+        e.preventDefault()
+        zoomIn({ duration: 200 })
+      }
+
+      // UX-20: Ctrl+- zoom out
+      if (ctrl && e.key === '-') {
+        e.preventDefault()
+        zoomOut({ duration: 200 })
+      }
+
+      // UX-20: Ctrl+0 fit all
+      if (ctrl && e.key === '0' && !e.shiftKey) {
+        e.preventDefault()
+        fitView({ padding: 0.15, duration: 300 })
+      }
+
+      // UX-20: Ctrl+Shift+0 zoom to 100%
+      if (ctrl && e.shiftKey && (e.key === '0' || e.key === ')')) {
+        e.preventDefault()
+        zoomTo(1, { duration: 300 })
+      }
+
+      // UX-20: Arrow keys — nudge selected nodes (1px, or 10px with Ctrl)
+      if (
+        (e.key === 'ArrowLeft' ||
+          e.key === 'ArrowRight' ||
+          e.key === 'ArrowUp' ||
+          e.key === 'ArrowDown') &&
+        !e.altKey &&
+        !readOnly
+      ) {
+        const hasSelected = nodes.some((n) => n.selected)
+        if (hasSelected) {
+          e.preventDefault()
+          const step = ctrl ? 10 : 1
+          const dx =
+            e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0
+          const dy =
+            e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0
+          setNodes((nds) =>
+            nds.map((n) =>
+              n.selected && n.draggable !== false
+                ? { ...n, position: { x: n.position.x + dx, y: n.position.y + dy } }
+                : n,
+            ),
+          )
+        }
+      }
+
       // K2-1: Space key down — mark held (hide happens on keyUp if no drag occurred)
       if (e.key === ' ' && !ctrl && !e.altKey && !e.shiftKey && !readOnly) {
         spaceHeldRef.current = true
@@ -1859,6 +1910,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       ungroupNode,
       toggleGroupCollapse,
       nodes,
+      zoomIn,
+      zoomOut,
+      zoomTo,
+      fitView,
+      setNodes,
     ],
   )
 
