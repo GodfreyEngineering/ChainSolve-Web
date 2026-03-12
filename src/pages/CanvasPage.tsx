@@ -75,7 +75,9 @@ import { AutosaveScheduler } from '../lib/autosaveScheduler'
 import { usePreferencesStore } from '../stores/preferencesStore'
 import { SheetsBar } from '../components/app/SheetsBar'
 import { TiledCanvasLayout } from '../components/canvas/TiledCanvasLayout'
-import { AiDockPanel } from '../components/app/AiDockPanel'
+const LazyAiDockPanel = lazy(() =>
+  import('../components/app/AiDockPanel').then((m) => ({ default: m.AiDockPanel })),
+)
 import { ConflictBanner } from '../components/app/ConflictBanner'
 import { UpgradeModal } from '../components/UpgradeModal'
 import { useEngine } from '../contexts/EngineContext'
@@ -925,7 +927,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : 'Failed to create sheet', 'error')
     }
-  }, [projectId, plan, canvases.length, toast, addCanvasToStore, handleSwitchCanvas])
+  }, [projectId, plan, canvases, toast, addCanvasToStore, handleSwitchCanvas])
 
   const handleRenameCanvas = useCallback(
     async (canvasId: string, newName: string) => {
@@ -2195,37 +2197,39 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           />
         )}
         {/* G8-1: AI Copilot docked right panel — always visible, collapsed by default */}
-        <AiDockPanel
-          open={isOpen(AI_COPILOT_WINDOW_ID)}
-          onRequestOpen={() => openWindow(AI_COPILOT_WINDOW_ID, { width: 520, height: 560 })}
-        >
-          <Suspense fallback={null}>
-            <LazyAiCopilotWindow
-              docked
-              plan={plan}
-              projectId={projectId}
-              canvasId={activeCanvasId ?? undefined}
-              selectedNodeIds={
-                canvasRef.current
-                  ? canvasRef.current
-                      .getSnapshot()
-                      .nodes.filter((n) => n.selected)
-                      .map((n) => n.id)
-                  : []
-              }
-              onApplyPatch={async (ops: AiPatchOp[]) => {
-                const snap = canvasRef.current?.getSnapshot()
-                if (!snap) return
-                const { applyPatchOps } = await import('../lib/aiCopilot/patchExecutor')
-                const result = applyPatchOps(ops, snap.nodes, snap.edges, true)
-                canvasRef.current?.setSnapshot(result.nodes, result.edges)
-                handleGraphChange(result.nodes, result.edges)
-              }}
-              onUpgrade={() => setUpgradeAiOpen(true)}
-              initialMessage={aiInitialMessage}
-            />
-          </Suspense>
-        </AiDockPanel>
+        <Suspense fallback={<div style={{ width: 28, flexShrink: 0 }} />}>
+          <LazyAiDockPanel
+            open={isOpen(AI_COPILOT_WINDOW_ID)}
+            onRequestOpen={() => openWindow(AI_COPILOT_WINDOW_ID, { width: 520, height: 560 })}
+          >
+            <Suspense fallback={null}>
+              <LazyAiCopilotWindow
+                docked
+                plan={plan}
+                projectId={projectId}
+                canvasId={activeCanvasId ?? undefined}
+                selectedNodeIds={
+                  canvasRef.current
+                    ? canvasRef.current
+                        .getSnapshot()
+                        .nodes.filter((n) => n.selected)
+                        .map((n) => n.id)
+                    : []
+                }
+                onApplyPatch={async (ops: AiPatchOp[]) => {
+                  const snap = canvasRef.current?.getSnapshot()
+                  if (!snap) return
+                  const { applyPatchOps } = await import('../lib/aiCopilot/patchExecutor')
+                  const result = applyPatchOps(ops, snap.nodes, snap.edges, true)
+                  canvasRef.current?.setSnapshot(result.nodes, result.edges)
+                  handleGraphChange(result.nodes, result.edges)
+                }}
+                onUpgrade={() => setUpgradeAiOpen(true)}
+                initialMessage={aiInitialMessage}
+              />
+            </Suspense>
+          </LazyAiDockPanel>
+        </Suspense>
       </div>
       {/* ── Canvas limit upgrade modal ──────────────────────────────────── */}
       <UpgradeModal

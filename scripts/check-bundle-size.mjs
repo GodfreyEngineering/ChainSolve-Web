@@ -10,8 +10,8 @@
  * and the entry's direct dynamic imports (the app bundle, not lazy chunks).
  *
  * Reports raw and gzip sizes.  Budgets:
- *   initial JS (gzip)   350 KB   — what the CDN actually serves
- *   *.wasm (raw)         600 KB   — before Brotli/gzip on the wire
+ *   initial JS (gzip)   300 KB   — what the CDN actually serves
+ *   *.wasm (raw)         800 KB   — before Brotli/gzip on the wire
  *
  * Total JS is reported for visibility but does NOT fail the build, since
  * lazy chunks (dialogs, panels) only load on demand.
@@ -34,7 +34,7 @@ const MANIFEST_PATH = join(DIST, '.vite', 'manifest.json')
 
 const KB = 1024
 const BUDGETS = {
-  initialGzip: 470 * KB, // initial-load JS closure (gzip) — V3-UI: +20 KB for lucide-react icon system
+  initialGzip: 300 * KB, // initial-load JS closure (gzip) — UI-PERF-05: lazy-split vega-lite, exceljs, AI Copilot, Settings, KaTeX
   wasmRaw: 800 * KB, // per-WASM file (raw) — ENG-09: -O3 speed build is larger than -Oz
   wasmGzip: 250 * KB, // per-WASM file (gzip) — ENG-09: updated for speed build
 }

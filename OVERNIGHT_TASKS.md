@@ -310,7 +310,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[UI-PERF-04] Service Worker: offline support** — Add service worker (`public/sw.js`) caching: app shell (HTML/JS/CSS/WASM), block registry (static), user preferences. Offline: canvas editing works (local state); saving shows "Offline — changes will sync when connected"; online: auto-sync pending saves. Use Workbox. Add `beforeinstallprompt` handler for PWA install. Verify: load app → disable network → reload → app loads from cache; changes sync on reconnect.
 
-- [ ] **[UI-PERF-05] Bundle splitting: tighten to 300KB gzip** — Run `npm run perf:bundle`. Identify large eager chunks. Ensure lazy-loaded: vega-lite, exceljs, AI Copilot components, Settings modal, KaTeX, full block descriptions. Update `check-bundle-size.mjs` budget: 300KB gzip initial JS (down from 350KB). Verify: Chrome DevTools shows initial JS < 300KB; vega-lite loads only when a plot node is first on canvas.
+- [x] **[UI-PERF-05] Bundle splitting: tighten to 300KB gzip** — Run `npm run perf:bundle`. Identify large eager chunks. Ensure lazy-loaded: vega-lite, exceljs, AI Copilot components, Settings modal, KaTeX, full block descriptions. Update `check-bundle-size.mjs` budget: 300KB gzip initial JS (down from 350KB). Verify: Chrome DevTools shows initial JS < 300KB; vega-lite loads only when a plot node is first on canvas.
 
 - [ ] **[UI-PERF-06] Web Vitals monitoring** — Add `web-vitals` library. Track LCP, CLS, INP on every page load. Send to `observability_events` via `POST /api/observability/vitals` Cloudflare Function. Verify: after page load, `observability_events` contains LCP, CLS, INP values.
 
