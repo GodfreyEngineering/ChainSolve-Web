@@ -194,7 +194,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[UX-11] Minimap: interactive and informative** — Nodes colored by category (teal=input, indigo=function, amber=output, purple=plot, green=group). pannable+zoomable (click to pan). Right-click → Fit All. Node count header above minimap. Fade-when-idle (opacity 0.45 → 1 on hover, reactivates for 3s after events). Verify: hover minimap → opacity rises; right-click → fits view.
 
-- [ ] **[UX-12] Drag-and-drop from OS onto canvas** — CSV files → auto-creates CSV Import block at drop position. Image files → creates Image annotation block. Detect via `onDragOver`/`onDrop` on canvas. Verify: drag .csv from Windows Explorer onto canvas → CSV Import block appears with file loaded.
+- [x] **[UX-12] Drag-and-drop from OS onto canvas** — CSV files (.csv/text-csv/text-plain) drag from OS → creates tableInput block at drop position with parsed data (header detection, quote stripping, numeric coercion) and filename as label. csvParser.ts new lib. Respects Pro entitlement. Image drop skipped (no image block type exists). Verify: drag .csv from Windows Explorer → tableInput block appears with file loaded.
 
 - [x] **[UX-13] Block pinning / Quick Access** — Right-click block → "Pin to Quick Access". Pinned blocks appear in a persistent strip at the top of the block library and quick-add palette (max 12). Persisted to `user_preferences`. Verify: pin "Sine" → appears in Quick Access; persists across sessions.
 
