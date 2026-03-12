@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from 'react'
+import { useCallback, useEffect, useMemo, useState, useRef, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CONTACT } from '../../lib/brand'
 import { useProjectStore } from '../../stores/projectStore'
@@ -282,7 +282,17 @@ export function AppHeader({
     [t, confirmState, onSave, confirmProceed],
   )
 
-  // ── Save status badge ───────────────────────────────────────────────────────
+  // ── Save status badge (PROJ-02: refresh every 30s for "N min ago") ─────────
+
+  // Tick every 30 s so relative-time labels ("2 min ago") stay fresh.
+  const [, setTick] = useState(0)
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  useEffect(() => {
+    tickRef.current = setInterval(() => setTick((n) => n + 1), 30_000)
+    return () => {
+      if (tickRef.current) clearInterval(tickRef.current)
+    }
+  }, [])
 
   const statusLabel = computeSaveStatusLabel(
     saveStatus,
@@ -290,7 +300,7 @@ export function AppHeader({
     isDirty,
     projectId,
     projectName,
-    fmtTime,
+    fmtRelativeTime,
     t,
     errorMessage,
   )
@@ -1156,7 +1166,12 @@ export function AppHeader({
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function fmtTime(d: Date): string {
+/** PROJ-02: Show relative time for recent saves; absolute HH:MM for older. */
+function fmtRelativeTime(d: Date): string {
+  const elapsed = Date.now() - d.getTime()
+  const mins = Math.floor(elapsed / 60_000)
+  if (mins < 1) return 'Just now'
+  if (mins < 60) return `${mins} min ago`
   return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 }
 
