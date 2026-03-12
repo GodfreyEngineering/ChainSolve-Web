@@ -306,7 +306,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[UI-PERF-02] React Flow: stable node/edge array references** — Audit `CanvasArea.tsx`: `nodes` and `edges` arrays passed to `<ReactFlow>` must be stable references (memoized). Values flow through `ComputedContext`, not through node data. Adding a value in a source block must not re-render all 1000 nodes. Verify with React DevTools Profiler: value update causes O(1) renders (only the changed node + its dependents), not O(N).
 
-- [ ] **[UI-PERF-03] Viewport culling for ultra-large graphs** — For graphs > 500 nodes: compare each node position+size against current viewport (from `useViewport()`). Nodes outside viewport are replaced with null in the render list (or use React Flow's built-in virtualization). Verify: 2000-node canvas where 50 visible → ~50 node DOM elements in DevTools Elements panel.
+- [x] **[UI-PERF-03] Viewport culling for ultra-large graphs** — For graphs > 500 nodes: compare each node position+size against current viewport (from `useViewport()`). Nodes outside viewport are replaced with null in the render list (or use React Flow's built-in virtualization). Verify: 2000-node canvas where 50 visible → ~50 node DOM elements in DevTools Elements panel.
 
 - [ ] **[UI-PERF-04] Service Worker: offline support** — Add service worker (`public/sw.js`) caching: app shell (HTML/JS/CSS/WASM), block registry (static), user preferences. Offline: canvas editing works (local state); saving shows "Offline — changes will sync when connected"; online: auto-sync pending saves. Use Workbox. Add `beforeinstallprompt` handler for PWA install. Verify: load app → disable network → reload → app loads from cache; changes sync on reconnect.
 

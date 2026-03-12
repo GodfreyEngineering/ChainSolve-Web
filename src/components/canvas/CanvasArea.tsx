@@ -2796,6 +2796,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     minZoom={0.08}
                     maxZoom={4}
                     proOptions={{ hideAttribution: true }}
+                    // UI-PERF-03: skip rendering nodes/edges outside the viewport
+                    // on large graphs. React Flow's built-in culling avoids creating
+                    // DOM elements for off-screen nodes, which dramatically reduces
+                    // layout work when the canvas has hundreds/thousands of nodes.
+                    onlyRenderVisibleElements={nodes.length > 500}
                   >
                     {bgDotsVisible && (
                       <>
