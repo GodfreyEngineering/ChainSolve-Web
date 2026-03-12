@@ -101,13 +101,7 @@ test.describe('Performance smoke', () => {
 
     // Run timing measurements inside the browser where the engine lives.
     const timingsRaw = await page.evaluate(
-      async ({
-        snap,
-        PATCH_ROUNDS,
-      }: {
-        snap: EngineSnapshot
-        PATCH_ROUNDS: number
-      }) => {
+      async ({ snap, PATCH_ROUNDS }: { snap: EngineSnapshot; PATCH_ROUNDS: number }) => {
         const engine = (window as Record<string, unknown>).__chainsolve_engine as EngineAPI
 
         // Load the 2k chain snapshot.

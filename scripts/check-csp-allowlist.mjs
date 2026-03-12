@@ -33,6 +33,8 @@ const APPROVED_ORIGINS = [
   'https://js.stripe.com',
   // Cloudflare Turnstile CAPTCHA (E2-2: script + widget iframe)
   'https://challenges.cloudflare.com',
+  // Sentry error tracking (DEV-04: error + performance reports via XHR/fetch)
+  'https://*.sentry.io',
 ]
 
 // ── Keywords that are not external origins ────────────────────────────────────

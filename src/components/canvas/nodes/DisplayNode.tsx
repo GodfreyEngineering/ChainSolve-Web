@@ -30,15 +30,24 @@ interface CopyMenu {
 function precisionToOpts(displayPrecision: string | undefined): FormatOptions | null {
   if (!displayPrecision || displayPrecision === 'global') return null
   switch (displayPrecision) {
-    case 'integer': return { numberDisplayMode: 'decimal', decimalPlaces: 0 }
-    case '2dp': return { numberDisplayMode: 'decimal', decimalPlaces: 2 }
-    case '4dp': return { numberDisplayMode: 'decimal', decimalPlaces: 4 }
-    case '8dp': return { numberDisplayMode: 'decimal', decimalPlaces: 8 }
-    case '15dp': return { numberDisplayMode: 'decimal', decimalPlaces: 15 }
-    case 'scientific': return { numberDisplayMode: 'scientific', decimalPlaces: 4 }
-    case 'sig_figs_3': return { numberDisplayMode: 'sig_figs', sigFigs: 3 }
-    case 'sig_figs_6': return { numberDisplayMode: 'sig_figs', sigFigs: 6 }
-    default: return null
+    case 'integer':
+      return { numberDisplayMode: 'decimal', decimalPlaces: 0 }
+    case '2dp':
+      return { numberDisplayMode: 'decimal', decimalPlaces: 2 }
+    case '4dp':
+      return { numberDisplayMode: 'decimal', decimalPlaces: 4 }
+    case '8dp':
+      return { numberDisplayMode: 'decimal', decimalPlaces: 8 }
+    case '15dp':
+      return { numberDisplayMode: 'decimal', decimalPlaces: 15 }
+    case 'scientific':
+      return { numberDisplayMode: 'scientific', decimalPlaces: 4 }
+    case 'sig_figs_3':
+      return { numberDisplayMode: 'sig_figs', sigFigs: 3 }
+    case 'sig_figs_6':
+      return { numberDisplayMode: 'sig_figs', sigFigs: 6 }
+    default:
+      return null
   }
 }
 
@@ -237,7 +246,14 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
               onClick={() => copyToClipboard(item.value)}
             >
               {item.label}
-              <span style={{ fontSize: '0.65rem', opacity: 0.45, marginLeft: 8, fontFamily: 'monospace' }}>
+              <span
+                style={{
+                  fontSize: '0.65rem',
+                  opacity: 0.45,
+                  marginLeft: 8,
+                  fontFamily: 'monospace',
+                }}
+              >
                 {item.value.length > 22 ? item.value.slice(0, 20) + '…' : item.value}
               </span>
             </button>

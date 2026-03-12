@@ -85,10 +85,7 @@ export function DangerZoneSettings() {
               {t('settings.deleteAccountConfirmTitle', 'Delete your account?')}
             </h3>
             <p style={dialogText}>
-              {t(
-                'settings.deleteAccountWarning',
-                'The following will be permanently deleted:',
-              )}
+              {t('settings.deleteAccountWarning', 'The following will be permanently deleted:')}
             </p>
             <ul style={deleteList}>
               <li>{t('settings.deleteAccountItem1', 'All projects and canvases')}</li>
@@ -124,8 +121,7 @@ export function DangerZoneSettings() {
               {t('settings.deleteAccountFinalTitle', 'Final confirmation')}
             </h3>
             <p style={dialogText}>
-              {t('settings.deleteAccountTypePrompt', 'Type')}{' '}
-              <strong>DELETE</strong>{' '}
+              {t('settings.deleteAccountTypePrompt', 'Type')} <strong>DELETE</strong>{' '}
               {t('settings.deleteAccountTypeConfirm', 'to permanently delete your account:')}
             </p>
             <input
@@ -170,7 +166,9 @@ export function DangerZoneSettings() {
       {step === 'error' && (
         <div style={overlayStyle} onClick={handleCancel}>
           <div style={dialogStyle} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ margin: '0 0 0.75rem', fontSize: '1rem', fontWeight: 700, color: '#f87171' }}>
+            <h3
+              style={{ margin: '0 0 0.75rem', fontSize: '1rem', fontWeight: 700, color: '#f87171' }}
+            >
               {t('settings.deleteAccountError', 'Deletion failed')}
             </h3>
             <p style={dialogText}>{errorMsg}</p>

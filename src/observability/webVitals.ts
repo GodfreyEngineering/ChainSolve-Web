@@ -111,17 +111,19 @@ export function initWebVitals(): void {
   _initialized = true
 
   // Dynamic import to keep web-vitals out of the initial JS bundle
-  import('web-vitals').then(({ onLCP, onCLS, onINP }) => {
-    onLCP((metric) => {
-      sendVital('LCP', metric.value, metric.rating, metric.navigationType)
+  import('web-vitals')
+    .then(({ onLCP, onCLS, onINP }) => {
+      onLCP((metric) => {
+        sendVital('LCP', metric.value, metric.rating, metric.navigationType)
+      })
+      onCLS((metric) => {
+        sendVital('CLS', metric.value, metric.rating, metric.navigationType)
+      })
+      onINP((metric) => {
+        sendVital('INP', metric.value, metric.rating, metric.navigationType)
+      })
     })
-    onCLS((metric) => {
-      sendVital('CLS', metric.value, metric.rating, metric.navigationType)
+    .catch(() => {
+      // Never propagate observability failures to the app
     })
-    onINP((metric) => {
-      sendVital('INP', metric.value, metric.rating, metric.navigationType)
-    })
-  }).catch(() => {
-    // Never propagate observability failures to the app
-  })
 }

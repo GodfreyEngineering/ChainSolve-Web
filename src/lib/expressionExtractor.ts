@@ -489,5 +489,7 @@ function formatNodeValue(expr: ExpressionNode): string {
       return `<${expr.value.rows.length}x${expr.value.columns.length} table>`
     case 'error':
       return `ERR(${expr.value.message})`
+    case 'interval':
+      return `[${expr.value.lo}, ${expr.value.hi}]`
   }
 }

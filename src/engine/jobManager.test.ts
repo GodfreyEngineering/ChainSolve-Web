@@ -32,7 +32,6 @@ class MockWorker extends EventTarget implements EventTarget {
   readonly sent: WorkerRequest[] = []
   private _terminated = false
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   postMessage(data: WorkerRequest, _transfer?: Transferable[]): void {
     this.sent.push(data)
   }
@@ -89,7 +88,7 @@ const READY_RESPONSE: WorkerResponse = {
   catalog: [],
   constantValues: {},
   engineVersion: '0.0.0-test',
-  contractVersion: 1,
+  contractVersion: 3,
   initMs: 42,
 }
 

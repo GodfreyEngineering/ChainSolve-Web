@@ -1426,6 +1426,179 @@ pub fn catalog() -> Vec<CatalogEntry> {
         // H3-1: Material/fluid preset catalog entries removed.
         // The unified Material node resolves presets in the TS bridge layer.
         // Rust eval handlers remain in ops.rs for backward compatibility.
+
+        // ── SCI-11: Statistical distributions ──────────────────────────
+        CatalogEntry { op_id: "prob.dist.normal_cdf", label: "Normal CDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("x", "x"), p("mu", "\u{03BC}"), p("sigma", "\u{03C3}")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.normal_inv_cdf", label: "Normal InvCDF (Probit)", category: "probDist", node_kind: "csOperation", inputs: vec![p("p", "p"), p("mu", "\u{03BC}"), p("sigma", "\u{03C3}")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.t_pdf", label: "t PDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("x", "x"), p("df", "df (\u{03BD})")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.t_cdf", label: "t CDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("x", "x"), p("df", "df (\u{03BD})")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.chi2_pdf", label: "Chi\u{00B2} PDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("x", "x"), p("k", "k (df)")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.chi2_cdf", label: "Chi\u{00B2} CDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("x", "x"), p("k", "k (df)")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.f_pdf", label: "F PDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("x", "x"), p("d1", "d1 (df1)"), p("d2", "d2 (df2)")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.f_cdf", label: "F CDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("x", "x"), p("d1", "d1 (df1)"), p("d2", "d2 (df2)")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.poisson_cdf", label: "Poisson CDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("k", "k"), p("lambda", "\u{03BB}")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.binomial_cdf", label: "Binomial CDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("k", "k"), p("n", "n"), p("p", "p")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.beta_pdf", label: "Beta PDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("x", "x"), p("a", "\u{03B1}"), p("b", "\u{03B2}")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.beta_cdf", label: "Beta CDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("x", "x"), p("a", "\u{03B1}"), p("b", "\u{03B2}")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.gamma_pdf", label: "Gamma PDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("x", "x"), p("alpha", "\u{03B1} (shape)"), p("beta", "\u{03B2} (scale)")], pro_only: true },
+        CatalogEntry { op_id: "prob.dist.weibull_pdf", label: "Weibull PDF", category: "probDist", node_kind: "csOperation", inputs: vec![p("x", "x"), p("k", "k (shape)"), p("lambda", "\u{03BB} (scale)")], pro_only: true },
+
+        // ── BLK-05: Expanded Electrical ─────────────────────────────────
+        CatalogEntry { op_id: "eng.elec.RC_tau", label: "RC Time Constant", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("R", "R (\u{03A9})"), p("C", "C (F)")], pro_only: true },
+        CatalogEntry { op_id: "eng.elec.RL_tau", label: "RL Time Constant", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("R", "R (\u{03A9})"), p("L", "L (H)")], pro_only: true },
+        CatalogEntry { op_id: "eng.elec.RLC_f0", label: "RLC Resonant Frequency", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("L", "L (H)"), p("C", "C (F)")], pro_only: true },
+        CatalogEntry { op_id: "eng.elec.RLC_Q", label: "RLC Quality Factor", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("R", "R (\u{03A9})"), p("L", "L (H)"), p("C", "C (F)")], pro_only: true },
+        CatalogEntry { op_id: "eng.elec.V_divider", label: "Voltage Divider", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("Vin", "Vin (V)"), p("R1", "R1 (\u{03A9})"), p("R2", "R2 (\u{03A9})")], pro_only: true },
+        CatalogEntry { op_id: "eng.elec.I_divider", label: "Current Divider", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("Iin", "Iin (A)"), p("R1", "R1 (\u{03A9})"), p("R2", "R2 (\u{03A9})")], pro_only: true },
+        CatalogEntry { op_id: "eng.elec.Z_cap", label: "Capacitive Reactance", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("f", "f (Hz)"), p("C", "C (F)")], pro_only: true },
+        CatalogEntry { op_id: "eng.elec.Z_ind", label: "Inductive Reactance", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("f", "f (Hz)"), p("L", "L (H)")], pro_only: true },
+        CatalogEntry { op_id: "eng.elec.filter_fc", label: "RC Filter Cutoff", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("R", "R (\u{03A9})"), p("C", "C (F)")], pro_only: true },
+        CatalogEntry { op_id: "eng.elec.transformer_v2", label: "Transformer Voltage", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("V1", "V1 (V)"), p("N1", "N1 (turns)"), p("N2", "N2 (turns)")], pro_only: true },
+        CatalogEntry { op_id: "eng.elec.three_phase_P", label: "Three-Phase Power", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("VL", "VL (V)"), p("IL", "IL (A)"), p("pf", "pf")], pro_only: true },
+        CatalogEntry { op_id: "eng.elec.diode_shockley", label: "Diode Current (Shockley)", category: "engElectrical", node_kind: "csOperation", inputs: vec![p("Is", "Is (A)"), p("V", "V (V)"), p("eta", "\u{03B7}"), p("Vt", "Vt (V)")], pro_only: true },
+
+        // ── BLK-01: Chemical Engineering ────────────────────────────────
+        CatalogEntry { op_id: "chem.ideal_gas_n", label: "n = PV/RT", category: "chem", node_kind: "csOperation", inputs: vec![p("P", "P (Pa)"), p("V", "V (m3)"), p("R", "R (J/molK)"), p("T", "T (K)")], pro_only: true },
+        CatalogEntry { op_id: "chem.antoine_vp", label: "Antoine VP", category: "chem", node_kind: "csOperation", inputs: vec![p("A", "A"), p("B", "B"), p("C", "C"), p("T", "T (C)")], pro_only: true },
+        CatalogEntry { op_id: "chem.raoults_partial", label: "Raoult's P_partial", category: "chem", node_kind: "csOperation", inputs: vec![p("x", "x (mol frac)"), p("Psat", "P_sat")], pro_only: true },
+        CatalogEntry { op_id: "chem.equilibrium_K", label: "K = exp(-dG/RT)", category: "chem", node_kind: "csOperation", inputs: vec![p("dG", "dG (J/mol)"), p("R", "R (J/molK)"), p("T", "T (K)")], pro_only: true },
+        CatalogEntry { op_id: "chem.arrhenius_rate", label: "k = A*exp(-Ea/RT)", category: "chem", node_kind: "csOperation", inputs: vec![p("A", "A (pre-exp)"), p("Ea", "Ea (J/mol)"), p("R", "R (J/molK)"), p("T", "T (K)")], pro_only: true },
+        CatalogEntry { op_id: "chem.heat_reaction", label: "dH_rxn", category: "chem", node_kind: "csOperation", inputs: vec![p("H_prod", "H_products"), p("H_react", "H_reactants")], pro_only: true },
+        CatalogEntry { op_id: "chem.mole_fraction", label: "x = n/n_total", category: "chem", node_kind: "csOperation", inputs: vec![p("n_comp", "n_comp (mol)"), p("n_total", "n_total (mol)")], pro_only: true },
+        CatalogEntry { op_id: "chem.ficks_flux", label: "Fick's Flux J", category: "chem", node_kind: "csOperation", inputs: vec![p("D", "D (m2/s)"), p("dC_dx", "dC/dx (mol/m4)")], pro_only: true },
+        CatalogEntry { op_id: "chem.CSTR_conv", label: "CSTR X (1st order)", category: "chem", node_kind: "csOperation", inputs: vec![p("k", "k (s-1)"), p("tau", "tau (s)")], pro_only: true },
+        CatalogEntry { op_id: "chem.enthalpy_sensible", label: "dH = Cp*dT", category: "chem", node_kind: "csOperation", inputs: vec![p("Cp", "Cp (J/molK)"), p("T1", "T1 (K)"), p("T2", "T2 (K)")], pro_only: true },
+
+        // ── BLK-02: Structural Engineering ──────────────────────────────
+        CatalogEntry { op_id: "struct.beam_deflect_ss", label: "delta = PL3/48EI", category: "structural", node_kind: "csOperation", inputs: vec![p("P", "P (N)"), p("L", "L (m)"), p("E", "E (Pa)"), p("I", "I (m4)")], pro_only: true },
+        CatalogEntry { op_id: "struct.beam_deflect_cantilever", label: "delta = PL3/3EI", category: "structural", node_kind: "csOperation", inputs: vec![p("P", "P (N)"), p("L", "L (m)"), p("E", "E (Pa)"), p("I", "I (m4)")], pro_only: true },
+        CatalogEntry { op_id: "struct.beam_moment_ss", label: "M = Pab/L", category: "structural", node_kind: "csOperation", inputs: vec![p("P", "P (N)"), p("a", "a (m)"), p("b", "b (m)"), p("L", "L (m)")], pro_only: true },
+        CatalogEntry { op_id: "struct.euler_buckling", label: "P_cr = pi2EI/(KL)2", category: "structural", node_kind: "csOperation", inputs: vec![p("E", "E (Pa)"), p("I", "I (m4)"), p("L", "L (m)"), p("K", "K (eff. len)")], pro_only: true },
+        CatalogEntry { op_id: "struct.von_mises", label: "sigma_vm (Von Mises)", category: "structural", node_kind: "csOperation", inputs: vec![p("sx", "sx (Pa)"), p("sy", "sy (Pa)"), p("txy", "txy (Pa)")], pro_only: true },
+        CatalogEntry { op_id: "struct.combined_stress", label: "sigma = sigma_ax + sigma_bend", category: "structural", node_kind: "csOperation", inputs: vec![p("s_ax", "s_axial (Pa)"), p("s_bend", "s_bending (Pa)")], pro_only: true },
+        CatalogEntry { op_id: "struct.steel_check", label: "Util = sigma/(Fy*phi)", category: "structural", node_kind: "csOperation", inputs: vec![p("sigma", "sigma (Pa)"), p("Fy", "F_y (Pa)"), p("phi", "phi")], pro_only: true },
+        CatalogEntry { op_id: "struct.bearing_capacity", label: "q_ult (Terzaghi)", category: "structural", node_kind: "csOperation", inputs: vec![p("c", "c (Pa)"), p("gamma", "gamma (kN/m3)"), p("D", "D_f (m)"), p("B", "B (m)"), p("Nc", "N_c"), p("Nq", "N_q"), p("Ngamma", "N_gamma")], pro_only: true },
+        CatalogEntry { op_id: "struct.concrete_moment_aci", label: "M_n (ACI)", category: "structural", node_kind: "csOperation", inputs: vec![p("fc", "f'c (Pa)"), p("b", "b (m)"), p("d", "d (m)"), p("As", "A_s (m2)"), p("fy", "f_y (Pa)")], pro_only: true },
+
+        // ── BLK-03: Aerospace Engineering ───────────────────────────────
+        CatalogEntry { op_id: "aero.ISA_T", label: "ISA T(h)", category: "aerospace", node_kind: "csOperation", inputs: vec![p("h", "h (m)")], pro_only: true },
+        CatalogEntry { op_id: "aero.ISA_P", label: "ISA P(h)", category: "aerospace", node_kind: "csOperation", inputs: vec![p("h", "h (m)")], pro_only: true },
+        CatalogEntry { op_id: "aero.ISA_rho", label: "ISA rho(h)", category: "aerospace", node_kind: "csOperation", inputs: vec![p("h", "h (m)")], pro_only: true },
+        CatalogEntry { op_id: "aero.ISA_a", label: "ISA a(h)", category: "aerospace", node_kind: "csOperation", inputs: vec![p("h", "h (m)")], pro_only: true },
+        CatalogEntry { op_id: "aero.mach_from_v", label: "M = v/a", category: "aerospace", node_kind: "csOperation", inputs: vec![p("v", "v (m/s)"), p("a", "a (m/s)")], pro_only: true },
+        CatalogEntry { op_id: "aero.dynamic_q", label: "q = 0.5*rho*v2", category: "aerospace", node_kind: "csOperation", inputs: vec![p("rho", "rho (kg/m3)"), p("v", "v (m/s)")], pro_only: true },
+        CatalogEntry { op_id: "aero.lift", label: "L = CL*q*S", category: "aerospace", node_kind: "csOperation", inputs: vec![p("CL", "C_L"), p("q", "q (Pa)"), p("S", "S (m2)")], pro_only: true },
+        CatalogEntry { op_id: "aero.drag", label: "D = CD*q*S", category: "aerospace", node_kind: "csOperation", inputs: vec![p("CD", "C_D"), p("q", "q (Pa)"), p("S", "S (m2)")], pro_only: true },
+        CatalogEntry { op_id: "aero.tsfc", label: "TSFC", category: "aerospace", node_kind: "csOperation", inputs: vec![p("thrust", "Thrust (N)"), p("fuel_flow", "fuel_flow (kg/s)")], pro_only: true },
+        CatalogEntry { op_id: "aero.tsiolkovsky", label: "dv = Isp*g0*ln(m0/mf)", category: "aerospace", node_kind: "csOperation", inputs: vec![p("Isp", "Isp (s)"), p("g0", "g0 (m/s2)"), p("m0", "m0 (kg)"), p("mf", "mf (kg)")], pro_only: true },
+        CatalogEntry { op_id: "aero.orbital_v", label: "v = sqrt(GM/r)", category: "aerospace", node_kind: "csOperation", inputs: vec![p("GM", "GM (m3/s2)"), p("r", "r (m)")], pro_only: true },
+        CatalogEntry { op_id: "aero.escape_v", label: "v_esc = sqrt(2GM/r)", category: "aerospace", node_kind: "csOperation", inputs: vec![p("GM", "GM (m3/s2)"), p("r", "r (m)")], pro_only: true },
+        CatalogEntry { op_id: "aero.hohmann_dv1", label: "Hohmann dv1", category: "aerospace", node_kind: "csOperation", inputs: vec![p("GM", "GM (m3/s2)"), p("r1", "r1 (m)"), p("r2", "r2 (m)")], pro_only: true },
+        CatalogEntry { op_id: "aero.hohmann_dv2", label: "Hohmann dv2", category: "aerospace", node_kind: "csOperation", inputs: vec![p("GM", "GM (m3/s2)"), p("r1", "r1 (m)"), p("r2", "r2 (m)")], pro_only: true },
+
+        // ── BLK-04: Control Systems ──────────────────────────────────────
+        CatalogEntry { op_id: "ctrl.step_1st_order", label: "Step 1st Order", category: "controlSystems", node_kind: "csOperation", inputs: vec![p("K", "K (gain)"), p("tau", "tau (s)"), p("t", "t (s)")], pro_only: true },
+        CatalogEntry { op_id: "ctrl.step_2nd_order", label: "Step 2nd Order", category: "controlSystems", node_kind: "csOperation", inputs: vec![p("K", "K (gain)"), p("wn", "wn (rad/s)"), p("zeta", "zeta"), p("t", "t (s)")], pro_only: true },
+        CatalogEntry { op_id: "ctrl.pid_output", label: "PID Output", category: "controlSystems", node_kind: "csOperation", inputs: vec![p("Kp", "K_p"), p("Ki", "K_i"), p("Kd", "K_d"), p("error", "e(t)"), p("integral", "int e dt"), p("dt", "dt (s)")], pro_only: true },
+        CatalogEntry { op_id: "ctrl.rms", label: "RMS", category: "controlSystems", node_kind: "csOperation", inputs: vec![p("y", "y (vector)")], pro_only: true },
+        CatalogEntry { op_id: "ctrl.peak2peak", label: "Peak-to-Peak", category: "controlSystems", node_kind: "csOperation", inputs: vec![p("y", "y (vector)")], pro_only: true },
+        CatalogEntry { op_id: "ctrl.settling_time_2pct", label: "t_s = 4*tau", category: "controlSystems", node_kind: "csOperation", inputs: vec![p("tau", "tau (s)")], pro_only: true },
+        CatalogEntry { op_id: "ctrl.overshoot_2nd", label: "%OS", category: "controlSystems", node_kind: "csOperation", inputs: vec![p("zeta", "zeta (damping)")], pro_only: true },
+        CatalogEntry { op_id: "ctrl.natural_freq", label: "wn = sqrt(k/m)", category: "controlSystems", node_kind: "csOperation", inputs: vec![p("k", "k (N/m)"), p("m", "m (kg)")], pro_only: true },
+        CatalogEntry { op_id: "ctrl.damping_ratio", label: "zeta = c/(2*sqrt(km))", category: "controlSystems", node_kind: "csOperation", inputs: vec![p("c", "c (Ns/m)"), p("k", "k (N/m)"), p("m", "m (kg)")], pro_only: true },
+        CatalogEntry { op_id: "ctrl.bode_mag_1st", label: "|H(jw)| 1st Order", category: "controlSystems", node_kind: "csOperation", inputs: vec![p("K", "K (gain)"), p("omega", "omega (rad/s)"), p("tau", "tau (s)")], pro_only: true },
+
+        // ── BLK-06: Life Sciences ────────────────────────────────────────
+        CatalogEntry { op_id: "bio.michaelis_menten", label: "Michaelis-Menten", category: "lifeSci", node_kind: "csOperation", inputs: vec![p("Vmax", "V_max"), p("Km", "K_m"), p("S", "[S]")], pro_only: true },
+        CatalogEntry { op_id: "bio.hill_eq", label: "Hill Equation", category: "lifeSci", node_kind: "csOperation", inputs: vec![p("n", "n (Hill coef)"), p("Kd", "K_d"), p("L", "[L]")], pro_only: true },
+        CatalogEntry { op_id: "bio.logistic_growth", label: "Logistic Growth", category: "lifeSci", node_kind: "csOperation", inputs: vec![p("r", "r (growth rate)"), p("K", "K (capacity)"), p("N0", "N0 (initial)"), p("t", "t")], pro_only: true },
+        CatalogEntry { op_id: "bio.exp_decay", label: "N = N0*e^(-lambda*t)", category: "lifeSci", node_kind: "csOperation", inputs: vec![p("N0", "N0"), p("lambda", "lambda (decay rate)"), p("t", "t")], pro_only: true },
+        CatalogEntry { op_id: "bio.half_life", label: "t1/2 = ln2/lambda", category: "lifeSci", node_kind: "csOperation", inputs: vec![p("lambda", "lambda (decay rate)")], pro_only: true },
+        CatalogEntry { op_id: "bio.drug_1cmp", label: "1-Compartment PK", category: "lifeSci", node_kind: "csOperation", inputs: vec![p("D", "D (dose)"), p("V", "V_d (L)"), p("k", "k_el (1/h)"), p("t", "t (h)")], pro_only: true },
+        CatalogEntry { op_id: "bio.henderson_hasselbalch", label: "Henderson-Hasselbalch", category: "lifeSci", node_kind: "csOperation", inputs: vec![p("pKa", "pKa"), p("A", "[A-]"), p("HA", "[HA]")], pro_only: true },
+        CatalogEntry { op_id: "bio.nernst", label: "Nernst Equation", category: "lifeSci", node_kind: "csOperation", inputs: vec![p("R", "R (J/molK)"), p("T", "T (K)"), p("z", "z (valence)"), p("F", "F (C/mol)"), p("C_out", "[out]"), p("C_in", "[in]")], pro_only: true },
+        CatalogEntry { op_id: "bio.BMI", label: "BMI", category: "lifeSci", node_kind: "csOperation", inputs: vec![p("mass_kg", "mass (kg)"), p("height_m", "height (m)")], pro_only: true },
+        CatalogEntry { op_id: "bio.BSA_dubois", label: "BSA (DuBois)", category: "lifeSci", node_kind: "csOperation", inputs: vec![p("W_kg", "W (kg)"), p("H_cm", "H (cm)")], pro_only: true },
+
+        // ── BLK-07: Finance Options ──────────────────────────────────────
+        CatalogEntry { op_id: "fin.options.bs_call", label: "Black-Scholes Call", category: "finOptions", node_kind: "csOperation", inputs: vec![p("S", "S (spot)"), p("K", "K (strike)"), p("T", "T (years)"), p("r", "r (risk-free)"), p("sigma", "sigma (vol)")], pro_only: true },
+        CatalogEntry { op_id: "fin.options.bs_put", label: "Black-Scholes Put", category: "finOptions", node_kind: "csOperation", inputs: vec![p("S", "S (spot)"), p("K", "K (strike)"), p("T", "T (years)"), p("r", "r (risk-free)"), p("sigma", "sigma (vol)")], pro_only: true },
+        CatalogEntry { op_id: "fin.options.bs_delta", label: "BS Delta", category: "finOptions", node_kind: "csOperation", inputs: vec![p("S", "S (spot)"), p("K", "K (strike)"), p("T", "T (years)"), p("r", "r (risk-free)"), p("sigma", "sigma (vol)")], pro_only: true },
+        CatalogEntry { op_id: "fin.options.bs_gamma", label: "BS Gamma", category: "finOptions", node_kind: "csOperation", inputs: vec![p("S", "S (spot)"), p("K", "K (strike)"), p("T", "T (years)"), p("r", "r (risk-free)"), p("sigma", "sigma (vol)")], pro_only: true },
+        CatalogEntry { op_id: "fin.options.bs_vega", label: "BS Vega", category: "finOptions", node_kind: "csOperation", inputs: vec![p("S", "S (spot)"), p("K", "K (strike)"), p("T", "T (years)"), p("r", "r (risk-free)"), p("sigma", "sigma (vol)")], pro_only: true },
+        CatalogEntry { op_id: "fin.options.kelly", label: "Kelly Criterion", category: "finOptions", node_kind: "csOperation", inputs: vec![p("p_win", "p (win prob)"), p("b", "b (odds)")], pro_only: true },
+        CatalogEntry { op_id: "fin.options.var_hist", label: "VaR (historical)", category: "finOptions", node_kind: "csOperation", inputs: vec![p("returns", "Returns (vector)"), p("conf", "Confidence")], pro_only: true },
+        CatalogEntry { op_id: "fin.options.cvar_hist", label: "CVaR (historical)", category: "finOptions", node_kind: "csOperation", inputs: vec![p("returns", "Returns (vector)"), p("conf", "Confidence")], pro_only: true },
+        CatalogEntry { op_id: "fin.options.bond_duration", label: "Macaulay Duration", category: "finOptions", node_kind: "csOperation", inputs: vec![p("coupon", "Coupon ($)"), p("face", "Face ($)"), p("ytm", "YTM"), p("n", "n (periods)")], pro_only: true },
+        CatalogEntry { op_id: "fin.options.dcf", label: "DCF Valuation", category: "finOptions", node_kind: "csOperation", inputs: vec![p("fcf", "FCF ($)"), p("wacc", "WACC"), p("g", "g (terminal)"), p("n", "n (years)")], pro_only: true },
+
+        // ── BLK-09: Date & Time ──────────────────────────────────────────
+        CatalogEntry { op_id: "date.from_ymd", label: "Date from Y/M/D", category: "dateTime", node_kind: "csOperation", inputs: vec![p("y", "Year"), p("m", "Month"), p("d", "Day")], pro_only: true },
+        CatalogEntry { op_id: "date.year", label: "Year of date", category: "dateTime", node_kind: "csOperation", inputs: vec![p("day", "date (days)")], pro_only: true },
+        CatalogEntry { op_id: "date.month", label: "Month of date", category: "dateTime", node_kind: "csOperation", inputs: vec![p("day", "date (days)")], pro_only: true },
+        CatalogEntry { op_id: "date.day_of_month", label: "Day of month", category: "dateTime", node_kind: "csOperation", inputs: vec![p("day", "date (days)")], pro_only: true },
+        CatalogEntry { op_id: "date.days_between", label: "Days Between", category: "dateTime", node_kind: "csOperation", inputs: vec![p("d1", "Date 1"), p("d2", "Date 2")], pro_only: true },
+        CatalogEntry { op_id: "date.add_days", label: "Add Days", category: "dateTime", node_kind: "csOperation", inputs: vec![p("d", "Date"), p("n", "n (days)")], pro_only: true },
+        CatalogEntry { op_id: "date.is_leap_year", label: "Is Leap Year", category: "dateTime", node_kind: "csOperation", inputs: vec![p("y", "Year")], pro_only: true },
+        CatalogEntry { op_id: "date.days_in_month", label: "Days in Month", category: "dateTime", node_kind: "csOperation", inputs: vec![p("m", "Month"), p("y", "Year")], pro_only: true },
+
+        // ── BLK-08: Text / String (SCI-08 text) ──────────────────────────
+        CatalogEntry { op_id: "num_to_text", label: "Number to Text", category: "text", node_kind: "csOperation", inputs: vec![p("value", "Value"), p("format", "Format")], pro_only: false },
+        CatalogEntry { op_id: "text_concat", label: "Concat Text", category: "text", node_kind: "csOperation", inputs: vec![p("a", "A"), p("b", "B")], pro_only: false },
+        CatalogEntry { op_id: "text_length", label: "Text Length", category: "text", node_kind: "csOperation", inputs: vec![p("text", "Text")], pro_only: false },
+        CatalogEntry { op_id: "text_to_num", label: "Text to Number", category: "text", node_kind: "csOperation", inputs: vec![p("text", "Text")], pro_only: false },
+
+        // ── SCI-04: Interval Arithmetic ───────────────────────────────────
+        CatalogEntry { op_id: "interval_from", label: "Interval (center ± hw)", category: "interval", node_kind: "csOperation", inputs: vec![p("center", "Center"), p("half_width", "±hw")], pro_only: true },
+        CatalogEntry { op_id: "interval_from_bounds", label: "Interval [lo, hi]", category: "interval", node_kind: "csOperation", inputs: vec![p("lo", "Lo"), p("hi", "Hi")], pro_only: true },
+        CatalogEntry { op_id: "interval_lo", label: "Interval Lo", category: "interval", node_kind: "csOperation", inputs: vec![p("interval", "Interval")], pro_only: true },
+        CatalogEntry { op_id: "interval_hi", label: "Interval Hi", category: "interval", node_kind: "csOperation", inputs: vec![p("interval", "Interval")], pro_only: true },
+        CatalogEntry { op_id: "interval_mid", label: "Interval Mid", category: "interval", node_kind: "csOperation", inputs: vec![p("interval", "Interval")], pro_only: true },
+        CatalogEntry { op_id: "interval_width", label: "Interval Width", category: "interval", node_kind: "csOperation", inputs: vec![p("interval", "Interval")], pro_only: true },
+        CatalogEntry { op_id: "interval_contains", label: "Interval Contains", category: "interval", node_kind: "csOperation", inputs: vec![p("interval", "Interval"), p("x", "x")], pro_only: true },
+        CatalogEntry { op_id: "interval_add", label: "Interval Add", category: "interval", node_kind: "csOperation", inputs: vec![p("a", "A"), p("b", "B")], pro_only: true },
+        CatalogEntry { op_id: "interval_sub", label: "Interval Subtract", category: "interval", node_kind: "csOperation", inputs: vec![p("a", "A"), p("b", "B")], pro_only: true },
+        CatalogEntry { op_id: "interval_mul", label: "Interval Multiply", category: "interval", node_kind: "csOperation", inputs: vec![p("a", "A"), p("b", "B")], pro_only: true },
+        CatalogEntry { op_id: "interval_div", label: "Interval Divide", category: "interval", node_kind: "csOperation", inputs: vec![p("a", "A"), p("b", "B")], pro_only: true },
+        CatalogEntry { op_id: "interval_pow", label: "Interval Power", category: "interval", node_kind: "csOperation", inputs: vec![p("a", "A"), p("b", "B")], pro_only: true },
+
+        // ── SCI-08: Complex Numbers ───────────────────────────────────────
+        CatalogEntry { op_id: "complex_from", label: "Complex From Re/Im", category: "complex", node_kind: "csOperation", inputs: vec![p("re", "Re"), p("im", "Im")], pro_only: true },
+        CatalogEntry { op_id: "complex_re", label: "Real Part", category: "complex", node_kind: "csOperation", inputs: vec![p("z", "z")], pro_only: true },
+        CatalogEntry { op_id: "complex_im", label: "Imaginary Part", category: "complex", node_kind: "csOperation", inputs: vec![p("z", "z")], pro_only: true },
+        CatalogEntry { op_id: "complex_mag", label: "Magnitude |z|", category: "complex", node_kind: "csOperation", inputs: vec![p("z", "z")], pro_only: true },
+        CatalogEntry { op_id: "complex_arg", label: "Argument ∠z", category: "complex", node_kind: "csOperation", inputs: vec![p("z", "z")], pro_only: true },
+        CatalogEntry { op_id: "complex_conj", label: "Conjugate z*", category: "complex", node_kind: "csOperation", inputs: vec![p("z", "z")], pro_only: true },
+        CatalogEntry { op_id: "complex_add", label: "Complex Add", category: "complex", node_kind: "csOperation", inputs: vec![p("a", "z₁"), p("b", "z₂")], pro_only: true },
+        CatalogEntry { op_id: "complex_mul", label: "Complex Multiply", category: "complex", node_kind: "csOperation", inputs: vec![p("a", "z₁"), p("b", "z₂")], pro_only: true },
+        CatalogEntry { op_id: "complex_div", label: "Complex Divide", category: "complex", node_kind: "csOperation", inputs: vec![p("a", "z₁"), p("b", "z₂")], pro_only: true },
+        CatalogEntry { op_id: "complex_exp", label: "Complex Exp eᶻ", category: "complex", node_kind: "csOperation", inputs: vec![p("z", "z")], pro_only: true },
+        CatalogEntry { op_id: "complex_ln", label: "Complex Ln", category: "complex", node_kind: "csOperation", inputs: vec![p("z", "z")], pro_only: true },
+        CatalogEntry { op_id: "complex_pow", label: "Complex Power", category: "complex", node_kind: "csOperation", inputs: vec![p("z", "z"), p("n", "n")], pro_only: true },
+
+        // ── SCI-09: Matrix Operations ─────────────────────────────────────
+        CatalogEntry { op_id: "matrix_from_table", label: "Table to Matrix", category: "matrix", node_kind: "csOperation", inputs: vec![p("table", "Table")], pro_only: true },
+        CatalogEntry { op_id: "matrix_to_table", label: "Matrix to Table", category: "matrix", node_kind: "csOperation", inputs: vec![p("matrix", "Matrix")], pro_only: true },
+        CatalogEntry { op_id: "matrix_multiply", label: "Matrix Multiply", category: "matrix", node_kind: "csOperation", inputs: vec![p("a", "A"), p("b", "B")], pro_only: true },
+        CatalogEntry { op_id: "matrix_transpose", label: "Matrix Transpose", category: "matrix", node_kind: "csOperation", inputs: vec![p("matrix", "Matrix")], pro_only: true },
+        CatalogEntry { op_id: "matrix_inverse", label: "Matrix Inverse", category: "matrix", node_kind: "csOperation", inputs: vec![p("matrix", "Matrix")], pro_only: true },
+        CatalogEntry { op_id: "matrix_det", label: "Determinant", category: "matrix", node_kind: "csOperation", inputs: vec![p("matrix", "Matrix")], pro_only: true },
+        CatalogEntry { op_id: "matrix_trace", label: "Trace", category: "matrix", node_kind: "csOperation", inputs: vec![p("matrix", "Matrix")], pro_only: true },
+        CatalogEntry { op_id: "matrix_solve", label: "Solve Ax = b", category: "matrix", node_kind: "csOperation", inputs: vec![p("a", "A (matrix)"), p("b", "b (vector)")], pro_only: true },
+
+        // ── BLK-10: Lookup Table Interpolation ───────────────────────────
+        CatalogEntry { op_id: "lookup.1d", label: "Lookup Table 1D", category: "tableOps", node_kind: "csOperation", inputs: vec![p("x_vec", "X (vector)"), p("y_vec", "Y (vector)"), p("x", "Query X")], pro_only: false },
+        CatalogEntry { op_id: "lookup.2d", label: "Lookup Table 2D", category: "tableOps", node_kind: "csOperation", inputs: vec![p("x_vec", "X axis"), p("y_vec", "Y axis"), p("z_mat", "Z (table)"), p("x", "Query X"), p("y", "Query Y")], pro_only: false },
+
+        // ── SCI-12: Signal Processing / FFT ──────────────────────────────
+        CatalogEntry { op_id: "signal.fft_magnitude", label: "FFT Magnitude", category: "signal", node_kind: "csOperation", inputs: vec![p("y", "y (vector)")], pro_only: true },
+        CatalogEntry { op_id: "signal.fft_power", label: "FFT Power", category: "signal", node_kind: "csOperation", inputs: vec![p("y", "y (vector)")], pro_only: true },
+        CatalogEntry { op_id: "signal.fft_freq_bins", label: "FFT Freq Bins", category: "signal", node_kind: "csOperation", inputs: vec![p("n", "N (samples)"), p("sample_rate", "fs (Hz)")], pro_only: true },
+        CatalogEntry { op_id: "signal.window_hann", label: "Hann Window", category: "signal", node_kind: "csOperation", inputs: vec![p("n", "N (length)")], pro_only: true },
+        CatalogEntry { op_id: "signal.window_hamming", label: "Hamming Window", category: "signal", node_kind: "csOperation", inputs: vec![p("n", "N (length)")], pro_only: true },
+        CatalogEntry { op_id: "signal.window_blackman", label: "Blackman Window", category: "signal", node_kind: "csOperation", inputs: vec![p("n", "N (length)")], pro_only: true },
+        CatalogEntry { op_id: "signal.filter_lowpass_fir", label: "Low-pass FIR Filter", category: "signal", node_kind: "csOperation", inputs: vec![p("y", "y (vector)"), p("cutoff_norm", "f_c/f_s"), p("taps", "Taps")], pro_only: true },
+        CatalogEntry { op_id: "signal.filter_highpass_fir", label: "High-pass FIR Filter", category: "signal", node_kind: "csOperation", inputs: vec![p("y", "y (vector)"), p("cutoff_norm", "f_c/f_s"), p("taps", "Taps")], pro_only: true },
     ]
 }
 
@@ -1478,7 +1651,7 @@ pub fn engine_version() -> &'static str {
 /// If you bump this, you must also:
 /// 1. Update the expected version check in `src/engine/index.ts` (TypeScript host).
 /// 2. Document the change in `docs/W9_3_CORRECTNESS.md`.
-pub const ENGINE_CONTRACT_VERSION: u32 = 1;
+pub const ENGINE_CONTRACT_VERSION: u32 = 3;
 
 pub fn engine_contract_version() -> u32 {
     ENGINE_CONTRACT_VERSION
@@ -1491,14 +1664,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 170);
+        assert_eq!(cat.len(), 313);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 170);
+        assert_eq!(parsed.as_array().unwrap().len(), 313);
     }
 
     #[test]

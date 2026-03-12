@@ -38,6 +38,8 @@ import {
   type Connection,
   type IsValidConnection,
   useOnViewportChange,
+  NodeToolbar,
+  Position as RFPosition,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
@@ -65,6 +67,8 @@ import { computeEffectiveEdgesAnimated } from '../../engine/edgesAnimGate'
 import { computeLodTier, type LodTier as LodTierGate } from '../../engine/lodGate'
 import { useVariablesStore } from '../../stores/variablesStore'
 import { usePublishedOutputsStore } from '../../stores/publishedOutputsStore'
+import { usePreferencesStore } from '../../stores/preferencesStore'
+import { matchesBinding, DEFAULT_KEYBINDINGS } from '../../lib/keybindings'
 import { BLOCK_REGISTRY, type NodeData } from '../../blocks/registry'
 import { ANNOTATION_REGISTRY } from '../../annotations/annotationRegistry'
 import { type Plan, getEntitlements, isBlockEntitled } from '../../lib/entitlements'
@@ -135,6 +139,9 @@ import { buildAuditModel } from '../../lib/pdf/auditModel'
 import type { CaptureResult } from '../../lib/pdf/captureCanvasImage'
 import { getUnitMismatch } from '../../units/unitCompat'
 import { getUnitSymbol } from '../../units/unitSymbols'
+import { listNodeComments, type NodeComment } from '../../lib/nodeCommentsService'
+import { NodeCommentsContext } from '../../contexts/NodeCommentsContext'
+import { NodeCommentDialog } from './NodeCommentDialog'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -801,6 +808,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // Background dots (E7-2)
   const [bgDotsVisible, setBgDotsVisible] = useState(getBgDotsPref)
 
+  // THEME-02: Canvas appearance preferences
+  const canvasBgStyle = usePreferencesStore((s) => s.canvasBgStyle)
+  const canvasGridSize = usePreferencesStore((s) => s.canvasGridSize)
+
+  // SCI-06: Angle unit preference for trig blocks.
+  const angleUnit = usePreferencesStore((s) => s.angleUnit)
+
+  // KB-01: User keybindings (read at render time so handler closure stays current)
+  const keybindingOverrides = usePreferencesStore((s) => s.keybindings)
+
   // Grid dot colors from CSS variables (theme-aware)
   const gridMinorColor = useMemo(() => {
     const v = getComputedStyle(document.documentElement)
@@ -892,6 +909,54 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // Context menu
   const [contextMenu, setContextMenu] = useState<ContextMenuTarget | null>(null)
 
+  // ADV-04: Node comments
+  const [comments, setComments] = useState<NodeComment[]>([])
+  const [commentDialog, setCommentDialog] = useState<{
+    nodeId: string
+    x: number
+    y: number
+  } | null>(null)
+
+  // Load comments whenever canvasId changes
+  useEffect(() => {
+    if (!canvasId) return
+    let cancelled = false
+    listNodeComments(canvasId)
+      .then((data) => {
+        if (!cancelled) setComments(data)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [canvasId])
+
+  const refreshComments = useCallback(() => {
+    if (!canvasId) return
+    listNodeComments(canvasId)
+      .then((data) => setComments(data))
+      .catch(() => {})
+  }, [canvasId])
+
+  const commentCounts = useMemo((): ReadonlyMap<string, number> => {
+    const map = new Map<string, number>()
+    for (const c of comments) {
+      if (!c.is_resolved) {
+        map.set(c.node_id, (map.get(c.node_id) ?? 0) + 1)
+      }
+    }
+    return map
+  }, [comments])
+
+  const openCommentThread = useCallback((nodeId: string) => {
+    // Position dialog near center of viewport
+    setCommentDialog({ nodeId, x: window.innerWidth / 2 - 150, y: 120 })
+  }, [])
+
+  const handleContextMenuComment = useCallback((nodeId: string) => {
+    setCommentDialog({ nodeId, x: window.innerWidth / 2 - 150, y: 120 })
+  }, [])
+
   // I2-1: Notation panel (chain-to-expression)
   const [notationTarget, setNotationTarget] = useState<{
     nodeId: string
@@ -978,6 +1043,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     variables,
     publishedOutputs,
     engineTelemetryOpts,
+    angleUnit,
   )
 
   // H7-1: After engine eval, update published outputs store with publish block values.
@@ -1030,7 +1096,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           return {
             ...n,
             position: pos,
-            style: { ...((n.style as React.CSSProperties | undefined) ?? {}), transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' },
+            style: {
+              ...((n.style as React.CSSProperties | undefined) ?? {}),
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            },
           }
         }),
       )
@@ -1500,9 +1569,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       doSaveHistory()
       setNodes((nds) =>
         nds.map((n) =>
-          n.id === nodeId
-            ? { ...n, data: { ...n.data, userColor: color ?? undefined } }
-            : n,
+          n.id === nodeId ? { ...n, data: { ...n.data, userColor: color ?? undefined } } : n,
         ),
       )
     },
@@ -1778,9 +1845,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     (nodeId: string, value: number) => {
       doSaveHistory()
       setNodes((nds) =>
-        nds.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...(n.data as NodeData), value } } : n,
-        ),
+        nds.map((n) => (n.id === nodeId ? { ...n, data: { ...(n.data as NodeData), value } } : n)),
       )
     },
     [doSaveHistory, setNodes],
@@ -1789,10 +1854,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   /** UX-10: Restore to a specific history entry (displayIdx 0 = most recent). */
   const handleRestoreHistory = useCallback(
     (displayIdx: number) => {
-      const target = historyRestoreToIndex(
-        displayIdx,
-        { nodes: latestNodes.current, edges: latestEdges.current },
-      )
+      const target = historyRestoreToIndex(displayIdx, {
+        nodes: latestNodes.current,
+        edges: latestEdges.current,
+      })
       if (!target) return
       setNodes(target.nodes)
       setEdges(target.edges)
@@ -1826,15 +1891,17 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       return
     }
     // UX-04: Try system clipboard for cross-tab paste
-    pasteFromSystemClipboard().then((sys) => {
-      if (!sys) return
-      doSaveHistory()
-      setNodes((nds) => [
-        ...nds.map((n) => (n.selected ? { ...n, selected: false } : n)),
-        ...sys.nodes,
-      ])
-      setEdges((eds) => [...eds, ...sys.edges])
-    }).catch(() => {})
+    pasteFromSystemClipboard()
+      .then((sys) => {
+        if (!sys) return
+        doSaveHistory()
+        setNodes((nds) => [
+          ...nds.map((n) => (n.selected ? { ...n, selected: false } : n)),
+          ...sys.nodes,
+        ])
+        setEdges((eds) => [...eds, ...sys.edges])
+      })
+      .catch(() => {})
   }, [doSaveHistory, setNodes, setEdges])
 
   // ── Select all ──────────────────────────────────────────────────────────
@@ -1874,24 +1941,162 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const paletteCommands = useMemo<PaletteCommand[]>(() => {
     if (readOnly) return []
     const cmds: PaletteCommand[] = [
-      { id: 'undo', kind: 'action', label: 'Undo', hint: 'Reverse the last change', kbd: 'Ctrl+Z', icon: '↩', onExecute: handleUndo },
-      { id: 'redo', kind: 'action', label: 'Redo', hint: 'Re-apply the last undone change', kbd: 'Ctrl+Shift+Z', icon: '↪', onExecute: handleRedo },
-      { id: 'fitView', kind: 'action', label: 'Fit view', hint: 'Zoom to show all nodes', kbd: 'Ctrl+Shift+F', icon: '⊡', onExecute: () => fitView({ padding: 0.15, duration: 300 }) },
-      { id: 'selectAll', kind: 'action', label: 'Select all', hint: 'Select all nodes', kbd: 'Ctrl+A', icon: '▣', onExecute: selectAll },
-      { id: 'deleteSelected', kind: 'action', label: 'Delete selected', hint: 'Delete selected nodes and edges', kbd: 'Del', icon: '✕', onExecute: deleteSelected },
-      { id: 'copy', kind: 'action', label: 'Copy', hint: 'Copy selected nodes to clipboard', kbd: 'Ctrl+C', icon: '⎘', onExecute: handleCopy },
-      { id: 'paste', kind: 'action', label: 'Paste', hint: 'Paste nodes from clipboard', kbd: 'Ctrl+V', icon: '⎗', onExecute: handlePaste },
-      { id: 'autoLayout', kind: 'action', label: 'Auto-layout', hint: 'Arrange nodes in a clean hierarchy', icon: '⊞', onExecute: () => handleAutoOrganise('LR') },
-      { id: 'toggleLibrary', kind: 'action', label: 'Toggle block library', hint: 'Show or hide the block library panel', icon: '⊟', onExecute: () => setLibVisible((v) => !v) },
-      { id: 'toggleSnap', kind: 'action', label: 'Toggle snap to grid', hint: 'Enable or disable snap to grid', icon: '⊞', onExecute: () => setSnapToGrid((v) => !v) },
-      { id: 'toggleMinimap', kind: 'action', label: 'Toggle minimap', hint: 'Show or hide the minimap', icon: '⊟', onExecute: () => { setMinimap((v) => { setMinimapPref(!v); return !v }) } },
-      { id: 'toggleFormulaBar', kind: 'action', label: 'Toggle formula bar', hint: 'Show or hide the formula/expression bar', kbd: 'Ctrl+Shift+F', icon: '=', onExecute: () => { setFormulaBarVisible((v) => { setFormulaBarPref(!v); return !v }) } },
-      { id: 'findBlock', kind: 'action', label: 'Find block', hint: 'Search and navigate to a block by label', kbd: 'Ctrl+F', icon: '⌕', onExecute: () => setFindOpen(true) },
-      { id: 'groupSelection', kind: 'action', label: 'Group selection', hint: 'Wrap selected nodes in a group', kbd: 'Ctrl+G', icon: '▢', onExecute: groupSelection },
-      { id: 'togglePresentation', kind: 'action', label: 'Toggle presentation mode', hint: 'Enter/exit fullscreen clean canvas view', kbd: 'Ctrl+Shift+P', icon: '⎙', onExecute: togglePresentationMode },
+      {
+        id: 'undo',
+        kind: 'action',
+        label: 'Undo',
+        hint: 'Reverse the last change',
+        kbd: 'Ctrl+Z',
+        icon: '↩',
+        onExecute: handleUndo,
+      },
+      {
+        id: 'redo',
+        kind: 'action',
+        label: 'Redo',
+        hint: 'Re-apply the last undone change',
+        kbd: 'Ctrl+Shift+Z',
+        icon: '↪',
+        onExecute: handleRedo,
+      },
+      {
+        id: 'fitView',
+        kind: 'action',
+        label: 'Fit view',
+        hint: 'Zoom to show all nodes',
+        kbd: 'Ctrl+Shift+F',
+        icon: '⊡',
+        onExecute: () => fitView({ padding: 0.15, duration: 300 }),
+      },
+      {
+        id: 'selectAll',
+        kind: 'action',
+        label: 'Select all',
+        hint: 'Select all nodes',
+        kbd: 'Ctrl+A',
+        icon: '▣',
+        onExecute: selectAll,
+      },
+      {
+        id: 'deleteSelected',
+        kind: 'action',
+        label: 'Delete selected',
+        hint: 'Delete selected nodes and edges',
+        kbd: 'Del',
+        icon: '✕',
+        onExecute: deleteSelected,
+      },
+      {
+        id: 'copy',
+        kind: 'action',
+        label: 'Copy',
+        hint: 'Copy selected nodes to clipboard',
+        kbd: 'Ctrl+C',
+        icon: '⎘',
+        onExecute: handleCopy,
+      },
+      {
+        id: 'paste',
+        kind: 'action',
+        label: 'Paste',
+        hint: 'Paste nodes from clipboard',
+        kbd: 'Ctrl+V',
+        icon: '⎗',
+        onExecute: handlePaste,
+      },
+      {
+        id: 'autoLayout',
+        kind: 'action',
+        label: 'Auto-layout',
+        hint: 'Arrange nodes in a clean hierarchy',
+        icon: '⊞',
+        onExecute: () => handleAutoOrganise('LR'),
+      },
+      {
+        id: 'toggleLibrary',
+        kind: 'action',
+        label: 'Toggle block library',
+        hint: 'Show or hide the block library panel',
+        icon: '⊟',
+        onExecute: () => setLibVisible((v) => !v),
+      },
+      {
+        id: 'toggleSnap',
+        kind: 'action',
+        label: 'Toggle snap to grid',
+        hint: 'Enable or disable snap to grid',
+        icon: '⊞',
+        onExecute: () => setSnapToGrid((v) => !v),
+      },
+      {
+        id: 'toggleMinimap',
+        kind: 'action',
+        label: 'Toggle minimap',
+        hint: 'Show or hide the minimap',
+        icon: '⊟',
+        onExecute: () => {
+          setMinimap((v) => {
+            setMinimapPref(!v)
+            return !v
+          })
+        },
+      },
+      {
+        id: 'toggleFormulaBar',
+        kind: 'action',
+        label: 'Toggle formula bar',
+        hint: 'Show or hide the formula/expression bar',
+        kbd: 'Ctrl+Shift+F',
+        icon: '=',
+        onExecute: () => {
+          setFormulaBarVisible((v) => {
+            setFormulaBarPref(!v)
+            return !v
+          })
+        },
+      },
+      {
+        id: 'findBlock',
+        kind: 'action',
+        label: 'Find block',
+        hint: 'Search and navigate to a block by label',
+        kbd: 'Ctrl+F',
+        icon: '⌕',
+        onExecute: () => setFindOpen(true),
+      },
+      {
+        id: 'groupSelection',
+        kind: 'action',
+        label: 'Group selection',
+        hint: 'Wrap selected nodes in a group',
+        kbd: 'Ctrl+G',
+        icon: '▢',
+        onExecute: groupSelection,
+      },
+      {
+        id: 'togglePresentation',
+        kind: 'action',
+        label: 'Toggle presentation mode',
+        hint: 'Enter/exit fullscreen clean canvas view',
+        kbd: 'Ctrl+Shift+P',
+        icon: '⎙',
+        onExecute: togglePresentationMode,
+      },
     ]
     return cmds
-  }, [readOnly, handleUndo, handleRedo, fitView, selectAll, deleteSelected, handleCopy, handlePaste, handleAutoOrganise, groupSelection, togglePresentationMode])
+  }, [
+    readOnly,
+    handleUndo,
+    handleRedo,
+    fitView,
+    selectAll,
+    deleteSelected,
+    handleCopy,
+    handlePaste,
+    handleAutoOrganise,
+    groupSelection,
+    togglePresentationMode,
+  ])
 
   // UX-03: Node labels for navigation search
   const paletteNodeLabels = useMemo(() => {
@@ -1999,8 +2204,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
       const ctrl = e.ctrlKey || e.metaKey
 
-      // Ctrl+K: command palette (works even in input fields)
-      if (ctrl && e.key === 'k') {
+      // KB-01: helper to get effective binding for an action
+      const kb = (action: keyof typeof DEFAULT_KEYBINDINGS) =>
+        keybindingOverrides[action] ?? DEFAULT_KEYBINDINGS[action]
+
+      // Command palette (configurable, works even in input fields)
+      if (matchesBinding(e, kb('commandPalette'))) {
         e.preventDefault()
         setPaletteOpen(true)
         return
@@ -2033,19 +2242,19 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       // Skip shortcuts when typing in form fields
       if (isInput) return
 
-      // Delete / Backspace
-      if ((e.key === 'Delete' || e.key === 'Backspace') && !readOnly) {
+      // Delete selection (configurable)
+      if ((matchesBinding(e, kb('deleteSelection')) || e.key === 'Backspace') && !readOnly) {
         deleteSelected()
       }
 
-      // Ctrl+Z: Undo
-      if (ctrl && e.key === 'z' && !e.shiftKey && !readOnly) {
+      // Undo (configurable)
+      if (matchesBinding(e, kb('undo')) && !readOnly) {
         e.preventDefault()
         handleUndo()
       }
 
-      // Ctrl+Shift+Z / Ctrl+Y: Redo
-      if (ctrl && ((e.key === 'Z' && e.shiftKey) || e.key === 'y') && !readOnly) {
+      // Redo (configurable) — also keep Ctrl+Y fallback
+      if ((matchesBinding(e, kb('redo')) || (ctrl && e.key === 'y')) && !readOnly) {
         e.preventDefault()
         handleRedo()
       }
@@ -2068,8 +2277,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         handlePaste()
       }
 
-      // Ctrl+A: Select all
-      if (ctrl && e.key === 'a') {
+      // Select all (configurable)
+      if (matchesBinding(e, kb('selectAll'))) {
         e.preventDefault()
         selectAll()
       }
@@ -2111,8 +2320,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         })
       }
 
-      // Ctrl+Shift+D: Toggle bottom dock
-      if (ctrl && e.shiftKey && e.key === 'D') {
+      // Ctrl+Shift+D: Toggle bottom dock (configurable)
+      if (matchesBinding(e, kb('toggleBottomDock'))) {
         e.preventDefault()
         setDockCollapsed((v) => !v)
       }
@@ -2160,8 +2369,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         zoomOut({ duration: 200 })
       }
 
-      // UX-20: Ctrl+0 fit all
-      if (ctrl && e.key === '0' && !e.shiftKey) {
+      // Zoom to fit (configurable)
+      if (matchesBinding(e, kb('zoomFit'))) {
         e.preventDefault()
         fitView({ padding: 0.15, duration: 300 })
       }
@@ -2185,10 +2394,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         if (hasSelected) {
           e.preventDefault()
           const step = ctrl ? 10 : 1
-          const dx =
-            e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0
-          const dy =
-            e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0
+          const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0
+          const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0
           setNodes((nds) =>
             nds.map((n) =>
               n.selected && n.draggable !== false
@@ -2226,6 +2433,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       setNodes,
       presentationMode,
       togglePresentationMode,
+      keybindingOverrides,
     ],
   )
 
@@ -2294,11 +2502,46 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       readOnly
         ? []
         : [
-            { id: 'insertAnnotText', kind: 'action', label: 'Insert text annotation', hint: 'Add a text label to the canvas', icon: 'A', onExecute: () => onInsertAnnotationAtCenter('annotation_text') },
-            { id: 'insertAnnotCallout', kind: 'action', label: 'Insert callout box', hint: 'Add a callout note box to the canvas', icon: '▭', onExecute: () => onInsertAnnotationAtCenter('annotation_callout') },
-            { id: 'insertAnnotStickyNote', kind: 'action', label: 'Insert sticky note', hint: 'Add a sticky note to the canvas', icon: '📝', onExecute: () => onInsertAnnotationAtCenter('annotation_sticky_note') },
-            { id: 'insertAnnotHighlight', kind: 'action', label: 'Insert highlight region', hint: 'Add a highlight region to the canvas', icon: '◻', onExecute: () => onInsertAnnotationAtCenter('annotation_highlight') },
-            { id: 'insertAnnotArrow', kind: 'action', label: 'Insert arrow annotation', hint: 'Add an arrow to the canvas', icon: '→', onExecute: () => onInsertAnnotationAtCenter('annotation_arrow') },
+            {
+              id: 'insertAnnotText',
+              kind: 'action',
+              label: 'Insert text annotation',
+              hint: 'Add a text label to the canvas',
+              icon: 'A',
+              onExecute: () => onInsertAnnotationAtCenter('annotation_text'),
+            },
+            {
+              id: 'insertAnnotCallout',
+              kind: 'action',
+              label: 'Insert callout box',
+              hint: 'Add a callout note box to the canvas',
+              icon: '▭',
+              onExecute: () => onInsertAnnotationAtCenter('annotation_callout'),
+            },
+            {
+              id: 'insertAnnotStickyNote',
+              kind: 'action',
+              label: 'Insert sticky note',
+              hint: 'Add a sticky note to the canvas',
+              icon: '📝',
+              onExecute: () => onInsertAnnotationAtCenter('annotation_sticky_note'),
+            },
+            {
+              id: 'insertAnnotHighlight',
+              kind: 'action',
+              label: 'Insert highlight region',
+              hint: 'Add a highlight region to the canvas',
+              icon: '◻',
+              onExecute: () => onInsertAnnotationAtCenter('annotation_highlight'),
+            },
+            {
+              id: 'insertAnnotArrow',
+              kind: 'action',
+              label: 'Insert arrow annotation',
+              hint: 'Add an arrow to the canvas',
+              icon: '→',
+              onExecute: () => onInsertAnnotationAtCenter('annotation_arrow'),
+            },
           ],
     [readOnly, onInsertAnnotationAtCenter],
   )
@@ -2507,647 +2750,756 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   return (
     <PlanContext.Provider value={plan ?? 'free'}>
       <ComputedStoreContext.Provider value={computedStore}>
-      <ComputedContext.Provider value={computed}>
-        <BindingContext.Provider value={bindingCtx}>
-          <CanvasSettingsContext.Provider value={canvasSettings}>
-            <ValuePopoverContext.Provider value={showValuePopover}>
-              {computed.size > 0 && (
-                <div data-testid="canvas-computed" style={{ display: 'none' }} />
-              )}
-              <div
-                data-edges-animated={effectiveEdgesAnimated ? 'true' : 'false'}
-                data-lod={effectiveLodTier}
-                data-badges={effectiveBadges ? 'true' : 'false'}
-                data-edge-badges={effectiveEdgeBadges ? 'true' : 'false'}
-                style={{
-                  display: 'flex',
-                  flex: 1,
-                  height: '100%',
-                  overflow: 'hidden',
-                  position: 'relative',
-                }}
+        <ComputedContext.Provider value={computed}>
+          <BindingContext.Provider value={bindingCtx}>
+            <CanvasSettingsContext.Provider value={canvasSettings}>
+              <NodeCommentsContext.Provider
+                value={{ commentCounts, openThread: openCommentThread }}
               >
-                {/* Block library panel — desktop: always present with dock handle; mobile: overlay */}
-                {!readOnly && !isMobile && !presentationMode && (
-                  <BlockLibrary
-                    width={libWidth}
-                    onResizeStart={onLibResizeStart}
-                    plan={plan}
-                    onProBlocked={() => setShowUpgradeModal(true)}
-                    onInsertTemplate={onInsertTemplate}
-                    collapsed={!libVisible}
-                    onToggleCollapsed={() => setLibVisible((v) => !v)}
-                    filterMainOverride={libFilterMain}
-                    onInsertBlock={insertBlockAtCenter}
-                  />
-                )}
+                <ValuePopoverContext.Provider value={showValuePopover}>
+                  {computed.size > 0 && (
+                    <div data-testid="canvas-computed" style={{ display: 'none' }} />
+                  )}
+                  <div
+                    data-edges-animated={effectiveEdgesAnimated ? 'true' : 'false'}
+                    data-lod={effectiveLodTier}
+                    data-badges={effectiveBadges ? 'true' : 'false'}
+                    data-edge-badges={effectiveEdgeBadges ? 'true' : 'false'}
+                    style={{
+                      display: 'flex',
+                      flex: 1,
+                      height: '100%',
+                      overflow: 'hidden',
+                      position: 'relative',
+                    }}
+                  >
+                    {/* Block library panel — desktop: always present with dock handle; mobile: overlay */}
+                    {!readOnly && !isMobile && !presentationMode && (
+                      <BlockLibrary
+                        width={libWidth}
+                        onResizeStart={onLibResizeStart}
+                        plan={plan}
+                        onProBlocked={() => setShowUpgradeModal(true)}
+                        onInsertTemplate={onInsertTemplate}
+                        collapsed={!libVisible}
+                        onToggleCollapsed={() => setLibVisible((v) => !v)}
+                        filterMainOverride={libFilterMain}
+                        onInsertBlock={insertBlockAtCenter}
+                      />
+                    )}
 
-                {/* Canvas */}
-                <div
-                  ref={canvasWrapRef}
-                  data-tour="canvas-area"
-                  style={{ flex: 1, position: 'relative', overflow: 'hidden' }}
-                  onDragOver={onDragOver}
-                  onDrop={onDrop}
-                  onKeyDown={onKeyDown}
-                  onKeyUp={onKeyUp}
-                  tabIndex={0}
-                  onMouseMove={(e) => {
-                    if (!laserMode || !presentationMode) return
-                    const rect = canvasWrapRef.current?.getBoundingClientRect()
-                    if (rect)
-                      setLaserPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
-                  }}
-                  onMouseLeave={() => {
-                    if (laserMode) setLaserPos(null)
-                  }}
-                >
-                  {/* UX-19: Spotlight CSS — dims non-selected nodes in presentation spotlight mode */}
-                  {presentationMode && spotlightMode && (
-                    <style>{`
+                    {/* Canvas */}
+                    <div
+                      ref={canvasWrapRef}
+                      data-tour="canvas-area"
+                      style={{ flex: 1, position: 'relative', overflow: 'hidden' }}
+                      onDragOver={onDragOver}
+                      onDrop={onDrop}
+                      onKeyDown={onKeyDown}
+                      onKeyUp={onKeyUp}
+                      tabIndex={0}
+                      onMouseMove={(e) => {
+                        if (!laserMode || !presentationMode) return
+                        const rect = canvasWrapRef.current?.getBoundingClientRect()
+                        if (rect) setLaserPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+                      }}
+                      onMouseLeave={() => {
+                        if (laserMode) setLaserPos(null)
+                      }}
+                    >
+                      {/* UX-19: Spotlight CSS — dims non-selected nodes in presentation spotlight mode */}
+                      {presentationMode && spotlightMode && (
+                        <style>{`
                       .react-flow__node { opacity: 0.12 !important; transition: opacity 0.25s; }
                       .react-flow__node.selected { opacity: 1 !important; transition: opacity 0.25s; filter: drop-shadow(0 0 28px rgba(28,171,176,0.7)); }
                     `}</style>
-                  )}
+                      )}
 
-                  {/* UX-19: Laser pointer overlay */}
-                  {presentationMode && laserMode && laserPos && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: laserPos.x - 18,
-                        top: laserPos.y - 18,
-                        width: 36,
-                        height: 36,
-                        borderRadius: '50%',
-                        background: 'rgba(255, 55, 55, 0.75)',
-                        boxShadow: '0 0 24px 10px rgba(255,55,55,0.4)',
-                        pointerEvents: 'none',
-                        zIndex: 200,
-                      }}
-                    />
-                  )}
+                      {/* UX-19: Laser pointer overlay */}
+                      {presentationMode && laserMode && laserPos && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            left: laserPos.x - 18,
+                            top: laserPos.y - 18,
+                            width: 36,
+                            height: 36,
+                            borderRadius: '50%',
+                            background: 'rgba(255, 55, 55, 0.75)',
+                            boxShadow: '0 0 24px 10px rgba(255,55,55,0.4)',
+                            pointerEvents: 'none',
+                            zIndex: 200,
+                          }}
+                        />
+                      )}
 
-                  {/* UX-19: Presentation mode floating control bar */}
-                  {presentationMode && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: 12,
-                        right: 12,
-                        zIndex: 200,
-                        display: 'flex',
-                        gap: 6,
-                        background: 'rgba(0,0,0,0.65)',
-                        borderRadius: 8,
-                        padding: '5px 8px',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                      }}
-                    >
-                      <button
-                        onClick={() => setSpotlightMode((v) => !v)}
-                        title="Spotlight mode: click a node to spotlight it"
-                        style={{
-                          padding: '3px 8px',
-                          background: spotlightMode ? 'rgba(28,171,176,0.25)' : 'transparent',
-                          border: `1px solid ${spotlightMode ? 'rgba(28,171,176,0.6)' : 'rgba(255,255,255,0.2)'}`,
-                          borderRadius: 5,
-                          color: spotlightMode ? 'var(--primary)' : 'rgba(255,255,255,0.7)',
-                          cursor: 'pointer',
-                          fontSize: '0.7rem',
-                          fontFamily: 'inherit',
-                        }}
+                      {/* UX-19: Presentation mode floating control bar */}
+                      {presentationMode && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 12,
+                            right: 12,
+                            zIndex: 200,
+                            display: 'flex',
+                            gap: 6,
+                            background: 'rgba(0,0,0,0.65)',
+                            borderRadius: 8,
+                            padding: '5px 8px',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                          }}
+                        >
+                          <button
+                            onClick={() => setSpotlightMode((v) => !v)}
+                            title="Spotlight mode: click a node to spotlight it"
+                            style={{
+                              padding: '3px 8px',
+                              background: spotlightMode ? 'rgba(28,171,176,0.25)' : 'transparent',
+                              border: `1px solid ${spotlightMode ? 'rgba(28,171,176,0.6)' : 'rgba(255,255,255,0.2)'}`,
+                              borderRadius: 5,
+                              color: spotlightMode ? 'var(--primary)' : 'rgba(255,255,255,0.7)',
+                              cursor: 'pointer',
+                              fontSize: '0.7rem',
+                              fontFamily: 'inherit',
+                            }}
+                          >
+                            ◎ Spotlight
+                          </button>
+                          <button
+                            onClick={() => setLaserMode((v) => !v)}
+                            title="Laser pointer: move mouse to draw attention"
+                            style={{
+                              padding: '3px 8px',
+                              background: laserMode ? 'rgba(255,55,55,0.2)' : 'transparent',
+                              border: `1px solid ${laserMode ? 'rgba(255,55,55,0.6)' : 'rgba(255,255,255,0.2)'}`,
+                              borderRadius: 5,
+                              color: laserMode ? '#ff6b6b' : 'rgba(255,255,255,0.7)',
+                              cursor: 'pointer',
+                              fontSize: '0.7rem',
+                              fontFamily: 'inherit',
+                            }}
+                          >
+                            ● Laser
+                          </button>
+                          <button
+                            onClick={togglePresentationMode}
+                            title="Exit presentation mode (Ctrl+Shift+P or Esc)"
+                            style={{
+                              padding: '3px 8px',
+                              background: 'transparent',
+                              border: '1px solid rgba(255,255,255,0.2)',
+                              borderRadius: 5,
+                              color: 'rgba(255,255,255,0.6)',
+                              cursor: 'pointer',
+                              fontSize: '0.7rem',
+                              fontFamily: 'inherit',
+                            }}
+                          >
+                            ✕ Exit
+                          </button>
+                        </div>
+                      )}
+
+                      {!presentationMode && toolbar}
+
+                      {/* UX-16: Formula bar (Ctrl+Shift+F to toggle) */}
+                      {!readOnly && formulaBarVisible && (
+                        <FormulaBar
+                          nodeId={inspectedId}
+                          node={
+                            inspectedId ? (nodes.find((n) => n.id === inspectedId) ?? null) : null
+                          }
+                          computedValue={inspectedId ? computed.get(inspectedId) : undefined}
+                          onCommit={handleFormulaCommit}
+                        />
+                      )}
+
+                      {paused && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 52,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            zIndex: 10,
+                            background: 'var(--surface-2)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 6,
+                            padding: '0.2rem 0.7rem',
+                            fontSize: '0.72rem',
+                            color: 'var(--text-muted)',
+                            boxShadow: '0 1px 6px rgba(0,0,0,0.25)',
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          {'\u23f8'} {t('toolbar.pausedBanner')}
+                        </div>
+                      )}
+                      {nodes.length === 0 && !readOnly && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            pointerEvents: 'none',
+                            zIndex: 1,
+                          }}
+                        >
+                          <div
+                            style={{
+                              pointerEvents: 'auto',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: '0.6rem',
+                              userSelect: 'none',
+                              textAlign: 'center',
+                              padding: '2rem',
+                              borderRadius: 16,
+                              background: 'rgba(255,255,255,0.025)',
+                              border: '1px solid rgba(255,255,255,0.06)',
+                              maxWidth: 320,
+                            }}
+                          >
+                            <div style={{ fontSize: '2.2rem', opacity: 0.3, lineHeight: 1 }}>⬡</div>
+                            <div
+                              style={{
+                                fontSize: '1rem',
+                                fontWeight: 700,
+                                color: 'rgba(255,255,255,0.35)',
+                                letterSpacing: '0.01em',
+                              }}
+                            >
+                              {t('canvas.emptyTitle', 'Start building')}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: '0.75rem',
+                                color: 'rgba(255,255,255,0.18)',
+                                lineHeight: 1.7,
+                              }}
+                            >
+                              {t('canvas.emptyHint')}
+                            </div>
+                            <button
+                              style={{
+                                marginTop: '0.3rem',
+                                padding: '0.45rem 1.2rem',
+                                borderRadius: 8,
+                                background: 'var(--primary)',
+                                border: 'none',
+                                color: '#fff',
+                                fontSize: '0.8rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                fontFamily: 'inherit',
+                                opacity: 0.85,
+                                transition: 'opacity 0.15s',
+                              }}
+                              onMouseEnter={(e) => {
+                                ;(e.currentTarget as HTMLButtonElement).style.opacity = '1'
+                              }}
+                              onMouseLeave={(e) => {
+                                ;(e.currentTarget as HTMLButtonElement).style.opacity = '0.85'
+                              }}
+                              onClick={() => {
+                                const cx = window.innerWidth / 2
+                                const cy = window.innerHeight / 2
+                                const fp = screenToFlowPosition({ x: cx, y: cy })
+                                setQuickAdd({
+                                  screenX: cx,
+                                  screenY: cy - 60,
+                                  flowX: fp.x,
+                                  flowY: fp.y,
+                                })
+                              }}
+                            >
+                              + {t('canvas.emptyAddBlock', 'Add first block')}
+                            </button>
+                            <div
+                              style={{
+                                fontSize: '0.65rem',
+                                color: 'rgba(255,255,255,0.12)',
+                              }}
+                            >
+                              {t(
+                                'canvas.emptyOrDoubleClick',
+                                'or double-click anywhere on the canvas',
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <ReactFlow
+                        nodes={displayedNodes}
+                        edges={displayedEdges}
+                        nodeTypes={NODE_TYPES}
+                        edgeTypes={EDGE_TYPES}
+                        onNodesChange={readOnly ? undefined : onNodesChange}
+                        onEdgesChange={readOnly ? undefined : onEdgesChange}
+                        onConnect={readOnly ? undefined : onConnect}
+                        isValidConnection={isValidConnection}
+                        onNodeDragStart={readOnly ? undefined : onNodeDragStart}
+                        onNodeDragStop={readOnly ? undefined : onNodeDragStop}
+                        onNodeClick={onNodeClick}
+                        onNodeDoubleClick={onNodeDoubleClick}
+                        onPaneClick={onPaneClick}
+                        onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
+                        onEdgeContextMenu={readOnly ? undefined : onEdgeContextMenu}
+                        onPaneContextMenu={readOnly ? undefined : onPaneContextMenu}
+                        nodesConnectable={!readOnly && !locked}
+                        nodesDraggable={!readOnly && !locked && !panMode}
+                        elementsSelectable={!readOnly}
+                        panOnDrag={panMode || locked ? [0, 1, 2] : [1, 2]}
+                        snapToGrid={snapToGrid}
+                        snapGrid={[16, 16]}
+                        fitView
+                        fitViewOptions={{ padding: 0.2 }}
+                        onMoveStart={onMoveStart}
+                        deleteKeyCode={null}
+                        minZoom={0.08}
+                        maxZoom={4}
+                        proOptions={{ hideAttribution: true }}
+                        // UI-PERF-03: skip rendering nodes/edges outside the viewport
+                        // on large graphs. React Flow's built-in culling avoids creating
+                        // DOM elements for off-screen nodes, which dramatically reduces
+                        // layout work when the canvas has hundreds/thousands of nodes.
+                        onlyRenderVisibleElements={nodes.length > 500}
                       >
-                        ◎ Spotlight
-                      </button>
-                      <button
-                        onClick={() => setLaserMode((v) => !v)}
-                        title="Laser pointer: move mouse to draw attention"
-                        style={{
-                          padding: '3px 8px',
-                          background: laserMode ? 'rgba(255,55,55,0.2)' : 'transparent',
-                          border: `1px solid ${laserMode ? 'rgba(255,55,55,0.6)' : 'rgba(255,255,255,0.2)'}`,
-                          borderRadius: 5,
-                          color: laserMode ? '#ff6b6b' : 'rgba(255,255,255,0.7)',
-                          cursor: 'pointer',
-                          fontSize: '0.7rem',
-                          fontFamily: 'inherit',
+                        {bgDotsVisible && canvasBgStyle !== 'solid' && (
+                          <>
+                            {canvasBgStyle === 'dot-grid' && (
+                              <>
+                                <Background
+                                  id="grid-minor"
+                                  variant={BackgroundVariant.Dots}
+                                  gap={canvasGridSize}
+                                  size={1.5}
+                                  color={gridMinorColor}
+                                />
+                                <Background
+                                  id="grid-major"
+                                  variant={BackgroundVariant.Dots}
+                                  gap={canvasGridSize * 5}
+                                  size={2}
+                                  color={gridMajorColor}
+                                />
+                              </>
+                            )}
+                            {canvasBgStyle === 'line-grid' && (
+                              <Background
+                                id="grid"
+                                variant={BackgroundVariant.Lines}
+                                gap={canvasGridSize}
+                                color={gridMinorColor}
+                              />
+                            )}
+                            {canvasBgStyle === 'cross-grid' && (
+                              <Background
+                                id="grid"
+                                variant={BackgroundVariant.Cross}
+                                gap={canvasGridSize}
+                                size={6}
+                                color={gridMinorColor}
+                              />
+                            )}
+                            {canvasBgStyle === 'large-dots' && (
+                              <Background
+                                id="grid"
+                                variant={BackgroundVariant.Dots}
+                                gap={canvasGridSize * 2}
+                                size={3}
+                                color={gridMinorColor}
+                              />
+                            )}
+                          </>
+                        )}
+                        {/* ADV-04: Comment count badges rendered as NodeToolbar overlays */}
+                        {Array.from(commentCounts.entries()).map(([nodeId, count]) =>
+                          count > 0 ? (
+                            <NodeToolbar
+                              key={`comment-badge-${nodeId}`}
+                              nodeId={nodeId}
+                              isVisible
+                              position={RFPosition.Top}
+                              offset={4}
+                            >
+                              <button
+                                className="nodrag"
+                                title={`${count} comment${count !== 1 ? 's' : ''}`}
+                                onClick={() => openCommentThread(nodeId)}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.2rem',
+                                  padding: '0.1rem 0.35rem',
+                                  fontSize: '0.65rem',
+                                  fontWeight: 700,
+                                  background: 'var(--primary)',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: 10,
+                                  cursor: 'pointer',
+                                  lineHeight: 1.4,
+                                  boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                                }}
+                              >
+                                💬 {count}
+                              </button>
+                            </NodeToolbar>
+                          ) : null,
+                        )}
+                      </ReactFlow>
+                      {minimap && (
+                        <MinimapWrapper
+                          bottomOffset={dockHeight}
+                          nodeCount={nodes.length}
+                          onFitView={() => fitView({ padding: 0.15, duration: 300 })}
+                        >
+                          <MiniMap
+                            pannable
+                            zoomable
+                            style={{
+                              position: 'relative',
+                              background: 'var(--surface-1)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '0 0 4px 4px',
+                            }}
+                            nodeColor={(node) => {
+                              // UX-11: color by node category
+                              switch (node.type) {
+                                case 'csSource':
+                                  return '#1cabb0' // teal — input
+                                case 'csOp':
+                                  return '#6366f1' // indigo — function
+                                case 'csDisplay':
+                                  return '#f59e0b' // amber — output
+                                case 'csPlot':
+                                  return '#8b5cf6' // purple — plot
+                                case 'csGroup':
+                                  return '#22c55e' // green — group
+                                case 'csAnnotation':
+                                  return '#94a3b8' // gray — annotation
+                                default:
+                                  return '#64748b'
+                              }
+                            }}
+                            maskColor="rgba(0,0,0,0.15)"
+                          />
+                        </MinimapWrapper>
+                      )}
+                      <CanvasToolbar
+                        panMode={panMode}
+                        locked={locked}
+                        snapToGrid={snapToGrid}
+                        minimap={minimap}
+                        paused={paused}
+                        inspVisible={inspVisible}
+                        readOnly={!!readOnly}
+                        onTogglePan={() => setPanMode((v) => !v)}
+                        onToggleLock={() => setLocked((v) => !v)}
+                        onToggleSnap={() => setSnapToGrid((v) => !v)}
+                        onToggleMinimap={() => {
+                          setMinimap((v) => {
+                            setMinimapPref(!v)
+                            return !v
+                          })
                         }}
-                      >
-                        ● Laser
-                      </button>
-                      <button
-                        onClick={togglePresentationMode}
-                        title="Exit presentation mode (Ctrl+Shift+P or Esc)"
-                        style={{
-                          padding: '3px 8px',
-                          background: 'transparent',
-                          border: '1px solid rgba(255,255,255,0.2)',
-                          borderRadius: 5,
-                          color: 'rgba(255,255,255,0.6)',
-                          cursor: 'pointer',
-                          fontSize: '0.7rem',
-                          fontFamily: 'inherit',
+                        onTogglePause={() => setPaused((v) => !v)}
+                        onRefresh={() => setEngineKey((k) => k + 1)}
+                        onToggleInspector={() => {
+                          if (inspVisible) {
+                            setInspectedId(null)
+                            closeWindow(INSPECTOR_WINDOW_ID)
+                          } else {
+                            openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
+                          }
+                          if (isMobile) setLibVisible(false)
                         }}
-                      >
-                        ✕ Exit
-                      </button>
+                        onAutoOrganise={(shiftKey) => handleAutoOrganise(shiftKey ? 'TB' : 'LR')}
+                        edgesAnimated={edgesAnimated}
+                        lodEnabled={lodEnabled}
+                        onToggleEdgesAnimated={() => {
+                          setEdgesAnimated((v) => {
+                            setEdgesAnimatedPref(!v)
+                            return !v
+                          })
+                        }}
+                        onToggleLod={() => {
+                          setLodEnabled((v) => {
+                            setLodPref(!v)
+                            return !v
+                          })
+                        }}
+                        badgesEnabled={badgesEnabled}
+                        onToggleBadges={() => {
+                          setBadgesEnabled((v) => {
+                            setBadgesPref(!v)
+                            return !v
+                          })
+                        }}
+                        edgeBadgesEnabled={edgeBadgesEnabled}
+                        onToggleEdgeBadges={() => {
+                          setEdgeBadgesEnabled((v) => {
+                            setEdgeBadgesPref(!v)
+                            return !v
+                          })
+                        }}
+                        bgDotsVisible={bgDotsVisible}
+                        onToggleBgDots={() => {
+                          setBgDotsVisible((v) => {
+                            setBgDotsPref(!v)
+                            return !v
+                          })
+                        }}
+                        onInsertAnnotation={onInsertAnnotationAtCenter}
+                        hiddenViewMode={hiddenViewMode}
+                        onToggleHiddenView={() => setHiddenViewMode((v) => !v)}
+                        hasHiddenNodes={hasHiddenNodes}
+                        onShowAllHidden={showAllHiddenNodes}
+                        presentationMode={presentationMode}
+                        onTogglePresentationMode={togglePresentationMode}
+                      />
+                      {/* Bottom Dock — hidden in presentation mode */}
+                      {!presentationMode && (
+                        <BottomDock
+                          panels={dockPanels}
+                          collapsed={dockCollapsed}
+                          onToggleCollapsed={() => setDockCollapsed((v) => !v)}
+                          onHeightChange={setDockHeight}
+                        />
+                      )}
+                      {/* V3-5.3: Floating annotation toolbar on annotation selection */}
+                      {inspectedId &&
+                        (() => {
+                          const n = getNode(inspectedId)
+                          return n?.type === 'csAnnotation' ? (
+                            <AnnotationToolbar
+                              nodeId={inspectedId}
+                              onZOrder={readOnly ? undefined : onAnnotationZOrder}
+                            />
+                          ) : null
+                        })()}
                     </div>
-                  )}
 
-                  {!presentationMode && toolbar}
+                    {/* Floating Inspector window (replaces sidebar + mobile drawer) */}
+                    {inspVisible && (
+                      <FloatingInspector
+                        nodeId={inspectedId}
+                        pinned={inspPinned}
+                        onTogglePin={() => setInspPinned((v) => !v)}
+                        onToggleCollapse={toggleGroupCollapse}
+                        onUngroupNode={ungroupNode}
+                        canUseGroups={ent.canUseGroups}
+                      />
+                    )}
 
-                  {/* UX-16: Formula bar (Ctrl+Shift+F to toggle) */}
-                  {!readOnly && formulaBarVisible && (
-                    <FormulaBar
-                      nodeId={inspectedId}
-                      node={inspectedId ? (nodes.find((n) => n.id === inspectedId) ?? null) : null}
-                      computedValue={inspectedId ? computed.get(inspectedId) : undefined}
-                      onCommit={handleFormulaCommit}
-                    />
-                  )}
-
-                  {paused && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: 52,
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        zIndex: 10,
-                        background: 'var(--surface-2)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 6,
-                        padding: '0.2rem 0.7rem',
-                        fontSize: '0.72rem',
-                        color: 'var(--text-muted)',
-                        boxShadow: '0 1px 6px rgba(0,0,0,0.25)',
-                        pointerEvents: 'none',
-                      }}
-                    >
-                      {'\u23f8'} {t('toolbar.pausedBanner')}
-                    </div>
-                  )}
-                  {nodes.length === 0 && !readOnly && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        pointerEvents: 'none',
-                        zIndex: 1,
-                      }}
-                    >
+                    {/* ── Mobile overlay drawers ──────────────────────────────────────────── */}
+                    {showBackdrop && (
                       <div
                         style={{
-                          pointerEvents: 'auto',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          gap: '0.6rem',
-                          userSelect: 'none',
-                          textAlign: 'center',
-                          padding: '2rem',
-                          borderRadius: 16,
-                          background: 'rgba(255,255,255,0.025)',
-                          border: '1px solid rgba(255,255,255,0.06)',
-                          maxWidth: 320,
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'var(--overlay)',
+                          zIndex: 19,
+                        }}
+                        onClick={() => {
+                          setLibVisible(false)
+                        }}
+                      />
+                    )}
+
+                    {/* Phase 12: Floating action button for quick-add on mobile */}
+                    {!readOnly && isMobile && !libVisible && (
+                      <button
+                        className="cs-mobile-fab"
+                        onClick={() => setLibVisible(true)}
+                        aria-label={t('canvas.mobileFabAdd')}
+                        title={t('canvas.mobileFabAdd')}
+                      >
+                        +
+                      </button>
+                    )}
+
+                    {!readOnly && isMobile && (
+                      <BottomSheet
+                        open={libVisible}
+                        onClose={() => setLibVisible(false)}
+                        title={t('dock.library', 'Library')}
+                        height="full"
+                      >
+                        <BlockLibrary
+                          width={mobileDrawerWidth}
+                          onResizeStart={() => {}}
+                          plan={plan}
+                          onProBlocked={() => setShowUpgradeModal(true)}
+                          onInsertTemplate={onInsertTemplate}
+                          filterMainOverride={libFilterMain}
+                          onInsertBlock={insertBlockAtCenter}
+                        />
+                      </BottomSheet>
+                    )}
+
+                    {/* Context menu */}
+                    {contextMenu && (
+                      <ContextMenu
+                        target={contextMenu}
+                        onClose={() => setContextMenu(null)}
+                        onDuplicateNode={duplicateNode}
+                        onDeleteNode={deleteNode}
+                        onDeleteEdge={deleteEdge}
+                        onInspectNode={inspectNode}
+                        onRenameNode={renameNode}
+                        onLockNode={lockNode}
+                        onFitView={() => fitView({ padding: 0.15, duration: 300 })}
+                        onAddBlockAtCursor={onAddBlockAtCursor}
+                        onGroupSelection={groupSelection}
+                        onUngroupNode={ungroupNode}
+                        onToggleCollapse={toggleGroupCollapse}
+                        onAutoResizeGroup={resizeGroupToFit}
+                        onDeleteSelected={deleteSelected}
+                        onSaveAsTemplate={saveAsTemplate}
+                        canUseGroups={ent.canUseGroups}
+                        onCopyNodeValue={copyNodeValue}
+                        onJumpToNode={jumpToNode}
+                        computed={computed}
+                        onPaste={readOnly ? undefined : handlePaste}
+                        onAutoLayout={readOnly ? undefined : () => handleAutoOrganise('LR')}
+                        onInspectEdge={inspectEdge}
+                        onInsertConversion={readOnly ? undefined : insertConversion}
+                        onExplainNode={onExplainNode}
+                        onInsertFromPrompt={onInsertFromPrompt}
+                        onAlignSelection={readOnly ? undefined : alignSelection}
+                        onInsertAnnotation={readOnly ? undefined : onInsertAnnotation}
+                        snapToGrid={snapToGrid}
+                        onToggleSnap={readOnly ? undefined : () => setSnapToGrid((v) => !v)}
+                        onSelectChain={readOnly ? undefined : selectChain}
+                        onShowNotation={showNotation}
+                        onHideSelected={readOnly ? undefined : hideSelectedNodes}
+                        onShowAllHidden={readOnly ? undefined : showAllHiddenNodes}
+                        hasHiddenNodes={hasHiddenNodes}
+                        onAnnotationZOrder={readOnly ? undefined : onAnnotationZOrder}
+                        onSetNodeColor={readOnly ? undefined : setNodeColor}
+                        onDisconnectNode={readOnly ? undefined : disconnectNode}
+                        onResetNodeToDefault={readOnly ? undefined : resetNodeToDefault}
+                        onAddProbeNode={readOnly ? undefined : addProbeNode}
+                        onSelectAll={selectAll}
+                        onAddComment={readOnly ? undefined : handleContextMenuComment}
+                      />
+                    )}
+
+                    {/* ADV-04: Node comment thread dialog */}
+                    {commentDialog && (
+                      <NodeCommentDialog
+                        nodeId={commentDialog.nodeId}
+                        nodeLabel={
+                          nodes.find((n) => n.id === commentDialog.nodeId)?.data?.label as
+                            | string
+                            | undefined
+                        }
+                        projectId={useProjectStore.getState().projectId ?? ''}
+                        canvasId={canvasId ?? ''}
+                        comments={comments.filter((c) => c.node_id === commentDialog.nodeId)}
+                        onRefresh={refreshComments}
+                        onClose={() => setCommentDialog(null)}
+                        x={commentDialog.x}
+                        y={commentDialog.y}
+                      />
+                    )}
+
+                    {/* I2-1: Notation panel */}
+                    {notationTarget && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: notationTarget.x,
+                          top: notationTarget.y,
+                          zIndex: 1000,
                         }}
                       >
-                        <div style={{ fontSize: '2.2rem', opacity: 0.3, lineHeight: 1 }}>⬡</div>
-                        <div
-                          style={{
-                            fontSize: '1rem',
-                            fontWeight: 700,
-                            color: 'rgba(255,255,255,0.35)',
-                            letterSpacing: '0.01em',
-                          }}
-                        >
-                          {t('canvas.emptyTitle', 'Start building')}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: '0.75rem',
-                            color: 'rgba(255,255,255,0.18)',
-                            lineHeight: 1.7,
-                          }}
-                        >
-                          {t('canvas.emptyHint')}
-                        </div>
-                        <button
-                          style={{
-                            marginTop: '0.3rem',
-                            padding: '0.45rem 1.2rem',
-                            borderRadius: 8,
-                            background: 'var(--primary)',
-                            border: 'none',
-                            color: '#fff',
-                            fontSize: '0.8rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            fontFamily: 'inherit',
-                            opacity: 0.85,
-                            transition: 'opacity 0.15s',
-                          }}
-                          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}
-                          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.85' }}
-                          onClick={() => {
-                            const cx = window.innerWidth / 2
-                            const cy = window.innerHeight / 2
-                            const fp = screenToFlowPosition({ x: cx, y: cy })
-                            setQuickAdd({ screenX: cx, screenY: cy - 60, flowX: fp.x, flowY: fp.y })
-                          }}
-                        >
-                          + {t('canvas.emptyAddBlock', 'Add first block')}
-                        </button>
-                        <div
-                          style={{
-                            fontSize: '0.65rem',
-                            color: 'rgba(255,255,255,0.12)',
-                          }}
-                        >
-                          {t('canvas.emptyOrDoubleClick', 'or double-click anywhere on the canvas')}
-                        </div>
+                        <ExpressionPanel
+                          nodeId={notationTarget.nodeId}
+                          nodes={nodes}
+                          edges={edges}
+                          computed={computed}
+                          onClose={() => setNotationTarget(null)}
+                        />
                       </div>
-                    </div>
-                  )}
-                  <ReactFlow
-                    nodes={displayedNodes}
-                    edges={displayedEdges}
-                    nodeTypes={NODE_TYPES}
-                    edgeTypes={EDGE_TYPES}
-                    onNodesChange={readOnly ? undefined : onNodesChange}
-                    onEdgesChange={readOnly ? undefined : onEdgesChange}
-                    onConnect={readOnly ? undefined : onConnect}
-                    isValidConnection={isValidConnection}
-                    onNodeDragStart={readOnly ? undefined : onNodeDragStart}
-                    onNodeDragStop={readOnly ? undefined : onNodeDragStop}
-                    onNodeClick={onNodeClick}
-                    onNodeDoubleClick={onNodeDoubleClick}
-                    onPaneClick={onPaneClick}
-                    onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
-                    onEdgeContextMenu={readOnly ? undefined : onEdgeContextMenu}
-                    onPaneContextMenu={readOnly ? undefined : onPaneContextMenu}
-                    nodesConnectable={!readOnly && !locked}
-                    nodesDraggable={!readOnly && !locked && !panMode}
-                    elementsSelectable={!readOnly}
-                    panOnDrag={panMode || locked ? [0, 1, 2] : [1, 2]}
-                    snapToGrid={snapToGrid}
-                    snapGrid={[16, 16]}
-                    fitView
-                    fitViewOptions={{ padding: 0.2 }}
-                    onMoveStart={onMoveStart}
-                    deleteKeyCode={null}
-                    minZoom={0.08}
-                    maxZoom={4}
-                    proOptions={{ hideAttribution: true }}
-                    // UI-PERF-03: skip rendering nodes/edges outside the viewport
-                    // on large graphs. React Flow's built-in culling avoids creating
-                    // DOM elements for off-screen nodes, which dramatically reduces
-                    // layout work when the canvas has hundreds/thousands of nodes.
-                    onlyRenderVisibleElements={nodes.length > 500}
-                  >
-                    {bgDotsVisible && (
-                      <>
-                        <Background
-                          id="grid-minor"
-                          variant={BackgroundVariant.Dots}
-                          gap={20}
-                          size={1.5}
-                          color={gridMinorColor}
-                        />
-                        <Background
-                          id="grid-major"
-                          variant={BackgroundVariant.Dots}
-                          gap={100}
-                          size={2}
-                          color={gridMajorColor}
-                        />
-                      </>
                     )}
-                  </ReactFlow>
-                  {minimap && (
-                    <MinimapWrapper
-                      bottomOffset={dockHeight}
-                      nodeCount={nodes.length}
-                      onFitView={() => fitView({ padding: 0.15, duration: 300 })}
-                    >
-                      <MiniMap
-                        pannable
-                        zoomable
-                        style={{
-                          position: 'relative',
-                          background: 'var(--surface-1)',
-                          border: '1px solid var(--border)',
-                          borderRadius: '0 0 4px 4px',
+
+                    {/* Quick-add palette */}
+                    {quickAdd && (
+                      <QuickAddPalette
+                        screenX={quickAdd.screenX}
+                        screenY={quickAdd.screenY}
+                        onAdd={onQuickAddBlock}
+                        onClose={() => setQuickAdd(null)}
+                        plan={plan}
+                        onProBlocked={() => {
+                          setQuickAdd(null)
+                          setShowUpgradeModal(true)
                         }}
-                        nodeColor={(node) => {
-                          // UX-11: color by node category
-                          switch (node.type) {
-                            case 'csSource': return '#1cabb0'   // teal — input
-                            case 'csOp': return '#6366f1'        // indigo — function
-                            case 'csDisplay': return '#f59e0b'   // amber — output
-                            case 'csPlot': return '#8b5cf6'      // purple — plot
-                            case 'csGroup': return '#22c55e'     // green — group
-                            case 'csAnnotation': return '#94a3b8' // gray — annotation
-                            default: return '#64748b'
-                          }
-                        }}
-                        maskColor="rgba(0,0,0,0.15)"
                       />
-                    </MinimapWrapper>
-                  )}
-                  <CanvasToolbar
-                    panMode={panMode}
-                    locked={locked}
-                    snapToGrid={snapToGrid}
-                    minimap={minimap}
-                    paused={paused}
-                    inspVisible={inspVisible}
-                    readOnly={!!readOnly}
-                    onTogglePan={() => setPanMode((v) => !v)}
-                    onToggleLock={() => setLocked((v) => !v)}
-                    onToggleSnap={() => setSnapToGrid((v) => !v)}
-                    onToggleMinimap={() => {
-                      setMinimap((v) => {
-                        setMinimapPref(!v)
-                        return !v
-                      })
-                    }}
-                    onTogglePause={() => setPaused((v) => !v)}
-                    onRefresh={() => setEngineKey((k) => k + 1)}
-                    onToggleInspector={() => {
-                      if (inspVisible) {
-                        setInspectedId(null)
-                        closeWindow(INSPECTOR_WINDOW_ID)
-                      } else {
-                        openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
-                      }
-                      if (isMobile) setLibVisible(false)
-                    }}
-                    onAutoOrganise={(shiftKey) => handleAutoOrganise(shiftKey ? 'TB' : 'LR')}
-                    edgesAnimated={edgesAnimated}
-                    lodEnabled={lodEnabled}
-                    onToggleEdgesAnimated={() => {
-                      setEdgesAnimated((v) => {
-                        setEdgesAnimatedPref(!v)
-                        return !v
-                      })
-                    }}
-                    onToggleLod={() => {
-                      setLodEnabled((v) => {
-                        setLodPref(!v)
-                        return !v
-                      })
-                    }}
-                    badgesEnabled={badgesEnabled}
-                    onToggleBadges={() => {
-                      setBadgesEnabled((v) => {
-                        setBadgesPref(!v)
-                        return !v
-                      })
-                    }}
-                    edgeBadgesEnabled={edgeBadgesEnabled}
-                    onToggleEdgeBadges={() => {
-                      setEdgeBadgesEnabled((v) => {
-                        setEdgeBadgesPref(!v)
-                        return !v
-                      })
-                    }}
-                    bgDotsVisible={bgDotsVisible}
-                    onToggleBgDots={() => {
-                      setBgDotsVisible((v) => {
-                        setBgDotsPref(!v)
-                        return !v
-                      })
-                    }}
-                    onInsertAnnotation={onInsertAnnotationAtCenter}
-                    hiddenViewMode={hiddenViewMode}
-                    onToggleHiddenView={() => setHiddenViewMode((v) => !v)}
-                    hasHiddenNodes={hasHiddenNodes}
-                    onShowAllHidden={showAllHiddenNodes}
-                    presentationMode={presentationMode}
-                    onTogglePresentationMode={togglePresentationMode}
-                  />
-                  {/* Bottom Dock — hidden in presentation mode */}
-                  {!presentationMode && (
-                    <BottomDock
-                      panels={dockPanels}
-                      collapsed={dockCollapsed}
-                      onToggleCollapsed={() => setDockCollapsed((v) => !v)}
-                      onHeightChange={setDockHeight}
-                    />
-                  )}
-                  {/* V3-5.3: Floating annotation toolbar on annotation selection */}
-                  {inspectedId &&
-                    (() => {
-                      const n = getNode(inspectedId)
-                      return n?.type === 'csAnnotation' ? (
-                        <AnnotationToolbar
-                          nodeId={inspectedId}
-                          onZOrder={readOnly ? undefined : onAnnotationZOrder}
+                    )}
+                    {/* Find block dialog */}
+                    {findOpen && (
+                      <Suspense fallback={null}>
+                        <LazyFindBlockDialog
+                          nodes={nodes}
+                          onFocusNode={focusNode}
+                          onClose={handleFindClose}
+                          onMatchesChange={handleMatchesChange}
                         />
-                      ) : null
-                    })()}
-                </div>
-
-                {/* Floating Inspector window (replaces sidebar + mobile drawer) */}
-                {inspVisible && (
-                  <FloatingInspector
-                    nodeId={inspectedId}
-                    pinned={inspPinned}
-                    onTogglePin={() => setInspPinned((v) => !v)}
-                    onToggleCollapse={toggleGroupCollapse}
-                    onUngroupNode={ungroupNode}
-                    canUseGroups={ent.canUseGroups}
-                  />
-                )}
-
-                {/* ── Mobile overlay drawers ──────────────────────────────────────────── */}
-                {showBackdrop && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: 'var(--overlay)',
-                      zIndex: 19,
-                    }}
-                    onClick={() => {
-                      setLibVisible(false)
-                    }}
-                  />
-                )}
-
-                {/* Phase 12: Floating action button for quick-add on mobile */}
-                {!readOnly && isMobile && !libVisible && (
-                  <button
-                    className="cs-mobile-fab"
-                    onClick={() => setLibVisible(true)}
-                    aria-label={t('canvas.mobileFabAdd')}
-                    title={t('canvas.mobileFabAdd')}
-                  >
-                    +
-                  </button>
-                )}
-
-                {!readOnly && isMobile && (
-                  <BottomSheet
-                    open={libVisible}
-                    onClose={() => setLibVisible(false)}
-                    title={t('dock.library', 'Library')}
-                    height="full"
-                  >
-                    <BlockLibrary
-                      width={mobileDrawerWidth}
-                      onResizeStart={() => {}}
-                      plan={plan}
-                      onProBlocked={() => setShowUpgradeModal(true)}
-                      onInsertTemplate={onInsertTemplate}
-                      filterMainOverride={libFilterMain}
-                      onInsertBlock={insertBlockAtCenter}
-                    />
-                  </BottomSheet>
-                )}
-
-                {/* Context menu */}
-                {contextMenu && (
-                  <ContextMenu
-                    target={contextMenu}
-                    onClose={() => setContextMenu(null)}
-                    onDuplicateNode={duplicateNode}
-                    onDeleteNode={deleteNode}
-                    onDeleteEdge={deleteEdge}
-                    onInspectNode={inspectNode}
-                    onRenameNode={renameNode}
-                    onLockNode={lockNode}
-                    onFitView={() => fitView({ padding: 0.15, duration: 300 })}
-                    onAddBlockAtCursor={onAddBlockAtCursor}
-                    onGroupSelection={groupSelection}
-                    onUngroupNode={ungroupNode}
-                    onToggleCollapse={toggleGroupCollapse}
-                    onAutoResizeGroup={resizeGroupToFit}
-                    onDeleteSelected={deleteSelected}
-                    onSaveAsTemplate={saveAsTemplate}
-                    canUseGroups={ent.canUseGroups}
-                    onCopyNodeValue={copyNodeValue}
-                    onJumpToNode={jumpToNode}
-                    computed={computed}
-                    onPaste={readOnly ? undefined : handlePaste}
-                    onAutoLayout={readOnly ? undefined : () => handleAutoOrganise('LR')}
-                    onInspectEdge={inspectEdge}
-                    onInsertConversion={readOnly ? undefined : insertConversion}
-                    onExplainNode={onExplainNode}
-                    onInsertFromPrompt={onInsertFromPrompt}
-                    onAlignSelection={readOnly ? undefined : alignSelection}
-                    onInsertAnnotation={readOnly ? undefined : onInsertAnnotation}
-                    snapToGrid={snapToGrid}
-                    onToggleSnap={readOnly ? undefined : () => setSnapToGrid((v) => !v)}
-                    onSelectChain={readOnly ? undefined : selectChain}
-                    onShowNotation={showNotation}
-                    onHideSelected={readOnly ? undefined : hideSelectedNodes}
-                    onShowAllHidden={readOnly ? undefined : showAllHiddenNodes}
-                    hasHiddenNodes={hasHiddenNodes}
-                    onAnnotationZOrder={readOnly ? undefined : onAnnotationZOrder}
-                    onSetNodeColor={readOnly ? undefined : setNodeColor}
-                    onDisconnectNode={readOnly ? undefined : disconnectNode}
-                    onResetNodeToDefault={readOnly ? undefined : resetNodeToDefault}
-                    onAddProbeNode={readOnly ? undefined : addProbeNode}
-                    onSelectAll={selectAll}
-                  />
-                )}
-
-                {/* I2-1: Notation panel */}
-                {notationTarget && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: notationTarget.x,
-                      top: notationTarget.y,
-                      zIndex: 1000,
-                    }}
-                  >
-                    <ExpressionPanel
-                      nodeId={notationTarget.nodeId}
-                      nodes={nodes}
-                      edges={edges}
-                      computed={computed}
-                      onClose={() => setNotationTarget(null)}
-                    />
-                  </div>
-                )}
-
-                {/* Quick-add palette */}
-                {quickAdd && (
-                  <QuickAddPalette
-                    screenX={quickAdd.screenX}
-                    screenY={quickAdd.screenY}
-                    onAdd={onQuickAddBlock}
-                    onClose={() => setQuickAdd(null)}
-                    plan={plan}
-                    onProBlocked={() => {
-                      setQuickAdd(null)
-                      setShowUpgradeModal(true)
-                    }}
-                  />
-                )}
-                {/* Find block dialog */}
-                {findOpen && (
-                  <Suspense fallback={null}>
-                    <LazyFindBlockDialog
-                      nodes={nodes}
-                      onFocusNode={focusNode}
-                      onClose={handleFindClose}
-                      onMatchesChange={handleMatchesChange}
-                    />
-                  </Suspense>
-                )}
-                {/* UX-09: Dim non-matching nodes when search is active */}
-                {searchMatchIds !== null && (
-                  <style>{`
+                      </Suspense>
+                    )}
+                    {/* UX-09: Dim non-matching nodes when search is active */}
+                    {searchMatchIds !== null && (
+                      <style>{`
                     .react-flow__node { opacity: 0.18 !important; transition: opacity 0.12s; }
                     ${searchMatchIds.map((id) => `.react-flow__node[data-id="${CSS.escape(id)}"]`).join(',\n')}
                     { opacity: 1 !important; }
                   `}</style>
-                )}
-                {/* Upgrade modal for Pro-only blocks */}
-                {showUpgradeModal && (
-                  <UpgradeModal
-                    open={showUpgradeModal}
-                    onClose={() => setShowUpgradeModal(false)}
-                    reason="feature_locked"
-                  />
-                )}
-                {/* UX-03: Command palette */}
-                {paletteOpen && (
-                  <CommandPalette
-                    commands={[...paletteCommands, ...annotationPaletteCommands]}
-                    nodeLabels={paletteNodeLabels}
-                    onClose={() => setPaletteOpen(false)}
-                    onInsertBlock={insertBlockAtCenter}
-                  />
-                )}
+                    )}
+                    {/* Upgrade modal for Pro-only blocks */}
+                    {showUpgradeModal && (
+                      <UpgradeModal
+                        open={showUpgradeModal}
+                        onClose={() => setShowUpgradeModal(false)}
+                        reason="feature_locked"
+                      />
+                    )}
+                    {/* UX-03: Command palette */}
+                    {paletteOpen && (
+                      <CommandPalette
+                        commands={[...paletteCommands, ...annotationPaletteCommands]}
+                        nodeLabels={paletteNodeLabels}
+                        onClose={() => setPaletteOpen(false)}
+                        onInsertBlock={insertBlockAtCenter}
+                      />
+                    )}
 
-                {/* Value popover (W12.4) */}
-                {popoverTarget && (
-                  <Suspense fallback={null}>
-                    <LazyValuePopover
-                      nodeId={popoverTarget.nodeId}
-                      x={popoverTarget.x}
-                      y={popoverTarget.y}
-                      computed={computed}
-                      onClose={() => setPopoverTarget(null)}
-                      onJumpToNode={jumpToNode}
-                    />
-                  </Suspense>
-                )}
-              </div>
-            </ValuePopoverContext.Provider>
-          </CanvasSettingsContext.Provider>
-        </BindingContext.Provider>
-      </ComputedContext.Provider>
+                    {/* Value popover (W12.4) */}
+                    {popoverTarget && (
+                      <Suspense fallback={null}>
+                        <LazyValuePopover
+                          nodeId={popoverTarget.nodeId}
+                          x={popoverTarget.x}
+                          y={popoverTarget.y}
+                          computed={computed}
+                          onClose={() => setPopoverTarget(null)}
+                          onJumpToNode={jumpToNode}
+                        />
+                      </Suspense>
+                    )}
+                  </div>
+                </ValuePopoverContext.Provider>
+              </NodeCommentsContext.Provider>
+            </CanvasSettingsContext.Provider>
+          </BindingContext.Provider>
+        </ComputedContext.Provider>
       </ComputedStoreContext.Provider>
     </PlanContext.Provider>
   )

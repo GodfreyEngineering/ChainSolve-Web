@@ -532,6 +532,18 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   'constElec',
   'presetMaterials',
   'presetFluids',
+  'chem',
+  'structural',
+  'aerospace',
+  'controlSystems',
+  'lifeSci',
+  'finOptions',
+  'dateTime',
+  'text',
+  'interval',
+  'signal',
+  'complex',
+  'matrix',
 ]
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -570,6 +582,18 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   presetMaterials: 'Material Presets',
   presetFluids: 'Fluid Presets',
   customFunctions: 'Custom Functions',
+  chem: 'Chemical Eng',
+  structural: 'Structural Eng',
+  aerospace: 'Aerospace',
+  controlSystems: 'Control Systems',
+  lifeSci: 'Life Sciences',
+  finOptions: 'Options & Risk',
+  dateTime: 'Date & Time',
+  text: 'Text',
+  interval: 'Interval Arithmetic',
+  signal: 'Signal Processing',
+  complex: 'Complex Numbers',
+  matrix: 'Matrix Ops',
 }
 
 // ── Block taxonomy (G3-1: 3 main categories with subcategories) ─────────────
@@ -632,6 +656,18 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
       { id: 'fnUtil', label: 'Utilities', categories: ['utilCalc'] },
       { id: 'fnVectorOps', label: 'List Ops', categories: ['vectorOps'] },
       { id: 'fnTableOps', label: 'Table Ops', categories: ['tableOps'] },
+      { id: 'fnChem', label: 'Chemical Eng', categories: ['chem'] },
+      { id: 'fnStructural', label: 'Structural Eng', categories: ['structural'] },
+      { id: 'fnAerospace', label: 'Aerospace', categories: ['aerospace'] },
+      { id: 'fnControlSystems', label: 'Control Systems', categories: ['controlSystems'] },
+      { id: 'fnLifeSci', label: 'Life Sciences', categories: ['lifeSci'] },
+      { id: 'fnFinOptions', label: 'Options & Risk', categories: ['finOptions'] },
+      { id: 'fnDateTime', label: 'Date & Time', categories: ['dateTime'] },
+      { id: 'fnText', label: 'Text', categories: ['text'] },
+      { id: 'fnInterval', label: 'Interval Arithmetic', categories: ['interval'] },
+      { id: 'fnSignal', label: 'Signal Processing', categories: ['signal'] },
+      { id: 'fnComplex', label: 'Complex Numbers', categories: ['complex'] },
+      { id: 'fnMatrix', label: 'Matrix Ops', categories: ['matrix'] },
     ],
   },
   {
@@ -737,6 +773,20 @@ import { registerPlotBlocks } from './plot-blocks'
 import { registerEngBlocks } from './eng-blocks'
 import { registerFinStatsBlocks } from './fin-stats-blocks'
 import { registerConstantsBlocks } from './constants-blocks'
+import { registerDistBlocks } from './dist-blocks'
+import { registerChemBlocks } from './chem-blocks'
+import { registerStructBlocks } from './struct-blocks'
+import { registerAeroBlocks } from './aero-blocks'
+import { registerCtrlBlocks } from './ctrl-blocks'
+import { registerBioBlocks } from './bio-blocks'
+import { registerFinOptionsBlocks } from './fin-options-blocks'
+import { registerDateBlocks } from './date-blocks'
+import { registerTextBlocks } from './text-blocks'
+import { registerIntervalBlocks } from './interval-blocks'
+import { registerSignalBlocks } from './signal-blocks'
+import { registerComplexBlocks } from './complex-blocks'
+import { registerMatrixBlocks } from './matrix-blocks'
+import { registerLookupBlocks } from './lookup-blocks'
 
 registerDataBlocks(reg)
 registerVectorBlocks(reg)
@@ -745,6 +795,20 @@ registerPlotBlocks(reg)
 registerEngBlocks(reg)
 registerFinStatsBlocks(reg)
 registerConstantsBlocks(reg)
+registerDistBlocks(reg)
+registerChemBlocks(reg)
+registerStructBlocks(reg)
+registerAeroBlocks(reg)
+registerCtrlBlocks(reg)
+registerBioBlocks(reg)
+registerFinOptionsBlocks(reg)
+registerDateBlocks(reg)
+registerTextBlocks(reg)
+registerIntervalBlocks(reg)
+registerSignalBlocks(reg)
+registerComplexBlocks(reg)
+registerMatrixBlocks(reg)
+registerLookupBlocks(reg)
 
 // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
 import { SEARCH_METADATA } from './blockSearchMetadata'

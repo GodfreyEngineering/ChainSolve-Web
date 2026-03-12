@@ -21,15 +21,12 @@ export function useFormatValue(): (v: Value | undefined) => string {
   const locale = i18n.language
   const prefs = usePreferencesStore()
 
-  const highPrecisionLookup = useCallback(
-    (n: number, decimalPlaces: number): string | null => {
-      const c = matchHighPrecisionConstant(n)
-      if (!c) return null
-      const dp = decimalPlaces >= 0 ? decimalPlaces : 6
-      return formatHighPrecision(c, Math.min(dp, 100))
-    },
-    [],
-  )
+  const highPrecisionLookup = useCallback((n: number, decimalPlaces: number): string | null => {
+    const c = matchHighPrecisionConstant(n)
+    if (!c) return null
+    const dp = decimalPlaces >= 0 ? decimalPlaces : 6
+    return formatHighPrecision(c, Math.min(dp, 100))
+  }, [])
 
   const opts: FormatOptions = {
     numberDisplayMode: prefs.numberDisplayMode,

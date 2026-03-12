@@ -1,13 +1,14 @@
 /**
- * ProjectsPanel — sidebar tab showing the user's projects.
+ * ProjectsPanel — sidebar tab showing the user's projects with folder tree (PROJ-04).
  *
- * Compact list view of projects with search, create, and open actions.
- * PROJ-05: Fuzzy search with match highlighting.
+ * Features:
+ *   - PROJ-05: Fuzzy search with match highlighting
+ *   - PROJ-04: Expandable folder nodes, drag-to-move, folder CRUD
  */
 
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Search, Upload } from 'lucide-react'
+import { Plus, Search, Upload, FolderPlus, ChevronRight, ChevronDown, Folder } from 'lucide-react'
 import {
   listProjects,
   renameProject,
@@ -15,6 +16,8 @@ import {
   duplicateProject,
   importProject,
   validateProjectJSON,
+  moveToFolder,
+  createProject,
   type ProjectRow,
 } from '../../../lib/projects'
 import { validateProjectName } from '../../../lib/validateProjectName'
@@ -24,11 +27,35 @@ import { removeRecentProject } from '../../../lib/recentProjects'
 import { Icon } from '../../ui/Icon'
 import { Tooltip } from '../../ui/Tooltip'
 
+// ── Local-storage key for extra empty folders ────────────────────────────────
+
+const CUSTOM_FOLDERS_KEY = 'cs:customFolders'
+
+function loadCustomFolders(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(CUSTOM_FOLDERS_KEY) ?? '[]') as string[]
+  } catch {
+    return []
+  }
+}
+
+function saveCustomFolders(folders: string[]): void {
+  try {
+    localStorage.setItem(CUSTOM_FOLDERS_KEY, JSON.stringify(folders))
+  } catch {
+    // ignore
+  }
+}
+
+// ── Props ─────────────────────────────────────────────────────────────────────
+
 interface ProjectsPanelProps {
   plan: Plan
   onOpenProject: (projectId: string) => void
   onNewProject: () => void
 }
+
+// ── ProjectsPanel ─────────────────────────────────────────────────────────────
 
 export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPanelProps) {
   const { t } = useTranslation()
@@ -39,14 +66,19 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
   const [menuOpen, setMenuOpen] = useState<string | null>(null)
   const [importing, setImporting] = useState(false)
   const importRef = useRef<HTMLInputElement>(null)
+  // Folder state
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() => new Set())
+  const [folderMenu, setFolderMenu] = useState<string | null>(null) // folder name with menu open
+  const [customFolders, setCustomFolders] = useState<string[]>(loadCustomFolders)
+  const [dragOverFolder, setDragOverFolder] = useState<string | null>(null)
+  const [dragProjectId, setDragProjectId] = useState<string | null>(null)
 
   const fetchProjects = useCallback(async () => {
-    setLoading(true)
     try {
       const rows = await listProjects()
       setProjects(rows)
     } catch {
-      // Ignore — projects may be loading
+      // ignore
     }
     setLoading(false)
   }, [])
@@ -61,32 +93,52 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
   const ent = getEntitlements(plan)
   const allowCreate = canCreateProject(plan, projects.length)
 
-  const filtered = useMemo(() => {
+  // ── Derived folder list ──────────────────────────────────────────────────────
+
+  const allFolders = useMemo(() => {
+    const dbFolders = new Set(
+      projects.map((p) => p.folder).filter((f): f is string => f != null && f.length > 0),
+    )
+    const merged = new Set([...dbFolders, ...customFolders])
+    return [...merged].sort((a, b) => a.localeCompare(b))
+  }, [projects, customFolders])
+
+  // Remove custom folders that now have real projects
+  useEffect(() => {
+    const dbFolders = new Set(projects.map((p) => p.folder).filter((f): f is string => f != null))
+    setCustomFolders((prev) => {
+      const next = prev.filter((f) => !dbFolders.has(f))
+      saveCustomFolders(next)
+      return next
+    })
+  }, [projects])
+
+  // ── Search / filter ──────────────────────────────────────────────────────────
+
+  const scored = useMemo(() => {
     const q = query.trim()
-    // Build list with fuzzy match results
     type Scored = { project: ProjectRow; score: number; matchIndices: number[] }
-    let scored: Scored[]
+    let result: Scored[]
     if (q) {
-      scored = projects
+      result = projects
         .map((p) => {
           const m = fuzzyMatch(q, p.name)
           return m ? { project: p, score: m.score, matchIndices: m.indices } : null
         })
         .filter((x): x is Scored => x !== null)
     } else {
-      scored = projects.map((p) => ({ project: p, score: 1, matchIndices: [] }))
+      result = projects.map((p) => ({ project: p, score: 1, matchIndices: [] }))
     }
-    // Sort: pinned first, then by fuzzy score desc (when querying), then by updated_at desc
-    return scored.sort((a, b) => {
+    return result.sort((a, b) => {
       const ap = pinnedIds.has(a.project.id) ? 0 : 1
       const bp = pinnedIds.has(b.project.id) ? 0 : 1
       if (ap !== bp) return ap - bp
       if (q && a.score !== b.score) return b.score - a.score
-      return (
-        new Date(b.project.updated_at).getTime() - new Date(a.project.updated_at).getTime()
-      )
+      return new Date(b.project.updated_at).getTime() - new Date(a.project.updated_at).getTime()
     })
   }, [projects, query, pinnedIds])
+
+  // ── Import ────────────────────────────────────────────────────────────────────
 
   const handleImport = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,11 +165,9 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
         }
         if (validation.warnings.length > 0) {
           const proceed = window.confirm(
-            t(
-              'home.importWarnings',
-              'Import warnings:\n\n{{warnings}}\n\nContinue anyway?',
-              { warnings: validation.warnings.join('\n') },
-            ),
+            t('home.importWarnings', 'Import warnings:\n\n{{warnings}}\n\nContinue anyway?', {
+              warnings: validation.warnings.join('\n'),
+            }),
           )
           if (!proceed) return
         }
@@ -134,6 +184,8 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
     [fetchProjects, t],
   )
 
+  // ── Project actions ───────────────────────────────────────────────────────────
+
   const handleRename = useCallback(
     async (proj: ProjectRow) => {
       setMenuOpen(null)
@@ -148,8 +200,7 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
         await renameProject(proj.id, next.trim())
         fetchProjects()
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Rename failed'
-        window.alert(msg)
+        window.alert(err instanceof Error ? err.message : 'Rename failed')
       }
     },
     [t, fetchProjects],
@@ -181,69 +232,219 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
     setPinnedIds(togglePinnedProject(projId))
   }, [])
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header: Search + Create */}
-      <div style={headerStyle}>
-        <div style={searchRowStyle}>
-          <Icon icon={Search} size={13} style={{ color: 'var(--text-faint)', flexShrink: 0 }} />
-          <input
-            type="search"
-            placeholder={t('home.searchProjects', 'Search projects...')}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            style={searchInputStyle}
-          />
+  const handleMoveToFolder = useCallback(
+    async (projId: string, folder: string | null) => {
+      setMenuOpen(null)
+      await moveToFolder(projId, folder)
+      fetchProjects()
+    },
+    [fetchProjects],
+  )
+
+  // ── Folder actions ────────────────────────────────────────────────────────────
+
+  const handleNewFolder = useCallback(() => {
+    const name = window.prompt(t('folders.newFolderPrompt', 'Folder name:'))?.trim()
+    if (!name) return
+    if (allFolders.includes(name)) {
+      window.alert(t('folders.alreadyExists', 'A folder with that name already exists.'))
+      return
+    }
+    setCustomFolders((prev) => {
+      const next = [...prev, name]
+      saveCustomFolders(next)
+      return next
+    })
+    setExpandedFolders((prev) => new Set([...prev, name]))
+  }, [allFolders, t])
+
+  const handleRenameFolder = useCallback(
+    async (oldName: string) => {
+      setFolderMenu(null)
+      const next = window.prompt(t('folders.renamePrompt', 'Rename folder:'), oldName)?.trim()
+      if (!next || next === oldName) return
+      if (allFolders.includes(next)) {
+        window.alert(t('folders.alreadyExists', 'A folder with that name already exists.'))
+        return
+      }
+      // Move all projects in this folder to the new name
+      const affected = projects.filter((p) => p.folder === oldName)
+      await Promise.all(affected.map((p) => moveToFolder(p.id, next)))
+      // Update custom folders if it was custom
+      setCustomFolders((prev) => {
+        const updated = prev.map((f) => (f === oldName ? next : f))
+        saveCustomFolders(updated)
+        return updated
+      })
+      fetchProjects()
+    },
+    [allFolders, projects, fetchProjects, t],
+  )
+
+  const handleDeleteFolder = useCallback(
+    async (folderName: string) => {
+      setFolderMenu(null)
+      const affected = projects.filter((p) => p.folder === folderName)
+      const msg =
+        affected.length > 0
+          ? t(
+              'folders.confirmDelete',
+              'Delete folder "{{name}}"? {{count}} project(s) will be moved to Unfiled.',
+              { name: folderName, count: affected.length },
+            )
+          : t('folders.confirmDeleteEmpty', 'Delete empty folder "{{name}}"?', {
+              name: folderName,
+            })
+      if (!window.confirm(msg)) return
+      await Promise.all(affected.map((p) => moveToFolder(p.id, null)))
+      setCustomFolders((prev) => {
+        const next = prev.filter((f) => f !== folderName)
+        saveCustomFolders(next)
+        return next
+      })
+      fetchProjects()
+    },
+    [projects, fetchProjects, t],
+  )
+
+  const handleNewProjectInFolder = useCallback(
+    async (folderName: string) => {
+      setFolderMenu(null)
+      if (!allowCreate) return
+      const proj = await createProject('Untitled project', folderName)
+      fetchProjects()
+      onOpenProject(proj.id)
+    },
+    [allowCreate, fetchProjects, onOpenProject],
+  )
+
+  // ── Drag-and-drop ─────────────────────────────────────────────────────────────
+
+  const handleDragStart = useCallback((projId: string) => {
+    setDragProjectId(projId)
+  }, [])
+
+  const handleDropOnFolder = useCallback(
+    async (folder: string | null) => {
+      if (!dragProjectId) return
+      setDragOverFolder(null)
+      setDragProjectId(null)
+      await moveToFolder(dragProjectId, folder)
+      fetchProjects()
+    },
+    [dragProjectId, fetchProjects],
+  )
+
+  // ── Render helpers ────────────────────────────────────────────────────────────
+
+  const toggleFolder = useCallback((name: string) => {
+    setExpandedFolders((prev) => {
+      const next = new Set(prev)
+      if (next.has(name)) next.delete(name)
+      else next.add(name)
+      return next
+    })
+  }, [])
+
+  const renderProjectRow = (proj: ProjectRow, matchIndices: number[]) => (
+    <ProjectItem
+      key={proj.id}
+      project={proj}
+      pinned={pinnedIds.has(proj.id)}
+      matchIndices={matchIndices}
+      menuOpen={menuOpen === proj.id}
+      folders={allFolders}
+      onOpen={() => onOpenProject(proj.id)}
+      onMenuToggle={() => setMenuOpen(menuOpen === proj.id ? null : proj.id)}
+      onRename={() => handleRename(proj)}
+      onDuplicate={() => handleDuplicate(proj)}
+      onDelete={() => handleDelete(proj)}
+      onPin={() => handlePin(proj.id)}
+      onMoveToFolder={(f) => handleMoveToFolder(proj.id, f)}
+      onDragStart={() => handleDragStart(proj.id)}
+    />
+  )
+
+  // In search mode: flat list
+  if (query.trim()) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <PanelHeader
+          query={query}
+          setQuery={setQuery}
+          allowCreate={allowCreate}
+          importing={importing}
+          importRef={importRef}
+          onNewProject={onNewProject}
+          onNewFolder={handleNewFolder}
+          onImport={handleImport}
+          t={t}
+        />
+        <div style={countStyle}>
+          {ent.maxProjects === Infinity
+            ? `${projects.length} ${t('sidebar.projectsCount', 'projects')}`
+            : `${projects.length} / ${ent.maxProjects}`}
         </div>
-        <div style={{ display: 'flex', gap: 4 }}>
-          <Tooltip content={t('home.createProject', 'New project')} side="bottom">
-            <button
-              data-tour="btn-new-project"
-              style={actionBtnStyle}
-              onClick={onNewProject}
-              disabled={!allowCreate}
-              aria-label={t('home.createProject')}
-            >
-              <Icon icon={Plus} size={14} />
-            </button>
-          </Tooltip>
-          <Tooltip content={t('home.importProject', 'Import')} side="bottom">
-            <button
-              style={{ ...actionBtnStyle, opacity: importing ? 0.5 : undefined }}
-              onClick={() => !importing && importRef.current?.click()}
-              aria-label={t('home.importProject')}
-              disabled={importing}
-            >
-              <Icon icon={Upload} size={14} />
-              {importing && (
-                <span style={{ fontSize: '0.6rem', marginLeft: 2, opacity: 0.8 }}>⟳</span>
-              )}
-            </button>
-          </Tooltip>
-          <input
-            ref={importRef}
-            type="file"
-            accept=".json,.chainsolvejson"
-            style={{ display: 'none' }}
-            onChange={handleImport}
-          />
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 0.3rem 0.5rem' }}>
+          {scored.map(({ project: proj, matchIndices }) => renderProjectRow(proj, matchIndices))}
         </div>
       </div>
+    )
+  }
 
-      {/* Count */}
+  // Folder tree mode
+  const projectsByFolder = new Map<string | null, ProjectRow[]>()
+  projectsByFolder.set(null, [])
+  for (const folder of allFolders) projectsByFolder.set(folder, [])
+  for (const p of projects) {
+    const f = p.folder ?? null
+    if (!projectsByFolder.has(f)) projectsByFolder.set(f, [])
+    projectsByFolder.get(f)!.push(p)
+  }
+
+  const sortProjects = (list: ProjectRow[]) =>
+    [...list].sort((a, b) => {
+      const ap = pinnedIds.has(a.id) ? 0 : 1
+      const bp = pinnedIds.has(b.id) ? 0 : 1
+      if (ap !== bp) return ap - bp
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    })
+
+  const unfiled = sortProjects(projectsByFolder.get(null) ?? [])
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <PanelHeader
+        query={query}
+        setQuery={setQuery}
+        allowCreate={allowCreate}
+        importing={importing}
+        importRef={importRef}
+        onNewProject={onNewProject}
+        onNewFolder={handleNewFolder}
+        onImport={handleImport}
+        t={t}
+      />
       <div style={countStyle}>
         {ent.maxProjects === Infinity
           ? `${projects.length} ${t('sidebar.projectsCount', 'projects')}`
           : `${projects.length} / ${ent.maxProjects}`}
       </div>
 
-      {/* Project list */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 0.3rem 0.5rem' }}>
         {loading && projects.length === 0 && (
           <div style={emptyStyle}>{t('home.loadingProjects', 'Loading...')}</div>
         )}
-        {!loading && projects.length === 0 && (
-          <div style={{ ...emptyStyle, gap: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {!loading && projects.length === 0 && allFolders.length === 0 && (
+          <div
+            style={{
+              ...emptyStyle,
+              gap: '0.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
             <div style={{ fontSize: '2rem', opacity: 0.35 }}>📁</div>
             <div style={{ fontWeight: 600, opacity: 0.6 }}>
               {t('home.noProjectsTitle', 'No projects yet')}
@@ -252,77 +453,263 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
               {t('home.noProjectsHint', 'Create your first project to get started')}
             </div>
             {canCreateProject(plan, 0) && (
-              <button
-                style={{
-                  marginTop: '0.3rem',
-                  padding: '0.4rem 1rem',
-                  borderRadius: 8,
-                  background: 'var(--primary)',
-                  border: 'none',
-                  color: '#fff',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                }}
-                onClick={onNewProject}
-              >
+              <button style={createFirstBtnStyle} onClick={onNewProject}>
                 + {t('home.createFirstProject', 'Create project')}
               </button>
             )}
           </div>
         )}
-        {filtered.map(({ project: proj, matchIndices }) => (
-          <ProjectRow
-            key={proj.id}
-            project={proj}
-            pinned={pinnedIds.has(proj.id)}
-            matchIndices={matchIndices}
-            menuOpen={menuOpen === proj.id}
-            onOpen={() => onOpenProject(proj.id)}
-            onMenuToggle={() => setMenuOpen(menuOpen === proj.id ? null : proj.id)}
-            onRename={() => handleRename(proj)}
-            onDuplicate={() => handleDuplicate(proj)}
-            onDelete={() => handleDelete(proj)}
-            onPin={() => handlePin(proj.id)}
-          />
-        ))}
+
+        {/* Folders */}
+        {allFolders.map((folder) => {
+          const folderProjects = sortProjects(projectsByFolder.get(folder) ?? [])
+          const expanded = expandedFolders.has(folder)
+          const isOver = dragOverFolder === folder
+          return (
+            <div key={folder}>
+              {/* Folder header */}
+              <div
+                style={{
+                  ...folderHeaderStyle,
+                  background: isOver ? 'var(--primary-dim)' : 'transparent',
+                  outline: isOver ? '2px solid var(--primary)' : 'none',
+                  borderRadius: 5,
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  setDragOverFolder(folder)
+                }}
+                onDragLeave={() => setDragOverFolder(null)}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  void handleDropOnFolder(folder)
+                }}
+              >
+                <button
+                  style={folderToggleBtn}
+                  onClick={() => toggleFolder(folder)}
+                  aria-label={expanded ? 'Collapse folder' : 'Expand folder'}
+                >
+                  <Icon icon={expanded ? ChevronDown : ChevronRight} size={12} />
+                  <Icon
+                    icon={Folder}
+                    size={13}
+                    style={{ color: 'var(--primary)', marginLeft: 2 }}
+                  />
+                  <span style={folderNameStyle}>{folder}</span>
+                  {folderProjects.length > 0 && (
+                    <span style={folderCountBadge}>{folderProjects.length}</span>
+                  )}
+                </button>
+
+                {/* Folder context menu button */}
+                <button
+                  style={folderMenuBtn}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setFolderMenu(folderMenu === folder ? null : folder)
+                  }}
+                  aria-label={t('projects.folderOptions')}
+                >
+                  ⋯
+                </button>
+
+                {folderMenu === folder && (
+                  <div style={folderMenuStyle}>
+                    <button
+                      className="cs-header-dropdown-item"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        void handleNewProjectInFolder(folder)
+                      }}
+                    >
+                      {t('folders.newProjectHere', 'New project here')}
+                    </button>
+                    <button
+                      className="cs-header-dropdown-item"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        void handleRenameFolder(folder)
+                      }}
+                    >
+                      {t('folders.rename', 'Rename')}
+                    </button>
+                    <div style={{ height: 1, background: 'var(--border)', margin: '0.15rem 0' }} />
+                    <button
+                      className="cs-header-dropdown-item"
+                      style={{ color: 'var(--danger)' }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        void handleDeleteFolder(folder)
+                      }}
+                    >
+                      {t('folders.delete', 'Delete folder')}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Folder contents */}
+              {expanded && (
+                <div style={{ paddingLeft: '1rem' }}>
+                  {folderProjects.length === 0 ? (
+                    <div style={folderEmptyStyle}>
+                      {t('folders.empty', 'Empty — drag a project here')}
+                    </div>
+                  ) : (
+                    folderProjects.map((proj) => renderProjectRow(proj, []))
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
+
+        {/* Unfiled section */}
+        {unfiled.length > 0 && (
+          <>
+            {allFolders.length > 0 && (
+              <div
+                style={unfiledHeaderStyle}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  setDragOverFolder('__unfiled__')
+                }}
+                onDragLeave={() => setDragOverFolder(null)}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  void handleDropOnFolder(null)
+                }}
+              >
+                <span style={{ flex: 1 }}>{t('folders.unfiled', 'Unfiled')}</span>
+                {dragOverFolder === '__unfiled__' && (
+                  <span style={{ fontSize: '0.65rem', color: 'var(--primary)' }}>
+                    {t('folders.dropHere', 'Drop here')}
+                  </span>
+                )}
+              </div>
+            )}
+            {unfiled.map((proj) => renderProjectRow(proj, []))}
+          </>
+        )}
       </div>
     </div>
   )
 }
 
-// ── ProjectRow ─────────────────────────────────────────────────────
+// ── PanelHeader ───────────────────────────────────────────────────────────────
 
-interface ProjectRowProps {
-  project: import('../../../lib/projects').ProjectRow
+function PanelHeader({
+  query,
+  setQuery,
+  allowCreate,
+  importing,
+  importRef,
+  onNewProject,
+  onNewFolder,
+  onImport,
+  t,
+}: {
+  query: string
+  setQuery: (q: string) => void
+  allowCreate: boolean
+  importing: boolean
+  importRef: React.RefObject<HTMLInputElement | null>
+  onNewProject: () => void
+  onNewFolder: () => void
+  onImport: (e: React.ChangeEvent<HTMLInputElement>) => void
+  t: ReturnType<typeof useTranslation>['t']
+}) {
+  return (
+    <div style={headerStyle}>
+      <div style={searchRowStyle}>
+        <Icon icon={Search} size={13} style={{ color: 'var(--text-faint)', flexShrink: 0 }} />
+        <input
+          type="search"
+          placeholder={t('home.searchProjects', 'Search projects...')}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          style={searchInputStyle}
+        />
+      </div>
+      <div style={{ display: 'flex', gap: 4 }}>
+        <Tooltip content={t('home.createProject', 'New project')} side="bottom">
+          <button
+            data-tour="btn-new-project"
+            style={actionBtnStyle}
+            onClick={onNewProject}
+            disabled={!allowCreate}
+            aria-label={t('home.createProject')}
+          >
+            <Icon icon={Plus} size={14} />
+          </button>
+        </Tooltip>
+        <Tooltip content={t('folders.newFolder', 'New folder')} side="bottom">
+          <button style={actionBtnStyle} onClick={onNewFolder} aria-label={t('folders.newFolder')}>
+            <Icon icon={FolderPlus} size={14} />
+          </button>
+        </Tooltip>
+        <Tooltip content={t('home.importProject', 'Import')} side="bottom">
+          <button
+            style={{ ...actionBtnStyle, opacity: importing ? 0.5 : undefined }}
+            onClick={() => !importing && importRef.current?.click()}
+            aria-label={t('home.importProject')}
+            disabled={importing}
+          >
+            <Icon icon={Upload} size={14} />
+          </button>
+        </Tooltip>
+        <input
+          ref={importRef}
+          type="file"
+          accept=".json,.chainsolvejson"
+          style={{ display: 'none' }}
+          onChange={onImport}
+        />
+      </div>
+    </div>
+  )
+}
+
+// ── ProjectItem ───────────────────────────────────────────────────────────────
+
+interface ProjectItemProps {
+  project: ProjectRow
   pinned: boolean
   matchIndices: number[]
   menuOpen: boolean
+  folders: string[]
   onOpen: () => void
   onMenuToggle: () => void
   onRename: () => void
   onDuplicate: () => void
   onDelete: () => void
   onPin: () => void
+  onMoveToFolder: (folder: string | null) => void
+  onDragStart: () => void
 }
 
-function ProjectRow({
+function ProjectItem({
   project,
   pinned,
   matchIndices,
   menuOpen,
+  folders,
   onOpen,
   onMenuToggle,
   onRename,
   onDuplicate,
   onDelete,
   onPin,
-}: ProjectRowProps) {
+  onMoveToFolder,
+  onDragStart,
+}: ProjectItemProps) {
   const [hovered, setHovered] = useState(false)
+  const [movingTo, setMovingTo] = useState(false)
 
   return (
     <div
+      draggable
       style={{
         ...rowStyle,
         background: hovered ? 'var(--primary-dim)' : 'transparent',
@@ -333,6 +720,13 @@ function ProjectRow({
         if (menuOpen) onMenuToggle()
       }}
       onClick={onOpen}
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = 'move'
+        onDragStart()
+      }}
+      onDragEnd={() => {
+        setHovered(false)
+      }}
     >
       {pinned && (
         <span style={{ fontSize: '0.6rem', color: 'var(--warning)', flexShrink: 0 }}>★</span>
@@ -390,6 +784,54 @@ function ProjectRow({
               >
                 Duplicate
               </button>
+
+              {/* Move to folder */}
+              {(folders.length > 0 || project.folder) && (
+                <>
+                  <div style={{ height: 1, background: 'var(--border)', margin: '0.15rem 0' }} />
+                  <button
+                    className="cs-header-dropdown-item"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setMovingTo((v) => !v)
+                    }}
+                  >
+                    Move to folder ›
+                  </button>
+                  {movingTo && (
+                    <div style={subMenuStyle}>
+                      {project.folder && (
+                        <button
+                          className="cs-header-dropdown-item"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setMovingTo(false)
+                            onMoveToFolder(null)
+                          }}
+                        >
+                          Remove from folder
+                        </button>
+                      )}
+                      {folders
+                        .filter((f) => f !== project.folder)
+                        .map((f) => (
+                          <button
+                            key={f}
+                            className="cs-header-dropdown-item"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setMovingTo(false)
+                              onMoveToFolder(f)
+                            }}
+                          >
+                            {f}
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </>
+              )}
+
               <div style={{ height: 1, background: 'var(--border)', margin: '0.15rem 0' }} />
               <button
                 className="cs-header-dropdown-item"
@@ -409,58 +851,46 @@ function ProjectRow({
   )
 }
 
-/**
- * Fuzzy match `query` against `target` (case-insensitive).
- * Returns matched character indices + a score, or null if no match.
- * Higher score = better match (consecutive runs score higher).
- */
+// ── Fuzzy match ───────────────────────────────────────────────────────────────
+
 function fuzzyMatch(query: string, target: string): { score: number; indices: number[] } | null {
   if (!query) return { score: 1, indices: [] }
   const q = query.toLowerCase()
-  const t = target.toLowerCase()
+  const tl = target.toLowerCase()
   const indices: number[] = []
   let qi = 0
   let ti = 0
-  while (qi < q.length && ti < t.length) {
-    if (q[qi] === t[ti]) {
+  while (qi < q.length && ti < tl.length) {
+    if (q[qi] === tl[ti]) {
       indices.push(ti)
       qi++
     }
     ti++
   }
-  if (qi < q.length) return null // not all query chars matched
-  // Score: bonus for consecutive runs and prefix match
+  if (qi < q.length) return null
   let score = 1
   let run = 1
   for (let i = 1; i < indices.length; i++) {
     if (indices[i] === indices[i - 1] + 1) {
       run++
-      score += run // consecutive chars score higher
+      score += run
     } else {
       run = 1
     }
   }
-  if (indices[0] === 0) score += 10 // prefix match bonus
+  if (indices[0] === 0) score += 10
   return { score, indices }
 }
 
-/**
- * Render a project name with fuzzy-matched characters highlighted.
- */
-function HighlightedName({
-  name,
-  indices,
-}: {
-  name: string
-  indices: number[]
-}) {
+// ── HighlightedName ───────────────────────────────────────────────────────────
+
+function HighlightedName({ name, indices }: { name: string; indices: number[] }) {
   if (indices.length === 0) return <>{name}</>
   const set = new Set(indices)
   const parts: React.ReactNode[] = []
   let i = 0
   while (i < name.length) {
     if (set.has(i)) {
-      // Collect consecutive highlighted chars
       let j = i
       while (j < name.length && set.has(j)) j++
       parts.push(
@@ -470,7 +900,6 @@ function HighlightedName({
       )
       i = j
     } else {
-      // Collect non-highlighted chars
       let j = i
       while (j < name.length && !set.has(j)) j++
       parts.push(<span key={i}>{name.slice(i, j)}</span>)
@@ -490,7 +919,7 @@ function fmtDate(iso: string): string {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 
-// ── Styles ────────────────────────────────────────────────────────
+// ── Styles ─────────────────────────────────────────────────────────────────────
 
 const headerStyle: React.CSSProperties = {
   display: 'flex',
@@ -549,6 +978,95 @@ const emptyStyle: React.CSSProperties = {
   color: 'var(--text-faint)',
 }
 
+const folderHeaderStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  padding: '0.2rem 0.3rem',
+  cursor: 'pointer',
+  position: 'relative',
+  marginTop: 2,
+}
+
+const folderToggleBtn: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 4,
+  flex: 1,
+  background: 'transparent',
+  border: 'none',
+  cursor: 'pointer',
+  color: 'var(--text)',
+  fontFamily: 'inherit',
+  padding: 0,
+  textAlign: 'left',
+}
+
+const folderNameStyle: React.CSSProperties = {
+  fontSize: '0.78rem',
+  fontWeight: 600,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  maxWidth: 160,
+}
+
+const folderCountBadge: React.CSSProperties = {
+  fontSize: '0.6rem',
+  background: 'rgba(107,114,128,0.2)',
+  color: 'var(--text-muted)',
+  borderRadius: 8,
+  padding: '0 5px',
+  fontWeight: 600,
+  marginLeft: 2,
+  flexShrink: 0,
+}
+
+const folderMenuBtn: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  color: 'var(--text-faint)',
+  fontSize: '0.85rem',
+  padding: '0 4px',
+  fontFamily: 'inherit',
+  lineHeight: 1,
+  flexShrink: 0,
+}
+
+const folderMenuStyle: React.CSSProperties = {
+  position: 'absolute',
+  right: 0,
+  top: '100%',
+  background: 'var(--surface-2)',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-md)',
+  padding: '0.2rem',
+  zIndex: 100,
+  minWidth: 140,
+  boxShadow: 'var(--shadow-lg)',
+}
+
+const folderEmptyStyle: React.CSSProperties = {
+  padding: '0.4rem 0.5rem',
+  fontSize: '0.68rem',
+  color: 'var(--text-faint)',
+  fontStyle: 'italic',
+}
+
+const unfiledHeaderStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  padding: '0.3rem 0.5rem',
+  fontSize: '0.65rem',
+  fontWeight: 700,
+  color: 'var(--text-faint)',
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  marginTop: 6,
+  borderRadius: 5,
+  cursor: 'default',
+}
+
 const rowStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -594,6 +1112,25 @@ const menuStyle: React.CSSProperties = {
   borderRadius: 'var(--radius-md)',
   padding: '0.2rem',
   zIndex: 100,
-  minWidth: 120,
+  minWidth: 140,
   boxShadow: 'var(--shadow-lg)',
+}
+
+const subMenuStyle: React.CSSProperties = {
+  marginLeft: '0.5rem',
+  borderLeft: '1px solid var(--border)',
+  paddingLeft: '0.3rem',
+}
+
+const createFirstBtnStyle: React.CSSProperties = {
+  marginTop: '0.3rem',
+  padding: '0.4rem 1rem',
+  borderRadius: 8,
+  background: 'var(--primary)',
+  border: 'none',
+  color: '#fff',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  fontFamily: 'inherit',
 }

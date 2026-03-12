@@ -41,7 +41,7 @@ export const LOD_COMPACT_REENTER = 0.45
 export const LOD_NANO_ENTER = 0.15
 
 /** Zoom rises to this or above → switch from nano back to minimal. */
-export const LOD_MINIMAL_REENTER = 0.20
+export const LOD_MINIMAL_REENTER = 0.2
 
 /**
  * Compute the next LOD tier given the current zoom and the previous tier.

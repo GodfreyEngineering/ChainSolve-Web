@@ -108,7 +108,7 @@ describe('uploadAvatar', () => {
   it('accepts a valid image file and returns a storage path', async () => {
     const img = new File([new Uint8Array(100)], 'photo.jpg', { type: 'image/jpeg' })
     const path = await uploadAvatar(img)
-    expect(path).toMatch(/^user-42\/avatar_\d+\.jpg$/)
+    expect(path).toMatch(/^user-42\/avatar\.jpg$/)
   })
 
   it('uploads to the uploads bucket with upsert', async () => {
@@ -117,9 +117,9 @@ describe('uploadAvatar', () => {
     await uploadAvatar(img)
     expect(supabase.storage.from).toHaveBeenCalledWith('uploads')
     expect(mockUpload).toHaveBeenCalledWith(
-      expect.stringMatching(/^user-42\/avatar_\d+\.png$/),
+      expect.stringMatching(/^user-42\/avatar\.jpg$/),
       img,
-      expect.objectContaining({ upsert: true, contentType: 'image/png' }),
+      expect.objectContaining({ upsert: true, contentType: 'image/jpeg' }),
     )
   })
 })

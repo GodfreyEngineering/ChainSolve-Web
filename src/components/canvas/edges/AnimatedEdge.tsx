@@ -13,9 +13,18 @@
  */
 
 import { memo, useMemo } from 'react'
-import { BaseEdge, EdgeLabelRenderer, getBezierPath, useNodes, type EdgeProps } from '@xyflow/react'
+import {
+  BaseEdge,
+  EdgeLabelRenderer,
+  getBezierPath,
+  getStraightPath,
+  getSmoothStepPath,
+  useNodes,
+  type EdgeProps,
+} from '@xyflow/react'
 import { useComputedValue } from '../../../contexts/ComputedContext'
 import { useCanvasSettings } from '../../../contexts/CanvasSettingsContext'
+import { usePreferencesStore } from '../../../stores/preferencesStore'
 import { formatValue } from '../../../engine/value'
 import type { Value } from '../../../engine/value'
 import { getUnitMismatch, type UnitMismatch } from '../../../units/unitCompat'
@@ -62,6 +71,8 @@ function AnimatedEdgeInner({
 }: EdgeProps) {
   const sourceValue = useComputedValue(source)
   const { edgesAnimated, edgeBadgesEnabled } = useCanvasSettings()
+  const edgeType = usePreferencesStore((s) => s.canvasEdgeType)
+  const edgeWidth = usePreferencesStore((s) => s.canvasEdgeWidth)
   const mismatch = useEdgeUnitMismatch(source, target)
   const stroke = edgeStroke(sourceValue, edgesAnimated)
   const allNodes = useNodes()
@@ -82,14 +93,36 @@ function AnimatedEdgeInner({
       ? 'var(--primary)'
       : stroke
 
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    sourcePosition,
-    targetPosition,
-  })
+  const [edgePath, labelX, labelY] =
+    edgeType === 'straight'
+      ? getStraightPath({ sourceX, sourceY, targetX, targetY })
+      : edgeType === 'step'
+        ? getSmoothStepPath({
+            sourceX,
+            sourceY,
+            targetX,
+            targetY,
+            sourcePosition,
+            targetPosition,
+            borderRadius: 0,
+          })
+        : edgeType === 'smoothstep'
+          ? getSmoothStepPath({
+              sourceX,
+              sourceY,
+              targetX,
+              targetY,
+              sourcePosition,
+              targetPosition,
+            })
+          : getBezierPath({
+              sourceX,
+              sourceY,
+              targetX,
+              targetY,
+              sourcePosition,
+              targetPosition,
+            })
 
   return (
     <>
@@ -103,7 +136,7 @@ function AnimatedEdgeInner({
         style={{
           ...style,
           stroke: effectiveStroke,
-          strokeWidth: selected ? 3 : mismatch ? 2 : (style?.strokeWidth ?? 1.5),
+          strokeWidth: selected ? 3 : mismatch ? 2 : (style?.strokeWidth ?? edgeWidth),
           strokeDasharray: mismatch ? '6 3' : undefined,
           filter: selected ? `drop-shadow(0 0 4px ${effectiveStroke})` : undefined,
         }}

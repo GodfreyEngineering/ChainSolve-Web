@@ -9,7 +9,14 @@
  *   auto-detect pipe delimiter, Worker-based parse with progress bar.
  */
 
-import { useState, useRef, useCallback, useEffect, type ChangeEvent, type KeyboardEvent } from 'react'
+import {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import {
@@ -54,9 +61,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
   const editInputRef = useRef<HTMLInputElement>(null)
 
   // Column widths (px)
-  const [colWidths, setColWidths] = useState<number[]>(() =>
-    columns.map(() => DEFAULT_COL_W),
-  )
+  const [colWidths, setColWidths] = useState<number[]>(() => columns.map(() => DEFAULT_COL_W))
 
   // Right-click context menu
   const [contextMenu, setContextMenu] = useState<{
@@ -288,7 +293,10 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
 
   const removeRow = useCallback(
     (ri: number) => {
-      onChange(columns, rows.filter((_, i) => i !== ri))
+      onChange(
+        columns,
+        rows.filter((_, i) => i !== ri),
+      )
     },
     [columns, rows, onChange],
   )
@@ -302,61 +310,69 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
 
   const resizeDrag = useRef<{ ci: number; startX: number; startW: number } | null>(null)
 
-  const onResizeMouseDown = useCallback((ci: number, e: React.MouseEvent) => {
-    e.preventDefault()
-    resizeDrag.current = { ci, startX: e.clientX, startW: colWidths[ci] ?? DEFAULT_COL_W }
-    const onMove = (me: MouseEvent) => {
-      if (!resizeDrag.current) return
-      const { ci: c, startX, startW } = resizeDrag.current
-      const w = Math.max(MIN_COL_W, startW + (me.clientX - startX))
-      setColWidths((prev) => prev.map((cw, i) => (i === c ? w : cw)))
-    }
-    const onUp = () => {
-      resizeDrag.current = null
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup', onUp)
-    }
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', onUp)
-  }, [colWidths])
+  const onResizeMouseDown = useCallback(
+    (ci: number, e: React.MouseEvent) => {
+      e.preventDefault()
+      resizeDrag.current = { ci, startX: e.clientX, startW: colWidths[ci] ?? DEFAULT_COL_W }
+      const onMove = (me: MouseEvent) => {
+        if (!resizeDrag.current) return
+        const { ci: c, startX, startW } = resizeDrag.current
+        const w = Math.max(MIN_COL_W, startW + (me.clientX - startX))
+        setColWidths((prev) => prev.map((cw, i) => (i === c ? w : cw)))
+      }
+      const onUp = () => {
+        resizeDrag.current = null
+        window.removeEventListener('mousemove', onMove)
+        window.removeEventListener('mouseup', onUp)
+      }
+      window.addEventListener('mousemove', onMove)
+      window.addEventListener('mouseup', onUp)
+    },
+    [colWidths],
+  )
 
   // ── CSV import ─────────────────────────────────────────────────────────────
 
   /** Step 1: file selected → parse preview (fast, sync-in-worker) then show panel. */
-  const handleCsvImport = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (!file) return
-      e.target.value = ''
-      const reader = new FileReader()
-      reader.onload = () => {
-        const text = reader.result as string
-        // Use csv-worker in preview mode so we don't block the main thread
-        const worker = new Worker(new URL('../../../engine/csv-worker.ts', import.meta.url), {
-          type: 'module',
-        })
-        worker.onmessage = (ev: MessageEvent) => {
-          worker.terminate()
-          const msg = ev.data as { ok: boolean; mode?: string; columns?: string[]; previewRows?: string[][]; totalRows?: number; sep?: string; error?: string }
-          if (msg.ok && msg.mode === 'preview') {
-            setCsvPreview({
-              fileName: file.name,
-              columns: msg.columns ?? [],
-              previewRows: msg.previewRows ?? [],
-              totalRows: msg.totalRows ?? 0,
-              sep: msg.sep ?? ',',
-              includeCols: (msg.columns ?? []).map(() => true),
-              text,
-            })
-          }
+  const handleCsvImport = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    const reader = new FileReader()
+    reader.onload = () => {
+      const text = reader.result as string
+      // Use csv-worker in preview mode so we don't block the main thread
+      const worker = new Worker(new URL('../../../engine/csv-worker.ts', import.meta.url), {
+        type: 'module',
+      })
+      worker.onmessage = (ev: MessageEvent) => {
+        worker.terminate()
+        const msg = ev.data as {
+          ok: boolean
+          mode?: string
+          columns?: string[]
+          previewRows?: string[][]
+          totalRows?: number
+          sep?: string
+          error?: string
         }
-        worker.onerror = () => worker.terminate()
-        worker.postMessage({ mode: 'preview', text })
+        if (msg.ok && msg.mode === 'preview') {
+          setCsvPreview({
+            fileName: file.name,
+            columns: msg.columns ?? [],
+            previewRows: msg.previewRows ?? [],
+            totalRows: msg.totalRows ?? 0,
+            sep: msg.sep ?? ',',
+            includeCols: (msg.columns ?? []).map(() => true),
+            text,
+          })
+        }
       }
-      reader.readAsText(file)
-    },
-    [],
-  )
+      worker.onerror = () => worker.terminate()
+      worker.postMessage({ mode: 'preview', text })
+    }
+    reader.readAsText(file)
+  }, [])
 
   /** Step 2: user confirmed preview → run full parse in Worker with progress. */
   const confirmCsvImport = useCallback(() => {
@@ -405,15 +421,18 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
 
     // Only pass includeCols if any column is excluded — avoids needless filtering
     const hasExclusion = includeCols.some((v) => !v)
-    const resolvedIncludeCols = hasExclusion
-      ? includeCols.slice(0, previewCols.length)
-      : undefined
+    const resolvedIncludeCols = hasExclusion ? includeCols.slice(0, previewCols.length) : undefined
 
     worker.postMessage({ mode: 'full', text, includeCols: resolvedIncludeCols })
   }, [csvPreview, onChange])
 
   // Cleanup csv worker on unmount
-  useEffect(() => () => { csvWorkerRef.current?.terminate() }, [])
+  useEffect(
+    () => () => {
+      csvWorkerRef.current?.terminate()
+    },
+    [],
+  )
 
   // ── Context menu ───────────────────────────────────────────────────────────
 
@@ -595,9 +614,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
                           style={editCellStyle}
                         />
                       ) : (
-                        <span style={cellTextStyle}>
-                          {String(rows[ri]?.[ci] ?? '')}
-                        </span>
+                        <span style={cellTextStyle}>{String(rows[ri]?.[ci] ?? '')}</span>
                       )}
                     </div>
                   )
@@ -621,14 +638,27 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
       {/* CSV preview panel */}
       {csvPreview && (
         <div style={csvPreviewPanelStyle}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 4,
+            }}
+          >
             <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--primary)' }}>
               {csvPreview.fileName} — {csvPreview.totalRows.toLocaleString()} rows
             </span>
             <button
               className="nodrag"
               onClick={() => setCsvPreview(null)}
-              style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '0.7rem' }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-faint)',
+                cursor: 'pointer',
+                fontSize: '0.7rem',
+              }}
             >
               ✕
             </button>
@@ -640,8 +670,11 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
               <label
                 key={ci}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 2,
-                  fontSize: '0.6rem', color: csvPreview.includeCols[ci] ? 'var(--primary)' : 'var(--text-faint)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  fontSize: '0.6rem',
+                  color: csvPreview.includeCols[ci] ? 'var(--primary)' : 'var(--text-faint)',
                   cursor: 'pointer',
                 }}
               >
@@ -651,7 +684,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
                   onChange={(e) => {
                     const next = [...csvPreview.includeCols]
                     next[ci] = e.target.checked
-                    setCsvPreview((p) => p ? { ...p, includeCols: next } : p)
+                    setCsvPreview((p) => (p ? { ...p, includeCols: next } : p))
                   }}
                   style={{ cursor: 'pointer' }}
                 />
@@ -705,21 +738,38 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
               </tbody>
             </table>
             {csvPreview.totalRows > csvPreview.previewRows.length && (
-              <div style={{ fontSize: '0.55rem', color: 'var(--text-faint)', marginTop: 2, textAlign: 'right' }}>
-                +{(csvPreview.totalRows - csvPreview.previewRows.length).toLocaleString()} more rows…
+              <div
+                style={{
+                  fontSize: '0.55rem',
+                  color: 'var(--text-faint)',
+                  marginTop: 2,
+                  textAlign: 'right',
+                }}
+              >
+                +{(csvPreview.totalRows - csvPreview.previewRows.length).toLocaleString()} more
+                rows…
               </div>
             )}
           </div>
 
           <button className="nodrag" onClick={confirmCsvImport} style={csvImportConfirmBtnStyle}>
-            {t('canvas.importCsvConfirm', 'Import {{n}} rows', { n: csvPreview.totalRows.toLocaleString() })}
+            {t('canvas.importCsvConfirm', 'Import {{n}} rows', {
+              n: csvPreview.totalRows.toLocaleString(),
+            })}
           </button>
         </div>
       )}
 
       {/* CSV parse progress bar */}
       {csvImportProgress !== null && (
-        <div style={{ height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 2, overflow: 'hidden' }}>
+        <div
+          style={{
+            height: 4,
+            background: 'rgba(255,255,255,0.07)',
+            borderRadius: 2,
+            overflow: 'hidden',
+          }}
+        >
           <div
             style={{
               height: '100%',
@@ -760,7 +810,9 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
       </div>
 
       {/* Warnings */}
-      {(csvTruncated || rows.length >= MAX_TABLE_INPUT_ROWS || columns.length >= MAX_TABLE_INPUT_COLS) && (
+      {(csvTruncated ||
+        rows.length >= MAX_TABLE_INPUT_ROWS ||
+        columns.length >= MAX_TABLE_INPUT_COLS) && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {csvTruncated && (
             <div style={warningStyle}>
@@ -773,7 +825,13 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
               <button
                 className="nodrag"
                 onClick={() => setCsvTruncated(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--warning)', cursor: 'pointer', fontSize: '0.6rem' }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--warning)',
+                  cursor: 'pointer',
+                  fontSize: '0.6rem',
+                }}
               >
                 ✕
               </button>
@@ -781,12 +839,16 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
           )}
           {rows.length >= MAX_TABLE_INPUT_ROWS && (
             <span style={{ fontSize: '0.62rem', color: 'var(--warning)' }}>
-              {t('table.rowLimitReached', 'Row limit reached ({{max}})', { max: MAX_TABLE_INPUT_ROWS.toLocaleString() })}
+              {t('table.rowLimitReached', 'Row limit reached ({{max}})', {
+                max: MAX_TABLE_INPUT_ROWS.toLocaleString(),
+              })}
             </span>
           )}
           {columns.length >= MAX_TABLE_INPUT_COLS && (
             <span style={{ fontSize: '0.62rem', color: 'var(--warning)' }}>
-              {t('table.colLimitReached', 'Column limit reached ({{max}})', { max: MAX_TABLE_INPUT_COLS })}
+              {t('table.colLimitReached', 'Column limit reached ({{max}})', {
+                max: MAX_TABLE_INPUT_COLS,
+              })}
             </span>
           )}
         </div>
@@ -810,20 +872,45 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
           onMouseDown={(e) => e.stopPropagation()}
         >
           {[
-            { label: t('canvas.addRow', 'Add row below'), action: () => { addRow(); setContextMenu(null) } },
-            { label: t('canvas.removeRow', 'Delete row'), action: () => { removeRow(contextMenu.row); setContextMenu(null) } },
+            {
+              label: t('canvas.addRow', 'Add row below'),
+              action: () => {
+                addRow()
+                setContextMenu(null)
+              },
+            },
+            {
+              label: t('canvas.removeRow', 'Delete row'),
+              action: () => {
+                removeRow(contextMenu.row)
+                setContextMenu(null)
+              },
+            },
             null,
-            { label: t('canvas.addColumnRight', 'Add column right'), action: () => { addCol(contextMenu.col); setContextMenu(null) } },
-            { label: columns.length > 1 ? t('canvas.removeColumn', 'Delete column') : t('canvas.removeColumn', 'Delete column') + ' (last)', action: () => { if (columns.length > 1) { removeCol(contextMenu.col); setContextMenu(null) } } },
+            {
+              label: t('canvas.addColumnRight', 'Add column right'),
+              action: () => {
+                addCol(contextMenu.col)
+                setContextMenu(null)
+              },
+            },
+            {
+              label:
+                columns.length > 1
+                  ? t('canvas.removeColumn', 'Delete column')
+                  : t('canvas.removeColumn', 'Delete column') + ' (last)',
+              action: () => {
+                if (columns.length > 1) {
+                  removeCol(contextMenu.col)
+                  setContextMenu(null)
+                }
+              },
+            },
           ].map((item, i) =>
             item === null ? (
               <div key={i} style={{ height: 1, background: 'var(--border)', margin: '3px 0' }} />
             ) : (
-              <button
-                key={i}
-                onClick={item.action}
-                style={contextMenuItemStyle}
-              >
+              <button key={i} onClick={item.action} style={contextMenuItemStyle}>
                 {item.label}
               </button>
             ),

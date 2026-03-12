@@ -228,11 +228,7 @@ export function MinimapWrapper({
             <span style={{ color: 'var(--text)', fontWeight: 600 }}>{nodeCount}</span>
             <span>node{nodeCount === 1 ? '' : 's'}</span>
             {onFitView && (
-              <span
-                style={{ marginLeft: 'auto', opacity: 0.6, fontSize: '0.55rem' }}
-              >
-                ⌥ fit
-              </span>
+              <span style={{ marginLeft: 'auto', opacity: 0.6, fontSize: '0.55rem' }}>⌥ fit</span>
             )}
           </div>
         )}

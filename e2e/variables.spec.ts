@@ -28,9 +28,7 @@ test.describe('Variables and bindings — engine API (P096)', () => {
       // Simulate a "variable" by giving a node a manual value (no edge connection)
       return engine.evaluateGraph({
         version: 1,
-        nodes: [
-          { id: 'mul', blockType: 'multiply', data: { manualValues: { a: 5, b: 3 } } },
-        ],
+        nodes: [{ id: 'mul', blockType: 'multiply', data: { manualValues: { a: 5, b: 3 } } }],
         edges: [],
       })
     })
@@ -99,9 +97,7 @@ test.describe('Variables and bindings — engine API (P096)', () => {
             data: { manualValues: { a: 7, b: 3 }, portOverrides: { a: true } },
           },
         ],
-        edges: [
-          { id: 'e1', source: 'src', sourceHandle: 'out', target: 'add', targetHandle: 'a' },
-        ],
+        edges: [{ id: 'e1', source: 'src', sourceHandle: 'out', target: 'add', targetHandle: 'a' }],
       })
     })
 

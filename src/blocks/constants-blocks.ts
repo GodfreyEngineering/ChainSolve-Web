@@ -17,7 +17,6 @@
 
 import type { BlockDef } from './types'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function registerConstantsBlocks(_register: (def: BlockDef) => void): void {
   // H4-1: Individual constant blocks removed -- all constants now accessed via
   // the unified Constant picker. See constantsCatalog.ts for the full catalog.

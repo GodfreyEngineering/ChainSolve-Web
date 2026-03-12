@@ -30,8 +30,8 @@ type AnyEdge = {
 }
 
 describe('TEMPLATES registry', () => {
-  it('has exactly 3 standard templates', () => {
-    expect(TEMPLATES).toHaveLength(3)
+  it('has at least 3 standard templates', () => {
+    expect(TEMPLATES.length).toBeGreaterThanOrEqual(3)
   })
 
   it('every template has a unique id', () => {

@@ -537,6 +537,48 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       )
     }
 
+    // ── Hourly rate limit (SEC-02): max 50 requests/hour per user ─────────
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString()
+    const { count: hourlyCount } = await supabaseAdmin
+      .from('ai_request_log')
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_id', userId)
+      .gte('created_at', oneHourAgo)
+
+    const HOURLY_REQUEST_LIMIT = 50
+    if ((hourlyCount ?? 0) >= HOURLY_REQUEST_LIMIT) {
+      // Log rate-limit hit for observability
+      supabaseAdmin.from('observability_events').insert({
+        ts: now.toISOString(),
+        env: 'production',
+        event_type: 'rate_limit_hit',
+        user_id: userId,
+        payload: {
+          endpoint: '/api/ai',
+          limit: HOURLY_REQUEST_LIMIT,
+          window: '1h',
+          count: hourlyCount,
+        },
+      }).then(() => { /* fire-and-forget */ }, () => { /* non-fatal */ })
+
+      const retryAfter = 3600 - Math.floor((now.getTime() - new Date(oneHourAgo).getTime()) / 1000)
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: 'Too many AI requests. Maximum 50 requests per hour.',
+          code: 'RATE_LIMITED',
+          retryAfterSeconds: retryAfter,
+        }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': String(retryAfter),
+          },
+        },
+      )
+    }
+
     // ── Fetch canvas context ──────────────────────────────────────────────
     let contextSummary = ''
     try {

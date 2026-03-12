@@ -731,7 +731,9 @@ export function Inspector({
             })()}
 
             {/* UX-08: What-if explorer — slider to temporarily override a connected input */}
-            {def && def.inputs.length > 0 && nodeId &&
+            {def &&
+              def.inputs.length > 0 &&
+              nodeId &&
               (() => {
                 const scalarConnected = def.inputs.filter((port) => {
                   if (!allEdges.some((e) => e.target === node.id && e.targetHandle === port.id))
@@ -804,7 +806,11 @@ export function Inspector({
                             {!isActive ? (
                               <button
                                 onClick={() => {
-                                  setWhatIfState({ nodeId: nodeId, portId: port.id, value: connectedNum })
+                                  setWhatIfState({
+                                    nodeId: nodeId,
+                                    portId: port.id,
+                                    value: connectedNum,
+                                  })
                                   if (!portOverrides[port.id]) toggleOverride(port.id)
                                   updateBinding(port.id, { kind: 'literal', value: connectedNum })
                                 }}
@@ -866,6 +872,7 @@ export function Inspector({
                   return String(isFinite(v.value) ? v.value : v.value > 0 ? '+∞' : '−∞')
                 if (v.kind === 'vector') return `vector[${v.length}]`
                 if (v.kind === 'table') return `table(${v.rows}×${v.columns})`
+                if (v.kind === 'text') return `"${v.value.slice(0, 40)}"`
                 return v.message.slice(0, 40)
               }
 

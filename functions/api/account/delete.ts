@@ -118,6 +118,36 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   // We call it with the user's JWT to preserve RLS identity.
   const { error: rpcErr } = await userClient.rpc("delete_my_account");
   if (rpcErr) {
+    // SEC-02: Rate limit — RPC raises P0001 when deletion was already requested
+    // within the past 24 hours. Surface as 429 rather than 500.
+    const isRateLimit =
+      rpcErr.code === "P0001" ||
+      rpcErr.message?.includes("once per 24 hours");
+    if (isRateLimit) {
+      // Log the rate-limit hit for observability
+      adminClient
+        .from("observability_events")
+        .insert({
+          ts: new Date().toISOString(),
+          env: "production",
+          event_type: "rate_limit_hit",
+          user_id: userId,
+          payload: {
+            endpoint: "/api/account/delete",
+            limit: 1,
+            window: "24h",
+          },
+        })
+        .then(() => { /* fire-and-forget */ }, () => { /* non-fatal */ });
+      return json(
+        {
+          ok: false,
+          error: "Account deletion can only be requested once per 24 hours.",
+          code: "RATE_LIMITED",
+        },
+        429
+      );
+    }
     return json(
       { ok: false, error: `Database deletion failed: ${rpcErr.message}` },
       500

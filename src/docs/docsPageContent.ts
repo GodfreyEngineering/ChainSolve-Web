@@ -38,6 +38,81 @@ export const DOCS_CONTENT: DocsContentMap = {
       'Larger tools such as the Theme Wizard, Block Library, and Settings open as draggable floating windows. You can move, resize, and close them independently.',
   },
 
+  gettingStarted: {
+    intro:
+      'This guide walks you from a blank canvas to a complete, saved calculation in six steps. No prior experience required — just follow along.',
+
+    firstChainTitle: 'Step 1 — Your first chain',
+    firstChain1:
+      'Open the block library from the Insert menu, the sidebar, or by double-clicking any empty area of the canvas.',
+    firstChain2:
+      'Drag a Number block onto the canvas. Double-click the value and type 42. Press Enter to confirm.',
+    firstChain3: 'Drag a second Number block and set its value to 8.',
+    firstChain4:
+      'Drag an Add block from the Math category. Drag from the output port of the first Number block (right side) to the top input port of the Add block (left side). Do the same for the second Number block.',
+    firstChain5:
+      'Drag a Display block from the Output category and connect the Add block output to it. You should see the value 50 appear immediately. That is your first chain.',
+
+    variablesTitle: 'Step 2 — Using variables for parametric studies',
+    variablesIntro:
+      'Variables let you give a name to a value and reuse it across many blocks. When you change the variable, every block that uses it updates at once.',
+    variablesStep1:
+      'Open the Variables panel from the View menu or the toolbar. Click the + button to create a variable. Name it "length" and set its value to 5.',
+    variablesStep2:
+      'Select a Number block on the canvas. In the Inspector on the right, click the chain icon next to the value field. Select your "length" variable from the list. The block now mirrors the variable value.',
+    variablesStep3:
+      'Set a range on the variable: Min = 1, Max = 20, Step = 0.5. A slider appears. Drag the slider — all blocks bound to "length" update live. This is parametric design.',
+    variablesTip:
+      'Tip: Right-click any Number block input and choose "Bind to variable" to skip the Inspector.',
+
+    tablesTitle: 'Step 3 — Working with tables and data',
+    tablesIntro:
+      'Tables are the primary way to work with multi-row data in ChainSolve. Each column is a named sequence of numbers.',
+    tablesStep1:
+      'Add a Table Input block from the Data category. Double-click the block to open the table editor. Click + Column to add columns named "X" and "Y". Type values in the cells — use Tab to move right, Enter to move down.',
+    tablesStep2:
+      'Connect the Y column output handle to a Statistics block. The Statistics block shows mean, min, max, and standard deviation for the column automatically.',
+    tablesStep3:
+      'For larger datasets, use File → Import CSV or drag a .csv file from your desktop directly onto the canvas. The block auto-detects headers and numeric columns. Up to 50 MB files are supported.',
+    tablesTip:
+      'Tip: Use Ctrl+V inside the table editor to paste data directly from Excel or Google Sheets.',
+
+    errorsTitle: 'Step 4 — Reading and tracing errors',
+    errorsIntro:
+      'When a block cannot compute its output, it shows a red error badge. Understanding these errors helps you fix problems quickly.',
+    errorsStep1:
+      'Hover over the red badge on any block to see the error message. Common errors: NaN (invalid arithmetic, e.g. sqrt of a negative number), Missing input (a required port is not connected), Dimension mismatch (incompatible units).',
+    errorsStep2:
+      'Open the Problems panel from the toolbar (exclamation icon) or View → Problems. It lists all errors with the block name, error type, and a suggested fix.',
+    errorsStep3:
+      'Click any error in the Problems panel to navigate the canvas to the affected block. The block is highlighted and the Inspector shows detailed error context.',
+    errorsTip:
+      'Tip: Use Graph Health (toolbar) to see a visual overview of all errors, warnings, and the evaluation critical path.',
+
+    sweepTitle: 'Step 5 — Parametric sweep for optimization',
+    sweepIntro:
+      'A parametric sweep evaluates your model across a range of input values automatically, producing a table of results without any manual iteration.',
+    sweepStep1:
+      'Add a Parametric Sweep block from the Analysis category. In the Inspector, set Start = 1, Stop = 10, Steps = 100.',
+    sweepStep2:
+      'Connect the input you want to vary (e.g. a Number block representing beam length) to the Sweep Variable Input port. Connect the output you want to track (e.g. a deflection result) to the Sweep Output port.',
+    sweepStep3:
+      'Click the Run button on the block. The engine evaluates 100 steps in a Web Worker and populates the result table. Connect the output to an XY Scatter Plot to visualise the relationship immediately.',
+    sweepTip:
+      'Tip: Nest two sweeps for a 2D parameter grid. The outer sweep drives the inner sweep variable, producing a matrix of results.',
+
+    exportTitle: 'Step 6 — Exporting your calculation',
+    exportIntro: 'Share your work or archive it in a portable format using the export tools.',
+    exportPdf:
+      'File → Export → Audit PDF: generates a formatted calculation report including all block values, diagrams, and a step-by-step evaluation trace. Suitable for engineering documentation and client deliverables.',
+    exportExcel:
+      'File → Export → Excel: exports all results to a structured .xlsx workbook. One worksheet per canvas. Block values are written as Excel formulas where possible so the spreadsheet stays live.',
+    exportJson:
+      'File → Export → Project: saves the full project as a .chainsolvejson file. Use for backup, sharing, or importing into another ChainSolve account.',
+    exportTip:
+      'Tip: Use File → Share to generate a read-only link that anyone can open in their browser without an account.',
+  },
+
   onboarding: {
     intro:
       'Welcome to ChainSolve. This guide covers everything you need to go from zero to a working calculation chain.',
@@ -654,5 +729,223 @@ export const DOCS_CONTENT: DocsContentMap = {
     contactTitle: 'Contact support',
     contactBody:
       'If you cannot resolve an issue, use Help > Bug Report to send a detailed report including screenshots and diagnostics. You can also email support directly.',
+  },
+
+  blockChemical: {
+    intro:
+      'Chemical Engineering blocks provide thermodynamic and reaction calculations for process engineering workflows.',
+    idealGasTitle: 'Ideal Gas Law',
+    idealGasBody:
+      'Computes pressure, volume, temperature, or moles from the ideal gas law (PV = nRT). Connect three of the four values and the block outputs the fourth. Use the unit picker to select Pa, kPa, atm, or bar for pressure; m³ or L for volume; K or °C for temperature.',
+    reynoldsTitle: 'Reynolds Number',
+    reynoldsBody:
+      'Calculates the dimensionless Reynolds number Re = ρvD/μ from fluid density (ρ), flow velocity (v), characteristic length (D), and dynamic viscosity (μ). Outputs the regime label (Laminar / Transitional / Turbulent) alongside the numeric value.',
+    arrhenius:
+      'Rate constant k = A·exp(−Ea/RT). Input the pre-exponential factor A, activation energy Ea (J/mol), and temperature T (K) to get the rate constant.',
+    antoineTitle: 'Antoine Equation',
+    antoineBody:
+      'Vapour pressure from the Antoine equation: log₁₀(P) = A − B/(C+T). Antoine constants A, B, C are properties of the fluid. Output is in the same pressure units as the constant set used.',
+  },
+
+  blockStructural: {
+    intro:
+      'Structural Engineering blocks cover beam theory, stress analysis, and section properties for civil and mechanical design.',
+    beamDeflectionTitle: 'Beam Deflection',
+    beamDeflectionBody:
+      "Calculates maximum deflection and reactions for common loading cases: point load at centre, uniformly distributed load (UDL), and point load at any position. Inputs: span L, load P (or w for UDL), Young's modulus E, and second moment of area I.",
+    columnBucklingTitle: 'Column Buckling (Euler)',
+    columnBucklingBody:
+      'Critical buckling load Pcr = π²EI/(KL)². The effective-length factor K depends on the end conditions: 0.5 (fixed-fixed), 0.7 (fixed-pinned), 1.0 (pinned-pinned), 2.0 (fixed-free). Connect E, I, L, and K to the four input ports.',
+    mohrCircle:
+      'Transforms a plane stress state (σx, σy, τxy) into principal stresses (σ₁, σ₂) and the maximum shear stress τmax. Use the angle output to find the principal plane orientation.',
+    sectionProps:
+      'Computes second moment of area I, section modulus Z, and radius of gyration r for rectangular, circular, hollow rectangular, and hollow circular cross-sections.',
+  },
+
+  blockAerospace: {
+    intro:
+      'Aerospace blocks implement atmospheric models, aerodynamic coefficients, and orbital mechanics for flight and space engineering.',
+    isaTitle: 'ISA Atmosphere',
+    isaBody:
+      'International Standard Atmosphere model. Input geometric altitude (m or ft) to get temperature, pressure, density, and speed of sound at that altitude. Valid from sea level to 86 km (troposphere, stratosphere, mesosphere).',
+    liftDragTitle: 'Lift and Drag',
+    liftDragBody:
+      'Lift L = ½ρv²SCL and Drag D = ½ρv²SCD. Connect air density ρ, velocity v, reference area S, and the lift and drag coefficients CL and CD. Tip: use the ISA block output for density at altitude.',
+    orbitalVelocity:
+      'Circular orbital velocity v = √(GM/r) and orbital period T = 2π√(r³/GM). Input orbital radius r (from centre of Earth) and the gravitational parameter GM (default: Earth, 3.986×10¹⁴ m³/s²).',
+    machTitle: 'Mach Number',
+    machBody:
+      'Mach number M = v/a and the isentropic relations for pressure ratio, temperature ratio, and density ratio at the given Mach number (assuming γ = 1.4 for air). Connect velocity and speed-of-sound inputs; use ISA output for the speed of sound.',
+  },
+
+  blockControlSystems: {
+    intro:
+      'Control Systems blocks implement transfer functions, PID analysis, and time-domain response for feedback design.',
+    pidTitle: 'PID Controller',
+    pidBody:
+      'Computes the PID output u(t) = Kp·e + Ki·∫e dt + Kd·de/dt. In the steady-state analyser, connect proportional gain Kp, integral gain Ki, and derivative gain Kd to evaluate step-response metrics: rise time, settling time, overshoot, and steady-state error.',
+    transferFnTitle: 'Transfer Function',
+    transferFnBody:
+      'Defines a continuous-time transfer function H(s) = N(s)/D(s) from numerator and denominator polynomial coefficient arrays. Connect to the Step Response or Bode Plot block to visualise frequency and time-domain behaviour.',
+    stepResponse:
+      'Calculates the step-response of a first or second-order system: final value, time constant τ, natural frequency ωn, damping ratio ζ, peak time tp, and percent overshoot %OS.',
+    bode: 'Generates magnitude (dB) and phase (°) arrays over a logarithmic frequency range for a given transfer function. Connect to a Plot block to display the Bode diagram.',
+  },
+
+  blockLifeSciences: {
+    intro:
+      'Life Sciences blocks provide pharmacokinetic, population growth, and enzyme kinetics models for biomedical and ecology workflows.',
+    pkOneCompTitle: 'One-Compartment PK',
+    pkOneCompBody:
+      'Single-compartment pharmacokinetic model: C(t) = (F·D/Vd)·e^(−kel·t). Inputs: bioavailability F, dose D, volume of distribution Vd, elimination rate constant kel, and time t. Output is plasma concentration C(t).',
+    michaelisMenten:
+      'Enzyme reaction rate v = Vmax·[S]/(Km + [S]). Connect substrate concentration [S], maximum rate Vmax, and Michaelis constant Km. The inhibition variant adds a competitive or non-competitive inhibitor port.',
+    hillEquation:
+      'Fractional occupancy f = [L]^n / (K_d^n + [L]^n). Input ligand concentration [L], dissociation constant K_d, and Hill coefficient n. Used for cooperative binding analysis.',
+    logisticGrowth:
+      'Population P(t) = K·P₀·e^(rt) / (K + P₀·(e^(rt) − 1)). Inputs: initial population P₀, carrying capacity K, growth rate r, and time t.',
+  },
+
+  blockFinanceOptions: {
+    intro:
+      'Finance – Options blocks implement Black-Scholes pricing, the Greeks, and binomial models for derivative valuation.',
+    blackScholesTitle: 'Black-Scholes',
+    blackScholesBody:
+      'European call and put prices via the Black-Scholes formula. Inputs: spot price S, strike K, risk-free rate r, volatility σ, and time-to-expiry T (years). Outputs: call price, put price, and the put-call parity check value.',
+    greeksTitle: 'Option Greeks',
+    greeksBody:
+      'Delta, Gamma, Vega, Theta, and Rho for European calls and puts. Uses the same inputs as the Black-Scholes block. Useful for building sensitivity dashboards: connect a Number block to σ and watch all Greeks update live.',
+    binomialTitle: 'Binomial Tree',
+    binomialBody:
+      'American or European option price via the Cox-Ross-Rubinstein binomial tree model. Inputs: spot S, strike K, r, σ, T, steps N, and option type (call/put, American/European). Useful for pricing options where early exercise matters.',
+    impliedVol:
+      'Newton-Raphson solver for implied volatility: given a market price, find the σ that reproduces it via Black-Scholes. Converges in 10–20 iterations for standard strikes and maturities.',
+  },
+
+  blockStatsDist: {
+    intro:
+      'Statistical Distributions blocks compute PDF, CDF, and quantile functions for common probability distributions.',
+    normalTitle: 'Normal Distribution',
+    normalBody:
+      'PDF, CDF, and inverse CDF (quantile) for the normal distribution N(μ, σ²). The Z-score block converts raw scores to standard normal units. Useful for confidence-interval and hypothesis-test calculations.',
+    tDistTitle: 't-Distribution',
+    tDistBody:
+      "Student's t PDF, CDF, and quantile for ν degrees of freedom. Use the two-sample t-test block to compare means with a pooled or Welch variance assumption.",
+    chiSquared:
+      'Chi-squared PDF, CDF, and quantile for k degrees of freedom. Connect observed and expected counts to the goodness-of-fit test block for a χ² statistic and p-value.',
+    binomial:
+      'Binomial PMF P(X = k) = C(n,k)·p^k·(1−p)^(n−k) and CDF. Inputs: number of trials n, success probability p, and outcome count k.',
+    poisson:
+      'Poisson PMF P(X = k) = λ^k·e^(−λ)/k! and CDF. Input rate parameter λ (events per interval) and k.',
+  },
+
+  blockFftSignal: {
+    intro:
+      'FFT / Signal Processing blocks analyse and transform discrete time-series data in the frequency domain.',
+    fftTitle: 'FFT',
+    fftBody:
+      'Computes the one-sided magnitude spectrum of a real-valued input vector using the Fast Fourier Transform. Inputs: signal array and sample rate fs (Hz). Outputs: frequency axis (Hz), magnitude array, and peak frequency. Connect a Table block as the signal source.',
+    windowTitle: 'Window Functions',
+    windowBody:
+      'Apply a Hann, Hamming, Blackman, or rectangular window to a signal before FFT to reduce spectral leakage. The window block outputs the windowed signal; chain it into the FFT block.',
+    filterTitle: 'Digital Filters',
+    filterBody:
+      'FIR low-pass, high-pass, band-pass, and band-stop filters designed by the Parks-McClellan (equiripple) method. Inputs: cutoff frequency (Hz), sample rate, filter order, and ripple (dB). Output is the filtered signal array.',
+    psd: "Power Spectral Density via Welch's method. Inputs: signal array, sample rate, window type, and segment length. Outputs the one-sided PSD (V²/Hz) and frequency axis.",
+  },
+
+  blockNumerical: {
+    intro:
+      'Numerical Methods blocks solve equations, integrals, and differential equations without writing any code.',
+    rootFindingTitle: 'Root Finding',
+    rootFindingBody:
+      'Bisection and Newton-Raphson solvers for scalar equations f(x) = 0. Connect a Formula block as the function definition; set the lower and upper bounds (bisection) or initial guess (Newton). Outputs the root, residual, and iteration count.',
+    numericalIntTitle: 'Numerical Integration',
+    numericalIntBody:
+      "Gauss-Legendre quadrature for ∫f(x)dx over [a, b] with 5, 10, or 20 points. Also available: trapezoidal and Simpson's 1/3 rule on tabular data arrays. Connect a Formula block for f(x).",
+    odeTitle: 'ODE Solver',
+    odeBody:
+      'Runge-Kutta RK4 integrator for first-order systems dy/dt = f(t, y). Define f using a Formula block, set initial condition y₀, and connect the time span [t₀, t_end] and step size. Outputs arrays of t and y for use in a Plot block.',
+    linearSystem:
+      'Solve a system of n linear equations Ax = b by LU decomposition. Connect an n×n matrix A and an n×1 column vector b. Outputs solution vector x and determinant of A.',
+  },
+
+  blockParametricSweep: {
+    intro:
+      'The Parametric Sweep block evaluates any output over a range of one input parameter, producing a result table without manual iteration.',
+    setupTitle: 'Setting up a sweep',
+    setupBody:
+      'Place a Parametric Sweep block on the canvas. Connect the input you want to vary (e.g. a Number block) to the Sweep Input port, and connect the output you want to track to the Sweep Output port. Set the start, stop, and number of steps in the block inspector. Click Run to execute.',
+    outputTitle: 'Sweep output',
+    outputBody:
+      'The sweep produces a two-column table: the first column is the swept parameter values, the second is the corresponding output values. Connect the table to a Plot block (XY Scatter) to visualise the relationship, or to a Table Display block to inspect individual values.',
+    parallelTitle: 'Parallel evaluation',
+    parallelBody:
+      'Sweeps with more than 100 steps are evaluated in a Web Worker to keep the UI responsive. Progress is shown in the block status. Each step re-evaluates the subgraph reachable from the sweep input, so only affected computations are rerun.',
+    tip: "Tip: Nest two Parametric Sweep blocks to produce a 2D sensitivity grid. Connect the outer sweep's step variable into the inner sweep's parameter to generate a matrix result.",
+  },
+
+  blockMonteCarlo: {
+    intro:
+      'Monte Carlo blocks propagate uncertainty through a calculation by sampling input distributions thousands of times.',
+    setupTitle: 'Assigning distributions',
+    setupBody:
+      'Connect a Distribution block (Normal, Uniform, Log-Normal, or Triangular) to any Number input. The Monte Carlo runner replaces the deterministic value with samples from the distribution on each trial. Non-connected inputs keep their fixed values.',
+    runTitle: 'Running a simulation',
+    runBody:
+      'Set the number of trials (1 000 to 100 000) in the Monte Carlo block. Click Run. The engine evaluates the full computation graph for each trial in the Web Worker. A progress indicator is shown during long simulations.',
+    outputTitle: 'Interpreting results',
+    outputBody:
+      'The block outputs mean, standard deviation, 5th and 95th percentiles, and the full sample array. Connect the sample array to a Histogram block to visualise the output distribution. Connect percentile outputs to Display blocks for confidence bounds.',
+    convergence:
+      'Use the Convergence Plot output to verify that statistics stabilise as trial count increases. If mean and σ are still drifting at your chosen trial count, increase the number of trials.',
+  },
+
+  blockOptimizer: {
+    intro:
+      'The Optimizer block finds input values that minimise or maximise any output using gradient-free methods.',
+    setupTitle: 'Configuring the optimizer',
+    setupBody:
+      'Connect the variables you want to optimise to the Decision Variable ports. Connect the output you want to minimise (or maximise) to the Objective port. Optionally connect constraint outputs to the Constraint ports (each must be ≤ 0 at feasibility). Set bounds for each decision variable in the inspector.',
+    methodsTitle: 'Optimisation methods',
+    methodsBody:
+      'Available methods: Nelder-Mead (gradient-free simplex, good for smooth problems), Differential Evolution (global, population-based, good for multimodal problems), and SLSQP (gradient-based, fastest for smooth convex problems with constraints). Switch methods in the block inspector.',
+    outputTitle: 'Optimizer output',
+    outputBody:
+      'Outputs the optimal decision variable values, optimal objective value, number of function evaluations, and a convergence flag. If the optimizer does not converge, increase the iteration limit or switch to a global method.',
+    tip: 'Tip: Start with Nelder-Mead. If results are poor or the problem has many local optima, switch to Differential Evolution with a population size of 10× the number of decision variables.',
+  },
+
+  blockComplex: {
+    intro:
+      'Complex Number blocks perform arithmetic, polar/rectangular conversion, and complex analysis functions.',
+    constructTitle: 'Constructing complex numbers',
+    constructBody:
+      'The Complex block accepts a real part and an imaginary part and outputs a complex value z = a + bi. Alternatively, connect magnitude |z| and angle θ (radians or degrees) to the Polar Input block.',
+    arithTitle: 'Complex arithmetic',
+    arithBody:
+      'Add, Subtract, Multiply, Divide, and Power blocks work with complex inputs. The output is a complex value; chain into the Real Part or Imaginary Part blocks to extract components, or into Magnitude/Angle blocks for polar form.',
+    functionsTitle: 'Complex functions',
+    functionsBody:
+      'Available: complex exponential e^z, complex logarithm ln(z), complex square root √z, and complex trigonometric functions (sin, cos, tan and their inverses). Useful for AC circuit analysis (phasors), 2D conformal mappings, and signal processing.',
+    phasor:
+      'Phasor blocks convert peak amplitude A and phase angle φ to a complex phasor Ae^(jφ). Use the Phasor Add block to sum phasors from multiple circuit branches.',
+  },
+
+  blockMatrix: {
+    intro:
+      'Matrix blocks create, transform, and factorise matrices for linear algebra and numerical computing.',
+    createTitle: 'Creating matrices',
+    createBody:
+      'The Matrix block accepts a table input (rows × columns) or individual element inputs. Use the Identity, Zeros, Ones, and Diagonal factory blocks to create common matrices. The Reshape block changes the dimensions of an existing matrix.',
+    opsTitle: 'Matrix operations',
+    opsBody:
+      'Available operations: add, subtract, multiply (matrix product), element-wise multiply (Hadamard), transpose, and scalar multiply. The Inverse block uses LU decomposition; the Pseudo-Inverse block uses SVD for non-square matrices.',
+    decompTitle: 'Decompositions',
+    decompBody:
+      'LU Decomposition (with partial pivoting): outputs L, U, and permutation matrix P. QR Decomposition: outputs orthogonal Q and upper triangular R. SVD: outputs U, Σ, and V^T. Eigenvalue block outputs eigenvalues and eigenvectors for real symmetric matrices.',
+    solveTitle: 'Solving linear systems',
+    solveBody:
+      'The Solve block computes x = A⁻¹b for a square system. Connect matrix A (n×n) and column vector b (n×1). For overdetermined systems (more equations than unknowns), use the Least Squares block which solves the normal equations A^T·A·x = A^T·b.',
   },
 }

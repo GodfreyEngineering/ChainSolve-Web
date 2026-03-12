@@ -108,6 +108,8 @@ interface ContextMenuProps {
   onAddProbeNode?: (edgeId: string) => void
   /** UX-15: Select all nodes on the canvas. */
   onSelectAll?: () => void
+  /** ADV-04: Open the comment thread for a node. */
+  onAddComment?: (nodeId: string) => void
 }
 
 const item: CSSProperties = {
@@ -218,6 +220,7 @@ export function ContextMenu({
   onResetNodeToDefault,
   onAddProbeNode,
   onSelectAll,
+  onAddComment,
 }: ContextMenuProps) {
   const { t } = useTranslation()
 
@@ -334,6 +337,16 @@ export function ContextMenu({
                 label={t('contextMenu.showNotation')}
                 onClick={() => {
                   onShowNotation(target.nodeId)
+                  onClose()
+                }}
+              />
+            )}
+            {onAddComment && (
+              <MenuItem
+                icon="☷"
+                label={t('contextMenu.addComment', 'Comment')}
+                onClick={() => {
+                  onAddComment(target.nodeId)
                   onClose()
                 }}
               />

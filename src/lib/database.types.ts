@@ -115,7 +115,14 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
-        Relationships: [{ foreignKeyName: 'profiles_id_fkey'; columns: ['id']; referencedRelation: 'users'; referencedColumns: ['id'] }]
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_id_fkey'
+            columns: ['id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
       }
 
       projects: {
@@ -159,7 +166,12 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'projects_owner_id_fkey'; columns: ['owner_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'projects_owner_id_fkey'
+            columns: ['owner_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -195,8 +207,18 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'canvases_project_id_fkey'; columns: ['project_id']; referencedRelation: 'projects'; referencedColumns: ['id'] },
-          { foreignKeyName: 'canvases_owner_id_fkey'; columns: ['owner_id']; referencedRelation: 'users'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'canvases_project_id_fkey'
+            columns: ['project_id']
+            referencedRelation: 'projects'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'canvases_owner_id_fkey'
+            columns: ['owner_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -241,8 +263,18 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'project_assets_project_id_fkey'; columns: ['project_id']; referencedRelation: 'projects'; referencedColumns: ['id'] },
-          { foreignKeyName: 'project_assets_user_id_fkey'; columns: ['user_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'project_assets_project_id_fkey'
+            columns: ['project_id']
+            referencedRelation: 'projects'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'project_assets_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -305,7 +337,12 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'user_preferences_id_fkey'; columns: ['id']; referencedRelation: 'users'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'user_preferences_id_fkey'
+            columns: ['id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -387,7 +424,12 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'group_templates_owner_id_fkey'; columns: ['owner_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'group_templates_owner_id_fkey'
+            columns: ['owner_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -423,8 +465,18 @@ export type Database = {
           is_active?: boolean
         }
         Relationships: [
-          { foreignKeyName: 'share_links_project_id_fkey'; columns: ['project_id']; referencedRelation: 'projects'; referencedColumns: ['id'] },
-          { foreignKeyName: 'share_links_created_by_fkey'; columns: ['created_by']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'share_links_project_id_fkey'
+            columns: ['project_id']
+            referencedRelation: 'projects'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'share_links_created_by_fkey'
+            columns: ['created_by']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -463,7 +515,12 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'node_comments_project_id_fkey'; columns: ['project_id']; referencedRelation: 'projects'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'node_comments_project_id_fkey'
+            columns: ['project_id']
+            referencedRelation: 'projects'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -557,8 +614,18 @@ export type Database = {
           created_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'simulation_runs_project_id_fkey'; columns: ['project_id']; referencedRelation: 'projects'; referencedColumns: ['id'] },
-          { foreignKeyName: 'simulation_runs_owner_id_fkey'; columns: ['owner_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'simulation_runs_project_id_fkey'
+            columns: ['project_id']
+            referencedRelation: 'projects'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'simulation_runs_owner_id_fkey'
+            columns: ['owner_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -600,8 +667,18 @@ export type Database = {
           created_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'project_snapshots_project_id_fkey'; columns: ['project_id']; referencedRelation: 'projects'; referencedColumns: ['id'] },
-          { foreignKeyName: 'project_snapshots_canvas_id_fkey'; columns: ['canvas_id']; referencedRelation: 'canvases'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'project_snapshots_project_id_fkey'
+            columns: ['project_id']
+            referencedRelation: 'projects'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'project_snapshots_canvas_id_fkey'
+            columns: ['canvas_id']
+            referencedRelation: 'canvases'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -634,7 +711,12 @@ export type Database = {
           created_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'bug_reports_user_id_fkey'; columns: ['user_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'bug_reports_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -667,7 +749,12 @@ export type Database = {
           created_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'suggestions_user_id_fkey'; columns: ['user_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'suggestions_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -740,7 +827,12 @@ export type Database = {
           created_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'user_reports_reporter_id_fkey'; columns: ['reporter_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'user_reports_reporter_id_fkey'
+            columns: ['reporter_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -770,7 +862,12 @@ export type Database = {
           user_agent?: string | null
         }
         Relationships: [
-          { foreignKeyName: 'user_terms_log_user_id_fkey'; columns: ['user_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'user_terms_log_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -812,7 +909,12 @@ export type Database = {
           is_current?: boolean
         }
         Relationships: [
-          { foreignKeyName: 'user_sessions_user_id_fkey'; columns: ['user_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'user_sessions_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -906,8 +1008,18 @@ export type Database = {
           created_at?: string
         }
         Relationships: [
-          { foreignKeyName: 'org_members_org_id_fkey'; columns: ['org_id']; referencedRelation: 'organizations'; referencedColumns: ['id'] },
-          { foreignKeyName: 'org_members_user_id_fkey'; columns: ['user_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+          {
+            foreignKeyName: 'org_members_org_id_fkey'
+            columns: ['org_id']
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'org_members_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
         ]
       }
 
@@ -1307,5 +1419,4 @@ export type TablesInsert<T extends keyof Database['public']['Tables']> =
   Database['public']['Tables'][T]['Insert']
 export type TablesUpdate<T extends keyof Database['public']['Tables']> =
   Database['public']['Tables'][T]['Update']
-export type Enums<T extends keyof Database['public']['Enums']> =
-  Database['public']['Enums'][T]
+export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T]

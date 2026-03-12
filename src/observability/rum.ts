@@ -25,7 +25,12 @@ const SESSION_KEY = 'cs_obs_session_v1'
 
 // ── Known event names ─────────────────────────────────────────────────────────
 
-export type RumEventName = 'project_open' | 'save' | 'save_failure' | 'engine_eval' | 'canvas_switch'
+export type RumEventName =
+  | 'project_open'
+  | 'save'
+  | 'save_failure'
+  | 'engine_eval'
+  | 'canvas_switch'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -127,10 +132,7 @@ export interface TimingOpts {
  * Start a timing measurement. Returns a stop function that records the duration.
  * Calling the stop function multiple times is safe — only the first call sends.
  */
-export function startTiming(
-  eventName: RumEventName,
-  opts?: TimingOpts,
-): () => void {
+export function startTiming(eventName: RumEventName, opts?: TimingOpts): () => void {
   if (!OBS_ENABLED) return () => {}
 
   const t0 = performance.now()
@@ -147,10 +149,6 @@ export function startTiming(
 /**
  * Record a pre-measured duration (when you already have start/end times).
  */
-export function recordTiming(
-  eventName: RumEventName,
-  durationMs: number,
-  opts?: TimingOpts,
-): void {
+export function recordTiming(eventName: RumEventName, durationMs: number, opts?: TimingOpts): void {
   sendTiming(eventName, durationMs, opts)
 }

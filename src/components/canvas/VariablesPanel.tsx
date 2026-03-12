@@ -32,7 +32,8 @@ type SortDir = 'asc' | 'desc'
 /** Export variables as a CSV string (name,value,unit,description). */
 function buildVariablesCSV(vars: ProjectVariable[]): string {
   const rows = vars.map((v) => {
-    const esc = (s: string) => (s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s)
+    const esc = (s: string) =>
+      s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s
     return [esc(v.name), String(v.value), esc(v.unit ?? ''), esc(v.description ?? '')].join(',')
   })
   return ['name,value,unit,description', ...rows].join('\n')
@@ -518,7 +519,7 @@ function InfluencePanel({ variables, allNodes, allEdges }: InfluencePanelProps) 
         const affectedOutputIds = findAffectedOutputs(boundNodeIds, allNodes, allEdges)
         const affectedLabels = affectedOutputIds.map((id) => {
           const n = allNodes.find((x) => x.id === id)
-          return n ? ((n.data as NodeData).label || (n.data as NodeData).blockType) : id
+          return n ? (n.data as NodeData).label || (n.data as NodeData).blockType : id
         })
         return { variable: v, affectedCount: affectedOutputIds.length, affectedLabels }
       })
@@ -527,7 +528,14 @@ function InfluencePanel({ variables, allNodes, allEdges }: InfluencePanelProps) 
 
   if (rows.length === 0) {
     return (
-      <div style={{ padding: '1rem', color: 'var(--text-faint)', fontSize: '0.72rem', textAlign: 'center' }}>
+      <div
+        style={{
+          padding: '1rem',
+          color: 'var(--text-faint)',
+          fontSize: '0.72rem',
+          textAlign: 'center',
+        }}
+      >
         {t('variablesPanel.noVariables', 'No variables to analyse.')}
       </div>
     )
@@ -674,11 +682,17 @@ export function VariablesPanel({ open, onClose }: VariablesPanelProps) {
       if (prefix) prefixCounts[prefix] = (prefixCounts[prefix] ?? 0) + 1
     }
     // Only group if ≥2 variables share a prefix
-    const activeGroups = new Set(Object.entries(prefixCounts).filter(([, c]) => c >= 2).map(([k]) => k))
+    const activeGroups = new Set(
+      Object.entries(prefixCounts)
+        .filter(([, c]) => c >= 2)
+        .map(([k]) => k),
+    )
     if (activeGroups.size === 0) return null
 
     // Build grouped list
-    const result: Array<{ type: 'group'; prefix: string } | { type: 'var'; variable: ProjectVariable }> = []
+    const result: Array<
+      { type: 'group'; prefix: string } | { type: 'var'; variable: ProjectVariable }
+    > = []
     const seenGroups = new Set<string>()
     for (const v of varList) {
       const prefix = getGroupPrefix(v.name)
@@ -917,11 +931,7 @@ export function VariablesPanel({ open, onClose }: VariablesPanelProps) {
           >
             Influence Analysis
           </div>
-          <InfluencePanel
-            variables={varList}
-            allNodes={allNodes}
-            allEdges={allEdges}
-          />
+          <InfluencePanel variables={varList} allNodes={allNodes} allEdges={allEdges} />
         </div>
       )}
 

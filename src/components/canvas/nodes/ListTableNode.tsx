@@ -138,9 +138,7 @@ function ListTableNodeInner({ id, data, selected }: NodeProps) {
     ? Math.min(values.length, Math.ceil((scrollTop + visibleH) / ROW_H) + OVERSCAN)
     : 0
 
-  const ariaLabel = values
-    ? `${nd.label} list, ${values.length} values`
-    : `${nd.label} list block`
+  const ariaLabel = values ? `${nd.label} list, ${values.length} values` : `${nd.label} list block`
 
   return (
     <div

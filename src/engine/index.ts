@@ -32,7 +32,9 @@ import type {
 // ── ENG-03: Binary result decoding ───────────────────────────────────────────
 
 /** Reconstruct EngineEvalResult from a binary-format result-binary message. */
-function decodeBinaryFullResult(msg: Extract<WorkerResponse, { type: 'result-binary' }>): EngineEvalResult {
+function decodeBinaryFullResult(
+  msg: Extract<WorkerResponse, { type: 'result-binary' }>,
+): EngineEvalResult {
   const values: EngineEvalResult['values'] = { ...msg.scalars.nonScalars }
   const { nodeIds, scalars } = msg.scalars
   for (let i = 0; i < nodeIds.length; i++) {
@@ -47,7 +49,9 @@ function decodeBinaryFullResult(msg: Extract<WorkerResponse, { type: 'result-bin
 }
 
 /** Reconstruct IncrementalEvalResult from a binary-format incremental-binary message. */
-function decodeBinaryIncrementalResult(msg: Extract<WorkerResponse, { type: 'incremental-binary' }>): IncrementalEvalResult {
+function decodeBinaryIncrementalResult(
+  msg: Extract<WorkerResponse, { type: 'incremental-binary' }>,
+): IncrementalEvalResult {
   const changedValues: IncrementalEvalResult['changedValues'] = { ...msg.scalars.nonScalars }
   const { nodeIds, scalars } = msg.scalars
   for (let i = 0; i < nodeIds.length; i++) {
@@ -133,7 +137,7 @@ export interface EngineAPI {
  * update (or vice-versa) — reject with a CONTRACT_MISMATCH error so the user
  * knows to clear cache and reload.
  */
-const EXPECTED_CONTRACT_VERSION = 1
+const EXPECTED_CONTRACT_VERSION = 3
 
 // ── Watchdog constant ─────────────────────────────────────────────────────
 
@@ -479,9 +483,11 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
       if (typeof SharedArrayBuffer !== 'undefined' && crossOriginIsolated) {
         const sab = new SharedArrayBuffer(data.byteLength)
         new Float64Array(sab).set(new Float64Array(data.buffer, data.byteOffset, data.length))
-        worker.postMessage(
-          { type: 'registerDataset', datasetId: id, buffer: sab } satisfies WorkerRequest,
-        )
+        worker.postMessage({
+          type: 'registerDataset',
+          datasetId: id,
+          buffer: sab,
+        } satisfies WorkerRequest)
       } else {
         const buffer = data.buffer.slice(
           data.byteOffset,

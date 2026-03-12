@@ -725,7 +725,10 @@ export function CanvasToolbar({
         {onTogglePresentationMode && (
           <>
             <div style={sep} />
-            <Tooltip content={t('toolbar.presentationMode', 'Presentation mode (Ctrl+Shift+P)')} side={tipSide}>
+            <Tooltip
+              content={t('toolbar.presentationMode', 'Presentation mode (Ctrl+Shift+P)')}
+              side={tipSide}
+            >
               <button
                 onClick={onTogglePresentationMode}
                 style={btnStyle(!!presentationMode)}

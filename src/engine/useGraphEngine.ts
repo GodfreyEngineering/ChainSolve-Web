@@ -44,7 +44,6 @@ export function hasStructuralChange(ops: PatchOp[]): boolean {
   return ops.some((op) => op.op !== 'updateNodeData')
 }
 
-
 /** K4-2: Maximum node errors to log per eval to avoid flooding the console. */
 const MAX_NODE_ERRORS_PER_EVAL = 10
 
@@ -99,6 +98,8 @@ export function useGraphEngine(
   publishedOutputs?: Record<string, number>,
   /** OBS-02: project/canvas IDs for engine eval telemetry. */
   telemetryOpts?: { projectId?: string; canvasId?: string },
+  /** SCI-06: Angle unit preference for trig blocks. */
+  angleUnit?: 'rad' | 'deg',
 ): GraphEngineResult {
   const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
   const [isPartial, setIsPartial] = useState(false)
@@ -110,6 +111,8 @@ export function useGraphEngine(
   const snapshotLoaded = useRef(false)
   const prevRefreshKey = useRef(refreshKey)
   const prevPausedRef = useRef(paused)
+  // SCI-06: Force full snapshot reload when angle unit changes.
+  const prevAngleUnitRef = useRef(angleUnit)
   const pendingRef = useRef(0) // Coalescing counter: skip stale results.
   // Debounce timer for data-only patches (see PATCH_DEBOUNCE_MS).
   const patchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -120,6 +123,13 @@ export function useGraphEngine(
     // When refreshKey changes, force a full snapshot re-evaluation.
     if (refreshKey !== prevRefreshKey.current) {
       prevRefreshKey.current = refreshKey
+      snapshotLoaded.current = false
+    }
+
+    // SCI-06: When angle unit changes, force a full snapshot re-evaluation
+    // so all trig nodes get the updated angleUnit in their data.
+    if (angleUnit !== prevAngleUnitRef.current) {
+      prevAngleUnitRef.current = angleUnit
       snapshotLoaded.current = false
     }
 
@@ -136,7 +146,7 @@ export function useGraphEngine(
       // First render: load full snapshot into persistent engine graph.
       snapshotLoaded.current = true
       const reqId = ++pendingRef.current
-      const snapshot = toEngineSnapshot(nodes, edges, constants, variables, publishedOutputs)
+      const snapshot = toEngineSnapshot(nodes, edges, constants, variables, publishedOutputs, angleUnit)
       dlog.debug('engine', 'Snapshot eval started', {
         nodeCount: nodes.length,
         edgeCount: edges.length,
@@ -244,7 +254,10 @@ export function useGraphEngine(
             const removedNodeIds = opsToSend
               .filter((op) => op.op === 'removeNode')
               .map((op) => (op as { op: 'removeNode'; nodeId: string }).nodeId)
-            store.update(result.changedValues, removedNodeIds.length > 0 ? removedNodeIds : undefined)
+            store.update(
+              result.changedValues,
+              removedNodeIds.length > 0 ? removedNodeIds : undefined,
+            )
             setComputed(store.getAll())
             if (perfEnabled) {
               updatePerfMetrics({
@@ -313,6 +326,7 @@ export function useGraphEngine(
     setEngineStatus,
     store,
     telemetryOpts,
+    angleUnit,
   ])
 
   return { computed, isPartial, computedStore: store }

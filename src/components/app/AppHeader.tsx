@@ -49,6 +49,9 @@ const LazyLlmGraphBuilderDialog = lazy(() =>
 const LazyTemplateManagerDialog = lazy(() =>
   import('../canvas/TemplateManagerDialog').then((m) => ({ default: m.TemplateManagerDialog })),
 )
+const LazyPublishWizardModal = lazy(() =>
+  import('./PublishWizardModal').then((m) => ({ default: m.PublishWizardModal })),
+)
 import { BLOCK_TAXONOMY } from '../../blocks/registry'
 import { getRecentProjects } from '../../lib/recentProjects'
 import { resetOnboarding } from '../../lib/onboardingState'
@@ -154,6 +157,7 @@ export function AppHeader({
   const [tourOpen, setTourOpen] = useState(false)
   const [wizardOpen, setWizardOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [publishWizardOpen, setPublishWizardOpen] = useState(false)
 
   const autosaveEnabled = usePreferencesStore((s) => s.autosaveEnabled)
 
@@ -368,6 +372,15 @@ export function AppHeader({
         onClick: () => {
           setOpenMenu(null)
           setExportDialogOpen(true)
+        },
+      },
+      { separator: true },
+      {
+        label: t('menu.publishToMarketplace', 'Publish to marketplace'),
+        disabled: !projectId || readOnly,
+        onClick: () => {
+          setOpenMenu(null)
+          setPublishWizardOpen(true)
         },
       },
       { separator: true },
@@ -1122,6 +1135,17 @@ export function AppHeader({
       {templateManagerOpen && (
         <Suspense fallback={null}>
           <LazyTemplateManagerDialog open onClose={() => setTemplateManagerOpen(false)} />
+        </Suspense>
+      )}
+      {publishWizardOpen && projectId && (
+        <Suspense fallback={null}>
+          <LazyPublishWizardModal
+            open
+            projectId={projectId}
+            projectName={projectName}
+            onClose={() => setPublishWizardOpen(false)}
+            onPublished={() => setPublishWizardOpen(false)}
+          />
         </Suspense>
       )}
       <ExportDialog

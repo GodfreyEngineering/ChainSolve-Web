@@ -36,7 +36,12 @@
 
   --text: #f4f4f3;
   --text-muted: rgba(244, 244, 243, 0.65); /* raised from 0.5 → 4.5:1 AA on both bg and card-bg */
-  --text-faint: rgba(244, 244, 243, 0.35); /* labels, section headers */
+  --text-faint: rgba(
+    244,
+    244,
+    243,
+    0.48
+  ); /* labels, section headers — raised to ≥4.5:1 WCAG AA on --surface-0 */
 
   --success: #22c55e;
   --danger: #ef4444;
@@ -172,7 +177,7 @@
 
   --text: #1a1a1a;
   --text-muted: rgba(26, 26, 26, 0.65); /* raised from 0.5 → 4.5:1 AA on bg and card-bg */
-  --text-faint: rgba(26, 26, 26, 0.35);
+  --text-faint: #6b6b69; /* WCAG AA compliant on light surfaces: ~4.6:1 on --surface-0 (#f5f5f4) */
   --primary-text: #0f7578; /* darker teal: 4.5:1 AA on light bg (--primary #1cabb0 only 2.5:1) */
 
   --grid-minor-color: rgba(0, 0, 0, 0.12);

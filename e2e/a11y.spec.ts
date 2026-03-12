@@ -32,7 +32,12 @@ const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] as const
 const SKIP_RULES = ['color-contrast']
 
 /** Summarise a violation for console output. */
-function summarise(v: { impact: string | null; id: string; description: string; nodes: unknown[] }) {
+function summarise(v: {
+  impact: string | null
+  id: string
+  description: string
+  nodes: unknown[]
+}) {
   return `  [${v.impact ?? 'unknown'}] ${v.id}: ${v.description} (${v.nodes.length} node(s))`
 }
 
@@ -59,9 +64,7 @@ test.describe('Accessibility — landing page (pre-mount)', () => {
       console.log(`Advisory a11y violations (non-blocking):\n${advisory.map(summarise).join('\n')}`)
     }
     if (blocking.length > 0) {
-      console.error(
-        `Blocking a11y violations:\n${blocking.map(summarise).join('\n')}`,
-      )
+      console.error(`Blocking a11y violations:\n${blocking.map(summarise).join('\n')}`)
     }
 
     expect(
@@ -87,12 +90,53 @@ test.describe('Accessibility — landing page (post-React-mount)', () => {
     const critical = results.violations.filter((v) => v.impact === 'critical')
 
     if (critical.length > 0) {
-      console.error(`Critical a11y violations after React mount:\n${critical.map(summarise).join('\n')}`)
+      console.error(
+        `Critical a11y violations after React mount:\n${critical.map(summarise).join('\n')}`,
+      )
     }
 
     expect(
       critical,
       `${critical.length} critical accessibility violation(s) found after React mount`,
+    ).toHaveLength(0)
+  })
+})
+
+test.describe('Accessibility — scratch canvas workspace', () => {
+  test('no critical or serious violations on scratch canvas', async ({ page }) => {
+    await page.goto('/app?scratch=1')
+
+    // Wait for React to mount and canvas to be visible — up to 30s for WASM
+    await page
+      .locator('[data-testid="react-mounted"], [data-testid="boot-fatal"]')
+      .first()
+      .waitFor({ state: 'attached', timeout: 30_000 })
+
+    const results = await new AxeBuilder({ page })
+      .withTags([...WCAG_TAGS])
+      .disableRules(SKIP_RULES)
+      .exclude('.react-flow__renderer') // React Flow canvas SVG is not user-facing HTML
+      .analyze()
+
+    const blocking = results.violations.filter(
+      (v) => v.impact === 'critical' || v.impact === 'serious',
+    )
+    const advisory = results.violations.filter(
+      (v) => v.impact === 'moderate' || v.impact === 'minor',
+    )
+
+    if (advisory.length > 0) {
+      console.log(
+        `Advisory a11y violations on workspace (non-blocking):\n${advisory.map(summarise).join('\n')}`,
+      )
+    }
+    if (blocking.length > 0) {
+      console.error(`Blocking a11y violations on workspace:\n${blocking.map(summarise).join('\n')}`)
+    }
+
+    expect(
+      blocking,
+      `${blocking.length} critical/serious accessibility violation(s) found on workspace`,
     ).toHaveLength(0)
   })
 })

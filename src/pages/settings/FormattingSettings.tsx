@@ -33,7 +33,10 @@ export function FormattingSettings({
               { value: 'auto', label: t('settings.displayAuto', 'Auto (smart)') },
               { value: 'decimal', label: t('settings.displayDecimal', 'Fixed decimal places') },
               { value: 'sig_figs', label: t('settings.displaySigFigs', 'Significant figures') },
-              { value: 'scientific', label: t('settings.displayScientific', 'Scientific notation always') },
+              {
+                value: 'scientific',
+                label: t('settings.displayScientific', 'Scientific notation always'),
+              },
             ]}
             value={mode}
             onChange={(e) =>
@@ -112,8 +115,12 @@ export function FormattingSettings({
               style={checkboxStyle}
             />
             <div>
-              <span style={checkLabelStyle}>{t('settings.trailingZeros', 'Show trailing zeros')}</span>
-              <span style={checkHintStyle}>{t('settings.trailingZerosHint', 'Show 1.50 instead of 1.5 in fixed-decimal mode.')}</span>
+              <span style={checkLabelStyle}>
+                {t('settings.trailingZeros', 'Show trailing zeros')}
+              </span>
+              <span style={checkHintStyle}>
+                {t('settings.trailingZerosHint', 'Show 1.50 instead of 1.5 in fixed-decimal mode.')}
+              </span>
             </div>
           </label>
         </div>
@@ -124,7 +131,10 @@ export function FormattingSettings({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Select
             label={t('settings.decimalSeparator', 'Decimal separator')}
-            hint={t('settings.decimalSeparatorHint', 'Character used between integer and fractional parts.')}
+            hint={t(
+              'settings.decimalSeparatorHint',
+              'Character used between integer and fractional parts.',
+            )}
             options={[
               { value: '.', label: t('settings.decimalPeriod', 'Period (1.23)') },
               { value: ',', label: t('settings.decimalComma', 'Comma (1,23)') },
@@ -141,8 +151,12 @@ export function FormattingSettings({
               style={checkboxStyle}
             />
             <div>
-              <span style={checkLabelStyle}>{t('settings.thousandsSep', 'Thousands separator')}</span>
-              <span style={checkHintStyle}>{t('settings.thousandsSepHint', 'Group digits in threes.')}</span>
+              <span style={checkLabelStyle}>
+                {t('settings.thousandsSep', 'Thousands separator')}
+              </span>
+              <span style={checkHintStyle}>
+                {t('settings.thousandsSepHint', 'Group digits in threes.')}
+              </span>
             </div>
           </label>
 
@@ -174,11 +188,26 @@ export function FormattingSettings({
               { value: 'parens', label: t('settings.negParens', 'Parentheses ((1.5))') },
             ]}
             value={prefs.negativeStyle}
-            onChange={(e) =>
-              prefs.update({ negativeStyle: e.target.value as 'minus' | 'parens' })
-            }
+            onChange={(e) => prefs.update({ negativeStyle: e.target.value as 'minus' | 'parens' })}
           />
         </div>
+      </div>
+
+      {/* SCI-06: Angle unit preference */}
+      <div style={cardStyle}>
+        <Select
+          label={t('settings.angleUnit', 'Angle unit')}
+          hint={t(
+            'settings.angleUnitHint',
+            'Controls how trig blocks (sin, cos, tan, asin, acos, atan, atan2) interpret and output angles. A ° or rad badge is shown on each trig block.',
+          )}
+          options={[
+            { value: 'rad', label: t('settings.angleUnitRad', 'Radians (rad)') },
+            { value: 'deg', label: t('settings.angleUnitDeg', 'Degrees (°)') },
+          ]}
+          value={prefs.angleUnit}
+          onChange={(e) => prefs.update({ angleUnit: e.target.value as 'rad' | 'deg' })}
+        />
       </div>
 
       {/* SCI-02: High-precision constants */}

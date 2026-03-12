@@ -42,6 +42,18 @@ export type BlockCategory =
   | 'presetMaterials'
   | 'presetFluids'
   | 'customFunctions'
+  | 'chem'
+  | 'structural'
+  | 'aerospace'
+  | 'controlSystems'
+  | 'lifeSci'
+  | 'finOptions'
+  | 'dateTime'
+  | 'text'
+  | 'interval'
+  | 'signal'
+  | 'complex'
+  | 'matrix'
 
 /** Which React Flow custom-node renderer to use. */
 export type NodeKind =

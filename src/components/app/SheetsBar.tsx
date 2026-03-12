@@ -212,12 +212,21 @@ function DesktopSheetsBar({
   }, [contextMenu, canvases])
 
   const commitMoveToPosition = useCallback(() => {
-    if (!moveTargetId || !onReorderCanvases) { setMoveTargetId(null); return }
+    if (!moveTargetId || !onReorderCanvases) {
+      setMoveTargetId(null)
+      return
+    }
     const pos = parseInt(movePosition, 10)
-    if (isNaN(pos) || pos < 1 || pos > canvases.length) { setMoveTargetId(null); return }
+    if (isNaN(pos) || pos < 1 || pos > canvases.length) {
+      setMoveTargetId(null)
+      return
+    }
     const ids = canvases.map((c) => c.id)
     const fromIdx = ids.indexOf(moveTargetId)
-    if (fromIdx === -1) { setMoveTargetId(null); return }
+    if (fromIdx === -1) {
+      setMoveTargetId(null)
+      return
+    }
     ids.splice(fromIdx, 1)
     ids.splice(pos - 1, 0, moveTargetId)
     onReorderCanvases(ids)
@@ -406,96 +415,101 @@ function DesktopSheetsBar({
       <span style={canvasCounterStyle}>{canvasCountLabel}</span>
 
       {/* UX-07: Move to Position inline mini-dialog */}
-      {moveTargetId && (() => {
-        const mvCanvas = canvases.find((c) => c.id === moveTargetId)
-        return (
-          <div
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 10000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'rgba(0,0,0,0.35)',
-            }}
-            onClick={() => setMoveTargetId(null)}
-          >
+      {moveTargetId &&
+        (() => {
+          const mvCanvas = canvases.find((c) => c.id === moveTargetId)
+          return (
             <div
               style={{
-                background: 'var(--surface-1)',
-                border: '1px solid var(--border)',
-                borderRadius: 10,
-                padding: '1rem 1.25rem',
-                minWidth: 280,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                position: 'fixed',
+                inset: 0,
+                zIndex: 10000,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(0,0,0,0.35)',
               }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={() => setMoveTargetId(null)}
             >
-              <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.6rem' }}>
-                {t('sheets.moveDialogTitle', 'Move "{{name}}" to position', { name: mvCanvas?.name ?? '' })}
-              </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input
-                  type="number"
-                  min={1}
-                  max={canvases.length}
-                  value={movePosition}
-                  onChange={(e) => setMovePosition(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') commitMoveToPosition()
-                    if (e.key === 'Escape') setMoveTargetId(null)
-                  }}
-                  style={{
-                    flex: 1,
-                    padding: '0.3rem 0.5rem',
-                    borderRadius: 5,
-                    border: '1px solid var(--border)',
-                    background: 'var(--input-bg)',
-                    color: 'var(--text)',
-                    fontSize: '0.85rem',
-                    outline: 'none',
-                  }}
-                  autoFocus
-                />
-                <button
-                  onClick={commitMoveToPosition}
-                  style={{
-                    padding: '0.3rem 0.8rem',
-                    borderRadius: 5,
-                    border: 'none',
-                    background: 'var(--primary)',
-                    color: 'var(--color-on-primary)',
-                    cursor: 'pointer',
-                    fontSize: '0.82rem',
-                    fontFamily: 'inherit',
-                  }}
+              <div
+                style={{
+                  background: 'var(--surface-1)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 10,
+                  padding: '1rem 1.25rem',
+                  minWidth: 280,
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.6rem' }}>
+                  {t('sheets.moveDialogTitle', 'Move "{{name}}" to position', {
+                    name: mvCanvas?.name ?? '',
+                  })}
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input
+                    type="number"
+                    min={1}
+                    max={canvases.length}
+                    value={movePosition}
+                    onChange={(e) => setMovePosition(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') commitMoveToPosition()
+                      if (e.key === 'Escape') setMoveTargetId(null)
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '0.3rem 0.5rem',
+                      borderRadius: 5,
+                      border: '1px solid var(--border)',
+                      background: 'var(--input-bg)',
+                      color: 'var(--text)',
+                      fontSize: '0.85rem',
+                      outline: 'none',
+                    }}
+                    autoFocus
+                  />
+                  <button
+                    onClick={commitMoveToPosition}
+                    style={{
+                      padding: '0.3rem 0.8rem',
+                      borderRadius: 5,
+                      border: 'none',
+                      background: 'var(--primary)',
+                      color: 'var(--color-on-primary)',
+                      cursor: 'pointer',
+                      fontSize: '0.82rem',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    {t('sheets.move', 'Move')}
+                  </button>
+                  <button
+                    onClick={() => setMoveTargetId(null)}
+                    style={{
+                      padding: '0.3rem 0.8rem',
+                      borderRadius: 5,
+                      border: '1px solid var(--border)',
+                      background: 'transparent',
+                      color: 'var(--text)',
+                      cursor: 'pointer',
+                      fontSize: '0.82rem',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    {t('common.cancel', 'Cancel')}
+                  </button>
+                </div>
+                <div
+                  style={{ marginTop: '0.4rem', fontSize: '0.68rem', color: 'var(--text-muted)' }}
                 >
-                  {t('sheets.move', 'Move')}
-                </button>
-                <button
-                  onClick={() => setMoveTargetId(null)}
-                  style={{
-                    padding: '0.3rem 0.8rem',
-                    borderRadius: 5,
-                    border: '1px solid var(--border)',
-                    background: 'transparent',
-                    color: 'var(--text)',
-                    cursor: 'pointer',
-                    fontSize: '0.82rem',
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  {t('common.cancel', 'Cancel')}
-                </button>
-              </div>
-              <div style={{ marginTop: '0.4rem', fontSize: '0.68rem', color: 'var(--text-muted)' }}>
-                {t('sheets.moveDialogHint', '1 to {{max}}', { max: canvases.length })}
+                  {t('sheets.moveDialogHint', '1 to {{max}}', { max: canvases.length })}
+                </div>
               </div>
             </div>
-          </div>
-        )
-      })()}
+          )
+        })()}
 
       {/* Context menu */}
       {contextMenu && (

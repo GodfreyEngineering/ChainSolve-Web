@@ -108,12 +108,22 @@ export function HistoryPanel({
             <span style={{ color: 'var(--text-faint)', fontSize: '0.55rem', flexShrink: 0 }}>
               ○
             </span>
-            <span style={{ color: 'var(--text)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span
+              style={{
+                color: 'var(--text)',
+                flex: 1,
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {entry.label ?? t('history.action', 'Action')}
             </span>
             {diffNodes !== 0 && (
               <span style={{ color: diffColor, fontSize: '0.65rem', flexShrink: 0 }}>
-                {diffSign}{diffNodes}n
+                {diffSign}
+                {diffNodes}n
               </span>
             )}
             <span

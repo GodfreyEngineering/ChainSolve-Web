@@ -6,6 +6,7 @@
  */
 
 import { create } from 'zustand'
+import type { KeybindingAction, KeyCombo } from '../lib/keybindings'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -13,6 +14,10 @@ export interface UserPreferences {
   // Autosave
   autosaveEnabled: boolean
   autosaveDelayMs: number
+
+  // SCI-06: Angle unit preference
+  /** Whether trig blocks interpret/output angles in degrees or radians. */
+  angleUnit: 'rad' | 'deg'
 
   // Numeric formatting (SCI-02, SCI-05, SCI-07)
   /** SCI-05: how numbers are displayed. */
@@ -43,6 +48,22 @@ export interface UserPreferences {
   defaultZoom: number // initial zoom percent for new canvases
   showGrid: boolean // show grid dots on canvas
 
+  // THEME-02: Canvas appearance
+  /** Background pattern: solid, dot-grid, line-grid, cross-grid, large-dots */
+  canvasBgStyle: 'solid' | 'dot-grid' | 'line-grid' | 'cross-grid' | 'large-dots'
+  /** Grid gap in pixels (8, 16, 32, 64) */
+  canvasGridSize: 8 | 16 | 32 | 64
+  /** Edge routing style */
+  canvasEdgeType: 'bezier' | 'step' | 'straight' | 'smoothstep'
+  /** Edge stroke width in px (1, 1.5, 2, 3) */
+  canvasEdgeWidth: 1 | 1.5 | 2 | 3
+  /** Node corner radius in px (0, 4, 8, 12) */
+  canvasNodeBorderRadius: 0 | 4 | 8 | 12
+  /** Node drop shadow strength */
+  canvasNodeShadow: 'none' | 'subtle' | 'strong'
+  /** Edge animation speed */
+  canvasAnimationSpeed: 'none' | 'slow' | 'medium' | 'fast'
+
   // Export defaults
   exportIncludeImages: boolean
   defaultExportFormat: 'pdf' | 'xlsx'
@@ -52,6 +73,10 @@ export interface UserPreferences {
   // Notification preferences (ACCT-08)
   /** Email me about new features and product updates (opt-out). */
   notifyProductUpdates: boolean
+
+  // KB-01: User-editable keyboard shortcuts
+  /** Partial overrides of DEFAULT_KEYBINDINGS. Only changed bindings are stored. */
+  keybindings: Partial<Record<KeybindingAction, KeyCombo>>
 }
 
 // ── Defaults ─────────────────────────────────────────────────────────────────
@@ -59,6 +84,8 @@ export interface UserPreferences {
 const DEFAULTS: UserPreferences = {
   autosaveEnabled: true,
   autosaveDelayMs: 2000,
+
+  angleUnit: 'rad',
 
   numberDisplayMode: 'auto',
   decimalPlaces: -1, // auto
@@ -77,12 +104,22 @@ const DEFAULTS: UserPreferences = {
   defaultZoom: 100,
   showGrid: true,
 
+  canvasBgStyle: 'dot-grid',
+  canvasGridSize: 16,
+  canvasEdgeType: 'bezier',
+  canvasEdgeWidth: 1.5,
+  canvasNodeBorderRadius: 8,
+  canvasNodeShadow: 'subtle',
+  canvasAnimationSpeed: 'medium',
+
   exportIncludeImages: true,
   defaultExportFormat: 'pdf',
   exportIncludeAnnotations: true,
   exportPageSize: 'a4',
 
   notifyProductUpdates: true,
+
+  keybindings: {},
 }
 
 // ── localStorage persistence ─────────────────────────────────────────────────

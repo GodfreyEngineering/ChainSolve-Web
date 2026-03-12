@@ -41,6 +41,18 @@ const CATEGORY_TO_DOCS: Record<BlockCategory, DocsSection> = {
   presetMaterials: 'materials',
   presetFluids: 'materials',
   customFunctions: 'block-library',
+  chem: 'block-engineering',
+  structural: 'block-engineering',
+  aerospace: 'block-engineering',
+  controlSystems: 'block-engineering',
+  lifeSci: 'block-engineering',
+  finOptions: 'block-finance',
+  dateTime: 'block-math',
+  text: 'block-math',
+  interval: 'block-math',
+  signal: 'block-math',
+  complex: 'block-math',
+  matrix: 'block-math',
 }
 
 export function getDocsSectionForCategory(category: BlockCategory): DocsSection {

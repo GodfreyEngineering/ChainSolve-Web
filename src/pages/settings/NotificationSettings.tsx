@@ -29,7 +29,9 @@ export function NotificationSettings() {
       </p>
 
       <div style={sectionStyle}>
-        <h3 style={sectionHeadingStyle}>{t('settings.emailNotifications', 'Email notifications')}</h3>
+        <h3 style={sectionHeadingStyle}>
+          {t('settings.emailNotifications', 'Email notifications')}
+        </h3>
 
         {/* Product updates — user-controllable */}
         <label style={rowStyle}>
@@ -56,9 +58,7 @@ export function NotificationSettings() {
         {/* Billing alerts — always on, non-interactive */}
         <div style={{ ...rowStyle, opacity: 0.55, cursor: 'not-allowed' }}>
           <div style={rowTextStyle}>
-            <span style={rowLabelStyle}>
-              {t('settings.notifyBillingAlerts', 'Billing alerts')}
-            </span>
+            <span style={rowLabelStyle}>{t('settings.notifyBillingAlerts', 'Billing alerts')}</span>
             <span style={rowHintStyle}>
               {t(
                 'settings.notifyBillingAlertsHint',

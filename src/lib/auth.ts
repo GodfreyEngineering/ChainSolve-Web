@@ -152,7 +152,7 @@ export function getPasswordStrength(password: string): PasswordStrength {
   if (/[A-Z]/.test(password)) classes++
   if (/[0-9]/.test(password)) classes++
   if (/[^a-zA-Z0-9]/.test(password)) classes++
-  const score = Math.min(4, Math.floor((password.length / 8) + (classes - 1))) as 0 | 1 | 2 | 3 | 4
+  const score = Math.min(4, Math.floor(password.length / 8 + (classes - 1))) as 0 | 1 | 2 | 3 | 4
   const labels = ['very-weak', 'weak', 'fair', 'strong', 'very-strong'] as const
   return { score, label: labels[score] }
 }

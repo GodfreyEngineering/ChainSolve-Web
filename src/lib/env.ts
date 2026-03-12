@@ -37,6 +37,9 @@ export const DIAGNOSTICS_UI_ENABLED = import.meta.env.VITE_DIAGNOSTICS_UI_ENABLE
 /** LLM API key for AI copilot. Empty string = not configured. */
 export const LLM_API_KEY = (import.meta.env.VITE_LLM_API_KEY as string) ?? ''
 
+/** DEV-04: Sentry DSN for error tracking. Empty string disables Sentry. */
+export const SENTRY_DSN = (import.meta.env.VITE_SENTRY_DSN as string) ?? ''
+
 // ── Placeholder detection ────────────────────────────────────────────────────
 
 const PLACEHOLDER_URL = 'https://placeholder.supabase.co'

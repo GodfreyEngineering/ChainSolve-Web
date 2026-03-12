@@ -33,6 +33,14 @@ import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
 import { useValueFlash } from '../../../hooks/useValueFlash'
 import { getPortUnitHint } from '../../../blocks/portUnitHints'
+import { usePreferencesStore } from '../../../stores/preferencesStore'
+
+// SCI-06: Trig ops that are affected by the angle unit preference.
+// Forward trig (sin/cos/tan): input is an angle.
+// Inverse trig (asin/acos/atan/atan2): output is an angle.
+const FORWARD_TRIG_OPS = new Set(['sin', 'cos', 'tan'])
+const INVERSE_TRIG_OPS = new Set(['asin', 'acos', 'atan', 'atan2'])
+const ANGLE_UNIT_OPS = new Set([...FORWARD_TRIG_OPS, ...INVERSE_TRIG_OPS])
 
 const LazyUnitPicker = lazy(() =>
   import('../editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
@@ -47,9 +55,17 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const { t } = useTranslation()
   const flashing = useValueFlash(value)
   const isLocked = draggable === false
+  // SCI-06: Angle unit preference for trig block badge display.
+  const angleUnit = usePreferencesStore((s) => s.angleUnit)
 
   const def = BLOCK_REGISTRY.get(nd.blockType)
   const inputs = def?.inputs ?? []
+
+  // SCI-06: Whether this block is angle-unit-sensitive.
+  const isTrigBlock = ANGLE_UNIT_OPS.has(nd.blockType)
+  const isForwardTrig = FORWARD_TRIG_OPS.has(nd.blockType)
+  // Badge label: show current angle unit indicator when trig block.
+  const angleUnitBadge = isTrigBlock ? (angleUnit === 'deg' ? '°' : 'rad') : null
 
   const manualValues = useMemo(
     () => (nd.manualValues ?? {}) as Record<string, number>,
@@ -162,6 +178,39 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
         <div className="cs-node-header-left" style={s.headerLeft}>
           <Icon icon={TypeIcon} size={14} style={{ ...s.headerIcon, color: typeColor }} />
           <span style={s.headerLabel}>{nd.label}</span>
+          {/* SCI-06: Angle unit badge on trig blocks */}
+          {angleUnitBadge && (
+            <span
+              title={
+                isForwardTrig
+                  ? angleUnit === 'deg'
+                    ? 'Input in degrees (auto-converted to radians)'
+                    : 'Input in radians'
+                  : angleUnit === 'deg'
+                    ? 'Output in degrees (auto-converted from radians)'
+                    : 'Output in radians'
+              }
+              style={{
+                fontSize: '0.58rem',
+                fontWeight: 700,
+                padding: '0.05rem 0.3rem',
+                borderRadius: 3,
+                background:
+                  angleUnit === 'deg'
+                    ? 'rgba(251,191,36,0.2)'
+                    : 'rgba(99,179,237,0.15)',
+                color: angleUnit === 'deg' ? 'rgb(251,191,36)' : 'rgb(99,179,237)',
+                border:
+                  angleUnit === 'deg'
+                    ? '1px solid rgba(251,191,36,0.4)'
+                    : '1px solid rgba(99,179,237,0.3)',
+                lineHeight: 1,
+                flexShrink: 0,
+              }}
+            >
+              {angleUnitBadge}
+            </span>
+          )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
           {isLocked && <span style={{ fontSize: '0.6rem', lineHeight: 1, opacity: 0.7 }}>🔒</span>}

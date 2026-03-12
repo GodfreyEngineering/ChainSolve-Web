@@ -253,7 +253,14 @@ const BlockItem = memo(function BlockItem({
       draggable={entitled}
       onDragStart={onDragStart}
       onClick={!entitled ? onProBlocked : undefined}
-      onDoubleClick={entitled && onInsertBlock ? () => { trackBlockUsed(def.type); onInsertBlock(def.type) } : undefined}
+      onDoubleClick={
+        entitled && onInsertBlock
+          ? () => {
+              trackBlockUsed(def.type)
+              onInsertBlock(def.type)
+            }
+          : undefined
+      }
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       title={entitled ? undefined : `${def.label} (${t('blockLibrary.proOnly')})`}
@@ -297,7 +304,11 @@ const BlockItem = memo(function BlockItem({
               color: isPinned ? 'var(--primary)' : 'var(--text-faint)',
               fontSize: '0.7rem',
             }}
-            title={isPinned ? t('blockLibrary.unpin', 'Unpin from Quick Access') : t('blockLibrary.pin', 'Pin to Quick Access')}
+            title={
+              isPinned
+                ? t('blockLibrary.unpin', 'Unpin from Quick Access')
+                : t('blockLibrary.pin', 'Pin to Quick Access')
+            }
             onClick={(e) => {
               e.stopPropagation()
               onTogglePin(def.type)
@@ -902,16 +913,23 @@ export function BlockLibrary({
     for (const main of taxForFilter) {
       for (const sub of main.subcategories) {
         const blocks = TAXONOMY_GROUPED.get(sub.id) ?? []
-        const filtered = q ? sortByRelevance(blocks.filter((d) => matchesQuery(d, q)), q) : blocks
+        const filtered = q
+          ? sortByRelevance(
+              blocks.filter((d) => matchesQuery(d, q)),
+              q,
+            )
+          : blocks
         filtered.forEach(addBlock)
       }
     }
     return result
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, filterMain, pinned, favList, recentList, ent])
 
   // Reset keyboard selection when query or filter changes
-  useEffect(() => { setKeyIndex(-1) }, [q, filterMain])
+  useEffect(() => {
+    setKeyIndex(-1)
+  }, [q, filterMain])
 
   const keyFocusedType = keyIndex >= 0 ? (visibleBlockTypes[keyIndex] ?? null) : null
 
@@ -931,7 +949,10 @@ export function BlockLibrary({
             type="search"
             placeholder={t('blockLibrary.searchPlaceholder')}
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setKeyIndex(-1) }}
+            onChange={(e) => {
+              setQuery(e.target.value)
+              setKeyIndex(-1)
+            }}
             onKeyDown={(e) => {
               if (e.key === 'ArrowDown') {
                 e.preventDefault()
@@ -941,7 +962,10 @@ export function BlockLibrary({
                 setKeyIndex((i) => Math.max(i - 1, -1))
               } else if (e.key === 'Enter' && keyIndex >= 0 && onInsertBlock) {
                 const type = visibleBlockTypes[keyIndex]
-                if (type) { trackBlockUsed(type); onInsertBlock(type) }
+                if (type) {
+                  trackBlockUsed(type)
+                  onInsertBlock(type)
+                }
               } else if (e.key === 'Escape') {
                 setKeyIndex(-1)
                 searchRef.current?.blur()

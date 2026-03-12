@@ -49,6 +49,18 @@ const VALID_CATEGORIES: BlockCategory[] = [
   'presetMaterials',
   'presetFluids',
   'customFunctions',
+  'chem',
+  'structural',
+  'aerospace',
+  'controlSystems',
+  'lifeSci',
+  'finOptions',
+  'dateTime',
+  'text',
+  'interval',
+  'complex',
+  'matrix',
+  'signal',
 ]
 
 const VALID_NODE_KINDS: NodeKind[] = [

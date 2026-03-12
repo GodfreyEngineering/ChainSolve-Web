@@ -40,10 +40,7 @@ test.describe('Smoke tests', () => {
 
   test('security meta tags are present', async ({ page }) => {
     await page.goto('/')
-    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
-      'content',
-      '#1CABB0',
-    )
+    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#1CABB0')
     await expect(page.locator('meta[name="viewport"]')).toBeAttached()
   })
 

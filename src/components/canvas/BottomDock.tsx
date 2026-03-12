@@ -66,7 +66,8 @@ function saveHeight(h: number) {
 function loadTab(): DockTab {
   try {
     const v = localStorage.getItem(TAB_KEY)
-    if (v === 'console' || v === 'health' || v === 'output' || v === 'problems' || v === 'history') return v
+    if (v === 'console' || v === 'health' || v === 'output' || v === 'problems' || v === 'history')
+      return v
   } catch {
     // ignore
   }

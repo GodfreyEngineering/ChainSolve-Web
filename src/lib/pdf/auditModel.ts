@@ -314,8 +314,7 @@ function blockCategory(blockType: string): string {
     return 'Arithmetic'
   if (blockType.startsWith('stats.') || blockType === 'mean' || blockType === 'stddev')
     return 'Statistics'
-  if (blockType.startsWith('fin.') || blockType === 'npv' || blockType === 'irr')
-    return 'Finance'
+  if (blockType.startsWith('fin.') || blockType === 'npv' || blockType === 'irr') return 'Finance'
   if (blockType === 'display' || blockType === 'probe') return 'Output'
   if (blockType === 'plot' || blockType === 'histogram') return 'Plot'
   if (blockType === 'tableInput' || blockType === 'csvImport') return 'Data'
@@ -344,9 +343,7 @@ function mapLinkedBlocks(
   const evalNodes = nodes.filter(
     (n) =>
       (n.data as Record<string, unknown>).blockType !== '__group__' &&
-      !(n.data as Record<string, unknown>).blockType
-        ?.toString()
-        .startsWith('annotation_'),
+      !(n.data as Record<string, unknown>).blockType?.toString().startsWith('annotation_'),
   )
 
   return evalNodes.map((n) => {

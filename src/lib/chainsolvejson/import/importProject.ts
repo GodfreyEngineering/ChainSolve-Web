@@ -239,7 +239,7 @@ export async function importChainsolveJsonAsNewProject(
     for (let i = 0; i < plan.canvases.length; i++) {
       if (signal?.aborted) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await cleanup(supabase as any, newProjectId, userId, createdCanvasIds, canvasStorage)
+        await cleanup(supabase as any, newProjectId, userId, createdCanvasIds, canvasStorage)
         return abortResult(fileName, model, validation)
       }
 

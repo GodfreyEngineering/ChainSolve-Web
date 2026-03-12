@@ -272,7 +272,12 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
                       : t('settings.avatarConfirm', 'Save photo')}
                   </button>
                   <button
-                    style={{ ...smallBtn, background: 'transparent', border: '1px solid var(--border)', color: 'inherit' }}
+                    style={{
+                      ...smallBtn,
+                      background: 'transparent',
+                      border: '1px solid var(--border)',
+                      color: 'inherit',
+                    }}
                     disabled={avatarUploading}
                     onClick={handleAvatarCancel}
                   >
@@ -378,7 +383,7 @@ export function ProfileSettings({ user, profile, onProfileUpdated }: Props) {
                       style={nameInput}
                       value={handle}
                       onChange={(e) => handleHandleChange(e.target.value)}
-                      placeholder="e.g. engineer_42"
+                      placeholder={t('settings.handlePlaceholder', 'e.g. engineer_42')}
                       maxLength={50}
                       disabled={handleSaving}
                       autoFocus

@@ -48,7 +48,11 @@ export default function AuthGate({ user, profile, onTermsAccepted, children }: A
 /** SEC-04: Escape HTML special characters in a value before interpolating
  *  into a dangerouslySetInnerHTML translation string. */
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }
 
 function EmailVerificationScreen({ email }: { email: string }) {
@@ -78,7 +82,9 @@ function EmailVerificationScreen({ email }: { email: string }) {
 
         <div
           style={s.infoBox}
-          dangerouslySetInnerHTML={{ __html: t('auth.verifyEmailBody', { email: escapeHtml(email) }) }}
+          dangerouslySetInnerHTML={{
+            __html: t('auth.verifyEmailBody', { email: escapeHtml(email) }),
+          }}
         />
 
         {error && <div style={s.errorBox}>{error}</div>}

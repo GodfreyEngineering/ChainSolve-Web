@@ -61,6 +61,10 @@ pub enum Value {
     Vector { value: Vec<f64> },
     Table { columns: Vec<String>, rows: Vec<Vec<f64>> },
     Error { message: String },
+    Text { value: String },
+    Interval { lo: f64, hi: f64 },
+    Complex { re: f64, im: f64 },
+    Matrix { rows: usize, cols: usize, data: Vec<f64> }, // row-major
 }
 
 impl Value {
@@ -70,6 +74,42 @@ impl Value {
 
     pub fn error(msg: impl Into<String>) -> Self {
         Value::Error { message: msg.into() }
+    }
+
+    pub fn interval(lo: f64, hi: f64) -> Self {
+        Value::Interval { lo: lo.min(hi), hi: lo.max(hi) }
+    }
+
+    pub fn as_interval(&self) -> Option<(f64, f64)> {
+        match self {
+            Value::Interval { lo, hi } => Some((*lo, *hi)),
+            Value::Scalar { value } => Some((*value, *value)), // scalar is degenerate interval
+            _ => None,
+        }
+    }
+
+    pub fn complex(re: f64, im: f64) -> Self {
+        Value::Complex { re, im }
+    }
+
+    pub fn as_complex(&self) -> Option<(f64, f64)> {
+        match self {
+            Value::Complex { re, im } => Some((*re, *im)),
+            Value::Scalar { value } => Some((*value, 0.0)),
+            _ => None,
+        }
+    }
+
+    pub fn matrix(rows: usize, cols: usize, data: Vec<f64>) -> Self {
+        assert_eq!(data.len(), rows * cols);
+        Value::Matrix { rows, cols, data }
+    }
+
+    pub fn as_matrix_data(&self) -> Option<(usize, usize, &Vec<f64>)> {
+        match self {
+            Value::Matrix { rows, cols, data } => Some((*rows, *cols, data)),
+            _ => None,
+        }
     }
 
     pub fn as_scalar(&self) -> Option<f64> {
@@ -93,6 +133,13 @@ impl Value {
         }
     }
 
+    pub fn as_text(&self) -> Option<&str> {
+        match self {
+            Value::Text { value } => Some(value.as_str()),
+            _ => None,
+        }
+    }
+
     pub fn is_error(&self) -> bool {
         matches!(self, Value::Error { .. })
     }
@@ -104,6 +151,10 @@ impl Value {
             Value::Vector { .. } => "vector",
             Value::Table { .. } => "table",
             Value::Error { .. } => "error",
+            Value::Text { .. } => "text",
+            Value::Interval { .. } => "interval",
+            Value::Complex { .. } => "complex",
+            Value::Matrix { .. } => "matrix",
         }
     }
 
@@ -122,6 +173,12 @@ impl Value {
             Value::Error { message } => ValueSummary::Error {
                 message: message.clone(),
             },
+            Value::Text { value } => ValueSummary::Text {
+                value: value.clone(),
+            },
+            Value::Interval { lo, hi } => ValueSummary::Interval { lo: *lo, hi: *hi },
+            Value::Complex { re, im } => ValueSummary::Complex { re: *re, im: *im },
+            Value::Matrix { rows, cols, data: _ } => ValueSummary::Matrix { rows: *rows, cols: *cols },
         }
     }
 }
@@ -223,6 +280,10 @@ pub enum ValueSummary {
     Vector { length: usize, sample: Vec<f64> },
     Table { rows: usize, columns: usize },
     Error { message: String },
+    Text { value: String },
+    Interval { lo: f64, hi: f64 },
+    Complex { re: f64, im: f64 },
+    Matrix { rows: usize, cols: usize },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

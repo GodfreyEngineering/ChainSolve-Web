@@ -5,6 +5,8 @@ import './index.css'
 import './i18n/config'
 import { installResizeObserverErrorSuppressor } from './lib/suppressResizeObserverError'
 import { initObservability } from './observability/client'
+import * as Sentry from '@sentry/react'
+import { SENTRY_DSN } from './lib/env.ts'
 import App from './App.tsx'
 
 // G0-4: Suppress benign ResizeObserver loop errors BEFORE observability
@@ -13,6 +15,30 @@ try {
   installResizeObserverErrorSuppressor()
 } catch {
   // intentionally swallowed
+}
+
+// DEV-04: Initialise Sentry error tracking if a DSN is configured.
+// Must run before any other error handlers so it captures boot-time errors.
+try {
+  if (SENTRY_DSN) {
+    Sentry.init({
+      dsn: SENTRY_DSN,
+      integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
+      tracesSampleRate: 0.1,
+      replaysSessionSampleRate: 0.05,
+      replaysOnErrorSampleRate: 1.0,
+      ignoreErrors: [
+        // Benign browser noise — not actionable
+        'ResizeObserver loop',
+        // Expected when no session exists
+        'AuthSessionMissingError',
+        // User navigation / fetch cancellation
+        'AbortError',
+      ],
+    })
+  }
+} catch {
+  // intentionally swallowed — Sentry must never prevent the app from booting
 }
 
 // Initialise observability early — installs global error handlers.
@@ -48,6 +74,7 @@ import { LoadingScreen } from './components/ui/LoadingScreen.tsx'
 import { OfflineBanner } from './components/OfflineBanner.tsx'
 import { registerServiceWorker, captureInstallPrompt } from './lib/serviceWorker.ts'
 import { initWebVitals } from './observability/webVitals.ts'
+import { useCanvasAppearance } from './hooks/useCanvasAppearance.ts'
 
 // UI-PERF-04: Register service worker for offline support and asset caching.
 // registerServiceWorker is safe to call regardless of SW support — it exits
@@ -94,6 +121,9 @@ function Root() {
       cancelled = true
     }
   }, [retryCount])
+
+  // THEME-02: Apply canvas appearance CSS variables from user preferences
+  useCanvasAppearance()
 
   const handleRetry = useCallback(() => {
     setError(null)

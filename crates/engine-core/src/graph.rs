@@ -31,6 +31,8 @@ use crate::types::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet, VecDeque};
+use std::hash::{Hash, Hasher};
+use std::collections::hash_map::DefaultHasher;
 
 // ── Progress callback signal ────────────────────────────────────────
 
@@ -96,6 +98,9 @@ pub struct EngineGraph {
     topo_order: Vec<String>,
     /// Cached computed values per node.
     values: HashMap<String, Value>,
+    /// Cheap hash of last-known output per node, used for ENG-05 value equality pruning.
+    /// Errors are never cached (always treated as changed).
+    value_hashes: HashMap<String, u64>,
     /// Nodes that need re-evaluation.
     dirty: HashSet<String>,
     /// Whether topo_order needs rebuilding.
@@ -113,6 +118,7 @@ impl EngineGraph {
             in_adj: HashMap::new(),
             topo_order: Vec::new(),
             values: HashMap::new(),
+            value_hashes: HashMap::new(),
             dirty: HashSet::new(),
             topo_dirty: true,
             datasets: HashMap::new(),
@@ -126,6 +132,7 @@ impl EngineGraph {
         self.out_adj.clear();
         self.in_adj.clear();
         self.values.clear();
+        self.value_hashes.clear();
         self.dirty.clear();
 
         for node in snapshot.nodes {
@@ -153,7 +160,11 @@ impl EngineGraph {
                     self.in_adj.entry(id.clone()).or_default();
                     self.nodes.insert(id.clone(), node);
                     self.mark_dirty(&id);
-                    self.topo_dirty = true;
+                    // ENG-08: A newly added node has no edges yet (edges come in separate
+                    // AddEdge ops), so it is isolated and can be safely appended to the end
+                    // of topo_order without a full rebuild. It has no incoming or outgoing
+                    // edges to violate topological ordering.
+                    self.topo_order.push(id);
                 }
                 PatchOp::RemoveNode { node_id } => {
                     // Cascade-remove all edges touching this node.
@@ -171,6 +182,7 @@ impl EngineGraph {
                     self.out_adj.remove(&node_id);
                     self.in_adj.remove(&node_id);
                     self.values.remove(&node_id);
+                    self.value_hashes.remove(&node_id);
                     self.dirty.remove(&node_id);
                     self.topo_dirty = true;
                 }
@@ -181,6 +193,10 @@ impl EngineGraph {
                     }
                 }
                 PatchOp::AddEdge { edge } => {
+                    // Remove old adjacency entries if this edge ID already exists (prevents duplicate entries).
+                    if self.edges.contains_key(&edge.id) {
+                        self.remove_edge_internal(&edge.id);
+                    }
                     let target_id = edge.target.clone();
                     self.add_edge_internal(&edge);
                     self.edges.insert(edge.id.clone(), edge);
@@ -378,18 +394,32 @@ impl EngineGraph {
                 }
             }
 
-            // Check if value actually changed (prune unnecessary downstream propagation).
-            let value_changed = match self.values.get(node_id) {
-                Some(old) => !values_equal(old, &result),
-                None => true,
+            // ENG-05: Compute a cheap hash of the new output to detect value changes.
+            // Errors are never considered stable — always treat as changed (hash = 0, never cached).
+            let new_hash = compute_value_hash(&result);
+            let is_error = matches!(result, Value::Error { .. });
+
+            // Compare new hash against the previously stored hash.
+            let hash_changed = if is_error {
+                // Errors always propagate downstream; do not cache their hash.
+                true
+            } else {
+                match self.value_hashes.get(node_id) {
+                    Some(&prev_hash) => new_hash != prev_hash,
+                    None => true, // No prior hash — treat as changed.
+                }
             };
 
             self.values.insert(node_id.to_string(), result.clone());
-            changed_values.insert(node_id.to_string(), result);
 
-            if !value_changed {
-                // Value didn't change — remove downstream from dirty set
-                // (they were pre-marked dirty by mark_dirty BFS, but can be pruned).
+            if hash_changed {
+                // Update stored hash (only for non-error values) and emit to changed_values.
+                if !is_error {
+                    self.value_hashes.insert(node_id.to_string(), new_hash);
+                }
+                changed_values.insert(node_id.to_string(), result);
+            } else {
+                // Hash matches — value hasn't changed. Prune downstream cascade.
                 self.prune_downstream(node_id);
             }
 
@@ -509,7 +539,7 @@ impl EngineGraph {
             if let Some(neighbors) = self.out_adj.get(id) {
                 for (_, target_id, _) in neighbors {
                     if let Some(deg) = remaining.get_mut(target_id.as_str()) {
-                        *deg -= 1;
+                        *deg = deg.saturating_sub(1);
                         if *deg == 0 {
                             queue.push_back(target_id.as_str());
                         }
@@ -542,41 +572,55 @@ impl EngineGraph {
     }
 }
 
-/// Compare two Values for equality (used for dirty pruning).
-/// For scalars, uses f64::to_bits() to handle NaN correctly.
-fn values_equal(a: &Value, b: &Value) -> bool {
-    match (a, b) {
-        (Value::Scalar { value: va }, Value::Scalar { value: vb }) => va.to_bits() == vb.to_bits(),
-        (Value::Vector { value: va }, Value::Vector { value: vb }) => {
-            va.len() == vb.len()
-                && va
-                    .iter()
-                    .zip(vb.iter())
-                    .all(|(a, b)| a.to_bits() == b.to_bits())
+/// ENG-05: Compute a cheap u64 hash of a Value using std's DefaultHasher.
+/// - Scalar: hashes the raw f64 bits (handles NaN deterministically).
+/// - Vector: hashes each element's bits in sequence.
+/// - Table: hashes all column names then all row element bits.
+/// - Error: returns 0 (errors are never cached; callers must treat them as always changed).
+fn compute_value_hash(value: &Value) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    match value {
+        Value::Scalar { value: v } => {
+            v.to_bits().hash(&mut hasher);
         }
-        (
-            Value::Table {
-                columns: ca,
-                rows: ra,
-            },
-            Value::Table {
-                columns: cb,
-                rows: rb,
-            },
-        ) => {
-            ca == cb
-                && ra.len() == rb.len()
-                && ra.iter().zip(rb.iter()).all(|(row_a, row_b)| {
-                    row_a.len() == row_b.len()
-                        && row_a
-                            .iter()
-                            .zip(row_b.iter())
-                            .all(|(a, b)| a.to_bits() == b.to_bits())
-                })
+        Value::Vector { value: v } => {
+            for elem in v {
+                elem.to_bits().hash(&mut hasher);
+            }
         }
-        (Value::Error { message: ma }, Value::Error { message: mb }) => ma == mb,
-        _ => false,
+        Value::Table { columns, rows } => {
+            for col in columns {
+                col.hash(&mut hasher);
+            }
+            for row in rows {
+                for elem in row {
+                    elem.to_bits().hash(&mut hasher);
+                }
+            }
+        }
+        Value::Error { .. } => {
+            return 0;
+        }
+        Value::Text { value } => {
+            value.hash(&mut hasher);
+        }
+        Value::Interval { lo, hi } => {
+            lo.to_bits().hash(&mut hasher);
+            hi.to_bits().hash(&mut hasher);
+        }
+        Value::Complex { re, im } => {
+            re.to_bits().hash(&mut hasher);
+            im.to_bits().hash(&mut hasher);
+        }
+        Value::Matrix { rows, cols, data } => {
+            rows.hash(&mut hasher);
+            cols.hash(&mut hasher);
+            for elem in data {
+                elem.to_bits().hash(&mut hasher);
+            }
+        }
     }
+    hasher.finish()
 }
 
 // ── Tests ────────────────────────────────────────────────────────────

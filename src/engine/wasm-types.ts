@@ -43,6 +43,9 @@ export type EngineValue =
   | { kind: 'vector'; value: number[] }
   | { kind: 'table'; columns: string[]; rows: number[][] }
   | { kind: 'error'; message: string }
+  | { kind: 'text'; value: string }
+  | { kind: 'complex'; re: number; im: number }
+  | { kind: 'matrix'; rows: number; cols: number; data: number[] }
 
 export interface EngineDiagnostic {
   nodeId?: string
@@ -102,6 +105,7 @@ export type ValueSummary =
   | { kind: 'vector'; length: number; sample: number[] }
   | { kind: 'table'; rows: number; columns: number }
   | { kind: 'error'; message: string }
+  | { kind: 'text'; value: string }
 
 export interface TraceEntry {
   nodeId: string

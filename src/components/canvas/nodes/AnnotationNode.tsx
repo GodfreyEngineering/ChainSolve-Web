@@ -36,9 +36,7 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
 
   const fontWeight = bold ? 700 : 600
   const fontStyle = italic ? ('italic' as const) : ('normal' as const)
-  const fontFamily = monospace
-    ? "ui-monospace, 'Cascadia Code', 'Fira Code', monospace"
-    : undefined
+  const fontFamily = monospace ? "ui-monospace, 'Cascadia Code', 'Fira Code', monospace" : undefined
 
   const [editing, setEditing] = useState(false)
   const editRef = useRef<HTMLDivElement>(null)
@@ -125,8 +123,7 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
       return (
         <ul style={{ margin: 0, paddingLeft: '1.2em', listStyle: 'disc' }}>
           {lines.map((line, i) => {
-            const content =
-              line.startsWith('- ') || line.startsWith('* ') ? line.slice(2) : line
+            const content = line.startsWith('- ') || line.startsWith('* ') ? line.slice(2) : line
             const isBullet = line.startsWith('- ') || line.startsWith('* ')
             return isBullet ? (
               <li key={i}>{hasMath(content) ? <KaTeXRenderer text={content} /> : content}</li>

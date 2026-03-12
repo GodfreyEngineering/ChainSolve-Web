@@ -771,6 +771,187 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'eng.elec.parallel_resistance', label: 'R∥ = R₁R₂/(R₁+R₂)' },
   })
 
+  // ── Electrical (expanded BLK-05) ────────────────────────────────────
+
+  register({
+    type: 'eng.elec.RC_tau',
+    label: 'RC Time Constant',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'R', label: 'R (Ω)' },
+      { id: 'C', label: 'C (F)' },
+    ],
+    defaultData: { blockType: 'eng.elec.RC_tau', label: 'τ = RC' },
+    synonyms: ['RC time constant', 'tau RC'],
+    tags: ['electronics', 'filter'],
+  })
+
+  register({
+    type: 'eng.elec.RL_tau',
+    label: 'RL Time Constant',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'R', label: 'R (Ω)' },
+      { id: 'L', label: 'L (H)' },
+    ],
+    defaultData: { blockType: 'eng.elec.RL_tau', label: 'τ = L/R' },
+    synonyms: ['RL time constant', 'tau RL'],
+    tags: ['electronics', 'inductor'],
+  })
+
+  register({
+    type: 'eng.elec.RLC_f0',
+    label: 'RLC Resonant Frequency',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'L', label: 'L (H)' },
+      { id: 'C', label: 'C (F)' },
+    ],
+    defaultData: { blockType: 'eng.elec.RLC_f0', label: 'f₀ = 1/(2π√LC)' },
+    synonyms: ['resonant frequency', 'RLC f0', 'LC circuit'],
+    tags: ['electronics', 'resonance'],
+  })
+
+  register({
+    type: 'eng.elec.RLC_Q',
+    label: 'RLC Quality Factor',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'R', label: 'R (Ω)' },
+      { id: 'L', label: 'L (H)' },
+      { id: 'C', label: 'C (F)' },
+    ],
+    defaultData: { blockType: 'eng.elec.RLC_Q', label: 'Q = (1/R)√(L/C)' },
+    synonyms: ['Q factor', 'quality factor RLC'],
+    tags: ['electronics', 'resonance'],
+  })
+
+  register({
+    type: 'eng.elec.V_divider',
+    label: 'Voltage Divider',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'Vin', label: 'Vᵢₙ (V)' },
+      { id: 'R1', label: 'R₁ (Ω)' },
+      { id: 'R2', label: 'R₂ (Ω)' },
+    ],
+    defaultData: { blockType: 'eng.elec.V_divider', label: 'Voltage Divider' },
+    synonyms: ['voltage divider', 'potential divider'],
+    tags: ['electronics'],
+  })
+
+  register({
+    type: 'eng.elec.I_divider',
+    label: 'Current Divider',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'Iin', label: 'Iᵢₙ (A)' },
+      { id: 'R1', label: 'R₁ (Ω)' },
+      { id: 'R2', label: 'R₂ (Ω)' },
+    ],
+    defaultData: { blockType: 'eng.elec.I_divider', label: 'Current Divider' },
+    synonyms: ['current divider'],
+    tags: ['electronics'],
+  })
+
+  register({
+    type: 'eng.elec.Z_cap',
+    label: 'Capacitive Reactance',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'f', label: 'f (Hz)' },
+      { id: 'C', label: 'C (F)' },
+    ],
+    defaultData: { blockType: 'eng.elec.Z_cap', label: 'Xc = 1/(2πfC)' },
+    synonyms: ['capacitive reactance', 'Xc', 'impedance capacitor'],
+    tags: ['electronics', 'AC'],
+  })
+
+  register({
+    type: 'eng.elec.Z_ind',
+    label: 'Inductive Reactance',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'f', label: 'f (Hz)' },
+      { id: 'L', label: 'L (H)' },
+    ],
+    defaultData: { blockType: 'eng.elec.Z_ind', label: 'XL = 2πfL' },
+    synonyms: ['inductive reactance', 'XL', 'impedance inductor'],
+    tags: ['electronics', 'AC'],
+  })
+
+  register({
+    type: 'eng.elec.filter_fc',
+    label: 'RC Filter Cutoff',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'R', label: 'R (Ω)' },
+      { id: 'C', label: 'C (F)' },
+    ],
+    defaultData: { blockType: 'eng.elec.filter_fc', label: 'fc = 1/(2πRC)' },
+    synonyms: ['cutoff frequency', 'RC filter', '-3dB frequency'],
+    tags: ['electronics', 'filter'],
+  })
+
+  register({
+    type: 'eng.elec.transformer_v2',
+    label: 'Transformer Voltage',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'V1', label: 'V₁ (V)' },
+      { id: 'N1', label: 'N₁ (turns)' },
+      { id: 'N2', label: 'N₂ (turns)' },
+    ],
+    defaultData: { blockType: 'eng.elec.transformer_v2', label: 'V₂ = V₁·N₂/N₁' },
+    synonyms: ['transformer', 'turns ratio'],
+    tags: ['electronics', 'magnetics'],
+  })
+
+  register({
+    type: 'eng.elec.three_phase_P',
+    label: 'Three-Phase Power',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'VL', label: 'VL (V)' },
+      { id: 'IL', label: 'IL (A)' },
+      { id: 'pf', label: 'pf' },
+    ],
+    defaultData: { blockType: 'eng.elec.three_phase_P', label: 'P = √3·VL·IL·pf' },
+    synonyms: ['three phase power', '3-phase', 'three phase'],
+    tags: ['electronics', 'power systems'],
+  })
+
+  register({
+    type: 'eng.elec.diode_shockley',
+    label: 'Diode Current (Shockley)',
+    category: 'engElectrical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'Is', label: 'Is (A)' },
+      { id: 'V', label: 'V (V)' },
+      { id: 'eta', label: 'η' },
+      { id: 'Vt', label: 'Vt (V)' },
+    ],
+    defaultData: {
+      blockType: 'eng.elec.diode_shockley',
+      label: 'Diode I',
+      manualValues: { eta: 1, Vt: 0.02585 },
+    },
+    synonyms: ['Shockley diode', 'diode equation', 'ideal diode'],
+    tags: ['electronics', 'semiconductor'],
+  })
+
   // ── Conversions ─────────────────────────────────────────────────────
 
   register({

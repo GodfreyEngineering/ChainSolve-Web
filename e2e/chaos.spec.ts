@@ -112,7 +112,12 @@ test.describe('Chaos — total Supabase blackout', () => {
     const errors = collectErrors(page)
 
     // Block every request to a Supabase-shaped URL.
-    for (const pattern of ['**/rest/v1/**', '**/auth/v1/**', '**/storage/v1/**', '**/realtime/v1/**']) {
+    for (const pattern of [
+      '**/rest/v1/**',
+      '**/auth/v1/**',
+      '**/storage/v1/**',
+      '**/realtime/v1/**',
+    ]) {
       await page.route(pattern, (route) => {
         void route.fulfill({
           status: 503,

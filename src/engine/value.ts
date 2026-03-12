@@ -29,7 +29,13 @@ export interface ErrorValue {
   readonly message: string
 }
 
-export type Value = ScalarValue | VectorValue | TableValue | ErrorValue
+export interface IntervalValue {
+  readonly kind: 'interval'
+  readonly lo: number
+  readonly hi: number
+}
+
+export type Value = ScalarValue | VectorValue | TableValue | ErrorValue | IntervalValue
 
 // ── Factory helpers ──────────────────────────────────────────────────────────
 
@@ -137,7 +143,9 @@ export function formatValue(v: Value | undefined, locale?: string, opts?: Format
 
       const mode = opts?.numberDisplayMode ?? 'auto'
       const decSep = opts?.decimalSeparator ?? '.'
-      const thouSep = opts?.thousandsSeparator ? (THOUSANDS_SEP_CHARS[opts.thousandsSeparatorChar ?? 'comma'] ?? ',') : null
+      const thouSep = opts?.thousandsSeparator
+        ? (THOUSANDS_SEP_CHARS[opts.thousandsSeparatorChar ?? 'comma'] ?? ',')
+        : null
       const negStyle = opts?.negativeStyle ?? 'minus'
       const keepTrailingZeros = opts?.trailingZeros ?? false
 
@@ -148,8 +156,9 @@ export function formatValue(v: Value | undefined, locale?: string, opts?: Format
         if (!keepTrailingZeros && !result.includes('e') && !result.includes('E')) {
           const decChar = decSep
           if (result.includes(decChar)) {
-            result = result.replace(new RegExp(`(\\${decChar}\\d*[1-9])0+$`), '$1')
-                          .replace(new RegExp(`\\${decChar}0+$`), '')
+            result = result
+              .replace(new RegExp(`(\\${decChar}\\d*[1-9])0+$`), '$1')
+              .replace(new RegExp(`\\${decChar}0+$`), '')
           }
         }
         // Apply negative style
@@ -203,7 +212,17 @@ export function formatValue(v: Value | undefined, locale?: string, opts?: Format
           const str = new Intl.NumberFormat(locale ?? 'en', intlOpts).format(n)
           // Apply custom separators on top of Intl output if requested
           if (decSep !== '.' || (thouSep !== null && thouSep !== ',')) {
-            return postProcess(applySeparators(str.replace(/,/g, '\uE000').replace(/\./g, '\uE001').replace(/\uE000/g, thouSep ?? ',').replace(/\uE001/g, decSep), decSep, null))
+            return postProcess(
+              applySeparators(
+                str
+                  .replace(/,/g, '\uE000')
+                  .replace(/\./g, '\uE001')
+                  .replace(/\uE000/g, thouSep ?? ',')
+                  .replace(/\uE001/g, decSep),
+                decSep,
+                null,
+              ),
+            )
           }
           return postProcess(str)
         } catch {
@@ -222,6 +241,8 @@ export function formatValue(v: Value | undefined, locale?: string, opts?: Format
       return `${v.rows.length}\u00D7${v.columns.length} table`
     case 'error':
       return v.message
+    case 'interval':
+      return `[${v.lo}, ${v.hi}]`
   }
 }
 
@@ -256,4 +277,3 @@ function applySeparators(s: string, decSep: '.' | ',', thouSep: string | null): 
   }
   return result + exponent
 }
-

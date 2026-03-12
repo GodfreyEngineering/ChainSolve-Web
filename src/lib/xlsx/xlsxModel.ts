@@ -168,8 +168,20 @@ export function buildAuditWorkbook(
   const health = buildHealthSheet(model.healthSummary)
 
   const sheets: SheetData[] = [summary.data, vars.data, nodeVals.data, diags.data, health.data]
-  const sheetNames: string[] = ['Summary', 'Variables', 'Node Values', 'Diagnostics', 'Graph Health']
-  const columns: Columns[] = [summary.columns, vars.columns, nodeVals.columns, diags.columns, health.columns]
+  const sheetNames: string[] = [
+    'Summary',
+    'Variables',
+    'Node Values',
+    'Diagnostics',
+    'Graph Health',
+  ]
+  const columns: Columns[] = [
+    summary.columns,
+    vars.columns,
+    nodeVals.columns,
+    diags.columns,
+    health.columns,
+  ]
 
   // ADV-07: live-linked sheet
   if (model.linkedBlocks.length > 0) {
@@ -456,7 +468,7 @@ const EXCEL_FORMULA: Record<string, (ins: string[]) => string> = {
 
 /** Category → background colour (ARGB hex without #). */
 const CATEGORY_COLOUR: Record<string, string> = {
-  Source: 'FFF0F9FF',  // sky blue tint
+  Source: 'FFF0F9FF', // sky blue tint
   Constant: 'FFF0FFF4', // green tint
   Arithmetic: 'FFFFF7ED', // orange tint
   Trigonometry: 'FFFDF4FF', // purple tint
@@ -494,7 +506,15 @@ export function buildLinkedCanvasSheet(
   ])
 
   // Column header row
-  rows.push(headerRow(['Label', 'Block Type', 'Category', 'Literal Input', OUTPUT_COL + ' Output / Formula']))
+  rows.push(
+    headerRow([
+      'Label',
+      'Block Type',
+      'Category',
+      'Literal Input',
+      OUTPUT_COL + ' Output / Formula',
+    ]),
+  )
 
   // Data rows
   for (const block of linkedBlocks) {

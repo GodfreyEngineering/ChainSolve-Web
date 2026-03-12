@@ -349,7 +349,9 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
                   color: config.xScale === 'log' ? '#fff' : 'var(--muted)',
                   transition: 'all 0.1s',
                 }}
-                onClick={() => updateConfig({ xScale: config.xScale === 'log' ? undefined : 'log' })}
+                onClick={() =>
+                  updateConfig({ xScale: config.xScale === 'log' ? undefined : 'log' })
+                }
                 title={t('plot.toggleXLog', 'Toggle X log scale')}
               >
                 X log
@@ -366,7 +368,9 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
                   color: config.yScale === 'log' ? '#fff' : 'var(--muted)',
                   transition: 'all 0.1s',
                 }}
-                onClick={() => updateConfig({ yScale: config.yScale === 'log' ? undefined : 'log' })}
+                onClick={() =>
+                  updateConfig({ yScale: config.yScale === 'log' ? undefined : 'log' })
+                }
                 title={t('plot.toggleYLog', 'Toggle Y log scale')}
               >
                 Y log

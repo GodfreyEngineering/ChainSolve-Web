@@ -34,9 +34,8 @@ import type { Page } from '@playwright/test'
  */
 async function readFatalMessage(page: Page): Promise<string> {
   return (
-    (await page
-      .locator('[data-testid="engine-fatal"]')
-      .getAttribute('data-fatal-message')) ?? '(no message attribute)'
+    (await page.locator('[data-testid="engine-fatal"]').getAttribute('data-fatal-message')) ??
+    '(no message attribute)'
   )
 }
 
@@ -83,7 +82,8 @@ async function dumpBootDiagnostics(
           path: new URL(e.name).pathname,
           ms: Math.round(e.duration),
           // responseStatus is available in modern Chromium via the extended timing API
-          status: (e as PerformanceResourceTiming & { responseStatus?: number }).responseStatus ?? '?',
+          status:
+            (e as PerformanceResourceTiming & { responseStatus?: number }).responseStatus ?? '?',
         })),
     )
     .catch(() => [])
@@ -111,9 +111,8 @@ async function dumpBootDiagnostics(
 async function checkBootFatal(page: Page, consoleErrors?: string[]): Promise<void> {
   if ((await page.locator('[data-testid="boot-fatal"]').count()) > 0) {
     const msg =
-      (await page
-        .locator('[data-testid="boot-fatal"]')
-        .getAttribute('data-fatal-message')) ?? '(no message)'
+      (await page.locator('[data-testid="boot-fatal"]').getAttribute('data-fatal-message')) ??
+      '(no message)'
     await dumpBootDiagnostics(page, 'boot-fatal detected', consoleErrors)
     throw new Error(`[boot-fatal] ${msg}`)
   }
@@ -139,10 +138,7 @@ async function checkBootFatal(page: Page, consoleErrors?: string[]): Promise<voi
  * @param consoleErrors Optional array of collected console error strings to
  *                      include in the failure message for easier debugging.
  */
-export async function waitForEngineOrFatal(
-  page: Page,
-  consoleErrors?: string[],
-): Promise<void> {
+export async function waitForEngineOrFatal(page: Page, consoleErrors?: string[]): Promise<void> {
   // ── Stage 1: React mounts (or boot throws) quickly ────────────────────────
   try {
     await page
@@ -178,8 +174,7 @@ export async function waitForEngineOrFatal(
   // Use count() instead of isVisible() — robust regardless of CSS visibility.
   if ((await page.locator('[data-testid="engine-fatal"]').count()) > 0) {
     const msg = await readFatalMessage(page)
-    const extra =
-      consoleErrors?.length ? `\nConsole errors:\n${consoleErrors.join('\n')}` : ''
+    const extra = consoleErrors?.length ? `\nConsole errors:\n${consoleErrors.join('\n')}` : ''
     throw new Error(`[engine-fatal] ${msg}${extra}`)
   }
 }
@@ -191,10 +186,7 @@ export async function waitForEngineOrFatal(
  *
  * Same two-stage approach as waitForEngineOrFatal.
  */
-export async function waitForCanvasOrFatal(
-  page: Page,
-  consoleErrors?: string[],
-): Promise<void> {
+export async function waitForCanvasOrFatal(page: Page, consoleErrors?: string[]): Promise<void> {
   // ── Stage 1: React mounts (or boot throws) quickly ────────────────────────
   try {
     await page
@@ -225,8 +217,7 @@ export async function waitForCanvasOrFatal(
   // ── Fatal check ────────────────────────────────────────────────────────────
   if ((await page.locator('[data-testid="engine-fatal"]').count()) > 0) {
     const msg = await readFatalMessage(page)
-    const extra =
-      consoleErrors?.length ? `\nConsole errors:\n${consoleErrors.join('\n')}` : ''
+    const extra = consoleErrors?.length ? `\nConsole errors:\n${consoleErrors.join('\n')}` : ''
     throw new Error(`[engine-fatal] ${msg}${extra}`)
   }
 }

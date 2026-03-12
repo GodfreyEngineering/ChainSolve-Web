@@ -184,18 +184,15 @@ test.describe('WASM engine — catalog & handshake (W9.1)', () => {
 
   // Canvas UI test: needs to navigate to /app?scratch=1, so it uses a fresh default page
   // to avoid corrupting the shared enginePage state.
-  baseTest(
-    'starter graph renders "7" in display node on canvas',
-    async ({ page }) => {
-      await page.goto('/app?scratch=1')
-      await waitForCanvasOrFatal(page)
+  baseTest('starter graph renders "7" in display node on canvas', async ({ page }) => {
+    await page.goto('/app?scratch=1')
+    await waitForCanvasOrFatal(page)
 
-      // The display node should show the value 7 (from 3 + 4 starter graph)
-      const display = page.locator('.react-flow__node-csDisplay')
-      await baseExpect(display.first()).toBeVisible()
-      await baseExpect(display.first()).toContainText('7')
-    },
-  )
+    // The display node should show the value 7 (from 3 + 4 starter graph)
+    const display = page.locator('.react-flow__node-csDisplay')
+    await baseExpect(display.first()).toBeVisible()
+    await baseExpect(display.first()).toContainText('7')
+  })
 })
 
 // ── W9.2: Incremental protocol ───────────────────────────────────────────────
@@ -409,9 +406,7 @@ test.describe('WASM engine — correctness contract (W9.3)', () => {
           { id: 'v1', blockType: 'vectorInput', data: { vectorData: [0] } },
           { id: 'sin', blockType: 'sin', data: {} },
         ],
-        edges: [
-          { id: 'e1', source: 'v1', sourceHandle: 'out', target: 'sin', targetHandle: 'a' },
-        ],
+        edges: [{ id: 'e1', source: 'v1', sourceHandle: 'out', target: 'sin', targetHandle: 'a' }],
       })
     })
 
@@ -496,7 +491,10 @@ test.describe('WASM engine — correctness contract (W9.3)', () => {
       )
     })
 
-    const r = result as { partial: boolean; values: Record<string, { kind: string; value: number }> }
+    const r = result as {
+      partial: boolean
+      values: Record<string, { kind: string; value: number }>
+    }
     expect(typeof r.partial).toBe('boolean')
     expect(r.partial).toBe(false) // small graph finishes within budget
     expect(r.values.add).toEqual({ kind: 'scalar', value: 3 })

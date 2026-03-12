@@ -31,6 +31,9 @@ pub mod ops;
 pub mod types;
 pub mod validate;
 
+#[cfg(test)]
+mod tests;
+
 use error::{EngineError, ErrorCode};
 use graph::{EvalSignal, PatchOp};
 use types::{EngineSnapshotV1, EvalOptions, EvalResult, IncrementalEvalResult};

@@ -125,9 +125,7 @@ export default function ProblemsPanel() {
                 onClick={() => jumpToNode(e.isRootCause ? e.nodeId : e.rootCauseId)}
               >
                 <CompassIcon size={10} />
-                {e.isRootCause
-                  ? t('problems.jump', 'Jump')
-                  : t('problems.jumpToRoot', 'Root')}
+                {e.isRootCause ? t('problems.jump', 'Jump') : t('problems.jumpToRoot', 'Root')}
               </button>
             </div>
             <div style={msgStyle}>{e.message}</div>

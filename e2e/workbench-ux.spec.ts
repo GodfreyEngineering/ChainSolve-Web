@@ -22,14 +22,11 @@ test.describe('Workbench UX: Home page (E11-1)', () => {
     await expect(page.locator('#root')).toBeAttached()
   })
 
-  test.fixme(
-    'authenticated user sees project browser on /app (requires auth session)',
-    async () => {
-      // 1. Set up authenticated session via storageState
-      // 2. Navigate to /app
-      // 3. Verify project browser renders (create project button, project list)
-    },
-  )
+  test.fixme('authenticated user sees project browser on /app (requires auth session)', async () => {
+    // 1. Set up authenticated session via storageState
+    // 2. Navigate to /app
+    // 3. Verify project browser renders (create project button, project list)
+  })
 })
 
 // ── Window manager ──────────────────────────────────────────────────────────────

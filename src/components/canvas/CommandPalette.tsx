@@ -208,9 +208,12 @@ export function CommandPalette({
     const groups: Record<CommandKind, PaletteCommand[]> = { action: [], block: [], node: [] }
     for (const item of allItems) groups[item.kind].push(item)
     const result: { label: string; items: PaletteCommand[] }[] = []
-    if (groups.action.length > 0) result.push({ label: t('commandPalette.actions', 'Actions'), items: groups.action })
-    if (groups.block.length > 0) result.push({ label: t('commandPalette.blocks', 'Blocks'), items: groups.block.slice(0, 12) })
-    if (groups.node.length > 0) result.push({ label: t('commandPalette.nodes', 'Nodes'), items: groups.node.slice(0, 8) })
+    if (groups.action.length > 0)
+      result.push({ label: t('commandPalette.actions', 'Actions'), items: groups.action })
+    if (groups.block.length > 0)
+      result.push({ label: t('commandPalette.blocks', 'Blocks'), items: groups.block.slice(0, 12) })
+    if (groups.node.length > 0)
+      result.push({ label: t('commandPalette.nodes', 'Nodes'), items: groups.node.slice(0, 8) })
     return result
   }, [q, allItems, t])
 
@@ -223,9 +226,15 @@ export function CommandPalette({
         <input
           ref={inputRef}
           style={inputStyle}
-          placeholder={t('commandPalette.placeholder', 'Type a command, block name, or node label…')}
+          placeholder={t(
+            'commandPalette.placeholder',
+            'Type a command, block name, or node label…',
+          )}
           value={query}
-          onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0) }}
+          onChange={(e) => {
+            setQuery(e.target.value)
+            setSelectedIndex(0)
+          }}
           onKeyDown={(e) => {
             if (e.key === 'ArrowDown') {
               e.preventDefault()
@@ -243,14 +252,31 @@ export function CommandPalette({
         />
 
         {flatItems.length === 0 && q && (
-          <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-faint)', fontSize: '0.85rem' }}>
+          <div
+            style={{
+              padding: '1rem',
+              textAlign: 'center',
+              color: 'var(--text-faint)',
+              fontSize: '0.85rem',
+            }}
+          >
             {t('commandPalette.noResults', 'No results for')} &ldquo;{query}&rdquo;
           </div>
         )}
 
         {flatItems.length === 0 && !q && (
-          <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-faint)', fontSize: '0.85rem' }}>
-            {t('commandPalette.hint', 'Start typing to search actions, blocks, or navigate to a node.')}
+          <div
+            style={{
+              padding: '1rem',
+              textAlign: 'center',
+              color: 'var(--text-faint)',
+              fontSize: '0.85rem',
+            }}
+          >
+            {t(
+              'commandPalette.hint',
+              'Start typing to search actions, blocks, or navigate to a node.',
+            )}
           </div>
         )}
 
@@ -286,7 +312,14 @@ export function CommandPalette({
                         onClick={() => execute(item)}
                       >
                         {item.icon && (
-                          <span style={{ fontSize: '0.9rem', opacity: 0.7, width: 18, textAlign: 'center' }}>
+                          <span
+                            style={{
+                              fontSize: '0.9rem',
+                              opacity: 0.7,
+                              width: 18,
+                              textAlign: 'center',
+                            }}
+                          >
                             {item.icon}
                           </span>
                         )}

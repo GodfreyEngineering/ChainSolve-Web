@@ -267,8 +267,12 @@ export async function createProject(name: string, folder?: string | null): Promi
   }
   if (folder) row.folder = folder
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await supabase.from('projects').insert(row as any).select(SELECT_COLS).single()
+  const { data, error } = await supabase
+    .from('projects')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .insert(row as any)
+    .select(SELECT_COLS)
+    .single()
 
   if (error) throw mapDbError(error.message, 'Failed to create project')
   if (!data) throw new ServiceError('DB_ERROR', 'Failed to create project')
@@ -409,7 +413,10 @@ export async function saveProject(
     return { updatedAt: row.updated_at, conflict: true }
   }
 
-  dlog.info('persistence', 'Project saved (atomic CAS)', { projectId, formatVersion: pj.formatVersion })
+  dlog.info('persistence', 'Project saved (atomic CAS)', {
+    projectId,
+    formatVersion: pj.formatVersion,
+  })
   return { updatedAt: row.updated_at, conflict: false }
 }
 
@@ -549,9 +556,13 @@ export async function duplicateProject(sourceId: string, newName: string): Promi
       }
     } else {
       // Legacy project: no canvas rows — create one canvas from the monolithic project.json graph
-      dlog.info('persistence', 'Legacy project detected during duplication — using project.json graph', {
-        sourceId,
-      })
+      dlog.info(
+        'persistence',
+        'Legacy project detected during duplication — using project.json graph',
+        {
+          sourceId,
+        },
+      )
       const newCanvas = await createCanvas(newProj.id, 'Sheet 1', {
         nodes: srcGraph.nodes,
         edges: srcGraph.edges,
@@ -650,9 +661,13 @@ export function validateProjectJSON(raw: unknown): ProjectJSONValidation {
       edges: Array.isArray(graph.edges) ? graph.edges : [],
     },
     blockVersions:
-      graph.blockVersions && typeof graph.blockVersions === 'object' && !Array.isArray(graph.blockVersions)
+      graph.blockVersions &&
+      typeof graph.blockVersions === 'object' &&
+      !Array.isArray(graph.blockVersions)
         ? (graph.blockVersions as Record<string, string>)
-        : typeof obj.blockVersions === 'object' && !Array.isArray(obj.blockVersions) && obj.blockVersions !== null
+        : typeof obj.blockVersions === 'object' &&
+            !Array.isArray(obj.blockVersions) &&
+            obj.blockVersions !== null
           ? (obj.blockVersions as Record<string, string>)
           : {},
   }

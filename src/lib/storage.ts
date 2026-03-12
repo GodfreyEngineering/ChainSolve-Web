@@ -124,10 +124,7 @@ export async function saveProjectJson(projectId: string, projectJson: unknown): 
  * PROJ-01: Upload project blob to storage without updating the DB.
  * Returns the storage key. Use with save_project_metadata RPC for atomic CAS.
  */
-export async function uploadProjectBlob(
-  projectId: string,
-  projectJson: unknown,
-): Promise<string> {
+export async function uploadProjectBlob(projectId: string, projectJson: unknown): Promise<string> {
   const session = await requireSession()
   const userId = session.user.id
   const key = `${userId}/${projectId}/project.json`

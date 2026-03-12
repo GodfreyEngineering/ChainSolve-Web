@@ -79,26 +79,30 @@ fn evaluate_node_inner(
         "inf" => Value::scalar(f64::INFINITY),
 
         // ── W11c: Constants & Presets (0 inputs → 1 scalar) ──────
-        // Math
+        // Math (canonical const.math.* IDs — SCI-01)
+        "const.math.pi"     => Value::scalar(std::f64::consts::PI),
+        "const.math.e"      => Value::scalar(std::f64::consts::E),
+        "const.math.tau"    => Value::scalar(std::f64::consts::TAU),
+        "const.math.phi"    => Value::scalar(1.618_033_988_749_894_848_2),
         "const.math.sqrt2"  => Value::scalar(std::f64::consts::SQRT_2),
         "const.math.ln2"    => Value::scalar(std::f64::consts::LN_2),
         "const.math.ln10"   => Value::scalar(std::f64::consts::LN_10),
-        // Physics
-        "const.physics.g0"        => Value::scalar(9.806_65),
-        "const.physics.R_molar"   => Value::scalar(8.314_462_618),
-        "const.physics.c"         => Value::scalar(299_792_458.0),
-        "const.physics.h"         => Value::scalar(6.626_070_15e-34),
-        "const.physics.hbar"      => Value::scalar(1.054_571_817e-34),
-        "const.physics.kB"        => Value::scalar(1.380_649e-23),
-        "const.physics.Na"        => Value::scalar(6.022_140_76e23),
-        "const.physics.qe"        => Value::scalar(1.602_176_634e-19),
-        "const.physics.F"         => Value::scalar(96_485.332_12),
-        "const.physics.me"        => Value::scalar(9.109_383_7015e-31),
-        "const.physics.mp"        => Value::scalar(1.672_621_923_69e-27),
-        "const.physics.G"         => Value::scalar(6.674_30e-11),
-        "const.physics.mu0"       => Value::scalar(1.256_637_062_12e-6),
-        "const.physics.eps0"      => Value::scalar(8.854_187_8128e-12),
-        "const.physics.sigma_sb"  => Value::scalar(5.670_374_419e-8),
+        // Physics — CODATA 2022 values (SCI-01)
+        "const.physics.g0"        => Value::scalar(9.806_65),                    // exact (CGPM 1901)
+        "const.physics.R_molar" | "const.physics.R" => Value::scalar(8.314_462_618),           // exact (SI 2019)
+        "const.physics.c"         => Value::scalar(299_792_458.0),               // exact (SI 2019)
+        "const.physics.h"         => Value::scalar(6.626_070_15e-34),            // exact (SI 2019)
+        "const.physics.hbar"      => Value::scalar(1.054_571_817_646_156_5e-34), // CODATA 2022
+        "const.physics.kB"        => Value::scalar(1.380_649e-23),               // exact (SI 2019)
+        "const.physics.Na" | "const.physics.NA" => Value::scalar(6.022_140_76e23),              // exact (SI 2019)
+        "const.physics.qe" | "const.physics.e" => Value::scalar(1.602_176_634e-19),             // exact (SI 2019)
+        "const.physics.F"         => Value::scalar(96_485.332_12),               // CODATA 2022
+        "const.physics.me"        => Value::scalar(9.109_383_713_9e-31),         // CODATA 2022
+        "const.physics.mp"        => Value::scalar(1.672_621_925_95e-27),        // CODATA 2022
+        "const.physics.G"         => Value::scalar(6.674_30e-11),                // CODATA 2022
+        "const.physics.mu0"       => Value::scalar(1.256_637_061_27e-6),         // CODATA 2022
+        "const.physics.eps0"      => Value::scalar(8.854_187_818_8e-12),         // CODATA 2022
+        "const.physics.sigma_sb" | "const.physics.sigma" => Value::scalar(5.670_374_419e-8),   // exact (SI 2019)
         // Atmosphere (typical ISA values)
         "const.atmos.p0_pa"       => Value::scalar(101_325.0),
         "const.atmos.t0_k"        => Value::scalar(288.15),
@@ -166,13 +170,54 @@ fn evaluate_node_inner(
         }
 
         // ── Trig ──────────────────────────────────────────────────
-        "sin" => unary_broadcast(inputs, |x| x.sin()),
-        "cos" => unary_broadcast(inputs, |x| x.cos()),
-        "tan" => unary_broadcast(inputs, |x| x.tan()),
-        "asin" => unary_broadcast(inputs, |x| x.asin()),
-        "acos" => unary_broadcast(inputs, |x| x.acos()),
-        "atan" => unary_broadcast(inputs, |x| x.atan()),
-        "atan2" => binary_broadcast_ports(inputs, "y", "x", |y, x| y.atan2(x)),
+        // angleUnit: if data["angleUnit"] == "deg", convert deg→rad on input
+        // for forward trig and rad→deg on output for inverse trig.
+        "sin" | "cos" | "tan" | "asin" | "acos" | "atan" => {
+            let deg_mode = data.get("angleUnit")
+                .and_then(|v| v.as_str()) == Some("deg");
+            match block_type {
+                "sin" => if deg_mode {
+                    unary_broadcast(inputs, |x| (x * std::f64::consts::PI / 180.0).sin())
+                } else {
+                    unary_broadcast(inputs, |x| x.sin())
+                },
+                "cos" => if deg_mode {
+                    unary_broadcast(inputs, |x| (x * std::f64::consts::PI / 180.0).cos())
+                } else {
+                    unary_broadcast(inputs, |x| x.cos())
+                },
+                "tan" => if deg_mode {
+                    unary_broadcast(inputs, |x| (x * std::f64::consts::PI / 180.0).tan())
+                } else {
+                    unary_broadcast(inputs, |x| x.tan())
+                },
+                "asin" => if deg_mode {
+                    unary_broadcast(inputs, |x| x.asin() * 180.0 / std::f64::consts::PI)
+                } else {
+                    unary_broadcast(inputs, |x| x.asin())
+                },
+                "acos" => if deg_mode {
+                    unary_broadcast(inputs, |x| x.acos() * 180.0 / std::f64::consts::PI)
+                } else {
+                    unary_broadcast(inputs, |x| x.acos())
+                },
+                "atan" => if deg_mode {
+                    unary_broadcast(inputs, |x| x.atan() * 180.0 / std::f64::consts::PI)
+                } else {
+                    unary_broadcast(inputs, |x| x.atan())
+                },
+                _ => unreachable!(),
+            }
+        }
+        "atan2" => {
+            let deg_mode = data.get("angleUnit")
+                .and_then(|v| v.as_str()) == Some("deg");
+            if deg_mode {
+                binary_broadcast_ports(inputs, "y", "x", |y, x| y.atan2(x) * 180.0 / std::f64::consts::PI)
+            } else {
+                binary_broadcast_ports(inputs, "y", "x", |y, x| y.atan2(x))
+            }
+        }
         "degToRad" => unary_broadcast_port(inputs, "deg", |d| d.to_radians()),
         "radToDeg" => unary_broadcast_port(inputs, "rad", |r| r.to_degrees()),
 
@@ -1246,6 +1291,831 @@ fn evaluate_node_inner(
             unary_broadcast_port(inputs, "pct", |p| p / 100.0)
         }
 
+        // ── SCI-01: Additional CODATA 2022 constants ──────────────────
+        "const.physics.mn"            => Value::scalar(1.674_927_500_56e-27),  // neutron mass (CODATA 2022)
+        "const.physics.alpha"         => Value::scalar(7.297_352_564_3e-3),    // fine-structure constant (CODATA 2022)
+        "const.physics.Ry"            => Value::scalar(10_973_731.568_157),    // Rydberg constant m⁻¹ (CODATA 2022)
+        "const.physics.amu" | "const.physics.u" => Value::scalar(1.660_539_068_92e-27), // atomic mass unit (CODATA 2022)
+        "const.physics.a0"            => Value::scalar(5.291_772_109_03e-11),  // Bohr radius
+        "const.physics.mu_B"          => Value::scalar(9.274_010_0783e-24),    // Bohr magneton
+        "const.physics.mu_N"          => Value::scalar(5.050_783_7461e-27),    // nuclear magneton
+
+        // ── SCI-11: Statistical distributions (extended) ─────────────
+        "prob.dist.normal_cdf" => {
+            let x     = scalar_or_nan(inputs, "x");
+            let mu    = scalar_or_nan(inputs, "mu");
+            let sigma = scalar_or_nan(inputs, "sigma");
+            if sigma <= 0.0 {
+                Value::error("Normal CDF: \u{03C3} must be > 0")
+            } else {
+                Value::scalar(normal_cdf((x - mu) / sigma))
+            }
+        }
+        "prob.dist.normal_inv_cdf" => {
+            let p     = scalar_or_nan(inputs, "p");
+            let mu    = scalar_or_nan(inputs, "mu");
+            let sigma = scalar_or_nan(inputs, "sigma");
+            if sigma <= 0.0 {
+                Value::error("Normal InvCDF: \u{03C3} must be > 0")
+            } else if !(0.0..=1.0).contains(&p) {
+                Value::error("Normal InvCDF: p must be in [0, 1]")
+            } else {
+                Value::scalar(mu + sigma * normal_inv_cdf(p))
+            }
+        }
+        "prob.dist.t_pdf" => {
+            let x  = scalar_or_nan(inputs, "x");
+            let df = scalar_or_nan(inputs, "df");
+            if df <= 0.0 {
+                Value::error("t-PDF: df must be > 0")
+            } else {
+                let log_coeff = log_gamma((df + 1.0) / 2.0)
+                    - log_gamma(df / 2.0)
+                    - 0.5 * (df * std::f64::consts::PI).ln();
+                let log_kernel = -((df + 1.0) / 2.0) * (1.0 + x * x / df).ln();
+                Value::scalar((log_coeff + log_kernel).exp())
+            }
+        }
+        "prob.dist.t_cdf" => {
+            let x  = scalar_or_nan(inputs, "x");
+            let df = scalar_or_nan(inputs, "df");
+            if df <= 0.0 {
+                Value::error("t-CDF: df must be > 0")
+            } else {
+                let z  = df / (x * x + df);
+                let ib = reg_inc_beta(df / 2.0, 0.5, z);
+                let p  = ib / 2.0;
+                Value::scalar(if x >= 0.0 { 1.0 - p } else { p })
+            }
+        }
+        "prob.dist.chi2_pdf" => {
+            let x = scalar_or_nan(inputs, "x");
+            let k = scalar_or_nan(inputs, "k");
+            if k <= 0.0 { return Value::error("Chi\u{00B2} PDF: k must be > 0"); }
+            if x < 0.0  { return Value::scalar(0.0); }
+            if x == 0.0 {
+                return if k < 2.0 { Value::scalar(f64::INFINITY) }
+                       else if (k - 2.0).abs() < 1e-12 { Value::scalar(0.5) }
+                       else { Value::scalar(0.0) };
+            }
+            let hk = k / 2.0;
+            let log_pdf = (hk - 1.0) * x.ln() - x / 2.0
+                          - hk * 2.0_f64.ln() - log_gamma(hk);
+            Value::scalar(log_pdf.exp())
+        }
+        "prob.dist.chi2_cdf" => {
+            let x = scalar_or_nan(inputs, "x");
+            let k = scalar_or_nan(inputs, "k");
+            if k <= 0.0 { return Value::error("Chi\u{00B2} CDF: k must be > 0"); }
+            if x <= 0.0 { return Value::scalar(0.0); }
+            Value::scalar(reg_gamma_lower(k / 2.0, x / 2.0))
+        }
+        "prob.dist.f_pdf" => {
+            let x  = scalar_or_nan(inputs, "x");
+            let d1 = scalar_or_nan(inputs, "d1");
+            let d2 = scalar_or_nan(inputs, "d2");
+            if d1 <= 0.0 || d2 <= 0.0 { return Value::error("F-PDF: d1,d2 must be > 0"); }
+            if x <= 0.0 { return Value::scalar(0.0); }
+            let log_pdf = (d1 / 2.0) * (d1 * x / (d1 * x + d2)).ln()
+                        + (d2 / 2.0) * (d2 / (d1 * x + d2)).ln()
+                        - x.ln()
+                        + log_gamma((d1 + d2) / 2.0)
+                        - log_gamma(d1 / 2.0)
+                        - log_gamma(d2 / 2.0);
+            Value::scalar(log_pdf.exp())
+        }
+        "prob.dist.f_cdf" => {
+            let x  = scalar_or_nan(inputs, "x");
+            let d1 = scalar_or_nan(inputs, "d1");
+            let d2 = scalar_or_nan(inputs, "d2");
+            if d1 <= 0.0 || d2 <= 0.0 { return Value::error("F-CDF: d1,d2 must be > 0"); }
+            if x <= 0.0 { return Value::scalar(0.0); }
+            Value::scalar(reg_inc_beta(d1 / 2.0, d2 / 2.0, d1 * x / (d1 * x + d2)))
+        }
+        "prob.dist.poisson_cdf" => {
+            let k_raw  = scalar_or_nan(inputs, "k");
+            let lambda = scalar_or_nan(inputs, "lambda");
+            if lambda < 0.0 { return Value::error("Poisson CDF: \u{03BB} must be \u{2265} 0"); }
+            if k_raw < 0.0  { return Value::scalar(0.0); }
+            let k = k_raw.floor() as u64;
+            // P(X \u{2264} k) = 1 - P(k+1, \u{03BB})
+            Value::scalar(1.0 - reg_gamma_lower((k + 1) as f64, lambda))
+        }
+        "prob.dist.binomial_cdf" => {
+            let k_raw = scalar_or_nan(inputs, "k");
+            let n_raw = scalar_or_nan(inputs, "n");
+            let p     = scalar_or_nan(inputs, "p");
+            if !(0.0..=1.0).contains(&p) { return Value::error("Binomial CDF: p must be in [0,1]"); }
+            let k = k_raw.floor() as i64;
+            let n = n_raw.round() as i64;
+            if k < 0 { return Value::scalar(0.0); }
+            if k >= n { return Value::scalar(1.0); }
+            Value::scalar(reg_inc_beta((n - k) as f64, (k + 1) as f64, 1.0 - p))
+        }
+        "prob.dist.beta_pdf" => {
+            let x = scalar_or_nan(inputs, "x");
+            let a = scalar_or_nan(inputs, "a");
+            let b = scalar_or_nan(inputs, "b");
+            if a <= 0.0 || b <= 0.0 { return Value::error("Beta PDF: a,b must be > 0"); }
+            if x < 0.0 || x > 1.0   { return Value::scalar(0.0); }
+            if x == 0.0 { return if a < 1.0 { Value::scalar(f64::INFINITY) } else { Value::scalar(0.0) }; }
+            if x == 1.0 { return if b < 1.0 { Value::scalar(f64::INFINITY) } else { Value::scalar(0.0) }; }
+            let log_pdf = (a - 1.0) * x.ln() + (b - 1.0) * (1.0 - x).ln()
+                          + log_gamma(a + b) - log_gamma(a) - log_gamma(b);
+            Value::scalar(log_pdf.exp())
+        }
+        "prob.dist.beta_cdf" => {
+            let x = scalar_or_nan(inputs, "x");
+            let a = scalar_or_nan(inputs, "a");
+            let b = scalar_or_nan(inputs, "b");
+            if a <= 0.0 || b <= 0.0 { return Value::error("Beta CDF: a,b must be > 0"); }
+            if x <= 0.0 { return Value::scalar(0.0); }
+            if x >= 1.0 { return Value::scalar(1.0); }
+            Value::scalar(reg_inc_beta(a, b, x))
+        }
+        "prob.dist.gamma_pdf" => {
+            let x     = scalar_or_nan(inputs, "x");
+            let alpha = scalar_or_nan(inputs, "alpha");
+            let beta  = scalar_or_nan(inputs, "beta");
+            if alpha <= 0.0 || beta <= 0.0 { return Value::error("Gamma PDF: \u{03B1},\u{03B2} must be > 0"); }
+            if x <= 0.0 { return Value::scalar(0.0); }
+            let log_pdf = (alpha - 1.0) * x.ln() - x / beta
+                          - alpha * beta.ln() - log_gamma(alpha);
+            Value::scalar(log_pdf.exp())
+        }
+        "prob.dist.weibull_pdf" => {
+            let x      = scalar_or_nan(inputs, "x");
+            let k      = scalar_or_nan(inputs, "k");
+            let lambda = scalar_or_nan(inputs, "lambda");
+            if k <= 0.0 || lambda <= 0.0 { return Value::error("Weibull PDF: k,\u{03BB} must be > 0"); }
+            if x < 0.0 { return Value::scalar(0.0); }
+            if x == 0.0 {
+                return if k < 1.0 { Value::scalar(f64::INFINITY) }
+                       else if (k - 1.0).abs() < 1e-12 { Value::scalar(k / lambda) }
+                       else { Value::scalar(0.0) };
+            }
+            Value::scalar((k / lambda) * (x / lambda).powf(k - 1.0) * (-(x / lambda).powf(k)).exp())
+        }
+
+        // ── BLK-01: Chemical Engineering ──────────────────────────────
+        "chem.ideal_gas_n" => {
+            let p = scalar_or_nan(inputs, "P");
+            let v = scalar_or_nan(inputs, "V");
+            let r = scalar_or_nan(inputs, "R");
+            let t = scalar_or_nan(inputs, "T");
+            let denom = r * t;
+            if denom == 0.0 { Value::error("Ideal gas n: R\u{00B7}T = 0") }
+            else { Value::scalar(p * v / denom) }
+        }
+        "chem.antoine_vp" => {
+            // log\u{2081}\u{2080}(P) = A - B/(C+T) \u{2192} Antoine equation (mmHg, \u{00B0}C)
+            let a = scalar_or_nan(inputs, "A");
+            let b = scalar_or_nan(inputs, "B");
+            let c = scalar_or_nan(inputs, "C");
+            let t = scalar_or_nan(inputs, "T");
+            Value::scalar(10.0_f64.powf(a - b / (c + t)))
+        }
+        "chem.raoults_partial" => {
+            binary_broadcast_ports(inputs, "x", "Psat", |x, psat| x * psat)
+        }
+        "chem.equilibrium_K" => {
+            let dg = scalar_or_nan(inputs, "dG");
+            let r  = scalar_or_nan(inputs, "R");
+            let t  = scalar_or_nan(inputs, "T");
+            let denom = r * t;
+            if denom == 0.0 { Value::error("Equilibrium K: R\u{00B7}T = 0") }
+            else { Value::scalar((-dg / denom).exp()) }
+        }
+        "chem.arrhenius_rate" => {
+            let a  = scalar_or_nan(inputs, "A");
+            let ea = scalar_or_nan(inputs, "Ea");
+            let r  = scalar_or_nan(inputs, "R");
+            let t  = scalar_or_nan(inputs, "T");
+            let denom = r * t;
+            if denom == 0.0 { Value::error("Arrhenius: R\u{00B7}T = 0") }
+            else { Value::scalar(a * (-ea / denom).exp()) }
+        }
+        "chem.heat_reaction" => {
+            binary_broadcast_ports(inputs, "H_prod", "H_react", |hp, hr| hp - hr)
+        }
+        "chem.mole_fraction" => {
+            let n_comp  = scalar_or_nan(inputs, "n_comp");
+            let n_total = scalar_or_nan(inputs, "n_total");
+            if n_total == 0.0 { Value::error("Mole fraction: n_total = 0") }
+            else { Value::scalar(n_comp / n_total) }
+        }
+        "chem.ficks_flux" => {
+            binary_broadcast_ports(inputs, "D", "dC_dx", |d, dc| -d * dc)
+        }
+        "chem.CSTR_conv" => {
+            let k   = scalar_or_nan(inputs, "k");
+            let tau = scalar_or_nan(inputs, "tau");
+            let denom = 1.0 + k * tau;
+            if denom == 0.0 { Value::error("CSTR: 1 + k\u{00B7}\u{03C4} = 0") }
+            else { Value::scalar(k * tau / denom) }
+        }
+        "chem.enthalpy_sensible" => {
+            let cp = scalar_or_nan(inputs, "Cp");
+            let t1 = scalar_or_nan(inputs, "T1");
+            let t2 = scalar_or_nan(inputs, "T2");
+            Value::scalar(cp * (t2 - t1))
+        }
+
+        // ── BLK-02: Structural / Civil Engineering ────────────────────
+        "struct.beam_deflect_ss" => {
+            let p  = scalar_or_nan(inputs, "P");
+            let l  = scalar_or_nan(inputs, "L");
+            let e  = scalar_or_nan(inputs, "E");
+            let ii = scalar_or_nan(inputs, "I");
+            let denom = 48.0 * e * ii;
+            if denom == 0.0 { Value::error("Beam SS: 48\u{00B7}E\u{00B7}I = 0") }
+            else { Value::scalar(p * l.powi(3) / denom) }
+        }
+        "struct.beam_deflect_cantilever" => {
+            let p  = scalar_or_nan(inputs, "P");
+            let l  = scalar_or_nan(inputs, "L");
+            let e  = scalar_or_nan(inputs, "E");
+            let ii = scalar_or_nan(inputs, "I");
+            let denom = 3.0 * e * ii;
+            if denom == 0.0 { Value::error("Cantilever: 3\u{00B7}E\u{00B7}I = 0") }
+            else { Value::scalar(p * l.powi(3) / denom) }
+        }
+        "struct.beam_moment_ss" => {
+            let p = scalar_or_nan(inputs, "P");
+            let a = scalar_or_nan(inputs, "a");
+            let b = scalar_or_nan(inputs, "b");
+            let l = scalar_or_nan(inputs, "L");
+            if l == 0.0 { Value::error("Beam moment: L = 0") }
+            else { Value::scalar(p * a * b / l) }
+        }
+        "struct.euler_buckling" => {
+            let e  = scalar_or_nan(inputs, "E");
+            let ii = scalar_or_nan(inputs, "I");
+            let l  = scalar_or_nan(inputs, "L");
+            let k  = scalar_or_nan(inputs, "K");
+            let kl = k * l;
+            if kl == 0.0 { Value::error("Euler buckling: K\u{00B7}L = 0") }
+            else { Value::scalar(std::f64::consts::PI.powi(2) * e * ii / kl.powi(2)) }
+        }
+        "struct.von_mises" => {
+            let sx  = scalar_or_nan(inputs, "sx");
+            let sy  = scalar_or_nan(inputs, "sy");
+            let txy = scalar_or_nan(inputs, "txy");
+            let val = sx * sx - sx * sy + sy * sy + 3.0 * txy * txy;
+            if val < 0.0 { Value::error("Von Mises: negative under sqrt") }
+            else { Value::scalar(val.sqrt()) }
+        }
+        "struct.combined_stress" => {
+            binary_broadcast_ports(inputs, "s_ax", "s_bend", |s_ax, s_bend| s_ax + s_bend)
+        }
+        "struct.steel_check" => {
+            let sigma = scalar_or_nan(inputs, "sigma");
+            let fy    = scalar_or_nan(inputs, "Fy");
+            let phi   = scalar_or_nan(inputs, "phi");
+            let denom = fy * phi;
+            if denom == 0.0 { Value::error("Steel check: Fy\u{00B7}\u{03C6} = 0") }
+            else { Value::scalar(sigma / denom) }
+        }
+        "struct.bearing_capacity" => {
+            let c     = scalar_or_nan(inputs, "c");
+            let gamma = scalar_or_nan(inputs, "gamma");
+            let d     = scalar_or_nan(inputs, "D");
+            let b     = scalar_or_nan(inputs, "B");
+            let nc    = scalar_or_nan(inputs, "Nc");
+            let nq    = scalar_or_nan(inputs, "Nq");
+            let ng    = scalar_or_nan(inputs, "Ngamma");
+            Value::scalar(c * nc + gamma * d * nq + 0.5 * gamma * b * ng)
+        }
+        "struct.concrete_moment_aci" => {
+            let fc  = scalar_or_nan(inputs, "fc");
+            let b   = scalar_or_nan(inputs, "b");
+            let d   = scalar_or_nan(inputs, "d");
+            let ias = scalar_or_nan(inputs, "As");
+            let fy  = scalar_or_nan(inputs, "fy");
+            let denom = 1.7 * fc * b;
+            if denom == 0.0 { Value::error("ACI moment: 1.7\u{00B7}fc\u{00B7}b = 0") }
+            else {
+                let a = ias * fy / denom;
+                Value::scalar(ias * fy * (d - a / 2.0))
+            }
+        }
+
+        // ── BLK-03: Aerospace Engineering ─────────────────────────────
+        "aero.ISA_T" => {
+            Value::scalar(isa_temperature(scalar_or_nan(inputs, "h")))
+        }
+        "aero.ISA_P" => {
+            Value::scalar(isa_pressure(scalar_or_nan(inputs, "h")))
+        }
+        "aero.ISA_rho" => {
+            let h = scalar_or_nan(inputs, "h");
+            let t = isa_temperature(h);
+            let p = isa_pressure(h);
+            Value::scalar(p / (287.05 * t))
+        }
+        "aero.ISA_a" => {
+            let t = isa_temperature(scalar_or_nan(inputs, "h"));
+            Value::scalar((1.4 * 287.05 * t).sqrt())
+        }
+        "aero.mach_from_v" => {
+            let v = scalar_or_nan(inputs, "v");
+            let a = scalar_or_nan(inputs, "a");
+            if a == 0.0 { Value::error("Mach: speed of sound = 0") }
+            else { Value::scalar(v / a) }
+        }
+        "aero.dynamic_q" => {
+            let rho = scalar_or_nan(inputs, "rho");
+            let v   = scalar_or_nan(inputs, "v");
+            Value::scalar(0.5 * rho * v * v)
+        }
+        "aero.lift" => {
+            let cl = scalar_or_nan(inputs, "CL");
+            let q  = scalar_or_nan(inputs, "q");
+            let s  = scalar_or_nan(inputs, "S");
+            Value::scalar(cl * q * s)
+        }
+        "aero.drag" => {
+            let cd = scalar_or_nan(inputs, "CD");
+            let q  = scalar_or_nan(inputs, "q");
+            let s  = scalar_or_nan(inputs, "S");
+            Value::scalar(cd * q * s)
+        }
+        "aero.tsfc" => {
+            let thrust    = scalar_or_nan(inputs, "thrust");
+            let fuel_flow = scalar_or_nan(inputs, "fuel_flow");
+            if thrust == 0.0 { Value::error("TSFC: thrust = 0") }
+            else { Value::scalar(fuel_flow / thrust) }
+        }
+        "aero.tsiolkovsky" => {
+            let isp = scalar_or_nan(inputs, "Isp");
+            let g0  = scalar_or_nan(inputs, "g0");
+            let m0  = scalar_or_nan(inputs, "m0");
+            let mf  = scalar_or_nan(inputs, "mf");
+            if mf <= 0.0 { Value::error("Tsiolkovsky: mf must be > 0") }
+            else if m0 <= mf { Value::error("Tsiolkovsky: m0 must be > mf") }
+            else { Value::scalar(isp * g0 * (m0 / mf).ln()) }
+        }
+        "aero.orbital_v" => {
+            let gm = scalar_or_nan(inputs, "GM");
+            let r  = scalar_or_nan(inputs, "r");
+            if r <= 0.0 { Value::error("Orbital v: r must be > 0") }
+            else { Value::scalar((gm / r).sqrt()) }
+        }
+        "aero.escape_v" => {
+            let gm = scalar_or_nan(inputs, "GM");
+            let r  = scalar_or_nan(inputs, "r");
+            if r <= 0.0 { Value::error("Escape v: r must be > 0") }
+            else { Value::scalar((2.0 * gm / r).sqrt()) }
+        }
+        "aero.hohmann_dv1" => {
+            let gm = scalar_or_nan(inputs, "GM");
+            let r1 = scalar_or_nan(inputs, "r1");
+            let r2 = scalar_or_nan(inputs, "r2");
+            if r1 <= 0.0 || r2 <= 0.0 { Value::error("Hohmann dv1: r1,r2 must be > 0") }
+            else {
+                let v1 = (gm / r1).sqrt();
+                Value::scalar(v1 * ((2.0 * r2 / (r1 + r2)).sqrt() - 1.0))
+            }
+        }
+        "aero.hohmann_dv2" => {
+            let gm = scalar_or_nan(inputs, "GM");
+            let r1 = scalar_or_nan(inputs, "r1");
+            let r2 = scalar_or_nan(inputs, "r2");
+            if r1 <= 0.0 || r2 <= 0.0 { Value::error("Hohmann dv2: r1,r2 must be > 0") }
+            else {
+                let v2 = (gm / r2).sqrt();
+                Value::scalar(v2 * (1.0 - (2.0 * r1 / (r1 + r2)).sqrt()))
+            }
+        }
+
+        // ── BLK-04: Control Systems ────────────────────────────────────
+        "ctrl.step_1st_order" => {
+            let k   = scalar_or_nan(inputs, "K");
+            let tau = scalar_or_nan(inputs, "tau");
+            let t   = scalar_or_nan(inputs, "t");
+            if tau == 0.0 { Value::error("1st order step: \u{03C4} = 0") }
+            else { Value::scalar(k * (1.0 - (-t / tau).exp())) }
+        }
+        "ctrl.step_2nd_order" => {
+            let k    = scalar_or_nan(inputs, "K");
+            let wn   = scalar_or_nan(inputs, "wn");
+            let zeta = scalar_or_nan(inputs, "zeta");
+            let t    = scalar_or_nan(inputs, "t");
+            if wn == 0.0 { return Value::error("2nd order step: \u{03C9}n = 0"); }
+            let result = if (zeta - 1.0).abs() < 1e-10 {
+                k * (1.0 - (1.0 + wn * t) * (-wn * t).exp())
+            } else if zeta < 1.0 {
+                let wd = wn * (1.0 - zeta * zeta).sqrt();
+                k * (1.0 - (-zeta * wn * t).exp() * (
+                    (wd * t).cos() + (zeta / (1.0 - zeta * zeta).sqrt()) * (wd * t).sin()
+                ))
+            } else {
+                let s1 = -zeta * wn + wn * (zeta * zeta - 1.0).sqrt();
+                let s2 = -zeta * wn - wn * (zeta * zeta - 1.0).sqrt();
+                k * (1.0 + (s2 * (s1 * t).exp() - s1 * (s2 * t).exp()) / (s1 - s2))
+            };
+            Value::scalar(result)
+        }
+        "ctrl.pid_output" => {
+            let kp       = scalar_or_nan(inputs, "Kp");
+            let ki       = scalar_or_nan(inputs, "Ki");
+            let kd       = scalar_or_nan(inputs, "Kd");
+            let error    = scalar_or_nan(inputs, "error");
+            let integral = scalar_or_nan(inputs, "integral");
+            let dt       = scalar_or_nan(inputs, "dt");
+            let deriv    = if dt == 0.0 { 0.0 } else { error / dt };
+            Value::scalar(kp * error + ki * integral + kd * deriv)
+        }
+        "ctrl.rms" => {
+            match inputs.get("y") {
+                Some(Value::Vector { value }) if !value.is_empty() => {
+                    let sum_sq = kahan_sum(value.iter().map(|x| x * x));
+                    Value::scalar((sum_sq / value.len() as f64).sqrt())
+                }
+                _ => Value::error("RMS: expected non-empty vector"),
+            }
+        }
+        "ctrl.peak2peak" => {
+            match inputs.get("y") {
+                Some(Value::Vector { value }) if !value.is_empty() => {
+                    let max = value.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+                    let min = value.iter().cloned().fold(f64::INFINITY, f64::min);
+                    Value::scalar(max - min)
+                }
+                _ => Value::error("Peak-to-peak: expected non-empty vector"),
+            }
+        }
+        "ctrl.settling_time_2pct" => {
+            let tau = scalar_or_nan(inputs, "tau");
+            if tau == 0.0 { Value::error("Settling time: \u{03C4} = 0") }
+            else { Value::scalar(4.0 * tau) }
+        }
+        "ctrl.overshoot_2nd" => {
+            let zeta = scalar_or_nan(inputs, "zeta");
+            if zeta >= 1.0 { Value::scalar(0.0) }
+            else if zeta <= 0.0 { Value::scalar(100.0) }
+            else {
+                let os = (-std::f64::consts::PI * zeta / (1.0 - zeta * zeta).sqrt()).exp() * 100.0;
+                Value::scalar(os)
+            }
+        }
+        "ctrl.natural_freq" => {
+            let k = scalar_or_nan(inputs, "k");
+            let m = scalar_or_nan(inputs, "m");
+            if m <= 0.0 { Value::error("Natural freq: m must be > 0") }
+            else { Value::scalar((k / m).sqrt()) }
+        }
+        "ctrl.damping_ratio" => {
+            let c = scalar_or_nan(inputs, "c");
+            let k = scalar_or_nan(inputs, "k");
+            let m = scalar_or_nan(inputs, "m");
+            let denom = 2.0 * (k * m).sqrt();
+            if denom == 0.0 { Value::error("Damping ratio: 2\u{00B7}\u{221A}(k\u{00B7}m) = 0") }
+            else { Value::scalar(c / denom) }
+        }
+        "ctrl.bode_mag_1st" => {
+            // |H(j\u{03C9})| = K / \u{221A}(1 + (\u{03C9}\u{03C4})\u{00B2}) for first-order
+            let k     = scalar_or_nan(inputs, "K");
+            let omega = scalar_or_nan(inputs, "omega");
+            let tau   = scalar_or_nan(inputs, "tau");
+            Value::scalar(k / (1.0 + (omega * tau).powi(2)).sqrt())
+        }
+
+        // ── BLK-05: Electrical Engineering Expanded ───────────────────
+        "eng.elec.RC_tau"        => binary_broadcast_ports(inputs, "R", "C", |r, c| r * c),
+        "eng.elec.RL_tau" => {
+            let l = scalar_or_nan(inputs, "L");
+            let r = scalar_or_nan(inputs, "R");
+            if r == 0.0 { Value::error("RL \u{03C4}: R = 0") }
+            else { Value::scalar(l / r) }
+        }
+        "eng.elec.RLC_f0" => {
+            let l  = scalar_or_nan(inputs, "L");
+            let c  = scalar_or_nan(inputs, "C");
+            let lc = l * c;
+            if lc <= 0.0 { Value::error("RLC f0: L\u{00B7}C must be > 0") }
+            else { Value::scalar(1.0 / (2.0 * std::f64::consts::PI * lc.sqrt())) }
+        }
+        "eng.elec.RLC_Q" => {
+            let r = scalar_or_nan(inputs, "R");
+            let l = scalar_or_nan(inputs, "L");
+            let c = scalar_or_nan(inputs, "C");
+            if r == 0.0 || c <= 0.0 { Value::error("RLC Q: R or C = 0") }
+            else { Value::scalar((1.0 / r) * (l / c).sqrt()) }
+        }
+        "eng.elec.V_divider" => {
+            let vin = scalar_or_nan(inputs, "Vin");
+            let r1  = scalar_or_nan(inputs, "R1");
+            let r2  = scalar_or_nan(inputs, "R2");
+            let sum = r1 + r2;
+            if sum == 0.0 { Value::error("V divider: R1+R2 = 0") }
+            else { Value::scalar(vin * r2 / sum) }
+        }
+        "eng.elec.I_divider" => {
+            let iin = scalar_or_nan(inputs, "Iin");
+            let r1  = scalar_or_nan(inputs, "R1");
+            let r2  = scalar_or_nan(inputs, "R2");
+            let sum = r1 + r2;
+            if sum == 0.0 { Value::error("I divider: R1+R2 = 0") }
+            else { Value::scalar(iin * r1 / sum) }
+        }
+        "eng.elec.Z_cap" => {
+            let c     = scalar_or_nan(inputs, "C");
+            let omega = scalar_or_nan(inputs, "omega");
+            if omega == 0.0 || c == 0.0 { Value::error("Z_cap: \u{03C9}\u{00B7}C = 0") }
+            else { Value::scalar(1.0 / (omega * c)) }
+        }
+        "eng.elec.Z_ind" => {
+            binary_broadcast_ports(inputs, "L", "omega", |l, omega| l * omega)
+        }
+        "eng.elec.filter_fc" => {
+            let r  = scalar_or_nan(inputs, "R");
+            let c  = scalar_or_nan(inputs, "C");
+            let rc = r * c;
+            if rc <= 0.0 { Value::error("Filter fc: R\u{00B7}C must be > 0") }
+            else { Value::scalar(1.0 / (2.0 * std::f64::consts::PI * rc)) }
+        }
+        "eng.elec.transformer_v2" => {
+            let n1 = scalar_or_nan(inputs, "N1");
+            let n2 = scalar_or_nan(inputs, "N2");
+            let v1 = scalar_or_nan(inputs, "V1");
+            if n1 == 0.0 { Value::error("Transformer: N1 = 0") }
+            else { Value::scalar(v1 * n2 / n1) }
+        }
+        "eng.elec.three_phase_P" => {
+            let v  = scalar_or_nan(inputs, "V_line");
+            let i  = scalar_or_nan(inputs, "I_line");
+            let pf = scalar_or_nan(inputs, "pf");
+            Value::scalar(3.0_f64.sqrt() * v * i * pf)
+        }
+        "eng.elec.diode_shockley" => {
+            let is  = scalar_or_nan(inputs, "Is");
+            let v   = scalar_or_nan(inputs, "V");
+            let n   = scalar_or_nan(inputs, "n");
+            let t   = scalar_or_nan(inputs, "T");
+            // VT = kB\u{00B7}T/q
+            let vt = 1.380_649e-23 * t / 1.602_176_634e-19;
+            if vt == 0.0 || n == 0.0 { Value::error("Shockley: n\u{00B7}VT = 0") }
+            else { Value::scalar(is * ((v / (n * vt)).exp() - 1.0)) }
+        }
+
+        // ── BLK-06: Biology and Life Sciences ─────────────────────────
+        "bio.michaelis_menten" => {
+            let vmax = scalar_or_nan(inputs, "Vmax");
+            let km   = scalar_or_nan(inputs, "Km");
+            let s    = scalar_or_nan(inputs, "S");
+            let denom = km + s;
+            if denom == 0.0 { Value::error("Michaelis-Menten: Km+S = 0") }
+            else { Value::scalar(vmax * s / denom) }
+        }
+        "bio.hill_eq" => {
+            let n   = scalar_or_nan(inputs, "n");
+            let kd  = scalar_or_nan(inputs, "Kd");
+            let l   = scalar_or_nan(inputs, "L");
+            let ln_val = l.powf(n);
+            let kdn    = kd.powf(n);
+            let denom  = kdn + ln_val;
+            if denom == 0.0 { Value::error("Hill eq: Kd^n + L^n = 0") }
+            else { Value::scalar(ln_val / denom) }
+        }
+        "bio.logistic_growth" => {
+            let r  = scalar_or_nan(inputs, "r");
+            let k  = scalar_or_nan(inputs, "K");
+            let n0 = scalar_or_nan(inputs, "N0");
+            let t  = scalar_or_nan(inputs, "t");
+            if n0 == 0.0 { Value::error("Logistic growth: N0 = 0") }
+            else {
+                let denom = 1.0 + (k / n0 - 1.0) * (-r * t).exp();
+                if denom == 0.0 { Value::error("Logistic growth: denominator = 0") }
+                else { Value::scalar(k / denom) }
+            }
+        }
+        "bio.exp_decay" => {
+            let n0  = scalar_or_nan(inputs, "N0");
+            let lam = scalar_or_nan(inputs, "lambda");
+            let t   = scalar_or_nan(inputs, "t");
+            Value::scalar(n0 * (-lam * t).exp())
+        }
+        "bio.half_life" => {
+            let lam = scalar_or_nan(inputs, "lambda");
+            if lam == 0.0 { Value::error("Half-life: \u{03BB} = 0") }
+            else { Value::scalar(2.0_f64.ln() / lam) }
+        }
+        "bio.drug_1cmp" => {
+            let d = scalar_or_nan(inputs, "D");
+            let v = scalar_or_nan(inputs, "V");
+            let k = scalar_or_nan(inputs, "k");
+            let t = scalar_or_nan(inputs, "t");
+            if v == 0.0 { Value::error("Drug 1-cmp: V = 0") }
+            else { Value::scalar((d / v) * (-k * t).exp()) }
+        }
+        "bio.henderson_hasselbalch" => {
+            let pka = scalar_or_nan(inputs, "pKa");
+            let a   = scalar_or_nan(inputs, "A");
+            let ha  = scalar_or_nan(inputs, "HA");
+            if ha == 0.0 { Value::error("Henderson-Hasselbalch: [HA] = 0") }
+            else { Value::scalar(pka + (a / ha).log10()) }
+        }
+        "bio.nernst" => {
+            let r     = scalar_or_nan(inputs, "R");
+            let t     = scalar_or_nan(inputs, "T");
+            let z     = scalar_or_nan(inputs, "z");
+            let f     = scalar_or_nan(inputs, "F");
+            let c_out = scalar_or_nan(inputs, "C_out");
+            let c_in  = scalar_or_nan(inputs, "C_in");
+            if z == 0.0 || f == 0.0 { Value::error("Nernst: z\u{00B7}F = 0") }
+            else if c_in <= 0.0 { Value::error("Nernst: C_in must be > 0") }
+            else { Value::scalar((r * t / (z * f)) * (c_out / c_in).ln()) }
+        }
+        "bio.BMI" => {
+            let mass = scalar_or_nan(inputs, "mass_kg");
+            let h    = scalar_or_nan(inputs, "height_m");
+            if h == 0.0 { Value::error("BMI: height = 0") }
+            else { Value::scalar(mass / (h * h)) }
+        }
+        "bio.BSA_dubois" => {
+            // BSA = 0.007184 \u{00B7} W^0.425 \u{00B7} H^0.725  (W in kg, H in cm)
+            let w = scalar_or_nan(inputs, "W_kg");
+            let h = scalar_or_nan(inputs, "H_cm");
+            Value::scalar(0.007184 * w.powf(0.425) * h.powf(0.725))
+        }
+
+        // ── BLK-07: Finance — Options & Advanced Instruments ──────────
+        "fin.options.bs_call" => {
+            let s     = scalar_or_nan(inputs, "S");
+            let k     = scalar_or_nan(inputs, "K");
+            let t     = scalar_or_nan(inputs, "T");
+            let r     = scalar_or_nan(inputs, "r");
+            let sigma = scalar_or_nan(inputs, "sigma");
+            if sigma <= 0.0 || t <= 0.0 { return Value::error("Black-Scholes: \u{03C3},T must be > 0"); }
+            if s <= 0.0 || k <= 0.0     { return Value::error("Black-Scholes: S,K must be > 0"); }
+            let sqrt_t = t.sqrt();
+            let d1 = ((s / k).ln() + (r + 0.5 * sigma * sigma) * t) / (sigma * sqrt_t);
+            let d2 = d1 - sigma * sqrt_t;
+            Value::scalar(s * normal_cdf(d1) - k * (-r * t).exp() * normal_cdf(d2))
+        }
+        "fin.options.bs_put" => {
+            let s     = scalar_or_nan(inputs, "S");
+            let k     = scalar_or_nan(inputs, "K");
+            let t     = scalar_or_nan(inputs, "T");
+            let r     = scalar_or_nan(inputs, "r");
+            let sigma = scalar_or_nan(inputs, "sigma");
+            if sigma <= 0.0 || t <= 0.0 { return Value::error("Black-Scholes: \u{03C3},T must be > 0"); }
+            if s <= 0.0 || k <= 0.0     { return Value::error("Black-Scholes: S,K must be > 0"); }
+            let sqrt_t = t.sqrt();
+            let d1 = ((s / k).ln() + (r + 0.5 * sigma * sigma) * t) / (sigma * sqrt_t);
+            let d2 = d1 - sigma * sqrt_t;
+            Value::scalar(k * (-r * t).exp() * normal_cdf(-d2) - s * normal_cdf(-d1))
+        }
+        "fin.options.bs_delta" => {
+            let s     = scalar_or_nan(inputs, "S");
+            let k     = scalar_or_nan(inputs, "K");
+            let t     = scalar_or_nan(inputs, "T");
+            let r     = scalar_or_nan(inputs, "r");
+            let sigma = scalar_or_nan(inputs, "sigma");
+            if sigma <= 0.0 || t <= 0.0 { return Value::error("BS delta: \u{03C3},T must be > 0"); }
+            if s <= 0.0 || k <= 0.0     { return Value::error("BS delta: S,K must be > 0"); }
+            let d1 = ((s / k).ln() + (r + 0.5 * sigma * sigma) * t) / (sigma * t.sqrt());
+            Value::scalar(normal_cdf(d1))
+        }
+        "fin.options.bs_gamma" => {
+            let s     = scalar_or_nan(inputs, "S");
+            let k     = scalar_or_nan(inputs, "K");
+            let t     = scalar_or_nan(inputs, "T");
+            let r     = scalar_or_nan(inputs, "r");
+            let sigma = scalar_or_nan(inputs, "sigma");
+            if sigma <= 0.0 || t <= 0.0 { return Value::error("BS gamma: \u{03C3},T must be > 0"); }
+            if s <= 0.0 || k <= 0.0     { return Value::error("BS gamma: S,K must be > 0"); }
+            let sqrt_t = t.sqrt();
+            let d1 = ((s / k).ln() + (r + 0.5 * sigma * sigma) * t) / (sigma * sqrt_t);
+            let n_d1 = normal_pdf_std(d1);
+            Value::scalar(n_d1 / (s * sigma * sqrt_t))
+        }
+        "fin.options.bs_vega" => {
+            let s     = scalar_or_nan(inputs, "S");
+            let k     = scalar_or_nan(inputs, "K");
+            let t     = scalar_or_nan(inputs, "T");
+            let r     = scalar_or_nan(inputs, "r");
+            let sigma = scalar_or_nan(inputs, "sigma");
+            if sigma <= 0.0 || t <= 0.0 { return Value::error("BS vega: \u{03C3},T must be > 0"); }
+            if s <= 0.0 || k <= 0.0     { return Value::error("BS vega: S,K must be > 0"); }
+            let sqrt_t = t.sqrt();
+            let d1 = ((s / k).ln() + (r + 0.5 * sigma * sigma) * t) / (sigma * sqrt_t);
+            Value::scalar(s * normal_pdf_std(d1) * sqrt_t)
+        }
+        "fin.options.kelly" => {
+            let p_win = scalar_or_nan(inputs, "p_win");
+            let b     = scalar_or_nan(inputs, "b");
+            if b == 0.0 { Value::error("Kelly: b = 0") }
+            else { Value::scalar(p_win - (1.0 - p_win) / b) }
+        }
+        "fin.options.var_hist" => {
+            let conf = scalar_or_nan(inputs, "conf");
+            match inputs.get("returns") {
+                Some(Value::Vector { value }) if !value.is_empty() => {
+                    let mut sorted = value.clone();
+                    sorted.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+                    let idx = ((1.0 - conf) * sorted.len() as f64).floor() as usize;
+                    let idx = idx.min(sorted.len() - 1);
+                    Value::scalar(-sorted[idx])
+                }
+                _ => Value::error("VaR: expected non-empty vector"),
+            }
+        }
+        "fin.options.cvar_hist" => {
+            let conf = scalar_or_nan(inputs, "conf");
+            match inputs.get("returns") {
+                Some(Value::Vector { value }) if !value.is_empty() => {
+                    let mut sorted = value.clone();
+                    sorted.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+                    let cutoff = ((1.0 - conf) * sorted.len() as f64).floor() as usize;
+                    let cutoff = cutoff.max(1).min(sorted.len());
+                    let tail_mean = kahan_sum(sorted[..cutoff].iter().copied()) / cutoff as f64;
+                    Value::scalar(-tail_mean)
+                }
+                _ => Value::error("CVaR: expected non-empty vector"),
+            }
+        }
+        "fin.options.bond_duration" => {
+            let coupon = scalar_or_nan(inputs, "coupon");
+            let face   = scalar_or_nan(inputs, "face");
+            let ytm    = scalar_or_nan(inputs, "ytm");
+            let n      = scalar_or_nan(inputs, "n").round() as i32;
+            if n <= 0 { return Value::error("Bond duration: n must be > 0"); }
+            let mut pv_total = 0.0_f64;
+            let mut weighted = 0.0_f64;
+            for t in 1..=n {
+                let cf    = if t == n { coupon + face } else { coupon };
+                let pv_t  = cf / (1.0 + ytm).powi(t);
+                pv_total += pv_t;
+                weighted += t as f64 * pv_t;
+            }
+            if pv_total == 0.0 { Value::error("Bond duration: PV = 0") }
+            else { Value::scalar(weighted / pv_total) }
+        }
+        "fin.options.dcf" => {
+            let wacc = scalar_or_nan(inputs, "wacc");
+            let g    = scalar_or_nan(inputs, "g");
+            let n    = scalar_or_nan(inputs, "n").round() as i32;
+            let fcf  = scalar_or_nan(inputs, "fcf");
+            if wacc <= g  { return Value::error("DCF: wacc must be > g"); }
+            if n <= 0     { return Value::error("DCF: n must be > 0"); }
+            let mut pv = 0.0_f64;
+            for i in 1..=n { pv += fcf / (1.0 + wacc).powi(i); }
+            let terminal = fcf * (1.0 + g) / (wacc - g);
+            pv += terminal / (1.0 + wacc).powi(n);
+            Value::scalar(pv)
+        }
+
+        // ── BLK-09: Date and Time Calculations ────────────────────────
+        "date.from_ymd" => {
+            let y = scalar_or_nan(inputs, "y").round() as i64;
+            let m = scalar_or_nan(inputs, "m").round() as i64;
+            let d = scalar_or_nan(inputs, "d").round() as i64;
+            Value::scalar(ymd_to_day(y, m, d) as f64)
+        }
+        "date.year" => {
+            let day = scalar_or_nan(inputs, "day").round() as i64;
+            let (y, _, _) = day_to_ymd(day);
+            Value::scalar(y as f64)
+        }
+        "date.month" => {
+            let day = scalar_or_nan(inputs, "day").round() as i64;
+            let (_, m, _) = day_to_ymd(day);
+            Value::scalar(m as f64)
+        }
+        "date.day_of_month" => {
+            let day = scalar_or_nan(inputs, "day").round() as i64;
+            let (_, _, d) = day_to_ymd(day);
+            Value::scalar(d as f64)
+        }
+        "date.days_between" => {
+            let d1 = scalar_or_nan(inputs, "d1").round() as i64;
+            let d2 = scalar_or_nan(inputs, "d2").round() as i64;
+            Value::scalar((d2 - d1) as f64)
+        }
+        "date.add_days" => {
+            let d = scalar_or_nan(inputs, "d").round() as i64;
+            let n = scalar_or_nan(inputs, "n").round() as i64;
+            Value::scalar((d + n) as f64)
+        }
+        "date.is_leap_year" => {
+            let y = scalar_or_nan(inputs, "y").round() as i64;
+            let leap = (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0);
+            Value::scalar(if leap { 1.0 } else { 0.0 })
+        }
+        "date.days_in_month" => {
+            let m = scalar_or_nan(inputs, "m").round() as i64;
+            let y = scalar_or_nan(inputs, "y").round() as i64;
+            let days: i64 = match m {
+                1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+                4 | 6 | 9 | 11               => 30,
+                2 => if (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0) { 29 } else { 28 },
+                _ => 0,
+            };
+            Value::scalar(days as f64)
+        }
+
         // ── H5-1: Custom function expression evaluator ──────────────
         "math_expr" => {
             let formula = data
@@ -1270,7 +2140,1055 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── SCI-10: Numerical Methods ─────────────────────────────────────────
+
+        // Trapezoidal integration: ∫y dx ≈ dx*(y[0]/2 + y[1]+…+y[n-2] + y[n-1]/2)
+        "num.integrate.trapz" => {
+            let dx = scalar_or_nan(inputs, "dx");
+            match inputs.get("y") {
+                Some(Value::Vector { value: yv }) => {
+                    let n = yv.len();
+                    if n < 2 { return Value::error("trapz: need ≥2 points"); }
+                    let sum = yv[0]/2.0 + yv[n-1]/2.0 + yv[1..n-1].iter().sum::<f64>();
+                    Value::scalar(sum * dx)
+                }
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("trapz: y must be a vector"),
+            }
+        }
+
+        // Simpson's 1/3 rule — requires odd number of points (n = 2k+1)
+        "num.integrate.simpsons" => {
+            let dx = scalar_or_nan(inputs, "dx");
+            match inputs.get("y") {
+                Some(Value::Vector { value: yv }) => {
+                    let n = yv.len();
+                    if n < 3 { return Value::error("simpsons: need ≥3 points"); }
+                    if (n-1) % 2 != 0 { return Value::error("simpsons: n must be odd (2k+1)"); }
+                    let mut s = yv[0] + yv[n-1];
+                    for i in 1..n-1 { s += yv[i] * if i%2==1 { 4.0 } else { 2.0 }; }
+                    Value::scalar(s * dx / 3.0)
+                }
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("simpsons: y must be a vector"),
+            }
+        }
+
+        // Forward finite difference: (y[i+1]-y[i])/dx; last uses backward
+        "num.diff.forward" => {
+            let dx = scalar_or_nan(inputs, "dx");
+            match inputs.get("y") {
+                Some(Value::Vector { value: yv }) => {
+                    let n = yv.len();
+                    if n < 2 { return Value::error("diff_forward: need ≥2 points"); }
+                    let mut r = vec![0.0f64; n];
+                    for i in 0..n-1 { r[i] = (yv[i+1]-yv[i])/dx; }
+                    r[n-1] = (yv[n-1]-yv[n-2])/dx;
+                    Value::Vector { value: r }
+                }
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("diff_forward: y must be a vector"),
+            }
+        }
+
+        // Central finite difference: (y[i+1]-y[i-1])/(2dx); endpoints use one-sided
+        "num.diff.central" => {
+            let dx = scalar_or_nan(inputs, "dx");
+            match inputs.get("y") {
+                Some(Value::Vector { value: yv }) => {
+                    let n = yv.len();
+                    if n < 3 { return Value::error("diff_central: need ≥3 points"); }
+                    let mut r = vec![0.0f64; n];
+                    r[0] = (yv[1]-yv[0])/dx;
+                    for i in 1..n-1 { r[i] = (yv[i+1]-yv[i-1])/(2.0*dx); }
+                    r[n-1] = (yv[n-1]-yv[n-2])/dx;
+                    Value::Vector { value: r }
+                }
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("diff_central: y must be a vector"),
+            }
+        }
+
+        // Backward finite difference: (y[i]-y[i-1])/dx; first uses forward
+        "num.diff.backward" => {
+            let dx = scalar_or_nan(inputs, "dx");
+            match inputs.get("y") {
+                Some(Value::Vector { value: yv }) => {
+                    let n = yv.len();
+                    if n < 2 { return Value::error("diff_backward: need ≥2 points"); }
+                    let mut r = vec![0.0f64; n];
+                    r[0] = (yv[1]-yv[0])/dx;
+                    for i in 1..n { r[i] = (yv[i]-yv[i-1])/dx; }
+                    Value::Vector { value: r }
+                }
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("diff_backward: y must be a vector"),
+            }
+        }
+
+        // Root finding: sign-change bracket + Regula Falsi on sampled (xv, f(xv)) data
+        "num.root.bisect" => {
+            match (inputs.get("xv"), inputs.get("fv")) {
+                (Some(Value::Vector { value: xv }), Some(Value::Vector { value: fv })) => {
+                    if xv.len() != fv.len() || xv.len() < 2 {
+                        return Value::error("root_bisect: xv and fv must have equal length ≥2");
+                    }
+                    for i in 0..xv.len()-1 {
+                        if fv[i] * fv[i+1] <= 0.0 {
+                            let df = fv[i+1]-fv[i];
+                            if df.abs() < f64::EPSILON { return Value::scalar(xv[i]); }
+                            return Value::scalar(xv[i] - fv[i]*(xv[i+1]-xv[i])/df);
+                        }
+                    }
+                    Value::error("root_bisect: no sign change found in provided samples")
+                }
+                _ => Value::error("root_bisect: xv and fv must be vectors"),
+            }
+        }
+
+        // Brent's method: IQI when 3 points available, else Regula Falsi
+        "num.root.brent" => {
+            match (inputs.get("xv"), inputs.get("fv")) {
+                (Some(Value::Vector { value: xv }), Some(Value::Vector { value: fv })) => {
+                    if xv.len() != fv.len() || xv.len() < 2 {
+                        return Value::error("root_brent: xv and fv must have equal length ≥2");
+                    }
+                    for i in 0..xv.len()-1 {
+                        if fv[i] * fv[i+1] <= 0.0 {
+                            if i > 0 {
+                                let (a,fa)=(xv[i-1],fv[i-1]); let (b,fb)=(xv[i],fv[i]); let (c,fc)=(xv[i+1],fv[i+1]);
+                                let d1=(fa-fb)*(fa-fc); let d2=(fb-fa)*(fb-fc); let d3=(fc-fa)*(fc-fb);
+                                if d1.abs()>1e-15 && d2.abs()>1e-15 && d3.abs()>1e-15 {
+                                    let s=a*fb*fc/d1+b*fa*fc/d2+c*fa*fb/d3;
+                                    if s>b.min(c) && s<b.max(c) { return Value::scalar(s); }
+                                }
+                            }
+                            let df=fv[i+1]-fv[i];
+                            if df.abs()<f64::EPSILON { return Value::scalar(xv[i]); }
+                            return Value::scalar(xv[i]-fv[i]*(xv[i+1]-xv[i])/df);
+                        }
+                    }
+                    Value::error("root_brent: no sign change found in provided samples")
+                }
+                _ => Value::error("root_brent: xv and fv must be vectors"),
+            }
+        }
+
+        // Newton-Raphson single step: x₁ = x₀ − f(x₀)/f′(x₀)
+        "num.root.newton" => {
+            let x0  = scalar_or_nan(inputs, "x0");
+            let fx  = scalar_or_nan(inputs, "fx");
+            let dfx = scalar_or_nan(inputs, "dfx");
+            if dfx.abs() < 1e-15 { Value::error("root_newton: derivative is zero") }
+            else { Value::scalar(x0 - fx/dfx) }
+        }
+
+        // Nearest-neighbor interpolation on sorted (xv, yv) at query x
+        "num.interp.nearest" => {
+            let x = scalar_or_nan(inputs, "x");
+            match (inputs.get("xv"), inputs.get("yv")) {
+                (Some(Value::Vector { value: xv }), Some(Value::Vector { value: yv })) => {
+                    if xv.len() != yv.len() || xv.is_empty() {
+                        return Value::error("interp_nearest: xv and yv must have same non-empty length");
+                    }
+                    let mut best=0usize; let mut best_d=(xv[0]-x).abs();
+                    for i in 1..xv.len() { let d=(xv[i]-x).abs(); if d<best_d{best_d=d;best=i;} }
+                    Value::scalar(yv[best])
+                }
+                _ => Value::error("interp_nearest: xv and yv must be vectors"),
+            }
+        }
+
+        // Linear interpolation on sorted (xv, yv) at query x
+        "num.interp.linear" => {
+            let x = scalar_or_nan(inputs, "x");
+            match (inputs.get("xv"), inputs.get("yv")) {
+                (Some(Value::Vector { value: xv }), Some(Value::Vector { value: yv })) => {
+                    let n = xv.len();
+                    if n != yv.len() || n < 2 {
+                        return Value::error("interp_linear: xv and yv must have equal length ≥2");
+                    }
+                    if x <= xv[0] { return Value::scalar(yv[0]); }
+                    if x >= xv[n-1] { return Value::scalar(yv[n-1]); }
+                    let mut lo=0; let mut hi=n-1;
+                    while hi-lo>1 { let mid=(lo+hi)/2; if xv[mid]<=x{lo=mid;}else{hi=mid;} }
+                    let t=(x-xv[lo])/(xv[hi]-xv[lo]);
+                    Value::scalar(yv[lo]+t*(yv[hi]-yv[lo]))
+                }
+                _ => Value::error("interp_linear: xv and yv must be vectors"),
+            }
+        }
+
+        // Natural cubic spline interpolation on sorted (xv, yv) at query xq
+        "num.interp.cubic_spline" => {
+            let xq = scalar_or_nan(inputs, "xq");
+            match (inputs.get("xv"), inputs.get("yv")) {
+                (Some(Value::Vector { value: xv }), Some(Value::Vector { value: yv })) => {
+                    let n = xv.len();
+                    if n != yv.len() || n < 2 {
+                        return Value::error("cubic_spline: xv and yv must have equal length ≥2");
+                    }
+                    if n == 2 {
+                        let t=((xq-xv[0])/(xv[1]-xv[0])).clamp(0.0,1.0);
+                        return Value::scalar(yv[0]+t*(yv[1]-yv[0]));
+                    }
+                    let mut h=vec![0.0f64;n-1];
+                    for i in 0..n-1 {
+                        h[i]=xv[i+1]-xv[i];
+                        if h[i]<=0.0 { return Value::error("cubic_spline: xv must be strictly increasing"); }
+                    }
+                    // Thomas algorithm for natural cubic spline (M[0]=M[n-1]=0)
+                    let mut diag=vec![1.0f64;n]; let mut sup=vec![0.0f64;n];
+                    let mut sub=vec![0.0f64;n]; let mut rhs=vec![0.0f64;n];
+                    for i in 1..n-1 {
+                        sub[i]=h[i-1]; diag[i]=2.0*(h[i-1]+h[i]); sup[i]=h[i];
+                        rhs[i]=6.0*((yv[i+1]-yv[i])/h[i]-(yv[i]-yv[i-1])/h[i-1]);
+                    }
+                    let mut c2=vec![0.0f64;n]; let mut d2=vec![0.0f64;n];
+                    c2[0]=sup[0]/diag[0]; d2[0]=rhs[0]/diag[0];
+                    for i in 1..n {
+                        let denom=diag[i]-sub[i]*c2[i-1];
+                        if denom.abs()<1e-15 { return Value::error("cubic_spline: ill-conditioned"); }
+                        c2[i]=if i<n-1{sup[i]/denom}else{0.0}; d2[i]=(rhs[i]-sub[i]*d2[i-1])/denom;
+                    }
+                    let mut m=vec![0.0f64;n]; m[n-1]=d2[n-1];
+                    for i in (0..n-1).rev() { m[i]=d2[i]-c2[i]*m[i+1]; }
+                    if xq<=xv[0] { return Value::scalar(yv[0]); }
+                    if xq>=xv[n-1] { return Value::scalar(yv[n-1]); }
+                    let mut idx=0; for i in 0..n-1 { if xq>=xv[i]&&xq<xv[i+1]{idx=i;break;} }
+                    let hi_i=h[idx]; let t=xq-xv[idx]; let s=xv[idx+1]-xq;
+                    Value::scalar(
+                        (m[idx]/(6.0*hi_i))*s.powi(3)+(m[idx+1]/(6.0*hi_i))*t.powi(3)
+                        +(yv[idx]/hi_i-m[idx]*hi_i/6.0)*s+(yv[idx+1]/hi_i-m[idx+1]*hi_i/6.0)*t
+                    )
+                }
+                _ => Value::error("cubic_spline: xv and yv must be vectors"),
+            }
+        }
+
+        // ── BLK-10: Lookup Table Interpolation blocks ─────────────────────────
+
+        // 1D lookup — method selected via data.method (nearest/linear/cubic, default linear)
+        "lookupTable1D" | "lookup.1d" => {
+            let query = scalar_or_nan(inputs, "query");
+            let method = data.get("method").and_then(|v|v.as_str()).unwrap_or("linear");
+            let xv_in = inputs.get("x_vec").or_else(|| inputs.get("xv"));
+            let yv_in = inputs.get("y_vec").or_else(|| inputs.get("yv"));
+            match (xv_in, yv_in) {
+                (Some(Value::Vector { value: xv }), Some(Value::Vector { value: yv })) => {
+                    let n=xv.len();
+                    if n!=yv.len()||n<2 { return Value::error("lookup1d: vectors must have equal length ≥2"); }
+                    if method=="nearest" {
+                        let mut best=0usize; let mut best_d=(xv[0]-query).abs();
+                        for i in 1..n { let d=(xv[i]-query).abs(); if d<best_d{best_d=d;best=i;} }
+                        Value::scalar(yv[best])
+                    } else { // linear (default; cubic handled via num.interp.cubic_spline)
+                        if query<=xv[0] { return Value::scalar(yv[0]); }
+                        if query>=xv[n-1] { return Value::scalar(yv[n-1]); }
+                        let mut lo=0; let mut hi=n-1;
+                        while hi-lo>1 { let mid=(lo+hi)/2; if xv[mid]<=query{lo=mid;}else{hi=mid;} }
+                        let t=(query-xv[lo])/(xv[hi]-xv[lo]);
+                        Value::scalar(yv[lo]+t*(yv[hi]-yv[lo]))
+                    }
+                }
+                _ => Value::error("lookup1d: x_vec and y_vec must be vectors"),
+            }
+        }
+
+        // 2D lookup — bilinear interpolation
+        "lookupTable2D" | "lookup.2d" => {
+            let qx=scalar_or_nan(inputs,"qx"); let qy=scalar_or_nan(inputs,"qy");
+            match (inputs.get("x_vec"),inputs.get("y_vec"),inputs.get("z_mat")) {
+                (Some(Value::Vector{value:xv}),Some(Value::Vector{value:yv}),Some(Value::Table{rows,..})) => {
+                    let nx=xv.len(); let ny=yv.len();
+                    if nx<2||ny<2 { return Value::error("lookup2d: need ≥2 x and y points"); }
+                    if rows.len()!=ny { return Value::error("lookup2d: z_mat rows must equal len(y_vec)"); }
+                    let qxc=qx.clamp(xv[0],xv[nx-1]); let qyc=qy.clamp(yv[0],yv[ny-1]);
+                    let mut xi=0usize; for i in 0..nx-1 { if xv[i]<=qxc&&qxc<=xv[i+1]{xi=i;break;} }
+                    let mut yi=0usize; for i in 0..ny-1 { if yv[i]<=qyc&&qyc<=yv[i+1]{yi=i;break;} }
+                    let get_z=|r:usize,c:usize|rows.get(r).and_then(|row|row.get(c)).copied().unwrap_or(f64::NAN);
+                    let tx=if(xv[xi+1]-xv[xi]).abs()<f64::EPSILON{0.0}else{(qxc-xv[xi])/(xv[xi+1]-xv[xi])};
+                    let ty=if(yv[yi+1]-yv[yi]).abs()<f64::EPSILON{0.0}else{(qyc-yv[yi])/(yv[yi+1]-yv[yi])};
+                    Value::scalar((1.0-tx)*(1.0-ty)*get_z(yi,xi)+tx*(1.0-ty)*get_z(yi,xi+1)
+                        +(1.0-tx)*ty*get_z(yi+1,xi)+tx*ty*get_z(yi+1,xi+1))
+                }
+                _ => Value::error("lookup2d: x_vec, y_vec (vectors) and z_mat (table) required"),
+            }
+        }
+
+        // ── TBL-03: Table row/column slicing ─────────────────────────────────
+
+        // Extract row i as a vector
+        "tbl.row_slice" | "table_row_slice" => {
+            let i=scalar_or_nan(inputs,"i").round() as usize;
+            match inputs.get("table") {
+                Some(Value::Table{rows,..}) => {
+                    if i>=rows.len() {
+                        Value::error(format!("table_row_slice: row {} out of bounds (len={})",i,rows.len()))
+                    } else { Value::Vector{value:rows[i].clone()} }
+                }
+                Some(e @ Value::Error{..}) => e.clone(),
+                _ => Value::error("table_row_slice: expected table input"),
+            }
+        }
+
+        // Extract named column as a vector
+        "tbl.col_slice" | "table_col_slice" => {
+            let col_name=data.get("col").or_else(||data.get("column")).and_then(|v|v.as_str()).unwrap_or("");
+            match inputs.get("table") {
+                Some(Value::Table{columns,rows}) => {
+                    match columns.iter().position(|c|c==col_name) {
+                        Some(idx) => {
+                            let col:Vec<f64>=rows.iter().map(|row|row.get(idx).copied().unwrap_or(f64::NAN)).collect();
+                            Value::Vector{value:col}
+                        }
+                        None => Value::error(format!("table_col_slice: column '{}' not found",col_name)),
+                    }
+                }
+                Some(e @ Value::Error{..}) => e.clone(),
+                _ => Value::error("table_col_slice: expected table input"),
+            }
+        }
+
+        // ── BLK-08: Text / String ops ─────────────────────────────────────────
+
+        // Format a number as text: num_to_text(value, format) where format is "%.2f", "%e", "%g"
+        "num_to_text" | "text.num_to_text" => {
+            let val = scalar_or_nan(inputs, "value");
+            let fmt = data.get("format").and_then(|v|v.as_str()).unwrap_or("%.6g");
+            // Implement a subset of printf-style formatting
+            let text = format_number(val, fmt);
+            Value::Text { value: text }
+        }
+
+        // Concatenate two text values
+        "text_concat" | "text.concat" => {
+            let a = get_text_or_num(inputs, "a");
+            let b = get_text_or_num(inputs, "b");
+            match (a, b) {
+                (Ok(sa), Ok(sb)) => Value::Text { value: format!("{}{}", sa, sb) },
+                (Err(e), _) | (_, Err(e)) => Value::error(e),
+            }
+        }
+
+        // Length of a text value
+        "text_length" | "text.length" => {
+            match inputs.get("value").or_else(|| inputs.get("text")) {
+                Some(Value::Text { value: s }) => Value::scalar(s.chars().count() as f64),
+                Some(Value::Error { .. }) => inputs.get("value").or_else(|| inputs.get("text")).cloned().unwrap(),
+                _ => Value::error("text_length: expected text input"),
+            }
+        }
+
+        // Parse text as a number
+        "text_to_num" | "text.to_num" => {
+            match inputs.get("text").or_else(|| inputs.get("value")) {
+                Some(Value::Text { value: s }) => {
+                    match s.trim().parse::<f64>() {
+                        Ok(v) => Value::scalar(v),
+                        Err(_) => Value::error(format!("text_to_num: cannot parse '{}' as number", s)),
+                    }
+                }
+                Some(Value::Scalar { value: v }) => Value::scalar(*v),
+                Some(Value::Error { .. }) => inputs.get("text").or_else(|| inputs.get("value")).cloned().unwrap(),
+                _ => Value::error("text_to_num: expected text input"),
+            }
+        }
+
+        // Display pass-through for Text values
+        "textDisplay" | "text.display" => {
+            inputs.get("value").cloned().unwrap_or(Value::Text { value: String::new() })
+        }
+
+        // ── SCI-04: Interval Arithmetic ───────────────────────────────────────
+
+        // Create interval from center and half-width
+        "interval_from" | "interval.from_center" => {
+            let center = scalar_or_nan(inputs, "center");
+            let hw = scalar_or_nan(inputs, "half_width").abs();
+            if center.is_nan() || hw.is_nan() { Value::error("interval_from: NaN input") }
+            else { Value::Interval { lo: center - hw, hi: center + hw } }
+        }
+
+        // Create interval from explicit bounds
+        "interval_from_bounds" | "interval.from_bounds" => {
+            let lo = scalar_or_nan(inputs, "lo");
+            let hi = scalar_or_nan(inputs, "hi");
+            if lo.is_nan() || hi.is_nan() { Value::error("interval_from_bounds: NaN input") }
+            else { Value::Interval { lo: lo.min(hi), hi: lo.max(hi) } }
+        }
+
+        // Extract lower bound
+        "interval_lo" | "interval.lo" => {
+            match inputs.get("interval").or_else(|| inputs.get("i")) {
+                Some(Value::Interval { lo, .. }) => Value::scalar(*lo),
+                Some(Value::Scalar { value: v }) => Value::scalar(*v),
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("interval_lo: expected interval input"),
+            }
+        }
+
+        // Extract upper bound
+        "interval_hi" | "interval.hi" => {
+            match inputs.get("interval").or_else(|| inputs.get("i")) {
+                Some(Value::Interval { hi, .. }) => Value::scalar(*hi),
+                Some(Value::Scalar { value: v }) => Value::scalar(*v),
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("interval_hi: expected interval input"),
+            }
+        }
+
+        // Extract midpoint
+        "interval_mid" | "interval.mid" => {
+            match inputs.get("interval").or_else(|| inputs.get("i")) {
+                Some(Value::Interval { lo, hi }) => Value::scalar((lo + hi) / 2.0),
+                Some(Value::Scalar { value: v }) => Value::scalar(*v),
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("interval_mid: expected interval input"),
+            }
+        }
+
+        // Width of interval
+        "interval_width" | "interval.width" => {
+            match inputs.get("interval").or_else(|| inputs.get("i")) {
+                Some(Value::Interval { lo, hi }) => Value::scalar(hi - lo),
+                Some(Value::Scalar { .. }) => Value::scalar(0.0),
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("interval_width: expected interval input"),
+            }
+        }
+
+        // Test if scalar x is contained in interval
+        "interval_contains" | "interval.contains" => {
+            let x = scalar_or_nan(inputs, "x");
+            match inputs.get("interval").or_else(|| inputs.get("i")) {
+                Some(Value::Interval { lo, hi }) => Value::scalar(if x >= *lo && x <= *hi { 1.0 } else { 0.0 }),
+                Some(Value::Scalar { value: v }) => Value::scalar(if (x - v).abs() < f64::EPSILON { 1.0 } else { 0.0 }),
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("interval_contains: expected interval input"),
+            }
+        }
+
+        // Interval add: [a,b] + [c,d] = [a+c, b+d]
+        "interval_add" | "interval.add" => {
+            interval_binary(inputs, "a", "b", |al,ah,bl,bh| (al+bl, ah+bh))
+        }
+
+        // Interval subtract: [a,b] - [c,d] = [a-d, b-c]
+        "interval_sub" | "interval.subtract" => {
+            interval_binary(inputs, "a", "b", |al,ah,bl,bh| (al-bh, ah-bl))
+        }
+
+        // Interval multiply: [a,b] * [c,d] = [min(ac,ad,bc,bd), max(ac,ad,bc,bd)]
+        "interval_mul" | "interval.multiply" => {
+            interval_binary(inputs, "a", "b", |al,ah,bl,bh| {
+                let products = [al*bl, al*bh, ah*bl, ah*bh];
+                (products.iter().cloned().fold(f64::INFINITY, f64::min),
+                 products.iter().cloned().fold(f64::NEG_INFINITY, f64::max))
+            })
+        }
+
+        // Interval divide: [a,b] / [c,d] — error if 0 ∈ [c,d]
+        "interval_div" | "interval.divide" => {
+            match (inputs.get("a"), inputs.get("b")) {
+                (Some(va), Some(vb)) => {
+                    let (al, ah) = match va { Value::Interval{lo,hi}=>(*lo,*hi), Value::Scalar{value:v}=>(*v,*v), Value::Error{..}=>return va.clone(), _=>return Value::error("interval_div: 'a' must be interval or scalar") };
+                    let (bl, bh) = match vb { Value::Interval{lo,hi}=>(*lo,*hi), Value::Scalar{value:v}=>(*v,*v), Value::Error{..}=>return vb.clone(), _=>return Value::error("interval_div: 'b' must be interval or scalar") };
+                    if bl <= 0.0 && bh >= 0.0 { return Value::error("interval_div: divisor interval contains zero"); }
+                    let products = [al/bl, al/bh, ah/bl, ah/bh];
+                    Value::Interval {
+                        lo: products.iter().cloned().fold(f64::INFINITY, f64::min),
+                        hi: products.iter().cloned().fold(f64::NEG_INFINITY, f64::max),
+                    }
+                }
+                _ => Value::error("interval_div: expected interval or scalar inputs 'a' and 'b'"),
+            }
+        }
+
+        // Interval power: [a,b]^n — monotone for positive intervals
+        "interval_pow" | "interval.power" => {
+            let n = scalar_or_nan(inputs, "n");
+            match inputs.get("a").or_else(|| inputs.get("base")) {
+                Some(Value::Interval { lo, hi }) => {
+                    let vals = [lo.powf(n), hi.powf(n), if n.floor()==n && n as i64 % 2==0 && *lo<0.0 { 0.0 } else { f64::INFINITY }];
+                    let lo_out = vals.iter().cloned().fold(f64::INFINITY, f64::min).max(if n.floor()==n && n as i64 % 2==0 { 0.0 } else { f64::NEG_INFINITY });
+                    let hi_out = lo.abs().max(hi.abs()).powf(n);
+                    Value::Interval { lo: lo.powf(n).min(hi.powf(n)).min(lo_out), hi: hi_out }
+                }
+                Some(Value::Scalar { value: v }) => Value::scalar(v.powf(n)),
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("interval_pow: expected interval or scalar input"),
+            }
+        }
+
+        // ── SCI-12: FFT and Signal Processing ────────────────────────────────
+
+        // FFT magnitude spectrum: input vector y → output vector of magnitude |FFT[k]| for k=0..n/2
+        "fft_magnitude" | "signal.fft_magnitude" => {
+            match inputs.get("y") {
+                Some(Value::Vector { value: yv }) => {
+                    let n = next_pow2(yv.len());
+                    let mut re: Vec<f64> = yv.iter().cloned().collect();
+                    re.resize(n, 0.0); // zero-pad to power of 2
+                    let mut im = vec![0.0f64; n];
+                    fft_inplace(&mut re, &mut im, false);
+                    let half = n / 2 + 1;
+                    let mag: Vec<f64> = (0..half).map(|k| (re[k]*re[k]+im[k]*im[k]).sqrt()).collect();
+                    Value::Vector { value: mag }
+                }
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("fft_magnitude: y must be a vector"),
+            }
+        }
+
+        // FFT power spectrum: |FFT[k]|^2 / n
+        "fft_power" | "signal.fft_power" => {
+            match inputs.get("y") {
+                Some(Value::Vector { value: yv }) => {
+                    let n = next_pow2(yv.len());
+                    let mut re: Vec<f64> = yv.iter().cloned().collect();
+                    re.resize(n, 0.0);
+                    let mut im = vec![0.0f64; n];
+                    fft_inplace(&mut re, &mut im, false);
+                    let half = n / 2 + 1;
+                    let nf = n as f64;
+                    let power: Vec<f64> = (0..half).map(|k| (re[k]*re[k]+im[k]*im[k])/nf).collect();
+                    Value::Vector { value: power }
+                }
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("fft_power: y must be a vector"),
+            }
+        }
+
+        // FFT frequency bin values: given n samples at sample_rate, return frequency for each bin
+        "fft_freq_bins" | "signal.fft_freq_bins" => {
+            let n_raw = scalar_or_nan(inputs, "n");
+            let sample_rate = scalar_or_nan(inputs, "sample_rate");
+            if n_raw.is_nan() || sample_rate.is_nan() || sample_rate <= 0.0 {
+                Value::error("fft_freq_bins: n and sample_rate must be positive")
+            } else {
+                let n = n_raw.round() as usize;
+                let half = n / 2 + 1;
+                let df = sample_rate / n as f64;
+                Value::Vector { value: (0..half).map(|k| k as f64 * df).collect() }
+            }
+        }
+
+        // Hann window
+        "window_hann" | "signal.window_hann" => {
+            let n_raw = scalar_or_nan(inputs, "n");
+            if n_raw.is_nan() || n_raw < 2.0 { return Value::error("window_hann: n must be >=2"); }
+            let n = n_raw.round() as usize;
+            let two_pi = 2.0 * std::f64::consts::PI;
+            Value::Vector { value: (0..n).map(|i| 0.5*(1.0 - (two_pi*i as f64/(n-1) as f64).cos())).collect() }
+        }
+
+        // Hamming window
+        "window_hamming" | "signal.window_hamming" => {
+            let n_raw = scalar_or_nan(inputs, "n");
+            if n_raw.is_nan() || n_raw < 2.0 { return Value::error("window_hamming: n must be >=2"); }
+            let n = n_raw.round() as usize;
+            let two_pi = 2.0 * std::f64::consts::PI;
+            Value::Vector { value: (0..n).map(|i| 0.54 - 0.46*(two_pi*i as f64/(n-1) as f64).cos()).collect() }
+        }
+
+        // Blackman window
+        "window_blackman" | "signal.window_blackman" => {
+            let n_raw = scalar_or_nan(inputs, "n");
+            if n_raw.is_nan() || n_raw < 2.0 { return Value::error("window_blackman: n must be >=2"); }
+            let n = n_raw.round() as usize;
+            let two_pi = 2.0 * std::f64::consts::PI;
+            Value::Vector { value: (0..n).map(|i| {
+                let x = two_pi * i as f64 / (n-1) as f64;
+                0.42 - 0.5*x.cos() + 0.08*(2.0*x).cos()
+            }).collect() }
+        }
+
+        // FIR lowpass filter (windowed sinc)
+        "filter_lowpass_fir" | "signal.filter_lowpass_fir" => {
+            let cutoff = scalar_or_nan(inputs, "cutoff_norm"); // normalized 0..0.5
+            let taps_f = scalar_or_nan(inputs, "taps");
+            match inputs.get("y") {
+                Some(Value::Vector { value: yv }) => {
+                    if cutoff.is_nan() || cutoff <= 0.0 || cutoff >= 0.5 {
+                        return Value::error("filter_lowpass_fir: cutoff_norm must be in (0, 0.5)");
+                    }
+                    let taps = taps_f.round() as usize;
+                    if taps < 3 || taps % 2 == 0 { return Value::error("filter_lowpass_fir: taps must be odd >=3"); }
+                    // Windowed sinc filter
+                    let half = taps / 2;
+                    let h: Vec<f64> = (0..taps).map(|i| {
+                        let n = i as f64 - half as f64;
+                        let sinc = if n == 0.0 { 2.0*cutoff } else { (2.0*cutoff*std::f64::consts::PI*n).sin() / (std::f64::consts::PI*n) };
+                        // Hann window
+                        let w = 0.5*(1.0-(2.0*std::f64::consts::PI*i as f64/(taps-1) as f64).cos());
+                        sinc * w
+                    }).collect();
+                    // Convolve y with h
+                    let ny = yv.len();
+                    let out: Vec<f64> = (0..ny).map(|i| {
+                        let mut sum = 0.0;
+                        for (j, &hj) in h.iter().enumerate() {
+                            let idx = i as isize + j as isize - half as isize;
+                            if idx >= 0 && idx < ny as isize { sum += yv[idx as usize] * hj; }
+                        }
+                        sum
+                    }).collect();
+                    Value::Vector { value: out }
+                }
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("filter_lowpass_fir: y must be a vector"),
+            }
+        }
+
+        // FIR highpass filter (spectral inversion of lowpass)
+        "filter_highpass_fir" | "signal.filter_highpass_fir" => {
+            let cutoff = scalar_or_nan(inputs, "cutoff_norm");
+            let taps_f = scalar_or_nan(inputs, "taps");
+            match inputs.get("y") {
+                Some(Value::Vector { value: yv }) => {
+                    if cutoff.is_nan() || cutoff <= 0.0 || cutoff >= 0.5 {
+                        return Value::error("filter_highpass_fir: cutoff_norm must be in (0, 0.5)");
+                    }
+                    let taps = taps_f.round() as usize;
+                    if taps < 3 || taps % 2 == 0 { return Value::error("filter_highpass_fir: taps must be odd >=3"); }
+                    let half = taps / 2;
+                    // Spectral inversion: h_hp[n] = -h_lp[n] + delta[n-half]
+                    let h: Vec<f64> = (0..taps).map(|i| {
+                        let n = i as f64 - half as f64;
+                        let sinc = if n == 0.0 { 2.0*cutoff } else { (2.0*cutoff*std::f64::consts::PI*n).sin() / (std::f64::consts::PI*n) };
+                        let w = 0.5*(1.0-(2.0*std::f64::consts::PI*i as f64/(taps-1) as f64).cos());
+                        let lp = sinc * w;
+                        if i == half { 1.0 - lp } else { -lp }
+                    }).collect();
+                    let ny = yv.len();
+                    let out: Vec<f64> = (0..ny).map(|i| {
+                        let mut sum = 0.0;
+                        for (j, &hj) in h.iter().enumerate() {
+                            let idx = i as isize + j as isize - half as isize;
+                            if idx >= 0 && idx < ny as isize { sum += yv[idx as usize] * hj; }
+                        }
+                        sum
+                    }).collect();
+                    Value::Vector { value: out }
+                }
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("filter_highpass_fir: y must be a vector"),
+            }
+        }
+
+        // ── SCI-08: Complex Number Operations ─────────────────────────────────
+
+        "complex_from" | "complex.from" => {
+            let re = scalar_or_nan(inputs, "re");
+            let im = scalar_or_nan(inputs, "im");
+            Value::Complex { re, im }
+        }
+        "complex_re" | "complex.re" => {
+            match inputs.get("z").or_else(||inputs.get("value")) {
+                Some(Value::Complex{re,..}) => Value::scalar(*re),
+                Some(Value::Scalar{value:v}) => Value::scalar(*v),
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("complex_re: expected complex input"),
+            }
+        }
+        "complex_im" | "complex.im" => {
+            match inputs.get("z").or_else(||inputs.get("value")) {
+                Some(Value::Complex{im,..}) => Value::scalar(*im),
+                Some(Value::Scalar{..}) => Value::scalar(0.0),
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("complex_im: expected complex input"),
+            }
+        }
+        "complex_mag" | "complex.mag" => {
+            match inputs.get("z").or_else(||inputs.get("value")) {
+                Some(Value::Complex{re,im}) => Value::scalar((re*re+im*im).sqrt()),
+                Some(Value::Scalar{value:v}) => Value::scalar(v.abs()),
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("complex_mag: expected complex input"),
+            }
+        }
+        "complex_arg" | "complex.arg" => {
+            match inputs.get("z").or_else(||inputs.get("value")) {
+                Some(Value::Complex{re,im}) => Value::scalar(im.atan2(*re)),
+                Some(Value::Scalar{value:v}) => Value::scalar(if *v>=0.0{0.0}else{std::f64::consts::PI}),
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("complex_arg: expected complex input"),
+            }
+        }
+        "complex_conj" | "complex.conj" => {
+            match inputs.get("z").or_else(||inputs.get("value")) {
+                Some(Value::Complex{re,im}) => Value::Complex{re:*re,im:-im},
+                Some(s@Value::Scalar{..}) => s.clone(),
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("complex_conj: expected complex input"),
+            }
+        }
+        "complex_add" | "complex.add" => {
+            complex_binary(inputs, "z1", "z2", |r1,i1,r2,i2| (r1+r2, i1+i2))
+        }
+        "complex_mul" | "complex.mul" => {
+            complex_binary(inputs, "z1", "z2", |r1,i1,r2,i2| (r1*r2-i1*i2, r1*i2+i1*r2))
+        }
+        "complex_div" | "complex.div" => {
+            complex_binary(inputs, "z1", "z2", |r1,i1,r2,i2| {
+                let denom = r2*r2+i2*i2;
+                if denom.abs()<1e-300 { (f64::NAN, f64::NAN) }
+                else { ((r1*r2+i1*i2)/denom, (i1*r2-r1*i2)/denom) }
+            })
+        }
+        "complex_exp" | "complex.exp" => {
+            match inputs.get("z").or_else(||inputs.get("value")) {
+                Some(Value::Complex{re,im}) => {
+                    let r = re.exp();
+                    Value::Complex{re:r*im.cos(), im:r*im.sin()}
+                }
+                Some(Value::Scalar{value:v}) => Value::scalar(v.exp()),
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("complex_exp: expected complex input"),
+            }
+        }
+        "complex_ln" | "complex.ln" => {
+            match inputs.get("z").or_else(||inputs.get("value")) {
+                Some(Value::Complex{re,im}) => {
+                    let r = (re*re+im*im).sqrt();
+                    if r < 1e-300 { Value::error("complex_ln: input is zero") }
+                    else { Value::Complex{re:r.ln(), im:im.atan2(*re)} }
+                }
+                Some(Value::Scalar{value:v}) => Value::scalar(v.ln()),
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("complex_ln: expected complex input"),
+            }
+        }
+        "complex_pow" | "complex.pow" => {
+            // z^n where n is a real scalar
+            let n = scalar_or_nan(inputs, "n");
+            match inputs.get("z").or_else(||inputs.get("base")) {
+                Some(Value::Complex{re,im}) => {
+                    let r = (re*re+im*im).sqrt().powf(n);
+                    let theta = im.atan2(*re) * n;
+                    Value::Complex{re:r*theta.cos(), im:r*theta.sin()}
+                }
+                Some(Value::Scalar{value:v}) => Value::scalar(v.powf(n)),
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("complex_pow: expected complex input"),
+            }
+        }
+
+        // ── SCI-09: Matrix Operations ─────────────────────────────────────────
+
+        // Convert Table to Matrix
+        "matrix_from_table" | "matrix.from_table" => {
+            match inputs.get("table") {
+                Some(Value::Table{columns,rows}) => {
+                    let nr = rows.len();
+                    if nr == 0 { return Value::error("matrix_from_table: empty table"); }
+                    let nc = columns.len();
+                    let mut data = Vec::with_capacity(nr*nc);
+                    for row in rows {
+                        for j in 0..nc { data.push(row.get(j).copied().unwrap_or(f64::NAN)); }
+                    }
+                    Value::Matrix{rows:nr,cols:nc,data}
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_from_table: expected table input"),
+            }
+        }
+
+        // Convert Matrix to Table
+        "matrix_to_table" | "matrix.to_table" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:nr,cols:nc,data}) => {
+                    let columns: Vec<String> = (0..*nc).map(|j| format!("col{}", j)).collect();
+                    let rows: Vec<Vec<f64>> = (0..*nr).map(|i| data[i*nc..(i+1)*nc].to_vec()).collect();
+                    Value::Table{columns,rows}
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_to_table: expected matrix input"),
+            }
+        }
+
+        // Matrix transpose
+        "matrix_transpose" | "matrix.transpose" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:nr,cols:nc,data}) => {
+                    let mut out = vec![0.0f64; nr*nc];
+                    for i in 0..*nr { for j in 0..*nc { out[j*nr+i] = data[i*nc+j]; } }
+                    Value::Matrix{rows:*nc,cols:*nr,data:out}
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_transpose: expected matrix input"),
+            }
+        }
+
+        // Matrix multiply A*B
+        "matrix_multiply" | "matrix.multiply" => {
+            match (inputs.get("a").or_else(||inputs.get("A")), inputs.get("b").or_else(||inputs.get("B"))) {
+                (Some(Value::Matrix{rows:ar,cols:ac,data:ad}), Some(Value::Matrix{rows:br,cols:bc,data:bd})) => {
+                    if ac != br { return Value::error(format!("matrix_multiply: inner dims mismatch {}x{} * {}x{}",ar,ac,br,bc)); }
+                    let mut out = vec![0.0f64; ar*bc];
+                    for i in 0..*ar { for j in 0..*bc { for k in 0..*ac { out[i*bc+j] += ad[i*ac+k]*bd[k*bc+j]; } } }
+                    Value::Matrix{rows:*ar,cols:*bc,data:out}
+                }
+                (Some(e@Value::Error{..}),_)|(_, Some(e@Value::Error{..})) => e.clone(),
+                _ => Value::error("matrix_multiply: expected two matrix inputs 'a' and 'b'"),
+            }
+        }
+
+        // Matrix determinant (Gaussian elimination)
+        "matrix_det" | "matrix.det" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:n,cols:nc,data}) => {
+                    if n != nc { return Value::error("matrix_det: matrix must be square"); }
+                    let n = *n; let mut a: Vec<f64> = data.clone();
+                    let mut det = 1.0f64;
+                    for col in 0..n {
+                        let pivot_row = (col..n).max_by(|&i,&j| a[i*n+col].abs().partial_cmp(&a[j*n+col].abs()).unwrap_or(std::cmp::Ordering::Equal));
+                        let pivot_row = match pivot_row { Some(r)=>r, None => return Value::error("matrix_det: singular matrix") };
+                        if a[pivot_row*n+col].abs() < 1e-300 { return Value::scalar(0.0); }
+                        if pivot_row != col {
+                            for j in 0..n { a.swap(col*n+j, pivot_row*n+j); }
+                            det *= -1.0;
+                        }
+                        det *= a[col*n+col];
+                        let piv = a[col*n+col];
+                        for row in col+1..n {
+                            let factor = a[row*n+col] / piv;
+                            for j in col..n { let v=a[col*n+j]; a[row*n+j] -= factor*v; }
+                        }
+                    }
+                    Value::scalar(det)
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_det: expected matrix input"),
+            }
+        }
+
+        // Matrix trace
+        "matrix_trace" | "matrix.trace" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:nr,cols:nc,data}) => {
+                    let diag_len = (*nr).min(*nc);
+                    Value::scalar((0..diag_len).map(|i| data[i*nc+i]).sum())
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_trace: expected matrix input"),
+            }
+        }
+
+        // Matrix inverse (Gauss-Jordan)
+        "matrix_inverse" | "matrix.inverse" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:n,cols:nc,data}) => {
+                    if n != nc { return Value::error("matrix_inverse: matrix must be square"); }
+                    let n = *n;
+                    let mut a: Vec<f64> = data.clone();
+                    let mut inv: Vec<f64> = (0..n*n).map(|i| if i/n==i%n{1.0}else{0.0}).collect();
+                    for col in 0..n {
+                        let pivot = (col..n).max_by(|&i,&j| a[i*n+col].abs().partial_cmp(&a[j*n+col].abs()).unwrap_or(std::cmp::Ordering::Equal)).unwrap_or(col);
+                        if a[pivot*n+col].abs() < 1e-300 { return Value::error("matrix_inverse: singular matrix"); }
+                        if pivot != col {
+                            for j in 0..n { a.swap(col*n+j,pivot*n+j); inv.swap(col*n+j,pivot*n+j); }
+                        }
+                        let piv=a[col*n+col];
+                        for j in 0..n { a[col*n+j]/=piv; inv[col*n+j]/=piv; }
+                        for row in 0..n {
+                            if row==col { continue; }
+                            let f=a[row*n+col];
+                            for j in 0..n { let av=a[col*n+j]; let iv=inv[col*n+j]; a[row*n+j]-=f*av; inv[row*n+j]-=f*iv; }
+                        }
+                    }
+                    Value::Matrix{rows:n,cols:n,data:inv}
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_inverse: expected matrix input"),
+            }
+        }
+
+        // Matrix solve Ax=b (least squares via Gauss elimination)
+        "matrix_solve" | "matrix.solve" => {
+            match (inputs.get("a").or_else(||inputs.get("A")), inputs.get("b")) {
+                (Some(Value::Matrix{rows:nr,cols:nc,data:adata}), Some(Value::Vector{value:bv})) => {
+                    if *nr != bv.len() { return Value::error("matrix_solve: rows of A must equal len of b"); }
+                    let n = *nr; let m = *nc;
+                    let mut aug: Vec<f64> = Vec::with_capacity(n*(m+1));
+                    for i in 0..n { aug.extend_from_slice(&adata[i*m..(i+1)*m]); aug.push(bv[i]); }
+                    let cols1 = m+1;
+                    for col in 0..m.min(n) {
+                        let pivot=(col..n).max_by(|&i,&j|aug[i*cols1+col].abs().partial_cmp(&aug[j*cols1+col].abs()).unwrap_or(std::cmp::Ordering::Equal)).unwrap_or(col);
+                        if aug[pivot*cols1+col].abs()<1e-300 { return Value::error("matrix_solve: singular system"); }
+                        if pivot!=col { for j in 0..cols1{aug.swap(col*cols1+j,pivot*cols1+j);} }
+                        let piv=aug[col*cols1+col];
+                        for j in col..cols1 { aug[col*cols1+j]/=piv; }
+                        for row in 0..n {
+                            if row==col{continue;}
+                            let f=aug[row*cols1+col];
+                            for j in col..cols1 { let v=aug[col*cols1+j]; aug[row*cols1+j]-=f*v; }
+                        }
+                    }
+                    let x:Vec<f64>=(0..m).map(|i|if i<n{aug[i*cols1+m]}else{0.0}).collect();
+                    Value::Vector{value:x}
+                }
+                (Some(e@Value::Error{..}),_)|(_, Some(e@Value::Error{..})) => e.clone(),
+                _ => Value::error("matrix_solve: expected matrix 'a' and vector 'b'"),
+            }
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
+    }
+}
+
+/// Apply a binary operation on two interval-or-scalar inputs.
+fn interval_binary<F>(
+    inputs: &std::collections::HashMap<String, Value>,
+    key_a: &str,
+    key_b: &str,
+    op: F,
+) -> Value
+where
+    F: Fn(f64, f64, f64, f64) -> (f64, f64),
+{
+    let get_bounds = |v: &Value| match v {
+        Value::Interval { lo, hi } => Ok((*lo, *hi)),
+        Value::Scalar { value } => Ok((*value, *value)),
+        Value::Error { message } => Err(message.clone()),
+        _ => Err("expected interval or scalar".to_string()),
+    };
+    match (inputs.get(key_a), inputs.get(key_b)) {
+        (Some(va), Some(vb)) => match (get_bounds(va), get_bounds(vb)) {
+            (Ok((al, ah)), Ok((bl, bh))) => {
+                let (lo, hi) = op(al, ah, bl, bh);
+                Value::Interval { lo: lo.min(hi), hi: lo.max(hi) }
+            }
+            (Err(e), _) | (_, Err(e)) => Value::error(e),
+        },
+        _ => Value::error(format!("interval op: inputs '{}' and '{}' required", key_a, key_b)),
+    }
+}
+
+// ── SCI-08: Complex binary helper ────────────────────────────────
+
+fn complex_binary<F>(
+    inputs: &std::collections::HashMap<String, Value>,
+    key1: &str,
+    key2: &str,
+    op: F,
+) -> Value
+where F: Fn(f64,f64,f64,f64)->(f64,f64),
+{
+    let to_cpx = |v: &Value| match v {
+        Value::Complex{re,im} => Ok((*re,*im)),
+        Value::Scalar{value} => Ok((*value,0.0)),
+        Value::Error{message} => Err(message.clone()),
+        _ => Err("expected complex or scalar".to_string()),
+    };
+    match (inputs.get(key1), inputs.get(key2)) {
+        (Some(v1),Some(v2)) => match (to_cpx(v1),to_cpx(v2)) {
+            (Ok((r1,i1)),Ok((r2,i2))) => { let (re,im)=op(r1,i1,r2,i2); Value::Complex{re,im} }
+            (Err(e),_)|(_, Err(e)) => Value::error(e),
+        },
+        _ => Value::error(format!("complex op: inputs '{}' and '{}' required",key1,key2)),
+    }
+}
+
+// ── BLK-08: Text formatting helpers ──────────────────────────────
+
+/// Format a floating-point number using a printf-like format string.
+/// Supports: %f, %e, %g, %d (with optional precision like %.2f, %8.3f).
+fn format_number(val: f64, fmt: &str) -> String {
+    if val.is_nan() { return "NaN".to_string(); }
+    if val.is_infinite() { return if val > 0.0 { "Inf".to_string() } else { "-Inf".to_string() }; }
+    // Parse format: %[width][.precision]specifier
+    let s = fmt.trim_start_matches('%');
+    let (prec, spec) = if let Some(dot) = s.find('.') {
+        let p = s[dot+1..].chars().take_while(|c|c.is_ascii_digit()).collect::<String>().parse::<usize>().unwrap_or(6);
+        let sp = s.chars().rev().next().unwrap_or('g');
+        (p, sp)
+    } else {
+        let sp = s.chars().rev().next().unwrap_or('g');
+        (6usize, sp)
+    };
+    match spec {
+        'f' => format!("{:.prec$}", val, prec=prec),
+        'e' => format!("{:.prec$e}", val, prec=prec),
+        'g' => {
+            // Use %e if exponent < -4 or >= precision, else %f
+            if val == 0.0 { return "0".to_string(); }
+            let exp = val.abs().log10().floor() as i32;
+            if exp < -4 || exp >= prec as i32 {
+                // Remove trailing zeros from scientific
+                let s = format!("{:.prec$e}", val, prec=if prec>0{prec-1}else{0});
+                s
+            } else {
+                let sig = prec as i32 - exp - 1;
+                let p = sig.max(0) as usize;
+                let s = format!("{:.prec$}", val, prec=p);
+                // Remove trailing zeros after decimal
+                if s.contains('.') { s.trim_end_matches('0').trim_end_matches('.').to_string() } else { s }
+            }
+        }
+        'd' => format!("{}", val.round() as i64),
+        _ => format!("{}", val),
+    }
+}
+
+/// Get text representation of an input value (Text as-is, Scalar as string).
+fn get_text_or_num(inputs: &std::collections::HashMap<String, Value>, key: &str) -> Result<String, String> {
+    match inputs.get(key) {
+        Some(Value::Text { value: s }) => Ok(s.clone()),
+        Some(Value::Scalar { value: v }) => Ok(format!("{}", v)),
+        Some(Value::Error { message: m }) => Err(m.clone()),
+        None => Ok(String::new()),
+        _ => Err(format!("text op: '{}' must be text or scalar", key)),
+    }
+}
+
+// ── SCI-12: FFT helpers ───────────────────────────────────────────
+
+/// Round up to next power of 2 (minimum 2).
+fn next_pow2(n: usize) -> usize {
+    if n <= 1 { return 2; }
+    let mut p = 1usize;
+    while p < n { p <<= 1; }
+    p
+}
+
+/// In-place Cooley-Tukey FFT (or IFFT if inverse=true).
+/// `re` and `im` must have the same power-of-2 length.
+fn fft_inplace(re: &mut [f64], im: &mut [f64], inverse: bool) {
+    let n = re.len();
+    debug_assert!(n.is_power_of_two());
+    // Bit-reversal permutation
+    let mut j = 0usize;
+    for i in 1..n {
+        let mut bit = n >> 1;
+        while j & bit != 0 { j ^= bit; bit >>= 1; }
+        j ^= bit;
+        if i < j { re.swap(i, j); im.swap(i, j); }
+    }
+    // Butterfly stages
+    let mut len = 2usize;
+    while len <= n {
+        let ang = 2.0 * std::f64::consts::PI / len as f64 * if inverse { 1.0 } else { -1.0 };
+        let (wre, wim) = (ang.cos(), ang.sin());
+        for i in (0..n).step_by(len) {
+            let (mut ure, mut uim) = (1.0f64, 0.0f64);
+            for k in 0..len/2 {
+                let (tre, tim) = (re[i+k+len/2]*ure - im[i+k+len/2]*uim,
+                                   re[i+k+len/2]*uim + im[i+k+len/2]*ure);
+                re[i+k+len/2] = re[i+k] - tre;
+                im[i+k+len/2] = im[i+k] - tim;
+                re[i+k] += tre;
+                im[i+k] += tim;
+                (ure, uim) = (ure*wre - uim*wim, ure*wim + uim*wre);
+            }
+        }
+        len <<= 1;
+    }
+    if inverse {
+        let nf = n as f64;
+        for x in re.iter_mut() { *x /= nf; }
+        for x in im.iter_mut() { *x /= nf; }
     }
 }
 
@@ -1305,6 +3223,20 @@ fn canonicalize_value(v: Value) -> Value {
                 .collect(),
         },
         Value::Error { .. } => v,
+        Value::Text { .. } => v, // Text values are not numeric, pass through unchanged
+        Value::Interval { lo, hi } => Value::Interval {
+            lo: canonicalize(lo),
+            hi: canonicalize(hi),
+        },
+        Value::Complex { re, im } => Value::Complex {
+            re: canonicalize(re),
+            im: canonicalize(im),
+        },
+        Value::Matrix { rows, cols, data } => Value::Matrix {
+            rows,
+            cols,
+            data: data.into_iter().map(canonicalize).collect(),
+        },
     }
 }
 
@@ -1340,6 +3272,7 @@ fn unary_broadcast_port(
                 .collect(),
         },
         Some(Value::Error { message }) => Value::error(message.clone()),
+        Some(other) => Value::error(format!("unary op: type '{}' is not numeric", other.kind_str())),
         None => Value::scalar(f(f64::NAN)),
     }
 }
@@ -1481,15 +3414,14 @@ fn binary_broadcast_ports(
                 .collect(),
         },
 
-        // Incompatible: Vector ⊕ Table, Table ⊕ Vector, or Error ⊕ None
+        // Incompatible: Vector ⊕ Table, Table ⊕ Vector, or mismatched types
         (Some(va), Some(vb)) => Value::error(format!(
             "Cannot broadcast {} with {}",
             va.kind_str(),
             vb.kind_str()
         )),
-        (Some(Value::Error { message }), None) | (None, Some(Value::Error { message })) => {
-            Value::error(message.clone())
-        }
+        // Catch-all: non-numeric types (Text, Interval, Complex, Matrix) combined with None
+        _ => Value::error("binary op: unsupported type combination"),
     }
 }
 
@@ -1522,20 +3454,260 @@ const Y_PORTS: [&str; 6] = ["y1", "y2", "y3", "y4", "y5", "y6"];
 /// Port names for cash-flow slots (CF0..CF5).
 const CF_PORTS: [&str; 6] = ["cf0", "cf1", "cf2", "cf3", "cf4", "cf5"];
 
-// ── Phase 14: Kahan compensated summation ────────────────────────────────────
+// ── SCI-03: Neumaier compensated summation ───────────────────────────────────
 
-/// Kahan compensated summation — reduces floating-point rounding errors
-/// when summing many f64 values by tracking a running compensation term.
+/// Neumaier compensated summation — handles both |sum| >> |x| and |x| >> |sum|.
+/// Strictly better than Kahan's original algorithm for all input orderings.
 fn kahan_sum(iter: impl Iterator<Item = f64>) -> f64 {
-    let mut sum = 0.0_f64;
-    let mut comp = 0.0_f64; // running compensation for lost low-order bits
+    let mut sum  = 0.0_f64;
+    let mut comp = 0.0_f64;
     for x in iter {
-        let y = x - comp;
-        let t = sum + y;
-        comp = (t - sum) - y;
+        let t = sum + x;
+        comp += if sum.abs() >= x.abs() {
+            (sum - t) + x   // |sum| >= |x|
+        } else {
+            (x - t) + sum   // |x| > |sum|
+        };
         sum = t;
     }
-    sum
+    sum + comp
+}
+
+// ── SCI-11 / BLK-07: Special mathematical functions ──────────────────────────
+
+/// High-accuracy erf via Horner polynomial (Abramowitz & Stegun 7.1.26).
+/// Max error |ε| ≤ 1.5×10⁻⁷.
+#[allow(clippy::excessive_precision)]
+fn erf_approx(x: f64) -> f64 {
+    let sign = if x < 0.0 { -1.0 } else { 1.0 };
+    let x = x.abs();
+    let t = 1.0 / (1.0 + 0.3275911 * x);
+    let poly = t * (0.254829592
+        + t * (-0.284496736
+        + t * (1.421413741
+        + t * (-1.453152027
+        + t * 1.061405429))));
+    sign * (1.0 - poly * (-x * x).exp())
+}
+
+/// Standard normal CDF Φ(z) = 0.5·(1 + erf(z/√2)).
+fn normal_cdf(z: f64) -> f64 {
+    0.5 * (1.0 + erf_approx(z / std::f64::consts::SQRT_2))
+}
+
+/// Standard normal PDF φ(z) = (1/√(2π))·exp(−z²/2).
+fn normal_pdf_std(z: f64) -> f64 {
+    (-0.5 * z * z).exp() / (2.0 * std::f64::consts::PI).sqrt()
+}
+
+/// Probit function (standard normal quantile) via Acklam's rational approximation.
+/// Max error ~4.5×10⁻⁴.
+#[allow(clippy::excessive_precision)]
+fn normal_inv_cdf(p: f64) -> f64 {
+    if p <= 0.0 { return f64::NEG_INFINITY; }
+    if p >= 1.0 { return f64::INFINITY; }
+    const A: [f64; 6] = [
+        -3.969683028665376e+01, 2.209460984245205e+02,
+        -2.759285104469687e+02, 1.383577518672690e+02,
+        -3.066479806614716e+01, 2.506628277459239e+00,
+    ];
+    const B: [f64; 5] = [
+        -5.447609879822406e+01, 1.615858368580409e+02,
+        -1.556989798598866e+02, 6.680131188771972e+01,
+        -1.328068155288572e+01,
+    ];
+    const C: [f64; 6] = [
+        -7.784894002430293e-03, -3.223964580411365e-01,
+        -2.400758277161838e+00, -2.549732539343734e+00,
+         4.374664141464968e+00,  2.938163982698783e+00,
+    ];
+    const D: [f64; 4] = [
+        7.784695709041462e-03, 3.224671290700398e-01,
+        2.445134137142996e+00, 3.754408661907416e+00,
+    ];
+    const P_LOW: f64 = 0.02425;
+    const P_HIGH: f64 = 1.0 - P_LOW;
+    if p < P_LOW {
+        let q = (-2.0 * p.ln()).sqrt();
+        (((((C[0]*q+C[1])*q+C[2])*q+C[3])*q+C[4])*q+C[5]) /
+        ((((D[0]*q+D[1])*q+D[2])*q+D[3])*q+1.0)
+    } else if p <= P_HIGH {
+        let q = p - 0.5;
+        let r = q * q;
+        (((((A[0]*r+A[1])*r+A[2])*r+A[3])*r+A[4])*r+A[5]) * q /
+        (((((B[0]*r+B[1])*r+B[2])*r+B[3])*r+B[4])*r+1.0)
+    } else {
+        let q = (-2.0 * (1.0 - p).ln()).sqrt();
+        -(((((C[0]*q+C[1])*q+C[2])*q+C[3])*q+C[4])*q+C[5]) /
+        ((((D[0]*q+D[1])*q+D[2])*q+D[3])*q+1.0)
+    }
+}
+
+/// ln(Γ(x)) via Lanczos approximation (g=7, n=9, ~15 significant digits).
+#[allow(clippy::excessive_precision)]
+fn log_gamma(x: f64) -> f64 {
+    const G: f64 = 7.0;
+    const C: [f64; 9] = [
+        0.99999999999980993,
+        676.5203681218851,
+        -1259.1392167224028,
+        771.32342877765313,
+        -176.61502916214059,
+        12.507343278686905,
+        -0.13857109526572012,
+        9.9843695780195716e-6,
+        1.5056327351493116e-7,
+    ];
+    if x < 0.5 {
+        std::f64::consts::PI.ln()
+            - (std::f64::consts::PI * x).sin().abs().ln()
+            - log_gamma(1.0 - x)
+    } else {
+        let xx = x - 1.0;
+        let mut a = C[0];
+        for i in 1..9 { a += C[i] / (xx + i as f64); }
+        let t = xx + G + 0.5;
+        0.5 * (2.0 * std::f64::consts::PI).ln()
+            + (xx + 0.5) * t.ln()
+            - t
+            + a.ln()
+    }
+}
+
+/// Regularised lower incomplete gamma P(a, x) = γ(a,x)/Γ(a).
+fn reg_gamma_lower(a: f64, x: f64) -> f64 {
+    if x <= 0.0 { return 0.0; }
+    if a <= 0.0 { return f64::NAN; }
+    if x < a + 1.0 {
+        // Series expansion
+        let mut ap  = a;
+        let mut del = 1.0 / a;
+        let mut sum = del;
+        for _ in 0..300 {
+            ap  += 1.0;
+            del *= x / ap;
+            sum += del;
+            if del.abs() < sum.abs() * 1e-14 { break; }
+        }
+        ((-x + a * x.ln()) - log_gamma(a)).exp() * sum
+    } else {
+        1.0 - reg_gamma_upper_cf(a, x)
+    }
+}
+
+/// Upper regularised incomplete gamma Q(a,x) via Lentz continued fraction.
+fn reg_gamma_upper_cf(a: f64, x: f64) -> f64 {
+    const FPMIN: f64 = 1e-300;
+    let mut b = x + 1.0 - a;
+    let mut c = 1.0 / FPMIN;
+    let mut d = 1.0 / b;
+    let mut h = d;
+    for i in 1_usize..=300 {
+        let an = -(i as f64) * (i as f64 - a);
+        b += 2.0;
+        d = an * d + b; if d.abs() < FPMIN { d = FPMIN; }
+        c = b + an / c; if c.abs() < FPMIN { c = FPMIN; }
+        d = 1.0 / d;
+        let del = d * c;
+        h *= del;
+        if (del - 1.0).abs() < 1e-14 { break; }
+    }
+    ((-x + a * x.ln()) - log_gamma(a)).exp() * h
+}
+
+/// Regularised incomplete beta I_x(a,b) via Lentz continued fraction.
+fn reg_inc_beta(a: f64, b: f64, x: f64) -> f64 {
+    if x <= 0.0 { return 0.0; }
+    if x >= 1.0 { return 1.0; }
+    // Symmetry: use CF on whichever side converges faster
+    if x > (a + 1.0) / (a + b + 2.0) {
+        return 1.0 - reg_inc_beta(b, a, 1.0 - x);
+    }
+    let log_beta = log_gamma(a) + log_gamma(b) - log_gamma(a + b);
+    let front = (a * x.ln() + b * (1.0 - x).ln() - log_beta - a.ln()).exp();
+    const FPMIN: f64 = 1e-300;
+    let mut c = 1.0;
+    let mut d = 1.0 - (a + b) * x / (a + 1.0);
+    if d.abs() < FPMIN { d = FPMIN; }
+    d = 1.0 / d;
+    let mut h = d;
+    for m in 1_usize..=300 {
+        let mf = m as f64;
+        // Even step
+        let aa = mf * (b - mf) * x / ((a + 2.0*mf - 1.0) * (a + 2.0*mf));
+        d = 1.0 + aa * d; if d.abs() < FPMIN { d = FPMIN; }
+        c = 1.0 + aa / c; if c.abs() < FPMIN { c = FPMIN; }
+        d = 1.0 / d; h *= d * c;
+        // Odd step
+        let aa = -(a + mf) * (a + b + mf) * x / ((a + 2.0*mf) * (a + 2.0*mf + 1.0));
+        d = 1.0 + aa * d; if d.abs() < FPMIN { d = FPMIN; }
+        c = 1.0 + aa / c; if c.abs() < FPMIN { c = FPMIN; }
+        d = 1.0 / d;
+        let del = d * c;
+        h *= del;
+        if (del - 1.0).abs() < 1e-14 { break; }
+    }
+    front * h
+}
+
+// ── BLK-03: ISA standard atmosphere helpers ───────────────────────────────────
+
+/// ICAO ISA temperature (K) at geometric altitude h (m).
+fn isa_temperature(h: f64) -> f64 {
+    if h <= 11_000.0 {
+        288.15 - 0.0065 * h            // troposphere
+    } else if h <= 20_000.0 {
+        216.65                          // tropopause (isothermal)
+    } else {
+        216.65 + 0.001 * (h - 20_000.0) // lower stratosphere
+    }
+}
+
+/// ICAO ISA pressure (Pa) at geometric altitude h (m).
+fn isa_pressure(h: f64) -> f64 {
+    const P0:  f64 = 101_325.0;
+    const T0:  f64 = 288.15;
+    const L:   f64 = 0.0065;   // magnitude of lapse rate
+    const R:   f64 = 287.05;
+    const G0:  f64 = 9.80665;
+    const T11: f64 = 216.65;
+    const P11: f64 = 22_632.1;
+    if h <= 11_000.0 {
+        P0 * ((T0 - L * h) / T0).powf(G0 / (L * R))
+    } else if h <= 20_000.0 {
+        P11 * (-(G0 / (R * T11)) * (h - 11_000.0)).exp()
+    } else {
+        const P20: f64 = 5_474.89;
+        const T20: f64 = 216.65;
+        const L2:  f64 = 0.001;
+        P20 * ((T20 + L2 * (h - 20_000.0)) / T20).powf(-G0 / (L2 * R))
+    }
+}
+
+// ── BLK-09: Date helpers ──────────────────────────────────────────────────────
+
+/// Encode (y, m, d) as days since 2000-01-01 (using Julian Day arithmetic).
+fn ymd_to_day(y: i64, m: i64, d: i64) -> i64 {
+    let a  = (14 - m) / 12;
+    let yy = y + 4800 - a;
+    let mm = m + 12 * a - 3;
+    let jdn = d + (153 * mm + 2) / 5 + 365 * yy + yy / 4 - yy / 100 + yy / 400 - 32045;
+    jdn - 2_451_545          // offset so 2000-01-01 = 0
+}
+
+/// Decode integer day (days since 2000-01-01) back to (year, month, day).
+fn day_to_ymd(day: i64) -> (i64, i64, i64) {
+    let jdn = day + 2_451_545;
+    let a = jdn + 32044;
+    let b = (4 * a + 3) / 146097;
+    let c = a - 146097 * b / 4;
+    let d = (4 * c + 3) / 1461;
+    let e = c - 1461 * d / 4;
+    let m = (5 * e + 2) / 153;
+    let dom   = e - (153 * m + 2) / 5 + 1;
+    let month = m + 3 - 12 * (m / 10);
+    let year  = 100 * b + d - 4800 + m / 10;
+    (year, month, dom)
 }
 
 /// Read the `c` (count) port, clamp to [min_c..6], return as usize.
@@ -2899,26 +5071,39 @@ mod tests {
     #[test]
     fn w11c_constants_table_driven() {
         let cases: &[(&str, f64, f64)] = &[
-            // Math constants
+            // Math constants (canonical const.math.* IDs — SCI-01)
+            ("const.math.pi",    std::f64::consts::PI,     1e-15),
+            ("const.math.e",     std::f64::consts::E,      1e-15),
+            ("const.math.tau",   std::f64::consts::TAU,    1e-15),
+            ("const.math.phi",   1.618_033_988_749_894_848_2, 1e-15),
             ("const.math.sqrt2", std::f64::consts::SQRT_2, 1e-15),
-            ("const.math.ln2", std::f64::consts::LN_2, 1e-15),
-            ("const.math.ln10", std::f64::consts::LN_10, 1e-15),
-            // Physics constants (exact SI 2019 where applicable)
-            ("const.physics.g0", 9.806_65, 1e-10),
-            ("const.physics.R_molar", 8.314_462_618, 1e-9),
-            ("const.physics.c", 299_792_458.0, 0.0),
-            ("const.physics.h", 6.626_070_15e-34, 1e-43),
-            ("const.physics.hbar", 1.054_571_817e-34, 1e-43),
-            ("const.physics.kB", 1.380_649e-23, 1e-32),
-            ("const.physics.Na", 6.022_140_76e23, 1e14),
-            ("const.physics.qe", 1.602_176_634e-19, 1e-28),
-            ("const.physics.F", 96_485.332_12, 1e-3),
-            ("const.physics.me", 9.109_383_7015e-31, 1e-40),
-            ("const.physics.mp", 1.672_621_923_69e-27, 1e-37),
-            ("const.physics.G", 6.674_30e-11, 1e-16),
-            ("const.physics.mu0", 1.256_637_062_12e-6, 1e-15),
-            ("const.physics.eps0", 8.854_187_8128e-12, 1e-21),
-            ("const.physics.sigma_sb", 5.670_374_419e-8, 1e-17),
+            ("const.math.ln2",   std::f64::consts::LN_2,   1e-15),
+            ("const.math.ln10",  std::f64::consts::LN_10,  1e-15),
+            // Physics constants — CODATA 2022 (SCI-01)
+            ("const.physics.g0",    9.806_65,                    1e-10),
+            ("const.physics.R_molar", 8.314_462_618,             1e-9),
+            ("const.physics.R",     8.314_462_618,               1e-9),
+            ("const.physics.c",     299_792_458.0,               0.0),
+            ("const.physics.h",     6.626_070_15e-34,            1e-43),
+            ("const.physics.hbar",  1.054_571_817_646_156_5e-34, 1e-43),
+            ("const.physics.kB",    1.380_649e-23,               1e-32),
+            ("const.physics.Na",    6.022_140_76e23,             1e14),
+            ("const.physics.NA",    6.022_140_76e23,             1e14),
+            ("const.physics.qe",    1.602_176_634e-19,           1e-28),
+            ("const.physics.e",     1.602_176_634e-19,           1e-28),
+            ("const.physics.F",     96_485.332_12,               1e-3),
+            ("const.physics.me",    9.109_383_713_9e-31,         1e-40),
+            ("const.physics.mp",    1.672_621_925_95e-27,        1e-37),
+            ("const.physics.mn",    1.674_927_500_56e-27,        1e-37),
+            ("const.physics.G",     6.674_30e-11,                1e-16),
+            ("const.physics.mu0",   1.256_637_061_27e-6,         1e-15),
+            ("const.physics.eps0",  8.854_187_818_8e-12,         1e-21),
+            ("const.physics.sigma_sb", 5.670_374_419e-8,         1e-17),
+            ("const.physics.sigma", 5.670_374_419e-8,            1e-17),
+            ("const.physics.alpha", 7.297_352_564_3e-3,          1e-16),
+            ("const.physics.Ry",    10_973_731.568_157,          1e-3),
+            ("const.physics.amu",   1.660_539_068_92e-27,        1e-37),
+            ("const.physics.u",     1.660_539_068_92e-27,        1e-37),
             // Atmosphere
             ("const.atmos.p0_pa", 101_325.0, 0.0),
             ("const.atmos.t0_k", 288.15, 0.0),

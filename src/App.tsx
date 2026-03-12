@@ -37,6 +37,11 @@ const ExploreItemPage = lazy(() =>
   import('./pages/ExploreItemPage').then((m) => ({ default: m.ExploreItemPage })),
 )
 
+// ADV-02: Shared project viewer
+const SharedProjectPage = lazy(() =>
+  import('./pages/SharedProjectPage').then((m) => ({ default: m.SharedProjectPage })),
+)
+
 function BillingSuccess() {
   const { t } = useTranslation()
   return (
@@ -268,6 +273,15 @@ export default function App() {
       />
       <Route path="/marketplace" element={<ExploreRedirect />} />
       <Route path="/marketplace/*" element={<ExploreRedirect />} />
+      {/* ADV-02: Shared project viewer */}
+      <Route
+        path="/share/:token"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="page" />}>
+            <SharedProjectPage />
+          </Suspense>
+        }
+      />
       {/* Catch-all 404 */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

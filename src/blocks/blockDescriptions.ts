@@ -291,4 +291,203 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Publishes its input value under a named channel. Subscribe blocks on any sheet can read from this channel.',
   subscribe:
     'Reads the latest value from a named publish channel. Use to share values across sheets.',
+
+  // ── SCI-11: Statistical distributions ────────────────────────────────────
+  'prob.dist.normal_cdf':
+    'Normal (Gaussian) CDF. Probability P(X ≤ x) for a normal distribution with mean μ and std dev σ.',
+  'prob.dist.normal_inv_cdf':
+    'Inverse normal CDF (probit). Returns x such that P(X ≤ x) = p for a normal distribution.',
+  'prob.dist.t_pdf':
+    "Student's t PDF. Density at x with df degrees of freedom.",
+  'prob.dist.t_cdf':
+    "Student's t CDF. Probability P(T ≤ x) for t-distribution with df degrees of freedom.",
+  'prob.dist.chi2_pdf':
+    'Chi-squared PDF. Density at x for chi² distribution with k degrees of freedom.',
+  'prob.dist.chi2_cdf':
+    'Chi-squared CDF. Probability P(X ≤ x) for chi² distribution with k degrees of freedom.',
+  'prob.dist.f_pdf':
+    'F-distribution PDF. Density at x with d₁ numerator and d₂ denominator degrees of freedom.',
+  'prob.dist.f_cdf':
+    'F-distribution CDF. Probability P(F ≤ x) with d₁ numerator and d₂ denominator degrees of freedom.',
+  'prob.dist.poisson_cdf':
+    'Poisson CDF. Probability of observing at most k events given Poisson rate lambda.',
+  'prob.dist.binomial_cdf':
+    'Binomial CDF. Probability of at most k successes in n trials each with probability p.',
+  'prob.dist.beta_pdf':
+    'Beta PDF. Density at x ∈ [0,1] for beta distribution with shape parameters α and β.',
+  'prob.dist.beta_cdf':
+    'Beta CDF (regularized incomplete beta). Probability P(X ≤ x) for beta distribution.',
+  'prob.dist.gamma_pdf':
+    'Gamma PDF. Density at x for gamma distribution with shape α and scale β.',
+  'prob.dist.weibull_pdf':
+    'Weibull PDF. Density at x for Weibull distribution with shape k and scale λ. Used in reliability engineering.',
+
+  // ── BLK-05: Expanded Electrical ──────────────────────────────────────────
+  'eng.elec.RC_tau': 'RC time constant τ = R·C. Time for voltage to reach 63.2% of its final value.',
+  'eng.elec.RL_tau': 'RL time constant τ = L/R. Time for current to reach 63.2% of its final value.',
+  'eng.elec.RLC_f0': 'RLC resonant (natural) frequency f₀ = 1/(2π√(LC)).',
+  'eng.elec.RLC_Q': 'RLC quality factor Q = (1/R)√(L/C). Higher Q means sharper resonance.',
+  'eng.elec.V_divider': 'Voltage divider. Output = Vin × R₂/(R₁+R₂).',
+  'eng.elec.I_divider': 'Current divider. Output current through R₁ = Iin × R₂/(R₁+R₂).',
+  'eng.elec.Z_cap': 'Capacitive reactance Xc = 1/(2πfC). Impedance of a capacitor at frequency f.',
+  'eng.elec.Z_ind': 'Inductive reactance XL = 2πfL. Impedance of an inductor at frequency f.',
+  'eng.elec.filter_fc': 'RC filter −3 dB cutoff frequency fc = 1/(2πRC).',
+  'eng.elec.transformer_v2': 'Ideal transformer secondary voltage V₂ = V₁ × N₂/N₁.',
+  'eng.elec.three_phase_P': 'Three-phase active power P = √3 × VL × IL × pf. VL: line voltage, IL: line current.',
+  'eng.elec.diode_shockley':
+    'Shockley ideal diode equation I = Is × (e^(V/(η·Vt)) − 1). η: ideality factor, Vt: thermal voltage (~0.02585 V at 300 K).',
+
+  // ── BLK-01: Chemical Engineering ─────────────────────────────────────────
+  'chem.ideal_gas_n': 'Ideal gas law solved for moles: n = PV/(RT). P: pressure (Pa), V: volume (m³), T: temperature (K).',
+  'chem.antoine_vp': 'Antoine equation vapor pressure: log₁₀(P) = A − B/(C+T). Returns P in the same units as the Antoine constants.',
+  'chem.raoults_partial': "Raoult's law partial pressure: P_i = x_i × P_sat. x_i: mole fraction, P_sat: pure component saturation pressure.",
+  'chem.equilibrium_K': 'Equilibrium constant K = exp(−ΔG/(RT)). ΔG: standard Gibbs free energy change (J/mol).',
+  'chem.arrhenius_rate': 'Arrhenius rate constant k = A × exp(−Ea/(RT)). A: pre-exponential factor, Ea: activation energy (J/mol).',
+  'chem.heat_reaction': 'Heat of reaction ΔH_rxn = H_products − H_reactants (Hess\'s law).',
+  'chem.mole_fraction': 'Mole fraction x = n_component / n_total.',
+  'chem.ficks_flux': "Fick's first law diffusion flux J = −D × dC/dx. D: diffusivity (m²/s).",
+  'chem.CSTR_conv': 'CSTR first-order conversion X = kτ/(1+kτ). k: rate constant, τ: residence time.',
+  'chem.enthalpy_sensible': 'Sensible heat ΔH = Cp × (T₂ − T₁). Enthalpy change for heating/cooling.',
+
+  // ── BLK-02: Structural Engineering ───────────────────────────────────────
+  'struct.beam_deflect_ss': 'Simply-supported beam max deflection δ = PL³/(48EI) under centre point load P.',
+  'struct.beam_deflect_cantilever': 'Cantilever beam max deflection δ = PL³/(3EI) under tip point load P.',
+  'struct.beam_moment_ss': 'Simply-supported beam bending moment at load point M = Pab/L. a + b = L.',
+  'struct.euler_buckling': 'Euler critical buckling load P_cr = π²EI/(KL)². K: effective length factor (1 for pinned-pinned).',
+  'struct.von_mises': 'Von Mises equivalent stress σ_vm = √(σx²−σxσy+σy²+3τxy²). Yield check: σ_vm < σ_y.',
+  'struct.combined_stress': 'Combined axial and bending stress σ = σ_axial + σ_bending.',
+  'struct.steel_check': 'Steel utilization ratio U = σ/(Fy × φ). Acceptable when U ≤ 1. φ typically 0.9.',
+  'struct.bearing_capacity': 'Terzaghi bearing capacity q_ult = cNc + qNq + 0.5γBNγ. c: cohesion, q: overburden.',
+  'struct.concrete_moment_aci': 'ACI nominal flexural capacity Mn for rectangular singly-reinforced section.',
+
+  // ── BLK-03: Aerospace Engineering ────────────────────────────────────────
+  'aero.ISA_T': 'ISA standard atmosphere temperature T(h) in Kelvin. Valid to 32 km (troposphere + lower stratosphere).',
+  'aero.ISA_P': 'ISA standard atmosphere pressure P(h) in Pa. Valid to 32 km.',
+  'aero.ISA_rho': 'ISA standard atmosphere air density ρ(h) in kg/m³. Valid to 32 km.',
+  'aero.ISA_a': 'ISA speed of sound a(h) = √(γRT(h)) in m/s. γ = 1.4 for air.',
+  'aero.mach_from_v': 'Mach number M = v/a. v: airspeed (m/s), a: local speed of sound (m/s).',
+  'aero.dynamic_q': 'Dynamic pressure q = ½ρv². Foundation of aerodynamic force equations.',
+  'aero.lift': 'Aerodynamic lift L = CL × q × S. CL: lift coefficient, S: wing reference area.',
+  'aero.drag': 'Aerodynamic drag D = CD × q × S. CD: drag coefficient, S: reference area.',
+  'aero.tsfc': 'Thrust-specific fuel consumption TSFC = ṁ_fuel / Thrust (kg/s/N). Lower is more efficient.',
+  'aero.tsiolkovsky': 'Tsiolkovsky rocket equation Δv = Isp × g₀ × ln(m₀/mf). Ideal velocity increment.',
+  'aero.orbital_v': 'Circular orbital velocity v = √(GM/r). GM: gravitational parameter, r: orbit radius.',
+  'aero.escape_v': 'Escape velocity v_esc = √(2GM/r). Minimum speed to escape gravitational field.',
+  'aero.hohmann_dv1': 'Hohmann transfer first maneuver Δv₁ at departure orbit. Transfers from r₁ to r₂.',
+  'aero.hohmann_dv2': 'Hohmann transfer second maneuver Δv₂ at arrival orbit. Circularizes at r₂.',
+
+  // ── BLK-04: Control Systems ───────────────────────────────────────────────
+  'ctrl.step_1st_order': 'First-order step response y(t) = K(1 − e^(−t/τ)). K: steady-state gain, τ: time constant.',
+  'ctrl.step_2nd_order':
+    'Second-order step response y(t). Computes output at time t for given natural frequency ωn and damping ratio ζ.',
+  'ctrl.pid_output': 'PID controller output u = Kp·e + Ki·∫e + Kd·(de/dt). Requires pre-integrated error and time step.',
+  'ctrl.rms': 'Root-mean-square of a signal vector. RMS = √(mean(y²)). Useful for AC signal characterization.',
+  'ctrl.peak2peak': 'Peak-to-peak amplitude of a signal vector. Output = max(y) − min(y).',
+  'ctrl.settling_time_2pct': '2% settling time approximation t_s ≈ 4τ for first-order systems.',
+  'ctrl.overshoot_2nd': 'Percent overshoot for second-order system: %OS = 100 × exp(−πζ/√(1−ζ²)). Valid for ζ < 1.',
+  'ctrl.natural_freq': 'Natural frequency ωn = √(k/m) for a spring-mass system.',
+  'ctrl.damping_ratio': 'Damping ratio ζ = c/(2√(km)) for a spring-mass-damper system.',
+  'ctrl.bode_mag_1st': 'First-order Bode magnitude |H(jω)| = K/√(1+(ωτ)²).',
+
+  // ── BLK-06: Life Sciences ─────────────────────────────────────────────────
+  'bio.michaelis_menten': 'Michaelis-Menten enzyme kinetics v = Vmax×[S]/(Km+[S]). Vmax: max velocity, Km: half-saturation constant.',
+  'bio.hill_eq': 'Hill equation for cooperative binding: θ = [L]^n/(Kd^n+[L]^n). n: Hill coefficient.',
+  'bio.logistic_growth': 'Logistic population growth N(t) = K/(1+((K−N₀)/N₀)×e^(−rt)). K: carrying capacity.',
+  'bio.exp_decay': 'Exponential decay N(t) = N₀ × e^(−λt). Models radioactive decay, drug elimination, etc.',
+  'bio.half_life': 'Half-life t₁/₂ = ln(2)/λ from decay constant λ.',
+  'bio.drug_1cmp': 'One-compartment pharmacokinetic model C(t) = (D/Vd) × e^(−k_el × t).',
+  'bio.henderson_hasselbalch': 'Henderson-Hasselbalch equation pH = pKa + log₁₀([A⁻]/[HA]). Buffer pH calculation.',
+  'bio.nernst': 'Nernst equation E = (RT/(zF)) × ln([out]/[in]). Electrochemical equilibrium potential.',
+  'bio.BMI': 'Body Mass Index BMI = mass(kg) / height(m)². Standard obesity screening metric.',
+  'bio.BSA_dubois': 'DuBois formula for body surface area BSA = 0.007184 × W^0.425 × H^0.725 (m²).',
+
+  // ── BLK-07: Finance Options & Risk ───────────────────────────────────────
+  'fin.options.bs_call':
+    'Black-Scholes call option price. Assumes European exercise, continuous dividends excluded.',
+  'fin.options.bs_put':
+    'Black-Scholes put option price. Uses put-call parity relationship.',
+  'fin.options.bs_delta':
+    'Black-Scholes Delta (Δ). Rate of change of option price with respect to the underlying spot price.',
+  'fin.options.bs_gamma':
+    'Black-Scholes Gamma (Γ). Rate of change of Delta; second derivative w.r.t. spot price.',
+  'fin.options.bs_vega':
+    'Black-Scholes Vega (ν). Sensitivity of option price to a 1-unit change in implied volatility.',
+  'fin.options.kelly':
+    'Kelly criterion optimal bet fraction f* = p − (1−p)/b. p: win probability, b: payout odds.',
+  'fin.options.var_hist':
+    'Historical Value at Risk (VaR) at confidence level. The loss not exceeded in (1−conf) of scenarios.',
+  'fin.options.cvar_hist':
+    'Historical Conditional VaR (CVaR / Expected Shortfall). Average loss in the worst (1−conf) scenarios.',
+  'fin.options.bond_duration':
+    'Macaulay duration of a bond: weighted average time to receive cash flows. Interest rate sensitivity measure.',
+  'fin.options.dcf':
+    'DCF terminal value using Gordon growth model: V = FCF×(1+g)/(WACC−g), plus n-year annuity PV.',
+
+  // ── BLK-09: Date & Time ───────────────────────────────────────────────────
+  'date.from_ymd': 'Encodes a calendar date (year, month, day) as integer days since 2000-01-01.',
+  'date.year': 'Extracts the year component from a date integer (days since 2000-01-01).',
+  'date.month': 'Extracts the month component (1–12) from a date integer.',
+  'date.day_of_month': 'Extracts the day-of-month (1–31) from a date integer.',
+  'date.days_between': 'Number of days between two date integers. Positive if d2 > d1.',
+  'date.add_days': 'Adds n days to a date integer. Returns a new date integer.',
+  'date.is_leap_year': 'Returns 1 if the given year is a leap year, 0 otherwise.',
+  'date.days_in_month': 'Returns the number of days in the given month and year (accounts for leap years).',
+
+  // ── BLK-08: Text / String ──────────────────────────────────────────────────
+  'num_to_text': 'Converts a number to a formatted text string. Format: %.2f (fixed), %e (scientific), %g (auto), %d (integer).',
+  'text_concat': 'Concatenates two text values: output = A + B.',
+  'text_length': 'Returns the character length of a text value.',
+  'text_to_num': 'Parses a text value as a floating-point number. Returns NaN if the text is not a valid number.',
+
+  // ── BLK-10: Lookup Table Interpolation ────────────────────────────────────
+  'lookup.1d': '1D lookup table interpolation. Given X and Y vectors, returns Y at query X. Method config: nearest, linear, or cubic spline.',
+  'lookup.2d': '2D bilinear lookup table. Given X-axis, Y-axis, and Z-matrix (table), returns interpolated Z at query (x, y).',
+
+  // ── SCI-04: Interval Arithmetic ────────────────────────────────────────────
+  'interval_from': 'Creates an interval [center - hw, center + hw] from a center value and half-width.',
+  'interval_from_bounds': 'Creates an interval [lo, hi] from explicit lower and upper bounds.',
+  'interval_lo': 'Extracts the lower bound of an interval.',
+  'interval_hi': 'Extracts the upper bound of an interval.',
+  'interval_mid': 'Returns the midpoint (center) of an interval: (lo + hi) / 2.',
+  'interval_width': 'Returns the width of an interval: hi - lo.',
+  'interval_contains': 'Returns 1 if x lies within the interval [lo, hi], 0 otherwise.',
+  'interval_add': 'Interval addition: [a,b] + [c,d] = [a+c, b+d].',
+  'interval_sub': 'Interval subtraction: [a,b] - [c,d] = [a-d, b-c].',
+  'interval_mul': 'Interval multiplication using all four products min/max.',
+  'interval_div': 'Interval division. Errors if divisor interval contains zero.',
+  'interval_pow': 'Raises an interval to an integer power n.',
+
+  // ── SCI-08: Complex Numbers ────────────────────────────────────────────────
+  'complex_from': 'Creates a complex number z = re + im·i from real and imaginary parts.',
+  'complex_re': 'Extracts the real part Re(z) of a complex number.',
+  'complex_im': 'Extracts the imaginary part Im(z) of a complex number.',
+  'complex_mag': 'Computes the magnitude (modulus) |z| = √(re² + im²) of a complex number.',
+  'complex_arg': 'Computes the argument (angle) ∠z = atan2(im, re) in radians.',
+  'complex_conj': 'Computes the complex conjugate z* = re - im·i.',
+  'complex_add': 'Adds two complex numbers: z₁ + z₂.',
+  'complex_mul': 'Multiplies two complex numbers: z₁ · z₂.',
+  'complex_div': 'Divides two complex numbers: z₁ / z₂. Errors if z₂ = 0.',
+  'complex_exp': 'Complex exponential: e^z = e^re · (cos(im) + i·sin(im)). Euler\'s formula.',
+  'complex_ln': 'Complex natural logarithm: ln|z| + i·arg(z). Errors if z = 0.',
+  'complex_pow': 'Raises a complex number z to real power n: z^n via polar form.',
+
+  // ── SCI-09: Matrix Operations ──────────────────────────────────────────────
+  'matrix_from_table': 'Converts a Table to a Matrix (row-major). Each table row becomes a matrix row.',
+  'matrix_to_table': 'Converts a Matrix back to a Table with columns named col0, col1, …',
+  'matrix_multiply': 'Matrix multiplication A · B. Inner dimensions must match.',
+  'matrix_transpose': 'Transposes a matrix: swaps rows and columns (Aᵀ).',
+  'matrix_inverse': 'Computes the inverse of a square matrix (Gauss-Jordan elimination). Errors if singular.',
+  'matrix_det': 'Computes the determinant of a square matrix via Gaussian elimination.',
+  'matrix_trace': 'Computes the trace: sum of diagonal elements tr(A).',
+  'matrix_solve': 'Solves the linear system Ax = b for x using Gaussian elimination with partial pivoting.',
+
+  // ── SCI-12: Signal Processing / FFT ───────────────────────────────────────
+  'signal.fft_magnitude': 'FFT magnitude spectrum: |FFT[k]| for k = 0..N/2. Input zero-padded to next power of 2.',
+  'signal.fft_power': 'FFT power spectrum: |FFT[k]|² / N for k = 0..N/2. Useful for energy analysis.',
+  'signal.fft_freq_bins': 'Frequency (Hz) for each FFT bin: k · fs / N. Use with FFT Magnitude or Power.',
+  'signal.window_hann': 'Generates a Hann (raised cosine) window of length N. Reduces spectral leakage.',
+  'signal.window_hamming': 'Generates a Hamming window of length N. Less side-lobe suppression than Hann.',
+  'signal.window_blackman': 'Generates a Blackman window of length N. Best side-lobe suppression of common windows.',
+  'signal.filter_lowpass_fir': 'Applies a low-pass FIR filter. cutoff_norm = f_cutoff / f_sample (0..0.5). taps: filter order.',
+  'signal.filter_highpass_fir': 'Applies a high-pass FIR filter. cutoff_norm = f_cutoff / f_sample (0..0.5). taps: filter order.',
 }

@@ -1,7 +1,7 @@
 {
   "name": "precision_kahan",
-  "description": "Phase 14: Kahan compensated summation — tests precision in reduction ops. stats.desc.sum(1e15, 1, -1e15) = 1.0 via Kahan. vectorSum([1e16, 1, -1e16]) = 0.0 (ULP at 1e16 = 2, beyond single-pass Kahan recovery).",
-  "contractVersion": 1,
+  "description": "SCI-03: Neumaier compensated summation — tests precision in reduction ops. stats.desc.sum(1e15, 1, -1e15) = 1.0. vectorSum([1e16, 1, -1e16]) = 1.0 (Neumaier correctly recovers the lost ULP that Kahan missed at 1e16).",
+  "contractVersion": 2,
   "snapshot": {
     "version": 1,
     "nodes": [
@@ -141,7 +141,7 @@
     },
     "sum1": {
       "kind": "scalar",
-      "value": 0.0
+      "value": 1.0
     },
     "x1_src": {
       "kind": "scalar",

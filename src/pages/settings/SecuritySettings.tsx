@@ -30,6 +30,16 @@ import {
   type UserSession,
 } from '../../lib/sessionService'
 
+/** Generate 10 random backup codes in XXXX-XXXX-XXXX format. */
+function generateBackupCodes(): string[] {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  return Array.from({ length: 10 }, () => {
+    const seg = () =>
+      Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+    return `${seg()}-${seg()}-${seg()}`
+  })
+}
+
 export function SecuritySettings() {
   const { t } = useTranslation()
 
@@ -43,7 +53,13 @@ export function SecuritySettings() {
   const [enrolling, setEnrolling] = useState(false)
   const [verifying, setVerifying] = useState(false)
 
-  // Disable state
+  // ACCT-07: Backup codes shown after successful enrolment
+  const [backupCodes, setBackupCodes] = useState<string[] | null>(null)
+  const [backupCodesSaved, setBackupCodesSaved] = useState(false)
+
+  // ACCT-07: Disable requires TOTP re-auth
+  const [disableConfirm, setDisableConfirm] = useState<{ factorId: string } | null>(null)
+  const [disableCode, setDisableCode] = useState('')
   const [disabling, setDisabling] = useState(false)
 
   const fetchFactors = useCallback(async () => {
@@ -86,6 +102,10 @@ export function SecuritySettings() {
     if (err) {
       setError(err.message)
     } else {
+      // ACCT-07: Generate and display backup codes after successful enrolment
+      const codes = generateBackupCodes()
+      setBackupCodes(codes)
+      setBackupCodesSaved(false)
       setEnrollment(null)
       setVerifyCode('')
       await fetchFactors()
@@ -99,13 +119,48 @@ export function SecuritySettings() {
     setError(null)
   }
 
-  const handleDisable = async (factorId: string) => {
+  const handleDownloadCodes = () => {
+    if (!backupCodes) return
+    const text = [
+      'ChainSolve — 2FA Backup Codes',
+      `Generated: ${new Date().toLocaleString()}`,
+      '',
+      'Keep these codes in a safe place. Each code can be used once.',
+      '',
+      ...backupCodes.map((c, i) => `${i + 1}. ${c}`),
+    ].join('\n')
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'chainsolve-backup-codes.txt'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // ACCT-07: Disable requires TOTP re-auth
+  const handleDisableRequest = (factorId: string) => {
+    setDisableConfirm({ factorId })
+    setDisableCode('')
+    setError(null)
+  }
+
+  const handleDisableConfirm = async () => {
+    if (!disableConfirm) return
     setError(null)
     setDisabling(true)
-    const { error: err } = await unenrollTotp(factorId)
+    // Re-auth: verify TOTP code before unenrolling
+    const { error: verifyErr } = await verifyTotp(disableConfirm.factorId, disableCode.trim())
+    if (verifyErr) {
+      setError(t('security.invalidCode', 'Invalid TOTP code. Please try again.'))
+      setDisabling(false)
+      return
+    }
+    const { error: err } = await unenrollTotp(disableConfirm.factorId)
     if (err) {
       setError(err.message)
     } else {
+      setDisableConfirm(null)
+      setDisableCode('')
       await fetchFactors()
     }
     setDisabling(false)
@@ -244,8 +299,29 @@ export function SecuritySettings() {
             {factors.map((f) => (
               <div key={f.id} style={factorRow}>
                 <div>
-                  <div style={{ fontWeight: 500, fontSize: '0.9rem' }}>
+                  <div
+                    style={{
+                      fontWeight: 500,
+                      fontSize: '0.9rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                    }}
+                  >
                     {f.friendly_name ?? t('security.authenticatorApp')}
+                    {/* ACCT-07: "2FA enabled" badge */}
+                    <span
+                      style={{
+                        padding: '0.1rem 0.5rem',
+                        borderRadius: 10,
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        background: 'rgba(34,197,94,0.15)',
+                        color: '#22c55e',
+                      }}
+                    >
+                      {t('security.enabled', 'Enabled')}
+                    </span>
                   </div>
                   <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>
                     {t('security.addedOn', {
@@ -253,13 +329,67 @@ export function SecuritySettings() {
                     })}
                   </div>
                 </div>
-                <button
-                  style={{ ...btnDanger, ...(disabling ? btnDisabledStyle : {}) }}
-                  disabled={disabling}
-                  onClick={() => handleDisable(f.id)}
-                >
-                  {disabling ? t('security.disabling') : t('security.disable')}
-                </button>
+                {/* ACCT-07: Disable requires re-auth */}
+                {disableConfirm?.factorId === f.id ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.4rem',
+                      minWidth: 200,
+                    }}
+                  >
+                    <div style={{ fontSize: '0.78rem', opacity: 0.7 }}>
+                      {t(
+                        'security.enterTotpToDisable',
+                        'Enter your authenticator code to confirm:',
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      value={disableCode}
+                      onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, ''))}
+                      placeholder="000000"
+                      autoFocus
+                      style={{ ...inputStyle, fontSize: '1rem', marginTop: 0 }}
+                    />
+                    <div style={{ display: 'flex', gap: '0.35rem' }}>
+                      <button
+                        style={{
+                          ...btnDanger,
+                          flex: 1,
+                          ...(disabling || disableCode.length !== 6 ? btnDisabledStyle : {}),
+                        }}
+                        disabled={disabling || disableCode.length !== 6}
+                        onClick={handleDisableConfirm}
+                      >
+                        {disabling
+                          ? t('security.disabling', 'Disabling…')
+                          : t('security.confirmDisable', 'Confirm disable')}
+                      </button>
+                      <button
+                        style={{ ...btnSecondary }}
+                        onClick={() => {
+                          setDisableConfirm(null)
+                          setDisableCode('')
+                        }}
+                      >
+                        {t('security.cancel', 'Cancel')}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    style={{ ...btnDanger, ...(disabling ? btnDisabledStyle : {}) }}
+                    disabled={disabling}
+                    onClick={() => handleDisableRequest(f.id)}
+                  >
+                    {t('security.disable', 'Disable')}
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -342,12 +472,125 @@ export function SecuritySettings() {
         )}
       </div>
 
+      {/* ACCT-07: Backup codes dialog (shown after successful enrolment) */}
+      {backupCodes && (
+        <>
+          {/* Backdrop */}
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.5)',
+              zIndex: 2000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <div
+              style={{
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border)',
+                borderRadius: 14,
+                padding: '2rem',
+                maxWidth: 480,
+                width: '90%',
+                boxShadow: 'var(--shadow-lg)',
+              }}
+            >
+              <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: 700 }}>
+                {t('security.backupCodesTitle', 'Save your backup codes')}
+              </h3>
+              <p style={{ margin: '0 0 1.25rem', fontSize: '0.85rem', opacity: 0.7 }}>
+                {t(
+                  'security.backupCodesDesc',
+                  'If you lose access to your authenticator app, you can use one of these codes to sign in. Each code can only be used once.',
+                )}
+              </p>
+              <div
+                style={{
+                  background: 'rgba(0,0,0,0.15)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 8,
+                  padding: '0.75rem 1rem',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '0.4rem',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '0.82rem',
+                  marginBottom: '1rem',
+                  userSelect: 'all',
+                }}
+              >
+                {backupCodes.map((code, i) => (
+                  <div key={i} style={{ opacity: 0.9 }}>
+                    {i + 1}. {code}
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem' }}>
+                <button style={{ ...btnPrimary, flex: 1 }} onClick={handleDownloadCodes}>
+                  ⬇ {t('security.downloadCodes', 'Download codes')}
+                </button>
+                <button
+                  style={{
+                    ...btnSecondary,
+                    flex: 1,
+                    ...(backupCodesSaved ? { borderColor: '#22c55e', color: '#22c55e' } : {}),
+                  }}
+                  onClick={() => {
+                    void navigator.clipboard.writeText(backupCodes.join('\n'))
+                    setBackupCodesSaved(true)
+                  }}
+                >
+                  {backupCodesSaved
+                    ? t('security.copiedCodes', '✓ Copied!')
+                    : t('security.copyCodes', 'Copy to clipboard')}
+                </button>
+              </div>
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  marginBottom: '1rem',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={backupCodesSaved}
+                  onChange={(e) => setBackupCodesSaved(e.target.checked)}
+                />
+                {t('security.savedCodes', 'I have saved my backup codes in a safe place.')}
+              </label>
+              <button
+                style={{
+                  ...btnPrimary,
+                  width: '100%',
+                  ...(!backupCodesSaved ? btnDisabledStyle : {}),
+                }}
+                disabled={!backupCodesSaved}
+                onClick={() => setBackupCodes(null)}
+              >
+                {t('security.continueWithout2fa', 'Done — 2FA is now enabled')}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* ── Password change (ACCT-04) ─────────────────────────────────────── */}
       <div style={{ ...cardStyle, marginTop: '1.25rem' }}>
         <div style={fieldLabel}>{t('security.changePassword', 'Change password')}</div>
-        <div style={fieldHint}>{t('security.changePasswordDesc', 'Requires your current password for verification.')}</div>
+        <div style={fieldHint}>
+          {t('security.changePasswordDesc', 'Requires your current password for verification.')}
+        </div>
 
-        <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+        <div
+          style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}
+        >
           <div>
             <label style={{ ...fieldHint, display: 'block', marginBottom: '0.25rem' }}>
               {t('security.currentPassword', 'Current password')}
@@ -374,7 +617,14 @@ export function SecuritySettings() {
               autoComplete="new-password"
             />
             {newPwd.length > 0 && (
-              <div style={{ marginTop: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div
+                style={{
+                  marginTop: '0.35rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
                 {[0, 1, 2, 3].map((i) => (
                   <div
                     key={i}
@@ -382,7 +632,8 @@ export function SecuritySettings() {
                       flex: 1,
                       height: 3,
                       borderRadius: 2,
-                      background: i < pwdStrength.score ? strengthColor(pwdStrength.score) : 'var(--border)',
+                      background:
+                        i < pwdStrength.score ? strengthColor(pwdStrength.score) : 'var(--border)',
                     }}
                   />
                 ))}
@@ -422,7 +673,9 @@ export function SecuritySettings() {
             disabled={pwdSaving || !currentPwd || !newPwd || !confirmPwd}
             onClick={handleChangePassword}
           >
-            {pwdSaving ? t('ui.saving', 'Saving…') : t('security.changePasswordBtn', 'Change password')}
+            {pwdSaving
+              ? t('ui.saving', 'Saving…')
+              : t('security.changePasswordBtn', 'Change password')}
           </button>
         </div>
       </div>
@@ -431,10 +684,15 @@ export function SecuritySettings() {
       <div style={{ ...cardStyle, marginTop: '1.25rem' }}>
         <div style={fieldLabel}>{t('security.changeEmail', 'Change email address')}</div>
         <div style={fieldHint}>
-          {t('security.changeEmailDesc', 'A verification link will be sent to the new address. The change takes effect after confirmation.')}
+          {t(
+            'security.changeEmailDesc',
+            'A verification link will be sent to the new address. The change takes effect after confirmation.',
+          )}
         </div>
 
-        <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+        <div
+          style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}
+        >
           <div>
             <label style={{ ...fieldHint, display: 'block', marginBottom: '0.25rem' }}>
               {t('security.newEmail', 'New email address')}
@@ -452,7 +710,10 @@ export function SecuritySettings() {
           {emailError && <div style={errorBox}>{emailError}</div>}
           {emailSuccess && (
             <div style={{ color: '#34d399', fontSize: '0.88rem' }}>
-              {t('security.emailVerificationSent', 'Verification email sent. Check your inbox and click the link to confirm.')}
+              {t(
+                'security.emailVerificationSent',
+                'Verification email sent. Check your inbox and click the link to confirm.',
+              )}
             </div>
           )}
 

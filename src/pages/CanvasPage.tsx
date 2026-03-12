@@ -73,6 +73,7 @@ import { useToast } from '../components/ui/useToast'
 import { useNetworkStatus } from '../hooks/useNetworkStatus'
 import { AutosaveScheduler } from '../lib/autosaveScheduler'
 import { usePreferencesStore } from '../stores/preferencesStore'
+import { matchesBinding } from '../lib/keybindings'
 import { SheetsBar } from '../components/app/SheetsBar'
 import { TiledCanvasLayout } from '../components/canvas/TiledCanvasLayout'
 const LazyAiDockPanel = lazy(() =>
@@ -156,6 +157,18 @@ export interface CanvasControls {
   redo: () => void
   startNameEdit: () => void
   toggleAutosave: () => void
+  /** ADV-03: Returns current canvas nodes/edges for snapshot creation. */
+  getCanvasSnapshot: () => {
+    nodes: import('@xyflow/react').Node<import('../blocks/registry').NodeData>[]
+    edges: import('@xyflow/react').Edge[]
+  }
+  /** ADV-03: Replace canvas with the given nodes/edges (used for snapshot restore). */
+  restoreCanvasSnapshot: (
+    nodes: import('@xyflow/react').Node<import('../blocks/registry').NodeData>[],
+    edges: import('@xyflow/react').Edge[],
+  ) => void
+  /** ADV-03: Current active canvas ID (null = scratch). */
+  activeCanvasId: string | null
 }
 
 interface CanvasPageProps {
@@ -428,7 +441,10 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
               pj.graph.nodes.length > 0
             ) {
               setCanvasLoadWarning(
-                t('canvas.loadedEmptyWarning', 'Canvas loaded empty — the saved data may be missing'),
+                t(
+                  'canvas.loadedEmptyWarning',
+                  'Canvas loaded empty — the saved data may be missing',
+                ),
               )
             } else {
               addBreadcrumb('canvas_load_success', {
@@ -720,10 +736,11 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     return () => window.removeEventListener('beforeunload', handler)
   }, [projectId, doSave])
 
-  // ── Ctrl+S / Cmd+S → immediate save or Save-As in scratch mode ────────────
+  // ── Save shortcut (KB-01: configurable) ────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      const saveCombo = usePreferencesStore.getState().keybindings['save'] ?? 'Ctrl+S'
+      if (matchesBinding(e, saveCombo)) {
         e.preventDefault()
         if (projectId && !readOnly) void doSave({ manual: true })
         else if (!projectId && !readOnly) setSaveAsRequested(true)
@@ -846,6 +863,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       redo: () => canvasRef.current?.redo(),
       startNameEdit,
       toggleAutosave: () => updatePrefs({ autosaveEnabled: !autosaveEnabled }),
+      getCanvasSnapshot: () => canvasRef.current?.getSnapshot() ?? { nodes: [], edges: [] },
+      restoreCanvasSnapshot: (nodes, edges) => canvasRef.current?.setSnapshot(nodes, edges),
+      activeCanvasId: activeCanvasId ?? null,
     })
     return () => onControlsReady(null)
   }, [
@@ -860,6 +880,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     handleSaveAs,
     startNameEdit,
     updatePrefs,
+    activeCanvasId,
   ])
 
   // ── Sheet / canvas operations ──────────────────────────────────────────────
@@ -1926,7 +1947,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
               'This may be a temporary network issue. Try reloading the project.',
             )}
           </p>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div
+            style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}
+          >
             <button
               onClick={() => setLoadRetryCount((c) => c + 1)}
               style={{

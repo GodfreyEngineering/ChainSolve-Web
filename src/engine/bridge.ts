@@ -16,6 +16,27 @@ import { MATERIAL_VALUES } from '../blocks/materialCatalog.ts'
 import { CONSTANT_VALUES } from '../blocks/constantsCatalog.ts'
 
 /**
+ * Trig block types whose inputs are angles (forward trig).
+ * When angleUnit === 'deg', the engine expects these to receive degrees
+ * via an `angleUnit` data field that the Rust ops read to convert.
+ */
+const FORWARD_TRIG_OPS = new Set(['sin', 'cos', 'tan'])
+
+/**
+ * Inverse trig block types whose outputs are angles.
+ * When angleUnit === 'deg', they should output in degrees via the
+ * `angleUnit` data field that the Rust ops read to convert.
+ */
+const INVERSE_TRIG_OPS = new Set(['asin', 'acos', 'atan', 'atan2'])
+
+/**
+ * All trig block types affected by the angle unit preference (SCI-06).
+ * degToRad / radToDeg are pass-through converters; when in deg mode they
+ * are effectively no-ops (the engine handles them as-is in radians).
+ */
+const ANGLE_UNIT_OPS = new Set([...FORWARD_TRIG_OPS, ...INVERSE_TRIG_OPS])
+
+/**
  * Build an EngineSnapshotV1 from React Flow nodes and edges.
  *
  * Group nodes (blockType === '__group__') and annotation nodes
@@ -29,6 +50,8 @@ export function toEngineSnapshot(
   variables?: VariablesMap,
   /** H7-1: Published channel values for subscribe block resolution. */
   publishedOutputs?: Record<string, number>,
+  /** SCI-06: Angle unit preference — injected into trig node data. */
+  angleUnit?: 'rad' | 'deg',
 ): EngineSnapshotV1 {
   const evalNodes = nodes.filter((n) => {
     const bt = (n.data as Record<string, unknown>).blockType as string
@@ -80,6 +103,11 @@ export function toEngineSnapshot(
         if (pubVal !== undefined) {
           data = { ...data, value: pubVal }
         }
+      }
+      // SCI-06: Inject angleUnit into trig node data so Rust can auto-convert.
+      // Only inject when deg mode is active — rad is the engine default.
+      if (angleUnit === 'deg' && ANGLE_UNIT_OPS.has(blockType)) {
+        data = { ...data, angleUnit: 'deg' }
       }
       // W12.2: resolve inputBindings → manualValues before sending to Rust.
       if (constants && variables && data.inputBindings) {

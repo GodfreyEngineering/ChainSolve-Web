@@ -34,7 +34,11 @@ export type AuthMode = 'login' | 'signup' | 'reset'
 /** SEC-04: Escape HTML special characters before interpolating user-controlled
  *  values into dangerouslySetInnerHTML translation strings. */
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }
 
 interface LoginProps {
@@ -238,7 +242,11 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
           <p style={s.sub}>{t('auth.checkInboxSub')}</p>
 
           <div style={s.infoBox}>
-            <span dangerouslySetInnerHTML={{ __html: t('auth.checkInboxBody', { email: escapeHtml(email) }) }} />
+            <span
+              dangerouslySetInnerHTML={{
+                __html: t('auth.checkInboxBody', { email: escapeHtml(email) }),
+              }}
+            />
           </div>
 
           {error && <div style={s.errorBox}>{error}</div>}
@@ -278,7 +286,11 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
           <p style={s.sub}>{t('auth.resetLinkSent')}</p>
 
           <div style={s.infoBox}>
-            <span dangerouslySetInnerHTML={{ __html: t('auth.resetLinkBody', { email: escapeHtml(email) }) }} />
+            <span
+              dangerouslySetInnerHTML={{
+                __html: t('auth.resetLinkBody', { email: escapeHtml(email) }),
+              }}
+            />
           </div>
 
           <Link

@@ -4,6 +4,12 @@ import { defineConfig } from 'vitest/config'
 // Does NOT build WASM or start Vite.  Runs in jsdom environment so
 // Web APIs (localStorage, crypto.subtle, fetch) are available.
 export default defineConfig({
+  define: {
+    __CS_VERSION__: JSON.stringify('test'),
+    __CS_SHA__: JSON.stringify('test'),
+    __CS_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __CS_ENV__: JSON.stringify('test'),
+  },
   test: {
     environment: 'jsdom',
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],

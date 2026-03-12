@@ -60,8 +60,7 @@ export function FormulaBar({ nodeId, node, computedValue, onCommit }: FormulaBar
 
   const startEdit = useCallback(() => {
     if (!isEditable || !nodeId) return
-    const raw =
-      nd?.value !== undefined && !isNaN(nd.value as number) ? String(nd.value) : ''
+    const raw = nd?.value !== undefined && !isNaN(nd.value as number) ? String(nd.value) : ''
     setDraft(raw)
     setEditingNodeId(nodeId)
     setError(false)
@@ -218,9 +217,7 @@ export function FormulaBar({ nodeId, node, computedValue, onCommit }: FormulaBar
           {error
             ? t('formulaBar.error', 'Invalid expression')
             : displayText ||
-              (nodeId
-                ? ''
-                : t('formulaBar.hint', 'Select a node to see its formula'))}
+              (nodeId ? '' : t('formulaBar.hint', 'Select a node to see its formula'))}
         </div>
       )}
 

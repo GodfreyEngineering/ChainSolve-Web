@@ -200,11 +200,7 @@ function migrateCanvasNodes(canvas: CanvasJSON): CanvasJSON {
   let edgesMutated = false
   const edges = canvas.edges.map((edge) => {
     const e = edge as Record<string, unknown>
-    if (
-      typeof e.source === 'string' &&
-      vectorInputIds.has(e.source) &&
-      e.sourceHandle === 'out'
-    ) {
+    if (typeof e.source === 'string' && vectorInputIds.has(e.source) && e.sourceHandle === 'out') {
       edgesMutated = true
       return { ...e, sourceHandle: 'col_0' }
     }

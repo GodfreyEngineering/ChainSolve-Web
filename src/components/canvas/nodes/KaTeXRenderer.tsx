@@ -13,10 +13,7 @@ import 'katex/dist/katex.min.css'
 // ── KaTeX lazy loader ────────────────────────────────────────────────────────
 
 type KatexLib = {
-  renderToString: (
-    expr: string,
-    opts?: { throwOnError?: boolean; displayMode?: boolean },
-  ) => string
+  renderToString: (expr: string, opts?: { throwOnError?: boolean; displayMode?: boolean }) => string
 }
 
 let katexPromise: Promise<KatexLib> | null = null

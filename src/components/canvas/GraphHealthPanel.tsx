@@ -58,11 +58,7 @@ export default function GraphHealthPanel({
   }, [report, t])
 
   const scoreColor =
-    report.healthScore >= 90
-      ? '#10b981'
-      : report.healthScore >= 70
-        ? '#f59e0b'
-        : '#ef4444'
+    report.healthScore >= 90 ? '#10b981' : report.healthScore >= 70 ? '#f59e0b' : '#ef4444'
 
   return (
     <div style={docked ? dockedStyle : minimized ? { ...panelStyle, height: 'auto' } : panelStyle}>
@@ -102,9 +98,19 @@ export default function GraphHealthPanel({
             {/* Circular-ish gauge */}
             <div style={{ position: 'relative', flexShrink: 0 }}>
               <svg width={54} height={54} viewBox="0 0 54 54">
-                <circle cx={27} cy={27} r={22} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={5} />
                 <circle
-                  cx={27} cy={27} r={22} fill="none"
+                  cx={27}
+                  cy={27}
+                  r={22}
+                  fill="none"
+                  stroke="rgba(255,255,255,0.06)"
+                  strokeWidth={5}
+                />
+                <circle
+                  cx={27}
+                  cy={27}
+                  r={22}
+                  fill="none"
                   stroke={scoreColor}
                   strokeWidth={5}
                   strokeDasharray={`${(report.healthScore / 100) * 138.2} 138.2`}
@@ -113,11 +119,18 @@ export default function GraphHealthPanel({
                   style={{ transition: 'stroke-dasharray 0.6s ease, stroke 0.4s ease' }}
                 />
               </svg>
-              <span style={{
-                position: 'absolute', inset: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.65rem', fontWeight: 700, color: scoreColor,
-              }}>
+              <span
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  color: scoreColor,
+                }}
+              >
                 {report.healthScore}%
               </span>
             </div>
@@ -161,10 +174,14 @@ export default function GraphHealthPanel({
               <div style={detailLabelStyle}>Disconnected nodes ({report.orphanNodeIds.length})</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
                 {report.orphanNodeIds.slice(0, 20).map((id) => (
-                  <span key={id} style={tagStyle}>{labelMap.get(id) ?? id}</span>
+                  <span key={id} style={tagStyle}>
+                    {labelMap.get(id) ?? id}
+                  </span>
                 ))}
                 {report.orphanNodeIds.length > 20 && (
-                  <span style={{ ...tagStyle, opacity: 0.5 }}>+{report.orphanNodeIds.length - 20} more</span>
+                  <span style={{ ...tagStyle, opacity: 0.5 }}>
+                    +{report.orphanNodeIds.length - 20} more
+                  </span>
                 )}
               </div>
             </div>
@@ -181,7 +198,9 @@ export default function GraphHealthPanel({
                   </span>
                 ))}
                 {report.errorNodeIds.length > 20 && (
-                  <span style={{ ...tagStyle, opacity: 0.5 }}>+{report.errorNodeIds.length - 20} more</span>
+                  <span style={{ ...tagStyle, opacity: 0.5 }}>
+                    +{report.errorNodeIds.length - 20} more
+                  </span>
                 )}
               </div>
             </div>
@@ -190,10 +209,15 @@ export default function GraphHealthPanel({
           {/* Critical path */}
           {report.criticalPath.length > 1 && (
             <div style={detailBoxStyle}>
-              <div style={detailLabelStyle}>
-                Critical path — {report.criticalPath.length} nodes
-              </div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted, #888)', marginTop: 4, wordBreak: 'break-all' }}>
+              <div style={detailLabelStyle}>Critical path — {report.criticalPath.length} nodes</div>
+              <div
+                style={{
+                  fontSize: '0.65rem',
+                  color: 'var(--text-muted, #888)',
+                  marginTop: 4,
+                  wordBreak: 'break-all',
+                }}
+              >
                 {report.criticalPath.map((id) => labelMap.get(id) ?? id).join(' → ')}
               </div>
             </div>
@@ -206,26 +230,29 @@ export default function GraphHealthPanel({
               <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginTop: 4 }}>
                 {report.orphanCount > 0 && (
                   <div style={fixSuggestionStyle}>
-                    → Delete or connect {report.orphanCount} disconnected node{report.orphanCount > 1 ? 's' : ''}
+                    → Delete or connect {report.orphanCount} disconnected node
+                    {report.orphanCount > 1 ? 's' : ''}
                   </div>
                 )}
                 {report.cycleDetected && (
                   <div style={fixSuggestionStyle}>
-                    → Remove edge from {
-                      report.cyclePath.length > 1
-                        ? `"${labelMap.get(report.cyclePath[report.cyclePath.length - 2]) ?? ''}" → "${labelMap.get(report.cyclePath[0]) ?? ''}"`
-                        : 'the cycle'
-                    } to break the loop
+                    → Remove edge from{' '}
+                    {report.cyclePath.length > 1
+                      ? `"${labelMap.get(report.cyclePath[report.cyclePath.length - 2]) ?? ''}" → "${labelMap.get(report.cyclePath[0]) ?? ''}"`
+                      : 'the cycle'}{' '}
+                    to break the loop
                   </div>
                 )}
                 {report.errorNodeIds.length > 0 && (
                   <div style={fixSuggestionStyle}>
-                    → Check inputs on {report.errorNodeIds.length} error node{report.errorNodeIds.length > 1 ? 's' : ''}
+                    → Check inputs on {report.errorNodeIds.length} error node
+                    {report.errorNodeIds.length > 1 ? 's' : ''}
                   </div>
                 )}
                 {report.crossingEdgeCount > 0 && (
                   <div style={fixSuggestionStyle}>
-                    → Move {report.crossingEdgeCount} cross-group edge{report.crossingEdgeCount > 1 ? 's' : ''} inside their respective groups
+                    → Move {report.crossingEdgeCount} cross-group edge
+                    {report.crossingEdgeCount > 1 ? 's' : ''} inside their respective groups
                   </div>
                 )}
               </div>

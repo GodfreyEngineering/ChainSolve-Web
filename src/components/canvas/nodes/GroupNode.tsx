@@ -24,8 +24,14 @@ import { Icon } from '../../ui/Icon'
 const DEFAULT_COLOR = 'var(--primary)'
 
 const GROUP_COLORS = [
-  '#1CABB0', '#6366f1', '#f59e0b', '#ef4444',
-  '#22c55e', '#ec4899', '#8b5cf6', '#64748b',
+  '#1CABB0',
+  '#6366f1',
+  '#f59e0b',
+  '#ef4444',
+  '#22c55e',
+  '#ec4899',
+  '#8b5cf6',
+  '#64748b',
 ]
 
 function GroupNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
@@ -96,11 +102,7 @@ function GroupNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
   /** Shared header content (label + rename + color dot + badges). */
   const renderHeaderContent = () => (
     <>
-      <Icon
-        icon={TypeIcon}
-        size={14}
-        style={{ flexShrink: 0, opacity: 0.7, color: typeColor }}
-      />
+      <Icon icon={TypeIcon} size={14} style={{ flexShrink: 0, opacity: 0.7, color: typeColor }} />
 
       {/* Color dot — click to toggle color picker */}
       <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -175,11 +177,7 @@ function GroupNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
           }}
         />
       ) : (
-        <span
-          style={labelStyle}
-          onDoubleClick={onDoubleClick}
-          title="Double-click to rename"
-        >
+        <span style={labelStyle} onDoubleClick={onDoubleClick} title="Double-click to rename">
           {nd.label}
         </span>
       )}

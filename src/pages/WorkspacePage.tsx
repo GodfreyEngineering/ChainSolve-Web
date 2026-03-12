@@ -32,8 +32,9 @@ import { useSidebarStore } from '../stores/sidebarStore'
 import { StatusBar } from '../components/app/StatusBar'
 import { RightSidebar } from '../components/app/RightSidebar'
 import { useStatusBarStore } from '../stores/statusBarStore'
-import { createProject, listProjects, importProject, type ProjectJSON } from '../lib/projects'
+import { listProjects, importProject, type ProjectJSON } from '../lib/projects'
 import { canCreateProject, isAtProjectLimit } from '../lib/entitlements'
+import { NewProjectModal } from '../components/app/NewProjectModal'
 import { useToast } from '../components/ui/useToast'
 import { PanelErrorBoundary } from '../components/ErrorBoundary'
 import type { CanvasControls } from './CanvasPage'
@@ -126,6 +127,9 @@ export default function WorkspacePage() {
   // Canvas controls exposed by embedded CanvasPage (Phase M)
   const [canvasControls, setCanvasControls] = useState<CanvasControls | null>(null)
 
+  // New project modal
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false)
+
   // Scratch mode: activated by ?scratch=1 param or user action
   const [scratchMode, setScratchMode] = useState(() => searchParams.get('scratch') === '1')
 
@@ -175,9 +179,7 @@ export default function WorkspacePage() {
         )
         return
       }
-      const proj = await createProject('Untitled project')
-      setScratchMode(false)
-      navigate(`/app/${proj.id}`)
+      setShowNewProjectModal(true)
     } catch (err: unknown) {
       toast(
         err instanceof Error
@@ -186,7 +188,7 @@ export default function WorkspacePage() {
         'error',
       )
     }
-  }, [auth.plan, navigate, toast, t])
+  }, [auth.plan, toast, t])
 
   const handleOpenScratch = useCallback(() => {
     setScratchMode(true)
@@ -317,6 +319,16 @@ export default function WorkspacePage() {
         </Suspense>
       )}
 
+      {/* New project modal (templates gallery) */}
+      <NewProjectModal
+        open={showNewProjectModal}
+        onClose={() => setShowNewProjectModal(false)}
+        onCreated={(id) => {
+          setScratchMode(false)
+          navigate(`/app/${id}`)
+        }}
+      />
+
       {/* Hidden import input */}
       <input
         ref={importRef}
@@ -334,6 +346,7 @@ export default function WorkspacePage() {
           onToggleSidebar={toggleSidebar}
           projectName={canvasControls?.projectName ?? null}
           canvasControls={canvasControls}
+          projectId={projectId ?? null}
         />
       </PanelErrorBoundary>
 

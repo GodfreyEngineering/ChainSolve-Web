@@ -19,6 +19,7 @@ import {
   Save,
   Undo2,
   Redo2,
+  History,
 } from 'lucide-react'
 import type { CanvasControls } from '../../pages/CanvasPage'
 import type { SaveStatus } from '../../stores/projectStore'
@@ -33,6 +34,8 @@ import { PlanBadge } from '../ui/PlanBadge'
 import { Tooltip } from '../ui/Tooltip'
 import { Icon } from '../ui/Icon'
 import { displayNameStyle } from '../../lib/planStyles'
+import { ShareDialog } from './ShareDialog'
+import { HistoryPanel } from './HistoryPanel'
 
 export const WORKSPACE_TOOLBAR_HEIGHT = 36
 
@@ -44,6 +47,8 @@ interface WorkspaceToolbarProps {
   projectName?: string | null
   /** Canvas controls exposed by CanvasPage in embedded mode. */
   canvasControls?: CanvasControls | null
+  /** ADV-02: Project ID for share link generation. */
+  projectId?: string | null
 }
 
 export function WorkspaceToolbar({
@@ -52,6 +57,7 @@ export function WorkspaceToolbar({
   onToggleSidebar,
   projectName,
   canvasControls,
+  projectId,
 }: WorkspaceToolbarProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -59,6 +65,10 @@ export function WorkspaceToolbar({
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [accountOpen, setAccountOpen] = useState(false)
   const accountRef = useRef<HTMLDivElement>(null)
+  // ADV-02: Share dialog
+  const [shareOpen, setShareOpen] = useState(false)
+  // ADV-03: History panel
+  const [historyOpen, setHistoryOpen] = useState(false)
   const isMac = navigator.platform?.includes('Mac')
   const shortcutLabel = isMac ? '⌘B' : 'Ctrl+B'
 
@@ -188,6 +198,23 @@ export function WorkspaceToolbar({
                 {t('canvas.autosave')}
               </button>
             </Tooltip>
+
+            {/* ADV-03: History button (only when a project canvas is active) */}
+            {projectId && canvasControls.activeCanvasId && (
+              <>
+                <div style={thinSepStyle} />
+                <Tooltip content={t('history.title', 'Version History')} side="bottom">
+                  <button
+                    className="cs-header-icon-btn"
+                    onClick={() => setHistoryOpen((v) => !v)}
+                    style={iconBtn}
+                    aria-label={t('history.title', 'Version History')}
+                  >
+                    <Icon icon={History} size={14} />
+                  </button>
+                </Tooltip>
+              </>
+            )}
           </div>
         ) : projectName ? (
           <span style={{ fontSize: '0.78rem', fontWeight: 500, opacity: 0.8 }}>{projectName}</span>
@@ -197,6 +224,30 @@ export function WorkspaceToolbar({
       {/* ── Right: Plan badge, Docs, Settings, Avatar ── */}
       <div style={rightStyle}>
         <PlanBadge plan={plan} variant="compact" />
+
+        {/* ADV-02: Share button (only when a project is open) */}
+        {projectId && (
+          <Tooltip content={t('share.shareProject', 'Share project')} side="bottom">
+            <button
+              className="cs-header-icon-btn"
+              onClick={() => setShareOpen(true)}
+              style={{
+                ...iconBtn,
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                letterSpacing: '0.02em',
+                padding: '0 0.55rem',
+                height: 26,
+                borderRadius: 6,
+                background: 'rgba(28,171,176,0.12)',
+                color: 'var(--primary)',
+              }}
+              aria-label={t('share.shareProject', 'Share project')}
+            >
+              {t('share.shareBtn', 'Share')}
+            </button>
+          </Tooltip>
+        )}
 
         <Tooltip content={t('nav.documentation', 'Documentation')} side="bottom">
           <button
@@ -293,6 +344,23 @@ export function WorkspaceToolbar({
         <SaveProgressBar
           progress={canvasControls.saveProgress}
           status={canvasControls.saveStatus as SaveStatus}
+        />
+      )}
+
+      {/* ADV-02: Share dialog */}
+      {shareOpen && projectId && (
+        <ShareDialog projectId={projectId} onClose={() => setShareOpen(false)} />
+      )}
+
+      {/* ADV-03: History panel */}
+      {historyOpen && projectId && canvasControls?.activeCanvasId && (
+        <HistoryPanel
+          projectId={projectId}
+          canvasId={canvasControls.activeCanvasId}
+          getSnapshot={canvasControls.getCanvasSnapshot}
+          restoreSnapshot={canvasControls.restoreCanvasSnapshot}
+          saveNow={canvasControls.save}
+          onClose={() => setHistoryOpen(false)}
         />
       )}
     </header>

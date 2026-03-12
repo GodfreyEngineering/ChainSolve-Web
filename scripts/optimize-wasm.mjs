@@ -13,7 +13,7 @@
  * Requires `binaryen` (devDependency) which provides wasm-opt.
  */
 
-import { execFileSync } from 'child_process'
+import { execFileSync, spawnSync } from 'child_process'
 import { statSync, existsSync, readdirSync, renameSync, unlinkSync } from 'fs'
 import { dirname, resolve, join } from 'path'
 import { fileURLToPath } from 'url'
@@ -23,9 +23,22 @@ const ROOT = resolve(__dirname, '..')
 
 // ── Resolve wasm-opt ─────────────────────────────────────────────
 
-const BIN = join(ROOT, 'node_modules', '.bin', 'wasm-opt')
+const isWindows = process.platform === 'win32'
+// On Windows, .cmd wrappers must be invoked via cmd.exe; store only the base name.
+const BIN_CMD = isWindows ? join(ROOT, 'node_modules', '.bin', 'wasm-opt.cmd') : null
+const BIN = isWindows ? null : join(ROOT, 'node_modules', '.bin', 'wasm-opt')
 
-if (!existsSync(BIN)) {
+function runWasmOpt(args) {
+  if (isWindows) {
+    const result = spawnSync('cmd.exe', ['/c', BIN_CMD, ...args], { stdio: 'inherit' })
+    if (result.status !== 0) throw new Error(`wasm-opt exited with ${result.status}`)
+  } else {
+    execFileSync(BIN, args, { stdio: 'inherit' })
+  }
+}
+
+const BIN_CHECK = isWindows ? BIN_CMD : BIN
+if (!existsSync(BIN_CHECK)) {
   console.warn('wasm-opt not found in node_modules/.bin — skipping optimization.')
   console.warn('Install binaryen: npm install --save-dev binaryen')
   process.exit(0)
@@ -33,8 +46,13 @@ if (!existsSync(BIN)) {
 
 // Print version for diagnostics
 try {
-  const ver = execFileSync(BIN, ['--version'], { encoding: 'utf-8' }).trim()
-  console.log(`wasm-opt: ${ver}`)
+  if (isWindows) {
+    const r = spawnSync('cmd.exe', ['/c', BIN_CMD, '--version'], { encoding: 'utf-8' })
+    console.log(`wasm-opt: ${(r.stdout || '').trim() || '(version unknown)'}`)
+  } else {
+    const ver = execFileSync(BIN, ['--version'], { encoding: 'utf-8' }).trim()
+    console.log(`wasm-opt: ${ver}`)
+  }
 } catch {
   console.log('wasm-opt: (version unknown)')
 }
@@ -105,9 +123,7 @@ for (const wasmPath of wasmFiles) {
 
   // Write to temp file — never corrupt the original on failure
   try {
-    execFileSync(BIN, [...FEATURE_FLAGS, ...OPT_FLAGS, wasmPath, '-o', tmpPath], {
-      stdio: 'inherit',
-    })
+    runWasmOpt([...FEATURE_FLAGS, ...OPT_FLAGS, wasmPath, '-o', tmpPath])
   } catch (err) {
     console.error(`  ::error::wasm-opt failed on ${label}: ${err.message}`)
     // Clean up temp file if it was partially written

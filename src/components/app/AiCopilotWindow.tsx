@@ -18,7 +18,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppWindow } from '../ui/AppWindow'
-import type { AiMode, AiPatchOp, RiskAssessment } from '../../lib/aiCopilot/types'
+import type { AiMode, AiTask, AiPatchOp, RiskAssessment } from '../../lib/aiCopilot/types'
 import { assessRisk, requiresConfirmation } from '../../lib/aiCopilot/riskScoring'
 import { sendCopilotRequest } from '../../lib/aiCopilot/aiService'
 import type { Plan } from '../../lib/entitlements'
@@ -117,6 +117,23 @@ const s = {
     textAlign: 'center' as const,
     padding: '0.15rem 0',
   },
+  suggestionsRow: {
+    display: 'flex',
+    gap: '0.3rem',
+    flexWrap: 'wrap' as const,
+  },
+  suggestionChip: {
+    padding: '0.2rem 0.55rem',
+    borderRadius: 12,
+    border: '1px solid rgba(28,171,176,0.3)',
+    background: 'rgba(28,171,176,0.08)',
+    color: 'var(--primary)',
+    fontSize: '0.72rem',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    fontWeight: 500,
+    transition: 'background 0.12s, border-color 0.12s',
+  } satisfies React.CSSProperties,
   opsPreview: {
     padding: '0.4rem 0.5rem',
     borderRadius: 6,
@@ -229,6 +246,7 @@ export function AiCopilotWindow({
 }: AiCopilotWindowProps) {
   const { t } = useTranslation()
   const [mode, setMode] = useState<AiMode>('edit')
+  const [activeTask, setActiveTask] = useState<AiTask>('chat')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState(initialMessage ?? '')
   const [loading, setLoading] = useState(false)
@@ -241,6 +259,77 @@ export function AiCopilotWindow({
 
   const canUse = plan === 'pro' || plan === 'trialing' || plan === 'enterprise'
   const isEnterprise = plan === 'enterprise'
+
+  const triggerSuggestion = useCallback(
+    (task: AiTask, message: string) => {
+      setActiveTask(task)
+      setInput(message)
+      // Auto-send immediately
+      if (!projectId || !canvasId || loading) return
+      setMessages((prev) => [...prev, { role: 'user', content: message }])
+      setLoading(true)
+      setPendingOps(null)
+      setPendingRisk(null)
+
+      const effectiveMode = task === 'explain_node' ? ('plan' as AiMode) : mode
+      sendCopilotRequest({
+        mode: effectiveMode,
+        task,
+        scope:
+          task === 'explain_node' && selectedNodeIds.length > 0 ? 'selection' : 'active_canvas',
+        userMessage: message,
+        projectId,
+        canvasId,
+        selectedNodeIds,
+      })
+        .then((response) => {
+          const ops = response.patchOps ?? []
+          const risk = assessRisk(ops)
+          if (response.tokensRemaining != null) setTokensRemaining(response.tokensRemaining)
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: response.message,
+              patchOps: ops,
+              risk,
+              assumptions: response.assumptions,
+            },
+          ])
+          setHistory((prev) => [
+            { summary: response.message.slice(0, 80), opsCount: ops.length, timestamp: Date.now() },
+            ...prev.slice(0, 19),
+          ])
+          if (ops.length > 0 && effectiveMode !== 'plan') {
+            const needsConfirm = requiresConfirmation(
+              risk.level,
+              effectiveMode === 'bypass' ? 'bypass' : 'edit',
+              isEnterprise,
+            )
+            if (!needsConfirm) onApplyPatch(ops, response.message)
+            else {
+              setPendingOps(ops)
+              setPendingRisk(risk)
+              setPendingSummary(response.message)
+            }
+          }
+        })
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : t('ai.errorGeneric')
+          setMessages((prev) => [...prev, { role: 'assistant', content: msg }])
+        })
+        .finally(() => {
+          setLoading(false)
+          setActiveTask('chat')
+          setInput('')
+          setTimeout(() => {
+            if (transcriptRef.current)
+              transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight
+          }, 50)
+        })
+    },
+    [projectId, canvasId, loading, mode, selectedNodeIds, isEnterprise, onApplyPatch, t],
+  )
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -263,7 +352,12 @@ export function AiCopilotWindow({
 
     try {
       const response = await sendCopilotRequest({
-        mode,
+        mode: activeTask === 'explain_node' ? 'plan' : mode,
+        task: activeTask,
+        scope:
+          selectedNodeIds.length > 0 && activeTask === 'explain_node'
+            ? 'selection'
+            : 'active_canvas',
         userMessage: trimmed,
         projectId,
         canvasId,
@@ -316,6 +410,7 @@ export function AiCopilotWindow({
       setMessages((prev) => [...prev, { role: 'assistant', content: msg }])
     } finally {
       setLoading(false)
+      setActiveTask('chat') // Reset to chat after specialized task completes
       scrollToBottom()
     }
   }, [
@@ -324,6 +419,7 @@ export function AiCopilotWindow({
     projectId,
     canvasId,
     mode,
+    activeTask,
     selectedNodeIds,
     isEnterprise,
     onApplyPatch,
@@ -405,6 +501,51 @@ export function AiCopilotWindow({
           {isEnterprise && <option value="bypass">{t('ai.modeBypass')}</option>}
         </select>
       </div>
+
+      {/* Smart suggestion chips (ADV-01) */}
+      {messages.length === 0 && !loading && (
+        <div style={s.suggestionsRow}>
+          <button
+            style={s.suggestionChip}
+            onClick={() =>
+              triggerSuggestion('explain_node', t('ai.suggestExplainGraph', 'Explain this graph'))
+            }
+            title={t('ai.suggestExplainGraphTip', 'Describe what the current canvas computes')}
+          >
+            {t('ai.suggestExplainGraph', 'Explain this graph')}
+          </button>
+          <button
+            style={s.suggestionChip}
+            onClick={() =>
+              triggerSuggestion('fix_graph', t('ai.suggestFindErrors', 'Find and fix errors'))
+            }
+            title={t('ai.suggestFindErrorsTip', 'Analyse the Problems panel and suggest fixes')}
+          >
+            {t('ai.suggestFindErrors', 'Find errors')}
+          </button>
+          <button
+            style={s.suggestionChip}
+            onClick={() =>
+              triggerSuggestion('generate_template', t('ai.suggestGenTemplate', 'Save as template'))
+            }
+            title={t(
+              'ai.suggestGenTemplateTip',
+              'Package the selected blocks as a reusable template',
+            )}
+          >
+            {t('ai.suggestGenTemplate', 'Save as template')}
+          </button>
+          <button
+            style={s.suggestionChip}
+            onClick={() =>
+              triggerSuggestion('chat', t('ai.suggestSimplify', 'Simplify this chain'))
+            }
+            title={t('ai.suggestSimplifyTip', 'Suggest ways to reduce complexity or merge blocks')}
+          >
+            {t('ai.suggestSimplify', 'Simplify chain')}
+          </button>
+        </div>
+      )}
 
       {/* Token budget */}
       {tokensRemaining != null && (

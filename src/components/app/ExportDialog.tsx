@@ -60,7 +60,11 @@ export interface ExportDialogProps {
   onClose: () => void
   hasProject: boolean
   exportInProgress?: boolean
-  onExportPdf: (opts: { includeImages: boolean; scope: ExportScope; pageSize: PdfPageSizeOption }) => void
+  onExportPdf: (opts: {
+    includeImages: boolean
+    scope: ExportScope
+    pageSize: PdfPageSizeOption
+  }) => void
   onExportXlsx: (opts: { includeTables: boolean; scope: ExportScope }) => void
   onExportJson: () => void
   onCancelExport?: () => void
@@ -93,7 +97,11 @@ export function ExportDialog({
 
     switch (prefs.format) {
       case 'pdf':
-        onExportPdf({ includeImages: prefs.includeImages, scope: prefs.scope, pageSize: prefs.pageSize })
+        onExportPdf({
+          includeImages: prefs.includeImages,
+          scope: prefs.scope,
+          pageSize: prefs.pageSize,
+        })
         break
       case 'xlsx':
         onExportXlsx({ includeTables: prefs.includeTables, scope: prefs.scope })
@@ -177,7 +185,9 @@ export function ExportDialog({
               {t('exportDialog.includeAnnotations')}
             </label>
             <div style={{ marginTop: 8 }}>
-              <div style={{ ...fieldLabel, marginBottom: 4 }}>{t('exportDialog.pageSize', 'Page size')}</div>
+              <div style={{ ...fieldLabel, marginBottom: 4 }}>
+                {t('exportDialog.pageSize', 'Page size')}
+              </div>
               <div style={radioGroup}>
                 {(['A4', 'Letter', 'A3'] as const).map((ps) => (
                   <label key={ps} style={radioLabel}>

@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc c1a22d90904d644f8c753c4a54cce4e560053858368889260789799c36e92561 # shrinks to ops = [AddNode { node: NodeDef { id: "n8", block_type: "number", data: {"value": Number(0.0)} } }, AddEdge { edge: EdgeDef { id: "e9", source: "n3", source_handle: "out", target: "n3", target_handle: "a" } }, AddEdge { edge: EdgeDef { id: "e9", source: "n7", source_handle: "out", target: "n3", target_handle: "a" } }, AddNode { node: NodeDef { id: "n7", block_type: "number", data: {"value": Number(0.0)} } }]

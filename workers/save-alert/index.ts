@@ -17,8 +17,8 @@
  */
 
 export interface Env {
-  APP_BASE_URL: string;
-  ADMIN_API_KEY: string;
+  APP_BASE_URL: string
+  ADMIN_API_KEY: string
 }
 
 export default {
@@ -26,55 +26,54 @@ export default {
    * Scheduled handler — runs once per day at 06:00 UTC.
    * Cron schedule configured in wrangler.toml: "0 6 * * *"
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async scheduled(_event: ScheduledEvent, env: Env, _ctx: ExecutionContext): Promise<void> {
-    const baseUrl = env.APP_BASE_URL?.replace(/\/$/, "");
+    const baseUrl = env.APP_BASE_URL?.replace(/\/$/, '')
     if (!baseUrl) {
-      console.error("[save-alert] APP_BASE_URL not configured");
-      return;
+      console.error('[save-alert] APP_BASE_URL not configured')
+      return
     }
 
-    const url = `${baseUrl}/api/admin/save-alert-check`;
+    const url = `${baseUrl}/api/admin/save-alert-check`
     try {
       const resp = await fetch(url, {
-        method: "GET",
+        method: 'GET',
         headers: {
           Authorization: `Bearer ${env.ADMIN_API_KEY}`,
         },
-      });
+      })
 
       if (!resp.ok) {
-        console.error(`[save-alert] check endpoint returned HTTP ${resp.status}`);
-        return;
+        console.error(`[save-alert] check endpoint returned HTTP ${resp.status}`)
+        return
       }
 
       const result = (await resp.json()) as {
-        alert_triggered: boolean;
-        total_saves: number;
-        total_failures: number;
-        overall_failure_rate: number;
-        alert_windows: unknown[];
-      };
+        alert_triggered: boolean
+        total_saves: number
+        total_failures: number
+        overall_failure_rate: number
+        alert_windows: unknown[]
+      }
 
       if (result.alert_triggered) {
         // Workers Logpush will capture this as a structured log entry.
         console.error(
-          "[save-alert] ALERT: save failure rate exceeded 1% threshold",
+          '[save-alert] ALERT: save failure rate exceeded 1% threshold',
           JSON.stringify({
             total_saves: result.total_saves,
             total_failures: result.total_failures,
             overall_failure_rate: result.overall_failure_rate,
             alert_windows: result.alert_windows,
           }),
-        );
+        )
       } else {
         console.log(
           `[save-alert] OK: ${result.total_saves} saves, ` +
             `${result.total_failures} failures (${(result.overall_failure_rate * 100).toFixed(2)}%)`,
-        );
+        )
       }
     } catch (err) {
-      console.error("[save-alert] fetch error:", String(err));
+      console.error('[save-alert] fetch error:', String(err))
     }
   },
-};
+}

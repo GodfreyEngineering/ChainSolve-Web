@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { execSync } from 'child_process'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
+import { wasmHotReload } from './vite-plugin-wasm-reload'
 
 function getGitSha(): string {
   try {
@@ -21,9 +23,22 @@ function getPkgVersion(): string {
   }
 }
 
+// DEV-04: Upload source maps to Sentry during production builds when
+// SENTRY_AUTH_TOKEN and VITE_SENTRY_DSN are set. Safe to omit in local dev.
+const sentryPlugin =
+  process.env.SENTRY_AUTH_TOKEN && process.env.VITE_SENTRY_DSN
+    ? sentryVitePlugin({
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT ?? 'chainsolve-web',
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
+        telemetry: false,
+      })
+    : null
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), wasmHotReload(), ...(sentryPlugin ? [sentryPlugin] : [])],
   define: {
     __CS_VERSION__: JSON.stringify(getPkgVersion()),
     __CS_SHA__: JSON.stringify(getGitSha()),

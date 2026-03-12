@@ -38,8 +38,10 @@ export function useCanvasEngine(
   primaryEngine: EngineAPI,
 ): CanvasEngineResult {
   const pool = useWorkerPool()
-  const [{ dedicatedEngine, engineSwitchCount }, setEngineState] =
-    useState<CanvasEngineState>({ dedicatedEngine: null, engineSwitchCount: 0 })
+  const [{ dedicatedEngine, engineSwitchCount }, setEngineState] = useState<CanvasEngineState>({
+    dedicatedEngine: null,
+    engineSwitchCount: 0,
+  })
 
   // Tracks the current canvasId for stale-result rejection in the async callback.
   const activeCanvasIdRef = useRef<string | undefined>(undefined)

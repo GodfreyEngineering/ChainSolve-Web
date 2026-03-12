@@ -31,8 +31,11 @@ export async function loadVariables(projectId: string): Promise<VariablesMap> {
 /** Save variables for a project (full overwrite of the JSONB column). */
 export async function saveVariables(projectId: string, variables: VariablesMap): Promise<void> {
   dlog.debug('variables', 'Saving variables', { projectId, count: Object.keys(variables).length })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await supabase.from('projects').update({ variables: variables as any }).eq('id', projectId)
+  const { error } = await supabase
+    .from('projects')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .update({ variables: variables as any })
+    .eq('id', projectId)
 
   if (error) {
     dlog.error('variables', 'Save failed', { projectId, error: error.message })

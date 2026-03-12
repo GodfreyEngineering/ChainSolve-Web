@@ -103,9 +103,21 @@ function tokenize(input: string): Token[] {
       i++
       continue
     }
-    if (ch === '(') { tokens.push({ type: 'lparen' }); i++; continue }
-    if (ch === ')') { tokens.push({ type: 'rparen' }); i++; continue }
-    if (ch === ',') { tokens.push({ type: 'comma' }); i++; continue }
+    if (ch === '(') {
+      tokens.push({ type: 'lparen' })
+      i++
+      continue
+    }
+    if (ch === ')') {
+      tokens.push({ type: 'rparen' })
+      i++
+      continue
+    }
+    if (ch === ',') {
+      tokens.push({ type: 'comma' })
+      i++
+      continue
+    }
 
     throw new Error(`Unexpected character: '${ch}' at position ${i}`)
   }

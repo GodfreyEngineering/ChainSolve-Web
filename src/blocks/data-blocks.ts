@@ -11,7 +11,6 @@
 
 import type { BlockDef } from './types'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function registerDataBlocks(_register: (def: BlockDef) => void): void {
   // No-op: vectorInput removed. tableInput is registered in table-blocks.ts.
 }

@@ -321,11 +321,7 @@ function NumberInputBody({
           }}
         />
         <Suspense fallback={null}>
-          <LazyUnitPicker
-            compact
-            value={unit}
-            onChange={(unitId) => onUnitChange(unitId)}
-          />
+          <LazyUnitPicker compact value={unit} onChange={(unitId) => onUnitChange(unitId)} />
         </Suspense>
       </div>
       {error && (
@@ -339,7 +335,10 @@ function NumberInputBody({
           <div
             style={{ position: 'fixed', inset: 0, zIndex: 1998 }}
             onClick={() => setInputMenu(null)}
-            onContextMenu={(e) => { e.preventDefault(); setInputMenu(null) }}
+            onContextMenu={(e) => {
+              e.preventDefault()
+              setInputMenu(null)
+            }}
           />
           <div
             className="nodrag"
@@ -358,16 +357,28 @@ function NumberInputBody({
             }}
           >
             <div
-              style={{ padding: '0.35rem 0.75rem', borderRadius: 4, cursor: 'default', opacity: 0.5 }}
+              style={{
+                padding: '0.35rem 0.75rem',
+                borderRadius: 4,
+                cursor: 'default',
+                opacity: 0.5,
+              }}
             >
               ✎ Set literal
             </div>
             {onSwitchToVariable && (
               <div
                 style={{ padding: '0.35rem 0.75rem', borderRadius: 4, cursor: 'pointer' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'var(--menu-hover)' }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
-                onClick={() => { setInputMenu(null); onSwitchToVariable() }}
+                onMouseEnter={(e) => {
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'var(--menu-hover)'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
+                }}
+                onClick={() => {
+                  setInputMenu(null)
+                  onSwitchToVariable()
+                }}
               >
                 𝑥 Bind to variable…
               </div>
@@ -375,9 +386,16 @@ function NumberInputBody({
             {onSwitchToConstant && (
               <div
                 style={{ padding: '0.35rem 0.75rem', borderRadius: 4, cursor: 'pointer' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'var(--menu-hover)' }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
-                onClick={() => { setInputMenu(null); onSwitchToConstant() }}
+                onMouseEnter={(e) => {
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'var(--menu-hover)'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.currentTarget as HTMLDivElement).style.background = 'transparent'
+                }}
+                onClick={() => {
+                  setInputMenu(null)
+                  onSwitchToConstant()
+                }}
               >
                 π Bind to constant…
               </div>
@@ -475,7 +493,11 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
 
   return (
     <div
-      style={{ ...s.node, ...userColorBg(nd.userColor), ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}) }}
+      style={{
+        ...s.node,
+        ...userColorBg(nd.userColor),
+        ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
+      }}
       role="group"
       aria-label={ariaLabel}
     >
@@ -737,12 +759,11 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
                       fontSize: '0.62rem',
                     }}
                   >
-                    {catEntry.symbol ? `${catEntry.symbol} = ` : ''}{fullPrecision}
+                    {catEntry.symbol ? `${catEntry.symbol} = ` : ''}
+                    {fullPrecision}
                     {catEntry.unit ? ` ${catEntry.unit}` : ''}
                   </span>
-                  {catEntry.description && (
-                    <span>{catEntry.description}</span>
-                  )}
+                  {catEntry.description && <span>{catEntry.description}</span>}
                   {/* PREC-03: Uncertainty and source */}
                   <span style={{ opacity: 0.7 }}>
                     {catEntry.uncertainty ? `\u00B1 ${catEntry.uncertainty}` : ''}
