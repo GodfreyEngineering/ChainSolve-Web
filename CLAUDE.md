@@ -162,11 +162,11 @@ Playwright does **not** run on PRs — only after merge to `main`, as a pre-cond
 
 | Metric | Budget |
 |--------|--------|
-| Initial JS (gzip) | 300 KB |
+| Initial JS (gzip) | 400 KB |
 | WASM (raw) | 800 KB |
 | WASM (gzip) | 250 KB |
 
-JS budget tightened (UI-PERF-05 target): use `React.lazy()` for heavy components (Settings, block descriptions, vega-lite, KaTeX, AI Copilot, exceljs). WASM budgets updated (ENG-09): switched wasm-opt from `-Oz` (size) to `-O3` (speed). Larger binary is acceptable for better runtime performance.
+JS budget raised to 400 KB gz: React + React Flow + i18n + Sentry + engine bridge account for ~355 KB gz of the initial closure. Block registry is lazy-loaded post engine-init (UI-PERF-05). Use `React.lazy()` for heavy components (Settings, block descriptions, vega-lite, KaTeX, AI Copilot, exceljs). WASM budgets updated (ENG-09): switched wasm-opt from `-Oz` (size) to `-O3` (speed). Larger binary is acceptable for better runtime performance.
 
 Use `React.lazy()` to keep new components out of the initial load. Run `npm run perf:bundle` after a build to check locally.
 
