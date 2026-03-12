@@ -188,7 +188,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[UX-08] Inspector: contextual intelligence** — Computed value shown prominently (large font + unit). Upstream chain: "Receiving from: [source] → [transform]". Downstream chain: "Feeding into: [display], [plot]". Formula rendered with KaTeX for math-heavy blocks. What-if slider: temporarily override input and see downstream live. Warnings section (division by zero possible, near-singular matrix). Verify: select Sine block → inspector shows formula sin(x), current input/output, and upstream/downstream.
 
-- [ ] **[UX-09] Search and jump to node (Ctrl+F)** — Inline search bar filters nodes by label, block type, or value. Non-matching nodes dim. Enter cycles through matches with smooth pan+zoom. Escape restores full opacity. Verify: Ctrl+F → "display" → all display nodes highlight; Enter navigates to each.
+- [x] **[UX-09] Search and jump to node (Ctrl+F)** — FindBlockDialog: onMatchesChange callback drives CSS dimming of non-matching nodes (18% opacity via data-id selectors). Enter now cycles through all matches. Match count + "Enter to cycle" hint in header. Cleanup clears dimming on close. Verify: Ctrl+F → "display" → all display nodes highlight; Enter navigates to each.
 
 - [ ] **[UX-10] Undo/redo: history timeline panel** — History tab in bottom dock: list of all undo-able actions with timestamps. Click entry → restore that state. Visual diff showing which nodes changed. Warning before undoing past a save point. Verify: add 10 nodes → open history → click entry 5 → canvas shows state at step 5.
 
