@@ -15,7 +15,7 @@ import { isError, isScalar } from '../../../engine/value'
 import { useFormatValue } from '../../../hooks/useFormatValue'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
 import { getUnitSymbol } from '../../../units/unitSymbols'
-import { NODE_STYLES as s } from './nodeStyles'
+import { NODE_STYLES as s, userColorBg } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
 
@@ -93,6 +93,7 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
       style={{
         ...s.node,
         minWidth: 140,
+        ...userColorBg(nd.userColor),
         ...borderOverride,
       }}
     >

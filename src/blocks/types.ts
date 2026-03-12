@@ -202,6 +202,8 @@ export interface NodeData extends Record<string, unknown> {
   publishChannelName?: string
   /** H7-1: Channel name subscribed to (csSubscribe nodes only). */
   subscribeChannelName?: string
+  /** UX-14: User-chosen accent color for this node (hex string). Tints node background. */
+  userColor?: string
 }
 
 export interface BlockDef {

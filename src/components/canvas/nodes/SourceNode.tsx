@@ -21,7 +21,7 @@ import { MATERIAL_PROPERTY_META, type MaterialProperty } from '../../../lib/cust
 import { getUnitSymbol } from '../../../units/unitSymbols'
 import { usePlan } from '../../../contexts/PlanContext'
 import { getEntitlements } from '../../../lib/entitlements'
-import { NODE_STYLES as s } from './nodeStyles'
+import { NODE_STYLES as s, userColorBg } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
 import { useValueFlash } from '../../../hooks/useValueFlash'
@@ -407,7 +407,7 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
   const TypeIcon = getNodeTypeIcon(nd.blockType)
 
   return (
-    <div style={{ ...s.node, ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}) }}>
+    <div style={{ ...s.node, ...userColorBg(nd.userColor), ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}) }}>
       <div
         style={{
           ...s.header,

@@ -1324,6 +1324,21 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [setNodes, doSaveHistory],
   )
 
+  // UX-14: Set user accent color for a node (null clears it)
+  const setNodeColor = useCallback(
+    (nodeId: string, color: string | null) => {
+      doSaveHistory()
+      setNodes((nds) =>
+        nds.map((n) =>
+          n.id === nodeId
+            ? { ...n, data: { ...n.data, userColor: color ?? undefined } }
+            : n,
+        ),
+      )
+    },
+    [setNodes, doSaveHistory],
+  )
+
   // G6-2: Select all nodes and edges in the connected component of a given node
   const selectChain = useCallback(
     (seedId: string) => {
@@ -2416,6 +2431,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     onShowAllHidden={readOnly ? undefined : showAllHiddenNodes}
                     hasHiddenNodes={hasHiddenNodes}
                     onAnnotationZOrder={readOnly ? undefined : onAnnotationZOrder}
+                    onSetNodeColor={readOnly ? undefined : setNodeColor}
                   />
                 )}
 

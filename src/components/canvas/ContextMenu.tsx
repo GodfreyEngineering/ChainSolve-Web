@@ -11,6 +11,18 @@ import type { Value } from '../../engine/value'
 import { isError } from '../../engine/value'
 import type { AlignOp } from '../../lib/alignmentHelpers'
 
+/** UX-14: Preset accent colors for node tinting. */
+const NODE_COLORS = [
+  '#ef4444', // red
+  '#f97316', // orange
+  '#eab308', // yellow
+  '#22c55e', // green
+  '#06b6d4', // cyan
+  '#3b82f6', // blue
+  '#a855f7', // violet
+  '#ec4899', // pink
+]
+
 export type ContextMenuTarget =
   | { kind: 'canvas'; x: number; y: number }
   | {
@@ -86,6 +98,8 @@ interface ContextMenuProps {
   hasHiddenNodes?: boolean
   /** V3-5.1: Z-order annotation (bring to front / send to back). */
   onAnnotationZOrder?: (nodeId: string, op: 'front' | 'back' | 'forward' | 'backward') => void
+  /** UX-14: Set user accent color for a node (null clears it). */
+  onSetNodeColor?: (nodeId: string, color: string | null) => void
 }
 
 const item: CSSProperties = {
@@ -191,6 +205,7 @@ export function ContextMenu({
   onShowAllHidden,
   hasHiddenNodes,
   onAnnotationZOrder,
+  onSetNodeColor,
 }: ContextMenuProps) {
   const { t } = useTranslation()
 
@@ -360,6 +375,65 @@ export function ContextMenu({
                     onClose()
                   }}
                 />
+              </>
+            )}
+            {onSetNodeColor && (
+              <>
+                <div style={sep} />
+                <SubLabel label={t('contextMenu.nodeColor', 'Node color')} />
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '0.2rem 0.9rem 0.35rem',
+                  }}
+                >
+                  {NODE_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      title={color}
+                      style={{
+                        width: 17,
+                        height: 17,
+                        borderRadius: '50%',
+                        background: color,
+                        border: '2px solid rgba(255,255,255,0.15)',
+                        cursor: 'pointer',
+                        padding: 0,
+                        flexShrink: 0,
+                      }}
+                      onClick={() => {
+                        onSetNodeColor(target.nodeId, color)
+                        onClose()
+                      }}
+                    />
+                  ))}
+                  <button
+                    title={t('contextMenu.clearColor', 'Clear color')}
+                    style={{
+                      width: 17,
+                      height: 17,
+                      borderRadius: '50%',
+                      background: 'transparent',
+                      border: '2px solid var(--border)',
+                      cursor: 'pointer',
+                      padding: 0,
+                      flexShrink: 0,
+                      fontSize: '0.6rem',
+                      color: 'var(--text-muted)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                    onClick={() => {
+                      onSetNodeColor(target.nodeId, null)
+                      onClose()
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
               </>
             )}
             {onHideSelected && (

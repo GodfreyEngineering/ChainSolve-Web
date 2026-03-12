@@ -10,6 +10,12 @@ import type { CSSProperties } from 'react'
 
 export const HANDLE_SIZE = 12
 
+/** UX-14: Returns a background override when the node has a user-chosen color. */
+export function userColorBg(userColor?: string): CSSProperties {
+  if (!userColor) return {}
+  return { background: `color-mix(in srgb, ${userColor} 18%, var(--node-bg))` }
+}
+
 export const NODE_STYLES = {
   node: {
     minWidth: 190,

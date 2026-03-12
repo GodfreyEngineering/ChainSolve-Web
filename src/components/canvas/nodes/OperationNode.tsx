@@ -28,7 +28,7 @@ import { ensureBinding } from '../../../lib/migrateBindings'
 import { ValueEditor } from '../editors/ValueEditor'
 import { getUnitSymbol } from '../../../units/unitSymbols'
 import { getConversionFactor, areSameDimension } from '../../../units/unitCompat'
-import { NODE_STYLES as s } from './nodeStyles'
+import { NODE_STYLES as s, userColorBg } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
 import { useValueFlash } from '../../../hooks/useValueFlash'
@@ -146,7 +146,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
       : {}
 
   return (
-    <div style={{ ...s.node, ...borderOverride }}>
+    <div style={{ ...s.node, ...userColorBg(nd.userColor), ...borderOverride }}>
       <div
         style={{
           ...s.header,
