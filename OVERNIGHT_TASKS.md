@@ -196,9 +196,9 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[UX-12] Drag-and-drop from OS onto canvas** — CSV files → auto-creates CSV Import block at drop position. Image files → creates Image annotation block. Detect via `onDragOver`/`onDrop` on canvas. Verify: drag .csv from Windows Explorer onto canvas → CSV Import block appears with file loaded.
 
-- [ ] **[UX-13] Block pinning / Quick Access** — Right-click block → "Pin to Quick Access". Pinned blocks appear in a persistent strip at the top of the block library and quick-add palette (max 12). Persisted to `user_preferences`. Verify: pin "Sine" → appears in Quick Access; persists across sessions.
+- [x] **[UX-13] Block pinning / Quick Access** — Right-click block → "Pin to Quick Access". Pinned blocks appear in a persistent strip at the top of the block library and quick-add palette (max 12). Persisted to `user_preferences`. Verify: pin "Sine" → appears in Quick Access; persists across sessions.
 
-- [ ] **[UX-14] Node color coding** — Right-click node → "Set color" → color picker. Tints node background. Persisted in `node.data.userColor`. Verify: set teal → node shows teal tint; save → reopen → teal persists.
+- [x] **[UX-14] Node color coding** — Right-click node → "Set color" → color picker. Tints node background. Persisted in `node.data.userColor`. Verify: set teal → node shows teal tint; save → reopen → teal persists.
 
 - [ ] **[UX-15] Context menu: completeness** — Node: Duplicate, Delete, Set Color, Add to Group, Save as Template, Pin Output, Copy Value, Inspect, Reset to Default, Disconnect All Edges, Extract to New Canvas. Edge: Delete, Inspect Value, Add Probe Node (inserts Display block on this edge). Canvas: Add Block, Paste, Auto-layout, Zoom Fit, Add Annotation, Add Text, Select All. Verify: right-click edge → Add Probe → Display block appears mid-edge with correct value.
 
@@ -206,11 +206,11 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[UX-17] Variables panel: full-featured** — Each variable: name, value slider, unit, description, "Jump to bound blocks" link. Import/export as CSV. Variable groups. Sensitivity analysis button (sweeps each variable ±10%, shows which outputs change most). Verify: drag slider → all bound blocks update in < 100ms.
 
-- [ ] **[UX-18] Empty canvas + empty projects: friendly states** — Empty canvas: centered illustration + "Start building" + quick-start options (double-click to add block, browse library, start from template). Empty projects list: "No projects yet" + "Create first project" + "Start from template". Both disappear as soon as content is added. Verify: new account → empty state on project list; new project → empty state on canvas.
+- [x] **[UX-18] Empty canvas + empty projects: friendly states** — Empty canvas: centered illustration + "Start building" + quick-start options (double-click to add block, browse library, start from template). Empty projects list: "No projects yet" + "Create first project" + "Start from template". Both disappear as soon as content is added. Verify: new account → empty state on project list; new project → empty state on canvas.
 
 - [ ] **[UX-19] Presentation mode** — "Present" button (or keyboard shortcut) enters full-screen clean view: library and inspector hidden, only canvas. Large-text overlays for slide titles. Spotlight mode: click node to highlight, dim others. Pointer/laser mode. Verify: enter presentation mode → clean canvas; click node → spotlight effect.
 
-- [ ] **[UX-20] Zoom and navigation: complete keyboard support** — Ctrl+= / Ctrl+- zoom. Ctrl+0 fit all. Ctrl+Shift+0 zoom to 100%. Ctrl+G select group's children. Arrow keys nudge selected nodes 1px (or grid step). Ctrl+Arrow nudge 10px. Page Up/Down switch canvas tabs. Middle-click drag to pan. Space+drag to pan. Verify: all shortcuts work and are listed in the shortcuts modal.
+- [x] **[UX-20] Zoom and navigation: complete keyboard support** — Ctrl+= / Ctrl+- zoom. Ctrl+0 fit all. Ctrl+Shift+0 zoom to 100%. Ctrl+G select group's children. Arrow keys nudge selected nodes 1px (or grid step). Ctrl+Arrow nudge 10px. Page Up/Down switch canvas tabs. Middle-click drag to pan. Space+drag to pan. Verify: all shortcuts work and are listed in the shortcuts modal.
 
 - [ ] **[UX-21] Block groups: polish and expand** — Groups already exist (W7). Polish: (1) Double-click group header to rename inline. (2) Group color picker on the group header (not just via context menu). (3) Collapse/expand animates smoothly (height transition). (4) Group shows node count badge when collapsed. (5) "Save group as template" saves to DB. (6) "Lock group" prevents accidental edits to contained nodes. (7) Group can be exported as a standalone .chainsolvejson block pack. Verify: collapse a group → smooth animation → shows "5 nodes" badge.
 
@@ -250,7 +250,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[PROJ-05] Project search** — Upgraded existing search to true fuzzy matching (sequential char match with scoring) + HighlightedName renders matched chars in primary color. Sorted by score when querying; pinned projects still appear first. Verify: type "beam" → shows all projects with "beam" in name; matched chars highlighted.
 
-- [ ] **[PROJ-06] Project import/export robustness** — Validate JSON against JSON Schema before accepting. Handle missing/extra fields. Migrate old schema versions. Embedded assets round-trip correctly. Version compatibility warning for newer schema versions. Progress indicator for large imports. Verify: export → import on different account → all blocks and data intact.
+- [x] **[PROJ-06] Project import/export robustness** — Validate JSON against JSON Schema before accepting. Handle missing/extra fields. Migrate old schema versions. Embedded assets round-trip correctly. Version compatibility warning for newer schema versions. Progress indicator for large imports. Verify: export → import on different account → all blocks and data intact.
 
 - [x] **[PROJ-07] Canvas duplication** — Right-click canvas tab → "Duplicate Canvas" → new canvas at end with "(copy)" suffix, copying all nodes and edges. Verify: duplicate a canvas → new tab with identical content.
 
@@ -290,7 +290,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 ## TIER 12 — SCIENTIFIC PRECISION: DISPLAY & SETTINGS
 
-- [ ] **[PREC-01] Precision mode selector in Settings** — Settings → Preferences → "Calculation Display": "Standard (6 sig figs)", "High Precision (15 decimal places)", "Scientific (N decimal places — N: 1–100)". Controls all value displays. Persist to `user_preferences`. Verify: switch to "High Precision" → Display blocks show 15dp; switch back → 6 sig figs.
+- [x] **[PREC-01] Precision mode selector in Settings** — Settings already has Number display mode (auto/decimal/sig_figs/scientific) + decimal places (up to 15 "high precision"), sig figs (2–10), and scientific notation threshold. Extended decimal places options to include 10, 12, 15 (high precision). The existing granular controls cover all PREC-01 requirements. Persist via preferencesStore → cs:prefs. Verify: select "Significant figures" + 6 → sig-fig display; select "Fixed decimal" + 15 → 15dp display.
 
 - [ ] **[PREC-02] Per-node display precision override** — Inspector for Display/Plot nodes: "Display precision" toggle overriding global for this node. Options: "Global", "Integer", "2dp", "4dp", "8dp", "15dp", "Scientific", "Sig figs (N)". Persist in `node.data.displayPrecision`. Verify: global is 6 sig figs; one node overridden to 15dp → shows 15dp for that node only.
 

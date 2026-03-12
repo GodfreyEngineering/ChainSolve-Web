@@ -54,6 +54,9 @@ export function FormattingSettings({
                 { value: '4', label: '4' },
                 { value: '6', label: '6' },
                 { value: '8', label: '8' },
+                { value: '10', label: '10' },
+                { value: '12', label: '12' },
+                { value: '15', label: t('settings.decimal15', '15 (high precision)') },
               ]}
               value={String(prefs.decimalPlaces)}
               onChange={(e) => prefs.update({ decimalPlaces: parseInt(e.target.value) })}
