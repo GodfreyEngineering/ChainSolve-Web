@@ -190,7 +190,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[UX-09] Search and jump to node (Ctrl+F)** — FindBlockDialog: onMatchesChange callback drives CSS dimming of non-matching nodes (18% opacity via data-id selectors). Enter now cycles through all matches. Match count + "Enter to cycle" hint in header. Cleanup clears dimming on close. Verify: Ctrl+F → "display" → all display nodes highlight; Enter navigates to each.
 
-- [ ] **[UX-10] Undo/redo: history timeline panel** — History tab in bottom dock: list of all undo-able actions with timestamps. Click entry → restore that state. Visual diff showing which nodes changed. Warning before undoing past a save point. Verify: add 10 nodes → open history → click entry 5 → canvas shows state at step 5.
+- [x] **[UX-10] Undo/redo: history timeline panel** — History tab in bottom dock: list of all undo-able actions with timestamps (relative). Click entry → restore that state, superseded entries become redo-able. Visual diff shows ±N node count change per entry. useGraphHistory extended with stackEntries (reactive) + restoreToIndex. Verify: add 10 nodes → open history → click entry 5 → canvas shows state at step 5.
 
 - [ ] **[UX-11] Minimap: interactive and informative** — Nodes shown as colored dots (color by category). Click to pan viewport. Drag viewport rectangle to pan. Right-click → Fit all. Node count in header. Fade when not in use. Verify: click a dot in minimap → canvas pans to that node.
 

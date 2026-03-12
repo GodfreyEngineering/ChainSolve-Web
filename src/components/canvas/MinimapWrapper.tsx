@@ -4,9 +4,11 @@
  * Renders as an absolute-positioned overlay on top of all canvas panels.
  * Supports drag-to-snap to 4 corner positions (TL, TR, BL, BR)
  * with ghost preview during drag. Position persists to localStorage.
+ *
+ * UX-11: Added node-count header, fade-when-idle, right-click → Fit All.
  */
 
-import { useCallback, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 
 // ── Snap positions ──────────────────────────────────────────────────────────
 
@@ -78,17 +80,71 @@ interface MinimapWrapperProps {
   children: ReactNode
   /** Current bottom dock height in px. Used to keep minimap above the dock. */
   bottomOffset?: number
+  /** UX-11: Total node count shown in header. */
+  nodeCount?: number
+  /** UX-11: Called on right-click → Fit All. */
+  onFitView?: () => void
 }
 
-export function MinimapWrapper({ children, bottomOffset = 40 }: MinimapWrapperProps) {
+export function MinimapWrapper({
+  children,
+  bottomOffset = 40,
+  nodeCount,
+  onFitView,
+}: MinimapWrapperProps) {
   const [corner, setCorner] = useState(loadCorner)
   const [dragging, setDragging] = useState(false)
   const [ghostCorner, setGhostCorner] = useState<Corner | null>(null)
+  // UX-11: Fade when idle — active (opacity 1) on hover; fades to 0.45 after 3s idle
+  const [hovered, setHovered] = useState(false)
+  const [active, setActive] = useState(false)
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const wrapperRef = useRef<HTMLDivElement | null>(null)
   const dragStartRef = useRef<{ x: number; y: number } | null>(null)
   const dragActiveRef = useRef(false)
 
+  // Bring to full opacity, start idle timer
+  const bringActive = useCallback(() => {
+    setActive(true)
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+    idleTimerRef.current = setTimeout(() => {
+      if (!hovered) setActive(false)
+    }, 3000)
+  }, [hovered])
+
+  // On first mount, start idle timer
+  useEffect(() => {
+    bringActive()
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const onMouseEnter = useCallback(() => {
+    setHovered(true)
+    setActive(true)
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+  }, [])
+
+  const onMouseLeave = useCallback(() => {
+    setHovered(false)
+    idleTimerRef.current = setTimeout(() => setActive(false), 2000)
+  }, [])
+
+  // UX-11: right-click → Fit All context menu
+  const onContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      onFitView?.()
+    },
+    [onFitView],
+  )
+
   const onMouseDown = useCallback((e: React.MouseEvent) => {
+    // Only left-button drag
+    if (e.button !== 0) return
     e.preventDefault()
     dragStartRef.current = { x: e.clientX, y: e.clientY }
     dragActiveRef.current = false
@@ -134,6 +190,8 @@ export function MinimapWrapper({ children, bottomOffset = 40 }: MinimapWrapperPr
     document.addEventListener('mouseup', onUp)
   }, [])
 
+  const opacity = active || hovered ? 1 : 0.45
+
   return (
     <>
       <div
@@ -141,9 +199,43 @@ export function MinimapWrapper({ children, bottomOffset = 40 }: MinimapWrapperPr
         style={{
           ...cornerStyle(corner, bottomOffset),
           cursor: dragging ? 'grabbing' : 'grab',
+          opacity,
+          transition: 'opacity 0.5s ease',
         }}
         onMouseDown={onMouseDown}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        onContextMenu={onContextMenu}
       >
+        {/* UX-11: Node count header */}
+        {nodeCount !== undefined && (
+          <div
+            style={{
+              background: 'var(--surface-1)',
+              border: '1px solid var(--border)',
+              borderBottom: 'none',
+              borderRadius: '4px 4px 0 0',
+              padding: '1px 6px',
+              fontSize: '0.6rem',
+              color: 'var(--text-faint)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              userSelect: 'none',
+            }}
+            title="Right-click to fit all"
+          >
+            <span style={{ color: 'var(--text)', fontWeight: 600 }}>{nodeCount}</span>
+            <span>node{nodeCount === 1 ? '' : 's'}</span>
+            {onFitView && (
+              <span
+                style={{ marginLeft: 'auto', opacity: 0.6, fontSize: '0.55rem' }}
+              >
+                ⌥ fit
+              </span>
+            )}
+          </div>
+        )}
         {children}
       </div>
       {dragging && ghostCorner && <div style={ghostStyle(ghostCorner, bottomOffset)} />}

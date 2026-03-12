@@ -2548,7 +2548,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     )}
                   </ReactFlow>
                   {minimap && (
-                    <MinimapWrapper bottomOffset={dockHeight}>
+                    <MinimapWrapper
+                      bottomOffset={dockHeight}
+                      nodeCount={nodes.length}
+                      onFitView={() => fitView({ padding: 0.15, duration: 300 })}
+                    >
                       <MiniMap
                         pannable
                         zoomable
@@ -2556,10 +2560,20 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                           position: 'relative',
                           background: 'var(--surface-1)',
                           border: '1px solid var(--border)',
+                          borderRadius: '0 0 4px 4px',
                         }}
-                        nodeColor={(node) =>
-                          node.type === 'csGroup' ? 'var(--primary)' : 'var(--text-muted)'
-                        }
+                        nodeColor={(node) => {
+                          // UX-11: color by node category
+                          switch (node.type) {
+                            case 'csSource': return '#1cabb0'   // teal — input
+                            case 'csOp': return '#6366f1'        // indigo — function
+                            case 'csDisplay': return '#f59e0b'   // amber — output
+                            case 'csPlot': return '#8b5cf6'      // purple — plot
+                            case 'csGroup': return '#22c55e'     // green — group
+                            case 'csAnnotation': return '#94a3b8' // gray — annotation
+                            default: return '#64748b'
+                          }
+                        }}
                         maskColor="rgba(0,0,0,0.15)"
                       />
                     </MinimapWrapper>
