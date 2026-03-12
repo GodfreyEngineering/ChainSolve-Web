@@ -206,6 +206,8 @@ function NumberInputBody({
   step = 1,
   min,
   max,
+  onSwitchToVariable,
+  onSwitchToConstant,
 }: {
   value: number
   unit?: string
@@ -214,11 +216,17 @@ function NumberInputBody({
   step?: number
   min?: number
   max?: number
+  /** UX-01: Switch this node to variable-binding mode */
+  onSwitchToVariable?: () => void
+  /** UX-01: Switch this node to constant-picker mode */
+  onSwitchToConstant?: () => void
 }) {
   // raw holds the user's in-progress string; null means "use external value"
   const [raw, setRaw] = useState<string | null>(null)
   const [error, setError] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  // UX-01: Right-click context menu state
+  const [inputMenu, setInputMenu] = useState<{ x: number; y: number } | null>(null)
 
   // When raw is null we show the committed value from props.
   // raw becomes non-null only on focus; cleared on blur/commit.
@@ -305,6 +313,12 @@ function NumberInputBody({
             }
           }}
           onWheel={onWheel}
+          onContextMenu={(e) => {
+            if (!onSwitchToVariable && !onSwitchToConstant) return
+            e.preventDefault()
+            e.stopPropagation()
+            setInputMenu({ x: e.clientX, y: e.clientY })
+          }}
         />
         <Suspense fallback={null}>
           <LazyUnitPicker
@@ -318,6 +332,58 @@ function NumberInputBody({
         <span style={{ fontSize: '0.6rem', color: 'var(--danger, #f87171)', marginTop: '0.15rem' }}>
           Enter a numeric value
         </span>
+      )}
+      {/* UX-01: Input mode context menu */}
+      {inputMenu && (
+        <>
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 1998 }}
+            onClick={() => setInputMenu(null)}
+            onContextMenu={(e) => { e.preventDefault(); setInputMenu(null) }}
+          />
+          <div
+            className="nodrag"
+            style={{
+              position: 'fixed',
+              left: inputMenu.x,
+              top: inputMenu.y,
+              zIndex: 1999,
+              background: 'var(--surface-2)',
+              border: '1px solid var(--border)',
+              borderRadius: 6,
+              padding: '0.25rem',
+              minWidth: 160,
+              boxShadow: 'var(--shadow-lg)',
+              fontSize: '0.8rem',
+            }}
+          >
+            <div
+              style={{ padding: '0.35rem 0.75rem', borderRadius: 4, cursor: 'default', opacity: 0.5 }}
+            >
+              ✎ Set literal
+            </div>
+            {onSwitchToVariable && (
+              <div
+                style={{ padding: '0.35rem 0.75rem', borderRadius: 4, cursor: 'pointer' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'var(--menu-hover)' }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
+                onClick={() => { setInputMenu(null); onSwitchToVariable() }}
+              >
+                𝑥 Bind to variable…
+              </div>
+            )}
+            {onSwitchToConstant && (
+              <div
+                style={{ padding: '0.35rem 0.75rem', borderRadius: 4, cursor: 'pointer' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'var(--menu-hover)' }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
+                onClick={() => { setInputMenu(null); onSwitchToConstant() }}
+              >
+                π Bind to constant…
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   )
@@ -448,6 +514,16 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
           step={nd.step as number | undefined}
           min={nd.min as number | undefined}
           max={nd.max as number | undefined}
+          onSwitchToVariable={() =>
+            updateNodeData(id, { blockType: 'variableSource', label: 'Variable', varId: undefined })
+          }
+          onSwitchToConstant={() =>
+            updateNodeData(id, {
+              blockType: 'constant',
+              label: 'Constant',
+              selectedConstantId: undefined,
+            })
+          }
         />
       )}
 

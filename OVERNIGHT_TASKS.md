@@ -200,7 +200,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[UX-14] Node color coding** — Right-click node → "Set color" → color picker. Tints node background. Persisted in `node.data.userColor`. Verify: set teal → node shows teal tint; save → reopen → teal persists.
 
-- [ ] **[UX-15] Context menu: completeness** — Node: Duplicate, Delete, Set Color, Add to Group, Save as Template, Pin Output, Copy Value, Inspect, Reset to Default, Disconnect All Edges, Extract to New Canvas. Edge: Delete, Inspect Value, Add Probe Node (inserts Display block on this edge). Canvas: Add Block, Paste, Auto-layout, Zoom Fit, Add Annotation, Add Text, Select All. Verify: right-click edge → Add Probe → Display block appears mid-edge with correct value.
+- [x] **[UX-15] Context menu: completeness** — Node: Duplicate, Delete, Set Color, Add to Group, Save as Template, Pin Output, Copy Value, Inspect, Reset to Default, Disconnect All Edges, Extract to New Canvas. Edge: Delete, Inspect Value, Add Probe Node (inserts Display block on this edge). Canvas: Add Block, Paste, Auto-layout, Zoom Fit, Add Annotation, Add Text, Select All. Verify: right-click edge → Add Probe → Display block appears mid-edge with correct value.
 
 - [ ] **[UX-16] Expression / formula bar** — Hideable bar below canvas toolbar. When source node selected: shows editable expression `= 42` or `= 2 * pi`. Typing updates the value binding. For operation nodes: shows `= sin(x)`. Useful for keyboard-first power users. Verify: select Number block → type `= 2*pi` in formula bar → block value updates to 6.283.
 
