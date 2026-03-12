@@ -81,6 +81,40 @@ const panelRetryStyle: CSSProperties = {
   cursor: 'pointer',
 }
 
+/**
+ * Returns true when the error is a failed dynamic import (chunk load failure).
+ * This happens when the Service Worker serves a stale chunk hash after a new
+ * deployment — the correct recovery is to reload the page once so the browser
+ * picks up the fresh SW and asset manifest.
+ */
+function isChunkLoadError(error: Error): boolean {
+  const msg = error.message
+  return (
+    msg.includes('dynamically imported module') ||
+    msg.includes('Failed to fetch dynamically imported') ||
+    msg.includes('Loading chunk') ||
+    msg.includes('Loading CSS chunk') ||
+    msg.includes('error loading')
+  )
+}
+
+/** Attempt a page reload to recover from a chunk load failure.
+ *  Throttled to once per 30 s via sessionStorage to prevent reload loops. */
+function tryChunkErrorReload(): boolean {
+  const KEY = 'cs_chunk_error_reloaded_at'
+  try {
+    const last = parseInt(sessionStorage.getItem(KEY) ?? '0', 10)
+    if (Date.now() - last > 30_000) {
+      sessionStorage.setItem(KEY, String(Date.now()))
+      window.location.reload()
+      return true
+    }
+  } catch {
+    // sessionStorage unavailable — cannot auto-reload safely
+  }
+  return false
+}
+
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { error: null }
 
@@ -92,6 +126,13 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('[ErrorBoundary]', error, info.componentStack)
     // Report to observability pipeline (best-effort; captureReactBoundary never throws)
     captureReactBoundary(error, info.componentStack ?? undefined)
+
+    // Chunk load failures indicate a stale SW cache after a new deployment.
+    // Auto-reload once so the browser picks up the fresh SW and asset hashes.
+    // The reload is throttled via sessionStorage to prevent infinite reload loops.
+    if (isChunkLoadError(error)) {
+      tryChunkErrorReload()
+    }
   }
 
   render() {

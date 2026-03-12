@@ -88,14 +88,45 @@ function showBootError(message: string) {
   document.getElementById('cs-boot-reload')?.addEventListener('click', () => location.reload())
 }
 
+/**
+ * Auto-reload once when a dynamic chunk fails to load (stale SW cache after
+ * a new deployment). Throttled to once per 30 s via sessionStorage to prevent
+ * infinite reload loops. Returns true if a reload was triggered.
+ */
+function tryChunkErrorReload(msg: string): boolean {
+  const isChunkError =
+    msg.includes('dynamically imported module') ||
+    msg.includes('Failed to fetch dynamically imported') ||
+    msg.includes('Loading chunk') ||
+    msg.includes('Loading CSS chunk') ||
+    msg.includes('error loading')
+  if (!isChunkError) return false
+
+  const KEY = 'cs_chunk_error_reloaded_at'
+  try {
+    const last = parseInt(sessionStorage.getItem(KEY) ?? '0', 10)
+    if (Date.now() - last > 30_000) {
+      sessionStorage.setItem(KEY, String(Date.now()))
+      window.location.reload()
+      return true
+    }
+  } catch {
+    // sessionStorage unavailable
+  }
+  return false
+}
+
 window.addEventListener('error', (e) => {
   // G0-4: Ignore benign ResizeObserver loop errors (spec-level noise).
   if (e.message && e.message.includes('ResizeObserver loop')) return
+  if (tryChunkErrorReload(e.message)) return
   showBootError(e.message)
 })
-window.addEventListener('unhandledrejection', (e) =>
-  showBootError((e as PromiseRejectionEvent).reason?.message ?? String(e)),
-)
+window.addEventListener('unhandledrejection', (e) => {
+  const msg = (e as PromiseRejectionEvent).reason?.message ?? String(e)
+  if (tryChunkErrorReload(msg)) return
+  showBootError(msg)
+})
 
 // Boot ladder rung 2: JS module has executed and global error-handlers are
 // installed.  The sentinel appears even if the dynamic import below fails,
@@ -109,6 +140,8 @@ window.addEventListener('unhandledrejection', (e) =>
 
 import('./main').catch((err: unknown) => {
   const msg = err instanceof Error ? err.message : 'Failed to load application'
+  // Auto-reload once on chunk load errors (stale SW cache after deployment).
+  if (tryChunkErrorReload(msg)) return
   // Log to console so the full error (including stack) appears in CI logs and
   // in browser DevTools even before Playwright can read the DOM sentinel.
   console.error('[boot] Failed to load application:', err)

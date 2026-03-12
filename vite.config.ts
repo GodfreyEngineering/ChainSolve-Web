@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { execSync } from 'child_process'
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
 import { wasmHotReload } from './vite-plugin-wasm-reload'
 
@@ -23,6 +23,30 @@ function getPkgVersion(): string {
   }
 }
 
+/**
+ * Injects the current git SHA into dist/sw.js as the CACHE_VERSION.
+ * This ensures sw.js content changes on every deployment, which causes the
+ * browser to detect the new SW and install it — invalidating stale caches.
+ * Without this, sw.js would be byte-identical across builds and the browser
+ * would never detect a new SW, leaving users with the original cached chunks.
+ */
+function swCacheVersionPlugin() {
+  return {
+    name: 'sw-cache-version',
+    apply: 'build' as const,
+    closeBundle() {
+      const sha = getGitSha()
+      const swPath = resolve(__dirname, 'dist/sw.js')
+      try {
+        const content = readFileSync(swPath, 'utf-8')
+        writeFileSync(swPath, content.replace('__BUILD_HASH__', sha))
+      } catch {
+        // sw.js not present (e.g. wasm-only partial builds) — safe to skip.
+      }
+    },
+  }
+}
+
 // DEV-04: Upload source maps to Sentry during production builds when
 // SENTRY_AUTH_TOKEN and VITE_SENTRY_DSN are set. Safe to omit in local dev.
 const sentryPlugin =
@@ -38,7 +62,7 @@ const sentryPlugin =
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), wasmHotReload(), ...(sentryPlugin ? [sentryPlugin] : [])],
+  plugins: [react(), wasmHotReload(), swCacheVersionPlugin(), ...(sentryPlugin ? [sentryPlugin] : [])],
   define: {
     __CS_VERSION__: JSON.stringify(getPkgVersion()),
     __CS_SHA__: JSON.stringify(getGitSha()),

@@ -76,9 +76,13 @@ import { initWebVitals } from './observability/webVitals.ts'
 import { useCanvasAppearance } from './hooks/useCanvasAppearance.ts'
 
 // UI-PERF-04: Register service worker for offline support and asset caching.
-// registerServiceWorker is safe to call regardless of SW support — it exits
-// early on unsupported environments (HTTP, older browsers).
-registerServiceWorker().catch(() => {})
+// When a new SW is waiting (new deployment detected), reload automatically so
+// the user always gets the latest version. The reload only happens when the
+// new SW explicitly enters "waiting" state — not mid-session — because the new
+// SW no longer calls skipWaiting() on install.
+registerServiceWorker((activate) => {
+  activate()
+}).catch(() => {})
 // Capture the browser's beforeinstallprompt so the app can show a custom
 // "Add to Home Screen" / PWA install button at a convenient moment.
 captureInstallPrompt()
