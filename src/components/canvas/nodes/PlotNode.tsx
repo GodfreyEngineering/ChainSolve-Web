@@ -8,7 +8,7 @@
 
 import { useTranslation } from 'react-i18next'
 import { memo, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Handle, Position, useEdges, type NodeProps } from '@xyflow/react'
+import { Handle, Position, useEdges, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
 import { formatValue } from '../../../engine/value'
 import type { Value } from '../../../engine/value'
@@ -18,6 +18,7 @@ import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
 import { loadVega, type VegaAPI } from '../../../lib/vega-loader'
 import { buildInlineSpec, type SpecResult } from '../../../lib/plot-spec'
+import { exportCSV } from '../../../lib/plot-export'
 
 const PlotExpandModalComponent = lazy(() => import('../PlotExpandModal'))
 
@@ -43,14 +44,32 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
   )
   const computed = useComputed()
   const edges = useEdges()
+  const { updateNodeData } = useReactFlow()
 
   // Find the value connected to this node's 'data' input
   const inputEdge = edges.find((e) => e.target === id && e.targetHandle === 'data')
   const inputValue = inputEdge ? computed.get(inputEdge.source) : undefined
   const headerValue = computed.get(id)
 
+  // Config patcher
+  const updateConfig = useCallback(
+    (patch: Partial<PlotConfig>) => {
+      updateNodeData(id, { plotConfig: { ...config, ...patch } })
+    },
+    [id, config, updateNodeData],
+  )
+
+  // Inline title edit state
+  const [titleEditing, setTitleEditing] = useState(false)
+  const [titleDraft, setTitleDraft] = useState('')
+
+  const commitTitle = () => {
+    updateConfig({ title: titleDraft.trim() || undefined })
+    setTitleEditing(false)
+  }
+
   // Derive spec result from inputs (pure computation, no side-effects)
-  const specResult = useMemo(() => buildInlineSpec(inputValue, config), [inputValue, config])
+  const specResult = useMemo(() => buildInlineSpec(inputValue, config, true), [inputValue, config])
   const specError = 'error' in specResult ? specResult.error : null
   const isDownsampled = !specError && (specResult as SpecResult).isDownsampled
 
@@ -116,7 +135,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
         const view = new vegaApi.View(runtime, {
           renderer: 'svg',
           container,
-          hover: false,
+          hover: true,
           expr: vegaApi.expressionInterpreter,
         })
         await (view as unknown as { runAsync: () => Promise<void> }).runAsync()
@@ -187,6 +206,52 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
             style={{ ...s.handleLeft, top: '50%', transform: 'translateY(-50%)' }}
           />
 
+          {/* Inline chart title — click to edit */}
+          <div
+            className="nodrag"
+            style={{ textAlign: 'center', marginBottom: '0.15rem', minHeight: '1.2rem' }}
+          >
+            {titleEditing ? (
+              <input
+                autoFocus
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onBlur={commitTitle}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') commitTitle()
+                  if (e.key === 'Escape') setTitleEditing(false)
+                }}
+                style={{
+                  width: '100%',
+                  textAlign: 'center',
+                  fontSize: '0.7rem',
+                  background: 'var(--input-bg, var(--card))',
+                  border: '1px solid var(--border)',
+                  borderRadius: 3,
+                  color: 'var(--text)',
+                  padding: '1px 4px',
+                  fontFamily: 'inherit',
+                }}
+              />
+            ) : (
+              <span
+                onClick={() => {
+                  setTitleDraft(config.title ?? '')
+                  setTitleEditing(true)
+                }}
+                style={{
+                  cursor: 'text',
+                  fontSize: '0.7rem',
+                  color: config.title ? 'var(--text)' : 'var(--muted)',
+                  opacity: config.title ? 0.9 : 0.35,
+                }}
+                title={t('plot.clickToEditTitle', 'Click to set chart title')}
+              >
+                {config.title || t('plot.addTitle', 'Add title…')}
+              </span>
+            )}
+          </div>
+
           {loading && (
             <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.4 }}>
               Loading chart...
@@ -221,7 +286,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
             <div
               style={{
                 position: 'absolute',
-                bottom: 8,
+                bottom: 36,
                 left: 8,
                 background: 'rgba(250,204,21,0.9)',
                 color: '#1a1a1a',
@@ -242,7 +307,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
               className="nodrag"
               style={{
                 position: 'absolute',
-                top: 8,
+                top: 30,
                 right: 8,
                 background: 'rgba(0,0,0,0.5)',
                 border: '1px solid rgba(255,255,255,0.15)',
@@ -257,6 +322,77 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
             >
               ⤢
             </button>
+          )}
+
+          {/* Inline toolbar: log scale toggles + CSV export */}
+          {!loading && !error && (
+            <div
+              className="nodrag"
+              style={{
+                display: 'flex',
+                gap: '0.2rem',
+                marginTop: '0.25rem',
+                alignItems: 'center',
+              }}
+            >
+              <button
+                style={{
+                  fontFamily: 'inherit',
+                  fontSize: '0.6rem',
+                  padding: '1px 5px',
+                  borderRadius: 3,
+                  border: '1px solid var(--border)',
+                  cursor: 'pointer',
+                  background: config.xScale === 'log' ? 'var(--accent)' : 'transparent',
+                  color: config.xScale === 'log' ? '#fff' : 'var(--muted)',
+                  transition: 'all 0.1s',
+                }}
+                onClick={() => updateConfig({ xScale: config.xScale === 'log' ? undefined : 'log' })}
+                title={t('plot.toggleXLog', 'Toggle X log scale')}
+              >
+                X log
+              </button>
+              <button
+                style={{
+                  fontFamily: 'inherit',
+                  fontSize: '0.6rem',
+                  padding: '1px 5px',
+                  borderRadius: 3,
+                  border: '1px solid var(--border)',
+                  cursor: 'pointer',
+                  background: config.yScale === 'log' ? 'var(--accent)' : 'transparent',
+                  color: config.yScale === 'log' ? '#fff' : 'var(--muted)',
+                  transition: 'all 0.1s',
+                }}
+                onClick={() => updateConfig({ yScale: config.yScale === 'log' ? undefined : 'log' })}
+                title={t('plot.toggleYLog', 'Toggle Y log scale')}
+              >
+                Y log
+              </button>
+              <div style={{ flex: 1 }} />
+              <button
+                style={{
+                  fontFamily: 'inherit',
+                  fontSize: '0.6rem',
+                  padding: '1px 5px',
+                  borderRadius: 3,
+                  border: '1px solid var(--border)',
+                  cursor: 'pointer',
+                  background: 'transparent',
+                  color: 'var(--muted)',
+                  transition: 'all 0.1s',
+                }}
+                onClick={() =>
+                  exportCSV(
+                    inputValue,
+                    `${nd.label.replace(/[^a-zA-Z0-9_-]/g, '_')}_${Date.now()}.csv`,
+                  )
+                }
+                title={t('plot.exportCSV', 'Export CSV')}
+              >
+                CSV ↓
+              </button>
+            </div>
           )}
         </div>
       </div>

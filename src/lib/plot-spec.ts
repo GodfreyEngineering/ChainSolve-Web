@@ -125,13 +125,15 @@ export interface SpecResult {
 /**
  * Build a Vega-Lite spec for inline (node body) rendering.
  * Uses compact dimensions regardless of theme preset.
+ * Pass interactive=true to enable scroll-to-zoom, drag-to-pan, and hover tooltips.
  */
 export function buildInlineSpec(
   value: Value | undefined,
   config: PlotConfig,
+  interactive = false,
 ): SpecResult | { error: string } {
   if (!value) return { error: 'No data connected' }
-  return buildSpec(value, config, INLINE_WIDTH, INLINE_HEIGHT)
+  return buildSpec(value, config, INLINE_WIDTH, INLINE_HEIGHT, interactive)
 }
 
 /**
@@ -196,6 +198,7 @@ function buildSpec(
   config: PlotConfig,
   width: number,
   height: number,
+  interactive = false,
 ): SpecResult | { error: string } {
   const data = extractPlotData(value, config)
   if ('error' in data) return data
@@ -338,6 +341,25 @@ function buildSpec(
       },
     }))
     base.layer = [mainLayer, ...ruleLayers]
+  }
+
+  // Interactive: scroll-to-zoom, drag-to-pan (double-click resets), hover tooltip
+  if (interactive) {
+    base.params = [{ name: 'grid', select: 'interval', bind: 'scales' }]
+    if (Array.isArray(base.layer)) {
+      // Reference-lines case: tooltip goes on the main data layer
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mainLayer = base.layer[0] as Record<string, any>
+      if (typeof mainLayer.mark === 'string') {
+        mainLayer.mark = { type: mainLayer.mark, tooltip: true }
+      } else if (mainLayer.mark && typeof mainLayer.mark === 'object') {
+        mainLayer.mark = { ...mainLayer.mark, tooltip: true }
+      }
+    } else if (typeof base.mark === 'string') {
+      base.mark = { type: base.mark, tooltip: true }
+    } else if (base.mark && typeof base.mark === 'object') {
+      base.mark = { ...base.mark, tooltip: true }
+    }
   }
 
   return {
