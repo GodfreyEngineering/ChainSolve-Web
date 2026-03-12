@@ -2208,6 +2208,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       zoomTo,
       fitView,
       setNodes,
+      presentationMode,
+      togglePresentationMode,
     ],
   )
 
