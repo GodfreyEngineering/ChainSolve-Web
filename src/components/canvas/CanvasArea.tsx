@@ -754,6 +754,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // Formula bar (UX-16)
   const [formulaBarVisible, setFormulaBarVisible] = useState(getFormulaBarPref)
 
+  // Presentation mode (UX-19)
+  const [presentationMode, setPresentationMode] = useState(false)
+  const [spotlightMode, setSpotlightMode] = useState(false)
+  const [laserMode, setLaserMode] = useState(false)
+  const [laserPos, setLaserPos] = useState<{ x: number; y: number } | null>(null)
+
   // Bottom toolbar state
   const [panMode, setPanMode] = useState(false)
   const [locked, setLocked] = useState(false)
@@ -903,6 +909,23 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   const canvasWrapRef = useRef<HTMLDivElement>(null)
   const { screenToFlowPosition, fitView, zoomIn, zoomOut, zoomTo, getNode } = useReactFlow()
+
+  // UX-19: Presentation mode toggle
+  const togglePresentationMode = useCallback(() => {
+    setPresentationMode((prev) => {
+      const next = !prev
+      if (next) {
+        setDockCollapsed(true)
+        canvasWrapRef.current?.requestFullscreen().catch(() => {})
+      } else {
+        if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
+        setSpotlightMode(false)
+        setLaserMode(false)
+        setLaserPos(null)
+      }
+      return next
+    })
+  }, [])
 
   // ── Computed values (incremental via WASM engine) ──────────────────────────
   const engine = useEngine()
@@ -1849,9 +1872,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       { id: 'toggleFormulaBar', kind: 'action', label: 'Toggle formula bar', hint: 'Show or hide the formula/expression bar', kbd: 'Ctrl+Shift+F', icon: '=', onExecute: () => { setFormulaBarVisible((v) => { setFormulaBarPref(!v); return !v }) } },
       { id: 'findBlock', kind: 'action', label: 'Find block', hint: 'Search and navigate to a block by label', kbd: 'Ctrl+F', icon: '⌕', onExecute: () => setFindOpen(true) },
       { id: 'groupSelection', kind: 'action', label: 'Group selection', hint: 'Wrap selected nodes in a group', kbd: 'Ctrl+G', icon: '▢', onExecute: groupSelection },
+      { id: 'togglePresentation', kind: 'action', label: 'Toggle presentation mode', hint: 'Enter/exit fullscreen clean canvas view', kbd: 'Ctrl+Shift+P', icon: '⎙', onExecute: togglePresentationMode },
     ]
     return cmds
-  }, [readOnly, handleUndo, handleRedo, fitView, selectAll, deleteSelected, handleCopy, handlePaste, handleAutoOrganise, groupSelection])
+  }, [readOnly, handleUndo, handleRedo, fitView, selectAll, deleteSelected, handleCopy, handlePaste, handleAutoOrganise, groupSelection, togglePresentationMode])
 
   // UX-03: Node labels for navigation search
   const paletteNodeLabels = useMemo(() => {
@@ -1973,6 +1997,20 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           setFormulaBarPref(!v)
           return !v
         })
+        return
+      }
+
+      // Ctrl+Shift+P: toggle presentation mode (UX-19)
+      if (ctrl && e.shiftKey && e.key === 'P') {
+        e.preventDefault()
+        togglePresentationMode()
+        return
+      }
+
+      // Escape: exit presentation mode if active (UX-19)
+      if (e.key === 'Escape' && presentationMode) {
+        e.preventDefault()
+        togglePresentationMode()
         return
       }
 
@@ -2456,7 +2494,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 }}
               >
                 {/* Block library panel — desktop: always present with dock handle; mobile: overlay */}
-                {!readOnly && !isMobile && (
+                {!readOnly && !isMobile && !presentationMode && (
                   <BlockLibrary
                     width={libWidth}
                     onResizeStart={onLibResizeStart}
@@ -2480,8 +2518,111 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   onKeyDown={onKeyDown}
                   onKeyUp={onKeyUp}
                   tabIndex={0}
+                  onMouseMove={(e) => {
+                    if (!laserMode || !presentationMode) return
+                    const rect = canvasWrapRef.current?.getBoundingClientRect()
+                    if (rect)
+                      setLaserPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+                  }}
+                  onMouseLeave={() => {
+                    if (laserMode) setLaserPos(null)
+                  }}
                 >
-                  {toolbar}
+                  {/* UX-19: Spotlight CSS — dims non-selected nodes in presentation spotlight mode */}
+                  {presentationMode && spotlightMode && (
+                    <style>{`
+                      .react-flow__node { opacity: 0.12 !important; transition: opacity 0.25s; }
+                      .react-flow__node.selected { opacity: 1 !important; transition: opacity 0.25s; filter: drop-shadow(0 0 28px rgba(28,171,176,0.7)); }
+                    `}</style>
+                  )}
+
+                  {/* UX-19: Laser pointer overlay */}
+                  {presentationMode && laserMode && laserPos && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: laserPos.x - 18,
+                        top: laserPos.y - 18,
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        background: 'rgba(255, 55, 55, 0.75)',
+                        boxShadow: '0 0 24px 10px rgba(255,55,55,0.4)',
+                        pointerEvents: 'none',
+                        zIndex: 200,
+                      }}
+                    />
+                  )}
+
+                  {/* UX-19: Presentation mode floating control bar */}
+                  {presentationMode && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 12,
+                        right: 12,
+                        zIndex: 200,
+                        display: 'flex',
+                        gap: 6,
+                        background: 'rgba(0,0,0,0.65)',
+                        borderRadius: 8,
+                        padding: '5px 8px',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                      }}
+                    >
+                      <button
+                        onClick={() => setSpotlightMode((v) => !v)}
+                        title="Spotlight mode: click a node to spotlight it"
+                        style={{
+                          padding: '3px 8px',
+                          background: spotlightMode ? 'rgba(28,171,176,0.25)' : 'transparent',
+                          border: `1px solid ${spotlightMode ? 'rgba(28,171,176,0.6)' : 'rgba(255,255,255,0.2)'}`,
+                          borderRadius: 5,
+                          color: spotlightMode ? 'var(--primary)' : 'rgba(255,255,255,0.7)',
+                          cursor: 'pointer',
+                          fontSize: '0.7rem',
+                          fontFamily: 'inherit',
+                        }}
+                      >
+                        ◎ Spotlight
+                      </button>
+                      <button
+                        onClick={() => setLaserMode((v) => !v)}
+                        title="Laser pointer: move mouse to draw attention"
+                        style={{
+                          padding: '3px 8px',
+                          background: laserMode ? 'rgba(255,55,55,0.2)' : 'transparent',
+                          border: `1px solid ${laserMode ? 'rgba(255,55,55,0.6)' : 'rgba(255,255,255,0.2)'}`,
+                          borderRadius: 5,
+                          color: laserMode ? '#ff6b6b' : 'rgba(255,255,255,0.7)',
+                          cursor: 'pointer',
+                          fontSize: '0.7rem',
+                          fontFamily: 'inherit',
+                        }}
+                      >
+                        ● Laser
+                      </button>
+                      <button
+                        onClick={togglePresentationMode}
+                        title="Exit presentation mode (Ctrl+Shift+P or Esc)"
+                        style={{
+                          padding: '3px 8px',
+                          background: 'transparent',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: 5,
+                          color: 'rgba(255,255,255,0.6)',
+                          cursor: 'pointer',
+                          fontSize: '0.7rem',
+                          fontFamily: 'inherit',
+                        }}
+                      >
+                        ✕ Exit
+                      </button>
+                    </div>
+                  )}
+
+                  {!presentationMode && toolbar}
 
                   {/* UX-16: Formula bar (Ctrl+Shift+F to toggle) */}
                   {!readOnly && formulaBarVisible && (
@@ -2749,14 +2890,18 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     onToggleHiddenView={() => setHiddenViewMode((v) => !v)}
                     hasHiddenNodes={hasHiddenNodes}
                     onShowAllHidden={showAllHiddenNodes}
+                    presentationMode={presentationMode}
+                    onTogglePresentationMode={togglePresentationMode}
                   />
-                  {/* Bottom Dock — always visible with docking handle (G5-2) */}
-                  <BottomDock
-                    panels={dockPanels}
-                    collapsed={dockCollapsed}
-                    onToggleCollapsed={() => setDockCollapsed((v) => !v)}
-                    onHeightChange={setDockHeight}
-                  />
+                  {/* Bottom Dock — hidden in presentation mode */}
+                  {!presentationMode && (
+                    <BottomDock
+                      panels={dockPanels}
+                      collapsed={dockCollapsed}
+                      onToggleCollapsed={() => setDockCollapsed((v) => !v)}
+                      onHeightChange={setDockHeight}
+                    />
+                  )}
                   {/* V3-5.3: Floating annotation toolbar on annotation selection */}
                   {inspectedId &&
                     (() => {

@@ -36,6 +36,7 @@ import {
   Eye,
   EyeOff,
   ScanEye,
+  Projector,
 } from 'lucide-react'
 
 export interface CanvasToolbarProps {
@@ -73,6 +74,9 @@ export interface CanvasToolbarProps {
   hasHiddenNodes?: boolean
   /** K2-1: Show all hidden blocks. */
   onShowAllHidden?: () => void
+  /** UX-19: Presentation mode toggle. */
+  presentationMode?: boolean
+  onTogglePresentationMode?: () => void
 }
 
 /** Width/height of the toolbar strip in pixels, exported for layout calculations. */
@@ -277,6 +281,8 @@ export function CanvasToolbar({
   onToggleHiddenView,
   hasHiddenNodes,
   onShowAllHidden,
+  presentationMode,
+  onTogglePresentationMode,
 }: CanvasToolbarProps) {
   const { t } = useTranslation()
   const { zoomIn, zoomOut, zoomTo, fitView } = useReactFlow()
@@ -707,6 +713,23 @@ export function CanvasToolbar({
         )}
 
         <div style={sep} />
+
+        {/* UX-19: Presentation mode toggle */}
+        {onTogglePresentationMode && (
+          <>
+            <div style={sep} />
+            <Tooltip content={t('toolbar.presentationMode', 'Presentation mode (Ctrl+Shift+P)')} side={tipSide}>
+              <button
+                onClick={onTogglePresentationMode}
+                style={btnStyle(!!presentationMode)}
+                aria-label={t('toolbar.presentationMode', 'Presentation mode')}
+                aria-pressed={!!presentationMode}
+              >
+                <Projector size={16} />
+              </button>
+            </Tooltip>
+          </>
+        )}
 
         <Tooltip content={t('help.learnMore')} side={tipSide}>
           <button
