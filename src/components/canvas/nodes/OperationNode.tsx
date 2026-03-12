@@ -195,10 +195,7 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
                 fontWeight: 700,
                 padding: '0.05rem 0.3rem',
                 borderRadius: 3,
-                background:
-                  angleUnit === 'deg'
-                    ? 'rgba(251,191,36,0.2)'
-                    : 'rgba(99,179,237,0.15)',
+                background: angleUnit === 'deg' ? 'rgba(251,191,36,0.2)' : 'rgba(99,179,237,0.15)',
                 color: angleUnit === 'deg' ? 'rgb(251,191,36)' : 'rgb(99,179,237)',
                 border:
                   angleUnit === 'deg'

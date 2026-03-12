@@ -40,7 +40,15 @@
     "actionHistory": "היסטוריה",
     "expandPanel": "הרחב את לוח ה-AI",
     "collapsePanel": "כווץ את לוח ה-AI",
-    "modeLabel": "מצב"
+    "modeLabel": "מצב",
+    "suggestExplainGraph": "Explain this graph",
+    "suggestExplainGraphTip": "Describe what the current canvas computes",
+    "suggestFindErrors": "Find and fix errors",
+    "suggestFindErrorsTip": "Analyse the Problems panel and suggest fixes",
+    "suggestGenTemplate": "Save as template",
+    "suggestGenTemplateTip": "Package the selected blocks as a reusable template",
+    "suggestSimplify": "Simplify this chain",
+    "suggestSimplifyTip": "Suggest ways to reduce complexity or merge blocks"
   },
   "mobileNav": {
     "menu": "תפריט",
@@ -101,7 +109,12 @@
     "onboarding": "Getting Started",
     "statProjects": "פרויקטים",
     "statPlan": "Plan",
-    "statMemberSince": "Member since"
+    "statMemberSince": "Member since",
+    "importErrorInvalidJson": "Import failed: not a valid JSON file.",
+    "importErrorValidation": "Import failed: {{error}}",
+    "importWarnings": "Import warnings:\n\n{{warnings}}\n\nContinue anyway?",
+    "importErrorFailed": "Import failed: {{error}}",
+    "createFirstProject": "Create project"
   },
   "projects": {
     "title": "פרויקטים",
@@ -399,7 +412,98 @@
     "edit": "ערוך",
     "moderation": "Moderation",
     "moderationDesc": "Review and act on content reports",
-    "suggest": "Suggest a feature"
+    "suggest": "Suggest a feature",
+    "dangerZone": "Danger Zone",
+    "deleteAccountTitle": "Delete account",
+    "deleteAccountDesc": "Permanently delete your account, all projects, and all data. This cannot be undone.",
+    "deleteAccount": "Delete account",
+    "deleteAccountConfirmTitle": "Delete your account?",
+    "deleteAccountWarning": "The following will be permanently deleted:",
+    "deleteAccountItem1": "All projects and canvases",
+    "deleteAccountItem2": "All uploaded files and assets",
+    "deleteAccountItem3": "Your profile and account settings",
+    "deleteAccountItem4": "Active subscription (cancelled immediately, no refund)",
+    "deleteAccountFinal": "This action is irreversible.",
+    "deleteAccountContinue": "Continue to deletion",
+    "deleteAccountFinalTitle": "Final confirmation",
+    "deleteAccountTypePrompt": "Type",
+    "deleteAccountTypeConfirm": "to permanently delete your account:",
+    "deleteAccountFinalBtn": "Permanently delete",
+    "deleteAccountProgress": "Deleting your account…",
+    "deleteAccountError": "Deletion failed",
+    "deleteAccountErrorHint": "Please try again or contact support if the problem persists.",
+    "close": "Close",
+    "canvasBgStyle": "Canvas background",
+    "bgDotGrid": "Dot grid",
+    "bgLineGrid": "Line grid",
+    "bgCrossGrid": "Cross grid",
+    "bgLargeDots": "Large dots",
+    "bgSolid": "Solid (no grid)",
+    "canvasGridSize": "Grid size",
+    "canvasEdgeType": "Edge style",
+    "edgeBezier": "Bezier (curved)",
+    "edgeSmoothstep": "Smooth step",
+    "edgeStep": "Step (sharp corners)",
+    "edgeStraight": "Straight",
+    "canvasEdgeWidth": "Edge width",
+    "canvasNodeBorderRadius": "Node corner radius",
+    "borderRadiusSquare": "Square (0 px)",
+    "borderRadiusRound": "Rounded (12 px)",
+    "canvasNodeShadow": "Node shadow",
+    "shadowNone": "None",
+    "shadowSubtle": "Subtle",
+    "shadowStrong": "Strong",
+    "canvasAnimationSpeed": "Animation speed",
+    "animNone": "None (disabled)",
+    "animFast": "Fast (250 ms)",
+    "animMedium": "Medium (600 ms)",
+    "animSlow": "Slow (1200 ms)",
+    "numberDisplayMode": "Number display",
+    "numberDisplayModeHint": "Controls how numeric values are shown.",
+    "displayAuto": "Auto (smart)",
+    "displayDecimal": "Fixed decimal places",
+    "displaySigFigs": "Significant figures",
+    "displayScientific": "Scientific notation always",
+    "decimal15": "15 (high precision)",
+    "sigFigs": "Significant figures",
+    "sigFigsHint": "Total number of meaningful digits.",
+    "trailingZeros": "Show trailing zeros",
+    "trailingZerosHint": "Show 1.50 instead of 1.5 in fixed-decimal mode.",
+    "decimalSeparator": "Decimal separator",
+    "decimalSeparatorHint": "Character used between integer and fractional parts.",
+    "decimalPeriod": "Period (1.23)",
+    "decimalComma": "Comma (1,23)",
+    "thousandsSepChar": "Thousands separator style",
+    "sepComma": "Comma (1,000)",
+    "sepPeriod": "Period (1.000)",
+    "sepSpace": "Thin space (1 0 00)",
+    "sepUnderscore": "Underscore (1_000)",
+    "sepApostrophe": "Apostrophe (1'000)",
+    "negativeStyle": "Negative number style",
+    "negativeStyleHint": "How negative values are displayed.",
+    "negMinus": "Minus sign (−1.5)",
+    "negParens": "Parentheses ((1.5))",
+    "angleUnit": "Angle unit",
+    "angleUnitHint": "Controls how trig blocks (sin, cos, tan, asin, acos, atan, atan2) interpret and output angles. A ° or rad badge is shown on each trig block.",
+    "angleUnitRad": "Radians (rad)",
+    "angleUnitDeg": "Degrees (°)",
+    "highPrecisionConstants": "High-precision constants",
+    "highPrecisionConstantsHint": "Show π, e, φ, √2 at full precision (100 decimal places) when matched.",
+    "notifications": "Notifications",
+    "notificationsDesc": "Control which emails ChainSolve sends to your account address.",
+    "emailNotifications": "Email notifications",
+    "notifyProductUpdates": "Product updates",
+    "notifyProductUpdatesHint": "New features, improvements, and occasional announcements.",
+    "notifyBillingAlerts": "Billing alerts",
+    "notifyBillingAlertsHint": "Payment failures, subscription renewals, and receipts. Cannot be disabled.",
+    "notifySecurityAlerts": "Security alerts",
+    "notifySecurityAlertsHint": "New sign-ins, password changes, and 2FA events. Cannot be disabled.",
+    "notificationsFooter": "You can also unsubscribe from product update emails using the link in any email we send you.",
+    "restartTour": "Restart tutorial",
+    "avatarConfirm": "Save photo",
+    "handleLabel": "Unique handle",
+    "handleHint": "Letters, numbers, _ or - · 3–50 characters · must be unique",
+    "handleEmpty": "Not set"
   },
   "security": {
     "title": "אבטחת חשבון",
@@ -427,7 +531,33 @@
     "revoke": "בטל",
     "revokeAll": "בטל את כל האחרים",
     "revoking": "מבטל…",
-    "noSessions": "לא נמצאו סשנים פעילים."
+    "noSessions": "לא נמצאו סשנים פעילים.",
+    "invalidCode": "Invalid TOTP code. Please try again.",
+    "passwordMismatch": "Passwords do not match.",
+    "enterTotpToDisable": "Enter your authenticator code to confirm:",
+    "confirmDisable": "Confirm disable",
+    "backupCodesTitle": "Save your backup codes",
+    "backupCodesDesc": "If you lose access to your authenticator app, you can use one of these codes to sign in. Each code can only be used once.",
+    "downloadCodes": "Download codes",
+    "copiedCodes": "✓ Copied!",
+    "copyCodes": "Copy to clipboard",
+    "savedCodes": "I have saved my backup codes in a safe place.",
+    "continueWithout2fa": "Done — 2FA is now enabled",
+    "changePassword": "Change password",
+    "changePasswordDesc": "Requires your current password for verification.",
+    "currentPassword": "Current password",
+    "currentPasswordPlaceholder": "Enter current password",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "At least 8 chars + 1 number",
+    "confirmPassword": "Confirm new password",
+    "confirmPasswordPlaceholder": "Repeat new password",
+    "passwordChanged": "Password changed successfully.",
+    "changePasswordBtn": "Change password",
+    "changeEmail": "Change email address",
+    "changeEmailDesc": "A verification link will be sent to the new address. The change takes effect after confirmation.",
+    "newEmail": "New email address",
+    "emailVerificationSent": "Verification email sent. Check your inbox and click the link to confirm.",
+    "changeEmailBtn": "Change email"
   },
   "mfa": {
     "challengeTitle": "אימות דו-שלבי",
@@ -552,7 +682,8 @@
     "debugConsole": "Debug console",
     "valueBadges": "Value badges",
     "edgeBadges": "Chain badges",
-    "themes": "ערכות נושא"
+    "themes": "ערכות נושא",
+    "presentationMode": "Presentation mode (Ctrl+Shift+P)"
   },
   "annotation": {
     "text": "טקסט",
@@ -571,7 +702,8 @@
     "arrowThickness": "Thickness",
     "arrowDash": "Line style",
     "arrowStartMarker": "Start marker",
-    "arrowEndMarker": "End marker"
+    "arrowEndMarker": "End marker",
+    "monospace": "Monospace font"
   },
   "annotationToolbar": {
     "decreaseFont": "הקטן גודל גופן",
@@ -673,7 +805,23 @@
     "manualValueTooltip": "ערך ידני",
     "createCustomMaterial": "+ צור מותאם אישית...",
     "createCustomMaterialPro": "+ צור מותאם אישית... (Pro)",
-    "formulaBarPlaceholder": "e.g. 2*pi or sqrt(2)"
+    "formulaBarPlaceholder": "e.g. 2*pi or sqrt(2)",
+    "emptyTitle": "Start building",
+    "emptyAddBlock": "Add first block",
+    "emptyOrDoubleClick": "or double-click anywhere on the canvas",
+    "renameColumn": "Rename column",
+    "importCsvConfirm": "Import {{n}} rows",
+    "reimportCsv": "Re-import",
+    "addColumnRight": "Add column right",
+    "findMatchCount": "{{count}} matches — Enter to cycle",
+    "findTypeToDim": "Type to search and dim non-matching nodes",
+    "canvasLoadFailed": "Canvas data could not be loaded — starting with an empty canvas. Other sheets are unaffected.",
+    "invalidProjectName": "Invalid project name",
+    "loadErrorHint": "This may be a temporary network issue. Try reloading the project.",
+    "retryLoad": "Retry",
+    "goToProjectManager": "Project Manager",
+    "needHelp": "Need help?",
+    "dismiss": "Dismiss"
   },
   "sheets": {
     "title": "גיליונות",
@@ -695,7 +843,12 @@
     "minimize": "מזער",
     "maximize": "הגדל",
     "restore": "שחזר",
-    "closePane": "סגור חלונית"
+    "closePane": "סגור חלונית",
+    "unsavedChanges": "Unsaved changes",
+    "moveDialogTitle": "Move \"{{name}}\" to position",
+    "move": "Move",
+    "moveDialogHint": "1 to {{max}}",
+    "moveToPosition": "Move to position…"
   },
   "contextMenu": {
     "inspect": "בדיקה",
@@ -751,7 +904,17 @@
     "annotRectangle": "Rectangle",
     "annotEllipse": "Ellipse",
     "annotDiamond": "Diamond",
-    "annotRoundedRect": "Rounded rectangle"
+    "annotRoundedRect": "Rounded rectangle",
+    "annotStickyNote": "Sticky Note",
+    "addComment": "Comment",
+    "nodeColor": "Node color",
+    "clearColor": "Clear color",
+    "resetToDefault": "Reset to default",
+    "disconnectAll": "Disconnect all edges",
+    "centerHorizontal": "Center horizontally",
+    "centerVertical": "Center vertically",
+    "addProbeNode": "Add probe display",
+    "selectAll": "Select all"
   },
   "errorBoundary": {
     "title": "משהו השתבש",
@@ -852,7 +1015,10 @@
   "common": {
     "cancel": "ביטול",
     "close": "סגור",
-    "loading": "טוען…"
+    "loading": "טוען…",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "materialWizard": {
     "createTitle": "יצירת חומר מותאם אישית",
@@ -913,7 +1079,14 @@
     "valuePlaceholder": "0",
     "empty": "אין משתנים עדיין.",
     "emptyHint": "לחץ על \"+ הוסף\" ליצירה.",
-    "noResults": "לא נמצאו משתנים תואמים."
+    "noResults": "לא נמצאו משתנים תואמים.",
+    "jumpToBound": "Jump to bound blocks",
+    "noVariables": "No variables to analyse.",
+    "influenceTitle": "Show influence analysis",
+    "exportCSV": "Export as CSV",
+    "importCSV": "Import from CSV",
+    "boundHint": "Nodes bound to this variable — click to focus",
+    "influenceHint": "Each variable's downstream reach — which output nodes (Display / Publish) it feeds."
   },
   "publishSubscribe": {
     "channelPlaceholder": "שם הערוץ",
@@ -1288,7 +1461,8 @@
     "termsAccept": "I accept the Terms & Conditions and Privacy Policy (v{{version}})",
     "termsContinue": "Continue",
     "termsSaving": "Saving…",
-    "termsRetry": "Failed to record acceptance. Please retry."
+    "termsRetry": "Failed to record acceptance. Please retry.",
+    "sessionExpired": "Your session expired — please sign in again."
   },
   "plot": {
     "xAxisPlaceholder": "ציר X",
@@ -1335,7 +1509,12 @@
     "error": "Chart error",
     "downsampled": "Downsampled",
     "branding": "Include branding in export",
-    "brandingCaption": "Generated by ChainSolve"
+    "brandingCaption": "Generated by ChainSolve",
+    "clickToEditTitle": "Click to set chart title",
+    "addTitle": "Add title…",
+    "toggleXLog": "Toggle X log scale",
+    "toggleYLog": "Toggle Y log scale",
+    "exportCSV": "Export CSV"
   },
   "groups": {
     "name": "שם",
@@ -1376,7 +1555,9 @@
     "confirm": "אישור",
     "search": "Search…",
     "loading": "טוען...",
-    "expand": "הרחב"
+    "expand": "הרחב",
+    "back": "Back",
+    "saving": "Saving…"
   },
   "blockLibrary": {
     "all": "הכל",
@@ -1392,7 +1573,10 @@
     "addFavourite": "Add to favourites",
     "removeFavourite": "Remove from favourites",
     "formula": "Formula",
-    "insertSavedGroup": "Insert \"{{name}}\" ({{count}} nodes)"
+    "insertSavedGroup": "Insert \"{{name}}\" ({{count}} nodes)",
+    "unpin": "Unpin from Quick Access",
+    "pin": "Pin to Quick Access",
+    "quickAccess": "Quick Access"
   },
   "inspector": {
     "empty": "לחץ על בלוק כדי לבדוק",
@@ -1412,7 +1596,8 @@
     "collapseDock": "Collapse dock",
     "dragToResize": "Drag to resize",
     "output": "פלט",
-    "problems": "בעיות"
+    "problems": "בעיות",
+    "history": "History"
   },
   "sidebar": {
     "projects": "פרויקטים",
@@ -1433,7 +1618,7 @@
     "createFailed": "לא ניתן ליצור פרויקט",
     "importSuccess": "הפרויקט יובא",
     "importFailed": "לא ניתן לייבא פרויקט",
-    "settingUp": "מגדיר את החשבון שלך\u2026",
+    "settingUp": "מגדיר את החשבון שלך…",
     "settingUpHint": "זה בדרך כלל לוקח רגע. אנא רענן את הדף.",
     "refresh": "רענן",
     "tryAgain": "נסה שוב"
@@ -1473,7 +1658,8 @@
     "category_block_pack": "Block Pack",
     "category_theme": "Theme",
     "category_group": "Group",
-    "category_custom_block": "Custom Block"
+    "category_custom_block": "Custom Block",
+    "lightbox": "Preview"
   },
   "explorePage": {
     "heroTitle": "Explore",
@@ -1692,7 +1878,8 @@
     "buildWithAI": "Build with AI…",
     "manageSavedGroups": "Manage Saved Groups…",
     "startTour": "Getting started tour",
-    "projectWizard": "Start a Project Wizard"
+    "projectWizard": "Start a Project Wizard",
+    "publishToMarketplace": "Publish to marketplace"
   },
   "time": {
     "justNow": "just now",
@@ -1730,13 +1917,18 @@
     "exporting": "Exporting…",
     "cancel": "Cancel export",
     "close": "Close",
-    "recentExports": "Recent exports"
+    "recentExports": "Recent exports",
+    "pageSize": "Page size"
   },
   "commandPalette": {
     "title": "Command Palette",
     "placeholder": "Type a command…",
     "noResults": "No matching actions",
-    "hint": "↑↓ navigate · ↵ execute · ESC close"
+    "hint": "↑↓ navigate · ↵ execute · ESC close",
+    "jumpToNode": "Jump to node",
+    "actions": "Actions",
+    "blocks": "Blocks",
+    "nodes": "Nodes"
   },
   "graphHealth": {
     "title": "Graph Health",
@@ -1989,6 +2181,120 @@
   "problems": {
     "noProblems": "לא זוהו בעיות",
     "problem": "בעיה",
-    "problems": "בעיות"
+    "problems": "בעיות",
+    "root": "root",
+    "propagated": "chain",
+    "jumpToNode": "Jump to node",
+    "jump": "Jump",
+    "jumpToRoot": "Root"
+  },
+  "history": {
+    "confirmRestore": "Restore this snapshot? Current state will be autosaved first.",
+    "confirmDelete": "Delete this snapshot?",
+    "title": "Version History",
+    "saving": "Saving…",
+    "saveSnapshot": "Save snapshot",
+    "empty": "No snapshots yet. Save one to start tracking history.",
+    "clickToRename": "Click to rename",
+    "untitled": "Snapshot",
+    "nodes": "nodes",
+    "edges": "edges",
+    "preview": "Preview",
+    "restore": "Restore",
+    "delete": "Delete",
+    "previewTitle": "Snapshot preview",
+    "current": "Current",
+    "restoreTooltip": "Click to restore to this state",
+    "action": "Action"
+  },
+  "share": {
+    "readOnly": "Read-only",
+    "noExpiry": "Never expires",
+    "expired": "Expired",
+    "expiresIn": "Expires in {{days}} day(s)",
+    "dialogTitle": "Share project",
+    "dialogDesc": "Share links let anyone view your project in read-only mode. They can fork it to make their own copy.",
+    "noLinks": "No active share links.",
+    "viewCount": "{{n}} view(s)",
+    "copy": "Copy link",
+    "revoke": "Revoke link",
+    "creating": "Creating…",
+    "createLink": "+ Create share link",
+    "shareProject": "Share project",
+    "shareBtn": "Share",
+    "linkUnavailable": "Link unavailable",
+    "goToApp": "Open ChainSolve",
+    "openFork": "Open fork",
+    "forking": "Forking…",
+    "fork": "Fork project",
+    "signInToFork": "Sign in to fork"
+  },
+  "newProject": {
+    "defaultName": "Untitled project",
+    "createFailed": "Failed to create project",
+    "title": "New project",
+    "blank": "Blank project",
+    "blankDesc": "Start with an empty canvas.",
+    "creating": "Creating…",
+    "create": "Create project"
+  },
+  "publishWizard": {
+    "errorGeneric": "Submit failed",
+    "title": "Publish to Marketplace",
+    "typeLabel": "Type",
+    "typeTemplate": "Project Template",
+    "typeTheme": "Theme",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Enter a title…",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Describe your listing…",
+    "tagsLabel": "Tags (comma-separated)",
+    "tagsPlaceholder": "e.g. finance, workflow, ai",
+    "reviewNote": "Verified authors are auto-approved. Others are submitted for review.",
+    "next": "Next",
+    "previewLabel": "Preview how your listing will appear:",
+    "submitting": "Submitting…",
+    "submit": "Submit",
+    "successTitle": "Your listing has been submitted!",
+    "successAutoApproved": "Your item is now live on the marketplace.",
+    "successPending": "It will appear after moderator review.",
+    "viewMarketplace": "View Marketplace",
+    "itemId": "Item ID:"
+  },
+  "folders": {
+    "newFolderPrompt": "Folder name:",
+    "alreadyExists": "A folder with that name already exists.",
+    "renamePrompt": "Rename folder:",
+    "confirmDelete": "Delete folder \"{{name}}\"? {{count}} project(s) will be moved to Unfiled.",
+    "confirmDeleteEmpty": "Delete empty folder \"{{name}}\"?",
+    "newProjectHere": "New project here",
+    "rename": "Rename",
+    "delete": "Delete folder",
+    "empty": "Empty — drag a project here",
+    "unfiled": "Unfiled",
+    "dropHere": "Drop here",
+    "newFolder": "New folder"
+  },
+  "table": {
+    "invalidNumber": "Invalid number",
+    "csvTruncated": "CSV truncated to {{cols}} cols × {{rows}} rows",
+    "rowLimitReached": "Row limit reached ({{max}})",
+    "colLimitReached": "Column limit reached ({{max}})"
+  },
+  "formulaBar": {
+    "noSelection": "No selection",
+    "clickToEdit": "Click or press = to edit",
+    "error": "Invalid expression",
+    "hint": "Select a node to see its formula",
+    "hint2": "Click or = to edit"
+  },
+  "nodeComments": {
+    "comments": "Comments",
+    "noComments": "No comments yet",
+    "reopen": "Reopen",
+    "resolve": "Resolve",
+    "addPlaceholder": "Add a comment…",
+    "adding": "Adding…",
+    "add": "Add"
   }
 }

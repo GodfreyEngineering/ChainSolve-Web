@@ -17,7 +17,8 @@ export function registerSignalBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'signal.fft_magnitude', label: 'FFT Magnitude' },
     synonyms: ['fft', 'fast fourier transform', 'magnitude spectrum', 'frequency spectrum'],
     tags: ['signal', 'fft', 'frequency'],
-    description: 'Computes the FFT magnitude spectrum of input vector y. Returns |FFT[k]| for k = 0 .. N/2 (first N/2+1 bins). Input is zero-padded to the next power of 2.',
+    description:
+      'Computes the FFT magnitude spectrum of input vector y. Returns |FFT[k]| for k = 0 .. N/2 (first N/2+1 bins). Input is zero-padded to the next power of 2.',
   })
 
   register({
@@ -29,7 +30,8 @@ export function registerSignalBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'signal.fft_power', label: 'FFT Power' },
     synonyms: ['power spectrum', 'psd', 'power spectral density', 'fft power'],
     tags: ['signal', 'fft', 'frequency'],
-    description: 'Computes the FFT power spectrum of input vector y. Returns |FFT[k]|^2 / N for k = 0 .. N/2.',
+    description:
+      'Computes the FFT power spectrum of input vector y. Returns |FFT[k]|^2 / N for k = 0 .. N/2.',
   })
 
   register({
@@ -96,7 +98,8 @@ export function registerSignalBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'signal.filter_lowpass_fir', label: 'Lowpass FIR' },
     synonyms: ['low pass filter', 'fir filter', 'lowpass', 'smoothing filter'],
     tags: ['signal', 'filter', 'fir'],
-    description: 'Windowed-sinc FIR lowpass filter. cutoff_norm is the normalized cutoff frequency (0 to 0.5 = Nyquist). taps must be an odd integer >= 3.',
+    description:
+      'Windowed-sinc FIR lowpass filter. cutoff_norm is the normalized cutoff frequency (0 to 0.5 = Nyquist). taps must be an odd integer >= 3.',
   })
 
   register({
@@ -112,6 +115,7 @@ export function registerSignalBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'signal.filter_highpass_fir', label: 'Highpass FIR' },
     synonyms: ['high pass filter', 'fir filter', 'highpass'],
     tags: ['signal', 'filter', 'fir'],
-    description: 'Windowed-sinc FIR highpass filter via spectral inversion. cutoff_norm is the normalized cutoff frequency (0 to 0.5 = Nyquist). taps must be an odd integer >= 3.',
+    description:
+      'Windowed-sinc FIR highpass filter via spectral inversion. cutoff_norm is the normalized cutoff frequency (0 to 0.5 = Nyquist). taps must be an odd integer >= 3.',
   })
 }

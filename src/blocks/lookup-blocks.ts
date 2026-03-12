@@ -19,7 +19,8 @@ export function registerLookupBlocks(register: (def: BlockDef) => void): void {
       { id: 'x', label: 'Query X' },
     ],
     defaultData: { blockType: 'lookup.1d', label: 'Lookup 1D', method: 'linear', proOnly: true },
-    description: '1D interpolated lookup: given X and Y vectors, returns Y at query X. Method: nearest, linear, or cubic.',
+    description:
+      '1D interpolated lookup: given X and Y vectors, returns Y at query X. Method: nearest, linear, or cubic.',
     synonyms: ['interpolate', 'lookup', 'table lookup', '1d interpolation'],
     tags: ['table', 'interpolation', 'lookup'],
   })
@@ -38,7 +39,8 @@ export function registerLookupBlocks(register: (def: BlockDef) => void): void {
       { id: 'y', label: 'Query Y' },
     ],
     defaultData: { blockType: 'lookup.2d', label: 'Lookup 2D', method: 'linear', proOnly: true },
-    description: '2D bilinear interpolation lookup: X-axis, Y-axis, Z-matrix (Table), query (x,y). Returns interpolated Z.',
+    description:
+      '2D bilinear interpolation lookup: X-axis, Y-axis, Z-matrix (Table), query (x,y). Returns interpolated Z.',
     synonyms: ['2d interpolation', 'bilinear', 'map lookup', 'surface lookup'],
     tags: ['table', 'interpolation', 'lookup', '2d'],
   })

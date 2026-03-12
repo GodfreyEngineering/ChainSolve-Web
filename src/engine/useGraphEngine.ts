@@ -146,7 +146,14 @@ export function useGraphEngine(
       // First render: load full snapshot into persistent engine graph.
       snapshotLoaded.current = true
       const reqId = ++pendingRef.current
-      const snapshot = toEngineSnapshot(nodes, edges, constants, variables, publishedOutputs, angleUnit)
+      const snapshot = toEngineSnapshot(
+        nodes,
+        edges,
+        constants,
+        variables,
+        publishedOutputs,
+        angleUnit,
+      )
       dlog.debug('engine', 'Snapshot eval started', {
         nodeCount: nodes.length,
         edgeCount: edges.length,

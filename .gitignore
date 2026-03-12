@@ -38,3 +38,10 @@ dist-ssr
 test-results/
 playwright-report/
 coverage/
+
+# Scratch / CI debug output files
+fmt_out.txt
+tsc_out.txt
+tsc_out2.txt
+lint_out.txt
+lint_out2.txt
