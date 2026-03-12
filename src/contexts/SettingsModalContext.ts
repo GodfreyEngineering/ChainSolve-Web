@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 
 /** J2-1: Account Settings tabs (security-sensitive). */
-export type AccountTab = 'profile' | 'billing' | 'security'
+export type AccountTab = 'profile' | 'billing' | 'security' | 'notifications'
 
 /** J2-1: App Settings tabs (workbench preferences). */
 export type AppTab =
@@ -34,7 +34,7 @@ export interface SettingsModalContextValue {
   closeAppSettings: () => void
 }
 
-const ACCOUNT_TABS = new Set<string>(['profile', 'billing', 'security'])
+const ACCOUNT_TABS = new Set<string>(['profile', 'billing', 'security', 'notifications'])
 
 /** Returns true if the tab belongs to Account Settings. */
 export function isAccountTab(tab: string): tab is AccountTab {

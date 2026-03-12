@@ -48,6 +48,10 @@ export interface UserPreferences {
   defaultExportFormat: 'pdf' | 'xlsx'
   exportIncludeAnnotations: boolean
   exportPageSize: 'a4' | 'letter'
+
+  // Notification preferences (ACCT-08)
+  /** Email me about new features and product updates (opt-out). */
+  notifyProductUpdates: boolean
 }
 
 // ── Defaults ─────────────────────────────────────────────────────────────────
@@ -77,6 +81,8 @@ const DEFAULTS: UserPreferences = {
   defaultExportFormat: 'pdf',
   exportIncludeAnnotations: true,
   exportPageSize: 'a4',
+
+  notifyProductUpdates: true,
 }
 
 // ── localStorage persistence ─────────────────────────────────────────────────

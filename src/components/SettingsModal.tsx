@@ -9,6 +9,7 @@ import type { AccountTab, AppTab } from '../contexts/SettingsModalContext'
 import { ProfileSettings } from '../pages/settings/ProfileSettings'
 import { PreferencesSettings } from '../pages/settings/PreferencesSettings'
 import { SecuritySettings } from '../pages/settings/SecuritySettings'
+import { NotificationSettings } from '../pages/settings/NotificationSettings'
 import { BillingAuthGate } from './BillingAuthGate'
 import { AppWindow } from './ui/AppWindow'
 import { ACCOUNT_SETTINGS_WINDOW_ID, APP_SETTINGS_WINDOW_ID } from './SettingsModalProvider'
@@ -35,6 +36,7 @@ const ACCOUNT_TABS: { key: AccountTab; icon: string }[] = [
   { key: 'profile', icon: '\u2302' },
   { key: 'billing', icon: '\u00A4' },
   { key: 'security', icon: '\u2616' },
+  { key: 'notifications', icon: '\u{1F514}' },
 ]
 
 const APP_TABS_BASE: { key: AppTab; icon: string; devOnly?: boolean; orgOnly?: boolean }[] = [
@@ -168,6 +170,7 @@ export function SettingsModal({ kind }: Props) {
             {accountTab === 'profile' && <ProfileSettings user={user} profile={profile} />}
             {accountTab === 'billing' && <BillingAuthGate profile={profile} />}
             {accountTab === 'security' && <SecuritySettings />}
+            {accountTab === 'notifications' && <NotificationSettings />}
           </main>
         </div>
       </AppWindow>

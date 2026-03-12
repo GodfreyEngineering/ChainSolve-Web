@@ -274,7 +274,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [ ] **[ACCT-07] 2FA: polished flow** — Complete `MfaSetupPrompt.tsx` and `MfaChallengeScreen.tsx`. Add: backup codes download (10 single-use codes) on 2FA enable. "2FA enabled" badge in SecuritySettings. "Disable 2FA" requires re-authentication. Verify: enable 2FA → login → TOTP challenge; backup code works to sign in.
 
-- [ ] **[ACCT-08] Notification preferences** — ProfileSettings or dedicated Notifications section: email toggle for product updates, billing alerts (always on), security alerts (always on). Store in `user_preferences`. Verify: unchecking "Product updates" persists to DB.
+- [x] **[ACCT-08] Notification preferences** — ProfileSettings or dedicated Notifications section: email toggle for product updates, billing alerts (always on), security alerts (always on). Store in `user_preferences`. Verify: unchecking "Product updates" persists to DB.
 
 ---
 
