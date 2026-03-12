@@ -123,17 +123,22 @@ export function SignupWizard({ open, onComplete }: Props) {
   const handleFinish = useCallback(async () => {
     setSubmitting(true)
     setError('')
+    let wizardStep = 'init'
     try {
-      // 1. Save display name via RPC (bypasses RLS)
+      // 1. Save display name (full_name) via RPC (bypasses RLS)
+      wizardStep = 'save-profile-name'
       await updateProfileViaRpc(displayName.trim() || null, null)
 
       // 2. Upload avatar (optional) — storage upload + profile update via RPC
       if (avatarFile) {
+        wizardStep = 'upload-avatar'
         const storagePath = await uploadAvatarFileOnly(avatarFile)
+        wizardStep = 'save-profile-avatar'
         await updateProfileViaRpc(null, storagePath)
       }
 
       // 3. Save preferences (locale, region — separate table, unaffected by RLS)
+      wizardStep = 'save-preferences'
       await updateUserPreferences({
         locale,
         region: region.trim() || null,
@@ -145,13 +150,26 @@ export function SignupWizard({ open, onComplete }: Props) {
       }
 
       // 5. Marketing opt-in via RPC (bypasses RLS)
+      wizardStep = 'save-marketing-opt-in'
       await updateMarketingOptInViaRpc(marketingOptIn)
 
       // 6. Plan choice is informational for now (Stripe checkout in Phase 3)
 
+      wizardStep = 'complete'
       onComplete()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('signupWizard.errorGeneric'))
+      const message = err instanceof Error ? err.message : t('signupWizard.errorGeneric')
+      console.error('[SignupWizard] handleFinish failed', {
+        wizardStep,
+        error: err,
+        message,
+        displayNameLength: displayName.trim().length,
+        hasAvatar: !!avatarFile,
+        locale,
+        region: region.trim() || null,
+        marketingOptIn,
+      })
+      setError(message)
     } finally {
       setSubmitting(false)
     }

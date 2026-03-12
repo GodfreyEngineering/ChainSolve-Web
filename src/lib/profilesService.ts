@@ -52,7 +52,14 @@ export function invalidateProfileCache(): void {
 /** Safety-net: create the caller's profile row if the signup trigger failed. */
 export async function ensureProfile(): Promise<void> {
   const { error } = await supabase.rpc('ensure_profile')
-  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  if (error) {
+    console.error('[profilesService] ensureProfile failed', {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+    })
+    throw new ServiceError('DB_ERROR', error.message, true)
+  }
   invalidateProfileCache()
 }
 
@@ -80,8 +87,17 @@ export async function getMyProfile(): Promise<Profile | null> {
  */
 export async function getOrCreateProfile(): Promise<Profile> {
   const { data, error } = await supabase.rpc('get_or_create_profile')
-  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  if (error) {
+    console.error('[profilesService] getOrCreateProfile failed', {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    })
+    throw new ServiceError('DB_ERROR', error.message, true)
+  }
   if (!data || typeof data !== 'object') {
+    console.error('[profilesService] getOrCreateProfile returned empty result', { data })
     throw new ServiceError('DB_ERROR', 'get_or_create_profile returned empty result')
   }
   const profile = data as Profile
@@ -92,34 +108,76 @@ export async function getOrCreateProfile(): Promise<Profile> {
 /** Accept ToS via RPC (bypasses RLS UPDATE policy). */
 export async function acceptTermsViaRpc(version: string): Promise<void> {
   const { error } = await supabase.rpc('accept_my_terms', { p_version: version })
-  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  if (error) {
+    console.error('[profilesService] acceptTermsViaRpc failed', {
+      version,
+      code: error.code,
+      message: error.message,
+      details: error.details,
+    })
+    throw new ServiceError('DB_ERROR', error.message, true)
+  }
   invalidateProfileCache()
 }
 
 /** Mark onboarding complete via RPC (bypasses RLS UPDATE policy). */
 export async function markOnboardingCompleteViaRpc(): Promise<void> {
   const { error } = await supabase.rpc('complete_my_onboarding')
-  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  if (error) {
+    console.error('[profilesService] markOnboardingCompleteViaRpc failed', {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+    })
+    throw new ServiceError('DB_ERROR', error.message, true)
+  }
   invalidateProfileCache()
 }
 
-/** Update display name and/or avatar URL via RPC (bypasses RLS UPDATE policy). */
+/**
+ * Update full name, avatar URL, and/or display name via RPC (bypasses RLS UPDATE policy).
+ * All parameters are optional — pass null to leave the field unchanged.
+ *
+ * Calls the 3-param update_my_profile(text, text, text) defined in migration 0009.
+ * The 2-param overload from migration 0008 was removed in migration 0010 to
+ * eliminate the PostgreSQL function-overload ambiguity that caused signup errors.
+ */
 export async function updateProfileViaRpc(
   fullName: string | null,
   avatarUrl: string | null,
+  displayName?: string | null,
 ): Promise<void> {
-  const { error } = await supabase.rpc('update_my_profile', {
+  const params: Record<string, unknown> = {
     p_full_name: fullName,
     p_avatar_url: avatarUrl,
-  })
-  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+    p_display_name: displayName ?? null,
+  }
+  const { error } = await supabase.rpc('update_my_profile', params)
+  if (error) {
+    console.error('[profilesService] updateProfileViaRpc failed', {
+      params: { fullName: fullName ? '[redacted]' : null, avatarUrl, displayName },
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    })
+    throw new ServiceError('DB_ERROR', error.message, true)
+  }
   invalidateProfileCache()
 }
 
 /** Update marketing opt-in via RPC (bypasses RLS UPDATE policy). */
 export async function updateMarketingOptInViaRpc(optIn: boolean): Promise<void> {
   const { error } = await supabase.rpc('update_my_marketing', { p_opt_in: optIn })
-  if (error) throw new ServiceError('DB_ERROR', error.message, true)
+  if (error) {
+    console.error('[profilesService] updateMarketingOptInViaRpc failed', {
+      optIn,
+      code: error.code,
+      message: error.message,
+      details: error.details,
+    })
+    throw new ServiceError('DB_ERROR', error.message, true)
+  }
   invalidateProfileCache()
 }
 

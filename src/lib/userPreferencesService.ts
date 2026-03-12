@@ -56,5 +56,13 @@ export async function updateUserPreferences(
     .update({ ...patch, updated_at: new Date().toISOString() })
     .eq('user_id', user.id)
 
-  if (error) throw error
+  if (error) {
+    console.error('[userPreferencesService] updateUserPreferences failed', {
+      patch,
+      code: error.code,
+      message: error.message,
+      details: error.details,
+    })
+    throw error
+  }
 }
