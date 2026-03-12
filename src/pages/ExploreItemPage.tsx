@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -52,6 +53,9 @@ export function ExploreItemPage() {
   const [activeThumb, setActiveThumb] = useState(0)
 
   const commentInputRef = useRef<HTMLInputElement>(null)
+  const lightboxRef = useRef<HTMLDivElement>(null)
+  // A11Y-01: Trap focus within lightbox dialog.
+  useFocusTrap(lightboxRef, lightboxIdx !== null)
 
   // Fetch item + likes + comments
   useEffect(() => {
@@ -359,8 +363,16 @@ export function ExploreItemPage() {
           onClick={() => setLightboxIdx(null)}
           role="dialog"
           aria-modal="true"
+          aria-label={t('explore.lightbox')}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setLightboxIdx(null)
+            else if (e.key === 'ArrowLeft')
+              setLightboxIdx((lightboxIdx - 1 + galleryImages.length) % galleryImages.length)
+            else if (e.key === 'ArrowRight')
+              setLightboxIdx((lightboxIdx + 1) % galleryImages.length)
+          }}
         >
-          <div style={lightboxInner} onClick={(e) => e.stopPropagation()}>
+          <div ref={lightboxRef} style={lightboxInner} onClick={(e) => e.stopPropagation()}>
             <button style={lightboxClose} onClick={() => setLightboxIdx(null)}>
               <X size={20} />
             </button>

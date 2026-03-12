@@ -1,6 +1,7 @@
 import { useRef, useEffect, type ReactNode, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useSwipeGesture } from '../../hooks/useSwipeGesture'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 
 interface BottomSheetProps {
   open: boolean
@@ -90,7 +91,10 @@ export function BottomSheet({ open, onClose, title, height = 'half', children }:
     enabled: open,
   })
 
-  // Trap focus inside sheet
+  // A11Y-01: Trap focus (Tab cycles within sheet) and return focus on close.
+  useFocusTrap(sheetRef, open)
+
+  // Escape closes the sheet
   useEffect(() => {
     if (!open) return
     const handleKey = (e: KeyboardEvent) => {

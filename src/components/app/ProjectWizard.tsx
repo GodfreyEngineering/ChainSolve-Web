@@ -6,8 +6,9 @@
  * output blocks, connecting them, and exporting.
  */
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 
 export interface ProjectWizardProps {
   onClose: () => void
@@ -27,6 +28,7 @@ type WizardStep = (typeof WIZARD_STEPS)[number]
 
 export function ProjectWizard({ onClose }: ProjectWizardProps) {
   const { t } = useTranslation()
+  const panelRef = useRef<HTMLDivElement>(null)
   const [activeStep, setActiveStep] = useState(0)
   const totalSteps = WIZARD_STEPS.length
   const currentStep: WizardStep = WIZARD_STEPS[activeStep]
@@ -61,9 +63,19 @@ export function ProjectWizard({ onClose }: ProjectWizardProps) {
     [activeStep, t],
   )
 
+  // A11Y-01: Focus trap and Escape key handler.
+  useFocusTrap(panelRef, true)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
   return (
     <div style={overlayStyle} role="dialog" aria-modal="true" aria-label={t('wizard.title')}>
-      <div style={panelStyle}>
+      <div ref={panelRef} style={panelStyle}>
         {/* Header */}
         <div style={headerStyle}>
           <h2 style={titleStyle}>{t('wizard.title')}</h2>
