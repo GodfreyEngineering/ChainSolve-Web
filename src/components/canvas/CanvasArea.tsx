@@ -949,12 +949,29 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       const positions = autoLayout(layoutNodes, relevantEdges, direction)
 
       doSaveHistory()
+      // UX-05: Add CSS transition for smooth animated repositioning
       setNodes((nds) =>
         nds.map((n) => {
           const pos = positions.get(n.id)
-          return pos ? { ...n, position: pos } : n
+          if (!pos) return n
+          return {
+            ...n,
+            position: pos,
+            style: { ...((n.style as React.CSSProperties | undefined) ?? {}), transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' },
+          }
         }),
       )
+      // Remove transition after animation completes
+      setTimeout(() => {
+        setNodes((nds) =>
+          nds.map((n) => {
+            if (!positions.has(n.id)) return n
+            const ns = { ...(n.style as React.CSSProperties | undefined) }
+            delete (ns as Record<string, unknown>).transition
+            return { ...n, style: Object.keys(ns).length ? ns : undefined }
+          }),
+        )
+      }, 350)
 
       // Fit view after layout
       requestAnimationFrame(() => fitView({ padding: 0.15, duration: 300 }))
