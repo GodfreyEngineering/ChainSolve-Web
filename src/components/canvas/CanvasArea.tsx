@@ -3512,13 +3512,14 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
 // ── Public export ─────────────────────────────────────────────────────────────
 
-export const CanvasArea = forwardRef<CanvasAreaHandle, CanvasAreaProps>(
-  function CanvasArea({ sidePanel, ...props }, ref) {
-    return (
-      <ReactFlowProvider>
-        <CanvasInner {...props} ref={ref} />
-        {sidePanel}
-      </ReactFlowProvider>
-    )
-  },
-)
+export const CanvasArea = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function CanvasArea(
+  { sidePanel, ...props },
+  ref,
+) {
+  return (
+    <ReactFlowProvider>
+      <CanvasInner {...props} ref={ref} />
+      {sidePanel}
+    </ReactFlowProvider>
+  )
+})
