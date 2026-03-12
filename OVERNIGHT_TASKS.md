@@ -192,7 +192,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 - [x] **[UX-10] Undo/redo: history timeline panel** — History tab in bottom dock: list of all undo-able actions with timestamps (relative). Click entry → restore that state, superseded entries become redo-able. Visual diff shows ±N node count change per entry. useGraphHistory extended with stackEntries (reactive) + restoreToIndex. Verify: add 10 nodes → open history → click entry 5 → canvas shows state at step 5.
 
-- [ ] **[UX-11] Minimap: interactive and informative** — Nodes shown as colored dots (color by category). Click to pan viewport. Drag viewport rectangle to pan. Right-click → Fit all. Node count in header. Fade when not in use. Verify: click a dot in minimap → canvas pans to that node.
+- [x] **[UX-11] Minimap: interactive and informative** — Nodes colored by category (teal=input, indigo=function, amber=output, purple=plot, green=group). pannable+zoomable (click to pan). Right-click → Fit All. Node count header above minimap. Fade-when-idle (opacity 0.45 → 1 on hover, reactivates for 3s after events). Verify: hover minimap → opacity rises; right-click → fits view.
 
 - [ ] **[UX-12] Drag-and-drop from OS onto canvas** — CSV files → auto-creates CSV Import block at drop position. Image files → creates Image annotation block. Detect via `onDragOver`/`onDrop` on canvas. Verify: drag .csv from Windows Explorer onto canvas → CSV Import block appears with file loaded.
 

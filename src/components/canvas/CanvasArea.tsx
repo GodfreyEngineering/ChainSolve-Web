@@ -91,6 +91,7 @@ import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard, pasteFromSystemClipboard } from '../../lib/clipboard'
 import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
+import { parseCSVToTableData } from '../../lib/csvParser'
 import { CommandPalette, type PaletteCommand } from './CommandPalette'
 const LazyFindBlockDialog = lazy(() =>
   import('./FindBlockDialog').then((m) => ({ default: m.FindBlockDialog })),
@@ -1043,6 +1044,48 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault()
       if (readOnly) return
+
+      // UX-12: OS file drop — CSV files create a tableInput block
+      if (e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0]
+        const isCSV =
+          file.type === 'text/csv' ||
+          file.type === 'text/plain' ||
+          file.name.toLowerCase().endsWith('.csv')
+        if (isCSV) {
+          const tableInputDef = BLOCK_REGISTRY.get('tableInput')
+          if (tableInputDef?.proOnly && !isBlockEntitled(tableInputDef, ent)) {
+            setShowUpgradeModal(true)
+            return
+          }
+          const position = screenToFlowPosition({ x: e.clientX, y: e.clientY })
+          const reader = new FileReader()
+          reader.onload = (ev) => {
+            const text = ev.target?.result
+            if (typeof text !== 'string') return
+            const tableData = parseCSVToTableData(text)
+            const id = `node_${++nodeIdCounter}`
+            doSaveHistory()
+            setNodes((nds) => [
+              ...nds,
+              {
+                id,
+                type: 'csData',
+                position,
+                data: {
+                  blockType: 'tableInput',
+                  label: file.name.replace(/\.csv$/i, ''),
+                  tableData,
+                },
+              } as Node<NodeData>,
+            ])
+          }
+          reader.readAsText(file)
+        }
+        return
+      }
+
+      // Block library drag
       const blockType = e.dataTransfer.getData(DRAG_TYPE)
       if (!blockType) return
       const def = BLOCK_REGISTRY.get(blockType)
