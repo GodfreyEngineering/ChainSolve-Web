@@ -205,6 +205,11 @@ export interface CanvasAreaProps {
 
   /** K1-1: Fired when a node drag ends — used for cross-sheet transfer detection. */
   onNodeDragStop?: (event: React.MouseEvent, node: { id: string }) => void
+  /**
+   * Optional side panel rendered inside ReactFlowProvider alongside CanvasInner.
+   * Use this to host components that need React Flow hooks (e.g. Inspector).
+   */
+  sidePanel?: React.ReactNode
 }
 
 /** Handle exposed by CanvasArea via forwardRef. */
@@ -3508,10 +3513,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 // ── Public export ─────────────────────────────────────────────────────────────
 
 export const CanvasArea = forwardRef<CanvasAreaHandle, CanvasAreaProps>(
-  function CanvasArea(props, ref) {
+  function CanvasArea({ sidePanel, ...props }, ref) {
     return (
       <ReactFlowProvider>
         <CanvasInner {...props} ref={ref} />
+        {sidePanel}
       </ReactFlowProvider>
     )
   },

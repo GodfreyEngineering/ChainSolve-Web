@@ -30,8 +30,7 @@ import { WelcomeCanvas } from '../components/canvas/WelcomeCanvas'
 import { LoadingScreen } from '../components/ui/LoadingScreen'
 import { useSidebarStore } from '../stores/sidebarStore'
 import { StatusBar } from '../components/app/StatusBar'
-import { RightSidebar } from '../components/app/RightSidebar'
-import { useStatusBarStore } from '../stores/statusBarStore'
+
 import { listProjects, importProject, type ProjectJSON } from '../lib/projects'
 import { canCreateProject, isAtProjectLimit } from '../lib/entitlements'
 import { NewProjectModal } from '../components/app/NewProjectModal'
@@ -121,7 +120,6 @@ export default function WorkspacePage() {
   const { open: sidebarOpen, toggle: toggleSidebar, setActiveTab } = useSidebarStore()
   const { toast } = useToast()
   const { t } = useTranslation()
-  const inspectedNodeId = useStatusBarStore((s) => s.inspectedNodeId)
   const importRef = useRef<HTMLInputElement>(null)
 
   // Canvas controls exposed by embedded CanvasPage (Phase M)
@@ -379,9 +377,6 @@ export default function WorkspacePage() {
             )}
           </PanelErrorBoundary>
         </div>
-
-        {/* Right sidebar (docked Inspector) — only when a canvas is active */}
-        {showCanvas && <RightSidebar selectedNodeId={inspectedNodeId} />}
       </div>
 
       {/* Status bar */}

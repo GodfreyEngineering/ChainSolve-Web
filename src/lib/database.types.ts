@@ -1399,6 +1399,20 @@ export type Database = {
           created_at: string
         }
       }
+      upsert_my_preferences: {
+        Args: {
+          p_locale?: string | null
+          p_theme?: string | null
+          p_region?: string | null
+          p_editor_layout?: string | null
+          p_sidebar_collapsed?: boolean | null
+        }
+        Returns: undefined
+      }
+      increment_share_link_views: {
+        Args: { p_token: string }
+        Returns: { project_id: string; is_active: boolean }[]
+      }
     }
 
     Enums: {
