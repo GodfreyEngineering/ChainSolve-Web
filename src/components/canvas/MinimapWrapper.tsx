@@ -34,7 +34,7 @@ function saveCorner(pos: Corner) {
   }
 }
 
-function cornerStyle(pos: Corner): React.CSSProperties {
+function cornerStyle(pos: Corner, bottomOffset: number): React.CSSProperties {
   const base: React.CSSProperties = {
     position: 'absolute',
     zIndex: 25,
@@ -42,7 +42,7 @@ function cornerStyle(pos: Corner): React.CSSProperties {
   }
 
   if (pos.startsWith('top-')) base.top = INSET
-  else base.bottom = INSET + 40 // leave room above BottomDock
+  else base.bottom = INSET + bottomOffset
 
   if (pos.endsWith('-left')) base.left = INSET
   else base.right = INSET
@@ -50,9 +50,9 @@ function cornerStyle(pos: Corner): React.CSSProperties {
   return base
 }
 
-function ghostStyle(pos: Corner): React.CSSProperties {
+function ghostStyle(pos: Corner, bottomOffset: number): React.CSSProperties {
   return {
-    ...cornerStyle(pos),
+    ...cornerStyle(pos, bottomOffset),
     width: 160,
     height: 100,
     borderRadius: 'var(--radius-md)',
@@ -76,9 +76,11 @@ function nearestCorner(x: number, y: number, w: number, h: number): Corner {
 
 interface MinimapWrapperProps {
   children: ReactNode
+  /** Current bottom dock height in px. Used to keep minimap above the dock. */
+  bottomOffset?: number
 }
 
-export function MinimapWrapper({ children }: MinimapWrapperProps) {
+export function MinimapWrapper({ children, bottomOffset = 40 }: MinimapWrapperProps) {
   const [corner, setCorner] = useState(loadCorner)
   const [dragging, setDragging] = useState(false)
   const [ghostCorner, setGhostCorner] = useState<Corner | null>(null)
@@ -137,14 +139,14 @@ export function MinimapWrapper({ children }: MinimapWrapperProps) {
       <div
         ref={wrapperRef}
         style={{
-          ...cornerStyle(corner),
+          ...cornerStyle(corner, bottomOffset),
           cursor: dragging ? 'grabbing' : 'grab',
         }}
         onMouseDown={onMouseDown}
       >
         {children}
       </div>
-      {dragging && ghostCorner && <div style={ghostStyle(ghostCorner)} />}
+      {dragging && ghostCorner && <div style={ghostStyle(ghostCorner, bottomOffset)} />}
     </>
   )
 }

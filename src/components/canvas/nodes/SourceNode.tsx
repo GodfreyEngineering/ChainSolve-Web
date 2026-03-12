@@ -6,7 +6,7 @@
  * The single output handle sits on the right edge.
  */
 
-import { memo, useCallback, useEffect, useMemo, useState, lazy, Suspense } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useComputed } from '../../../contexts/ComputedContext'
@@ -196,6 +196,133 @@ function MaterialPickerBody({
   )
 }
 
+// ── BUG-01: Raw-string number input with scroll-to-increment ──────────────
+
+function NumberInputBody({
+  value,
+  unit,
+  onCommit,
+  onUnitChange,
+  step = 1,
+  min,
+  max,
+}: {
+  value: number
+  unit?: string
+  onCommit: (v: number) => void
+  onUnitChange: (unitId: string | undefined) => void
+  step?: number
+  min?: number
+  max?: number
+}) {
+  // raw holds the user's in-progress string; null means "use external value"
+  const [raw, setRaw] = useState<string | null>(null)
+  const [error, setError] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // When raw is null we show the committed value from props.
+  // raw becomes non-null only on focus; cleared on blur/commit.
+  const displayValue = raw ?? String(value)
+
+  const commit = useCallback(
+    (str: string) => {
+      const trimmed = str.trim()
+      if (trimmed === '' || trimmed === '-') {
+        setError(true)
+        return
+      }
+      const n = parseFloat(trimmed)
+      if (isNaN(n)) {
+        setError(true)
+        return
+      }
+      const clamped =
+        min !== undefined && max !== undefined
+          ? Math.min(max, Math.max(min, n))
+          : min !== undefined
+            ? Math.max(min, n)
+            : max !== undefined
+              ? Math.min(max, n)
+              : n
+      setError(false)
+      setRaw(null)
+      onCommit(clamped)
+    },
+    [onCommit, min, max],
+  )
+
+  const onWheel = useCallback(
+    (e: React.WheelEvent<HTMLInputElement>) => {
+      e.preventDefault()
+      const delta = e.deltaY < 0 ? step : -step
+      const next = value + delta
+      const clamped =
+        min !== undefined && max !== undefined
+          ? Math.min(max, Math.max(min, next))
+          : min !== undefined
+            ? Math.max(min, next)
+            : max !== undefined
+              ? Math.min(max, next)
+              : next
+      onCommit(clamped)
+    },
+    [value, step, min, max, onCommit],
+  )
+
+  return (
+    <div className="cs-node-body" style={s.body}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+        <input
+          ref={inputRef}
+          type="text"
+          inputMode="decimal"
+          style={{
+            ...s.numInput,
+            flex: 1,
+            borderColor: error ? 'var(--danger, #f87171)' : undefined,
+            outline: error ? '1px solid var(--danger, #f87171)' : undefined,
+          }}
+          value={displayValue}
+          className="nodrag"
+          title={error ? 'Enter a numeric value' : undefined}
+          onChange={(e) => {
+            setRaw(e.target.value)
+            setError(false)
+          }}
+          onFocus={(e) => {
+            setRaw(String(value))
+            e.target.select()
+          }}
+          onBlur={(e) => commit(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              commit((e.target as HTMLInputElement).value)
+              ;(e.target as HTMLInputElement).blur()
+            } else if (e.key === 'Escape') {
+              setRaw(null)
+              setError(false)
+              ;(e.target as HTMLInputElement).blur()
+            }
+          }}
+          onWheel={onWheel}
+        />
+        <Suspense fallback={null}>
+          <LazyUnitPicker
+            compact
+            value={unit}
+            onChange={(unitId) => onUnitChange(unitId)}
+          />
+        </Suspense>
+      </div>
+      {error && (
+        <span style={{ fontSize: '0.6rem', color: 'var(--danger, #f87171)', marginTop: '0.15rem' }}>
+          Enter a numeric value
+        </span>
+      )}
+    </div>
+  )
+}
+
 function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
   const nd = data as NodeData
   const { updateNodeData } = useReactFlow()
@@ -313,28 +440,15 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
       </div>
 
       {isNumber && (
-        <div className="cs-node-body" style={s.body}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <input
-              type="number"
-              style={{ ...s.numInput, flex: 1 }}
-              value={nd.value ?? 0}
-              step="any"
-              className="nodrag"
-              onChange={(e) => {
-                const n = parseFloat(e.target.value)
-                if (!isNaN(n)) updateValue(n)
-              }}
-            />
-            <Suspense fallback={null}>
-              <LazyUnitPicker
-                compact
-                value={nd.unit as string | undefined}
-                onChange={(unitId) => updateNodeData(id, { unit: unitId })}
-              />
-            </Suspense>
-          </div>
-        </div>
+        <NumberInputBody
+          value={nd.value ?? 0}
+          unit={nd.unit as string | undefined}
+          onCommit={updateValue}
+          onUnitChange={(unitId) => updateNodeData(id, { unit: unitId })}
+          step={nd.step as number | undefined}
+          min={nd.min as number | undefined}
+          max={nd.max as number | undefined}
+        />
       )}
 
       {isSlider && (

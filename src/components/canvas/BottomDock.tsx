@@ -30,6 +30,8 @@ interface BottomDockProps {
   onToggleCollapsed?: () => void
   /** Right inset in px (leaves room for vertical toolbar). */
   rightInset?: number
+  /** Called whenever the visible dock height changes (for minimap positioning). */
+  onHeightChange?: (height: number) => void
 }
 
 // ── Persistence helpers ──────────────────────────────────────────────────
@@ -89,6 +91,7 @@ export function BottomDock({
   collapsed = false,
   onToggleCollapsed,
   rightInset = 0,
+  onHeightChange,
 }: BottomDockProps) {
   const { t } = useTranslation()
   const { windows } = useWindowManager()
@@ -100,6 +103,11 @@ export function BottomDock({
   })
   const dragRef = useRef<{ startY: number; startH: number } | null>(null)
   const rafId = useRef(0)
+
+  // Notify parent of effective height (for minimap positioning)
+  useEffect(() => {
+    onHeightChange?.(collapsed ? COLLAPSED_DOCK_HEIGHT : height)
+  }, [height, collapsed, onHeightChange])
 
   // Persist tab changes
   const switchTab = useCallback((tab: DockTab) => {

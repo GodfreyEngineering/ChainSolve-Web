@@ -1,13 +1,11 @@
 name: Full E2E suite
 
 # Triggers:
-#   1. Nightly at 02:00 UTC — catches regressions before the next working day.
-#   2. workflow_dispatch — run manually from the GitHub Actions UI at any time.
-#      Use this after a large refactor, before a release, or to investigate a
-#      specific regression that only shows up in the full suite.
+#   workflow_dispatch — run manually from the GitHub Actions UI at any time.
+#   Use this after a large refactor, before a release, or to investigate a
+#   specific regression that only shows up in the full suite.
+#   Scheduled nightly run removed — trigger manually as needed.
 on:
-  schedule:
-    - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
       reason:

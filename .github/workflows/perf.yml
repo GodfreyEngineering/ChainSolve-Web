@@ -1,10 +1,8 @@
 name: Performance
 
 on:
-  schedule:
-    # Monday 03:00 UTC — weekly nightly perf health check.
-    # Not PR-gated; failures here are tracked but do not block merges.
-    - cron: '0 3 * * 1'
+  # Scheduled weekly run removed — trigger manually as needed via workflow_dispatch.
+  # Not PR-gated; failures here are tracked but do not block merges.
   workflow_dispatch:
 
 permissions:

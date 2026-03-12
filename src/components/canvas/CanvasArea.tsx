@@ -753,6 +753,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     }
   }, [dockCollapsed])
 
+  // Track dock height for minimap positioning
+  const [dockHeight, setDockHeight] = useState(200)
+
   // Background dots (E7-2)
   const [bgDotsVisible, setBgDotsVisible] = useState(getBgDotsPref)
 
@@ -2201,7 +2204,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     )}
                   </ReactFlow>
                   {minimap && (
-                    <MinimapWrapper>
+                    <MinimapWrapper bottomOffset={dockHeight}>
                       <MiniMap
                         pannable
                         zoomable
@@ -2292,6 +2295,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     panels={dockPanels}
                     collapsed={dockCollapsed}
                     onToggleCollapsed={() => setDockCollapsed((v) => !v)}
+                    onHeightChange={setDockHeight}
                   />
                   {/* V3-5.3: Floating annotation toolbar on annotation selection */}
                   {inspectedId &&
