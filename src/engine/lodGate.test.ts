@@ -5,6 +5,8 @@ import {
   LOD_FULL_REENTER,
   LOD_MINIMAL_ENTER,
   LOD_COMPACT_REENTER,
+  LOD_NANO_ENTER,
+  LOD_MINIMAL_REENTER,
 } from './lodGate.ts'
 
 describe('computeLodTier', () => {
@@ -12,6 +14,7 @@ describe('computeLodTier', () => {
   it('re-enter thresholds are above their enter counterparts (hysteresis)', () => {
     expect(LOD_FULL_REENTER).toBeGreaterThan(LOD_COMPACT_ENTER)
     expect(LOD_COMPACT_REENTER).toBeGreaterThan(LOD_MINIMAL_ENTER)
+    expect(LOD_MINIMAL_REENTER).toBeGreaterThan(LOD_NANO_ENTER)
   })
 
   // ── Normal zoom-out path ─────────────────────────────────────────────────
@@ -68,5 +71,26 @@ describe('computeLodTier', () => {
 
   it('returns full immediately from compact when zoom is high', () => {
     expect(computeLodTier(2.0, 'compact')).toBe('full')
+  })
+
+  // ── Nano tier ────────────────────────────────────────────────────────────
+  it('transitions minimal → nano just below LOD_NANO_ENTER', () => {
+    expect(computeLodTier(LOD_NANO_ENTER - 0.01, 'minimal')).toBe('nano')
+  })
+
+  it('stays nano below LOD_MINIMAL_REENTER', () => {
+    expect(computeLodTier(LOD_MINIMAL_REENTER - 0.01, 'nano')).toBe('nano')
+    expect(computeLodTier(0, 'nano')).toBe('nano')
+  })
+
+  it('transitions nano → minimal at LOD_MINIMAL_REENTER', () => {
+    expect(computeLodTier(LOD_MINIMAL_REENTER, 'nano')).toBe('minimal')
+    expect(computeLodTier(LOD_MINIMAL_REENTER + 0.05, 'nano')).toBe('minimal')
+  })
+
+  it('does not jump from full to nano in one step', () => {
+    expect(computeLodTier(0, 'full')).toBe('compact')
+    expect(computeLodTier(0, 'compact')).toBe('minimal')
+    expect(computeLodTier(0, 'minimal')).toBe('nano')
   })
 })

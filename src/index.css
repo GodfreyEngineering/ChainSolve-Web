@@ -342,9 +342,12 @@ button:focus:not(:focus-visible) {
  * React Flow handles, causing edges to collapse to the node origin (0,0).
  * Instead, visually collapse the body while keeping handles in the DOM
  * so getBoundingClientRect() still returns correct positions.
+ *
+ * Tiers: full (zoom≥0.6) → compact (0.35–0.6) → minimal (0.15–0.35) → nano (<0.15)
  */
 [data-lod='compact'] .cs-node-body,
-[data-lod='minimal'] .cs-node-body {
+[data-lod='minimal'] .cs-node-body,
+[data-lod='nano'] .cs-node-body {
   max-height: 0 !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
@@ -352,8 +355,20 @@ button:focus:not(:focus-visible) {
   pointer-events: none !important;
   opacity: 0 !important;
 }
-[data-lod='minimal'] .cs-node-header-value {
+[data-lod='minimal'] .cs-node-header-value,
+[data-lod='nano'] .cs-node-header-value {
   display: none !important;
+}
+/* Nano: hide header text content, leaving only the colored accent bar. */
+[data-lod='nano'] .cs-node-header-left {
+  visibility: hidden !important;
+}
+/* Handles: hide at compact and below (pointer-events off prevents interaction at low zoom). */
+[data-lod='compact'] .react-flow__handle,
+[data-lod='minimal'] .react-flow__handle,
+[data-lod='nano'] .react-flow__handle {
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* ── Value badges — toggleable header value labels ───────────────────────── */
@@ -369,7 +384,8 @@ button:focus:not(:focus-visible) {
   display: none !important;
 }
 [data-lod='compact'] .cs-edge-badge,
-[data-lod='minimal'] .cs-edge-badge {
+[data-lod='minimal'] .cs-edge-badge,
+[data-lod='nano'] .cs-edge-badge {
   display: none !important;
 }
 

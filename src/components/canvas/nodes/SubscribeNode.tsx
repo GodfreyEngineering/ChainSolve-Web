@@ -52,7 +52,7 @@ function SubscribeNodeInner({ id, data, selected }: NodeProps) {
           background: `linear-gradient(to right, color-mix(in srgb, ${typeColor} 6%, transparent), transparent)`,
         }}
       >
-        <div style={s.headerLeft}>
+        <div className="cs-node-header-left" style={s.headerLeft}>
           <Icon icon={TypeIcon} size={14} style={{ ...s.headerIcon, color: typeColor }} />
           <span style={s.headerLabel}>{nd.label}</span>
         </div>

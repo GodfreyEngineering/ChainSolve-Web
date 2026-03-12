@@ -832,17 +832,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // Ref persists whether animation was auto-disabled so we only re-enable
   // once the edge count drops below ANIM_EDGES_REENABLE_AT (< ANIM_EDGES_DISABLE_AT).
   const animAutoDisabledRef = useRef(false)
-  const effectiveEdgesAnimated = computeEffectiveEdgesAnimated(
-    edgesAnimated,
-    edges.length,
-    animAutoDisabledRef.current,
-  )
+  const effectiveLodTier: LodTier = lodEnabled ? lodTier : 'full'
+
+  const effectiveEdgesAnimated =
+    // UI-PERF-01: disable animation at compact/minimal/nano (no benefit, only cost at low zoom)
+    effectiveLodTier === 'full' &&
+    computeEffectiveEdgesAnimated(edgesAnimated, edges.length, animAutoDisabledRef.current)
   // Keep hysteresis state in sync.  We are "auto-disabled" any time the user
   // wants animation ON but the gate forced it OFF (either over the hard
   // threshold or in the hysteresis band).
   animAutoDisabledRef.current = !effectiveEdgesAnimated && edgesAnimated
-
-  const effectiveLodTier: LodTier = lodEnabled ? lodTier : 'full'
 
   // Perf-gate badges: auto-hide at >300 nodes
   const effectiveBadges = badgesEnabled && nodes.length <= 300
