@@ -21,8 +21,17 @@ export interface GraphHealthReport {
   groupCount: number
   collapsedGroupCount: number
   orphanCount: number
+  orphanNodeIds: string[]
   crossingEdgeCount: number
   cycleDetected: boolean
+  /** IDs of nodes forming the detected cycle (empty if no cycle). */
+  cyclePath: string[]
+  /** IDs of nodes on the critical (longest) path, in order (empty if cyclic). */
+  criticalPath: string[]
+  /** IDs of nodes whose computed value is an error. */
+  errorNodeIds: string[]
+  /** Composite health score 0-100. */
+  healthScore: number
   warnings: HealthWarning[]
 }
 
@@ -65,11 +74,12 @@ export function getCrossingEdgesForGroup(groupId: string, nodes: Node[], edges: 
 // ── Cycle detection ──────────────────────────────────────────────────────────
 
 /**
- * Simple DFS-based cycle detection on the directed edge graph.
+ * DFS-based cycle detection; returns the cycle as an array of node IDs,
+ * or null if no cycle exists.
  * Excludes group nodes (blockType === '__group__') from the graph.
  * O(V + E).
  */
-function hasCycle(nodes: Node[], edges: Edge[]): boolean {
+function findCyclePath(nodes: Node[], edges: Edge[]): string[] | null {
   const evalNodeIds = new Set(
     nodes
       .filter((n) => (n.data as Record<string, unknown>).blockType !== '__group__')
@@ -88,46 +98,164 @@ function hasCycle(nodes: Node[], edges: Edge[]): boolean {
   const state = new Map<string, number>()
   for (const id of evalNodeIds) state.set(id, 0)
 
-  for (const id of evalNodeIds) {
-    if (state.get(id) === 0) {
-      const stack = [id]
-      const iterStack: { node: string; idx: number }[] = [{ node: id, idx: 0 }]
-      state.set(id, 1)
+  for (const startId of evalNodeIds) {
+    if (state.get(startId) !== 0) continue
 
-      while (iterStack.length > 0) {
-        const top = iterStack[iterStack.length - 1]
-        const neighbors = adj.get(top.node) ?? []
+    const stack: string[] = []
+    const iterStack: { node: string; idx: number }[] = []
 
-        if (top.idx >= neighbors.length) {
-          state.set(top.node, 2)
-          iterStack.pop()
-          stack.pop()
-          continue
-        }
+    state.set(startId, 1)
+    stack.push(startId)
+    iterStack.push({ node: startId, idx: 0 })
 
-        const next = neighbors[top.idx]
-        top.idx++
+    while (iterStack.length > 0) {
+      const top = iterStack[iterStack.length - 1]
+      const neighbors = adj.get(top.node) ?? []
 
-        const ns = state.get(next)
-        if (ns === 1) return true // back edge → cycle
-        if (ns === 0) {
-          state.set(next, 1)
-          stack.push(next)
-          iterStack.push({ node: next, idx: 0 })
-        }
+      if (top.idx >= neighbors.length) {
+        state.set(top.node, 2)
+        iterStack.pop()
+        stack.pop()
+        continue
+      }
+
+      const next = neighbors[top.idx]
+      top.idx++
+
+      const ns = state.get(next)
+      if (ns === 1) {
+        // Found back edge — reconstruct cycle from stack
+        const cycleStart = stack.indexOf(next)
+        return [...stack.slice(cycleStart), next]
+      }
+      if (ns === 0) {
+        state.set(next, 1)
+        stack.push(next)
+        iterStack.push({ node: next, idx: 0 })
       }
     }
   }
-  return false
+  return null
+}
+
+// ── Critical path ─────────────────────────────────────────────────────────────
+
+/**
+ * Finds the longest path (critical path) in the DAG using topological sort + DP.
+ * Returns node IDs in order from source to sink.
+ * Returns [] for cyclic graphs or empty graphs.
+ * O(V + E).
+ */
+function findCriticalPath(nodes: Node[], edges: Edge[]): string[] {
+  const evalNodes = nodes.filter(
+    (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
+  )
+  if (evalNodes.length === 0) return []
+
+  const ids = new Set(evalNodes.map((n) => n.id))
+  const adj = new Map<string, string[]>() // successors
+  const inDeg = new Map<string, number>()
+
+  for (const id of ids) {
+    adj.set(id, [])
+    inDeg.set(id, 0)
+  }
+
+  for (const e of edges) {
+    if (ids.has(e.source) && ids.has(e.target)) {
+      adj.get(e.source)!.push(e.target)
+      inDeg.set(e.target, (inDeg.get(e.target) ?? 0) + 1)
+    }
+  }
+
+  // Kahn's topological sort
+  const queue: string[] = []
+  for (const [id, deg] of inDeg) {
+    if (deg === 0) queue.push(id)
+  }
+
+  const topo: string[] = []
+  const remaining = new Map(inDeg)
+  while (queue.length > 0) {
+    const node = queue.shift()!
+    topo.push(node)
+    for (const next of adj.get(node) ?? []) {
+      const d = (remaining.get(next) ?? 1) - 1
+      remaining.set(next, d)
+      if (d === 0) queue.push(next)
+    }
+  }
+
+  // If not all nodes processed → cycle; bail out
+  if (topo.length !== ids.size) return []
+
+  // Longest path DP (dp[id] = length of longest path ending at id)
+  const dp = new Map<string, number>()
+  const prev = new Map<string, string | null>()
+  for (const id of topo) {
+    dp.set(id, 1)
+    prev.set(id, null)
+  }
+
+  for (const id of topo) {
+    for (const next of adj.get(id) ?? []) {
+      const candidate = (dp.get(id) ?? 1) + 1
+      if (candidate > (dp.get(next) ?? 1)) {
+        dp.set(next, candidate)
+        prev.set(next, id)
+      }
+    }
+  }
+
+  // Find the node with the maximum dp value
+  let maxLen = 0
+  let endNode = ''
+  for (const [id, len] of dp) {
+    if (len > maxLen) {
+      maxLen = len
+      endNode = id
+    }
+  }
+
+  if (maxLen < 2) return [] // single node isn't a meaningful chain
+
+  // Reconstruct path by tracing back through prev
+  const path: string[] = []
+  let cur: string | null | undefined = endNode
+  while (cur != null) {
+    path.unshift(cur)
+    cur = prev.get(cur) ?? null
+  }
+  return path
+}
+
+// ── Health score ──────────────────────────────────────────────────────────────
+
+function computeHealthScore(
+  cycleDetected: boolean,
+  orphanCount: number,
+  errorCount: number,
+  crossingEdgeCount: number,
+): number {
+  let score = 100
+  if (cycleDetected) score -= 30
+  score -= Math.min(orphanCount * 3, 15)
+  score -= Math.min(errorCount * 5, 20)
+  score -= Math.min(crossingEdgeCount * 2, 10)
+  return Math.max(0, score)
 }
 
 // ── Compute health ───────────────────────────────────────────────────────────
 
 /**
  * Compute a full health report from the current graph state.
- * All operations are O(N) in nodes + edges.
+ * @param computedValues  Optional map of nodeId → Value (for error-node detection).
  */
-export function computeGraphHealth(nodes: Node[], edges: Edge[]): GraphHealthReport {
+export function computeGraphHealth(
+  nodes: Node[],
+  edges: Edge[],
+  computedValues?: ReadonlyMap<string, { kind: string }>,
+): GraphHealthReport {
   const groups = nodes.filter((n) => (n.data as Record<string, unknown>).blockType === '__group__')
   const evalNodes = nodes.filter(
     (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
@@ -143,10 +271,31 @@ export function computeGraphHealth(nodes: Node[], edges: Edge[]): GraphHealthRep
     connected.add(e.source)
     connected.add(e.target)
   }
-  const orphanCount = evalNodes.filter((n) => !connected.has(n.id)).length
+  const orphanNodeIds = evalNodes.filter((n) => !connected.has(n.id)).map((n) => n.id)
+  const orphanCount = orphanNodeIds.length
 
   const crossingEdgeCount = getCrossingEdges(nodes, edges).length
-  const cycleDetected = hasCycle(nodes, edges)
+  const cyclePath = findCyclePath(nodes, edges) ?? []
+  const cycleDetected = cyclePath.length > 0
+
+  // Error nodes from computed values
+  const errorNodeIds: string[] = []
+  if (computedValues) {
+    for (const [id, val] of computedValues) {
+      if (val.kind === 'error' && connected.has(id)) {
+        errorNodeIds.push(id)
+      }
+    }
+  }
+
+  const criticalPath = cycleDetected ? [] : findCriticalPath(nodes, edges)
+
+  const healthScore = computeHealthScore(
+    cycleDetected,
+    orphanCount,
+    errorNodeIds.length,
+    crossingEdgeCount,
+  )
 
   // Build warnings
   const warnings: HealthWarning[] = []
@@ -181,14 +330,27 @@ export function computeGraphHealth(nodes: Node[], edges: Edge[]): GraphHealthRep
     })
   }
 
+  if (errorNodeIds.length > 0) {
+    warnings.push({
+      key: 'graphHealth.errorNodes',
+      severity: 'warn',
+      detail: String(errorNodeIds.length),
+    })
+  }
+
   return {
     nodeCount: evalNodes.length,
     edgeCount: edges.length,
     groupCount: groups.length,
     collapsedGroupCount: collapsedGroups.length,
     orphanCount,
+    orphanNodeIds,
     crossingEdgeCount,
     cycleDetected,
+    cyclePath,
+    criticalPath,
+    errorNodeIds,
+    healthScore,
     warnings,
   }
 }
@@ -209,6 +371,7 @@ export function formatHealthReport(
     `  ${t('graphHealth.edges')}: ${report.edgeCount}`,
     `  ${t('graphHealth.groups')}: ${report.groupCount}`,
     `  ${t('graphHealth.collapsed')}: ${report.collapsedGroupCount}`,
+    `  Health: ${report.healthScore}%`,
     '',
   ]
 
@@ -219,10 +382,16 @@ export function formatHealthReport(
     lines.push(`  ⚠ ${t('graphHealth.crossingEdges', { count: report.crossingEdgeCount })}`)
   }
   if (report.cycleDetected) {
-    lines.push(`  ⚠ ${t('graphHealth.cycleDetected')}`)
+    lines.push(`  ⚠ ${t('graphHealth.cycleDetected')} [${report.cyclePath.join(' → ')}]`)
+  }
+  if (report.errorNodeIds.length > 0) {
+    lines.push(`  ⚠ ${report.errorNodeIds.length} error node(s)`)
   }
   if (report.nodeCount > 300) {
     lines.push(`  ℹ ${t('graphHealth.largeGraph')}`)
+  }
+  if (report.criticalPath.length > 0) {
+    lines.push(`  Critical path: ${report.criticalPath.length} nodes`)
   }
 
   return lines.join('\n')
