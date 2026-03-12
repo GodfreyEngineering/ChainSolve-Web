@@ -706,6 +706,13 @@ export function CanvasToolbar({
                     <span style={annotIconStyle}>{'\u21e5'}</span>
                     {t('contextMenu.annotLeader')}
                   </button>
+                  <button
+                    style={annotItemStyle}
+                    onClick={() => insertAnnot('annotation_sticky_note')}
+                  >
+                    <span style={annotIconStyle}>{'\ud83d\udcdd'}</span>
+                    {t('contextMenu.annotStickyNote', 'Sticky Note')}
+                  </button>
                 </div>
               )}
             </div>

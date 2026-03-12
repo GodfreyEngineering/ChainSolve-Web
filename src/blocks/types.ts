@@ -168,6 +168,7 @@ export interface NodeData extends Record<string, unknown> {
     | 'ellipse'
     | 'diamond'
     | 'rounded_rectangle'
+    | 'sticky_note'
   /** Annotation text content (csAnnotation nodes only). */
   annotationText?: string
   /** Annotation color — hex string (csAnnotation nodes only). */
@@ -198,6 +199,8 @@ export interface NodeData extends Record<string, unknown> {
   annotationArrowThickness?: number
   /** V3-5.2: Arrow dash pattern. */
   annotationArrowDash?: 'solid' | 'dashed' | 'dotted'
+  /** UX-22: Monospace font for text/callout/leader annotations. */
+  annotationMonospace?: boolean
   /** H1-1: Unit assigned to this node's output. Unit id from unitCatalog. */
   unit?: string
   /** H7-1: Channel name for publish blocks (csPublish nodes only). */

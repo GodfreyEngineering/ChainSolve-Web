@@ -31,7 +31,8 @@ export function AnnotationInspector({ data, onUpdate, onZOrder }: Props) {
   const hasText =
     data.annotationType === 'text' ||
     data.annotationType === 'callout' ||
-    data.annotationType === 'leader'
+    data.annotationType === 'leader' ||
+    data.annotationType === 'sticky_note'
 
   const isResizable =
     data.annotationType === 'highlight' ||
@@ -40,7 +41,8 @@ export function AnnotationInspector({ data, onUpdate, onZOrder }: Props) {
     data.annotationType === 'rectangle' ||
     data.annotationType === 'ellipse' ||
     data.annotationType === 'diamond' ||
-    data.annotationType === 'rounded_rectangle'
+    data.annotationType === 'rounded_rectangle' ||
+    data.annotationType === 'sticky_note'
 
   const isShape =
     data.annotationType === 'rectangle' ||
@@ -135,6 +137,20 @@ export function AnnotationInspector({ data, onUpdate, onZOrder }: Props) {
             aria-pressed={!!data.annotationItalic}
           >
             I
+          </button>
+          <button
+            style={{
+              ...toggleStyle,
+              fontFamily: 'monospace',
+              fontSize: '0.72rem',
+              background: data.annotationMonospace ? 'var(--primary)' : 'var(--surface-hover)',
+            }}
+            onClick={() => onUpdate({ annotationMonospace: !data.annotationMonospace })}
+            title={t('annotation.monospace', 'Monospace font')}
+            aria-label={t('annotation.monospace', 'Monospace font')}
+            aria-pressed={!!data.annotationMonospace}
+          >
+            {'</>'}
           </button>
           <div style={{ width: 1, background: 'var(--border)', margin: '0 2px' }} />
           {(['left', 'center', 'right'] as const).map((align) => (

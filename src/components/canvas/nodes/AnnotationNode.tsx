@@ -13,6 +13,8 @@ import { memo, useCallback, useRef, useState } from 'react'
 import { Handle, Position, NodeResizer, useReactFlow } from '@xyflow/react'
 import type { NodeProps, Node } from '@xyflow/react'
 import type { NodeData } from '../../../blocks/types'
+import { KaTeXRenderer } from './KaTeXRenderer'
+import { hasMath } from '../../../lib/mathUtils'
 
 const DEFAULT_COLOR = '#facc15'
 const DEFAULT_FONT_SIZE = 14
@@ -30,16 +32,23 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
   const h = nd.annotationHeight
   const borderWidth = nd.annotationBorderWidth ?? 2
   const fillColor = nd.annotationFillColor ?? `${color}20`
+  const monospace = nd.annotationMonospace ?? false
 
   const fontWeight = bold ? 700 : 600
   const fontStyle = italic ? ('italic' as const) : ('normal' as const)
+  const fontFamily = monospace
+    ? "ui-monospace, 'Cascadia Code', 'Fira Code', monospace"
+    : undefined
 
   const [editing, setEditing] = useState(false)
   const editRef = useRef<HTMLDivElement>(null)
   const { updateNodeData } = useReactFlow()
 
   const hasText =
-    annotationType === 'text' || annotationType === 'callout' || annotationType === 'leader'
+    annotationType === 'text' ||
+    annotationType === 'callout' ||
+    annotationType === 'leader' ||
+    annotationType === 'sticky_note'
 
   const handleDoubleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -87,7 +96,8 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
     annotationType === 'rectangle' ||
     annotationType === 'ellipse' ||
     annotationType === 'diamond' ||
-    annotationType === 'rounded_rectangle'
+    annotationType === 'rounded_rectangle' ||
+    annotationType === 'sticky_note'
 
   const resizerEl = isResizable && selected && (
     <NodeResizer
@@ -105,6 +115,35 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
     />
   )
 
+  /** Render text with bullet list and optional KaTeX math support. */
+  const renderText = (t: string) => {
+    // Bullet list: lines starting with "- " become bullet points
+    const lines = t.split('\n')
+    const hasBullets = lines.some((l) => l.startsWith('- ') || l.startsWith('* '))
+
+    if (hasBullets) {
+      return (
+        <ul style={{ margin: 0, paddingLeft: '1.2em', listStyle: 'disc' }}>
+          {lines.map((line, i) => {
+            const content =
+              line.startsWith('- ') || line.startsWith('* ') ? line.slice(2) : line
+            const isBullet = line.startsWith('- ') || line.startsWith('* ')
+            return isBullet ? (
+              <li key={i}>{hasMath(content) ? <KaTeXRenderer text={content} /> : content}</li>
+            ) : (
+              <span key={i} style={{ display: 'block' }}>
+                {hasMath(line) ? <KaTeXRenderer text={line} /> : line}
+              </span>
+            )
+          })}
+        </ul>
+      )
+    }
+
+    if (hasMath(t)) return <KaTeXRenderer text={t} />
+    return <>{t}</>
+  }
+
   /** Inline-editable text element. */
   const editableText = editing ? (
     <div
@@ -118,12 +157,13 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
         minWidth: 20,
         cursor: 'text',
         borderBottom: `1px solid ${color}88`,
+        fontFamily,
       }}
     >
       {text}
     </div>
   ) : (
-    <span>{text}</span>
+    <span style={{ fontFamily }}>{renderText(text)}</span>
   )
 
   // ── Arrow ──────────────────────────────────────────────────────────────────
@@ -394,6 +434,64 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
             />
           )}
         </svg>
+      </div>
+    )
+  }
+
+  // ── Sticky note ────────────────────────────────────────────────────────────
+  if (annotationType === 'sticky_note') {
+    const stickyW = w ?? 160
+    const stickyH = h ?? 120
+    return (
+      <div
+        style={{
+          width: stickyW,
+          height: stickyH,
+          background: color,
+          borderRadius: '2px 10px 10px 10px',
+          boxShadow: selected
+            ? `2px 4px 16px rgba(0,0,0,0.35), 0 0 0 2px ${color}`
+            : '2px 4px 12px rgba(0,0,0,0.25)',
+          padding: '0.5rem 0.6rem',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          cursor: 'grab',
+          overflow: 'hidden',
+        }}
+        onDoubleClick={handleDoubleClick}
+      >
+        {resizerEl}
+        {/* Folded corner */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: 0,
+            height: 0,
+            borderStyle: 'solid',
+            borderWidth: '12px 12px 0 0',
+            borderColor: `rgba(0,0,0,0.15) transparent transparent transparent`,
+          }}
+        />
+        <div
+          style={{
+            flex: 1,
+            color: 'rgba(0,0,0,0.8)',
+            fontSize,
+            fontWeight,
+            fontStyle,
+            fontFamily: fontFamily ?? "'Montserrat', system-ui, sans-serif",
+            textAlign,
+            lineHeight: 1.4,
+            whiteSpace: 'pre-wrap',
+            overflowY: 'auto',
+          }}
+        >
+          {editableText}
+        </div>
       </div>
     )
   }

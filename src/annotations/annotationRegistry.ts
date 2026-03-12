@@ -21,6 +21,7 @@ export type AnnotationType =
   | 'ellipse'
   | 'diamond'
   | 'rounded_rectangle'
+  | 'sticky_note'
 
 /** Arrow endpoint marker styles (V3-5.2). */
 export type ArrowMarker = 'none' | 'arrowhead' | 'dot' | 'square'
@@ -115,5 +116,11 @@ export const ANNOTATION_REGISTRY: ReadonlyMap<string, AnnotationDef> = new Map([
   def('annotation_rounded_rectangle', 'Rounded Rectangle', 'rounded_rectangle', '#a78bfa', {
     annotationBorderWidth: 2,
     annotationFillColor: 'rgba(167,139,250,0.12)',
+  }),
+
+  // UX-22: Sticky note variant
+  def('annotation_sticky_note', 'Sticky Note', 'sticky_note', '#fde68a', {
+    annotationText: 'Note',
+    annotationFontSize: 13,
   }),
 ])

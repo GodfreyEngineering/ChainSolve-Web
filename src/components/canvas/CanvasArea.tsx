@@ -2272,6 +2272,21 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [screenToFlowPosition, setNodes, doSaveHistory],
   )
 
+  // UX-22: Annotation insert commands for the command palette (defined after onInsertAnnotationAtCenter)
+  const annotationPaletteCommands = useMemo<PaletteCommand[]>(
+    () =>
+      readOnly
+        ? []
+        : [
+            { id: 'insertAnnotText', kind: 'action', label: 'Insert text annotation', hint: 'Add a text label to the canvas', icon: 'A', onExecute: () => onInsertAnnotationAtCenter('annotation_text') },
+            { id: 'insertAnnotCallout', kind: 'action', label: 'Insert callout box', hint: 'Add a callout note box to the canvas', icon: '▭', onExecute: () => onInsertAnnotationAtCenter('annotation_callout') },
+            { id: 'insertAnnotStickyNote', kind: 'action', label: 'Insert sticky note', hint: 'Add a sticky note to the canvas', icon: '📝', onExecute: () => onInsertAnnotationAtCenter('annotation_sticky_note') },
+            { id: 'insertAnnotHighlight', kind: 'action', label: 'Insert highlight region', hint: 'Add a highlight region to the canvas', icon: '◻', onExecute: () => onInsertAnnotationAtCenter('annotation_highlight') },
+            { id: 'insertAnnotArrow', kind: 'action', label: 'Insert arrow annotation', hint: 'Add an arrow to the canvas', icon: '→', onExecute: () => onInsertAnnotationAtCenter('annotation_arrow') },
+          ],
+    [readOnly, onInsertAnnotationAtCenter],
+  )
+
   // V3-5.1: Z-order annotation nodes
   const onAnnotationZOrder = useCallback(
     (nodeId: string, op: 'front' | 'back' | 'forward' | 'backward') => {
@@ -3086,7 +3101,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 {/* UX-03: Command palette */}
                 {paletteOpen && (
                   <CommandPalette
-                    commands={paletteCommands}
+                    commands={[...paletteCommands, ...annotationPaletteCommands]}
                     nodeLabels={paletteNodeLabels}
                     onClose={() => setPaletteOpen(false)}
                     onInsertBlock={insertBlockAtCenter}
