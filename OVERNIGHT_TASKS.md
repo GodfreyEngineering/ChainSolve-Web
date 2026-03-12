@@ -240,7 +240,7 @@ Status: In progress | Model: Claude Sonnet 4.6
 
 ## TIER 9 — PROJECT MANAGEMENT OVERHAUL
 
-- [ ] **[PROJ-01] Atomic save via CAS RPC** — Replace read-then-write in `saveProject()` with the `save_project_metadata` RPC (DB-06). Verify: two concurrent saves → one wins, one gets `{ conflict: true }`.
+- [x] **[PROJ-01] Atomic save via CAS RPC** — Replace read-then-write in `saveProject()` with the `save_project_metadata` RPC (DB-06). Verify: two concurrent saves → one wins, one gets `{ conflict: true }`.
 
 - [ ] **[PROJ-02] Autosave reliability: queue + retry + feedback** — Exponential backoff retry (1s, 2s, 4s, max 3 attempts). Persistent toast on failure: "Auto-save failed — click to save manually." "Last saved: N min ago" in status bar. `beforeunload` dialog if dirty. Verify: go offline, make changes, reconnect → auto-save succeeds.
 

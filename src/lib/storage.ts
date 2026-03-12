@@ -96,6 +96,10 @@ function sanitiseFilename(filename: string): string {
  * Serialise `projectJson` to JSON and upsert it at
  * `{userId}/{projectId}/project.json` in the **projects** bucket.
  * Then stamps `projects.storage_key` in the DB with the same path.
+ *
+ * NOTE: For conflict-safe saves, use uploadProjectBlob() followed by the
+ * save_project_metadata RPC (PROJ-01). This function is kept for initial
+ * project creation and re-format migrations where no conflict check is needed.
  */
 export async function saveProjectJson(projectId: string, projectJson: unknown): Promise<void> {
   const session = await requireSession()
@@ -114,6 +118,22 @@ export async function saveProjectJson(projectId: string, projectJson: unknown): 
 
   if (dbErr)
     throw new ServiceError('DB_ERROR', `DB update (storage_key) failed: ${dbErr.message}`, true)
+}
+
+/**
+ * PROJ-01: Upload project blob to storage without updating the DB.
+ * Returns the storage key. Use with save_project_metadata RPC for atomic CAS.
+ */
+export async function uploadProjectBlob(
+  projectId: string,
+  projectJson: unknown,
+): Promise<string> {
+  const session = await requireSession()
+  const userId = session.user.id
+  const key = `${userId}/${projectId}/project.json`
+  const blob = new Blob([JSON.stringify(projectJson)], { type: 'application/json' })
+  await uploadWithRetry('projects', key, blob, { upsert: true, contentType: 'application/json' })
+  return key
 }
 
 /**

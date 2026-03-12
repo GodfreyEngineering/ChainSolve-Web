@@ -4,19 +4,18 @@
  * All operations require an authenticated session.
  * Projects table uses `owner_id` (see migration 0003).
  *
- * Conflict detection: before every save we read the DB updated_at and
- * compare it with the value we captured at load time. If the DB is newer,
- * a concurrent write occurred — we return { conflict: true } without
- * overwriting. The caller is responsible for showing a resolution UI.
- *
- * For W8+ we will replace the read-then-write with an atomic Postgres
- * RPC (CAS on updated_at). See docs/PROJECT_FORMAT.md §Conflict detection.
+ * PROJ-01: Conflict detection uses the `save_project_metadata` RPC which
+ * performs a Compare-And-Swap on `updated_at` atomically in Postgres.
+ * The blob is uploaded to storage first; then the RPC checks the CAS and
+ * updates the DB. If conflict: true, the blob is a no-op (overwritten next
+ * successful save). The caller is responsible for showing a resolution UI.
  */
 
 import type { VariablesMap } from './variables'
 import { supabase } from './supabase'
 import {
   saveProjectJson,
+  uploadProjectBlob,
   loadProjectJson,
   listProjectAssets,
   downloadAssetBytes,
@@ -351,16 +350,18 @@ export async function loadProject(projectId: string): Promise<ProjectJSON> {
 }
 
 /**
- * Save graph to storage with optimistic-lock conflict detection.
+ * PROJ-01: Save graph to storage with atomic CAS conflict detection.
  *
- * Returns { conflict: true } when the DB row was updated after we loaded it
- * (indicating a concurrent write from another session). In that case we do
- * NOT overwrite — the caller shows a resolution UI.
+ * Steps:
+ * 1. Build and upload the project JSON blob to storage.
+ * 2. Call save_project_metadata RPC with the storage key and knownUpdatedAt.
+ *    The RPC atomically checks the current updated_at and updates the row.
+ * 3. If conflict: true, return without overwriting — caller shows resolution UI.
  *
- * E8-1: When `skipConflictCheck` is true, the optimistic lock comparison is
- * skipped. The caller (doSave) performs the check before any same-session DB
- * writes (e.g. saveVariables) that would bump `updated_at` and cause false
- * conflict detections.
+ * E8-1: When `skipConflictCheck` is true, skip the CAS and just do the
+ * upload + a plain storage_key update. Used when the caller has already
+ * verified there is no conflict (avoids false positives from same-session
+ * writes that bump updated_at between check and save).
  */
 export async function saveProject(
   projectId: string,
@@ -371,22 +372,44 @@ export async function saveProject(
   prev?: Pick<ProjectJSON, 'createdAt' | 'formatVersion'>,
   skipConflictCheck?: boolean,
 ): Promise<{ updatedAt: string; conflict: boolean }> {
-  // Optimistic lock check (skipped when caller already checked)
-  if (!skipConflictCheck) {
-    const dbUpdatedAt = await readUpdatedAt(projectId)
-    if (dbUpdatedAt && new Date(dbUpdatedAt) > new Date(knownUpdatedAt)) {
-      dlog.warn('persistence', 'Conflict detected', { projectId })
-      return { updatedAt: dbUpdatedAt, conflict: true }
-    }
+  const pj = buildJson(projectId, projectName, nodes, edges, prev)
+
+  if (skipConflictCheck) {
+    // Caller already verified no conflict — plain save without CAS.
+    await saveProjectJson(projectId, pj)
+    const freshUpdatedAt = (await readUpdatedAt(projectId)) ?? new Date().toISOString()
+    dlog.info('persistence', 'Project saved (skip-check)', { projectId })
+    return { updatedAt: freshUpdatedAt, conflict: false }
   }
 
-  // Write — saveProjectJson also stamps storage_key → triggers DB updated_at
-  const pj = buildJson(projectId, projectName, nodes, edges, prev)
-  await saveProjectJson(projectId, pj)
+  // PROJ-01: Upload blob first (no DB update), then CAS via RPC.
+  const storageKey = await uploadProjectBlob(projectId, pj)
 
-  const freshUpdatedAt = (await readUpdatedAt(projectId)) ?? new Date().toISOString()
-  dlog.info('persistence', 'Project saved', { projectId, formatVersion: pj.formatVersion })
-  return { updatedAt: freshUpdatedAt, conflict: false }
+  type RpcRow = { updated_at: string; conflict: boolean }
+  const { data, error } = await supabase.rpc('save_project_metadata', {
+    p_id: projectId,
+    p_known_updated_at: knownUpdatedAt,
+    p_name: projectName,
+    p_storage_key: storageKey,
+    p_variables: null,
+  })
+
+  if (error) {
+    throw new ServiceError('DB_ERROR', `save_project_metadata failed: ${error.message}`, true)
+  }
+
+  const row = (data as RpcRow[] | null)?.[0]
+  if (!row) {
+    throw new ServiceError('DB_ERROR', 'save_project_metadata returned no rows', true)
+  }
+
+  if (row.conflict) {
+    dlog.warn('persistence', 'Conflict detected', { projectId })
+    return { updatedAt: row.updated_at, conflict: true }
+  }
+
+  dlog.info('persistence', 'Project saved (atomic CAS)', { projectId, formatVersion: pj.formatVersion })
+  return { updatedAt: row.updated_at, conflict: false }
 }
 
 /** Rename a project row. Returns the new DB updated_at. */
