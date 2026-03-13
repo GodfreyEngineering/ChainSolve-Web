@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="robots" content="noindex, nofollow" />
+    <meta name="robots" content="index, follow" />
     <meta name="description" content="ChainSolve — scientific node-graph calculator. Build computation chains visually." />
     <meta name="theme-color" content="#1CABB0" />
     <link rel="canonical" href="https://app.chainsolve.co.uk/" />
@@ -47,10 +47,12 @@
   </head>
   <body>
     <div id="root">
-      <!-- J4-1: Pre-React loading screen (removed when React mounts) -->
-      <div id="cs-preloader" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f0f0f">
-        <img src="/brand/logo-wide-text.png" alt="" width="120" height="28" style="opacity:0.4">
-      </div>
+      <main>
+        <!-- J4-1: Pre-React loading screen (removed when React mounts) -->
+        <div id="cs-preloader" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f0f0f">
+          <img src="/brand/logo-wide-text.png" alt="ChainSolve loading" width="120" height="30" style="opacity:0.4">
+        </div>
+      </main>
     </div>
     <script type="module" src="/src/boot.ts"></script>
   </body>

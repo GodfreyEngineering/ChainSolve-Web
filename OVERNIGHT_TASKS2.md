@@ -261,7 +261,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **8.08 Worker pool leak prevention** — In `src/engine/workerPool.ts`, ensure workers are terminated when: (a) canvas is closed, (b) project is closed, (c) tab is closed. Add a `dispose()` method that terminates all workers. Call it in cleanup effects. Files: `src/engine/workerPool.ts`, `src/pages/CanvasPage.tsx`. Verify: open 5 canvases → close all → DevTools shows 0 Web Workers.
 
-- [ ] **8.09 Lighthouse performance score** — Run Lighthouse on production build. Target: Performance > 90, Accessibility > 90, Best Practices > 95, SEO > 80. Fix any flagged issues. Files: various based on Lighthouse report. Verify: Lighthouse scores meet targets.
+- [x] **8.09 Lighthouse performance score** — Run Lighthouse on production build. Target: Performance > 90, Accessibility > 90, Best Practices > 95, SEO > 80. Fix any flagged issues. Files: various based on Lighthouse report. Verify: Lighthouse scores meet targets.
 
 - [x] **8.10 Repo housekeeping — remove AI-generated comments** — Grep for patterns like `// This is a`, `// This function`, `// TODO: implement`, `// HACK`, `// FIXME` without issue numbers. Remove unhelpful comments. Keep comments that explain WHY, not WHAT. Files: entire `src/`. Verify: no gratuitous comments remain. `npm run lint` passes.
 
