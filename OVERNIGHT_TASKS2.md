@@ -33,7 +33,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **1.12 Stripe webhook idempotency audit** — Verify `stripe_events` table dedup works: INSERT ON CONFLICT DO NOTHING on `id` (Stripe event ID). Check all webhook handlers check for existing event before processing. Verify: replay same webhook event — no duplicate processing.
 
-- [ ] **1.13 Auth session missing warning fix** — The console warning `[auth] session invalid — signing out: Auth session missing!` appears on fresh load. In `src/lib/supabase.ts` and `src/hooks/useSessionGuard.ts`, suppress this warning for initial unauthenticated state (not logged in = expected, not an error). Only warn when a previously-valid session becomes invalid. Verify: open app not logged in — no console warning.
+- [x] **1.13 Auth session missing warning fix** — The console warning `[auth] session invalid — signing out: Auth session missing!` appears on fresh load. In `src/lib/supabase.ts` and `src/hooks/useSessionGuard.ts`, suppress this warning for initial unauthenticated state (not logged in = expected, not an error). Only warn when a previously-valid session becomes invalid. Verify: open app not logged in — no console warning.
 
 ---
 
