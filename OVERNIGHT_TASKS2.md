@@ -21,7 +21,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **1.06 2FA email gate for billing & account changes** — Wire `BillingAuthGate.tsx` (already exists) into actual billing flows. Require email OTP challenge before: changing password, changing email, updating billing method, deleting account. Use Supabase MFA API (TOTP already implemented in `MfaChallengeScreen.tsx`). Verify: attempt billing change → OTP challenge appears. Existing tests `MfaChallengeScreen.test.ts` pass.
 
-- [ ] **1.07 Session security tightening** — Audit `src/lib/sessionService.ts`. Ensure: (a) session token rotation on privilege escalation, (b) `SESSION_CHECK_INTERVAL_MS` (60s) actually revokes stale sessions server-side via `cleanup_stale_sessions(days)` RPC, (c) single-session policy enforced for enterprise orgs via `policy_single_session`. Verify: login on two devices with enterprise org — first session revoked.
+- [x] **1.07 Session security tightening** — Audit `src/lib/sessionService.ts`. Ensure: (a) session token rotation on privilege escalation, (b) `SESSION_CHECK_INTERVAL_MS` (60s) actually revokes stale sessions server-side via `cleanup_stale_sessions(days)` RPC, (c) single-session policy enforced for enterprise orgs via `policy_single_session`. Verify: login on two devices with enterprise org — first session revoked.
 
 - [ ] **1.08 Rate limiting on all public Cloudflare Functions** — Add per-IP + per-user rate limiting middleware to `functions/_middleware.ts`. Limits: auth endpoints (5/min), stripe webhooks (exempt — Stripe retries), AI endpoint (10/min free, 30/min pro), student verification (3/hr), account deletion (1/day — already in DB). Use Cloudflare `request.cf` for IP. Verify: exceed rate limit → 429 response with `Retry-After` header.
 
