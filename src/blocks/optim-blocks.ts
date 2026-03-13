@@ -109,8 +109,7 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
     },
     synonyms: ['convergence', 'optimization progress'],
     tags: ['optimization', 'plot'],
-    description:
-      'Visualizes optimizer convergence: objective value vs iteration count.',
+    description: 'Visualizes optimizer convergence: objective value vs iteration count.',
   })
 
   register({
@@ -122,8 +121,7 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'optim.resultsTable', label: 'Optimization Results' },
     synonyms: ['results', 'optimal values', 'solution'],
     tags: ['optimization', 'results'],
-    description:
-      'Displays final optimal variable values, objective value, and convergence status.',
+    description: 'Displays final optimal variable values, objective value, and convergence status.',
   })
 
   // ── Sweep & Monte Carlo (5.04, 5.05) ───────────────────────────────────

@@ -22,9 +22,7 @@ export function useFormatValue(): (v: Value | undefined) => string {
   const numberDisplayMode = usePreferencesStore((s) => s.numberDisplayMode)
   const decimalPlaces = usePreferencesStore((s) => s.decimalPlaces)
   const sigFigs = usePreferencesStore((s) => s.sigFigs)
-  const scientificNotationThreshold = usePreferencesStore(
-    (s) => s.scientificNotationThreshold,
-  )
+  const scientificNotationThreshold = usePreferencesStore((s) => s.scientificNotationThreshold)
   const thousandsSeparator = usePreferencesStore((s) => s.thousandsSeparator)
   const thousandsSeparatorChar = usePreferencesStore((s) => s.thousandsSeparatorChar)
   const decimalSeparator = usePreferencesStore((s) => s.decimalSeparator)

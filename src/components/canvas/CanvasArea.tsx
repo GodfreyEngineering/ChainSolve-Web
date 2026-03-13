@@ -2802,7 +2802,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           ]
         : []),
     ],
-    [nodes, edges, t, onFixWithCopilot, onExplainIssues, stackEntries, handleRestoreHistory, canvasId],
+    [
+      nodes,
+      edges,
+      t,
+      onFixWithCopilot,
+      onExplainIssues,
+      stackEntries,
+      handleRestoreHistory,
+      canvasId,
+    ],
   )
 
   return (
@@ -2981,8 +2990,13 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                                     const nd = srcNode?.data as Record<string, unknown> | undefined
                                     const label = (nd?.label as string) ?? e.source
                                     const cv = computed.get(e.source)
-                                    const val = cv && 'value' in cv ? (cv.value as number) : undefined
-                                    return { name: label, value: val, nodeId: e.source } as FormulaUpstreamVar
+                                    const val =
+                                      cv && 'value' in cv ? (cv.value as number) : undefined
+                                    return {
+                                      name: label,
+                                      value: val,
+                                      nodeId: e.source,
+                                    } as FormulaUpstreamVar
                                   })
                               : undefined
                           }

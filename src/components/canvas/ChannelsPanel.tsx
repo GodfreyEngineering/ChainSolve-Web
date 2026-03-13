@@ -27,7 +27,10 @@ export function ChannelsPanel() {
   if (entries.length === 0) {
     return (
       <div style={emptyStyle}>
-        {t('channels.empty', 'No published channels. Add a Publish block to share values across canvases.')}
+        {t(
+          'channels.empty',
+          'No published channels. Add a Publish block to share values across canvases.',
+        )}
       </div>
     )
   }
@@ -37,7 +40,9 @@ export function ChannelsPanel() {
       {/* Header row */}
       <div style={headerRowStyle}>
         <span style={{ ...cellStyle, flex: 2 }}>{t('channels.name', 'Channel')}</span>
-        <span style={{ ...cellStyle, flex: 1, textAlign: 'right' }}>{t('channels.value', 'Value')}</span>
+        <span style={{ ...cellStyle, flex: 1, textAlign: 'right' }}>
+          {t('channels.value', 'Value')}
+        </span>
         <span style={{ ...cellStyle, flex: 1.5 }}>{t('channels.source', 'Source Canvas')}</span>
       </div>
       {/* Channel rows */}

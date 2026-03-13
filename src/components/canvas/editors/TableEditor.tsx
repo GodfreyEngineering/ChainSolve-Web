@@ -72,11 +72,7 @@ interface TableEditorProps {
  * Supports: cell refs (A1, B2), +, -, *, /, parentheses, numeric literals.
  * Returns the result or null if invalid.
  */
-function evaluateCellFormula(
-  formula: string,
-  rows: number[][],
-  columns: string[],
-): number | null {
+function evaluateCellFormula(formula: string, rows: number[][], columns: string[]): number | null {
   if (!formula.startsWith('=')) return null
   const expr = formula.slice(1).trim()
   if (!expr) return null
@@ -121,7 +117,13 @@ function colLettersToIndex(letters: string, columns: string[]): number {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export function TableEditor({ columns, rows, onChange, columnTypes: _columnTypes, onColumnTypesChange: _onColumnTypesChange }: TableEditorProps) {
+export function TableEditor({
+  columns,
+  rows,
+  onChange,
+  columnTypes: _columnTypes,
+  onColumnTypesChange: _onColumnTypesChange,
+}: TableEditorProps) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -253,7 +255,11 @@ export function TableEditor({ columns, rows, onChange, columnTypes: _columnTypes
         const result = evaluateCellFormula(trimmed, rows, columns)
         if (result !== null && !isNaN(result)) {
           pushUndo()
-          setEditErrors((prev) => { const next = new Set(prev); next.delete(`${row}:${col}`); return next })
+          setEditErrors((prev) => {
+            const next = new Set(prev)
+            next.delete(`${row}:${col}`)
+            return next
+          })
           const nextRows = rows.map((r, ri) =>
             ri === row ? r.map((c, ci) => (ci === col ? result : c)) : r,
           )
@@ -428,7 +434,21 @@ export function TableEditor({ columns, rows, onChange, columnTypes: _columnTypes
         }
       }
     },
-    [isEditing, editValue, rows, columns, onChange, startEdit, commitEdit, cancelEdit, moveTo, undo, redo, pushUndo, selBounds],
+    [
+      isEditing,
+      editValue,
+      rows,
+      columns,
+      onChange,
+      startEdit,
+      commitEdit,
+      cancelEdit,
+      moveTo,
+      undo,
+      redo,
+      pushUndo,
+      selBounds,
+    ],
   )
 
   // ── Copy/paste ─────────────────────────────────────────────────────────────
@@ -777,7 +797,10 @@ export function TableEditor({ columns, rows, onChange, columnTypes: _columnTypes
                   const colW = colWidths[ci] ?? DEFAULT_COL_W
                   // 4.07: Multi-cell selection highlight
                   const inRange = selBounds
-                    ? ri >= selBounds.r1 && ri <= selBounds.r2 && ci >= selBounds.c1 && ci <= selBounds.c2
+                    ? ri >= selBounds.r1 &&
+                      ri <= selBounds.r2 &&
+                      ci >= selBounds.c1 &&
+                      ci <= selBounds.c2
                     : false
 
                   return (

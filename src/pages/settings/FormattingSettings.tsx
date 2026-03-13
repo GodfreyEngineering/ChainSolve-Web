@@ -21,9 +21,7 @@ export function FormattingSettings({
   const mode = usePreferencesStore((s) => s.numberDisplayMode)
   const decimalPlaces = usePreferencesStore((s) => s.decimalPlaces)
   const sigFigs = usePreferencesStore((s) => s.sigFigs)
-  const scientificNotationThreshold = usePreferencesStore(
-    (s) => s.scientificNotationThreshold,
-  )
+  const scientificNotationThreshold = usePreferencesStore((s) => s.scientificNotationThreshold)
   const trailingZeros = usePreferencesStore((s) => s.trailingZeros)
   const decimalSeparator = usePreferencesStore((s) => s.decimalSeparator)
   const thousandsSeparator = usePreferencesStore((s) => s.thousandsSeparator)
@@ -51,9 +49,7 @@ export function FormattingSettings({
               },
             ]}
             value={mode}
-            onChange={(e) =>
-              updatePrefs({ numberDisplayMode: e.target.value as typeof mode })
-            }
+            onChange={(e) => updatePrefs({ numberDisplayMode: e.target.value as typeof mode })}
           />
 
           {(mode === 'auto' || mode === 'decimal') && (

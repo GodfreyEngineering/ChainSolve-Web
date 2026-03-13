@@ -69,16 +69,56 @@ describe('getEntitlements', () => {
     expect(getEntitlements('pro')).toEqual(getEntitlements('trialing'))
   })
 
-  it('student plan: identical entitlements to pro', () => {
-    expect(getEntitlements('student')).toEqual(getEntitlements('pro'))
+  it('student plan: same feature access as pro, different AI daily limit', () => {
+    const student = getEntitlements('student')
+    const pro = getEntitlements('pro')
+    // Same feature access flags and limits
+    expect(student.maxProjects).toBe(pro.maxProjects)
+    expect(student.maxCanvases).toBe(pro.maxCanvases)
+    expect(student.canUploadCsv).toBe(pro.canUploadCsv)
+    expect(student.canUseArrays).toBe(pro.canUseArrays)
+    expect(student.canUsePlots).toBe(pro.canUsePlots)
+    expect(student.canUseRules).toBe(pro.canUseRules)
+    expect(student.canExport).toBe(pro.canExport)
+    expect(student.canUseAi).toBe(pro.canUseAi)
+    expect(student.maxNNParameters).toBe(pro.maxNNParameters)
+    expect(student.maxNNEpochs).toBe(pro.maxNNEpochs)
+    // Student has lower AI daily request limit
+    expect(student.aiDailyRequestLimit).toBe(10)
   })
 
-  it('enterprise plan: identical entitlements to pro', () => {
-    expect(getEntitlements('enterprise')).toEqual(getEntitlements('pro'))
+  it('enterprise plan: same feature access as pro, higher AI daily limit', () => {
+    const ent = getEntitlements('enterprise')
+    const pro = getEntitlements('pro')
+    expect(ent.maxProjects).toBe(pro.maxProjects)
+    expect(ent.maxCanvases).toBe(pro.maxCanvases)
+    expect(ent.canUploadCsv).toBe(pro.canUploadCsv)
+    expect(ent.canUseArrays).toBe(pro.canUseArrays)
+    expect(ent.canUsePlots).toBe(pro.canUsePlots)
+    expect(ent.canUseRules).toBe(pro.canUseRules)
+    expect(ent.canExport).toBe(pro.canExport)
+    expect(ent.canUseAi).toBe(pro.canUseAi)
+    expect(ent.maxNNParameters).toBe(pro.maxNNParameters)
+    expect(ent.maxNNEpochs).toBe(pro.maxNNEpochs)
+    // Enterprise has higher AI daily request limit
+    expect(ent.aiDailyRequestLimit).toBe(1000)
   })
 
-  it('developer plan: identical entitlements to pro', () => {
-    expect(getEntitlements('developer')).toEqual(getEntitlements('pro'))
+  it('developer plan: same feature access as pro, unlimited AI daily limit', () => {
+    const dev = getEntitlements('developer')
+    const pro = getEntitlements('pro')
+    expect(dev.maxProjects).toBe(pro.maxProjects)
+    expect(dev.maxCanvases).toBe(pro.maxCanvases)
+    expect(dev.canUploadCsv).toBe(pro.canUploadCsv)
+    expect(dev.canUseArrays).toBe(pro.canUseArrays)
+    expect(dev.canUsePlots).toBe(pro.canUsePlots)
+    expect(dev.canUseRules).toBe(pro.canUseRules)
+    expect(dev.canExport).toBe(pro.canExport)
+    expect(dev.canUseAi).toBe(pro.canUseAi)
+    expect(dev.maxNNParameters).toBe(pro.maxNNParameters)
+    expect(dev.maxNNEpochs).toBe(pro.maxNNEpochs)
+    // Developer has unlimited AI daily requests
+    expect(dev.aiDailyRequestLimit).toBe(Infinity)
   })
 
   it('past_due plan: restricted (no groups/themes unlike free)', () => {

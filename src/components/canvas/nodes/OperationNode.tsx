@@ -236,12 +236,14 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
           >
             {formatValue(value)}
             {(nd.unit || inferredUnit?.unit) && (
-              <span style={{
-                fontSize: '0.6rem',
-                marginLeft: '0.15rem',
-                opacity: nd.unit ? 0.7 : 0.4,
-                fontStyle: nd.unit ? undefined : 'italic',
-              }}>
+              <span
+                style={{
+                  fontSize: '0.6rem',
+                  marginLeft: '0.15rem',
+                  opacity: nd.unit ? 0.7 : 0.4,
+                  fontStyle: nd.unit ? undefined : 'italic',
+                }}
+              >
                 {nd.unit ? getUnitSymbol(nd.unit) : inferredUnit?.unit}
               </span>
             )}

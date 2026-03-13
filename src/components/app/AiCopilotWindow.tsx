@@ -336,7 +336,17 @@ export function AiCopilotWindow({
           }, 50)
         })
     },
-    [projectId, canvasId, loading, mode, selectedNodeIds, isEnterprise, onApplyPatch, t, computedValues],
+    [
+      projectId,
+      canvasId,
+      loading,
+      mode,
+      selectedNodeIds,
+      isEnterprise,
+      onApplyPatch,
+      t,
+      computedValues,
+    ],
   )
 
   const scrollToBottom = useCallback(() => {
@@ -521,7 +531,10 @@ export function AiCopilotWindow({
               )}
             </p>
             <p style={{ fontSize: '0.72rem', opacity: 0.5, margin: 0 }}>
-              {t('ai.optedOutHint', 'To re-enable, go to Settings > Privacy and turn off "Opt out of AI".')}
+              {t(
+                'ai.optedOutHint',
+                'To re-enable, go to Settings > Privacy and turn off "Opt out of AI".',
+              )}
             </p>
           </>
         ) : (
@@ -608,10 +621,11 @@ export function AiCopilotWindow({
           </button>
           <button
             style={s.suggestionChip}
-            onClick={() =>
-              triggerSuggestion('optimize', t('ai.suggestOptimize', 'Optimize graph'))
-            }
-            title={t('ai.suggestOptimizeTip', 'Find redundancies and suggest structural improvements')}
+            onClick={() => triggerSuggestion('optimize', t('ai.suggestOptimize', 'Optimize graph'))}
+            title={t(
+              'ai.suggestOptimizeTip',
+              'Find redundancies and suggest structural improvements',
+            )}
           >
             {t('ai.suggestOptimize', 'Optimize')}
           </button>

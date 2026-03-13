@@ -32,7 +32,10 @@ export function AccessibilitySettings() {
         <div>
           <div style={labelStyle}>{t('settings.highContrast', 'High contrast mode')}</div>
           <div style={hintStyle}>
-            {t('settings.highContrastHint', 'Increases border and text contrast for better visibility.')}
+            {t(
+              'settings.highContrastHint',
+              'Increases border and text contrast for better visibility.',
+            )}
           </div>
         </div>
       </label>
@@ -48,7 +51,10 @@ export function AccessibilitySettings() {
         <div>
           <div style={labelStyle}>{t('settings.reducedMotion', 'Reduced motion')}</div>
           <div style={hintStyle}>
-            {t('settings.reducedMotionHint', 'Disables animations and transitions across the interface.')}
+            {t(
+              'settings.reducedMotionHint',
+              'Disables animations and transitions across the interface.',
+            )}
           </div>
         </div>
       </label>
@@ -93,7 +99,10 @@ export function AccessibilitySettings() {
         <div>
           <div style={labelStyle}>{t('settings.analytics', 'Anonymous analytics')}</div>
           <div style={hintStyle}>
-            {t('settings.analyticsHint', 'Help improve ChainSolve by sending anonymous usage data.')}
+            {t(
+              'settings.analyticsHint',
+              'Help improve ChainSolve by sending anonymous usage data.',
+            )}
           </div>
         </div>
       </label>
@@ -109,7 +118,10 @@ export function AccessibilitySettings() {
         <div>
           <div style={labelStyle}>{t('settings.crashReporting', 'Crash reporting')}</div>
           <div style={hintStyle}>
-            {t('settings.crashReportingHint', 'Automatically send crash reports to help us fix bugs faster.')}
+            {t(
+              'settings.crashReportingHint',
+              'Automatically send crash reports to help us fix bugs faster.',
+            )}
           </div>
         </div>
       </label>

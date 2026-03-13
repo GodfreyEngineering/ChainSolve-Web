@@ -544,6 +544,9 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   'signal',
   'complex',
   'matrix',
+  'optimization',
+  'machineLearning',
+  'neuralNetworks',
 ]
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -671,6 +674,9 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
       { id: 'fnSignal', label: 'Signal Processing', categories: ['signal'] },
       { id: 'fnComplex', label: 'Complex Numbers', categories: ['complex'] },
       { id: 'fnMatrix', label: 'Matrix Ops', categories: ['matrix'] },
+      { id: 'fnOptimization', label: 'Optimization', categories: ['optimization'] },
+      { id: 'fnMachineLearning', label: 'Machine Learning', categories: ['machineLearning'] },
+      { id: 'fnNeuralNetworks', label: 'Neural Networks', categories: ['neuralNetworks'] },
     ],
   },
   {
@@ -842,7 +848,42 @@ for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {
 // 'constant' and 'material' are UI-only in the sense that their TS registry type
 // key ('constant', 'material') does not correspond to a Rust op with the same name.
 // The actual Rust ops for material are named 'material_full' (stored in data.blockType).
-export const UI_ONLY_BLOCKS: ReadonlySet<string> = new Set(['constant', 'material'])
+export const UI_ONLY_BLOCKS: ReadonlySet<string> = new Set([
+  'constant',
+  'material',
+  // Optimization blocks — TS-only until Rust ops are implemented
+  'optim.designVariable',
+  'optim.objectiveFunction',
+  'optim.gradientDescent',
+  'optim.geneticAlgorithm',
+  'optim.nelderMead',
+  'optim.convergencePlot',
+  'optim.resultsTable',
+  'optim.parametricSweep',
+  'optim.monteCarlo',
+  'optim.sensitivity',
+  'optim.doe',
+  // Machine Learning blocks — TS-only until Rust ops are implemented
+  'ml.trainTestSplit',
+  'ml.linearRegression',
+  'ml.polynomialRegression',
+  'ml.knnClassifier',
+  'ml.decisionTree',
+  'ml.predict',
+  'ml.mse',
+  'ml.r2',
+  'ml.confusionMatrix',
+  // Neural Network blocks — TS-only until Rust ops are implemented
+  'nn.input',
+  'nn.dense',
+  'nn.conv1d',
+  'nn.dropout',
+  'nn.activation',
+  'nn.sequential',
+  'nn.trainer',
+  'nn.predict',
+  'nn.export',
+])
 
 /**
  * Validate and reconcile the TS registry with the Rust catalog.

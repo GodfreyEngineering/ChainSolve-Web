@@ -441,10 +441,7 @@ export function showBillingBanner(plan: Plan): 'past_due' | 'canceled' | null {
  * 5.13: Validate a neural network model size against plan limits.
  * Returns null if within limits, or a user-friendly message string if exceeded.
  */
-export function validateNNSize(
-  plan: Plan,
-  parameterCount: number,
-): string | null {
+export function validateNNSize(plan: Plan, parameterCount: number): string | null {
   const ent = getEntitlements(plan)
   if (ent.maxNNParameters === 0) {
     return 'Neural networks require a Pro plan or higher. Upgrade to start training models.'
@@ -465,10 +462,7 @@ export function validateNNSize(
  * 5.13: Validate training epoch count against plan limits.
  * Returns null if within limits, or a user-friendly message string if exceeded.
  */
-export function validateNNEpochs(
-  plan: Plan,
-  epochs: number,
-): string | null {
+export function validateNNEpochs(plan: Plan, epochs: number): string | null {
   const ent = getEntitlements(plan)
   if (ent.maxNNEpochs === 0) {
     return 'Neural network training requires a Pro plan or higher.'

@@ -46,10 +46,8 @@ function useEdgeUnitMismatch(sourceId: string, targetId: string): UnitMismatch |
     const srcNode = nodes.find((n) => n.id === sourceId)
     const tgtNode = nodes.find((n) => n.id === targetId)
     // Use explicit unit first, fall back to inferred unit
-    const srcUnit =
-      (srcNode?.data as NodeData | undefined)?.unit ?? inferred.get(sourceId)?.unit
-    const tgtUnit =
-      (tgtNode?.data as NodeData | undefined)?.unit ?? inferred.get(targetId)?.unit
+    const srcUnit = (srcNode?.data as NodeData | undefined)?.unit ?? inferred.get(sourceId)?.unit
+    const tgtUnit = (tgtNode?.data as NodeData | undefined)?.unit ?? inferred.get(targetId)?.unit
     return getUnitMismatch(srcUnit, tgtUnit)
   }, [nodes, sourceId, targetId, inferred])
 }

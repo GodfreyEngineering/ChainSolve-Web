@@ -537,4 +537,68 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Applies a low-pass FIR filter. cutoff_norm = f_cutoff / f_sample (0..0.5). taps: filter order.',
   'signal.filter_highpass_fir':
     'Applies a high-pass FIR filter. cutoff_norm = f_cutoff / f_sample (0..0.5). taps: filter order.',
+
+  // ── Optimization (5.01) ─────────────────────────────────────────────────
+  'optim.designVariable':
+    'A variable that the optimizer will adjust. Set the range (min/max) and initial value.',
+  'optim.objectiveFunction':
+    'Wraps a computed value as the objective (cost) function. The optimizer will try to minimize this value.',
+  'optim.gradientDescent':
+    'Minimizes the objective using gradient descent. Supports configurable learning rate, momentum, and max iterations.',
+  'optim.geneticAlgorithm':
+    'Population-based optimizer using selection, crossover, and mutation. Good for non-smooth or multi-modal problems.',
+  'optim.nelderMead':
+    'Derivative-free simplex optimizer (Nelder-Mead). Works well for low-dimensional smooth problems.',
+  'optim.convergencePlot':
+    'Visualizes optimizer convergence: objective value vs iteration count.',
+  'optim.resultsTable':
+    'Displays final optimal variable values, objective value, and convergence status.',
+  'optim.parametricSweep':
+    'Evaluates a function over linearly spaced values of a variable. Outputs an input-output table for sensitivity analysis.',
+  'optim.monteCarlo':
+    'Runs N random samples from specified distributions. Outputs statistics (mean, std, percentiles) and histogram.',
+  'optim.sensitivity':
+    'Varies each input one at a time while holding others constant. Produces a tornado chart of parameter sensitivity.',
+  'optim.doe':
+    'Generates experiment matrices: full factorial, Latin hypercube, or Sobol sequence. Outputs table of configurations.',
+
+  // ── Machine Learning (5.06) ─────────────────────────────────────────────
+  'ml.trainTestSplit':
+    'Splits a table dataset into training and test sets. Default 80/20 split ratio.',
+  'ml.linearRegression':
+    'Ordinary Least Squares linear regression. Outputs model coefficients, intercept, and predictions.',
+  'ml.polynomialRegression':
+    'Polynomial regression with configurable degree. Fits y = a0 + a1x + a2x2 + ... anxn.',
+  'ml.knnClassifier':
+    'K-Nearest Neighbors classifier. Configurable k (number of neighbors).',
+  'ml.decisionTree':
+    'Decision tree for classification or regression. Configurable max depth.',
+  'ml.predict':
+    'Apply a trained model to new data and output predictions.',
+  'ml.mse':
+    'Mean Squared Error between actual and predicted values.',
+  'ml.r2':
+    'R-squared (coefficient of determination). 1.0 = perfect fit, 0.0 = no better than mean.',
+  'ml.confusionMatrix':
+    'Displays a confusion matrix for classification results. Shows true/false positives/negatives.',
+
+  // ── Neural Networks (5.09) ──────────────────────────────────────────────
+  'nn.input':
+    'Defines the input shape for a neural network. Set the number of input features.',
+  'nn.dense':
+    'Fully connected (dense) layer. Configurable number of units and activation function.',
+  'nn.conv1d':
+    'One-dimensional convolution layer. Good for time-series and signal data.',
+  'nn.dropout':
+    'Randomly sets input elements to zero during training to prevent overfitting.',
+  'nn.activation':
+    'Applies an activation function: ReLU, Sigmoid, Tanh, or Softmax.',
+  'nn.sequential':
+    'Chains layers into a sequential neural network model. Connect layers in order.',
+  'nn.trainer':
+    'Trains a neural network using backpropagation. Configurable epochs, batch size, learning rate, and loss function.',
+  'nn.predict':
+    'Runs inference on a trained neural network. Feed new data to get predictions.',
+  'nn.export':
+    'Exports a trained neural network to ONNX format for use in other tools.',
 }

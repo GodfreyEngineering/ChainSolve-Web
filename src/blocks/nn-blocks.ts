@@ -23,8 +23,7 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
     },
     synonyms: ['neural network input', 'input layer'],
     tags: ['nn', 'input'],
-    description:
-      'Defines the input shape for a neural network. Set the number of input features.',
+    description: 'Defines the input shape for a neural network. Set the number of input features.',
   })
 
   // ── Layers ──────────────────────────────────────────────────────────────
@@ -59,8 +58,7 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
     },
     synonyms: ['convolution', '1d convolution', 'conv'],
     tags: ['nn', 'layer', 'convolution'],
-    description:
-      'One-dimensional convolution layer. Good for time-series and signal data.',
+    description: 'One-dimensional convolution layer. Good for time-series and signal data.',
   })
 
   register({
@@ -76,8 +74,7 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
     },
     synonyms: ['dropout', 'regularization'],
     tags: ['nn', 'layer', 'regularization'],
-    description:
-      'Randomly sets input elements to zero during training to prevent overfitting.',
+    description: 'Randomly sets input elements to zero during training to prevent overfitting.',
   })
 
   register({
@@ -89,8 +86,7 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'nn.activation', label: 'Activation' },
     synonyms: ['relu', 'sigmoid', 'tanh', 'softmax', 'activation function'],
     tags: ['nn', 'activation'],
-    description:
-      'Applies an activation function: ReLU, Sigmoid, Tanh, or Softmax.',
+    description: 'Applies an activation function: ReLU, Sigmoid, Tanh, or Softmax.',
   })
 
   // ── Model Assembly ──────────────────────────────────────────────────────
@@ -104,8 +100,7 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'nn.sequential', label: 'Sequential Model' },
     synonyms: ['sequential', 'model', 'network'],
     tags: ['nn', 'model'],
-    description:
-      'Chains layers into a sequential neural network model. Connect layers in order.',
+    description: 'Chains layers into a sequential neural network model. Connect layers in order.',
   })
 
   // ── Training & Inference ────────────────────────────────────────────────
@@ -143,8 +138,7 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'nn.predict', label: 'NN Predict' },
     synonyms: ['predict', 'inference', 'forward pass'],
     tags: ['nn', 'predict'],
-    description:
-      'Runs inference on a trained neural network. Feed new data to get predictions.',
+    description: 'Runs inference on a trained neural network. Feed new data to get predictions.',
   })
 
   register({
@@ -156,7 +150,6 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'nn.export', label: 'Export Model' },
     synonyms: ['export', 'ONNX', 'save model'],
     tags: ['nn', 'export'],
-    description:
-      'Exports a trained neural network to ONNX format for use in other tools.',
+    description: 'Exports a trained neural network to ONNX format for use in other tools.',
   })
 }

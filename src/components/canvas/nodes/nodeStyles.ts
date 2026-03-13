@@ -44,7 +44,8 @@ export const NODE_STYLES = {
     padding: '0.4rem 0.65rem',
     background: 'var(--node-header-bg)',
     borderBottom: '1px solid var(--node-border)',
-    borderRadius: 'var(--canvas-node-border-radius, 12px) var(--canvas-node-border-radius, 12px) 0 0',
+    borderRadius:
+      'var(--canvas-node-border-radius, 12px) var(--canvas-node-border-radius, 12px) 0 0',
     gap: '0.5rem',
     minHeight: 32,
   } as CSSProperties,

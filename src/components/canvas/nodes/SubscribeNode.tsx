@@ -93,7 +93,10 @@ function SubscribeNodeInner({ id, data, selected }: NodeProps) {
           <option value="">{t('publishSubscribe.selectChannel')}</option>
           {channelNames.map((name) => (
             <option key={name} value={name}>
-              {name} = {formatValue(channels[name]?.value !== undefined ? mkScalar(channels[name].value) : undefined)}
+              {name} ={' '}
+              {formatValue(
+                channels[name]?.value !== undefined ? mkScalar(channels[name].value) : undefined,
+              )}
             </option>
           ))}
         </select>

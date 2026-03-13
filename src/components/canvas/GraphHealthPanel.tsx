@@ -169,7 +169,9 @@ export default function GraphHealthPanel({
           {/* Disconnected blocks */}
           {report.orphanNodeIds.length > 0 && (
             <div style={detailBoxStyle}>
-              <div style={detailLabelStyle}>Disconnected blocks ({report.orphanNodeIds.length})</div>
+              <div style={detailLabelStyle}>
+                Disconnected blocks ({report.orphanNodeIds.length})
+              </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
                 {report.orphanNodeIds.slice(0, 20).map((id) => (
                   <span key={id} style={tagStyle}>
@@ -207,7 +209,9 @@ export default function GraphHealthPanel({
           {/* Critical path */}
           {report.criticalPath.length > 1 && (
             <div style={detailBoxStyle}>
-              <div style={detailLabelStyle}>Critical path — {report.criticalPath.length} blocks</div>
+              <div style={detailLabelStyle}>
+                Critical path — {report.criticalPath.length} blocks
+              </div>
               <div
                 style={{
                   fontSize: '0.65rem',

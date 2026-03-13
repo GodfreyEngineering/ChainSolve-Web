@@ -25,10 +25,13 @@ export function CookieConsentBanner() {
 
     if (choice === 'declined') {
       // Disable Sentry by calling close() — no further events are sent
-      import('@sentry/react').then((Sentry) => {
-        const client = Sentry.getClient()
-        if (client) void client.close()
-      }, () => {})
+      import('@sentry/react').then(
+        (Sentry) => {
+          const client = Sentry.getClient()
+          if (client) void client.close()
+        },
+        () => {},
+      )
     }
 
     setVisible(false)

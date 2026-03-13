@@ -133,9 +133,7 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
   const scalarValue = value && isScalar(value) ? value.value : null
   // 4.05: Show explicit unit, or fall back to inferred unit
   const explicitUnit = nd.unit as string | undefined
-  const unitSymbol = explicitUnit
-    ? getUnitSymbol(explicitUnit)
-    : inferredUnit?.unit ?? ''
+  const unitSymbol = explicitUnit ? getUnitSymbol(explicitUnit) : (inferredUnit?.unit ?? '')
 
   const ariaLabel = `${nd.label} display, value: ${formatValue(value)}`
 
@@ -192,12 +190,14 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
         >
           {formatValue(value)}
           {unitSymbol && (
-            <span style={{
-              fontSize: '0.7rem',
-              marginLeft: '0.2rem',
-              opacity: explicitUnit ? 0.7 : 0.35,
-              fontStyle: explicitUnit ? undefined : 'italic',
-            }}>
+            <span
+              style={{
+                fontSize: '0.7rem',
+                marginLeft: '0.2rem',
+                opacity: explicitUnit ? 0.7 : 0.35,
+                fontStyle: explicitUnit ? undefined : 'italic',
+              }}
+            >
               {unitSymbol}
             </span>
           )}

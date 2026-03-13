@@ -153,10 +153,7 @@ export async function adminGetUser(userId: string): Promise<AdminUserDetail> {
   return result as unknown as AdminUserDetail
 }
 
-export async function adminOverridePlan(
-  userId: string,
-  plan: string,
-): Promise<void> {
+export async function adminOverridePlan(userId: string, plan: string): Promise<void> {
   const result = await adminApiCall({ action: 'override_plan', user_id: userId, plan })
   if (!result.ok) throw new Error(result.error ?? 'Override failed')
 }
@@ -166,10 +163,7 @@ export async function adminResetPassword(userId: string): Promise<void> {
   if (!result.ok) throw new Error(result.error ?? 'Reset failed')
 }
 
-export async function adminToggleDisabled(
-  userId: string,
-  disabled: boolean,
-): Promise<void> {
+export async function adminToggleDisabled(userId: string, disabled: boolean): Promise<void> {
   const result = await adminApiCall({ action: 'toggle_disabled', user_id: userId, disabled })
   if (!result.ok) throw new Error(result.error ?? 'Toggle failed')
 }

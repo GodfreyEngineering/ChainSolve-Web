@@ -411,7 +411,12 @@ export function CanvasToolbar({
           ...computeBarStyle(snapEdge),
           cursor: dragging ? 'grabbing' : 'grab',
           // 8.04: Scale up on mobile for WCAG ≥44px touch targets
-          ...(isMobile ? { transform: `${computeBarStyle(snapEdge).transform ?? ''} scale(1.4)`.trim(), transformOrigin: 'center' } : {}),
+          ...(isMobile
+            ? {
+                transform: `${computeBarStyle(snapEdge).transform ?? ''} scale(1.4)`.trim(),
+                transformOrigin: 'center',
+              }
+            : {}),
         }}
         role="toolbar"
         aria-label={t('toolbar.label')}

@@ -481,7 +481,14 @@ export function Inspector({
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <input
                   type="color"
-                  style={{ width: 28, height: 22, padding: 0, border: 'none', cursor: 'pointer', background: 'none' }}
+                  style={{
+                    width: 28,
+                    height: 22,
+                    padding: 0,
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: 'none',
+                  }}
                   value={(nd.userColor as string) ?? '#1cabb0'}
                   onChange={(e) => update({ userColor: e.target.value })}
                   title={t('inspector.accentColor', 'Accent Color')}
@@ -489,7 +496,13 @@ export function Inspector({
                 {nd.userColor && (
                   <button
                     type="button"
-                    style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '0.65rem' }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text-faint)',
+                      cursor: 'pointer',
+                      fontSize: '0.65rem',
+                    }}
                     onClick={() => update({ userColor: undefined })}
                   >
                     {t('inspector.resetColor', 'Reset')}
@@ -602,29 +615,38 @@ export function Inspector({
                 <select
                   style={{ ...inp, width: '100%' }}
                   value={(nd.tableOutputMode as string) ?? 'columns'}
-                  onChange={(e) => update({ tableOutputMode: e.target.value as 'columns' | 'table' | 'row' | 'column' })}
+                  onChange={(e) =>
+                    update({
+                      tableOutputMode: e.target.value as 'columns' | 'table' | 'row' | 'column',
+                    })
+                  }
                   title={t('inspector.tableOutputMode', 'Output Mode')}
                 >
-                  <option value="columns">{t('inspector.tableMode.columns', 'All Columns (one port each)')}</option>
+                  <option value="columns">
+                    {t('inspector.tableMode.columns', 'All Columns (one port each)')}
+                  </option>
                   <option value="table">{t('inspector.tableMode.table', 'Entire Table')}</option>
                   <option value="column">{t('inspector.tableMode.column', 'Single Column')}</option>
                   <option value="row">{t('inspector.tableMode.row', 'Single Row')}</option>
                 </select>
-                {(nd.tableOutputMode as string) === 'column' && (() => {
-                  const td = (nd.tableData as { columns: string[] } | undefined)
-                  return (
-                    <select
-                      style={{ ...inp, width: '100%', marginTop: 4 }}
-                      value={nd.tableOutputCol ?? 0}
-                      onChange={(e) => update({ tableOutputCol: parseInt(e.target.value, 10) })}
-                      title={t('inspector.tableOutputCol', 'Select column')}
-                    >
-                      {(td?.columns ?? []).map((col, ci) => (
-                        <option key={ci} value={ci}>{col}</option>
-                      ))}
-                    </select>
-                  )
-                })()}
+                {(nd.tableOutputMode as string) === 'column' &&
+                  (() => {
+                    const td = nd.tableData as { columns: string[] } | undefined
+                    return (
+                      <select
+                        style={{ ...inp, width: '100%', marginTop: 4 }}
+                        value={nd.tableOutputCol ?? 0}
+                        onChange={(e) => update({ tableOutputCol: parseInt(e.target.value, 10) })}
+                        title={t('inspector.tableOutputCol', 'Select column')}
+                      >
+                        {(td?.columns ?? []).map((col, ci) => (
+                          <option key={ci} value={ci}>
+                            {col}
+                          </option>
+                        ))}
+                      </select>
+                    )
+                  })()}
                 {(nd.tableOutputMode as string) === 'row' && (
                   <input
                     type="number"

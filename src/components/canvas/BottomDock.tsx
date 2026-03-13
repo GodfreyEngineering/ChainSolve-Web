@@ -14,7 +14,14 @@ import { Tooltip } from '../ui/Tooltip'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-export type DockTab = 'console' | 'health' | 'output' | 'problems' | 'history' | 'notes' | 'channels'
+export type DockTab =
+  | 'console'
+  | 'health'
+  | 'output'
+  | 'problems'
+  | 'history'
+  | 'notes'
+  | 'channels'
 
 export interface DockPanel {
   id: DockTab

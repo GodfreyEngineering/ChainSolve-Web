@@ -55,7 +55,13 @@ interface FormulaBarProps {
   upstreamVars?: FormulaUpstreamVar[]
 }
 
-export function FormulaBar({ nodeId, node, computedValue, onCommit, upstreamVars }: FormulaBarProps) {
+export function FormulaBar({
+  nodeId,
+  node,
+  computedValue,
+  onCommit,
+  upstreamVars,
+}: FormulaBarProps) {
   const { t } = useTranslation()
   const nd = node?.data as NodeData | undefined
   const isEditable =
@@ -312,7 +318,10 @@ export function FormulaBar({ nodeId, node, computedValue, onCommit, upstreamVars
               padding: '0 4px',
               height: '100%',
               ...(validationMsg
-                ? { textDecoration: 'underline wavy var(--danger-text)', textUnderlineOffset: '3px' }
+                ? {
+                    textDecoration: 'underline wavy var(--danger-text)',
+                    textUnderlineOffset: '3px',
+                  }
                 : {}),
             }}
             title={validationMsg ?? acTooltip ?? undefined}
@@ -332,7 +341,12 @@ export function FormulaBar({ nodeId, node, computedValue, onCommit, upstreamVars
                     background: i === acIndex ? 'var(--primary-dim)' : 'transparent',
                   }}
                 >
-                  <span style={{ fontWeight: 600, color: item.kind === 'function' ? 'var(--primary)' : 'var(--warning)' }}>
+                  <span
+                    style={{
+                      fontWeight: 600,
+                      color: item.kind === 'function' ? 'var(--primary)' : 'var(--warning)',
+                    }}
+                  >
                     {item.signature ?? item.name}
                   </span>
                   <span style={{ opacity: 0.5, marginLeft: 8 }}>{item.description}</span>

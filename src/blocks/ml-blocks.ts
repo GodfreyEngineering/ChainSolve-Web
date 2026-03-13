@@ -23,8 +23,7 @@ export function registerMLBlocks(register: (def: BlockDef) => void): void {
     },
     synonyms: ['train test split', 'data split', 'holdout'],
     tags: ['ml', 'data'],
-    description:
-      'Splits a table dataset into training and test sets. Default 80/20 split ratio.',
+    description: 'Splits a table dataset into training and test sets. Default 80/20 split ratio.',
   })
 
   // ── Regression Models ───────────────────────────────────────────────────
@@ -83,8 +82,7 @@ export function registerMLBlocks(register: (def: BlockDef) => void): void {
     },
     synonyms: ['knn', 'k nearest neighbors', 'classifier'],
     tags: ['ml', 'classification'],
-    description:
-      'K-Nearest Neighbors classifier. Configurable k (number of neighbors).',
+    description: 'K-Nearest Neighbors classifier. Configurable k (number of neighbors).',
   })
 
   register({
@@ -103,8 +101,7 @@ export function registerMLBlocks(register: (def: BlockDef) => void): void {
     },
     synonyms: ['decision tree', 'CART', 'tree classifier'],
     tags: ['ml', 'classification'],
-    description:
-      'Decision tree for classification or regression. Configurable max depth.',
+    description: 'Decision tree for classification or regression. Configurable max depth.',
   })
 
   // ── Prediction ──────────────────────────────────────────────────────────
@@ -121,8 +118,7 @@ export function registerMLBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'ml.predict', label: 'ML Predict' },
     synonyms: ['predict', 'inference', 'apply model'],
     tags: ['ml', 'predict'],
-    description:
-      'Apply a trained model to new data and output predictions.',
+    description: 'Apply a trained model to new data and output predictions.',
   })
 
   // ── Metrics ─────────────────────────────────────────────────────────────
@@ -139,8 +135,7 @@ export function registerMLBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'ml.mse', label: 'MSE' },
     synonyms: ['mean squared error', 'MSE', 'loss'],
     tags: ['ml', 'metrics'],
-    description:
-      'Mean Squared Error between actual and predicted values.',
+    description: 'Mean Squared Error between actual and predicted values.',
   })
 
   register({
@@ -155,8 +150,7 @@ export function registerMLBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'ml.r2', label: 'R² Score' },
     synonyms: ['r squared', 'coefficient of determination', 'R2'],
     tags: ['ml', 'metrics'],
-    description:
-      'R² (coefficient of determination). 1.0 = perfect fit, 0.0 = no better than mean.',
+    description: 'R² (coefficient of determination). 1.0 = perfect fit, 0.0 = no better than mean.',
   })
 
   register({

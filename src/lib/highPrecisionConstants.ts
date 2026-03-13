@@ -84,7 +84,7 @@ export const PHYSICS_CONSTANTS: readonly HighPrecisionConstant[] = [
     category: 'physics',
   },
   {
-    f64: 6.67430e-11,
+    f64: 6.6743e-11,
     name: 'Gravitational constant',
     symbol: 'G',
     digits: '0.0000000000667430',

@@ -12,7 +12,42 @@ import { resolve } from 'path'
 import { BLOCK_REGISTRY } from './registry'
 
 // UI-only blocks have no Rust op — excluded from the sync check.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material'])
+const UI_ONLY_BLOCKS = new Set([
+  'constant',
+  'material',
+  // Optimization blocks — TS-only until Rust ops are implemented
+  'optim.designVariable',
+  'optim.objectiveFunction',
+  'optim.gradientDescent',
+  'optim.geneticAlgorithm',
+  'optim.nelderMead',
+  'optim.convergencePlot',
+  'optim.resultsTable',
+  'optim.parametricSweep',
+  'optim.monteCarlo',
+  'optim.sensitivity',
+  'optim.doe',
+  // Machine Learning blocks — TS-only until Rust ops are implemented
+  'ml.trainTestSplit',
+  'ml.linearRegression',
+  'ml.polynomialRegression',
+  'ml.knnClassifier',
+  'ml.decisionTree',
+  'ml.predict',
+  'ml.mse',
+  'ml.r2',
+  'ml.confusionMatrix',
+  // Neural Network blocks — TS-only until Rust ops are implemented
+  'nn.input',
+  'nn.dense',
+  'nn.conv1d',
+  'nn.dropout',
+  'nn.activation',
+  'nn.sequential',
+  'nn.trainer',
+  'nn.predict',
+  'nn.export',
+])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.

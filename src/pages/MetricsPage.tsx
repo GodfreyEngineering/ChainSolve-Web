@@ -371,7 +371,15 @@ function AdminUserManagement() {
             {(selectedUser.profile.display_name as string) ?? 'User'} — {selectedUser.email}
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.82rem', marginBottom: '1rem' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '0.5rem',
+              fontSize: '0.82rem',
+              marginBottom: '1rem',
+            }}
+          >
             <div>
               <strong>Plan:</strong> {selectedUser.profile.plan as string}
             </div>

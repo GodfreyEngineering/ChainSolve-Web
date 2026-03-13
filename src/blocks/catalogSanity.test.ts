@@ -61,6 +61,9 @@ const VALID_CATEGORIES: BlockCategory[] = [
   'complex',
   'matrix',
   'signal',
+  'optimization',
+  'machineLearning',
+  'neuralNetworks',
 ]
 
 const VALID_NODE_KINDS: NodeKind[] = [

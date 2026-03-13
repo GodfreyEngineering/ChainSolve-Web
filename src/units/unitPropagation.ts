@@ -31,18 +31,30 @@ export interface InferredUnit {
 export type UnitMap = Map<string, InferredUnit>
 
 // Operations that preserve the input unit (single-input passthrough)
-const PASSTHROUGH_OPS = new Set([
-  'negate', 'abs', 'round', 'floor', 'ceil', 'clamp', 'min', 'max',
-])
+const PASSTHROUGH_OPS = new Set(['negate', 'abs', 'round', 'floor', 'ceil', 'clamp', 'min', 'max'])
 
 // Operations that require same-dimension inputs, output = that dimension
 const ADDITIVE_OPS = new Set(['add', 'subtract'])
 
 // Operations that produce dimensionless output
 const DIMENSIONLESS_OPS = new Set([
-  'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2',
-  'sinh', 'cosh', 'tanh', 'asinh', 'acosh', 'atanh',
-  'ln', 'log2', 'log10', 'exp',
+  'sin',
+  'cos',
+  'tan',
+  'asin',
+  'acos',
+  'atan',
+  'atan2',
+  'sinh',
+  'cosh',
+  'tanh',
+  'asinh',
+  'acosh',
+  'atanh',
+  'ln',
+  'log2',
+  'log10',
+  'exp',
 ])
 
 /**
@@ -116,12 +128,10 @@ export function propagateUnits(nodes: Node[], edges: Edge[]): UnitMap {
     const incoming = incomingEdges.get(nodeId)
     if (incoming && incoming.length > 0) {
       // Gather input units
-      const inputUnits: { handle: string; unit: string | undefined }[] = incoming.map(
-        (e) => ({
-          handle: e.targetHandle,
-          unit: getNodeUnit(e.source, nodeMap, result),
-        }),
-      )
+      const inputUnits: { handle: string; unit: string | undefined }[] = incoming.map((e) => ({
+        handle: e.targetHandle,
+        unit: getNodeUnit(e.source, nodeMap, result),
+      }))
 
       const inferred = inferOutputUnit(blockType, inputUnits)
       if (inferred) {
@@ -257,15 +267,26 @@ function inferOutputUnit(
 
 /** Map base units to their squared forms. */
 const SQUARED: Record<string, string> = {
-  m: 'm2', cm: 'cm2', mm: 'mm2', km: 'km2',
-  in: 'in2', ft: 'ft2',
+  m: 'm2',
+  cm: 'cm2',
+  mm: 'mm2',
+  km: 'km2',
+  in: 'in2',
+  ft: 'ft2',
 }
 
 /** Map squared units back to their roots. */
 const ROOTS: Record<string, string> = {
-  m2: 'm', cm2: 'cm', mm2: 'mm', km2: 'km',
-  in2: 'in', ft2: 'ft',
-  m4: 'm2', cm4: 'cm2', mm4: 'mm2', in4: 'in2',
+  m2: 'm',
+  cm2: 'cm',
+  mm2: 'mm',
+  km2: 'km',
+  in2: 'in',
+  ft2: 'ft',
+  m4: 'm2',
+  cm4: 'cm2',
+  mm4: 'mm2',
+  in4: 'in2',
 }
 
 function getSquaredSymbol(unit: string): string | undefined {

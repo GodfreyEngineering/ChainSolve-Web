@@ -189,7 +189,7 @@ export function LlmGraphBuilderDialog({
   const nodeCount = ops.filter((o) => o.op === 'addNode').length
   const edgeCount = ops.filter((o) => o.op === 'addEdge').length
   const groupCount = ops.filter((o) => o.op === 'createGroup').length
-  const needsConfirm = risk ? requiresConfirmation(risk, 'edit', false) : false
+  const needsConfirm = risk ? requiresConfirmation(risk.level, 'edit', false) : false
 
   async function handleGenerate() {
     if (!projectId || !canvasId) {
@@ -295,7 +295,10 @@ export function LlmGraphBuilderDialog({
 
               <div style={s.planMeta}>
                 <span>
-                  {t('llmBuilder.nodeCount', { count: nodeCount, defaultValue: '{{count}} blocks' })}
+                  {t('llmBuilder.nodeCount', {
+                    count: nodeCount,
+                    defaultValue: '{{count}} blocks',
+                  })}
                 </span>
                 <span>
                   {t('llmBuilder.edgeCount', {

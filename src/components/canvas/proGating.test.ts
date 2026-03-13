@@ -99,7 +99,9 @@ describe('Pro feature gating', () => {
 describe('Variable block separation (D6-3)', () => {
   it('only one variable-related block exists: variableSource', () => {
     const varBlocks = [...BLOCK_REGISTRY.values()].filter(
-      (d) => d.type.toLowerCase().includes('variable') || d.type === 'variableSource',
+      (d) =>
+        (d.type.toLowerCase().includes('variable') && d.category === 'variable') ||
+        d.type === 'variableSource',
     )
     expect(varBlocks).toHaveLength(1)
     expect(varBlocks[0].type).toBe('variableSource')

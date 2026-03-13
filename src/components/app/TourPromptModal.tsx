@@ -18,11 +18,16 @@ export function TourPromptModal({ open, onAccept, onDecline }: Props) {
   const { t } = useTranslation()
 
   return (
-    <Modal open={open} onClose={onDecline} title={t('tour.promptTitle', 'Welcome to ChainSolve!')} width={400}>
+    <Modal
+      open={open}
+      onClose={onDecline}
+      title={t('tour.promptTitle', 'Welcome to ChainSolve!')}
+      width={400}
+    >
       <p style={descStyle}>
         {t(
           'tour.promptDesc',
-          "We have a quick interactive tour that shows you how everything works. It only takes a minute.",
+          'We have a quick interactive tour that shows you how everything works. It only takes a minute.',
         )}
       </p>
       <div style={btnRow}>
