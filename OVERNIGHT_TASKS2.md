@@ -25,7 +25,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **1.08 Rate limiting on all public Cloudflare Functions** — Add per-IP + per-user rate limiting middleware to `functions/_middleware.ts`. Limits: auth endpoints (5/min), stripe webhooks (exempt — Stripe retries), AI endpoint (10/min free, 30/min pro), student verification (3/hr), account deletion (1/day — already in DB). Use Cloudflare `request.cf` for IP. Verify: exceed rate limit → 429 response with `Retry-After` header.
 
-- [ ] **1.09 Scheduled Supabase backups** — Create `.github/workflows/backup.yml` with daily cron (`0 3 * * *`). Call Supabase Management API `POST /v1/projects/{ref}/database/backups`. Log to `audit_log` table. Create `docs/BACKUP_RUNBOOK.md` with restore procedures. Verify: trigger manually, confirm backup in Supabase dashboard.
+- [x] **1.09 Scheduled Supabase backups** — Create `.github/workflows/backup.yml` with daily cron (`0 3 * * *`). Call Supabase Management API `POST /v1/projects/{ref}/database/backups`. Log to `audit_log` table. Create `docs/BACKUP_RUNBOOK.md` with restore procedures. Verify: trigger manually, confirm backup in Supabase dashboard.
 
 - [ ] **1.10 Storage cleanup policy** — Add a scheduled function or GitHub Action that: (a) removes orphaned files in `projects` bucket not referenced by any `canvases.storage_path` or `project_assets.storage_path`, (b) removes orphaned files in `uploads` bucket not referenced by `profiles.avatar_url`. Run weekly. Verify: create orphaned file, run cleanup, file removed.
 
