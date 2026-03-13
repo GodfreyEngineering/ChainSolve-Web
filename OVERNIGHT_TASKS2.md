@@ -15,7 +15,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **1.03 RLS policy audit & hardening** — Create `supabase/migrations/0013_rls_hardening.sql`. Audit all 29 tables for RLS coverage. Ensure `simulation_runs`, `project_snapshots`, `node_comments`, `fs_items`, `group_templates` all have SELECT/INSERT/UPDATE/DELETE policies scoped to `auth.uid()`. Add missing policies. Verify: `src/supabaseMigrations.test.ts` passes; attempt cross-user access via Supabase SQL editor — denied.
 
-- [ ] **1.04 Org seat enforcement at DB level** — Add a trigger or CHECK constraint on `org_members` INSERT that validates `count(org_members where org_id) < organizations.max_seats`. Currently enforcement is application-only. Add to migration 0013. Verify: attempt to add member beyond max_seats — INSERT fails.
+- [x] **1.04 Org seat enforcement at DB level** — Add a trigger or CHECK constraint on `org_members` INSERT that validates `count(org_members where org_id) < organizations.max_seats`. Currently enforcement is application-only. Add to migration 0013. Verify: attempt to add member beyond max_seats — INSERT fails.
 
 - [ ] **1.05 Input validation: shared `validateUserString()` utility** — Create `src/lib/validateUserString.ts`. Rules: 3–50 chars, alphanumeric + underscore + dash only (no spaces), case-insensitive offensive word filter (expand `FORBIDDEN_PATTERNS` from current `validateDisplayName.ts`). Apply to: display names, project names, material names, group names, theme names, all filenames. Update `validateDisplayName.ts` and `validateProjectName.ts` to delegate. Verify: unit tests cover no-spaces, offensive words blocked, edge cases. `npm run test:unit` passes.
 
