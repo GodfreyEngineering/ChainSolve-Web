@@ -203,7 +203,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **6.05 AI streaming responses** — Switch from batch to streaming AI responses. Show tokens appearing in real-time in the AI panel. For graph generation, show blocks appearing on canvas as they're described. Files: `src/components/app/AiCopilotWindow.tsx`, `functions/api/ai.ts`. Verify: prompt → see response streaming word by word.
 
-- [ ] **6.06 AI formula autocomplete** — In expression/formula inputs, offer AI-powered autocomplete. As user types, suggest completions based on context (available variables, upstream values, common patterns). Files: `src/components/canvas/ExpressionPanel.tsx`, `src/components/canvas/FormulaBar.tsx`. Verify: type "sin(" → AI suggests "sin(angle_rad)" based on upstream variable.
+- [x] **6.06 AI formula autocomplete** — In expression/formula inputs, offer AI-powered autocomplete. As user types, suggest completions based on context (available variables, upstream values, common patterns). Files: `src/components/canvas/ExpressionPanel.tsx`, `src/components/canvas/FormulaBar.tsx`. Verify: type "sin(" → AI suggests "sin(angle_rad)" based on upstream variable.
 
 - [ ] **6.07 AI rate limiting by plan tier** — Enforce limits: free=0 AI requests, student=10/day, pro=100/day, enterprise=1000/day, developer=unlimited. Track in `ai_usage_monthly` table. Show remaining quota in AI panel header. Files: `functions/api/ai.ts`, `src/lib/entitlements.ts`, `src/components/app/AiCopilotWindow.tsx`. Verify: free user → "Upgrade to use AI". Pro user → "95 requests remaining today".
 
