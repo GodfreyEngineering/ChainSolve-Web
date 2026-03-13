@@ -7,9 +7,16 @@
  * Only accessible to is_admin users. Redirects to /app for non-admins.
  */
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import {
+  adminSearchUsers,
+  adminGetUser,
+  adminOverridePlan,
+  adminResetPassword,
+  adminToggleDisabled,
+} from '../lib/adminService'
 
 interface MetricRow {
   event_name: string
@@ -188,6 +195,256 @@ export function MetricsPage() {
           </tbody>
         </table>
       )}
+
+      {/* 7.08: User management section */}
+      <AdminUserManagement />
+    </div>
+  )
+}
+
+// ── 7.08: Admin User Management ─────────────────────────────────────────────
+
+interface UserSummary {
+  id: string
+  display_name: string | null
+  email: string | null
+  plan: string
+  is_admin: boolean
+  is_developer: boolean
+  is_student: boolean
+  created_at: string
+}
+
+interface UserDetail {
+  profile: Record<string, unknown>
+  email: string | null
+  email_confirmed: boolean
+  last_sign_in: string | null
+  projects: Array<{
+    id: string
+    name: string
+    created_at: string
+    updated_at: string
+    is_public: boolean
+  }>
+}
+
+function AdminUserManagement() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [results, setResults] = useState<UserSummary[]>([])
+  const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [actionMsg, setActionMsg] = useState<string | null>(null)
+  const [planOverride, setPlanOverride] = useState('')
+
+  const handleSearch = useCallback(async () => {
+    if (searchQuery.trim().length < 2) return
+    setSearching(true)
+    setActionMsg(null)
+    setSelectedUser(null)
+    setSelectedId(null)
+    try {
+      const users = await adminSearchUsers(searchQuery.trim())
+      setResults(users)
+    } catch (err) {
+      setActionMsg(err instanceof Error ? err.message : 'Search failed')
+    }
+    setSearching(false)
+  }, [searchQuery])
+
+  const handleSelectUser = useCallback(async (userId: string) => {
+    setSelectedId(userId)
+    setActionMsg(null)
+    try {
+      const detail = await adminGetUser(userId)
+      setSelectedUser(detail)
+      setPlanOverride((detail.profile.plan as string) ?? 'free')
+    } catch (err) {
+      setActionMsg(err instanceof Error ? err.message : 'Failed to load user')
+    }
+  }, [])
+
+  const handleOverridePlan = useCallback(async () => {
+    if (!selectedId || !planOverride) return
+    try {
+      await adminOverridePlan(selectedId, planOverride)
+      setActionMsg(`Plan set to ${planOverride}`)
+      // Refresh user detail
+      const detail = await adminGetUser(selectedId)
+      setSelectedUser(detail)
+    } catch (err) {
+      setActionMsg(err instanceof Error ? err.message : 'Override failed')
+    }
+  }, [selectedId, planOverride])
+
+  const handleResetPassword = useCallback(async () => {
+    if (!selectedId) return
+    try {
+      await adminResetPassword(selectedId)
+      setActionMsg('Password reset email sent')
+    } catch (err) {
+      setActionMsg(err instanceof Error ? err.message : 'Reset failed')
+    }
+  }, [selectedId])
+
+  const handleToggleDisabled = useCallback(
+    async (disabled: boolean) => {
+      if (!selectedId) return
+      try {
+        await adminToggleDisabled(selectedId, disabled)
+        setActionMsg(disabled ? 'Account disabled' : 'Account enabled')
+      } catch (err) {
+        setActionMsg(err instanceof Error ? err.message : 'Toggle failed')
+      }
+    },
+    [selectedId],
+  )
+
+  return (
+    <div style={{ marginTop: '3rem' }}>
+      <h2 style={{ margin: '0 0 1rem', fontSize: '1.2rem' }}>User Management</h2>
+
+      {/* Search bar */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: '1rem' }}>
+        <input
+          style={searchInput}
+          placeholder="Search by email or display name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') void handleSearch()
+          }}
+        />
+        <button style={adminBtn} onClick={() => void handleSearch()} disabled={searching}>
+          {searching ? 'Searching...' : 'Search'}
+        </button>
+      </div>
+
+      {/* Results list */}
+      {results.length > 0 && (
+        <table style={tableStyle}>
+          <thead>
+            <tr>
+              <th style={th}>User</th>
+              <th style={th}>Plan</th>
+              <th style={th}>Joined</th>
+              <th style={th}>Roles</th>
+            </tr>
+          </thead>
+          <tbody>
+            {results.map((u) => (
+              <tr
+                key={u.id}
+                style={{
+                  ...trStyle,
+                  cursor: 'pointer',
+                  background: selectedId === u.id ? 'rgba(99,102,241,0.1)' : undefined,
+                }}
+                onClick={() => void handleSelectUser(u.id)}
+              >
+                <td style={td}>
+                  <div style={{ fontWeight: 500 }}>{u.display_name ?? '(no name)'}</div>
+                  <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{u.email ?? u.id}</div>
+                </td>
+                <td style={td}>
+                  <span style={planBadge}>{u.plan}</span>
+                </td>
+                <td style={{ ...td, fontSize: '0.78rem', opacity: 0.6 }}>
+                  {new Date(u.created_at).toLocaleDateString()}
+                </td>
+                <td style={{ ...td, fontSize: '0.78rem' }}>
+                  {[u.is_admin && 'admin', u.is_developer && 'dev', u.is_student && 'student']
+                    .filter(Boolean)
+                    .join(', ') || '-'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {/* User detail panel */}
+      {selectedUser && selectedId && (
+        <div style={detailPanel}>
+          <h3 style={{ margin: '0 0 0.75rem', fontSize: '1rem' }}>
+            {(selectedUser.profile.display_name as string) ?? 'User'} — {selectedUser.email}
+          </h3>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.82rem', marginBottom: '1rem' }}>
+            <div>
+              <strong>Plan:</strong> {selectedUser.profile.plan as string}
+            </div>
+            <div>
+              <strong>Email confirmed:</strong> {selectedUser.email_confirmed ? 'Yes' : 'No'}
+            </div>
+            <div>
+              <strong>Last sign in:</strong>{' '}
+              {selectedUser.last_sign_in
+                ? new Date(selectedUser.last_sign_in).toLocaleString()
+                : 'Never'}
+            </div>
+            <div>
+              <strong>Projects:</strong> {selectedUser.projects.length}
+            </div>
+          </div>
+
+          {/* Projects list */}
+          {selectedUser.projects.length > 0 && (
+            <details style={{ marginBottom: '1rem' }}>
+              <summary style={{ cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600 }}>
+                Projects ({selectedUser.projects.length})
+              </summary>
+              <ul style={{ margin: '0.5rem 0 0 1rem', padding: 0, fontSize: '0.78rem' }}>
+                {selectedUser.projects.slice(0, 20).map((p) => (
+                  <li key={p.id} style={{ marginBottom: 4 }}>
+                    {p.name} {p.is_public ? '(public)' : ''} —{' '}
+                    {new Date(p.updated_at).toLocaleDateString()}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+
+          {/* Actions */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <select
+              style={searchInput}
+              value={planOverride}
+              onChange={(e) => setPlanOverride(e.target.value)}
+              title="Override plan"
+            >
+              <option value="free">free</option>
+              <option value="trialing">trialing</option>
+              <option value="pro">pro</option>
+              <option value="student">student</option>
+              <option value="enterprise">enterprise</option>
+              <option value="developer">developer</option>
+            </select>
+            <button style={adminBtn} onClick={() => void handleOverridePlan()}>
+              Override plan
+            </button>
+            <button style={adminBtn} onClick={() => void handleResetPassword()}>
+              Send password reset
+            </button>
+            <button
+              style={{ ...adminBtn, borderColor: '#f87171', color: '#f87171' }}
+              onClick={() => void handleToggleDisabled(true)}
+            >
+              Disable
+            </button>
+            <button style={adminBtn} onClick={() => void handleToggleDisabled(false)}>
+              Enable
+            </button>
+          </div>
+
+          {actionMsg && (
+            <div style={{ marginTop: '0.5rem', fontSize: '0.82rem', color: 'var(--primary)' }}>
+              {actionMsg}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -245,3 +502,46 @@ const td: React.CSSProperties = {
 }
 
 const trStyle: React.CSSProperties = {}
+
+const searchInput: React.CSSProperties = {
+  padding: '0.4rem 0.75rem',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  background: 'var(--bg)',
+  color: 'inherit',
+  fontSize: '0.85rem',
+  fontFamily: 'inherit',
+  flex: 1,
+  minWidth: 200,
+}
+
+const adminBtn: React.CSSProperties = {
+  padding: '0.4rem 1rem',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  background: 'transparent',
+  color: 'inherit',
+  fontWeight: 600,
+  fontSize: '0.82rem',
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+  flexShrink: 0,
+}
+
+const planBadge: React.CSSProperties = {
+  display: 'inline-block',
+  padding: '0.15rem 0.5rem',
+  borderRadius: 4,
+  background: 'rgba(99,102,241,0.15)',
+  color: 'var(--primary)',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+}
+
+const detailPanel: React.CSSProperties = {
+  marginTop: '1rem',
+  padding: '1.25rem',
+  border: '1px solid var(--border)',
+  borderRadius: 8,
+  background: 'var(--surface-1)',
+}

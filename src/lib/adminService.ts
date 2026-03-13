@@ -91,3 +91,85 @@ export async function requireAdminRole(): Promise<void> {
   if (error || !data) throw new Error('Could not verify admin role')
   if (!data.is_developer && !data.is_admin) throw new Error('Admin role required')
 }
+
+// ── 7.08: Admin user management ──────────────────────────────────────────────
+
+interface AdminUserSummary {
+  id: string
+  display_name: string | null
+  email: string | null
+  plan: string
+  is_admin: boolean
+  is_developer: boolean
+  is_student: boolean
+  created_at: string
+}
+
+interface AdminUserDetail {
+  profile: Record<string, unknown>
+  email: string | null
+  email_confirmed: boolean
+  last_sign_in: string | null
+  projects: Array<{
+    id: string
+    name: string
+    created_at: string
+    updated_at: string
+    is_public: boolean
+  }>
+}
+
+async function adminApiCall(body: Record<string, unknown>): Promise<{
+  ok: boolean
+  error?: string
+  [key: string]: unknown
+}> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) return { ok: false, error: 'Not signed in' }
+
+  const resp = await fetch('/api/admin/manage-user', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+
+  return (await resp.json()) as { ok: boolean; error?: string; [key: string]: unknown }
+}
+
+export async function adminSearchUsers(query: string): Promise<AdminUserSummary[]> {
+  const result = await adminApiCall({ action: 'search', query })
+  if (!result.ok) throw new Error(result.error ?? 'Search failed')
+  return result.users as AdminUserSummary[]
+}
+
+export async function adminGetUser(userId: string): Promise<AdminUserDetail> {
+  const result = await adminApiCall({ action: 'get_user', user_id: userId })
+  if (!result.ok) throw new Error(result.error ?? 'Get user failed')
+  return result as unknown as AdminUserDetail
+}
+
+export async function adminOverridePlan(
+  userId: string,
+  plan: string,
+): Promise<void> {
+  const result = await adminApiCall({ action: 'override_plan', user_id: userId, plan })
+  if (!result.ok) throw new Error(result.error ?? 'Override failed')
+}
+
+export async function adminResetPassword(userId: string): Promise<void> {
+  const result = await adminApiCall({ action: 'reset_password', user_id: userId })
+  if (!result.ok) throw new Error(result.error ?? 'Reset failed')
+}
+
+export async function adminToggleDisabled(
+  userId: string,
+  disabled: boolean,
+): Promise<void> {
+  const result = await adminApiCall({ action: 'toggle_disabled', user_id: userId, disabled })
+  if (!result.ok) throw new Error(result.error ?? 'Toggle failed')
+}
