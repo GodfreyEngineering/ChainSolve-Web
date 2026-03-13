@@ -13,7 +13,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **1.02 Database FK cascade hardening** — Create `supabase/migrations/0012_fk_cascade_and_indexes.sql`. Add `ON DELETE CASCADE` to `canvases.project_id_fkey`, `project_assets.project_id_fkey`, `project_snapshots.project_id_fkey`, `node_comments.project_id_fkey`, `simulation_runs.project_id_fkey`, `fs_items.project_id_fkey`. Add `ON DELETE CASCADE` to `marketplace_install_events.item_id` FK. Add missing indexes on all unindexed FKs. Verify: delete a project via SQL, confirm all child rows cascade-delete with no FK errors.
 
-- [ ] **1.03 RLS policy audit & hardening** — Create `supabase/migrations/0013_rls_hardening.sql`. Audit all 29 tables for RLS coverage. Ensure `simulation_runs`, `project_snapshots`, `node_comments`, `fs_items`, `group_templates` all have SELECT/INSERT/UPDATE/DELETE policies scoped to `auth.uid()`. Add missing policies. Verify: `src/supabaseMigrations.test.ts` passes; attempt cross-user access via Supabase SQL editor — denied.
+- [x] **1.03 RLS policy audit & hardening** — Create `supabase/migrations/0013_rls_hardening.sql`. Audit all 29 tables for RLS coverage. Ensure `simulation_runs`, `project_snapshots`, `node_comments`, `fs_items`, `group_templates` all have SELECT/INSERT/UPDATE/DELETE policies scoped to `auth.uid()`. Add missing policies. Verify: `src/supabaseMigrations.test.ts` passes; attempt cross-user access via Supabase SQL editor — denied.
 
 - [ ] **1.04 Org seat enforcement at DB level** — Add a trigger or CHECK constraint on `org_members` INSERT that validates `count(org_members where org_id) < organizations.max_seats`. Currently enforcement is application-only. Add to migration 0013. Verify: attempt to add member beyond max_seats — INSERT fails.
 
