@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Plus, Search, Upload, FolderPlus, ChevronRight, ChevronDown, Folder } from 'lucide-react'
 import {
@@ -24,6 +25,8 @@ import { validateProjectName } from '../../../lib/validateProjectName'
 import { canCreateProject, getEntitlements, type Plan } from '../../../lib/entitlements'
 import { getPinnedProjects, togglePinnedProject } from '../../../lib/pinnedProjects'
 import { removeRecentProject } from '../../../lib/recentProjects'
+import { useProjectStore } from '../../../stores/projectStore'
+import { useCanvasesStore } from '../../../stores/canvasesStore'
 import { Icon } from '../../ui/Icon'
 import { Tooltip } from '../../ui/Tooltip'
 
@@ -59,6 +62,7 @@ interface ProjectsPanelProps {
 
 export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPanelProps) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [projects, setProjects] = useState<ProjectRow[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
@@ -218,13 +222,28 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
   const handleDelete = useCallback(
     async (proj: ProjectRow) => {
       setMenuOpen(null)
-      if (!window.confirm(t('home.confirmDelete', 'Delete "{{name}}"?', { name: proj.name })))
-        return
+      const isOpen = useProjectStore.getState().projectId === proj.id
+      const confirmMsg = isOpen
+        ? t(
+            'home.confirmDeleteOpen',
+            'This project is currently open. Close it and delete "{{name}}"?',
+            { name: proj.name },
+          )
+        : t('home.confirmDelete', 'Delete "{{name}}"?', { name: proj.name })
+      if (!window.confirm(confirmMsg)) return
+
+      // If the project being deleted is currently open, navigate away first
+      if (isOpen) {
+        useProjectStore.getState().reset()
+        useCanvasesStore.getState().reset()
+        navigate('/app')
+      }
+
       await deleteProject(proj.id)
       removeRecentProject(proj.id)
       fetchProjects()
     },
-    [t, fetchProjects],
+    [t, fetchProjects, navigate],
   )
 
   const handlePin = useCallback((projId: string) => {
