@@ -77,6 +77,10 @@ export interface Entitlements {
   canUseGraphTableOutputs: boolean
   /** H8-1: Whether user can import files into projects. Pro + Enterprise only. */
   canImportFiles: boolean
+  /** 5.13: Max neural network parameters allowed (web limit). */
+  maxNNParameters: number
+  /** 5.13: Max training epochs per NN training run. */
+  maxNNEpochs: number
 }
 
 // ── Entitlement map ──────────────────────────────────────────────────────────
@@ -98,6 +102,8 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseListBlocks: false,
     canUseGraphTableOutputs: false,
     canImportFiles: false,
+    maxNNParameters: 100_000,
+    maxNNEpochs: 100,
   },
   trialing: {
     maxProjects: Infinity,
@@ -115,6 +121,8 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseListBlocks: true,
     canUseGraphTableOutputs: true,
     canImportFiles: true,
+    maxNNParameters: 1_000_000,
+    maxNNEpochs: 10_000,
   },
   pro: {
     maxProjects: Infinity,
@@ -132,6 +140,8 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseListBlocks: true,
     canUseGraphTableOutputs: true,
     canImportFiles: true,
+    maxNNParameters: 1_000_000,
+    maxNNEpochs: 10_000,
   },
   student: {
     maxProjects: Infinity,
@@ -149,6 +159,8 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseListBlocks: true,
     canUseGraphTableOutputs: true,
     canImportFiles: true,
+    maxNNParameters: 1_000_000,
+    maxNNEpochs: 10_000,
   },
   enterprise: {
     maxProjects: Infinity,
@@ -166,6 +178,8 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseListBlocks: true,
     canUseGraphTableOutputs: true,
     canImportFiles: true,
+    maxNNParameters: 1_000_000,
+    maxNNEpochs: 10_000,
   },
   developer: {
     maxProjects: Infinity,
@@ -183,6 +197,8 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseListBlocks: true,
     canUseGraphTableOutputs: true,
     canImportFiles: true,
+    maxNNParameters: 1_000_000,
+    maxNNEpochs: 10_000,
   },
   past_due: {
     maxProjects: 1,
@@ -200,6 +216,8 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseListBlocks: false,
     canUseGraphTableOutputs: false,
     canImportFiles: false,
+    maxNNParameters: 0,
+    maxNNEpochs: 0,
   },
   canceled: {
     maxProjects: 1,
@@ -217,6 +235,8 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canUseListBlocks: false,
     canUseGraphTableOutputs: false,
     canImportFiles: false,
+    maxNNParameters: 0,
+    maxNNEpochs: 0,
   },
 }
 
@@ -404,6 +424,54 @@ export function canCreateCanvas(plan: Plan, currentCount: number): boolean {
 export function showBillingBanner(plan: Plan): 'past_due' | 'canceled' | null {
   if (plan === 'past_due') return 'past_due'
   if (plan === 'canceled') return 'canceled'
+  return null
+}
+
+/**
+ * 5.13: Validate a neural network model size against plan limits.
+ * Returns null if within limits, or a user-friendly message string if exceeded.
+ */
+export function validateNNSize(
+  plan: Plan,
+  parameterCount: number,
+): string | null {
+  const ent = getEntitlements(plan)
+  if (ent.maxNNParameters === 0) {
+    return 'Neural networks require a Pro plan or higher. Upgrade to start training models.'
+  }
+  if (parameterCount > ent.maxNNParameters) {
+    const limitStr = ent.maxNNParameters.toLocaleString()
+    const actualStr = parameterCount.toLocaleString()
+    return (
+      `Your model has ${actualStr} parameters. ` +
+      `The web version supports up to ${limitStr}. ` +
+      `Desktop version (coming soon) supports unlimited.`
+    )
+  }
+  return null
+}
+
+/**
+ * 5.13: Validate training epoch count against plan limits.
+ * Returns null if within limits, or a user-friendly message string if exceeded.
+ */
+export function validateNNEpochs(
+  plan: Plan,
+  epochs: number,
+): string | null {
+  const ent = getEntitlements(plan)
+  if (ent.maxNNEpochs === 0) {
+    return 'Neural network training requires a Pro plan or higher.'
+  }
+  if (epochs > ent.maxNNEpochs) {
+    const limitStr = ent.maxNNEpochs.toLocaleString()
+    return (
+      `Maximum ${limitStr} epochs per training run on your current plan. ` +
+      (plan === 'free' || plan === 'student'
+        ? 'Upgrade to Pro for up to 10,000 epochs.'
+        : 'Desktop version (coming soon) supports unlimited epochs.')
+    )
+  }
   return null
 }
 
