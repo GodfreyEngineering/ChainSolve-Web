@@ -253,7 +253,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **8.04 Mobile — toolbar adaptation** — Reduce toolbar to essential buttons on mobile. Use hamburger/overflow menu for less-used tools. Ensure all touch targets are ≥44px (WCAG). Files: `src/components/canvas/CanvasToolbar.tsx`, `src/components/app/WorkspaceToolbar.tsx`. Verify: on mobile — all buttons tappable, no overlapping.
 
-- [ ] **8.05 Bundle size audit** — Run `npm run perf:bundle`. Check against budgets: initial JS (gzip) < 400KB, WASM (gzip) < 250KB. If over, identify largest chunks and code-split or lazy-load. Check that heavy dependencies (KaTeX, Vega-Lite, ml.js) are lazy-loaded. Files: `vite.config.ts`, `src/App.tsx` (lazy imports). Verify: `npm run build` → bundle report within budget.
+- [x] **8.05 Bundle size audit** — Run `npm run perf:bundle`. Check against budgets: initial JS (gzip) < 400KB, WASM (gzip) < 250KB. If over, identify largest chunks and code-split or lazy-load. Check that heavy dependencies (KaTeX, Vega-Lite, ml.js) are lazy-loaded. Files: `vite.config.ts`, `src/App.tsx` (lazy imports). Verify: `npm run build` → bundle report within budget.
 
 - [ ] **8.06 React.memo on all node components** — Wrap all node components (`SourceNode`, `OperationNode`, `DisplayNode`, `DataNode`, `PlotNode`, `ListTableNode`, `GroupNode`, `PublishNode`, `SubscribeNode`, `AnnotationNode`, `MaterialNode`) with `React.memo()` if not already. Use shallow comparison. Files: `src/components/canvas/nodes/*.tsx`. Verify: React DevTools profiler shows no unnecessary re-renders on unrelated state changes.
 
