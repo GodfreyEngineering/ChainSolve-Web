@@ -69,7 +69,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 > Visual, interaction, and terminology improvements. No new features, just making existing things better.
 
-- [ ] **3.01 Share button positioning** — Move share button to LEFT of plan badge with 8px gap. Only render when `projectStore.projectId` is truthy AND project is shareable (not scratch). Files: `src/components/app/WorkspaceToolbar.tsx` (or `AppHeader.tsx`). Verify: visual inspection — share button left of badge, hidden when no project.
+- [x] **3.01 Share button positioning** — Move share button to LEFT of plan badge with 8px gap. Only render when `projectStore.projectId` is truthy AND project is shareable (not scratch). Files: `src/components/app/WorkspaceToolbar.tsx` (or `AppHeader.tsx`). Verify: visual inspection — share button left of badge, hidden when no project.
 
 - [ ] **3.02 Status bar: "nodes" → "blocks", "edges" → "chains"** — In `src/components/app/StatusBar.tsx` lines 54/58, change i18n keys from `statusBar.nodes`/`statusBar.edges` to `statusBar.blocks`/`statusBar.chains`. Update all 6 locale files (`en.json`, `es.json`, `fr.json`, `it.json`, `de.json`, `he.json`). Also rename internal variable names `nodeCount`/`edgeCount` to `blockCount`/`chainCount` for consistency. Files: `src/components/app/StatusBar.tsx`, `src/i18n/locales/*.json`. Verify: status bar shows "X blocks · Y chains".
 
