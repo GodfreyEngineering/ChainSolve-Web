@@ -14,7 +14,7 @@ import { Tooltip } from '../ui/Tooltip'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-export type DockTab = 'console' | 'health' | 'output' | 'problems' | 'history' | 'notes'
+export type DockTab = 'console' | 'health' | 'output' | 'problems' | 'history' | 'notes' | 'channels'
 
 export interface DockPanel {
   id: DockTab
@@ -72,7 +72,8 @@ function loadTab(): DockTab {
       v === 'output' ||
       v === 'problems' ||
       v === 'history' ||
-      v === 'notes'
+      v === 'notes' ||
+      v === 'channels'
     )
       return v
   } catch {

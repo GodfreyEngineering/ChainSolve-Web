@@ -113,6 +113,9 @@ const LazyCanvasNotes = lazy(() =>
 const LazyHistoryPanel = lazy(() =>
   import('./HistoryPanel').then((m) => ({ default: m.HistoryPanel })),
 )
+const LazyChannelsPanel = lazy(() =>
+  import('./ChannelsPanel').then((m) => ({ default: m.ChannelsPanel })),
+)
 import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
@@ -2753,6 +2756,15 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               currentEdgeCount={edges.length}
               onRestore={handleRestoreHistory}
             />
+          </Suspense>
+        ),
+      },
+      {
+        id: 'channels' as DockTab,
+        label: t('dock.channels', 'Channels'),
+        content: (
+          <Suspense fallback={null}>
+            <LazyChannelsPanel />
           </Suspense>
         ),
       },
