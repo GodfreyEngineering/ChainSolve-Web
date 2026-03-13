@@ -40,7 +40,7 @@ export function CookieConsentBanner() {
   if (!visible) return null
 
   return (
-    <div style={bannerStyle} role="dialog" aria-label="Cookie consent">
+    <div style={bannerStyle} role="dialog" aria-label={t('cookie.ariaLabel', 'Cookie consent')}>
       <div style={contentStyle}>
         <p style={textStyle}>
           {t(

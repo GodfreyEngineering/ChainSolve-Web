@@ -39,6 +39,8 @@ const ALLOWLIST = new Set([
   'src/pages/AppShell.tsx|Project actions',
   // Login — auth pages do not yet import useTranslation
   'src/pages/Login.tsx|Re-enter password',
+  // MetricsPage — admin-only page, not user-facing
+  'src/pages/MetricsPage.tsx|Search by email or display name...',
 ])
 
 // ── Scan ──────────────────────────────────────────────────────────────────────

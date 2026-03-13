@@ -657,7 +657,7 @@ export function Inspector({
                       const v = parseInt(e.target.value, 10)
                       if (!isNaN(v) && v >= 0) update({ tableOutputRow: v })
                     }}
-                    placeholder="Row index (0-based)"
+                    placeholder={t('inspector.rowIndexPlaceholder', 'Row index (0-based)')}
                   />
                 )}
               </div>
