@@ -96,7 +96,6 @@ function evaluateCellFormula(
   if (!/^[\d+\-*/().eE\s]+$/.test(resolved)) return null
 
   try {
-    // eslint-disable-next-line no-new-func
     const result = new Function(`"use strict"; return (${resolved})`)() as unknown
     return typeof result === 'number' && isFinite(result) ? result : null
   } catch {

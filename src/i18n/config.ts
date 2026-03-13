@@ -25,7 +25,6 @@ export const SUPPORTED_LANGUAGES = [
 // "maintained with support from Locize") which pollutes the console.
 // Intercept console.warn during init only; restore immediately after.
 const _origWarn = console.warn
-// eslint-disable-next-line no-console
 console.warn = (...args: unknown[]) => {
   if (typeof args[0] === 'string' && /i18next|locize/i.test(args[0])) return
   _origWarn.apply(console, args)

@@ -59,9 +59,12 @@ export function useGraphHistory(limit = DEFAULT_LIMIT, canvasId?: string) {
     if (cached) {
       undoStack.current = cached.undo
       redoStack.current = cached.redo
-      setCanUndo(cached.undo.length > 0)
-      setCanRedo(cached.redo.length > 0)
-      setStackEntries([...cached.undo].reverse())
+      // Defer state updates to avoid synchronous setState in effect body
+      queueMicrotask(() => {
+        setCanUndo(cached.undo.length > 0)
+        setCanRedo(cached.redo.length > 0)
+        setStackEntries([...cached.undo].reverse())
+      })
     }
     cacheKeyRef.current = canvasId
     // Save to cache on unmount

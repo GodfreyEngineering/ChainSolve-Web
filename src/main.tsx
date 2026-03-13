@@ -18,7 +18,7 @@ try {
 }
 
 // 7.07: Check cookie consent before initialising tracking.
-import { getCookieConsent } from './components/CookieConsent.tsx'
+import { getCookieConsent } from './lib/cookieConsent.ts'
 const _cookieConsent = getCookieConsent()
 
 // DEV-04: Initialise Sentry error tracking if a DSN is configured.

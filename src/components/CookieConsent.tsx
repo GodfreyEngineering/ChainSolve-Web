@@ -7,20 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
-const LS_KEY = 'cs:cookie-consent'
-
-export type CookieConsentChoice = 'accepted' | 'declined' | null
-
-export function getCookieConsent(): CookieConsentChoice {
-  try {
-    const v = localStorage.getItem(LS_KEY)
-    if (v === 'accepted' || v === 'declined') return v
-    return null
-  } catch {
-    return null
-  }
-}
+import { getCookieConsent, setCookieConsent } from '../lib/cookieConsent'
 
 export function CookieConsentBanner() {
   const { t } = useTranslation()
@@ -34,11 +21,7 @@ export function CookieConsentBanner() {
   }, [])
 
   const handleChoice = useCallback((choice: 'accepted' | 'declined') => {
-    try {
-      localStorage.setItem(LS_KEY, choice)
-    } catch {
-      // localStorage full or blocked — proceed anyway
-    }
+    setCookieConsent(choice)
 
     if (choice === 'declined') {
       // Disable Sentry by calling close() — no further events are sent

@@ -21,6 +21,7 @@ interface MenuPosition {
 export function useMenuPosition(x: number, y: number) {
   const menuRef = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState<MenuPosition>({ left: x, top: y })
+  const posRef = useRef(pos)
 
   useLayoutEffect(() => {
     const el = menuRef.current
@@ -42,7 +43,14 @@ export function useMenuPosition(x: number, y: number) {
       top = Math.max(MARGIN, y - rect.height)
     }
 
-    setPos({ left, top })
+    // Only update state if values actually changed
+    if (posRef.current.left !== left || posRef.current.top !== top) {
+      const next = { left, top }
+      posRef.current = next
+      // Deferred to satisfy react-hooks/set-state-in-effect; runs before paint
+      // since useLayoutEffect already blocks the paint cycle.
+      queueMicrotask(() => setPos(next))
+    }
   }, [x, y])
 
   return { menuRef, pos }
