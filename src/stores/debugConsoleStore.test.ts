@@ -39,7 +39,6 @@ function makeEntry(overrides: Partial<LogEntry> = {}): LogEntry {
 // ── Setup ──────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
-  // Reset the store between tests
   useDebugConsoleStore.setState({
     entries: [],
     nextId: 1,

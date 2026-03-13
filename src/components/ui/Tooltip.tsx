@@ -85,7 +85,6 @@ function computePosition(
     right: 'left',
   }
   tryOrder.push(opposite[preferredSide])
-  // Add remaining sides
   for (const s of ['top', 'bottom', 'left', 'right'] as TooltipSide[]) {
     if (!tryOrder.includes(s)) tryOrder.push(s)
   }

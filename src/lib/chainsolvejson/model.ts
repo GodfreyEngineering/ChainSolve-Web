@@ -253,7 +253,6 @@ export async function buildEmbeddedAsset(
   bytes: Uint8Array,
 ): Promise<EmbeddedAsset> {
   const sha256 = await sha256BytesHex(bytes)
-  // Convert bytes to base64
   let binary = ''
   for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i])

@@ -1680,7 +1680,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   const deleteSelected = useCallback(() => {
     doSaveHistory()
-    // Delete selected edges
     setEdges((eds) => {
       const selectedEdgeIds = new Set(eds.filter((e) => e.selected).map((e) => e.id))
       // Keep this set for node-deletion cascade below

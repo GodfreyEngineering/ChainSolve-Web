@@ -88,7 +88,6 @@ function MaterialPickerBody({
       updateNodeData(id, { selectedMaterialId: undefined, label: 'Material' })
       return
     }
-    // Check custom material
     const custom = parseCustomMaterialId(matId)
     if (custom) {
       const mat = customMaterials.find((m) => m.id === custom.materialId)

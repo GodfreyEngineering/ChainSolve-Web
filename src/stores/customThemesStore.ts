@@ -103,7 +103,6 @@ export const useCustomThemesStore = create<CustomThemesState>((set, get) => ({
   },
 
   activateTheme: (id) => {
-    // Clear previous
     const prevId = get().activeThemeId
     if (prevId) {
       const prev = get().themes.find((t) => t.id === prevId)

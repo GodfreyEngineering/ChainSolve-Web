@@ -233,10 +233,8 @@ export function ArtifactToolbar({
     document.addEventListener('mouseup', onUp)
   }, [])
 
-  // Tooltip side based on position
   const tooltipSide = snap.endsWith('-right') ? 'left' : 'right'
 
-  // Hide on mobile
   if (isMobile) return null
 
   // Don't render if no actions available

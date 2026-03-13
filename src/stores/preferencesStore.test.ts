@@ -8,7 +8,6 @@ import { usePreferencesStore } from './preferencesStore'
 describe('preferencesStore', () => {
   beforeEach(() => {
     localStorage.clear()
-    // Reset store to defaults
     usePreferencesStore.getState().reset()
   })
 

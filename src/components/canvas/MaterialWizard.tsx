@@ -176,7 +176,6 @@ export function MaterialWizard({ open, onClose, editMaterial }: MaterialWizardPr
         return
       }
 
-      // Parse string values to numbers
       const parsed: Partial<Record<MaterialProperty, number>> = {}
       for (const key of MATERIAL_PROPERTIES) {
         const raw = properties[key]

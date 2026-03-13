@@ -72,7 +72,6 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
   const [resendLoading, setResendLoading] = useState(false)
   const [resendMsg, setResendMsg] = useState<string | null>(null)
 
-  // Reset success state
   const [resetSent, setResetSent] = useState(false)
 
   // J1-4: MFA challenge state (shown when user has TOTP enrolled)

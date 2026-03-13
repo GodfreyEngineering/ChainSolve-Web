@@ -302,7 +302,6 @@ export async function loadCanvasGraph(
       try {
         const raw = await downloadCanvasGraph(userId, projectId, canvasId)
         const freshGraph = parseCanvasJson(raw, canvasId, projectId)
-        // Update cache regardless
         void setCachedCanvas(userId, projectId, canvasId, raw)
         // Notify caller if data changed (node/edge count mismatch = quick check)
         if (
@@ -452,7 +451,6 @@ export async function migrateProjectToMultiCanvas(
     edges: legacyEdges,
   })
 
-  // Set as active
   await setActiveCanvas(projectId, canvas.id)
 
   return canvas

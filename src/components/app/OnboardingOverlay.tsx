@@ -190,7 +190,6 @@ export function OnboardingOverlay({ mode, onClose }: OnboardingOverlayProps) {
   // ── Overlay mode: spotlight tour ────────────────────────────────────────
 
   if (allDone) {
-    // Show completion screen
     return (
       <div style={overlayBackdropStyle} role="dialog" aria-modal="true">
         <div style={completionCardStyle}>

@@ -94,7 +94,6 @@ export function ExplorePage() {
     setFetchSeq((seq) => seq + 1)
   }, [])
 
-  // Fetch items
   useEffect(() => {
     let cancelled = false
     // Use the first selected category, or undefined for all
