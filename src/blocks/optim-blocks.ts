@@ -1,0 +1,204 @@
+/**
+ * optim-blocks.ts — Optimization, sweep, and Monte Carlo block pack (5.01).
+ *
+ * Blocks for gradient descent, genetic algorithm, Nelder-Mead, parametric
+ * sweep, Monte Carlo simulation, sensitivity analysis, and DOE.
+ * Evaluation handled by Rust/WASM engine ops (optim.* namespace).
+ */
+
+import type { BlockDef } from './types'
+
+export function registerOptimBlocks(register: (def: BlockDef) => void): void {
+  // ── Design & Objective ──────────────────────────────────────────────────
+
+  register({
+    type: 'optim.designVariable',
+    label: 'Design Variable',
+    category: 'optimization',
+    nodeKind: 'csSource',
+    inputs: [],
+    defaultData: {
+      blockType: 'optim.designVariable',
+      label: 'Design Variable',
+      value: 0,
+      min: -10,
+      max: 10,
+      step: 0.1,
+    },
+    synonyms: ['design variable', 'parameter', 'decision variable'],
+    tags: ['optimization', 'variable'],
+    description:
+      'A variable that the optimizer will adjust. Set the range (min/max) and initial value.',
+  })
+
+  register({
+    type: 'optim.objectiveFunction',
+    label: 'Objective Function',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'value', label: 'Value to minimize' }],
+    defaultData: { blockType: 'optim.objectiveFunction', label: 'Objective Function' },
+    synonyms: ['objective', 'cost function', 'fitness', 'loss'],
+    tags: ['optimization', 'objective'],
+    description:
+      'Wraps a computed value as the objective (cost) function. The optimizer will try to minimize this value.',
+  })
+
+  // ── Optimizers ──────────────────────────────────────────────────────────
+
+  register({
+    type: 'optim.gradientDescent',
+    label: 'Gradient Descent',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'objective', label: 'Objective' },
+      { id: 'variables', label: 'Variables' },
+    ],
+    defaultData: { blockType: 'optim.gradientDescent', label: 'Gradient Descent' },
+    synonyms: ['gradient descent', 'steepest descent', 'GD'],
+    tags: ['optimization', 'gradient'],
+    description:
+      'Minimizes the objective using gradient descent. Supports configurable learning rate, momentum, and max iterations.',
+  })
+
+  register({
+    type: 'optim.geneticAlgorithm',
+    label: 'Genetic Algorithm',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'objective', label: 'Objective' },
+      { id: 'variables', label: 'Variables' },
+    ],
+    defaultData: { blockType: 'optim.geneticAlgorithm', label: 'Genetic Algorithm' },
+    synonyms: ['genetic algorithm', 'GA', 'evolutionary'],
+    tags: ['optimization', 'evolutionary'],
+    description:
+      'Population-based optimizer using selection, crossover, and mutation. Good for non-smooth or multi-modal problems.',
+  })
+
+  register({
+    type: 'optim.nelderMead',
+    label: 'Nelder-Mead',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'objective', label: 'Objective' },
+      { id: 'variables', label: 'Variables' },
+    ],
+    defaultData: { blockType: 'optim.nelderMead', label: 'Nelder-Mead' },
+    synonyms: ['nelder mead', 'simplex', 'amoeba'],
+    tags: ['optimization', 'simplex'],
+    description:
+      'Derivative-free simplex optimizer (Nelder-Mead). Works well for low-dimensional smooth problems.',
+  })
+
+  // ── Visualization & Results ─────────────────────────────────────────────
+
+  register({
+    type: 'optim.convergencePlot',
+    label: 'Convergence Plot',
+    category: 'optimization',
+    nodeKind: 'csPlot',
+    inputs: [{ id: 'data', label: 'Optimizer output' }],
+    defaultData: {
+      blockType: 'optim.convergencePlot',
+      label: 'Convergence Plot',
+      plotConfig: { chartType: 'xyLine', xLabel: 'Iteration', yLabel: 'Objective' },
+    },
+    synonyms: ['convergence', 'optimization progress'],
+    tags: ['optimization', 'plot'],
+    description:
+      'Visualizes optimizer convergence: objective value vs iteration count.',
+  })
+
+  register({
+    type: 'optim.resultsTable',
+    label: 'Optimization Results',
+    category: 'optimization',
+    nodeKind: 'csDisplay',
+    inputs: [{ id: 'data', label: 'Optimizer output' }],
+    defaultData: { blockType: 'optim.resultsTable', label: 'Optimization Results' },
+    synonyms: ['results', 'optimal values', 'solution'],
+    tags: ['optimization', 'results'],
+    description:
+      'Displays final optimal variable values, objective value, and convergence status.',
+  })
+
+  // ── Sweep & Monte Carlo (5.04, 5.05) ───────────────────────────────────
+
+  register({
+    type: 'optim.parametricSweep',
+    label: 'Parametric Sweep',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'objective', label: 'Function' },
+      { id: 'variable', label: 'Variable' },
+    ],
+    defaultData: {
+      blockType: 'optim.parametricSweep',
+      label: 'Parametric Sweep',
+      manualValues: { steps: 100 },
+    },
+    synonyms: ['sweep', 'parameter study', 'sensitivity'],
+    tags: ['optimization', 'sweep'],
+    description:
+      'Evaluates a function over linearly spaced values of a variable. Outputs an input→output table for sensitivity analysis.',
+  })
+
+  register({
+    type: 'optim.monteCarlo',
+    label: 'Monte Carlo',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'objective', label: 'Function' },
+      { id: 'variables', label: 'Variables' },
+    ],
+    defaultData: {
+      blockType: 'optim.monteCarlo',
+      label: 'Monte Carlo',
+      manualValues: { samples: 1000 },
+    },
+    synonyms: ['monte carlo', 'random sampling', 'stochastic'],
+    tags: ['optimization', 'simulation'],
+    description:
+      'Runs N random samples from specified distributions. Outputs statistics (mean, std, percentiles) and histogram.',
+  })
+
+  // ── Sensitivity & DOE (5.14, 5.15) ─────────────────────────────────────
+
+  register({
+    type: 'optim.sensitivity',
+    label: 'Sensitivity Analysis',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'objective', label: 'Function' },
+      { id: 'variables', label: 'Variables' },
+    ],
+    defaultData: { blockType: 'optim.sensitivity', label: 'Sensitivity Analysis' },
+    synonyms: ['tornado', 'one-at-a-time', 'OAT'],
+    tags: ['optimization', 'sensitivity'],
+    description:
+      'Varies each input one at a time while holding others constant. Produces a tornado chart of parameter sensitivity.',
+  })
+
+  register({
+    type: 'optim.doe',
+    label: 'Design of Experiments',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'variables', label: 'Variables' }],
+    defaultData: {
+      blockType: 'optim.doe',
+      label: 'Design of Experiments',
+    },
+    synonyms: ['DOE', 'factorial', 'latin hypercube', 'sobol'],
+    tags: ['optimization', 'DOE'],
+    description:
+      'Generates experiment matrices: full factorial, Latin hypercube, or Sobol sequence. Outputs table of configurations.',
+  })
+}

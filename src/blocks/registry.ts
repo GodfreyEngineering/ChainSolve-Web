@@ -786,6 +786,9 @@ import { registerIntervalBlocks } from './interval-blocks'
 import { registerSignalBlocks } from './signal-blocks'
 import { registerComplexBlocks } from './complex-blocks'
 import { registerMatrixBlocks } from './matrix-blocks'
+import { registerOptimBlocks } from './optim-blocks'
+import { registerMLBlocks } from './ml-blocks'
+import { registerNNBlocks } from './nn-blocks'
 import { registerLookupBlocks } from './lookup-blocks'
 
 registerDataBlocks(reg)
@@ -809,6 +812,9 @@ registerSignalBlocks(reg)
 registerComplexBlocks(reg)
 registerMatrixBlocks(reg)
 registerLookupBlocks(reg)
+registerOptimBlocks(reg)
+registerMLBlocks(reg)
+registerNNBlocks(reg)
 
 // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
 import { SEARCH_METADATA } from './blockSearchMetadata'

@@ -54,6 +54,9 @@ export type BlockCategory =
   | 'signal'
   | 'complex'
   | 'matrix'
+  | 'optimization'
+  | 'machineLearning'
+  | 'neuralNetworks'
 
 /** Which React Flow custom-node renderer to use. */
 export type NodeKind =
