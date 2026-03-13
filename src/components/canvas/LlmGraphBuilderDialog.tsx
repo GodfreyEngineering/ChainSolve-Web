@@ -1,18 +1,16 @@
 /**
- * LlmGraphBuilderDialog — P149: LLM-assisted graph building dialog.
+ * LlmGraphBuilderDialog — 6.03: AI-powered graph generation dialog.
  *
- * Shows a text-area where the user describes the graph they want to build.
- * Submits to llmGraphBuilderService.buildGraphFromPrompt().
- *
- * When VITE_LLM_API_KEY is not configured, the dialog shows setup
- * instructions.  When the service returns a plan, a summary is shown
- * (future: auto-apply to canvas).
+ * Uses the AI Copilot service (sendCopilotRequest) to generate graphs
+ * from natural language prompts. Supports large graphs (100+ blocks)
+ * with risk scoring and "Apply to Canvas" functionality.
  */
 
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { buildGraphFromPrompt } from '../../lib/llmGraphBuilderService'
-import type { LlmGraphPlan } from '../../lib/llmGraphBuilderService'
+import { sendCopilotRequest } from '../../lib/aiCopilot/aiService'
+import { assessRisk, requiresConfirmation } from '../../lib/aiCopilot/riskScoring'
+import type { AiPatchOp, RiskAssessment } from '../../lib/aiCopilot/types'
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -31,7 +29,7 @@ const s = {
     border: '1px solid rgba(255,255,255,0.1)',
     borderRadius: 14,
     padding: '1.5rem',
-    width: 540,
+    width: 580,
     maxWidth: 'calc(100vw - 2rem)',
     maxHeight: 'calc(100vh - 4rem)',
     overflowY: 'auto' as const,
@@ -88,7 +86,7 @@ const s = {
     cursor: 'pointer',
     fontFamily: 'inherit',
   } satisfies React.CSSProperties,
-  infoBox: (variant: 'info' | 'success' | 'error'): React.CSSProperties => ({
+  infoBox: (variant: 'info' | 'success' | 'error' | 'warning'): React.CSSProperties => ({
     borderRadius: 8,
     padding: '0.75rem',
     marginTop: '0.9rem',
@@ -98,14 +96,26 @@ const s = {
         ? 'rgba(28,171,176,0.1)'
         : variant === 'success'
           ? 'rgba(34,197,94,0.1)'
-          : 'rgba(239,68,68,0.1)',
-    border: `1px solid ${variant === 'info' ? 'rgba(28,171,176,0.3)' : variant === 'success' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
+          : variant === 'warning'
+            ? 'rgba(234,179,8,0.1)'
+            : 'rgba(239,68,68,0.1)',
+    border: `1px solid ${
+      variant === 'info'
+        ? 'rgba(28,171,176,0.3)'
+        : variant === 'success'
+          ? 'rgba(34,197,94,0.3)'
+          : variant === 'warning'
+            ? 'rgba(234,179,8,0.3)'
+            : 'rgba(239,68,68,0.3)'
+    }`,
     color:
       variant === 'info'
         ? 'var(--primary)'
         : variant === 'success'
           ? 'var(--success)'
-          : 'var(--danger)',
+          : variant === 'warning'
+            ? 'var(--warning-text, #eab308)'
+            : 'var(--danger)',
   }),
   planSummary: {
     borderRadius: 8,
@@ -123,6 +133,25 @@ const s = {
     opacity: 0.6,
     fontSize: '0.78rem',
   } satisfies React.CSSProperties,
+  riskBadge: (level: string): React.CSSProperties => ({
+    display: 'inline-block',
+    padding: '0.15rem 0.5rem',
+    borderRadius: 6,
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    background:
+      level === 'high'
+        ? 'rgba(239,68,68,0.2)'
+        : level === 'medium'
+          ? 'rgba(234,179,8,0.2)'
+          : 'rgba(34,197,94,0.2)',
+    color:
+      level === 'high'
+        ? 'var(--danger)'
+        : level === 'medium'
+          ? 'var(--warning-text, #eab308)'
+          : 'var(--success)',
+  }),
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -130,56 +159,102 @@ const s = {
 export interface LlmGraphBuilderDialogProps {
   open: boolean
   onClose: () => void
+  projectId: string | undefined
+  canvasId: string | undefined
+  onApplyPatch: (ops: AiPatchOp[], summary: string) => void
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function LlmGraphBuilderDialog({ open, onClose }: LlmGraphBuilderDialogProps) {
+export function LlmGraphBuilderDialog({
+  open,
+  onClose,
+  projectId,
+  canvasId,
+  onApplyPatch,
+}: LlmGraphBuilderDialogProps) {
   const { t } = useTranslation()
   const [prompt, setPrompt] = useState('')
   const [loading, setLoading] = useState(false)
-  const [plan, setPlan] = useState<LlmGraphPlan | null>(null)
-  const [notConfigured, setNotConfigured] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [assumptions, setAssumptions] = useState<string[]>([])
+  const [ops, setOps] = useState<AiPatchOp[]>([])
+  const [risk, setRisk] = useState<RiskAssessment | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [applied, setApplied] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   if (!open) return null
 
+  const nodeCount = ops.filter((o) => o.op === 'addNode').length
+  const edgeCount = ops.filter((o) => o.op === 'addEdge').length
+  const groupCount = ops.filter((o) => o.op === 'createGroup').length
+  const needsConfirm = risk ? requiresConfirmation('edit', risk) : false
+
   async function handleGenerate() {
+    if (!projectId || !canvasId) {
+      setError('No active project or canvas.')
+      return
+    }
     setLoading(true)
-    setPlan(null)
-    setNotConfigured(false)
+    setMessage(null)
+    setAssumptions([])
+    setOps([])
+    setRisk(null)
     setError(null)
+    setApplied(false)
     try {
-      const result = await buildGraphFromPrompt(prompt)
-      if (result.status === 'ok') {
-        setPlan(result.plan)
-      } else if (result.status === 'not_configured') {
-        setNotConfigured(true)
-      } else {
-        setError(result.message)
-      }
+      const response = await sendCopilotRequest({
+        mode: 'edit',
+        task: 'chat',
+        scope: 'active_canvas',
+        userMessage: prompt,
+        projectId,
+        canvasId,
+        selectedNodeIds: [],
+      })
+      setMessage(response.message)
+      setAssumptions(response.assumptions ?? [])
+      const patchOps = response.patchOps ?? []
+      setOps(patchOps)
+      setRisk(assessRisk(patchOps))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'AI request failed')
     } finally {
       setLoading(false)
     }
   }
 
+  function handleApply() {
+    if (ops.length === 0) return
+    onApplyPatch(ops, message ?? 'AI-generated graph')
+    setApplied(true)
+  }
+
   function handleClose() {
     setPrompt('')
-    setPlan(null)
-    setNotConfigured(false)
+    setMessage(null)
+    setAssumptions([])
+    setOps([])
+    setRisk(null)
     setError(null)
+    setApplied(false)
     onClose()
   }
 
   return (
     <div style={s.overlay} onClick={handleClose}>
       <div style={s.dialog} onClick={(e) => e.stopPropagation()}>
-        <h2 style={s.title}>{t('llmBuilder.title')}</h2>
-        <p style={s.subtitle}>{t('llmBuilder.subtitle')}</p>
+        <h2 style={s.title}>{t('llmBuilder.title', 'Build Graph from Prompt')}</h2>
+        <p style={s.subtitle}>
+          {t(
+            'llmBuilder.subtitle',
+            'Describe the calculation you want and AI will generate the blocks and connections.',
+          )}
+        </p>
 
         <label style={s.label} htmlFor="llm-prompt">
-          {t('llmBuilder.promptLabel')}
+          {t('llmBuilder.promptLabel', 'What do you want to calculate?')}
         </label>
         <textarea
           id="llm-prompt"
@@ -187,46 +262,100 @@ export function LlmGraphBuilderDialog({ open, onClose }: LlmGraphBuilderDialogPr
           style={s.textarea}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder={t('llmBuilder.promptPlaceholder')}
+          placeholder={t(
+            'llmBuilder.promptPlaceholder',
+            'e.g. "Build a beam deflection calculator with inputs for force, length, E and I"',
+          )}
           disabled={loading}
-          maxLength={2000}
+          maxLength={4000}
         />
-
-        {notConfigured && (
-          <div style={s.infoBox('info')}>
-            <strong>{t('llmBuilder.notConfiguredTitle')}</strong>
-            <br />
-            {t('llmBuilder.notConfiguredBody')}
-          </div>
-        )}
 
         {error && <div style={s.infoBox('error')}>{error}</div>}
 
-        {plan && (
+        {message && !applied && (
           <div>
-            <div style={s.infoBox('success')}>{t('llmBuilder.planReady')}</div>
+            <div style={s.infoBox('success')}>
+              {t('llmBuilder.planReady', 'Graph plan generated!')}
+            </div>
             <div style={s.planSummary}>
-              <strong>{t('llmBuilder.planSummaryLabel')}</strong>
+              <strong>{t('llmBuilder.planSummaryLabel', 'Plan')}</strong>
               <br />
-              {plan.summary}
+              {message}
+
+              {assumptions.length > 0 && (
+                <div style={{ marginTop: '0.5rem', opacity: 0.7, fontSize: '0.8rem' }}>
+                  <strong>{t('llmBuilder.assumptions', 'Assumptions')}:</strong>
+                  <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1.2rem' }}>
+                    {assumptions.map((a, i) => (
+                      <li key={i}>{a}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               <div style={s.planMeta}>
-                <span>{t('llmBuilder.nodeCount', { count: plan.nodes.length })}</span>
-                <span>{t('llmBuilder.edgeCount', { count: plan.edges.length })}</span>
+                <span>
+                  {t('llmBuilder.nodeCount', { count: nodeCount, defaultValue: '{{count}} blocks' })}
+                </span>
+                <span>
+                  {t('llmBuilder.edgeCount', {
+                    count: edgeCount,
+                    defaultValue: '{{count}} connections',
+                  })}
+                </span>
+                {groupCount > 0 && (
+                  <span>
+                    {t('llmBuilder.groupCount', {
+                      count: groupCount,
+                      defaultValue: '{{count}} groups',
+                    })}
+                  </span>
+                )}
+                {risk && <span style={s.riskBadge(risk.level)}>{risk.level} risk</span>}
               </div>
             </div>
+
+            {needsConfirm && risk && risk.reasons.length > 0 && (
+              <div style={s.infoBox('warning')}>
+                <strong>{t('llmBuilder.confirmWarning', 'Review before applying')}:</strong>
+                <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1.2rem', fontSize: '0.8rem' }}>
+                  {risk.reasons.map((r, i) => (
+                    <li key={i}>{r}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {applied && (
+          <div style={s.infoBox('success')}>
+            {t('llmBuilder.applied', 'Graph applied to canvas!')}
           </div>
         )}
 
         <div style={s.actions}>
           <button style={s.ghostBtn} onClick={handleClose} disabled={loading}>
-            {t('common.cancel')}
+            {t('common.cancel', 'Cancel')}
           </button>
+          {ops.length > 0 && !applied && (
+            <button
+              style={{ ...s.primaryBtn, background: 'var(--success, #22c55e)' }}
+              onClick={handleApply}
+            >
+              {t('llmBuilder.apply', 'Apply to Canvas')}
+            </button>
+          )}
           <button
             style={{ ...s.primaryBtn, opacity: loading || !prompt.trim() ? 0.5 : 1 }}
             onClick={() => void handleGenerate()}
             disabled={loading || !prompt.trim()}
           >
-            {loading ? t('llmBuilder.generating') : t('llmBuilder.generate')}
+            {loading
+              ? t('llmBuilder.generating', 'Generating...')
+              : ops.length > 0
+                ? t('llmBuilder.regenerate', 'Regenerate')
+                : t('llmBuilder.generate', 'Generate')}
           </button>
         </div>
       </div>

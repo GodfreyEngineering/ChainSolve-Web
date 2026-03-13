@@ -2078,6 +2078,15 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           }}
           saveAsRequested={saveAsRequested}
           onSaveAsRequestHandled={() => setSaveAsRequested(false)}
+          canvasId={activeCanvasId ?? undefined}
+          onApplyPatch={async (ops) => {
+            const snap = canvasRef.current?.getSnapshot()
+            if (!snap) return
+            const { applyPatchOps } = await import('../lib/aiCopilot/patchExecutor')
+            const result = applyPatchOps(ops, snap.nodes, snap.edges, true)
+            canvasRef.current?.setSnapshot(result.nodes, result.edges)
+            handleGraphChange(result.nodes, result.edges)
+          }}
         />
       )}
 

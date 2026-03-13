@@ -60,6 +60,7 @@ import { flattenMenusToActions, type MenuDef } from '../../lib/actions'
 import { computeSaveStatusLabel } from '../../lib/saveStatusLabel'
 import type { CanvasAreaHandle } from '../canvas/CanvasArea'
 import type { ThemeMode } from '../../contexts/ThemeContext'
+import type { AiPatchOp } from '../../lib/aiCopilot/types'
 import { ExportDialog } from './ExportDialog'
 
 // ── Props ────────────────────────────────────────────────────────────────────
@@ -95,6 +96,10 @@ export interface AppHeaderProps {
   /** L4-1: External trigger to open Save-As dialog (e.g. Ctrl+S in scratch mode). */
   saveAsRequested?: boolean
   onSaveAsRequestHandled?: () => void
+  /** 6.03: Active canvas ID for LLM graph builder. */
+  canvasId?: string
+  /** 6.03: Apply AI-generated patch ops to the canvas. */
+  onApplyPatch?: (ops: AiPatchOp[], summary: string) => void
 }
 
 export function AppHeader({
@@ -123,6 +128,8 @@ export function AppHeader({
   onRetryOffline,
   saveAsRequested,
   onSaveAsRequestHandled,
+  canvasId,
+  onApplyPatch,
 }: AppHeaderProps) {
   const { t } = useTranslation()
   const { toast } = useToast()
@@ -1129,7 +1136,13 @@ export function AppHeader({
       )}
       {llmBuilderOpen && (
         <Suspense fallback={null}>
-          <LazyLlmGraphBuilderDialog open onClose={() => setLlmBuilderOpen(false)} />
+          <LazyLlmGraphBuilderDialog
+            open
+            onClose={() => setLlmBuilderOpen(false)}
+            projectId={projectId}
+            canvasId={canvasId}
+            onApplyPatch={onApplyPatch ?? (() => {})}
+          />
         </Suspense>
       )}
       {templateManagerOpen && (
