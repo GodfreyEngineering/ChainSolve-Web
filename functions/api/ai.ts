@@ -63,24 +63,63 @@ const VALID_TASKS: AiTask[] = [
   'generate_theme',
 ]
 
-// ── Compact block catalog for system prompt ─────────────────────────────────
+// ── Comprehensive block catalog for system prompt (6.01) ────────────────────
 
-const BLOCK_CATALOG_DIGEST = `Available blockTypes (use ONLY these):
-INPUT: number, slider, variableSource, constant, material
-CONSTANTS: pi, euler, tau, phi
-MATH: add(a,b), subtract(a,b), multiply(a,b), divide(a,b), negate(a), abs(a), sqrt(a), power(base,exp), floor(a), ceil(a), round(a), mod(a,b), clamp(val,min,max)
+const BLOCK_CATALOG_DIGEST = `Available blockTypes (use ONLY these). Format: type(input_port_ids).
+
+INPUT: number(), slider(), variableSource(), constant(), material(), subscribe(), tableInput()
+OUTPUT: display(value), publish(value)
+MATH: add(a,b), subtract(a,b), multiply(a,b), divide(a,b), negate(a), abs(a), sqrt(a), power(base,exp), floor(a), ceil(a), round(a), mod(a,b), clamp(val,min,max), trunc(a), sign(a), ln(a), log10(a), exp(a), log_base(val,base), roundn(val,digits)
 TRIG: sin(a), cos(a), tan(a), asin(a), acos(a), atan(a), atan2(y,x), degToRad(deg), radToDeg(rad)
 LOGIC: greater(a,b), less(a,b), equal(a,b), ifthenelse(cond,then,else), max(a,b), min(a,b)
-OUTPUT: display(value)
-ENG.MECHANICS: eng.mechanics.hooke(F,k), eng.mechanics.power_work_time(W,t), eng.mechanics.kinetic_energy(m,v), eng.mechanics.potential_energy(m,g,h), eng.mechanics.momentum(m,v)
-ENG.FLUIDS: eng.fluids.reynolds(rho,v,D,mu), eng.fluids.bernoulli_pressure(rho,v,h), eng.fluids.flow_rate(A,v)
-ENG.SECTIONS: eng.sections.bending_stress(M,y,I), eng.sections.area_annulus(d_inner,d_outer)
-FIN.TVM: fin.tvm.compound_fv(PV,r,n,t), fin.tvm.rule_of_72(r)
-STATS: stats.desc.mean(c,x1..x6), stats.desc.stddev(c,x1..x6), stats.rel.linreg_slope(c,x1..x6,y1..y6)
+
+MECHANICS: eng.mechanics.v_from_uat(u,a,t), eng.mechanics.s_from_ut_a_t(u,t,a), eng.mechanics.v2_from_u2_as(u,a,s), eng.mechanics.force_ma(m,a), eng.mechanics.weight_mg(m,g), eng.mechanics.momentum_mv(m,v), eng.mechanics.kinetic_energy(m,v), eng.mechanics.potential_energy(m,g,h), eng.mechanics.work_Fs(F,s), eng.mechanics.power_work_time(W,t), eng.mechanics.power_Fv(F,v), eng.mechanics.torque_Fr(F,r), eng.mechanics.omega_from_rpm(rpm), eng.mechanics.rpm_from_omega(omega), eng.mechanics.power_rot_Tomega(T,omega), eng.mechanics.centripetal_acc(v,r), eng.mechanics.centripetal_force(m,v,r), eng.mechanics.friction_force(mu,N), eng.mechanics.impulse(F,dt)
+MATERIALS: eng.materials.stress_F_A(F,A), eng.materials.strain_dL_L(dL,L), eng.materials.youngs_modulus(sigma,epsilon), eng.materials.pressure_F_A(F,A), eng.materials.safety_factor(strength,stress), eng.materials.spring_force_kx(k,x), eng.materials.spring_energy(k,x)
+SECTIONS: eng.sections.area_circle(d), eng.sections.area_annulus(d_outer,d_inner), eng.sections.I_rect(b,h), eng.sections.I_circle(d), eng.sections.J_circle(d), eng.sections.bending_stress(M,y,I), eng.sections.torsional_shear(T,r,J)
+INERTIA: eng.inertia.solid_cylinder(m,r), eng.inertia.hollow_cylinder(m,r_inner,r_outer), eng.inertia.solid_sphere(m,r), eng.inertia.rod_center(m,L), eng.inertia.rod_end(m,L)
+FLUIDS: eng.fluids.flow_Q_from_Av(A,v), eng.fluids.velocity_from_QA(Q,A), eng.fluids.mass_flow(rho,Q), eng.fluids.reynolds(rho,v,D,mu), eng.fluids.dynamic_pressure(rho,v), eng.fluids.hagen_poiseuille_dp(mu,L,Q,D), eng.fluids.darcy_weisbach_dp(f,L,D,rho,v), eng.fluids.buoyancy(rho,V,g)
+THERMO: eng.thermo.ideal_gas_P(n,R,T,V), eng.thermo.ideal_gas_T(P,V,n,R), eng.thermo.heat_Q_mcDT(m,c,dT), eng.thermo.conduction_Qdot(k,A,dT,L), eng.thermo.convection_Qdot(h,A,dT), eng.thermo.carnot_efficiency(T_cold,T_hot), eng.thermo.thermal_expansion(alpha,L,dT)
+ELECTRICAL: eng.elec.ohms_V(I,R), eng.elec.power_VI(V,I), eng.elec.power_I2R(I,R), eng.elec.power_V2R(V,R), eng.elec.capacitance_Q_V(Q,V), eng.elec.series_resistance(R1,R2), eng.elec.parallel_resistance(R1,R2), eng.elec.RC_tau(R,C), eng.elec.RL_tau(R,L), eng.elec.RLC_f0(L,C), eng.elec.RLC_Q(R,L,C), eng.elec.V_divider(Vin,R1,R2), eng.elec.I_divider(Iin,R1,R2), eng.elec.Z_cap(f,C), eng.elec.Z_ind(f,L), eng.elec.filter_fc(R,C), eng.elec.transformer_v2(V1,N1,N2), eng.elec.three_phase_P(VL,IL,pf), eng.elec.diode_shockley(Is,V,eta,Vt)
+CONVERSIONS: eng.conv.deg_to_rad(deg), eng.conv.rad_to_deg(rad), eng.conv.mm_to_m(mm), eng.conv.m_to_mm(m), eng.conv.bar_to_pa(bar), eng.conv.pa_to_bar(Pa), eng.conv.lpm_to_m3s(lpm), eng.conv.m3s_to_lpm(m3s), unit_convert(value)
+
+FINANCE TVM: fin.tvm.simple_interest(P,r,t), fin.tvm.compound_fv(PV,r,n,t), fin.tvm.compound_pv(FV,r,n,t), fin.tvm.continuous_fv(PV,r,t), fin.tvm.annuity_pv(PMT,r,n), fin.tvm.annuity_fv(PMT,r,n), fin.tvm.annuity_pmt(PV,r,n), fin.tvm.npv(r,c,cf0,cf1,cf2,cf3,cf4,cf5), fin.tvm.rule_of_72(r), fin.tvm.effective_rate(r,n)
+FINANCE RETURNS: fin.returns.pct_return(v0,v1), fin.returns.log_return(v0,v1), fin.returns.cagr(v0,v1,t), fin.returns.sharpe(ret,rf,sigma), fin.returns.weighted_avg(c,x1..x6,y1..y6), fin.returns.portfolio_variance(w1,w2,s1,s2,rho)
+FINANCE DEPR: fin.depr.straight_line(cost,salvage,life), fin.depr.declining_balance(cost,salvage,life,period)
+FINANCE OPTIONS: fin.options.bs_call(S,K,T,r,sigma), fin.options.bs_put(S,K,T,r,sigma), fin.options.bs_delta(S,K,T,r,sigma), fin.options.bs_gamma(S,K,T,r,sigma), fin.options.bs_vega(S,K,T,r,sigma), fin.options.kelly(p_win,b), fin.options.var_hist(returns,conf), fin.options.cvar_hist(returns,conf), fin.options.bond_duration(coupon,face,ytm,n), fin.options.dcf(fcf,wacc,g,n)
+
+DESCRIPTIVE STATS: stats.desc.mean(c,x1..x6), stats.desc.median(c,x1..x6), stats.desc.mode_approx(c,x1..x6), stats.desc.range(c,x1..x6), stats.desc.variance(c,x1..x6), stats.desc.stddev(c,x1..x6), stats.desc.sum(c,x1..x6), stats.desc.geo_mean(c,x1..x6), stats.desc.zscore(x,mu,sigma)
+RELATIONSHIPS: stats.rel.covariance(c,x1..x6,y1..y6), stats.rel.correlation(c,x1..x6,y1..y6), stats.rel.linreg_slope(c,x1..x6,y1..y6), stats.rel.linreg_intercept(c,x1..x6,y1..y6)
+COMBINATORICS: prob.comb.factorial(n), prob.comb.permutation(n,k), prob.comb.combination(n,k)
+DISTRIBUTIONS: prob.dist.binomial_pmf(n,k,p), prob.dist.poisson_pmf(k,lambda), prob.dist.exponential_pdf(x,lambda), prob.dist.exponential_cdf(x,lambda), prob.dist.normal_pdf(x,mu,sigma), prob.dist.normal_cdf(x,mu,sigma), prob.dist.normal_inv_cdf(p,mu,sigma), prob.dist.t_pdf(x,df), prob.dist.t_cdf(x,df), prob.dist.chi2_pdf(x,k), prob.dist.chi2_cdf(x,k), prob.dist.f_pdf(x,d1,d2), prob.dist.f_cdf(x,d1,d2), prob.dist.poisson_cdf(k,lambda), prob.dist.binomial_cdf(k,n,p), prob.dist.beta_pdf(x,a,b), prob.dist.beta_cdf(x,a,b), prob.dist.gamma_pdf(x,alpha,beta), prob.dist.weibull_pdf(x,k,lambda)
+UTILITIES: util.round.to_dp(x,dp), util.pct.to_decimal(pct)
+
+CHEMICAL ENG: chem.ideal_gas_n(P,V,R,T), chem.antoine_vp(A,B,C,T), chem.raoults_partial(x,Psat), chem.equilibrium_K(dG,R,T), chem.arrhenius_rate(A,Ea,R,T), chem.heat_reaction(H_prod,H_react), chem.mole_fraction(n_comp,n_total), chem.ficks_flux(D,dC_dx), chem.CSTR_conv(k,tau), chem.enthalpy_sensible(Cp,T1,T2)
+STRUCTURAL ENG: struct.beam_deflect_ss(P,L,E,I), struct.beam_deflect_cantilever(P,L,E,I), struct.beam_moment_ss(P,a,b,L), struct.euler_buckling(E,I,L,K), struct.von_mises(sx,sy,txy), struct.combined_stress(s_ax,s_bend), struct.steel_check(sigma,Fy,phi), struct.bearing_capacity(c,gamma,D,B,Nc,Nq,Ngamma), struct.concrete_moment_aci(fc,b,d,As,fy)
+AEROSPACE: aero.ISA_T(h), aero.ISA_P(h), aero.ISA_rho(h), aero.ISA_a(h), aero.mach_from_v(v,a), aero.dynamic_q(rho,v), aero.lift(CL,q,S), aero.drag(CD,q,S), aero.tsfc(thrust,fuel_flow), aero.tsiolkovsky(Isp,g0,m0,mf), aero.orbital_v(GM,r), aero.escape_v(GM,r), aero.hohmann_dv1(GM,r1,r2), aero.hohmann_dv2(GM,r1,r2)
+CONTROL SYSTEMS: ctrl.step_1st_order(K,tau,t), ctrl.step_2nd_order(K,wn,zeta,t), ctrl.pid_output(Kp,Ki,Kd,error,integral,dt), ctrl.rms(y), ctrl.peak2peak(y), ctrl.settling_time_2pct(tau), ctrl.overshoot_2nd(zeta), ctrl.natural_freq(k,m), ctrl.damping_ratio(c,k,m), ctrl.bode_mag_1st(K,omega,tau)
+LIFE SCIENCES: bio.michaelis_menten(Vmax,Km,S), bio.hill_eq(n,Kd,L), bio.logistic_growth(r,K,N0,t), bio.exp_decay(N0,lambda,t), bio.half_life(lambda), bio.drug_1cmp(D,V,k,t), bio.henderson_hasselbalch(pKa,A,HA), bio.nernst(R,T,z,F,C_out,C_in), bio.BMI(mass_kg,height_m), bio.BSA_dubois(W_kg,H_cm)
+DATE/TIME: date.from_ymd(y,m,d), date.year(day), date.month(day), date.day_of_month(day), date.days_between(d1,d2), date.add_days(d,n), date.is_leap_year(y), date.days_in_month(m,y)
+TEXT: num_to_text(value), text_concat(a,b), text_length(value), text_to_num(text)
+
+LIST OPS: vectorLength(vec), vectorSum(vec), vectorMean(vec), vectorMin(vec), vectorMax(vec), vectorSort(vec), vectorReverse(vec), vectorSlice(vec,start,end), vectorConcat(a,b), vectorMap(vec,scalar)
+TABLE OPS: table_extract_col(table,index)
+LOOKUP: lookup.1d(x_vec,y_vec,x), lookup.2d(x_vec,y_vec,z_mat,x,y)
+INTERVAL ARITHMETIC: interval_from(center,half_width), interval_from_bounds(lo,hi), interval_lo(interval), interval_hi(interval), interval_mid(interval), interval_width(interval), interval_contains(interval,x), interval_add(a,b), interval_sub(a,b), interval_mul(a,b), interval_div(a,b), interval_pow(a,n)
+SIGNAL PROCESSING: signal.fft_magnitude(y), signal.fft_power(y), signal.fft_freq_bins(n,sample_rate), signal.window_hann(n), signal.window_hamming(n), signal.window_blackman(n), signal.filter_lowpass_fir(y,cutoff_norm,taps), signal.filter_highpass_fir(y,cutoff_norm,taps)
+COMPLEX NUMBERS: complex_from(re,im), complex_re(z), complex_im(z), complex_mag(z), complex_arg(z), complex_conj(z), complex_add(z1,z2), complex_mul(z1,z2), complex_div(z1,z2), complex_exp(z), complex_ln(z), complex_pow(z,n)
+MATRIX OPS: matrix_from_table(table), matrix_to_table(matrix), matrix_multiply(a,b), matrix_transpose(matrix), matrix_inverse(matrix), matrix_det(matrix), matrix_trace(matrix), matrix_solve(a,b)
+PLOT: xyPlot(data), histogram(data), barChart(data), heatmap(data), listTable(data)
+
+OPTIMIZATION: optim.designVariable(), optim.objectiveFunction(value), optim.gradientDescent(objective,variables), optim.geneticAlgorithm(objective,variables), optim.nelderMead(objective,variables), optim.convergencePlot(data), optim.resultsTable(data), optim.parametricSweep(objective,variable), optim.monteCarlo(objective,variables), optim.sensitivity(objective,variables), optim.doe(variables)
+MACHINE LEARNING: ml.trainTestSplit(data), ml.linearRegression(trainX,trainY), ml.polynomialRegression(trainX,trainY), ml.knnClassifier(trainX,trainY), ml.decisionTree(trainX,trainY), ml.predict(model,data), ml.mse(actual,predicted), ml.r2(actual,predicted), ml.confusionMatrix(actual,predicted)
+NEURAL NETWORKS: nn.input(), nn.dense(input), nn.conv1d(input), nn.dropout(input), nn.activation(input), nn.sequential(layers), nn.trainer(model,trainX,trainY), nn.predict(model,data), nn.export(model)
 
 Port naming: binary ops use a,b. All blocks output via "out" handle.
-Edge sourceHandle is always "out". targetHandle is the port id (e.g. "a", "b", "value").
+Edge sourceHandle is always "out". Edge targetHandle is the port id (e.g. "a", "b", "value").
 Node IDs: use "ai_node_1", "ai_node_2", etc. Edge IDs: use "ai_edge_1", etc.
+For stats blocks with c,x1..x6: c = count of values, x1..x6 = values. For relationship blocks, also y1..y6.
+For "number" nodes, set data.value. For "slider" nodes, set data.value, data.min, data.max, data.step.
+For "constant" nodes, set data.selectedConstantId (e.g. "pi", "euler", "tau", "phi", or any constant from the catalog).
 
 ADVANCED OPS (beyond addNode/addEdge/removeNode/removeEdge/updateNodeData/setInputBinding/createVariable/updateVariable):
 
