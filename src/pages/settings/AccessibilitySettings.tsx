@@ -107,6 +107,25 @@ export function AccessibilitySettings() {
           </div>
         </div>
       </label>
+
+      {/* 6.08: AI opt-out */}
+      <label style={rowStyle}>
+        <input
+          type="checkbox"
+          checked={prefs.aiOptOut}
+          onChange={(e) => prefs.update({ aiOptOut: e.target.checked })}
+          style={{ accentColor: 'var(--primary)' }}
+        />
+        <div>
+          <div style={labelStyle}>{t('settings.aiOptOut', 'Opt out of AI Copilot')}</div>
+          <div style={hintStyle}>
+            {t(
+              'settings.aiOptOutHint',
+              'When enabled, no canvas data is sent to external AI services. The AI Copilot panel will be disabled.',
+            )}
+          </div>
+        </div>
+      </label>
     </div>
   )
 }

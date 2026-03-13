@@ -87,6 +87,8 @@ export interface UserPreferences {
   analyticsOptIn: boolean
   /** Opt-in to crash reporting. */
   crashReportingOptIn: boolean
+  /** 6.08: Opt out of AI Copilot — no canvas data sent to OpenAI. */
+  aiOptOut: boolean
 
   // KB-01: User-editable keyboard shortcuts
   /** Partial overrides of DEFAULT_KEYBINDINGS. Only changed bindings are stored. */
@@ -139,6 +141,7 @@ const DEFAULTS: UserPreferences = {
 
   analyticsOptIn: true,
   crashReportingOptIn: true,
+  aiOptOut: false,
 
   keybindings: {},
 }

@@ -22,6 +22,7 @@ import type { AiMode, AiTask, AiPatchOp, RiskAssessment } from '../../lib/aiCopi
 import { assessRisk, requiresConfirmation } from '../../lib/aiCopilot/riskScoring'
 import { sendCopilotRequest, sendCopilotRequestStreaming } from '../../lib/aiCopilot/aiService'
 import { getEntitlements, type Plan } from '../../lib/entitlements'
+import { usePreferencesStore } from '../../stores/preferencesStore'
 import { AI_COPILOT_WINDOW_ID } from '../../lib/aiCopilot/constants'
 export { AI_COPILOT_WINDOW_ID }
 
@@ -261,7 +262,8 @@ export function AiCopilotWindow({
   const transcriptRef = useRef<HTMLDivElement>(null)
 
   const ent = getEntitlements(plan)
-  const canUse = ent.canUseAi
+  const aiOptOut = usePreferencesStore((s) => s.aiOptOut)
+  const canUse = ent.canUseAi && !aiOptOut
   const isEnterprise = plan === 'enterprise'
 
   const triggerSuggestion = useCallback(
@@ -504,28 +506,46 @@ export function AiCopilotWindow({
     [handleSend],
   )
 
-  // ── Locked state for Free users ──────────────────────────────────────────
+  // ── Locked state for Free users or opted-out users ──────────────────────
   if (!canUse) {
+    const isOptedOut = aiOptOut && ent.canUseAi
     const lockedContent = (
       <div style={s.lockedOverlay}>
-        <div
-          style={{
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            letterSpacing: '0.05em',
-            padding: '0.35rem 0.9rem',
-            borderRadius: 6,
-            border: '1px solid rgba(255,255,255,0.15)',
-            opacity: 0.5,
-          }}
-        >
-          PRO
-        </div>
-        <strong>{t('ai.upgradeTitle')}</strong>
-        <p style={{ fontSize: '0.84rem', opacity: 0.7, margin: 0 }}>{t('ai.upgradeBody')}</p>
-        <button style={s.sendBtn} onClick={onUpgrade}>
-          {t('ai.upgradeTitle')}
-        </button>
+        {isOptedOut ? (
+          <>
+            <strong>{t('ai.optedOutTitle', 'AI Copilot Disabled')}</strong>
+            <p style={{ fontSize: '0.84rem', opacity: 0.7, margin: 0 }}>
+              {t(
+                'ai.optedOutBody',
+                'You have opted out of AI features in Privacy settings. No canvas data is sent to external services.',
+              )}
+            </p>
+            <p style={{ fontSize: '0.72rem', opacity: 0.5, margin: 0 }}>
+              {t('ai.optedOutHint', 'To re-enable, go to Settings > Privacy and turn off "Opt out of AI".')}
+            </p>
+          </>
+        ) : (
+          <>
+            <div
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                letterSpacing: '0.05em',
+                padding: '0.35rem 0.9rem',
+                borderRadius: 6,
+                border: '1px solid rgba(255,255,255,0.15)',
+                opacity: 0.5,
+              }}
+            >
+              PRO
+            </div>
+            <strong>{t('ai.upgradeTitle')}</strong>
+            <p style={{ fontSize: '0.84rem', opacity: 0.7, margin: 0 }}>{t('ai.upgradeBody')}</p>
+            <button style={s.sendBtn} onClick={onUpgrade}>
+              {t('ai.upgradeTitle')}
+            </button>
+          </>
+        )}
       </div>
     )
     if (docked) return lockedContent

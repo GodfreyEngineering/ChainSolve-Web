@@ -42,6 +42,26 @@ For enterprise customers requiring additional guarantees:
 
 > Note: ChainSolve does not currently have a ZDR agreement with OpenAI. Enterprise customers with strict data requirements should contact us to discuss options.
 
+## User opt-out
+
+Users can opt out of AI features entirely via **Settings > Accessibility & Privacy > Opt out of AI Copilot**. When opted out:
+
+- The AI Copilot panel is disabled and shows an opt-out notice.
+- No canvas data, prompts, or context is sent to OpenAI or any external AI service.
+- The preference is stored locally in the browser (`localStorage`) under `cs:prefs`.
+- The setting takes effect immediately — no page reload required.
+
+## Enterprise AI controls
+
+Enterprise organisations can control AI usage via `ai_org_policies`:
+
+- **`ai_enabled`** — disable AI Copilot for all users in the organisation.
+- **`ai_allowed_modes`** — restrict which modes (plan/edit/bypass) are available.
+- **`allow_bypass`** — enable or disable the auto-apply bypass mode.
+- **`monthly_token_limit_per_seat`** — per-user monthly token budget.
+
+When an enterprise admin disables AI, the panel is hidden for all org members regardless of their personal preference.
+
 ## Server-side proxy
 
 All AI traffic is routed through our Cloudflare Pages Function (`POST /api/ai`). The browser never communicates directly with OpenAI. The API key is stored as a Cloudflare Pages secret and is never exposed to the client.
