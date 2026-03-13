@@ -40,6 +40,7 @@ import {
   useOnViewportChange,
   NodeToolbar,
   Position as RFPosition,
+  SelectionMode,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
@@ -3062,6 +3063,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         nodesConnectable={!readOnly && !locked}
                         nodesDraggable={!readOnly && !locked && !panMode}
                         elementsSelectable={!readOnly}
+                        selectionOnDrag={!readOnly && !locked && !panMode}
+                        selectionMode={SelectionMode.Partial}
                         panOnDrag={panMode || locked ? [0, 1, 2] : [1, 2]}
                         snapToGrid={snapToGrid}
                         snapGrid={[16, 16]}
