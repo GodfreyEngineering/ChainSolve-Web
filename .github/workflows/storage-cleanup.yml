@@ -1,0 +1,153 @@
+# ============================================================
+# storage-cleanup.yml — Weekly orphaned storage file cleanup.
+#
+# Runs every Sunday at 04:00 UTC. Lists files in Supabase Storage
+# buckets and removes those not referenced by any database record.
+#
+# Buckets checked:
+#   - projects: files referenced by canvases.storage_path or
+#               project_assets.storage_path
+#   - uploads:  files referenced by profiles.avatar_url
+#
+# Required secrets:
+#   SUPABASE_URL              — Project URL (https://xxx.supabase.co)
+#   SUPABASE_SERVICE_ROLE_KEY — Service role key (full access)
+#
+# Can also be triggered manually. Dry-run mode by default for
+# manual triggers (set DRY_RUN=false to actually delete).
+# ============================================================
+
+name: Storage cleanup
+
+on:
+  schedule:
+    - cron: '0 4 * * 0' # 04:00 UTC every Sunday
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (list but do not delete)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  cleanup:
+    name: Clean orphaned storage files
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # Scheduled runs always delete; manual runs respect the input
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run || 'false' }}
+
+    steps:
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Clean orphaned project files
+        run: |
+          echo "=== Checking projects bucket ==="
+          echo "DRY_RUN=$DRY_RUN"
+
+          # Get all storage_path values from canvases and project_assets
+          CANVAS_PATHS=$(curl -s \
+            "${SUPABASE_URL}/rest/v1/canvases?select=storage_path&storage_path=not.is.null" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            | jq -r '.[].storage_path // empty')
+
+          ASSET_PATHS=$(curl -s \
+            "${SUPABASE_URL}/rest/v1/project_assets?select=storage_path&storage_path=not.is.null" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            | jq -r '.[].storage_path // empty')
+
+          # Combine into a set for fast lookup
+          REFERENCED=$(echo -e "${CANVAS_PATHS}\n${ASSET_PATHS}" | sort -u | grep -v '^$' || true)
+          REF_COUNT=$(echo "$REFERENCED" | grep -c . || echo "0")
+          echo "Referenced paths in DB: $REF_COUNT"
+
+          # List all files in the projects bucket
+          STORAGE_FILES=$(curl -s \
+            "${SUPABASE_URL}/storage/v1/object/list/projects" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{"prefix":"","limit":1000,"sortBy":{"column":"name","order":"asc"}}' \
+            | jq -r '.[].name // empty' 2>/dev/null || true)
+
+          ORPHAN_COUNT=0
+          DELETE_COUNT=0
+
+          for file in $STORAGE_FILES; do
+            if ! echo "$REFERENCED" | grep -qF "$file"; then
+              ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
+              echo "  Orphaned: $file"
+              if [ "$DRY_RUN" = "false" ]; then
+                curl -s -X DELETE \
+                  "${SUPABASE_URL}/storage/v1/object/projects/${file}" \
+                  -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+                  -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" > /dev/null
+                DELETE_COUNT=$((DELETE_COUNT + 1))
+              fi
+            fi
+          done
+
+          echo "Orphaned files found: $ORPHAN_COUNT"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "(Dry run — no files deleted)"
+          else
+            echo "Files deleted: $DELETE_COUNT"
+          fi
+
+      - name: Clean orphaned avatar files
+        run: |
+          echo "=== Checking uploads bucket (avatars) ==="
+
+          # Get all avatar_url values from profiles
+          AVATAR_PATHS=$(curl -s \
+            "${SUPABASE_URL}/rest/v1/profiles?select=avatar_url&avatar_url=not.is.null" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            | jq -r '.[].avatar_url // empty' | grep -v '^$' | sort -u || true)
+
+          REF_COUNT=$(echo "$AVATAR_PATHS" | grep -c . || echo "0")
+          echo "Referenced avatar paths: $REF_COUNT"
+
+          # List files in uploads bucket
+          STORAGE_FILES=$(curl -s \
+            "${SUPABASE_URL}/storage/v1/object/list/uploads" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{"prefix":"","limit":1000,"sortBy":{"column":"name","order":"asc"}}' \
+            | jq -r '.[].name // empty' 2>/dev/null || true)
+
+          ORPHAN_COUNT=0
+          DELETE_COUNT=0
+
+          for file in $STORAGE_FILES; do
+            if ! echo "$AVATAR_PATHS" | grep -qF "$file"; then
+              ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
+              echo "  Orphaned: $file"
+              if [ "$DRY_RUN" = "false" ]; then
+                curl -s -X DELETE \
+                  "${SUPABASE_URL}/storage/v1/object/uploads/${file}" \
+                  -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+                  -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" > /dev/null
+                DELETE_COUNT=$((DELETE_COUNT + 1))
+              fi
+            fi
+          done
+
+          echo "Orphaned avatar files found: $ORPHAN_COUNT"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "(Dry run — no files deleted)"
+          else
+            echo "Files deleted: $DELETE_COUNT"
+          fi
