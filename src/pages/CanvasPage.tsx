@@ -105,7 +105,6 @@ import { validateProjectName } from '../lib/validateProjectName'
 import type { CaptureResult } from '../lib/pdf/captureCanvasImage'
 import type { TableExport } from '../lib/xlsx/xlsxModel'
 import { useStatusBarStore } from '../stores/statusBarStore'
-import { RightSidebar } from '../components/app/RightSidebar'
 
 const PerfHud = lazy(() =>
   import('../components/PerfHud.tsx').then((m) => ({ default: m.PerfHud })),
@@ -209,7 +208,6 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const resetProject = useProjectStore((s) => s.reset)
 
   // ── Right sidebar ─────────────────────────────────────────────────────────
-  const inspectedNodeId = useStatusBarStore((s) => s.inspectedNodeId)
 
   // ── Canvases store selectors ───────────────────────────────────────────────
   const canvases = useCanvasesStore((s) => s.canvases)
@@ -2245,7 +2243,6 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                 onExplainNode={(nodeId) => openAiPanel(`Explain node ${nodeId}`)}
                 onInsertFromPrompt={() => openAiPanel()}
                 onNodeDragStop={handleNodeDragStop(activeCanvasId)}
-                sidePanel={<RightSidebar selectedNodeId={inspectedNodeId} />}
               />
             }
             secondaryContent={
@@ -2295,7 +2292,6 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
             onExplainIssues={() => openAiPanel()}
             onExplainNode={(nodeId) => openAiPanel(`Explain node ${nodeId}`)}
             onInsertFromPrompt={() => openAiPanel()}
-            sidePanel={<RightSidebar selectedNodeId={inspectedNodeId} />}
           />
         )}
         {/* G8-1: AI Copilot docked right panel — always visible, collapsed by default */}
