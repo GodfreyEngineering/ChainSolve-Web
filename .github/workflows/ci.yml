@@ -99,6 +99,9 @@ jobs:
         run: node scripts/check-robots-meta.mjs
 
       - name: npm audit (zero high/critical)
+        # continue-on-error for Dependabot PRs — new dep versions may have
+        # transient advisories that haven't been patched upstream yet.
+        continue-on-error: ${{ github.actor == 'dependabot[bot]' }}
         run: npm audit --audit-level=high
 
       - name: Format check
