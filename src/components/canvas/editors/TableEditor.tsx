@@ -122,7 +122,7 @@ function colLettersToIndex(letters: string, columns: string[]): number {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export function TableEditor({ columns, rows, onChange, columnTypes, onColumnTypesChange }: TableEditorProps) {
+export function TableEditor({ columns, rows, onChange, columnTypes: _columnTypes, onColumnTypesChange: _onColumnTypesChange }: TableEditorProps) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
 

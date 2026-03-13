@@ -10,6 +10,7 @@ import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { useComputedValue } from '../../../contexts/ComputedContext'
 import { useFormatValue } from '../../../hooks/useFormatValue'
+import { mkScalar } from '../../../engine/value'
 import { usePublishedOutputsStore } from '../../../stores/publishedOutputsStore'
 import type { NodeData } from '../../../blocks/registry'
 import { NODE_STYLES as s } from './nodeStyles'
@@ -92,7 +93,7 @@ function SubscribeNodeInner({ id, data, selected }: NodeProps) {
           <option value="">{t('publishSubscribe.selectChannel')}</option>
           {channelNames.map((name) => (
             <option key={name} value={name}>
-              {name} = {formatValue(channels[name]?.value ?? 0)}
+              {name} = {formatValue(channels[name]?.value !== undefined ? mkScalar(channels[name].value) : undefined)}
             </option>
           ))}
         </select>

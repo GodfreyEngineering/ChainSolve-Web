@@ -1829,6 +1829,7 @@
     "selectUnit": "Select unit",
     "search": "Search units…",
     "noResults": "No units found",
+    "suggested": "Suggested",
     "dim": {
       "length": "Length",
       "mass": "Mass",

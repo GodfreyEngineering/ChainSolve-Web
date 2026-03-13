@@ -20,6 +20,9 @@ const proEntitlements: Entitlements = {
   canUseListBlocks: true,
   canUseGraphTableOutputs: true,
   canImportFiles: true,
+  maxNNParameters: 100_000,
+  maxNNEpochs: 500,
+  aiDailyRequestLimit: Infinity,
 }
 
 /** Minimal free entitlements with restricted capabilities. */
@@ -39,6 +42,9 @@ const freeEntitlements: Entitlements = {
   canUseListBlocks: false,
   canUseGraphTableOutputs: false,
   canImportFiles: false,
+  maxNNParameters: 0,
+  maxNNEpochs: 0,
+  aiDailyRequestLimit: 0,
 }
 
 /** Default org policy — everything allowed. */

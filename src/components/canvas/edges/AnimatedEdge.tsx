@@ -68,7 +68,7 @@ function AnimatedEdgeInner({
   selected,
 }: EdgeProps) {
   const sourceValue = useComputedValue(source)
-  const { edgesAnimated, edgeBadgesEnabled } = useCanvasSettings()
+  const { edgeBadgesEnabled } = useCanvasSettings()
   const edgeType = usePreferencesStore((s) => s.canvasEdgeType)
   const edgeWidth = usePreferencesStore((s) => s.canvasEdgeWidth)
   const mismatch = useEdgeUnitMismatch(source, target)

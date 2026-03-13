@@ -9,6 +9,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePublishedOutputsStore } from '../../stores/publishedOutputsStore'
 import { useFormatValue } from '../../hooks/useFormatValue'
+import { mkScalar } from '../../engine/value'
 
 export function ChannelsPanel() {
   const { t } = useTranslation()
@@ -53,7 +54,7 @@ export function ChannelsPanel() {
               fontFamily: "ui-monospace, 'Cascadia Code', monospace",
             }}
           >
-            {formatValue(ch.value)}
+            {formatValue(mkScalar(ch.value))}
           </span>
           <span style={{ ...cellStyle, flex: 1.5, opacity: 0.5 }}>
             {ch.sourceCanvasId.slice(0, 8)}

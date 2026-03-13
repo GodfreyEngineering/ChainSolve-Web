@@ -275,7 +275,7 @@ function UnitDropdown({
         {suggestedDim && suggestedDim.units.length > 0 && (
           <div key="__suggested">
             <div style={{ ...groupLabelStyle, color: 'var(--primary)', opacity: 0.7 }}>
-              {t('units.suggested', 'Suggested')} — {t(suggestedDim.labelKey)}
+              {t('units.suggested')} — {t(suggestedDim.labelKey)}
             </div>
             {suggestedDim.units.map((u) => (
               <button

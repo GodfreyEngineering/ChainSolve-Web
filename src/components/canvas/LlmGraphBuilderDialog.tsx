@@ -189,7 +189,7 @@ export function LlmGraphBuilderDialog({
   const nodeCount = ops.filter((o) => o.op === 'addNode').length
   const edgeCount = ops.filter((o) => o.op === 'addEdge').length
   const groupCount = ops.filter((o) => o.op === 'createGroup').length
-  const needsConfirm = risk ? requiresConfirmation('edit', risk) : false
+  const needsConfirm = risk ? requiresConfirmation(risk, 'edit', false) : false
 
   async function handleGenerate() {
     if (!projectId || !canvasId) {

@@ -5,7 +5,7 @@
  * horizontally or vertically if it would overflow the screen edge.
  */
 
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 
 const MARGIN = 8
 

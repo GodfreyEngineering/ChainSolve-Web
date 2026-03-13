@@ -594,6 +594,9 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   signal: 'Signal Processing',
   complex: 'Complex Numbers',
   matrix: 'Matrix Ops',
+  optimization: 'Optimization',
+  machineLearning: 'Machine Learning',
+  neuralNetworks: 'Neural Networks',
 }
 
 // ── Block taxonomy (G3-1: 3 main categories with subcategories) ─────────────

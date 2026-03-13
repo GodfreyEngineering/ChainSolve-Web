@@ -602,7 +602,7 @@ export function Inspector({
                 <select
                   style={{ ...inp, width: '100%' }}
                   value={(nd.tableOutputMode as string) ?? 'columns'}
-                  onChange={(e) => update({ tableOutputMode: e.target.value })}
+                  onChange={(e) => update({ tableOutputMode: e.target.value as 'columns' | 'table' | 'row' | 'column' })}
                   title={t('inspector.tableOutputMode', 'Output Mode')}
                 >
                   <option value="columns">{t('inspector.tableMode.columns', 'All Columns (one port each)')}</option>
