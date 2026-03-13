@@ -17,10 +17,15 @@ try {
   // intentionally swallowed
 }
 
+// 7.07: Check cookie consent before initialising tracking.
+import { getCookieConsent } from './components/CookieConsent.tsx'
+const _cookieConsent = getCookieConsent()
+
 // DEV-04: Initialise Sentry error tracking if a DSN is configured.
 // Must run before any other error handlers so it captures boot-time errors.
+// 7.07: Skip Sentry if the user declined cookie consent.
 try {
-  if (SENTRY_DSN) {
+  if (SENTRY_DSN && _cookieConsent !== 'declined') {
     Sentry.init({
       dsn: SENTRY_DSN,
       integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
@@ -71,6 +76,7 @@ import { createWorkerPool, type WorkerPoolAPI } from './engine/workerPool.ts'
 import { BrowserRouter } from 'react-router-dom'
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx'
 import { OfflineBanner } from './components/OfflineBanner.tsx'
+import { CookieConsentBanner } from './components/CookieConsent.tsx'
 import { registerServiceWorker, captureInstallPrompt } from './lib/serviceWorker.ts'
 import { initWebVitals } from './observability/webVitals.ts'
 import { useCanvasAppearance } from './hooks/useCanvasAppearance.ts'
@@ -141,6 +147,9 @@ function Root() {
 
   return (
     <>
+      {/* 7.07: Cookie consent banner — shown on first visit */}
+      <CookieConsentBanner />
+
       {/* UI-PERF-04: Persistent offline banner — visible when browser is offline or
           a save was queued while offline. */}
       <OfflineBanner />
