@@ -24,8 +24,8 @@ function EngineStatusIcon({ status }: { status: EngineStatus }) {
 export function StatusBar() {
   const { t, i18n } = useTranslation()
   const engineStatus = useStatusBarStore((s) => s.engineStatus)
-  const nodeCount = useStatusBarStore((s) => s.nodeCount)
-  const edgeCount = useStatusBarStore((s) => s.edgeCount)
+  const blockCount = useStatusBarStore((s) => s.nodeCount)
+  const chainCount = useStatusBarStore((s) => s.edgeCount)
   const zoomPercent = useStatusBarStore((s) => s.zoomPercent)
   const snapToGrid = useStatusBarStore((s) => s.snapToGrid)
 
@@ -51,11 +51,11 @@ export function StatusBar() {
           <EngineStatusIcon status={engineStatus} />
         </span>
         <span className="statusbar-item">
-          {nodeCount} {t('statusBar.nodes')}
+          {blockCount} {t('statusBar.blocks')}
         </span>
         <span className="statusbar-sep" aria-hidden="true" />
         <span className="statusbar-item">
-          {edgeCount} {t('statusBar.edges')}
+          {chainCount} {t('statusBar.chains')}
         </span>
       </div>
       {exportProgress && (

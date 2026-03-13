@@ -2162,8 +2162,8 @@
     "browseHint": "Alle Themen durchsuchen oder tippen Sie, um zu suchen."
   },
   "statusBar": {
-    "nodes": "Knoten",
-    "edges": "Kanten",
+    "blocks": "Blöcke",
+    "chains": "Ketten",
     "engineIdle": "Bereit",
     "engineComputing": "Berechnung",
     "engineError": "Fehler",

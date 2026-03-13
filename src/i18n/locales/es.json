@@ -2162,8 +2162,8 @@
     "browseHint": "Explorar todos los temas o escriba para buscar."
   },
   "statusBar": {
-    "nodes": "nodos",
-    "edges": "aristas",
+    "blocks": "bloques",
+    "chains": "cadenas",
     "engineIdle": "Inactivo",
     "engineComputing": "Calculando",
     "engineError": "Error",

@@ -2162,8 +2162,8 @@
     "errorDelete": "Failed to delete saved group."
   },
   "statusBar": {
-    "nodes": "צמתים",
-    "edges": "קשתות",
+    "blocks": "בלוקים",
+    "chains": "שרשראות",
     "engineIdle": "מוכן",
     "engineComputing": "מחשב",
     "engineError": "שגיאה",

@@ -2208,8 +2208,8 @@
     "bottomPanel": "Bottom Panel"
   },
   "statusBar": {
-    "nodes": "nodes",
-    "edges": "edges",
+    "blocks": "blocks",
+    "chains": "chains",
     "engineIdle": "Idle",
     "engineComputing": "Computing",
     "engineError": "Error",
