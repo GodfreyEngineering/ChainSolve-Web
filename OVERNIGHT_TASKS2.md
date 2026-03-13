@@ -61,7 +61,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **2.10 Canvas data corruption prevention** — Add a `canvasSchema.ts` validation step on every save: before uploading to storage, validate the graph JSON against the schema. Reject saves with invalid data (log error, keep last known good). Add a `repairCanvas()` function that strips invalid nodes/edges and logs what was removed. Files: `src/lib/canvasSchema.ts`, `src/lib/canvases.ts`. Verify: corrupt a canvas JSON manually → repair function fixes it, save succeeds with clean data.
 
-- [ ] **2.11 i18next console warning cleanup** — The `i18next is maintained with support from Locize` message is a startup banner. Suppress it by setting `i18next.init({ ... })` option `logLevel: 'warn'` or filtering the specific message in `src/i18n/config.ts`. Files: `src/i18n/config.ts`. Verify: open app → no i18next marketing banner in console.
+- [x] **2.11 i18next console warning cleanup** — The `i18next is maintained with support from Locize` message is a startup banner. Suppress it by setting `i18next.init({ ... })` option `logLevel: 'warn'` or filtering the specific message in `src/i18n/config.ts`. Files: `src/i18n/config.ts`. Verify: open app → no i18next marketing banner in console.
 
 ---
 
