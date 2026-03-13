@@ -26,6 +26,10 @@ import { PlotInspector } from './PlotInspector'
 import { GroupInspector } from './GroupInspector'
 import { AnnotationInspector } from './nodes/AnnotationInspector'
 import { buildExpressionTree, renderExpressionText } from '../../lib/expressionExtractor'
+import {
+  matchHighPrecisionConstant,
+  loadFullPrecisionDigits,
+} from '../../lib/highPrecisionConstants'
 
 const LazyUnitPicker = lazy(() =>
   import('./editors/UnitPicker').then((m) => ({ default: m.UnitPicker })),
@@ -1074,6 +1078,38 @@ export function Inspector({
                 output
               </span>
             </div>
+            {/* 4.01: Copy full precision for matched constants */}
+            {value !== undefined &&
+              isScalar(value) &&
+              matchHighPrecisionConstant(value.value) !== null && (
+                <button
+                  type="button"
+                  style={{
+                    marginTop: 6,
+                    width: '100%',
+                    padding: '0.35rem 0.6rem',
+                    fontSize: '0.7rem',
+                    fontFamily: 'inherit',
+                    fontWeight: 500,
+                    border: '1px solid var(--border)',
+                    borderRadius: 6,
+                    background: 'transparent',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                  }}
+                  onClick={async () => {
+                    if (!isScalar(value)) return
+                    await loadFullPrecisionDigits()
+                    const c = matchHighPrecisionConstant(value.value)
+                    if (c) {
+                      navigator.clipboard.writeText(c.digits).catch(() => {})
+                    }
+                  }}
+                  title={`Copy ${matchHighPrecisionConstant(isScalar(value) ? value.value : 0)?.name ?? 'constant'} to full precision`}
+                >
+                  {t('inspector.copyFullPrecision', 'Copy full precision (10,000 digits)')}
+                </button>
+              )}
           </>
         )}
       </div>
