@@ -561,6 +561,8 @@
     "tab_exportDesc": "Default format, page size, and export options",
     "tab_shortcuts": "Shortcuts",
     "tab_shortcutsDesc": "Keyboard shortcuts reference",
+    "tab_accessibility": "Accessibility",
+    "tab_accessibilityDesc": "High contrast, reduced motion, font scale, and privacy",
     "autosaveTitle": "Autosave",
     "autosaveEnable": "Enable autosave",
     "autosaveEnableHint": "Automatically save changes after editing",

@@ -23,6 +23,7 @@ import { ExportSettings } from './ExportSettings'
 import { KeyboardShortcutsSettings } from './KeyboardShortcutsSettings'
 import { DeveloperSettings } from './DeveloperSettings'
 import { OrgSettings } from './OrgSettings'
+import { AccessibilitySettings } from './AccessibilitySettings'
 import type { Profile } from '../../lib/profilesService'
 
 const LazyThemeWizard = lazy(() =>
@@ -329,6 +330,9 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
 
       {/* Keyboard Shortcuts */}
       {tab === 'shortcuts' && <KeyboardShortcutsSettings cardStyle={cardStyle} />}
+
+      {/* Accessibility & Privacy */}
+      {tab === 'accessibility' && <AccessibilitySettings />}
 
       {/* Organization */}
       {tab === 'organization' && (

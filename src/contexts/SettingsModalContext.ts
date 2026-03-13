@@ -11,6 +11,7 @@ export type AppTab =
   | 'formatting'
   | 'export'
   | 'shortcuts'
+  | 'accessibility'
   | 'organization'
   | 'developer'
 

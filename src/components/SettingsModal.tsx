@@ -48,6 +48,7 @@ const APP_TABS_BASE: { key: AppTab; icon: string; devOnly?: boolean; orgOnly?: b
   { key: 'formatting', icon: '#' },
   { key: 'export', icon: '\u21E9' },
   { key: 'shortcuts', icon: '\u2328' },
+  { key: 'accessibility', icon: '\u267F' },
   { key: 'organization', icon: '\u{1F3E2}', orgOnly: true },
   { key: 'developer', icon: '\u{1F6E0}', devOnly: true },
 ]

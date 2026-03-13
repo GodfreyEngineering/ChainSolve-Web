@@ -74,6 +74,20 @@ export interface UserPreferences {
   /** Email me about new features and product updates (opt-out). */
   notifyProductUpdates: boolean
 
+  // 4.12: Accessibility
+  /** High contrast mode — increases border/text contrast. */
+  highContrastMode: boolean
+  /** Reduced motion — disables animations. */
+  reducedMotion: boolean
+  /** Font size scale (80%–150%). */
+  fontScale: number
+
+  // 4.12: Privacy
+  /** Opt-in to anonymous analytics. */
+  analyticsOptIn: boolean
+  /** Opt-in to crash reporting. */
+  crashReportingOptIn: boolean
+
   // KB-01: User-editable keyboard shortcuts
   /** Partial overrides of DEFAULT_KEYBINDINGS. Only changed bindings are stored. */
   keybindings: Partial<Record<KeybindingAction, KeyCombo>>
@@ -118,6 +132,13 @@ const DEFAULTS: UserPreferences = {
   exportPageSize: 'a4',
 
   notifyProductUpdates: true,
+
+  highContrastMode: false,
+  reducedMotion: false,
+  fontScale: 100,
+
+  analyticsOptIn: true,
+  crashReportingOptIn: true,
 
   keybindings: {},
 }
