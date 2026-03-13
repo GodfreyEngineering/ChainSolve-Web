@@ -81,6 +81,8 @@ export interface Entitlements {
   maxNNParameters: number
   /** 5.13: Max training epochs per NN training run. */
   maxNNEpochs: number
+  /** 6.07: Daily AI request limit. 0 = no access, Infinity = unlimited. */
+  aiDailyRequestLimit: number
 }
 
 // ── Entitlement map ──────────────────────────────────────────────────────────
@@ -104,6 +106,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canImportFiles: false,
     maxNNParameters: 100_000,
     maxNNEpochs: 100,
+    aiDailyRequestLimit: 0,
   },
   trialing: {
     maxProjects: Infinity,
@@ -123,6 +126,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canImportFiles: true,
     maxNNParameters: 1_000_000,
     maxNNEpochs: 10_000,
+    aiDailyRequestLimit: 100,
   },
   pro: {
     maxProjects: Infinity,
@@ -142,6 +146,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canImportFiles: true,
     maxNNParameters: 1_000_000,
     maxNNEpochs: 10_000,
+    aiDailyRequestLimit: 100,
   },
   student: {
     maxProjects: Infinity,
@@ -161,6 +166,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canImportFiles: true,
     maxNNParameters: 1_000_000,
     maxNNEpochs: 10_000,
+    aiDailyRequestLimit: 10,
   },
   enterprise: {
     maxProjects: Infinity,
@@ -180,6 +186,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canImportFiles: true,
     maxNNParameters: 1_000_000,
     maxNNEpochs: 10_000,
+    aiDailyRequestLimit: 1000,
   },
   developer: {
     maxProjects: Infinity,
@@ -199,6 +206,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canImportFiles: true,
     maxNNParameters: 1_000_000,
     maxNNEpochs: 10_000,
+    aiDailyRequestLimit: Infinity,
   },
   past_due: {
     maxProjects: 1,
@@ -218,6 +226,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canImportFiles: false,
     maxNNParameters: 0,
     maxNNEpochs: 0,
+    aiDailyRequestLimit: 0,
   },
   canceled: {
     maxProjects: 1,
@@ -237,6 +246,7 @@ const ENTITLEMENTS: Record<Plan, Entitlements> = {
     canImportFiles: false,
     maxNNParameters: 0,
     maxNNEpochs: 0,
+    aiDailyRequestLimit: 0,
   },
 }
 

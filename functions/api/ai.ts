@@ -59,7 +59,7 @@ interface AiRequestBody {
   }
 }
 
-type Plan = 'free' | 'trialing' | 'pro' | 'enterprise' | 'past_due' | 'canceled'
+type Plan = 'free' | 'trialing' | 'pro' | 'student' | 'enterprise' | 'past_due' | 'canceled'
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
@@ -814,6 +814,45 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       )
     }
 
+    // ── 6.07: Daily request limit by plan tier ─────────────────────────────
+    const DAILY_LIMITS: Record<Plan, number> = {
+      free: 0,
+      student: 10,
+      trialing: 100,
+      pro: 100,
+      enterprise: 1000,
+      past_due: 0,
+      canceled: 0,
+    }
+    // Developer/admin accounts (resolved to 'enterprise' above) are unlimited
+    const dailyLimit = isDev || isAdm ? Infinity : (DAILY_LIMITS[plan] ?? 0)
+
+    if (dailyLimit !== Infinity) {
+      const todayStart = new Date(now)
+      todayStart.setUTCHours(0, 0, 0, 0)
+      const { count: dailyCount } = await supabaseAdmin
+        .from('ai_request_log')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_id', userId)
+        .gte('created_at', todayStart.toISOString())
+
+      if ((dailyCount ?? 0) >= dailyLimit) {
+        return Response.json(
+          {
+            ok: false,
+            error:
+              dailyLimit === 0
+                ? 'AI Copilot requires a Pro or Enterprise subscription'
+                : `Daily AI request limit reached (${dailyLimit}/day). Resets at midnight UTC.`,
+            code: 'DAILY_LIMIT',
+            dailyLimit,
+            dailyUsed: dailyCount ?? 0,
+          },
+          { status: 429 },
+        )
+      }
+    }
+
     // ── Fetch canvas context ──────────────────────────────────────────────
     let contextSummary = ''
     try {
@@ -1029,6 +1068,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       patchOps: parsed.patch?.ops ?? [],
       usage: { tokensIn, tokensOut },
       tokensRemaining,
+      dailyLimit: dailyLimit === Infinity ? null : dailyLimit,
     }
 
     // Include extra fields for specific tasks
