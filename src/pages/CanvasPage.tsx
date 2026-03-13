@@ -106,6 +106,7 @@ import { validateProjectName } from '../lib/validateProjectName'
 import type { CaptureResult } from '../lib/pdf/captureCanvasImage'
 import type { TableExport } from '../lib/xlsx/xlsxModel'
 import { useStatusBarStore } from '../stores/statusBarStore'
+import { useWorkerPool } from '../contexts/WorkerPoolContext'
 
 const PerfHud = lazy(() =>
   import('../components/PerfHud.tsx').then((m) => ({ default: m.PerfHud })),
@@ -234,6 +235,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
 
   // ── Published outputs store (H7-1) ──────────────────────────────────────
   const resetPublishedOutputs = usePublishedOutputsStore((s) => s.reset)
+
+  // ── Worker pool (ENG-04) ────────────────────────────────────────────────
+  const pool = useWorkerPool()
 
   // ── Network status ─────────────────────────────────────────────────────────
   const { isOnline } = useNetworkStatus()
@@ -392,6 +396,12 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     resetCanvases()
     resetVariables()
     resetPublishedOutputs()
+    // ENG-04: Evict all canvas workers when switching/closing projects
+    if (pool) {
+      for (const cid of pool.stats.assignedCanvases) {
+        pool.evictCanvas(cid)
+      }
+    }
     conflictServerTs.current = null
     scratchDirtyRef.current = false
 
@@ -539,7 +549,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId, loadRetryCount])
+  }, [projectId, loadRetryCount, pool])
 
   // Cleanup debounce timer + history cache on unmount
   useEffect(() => {
@@ -1024,6 +1034,8 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       try {
         await deleteCanvas(canvasId, projectId)
         removeCanvasFromStore(canvasId)
+        // ENG-04: Free the worker slot for the deleted canvas
+        pool?.evictCanvas(canvasId)
 
         // If we deleted the active canvas, switch to the first remaining
         if (canvasId === activeCanvasId) {
@@ -1044,6 +1056,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       t,
       removeCanvasFromStore,
       handleSwitchCanvas,
+      pool,
     ],
   )
 

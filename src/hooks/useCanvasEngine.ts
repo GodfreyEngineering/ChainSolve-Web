@@ -76,6 +76,11 @@ export function useCanvasEngine(
         engineSwitchCount: prev.engineSwitchCount + 1,
       }))
     })
+
+    // Cleanup: release the canvas worker on unmount or canvasId change
+    return () => {
+      if (canvasId) pool.releaseCanvas(canvasId)
+    }
   }, [canvasId, pool])
 
   return {

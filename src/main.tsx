@@ -135,6 +135,14 @@ function Root() {
     }
   }, [retryCount])
 
+  // ENG-04: Dispose worker pool on page unload to terminate all Web Workers
+  useEffect(() => {
+    if (!pool) return
+    const handler = () => pool.dispose()
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [pool])
+
   // THEME-02: Apply canvas appearance CSS variables from user preferences
   useCanvasAppearance()
 
