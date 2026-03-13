@@ -25,6 +25,7 @@ import {
   type CanvasAreaHandle,
 } from '../components/canvas/CanvasArea'
 import { INITIAL_NODES, INITIAL_EDGES } from '../components/canvas/canvasDefaults'
+import { clearHistoryCache } from '../hooks/useGraphHistory'
 import type { Node, Edge } from '@xyflow/react'
 import type { NodeData } from '../blocks/registry'
 import type { ExportAsset } from '../lib/chainsolvejson/model'
@@ -540,12 +541,13 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, loadRetryCount])
 
-  // Cleanup debounce timer on unmount
+  // Cleanup debounce timer + history cache on unmount
   useEffect(() => {
     const scheduler = autosaveScheduler.current
     return () => {
       scheduler.cancel()
       if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
+      clearHistoryCache() // 4.15: clear per-canvas history on project close
     }
   }, [])
 

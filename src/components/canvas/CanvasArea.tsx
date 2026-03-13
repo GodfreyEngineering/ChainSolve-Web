@@ -485,7 +485,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges ?? INITIAL_EDGES)
 
   // ── Graph history (undo/redo) ───────────────────────────────────────────────
-  const history = useGraphHistory(50)
+  const history = useGraphHistory(50, canvasId)
 
   const {
     save: historySave,

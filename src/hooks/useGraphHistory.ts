@@ -4,9 +4,13 @@
  * API is entirely explicit — the caller decides when to save a checkpoint.
  * Stacks are stored in refs (no re-render on push); canUndo/canRedo/stackEntries
  * are reactive state so consumers can observe them.
+ *
+ * 4.15: Per-canvas history cache — history survives tab switches by caching
+ * stacks in a module-level Map keyed by canvasId. On unmount, stacks are
+ * saved; on mount with a known canvasId, they are restored.
  */
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Node, Edge } from '@xyflow/react'
 import type { NodeData } from '../blocks/types'
 
@@ -26,13 +30,50 @@ interface StoredSnapshot extends GraphSnapshot {
 
 const DEFAULT_LIMIT = 50
 
-export function useGraphHistory(limit = DEFAULT_LIMIT) {
+// 4.15: Module-level cache for per-canvas history stacks
+interface CachedStacks {
+  undo: StoredSnapshot[]
+  redo: StoredSnapshot[]
+}
+const historyCache = new Map<string, CachedStacks>()
+
+/** Clear cached history for a canvas (call on project close). */
+export function clearHistoryCache(canvasId?: string) {
+  if (canvasId) historyCache.delete(canvasId)
+  else historyCache.clear()
+}
+
+export function useGraphHistory(limit = DEFAULT_LIMIT, canvasId?: string) {
   const undoStack = useRef<StoredSnapshot[]>([])
   const redoStack = useRef<StoredSnapshot[]>([])
   const [canUndo, setCanUndo] = useState(false)
   const [canRedo, setCanRedo] = useState(false)
   /** Reactive copy of undo stack, newest first (for HistoryPanel display). */
   const [stackEntries, setStackEntries] = useState<StoredSnapshot[]>([])
+
+  // 4.15: Restore cached history on mount
+  const cacheKeyRef = useRef(canvasId)
+  useEffect(() => {
+    if (!canvasId) return
+    const cached = historyCache.get(canvasId)
+    if (cached) {
+      undoStack.current = cached.undo
+      redoStack.current = cached.redo
+      setCanUndo(cached.undo.length > 0)
+      setCanRedo(cached.redo.length > 0)
+      setStackEntries([...cached.undo].reverse())
+    }
+    cacheKeyRef.current = canvasId
+    // Save to cache on unmount
+    return () => {
+      if (cacheKeyRef.current) {
+        historyCache.set(cacheKeyRef.current, {
+          undo: [...undoStack.current],
+          redo: [...redoStack.current],
+        })
+      }
+    }
+  }, [canvasId])
 
   const sync = useCallback(() => {
     setCanUndo(undoStack.current.length > 0)
