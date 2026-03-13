@@ -10,9 +10,14 @@
  * to the homepage with a ?deleted=1 query param.
  */
 
-import { useCallback, useState } from 'react'
+import { lazy, Suspense, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { deleteMyAccount, signOut } from '../../lib/auth'
+import { isReauthed } from '../../lib/reauth'
+
+const LazyReauthModal = lazy(() =>
+  import('../../components/ui/ReauthModal').then((m) => ({ default: m.ReauthModal })),
+)
 
 type Step = 'idle' | 'confirm1' | 'confirm2' | 'deleting' | 'error'
 
@@ -21,11 +26,16 @@ export function DangerZoneSettings() {
   const [step, setStep] = useState<Step>('idle')
   const [confirmText, setConfirmText] = useState('')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [reauthOpen, setReauthOpen] = useState(false)
 
   const handleOpenDialog = useCallback(() => {
-    setStep('confirm1')
-    setConfirmText('')
-    setErrorMsg(null)
+    if (isReauthed()) {
+      setStep('confirm1')
+      setConfirmText('')
+      setErrorMsg(null)
+    } else {
+      setReauthOpen(true)
+    }
   }, [])
 
   const handleProceedToStep2 = useCallback(() => {
@@ -185,6 +195,22 @@ export function DangerZoneSettings() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Re-auth modal — must verify password before deletion flow */}
+      {reauthOpen && (
+        <Suspense fallback={null}>
+          <LazyReauthModal
+            open={reauthOpen}
+            onClose={() => setReauthOpen(false)}
+            onSuccess={() => {
+              setReauthOpen(false)
+              setStep('confirm1')
+              setConfirmText('')
+              setErrorMsg(null)
+            }}
+          />
+        </Suspense>
       )}
     </div>
   )

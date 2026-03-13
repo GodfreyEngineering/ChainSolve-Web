@@ -8,7 +8,7 @@
  *   - View and revoke active device sessions
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   enrollTotp,
@@ -29,6 +29,11 @@ import {
   getCurrentSessionId,
   type UserSession,
 } from '../../lib/sessionService'
+import { isReauthed } from '../../lib/reauth'
+
+const LazyReauthModal = lazy(() =>
+  import('../../components/ui/ReauthModal').then((m) => ({ default: m.ReauthModal })),
+)
 
 /** Generate 10 random backup codes in XXXX-XXXX-XXXX format. */
 function generateBackupCodes(): string[] {
@@ -248,8 +253,9 @@ export function SecuritySettings() {
   const [emailSaving, setEmailSaving] = useState(false)
   const [emailError, setEmailError] = useState<string | null>(null)
   const [emailSuccess, setEmailSuccess] = useState(false)
+  const [emailReauthOpen, setEmailReauthOpen] = useState(false)
 
-  const handleChangeEmail = async () => {
+  const doEmailChange = async () => {
     setEmailError(null)
     setEmailSuccess(false)
     setEmailSaving(true)
@@ -261,6 +267,14 @@ export function SecuritySettings() {
       setNewEmail('')
     }
     setEmailSaving(false)
+  }
+
+  const handleChangeEmail = async () => {
+    if (isReauthed()) {
+      await doEmailChange()
+    } else {
+      setEmailReauthOpen(true)
+    }
   }
 
   if (loading) {
@@ -788,6 +802,20 @@ export function SecuritySettings() {
           </div>
         )}
       </div>
+
+      {/* Re-auth modal — must verify password before email change */}
+      {emailReauthOpen && (
+        <Suspense fallback={null}>
+          <LazyReauthModal
+            open={emailReauthOpen}
+            onClose={() => setEmailReauthOpen(false)}
+            onSuccess={() => {
+              setEmailReauthOpen(false)
+              void doEmailChange()
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }
