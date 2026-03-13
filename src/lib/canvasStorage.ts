@@ -21,7 +21,7 @@ async function requireSession() {
   return session
 }
 
-const UPLOAD_RETRY_DELAYS = [1000, 2000]
+const UPLOAD_RETRY_DELAYS = [1000, 2000, 5000]
 const DOWNLOAD_RETRY_DELAYS = [500, 1500, 4000]
 
 async function uploadBlobWithRetry(key: string, blob: Blob): Promise<void> {
@@ -36,7 +36,9 @@ async function uploadBlobWithRetry(key: string, blob: Blob): Promise<void> {
     } catch (err) {
       lastError = err
       if (attempt < UPLOAD_RETRY_DELAYS.length && isRetryableError(err)) {
-        await new Promise((r) => setTimeout(r, UPLOAD_RETRY_DELAYS[attempt]))
+        const base = UPLOAD_RETRY_DELAYS[attempt]
+        const jitter = base * 0.25 * (Math.random() * 2 - 1)
+        await new Promise((r) => setTimeout(r, base + jitter))
         continue
       }
       throw err

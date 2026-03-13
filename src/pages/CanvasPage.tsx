@@ -661,10 +661,11 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           // Offline — queue for retry using exponential backoff
           queueOffline()
           if (offlineRetryTimer.current) clearTimeout(offlineRetryTimer.current)
-          const delay =
+          const base =
             OFFLINE_RETRY_DELAYS[
               Math.min(offlineRetryCount.current, OFFLINE_RETRY_DELAYS.length - 1)
             ]
+          const delay = base + base * 0.25 * (Math.random() * 2 - 1)
           offlineRetryTimer.current = setTimeout(() => {
             offlineRetryCount.current++
             void doSave()
@@ -728,7 +729,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   // ── E8-2: Stuck-save watchdog — recover if save stays in 'saving' too long ─
   useEffect(() => {
     if (saveStatus !== 'saving') return
-    const timer = setTimeout(() => recoverStuckSave(), 30_000) // 30 s
+    const timer = setTimeout(() => recoverStuckSave(), 10_000) // 10 s
     return () => clearTimeout(timer)
   }, [saveStatus, recoverStuckSave])
 
