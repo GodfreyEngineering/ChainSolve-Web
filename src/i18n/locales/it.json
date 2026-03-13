@@ -1749,7 +1749,9 @@
     "centerHorizontal": "Center horizontally",
     "centerVertical": "Center vertically",
     "addProbeNode": "Add probe display",
-    "selectAll": "Select all"
+    "selectAll": "Select all",
+    "hideMinimap": "Hide minimap",
+    "showMinimap": "Show minimap"
   },
   "errorBoundary": {
     "title": "Qualcosa è andato storto",
