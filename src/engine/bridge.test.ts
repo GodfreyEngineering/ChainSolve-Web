@@ -160,7 +160,7 @@ describe('toEngineSnapshot — constant block mapping (D7-3 / H4-1)', () => {
     expect((snap.nodes[0].data as Record<string, unknown>).value).toBe(9.80665)
   })
 
-  it('falls back to selectedConstantId as blockType for unknown constants', () => {
+  it('falls back to number(0) for unknown constant IDs instead of raw blockType', () => {
     const nodes = [
       makeNode('c1', 'constant', {
         blockType: 'constant',
@@ -168,20 +168,29 @@ describe('toEngineSnapshot — constant block mapping (D7-3 / H4-1)', () => {
       }),
     ]
     const snap = toEngineSnapshot(nodes, [])
-    // Unknown constants pass through for backward compat with Rust ops.rs
-    expect(snap.nodes[0].blockType).toBe('legacy.unknown')
+    expect(snap.nodes[0].blockType).toBe('number')
+    expect((snap.nodes[0].data as Record<string, unknown>).value).toBe(0)
   })
 
-  it('keeps blockType as "constant" when no selectedConstantId', () => {
+  it('falls back to number(0) when no selectedConstantId', () => {
     const nodes = [makeNode('c1', 'constant', { blockType: 'constant' })]
     const snap = toEngineSnapshot(nodes, [])
-    expect(snap.nodes[0].blockType).toBe('constant')
+    expect(snap.nodes[0].blockType).toBe('number')
+    expect((snap.nodes[0].data as Record<string, unknown>).value).toBe(0)
   })
 
-  it('keeps blockType as "constant" when selectedConstantId is not a string', () => {
+  it('falls back to number(0) when selectedConstantId is not a string', () => {
     const nodes = [makeNode('c1', 'constant', { blockType: 'constant', selectedConstantId: 42 })]
     const snap = toEngineSnapshot(nodes, [])
-    expect(snap.nodes[0].blockType).toBe('constant')
+    expect(snap.nodes[0].blockType).toBe('number')
+    expect((snap.nodes[0].data as Record<string, unknown>).value).toBe(0)
+  })
+
+  it('preserves existing value when selectedConstantId is missing', () => {
+    const nodes = [makeNode('c1', 'constant', { blockType: 'constant', value: 123 })]
+    const snap = toEngineSnapshot(nodes, [])
+    expect(snap.nodes[0].blockType).toBe('number')
+    expect((snap.nodes[0].data as Record<string, unknown>).value).toBe(123)
   })
 })
 
