@@ -16,7 +16,6 @@ import { useCustomThemesStore } from '../../stores/customThemesStore'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { THEME_WIZARD_WINDOW_ID, THEME_LIBRARY_WINDOW_ID } from '../../components/windowIds'
 import { getEntitlements, type Plan } from '../../lib/entitlements'
-import { HelpLink } from '../../components/ui/HelpLink'
 import type { AppTab } from '../../contexts/SettingsModalContext'
 import { EditorSettings } from './EditorSettings'
 import { FormattingSettings } from './FormattingSettings'
@@ -85,10 +84,7 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-        <h2 style={headingStyle}>{t(`settings.tab_${tab}`)}</h2>
-        <HelpLink section="onboarding" />
-      </div>
+      <h2 style={headingStyle}>{t(`settings.tab_${tab}`)}</h2>
       <p style={sectionDescStyle}>{t(`settings.tab_${tab}Desc`)}</p>
 
       {/* General */}

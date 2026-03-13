@@ -50,7 +50,6 @@ import {
   togglePinnedBlock,
 } from './blockLibraryUtils'
 import { ChevronLeft, ChevronRight, Library } from 'lucide-react'
-import { HelpLink } from '../ui/HelpLink'
 import { Tooltip } from '../ui/Tooltip'
 
 const FunctionWizard = lazy(() =>
@@ -972,7 +971,6 @@ export function BlockLibrary({
               }
             }}
           />
-          <HelpLink section="block-library" />
         </div>
 
         <div style={s.catFilter}>

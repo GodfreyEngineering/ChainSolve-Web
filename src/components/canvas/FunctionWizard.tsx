@@ -12,7 +12,6 @@
 
 import { useState, useCallback, type FormEvent } from 'react'
 import { Modal } from '../ui/Modal'
-import { HelpLink } from '../ui/HelpLink'
 import {
   CUSTOM_FUNCTION_TAGS,
   CUSTOM_FUNCTION_TAG_LABELS,
@@ -215,9 +214,6 @@ export function FunctionWizard({ open, onClose, editFunction }: FunctionWizardPr
       width={460}
     >
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.3rem' }}>
-          <HelpLink section="block-library" />
-        </div>
         {/* Name field */}
         <div style={{ marginBottom: '0.7rem' }}>
           <label style={labelStyle}>{t('functionWizard.nameLabel', 'Function name')}</label>

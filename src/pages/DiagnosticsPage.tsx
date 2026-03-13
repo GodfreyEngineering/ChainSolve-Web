@@ -27,7 +27,6 @@ import { redactObject } from '../observability/redact'
 import type { DoctorCheck } from '../observability/types'
 import type { ObsEvent } from '../observability/types'
 import type { EngineAPI, TraceEntry } from '../engine/index.ts'
-import { HelpLink } from '../components/ui/HelpLink'
 import { LegalFooter } from '../components/ui/LegalFooter'
 
 // ── Trace helpers (P036) ──────────────────────────────────────────────────────
@@ -233,10 +232,7 @@ export default function DiagnosticsPage() {
     <div style={s.page}>
       {/* Header */}
       <div style={{ maxWidth: '900px', margin: '0 auto 2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <h1 style={{ margin: '0 0 0.25rem', fontSize: '1.4rem' }}>Diagnostics</h1>
-          <HelpLink section="troubleshooting" />
-        </div>
+        <h1 style={{ margin: '0 0 0.25rem', fontSize: '1.4rem' }}>Diagnostics</h1>
         <p style={{ margin: 0, opacity: 0.4, fontSize: '0.8rem' }}>
           Internal diagnostics surface — not visible to end users in production.
         </p>

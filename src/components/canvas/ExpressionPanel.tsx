@@ -9,7 +9,6 @@ import { useMemo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Node, Edge } from '@xyflow/react'
 import type { Value } from '../../engine/value'
-import { HelpLink } from '../ui/HelpLink'
 import {
   buildExpressionTree,
   renderExpressionText,
@@ -54,7 +53,6 @@ export function ExpressionPanel({ nodeId, nodes, edges, computed, onClose }: Exp
       <div style={panelStyle}>
         <div style={headerStyle}>
           <span style={titleStyle}>{t('expressionPanel.title')}</span>
-          <HelpLink section="exports" style={{ marginLeft: 'auto', marginRight: 4 }} />
           <button
             style={closeBtnStyle}
             onClick={onClose}
@@ -75,7 +73,6 @@ export function ExpressionPanel({ nodeId, nodes, edges, computed, onClose }: Exp
     <div style={panelStyle}>
       <div style={headerStyle}>
         <span style={titleStyle}>{t('expressionPanel.title')}</span>
-        <HelpLink section="exports" style={{ marginLeft: 'auto', marginRight: 4 }} />
         <button
           style={closeBtnStyle}
           onClick={onClose}
