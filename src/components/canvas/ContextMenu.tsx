@@ -111,6 +111,10 @@ interface ContextMenuProps {
   onSelectAll?: () => void
   /** ADV-04: Open the comment thread for a node. */
   onAddComment?: (nodeId: string) => void
+  /** 3.15: Toggle minimap visibility from canvas context menu. */
+  onToggleMinimap?: () => void
+  /** 3.15: Current minimap visible state. */
+  minimapVisible?: boolean
 }
 
 const item: CSSProperties = {
@@ -222,6 +226,8 @@ export function ContextMenu({
   onAddProbeNode,
   onSelectAll,
   onAddComment,
+  onToggleMinimap,
+  minimapVisible,
 }: ContextMenuProps) {
   const { t } = useTranslation()
   const { menuRef, pos } = useMenuPosition(target.x, target.y)
@@ -886,6 +892,20 @@ export function ContextMenu({
                 label={snapToGrid ? t('contextMenu.snapGridOff') : t('contextMenu.snapGridOn')}
                 onClick={() => {
                   onToggleSnap()
+                  onClose()
+                }}
+              />
+            )}
+            {onToggleMinimap && (
+              <MenuItem
+                icon={minimapVisible ? '⊟' : '⊞'}
+                label={
+                  minimapVisible
+                    ? t('contextMenu.hideMinimap', 'Hide minimap')
+                    : t('contextMenu.showMinimap', 'Show minimap')
+                }
+                onClick={() => {
+                  onToggleMinimap()
                   onClose()
                 }}
               />

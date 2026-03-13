@@ -3400,6 +3400,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         onAddProbeNode={readOnly ? undefined : addProbeNode}
                         onSelectAll={selectAll}
                         onAddComment={readOnly ? undefined : handleContextMenuComment}
+                        onToggleMinimap={() => setMinimap((v) => !v)}
+                        minimapVisible={minimap}
                       />
                     )}
 
