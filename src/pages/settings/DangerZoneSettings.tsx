@@ -12,7 +12,7 @@
 
 import { lazy, Suspense, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { deleteMyAccount, signOut } from '../../lib/auth'
+import { deleteMyAccount, exportMyData, signOut } from '../../lib/auth'
 import { isReauthed } from '../../lib/reauth'
 
 const LazyReauthModal = lazy(() =>
@@ -27,6 +27,8 @@ export function DangerZoneSettings() {
   const [confirmText, setConfirmText] = useState('')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [reauthOpen, setReauthOpen] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [exportMsg, setExportMsg] = useState<string | null>(null)
 
   const handleOpenDialog = useCallback(() => {
     if (isReauthed()) {
@@ -64,9 +66,56 @@ export function DangerZoneSettings() {
     window.location.href = '/?deleted=1'
   }, [confirmText])
 
+  const handleExport = useCallback(async () => {
+    setExporting(true)
+    setExportMsg(null)
+    const { error } = await exportMyData()
+    setExporting(false)
+    if (error) {
+      setExportMsg(error)
+    } else {
+      setExportMsg(t('settings.exportSuccess', 'Download started.'))
+    }
+  }, [t])
+
   return (
     <div>
       <h2 style={headingStyle}>{t('settings.dangerZone', 'Danger Zone')}</h2>
+
+      {/* GDPR data export */}
+      <div style={exportCardStyle}>
+        <div style={dangerRowStyle}>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
+              {t('settings.exportDataTitle', 'Export your data')}
+            </div>
+            <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.2rem' }}>
+              {t(
+                'settings.exportDataDesc',
+                'Download all your personal data as a JSON file (GDPR right of access). Limited to once per day.',
+              )}
+            </div>
+            {exportMsg && (
+              <div
+                style={{
+                  fontSize: '0.78rem',
+                  marginTop: '0.35rem',
+                  color: exportMsg.includes('Download') ? 'var(--text)' : '#f87171',
+                }}
+              >
+                {exportMsg}
+              </div>
+            )}
+          </div>
+          <button style={exportBtn} onClick={() => void handleExport()} disabled={exporting}>
+            {exporting
+              ? t('settings.exporting', 'Exporting\u2026')
+              : t('settings.exportData', 'Export data')}
+          </button>
+        </div>
+      </div>
+
+      <div style={{ height: '1rem' }} />
 
       <div style={dangerCardStyle}>
         <div style={dangerRowStyle}>
@@ -222,6 +271,26 @@ const headingStyle: React.CSSProperties = {
   margin: '0 0 1.25rem',
   fontSize: '1.15rem',
   fontWeight: 700,
+}
+
+const exportCardStyle: React.CSSProperties = {
+  border: '1px solid var(--border)',
+  borderRadius: 12,
+  padding: '1.25rem 1.5rem',
+  background: 'var(--surface-1)',
+}
+
+const exportBtn: React.CSSProperties = {
+  padding: '0.45rem 1rem',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  background: 'transparent',
+  color: 'inherit',
+  fontWeight: 600,
+  fontSize: '0.82rem',
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+  flexShrink: 0,
 }
 
 const dangerCardStyle: React.CSSProperties = {

@@ -119,6 +119,47 @@ export async function deleteMyAccount(): Promise<{ error: string | null }> {
   }
 }
 
+/**
+ * GDPR data export — 7.05.
+ * Calls POST /api/account/export-data which returns all personal data as JSON.
+ * Triggers a browser download of the JSON file.
+ */
+export async function exportMyData(): Promise<{ error: string | null }> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) return { error: 'Not signed in' }
+
+  try {
+    const resp = await fetch('/api/account/export-data', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+    if (!resp.ok) {
+      const body = (await resp.json().catch(() => ({}))) as { error?: string; code?: string }
+      if (body.code === 'RATE_LIMITED') {
+        return { error: body.error ?? 'Export limit reached. Try again in 24 hours.' }
+      }
+      return { error: body.error ?? `Server error ${resp.status}` }
+    }
+    // Trigger browser download
+    const blob = await resp.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download =
+      resp.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1] ??
+      `chainsolve-data-export.json`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+    return { error: null }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Network error' }
+  }
+}
+
 export async function refreshSession(): Promise<{
   session: Session | null
   error: AuthError | null
