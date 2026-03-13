@@ -27,7 +27,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **1.09 Scheduled Supabase backups** — Create `.github/workflows/backup.yml` with daily cron (`0 3 * * *`). Call Supabase Management API `POST /v1/projects/{ref}/database/backups`. Log to `audit_log` table. Create `docs/BACKUP_RUNBOOK.md` with restore procedures. Verify: trigger manually, confirm backup in Supabase dashboard.
 
-- [ ] **1.10 Storage cleanup policy** — Add a scheduled function or GitHub Action that: (a) removes orphaned files in `projects` bucket not referenced by any `canvases.storage_path` or `project_assets.storage_path`, (b) removes orphaned files in `uploads` bucket not referenced by `profiles.avatar_url`. Run weekly. Verify: create orphaned file, run cleanup, file removed.
+- [x] **1.10 Storage cleanup policy** — Add a scheduled function or GitHub Action that: (a) removes orphaned files in `projects` bucket not referenced by any `canvases.storage_path` or `project_assets.storage_path`, (b) removes orphaned files in `uploads` bucket not referenced by `profiles.avatar_url`. Run weekly. Verify: create orphaned file, run cleanup, file removed.
 
 - [ ] **1.11 Student verification brute-force protection** — In `functions/api/student/confirm.ts`, add rate limiting: max 5 attempts per email per hour. After 5 failures, lock the verification for 1 hour. Hash comparison should use constant-time comparison. Verify: attempt 6 wrong codes → locked response.
 
