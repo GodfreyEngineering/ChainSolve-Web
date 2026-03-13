@@ -11,7 +11,7 @@
  * and resolved value. Clicking the chip opens the picker popover.
  */
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { InputBinding } from '../../../blocks/types'
 import { useBindingContext } from '../../../contexts/BindingContext'
@@ -116,6 +116,47 @@ export function ValueEditor({ binding, onChange, compact, override }: ValueEdito
   const containerRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
+  // 2.09: Raw-string buffer for literal input — only commit on blur/Enter.
+  // When the input is not focused, we show the binding value directly;
+  // rawValue is only used while the user is actively typing.
+  const [rawValue, setRawValue] = useState('')
+  const [literalFocused, setLiteralFocused] = useState(false)
+
+  // Display value: raw buffer while editing, binding value otherwise.
+  const displayValue = literalFocused
+    ? rawValue
+    : binding?.kind === 'literal'
+      ? String(binding.value)
+      : ''
+
+  const commitRaw = useCallback(
+    (raw: string) => {
+      const v = parseFloat(raw)
+      if (!isNaN(v)) {
+        onChange({ kind: 'literal', value: v, raw })
+      } else if (raw.trim() === '' || raw === '-') {
+        onChange({ kind: 'literal', value: 0, raw: '0' })
+      }
+    },
+    [onChange],
+  )
+
+  const handleLiteralKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        commitRaw(rawValue)
+        ;(e.target as HTMLInputElement).blur()
+      } else if (e.key === 'Escape') {
+        // Revert and blur — onBlur handler will see literalFocused=false
+        // after this state update, so it won't double-commit.
+        setLiteralFocused(false)
+        ;(e.target as HTMLInputElement).blur()
+      }
+    },
+    [commitRaw, rawValue],
+  )
+
   // Close popover on click outside
   useEffect(() => {
     if (!popoverOpen) return
@@ -215,16 +256,22 @@ export function ValueEditor({ binding, onChange, compact, override }: ValueEdito
       {(!binding || binding.kind === 'literal') && (
         <>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             className={compact ? 'nodrag' : undefined}
             style={inputStyle}
-            value={binding?.kind === 'literal' ? binding.value : ''}
+            value={displayValue}
             placeholder="0"
-            step="any"
-            onChange={(e) => {
-              const v = parseFloat(e.target.value)
-              if (!isNaN(v)) onChange({ kind: 'literal', value: v, raw: e.target.value })
+            onChange={(e) => setRawValue(e.target.value)}
+            onFocus={(e) => {
+              setLiteralFocused(true)
+              setRawValue(e.target.value)
             }}
+            onBlur={() => {
+              if (literalFocused) commitRaw(rawValue)
+              setLiteralFocused(false)
+            }}
+            onKeyDown={handleLiteralKeyDown}
             title={override ? t('canvas.manualOverrideTooltip') : t('canvas.manualValueTooltip')}
           />
           <button

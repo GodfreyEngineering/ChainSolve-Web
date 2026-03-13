@@ -9,7 +9,7 @@
  * - className="nodrag" on all interactive elements
  */
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { parsePastedText } from './parsePastedText'
 
@@ -35,6 +35,10 @@ export function VectorEditor({ values, onChange }: VectorEditorProps) {
   const [pasteError, setPasteError] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // 2.09: Per-cell raw-string editing state — only commit on blur/Enter.
+  // Stores { index, raw } for the cell currently being edited.
+  const [editingCell, setEditingCell] = useState<{ index: number; raw: string } | null>(null)
+
   const totalH = values.length * ROW_H
   const visibleH = Math.min(totalH, MAX_VISIBLE_H)
   const startIdx = Math.max(0, Math.floor(scrollTop / ROW_H) - OVERSCAN)
@@ -51,6 +55,33 @@ export function VectorEditor({ values, onChange }: VectorEditorProps) {
       onChange(next)
     },
     [values, onChange],
+  )
+
+  const commitCell = useCallback(
+    (index: number, raw: string) => {
+      const v = parseFloat(raw)
+      if (!isNaN(v)) {
+        updateAt(index, v)
+      } else if (raw.trim() === '' || raw === '-') {
+        updateAt(index, 0)
+      }
+      setEditingCell(null)
+    },
+    [updateAt],
+  )
+
+  const handleCellKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>, index: number, raw: string) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        commitCell(index, raw)
+        ;(e.target as HTMLInputElement).blur()
+      } else if (e.key === 'Escape') {
+        setEditingCell(null)
+        ;(e.target as HTMLInputElement).blur()
+      }
+    },
+    [commitCell],
   )
 
   const removeAt = useCallback(
@@ -164,13 +195,17 @@ export function VectorEditor({ values, onChange }: VectorEditorProps) {
               >
                 <span style={idxStyle}>{i}</span>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   className="nodrag"
-                  step="any"
-                  value={values[i]}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value)
-                    if (!isNaN(v)) updateAt(i, v)
+                  value={editingCell?.index === i ? editingCell.raw : String(values[i])}
+                  onChange={(e) => setEditingCell({ index: i, raw: e.target.value })}
+                  onFocus={() => setEditingCell({ index: i, raw: String(values[i]) })}
+                  onBlur={() => {
+                    if (editingCell?.index === i) commitCell(i, editingCell.raw)
+                  }}
+                  onKeyDown={(e) => {
+                    if (editingCell?.index === i) handleCellKeyDown(e, i, editingCell.raw)
                   }}
                   style={inputStyle}
                 />
