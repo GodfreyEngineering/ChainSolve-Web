@@ -7,6 +7,7 @@
 
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useMenuPosition } from '../../hooks/useMenuPosition'
 import type { Value } from '../../engine/value'
 import { isError } from '../../engine/value'
 import type { AlignOp } from '../../lib/alignmentHelpers'
@@ -223,11 +224,12 @@ export function ContextMenu({
   onAddComment,
 }: ContextMenuProps) {
   const { t } = useTranslation()
+  const { menuRef, pos } = useMenuPosition(target.x, target.y)
 
   const menuStyle: CSSProperties = {
     position: 'fixed',
-    left: target.x,
-    top: target.y,
+    left: pos.left,
+    top: pos.top,
     zIndex: 1000,
     background: 'var(--surface-2)',
     border: '1px solid var(--border)',
@@ -252,6 +254,7 @@ export function ContextMenu({
       />
 
       <div
+        ref={menuRef}
         style={{ ...menuStyle, zIndex: 1000 }}
         role="menu"
         onKeyDown={(e) => e.key === 'Escape' && onClose()}

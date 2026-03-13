@@ -5,7 +5,7 @@
  * Mobile (<900px):   dropdown selector with create button.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { canCreateCanvas, getEntitlements, type Plan } from '../../lib/entitlements'
@@ -123,6 +123,24 @@ function DesktopSheetsBar({
       setTimeout(() => editInputRef.current?.select(), 0)
     }
   }, [editingId])
+
+  // Clamp context menu position to viewport
+  useLayoutEffect(() => {
+    const el = contextRef.current
+    if (!el || !contextMenu) return
+    const rect = el.getBoundingClientRect()
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const margin = 8
+    let left = contextMenu.x
+    let top = contextMenu.y
+    if (left + rect.width > vw - margin) left = Math.max(margin, contextMenu.x - rect.width)
+    if (top + rect.height > vh - margin) top = Math.max(margin, contextMenu.y - rect.height)
+    if (left !== contextMenu.x || top !== contextMenu.y) {
+      el.style.left = `${left}px`
+      el.style.top = `${top}px`
+    }
+  }, [contextMenu])
 
   // Close context menu on outside click
   useEffect(() => {
