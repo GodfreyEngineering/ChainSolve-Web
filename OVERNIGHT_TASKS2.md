@@ -215,7 +215,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 > Production security for 100k+ users.
 
-- [ ] **7.01 Cloudflare Functions input validation audit** — Review all 23 functions in `functions/api/`. Ensure every endpoint: (a) validates JWT (except public health checks), (b) validates and sanitises all input parameters, (c) returns generic error messages (no stack traces — already checked by CI `scripts/check-billing-stack.mjs`), (d) sets appropriate CORS headers, (e) handles malformed JSON gracefully. Files: `functions/api/**/*.ts`. Verify: send malformed JSON to each endpoint → 400 response, no stack trace.
+- [x] **7.01 Cloudflare Functions input validation audit** — Review all 23 functions in `functions/api/`. Ensure every endpoint: (a) validates JWT (except public health checks), (b) validates and sanitises all input parameters, (c) returns generic error messages (no stack traces — already checked by CI `scripts/check-billing-stack.mjs`), (d) sets appropriate CORS headers, (e) handles malformed JSON gracefully. Files: `functions/api/**/*.ts`. Verify: send malformed JSON to each endpoint → 400 response, no stack trace.
 
 - [x] **7.02 CSP headers verification** — Audit `public/_headers`. Ensure: (a) `script-src` includes `'wasm-unsafe-eval'` and `'self'` only, (b) `style-src` allows inline styles (React), (c) `img-src` allows Supabase storage + Stripe, (d) `connect-src` allows Supabase + Stripe + Sentry + Cloudflare, (e) `frame-ancestors 'none'` (prevent clickjacking), (f) report-uri points to `/api/report/csp`. Files: `public/_headers`. Verify: no CSP violations in browser console on normal usage. `csp_reports` table empty after normal session.
 
