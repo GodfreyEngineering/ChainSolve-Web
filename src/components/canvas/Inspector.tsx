@@ -475,6 +475,47 @@ export function Inspector({
                 </Suspense>,
               )}
 
+            {/* 4.09: Accent color picker */}
+            {field(
+              t('inspector.accentColor', 'Accent Color'),
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <input
+                  type="color"
+                  style={{ width: 28, height: 22, padding: 0, border: 'none', cursor: 'pointer', background: 'none' }}
+                  value={(nd.userColor as string) ?? '#1cabb0'}
+                  onChange={(e) => update({ userColor: e.target.value })}
+                  title={t('inspector.accentColor', 'Accent Color')}
+                />
+                {nd.userColor && (
+                  <button
+                    type="button"
+                    style={{ background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer', fontSize: '0.65rem' }}
+                    onClick={() => update({ userColor: undefined })}
+                  >
+                    {t('inspector.resetColor', 'Reset')}
+                  </button>
+                )}
+              </div>,
+            )}
+
+            {/* 4.09: Node notes field */}
+            {field(
+              t('inspector.notes', 'Notes'),
+              <textarea
+                style={{
+                  ...inp,
+                  width: '100%',
+                  minHeight: 40,
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  fontSize: '0.72rem',
+                }}
+                value={(nd.nodeNotes as string) ?? ''}
+                onChange={(e) => update({ nodeNotes: e.target.value || undefined })}
+                placeholder={t('inspector.notesPlaceholder', 'Add notes about this block...')}
+              />,
+            )}
+
             {/* Number source */}
             {nd.blockType === 'number' &&
               field(

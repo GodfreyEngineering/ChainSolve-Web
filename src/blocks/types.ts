@@ -239,6 +239,8 @@ export interface NodeData extends Record<string, unknown> {
   tableOutputCol?: number
   /** 4.08: Selected row index for 'row' output mode. */
   tableOutputRow?: number
+  /** 4.09: User notes/comments on this block. */
+  nodeNotes?: string
 }
 
 export interface BlockDef {
