@@ -120,7 +120,18 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
       setIsEditing(true)
       const v = initial ?? String(rows[row]?.[col] ?? '')
       setEditValue(v)
-      requestAnimationFrame(() => editInputRef.current?.select())
+      requestAnimationFrame(() => {
+        const el = editInputRef.current
+        if (!el) return
+        if (initial !== undefined) {
+          // Type-to-edit: place cursor at end (content is the typed char)
+          el.focus()
+          el.setSelectionRange(v.length, v.length)
+        } else {
+          // Double-click or Enter: select all for easy replacement
+          el.select()
+        }
+      })
     },
     [rows],
   )
@@ -190,7 +201,10 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
           e.preventDefault()
           moveTo(row > 0 ? row - 1 : 0, col)
         } else if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1) {
-          // Start editing with typed character
+          // Start editing with typed character — prevent default so the
+          // keystroke doesn't also propagate into the now-focused input
+          // (which would cause the character to appear twice).
+          e.preventDefault()
           startEdit(row, col, e.key)
         }
       } else {
