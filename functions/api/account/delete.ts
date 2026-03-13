@@ -64,12 +64,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // ── Step 1: Fetch profile for Stripe IDs ──────────────────────────────────
+  // ── Step 1: Fetch profile for Stripe IDs + email for audit ────────────────
   const { data: profile } = await adminClient
     .from("profiles")
-    .select("stripe_customer_id, stripe_subscription_id")
+    .select("stripe_customer_id, stripe_subscription_id, display_name")
     .eq("id", userId)
     .single();
+  const userEmail = user.email;
 
   // ── Step 2: Cancel Stripe subscription ────────────────────────────────────
   if (profile?.stripe_subscription_id) {
@@ -166,6 +167,38 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       500
     );
   }
+
+  // ── Step 6: Post-deletion audit entry (7.06 — GDPR 30-day retention) ─────
+  // The RPC's audit_log entry has user_id SET NULL after cascade.
+  // Insert a second entry with email + display name in metadata so
+  // the deletion can be traced for the 30-day legal retention period.
+  adminClient
+    .from("audit_log")
+    .insert({
+      user_id: null,
+      event_type: "account_deleted",
+      object_type: "profile",
+      object_id: userId,
+      metadata: {
+        email: userEmail,
+        display_name: profile?.display_name ?? null,
+        stripe_customer_id: profile?.stripe_customer_id ?? null,
+        deleted_at: new Date().toISOString(),
+      },
+    })
+    .then(
+      () => {
+        /* fire-and-forget */
+      },
+      () => {
+        /* non-fatal */
+      }
+    );
+
+  // NOTE: Confirmation email requires an email delivery service
+  // (Resend, SendGrid, etc.) which is not yet configured. When
+  // available, send a "Your account has been deleted" email to
+  // `userEmail` here.
 
   return json({ ok: true }, 200);
 };
