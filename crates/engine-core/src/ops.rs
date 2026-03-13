@@ -3034,6 +3034,305 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Optimization ──────────────────────────────────────────
+        "optim.designVariable" => {
+            // Source node: emit a table describing this design variable
+            let min = data.get("min").and_then(|v| v.as_f64()).unwrap_or(-10.0);
+            let max = data.get("max").and_then(|v| v.as_f64()).unwrap_or(10.0);
+            let initial = data.get("value").and_then(|v| v.as_f64()).unwrap_or((min + max) / 2.0);
+            let step = data.get("step").and_then(|v| v.as_f64()).unwrap_or(0.1);
+            Value::Table {
+                columns: vec!["min".into(), "max".into(), "initial".into(), "step".into()],
+                rows: vec![vec![min, max, initial, step]],
+            }
+        }
+
+        "optim.objectiveFunction" => {
+            // Pass through the input value
+            inputs.get("value").cloned().unwrap_or(Value::scalar(f64::NAN))
+        }
+
+        "optim.gradientDescent" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let f = optim::get_objective_fn(data);
+                    let max_iter = data.get("maxIterations").and_then(|v| v.as_f64()).unwrap_or(500.0) as usize;
+                    let lr = data.get("learningRate").and_then(|v| v.as_f64()).unwrap_or(0.01);
+                    let momentum = data.get("momentum").and_then(|v| v.as_f64()).unwrap_or(0.9);
+                    let tol = data.get("tolerance").and_then(|v| v.as_f64()).unwrap_or(1e-8);
+                    let result = optim::gradient::gradient_descent(&f, &vars, max_iter, lr, momentum, tol);
+                    optim::result_to_table(&result, &vars)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
+        "optim.geneticAlgorithm" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let f = optim::get_objective_fn(data);
+                    let gens = data.get("maxGenerations").and_then(|v| v.as_f64()).unwrap_or(200.0) as usize;
+                    let pop = data.get("populationSize").and_then(|v| v.as_f64()).unwrap_or(50.0) as usize;
+                    let mut_rate = data.get("mutationRate").and_then(|v| v.as_f64()).unwrap_or(0.1);
+                    let cross_rate = data.get("crossoverRate").and_then(|v| v.as_f64()).unwrap_or(0.8);
+                    let tol = data.get("tolerance").and_then(|v| v.as_f64()).unwrap_or(1e-8);
+                    let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+                    let result = optim::genetic::genetic_algorithm(&f, &vars, gens, pop, mut_rate, cross_rate, tol, seed);
+                    optim::result_to_table(&result, &vars)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
+        "optim.nelderMead" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let f = optim::get_objective_fn(data);
+                    let max_iter = data.get("maxIterations").and_then(|v| v.as_f64()).unwrap_or(1000.0) as usize;
+                    let tol = data.get("tolerance").and_then(|v| v.as_f64()).unwrap_or(1e-8);
+                    let result = optim::simplex::nelder_mead(&f, &vars, max_iter, tol, 1.0, 2.0, 0.5, 0.5);
+                    optim::result_to_table(&result, &vars)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
+        "optim.convergencePlot" | "optim.resultsTable" => {
+            // Pass through optimizer output (Table)
+            inputs.get("data").cloned().unwrap_or(Value::scalar(f64::NAN))
+        }
+
+        "optim.parametricSweep" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let f = optim::get_objective_fn(data);
+                    let steps = data.get("manualValues")
+                        .and_then(|v| v.get("steps"))
+                        .and_then(|v| v.as_f64())
+                        .or_else(|| data.get("steps").and_then(|v| v.as_f64()))
+                        .unwrap_or(100.0) as usize;
+                    optim::sweep::parametric_sweep(&f, &vars[0], steps)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
+        "optim.monteCarlo" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let f = optim::get_objective_fn(data);
+                    let samples = data.get("manualValues")
+                        .and_then(|v| v.get("samples"))
+                        .and_then(|v| v.as_f64())
+                        .or_else(|| data.get("samples").and_then(|v| v.as_f64()))
+                        .unwrap_or(1000.0) as usize;
+                    let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+                    optim::montecarlo::monte_carlo(&f, &vars, samples, seed)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
+        "optim.sensitivity" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let f = optim::get_objective_fn(data);
+                    optim::sensitivity::sensitivity_analysis(&f, &vars)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
+        "optim.doe" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let method = data.get("method").and_then(|v| v.as_str()).unwrap_or("factorial");
+                    let levels = data.get("levels").and_then(|v| v.as_f64()).unwrap_or(3.0) as usize;
+                    let samples = data.get("samples").and_then(|v| v.as_f64()).unwrap_or(50.0) as usize;
+                    let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+                    optim::doe::design_of_experiments(&vars, method, levels, samples, seed)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
+        // ── Machine Learning ─────────────────────────────────────────
+        "ml.trainTestSplit" => {
+            match inputs.get("data") {
+                Some(Value::Table { columns, rows }) => {
+                    let ratio = data.get("ratio").and_then(|v| v.as_f64()).unwrap_or(0.8);
+                    let split_idx = (rows.len() as f64 * ratio).round() as usize;
+                    let split_idx = split_idx.clamp(1, rows.len().saturating_sub(1));
+                    let train_rows = rows[..split_idx].to_vec();
+                    let test_rows = rows[split_idx..].to_vec();
+                    // Return combined table with a "split" column (0=train, 1=test)
+                    let mut out_cols = columns.clone();
+                    out_cols.push("_split".into());
+                    let mut out_rows = Vec::with_capacity(rows.len());
+                    for row in &train_rows {
+                        let mut r = row.clone();
+                        r.push(0.0);
+                        out_rows.push(r);
+                    }
+                    for row in &test_rows {
+                        let mut r = row.clone();
+                        r.push(1.0);
+                        out_rows.push(r);
+                    }
+                    Value::Table { columns: out_cols, rows: out_rows }
+                }
+                Some(Value::Error { .. }) => inputs["data"].clone(),
+                _ => Value::error("trainTestSplit: expected table input"),
+            }
+        }
+
+        "ml.linearRegression" => {
+            use crate::ml;
+            match (inputs.get("trainX"), inputs.get("trainY")) {
+                (Some(Value::Table { rows: x_rows, .. }), Some(Value::Vector { value: y })) => {
+                    match ml::linreg::fit(x_rows, y) {
+                        Ok(model) => ml::linreg::model_to_value(&model),
+                        Err(e) => Value::error(e),
+                    }
+                }
+                (Some(Value::Vector { value: x }), Some(Value::Vector { value: y })) => {
+                    let x_rows: Vec<Vec<f64>> = x.iter().map(|&v| vec![v]).collect();
+                    match ml::linreg::fit(&x_rows, y) {
+                        Ok(model) => ml::linreg::model_to_value(&model),
+                        Err(e) => Value::error(e),
+                    }
+                }
+                _ => Value::error("linearRegression: expected trainX (table/vector) and trainY (vector)"),
+            }
+        }
+
+        "ml.polynomialRegression" => {
+            use crate::ml;
+            match (inputs.get("trainX"), inputs.get("trainY")) {
+                (Some(Value::Vector { value: x }), Some(Value::Vector { value: y })) => {
+                    let degree = data.get("degree").and_then(|v| v.as_f64()).unwrap_or(2.0) as usize;
+                    match ml::polyreg::fit(x, y, degree) {
+                        Ok(model) => ml::linreg::model_to_value(&model),
+                        Err(e) => Value::error(e),
+                    }
+                }
+                _ => Value::error("polynomialRegression: expected trainX and trainY as vectors"),
+            }
+        }
+
+        "ml.knnClassifier" => {
+            use crate::ml;
+            match (inputs.get("trainX"), inputs.get("trainY")) {
+                (Some(Value::Table { rows: x_rows, .. }), Some(Value::Vector { value: y })) => {
+                    let k = data.get("k").and_then(|v| v.as_f64()).unwrap_or(3.0) as usize;
+                    match ml::knn::fit(x_rows.clone(), y.clone(), k) {
+                        Ok(model) => {
+                            // Return predictions on training data as verification
+                            let preds = ml::knn::predict(&model, x_rows);
+                            Value::Vector { value: preds }
+                        }
+                        Err(e) => Value::error(e),
+                    }
+                }
+                _ => Value::error("knnClassifier: expected trainX (table) and trainY (vector)"),
+            }
+        }
+
+        "ml.decisionTree" => {
+            use crate::ml;
+            match (inputs.get("trainX"), inputs.get("trainY")) {
+                (Some(Value::Table { rows: x_rows, .. }), Some(Value::Vector { value: y })) => {
+                    let max_depth = data.get("maxDepth").and_then(|v| v.as_f64()).unwrap_or(5.0) as usize;
+                    match ml::decision_tree::fit(x_rows, y, max_depth) {
+                        Ok(model) => {
+                            let preds = ml::decision_tree::predict(&model, x_rows);
+                            Value::Vector { value: preds }
+                        }
+                        Err(e) => Value::error(e),
+                    }
+                }
+                _ => Value::error("decisionTree: expected trainX (table) and trainY (vector)"),
+            }
+        }
+
+        "ml.predict" => {
+            // Generic predict: pass through model output + new data
+            // In practice, model state is managed on the TS side
+            inputs.get("model").cloned()
+                .or_else(|| inputs.get("data").cloned())
+                .unwrap_or(Value::error("predict: no model or data provided"))
+        }
+
+        "ml.mse" => {
+            use crate::ml;
+            match (inputs.get("actual"), inputs.get("predicted")) {
+                (Some(Value::Vector { value: actual }), Some(Value::Vector { value: predicted })) => {
+                    Value::scalar(ml::metrics::mse(actual, predicted))
+                }
+                _ => Value::error("mse: expected actual and predicted as vectors"),
+            }
+        }
+
+        "ml.r2" => {
+            use crate::ml;
+            match (inputs.get("actual"), inputs.get("predicted")) {
+                (Some(Value::Vector { value: actual }), Some(Value::Vector { value: predicted })) => {
+                    Value::scalar(ml::metrics::r_squared(actual, predicted))
+                }
+                _ => Value::error("r2: expected actual and predicted as vectors"),
+            }
+        }
+
+        "ml.confusionMatrix" => {
+            use crate::ml;
+            match (inputs.get("actual"), inputs.get("predicted")) {
+                (Some(Value::Vector { value: actual }), Some(Value::Vector { value: predicted })) => {
+                    ml::metrics::confusion_matrix(actual, predicted)
+                }
+                _ => Value::error("confusionMatrix: expected actual and predicted as vectors"),
+            }
+        }
+
+        // ── Neural Network ───────────────────────────────────────────
+        "nn.input" => {
+            // Source node: emit shape info from node data
+            let shape = data.get("shape").and_then(|v| v.as_f64()).unwrap_or(1.0) as usize;
+            Value::scalar(shape as f64)
+        }
+
+        "nn.dense" | "nn.conv1d" | "nn.dropout" | "nn.activation" => {
+            // Layer definition nodes: pass through with metadata
+            let input = inputs.get("input").cloned().unwrap_or(Value::scalar(f64::NAN));
+            input
+        }
+
+        "nn.sequential" => {
+            // Build model summary from layer chain
+            inputs.get("layers").cloned().unwrap_or(Value::scalar(0.0))
+        }
+
+        "nn.trainer" => {
+            // Training is managed by the TS/worker layer; engine returns status
+            inputs.get("model").cloned().unwrap_or(Value::error("trainer: no model connected"))
+        }
+
+        "nn.predict" => {
+            inputs.get("model").cloned()
+                .or_else(|| inputs.get("data").cloned())
+                .unwrap_or(Value::error("nn.predict: no model or data"))
+        }
+
+        "nn.export" => {
+            inputs.get("model").cloned().unwrap_or(Value::error("nn.export: no model connected"))
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }

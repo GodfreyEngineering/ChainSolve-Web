@@ -137,7 +137,7 @@ export interface EngineAPI {
  * update (or vice-versa) — reject with a CONTRACT_MISMATCH error so the user
  * knows to clear cache and reload.
  */
-const EXPECTED_CONTRACT_VERSION = 3
+const EXPECTED_CONTRACT_VERSION = 4
 
 // ── Watchdog constant ─────────────────────────────────────────────────────
 

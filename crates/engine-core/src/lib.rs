@@ -27,7 +27,10 @@ pub mod error;
 pub mod eval;
 pub mod expr;
 pub mod graph;
+pub mod ml;
+pub mod nn;
 pub mod ops;
+pub mod optim;
 pub mod types;
 pub mod validate;
 

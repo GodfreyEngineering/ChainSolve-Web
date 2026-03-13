@@ -1,0 +1,4 @@
+# Redirect build artifacts to a path without spaces.
+# The OneDrive path contains spaces which break dlltool/as on the GNU target.
+[build]
+target-dir = "C:/cargo-target"

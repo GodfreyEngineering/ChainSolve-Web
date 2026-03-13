@@ -1599,6 +1599,41 @@ pub fn catalog() -> Vec<CatalogEntry> {
         CatalogEntry { op_id: "signal.window_blackman", label: "Blackman Window", category: "signal", node_kind: "csOperation", inputs: vec![p("n", "N (length)")], pro_only: true },
         CatalogEntry { op_id: "signal.filter_lowpass_fir", label: "Low-pass FIR Filter", category: "signal", node_kind: "csOperation", inputs: vec![p("y", "y (vector)"), p("cutoff_norm", "f_c/f_s"), p("taps", "Taps")], pro_only: true },
         CatalogEntry { op_id: "signal.filter_highpass_fir", label: "High-pass FIR Filter", category: "signal", node_kind: "csOperation", inputs: vec![p("y", "y (vector)"), p("cutoff_norm", "f_c/f_s"), p("taps", "Taps")], pro_only: true },
+
+        // ── Optimization ──────────────────────────────────────────────
+        CatalogEntry { op_id: "optim.designVariable", label: "Design Variable", category: "optimization", node_kind: "csSource", inputs: vec![], pro_only: false },
+        CatalogEntry { op_id: "optim.objectiveFunction", label: "Objective Function", category: "optimization", node_kind: "csOperation", inputs: vec![p("value", "Value to minimize")], pro_only: false },
+        CatalogEntry { op_id: "optim.gradientDescent", label: "Gradient Descent", category: "optimization", node_kind: "csOperation", inputs: vec![p("objective", "Objective"), p("variables", "Variables")], pro_only: false },
+        CatalogEntry { op_id: "optim.geneticAlgorithm", label: "Genetic Algorithm", category: "optimization", node_kind: "csOperation", inputs: vec![p("objective", "Objective"), p("variables", "Variables")], pro_only: false },
+        CatalogEntry { op_id: "optim.nelderMead", label: "Nelder-Mead", category: "optimization", node_kind: "csOperation", inputs: vec![p("objective", "Objective"), p("variables", "Variables")], pro_only: false },
+        CatalogEntry { op_id: "optim.convergencePlot", label: "Convergence Plot", category: "optimization", node_kind: "csPlot", inputs: vec![p("data", "Optimizer output")], pro_only: false },
+        CatalogEntry { op_id: "optim.resultsTable", label: "Optimization Results", category: "optimization", node_kind: "csDisplay", inputs: vec![p("data", "Optimizer output")], pro_only: false },
+        CatalogEntry { op_id: "optim.parametricSweep", label: "Parametric Sweep", category: "optimization", node_kind: "csOperation", inputs: vec![p("objective", "Function"), p("variable", "Variable")], pro_only: false },
+        CatalogEntry { op_id: "optim.monteCarlo", label: "Monte Carlo", category: "optimization", node_kind: "csOperation", inputs: vec![p("objective", "Function"), p("variables", "Variables")], pro_only: false },
+        CatalogEntry { op_id: "optim.sensitivity", label: "Sensitivity Analysis", category: "optimization", node_kind: "csOperation", inputs: vec![p("objective", "Function"), p("variables", "Variables")], pro_only: false },
+        CatalogEntry { op_id: "optim.doe", label: "Design of Experiments", category: "optimization", node_kind: "csOperation", inputs: vec![p("variables", "Variables")], pro_only: false },
+
+        // ── Machine Learning ──────────────────────────────────────────
+        CatalogEntry { op_id: "ml.trainTestSplit", label: "Train/Test Split", category: "machineLearning", node_kind: "csOperation", inputs: vec![p("data", "Dataset (table)")], pro_only: false },
+        CatalogEntry { op_id: "ml.linearRegression", label: "Linear Regression", category: "machineLearning", node_kind: "csOperation", inputs: vec![p("trainX", "Training features"), p("trainY", "Training labels")], pro_only: false },
+        CatalogEntry { op_id: "ml.polynomialRegression", label: "Polynomial Regression", category: "machineLearning", node_kind: "csOperation", inputs: vec![p("trainX", "Training features"), p("trainY", "Training labels")], pro_only: false },
+        CatalogEntry { op_id: "ml.knnClassifier", label: "KNN Classifier", category: "machineLearning", node_kind: "csOperation", inputs: vec![p("trainX", "Training features"), p("trainY", "Training labels")], pro_only: false },
+        CatalogEntry { op_id: "ml.decisionTree", label: "Decision Tree", category: "machineLearning", node_kind: "csOperation", inputs: vec![p("trainX", "Training features"), p("trainY", "Training labels")], pro_only: false },
+        CatalogEntry { op_id: "ml.predict", label: "ML Predict", category: "machineLearning", node_kind: "csOperation", inputs: vec![p("model", "Trained model"), p("data", "New data")], pro_only: false },
+        CatalogEntry { op_id: "ml.mse", label: "Mean Squared Error", category: "machineLearning", node_kind: "csOperation", inputs: vec![p("actual", "Actual"), p("predicted", "Predicted")], pro_only: false },
+        CatalogEntry { op_id: "ml.r2", label: "R² Score", category: "machineLearning", node_kind: "csOperation", inputs: vec![p("actual", "Actual"), p("predicted", "Predicted")], pro_only: false },
+        CatalogEntry { op_id: "ml.confusionMatrix", label: "Confusion Matrix", category: "machineLearning", node_kind: "csOperation", inputs: vec![p("actual", "Actual"), p("predicted", "Predicted")], pro_only: false },
+
+        // ── Neural Network ────────────────────────────────────────────
+        CatalogEntry { op_id: "nn.input", label: "NN Input", category: "neuralNetworks", node_kind: "csSource", inputs: vec![], pro_only: true },
+        CatalogEntry { op_id: "nn.dense", label: "Dense Layer", category: "neuralNetworks", node_kind: "csOperation", inputs: vec![p("input", "Input")], pro_only: true },
+        CatalogEntry { op_id: "nn.conv1d", label: "Conv1D Layer", category: "neuralNetworks", node_kind: "csOperation", inputs: vec![p("input", "Input")], pro_only: true },
+        CatalogEntry { op_id: "nn.dropout", label: "Dropout Layer", category: "neuralNetworks", node_kind: "csOperation", inputs: vec![p("input", "Input")], pro_only: true },
+        CatalogEntry { op_id: "nn.activation", label: "Activation", category: "neuralNetworks", node_kind: "csOperation", inputs: vec![p("input", "Input")], pro_only: true },
+        CatalogEntry { op_id: "nn.sequential", label: "Sequential Model", category: "neuralNetworks", node_kind: "csOperation", inputs: vec![p("layers", "Layers")], pro_only: true },
+        CatalogEntry { op_id: "nn.trainer", label: "NN Trainer", category: "neuralNetworks", node_kind: "csOperation", inputs: vec![p("model", "Model"), p("trainX", "Training data"), p("trainY", "Training labels")], pro_only: true },
+        CatalogEntry { op_id: "nn.predict", label: "NN Predict", category: "neuralNetworks", node_kind: "csOperation", inputs: vec![p("model", "Trained model"), p("data", "Input data")], pro_only: true },
+        CatalogEntry { op_id: "nn.export", label: "NN Export", category: "neuralNetworks", node_kind: "csOperation", inputs: vec![p("model", "Trained model")], pro_only: true },
     ]
 }
 
@@ -1651,7 +1686,7 @@ pub fn engine_version() -> &'static str {
 /// If you bump this, you must also:
 /// 1. Update the expected version check in `src/engine/index.ts` (TypeScript host).
 /// 2. Document the change in `docs/W9_3_CORRECTNESS.md`.
-pub const ENGINE_CONTRACT_VERSION: u32 = 3;
+pub const ENGINE_CONTRACT_VERSION: u32 = 4;
 
 pub fn engine_contract_version() -> u32 {
     ENGINE_CONTRACT_VERSION
@@ -1664,14 +1699,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 313);
+        assert_eq!(cat.len(), 342);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 313);
+        assert_eq!(parsed.as_array().unwrap().len(), 342);
     }
 
     #[test]
