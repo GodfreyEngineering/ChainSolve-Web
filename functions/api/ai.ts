@@ -30,7 +30,14 @@ type Env = {
   SUPABASE_SERVICE_ROLE_KEY: string
 }
 
-type AiTask = 'chat' | 'fix_graph' | 'explain_node' | 'generate_template' | 'generate_theme'
+type AiTask =
+  | 'chat'
+  | 'fix_graph'
+  | 'explain_node'
+  | 'generate_template'
+  | 'generate_theme'
+  | 'optimize'
+  | 'suggest'
 
 interface AiRequestBody {
   mode: 'plan' | 'edit' | 'bypass'
@@ -244,6 +251,54 @@ Required JSON response:
     "baseMode": "dark"|"light",
     "variables": { "--bg-primary": "#1a1a2e", "--accent": "#e94560", ... }
   }
+}`
+  }
+
+  if (task === 'optimize') {
+    return `${base}
+
+TASK: OPTIMIZE GRAPH
+Analyse the user's graph for inefficiencies and suggest optimizations:
+- Identify redundant or duplicate computation chains that can be merged.
+- Spot unnecessary intermediate nodes that could be replaced by a single block.
+- Suggest reordering or restructuring for clarity and performance.
+- Recommend using groups to organise related blocks.
+- If constant sub-expressions exist, suggest folding them into a single constant.
+Do NOT remove nodes unless redundancy is clear. Prefer restructuring over deletion.
+Mark risk as medium if proposing structural changes, low for cosmetic changes.
+Mode: ${mode}
+
+Required JSON response:
+{
+  "mode": "${mode}",
+  "message": "summary of optimizations found and proposed changes",
+  "assumptions": ["any assumptions"],
+  "risk": { "level": "low"|"medium"|"high", "reasons": ["..."] },
+  "patch": { "ops": [...] }
+}`
+  }
+
+  if (task === 'suggest') {
+    return `${base}
+
+TASK: SUGGEST IMPROVEMENTS
+Review the user's graph and suggest improvements:
+- Missing validation or error handling (e.g. division by zero guards, range checks).
+- Additional outputs that would be useful (e.g. intermediate results, unit conversions).
+- Better block choices (e.g. using a specialised engineering block instead of raw math).
+- Missing connections or unused outputs that could feed downstream calculations.
+- Opportunities to add documentation via annotations or labels.
+This is primarily advisory. Propose patch ops only when the improvement is concrete and low-risk.
+For complex suggestions, describe them in the message and set ops to empty.
+Mode: ${mode}
+
+Required JSON response:
+{
+  "mode": "${mode}",
+  "message": "list of suggested improvements with rationale",
+  "assumptions": ["any assumptions"],
+  "risk": { "level": "low"|"medium"|"high", "reasons": ["..."] },
+  "patch": { "ops": [...] }
 }`
   }
 

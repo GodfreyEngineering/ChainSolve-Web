@@ -13,7 +13,14 @@ export type AiScope = 'active_canvas' | 'selection'
 
 // ── Workflow tasks (AI-3) ──────────────────────────────────────────────────
 
-export type AiTask = 'chat' | 'fix_graph' | 'explain_node' | 'generate_template' | 'generate_theme'
+export type AiTask =
+  | 'chat'
+  | 'fix_graph'
+  | 'explain_node'
+  | 'generate_template'
+  | 'generate_theme'
+  | 'optimize'
+  | 'suggest'
 
 // ── Patch operations ────────────────────────────────────────────────────────
 

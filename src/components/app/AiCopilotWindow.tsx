@@ -275,7 +275,8 @@ export function AiCopilotWindow({
       setPendingOps(null)
       setPendingRisk(null)
 
-      const effectiveMode = task === 'explain_node' ? ('plan' as AiMode) : mode
+      const effectiveMode =
+        task === 'explain_node' || task === 'suggest' ? ('plan' as AiMode) : mode
       sendCopilotRequest({
         mode: effectiveMode,
         task,
@@ -357,7 +358,7 @@ export function AiCopilotWindow({
 
     try {
       const response = await sendCopilotRequest({
-        mode: activeTask === 'explain_node' ? 'plan' : mode,
+        mode: activeTask === 'explain_node' || activeTask === 'suggest' ? 'plan' : mode,
         task: activeTask,
         scope:
           selectedNodeIds.length > 0 && activeTask === 'explain_node'
@@ -544,11 +545,23 @@ export function AiCopilotWindow({
           <button
             style={s.suggestionChip}
             onClick={() =>
-              triggerSuggestion('chat', t('ai.suggestSimplify', 'Simplify this chain'))
+              triggerSuggestion('optimize', t('ai.suggestOptimize', 'Optimize graph'))
             }
-            title={t('ai.suggestSimplifyTip', 'Suggest ways to reduce complexity or merge blocks')}
+            title={t('ai.suggestOptimizeTip', 'Find redundancies and suggest structural improvements')}
           >
-            {t('ai.suggestSimplify', 'Simplify chain')}
+            {t('ai.suggestOptimize', 'Optimize')}
+          </button>
+          <button
+            style={s.suggestionChip}
+            onClick={() =>
+              triggerSuggestion('suggest', t('ai.suggestImprovements', 'Suggest improvements'))
+            }
+            title={t(
+              'ai.suggestImprovementsTip',
+              'Recommend missing validations, better blocks, or additional outputs',
+            )}
+          >
+            {t('ai.suggestImprovements', 'Suggest improvements')}
           </button>
         </div>
       )}
