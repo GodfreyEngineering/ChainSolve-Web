@@ -12,6 +12,7 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     exclude: ['src/**/*.e2e.ts', 'e2e/**'],
     // Coverage: `npm run test:coverage` (not run in verify-ci to keep CI fast).

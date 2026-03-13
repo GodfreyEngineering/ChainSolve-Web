@@ -102,6 +102,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
 
   // ── Virtualizer ─────────────────────────────────────────────────────────────
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- virtualizer returns stable fns; skip is safe
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => containerRef.current,

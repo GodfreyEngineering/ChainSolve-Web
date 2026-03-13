@@ -24,12 +24,17 @@ const ROOT = resolve(__dirname, '..')
 // ── Resolve wasm-opt ─────────────────────────────────────────────
 
 const isWindows = process.platform === 'win32'
-// On Windows, .cmd wrappers must be invoked via cmd.exe; store only the base name.
+// On Windows, the .cmd wrapper and cmd.exe /c break when paths contain spaces.
+// Use the Node.js script in binaryen/bin directly via process.execPath.
+const BIN_NODE_SCRIPT = join(ROOT, 'node_modules', 'binaryen', 'bin', 'wasm-opt')
 const BIN_CMD = isWindows ? join(ROOT, 'node_modules', '.bin', 'wasm-opt.cmd') : null
 const BIN = isWindows ? null : join(ROOT, 'node_modules', '.bin', 'wasm-opt')
 
 function runWasmOpt(args) {
-  if (isWindows) {
+  if (isWindows && existsSync(BIN_NODE_SCRIPT)) {
+    // Invoke the Node.js wrapper script directly — avoids cmd.exe quoting issues
+    execFileSync(process.execPath, [BIN_NODE_SCRIPT, ...args], { stdio: 'inherit' })
+  } else if (isWindows) {
     const result = spawnSync('cmd.exe', ['/c', BIN_CMD, ...args], { stdio: 'inherit' })
     if (result.status !== 0) throw new Error(`wasm-opt exited with ${result.status}`)
   } else {
@@ -37,7 +42,7 @@ function runWasmOpt(args) {
   }
 }
 
-const BIN_CHECK = isWindows ? BIN_CMD : BIN
+const BIN_CHECK = isWindows ? BIN_NODE_SCRIPT : BIN
 if (!existsSync(BIN_CHECK)) {
   console.warn('wasm-opt not found in node_modules/.bin — skipping optimization.')
   console.warn('Install binaryen: npm install --save-dev binaryen')
@@ -46,7 +51,10 @@ if (!existsSync(BIN_CHECK)) {
 
 // Print version for diagnostics
 try {
-  if (isWindows) {
+  if (isWindows && existsSync(BIN_NODE_SCRIPT)) {
+    const ver = execFileSync(process.execPath, [BIN_NODE_SCRIPT, '--version'], { encoding: 'utf-8' }).trim()
+    console.log(`wasm-opt: ${ver}`)
+  } else if (isWindows) {
     const r = spawnSync('cmd.exe', ['/c', BIN_CMD, '--version'], { encoding: 'utf-8' })
     console.log(`wasm-opt: ${(r.stdout || '').trim() || '(version unknown)'}`)
   } else {

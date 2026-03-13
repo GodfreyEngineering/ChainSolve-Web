@@ -335,6 +335,29 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const [variablesPanelOpen, setVariablesPanelOpen] = useState(false)
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false)
   const [materialWizardOpen, setMaterialWizardOpen] = useState(false)
+  // Monotonic counter bumped on every graph change — triggers VariablesPanel
+  // snapshot re-derivation without coupling it to ReactFlowProvider.
+  const [graphVersion, setGraphVersion] = useState(0)
+
+  // Derive canvas snapshot for VariablesPanel (only when open, re-derived on graph changes).
+  // graphVersion is consumed as a void expression so the dep triggers re-derivation
+  // when nodes/edges change, even though the actual data comes from the ref snapshot.
+  const vpSnapshot = useMemo(() => {
+    void graphVersion
+    if (!variablesPanelOpen) return { nodes: [] as Node<NodeData>[], edges: [] as Edge[] }
+    const ref =
+      focusedCanvasId && focusedCanvasId === secondaryCanvasId ? secondaryCanvasRef : canvasRef
+    return ref.current?.getSnapshot() ?? { nodes: [] as Node<NodeData>[], edges: [] as Edge[] }
+  }, [variablesPanelOpen, graphVersion, focusedCanvasId, secondaryCanvasId])
+
+  const handleFitViewToNodes = useCallback(
+    (nodeIds: string[]) => {
+      const ref =
+        focusedCanvasId && focusedCanvasId === secondaryCanvasId ? secondaryCanvasRef : canvasRef
+      ref.current?.fitViewToNodes(nodeIds)
+    },
+    [focusedCanvasId, secondaryCanvasId],
+  )
 
   // ── Inline project name editing ────────────────────────────────────────────
   const [nameEditing, setNameEditing] = useState(false)
@@ -712,6 +735,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     // Suppress dirty/autosave during export canvas switching
     if (exportingRef.current) return
     markDirty()
+    setGraphVersion((v) => v + 1)
     const currentCanvasId = useCanvasesStore.getState().activeCanvasId
     if (currentCanvasId) markCanvasDirty(currentCanvasId)
     // D8-1: autosave gated by user preference (default OFF)
@@ -724,6 +748,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const handleScratchGraphChange: NonNullable<CanvasAreaProps['onGraphChange']> =
     useCallback(() => {
       scratchDirtyRef.current = true
+      setGraphVersion((v) => v + 1)
     }, [])
 
   // ── Flush save on tab close / refresh (best-effort) ────────────────────────
@@ -2316,6 +2341,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         <LazyVariablesPanel
           open={variablesPanelOpen}
           onClose={() => setVariablesPanelOpen(false)}
+          nodes={vpSnapshot.nodes}
+          edges={vpSnapshot.edges}
+          onFitViewToNodes={handleFitViewToNodes}
         />
       </Suspense>
       {templateManagerOpen && (

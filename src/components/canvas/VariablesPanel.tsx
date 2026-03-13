@@ -11,7 +11,6 @@
  */
 
 import { useRef, useEffect, useCallback, useState, useMemo, memo } from 'react'
-import { useNodes, useEdges, useReactFlow } from '@xyflow/react'
 import type { Node, Edge } from '@xyflow/react'
 import { useVariablesStore } from '../../stores/variablesStore'
 import type { ProjectVariable } from '../../lib/variables'
@@ -22,6 +21,12 @@ import { HelpLink } from '../ui/HelpLink'
 export interface VariablesPanelProps {
   open: boolean
   onClose: () => void
+  /** Current canvas nodes — passed from CanvasPage to avoid ReactFlowProvider dependency. */
+  nodes: Node<NodeData>[]
+  /** Current canvas edges — passed from CanvasPage to avoid ReactFlowProvider dependency. */
+  edges: Edge[]
+  /** Pan/zoom to show specific nodes by ID (delegates to CanvasAreaHandle.fitViewToNodes). */
+  onFitViewToNodes: (nodeIds: string[]) => void
 }
 
 type SortKey = 'name' | 'value' | 'unit'
@@ -620,17 +625,19 @@ function InfluencePanel({ variables, allNodes, allEdges }: InfluencePanelProps) 
 
 // ── Main panel ──────────────────────────────────────────────────────────────
 
-export function VariablesPanel({ open, onClose }: VariablesPanelProps) {
+export function VariablesPanel({
+  open,
+  onClose,
+  nodes,
+  edges,
+  onFitViewToNodes,
+}: VariablesPanelProps) {
   const { t } = useTranslation()
   const variables = useVariablesStore((s) => s.variables)
   const setVariable = useVariablesStore((s) => s.setVariable)
   const removeVariable = useVariablesStore((s) => s.removeVariable)
   const panelRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const allNodes = useNodes() as Node<NodeData>[]
-  const allEdges = useEdges()
-  const { fitView } = useReactFlow()
 
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('name')
@@ -642,12 +649,12 @@ export function VariablesPanel({ open, onClose }: VariablesPanelProps) {
   // Compute how many nodes are bound to each variable
   const boundCounts = useMemo(() => {
     const counts: Record<string, number> = {}
-    for (const node of allNodes) {
+    for (const node of nodes) {
       const varId = (node.data as NodeData).varId
       if (varId) counts[varId] = (counts[varId] ?? 0) + 1
     }
     return counts
-  }, [allNodes])
+  }, [nodes])
 
   // Filter and sort variables
   const varList = useMemo(() => {
@@ -754,16 +761,14 @@ export function VariablesPanel({ open, onClose }: VariablesPanelProps) {
 
   const handleJumpToBound = useCallback(
     (varId: string) => {
-      const boundNodes = allNodes.filter((n) => (n.data as NodeData).varId === varId)
-      if (boundNodes.length > 0) {
-        fitView({
-          nodes: boundNodes.map((n) => ({ id: n.id })),
-          padding: 0.4,
-          duration: 400,
-        })
+      const boundNodeIds = nodes
+        .filter((n) => (n.data as NodeData).varId === varId)
+        .map((n) => n.id)
+      if (boundNodeIds.length > 0) {
+        onFitViewToNodes(boundNodeIds)
       }
     },
-    [allNodes, fitView],
+    [nodes, onFitViewToNodes],
   )
 
   const handleExportCSV = useCallback(() => {
@@ -931,7 +936,7 @@ export function VariablesPanel({ open, onClose }: VariablesPanelProps) {
           >
             Influence Analysis
           </div>
-          <InfluencePanel variables={varList} allNodes={allNodes} allEdges={allEdges} />
+          <InfluencePanel variables={varList} allNodes={nodes} allEdges={edges} />
         </div>
       )}
 

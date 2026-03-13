@@ -218,6 +218,8 @@ export interface CanvasAreaHandle {
   /** AI-1: Replace the canvas state with new nodes/edges (used by AI Copilot patch apply). */
   setSnapshot: (nodes: Node<NodeData>[], edges: Edge[]) => void
   fitView: () => void
+  /** Pan/zoom to show specific nodes (used by VariablesPanel "jump to bound"). */
+  fitViewToNodes: (nodeIds: string[]) => void
   zoomIn: () => void
   zoomOut: () => void
   toggleLibrary: () => void
@@ -506,6 +508,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       setEdges(newEdges)
     },
     fitView: () => fitView({ padding: 0.15, duration: 300 }),
+    fitViewToNodes: (nodeIds: string[]) =>
+      fitView({ nodes: nodeIds.map((id) => ({ id })), padding: 0.4, duration: 400 }),
     zoomIn: () => zoomIn({ duration: 200 }),
     zoomOut: () => zoomOut({ duration: 200 }),
     toggleLibrary: () => setLibVisible((v) => !v),
