@@ -11,16 +11,9 @@
 
 import type { CSSProperties } from 'react'
 import { memo, useMemo, useCallback } from 'react'
-import {
-  Handle,
-  Position,
-  useEdges,
-  useReactFlow,
-  type NodeProps,
-  type IsValidConnection,
-} from '@xyflow/react'
+import { Handle, Position, useEdges, type NodeProps, type IsValidConnection } from '@xyflow/react'
 import { useComputedValue } from '../../../contexts/ComputedContext'
-import { formatValue, isError, isTable } from '../../../engine/value'
+import { isError, isTable } from '../../../engine/value'
 import type { TableValue } from '../../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
 import { NODE_STYLES as s, userColorBg } from './nodeStyles'
@@ -105,7 +98,6 @@ function Sparkline({
 
 function OptimizerNodeInner({ id, data, selected, draggable }: NodeProps) {
   const nd = data as NodeData
-  const { updateNodeData } = useReactFlow()
   const allEdges = useEdges()
   const value = useComputedValue(id)
   const isLocked = draggable === false
@@ -198,11 +190,8 @@ function OptimizerNodeInner({ id, data, selected, draggable }: NodeProps) {
       {/* Body */}
       <div className="cs-node-body" style={{ position: 'relative', padding: '0.35rem 0.5rem' }}>
         {/* Input handles */}
-        {inputs.map((port, i) => {
-          const connected = allEdges.some(
-            (e) => e.target === id && e.targetHandle === port.id,
-          )
-          const topPx = (i + 0.5) * ROW_H
+        {inputs.map((port) => {
+          const connected = allEdges.some((e) => e.target === id && e.targetHandle === port.id)
           return (
             <div
               key={port.id}
@@ -229,9 +218,7 @@ function OptimizerNodeInner({ id, data, selected, draggable }: NodeProps) {
                 }}
               />
               <span style={s.portLabel}>{port.label}</span>
-              {connected && (
-                <span style={connectedBadge}>connected</span>
-              )}
+              {connected && <span style={connectedBadge}>connected</span>}
             </div>
           )
         })}
@@ -241,16 +228,9 @@ function OptimizerNodeInner({ id, data, selected, draggable }: NodeProps) {
           <div style={chartSection}>
             <div style={chartLabel}>Convergence</div>
             <div style={{ padding: '0.15rem 0' }}>
-              <Sparkline
-                data={convergence}
-                width={200}
-                height={40}
-                color="var(--primary)"
-              />
+              <Sparkline data={convergence} width={200} height={40} color="var(--primary)" />
             </div>
-            <div style={chartMeta}>
-              {convergence.length} iterations
-            </div>
+            <div style={chartMeta}>{convergence.length} iterations</div>
           </div>
         )}
 
@@ -258,9 +238,7 @@ function OptimizerNodeInner({ id, data, selected, draggable }: NodeProps) {
         {bestObjective !== null && (
           <div style={resultSection}>
             <div style={resultLabel}>Best value found</div>
-            <div style={resultValue}>
-              {bestObjective.toPrecision(6)}
-            </div>
+            <div style={resultValue}>{bestObjective.toPrecision(6)}</div>
           </div>
         )}
 
@@ -278,9 +256,7 @@ function OptimizerNodeInner({ id, data, selected, draggable }: NodeProps) {
 
         {/* Waiting state */}
         {status === 'waiting' && (
-          <div style={waitingMsg}>
-            Connect an objective and variables to optimize
-          </div>
+          <div style={waitingMsg}>Connect an objective and variables to optimize</div>
         )}
 
         {/* Output handle */}
@@ -308,9 +284,7 @@ function OptimizerNodeInner({ id, data, selected, draggable }: NodeProps) {
   )
 }
 
-function statusBadgeStyle(
-  status: 'waiting' | 'optimized' | 'error',
-): CSSProperties {
+function statusBadgeStyle(status: 'waiting' | 'optimized' | 'error'): CSSProperties {
   const base: CSSProperties = {
     fontSize: '0.55rem',
     fontWeight: 700,

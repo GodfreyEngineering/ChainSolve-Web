@@ -12,13 +12,7 @@
 
 import type { CSSProperties } from 'react'
 import { memo, useMemo, useCallback } from 'react'
-import {
-  Handle,
-  Position,
-  useEdges,
-  type NodeProps,
-  type IsValidConnection,
-} from '@xyflow/react'
+import { Handle, Position, useEdges, type NodeProps, type IsValidConnection } from '@xyflow/react'
 import { useComputedValue } from '../../../contexts/ComputedContext'
 import { isError, isTable } from '../../../engine/value'
 import type { TableValue } from '../../../engine/value'
@@ -50,15 +44,7 @@ function extractLossHistory(table: TableValue): number[] {
 }
 
 /** Mini sparkline for loss curve. */
-function LossSparkline({
-  data,
-  width,
-  height,
-}: {
-  data: number[]
-  width: number
-  height: number
-}) {
+function LossSparkline({ data, width, height }: { data: number[]; width: number; height: number }) {
   const filtered = data.filter((d) => isFinite(d))
   if (filtered.length < 2) return null
 
@@ -75,7 +61,12 @@ function LossSparkline({
     .join(' ')
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      style={{ display: 'block' }}
+    >
       <polyline
         points={points}
         fill="none"
@@ -115,15 +106,7 @@ function ArchitectureDiagram({ layers }: { layers: { type: string; size: number 
         const color = LAYER_COLORS[layer.type] ?? '#6b7280'
         return (
           <g key={i}>
-            <rect
-              x={x}
-              y={y}
-              width={barWidth}
-              height={h}
-              rx={2}
-              fill={color}
-              opacity={0.8}
-            />
+            <rect x={x} y={y} width={barWidth} height={h} rx={2} fill={color} opacity={0.8} />
             <title>{`${layer.type}: ${layer.size}`}</title>
           </g>
         )
@@ -253,9 +236,7 @@ function NeuralNetNodeInner({ id, data, selected, draggable }: NodeProps) {
 
         {/* Input handles */}
         {inputs.map((port) => {
-          const connected = allEdges.some(
-            (e) => e.target === id && e.targetHandle === port.id,
-          )
+          const connected = allEdges.some((e) => e.target === id && e.targetHandle === port.id)
           return (
             <div
               key={port.id}

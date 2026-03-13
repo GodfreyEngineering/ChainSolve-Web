@@ -10,13 +10,7 @@
 
 import type { CSSProperties } from 'react'
 import { memo, useMemo, useCallback } from 'react'
-import {
-  Handle,
-  Position,
-  useEdges,
-  type NodeProps,
-  type IsValidConnection,
-} from '@xyflow/react'
+import { Handle, Position, useEdges, type NodeProps, type IsValidConnection } from '@xyflow/react'
 import { useComputedValue } from '../../../contexts/ComputedContext'
 import { isError, isTable, isScalar } from '../../../engine/value'
 import type { TableValue } from '../../../engine/value'
@@ -122,9 +116,7 @@ function MLModelNodeInner({ id, data, selected, draggable }: NodeProps) {
 
         {/* Input handles */}
         {inputs.map((port) => {
-          const connected = allEdges.some(
-            (e) => e.target === id && e.targetHandle === port.id,
-          )
+          const connected = allEdges.some((e) => e.target === id && e.targetHandle === port.id)
           return (
             <div
               key={port.id}
@@ -151,9 +143,7 @@ function MLModelNodeInner({ id, data, selected, draggable }: NodeProps) {
                 }}
               />
               <span style={s.portLabel}>{port.label}</span>
-              {connected && (
-                <span style={connBadge}>&#9654;</span>
-              )}
+              {connected && <span style={connBadge}>&#9654;</span>}
             </div>
           )
         })}
@@ -171,18 +161,12 @@ function MLModelNodeInner({ id, data, selected, draggable }: NodeProps) {
         {status === 'trained' && hasScalar && (
           <div style={summaryBox}>
             <div style={summaryLabel}>Output</div>
-            <div style={scalarDisplay}>
-              {(value as { value: number }).value.toPrecision(6)}
-            </div>
+            <div style={scalarDisplay}>{(value as { value: number }).value.toPrecision(6)}</div>
           </div>
         )}
 
         {/* Waiting state */}
-        {status === 'waiting' && (
-          <div style={waitingStyle}>
-            Connect training data to fit model
-          </div>
-        )}
+        {status === 'waiting' && <div style={waitingStyle}>Connect training data to fit model</div>}
 
         {/* Output handle */}
         <Handle

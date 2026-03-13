@@ -2,8 +2,8 @@
 /**
  * scripts/check-robots-meta.mjs — Guard: dist/index.html contains robots meta.
  *
- * Verifies the built HTML includes <meta name="robots" content="noindex, nofollow" />.
- * This prevents accidental removal of the tag that keeps the app out of search indexes.
+ * Verifies the built HTML includes a <meta name="robots"> tag allowing indexing.
+ * The app should be publicly indexable (robots.txt handles route-level blocking).
  *
  * Run after `npm run build`:
  *   node scripts/check-robots-meta.mjs
@@ -27,13 +27,13 @@ for (const file of targets) {
   if (!existsSync(file)) continue
   checked++
   const html = readFileSync(file, 'utf-8')
-  if (!html.includes('noindex')) {
-    console.error(`::error::Missing robots noindex meta tag in ${file}`)
-    console.error('Expected: <meta name="robots" content="noindex, nofollow" />')
+  if (!html.includes('name="robots"')) {
+    console.error(`::error::Missing robots meta tag in ${file}`)
+    console.error('Expected: <meta name="robots" content="index, follow" />')
     process.exit(1)
   }
   const label = file.replace(ROOT + '/', '')
-  console.log(`${label}: robots noindex meta tag present`)
+  console.log(`${label}: robots meta tag present`)
 }
 
 if (checked === 0) {
