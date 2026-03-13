@@ -224,6 +224,8 @@ export interface CanvasAreaHandle {
   getSnapshot: () => { nodes: Node<NodeData>[]; edges: Edge[] }
   /** AI-1: Replace the canvas state with new nodes/edges (used by AI Copilot patch apply). */
   setSnapshot: (nodes: Node<NodeData>[], edges: Edge[]) => void
+  /** 6.02: Get computed values for AI context injection. nodeId → scalar or error string. */
+  getComputedValues: () => Record<string, number | string>
   fitView: () => void
   /** Pan/zoom to show specific nodes (used by VariablesPanel "jump to bound"). */
   fitViewToNodes: (nodeIds: string[]) => void
@@ -513,6 +515,14 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       historySave({ nodes: latestNodes.current, edges: latestEdges.current })
       setNodes(newNodes)
       setEdges(newEdges)
+    },
+    getComputedValues: () => {
+      const result: Record<string, number | string> = {}
+      for (const [nodeId, val] of computed) {
+        if (val.kind === 'scalar') result[nodeId] = val.value
+        else if (val.kind === 'error') result[nodeId] = val.message
+      }
+      return result
     },
     fitView: () => fitView({ padding: 0.15, duration: 300 }),
     fitViewToNodes: (nodeIds: string[]) =>

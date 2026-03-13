@@ -18,6 +18,8 @@ export interface SendCopilotOptions {
   selectedNodeIds: string[]
   locale?: string
   diagnostics?: { level: string; code: string; message: string; nodeIds?: string[] }[]
+  /** 6.02: Computed values per node — nodeId → scalar number or error string. */
+  computedValues?: Record<string, number | string>
 }
 
 /**
@@ -42,6 +44,7 @@ export async function sendCopilotRequest(opts: SendCopilotOptions): Promise<AiAp
     clientContext: {
       locale: opts.locale,
       diagnostics: opts.diagnostics,
+      computedValues: opts.computedValues,
     },
   }
 

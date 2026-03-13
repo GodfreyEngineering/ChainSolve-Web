@@ -2326,6 +2326,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                 }}
                 onUpgrade={() => setUpgradeAiOpen(true)}
                 initialMessage={aiInitialMessage}
+                computedValues={canvasRef.current?.getComputedValues()}
               />
             </Suspense>
           </LazyAiDockPanel>

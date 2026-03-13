@@ -45,6 +45,8 @@ interface AiRequestBody {
     theme?: string
     decimalPlaces?: number
     diagnostics?: { level: string; code: string; message: string; nodeIds?: string[] }[]
+    /** 6.02: Computed values per node — nodeId → scalar number or error string. */
+    computedValues?: Record<string, number | string>
   }
 }
 
@@ -662,12 +664,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             )
           }
 
+          // 6.02: Merge client-side computed values into node summaries
+          const cv = body.clientContext?.computedValues ?? {}
+
           // Build compact summary
           const nodeSummaries = relevantNodes
             .slice(0, 50)
             .map((n) => {
               const d = n.data as Record<string, unknown> | undefined
-              return `${n.id}: ${d?.blockType ?? '?'}${d?.label ? ` "${d.label}"` : ''}${d?.value !== undefined ? ` val=${d.value}` : ''}`
+              const computed = cv[n.id]
+              const computedStr =
+                computed !== undefined
+                  ? typeof computed === 'string'
+                    ? ` ERROR="${computed}"`
+                    : ` => ${computed}`
+                  : ''
+              return `${n.id}: ${d?.blockType ?? '?'}${d?.label ? ` "${d.label}"` : ''}${d?.value !== undefined ? ` val=${d.value}` : ''}${computedStr}`
             })
             .join('\n')
 

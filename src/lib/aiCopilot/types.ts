@@ -112,6 +112,8 @@ export interface AiApiRequest {
     theme?: string
     decimalPlaces?: number
     diagnostics?: { level: string; code: string; message: string; nodeIds?: string[] }[]
+    /** 6.02: Computed values per node — nodeId → scalar number or error string. */
+    computedValues?: Record<string, number | string>
   }
 }
 

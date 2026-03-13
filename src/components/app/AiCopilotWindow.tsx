@@ -230,6 +230,8 @@ export interface AiCopilotWindowProps {
   initialMessage?: string
   /** G8-1: When true, render content directly without AppWindow wrapper (for docked mode). */
   docked?: boolean
+  /** 6.02: Computed values per node for AI context. */
+  computedValues?: Record<string, number | string>
 }
 
 // ── Component ───────────────────────────────────────────────────────────────
@@ -243,6 +245,7 @@ export function AiCopilotWindow({
   onUpgrade,
   initialMessage,
   docked = false,
+  computedValues,
 }: AiCopilotWindowProps) {
   const { t } = useTranslation()
   const [mode, setMode] = useState<AiMode>('edit')
@@ -282,6 +285,7 @@ export function AiCopilotWindow({
         projectId,
         canvasId,
         selectedNodeIds,
+        computedValues,
       })
         .then((response) => {
           const ops = response.patchOps ?? []
@@ -329,7 +333,7 @@ export function AiCopilotWindow({
           }, 50)
         })
     },
-    [projectId, canvasId, loading, mode, selectedNodeIds, isEnterprise, onApplyPatch, t],
+    [projectId, canvasId, loading, mode, selectedNodeIds, isEnterprise, onApplyPatch, t, computedValues],
   )
 
   const scrollToBottom = useCallback(() => {
@@ -363,6 +367,7 @@ export function AiCopilotWindow({
         projectId,
         canvasId,
         selectedNodeIds,
+        computedValues,
       })
 
       const ops = response.patchOps ?? []
