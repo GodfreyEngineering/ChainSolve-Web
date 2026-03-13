@@ -18,7 +18,19 @@ export function EditorSettings({
   checkHintStyle,
 }: Props) {
   const { t } = useTranslation()
-  const prefs = usePreferencesStore()
+  const defaultSnapToGrid = usePreferencesStore((s) => s.defaultSnapToGrid)
+  const defaultEdgeAnimation = usePreferencesStore((s) => s.defaultEdgeAnimation)
+  const defaultLod = usePreferencesStore((s) => s.defaultLod)
+  const showGrid = usePreferencesStore((s) => s.showGrid)
+  const defaultZoom = usePreferencesStore((s) => s.defaultZoom)
+  const canvasBgStyle = usePreferencesStore((s) => s.canvasBgStyle)
+  const canvasGridSize = usePreferencesStore((s) => s.canvasGridSize)
+  const canvasEdgeType = usePreferencesStore((s) => s.canvasEdgeType)
+  const canvasEdgeWidth = usePreferencesStore((s) => s.canvasEdgeWidth)
+  const canvasNodeBorderRadius = usePreferencesStore((s) => s.canvasNodeBorderRadius)
+  const canvasNodeShadow = usePreferencesStore((s) => s.canvasNodeShadow)
+  const canvasAnimationSpeed = usePreferencesStore((s) => s.canvasAnimationSpeed)
+  const updatePrefs = usePreferencesStore((s) => s.update)
 
   return (
     <div style={cardStyle}>
@@ -26,8 +38,8 @@ export function EditorSettings({
         <label style={checkRowStyle}>
           <input
             type="checkbox"
-            checked={prefs.defaultSnapToGrid}
-            onChange={(e) => prefs.update({ defaultSnapToGrid: e.target.checked })}
+            checked={defaultSnapToGrid}
+            onChange={(e) => updatePrefs({ defaultSnapToGrid: e.target.checked })}
             style={checkboxStyle}
           />
           <div>
@@ -39,8 +51,8 @@ export function EditorSettings({
         <label style={checkRowStyle}>
           <input
             type="checkbox"
-            checked={prefs.defaultEdgeAnimation}
-            onChange={(e) => prefs.update({ defaultEdgeAnimation: e.target.checked })}
+            checked={defaultEdgeAnimation}
+            onChange={(e) => updatePrefs({ defaultEdgeAnimation: e.target.checked })}
             style={checkboxStyle}
           />
           <div>
@@ -52,8 +64,8 @@ export function EditorSettings({
         <label style={checkRowStyle}>
           <input
             type="checkbox"
-            checked={prefs.defaultLod}
-            onChange={(e) => prefs.update({ defaultLod: e.target.checked })}
+            checked={defaultLod}
+            onChange={(e) => updatePrefs({ defaultLod: e.target.checked })}
             style={checkboxStyle}
           />
           <div>
@@ -65,8 +77,8 @@ export function EditorSettings({
         <label style={checkRowStyle}>
           <input
             type="checkbox"
-            checked={prefs.showGrid}
-            onChange={(e) => prefs.update({ showGrid: e.target.checked })}
+            checked={showGrid}
+            onChange={(e) => updatePrefs({ showGrid: e.target.checked })}
             style={checkboxStyle}
           />
           <div>
@@ -85,8 +97,8 @@ export function EditorSettings({
             { value: '125', label: '125%' },
             { value: '150', label: '150%' },
           ]}
-          value={String(prefs.defaultZoom)}
-          onChange={(e) => prefs.update({ defaultZoom: parseInt(e.target.value) })}
+          value={String(defaultZoom)}
+          onChange={(e) => updatePrefs({ defaultZoom: parseInt(e.target.value) })}
         />
 
         <Select
@@ -98,9 +110,9 @@ export function EditorSettings({
             { value: 'large-dots', label: t('settings.bgLargeDots', 'Large dots') },
             { value: 'solid', label: t('settings.bgSolid', 'Solid (no grid)') },
           ]}
-          value={prefs.canvasBgStyle}
+          value={canvasBgStyle}
           onChange={(e) =>
-            prefs.update({
+            updatePrefs({
               canvasBgStyle: e.target.value as
                 | 'solid'
                 | 'dot-grid'
@@ -119,9 +131,9 @@ export function EditorSettings({
             { value: '32', label: '32 px' },
             { value: '64', label: '64 px' },
           ]}
-          value={String(prefs.canvasGridSize)}
+          value={String(canvasGridSize)}
           onChange={(e) =>
-            prefs.update({ canvasGridSize: parseInt(e.target.value) as 8 | 16 | 32 | 64 })
+            updatePrefs({ canvasGridSize: parseInt(e.target.value) as 8 | 16 | 32 | 64 })
           }
         />
 
@@ -133,9 +145,9 @@ export function EditorSettings({
             { value: 'step', label: t('settings.edgeStep', 'Step (sharp corners)') },
             { value: 'straight', label: t('settings.edgeStraight', 'Straight') },
           ]}
-          value={prefs.canvasEdgeType}
+          value={canvasEdgeType}
           onChange={(e) =>
-            prefs.update({
+            updatePrefs({
               canvasEdgeType: e.target.value as 'bezier' | 'step' | 'straight' | 'smoothstep',
             })
           }
@@ -149,9 +161,9 @@ export function EditorSettings({
             { value: '2', label: '2 px' },
             { value: '3', label: '3 px (thick)' },
           ]}
-          value={String(prefs.canvasEdgeWidth)}
+          value={String(canvasEdgeWidth)}
           onChange={(e) =>
-            prefs.update({ canvasEdgeWidth: parseFloat(e.target.value) as 1 | 1.5 | 2 | 3 })
+            updatePrefs({ canvasEdgeWidth: parseFloat(e.target.value) as 1 | 1.5 | 2 | 3 })
           }
         />
 
@@ -163,9 +175,9 @@ export function EditorSettings({
             { value: '8', label: '8 px' },
             { value: '12', label: t('settings.borderRadiusRound', 'Rounded (12 px)') },
           ]}
-          value={String(prefs.canvasNodeBorderRadius)}
+          value={String(canvasNodeBorderRadius)}
           onChange={(e) =>
-            prefs.update({
+            updatePrefs({
               canvasNodeBorderRadius: parseInt(e.target.value) as 0 | 4 | 8 | 12,
             })
           }
@@ -178,9 +190,9 @@ export function EditorSettings({
             { value: 'subtle', label: t('settings.shadowSubtle', 'Subtle') },
             { value: 'strong', label: t('settings.shadowStrong', 'Strong') },
           ]}
-          value={prefs.canvasNodeShadow}
+          value={canvasNodeShadow}
           onChange={(e) =>
-            prefs.update({ canvasNodeShadow: e.target.value as 'none' | 'subtle' | 'strong' })
+            updatePrefs({ canvasNodeShadow: e.target.value as 'none' | 'subtle' | 'strong' })
           }
         />
 
@@ -192,9 +204,9 @@ export function EditorSettings({
             { value: 'medium', label: t('settings.animMedium', 'Medium (600 ms)') },
             { value: 'slow', label: t('settings.animSlow', 'Slow (1200 ms)') },
           ]}
-          value={prefs.canvasAnimationSpeed}
+          value={canvasAnimationSpeed}
           onChange={(e) =>
-            prefs.update({
+            updatePrefs({
               canvasAnimationSpeed: e.target.value as 'none' | 'slow' | 'medium' | 'fast',
             })
           }

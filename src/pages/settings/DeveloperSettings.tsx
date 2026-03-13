@@ -40,7 +40,8 @@ export function DeveloperSettings({
   checkHintStyle,
 }: Props) {
   const { t } = useTranslation()
-  const prefs = usePreferencesStore()
+  const defaultLod = usePreferencesStore((s) => s.defaultLod)
+  const updatePrefs = usePreferencesStore((s) => s.update)
   const [planOverride, setPlanOverride] = useState<string>(getDevPlanOverride() ?? '')
 
   const handlePlanChange = (value: string) => {
@@ -86,8 +87,8 @@ export function DeveloperSettings({
           <label style={checkRowStyle}>
             <input
               type="checkbox"
-              checked={prefs.defaultLod}
-              onChange={(e) => prefs.update({ defaultLod: e.target.checked })}
+              checked={defaultLod}
+              onChange={(e) => updatePrefs({ defaultLod: e.target.checked })}
               style={checkboxStyle}
             />
             <div>

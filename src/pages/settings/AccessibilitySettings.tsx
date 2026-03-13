@@ -7,7 +7,13 @@ import { usePreferencesStore } from '../../stores/preferencesStore'
 
 export function AccessibilitySettings() {
   const { t } = useTranslation()
-  const prefs = usePreferencesStore()
+  const highContrastMode = usePreferencesStore((s) => s.highContrastMode)
+  const reducedMotion = usePreferencesStore((s) => s.reducedMotion)
+  const fontScale = usePreferencesStore((s) => s.fontScale)
+  const analyticsOptIn = usePreferencesStore((s) => s.analyticsOptIn)
+  const crashReportingOptIn = usePreferencesStore((s) => s.crashReportingOptIn)
+  const aiOptOut = usePreferencesStore((s) => s.aiOptOut)
+  const updatePrefs = usePreferencesStore((s) => s.update)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -19,8 +25,8 @@ export function AccessibilitySettings() {
       <label style={rowStyle}>
         <input
           type="checkbox"
-          checked={prefs.highContrastMode}
-          onChange={(e) => prefs.update({ highContrastMode: e.target.checked })}
+          checked={highContrastMode}
+          onChange={(e) => updatePrefs({ highContrastMode: e.target.checked })}
           style={{ accentColor: 'var(--primary)' }}
         />
         <div>
@@ -35,8 +41,8 @@ export function AccessibilitySettings() {
       <label style={rowStyle}>
         <input
           type="checkbox"
-          checked={prefs.reducedMotion}
-          onChange={(e) => prefs.update({ reducedMotion: e.target.checked })}
+          checked={reducedMotion}
+          onChange={(e) => updatePrefs({ reducedMotion: e.target.checked })}
           style={{ accentColor: 'var(--primary)' }}
         />
         <div>
@@ -56,13 +62,13 @@ export function AccessibilitySettings() {
             min={80}
             max={150}
             step={10}
-            value={prefs.fontScale}
-            onChange={(e) => prefs.update({ fontScale: parseInt(e.target.value, 10) })}
+            value={fontScale}
+            onChange={(e) => updatePrefs({ fontScale: parseInt(e.target.value, 10) })}
             style={{ flex: 1, accentColor: 'var(--primary)' }}
             title={t('settings.fontScale', 'Font size scale')}
           />
           <span style={{ fontSize: '0.85rem', fontFamily: 'monospace', minWidth: 40 }}>
-            {prefs.fontScale}%
+            {fontScale}%
           </span>
         </div>
         <div style={hintStyle}>
@@ -80,8 +86,8 @@ export function AccessibilitySettings() {
       <label style={rowStyle}>
         <input
           type="checkbox"
-          checked={prefs.analyticsOptIn}
-          onChange={(e) => prefs.update({ analyticsOptIn: e.target.checked })}
+          checked={analyticsOptIn}
+          onChange={(e) => updatePrefs({ analyticsOptIn: e.target.checked })}
           style={{ accentColor: 'var(--primary)' }}
         />
         <div>
@@ -96,8 +102,8 @@ export function AccessibilitySettings() {
       <label style={rowStyle}>
         <input
           type="checkbox"
-          checked={prefs.crashReportingOptIn}
-          onChange={(e) => prefs.update({ crashReportingOptIn: e.target.checked })}
+          checked={crashReportingOptIn}
+          onChange={(e) => updatePrefs({ crashReportingOptIn: e.target.checked })}
           style={{ accentColor: 'var(--primary)' }}
         />
         <div>
@@ -112,8 +118,8 @@ export function AccessibilitySettings() {
       <label style={rowStyle}>
         <input
           type="checkbox"
-          checked={prefs.aiOptOut}
-          onChange={(e) => prefs.update({ aiOptOut: e.target.checked })}
+          checked={aiOptOut}
+          onChange={(e) => updatePrefs({ aiOptOut: e.target.checked })}
           style={{ accentColor: 'var(--primary)' }}
         />
         <div>

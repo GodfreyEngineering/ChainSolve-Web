@@ -19,7 +19,18 @@ import { matchHighPrecisionConstant, formatHighPrecision } from '../lib/highPrec
 export function useFormatValue(): (v: Value | undefined) => string {
   const { i18n } = useTranslation()
   const locale = i18n.language
-  const prefs = usePreferencesStore()
+  const numberDisplayMode = usePreferencesStore((s) => s.numberDisplayMode)
+  const decimalPlaces = usePreferencesStore((s) => s.decimalPlaces)
+  const sigFigs = usePreferencesStore((s) => s.sigFigs)
+  const scientificNotationThreshold = usePreferencesStore(
+    (s) => s.scientificNotationThreshold,
+  )
+  const thousandsSeparator = usePreferencesStore((s) => s.thousandsSeparator)
+  const thousandsSeparatorChar = usePreferencesStore((s) => s.thousandsSeparatorChar)
+  const decimalSeparator = usePreferencesStore((s) => s.decimalSeparator)
+  const negativeStyle = usePreferencesStore((s) => s.negativeStyle)
+  const trailingZeros = usePreferencesStore((s) => s.trailingZeros)
+  const highPrecisionConstants = usePreferencesStore((s) => s.highPrecisionConstants)
 
   const highPrecisionLookup = useCallback((n: number, decimalPlaces: number): string | null => {
     const c = matchHighPrecisionConstant(n)
@@ -29,16 +40,16 @@ export function useFormatValue(): (v: Value | undefined) => string {
   }, [])
 
   const opts: FormatOptions = {
-    numberDisplayMode: prefs.numberDisplayMode,
-    decimalPlaces: prefs.decimalPlaces,
-    sigFigs: prefs.sigFigs,
-    scientificNotationThreshold: prefs.scientificNotationThreshold,
-    thousandsSeparator: prefs.thousandsSeparator,
-    thousandsSeparatorChar: prefs.thousandsSeparatorChar,
-    decimalSeparator: prefs.decimalSeparator,
-    negativeStyle: prefs.negativeStyle,
-    trailingZeros: prefs.trailingZeros,
-    ...(prefs.highPrecisionConstants ? { highPrecisionLookup } : {}),
+    numberDisplayMode,
+    decimalPlaces,
+    sigFigs,
+    scientificNotationThreshold,
+    thousandsSeparator,
+    thousandsSeparatorChar,
+    decimalSeparator,
+    negativeStyle,
+    trailingZeros,
+    ...(highPrecisionConstants ? { highPrecisionLookup } : {}),
   }
 
   return useCallback(
@@ -46,16 +57,16 @@ export function useFormatValue(): (v: Value | undefined) => string {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       locale,
-      prefs.numberDisplayMode,
-      prefs.decimalPlaces,
-      prefs.sigFigs,
-      prefs.scientificNotationThreshold,
-      prefs.thousandsSeparator,
-      prefs.thousandsSeparatorChar,
-      prefs.decimalSeparator,
-      prefs.negativeStyle,
-      prefs.trailingZeros,
-      prefs.highPrecisionConstants,
+      numberDisplayMode,
+      decimalPlaces,
+      sigFigs,
+      scientificNotationThreshold,
+      thousandsSeparator,
+      thousandsSeparatorChar,
+      decimalSeparator,
+      negativeStyle,
+      trailingZeros,
+      highPrecisionConstants,
       highPrecisionLookup,
     ],
   )

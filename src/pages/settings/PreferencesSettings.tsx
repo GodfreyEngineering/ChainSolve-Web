@@ -48,7 +48,9 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [feedbackType, setFeedbackType] = useState<'bug' | 'suggestion' | 'block_request'>('bug')
   const [upgradeOpen, setUpgradeOpen] = useState(false)
-  const prefs = usePreferencesStore()
+  const autosaveEnabled = usePreferencesStore((s) => s.autosaveEnabled)
+  const autosaveDelayMs = usePreferencesStore((s) => s.autosaveDelayMs)
+  const updatePrefs = usePreferencesStore((s) => s.update)
   const { themes, activeThemeId, activateTheme, deleteTheme } = useCustomThemesStore()
   const { openWindow, isOpen } = useWindowManager()
   const wizardOpen = isOpen(THEME_WIZARD_WINDOW_ID)
@@ -109,8 +111,8 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
               <label style={checkRowStyle}>
                 <input
                   type="checkbox"
-                  checked={prefs.autosaveEnabled}
-                  onChange={(e) => prefs.update({ autosaveEnabled: e.target.checked })}
+                  checked={autosaveEnabled}
+                  onChange={(e) => updatePrefs({ autosaveEnabled: e.target.checked })}
                   style={checkboxStyle}
                 />
                 <div>
@@ -119,7 +121,7 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
                 </div>
               </label>
 
-              {prefs.autosaveEnabled && (
+              {autosaveEnabled && (
                 <Select
                   label={t('settings.autosaveDelay')}
                   options={[
@@ -128,8 +130,8 @@ export function PreferencesSettings({ plan = 'free', tab = 'general' }: Props) {
                     { value: '5000', label: t('settings.seconds', { count: 5 }) },
                     { value: '10000', label: t('settings.seconds', { count: 10 }) },
                   ]}
-                  value={String(prefs.autosaveDelayMs)}
-                  onChange={(e) => prefs.update({ autosaveDelayMs: parseInt(e.target.value) })}
+                  value={String(autosaveDelayMs)}
+                  onChange={(e) => updatePrefs({ autosaveDelayMs: parseInt(e.target.value) })}
                 />
               )}
             </div>

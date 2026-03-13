@@ -18,7 +18,11 @@ export function ExportSettings({
   checkHintStyle,
 }: Props) {
   const { t } = useTranslation()
-  const prefs = usePreferencesStore()
+  const defaultExportFormat = usePreferencesStore((s) => s.defaultExportFormat)
+  const exportPageSize = usePreferencesStore((s) => s.exportPageSize)
+  const exportIncludeImages = usePreferencesStore((s) => s.exportIncludeImages)
+  const exportIncludeAnnotations = usePreferencesStore((s) => s.exportIncludeAnnotations)
+  const updatePrefs = usePreferencesStore((s) => s.update)
 
   return (
     <div style={cardStyle}>
@@ -29,8 +33,8 @@ export function ExportSettings({
             { value: 'pdf', label: 'PDF' },
             { value: 'xlsx', label: 'Excel (XLSX)' },
           ]}
-          value={prefs.defaultExportFormat}
-          onChange={(e) => prefs.update({ defaultExportFormat: e.target.value as 'pdf' | 'xlsx' })}
+          value={defaultExportFormat}
+          onChange={(e) => updatePrefs({ defaultExportFormat: e.target.value as 'pdf' | 'xlsx' })}
         />
 
         <Select
@@ -40,15 +44,15 @@ export function ExportSettings({
             { value: 'a4', label: 'A4' },
             { value: 'letter', label: 'Letter' },
           ]}
-          value={prefs.exportPageSize}
-          onChange={(e) => prefs.update({ exportPageSize: e.target.value as 'a4' | 'letter' })}
+          value={exportPageSize}
+          onChange={(e) => updatePrefs({ exportPageSize: e.target.value as 'a4' | 'letter' })}
         />
 
         <label style={checkRowStyle}>
           <input
             type="checkbox"
-            checked={prefs.exportIncludeImages}
-            onChange={(e) => prefs.update({ exportIncludeImages: e.target.checked })}
+            checked={exportIncludeImages}
+            onChange={(e) => updatePrefs({ exportIncludeImages: e.target.checked })}
             style={checkboxStyle}
           />
           <div>
@@ -60,8 +64,8 @@ export function ExportSettings({
         <label style={checkRowStyle}>
           <input
             type="checkbox"
-            checked={prefs.exportIncludeAnnotations}
-            onChange={(e) => prefs.update({ exportIncludeAnnotations: e.target.checked })}
+            checked={exportIncludeAnnotations}
+            onChange={(e) => updatePrefs({ exportIncludeAnnotations: e.target.checked })}
             style={checkboxStyle}
           />
           <div>

@@ -18,8 +18,20 @@ export function FormattingSettings({
   checkHintStyle,
 }: Props) {
   const { t } = useTranslation()
-  const prefs = usePreferencesStore()
-  const mode = prefs.numberDisplayMode
+  const mode = usePreferencesStore((s) => s.numberDisplayMode)
+  const decimalPlaces = usePreferencesStore((s) => s.decimalPlaces)
+  const sigFigs = usePreferencesStore((s) => s.sigFigs)
+  const scientificNotationThreshold = usePreferencesStore(
+    (s) => s.scientificNotationThreshold,
+  )
+  const trailingZeros = usePreferencesStore((s) => s.trailingZeros)
+  const decimalSeparator = usePreferencesStore((s) => s.decimalSeparator)
+  const thousandsSeparator = usePreferencesStore((s) => s.thousandsSeparator)
+  const thousandsSeparatorChar = usePreferencesStore((s) => s.thousandsSeparatorChar)
+  const negativeStyle = usePreferencesStore((s) => s.negativeStyle)
+  const angleUnit = usePreferencesStore((s) => s.angleUnit)
+  const highPrecisionConstants = usePreferencesStore((s) => s.highPrecisionConstants)
+  const updatePrefs = usePreferencesStore((s) => s.update)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -40,7 +52,7 @@ export function FormattingSettings({
             ]}
             value={mode}
             onChange={(e) =>
-              prefs.update({ numberDisplayMode: e.target.value as typeof prefs.numberDisplayMode })
+              updatePrefs({ numberDisplayMode: e.target.value as typeof mode })
             }
           />
 
@@ -61,8 +73,8 @@ export function FormattingSettings({
                 { value: '12', label: '12' },
                 { value: '15', label: t('settings.decimal15', '15 (high precision)') },
               ]}
-              value={String(prefs.decimalPlaces)}
-              onChange={(e) => prefs.update({ decimalPlaces: parseInt(e.target.value) })}
+              value={String(decimalPlaces)}
+              onChange={(e) => updatePrefs({ decimalPlaces: parseInt(e.target.value) })}
             />
           )}
 
@@ -79,8 +91,8 @@ export function FormattingSettings({
                 { value: '8', label: '8' },
                 { value: '10', label: '10' },
               ]}
-              value={String(prefs.sigFigs)}
-              onChange={(e) => prefs.update({ sigFigs: parseInt(e.target.value) })}
+              value={String(sigFigs)}
+              onChange={(e) => updatePrefs({ sigFigs: parseInt(e.target.value) })}
             />
           )}
 
@@ -95,9 +107,9 @@ export function FormattingSettings({
                 { value: '1000000', label: t('settings.sciDefault', '1,000,000 (default)') },
                 { value: '1000000000', label: '1,000,000,000' },
               ]}
-              value={String(prefs.scientificNotationThreshold)}
+              value={String(scientificNotationThreshold)}
               onChange={(e) =>
-                prefs.update({ scientificNotationThreshold: parseFloat(e.target.value) })
+                updatePrefs({ scientificNotationThreshold: parseFloat(e.target.value) })
               }
             />
           )}
@@ -110,8 +122,8 @@ export function FormattingSettings({
           <label style={checkRowStyle}>
             <input
               type="checkbox"
-              checked={prefs.trailingZeros}
-              onChange={(e) => prefs.update({ trailingZeros: e.target.checked })}
+              checked={trailingZeros}
+              onChange={(e) => updatePrefs({ trailingZeros: e.target.checked })}
               style={checkboxStyle}
             />
             <div>
@@ -139,15 +151,15 @@ export function FormattingSettings({
               { value: '.', label: t('settings.decimalPeriod', 'Period (1.23)') },
               { value: ',', label: t('settings.decimalComma', 'Comma (1,23)') },
             ]}
-            value={prefs.decimalSeparator}
-            onChange={(e) => prefs.update({ decimalSeparator: e.target.value as '.' | ',' })}
+            value={decimalSeparator}
+            onChange={(e) => updatePrefs({ decimalSeparator: e.target.value as '.' | ',' })}
           />
 
           <label style={checkRowStyle}>
             <input
               type="checkbox"
-              checked={prefs.thousandsSeparator}
-              onChange={(e) => prefs.update({ thousandsSeparator: e.target.checked })}
+              checked={thousandsSeparator}
+              onChange={(e) => updatePrefs({ thousandsSeparator: e.target.checked })}
               style={checkboxStyle}
             />
             <div>
@@ -160,7 +172,7 @@ export function FormattingSettings({
             </div>
           </label>
 
-          {prefs.thousandsSeparator && (
+          {thousandsSeparator && (
             <Select
               label={t('settings.thousandsSepChar', 'Thousands separator style')}
               options={[
@@ -170,10 +182,10 @@ export function FormattingSettings({
                 { value: 'underscore', label: t('settings.sepUnderscore', 'Underscore (1_000)') },
                 { value: 'apostrophe', label: t('settings.sepApostrophe', "Apostrophe (1'000)") },
               ]}
-              value={prefs.thousandsSeparatorChar}
+              value={thousandsSeparatorChar}
               onChange={(e) =>
-                prefs.update({
-                  thousandsSeparatorChar: e.target.value as typeof prefs.thousandsSeparatorChar,
+                updatePrefs({
+                  thousandsSeparatorChar: e.target.value as typeof thousandsSeparatorChar,
                 })
               }
             />
@@ -187,8 +199,8 @@ export function FormattingSettings({
               { value: 'minus', label: t('settings.negMinus', 'Minus sign (−1.5)') },
               { value: 'parens', label: t('settings.negParens', 'Parentheses ((1.5))') },
             ]}
-            value={prefs.negativeStyle}
-            onChange={(e) => prefs.update({ negativeStyle: e.target.value as 'minus' | 'parens' })}
+            value={negativeStyle}
+            onChange={(e) => updatePrefs({ negativeStyle: e.target.value as 'minus' | 'parens' })}
           />
         </div>
       </div>
@@ -205,8 +217,8 @@ export function FormattingSettings({
             { value: 'rad', label: t('settings.angleUnitRad', 'Radians (rad)') },
             { value: 'deg', label: t('settings.angleUnitDeg', 'Degrees (°)') },
           ]}
-          value={prefs.angleUnit}
-          onChange={(e) => prefs.update({ angleUnit: e.target.value as 'rad' | 'deg' })}
+          value={angleUnit}
+          onChange={(e) => updatePrefs({ angleUnit: e.target.value as 'rad' | 'deg' })}
         />
       </div>
 
@@ -215,8 +227,8 @@ export function FormattingSettings({
         <label style={checkRowStyle}>
           <input
             type="checkbox"
-            checked={prefs.highPrecisionConstants}
-            onChange={(e) => prefs.update({ highPrecisionConstants: e.target.checked })}
+            checked={highPrecisionConstants}
+            onChange={(e) => updatePrefs({ highPrecisionConstants: e.target.checked })}
             style={checkboxStyle}
           />
           <div>

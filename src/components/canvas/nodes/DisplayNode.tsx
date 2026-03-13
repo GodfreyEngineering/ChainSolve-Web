@@ -56,16 +56,18 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
   const value = useComputedValue(id)
   const globalFormatValue = useFormatValue()
-  const prefs = usePreferencesStore()
+  const decimalSeparator = usePreferencesStore((s) => s.decimalSeparator)
+  const thousandsSeparator = usePreferencesStore((s) => s.thousandsSeparator)
+  const thousandsSeparatorChar = usePreferencesStore((s) => s.thousandsSeparatorChar)
 
   // PREC-02: if this node has a per-node precision override, apply it
   const precOpts = precisionToOpts(nd.displayPrecision)
   const formatValue = precOpts
     ? (v: Parameters<typeof globalFormatValue>[0]) =>
         rawFormatValue(v, undefined, {
-          decimalSeparator: prefs.decimalSeparator,
-          thousandsSeparator: prefs.thousandsSeparator,
-          thousandsSeparatorChar: prefs.thousandsSeparatorChar,
+          decimalSeparator,
+          thousandsSeparator,
+          thousandsSeparatorChar,
           ...precOpts,
         })
     : globalFormatValue
