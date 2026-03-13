@@ -221,11 +221,9 @@ export function WorkspaceToolbar({
         ) : null}
       </div>
 
-      {/* ── Right: Plan badge, Docs, Settings, Avatar ── */}
+      {/* ── Right: Share, Plan badge, Docs, Settings, Avatar ── */}
       <div style={rightStyle}>
-        <PlanBadge plan={plan} variant="compact" />
-
-        {/* ADV-02: Share button (only when a project is open) */}
+        {/* ADV-02: Share button (only when a project is open — left of plan badge) */}
         {projectId && (
           <Tooltip content={t('share.shareProject', 'Share project')} side="bottom">
             <button
@@ -241,6 +239,7 @@ export function WorkspaceToolbar({
                 borderRadius: 6,
                 background: 'rgba(28,171,176,0.12)',
                 color: 'var(--primary)',
+                marginRight: 8,
               }}
               aria-label={t('share.shareProject', 'Share project')}
             >
@@ -248,6 +247,8 @@ export function WorkspaceToolbar({
             </button>
           </Tooltip>
         )}
+
+        <PlanBadge plan={plan} variant="compact" />
 
         <Tooltip content={t('nav.documentation', 'Documentation')} side="bottom">
           <button
