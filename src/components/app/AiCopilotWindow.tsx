@@ -21,7 +21,7 @@ import { AppWindow } from '../ui/AppWindow'
 import type { AiMode, AiTask, AiPatchOp, RiskAssessment } from '../../lib/aiCopilot/types'
 import { assessRisk, requiresConfirmation } from '../../lib/aiCopilot/riskScoring'
 import { sendCopilotRequest } from '../../lib/aiCopilot/aiService'
-import type { Plan } from '../../lib/entitlements'
+import { getEntitlements, type Plan } from '../../lib/entitlements'
 import { AI_COPILOT_WINDOW_ID } from '../../lib/aiCopilot/constants'
 export { AI_COPILOT_WINDOW_ID }
 
@@ -257,7 +257,8 @@ export function AiCopilotWindow({
   const [history, setHistory] = useState<ActionHistoryEntry[]>([])
   const transcriptRef = useRef<HTMLDivElement>(null)
 
-  const canUse = plan === 'pro' || plan === 'trialing' || plan === 'enterprise'
+  const ent = getEntitlements(plan)
+  const canUse = ent.canUseAi
   const isEnterprise = plan === 'enterprise'
 
   const triggerSuggestion = useCallback(
