@@ -47,6 +47,8 @@ interface AiRequestBody {
   projectId: string
   canvasId: string
   selectedNodeIds: string[]
+  /** 6.05: Request streaming SSE response. */
+  stream?: boolean
   clientContext?: {
     locale?: string
     theme?: string
@@ -469,6 +471,143 @@ async function callOpenAi(
   return { parsed: validated, usage: data.usage, responseId: data.id }
 }
 
+// ── 6.05: Streaming OpenAI call ──────────────────────────────────────────
+
+/**
+ * Call OpenAI with streaming enabled. Returns a ReadableStream of SSE events
+ * that forwards text deltas and ends with a `done` event containing the
+ * parsed structured response.
+ */
+async function callOpenAiStreaming(
+  apiKey: string,
+  model: string,
+  systemPrompt: string,
+  userMessage: string,
+): Promise<{ stream: ReadableStream<Uint8Array>; getUsage: () => Promise<OpenAiUsage> }> {
+  const res = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      store: false,
+      stream: true,
+      input: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      text: { format: { type: 'json_object' } },
+    }),
+  })
+
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => '')
+    throw new Error(`OpenAI API error ${res.status}: ${errBody.slice(0, 200)}`)
+  }
+
+  const encoder = new TextEncoder()
+  let fullText = ''
+  let usage: OpenAiUsage = { input_tokens: 0, output_tokens: 0 }
+  let usageResolve: (u: OpenAiUsage) => void
+  const usagePromise = new Promise<OpenAiUsage>((resolve) => {
+    usageResolve = resolve
+  })
+
+  const reader = res.body!.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  const stream = new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) {
+            // Parse the accumulated JSON and send the final response
+            let parsed = validateAiResponse(safeJsonParse(fullText))
+            if (!parsed) {
+              // Try to repair with a non-streaming call
+              try {
+                const repair = await callOpenAi(apiKey, model, systemPrompt, userMessage)
+                parsed = repair.parsed
+                usage = {
+                  input_tokens: usage.input_tokens + repair.usage.input_tokens,
+                  output_tokens: usage.output_tokens + repair.usage.output_tokens,
+                }
+              } catch {
+                parsed = {
+                  mode: 'plan',
+                  message: fullText || 'AI returned invalid JSON',
+                  assumptions: [],
+                  risk: { level: 'low', reasons: [] },
+                  patch: { ops: [] },
+                }
+              }
+            }
+
+            const doneEvent = JSON.stringify({ type: 'done', response: parsed })
+            controller.enqueue(encoder.encode(`data: ${doneEvent}\n\n`))
+            controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+            controller.close()
+            usageResolve!(usage)
+            return
+          }
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() ?? ''
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ') && !line.startsWith('event: ')) continue
+            if (line.startsWith('event: ')) continue
+
+            const data = line.slice(6).trim()
+            if (data === '[DONE]') continue
+
+            try {
+              const event = JSON.parse(data) as Record<string, unknown>
+              const eventType = event.type as string | undefined
+
+              // OpenAI Responses API streaming events
+              if (eventType === 'response.output_text.delta') {
+                const delta = (event.delta as string) ?? ''
+                fullText += delta
+                const sseData = JSON.stringify({ type: 'delta', text: delta })
+                controller.enqueue(encoder.encode(`data: ${sseData}\n\n`))
+              } else if (eventType === 'response.completed') {
+                const resp = event.response as Record<string, unknown> | undefined
+                if (resp?.usage) {
+                  usage = resp.usage as OpenAiUsage
+                }
+              }
+            } catch {
+              // Skip unparseable events
+            }
+          }
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Stream error'
+        const errEvent = JSON.stringify({ type: 'error', error: msg })
+        controller.enqueue(encoder.encode(`data: ${errEvent}\n\n`))
+        controller.close()
+        usageResolve!(usage)
+      }
+    },
+  })
+
+  return { stream, getUsage: () => usagePromise }
+}
+
+function safeJsonParse(text: string): unknown {
+  try {
+    return JSON.parse(text)
+  } catch {
+    return null
+  }
+}
+
 // ── Handler ─────────────────────────────────────────────────────────────────
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -770,6 +909,68 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const systemPrompt = buildSystemPrompt(body.mode, task)
     const userPrompt = `${body.userMessage}${contextSummary}`
 
+    // ── 6.05: Streaming path ────────────────────────────────────────────
+    if (body.stream) {
+      const { stream, getUsage } = await callOpenAiStreaming(
+        OPEN_AI_API_KEY,
+        model,
+        systemPrompt,
+        userPrompt,
+      )
+
+      // Fire-and-forget: update quota and log after stream completes
+      void getUsage().then(async (streamUsage) => {
+        const tokensIn = streamUsage.input_tokens ?? 0
+        const tokensOut = streamUsage.output_tokens ?? 0
+        try {
+          if (usage?.id) {
+            await supabaseAdmin
+              .from('ai_usage_monthly')
+              .update({
+                tokens_in: (usage.tokens_in ?? 0) + tokensIn,
+                tokens_out: (usage.tokens_out ?? 0) + tokensOut,
+                requests: ((usage as Record<string, unknown>).requests as number) + 1,
+                last_request_at: now.toISOString(),
+              })
+              .eq('id', usage.id)
+          } else {
+            await supabaseAdmin.from('ai_usage_monthly').insert({
+              owner_id: userId,
+              org_id: orgId,
+              period_start: periodStart,
+              tokens_in: tokensIn,
+              tokens_out: tokensOut,
+              requests: 1,
+              last_request_at: now.toISOString(),
+            })
+          }
+          await supabaseAdmin.from('ai_request_log').insert({
+            owner_id: userId,
+            org_id: orgId,
+            mode: body.mode,
+            task,
+            model,
+            tokens_in: tokensIn,
+            tokens_out: tokensOut,
+            ops_count: 0, // Not easily available in streaming path
+            risk_level: 'low',
+            response_id: `stream-${reqId}`,
+          })
+        } catch {
+          // Non-fatal: quota/log update failure
+        }
+      })
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+        },
+      })
+    }
+
+    // ── Non-streaming path ──────────────────────────────────────────────
     const {
       parsed,
       usage: aiUsage,

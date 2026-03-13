@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next'
 import { AppWindow } from '../ui/AppWindow'
 import type { AiMode, AiTask, AiPatchOp, RiskAssessment } from '../../lib/aiCopilot/types'
 import { assessRisk, requiresConfirmation } from '../../lib/aiCopilot/riskScoring'
-import { sendCopilotRequest } from '../../lib/aiCopilot/aiService'
+import { sendCopilotRequest, sendCopilotRequestStreaming } from '../../lib/aiCopilot/aiService'
 import { getEntitlements, type Plan } from '../../lib/entitlements'
 import { AI_COPILOT_WINDOW_ID } from '../../lib/aiCopilot/constants'
 export { AI_COPILOT_WINDOW_ID }
@@ -356,60 +356,103 @@ export function AiCopilotWindow({
     setPendingRisk(null)
     scrollToBottom()
 
+    const effectiveMode =
+      activeTask === 'explain_node' || activeTask === 'suggest' ? ('plan' as const) : mode
+    const requestOpts = {
+      mode: effectiveMode,
+      task: activeTask,
+      scope: (selectedNodeIds.length > 0 && activeTask === 'explain_node'
+        ? 'selection'
+        : 'active_canvas') as 'selection' | 'active_canvas',
+      userMessage: trimmed,
+      projectId,
+      canvasId,
+      selectedNodeIds,
+      computedValues,
+    }
+
     try {
-      const response = await sendCopilotRequest({
-        mode: activeTask === 'explain_node' || activeTask === 'suggest' ? 'plan' : mode,
-        task: activeTask,
-        scope:
-          selectedNodeIds.length > 0 && activeTask === 'explain_node'
-            ? 'selection'
-            : 'active_canvas',
-        userMessage: trimmed,
-        projectId,
-        canvasId,
-        selectedNodeIds,
-        computedValues,
-      })
+      // 6.05: Use streaming for chat-like tasks to show text as it arrives
+      let streamingText = ''
+      let streamingMsgIndex = -1
 
-      const ops = response.patchOps ?? []
-      const risk = assessRisk(ops)
+      for await (const event of sendCopilotRequestStreaming(requestOpts)) {
+        if (event.type === 'delta') {
+          streamingText += event.text
+          if (streamingMsgIndex === -1) {
+            // Add a new assistant message and remember its index
+            setMessages((prev) => {
+              streamingMsgIndex = prev.length
+              return [...prev, { role: 'assistant', content: streamingText }]
+            })
+          } else {
+            // Update the existing streaming message
+            const text = streamingText
+            setMessages((prev) => {
+              const updated = [...prev]
+              const idx = updated.length - 1
+              if (idx >= 0 && updated[idx].role === 'assistant') {
+                updated[idx] = { ...updated[idx], content: text }
+              }
+              return updated
+            })
+          }
+          scrollToBottom()
+        } else if (event.type === 'done') {
+          const response = event.response
+          const ops = response.patchOps ?? []
+          const risk = assessRisk(ops)
 
-      if (response.tokensRemaining != null) {
-        setTokensRemaining(response.tokensRemaining)
-      }
+          if (response.tokensRemaining != null) {
+            setTokensRemaining(response.tokensRemaining)
+          }
 
-      const aiMsg: ChatMessage = {
-        role: 'assistant',
-        content: response.message,
-        patchOps: ops,
-        risk,
-        assumptions: response.assumptions,
-      }
-      setMessages((prev) => [...prev, aiMsg])
+          // Finalize the streaming message with full data
+          const finalMsg: ChatMessage = {
+            role: 'assistant',
+            content: response.message,
+            patchOps: ops,
+            risk,
+            assumptions: response.assumptions,
+          }
 
-      // Track in history
-      setHistory((prev) => [
-        {
-          summary: response.message.slice(0, 80),
-          opsCount: ops.length,
-          timestamp: Date.now(),
-        },
-        ...prev.slice(0, 19),
-      ])
+          setMessages((prev) => {
+            const updated = [...prev]
+            // Replace the last streaming message or append
+            if (streamingMsgIndex !== -1 && updated.length > 0) {
+              updated[updated.length - 1] = finalMsg
+            } else {
+              updated.push(finalMsg)
+            }
+            return updated
+          })
 
-      if (ops.length > 0 && mode !== 'plan') {
-        const needsConfirm = requiresConfirmation(
-          risk.level,
-          mode === 'bypass' ? 'bypass' : 'edit',
-          isEnterprise,
-        )
-        if (!needsConfirm) {
-          onApplyPatch(ops, response.message)
-          setMessages((prev) => [...prev, { role: 'assistant', content: t('ai.applied') }])
-        } else {
-          setPendingOps(ops)
-          setPendingRisk(risk)
-          setPendingSummary(response.message)
+          setHistory((prev) => [
+            {
+              summary: response.message.slice(0, 80),
+              opsCount: ops.length,
+              timestamp: Date.now(),
+            },
+            ...prev.slice(0, 19),
+          ])
+
+          if (ops.length > 0 && effectiveMode !== 'plan') {
+            const needsConfirm = requiresConfirmation(
+              risk.level,
+              effectiveMode === 'bypass' ? 'bypass' : 'edit',
+              isEnterprise,
+            )
+            if (!needsConfirm) {
+              onApplyPatch(ops, response.message)
+              setMessages((prev) => [...prev, { role: 'assistant', content: t('ai.applied') }])
+            } else {
+              setPendingOps(ops)
+              setPendingRisk(risk)
+              setPendingSummary(response.message)
+            }
+          }
+        } else if (event.type === 'error') {
+          setMessages((prev) => [...prev, { role: 'assistant', content: event.error }])
         }
       }
     } catch (err: unknown) {
@@ -417,7 +460,7 @@ export function AiCopilotWindow({
       setMessages((prev) => [...prev, { role: 'assistant', content: msg }])
     } finally {
       setLoading(false)
-      setActiveTask('chat') // Reset to chat after specialized task completes
+      setActiveTask('chat')
       scrollToBottom()
     }
   }, [
@@ -432,6 +475,7 @@ export function AiCopilotWindow({
     onApplyPatch,
     scrollToBottom,
     t,
+    computedValues,
   ])
 
   const handleApply = useCallback(() => {

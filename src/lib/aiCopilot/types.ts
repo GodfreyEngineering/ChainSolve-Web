@@ -114,6 +114,8 @@ export interface AiApiRequest {
   projectId: string
   canvasId: string
   selectedNodeIds: string[]
+  /** 6.05: Request streaming SSE response. */
+  stream?: boolean
   clientContext?: {
     locale?: string
     theme?: string
