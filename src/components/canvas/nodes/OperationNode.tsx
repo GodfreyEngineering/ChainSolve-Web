@@ -386,6 +386,12 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
           id="out"
           style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
         />
+        {/* 4.04: Unit badge next to output handle */}
+        {nd.unit && (
+          <span style={{ ...s.outputUnitBadge, top: '50%' }}>
+            {getUnitSymbol(nd.unit)}
+          </span>
+        )}
       </div>
       {isErr && errorMsg && (
         <div style={s.errorFooter} title={errorMsg}>

@@ -21,12 +21,14 @@ interface UnitPickerProps {
   onChange: (unitId: string | undefined) => void
   /** Compact mode — smaller for inline use on nodes. */
   compact?: boolean
+  /** 4.04: Dimension id to auto-suggest compatible units (e.g. "length"). */
+  suggestedDimension?: string
 }
 
 /** Lazily resolved catalog. Shared across all UnitPicker instances. */
 let _cachedDimensions: readonly UnitDimension[] | null = null
 
-export function UnitPicker({ value, onChange, compact }: UnitPickerProps) {
+export function UnitPicker({ value, onChange, compact, suggestedDimension }: UnitPickerProps) {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
@@ -116,6 +118,7 @@ export function UnitPicker({ value, onChange, compact }: UnitPickerProps) {
             }}
             compact
             t={t}
+            suggestedDimension={suggestedDimension}
           />
         )}
       </div>
@@ -161,6 +164,7 @@ export function UnitPicker({ value, onChange, compact }: UnitPickerProps) {
           }}
           compact={false}
           t={t}
+          suggestedDimension={suggestedDimension}
         />
       )}
     </div>
@@ -181,6 +185,8 @@ interface UnitDropdownProps {
   onChange: (id: string | undefined) => void
   compact: boolean
   t: (key: string) => string
+  /** 4.04: Dimension id to highlight as "Suggested" at top of list. */
+  suggestedDimension?: string
 }
 
 function UnitDropdown({
@@ -191,7 +197,16 @@ function UnitDropdown({
   onChange,
   compact,
   t,
+  suggestedDimension,
 }: UnitDropdownProps) {
+  // 4.04: Extract suggested dimension units to show at top
+  const suggestedDim = suggestedDimension
+    ? dimensions.find((d) => d.id === suggestedDimension)
+    : undefined
+  const remainingDimensions = suggestedDim
+    ? dimensions.filter((d) => d.id !== suggestedDimension)
+    : dimensions
+
   return (
     <div
       style={{
@@ -256,7 +271,37 @@ function UnitDropdown({
           {t('units.none')}
         </button>
 
-        {dimensions.map((dim) => (
+        {/* 4.04: Suggested units from connected input dimension */}
+        {suggestedDim && suggestedDim.units.length > 0 && (
+          <div key="__suggested">
+            <div style={{ ...groupLabelStyle, color: 'var(--primary)', opacity: 0.7 }}>
+              {t('units.suggested', 'Suggested')} — {t(suggestedDim.labelKey)}
+            </div>
+            {suggestedDim.units.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                onClick={() => onChange(u.id)}
+                style={{
+                  ...optionStyle,
+                  color: value === u.id ? 'var(--primary)' : 'var(--text)',
+                  background: value === u.id ? 'rgba(28,171,176,0.1)' : 'rgba(28,171,176,0.03)',
+                  fontWeight: value === u.id ? 600 : 400,
+                }}
+              >
+                <span>{u.symbol}</span>
+                {u.symbol !== u.id && (
+                  <span style={{ marginLeft: '0.5rem', fontSize: '0.62rem', opacity: 0.4 }}>
+                    {u.id}
+                  </span>
+                )}
+              </button>
+            ))}
+            <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', margin: '0.2rem 0' }} />
+          </div>
+        )}
+
+        {remainingDimensions.map((dim) => (
           <div key={dim.id}>
             <div style={groupLabelStyle}>{t(dim.labelKey)}</div>
             {dim.units.map((u) => (

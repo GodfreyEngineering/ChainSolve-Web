@@ -22,6 +22,7 @@ import { getDocsSectionForCategory } from '../../lib/docsHelpers'
 import { HelpLink } from '../ui/HelpLink'
 import { ValueEditor } from './editors/ValueEditor'
 import { getUnitSymbol } from '../../units/unitSymbols'
+import { getDimension } from '../../units/unitCompat'
 import { PlotInspector } from './PlotInspector'
 import { GroupInspector } from './GroupInspector'
 import { AnnotationInspector } from './nodes/AnnotationInspector'
@@ -104,6 +105,22 @@ export function Inspector({
   const formatValue = useFormatValue()
   const node = nodeId ? (allNodes.find((n) => n.id === nodeId) ?? null) : null
   const nd = node?.data as NodeData | undefined
+
+  // 4.04: Derive suggested unit dimension from connected upstream nodes
+  const suggestedDimension = (() => {
+    if (!nodeId) return undefined
+    for (const edge of allEdges) {
+      if (edge.target !== nodeId) continue
+      const srcNode = allNodes.find((n) => n.id === edge.source)
+      const srcData = srcNode?.data as NodeData | undefined
+      const srcUnit = srcData?.unit as string | undefined
+      if (srcUnit) {
+        const dim = getDimension(srcUnit)
+        if (dim) return dim
+      }
+    }
+    return undefined
+  })()
 
   // G4-1: Lazy-load block descriptions to avoid bloating the initial bundle
   const [descriptions, setDescriptions] = useState<Record<string, string>>({})
@@ -453,6 +470,7 @@ export function Inspector({
                   <LazyUnitPicker
                     value={nd.unit as string | undefined}
                     onChange={(unitId) => update({ unit: unitId })}
+                    suggestedDimension={suggestedDimension}
                   />
                 </Suspense>,
               )}

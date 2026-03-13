@@ -215,4 +215,23 @@ export const NODE_STYLES = {
     borderRadius: 3,
     background: 'rgba(0,0,0,0.1)',
   } as CSSProperties,
+
+  /** 4.04: Unit badge shown next to output handle */
+  outputUnitBadge: {
+    position: 'absolute' as const,
+    right: HANDLE_SIZE + 2,
+    top: '50%',
+    transform: 'translateY(-50%)',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '0.58rem',
+    fontWeight: 600,
+    color: 'var(--primary)',
+    background: 'rgba(28,171,176,0.1)',
+    border: '1px solid rgba(28,171,176,0.2)',
+    borderRadius: 3,
+    padding: '0 0.2rem',
+    lineHeight: 1.4,
+    whiteSpace: 'nowrap' as const,
+    pointerEvents: 'none' as const,
+  } as CSSProperties,
 }
