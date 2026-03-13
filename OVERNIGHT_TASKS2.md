@@ -271,7 +271,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **8.13 Documentation update** — Review and update all docs in `docs/`: (a) Architecture Decision Records (ADRs) reflect current state, (b) `AI_COPILOT.md`, `AI_PRIVACY.md`, `AI_WORKFLOWS.md` updated for enhanced AI, (c) `BACKUP_RUNBOOK.md` created (1.09), (d) `ADMIN_GUIDE.md` created (7.09), (e) `PENTEST_CHECKLIST.md` created (7.11), (f) `DATA_RETENTION.md` created (7.12). Files: `docs/**/*.md`. Verify: all docs accurate and consistent.
 
-- [ ] **8.14 Full CI pipeline verification** — After all changes, run `npm run verify:ci` locally. Ensure: (a) Prettier passes, (b) ESLint passes, (c) TypeScript compiles, (d) all unit tests pass, (e) WASM builds, (f) Vite builds, (g) bundle within budget, (h) e2e smoke tests pass. Fix any regressions. Files: none (verification only). Verify: `npm run verify:ci` exits 0.
+- [x] **8.14 Full CI pipeline verification** — After all changes, run `npm run verify:ci` locally. Ensure: (a) Prettier passes, (b) ESLint passes, (c) TypeScript compiles, (d) all unit tests pass, (e) WASM builds, (f) Vite builds, (g) bundle within budget, (h) e2e smoke tests pass. Fix any regressions. Files: none (verification only). Verify: `npm run verify:ci` exits 0.
 
 ---
 
