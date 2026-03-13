@@ -20,6 +20,8 @@ import {
   buildCanvasJson,
   buildCanvasJsonFromGraph,
   parseCanvasJson,
+  validateCanvasShape,
+  repairCanvas,
   type CanvasJSON,
 } from './canvasSchema'
 import { ServiceError } from './errors'
@@ -348,7 +350,24 @@ export async function saveCanvasGraph(
 ): Promise<void> {
   const session = await requireSession()
   const userId = session.user.id
-  const json = buildCanvasJsonFromGraph(canvasId, projectId, nodes, edges)
+  let json = buildCanvasJsonFromGraph(canvasId, projectId, nodes, edges)
+
+  // 2.10: Validate before save — repair if needed, reject if unrepairable.
+  const validation = validateCanvasShape(json)
+  if (!validation.ok) {
+    console.error('[canvas] Save blocked: invalid canvas JSON shape', validation.errors)
+    throw new ServiceError('CANVAS_INVALID', `Canvas save blocked: ${validation.errors.join(', ')}`)
+  }
+
+  const repair = repairCanvas(json)
+  if (repair.removedNodes > 0 || repair.removedEdges > 0) {
+    console.warn(
+      `[canvas] Repaired canvas before save: removed ${repair.removedNodes} nodes, ${repair.removedEdges} edges`,
+      repair.details,
+    )
+    json = repair.canvas
+  }
+
   await uploadCanvasGraph(userId, projectId, canvasId, json)
 
   // Write-through: update IndexedDB cache so next load is instant

@@ -6,6 +6,8 @@ import {
   buildCanvasJsonFromGraph,
   parseCanvasJson,
   migrateV3toV4,
+  repairCanvas,
+  type CanvasJSON,
 } from './canvasSchema'
 
 // ── validateCanvasShape ──────────────────────────────────────────────────────
@@ -291,5 +293,118 @@ describe('buildCanvasJson', () => {
     expect(c.nodes).toEqual([])
     expect(c.edges).toEqual([])
     expect(c.datasetRefs).toEqual([])
+  })
+})
+
+// ── repairCanvas ─────────────────────────────────────────────────────────────
+
+describe('repairCanvas', () => {
+  const base: CanvasJSON = {
+    schemaVersion: 4,
+    canvasId: 'c',
+    projectId: 'p',
+    nodes: [],
+    edges: [],
+    datasetRefs: [],
+  }
+
+  it('returns unchanged canvas when all nodes/edges are valid', () => {
+    const canvas: CanvasJSON = {
+      ...base,
+      nodes: [{ id: 'n1', type: 'csSource', position: { x: 0, y: 0 }, data: {} }],
+      edges: [{ id: 'e1', source: 'n1', target: 'n1' }],
+    }
+    const result = repairCanvas(canvas)
+    expect(result.removedNodes).toBe(0)
+    expect(result.removedEdges).toBe(0)
+    expect(result.canvas.nodes).toHaveLength(1)
+    expect(result.canvas.edges).toHaveLength(1)
+  })
+
+  it('strips nodes missing id', () => {
+    const canvas: CanvasJSON = {
+      ...base,
+      nodes: [{ type: 'csSource' }, { id: 'n1', type: 'csSource' }],
+    }
+    const result = repairCanvas(canvas)
+    expect(result.removedNodes).toBe(1)
+    expect(result.canvas.nodes).toHaveLength(1)
+  })
+
+  it('strips nodes missing type', () => {
+    const canvas: CanvasJSON = {
+      ...base,
+      nodes: [{ id: 'n1' }, { id: 'n2', type: 'csOp' }],
+    }
+    const result = repairCanvas(canvas)
+    expect(result.removedNodes).toBe(1)
+    expect(result.canvas.nodes).toHaveLength(1)
+  })
+
+  it('strips null/non-object nodes', () => {
+    const canvas: CanvasJSON = {
+      ...base,
+      nodes: [null, 'bad', 42, { id: 'n1', type: 'csSource' }] as unknown[],
+    }
+    const result = repairCanvas(canvas)
+    expect(result.removedNodes).toBe(3)
+    expect(result.canvas.nodes).toHaveLength(1)
+  })
+
+  it('strips edges with missing source/target', () => {
+    const canvas: CanvasJSON = {
+      ...base,
+      nodes: [{ id: 'n1', type: 'csSource' }],
+      edges: [
+        { id: 'e1', source: 'n1', target: 'n1' },
+        { id: 'e2', source: 'n1' }, // missing target
+        { id: 'e3', target: 'n1' }, // missing source
+      ],
+    }
+    const result = repairCanvas(canvas)
+    expect(result.removedEdges).toBe(2)
+    expect(result.canvas.edges).toHaveLength(1)
+  })
+
+  it('strips edges referencing non-existent nodes', () => {
+    const canvas: CanvasJSON = {
+      ...base,
+      nodes: [{ id: 'n1', type: 'csSource' }],
+      edges: [
+        { id: 'e1', source: 'n1', target: 'n1' },
+        { id: 'e2', source: 'n1', target: 'n999' }, // dangling target
+        { id: 'e3', source: 'n999', target: 'n1' }, // dangling source
+      ],
+    }
+    const result = repairCanvas(canvas)
+    expect(result.removedEdges).toBe(2)
+    expect(result.canvas.edges).toHaveLength(1)
+    expect(result.details).toHaveLength(2)
+  })
+
+  it('strips edges referencing nodes that were themselves removed', () => {
+    const canvas: CanvasJSON = {
+      ...base,
+      nodes: [
+        { id: 'n1', type: 'csSource' },
+        { id: '' }, // invalid node — empty id
+      ],
+      edges: [{ id: 'e1', source: 'n1', target: '' }], // references invalid node
+    }
+    const result = repairCanvas(canvas)
+    expect(result.removedNodes).toBe(1)
+    expect(result.removedEdges).toBe(1)
+  })
+
+  it('returns details describing each removal', () => {
+    const canvas: CanvasJSON = {
+      ...base,
+      nodes: [null as unknown, { id: 'n1', type: 'csSource' }],
+      edges: [{ id: 'e1', source: 'n1', target: 'gone' }],
+    }
+    const result = repairCanvas(canvas)
+    expect(result.details.length).toBeGreaterThanOrEqual(2)
+    expect(result.details.some((d) => d.includes('node'))).toBe(true)
+    expect(result.details.some((d) => d.includes('edge'))).toBe(true)
   })
 })

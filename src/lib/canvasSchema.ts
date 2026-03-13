@@ -137,6 +137,98 @@ export function buildCanvasJsonFromGraph(
   }
 }
 
+// ── Node/Edge validation & repair ────────────────────────────────────────────
+
+/**
+ * Validate that a node object has the minimum required shape:
+ * must be a non-null object with `id` (non-empty string) and `type` (non-empty string).
+ */
+function isValidNode(node: unknown): boolean {
+  if (node === null || typeof node !== 'object') return false
+  const n = node as Record<string, unknown>
+  return (
+    typeof n.id === 'string' && n.id.length > 0 && typeof n.type === 'string' && n.type.length > 0
+  )
+}
+
+/**
+ * Validate that an edge object has the minimum required shape:
+ * must be a non-null object with `id`, `source`, and `target` (all non-empty strings).
+ */
+function isValidEdge(edge: unknown): boolean {
+  if (edge === null || typeof edge !== 'object') return false
+  const e = edge as Record<string, unknown>
+  return (
+    typeof e.id === 'string' &&
+    e.id.length > 0 &&
+    typeof e.source === 'string' &&
+    e.source.length > 0 &&
+    typeof e.target === 'string' &&
+    e.target.length > 0
+  )
+}
+
+export interface RepairResult {
+  canvas: CanvasJSON
+  removedNodes: number
+  removedEdges: number
+  details: string[]
+}
+
+/**
+ * Strip invalid nodes and edges from a CanvasJSON, returning a clean copy.
+ *
+ * Removes:
+ *   - Nodes missing `id` or `type`
+ *   - Edges missing `id`, `source`, or `target`
+ *   - Edges referencing nodes that don't exist in the (cleaned) node set
+ *
+ * Logs what was removed in the `details` array so callers can surface
+ * the information without the repair silently eating data.
+ */
+export function repairCanvas(canvas: CanvasJSON): RepairResult {
+  const details: string[] = []
+
+  // 1. Filter invalid nodes
+  const validNodes = canvas.nodes.filter((node) => {
+    if (isValidNode(node)) return true
+    const id = (node as Record<string, unknown>)?.id ?? '(no id)'
+    details.push(`Removed invalid node: ${String(id)}`)
+    return false
+  })
+  const removedNodes = canvas.nodes.length - validNodes.length
+
+  // 2. Build node ID set for edge validation
+  const nodeIds = new Set(validNodes.map((n) => (n as Record<string, unknown>).id as string))
+
+  // 3. Filter invalid edges + dangling references
+  const validEdges = canvas.edges.filter((edge) => {
+    if (!isValidEdge(edge)) {
+      const id = (edge as Record<string, unknown>)?.id ?? '(no id)'
+      details.push(`Removed invalid edge: ${String(id)}`)
+      return false
+    }
+    const e = edge as Record<string, unknown>
+    if (!nodeIds.has(e.source as string)) {
+      details.push(`Removed edge ${String(e.id)}: source node ${String(e.source)} not found`)
+      return false
+    }
+    if (!nodeIds.has(e.target as string)) {
+      details.push(`Removed edge ${String(e.id)}: target node ${String(e.target)} not found`)
+      return false
+    }
+    return true
+  })
+  const removedEdges = canvas.edges.length - validEdges.length
+
+  return {
+    canvas: { ...canvas, nodes: validNodes, edges: validEdges },
+    removedNodes,
+    removedEdges,
+    details,
+  }
+}
+
 // ── Node-level migrations (applied after V4 load) ───────────────────────────
 
 /**

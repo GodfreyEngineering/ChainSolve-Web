@@ -19,6 +19,7 @@ export type ErrorCode =
   | 'READ_ONLY_PLAN'
   | 'FILE_TOO_LARGE'
   | 'INVALID_FILE'
+  | 'CANVAS_INVALID'
 
 export class ServiceError extends Error {
   readonly code: ErrorCode

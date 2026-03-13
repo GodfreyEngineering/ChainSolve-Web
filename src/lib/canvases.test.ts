@@ -124,9 +124,30 @@ vi.mock('./canvasStorage', () => ({
 }))
 
 vi.mock('./canvasSchema', () => ({
-  buildCanvasJson: vi.fn().mockReturnValue({ schemaVersion: 1, nodes: [], edges: [] }),
-  buildCanvasJsonFromGraph: vi.fn().mockReturnValue({ schemaVersion: 1, nodes: [], edges: [] }),
+  buildCanvasJson: vi.fn().mockReturnValue({
+    schemaVersion: 4,
+    canvasId: 'c',
+    projectId: 'p',
+    nodes: [],
+    edges: [],
+    datasetRefs: [],
+  }),
+  buildCanvasJsonFromGraph: vi.fn().mockReturnValue({
+    schemaVersion: 4,
+    canvasId: 'c',
+    projectId: 'p',
+    nodes: [],
+    edges: [],
+    datasetRefs: [],
+  }),
   parseCanvasJson: vi.fn().mockReturnValue({ nodes: [], edges: [] }),
+  validateCanvasShape: vi.fn().mockReturnValue({ ok: true, errors: [] }),
+  repairCanvas: vi.fn().mockImplementation((canvas: unknown) => ({
+    canvas,
+    removedNodes: 0,
+    removedEdges: 0,
+    details: [],
+  })),
 }))
 
 import {
@@ -163,19 +184,35 @@ function setupChain() {
   vi.mocked(CanvasStorageMod.deleteCanvasGraph).mockResolvedValue(undefined)
   vi.mocked(CanvasStorageMod.verifyCanvasGraph).mockResolvedValue(true)
   vi.mocked(CanvasSchemaMod.buildCanvasJson).mockReturnValue({
-    schemaVersion: 1,
+    schemaVersion: 4,
+    canvasId: 'c',
+    projectId: 'p',
     nodes: [],
     edges: [],
+    datasetRefs: [],
   } as unknown as ReturnType<typeof CanvasSchemaMod.buildCanvasJson>)
   vi.mocked(CanvasSchemaMod.buildCanvasJsonFromGraph).mockReturnValue({
-    schemaVersion: 1,
+    schemaVersion: 4,
+    canvasId: 'c',
+    projectId: 'p',
     nodes: [],
     edges: [],
+    datasetRefs: [],
   } as unknown as ReturnType<typeof CanvasSchemaMod.buildCanvasJsonFromGraph>)
   vi.mocked(CanvasSchemaMod.parseCanvasJson).mockReturnValue({
     nodes: [],
     edges: [],
   } as unknown as ReturnType<typeof CanvasSchemaMod.parseCanvasJson>)
+  vi.mocked(CanvasSchemaMod.validateCanvasShape).mockReturnValue({ ok: true, errors: [] })
+  vi.mocked(CanvasSchemaMod.repairCanvas).mockImplementation(
+    (canvas: unknown) =>
+      ({
+        canvas,
+        removedNodes: 0,
+        removedEdges: 0,
+        details: [],
+      }) as ReturnType<typeof CanvasSchemaMod.repairCanvas>,
+  )
 }
 
 const CANVAS_ROW: CanvasRow = {
