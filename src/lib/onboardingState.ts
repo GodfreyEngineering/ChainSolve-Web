@@ -4,7 +4,12 @@
  * Tracks which guided steps the user has completed. The checklist
  * is shown on first login and remains accessible from the Help menu
  * until all steps are done.
+ *
+ * 3.19: Also writes `profiles.onboarding_completed_at` to Supabase
+ * when onboarding is dismissed or all steps completed.
  */
+
+import { supabase } from './supabase'
 
 const STORAGE_KEY = 'cs:onboarding-checklist'
 
@@ -70,6 +75,9 @@ export function completeStep(stepId: OnboardingStepId): OnboardingState {
   const state = getOnboardingState()
   state.completed[stepId] = true
   saveState(state)
+  if (allCompleted(state)) {
+    void markOnboardingCompletedInProfile()
+  }
   return state
 }
 
@@ -78,6 +86,7 @@ export function dismissOnboarding(): OnboardingState {
   const state = getOnboardingState()
   state.dismissed = true
   saveState(state)
+  void markOnboardingCompletedInProfile()
   return state
 }
 
@@ -113,4 +122,23 @@ export function shouldShowOnboarding(): boolean {
   const state = getOnboardingState()
   // Show if not dismissed and not all completed
   return !state.dismissed && !allCompleted(state)
+}
+
+/**
+ * 3.19: Write `onboarding_completed_at` to the profiles table.
+ * Best-effort — does not throw on failure.
+ */
+export async function markOnboardingCompletedInProfile(): Promise<void> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return
+    await supabase
+      .from('profiles')
+      .update({ onboarding_completed_at: new Date().toISOString() })
+      .eq('id', session.user.id)
+  } catch {
+    // Best-effort — don't block the UI
+  }
 }

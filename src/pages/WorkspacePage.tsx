@@ -54,6 +54,9 @@ const LazyMfaSetupPrompt = lazy(() =>
 const LazyFirstRunModal = lazy(() =>
   import('../components/app/FirstRunModal').then((m) => ({ default: m.FirstRunModal })),
 )
+const LazyTourPromptModal = lazy(() =>
+  import('../components/app/TourPromptModal').then((m) => ({ default: m.TourPromptModal })),
+)
 
 // Lazy-load CanvasPage to keep the workspace shell fast
 const CanvasPage = lazy(() => import('./CanvasPage'))
@@ -145,6 +148,7 @@ export default function WorkspacePage() {
       return false
     }
   })
+  const [tourPromptOpen, setTourPromptOpen] = useState(false)
 
   const showCanvas = !!projectId || scratchMode
 
@@ -303,6 +307,7 @@ export default function WorkspacePage() {
             open
             onClose={() => {
               setFirstRunOpen(false)
+              setTourPromptOpen(true)
               try {
                 localStorage.setItem(ONBOARDED_KEY, '1')
               } catch {
@@ -313,6 +318,22 @@ export default function WorkspacePage() {
             onBrowseTemplates={handleOpenExplore}
             onImport={handleImport}
             onSelectTemplate={(id) => handleOpenProject(id)}
+          />
+        </Suspense>
+      )}
+
+      {/* 3.19: Tour prompt — shown after first-run modal */}
+      {tourPromptOpen && (
+        <Suspense fallback={null}>
+          <LazyTourPromptModal
+            open
+            onAccept={() => {
+              setTourPromptOpen(false)
+              window.dispatchEvent(new CustomEvent('cs:restart-tour'))
+            }}
+            onDecline={() => {
+              setTourPromptOpen(false)
+            }}
           />
         </Suspense>
       )}
