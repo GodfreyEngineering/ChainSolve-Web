@@ -259,7 +259,7 @@ export function FindBlockDialog({
                 opacity: 0.4,
               }}
             >
-              {t('canvas.findTypeToDim', 'Type to search and dim non-matching nodes')}
+              {t('canvas.findTypeToDim', 'Type to search and dim non-matching blocks')}
             </div>
           )}
         </div>

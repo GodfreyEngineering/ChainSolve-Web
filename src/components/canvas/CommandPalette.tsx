@@ -152,7 +152,7 @@ export function CommandPalette({
       id: `node:${n.id}`,
       kind: 'node' as CommandKind,
       label: n.label,
-      hint: t('commandPalette.jumpToNode', 'Jump to node'),
+      hint: t('commandPalette.jumpToNode', 'Jump to block'),
       icon: '⤳',
       onExecute: n.onJump,
     }))
@@ -213,7 +213,7 @@ export function CommandPalette({
     if (groups.block.length > 0)
       result.push({ label: t('commandPalette.blocks', 'Blocks'), items: groups.block.slice(0, 12) })
     if (groups.node.length > 0)
-      result.push({ label: t('commandPalette.nodes', 'Nodes'), items: groups.node.slice(0, 8) })
+      result.push({ label: t('commandPalette.nodes', 'Blocks'), items: groups.node.slice(0, 8) })
     return result
   }, [q, allItems, t])
 
@@ -228,7 +228,7 @@ export function CommandPalette({
           style={inputStyle}
           placeholder={t(
             'commandPalette.placeholder',
-            'Type a command, block name, or node label…',
+            'Type a command, block name, or block label…',
           )}
           value={query}
           onChange={(e) => {

@@ -137,8 +137,8 @@ export default function GraphHealthPanel({
 
             {/* Stats grid */}
             <div style={{ ...gridStyle, flex: 1 }}>
-              <StatCell label={t('graphHealth.nodes', 'Nodes')} value={report.nodeCount} />
-              <StatCell label={t('graphHealth.edges', 'Edges')} value={report.edgeCount} />
+              <StatCell label={t('graphHealth.nodes', 'Blocks')} value={report.nodeCount} />
+              <StatCell label={t('graphHealth.edges', 'Chains')} value={report.edgeCount} />
               <StatCell label={t('graphHealth.groups', 'Groups')} value={report.groupCount} />
               <StatCell
                 label={t('graphHealth.collapsed', 'Collapsed')}
@@ -168,10 +168,10 @@ export default function GraphHealthPanel({
             </div>
           )}
 
-          {/* Disconnected nodes */}
+          {/* Disconnected blocks */}
           {report.orphanNodeIds.length > 0 && (
             <div style={detailBoxStyle}>
-              <div style={detailLabelStyle}>Disconnected nodes ({report.orphanNodeIds.length})</div>
+              <div style={detailLabelStyle}>Disconnected blocks ({report.orphanNodeIds.length})</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
                 {report.orphanNodeIds.slice(0, 20).map((id) => (
                   <span key={id} style={tagStyle}>
@@ -187,10 +187,10 @@ export default function GraphHealthPanel({
             </div>
           )}
 
-          {/* Error nodes */}
+          {/* Error blocks */}
           {report.errorNodeIds.length > 0 && (
             <div style={detailBoxStyle}>
-              <div style={detailLabelStyle}>Error nodes ({report.errorNodeIds.length})</div>
+              <div style={detailLabelStyle}>Error blocks ({report.errorNodeIds.length})</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
                 {report.errorNodeIds.slice(0, 20).map((id) => (
                   <span key={id} style={{ ...tagStyle, borderColor: '#ef4444', color: '#ef4444' }}>
@@ -209,7 +209,7 @@ export default function GraphHealthPanel({
           {/* Critical path */}
           {report.criticalPath.length > 1 && (
             <div style={detailBoxStyle}>
-              <div style={detailLabelStyle}>Critical path — {report.criticalPath.length} nodes</div>
+              <div style={detailLabelStyle}>Critical path — {report.criticalPath.length} blocks</div>
               <div
                 style={{
                   fontSize: '0.65rem',
@@ -230,13 +230,13 @@ export default function GraphHealthPanel({
               <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginTop: 4 }}>
                 {report.orphanCount > 0 && (
                   <div style={fixSuggestionStyle}>
-                    → Delete or connect {report.orphanCount} disconnected node
+                    → Delete or connect {report.orphanCount} disconnected block
                     {report.orphanCount > 1 ? 's' : ''}
                   </div>
                 )}
                 {report.cycleDetected && (
                   <div style={fixSuggestionStyle}>
-                    → Remove edge from{' '}
+                    → Remove chain from{' '}
                     {report.cyclePath.length > 1
                       ? `"${labelMap.get(report.cyclePath[report.cyclePath.length - 2]) ?? ''}" → "${labelMap.get(report.cyclePath[0]) ?? ''}"`
                       : 'the cycle'}{' '}
@@ -245,13 +245,13 @@ export default function GraphHealthPanel({
                 )}
                 {report.errorNodeIds.length > 0 && (
                   <div style={fixSuggestionStyle}>
-                    → Check inputs on {report.errorNodeIds.length} error node
+                    → Check inputs on {report.errorNodeIds.length} error block
                     {report.errorNodeIds.length > 1 ? 's' : ''}
                   </div>
                 )}
                 {report.crossingEdgeCount > 0 && (
                   <div style={fixSuggestionStyle}>
-                    → Move {report.crossingEdgeCount} cross-group edge
+                    → Move {report.crossingEdgeCount} cross-group chain
                     {report.crossingEdgeCount > 1 ? 's' : ''} inside their respective groups
                   </div>
                 )}

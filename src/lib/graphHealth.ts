@@ -385,13 +385,13 @@ export function formatHealthReport(
     lines.push(`  ⚠ ${t('graphHealth.cycleDetected')} [${report.cyclePath.join(' → ')}]`)
   }
   if (report.errorNodeIds.length > 0) {
-    lines.push(`  ⚠ ${report.errorNodeIds.length} error node(s)`)
+    lines.push(`  ⚠ ${report.errorNodeIds.length} error block(s)`)
   }
   if (report.nodeCount > 300) {
     lines.push(`  ℹ ${t('graphHealth.largeGraph')}`)
   }
   if (report.criticalPath.length > 0) {
-    lines.push(`  Critical path: ${report.criticalPath.length} nodes`)
+    lines.push(`  Critical path: ${report.criticalPath.length} blocks`)
   }
 
   return lines.join('\n')

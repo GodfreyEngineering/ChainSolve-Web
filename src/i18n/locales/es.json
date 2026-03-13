@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "ChainSolve",
-    "tagline": "Calculadora científica de nodos"
+    "tagline": "Calculadora científica de bloques"
   },
   "nav": {
     "signOut": "Cerrar sesión",
@@ -20,7 +20,7 @@
   "home": {
     "title": "Inicio del espacio de trabajo",
     "welcome": "Bienvenido a ChainSolve",
-    "subtitle": "Tu espacio de trabajo científico de nodos",
+    "subtitle": "Tu espacio de trabajo científico de bloques",
     "createProject": "Crear proyecto",
     "createProjectDesc": "Iniciar un nuevo proyecto guardado",
     "openScratch": "Lienzo temporal",
@@ -296,7 +296,7 @@
     "reload": "Recargar del servidor",
     "emptyHint": "Haz clic derecho en el lienzo para insertar un bloque, pulsa / para inserción rápida, o abre la biblioteca de bloques.",
     "mobileFabAdd": "Añadir bloque",
-    "findPlaceholder": "Buscar nodos…",
+    "findPlaceholder": "Buscar bloques…",
     "findHint": "↑↓ navegar · ↵ enfocar · ESC",
     "noMatches": "No se encontraron bloques",
     "instructions": "Arrastra bloques desde la biblioteca. Conecta salidas → entradas. Clic derecho para más opciones.",
@@ -361,7 +361,7 @@
     "reimportCsv": "Re-import",
     "addColumnRight": "Add column right",
     "findMatchCount": "{{count}} matches — Enter to cycle",
-    "findTypeToDim": "Type to search and dim non-matching nodes",
+    "findTypeToDim": "Type to search and dim non-matching blocks",
     "canvasLoadFailed": "Canvas data could not be loaded — starting with an empty canvas. Other sheets are unaffected.",
     "invalidProjectName": "Invalid project name",
     "loadErrorHint": "This may be a temporary network issue. Try reloading the project.",
@@ -575,7 +575,7 @@
     "thousandsSep": "Separador de miles",
     "thousandsSepHint": "Mostrar puntos en numeros grandes (1.000.000)",
     "lodRendering": "Renderizado por nivel de detalle",
-    "lodRenderingHint": "Simplificar nodos a zoom bajo para mejor rendimiento",
+    "lodRenderingHint": "Simplificar bloques a zoom bajo para mejor rendimiento",
     "showGrid": "Mostrar cuadricula",
     "showGridHint": "Mostrar puntos de cuadricula en el fondo del lienzo",
     "defaultZoom": "Zoom predeterminado",
@@ -631,16 +631,16 @@
     "bgLargeDots": "Large dots",
     "bgSolid": "Solid (no grid)",
     "canvasGridSize": "Grid size",
-    "canvasEdgeType": "Edge style",
+    "canvasEdgeType": "Chain style",
     "edgeBezier": "Bezier (curved)",
     "edgeSmoothstep": "Smooth step",
     "edgeStep": "Step (sharp corners)",
     "edgeStraight": "Straight",
-    "canvasEdgeWidth": "Edge width",
-    "canvasNodeBorderRadius": "Node corner radius",
+    "canvasEdgeWidth": "Chain width",
+    "canvasNodeBorderRadius": "Block corner radius",
     "borderRadiusSquare": "Square (0 px)",
     "borderRadiusRound": "Rounded (12 px)",
-    "canvasNodeShadow": "Node shadow",
+    "canvasNodeShadow": "Block shadow",
     "shadowNone": "None",
     "shadowSubtle": "Subtle",
     "shadowStrong": "Strong",
@@ -794,7 +794,7 @@
     "restore": "Restaurar",
     "copy": "Copiar",
     "copyJson": "Copiar JSON",
-    "jump": "Ir al nodo",
+    "jump": "Ir al bloque",
     "edit": "Editar",
     "expand": "Expandir",
     "back": "Back",
@@ -960,8 +960,8 @@
     "influenceTitle": "Show influence analysis",
     "exportCSV": "Export as CSV",
     "importCSV": "Import from CSV",
-    "boundHint": "Nodes bound to this variable — click to focus",
-    "influenceHint": "Each variable's downstream reach — which output nodes (Display / Publish) it feeds."
+    "boundHint": "Blocks bound to this variable — click to focus",
+    "influenceHint": "Each variable's downstream reach — which output blocks (Display / Publish) it feeds."
   },
   "publishSubscribe": {
     "channelPlaceholder": "Nombre del canal",
@@ -979,7 +979,7 @@
     "notes": "Notas",
     "notesPlaceholder": "Agregar notas…",
     "members": "Miembros",
-    "memberCount": "{{count}} nodos",
+    "memberCount": "{{count}} bloques",
     "deleteGroup": "Eliminar grupo",
     "saveAsGroup": "Guardar como grupo…",
     "savedGroupName": "Nombre del grupo:",
@@ -991,7 +991,7 @@
     "renameSavedGroup": "Renombrar grupo guardado…",
     "groupSaved": "Grupo guardado",
     "proRequired": "Requiere Pro",
-    "minSelection": "Selecciona 2+ nodos para agrupar",
+    "minSelection": "Selecciona 2+ bloques para agrupar",
     "name": "Nombre",
     "noMembers": "Sin miembros"
   },
@@ -1086,10 +1086,10 @@
     "placeholder": "Escribir un comando…",
     "noResults": "No hay acciones coincidentes",
     "hint": "↑↓ navegar · ↵ ejecutar · ESC cerrar",
-    "jumpToNode": "Jump to node",
+    "jumpToNode": "Jump to block",
     "actions": "Actions",
     "blocks": "Blocks",
-    "nodes": "Nodes"
+    "nodes": "Blocks"
   },
   "shortcuts": {
     "global": "Global",
@@ -1137,7 +1137,7 @@
     "presentationMode": "Presentation mode (Ctrl+Shift+P)"
   },
   "inspector": {
-    "pin": "Fijar al nodo actual",
+    "pin": "Fijar al bloque actual",
     "unpin": "Desfijar selección",
     "pinned": "Fijado",
     "followSelection": "Siguiendo selección",
@@ -1175,7 +1175,7 @@
     "addFavourite": "Agregar a favoritos",
     "removeFavourite": "Quitar de favoritos",
     "formula": "Fórmula",
-    "insertSavedGroup": "Insertar \"{{name}}\" ({{count}} nodos)",
+    "insertSavedGroup": "Insertar \"{{name}}\" ({{count}} bloques)",
     "all": "Todos",
     "favourites": "Favoritos",
     "recent": "Recientes",
@@ -1237,11 +1237,11 @@
   },
   "graphHealth": {
     "title": "Estado del grafo",
-    "nodes": "Nodos",
+    "nodes": "Bloques",
     "edges": "Cadenas",
     "groups": "Grupos",
     "collapsed": "Colapsados",
-    "orphans": "{{count}} nodo(s) desconectado(s)",
+    "orphans": "{{count}} bloque(s) desconectado(s)",
     "crossingEdges": "{{count}} cadena(s) cruzan limites de grupo",
     "largeGraph": "Grafo grande — insignias ocultas automáticamente",
     "cycleDetected": "Ciclo detectado — puede causar evaluación infinita",
@@ -1610,7 +1610,7 @@
     "generating": "Generando…",
     "planReady": "Plan del grafo generado",
     "planSummaryLabel": "Resumen",
-    "nodeCount": "{{count}} nodos",
+    "nodeCount": "{{count}} bloques",
     "edgeCount": "{{count}} cadenas",
     "notConfiguredTitle": "IA no configurada",
     "notConfiguredBody": "Establece VITE_LLM_API_KEY en tu archivo .env para habilitar la construcción asistida por IA."
@@ -1693,10 +1693,10 @@
     "unlockPosition": "Desbloquear posición",
     "copyValue": "Copiar valor",
     "jumpToSource": "Ir al origen",
-    "explainNode": "Explicar este nodo",
+    "explainNode": "Explicar este bloque",
     "selectChain": "Seleccionar cadena",
     "showNotation": "Mostrar notación",
-    "deleteNode": "Eliminar nodo",
+    "deleteNode": "Eliminar bloque",
     "expand": "Expandir",
     "collapse": "Contraer",
     "saveAsGroup": "Guardar como grupo…",
@@ -1742,10 +1742,10 @@
     "annotRoundedRect": "Rectangulo redondeado",
     "annotStickyNote": "Sticky Note",
     "addComment": "Comment",
-    "nodeColor": "Node color",
+    "nodeColor": "Block color",
     "clearColor": "Clear color",
     "resetToDefault": "Reset to default",
-    "disconnectAll": "Disconnect all edges",
+    "disconnectAll": "Disconnect all chains",
     "centerHorizontal": "Center horizontally",
     "centerVertical": "Center vertically",
     "addProbeNode": "Add probe display",
@@ -1915,7 +1915,7 @@
     "errorInvalidCode": "Introduce el código de 6 dígitos enviado a tu correo."
   },
   "seo": {
-    "defaultDescription": "Calculadora científica de grafos de nodos. Construye cadenas de cálculo visualmente.",
+    "defaultDescription": "Calculadora científica de grafos de bloques. Construye cadenas de cálculo visualmente.",
     "login": {
       "title": "Iniciar sesión — ChainSolve",
       "description": "Inicia sesión en ChainSolve para acceder a tus proyectos y cadenas de cálculo."
@@ -2184,7 +2184,7 @@
     "problems": "problemas",
     "root": "root",
     "propagated": "chain",
-    "jumpToNode": "Jump to node",
+    "jumpToNode": "Jump to block",
     "jump": "Jump",
     "jumpToRoot": "Root"
   },
@@ -2197,8 +2197,8 @@
     "empty": "No snapshots yet. Save one to start tracking history.",
     "clickToRename": "Click to rename",
     "untitled": "Snapshot",
-    "nodes": "nodes",
-    "edges": "edges",
+    "nodes": "blocks",
+    "edges": "chains",
     "preview": "Preview",
     "restore": "Restore",
     "delete": "Delete",
@@ -2285,7 +2285,7 @@
     "noSelection": "No selection",
     "clickToEdit": "Click or press = to edit",
     "error": "Invalid expression",
-    "hint": "Select a node to see its formula",
+    "hint": "Select a block to see its formula",
     "hint2": "Click or = to edit"
   },
   "nodeComments": {

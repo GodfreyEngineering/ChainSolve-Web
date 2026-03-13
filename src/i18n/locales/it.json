@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "ChainSolve",
-    "tagline": "Calcolatrice scientifica a nodi"
+    "tagline": "Calcolatrice scientifica a blocchi"
   },
   "nav": {
     "signOut": "Esci",
@@ -20,7 +20,7 @@
   "home": {
     "title": "Home dell'area di lavoro",
     "welcome": "Benvenuto su ChainSolve",
-    "subtitle": "Il tuo spazio di lavoro scientifico a nodi",
+    "subtitle": "Il tuo spazio di lavoro scientifico a blocchi",
     "createProject": "Crea progetto",
     "createProjectDesc": "Inizia un nuovo progetto salvato",
     "openScratch": "Lavagna temporanea",
@@ -296,7 +296,7 @@
     "reload": "Ricarica dal server",
     "emptyHint": "Clic destro sulla tela per inserire un blocco, premi / per inserimento rapido, o apri la libreria dei blocchi.",
     "mobileFabAdd": "Aggiungi blocco",
-    "findPlaceholder": "Cerca nodi…",
+    "findPlaceholder": "Cerca blocchi…",
     "findHint": "↑↓ naviga · ↵ metti a fuoco · ESC",
     "noMatches": "Nessun blocco trovato",
     "instructions": "Trascina i blocchi dalla libreria. Collega uscite → ingressi. Clic destro per più opzioni.",
@@ -361,7 +361,7 @@
     "reimportCsv": "Re-import",
     "addColumnRight": "Add column right",
     "findMatchCount": "{{count}} matches — Enter to cycle",
-    "findTypeToDim": "Type to search and dim non-matching nodes",
+    "findTypeToDim": "Type to search and dim non-matching blocks",
     "canvasLoadFailed": "Canvas data could not be loaded — starting with an empty canvas. Other sheets are unaffected.",
     "invalidProjectName": "Invalid project name",
     "loadErrorHint": "This may be a temporary network issue. Try reloading the project.",
@@ -575,7 +575,7 @@
     "thousandsSep": "Separatore delle migliaia",
     "thousandsSepHint": "Mostra punti nei numeri grandi (1.000.000)",
     "lodRendering": "Rendering per livello di dettaglio",
-    "lodRenderingHint": "Semplifica i nodi a zoom basso per prestazioni migliori",
+    "lodRenderingHint": "Semplifica i blocchi a zoom basso per prestazioni migliori",
     "showGrid": "Mostra griglia",
     "showGridHint": "Mostra i punti della griglia sullo sfondo del canvas",
     "defaultZoom": "Zoom predefinito",
@@ -631,16 +631,16 @@
     "bgLargeDots": "Large dots",
     "bgSolid": "Solid (no grid)",
     "canvasGridSize": "Grid size",
-    "canvasEdgeType": "Edge style",
+    "canvasEdgeType": "Chain style",
     "edgeBezier": "Bezier (curved)",
     "edgeSmoothstep": "Smooth step",
     "edgeStep": "Step (sharp corners)",
     "edgeStraight": "Straight",
-    "canvasEdgeWidth": "Edge width",
-    "canvasNodeBorderRadius": "Node corner radius",
+    "canvasEdgeWidth": "Chain width",
+    "canvasNodeBorderRadius": "Block corner radius",
     "borderRadiusSquare": "Square (0 px)",
     "borderRadiusRound": "Rounded (12 px)",
-    "canvasNodeShadow": "Node shadow",
+    "canvasNodeShadow": "Block shadow",
     "shadowNone": "None",
     "shadowSubtle": "Subtle",
     "shadowStrong": "Strong",
@@ -794,7 +794,7 @@
     "restore": "Ripristina",
     "copy": "Copia",
     "copyJson": "Copia JSON",
-    "jump": "Vai al nodo",
+    "jump": "Vai al blocco",
     "edit": "Modifica",
     "expand": "Espandi",
     "back": "Back",
@@ -960,8 +960,8 @@
     "influenceTitle": "Show influence analysis",
     "exportCSV": "Export as CSV",
     "importCSV": "Import from CSV",
-    "boundHint": "Nodes bound to this variable — click to focus",
-    "influenceHint": "Each variable's downstream reach — which output nodes (Display / Publish) it feeds."
+    "boundHint": "Blocks bound to this variable — click to focus",
+    "influenceHint": "Each variable's downstream reach — which output blocks (Display / Publish) it feeds."
   },
   "publishSubscribe": {
     "channelPlaceholder": "Nome del canale",
@@ -979,7 +979,7 @@
     "notes": "Note",
     "notesPlaceholder": "Aggiungi note…",
     "members": "Membri",
-    "memberCount": "{{count}} nodi",
+    "memberCount": "{{count}} blocchi",
     "deleteGroup": "Elimina gruppo",
     "saveAsGroup": "Salva come gruppo…",
     "savedGroupName": "Nome del gruppo:",
@@ -991,7 +991,7 @@
     "renameSavedGroup": "Rinomina gruppo salvato…",
     "groupSaved": "Gruppo salvato",
     "proRequired": "Pro richiesto",
-    "minSelection": "Seleziona 2+ nodi per raggruppare",
+    "minSelection": "Seleziona 2+ blocchi per raggruppare",
     "name": "Nome",
     "noMembers": "Nessun membro"
   },
@@ -1086,10 +1086,10 @@
     "placeholder": "Digita un comando…",
     "noResults": "Nessuna azione corrispondente",
     "hint": "↑↓ navigare · ↵ eseguire · ESC chiudere",
-    "jumpToNode": "Jump to node",
+    "jumpToNode": "Jump to block",
     "actions": "Actions",
     "blocks": "Blocks",
-    "nodes": "Nodes"
+    "nodes": "Blocks"
   },
   "shortcuts": {
     "global": "Globale",
@@ -1137,7 +1137,7 @@
     "presentationMode": "Presentation mode (Ctrl+Shift+P)"
   },
   "inspector": {
-    "pin": "Fissa al nodo corrente",
+    "pin": "Fissa al blocco corrente",
     "unpin": "Sgancia la selezione",
     "pinned": "Fissato",
     "followSelection": "Segue la selezione",
@@ -1175,7 +1175,7 @@
     "addFavourite": "Aggiungi ai preferiti",
     "removeFavourite": "Rimuovi dai preferiti",
     "formula": "Formula",
-    "insertSavedGroup": "Inserisci \"{{name}}\" ({{count}} nodi)",
+    "insertSavedGroup": "Inserisci \"{{name}}\" ({{count}} blocchi)",
     "all": "Tutti",
     "favourites": "Preferiti",
     "recent": "Recenti",
@@ -1237,11 +1237,11 @@
   },
   "graphHealth": {
     "title": "Salute del grafo",
-    "nodes": "Nodi",
+    "nodes": "Blocchi",
     "edges": "Catene",
     "groups": "Gruppi",
     "collapsed": "Compressi",
-    "orphans": "{{count}} nodo/i disconnesso/i",
+    "orphans": "{{count}} blocco/i disconnesso/i",
     "crossingEdges": "{{count}} catena/e attraversano i confini del gruppo",
     "largeGraph": "Grafo grande — badge nascosti automaticamente",
     "cycleDetected": "Ciclo rilevato — può causare valutazione infinita",
@@ -1610,7 +1610,7 @@
     "generating": "Generazione…",
     "planReady": "Piano del grafo generato",
     "planSummaryLabel": "Riepilogo",
-    "nodeCount": "{{count}} nodi",
+    "nodeCount": "{{count}} blocchi",
     "edgeCount": "{{count}} catene",
     "notConfiguredTitle": "IA non configurata",
     "notConfiguredBody": "Imposta VITE_LLM_API_KEY nel tuo file .env per abilitare la creazione assistita dall'IA."
@@ -1693,10 +1693,10 @@
     "unlockPosition": "Sblocca posizione",
     "copyValue": "Copia valore",
     "jumpToSource": "Vai all'origine",
-    "explainNode": "Spiega questo nodo",
+    "explainNode": "Spiega questo blocco",
     "selectChain": "Seleziona catena",
     "showNotation": "Mostra notazione",
-    "deleteNode": "Elimina nodo",
+    "deleteNode": "Elimina blocco",
     "expand": "Espandi",
     "collapse": "Comprimi",
     "saveAsGroup": "Salva come gruppo…",
@@ -1742,10 +1742,10 @@
     "annotRoundedRect": "Rettangolo arrotondato",
     "annotStickyNote": "Sticky Note",
     "addComment": "Comment",
-    "nodeColor": "Node color",
+    "nodeColor": "Block color",
     "clearColor": "Clear color",
     "resetToDefault": "Reset to default",
-    "disconnectAll": "Disconnect all edges",
+    "disconnectAll": "Disconnect all chains",
     "centerHorizontal": "Center horizontally",
     "centerVertical": "Center vertically",
     "addProbeNode": "Add probe display",
@@ -1915,7 +1915,7 @@
     "errorInvalidCode": "Inserisci il codice a 6 cifre inviato alla tua email."
   },
   "seo": {
-    "defaultDescription": "Calcolatrice scientifica a grafo di nodi. Costruisci catene di calcolo visivamente.",
+    "defaultDescription": "Calcolatrice scientifica a grafo di blocchi. Costruisci catene di calcolo visivamente.",
     "login": {
       "title": "Accedi — ChainSolve",
       "description": "Accedi a ChainSolve per consultare i tuoi progetti e le catene di calcolo."
@@ -2184,7 +2184,7 @@
     "problems": "problemi",
     "root": "root",
     "propagated": "chain",
-    "jumpToNode": "Jump to node",
+    "jumpToNode": "Jump to block",
     "jump": "Jump",
     "jumpToRoot": "Root"
   },
@@ -2197,8 +2197,8 @@
     "empty": "No snapshots yet. Save one to start tracking history.",
     "clickToRename": "Click to rename",
     "untitled": "Snapshot",
-    "nodes": "nodes",
-    "edges": "edges",
+    "nodes": "blocks",
+    "edges": "chains",
     "preview": "Preview",
     "restore": "Restore",
     "delete": "Delete",
@@ -2285,7 +2285,7 @@
     "noSelection": "No selection",
     "clickToEdit": "Click or press = to edit",
     "error": "Invalid expression",
-    "hint": "Select a node to see its formula",
+    "hint": "Select a block to see its formula",
     "hint2": "Click or = to edit"
   },
   "nodeComments": {

@@ -121,7 +121,7 @@ export default function ProblemsPanel() {
               <span style={labelStyle}>{e.label}</span>
               <button
                 style={jumpBtnStyle}
-                title={t('problems.jumpToNode', 'Jump to node')}
+                title={t('problems.jumpToNode', 'Jump to block')}
                 onClick={() => jumpToNode(e.isRootCause ? e.nodeId : e.rootCauseId)}
               >
                 <CompassIcon size={10} />

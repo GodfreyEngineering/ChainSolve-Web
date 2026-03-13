@@ -217,7 +217,7 @@ export function FormulaBar({ nodeId, node, computedValue, onCommit }: FormulaBar
           {error
             ? t('formulaBar.error', 'Invalid expression')
             : displayText ||
-              (nodeId ? '' : t('formulaBar.hint', 'Select a node to see its formula'))}
+              (nodeId ? '' : t('formulaBar.hint', 'Select a block to see its formula'))}
         </div>
       )}
 

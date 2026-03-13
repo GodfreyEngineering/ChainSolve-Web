@@ -81,7 +81,7 @@
     "noProjectsHint": "צור אחד כדי להתחיל",
     "title": "Workbench Home",
     "welcome": "Welcome to ChainSolve",
-    "subtitle": "Your scientific node-graph workspace",
+    "subtitle": "Your scientific block-graph workspace",
     "createProject": "Create Project",
     "createProjectDesc": "Start a new saved project",
     "openScratch": "Scratch Canvas",
@@ -305,7 +305,7 @@
     "thousandsSep": "מפריד אלפים",
     "thousandsSepHint": "הצג פסיקים במספרים גדולים (1,000,000)",
     "lodRendering": "רנדרינג לפי רמת פירוט",
-    "lodRenderingHint": "פשט צמתים בזום נמוך לביצועים טובים יותר",
+    "lodRenderingHint": "פשט בלוקים בזום נמוך לביצועים טובים יותר",
     "showGrid": "הצג רשת",
     "showGridHint": "הצג נקודות רשת על רקע הקנבס",
     "defaultZoom": "זום ברירת מחדל",
@@ -440,16 +440,16 @@
     "bgLargeDots": "Large dots",
     "bgSolid": "Solid (no grid)",
     "canvasGridSize": "Grid size",
-    "canvasEdgeType": "Edge style",
+    "canvasEdgeType": "Chain style",
     "edgeBezier": "Bezier (curved)",
     "edgeSmoothstep": "Smooth step",
     "edgeStep": "Step (sharp corners)",
     "edgeStraight": "Straight",
-    "canvasEdgeWidth": "Edge width",
-    "canvasNodeBorderRadius": "Node corner radius",
+    "canvasEdgeWidth": "Chain width",
+    "canvasNodeBorderRadius": "Block corner radius",
     "borderRadiusSquare": "Square (0 px)",
     "borderRadiusRound": "Rounded (12 px)",
-    "canvasNodeShadow": "Node shadow",
+    "canvasNodeShadow": "Block shadow",
     "shadowNone": "None",
     "shadowSubtle": "Subtle",
     "shadowStrong": "Strong",
@@ -758,7 +758,7 @@
     "reload": "Reload from server",
     "emptyHint": "Right-click the canvas to insert a block, press / for quick insert, or open the block library.",
     "mobileFabAdd": "הוסף בלוק",
-    "findPlaceholder": "Search nodes…",
+    "findPlaceholder": "Search blocks…",
     "findHint": "↑↓ navigate · ↵ focus · ESC",
     "noMatches": "No blocks match",
     "instructions": "Drag blocks from the library. Connect outputs → inputs. Right-click for more options.",
@@ -814,7 +814,7 @@
     "reimportCsv": "Re-import",
     "addColumnRight": "Add column right",
     "findMatchCount": "{{count}} matches — Enter to cycle",
-    "findTypeToDim": "Type to search and dim non-matching nodes",
+    "findTypeToDim": "Type to search and dim non-matching blocks",
     "canvasLoadFailed": "Canvas data could not be loaded — starting with an empty canvas. Other sheets are unaffected.",
     "invalidProjectName": "Invalid project name",
     "loadErrorHint": "This may be a temporary network issue. Try reloading the project.",
@@ -858,10 +858,10 @@
     "unlockPosition": "ביטול נעילת מיקום",
     "copyValue": "העתקת ערך",
     "jumpToSource": "מעבר למקור",
-    "explainNode": "הסבר צומת זה",
+    "explainNode": "הסבר בלוק זה",
     "selectChain": "בחירת שרשרת",
     "showNotation": "הצג סימון",
-    "deleteNode": "מחיקת צומת",
+    "deleteNode": "מחיקת בלוק",
     "expand": "הרחבה",
     "collapse": "כיווץ",
     "saveAsGroup": "שמירה כתבנית…",
@@ -907,10 +907,10 @@
     "annotRoundedRect": "Rounded rectangle",
     "annotStickyNote": "Sticky Note",
     "addComment": "Comment",
-    "nodeColor": "Node color",
+    "nodeColor": "Block color",
     "clearColor": "Clear color",
     "resetToDefault": "Reset to default",
-    "disconnectAll": "Disconnect all edges",
+    "disconnectAll": "Disconnect all chains",
     "centerHorizontal": "Center horizontally",
     "centerVertical": "Center vertically",
     "addProbeNode": "Add probe display",
@@ -1085,8 +1085,8 @@
     "influenceTitle": "Show influence analysis",
     "exportCSV": "Export as CSV",
     "importCSV": "Import from CSV",
-    "boundHint": "Nodes bound to this variable — click to focus",
-    "influenceHint": "Each variable's downstream reach — which output nodes (Display / Publish) it feeds."
+    "boundHint": "Blocks bound to this variable — click to focus",
+    "influenceHint": "Each variable's downstream reach — which output blocks (Display / Publish) it feeds."
   },
   "publishSubscribe": {
     "channelPlaceholder": "שם הערוץ",
@@ -1214,7 +1214,7 @@
     "errorInvalidCode": "נא להזין את הקוד בן 6 הספרות שנשלח לדוא\"ל שלך."
   },
   "seo": {
-    "defaultDescription": "מחשבון מדעי מבוסס גרף צמתים. בנה שרשראות חישוב ויזואלית.",
+    "defaultDescription": "מחשבון מדעי מבוסס גרף בלוקים. בנה שרשראות חישוב ויזואלית.",
     "login": {
       "title": "התחברות — ChainSolve",
       "description": "התחבר ל-ChainSolve כדי לגשת לפרויקטים ושרשראות החישוב שלך."
@@ -1528,7 +1528,7 @@
     "notes": "Notes",
     "notesPlaceholder": "Add notes…",
     "members": "Members",
-    "memberCount": "{{count}} nodes",
+    "memberCount": "{{count}} blocks",
     "deleteGroup": "Delete group",
     "saveAsGroup": "Save as reusable group…",
     "savedGroupName": "Saved group name:",
@@ -1540,7 +1540,7 @@
     "renameSavedGroup": "Rename saved group…",
     "groupSaved": "Group saved",
     "proRequired": "Pro required",
-    "minSelection": "Select 2+ nodes to group"
+    "minSelection": "Select 2+ blocks to group"
   },
   "ui": {
     "minimize": "מזער",
@@ -1548,7 +1548,7 @@
     "restore": "שחזר",
     "copy": "העתק",
     "copyJson": "העתק JSON",
-    "jump": "קפוץ לצומת",
+    "jump": "קפוץ לבלוק",
     "edit": "ערוך",
     "close": "סגור",
     "cancel": "ביטול",
@@ -1573,7 +1573,7 @@
     "addFavourite": "Add to favourites",
     "removeFavourite": "Remove from favourites",
     "formula": "Formula",
-    "insertSavedGroup": "Insert \"{{name}}\" ({{count}} nodes)",
+    "insertSavedGroup": "Insert \"{{name}}\" ({{count}} blocks)",
     "unpin": "Unpin from Quick Access",
     "pin": "Pin to Quick Access",
     "quickAccess": "Quick Access"
@@ -1581,7 +1581,7 @@
   "inspector": {
     "empty": "לחץ על בלוק כדי לבדוק",
     "emptyHint": "או לחץ ימני על הקנבס כדי להוסיף אחד.",
-    "pin": "Pin to current node",
+    "pin": "Pin to current block",
     "unpin": "Unpin selection",
     "pinned": "Pinned",
     "followSelection": "Following selection",
@@ -1695,7 +1695,7 @@
   },
   "app": {
     "name": "ChainSolve",
-    "tagline": "Scientific node-graph calculator"
+    "tagline": "Scientific block-graph calculator"
   },
   "nav": {
     "signOut": "Sign out",
@@ -1925,18 +1925,18 @@
     "placeholder": "Type a command…",
     "noResults": "No matching actions",
     "hint": "↑↓ navigate · ↵ execute · ESC close",
-    "jumpToNode": "Jump to node",
+    "jumpToNode": "Jump to block",
     "actions": "Actions",
     "blocks": "Blocks",
-    "nodes": "Nodes"
+    "nodes": "Blocks"
   },
   "graphHealth": {
     "title": "Graph Health",
-    "nodes": "Nodes",
+    "nodes": "Blocks",
     "edges": "Chains",
     "groups": "קבוצות",
     "collapsed": "Collapsed",
-    "orphans": "{{count}} disconnected node(s)",
+    "orphans": "{{count}} disconnected block(s)",
     "crossingEdges": "{{count}} chain(s) cross group boundaries",
     "largeGraph": "Large graph — badges auto-hidden",
     "cycleDetected": "Cycle detected — may cause infinite eval",
@@ -2143,7 +2143,7 @@
     "generating": "Generating…",
     "planReady": "Graph plan generated",
     "planSummaryLabel": "Summary",
-    "nodeCount": "{{count}} nodes",
+    "nodeCount": "{{count}} blocks",
     "edgeCount": "{{count}} chains",
     "notConfiguredTitle": "AI not configured",
     "notConfiguredBody": "Set VITE_LLM_API_KEY in your .env file to enable AI-assisted graph building."
@@ -2184,7 +2184,7 @@
     "problems": "בעיות",
     "root": "root",
     "propagated": "chain",
-    "jumpToNode": "Jump to node",
+    "jumpToNode": "Jump to block",
     "jump": "Jump",
     "jumpToRoot": "Root"
   },
@@ -2197,8 +2197,8 @@
     "empty": "No snapshots yet. Save one to start tracking history.",
     "clickToRename": "Click to rename",
     "untitled": "Snapshot",
-    "nodes": "nodes",
-    "edges": "edges",
+    "nodes": "blocks",
+    "edges": "chains",
     "preview": "Preview",
     "restore": "Restore",
     "delete": "Delete",
@@ -2285,7 +2285,7 @@
     "noSelection": "No selection",
     "clickToEdit": "Click or press = to edit",
     "error": "Invalid expression",
-    "hint": "Select a node to see its formula",
+    "hint": "Select a block to see its formula",
     "hint2": "Click or = to edit"
   },
   "nodeComments": {
