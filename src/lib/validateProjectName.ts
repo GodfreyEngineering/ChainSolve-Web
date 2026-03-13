@@ -7,9 +7,12 @@
  *   - No control characters (ASCII 0x00–0x1F or 0x7F)
  *   - No filesystem-unsafe characters: / \ : * ? " < > |
  *   - No consecutive whitespace characters (PROJ-08)
+ *   - No offensive/forbidden words (shared filter)
  *
  * Used by SaveAsDialog and CanvasPage inline rename before persisting to DB.
  */
+
+import { hasControlChars, findForbiddenWord } from './validateUserString'
 
 export const PROJECT_NAME_MAX_LENGTH = 100
 
@@ -18,10 +21,6 @@ export interface ProjectNameValidation {
   /** Human-readable reason when ok === false. */
   error?: string
 }
-
-/** Matches any ASCII control character (U+0000–U+001F, U+007F). */
-// eslint-disable-next-line no-control-regex
-const CONTROL_CHARS = /[\x00-\x1F\x7F]/
 
 /** Characters unsafe for filenames on Windows/macOS/Linux. */
 const UNSAFE_FILENAME_CHARS = /[/\\:*?"<>|]/
@@ -55,7 +54,7 @@ export function validateProjectName(name: unknown): ProjectNameValidation {
     }
   }
 
-  if (CONTROL_CHARS.test(trimmed)) {
+  if (hasControlChars(trimmed)) {
     return { ok: false, error: 'project name must not contain control characters' }
   }
 
@@ -68,6 +67,10 @@ export function validateProjectName(name: unknown): ProjectNameValidation {
 
   if (CONSECUTIVE_WHITESPACE.test(trimmed)) {
     return { ok: false, error: 'project name must not contain consecutive spaces' }
+  }
+
+  if (findForbiddenWord(trimmed)) {
+    return { ok: false, error: 'project name contains a forbidden word' }
   }
 
   return { ok: true }
