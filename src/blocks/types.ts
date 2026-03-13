@@ -71,6 +71,7 @@ export type NodeKind =
   | 'csSubscribe'
   | 'csAnnotation'
   | 'csMaterial'
+  | 'csOptimizer'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

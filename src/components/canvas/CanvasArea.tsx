@@ -131,6 +131,7 @@ import { SubscribeNode } from './nodes/SubscribeNode'
 import { AnnotationNode } from './nodes/AnnotationNode'
 import { AnnotationToolbar } from './AnnotationToolbar'
 import { MaterialNode } from './nodes/MaterialNode'
+import { OptimizerNode } from './nodes/OptimizerNode'
 import { copyValueToClipboard } from '../../engine/valueFormat'
 import {
   computeGraphHealth,
@@ -167,6 +168,7 @@ const NODE_TYPES = {
   csSubscribe: SubscribeNode,
   csAnnotation: AnnotationNode,
   csMaterial: MaterialNode,
+  csOptimizer: OptimizerNode,
 } as const
 
 const EDGE_TYPES = {

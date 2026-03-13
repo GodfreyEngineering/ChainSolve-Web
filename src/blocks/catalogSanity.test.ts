@@ -78,6 +78,7 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csSubscribe',
   'csAnnotation',
   'csMaterial',
+  'csOptimizer',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {

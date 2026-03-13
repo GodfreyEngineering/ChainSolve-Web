@@ -50,7 +50,7 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
     type: 'optim.gradientDescent',
     label: 'Gradient Descent',
     category: 'optimization',
-    nodeKind: 'csOperation',
+    nodeKind: 'csOptimizer',
     inputs: [
       { id: 'objective', label: 'Objective' },
       { id: 'variables', label: 'Variables' },
@@ -66,7 +66,7 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
     type: 'optim.geneticAlgorithm',
     label: 'Genetic Algorithm',
     category: 'optimization',
-    nodeKind: 'csOperation',
+    nodeKind: 'csOptimizer',
     inputs: [
       { id: 'objective', label: 'Objective' },
       { id: 'variables', label: 'Variables' },
@@ -82,7 +82,7 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
     type: 'optim.nelderMead',
     label: 'Nelder-Mead',
     category: 'optimization',
-    nodeKind: 'csOperation',
+    nodeKind: 'csOptimizer',
     inputs: [
       { id: 'objective', label: 'Objective' },
       { id: 'variables', label: 'Variables' },

@@ -24,6 +24,9 @@ import {
   Highlighter,
   ArrowRight,
   MoveRight,
+  Target,
+  Dna,
+  Triangle,
 } from 'lucide-react'
 
 // ── Color mapping ──────────────────────────────────────────────────────────
@@ -47,6 +50,12 @@ const TABLE_TYPES = new Set(['listTable', 'csListTable'])
 const GROUP_TYPES = new Set(['group', 'csGroup'])
 const PUBLISH_TYPES = new Set(['publish', 'csPublish'])
 const SUBSCRIBE_TYPES = new Set(['subscribe', 'csSubscribe'])
+const OPTIMIZER_TYPES = new Set([
+  'optim.gradientDescent',
+  'optim.geneticAlgorithm',
+  'optim.nelderMead',
+])
+
 const ANNOTATION_TYPES = new Set([
   'annotation_text',
   'annotation_callout',
@@ -68,6 +77,7 @@ export function getNodeTypeColor(blockType: string): string {
   if (GROUP_TYPES.has(blockType)) return '--node-color-group'
   if (PUBLISH_TYPES.has(blockType)) return '--node-color-operation'
   if (SUBSCRIBE_TYPES.has(blockType)) return '--node-color-operation'
+  if (OPTIMIZER_TYPES.has(blockType)) return '--node-color-source'
   if (ANNOTATION_TYPES.has(blockType)) return '--node-color-group'
   // Default: operation (the largest category)
   return '--node-color-operation'
@@ -106,6 +116,10 @@ const ICON_MAP: Record<string, LucideIcon> = {
   csPublish: Upload,
   subscribe: Download,
   csSubscribe: Download,
+
+  'optim.gradientDescent': Target,
+  'optim.geneticAlgorithm': Dna,
+  'optim.nelderMead': Triangle,
 
   annotation_text: Type,
   annotation_callout: MessageSquare,
