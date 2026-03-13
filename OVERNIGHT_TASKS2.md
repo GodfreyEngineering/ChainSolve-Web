@@ -201,7 +201,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **6.04 AI tasks — optimize, explain, find errors, suggest** — Add preset AI tasks accessible via toolbar or context menu: (a) "Optimize this graph" → AI suggests simplifications, (b) "Explain this calculation" → AI traces computation chain in plain English, (c) "Find errors" → AI identifies issues and suggests fixes, (d) "Suggest improvements" → AI recommends additional blocks or better approaches. Files: `src/components/app/AiCopilotWindow.tsx`, `src/lib/aiCopilot/tasks.ts`. Verify: each task produces useful, actionable output.
 
-- [ ] **6.05 AI streaming responses** — Switch from batch to streaming AI responses. Show tokens appearing in real-time in the AI panel. For graph generation, show blocks appearing on canvas as they're described. Files: `src/components/app/AiCopilotWindow.tsx`, `functions/api/ai.ts`. Verify: prompt → see response streaming word by word.
+- [x] **6.05 AI streaming responses** — Switch from batch to streaming AI responses. Show tokens appearing in real-time in the AI panel. For graph generation, show blocks appearing on canvas as they're described. Files: `src/components/app/AiCopilotWindow.tsx`, `functions/api/ai.ts`. Verify: prompt → see response streaming word by word.
 
 - [ ] **6.06 AI formula autocomplete** — In expression/formula inputs, offer AI-powered autocomplete. As user types, suggest completions based on context (available variables, upstream values, common patterns). Files: `src/components/canvas/ExpressionPanel.tsx`, `src/components/canvas/FormulaBar.tsx`. Verify: type "sin(" → AI suggests "sin(angle_rad)" based on upstream variable.
 
