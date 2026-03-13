@@ -31,17 +31,10 @@ import { getUnitMismatch, type UnitMismatch } from '../../../units/unitCompat'
 import { getUnitSymbol } from '../../../units/unitSymbols'
 import type { NodeData } from '../../../blocks/types'
 
-const KIND_COLORS: Record<string, string> = {
-  scalar: '#14b8a6',
-  vector: '#a78bfa',
-  table: 'var(--warning)',
-  error: 'var(--danger)',
-}
-
-function edgeStroke(v: Value | undefined, animated: boolean): string {
-  if (!animated) return 'var(--primary)'
-  if (!v) return 'var(--text-muted)'
-  return KIND_COLORS[v.kind] ?? 'var(--text-muted)'
+function edgeStroke(v: Value | undefined): string {
+  if (!v) return 'var(--text)'
+  if (v.kind === 'error') return 'var(--danger)'
+  return 'var(--text)'
 }
 
 /** H1-2: Resolve unit mismatch between source and target nodes. */
@@ -74,7 +67,7 @@ function AnimatedEdgeInner({
   const edgeType = usePreferencesStore((s) => s.canvasEdgeType)
   const edgeWidth = usePreferencesStore((s) => s.canvasEdgeWidth)
   const mismatch = useEdgeUnitMismatch(source, target)
-  const stroke = edgeStroke(sourceValue, edgesAnimated)
+  const stroke = edgeStroke(sourceValue)
   const allNodes = useNodes()
   const edgeTitle = useMemo(() => {
     const srcNode = allNodes.find((n) => n.id === source)
@@ -84,11 +77,11 @@ function AnimatedEdgeInner({
     return `${srcLabel} \u2192 ${tgtLabel}`
   }, [allNodes, source, target])
 
-  // H1-2: Override stroke colour when there is a unit mismatch
+  // Edge color: white default, yellow warnings, red errors
   const effectiveStroke = mismatch
     ? mismatch.sameDimension
-      ? '#fbbf24' // amber — same dimension, convertible
-      : 'var(--danger-text)' // red — different dimensions, incompatible
+      ? 'var(--warning)' // yellow — same dimension, convertible
+      : 'var(--danger)' // red — different dimensions, incompatible
     : selected
       ? 'var(--primary)'
       : stroke
