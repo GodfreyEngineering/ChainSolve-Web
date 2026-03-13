@@ -77,6 +77,8 @@ export interface CanvasToolbarProps {
   /** UX-19: Presentation mode toggle. */
   presentationMode?: boolean
   onTogglePresentationMode?: () => void
+  /** 8.04: Mobile mode — larger touch targets. */
+  isMobile?: boolean
 }
 
 /** Width/height of the toolbar strip in pixels, exported for layout calculations. */
@@ -283,6 +285,7 @@ export function CanvasToolbar({
   onShowAllHidden,
   presentationMode,
   onTogglePresentationMode,
+  isMobile,
 }: CanvasToolbarProps) {
   const { t } = useTranslation()
   const { zoomIn, zoomOut, zoomTo, fitView } = useReactFlow()
@@ -407,6 +410,8 @@ export function CanvasToolbar({
         style={{
           ...computeBarStyle(snapEdge),
           cursor: dragging ? 'grabbing' : 'grab',
+          // 8.04: Scale up on mobile for WCAG ≥44px touch targets
+          ...(isMobile ? { transform: `${computeBarStyle(snapEdge).transform ?? ''} scale(1.4)`.trim(), transformOrigin: 'center' } : {}),
         }}
         role="toolbar"
         aria-label={t('toolbar.label')}

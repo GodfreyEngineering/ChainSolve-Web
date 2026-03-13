@@ -120,6 +120,7 @@ const LazyChannelsPanel = lazy(() =>
 import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { useLongPress } from '../../hooks/useLongPress'
 import { BottomSheet } from '../ui/BottomSheet'
 import { ValuePopoverContext, type ShowValuePopover } from '../../contexts/ValuePopoverContext'
 const LazyValuePopover = lazy(() =>
@@ -757,6 +758,14 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   })
   const [libVisible, setLibVisible] = useState(() => !isMobile)
   const [libFilterMain, setLibFilterMain] = useState<string | null>(null)
+
+  // 8.01: Long-press on empty canvas opens block library on mobile
+  const longPressHandlers = useLongPress(
+    () => {
+      if (!readOnly) setLibVisible(true)
+    },
+    { enabled: isMobile && !readOnly },
+  )
 
   // Inspector state (select on click, open on double-click)
   const [inspectedId, setInspectedId] = useState<string | null>(null)
@@ -2848,6 +2857,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                       onKeyDown={onKeyDown}
                       onKeyUp={onKeyUp}
                       tabIndex={0}
+                      {...longPressHandlers}
                       onMouseMove={(e) => {
                         if (!laserMode || !presentationMode) return
                         const rect = canvasWrapRef.current?.getBoundingClientRect()
@@ -3129,6 +3139,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         deleteKeyCode={null}
                         minZoom={0.08}
                         maxZoom={4}
+                        zoomOnPinch
                         proOptions={{ hideAttribution: true }}
                         // UI-PERF-03: skip rendering nodes/edges outside the viewport
                         // on large graphs. React Flow's built-in culling avoids creating
@@ -3329,6 +3340,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         onShowAllHidden={showAllHiddenNodes}
                         presentationMode={presentationMode}
                         onTogglePresentationMode={togglePresentationMode}
+                        isMobile={isMobile}
                       />
                       {/* Bottom Dock — hidden in presentation mode */}
                       {!presentationMode && (
