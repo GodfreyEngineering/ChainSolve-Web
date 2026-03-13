@@ -317,14 +317,21 @@ export async function loadCanvasGraph(
     return cachedGraph
   }
 
-  // 3. Cache miss — fetch from Supabase (current behavior)
-  const raw = await downloadCanvasGraph(userId, projectId, canvasId)
-  const graph = parseCanvasJson(raw, canvasId, projectId)
+  // 3. Cache miss — fetch from Supabase with fallback to empty canvas
+  try {
+    const raw = await downloadCanvasGraph(userId, projectId, canvasId)
+    const graph = parseCanvasJson(raw, canvasId, projectId)
 
-  // 4. Populate cache for next visit
-  void setCachedCanvas(userId, projectId, canvasId, raw)
+    // 4. Populate cache for next visit
+    void setCachedCanvas(userId, projectId, canvasId, raw)
 
-  return graph
+    return graph
+  } catch (err) {
+    // Download failed after retries — return empty canvas so the UI
+    // doesn't crash. The user can still work; autosave will persist later.
+    console.warn('[canvas] Download failed, returning empty canvas:', err)
+    return buildCanvasJson(canvasId, projectId)
+  }
 }
 
 /**

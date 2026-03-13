@@ -22,6 +22,7 @@ async function requireSession() {
 }
 
 const UPLOAD_RETRY_DELAYS = [1000, 2000]
+const DOWNLOAD_RETRY_DELAYS = [500, 1500, 4000]
 
 async function uploadBlobWithRetry(key: string, blob: Blob): Promise<void> {
   let lastError: unknown
@@ -70,6 +71,9 @@ export async function uploadCanvasGraph(
 /**
  * Download and parse a canvas graph JSON from storage.
  * Returns `null` if the file does not exist (treated as empty graph).
+ *
+ * Retries transient failures with exponential backoff (500ms → 1.5s → 4s)
+ * plus random jitter to avoid thundering-herd on reconnection.
  */
 export async function downloadCanvasGraph(
   ownerId: string,
@@ -79,18 +83,34 @@ export async function downloadCanvasGraph(
   await requireSession()
   const key = canvasKey(ownerId, projectId, canvasId)
 
-  const { data, error } = await supabase.storage.from('projects').download(key)
+  let lastError: unknown
+  for (let attempt = 0; attempt <= DOWNLOAD_RETRY_DELAYS.length; attempt++) {
+    try {
+      const { data, error } = await supabase.storage.from('projects').download(key)
 
-  if (error) {
-    // Treat 404 / "Object not found" as empty graph
-    if (error.message.includes('not found') || error.message.includes('404')) {
-      return null
+      if (error) {
+        // Treat 404 / "Object not found" as empty graph — not retryable
+        if (error.message.includes('not found') || error.message.includes('404')) {
+          return null
+        }
+        throw new ServiceError('STORAGE_ERROR', `Canvas download failed: ${error.message}`, true)
+      }
+      if (!data) return null
+
+      return JSON.parse(await data.text())
+    } catch (err) {
+      lastError = err
+      if (attempt < DOWNLOAD_RETRY_DELAYS.length && isRetryableError(err)) {
+        // Exponential backoff + jitter (±25%)
+        const base = DOWNLOAD_RETRY_DELAYS[attempt]
+        const jitter = base * 0.25 * (Math.random() * 2 - 1)
+        await new Promise((r) => setTimeout(r, base + jitter))
+        continue
+      }
+      throw err
     }
-    throw new ServiceError('STORAGE_ERROR', `Canvas download failed: ${error.message}`, true)
   }
-  if (!data) return null
-
-  return JSON.parse(await data.text())
+  throw lastError
 }
 
 /**
