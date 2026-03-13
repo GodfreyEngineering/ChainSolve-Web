@@ -590,47 +590,72 @@ button:focus:not(:focus-visible) {
 }
 
 /* ── Dock panels ──────────────────────────────────────────────────────────── */
+@keyframes cs-chevron-flip {
+  from {
+    transform: rotate(180deg);
+    opacity: 0.4;
+  }
+  to {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+}
 .cs-dock-handle {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.3s ease;
   user-select: none;
 }
 .cs-dock-handle:hover {
   background: var(--primary-dim);
+}
+.cs-dock-handle svg {
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
+}
+.cs-dock-handle:hover svg {
+  color: var(--primary);
+  transform: scale(1.1);
 }
 .cs-dock-handle-chevron {
   color: var(--text-faint);
   line-height: 1;
   user-select: none;
   pointer-events: none;
+  animation: cs-chevron-flip 0.3s ease;
   transition:
-    color 0.15s ease,
-    transform 0.2s ease;
+    color 0.3s ease,
+    transform 0.3s ease;
 }
 .cs-dock-handle:hover .cs-dock-handle-chevron {
   color: var(--primary);
+  transform: scale(1.1);
 }
 .cs-dock-collapse-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
+  border-radius: var(--radius-sm, 4px);
   background: transparent;
-  color: var(--text-faint);
+  color: var(--text-muted);
   cursor: pointer;
-  padding: 0 4px;
-  font-size: 0.72rem;
+  padding: 2px 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
   line-height: 1;
   transition:
-    color 0.15s,
-    transform 0.2s;
+    color 0.3s ease,
+    background 0.3s ease,
+    transform 0.3s ease;
 }
 .cs-dock-collapse-btn:hover {
   color: var(--primary);
+  background: var(--primary-dim);
 }
 .cs-dock-tab {
   padding: 4px 10px;
@@ -715,10 +740,11 @@ button:focus:not(:focus-visible) {
 }
 /* Chevron rotation on collapse handles */
 .cs-dock-collapse-btn svg {
-  transition: transform 0.2s ease;
+  animation: cs-chevron-flip 0.3s ease;
+  transition: transform 0.3s ease;
 }
 .cs-dock-collapse-btn:hover svg {
-  transform: scale(1.2);
+  transform: scale(1.1);
 }
 
 /* ── Chrome buttons (window title bar) — V2-036 ──────────────────────── */

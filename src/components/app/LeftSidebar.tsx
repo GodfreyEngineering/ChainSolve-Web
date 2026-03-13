@@ -124,7 +124,12 @@ export function LeftSidebar({ plan, onOpenProject, onNewProject }: LeftSidebarPr
         ))}
         <div style={{ flex: 1 }} />
         <Tooltip content={t('sidebar.collapse', 'Collapse sidebar')} side="bottom">
-          <button style={collapseBtnStyle} onClick={toggle} aria-label={t('sidebar.collapse')}>
+          <button
+            className="cs-dock-collapse-btn"
+            style={{ width: 26, height: 26 }}
+            onClick={toggle}
+            aria-label={t('sidebar.collapse')}
+          >
             <Icon icon={ChevronLeft} size={14} />
           </button>
         </Tooltip>
@@ -224,20 +229,6 @@ const tabBtnStyle: React.CSSProperties = {
 const tabBtnActiveStyle: React.CSSProperties = {
   background: 'var(--primary-dim)',
   color: 'var(--primary-text)',
-}
-
-const collapseBtnStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: 24,
-  height: 24,
-  border: 'none',
-  borderRadius: 'var(--radius-sm)',
-  background: 'transparent',
-  color: 'var(--text-faint)',
-  cursor: 'pointer',
-  fontFamily: 'inherit',
 }
 
 const contentStyle: React.CSSProperties = {
