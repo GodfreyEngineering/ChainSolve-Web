@@ -554,6 +554,52 @@ export function Inspector({
               </>
             )}
 
+            {/* 4.08: Table output mode selector */}
+            {nd.blockType === 'tableInput' && (
+              <div style={{ marginBottom: '0.7rem' }}>
+                <span style={fieldLabel}>{t('inspector.tableOutputMode', 'Output Mode')}</span>
+                <select
+                  style={{ ...inp, width: '100%' }}
+                  value={(nd.tableOutputMode as string) ?? 'columns'}
+                  onChange={(e) => update({ tableOutputMode: e.target.value })}
+                  title={t('inspector.tableOutputMode', 'Output Mode')}
+                >
+                  <option value="columns">{t('inspector.tableMode.columns', 'All Columns (one port each)')}</option>
+                  <option value="table">{t('inspector.tableMode.table', 'Entire Table')}</option>
+                  <option value="column">{t('inspector.tableMode.column', 'Single Column')}</option>
+                  <option value="row">{t('inspector.tableMode.row', 'Single Row')}</option>
+                </select>
+                {(nd.tableOutputMode as string) === 'column' && (() => {
+                  const td = (nd.tableData as { columns: string[] } | undefined)
+                  return (
+                    <select
+                      style={{ ...inp, width: '100%', marginTop: 4 }}
+                      value={nd.tableOutputCol ?? 0}
+                      onChange={(e) => update({ tableOutputCol: parseInt(e.target.value, 10) })}
+                      title={t('inspector.tableOutputCol', 'Select column')}
+                    >
+                      {(td?.columns ?? []).map((col, ci) => (
+                        <option key={ci} value={ci}>{col}</option>
+                      ))}
+                    </select>
+                  )
+                })()}
+                {(nd.tableOutputMode as string) === 'row' && (
+                  <input
+                    type="number"
+                    style={{ ...monoInp, width: '100%', marginTop: 4 }}
+                    min={0}
+                    value={nd.tableOutputRow ?? 0}
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value, 10)
+                      if (!isNaN(v) && v >= 0) update({ tableOutputRow: v })
+                    }}
+                    placeholder="Row index (0-based)"
+                  />
+                )}
+              </div>
+            )}
+
             {/* Per-port inputs (operation nodes) */}
             {def && def.inputs.length > 0 && (
               <div style={{ marginBottom: '0.7rem' }}>

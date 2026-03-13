@@ -22,6 +22,7 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
   const { updateNodeData } = useReactFlow()
   const value = useComputedValue(id)
   const isTable = nd.blockType === 'tableInput'
+  const tableOutputMode = (nd.tableOutputMode as string | undefined) ?? 'columns'
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
   const TypeIcon = getNodeTypeIcon(nd.blockType)
@@ -84,19 +85,36 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
       </div>
 
       {isTable ? (
-        tableData.columns.map((col, ci) => (
+        tableOutputMode === 'columns' ? (
+          tableData.columns.map((col, ci) => (
+            <Handle
+              key={col}
+              type="source"
+              position={Position.Right}
+              id={`col_${ci}`}
+              style={{
+                ...s.handleRight,
+                top: `${((ci + 1) / (tableData.columns.length + 1)) * 100}%`,
+              }}
+              title={col}
+            />
+          ))
+        ) : (
+          /* 4.08: Single output handle for table/row/column modes */
           <Handle
-            key={col}
             type="source"
             position={Position.Right}
-            id={`col_${ci}`}
-            style={{
-              ...s.handleRight,
-              top: `${((ci + 1) / (tableData.columns.length + 1)) * 100}%`,
-            }}
-            title={col}
+            id="out"
+            style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
+            title={
+              tableOutputMode === 'table'
+                ? 'Entire table'
+                : tableOutputMode === 'row'
+                  ? `Row ${(nd.tableOutputRow ?? 0) + 1}`
+                  : `Column ${tableData.columns[nd.tableOutputCol ?? 0] ?? 'A'}`
+            }
           />
-        ))
+        )
       ) : (
         <Handle
           type="source"

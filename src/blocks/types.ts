@@ -227,6 +227,18 @@ export interface NodeData extends Record<string, unknown> {
    * 'global' (or undefined) uses global preferences.
    */
   displayPrecision?: string
+  /**
+   * 4.08: Table output mode for tableInput blocks.
+   * 'columns' (default) — one output per column
+   * 'table' — single output with full table value
+   * 'row' — single output with selected row as vector
+   * 'column' — single output with selected column as vector
+   */
+  tableOutputMode?: 'columns' | 'table' | 'row' | 'column'
+  /** 4.08: Selected column index for 'column' output mode. */
+  tableOutputCol?: number
+  /** 4.08: Selected row index for 'row' output mode. */
+  tableOutputRow?: number
 }
 
 export interface BlockDef {
