@@ -149,7 +149,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **4.17 Plot block enhancement** — Improve plot blocks: (a) more chart types (bar, scatter, histogram, pie, heatmap), (b) axis labels and title editing, (c) interactive zoom/pan on plot, (d) export plot as PNG/SVG, (e) legend toggle, (f) multiple series on one plot. Files: `src/components/canvas/nodes/PlotNode.tsx`, `src/lib/plot-spec.ts`, `src/lib/plot-export.ts`. Verify: create scatter plot with 2 series, add title, export as PNG.
 
-- [ ] **4.18 Auto-layout algorithm improvement** — Current auto-layout uses dagre. Add: (a) layout direction selector (LR/TB/RL/BT) in toolbar, (b) preserve user-positioned nodes (only layout un-positioned), (c) respect group boundaries, (d) minimize edge crossings. Files: `src/lib/autoLayout.ts`, `src/components/canvas/CanvasToolbar.tsx`. Verify: click auto-layout → graph reorganizes with minimal crossings, groups stay intact.
+- [x] **4.18 Auto-layout algorithm improvement** — Current auto-layout uses dagre. Add: (a) layout direction selector (LR/TB/RL/BT) in toolbar, (b) preserve user-positioned nodes (only layout un-positioned), (c) respect group boundaries, (d) minimize edge crossings. Files: `src/lib/autoLayout.ts`, `src/components/canvas/CanvasToolbar.tsx`. Verify: click auto-layout → graph reorganizes with minimal crossings, groups stay intact.
 
 ---
 
