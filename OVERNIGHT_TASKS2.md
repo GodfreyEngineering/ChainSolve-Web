@@ -207,7 +207,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **6.07 AI rate limiting by plan tier** — Enforce limits: free=0 AI requests, student=10/day, pro=100/day, enterprise=1000/day, developer=unlimited. Track in `ai_usage_monthly` table. Show remaining quota in AI panel header. Files: `functions/api/ai.ts`, `src/lib/entitlements.ts`, `src/components/app/AiCopilotWindow.tsx`. Verify: free user → "Upgrade to use AI". Pro user → "95 requests remaining today".
 
-- [ ] **6.08 AI privacy compliance** — Ensure: (a) user data never sent to AI without consent, (b) opt-out toggle in Privacy settings, (c) AI requests logged in `ai_request_log` for compliance, (d) enterprise orgs can disable AI via `policy_ai_enabled`, (e) `docs/AI_PRIVACY.md` updated. Files: `src/pages/settings/PreferencesSettings.tsx`, `functions/api/ai.ts`, `docs/AI_PRIVACY.md`. Verify: opt out of AI → panel disabled. Enterprise with AI disabled → panel hidden.
+- [x] **6.08 AI privacy compliance** — Ensure: (a) user data never sent to AI without consent, (b) opt-out toggle in Privacy settings, (c) AI requests logged in `ai_request_log` for compliance, (d) enterprise orgs can disable AI via `policy_ai_enabled`, (e) `docs/AI_PRIVACY.md` updated. Files: `src/pages/settings/PreferencesSettings.tsx`, `functions/api/ai.ts`, `docs/AI_PRIVACY.md`. Verify: opt out of AI → panel disabled. Enterprise with AI disabled → panel hidden.
 
 ---
 
