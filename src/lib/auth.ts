@@ -9,6 +9,7 @@ import { supabase } from './supabase'
 import type { AuthError, Session, User } from '@supabase/supabase-js'
 import { invalidateProfileCache } from './profilesService'
 import { clearCanvasCache } from './canvasCache'
+import { registerSession, removeCurrentSession } from './sessionService'
 
 export async function getCurrentUser(): Promise<User | null> {
   const {
@@ -182,7 +183,17 @@ export async function changePassword(
     return { error: 'Current password is incorrect.' }
   }
   const { error } = await supabase.auth.updateUser({ password: newPassword })
-  return { error: error?.message ?? null }
+  if (error) return { error: error.message }
+
+  // Session rotation: invalidate old device session and register a new one.
+  // This ensures any compromised session token is no longer valid.
+  const user = await getCurrentUser()
+  if (user) {
+    await removeCurrentSession()
+    await registerSession(user.id)
+  }
+
+  return { error: null }
 }
 
 // ── Email change (ACCT-03) ───────────────────────────────────────────────────
