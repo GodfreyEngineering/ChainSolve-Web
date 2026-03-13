@@ -17,6 +17,7 @@ import { useFormatValue } from '../../../hooks/useFormatValue'
 import { usePreferencesStore } from '../../../stores/preferencesStore'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
 import { getUnitSymbol } from '../../../units/unitSymbols'
+import { useInferredUnits } from '../../../hooks/useInferredUnits'
 import { NODE_STYLES as s, userColorBg } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
@@ -70,6 +71,9 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
     : globalFormatValue
   const edges = useEdges()
   const nodes = useNodes()
+  // 4.05: Inferred unit from upstream propagation
+  const inferredUnits = useInferredUnits()
+  const inferredUnit = inferredUnits.get(id)
   const [copyMenu, setCopyMenu] = useState<CopyMenu | null>(null)
   const menuRef = useRef<HTMLDivElement | null>(null)
 
@@ -125,7 +129,11 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
   }
 
   const scalarValue = value && isScalar(value) ? value.value : null
-  const unitSymbol = nd.unit ? getUnitSymbol(nd.unit) : ''
+  // 4.05: Show explicit unit, or fall back to inferred unit
+  const explicitUnit = nd.unit as string | undefined
+  const unitSymbol = explicitUnit
+    ? getUnitSymbol(explicitUnit)
+    : inferredUnit?.unit ?? ''
 
   const ariaLabel = `${nd.label} display, value: ${formatValue(value)}`
 
@@ -181,8 +189,13 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
           title={scalarValue !== null ? String(scalarValue) : undefined}
         >
           {formatValue(value)}
-          {nd.unit && (
-            <span style={{ fontSize: '0.7rem', marginLeft: '0.2rem', opacity: 0.7 }}>
+          {unitSymbol && (
+            <span style={{
+              fontSize: '0.7rem',
+              marginLeft: '0.2rem',
+              opacity: explicitUnit ? 0.7 : 0.35,
+              fontStyle: explicitUnit ? undefined : 'italic',
+            }}>
               {unitSymbol}
             </span>
           )}

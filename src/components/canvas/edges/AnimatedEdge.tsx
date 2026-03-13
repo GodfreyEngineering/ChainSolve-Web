@@ -29,6 +29,7 @@ import { formatValue } from '../../../engine/value'
 import type { Value } from '../../../engine/value'
 import { getUnitMismatch, type UnitMismatch } from '../../../units/unitCompat'
 import { getUnitSymbol } from '../../../units/unitSymbols'
+import { useInferredUnits } from '../../../hooks/useInferredUnits'
 import type { NodeData } from '../../../blocks/types'
 
 function edgeStroke(v: Value | undefined): string {
@@ -37,16 +38,20 @@ function edgeStroke(v: Value | undefined): string {
   return 'var(--text)'
 }
 
-/** H1-2: Resolve unit mismatch between source and target nodes. */
+/** H1-2 + 4.05: Resolve unit mismatch, including inferred units from propagation. */
 function useEdgeUnitMismatch(sourceId: string, targetId: string): UnitMismatch | null {
   const nodes = useNodes()
+  const inferred = useInferredUnits()
   return useMemo(() => {
     const srcNode = nodes.find((n) => n.id === sourceId)
     const tgtNode = nodes.find((n) => n.id === targetId)
-    const srcUnit = (srcNode?.data as NodeData | undefined)?.unit
-    const tgtUnit = (tgtNode?.data as NodeData | undefined)?.unit
+    // Use explicit unit first, fall back to inferred unit
+    const srcUnit =
+      (srcNode?.data as NodeData | undefined)?.unit ?? inferred.get(sourceId)?.unit
+    const tgtUnit =
+      (tgtNode?.data as NodeData | undefined)?.unit ?? inferred.get(targetId)?.unit
     return getUnitMismatch(srcUnit, tgtUnit)
-  }, [nodes, sourceId, targetId])
+  }, [nodes, sourceId, targetId, inferred])
 }
 
 function AnimatedEdgeInner({

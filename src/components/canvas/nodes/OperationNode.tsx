@@ -28,6 +28,7 @@ import { ensureBinding } from '../../../lib/migrateBindings'
 import { ValueEditor } from '../editors/ValueEditor'
 import { getUnitSymbol } from '../../../units/unitSymbols'
 import { getConversionFactor, areSameDimension } from '../../../units/unitCompat'
+import { useInferredUnits } from '../../../hooks/useInferredUnits'
 import { NODE_STYLES as s, userColorBg } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
@@ -57,6 +58,9 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const isLocked = draggable === false
   // SCI-06: Angle unit preference for trig block badge display.
   const angleUnit = usePreferencesStore((s) => s.angleUnit)
+  // 4.05: Inferred unit from propagation (display-only)
+  const inferredUnits = useInferredUnits()
+  const inferredUnit = inferredUnits.get(id)
 
   const def = BLOCK_REGISTRY.get(nd.blockType)
   const inputs = def?.inputs ?? []
@@ -231,9 +235,14 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
             }}
           >
             {formatValue(value)}
-            {nd.unit && (
-              <span style={{ fontSize: '0.6rem', marginLeft: '0.15rem', opacity: 0.7 }}>
-                {getUnitSymbol(nd.unit)}
+            {(nd.unit || inferredUnit?.unit) && (
+              <span style={{
+                fontSize: '0.6rem',
+                marginLeft: '0.15rem',
+                opacity: nd.unit ? 0.7 : 0.4,
+                fontStyle: nd.unit ? undefined : 'italic',
+              }}>
+                {nd.unit ? getUnitSymbol(nd.unit) : inferredUnit?.unit}
               </span>
             )}
           </span>
@@ -386,10 +395,18 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
           id="out"
           style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
         />
-        {/* 4.04: Unit badge next to output handle */}
-        {nd.unit && (
-          <span style={{ ...s.outputUnitBadge, top: '50%' }}>
-            {getUnitSymbol(nd.unit)}
+        {/* 4.04+4.05: Unit badge next to output handle (explicit or inferred) */}
+        {(nd.unit || inferredUnit?.unit) && (
+          <span
+            style={{
+              ...s.outputUnitBadge,
+              top: '50%',
+              // Inferred units show with reduced opacity to distinguish from explicit
+              ...(nd.unit ? {} : { opacity: 0.55, borderStyle: 'dashed' }),
+            }}
+            title={nd.unit ? getUnitSymbol(nd.unit) : `Inferred: ${inferredUnit?.unit}`}
+          >
+            {nd.unit ? getUnitSymbol(nd.unit) : inferredUnit?.unit}
           </span>
         )}
       </div>
