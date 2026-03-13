@@ -78,14 +78,28 @@ export const onRequestPost: PagesFunction<{
     return new Response(`Webhook signature verification failed: ${message}`, { status: 400 })
   }
 
-  // Idempotent audit log — event.id (PK) makes duplicate deliveries safe.
-  await supabaseAdmin.from('stripe_events').upsert({
-    id: event.id,
-    type: event.type,
-    payload: event as unknown as Record<string, unknown>,
-  })
+  // Idempotent dedup — check if this event was already processed.
+  // INSERT with ON CONFLICT DO NOTHING: if the event.id (PK) already exists,
+  // the insert is a no-op and we skip all processing to prevent duplicate
+  // side effects (plan changes, seat updates, purchase records).
+  const { data: insertResult, error: insertErr } = await supabaseAdmin
+    .from('stripe_events')
+    .upsert(
+      {
+        id: event.id,
+        type: event.type,
+        payload: event as unknown as Record<string, unknown>,
+      },
+      { onConflict: 'id', ignoreDuplicates: true },
+    )
+    .select('id')
 
-  // mapStatusToPlan is imported from ./_lib.ts (tested separately).
+  // If ignoreDuplicates skipped the insert, the select returns empty.
+  // Also check by querying if the event existed before this request.
+  if (!insertErr && insertResult && insertResult.length === 0) {
+    // Event already existed — this is a duplicate delivery, skip processing.
+    return new Response('ok (duplicate)', { status: 200 })
+  }
 
   // Handle subscription lifecycle events
   if (event.type.startsWith('customer.subscription.')) {
