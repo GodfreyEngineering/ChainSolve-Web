@@ -9,7 +9,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 > DB, auth, RLS, security fundamentals. Everything else depends on these.
 
-- [ ] **1.01 Fix Dependabot / CI workflow failures** — Review `.github/workflows/*.yml` for failing Dependabot PRs. Pin compatible Node 22 / Rust stable versions, ensure `VITE_IS_CI_BUILD=true` is set for PR jobs (per invariant #3 in CLAUDE.md). Fix any stale lockfile or secret-access issues. Verify: open a Dependabot PR and confirm all CI jobs pass green.
+- [x] **1.01 Fix Dependabot / CI workflow failures** — Review `.github/workflows/*.yml` for failing Dependabot PRs. Pin compatible Node 22 / Rust stable versions, ensure `VITE_IS_CI_BUILD=true` is set for PR jobs (per invariant #3 in CLAUDE.md). Fix any stale lockfile or secret-access issues. Verify: open a Dependabot PR and confirm all CI jobs pass green.
 
 - [ ] **1.02 Database FK cascade hardening** — Create `supabase/migrations/0012_fk_cascade_and_indexes.sql`. Add `ON DELETE CASCADE` to `canvases.project_id_fkey`, `project_assets.project_id_fkey`, `project_snapshots.project_id_fkey`, `node_comments.project_id_fkey`, `simulation_runs.project_id_fkey`, `fs_items.project_id_fkey`. Add `ON DELETE CASCADE` to `marketplace_install_events.item_id` FK. Add missing indexes on all unindexed FKs. Verify: delete a project via SQL, confirm all child rows cascade-delete with no FK errors.
 
