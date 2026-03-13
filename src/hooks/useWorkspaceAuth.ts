@@ -93,7 +93,13 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
         error: userErr,
       } = await supabase.auth.getUser()
       if (userErr || !validatedUser) {
-        console.warn('[auth] session invalid — signing out:', userErr?.message)
+        // "Auth session missing" is expected when a stale cached session
+        // exists but the user is not actually logged in — suppress the
+        // warning for this normal case to avoid noisy console output.
+        const msg = userErr?.message ?? ''
+        if (!msg.toLowerCase().includes('session missing')) {
+          console.warn('[auth] session invalid — signing out:', msg)
+        }
         await supabase.auth.signOut()
         navigate('/login')
         return
