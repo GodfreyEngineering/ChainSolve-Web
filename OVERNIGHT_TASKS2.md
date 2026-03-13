@@ -245,13 +245,13 @@ Status: Not started | Model: Claude Opus 4.6
 
 > Polish for production deployment.
 
-- [ ] **8.01 Mobile touch — block placement** — Enable long-press to add blocks on mobile (use `useLongPress.ts` hook, already exists). On long-press on empty canvas, show block picker. On tap block in library, place at viewport center. Files: `src/hooks/useLongPress.ts`, `src/components/canvas/CanvasArea.tsx`, `src/components/canvas/BlockLibrary.tsx`. Verify: on mobile device — long-press canvas → block picker. Tap block → placed on canvas.
+- [x] **8.01 Mobile touch — block placement** — Enable long-press to add blocks on mobile (use `useLongPress.ts` hook, already exists). On long-press on empty canvas, show block picker. On tap block in library, place at viewport center. Files: `src/hooks/useLongPress.ts`, `src/components/canvas/CanvasArea.tsx`, `src/components/canvas/BlockLibrary.tsx`. Verify: on mobile device — long-press canvas → block picker. Tap block → placed on canvas.
 
-- [ ] **8.02 Mobile touch — pinch-to-zoom** — ReactFlow supports pinch-to-zoom natively. Ensure `zoomOnPinch={true}` is set in CanvasArea. Test on iOS Safari and Chrome Android. Files: `src/components/canvas/CanvasArea.tsx`. Verify: pinch gesture on mobile → smooth zoom.
+- [x] **8.02 Mobile touch — pinch-to-zoom** — ReactFlow supports pinch-to-zoom natively. Ensure `zoomOnPinch={true}` is set in CanvasArea. Test on iOS Safari and Chrome Android. Files: `src/components/canvas/CanvasArea.tsx`. Verify: pinch gesture on mobile → smooth zoom.
 
-- [ ] **8.03 Mobile — responsive panels** — Ensure all panels (block library, inspector, bottom dock, AI panel) use `BottomSheet` variant on mobile (< 768px). Use `useIsMobile()` hook. Panels should be full-width sheets that slide up from bottom. Files: `src/hooks/useIsMobile.ts`, `src/components/canvas/BlockLibrary.tsx`, `src/components/canvas/FloatingInspector.tsx`, `src/components/canvas/BottomDock.tsx`. Verify: on mobile — panels appear as bottom sheets, not floating windows.
+- [x] **8.03 Mobile — responsive panels** — Ensure all panels (block library, inspector, bottom dock, AI panel) use `BottomSheet` variant on mobile (< 768px). Use `useIsMobile()` hook. Panels should be full-width sheets that slide up from bottom. Files: `src/hooks/useIsMobile.ts`, `src/components/canvas/BlockLibrary.tsx`, `src/components/canvas/FloatingInspector.tsx`, `src/components/canvas/BottomDock.tsx`. Verify: on mobile — panels appear as bottom sheets, not floating windows.
 
-- [ ] **8.04 Mobile — toolbar adaptation** — Reduce toolbar to essential buttons on mobile. Use hamburger/overflow menu for less-used tools. Ensure all touch targets are ≥44px (WCAG). Files: `src/components/canvas/CanvasToolbar.tsx`, `src/components/app/WorkspaceToolbar.tsx`. Verify: on mobile — all buttons tappable, no overlapping.
+- [x] **8.04 Mobile — toolbar adaptation** — Reduce toolbar to essential buttons on mobile. Use hamburger/overflow menu for less-used tools. Ensure all touch targets are ≥44px (WCAG). Files: `src/components/canvas/CanvasToolbar.tsx`, `src/components/app/WorkspaceToolbar.tsx`. Verify: on mobile — all buttons tappable, no overlapping.
 
 - [ ] **8.05 Bundle size audit** — Run `npm run perf:bundle`. Check against budgets: initial JS (gzip) < 400KB, WASM (gzip) < 250KB. If over, identify largest chunks and code-split or lazy-load. Check that heavy dependencies (KaTeX, Vega-Lite, ml.js) are lazy-loaded. Files: `vite.config.ts`, `src/App.tsx` (lazy imports). Verify: `npm run build` → bundle report within budget.
 
