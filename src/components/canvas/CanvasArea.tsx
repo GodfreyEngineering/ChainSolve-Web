@@ -132,6 +132,8 @@ import { AnnotationNode } from './nodes/AnnotationNode'
 import { AnnotationToolbar } from './AnnotationToolbar'
 import { MaterialNode } from './nodes/MaterialNode'
 import { OptimizerNode } from './nodes/OptimizerNode'
+import { MLModelNode } from './nodes/MLModelNode'
+import { NeuralNetNode } from './nodes/NeuralNetNode'
 import { copyValueToClipboard } from '../../engine/valueFormat'
 import {
   computeGraphHealth,
@@ -169,6 +171,8 @@ const NODE_TYPES = {
   csAnnotation: AnnotationNode,
   csMaterial: MaterialNode,
   csOptimizer: OptimizerNode,
+  csMLModel: MLModelNode,
+  csNeuralNet: NeuralNetNode,
 } as const
 
 const EDGE_TYPES = {

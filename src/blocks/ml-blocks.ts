@@ -32,7 +32,7 @@ export function registerMLBlocks(register: (def: BlockDef) => void): void {
     type: 'ml.linearRegression',
     label: 'Linear Regression',
     category: 'machineLearning',
-    nodeKind: 'csOperation',
+    nodeKind: 'csMLModel',
     inputs: [
       { id: 'trainX', label: 'Training features' },
       { id: 'trainY', label: 'Training labels' },
@@ -48,7 +48,7 @@ export function registerMLBlocks(register: (def: BlockDef) => void): void {
     type: 'ml.polynomialRegression',
     label: 'Polynomial Regression',
     category: 'machineLearning',
-    nodeKind: 'csOperation',
+    nodeKind: 'csMLModel',
     inputs: [
       { id: 'trainX', label: 'Training features' },
       { id: 'trainY', label: 'Training labels' },
@@ -70,7 +70,7 @@ export function registerMLBlocks(register: (def: BlockDef) => void): void {
     type: 'ml.knnClassifier',
     label: 'KNN Classifier',
     category: 'machineLearning',
-    nodeKind: 'csOperation',
+    nodeKind: 'csMLModel',
     inputs: [
       { id: 'trainX', label: 'Training features' },
       { id: 'trainY', label: 'Training labels' },
@@ -89,7 +89,7 @@ export function registerMLBlocks(register: (def: BlockDef) => void): void {
     type: 'ml.decisionTree',
     label: 'Decision Tree',
     category: 'machineLearning',
-    nodeKind: 'csOperation',
+    nodeKind: 'csMLModel',
     inputs: [
       { id: 'trainX', label: 'Training features' },
       { id: 'trainY', label: 'Training labels' },

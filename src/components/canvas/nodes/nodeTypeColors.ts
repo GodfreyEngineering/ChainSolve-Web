@@ -27,6 +27,13 @@ import {
   Target,
   Dna,
   Triangle,
+  TrendingUp,
+  Sparkles,
+  GitFork,
+  Brain,
+  Cpu,
+  Zap,
+  FileOutput,
 } from 'lucide-react'
 
 // ── Color mapping ──────────────────────────────────────────────────────────
@@ -50,6 +57,23 @@ const TABLE_TYPES = new Set(['listTable', 'csListTable'])
 const GROUP_TYPES = new Set(['group', 'csGroup'])
 const PUBLISH_TYPES = new Set(['publish', 'csPublish'])
 const SUBSCRIBE_TYPES = new Set(['subscribe', 'csSubscribe'])
+const ML_MODEL_TYPES = new Set([
+  'ml.linearRegression',
+  'ml.polynomialRegression',
+  'ml.knnClassifier',
+  'ml.decisionTree',
+])
+
+const NN_TYPES = new Set([
+  'nn.dense',
+  'nn.conv1d',
+  'nn.dropout',
+  'nn.activation',
+  'nn.sequential',
+  'nn.trainer',
+  'nn.export',
+])
+
 const OPTIMIZER_TYPES = new Set([
   'optim.gradientDescent',
   'optim.geneticAlgorithm',
@@ -78,6 +102,8 @@ export function getNodeTypeColor(blockType: string): string {
   if (PUBLISH_TYPES.has(blockType)) return '--node-color-operation'
   if (SUBSCRIBE_TYPES.has(blockType)) return '--node-color-operation'
   if (OPTIMIZER_TYPES.has(blockType)) return '--node-color-source'
+  if (ML_MODEL_TYPES.has(blockType)) return '--node-color-data'
+  if (NN_TYPES.has(blockType)) return '--node-color-plot'
   if (ANNOTATION_TYPES.has(blockType)) return '--node-color-group'
   // Default: operation (the largest category)
   return '--node-color-operation'
@@ -120,6 +146,19 @@ const ICON_MAP: Record<string, LucideIcon> = {
   'optim.gradientDescent': Target,
   'optim.geneticAlgorithm': Dna,
   'optim.nelderMead': Triangle,
+
+  'ml.linearRegression': TrendingUp,
+  'ml.polynomialRegression': Sparkles,
+  'ml.knnClassifier': GitFork,
+  'ml.decisionTree': GitFork,
+
+  'nn.dense': Brain,
+  'nn.conv1d': Cpu,
+  'nn.dropout': Zap,
+  'nn.activation': Zap,
+  'nn.sequential': Brain,
+  'nn.trainer': Brain,
+  'nn.export': FileOutput,
 
   annotation_text: Type,
   annotation_callout: MessageSquare,

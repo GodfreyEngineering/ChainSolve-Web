@@ -72,6 +72,8 @@ export type NodeKind =
   | 'csAnnotation'
   | 'csMaterial'
   | 'csOptimizer'
+  | 'csMLModel'
+  | 'csNeuralNet'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 
