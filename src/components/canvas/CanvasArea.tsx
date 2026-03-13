@@ -107,6 +107,9 @@ const LazyDebugConsolePanel = lazy(() => import('./DebugConsolePanel'))
 const LazyGraphHealthPanel = lazy(() => import('./GraphHealthPanel'))
 const LazyOutputPanel = lazy(() => import('./OutputPanel'))
 const LazyProblemsPanel = lazy(() => import('./ProblemsPanel'))
+const LazyCanvasNotes = lazy(() =>
+  import('./CanvasNotes').then((m) => ({ default: m.CanvasNotes })),
+)
 const LazyHistoryPanel = lazy(() =>
   import('./HistoryPanel').then((m) => ({ default: m.HistoryPanel })),
 )
@@ -2753,8 +2756,21 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           </Suspense>
         ),
       },
+      ...(canvasId
+        ? [
+            {
+              id: 'notes' as DockTab,
+              label: t('dock.notes', 'Notes'),
+              content: (
+                <Suspense fallback={null}>
+                  <LazyCanvasNotes canvasId={canvasId} />
+                </Suspense>
+              ),
+            },
+          ]
+        : []),
     ],
-    [nodes, edges, t, onFixWithCopilot, onExplainIssues, stackEntries, handleRestoreHistory],
+    [nodes, edges, t, onFixWithCopilot, onExplainIssues, stackEntries, handleRestoreHistory, canvasId],
   )
 
   return (
