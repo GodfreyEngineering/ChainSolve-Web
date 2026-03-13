@@ -24,6 +24,7 @@ import {
 } from './canvasSchema'
 import { ServiceError } from './errors'
 import { validateProjectName } from './validateProjectName'
+import { getCachedCanvas, setCachedCanvas } from './canvasCache'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -275,13 +276,55 @@ export async function getActiveCanvasId(projectId: string): Promise<string | nul
 
 /**
  * Load the graph JSON for a specific canvas.
- * Returns a parsed CanvasJSON (empty graph if file missing).
+ *
+ * Uses a stale-while-revalidate pattern: if a cached snapshot exists in
+ * IndexedDB it is returned immediately, then the authoritative copy is
+ * fetched from Supabase in the background and the cache is updated.
+ * The optional `onRevalidated` callback fires if the fresh data differs.
  */
-export async function loadCanvasGraph(projectId: string, canvasId: string): Promise<CanvasJSON> {
+export async function loadCanvasGraph(
+  projectId: string,
+  canvasId: string,
+  opts?: { onRevalidated?: (fresh: CanvasJSON) => void },
+): Promise<CanvasJSON> {
   const session = await requireSession()
   const userId = session.user.id
+
+  // 1. Try IndexedDB cache first (< 5 ms)
+  const cached = await getCachedCanvas(userId, projectId, canvasId)
+  if (cached) {
+    const cachedGraph = parseCanvasJson(cached, canvasId, projectId)
+
+    // 2. Background revalidation — fetch authoritative copy from Supabase
+    void (async () => {
+      try {
+        const raw = await downloadCanvasGraph(userId, projectId, canvasId)
+        const freshGraph = parseCanvasJson(raw, canvasId, projectId)
+        // Update cache regardless
+        void setCachedCanvas(userId, projectId, canvasId, raw)
+        // Notify caller if data changed (node/edge count mismatch = quick check)
+        if (
+          freshGraph.nodes.length !== cachedGraph.nodes.length ||
+          freshGraph.edges.length !== cachedGraph.edges.length
+        ) {
+          opts?.onRevalidated?.(freshGraph)
+        }
+      } catch {
+        // Background revalidation is best-effort
+      }
+    })()
+
+    return cachedGraph
+  }
+
+  // 3. Cache miss — fetch from Supabase (current behavior)
   const raw = await downloadCanvasGraph(userId, projectId, canvasId)
-  return parseCanvasJson(raw, canvasId, projectId)
+  const graph = parseCanvasJson(raw, canvasId, projectId)
+
+  // 4. Populate cache for next visit
+  void setCachedCanvas(userId, projectId, canvasId, raw)
+
+  return graph
 }
 
 /**
@@ -300,6 +343,9 @@ export async function saveCanvasGraph(
   const userId = session.user.id
   const json = buildCanvasJsonFromGraph(canvasId, projectId, nodes, edges)
   await uploadCanvasGraph(userId, projectId, canvasId, json)
+
+  // Write-through: update IndexedDB cache so next load is instant
+  void setCachedCanvas(userId, projectId, canvasId, json)
 
   if (opts?.verify) {
     const ok = await verifyCanvasGraph(userId, projectId, canvasId, nodes.length)

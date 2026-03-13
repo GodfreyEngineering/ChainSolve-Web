@@ -8,6 +8,7 @@
 import { supabase } from './supabase'
 import type { AuthError, Session, User } from '@supabase/supabase-js'
 import { invalidateProfileCache } from './profilesService'
+import { clearCanvasCache } from './canvasCache'
 
 export async function getCurrentUser(): Promise<User | null> {
   const {
@@ -82,6 +83,8 @@ export async function resendConfirmation(email: string): Promise<{ error: AuthEr
 
 export async function signOut(): Promise<void> {
   invalidateProfileCache()
+  // Clear cached canvas snapshots so a different user doesn't see stale data
+  void clearCanvasCache()
   await supabase.auth.signOut()
 }
 
