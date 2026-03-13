@@ -113,6 +113,9 @@ export function useGraphEngine(
   const prevPausedRef = useRef(paused)
   // SCI-06: Force full snapshot reload when angle unit changes.
   const prevAngleUnitRef = useRef(angleUnit)
+  // H7-1: Force full snapshot reload when published outputs change
+  // so subscribe blocks pick up cross-canvas value updates.
+  const prevPublishedRef = useRef(publishedOutputs)
   const pendingRef = useRef(0) // Coalescing counter: skip stale results.
   // Debounce timer for data-only patches (see PATCH_DEBOUNCE_MS).
   const patchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -130,6 +133,15 @@ export function useGraphEngine(
     // so all trig nodes get the updated angleUnit in their data.
     if (angleUnit !== prevAngleUnitRef.current) {
       prevAngleUnitRef.current = angleUnit
+      snapshotLoaded.current = false
+    }
+
+    // H7-1: When published outputs change (cross-canvas publish), force a
+    // full snapshot re-evaluation so subscribe blocks get the new values.
+    // The diff engine won't detect this change because it lives outside
+    // node data — it's injected by toEngineSnapshot at bridge time.
+    if (publishedOutputs !== prevPublishedRef.current) {
+      prevPublishedRef.current = publishedOutputs
       snapshotLoaded.current = false
     }
 
