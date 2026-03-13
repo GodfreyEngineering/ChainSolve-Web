@@ -14,6 +14,7 @@ import {
   useRef,
   useCallback,
   useEffect,
+  useMemo,
   type ChangeEvent,
   type KeyboardEvent,
 } from 'react'
@@ -41,15 +42,87 @@ interface CellId {
   col: number
 }
 
+/** 4.07: Multi-cell selection range (anchor + current). */
+interface CellRange {
+  anchor: CellId
+  current: CellId
+}
+
+/** 4.07: Undo/redo snapshot. */
+interface TableSnapshot {
+  columns: string[]
+  rows: number[][]
+}
+
+const MAX_UNDO = 40
+
 interface TableEditorProps {
   columns: string[]
   rows: number[][]
   onChange: (columns: string[], rows: number[][]) => void
+  /** 4.07: Column types — 'number' (default) or 'text'. */
+  columnTypes?: string[]
+  onColumnTypesChange?: (types: string[]) => void
+}
+
+// ── 4.07: Simple cell formula evaluator ────────────────────────────────────────
+
+/**
+ * Evaluate a simple cell formula like =A1+B2, =A1*A2, =A1-A2, =A1/A2.
+ * Supports: cell refs (A1, B2), +, -, *, /, parentheses, numeric literals.
+ * Returns the result or null if invalid.
+ */
+function evaluateCellFormula(
+  formula: string,
+  rows: number[][],
+  columns: string[],
+): number | null {
+  if (!formula.startsWith('=')) return null
+  const expr = formula.slice(1).trim()
+  if (!expr) return null
+
+  // Replace cell references (e.g. A1, B12) with their values
+  // Column letter(s) → column index, row number → row index (1-based)
+  const cellRefPattern = /\b([A-Z]+)(\d+)\b/gi
+  const resolved = expr.replace(cellRefPattern, (_, colLetters: string, rowStr: string) => {
+    const colIdx = colLettersToIndex(colLetters.toUpperCase(), columns)
+    const rowIdx = parseInt(rowStr, 10) - 1 // 1-based → 0-based
+    if (colIdx < 0 || colIdx >= columns.length) return 'NaN'
+    if (rowIdx < 0 || rowIdx >= rows.length) return 'NaN'
+    return String(rows[rowIdx]?.[colIdx] ?? 0)
+  })
+
+  // Safety: only allow digits, operators, parentheses, spaces, decimal points
+  if (!/^[\d+\-*/().eE\s]+$/.test(resolved)) return null
+
+  try {
+    // eslint-disable-next-line no-new-func
+    const result = new Function(`"use strict"; return (${resolved})`)() as unknown
+    return typeof result === 'number' && isFinite(result) ? result : null
+  } catch {
+    return null
+  }
+}
+
+/** Convert column letters (A, B, ..., Z, AA, AB, ...) to column index. */
+function colLettersToIndex(letters: string, columns: string[]): number {
+  // First try matching column names directly
+  const directIdx = columns.findIndex(
+    (c) => c.toUpperCase() === letters || c.toUpperCase().replace(/\s/g, '') === letters,
+  )
+  if (directIdx >= 0) return directIdx
+
+  // Fall back to A=0, B=1, ..., Z=25, AA=26, etc.
+  let idx = 0
+  for (let i = 0; i < letters.length; i++) {
+    idx = idx * 26 + (letters.charCodeAt(i) - 64)
+  }
+  return idx - 1 // 0-based
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
+export function TableEditor({ columns, rows, onChange, columnTypes, onColumnTypesChange }: TableEditorProps) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -59,6 +132,43 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editErrors, setEditErrors] = useState<Set<string>>(new Set())
   const editInputRef = useRef<HTMLInputElement>(null)
+
+  // 4.07: Multi-cell selection range
+  const [selRange, setSelRange] = useState<CellRange | null>(null)
+
+  // 4.07: Undo/redo history
+  const undoStack = useRef<TableSnapshot[]>([])
+  const redoStack = useRef<TableSnapshot[]>([])
+
+  const pushUndo = useCallback(() => {
+    undoStack.current.push({ columns: [...columns], rows: rows.map((r) => [...r]) })
+    if (undoStack.current.length > MAX_UNDO) undoStack.current.shift()
+    redoStack.current = [] // clear redo on new change
+  }, [columns, rows])
+
+  const undo = useCallback(() => {
+    const snap = undoStack.current.pop()
+    if (!snap) return
+    redoStack.current.push({ columns: [...columns], rows: rows.map((r) => [...r]) })
+    onChange(snap.columns, snap.rows)
+  }, [columns, rows, onChange])
+
+  const redo = useCallback(() => {
+    const snap = redoStack.current.pop()
+    if (!snap) return
+    undoStack.current.push({ columns: [...columns], rows: rows.map((r) => [...r]) })
+    onChange(snap.columns, snap.rows)
+  }, [columns, rows, onChange])
+
+  // 4.07: Compute normalised selection bounds
+  const selBounds = useMemo(() => {
+    if (!selRange) return null
+    const r1 = Math.min(selRange.anchor.row, selRange.current.row)
+    const r2 = Math.max(selRange.anchor.row, selRange.current.row)
+    const c1 = Math.min(selRange.anchor.col, selRange.current.col)
+    const c2 = Math.max(selRange.anchor.col, selRange.current.col)
+    return { r1, r2, c1, c2 }
+  }, [selRange])
 
   // Column widths (px)
   const [colWidths, setColWidths] = useState<number[]>(() => columns.map(() => DEFAULT_COL_W))
@@ -139,12 +249,31 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
   const commitEdit = useCallback(
     (row: number, col: number, raw: string) => {
       const trimmed = raw.trim()
+      // 4.07: Basic formula support — evaluate =A1+B2 style expressions
+      if (trimmed.startsWith('=')) {
+        const result = evaluateCellFormula(trimmed, rows, columns)
+        if (result !== null && !isNaN(result)) {
+          pushUndo()
+          setEditErrors((prev) => { const next = new Set(prev); next.delete(`${row}:${col}`); return next })
+          const nextRows = rows.map((r, ri) =>
+            ri === row ? r.map((c, ci) => (ci === col ? result : c)) : r,
+          )
+          onChange(columns, nextRows)
+          setIsEditing(false)
+          return
+        }
+        // Formula error — mark as invalid
+        setEditErrors((prev) => new Set([...prev, `${row}:${col}`]))
+        setIsEditing(false)
+        return
+      }
       const n = parseFloat(trimmed)
       if (trimmed === '' || isNaN(n)) {
         const key = `${row}:${col}`
         setEditErrors((prev) => new Set([...prev, key]))
         // Keep old value
       } else {
+        pushUndo()
         setEditErrors((prev) => {
           const next = new Set(prev)
           next.delete(`${row}:${col}`)
@@ -157,7 +286,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
       }
       setIsEditing(false)
     },
-    [rows, columns, onChange],
+    [rows, columns, onChange, pushUndo],
   )
 
   const cancelEdit = useCallback(() => {
@@ -178,27 +307,96 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
 
   const handleCellKeyDown = useCallback(
     (e: KeyboardEvent, row: number, col: number) => {
+      // 4.07: Undo/redo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        undo()
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault()
+        redo()
+        return
+      }
+      // 4.07: Ctrl+C copy selected range
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !isEditing && selBounds) {
+        e.preventDefault()
+        const lines: string[] = []
+        for (let ri = selBounds.r1; ri <= selBounds.r2; ri++) {
+          const cells: string[] = []
+          for (let ci = selBounds.c1; ci <= selBounds.c2; ci++) {
+            cells.push(String(rows[ri]?.[ci] ?? ''))
+          }
+          lines.push(cells.join('\t'))
+        }
+        navigator.clipboard.writeText(lines.join('\n')).catch(() => {})
+        return
+      }
       if (!isEditing) {
         if (e.key === 'Enter' || e.key === 'F2') {
           e.preventDefault()
           startEdit(row, col)
         } else if (e.key === 'Delete' || e.key === 'Backspace') {
           e.preventDefault()
-          const nextRows = rows.map((r, ri) =>
-            ri === row ? r.map((c, ci) => (ci === col ? 0 : c)) : r,
-          )
-          onChange(columns, nextRows)
+          pushUndo()
+          // 4.07: Delete all cells in selection range
+          if (selBounds) {
+            const nextRows = rows.map((r, ri) =>
+              ri >= selBounds.r1 && ri <= selBounds.r2
+                ? r.map((c, ci) => (ci >= selBounds.c1 && ci <= selBounds.c2 ? 0 : c))
+                : r,
+            )
+            onChange(columns, nextRows)
+          } else {
+            const nextRows = rows.map((r, ri) =>
+              ri === row ? r.map((c, ci) => (ci === col ? 0 : c)) : r,
+            )
+            onChange(columns, nextRows)
+          }
+        } else if (e.key === 'ArrowRight' && e.shiftKey) {
+          // 4.07: Shift+Arrow extends selection
+          e.preventDefault()
+          setSelRange((prev) => {
+            const anchor = prev?.anchor ?? { row, col }
+            const nc = Math.min(columns.length - 1, (prev?.current.col ?? col) + 1)
+            return { anchor, current: { row: prev?.current.row ?? row, col: nc } }
+          })
+        } else if (e.key === 'ArrowLeft' && e.shiftKey) {
+          e.preventDefault()
+          setSelRange((prev) => {
+            const anchor = prev?.anchor ?? { row, col }
+            const nc = Math.max(0, (prev?.current.col ?? col) - 1)
+            return { anchor, current: { row: prev?.current.row ?? row, col: nc } }
+          })
+        } else if (e.key === 'ArrowDown' && e.shiftKey) {
+          e.preventDefault()
+          setSelRange((prev) => {
+            const anchor = prev?.anchor ?? { row, col }
+            const nr = Math.min(rows.length - 1, (prev?.current.row ?? row) + 1)
+            return { anchor, current: { row: nr, col: prev?.current.col ?? col } }
+          })
+        } else if (e.key === 'ArrowUp' && e.shiftKey) {
+          e.preventDefault()
+          setSelRange((prev) => {
+            const anchor = prev?.anchor ?? { row, col }
+            const nr = Math.max(0, (prev?.current.row ?? row) - 1)
+            return { anchor, current: { row: nr, col: prev?.current.col ?? col } }
+          })
         } else if (e.key === 'ArrowRight' || (e.key === 'Tab' && !e.shiftKey)) {
           e.preventDefault()
+          setSelRange(null)
           moveTo(row, col + 1 < columns.length ? col + 1 : col)
         } else if (e.key === 'ArrowLeft' || (e.key === 'Tab' && e.shiftKey)) {
           e.preventDefault()
+          setSelRange(null)
           moveTo(row, col > 0 ? col - 1 : 0)
         } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
           e.preventDefault()
+          setSelRange(null)
           moveTo(row + 1, col)
         } else if (e.key === 'ArrowUp') {
           e.preventDefault()
+          setSelRange(null)
           moveTo(row > 0 ? row - 1 : 0, col)
         } else if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1) {
           // Start editing with typed character — prevent default so the
@@ -231,7 +429,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
         }
       }
     },
-    [isEditing, editValue, rows, columns, onChange, startEdit, commitEdit, cancelEdit, moveTo],
+    [isEditing, editValue, rows, columns, onChange, startEdit, commitEdit, cancelEdit, moveTo, undo, redo, pushUndo, selBounds],
   )
 
   // ── Copy/paste ─────────────────────────────────────────────────────────────
@@ -241,6 +439,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
       const text = e.clipboardData.getData('text')
       if (!text) return
       e.preventDefault()
+      pushUndo()
       const parsed = parsePastedGrid(text)
       if (parsed.length === 0) return
 
@@ -264,7 +463,7 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
       const { columns: c, rows: r } = enforceTableLimits(columns, nextRows)
       onChange(c, r)
     },
-    [rows, columns, onChange],
+    [rows, columns, onChange, pushUndo],
   )
 
   // ── Column operations ──────────────────────────────────────────────────────
@@ -281,16 +480,18 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
   const removeCol = useCallback(
     (ci: number) => {
       if (columns.length <= 1) return
+      pushUndo()
       const nextCols = columns.filter((_, i) => i !== ci)
       const nextRows = rows.map((row) => row.filter((_, i) => i !== ci))
       onChange(nextCols, nextRows)
     },
-    [columns, rows, onChange],
+    [columns, rows, onChange, pushUndo],
   )
 
   const addCol = useCallback(
     (afterIndex?: number) => {
       if (columns.length >= MAX_TABLE_INPUT_COLS) return
+      pushUndo()
       const insertAt = afterIndex !== undefined ? afterIndex + 1 : columns.length
       const nextCols = [...columns]
       nextCols.splice(insertAt, 0, `Col${columns.length + 1}`)
@@ -301,25 +502,27 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
       })
       onChange(nextCols, nextRows)
     },
-    [columns, rows, onChange],
+    [columns, rows, onChange, pushUndo],
   )
 
   // ── Row operations ─────────────────────────────────────────────────────────
 
   const removeRow = useCallback(
     (ri: number) => {
+      pushUndo()
       onChange(
         columns,
         rows.filter((_, i) => i !== ri),
       )
     },
-    [columns, rows, onChange],
+    [columns, rows, onChange, pushUndo],
   )
 
   const addRow = useCallback(() => {
     if (rows.length >= MAX_TABLE_INPUT_ROWS) return
+    pushUndo()
     onChange(columns, [...rows, new Array(columns.length).fill(0)])
-  }, [columns, rows, onChange])
+  }, [columns, rows, onChange, pushUndo])
 
   // ── Column resize ──────────────────────────────────────────────────────────
 
@@ -573,6 +776,10 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
                   const isEditingCell = isSelected && isEditing
                   const hasError = editErrors.has(cellKey)
                   const colW = colWidths[ci] ?? DEFAULT_COL_W
+                  // 4.07: Multi-cell selection highlight
+                  const inRange = selBounds
+                    ? ri >= selBounds.r1 && ri <= selBounds.r2 && ci >= selBounds.c1 && ci <= selBounds.c2
+                    : false
 
                   return (
                     <div
@@ -587,15 +794,25 @@ export function TableEditor({ columns, rows, onChange }: TableEditorProps) {
                           ? '1px solid var(--primary)'
                           : hasError
                             ? '1px solid var(--danger-text, #f87171)'
-                            : '1px solid rgba(255,255,255,0.06)',
+                            : inRange
+                              ? '1px solid rgba(28,171,176,0.4)'
+                              : '1px solid rgba(255,255,255,0.06)',
                         background: isSelected
                           ? 'rgba(28,171,176,0.08)'
-                          : ri % 2 === 0
-                            ? 'rgba(0,0,0,0.2)'
-                            : 'rgba(0,0,0,0.12)',
+                          : inRange
+                            ? 'rgba(28,171,176,0.12)'
+                            : ri % 2 === 0
+                              ? 'rgba(0,0,0,0.2)'
+                              : 'rgba(0,0,0,0.12)',
                       }}
-                      onClick={() => {
-                        setSelected({ row: ri, col: ci })
+                      onClick={(e) => {
+                        if (e.shiftKey && selected) {
+                          // 4.07: Shift+click extends selection range
+                          setSelRange({ anchor: selected, current: { row: ri, col: ci } })
+                        } else {
+                          setSelRange(null)
+                          setSelected({ row: ri, col: ci })
+                        }
                         setIsEditing(false)
                       }}
                       onDoubleClick={() => startEdit(ri, ci)}
