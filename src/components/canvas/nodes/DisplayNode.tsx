@@ -178,6 +178,7 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
           style={{ ...displayStyle, cursor: scalarValue !== null ? 'context-menu' : undefined }}
           className="nodrag"
           onContextMenu={handleContextMenu}
+          title={scalarValue !== null ? String(scalarValue) : undefined}
         >
           {formatValue(value)}
           {nd.unit && (

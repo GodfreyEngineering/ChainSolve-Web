@@ -517,6 +517,7 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
           <span
             className={`cs-node-header-value cs-value-badge nodrag${flashing ? ' cs-flashing' : ''}`}
             style={{ ...s.headerValue, color: typeColor, cursor: 'pointer' }}
+            title={value !== undefined && isScalar(value) ? String(value.value) : undefined}
             onClick={(e) => {
               e.stopPropagation()
               showPopover(id, e.clientX, e.clientY)

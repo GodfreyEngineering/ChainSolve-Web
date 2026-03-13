@@ -79,6 +79,9 @@ export const NODE_STYLES = {
     color: 'var(--primary)',
     whiteSpace: 'nowrap' as const,
     flexShrink: 0,
+    maxWidth: 180,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   } as CSSProperties,
 
   body: {
@@ -154,6 +157,10 @@ export const NODE_STYLES = {
     textAlign: 'center' as const,
     padding: '0.3rem 0',
     color: 'var(--primary)',
+    maxWidth: 400,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   } as CSSProperties,
 
   handleLeft: {
