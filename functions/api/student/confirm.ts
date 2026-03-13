@@ -7,6 +7,10 @@
  *
  * Student licenses expire after 1 year (student_expires_at).
  *
+ * Brute-force protection: max 5 failed attempts per user per hour.
+ * After 5 failures the endpoint returns 429 for 1 hour.
+ * Hash comparison uses constant-time comparison.
+ *
  * Request body: { code: string }
  * Response:     { ok: true } or { ok: false, error: string }
  */
@@ -21,6 +25,82 @@ async function hashCode(code: string): Promise<string> {
   return Array.from(new Uint8Array(buf))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
+}
+
+/**
+ * Constant-time string comparison to prevent timing attacks.
+ * Both strings must be the same length (which they are — SHA-256 hex).
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  const encoder = new TextEncoder()
+  const bufA = encoder.encode(a)
+  const bufB = encoder.encode(b)
+  let result = 0
+  for (let i = 0; i < bufA.length; i++) {
+    result |= bufA[i] ^ bufB[i]
+  }
+  return result === 0
+}
+
+// ── Brute-force protection ────────────────────────────────────────────
+
+const MAX_ATTEMPTS = 5
+const LOCKOUT_MS = 60 * 60 * 1000 // 1 hour
+
+interface AttemptEntry {
+  count: number
+  firstAttempt: number
+}
+
+/** Per-user attempt tracking (per-isolate, resets on worker restart). */
+const attempts = new Map<string, AttemptEntry>()
+
+function checkBruteForce(userId: string): Response | null {
+  const now = Date.now()
+  const entry = attempts.get(userId)
+
+  if (!entry) return null
+
+  // Reset if the lockout window has expired
+  if (now - entry.firstAttempt > LOCKOUT_MS) {
+    attempts.delete(userId)
+    return null
+  }
+
+  if (entry.count >= MAX_ATTEMPTS) {
+    const retryAfter = Math.ceil((entry.firstAttempt + LOCKOUT_MS - now) / 1000)
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: 'Too many failed attempts. Please try again later.',
+      }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(Math.max(retryAfter, 1)),
+        },
+      },
+    )
+  }
+
+  return null
+}
+
+function recordFailure(userId: string): void {
+  const now = Date.now()
+  const entry = attempts.get(userId)
+
+  if (!entry || now - entry.firstAttempt > LOCKOUT_MS) {
+    attempts.set(userId, { count: 1, firstAttempt: now })
+  } else {
+    entry.count++
+  }
+}
+
+function clearAttempts(userId: string): void {
+  attempts.delete(userId)
 }
 
 // ── Types ────────────────────────────────────────────────────────────
@@ -49,6 +129,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   const userId = userData.user.id
 
+  // ── Brute-force check ───────────────────────────────────────────────
+  const blocked = checkBruteForce(userId)
+  if (blocked) return blocked
+
   // ── Parse ──────────────────────────────────────────────────────────
   let body: { code?: string }
   try {
@@ -75,13 +159,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return jsonError('No pending verification found. Request a new code.', 400)
   }
 
-  // ── Verify code hash against all pending rows ──────────────────────
+  // ── Verify code hash against all pending rows (constant-time) ──────
   const submittedHash = await hashCode(code)
-  const match = pending.find((row) => row.code_hash === submittedHash)
+  const match = pending.find((row) => timingSafeEqual(row.code_hash, submittedHash))
 
   if (!match) {
+    recordFailure(userId)
     return jsonError('Invalid verification code', 400)
   }
+
+  // ── Success: clear attempt counter ──────────────────────────────────
+  clearAttempts(userId)
 
   // ── Mark verification confirmed ────────────────────────────────────
   const now = new Date().toISOString()
