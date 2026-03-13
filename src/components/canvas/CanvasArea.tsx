@@ -1099,6 +1099,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         id: n.id,
         width: (n.measured?.width as number | undefined) ?? DEFAULT_NODE_WIDTH,
         height: (n.measured?.height as number | undefined) ?? DEFAULT_NODE_HEIGHT,
+        parentId: n.parentId,
       }))
 
       const positions = autoLayout(layoutNodes, relevantEdges, direction)
