@@ -39,6 +39,17 @@
 
   // ── ESLint ────────────────────────────────────────────────────────────────
   "eslint.useFlatConfig": true,
+
+  // ── Edge DevTools — disable CSS inline-style hints (React uses style={{}}) ─
+  "vscode-edge-devtools.webhint": false,
+
+  // ── Markdown lint — disable for workspace (docs are auto-generated) ───────
+  "markdownlint.config": {
+    "MD022": false,
+    "MD032": false,
+    "MD060": false
+  },
+
   "claudeCode.allowDangerouslySkipPermissions": true,
   "claudeCode.initialPermissionMode": "bypassPermissions"
 }
