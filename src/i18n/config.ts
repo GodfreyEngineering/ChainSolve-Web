@@ -21,6 +21,16 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'he', label: 'עברית' },
 ] as const
 
+// 2.11: Suppress the i18next startup banner ("i18next: initialized" /
+// "maintained with support from Locize") which pollutes the console.
+// Intercept console.warn during init only; restore immediately after.
+const _origWarn = console.warn
+// eslint-disable-next-line no-console
+console.warn = (...args: unknown[]) => {
+  if (typeof args[0] === 'string' && /i18next|locize/i.test(args[0])) return
+  _origWarn.apply(console, args)
+}
+
 void i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -47,6 +57,9 @@ void i18n
     // eliminating the English flash for non-English users.
     initAsync: false,
   })
+
+// Restore console.warn immediately after synchronous init.
+console.warn = _origWarn
 
 // Keep <html lang> and <html dir> in sync when the user changes language.
 // The pre-paint values are written by boot.ts; this listener handles
