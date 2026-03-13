@@ -287,6 +287,8 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const [loadRetryCount, setLoadRetryCount] = useState(0)
   const [initNodes, setInitNodes] = useState<Node<NodeData>[] | undefined>()
   const [initEdges, setInitEdges] = useState<Edge[] | undefined>()
+  /** True while a canvas switch is in progress — prevents interaction with stale canvas. */
+  const [canvasSwitching, setCanvasSwitching] = useState(false)
 
   // ── L4-1: Scratch mode state ──────────────────────────────────────────────
   /** Tracks whether the user has modified the scratch canvas (for beforeunload). */
@@ -918,6 +920,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     async (canvasId: string) => {
       if (!projectId || canvasId === activeCanvasId) return
 
+      // Show loading gate — prevents interaction with stale canvas during async ops
+      setCanvasSwitching(true)
+
       // Cancel any pending autosave for the current canvas — we save explicitly below
       autosaveScheduler.current.cancel()
 
@@ -933,6 +938,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
             t('canvas.saveBeforeSwitchFailed', 'Could not save current sheet. Please try again.'),
             'error',
           )
+          setCanvasSwitching(false)
           return
         }
       }
@@ -961,6 +967,8 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         if (loadingCanvasRef.current === canvasId) {
           toast(err instanceof Error ? err.message : 'Failed to switch canvas', 'error')
         }
+      } finally {
+        setCanvasSwitching(false)
       }
     },
     [projectId, activeCanvasId, doSave, setActiveCanvasId, completeSave, toast, t],
@@ -2167,7 +2175,34 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       )}
 
       {/* ── Canvas ─────────────────────────────────────────────────────────── */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
+        {canvasSwitching && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(0,0,0,0.25)',
+              pointerEvents: 'all',
+            }}
+          >
+            <div
+              style={{
+                padding: '0.6rem 1.2rem',
+                borderRadius: 8,
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border)',
+                fontSize: '0.85rem',
+                opacity: 0.9,
+              }}
+            >
+              {t('canvas.switching', 'Switching sheet\u2026')}
+            </div>
+          </div>
+        )}
         {viewMode !== 'fullscreen' && secondaryCanvasId && activeCanvasId ? (
           /* K1-1: Tiled layout with two canvas panes */
           <TiledCanvasLayout
