@@ -237,6 +237,68 @@ class Parser {
   }
 }
 
+// ── Autocomplete metadata (4.14) ────────────────────────────────────────────
+
+export interface FormulaSymbol {
+  name: string
+  kind: 'function' | 'constant'
+  signature?: string
+  description: string
+}
+
+/** All available function and constant names for autocomplete. */
+export const FORMULA_SYMBOLS: FormulaSymbol[] = [
+  // Constants
+  { name: 'pi', kind: 'constant', description: '\u03C0 \u2248 3.14159' },
+  { name: 'tau', kind: 'constant', description: '2\u03C0 \u2248 6.28318' },
+  { name: 'phi', kind: 'constant', description: 'Golden ratio \u2248 1.61803' },
+  { name: 'e', kind: 'constant', description: "Euler's number \u2248 2.71828" },
+  { name: 'inf', kind: 'constant', description: 'Infinity' },
+  // Functions
+  { name: 'sqrt', kind: 'function', signature: 'sqrt(x)', description: 'Square root' },
+  { name: 'cbrt', kind: 'function', signature: 'cbrt(x)', description: 'Cube root' },
+  { name: 'abs', kind: 'function', signature: 'abs(x)', description: 'Absolute value' },
+  { name: 'sin', kind: 'function', signature: 'sin(x)', description: 'Sine (radians)' },
+  { name: 'cos', kind: 'function', signature: 'cos(x)', description: 'Cosine (radians)' },
+  { name: 'tan', kind: 'function', signature: 'tan(x)', description: 'Tangent (radians)' },
+  { name: 'asin', kind: 'function', signature: 'asin(x)', description: 'Arcsine' },
+  { name: 'acos', kind: 'function', signature: 'acos(x)', description: 'Arccosine' },
+  { name: 'atan', kind: 'function', signature: 'atan(x)', description: 'Arctangent' },
+  { name: 'atan2', kind: 'function', signature: 'atan2(y, x)', description: 'Two-argument arctangent' },
+  { name: 'log10', kind: 'function', signature: 'log10(x)', description: 'Log base 10' },
+  { name: 'log', kind: 'function', signature: 'log(x)', description: 'Log base 10' },
+  { name: 'ln', kind: 'function', signature: 'ln(x)', description: 'Natural log' },
+  { name: 'exp', kind: 'function', signature: 'exp(x)', description: 'e^x' },
+  { name: 'floor', kind: 'function', signature: 'floor(x)', description: 'Round down' },
+  { name: 'ceil', kind: 'function', signature: 'ceil(x)', description: 'Round up' },
+  { name: 'round', kind: 'function', signature: 'round(x)', description: 'Round to nearest' },
+  { name: 'trunc', kind: 'function', signature: 'trunc(x)', description: 'Truncate decimal' },
+  { name: 'sign', kind: 'function', signature: 'sign(x)', description: 'Sign (-1, 0, 1)' },
+  { name: 'min', kind: 'function', signature: 'min(a, b, ...)', description: 'Minimum value' },
+  { name: 'max', kind: 'function', signature: 'max(a, b, ...)', description: 'Maximum value' },
+  { name: 'hypot', kind: 'function', signature: 'hypot(a, b)', description: 'Hypotenuse \u221A(a\u00B2+b\u00B2)' },
+  { name: 'pow', kind: 'function', signature: 'pow(base, exp)', description: 'Power (base^exp)' },
+  { name: 'deg', kind: 'function', signature: 'deg(x)', description: 'Radians to degrees' },
+  { name: 'rad', kind: 'function', signature: 'rad(x)', description: 'Degrees to radians' },
+]
+
+/**
+ * Validate a formula without evaluating. Returns null if valid, or an error message.
+ */
+export function validateFormula(expr: string): string | null {
+  const trimmed = expr.trim()
+  if (!trimmed) return null
+  try {
+    const tokens = tokenize(trimmed)
+    const parser = new Parser(tokens)
+    parser.parseExpr(0)
+    if (parser.peek().type !== 'eof') return 'Unexpected tokens after expression'
+    return null
+  } catch (e) {
+    return e instanceof Error ? e.message : 'Invalid expression'
+  }
+}
+
 // ── Public API ───────────────────────────────────────────────────────────────
 
 /**

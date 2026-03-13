@@ -9,14 +9,15 @@
  * Positioned absolute at top of canvas wrapper div.
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Node } from '@xyflow/react'
 import type { NodeData } from '../../blocks/types'
 import { BLOCK_DESCRIPTIONS } from '../../blocks/blockDescriptions'
 import { isScalar } from '../../engine/value'
 import type { Value } from '../../engine/value'
-import { safeEvalFormula } from '../../lib/formulaEval'
+import { safeEvalFormula, validateFormula, FORMULA_SYMBOLS } from '../../lib/formulaEval'
+import type { FormulaSymbol } from '../../lib/formulaEval'
 
 /** Extract the formula clause from a block description (e.g. "Output = A + B"). */
 function extractFormula(blockType: string): string {
@@ -55,8 +56,72 @@ export function FormulaBar({ nodeId, node, computedValue, onCommit }: FormulaBar
   // Using node ID instead of a boolean avoids useEffect-based reset.
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null)
   const [error, setError] = useState(false)
+  const [validationMsg, setValidationMsg] = useState<string | null>(null)
+  const [acItems, setAcItems] = useState<FormulaSymbol[]>([])
+  const [acIndex, setAcIndex] = useState(0)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const editing = editingNodeId !== null && editingNodeId === nodeId
+
+  /** Extract the current word being typed (for autocomplete). */
+  const getWordAtCursor = useCallback((text: string, cursorPos: number): string => {
+    const before = text.slice(0, cursorPos)
+    const match = before.match(/[a-zA-Z_]\w*$/)
+    return match ? match[0].toLowerCase() : ''
+  }, [])
+
+  /** Update autocomplete suggestions based on current draft. */
+  const updateAutocomplete = useCallback(
+    (text: string, cursorPos: number) => {
+      const word = getWordAtCursor(text, cursorPos)
+      if (word.length >= 1) {
+        const matches = FORMULA_SYMBOLS.filter((s) => s.name.startsWith(word) && s.name !== word)
+        setAcItems(matches.slice(0, 8))
+        setAcIndex(0)
+      } else {
+        setAcItems([])
+      }
+      // Live validation
+      const stripped = text.trim().replace(/^=\s*/, '')
+      if (stripped) {
+        const msg = validateFormula(stripped)
+        setValidationMsg(msg)
+      } else {
+        setValidationMsg(null)
+      }
+    },
+    [getWordAtCursor],
+  )
+
+  /** Accept an autocomplete suggestion. */
+  const acceptAutocomplete = useCallback(
+    (symbol: FormulaSymbol) => {
+      const input = inputRef.current
+      if (!input) return
+      const cursorPos = input.selectionStart ?? draft.length
+      const word = getWordAtCursor(draft, cursorPos)
+      const before = draft.slice(0, cursorPos - word.length)
+      const after = draft.slice(cursorPos)
+      const insertion = symbol.kind === 'function' ? symbol.name + '(' : symbol.name
+      const newDraft = before + insertion + after
+      setDraft(newDraft)
+      setAcItems([])
+      // Move cursor after insertion
+      const newPos = before.length + insertion.length
+      requestAnimationFrame(() => {
+        input.setSelectionRange(newPos, newPos)
+        input.focus()
+      })
+    },
+    [draft, getWordAtCursor],
+  )
+
+  // Memoize tooltip for hovered autocomplete items
+  const acTooltip = useMemo(() => {
+    if (acItems.length === 0) return null
+    const item = acItems[acIndex]
+    return item ? `${item.signature ?? item.name}: ${item.description}` : null
+  }, [acItems, acIndex])
 
   const startEdit = useCallback(() => {
     if (!isEditable || !nodeId) return
@@ -161,36 +226,97 @@ export function FormulaBar({ nodeId, node, computedValue, onCommit }: FormulaBar
 
       {/* Formula input (editing) or display (read-only / idle) */}
       {editing && isEditable && nodeId ? (
-        <input
-          autoFocus
-          value={draft}
-          onChange={(e) => {
-            setDraft(e.target.value)
-            setError(false)
-          }}
-          onBlur={commit}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
-              commit()
-            }
-            if (e.key === 'Escape') {
-              e.preventDefault()
-              cancel()
-            }
-          }}
-          placeholder={t('canvas.formulaBarPlaceholder')}
-          style={{
-            flex: 1,
-            background: 'transparent',
-            border: 'none',
-            outline: 'none',
-            color: 'var(--text)',
-            fontFamily: 'inherit',
-            fontSize: 'inherit',
-            padding: '0 4px',
-          }}
-        />
+        <div style={{ flex: 1, position: 'relative' }}>
+          <input
+            ref={inputRef}
+            autoFocus
+            value={draft}
+            onChange={(e) => {
+              setDraft(e.target.value)
+              setError(false)
+              updateAutocomplete(e.target.value, e.target.selectionStart ?? e.target.value.length)
+            }}
+            onBlur={() => {
+              // Delay to allow autocomplete click
+              setTimeout(() => {
+                setAcItems([])
+                commit()
+              }, 150)
+            }}
+            onKeyDown={(e) => {
+              // Autocomplete navigation
+              if (acItems.length > 0) {
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault()
+                  setAcIndex((i) => Math.min(i + 1, acItems.length - 1))
+                  return
+                }
+                if (e.key === 'ArrowUp') {
+                  e.preventDefault()
+                  setAcIndex((i) => Math.max(i - 1, 0))
+                  return
+                }
+                if (e.key === 'Tab' || (e.key === 'Enter' && acItems.length > 0)) {
+                  e.preventDefault()
+                  acceptAutocomplete(acItems[acIndex])
+                  return
+                }
+                if (e.key === 'Escape') {
+                  e.preventDefault()
+                  setAcItems([])
+                  return
+                }
+              }
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                commit()
+              }
+              if (e.key === 'Escape') {
+                e.preventDefault()
+                cancel()
+              }
+            }}
+            placeholder={t('canvas.formulaBarPlaceholder')}
+            style={{
+              width: '100%',
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+              color: 'var(--text)',
+              fontFamily: 'inherit',
+              fontSize: 'inherit',
+              padding: '0 4px',
+              height: '100%',
+              ...(validationMsg
+                ? { textDecoration: 'underline wavy var(--danger-text)', textUnderlineOffset: '3px' }
+                : {}),
+            }}
+            title={validationMsg ?? acTooltip ?? undefined}
+          />
+          {/* Autocomplete dropdown */}
+          {acItems.length > 0 && (
+            <div style={acDropdownStyle}>
+              {acItems.map((item, i) => (
+                <div
+                  key={item.name}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    acceptAutocomplete(item)
+                  }}
+                  style={{
+                    ...acItemStyle,
+                    background: i === acIndex ? 'var(--primary-dim)' : 'transparent',
+                  }}
+                >
+                  <span style={{ fontWeight: 600, color: item.kind === 'function' ? 'var(--primary)' : 'var(--warning)' }}>
+                    {item.signature ?? item.name}
+                  </span>
+                  <span style={{ opacity: 0.5, marginLeft: 8 }}>{item.description}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       ) : (
         <div
           onClick={isEditable ? startEdit : undefined}
@@ -239,4 +365,32 @@ export function FormulaBar({ nodeId, node, computedValue, onCommit }: FormulaBar
       )}
     </div>
   )
+}
+
+// ── Autocomplete styles ─────────────────────────────────────────────────────
+
+const acDropdownStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '100%',
+  left: 0,
+  right: 0,
+  zIndex: 100,
+  background: 'var(--surface-1)',
+  border: '1px solid var(--border)',
+  borderTop: 'none',
+  borderRadius: '0 0 6px 6px',
+  boxShadow: 'var(--shadow-lg)',
+  maxHeight: 200,
+  overflowY: 'auto',
+  fontFamily: "ui-monospace, 'Cascadia Code', monospace",
+  fontSize: '0.72rem',
+}
+
+const acItemStyle: React.CSSProperties = {
+  padding: '4px 8px',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
 }
