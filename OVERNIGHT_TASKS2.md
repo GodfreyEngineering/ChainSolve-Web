@@ -23,7 +23,7 @@ Status: Not started | Model: Claude Opus 4.6
 
 - [x] **1.07 Session security tightening** — Audit `src/lib/sessionService.ts`. Ensure: (a) session token rotation on privilege escalation, (b) `SESSION_CHECK_INTERVAL_MS` (60s) actually revokes stale sessions server-side via `cleanup_stale_sessions(days)` RPC, (c) single-session policy enforced for enterprise orgs via `policy_single_session`. Verify: login on two devices with enterprise org — first session revoked.
 
-- [ ] **1.08 Rate limiting on all public Cloudflare Functions** — Add per-IP + per-user rate limiting middleware to `functions/_middleware.ts`. Limits: auth endpoints (5/min), stripe webhooks (exempt — Stripe retries), AI endpoint (10/min free, 30/min pro), student verification (3/hr), account deletion (1/day — already in DB). Use Cloudflare `request.cf` for IP. Verify: exceed rate limit → 429 response with `Retry-After` header.
+- [x] **1.08 Rate limiting on all public Cloudflare Functions** — Add per-IP + per-user rate limiting middleware to `functions/_middleware.ts`. Limits: auth endpoints (5/min), stripe webhooks (exempt — Stripe retries), AI endpoint (10/min free, 30/min pro), student verification (3/hr), account deletion (1/day — already in DB). Use Cloudflare `request.cf` for IP. Verify: exceed rate limit → 429 response with `Retry-After` header.
 
 - [ ] **1.09 Scheduled Supabase backups** — Create `.github/workflows/backup.yml` with daily cron (`0 3 * * *`). Call Supabase Management API `POST /v1/projects/{ref}/database/backups`. Log to `audit_log` table. Create `docs/BACKUP_RUNBOOK.md` with restore procedures. Verify: trigger manually, confirm backup in Supabase dashboard.
 
