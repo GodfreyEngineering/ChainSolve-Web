@@ -35,15 +35,27 @@ function extractFormula(blockType: string): string {
 
 export const FORMULA_BAR_HEIGHT = 28
 
+/** 6.06: Upstream variable info for context-aware autocomplete. */
+export interface FormulaUpstreamVar {
+  /** Variable or node label (e.g. "Force", "length"). */
+  name: string
+  /** Current computed value, if available. */
+  value?: number
+  /** Source node ID. */
+  nodeId: string
+}
+
 interface FormulaBarProps {
   nodeId: string | null
   node: Node<NodeData> | null
   computedValue: Value | undefined
   /** Called when the user commits a new expression for a source node. */
   onCommit: (nodeId: string, value: number) => void
+  /** 6.06: Upstream variables available for context-aware autocomplete. */
+  upstreamVars?: FormulaUpstreamVar[]
 }
 
-export function FormulaBar({ nodeId, node, computedValue, onCommit }: FormulaBarProps) {
+export function FormulaBar({ nodeId, node, computedValue, onCommit, upstreamVars }: FormulaBarProps) {
   const { t } = useTranslation()
   const nd = node?.data as NodeData | undefined
   const isEditable =
@@ -70,12 +82,24 @@ export function FormulaBar({ nodeId, node, computedValue, onCommit }: FormulaBar
     return match ? match[0].toLowerCase() : ''
   }, [])
 
+  // 6.06: Build upstream variable symbols for autocomplete
+  const upstreamSymbols = useMemo((): FormulaSymbol[] => {
+    if (!upstreamVars?.length) return []
+    return upstreamVars.map((v) => ({
+      name: v.name.toLowerCase().replace(/\s+/g, '_'),
+      kind: 'constant' as const,
+      description: v.value !== undefined ? `= ${v.value} (from ${v.name})` : `from ${v.name}`,
+    }))
+  }, [upstreamVars])
+
   /** Update autocomplete suggestions based on current draft. */
   const updateAutocomplete = useCallback(
     (text: string, cursorPos: number) => {
       const word = getWordAtCursor(text, cursorPos)
       if (word.length >= 1) {
-        const matches = FORMULA_SYMBOLS.filter((s) => s.name.startsWith(word) && s.name !== word)
+        // 6.06: Merge upstream vars (shown first) with formula symbols
+        const allSymbols = [...upstreamSymbols, ...FORMULA_SYMBOLS]
+        const matches = allSymbols.filter((s) => s.name.startsWith(word) && s.name !== word)
         setAcItems(matches.slice(0, 8))
         setAcIndex(0)
       } else {
@@ -90,7 +114,7 @@ export function FormulaBar({ nodeId, node, computedValue, onCommit }: FormulaBar
         setValidationMsg(null)
       }
     },
-    [getWordAtCursor],
+    [getWordAtCursor, upstreamSymbols],
   )
 
   /** Accept an autocomplete suggestion. */

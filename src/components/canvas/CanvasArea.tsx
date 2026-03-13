@@ -100,6 +100,7 @@ import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
 import { parseCSVToTableData } from '../../lib/csvParser'
 import { CommandPalette, type PaletteCommand } from './CommandPalette'
 import { FormulaBar } from './FormulaBar'
+import type { FormulaUpstreamVar } from './FormulaBar'
 const LazyFindBlockDialog = lazy(() =>
   import('./FindBlockDialog').then((m) => ({ default: m.FindBlockDialog })),
 )
@@ -2961,6 +2962,21 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                           }
                           computedValue={inspectedId ? computed.get(inspectedId) : undefined}
                           onCommit={handleFormulaCommit}
+                          upstreamVars={
+                            // 6.06: Collect upstream variables for context-aware autocomplete
+                            inspectedId
+                              ? edges
+                                  .filter((e) => e.target === inspectedId)
+                                  .map((e) => {
+                                    const srcNode = nodes.find((n) => n.id === e.source)
+                                    const nd = srcNode?.data as Record<string, unknown> | undefined
+                                    const label = (nd?.label as string) ?? e.source
+                                    const cv = computed.get(e.source)
+                                    const val = cv && 'value' in cv ? (cv.value as number) : undefined
+                                    return { name: label, value: val, nodeId: e.source } as FormulaUpstreamVar
+                                  })
+                              : undefined
+                          }
                         />
                       )}
 
