@@ -27,7 +27,7 @@ export const NODE_STYLES = {
     fontFamily: "'Montserrat', system-ui, sans-serif",
     fontSize: '0.8rem',
     color: 'var(--text)',
-    overflow: 'hidden',
+    overflow: 'visible',
     transition: 'box-shadow 0.15s ease, border-color 0.15s ease',
   } as CSSProperties,
 
@@ -44,6 +44,7 @@ export const NODE_STYLES = {
     padding: '0.4rem 0.65rem',
     background: 'var(--node-header-bg)',
     borderBottom: '1px solid var(--node-border)',
+    borderRadius: 'var(--canvas-node-border-radius, 12px) var(--canvas-node-border-radius, 12px) 0 0',
     gap: '0.5rem',
     minHeight: 32,
   } as CSSProperties,
