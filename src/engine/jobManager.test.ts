@@ -88,7 +88,7 @@ const READY_RESPONSE: WorkerResponse = {
   catalog: [],
   constantValues: {},
   engineVersion: '0.0.0-test',
-  contractVersion: 3,
+  contractVersion: 4,
   initMs: 42,
 }
 
