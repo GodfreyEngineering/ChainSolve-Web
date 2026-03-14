@@ -32,10 +32,10 @@ test.describe('Smoke tests', () => {
     await expect(page.locator('#root')).toBeAttached()
   })
 
-  test('noindex meta tag is present', async ({ page }) => {
+  test('robots meta tag allows indexing', async ({ page }) => {
     await page.goto('/')
     const robots = page.locator('meta[name="robots"]')
-    await expect(robots).toHaveAttribute('content', 'noindex, nofollow')
+    await expect(robots).toHaveAttribute('content', 'index, follow')
   })
 
   test('security meta tags are present', async ({ page }) => {
