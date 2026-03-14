@@ -42,6 +42,9 @@ Desktop.ini
 /target
 crates/engine-wasm/pkg/
 
+# Local Cargo config (Windows-specific target-dir workaround)
+.cargo/config.toml
+
 # Local Claude settings
 .claude/
 
