@@ -1,0 +1,83 @@
+/**
+ * registerAllBlocks — lazily loaded block registration module (UI-PERF-05).
+ *
+ * All domain-specific block packs (engineering, finance, ML, etc.) are
+ * registered here rather than in registry.ts so that they are excluded
+ * from the initial JS bundle. This module is dynamically imported in
+ * main.tsx after the WASM engine is ready.
+ */
+
+import type { BlockDef } from './types'
+import { BLOCK_REGISTRY } from './registry'
+
+import { registerDataBlocks } from './data-blocks'
+import { registerVectorBlocks } from './vector-blocks'
+import { registerTableBlocks } from './table-blocks'
+import { registerPlotBlocks } from './plot-blocks'
+import { registerEngBlocks } from './eng-blocks'
+import { registerFinStatsBlocks } from './fin-stats-blocks'
+import { registerConstantsBlocks } from './constants-blocks'
+import { registerDistBlocks } from './dist-blocks'
+import { registerChemBlocks } from './chem-blocks'
+import { registerStructBlocks } from './struct-blocks'
+import { registerAeroBlocks } from './aero-blocks'
+import { registerCtrlBlocks } from './ctrl-blocks'
+import { registerBioBlocks } from './bio-blocks'
+import { registerFinOptionsBlocks } from './fin-options-blocks'
+import { registerDateBlocks } from './date-blocks'
+import { registerTextBlocks } from './text-blocks'
+import { registerIntervalBlocks } from './interval-blocks'
+import { registerSignalBlocks } from './signal-blocks'
+import { registerComplexBlocks } from './complex-blocks'
+import { registerMatrixBlocks } from './matrix-blocks'
+import { registerOptimBlocks } from './optim-blocks'
+import { registerMLBlocks } from './ml-blocks'
+import { registerNNBlocks } from './nn-blocks'
+import { registerLookupBlocks } from './lookup-blocks'
+import { SEARCH_METADATA } from './blockSearchMetadata'
+
+function reg(
+  def: Omit<BlockDef, 'synonyms' | 'tags' | 'description' | 'proOnly'> & { proOnly?: boolean },
+): void {
+  BLOCK_REGISTRY.set(def.type, def)
+}
+
+/** Register all domain block packs and apply search metadata. */
+export function registerAllBlocks(): void {
+  // Skip if already registered (idempotent)
+  if (BLOCK_REGISTRY.size > 50) return
+
+  registerDataBlocks(reg)
+  registerVectorBlocks(reg)
+  registerTableBlocks(reg)
+  registerPlotBlocks(reg)
+  registerEngBlocks(reg)
+  registerFinStatsBlocks(reg)
+  registerConstantsBlocks(reg)
+  registerDistBlocks(reg)
+  registerChemBlocks(reg)
+  registerStructBlocks(reg)
+  registerAeroBlocks(reg)
+  registerCtrlBlocks(reg)
+  registerBioBlocks(reg)
+  registerFinOptionsBlocks(reg)
+  registerDateBlocks(reg)
+  registerTextBlocks(reg)
+  registerIntervalBlocks(reg)
+  registerSignalBlocks(reg)
+  registerComplexBlocks(reg)
+  registerMatrixBlocks(reg)
+  registerLookupBlocks(reg)
+  registerOptimBlocks(reg)
+  registerMLBlocks(reg)
+  registerNNBlocks(reg)
+
+  // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
+  for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {
+    const def = BLOCK_REGISTRY.get(opId)
+    if (def) {
+      if (meta.synonyms) def.synonyms = meta.synonyms
+      if (meta.tags) def.tags = meta.tags
+    }
+  }
+}

@@ -8,7 +8,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { trackBlockUsed, getRecentlyUsed, MAX_RECENT_BLOCKS } from './blockLibraryUtils'
 import { BLOCK_REGISTRY, CATEGORY_LABELS } from '../../blocks/registry'
+import { registerAllBlocks } from '../../blocks/registerAllBlocks'
 import type { BlockCategory } from '../../blocks/types'
+
+// Ensure domain block packs are loaded (UI-PERF-05: lazy by default)
+registerAllBlocks()
 
 // ── blockLibraryUtils — getRecentlyUsed ─────────────────────────────────────
 

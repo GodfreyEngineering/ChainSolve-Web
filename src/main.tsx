@@ -114,9 +114,13 @@ function Root() {
           return
         }
         // UI-PERF-05: Load the block registry lazily so it is excluded from the
-        // initial JS bundle. The registry + all domain block files load here,
-        // in parallel with WASM init, only after the engine is ready.
-        const { validateCatalog } = await import('./blocks/registry')
+        // initial JS bundle. Domain block packs + search metadata load here,
+        // after WASM init, keeping them out of the initial closure.
+        const [{ validateCatalog }, { registerAllBlocks }] = await Promise.all([
+          import('./blocks/registry'),
+          import('./blocks/registerAllBlocks'),
+        ])
+        registerAllBlocks()
         validateCatalog(eng.catalog)
         ;(window as unknown as Record<string, unknown>).__chainsolve_engine = eng
         console.info('[engine] WASM engine ready, version:', eng.engineVersion)

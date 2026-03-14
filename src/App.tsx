@@ -1,10 +1,12 @@
 import { lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
-import Login from './pages/Login'
 import { SettingsRedirect } from './components/SettingsRedirect'
 import { isDiagnosticsUIEnabled } from './lib/devFlags'
 import { RouteSkeleton } from './components/ui/RouteSkeleton'
+
+// Lazy-load Login to keep @supabase/supabase-js out of the initial bundle
+const Login = lazy(() => import('./pages/Login'))
 
 // Lazy-load WorkspacePage (unified single-page workspace)
 const WorkspacePage = lazy(() => import('./pages/WorkspacePage'))
@@ -171,9 +173,30 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/app" replace />} />
-      <Route path="/login" element={<Login initialMode="login" />} />
-      <Route path="/signup" element={<Login initialMode="signup" />} />
-      <Route path="/reset-password" element={<Login initialMode="reset" />} />
+      <Route
+        path="/login"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+            <Login initialMode="login" />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+            <Login initialMode="signup" />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+            <Login initialMode="reset" />
+          </Suspense>
+        }
+      />
       <Route
         path="/terms"
         element={

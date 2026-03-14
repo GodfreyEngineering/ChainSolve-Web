@@ -10,6 +10,10 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { BLOCK_REGISTRY } from './registry'
+import { registerAllBlocks } from './registerAllBlocks'
+
+// Ensure domain block packs are loaded (UI-PERF-05: lazy by default)
+registerAllBlocks()
 
 // UI-only blocks have no Rust op — excluded from the sync check.
 const UI_ONLY_BLOCKS = new Set(['constant', 'material'])

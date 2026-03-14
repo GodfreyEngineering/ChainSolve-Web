@@ -9,6 +9,10 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import type { CatalogEntry } from '../engine/wasm-types'
 import { BLOCK_REGISTRY, UI_ONLY_BLOCKS, validateCatalog } from './registry'
+import { registerAllBlocks } from './registerAllBlocks'
+
+// Ensure domain block packs are loaded (UI-PERF-05: lazy by default)
+registerAllBlocks()
 
 // ── Structural: no console.warn in validateCatalog ──────────────────────────
 

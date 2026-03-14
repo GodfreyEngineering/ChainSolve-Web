@@ -11,7 +11,11 @@
 
 import { describe, it, expect } from 'vitest'
 import { BLOCK_REGISTRY } from './registry'
+import { registerAllBlocks } from './registerAllBlocks'
 import type { BlockCategory, NodeKind } from './types'
+
+// Ensure domain block packs are loaded (UI-PERF-05: lazy by default)
+registerAllBlocks()
 
 const VALID_CATEGORIES: BlockCategory[] = [
   'input',

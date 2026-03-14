@@ -772,69 +772,11 @@ export function getMaterialsCatalog(): MaterialsCatalogEntry[] {
   }))
 }
 
-// ── Pro-only block registration (no circular imports) ────────────────────────
-// Block packs export registration functions instead of importing reg.
-
-import { registerDataBlocks } from './data-blocks'
-import { registerVectorBlocks } from './vector-blocks'
-import { registerTableBlocks } from './table-blocks'
-import { registerPlotBlocks } from './plot-blocks'
-import { registerEngBlocks } from './eng-blocks'
-import { registerFinStatsBlocks } from './fin-stats-blocks'
-import { registerConstantsBlocks } from './constants-blocks'
-import { registerDistBlocks } from './dist-blocks'
-import { registerChemBlocks } from './chem-blocks'
-import { registerStructBlocks } from './struct-blocks'
-import { registerAeroBlocks } from './aero-blocks'
-import { registerCtrlBlocks } from './ctrl-blocks'
-import { registerBioBlocks } from './bio-blocks'
-import { registerFinOptionsBlocks } from './fin-options-blocks'
-import { registerDateBlocks } from './date-blocks'
-import { registerTextBlocks } from './text-blocks'
-import { registerIntervalBlocks } from './interval-blocks'
-import { registerSignalBlocks } from './signal-blocks'
-import { registerComplexBlocks } from './complex-blocks'
-import { registerMatrixBlocks } from './matrix-blocks'
-import { registerOptimBlocks } from './optim-blocks'
-import { registerMLBlocks } from './ml-blocks'
-import { registerNNBlocks } from './nn-blocks'
-import { registerLookupBlocks } from './lookup-blocks'
-
-registerDataBlocks(reg)
-registerVectorBlocks(reg)
-registerTableBlocks(reg)
-registerPlotBlocks(reg)
-registerEngBlocks(reg)
-registerFinStatsBlocks(reg)
-registerConstantsBlocks(reg)
-registerDistBlocks(reg)
-registerChemBlocks(reg)
-registerStructBlocks(reg)
-registerAeroBlocks(reg)
-registerCtrlBlocks(reg)
-registerBioBlocks(reg)
-registerFinOptionsBlocks(reg)
-registerDateBlocks(reg)
-registerTextBlocks(reg)
-registerIntervalBlocks(reg)
-registerSignalBlocks(reg)
-registerComplexBlocks(reg)
-registerMatrixBlocks(reg)
-registerLookupBlocks(reg)
-registerOptimBlocks(reg)
-registerMLBlocks(reg)
-registerNNBlocks(reg)
-
-// E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
-import { SEARCH_METADATA } from './blockSearchMetadata'
-for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {
-  const def = BLOCK_REGISTRY.get(opId)
-  if (def) {
-    if (meta.synonyms) def.synonyms = meta.synonyms
-    if (meta.tags) def.tags = meta.tags
-  }
-}
-
+// ── Domain block packs (UI-PERF-05) ─────────────────────────────────────────
+// Block packs are lazily loaded via registerAllBlocks.ts to keep them out of
+// the initial JS bundle. They are imported dynamically in main.tsx after the
+// WASM engine boots. See registerAllBlocks.ts for the full list.
+//
 // G4-1: Block descriptions live in blockDescriptions.ts and are imported
 // directly by consumers (Inspector) to avoid bloating the initial bundle.
 

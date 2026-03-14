@@ -15,7 +15,11 @@ import {
   getConstantsCatalog,
   getMaterialsCatalog,
 } from '../../blocks/registry'
+import { registerAllBlocks } from '../../blocks/registerAllBlocks'
 import { getEntitlements, isBlockEntitled } from '../../lib/entitlements'
+
+// Ensure domain block packs are loaded (UI-PERF-05: lazy by default)
+registerAllBlocks()
 
 /** Pro-only categories (must match BlockLibrary.tsx PRO_CATEGORIES). */
 const PRO_CATEGORIES = new Set([
