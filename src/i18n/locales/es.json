@@ -584,6 +584,10 @@
     "showGridHint": "Mostrar puntos de cuadricula en el fondo del lienzo",
     "defaultZoom": "Zoom predeterminado",
     "defaultZoomHint": "Nivel de zoom inicial para nuevos lienzos",
+    "autoLayoutDirection": "Direcci\u00f3n de dise\u00f1o autom\u00e1tico",
+    "autoLayoutDirectionHint": "Direcci\u00f3n predeterminada al organizar bloques autom\u00e1ticamente.",
+    "layoutLR": "Izquierda a derecha",
+    "layoutTB": "Arriba a abajo",
     "exportPageSize": "Tamano de pagina",
     "exportPageSizeHint": "Tamano de pagina predeterminado para exportaciones PDF",
     "exportAnnotations": "Incluir anotaciones",
@@ -2283,7 +2287,26 @@
     "previewTitle": "Snapshot preview",
     "current": "Current",
     "restoreTooltip": "Click to restore to this state",
-    "action": "Action"
+    "action": "Action",
+    "emptyUndoHistory": "Aún no hay historial — realice cambios para verlos aquí.",
+    "saveCheckpoint": "Guardar punto de control",
+    "checkpointPlaceholder": "Nombre del punto de control…",
+    "save": "Guardar",
+    "clear": "Borrar",
+    "confirmClear": "¿Borrar todo el historial? Esta acción no se puede deshacer."
+  },
+  "presentation": {
+    "spotlight": "Foco",
+    "spotlightTooltip": "Modo foco: haga clic en un nodo para destacarlo",
+    "laser": "Láser",
+    "laserTooltip": "Puntero láser: mueva el ratón para llamar la atención",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "fitView": "Ajustar vista",
+    "fit": "Ajustar",
+    "exitTooltip": "Salir del modo presentación (Ctrl+Mayús+P o Esc)",
+    "exit": "Salir",
+    "modeLabel": "Modo Presentación"
   },
   "share": {
     "readOnly": "Read-only",
@@ -2305,7 +2328,17 @@
     "openFork": "Open fork",
     "forking": "Forking…",
     "fork": "Fork project",
-    "signInToFork": "Sign in to fork"
+    "signInToFork": "Sign in to fork",
+    "accessDesc": "Cualquier persona con el enlace puede ver y bifurcar este proyecto.",
+    "emptyTitle": "Sin enlaces de uso compartido",
+    "emptyDesc": "Crea un enlace para compartir este proyecto.",
+    "created": "Creado {{time}}",
+    "copied": "\u00a1Copiado!",
+    "expiryLabel": "Caducidad del enlace",
+    "expiry7": "7 d\u00edas",
+    "expiry30": "30 d\u00edas",
+    "expiry90": "90 d\u00edas",
+    "expiryNever": "Nunca"
   },
   "newProject": {
     "defaultName": "Untitled project",

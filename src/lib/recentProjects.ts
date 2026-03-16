@@ -42,3 +42,13 @@ export function removeRecentProject(id: string): void {
     // ignore
   }
 }
+
+/** Remove entries whose id is not in the given valid set. */
+export function pruneRecentProjects(validIds: Set<string>): void {
+  const list = getRecentProjects().filter((p) => validIds.has(p.id))
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list))
+  } catch {
+    // ignore
+  }
+}

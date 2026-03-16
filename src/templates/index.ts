@@ -12,6 +12,8 @@ import { buildStats101 } from './stats-101'
 import { buildScienceProjectile } from './science-projectile'
 import { buildEngineeringRc } from './engineering-rc'
 import { buildStudentQuadratic } from './student-quadratic'
+import { buildStructuralBeam } from './structural-beam'
+import { buildHeatTransfer } from './heat-transfer'
 
 export interface TemplateMeta {
   /** Stable unique key — never rename after shipping. */
@@ -79,5 +81,23 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ['algebra', 'quadratic', 'roots'],
     category: 'Student',
     buildGraph: buildStudentQuadratic,
+  },
+  {
+    id: 'structural-beam',
+    name: 'Simply Supported Beam',
+    description:
+      'Bending stress and deflection for a simply supported beam with central point load \u2014 \u03c3 = PL/(4Z), \u03b4 = PL\u00b3/(48EI).',
+    tags: ['structural', 'beam', 'civil', 'mechanics'],
+    category: 'Engineering',
+    buildGraph: buildStructuralBeam,
+  },
+  {
+    id: 'heat-transfer',
+    name: 'Conductive Heat Transfer',
+    description:
+      "Fourier's law through a flat wall: Q = k\u00b7A\u00b7\u0394T/L. Also computes thermal resistance R and heat flux q.",
+    tags: ['thermodynamics', 'heat', 'conduction', 'thermal'],
+    category: 'Engineering',
+    buildGraph: buildHeatTransfer,
   },
 ]

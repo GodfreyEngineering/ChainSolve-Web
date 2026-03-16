@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Clock } from 'lucide-react'
-import { getRecentProjects, removeRecentProject } from '../../../lib/recentProjects'
+import { getRecentProjects, pruneRecentProjects } from '../../../lib/recentProjects'
 import { listProjects, type ProjectRow } from '../../../lib/projects'
 import { Icon } from '../../ui/Icon'
 
@@ -27,12 +27,9 @@ export function RecentPanel({ onOpenProject }: RecentPanelProps) {
         setProjects(map)
 
         // Prune stale entries that no longer exist in DB
-        const currentIds = getRecentProjects().map((r) => r.id)
-        const staleIds = currentIds.filter((id) => !map.has(id))
-        if (staleIds.length > 0) {
-          for (const id of staleIds) removeRecentProject(id)
-          setRecentIds(getRecentProjects().map((r) => r.id))
-        }
+        const validIds = new Set(map.keys())
+        pruneRecentProjects(validIds)
+        setRecentIds(getRecentProjects().map((r) => r.id))
       })
       .catch(() => {})
       .finally(() => setLoading(false))

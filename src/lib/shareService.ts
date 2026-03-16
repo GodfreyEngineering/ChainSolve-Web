@@ -19,10 +19,17 @@ export type ShareLink = {
   is_active: boolean
 }
 
-/** Create a share link for a project. Expires in 30 days by default. */
-export async function createShareLink(projectId: string, expiresInDays = 30): Promise<ShareLink> {
-  const expiresAt = new Date()
-  expiresAt.setDate(expiresAt.getDate() + expiresInDays)
+/** Create a share link for a project. Expires in 30 days by default; pass 0 for no expiry. */
+export async function createShareLink(
+  projectId: string,
+  expiresInDays: number = 30,
+): Promise<ShareLink> {
+  let expiresAt: string | null = null
+  if (expiresInDays > 0) {
+    const d = new Date()
+    d.setDate(d.getDate() + expiresInDays)
+    expiresAt = d.toISOString()
+  }
 
   const {
     data: { user },
@@ -34,7 +41,7 @@ export async function createShareLink(projectId: string, expiresInDays = 30): Pr
     .insert({
       project_id: projectId,
       created_by: user.id,
-      expires_at: expiresAt.toISOString(),
+      expires_at: expiresAt,
     })
     .select()
     .single()

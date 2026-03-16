@@ -9,6 +9,7 @@
 import { useNodes } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import type { NodeData } from '../../blocks/types'
+import { validateUserLabel } from '../../lib/validateUserString'
 
 const COLOR_PRESETS = [
   '#1CABB0', // teal
@@ -99,7 +100,12 @@ export function GroupInspector({
         <input
           style={inp}
           value={data.label}
-          onChange={(e) => !readOnly && onUpdate({ label: e.target.value })}
+          onChange={(e) => {
+            if (readOnly) return
+            const v = e.target.value
+            const result = validateUserLabel(v, { field: 'Group name' })
+            if (result.ok || v === '') onUpdate({ label: v })
+          }}
           readOnly={readOnly}
         />,
       )}

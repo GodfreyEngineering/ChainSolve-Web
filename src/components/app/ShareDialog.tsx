@@ -1,7 +1,7 @@
 /**
  * ShareDialog — manage share links for a project.
  *
- * Shows existing links, allows creating new ones, and revoking.
+ * Shows existing links, allows creating new ones with expiry picker, and revoking.
  */
 
 import type { CSSProperties } from 'react'
@@ -20,6 +20,32 @@ interface ShareDialogProps {
   onClose: () => void
 }
 
+/** Format a date as relative time (e.g. "2 hours ago", "in 5 days"). */
+function formatRelativeTime(isoDate: string): string {
+  const now = Date.now()
+  const target = new Date(isoDate).getTime()
+  const diffMs = target - now
+  const absDiff = Math.abs(diffMs)
+  const seconds = Math.floor(absDiff / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  const isFuture = diffMs > 0
+
+  if (seconds < 60) return isFuture ? 'in a moment' : 'just now'
+  if (minutes < 60) {
+    const label = minutes === 1 ? '1 minute' : `${minutes} minutes`
+    return isFuture ? `in ${label}` : `${label} ago`
+  }
+  if (hours < 24) {
+    const label = hours === 1 ? '1 hour' : `${hours} hours`
+    return isFuture ? `in ${label}` : `${label} ago`
+  }
+  const label = days === 1 ? '1 day' : `${days} days`
+  return isFuture ? `in ${label}` : `${label} ago`
+}
+
 export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
   const { t } = useTranslation()
   const [links, setLinks] = useState<ShareLink[]>([])
@@ -27,6 +53,7 @@ export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [expiryDays, setExpiryDays] = useState<number>(30)
 
   const fetchLinks = useCallback(async () => {
     try {
@@ -47,7 +74,7 @@ export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
     setCreating(true)
     setError(null)
     try {
-      await createShareLink(projectId)
+      await createShareLink(projectId, expiryDays)
       await fetchLinks()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create link')
@@ -77,8 +104,11 @@ export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
     const d = new Date(expiresAt)
     const now = new Date()
     if (d < now) return t('share.expired', 'Expired')
-    const days = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-    return t('share.expiresIn', 'Expires in {{days}} day(s)', { days })
+    return formatRelativeTime(expiresAt)
+  }
+
+  const formatCreated = (createdAt: string) => {
+    return formatRelativeTime(createdAt)
   }
 
   return (
@@ -96,7 +126,7 @@ export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
           left: '50%',
           transform: 'translate(-50%, -50%)',
           zIndex: 2001,
-          width: 440,
+          width: 460,
           maxWidth: '90vw',
           background: 'var(--surface-2)',
           border: '1px solid var(--border)',
@@ -112,7 +142,7 @@ export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '1.25rem',
+            marginBottom: '0.75rem',
           }}
         >
           <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>
@@ -128,16 +158,31 @@ export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
             }}
             onClick={onClose}
           >
-            ✕
+            {'\u2715'}
           </button>
         </div>
 
-        <p style={{ margin: '0 0 1.25rem', fontSize: '0.85rem', opacity: 0.7 }}>
-          {t(
-            'share.dialogDesc',
-            'Share links let anyone view your project in read-only mode. They can fork it to make their own copy.',
-          )}
-        </p>
+        {/* Description banner */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.6rem 0.75rem',
+            background: 'rgba(28,171,176,0.08)',
+            border: '1px solid rgba(28,171,176,0.2)',
+            borderRadius: 8,
+            marginBottom: '1.25rem',
+            fontSize: '0.82rem',
+            color: 'var(--text)',
+            lineHeight: 1.45,
+          }}
+        >
+          <span style={{ fontSize: '1rem', flexShrink: 0 }}>{'\uD83D\uDD17'}</span>
+          <span>
+            {t('share.accessDesc', 'Anyone with the link can view and fork this project.')}
+          </span>
+        </div>
 
         {error && (
           <div
@@ -157,7 +202,7 @@ export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
 
         {loading ? (
           <div style={{ opacity: 0.5, textAlign: 'center', padding: '1rem', fontSize: '0.85rem' }}>
-            {t('ui.loading', 'Loading…')}
+            {t('ui.loading', 'Loading\u2026')}
           </div>
         ) : (
           <>
@@ -165,35 +210,51 @@ export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
               <div
                 style={{
                   textAlign: 'center',
-                  padding: '1.5rem 0',
-                  opacity: 0.5,
-                  fontSize: '0.85rem',
+                  padding: '2rem 1rem',
+                  border: '1px dashed var(--border)',
+                  borderRadius: 10,
+                  marginBottom: '1rem',
                 }}
               >
-                {t('share.noLinks', 'No active share links.')}
+                <div
+                  style={{
+                    fontSize: '1.5rem',
+                    marginBottom: '0.5rem',
+                    opacity: 0.4,
+                  }}
+                >
+                  {'\uD83D\uDD17'}
+                </div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                  {t('share.emptyTitle', 'No share links yet')}
+                </div>
+                <div style={{ fontSize: '0.78rem', opacity: 0.5, marginBottom: '1rem' }}>
+                  {t('share.emptyDesc', 'Create a link to let others view this project.')}
+                </div>
               </div>
             ) : (
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.5rem',
-                  marginBottom: '1rem',
+                  gap: '0.65rem',
+                  marginBottom: '1.25rem',
                 }}
               >
                 {links.map((link) => {
                   const url = buildShareUrl(link.token)
+                  const isCopied = copiedId === link.id
                   return (
                     <div
                       key={link.id}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.65rem 0.75rem',
+                        gap: '0.6rem',
+                        padding: '0.75rem 0.85rem',
                         background: 'var(--surface-1)',
                         border: '1px solid var(--border)',
-                        borderRadius: 8,
+                        borderRadius: 10,
                       }}
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -213,13 +274,19 @@ export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
                           style={{
                             fontSize: '0.7rem',
                             opacity: 0.5,
-                            marginTop: '0.15rem',
+                            marginTop: '0.25rem',
                             display: 'flex',
                             gap: '0.5rem',
                           }}
                         >
+                          <span>
+                            {t('share.created', 'Created {{time}}', {
+                              time: formatCreated(link.created_at),
+                            })}
+                          </span>
+                          <span>{'\u00B7'}</span>
                           <span>{formatExpiry(link.expires_at)}</span>
-                          <span>·</span>
+                          <span>{'\u00B7'}</span>
                           <span>
                             {t('share.viewCount', '{{n}} view(s)', {
                               n: link.view_count,
@@ -228,18 +295,23 @@ export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
                         </div>
                       </div>
                       <button
-                        style={iconBtn}
+                        style={{
+                          ...copyBtnStyle,
+                          background: isCopied ? 'rgba(34,197,94,0.15)' : 'var(--surface-hover)',
+                          color: isCopied ? '#22c55e' : 'var(--text)',
+                          borderColor: isCopied ? 'rgba(34,197,94,0.3)' : 'var(--border)',
+                        }}
                         title={t('share.copy', 'Copy link')}
                         onClick={() => void handleCopy(link)}
                       >
-                        {copiedId === link.id ? '✓' : '⎘'}
+                        {isCopied ? t('share.copied', 'Copied!') : t('share.copy', 'Copy link')}
                       </button>
                       <button
                         style={{ ...iconBtn, color: 'var(--danger-text)' }}
                         title={t('share.revoke', 'Revoke link')}
                         onClick={() => void handleRevoke(link.id)}
                       >
-                        ✕
+                        {'\u2715'}
                       </button>
                     </div>
                   )
@@ -247,27 +319,47 @@ export function ShareDialog({ projectId, onClose }: ShareDialogProps) {
               </div>
             )}
 
-            <button
+            {/* Create section */}
+            <div
               style={{
-                width: '100%',
-                padding: '0.6rem',
-                borderRadius: 8,
-                border: 'none',
-                background: 'var(--primary)',
-                color: '#fff',
-                fontWeight: 600,
-                fontSize: '0.9rem',
-                cursor: creating ? 'not-allowed' : 'pointer',
-                opacity: creating ? 0.6 : 1,
-                fontFamily: 'inherit',
+                display: 'flex',
+                gap: '0.5rem',
+                alignItems: 'center',
               }}
-              disabled={creating}
-              onClick={() => void handleCreate()}
             >
-              {creating
-                ? t('share.creating', 'Creating…')
-                : t('share.createLink', '+ Create share link')}
-            </button>
+              <select
+                style={selectStyle}
+                value={String(expiryDays)}
+                onChange={(e) => setExpiryDays(parseInt(e.target.value))}
+                aria-label={t('share.expiryLabel', 'Link expiry')}
+              >
+                <option value="7">{t('share.expiry7', '7 days')}</option>
+                <option value="30">{t('share.expiry30', '30 days')}</option>
+                <option value="90">{t('share.expiry90', '90 days')}</option>
+                <option value="0">{t('share.expiryNever', 'Never')}</option>
+              </select>
+              <button
+                style={{
+                  flex: 1,
+                  padding: '0.6rem',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: 'var(--primary)',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  cursor: creating ? 'not-allowed' : 'pointer',
+                  opacity: creating ? 0.6 : 1,
+                  fontFamily: 'inherit',
+                }}
+                disabled={creating}
+                onClick={() => void handleCreate()}
+              >
+                {creating
+                  ? t('share.creating', 'Creating\u2026')
+                  : t('share.createLink', '+ Create share link')}
+              </button>
+            </div>
           </>
         )}
       </div>
@@ -283,5 +375,29 @@ const iconBtn: CSSProperties = {
   fontSize: '0.9rem',
   padding: '0.15rem 0.25rem',
   borderRadius: 4,
+  flexShrink: 0,
+}
+
+const copyBtnStyle: CSSProperties = {
+  padding: '0.35rem 0.65rem',
+  borderRadius: 6,
+  border: '1px solid var(--border)',
+  cursor: 'pointer',
+  fontSize: '0.72rem',
+  fontWeight: 600,
+  fontFamily: 'inherit',
+  flexShrink: 0,
+  transition: 'background 0.15s, color 0.15s',
+}
+
+const selectStyle: CSSProperties = {
+  padding: '0.55rem 0.65rem',
+  borderRadius: 8,
+  border: '1px solid var(--border)',
+  background: 'var(--surface-1)',
+  color: 'var(--text)',
+  fontSize: '0.82rem',
+  fontFamily: 'inherit',
+  cursor: 'pointer',
   flexShrink: 0,
 }

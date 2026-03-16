@@ -584,6 +584,10 @@
     "showGridHint": "Afficher les points de grille sur l'arrière-plan du canevas",
     "defaultZoom": "Zoom par défaut",
     "defaultZoomHint": "Niveau de zoom initial pour les nouveaux canevas",
+    "autoLayoutDirection": "Direction de mise en page auto",
+    "autoLayoutDirectionHint": "Direction par d\u00e9faut lors de l'organisation automatique des blocs.",
+    "layoutLR": "Gauche \u00e0 droite",
+    "layoutTB": "Haut en bas",
     "exportPageSize": "Taille de page",
     "exportPageSizeHint": "Taille de page par défaut pour les exportations PDF",
     "exportAnnotations": "Inclure les annotations",
@@ -2283,7 +2287,26 @@
     "previewTitle": "Snapshot preview",
     "current": "Current",
     "restoreTooltip": "Click to restore to this state",
-    "action": "Action"
+    "action": "Action",
+    "emptyUndoHistory": "Pas encore d'historique — effectuez des modifications pour les voir ici.",
+    "saveCheckpoint": "Enregistrer un point de contrôle",
+    "checkpointPlaceholder": "Nom du point de contrôle…",
+    "save": "Enregistrer",
+    "clear": "Effacer",
+    "confirmClear": "Effacer tout l'historique ? Cette action est irréversible."
+  },
+  "presentation": {
+    "spotlight": "Projecteur",
+    "spotlightTooltip": "Mode projecteur : cliquez sur un nœud pour le mettre en avant",
+    "laser": "Laser",
+    "laserTooltip": "Pointeur laser : déplacez la souris pour attirer l'attention",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "fitView": "Ajuster la vue",
+    "fit": "Ajuster",
+    "exitTooltip": "Quitter le mode présentation (Ctrl+Maj+P ou Échap)",
+    "exit": "Quitter",
+    "modeLabel": "Mode Présentation"
   },
   "share": {
     "readOnly": "Read-only",
@@ -2305,7 +2328,17 @@
     "openFork": "Open fork",
     "forking": "Forking…",
     "fork": "Fork project",
-    "signInToFork": "Sign in to fork"
+    "signInToFork": "Sign in to fork",
+    "accessDesc": "Toute personne disposant du lien peut consulter et dupliquer ce projet.",
+    "emptyTitle": "Aucun lien de partage",
+    "emptyDesc": "Cr\u00e9ez un lien pour partager ce projet.",
+    "created": "Cr\u00e9\u00e9 {{time}}",
+    "copied": "Copi\u00e9 !",
+    "expiryLabel": "Expiration du lien",
+    "expiry7": "7 jours",
+    "expiry30": "30 jours",
+    "expiry90": "90 jours",
+    "expiryNever": "Jamais"
   },
   "newProject": {
     "defaultName": "Untitled project",

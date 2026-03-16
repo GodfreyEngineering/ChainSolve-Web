@@ -584,6 +584,10 @@
     "showGridHint": "Rasterpunkte auf dem Canvas-Hintergrund anzeigen",
     "defaultZoom": "Standard-Zoom",
     "defaultZoomHint": "Anfaengliche Zoomstufe fuer neue Canvases",
+    "autoLayoutDirection": "Auto-Layout-Richtung",
+    "autoLayoutDirectionHint": "Standardrichtung beim automatischen Anordnen von Blöcken.",
+    "layoutLR": "Links nach rechts",
+    "layoutTB": "Oben nach unten",
     "exportPageSize": "Seitengroesse",
     "exportPageSizeHint": "Standard-Seitengroesse fuer PDF-Exporte",
     "exportAnnotations": "Anmerkungen einbeziehen",
@@ -2283,7 +2287,26 @@
     "previewTitle": "Snapshot preview",
     "current": "Current",
     "restoreTooltip": "Click to restore to this state",
-    "action": "Action"
+    "action": "Action",
+    "emptyUndoHistory": "Noch kein Verlauf — nehmen Sie Änderungen vor, um sie hier zu sehen.",
+    "saveCheckpoint": "Checkpoint speichern",
+    "checkpointPlaceholder": "Checkpoint-Name…",
+    "save": "Speichern",
+    "clear": "Löschen",
+    "confirmClear": "Gesamten Verlauf löschen? Dies kann nicht rückgängig gemacht werden."
+  },
+  "presentation": {
+    "spotlight": "Spotlight",
+    "spotlightTooltip": "Spotlight-Modus: Klicken Sie auf einen Knoten, um ihn hervorzuheben",
+    "laser": "Laser",
+    "laserTooltip": "Laserpointer: Maus bewegen, um Aufmerksamkeit zu lenken",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "fitView": "Ansicht anpassen",
+    "fit": "Anpassen",
+    "exitTooltip": "Präsentationsmodus beenden (Strg+Umschalt+P oder Esc)",
+    "exit": "Beenden",
+    "modeLabel": "Präsentationsmodus"
   },
   "share": {
     "readOnly": "Read-only",
@@ -2305,7 +2328,17 @@
     "openFork": "Open fork",
     "forking": "Forking…",
     "fork": "Fork project",
-    "signInToFork": "Sign in to fork"
+    "signInToFork": "Sign in to fork",
+    "accessDesc": "Jeder mit dem Link kann dieses Projekt ansehen und forken.",
+    "emptyTitle": "Noch keine Freigabelinks",
+    "emptyDesc": "Erstellen Sie einen Link, um dieses Projekt mit anderen zu teilen.",
+    "created": "Erstellt {{time}}",
+    "copied": "Kopiert!",
+    "expiryLabel": "Link-Ablauf",
+    "expiry7": "7 Tage",
+    "expiry30": "30 Tage",
+    "expiry90": "90 Tage",
+    "expiryNever": "Nie"
   },
   "newProject": {
     "defaultName": "Untitled project",

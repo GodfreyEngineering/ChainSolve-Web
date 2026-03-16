@@ -722,6 +722,29 @@ export function CanvasToolbar({
                     <span style={annotIconStyle}>{'\ud83d\udcdd'}</span>
                     {t('contextMenu.annotStickyNote', 'Sticky Note')}
                   </button>
+                  <div style={{ ...annotSepStyle }} />
+                  <button
+                    style={annotItemStyle}
+                    onClick={() => insertAnnot('annotation_rectangle')}
+                  >
+                    <span style={annotIconStyle}>{'\u25ad'}</span>
+                    {t('contextMenu.annotRectangle', 'Rectangle')}
+                  </button>
+                  <button style={annotItemStyle} onClick={() => insertAnnot('annotation_ellipse')}>
+                    <span style={annotIconStyle}>{'\u25cb'}</span>
+                    {t('contextMenu.annotEllipse', 'Ellipse')}
+                  </button>
+                  <button style={annotItemStyle} onClick={() => insertAnnot('annotation_diamond')}>
+                    <span style={annotIconStyle}>{'\u25c7'}</span>
+                    {t('contextMenu.annotDiamond', 'Diamond')}
+                  </button>
+                  <button
+                    style={annotItemStyle}
+                    onClick={() => insertAnnot('annotation_rounded_rectangle')}
+                  >
+                    <span style={annotIconStyle}>{'\u25a2'}</span>
+                    {t('contextMenu.annotRoundedRect', 'Rounded rectangle')}
+                  </button>
                 </div>
               )}
             </div>
@@ -864,6 +887,12 @@ const annotIconStyle: React.CSSProperties = {
   fontSize: '0.72rem',
   opacity: 0.6,
   flexShrink: 0,
+}
+
+const annotSepStyle: React.CSSProperties = {
+  height: 1,
+  background: 'var(--border)',
+  margin: '0.15rem 0.25rem',
 }
 
 const zoomInputStyle: React.CSSProperties = {

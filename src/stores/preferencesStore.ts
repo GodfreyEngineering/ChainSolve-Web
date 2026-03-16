@@ -63,6 +63,8 @@ export interface UserPreferences {
   canvasNodeShadow: 'none' | 'subtle' | 'strong'
   /** Edge animation speed */
   canvasAnimationSpeed: 'none' | 'slow' | 'medium' | 'fast'
+  /** Auto-layout direction preference */
+  autoLayoutDirection: 'LR' | 'TB'
 
   // Export defaults
   exportIncludeImages: boolean
@@ -127,6 +129,7 @@ const DEFAULTS: UserPreferences = {
   canvasNodeBorderRadius: 8,
   canvasNodeShadow: 'subtle',
   canvasAnimationSpeed: 'medium',
+  autoLayoutDirection: 'LR',
 
   exportIncludeImages: true,
   defaultExportFormat: 'pdf',

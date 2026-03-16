@@ -322,6 +322,10 @@
     "showGridHint": "הצג נקודות רשת על רקע הקנבס",
     "defaultZoom": "זום ברירת מחדל",
     "defaultZoomHint": "רמת זום ראשונית לקנבסים חדשים",
+    "autoLayoutDirection": "Auto-layout direction",
+    "autoLayoutDirectionHint": "Default direction for automatic graph layout",
+    "layoutLR": "Left to right",
+    "layoutTB": "Top to bottom",
     "exportPageSize": "גודל עמוד",
     "exportPageSizeHint": "גודל עמוד ברירת מחדל לייצוא PDF",
     "exportAnnotations": "כלול הערות",
@@ -2226,7 +2230,26 @@
     "previewTitle": "Snapshot preview",
     "current": "Current",
     "restoreTooltip": "Click to restore to this state",
-    "action": "Action"
+    "action": "Action",
+    "emptyUndoHistory": "אין היסטוריה עדיין — בצע שינויים כדי לראותם כאן.",
+    "saveCheckpoint": "שמור נקודת ביקורת",
+    "checkpointPlaceholder": "שם נקודת הביקורת…",
+    "save": "שמור",
+    "clear": "נקה",
+    "confirmClear": "לנקות את כל ההיסטוריה? פעולה זו אינה ניתנת לביטול."
+  },
+  "presentation": {
+    "spotlight": "זרקור",
+    "spotlightTooltip": "מצב זרקור: לחץ על צומת כדי להדגיש אותו",
+    "laser": "לייזר",
+    "laserTooltip": "מצביע לייזר: הזז את העכבר כדי למשוך תשומת לב",
+    "zoomIn": "הגדל",
+    "zoomOut": "הקטן",
+    "fitView": "התאם תצוגה",
+    "fit": "התאם",
+    "exitTooltip": "צא ממצב מצגת (Ctrl+Shift+P או Esc)",
+    "exit": "צא",
+    "modeLabel": "מצב מצגת"
   },
   "share": {
     "readOnly": "Read-only",
@@ -2248,7 +2271,17 @@
     "openFork": "Open fork",
     "forking": "Forking…",
     "fork": "Fork project",
-    "signInToFork": "Sign in to fork"
+    "signInToFork": "Sign in to fork",
+    "accessDesc": "Anyone with the link can view and fork this project.",
+    "emptyTitle": "No share links yet",
+    "emptyDesc": "Create a link to share this project with others.",
+    "created": "Created",
+    "copied": "Copied!",
+    "expiryLabel": "Link expiry",
+    "expiry7": "7 days",
+    "expiry30": "30 days",
+    "expiry90": "90 days",
+    "expiryNever": "Never"
   },
   "newProject": {
     "defaultName": "Untitled project",

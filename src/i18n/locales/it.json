@@ -583,6 +583,10 @@
     "showGridHint": "Mostra i punti della griglia sullo sfondo del canvas",
     "defaultZoom": "Zoom predefinito",
     "defaultZoomHint": "Livello di zoom iniziale per i nuovi canvas",
+    "autoLayoutDirection": "Direzione layout automatico",
+    "autoLayoutDirectionHint": "Direzione predefinita per l'organizzazione automatica dei blocchi.",
+    "layoutLR": "Da sinistra a destra",
+    "layoutTB": "Dall'alto in basso",
     "exportPageSize": "Dimensione pagina",
     "exportPageSizeHint": "Dimensione pagina predefinita per le esportazioni PDF",
     "exportAnnotations": "Includi annotazioni",
@@ -2231,7 +2235,26 @@
     "previewTitle": "Snapshot preview",
     "current": "Current",
     "restoreTooltip": "Click to restore to this state",
-    "action": "Action"
+    "action": "Action",
+    "emptyUndoHistory": "Nessuna cronologia — apporta modifiche per vederle qui.",
+    "saveCheckpoint": "Salva punto di controllo",
+    "checkpointPlaceholder": "Nome del punto di controllo…",
+    "save": "Salva",
+    "clear": "Cancella",
+    "confirmClear": "Cancellare tutta la cronologia? Questa azione non può essere annullata."
+  },
+  "presentation": {
+    "spotlight": "Spotlight",
+    "spotlightTooltip": "Modalità spotlight: clicca su un nodo per evidenziarlo",
+    "laser": "Laser",
+    "laserTooltip": "Puntatore laser: muovi il mouse per attirare l'attenzione",
+    "zoomIn": "Zoom avanti",
+    "zoomOut": "Zoom indietro",
+    "fitView": "Adatta vista",
+    "fit": "Adatta",
+    "exitTooltip": "Esci dalla modalità presentazione (Ctrl+Maiusc+P o Esc)",
+    "exit": "Esci",
+    "modeLabel": "Modalità Presentazione"
   },
   "share": {
     "readOnly": "Read-only",
@@ -2253,7 +2276,17 @@
     "openFork": "Open fork",
     "forking": "Forking…",
     "fork": "Fork project",
-    "signInToFork": "Sign in to fork"
+    "signInToFork": "Sign in to fork",
+    "accessDesc": "Chiunque abbia il link pu\u00f2 visualizzare e duplicare questo progetto.",
+    "emptyTitle": "Nessun link di condivisione",
+    "emptyDesc": "Crea un link per condividere questo progetto.",
+    "created": "Creato {{time}}",
+    "copied": "Copiato!",
+    "expiryLabel": "Scadenza del link",
+    "expiry7": "7 giorni",
+    "expiry30": "30 giorni",
+    "expiry90": "90 giorni",
+    "expiryNever": "Mai"
   },
   "newProject": {
     "defaultName": "Untitled project",

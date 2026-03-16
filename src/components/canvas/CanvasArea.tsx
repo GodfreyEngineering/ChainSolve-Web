@@ -503,11 +503,32 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     redo: historyRedo,
     stackEntries,
     restoreToIndex: historyRestoreToIndex,
+    clear: historyClear,
   } = history
 
   const doSaveHistory = useCallback(() => {
     historySave({ nodes: latestNodes.current, edges: latestEdges.current })
   }, [historySave])
+
+  // 5.1: Save a named checkpoint from the HistoryPanel
+  const handleSaveCheckpoint = useCallback(
+    (label: string) => {
+      historySave({ nodes: latestNodes.current, edges: latestEdges.current, label })
+    },
+    [historySave],
+  )
+
+  // 5.1: Rename a history entry label in-place
+  const handleRenameHistoryEntry = useCallback(
+    (displayIdx: number, newLabel: string) => {
+      // stackEntries is newest-first; directly mutate the label on the snapshot
+      const entry = stackEntries[displayIdx]
+      if (entry) {
+        ;(entry as { label?: string }).label = newLabel || undefined
+      }
+    },
+    [stackEntries],
+  )
 
   // Expose a live snapshot getter so the parent can read the authoritative
   // graph state at save time (instead of relying on stale refs).
@@ -809,6 +830,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const [spotlightMode, setSpotlightMode] = useState(false)
   const [laserMode, setLaserMode] = useState(false)
   const [laserPos, setLaserPos] = useState<{ x: number; y: number } | null>(null)
+  // 5.2: Entry announcement overlay
+  const [showPresentationAnnouncement, setShowPresentationAnnouncement] = useState(false)
 
   // Bottom toolbar state
   const [panMode, setPanMode] = useState(false)
@@ -856,6 +879,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   // SCI-06: Angle unit preference for trig blocks.
   const angleUnit = usePreferencesStore((s) => s.angleUnit)
+
+  // 5.6: Auto-layout direction preference
+  const autoLayoutDirection = usePreferencesStore((s) => s.autoLayoutDirection)
 
   // KB-01: User keybindings (read at render time so handler closure stays current)
   const keybindingOverrides = usePreferencesStore((s) => s.keybindings)
@@ -1024,11 +1050,15 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       if (next) {
         setDockCollapsed(true)
         canvasWrapRef.current?.requestFullscreen().catch(() => {})
+        // 5.2: Show entry announcement
+        setShowPresentationAnnouncement(true)
+        setTimeout(() => setShowPresentationAnnouncement(false), 1500)
       } else {
         if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
         setSpotlightMode(false)
         setLaserMode(false)
         setLaserPos(null)
+        setShowPresentationAnnouncement(false)
       }
       return next
     })
@@ -2809,6 +2839,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               currentNodeCount={nodes.length}
               currentEdgeCount={edges.length}
               onRestore={handleRestoreHistory}
+              onSaveCheckpoint={handleSaveCheckpoint}
+              onClear={historyClear}
+              onRenameEntry={handleRenameHistoryEntry}
             />
           </Suspense>
         ),
@@ -2844,6 +2877,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       onExplainIssues,
       stackEntries,
       handleRestoreHistory,
+      handleSaveCheckpoint,
+      historyClear,
+      handleRenameHistoryEntry,
       canvasId,
       healthWarningCount,
       problemCount,
@@ -2911,11 +2947,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         if (laserMode) setLaserPos(null)
                       }}
                     >
-                      {/* UX-19: Spotlight CSS — dims non-selected nodes in presentation spotlight mode */}
+                      {/* UX-19 / 5.2: Spotlight CSS — dims non-selected nodes with smooth transitions */}
                       {presentationMode && spotlightMode && (
                         <style>{`
-                      .react-flow__node { opacity: 0.12 !important; transition: opacity 0.25s; }
-                      .react-flow__node.selected { opacity: 1 !important; transition: opacity 0.25s; filter: drop-shadow(0 0 28px rgba(28,171,176,0.7)); }
+                      .react-flow__node { opacity: 0.12 !important; transition: opacity 0.4s ease, filter 0.4s ease, transform 0.35s ease; }
+                      .react-flow__node.selected { opacity: 1 !important; transition: opacity 0.4s ease, filter 0.4s ease, transform 0.35s ease; filter: drop-shadow(0 0 28px rgba(28,171,176,0.7)); }
                     `}</style>
                       )}
 
@@ -2937,72 +2973,206 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         />
                       )}
 
-                      {/* UX-19: Presentation mode floating control bar */}
+                      {/* UX-19 / 5.2: Presentation mode floating control bar (polished) */}
                       {presentationMode && (
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: 12,
-                            right: 12,
-                            zIndex: 200,
-                            display: 'flex',
-                            gap: 6,
-                            background: 'rgba(0,0,0,0.65)',
-                            borderRadius: 8,
-                            padding: '5px 8px',
-                            backdropFilter: 'blur(10px)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                          }}
-                        >
-                          <button
-                            onClick={() => setSpotlightMode((v) => !v)}
-                            title="Spotlight mode: click a node to spotlight it"
+                        <>
+                          {/* 5.2: Fade-in animation style */}
+                          <style>{`
+                            @keyframes cs-pres-fade-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+                            @keyframes cs-pres-announce { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.02); } }
+                          `}</style>
+                          <div
                             style={{
-                              padding: '3px 8px',
-                              background: spotlightMode ? 'rgba(28,171,176,0.25)' : 'transparent',
-                              border: `1px solid ${spotlightMode ? 'rgba(28,171,176,0.6)' : 'rgba(255,255,255,0.2)'}`,
-                              borderRadius: 5,
-                              color: spotlightMode ? 'var(--primary)' : 'rgba(255,255,255,0.7)',
-                              cursor: 'pointer',
-                              fontSize: '0.7rem',
-                              fontFamily: 'inherit',
+                              position: 'absolute',
+                              top: 14,
+                              right: 14,
+                              zIndex: 200,
+                              display: 'flex',
+                              gap: 6,
+                              background: 'rgba(0,0,0,0.72)',
+                              borderRadius: 12,
+                              padding: '6px 10px',
+                              backdropFilter: 'blur(16px)',
+                              border: '1px solid rgba(255,255,255,0.12)',
+                              boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+                              animation: 'cs-pres-fade-in 0.35s ease-out',
                             }}
                           >
-                            ◎ Spotlight
-                          </button>
-                          <button
-                            onClick={() => setLaserMode((v) => !v)}
-                            title="Laser pointer: move mouse to draw attention"
-                            style={{
-                              padding: '3px 8px',
-                              background: laserMode ? 'rgba(255,55,55,0.2)' : 'transparent',
-                              border: `1px solid ${laserMode ? 'rgba(255,55,55,0.6)' : 'rgba(255,255,255,0.2)'}`,
-                              borderRadius: 5,
-                              color: laserMode ? '#ff6b6b' : 'rgba(255,255,255,0.7)',
-                              cursor: 'pointer',
-                              fontSize: '0.7rem',
-                              fontFamily: 'inherit',
-                            }}
-                          >
-                            ● Laser
-                          </button>
-                          <button
-                            onClick={togglePresentationMode}
-                            title="Exit presentation mode (Ctrl+Shift+P or Esc)"
-                            style={{
-                              padding: '3px 8px',
-                              background: 'transparent',
-                              border: '1px solid rgba(255,255,255,0.2)',
-                              borderRadius: 5,
-                              color: 'rgba(255,255,255,0.6)',
-                              cursor: 'pointer',
-                              fontSize: '0.7rem',
-                              fontFamily: 'inherit',
-                            }}
-                          >
-                            ✕ Exit
-                          </button>
-                        </div>
+                            <button
+                              onClick={() => setSpotlightMode((v) => !v)}
+                              title={t(
+                                'presentation.spotlightTooltip',
+                                'Spotlight mode: click a node to spotlight it',
+                              )}
+                              style={{
+                                padding: '4px 10px',
+                                height: 32,
+                                background: spotlightMode ? 'rgba(28,171,176,0.25)' : 'transparent',
+                                border: `1px solid ${spotlightMode ? 'rgba(28,171,176,0.6)' : 'rgba(255,255,255,0.18)'}`,
+                                borderRadius: 7,
+                                color: spotlightMode ? 'var(--primary)' : 'rgba(255,255,255,0.7)',
+                                cursor: 'pointer',
+                                fontSize: '0.72rem',
+                                fontFamily: 'inherit',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 4,
+                              }}
+                            >
+                              {t('presentation.spotlight', 'Spotlight')}
+                            </button>
+                            <button
+                              onClick={() => setLaserMode((v) => !v)}
+                              title={t(
+                                'presentation.laserTooltip',
+                                'Laser pointer: move mouse to draw attention',
+                              )}
+                              style={{
+                                padding: '4px 10px',
+                                height: 32,
+                                background: laserMode ? 'rgba(255,55,55,0.2)' : 'transparent',
+                                border: `1px solid ${laserMode ? 'rgba(255,55,55,0.6)' : 'rgba(255,255,255,0.18)'}`,
+                                borderRadius: 7,
+                                color: laserMode ? '#ff6b6b' : 'rgba(255,255,255,0.7)',
+                                cursor: 'pointer',
+                                fontSize: '0.72rem',
+                                fontFamily: 'inherit',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 4,
+                              }}
+                            >
+                              {t('presentation.laser', 'Laser')}
+                            </button>
+
+                            {/* 5.2: Divider */}
+                            <div
+                              style={{
+                                width: 1,
+                                background: 'rgba(255,255,255,0.12)',
+                                margin: '4px 2px',
+                              }}
+                            />
+
+                            {/* 5.2: Zoom controls */}
+                            <button
+                              onClick={() => zoomIn({ duration: 200 })}
+                              title={t('presentation.zoomIn', 'Zoom in')}
+                              style={{
+                                padding: '4px 8px',
+                                height: 32,
+                                background: 'transparent',
+                                border: '1px solid rgba(255,255,255,0.18)',
+                                borderRadius: 7,
+                                color: 'rgba(255,255,255,0.7)',
+                                cursor: 'pointer',
+                                fontSize: '0.82rem',
+                                fontFamily: 'inherit',
+                                display: 'flex',
+                                alignItems: 'center',
+                              }}
+                            >
+                              +
+                            </button>
+                            <button
+                              onClick={() => zoomOut({ duration: 200 })}
+                              title={t('presentation.zoomOut', 'Zoom out')}
+                              style={{
+                                padding: '4px 8px',
+                                height: 32,
+                                background: 'transparent',
+                                border: '1px solid rgba(255,255,255,0.18)',
+                                borderRadius: 7,
+                                color: 'rgba(255,255,255,0.7)',
+                                cursor: 'pointer',
+                                fontSize: '0.82rem',
+                                fontFamily: 'inherit',
+                                display: 'flex',
+                                alignItems: 'center',
+                              }}
+                            >
+                              &minus;
+                            </button>
+                            <button
+                              onClick={() => fitView({ duration: 300 })}
+                              title={t('presentation.fitView', 'Fit view')}
+                              style={{
+                                padding: '4px 8px',
+                                height: 32,
+                                background: 'transparent',
+                                border: '1px solid rgba(255,255,255,0.18)',
+                                borderRadius: 7,
+                                color: 'rgba(255,255,255,0.7)',
+                                cursor: 'pointer',
+                                fontSize: '0.72rem',
+                                fontFamily: 'inherit',
+                                display: 'flex',
+                                alignItems: 'center',
+                              }}
+                            >
+                              {t('presentation.fit', 'Fit')}
+                            </button>
+
+                            {/* 5.2: Divider */}
+                            <div
+                              style={{
+                                width: 1,
+                                background: 'rgba(255,255,255,0.12)',
+                                margin: '4px 2px',
+                              }}
+                            />
+
+                            <button
+                              onClick={togglePresentationMode}
+                              title={t(
+                                'presentation.exitTooltip',
+                                'Exit presentation mode (Ctrl+Shift+P or Esc)',
+                              )}
+                              style={{
+                                padding: '4px 10px',
+                                height: 32,
+                                background: 'transparent',
+                                border: '1px solid rgba(255,255,255,0.18)',
+                                borderRadius: 7,
+                                color: 'rgba(255,255,255,0.6)',
+                                cursor: 'pointer',
+                                fontSize: '0.72rem',
+                                fontFamily: 'inherit',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 4,
+                              }}
+                            >
+                              {t('presentation.exit', 'Exit')}
+                            </button>
+                          </div>
+
+                          {/* 5.2: Entry announcement overlay */}
+                          {showPresentationAnnouncement && (
+                            <div
+                              style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                zIndex: 210,
+                                padding: '16px 36px',
+                                borderRadius: 14,
+                                background: 'rgba(0,0,0,0.75)',
+                                backdropFilter: 'blur(20px)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                color: 'rgba(255,255,255,0.9)',
+                                fontSize: '1.2rem',
+                                fontWeight: 600,
+                                letterSpacing: '0.02em',
+                                pointerEvents: 'none',
+                                animation: 'cs-pres-announce 1.5s ease-out forwards',
+                              }}
+                            >
+                              {t('presentation.modeLabel', 'Presentation Mode')}
+                            </div>
+                          )}
+                        </>
                       )}
 
                       {!presentationMode && toolbar}
@@ -3346,7 +3516,15 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                           }
                           if (isMobile) setLibVisible(false)
                         }}
-                        onAutoOrganise={(shiftKey) => handleAutoOrganise(shiftKey ? 'TB' : 'LR')}
+                        onAutoOrganise={(shiftKey) =>
+                          handleAutoOrganise(
+                            shiftKey
+                              ? autoLayoutDirection === 'LR'
+                                ? 'TB'
+                                : 'LR'
+                              : autoLayoutDirection,
+                          )
+                        }
                         edgesAnimated={edgesAnimated}
                         lodEnabled={lodEnabled}
                         onToggleEdgesAnimated={() => {

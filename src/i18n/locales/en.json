@@ -595,6 +595,10 @@
     "showGridHint": "Display grid dots on the canvas background",
     "defaultZoom": "Default zoom",
     "defaultZoomHint": "Initial zoom level for new canvases",
+    "autoLayoutDirection": "Auto-layout direction",
+    "autoLayoutDirectionHint": "Default direction for automatic graph layout",
+    "layoutLR": "Left to right",
+    "layoutTB": "Top to bottom",
     "exportPageSize": "Page size",
     "exportPageSizeHint": "Default page size for PDF exports",
     "exportAnnotations": "Include annotations",
@@ -2313,7 +2317,26 @@
     "previewTitle": "Snapshot preview",
     "current": "Current",
     "restoreTooltip": "Click to restore to this state",
-    "action": "Action"
+    "action": "Action",
+    "emptyUndoHistory": "No history yet — make some changes to see them here.",
+    "saveCheckpoint": "Save checkpoint",
+    "checkpointPlaceholder": "Checkpoint name…",
+    "save": "Save",
+    "clear": "Clear",
+    "confirmClear": "Clear all history? This cannot be undone."
+  },
+  "presentation": {
+    "spotlight": "Spotlight",
+    "spotlightTooltip": "Spotlight mode: click a node to spotlight it",
+    "laser": "Laser",
+    "laserTooltip": "Laser pointer: move mouse to draw attention",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fitView": "Fit view",
+    "fit": "Fit",
+    "exitTooltip": "Exit presentation mode (Ctrl+Shift+P or Esc)",
+    "exit": "Exit",
+    "modeLabel": "Presentation Mode"
   },
   "share": {
     "readOnly": "Read-only",
@@ -2335,7 +2358,17 @@
     "openFork": "Open fork",
     "forking": "Forking…",
     "fork": "Fork project",
-    "signInToFork": "Sign in to fork"
+    "signInToFork": "Sign in to fork",
+    "accessDesc": "Anyone with the link can view and fork this project.",
+    "emptyTitle": "No share links yet",
+    "emptyDesc": "Create a link to share this project with others.",
+    "created": "Created",
+    "copied": "Copied!",
+    "expiryLabel": "Link expiry",
+    "expiry7": "7 days",
+    "expiry30": "30 days",
+    "expiry90": "90 days",
+    "expiryNever": "Never"
   },
   "newProject": {
     "defaultName": "Untitled project",

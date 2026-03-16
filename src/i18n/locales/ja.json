@@ -595,6 +595,10 @@
     "showGridHint": "Display grid dots on the canvas background",
     "defaultZoom": "Default zoom",
     "defaultZoomHint": "Initial zoom level for new canvases",
+    "autoLayoutDirection": "Auto-layout direction",
+    "autoLayoutDirectionHint": "Default direction for automatic graph layout",
+    "layoutLR": "Left to right",
+    "layoutTB": "Top to bottom",
     "exportPageSize": "Page size",
     "exportPageSizeHint": "Default page size for PDF exports",
     "exportAnnotations": "Include annotations",
@@ -2313,7 +2317,26 @@
     "previewTitle": "Snapshot preview",
     "current": "Current",
     "restoreTooltip": "Click to restore to this state",
-    "action": "Action"
+    "action": "Action",
+    "emptyUndoHistory": "まだ履歴がありません — 変更を加えるとここに表示されます。",
+    "saveCheckpoint": "チェックポイントを保存",
+    "checkpointPlaceholder": "チェックポイント名…",
+    "save": "保存",
+    "clear": "クリア",
+    "confirmClear": "すべての履歴を消去しますか？この操作は元に戻せません。"
+  },
+  "presentation": {
+    "spotlight": "スポットライト",
+    "spotlightTooltip": "スポットライトモード：ノードをクリックしてハイライト",
+    "laser": "レーザー",
+    "laserTooltip": "レーザーポインター：マウスを動かして注目を集める",
+    "zoomIn": "ズームイン",
+    "zoomOut": "ズームアウト",
+    "fitView": "ビューに合わせる",
+    "fit": "合わせる",
+    "exitTooltip": "プレゼンテーションモードを終了（Ctrl+Shift+PまたはEsc）",
+    "exit": "終了",
+    "modeLabel": "プレゼンテーションモード"
   },
   "share": {
     "readOnly": "Read-only",
@@ -2335,7 +2358,17 @@
     "openFork": "Open fork",
     "forking": "Forking…",
     "fork": "Fork project",
-    "signInToFork": "Sign in to fork"
+    "signInToFork": "Sign in to fork",
+    "accessDesc": "Anyone with the link can view and fork this project.",
+    "emptyTitle": "No share links yet",
+    "emptyDesc": "Create a link to share this project with others.",
+    "created": "Created",
+    "copied": "Copied!",
+    "expiryLabel": "Link expiry",
+    "expiry7": "7 days",
+    "expiry30": "30 days",
+    "expiry90": "90 days",
+    "expiryNever": "Never"
   },
   "newProject": {
     "defaultName": "Untitled project",

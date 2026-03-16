@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FolderOpen } from 'lucide-react'
-import { getRecentProjects, removeRecentProject } from '../../lib/recentProjects'
+import { getRecentProjects, pruneRecentProjects } from '../../lib/recentProjects'
 import { listProjects, type ProjectRow } from '../../lib/projects'
 import { Skeleton } from '../ui/Skeleton'
 import { Icon } from '../ui/Icon'
@@ -31,9 +31,7 @@ export function RecentProjectsGrid({ onOpenProject }: RecentProjectsGridProps) {
         for (const r of rows) map.set(r.id, r)
 
         // Prune stale entries
-        const recentIds = getRecentProjects().map((r) => r.id)
-        const staleIds = recentIds.filter((id) => !map.has(id))
-        for (const id of staleIds) removeRecentProject(id)
+        pruneRecentProjects(new Set(map.keys()))
 
         // Build ordered list of valid recent projects
         const validIds = getRecentProjects().map((r) => r.id)

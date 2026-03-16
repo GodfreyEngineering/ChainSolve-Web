@@ -152,3 +152,54 @@ export function validateUserString(name: unknown, opts: StrictOptions = {}): Val
 
   return { ok: true }
 }
+
+// ── Relaxed validator (labels: spaces OK) ─────────────────────────────
+
+/** Relaxed label: Unicode letters, digits, spaces, punctuation, symbols. */
+const LABEL_CHARS = /^[\p{L}\p{N}\p{P}\p{S}\s]+$/u
+
+export interface LabelOptions {
+  /** Maximum length (default 100). */
+  maxLength?: number
+  /** Field label for error messages (default "label"). */
+  field?: string
+}
+
+/**
+ * Validate a human-readable label (spaces and punctuation OK).
+ *
+ * Rules: 1–100 chars, no control characters, no forbidden words.
+ * Use for: block labels, group names, variable labels, annotations.
+ */
+export function validateUserLabel(name: unknown, opts: LabelOptions = {}): ValidationResult {
+  const { maxLength = 100, field = 'label' } = opts
+
+  if (typeof name !== 'string') {
+    return { ok: false, error: `${field} must be a string` }
+  }
+
+  const trimmed = name.trim()
+
+  if (!trimmed) {
+    return { ok: true } // Empty labels are OK (will use default)
+  }
+
+  if (trimmed.length > maxLength) {
+    return { ok: false, error: `${field} must not exceed ${maxLength} characters` }
+  }
+
+  if (hasControlChars(trimmed)) {
+    return { ok: false, error: `${field} contains invalid characters` }
+  }
+
+  if (!LABEL_CHARS.test(trimmed)) {
+    return { ok: false, error: `${field} contains invalid characters` }
+  }
+
+  const forbidden = findForbiddenWord(trimmed)
+  if (forbidden) {
+    return { ok: false, error: `${field} contains inappropriate content` }
+  }
+
+  return { ok: true }
+}

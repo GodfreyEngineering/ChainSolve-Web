@@ -30,6 +30,7 @@ export function EditorSettings({
   const canvasNodeBorderRadius = usePreferencesStore((s) => s.canvasNodeBorderRadius)
   const canvasNodeShadow = usePreferencesStore((s) => s.canvasNodeShadow)
   const canvasAnimationSpeed = usePreferencesStore((s) => s.canvasAnimationSpeed)
+  const autoLayoutDirection = usePreferencesStore((s) => s.autoLayoutDirection)
   const updatePrefs = usePreferencesStore((s) => s.update)
 
   return (
@@ -210,6 +211,26 @@ export function EditorSettings({
               canvasAnimationSpeed: e.target.value as 'none' | 'slow' | 'medium' | 'fast',
             })
           }
+        />
+
+        <Select
+          label={t('settings.autoLayoutDirection', 'Auto-layout direction')}
+          hint={t(
+            'settings.autoLayoutDirectionHint',
+            'Default flow direction when auto-organising blocks.',
+          )}
+          options={[
+            {
+              value: 'LR',
+              label: t('settings.layoutLR', 'Left to right'),
+            },
+            {
+              value: 'TB',
+              label: t('settings.layoutTB', 'Top to bottom'),
+            },
+          ]}
+          value={autoLayoutDirection}
+          onChange={(e) => updatePrefs({ autoLayoutDirection: e.target.value as 'LR' | 'TB' })}
         />
       </div>
     </div>
