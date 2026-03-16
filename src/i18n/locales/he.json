@@ -1599,7 +1599,13 @@
     "unpin": "Unpin selection",
     "pinned": "Pinned",
     "followSelection": "Following selection",
-    "inputsLabel": "קלטים"
+    "inputsLabel": "\u05e7\u05dc\u05d8\u05d9\u05dd",
+    "tableData": "Table Data",
+    "vectorData": "Vector Data",
+    "copyAll": "Copy all",
+    "items": "items",
+    "value": "Value",
+    "showingFirst": "Showing first 50 of {{count}} rows"
   },
   "dock": {
     "library": "ספרייה",

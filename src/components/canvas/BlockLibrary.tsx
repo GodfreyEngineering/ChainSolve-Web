@@ -234,8 +234,6 @@ const BlockItem = memo(function BlockItem({
   const { t } = useTranslation()
   const [hovered, setHovered] = useState(false)
   const isFav = favs.has(def.type)
-  const showExpanded = (hovered || keyFocused) && entitled && description
-
   const onDragStart = (e: DragEvent<HTMLDivElement>) => {
     if (!entitled) {
       e.preventDefault()
@@ -247,7 +245,63 @@ const BlockItem = memo(function BlockItem({
     trackBlockUsed(def.type)
   }
 
-  return (
+  const tooltipContent =
+    entitled && description ? (
+      <div style={{ maxWidth: 240, padding: '0.15rem 0' }}>
+        <div
+          style={{
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            marginBottom: 4,
+            color: 'var(--fg, #F4F4F3)',
+          }}
+        >
+          {def.label}
+        </div>
+        <div style={{ fontSize: '0.67rem', color: 'rgba(244,244,243,0.7)', lineHeight: 1.4 }}>
+          {description}
+        </div>
+        {def.inputs.length > 0 && (
+          <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+            <span
+              style={{
+                fontSize: '0.58rem',
+                color: 'rgba(244,244,243,0.4)',
+                marginRight: 2,
+              }}
+            >
+              Inputs:
+            </span>
+            {def.inputs.map((p) => (
+              <span
+                key={p.id}
+                style={{
+                  fontSize: '0.6rem',
+                  padding: '0.05rem 0.3rem',
+                  borderRadius: 3,
+                  background: 'rgba(28,171,176,0.12)',
+                  color: 'var(--primary-text)',
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                {p.label}
+              </span>
+            ))}
+          </div>
+        )}
+        <div
+          style={{
+            marginTop: 6,
+            fontSize: '0.58rem',
+            color: 'rgba(244,244,243,0.35)',
+          }}
+        >
+          Double-click to add · Drag to place
+        </div>
+      </div>
+    ) : null
+
+  const blockCard = (
     <div
       draggable={entitled}
       onDragStart={onDragStart}
@@ -275,7 +329,7 @@ const BlockItem = memo(function BlockItem({
         outline: keyFocused ? '1px solid var(--primary)' : undefined,
         opacity: entitled ? 1 : 0.45,
         cursor: entitled ? 'grab' : 'pointer',
-        padding: showExpanded ? '0.28rem 0.6rem 0.35rem' : '0.28rem 0.6rem',
+        padding: '0.28rem 0.6rem',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -335,54 +389,17 @@ const BlockItem = memo(function BlockItem({
           </button>
         )}
       </div>
-      {/* UX-02: Inline expanded preview */}
-      {showExpanded && (
-        <div style={{ marginTop: '0.25rem', pointerEvents: 'none' }}>
-          <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-            {description}
-          </div>
-          {def.inputs.length > 0 && (
-            <div
-              style={{
-                marginTop: '0.2rem',
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '0.2rem',
-              }}
-            >
-              {def.inputs.map((p) => (
-                <span
-                  key={p.id}
-                  style={{
-                    fontSize: '0.6rem',
-                    padding: '0.05rem 0.3rem',
-                    borderRadius: 3,
-                    background: 'rgba(28,171,176,0.12)',
-                    color: 'var(--primary-text)',
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}
-                >
-                  {p.label}
-                </span>
-              ))}
-            </div>
-          )}
-          {onInsertBlock && (
-            <div
-              style={{
-                marginTop: '0.2rem',
-                fontSize: '0.6rem',
-                color: 'var(--text-faint)',
-                fontStyle: 'italic',
-              }}
-            >
-              Double-click to add · Drag to place
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
+
+  if (tooltipContent) {
+    return (
+      <Tooltip content={tooltipContent} side="right" display="block">
+        {blockCard}
+      </Tooltip>
+    )
+  }
+  return blockCard
 })
 
 // ── TemplateItem ─────────────────────────────────────────────────────────────

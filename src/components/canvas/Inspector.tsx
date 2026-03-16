@@ -1237,6 +1237,236 @@ export function Inspector({
                   {t('inspector.copyFullPrecision', 'Copy full precision (10,000 digits)')}
                 </button>
               )}
+
+            {/* Table/Vector data viewer */}
+            {value && value.kind === 'table' && (
+              <div style={{ marginTop: '0.7rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 4,
+                  }}
+                >
+                  <span style={fieldLabel}>
+                    {t('inspector.tableData', 'Table Data')} ({value.rows.length}×
+                    {value.columns.length})
+                  </span>
+                  <button
+                    type="button"
+                    style={{
+                      fontSize: '0.6rem',
+                      padding: '0.15rem 0.4rem',
+                      borderRadius: 4,
+                      border: '1px solid var(--border)',
+                      background: 'transparent',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                    }}
+                    onClick={() => {
+                      const header = value.columns.join('\t')
+                      const rows = value.rows.map((r) => r.join('\t')).join('\n')
+                      navigator.clipboard.writeText(`${header}\n${rows}`).catch(() => {})
+                    }}
+                    title={t('inspector.copyAll', 'Copy all data')}
+                  >
+                    {t('inspector.copyAll', 'Copy all')}
+                  </button>
+                </div>
+                <div
+                  style={{
+                    maxHeight: 160,
+                    overflowY: 'auto',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 6,
+                    fontSize: '0.65rem',
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        {value.columns.map((col) => (
+                          <th
+                            key={col}
+                            style={{
+                              padding: '0.2rem 0.35rem',
+                              borderBottom: '1px solid rgba(255,255,255,0.12)',
+                              textAlign: 'right',
+                              fontWeight: 600,
+                              color: 'var(--primary)',
+                              position: 'sticky',
+                              top: 0,
+                              background: 'var(--surface-1)',
+                            }}
+                          >
+                            {col}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {value.rows.slice(0, 50).map((row, ri) => (
+                        <tr key={ri}>
+                          {row.map((cell, ci) => (
+                            <td
+                              key={ci}
+                              style={{
+                                padding: '0.15rem 0.35rem',
+                                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                                textAlign: 'right',
+                                color: 'var(--text)',
+                              }}
+                            >
+                              {typeof cell === 'number' ? cell.toPrecision(6) : String(cell)}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {value.rows.length > 50 && (
+                    <div
+                      style={{
+                        padding: '0.2rem',
+                        textAlign: 'center',
+                        fontSize: '0.6rem',
+                        color: 'var(--text-faint)',
+                      }}
+                    >
+                      {t('inspector.showingFirst', 'Showing first 50 of {{count}} rows', {
+                        count: value.rows.length,
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {value && value.kind === 'vector' && value.value.length > 0 && (
+              <div style={{ marginTop: '0.7rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 4,
+                  }}
+                >
+                  <span style={fieldLabel}>
+                    {t('inspector.vectorData', 'Vector Data')} ({value.value.length}{' '}
+                    {t('inspector.items', 'items')})
+                  </span>
+                  <button
+                    type="button"
+                    style={{
+                      fontSize: '0.6rem',
+                      padding: '0.15rem 0.4rem',
+                      borderRadius: 4,
+                      border: '1px solid var(--border)',
+                      background: 'transparent',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                    }}
+                    onClick={() => {
+                      navigator.clipboard.writeText(value.value.join('\n')).catch(() => {})
+                    }}
+                    title={t('inspector.copyAll', 'Copy all data')}
+                  >
+                    {t('inspector.copyAll', 'Copy all')}
+                  </button>
+                </div>
+                <div
+                  style={{
+                    maxHeight: 160,
+                    overflowY: 'auto',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 6,
+                    fontSize: '0.65rem',
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        <th
+                          style={{
+                            padding: '0.2rem 0.35rem',
+                            borderBottom: '1px solid rgba(255,255,255,0.12)',
+                            textAlign: 'right',
+                            fontWeight: 600,
+                            color: 'var(--text-faint)',
+                            width: 40,
+                            position: 'sticky',
+                            top: 0,
+                            background: 'var(--surface-1)',
+                          }}
+                        >
+                          #
+                        </th>
+                        <th
+                          style={{
+                            padding: '0.2rem 0.35rem',
+                            borderBottom: '1px solid rgba(255,255,255,0.12)',
+                            textAlign: 'right',
+                            fontWeight: 600,
+                            color: 'var(--primary)',
+                            position: 'sticky',
+                            top: 0,
+                            background: 'var(--surface-1)',
+                          }}
+                        >
+                          {t('inspector.value', 'Value')}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {value.value.slice(0, 100).map((v, i) => (
+                        <tr key={i}>
+                          <td
+                            style={{
+                              padding: '0.15rem 0.35rem',
+                              borderBottom: '1px solid rgba(255,255,255,0.04)',
+                              textAlign: 'right',
+                              color: 'var(--text-faint)',
+                            }}
+                          >
+                            {i}
+                          </td>
+                          <td
+                            style={{
+                              padding: '0.15rem 0.35rem',
+                              borderBottom: '1px solid rgba(255,255,255,0.04)',
+                              textAlign: 'right',
+                              color: 'var(--text)',
+                            }}
+                          >
+                            {v.toPrecision(6)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {value.value.length > 100 && (
+                    <div
+                      style={{
+                        padding: '0.2rem',
+                        textAlign: 'center',
+                        fontSize: '0.6rem',
+                        color: 'var(--text-faint)',
+                      }}
+                    >
+                      {t('inspector.showingFirst', 'Showing first 50 of {{count}} rows', {
+                        count: value.value.length,
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

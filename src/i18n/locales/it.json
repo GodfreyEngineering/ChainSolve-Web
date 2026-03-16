@@ -1146,7 +1146,13 @@
     "followSelection": "Segue la selezione",
     "empty": "Clicca su un blocco per ispezionarlo",
     "emptyHint": "Oppure clicca destro sul canvas per inserirne uno.",
-    "inputsLabel": "Ingressi"
+    "inputsLabel": "Ingressi",
+    "tableData": "Dati tabella",
+    "vectorData": "Dati vettoriali",
+    "copyAll": "Copia tutto",
+    "items": "elementi",
+    "value": "Valore",
+    "showingFirst": "Prime 50 righe di {{count}}"
   },
   "annotation": {
     "text": "Testo",

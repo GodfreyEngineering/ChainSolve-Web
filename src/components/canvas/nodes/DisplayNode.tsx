@@ -192,10 +192,18 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
           {unitSymbol && (
             <span
               style={{
-                fontSize: '0.7rem',
-                marginLeft: '0.2rem',
-                opacity: explicitUnit ? 0.7 : 0.35,
+                fontSize: '0.85rem',
+                marginLeft: '0.25rem',
+                padding: '0.05rem 0.3rem',
+                borderRadius: 4,
+                background: explicitUnit ? 'rgba(28,171,176,0.12)' : 'rgba(255,255,255,0.04)',
+                border: explicitUnit
+                  ? '1px solid rgba(28,171,176,0.2)'
+                  : '1px dashed rgba(255,255,255,0.1)',
+                opacity: explicitUnit ? 0.85 : 0.55,
                 fontStyle: explicitUnit ? undefined : 'italic',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 600,
               }}
             >
               {unitSymbol}

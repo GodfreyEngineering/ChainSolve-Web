@@ -791,9 +791,14 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
         </div>
       )}
 
-      {/* 4.04: Output handle with unit badge */}
-      <div style={{ position: 'relative' }}>
-        <Handle type="source" position={Position.Right} id="out" style={s.handleRight} />
+      {/* 4.04+4.6: Output handle with unit badge — explicit vertical centering */}
+      <div style={{ position: 'relative', minHeight: 8 }}>
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="out"
+          style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
+        />
         {nd.unit && <span style={s.outputUnitBadge}>{getUnitSymbol(nd.unit)}</span>}
       </div>
     </div>

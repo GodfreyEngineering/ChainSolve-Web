@@ -1180,7 +1180,13 @@
     },
     "tableOutputCol": "Select column",
     "rowIndexPlaceholder": "Row index (0-based)",
-    "copyFullPrecision": "Copy full precision (10,000 digits)"
+    "copyFullPrecision": "Copy full precision (10,000 digits)",
+    "tableData": "Tabellendaten",
+    "vectorData": "Vektordaten",
+    "copyAll": "Alles kopieren",
+    "items": "Elemente",
+    "value": "Wert",
+    "showingFirst": "Erste 50 von {{count}} Zeilen"
   },
   "annotation": {
     "text": "Text",

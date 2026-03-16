@@ -122,7 +122,7 @@ function MaterialNodeInner({ id, data, selected }: NodeProps) {
           <span style={s.headerLabel}>{nd.label}</span>
         </div>
         <span className="cs-node-header-value" style={s.headerValue}>
-          {formatValue(value)}
+          {selectedMaterial ? `${properties.length} props` : '—'}
         </span>
       </div>
 
