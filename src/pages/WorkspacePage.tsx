@@ -366,6 +366,9 @@ export default function WorkspacePage() {
           projectName={canvasControls?.projectName ?? null}
           canvasControls={canvasControls}
           projectId={projectId ?? null}
+          onExportPdf={(_opts) => void canvasControls?.exportPdf()}
+          onExportXlsx={(_opts) => void canvasControls?.exportXlsx()}
+          onExportJson={() => canvasControls?.exportJson()}
         />
       </PanelErrorBoundary>
 

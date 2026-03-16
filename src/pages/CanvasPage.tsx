@@ -171,6 +171,12 @@ export interface CanvasControls {
   ) => void
   /** ADV-03: Current active canvas ID (null = scratch). */
   activeCanvasId: string | null
+  /** Export: trigger PDF export. */
+  exportPdf: () => Promise<void>
+  /** Export: trigger XLSX export. */
+  exportXlsx: () => Promise<void>
+  /** Export: trigger JSON export. */
+  exportJson: () => void
 }
 
 interface CanvasPageProps {
@@ -939,6 +945,21 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
       getCanvasSnapshot: () => canvasRef.current?.getSnapshot() ?? { nodes: [], edges: [] },
       restoreCanvasSnapshot: (nodes, edges) => canvasRef.current?.setSnapshot(nodes, edges),
       activeCanvasId: activeCanvasId ?? null,
+      exportPdf: () => canvasRef.current?.exportPdfAudit() ?? Promise.resolve(),
+      exportXlsx: () => canvasRef.current?.exportXlsxAuditActive() ?? Promise.resolve(),
+      exportJson: () => {
+        // Lazy-call: handleExportChainsolveJson is defined later in the component
+        const snap = canvasRef.current?.getSnapshot()
+        if (snap) {
+          import('../lib/export-file-utils').then(({ downloadBlob }) => {
+            const json = JSON.stringify({ nodes: snap.nodes, edges: snap.edges }, null, 2)
+            downloadBlob(
+              new Blob([json], { type: 'application/json' }),
+              `${projectName ?? 'untitled'}.chainsolvejson`,
+            )
+          })
+        }
+      },
     })
     return () => onControlsReady(null)
   }, [
@@ -954,6 +975,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     startNameEdit,
     updatePrefs,
     activeCanvasId,
+    projectId,
   ])
 
   // ── Sheet / canvas operations ──────────────────────────────────────────────

@@ -10,7 +10,6 @@
 import type { BlockDef } from './types'
 import { BLOCK_REGISTRY } from './registry'
 
-import { registerDataBlocks } from './data-blocks'
 import { registerVectorBlocks } from './vector-blocks'
 import { registerTableBlocks } from './table-blocks'
 import { registerPlotBlocks } from './plot-blocks'
@@ -47,7 +46,6 @@ export function registerAllBlocks(): void {
   // Skip if already registered (idempotent)
   if (BLOCK_REGISTRY.size > 50) return
 
-  registerDataBlocks(reg)
   registerVectorBlocks(reg)
   registerTableBlocks(reg)
   registerPlotBlocks(reg)

@@ -962,16 +962,44 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const { toast } = useToast()
 
   // Notify parent of graph changes — skip the initial mount so loading a project
-  // does not immediately mark the canvas as dirty.  Always fire regardless of
-  // pause state so autosave keeps working; engine evaluation is gated separately
-  // inside useGraphEngine.
+  // Notify parent of graph changes (for dirty marking + autosave).
+  // Skip position-only changes to avoid unnecessary dirty-marking during node drags.
+  // Engine evaluation is gated separately inside useGraphEngine (diffGraph).
   const isFirstRender = useRef(true)
+  const prevNodesRef2 = useRef<readonly Node<NodeData>[]>([])
+  const prevEdgesRef2 = useRef<readonly Edge[]>([])
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false
+      prevNodesRef2.current = nodes
+      prevEdgesRef2.current = edges
       return
     }
-    onGraphChange?.(nodes, edges)
+    const prevN = prevNodesRef2.current
+    const prevE = prevEdgesRef2.current
+    prevNodesRef2.current = nodes
+    prevEdgesRef2.current = edges
+
+    // Count change → structural change → always fire
+    if (nodes.length !== prevN.length || edges.length !== prevE.length) {
+      onGraphChange?.(nodes, edges)
+      return
+    }
+    // Check if any node data changed (not just position)
+    for (let i = 0; i < nodes.length; i++) {
+      if (nodes[i].data !== prevN[i]?.data || nodes[i].id !== prevN[i]?.id) {
+        onGraphChange?.(nodes, edges)
+        return
+      }
+    }
+    // Check if any edge changed
+    for (let i = 0; i < edges.length; i++) {
+      if (edges[i].id !== prevE[i]?.id) {
+        onGraphChange?.(nodes, edges)
+        return
+      }
+    }
+    // Position-only change — skip (don't dirty-mark or trigger autosave)
   }, [nodes, edges, onGraphChange])
 
   // Context menu
