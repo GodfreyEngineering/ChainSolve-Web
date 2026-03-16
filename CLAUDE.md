@@ -2,6 +2,26 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project stage: PRE-RELEASE / ACTIVE DEVELOPMENT
+
+**There are zero active users.** This app has not been publicly released. We are building toward a v1.0 launch.
+
+**What this means for you (Claude):**
+
+- **You have full authority and autonomy.** Edit, delete, refactor, rewrite, restructure anything — code, schemas, migrations, workflows, tests, entire subsystems. There is no backwards-compatibility constraint. No API contract is sacred. No migration history needs preserving. No user data exists to migrate.
+- **Make big, bold changes when they improve the product.** Don't patch around bad foundations — rip them out and rebuild properly. The goal is to ship a rock-solid v1.0, not to preserve the current state.
+- **Supabase schema is fully mutable.** Drop tables, rename columns, rewrite migrations from scratch, restructure RLS policies — whatever produces the cleanest schema. There are no deployed databases with user data.
+- **CI/CD workflows are fully mutable.** Rewrite, consolidate, or delete workflows as needed.
+- **Tests can be rewritten or restructured freely.** Change test infrastructure, frameworks, fixture formats, golden files — whatever makes the test suite most effective.
+
+**Core pillars (in priority order):**
+
+1. **Performance** — The engine must be fast. The UI must be responsive. Bundle sizes must stay within budget. Lazy-load aggressively. Zero wasted renders.
+2. **Accuracy** — Computation results must be scientifically correct. NaN handling, broadcasting, deterministic evaluation, CODATA constants — no compromises on correctness.
+3. **UI/UX** — The interface must be intuitive, polished, and delightful. Clean visual design, smooth interactions, helpful error states, accessible.
+
+**When v1.0 launches (you'll be told explicitly),** the rules flip: minimal edits, always backwards-compatible, incremental versioning, migration safety, deprecation cycles. Until then, build the best possible foundation.
+
 ## Overview
 
 ChainSolve Web is a browser-based visual computation platform. Users wire together blocks on a canvas; a Rust/WASM engine evaluates the graph in a Web Worker and results appear in real time. Stack: Vite 7 + React 19 + TypeScript 5.9 (strict), Rust/WASM compute engine, Supabase (auth + DB), Stripe (billing), Cloudflare Pages (hosting + Functions).
@@ -200,9 +220,11 @@ Both `Content-Security-Policy` lines in `public/_headers` must include `'wasm-un
 
 `VITE_IS_CI_BUILD=true` suppresses the `CONFIG_INVALID` guard in `src/lib/supabase.ts`. It is set only for the `node_checks` (PR) job — **never** for the `deploy` job. Setting it in deploy will send placeholder credentials to production silently.
 
-### 4. Migrations are append-only
+### 4. Migrations (pre-release: fully mutable)
 
-`supabase/migrations/` is a numbered, append-only history. Never edit or delete an existing migration file. Create a new numbered migration to fix a past one. All migrations must be idempotent (use `IF NOT EXISTS`, `CREATE OR REPLACE`, `DROP ... IF EXISTS` before `CREATE`). Wrap multi-statement migrations in `BEGIN; ... COMMIT;`. Enable RLS immediately on new tables. Qualify tables with `public.`. Functions must include `SET search_path = public`.
+**Pre-release:** Migrations can be edited, deleted, squashed, or rewritten freely — there is no deployed database with user data. Optimize for the cleanest possible schema. When writing migrations, still use good habits: `IF NOT EXISTS`, `CREATE OR REPLACE`, idempotent statements, RLS on new tables, `public.` qualification, `SET search_path = public` on functions.
+
+**Post-v1.0 (you'll be told):** Migrations become append-only. Never edit or delete an existing migration file. Create a new numbered migration to fix a past one.
 
 ### 5. COOP+COEP headers must stay in `public/_headers`
 
