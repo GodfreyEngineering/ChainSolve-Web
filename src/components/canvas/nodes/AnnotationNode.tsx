@@ -24,11 +24,26 @@ const DEFAULT_FONT_SIZE = 14
 
 /** Sanitize HTML to allow only safe inline formatting tags. */
 function sanitizeHtml(html: string): string {
-  // Strip all tags except b, i, u, br, strong, em
-  return html.replace(
-    /<\/?(?!b>|\/b>|i>|\/i>|u>|\/u>|br\s*\/?>|strong>|\/strong>|em>|\/em>)[^>]*>/gi,
-    '',
-  )
+  // Allowlist approach: parse with DOMParser and only keep safe tags.
+  // This avoids regex-based sanitization which can be bypassed with
+  // nested multi-character sequences (CWE-20/80/116).
+  const SAFE_TAGS = new Set(['B', 'I', 'U', 'BR', 'STRONG', 'EM'])
+
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+
+  function clean(node: Node): string {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? ''
+    if (node.nodeType !== Node.ELEMENT_NODE) return ''
+    const el = node as Element
+    const children = Array.from(el.childNodes).map(clean).join('')
+    if (SAFE_TAGS.has(el.tagName)) {
+      const tag = el.tagName.toLowerCase()
+      return tag === 'br' ? '<br>' : `<${tag}>${children}</${tag}>`
+    }
+    return children // strip the tag but keep text content
+  }
+
+  return Array.from(doc.body.childNodes).map(clean).join('')
 }
 
 /** Floating formatting toolbar for text editing. */
