@@ -76,7 +76,9 @@
     "importWarnings": "Import warnings:\n\n{{warnings}}\n\nContinue anyway?",
     "importErrorFailed": "Import failed: {{error}}",
     "createFirstProject": "Create project",
-    "confirmDeleteOpen": "This project is currently open. Close it and delete \"{{name}}\"?"
+    "confirmDeleteOpen": "This project is currently open. Close it and delete \"{{name}}\"?",
+    "duplicateError": "Duplizieren fehlgeschlagen: {{error}}",
+    "deleteError": "L\u00f6schen fehlgeschlagen: {{error}}"
   },
   "contact": {
     "support": "Support",
@@ -1679,7 +1681,11 @@
     "modePlan": "Planen",
     "modeEdit": "Bearbeiten",
     "modeBypass": "Automatisch",
-    "generating": "Generierung…",
+    "generating": "Generierung\u2026",
+    "buildingModel": "Modell wird erstellt\u2026",
+    "analyzingGraph": "Graph wird analysiert und repariert\u2026",
+    "analyzing": "Analyse\u2026",
+    "optimizing": "Graph wird optimiert\u2026",
     "apply": "Änderungen anwenden",
     "cancel": "Abbrechen",
     "permissionRequired": "Diese Änderung erfordert Ihre Bestätigung vor der Anwendung.",
@@ -2118,7 +2124,8 @@
     "projectsCount": "Projekte",
     "exploreTitle": "Vorlagen entdecken",
     "exploreDesc": "Durchsuche Community-Vorlagen, vorgefertigte Ketten und geteilte Projekte.",
-    "openExplore": "Entdecken öffnen"
+    "openExplore": "Entdecken öffnen",
+    "refresh": "Aktualisieren"
   },
   "workspace": {
     "freePlanLimit": "Kostenloser Plan erlaubt 1 Projekt. Scratch-Canvas wird geöffnet — löschen Sie Ihr Projekt oder upgraden Sie.",

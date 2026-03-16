@@ -579,18 +579,28 @@ export async function duplicateProject(sourceId: string, newName: string): Promi
       await setActiveCanvas(newProj.id, firstNewCanvasId)
     }
 
-    // Copy project assets (metadata + bytes)
-    const srcAssets = await listProjectAssets(sourceId)
-    for (const asset of srcAssets) {
-      const bytes = await downloadAssetBytes(asset.storage_path)
-      await uploadAssetBytes(
-        newProj.id,
-        asset.name,
-        asset.mime_type ?? 'application/octet-stream',
-        bytes,
-        asset.sha256,
-        asset.kind ?? 'csv',
-      )
+    // Copy project assets (metadata + bytes). Non-critical — if asset copy
+    // fails (e.g. schema mismatch or storage error), the project is still
+    // usable without assets.
+    try {
+      const srcAssets = await listProjectAssets(sourceId)
+      for (const asset of srcAssets) {
+        const bytes = await downloadAssetBytes(asset.storage_path)
+        await uploadAssetBytes(
+          newProj.id,
+          asset.name,
+          asset.mime_type ?? 'application/octet-stream',
+          bytes,
+          asset.sha256,
+          asset.kind ?? 'csv',
+        )
+      }
+    } catch (assetErr) {
+      dlog.warn('persistence', 'Asset copy failed during duplicate — skipping', {
+        error: String(assetErr),
+        sourceId,
+        newProjectId: newProj.id,
+      })
     }
   } catch (err) {
     await rollback()

@@ -4,8 +4,12 @@
     "modePlan": "תכנון",
     "modeEdit": "עריכה",
     "modeBypass": "אוטומטי",
-    "generating": "מייצר…",
-    "apply": "החל שינויים",
+    "generating": "\u05de\u05d9\u05d9\u05e6\u05e8\u2026",
+    "buildingModel": "\u05d1\u05d5\u05e0\u05d4 \u05d0\u05ea \u05d4\u05de\u05d5\u05d3\u05dc\u2026",
+    "analyzingGraph": "\u05de\u05e0\u05ea\u05d7 \u05d5\u05de\u05ea\u05e7\u05df \u05d0\u05ea \u05d4\u05d2\u05e8\u05e3\u2026",
+    "analyzing": "\u05de\u05e0\u05ea\u05d7\u2026",
+    "optimizing": "\u05de\u05d9\u05d8\u05d1 \u05d0\u05ea \u05d4\u05d2\u05e8\u05e3\u2026",
+    "apply": "\u05d4\u05d7\u05dc \u05e9\u05d9\u05e0\u05d5\u05d9\u05d9\u05dd",
     "cancel": "ביטול",
     "permissionRequired": "שינוי זה דורש אישור לפני החלה.",
     "quotaExceeded": "מכסת ה-AI החודשית חרגה. שדרג לקבלת טוקנים נוספים.",
@@ -114,10 +118,13 @@
     "importErrorValidation": "Import failed: {{error}}",
     "importWarnings": "Import warnings:\n\n{{warnings}}\n\nContinue anyway?",
     "importErrorFailed": "Import failed: {{error}}",
-    "createFirstProject": "Create project"
+    "createFirstProject": "Create project",
+    "confirmDeleteOpen": "This project is currently open. Close it and delete \"{{name}}\"?",
+    "duplicateError": "Duplicate failed: {{error}}",
+    "deleteError": "Delete failed: {{error}}"
   },
   "projects": {
-    "title": "פרויקטים",
+    "title": "\u05e4\u05e8\u05d5\u05d9\u05e7\u05d8\u05d9\u05dd",
     "newProject": "פרויקט חדש",
     "import": "ייבוא .json",
     "noProjects": "אין עדיין פרויקטים",
@@ -1612,7 +1619,8 @@
     "projectsCount": "פרויקטים",
     "exploreTitle": "חקור תבניות",
     "exploreDesc": "עיין בתבניות קהילתיות, שרשראות מוכנות ופרויקטים משותפים.",
-    "openExplore": "פתח חקירה"
+    "openExplore": "פתח חקירה",
+    "refresh": "רענן"
   },
   "workspace": {
     "freePlanLimit": "התוכנית החינמית מאפשרת פרויקט אחד. פותח קנבס זמני — מחקו את הפרויקט שלכם או שדרגו כדי לשמור.",

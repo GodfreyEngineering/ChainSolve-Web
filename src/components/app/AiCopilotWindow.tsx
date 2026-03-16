@@ -200,6 +200,23 @@ const s = {
     background: 'rgba(255,255,255,0.1)',
     overflow: 'hidden' as const,
   },
+  thinkingDot: {
+    display: 'inline-block',
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    background: 'var(--primary)',
+    animation: 'cs-ai-pulse 1.2s ease-in-out infinite',
+    flexShrink: 0,
+  } satisfies React.CSSProperties,
+}
+
+// Inject the pulse animation into the document once.
+if (typeof document !== 'undefined' && !document.getElementById('cs-ai-pulse-style')) {
+  const style = document.createElement('style')
+  style.id = 'cs-ai-pulse-style'
+  style.textContent = `@keyframes cs-ai-pulse { 0%, 100% { opacity: 0.3; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.1); } }`
+  document.head.appendChild(style)
 }
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -384,32 +401,14 @@ export function AiCopilotWindow({
     }
 
     try {
-      // 6.05: Use streaming for chat-like tasks to show text as it arrives
-      let streamingText = ''
-      let streamingMsgIndex = -1
-
+      // 6.05: Stream the response but only display the final human-readable
+      // message. Delta events contain raw JSON (the AI returns structured
+      // JSON, not prose) so we suppress them and show a loading indicator
+      // via the `loading` state instead.
       for await (const event of sendCopilotRequestStreaming(requestOpts)) {
         if (event.type === 'delta') {
-          streamingText += event.text
-          if (streamingMsgIndex === -1) {
-            // Add a new assistant message and remember its index
-            setMessages((prev) => {
-              streamingMsgIndex = prev.length
-              return [...prev, { role: 'assistant', content: streamingText }]
-            })
-          } else {
-            // Update the existing streaming message
-            const text = streamingText
-            setMessages((prev) => {
-              const updated = [...prev]
-              const idx = updated.length - 1
-              if (idx >= 0 && updated[idx].role === 'assistant') {
-                updated[idx] = { ...updated[idx], content: text }
-              }
-              return updated
-            })
-          }
-          scrollToBottom()
+          // Raw JSON token — skip display. The loading indicator handles UX.
+          continue
         } else if (event.type === 'done') {
           const response = event.response
           const ops = response.patchOps ?? []
@@ -419,7 +418,6 @@ export function AiCopilotWindow({
             setTokensRemaining(response.tokensRemaining)
           }
 
-          // Finalize the streaming message with full data
           const finalMsg: ChatMessage = {
             role: 'assistant',
             content: response.message,
@@ -428,16 +426,7 @@ export function AiCopilotWindow({
             assumptions: response.assumptions,
           }
 
-          setMessages((prev) => {
-            const updated = [...prev]
-            // Replace the last streaming message or append
-            if (streamingMsgIndex !== -1 && updated.length > 0) {
-              updated[updated.length - 1] = finalMsg
-            } else {
-              updated.push(finalMsg)
-            }
-            return updated
-          })
+          setMessages((prev) => [...prev, finalMsg])
 
           setHistory((prev) => [
             {
@@ -701,7 +690,28 @@ export function AiCopilotWindow({
           </div>
         ))}
         {loading && (
-          <div style={{ ...s.msgAi, opacity: 0.6, fontStyle: 'italic' }}>{t('ai.generating')}</div>
+          <div
+            style={{
+              ...s.msgAi,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              opacity: 0.7,
+            }}
+          >
+            <span style={s.thinkingDot} />
+            <span style={{ fontStyle: 'italic' }}>
+              {activeTask === 'chat' && mode === 'edit'
+                ? t('ai.buildingModel', 'Building your model\u2026')
+                : activeTask === 'fix_graph'
+                  ? t('ai.analyzingGraph', 'Analyzing and fixing graph\u2026')
+                  : activeTask === 'explain_node'
+                    ? t('ai.analyzing', 'Analyzing\u2026')
+                    : activeTask === 'optimize'
+                      ? t('ai.optimizing', 'Optimizing graph\u2026')
+                      : t('ai.generating')}
+            </span>
+          </div>
         )}
       </div>
 

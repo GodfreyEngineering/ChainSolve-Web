@@ -36,6 +36,15 @@ const perfEnabled = isPerfHudEnabled()
 export const PATCH_DEBOUNCE_MS = 50
 
 /**
+ * Returns true when an error is the expected "Engine disposed" rejection
+ * that fires during project/canvas navigation. These should be silently
+ * swallowed — they are not bugs.
+ */
+function isEngineDisposedError(err: unknown): boolean {
+  return err instanceof Error && err.message === 'Engine disposed'
+}
+
+/**
  * Returns true when at least one op is a structural change (i.e. anything
  * other than a node-data update).  Structural ops require immediate dispatch
  * so the engine graph stays consistent.
@@ -173,61 +182,69 @@ export function useGraphEngine(
       const t0 = perfEnabled ? performance.now() : 0
       perfMark('cs:eval:start')
       setEngineStatus('computing')
-      engine.loadSnapshot(snapshot, options).then((result) => {
-        if (reqId !== pendingRef.current) return
-        perfMeasure('cs:eval:snapshot', 'cs:eval:start')
-        store.load(result.values)
-        setComputed(store.getAll())
-        setIsPartial(result.partial ?? false)
-        const snapshotErrors = Object.keys(result.values).filter(
-          (id) => (result.values[id] as Value)?.kind === 'error',
-        )
-        dlog.info('engine', 'Snapshot eval complete', {
-          evalMs: Math.round(result.elapsedUs / 1000),
-          nodesComputed: Object.keys(result.values).length,
-          partial: result.partial ?? false,
-          errorCount: snapshotErrors.length,
-          ...(snapshotErrors.length > 0 ? { errorNodeIds: snapshotErrors.slice(0, 5) } : {}),
-        })
-        // K4-2: Log individual node error messages for console guidance.
-        seenErrorsRef.current.clear()
-        logNodeErrors(result.values, seenErrorsRef.current)
-        const health = computeGraphHealth(nodes, edges)
-        dlog.info('engine', 'Graph health', {
-          nodeCount: health.nodeCount,
-          edgeCount: health.edgeCount,
-          groupCount: health.groupCount,
-          orphanCount: health.orphanCount,
-          crossingEdgeCount: health.crossingEdgeCount,
-          cycleDetected: health.cycleDetected,
-          warningCount: health.warnings.length,
-        })
-        if (perfEnabled) {
-          updatePerfMetrics({
-            lastEvalMs: result.elapsedUs / 1000,
-            workerRoundTripMs: performance.now() - t0,
-            nodesEvaluated: Object.keys(result.values).length,
-            totalNodes: nodes.length,
-            isPartial: result.partial ?? false,
+      engine
+        .loadSnapshot(snapshot, options)
+        .then((result) => {
+          if (reqId !== pendingRef.current) return
+          perfMeasure('cs:eval:snapshot', 'cs:eval:start')
+          store.load(result.values)
+          setComputed(store.getAll())
+          setIsPartial(result.partial ?? false)
+          const snapshotErrors = Object.keys(result.values).filter(
+            (id) => (result.values[id] as Value)?.kind === 'error',
+          )
+          dlog.info('engine', 'Snapshot eval complete', {
+            evalMs: Math.round(result.elapsedUs / 1000),
+            nodesComputed: Object.keys(result.values).length,
+            partial: result.partial ?? false,
+            errorCount: snapshotErrors.length,
+            ...(snapshotErrors.length > 0 ? { errorNodeIds: snapshotErrors.slice(0, 5) } : {}),
           })
-          engine.getStats().then((stats) => {
+          // K4-2: Log individual node error messages for console guidance.
+          seenErrorsRef.current.clear()
+          logNodeErrors(result.values, seenErrorsRef.current)
+          const health = computeGraphHealth(nodes, edges)
+          dlog.info('engine', 'Graph health', {
+            nodeCount: health.nodeCount,
+            edgeCount: health.edgeCount,
+            groupCount: health.groupCount,
+            orphanCount: health.orphanCount,
+            crossingEdgeCount: health.crossingEdgeCount,
+            cycleDetected: health.cycleDetected,
+            warningCount: health.warnings.length,
+          })
+          if (perfEnabled) {
             updatePerfMetrics({
-              datasetCount: stats.datasetCount,
-              datasetTotalBytes: stats.datasetTotalBytes,
+              lastEvalMs: result.elapsedUs / 1000,
+              workerRoundTripMs: performance.now() - t0,
+              nodesEvaluated: Object.keys(result.values).length,
+              totalNodes: nodes.length,
+              isPartial: result.partial ?? false,
             })
-          })
-        }
-        recordEngineEval(
-          'snapshot',
-          result.elapsedUs,
-          nodes.length,
-          edges.length,
-          Object.keys(result.values).length,
-          result.partial ?? false,
-          telemetryOpts,
-        )
-        setEngineStatus('idle')
-      })
+            engine.getStats().then((stats) => {
+              updatePerfMetrics({
+                datasetCount: stats.datasetCount,
+                datasetTotalBytes: stats.datasetTotalBytes,
+              })
+            })
+          }
+          recordEngineEval(
+            'snapshot',
+            result.elapsedUs,
+            nodes.length,
+            edges.length,
+            Object.keys(result.values).length,
+            result.partial ?? false,
+            telemetryOpts,
+          )
+          setEngineStatus('idle')
+        })
+        .catch((err: unknown) => {
+          // Engine disposed during project/canvas switch — expected, not a bug.
+          if (isEngineDisposedError(err)) return
+          dlog.warn('engine', 'Snapshot eval interrupted', { error: String(err) })
+          setEngineStatus('error')
+        })
     } else {
       // Subsequent renders: diff and apply patch.
       const ops = diffGraph(prevNodesRef.current, prevEdgesRef.current, nodes, edges)
@@ -305,6 +322,8 @@ export function useGraphEngine(
             setEngineStatus('idle')
           })
           .catch((err: unknown) => {
+            // Engine disposed during project/canvas switch — expected, not a bug.
+            if (isEngineDisposedError(err)) return
             dlog.warn('engine', 'Eval interrupted', { error: String(err) })
             setEngineStatus('error')
           })
@@ -332,6 +351,15 @@ export function useGraphEngine(
 
     prevNodesRef.current = nodes
     prevEdgesRef.current = edges
+
+    // Cleanup: cancel any pending debounce timer so it doesn't fire
+    // after the engine has been disposed (project/canvas switch).
+    return () => {
+      if (patchTimerRef.current !== null) {
+        clearTimeout(patchTimerRef.current)
+        patchTimerRef.current = null
+      }
+    }
   }, [
     nodes,
     edges,

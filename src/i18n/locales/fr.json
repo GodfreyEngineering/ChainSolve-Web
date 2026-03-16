@@ -76,7 +76,9 @@
     "importWarnings": "Import warnings:\n\n{{warnings}}\n\nContinue anyway?",
     "importErrorFailed": "Import failed: {{error}}",
     "createFirstProject": "Create project",
-    "confirmDeleteOpen": "This project is currently open. Close it and delete \"{{name}}\"?"
+    "confirmDeleteOpen": "This project is currently open. Close it and delete \"{{name}}\"?",
+    "duplicateError": "\u00c9chec de la duplication : {{error}}",
+    "deleteError": "\u00c9chec de la suppression : {{error}}"
   },
   "contact": {
     "support": "Assistance",
@@ -1679,7 +1681,11 @@
     "modePlan": "Planifier",
     "modeEdit": "Modifier",
     "modeBypass": "Automatique",
-    "generating": "Génération…",
+    "generating": "G\u00e9n\u00e9ration\u2026",
+    "buildingModel": "Construction du mod\u00e8le\u2026",
+    "analyzingGraph": "Analyse et correction du graphe\u2026",
+    "analyzing": "Analyse\u2026",
+    "optimizing": "Optimisation du graphe\u2026",
     "apply": "Appliquer les modifications",
     "cancel": "Annuler",
     "permissionRequired": "Cette modification nécessite votre confirmation avant d'être appliquée.",
@@ -2118,7 +2124,8 @@
     "projectsCount": "projets",
     "exploreTitle": "Explorer les modèles",
     "exploreDesc": "Parcourez les modèles communautaires, chaînes prêtes à l'emploi et projets partagés.",
-    "openExplore": "Ouvrir Explorer"
+    "openExplore": "Ouvrir Explorer",
+    "refresh": "Actualiser"
   },
   "workspace": {
     "freePlanLimit": "Le plan gratuit autorise 1 projet. Ouverture du canvas temporaire — supprimez votre projet ou passez à un plan supérieur.",

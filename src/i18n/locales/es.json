@@ -76,7 +76,9 @@
     "importWarnings": "Import warnings:\n\n{{warnings}}\n\nContinue anyway?",
     "importErrorFailed": "Import failed: {{error}}",
     "createFirstProject": "Create project",
-    "confirmDeleteOpen": "This project is currently open. Close it and delete \"{{name}}\"?"
+    "confirmDeleteOpen": "This project is currently open. Close it and delete \"{{name}}\"?",
+    "duplicateError": "Error al duplicar: {{error}}",
+    "deleteError": "Error al eliminar: {{error}}"
   },
   "contact": {
     "support": "Soporte",
@@ -1679,7 +1681,11 @@
     "modePlan": "Planificar",
     "modeEdit": "Editar",
     "modeBypass": "Automático",
-    "generating": "Generando…",
+    "generating": "Generando\u2026",
+    "buildingModel": "Construyendo tu modelo\u2026",
+    "analyzingGraph": "Analizando y corrigiendo el grafo\u2026",
+    "analyzing": "Analizando\u2026",
+    "optimizing": "Optimizando el grafo\u2026",
     "apply": "Aplicar cambios",
     "cancel": "Cancelar",
     "permissionRequired": "Este cambio requiere tu confirmación antes de aplicarse.",
@@ -2118,7 +2124,8 @@
     "projectsCount": "proyectos",
     "exploreTitle": "Explorar plantillas",
     "exploreDesc": "Navega plantillas de la comunidad, cadenas predefinidas y proyectos compartidos.",
-    "openExplore": "Abrir Explorar"
+    "openExplore": "Abrir Explorar",
+    "refresh": "Actualizar"
   },
   "workspace": {
     "freePlanLimit": "El plan gratuito permite 1 proyecto. Abriendo canvas temporal — elimine su proyecto o actualice para guardar.",

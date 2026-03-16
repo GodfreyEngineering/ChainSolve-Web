@@ -75,7 +75,10 @@
     "importErrorValidation": "Import failed: {{error}}",
     "importWarnings": "Import warnings:\n\n{{warnings}}\n\nContinue anyway?",
     "importErrorFailed": "Import failed: {{error}}",
-    "createFirstProject": "Create project"
+    "createFirstProject": "Create project",
+    "confirmDeleteOpen": "This project is currently open. Close it and delete \"{{name}}\"?",
+    "duplicateError": "Duplicate failed: {{error}}",
+    "deleteError": "Delete failed: {{error}}"
   },
   "contact": {
     "support": "Assistenza",
@@ -1633,7 +1636,11 @@
     "modePlan": "Pianifica",
     "modeEdit": "Modifica",
     "modeBypass": "Automatico",
-    "generating": "Generazione…",
+    "generating": "Generazione\u2026",
+    "buildingModel": "Costruzione del modello\u2026",
+    "analyzingGraph": "Analisi e correzione del grafo\u2026",
+    "analyzing": "Analisi\u2026",
+    "optimizing": "Ottimizzazione del grafo\u2026",
     "apply": "Applica modifiche",
     "cancel": "Annulla",
     "permissionRequired": "Questa modifica richiede la tua conferma prima dell'applicazione.",
@@ -2067,7 +2074,8 @@
     "projectsCount": "progetti",
     "exploreTitle": "Esplora modelli",
     "exploreDesc": "Sfoglia modelli della community, catene predefinite e progetti condivisi.",
-    "openExplore": "Apri Esplora"
+    "openExplore": "Apri Esplora",
+    "refresh": "Aggiorna"
   },
   "workspace": {
     "freePlanLimit": "Il piano gratuito consente 1 progetto. Apertura canvas temporaneo — elimina il progetto o fai l'upgrade per salvare.",

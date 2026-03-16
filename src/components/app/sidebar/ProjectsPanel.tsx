@@ -9,7 +9,16 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Plus, Search, Upload, FolderPlus, ChevronRight, ChevronDown, Folder } from 'lucide-react'
+import {
+  Plus,
+  Search,
+  Upload,
+  FolderPlus,
+  ChevronRight,
+  ChevronDown,
+  Folder,
+  RefreshCw,
+} from 'lucide-react'
 import {
   listProjects,
   renameProject,
@@ -87,12 +96,19 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
     setLoading(false)
   }, [])
 
+  // Fetch on mount
   useEffect(() => {
-    void listProjects()
-      .then((rows) => setProjects(rows))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
+    void fetchProjects()
+  }, [fetchProjects])
+
+  // Auto-refresh when a project save completes (saveStatus transitions to 'saved')
+  useEffect(() => {
+    return useProjectStore.subscribe((state, prev) => {
+      if (state.saveStatus === 'saved' && prev.saveStatus !== 'saved') {
+        void fetchProjects()
+      }
+    })
+  }, [fetchProjects])
 
   const ent = getEntitlements(plan)
   const allowCreate = canCreateProject(plan, projects.length)
@@ -213,10 +229,18 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
   const handleDuplicate = useCallback(
     async (proj: ProjectRow) => {
       setMenuOpen(null)
-      await duplicateProject(proj.id, `${proj.name} (copy)`)
-      fetchProjects()
+      try {
+        await duplicateProject(proj.id, `${proj.name} (copy)`)
+        fetchProjects()
+      } catch (err: unknown) {
+        window.alert(
+          t('home.duplicateError', 'Duplicate failed: {{error}}', {
+            error: err instanceof Error ? err.message : String(err),
+          }),
+        )
+      }
     },
-    [fetchProjects],
+    [fetchProjects, t],
   )
 
   const handleDelete = useCallback(
@@ -232,16 +256,24 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
         : t('home.confirmDelete', 'Delete "{{name}}"?', { name: proj.name })
       if (!window.confirm(confirmMsg)) return
 
-      // If the project being deleted is currently open, navigate away first
-      if (isOpen) {
-        useProjectStore.getState().reset()
-        useCanvasesStore.getState().reset()
-        navigate('/app')
-      }
+      try {
+        // If the project being deleted is currently open, navigate away first
+        if (isOpen) {
+          useProjectStore.getState().reset()
+          useCanvasesStore.getState().reset()
+          navigate('/app')
+        }
 
-      await deleteProject(proj.id)
-      removeRecentProject(proj.id)
-      fetchProjects()
+        await deleteProject(proj.id)
+        removeRecentProject(proj.id)
+        fetchProjects()
+      } catch (err: unknown) {
+        window.alert(
+          t('home.deleteError', 'Delete failed: {{error}}', {
+            error: err instanceof Error ? err.message : String(err),
+          }),
+        )
+      }
     },
     [t, fetchProjects, navigate],
   )
@@ -254,8 +286,12 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
   const handleMoveToFolder = useCallback(
     async (projId: string, folder: string | null) => {
       setMenuOpen(null)
-      await moveToFolder(projId, folder)
-      fetchProjects()
+      try {
+        await moveToFolder(projId, folder)
+        fetchProjects()
+      } catch (err: unknown) {
+        window.alert(err instanceof Error ? err.message : 'Move failed')
+      }
     },
     [fetchProjects],
   )
@@ -286,16 +322,18 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
         window.alert(t('folders.alreadyExists', 'A folder with that name already exists.'))
         return
       }
-      // Move all projects in this folder to the new name
-      const affected = projects.filter((p) => p.folder === oldName)
-      await Promise.all(affected.map((p) => moveToFolder(p.id, next)))
-      // Update custom folders if it was custom
-      setCustomFolders((prev) => {
-        const updated = prev.map((f) => (f === oldName ? next : f))
-        saveCustomFolders(updated)
-        return updated
-      })
-      fetchProjects()
+      try {
+        const affected = projects.filter((p) => p.folder === oldName)
+        await Promise.all(affected.map((p) => moveToFolder(p.id, next)))
+        setCustomFolders((prev) => {
+          const updated = prev.map((f) => (f === oldName ? next : f))
+          saveCustomFolders(updated)
+          return updated
+        })
+        fetchProjects()
+      } catch (err: unknown) {
+        window.alert(err instanceof Error ? err.message : 'Rename folder failed')
+      }
     },
     [allFolders, projects, fetchProjects, t],
   )
@@ -315,13 +353,17 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
               name: folderName,
             })
       if (!window.confirm(msg)) return
-      await Promise.all(affected.map((p) => moveToFolder(p.id, null)))
-      setCustomFolders((prev) => {
-        const next = prev.filter((f) => f !== folderName)
-        saveCustomFolders(next)
-        return next
-      })
-      fetchProjects()
+      try {
+        await Promise.all(affected.map((p) => moveToFolder(p.id, null)))
+        setCustomFolders((prev) => {
+          const next = prev.filter((f) => f !== folderName)
+          saveCustomFolders(next)
+          return next
+        })
+        fetchProjects()
+      } catch (err: unknown) {
+        window.alert(err instanceof Error ? err.message : 'Delete folder failed')
+      }
     },
     [projects, fetchProjects, t],
   )
@@ -330,9 +372,13 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
     async (folderName: string) => {
       setFolderMenu(null)
       if (!allowCreate) return
-      const proj = await createProject('Untitled project', folderName)
-      fetchProjects()
-      onOpenProject(proj.id)
+      try {
+        const proj = await createProject('Untitled project', folderName)
+        fetchProjects()
+        onOpenProject(proj.id)
+      } catch (err: unknown) {
+        window.alert(err instanceof Error ? err.message : 'Create project failed')
+      }
     },
     [allowCreate, fetchProjects, onOpenProject],
   )
@@ -348,8 +394,12 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
       if (!dragProjectId) return
       setDragOverFolder(null)
       setDragProjectId(null)
-      await moveToFolder(dragProjectId, folder)
-      fetchProjects()
+      try {
+        await moveToFolder(dragProjectId, folder)
+        fetchProjects()
+      } catch (err: unknown) {
+        window.alert(err instanceof Error ? err.message : 'Move failed')
+      }
     },
     [dragProjectId, fetchProjects],
   )
@@ -397,6 +447,7 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
           onNewProject={onNewProject}
           onNewFolder={handleNewFolder}
           onImport={handleImport}
+          onRefresh={fetchProjects}
           t={t}
         />
         <div style={countStyle}>
@@ -442,6 +493,7 @@ export function ProjectsPanel({ plan, onOpenProject, onNewProject }: ProjectsPan
         onNewProject={onNewProject}
         onNewFolder={handleNewFolder}
         onImport={handleImport}
+        onRefresh={fetchProjects}
         t={t}
       />
       <div style={countStyle}>
@@ -627,6 +679,7 @@ function PanelHeader({
   onNewProject,
   onNewFolder,
   onImport,
+  onRefresh,
   t,
 }: {
   query: string
@@ -637,6 +690,7 @@ function PanelHeader({
   onNewProject: () => void
   onNewFolder: () => void
   onImport: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onRefresh: () => void
   t: ReturnType<typeof useTranslation>['t']
 }) {
   return (
@@ -652,6 +706,15 @@ function PanelHeader({
         />
       </div>
       <div style={{ display: 'flex', gap: 4 }}>
+        <Tooltip content={t('sidebar.refresh', 'Refresh')} side="bottom">
+          <button
+            style={actionBtnStyle}
+            onClick={onRefresh}
+            aria-label={t('sidebar.refresh', 'Refresh')}
+          >
+            <Icon icon={RefreshCw} size={14} />
+          </button>
+        </Tooltip>
         <Tooltip content={t('home.createProject', 'New project')} side="bottom">
           <button
             data-tour="btn-new-project"

@@ -76,7 +76,9 @@
     "importWarnings": "Import warnings:\n\n{{warnings}}\n\nContinue anyway?",
     "importErrorFailed": "Import failed: {{error}}",
     "createFirstProject": "Create project",
-    "confirmDeleteOpen": "This project is currently open. Close it and delete \"{{name}}\"?"
+    "confirmDeleteOpen": "This project is currently open. Close it and delete \"{{name}}\"?",
+    "duplicateError": "Duplicate failed: {{error}}",
+    "deleteError": "Delete failed: {{error}}"
   },
   "contact": {
     "support": "Support",
@@ -1726,7 +1728,11 @@
     "modePlan": "Plan",
     "modeEdit": "Edit",
     "modeBypass": "Bypass",
-    "generating": "Generating…",
+    "generating": "Generating\u2026",
+    "buildingModel": "Building your model\u2026",
+    "analyzingGraph": "Analyzing and fixing graph\u2026",
+    "analyzing": "Analyzing\u2026",
+    "optimizing": "Optimizing graph\u2026",
     "apply": "Apply changes",
     "cancel": "Cancel",
     "permissionRequired": "This change requires your confirmation before applying.",
@@ -2179,7 +2185,8 @@
     "projectsCount": "projects",
     "exploreTitle": "Explore Templates",
     "exploreDesc": "Browse community templates, ready-made chains, and shared projects.",
-    "openExplore": "Open Explore"
+    "openExplore": "Open Explore",
+    "refresh": "更新"
   },
   "workspace": {
     "freePlanLimit": "Free plan allows 1 project. Opening scratch canvas — delete your project or upgrade to save.",
