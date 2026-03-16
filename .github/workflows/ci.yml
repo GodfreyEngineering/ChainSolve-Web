@@ -349,6 +349,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3.99.0'
           # Deploy static assets from dist/ as production (--branch=main).
           # Wrangler picks up functions/ from the working directory automatically.
           # wrangler.jsonc provides the compatibility_date.
