@@ -219,6 +219,12 @@ export interface NodeData extends Record<string, unknown> {
   annotationArrowDash?: 'solid' | 'dashed' | 'dotted'
   /** UX-22: Monospace font for text/callout/leader annotations. */
   annotationMonospace?: boolean
+  /** V3-5.3: Arrow length in px (csAnnotation arrow nodes). */
+  annotationArrowLength?: number
+  /** V3-5.3: Rotation in degrees (csAnnotation arrow nodes). */
+  annotationRotation?: number
+  /** V3-5.3: Rich-text HTML content for text/callout/sticky_note annotations. */
+  annotationHtml?: string
   /** H1-1: Unit assigned to this node's output. Unit id from unitCatalog. */
   unit?: string
   /** H7-1: Channel name for publish blocks (csPublish nodes only). */

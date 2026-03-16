@@ -56,13 +56,13 @@ export function diffGraph(
 ): PatchOp[] {
   const ops: PatchOp[] = []
 
-  // Filter out group nodes (not engine-relevant).
-  const prevEvalNodes = prevNodes.filter(
-    (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
-  )
-  const nextEvalNodes = nextNodes.filter(
-    (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
-  )
+  // Filter out group nodes and annotations (not engine-relevant).
+  const isNonEval = (n: Node) => {
+    const bt = (n.data as Record<string, unknown>).blockType as string
+    return bt === '__group__' || bt.startsWith('annotation_')
+  }
+  const prevEvalNodes = prevNodes.filter((n) => !isNonEval(n))
+  const nextEvalNodes = nextNodes.filter((n) => !isNonEval(n))
 
   const prevNodeMap = new Map(prevEvalNodes.map((n) => [n.id, n]))
   const nextNodeMap = new Map(nextEvalNodes.map((n) => [n.id, n]))

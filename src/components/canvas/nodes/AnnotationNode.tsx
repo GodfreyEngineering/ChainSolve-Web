@@ -7,11 +7,14 @@
  *
  * V3-5.3: Double-click text/callout/leader to enter inline edit mode.
  * Click outside (blur) commits the edit.
+ * V3-5.3: NodeResizer onResize callback for shapes/text.
+ * V3-5.3: Arrow length/rotation support.
+ * V3-5.3: Inline formatting toolbar (Bold/Italic/Underline).
  */
 
 import { memo, useCallback, useRef, useState } from 'react'
 import { Handle, Position, NodeResizer, useReactFlow } from '@xyflow/react'
-import type { NodeProps, Node } from '@xyflow/react'
+import type { NodeProps, Node, ResizeParams } from '@xyflow/react'
 import type { NodeData } from '../../../blocks/types'
 import { KaTeXRenderer } from './KaTeXRenderer'
 import { hasMath } from '../../../lib/mathUtils'
@@ -19,10 +22,83 @@ import { hasMath } from '../../../lib/mathUtils'
 const DEFAULT_COLOR = '#facc15'
 const DEFAULT_FONT_SIZE = 14
 
+/** Sanitize HTML to allow only safe inline formatting tags. */
+function sanitizeHtml(html: string): string {
+  // Strip all tags except b, i, u, br, strong, em
+  return html.replace(
+    /<\/?(?!b>|\/b>|i>|\/i>|u>|\/u>|br\s*\/?>|strong>|\/strong>|em>|\/em>)[^>]*>/gi,
+    '',
+  )
+}
+
+/** Floating formatting toolbar for text editing. */
+function FormattingToolbar({ color }: { color: string }) {
+  const exec = (cmd: string) => (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    document.execCommand(cmd)
+  }
+
+  const btnStyle: React.CSSProperties = {
+    width: 24,
+    height: 24,
+    border: 'none',
+    background: 'transparent',
+    color: '#eee',
+    cursor: 'pointer',
+    borderRadius: 3,
+    fontSize: 12,
+    fontWeight: 700,
+    lineHeight: '24px',
+    padding: 0,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: -32,
+        left: 0,
+        display: 'flex',
+        gap: 2,
+        background: '#222',
+        borderRadius: 4,
+        padding: '2px 4px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+        zIndex: 100,
+        border: `1px solid ${color}44`,
+      }}
+      onMouseDown={(e) => e.preventDefault()}
+    >
+      <button style={btnStyle} onMouseDown={exec('bold')} title="Bold">
+        B
+      </button>
+      <button
+        style={{ ...btnStyle, fontStyle: 'italic' }}
+        onMouseDown={exec('italic')}
+        title="Italic"
+      >
+        I
+      </button>
+      <button
+        style={{ ...btnStyle, textDecoration: 'underline' }}
+        onMouseDown={exec('underline')}
+        title="Underline"
+      >
+        U
+      </button>
+    </div>
+  )
+}
+
 function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
   const nd = data as NodeData
   const annotationType = nd.annotationType ?? 'text'
   const text = nd.annotationText ?? nd.label ?? ''
+  const html = nd.annotationHtml
   const color = nd.annotationColor ?? DEFAULT_COLOR
   const fontSize = nd.annotationFontSize ?? DEFAULT_FONT_SIZE
   const bold = nd.annotationBold ?? false
@@ -70,9 +146,20 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
 
   const commitEdit = useCallback(() => {
     if (!editing) return
-    const newText = editRef.current?.innerText ?? text
+    const el = editRef.current
+    if (!el) {
+      setEditing(false)
+      return
+    }
+    const newHtml = el.innerHTML
+    const newText = el.innerText ?? text
     setEditing(false)
-    updateNodeData(id, { annotationText: newText })
+    // Check if HTML contains any formatting tags
+    const hasFormatting = /<(b|i|u|strong|em)\b/i.test(newHtml)
+    updateNodeData(id, {
+      annotationText: newText,
+      annotationHtml: hasFormatting ? newHtml : undefined,
+    })
   }, [editing, text, id, updateNodeData])
 
   const handleKeyDown = useCallback(
@@ -85,6 +172,17 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
       }
     },
     [commitEdit],
+  )
+
+  /** Handle NodeResizer resize — update annotationWidth/Height in node data. */
+  const handleResize = useCallback(
+    (_event: unknown, params: ResizeParams) => {
+      updateNodeData(id, {
+        annotationWidth: Math.round(params.width),
+        annotationHeight: Math.round(params.height),
+      })
+    },
+    [id, updateNodeData],
   )
 
   const isResizable =
@@ -102,6 +200,7 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
       minWidth={40}
       minHeight={24}
       isVisible={selected}
+      onResize={handleResize}
       lineStyle={{ borderColor: color, borderWidth: 1 }}
       handleStyle={{
         width: 8,
@@ -141,6 +240,16 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
     return <>{t}</>
   }
 
+  /** Render content — use rich HTML if available, otherwise plain text with KaTeX. */
+  const renderContent = () => {
+    if (html) {
+      return (
+        <span style={{ fontFamily }} dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }} />
+      )
+    }
+    return <span style={{ fontFamily }}>{renderText(text)}</span>
+  }
+
   /** Inline-editable text element. */
   const editableText = editing ? (
     <div
@@ -149,18 +258,18 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
       suppressContentEditableWarning
       onBlur={commitEdit}
       onKeyDown={handleKeyDown}
+      dangerouslySetInnerHTML={{ __html: html ? sanitizeHtml(html) : text }}
       style={{
         outline: 'none',
         minWidth: 20,
         cursor: 'text',
+        userSelect: 'text',
         borderBottom: `1px solid ${color}88`,
         fontFamily,
       }}
-    >
-      {text}
-    </div>
+    />
   ) : (
-    <span style={{ fontFamily }}>{renderText(text)}</span>
+    renderContent()
   )
 
   // ── Arrow ──────────────────────────────────────────────────────────────────
@@ -169,6 +278,8 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
     const dash = nd.annotationArrowDash ?? 'solid'
     const startMarker = nd.annotationArrowStart ?? 'none'
     const endMarker = nd.annotationArrowEnd ?? 'arrowhead'
+    const arrowLength = nd.annotationArrowLength ?? 120
+    const rotation = nd.annotationRotation ?? 0
     const dashArray =
       dash === 'dashed'
         ? `${thickness * 3} ${thickness * 2}`
@@ -177,11 +288,28 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
           : undefined
 
     const mid = (type: string, pos: 'start' | 'end') =>
-      `arrow-${type}-${pos}-${color.replace('#', '')}`
+      `arrow-${type}-${pos}-${color.replace('#', '')}-${id}`
 
     return (
-      <div style={{ ...arrowStyle, color, textShadow: selected ? `0 0 8px ${color}55` : 'none' }}>
-        <svg width="80" height="32" viewBox="0 0 80 32" fill="none" overflow="visible">
+      <div
+        style={{
+          ...arrowStyle,
+          color,
+          textShadow: selected ? `0 0 8px ${color}55` : 'none',
+          width: arrowLength,
+          height: 32,
+          transform: rotation ? `rotate(${rotation}deg)` : undefined,
+          transformOrigin: 'center center',
+        }}
+      >
+        <svg
+          width="100%"
+          height="32"
+          viewBox={`0 0 ${arrowLength} 32`}
+          fill="none"
+          overflow="visible"
+          preserveAspectRatio="none"
+        >
           <defs>
             {endMarker === 'arrowhead' && (
               <marker
@@ -271,7 +399,7 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
           <line
             x1="4"
             y1="16"
-            x2="72"
+            x2={arrowLength - 8}
             y2="16"
             stroke={color}
             strokeWidth={thickness}
@@ -290,8 +418,8 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
     return (
       <div
         style={{
-          width: w ?? '100%',
-          height: h ?? '100%',
+          width: w ?? 120,
+          height: h ?? 60,
           minWidth: 80,
           minHeight: 40,
           borderRadius: 8,
@@ -317,10 +445,12 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
           boxShadow: selected
             ? `0 0 0 2px ${color}44, 0 2px 8px rgba(0,0,0,0.25)`
             : '0 2px 8px rgba(0,0,0,0.15)',
+          position: 'relative',
         }}
         onDoubleClick={handleDoubleClick}
       >
         {resizerEl}
+        {editing && <FormattingToolbar color={color} />}
         <div style={{ ...calloutAccent, background: color }} />
         <div style={{ ...calloutBody, fontSize, fontWeight, fontStyle, textAlign }}>
           {editableText}
@@ -342,6 +472,8 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
           color,
           textShadow: selected ? `0 0 8px ${color}55` : 'none',
           position: 'relative',
+          userSelect: editing ? 'text' : 'none',
+          cursor: editing ? 'text' : 'grab',
         }}
         onDoubleClick={handleDoubleClick}
       >
@@ -454,12 +586,13 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          cursor: 'grab',
+          cursor: editing ? 'text' : 'grab',
           overflow: 'hidden',
         }}
         onDoubleClick={handleDoubleClick}
       >
         {resizerEl}
+        {editing && <FormattingToolbar color={color} />}
         {/* Folded corner */}
         <div
           style={{
@@ -485,6 +618,7 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
             lineHeight: 1.4,
             whiteSpace: 'pre-wrap',
             overflowY: 'auto',
+            userSelect: editing ? 'text' : 'none',
           }}
         >
           {editableText}
@@ -504,13 +638,17 @@ function AnnotationNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) 
         textAlign,
         color,
         textShadow: selected ? `0 0 8px ${color}55` : 'none',
-        width: w,
-        height: h,
+        width: w ?? 'auto',
+        height: h ?? 'auto',
         minWidth: w ? undefined : 'auto',
+        position: 'relative',
+        userSelect: editing ? 'text' : 'none',
+        cursor: editing ? 'text' : 'grab',
       }}
       onDoubleClick={handleDoubleClick}
     >
       {resizerEl}
+      {editing && <FormattingToolbar color={color} />}
       {editableText}
     </div>
   )

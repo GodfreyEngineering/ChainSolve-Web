@@ -11,7 +11,7 @@ import { memo, useMemo, useCallback, useRef, useState } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { useComputedValue } from '../../../contexts/ComputedContext'
-import { isVector, isError } from '../../../engine/value'
+import { isVector, isError, type Value } from '../../../engine/value'
 import type { NodeData } from '../../../blocks/types'
 import { NODE_STYLES as s } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
@@ -109,20 +109,35 @@ function ListTableNodeInner({ id, data, selected }: NodeProps) {
   const [scrollTop, setScrollTop] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  const isTable = (
+    v: Value | undefined,
+  ): v is { kind: 'table'; columns: string[]; rows: number[][] } =>
+    v !== undefined && v.kind === 'table'
+
   const values = useMemo(() => {
     if (value && isVector(value)) return value.value
     return null
   }, [value])
 
+  const tableData = useMemo(() => {
+    if (isTable(value)) return { columns: value.columns, rows: value.rows }
+    return null
+  }, [value])
+
   const stats = useMemo(() => {
-    if (!values) return null
-    return computeStats(values)
-  }, [values])
+    if (values) return computeStats(values)
+    if (tableData && tableData.rows.length > 0) {
+      // Stats for first numeric column
+      const firstCol = tableData.rows.map((r) => r[0]).filter((v) => !isNaN(v))
+      return computeStats(firstCol)
+    }
+    return null
+  }, [values, tableData])
 
   const errorMsg = useMemo(() => {
     if (!value) return t('listTable.noData')
     if (isError(value)) return value.message
-    if (!isVector(value)) return t('listTable.expectList')
+    if (!isVector(value) && !isTable(value)) return t('listTable.expectList')
     return null
   }, [value, t])
 
@@ -130,22 +145,25 @@ function ListTableNodeInner({ id, data, selected }: NodeProps) {
     setScrollTop((e.target as HTMLDivElement).scrollTop)
   }, [])
 
-  // Virtual scroll for large lists
-  const totalH = (values?.length ?? 0) * ROW_H
+  // Virtual scroll for large lists/tables
+  const rowCount = values?.length ?? tableData?.rows.length ?? 0
+  const totalH = rowCount * ROW_H
   const visibleH = Math.min(MAX_VISIBLE_H, totalH)
   const startIdx = Math.max(0, Math.floor(scrollTop / ROW_H) - OVERSCAN)
-  const endIdx = values
-    ? Math.min(values.length, Math.ceil((scrollTop + visibleH) / ROW_H) + OVERSCAN)
-    : 0
+  const endIdx = Math.min(rowCount, Math.ceil((scrollTop + visibleH) / ROW_H) + OVERSCAN)
 
-  const ariaLabel = values ? `${nd.label} list, ${values.length} values` : `${nd.label} list block`
+  const ariaLabel = tableData
+    ? `${nd.label} table, ${tableData.rows.length} rows \u00d7 ${tableData.columns.length} columns`
+    : values
+      ? `${nd.label} list, ${values.length} values`
+      : `${nd.label} table output`
 
   return (
     <div
       style={{
         ...s.node,
-        minWidth: 180,
-        maxWidth: 280,
+        minWidth: tableData ? 220 : 180,
+        maxWidth: tableData ? 400 : 280,
         ...(selected ? { ...s.nodeSelected, borderColor: typeColor } : {}),
       }}
       role="group"
@@ -162,11 +180,15 @@ function ListTableNodeInner({ id, data, selected }: NodeProps) {
           <Icon icon={TypeIcon} size={14} style={{ ...s.headerIcon, color: typeColor }} />
           <span style={s.headerLabel}>{nd.label}</span>
         </div>
-        {stats && (
+        {tableData ? (
+          <span style={s.headerValue}>
+            {tableData.rows.length}\u00d7{tableData.columns.length}
+          </span>
+        ) : stats ? (
           <span style={s.headerValue}>
             {stats.count} {t('listTable.items')}
           </span>
-        )}
+        ) : null}
       </div>
 
       <div className="cs-node-body" style={{ ...s.body, padding: '0.3rem 0.4rem' }}>
@@ -284,6 +306,108 @@ function ListTableNodeInner({ id, data, selected }: NodeProps) {
                   <div>
                     <span style={statLabelStyle}>{t('listTable.statSum')}</span>{' '}
                     <span style={statValueStyle}>{fmtNum(stats.sum)}</span>
+                  </div>
+                  <div>
+                    <span style={statLabelStyle}>{t('listTable.statCount')}</span>{' '}
+                    <span style={statValueStyle}>{stats.count}</span>
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Table data rendering */}
+        {tableData && tableData.rows.length > 0 && (
+          <>
+            {/* Column headers */}
+            <div
+              style={{
+                display: 'flex',
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
+                marginBottom: 2,
+                overflowX: 'hidden',
+              }}
+            >
+              <span style={{ ...idxCellStyle, fontWeight: 700, fontSize: '0.58rem' }}>#</span>
+              {tableData.columns.map((col) => (
+                <span
+                  key={col}
+                  style={{
+                    ...valCellStyle,
+                    fontWeight: 700,
+                    fontSize: '0.58rem',
+                    color: 'var(--primary)',
+                  }}
+                >
+                  {col}
+                </span>
+              ))}
+            </div>
+
+            {/* Scrollable table body */}
+            <div
+              ref={containerRef}
+              className="nodrag nowheel"
+              onScroll={handleScroll}
+              style={{
+                maxHeight: MAX_VISIBLE_H,
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                position: 'relative',
+              }}
+            >
+              <div style={{ height: totalH, position: 'relative' }}>
+                {Array.from({ length: endIdx - startIdx }, (_, i) => {
+                  const idx = startIdx + i
+                  const row = tableData.rows[idx]
+                  if (!row) return null
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        position: 'absolute',
+                        top: idx * ROW_H,
+                        left: 0,
+                        right: 0,
+                        height: ROW_H,
+                        display: 'flex',
+                        alignItems: 'center',
+                        borderBottom: '1px solid rgba(255,255,255,0.03)',
+                      }}
+                    >
+                      <span style={idxCellStyle}>{idx}</span>
+                      {row.map((cell, ci) => (
+                        <span key={ci} style={valCellStyle}>
+                          {fmtNum(cell)}
+                        </span>
+                      ))}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Summary statistics */}
+            <div
+              style={{
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                marginTop: 4,
+                paddingTop: 4,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '2px 8px',
+              }}
+            >
+              {stats && (
+                <>
+                  <div>
+                    <span style={statLabelStyle}>{t('listTable.statMin')}</span>{' '}
+                    <span style={statValueStyle}>{fmtNum(stats.min)}</span>
+                  </div>
+                  <div>
+                    <span style={statLabelStyle}>{t('listTable.statMax')}</span>{' '}
+                    <span style={statValueStyle}>{fmtNum(stats.max)}</span>
                   </div>
                   <div>
                     <span style={statLabelStyle}>{t('listTable.statCount')}</span>{' '}

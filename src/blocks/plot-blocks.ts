@@ -96,14 +96,13 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
 
   register({
     type: 'listTable',
-    label: 'List Table',
-    category: 'plot',
+    label: 'Table Output',
+    category: 'output',
     nodeKind: 'csListTable',
     inputs: [{ id: 'data', label: 'Data' }],
-    proOnly: true,
     defaultData: {
       blockType: 'listTable',
-      label: 'List Table',
+      label: 'Table Output',
     },
   })
 }

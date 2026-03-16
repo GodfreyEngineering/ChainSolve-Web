@@ -686,7 +686,7 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
       {
         id: 'outDisplay',
         label: 'Display',
-        blockTypes: ['display'],
+        blockTypes: ['display', 'listTable'],
       },
       { id: 'outPublish', label: 'Publish / Subscribe', blockTypes: ['publish', 'subscribe'] },
       { id: 'outGraph', label: 'Graph blocks', categories: ['plot'] },
@@ -802,9 +802,13 @@ export const UI_ONLY_BLOCKS: ReadonlySet<string> = new Set(['constant', 'materia
  *   - TS-only blocks (UI_ONLY_BLOCKS) are expected and silently skipped.
  *   - No console.warn at boot — clean logs.
  */
+/** Deprecated Rust ops that should NOT be auto-registered in the block library. */
+const DEPRECATED_OPS = new Set(['vectorInput', 'material_full'])
+
 export function validateCatalog(catalog: CatalogEntry[]): void {
   // Auto-register generic BlockDefs for any Rust catalog op missing from TS.
   for (const entry of catalog) {
+    if (DEPRECATED_OPS.has(entry.opId)) continue
     if (!BLOCK_REGISTRY.has(entry.opId)) {
       BLOCK_REGISTRY.set(entry.opId, {
         type: entry.opId,

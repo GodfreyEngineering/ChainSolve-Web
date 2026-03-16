@@ -257,9 +257,10 @@ export function computeGraphHealth(
   computedValues?: ReadonlyMap<string, { kind: string }>,
 ): GraphHealthReport {
   const groups = nodes.filter((n) => (n.data as Record<string, unknown>).blockType === '__group__')
-  const evalNodes = nodes.filter(
-    (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
-  )
+  const evalNodes = nodes.filter((n) => {
+    const bt = (n.data as Record<string, unknown>).blockType as string
+    return bt !== '__group__' && !bt.startsWith('annotation_')
+  })
 
   const collapsedGroups = groups.filter(
     (n) => (n.data as Record<string, unknown>).groupCollapsed === true,

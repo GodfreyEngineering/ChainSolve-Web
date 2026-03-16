@@ -2813,9 +2813,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       connectedIds.add(e.source)
       connectedIds.add(e.target)
     }
-    const realNodes = nodes.filter(
-      (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
-    )
+    const realNodes = nodes.filter((n) => {
+      const bt = (n.data as Record<string, unknown>).blockType as string
+      return bt !== '__group__' && !bt.startsWith('annotation_')
+    })
     let warnings = 0
     for (const n of realNodes) {
       if (!connectedIds.has(n.id)) warnings++
