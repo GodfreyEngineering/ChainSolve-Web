@@ -20,6 +20,7 @@ import {
   Undo2,
   Redo2,
   History,
+  Share2,
 } from 'lucide-react'
 import type { CanvasControls } from '../../pages/CanvasPage'
 import type { SaveStatus } from '../../stores/projectStore'
@@ -231,18 +232,23 @@ export function WorkspaceToolbar({
               onClick={() => setShareOpen(true)}
               style={{
                 ...iconBtn,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
                 fontSize: '0.78rem',
                 fontWeight: 700,
                 letterSpacing: '0.02em',
-                padding: '0 0.55rem',
-                height: 26,
+                padding: '0.15rem 0.6rem',
+                height: 28,
                 borderRadius: 6,
                 background: 'rgba(28,171,176,0.12)',
                 color: 'var(--primary)',
                 marginRight: 8,
+                whiteSpace: 'nowrap',
               }}
               aria-label={t('share.shareProject', 'Share project')}
             >
+              <Share2 size={14} />
               {t('share.shareBtn', 'Share')}
             </button>
           </Tooltip>

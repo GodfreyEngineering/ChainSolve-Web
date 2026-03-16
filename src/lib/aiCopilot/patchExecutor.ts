@@ -12,6 +12,7 @@ import type { Node, Edge } from '@xyflow/react'
 import type { AiPatchOp, AiNodeSpec, AiEdgeSpec } from './types'
 import type { NodeData } from '../../blocks/types'
 import { BLOCK_REGISTRY } from '../../blocks/registry'
+import { createGroup as createGroupFromLib } from '../groups'
 
 // ── Validation types ────────────────────────────────────────────────────────
 
@@ -270,7 +271,6 @@ export function applyPatchOps(
       }
 
       case 'createGroup': {
-        // Group ops are handled by the caller (groups.createGroup).
         if (!Array.isArray(op.nodeIds) || op.nodeIds.length < 2) {
           errors.push({
             opIndex: i,
@@ -286,6 +286,28 @@ export function applyPatchOps(
             opIndex: i,
             op: op.op,
             message: `Nodes not found: ${missing.join(', ')}`,
+          })
+          break
+        }
+        // Actually create the group node and reparent members
+        try {
+          const { groupNode, updatedNodes } = createGroupFromLib(
+            op.nodeIds,
+            nodes as Node<NodeData>[],
+          )
+          // Apply optional label and color from the AI op
+          if (op.label) {
+            ;(groupNode.data as NodeData).label = op.label
+          }
+          if (op.color) {
+            ;(groupNode.data as NodeData).groupColor = op.color
+          }
+          nodes = [groupNode, ...updatedNodes]
+        } catch {
+          errors.push({
+            opIndex: i,
+            op: op.op,
+            message: 'Failed to create group',
           })
           break
         }

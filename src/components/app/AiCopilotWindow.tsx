@@ -719,7 +719,7 @@ export function AiCopilotWindow({
                 }}
                 title={t('ai.deleteConversation', 'Delete')}
               >
-                \u00D7
+                ×
               </button>
             </div>
           ))}

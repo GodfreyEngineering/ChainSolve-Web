@@ -32,7 +32,6 @@ import {
   RefreshCw,
   PanelRight,
   Pencil,
-  HelpCircle,
   Eye,
   EyeOff,
   ScanEye,
@@ -750,16 +749,6 @@ export function CanvasToolbar({
             </Tooltip>
           </>
         )}
-
-        <Tooltip content={t('help.learnMore')} side={tipSide}>
-          <button
-            onClick={() => window.open('/docs?section=shortcuts', '_blank', 'noopener')}
-            style={btnStyle(false)}
-            aria-label={t('help.learnMore')}
-          >
-            <HelpCircle size={16} />
-          </button>
-        </Tooltip>
       </div>
       {dragging && ghostEdge && (
         <>
