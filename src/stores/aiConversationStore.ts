@@ -14,6 +14,7 @@ import type { AiPatchOp, RiskAssessment } from '../lib/ai/types'
 export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
+  thinking?: string
   patchOps?: AiPatchOp[]
   risk?: RiskAssessment
   assumptions?: string[]

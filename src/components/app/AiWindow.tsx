@@ -310,6 +310,7 @@ export function AiWindow({
   const [activeTask, setActiveTask] = useState<AiTask>(initialTask ?? 'chat')
   const [input, setInput] = useState(initialMessage ?? '')
   const [loading, setLoading] = useState(false)
+  const [streamPhase, setStreamPhase] = useState<'thinking' | 'building'>('thinking')
   const [pendingOps, setPendingOps] = useState<AiPatchOp[] | null>(null)
   const [pendingRisk, setPendingRisk] = useState<RiskAssessment | null>(null)
   const [pendingSummary, setPendingSummary] = useState('')
@@ -375,6 +376,7 @@ export function AiWindow({
       if (!projectId || !canvasId || loading) return
       setMessages((prev) => [...prev, { role: 'user', content: message }])
       setLoading(true)
+      setStreamPhase('thinking')
       setPendingOps(null)
       setPendingRisk(null)
 
@@ -400,6 +402,7 @@ export function AiWindow({
             {
               role: 'assistant',
               content: response.message,
+              thinking: response.thinking,
               patchOps: ops,
               risk,
               assumptions: response.assumptions,
@@ -462,6 +465,7 @@ export function AiWindow({
     setInput('')
     setMessages((prev) => [...prev, { role: 'user', content: trimmed }])
     setLoading(true)
+    setStreamPhase('thinking')
     setPendingOps(null)
     setPendingRisk(null)
     scrollToBottom()
@@ -488,7 +492,8 @@ export function AiWindow({
       // via the `loading` state instead.
       for await (const event of sendAiRequestStreaming(requestOpts)) {
         if (event.type === 'delta') {
-          // Raw JSON token — skip display. The loading indicator handles UX.
+          // Raw JSON token — skip display. Transition to building phase.
+          setStreamPhase('building')
           continue
         } else if (event.type === 'done') {
           const response = event.response
@@ -502,6 +507,7 @@ export function AiWindow({
           const finalMsg: ChatMessage = {
             role: 'assistant',
             content: response.message,
+            thinking: response.thinking,
             patchOps: ops,
             risk,
             assumptions: response.assumptions,
@@ -816,6 +822,24 @@ export function AiWindow({
         )}
         {messages.map((msg, i) => (
           <div key={i} style={msg.role === 'user' ? s.msgUser : s.msgAi}>
+            {msg.thinking && (
+              <details
+                style={{
+                  fontSize: '0.72rem',
+                  color: 'rgba(244,244,243,0.5)',
+                  borderLeft: '2px solid var(--primary)',
+                  paddingLeft: 8,
+                  marginBottom: 8,
+                }}
+              >
+                <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: '0.7rem' }}>
+                  {t('ai.reasoning', 'Reasoning')}
+                </summary>
+                <div style={{ marginTop: 4, whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
+                  {msg.thinking}
+                </div>
+              </details>
+            )}
             <div>{msg.content}</div>
             {msg.assumptions && msg.assumptions.length > 0 && (
               <div style={{ marginTop: '0.3rem', opacity: 0.6, fontSize: '0.75rem' }}>
@@ -848,24 +872,18 @@ export function AiWindow({
         {loading && (
           <div
             style={{
-              ...s.msgAi,
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: 8,
+              padding: '0.5rem',
               opacity: 0.7,
             }}
           >
             <span style={s.thinkingDot} />
-            <span style={{ fontStyle: 'italic' }}>
-              {activeTask === 'chat' && mode === 'edit'
-                ? t('ai.buildingModel', 'Building your model\u2026')
-                : activeTask === 'fix_graph'
-                  ? t('ai.analyzingGraph', 'Analyzing and fixing graph\u2026')
-                  : activeTask === 'explain_node'
-                    ? t('ai.analyzing', 'Analyzing\u2026')
-                    : activeTask === 'optimize'
-                      ? t('ai.optimizing', 'Optimizing graph\u2026')
-                      : t('ai.generating')}
+            <span style={{ fontSize: '0.78rem' }}>
+              {streamPhase === 'thinking'
+                ? t('ai.analyzingRequest', 'Analyzing your request\u2026')
+                : t('ai.buildingModel', 'Building your model\u2026')}
             </span>
           </div>
         )}

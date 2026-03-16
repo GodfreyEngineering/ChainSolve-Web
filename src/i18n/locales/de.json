@@ -1686,6 +1686,8 @@
     "analyzingGraph": "Graph wird analysiert und repariert\u2026",
     "analyzing": "Analyse\u2026",
     "optimizing": "Graph wird optimiert\u2026",
+    "analyzingRequest": "Ihre Anfrage wird analysiert\u2026",
+    "reasoning": "Denkprozess",
     "apply": "Änderungen anwenden",
     "cancel": "Abbrechen",
     "permissionRequired": "Diese Änderung erfordert Ihre Bestätigung vor der Anwendung.",

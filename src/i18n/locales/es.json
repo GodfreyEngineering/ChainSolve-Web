@@ -1686,6 +1686,8 @@
     "analyzingGraph": "Analizando y corrigiendo el grafo\u2026",
     "analyzing": "Analizando\u2026",
     "optimizing": "Optimizando el grafo\u2026",
+    "analyzingRequest": "Analizando tu solicitud\u2026",
+    "reasoning": "Razonamiento",
     "apply": "Aplicar cambios",
     "cancel": "Cancelar",
     "permissionRequired": "Este cambio requiere tu confirmación antes de aplicarse.",

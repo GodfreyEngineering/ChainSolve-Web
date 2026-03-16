@@ -97,6 +97,7 @@ export interface RiskAssessment {
 export interface AiResponsePayload {
   mode: AiMode
   message: string
+  thinking?: string
   assumptions: string[]
   risk: { level: RiskLevel; reasons: string[] }
   patch: {
@@ -130,6 +131,7 @@ export interface AiApiResponse {
   ok: true
   task: AiTask
   message: string
+  thinking?: string
   assumptions: string[]
   risk: RiskAssessment
   patchOps: AiPatchOp[]

@@ -1733,6 +1733,8 @@
     "analyzingGraph": "Analyzing and fixing graph\u2026",
     "analyzing": "Analyzing\u2026",
     "optimizing": "Optimizing graph\u2026",
+    "analyzingRequest": "Analyzing your request\u2026",
+    "reasoning": "Reasoning",
     "apply": "Apply changes",
     "cancel": "Cancel",
     "permissionRequired": "This change requires your confirmation before applying.",

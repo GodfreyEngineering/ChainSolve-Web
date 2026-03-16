@@ -167,6 +167,7 @@ ${BLOCK_CATALOG_DIGEST}
 
 RULES:
 - Return ONLY valid JSON matching the required schema. No markdown, no code fences.
+- Always include a "thinking" field in your JSON response with your step-by-step reasoning before providing the final answer. This should be a clear explanation of your approach, what calculations you're setting up, and why you chose specific blocks.
 - Do NOT hallucinate blockType values. Only use block types from the catalog above.
 - All node IDs must be unique strings prefixed with "ai_node_".
 - All edge IDs must be unique strings prefixed with "ai_edge_".
@@ -174,7 +175,24 @@ RULES:
 - For "number" nodes, set data.value to the numeric value.
 - Position nodes in a readable left-to-right layout (x increases by ~200 per column).
 - Keep explanations concise. Focus on the graph structure.
-- Assess risk honestly: low for simple additions, medium for >10 ops or variable changes, high for removals.`
+- Assess risk honestly: low for simple additions, medium for >10 ops or variable changes, high for removals.
+
+COLORING: After creating nodes, include updateNodeData ops to set "userColor" for visual categorization of different subsystems:
+- Input parameters: "#3B82F6" (blue)
+- Core computation: "#8B5CF6" (purple)
+- Constants/references: "#F59E0B" (amber)
+- Output/display nodes: "#10B981" (green)
+- Constraints/limits: "#EF4444" (red)
+
+GROUPS: You MUST organize related nodes into logical groups using createGroup ops for ANY response with 4 or more nodes. Name groups descriptively (e.g., "Input Parameters", "Aerodynamics", "Results Display"). Use different colors per subsystem group. Every node should belong to a group. This is mandatory, not optional.
+
+BEST PRACTICES:
+- Set descriptive labels on ALL nodes. Never use raw blockType as label. Labels should describe what the value represents (e.g., "Car Mass (kg)" not "number").
+- Use display blocks with units for all key outputs so users can see results immediately.
+- Layout nodes left-to-right: inputs on the left (~x:100), computation in the middle (~x:400-700), outputs on the right (~x:900+). Space nodes vertically ~60px apart.
+- When engineering/science blocks exist in the catalog (kinetic_energy, force_ma, etc.), use them instead of building manual arithmetic chains.
+- Use unit_convert blocks when units need converting between subsystems.
+- For large models, create clear visual separation between subsystems by using groups with distinct colors and spacing groups ~100px apart vertically.`
 
   if (task === 'fix_graph') {
     return `${base}
@@ -188,6 +206,7 @@ Mode: ${mode}
 
 Required JSON response:
 {
+  "thinking": "step-by-step reasoning about the fix",
   "mode": "${mode}",
   "message": "what was fixed and why",
   "assumptions": ["any assumptions"],
@@ -205,6 +224,7 @@ This is READ-ONLY. Do NOT propose any patch ops. Return empty ops array.
 
 Required JSON response:
 {
+  "thinking": "step-by-step reasoning about the node analysis",
   "mode": "plan",
   "message": "concise explanation of the node and its role in the chain",
   "assumptions": [],
@@ -228,6 +248,7 @@ The template should be a self-contained subgraph (nodes + edges) with normalized
 
 Required JSON response:
 {
+  "thinking": "step-by-step reasoning about the template",
   "mode": "plan",
   "message": "description of the template",
   "assumptions": [],
@@ -251,6 +272,7 @@ Values must be valid CSS color values (hex, rgb, hsl).
 
 Required JSON response:
 {
+  "thinking": "step-by-step reasoning about the theme design",
   "mode": "plan",
   "message": "description of the theme",
   "assumptions": [],
@@ -280,6 +302,7 @@ Mode: ${mode}
 
 Required JSON response:
 {
+  "thinking": "step-by-step reasoning about the optimizations",
   "mode": "${mode}",
   "message": "summary of optimizations found and proposed changes",
   "assumptions": ["any assumptions"],
@@ -304,6 +327,7 @@ Mode: ${mode}
 
 Required JSON response:
 {
+  "thinking": "step-by-step reasoning about the improvements",
   "mode": "${mode}",
   "message": "list of suggested improvements with rationale",
   "assumptions": ["any assumptions"],
@@ -320,11 +344,9 @@ Required JSON response:
   - bypass: propose ops for auto-apply (user still confirms high-risk).
 - IMPORTANT: When mode is "edit", always include the actual patch ops to implement the request. The user expects blocks to appear on their canvas, not just a text explanation.
 
-BEST PRACTICES — build professional, well-organized models:
-- GROUPS: Always organize related nodes into logical groups using createGroup ops. Name groups clearly (e.g. "Input Parameters", "Aerodynamics", "Results"). Use different colors per subsystem. For large models (>10 nodes), groups are mandatory.
+ADDITIONAL CHAT BEST PRACTICES:
 - LABELS: Give every number node a descriptive label with units, e.g. "Mass (kg)", "Velocity (m/s)", "Pressure (Pa)". Never leave labels as defaults.
 - DISPLAY BLOCKS: Add display blocks for key outputs and intermediate results so the user can see computed values. Label them clearly, e.g. "Total Force (N)", "Efficiency (%)".
-- LAYOUT: Position nodes in a clean left-to-right flow. Inputs on the left (x: 100-300), computation in the middle (x: 400-800), outputs on the right (x: 900+). Use vertical spacing (y += 60-80) between related nodes. Group vertically by subsystem.
 - ENGINEERING BLOCKS: Prefer specialized engineering blocks (e.g. eng.mechanics.kinetic_energy) over building the formula from raw math blocks. This is more readable and less error-prone.
 - MATERIALS: When building engineering models, define materials using createMaterial ops with realistic properties (density, Young's modulus, etc.).
 - CUSTOM FUNCTIONS: For repeated calculations, create reusable custom functions with createCustomFunction instead of duplicating node chains.
@@ -334,6 +356,7 @@ BEST PRACTICES — build professional, well-organized models:
 
 Required JSON response schema:
 {
+  "thinking": "step-by-step reasoning about your approach",
   "mode": "${mode}",
   "message": "human explanation of what this does",
   "assumptions": ["any assumptions made"],
@@ -358,6 +381,7 @@ Required JSON response schema:
 interface AiResponse {
   mode: string
   message: string
+  thinking?: string
   assumptions: string[]
   risk: { level: string; reasons: string[] }
   patch: { ops: unknown[] }
@@ -386,6 +410,13 @@ function validateAiResponse(raw: unknown): AiResponse | null {
   }
   const patch = obj.patch as Record<string, unknown>
   if (!Array.isArray(patch.ops)) patch.ops = []
+
+  // Allow thinking field to pass through
+  if (typeof obj.thinking === 'string') {
+    // keep it
+  } else {
+    delete obj.thinking
+  }
 
   return obj as unknown as AiResponse
 }
@@ -574,6 +605,7 @@ async function callOpenAiStreaming(
               ok: true as const,
               task: streamMeta?.task ?? 'chat',
               message: parsed.message,
+              ...(parsed.thinking ? { thinking: parsed.thinking } : {}),
               assumptions: parsed.assumptions ?? [],
               risk: parsed.risk ?? { level: 'low', reasons: [] },
               patchOps: parsed.patch?.ops ?? [],
@@ -1124,6 +1156,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     // Include extra fields for specific tasks
+    if (parsed.thinking) response.thinking = parsed.thinking
     if (parsed.explanation) response.explanation = parsed.explanation
     if (parsed.template) response.template = parsed.template
     if (parsed.theme) response.theme = parsed.theme
