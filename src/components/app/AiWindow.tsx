@@ -446,6 +446,7 @@ export function AiWindow({
       onApplyPatch,
       t,
       computedValues,
+      setMessages,
     ],
   )
   triggerSuggestionRef.current = triggerSuggestion
@@ -555,6 +556,7 @@ export function AiWindow({
     scrollToBottom,
     t,
     computedValues,
+    setMessages,
   ])
 
   const handleApply = useCallback(() => {
@@ -565,7 +567,7 @@ export function AiWindow({
       setPendingRisk(null)
       setPendingSummary('')
     }
-  }, [pendingOps, pendingSummary, onApplyPatch, t])
+  }, [pendingOps, pendingSummary, onApplyPatch, t, setMessages])
 
   const handleCancelPending = useCallback(() => {
     setPendingOps(null)

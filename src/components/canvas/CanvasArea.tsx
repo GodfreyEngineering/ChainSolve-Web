@@ -1348,7 +1348,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         { id, type: def.nodeKind, position, data: { ...def.defaultData } } as Node<NodeData>,
       ])
     },
-    [readOnly, ent, screenToFlowPosition, setNodes, doSaveHistory],
+    [readOnly, ent, screenToFlowPosition, setNodes, doSaveHistory, toast],
   )
 
   // ── Context menus ───────────────────────────────────────────────────────────
