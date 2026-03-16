@@ -27,6 +27,8 @@ export interface DockPanel {
   id: DockTab
   label: string
   content: ReactNode
+  /** Badge count (errors/warnings). Shown as a colored dot or count on the tab. */
+  badge?: number
 }
 
 interface BottomDockProps {
@@ -234,8 +236,12 @@ export function BottomDock({
               onClick={() => switchTab(panel.id)}
               title={panel.label}
               aria-label={panel.label}
+              style={{ position: 'relative' }}
             >
               {panel.label}
+              {panel.badge != null && panel.badge > 0 && (
+                <span style={badgeStyle}>{panel.badge > 9 ? '9+' : panel.badge}</span>
+              )}
             </button>
           ))}
         </div>
@@ -281,6 +287,24 @@ const tabBarStyle: React.CSSProperties = {
   borderBottom: '1px solid var(--border, #333)',
   flexShrink: 0,
   height: 28,
+}
+
+const badgeStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: 2,
+  right: 2,
+  minWidth: 14,
+  height: 14,
+  borderRadius: 7,
+  background: 'var(--danger, #ef4444)',
+  color: '#fff',
+  fontSize: '0.55rem',
+  fontWeight: 700,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  lineHeight: 1,
+  padding: '0 3px',
 }
 
 const contentStyle: React.CSSProperties = {

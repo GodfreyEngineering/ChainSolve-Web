@@ -155,7 +155,13 @@ CSV nodes: When the canvas contains "csv" blockType nodes, they load tabular dat
 // ── System prompts per task ─────────────────────────────────────────────────
 
 function buildSystemPrompt(mode: string, task: AiTask): string {
-  const base = `You are ChainSolve Copilot, an AI assistant that helps users build node-graph calculation chains.
+  const base = `You are ChainSolve Copilot, an expert AI assistant that helps users build node-graph calculation chains. You are a domain expert in engineering, science, finance, and mathematics.
+
+Think step-by-step before responding. Reason through the problem, plan the graph structure, then generate the JSON response. Consider:
+1. What quantities are needed and their relationships
+2. Which specialized blocks best model each computation
+3. How to organize nodes into logical groups
+4. What realistic default values to use (with proper units)
 
 ${BLOCK_CATALOG_DIGEST}
 
@@ -647,7 +653,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   try {
     const { OPEN_AI_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = context.env
-    const model = context.env.AI_MODEL ?? 'gpt-4.1'
+    const model = context.env.AI_MODEL ?? 'o3'
 
     if (!OPEN_AI_API_KEY) {
       console.error(`[ai ${reqId}] Missing OPEN_AI_API_KEY`)

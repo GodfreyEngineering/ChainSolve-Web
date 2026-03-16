@@ -2726,6 +2726,32 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   )
 
   // ── Bottom dock panels (G5-2: always both tabs) ────────────────────────
+  // Badge counts for bottom panel tabs
+  const problemCount = useMemo(() => {
+    let count = 0
+    for (const v of computed.values()) {
+      if ((v as { kind: string }).kind === 'error') count++
+    }
+    return count
+  }, [computed])
+
+  // Simple health warning count: disconnected nodes (no edges)
+  const healthWarningCount = useMemo(() => {
+    const connectedIds = new Set<string>()
+    for (const e of edges) {
+      connectedIds.add(e.source)
+      connectedIds.add(e.target)
+    }
+    const realNodes = nodes.filter(
+      (n) => (n.data as Record<string, unknown>).blockType !== '__group__',
+    )
+    let warnings = 0
+    for (const n of realNodes) {
+      if (!connectedIds.has(n.id)) warnings++
+    }
+    return warnings + problemCount
+  }, [nodes, edges, problemCount])
+
   const dockPanels = useMemo<DockPanel[]>(
     () => [
       {
@@ -2740,6 +2766,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       {
         id: 'health' as DockTab,
         label: t('toolbar.graphHealth', 'Graph Health'),
+        badge: healthWarningCount,
         content: (
           <Suspense fallback={null}>
             <LazyGraphHealthPanel
@@ -2765,6 +2792,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       {
         id: 'problems' as DockTab,
         label: t('dock.problems', 'Problems'),
+        badge: problemCount,
         content: (
           <Suspense fallback={null}>
             <LazyProblemsPanel />
@@ -2817,6 +2845,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       stackEntries,
       handleRestoreHistory,
       canvasId,
+      healthWarningCount,
+      problemCount,
     ],
   )
 

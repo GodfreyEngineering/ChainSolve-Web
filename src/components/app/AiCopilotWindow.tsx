@@ -15,7 +15,7 @@
  * Free users see a locked state with upgrade CTA.
  */
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppWindow } from '../ui/AppWindow'
 import type { AiMode, AiTask, AiPatchOp, RiskAssessment } from '../../lib/aiCopilot/types'
@@ -23,6 +23,7 @@ import { assessRisk, requiresConfirmation } from '../../lib/aiCopilot/riskScorin
 import { sendCopilotRequest, sendCopilotRequestStreaming } from '../../lib/aiCopilot/aiService'
 import { getEntitlements, type Plan } from '../../lib/entitlements'
 import { usePreferencesStore } from '../../stores/preferencesStore'
+import { useAiConversationStore, type ChatMessage } from '../../stores/aiConversationStore'
 import { AI_COPILOT_WINDOW_ID } from '../../lib/aiCopilot/constants'
 export { AI_COPILOT_WINDOW_ID }
 
@@ -209,6 +210,58 @@ const s = {
     animation: 'cs-ai-pulse 1.2s ease-in-out infinite',
     flexShrink: 0,
   } satisfies React.CSSProperties,
+  convHeader: {
+    display: 'flex',
+    gap: 4,
+    alignItems: 'center',
+  },
+  convHeaderBtn: {
+    padding: '0.2rem 0.5rem',
+    borderRadius: 6,
+    border: '1px solid rgba(255,255,255,0.12)',
+    background: 'rgba(255,255,255,0.04)',
+    color: 'var(--fg, #F4F4F3)',
+    fontSize: '0.75rem',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  } satisfies React.CSSProperties,
+  convList: {
+    maxHeight: 200,
+    overflowY: 'auto' as const,
+    borderRadius: 6,
+    border: '1px solid rgba(255,255,255,0.1)',
+    background: 'rgba(0,0,0,0.2)',
+  },
+  convItem: {
+    display: 'flex',
+    alignItems: 'center',
+    borderBottom: '1px solid rgba(255,255,255,0.05)',
+  },
+  convItemBtn: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '0.35rem 0.5rem',
+    background: 'transparent',
+    border: 'none',
+    color: 'var(--fg, #F4F4F3)',
+    fontSize: '0.75rem',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    textAlign: 'left' as const,
+    overflow: 'hidden',
+  } satisfies React.CSSProperties,
+  convDeleteBtn: {
+    padding: '0.2rem 0.4rem',
+    background: 'transparent',
+    border: 'none',
+    color: 'rgba(239,68,68,0.7)',
+    fontSize: '0.85rem',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    flexShrink: 0,
+  } satisfies React.CSSProperties,
 }
 
 // Inject the pulse animation into the document once.
@@ -217,22 +270,6 @@ if (typeof document !== 'undefined' && !document.getElementById('cs-ai-pulse-sty
   style.id = 'cs-ai-pulse-style'
   style.textContent = `@keyframes cs-ai-pulse { 0%, 100% { opacity: 0.3; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.1); } }`
   document.head.appendChild(style)
-}
-
-// ── Types ───────────────────────────────────────────────────────────────────
-
-interface ChatMessage {
-  role: 'user' | 'assistant'
-  content: string
-  patchOps?: AiPatchOp[]
-  risk?: RiskAssessment
-  assumptions?: string[]
-}
-
-interface ActionHistoryEntry {
-  summary: string
-  opsCount: number
-  timestamp: number
 }
 
 // ── Props ───────────────────────────────────────────────────────────────────
@@ -246,6 +283,8 @@ export interface AiCopilotWindowProps {
   onUpgrade: () => void
   /** Prefill the user message. */
   initialMessage?: string
+  /** Auto-trigger a specific task on open (e.g. from graph health buttons). */
+  initialTask?: AiTask
   /** G8-1: When true, render content directly without AppWindow wrapper (for docked mode). */
   docked?: boolean
   /** 6.02: Computed values per node for AI context. */
@@ -262,26 +301,71 @@ export function AiCopilotWindow({
   onApplyPatch,
   onUpgrade,
   initialMessage,
+  initialTask,
   docked = false,
   computedValues,
 }: AiCopilotWindowProps) {
   const { t } = useTranslation()
   const [mode, setMode] = useState<AiMode>('edit')
-  const [activeTask, setActiveTask] = useState<AiTask>('chat')
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [activeTask, setActiveTask] = useState<AiTask>(initialTask ?? 'chat')
   const [input, setInput] = useState(initialMessage ?? '')
   const [loading, setLoading] = useState(false)
   const [pendingOps, setPendingOps] = useState<AiPatchOp[] | null>(null)
   const [pendingRisk, setPendingRisk] = useState<RiskAssessment | null>(null)
   const [pendingSummary, setPendingSummary] = useState('')
   const [tokensRemaining, setTokensRemaining] = useState<number | null>(null)
-  const [history, setHistory] = useState<ActionHistoryEntry[]>([])
+  const [showConvList, setShowConvList] = useState(false)
   const transcriptRef = useRef<HTMLDivElement>(null)
+
+  // Persistent conversation store
+  const convStore = useAiConversationStore()
+  const activeConv = convStore.getActive()
+  const messages = useMemo(() => activeConv?.messages ?? [], [activeConv])
+  // Wrap setMessages to persist to store
+  const setMessages = useCallback(
+    (updater: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+      const current = useAiConversationStore.getState().getActive()?.messages ?? []
+      const newMsgs = typeof updater === 'function' ? updater(current) : updater
+      // Sync back to store: replace all messages on active conversation
+      if (newMsgs.length > current.length) {
+        // New message added
+        const added = newMsgs[newMsgs.length - 1]
+        convStore.addMessage(added)
+      } else if (newMsgs.length === current.length && newMsgs.length > 0) {
+        // Last message updated (streaming finalize)
+        convStore.updateLastMessage(newMsgs[newMsgs.length - 1])
+      }
+    },
+    [convStore],
+  )
 
   const ent = getEntitlements(plan)
   const aiOptOut = usePreferencesStore((s) => s.aiOptOut)
   const canUse = ent.canUseAi && !aiOptOut
   const isEnterprise = plan === 'enterprise'
+  const autoTriggeredRef = useRef(false)
+
+  // Auto-trigger when opened with initialTask (e.g. from graph health buttons)
+  useEffect(() => {
+    if (
+      initialTask &&
+      initialMessage &&
+      canUse &&
+      projectId &&
+      canvasId &&
+      !autoTriggeredRef.current &&
+      messages.length === 0
+    ) {
+      autoTriggeredRef.current = true
+      // Defer to next tick so triggerSuggestion is defined
+      setTimeout(() => {
+        triggerSuggestionRef.current?.(initialTask, initialMessage)
+      }, 0)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialTask, initialMessage, canUse, projectId, canvasId])
+
+  const triggerSuggestionRef = useRef<((task: AiTask, msg: string) => void) | null>(null)
 
   const triggerSuggestion = useCallback(
     (task: AiTask, message: string) => {
@@ -320,10 +404,6 @@ export function AiCopilotWindow({
               risk,
               assumptions: response.assumptions,
             },
-          ])
-          setHistory((prev) => [
-            { summary: response.message.slice(0, 80), opsCount: ops.length, timestamp: Date.now() },
-            ...prev.slice(0, 19),
           ])
           if (ops.length > 0 && effectiveMode !== 'plan') {
             const needsConfirm = requiresConfirmation(
@@ -365,6 +445,7 @@ export function AiCopilotWindow({
       computedValues,
     ],
   )
+  triggerSuggestionRef.current = triggerSuggestion
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -427,15 +508,6 @@ export function AiCopilotWindow({
           }
 
           setMessages((prev) => [...prev, finalMsg])
-
-          setHistory((prev) => [
-            {
-              summary: response.message.slice(0, 80),
-              opsCount: ops.length,
-              timestamp: Date.now(),
-            },
-            ...prev.slice(0, 19),
-          ])
 
           if (ops.length > 0 && effectiveMode !== 'plan') {
             const needsConfirm = requiresConfirmation(
@@ -565,6 +637,95 @@ export function AiCopilotWindow({
 
   const mainContent = (
     <div style={s.container}>
+      {/* Conversation header */}
+      <div style={s.convHeader}>
+        <button
+          type="button"
+          style={s.convHeaderBtn}
+          onClick={() => {
+            convStore.newConversation()
+            setInput('')
+          }}
+          title={t('ai.newConversation', 'New conversation')}
+        >
+          +
+        </button>
+        <button
+          type="button"
+          style={{
+            ...s.convHeaderBtn,
+            flex: 1,
+            textAlign: 'left' as const,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap' as const,
+          }}
+          onClick={() => setShowConvList(!showConvList)}
+        >
+          {activeConv?.title ?? t('ai.newConversation', 'New conversation')}
+          <span style={{ marginLeft: 4, fontSize: '0.6rem', opacity: 0.5 }}>
+            {showConvList ? '\u25B2' : '\u25BC'}
+          </span>
+        </button>
+      </div>
+
+      {/* Conversation list dropdown */}
+      {showConvList && (
+        <div style={s.convList}>
+          {convStore.conversations.length === 0 && (
+            <div
+              style={{ padding: '0.5rem', opacity: 0.4, fontSize: '0.72rem', textAlign: 'center' }}
+            >
+              {t('ai.noConversations', 'No previous conversations')}
+            </div>
+          )}
+          {convStore.conversations.map((conv) => (
+            <div
+              key={conv.id}
+              style={{
+                ...s.convItem,
+                background:
+                  conv.id === convStore.activeId ? 'rgba(28,171,176,0.15)' : 'transparent',
+              }}
+            >
+              <button
+                type="button"
+                style={s.convItemBtn}
+                onClick={() => {
+                  convStore.switchTo(conv.id)
+                  setShowConvList(false)
+                }}
+              >
+                <span
+                  style={{
+                    flex: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {conv.title}
+                </span>
+                <span style={{ fontSize: '0.6rem', opacity: 0.4, flexShrink: 0 }}>
+                  {conv.messages.length} msgs
+                </span>
+              </button>
+              <button
+                type="button"
+                style={s.convDeleteBtn}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  convStore.remove(conv.id)
+                }}
+                title={t('ai.deleteConversation', 'Delete')}
+              >
+                \u00D7
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Mode selector */}
       <div style={s.row}>
         <span style={s.label}>{t('ai.modeLabel')}</span>
@@ -784,25 +945,6 @@ export function AiCopilotWindow({
       </div>
 
       {/* Action history (collapsible) */}
-      {history.length > 0 && (
-        <details style={{ fontSize: '0.7rem', opacity: 0.6 }}>
-          <summary style={{ cursor: 'pointer' }}>
-            {t('ai.actionHistory', 'History')} ({history.length})
-          </summary>
-          <div style={{ marginTop: '0.3rem', maxHeight: 80, overflowY: 'auto' }}>
-            {history.map((h, i) => (
-              <div
-                key={i}
-                style={{ padding: '0.15rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
-              >
-                {h.summary}
-                {h.opsCount > 0 && ` (${h.opsCount} ops)`}
-              </div>
-            ))}
-          </div>
-        </details>
-      )}
-
       {/* Privacy notice */}
       <div style={s.privacyNotice}>{t('ai.privacyNoticeShort')}</div>
     </div>

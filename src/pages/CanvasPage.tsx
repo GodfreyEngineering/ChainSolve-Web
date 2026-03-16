@@ -1827,11 +1827,15 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const [upgradeExportOpen, setUpgradeExportOpen] = useState(false)
   const [upgradeAiOpen, setUpgradeAiOpen] = useState(false)
   const [aiInitialMessage, setAiInitialMessage] = useState<string | undefined>()
+  const [aiInitialTask, setAiInitialTask] = useState<
+    import('../lib/aiCopilot/types').AiTask | undefined
+  >()
 
-  /** Open the AI Copilot panel, optionally prefilling a message. */
+  /** Open the AI Copilot panel, optionally prefilling a message and task. */
   const openAiPanel = useCallback(
-    (message?: string) => {
+    (message?: string, task?: import('../lib/aiCopilot/types').AiTask) => {
       setAiInitialMessage(message)
+      setAiInitialTask(task)
       openWindow(AI_COPILOT_WINDOW_ID, { width: 520, height: 560 })
     },
     [openWindow],
@@ -2281,8 +2285,10 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                 onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
                 onOpenGroups={() => setTemplateManagerOpen(true)}
                 onOpenMaterials={() => setMaterialWizardOpen(true)}
-                onFixWithCopilot={() => openAiPanel()}
-                onExplainIssues={() => openAiPanel()}
+                onFixWithCopilot={() => openAiPanel('Fix all graph issues', 'fix_graph')}
+                onExplainIssues={() =>
+                  openAiPanel('Explain all graph issues and warnings', 'explain_node')
+                }
                 onExplainNode={(nodeId) => openAiPanel(`Explain node ${nodeId}`)}
                 onInsertFromPrompt={() => openAiPanel()}
                 onNodeDragStop={handleNodeDragStop(activeCanvasId)}
@@ -2307,8 +2313,10 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                 onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
                 onOpenGroups={() => setTemplateManagerOpen(true)}
                 onOpenMaterials={() => setMaterialWizardOpen(true)}
-                onFixWithCopilot={() => openAiPanel()}
-                onExplainIssues={() => openAiPanel()}
+                onFixWithCopilot={() => openAiPanel('Fix all graph issues', 'fix_graph')}
+                onExplainIssues={() =>
+                  openAiPanel('Explain all graph issues and warnings', 'explain_node')
+                }
                 onExplainNode={(nodeId) => openAiPanel(`Explain node ${nodeId}`)}
                 onInsertFromPrompt={() => openAiPanel()}
                 onNodeDragStop={handleNodeDragStop(secondaryCanvasId)}
@@ -2331,8 +2339,10 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
             onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
             onOpenGroups={() => setTemplateManagerOpen(true)}
             onOpenMaterials={() => setMaterialWizardOpen(true)}
-            onFixWithCopilot={() => openAiPanel()}
-            onExplainIssues={() => openAiPanel()}
+            onFixWithCopilot={() => openAiPanel('Fix all graph issues', 'fix_graph')}
+            onExplainIssues={() =>
+              openAiPanel('Explain all graph issues and warnings', 'explain_node')
+            }
             onExplainNode={(nodeId) => openAiPanel(`Explain node ${nodeId}`)}
             onInsertFromPrompt={() => openAiPanel()}
           />
@@ -2376,6 +2386,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                 }}
                 onUpgrade={() => setUpgradeAiOpen(true)}
                 initialMessage={aiInitialMessage}
+                initialTask={aiInitialTask}
                 computedValues={canvasRef.current?.getComputedValues()}
               />
             </Suspense>
