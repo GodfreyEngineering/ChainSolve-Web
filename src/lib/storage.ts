@@ -106,7 +106,14 @@ export async function saveProjectJson(projectId: string, projectJson: unknown): 
   const userId = session.user.id
   const key = `${userId}/${projectId}/project.json`
 
-  const blob = new Blob([JSON.stringify(projectJson)], { type: 'application/json' })
+  let serialized: string
+  try {
+    serialized = JSON.stringify(projectJson)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    throw new ServiceError('SERIALIZATION_ERROR', `Failed to serialize project JSON: ${msg}`, false)
+  }
+  const blob = new Blob([serialized], { type: 'application/json' })
 
   await uploadWithRetry('projects', key, blob, { upsert: true, contentType: 'application/json' })
 
@@ -123,12 +130,29 @@ export async function saveProjectJson(projectId: string, projectJson: unknown): 
 /**
  * PROJ-01: Upload project blob to storage without updating the DB.
  * Returns the storage key. Use with save_project_metadata RPC for atomic CAS.
+ *
+ * A.1: Wraps JSON.stringify in a try/catch to handle circular references
+ * gracefully. Logs payload size for debugging large project saves.
  */
 export async function uploadProjectBlob(projectId: string, projectJson: unknown): Promise<string> {
   const session = await requireSession()
   const userId = session.user.id
   const key = `${userId}/${projectId}/project.json`
-  const blob = new Blob([JSON.stringify(projectJson)], { type: 'application/json' })
+
+  let serialized: string
+  try {
+    serialized = JSON.stringify(projectJson)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    throw new ServiceError('SERIALIZATION_ERROR', `Failed to serialize project JSON: ${msg}`, false)
+  }
+
+  const sizeMB = serialized.length / 1024 / 1024
+  if (sizeMB > 5) {
+    console.warn(`[storage] Large project blob: ${sizeMB.toFixed(1)} MB`, { projectId })
+  }
+
+  const blob = new Blob([serialized], { type: 'application/json' })
   await uploadWithRetry('projects', key, blob, { upsert: true, contentType: 'application/json' })
   return key
 }

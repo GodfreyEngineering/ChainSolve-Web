@@ -14,6 +14,9 @@ import { buildEngineeringRc } from './engineering-rc'
 import { buildStudentQuadratic } from './student-quadratic'
 import { buildStructuralBeam } from './structural-beam'
 import { buildHeatTransfer } from './heat-transfer'
+import { buildOhmsLaw } from './ohms-law'
+import { buildFluidFlow } from './fluid-flow'
+import { buildInvestmentReturns } from './investment-returns'
 
 export interface TemplateMeta {
   /** Stable unique key — never rename after shipping. */
@@ -99,5 +102,32 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ['thermodynamics', 'heat', 'conduction', 'thermal'],
     category: 'Engineering',
     buildGraph: buildHeatTransfer,
+  },
+  {
+    id: 'ohms-law',
+    name: "Ohm's Law & Power",
+    description:
+      "Ohm's law V = IR and electrical power P = IV, P = I\u00B2R \u2014 three classic electrical calculations sharing voltage, current, and resistance inputs.",
+    tags: ['electronics', 'circuits', 'ohm', 'power'],
+    category: 'Student',
+    buildGraph: buildOhmsLaw,
+  },
+  {
+    id: 'fluid-flow',
+    name: 'Reynolds Number & Flow Regime',
+    description:
+      'Computes the Reynolds number Re = \u03C1vD/\u03BC and classifies flow as laminar (Re < 2300) or turbulent. Inputs: density, velocity, diameter, viscosity.',
+    tags: ['fluids', 'reynolds', 'laminar', 'turbulent', 'pipe flow'],
+    category: 'Engineering',
+    buildGraph: buildFluidFlow,
+  },
+  {
+    id: 'investment-returns',
+    name: 'Investment Returns',
+    description:
+      'Side-by-side compound interest FV = PV(1+r/n)^(nt) and simple interest SI = Prt \u2014 compare growth strategies over time.',
+    tags: ['finance', 'interest', 'compound', 'investment'],
+    category: 'Finance',
+    buildGraph: buildInvestmentReturns,
   },
 ]

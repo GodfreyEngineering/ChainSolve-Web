@@ -21,6 +21,7 @@ import {
   Redo2,
   History,
   Share2,
+  Download,
 } from 'lucide-react'
 import type { CanvasControls } from '../../pages/CanvasPage'
 import type { SaveStatus } from '../../stores/projectStore'
@@ -36,6 +37,7 @@ import { Tooltip } from '../ui/Tooltip'
 import { Icon } from '../ui/Icon'
 import { displayNameStyle } from '../../lib/planStyles'
 import { ShareDialog } from './ShareDialog'
+import { ExportDialog } from './ExportDialog'
 import { HistoryPanel } from './HistoryPanel'
 
 export const WORKSPACE_TOOLBAR_HEIGHT = 36
@@ -50,6 +52,16 @@ interface WorkspaceToolbarProps {
   canvasControls?: CanvasControls | null
   /** ADV-02: Project ID for share link generation. */
   projectId?: string | null
+  /** C.4: Export handlers for the Export dialog. */
+  exportInProgress?: boolean
+  onExportPdf?: (opts: {
+    includeImages: boolean
+    scope: 'active' | 'project'
+    pageSize: 'A4' | 'Letter' | 'A3'
+  }) => void
+  onExportXlsx?: (opts: { includeTables: boolean; scope: 'active' | 'project' }) => void
+  onExportJson?: () => void
+  onCancelExport?: () => void
 }
 
 export function WorkspaceToolbar({
@@ -59,6 +71,11 @@ export function WorkspaceToolbar({
   projectName,
   canvasControls,
   projectId,
+  exportInProgress,
+  onExportPdf,
+  onExportXlsx,
+  onExportJson,
+  onCancelExport,
 }: WorkspaceToolbarProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -68,6 +85,11 @@ export function WorkspaceToolbar({
   const accountRef = useRef<HTMLDivElement>(null)
   // ADV-02: Share dialog
   const [shareOpen, setShareOpen] = useState(false)
+  // C.4: Export dialog
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  // C.4: Hover states for Share/Export buttons
+  const [shareHover, setShareHover] = useState(false)
+  const [exportHover, setExportHover] = useState(false)
   // ADV-03: History panel
   const [historyOpen, setHistoryOpen] = useState(false)
   const isMac = navigator.platform?.includes('Mac')
@@ -230,26 +252,40 @@ export function WorkspaceToolbar({
             <button
               className="cs-header-icon-btn"
               onClick={() => setShareOpen(true)}
+              onMouseEnter={() => setShareHover(true)}
+              onMouseLeave={() => setShareHover(false)}
               style={{
-                ...iconBtn,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 4,
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                letterSpacing: '0.02em',
-                padding: '0.15rem 0.6rem',
-                height: 28,
-                borderRadius: 6,
+                ...actionBtnStyle,
                 background: 'rgba(28,171,176,0.12)',
                 color: 'var(--primary)',
-                marginRight: 8,
-                whiteSpace: 'nowrap',
+                ...(shareHover ? actionBtnHoverStyle : {}),
               }}
               aria-label={t('share.shareProject', 'Share project')}
             >
               <Share2 size={14} />
               {t('share.shareBtn', 'Share')}
+            </button>
+          </Tooltip>
+        )}
+
+        {/* C.4: Export button (only when a project is open) */}
+        {projectId && (
+          <Tooltip content={t('menu.export', 'Export')} side="bottom">
+            <button
+              className="cs-header-icon-btn"
+              onClick={() => setExportDialogOpen(true)}
+              onMouseEnter={() => setExportHover(true)}
+              onMouseLeave={() => setExportHover(false)}
+              style={{
+                ...actionBtnStyle,
+                background: 'rgba(28,171,176,0.08)',
+                color: 'var(--primary)',
+                ...(exportHover ? actionBtnHoverStyle : {}),
+              }}
+              aria-label={t('menu.export', 'Export')}
+            >
+              <Download size={14} />
+              {t('menu.export', 'Export')}
             </button>
           </Tooltip>
         )}
@@ -357,6 +393,20 @@ export function WorkspaceToolbar({
       {/* ADV-02: Share dialog */}
       {shareOpen && projectId && (
         <ShareDialog projectId={projectId} onClose={() => setShareOpen(false)} />
+      )}
+
+      {/* C.4: Export dialog */}
+      {exportDialogOpen && (
+        <ExportDialog
+          open={exportDialogOpen}
+          onClose={() => setExportDialogOpen(false)}
+          hasProject={!!projectId}
+          exportInProgress={!!exportInProgress}
+          onExportPdf={onExportPdf ?? (() => {})}
+          onExportXlsx={onExportXlsx ?? (() => {})}
+          onExportJson={onExportJson ?? (() => {})}
+          onCancelExport={onCancelExport}
+        />
       )}
 
       {/* ADV-03: History panel */}
@@ -478,6 +528,29 @@ const dirtyDotStyle: React.CSSProperties = {
   height: 5,
   borderRadius: '50%',
   background: 'var(--primary)',
+}
+
+/** C.4: Shared style for Share / Export action buttons with hover animation. */
+const actionBtnStyle: React.CSSProperties = {
+  ...iconBtn,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 4,
+  fontSize: '0.78rem',
+  fontWeight: 700,
+  letterSpacing: '0.02em',
+  padding: '0.15rem 0.6rem',
+  height: 28,
+  borderRadius: 6,
+  marginRight: 4,
+  whiteSpace: 'nowrap',
+  transition: 'all 0.15s ease',
+  width: 'auto',
+}
+
+const actionBtnHoverStyle: React.CSSProperties = {
+  filter: 'brightness(1.2)',
+  transform: 'scale(1.03)',
 }
 
 const autosaveBtn: React.CSSProperties = {

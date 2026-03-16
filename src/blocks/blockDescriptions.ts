@@ -70,8 +70,6 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Shows a computed value prominently on the canvas. Connect any output to see its result.',
 
   // ── Data inputs (Pro) ─────────────────────────────────────────────────────
-  vectorInput:
-    'Enter an array of numbers directly. Paste from Excel, CSV, or type values. Used as input to array/list operations and plots.',
   tableInput:
     'Spreadsheet-style table input with named columns. Each column is a separate output port. Import from CSV or type values directly.',
   table_extract_col:

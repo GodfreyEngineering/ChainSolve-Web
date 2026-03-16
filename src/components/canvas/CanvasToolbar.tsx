@@ -8,7 +8,7 @@
  * view toggles (minimap, edges, LOD, badges),
  * engine controls (pause, refresh), and inspector toggle.
  */
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useReactFlow, useViewport } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { Tooltip } from '../ui/Tooltip'
@@ -31,7 +31,6 @@ import {
   Play,
   RefreshCw,
   PanelRight,
-  Pencil,
   Eye,
   EyeOff,
   ScanEye,
@@ -277,7 +276,8 @@ export function CanvasToolbar({
   onToggleEdgeBadges,
   bgDotsVisible,
   onToggleBgDots,
-  onInsertAnnotation,
+  // C.2: onInsertAnnotation no longer used in toolbar (annotations available via right-click menu)
+  onInsertAnnotation: _,
   hiddenViewMode,
   onToggleHiddenView,
   hasHiddenNodes,
@@ -293,31 +293,9 @@ export function CanvasToolbar({
   const [snapEdge, setSnapEdge] = useState<SnapEdge>(loadSnap)
   const [dragging, setDragging] = useState(false)
   const [ghostEdge, setGhostEdge] = useState<SnapEdge | null>(null)
-  const [annotOpen, setAnnotOpen] = useState(false)
   const barRef = useRef<HTMLDivElement>(null)
-  const annotRef = useRef<HTMLDivElement>(null)
   const dragStartRef = useRef<{ x: number; y: number } | null>(null)
   const dragActiveRef = useRef(false)
-
-  // Close annotation dropdown on outside click
-  useEffect(() => {
-    if (!annotOpen) return
-    const handler = (e: MouseEvent) => {
-      if (annotRef.current && !annotRef.current.contains(e.target as globalThis.Node)) {
-        setAnnotOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [annotOpen])
-
-  const insertAnnot = useCallback(
-    (type: string) => {
-      onInsertAnnotation?.(type)
-      setAnnotOpen(false)
-    },
-    [onInsertAnnotation],
-  )
 
   const handleZoomInputKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -675,82 +653,6 @@ export function CanvasToolbar({
           </button>
         </Tooltip>
 
-        {/* ── Annotations (I3-1) ── */}
-        {!readOnly && onInsertAnnotation && (
-          <>
-            <div style={sep} />
-            <div ref={annotRef} style={{ position: 'relative', flexShrink: 0 }}>
-              <Tooltip content={t('toolbar.annotations')} side={tipSide}>
-                <button
-                  onClick={() => setAnnotOpen((v) => !v)}
-                  style={btnStyle(annotOpen)}
-                  aria-label={t('toolbar.annotations')}
-                  aria-expanded={annotOpen}
-                >
-                  <Pencil size={16} />
-                </button>
-              </Tooltip>
-              {annotOpen && (
-                <div style={annotDropStyle(snapEdge)}>
-                  <button style={annotItemStyle} onClick={() => insertAnnot('annotation_text')}>
-                    <span style={annotIconStyle}>A</span>
-                    {t('contextMenu.annotText')}
-                  </button>
-                  <button style={annotItemStyle} onClick={() => insertAnnot('annotation_callout')}>
-                    <span style={annotIconStyle}>{'\u25ad'}</span>
-                    {t('contextMenu.annotCallout')}
-                  </button>
-                  <button
-                    style={annotItemStyle}
-                    onClick={() => insertAnnot('annotation_highlight')}
-                  >
-                    <span style={annotIconStyle}>{'\u25fb'}</span>
-                    {t('contextMenu.annotHighlight')}
-                  </button>
-                  <button style={annotItemStyle} onClick={() => insertAnnot('annotation_arrow')}>
-                    <span style={annotIconStyle}>{'\u2192'}</span>
-                    {t('contextMenu.annotArrow')}
-                  </button>
-                  <button style={annotItemStyle} onClick={() => insertAnnot('annotation_leader')}>
-                    <span style={annotIconStyle}>{'\u21e5'}</span>
-                    {t('contextMenu.annotLeader')}
-                  </button>
-                  <button
-                    style={annotItemStyle}
-                    onClick={() => insertAnnot('annotation_sticky_note')}
-                  >
-                    <span style={annotIconStyle}>{'\ud83d\udcdd'}</span>
-                    {t('contextMenu.annotStickyNote', 'Sticky Note')}
-                  </button>
-                  <div style={{ ...annotSepStyle }} />
-                  <button
-                    style={annotItemStyle}
-                    onClick={() => insertAnnot('annotation_rectangle')}
-                  >
-                    <span style={annotIconStyle}>{'\u25ad'}</span>
-                    {t('contextMenu.annotRectangle', 'Rectangle')}
-                  </button>
-                  <button style={annotItemStyle} onClick={() => insertAnnot('annotation_ellipse')}>
-                    <span style={annotIconStyle}>{'\u25cb'}</span>
-                    {t('contextMenu.annotEllipse', 'Ellipse')}
-                  </button>
-                  <button style={annotItemStyle} onClick={() => insertAnnot('annotation_diamond')}>
-                    <span style={annotIconStyle}>{'\u25c7'}</span>
-                    {t('contextMenu.annotDiamond', 'Diamond')}
-                  </button>
-                  <button
-                    style={annotItemStyle}
-                    onClick={() => insertAnnot('annotation_rounded_rectangle')}
-                  >
-                    <span style={annotIconStyle}>{'\u25a2'}</span>
-                    {t('contextMenu.annotRoundedRect', 'Rounded rectangle')}
-                  </button>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
         <div style={sep} />
 
         {/* UX-19: Presentation mode toggle */}
@@ -819,80 +721,6 @@ const zoomDisplayStyle: React.CSSProperties = {
   width: 28,
   textAlign: 'center' as const,
   lineHeight: 1.2,
-}
-
-// ── Annotation dropdown styles (I3-1) ─────────────────────────────────────
-
-function annotDropStyle(edge: SnapEdge): React.CSSProperties {
-  const base: React.CSSProperties = {
-    position: 'absolute',
-    zIndex: 100,
-    background: 'var(--surface-1)',
-    border: '1px solid var(--border)',
-    borderRadius: 'var(--radius-md)',
-    padding: '0.25rem',
-    boxShadow: 'var(--shadow-lg)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.1rem',
-    minWidth: 140,
-    animation: 'cs-fade-in 0.1s ease-out',
-  }
-  // Position dropdown based on which edge the toolbar is snapped to
-  if (edge === 'bottom') {
-    base.bottom = '100%'
-    base.left = '50%'
-    base.transform = 'translateX(-50%)'
-    base.marginBottom = 6
-  } else if (edge === 'left') {
-    base.left = '100%'
-    base.top = '50%'
-    base.transform = 'translateY(-50%)'
-    base.marginLeft = 6
-  } else if (edge === 'right') {
-    base.right = '100%'
-    base.top = '50%'
-    base.transform = 'translateY(-50%)'
-    base.marginRight = 6
-  } else {
-    // top (default)
-    base.top = '100%'
-    base.left = '50%'
-    base.transform = 'translateX(-50%)'
-    base.marginTop = 6
-  }
-  return base
-}
-
-const annotItemStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.4rem',
-  padding: '0.3rem 0.5rem',
-  borderRadius: 'var(--radius-sm)',
-  border: 'none',
-  background: 'transparent',
-  color: 'var(--text)',
-  cursor: 'pointer',
-  fontSize: '0.72rem',
-  fontWeight: 500,
-  fontFamily: 'inherit',
-  whiteSpace: 'nowrap',
-  textAlign: 'left',
-}
-
-const annotIconStyle: React.CSSProperties = {
-  width: 16,
-  textAlign: 'center',
-  fontSize: '0.72rem',
-  opacity: 0.6,
-  flexShrink: 0,
-}
-
-const annotSepStyle: React.CSSProperties = {
-  height: 1,
-  background: 'var(--border)',
-  margin: '0.15rem 0.25rem',
 }
 
 const zoomInputStyle: React.CSSProperties = {

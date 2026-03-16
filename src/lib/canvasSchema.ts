@@ -69,22 +69,35 @@ export function validateCanvasShape(raw: unknown): CanvasValidationResult {
  * ReactFlow node and edge data can contain arbitrary nested objects; this
  * guard ensures we never persist a value that would silently become `null`
  * or cause a JSON.parse error depending on the serialiser.
+ *
+ * A.1: Uses a `seen` WeakSet to detect circular references and replace them
+ * with `null` instead of infinitely recursing. Groups with parent-child
+ * relationships in React Flow can create circular refs in internal state.
  */
-export function sanitizeJsonNumbers(value: unknown): unknown {
+export function sanitizeJsonNumbers(value: unknown, seen?: WeakSet<object>): unknown {
   if (typeof value === 'number') {
     return Number.isFinite(value) ? value : null
   }
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return value
+  }
+
+  // Circular reference detection
+  const visited = seen ?? new WeakSet<object>()
+  if (visited.has(value as object)) {
+    return null
+  }
+  visited.add(value as object)
+
   if (Array.isArray(value)) {
-    return value.map(sanitizeJsonNumbers)
+    return value.map((item) => sanitizeJsonNumbers(item, visited))
   }
-  if (value !== null && typeof value === 'object') {
-    const out: Record<string, unknown> = {}
-    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-      out[k] = sanitizeJsonNumbers(v)
-    }
-    return out
+
+  const out: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    out[k] = sanitizeJsonNumbers(v, visited)
   }
-  return value
+  return out
 }
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -118,8 +131,12 @@ export function buildCanvasJson(canvasId: string, projectId: string): CanvasJSON
 
 /** Build a CanvasJSON from existing nodes/edges.
  *
- * Sanitizes NaN/Infinity in node and edge data before serialisation so that
- * no non-finite numbers are ever persisted to storage.
+ * Sanitizes NaN/Infinity and circular references in node and edge data
+ * before serialisation so that no non-finite numbers or circular structures
+ * are ever persisted to storage.
+ *
+ * A.1: Strips React Flow internal properties (internals, measured) that
+ * can contain circular references and are not needed for persistence.
  */
 export function buildCanvasJsonFromGraph(
   canvasId: string,
@@ -127,12 +144,27 @@ export function buildCanvasJsonFromGraph(
   nodes: unknown[],
   edges: unknown[],
 ): CanvasJSON {
+  // Strip React Flow internal properties before sanitization to avoid
+  // circular refs and reduce payload size for large projects.
+  const cleanNodes = nodes.map((node) => {
+    if (node === null || typeof node !== 'object') return node
+    const n = node as Record<string, unknown>
+    const { internals: _internals, measured: _measured, ...rest } = n
+    return rest
+  })
+  const cleanEdges = edges.map((edge) => {
+    if (edge === null || typeof edge !== 'object') return edge
+    const e = edge as Record<string, unknown>
+    const { internals: _internals, ...rest } = e
+    return rest
+  })
+
   return {
     schemaVersion: 4,
     canvasId,
     projectId,
-    nodes: sanitizeJsonNumbers(nodes) as unknown[],
-    edges: sanitizeJsonNumbers(edges) as unknown[],
+    nodes: sanitizeJsonNumbers(cleanNodes) as unknown[],
+    edges: sanitizeJsonNumbers(cleanEdges) as unknown[],
     datasetRefs: [],
   }
 }

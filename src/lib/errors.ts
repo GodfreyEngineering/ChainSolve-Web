@@ -20,6 +20,7 @@ export type ErrorCode =
   | 'FILE_TOO_LARGE'
   | 'INVALID_FILE'
   | 'CANVAS_INVALID'
+  | 'SERIALIZATION_ERROR'
 
 export class ServiceError extends Error {
   readonly code: ErrorCode

@@ -139,6 +139,20 @@ export function applyPatchOps(
           })
           break
         }
+        // Port validation: verify target handle matches the block definition's inputs
+        const targetNode = nodes.find((n) => n.id === op.edge.target)
+        if (targetNode) {
+          const tgtBlockType = (targetNode.data as NodeData)?.blockType
+          const tgtDef = tgtBlockType ? BLOCK_REGISTRY.get(tgtBlockType) : undefined
+          const tgtHandle = op.edge.targetHandle ?? 'value'
+          if (tgtDef?.inputs && tgtDef.inputs.length > 0) {
+            if (!tgtDef.inputs.some((p) => p.id === tgtHandle)) {
+              console.warn(
+                `[patchExecutor] addEdge op ${i}: targetHandle "${tgtHandle}" not found in ${tgtBlockType} inputs (available: ${tgtDef.inputs.map((p) => p.id).join(', ')})`,
+              )
+            }
+          }
+        }
         // Fan-in check: only one edge per target handle
         const targetHandle = op.edge.targetHandle ?? 'value'
         const existingFanIn = edges.some(

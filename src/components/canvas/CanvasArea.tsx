@@ -93,7 +93,7 @@ import { CanvasToolbar } from './CanvasToolbar'
 import { ArtifactToolbar } from './ArtifactToolbar'
 import { MinimapWrapper } from './MinimapWrapper'
 import { useTranslation } from 'react-i18next'
-import { autoLayout, type LayoutDirection } from '../../lib/autoLayout'
+import { autoLayout, type LayoutDirection, type AutoLayoutResult } from '../../lib/autoLayout'
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard, pasteFromSystemClipboard } from '../../lib/clipboard'
 import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
@@ -1143,44 +1143,81 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   const handleAutoOrganise = useCallback(
     (direction: LayoutDirection = 'LR') => {
-      // Determine target: selected (≥2) or all non-group nodes
-      const selected = nodes.filter((n) => n.selected && n.type !== 'csGroup')
-      const targets = selected.length >= 2 ? selected : nodes.filter((n) => n.type !== 'csGroup')
-      if (targets.length === 0) return
+      // A.4: Include group nodes in layout targets so they get repositioned
+      // alongside their children. Children's parentId is preserved.
+      const selected = nodes.filter((n) => n.selected)
+      const allTargets =
+        selected.length >= 2
+          ? // When selecting, also include parent groups of selected children
+            (() => {
+              const ids = new Set(selected.map((n) => n.id))
+              // Add parent groups that have selected children
+              for (const n of selected) {
+                if (n.parentId && !ids.has(n.parentId)) {
+                  const parent = nodes.find((p) => p.id === n.parentId)
+                  if (parent) ids.add(parent.id)
+                }
+              }
+              return nodes.filter((n) => ids.has(n.id))
+            })()
+          : nodes // layout all nodes including groups
+      if (allTargets.length === 0) return
 
-      const targetIds = new Set(targets.map((n) => n.id))
+      const targetIds = new Set(allTargets.map((n) => n.id))
       const relevantEdges = edges.filter((e) => targetIds.has(e.source) && targetIds.has(e.target))
 
-      const layoutNodes = targets.map((n) => ({
+      const layoutNodes = allTargets.map((n) => ({
         id: n.id,
         width: (n.measured?.width as number | undefined) ?? DEFAULT_NODE_WIDTH,
         height: (n.measured?.height as number | undefined) ?? DEFAULT_NODE_HEIGHT,
         parentId: n.parentId,
+        isGroup: n.type === 'csGroup',
       }))
 
-      const positions = autoLayout(layoutNodes, relevantEdges, direction)
+      const result: AutoLayoutResult = autoLayout(layoutNodes, relevantEdges, direction)
+      const { positions, groupSizes } = result
 
       doSaveHistory()
       // UX-05: Add CSS transition for smooth animated repositioning
       setNodes((nds) =>
         nds.map((n) => {
           const pos = positions.get(n.id)
-          if (!pos) return n
-          return {
+          const groupSize = groupSizes.get(n.id)
+          if (!pos && !groupSize) return n
+
+          const updates: Record<string, unknown> = {
             ...n,
-            position: pos,
             style: {
               ...((n.style as React.CSSProperties | undefined) ?? {}),
               transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             },
           }
+
+          // A.4: Apply position (already relative for children with parentId)
+          if (pos) {
+            updates.position = pos
+          }
+
+          // A.4: Resize group nodes to fit their children
+          if (groupSize && n.type === 'csGroup') {
+            updates.style = {
+              ...((updates.style as React.CSSProperties | undefined) ?? {}),
+              width: groupSize.width,
+              height: groupSize.height,
+            }
+            // Also set width/height at top level for React Flow
+            updates.width = groupSize.width
+            updates.height = groupSize.height
+          }
+
+          return updates as typeof n
         }),
       )
       // Remove transition after animation completes
       setTimeout(() => {
         setNodes((nds) =>
           nds.map((n) => {
-            if (!positions.has(n.id)) return n
+            if (!positions.has(n.id) && !groupSizes.has(n.id)) return n
             const ns = { ...(n.style as React.CSSProperties | undefined) }
             delete (ns as Record<string, unknown>).transition
             return { ...n, style: Object.keys(ns).length ? ns : undefined }
@@ -1284,6 +1321,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 },
               } as Node<NodeData>,
             ])
+            toast(
+              `CSV loaded: ${file.name} (${tableData.rows.length} rows \u00d7 ${tableData.columns.length} columns)`,
+              'success',
+            )
           }
           reader.readAsText(file)
         }
@@ -3349,7 +3390,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         elementsSelectable={!readOnly}
                         selectionOnDrag={!readOnly && !locked && !panMode}
                         selectionMode={SelectionMode.Partial}
-                        panOnDrag={panMode || locked ? [0, 1, 2] : [1, 2]}
+                        panOnDrag={panMode || locked ? [0, 1] : [1]}
                         snapToGrid={snapToGrid}
                         snapGrid={[16, 16]}
                         fitView

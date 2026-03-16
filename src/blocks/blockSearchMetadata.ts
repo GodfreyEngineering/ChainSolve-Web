@@ -205,4 +205,88 @@ export const SEARCH_METADATA: Record<string, SearchMeta> = {
 
   // ── Output ──────────────────────────────────────────────────────────────────
   display: { synonyms: ['result', 'answer', 'show', 'output'], tags: ['output'] },
+
+  // ── Data ────────────────────────────────────────────────────────────────
+  tableInput: {
+    synonyms: ['spreadsheet', 'csv', 'data table', 'grid', 'matrix'],
+    tags: ['data', 'input'],
+  },
+  table_extract_col: {
+    synonyms: ['column', 'extract', 'select column'],
+    tags: ['data', 'table'],
+  },
+
+  // ── Constants & Materials ──────────────────────────────────────────────
+  constant: {
+    synonyms: ['pi', 'euler', 'boltzmann', 'avogadro', 'physics constant'],
+    tags: ['constant', 'input'],
+  },
+  material: {
+    synonyms: ['steel', 'aluminium', 'copper', 'density', 'modulus'],
+    tags: ['material', 'input'],
+  },
+
+  // ── Control Systems ────────────────────────────────────────────────────
+  'ctrl.step_1st_order': {
+    synonyms: ['first order', 'step response', 'time constant'],
+    tags: ['control', 'dynamics'],
+  },
+  'ctrl.step_2nd_order': {
+    synonyms: ['second order', 'underdamped', 'overshoot'],
+    tags: ['control', 'dynamics'],
+  },
+  'ctrl.pid_output': {
+    synonyms: ['PID', 'controller', 'feedback', 'proportional integral derivative'],
+    tags: ['control'],
+  },
+  'ctrl.natural_freq': {
+    synonyms: ['resonance', 'natural frequency', 'eigenfrequency'],
+    tags: ['control', 'vibration'],
+  },
+  'ctrl.damping_ratio': {
+    synonyms: ['zeta', 'damping', 'critical damping'],
+    tags: ['control', 'vibration'],
+  },
+  'ctrl.bode_mag_1st': {
+    synonyms: ['bode', 'frequency response', 'transfer function'],
+    tags: ['control', 'frequency'],
+  },
+
+  // ── Complex Numbers ────────────────────────────────────────────────────
+  complex_from: {
+    synonyms: ['complex number', 'imaginary', 'real imaginary'],
+    tags: ['complex', 'math'],
+  },
+  complex_mag: {
+    synonyms: ['modulus', 'absolute value', 'magnitude'],
+    tags: ['complex', 'math'],
+  },
+  complex_arg: {
+    synonyms: ['phase', 'angle', 'argument'],
+    tags: ['complex', 'math'],
+  },
+
+  // ── Signal Processing ──────────────────────────────────────────────────
+  'signal.fft_magnitude': {
+    synonyms: ['FFT', 'spectrum', 'frequency analysis', 'Fourier'],
+    tags: ['signal', 'frequency'],
+  },
+  'signal.filter_lowpass_fir': {
+    synonyms: ['low pass', 'filter', 'smooth', 'noise removal'],
+    tags: ['signal', 'filter'],
+  },
+  'signal.filter_highpass_fir': {
+    synonyms: ['high pass', 'filter', 'AC coupling'],
+    tags: ['signal', 'filter'],
+  },
+
+  // ── Publish / Subscribe ────────────────────────────────────────────────
+  publish: {
+    synonyms: ['broadcast', 'emit', 'send', 'channel'],
+    tags: ['output', 'cross-sheet'],
+  },
+  subscribe: {
+    synonyms: ['receive', 'listen', 'channel', 'link'],
+    tags: ['input', 'cross-sheet'],
+  },
 }

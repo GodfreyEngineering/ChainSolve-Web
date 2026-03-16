@@ -11,16 +11,16 @@
  *   curl https://app.chainsolve.co.uk/api/healthz
  */
 
-type Env = Record<string, string>;
+type Env = Record<string, string>
 
 export const onRequestGet: PagesFunction<Env> = (context) => {
-  const appVersion = context.env["CF_PAGES_COMMIT_SHA"] ?? "unknown";
-  const env = context.env["CF_PAGES_ENV"] ?? "unknown";
+  const appVersion = context.env['CF_PAGES_COMMIT_SHA'] ?? 'unknown'
+  const env = context.env['CF_PAGES_ENV'] ?? 'unknown'
 
   return Response.json({
     ok: true,
     app_version: appVersion.slice(0, 40),
     env,
     ts: new Date().toISOString(),
-  });
-};
+  })
+}

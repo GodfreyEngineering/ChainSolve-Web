@@ -232,7 +232,7 @@ function MaterialNodeInner({ id, data, selected }: NodeProps) {
           id={`prop_${p.key}`}
           style={{
             ...s.handleRight,
-            top: `${headerOffset() + i * ROW_H + ROW_H / 2}px`,
+            top: `${headerOffset() + i * ROW_H}px`,
           }}
           title={p.meta?.label ?? p.key}
         />
@@ -251,10 +251,20 @@ function MaterialNodeInner({ id, data, selected }: NodeProps) {
   )
 }
 
-/** Offset in px from top of node to first property row */
+/** Offset in px from top of node to center of first property row.
+ *
+ * Breakdown:
+ *   header (minHeight 32 + 2px border-bottom)       = 34
+ *   body padding-top (0.45rem)                       = 7.2
+ *   search input (~22px) + marginBottom (0.25rem=4)  = 26
+ *   dropdown select (~22px)                          = 22
+ *   property list marginTop (0.35rem)                = 5.6
+ *   half of ROW_H (26/2)                             = 13
+ *                                                    ──────
+ *   total                                            ≈ 107.8
+ */
 function headerOffset(): number {
-  // header (~36px) + body padding (~7px) + search input (~26px) + dropdown (~26px) + gap (~8px)
-  return 103
+  return 108
 }
 
 /** Format a property value compactly */

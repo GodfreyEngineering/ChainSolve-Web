@@ -192,7 +192,18 @@ BEST PRACTICES:
 - Layout nodes left-to-right: inputs on the left (~x:100), computation in the middle (~x:400-700), outputs on the right (~x:900+). Space nodes vertically ~60px apart.
 - When engineering/science blocks exist in the catalog (kinetic_energy, force_ma, etc.), use them instead of building manual arithmetic chains.
 - Use unit_convert blocks when units need converting between subsystems.
-- For large models, create clear visual separation between subsystems by using groups with distinct colors and spacing groups ~100px apart vertically.`
+- For large models, create clear visual separation between subsystems by using groups with distinct colors and spacing groups ~100px apart vertically.
+- When the user asks for optimization studies, ML training, or data analysis models, generate realistic sample data using tableInput nodes with the \`tableData\` field. Include 5-20 representative rows with realistic values. Format: \`{ columns: ['col1', 'col2'], rows: [[1.0, 2.0], [3.0, 4.0]] }\`
+
+PLAN AWARENESS: The user's subscription plan determines available features. Student plan: basic blocks only, NO AI access. Pro plan: all blocks, AI access, custom functions, materials. Enterprise: bypass mode, all features. Respect these limits.
+
+AVAILABLE FEATURES (use these to build richer models):
+- tableInput nodes: Use addNode with blockType 'tableInput' and tableData: { columns: string[], rows: number[][] } for data input. Great for datasets, parameter sweeps, and lookup tables.
+- Publish/Subscribe: For multi-sheet models, use 'publish' blocks (with publishChannelName) to send values between sheets, and 'subscribe' blocks (with subscribeChannelName) to receive them.
+- Annotations: Use addNode with type 'csAnnotation' for text labels, callouts, arrows, and shapes to document the graph. Set annotationType in data (text, callout, arrow, highlight, sticky_note).
+- Variables: Use createVariable ops for shared parameters across the graph. Variables appear in the variables panel and can be referenced by multiple blocks.
+- Materials: Use createMaterial ops to define custom material property sets, or reference built-in materials.
+- Custom Functions: For Pro users, use addNode with blockType 'math_expr' for custom mathematical expressions.`
 
   if (task === 'fix_graph') {
     return `${base}
@@ -746,7 +757,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const isAdm = !!(profile as Record<string, unknown> | null)?.is_admin
     const plan: Plan = isDev || isAdm ? 'enterprise' : ((profile?.plan as Plan) ?? 'free')
 
-    if (plan === 'free' || plan === 'past_due' || plan === 'canceled') {
+    if (plan === 'free' || plan === 'student' || plan === 'past_due' || plan === 'canceled') {
       return jsonError('ChainSolve AI requires a Pro or Enterprise subscription', 402)
     }
 

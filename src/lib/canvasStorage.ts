@@ -54,8 +54,20 @@ function canvasKey(userId: string, projectId: string, canvasId: string): string 
 // ── Exported helpers ────────────────────────────────────────────────────────
 
 /**
+ * Maximum permitted canvas graph JSON size (10 MB).
+ * Large projects with many blocks/groups can produce multi-MB payloads.
+ * Supabase free tier has a 50 MB bucket limit per file; we cap lower to
+ * catch runaway serialization early.
+ */
+const MAX_CANVAS_JSON_BYTES = 10 * 1024 * 1024
+
+/**
  * Upload (upsert) a canvas graph JSON to storage.
  * Path: {userId}/{projectId}/canvases/{canvasId}.json
+ *
+ * A.1: Wraps JSON.stringify in a try/catch to handle circular references
+ * (which can occur with React Flow group nodes). Also validates payload
+ * size before uploading.
  */
 export async function uploadCanvasGraph(
   ownerId: string,
@@ -65,8 +77,28 @@ export async function uploadCanvasGraph(
 ): Promise<void> {
   await requireSession()
   const key = canvasKey(ownerId, projectId, canvasId)
-  const blob = new Blob([JSON.stringify(json)], { type: 'application/json' })
 
+  let serialized: string
+  try {
+    serialized = JSON.stringify(json)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[canvasStorage] JSON.stringify failed for canvas', canvasId, msg)
+    throw new ServiceError(
+      'SERIALIZATION_ERROR',
+      `Failed to serialize canvas data: ${msg}. This may indicate circular references in the graph.`,
+      false,
+    )
+  }
+
+  if (serialized.length > MAX_CANVAS_JSON_BYTES) {
+    console.warn(
+      `[canvasStorage] Canvas JSON is very large: ${(serialized.length / 1024 / 1024).toFixed(1)} MB`,
+      { canvasId, projectId },
+    )
+  }
+
+  const blob = new Blob([serialized], { type: 'application/json' })
   await uploadBlobWithRetry(key, blob)
 }
 

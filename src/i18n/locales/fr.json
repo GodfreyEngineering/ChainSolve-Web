@@ -378,7 +378,6 @@
     "categoryData": "Données",
     "categoryVectorOps": "Ops. Vectorielles",
     "categoryTableOps": "Ops. de Table",
-    "vectorInput": "Entrée Vecteur",
     "tableInput": "Entrée Table",
     "table_extract_col": "Colonne de Table",
     "material_full": "Matériau (Complet)",
@@ -2189,7 +2188,8 @@
     "category_theme": "Thème",
     "category_group": "Groupe",
     "category_custom_block": "Bloc personnalisé",
-    "lightbox": "Preview"
+    "lightbox": "Preview",
+    "standardTemplates": "Modèles intégrés"
   },
   "explorePage": {
     "heroTitle": "Explorer",

@@ -18,12 +18,12 @@
  */
 
 type Env = {
-  SUPABASE_URL: string;
-  SUPABASE_SERVICE_ROLE_KEY: string;
-  STRIPE_SECRET_KEY: string;
-  STRIPE_WEBHOOK_SECRET: string;
-  STRIPE_PRICE_ID_PRO_MONTHLY: string;
-};
+  SUPABASE_URL: string
+  SUPABASE_SERVICE_ROLE_KEY: string
+  STRIPE_SECRET_KEY: string
+  STRIPE_WEBHOOK_SECRET: string
+  STRIPE_PRICE_ID_PRO_MONTHLY: string
+}
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const checks: Record<string, boolean> = {
@@ -32,9 +32,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     STRIPE_SECRET_KEY: Boolean(context.env.STRIPE_SECRET_KEY),
     STRIPE_WEBHOOK_SECRET: Boolean(context.env.STRIPE_WEBHOOK_SECRET),
     STRIPE_PRICE_ID_PRO_MONTHLY: Boolean(context.env.STRIPE_PRICE_ID_PRO_MONTHLY),
-  };
+  }
 
-  const ok = Object.values(checks).every(Boolean);
+  const ok = Object.values(checks).every(Boolean)
 
-  return Response.json({ ok, checks }, { status: ok ? 200 : 500 });
-};
+  return Response.json({ ok, checks }, { status: ok ? 200 : 500 })
+}

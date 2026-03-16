@@ -23,6 +23,9 @@ import {
   type ExploreSortKey,
   type ExploreSource,
 } from '../lib/marketplaceService'
+import { TEMPLATES } from '../templates/index'
+import { createProjectFromTemplate } from '../lib/projects'
+import { useToast } from '../components/ui/useToast'
 
 const SORT_OPTIONS: Array<{ key: ExploreSortKey; labelKey: string }> = [
   { key: 'downloads', labelKey: 'explore.sortPopular' },
@@ -37,6 +40,24 @@ export function ExplorePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { toast } = useToast()
+  const [creatingTemplateId, setCreatingTemplateId] = useState<string | null>(null)
+
+  const handleUseTemplate = useCallback(
+    async (templateId: string) => {
+      setCreatingTemplateId(templateId)
+      try {
+        const proj = await createProjectFromTemplate(templateId)
+        navigate(`/app/${proj.id}`)
+      } catch (err) {
+        console.error('[explore-template]', err)
+        toast(String(err instanceof Error ? err.message : 'Failed to create project'), 'error')
+      } finally {
+        setCreatingTemplateId(null)
+      }
+    },
+    [navigate, toast],
+  )
 
   const initialSort = (searchParams.get('sort') as ExploreSortKey) || 'downloads'
   const initialQuery = searchParams.get('q') || ''
@@ -161,6 +182,31 @@ export function ExplorePage() {
       <div style={hero}>
         <h1 style={heroTitle}>{t('explorePage.heroTitle')}</h1>
         <p style={heroSub}>{t('explorePage.heroSub')}</p>
+      </div>
+
+      {/* Built-in Templates (F.2) */}
+      <div style={builtInSection}>
+        <h2 style={builtInTitle}>{t('explore.standardTemplates')}</h2>
+        <div style={builtInGrid}>
+          {TEMPLATES.map((tmpl) => (
+            <div key={tmpl.id} style={builtInCard}>
+              <div style={builtInCardHeader}>
+                <span style={builtInCardName}>{tmpl.name}</span>
+                <span style={categoryBadge}>{tmpl.category}</span>
+              </div>
+              <p style={builtInCardDesc}>{tmpl.description}</p>
+              <button
+                style={useTemplateBtn}
+                disabled={creatingTemplateId === tmpl.id}
+                onClick={() => handleUseTemplate(tmpl.id)}
+              >
+                {creatingTemplateId === tmpl.id
+                  ? '\u2026'
+                  : t('explore.useTemplate', 'Use Template')}
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Featured collections (V3-7.2) */}
@@ -382,4 +428,75 @@ const skeletonCard: React.CSSProperties = {
 
 const skeletonBody: React.CSSProperties = {
   padding: '0.6rem 0.75rem',
+}
+
+const builtInSection: React.CSSProperties = {
+  padding: '1.5rem 2rem 0',
+}
+
+const builtInTitle: React.CSSProperties = {
+  fontSize: '1.1rem',
+  fontWeight: 700,
+  margin: '0 0 0.8rem',
+}
+
+const builtInGrid: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+  gap: 14,
+}
+
+const builtInCard: React.CSSProperties = {
+  background: 'var(--surface-2)',
+  border: '1px solid var(--border)',
+  borderRadius: 10,
+  padding: '0.85rem 1rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 8,
+}
+
+const builtInCardHeader: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: 8,
+}
+
+const builtInCardName: React.CSSProperties = {
+  fontWeight: 600,
+  fontSize: '0.9rem',
+}
+
+const categoryBadge: React.CSSProperties = {
+  fontSize: '0.68rem',
+  fontWeight: 600,
+  background: 'var(--primary, #1CABB0)',
+  color: '#fff',
+  borderRadius: 4,
+  padding: '2px 6px',
+  textTransform: 'uppercase',
+  letterSpacing: '0.03em',
+  flexShrink: 0,
+}
+
+const builtInCardDesc: React.CSSProperties = {
+  fontSize: '0.78rem',
+  color: 'var(--text-muted)',
+  margin: 0,
+  lineHeight: 1.45,
+  flex: 1,
+}
+
+const useTemplateBtn: React.CSSProperties = {
+  alignSelf: 'flex-start',
+  background: 'var(--primary, #1CABB0)',
+  color: '#fff',
+  border: 'none',
+  borderRadius: 6,
+  padding: '0.35rem 0.75rem',
+  fontSize: '0.78rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  fontFamily: "'Montserrat', system-ui, sans-serif",
 }

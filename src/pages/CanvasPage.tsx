@@ -567,7 +567,36 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   // Saves to both per-canvas storage and project-level conflict detection.
   const doSave = useCallback(
     async (opts?: { forceKnownUpdatedAt?: string; manual?: boolean }) => {
-      if (!projectId || isSaving.current) return
+      if (!projectId) return
+
+      // A.1: If a save is already in progress, queue a retry for manual saves
+      // instead of silently dropping them. Autosaves can be safely skipped.
+      if (isSaving.current) {
+        if (opts?.manual) {
+          // Wait for the current save to finish, then retry
+          const waitForSave = () =>
+            new Promise<void>((resolve) => {
+              const check = setInterval(() => {
+                if (!isSaving.current) {
+                  clearInterval(check)
+                  resolve()
+                }
+              }, 100)
+              // Safety timeout: don't wait forever
+              setTimeout(() => {
+                clearInterval(check)
+                resolve()
+              }, 5000)
+            })
+          await waitForSave()
+          if (isSaving.current) {
+            console.warn('[save] Save still in progress after 5s wait, skipping manual save')
+            return
+          }
+        } else {
+          return
+        }
+      }
 
       const snapshot = canvasRef.current?.getSnapshot()
       if (!snapshot) return

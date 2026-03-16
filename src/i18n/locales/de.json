@@ -378,7 +378,6 @@
     "categoryData": "Daten",
     "categoryVectorOps": "Vektor-Ops.",
     "categoryTableOps": "Tabellen-Ops.",
-    "vectorInput": "Vektor-Eingabe",
     "tableInput": "Tabellen-Eingabe",
     "table_extract_col": "Tabellenspalte",
     "material_full": "Material (Voll)",
@@ -2189,7 +2188,8 @@
     "category_theme": "Theme",
     "category_group": "Gruppe",
     "category_custom_block": "Benutzerdefinierter Block",
-    "lightbox": "Preview"
+    "lightbox": "Preview",
+    "standardTemplates": "Standardvorlagen"
   },
   "explorePage": {
     "heroTitle": "Entdecken",

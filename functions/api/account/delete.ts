@@ -14,102 +14,100 @@
  * Rate limit: enforced at the Cloudflare layer (max 1/day per IP).
  */
 
-import { createClient } from "@supabase/supabase-js";
-import Stripe from "stripe";
+import { createClient } from '@supabase/supabase-js'
+import Stripe from 'stripe'
 
 type Env = {
-  SUPABASE_URL: string;
-  SUPABASE_SERVICE_ROLE_KEY: string;
-  STRIPE_SECRET_KEY: string;
-};
+  SUPABASE_URL: string
+  SUPABASE_SERVICE_ROLE_KEY: string
+  STRIPE_SECRET_KEY: string
+}
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const { env, request } = context;
+  const { env, request } = context
 
   // ── Validate environment ───────────────────────────────────────────────────
   const missingEnv = (
-    ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "STRIPE_SECRET_KEY"] as const
-  ).filter((k) => !env[k]);
+    ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'STRIPE_SECRET_KEY'] as const
+  ).filter((k) => !env[k])
   if (missingEnv.length > 0) {
-    return json(
-      { ok: false, error: `Missing env: ${missingEnv.join(", ")}` },
-      500
-    );
+    return json({ ok: false, error: `Missing env: ${missingEnv.join(', ')}` }, 500)
   }
 
   // ── Auth ───────────────────────────────────────────────────────────────────
-  const authHeader = request.headers.get("Authorization") ?? "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  const authHeader = request.headers.get('Authorization') ?? ''
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
   if (!token) {
-    return json({ ok: false, error: "Authorization required" }, 401);
+    return json({ ok: false, error: 'Authorization required' }, 401)
   }
 
   // Use a user-scoped client to resolve identity, then service-role for admin ops
   const userClient = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
     global: { headers: { Authorization: `Bearer ${token}` } },
-  });
+  })
 
   const {
     data: { user },
     error: userErr,
-  } = await userClient.auth.getUser(token);
+  } = await userClient.auth.getUser(token)
   if (userErr || !user) {
-    return json({ ok: false, error: "Invalid or expired token" }, 401);
+    return json({ ok: false, error: 'Invalid or expired token' }, 401)
   }
-  const userId = user.id;
+  const userId = user.id
 
   // Service-role client for privileged operations
-  const adminClient = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  const adminClient = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
 
   // ── Step 1: Fetch profile for Stripe IDs + email for audit ────────────────
   const { data: profile } = await adminClient
-    .from("profiles")
-    .select("stripe_customer_id, stripe_subscription_id, display_name")
-    .eq("id", userId)
-    .single();
-  const userEmail = user.email;
+    .from('profiles')
+    .select('stripe_customer_id, stripe_subscription_id, display_name')
+    .eq('id', userId)
+    .single()
+  const userEmail = user.email
 
   // ── Step 2: Cancel Stripe subscription ────────────────────────────────────
   if (profile?.stripe_subscription_id) {
     try {
-      const stripe = new Stripe(env.STRIPE_SECRET_KEY);
+      const stripe = new Stripe(env.STRIPE_SECRET_KEY)
       await stripe.subscriptions.cancel(profile.stripe_subscription_id, {
-        cancellation_details: { comment: "User-initiated account deletion" },
-      });
+        cancellation_details: { comment: 'User-initiated account deletion' },
+      })
     } catch (stripeErr) {
       // Non-fatal: subscription may already be cancelled or customer deleted
-      console.error("[account/delete] Stripe cancel failed:", stripeErr);
+      console.error('[account/delete] Stripe cancel failed:', stripeErr)
     }
   }
 
   // ── Step 3: Purge storage ─────────────────────────────────────────────────
-  const BUCKETS = ["uploads", "projects"] as const;
+  const BUCKETS = ['uploads', 'projects'] as const
   for (const bucket of BUCKETS) {
     try {
       const { data: files } = await adminClient.storage.from(bucket).list(userId, {
         limit: 1000,
-      });
+      })
       if (files && files.length > 0) {
-        const paths = files.map((f) => `${userId}/${f.name}`);
-        await adminClient.storage.from(bucket).remove(paths);
+        const paths = files.map((f) => `${userId}/${f.name}`)
+        await adminClient.storage.from(bucket).remove(paths)
       }
       // Also purge any sub-directories (e.g. userId/projectId/canvasId)
       // List without prefix to find project-level folders
-      const { data: topLevel } = await adminClient.storage.from(bucket).list(userId);
+      const { data: topLevel } = await adminClient.storage.from(bucket).list(userId)
       if (topLevel) {
         for (const folder of topLevel.filter((f) => !f.id)) {
-          const prefix = `${userId}/${folder.name}`;
-          const { data: subFiles } = await adminClient.storage.from(bucket).list(prefix, { limit: 1000 });
+          const prefix = `${userId}/${folder.name}`
+          const { data: subFiles } = await adminClient.storage
+            .from(bucket)
+            .list(prefix, { limit: 1000 })
           if (subFiles && subFiles.length > 0) {
-            await adminClient.storage.from(bucket).remove(subFiles.map((f) => `${prefix}/${f.name}`));
+            await adminClient.storage
+              .from(bucket)
+              .remove(subFiles.map((f) => `${prefix}/${f.name}`))
           }
         }
       }
     } catch (storageErr) {
-      console.error(`[account/delete] Storage purge error (${bucket}):`, storageErr);
+      console.error(`[account/delete] Storage purge error (${bucket}):`, storageErr)
       // Continue — don't fail the whole deletion for storage errors
     }
   }
@@ -117,55 +115,56 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   // ── Step 4: Delete database rows via RPC ──────────────────────────────────
   // The RPC uses SECURITY DEFINER to delete all user-owned data atomically.
   // We call it with the user's JWT to preserve RLS identity.
-  const { error: rpcErr } = await userClient.rpc("delete_my_account");
+  const { error: rpcErr } = await userClient.rpc('delete_my_account')
   if (rpcErr) {
     // SEC-02: Rate limit — RPC raises P0001 when deletion was already requested
     // within the past 24 hours. Surface as 429 rather than 500.
-    const isRateLimit =
-      rpcErr.code === "P0001" ||
-      rpcErr.message?.includes("once per 24 hours");
+    const isRateLimit = rpcErr.code === 'P0001' || rpcErr.message?.includes('once per 24 hours')
     if (isRateLimit) {
       // Log the rate-limit hit for observability
       adminClient
-        .from("observability_events")
+        .from('observability_events')
         .insert({
           ts: new Date().toISOString(),
-          env: "production",
-          event_type: "rate_limit_hit",
+          env: 'production',
+          event_type: 'rate_limit_hit',
           user_id: userId,
           payload: {
-            endpoint: "/api/account/delete",
+            endpoint: '/api/account/delete',
             limit: 1,
-            window: "24h",
+            window: '24h',
           },
         })
-        .then(() => { /* fire-and-forget */ }, () => { /* non-fatal */ });
+        .then(
+          () => {
+            /* fire-and-forget */
+          },
+          () => {
+            /* non-fatal */
+          },
+        )
       return json(
         {
           ok: false,
-          error: "Account deletion can only be requested once per 24 hours.",
-          code: "RATE_LIMITED",
+          error: 'Account deletion can only be requested once per 24 hours.',
+          code: 'RATE_LIMITED',
         },
-        429
-      );
+        429,
+      )
     }
-    return json(
-      { ok: false, error: `Database deletion failed: ${rpcErr.message}` },
-      500
-    );
+    return json({ ok: false, error: `Database deletion failed: ${rpcErr.message}` }, 500)
   }
 
   // ── Step 5: Delete auth.users row ─────────────────────────────────────────
-  const { error: deleteUserErr } =
-    await adminClient.auth.admin.deleteUser(userId);
+  const { error: deleteUserErr } = await adminClient.auth.admin.deleteUser(userId)
   if (deleteUserErr) {
     return json(
       {
         ok: false,
         error: `Auth user deletion failed: ${deleteUserErr.message}`,
       },
-      500
-    );
+      500,
+    )
   }
 
   // ── Step 6: Post-deletion audit entry (7.06 — GDPR 30-day retention) ─────
@@ -173,11 +172,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   // Insert a second entry with email + display name in metadata so
   // the deletion can be traced for the 30-day legal retention period.
   adminClient
-    .from("audit_log")
+    .from('audit_log')
     .insert({
       user_id: null,
-      event_type: "account_deleted",
-      object_type: "profile",
+      event_type: 'account_deleted',
+      object_type: 'profile',
       object_id: userId,
       metadata: {
         email: userEmail,
@@ -192,20 +191,20 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       },
       () => {
         /* non-fatal */
-      }
-    );
+      },
+    )
 
   // NOTE: Confirmation email requires an email delivery service
   // (Resend, SendGrid, etc.) which is not yet configured. When
   // available, send a "Your account has been deleted" email to
   // `userEmail` here.
 
-  return json({ ok: true }, 200);
-};
+  return json({ ok: true }, 200)
+}
 
 function json(body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
-  });
+    headers: { 'Content-Type': 'application/json' },
+  })
 }
