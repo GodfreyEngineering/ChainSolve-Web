@@ -1,5 +1,5 @@
 /**
- * aiConversationStore — Zustand store for persistent AI Copilot conversations.
+ * aiConversationStore — Zustand store for persistent ChainSolve AI conversations.
  *
  * Persists conversations to localStorage so they survive panel close/reopen
  * and page reloads. Each conversation has a unique ID, title, timestamp,
@@ -7,7 +7,7 @@
  */
 
 import { create } from 'zustand'
-import type { AiPatchOp, RiskAssessment } from '../lib/aiCopilot/types'
+import type { AiPatchOp, RiskAssessment } from '../lib/ai/types'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 

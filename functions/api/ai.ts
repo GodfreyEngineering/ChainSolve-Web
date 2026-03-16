@@ -1,7 +1,7 @@
 /**
  * POST /api/ai
  *
- * ChainSolve AI Copilot server-side proxy (AI-1 / AI-2 / AI-3).
+ * ChainSolve AI server-side proxy (AI-1 / AI-2 / AI-3).
  *
  * 1. Verify Supabase JWT -> get user identity.
  * 2. Check plan entitlements (Pro/Enterprise only).
@@ -155,7 +155,7 @@ CSV nodes: When the canvas contains "csv" blockType nodes, they load tabular dat
 // ── System prompts per task ─────────────────────────────────────────────────
 
 function buildSystemPrompt(mode: string, task: AiTask): string {
-  const base = `You are ChainSolve Copilot, an expert AI assistant that helps users build node-graph calculation chains. You are a domain expert in engineering, science, finance, and mathematics.
+  const base = `You are ChainSolve AI, an expert AI assistant that helps users build node-graph calculation chains. You are a domain expert in engineering, science, finance, and mathematics.
 
 Think step-by-step before responding. Reason through the problem, plan the graph structure, then generate the JSON response. Consider:
 1. What quantities are needed and their relationships
@@ -579,7 +579,10 @@ async function callOpenAiStreaming(
               patchOps: parsed.patch?.ops ?? [],
               usage: { tokensIn, tokensOut },
               tokensRemaining: streamMeta
-                ? Math.max(0, streamMeta.tokenLimit - streamMeta.currentTokens - tokensIn - tokensOut)
+                ? Math.max(
+                    0,
+                    streamMeta.tokenLimit - streamMeta.currentTokens - tokensIn - tokensOut,
+                  )
                 : undefined,
               ...(parsed.explanation ? { explanation: parsed.explanation } : {}),
               ...(parsed.template ? { template: parsed.template } : {}),
@@ -712,7 +715,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const plan: Plan = isDev || isAdm ? 'enterprise' : ((profile?.plan as Plan) ?? 'free')
 
     if (plan === 'free' || plan === 'past_due' || plan === 'canceled') {
-      return jsonError('AI Copilot requires a Pro or Enterprise subscription', 402)
+      return jsonError('ChainSolve AI requires a Pro or Enterprise subscription', 402)
     }
 
     // ── Resolve org for enterprise ────────────────────────────────────────
@@ -755,7 +758,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Enterprise org disabled AI entirely
     if (!aiEnabled) {
       return Response.json(
-        { ok: false, error: 'AI Copilot is disabled by your organization', code: 'AI_DISABLED' },
+        { ok: false, error: 'ChainSolve AI is disabled by your organization', code: 'AI_DISABLED' },
         { status: 403 },
       )
     }
@@ -821,18 +824,28 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const HOURLY_REQUEST_LIMIT = 50
     if ((hourlyCount ?? 0) >= HOURLY_REQUEST_LIMIT) {
       // Log rate-limit hit for observability
-      supabaseAdmin.from('observability_events').insert({
-        ts: now.toISOString(),
-        env: 'production',
-        event_type: 'rate_limit_hit',
-        user_id: userId,
-        payload: {
-          endpoint: '/api/ai',
-          limit: HOURLY_REQUEST_LIMIT,
-          window: '1h',
-          count: hourlyCount,
-        },
-      }).then(() => { /* fire-and-forget */ }, () => { /* non-fatal */ })
+      supabaseAdmin
+        .from('observability_events')
+        .insert({
+          ts: now.toISOString(),
+          env: 'production',
+          event_type: 'rate_limit_hit',
+          user_id: userId,
+          payload: {
+            endpoint: '/api/ai',
+            limit: HOURLY_REQUEST_LIMIT,
+            window: '1h',
+            count: hourlyCount,
+          },
+        })
+        .then(
+          () => {
+            /* fire-and-forget */
+          },
+          () => {
+            /* non-fatal */
+          },
+        )
 
       const retryAfter = 3600 - Math.floor((now.getTime() - new Date(oneHourAgo).getTime()) / 1000)
       return new Response(
@@ -880,7 +893,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             ok: false,
             error:
               dailyLimit === 0
-                ? 'AI Copilot requires a Pro or Enterprise subscription'
+                ? 'ChainSolve AI requires a Pro or Enterprise subscription'
                 : `Daily AI request limit reached (${dailyLimit}/day). Resets at midnight UTC.`,
             code: 'DAILY_LIMIT',
             dailyLimit,

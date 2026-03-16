@@ -1,5 +1,5 @@
 /**
- * riskScoring.ts — deterministic risk assessment for AI copilot patch ops.
+ * riskScoring.ts — deterministic risk assessment for AI patch ops.
  *
  * Rules:
  *   HIGH: removeNode/removeEdge affecting >5 edges, variable deletions,

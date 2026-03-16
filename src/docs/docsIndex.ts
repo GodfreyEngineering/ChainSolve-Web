@@ -453,7 +453,7 @@ export const DOCS_INDEX: DocsEntry[] = [
   {
     id: 'ai-overview',
     section: 'AI assistant',
-    title: 'AI copilot — plan & edit modes',
+    title: 'ChainSolve AI — plan & edit modes',
     description:
       'The AI assistant helps you build and refine calculation chains. In Plan mode it suggests which blocks and connections to add based on your goal. In Edit mode it can modify existing blocks, rewire chains, and fix errors. Open the assistant from the toolbar or press Ctrl+Shift+A. The AI never modifies your canvas without confirmation.',
     keywords: [

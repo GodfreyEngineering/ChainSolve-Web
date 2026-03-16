@@ -18,8 +18,8 @@ interface GraphHealthPanelProps {
   onClose: () => void
   /** When true, skip outer positioning chrome (rendered inside BottomDock). */
   docked?: boolean
-  /** AI-3: Trigger "Fix with Copilot" workflow. */
-  onFixWithCopilot?: () => void
+  /** AI-3: Trigger "Fix with AI" workflow. */
+  onFixWithAi?: () => void
   /** AI-3: Trigger "Explain issues" workflow. */
   onExplainIssues?: () => void
 }
@@ -29,7 +29,7 @@ export default function GraphHealthPanel({
   edges,
   onClose,
   docked,
-  onFixWithCopilot,
+  onFixWithAi,
   onExplainIssues,
 }: GraphHealthPanelProps) {
   const { t } = useTranslation()
@@ -262,11 +262,11 @@ export default function GraphHealthPanel({
           )}
 
           {/* AI-3: Quick actions */}
-          {report.warnings.length > 0 && (onFixWithCopilot || onExplainIssues) && (
+          {report.warnings.length > 0 && (onFixWithAi || onExplainIssues) && (
             <div style={aiActionsStyle}>
-              {onFixWithCopilot && (
-                <button style={aiActionBtn} onClick={onFixWithCopilot}>
-                  {t('ai.fixGraph', 'Fix with Copilot')}
+              {onFixWithAi && (
+                <button style={aiActionBtn} onClick={onFixWithAi}>
+                  {t('ai.fixGraph', 'Fix with AI')}
                 </button>
               )}
               {onExplainIssues && (

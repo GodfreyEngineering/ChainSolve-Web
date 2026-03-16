@@ -10,7 +10,7 @@ import { useToast } from '../ui/useToast'
 import { DropdownMenu, type MenuEntry } from '../ui/DropdownMenu'
 import type { ConfirmAction } from './ConfirmDialog'
 import { ABOUT_WINDOW_ID, DOCS_WINDOW_ID } from '../windowIds'
-import { AI_COPILOT_WINDOW_ID } from '../../lib/aiCopilot/constants'
+import { AI_WINDOW_ID } from '../../lib/ai/constants'
 
 const LazyFeedbackModal = lazy(() =>
   import('../FeedbackModal').then((m) => ({ default: m.FeedbackModal })),
@@ -60,7 +60,7 @@ import { flattenMenusToActions, type MenuDef } from '../../lib/actions'
 import { computeSaveStatusLabel } from '../../lib/saveStatusLabel'
 import type { CanvasAreaHandle } from '../canvas/CanvasArea'
 import type { ThemeMode } from '../../contexts/ThemeContext'
-import type { AiPatchOp } from '../../lib/aiCopilot/types'
+import type { AiPatchOp } from '../../lib/ai/types'
 import { ExportDialog } from './ExportDialog'
 
 // ── Props ────────────────────────────────────────────────────────────────────
@@ -606,7 +606,7 @@ export function AppHeader({
       {
         label: t('menu.buildWithAI'),
         onClick: () => {
-          openWin(AI_COPILOT_WINDOW_ID, { width: 520, height: 560 })
+          openWin(AI_WINDOW_ID, { width: 520, height: 560 })
           setOpenMenu(null)
         },
       },

@@ -44,7 +44,7 @@ const STEP_TARGETS: Record<OnboardingStepId, string> = {
   problems_panel: 'problems-panel',
   variables_panel: 'variables-panel',
   sheets_tabs: 'sheets-bar',
-  ai_copilot: 'ai-copilot',
+  ai_copilot: 'ai-assistant',
 }
 
 export interface OnboardingOverlayProps {

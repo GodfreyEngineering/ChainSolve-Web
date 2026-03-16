@@ -1,8 +1,8 @@
 /**
- * AI Copilot shared types — used by the client UI and the API route.
+ * ChainSolve AI shared types — used by the client UI and the API route.
  *
  * These types define the stable patch format, risk levels, and API
- * request/response shapes for the ChainSolve AI Copilot (AI-1 / AI-2 / AI-3).
+ * request/response shapes for ChainSolve AI (AI-1 / AI-2 / AI-3).
  */
 
 // ── Modes ───────────────────────────────────────────────────────────────────

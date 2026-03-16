@@ -1,16 +1,16 @@
 /**
  * LlmGraphBuilderDialog — 6.03: AI-powered graph generation dialog.
  *
- * Uses the AI Copilot service (sendCopilotRequest) to generate graphs
+ * Uses the ChainSolve AI service (sendAiRequest) to generate graphs
  * from natural language prompts. Supports large graphs (100+ blocks)
  * with risk scoring and "Apply to Canvas" functionality.
  */
 
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { sendCopilotRequest } from '../../lib/aiCopilot/aiService'
-import { assessRisk, requiresConfirmation } from '../../lib/aiCopilot/riskScoring'
-import type { AiPatchOp, RiskAssessment } from '../../lib/aiCopilot/types'
+import { sendAiRequest } from '../../lib/ai/aiService'
+import { assessRisk, requiresConfirmation } from '../../lib/ai/riskScoring'
+import type { AiPatchOp, RiskAssessment } from '../../lib/ai/types'
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -204,7 +204,7 @@ export function LlmGraphBuilderDialog({
     setError(null)
     setApplied(false)
     try {
-      const response = await sendCopilotRequest({
+      const response = await sendAiRequest({
         mode: 'edit',
         task: 'chat',
         scope: 'active_canvas',

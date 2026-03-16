@@ -1,7 +1,7 @@
 /**
  * Context Pack Minimizer (AI-3).
  *
- * Extracts the minimal subgraph needed for a Copilot request.
+ * Extracts the minimal subgraph needed for an AI request.
  * Strips unnecessary fields and limits hop depth.
  */
 

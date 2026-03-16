@@ -87,7 +87,7 @@ export interface UserPreferences {
   analyticsOptIn: boolean
   /** Opt-in to crash reporting. */
   crashReportingOptIn: boolean
-  /** 6.08: Opt out of AI Copilot — no canvas data sent to OpenAI. */
+  /** 6.08: Opt out of ChainSolve AI — no canvas data sent to OpenAI. */
   aiOptOut: boolean
 
   // KB-01: User-editable keyboard shortcuts

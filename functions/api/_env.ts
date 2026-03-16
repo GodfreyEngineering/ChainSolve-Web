@@ -22,7 +22,7 @@ export interface CfEnv {
   STRIPE_PRICE_ID_ENT_UNLIMITED_MONTHLY: string
   STRIPE_PRICE_ID_ENT_UNLIMITED_ANNUAL: string
 
-  // ── AI Copilot ──────────────────────────────────────────────────────────────
+  // ── ChainSolve AI ───────────────────────────────────────────────────────────
   OPEN_AI_API_KEY?: string
   AI_MODEL?: string
 }
@@ -36,16 +36,14 @@ export interface CfEnv {
  *     'SUPABASE_URL', 'STRIPE_SECRET_KEY',
  *   ])
  */
-export function requireEnv<K extends keyof CfEnv>(
-  env: CfEnv,
-  keys: K[],
-): Pick<CfEnv, K> {
+export function requireEnv<K extends keyof CfEnv>(env: CfEnv, keys: K[]): Pick<CfEnv, K> {
   const missing = keys.filter((k) => !env[k])
   if (missing.length > 0) {
     throw new Response(
       JSON.stringify({
         ok: false,
-        error: `Missing required environment variable(s): ${missing.join(', ')}. ` +
+        error:
+          `Missing required environment variable(s): ${missing.join(', ')}. ` +
           'Configure them in Cloudflare Pages → Settings → Environment variables.',
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } },

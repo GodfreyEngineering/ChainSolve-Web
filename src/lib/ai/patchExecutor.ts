@@ -1,5 +1,5 @@
 /**
- * patchExecutor.ts — safe patch executor for AI copilot ops.
+ * patchExecutor.ts — safe patch executor for AI patch ops.
  *
  * Validates ops against current canvas state, prevents invalid edges
  * (fan-in > 1), ensures unique IDs, and rejects destructive ops unless

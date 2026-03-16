@@ -32,7 +32,7 @@ export const DOCS_CONTENT: DocsContentMap = {
       'Click a block to open the inspector on the right side. The inspector shows the block name, its input and output ports, current values, unit assignments, and any applicable settings. You can rename blocks, change units, and edit input bindings directly from the inspector.',
     panelsTitle: 'Side panels',
     panelsBody:
-      'Several features open as collapsible side panels: the Variables panel, the Graph Health panel, and the AI Copilot. These panels dock to the edges of the canvas and can be opened or closed from the toolbar.',
+      'Several features open as collapsible side panels: the Variables panel, the Graph Health panel, and ChainSolve AI. These panels dock to the edges of the canvas and can be opened or closed from the toolbar.',
     windowsTitle: 'Floating windows',
     windowsBody:
       'Larger tools such as the Theme Wizard, Block Library, and Settings open as draggable floating windows. You can move, resize, and close them independently.',

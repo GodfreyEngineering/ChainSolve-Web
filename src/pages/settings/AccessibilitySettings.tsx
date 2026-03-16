@@ -135,11 +135,11 @@ export function AccessibilitySettings() {
           style={{ accentColor: 'var(--primary)' }}
         />
         <div>
-          <div style={labelStyle}>{t('settings.aiOptOut', 'Opt out of AI Copilot')}</div>
+          <div style={labelStyle}>{t('settings.aiOptOut', 'Opt out of ChainSolve AI')}</div>
           <div style={hintStyle}>
             {t(
               'settings.aiOptOutHint',
-              'When enabled, no canvas data is sent to external AI services. The AI Copilot panel will be disabled.',
+              'When enabled, no canvas data is sent to external AI services. The ChainSolve AI panel will be disabled.',
             )}
           </div>
         </div>

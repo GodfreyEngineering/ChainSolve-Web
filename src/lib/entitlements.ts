@@ -65,7 +65,7 @@ export interface Entitlements {
   canEditThemes: boolean
   /** D11-4: Whether user can export (PDF/XLSX/.chainsolvejson) and import. */
   canExport: boolean
-  /** AI-1: Whether user can access the AI Copilot. Pro + Enterprise only. */
+  /** AI-1: Whether user can access ChainSolve AI. Pro + Enterprise only. */
   canUseAi: boolean
   /** H3-2: Whether user can create custom materials. Pro + Enterprise only. */
   canCreateCustomMaterials: boolean

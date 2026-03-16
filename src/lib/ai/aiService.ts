@@ -8,7 +8,7 @@
 import { getSession } from '../auth'
 import type { AiApiRequest, AiApiResponse, AiApiError, AiMode, AiScope, AiTask } from './types'
 
-export interface SendCopilotOptions {
+export interface SendAiOptions {
   mode: AiMode
   task?: AiTask
   scope?: AiScope
@@ -23,10 +23,10 @@ export interface SendCopilotOptions {
 }
 
 /**
- * Send a copilot request to POST /api/ai.
+ * Send an AI request to POST /api/ai.
  * Returns the parsed response or throws with a user-facing message.
  */
-export async function sendCopilotRequest(opts: SendCopilotOptions): Promise<AiApiResponse> {
+export async function sendAiRequest(opts: SendAiOptions): Promise<AiApiResponse> {
   const session = await getSession()
   const token = session?.access_token
   if (!token) {
@@ -76,13 +76,11 @@ export type AiStreamEvent =
   | { type: 'error'; error: string }
 
 /**
- * Send a streaming copilot request. Returns an async iterable of SSE events.
+ * Send a streaming AI request. Returns an async iterable of SSE events.
  * Text deltas arrive as `{type:'delta', text:'...'}` and the final structured
  * response arrives as `{type:'done', response:{...}}`.
  */
-export async function* sendCopilotRequestStreaming(
-  opts: SendCopilotOptions,
-): AsyncGenerator<AiStreamEvent> {
+export async function* sendAiRequestStreaming(opts: SendAiOptions): AsyncGenerator<AiStreamEvent> {
   const session = await getSession()
   const token = session?.access_token
   if (!token) {

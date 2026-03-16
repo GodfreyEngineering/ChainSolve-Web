@@ -55,9 +55,9 @@ export default function PrivacyPage() {
                 account.
               </li>
               <li>
-                <strong>Usage metadata</strong> &mdash; timestamps, feature usage counters (e.g. AI
-                Copilot token counts), and anonymised performance metrics. We do not store raw AI
-                prompts or responses.
+                <strong>Usage metadata</strong> &mdash; timestamps, feature usage counters (e.g.
+                ChainSolve AI token counts), and anonymised performance metrics. We do not store raw
+                AI prompts or responses.
               </li>
               <li>
                 <strong>Payment data</strong> &mdash; processed by Stripe. We do not store card
@@ -109,9 +109,9 @@ export default function PrivacyPage() {
                 <strong>Cloudflare</strong> &mdash; hosting, CDN, and DDoS protection.
               </li>
               <li>
-                <strong>OpenAI</strong> &mdash; AI Copilot requests (opt-in feature only). Requests
-                are sent with <code>store:&nbsp;false</code> so OpenAI does not retain your data.
-                See our{' '}
+                <strong>OpenAI</strong> &mdash; ChainSolve AI requests (opt-in feature only).
+                Requests are sent with <code>store:&nbsp;false</code> so OpenAI does not retain your
+                data. See our{' '}
                 <a href="/docs?section=ai-assistant" style={s.link}>
                   AI Privacy documentation
                 </a>{' '}

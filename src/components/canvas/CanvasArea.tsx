@@ -208,9 +208,9 @@ export interface CanvasAreaProps {
   /** Open the Material Wizard. */
   onOpenMaterials?: () => void
 
-  /* ── AI Copilot entrypoints (AI-3) ───────────────────────────────────────── */
-  /** Trigger "Fix with Copilot" from Graph Health panel. */
-  onFixWithCopilot?: () => void
+  /* ── ChainSolve AI entrypoints (AI-3) ────────────────────────────────────── */
+  /** Trigger "Fix with AI" from Graph Health panel. */
+  onFixWithAi?: () => void
   /** Trigger "Explain issues" from Graph Health panel. */
   onExplainIssues?: () => void
   /** Trigger "Explain this node" from context menu. */
@@ -230,7 +230,7 @@ export interface CanvasAreaProps {
 /** Handle exposed by CanvasArea via forwardRef. */
 export interface CanvasAreaHandle {
   getSnapshot: () => { nodes: Node<NodeData>[]; edges: Edge[] }
-  /** AI-1: Replace the canvas state with new nodes/edges (used by AI Copilot patch apply). */
+  /** AI-1: Replace the canvas state with new nodes/edges (used by ChainSolve AI patch apply). */
   setSnapshot: (nodes: Node<NodeData>[], edges: Edge[]) => void
   /** 6.02: Get computed values for AI context injection. nodeId → scalar or error string. */
   getComputedValues: () => Record<string, number | string>
@@ -478,7 +478,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     onOpenVariables,
     onOpenGroups,
     onOpenMaterials,
-    onFixWithCopilot,
+    onFixWithAi,
     onExplainIssues,
     onExplainNode,
     onInsertFromPrompt,
@@ -2774,7 +2774,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               nodes={nodes}
               edges={edges}
               onClose={() => setDockCollapsed(true)}
-              onFixWithCopilot={onFixWithCopilot}
+              onFixWithAi={onFixWithAi}
               onExplainIssues={onExplainIssues}
             />
           </Suspense>
@@ -2840,7 +2840,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       nodes,
       edges,
       t,
-      onFixWithCopilot,
+      onFixWithAi,
       onExplainIssues,
       stackEntries,
       handleRestoreHistory,

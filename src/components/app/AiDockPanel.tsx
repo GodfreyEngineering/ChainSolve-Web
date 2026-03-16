@@ -1,5 +1,5 @@
 /**
- * AiDockPanel — right-side docking panel for the AI Copilot (G8-1).
+ * AiDockPanel — right-side docking panel for ChainSolve AI (G8-1).
  *
  * Provides a collapsible/expandable side panel on the right edge of the
  * canvas area. When collapsed, shows a thin vertical handle strip with
@@ -142,7 +142,7 @@ export function AiDockPanel({ children, open, onRequestOpen }: AiDockPanelProps)
 
   // Expanded panel
   return (
-    <div style={{ ...panelStyle, width }} data-tour="ai-copilot">
+    <div style={{ ...panelStyle, width }} data-tour="ai-assistant">
       {/* Resize handle on left edge */}
       <AiDockHandle
         side="collapse"
@@ -175,7 +175,7 @@ function AiPlaceholder() {
       }}
     >
       <Sparkles size={20} style={{ opacity: 0.4 }} />
-      <span>{t('ai.title', 'AI Copilot')}</span>
+      <span>{t('ai.title', 'ChainSolve AI')}</span>
     </div>
   )
 }

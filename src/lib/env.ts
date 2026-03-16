@@ -34,7 +34,7 @@ export const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''
 /** Diagnostics UI enabled in production. Always available in dev. */
 export const DIAGNOSTICS_UI_ENABLED = import.meta.env.VITE_DIAGNOSTICS_UI_ENABLED === 'true'
 
-/** LLM API key for AI copilot. Empty string = not configured. */
+/** LLM API key for ChainSolve AI. Empty string = not configured. */
 export const LLM_API_KEY = (import.meta.env.VITE_LLM_API_KEY as string) ?? ''
 
 /** DEV-04: Sentry DSN for error tracking. Empty string disables Sentry. */

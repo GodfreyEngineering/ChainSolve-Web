@@ -85,8 +85,8 @@ import { UpgradeModal } from '../components/UpgradeModal'
 import { useEngine } from '../contexts/EngineContext'
 import { useWindowManager } from '../contexts/WindowManagerContext'
 import { THEME_LIBRARY_WINDOW_ID, THEME_WIZARD_WINDOW_ID } from '../components/windowIds'
-import { AI_COPILOT_WINDOW_ID } from '../lib/aiCopilot/constants'
-import type { AiPatchOp } from '../lib/aiCopilot/types'
+import { AI_WINDOW_ID } from '../lib/ai/constants'
+import type { AiPatchOp } from '../lib/ai/types'
 import { buildConstantsLookup } from '../engine/resolveBindings'
 import { toEngineSnapshot } from '../engine/bridge'
 import {
@@ -133,8 +133,8 @@ const LazyThemeLibraryWindow = lazy(() =>
 const LazyThemeWizard = lazy(() =>
   import('../components/ThemeWizard').then((m) => ({ default: m.ThemeWizard })),
 )
-const LazyAiCopilotWindow = lazy(() =>
-  import('../components/app/AiCopilotWindow').then((m) => ({ default: m.AiCopilotWindow })),
+const LazyAiWindow = lazy(() =>
+  import('../components/app/AiWindow').then((m) => ({ default: m.AiWindow })),
 )
 
 const LazySessionRevokedModal = lazy(() =>
@@ -1827,16 +1827,14 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const [upgradeExportOpen, setUpgradeExportOpen] = useState(false)
   const [upgradeAiOpen, setUpgradeAiOpen] = useState(false)
   const [aiInitialMessage, setAiInitialMessage] = useState<string | undefined>()
-  const [aiInitialTask, setAiInitialTask] = useState<
-    import('../lib/aiCopilot/types').AiTask | undefined
-  >()
+  const [aiInitialTask, setAiInitialTask] = useState<import('../lib/ai/types').AiTask | undefined>()
 
-  /** Open the AI Copilot panel, optionally prefilling a message and task. */
+  /** Open the ChainSolve AI panel, optionally prefilling a message and task. */
   const openAiPanel = useCallback(
-    (message?: string, task?: import('../lib/aiCopilot/types').AiTask) => {
+    (message?: string, task?: import('../lib/ai/types').AiTask) => {
       setAiInitialMessage(message)
       setAiInitialTask(task)
-      openWindow(AI_COPILOT_WINDOW_ID, { width: 520, height: 560 })
+      openWindow(AI_WINDOW_ID, { width: 520, height: 560 })
     },
     [openWindow],
   )
@@ -2109,7 +2107,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           onApplyPatch={async (ops) => {
             const snap = canvasRef.current?.getSnapshot()
             if (!snap) return
-            const { applyPatchOps } = await import('../lib/aiCopilot/patchExecutor')
+            const { applyPatchOps } = await import('../lib/ai/patchExecutor')
             const result = applyPatchOps(ops, snap.nodes, snap.edges, true)
             canvasRef.current?.setSnapshot(result.nodes, result.edges)
             handleGraphChange(result.nodes, result.edges)
@@ -2285,7 +2283,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                 onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
                 onOpenGroups={() => setTemplateManagerOpen(true)}
                 onOpenMaterials={() => setMaterialWizardOpen(true)}
-                onFixWithCopilot={() => openAiPanel('Fix all graph issues', 'fix_graph')}
+                onFixWithAi={() => openAiPanel('Fix all graph issues', 'fix_graph')}
                 onExplainIssues={() =>
                   openAiPanel('Explain all graph issues and warnings', 'explain_node')
                 }
@@ -2313,7 +2311,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                 onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
                 onOpenGroups={() => setTemplateManagerOpen(true)}
                 onOpenMaterials={() => setMaterialWizardOpen(true)}
-                onFixWithCopilot={() => openAiPanel('Fix all graph issues', 'fix_graph')}
+                onFixWithAi={() => openAiPanel('Fix all graph issues', 'fix_graph')}
                 onExplainIssues={() =>
                   openAiPanel('Explain all graph issues and warnings', 'explain_node')
                 }
@@ -2339,7 +2337,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
             onOpenVariables={() => setVariablesPanelOpen((v) => !v)}
             onOpenGroups={() => setTemplateManagerOpen(true)}
             onOpenMaterials={() => setMaterialWizardOpen(true)}
-            onFixWithCopilot={() => openAiPanel('Fix all graph issues', 'fix_graph')}
+            onFixWithAi={() => openAiPanel('Fix all graph issues', 'fix_graph')}
             onExplainIssues={() =>
               openAiPanel('Explain all graph issues and warnings', 'explain_node')
             }
@@ -2347,14 +2345,14 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
             onInsertFromPrompt={() => openAiPanel()}
           />
         )}
-        {/* G8-1: AI Copilot docked right panel — always visible, collapsed by default */}
+        {/* G8-1: ChainSolve AI docked right panel — always visible, collapsed by default */}
         <Suspense fallback={<div style={{ width: 28, flexShrink: 0 }} />}>
           <LazyAiDockPanel
-            open={isOpen(AI_COPILOT_WINDOW_ID)}
-            onRequestOpen={() => openWindow(AI_COPILOT_WINDOW_ID, { width: 520, height: 560 })}
+            open={isOpen(AI_WINDOW_ID)}
+            onRequestOpen={() => openWindow(AI_WINDOW_ID, { width: 520, height: 560 })}
           >
             <Suspense fallback={null}>
-              <LazyAiCopilotWindow
+              <LazyAiWindow
                 docked
                 plan={plan}
                 projectId={projectId}
@@ -2370,7 +2368,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                 onApplyPatch={async (ops: AiPatchOp[]) => {
                   const snap = canvasRef.current?.getSnapshot()
                   if (!snap) return
-                  const { applyPatchOps } = await import('../lib/aiCopilot/patchExecutor')
+                  const { applyPatchOps } = await import('../lib/ai/patchExecutor')
                   const result = applyPatchOps(ops, snap.nodes, snap.edges, true)
                   canvasRef.current?.setSnapshot(result.nodes, result.edges)
                   handleGraphChange(result.nodes, result.edges)

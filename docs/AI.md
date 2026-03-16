@@ -1,6 +1,6 @@
-# AI Copilot (AI-1 / AI-2 / AI-3)
+# ChainSolve AI (AI-1 / AI-2 / AI-3)
 
-ChainSolve Copilot is an AI-assisted graph building feature available to **Pro** and **Enterprise** users.
+ChainSolve AI is an AI-assisted graph building feature available to **Pro** and **Enterprise** users.
 
 ## Modes
 
@@ -29,7 +29,7 @@ ChainSolve Copilot is an AI-assisted graph building feature available to **Pro**
 
 ### Quick Action Entrypoints
 
-- **Graph Health panel** → "Fix with Copilot" / "Explain issues"
+- **Graph Health panel** → "Fix with AI" / "Explain issues"
 - **Node context menu** → "Explain this node"
 - **Canvas context menu** → "Insert blocks from prompt…"
 
@@ -37,7 +37,7 @@ ChainSolve Copilot is an AI-assisted graph building feature available to **Pro**
 
 | Control                  | Description                                     | Default |
 |--------------------------|-------------------------------------------------|---------|
-| `ai_enabled`             | Master toggle — disable Copilot for the org     | true    |
+| `ai_enabled`             | Master toggle — disable AI for the org           | true    |
 | `ai_allowed_modes`       | Restrict available modes (plan/edit/bypass)      | all     |
 | `allow_bypass`           | Allow Bypass mode                                | false   |
 | `monthly_token_limit_per_seat` | Per-seat monthly token budget              | 200,000 |

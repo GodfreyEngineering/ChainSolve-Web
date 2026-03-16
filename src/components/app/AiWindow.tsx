@@ -1,5 +1,5 @@
 /**
- * AiCopilotWindow — AI Copilot in-app window (AI-1 / AI-2 / AI-3).
+ * AiWindow — ChainSolve AI in-app window (AI-1 / AI-2 / AI-3).
  *
  * Opens as an AppWindow via the window manager. Provides:
  *   - Mode selector: Plan / Edit / Bypass
@@ -18,14 +18,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppWindow } from '../ui/AppWindow'
-import type { AiMode, AiTask, AiPatchOp, RiskAssessment } from '../../lib/aiCopilot/types'
-import { assessRisk, requiresConfirmation } from '../../lib/aiCopilot/riskScoring'
-import { sendCopilotRequest, sendCopilotRequestStreaming } from '../../lib/aiCopilot/aiService'
+import type { AiMode, AiTask, AiPatchOp, RiskAssessment } from '../../lib/ai/types'
+import { assessRisk, requiresConfirmation } from '../../lib/ai/riskScoring'
+import { sendAiRequest, sendAiRequestStreaming } from '../../lib/ai/aiService'
 import { getEntitlements, type Plan } from '../../lib/entitlements'
 import { usePreferencesStore } from '../../stores/preferencesStore'
 import { useAiConversationStore, type ChatMessage } from '../../stores/aiConversationStore'
-import { AI_COPILOT_WINDOW_ID } from '../../lib/aiCopilot/constants'
-export { AI_COPILOT_WINDOW_ID }
+import { AI_WINDOW_ID } from '../../lib/ai/constants'
+export { AI_WINDOW_ID }
 
 // ── Styles ──────────────────────────────────────────────────────────────────
 
@@ -274,7 +274,7 @@ if (typeof document !== 'undefined' && !document.getElementById('cs-ai-pulse-sty
 
 // ── Props ───────────────────────────────────────────────────────────────────
 
-export interface AiCopilotWindowProps {
+export interface AiWindowProps {
   plan: Plan
   projectId: string | undefined
   canvasId: string | undefined
@@ -293,7 +293,7 @@ export interface AiCopilotWindowProps {
 
 // ── Component ───────────────────────────────────────────────────────────────
 
-export function AiCopilotWindow({
+export function AiWindow({
   plan,
   projectId,
   canvasId,
@@ -304,7 +304,7 @@ export function AiCopilotWindow({
   initialTask,
   docked = false,
   computedValues,
-}: AiCopilotWindowProps) {
+}: AiWindowProps) {
   const { t } = useTranslation()
   const [mode, setMode] = useState<AiMode>('edit')
   const [activeTask, setActiveTask] = useState<AiTask>(initialTask ?? 'chat')
@@ -380,7 +380,7 @@ export function AiCopilotWindow({
 
       const effectiveMode =
         task === 'explain_node' || task === 'suggest' ? ('plan' as AiMode) : mode
-      sendCopilotRequest({
+      sendAiRequest({
         mode: effectiveMode,
         task,
         scope:
@@ -486,7 +486,7 @@ export function AiCopilotWindow({
       // message. Delta events contain raw JSON (the AI returns structured
       // JSON, not prose) so we suppress them and show a loading indicator
       // via the `loading` state instead.
-      for await (const event of sendCopilotRequestStreaming(requestOpts)) {
+      for await (const event of sendAiRequestStreaming(requestOpts)) {
         if (event.type === 'delta') {
           // Raw JSON token — skip display. The loading indicator handles UX.
           continue
@@ -584,7 +584,7 @@ export function AiCopilotWindow({
       <div style={s.lockedOverlay}>
         {isOptedOut ? (
           <>
-            <strong>{t('ai.optedOutTitle', 'AI Copilot Disabled')}</strong>
+            <strong>{t('ai.optedOutTitle', 'ChainSolve AI Disabled')}</strong>
             <p style={{ fontSize: '0.84rem', opacity: 0.7, margin: 0 }}>
               {t(
                 'ai.optedOutBody',
@@ -624,12 +624,7 @@ export function AiCopilotWindow({
     )
     if (docked) return lockedContent
     return (
-      <AppWindow
-        windowId={AI_COPILOT_WINDOW_ID}
-        title={t('ai.title')}
-        minWidth={360}
-        minHeight={260}
-      >
+      <AppWindow windowId={AI_WINDOW_ID} title={t('ai.title')} minWidth={360} minHeight={260}>
         {lockedContent}
       </AppWindow>
     )
@@ -952,7 +947,7 @@ export function AiCopilotWindow({
 
   if (docked) return mainContent
   return (
-    <AppWindow windowId={AI_COPILOT_WINDOW_ID} title={t('ai.title')} minWidth={400} minHeight={360}>
+    <AppWindow windowId={AI_WINDOW_ID} title={t('ai.title')} minWidth={400} minHeight={360}>
       {mainContent}
     </AppWindow>
   )

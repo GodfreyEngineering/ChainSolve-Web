@@ -33,7 +33,7 @@ interface ImportMetaEnv {
   /** Turnstile site key. Omit to disable CAPTCHA. */
   readonly VITE_TURNSTILE_SITE_KEY?: string
 
-  // ── AI Copilot ─────────────────────────────────────────────────────────────
-  /** LLM API key for AI copilot. Omit to disable. */
+  // ── ChainSolve AI ──────────────────────────────────────────────────────────
+  /** LLM API key for ChainSolve AI. Omit to disable. */
   readonly VITE_LLM_API_KEY?: string
 }

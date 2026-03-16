@@ -722,8 +722,8 @@
     "analyticsHint": "Help improve ChainSolve by sending anonymous usage data.",
     "crashReporting": "Crash reporting",
     "crashReportingHint": "Automatically send crash reports to help us fix bugs faster.",
-    "aiOptOut": "Opt out of AI Copilot",
-    "aiOptOutHint": "When enabled, no canvas data is sent to external AI services. The AI Copilot panel will be disabled.",
+    "aiOptOut": "Opt out of ChainSolve AI",
+    "aiOptOutHint": "When enabled, no canvas data is sent to external AI services. The ChainSolve AI panel will be disabled.",
     "exportSuccess": "Download started.",
     "exportDataTitle": "Export your data",
     "exportDataDesc": "Download all your personal data as a JSON file (GDPR right of access). Limited to once per day.",
@@ -924,7 +924,7 @@
     "featImport": "Import projects & files",
     "featCustomMaterials": "Custom materials",
     "featCustomFunctions": "Custom function blocks",
-    "featAi": "AI Copilot",
+    "featAi": "ChainSolve AI",
     "featOrgMgmt": "Organization management",
     "featSeatMgmt": "Seat management",
     "featPrioritySupport": "Priority support"
@@ -1457,9 +1457,9 @@
         "description": "Each project can have multiple Sheets (canvases). Use the Sheets bar to switch between them, add new ones, or rename and reorder them. Sheets share the same Variables."
       },
       "ai_copilot": {
-        "short": "AI Copilot",
-        "title": "Get help from the AI Copilot",
-        "description": "The AI Copilot panel (right side) can suggest block chains from natural language, explain your graph, find errors, and more. Click the Sparkles icon or press Ctrl+Shift+A to open it."
+        "short": "ChainSolve AI",
+        "title": "Get help from ChainSolve AI",
+        "description": "The ChainSolve AI panel (right side) can suggest block chains from natural language, explain your graph, find errors, and more. Click the Sparkles icon or press Ctrl+Shift+A to open it."
       }
     },
     "promptTitle": "Welcome to ChainSolve!",
@@ -1661,7 +1661,7 @@
     "policyCommentsHint": "Members can leave reviews and comments on marketplace items",
     "policySingleSession": "Enforce single active session per user",
     "policyAi": "Allow AI-assisted features",
-    "policyAiHint": "Members can use AI Copilot and AI-powered tools",
+    "policyAiHint": "Members can use ChainSolve AI and AI-powered tools",
     "policyExport": "Allow project export",
     "policyExportHint": "Members can export projects as PDF, XLSX, or JSON",
     "policyCustomFns": "Allow custom function creation",
@@ -1724,7 +1724,7 @@
     "errorDelete": "Failed to delete saved group."
   },
   "ai": {
-    "title": "AI Copilot",
+    "title": "ChainSolve AI",
     "modePlan": "Plan",
     "modeEdit": "Edit",
     "modeBypass": "Bypass",
@@ -1737,7 +1737,7 @@
     "cancel": "Cancel",
     "permissionRequired": "This change requires your confirmation before applying.",
     "quotaExceeded": "Monthly AI quota exceeded. Upgrade for more tokens.",
-    "lockedFree": "AI Copilot is available on Pro and Enterprise plans.",
+    "lockedFree": "ChainSolve AI is available on Pro and Enterprise plans.",
     "errorGeneric": "Something went wrong. Please try again.",
     "newConversation": "New conversation",
     "noConversations": "No previous conversations",
@@ -1756,8 +1756,8 @@
     "confirmDestructive": "This includes destructive changes. Apply anyway?",
     "confirmMedium": "This includes medium-risk changes. Review and apply?",
     "upgradeTitle": "Upgrade to Pro",
-    "upgradeBody": "AI Copilot requires a Pro plan.",
-    "fixGraph": "Fix with Copilot",
+    "upgradeBody": "ChainSolve AI requires a Pro plan.",
+    "fixGraph": "Fix with AI",
     "explainNode": "Explain",
     "publishToExplore": "Publish to Explore",
     "beforeAfter": "Before / After",
@@ -1767,7 +1767,7 @@
     "addContextConfirm": "Include more context?",
     "taskNotAllowed": "This workflow is not allowed by your organization policy.",
     "tokensRemaining": "Tokens left",
-    "disabledByOrg": "AI Copilot is disabled by your organization.",
+    "disabledByOrg": "ChainSolve AI is disabled by your organization.",
     "actionHistory": "History",
     "expandPanel": "Expand AI panel",
     "collapsePanel": "Collapse AI panel",
@@ -1780,7 +1780,7 @@
     "suggestGenTemplateTip": "Package the selected blocks as a reusable template",
     "suggestSimplify": "Simplify this chain",
     "suggestSimplifyTip": "Suggest ways to reduce complexity or merge blocks",
-    "optedOutTitle": "AI Copilot Disabled",
+    "optedOutTitle": "ChainSolve AI Disabled",
     "optedOutBody": "You have opted out of AI features in Privacy settings. No canvas data is sent to external services.",
     "optedOutHint": "To re-enable, go to Settings > Privacy and turn off \"Opt out of AI\".",
     "suggestOptimize": "Optimize graph",
