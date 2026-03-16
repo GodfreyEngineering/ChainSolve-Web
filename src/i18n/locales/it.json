@@ -1677,7 +1677,12 @@
     "suggestGenTemplate": "Save as template",
     "suggestGenTemplateTip": "Package the selected blocks as a reusable template",
     "suggestSimplify": "Simplify this chain",
-    "suggestSimplifyTip": "Suggest ways to reduce complexity or merge blocks"
+    "suggestSimplifyTip": "Suggest ways to reduce complexity or merge blocks",
+    "suggestOptimize": "Optimise chain",
+    "suggestOptimizeTip": "Find redundancies and suggest structural improvements",
+    "suggestImprovements": "Suggest improvements",
+    "suggestImprovementsTip": "Recommend missing validations, better blocks, or additional outputs",
+    "patchPartialFail": "Applicato con {{count}} errore/i: {{first}}"
   },
   "terms": {
     "title": "Termini e Condizioni",

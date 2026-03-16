@@ -2112,7 +2112,8 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
             if (result.errors?.length) {
               toast(
                 t('ai.patchPartialFail', {
-                  defaultValue: `Applied with ${result.errors.length} error(s): ${result.errors[0]}`,
+                  count: result.errors.length,
+                  first: result.errors[0],
                 }),
                 'info',
               )
@@ -2366,7 +2367,8 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                   if (result.errors?.length) {
                     toast(
                       t('ai.patchPartialFail', {
-                        defaultValue: `Applied with ${result.errors.length} error(s): ${result.errors[0]}`,
+                        count: result.errors.length,
+                        first: result.errors[0],
                       }),
                       'info',
                     )

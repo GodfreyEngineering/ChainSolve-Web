@@ -1777,7 +1777,8 @@
     "suggestOptimize": "Optimize graph",
     "suggestOptimizeTip": "Find redundancies and suggest structural improvements",
     "suggestImprovements": "Suggest improvements",
-    "suggestImprovementsTip": "Recommend missing validations, better blocks, or additional outputs"
+    "suggestImprovementsTip": "Recommend missing validations, better blocks, or additional outputs",
+    "patchPartialFail": "Applied with {{count}} error(s): {{first}}"
   },
   "terms": {
     "title": "Terms & Conditions",

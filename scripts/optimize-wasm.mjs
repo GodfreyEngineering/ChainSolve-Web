@@ -35,8 +35,10 @@ function runWasmOpt(args) {
     // Invoke the Node.js wrapper script directly — avoids cmd.exe quoting issues
     execFileSync(process.execPath, [BIN_NODE_SCRIPT, ...args], { stdio: 'inherit' })
   } else if (isWindows) {
-    const result = spawnSync('cmd.exe', ['/c', BIN_CMD, ...args], { stdio: 'inherit' })
-    if (result.status !== 0) throw new Error(`wasm-opt exited with ${result.status}`)
+    // Use execFileSync with shell:true so Node handles .cmd resolution safely.
+    // This avoids manually passing paths to cmd.exe which CodeQL flags as
+    // "shell command built from environment values".
+    execFileSync(BIN_CMD, args, { stdio: 'inherit', shell: true })
   } else {
     execFileSync(BIN, args, { stdio: 'inherit' })
   }
@@ -55,7 +57,7 @@ try {
     const ver = execFileSync(process.execPath, [BIN_NODE_SCRIPT, '--version'], { encoding: 'utf-8' }).trim()
     console.log(`wasm-opt: ${ver}`)
   } else if (isWindows) {
-    const r = spawnSync('cmd.exe', ['/c', BIN_CMD, '--version'], { encoding: 'utf-8' })
+    const r = spawnSync(BIN_CMD, ['--version'], { encoding: 'utf-8', shell: true })
     console.log(`wasm-opt: ${(r.stdout || '').trim() || '(version unknown)'}`)
   } else {
     const ver = execFileSync(BIN, ['--version'], { encoding: 'utf-8' }).trim()

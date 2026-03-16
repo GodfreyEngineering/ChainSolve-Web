@@ -1777,7 +1777,8 @@
     "suggestOptimize": "Optimize graph",
     "suggestOptimizeTip": "Find redundancies and suggest structural improvements",
     "suggestImprovements": "Suggest improvements",
-    "suggestImprovementsTip": "Recommend missing validations, better blocks, or additional outputs"
+    "suggestImprovementsTip": "Recommend missing validations, better blocks, or additional outputs",
+    "patchPartialFail": "{{count}} 件のエラーで適用されました: {{first}}"
   },
   "terms": {
     "title": "Terms & Conditions",

@@ -17,9 +17,11 @@ import type { Plugin } from 'vite'
 import { spawn } from 'node:child_process'
 
 // ── Client-side toast script (injected into index.html during dev only) ──────
+// This is the script *body* only — no <script> wrapper tags.
+// The transformIndexHtml hook returns a HtmlTagDescriptor that wraps it in
+// <script type="module"> automatically.
 
-const CLIENT_SCRIPT = `
-<script type="module" data-vite-wasm-reload>
+const CLIENT_SCRIPT_BODY = `
 if (import.meta.hot) {
   let _toast = null
   function _show(msg, color) {
@@ -43,7 +45,7 @@ if (import.meta.hot) {
   import.meta.hot.on('wasm:build-done',  () => { _show('✓  WASM rebuilt', '#059669'); setTimeout(_hide, 1800) })
   import.meta.hot.on('wasm:build-error', () => _show('✗  WASM build failed \u2014 check terminal', '#dc2626'))
 }
-</script>`.trim()
+`.trim()
 
 // ── Plugin ────────────────────────────────────────────────────────────────────
 
@@ -122,7 +124,7 @@ export function wasmHotReload(): Plugin {
       handler(_html, ctx) {
         // Only inject during dev server (ctx.server is set in serve mode).
         if (!ctx.server) return
-        return [{ tag: 'script', attrs: { type: 'module', 'data-vite-wasm-reload': '' }, children: CLIENT_SCRIPT.replace(/<script[^>]*>|<\/script>/g, '').trim() }]
+        return [{ tag: 'script', attrs: { type: 'module', 'data-vite-wasm-reload': '' }, children: CLIENT_SCRIPT_BODY }]
       },
     },
   }

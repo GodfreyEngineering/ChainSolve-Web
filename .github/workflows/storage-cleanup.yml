@@ -33,6 +33,11 @@ on:
           - 'true'
           - 'false'
 
+permissions: {}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   cleanup:
     name: Clean orphaned storage files
