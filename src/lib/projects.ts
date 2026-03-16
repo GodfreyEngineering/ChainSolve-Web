@@ -321,6 +321,11 @@ export async function createProjectFromTemplate(templateId: string): Promise<Pro
   const proj = data as ProjectRow
 
   const graph = tmpl.buildGraph(canvasId, projectId)
+  // Safety net: ensure node.type is a valid ReactFlow nodeKind, not a block
+  // registry key.  Templates SHOULD use nodeKinds directly, but this catches
+  // any mismatches at load time to prevent blank/broken blocks on the canvas.
+  const { normalizeTemplateNodes } = await import('../templates/normalizeTemplateNodes')
+  graph.nodes = normalizeTemplateNodes(graph.nodes as Parameters<typeof normalizeTemplateNodes>[0])
   const pj = buildJson(proj.id, uniqueName, graph.nodes, graph.edges)
   await saveProjectJson(proj.id, pj)
 

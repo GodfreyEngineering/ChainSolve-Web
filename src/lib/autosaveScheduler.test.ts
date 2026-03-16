@@ -124,4 +124,43 @@ describe('AutosaveScheduler', () => {
     vi.advanceTimersByTime(1)
     expect(save).toHaveBeenCalledTimes(1)
   })
+
+  it('flush() executes the pending save immediately', () => {
+    const save = vi.fn()
+    const s = new AutosaveScheduler(save, 2000)
+    s.schedule()
+    expect(s.hasPending()).toBe(true)
+    s.flush()
+    expect(save).toHaveBeenCalledTimes(1)
+    expect(s.hasPending()).toBe(false)
+  })
+
+  it('flush() on an idle scheduler is a no-op', () => {
+    const save = vi.fn()
+    const s = new AutosaveScheduler(save, 2000)
+    s.flush()
+    expect(save).not.toHaveBeenCalled()
+    expect(s.hasPending()).toBe(false)
+  })
+
+  it('flush() prevents the debounced timer from firing again', () => {
+    const save = vi.fn()
+    const s = new AutosaveScheduler(save, 2000)
+    s.schedule()
+    s.flush()
+    vi.advanceTimersByTime(3000)
+    // Should only have been called once (by flush), not twice
+    expect(save).toHaveBeenCalledTimes(1)
+  })
+
+  it('schedule after flush works normally', () => {
+    const save = vi.fn()
+    const s = new AutosaveScheduler(save, 2000)
+    s.schedule()
+    s.flush()
+    expect(save).toHaveBeenCalledTimes(1)
+    s.schedule()
+    vi.advanceTimersByTime(2000)
+    expect(save).toHaveBeenCalledTimes(2)
+  })
 })

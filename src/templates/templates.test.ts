@@ -15,6 +15,24 @@
 import { describe, it, expect } from 'vitest'
 import { TEMPLATES } from './index'
 
+/** Valid ReactFlow nodeKinds — must match NodeKind type in blocks/types.ts */
+const VALID_NODE_KINDS = new Set([
+  'csSource',
+  'csOperation',
+  'csDisplay',
+  'csData',
+  'csPlot',
+  'csListTable',
+  'csGroup',
+  'csPublish',
+  'csSubscribe',
+  'csAnnotation',
+  'csMaterial',
+  'csOptimizer',
+  'csMLModel',
+  'csNeuralNet',
+])
+
 type AnyNode = {
   id: string
   type: string
@@ -87,10 +105,22 @@ describe('Sample templates', () => {
 
       it('all number-block values are finite', () => {
         for (const node of nodes) {
-          if (node.type === 'number') {
+          if (node.data.blockType === 'number') {
             expect(Number.isFinite(node.data.value as number)).toBe(true)
           }
         }
+      })
+
+      it('all node types are valid ReactFlow nodeKinds (not block registry keys)', () => {
+        const invalid: string[] = []
+        for (const node of nodes) {
+          if (!VALID_NODE_KINDS.has(node.type)) {
+            invalid.push(
+              `${node.id}: type="${node.type}" (should be a nodeKind like csSource/csOperation/csDisplay)`,
+            )
+          }
+        }
+        expect(invalid, `Nodes with invalid type:\n${invalid.join('\n')}`).toEqual([])
       })
 
       it('all edges reference valid node IDs', () => {

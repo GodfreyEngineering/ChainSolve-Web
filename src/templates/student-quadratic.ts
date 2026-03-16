@@ -15,33 +15,33 @@ export function buildStudentQuadratic(canvasId: string, projectId: string): Canv
     // ── Inputs ────────────────────────────────────────────────────────
     {
       id: 'quad-a',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 0 },
       data: { blockType: 'number', label: 'a', value: 1 },
     },
     {
       id: 'quad-b',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 120 },
       data: { blockType: 'number', label: 'b', value: -3 },
     },
     {
       id: 'quad-c',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 240 },
       data: { blockType: 'number', label: 'c', value: 2 },
     },
     // constant 4 for discriminant
     {
       id: 'quad-four',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 360 },
       data: { blockType: 'number', label: '4', value: 4 },
     },
     // constant 2 for denominator
     {
       id: 'quad-two',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 480 },
       data: { blockType: 'number', label: '2', value: 2 },
     },
@@ -50,62 +50,62 @@ export function buildStudentQuadratic(canvasId: string, projectId: string): Canv
     // neg_b = -b
     {
       id: 'quad-negb',
-      type: 'negate',
+      type: 'csOperation',
       position: { x: 240, y: 120 },
       data: { blockType: 'negate', label: '-b' },
     },
     // b_squared = b * b
     {
       id: 'quad-bsq',
-      type: 'multiply',
+      type: 'csOperation',
       position: { x: 240, y: 240 },
       data: { blockType: 'multiply', label: 'b²' },
     },
     // four_ac = 4 * a * c  (split into two multiplies: 4a first, then *c)
     {
       id: 'quad-4a',
-      type: 'multiply',
+      type: 'csOperation',
       position: { x: 240, y: 360 },
       data: { blockType: 'multiply', label: '4a' },
     },
     {
       id: 'quad-4ac',
-      type: 'multiply',
+      type: 'csOperation',
       position: { x: 440, y: 360 },
       data: { blockType: 'multiply', label: '4ac' },
     },
     // discriminant = b² - 4ac
     {
       id: 'quad-disc',
-      type: 'subtract',
+      type: 'csOperation',
       position: { x: 640, y: 300 },
       data: { blockType: 'subtract', label: 'b²-4ac' },
     },
     // sqrt_disc = √(b²-4ac)
     {
       id: 'quad-sqrt',
-      type: 'sqrt',
+      type: 'csOperation',
       position: { x: 840, y: 300 },
       data: { blockType: 'sqrt', label: '√(b²-4ac)' },
     },
     // numerator = -b + √(b²-4ac)
     {
       id: 'quad-numer',
-      type: 'add',
+      type: 'csOperation',
       position: { x: 1040, y: 200 },
       data: { blockType: 'add', label: '-b + √disc' },
     },
     // denom = 2 * a
     {
       id: 'quad-denom',
-      type: 'multiply',
+      type: 'csOperation',
       position: { x: 240, y: 480 },
       data: { blockType: 'multiply', label: '2a' },
     },
     // x1 = numerator / (2a)
     {
       id: 'quad-x1',
-      type: 'divide',
+      type: 'csOperation',
       position: { x: 1240, y: 300 },
       data: { blockType: 'divide', label: 'x₁' },
     },
@@ -113,7 +113,7 @@ export function buildStudentQuadratic(canvasId: string, projectId: string): Canv
     // ── Output ────────────────────────────────────────────────────────
     {
       id: 'quad-disp',
-      type: 'display',
+      type: 'csDisplay',
       position: { x: 1440, y: 300 },
       data: { blockType: 'display', label: 'Root x₁' },
     },

@@ -55,6 +55,19 @@ export class AutosaveScheduler {
     }
   }
 
+  /**
+   * Flush any pending save immediately — execute the save function and clear
+   * the timer.  This is critical for tab/canvas switching: we must persist the
+   * current canvas synchronously *before* the active canvas changes.
+   */
+  flush(): void {
+    if (this.timer !== null) {
+      clearTimeout(this.timer)
+      this.timer = null
+      this.saveFn()
+    }
+  }
+
   /** True if a save is currently scheduled. */
   hasPending(): boolean {
     return this.timer !== null

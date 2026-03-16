@@ -19,13 +19,13 @@ export function buildEngineeringRc(canvasId: string, projectId: string): CanvasJ
     // ── Inputs ────────────────────────────────────────────────────────
     {
       id: 'rc-r',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 0 },
       data: { blockType: 'number', label: 'Resistance R (Ω)', value: 1000 },
     },
     {
       id: 'rc-c',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 120 },
       data: { blockType: 'number', label: 'Capacitance C (F)', value: 0.001 },
     },
@@ -33,7 +33,7 @@ export function buildEngineeringRc(canvasId: string, projectId: string): CanvasJ
     // ── Operation ─────────────────────────────────────────────────────
     {
       id: 'rc-tau',
-      type: 'multiply',
+      type: 'csOperation',
       position: { x: 240, y: 60 },
       data: { blockType: 'multiply', label: 'τ = R·C' },
     },
@@ -41,7 +41,7 @@ export function buildEngineeringRc(canvasId: string, projectId: string): CanvasJ
     // ── Output ────────────────────────────────────────────────────────
     {
       id: 'rc-disp',
-      type: 'display',
+      type: 'csDisplay',
       position: { x: 440, y: 60 },
       data: { blockType: 'display', label: 'Time Constant τ (s)' },
     },

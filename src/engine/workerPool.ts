@@ -19,6 +19,19 @@
 
 import { createEngine, type EngineAPI, type WorkerFactory } from './index.ts'
 
+/**
+ * Typed error thrown when a pending acquireEngine() promise is rejected
+ * because the canvas was evicted (e.g. project switch or pool LRU eviction).
+ * Callers should catch this and silently ignore it — it is expected during
+ * navigation and not a bug.
+ */
+export class EngineEvictedError extends Error {
+  constructor(canvasId: string) {
+    super(`Engine for canvas "${canvasId}" was evicted before initialization completed`)
+    this.name = 'EngineEvictedError'
+  }
+}
+
 // ── Pool size ────────────────────────────────────────────────────────────────
 
 function defaultMaxPoolSize(): number {
@@ -81,8 +94,10 @@ export function createWorkerPool(
   // canvasId → resolved engine (fully initialized, ready to use)
   const engines = new Map<string, EngineAPI>()
 
-  // canvasId → in-flight initialization promise (not yet ready)
-  const pending = new Map<string, Promise<EngineAPI>>()
+  // canvasId → in-flight initialization promise + reject callback.
+  // The reject function is used to cleanly cancel pending acquireEngine()
+  // promises when a canvas is evicted before its engine finishes initializing.
+  const pending = new Map<string, { promise: Promise<EngineAPI>; reject: (err: Error) => void }>()
 
   // LRU order: head = most-recently used, tail = least-recently used.
   // Contains all canvasIds that currently have an assigned worker slot
@@ -122,7 +137,7 @@ export function createWorkerPool(
     // Already initializing — return the in-flight promise.
     const inFlight = pending.get(canvasId)
     if (inFlight) {
-      return inFlight
+      return inFlight.promise
     }
 
     // Need to create a new engine. Evict LRU if at capacity.
@@ -136,18 +151,30 @@ export function createWorkerPool(
       // better to have a briefly over-capacity pool than to block the canvas.
     }
 
-    const p = createEngine(factory).then((eng) => {
-      if (disposed) {
-        eng.dispose()
-        throw new Error('WorkerPool disposed during engine initialization')
-      }
-      pending.delete(canvasId)
-      engines.set(canvasId, eng)
-      touch(canvasId)
-      return eng
+    // Wrap in a cancellable promise so evictCanvas can reject in-flight inits.
+    let rejectPending!: (err: Error) => void
+    const p = new Promise<EngineAPI>((resolve, reject) => {
+      rejectPending = reject
+      createEngine(factory).then((eng) => {
+        if (disposed) {
+          eng.dispose()
+          reject(new Error('WorkerPool disposed during engine initialization'))
+          return
+        }
+        // Guard: if evictCanvas was called while initializing, the pending
+        // entry has already been removed and the reject callback fired.
+        if (!pending.has(canvasId)) {
+          eng.dispose()
+          return // reject was already called by evictCanvas
+        }
+        pending.delete(canvasId)
+        engines.set(canvasId, eng)
+        touch(canvasId)
+        resolve(eng)
+      }, reject)
     })
 
-    pending.set(canvasId, p)
+    pending.set(canvasId, { promise: p, reject: rejectPending })
     return p
   }
 
@@ -166,8 +193,13 @@ export function createWorkerPool(
       eng.dispose()
       engines.delete(canvasId)
     }
-    // Cancel pending (the promise will reject after disposal is set)
-    pending.delete(canvasId)
+    // Reject any in-flight acquireEngine promise so callers get a clean
+    // EngineEvictedError instead of a dangling/never-resolving promise.
+    const inflight = pending.get(canvasId)
+    if (inflight) {
+      inflight.reject(new EngineEvictedError(canvasId))
+      pending.delete(canvasId)
+    }
     const idx = lruOrder.indexOf(canvasId)
     if (idx !== -1) lruOrder.splice(idx, 1)
   }

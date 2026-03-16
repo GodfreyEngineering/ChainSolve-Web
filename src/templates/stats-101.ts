@@ -23,70 +23,70 @@ export function buildStats101(canvasId: string, projectId: string): CanvasJSON {
     // ── Count ─────────────────────────────────────────────────────────
     {
       id: 's101-c',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 0 },
       data: { blockType: 'number', label: 'Count n', value: 6 },
     },
     // ── Data points ───────────────────────────────────────────────────
     {
       id: 's101-x1',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 120 },
       data: { blockType: 'number', label: 'x₁', value: 10 },
     },
     {
       id: 's101-x2',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 220 },
       data: { blockType: 'number', label: 'x₂', value: 20 },
     },
     {
       id: 's101-x3',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 320 },
       data: { blockType: 'number', label: 'x₃', value: 30 },
     },
     {
       id: 's101-x4',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 420 },
       data: { blockType: 'number', label: 'x₄', value: 40 },
     },
     {
       id: 's101-x5',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 520 },
       data: { blockType: 'number', label: 'x₅', value: 50 },
     },
     {
       id: 's101-x6',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 620 },
       data: { blockType: 'number', label: 'x₆', value: 60 },
     },
     // ── Operations ────────────────────────────────────────────────────
     {
       id: 's101-mean',
-      type: 'stats.desc.mean',
+      type: 'csOperation',
       position: { x: 280, y: 160 },
       data: { blockType: 'stats.desc.mean', label: 'Mean', manualValues: { c: 6 } },
     },
     {
       id: 's101-stddev',
-      type: 'stats.desc.stddev',
+      type: 'csOperation',
       position: { x: 280, y: 460 },
       data: { blockType: 'stats.desc.stddev', label: 'Std Dev', manualValues: { c: 6 } },
     },
     // ── Outputs ───────────────────────────────────────────────────────
     {
       id: 's101-mean-disp',
-      type: 'display',
+      type: 'csDisplay',
       position: { x: 500, y: 160 },
       data: { blockType: 'display', label: 'Mean x̄' },
     },
     {
       id: 's101-stddev-disp',
-      type: 'display',
+      type: 'csDisplay',
       position: { x: 500, y: 460 },
       data: { blockType: 'display', label: 'Std Dev σ' },
     },

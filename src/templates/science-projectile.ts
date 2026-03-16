@@ -20,33 +20,33 @@ export function buildScienceProjectile(canvasId: string, projectId: string): Can
     // ── Inputs ────────────────────────────────────────────────────────
     {
       id: 'proj-v0',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 0 },
       data: { blockType: 'number', label: 'Initial velocity v₀ (m/s)', value: 50 },
     },
     {
       id: 'proj-angle',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 120 },
       data: { blockType: 'number', label: 'Angle θ (degrees)', value: 45 },
     },
     {
       id: 'proj-g',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 240 },
       data: { blockType: 'number', label: 'Gravity g (m/s²)', value: 9.81 },
     },
     // deg→rad conversion factor: π/180
     {
       id: 'proj-pi180',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 360 },
       data: { blockType: 'number', label: 'π/180', value: 0.017453292519943295 },
     },
     // constant 2 (for 2θ and v₀²)
     {
       id: 'proj-two',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 480 },
       data: { blockType: 'number', label: '2', value: 2 },
     },
@@ -55,42 +55,42 @@ export function buildScienceProjectile(canvasId: string, projectId: string): Can
     // v0squared = v₀ * v₀
     {
       id: 'proj-v0sq',
-      type: 'multiply',
+      type: 'csOperation',
       position: { x: 240, y: 0 },
       data: { blockType: 'multiply', label: 'v₀²' },
     },
     // theta_rad = angle * (π/180)
     {
       id: 'proj-deg2rad',
-      type: 'multiply',
+      type: 'csOperation',
       position: { x: 240, y: 120 },
       data: { blockType: 'multiply', label: 'θ (rad)' },
     },
     // two_theta = 2 * theta_rad
     {
       id: 'proj-2theta',
-      type: 'multiply',
+      type: 'csOperation',
       position: { x: 440, y: 120 },
       data: { blockType: 'multiply', label: '2θ' },
     },
     // sin2theta = sin(2θ)
     {
       id: 'proj-sin2theta',
-      type: 'sin',
+      type: 'csOperation',
       position: { x: 640, y: 120 },
       data: { blockType: 'sin', label: 'sin(2θ)' },
     },
     // numerator = v0sq * sin(2θ)
     {
       id: 'proj-numer',
-      type: 'multiply',
+      type: 'csOperation',
       position: { x: 840, y: 60 },
       data: { blockType: 'multiply', label: 'v₀²·sin(2θ)' },
     },
     // range = numerator / g
     {
       id: 'proj-range',
-      type: 'divide',
+      type: 'csOperation',
       position: { x: 1040, y: 60 },
       data: { blockType: 'divide', label: 'R = v₀²·sin(2θ)/g' },
     },
@@ -98,7 +98,7 @@ export function buildScienceProjectile(canvasId: string, projectId: string): Can
     // ── Output ────────────────────────────────────────────────────────
     {
       id: 'proj-disp',
-      type: 'display',
+      type: 'csDisplay',
       position: { x: 1240, y: 60 },
       data: { blockType: 'display', label: 'Range R (m)' },
     },

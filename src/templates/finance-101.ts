@@ -18,52 +18,52 @@ export function buildFinance101(canvasId: string, projectId: string): CanvasJSON
     // ── Shared inputs ─────────────────────────────────────────────────
     {
       id: 'f101-pv',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 0 },
       data: { blockType: 'number', label: 'Principal PV', value: 1000 },
     },
     {
       id: 'f101-r',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 120 },
       data: { blockType: 'number', label: 'Rate r (decimal)', value: 0.05 },
     },
     {
       id: 'f101-t',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 240 },
       data: { blockType: 'number', label: 'Time t (years)', value: 1 },
     },
     // ── Compound FV extra input ────────────────────────────────────────
     {
       id: 'f101-n',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 360 },
       data: { blockType: 'number', label: 'Periods/yr n', value: 12 },
     },
     // ── Operations ────────────────────────────────────────────────────
     {
       id: 'f101-fv',
-      type: 'fin.tvm.compound_fv',
+      type: 'csOperation',
       position: { x: 280, y: 180 },
       data: { blockType: 'fin.tvm.compound_fv', label: 'Compound FV' },
     },
     {
       id: 'f101-si',
-      type: 'fin.tvm.simple_interest',
+      type: 'csOperation',
       position: { x: 280, y: 360 },
       data: { blockType: 'fin.tvm.simple_interest', label: 'Simple Int.' },
     },
     // ── Outputs ───────────────────────────────────────────────────────
     {
       id: 'f101-fv-disp',
-      type: 'display',
+      type: 'csDisplay',
       position: { x: 500, y: 180 },
       data: { blockType: 'display', label: 'Future Value ($)' },
     },
     {
       id: 'f101-si-disp',
-      type: 'display',
+      type: 'csDisplay',
       position: { x: 500, y: 360 },
       data: { blockType: 'display', label: 'Simple Interest ($)' },
     },

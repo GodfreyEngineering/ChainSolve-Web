@@ -17,45 +17,45 @@ export function buildPhysics101(canvasId: string, projectId: string): CanvasJSON
     // ── Inputs ────────────────────────────────────────────────────────
     {
       id: 'p101-m',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 0 },
       data: { blockType: 'number', label: 'Mass m (kg)', value: 10 },
     },
     {
       id: 'p101-a',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 120 },
       data: { blockType: 'number', label: 'Accel a (m/s²)', value: 2 },
     },
     {
       id: 'p101-v',
-      type: 'number',
+      type: 'csSource',
       position: { x: 0, y: 300 },
       data: { blockType: 'number', label: 'Velocity v (m/s)', value: 5 },
     },
     // ── Operations ────────────────────────────────────────────────────
     {
       id: 'p101-force',
-      type: 'eng.mechanics.force_ma',
+      type: 'csOperation',
       position: { x: 220, y: 60 },
       data: { blockType: 'eng.mechanics.force_ma', label: 'F = ma' },
     },
     {
       id: 'p101-ke',
-      type: 'eng.mechanics.kinetic_energy',
+      type: 'csOperation',
       position: { x: 220, y: 240 },
       data: { blockType: 'eng.mechanics.kinetic_energy', label: 'KE = ½mv²' },
     },
     // ── Outputs ───────────────────────────────────────────────────────
     {
       id: 'p101-force-disp',
-      type: 'display',
+      type: 'csDisplay',
       position: { x: 440, y: 60 },
       data: { blockType: 'display', label: 'Force F (N)' },
     },
     {
       id: 'p101-ke-disp',
-      type: 'display',
+      type: 'csDisplay',
       position: { x: 440, y: 240 },
       data: { blockType: 'display', label: 'Kinetic Energy (J)' },
     },

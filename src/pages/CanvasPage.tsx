@@ -312,6 +312,8 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   // BUG-10: tracks which canvasId is currently being loaded so rapid tab
   // switching discards out-of-order resolved promises.
   const loadingCanvasRef = useRef<string | null>(null)
+  // Mutex: prevents concurrent tab switches that can corrupt state
+  const isSwitchingCanvas = useRef(false)
 
   // ── K1-1: Secondary canvas state for tiled mode ──────────────────────────
   const secondaryCanvasRef = useRef<CanvasAreaHandle>(null)
@@ -930,14 +932,20 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const handleSwitchCanvas = useCallback(
     async (canvasId: string) => {
       if (!projectId || canvasId === activeCanvasId) return
+      // Mutex: prevent concurrent tab switches that could corrupt save state
+      if (isSwitchingCanvas.current) return
+      isSwitchingCanvas.current = true
 
       // Show loading gate — prevents interaction with stale canvas during async ops
       setCanvasSwitching(true)
 
-      // Cancel any pending autosave for the current canvas — we save explicitly below
-      autosaveScheduler.current.cancel()
+      // Flush any pending autosave immediately — this captures the CURRENT canvas
+      // snapshot and saves it before we switch away.  Using flush() (not cancel())
+      // is critical: cancel() would discard unsaved changes.
+      autosaveScheduler.current.flush()
 
-      // Save current canvas if dirty before switching — abort on failure to prevent data loss
+      // Save current canvas if still dirty after flush (e.g. changes made after
+      // last schedule call) — abort on failure to prevent data loss.
       const canvasIsDirty =
         useProjectStore.getState().isDirty ||
         useCanvasesStore.getState().dirtyCanvasIds.has(activeCanvasId ?? '')
@@ -950,6 +958,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
             'error',
           )
           setCanvasSwitching(false)
+          isSwitchingCanvas.current = false
           return
         }
       }
@@ -980,6 +989,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         }
       } finally {
         setCanvasSwitching(false)
+        isSwitchingCanvas.current = false
       }
     },
     [projectId, activeCanvasId, doSave, setActiveCanvasId, completeSave, toast, t],
@@ -2099,6 +2109,14 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
             const result = applyPatchOps(ops, snap.nodes, snap.edges, true)
             canvasRef.current?.setSnapshot(result.nodes, result.edges)
             handleGraphChange(result.nodes, result.edges)
+            if (result.errors?.length) {
+              toast(
+                t('ai.patchPartialFail', {
+                  defaultValue: `Applied with ${result.errors.length} error(s): ${result.errors[0]}`,
+                }),
+                'info',
+              )
+            }
           }}
         />
       )}
@@ -2345,6 +2363,14 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
                   const result = applyPatchOps(ops, snap.nodes, snap.edges, true)
                   canvasRef.current?.setSnapshot(result.nodes, result.edges)
                   handleGraphChange(result.nodes, result.edges)
+                  if (result.errors?.length) {
+                    toast(
+                      t('ai.patchPartialFail', {
+                        defaultValue: `Applied with ${result.errors.length} error(s): ${result.errors[0]}`,
+                      }),
+                      'info',
+                    )
+                  }
                 }}
                 onUpgrade={() => setUpgradeAiOpen(true)}
                 initialMessage={aiInitialMessage}

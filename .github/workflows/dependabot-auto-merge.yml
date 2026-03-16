@@ -1,11 +1,18 @@
-# Auto-approve and auto-merge Dependabot PRs after CI passes.
+# Auto-merge Dependabot PRs after CI passes.
 #
 # Policy:
 #   - Patch + minor version updates: auto-merge after CI green.
 #   - Major version updates: require manual review.
 #
+# Note: We do NOT auto-approve because GITHUB_TOKEN cannot approve PRs
+# in the same repo. Instead, we rely on branch protection requiring CI
+# to pass, and enable auto-merge (squash) so GitHub merges once checks
+# are green.
+#
 # Requires: Settings → General → "Allow auto-merge" enabled on the repo.
 # Requires: Branch protection rule on `main` requiring CI to pass.
+# Requires: Branch protection does NOT require approvals for auto-merge,
+#           OR a separate approval is granted manually / via a PAT.
 
 name: Dependabot auto-merge
 
@@ -25,16 +32,9 @@ jobs:
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v2
+        uses: dependabot/fetch-metadata@v2.4.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Auto-approve patch and minor updates
-        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
-        run: gh pr review --approve "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Enable auto-merge for patch and minor updates
         if: steps.metadata.outputs.update-type != 'version-update:semver-major'

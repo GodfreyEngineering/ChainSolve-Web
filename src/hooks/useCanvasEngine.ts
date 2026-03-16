@@ -10,6 +10,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { EngineAPI } from '../engine/index.ts'
 import { useWorkerPool } from '../contexts/WorkerPoolContext.ts'
+import { EngineEvictedError } from '../engine/workerPool.ts'
 
 export interface CanvasEngineResult {
   /** The engine to use for this canvas (primary until dedicated is ready). */
@@ -68,14 +69,22 @@ export function useCanvasEngine(
     // Acquire a dedicated engine for this canvas.
     // setState is called only in the async callback, satisfying the
     // react-hooks/set-state-in-effect lint rule.
-    pool.acquireEngine(canvasId).then((eng) => {
-      // Guard: canvasId may have changed while we were waiting.
-      if (generationRef.current !== generation) return
-      setEngineState((prev) => ({
-        dedicatedEngine: eng,
-        engineSwitchCount: prev.engineSwitchCount + 1,
-      }))
-    })
+    pool
+      .acquireEngine(canvasId)
+      .then((eng) => {
+        // Guard: canvasId may have changed while we were waiting.
+        if (generationRef.current !== generation) return
+        setEngineState((prev) => ({
+          dedicatedEngine: eng,
+          engineSwitchCount: prev.engineSwitchCount + 1,
+        }))
+      })
+      .catch((err) => {
+        // EngineEvictedError is expected during project/canvas switching —
+        // the canvas was navigated away from before its engine finished init.
+        if (err instanceof EngineEvictedError) return
+        console.error('[useCanvasEngine] Engine acquisition failed:', err)
+      })
 
     // Cleanup: release the canvas worker on unmount or canvasId change
     return () => {

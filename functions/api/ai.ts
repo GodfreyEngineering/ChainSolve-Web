@@ -72,6 +72,8 @@ const VALID_TASKS: AiTask[] = [
   'explain_node',
   'generate_template',
   'generate_theme',
+  'optimize',
+  'suggest',
 ]
 
 // ── Comprehensive block catalog for system prompt (6.01) ────────────────────
@@ -308,8 +310,9 @@ Required JSON response:
   return `${base}
 - Current mode: ${mode}
   - plan: describe steps only, patch.ops should be empty.
-  - edit: propose ops for user review.
+  - edit: You MUST generate patch.ops that implement the user's request. Do NOT just explain — actually create the nodes and edges. Every request in edit mode should produce concrete addNode/addEdge ops unless the user explicitly asks for an explanation only.
   - bypass: propose ops for auto-apply (user still confirms high-risk).
+- IMPORTANT: When mode is "edit", always include the actual patch ops to implement the request. The user expects blocks to appear on their canvas, not just a text explanation.
 - For large projects: organize related nodes into groups using createGroup ops.
 - When the user asks about materials or material properties, use createMaterial to define them.
 - When the user asks for a reusable formula or function, use createCustomFunction.
@@ -483,6 +486,7 @@ async function callOpenAiStreaming(
   model: string,
   systemPrompt: string,
   userMessage: string,
+  streamMeta?: { task: AiTask; tokenLimit: number; currentTokens: number },
 ): Promise<{ stream: ReadableStream<Uint8Array>; getUsage: () => Promise<OpenAiUsage> }> {
   const res = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
@@ -547,7 +551,26 @@ async function callOpenAiStreaming(
               }
             }
 
-            const doneEvent = JSON.stringify({ type: 'done', response: parsed })
+            // Transform the internal AiResponse into the public AiApiResponse
+            // shape so the client reads patchOps (not patch.ops), ok:true, etc.
+            const tokensIn = usage.input_tokens ?? 0
+            const tokensOut = usage.output_tokens ?? 0
+            const apiResponse = {
+              ok: true as const,
+              task: streamMeta?.task ?? 'chat',
+              message: parsed.message,
+              assumptions: parsed.assumptions ?? [],
+              risk: parsed.risk ?? { level: 'low', reasons: [] },
+              patchOps: parsed.patch?.ops ?? [],
+              usage: { tokensIn, tokensOut },
+              tokensRemaining: streamMeta
+                ? Math.max(0, streamMeta.tokenLimit - streamMeta.currentTokens - tokensIn - tokensOut)
+                : undefined,
+              ...(parsed.explanation ? { explanation: parsed.explanation } : {}),
+              ...(parsed.template ? { template: parsed.template } : {}),
+              ...(parsed.theme ? { theme: parsed.theme } : {}),
+            }
+            const doneEvent = JSON.stringify({ type: 'done', response: apiResponse })
             controller.enqueue(encoder.encode(`data: ${doneEvent}\n\n`))
             controller.enqueue(encoder.encode('data: [DONE]\n\n'))
             controller.close()
@@ -955,6 +978,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         model,
         systemPrompt,
         userPrompt,
+        { task, tokenLimit, currentTokens },
       )
 
       // Fire-and-forget: update quota and log after stream completes

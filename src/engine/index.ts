@@ -428,6 +428,7 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
 
   return {
     evaluateGraph(snapshot, options) {
+      if (disposed) return Promise.reject(new Error('Engine disposed'))
       const opts = traceEnabled ? { ...options, trace: true } : options
       return new Promise((resolve, reject) => {
         const id = nextId++
@@ -438,6 +439,7 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
     },
 
     loadSnapshot(snapshot, options) {
+      if (disposed) return Promise.reject(new Error('Engine disposed'))
       const opts = traceEnabled ? { ...options, trace: true } : options
       lastSnapshotArgs = { snapshot, options: opts }
       return new Promise((resolve, reject) => {
@@ -449,6 +451,7 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
     },
 
     applyPatch(ops, options) {
+      if (disposed) return Promise.reject(new Error('Engine disposed'))
       return new Promise((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'incremental', resolve, reject })
@@ -458,6 +461,7 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
     },
 
     setInput(nodeId, portId, value) {
+      if (disposed) return Promise.reject(new Error('Engine disposed'))
       return new Promise((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'incremental', resolve, reject })
@@ -467,6 +471,7 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
     },
 
     getStats() {
+      if (disposed) return Promise.reject(new Error('Engine disposed'))
       return new Promise<EngineStats>((resolve, reject) => {
         const id = nextId++
         pending.set(id, { kind: 'stats', resolve, reject })

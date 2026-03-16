@@ -52,9 +52,22 @@ npm run verify:fast           # Quick checks (no cargo/wasm) — use before ever
 npm run verify:ci             # Full CI-equivalent pipeline — use before merging
 ```
 
-To check flakiness before merging engine changes:
+### verify:fast vs verify:ci
+
+**`verify:fast`** (pre-push) — no wasm-pack/cargo needed: lockfile sync, npm audit, Prettier, ESLint, WASM export guard, tsc (app + functions), vitest.
+
+**`verify:ci`** (full CI) — everything above plus: wasm-pack release build, wasm-opt, cargo test, Vite build, bundle size check.
+
+### Flakiness check (before merging engine changes)
+
 ```bash
 CI=true npx playwright test --project=smoke --repeat-each=5
+```
+
+### Regenerating golden fixtures (after changing ops)
+
+```bash
+GOLDEN_UPDATE=1 cargo test -p engine-core --test golden
 ```
 
 ## Architecture
@@ -69,13 +82,29 @@ CI=true npx playwright test --project=smoke --repeat-each=5
 
 ### Layer boundaries (enforced by ESLint adapter-boundary rule)
 
-- `src/components/` — React UI; **cannot** import `src/lib/supabase` directly
-- `src/lib/` — Service layer; all Supabase/Stripe calls live here
+- `src/components/` — React UI; **cannot** import `src/lib/supabase` directly (type-only imports OK)
+- `src/lib/` — Service layer; all Supabase/Stripe calls live here (named exports only, no defaults)
 - `src/engine/` — WASM bridge, worker, diff logic, value types
 - `src/blocks/` — Block definitions (metadata + port schemas); no evaluation logic
 - `src/stores/` — Zustand stores (project metadata, variables, published outputs)
 - `src/contexts/` — React Contexts (engine API, plan/entitlements, theme, canvas settings)
 - `functions/` — Cloudflare Pages Functions (server-side: Stripe webhooks, CSP reports)
+
+### Rust vs TypeScript boundary
+
+If it affects computed values, it **must** live in Rust. If it affects presentation only, it lives in TypeScript.
+
+| Responsibility | Rust (`engine-core`) | TypeScript |
+| --- | --- | --- |
+| Math evaluation, NaN/Infinity canonicalization | ✅ | ❌ |
+| Topological sort, dirty propagation, incremental eval | ✅ | ❌ |
+| Broadcasting rules, value type system (runtime) | ✅ | Mirror types in `src/engine/value.ts` |
+| Graph snapshot serialization | Bridge (`src/engine/bridge.ts`) | React Flow → EngineSnapshotV1 |
+| Patch diffing | — | `src/engine/diffGraph.ts` (Rust only applies patches) |
+| Block metadata (labels, ports, categories) | ❌ | `src/blocks/` |
+| Auth, storage, billing | ❌ | `src/lib/`, `functions/api/` |
+
+The `src/engine/value.ts` mirror types let the UI pattern-match on value kinds without importing from the WASM pkg. Do not add evaluation logic to these mirror types.
 
 ### Rust/WASM engine
 
@@ -98,6 +127,7 @@ The **primary engine** (global singleton, always ready) handles the first render
 ### Dataset transfer (ENG-02)
 
 `registerDataset()` in `src/engine/index.ts` detects `crossOriginIsolated` at runtime:
+
 - **COOP+COEP active** → allocates a `SharedArrayBuffer` and writes the Float64 data once, zero-copy to the worker.
 - **Not isolated** → copies data into a plain `ArrayBuffer` and *transfers* it (structured-clone transfer, still zero-copy but one-way).
 
@@ -105,53 +135,90 @@ The required COOP/COEP response headers live in `public/_headers` (see Hard Inva
 
 ### Block system
 
-Blocks are defined in `src/blocks/` as metadata (`BlockDef`) with port schemas — no evaluation. The Rust engine owns all computation. `src/blocks/registry.ts` is the master registry.
+Blocks are defined in `src/blocks/` as metadata (`BlockDef`) with port schemas — no evaluation. The Rust engine owns all computation. `src/blocks/registry.ts` is the master registry. Block categories are defined as `BlockCategory` in `src/blocks/types.ts`. Block definition files follow the naming convention `*-blocks.ts`.
 
-**Block category constants** (`BlockCategory` in `src/blocks/types.ts`):
-- Original: `input`, `variable`, `math`, `trig`, `constants`, `logic`, `output`, `data`, `vectorOps`, `tableOps`, `plot`
-- Engineering: `engMechanics`, `engMaterials`, `engSections`, `engInertia`, `engFluids`, `engThermo`, `engElectrical`, `engConversions`
-- Finance: `finTvm`, `finReturns`, `finDepr`, `finOptions`
-- Statistics: `statsDesc`, `statsRel`, `probComb`, `probDist`, `dist`
-- New (overnight run): `text`, `interval`, `signal`, `complex`, `matrix`, `chem`, `structural`, `aerospace`, `controlSystems`, `lifeSci`, `dateTime`, `lookup`
-- Presets: `presetMaterials`, `presetFluids`, `constMath`, `constPhysics`, `constAtmos`, `constThermo`, `constElec`, `customFunctions`
+## Adding a new block op (end-to-end)
 
-**New block files (overnight run):**
-`src/blocks/complex-blocks.ts`, `src/blocks/matrix-blocks.ts`, `src/blocks/signal-blocks.ts`, `src/blocks/interval-blocks.ts`, `src/blocks/text-blocks.ts`, `src/blocks/chem-blocks.ts`, `src/blocks/struct-blocks.ts`, `src/blocks/aero-blocks.ts`, `src/blocks/ctrl-blocks.ts`, `src/blocks/bio-blocks.ts`, `src/blocks/fin-options-blocks.ts`, `src/blocks/date-blocks.ts`, `src/blocks/lookup-blocks.ts`, `src/blocks/dist-blocks.ts`, `src/blocks/eng-blocks.ts`, `src/blocks/fin-stats-blocks.ts`, `src/blocks/constants-blocks.ts`
+This is the most common engine change. Follow these steps in order:
+
+1. **Implement in Rust** — add a `match` arm in `crates/engine-core/src/ops.rs`
+2. **Register in catalog** — add an `OpSpec` entry to `CATALOG` in `crates/engine-core/src/catalog.rs`
+3. **Write golden test** — add a fixture to `crates/engine-core/tests/fixtures/`, run `GOLDEN_UPDATE=1 cargo test -p engine-core --test golden`
+4. **Bump `ENGINE_CONTRACT_VERSION`** if you changed evaluation semantics (see Hard Invariant #1)
+5. **Add block metadata** — create/edit the appropriate `src/blocks/*-blocks.ts` file, register in `src/blocks/registry.ts`
+6. **Add i18n label** — add to `src/i18n/locales/en.json` under `"blocks"`, repeat for `es.json`, `fr.json`, `it.json`, `de.json`
+7. **Build and test** — `npm run wasm:build:dev && npm run check && npm run test:e2e:smoke`
 
 ## Code style
 
-- **TypeScript**: `singleQuote: true`, `semi: false`, `tabWidth: 2` (Prettier). Strict mode: `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`, `erasableSyntaxOnly`. Use `import type` for type-only imports.
-- **Rust**: Edition 2021, standard `cargo fmt` defaults.
+- **TypeScript**: `singleQuote: true`, `semi: false`, `tabWidth: 2` (Prettier). Strict mode: `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`, `erasableSyntaxOnly`. Use `import type` for type-only imports. Unused vars/params: prefix with `_`.
+- **Rust**: Edition 2021, standard `cargo fmt` defaults. Module-level `//!` doc comments on every `.rs` file. Error codes: `SCREAMING_SNAKE_CASE`.
+
+### File naming
+
+| Type | Convention | Example |
+| --- | --- | --- |
+| React component | PascalCase `.tsx` | `CanvasArea.tsx` |
+| React hook | camelCase `.ts`, `use` prefix | `useGraphEngine.ts` |
+| Library module | camelCase `.ts` | `entitlements.ts` |
+| Block pack | camelCase `.ts`, `-blocks` suffix | `vector-blocks.ts` |
+| Web Worker | camelCase `.ts`, `-worker` suffix | `csv-worker.ts` |
+
+### Export conventions
+
+- **Components**: one default export per file.
+- **Libraries (`src/lib/`)**: named exports only (no default).
+- **Barrel files (`index.ts`)**: only in `src/components/ui/`. Do not add barrels elsewhere.
+
+### Error codes
+
+TypeScript error codes use `[SCREAMING_SNAKE_CASE]` as the first token in thrown `Error` messages (e.g. `[CONFIG_INVALID]`, `[WASM_CSP_BLOCKED]`, `[ENGINE_CONTRACT_MISMATCH]`). Rust diagnostic codes live in `crates/engine-core/src/catalog.rs`.
+
+### Styling
+
+- Inline styles for canvas nodes (React Flow constraint) — shared constants in `src/components/canvas/nodes/nodeStyles.ts`
+- Global design tokens in `src/index.css` (CSS custom properties)
+- No CSS modules; prefer inline styles or global CSS
+- Design tokens: Primary `#1CABB0`, Background `#1a1a1a`, Card `#383838`, Text `#F4F4F3`
+- Fonts: Montserrat (UI), JetBrains Mono (numbers)
 
 ## Hard invariants — do not break
 
 ### 1. Engine contract versioning
+
 When changing anything affecting engine evaluation (broadcasting, error propagation, value semantics):
+
 1. Bump `ENGINE_CONTRACT_VERSION` in `crates/engine-core/src/catalog.rs` (currently `3`)
 2. Update the expected version in `src/engine/index.ts` (search `contractVersion`)
 3. Document in `docs/W9_3_CORRECTNESS.md`
 
 ### 2. CSP must keep `'wasm-unsafe-eval'`
+
 Both `Content-Security-Policy` lines in `public/_headers` must include `'wasm-unsafe-eval'` in `script-src`. Without it, `WebAssembly.instantiateStreaming()` is blocked and the engine fails to load.
 
 ### 3. CI two-build strategy
+
 `VITE_IS_CI_BUILD=true` suppresses the `CONFIG_INVALID` guard in `src/lib/supabase.ts`. It is set only for the `node_checks` (PR) job — **never** for the `deploy` job. Setting it in deploy will send placeholder credentials to production silently.
 
 ### 4. Migrations are append-only
-`supabase/migrations/` is a numbered, append-only history. Never edit or delete an existing migration file. Create a new numbered migration to fix a past one.
+
+`supabase/migrations/` is a numbered, append-only history. Never edit or delete an existing migration file. Create a new numbered migration to fix a past one. All migrations must be idempotent (use `IF NOT EXISTS`, `CREATE OR REPLACE`, `DROP ... IF EXISTS` before `CREATE`). Wrap multi-statement migrations in `BEGIN; ... COMMIT;`. Enable RLS immediately on new tables. Qualify tables with `public.`. Functions must include `SET search_path = public`.
 
 ### 5. COOP+COEP headers must stay in `public/_headers`
+
 The `/*` section in `public/_headers` must include:
-```
+
+```text
 Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
 ```
+
 Without these, `crossOriginIsolated` is `false`, `SharedArrayBuffer` is unavailable, and dataset transfer falls back to ArrayBuffer copy. Never remove them.
 
 ## CI structure
 
 | Trigger | Jobs |
-|---------|------|
+| ------- | ---- |
 | PR to `main` | `rust_tests` + `node_checks` (typecheck + lint + format + build with placeholder creds) |
 | Push to `main` | above + `e2e_smoke` (10 Playwright tests) + `deploy` |
 | Manual (`workflow_dispatch`) | Full E2E suite (`e2e-full.yml`) or Performance suite (`perf.yml`) |
@@ -161,19 +228,17 @@ Playwright does **not** run on PRs — only after merge to `main`, as a pre-cond
 ## Bundle size budgets (enforced by CI)
 
 | Metric | Budget |
-|--------|--------|
+| ------ | ------ |
 | Initial JS (gzip) | 400 KB |
 | WASM (raw) | 800 KB |
 | WASM (gzip) | 250 KB |
-
-JS budget raised to 400 KB gz: React + React Flow + i18n + Sentry + engine bridge account for ~355 KB gz of the initial closure. Block registry is lazy-loaded post engine-init (UI-PERF-05). Use `React.lazy()` for heavy components (Settings, block descriptions, vega-lite, KaTeX, AI Copilot, exceljs). WASM budgets updated (ENG-09): switched wasm-opt from `-Oz` (size) to `-O3` (speed). Larger binary is acceptable for better runtime performance.
 
 Use `React.lazy()` to keep new components out of the initial load. Run `npm run perf:bundle` after a build to check locally.
 
 ## Rust test locations
 
 | Test suite | Path |
-|---|---|
+| --- | --- |
 | Unit tests | `crates/engine-core/src/` (inline `#[cfg(test)]` modules) |
 | Golden fixtures | `crates/engine-core/tests/golden.rs` + `tests/fixtures/*.fixture.json` |
 | Property tests (external) | `crates/engine-core/tests/properties.rs` |
