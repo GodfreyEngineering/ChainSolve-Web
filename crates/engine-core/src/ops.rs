@@ -3627,6 +3627,40 @@ fn evaluate_node_inner(
             Value::scalar(crate::vehicle::thermal::brake_power(energy, dt))
         }
 
+        // ── Vehicle Lap Simulation ─────────────────────────────────────
+
+        "veh.lap.simulate" => {
+            // Track input: Table with columns [distance, curvature]
+            let track = match inputs.get("track") {
+                Some(Value::Table { rows, .. }) => {
+                    rows.iter()
+                        .map(|r| (r.get(0).copied().unwrap_or(0.0), r.get(1).copied().unwrap_or(0.0)))
+                        .collect::<Vec<(f64, f64)>>()
+                }
+                _ => return Value::error("veh.lap.simulate: 'track' input required (Table: distance, curvature)"),
+            };
+
+            let vehicle = crate::vehicle::lap::LapVehicle {
+                mass: scalar_or(data, "mass", 1500.0),
+                power: scalar_or(data, "power", 200000.0),
+                cd: scalar_or(data, "cd", 0.35),
+                cl: scalar_or(data, "cl", 0.1),
+                frontal_area: scalar_or(data, "frontalArea", 2.0),
+                mu: scalar_or(data, "mu", 1.2),
+                rho: scalar_or(data, "rho", 1.225),
+            };
+
+            let result = crate::vehicle::lap::simulate_lap(&track, &vehicle);
+
+            // Return as Table: [distance, speed]
+            Value::Table {
+                columns: vec!["distance".to_string(), "speed".to_string()],
+                rows: result.distance.iter().zip(result.speed.iter())
+                    .map(|(d, s)| vec![*d, *s])
+                    .collect(),
+            }
+        }
+
         // ── ML Feature Preprocessing ─────────────────────────────────
 
         "ml.featureScale" => {

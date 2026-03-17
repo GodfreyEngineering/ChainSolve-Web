@@ -1030,6 +1030,25 @@ reg({
 })
 
 reg({
+  type: 'veh.lap.simulate',
+  label: 'Lap Simulation',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [{ id: 'track', label: 'Track (table)' }],
+  defaultData: {
+    blockType: 'veh.lap.simulate',
+    label: 'Lap Sim',
+    mass: 1500,
+    power: 200000,
+    cd: 0.35,
+    mu: 1.2,
+  },
+  proOnly: true,
+  description:
+    'Point-mass quasi-steady-state lap simulation. Input = track (distance, curvature). Output = speed profile.',
+})
+
+reg({
   type: 'veh.brake.energy',
   label: 'Brake Energy',
   category: 'vehicleSim',

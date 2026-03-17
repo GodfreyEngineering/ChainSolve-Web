@@ -9,6 +9,7 @@
 //! - Dixon, "Suspension Geometry and Computation" (2009)
 
 pub mod aero;
+pub mod lap;
 pub mod powertrain;
 pub mod suspension;
 pub mod thermal;
