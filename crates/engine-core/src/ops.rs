@@ -26,6 +26,11 @@
 use crate::types::Value;
 use std::collections::HashMap;
 
+/// Read an f64 from a node's data map, falling back to a default.
+fn scalar_or(data: &HashMap<String, serde_json::Value>, key: &str, default: f64) -> f64 {
+    data.get(key).and_then(|v| v.as_f64()).unwrap_or(default)
+}
+
 /// Evaluate a single node given its block type, resolved input values,
 /// the node's own data map, and an optional dataset registry.
 ///
@@ -3331,6 +3336,111 @@ fn evaluate_node_inner(
 
         "nn.export" => {
             inputs.get("model").cloned().unwrap_or(Value::error("nn.export: no model connected"))
+        }
+
+        // ── ODE Solvers (Phase 4) ──────────────────────────────────────
+
+        "ode.rk4" | "ode.rk45" => {
+            // Parse equations from Text input
+            let equations_text = match inputs.get("equations") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => return Value::error("ODE solver: 'equations' input required (Text, semicolon-separated)"),
+            };
+            let equations: Vec<String> = equations_text.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            if equations.is_empty() {
+                return Value::error("ODE solver: no equations provided");
+            }
+
+            // Parse initial state from Vector input
+            let y0 = match inputs.get("y0") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                _ => return Value::error("ODE solver: 'y0' input required (initial state vector)"),
+            };
+            if y0.len() != equations.len() {
+                return Value::error(format!(
+                    "ODE solver: {} equations but {} initial values",
+                    equations.len(), y0.len()
+                ));
+            }
+
+            let t_start = scalar_or(data, "t_start", 0.0);
+            let t_end = scalar_or(data, "t_end", 1.0);
+            let dt = scalar_or(data, "dt", 0.01);
+            let tolerance = scalar_or(data, "tolerance", 1e-6);
+
+            let state_names: Vec<String> = (0..equations.len()).map(|i| format!("y{}", i)).collect();
+
+            // Collect parameters from data
+            let mut params = std::collections::HashMap::new();
+            if let Some(serde_json::Value::Object(obj)) = data.get("params") {
+                for (k, v) in obj {
+                    if let Some(n) = v.as_f64() {
+                        params.insert(k.clone(), n);
+                    }
+                }
+            }
+
+            let system = crate::ode::OdeSystem { equations, state_names: state_names.clone(), params };
+            let config = crate::ode::OdeSolverConfig {
+                t_start, t_end, dt, tolerance,
+                max_steps: 100_000,
+            };
+
+            let result = if block_type == "ode.rk45" {
+                crate::ode::rk45::solve_rk45(&system, &y0, &config)
+            } else {
+                crate::ode::rk4::solve_rk4(&system, &y0, &config)
+            };
+
+            // Convert to Table value
+            let columns = result.column_names.clone();
+            let rows: Vec<Vec<f64>> = result.t.iter().zip(result.states.iter()).map(|(t, ys)| {
+                let mut row = vec![*t];
+                row.extend_from_slice(ys);
+                row
+            }).collect();
+
+            Value::Table { columns, rows }
+        }
+
+        // ── Vehicle Simulation (Phase 5) ──────────────────────────────
+
+        "veh.tire.lateralForce" => {
+            let slip = scalar_or_nan(inputs, "slip_angle");
+            let fz = scalar_or_nan(inputs, "Fz");
+            let b = scalar_or_nan(inputs, "B");
+            let c = scalar_or_nan(inputs, "C");
+            let d = scalar_or_nan(inputs, "D");
+            let e = scalar_or_nan(inputs, "E");
+            Value::scalar(crate::vehicle::tire::lateral_force(slip, fz, b, c, d, e))
+        }
+
+        "veh.tire.longForce" => {
+            let slip = scalar_or_nan(inputs, "slip_ratio");
+            let fz = scalar_or_nan(inputs, "Fz");
+            let b = scalar_or_nan(inputs, "B");
+            let c = scalar_or_nan(inputs, "C");
+            let d = scalar_or_nan(inputs, "D");
+            let e = scalar_or_nan(inputs, "E");
+            Value::scalar(crate::vehicle::tire::longitudinal_force(slip, fz, b, c, d, e))
+        }
+
+        "veh.tire.sweep" => {
+            let fz = scalar_or_nan(inputs, "Fz");
+            let b = scalar_or_nan(inputs, "B");
+            let c = scalar_or_nan(inputs, "C");
+            let d = scalar_or_nan(inputs, "D");
+            let e = scalar_or_nan(inputs, "E");
+            let slip_min = scalar_or(data, "slipMin", -0.2);
+            let slip_max = scalar_or(data, "slipMax", 0.2);
+            let n_points = scalar_or(data, "points", 101.0) as usize;
+
+            let (slips, forces) = crate::vehicle::tire::force_sweep(fz, b, c, d, e, slip_min, slip_max, n_points);
+            Value::Table {
+                columns: vec!["slip".to_string(), "force".to_string()],
+                rows: slips.into_iter().zip(forces).map(|(s, f)| vec![s, f]).collect(),
+            }
         }
 
         _ => Value::error(format!("Unknown block type: {}", block_type)),
