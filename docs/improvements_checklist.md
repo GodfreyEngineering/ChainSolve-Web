@@ -235,15 +235,15 @@ The NN module has real implementations (Sequential, Dense, Conv1D, backprop) but
 
 ### 7A — Feature Preprocessing
 
-- [ ] **7.1** `ml/preprocess.rs` — standardise, normalise, train/test split
-- [ ] **7.2** Ops: `ml.featureScale`, `ml.trainTestSplit`
-- [ ] **7.3** Block definitions and i18n
+- [x] **7.1** `ml/preprocess.rs` — standardize, normalize, train_test_split (3 tests)
+- [ ] **7.2** Ops: `ml.featureScale`, `ml.trainTestSplit` *(Rust functions ready, ops.rs wiring deferred)*
+- [ ] **7.3** Block definitions and i18n *(deferred)*
 
 ### 7B — Classification Metrics
 
-- [ ] **7.4** `ml/classification_metrics.rs` — precision/recall/F1, ROC curve, AUC
-- [ ] **7.5** Ops: `ml.classMetrics`, `ml.rocCurve`, `ml.auc`
-- [ ] **7.6** Block definitions and i18n
+- [x] **7.4** `ml/classification_metrics.rs` — precision/recall/F1, ROC curve, AUC (4 tests)
+- [ ] **7.5** Ops: `ml.classMetrics`, `ml.rocCurve`, `ml.auc` *(Rust functions ready, ops.rs wiring deferred)*
+- [ ] **7.6** Block definitions and i18n *(deferred)*
 
 ### 7C — Cross-Validation & Grid Search
 
@@ -258,9 +258,9 @@ The NN module has real implementations (Sequential, Dense, Conv1D, backprop) but
 
 ### 8A — LP Solver
 
-- [ ] **8.1** `optim/lp.rs` — revised simplex with Bland's anti-cycling (ref: Nocedal & Wright 2006)
-- [ ] **8.2** `optim.lpSolve` op
-- [ ] **8.3** Golden fixture
+- [x] **8.1** `optim/lp.rs` — two-phase simplex with Bland's anti-cycling rule (2 tests)
+- [ ] **8.2** `optim.lpSolve` op *(Rust function ready, ops.rs wiring deferred)*
+- [ ] **8.3** Golden fixture *(deferred)*
 
 ### 8B — QP Solver
 
