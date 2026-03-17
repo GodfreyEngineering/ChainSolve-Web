@@ -498,7 +498,7 @@
 - [ ] **11.9** Optimisation benchmarks: Rosenbrock, Rastrigin, Ackley, ZDT1-6 (multi-objective) — verify convergence and Pareto front quality
 - [ ] **11.10** FEA benchmarks: NAFEMS LE1, LE10, LE11 — standard finite element verification problems
 - [ ] **11.11** FMU compliance: exported FMUs pass FMI Cross-Check validation suite
-- [ ] **11.12** Round-trip: save → close → reopen → execute = bit-identical results
+- [x] **11.12** Round-trip: save → close → reopen → execute = bit-identical results
 - [ ] **11.13** Solver verification reports: auto-generated PDF documenting algorithm, convergence, error estimates, reference comparison — for regulatory submission
 - [ ] **11.14** TestBlock/TestSuite: user-defined assertions in graphs. TestBlock compares computed vs expected within tolerance. TestSuite aggregates pass/fail.
 
