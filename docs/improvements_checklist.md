@@ -484,25 +484,66 @@ The NN module (`crates/engine-core/src/nn/`) already has `Sequential`, `DenseLay
 
 ---
 
-## Phase 8 — Long-Running Simulation Infrastructure
+## Phase 8 — Long-Running & Continuous Simulation Infrastructure
 
-Neural network training, lap simulation, and grid search can take seconds to minutes. They must not block the normal eval worker.
+Neural network training, lap simulation, and grid search can take seconds to minutes — or run indefinitely until the user stops them. They must not block the normal eval worker. The simulation worker supports two modes: **single-shot** (run once → return result) and **continuous** (loop until stopped, streaming results each iteration).
+
+### 8A — Simulation Worker Core
 
 - [ ] **8.1** Create `src/engine/simulationWorker.ts`:
   - `SimulationWorkerAPI` class: spawns a dedicated Web Worker on demand
   - Loads the same WASM module as the eval worker
-  - Handles `runSimulation` / `cancelSimulation` messages
-  - Streams progress back to main thread: `{ type: 'simulationProgress', requestId, step, total, partialResults }`
-  - Returns final result: `{ type: 'simulationResult', requestId, result }`
+  - Handles messages: `runSimulation`, `cancelSimulation`, `pauseSimulation`, `resumeSimulation`
+  - Supports `mode: 'single' | 'continuous'` in the simulation config
+  - **Single mode**: runs the computation once, streams progress, returns final result
+  - **Continuous mode**: loops indefinitely (epoch after epoch, timestep after timestep), streaming partial results after each iteration, until the user sends `cancelSimulation` or `pauseSimulation`
+  - Streams progress: `{ type: 'simulationProgress', requestId, iteration, totalIterations?, partialResults, metrics }`
+  - On stop/complete: `{ type: 'simulationResult', requestId, result, iterationsCompleted }`
 - [ ] **8.2** In `crates/engine-wasm/src/lib.rs`, add `#[wasm_bindgen] pub fn run_simulation(config_json: &str, progress_cb: &js_sys::Function) -> String`:
-  - Parses simulation config (which op, which inputs)
-  - Runs the long computation with periodic progress callbacks
-  - Returns final result as JSON
-- [ ] **8.3** In `src/engine/index.ts`, add `runSimulation(config, onProgress) → Promise<SimulationResult>` to `EngineAPI` — delegates to SimulationWorker
-- [ ] **8.4** In NN/ML/optimization node components, add "Train" / "Run Simulation" button that triggers `runSimulation` instead of normal eval
-- [ ] **8.5** Add progress UI: progress bar + estimated time remaining in the node's inspector panel
-- [ ] **8.6** Add cancellation: "Stop" button that sends `cancelSimulation` to the worker
-- [ ] **8.7** Test: train a small NN (XOR), verify progress updates stream to UI, verify cancellation works mid-training
+  - Parses simulation config: `{ op, inputs, mode, maxIterations?, batchSize? }`
+  - For single mode: runs the computation, calls `progress_cb` periodically, returns final JSON
+  - For continuous mode: runs in a loop calling `progress_cb` after each iteration with partial results — the JS callback returns `EvalSignal::Continue | EvalSignal::Abort` to control the loop
+  - The progress callback is the cancellation mechanism: when the user clicks Stop, the main thread sets a flag that the callback reads, returning `Abort` to break the Rust loop
+- [ ] **8.3** In `src/engine/index.ts`, add to `EngineAPI`:
+  - `runSimulation(config, onProgress) → Promise<SimulationResult>` — delegates to SimulationWorker
+  - `stopSimulation(requestId) → void` — sends cancel signal
+  - `pauseSimulation(requestId) → void` — pauses continuous loop (can be resumed)
+  - `resumeSimulation(requestId) → void` — resumes paused simulation
+  - `isSimulationRunning() → boolean` — check if sim worker is busy
+
+### 8B — Continuous Mode for NN Training
+
+- [ ] **8.4** Update `nn.trainer` op to support `mode: 'continuous'` in config:
+  - When `maxEpochs` is set: train for that many epochs (single mode)
+  - When `maxEpochs` is 0 or absent: train indefinitely until stopped (continuous mode)
+  - After each epoch, call progress callback with `{ epoch, trainLoss, valLoss, bestLoss, learningRate }`
+  - On stop: return the model at its best validation loss (not the final epoch)
+- [ ] **8.5** Update `nn.trainer` inspector panel UI:
+  - "Train" button starts training, transforms into "Stop" button while running
+  - "Pause" / "Resume" buttons for continuous mode
+  - Live loss chart that updates after each epoch (connects to plot block)
+  - Display: current epoch, train loss, val loss, best loss, learning rate, elapsed time
+
+### 8C — Continuous Mode for Simulations
+
+- [ ] **8.6** For ODE/vehicle simulation blocks that support continuous mode:
+  - ODE solvers can run with `t_end = Infinity` (continuous time integration, streaming state each step)
+  - Vehicle lap sim can run multiple laps continuously (accumulating statistics)
+  - Monte Carlo can accumulate samples indefinitely, refining estimates until stopped
+- [ ] **8.7** Add a `SimulationStatusStore` Zustand store (`src/stores/simulationStatusStore.ts`):
+  - Tracks active simulations: `{ nodeId, requestId, mode, status: 'running' | 'paused' | 'complete', iteration, metrics }`
+  - Node components read this to show live status
+  - Status bar shows "Simulation running (epoch 47, loss: 0.023)" when active
+
+### 8D — UI Integration & Testing
+
+- [ ] **8.8** In NN/ML/optimization/vehicle node components, add "Train" / "Run Simulation" / "Stop" buttons that trigger `runSimulation` with appropriate mode
+- [ ] **8.9** Add progress UI: progress bar + iteration counter + estimated time remaining in the node's inspector panel
+- [ ] **8.10** Ensure normal graph evaluation continues working while a simulation runs on the separate worker — the two workers must be independent
+- [ ] **8.11** Test single mode: run a fixed-epoch NN training, verify it completes and returns results
+- [ ] **8.12** Test continuous mode: start NN training with no epoch limit, verify loss streams to UI each epoch, click Stop, verify model is returned at best loss
+- [ ] **8.13** Test pause/resume: start continuous training, pause at epoch 10, resume, verify it continues from epoch 10
+- [ ] **8.14** Test independence: while a simulation runs, edit a different part of the graph and verify normal eval still works
 
 ---
 
@@ -645,10 +686,10 @@ Neural network training, lap simulation, and grid search can take seconds to min
 | 5 — NN Training | 10 | nn/lr_schedule.rs | 2 | nn-blocks.ts, ops.rs |
 | 6 — ML Workflows | 10 | ml/preprocess.rs, ml/classification_metrics.rs | ~6 | ml-blocks.ts |
 | 7 — Optimization | 12 | optim/lp.rs, optim/qp.rs, optim/pareto.rs, optim/sobol_sensitivity.rs | 4 | optim-blocks.ts |
-| 8 — Sim Worker | 7 | — | — | simulationWorker.ts, engine-wasm/lib.rs |
+| 8 — Sim Worker | 14 | — | — | simulationWorker.ts, simulationStatusStore.ts, engine-wasm/lib.rs |
 | 9 — Frontend | 11 | — | — | CanvasArea.tsx (decomposition), nodeStyles.ts |
 | 10 — Housekeeping | 54 | — | — | All docs, scripts, CI |
-| **Total** | **215** | **~15 new modules** | **~43 new blocks** | |
+| **Total** | **222** | **~15 new modules** | **~43 new blocks** | |
 
 ---
 
