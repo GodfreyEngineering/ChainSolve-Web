@@ -516,6 +516,8 @@
     "toggleXLog": "Toggle X log scale",
     "toggleYLog": "Toggle Y log scale",
     "exportCSV": "Export CSV",
+    "animTimeColumn": "アニメーション時間列",
+    "animNone": "（なし — 静的プロット）",
     "y2Column": "右Y列",
     "y2None": "（なし — 単一軸）",
     "y2Label": "右Yラベル",

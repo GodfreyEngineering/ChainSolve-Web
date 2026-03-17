@@ -508,6 +508,8 @@
     "toggleXLog": "Toggle X log scale",
     "toggleYLog": "Toggle Y log scale",
     "exportCSV": "Export CSV",
+    "animTimeColumn": "Columna de tiempo de animación",
+    "animNone": "(ninguna — gráfico estático)",
     "y2Column": "Columna Y derecha",
     "y2None": "(ninguna — eje único)",
     "y2Label": "Etiqueta Y derecha",

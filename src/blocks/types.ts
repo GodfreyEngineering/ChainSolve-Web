@@ -138,6 +138,8 @@ export interface PlotConfig {
   xColumn?: string
   /** For Table input: column names for Y series (left / primary axis). */
   yColumns?: string[]
+  /** Time column for animation (xyLine/xyScatter): scrubs data row by row. */
+  animTimeColumn?: string
   /** Secondary Y-axis columns (right axis, xyLine/xyScatter only). */
   yColumns2?: string[]
   /** Right-axis label. */

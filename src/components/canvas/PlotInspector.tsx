@@ -306,6 +306,26 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
               </select>,
             )}
 
+          {/* Animation time column (xyLine / xyScatter only) */}
+          {(config.chartType === 'xyLine' || config.chartType === 'xyScatter') &&
+            field(
+              t('plot.animTimeColumn'),
+              <select
+                value={config.animTimeColumn ?? ''}
+                onChange={(e) =>
+                  onUpdate({ animTimeColumn: e.target.value || undefined })
+                }
+                style={selectStyle}
+              >
+                <option value="">{t('plot.animNone')}</option>
+                {columns.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>,
+            )}
+
           {/* Secondary Y-axis (xyLine / xyScatter only) */}
           {(config.chartType === 'xyLine' || config.chartType === 'xyScatter') && (
             <>
