@@ -15,6 +15,11 @@ use std::collections::HashMap;
 
 /// Evaluate the RHS of the ODE system at the given state.
 fn eval_rhs(system: &OdeSystem, t: f64, y: &[f64]) -> Vec<f64> {
+    eval_rhs_pub(system, t, y)
+}
+
+/// Public version of eval_rhs for use by other solvers (RK45, BDF).
+pub fn eval_rhs_pub(system: &OdeSystem, t: f64, y: &[f64]) -> Vec<f64> {
     let n = system.equations.len();
     let mut vars: HashMap<String, f64> = system.params.clone();
     vars.insert("t".to_string(), t);

@@ -7,6 +7,7 @@
 //! and return an `OdeResult` (time series of state variables as vectors).
 
 pub mod rk4;
+pub mod rk45;
 pub mod types;
 
 pub use types::{OdeResult, OdeSolverConfig, OdeSystem};
