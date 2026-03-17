@@ -37,6 +37,7 @@ import {
   type Edge,
   type Connection,
   type IsValidConnection,
+  type OnConnectStartParams,
   useOnViewportChange,
   NodeToolbar,
   Position as RFPosition,
@@ -1116,6 +1117,20 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     screenY: number
     flowX: number
     flowY: number
+    /** 3.50: When palette opened by dragging from a port, store the source info for auto-wiring */
+    connectSource?: {
+      nodeId: string
+      handleId: string | null
+      handleType: 'source' | 'target'
+    }
+  } | null>(null)
+
+  // 3.50: Track in-progress connection drag to detect "released on empty space"
+  const connectingRef = useRef<{
+    nodeId: string | null
+    handleId: string | null
+    handleType: 'source' | 'target' | null
+    didConnect: boolean
   } | null>(null)
 
   const canvasWrapRef = useRef<HTMLDivElement>(null)
@@ -1329,10 +1344,46 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   const onConnect = useCallback(
     (params: Connection) => {
+      // 3.50: Mark that a connection was formed (suppress QuickAddPalette from onConnectEnd)
+      if (connectingRef.current) connectingRef.current.didConnect = true
       doSaveHistory()
       setEdges((eds) => addEdge(params, eds))
     },
     [setEdges, doSaveHistory],
+  )
+
+  // 3.50: Record which handle the user started dragging from
+  const onConnectStart = useCallback((_: MouseEvent | TouchEvent, params: OnConnectStartParams) => {
+    connectingRef.current = {
+      nodeId: params.nodeId,
+      handleId: params.handleId,
+      handleType: params.handleType as 'source' | 'target' | null,
+      didConnect: false,
+    }
+  }, [])
+
+  // 3.50: If released on empty space (no connection formed), open QuickAddPalette for auto-wire
+  const onConnectEnd = useCallback(
+    (event: MouseEvent | TouchEvent) => {
+      const info = connectingRef.current
+      connectingRef.current = null
+      if (readOnly || !info || info.didConnect || !info.nodeId || !info.handleType) return
+      const clientX = 'clientX' in event ? event.clientX : event.touches[0]?.clientX ?? 0
+      const clientY = 'clientY' in event ? event.clientY : event.touches[0]?.clientY ?? 0
+      // Only trigger when released over the canvas pane (not over a node handle)
+      const target = event.target as Element | null
+      if (target?.closest('.react-flow__handle')) return
+      if (target?.closest('.react-flow__node')) return
+      const pos = screenToFlowPosition({ x: clientX, y: clientY })
+      setQuickAdd({
+        screenX: clientX,
+        screenY: clientY,
+        flowX: pos.x,
+        flowY: pos.y,
+        connectSource: { nodeId: info.nodeId, handleId: info.handleId, handleType: info.handleType },
+      })
+    },
+    [readOnly, screenToFlowPosition],
   )
 
   // ── Inspector: single-click selects, double-click opens inspector ───────────
@@ -2948,9 +2999,31 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           data: { ...def.defaultData },
         } as Node<NodeData>,
       ])
+      // 3.50: Auto-wire the new block to the port the user dragged from
+      const src = quickAdd.connectSource
+      if (src) {
+        const firstInputId = def.variadic ? 'in_0' : (def.inputs[0]?.id ?? null)
+        if (src.handleType === 'source' && firstInputId) {
+          // User dragged from an output → new block receives data
+          setEdges((eds) =>
+            addEdge(
+              { source: src.nodeId, sourceHandle: src.handleId, target: id, targetHandle: firstInputId },
+              eds,
+            ),
+          )
+        } else if (src.handleType === 'target') {
+          // User dragged from an input → new block feeds data
+          setEdges((eds) =>
+            addEdge(
+              { source: id, sourceHandle: 'out', target: src.nodeId, targetHandle: src.handleId },
+              eds,
+            ),
+          )
+        }
+      }
       setQuickAdd(null)
     },
-    [quickAdd, setNodes, doSaveHistory],
+    [quickAdd, setNodes, setEdges, doSaveHistory],
   )
 
   // UX-02: Insert a block at the canvas viewport center (keyboard/double-click from library)
@@ -3613,6 +3686,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         onNodesChange={readOnly ? undefined : onNodesChange}
                         onEdgesChange={readOnly ? undefined : onEdgesChange}
                         onConnect={readOnly ? undefined : onConnect}
+                        onConnectStart={readOnly ? undefined : onConnectStart}
+                        onConnectEnd={readOnly ? undefined : onConnectEnd}
                         isValidConnection={isValidConnection}
                         onNodeDragStart={readOnly ? undefined : onNodeDragStart}
                         onNodeDrag={readOnly ? undefined : onNodeDrag}
