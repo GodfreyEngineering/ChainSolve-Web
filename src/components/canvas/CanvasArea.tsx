@@ -101,7 +101,7 @@ import { autoLayout, type LayoutDirection, type AutoLayoutResult } from '../../l
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard, pasteFromSystemClipboard } from '../../lib/clipboard'
 import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
-import { parseCSVToTableData } from '../../lib/csvParser'
+import { parseCSVToTableData, parseNpyToTableData } from '../../lib/csvParser'
 import { CommandPalette, type PaletteCommand } from './CommandPalette'
 import { FormulaBar } from './FormulaBar'
 import type { FormulaUpstreamVar } from './FormulaBar'
@@ -1453,9 +1453,51 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       e.preventDefault()
       if (readOnly) return
 
-      // UX-12: OS file drop — CSV files create a tableInput block
+      // UX-12: OS file drop — CSV / NumPy .npy files create a tableInput block
       if (e.dataTransfer.files.length > 0) {
         const file = e.dataTransfer.files[0]
+        const nameLower = file.name.toLowerCase()
+
+        // 4.10: NumPy .npy file → parse and create tableInput/matrixInput block
+        if (nameLower.endsWith('.npy')) {
+          const position = screenToFlowPosition({ x: e.clientX, y: e.clientY })
+          const reader = new FileReader()
+          reader.onload = (ev) => {
+            const buf = ev.target?.result
+            if (!(buf instanceof ArrayBuffer)) return
+            try {
+              const tableData = parseNpyToTableData(buf)
+              if (!tableData) {
+                toast('Could not parse .npy file: unsupported dtype or shape', 'error')
+                return
+              }
+              const id = `node_${++nodeIdCounter}`
+              doSaveHistory()
+              setNodes((nds) => [
+                ...nds,
+                {
+                  id,
+                  type: 'csData',
+                  position,
+                  data: {
+                    blockType: 'matrixInput',
+                    label: file.name.replace(/\.npy$/i, ''),
+                    tableData,
+                  },
+                } as Node<NodeData>,
+              ])
+              toast(
+                `NumPy array loaded: ${tableData.rows.length} × ${tableData.columns.length}`,
+                'success',
+              )
+            } catch {
+              toast('Failed to parse .npy file', 'error')
+            }
+          }
+          reader.readAsArrayBuffer(file)
+          return
+        }
+
         const isCSV =
           file.type === 'text/csv' ||
           file.type === 'text/plain' ||
