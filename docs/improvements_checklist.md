@@ -9,7 +9,7 @@
 > 3. **UX** — Formula bar expression language, variadic blocks, magnetic snapping, professional polish
 > 4. **Capability** — ODE solvers, vehicle simulation, neural network training, LP/QP optimization
 >
-> **Evaluation philosophy:** ChainSolve evaluates **reactively** — when inputs, blocks, or chains change. Never continuously. Never in a loop. Simulations and training have defined endpoints. Simple and efficient.
+> **Evaluation philosophy:** ChainSolve evaluates **reactively** — when inputs, blocks, or chains change. Never continuously in the background. Simulations have defined endpoints. Users can opt-in to **looping simulations** (e.g., pendulum over 10 periods with live plotting) — this is explicit, user-initiated, and runs on a dedicated worker. Simple and efficient.
 
 ---
 
@@ -281,46 +281,57 @@ The NN module has real implementations (Sequential, Dense, Conv1D, backprop) but
 
 ---
 
-## Phase 9 — Long-Running Simulation Infrastructure (Finite Tasks Only)
+## Phase 9 — Long-Running & Looping Simulation Infrastructure
 
-Simulations, training, and optimisation can take seconds to minutes. They run to **completion** (defined end) on a dedicated worker. No continuous/indefinite loops.
+Simulations and training run on a dedicated worker. Most tasks are **finite** (defined end). Some simulations support **looping** — the user explicitly opts in, the simulation runs for N cycles or until stopped, and results stream to a live graph (e.g., pendulum angle vs time showing periodic motion). Looping is user-initiated, never automatic.
 
 ### 9A — Simulation Worker
 
 - [ ] **9.1** Create `src/engine/simulationWorker.ts` — `SimulationWorkerAPI`, dedicated Web Worker
 - [ ] **9.2** Loads same WASM module as eval worker
-- [ ] **9.3** Messages: `runSimulation`, `cancelSimulation` — NO pause/resume for indefinite loops
-- [ ] **9.4** All tasks have defined end: `maxIterations`, `targetLoss`, `endTime`, `convergenceThreshold`
-- [ ] **9.5** Progress: `{ type: 'simulationProgress', iteration, totalIterations, partialResults, metrics }`
-- [ ] **9.6** Completion: `{ type: 'simulationResult', result, status: 'complete' | 'cancelled' }`
+- [ ] **9.3** Messages: `runSimulation`, `cancelSimulation`
+- [ ] **9.4** Simulation config has a defined end: `maxIterations`, `targetLoss`, `endTime`, `convergenceThreshold`
+- [ ] **9.5** **Looping mode**: config can set `loop: true` + `loopCount: N` (default 1). When `loop: true` and `loopCount > 1`, the simulation restarts from initial conditions after each cycle for N total cycles. When `loopCount` is omitted, loops until the user clicks Stop. Results from each cycle append to the output table for plotting periodic behaviour (e.g., pendulum: angle vs time over 10 periods).
+- [ ] **9.6** Progress: `{ type: 'simulationProgress', iteration, totalIterations, cycle, totalCycles, partialResults, metrics }`
+- [ ] **9.7** Completion: `{ type: 'simulationResult', result, status: 'complete' | 'cancelled', cyclesCompleted }`
 
 ### 9B — WASM Binding
 
-- [ ] **9.7** `run_simulation(config_json, progress_cb) -> String` in `engine-wasm`
-- [ ] **9.8** Config: `{ op, inputs, maxIterations, convergenceThreshold?, batchSize? }` — always finite
-- [ ] **9.9** Progress callback returns `Continue | Abort` for cancellation
+- [ ] **9.8** `run_simulation(config_json, progress_cb) -> String` in `engine-wasm`
+- [ ] **9.9** Config: `{ op, inputs, maxIterations, endTime?, convergenceThreshold?, batchSize?, loop?, loopCount? }`
+- [ ] **9.10** For looping: Rust runs the ODE/simulation solver for one cycle, appends results, resets state to initial conditions, repeats. Progress callback fires between cycles with accumulated results.
+- [ ] **9.11** Progress callback returns `Continue | Abort` for cancellation (works between cycles for looping sims)
 
 ### 9C — Engine API
 
-- [ ] **9.10** `runSimulation(config, onProgress) -> Promise<SimulationResult>` in `EngineAPI`
-- [ ] **9.11** `cancelSimulation(requestId) -> void`
-- [ ] **9.12** `isSimulationRunning() -> boolean`
+- [ ] **9.12** `runSimulation(config, onProgress) -> Promise<SimulationResult>` in `EngineAPI`
+- [ ] **9.13** `cancelSimulation(requestId) -> void`
+- [ ] **9.14** `isSimulationRunning() -> boolean`
 
 ### 9D — NN Training Integration
 
-- [ ] **9.13** `nn.trainer` requires `maxEpochs > 0` or `targetLoss` — always finite
-- [ ] **9.14** Stream `{ epoch, totalEpochs, trainLoss, valLoss }` per epoch
-- [ ] **9.15** Return model at best validation loss on complete/cancel
-- [ ] **9.16** Inspector UI: "Train" starts, "Stop" cancels. Live loss chart. No Pause/Resume.
+- [ ] **9.15** `nn.trainer` requires `maxEpochs > 0` or `targetLoss` — always finite, no looping
+- [ ] **9.16** Stream `{ epoch, totalEpochs, trainLoss, valLoss }` per epoch
+- [ ] **9.17** Return model at best validation loss on complete/cancel
+- [ ] **9.18** Inspector UI: "Train" starts, "Stop" cancels. Live loss chart.
 
-### 9E — Status & Testing
+### 9E — Looping Simulation UI
 
-- [ ] **9.17** `simulationStatusStore.ts` — tracks active sims: `{ nodeId, status, iteration, totalIterations, metrics }`
-- [ ] **9.18** StatusBar shows "Training (epoch 47/100, loss: 0.023)" when active
-- [ ] **9.19** Normal graph eval continues while sim runs on separate worker
-- [ ] **9.20** Test: fixed-epoch training completes and returns results
-- [ ] **9.21** Test: cancel mid-training, model returned at best loss
-- [ ] **9.22** Test: normal eval works during active simulation
+- [ ] **9.19** ODE/vehicle sim inspector panels: checkbox "Loop simulation" + input "Number of cycles" (default: until stopped)
+- [ ] **9.20** When looping, connected Plot blocks update live — each cycle appends data points, graph extends in real-time
+- [ ] **9.21** "Stop" button cleanly ends after the current cycle (no mid-cycle abort unless force-cancelled)
+- [ ] **9.22** Live cycle counter in inspector: "Cycle 3/10" or "Cycle 7 (running until stopped)"
+
+### 9F — Status & Testing
+
+- [ ] **9.23** `simulationStatusStore.ts` — tracks: `{ nodeId, status, iteration, totalIterations, cycle, totalCycles, metrics }`
+- [ ] **9.24** StatusBar shows "Simulating (cycle 3/10)" or "Training (epoch 47/100)"
+- [ ] **9.25** Normal graph eval continues while sim runs on separate worker
+- [ ] **9.26** Test: finite simulation completes and returns results
+- [ ] **9.27** Test: looping pendulum sim for 5 cycles, verify 5x data in output table
+- [ ] **9.28** Test: loop until stopped, cancel after 3 cycles, verify partial results returned
+- [ ] **9.29** Test: cancel mid-training, model returned at best loss
+- [ ] **9.30** Test: normal eval works during active simulation
 
 ---
 
@@ -562,13 +573,13 @@ Every user journey, from first signup to daily power use, must be polished and p
 | 6 | NN Training Pipeline | 9 | Pending |
 | 7 | ML Training Workflows | 10 | Pending |
 | 8 | Optimisation Engine | 11 | Pending |
-| 9 | Long-Running Simulation Infra | 22 | Pending (reworked, no continuous) |
+| 9 | Simulation Infra (finite + opt-in looping) | 30 | Pending |
 | 10 | Block-to-Block Magnetic Snapping | 15 | NEW |
 | 11 | Formula Bar Expression Language | 30 | NEW |
 | 12 | Frontend Polish | 10 | Pending |
 | 13 | End-to-End UX Audit | 23 | NEW |
 | 14 | Housekeeping & Professional Audit | 49 | Pending (updated) |
-| **Total** | | **~290** | |
+| **Total** | | **~298** | |
 
 ---
 
