@@ -1174,7 +1174,8 @@
     "close": "Close",
     "recentExports": "Recent exports",
     "pageSize": "Page size",
-    "format_git": "Git対応 (.chainsolve)"
+    "format_git": "Git対応 (.chainsolve)",
+    "format_html": "スタンドアロンHTML (.html)"
   },
   "commandPalette": {
     "title": "Command Palette",

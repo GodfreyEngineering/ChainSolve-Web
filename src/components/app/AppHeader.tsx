@@ -90,6 +90,8 @@ export interface AppHeaderProps {
   onExportChainsolveJson?: () => void
   /** 5.11: Git-friendly .chainsolve export */
   onExportGitFriendly?: () => void
+  /** 5.10: Standalone HTML export */
+  onExportStandaloneHtml?: () => void
   onImportChainsolveJson?: () => void
   onCancelExport?: () => void
   /** Network status — drives offline badge and offline-queued retry action. */
@@ -125,6 +127,7 @@ export function AppHeader({
   onExportExcelProject,
   onExportChainsolveJson,
   onExportGitFriendly,
+  onExportStandaloneHtml,
   onImportChainsolveJson,
   onCancelExport,
   isOnline = true,
@@ -1209,6 +1212,12 @@ export function AppHeader({
           if (onExportGitFriendly) {
             toast(t('chainsolveJsonExport.generating'), 'info')
             onExportGitFriendly()
+          }
+        }}
+        onExportHtml={() => {
+          if (onExportStandaloneHtml) {
+            toast(t('chainsolveJsonExport.generating'), 'info')
+            onExportStandaloneHtml()
           }
         }}
         onCancelExport={onCancelExport}

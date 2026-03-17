@@ -1132,7 +1132,8 @@
     "close": "Chiudi",
     "recentExports": "Esportazioni recenti",
     "pageSize": "Page size",
-    "format_git": "Compatibile Git (.chainsolve)"
+    "format_git": "Compatibile Git (.chainsolve)",
+    "format_html": "HTML autonomo (.html)"
   },
   "commandPalette": {
     "title": "Tavolozza comandi",

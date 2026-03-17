@@ -1174,7 +1174,8 @@
     "close": "Close",
     "recentExports": "Recent exports",
     "pageSize": "Page size",
-    "format_git": "Git-friendly (.chainsolve)"
+    "format_git": "Git-friendly (.chainsolve)",
+    "format_html": "Standalone HTML (.html)"
   },
   "commandPalette": {
     "title": "Command Palette",

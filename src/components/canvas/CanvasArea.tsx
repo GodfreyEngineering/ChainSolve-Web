@@ -238,6 +238,8 @@ export interface CanvasAreaHandle {
   setSnapshot: (nodes: Node<NodeData>[], edges: Edge[]) => void
   /** 6.02: Get computed values for AI context injection. nodeId → scalar or error string. */
   getComputedValues: () => Record<string, number | string>
+  /** 5.10: Full computed value map for standalone HTML export. */
+  getAllComputedValues: () => ReadonlyMap<string, import('../../engine/value').Value>
   fitView: () => void
   /** Pan/zoom to show specific nodes (used by VariablesPanel "jump to bound"). */
   fitViewToNodes: (nodeIds: string[]) => void
@@ -557,6 +559,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       }
       return result
     },
+    getAllComputedValues: () => computed,
     fitView: () => fitView({ padding: 0.15, duration: 300 }),
     fitViewToNodes: (nodeIds: string[]) =>
       fitView({ nodes: nodeIds.map((id) => ({ id })), padding: 0.4, duration: 400 }),

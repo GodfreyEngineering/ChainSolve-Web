@@ -1967,6 +1967,37 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     }
   }, [projectId, engine, toast, t])
 
+  // ── 5.10: Standalone HTML export ─────────────────────────────────────────────
+
+  const handleExportStandaloneHtml = useCallback(async () => {
+    if (exportingRef.current) return
+    exportingRef.current = true
+    setExportInProgress(true)
+    try {
+      const { exportStandaloneHtml } = await import('../lib/standaloneHtmlExport')
+      const snap = canvasRef.current?.getSnapshot()
+      const allComputed = canvasRef.current?.getAllComputedValues() ?? new Map()
+      // Find viewport DOM element — capture handled inside exportStandaloneHtml via html-to-image
+      const viewportDom = document.querySelector('.react-flow__viewport') as HTMLElement | null
+      const ps = useProjectStore.getState()
+      await exportStandaloneHtml({
+        projectName: ps.projectName ?? 'ChainSolve Project',
+        exportedAt: new Date().toISOString(),
+        viewportElement: viewportDom,
+        nodes: (snap?.nodes ?? []) as import('@xyflow/react').Node<import('../blocks/types').NodeData>[],
+        computedValues: allComputed,
+        graphJson: JSON.stringify({ nodes: snap?.nodes ?? [], edges: snap?.edges ?? [] }),
+      })
+      toast(t('chainsolveJsonExport.success'), 'success')
+    } catch (err) {
+      console.error('[html-export]', err)
+      toast(t('chainsolveJsonExport.failed'), 'error')
+    } finally {
+      exportingRef.current = false
+      setExportInProgress(false)
+    }
+  }, [toast, t])
+
   // ── .chainsolvejson import ──────────────────────────────────────────────────
 
   const importFileRef = useRef<HTMLInputElement>(null)
@@ -2115,6 +2146,14 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     void handleExportGitFriendly()
   }, [ent.canExport, handleExportGitFriendly])
 
+  const gatedExportHtml = useCallback(() => {
+    if (!ent.canExport) {
+      setUpgradeExportOpen(true)
+      return
+    }
+    void handleExportStandaloneHtml()
+  }, [ent.canExport, handleExportStandaloneHtml])
+
   const gatedImportJson = useCallback(() => {
     if (!ent.canExport) {
       setUpgradeExportOpen(true)
@@ -2251,6 +2290,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           onExportExcelProject={gatedExportExcel}
           onExportChainsolveJson={gatedExportJson}
           onExportGitFriendly={gatedExportGit}
+          onExportStandaloneHtml={gatedExportHtml}
           onImportChainsolveJson={gatedImportJson}
           isOnline={isOnline}
           onRetryOffline={() => {

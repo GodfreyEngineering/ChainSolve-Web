@@ -1152,7 +1152,8 @@
     "close": "Fermer",
     "recentExports": "Exports récents",
     "pageSize": "Page size",
-    "format_git": "Adapté à Git (.chainsolve)"
+    "format_git": "Adapté à Git (.chainsolve)",
+    "format_html": "HTML autonome (.html)"
   },
   "commandPalette": {
     "title": "Palette de commandes",
