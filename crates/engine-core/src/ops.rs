@@ -3400,8 +3400,11 @@ fn evaluate_node_inner(
                 _ => return Value::error("nn.trainer: 'trainY' input required (Table or Vector)"),
             };
 
-            // Parse training config
+            // Parse training config — Phase 6.6: training always has a defined end
             let epochs = data.get("epochs").and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+            if epochs == 0 {
+                return Value::error("nn.trainer: epochs must be > 0 (training must have a defined end)");
+            }
             let batch_size = data.get("batchSize").and_then(|v| v.as_u64()).unwrap_or(32) as usize;
             let learning_rate = scalar_or(data, "learningRate", 0.01);
             let loss_str = data.get("loss").and_then(|v| v.as_str()).unwrap_or("mse");
