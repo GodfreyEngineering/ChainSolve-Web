@@ -3211,6 +3211,76 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Numerical Integration ─────────────────────────────────
+
+        // Gauss-Kronrod adaptive integration of f(x) over [a, b]
+        "integrate_gk" | "integrate.gk" => {
+            let formula = data.get("formula").and_then(|v| v.as_str()).unwrap_or("");
+            if formula.is_empty() {
+                return Value::error("integrate_gk: no formula provided");
+            }
+            let a = scalar_or_nan(inputs, "a");
+            let b = scalar_or_nan(inputs, "b");
+            if a.is_nan() || b.is_nan() {
+                return Value::error("integrate_gk: integration bounds a and b are required");
+            }
+            let tol = data.get("tol").and_then(|v| v.as_f64()).unwrap_or(1e-10);
+            let max_depth = data.get("maxDepth").and_then(|v| v.as_u64()).unwrap_or(15) as usize;
+
+            let f = |x: f64| -> f64 {
+                let mut vars = std::collections::HashMap::new();
+                vars.insert("x".to_string(), x);
+                crate::expr::eval_expr(formula, &vars).unwrap_or(f64::NAN)
+            };
+            let result = crate::integrate::gauss_kronrod(&f, a, b, tol, max_depth);
+            Value::scalar(result.value)
+        }
+
+        // Clenshaw-Curtis integration of f(x) over [a, b]
+        "integrate_cc" | "integrate.cc" => {
+            let formula = data.get("formula").and_then(|v| v.as_str()).unwrap_or("");
+            if formula.is_empty() {
+                return Value::error("integrate_cc: no formula provided");
+            }
+            let a = scalar_or_nan(inputs, "a");
+            let b = scalar_or_nan(inputs, "b");
+            if a.is_nan() || b.is_nan() {
+                return Value::error("integrate_cc: integration bounds a and b are required");
+            }
+            let n = data.get("points").and_then(|v| v.as_u64()).unwrap_or(65) as usize;
+
+            let f = |x: f64| -> f64 {
+                let mut vars = std::collections::HashMap::new();
+                vars.insert("x".to_string(), x);
+                crate::expr::eval_expr(formula, &vars).unwrap_or(f64::NAN)
+            };
+            let result = crate::integrate::clenshaw_curtis(&f, a, b, n);
+            Value::scalar(result.value)
+        }
+
+        // Monte Carlo integration of f(x) over [a, b]
+        "integrate_mc" | "integrate.mc" => {
+            let formula = data.get("formula").and_then(|v| v.as_str()).unwrap_or("");
+            if formula.is_empty() {
+                return Value::error("integrate_mc: no formula provided");
+            }
+            let a = scalar_or_nan(inputs, "a");
+            let b = scalar_or_nan(inputs, "b");
+            if a.is_nan() || b.is_nan() {
+                return Value::error("integrate_mc: integration bounds a and b are required");
+            }
+            let n = data.get("samples").and_then(|v| v.as_u64()).unwrap_or(10000) as usize;
+            let seed = data.get("seed").and_then(|v| v.as_u64()).unwrap_or(42);
+
+            let f = |x: f64| -> f64 {
+                let mut vars = std::collections::HashMap::new();
+                vars.insert("x".to_string(), x);
+                crate::expr::eval_expr(formula, &vars).unwrap_or(f64::NAN)
+            };
+            let result = crate::integrate::monte_carlo(&f, a, b, n, seed);
+            Value::scalar(result.value)
+        }
+
         // ── Optimization ──────────────────────────────────────────
         "optim.designVariable" => {
             // Source node: emit a table describing this design variable

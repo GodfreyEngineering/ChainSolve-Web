@@ -540,6 +540,14 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   root_polynomial:
     'Find all real roots of a polynomial via companion matrix eigenvalues. Input: coefficient vector [c0, c1, ..., cn].',
 
+  // ── Numerical Integration ──────────────────────────────────────────────────
+  integrate_gk:
+    'Adaptive Gauss-Kronrod G7-K15 quadrature with automatic subdivision and error estimation.',
+  integrate_cc:
+    'Clenshaw-Curtis quadrature using Chebyshev points. Exponential convergence for smooth integrands.',
+  integrate_mc:
+    'Monte Carlo quadrature with deterministic seed. Suitable for high-dimensional or irregular integrands.',
+
   // ── SCI-12: Signal Processing / FFT ───────────────────────────────────────
   'signal.fft_magnitude':
     'FFT magnitude spectrum: |FFT[k]| for k = 0..N/2. Input zero-padded to next power of 2.',
