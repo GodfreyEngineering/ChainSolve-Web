@@ -410,7 +410,7 @@
 - [ ] **6.14** Scope block: 30fps live update during simulation, configurable buffer, vertical trigger line at current time — like Simulink's Scope
 - [ ] **6.15** Multi-axis: secondary Y-axis, stacked panels with shared X-axis (like Simulink Data Inspector)
 - [ ] **6.16** 3D viewport: Three.js orbit camera, mesh visualisation (wireframe/solid/transparent), section planes, vehicle animation, mechanism motion — for geometry and dynamics visualisation
-- [ ] **6.17** Plot annotations: interactive arrows, text labels, reference lines (horizontal/vertical), shaded regions — all draggable
+- [x] **6.17** Plot annotations: interactive arrows, text labels, reference lines (horizontal/vertical), shaded regions — all draggable
 
 ---
 
