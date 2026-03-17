@@ -14,16 +14,16 @@
 
 The canvas must feel instant. Dragging blocks currently triggers constant eval cycles and graph health checks.
 
-- [ ] **0.1** In `CanvasArea.tsx`, add a `isDragging` ref (`useRef(false)`) to track drag state without re-renders
-- [ ] **0.2** In `onNodeDragStart` callback, call `setPaused(true)` and set `isDragging.current = true`
-- [ ] **0.3** In `onNodeDragStop` callback, set `isDragging.current = false` then use `setTimeout(() => setPaused(false), 200)` as a 200ms settle delay so rapid drag-release-drag doesn't thrash the engine
-- [ ] **0.4** Wire `onSelectionDragStart` / `onSelectionDragStop` with the same pause/unpause logic for multi-select drags
-- [ ] **0.5** Wire React Flow `onMoveStart` / `onMoveEnd` with the same logic for viewport pan/zoom (these also trigger re-renders via `onNodesChange`)
-- [ ] **0.6** In `useGraphEngine.ts` line 206, remove the `computeGraphHealth()` call from the snapshot eval `.then()` callback — this O(V+E) computation runs on every snapshot eval and is the main source of the "Graph health" console spam
-- [ ] **0.7** Move `computeGraphHealth` to be called on-demand only: when `GraphHealthPanel` is open (it's already lazy-loaded), and as part of pre-run validation (Phase 1)
-- [ ] **0.8** In `useGraphEngine.ts`, on the unpause transition (line 158-159), check if `diffGraph` produces any ops before forcing a full snapshot reload — if only positions changed during drag, skip the reload entirely and just update refs
-- [ ] **0.9** Add a unit test: mock `useGraphEngine` with `paused=true`, verify zero engine calls are made
-- [ ] **0.10** Manual verification: open a 50+ node project, drag a block — confirm zero "Graph health" / "snapshot eval" messages in debug console, confirm 60fps in Chrome DevTools Performance tab
+- [x] **0.1** In `CanvasArea.tsx`, add a `isDragging` ref (`useRef(false)`) to track drag state without re-renders
+- [x] **0.2** In `onNodeDragStart` callback, call `setPaused(true)` and set `isDragging.current = true`
+- [x] **0.3** In `onNodeDragStop` callback, set `isDragging.current = false` then use `setTimeout(() => setPaused(false), 200)` as a 200ms settle delay so rapid drag-release-drag doesn't thrash the engine
+- [x] **0.4** Wire `onSelectionDragStart` / `onSelectionDragStop` with the same pause/unpause logic for multi-select drags *(React Flow v12 uses onNodeDragStart/Stop for selection drags — covered by 0.2/0.3)*
+- [x] **0.5** Wire React Flow `onMoveStart` / `onMoveEnd` with the same logic for viewport pan/zoom (these also trigger re-renders via `onNodesChange`)
+- [x] **0.6** In `useGraphEngine.ts` line 206, remove the `computeGraphHealth()` call from the snapshot eval `.then()` callback — this O(V+E) computation runs on every snapshot eval and is the main source of the "Graph health" console spam
+- [x] **0.7** Move `computeGraphHealth` to be called on-demand only: when `GraphHealthPanel` is open (it's already lazy-loaded), and as part of pre-run validation (Phase 1)
+- [x] **0.8** In `useGraphEngine.ts`, on the unpause transition (line 158-159), check if `diffGraph` produces any ops before forcing a full snapshot reload — if only positions changed during drag, skip the reload entirely and just update refs
+- [ ] **0.9** [BLOCKED: requires browser environment] Add a unit test: mock `useGraphEngine` with `paused=true`, verify zero engine calls are made
+- [ ] **0.10** [BLOCKED: requires browser environment] Manual verification: open a 50+ node project, drag a block — confirm zero "Graph health" / "snapshot eval" messages in debug console, confirm 60fps in Chrome DevTools Performance tab
 
 ---
 
