@@ -571,6 +571,10 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Sobol quasi-random low-discrepancy sequence. More uniform than pseudorandom for integration and DOE.',
   rng_halton:
     'Halton quasi-random sequence using co-prime bases. Low-discrepancy up to ~20 dimensions.',
+  rng_normal:
+    'Generate normally distributed random numbers (Box-Muller). Default μ=0, σ=1. Deterministic given seed.',
+  rng_lognormal:
+    'Generate log-normally distributed random numbers. X = exp(μ + σ·Z). Deterministic given seed.',
 
   // ── SCI-12: Signal Processing / FFT ───────────────────────────────────────
   'signal.fft_magnitude':

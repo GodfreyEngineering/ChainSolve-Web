@@ -231,4 +231,36 @@ export function registerNumericalBlocks(register: (def: BlockDef) => void): void
     synonyms: ['halton', 'quasi-random', 'low discrepancy'],
     tags: ['numerical', 'random', 'sampling', 'quasi-random'],
   })
+
+  register({
+    type: 'rng_normal',
+    label: 'Random Normal',
+    category: 'numerical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'mu', label: 'Mean' },
+      { id: 'sigma', label: 'Std Dev' },
+    ],
+    defaultData: { blockType: 'rng_normal', label: 'Random Normal', samples: 100, seed: 42 },
+    description:
+      'Generate a vector of normally distributed random numbers (Box-Muller transform). Default μ=0, σ=1. Deterministic given seed.',
+    synonyms: ['gaussian', 'normal distribution', 'bell curve', 'randn'],
+    tags: ['numerical', 'random', 'sampling'],
+  })
+
+  register({
+    type: 'rng_lognormal',
+    label: 'Random Log-Normal',
+    category: 'numerical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'mu', label: 'Log Mean' },
+      { id: 'sigma', label: 'Log Std Dev' },
+    ],
+    defaultData: { blockType: 'rng_lognormal', label: 'Random Log-Normal', samples: 100, seed: 42 },
+    description:
+      'Generate a vector of log-normally distributed random numbers. X = exp(μ + σ·Z) where Z ~ N(0,1). Default μ=0, σ=1. Deterministic given seed.',
+    synonyms: ['lognormal', 'log normal distribution', 'skewed distribution'],
+    tags: ['numerical', 'random', 'sampling'],
+  })
 }

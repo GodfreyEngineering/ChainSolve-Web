@@ -3450,6 +3450,30 @@ fn evaluate_node_inner(
             }
         }
 
+        "rng_normal" | "rng.normal" => {
+            let n = data.get("samples").and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+            let seed = data.get("seed").and_then(|v| v.as_u64()).unwrap_or(42);
+            let mu_v = scalar_or_nan(inputs, "mu");
+            let sigma_v = scalar_or_nan(inputs, "sigma");
+            let mu = if mu_v.is_nan() { 0.0 } else { mu_v };
+            let sigma = if sigma_v.is_nan() { 1.0 } else { sigma_v };
+            let mut rng = crate::rng::Xoshiro256::new(seed);
+            let values: Vec<f64> = (0..n).map(|_| mu + sigma * rng.next_gaussian()).collect();
+            Value::Vector { value: values }
+        }
+
+        "rng_lognormal" | "rng.lognormal" => {
+            let n = data.get("samples").and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+            let seed = data.get("seed").and_then(|v| v.as_u64()).unwrap_or(42);
+            let mu_v = scalar_or_nan(inputs, "mu");
+            let sigma_v = scalar_or_nan(inputs, "sigma");
+            let mu = if mu_v.is_nan() { 0.0 } else { mu_v };
+            let sigma = if sigma_v.is_nan() { 1.0 } else { sigma_v };
+            let mut rng = crate::rng::Xoshiro256::new(seed);
+            let values: Vec<f64> = (0..n).map(|_| (mu + sigma * rng.next_gaussian()).exp()).collect();
+            Value::Vector { value: values }
+        }
+
         // ── Optimization ──────────────────────────────────────────
         "optim.designVariable" => {
             // Source node: emit a table describing this design variable

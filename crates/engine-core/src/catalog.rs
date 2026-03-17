@@ -486,6 +486,8 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("rng_lhs", "Latin Hypercube Sample", "numerical", "csOperation", vec![], false),
         entry("rng_sobol", "Sobol Sequence", "numerical", "csOperation", vec![], false),
         entry("rng_halton", "Halton Sequence", "numerical", "csOperation", vec![], false),
+        entry("rng_normal", "Random Normal", "numerical", "csOperation", vec![p("mu", "Mean"), p("sigma", "Std Dev")], false),
+        entry("rng_lognormal", "Random Log-Normal", "numerical", "csOperation", vec![p("mu", "Log Mean"), p("sigma", "Log Std Dev")], false),
 
         // ── BLK-10: Lookup Table Interpolation ───────────────────────────
         entry("lookup.1d", "Lookup Table 1D", "tableOps", "csOperation", vec![p("x_vec", "X (vector)"), p("y_vec", "Y (vector)"), p("x", "Query X")], false),
@@ -624,14 +626,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 385);
+        assert_eq!(cat.len(), 387);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 385);
+        assert_eq!(parsed.as_array().unwrap().len(), 387);
     }
 
     #[test]
