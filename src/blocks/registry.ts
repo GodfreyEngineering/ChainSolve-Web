@@ -35,6 +35,7 @@ function reg(def: {
   variadic?: boolean
   minInputs?: number
   maxInputs?: number
+  description?: string
 }): void {
   BLOCK_REGISTRY.set(def.type, def)
 }
@@ -562,6 +563,8 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   'optimization',
   'machineLearning',
   'neuralNetworks',
+  'odeSolvers',
+  'vehicleSim',
 ]
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -615,6 +618,8 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   optimization: 'Optimization',
   machineLearning: 'Machine Learning',
   neuralNetworks: 'Neural Networks',
+  odeSolvers: 'ODE Solvers',
+  vehicleSim: 'Vehicle Simulation',
 }
 
 // ── Block taxonomy (G3-1: 3 main categories with subcategories) ─────────────
@@ -692,6 +697,8 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
       { id: 'fnOptimization', label: 'Optimization', categories: ['optimization'] },
       { id: 'fnMachineLearning', label: 'Machine Learning', categories: ['machineLearning'] },
       { id: 'fnNeuralNetworks', label: 'Neural Networks', categories: ['neuralNetworks'] },
+      { id: 'fnOdeSolvers', label: 'ODE Solvers', categories: ['odeSolvers'] },
+      { id: 'fnVehicleSim', label: 'Vehicle Simulation', categories: ['vehicleSim'] },
     ],
   },
   {
@@ -837,6 +844,100 @@ export function validateCatalog(catalog: CatalogEntry[]): void {
     }
   }
 }
+
+// ── ODE Solvers (Phase 4) ────────────────────────────────────────────────────
+
+reg({
+  type: 'ode.rk4',
+  label: 'ODE Solver (RK4)',
+  category: 'odeSolvers',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'equations', label: 'Equations (text)' },
+    { id: 'y0', label: 'Initial state' },
+  ],
+  defaultData: { blockType: 'ode.rk4', label: 'ODE RK4', t_end: 1.0, dt: 0.01 },
+  proOnly: true,
+  description:
+    'Solve a system of ODEs using the classic 4th-order Runge-Kutta method (fixed step). Output = table of (t, y0, y1, ...).',
+})
+
+reg({
+  type: 'ode.rk45',
+  label: 'ODE Solver (Adaptive)',
+  category: 'odeSolvers',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'equations', label: 'Equations (text)' },
+    { id: 'y0', label: 'Initial state' },
+  ],
+  defaultData: { blockType: 'ode.rk45', label: 'ODE RK45', t_end: 1.0, dt: 0.1, tolerance: 1e-6 },
+  proOnly: true,
+  description:
+    'Solve a system of ODEs using the Dormand-Prince RK4(5) adaptive-step method. Automatically adjusts step size for accuracy.',
+})
+
+// ── Vehicle Simulation (Phase 5) ────────────────────────────────────────────
+
+reg({
+  type: 'veh.tire.lateralForce',
+  label: 'Pacejka Lateral Fy',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'slip_angle', label: 'Slip angle (rad)' },
+    { id: 'Fz', label: 'Fz (N)' },
+    { id: 'B', label: 'B' },
+    { id: 'C', label: 'C' },
+    { id: 'D', label: 'D' },
+    { id: 'E', label: 'E' },
+  ],
+  defaultData: { blockType: 'veh.tire.lateralForce', label: 'Pacejka Fy' },
+  proOnly: true,
+  description: 'Pacejka Magic Formula lateral tire force Fy from slip angle. Output = Fy (N).',
+})
+
+reg({
+  type: 'veh.tire.longForce',
+  label: 'Pacejka Longitudinal Fx',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'slip_ratio', label: 'Slip ratio' },
+    { id: 'Fz', label: 'Fz (N)' },
+    { id: 'B', label: 'B' },
+    { id: 'C', label: 'C' },
+    { id: 'D', label: 'D' },
+    { id: 'E', label: 'E' },
+  ],
+  defaultData: { blockType: 'veh.tire.longForce', label: 'Pacejka Fx' },
+  proOnly: true,
+  description: 'Pacejka Magic Formula longitudinal tire force Fx from slip ratio. Output = Fx (N).',
+})
+
+reg({
+  type: 'veh.tire.sweep',
+  label: 'Tire Force Sweep',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'Fz', label: 'Fz (N)' },
+    { id: 'B', label: 'B' },
+    { id: 'C', label: 'C' },
+    { id: 'D', label: 'D' },
+    { id: 'E', label: 'E' },
+  ],
+  defaultData: {
+    blockType: 'veh.tire.sweep',
+    label: 'Tire Sweep',
+    slipMin: -0.2,
+    slipMax: 0.2,
+    points: 101,
+  },
+  proOnly: true,
+  description:
+    'Generate a Pacejka tire force vs slip table for plotting. Output = table (slip, force).',
+})
 
 // ── H5-1: Custom function block dynamic registration ────────────────────────
 

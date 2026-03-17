@@ -35,6 +35,8 @@ const PRO_CATEGORIES = new Set([
   'probComb',
   'probDist',
   'utilCalc',
+  'odeSolvers',
+  'vehicleSim',
 ])
 
 describe('Pro feature gating', () => {

@@ -68,6 +68,8 @@ const VALID_CATEGORIES: BlockCategory[] = [
   'optimization',
   'machineLearning',
   'neuralNetworks',
+  'odeSolvers',
+  'vehicleSim',
 ]
 
 const VALID_NODE_KINDS: NodeKind[] = [

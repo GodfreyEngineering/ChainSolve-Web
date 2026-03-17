@@ -587,4 +587,13 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Trains a neural network using backpropagation. Configurable epochs, batch size, learning rate, and loss function.',
   'nn.predict': 'Runs inference on a trained neural network. Feed new data to get predictions.',
   'nn.export': 'Exports a trained neural network to ONNX format for use in other tools.',
+  // ODE Solvers
+  'ode.rk4':
+    'Solve a system of ODEs using the classic 4th-order Runge-Kutta method. Output = table of time vs state variables.',
+  'ode.rk45':
+    'Solve ODEs using the Dormand-Prince adaptive-step method. Automatically adjusts step size for accuracy.',
+  // Vehicle Simulation
+  'veh.tire.lateralForce': 'Pacejka Magic Formula lateral tire force Fy from slip angle.',
+  'veh.tire.longForce': 'Pacejka Magic Formula longitudinal tire force Fx from slip ratio.',
+  'veh.tire.sweep': 'Generate a tire force vs slip sweep table for plotting.',
 }

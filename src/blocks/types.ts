@@ -57,6 +57,8 @@ export type BlockCategory =
   | 'optimization'
   | 'machineLearning'
   | 'neuralNetworks'
+  | 'odeSolvers'
+  | 'vehicleSim'
 
 /** Which React Flow custom-node renderer to use. */
 export type NodeKind =
