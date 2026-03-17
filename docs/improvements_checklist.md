@@ -195,10 +195,10 @@ Ref: Pacejka 2012, Milliken & Milliken 1995, Dixon 2009.
 
 ### 5C — Aero, Powertrain, Lap Sim
 
-- [ ] **5.7** `vehicle/aero.rs` — drag, downforce, side force, balance, presets
-- [ ] **5.8** `vehicle/powertrain.rs` — torque map interpolation, gear ratios, drivetrain loss
+- [x] **5.7** `vehicle/aero.rs` — drag, downforce, side_force, aero_balance, cd_a + 4 presets + 5 tests
+- [x] **5.8** `vehicle/powertrain.rs` — torque_from_map, gear_ratio, drivetrain_loss, wheel_speed + 4 tests
 - [ ] **5.9** `vehicle/lap.rs` — point-mass quasi-steady-state lap simulation
-- [ ] **5.10** Match arms for all `veh.aero.*`, `veh.powertrain.*`, `veh.lap.*`
+- [x] **5.10** Match arms for `veh.aero.drag`, `veh.aero.downforce`, `veh.aero.balance`, `veh.powertrain.gearRatio`, `veh.powertrain.wheelSpeed`, `veh.powertrain.drivetrainLoss` (lap sim deferred)
 
 ### 5D — Telemetry & Thermal
 
