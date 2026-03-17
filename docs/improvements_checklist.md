@@ -367,7 +367,7 @@
 - [ ] **4.14** .tir tire parameter file: parse Pacejka MF 6.2 format used across automotive industry
 - [ ] **4.15** OpenDRIVE .xodr: parse road geometry description for driving simulation scenarios
 - [ ] **4.16** ONNX export: save trained neural network as .onnx file for deployment in other tools
-- [ ] **4.17** LaTeX export: render symbolic expressions as LaTeX source code for papers/reports
+- [x] **4.17** LaTeX export: render symbolic expressions as LaTeX source code for papers/reports
 - [x] **4.18** Clipboard paste: detect tabular data from Excel/Sheets clipboard → auto-create DataTable block
 - [ ] **4.19** WebSocket input: live sensor data at up to 1kHz with ring buffer — for DAQ integration
 - [ ] **4.20** SQL query block: connect to PostgreSQL (via Supabase), parameterised queries, output as DataTable
