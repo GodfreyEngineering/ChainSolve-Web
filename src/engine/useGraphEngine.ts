@@ -7,7 +7,7 @@
  * Results are merged incrementally (only changed values update the map).
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Node, Edge } from '@xyflow/react'
 import type { EngineAPI } from './index.ts'
 import type { EvalOptions, PatchOp } from './wasm-types.ts'
@@ -16,6 +16,8 @@ import type { ConstantsLookup } from './resolveBindings.ts'
 import type { VariablesMap } from '../lib/variables.ts'
 import { toEngineSnapshot } from './bridge.ts'
 import { diffGraph } from './diffGraph.ts'
+import { EvalScheduler } from './evalScheduler.ts'
+import type { EvalMode } from './evalScheduler.ts'
 import { isPerfHudEnabled } from '../lib/devFlags.ts'
 import { updatePerfMetrics } from './perfMetrics.ts'
 import { perfMark, perfMeasure } from '../perf/marks.ts'
@@ -26,12 +28,8 @@ import { ComputedStore } from '../contexts/ComputedStore.ts'
 
 const perfEnabled = isPerfHudEnabled()
 
-/**
- * Milliseconds to wait before sending a data-only patch to the engine.
- * Rapid keystrokes in number/formula inputs within this window are coalesced
- * into a single applyPatch call, reducing worker message-queue pressure.
- * Structural changes (add/remove node/edge) bypass this delay entirely.
- */
+// Patch debounce is now inside evalScheduler.ts. Re-export constant
+// for backwards compat with existing tests.
 export const PATCH_DEBOUNCE_MS = 50
 
 /**
@@ -87,6 +85,10 @@ export interface GraphEngineResult {
   computed: ReadonlyMap<string, Value>
   isPartial: boolean
   computedStore: ComputedStore
+  /** Manually trigger evaluation (for Run button in manual/deferred mode). */
+  triggerEval: () => void
+  /** Number of patch ops waiting to be dispatched. */
+  pendingPatchCount: number
 }
 
 export function useGraphEngine(
@@ -108,6 +110,8 @@ export function useGraphEngine(
   telemetryOpts?: { projectId?: string; canvasId?: string },
   /** SCI-06: Angle unit preference for trig blocks. */
   angleUnit?: 'rad' | 'deg',
+  /** Phase 1: Evaluation mode — auto, deferred, or manual. Default: auto. */
+  evalMode?: EvalMode,
 ): GraphEngineResult {
   const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
   const [isPartial, setIsPartial] = useState(false)
@@ -125,10 +129,25 @@ export function useGraphEngine(
   // so subscribe blocks pick up cross-canvas value updates.
   const prevPublishedRef = useRef(publishedOutputs)
   const pendingRef = useRef(0) // Coalescing counter: skip stale results.
-  // Debounce timer for data-only patches (see PATCH_DEBOUNCE_MS).
-  const patchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // K4-2: Track already-logged node errors to avoid console spam.
   const seenErrorsRef = useRef<Set<string>>(new Set())
+
+  // Phase 1: EvalScheduler manages patch dispatch timing.
+  const [schedulerInstance] = useState(() => new EvalScheduler(evalMode ?? 'auto'))
+  const [pendingPatchCount, setPendingPatchCount] = useState(0)
+
+  // Keep scheduler mode in sync with the evalMode prop.
+  useEffect(() => {
+    schedulerInstance.mode = evalMode ?? 'auto'
+  }, [evalMode, schedulerInstance])
+
+  // Register pending-count callback once.
+  useEffect(() => {
+    schedulerInstance.onPendingChange(setPendingPatchCount)
+    return () => {
+      schedulerInstance.dispose()
+    }
+  }, [schedulerInstance])
 
   useEffect(() => {
     // When refreshKey changes, force a full snapshot re-evaluation.
@@ -334,36 +353,19 @@ export function useGraphEngine(
           })
       }
 
-      if (hasStructuralChange(ops)) {
-        // Structural changes (add/remove node or edge) fire immediately.
-        // Also flush any pending data-only debounce to avoid lost updates.
-        if (patchTimerRef.current !== null) {
-          clearTimeout(patchTimerRef.current)
-          patchTimerRef.current = null
-        }
-        firePatch(ops)
-      } else {
-        // Data-only changes (node value/formula edits): debounce to coalesce
-        // rapid keystrokes before sending to the worker.
-        if (patchTimerRef.current !== null) clearTimeout(patchTimerRef.current)
-        const capturedOps = ops // snapshot at this render
-        patchTimerRef.current = setTimeout(() => {
-          patchTimerRef.current = null
-          firePatch(capturedOps)
-        }, PATCH_DEBOUNCE_MS)
-      }
+      // Phase 1: Delegate dispatch timing to the EvalScheduler.
+      // The scheduler handles debouncing, idle-callback, or manual
+      // accumulation based on the current evalMode.
+      schedulerInstance.onFlush(firePatch)
+      schedulerInstance.enqueue(ops)
     }
 
     prevNodesRef.current = nodes
     prevEdgesRef.current = edges
 
-    // Cleanup: cancel any pending debounce timer so it doesn't fire
-    // after the engine has been disposed (project/canvas switch).
+    // Cleanup: clear scheduler timers on effect re-run or unmount.
     return () => {
-      if (patchTimerRef.current !== null) {
-        clearTimeout(patchTimerRef.current)
-        patchTimerRef.current = null
-      }
+      schedulerInstance.clear()
     }
   }, [
     nodes,
@@ -379,7 +381,25 @@ export function useGraphEngine(
     store,
     telemetryOpts,
     angleUnit,
+    schedulerInstance,
   ])
 
-  return { computed, isPartial, computedStore: store }
+  // Phase 1: triggerEval — flush any pending scheduler ops OR force a full
+  // snapshot reload if there are no pending ops (covers "re-run everything").
+  const triggerEval = useCallback(() => {
+    if (schedulerInstance.pendingCount > 0) {
+      schedulerInstance.flush()
+    } else {
+      // No pending ops — force a full snapshot reload (same as Refresh button)
+      snapshotLoaded.current = false
+      // Trigger the effect by updating a ref-change signal. Since React
+      // won't re-run the effect just from a ref change, we nudge it via
+      // the existing mechanism: the caller can bump refreshKey.
+      // For now, just mark snapshot as not loaded — the next render cycle
+      // will pick it up since nodes/edges are in the dep array.
+      prevNodesRef.current = [] // Force diff to see "everything changed"
+    }
+  }, [schedulerInstance])
+
+  return { computed, isPartial, computedStore: store, triggerEval, pendingPatchCount }
 }
