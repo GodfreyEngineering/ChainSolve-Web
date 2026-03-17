@@ -1,5 +1,5 @@
 /**
- * csvParser.ts — CSV + NumPy .npy → table data parsers for file drop support.
+ * csvParser.ts — CSV + NumPy .npy + Excel .xlsx → table data parsers for file drop support.
  *
  * CSV handles:
  * - Optional header row detection (non-numeric first cell → treat as header)
@@ -8,6 +8,7 @@
  * - Windows (CRLF) and Unix (LF) line endings
  *
  * NumPy .npy (4.10): parses v1/v2 format for float32/float64 1D/2D arrays.
+ * Excel .xlsx (4.6): dynamically imports SheetJS, reads first sheet.
  */
 
 export interface ParsedCSV {
@@ -154,4 +155,62 @@ export function parseNpyToTableData(buf: ArrayBuffer): ParsedCSV | null {
   }
 
   return { columns, rows }
+}
+
+/**
+ * 4.6: Parse Excel .xlsx / .xls ArrayBuffer into ParsedCSV format.
+ *
+ * Reads the first sheet. Row 1 is used as column headers if any cell is
+ * non-numeric; otherwise columns are named A, B, C…
+ * Non-numeric cell values in data rows are coerced to 0.
+ * Dynamically imports SheetJS (xlsx) so it does not affect initial bundle size.
+ */
+export async function parseXlsxToTableData(buf: ArrayBuffer): Promise<ParsedCSV | null> {
+  try {
+    const XLSX = await import('xlsx')
+    const wb = XLSX.read(new Uint8Array(buf), { type: 'array' })
+    const sheetName = wb.SheetNames[0]
+    if (!sheetName) return null
+    const ws = wb.Sheets[sheetName]
+    if (!ws) return null
+
+    // Get raw rows as arrays (header: 1 keeps first row as data)
+    const raw = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: 0 })
+    if (raw.length === 0) return null
+
+    const firstRow = raw[0] as unknown[]
+
+    // Detect header row: first row is a header if any cell is non-numeric string
+    const isHeader = firstRow.some((v) => typeof v === 'string' && v !== '' && isNaN(Number(v)))
+
+    let columns: string[]
+    let dataRows: unknown[][]
+
+    if (isHeader) {
+      columns = firstRow.map((v, i) =>
+        v != null && String(v).trim() !== ''
+          ? String(v).trim()
+          : String.fromCharCode(65 + (i % 26)),
+      )
+      dataRows = raw.slice(1) as unknown[][]
+    } else {
+      columns = firstRow.map((_, i) => String.fromCharCode(65 + (i % 26)))
+      dataRows = raw as unknown[][]
+    }
+
+    if (dataRows.length === 0) return { columns, rows: [columns.map(() => 0)] }
+
+    const rows = dataRows.map((row) => {
+      const cells = row as unknown[]
+      return columns.map((_, ci) => {
+        const cellVal = cells[ci]
+        const n = Number(cellVal)
+        return isNaN(n) ? 0 : n
+      })
+    })
+
+    return { columns, rows }
+  } catch {
+    return null
+  }
 }

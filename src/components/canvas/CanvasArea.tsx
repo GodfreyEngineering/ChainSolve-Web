@@ -101,7 +101,7 @@ import { autoLayout, type LayoutDirection, type AutoLayoutResult } from '../../l
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard, pasteFromSystemClipboard } from '../../lib/clipboard'
 import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
-import { parseCSVToTableData, parseNpyToTableData } from '../../lib/csvParser'
+import { parseCSVToTableData, parseNpyToTableData, parseXlsxToTableData } from '../../lib/csvParser'
 import { computeDatasetHash } from '../../lib/datasetHash'
 import { CommandPalette, type PaletteCommand } from './CommandPalette'
 import { FormulaBar } from './FormulaBar'
@@ -1495,6 +1495,53 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               )
             } catch {
               toast('Failed to parse .npy file', 'error')
+            }
+          }
+          reader.readAsArrayBuffer(file)
+          return
+        }
+
+        // 4.6: Excel .xlsx / .xls file → parse first sheet and create tableInput block
+        if (nameLower.endsWith('.xlsx') || nameLower.endsWith('.xls')) {
+          const tableInputDef = BLOCK_REGISTRY.get('tableInput')
+          if (tableInputDef?.proOnly && !isBlockEntitled(tableInputDef, ent)) {
+            setShowUpgradeModal(true)
+            return
+          }
+          const position = screenToFlowPosition({ x: e.clientX, y: e.clientY })
+          const reader = new FileReader()
+          reader.onload = async (ev) => {
+            const buf = ev.target?.result
+            if (!(buf instanceof ArrayBuffer)) return
+            try {
+              const tableData = await parseXlsxToTableData(buf)
+              if (!tableData) {
+                toast('Could not parse Excel file: no numeric sheet data found', 'error')
+                return
+              }
+              const datasetHash = await computeDatasetHash(tableData)
+              const id = `node_${++nodeIdCounter}`
+              doSaveHistory()
+              setNodes((nds) => [
+                ...nds,
+                {
+                  id,
+                  type: 'csData',
+                  position,
+                  data: {
+                    blockType: 'tableInput',
+                    label: file.name.replace(/\.(xlsx|xls)$/i, ''),
+                    tableData,
+                    datasetHash,
+                  },
+                } as Node<NodeData>,
+              ])
+              toast(
+                `Excel loaded: ${file.name} (${tableData.rows.length} rows × ${tableData.columns.length} columns)`,
+                'success',
+              )
+            } catch {
+              toast('Failed to parse Excel file', 'error')
             }
           }
           reader.readAsArrayBuffer(file)
