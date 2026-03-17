@@ -11,4 +11,5 @@
 pub mod aero;
 pub mod powertrain;
 pub mod suspension;
+pub mod thermal;
 pub mod tire;
