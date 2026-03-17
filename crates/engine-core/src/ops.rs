@@ -26,6 +26,35 @@
 use crate::types::Value;
 use std::collections::HashMap;
 
+/// Phase 3.8: Try HP arithmetic if data.precision is set and inputs are scalar.
+/// Falls back to normal nary_broadcast if no precision or non-scalar inputs.
+fn hp_or_broadcast(
+    inputs: &HashMap<String, Value>,
+    data: &HashMap<String, serde_json::Value>,
+    f64_op: impl Fn(f64, f64) -> f64 + Copy,
+    hp_op: impl Fn(&str, &str, u32) -> Result<(String, f64), String>,
+) -> Value {
+    // Check for precision override in node data
+    if let Some(prec) = data.get("precision").and_then(|v| v.as_u64()) {
+        let precision = prec as u32;
+        // Only HP for simple binary scalar case (a/b ports)
+        if let (Some(Value::Scalar { value: a }), Some(Value::Scalar { value: b })) =
+            (inputs.get("a"), inputs.get("b"))
+        {
+            match hp_op(&a.to_string(), &b.to_string(), precision) {
+                Ok((display, approx)) => {
+                    return Value::HighPrecision { display, approx, precision };
+                }
+                Err(_) => {
+                    // Fall through to f64
+                }
+            }
+        }
+    }
+    // Default: normal broadcast
+    nary_broadcast(inputs, f64_op)
+}
+
 /// Read an f64 from a node's data map, falling back to a default.
 fn scalar_or(data: &HashMap<String, serde_json::Value>, key: &str, default: f64) -> f64 {
     data.get(key).and_then(|v| v.as_f64()).unwrap_or(default)
@@ -141,10 +170,11 @@ fn evaluate_node_inner(
         "preset.fluids.diesel_rho"     => Value::scalar(832.0),
 
         // ── Math (2 inputs: a, b or 1 input: in) ─────────────────
-        "add" => nary_broadcast(inputs, |a, b| a + b),
-        "subtract" => binary_broadcast(inputs, |a, b| a - b),
-        "multiply" => nary_broadcast(inputs, |a, b| a * b),
-        "divide" => binary_broadcast(inputs, |a, b| a / b),
+        // Phase 3.8: When data.precision is set, use HP arithmetic for scalar ops.
+        "add" => hp_or_broadcast(inputs, data, |a, b| a + b, crate::precision::hp_add),
+        "subtract" => hp_or_broadcast(inputs, data, |a, b| a - b, crate::precision::hp_sub),
+        "multiply" => hp_or_broadcast(inputs, data, |a, b| a * b, crate::precision::hp_mul),
+        "divide" => hp_or_broadcast(inputs, data, |a, b| a / b, crate::precision::hp_div),
         "power" => binary_broadcast_ports(inputs, "base", "exp", |base, exp| base.powf(exp)),
         "mod" => binary_broadcast(inputs, |a, b| a % b),
         "clamp" => {
@@ -5951,5 +5981,46 @@ mod tests {
         }
         let v = evaluate_node("add", &inputs, &HashMap::new());
         assert_eq!(v.as_scalar(), Some(55.0)); // sum of 1..10 = 55
+    }
+
+    // ── High-Precision tests (require `high-precision` feature) ──
+
+    #[test]
+    #[cfg(feature = "high-precision")]
+    fn hp_add_returns_high_precision_value() {
+        let inputs = make_inputs(&[("a", 1.5), ("b", 2.5)]);
+        let mut data = HashMap::new();
+        data.insert("precision".into(), serde_json::json!(50));
+        let v = evaluate_node("add", &inputs, &data);
+        match &v {
+            Value::HighPrecision { approx, precision, .. } => {
+                assert!((*approx - 4.0).abs() < 1e-10, "HP approx: {}", approx);
+                assert_eq!(*precision, 50);
+            }
+            _ => panic!("Expected HighPrecision, got {:?}", v),
+        }
+    }
+
+    #[test]
+    #[cfg(feature = "high-precision")]
+    fn hp_mul_precision() {
+        let inputs = make_inputs(&[("a", 3.0), ("b", 7.0)]);
+        let mut data = HashMap::new();
+        data.insert("precision".into(), serde_json::json!(20));
+        let v = evaluate_node("multiply", &inputs, &data);
+        match &v {
+            Value::HighPrecision { approx, .. } => {
+                assert!((*approx - 21.0).abs() < 1e-10);
+            }
+            _ => panic!("Expected HighPrecision, got {:?}", v),
+        }
+    }
+
+    #[test]
+    fn hp_falls_back_to_f64_without_precision() {
+        // Without data.precision, should use normal f64 path
+        let inputs = make_inputs(&[("a", 1.0), ("b", 2.0)]);
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(3.0)); // Normal scalar, not HP
     }
 }
