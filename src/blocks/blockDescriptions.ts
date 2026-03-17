@@ -596,4 +596,14 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'veh.tire.lateralForce': 'Pacejka Magic Formula lateral tire force Fy from slip angle.',
   'veh.tire.longForce': 'Pacejka Magic Formula longitudinal tire force Fx from slip ratio.',
   'veh.tire.sweep': 'Generate a tire force vs slip sweep table for plotting.',
+  // Vehicle Aero
+  'veh.aero.drag': 'Aerodynamic drag force: F = 0.5 × ρ × Cd × A × v².',
+  'veh.aero.downforce': 'Aerodynamic downforce: F = 0.5 × ρ × Cl × A × v².',
+  'veh.aero.balance': 'Front downforce percentage: F_front / F_total × 100.',
+  // Vehicle Powertrain
+  'veh.powertrain.gearRatio':
+    'Apply gear ratio: torque_out = torque × ratio, rpm_out = rpm / ratio.',
+  'veh.powertrain.wheelSpeed':
+    'Vehicle speed from engine RPM, tire radius, and overall gear ratio.',
+  'veh.powertrain.drivetrainLoss': 'Apply drivetrain efficiency: P_out = P_in × η.',
 }

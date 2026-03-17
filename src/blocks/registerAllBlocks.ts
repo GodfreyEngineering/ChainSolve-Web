@@ -43,8 +43,9 @@ function reg(
 
 /** Register all domain block packs and apply search metadata. */
 export function registerAllBlocks(): void {
-  // Skip if already registered (idempotent)
-  if (BLOCK_REGISTRY.size > 50) return
+  // Skip if already registered (idempotent).
+  // Core registry has ~60 blocks; domain packs bring it to 300+.
+  if (BLOCK_REGISTRY.size > 100) return
 
   registerVectorBlocks(reg)
   registerTableBlocks(reg)

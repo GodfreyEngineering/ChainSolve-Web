@@ -510,6 +510,12 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("veh.tire.lateralForce", "Pacejka Lateral Fy", "vehicleSim", "csOperation", vec![p("slip_angle", "Slip angle (rad)"), p("Fz", "Fz (N)"), p("B", "B"), p("C", "C"), p("D", "D"), p("E", "E")], true),
         entry("veh.tire.longForce", "Pacejka Longitudinal Fx", "vehicleSim", "csOperation", vec![p("slip_ratio", "Slip ratio"), p("Fz", "Fz (N)"), p("B", "B"), p("C", "C"), p("D", "D"), p("E", "E")], true),
         entry("veh.tire.sweep", "Tire Force Sweep", "vehicleSim", "csOperation", vec![p("Fz", "Fz (N)"), p("B", "B"), p("C", "C"), p("D", "D"), p("E", "E")], true),
+        entry("veh.aero.drag", "Aero Drag", "vehicleSim", "csOperation", vec![p("rho", "ρ (kg/m³)"), p("Cd", "Cd"), p("A", "A (m²)"), p("v", "v (m/s)")], true),
+        entry("veh.aero.downforce", "Aero Downforce", "vehicleSim", "csOperation", vec![p("rho", "ρ (kg/m³)"), p("Cl", "Cl"), p("A", "A (m²)"), p("v", "v (m/s)")], true),
+        entry("veh.aero.balance", "Aero Balance", "vehicleSim", "csOperation", vec![p("f_front", "F front (N)"), p("f_total", "F total (N)")], true),
+        entry("veh.powertrain.gearRatio", "Gear Ratio", "vehicleSim", "csOperation", vec![p("torque", "Torque (Nm)"), p("rpm", "RPM"), p("ratio", "Ratio")], true),
+        entry("veh.powertrain.wheelSpeed", "Wheel Speed", "vehicleSim", "csOperation", vec![p("rpm", "RPM"), p("radius", "Radius (m)"), p("ratio", "Overall ratio")], true),
+        entry("veh.powertrain.drivetrainLoss", "Drivetrain Loss", "vehicleSim", "csOperation", vec![p("power", "Power (W)"), p("efficiency", "η")], true),
     ]
 }
 
@@ -575,14 +581,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 347);
+        assert_eq!(cat.len(), 353);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 347);
+        assert_eq!(parsed.as_array().unwrap().len(), 353);
     }
 
     #[test]

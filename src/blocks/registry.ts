@@ -939,6 +939,96 @@ reg({
     'Generate a Pacejka tire force vs slip table for plotting. Output = table (slip, force).',
 })
 
+reg({
+  type: 'veh.aero.drag',
+  label: 'Aero Drag',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'rho', label: 'ρ (kg/m³)' },
+    { id: 'Cd', label: 'Cd' },
+    { id: 'A', label: 'A (m²)' },
+    { id: 'v', label: 'v (m/s)' },
+  ],
+  defaultData: { blockType: 'veh.aero.drag', label: 'Aero Drag' },
+  proOnly: true,
+  description: 'Aerodynamic drag force: F = 0.5 × ρ × Cd × A × v².',
+})
+
+reg({
+  type: 'veh.aero.downforce',
+  label: 'Aero Downforce',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'rho', label: 'ρ (kg/m³)' },
+    { id: 'Cl', label: 'Cl' },
+    { id: 'A', label: 'A (m²)' },
+    { id: 'v', label: 'v (m/s)' },
+  ],
+  defaultData: { blockType: 'veh.aero.downforce', label: 'Aero Downforce' },
+  proOnly: true,
+  description: 'Aerodynamic downforce: F = 0.5 × ρ × Cl × A × v².',
+})
+
+reg({
+  type: 'veh.aero.balance',
+  label: 'Aero Balance',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'f_front', label: 'F front (N)' },
+    { id: 'f_total', label: 'F total (N)' },
+  ],
+  defaultData: { blockType: 'veh.aero.balance', label: 'Aero Balance' },
+  proOnly: true,
+  description: 'Front downforce percentage: F_front / F_total × 100.',
+})
+
+reg({
+  type: 'veh.powertrain.gearRatio',
+  label: 'Gear Ratio',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'torque', label: 'Torque (Nm)' },
+    { id: 'rpm', label: 'RPM' },
+    { id: 'ratio', label: 'Ratio' },
+  ],
+  defaultData: { blockType: 'veh.powertrain.gearRatio', label: 'Gear Ratio' },
+  proOnly: true,
+  description: 'Apply gear ratio: torque_out = torque × ratio, rpm_out = rpm / ratio.',
+})
+
+reg({
+  type: 'veh.powertrain.wheelSpeed',
+  label: 'Wheel Speed',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'rpm', label: 'RPM' },
+    { id: 'radius', label: 'Radius (m)' },
+    { id: 'ratio', label: 'Overall ratio' },
+  ],
+  defaultData: { blockType: 'veh.powertrain.wheelSpeed', label: 'Wheel Speed' },
+  proOnly: true,
+  description: 'Vehicle speed from engine RPM, tire radius, and overall gear ratio.',
+})
+
+reg({
+  type: 'veh.powertrain.drivetrainLoss',
+  label: 'Drivetrain Loss',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'power', label: 'Power (W)' },
+    { id: 'efficiency', label: 'η' },
+  ],
+  defaultData: { blockType: 'veh.powertrain.drivetrainLoss', label: 'Drivetrain Loss' },
+  proOnly: true,
+  description: 'Apply drivetrain efficiency: P_out = P_in × η.',
+})
+
 // ── H5-1: Custom function block dynamic registration ────────────────────────
 
 import type { CustomFunction } from '../lib/customFunctions'

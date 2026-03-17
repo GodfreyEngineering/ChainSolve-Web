@@ -8,4 +8,6 @@
 //! - Milliken & Milliken, "Race Car Vehicle Dynamics" (1995)
 //! - Dixon, "Suspension Geometry and Computation" (2009)
 
+pub mod aero;
+pub mod powertrain;
 pub mod tire;

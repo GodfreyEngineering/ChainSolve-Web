@@ -3443,6 +3443,53 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Vehicle Aero ──────────────────────────────────────────────
+
+        "veh.aero.drag" => {
+            let rho = scalar_or_nan(inputs, "rho");
+            let cd = scalar_or_nan(inputs, "Cd");
+            let area = scalar_or_nan(inputs, "A");
+            let v = scalar_or_nan(inputs, "v");
+            Value::scalar(crate::vehicle::aero::drag_force(rho, cd, area, v))
+        }
+
+        "veh.aero.downforce" => {
+            let rho = scalar_or_nan(inputs, "rho");
+            let cl = scalar_or_nan(inputs, "Cl");
+            let area = scalar_or_nan(inputs, "A");
+            let v = scalar_or_nan(inputs, "v");
+            Value::scalar(crate::vehicle::aero::downforce(rho, cl, area, v))
+        }
+
+        "veh.aero.balance" => {
+            let f_front = scalar_or_nan(inputs, "f_front");
+            let f_total = scalar_or_nan(inputs, "f_total");
+            Value::scalar(crate::vehicle::aero::aero_balance(f_front, f_total))
+        }
+
+        // ── Vehicle Powertrain ───────────────────────────────────────
+
+        "veh.powertrain.gearRatio" => {
+            let torque = scalar_or_nan(inputs, "torque");
+            let rpm = scalar_or_nan(inputs, "rpm");
+            let ratio = scalar_or_nan(inputs, "ratio");
+            let (t_out, rpm_out) = crate::vehicle::powertrain::gear_ratio(torque, rpm, ratio);
+            Value::Vector { value: vec![t_out, rpm_out] }
+        }
+
+        "veh.powertrain.wheelSpeed" => {
+            let rpm = scalar_or_nan(inputs, "rpm");
+            let radius = scalar_or_nan(inputs, "radius");
+            let ratio = scalar_or_nan(inputs, "ratio");
+            Value::scalar(crate::vehicle::powertrain::wheel_speed(rpm, radius, ratio))
+        }
+
+        "veh.powertrain.drivetrainLoss" => {
+            let power = scalar_or_nan(inputs, "power");
+            let efficiency = scalar_or_nan(inputs, "efficiency");
+            Value::scalar(crate::vehicle::powertrain::drivetrain_loss(power, efficiency))
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }
