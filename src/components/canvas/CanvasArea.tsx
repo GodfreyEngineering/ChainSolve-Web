@@ -102,6 +102,7 @@ import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard, pasteFromSystemClipboard } from '../../lib/clipboard'
 import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
 import { parseCSVToTableData, parseNpyToTableData } from '../../lib/csvParser'
+import { computeDatasetHash } from '../../lib/datasetHash'
 import { CommandPalette, type PaletteCommand } from './CommandPalette'
 import { FormulaBar } from './FormulaBar'
 import type { FormulaUpstreamVar } from './FormulaBar'
@@ -1462,7 +1463,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         if (nameLower.endsWith('.npy')) {
           const position = screenToFlowPosition({ x: e.clientX, y: e.clientY })
           const reader = new FileReader()
-          reader.onload = (ev) => {
+          reader.onload = async (ev) => {
             const buf = ev.target?.result
             if (!(buf instanceof ArrayBuffer)) return
             try {
@@ -1471,6 +1472,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 toast('Could not parse .npy file: unsupported dtype or shape', 'error')
                 return
               }
+              const datasetHash = await computeDatasetHash(tableData)
               const id = `node_${++nodeIdCounter}`
               doSaveHistory()
               setNodes((nds) => [
@@ -1483,6 +1485,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                     blockType: 'matrixInput',
                     label: file.name.replace(/\.npy$/i, ''),
                     tableData,
+                    datasetHash,
                   },
                 } as Node<NodeData>,
               ])
@@ -1510,10 +1513,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           }
           const position = screenToFlowPosition({ x: e.clientX, y: e.clientY })
           const reader = new FileReader()
-          reader.onload = (ev) => {
+          reader.onload = async (ev) => {
             const text = ev.target?.result
             if (typeof text !== 'string') return
             const tableData = parseCSVToTableData(text)
+            const datasetHash = await computeDatasetHash(tableData)
             const id = `node_${++nodeIdCounter}`
             doSaveHistory()
             setNodes((nds) => [
@@ -1526,6 +1530,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   blockType: 'tableInput',
                   label: file.name.replace(/\.csv$/i, ''),
                   tableData,
+                  datasetHash,
                 },
               } as Node<NodeData>,
             ])
@@ -2302,19 +2307,23 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       const screenY = rect ? rect.top + rect.height / 2 : window.innerHeight / 2
       const pos = screenToFlowPosition({ x: screenX, y: screenY })
       doSaveHistory()
-      setNodes((nds) => [
-        ...nds,
-        {
-          id,
-          type: 'csData',
-          position: { x: pos.x - 120, y: pos.y - tableRows.length * 14 },
-          data: {
-            blockType: 'tableInput',
-            label: 'Pasted Table',
-            tableData: { columns, rows: tableRows },
-          },
-        } as Node<NodeData>,
-      ])
+      const tableData = { columns, rows: tableRows }
+      computeDatasetHash(tableData).then((datasetHash) => {
+        setNodes((nds) => [
+          ...nds,
+          {
+            id,
+            type: 'csData',
+            position: { x: pos.x - 120, y: pos.y - tableRows.length * 14 },
+            data: {
+              blockType: 'tableInput',
+              label: 'Pasted Table',
+              tableData,
+              datasetHash,
+            },
+          } as Node<NodeData>,
+        ])
+      })
     }
     document.addEventListener('paste', onPaste)
     return () => document.removeEventListener('paste', onPaste)

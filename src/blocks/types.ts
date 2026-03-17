@@ -175,6 +175,8 @@ export interface NodeData extends Record<string, unknown> {
   vectorData?: number[]
   /** Table data for tableInput / csvImport nodes. */
   tableData?: { columns: string[]; rows: number[][] }
+  /** SHA-256 hex digest of the imported dataset content (4.22 — reproducibility). */
+  datasetHash?: string
   /** Storage path of an uploaded CSV file. */
   csvStoragePath?: string
   /** Plot visualization configuration (csPlot nodes). */

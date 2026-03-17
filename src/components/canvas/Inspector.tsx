@@ -1398,6 +1398,49 @@ export function Inspector({
               </div>
             )}
 
+            {/* SHA-256 dataset hash (4.22 — reproducibility) */}
+            {nd.datasetHash && (
+              <div style={{ marginTop: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                  <span style={{ ...fieldLabel, fontSize: '0.6rem' }}>
+                    SHA-256 hash
+                  </span>
+                  <button
+                    type="button"
+                    style={{
+                      fontSize: '0.6rem',
+                      padding: '0.1rem 0.35rem',
+                      borderRadius: 4,
+                      border: '1px solid var(--border)',
+                      background: 'transparent',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                    }}
+                    onClick={() => navigator.clipboard.writeText(nd.datasetHash as string).catch(() => {})}
+                    title="Copy full SHA-256 hash"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '0.58rem',
+                    color: 'var(--text-faint)',
+                    wordBreak: 'break-all',
+                    padding: '0.2rem 0.35rem',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: 4,
+                    userSelect: 'all',
+                  }}
+                  title={nd.datasetHash as string}
+                >
+                  {(nd.datasetHash as string).slice(0, 16)}…{(nd.datasetHash as string).slice(-16)}
+                </div>
+              </div>
+            )}
+
             {value && value.kind === 'vector' && value.value.length > 0 && (
               <div style={{ marginTop: '0.7rem' }}>
                 <div
