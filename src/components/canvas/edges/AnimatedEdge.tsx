@@ -37,6 +37,7 @@ import { getUnitMismatch, type UnitMismatch } from '../../../units/unitCompat'
 import { getUnitSymbol } from '../../../units/unitSymbols'
 import { useInferredUnits } from '../../../hooks/useInferredUnits'
 import type { NodeData } from '../../../blocks/types'
+import { useFlowHighlightStore } from '../../../stores/flowHighlightStore'
 
 function edgeStroke(v: Value | undefined): string {
   return getValueTypeColor(v)
@@ -85,6 +86,7 @@ function useEdgeUnitMismatch(sourceId: string, targetId: string): UnitMismatch |
 }
 
 function AnimatedEdgeInner({
+  id,
   sourceX,
   sourceY,
   targetX,
@@ -104,6 +106,11 @@ function AnimatedEdgeInner({
   const mismatch = useEdgeUnitMismatch(source, target)
   const stroke = edgeStroke(sourceValue)
   const allNodes = useNodes()
+
+  // 3.39: Data flow highlighting — dim this edge when another path is highlighted
+  const highlightedEdgeIds = useFlowHighlightStore((s) => s.highlightedEdgeIds)
+  const isHighlightActive = highlightedEdgeIds.size > 0
+  const isOnHighlightedPath = isHighlightActive && highlightedEdgeIds.has(id)
 
   // 3.20: Hover state for data-shape label
   const [hovered, setHovered] = useState(false)
@@ -125,6 +132,7 @@ function AnimatedEdgeInner({
   }, [allNodes, source])
 
   // Edge color: value-kind default, yellow warnings, red errors, primary when selected
+  // 3.39: When a highlight is active, dim non-highlighted edges and boost highlighted ones
   const effectiveStroke = mismatch
     ? mismatch.sameDimension
       ? 'var(--warning)' // yellow — same dimension, convertible
@@ -132,6 +140,16 @@ function AnimatedEdgeInner({
     : selected
       ? 'var(--primary)'
       : stroke
+
+  const highlightOpacity = isHighlightActive && !isOnHighlightedPath ? 0.12 : 1
+  const baseWidth = typeof style?.strokeWidth === 'number' ? style.strokeWidth : edgeWidth
+  const highlightStrokeWidth = isOnHighlightedPath
+    ? Math.max(selected ? 3 : mismatch ? 2 : baseWidth, 2.5)
+    : selected
+      ? 3
+      : mismatch
+        ? 2
+        : baseWidth
 
   const [edgePath, labelX, labelY] =
     edgeType === 'straight'
@@ -183,9 +201,16 @@ function AnimatedEdgeInner({
         style={{
           ...style,
           stroke: effectiveStroke,
-          strokeWidth: selected ? 3 : mismatch ? 2 : (style?.strokeWidth ?? edgeWidth),
+          strokeWidth: highlightStrokeWidth,
           strokeDasharray: mismatch ? '6 3' : undefined,
-          filter: selected ? `drop-shadow(0 0 4px ${effectiveStroke})` : undefined,
+          opacity: highlightOpacity,
+          filter:
+            isOnHighlightedPath
+              ? `drop-shadow(0 0 3px ${effectiveStroke})`
+              : selected
+                ? `drop-shadow(0 0 4px ${effectiveStroke})`
+                : undefined,
+          transition: 'opacity 0.15s ease, stroke-width 0.1s ease',
         }}
       />
       {/* H1-2: Unit mismatch warning badge */}

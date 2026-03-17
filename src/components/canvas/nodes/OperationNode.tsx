@@ -29,13 +29,14 @@ import { ValueEditor } from '../editors/ValueEditor'
 import { getUnitSymbol } from '../../../units/unitSymbols'
 import { getConversionFactor, areSameDimension } from '../../../units/unitCompat'
 import { useInferredUnits } from '../../../hooks/useInferredUnits'
-import { NODE_STYLES as s, userColorBg } from './nodeStyles'
+import { NODE_STYLES as s, userColorBg, HANDLE_SIZE } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon, getCategoryDomainColor } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
 import { useValueFlash } from '../../../hooks/useValueFlash'
 import { getPortUnitHint } from '../../../blocks/portUnitHints'
 import { usePreferencesStore } from '../../../stores/preferencesStore'
 import { getValueTypeColor } from '../../../engine/portTypeColors'
+import { useFlowHighlightStore } from '../../../stores/flowHighlightStore'
 
 // SCI-06: Trig ops that are affected by the angle unit preference.
 // Forward trig (sin/cos/tan): input is an angle.
@@ -52,6 +53,17 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const nd = data as NodeData
   const { updateNodeData } = useReactFlow()
   const allEdges = useEdges()
+
+  // 3.39: Data flow highlighting — activate on port hover
+  const setHighlightedPort = useFlowHighlightStore((s) => s.setHighlightedPort)
+  const clearHighlight = useFlowHighlightStore((s) => s.clearHighlight)
+  const handlePortMouseEnter = useCallback(
+    (portId: string, portType: 'source' | 'target') => {
+      setHighlightedPort(id, portId, portType, allEdges)
+    },
+    [id, allEdges, setHighlightedPort],
+  )
+  const handlePortMouseLeave = useCallback(() => clearHighlight(), [clearHighlight])
   const value = useComputedValue(id)
   const showPopover = useShowValuePopover()
   const { t } = useTranslation()
@@ -288,6 +300,8 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
           return (
             <div
               key={port.id}
+              onMouseEnter={() => handlePortMouseEnter(port.id, 'target')}
+              onMouseLeave={handlePortMouseLeave}
               style={{
                 position: 'absolute',
                 top: topPx,
@@ -465,17 +479,36 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
         )}
 
         {/* Output handle — right edge, vertically centred */}
-        <Handle
-          type="source"
-          position={Position.Right}
-          id="out"
+        {/* 3.39: onMouseEnter/Leave on a wrapper div since Handle SVG doesn't bubble consistently */}
+        <div
+          onMouseEnter={() => handlePortMouseEnter('out', 'source')}
+          onMouseLeave={handlePortMouseLeave}
           style={{
-            ...s.handleRight,
-            background: getValueTypeColor(value),
+            position: 'absolute',
             top: '50%',
+            right: -(HANDLE_SIZE / 2 + 2),
             transform: 'translateY(-50%)',
+            width: HANDLE_SIZE + 4,
+            height: HANDLE_SIZE + 4,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-        />
+        >
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="out"
+            style={{
+              ...s.handleRight,
+              background: getValueTypeColor(value),
+              position: 'relative',
+              top: 'auto',
+              right: 'auto',
+              transform: 'none',
+            }}
+          />
+        </div>
         {/* 4.04+4.05: Unit badge next to output handle (explicit or inferred) */}
         {(nd.unit || inferredUnit?.unit) && (
           <span
