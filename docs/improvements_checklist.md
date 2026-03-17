@@ -37,25 +37,25 @@ Evaluation is **reactive**: fires once when inputs/blocks/chains change, never c
 ### 1A — Simplify EvalScheduler
 
 - [x] **1.1** `EvalScheduler` class created in `src/engine/evalScheduler.ts`
-- [ ] **1.2** [REWORK] Change `EvalMode` type from `'auto' | 'deferred' | 'manual'` to `'reactive' | 'manual'`
-- [ ] **1.3** [REWORK] Remove `_scheduleDeferred()` method and all `requestIdleCallback` / idle-fallback logic
-- [ ] **1.4** [REWORK] Rename `_scheduleAuto()` to `_scheduleReactive()` — structural changes fire immediately, data-only changes debounce 50ms for keystroke coalescing then fire once
-- [ ] **1.5** [REWORK] Remove `suggestEvalMode()` — no auto-detection by node count. Default is always `'reactive'`
-- [ ] **1.6** [REWORK] Update constructor default from `'auto'` to `'reactive'`
-- [ ] **1.7** [REWORK] Update all 15 evalScheduler tests: replace `'auto'` with `'reactive'`, remove deferred tests, add reactive-specific tests
+- [x] **1.2** [REWORK] Change `EvalMode` type from `'auto' | 'deferred' | 'manual'` to `'reactive' | 'manual'`
+- [x] **1.3** [REWORK] Remove `_scheduleDeferred()` method and all `requestIdleCallback` / idle-fallback logic
+- [x] **1.4** [REWORK] Rename `_scheduleAuto()` to `_scheduleReactive()` — structural changes fire immediately, data-only changes debounce 50ms for keystroke coalescing then fire once
+- [x] **1.5** [REWORK] Remove `suggestEvalMode()` — no auto-detection by node count. Default is always `'reactive'`
+- [x] **1.6** [REWORK] Update constructor default from `'auto'` to `'reactive'`
+- [x] **1.7** [REWORK] Update all evalScheduler tests: reactive/manual modes, coalescing, dispose, mode switching
 
 ### 1B — Update useGraphEngine
 
 - [x] **1.8** `useGraphEngine` refactored to use scheduler
 - [x] **1.9** `triggerEval` callback in return value
 - [x] **1.10** `pendingPatchCount` in return value
-- [ ] **1.11** [REWORK] Update `evalMode` parameter type to `'reactive' | 'manual'`
+- [x] **1.11** [REWORK] Update `evalMode` parameter type to `'reactive' | 'manual'`
 
 ### 1C — Simplify CanvasToolbar
 
 - [x] **1.12** Run button added to toolbar
-- [ ] **1.13** [REWORK] Always show Run button (useful for force-refresh in both modes). Remove Zap auto-run indicator entirely.
-- [ ] **1.14** [REWORK] Remove `evalMode` and mode-switching from toolbar props — no user-facing mode selection
+- [x] **1.13** [REWORK] Always show Run button (useful for force-refresh in both modes). Remove Zap auto-run indicator entirely.
+- [x] **1.14** [REWORK] Remove `evalMode` and mode-switching from toolbar props — no user-facing mode selection
 - [x] **1.15** Ctrl+Enter / F5 keyboard shortcuts wired
 - [x] **1.16** i18n keys added across all 7 locales
 
@@ -72,10 +72,10 @@ Evaluation is **reactive**: fires once when inputs/blocks/chains change, never c
 ### 1E — Status Bar & Stale Tracking
 
 - [x] **1.24** `statusBarStore` has `evalMode`, `isStale`, `lastEvalMs`, `lastEvalNodeCount`, `pendingPatchCount`
-- [ ] **1.25** [REWORK] Update `EvalMode` type in statusBarStore to `'reactive' | 'manual'`, migrate stored `'auto'`/`'deferred'` values
+- [x] **1.25** [REWORK] Update `EvalMode` type in statusBarStore to `'reactive' | 'manual'`, migrate stored `'auto'`/`'deferred'` values
 - [x] **1.26** `useGraphEngine` sets `isStale=true` on enqueue, `isStale=false` after eval
 - [x] **1.27** `StatusBar.tsx` shows timing, stale state, mode indicator
-- [ ] **1.28** [REWORK] Remove "Deferred" status text. Show "Reactive" or "Manual" only.
+- [x] **1.28** [REWORK] Remove "Deferred" status text. Show "Manual" only when set.
 
 ---
 
