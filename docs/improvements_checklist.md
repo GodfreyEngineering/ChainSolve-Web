@@ -341,24 +341,24 @@ When dragging a block near another, show ghost highlight of snap position before
 
 ### 10A — Snap Detection
 
-- [ ] **10.1** Create `src/hooks/useBlockSnapping.ts` — calculate snap targets from block positions/dimensions
-- [ ] **10.2** Snap zones: right-to-left (horizontal chain), bottom-to-top (vertical), center-align H/V
-- [ ] **10.3** Snap threshold: 20px (configurable)
-- [ ] **10.4** During drag, compute nearest snap target for each side
-- [ ] **10.5** Return adjusted position + snap guide metadata
+- [x] **10.1** Create `src/hooks/useBlockSnapping.ts` — snap detection engine with 6 snap zones
+- [x] **10.2** Snap zones: right→left (horizontal chain, 12px gap), bottom→top (vertical), center-align H/V
+- [x] **10.3** Snap threshold: 20px default (configurable via hook parameter)
+- [x] **10.4** `computeSnap()` finds nearest snap target across all non-annotation/group nodes
+- [x] **10.5** Returns `{ x, y, snapped, guides }` with SnapGuide metadata for rendering
 
 ### 10B — Visual Guides
 
-- [ ] **10.6** Create `src/components/canvas/SnapGuides.tsx` — alignment guide lines on canvas
-- [ ] **10.7** Ghost highlight: semi-transparent outline at snap position while dragging near target
-- [ ] **10.8** Guide lines: thin cyan (#1CABB0) lines extending across canvas when blocks aligned
-- [ ] **10.9** Snap feedback: subtle animation when block snaps
+- [x] **10.6** Create `src/components/canvas/SnapGuides.tsx` — SVG overlay rendering alignment guide lines
+- [ ] **10.7** Ghost highlight: semi-transparent outline at snap position *(deferred — guide lines sufficient for v1)*
+- [x] **10.8** Guide lines: thin cyan (#1CABB0) dashed lines when blocks aligned
+- [ ] **10.9** Snap feedback animation *(deferred)*
 
 ### 10C — Integration
 
-- [ ] **10.10** Wire into `CanvasArea.tsx` `onNodeDrag` — adjust position in real-time
-- [ ] **10.11** "Magnetic snap" toggle in CanvasToolbar (separate from grid snap)
-- [ ] **10.12** Persist toggle in localStorage
+- [x] **10.10** Wire into `CanvasArea.tsx` `onNodeDrag` — adjusts position in real-time during drag
+- [ ] **10.11** "Magnetic snap" toggle in CanvasToolbar *(deferred — state exists, UI toggle not yet added)*
+- [x] **10.12** Persist toggle in localStorage (`cs:magneticSnap`)
 - [ ] **10.13** Works during multi-selection drag
 - [ ] **10.14** i18n keys across 7 locales
 - [ ] **10.15** Performance: snap computation < 2ms per frame with 500 blocks
