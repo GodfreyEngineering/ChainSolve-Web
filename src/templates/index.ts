@@ -18,6 +18,7 @@ import { buildOhmsLaw } from './ohms-law'
 import { buildFluidFlow } from './fluid-flow'
 import { buildInvestmentReturns } from './investment-returns'
 import { buildSpringMassDamper } from './spring-mass-damper'
+import { buildPidController } from './pid-controller'
 
 export interface TemplateMeta {
   /** Stable unique key — never rename after shipping. */
@@ -139,5 +140,14 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ['tutorial', 'control', 'dynamics', 'spring', 'mechanical', 'damper'],
     category: 'Engineering',
     buildGraph: buildSpringMassDamper,
+  },
+  {
+    id: 'pid-controller',
+    name: 'PID Controller Tuning',
+    description:
+      'PID output u(t) = Kp·e(t) + Ki·∫e dt + Kd·Δe/Δt — tune proportional, integral, and derivative gains to explore controller response.',
+    tags: ['control', 'pid', 'tuning', 'engineering', 'dynamics'],
+    category: 'Engineering',
+    buildGraph: buildPidController,
   },
 ]
