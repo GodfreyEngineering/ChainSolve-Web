@@ -8,3 +8,4 @@ pub mod activation;
 pub mod model;
 pub mod train;
 pub mod export;
+pub mod lr_schedule;
