@@ -235,4 +235,24 @@ export const NODE_STYLES = {
     whiteSpace: 'nowrap' as const,
     pointerEvents: 'none' as const,
   } as CSSProperties,
+
+  // Phase 12: Stale node overlay — applied when graph changed since last eval
+  staleOverlay: {
+    opacity: 0.5,
+    filter: 'grayscale(30%)',
+    borderStyle: 'dashed',
+  } as CSSProperties,
+
+  // Phase 12: Error badge — small red dot in top-right corner
+  errorBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 10,
+    height: 10,
+    borderRadius: '50%',
+    background: 'var(--danger, #ef4444)',
+    border: '2px solid var(--node-bg)',
+    zIndex: 10,
+  } as CSSProperties,
 }
