@@ -477,6 +477,122 @@ function buildSpec(
       }
       break
     }
+
+    case 'bode': {
+      // Bode plot: magnitude (dB) + phase (deg) vs frequency on log x-axis.
+      // Expects a Table with columns: freq (Hz or rad/s), mag_dB, phase_deg.
+      // If only 2 columns, treats col 0 as freq and col 1 as magnitude.
+      const freqField = config.xColumn ?? data.columns[0] ?? 'freq'
+      const magField = config.yColumns?.[0] ?? data.columns[1] ?? 'mag_dB'
+      const phaseField = config.yColumns?.[1] ?? data.columns[2]
+
+      const freqEnc = {
+        field: freqField,
+        type: 'quantitative' as const,
+        scale: { type: 'log' as const },
+        title: config.xLabel ?? 'Frequency',
+        axis: { grid: config.showGrid ?? true },
+      }
+
+      if (phaseField) {
+        // Two-panel Bode: magnitude top, phase bottom via vconcat
+        base.vconcat = [
+          {
+            height: Math.round(height * 0.55),
+            mark: { type: 'line', strokeWidth: theme.lineWidth, color: '#1CABB0' },
+            encoding: {
+              x: { ...freqEnc, axis: { ...freqEnc.axis, labels: false, title: null } },
+              y: { field: magField, type: 'quantitative', title: config.yLabel ?? 'Magnitude (dB)', axis: { grid: config.showGrid ?? true } },
+              tooltip: [
+                { field: freqField, title: 'Freq', format: '.3g' },
+                { field: magField, title: 'Mag (dB)', format: '.2f' },
+              ],
+            },
+          },
+          {
+            height: Math.round(height * 0.35),
+            mark: { type: 'line', strokeWidth: theme.lineWidth, color: '#f472b6' },
+            encoding: {
+              x: freqEnc,
+              y: { field: phaseField, type: 'quantitative', title: 'Phase (deg)', axis: { grid: config.showGrid ?? true } },
+              tooltip: [
+                { field: freqField, title: 'Freq', format: '.3g' },
+                { field: phaseField, title: 'Phase (°)', format: '.1f' },
+              ],
+            },
+          },
+        ]
+        base.resolve = { scale: { x: 'shared' } }
+        delete base.width
+        delete base.height
+      } else {
+        // Single-panel: just magnitude
+        base.mark = { type: 'line', strokeWidth: theme.lineWidth, color: '#1CABB0' }
+        base.encoding = {
+          x: freqEnc,
+          y: { field: magField, type: 'quantitative', title: config.yLabel ?? 'Magnitude (dB)', axis: { grid: config.showGrid ?? true } },
+          tooltip: [
+            { field: freqField, title: 'Freq', format: '.3g' },
+            { field: magField, title: 'Mag (dB)', format: '.2f' },
+          ],
+        }
+      }
+      break
+    }
+
+    case 'nyquist': {
+      // Nyquist plot: Re(G(jω)) vs Im(G(jω)).
+      // Expects a Table with columns: re, im (and optionally freq for tooltip).
+      // Also draws the unit circle for reference and marks the -1+0j point.
+      const reField = config.xColumn ?? data.columns[0] ?? 're'
+      const imField = config.yColumns?.[0] ?? data.columns[1] ?? 'im'
+      const freqTooltip = data.columns[2]
+        ? [{ field: data.columns[2], title: 'Freq', format: '.3g' }]
+        : []
+
+      // Main locus + -1 point reference
+      base.layer = [
+        // Nyquist locus
+        {
+          mark: { type: 'line', strokeWidth: theme.lineWidth, color: '#1CABB0' },
+          encoding: {
+            x: { field: reField, type: 'quantitative', scale: xScale, title: config.xLabel ?? 'Re[G(jω)]', axis: { grid: config.showGrid ?? true } },
+            y: { field: imField, type: 'quantitative', scale: yScale, title: config.yLabel ?? 'Im[G(jω)]', axis: { grid: config.showGrid ?? true } },
+            tooltip: [
+              { field: reField, title: 'Re', format: '.4f' },
+              { field: imField, title: 'Im', format: '.4f' },
+              ...freqTooltip,
+            ],
+          },
+        },
+        // Critical point marker at (-1, 0)
+        {
+          data: { values: [{ re: -1, im: 0 }] },
+          mark: { type: 'point', shape: 'cross', size: 80, color: '#ef4444', strokeWidth: 2 },
+          encoding: {
+            x: { field: 're', type: 'quantitative' },
+            y: { field: 'im', type: 'quantitative' },
+          },
+        },
+        // Unit circle reference
+        {
+          data: {
+            values: Array.from({ length: 361 }, (_, i) => ({
+              re: Math.cos((i * Math.PI) / 180),
+              im: Math.sin((i * Math.PI) / 180),
+            })),
+          },
+          mark: { type: 'line', color: '#6b7280', strokeDash: [4, 4], strokeWidth: 0.8, opacity: 0.5 },
+          encoding: {
+            x: { field: 're', type: 'quantitative' },
+            y: { field: 'im', type: 'quantitative' },
+          },
+        },
+      ]
+      delete base.mark
+      delete base.encoding
+      break
+    }
   }
 
   // Grid

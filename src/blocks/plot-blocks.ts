@@ -95,6 +95,54 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'bodePlot',
+    label: 'Bode Plot',
+    category: 'plot',
+    nodeKind: 'csPlot',
+    inputs: [{ id: 'data', label: 'Data' }],
+    proOnly: true,
+    description:
+      'Bode plot for control systems: magnitude (dB) vs frequency on a log axis, with optional phase panel below. Expects a Table with columns: freq, mag_dB, and optionally phase_deg.',
+    defaultData: {
+      blockType: 'bodePlot',
+      label: 'Bode Plot',
+      plotConfig: {
+        chartType: 'bode',
+        showGrid: true,
+        showLegend: false,
+        legendPosition: 'right',
+        themePreset: 'paper-single',
+        xLabel: 'Frequency (rad/s)',
+        yLabel: 'Magnitude (dB)',
+      } satisfies PlotConfig,
+    },
+  })
+
+  register({
+    type: 'nyquistPlot',
+    label: 'Nyquist Plot',
+    category: 'plot',
+    nodeKind: 'csPlot',
+    inputs: [{ id: 'data', label: 'Data' }],
+    proOnly: true,
+    description:
+      'Nyquist plot: real part vs imaginary part of G(jω). Expects a Table with columns re, im (and optionally freq for tooltip). Includes a unit-circle reference and critical point marker at (−1, 0).',
+    defaultData: {
+      blockType: 'nyquistPlot',
+      label: 'Nyquist Plot',
+      plotConfig: {
+        chartType: 'nyquist',
+        showGrid: true,
+        showLegend: false,
+        legendPosition: 'right',
+        themePreset: 'paper-single',
+        xLabel: 'Re[G(jω)]',
+        yLabel: 'Im[G(jω)]',
+      } satisfies PlotConfig,
+    },
+  })
+
+  register({
     type: 'boxPlot',
     label: 'Box Plot',
     category: 'plot',

@@ -482,6 +482,8 @@
     "chartHistogram": "Histogramm",
     "chartBar": "Balken",
     "chartHeatmap": "Heatmap",
+    "chartBode": "Bode-Diagramm",
+    "chartNyquist": "Nyquist-Diagramm",
     "chartBoxplot": "Box-Plot",
     "chartViolin": "Violin-Plot",
     "chartParallelCoords": "Parallelkoordinaten",

@@ -1526,6 +1526,8 @@
     "chartHistogram": "Histogram",
     "chartBar": "Bar",
     "chartHeatmap": "Heatmap",
+    "chartBode": "Bode Plot",
+    "chartNyquist": "Nyquist Plot",
     "chartBoxplot": "Box Plot",
     "chartViolin": "Violin Plot",
     "chartParallelCoords": "Parallel Coordinates",

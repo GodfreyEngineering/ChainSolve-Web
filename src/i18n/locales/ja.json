@@ -490,6 +490,8 @@
     "chartHistogram": "Histogram",
     "chartBar": "Bar",
     "chartHeatmap": "Heatmap",
+    "chartBode": "ボード線図",
+    "chartNyquist": "ナイキスト線図",
     "chartBoxplot": "箱ひげ図",
     "chartViolin": "バイオリン図",
     "chartParallelCoords": "平行座標",
