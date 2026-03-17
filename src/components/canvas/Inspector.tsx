@@ -128,6 +128,22 @@ export function Inspector({
     import('../../blocks/blockDescriptions').then((m) => setDescriptions(m.BLOCK_DESCRIPTIONS))
   }, [])
 
+  // 9.13: Progressive disclosure — advanced section collapsed by default
+  const [showAdvanced, setShowAdvanced] = useState(() => {
+    try {
+      return localStorage.getItem('cs:inspAdvanced') === 'true'
+    } catch {
+      return false
+    }
+  })
+  const toggleAdvanced = () =>
+    setShowAdvanced((v) => {
+      try {
+        localStorage.setItem('cs:inspAdvanced', String(!v))
+      } catch {}
+      return !v
+    })
+
   // UX-08: What-if explorer state — tracks active temporary override per node
   const [whatIfState, setWhatIfState] = useState<{
     nodeId: string
@@ -462,71 +478,108 @@ export function Inspector({
                 }
               })()}
 
-            {/* H1-1: Unit picker — available for source, operation, display, and data nodes */}
-            {def?.nodeKind !== 'csPlot' &&
-              field(
-                t('units.unit'),
-                <Suspense fallback={null}>
-                  <LazyUnitPicker
-                    value={nd.unit as string | undefined}
-                    onChange={(unitId) => update({ unit: unitId })}
-                    suggestedDimension={suggestedDimension}
-                  />
-                </Suspense>,
-              )}
-
-            {/* 4.09: Accent color picker */}
-            {field(
-              t('inspector.accentColor', 'Accent Color'),
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input
-                  type="color"
-                  style={{
-                    width: 28,
-                    height: 22,
-                    padding: 0,
-                    border: 'none',
-                    cursor: 'pointer',
-                    background: 'none',
-                  }}
-                  value={(nd.userColor as string) ?? '#1cabb0'}
-                  onChange={(e) => update({ userColor: e.target.value })}
-                  title={t('inspector.accentColor', 'Accent Color')}
-                />
-                {nd.userColor && (
-                  <button
-                    type="button"
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text-faint)',
-                      cursor: 'pointer',
-                      fontSize: '0.65rem',
-                    }}
-                    onClick={() => update({ userColor: undefined })}
-                  >
-                    {t('inspector.resetColor', 'Reset')}
-                  </button>
-                )}
-              </div>,
-            )}
-
-            {/* 4.09: Node notes field */}
-            {field(
-              t('inspector.notes', 'Notes'),
-              <textarea
+            {/* 9.13: Progressive disclosure — Advanced toggle */}
+            <button
+              onClick={toggleAdvanced}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                background: 'transparent',
+                border: 'none',
+                color: 'rgba(244,244,243,0.35)',
+                cursor: 'pointer',
+                fontSize: '0.62rem',
+                fontWeight: 700,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                padding: '0.15rem 0',
+                marginBottom: showAdvanced ? '0.5rem' : '0.3rem',
+                fontFamily: 'inherit',
+              }}
+              title={showAdvanced ? 'Hide advanced settings' : 'Show advanced settings'}
+            >
+              <span
                 style={{
-                  ...inp,
-                  width: '100%',
-                  minHeight: 40,
-                  resize: 'vertical',
-                  fontFamily: 'inherit',
-                  fontSize: '0.72rem',
+                  display: 'inline-block',
+                  transition: 'transform 0.15s',
+                  transform: showAdvanced ? 'rotate(90deg)' : 'rotate(0deg)',
                 }}
-                value={(nd.nodeNotes as string) ?? ''}
-                onChange={(e) => update({ nodeNotes: e.target.value || undefined })}
-                placeholder={t('inspector.notesPlaceholder', 'Add notes about this block...')}
-              />,
+              >
+                ▶
+              </span>
+              Advanced
+            </button>
+
+            {showAdvanced && (
+              <>
+                {/* H1-1: Unit picker — available for source, operation, display, and data nodes */}
+                {def?.nodeKind !== 'csPlot' &&
+                  field(
+                    t('units.unit'),
+                    <Suspense fallback={null}>
+                      <LazyUnitPicker
+                        value={nd.unit as string | undefined}
+                        onChange={(unitId) => update({ unit: unitId })}
+                        suggestedDimension={suggestedDimension}
+                      />
+                    </Suspense>,
+                  )}
+
+                {/* 4.09: Accent color picker */}
+                {field(
+                  t('inspector.accentColor', 'Accent Color'),
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <input
+                      type="color"
+                      style={{
+                        width: 28,
+                        height: 22,
+                        padding: 0,
+                        border: 'none',
+                        cursor: 'pointer',
+                        background: 'none',
+                      }}
+                      value={(nd.userColor as string) ?? '#1cabb0'}
+                      onChange={(e) => update({ userColor: e.target.value })}
+                      title={t('inspector.accentColor', 'Accent Color')}
+                    />
+                    {nd.userColor && (
+                      <button
+                        type="button"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--text-faint)',
+                          cursor: 'pointer',
+                          fontSize: '0.65rem',
+                        }}
+                        onClick={() => update({ userColor: undefined })}
+                      >
+                        {t('inspector.resetColor', 'Reset')}
+                      </button>
+                    )}
+                  </div>,
+                )}
+
+                {/* 4.09: Node notes field */}
+                {field(
+                  t('inspector.notes', 'Notes'),
+                  <textarea
+                    style={{
+                      ...inp,
+                      width: '100%',
+                      minHeight: 40,
+                      resize: 'vertical',
+                      fontFamily: 'inherit',
+                      fontSize: '0.72rem',
+                    }}
+                    value={(nd.nodeNotes as string) ?? ''}
+                    onChange={(e) => update({ nodeNotes: e.target.value || undefined })}
+                    placeholder={t('inspector.notesPlaceholder', 'Add notes about this block...')}
+                  />,
+                )}
+              </>
             )}
 
             {/* Number source */}
