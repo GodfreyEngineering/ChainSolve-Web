@@ -468,7 +468,7 @@
 - [ ] **9.13** Progressive disclosure: simple blocks show minimal config by default. "Advanced" toggle reveals all parameters.
 - [ ] **9.14** MathSheet block: spreadsheet within node graph. Input ports → named variables. Cells support unit-aware formulas. Outputs computed columns. The Excel-killer feature.
 - [ ] **9.15** CodeBlock: inline Rust/Python with autocomplete, type inference, instant eval. Connected input variables available by name. Output auto-typed. The MATLAB-killer feature.
-- [ ] **9.16** Contextual help: hover over block in search palette → 3-sentence description + animated GIF preview
+- [x] **9.16** Contextual help: hover over block in search palette → 3-sentence description + animated GIF preview
 
 ---
 
