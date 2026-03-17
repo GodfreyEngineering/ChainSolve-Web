@@ -301,7 +301,7 @@
 - [x] **3.14** Variadic blocks: detect via def.variadic, render dynamic input handles (in_0..in_N based on dynamicInputCount). "+" button to add port, "×" to remove beyond minInputs. Body height adjusts. Non-variadic blocks render static a/b ports.
 - [x] **3.15** Port type colours: float=blue, vector=green, matrix=purple, signal=orange, physical=red, string=gray, boolean=yellow, any=white — visual distinction helps users understand data flow at a glance
 - [x] **3.16** Port type compatibility: incompatible connections show red snap indicator, compatible show green — prevent wiring errors before they happen
-- [ ] **3.17** Auto type coercion indicators: when scalar→vector broadcast happens, show a small "↗" icon on the port to indicate the coercion
+- [x] **3.17** Auto type coercion indicators: when scalar→vector broadcast happens, show a small "↗" icon on the port to indicate the coercion
 - [ ] **3.18** Inline value display upgrades: vectors show sparkline (tiny line chart), matrices show heatmap thumbnail (colour-coded density), signals show waveform preview, booleans show LED indicator (green/red)
 - [x] **3.19** Double-click node → open full config panel as side sheet (slide from right, 400px wide) instead of requiring separate inspector — faster workflow
 - [x] **3.20** Edge labels: on hover, show data shape label ("[3×3]", "[1024]", "5.23 N") — understand data flow without clicking
