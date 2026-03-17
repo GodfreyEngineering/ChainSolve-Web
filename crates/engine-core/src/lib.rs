@@ -35,6 +35,7 @@ pub mod ode;
 pub mod ops;
 pub mod optim;
 pub mod precision;
+pub mod sparse;
 pub mod vehicle;
 pub mod types;
 pub mod validate;
