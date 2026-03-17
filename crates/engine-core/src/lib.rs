@@ -41,6 +41,7 @@ pub mod rng;
 pub mod rootfinding;
 pub mod sparse;
 pub mod sparse_solvers;
+pub mod symbolic;
 pub mod vehicle;
 pub mod types;
 pub mod validate;
