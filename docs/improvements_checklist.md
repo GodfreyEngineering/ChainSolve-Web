@@ -85,13 +85,13 @@ Operator blocks (add, multiply, max, min, etc.) currently have exactly 2 inputs.
 
 ### 2A — Rust Engine Variadic Support
 
-- [ ] **2.1** Add `variadic: bool`, `min_inputs: Option<u32>`, `max_inputs: Option<u32>` fields to `CatalogEntry` in `catalog.rs`
-- [ ] **2.2** Mark ops as variadic in the catalog: `add`, `multiply`, `max`, `min`, `vec.concat`, `text.concat` — with `min_inputs: 2, max_inputs: 64`
-- [ ] **2.3** Create `nary_broadcast()` in `ops.rs` — applies a binary associative op across N inputs (`in_0`, `in_1`, ..., `in_N`) by left-fold with broadcasting
-- [ ] **2.4** Create `nary_reduce()` in `ops.rs` — similar for non-broadcasting scalar reduction (max/min across many scalars)
-- [ ] **2.5** Update `add`, `multiply`, `max`, `min` match arms: if inputs contain `in_0`, use nary path; else fall back to existing `binary_broadcast` with `a`/`b` for backward compatibility
-- [ ] **2.6** Update `validate_pre_eval()` to skip fixed-port validation for variadic ops
-- [ ] **2.7** Unit tests: add with 3, 5, 10 inputs; multiply with 3; max/min with 4; scalar+vector mixing
+- [x] **2.1** Add `variadic: Option<bool>`, `min_inputs: Option<u32>`, `max_inputs: Option<u32>` fields to `CatalogEntry` in `catalog.rs`. Converted all 347 entries to use `entry()`/`variadic_entry()` helpers.
+- [x] **2.2** Mark ops as variadic: `add`, `multiply`, `max`, `min`, `vectorConcat`, `text_concat` — `min_inputs: 2, max_inputs: 64`
+- [x] **2.3** Create `nary_broadcast()` in `ops.rs` — left-fold with broadcasting across `in_0`..`in_N`, falls back to `a`/`b` for backward compat
+- [x] **2.4** `nary_broadcast` handles both scalar reduction and vector broadcasting via `binary_broadcast_two_values()` helper
+- [x] **2.5** Updated `add`, `multiply`, `max`, `min` match arms to use `nary_broadcast`
+- [ ] **2.6** Update `validate_pre_eval()` to skip fixed-port validation for variadic ops *(deferred — validation already works with variadic since it checks catalog inputs which list the default a/b ports)*
+- [x] **2.7** 8 unit tests: add with 3/5/10 inputs, multiply with 3, max/min with 4, scalar+vector mix, backward compat
 - [ ] **2.8** Golden fixtures: `variadic_add.fixture.json`, `variadic_multiply.fixture.json`
 
 ### 2B — TypeScript Variadic Support
