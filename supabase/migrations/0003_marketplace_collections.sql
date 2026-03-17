@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS public.marketplace_collections (
 );
 
 -- Trigger for updated_at
+DROP TRIGGER IF EXISTS set_marketplace_collections_updated_at ON public.marketplace_collections;
 CREATE TRIGGER set_marketplace_collections_updated_at
   BEFORE UPDATE ON public.marketplace_collections
   FOR EACH ROW
@@ -22,6 +23,7 @@ CREATE TRIGGER set_marketplace_collections_updated_at
 -- RLS: public read, service_role write
 ALTER TABLE public.marketplace_collections ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS marketplace_collections_read ON public.marketplace_collections;
 CREATE POLICY marketplace_collections_read
   ON public.marketplace_collections
   FOR SELECT
