@@ -496,6 +496,7 @@
     "chartViolin": "バイオリン図",
     "chartParallelCoords": "平行座標",
     "chartContour": "等高線 / 密度",
+    "chartPareto": "パレートフロント",
     "exportSvg": "SVG",
     "exportPng": "PNG",
     "exportCsv": "CSV",

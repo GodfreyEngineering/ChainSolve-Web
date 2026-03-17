@@ -1532,6 +1532,7 @@
     "chartViolin": "Violin Plot",
     "chartParallelCoords": "Parallel Coordinates",
     "chartContour": "Contour / Density",
+    "chartPareto": "חזית פארטו",
     "exportCsv": "CSV",
     "openInTab": "Open SVG in tab",
     "pngScale": "PNG Scale",

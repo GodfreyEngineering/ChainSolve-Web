@@ -488,6 +488,7 @@
     "chartViolin": "Gráfico de violín",
     "chartParallelCoords": "Coordenadas paralelas",
     "chartContour": "Contorno / Densidad",
+    "chartPareto": "Frente de Pareto",
     "exportSvg": "SVG",
     "exportPng": "PNG",
     "exportCsv": "CSV",

@@ -683,6 +683,113 @@ function buildSpec(
       delete base.encoding
       break
     }
+
+    case 'pareto': {
+      // 6.11: Pareto front plot — scatter with Pareto-optimal points highlighted.
+      // Input: 2-column table [x, y] where lower values are assumed to be better
+      // (minimization sense). Pareto-optimal points are rendered larger in cyan.
+      const xField = config.xColumn ?? data.columns[0] ?? 'x'
+      const yField = config.yColumns?.[0] ?? data.columns[1] ?? data.columns[0] ?? 'y'
+
+      // Compute Pareto front client-side: a point p dominates q iff
+      // p.x <= q.x AND p.y <= q.y with at least one strict inequality (minimisation).
+      const pts = data.values as Record<string, number>[]
+      const isPareto = pts.map((p, i) =>
+        !pts.some(
+          (q, j) =>
+            i !== j &&
+            (q[xField] ?? 0) <= (p[xField] ?? 0) &&
+            (q[yField] ?? 0) <= (p[yField] ?? 0) &&
+            ((q[xField] ?? 0) < (p[xField] ?? 0) || (q[yField] ?? 0) < (p[yField] ?? 0)),
+        ),
+      )
+
+      // Annotate values with _pareto boolean
+      const annotated = pts.map((row, i) => ({ ...row, _pareto: isPareto[i] }))
+
+      // Pareto front points sorted by xField for staircase line
+      const frontPts = annotated
+        .filter((r) => r._pareto)
+        .sort((a, b) => (a[xField] ?? 0) - (b[xField] ?? 0))
+
+      // Staircase line: for each consecutive pair (x1,y1)→(x2,y2), emit
+      // intermediate point (x2,y1) to create right-angle steps.
+      const staircasePts: { x: number; y: number }[] = []
+      for (let i = 0; i < frontPts.length; i++) {
+        const p = frontPts[i]
+        staircasePts.push({ x: p[xField] as number, y: p[yField] as number })
+        if (i + 1 < frontPts.length) {
+          const q = frontPts[i + 1]
+          staircasePts.push({ x: q[xField] as number, y: p[yField] as number })
+        }
+      }
+
+      base.layer = [
+        // All points (gray, small)
+        {
+          data: { values: annotated },
+          mark: { type: 'point', size: 40, color: '#9ca3af', opacity: 0.6 },
+          encoding: {
+            x: {
+              field: xField,
+              type: 'quantitative',
+              scale: xScale,
+              title: config.xLabel ?? xField,
+              axis: { grid: config.showGrid ?? true },
+            },
+            y: {
+              field: yField,
+              type: 'quantitative',
+              scale: yScale,
+              title: config.yLabel ?? yField,
+              axis: { grid: config.showGrid ?? true },
+            },
+            tooltip: [
+              { field: xField, type: 'quantitative', format: '.4g' },
+              { field: yField, type: 'quantitative', format: '.4g' },
+              { field: '_pareto', title: 'Pareto-optimal' },
+            ],
+          },
+        },
+        // Pareto-optimal points (cyan, larger)
+        {
+          data: { values: annotated.filter((r) => r._pareto) },
+          mark: {
+            type: 'point',
+            size: 120,
+            color: '#1CABB0',
+            strokeWidth: 1.5,
+            filled: true,
+          },
+          encoding: {
+            x: { field: xField, type: 'quantitative' },
+            y: { field: yField, type: 'quantitative' },
+          },
+        },
+        // Staircase line connecting Pareto front
+        ...(staircasePts.length > 1
+          ? [
+              {
+                data: { values: staircasePts },
+                mark: {
+                  type: 'line',
+                  color: '#1CABB0',
+                  strokeWidth: 1.5,
+                  strokeDash: [4, 3],
+                  opacity: 0.7,
+                },
+                encoding: {
+                  x: { field: 'x', type: 'quantitative' },
+                  y: { field: 'y', type: 'quantitative' },
+                },
+              },
+            ]
+          : []),
+      ]
+      delete base.mark
+      delete base.encoding
+      break
+    }
   }
 
   // Grid

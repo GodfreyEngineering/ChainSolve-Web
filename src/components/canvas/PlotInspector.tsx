@@ -108,6 +108,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
           <option value="violin">{t('plot.chartViolin')}</option>
           <option value="parallelCoords">{t('plot.chartParallelCoords')}</option>
           <option value="contour">{t('plot.chartContour')}</option>
+          <option value="pareto">{t('plot.chartPareto')}</option>
         </select>,
       )}
 

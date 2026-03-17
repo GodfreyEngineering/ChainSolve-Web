@@ -496,6 +496,7 @@
     "chartViolin": "Violin Plot",
     "chartParallelCoords": "Parallel Coordinates",
     "chartContour": "Contour / Density",
+    "chartPareto": "Pareto Front",
     "exportSvg": "SVG",
     "exportPng": "PNG",
     "exportCsv": "CSV",

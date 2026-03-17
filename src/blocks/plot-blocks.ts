@@ -231,6 +231,30 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'paretoPlot',
+    label: 'Pareto Plot',
+    category: 'plot',
+    nodeKind: 'csPlot',
+    inputs: [{ id: 'data', label: 'Data' }],
+    proOnly: true,
+    description:
+      'Pareto front plot for multi-objective optimisation. Expects a Table with two numeric columns [objective1, objective2]. Non-dominated (Pareto-optimal) points are highlighted in cyan with a staircase front line.',
+    defaultData: {
+      blockType: 'paretoPlot',
+      label: 'Pareto Plot',
+      plotConfig: {
+        chartType: 'pareto',
+        showGrid: true,
+        showLegend: false,
+        legendPosition: 'right',
+        themePreset: 'paper-single',
+        xLabel: 'Objective 1',
+        yLabel: 'Objective 2',
+      } satisfies PlotConfig,
+    },
+  })
+
+  register({
     type: 'listTable',
     label: 'Table Output',
     category: 'output',
