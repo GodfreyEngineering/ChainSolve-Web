@@ -28,6 +28,11 @@ export function StatusBar() {
   const chainCount = useStatusBarStore((s) => s.edgeCount)
   const zoomPercent = useStatusBarStore((s) => s.zoomPercent)
   const snapToGrid = useStatusBarStore((s) => s.snapToGrid)
+  const isStale = useStatusBarStore((s) => s.isStale)
+  const lastEvalMs = useStatusBarStore((s) => s.lastEvalMs)
+  const lastEvalNodeCount = useStatusBarStore((s) => s.lastEvalNodeCount)
+  const pendingPatchCount = useStatusBarStore((s) => s.pendingPatchCount)
+  const evalMode = useStatusBarStore((s) => s.evalMode)
 
   const exportProgress = useStatusBarStore((s) => s.exportProgress)
 
@@ -42,14 +47,22 @@ export function StatusBar() {
       ? t('statusBar.engineComputing')
       : engineStatus === 'error'
         ? t('statusBar.engineError')
-        : t('statusBar.engineIdle')
+        : isStale
+          ? pendingPatchCount > 0
+            ? `${pendingPatchCount} ${t('statusBar.pendingChanges', 'pending')}`
+            : t('statusBar.stale', 'Stale')
+          : lastEvalMs !== null
+            ? `${lastEvalNodeCount} ${t('statusBar.blocks')} \u00B7 ${lastEvalMs} ms`
+            : t('statusBar.engineIdle')
 
   return (
     <div className="statusbar" role="status" aria-live="polite">
       <div className="statusbar-left">
         <span className="statusbar-item" title={`Engine: ${engineLabel}`}>
           <EngineStatusIcon status={engineStatus} />
+          <span style={{ marginLeft: 4, opacity: 0.8 }}>{engineLabel}</span>
         </span>
+        <span className="statusbar-sep" aria-hidden="true" />
         <span className="statusbar-item">
           {blockCount} {t('statusBar.blocks')}
         </span>
@@ -57,6 +70,16 @@ export function StatusBar() {
         <span className="statusbar-item">
           {chainCount} {t('statusBar.chains')}
         </span>
+        {evalMode !== 'auto' && (
+          <>
+            <span className="statusbar-sep" aria-hidden="true" />
+            <span className="statusbar-item" style={{ opacity: 0.6, fontSize: '0.65rem' }}>
+              {evalMode === 'manual'
+                ? t('toolbar.manualMode', 'Manual')
+                : t('statusBar.deferred', 'Deferred')}
+            </span>
+          </>
+        )}
       </div>
       {exportProgress && (
         <div className="statusbar-center">

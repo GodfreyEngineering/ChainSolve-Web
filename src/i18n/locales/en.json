@@ -2303,7 +2303,10 @@
     "engineError": "Error",
     "snapToGrid": "Snap to grid",
     "nodes": "Nodes",
-    "edges": "Edges"
+    "edges": "Edges",
+    "stale": "Stale — re-run needed",
+    "pendingChanges": "pending",
+    "deferred": "Deferred"
   },
   "history": {
     "confirmRestore": "Restore this snapshot? Current state will be autosaved first.",
