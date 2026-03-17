@@ -123,7 +123,7 @@ Make ChainSolve trustworthy for PhD-level research and production vehicle calcul
 - [x] **3.3** Add `Value::HighPrecision { display, approx, precision }` to `types.rs` with serde tagged variant
 - [x] **3.4** Handle in `kind_str()`, `summarize()`, `compute_value_hash()`
 - [x] **3.5** Update `canonicalize_value()` to pass through HP values unchanged
-- [ ] **3.6** Create `precision.rs` — HP arithmetic: add, sub, mul, div, sqrt, pow, sin, cos, pi (Chudnovsky)
+- [x] **3.6** Create `precision.rs` — HP arithmetic: add, sub, mul, div using dashu-float DBig (sqrt/pow/trig deferred)
 - [ ] **3.7** Add `precision: Option<u32>` to `EvalOptions`
 - [ ] **3.8** In `ops.rs`, branch to HP path when precision set
 - [ ] **3.9** Per-node precision override via `data.precision`
