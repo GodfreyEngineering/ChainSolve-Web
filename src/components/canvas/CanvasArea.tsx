@@ -54,6 +54,7 @@ import { GroupNode } from './nodes/GroupNode'
 import { BlockLibrary } from './BlockLibrary'
 import { DRAG_TYPE } from './blockLibraryUtils'
 import { FloatingInspector, INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS } from './FloatingInspector'
+import { NodeSideSheet } from './NodeSideSheet'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
 import { ExpressionPanel } from './ExpressionPanel'
@@ -809,6 +810,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   // Inspector state (select on click, open on double-click)
   const [inspectedId, setInspectedId] = useState<string | null>(null)
   const [inspPinned, setInspPinned] = useState(false)
+  // 3.19: side sheet opened via double-click (slide from right, 400 px)
+  const [sideSheetOpen, setSideSheetOpen] = useState(false)
   const { openWindow, closeWindow, isOpen: isWinOpen } = useWindowManager()
   const inspVisible = isWinOpen(INSPECTOR_WINDOW_ID)
 
@@ -1329,14 +1332,23 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const onNodeDoubleClick = useCallback(
     (_: MouseEvent, node: Node) => {
       if (!inspPinned) setInspectedId(node.id)
-      openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
-      if (isMobile) setLibVisible(false)
+      if (isMobile) {
+        // Mobile: use the existing floating inspector / bottom sheet
+        openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
+        setLibVisible(false)
+      } else {
+        // Desktop: open the side sheet (3.19)
+        setSideSheetOpen(true)
+      }
     },
     [isMobile, inspPinned, openWindow],
   )
 
   const onPaneClick = useCallback(() => {
-    if (!inspPinned) setInspectedId(null)
+    if (!inspPinned) {
+      setInspectedId(null)
+      setSideSheetOpen(false)
+    }
     setNotationTarget(null)
     if (isMobile) {
       setLibVisible(false)
@@ -3837,6 +3849,20 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                       <FloatingInspector
                         nodeId={inspectedId}
                         pinned={inspPinned}
+                        onTogglePin={() => setInspPinned((v) => !v)}
+                        onToggleCollapse={toggleGroupCollapse}
+                        onUngroupNode={ungroupNode}
+                        canUseGroups={ent.canUseGroups}
+                      />
+                    )}
+
+                    {/* 3.19: Side sheet inspector — opened by double-clicking a node */}
+                    {!isMobile && (
+                      <NodeSideSheet
+                        open={sideSheetOpen}
+                        nodeId={inspectedId}
+                        pinned={inspPinned}
+                        onClose={() => setSideSheetOpen(false)}
                         onTogglePin={() => setInspPinned((v) => !v)}
                         onToggleCollapse={toggleGroupCollapse}
                         onUngroupNode={ungroupNode}
