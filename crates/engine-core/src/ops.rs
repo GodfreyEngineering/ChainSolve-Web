@@ -3359,6 +3359,60 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Random Number Generation ──────────────────────────────
+        "rng_uniform" | "rng.uniform" => {
+            let n = data.get("samples").and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+            let seed = data.get("seed").and_then(|v| v.as_u64()).unwrap_or(42);
+            let lo_v = scalar_or_nan(inputs, "lo");
+            let hi_v = scalar_or_nan(inputs, "hi");
+            let lo = if lo_v.is_nan() { 0.0 } else { lo_v };
+            let hi = if hi_v.is_nan() { 1.0 } else { hi_v };
+            let mut rng = crate::rng::Xoshiro256::new(seed);
+            let values: Vec<f64> = (0..n).map(|_| rng.next_range(lo, hi)).collect();
+            Value::Vector { value: values }
+        }
+
+        "rng_lhs" | "rng.lhs" => {
+            let n = data.get("samples").and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+            let dims = data.get("dims").and_then(|v| v.as_u64()).unwrap_or(1) as usize;
+            let seed = data.get("seed").and_then(|v| v.as_u64()).unwrap_or(42);
+            let pts = crate::rng::latin_hypercube(n, dims, seed);
+            if dims == 1 {
+                Value::Vector { value: pts.into_iter().map(|r| r[0]).collect() }
+            } else {
+                let columns: Vec<String> = (0..dims).map(|d| format!("d{d}")).collect();
+                let rows: Vec<Vec<f64>> = pts;
+                Value::Table { columns, rows }
+            }
+        }
+
+        "rng_sobol" | "rng.sobol" => {
+            let n = data.get("samples").and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+            let dims = data.get("dims").and_then(|v| v.as_u64()).unwrap_or(1) as usize;
+            let pts = crate::rng::sobol_points(n, dims);
+            if dims == 1 {
+                Value::Vector { value: pts.into_iter().map(|r| r[0]).collect() }
+            } else {
+                let columns: Vec<String> = (0..dims).map(|d| format!("d{d}")).collect();
+                let rows: Vec<Vec<f64>> = pts;
+                Value::Table { columns, rows }
+            }
+        }
+
+        "rng_halton" | "rng.halton" => {
+            let n = data.get("samples").and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+            let dims = data.get("dims").and_then(|v| v.as_u64()).unwrap_or(1) as usize;
+            let skip = data.get("skip").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
+            let pts = crate::rng::halton_points(n, dims, skip);
+            if dims == 1 {
+                Value::Vector { value: pts.into_iter().map(|r| r[0]).collect() }
+            } else {
+                let columns: Vec<String> = (0..dims).map(|d| format!("d{d}")).collect();
+                let rows: Vec<Vec<f64>> = pts;
+                Value::Table { columns, rows }
+            }
+        }
+
         // ── Optimization ──────────────────────────────────────────
         "optim.designVariable" => {
             // Source node: emit a table describing this design variable

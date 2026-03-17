@@ -37,6 +37,7 @@ pub mod ode;
 pub mod ops;
 pub mod optim;
 pub mod precision;
+pub mod rng;
 pub mod rootfinding;
 pub mod sparse;
 pub mod sparse_solvers;

@@ -556,6 +556,16 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   interp_bspline:
     "B-spline curve evaluation using de Boor's algorithm. Control points define shape; degree controls smoothness.",
 
+  // ── Random Number Generation ──────────────────────────────────────────────
+  rng_uniform:
+    'Generate uniform random numbers using Xoshiro256++ PRNG. Deterministic given seed.',
+  rng_lhs:
+    'Latin Hypercube Sampling — stratified random sampling with guaranteed space coverage.',
+  rng_sobol:
+    'Sobol quasi-random low-discrepancy sequence. More uniform than pseudorandom for integration and DOE.',
+  rng_halton:
+    'Halton quasi-random sequence using co-prime bases. Low-discrepancy up to ~20 dimensions.',
+
   // ── SCI-12: Signal Processing / FFT ───────────────────────────────────────
   'signal.fft_magnitude':
     'FFT magnitude spectrum: |FFT[k]| for k = 0..N/2. Input zero-padded to next power of 2.',

@@ -174,4 +174,61 @@ export function registerNumericalBlocks(register: (def: BlockDef) => void): void
     synonyms: ['b-spline', 'de boor', 'basis spline', 'NURBS'],
     tags: ['numerical', 'interpolation', 'bspline'],
   })
+
+  // ── Random Number Generation ─────────────────────────────────
+
+  register({
+    type: 'rng_uniform',
+    label: 'Random Uniform',
+    category: 'numerical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'lo', label: 'Lower Bound' },
+      { id: 'hi', label: 'Upper Bound' },
+    ],
+    defaultData: { blockType: 'rng_uniform', label: 'Random Uniform', samples: 100, seed: 42 },
+    description:
+      'Generate a vector of uniform random numbers using Xoshiro256++ PRNG. Deterministic given seed. Default range [0, 1).',
+    synonyms: ['random', 'uniform', 'xoshiro', 'prng', 'random numbers'],
+    tags: ['numerical', 'random', 'sampling'],
+  })
+
+  register({
+    type: 'rng_lhs',
+    label: 'Latin Hypercube Sample',
+    category: 'numerical',
+    nodeKind: 'csOperation',
+    inputs: [],
+    defaultData: { blockType: 'rng_lhs', label: 'Latin Hypercube Sample', samples: 100, dims: 1, seed: 42 },
+    description:
+      'Latin Hypercube Sampling — stratified random sampling where each dimension is divided into equal-probability bins. Better space coverage than pure random.',
+    synonyms: ['LHS', 'stratified sampling', 'space-filling'],
+    tags: ['numerical', 'random', 'sampling', 'DOE'],
+  })
+
+  register({
+    type: 'rng_sobol',
+    label: 'Sobol Sequence',
+    category: 'numerical',
+    nodeKind: 'csOperation',
+    inputs: [],
+    defaultData: { blockType: 'rng_sobol', label: 'Sobol Sequence', samples: 100, dims: 1 },
+    description:
+      'Sobol quasi-random low-discrepancy sequence. Fills the space more uniformly than pseudorandom numbers. Ideal for numerical integration and DOE.',
+    synonyms: ['sobol', 'quasi-random', 'low discrepancy', 'van der corput'],
+    tags: ['numerical', 'random', 'sampling', 'quasi-random'],
+  })
+
+  register({
+    type: 'rng_halton',
+    label: 'Halton Sequence',
+    category: 'numerical',
+    nodeKind: 'csOperation',
+    inputs: [],
+    defaultData: { blockType: 'rng_halton', label: 'Halton Sequence', samples: 100, dims: 1, skip: 0 },
+    description:
+      'Halton quasi-random sequence using co-prime bases. Low-discrepancy sequence for up to ~20 dimensions. Optional skip parameter to avoid initial correlations.',
+    synonyms: ['halton', 'quasi-random', 'low discrepancy'],
+    tags: ['numerical', 'random', 'sampling', 'quasi-random'],
+  })
 }
