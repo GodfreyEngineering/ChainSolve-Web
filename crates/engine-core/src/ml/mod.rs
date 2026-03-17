@@ -8,5 +8,6 @@ pub mod linreg;
 pub mod polyreg;
 pub mod knn;
 pub mod decision_tree;
+pub mod classification_metrics;
 pub mod metrics;
 pub mod preprocess;
