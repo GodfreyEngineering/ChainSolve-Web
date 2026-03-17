@@ -19,6 +19,11 @@ import { buildFluidFlow } from './fluid-flow'
 import { buildInvestmentReturns } from './investment-returns'
 import { buildSpringMassDamper } from './spring-mass-damper'
 import { buildPidController } from './pid-controller'
+import { buildVehicleSuspension } from './vehicle-suspension'
+import { buildCurveFitting } from './curve-fitting'
+import { buildNeuralNetworkTraining } from './neural-network-training'
+import { buildStructuralOptimisation } from './structural-optimisation'
+import { buildBatteryThermal } from './battery-thermal'
 
 export interface TemplateMeta {
   /** Stable unique key — never rename after shipping. */
@@ -149,5 +154,50 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ['control', 'pid', 'tuning', 'engineering', 'dynamics'],
     category: 'Engineering',
     buildGraph: buildPidController,
+  },
+  {
+    id: 'vehicle-suspension',
+    name: 'Vehicle Suspension K&C',
+    description:
+      'Quarter-car suspension model: sprung frequency fn_s, unsprung frequency fn_u, damping ratio ζ, and percent overshoot for ride and handling analysis.',
+    tags: ['vehicle', 'suspension', 'dynamics', 'control', 'automotive'],
+    category: 'Engineering',
+    buildGraph: buildVehicleSuspension,
+  },
+  {
+    id: 'curve-fitting',
+    name: 'Curve Fitting',
+    description:
+      'Linear regression y = a + b·x — fit a line to your data, inspect slope, intercept, R² goodness-of-fit, and predict new values.',
+    tags: ['statistics', 'regression', 'data', 'curve fitting', 'machine learning'],
+    category: 'Science',
+    buildGraph: buildCurveFitting,
+  },
+  {
+    id: 'neural-network-training',
+    name: 'Neural Network Training',
+    description:
+      'Feedforward network hyperparameter explorer: parameter count for a two-layer MLP, and cross-entropy loss H = −y·log(ŷ) for a single prediction.',
+    tags: ['machine learning', 'neural network', 'deep learning', 'loss', 'hyperparameters'],
+    category: 'Science',
+    buildGraph: buildNeuralNetworkTraining,
+  },
+  {
+    id: 'structural-optimisation',
+    name: 'Structural Optimisation',
+    description:
+      'Minimise hollow circular beam mass subject to bending stress σ and central deflection δ constraints — tune outer radius R and wall thickness t.',
+    tags: ['structural', 'optimisation', 'beam', 'civil', 'mechanics', 'engineering'],
+    category: 'Engineering',
+    buildGraph: buildStructuralOptimisation,
+  },
+  {
+    id: 'battery-thermal',
+    name: 'Battery Thermal Model',
+    description:
+      'Lumped thermal model of a Li-ion cell during discharge — Joule heat Q_gen = I²R, convective cooling Q_loss = hAΔT, and cell temperature T_cell.',
+    tags: ['battery', 'thermal', 'EV', 'energy', 'electrical', 'engineering'],
+    category: 'Engineering',
+    buildGraph: buildBatteryThermal,
   },
 ]
