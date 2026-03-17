@@ -330,7 +330,7 @@
 - [ ] **3.37** Step execution: step through graph one node at a time (forward/backward in topological order) — with current node highlighted and inputs/outputs displayed
 - [ ] **3.38** Execution timeline: collapsible bottom panel showing Gantt-chart of block execution with durations — identifies bottleneck blocks at a glance
 - [x] **3.39** Data flow highlighting: hover over any port → all upstream (feeding) and downstream (consuming) connections highlighted in accent colour — trace data flow through complex graphs
-- [ ] **3.40** Diff view: compare two execution snapshots side-by-side — value deltas highlighted (green=increased, red=decreased) — for regression analysis
+- [x] **3.40** Diff view: compare two execution snapshots side-by-side — value deltas highlighted (green=increased, red=decreased) — for regression analysis
 
 ### 3E — Formula Bar & CSEL Expression Language
 
