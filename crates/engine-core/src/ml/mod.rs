@@ -9,3 +9,4 @@ pub mod polyreg;
 pub mod knn;
 pub mod decision_tree;
 pub mod metrics;
+pub mod preprocess;
