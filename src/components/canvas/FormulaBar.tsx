@@ -18,6 +18,7 @@ import { isScalar } from '../../engine/value'
 import type { Value } from '../../engine/value'
 import { safeEvalFormula, validateFormula, FORMULA_SYMBOLS } from '../../lib/formulaEval'
 import type { FormulaSymbol } from '../../lib/formulaEval'
+import { tokenize } from '../../engine/csel/lexer'
 
 // ── 3.49: Expression history stored in localStorage ─────────────────────────
 
@@ -56,6 +57,89 @@ function extractFormula(blockType: string): string {
   const returnsMatch = desc.match(/[Rr]eturns\s+([^.]+)/)
   if (returnsMatch) return returnsMatch[1].trim()
   return blockType
+}
+
+// ── 3.47: CSEL Syntax Highlighting ──────────────────────────────────────────
+
+const CSEL_CONSTANTS = new Set(['pi', 'e', 'tau', 'phi'])
+
+/**
+ * Tokenise a CSEL expression and return an array of React spans with colours:
+ *   operators → cyan, numbers → orange, functions → purple,
+ *   constants  → orange, variables → green, punctuation → muted
+ */
+function highlightCsel(text: string): React.ReactNode[] {
+  if (!text) return []
+  let tokens
+  try {
+    tokens = tokenize(text)
+  } catch {
+    return [<span key="raw">{text}</span>]
+  }
+
+  const spans: React.ReactNode[] = []
+  let lastPos = 0
+
+  for (let i = 0; i < tokens.length; i++) {
+    const tok = tokens[i]
+    if (tok.type === 'eof') break
+
+    // Emit any whitespace/unrecognised chars between tokens
+    if (tok.position > lastPos) {
+      spans.push(<span key={`ws-${lastPos}`}>{text.slice(lastPos, tok.position)}</span>)
+    }
+
+    const nextType = tokens[i + 1]?.type
+
+    let color: string
+    switch (tok.type) {
+      case 'number':
+        color = '#fb923c' // orange
+        break
+      case 'identifier':
+        if (nextType === 'lparen') {
+          color = '#a78bfa' // purple — function call
+        } else if (CSEL_CONSTANTS.has(tok.value.toLowerCase())) {
+          color = '#fb923c' // orange — known constant
+        } else {
+          color = '#4ade80' // green — variable
+        }
+        break
+      case 'plus':
+      case 'minus':
+      case 'star':
+      case 'slash':
+      case 'caret':
+      case 'equals':
+      case 'semicolon':
+      case 'pipe':
+      case 'arrow':
+        color = '#22d3ee' // cyan — operator
+        break
+      case 'lparen':
+      case 'rparen':
+      case 'comma':
+        color = 'var(--text-faint)'
+        break
+      default:
+        color = 'var(--text)'
+    }
+
+    const end = tok.position + tok.value.length
+    spans.push(
+      <span key={`tok-${i}`} style={{ color }}>
+        {text.slice(tok.position, end)}
+      </span>,
+    )
+    lastPos = end
+  }
+
+  // Trailing chars after last real token
+  if (lastPos < text.length) {
+    spans.push(<span key="tail">{text.slice(lastPos)}</span>)
+  }
+
+  return spans
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -102,6 +186,9 @@ export function FormulaBar({
   const [expressionMode, setExpressionMode] = useState(false)
   const [exprDraft, setExprDraft] = useState('')
   const [exprError, setExprError] = useState<string | null>(null)
+  // 3.47: Scroll tracking for overlay alignment
+  const exprInputRef = useRef<HTMLInputElement>(null)
+  const [exprScrollLeft, setExprScrollLeft] = useState(0)
 
   // 3.49: Expression history — persisted across page reloads
   const [history, setHistory] = useState<string[]>(() => loadHistory())
@@ -296,81 +383,113 @@ export function FormulaBar({
       {expressionMode ? (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '0 8px', gap: 6 }}>
           <span style={{ color: 'var(--text-faint)', fontSize: '0.7rem', flexShrink: 0 }}>=</span>
-          <input
-            autoFocus
-            value={exprDraft}
-            onChange={(e) => {
-              setExprDraft(e.target.value)
-              setExprError(null)
-              // Typing resets history navigation — user is editing a new expression
-              if (historyIdx !== -1) setHistoryIdx(-1)
-            }}
-            onKeyDown={(e) => {
-              // 3.49: Up arrow — navigate backwards through history
-              if (e.key === 'ArrowUp' && history.length > 0) {
-                e.preventDefault()
-                const nextIdx = historyIdx + 1
-                if (nextIdx < history.length) {
-                  setHistoryIdx(nextIdx)
-                  setExprDraft(history[nextIdx])
-                  setExprError(null)
-                }
-                return
+          {/* 3.47: Syntax-highlighted expression input via transparent input + overlay */}
+          <div style={{ flex: 1, position: 'relative', overflow: 'hidden', height: '100%', display: 'flex', alignItems: 'center' }}>
+            {/* Highlight overlay — scrolls with input via exprScrollLeft */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: -exprScrollLeft,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                fontFamily: 'inherit',
+                fontSize: 'inherit',
+                whiteSpace: 'pre',
+                pointerEvents: 'none',
+                userSelect: 'none',
+                overflow: 'visible',
+                opacity: exprError ? 0.4 : 1,
+              }}
+            >
+              {exprDraft
+                ? highlightCsel(exprDraft)
+                : <span style={{ color: 'var(--text-faint)' }}>{t('formulaBar.exprPlaceholder', 'Type expression... e.g. 1+2= or sin(pi/4)= or x=5; x*2=')}</span>
               }
-              // 3.49: Down arrow — navigate forwards / back to live draft
-              if (e.key === 'ArrowDown') {
-                e.preventDefault()
-                if (historyIdx > 0) {
-                  const nextIdx = historyIdx - 1
-                  setHistoryIdx(nextIdx)
-                  setExprDraft(history[nextIdx])
-                  setExprError(null)
-                } else if (historyIdx === 0) {
-                  setHistoryIdx(-1)
-                  setExprDraft(liveDraftRef.current)
-                  setExprError(null)
+            </div>
+            <input
+              ref={exprInputRef}
+              autoFocus
+              value={exprDraft}
+              onChange={(e) => {
+                setExprDraft(e.target.value)
+                setExprError(null)
+                // Typing resets history navigation — user is editing a new expression
+                if (historyIdx !== -1) setHistoryIdx(-1)
+              }}
+              onScroll={(e) => setExprScrollLeft((e.target as HTMLInputElement).scrollLeft)}
+              onKeyDown={(e) => {
+                // 3.49: Up arrow — navigate backwards through history
+                if (e.key === 'ArrowUp' && history.length > 0) {
+                  e.preventDefault()
+                  const nextIdx = historyIdx + 1
+                  if (nextIdx < history.length) {
+                    setHistoryIdx(nextIdx)
+                    setExprDraft(history[nextIdx])
+                    setExprError(null)
+                  }
+                  return
                 }
-                return
-              }
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                const expr = exprDraft.trim()
-                if (!expr) return
-                try {
-                  onExpressionSubmit?.(expr)
-                  // 3.49: Save to history on successful submit
-                  const newHistory = pushHistory(history, expr)
-                  setHistory(newHistory)
-                  saveHistory(newHistory)
+                // 3.49: Down arrow — navigate forwards / back to live draft
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault()
+                  if (historyIdx > 0) {
+                    const nextIdx = historyIdx - 1
+                    setHistoryIdx(nextIdx)
+                    setExprDraft(history[nextIdx])
+                    setExprError(null)
+                  } else if (historyIdx === 0) {
+                    setHistoryIdx(-1)
+                    setExprDraft(liveDraftRef.current)
+                    setExprError(null)
+                  }
+                  return
+                }
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  const expr = exprDraft.trim()
+                  if (!expr) return
+                  try {
+                    onExpressionSubmit?.(expr)
+                    // 3.49: Save to history on successful submit
+                    const newHistory = pushHistory(history, expr)
+                    setHistory(newHistory)
+                    saveHistory(newHistory)
+                    setExprDraft('')
+                    setExprError(null)
+                    setHistoryIdx(-1)
+                    liveDraftRef.current = ''
+                  } catch (err) {
+                    setExprError(String(err))
+                  }
+                }
+                if (e.key === 'Escape') {
+                  setExpressionMode(false)
                   setExprDraft('')
                   setExprError(null)
                   setHistoryIdx(-1)
-                  liveDraftRef.current = ''
-                } catch (err) {
-                  setExprError(String(err))
                 }
-              }
-              if (e.key === 'Escape') {
-                setExpressionMode(false)
-                setExprDraft('')
-                setExprError(null)
-                setHistoryIdx(-1)
-              }
-            }}
-            placeholder={t(
-              'formulaBar.exprPlaceholder',
-              'Type expression... e.g. 1+2= or sin(pi/4)= or x=5; x*2=',
-            )}
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              color: exprError ? 'var(--danger)' : 'var(--text)',
-              fontFamily: 'inherit',
-              fontSize: 'inherit',
-            }}
-          />
+              }}
+              placeholder=""
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                // Transparent text — the highlight overlay provides color
+                color: exprError ? 'var(--danger)' : 'transparent',
+                caretColor: exprError ? 'var(--danger)' : 'var(--text)',
+                fontFamily: 'inherit',
+                fontSize: 'inherit',
+                padding: 0,
+                width: '100%',
+              }}
+            />
+          </div>
           {exprError && (
             <span style={{ color: 'var(--danger)', fontSize: '0.65rem', flexShrink: 0 }}>
               {exprError}
