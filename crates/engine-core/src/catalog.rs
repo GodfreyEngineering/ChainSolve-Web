@@ -470,6 +470,12 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("integrate_cc", "Clenshaw-Curtis Integral", "numerical", "csOperation", vec![p("a", "Lower Bound"), p("b", "Upper Bound")], true),
         entry("integrate_mc", "Monte Carlo Integral", "numerical", "csOperation", vec![p("a", "Lower Bound"), p("b", "Upper Bound")], true),
 
+        // ── Norms ────────────────────────────────────────────────────────
+        entry("norm_l1", "L1 Norm", "math", "csOperation", vec![p("a", "Input")], false),
+        entry("norm_l2", "L2 Norm", "math", "csOperation", vec![p("a", "Input")], false),
+        entry("norm_linf", "L-Infinity Norm", "math", "csOperation", vec![p("a", "Input")], false),
+        entry("norm_frobenius", "Frobenius Norm", "math", "csOperation", vec![p("a", "Input")], false),
+
         // ── Interpolation ───────────────────────────────────────────────
         entry("interp_cubic_spline", "Cubic Spline Interpolation", "numerical", "csOperation", vec![p("xs", "X Points"), p("ys", "Y Points"), p("query", "Query")], false),
         entry("interp_akima", "Akima Interpolation", "numerical", "csOperation", vec![p("xs", "X Points"), p("ys", "Y Points"), p("query", "Query")], false),
@@ -618,14 +624,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 381);
+        assert_eq!(cat.len(), 385);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 381);
+        assert_eq!(parsed.as_array().unwrap().len(), 385);
     }
 
     #[test]

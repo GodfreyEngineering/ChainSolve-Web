@@ -3281,6 +3281,43 @@ fn evaluate_node_inner(
             Value::scalar(result.value)
         }
 
+        // ── Norms ─────────────────────────────────────────────────
+        "norm_l1" | "norm.l1" => {
+            match inputs.get("a") {
+                Some(Value::Vector { value }) => Value::scalar(value.iter().map(|x| x.abs()).sum()),
+                Some(Value::Matrix { data, .. }) => Value::scalar(data.iter().map(|x| x.abs()).sum()),
+                Some(Value::Scalar { value }) => Value::scalar(value.abs()),
+                _ => Value::scalar(f64::NAN),
+            }
+        }
+
+        "norm_l2" | "norm.l2" => {
+            match inputs.get("a") {
+                Some(Value::Vector { value }) => Value::scalar(value.iter().map(|x| x * x).sum::<f64>().sqrt()),
+                Some(Value::Matrix { data, .. }) => Value::scalar(data.iter().map(|x| x * x).sum::<f64>().sqrt()),
+                Some(Value::Scalar { value }) => Value::scalar(value.abs()),
+                _ => Value::scalar(f64::NAN),
+            }
+        }
+
+        "norm_linf" | "norm.linf" => {
+            match inputs.get("a") {
+                Some(Value::Vector { value }) => Value::scalar(value.iter().map(|x| x.abs()).fold(f64::NEG_INFINITY, f64::max)),
+                Some(Value::Matrix { data, .. }) => Value::scalar(data.iter().map(|x| x.abs()).fold(f64::NEG_INFINITY, f64::max)),
+                Some(Value::Scalar { value }) => Value::scalar(value.abs()),
+                _ => Value::scalar(f64::NAN),
+            }
+        }
+
+        "norm_frobenius" | "norm.frobenius" => {
+            match inputs.get("a") {
+                Some(Value::Matrix { data, .. }) => Value::scalar(data.iter().map(|x| x * x).sum::<f64>().sqrt()),
+                Some(Value::Vector { value }) => Value::scalar(value.iter().map(|x| x * x).sum::<f64>().sqrt()),
+                Some(Value::Scalar { value }) => Value::scalar(value.abs()),
+                _ => Value::scalar(f64::NAN),
+            }
+        }
+
         // ── Interpolation ─────────────────────────────────────────
         "interp_cubic_spline" | "interp.cubicSpline" => {
             let xs = match inputs.get("xs") {

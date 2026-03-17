@@ -548,6 +548,12 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   integrate_mc:
     'Monte Carlo quadrature with deterministic seed. Suitable for high-dimensional or irregular integrands.',
 
+  // ── Norms ────────────────────────────────────────────────────────────────
+  norm_l1: 'L1 norm (Manhattan distance): sum of absolute values.',
+  norm_l2: 'L2 norm (Euclidean): square root of sum of squares.',
+  norm_linf: 'L-infinity norm: maximum absolute value.',
+  norm_frobenius: 'Frobenius norm: square root of sum of squared elements.',
+
   // ── Interpolation ─────────────────────────────────────────────────────────
   interp_cubic_spline:
     'Cubic spline interpolation through data points with natural, clamped, or not-a-knot boundary conditions.',

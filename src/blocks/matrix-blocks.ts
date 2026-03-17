@@ -212,4 +212,54 @@ export function registerMatrixBlocks(register: (def: BlockDef) => void): void {
     synonyms: ['kappa', 'condition number', 'ill-conditioned'],
     tags: ['matrix', 'linear algebra', 'decomposition'],
   })
+
+  // ── Norms ───────────────────────────────────────────────────
+
+  register({
+    type: 'norm_l1',
+    label: 'L1 Norm',
+    category: 'math',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'a', label: 'Input' }],
+    defaultData: { blockType: 'norm_l1', label: 'L1 Norm' },
+    description: 'L1 norm (Manhattan distance): sum of absolute values. Works on vectors and matrices.',
+    synonyms: ['manhattan', 'taxicab', 'absolute sum', 'L1'],
+    tags: ['math', 'norm', 'linear algebra'],
+  })
+
+  register({
+    type: 'norm_l2',
+    label: 'L2 Norm',
+    category: 'math',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'a', label: 'Input' }],
+    defaultData: { blockType: 'norm_l2', label: 'L2 Norm' },
+    description: 'L2 norm (Euclidean distance): square root of sum of squares. Works on vectors and matrices.',
+    synonyms: ['euclidean', 'magnitude', 'length', 'L2'],
+    tags: ['math', 'norm', 'linear algebra'],
+  })
+
+  register({
+    type: 'norm_linf',
+    label: 'L-Infinity Norm',
+    category: 'math',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'a', label: 'Input' }],
+    defaultData: { blockType: 'norm_linf', label: 'L-Infinity Norm' },
+    description: 'L-infinity norm (max norm): maximum absolute value. Works on vectors and matrices.',
+    synonyms: ['max norm', 'infinity norm', 'Chebyshev', 'Linf'],
+    tags: ['math', 'norm', 'linear algebra'],
+  })
+
+  register({
+    type: 'norm_frobenius',
+    label: 'Frobenius Norm',
+    category: 'math',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'a', label: 'Input' }],
+    defaultData: { blockType: 'norm_frobenius', label: 'Frobenius Norm' },
+    description: 'Frobenius norm: square root of sum of squared elements. Equivalent to L2 for vectors. Standard matrix norm.',
+    synonyms: ['frobenius', 'Hilbert-Schmidt', 'matrix norm'],
+    tags: ['math', 'norm', 'linear algebra', 'matrix'],
+  })
 }
