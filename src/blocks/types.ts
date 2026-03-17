@@ -271,4 +271,12 @@ export interface BlockDef {
   tags?: string[]
   /** G4-1: Human-readable description shown in the Inspector panel. */
   description?: string
+  /** Phase 2: When true, this block supports a variable number of inputs.
+   *  The UI can add/remove input ports dynamically. Port IDs for variadic
+   *  blocks follow the pattern `in_0`, `in_1`, ..., `in_N`. */
+  variadic?: boolean
+  /** Minimum number of inputs for variadic blocks (default: 2). */
+  minInputs?: number
+  /** Maximum number of inputs for variadic blocks (default: 64). */
+  maxInputs?: number
 }

@@ -67,6 +67,12 @@ export interface CatalogEntry {
   nodeKind: string
   inputs: { id: string; label: string }[]
   proOnly: boolean
+  /** Phase 2: When true, supports variable number of inputs (in_0, in_1, ...). */
+  variadic?: boolean
+  /** Minimum inputs for variadic blocks (default: 2). */
+  minInputs?: number
+  /** Maximum inputs for variadic blocks (default: 64). */
+  maxInputs?: number
 }
 
 // ── Patch operations (W9.2) ──────────────────────────────────────

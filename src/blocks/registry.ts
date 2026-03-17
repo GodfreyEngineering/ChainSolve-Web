@@ -32,6 +32,9 @@ function reg(def: {
   inputs: { id: string; label: string }[]
   defaultData: BlockDef['defaultData']
   proOnly?: boolean
+  variadic?: boolean
+  minInputs?: number
+  maxInputs?: number
 }): void {
   BLOCK_REGISTRY.set(def.type, def)
 }
@@ -105,6 +108,9 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'add', label: 'Add' },
+  variadic: true,
+  minInputs: 2,
+  maxInputs: 64,
 })
 
 reg({
@@ -129,6 +135,9 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'multiply', label: 'Multiply' },
+  variadic: true,
+  minInputs: 2,
+  maxInputs: 64,
 })
 
 reg({
@@ -450,6 +459,9 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'max', label: 'Max' },
+  variadic: true,
+  minInputs: 2,
+  maxInputs: 64,
 })
 
 reg({
@@ -462,6 +474,9 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'min', label: 'Min' },
+  variadic: true,
+  minInputs: 2,
+  maxInputs: 64,
 })
 
 // ── Output category ───────────────────────────────────────────────────────────
