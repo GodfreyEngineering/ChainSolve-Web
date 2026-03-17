@@ -9,8 +9,10 @@
 pub mod gradient;
 pub mod genetic;
 pub mod lp;
+pub mod pareto;
 pub mod qp;
 pub mod simplex;
+pub mod sobol_sensitivity;
 pub mod sweep;
 pub mod montecarlo;
 pub mod sensitivity;
