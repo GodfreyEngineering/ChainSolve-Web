@@ -435,7 +435,7 @@ Users type `1+1=` → auto-creates Number(1), Number(1), Add, Display blocks wir
 
 ### 12B — Node Visual States
 
-- [ ] **12.7** `nodeStyles.ts` — stale overlay: `opacity: 0.5, filter: grayscale(30%), borderStyle: dashed`
+- [x] **12.7** `nodeStyles.ts` — staleOverlay + errorBadge CSS style constants added
 - [ ] **12.8** Computing spinner overlay when engine evaluating a node
 - [ ] **12.9** Error badge (red dot) in top-right corner
 - [ ] **12.10** Update OperationNode, DisplayNode, DataNode, PlotNode with stale/error styles
