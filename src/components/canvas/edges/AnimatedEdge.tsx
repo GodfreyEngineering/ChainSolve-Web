@@ -27,15 +27,14 @@ import { useCanvasSettings } from '../../../contexts/CanvasSettingsContext'
 import { usePreferencesStore } from '../../../stores/preferencesStore'
 import { formatValue } from '../../../engine/value'
 import type { Value } from '../../../engine/value'
+import { getValueTypeColor } from '../../../engine/portTypeColors'
 import { getUnitMismatch, type UnitMismatch } from '../../../units/unitCompat'
 import { getUnitSymbol } from '../../../units/unitSymbols'
 import { useInferredUnits } from '../../../hooks/useInferredUnits'
 import type { NodeData } from '../../../blocks/types'
 
 function edgeStroke(v: Value | undefined): string {
-  if (!v) return 'var(--text)'
-  if (v.kind === 'error') return 'var(--danger)'
-  return 'var(--text)'
+  return getValueTypeColor(v)
 }
 
 /** H1-2 + 4.05: Resolve unit mismatch, including inferred units from propagation. */

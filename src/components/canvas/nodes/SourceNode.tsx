@@ -23,6 +23,7 @@ import { usePlan } from '../../../contexts/PlanContext'
 import { getEntitlements } from '../../../lib/entitlements'
 import { NODE_STYLES as s, userColorBg } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
+import { getValueTypeColor } from '../../../engine/portTypeColors'
 import { Icon } from '../../ui/Icon'
 import { useValueFlash } from '../../../hooks/useValueFlash'
 
@@ -797,7 +798,12 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
           type="source"
           position={Position.Right}
           id="out"
-          style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
+          style={{
+            ...s.handleRight,
+            background: getValueTypeColor(value),
+            top: '50%',
+            transform: 'translateY(-50%)',
+          }}
         />
         {nd.unit && <span style={s.outputUnitBadge}>{getUnitSymbol(nd.unit)}</span>}
       </div>

@@ -132,6 +132,14 @@
   --handle-output: #22c55e;
   --edge-color: #1cabb0;
 
+  /* ── Port / edge value-type colours (3.15) ───────────────────────────────── */
+  --value-color-scalar: #60a5fa; /* blue   — float / scalar */
+  --value-color-vector: #4ade80; /* green  — vector / array */
+  --value-color-table: #c084fc; /* purple — matrix / table */
+  --value-color-interval: #fb923c; /* orange — interval / signal */
+  --value-color-error: #f87171; /* red    — error */
+  --value-color-any: #9ca3af; /* gray   — unknown / any */
+
   font-family:
     'Montserrat',
     system-ui,

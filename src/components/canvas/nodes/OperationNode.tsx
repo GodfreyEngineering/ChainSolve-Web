@@ -35,6 +35,7 @@ import { Icon } from '../../ui/Icon'
 import { useValueFlash } from '../../../hooks/useValueFlash'
 import { getPortUnitHint } from '../../../blocks/portUnitHints'
 import { usePreferencesStore } from '../../../stores/preferencesStore'
+import { getValueTypeColor } from '../../../engine/portTypeColors'
 
 // SCI-06: Trig ops that are affected by the angle unit preference.
 // Forward trig (sin/cos/tan): input is an angle.
@@ -457,7 +458,12 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
           type="source"
           position={Position.Right}
           id="out"
-          style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
+          style={{
+            ...s.handleRight,
+            background: getValueTypeColor(value),
+            top: '50%',
+            transform: 'translateY(-50%)',
+          }}
         />
         {/* 4.04+4.05: Unit badge next to output handle (explicit or inferred) */}
         {(nd.unit || inferredUnit?.unit) && (
