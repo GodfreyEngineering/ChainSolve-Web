@@ -69,6 +69,19 @@ reg({
   defaultData: { blockType: 'variableSource', label: 'Variable', value: 0 },
 })
 
+reg({
+  type: 'boolean_input',
+  label: 'Boolean',
+  category: 'input',
+  nodeKind: 'csSource',
+  inputs: [],
+  defaultData: { blockType: 'boolean_input', label: 'Boolean', value: 0 },
+  description:
+    'Toggle switch outputting 0.0 (false) or 1.0 (true). Use with IfThenElse for conditional logic.',
+  synonyms: ['toggle', 'switch', 'true false', 'boolean', 'flag'],
+  tags: ['input', 'logic'],
+})
+
 // ── Constants category ────────────────────────────────────────────────────────
 // H4-1: Individual constant blocks (pi, euler, tau, phi, const.*) removed.
 // All constants accessed via the unified Constant picker backed by constantsCatalog.ts.

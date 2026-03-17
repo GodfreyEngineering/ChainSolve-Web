@@ -94,7 +94,7 @@ fn evaluate_node_inner(
 ) -> Value {
     match block_type {
         // ── Sources (0 inputs) ────────────────────────────────────
-        "number" | "slider" | "variableSource" => {
+        "number" | "slider" | "variableSource" | "boolean_input" => {
             let v = data
                 .get("value")
                 .and_then(|v| v.as_f64())

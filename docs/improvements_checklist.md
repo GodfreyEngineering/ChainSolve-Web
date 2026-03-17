@@ -126,7 +126,7 @@
 - [ ] **2.25** CurveFit: least-squares fitting to user-defined model (Levenberg-Marquardt algorithm), polynomial fit (degree N), spline smoothing — returns fitted parameters + R² + residuals
 - [ ] **2.26** Filter design: `DesignFilter` (Butterworth/Chebyshev I/II/elliptic, specify order + cutoff), `ApplyFilter` (FIR/IIR), `ZeroPhaseFilter` — for signal processing workflows
 - [x] **2.27** Norm blocks: L1, L2, Linf, Frobenius norms — for vectors and matrices
-- [ ] **2.28** RandomSample: uniform, normal, log-normal, Latin Hypercube, Sobol sequence, Halton sequence — with seed control for reproducibility
+- [x] **2.28** RandomSample: uniform, normal, log-normal, Latin Hypercube, Sobol sequence, Halton sequence — with seed control for reproducibility
 
 ### 2C — ODE/DAE/PDE Solver Blocks
 

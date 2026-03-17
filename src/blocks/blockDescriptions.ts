@@ -14,6 +14,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Interactive slider for exploring a range of values. Drag to sweep through min/max and see results update live.',
   variableSource:
     'Reference a named variable defined in the Variables panel. Output updates when the variable value changes.',
+  boolean_input:
+    'Toggle switch outputting 0 (false) or 1 (true). Connect to IfThenElse for conditional computation.',
 
   // ── Constants ────────────────────────────────────────────────────────────
   constant:
