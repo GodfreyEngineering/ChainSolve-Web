@@ -65,6 +65,10 @@ pub enum Value {
     Interval { lo: f64, hi: f64 },
     Complex { re: f64, im: f64 },
     Matrix { rows: usize, cols: usize, data: Vec<f64> }, // row-major
+    /// Phase 3: Arbitrary-precision float value. The `display` string carries
+    /// the full decimal expansion losslessly across the WASM boundary. The
+    /// `approx` f64 provides a fast preview for display/comparison.
+    HighPrecision { display: String, approx: f64, precision: u32 },
 }
 
 impl Value {
@@ -155,6 +159,7 @@ impl Value {
             Value::Interval { .. } => "interval",
             Value::Complex { .. } => "complex",
             Value::Matrix { .. } => "matrix",
+            Value::HighPrecision { .. } => "highPrecision",
         }
     }
 
@@ -179,6 +184,7 @@ impl Value {
             Value::Interval { lo, hi } => ValueSummary::Interval { lo: *lo, hi: *hi },
             Value::Complex { re, im } => ValueSummary::Complex { re: *re, im: *im },
             Value::Matrix { rows, cols, data: _ } => ValueSummary::Matrix { rows: *rows, cols: *cols },
+            Value::HighPrecision { approx, .. } => ValueSummary::Scalar { value: *approx },
         }
     }
 }

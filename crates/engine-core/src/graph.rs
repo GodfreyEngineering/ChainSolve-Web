@@ -778,6 +778,10 @@ fn compute_value_hash(value: &Value) -> u64 {
                 elem.to_bits().hash(&mut hasher);
             }
         }
+        Value::HighPrecision { display, precision, .. } => {
+            display.hash(&mut hasher);
+            precision.hash(&mut hasher);
+        }
     }
     hasher.finish()
 }

@@ -3536,6 +3536,8 @@ fn canonicalize_value(v: Value) -> Value {
             cols,
             data: data.into_iter().map(canonicalize).collect(),
         },
+        // HighPrecision values are already canonicalized (arbitrary precision, no f64 artefacts)
+        Value::HighPrecision { .. } => v,
     }
 }
 
