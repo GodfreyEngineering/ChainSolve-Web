@@ -372,7 +372,7 @@
 - [ ] **4.19** WebSocket input: live sensor data at up to 1kHz with ring buffer — for DAQ integration
 - [ ] **4.20** SQL query block: connect to PostgreSQL (via Supabase), parameterised queries, output as DataTable
 - [ ] **4.21** REST/GraphQL API client block: request builder with auth (API key, OAuth, Bearer), JSON parsing
-- [ ] **4.22** Data versioning: SHA-256 content-hash every referenced dataset — graphs reference by hash for reproducibility
+- [x] **4.22** Data versioning: SHA-256 content-hash every referenced dataset — graphs reference by hash for reproducibility
 
 ---
 
