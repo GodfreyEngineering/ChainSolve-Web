@@ -118,6 +118,9 @@ export function useGraphEngine(
   // UI-PERF-02: per-node subscription store — stable instance for the hook's lifetime
   const [store] = useState(() => new ComputedStore())
   const setEngineStatus = useStatusBarStore((s) => s.setEngineStatus)
+  const setIsStale = useStatusBarStore((s) => s.setIsStale)
+  const setLastEvalMs = useStatusBarStore((s) => s.setLastEvalMs)
+  const setLastEvalNodeCount = useStatusBarStore((s) => s.setLastEvalNodeCount)
   const prevNodesRef = useRef<Node[]>([])
   const prevEdgesRef = useRef<Edge[]>([])
   const snapshotLoaded = useRef(false)
@@ -266,6 +269,10 @@ export function useGraphEngine(
             result.partial ?? false,
             telemetryOpts,
           )
+          // Phase 1E: Update stale/timing state after successful eval.
+          setIsStale(false)
+          setLastEvalMs(Math.round(result.elapsedUs / 1000))
+          setLastEvalNodeCount(Object.keys(result.values).length)
           setEngineStatus('idle')
         })
         .catch((err: unknown) => {
@@ -348,6 +355,10 @@ export function useGraphEngine(
               result.partial ?? false,
               telemetryOpts,
             )
+            // Phase 1E: Update stale/timing state after successful patch eval.
+            setIsStale(false)
+            setLastEvalMs(Math.round(result.elapsedUs / 1000))
+            setLastEvalNodeCount(result.evaluatedCount)
             setEngineStatus('idle')
           })
           .catch((err: unknown) => {
@@ -364,6 +375,11 @@ export function useGraphEngine(
       if (schedulerRef.current) {
         schedulerRef.current.onFlush(firePatch)
         schedulerRef.current.enqueue(ops)
+        // Phase 1E: Mark graph as stale when ops are enqueued but not yet dispatched.
+        // In auto mode the scheduler flushes immediately (after debounce), so
+        // isStale is briefly true then cleared by the eval callback.
+        // In manual/deferred mode, isStale stays true until the user clicks Run.
+        setIsStale(true)
       }
     }
 
@@ -385,6 +401,9 @@ export function useGraphEngine(
     variables,
     publishedOutputs,
     setEngineStatus,
+    setIsStale,
+    setLastEvalMs,
+    setLastEvalNodeCount,
     store,
     telemetryOpts,
     angleUnit,
