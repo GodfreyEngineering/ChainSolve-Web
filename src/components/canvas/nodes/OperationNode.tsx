@@ -9,7 +9,7 @@
  */
 
 import type { CSSProperties } from 'react'
-import { memo, useCallback, useMemo, lazy, Suspense } from 'react'
+import { memo, useCallback, useContext, useMemo, lazy, Suspense } from 'react'
 import {
   Handle,
   Position,
@@ -18,7 +18,7 @@ import {
   type NodeProps,
   type IsValidConnection,
 } from '@xyflow/react'
-import { useComputedValue } from '../../../contexts/ComputedContext'
+import { useComputedValue, ComputedStoreContext } from '../../../contexts/ComputedContext'
 import { useShowValuePopover } from '../../../contexts/ValuePopoverContext'
 import { formatValue, isError } from '../../../engine/value'
 import { BLOCK_REGISTRY, type NodeData } from '../../../blocks/registry'
@@ -74,6 +74,11 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   // 4.05: Inferred unit from propagation (display-only)
   const inferredUnits = useInferredUnits()
   const inferredUnit = inferredUnits.get(id)
+
+  // 3.17: Coercion indicator — detect which input ports receive a scalar that
+  // gets broadcast to a vector/matrix output. We read the ComputedStore directly
+  // (not a hook) to look up source node values without conditional hook calls.
+  const computedStore = useContext(ComputedStoreContext)
 
   const def = BLOCK_REGISTRY.get(nd.blockType)
   const isVariadic = def?.variadic === true
@@ -295,6 +300,17 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
           const override = portOverrides[port.id] === true
           const showInput = !connected || override
 
+          // 3.17: Detect scalar→vector broadcast coercion on this port.
+          // If the source node emits a scalar but our output is vector/matrix, broadcast occurred.
+          const isCoerced: boolean = (() => {
+            if (!connected || !computedStore) return false
+            const edge = allEdges.find((e) => e.target === id && e.targetHandle === port.id)
+            if (!edge) return false
+            const srcVal = computedStore.get(edge.source)
+            if (!srcVal || srcVal.kind !== 'scalar') return false
+            return value?.kind === 'vector' || value?.kind === 'table'
+          })()
+
           const topPx = (i + 0.5) * ROW_H
 
           return (
@@ -369,6 +385,24 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
                   </button>
                 )}
               </span>
+
+              {/* 3.17: Coercion indicator — scalar input broadcast to vector */}
+              {isCoerced && (
+                <span
+                  title="Scalar broadcasted to vector"
+                  style={{
+                    fontSize: '0.6rem',
+                    color: 'var(--value-color-interval, #fb923c)',
+                    opacity: 0.9,
+                    flexShrink: 0,
+                    marginRight: 2,
+                    lineHeight: 1,
+                    cursor: 'default',
+                  }}
+                >
+                  ↗
+                </span>
+              )}
 
               {showInput ? (
                 <ValueEditor
