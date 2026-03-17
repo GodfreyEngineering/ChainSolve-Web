@@ -12,6 +12,8 @@ import type {
   ScaleType,
   LegendPosition,
   PlotThemePreset,
+  ReferenceLine,
+  AnnotationType,
 } from '../../blocks/types'
 import type { Value } from '../../engine/value'
 import { isTable } from '../../engine/value'
@@ -304,6 +306,214 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
             )}
         </>
       )}
+
+      {/* Annotations: reference lines, bands, text labels */}
+      <AnnotationEditor
+        annotations={config.referenceLines ?? []}
+        onUpdate={(annotations) => onUpdate({ referenceLines: annotations })}
+      />
+    </div>
+  )
+}
+
+// ── Annotation editor sub-component ────────────────────────────────────────
+
+interface AnnotationEditorProps {
+  annotations: ReferenceLine[]
+  onUpdate: (annotations: ReferenceLine[]) => void
+}
+
+const annotationHeaderStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  marginBottom: '0.4rem',
+  marginTop: '0.7rem',
+}
+
+const smallBtn: React.CSSProperties = {
+  fontSize: '0.7rem',
+  padding: '0.15rem 0.4rem',
+  borderRadius: 4,
+  border: '1px solid rgba(255,255,255,0.15)',
+  background: 'rgba(28,171,176,0.15)',
+  color: 'var(--primary)',
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+}
+
+const annotationCard: React.CSSProperties = {
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: 6,
+  padding: '0.4rem 0.5rem',
+  marginBottom: '0.4rem',
+  background: 'rgba(0,0,0,0.12)',
+}
+
+const tinyInp: React.CSSProperties = {
+  padding: '0.18rem 0.35rem',
+  borderRadius: 4,
+  border: '1px solid rgba(255,255,255,0.1)',
+  background: 'rgba(0,0,0,0.2)',
+  color: 'var(--text)',
+  fontSize: '0.75rem',
+  fontFamily: 'inherit',
+  outline: 'none',
+  width: '100%',
+  boxSizing: 'border-box',
+}
+
+function AnnotationEditor({ annotations, onUpdate }: AnnotationEditorProps) {
+  const { t } = useTranslation()
+
+  const updateAt = (idx: number, patch: Partial<ReferenceLine>) => {
+    const next = annotations.map((a, i) => (i === idx ? { ...a, ...patch } : a))
+    onUpdate(next)
+  }
+
+  const removeAt = (idx: number) => {
+    onUpdate(annotations.filter((_, i) => i !== idx))
+  }
+
+  const addAnnotation = () => {
+    onUpdate([...annotations, { type: 'line', axis: 'y', value: 0, color: '#ef4444' }])
+  }
+
+  return (
+    <div style={{ marginTop: '0.5rem' }}>
+      <div style={annotationHeaderStyle}>
+        <span
+          style={{
+            fontSize: '0.6rem',
+            fontWeight: 700,
+            letterSpacing: '0.05em',
+            color: 'rgba(28,171,176,0.6)',
+            textTransform: 'uppercase',
+          }}
+        >
+          {t('plot.annotations')}
+        </span>
+        <button style={smallBtn} onClick={addAnnotation}>
+          {t('plot.annotationAdd')}
+        </button>
+      </div>
+
+      {annotations.map((ann, idx) => {
+        const kind: AnnotationType = ann.type ?? 'line'
+        return (
+          <div key={idx} style={annotationCard}>
+            {/* Row 1: type + axis + remove */}
+            <div
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '0.3rem', marginBottom: '0.3rem' }}
+            >
+              <select
+                style={{ ...tinyInp, appearance: 'auto', cursor: 'pointer' }}
+                value={kind}
+                onChange={(e) => updateAt(idx, { type: e.target.value as AnnotationType })}
+              >
+                <option value="line">{t('plot.annotationLine')}</option>
+                <option value="band">{t('plot.annotationBand')}</option>
+                <option value="text">{t('plot.annotationText')}</option>
+              </select>
+              {kind !== 'text' && (
+                <select
+                  style={{ ...tinyInp, appearance: 'auto', cursor: 'pointer' }}
+                  value={ann.axis ?? 'y'}
+                  onChange={(e) => updateAt(idx, { axis: e.target.value as 'x' | 'y' })}
+                >
+                  <option value="x">{t('plot.annotationAxisX')}</option>
+                  <option value="y">{t('plot.annotationAxisY')}</option>
+                </select>
+              )}
+              {kind === 'text' && <div />}
+              <button
+                style={{ ...smallBtn, background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}
+                onClick={() => removeAt(idx)}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Row 2: value fields */}
+            {kind === 'line' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem', marginBottom: '0.3rem' }}>
+                <input
+                  type="number"
+                  style={tinyInp}
+                  value={ann.value ?? 0}
+                  placeholder={t('plot.annotationValue')}
+                  onChange={(e) => updateAt(idx, { value: Number(e.target.value) })}
+                />
+                <input
+                  type="color"
+                  style={{ ...tinyInp, padding: '0.1rem', height: '1.6rem', cursor: 'pointer' }}
+                  value={ann.color ?? '#ef4444'}
+                  onChange={(e) => updateAt(idx, { color: e.target.value })}
+                />
+              </div>
+            )}
+
+            {kind === 'band' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.3rem', marginBottom: '0.3rem' }}>
+                <input
+                  type="number"
+                  style={tinyInp}
+                  value={ann.value ?? 0}
+                  placeholder={t('plot.annotationFrom')}
+                  onChange={(e) => updateAt(idx, { value: Number(e.target.value) })}
+                />
+                <input
+                  type="number"
+                  style={tinyInp}
+                  value={ann.value2 ?? 0}
+                  placeholder={t('plot.annotationTo')}
+                  onChange={(e) => updateAt(idx, { value2: Number(e.target.value) })}
+                />
+                <input
+                  type="color"
+                  style={{ ...tinyInp, padding: '0.1rem', height: '1.6rem', cursor: 'pointer' }}
+                  value={ann.color ?? '#ef4444'}
+                  onChange={(e) => updateAt(idx, { color: e.target.value })}
+                />
+              </div>
+            )}
+
+            {kind === 'text' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.3rem', marginBottom: '0.3rem' }}>
+                <input
+                  type="number"
+                  style={tinyInp}
+                  value={ann.x ?? 0}
+                  placeholder="X"
+                  onChange={(e) => updateAt(idx, { x: Number(e.target.value) })}
+                />
+                <input
+                  type="number"
+                  style={tinyInp}
+                  value={ann.y ?? 0}
+                  placeholder="Y"
+                  onChange={(e) => updateAt(idx, { y: Number(e.target.value) })}
+                />
+                <input
+                  type="color"
+                  style={{ ...tinyInp, padding: '0.1rem', height: '1.6rem', cursor: 'pointer' }}
+                  value={ann.color ?? '#ef4444'}
+                  onChange={(e) => updateAt(idx, { color: e.target.value })}
+                />
+              </div>
+            )}
+
+            {/* Row 3: label / text content */}
+            <input
+              type="text"
+              style={tinyInp}
+              value={ann.text ?? ann.label ?? ''}
+              placeholder={kind === 'text' ? t('plot.annotationTextContent') : t('plot.annotationLabel')}
+              onChange={(e) => updateAt(idx, { text: e.target.value || undefined, label: undefined })}
+            />
+          </div>
+        )
+      })}
     </div>
   )
 }

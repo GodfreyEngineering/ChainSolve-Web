@@ -96,9 +96,22 @@ export type ScaleType = 'linear' | 'log'
 export type LegendPosition = 'right' | 'bottom' | 'none'
 export type PlotThemePreset = 'paper-single' | 'paper-double' | 'presentation' | 'report'
 
+export type AnnotationType = 'line' | 'band' | 'text'
+
 export interface ReferenceLine {
-  axis: 'x' | 'y'
-  value: number
+  /** Annotation kind: reference line, shaded band, or floating text label. Default: 'line'. */
+  type?: AnnotationType
+  /** Primary axis value (for line) or band start (for band), or ignored (for text). */
+  axis?: 'x' | 'y'
+  value?: number
+  /** Band end value (type='band' only). */
+  value2?: number
+  /** Text content (type='text') or line label (type='line'). */
+  text?: string
+  /** X coordinate for floating text annotation (type='text'). */
+  x?: number
+  /** Y coordinate for floating text annotation (type='text'). */
+  y?: number
   label?: string
   color?: string
 }

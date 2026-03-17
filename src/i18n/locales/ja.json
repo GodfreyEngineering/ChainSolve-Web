@@ -514,7 +514,19 @@
     "addTitle": "Add title…",
     "toggleXLog": "Toggle X log scale",
     "toggleYLog": "Toggle Y log scale",
-    "exportCSV": "Export CSV"
+    "exportCSV": "Export CSV",
+    "annotations": "注釈",
+    "annotationAdd": "+ 追加",
+    "annotationLine": "線",
+    "annotationBand": "帯",
+    "annotationText": "テキスト",
+    "annotationAxisX": "X軸",
+    "annotationAxisY": "Y軸",
+    "annotationValue": "値",
+    "annotationFrom": "開始",
+    "annotationTo": "終了",
+    "annotationLabel": "ラベル（任意）",
+    "annotationTextContent": "テキスト内容"
   },
   "settings": {
     "title": "Settings",

@@ -506,7 +506,19 @@
     "addTitle": "Add title…",
     "toggleXLog": "Toggle X log scale",
     "toggleYLog": "Toggle Y log scale",
-    "exportCSV": "Export CSV"
+    "exportCSV": "Export CSV",
+    "annotations": "Annotations",
+    "annotationAdd": "+ Ajouter",
+    "annotationLine": "Ligne",
+    "annotationBand": "Bande",
+    "annotationText": "Texte",
+    "annotationAxisX": "Axe X",
+    "annotationAxisY": "Axe Y",
+    "annotationValue": "Valeur",
+    "annotationFrom": "De",
+    "annotationTo": "À",
+    "annotationLabel": "Étiquette (optionnel)",
+    "annotationTextContent": "Contenu du texte"
   },
   "settings": {
     "title": "Paramètres",

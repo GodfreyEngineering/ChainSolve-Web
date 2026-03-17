@@ -1545,7 +1545,19 @@
     "addTitle": "Add title…",
     "toggleXLog": "Toggle X log scale",
     "toggleYLog": "Toggle Y log scale",
-    "exportCSV": "Export CSV"
+    "exportCSV": "Export CSV",
+    "annotations": "הערות",
+    "annotationAdd": "+ הוסף",
+    "annotationLine": "קו",
+    "annotationBand": "רצועה",
+    "annotationText": "טקסט",
+    "annotationAxisX": "ציר X",
+    "annotationAxisY": "ציר Y",
+    "annotationValue": "ערך",
+    "annotationFrom": "מ",
+    "annotationTo": "עד",
+    "annotationLabel": "תווית (אופציונלי)",
+    "annotationTextContent": "תוכן הטקסט"
   },
   "groups": {
     "name": "שם",

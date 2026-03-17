@@ -9,7 +9,7 @@
 
 import type { Value } from '../engine/value'
 import { isVector, isTable, isScalar, isError } from '../engine/value'
-import type { PlotConfig, PlotThemePreset } from '../blocks/types'
+import type { PlotConfig, PlotThemePreset, ReferenceLine } from '../blocks/types'
 import { lttbDownsample, type Point } from './downsample'
 
 // ── Theme presets ──────────────────────────────────────────────────────────
@@ -616,7 +616,7 @@ function buildSpec(
     base.encoding.color.legend = null
   }
 
-  // Reference lines as layer
+  // Annotations (reference lines, bands, text labels) as extra Vega-Lite layers
   if (config.referenceLines && config.referenceLines.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mainLayer: Record<string, any> = { mark: base.mark, encoding: base.encoding }
@@ -626,13 +626,84 @@ function buildSpec(
       mainLayer.transform = base.transform
       delete base.transform
     }
-    const ruleLayers = config.referenceLines.map((rl) => ({
-      mark: { type: 'rule', color: rl.color ?? '#ef4444', strokeDash: [4, 4] },
-      encoding: {
-        [rl.axis]: { datum: rl.value },
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const annotationLayers: Record<string, any>[] = config.referenceLines.flatMap(
+      (rl: ReferenceLine) => {
+        const kind = rl.type ?? 'line'
+        const colour = rl.color ?? '#ef4444'
+
+        if (kind === 'band' && rl.axis && rl.value !== undefined && rl.value2 !== undefined) {
+          // Shaded rectangular band between value and value2 on the given axis
+          const isX = rl.axis === 'x'
+          return [
+            {
+              mark: { type: 'rect', color: colour, opacity: 0.15 },
+              encoding: isX
+                ? { x: { datum: rl.value }, x2: { datum: rl.value2 } }
+                : { y: { datum: rl.value }, y2: { datum: rl.value2 } },
+            },
+          ]
+        }
+
+        if (kind === 'text' && rl.x !== undefined && rl.y !== undefined) {
+          // Floating text annotation at explicit (x, y) coordinates
+          return [
+            {
+              mark: {
+                type: 'text',
+                color: colour,
+                fontSize: 11,
+                fontWeight: 600,
+                align: 'left',
+                baseline: 'bottom',
+                dx: 4,
+              },
+              encoding: {
+                x: { datum: rl.x },
+                y: { datum: rl.y },
+                text: { value: rl.text ?? '' },
+              },
+            },
+          ]
+        }
+
+        // Default: reference line (rule mark) — original behaviour
+        if (rl.axis && rl.value !== undefined) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const layers: Record<string, any>[] = [
+            {
+              mark: { type: 'rule', color: colour, strokeDash: [4, 4] },
+              encoding: { [rl.axis]: { datum: rl.value } },
+            },
+          ]
+          // Optional label on the line
+          const labelText = rl.text ?? rl.label
+          if (labelText) {
+            layers.push({
+              mark: {
+                type: 'text',
+                color: colour,
+                fontSize: 10,
+                align: rl.axis === 'x' ? 'left' : 'right',
+                baseline: rl.axis === 'x' ? 'bottom' : 'middle',
+                dx: rl.axis === 'x' ? 4 : -4,
+                dy: rl.axis === 'x' ? -4 : 0,
+              },
+              encoding: {
+                [rl.axis]: { datum: rl.value },
+                text: { value: labelText },
+              },
+            })
+          }
+          return layers
+        }
+
+        return []
       },
-    }))
-    base.layer = [mainLayer, ...ruleLayers]
+    )
+
+    base.layer = [mainLayer, ...annotationLayers]
   }
 
   // Interactive: scroll-to-zoom, drag-to-pan (double-click resets), hover tooltip
