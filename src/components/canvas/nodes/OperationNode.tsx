@@ -63,7 +63,20 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const inferredUnit = inferredUnits.get(id)
 
   const def = BLOCK_REGISTRY.get(nd.blockType)
-  const inputs = def?.inputs ?? []
+  const isVariadic = def?.variadic === true
+  const minInputs = def?.minInputs ?? 2
+  const maxInputs = def?.maxInputs ?? 64
+  const dynamicInputCount = (nd.dynamicInputCount as number | undefined) ?? minInputs
+
+  // For variadic blocks, generate dynamic input ports (in_0, in_1, ..., in_N).
+  // For non-variadic blocks, use the static inputs from the block definition.
+  const inputs = useMemo(() => {
+    if (!isVariadic) return def?.inputs ?? []
+    return Array.from({ length: dynamicInputCount }, (_, i) => ({
+      id: `in_${i}`,
+      label: `${i + 1}`,
+    }))
+  }, [isVariadic, dynamicInputCount, def?.inputs])
 
   // SCI-06: Whether this block is angle-unit-sensitive.
   const isTrigBlock = ANGLE_UNIT_OPS.has(nd.blockType)
@@ -151,7 +164,8 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
 
   const ROW_H = 30
   const CONVERT_EXTRA = isConvert ? 58 : 0
-  const bodyH = Math.max(inputs.length * ROW_H, 36) + CONVERT_EXTRA
+  const variadicExtraH = isVariadic && dynamicInputCount < maxInputs ? 18 : 0
+  const bodyH = Math.max(inputs.length * ROW_H, 36) + CONVERT_EXTRA + variadicExtraH
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
   const TypeIcon = getNodeTypeIcon(nd.blockType)
@@ -305,6 +319,29 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
                     </span>
                   ) : null
                 })()}
+                {/* Phase 2C: Remove button for variadic ports beyond minInputs */}
+                {isVariadic && i >= minInputs && (
+                  <button
+                    className="nodrag nopan"
+                    onClick={() => {
+                      const newCount = Math.max(minInputs, dynamicInputCount - 1)
+                      updateNodeData(id, { dynamicInputCount: newCount })
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'rgba(255,255,255,0.3)',
+                      fontSize: '0.55rem',
+                      cursor: 'pointer',
+                      padding: '0 2px',
+                      marginLeft: 2,
+                      lineHeight: 1,
+                    }}
+                    title={t('toolbar.removeInput', 'Remove input')}
+                  >
+                    \u00D7
+                  </button>
+                )}
               </span>
 
               {showInput ? (
@@ -357,6 +394,31 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
             </div>
           )
         })}
+
+        {/* Phase 2C: Add/remove input buttons for variadic blocks */}
+        {isVariadic && dynamicInputCount < maxInputs && (
+          <button
+            className="nodrag nopan"
+            onClick={() => updateNodeData(id, { dynamicInputCount: dynamicInputCount + 1 })}
+            style={{
+              position: 'absolute',
+              top: inputs.length * ROW_H + 2,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'none',
+              border: '1px dashed rgba(255,255,255,0.2)',
+              borderRadius: 3,
+              color: 'rgba(255,255,255,0.4)',
+              fontSize: '0.6rem',
+              cursor: 'pointer',
+              padding: '0 6px',
+              lineHeight: '14px',
+            }}
+            title={t('toolbar.addInput', '+ Input')}
+          >
+            +
+          </button>
+        )}
 
         {/* H1-3: Dual unit pickers for unit_convert block */}
         {isConvert && (
