@@ -1,695 +1,575 @@
 # ChainSolve Engine & Platform Improvements Checklist
 
-> **Goal:** Transform ChainSolve into the best-in-class computation workbench — faster than MATLAB, more accurate than Excel, with a UI that feels buttery smooth. Every step below is a concrete, implementable micro-task ordered by priority and dependency.
+> **Goal:** Transform ChainSolve into the obvious best-in-class computation workbench — faster than MATLAB, more accurate than Excel, better workflow than Altair HyperStudy. The UI must feel buttery smooth, the engine must be scientifically trustworthy, and the platform must scale from simple `1+1` to full vehicle simulations with neural networks.
 >
 > **Core pillars (priority order):**
-> 1. **Performance** — 60fps canvas, instant feedback, zero wasted computation
+>
+> 1. **Performance** — 60fps canvas, zero wasted computation, reactive-only evaluation
 > 2. **Accuracy** — IEEE 754 rigour, compensated algorithms, optional arbitrary precision to 9,999 decimal places
-> 3. **Capability** — ODE solvers, vehicle simulation, neural network training, LP/QP optimization
-> 4. **UX** — Run button, stale indicators, progress feedback, pre-run validation
+> 3. **UX** — Formula bar expression language, variadic blocks, magnetic snapping, professional polish
+> 4. **Capability** — ODE solvers, vehicle simulation, neural network training, LP/QP optimization
+>
+> **Evaluation philosophy:** ChainSolve evaluates **reactively** — when inputs, blocks, or chains change. Never continuously. Never in a loop. Simulations and training have defined endpoints. Simple and efficient.
 
 ---
 
-## Phase 0 — Drag Performance Fix (Critical / Immediate)
+## Phase 0 — Drag Performance Fix (DONE)
 
-The canvas must feel instant. Dragging blocks currently triggers constant eval cycles and graph health checks.
+The canvas must feel instant. Dragging blocks no longer triggers eval cycles or graph health checks.
 
-- [x] **0.1** In `CanvasArea.tsx`, add a `isDragging` ref (`useRef(false)`) to track drag state without re-renders
-- [x] **0.2** In `onNodeDragStart` callback, call `setPaused(true)` and set `isDragging.current = true`
-- [x] **0.3** In `onNodeDragStop` callback, set `isDragging.current = false` then use `setTimeout(() => setPaused(false), 200)` as a 200ms settle delay so rapid drag-release-drag doesn't thrash the engine
-- [x] **0.4** Wire `onSelectionDragStart` / `onSelectionDragStop` with the same pause/unpause logic for multi-select drags *(React Flow v12 uses onNodeDragStart/Stop for selection drags — covered by 0.2/0.3)*
-- [x] **0.5** Wire React Flow `onMoveStart` / `onMoveEnd` with the same logic for viewport pan/zoom (these also trigger re-renders via `onNodesChange`)
-- [x] **0.6** In `useGraphEngine.ts` line 206, remove the `computeGraphHealth()` call from the snapshot eval `.then()` callback — this O(V+E) computation runs on every snapshot eval and is the main source of the "Graph health" console spam
-- [x] **0.7** Move `computeGraphHealth` to be called on-demand only: when `GraphHealthPanel` is open (it's already lazy-loaded), and as part of pre-run validation (Phase 1)
-- [x] **0.8** In `useGraphEngine.ts`, on the unpause transition (line 158-159), check if `diffGraph` produces any ops before forcing a full snapshot reload — if only positions changed during drag, skip the reload entirely and just update refs
-- [ ] **0.9** [BLOCKED: requires browser environment] Add a unit test: mock `useGraphEngine` with `paused=true`, verify zero engine calls are made
-- [ ] **0.10** [BLOCKED: requires browser environment] Manual verification: open a 50+ node project, drag a block — confirm zero "Graph health" / "snapshot eval" messages in debug console, confirm 60fps in Chrome DevTools Performance tab
+- [x] **0.1** Add `isDragging` ref to `CanvasArea.tsx` to track drag state without re-renders
+- [x] **0.2** Pause engine on `onNodeDragStart`
+- [x] **0.3** Unpause on `onNodeDragStop` with 200ms settle delay (prevents thrash on rapid drag-release-drag)
+- [x] **0.4** Selection drags covered by 0.2/0.3 (React Flow v12 uses same events)
+- [x] **0.5** Pause/unpause on `onMoveStart`/`onMoveEnd` for viewport pan/zoom
+- [x] **0.6** Remove `computeGraphHealth()` from the snapshot eval hot path in `useGraphEngine.ts`
+- [x] **0.7** Graph health now on-demand only (GraphHealthPanel lazy-loads and computes its own)
+- [x] **0.8** Optimised unpause transition — skip full snapshot reload when only positions changed
+- [ ] **0.9** [BLOCKED: browser] Unit test: `paused=true` → zero engine calls
+- [ ] **0.10** [BLOCKED: browser] Manual verification: 60fps drag on 50+ node project
 
 ---
 
-## Phase 1 — Evaluation Model Redesign
+## Phase 1 — Reactive Evaluation Model (REWORK from previous auto/deferred/manual)
 
-Replace the "always auto-eval" model with a smart hybrid that auto-evals small graphs and requires manual runs for large ones.
+Evaluation is **reactive**: fires once when inputs/blocks/chains change, never continuously. Optional manual mode for users who want explicit Run control.
 
-### 1A — Eval Scheduler
+### 1A — Simplify EvalScheduler
 
-- [x] **1.1** Create `src/engine/evalScheduler.ts` — a class (not a hook) that encapsulates patch accumulation and dispatch:
-  - `pendingOps: PatchOp[]` — accumulated patches
-  - `mode: 'auto' | 'deferred' | 'manual'` — current eval mode
-  - `enqueue(ops: PatchOp[]): void` — adds ops, schedules dispatch based on mode
-  - `flush(): void` — dispatches all pending ops to the engine immediately
-  - `clear(): void` — discards pending ops (for navigation/disposal)
-  - `pendingCount: number` — getter for UI
-- [x] **1.2** Auto mode: `enqueue` calls `flush` after `PATCH_DEBOUNCE_MS` (50ms) for data-only changes, immediately for structural changes (existing behavior)
-- [x] **1.3** Deferred mode: `enqueue` schedules via `requestIdleCallback` with a 2000ms timeout fallback — evaluation fires after 2s of idle or immediately if the user presses Run
-- [x] **1.4** Manual mode: `enqueue` only updates `pendingCount` in the status bar store — evaluation only fires on explicit `flush()` call (Run button)
-- [x] **1.5** Add auto-detection logic: `mode = nodeCount < 50 ? 'auto' : nodeCount < 300 ? 'deferred' : 'manual'` — user can override per project
-- [x] **1.6** Write unit tests for `evalScheduler`: verify auto dispatches after debounce, deferred dispatches on idle, manual only on flush
+- [x] **1.1** `EvalScheduler` class created in `src/engine/evalScheduler.ts`
+- [ ] **1.2** [REWORK] Change `EvalMode` type from `'auto' | 'deferred' | 'manual'` to `'reactive' | 'manual'`
+- [ ] **1.3** [REWORK] Remove `_scheduleDeferred()` method and all `requestIdleCallback` / idle-fallback logic
+- [ ] **1.4** [REWORK] Rename `_scheduleAuto()` to `_scheduleReactive()` — structural changes fire immediately, data-only changes debounce 50ms for keystroke coalescing then fire once
+- [ ] **1.5** [REWORK] Remove `suggestEvalMode()` — no auto-detection by node count. Default is always `'reactive'`
+- [ ] **1.6** [REWORK] Update constructor default from `'auto'` to `'reactive'`
+- [ ] **1.7** [REWORK] Update all 15 evalScheduler tests: replace `'auto'` with `'reactive'`, remove deferred tests, add reactive-specific tests
 
-### 1B — Refactor useGraphEngine to Use Scheduler
+### 1B — Update useGraphEngine
 
-- [x] **1.7** Add `evalMode: 'auto' | 'deferred' | 'manual'` parameter to `useGraphEngine` hook
-- [x] **1.8** Replace the inline debounce/dispatch logic (lines 260-349) with calls to `evalScheduler.enqueue()` and `evalScheduler.flush()`
-- [x] **1.9** Add `triggerEval` callback to the hook's return value — calls `evalScheduler.flush()`, used by the Run button
-- [x] **1.10** Add `pendingPatchCount` to the hook's return value — read from scheduler, used by status bar
-- [x] **1.11** Ensure the scheduler is disposed on hook cleanup (return function in useEffect)
+- [x] **1.8** `useGraphEngine` refactored to use scheduler
+- [x] **1.9** `triggerEval` callback in return value
+- [x] **1.10** `pendingPatchCount` in return value
+- [ ] **1.11** [REWORK] Update `evalMode` parameter type to `'reactive' | 'manual'`
 
-### 1C — Run / Stop / Auto-Run Buttons
+### 1C — Simplify CanvasToolbar
 
-- [x] **1.12** In `CanvasToolbar.tsx`, replace the existing Pause/Play + Refresh button group in the Engine section with:
-  - **Run button** (Play icon, `#1CABB0` accent): visible when `evalMode !== 'auto'` or when stale. Calls `onRun()` prop
-  - **Stop button** (Square icon, red accent): visible when `engineStatus === 'computing'`. Calls `onStop()` prop (cancels in-flight eval)
-  - **Auto-run toggle** (Zap icon): toggles between auto and manual mode. When toggling to auto, immediately calls `onRun()` if stale
-  - Keep the existing Refresh button for "force full snapshot reload"
-- [x] **1.13** Add `CanvasToolbarProps`: `onRun`, `onStop`, `evalMode`, `onToggleEvalMode`, `isStale`, `pendingPatchCount`
-- [x] **1.14** Wire props through `CanvasArea.tsx` → `CanvasToolbar` — triggerEval and pendingPatchCount from useGraphEngine
-- [x] **1.15** Add keyboard shortcuts in `CanvasArea.tsx` `onKeyDown` handler:
-  - `Ctrl+Enter` or `F5` → trigger eval (call `triggerEval`)
-  - *(Ctrl+Shift+Enter and Escape stop deferred to future iteration)*
-- [x] **1.16** Add i18n keys: `toolbar.run`, `toolbar.stop`, `toolbar.autoRun`, `toolbar.manualMode`, `toolbar.pendingChanges` — across all 7 locales (en, es, fr, it, de, he, ja)
+- [x] **1.12** Run button added to toolbar
+- [ ] **1.13** [REWORK] Always show Run button (useful for force-refresh in both modes). Remove Zap auto-run indicator entirely.
+- [ ] **1.14** [REWORK] Remove `evalMode` and mode-switching from toolbar props — no user-facing mode selection
+- [x] **1.15** Ctrl+Enter / F5 keyboard shortcuts wired
+- [x] **1.16** i18n keys added across all 7 locales
 
 ### 1D — Pre-Run Validation
 
-- [x] **1.17** In `crates/engine-core/src/graph.rs`, add `validate_pre_eval(catalog_inputs) -> Vec<Diagnostic>`:
-  - Cycle detection via Kahn's algorithm (reused from rebuild_topo)
-  - Missing required inputs: catalog-aware port checking against edges + manualValues
-  - Dangling edges: source/target node existence
-  - Returns diagnostics without running any evaluation
-- [x] **1.18** *(Deferred — value_type on PortDef not needed for Phase 1; catalog inputs map used instead)*
-- [x] **1.19** In `crates/engine-core/src/lib.rs`, add `pub fn run_validate(graph: &EngineGraph) -> Vec<Diagnostic>` — builds catalog inputs map, delegates to validate_pre_eval
-- [x] **1.20** In `crates/engine-wasm/src/lib.rs`, expose `validate_graph` via `#[wasm_bindgen]`
-- [x] **1.21** In `src/engine/worker.ts`, handle new `'validateGraph'` message type
-- [x] **1.22** In `src/engine/index.ts`, add `validateGraph(): Promise<EngineDiagnostic[]>` to `EngineAPI`
-- [ ] **1.23** Wire validation into the Run button flow: validate first → show diagnostics if errors → evaluate only if clean (or user force-runs) *(deferred — requires ProblemsPanel UI work)*
-- [ ] **1.24** Wire `ProblemsPanel.tsx` (already exists, lazy-loaded) to display validation diagnostics *(deferred — UI integration)*
-- [ ] **1.25** [BLOCKED: requires wasm:build to generate .d.ts] Add golden fixture for validation errors
-- [ ] **1.26** [BLOCKED: requires wasm:build] Add Rust unit tests for validate_pre_eval — will add inline tests once verified end-to-end
+- [x] **1.17** `validate_pre_eval()` in Rust `graph.rs` — cycles, missing inputs, dangling edges
+- [x] **1.18** `run_validate()` in `lib.rs` with catalog-aware port checking
+- [x] **1.19** `validate_graph` WASM export in `engine-wasm/src/lib.rs`
+- [x] **1.20** Worker handles `'validateGraph'` message
+- [x] **1.21** `EngineAPI.validateGraph()` method
+- [ ] **1.22** Wire validation into Run button flow: validate → show diagnostics → eval only if clean
+- [ ] **1.23** Wire `ProblemsPanel` to display validation diagnostics
 
-### 1E — Stale Result Tracking
+### 1E — Status Bar & Stale Tracking
 
-- [x] **1.27** Add to `statusBarStore.ts`:
-  - `evalMode: 'auto' | 'deferred' | 'manual'` with localStorage persistence (`cs:evalMode`)
-  - `isStale: boolean` — true when graph changed since last eval in non-auto mode
-  - `lastEvalMs: number | null` — elapsed time of last successful eval
-  - `lastEvalNodeCount: number` — nodes computed in last eval
-  - `pendingPatchCount: number` — patches waiting to be dispatched
-  - `setEvalMode`, `setIsStale`, `setLastEvalMs`, `setLastEvalNodeCount`, `setPendingPatchCount` actions
-- [x] **1.28** In `useGraphEngine.ts`, when scheduler enqueues ops, set `isStale = true`
-- [x] **1.29** After successful eval (snapshot + patch callbacks), set `isStale = false` and update `lastEvalMs` / `lastEvalNodeCount`
-- [ ] **1.30** Create `useIsStale(nodeId)` hook in `src/contexts/ComputedStore.ts` — returns true if node is in stale set *(deferred — requires per-node stale tracking, currently isStale is graph-wide)*
-- [ ] **1.31** In node components, when stale: apply `opacity: 0.5` and dashed border style *(deferred — depends on 1.30)*
-- [ ] **1.32** Add stale overlay CSS constants to `nodeStyles.ts` *(deferred — depends on 1.30)*
-
-### 1F — Enhanced Status Bar
-
-- [x] **1.33** *(Simplified approach: kept EngineStatus as simple union, added separate isStale/lastEvalMs/pendingPatchCount to store. Richer status computed in StatusBar component.)*
-  ```typescript
-  type EngineStatus =
-    | { state: 'idle' }
-    | { state: 'computing'; progress?: { completed: number; total: number } }
-    | { state: 'complete'; nodeCount: number; evalMs: number }
-    | { state: 'error'; errorCount: number }
-    | { state: 'stale'; pendingCount: number }
-  ```
-- [x] **1.34** Update `StatusBar.tsx` to render engine label with timing info, stale state, pending count, and eval mode indicator
-- [ ] **1.35** Add precision mode indicator reading from `usePreferencesStore` *(deferred to Phase 2)*
-- [ ] **1.36** Add thin progress bar element visible during computing *(deferred — CSS animation work)*
-- [x] **1.37** Add i18n keys: `statusBar.stale`, `statusBar.pendingChanges`, `statusBar.deferred` to en.json *(other locales deferred to housekeeping)*
+- [x] **1.24** `statusBarStore` has `evalMode`, `isStale`, `lastEvalMs`, `lastEvalNodeCount`, `pendingPatchCount`
+- [ ] **1.25** [REWORK] Update `EvalMode` type in statusBarStore to `'reactive' | 'manual'`, migrate stored `'auto'`/`'deferred'` values
+- [x] **1.26** `useGraphEngine` sets `isStale=true` on enqueue, `isStale=false` after eval
+- [x] **1.27** `StatusBar.tsx` shows timing, stale state, mode indicator
+- [ ] **1.28** [REWORK] Remove "Deferred" status text. Show "Reactive" or "Manual" only.
 
 ---
 
-## Phase 2 — Scientific Accuracy & Precision
+## Phase 2 — Multi-Input Variadic Blocks (NEW)
+
+Operator blocks (add, multiply, max, min, etc.) currently have exactly 2 inputs. Users need N inputs — drag more connections or click "+" to expand.
+
+### 2A — Rust Engine Variadic Support
+
+- [ ] **2.1** Add `variadic: bool`, `min_inputs: Option<u32>`, `max_inputs: Option<u32>` fields to `CatalogEntry` in `catalog.rs`
+- [ ] **2.2** Mark ops as variadic in the catalog: `add`, `multiply`, `max`, `min`, `vec.concat`, `text.concat` — with `min_inputs: 2, max_inputs: 64`
+- [ ] **2.3** Create `nary_broadcast()` in `ops.rs` — applies a binary associative op across N inputs (`in_0`, `in_1`, ..., `in_N`) by left-fold with broadcasting
+- [ ] **2.4** Create `nary_reduce()` in `ops.rs` — similar for non-broadcasting scalar reduction (max/min across many scalars)
+- [ ] **2.5** Update `add`, `multiply`, `max`, `min` match arms: if inputs contain `in_0`, use nary path; else fall back to existing `binary_broadcast` with `a`/`b` for backward compatibility
+- [ ] **2.6** Update `validate_pre_eval()` to skip fixed-port validation for variadic ops
+- [ ] **2.7** Unit tests: add with 3, 5, 10 inputs; multiply with 3; max/min with 4; scalar+vector mixing
+- [ ] **2.8** Golden fixtures: `variadic_add.fixture.json`, `variadic_multiply.fixture.json`
+
+### 2B — TypeScript Variadic Support
+
+- [ ] **2.9** Add `variadic?: boolean`, `minInputs?: number`, `maxInputs?: number` to `BlockDef` in `src/blocks/types.ts`
+- [ ] **2.10** Read variadic fields from catalog in WASM bridge
+- [ ] **2.11** Mark add, multiply, max, min as variadic in block definitions
+- [ ] **2.12** Update `diffGraph.ts` to handle dynamic port changes (new/removed ports emit appropriate ops)
+
+### 2C — Variadic Node UI
+
+- [ ] **2.13** In `OperationNode.tsx`, detect variadic blocks → render "+" button below last input handle
+- [ ] **2.14** "Add input" action: increment `dynamicInputCount` in node data, re-render handles with `in_0`...`in_N` IDs
+- [ ] **2.15** "Remove input" button on hover of each port beyond `minInputs` — removes port and disconnects edge
+- [ ] **2.16** Drag-to-expand: dragging a wire to the bottom of a variadic node auto-creates a new port
+- [ ] **2.17** i18n keys for add/remove port tooltips across all 7 locales
+- [ ] **2.18** E2E test: create add block with 4 inputs, wire numbers, verify sum
+
+---
+
+## Phase 3 — Scientific Accuracy & Precision
 
 Make ChainSolve trustworthy for PhD-level research and production vehicle calculations.
 
-### 2A — Arbitrary Precision Foundation
+### 3A — Arbitrary Precision Foundation
 
-- [ ] **2.1** Add `dashu-float` dependency to `crates/engine-core/Cargo.toml` behind a `high-precision` feature flag:
-  ```toml
-  [features]
-  default = []
-  high-precision = ["dashu-float"]
+- [ ] **3.1** Add `dashu-float` dependency to `engine-core/Cargo.toml` behind `high-precision` feature flag
+- [ ] **3.2** Enable feature in `engine-wasm/Cargo.toml`
+- [ ] **3.3** Add `Value::HighPrecision { display: String, approx: f64, precision: u32 }` to `types.rs`
+- [ ] **3.4** Update serde for new variant
+- [ ] **3.5** Update `canonicalize_value()` to pass through HP values
+- [ ] **3.6** Create `precision.rs` — HP arithmetic: add, sub, mul, div, sqrt, pow, sin, cos, pi (Chudnovsky)
+- [ ] **3.7** Add `precision: Option<u32>` to `EvalOptions`
+- [ ] **3.8** In `ops.rs`, branch to HP path when precision set
+- [ ] **3.9** Per-node precision override via `data.precision`
+- [ ] **3.10** Mirror `HighPrecision` in `src/engine/value.ts`
+- [ ] **3.11** Format HP values in `formatValue` — display string, truncated to user's display precision
+- [ ] **3.12** Precision mode selector in settings panel
+- [ ] **3.13** Golden fixture: `1/3 * 3 = 1.000...` at 100 digits
+- [ ] **3.14** Golden fixture: pi to 1000 digits
+- [ ] **3.15** Verify WASM size stays within 250KB gzip budget
 
-  [dependencies]
-  dashu-float = { version = "0.4", optional = true }
-  ```
-- [ ] **2.2** Enable the feature in `crates/engine-wasm/Cargo.toml` so it compiles into the WASM binary:
-  ```toml
-  engine-core = { path = "../engine-core", features = ["high-precision"] }
-  ```
-- [ ] **2.3** Add `Value::HighPrecision` variant to `crates/engine-core/src/types.rs`:
-  ```rust
-  HighPrecision {
-      /// Full decimal string representation (lossless across WASM boundary)
-      display: String,
-      /// f64 approximation for fast UI preview / comparisons
-      approx: f64,
-      /// Decimal digits of precision used
-      precision: u32,
-  }
-  ```
-- [ ] **2.4** Update serde serialization for the new variant — tagged as `"kind": "highPrecision"`
-- [ ] **2.5** Update `canonicalize_value()` in `ops.rs` to handle the new variant (pass through unchanged)
-- [ ] **2.6** Create `crates/engine-core/src/precision.rs` — high-precision arithmetic helpers:
-  - `hp_add(a: &str, b: &str, precision: u32) -> String`
-  - `hp_sub(a: &str, b: &str, precision: u32) -> String`
-  - `hp_mul(a: &str, b: &str, precision: u32) -> String`
-  - `hp_div(a: &str, b: &str, precision: u32) -> String`
-  - `hp_sqrt(a: &str, precision: u32) -> String`
-  - `hp_pow(base: &str, exp: &str, precision: u32) -> String`
-  - `hp_sin(a: &str, precision: u32) -> String` (Taylor series at arbitrary precision)
-  - `hp_cos(a: &str, precision: u32) -> String`
-  - `hp_pi(precision: u32) -> String` (Chudnovsky algorithm for ultra-fast pi)
-- [ ] **2.7** Add `precision: Option<u32>` to `EvalOptions` in `types.rs`
-- [ ] **2.8** In `ops.rs`, for arithmetic ops (add, sub, mul, div, sqrt, pow), add a branch: if `options.precision.is_some()`, call `precision.rs` functions instead of f64 arithmetic
-- [ ] **2.9** Add per-node precision override: read `data.precision` from `NodeDef` — if present, that node evaluates in HP mode regardless of global setting
-- [ ] **2.10** Mirror `HighPrecision` in `src/engine/value.ts`:
-  ```typescript
-  interface HighPrecisionValue {
-    kind: 'highPrecision'
-    display: string
-    approx: number
-    precision: number
-  }
-  ```
-- [ ] **2.11** Update `formatValue` in `src/engine/value.ts` to handle `HighPrecisionValue` — display the string directly, truncated to the user's display precision setting
-- [ ] **2.12** Add precision mode selector to canvas settings or project settings panel — dropdown: "Standard (f64)" / "High (100 digits)" / "Ultra (1000 digits)" / "Custom..."
-- [ ] **2.13** Add golden fixture: `hp_arithmetic.fixture.json` — test `1/3 * 3 = 1.000...` at 100 digits
-- [ ] **2.14** Add golden fixture: `hp_pi.fixture.json` — test pi to 1000 digits against known value
-- [ ] **2.15** Measure WASM size impact — `dashu-float` should add ~50-70KB gzipped, verify under 250KB gzip budget
-- [ ] **2.16** Add Rust unit tests: HP add/sub/mul/div roundtrip, HP vs f64 consistency for standard-precision values
+### 3B — Compensated Arithmetic
 
-### 2B — Compensated Arithmetic
+- [ ] **3.16** Create `compensated.rs` — Ogita-Rump-Oishi dot product, Kahan-Babuska-Neumaier sum, compensated two-product
+- [ ] **3.17** Replace `kahan_sum` in vector ops with `compensated_sum`
+- [ ] **3.18** Use `compensated_dot` in matrix multiply and statistics blocks
+- [ ] **3.19** Golden fixture: `sum(1e16, 1, -1e16) = 1`
+- [ ] **3.20** Benchmark: compensated within 2x of naive
 
-- [ ] **2.17** Create `crates/engine-core/src/compensated.rs`:
-  - `compensated_dot(a: &[f64], b: &[f64]) -> f64` — Ogita-Rump-Oishi algorithm for accurate dot products
-  - `compensated_sum(vals: &[f64]) -> f64` — Kahan-Babuskha-Neumaier (upgrade existing Kahan in ops.rs)
-  - `compensated_two_product(a: f64, b: f64) -> (f64, f64)` — error-free transformation for multiplication
-- [ ] **2.18** Replace existing `kahan_sum` usage in `ops.rs` vector ops with `compensated_sum`
-- [ ] **2.19** Use `compensated_dot` in matrix multiplication ops and statistics blocks (correlation, regression)
-- [ ] **2.20** Add golden fixture: `compensated_arithmetic.fixture.json` — test `sum(1e16, 1, -1e16) = 1` (naive gives 0)
-- [ ] **2.21** Benchmark: verify compensated algorithms are within 2x of naive performance for typical workloads
+### 3C — Uncertainty Propagation
 
-### 2C — Uncertainty Propagation (Future Enhancement)
-
-- [ ] **2.22** Design `Value::Uncertain { value: f64, uncertainty: f64, confidence: f64 }` variant
-- [ ] **2.23** Implement standard error propagation for arithmetic ops:
-  - Addition/subtraction: `delta_z = sqrt(delta_x^2 + delta_y^2)`
-  - Multiplication: `delta_z/z = sqrt((delta_x/x)^2 + (delta_y/y)^2)`
-- [ ] **2.24** Add opt-in uncertainty mode via `EvalOptions`
-- [ ] **2.25** Mirror in TypeScript value types
-- [ ] **2.26** Display uncertainty as `value ± uncertainty` in Display nodes
+- [ ] **3.21** Design `Value::Uncertain { value, uncertainty, confidence }` variant
+- [ ] **3.22** Implement standard error propagation for arithmetic ops
+- [ ] **3.23** Opt-in via `EvalOptions`
+- [ ] **3.24** Mirror in TypeScript
+- [ ] **3.25** Display as `value ± uncertainty` in Display nodes
 
 ---
 
-## Phase 3 — ODE/PDE Solvers (Physics Foundation)
+## Phase 4 — ODE/PDE Solvers
 
-These are required before vehicle simulation (Phase 4) — suspension models, thermal models, and lap simulation all need ODE solvers.
+Required before vehicle simulation — suspension, thermal models, and lap sim need ODE solvers.
 
-### 3A — Core ODE Module
+### 4A — Core ODE Module
 
-- [ ] **3.1** Create `crates/engine-core/src/ode/mod.rs` — module declaration with `pub mod rk4; pub mod rk45; pub mod bdf; pub mod types;`
-- [ ] **3.2** Create `crates/engine-core/src/ode/types.rs`:
-  - `OdeSystem` struct: `{ equations: Vec<String>, state_names: Vec<String>, params: HashMap<String, f64> }`
-  - `OdeResult` struct: `{ t: Vec<f64>, states: Vec<Vec<f64>> }` (time series of state variables)
-  - `OdeSolverConfig`: `{ t_start, t_end, dt, tolerance, max_steps }`
-- [ ] **3.3** Create `crates/engine-core/src/ode/rk4.rs` — classic 4th-order Runge-Kutta:
-  - `solve_rk4(system: &OdeSystem, y0: &[f64], config: &OdeSolverConfig) -> OdeResult`
-  - Fixed step size, O(h^4) accuracy
-  - Evaluate RHS using existing `expr::eval_expr` for each equation
-  - Ref: Hairer, Norsett, Wanner "Solving Ordinary Differential Equations I" (1993)
-- [ ] **3.4** Create `crates/engine-core/src/ode/rk45.rs` — Dormand-Prince adaptive step:
-  - `solve_rk45(system: &OdeSystem, y0: &[f64], config: &OdeSolverConfig) -> OdeResult`
-  - Embedded 4(5) pair for error estimation
-  - Automatic step size control: `h_new = h * min(5, max(0.2, 0.9 * (tol/err)^(1/5)))`
-  - Step rejection when error exceeds tolerance
-  - Ref: Dormand & Prince (1980), equivalent to MATLAB's `ode45`
-- [ ] **3.5** Create `crates/engine-core/src/ode/bdf.rs` — implicit BDF for stiff systems:
-  - `solve_bdf(system: &OdeSystem, y0: &[f64], config: &OdeSolverConfig) -> OdeResult`
-  - Backward Differentiation Formula orders 1-5
-  - Newton iteration at each step for the implicit solve
-  - Order and step size adaptation
-  - Ref: Hairer & Wanner "Solving ODEs II: Stiff and Differential-Algebraic Problems" (1996)
-- [ ] **3.6** Register `ode` module in `crates/engine-core/src/lib.rs`
-- [ ] **3.7** Add unit tests for each solver:
-  - `y' = y, y(0) = 1` — must match `e^t` to 10^-8 relative error (RK4/RK45)
-  - `y' = -1000*y, y(0) = 1` — stiff system, BDF must converge, RK4 should need tiny step
-  - Harmonic oscillator `x'' = -x` — energy conservation check
-  - Lorenz attractor (chaotic) — determinism check (same initial conditions → same trajectory)
+- [ ] **4.1** Create `crates/engine-core/src/ode/mod.rs` with `rk4`, `rk45`, `bdf`, `types` submodules
+- [ ] **4.2** `ode/types.rs` — `OdeSystem`, `OdeResult`, `OdeSolverConfig` structs
+- [ ] **4.3** `ode/rk4.rs` — classic 4th-order Runge-Kutta (fixed step, expression-based RHS via `expr.rs`)
+- [ ] **4.4** `ode/rk45.rs` — Dormand-Prince adaptive step with error control (ref: Dormand & Prince 1980)
+- [ ] **4.5** `ode/bdf.rs` — implicit BDF for stiff systems with Newton iteration (ref: Hairer & Wanner 1996)
+- [ ] **4.6** Register `ode` module in `lib.rs`
+- [ ] **4.7** Unit tests: `y'=y` → `e^t`, stiff decay, harmonic oscillator energy conservation, Lorenz determinism
 
-### 3B — ODE Blocks
+### 4B — ODE Blocks
 
-- [ ] **3.8** Add match arms in `ops.rs` for ODE blocks:
-  - `ode.rk4` — inputs: equations (Text), initial_state (Vector), t_start, t_end, dt. Output: Table
-  - `ode.rk45` — inputs: equations (Text), initial_state (Vector), t_start, t_end, tolerance. Output: Table
-  - `ode.bdf` — same interface as rk45 but for stiff systems. Output: Table
-  - `ode.stateSpace` — inputs: A (Matrix), B (Matrix), C (Matrix), D (Matrix), u (Vector), x0 (Vector), t_end, dt. Output: Table (state trajectory + output)
-  - `ode.initialCondition` — source block that outputs a Vector of initial conditions
-  - `ode.systemDef` — source block that outputs a Text containing equation definitions
-- [ ] **3.9** Create `src/blocks/ode-blocks.ts` with block definitions for all 6 ODE blocks
-- [ ] **3.10** Register in `src/blocks/registry.ts`
-- [ ] **3.11** Add `BlockCategory` value `'odeSolvers'` in `src/blocks/types.ts`
-- [ ] **3.12** Add i18n labels in all 7 locales under `"blocks"` namespace
-- [ ] **3.13** Add catalog entries in `crates/engine-core/src/catalog.rs` for all ODE ops
-- [ ] **3.14** Add golden fixtures:
-  - `ode_exponential.fixture.json` — `y' = y` → `e^t`
-  - `ode_harmonic.fixture.json` — `x'' = -x` → sin/cos
-  - `ode_stiff.fixture.json` — stiff decay system with BDF
+- [ ] **4.8** Match arms in `ops.rs` for `ode.rk4`, `ode.rk45`, `ode.bdf`, `ode.stateSpace`, `ode.initialCondition`, `ode.systemDef`
+- [ ] **4.9** Create `src/blocks/ode-blocks.ts` with 6 block definitions
+- [ ] **4.10** Register in `registry.ts`, add `BlockCategory` `'odeSolvers'`
+- [ ] **4.11** i18n labels across all 7 locales
+- [ ] **4.12** Catalog entries in `catalog.rs`
+- [ ] **4.13** Golden fixtures: exponential, harmonic, stiff
 
 ---
 
-## Phase 4 — Vehicle Simulation
+## Phase 5 — Vehicle Simulation
 
-Reference texts: Pacejka "Tire and Vehicle Dynamics" 3rd ed (2012), Milliken & Milliken "Race Car Vehicle Dynamics" (1995), Dixon "Suspension Geometry and Computation" (2009).
+Ref: Pacejka 2012, Milliken & Milliken 1995, Dixon 2009.
 
-### 4A — Tire Model (Pacejka Magic Formula)
+### 5A — Tire (Pacejka Magic Formula)
 
-- [ ] **4.1** Create `crates/engine-core/src/vehicle/mod.rs` with `pub mod tire; pub mod suspension; pub mod aero; pub mod powertrain; pub mod lap; pub mod thermal;`
-- [ ] **4.2** Create `crates/engine-core/src/vehicle/tire.rs`:
-  - `pacejka_lateral(slip_angle: f64, fz: f64, b: f64, c: f64, d: f64, e: f64) -> f64`
-    Formula: `Fy = D * sin(C * atan(B*alpha - E*(B*alpha - atan(B*alpha))))`
-  - `pacejka_longitudinal(slip_ratio: f64, fz: f64, b: f64, c: f64, d: f64, e: f64) -> f64`
-    Same formula with slip ratio instead of slip angle
-  - `pacejka_combined(slip_angle: f64, slip_ratio: f64, fz: f64, params: &TireParams) -> (f64, f64)`
-    Combined slip using Pacejka's similarity method
-  - `TireParams` struct with B, C, D, E coefficients + combined slip parameters
-  - `TirePreset` enum with typical coefficients for: `SportRadial`, `EconomyRadial`, `WetWeather`, `Slick`, `AllSeason`
-- [ ] **4.3** Register `vehicle` module in `crates/engine-core/src/lib.rs`
-- [ ] **4.4** Add match arms in `ops.rs` for tire blocks:
-  - `veh.tire.lateralForce` — inputs: slip_angle, Fz, B, C, D, E → Scalar (Fy)
-  - `veh.tire.longForce` — inputs: slip_ratio, Fz, B, C, D, E → Scalar (Fx)
-  - `veh.tire.combinedSlip` — inputs: slip_angle, slip_ratio, Fz, params → Table (Fx, Fy)
-  - `veh.tire.sweep` — inputs: Fz, B, C, D, E, slip_range → Table (slip vs force curve for plotting)
-  - `veh.tire.preset` — input: tire_type dropdown → outputs B, C, D, E coefficients
-- [ ] **4.5** Add unit tests: verify Pacejka output against published data (e.g., Fy at alpha=5deg for typical sport tire)
+- [ ] **5.1** Create `vehicle/mod.rs` with `tire`, `suspension`, `aero`, `powertrain`, `lap`, `thermal` submodules
+- [ ] **5.2** `vehicle/tire.rs` — lateral force, longitudinal force, combined slip, tire sweep, presets
+- [ ] **5.3** Match arms in `ops.rs` for `veh.tire.*`
+- [ ] **5.4** Unit tests against published Pacejka data
 
-### 4B — Suspension Models
+### 5B — Suspension
 
-- [ ] **4.6** Create `crates/engine-core/src/vehicle/suspension.rs`:
-  - `quarter_car(m_s, m_u, k_s, c_s, k_t, road_input, config) -> OdeResult`
-    2-DOF: `m_s*x_s'' = -k_s*(x_s-x_u) - c_s*(x_s'-x_u')` and `m_u*x_u'' = k_s*(x_s-x_u) + c_s*(x_s'-x_u') - k_t*(x_u-x_r)`
-  - `half_car(params, road_inputs, config) -> OdeResult` — 4-DOF: front/rear sprung + unsprung
-  - `full_vehicle(params, road_inputs, config) -> OdeResult` — 7-DOF: body (heave, pitch, roll) + 4 wheels
-  - Uses RK45 solver from Phase 3 internally
-- [ ] **4.7** Add match arms in `ops.rs`:
-  - `veh.suspension.quarterCar` — inputs: m_s, m_u, k_s, c_s, k_t, road_profile (Vector), dt → Table (displacement, velocity vs time)
-  - `veh.suspension.halfCar` — inputs: front/rear params + road profiles → Table
-  - `veh.suspension.fullVehicle` — inputs: vehicle params + 4 road profiles → Table
-  - `veh.suspension.springDamper` — F = kx + cv (simple force element)
-  - `veh.suspension.arb` — anti-roll bar contribution to roll stiffness
+- [ ] **5.5** `vehicle/suspension.rs` — quarter-car, half-car, full vehicle 7-DOF (uses ODE solvers)
+- [ ] **5.6** Match arms for `veh.suspension.*`
 
-### 4C — Vehicle Aerodynamics
+### 5C — Aero, Powertrain, Lap Sim
 
-- [ ] **4.8** Create `crates/engine-core/src/vehicle/aero.rs`:
-  - `drag_force(rho, cd, area, velocity) -> f64` — `F = 0.5 * rho * Cd * A * v^2`
-  - `downforce(rho, cl, area, velocity) -> f64` — `F = 0.5 * rho * Cl * A * v^2`
-  - `side_force(rho, cs, area, velocity) -> f64`
-  - `aero_balance(f_front, f_total) -> f64` — front downforce percentage
-  - `AeroPreset` enum: `Sedan`, `SportsCar`, `F1Car`, `Truck`, `Motorcycle`
-- [ ] **4.9** Add match arms in `ops.rs`:
-  - `veh.aero.drag`, `veh.aero.downforce`, `veh.aero.sideForce`, `veh.aero.balance`, `veh.aero.cdA`, `veh.aero.preset`
+- [ ] **5.7** `vehicle/aero.rs` — drag, downforce, side force, balance, presets
+- [ ] **5.8** `vehicle/powertrain.rs` — torque map interpolation, gear ratios, drivetrain loss
+- [ ] **5.9** `vehicle/lap.rs` — point-mass quasi-steady-state lap simulation
+- [ ] **5.10** Match arms for all `veh.aero.*`, `veh.powertrain.*`, `veh.lap.*`
 
-### 4D — Powertrain
+### 5D — Telemetry & Thermal
 
-- [ ] **4.10** Create `crates/engine-core/src/vehicle/powertrain.rs`:
-  - `torque_from_map(rpm: f64, torque_curve: &[(f64, f64)]) -> f64` — linear interpolation on torque vs RPM table
-  - `gear_ratio(torque_in: f64, rpm_in: f64, ratio: f64) -> (f64, f64)` — torque_out, rpm_out
-  - `drivetrain_loss(power: f64, efficiency: f64) -> f64`
-  - `wheel_speed(rpm: f64, tire_radius: f64, gear_ratio: f64, final_drive: f64) -> f64`
-- [ ] **4.11** Add match arms in `ops.rs`:
-  - `veh.powertrain.torqueMap`, `veh.powertrain.gearRatio`, `veh.powertrain.finalDrive`, `veh.powertrain.drivetrainLoss`, `veh.powertrain.wheelTorque`, `veh.powertrain.wheelSpeed`
+- [ ] **5.11** `veh.telemetry.compare` — overlay sim vs actual data
+- [ ] **5.12** `vehicle/thermal.rs` — brake thermal model with ODE solver
+- [ ] **5.13** Match arms for `veh.brake.*`
 
-### 4E — Lap Simulation
+### 5E — Block Definitions & Registration
 
-- [ ] **4.12** Create `crates/engine-core/src/vehicle/lap.rs`:
-  - Point-mass quasi-steady-state lap simulation (ref: Milliken & Milliken):
-    1. Discretize track into segments: `(distance, curvature)` pairs
-    2. For each segment: `v_max = sqrt(mu * g / curvature)` (grip limited)
-    3. Forward pass: acceleration limited by traction `a_max = (F_drive - F_drag) / m`
-    4. Backward pass: braking limited by traction `a_brake = (F_brake + F_drag) / m`
-    5. Combine: speed at each point = `min(forward_speed, backward_speed, corner_speed)`
-    6. Integrate time: `dt = ds / v` for each segment
-  - `simulate_lap(track: &[(f64, f64)], vehicle: &VehicleParams) -> LapResult`
-  - `VehicleParams`: mass, power, Cd, Cl, A, mu, tire params, gear ratios
-  - `LapResult`: lap_time, sector_times, speed_trace (Table), gear_trace
-- [ ] **4.13** Add match arms in `ops.rs`:
-  - `veh.lap.track` — source block: define track as Table (distance, curvature)
-  - `veh.lap.simulate` — inputs: track (Table), vehicle params → Table (results)
-  - `veh.lap.results` — display: lap time, speed trace, gear usage
-
-### 4F — Telemetry & Thermal
-
-- [ ] **4.14** Add `veh.telemetry.compare` — overlay simulation vs actual data (two Table inputs → merged Table for plotting)
-- [ ] **4.15** Add `veh.telemetry.channelMath` — derivative, integral, moving average on telemetry channels
-- [ ] **4.16** Create `crates/engine-core/src/vehicle/thermal.rs`:
-  - `brake_thermal(power, h, area, t_ambient, mass, specific_heat, dt) -> OdeResult`
-    `dT/dt = (P_brake - h*A*(T - T_amb)) / (m*c)`
-  - `brake_energy(mass, v1, v2) -> f64` — `E = 0.5 * m * (v1^2 - v2^2)`
-- [ ] **4.17** Add match arms for `veh.brake.thermal`, `veh.brake.energy`
-
-### 4G — Vehicle Block Definitions & Registration
-
-- [ ] **4.18** Create `src/blocks/vehicle-blocks.ts` with all ~25 vehicle block definitions
-- [ ] **4.19** Add `BlockCategory` value `'vehicleSim'` in `src/blocks/types.ts`
-- [ ] **4.20** Register all vehicle blocks in `src/blocks/registry.ts`
-- [ ] **4.21** Add catalog entries in `crates/engine-core/src/catalog.rs` for all vehicle ops
-- [ ] **4.22** Add i18n labels for all vehicle blocks across all 7 locales
-- [ ] **4.23** Add golden fixtures:
-  - `veh_pacejka.fixture.json` — Pacejka lateral force at known slip angles
-  - `veh_quarter_car.fixture.json` — quarter-car step response
-  - `veh_lap_simple.fixture.json` — simple oval track lap time
-- [ ] **4.24** Add property tests: tire force symmetry properties, energy conservation in suspension
+- [ ] **5.14** Create `src/blocks/vehicle-blocks.ts` with ~25 block definitions
+- [ ] **5.15** Add `BlockCategory` `'vehicleSim'`, register all in `registry.ts`
+- [ ] **5.16** Catalog entries, i18n labels across 7 locales
+- [ ] **5.17** Golden fixtures: Pacejka force, quarter-car step response, simple lap time
 
 ---
 
-## Phase 5 — Neural Network Training Pipeline
+## Phase 6 — Neural Network Training Pipeline
 
-The NN module (`crates/engine-core/src/nn/`) already has `Sequential`, `DenseLayer`, `Conv1DLayer`, backpropagation training, and JSON export/import. The `nn.trainer` op in `ops.rs` is a stub that needs wiring.
+The NN module has real implementations (Sequential, Dense, Conv1D, backprop) but `nn.trainer` is a stub.
 
-### 5A — Wire nn.trainer to Real Training
-
-- [ ] **5.1** In `ops.rs`, replace the `nn.trainer` stub with real implementation:
-  - Parse `data.layers` JSON array → build `Sequential` model
-  - Parse trainX/trainY from input ports (Vector → reshape based on `data.inputSize`)
-  - Parse training config: epochs, batchSize, learningRate, lossFunction from `data`
-  - Call `nn::train::train()` with the parsed config
-  - Return result: loss_history as Vector + serialized model as Text (JSON via `nn::export`)
-- [ ] **5.2** In `nn.predict` op, replace stub:
-  - Accept `model` input (Text containing JSON ModelExport)
-  - Accept `data` input (Vector or Table)
-  - Deserialize model via `nn::export::import_model()`
-  - Run `Sequential::forward()` for each sample
-  - Return Vector of predictions
-- [ ] **5.3** Add layer configuration UI panel for `nn.trainer` in the FloatingInspector — layer list editor with add/remove/reorder, each layer has type (dense/conv1d/dropout), units, activation
-
-### 5B — Training Enhancements
-
-- [ ] **5.4** Create `crates/engine-core/src/nn/lr_schedule.rs`:
-  - `LRSchedule` enum: `Constant`, `StepDecay { drop_factor, drop_every }`, `CosineAnnealing { t_max }`, `ExponentialDecay { gamma }`
-  - `fn get_lr(schedule: &LRSchedule, base_lr: f64, epoch: usize) -> f64`
-- [ ] **5.5** Integrate LR schedule into `nn::train::train()` — apply schedule per epoch
-- [ ] **5.6** Add early stopping to `TrainConfig`:
-  - `patience: usize` (epochs without improvement before stopping)
-  - `validation_split: f64` (fraction of data held out)
-  - Split data, track validation loss, stop early when val loss doesn't improve for `patience` epochs
-- [ ] **5.7** Add progress callback to `train()` — reports `(epoch, total_epochs, train_loss, val_loss)` for streaming to UI
-
-### 5C — New NN Blocks
-
-- [ ] **5.8** Add blocks to `src/blocks/nn-blocks.ts`:
-  - `nn.lrSchedule` — configure learning rate schedule (dropdown: constant/step/cosine/exp)
-  - `nn.summary` — takes model Text, displays layer shapes and param counts as Table
-- [ ] **5.9** Register new blocks, add catalog entries, add i18n labels
-- [ ] **5.10** Add golden fixture: `nn_xor_training.fixture.json` — full XOR training graph, verify loss decreases
+- [ ] **6.1** Wire `nn.trainer` in `ops.rs` — parse layers from `data.layers`, call `nn::train::train()`, return loss history + serialised model
+- [ ] **6.2** Wire `nn.predict` — deserialise model, run `Sequential::forward()`
+- [ ] **6.3** Layer configuration UI panel in FloatingInspector
+- [ ] **6.4** `nn/lr_schedule.rs` — constant, step decay, cosine annealing, exponential decay
+- [ ] **6.5** Early stopping with validation split and patience
+- [ ] **6.6** Training always has defined end: `maxEpochs` (required, > 0) or `targetLoss`
+- [ ] **6.7** Progress callback: `{ epoch, totalEpochs, trainLoss, valLoss, bestLoss, lr }`
+- [ ] **6.8** New blocks: `nn.lrSchedule`, `nn.summary`
+- [ ] **6.9** Golden fixture: XOR training, verify loss decreases
 
 ---
 
-## Phase 6 — ML Training Workflows
+## Phase 7 — ML Training Workflows
 
-### 6A — Feature Preprocessing
+### 7A — Feature Preprocessing
 
-- [ ] **6.1** Create `crates/engine-core/src/ml/preprocess.rs`:
-  - `standardize(data: &[Vec<f64>]) -> (Vec<Vec<f64>>, Vec<f64>, Vec<f64>)` — z-score normalization, returns (scaled, means, stds)
-  - `normalize(data: &[Vec<f64>]) -> (Vec<Vec<f64>>, Vec<f64>, Vec<f64>)` — min-max to [0,1], returns (scaled, mins, maxs)
-  - `train_test_split(data: &[Vec<f64>], labels: &[f64], ratio: f64, seed: u64) -> (train_x, train_y, test_x, test_y)`
-- [ ] **6.2** Add ops: `ml.featureScale`, `ml.trainTestSplit` (verify existing one works or replace)
-- [ ] **6.3** Add block definitions and i18n labels
+- [ ] **7.1** `ml/preprocess.rs` — standardise, normalise, train/test split
+- [ ] **7.2** Ops: `ml.featureScale`, `ml.trainTestSplit`
+- [ ] **7.3** Block definitions and i18n
 
-### 6B — Classification Metrics
+### 7B — Classification Metrics
 
-- [ ] **6.4** Create `crates/engine-core/src/ml/classification_metrics.rs`:
-  - `precision_recall_f1(y_true: &[f64], y_pred: &[f64]) -> Table` — per-class + macro/weighted averages
-  - `roc_curve(y_true: &[f64], y_scores: &[f64]) -> Vec<(f64, f64)>` — (FPR, TPR) pairs
-  - `auc(roc_points: &[(f64, f64)]) -> f64` — trapezoidal rule
-- [ ] **6.5** Add ops: `ml.classMetrics`, `ml.rocCurve`, `ml.auc`
-- [ ] **6.6** Add block definitions and i18n labels
+- [ ] **7.4** `ml/classification_metrics.rs` — precision/recall/F1, ROC curve, AUC
+- [ ] **7.5** Ops: `ml.classMetrics`, `ml.rocCurve`, `ml.auc`
+- [ ] **7.6** Block definitions and i18n
 
-### 6C — Cross-Validation & Grid Search
+### 7C — Cross-Validation & Grid Search
 
-- [ ] **6.7** Add `ml.kfoldCV` op:
-  - Inputs: data Table, model type enum (linreg/polyreg/knn/dtree), model params, k, metric (mse/r2/accuracy)
-  - Internally: split data into k folds, train/predict/score for each fold
-  - Output: Table with fold scores + mean + std
-- [ ] **6.8** Add `ml.gridSearch` op:
-  - Inputs: model type, data, parameter grid (Table of param name + values)
-  - Internal loop: for each param combo, run k-fold CV
-  - Output: Table of param combos + scores, sorted by best
-  - Uses progress callback for long runs
-- [ ] **6.9** Add block definitions and i18n labels
-- [ ] **6.10** Add golden fixtures for k-fold CV and grid search with known datasets (e.g., iris-like synthetic data)
+- [ ] **7.7** `ml.kfoldCV` op — k-fold cross-validation as a macro op
+- [ ] **7.8** `ml.gridSearch` op — parameter grid search (finite: iterates all combos, no looping)
+- [ ] **7.9** Block definitions and i18n
+- [ ] **7.10** Golden fixtures for k-fold CV and grid search
 
 ---
 
-## Phase 7 — Optimization Engine
+## Phase 8 — Optimisation Engine
 
-### 7A — LP Solver (Revised Simplex)
+### 8A — LP Solver
 
-- [ ] **7.1** Create `crates/engine-core/src/optim/lp.rs`:
-  - `solve_lp(c: &[f64], a_ub: &[Vec<f64>], b_ub: &[f64], bounds: &[(f64, f64)]) -> LpResult`
-  - Implement revised simplex method with Bland's anti-cycling rule
-  - Handle infeasible and unbounded cases with clear error diagnostics
-  - `LpResult`: optimal values, optimal objective, status (optimal/infeasible/unbounded)
-  - Ref: Nocedal & Wright "Numerical Optimization" (2006)
-- [ ] **7.2** Add `optim.lpSolve` op: inputs: objective (Vector), constraints (Matrix), bounds (Table) → Table (optimal values + objective)
-- [ ] **7.3** Add golden fixture: `lp_simple.fixture.json` — 2-variable LP with known optimal
+- [ ] **8.1** `optim/lp.rs` — revised simplex with Bland's anti-cycling (ref: Nocedal & Wright 2006)
+- [ ] **8.2** `optim.lpSolve` op
+- [ ] **8.3** Golden fixture
 
-### 7B — QP Solver (Interior Point)
+### 8B — QP Solver
 
-- [ ] **7.4** Create `crates/engine-core/src/optim/qp.rs`:
-  - `solve_qp(h: &[Vec<f64>], f: &[f64], a_eq, b_eq, a_ineq, b_ineq) -> QpResult`
-  - Implement Mehrotra's predictor-corrector interior point method
-  - Convex QP only (positive semidefinite H)
-  - Ref: Nocedal & Wright "Numerical Optimization" (2006), Chapter 16
-- [ ] **7.5** Add `optim.qpSolve` op
-- [ ] **7.6** Add golden fixture: `qp_simple.fixture.json`
+- [ ] **8.4** `optim/qp.rs` — Mehrotra interior point for convex QP
+- [ ] **8.5** `optim.qpSolve` op
+- [ ] **8.6** Golden fixture
 
-### 7C — Multi-Objective Optimization (NSGA-II)
+### 8C — Multi-Objective (NSGA-II)
 
-- [ ] **7.7** Create `crates/engine-core/src/optim/pareto.rs`:
-  - `nsga2(objectives: &[&dyn Fn(&[f64]) -> f64], bounds: &[(f64, f64)], pop_size, generations) -> Vec<Vec<f64>>`
-  - Non-dominated sorting + crowding distance
-  - Ref: Deb et al. "A Fast and Elitist Multiobjective Genetic Algorithm: NSGA-II" (2002)
-- [ ] **7.8** Add `optim.paretoFront` op
-- [ ] **7.9** Add block definition and i18n labels
+- [ ] **8.7** `optim/pareto.rs` — NSGA-II (ref: Deb et al. 2002)
+- [ ] **8.8** `optim.paretoFront` op, block definition, i18n
 
-### 7D — Global Sensitivity (Sobol')
+### 8D — Global Sensitivity (Sobol')
 
-- [ ] **7.10** Create `crates/engine-core/src/optim/sobol_sensitivity.rs`:
-  - `sobol_indices(objective, bounds, n_samples) -> Table` (S1 first-order + ST total-order per variable)
-  - Uses existing DOE Sobol sequence generator for sampling
-  - Ref: Saltelli "Making Best Use of Model Evaluations to Compute Sensitivity Indices" (2002)
-- [ ] **7.11** Add `optim.sobolSensitivity` op
-- [ ] **7.12** Add golden fixture with known analytical Sobol indices
+- [ ] **8.9** `optim/sobol_sensitivity.rs` — Sobol' indices (ref: Saltelli 2002)
+- [ ] **8.10** `optim.sobolSensitivity` op, block definition, i18n
+- [ ] **8.11** Golden fixture with known analytical indices
 
 ---
 
-## Phase 8 — Long-Running & Continuous Simulation Infrastructure
+## Phase 9 — Long-Running Simulation Infrastructure (Finite Tasks Only)
 
-Neural network training, lap simulation, and grid search can take seconds to minutes — or run indefinitely until the user stops them. They must not block the normal eval worker. The simulation worker supports two modes: **single-shot** (run once → return result) and **continuous** (loop until stopped, streaming results each iteration).
+Simulations, training, and optimisation can take seconds to minutes. They run to **completion** (defined end) on a dedicated worker. No continuous/indefinite loops.
 
-### 8A — Simulation Worker Core
+### 9A — Simulation Worker
 
-- [ ] **8.1** Create `src/engine/simulationWorker.ts`:
-  - `SimulationWorkerAPI` class: spawns a dedicated Web Worker on demand
-  - Loads the same WASM module as the eval worker
-  - Handles messages: `runSimulation`, `cancelSimulation`, `pauseSimulation`, `resumeSimulation`
-  - Supports `mode: 'single' | 'continuous'` in the simulation config
-  - **Single mode**: runs the computation once, streams progress, returns final result
-  - **Continuous mode**: loops indefinitely (epoch after epoch, timestep after timestep), streaming partial results after each iteration, until the user sends `cancelSimulation` or `pauseSimulation`
-  - Streams progress: `{ type: 'simulationProgress', requestId, iteration, totalIterations?, partialResults, metrics }`
-  - On stop/complete: `{ type: 'simulationResult', requestId, result, iterationsCompleted }`
-- [ ] **8.2** In `crates/engine-wasm/src/lib.rs`, add `#[wasm_bindgen] pub fn run_simulation(config_json: &str, progress_cb: &js_sys::Function) -> String`:
-  - Parses simulation config: `{ op, inputs, mode, maxIterations?, batchSize? }`
-  - For single mode: runs the computation, calls `progress_cb` periodically, returns final JSON
-  - For continuous mode: runs in a loop calling `progress_cb` after each iteration with partial results — the JS callback returns `EvalSignal::Continue | EvalSignal::Abort` to control the loop
-  - The progress callback is the cancellation mechanism: when the user clicks Stop, the main thread sets a flag that the callback reads, returning `Abort` to break the Rust loop
-- [ ] **8.3** In `src/engine/index.ts`, add to `EngineAPI`:
-  - `runSimulation(config, onProgress) → Promise<SimulationResult>` — delegates to SimulationWorker
-  - `stopSimulation(requestId) → void` — sends cancel signal
-  - `pauseSimulation(requestId) → void` — pauses continuous loop (can be resumed)
-  - `resumeSimulation(requestId) → void` — resumes paused simulation
-  - `isSimulationRunning() → boolean` — check if sim worker is busy
+- [ ] **9.1** Create `src/engine/simulationWorker.ts` — `SimulationWorkerAPI`, dedicated Web Worker
+- [ ] **9.2** Loads same WASM module as eval worker
+- [ ] **9.3** Messages: `runSimulation`, `cancelSimulation` — NO pause/resume for indefinite loops
+- [ ] **9.4** All tasks have defined end: `maxIterations`, `targetLoss`, `endTime`, `convergenceThreshold`
+- [ ] **9.5** Progress: `{ type: 'simulationProgress', iteration, totalIterations, partialResults, metrics }`
+- [ ] **9.6** Completion: `{ type: 'simulationResult', result, status: 'complete' | 'cancelled' }`
 
-### 8B — Continuous Mode for NN Training
+### 9B — WASM Binding
 
-- [ ] **8.4** Update `nn.trainer` op to support `mode: 'continuous'` in config:
-  - When `maxEpochs` is set: train for that many epochs (single mode)
-  - When `maxEpochs` is 0 or absent: train indefinitely until stopped (continuous mode)
-  - After each epoch, call progress callback with `{ epoch, trainLoss, valLoss, bestLoss, learningRate }`
-  - On stop: return the model at its best validation loss (not the final epoch)
-- [ ] **8.5** Update `nn.trainer` inspector panel UI:
-  - "Train" button starts training, transforms into "Stop" button while running
-  - "Pause" / "Resume" buttons for continuous mode
-  - Live loss chart that updates after each epoch (connects to plot block)
-  - Display: current epoch, train loss, val loss, best loss, learning rate, elapsed time
+- [ ] **9.7** `run_simulation(config_json, progress_cb) -> String` in `engine-wasm`
+- [ ] **9.8** Config: `{ op, inputs, maxIterations, convergenceThreshold?, batchSize? }` — always finite
+- [ ] **9.9** Progress callback returns `Continue | Abort` for cancellation
 
-### 8C — Continuous Mode for Simulations
+### 9C — Engine API
 
-- [ ] **8.6** For ODE/vehicle simulation blocks that support continuous mode:
-  - ODE solvers can run with `t_end = Infinity` (continuous time integration, streaming state each step)
-  - Vehicle lap sim can run multiple laps continuously (accumulating statistics)
-  - Monte Carlo can accumulate samples indefinitely, refining estimates until stopped
-- [ ] **8.7** Add a `SimulationStatusStore` Zustand store (`src/stores/simulationStatusStore.ts`):
-  - Tracks active simulations: `{ nodeId, requestId, mode, status: 'running' | 'paused' | 'complete', iteration, metrics }`
-  - Node components read this to show live status
-  - Status bar shows "Simulation running (epoch 47, loss: 0.023)" when active
+- [ ] **9.10** `runSimulation(config, onProgress) -> Promise<SimulationResult>` in `EngineAPI`
+- [ ] **9.11** `cancelSimulation(requestId) -> void`
+- [ ] **9.12** `isSimulationRunning() -> boolean`
 
-### 8D — UI Integration & Testing
+### 9D — NN Training Integration
 
-- [ ] **8.8** In NN/ML/optimization/vehicle node components, add "Train" / "Run Simulation" / "Stop" buttons that trigger `runSimulation` with appropriate mode
-- [ ] **8.9** Add progress UI: progress bar + iteration counter + estimated time remaining in the node's inspector panel
-- [ ] **8.10** Ensure normal graph evaluation continues working while a simulation runs on the separate worker — the two workers must be independent
-- [ ] **8.11** Test single mode: run a fixed-epoch NN training, verify it completes and returns results
-- [ ] **8.12** Test continuous mode: start NN training with no epoch limit, verify loss streams to UI each epoch, click Stop, verify model is returned at best loss
-- [ ] **8.13** Test pause/resume: start continuous training, pause at epoch 10, resume, verify it continues from epoch 10
-- [ ] **8.14** Test independence: while a simulation runs, edit a different part of the graph and verify normal eval still works
+- [ ] **9.13** `nn.trainer` requires `maxEpochs > 0` or `targetLoss` — always finite
+- [ ] **9.14** Stream `{ epoch, totalEpochs, trainLoss, valLoss }` per epoch
+- [ ] **9.15** Return model at best validation loss on complete/cancel
+- [ ] **9.16** Inspector UI: "Train" starts, "Stop" cancels. Live loss chart. No Pause/Resume.
+
+### 9E — Status & Testing
+
+- [ ] **9.17** `simulationStatusStore.ts` — tracks active sims: `{ nodeId, status, iteration, totalIterations, metrics }`
+- [ ] **9.18** StatusBar shows "Training (epoch 47/100, loss: 0.023)" when active
+- [ ] **9.19** Normal graph eval continues while sim runs on separate worker
+- [ ] **9.20** Test: fixed-epoch training completes and returns results
+- [ ] **9.21** Test: cancel mid-training, model returned at best loss
+- [ ] **9.22** Test: normal eval works during active simulation
 
 ---
 
-## Phase 9 — Frontend Polish
+## Phase 10 — Block-to-Block Magnetic Snapping (NEW)
 
-### 9A — CanvasArea Decomposition
+When dragging a block near another, show ghost highlight of snap position before release.
 
-- [ ] **9.1** Extract keyboard shortcut handler (~200 lines) from `CanvasArea.tsx` into `src/hooks/useCanvasKeyboard.ts`
-- [ ] **9.2** Extract context menu logic (~150 lines) into `src/hooks/useCanvasContextMenu.ts`
-- [ ] **9.3** Extract drag/drop handlers (~100 lines) into `src/hooks/useCanvasDragDrop.ts`
-- [ ] **9.4** Extract clipboard operations into `src/hooks/useCanvasClipboard.ts`
-- [ ] **9.5** Extract template/group operations into `src/hooks/useCanvasGroups.ts`
-- [ ] **9.6** Verify no behavior changes — run full E2E smoke suite after each extraction
+### 10A — Snap Detection
 
-### 9B — Enhanced Node Visual States
+- [ ] **10.1** Create `src/hooks/useBlockSnapping.ts` — calculate snap targets from block positions/dimensions
+- [ ] **10.2** Snap zones: right-to-left (horizontal chain), bottom-to-top (vertical), center-align H/V
+- [ ] **10.3** Snap threshold: 20px (configurable)
+- [ ] **10.4** During drag, compute nearest snap target for each side
+- [ ] **10.5** Return adjusted position + snap guide metadata
 
-- [ ] **9.7** In `nodeStyles.ts`, add visual style constants:
-  - `staleOverlay`: `{ opacity: 0.5, filter: 'grayscale(30%)', borderStyle: 'dashed' }`
-  - `computingOverlay`: pulsing border animation `@keyframes pulse { 0% { borderColor: #1CABB0 } 50% { borderColor: transparent } }`
-  - `errorBadge`: small red dot in top-right corner of node
-- [ ] **9.8** Update `OperationNode.tsx`, `DisplayNode.tsx`, `DataNode.tsx`, `PlotNode.tsx` to read `useIsStale(id)` and apply stale styles
-- [ ] **9.9** Add computing spinner overlay when `engineStatus === 'computing'` and node is in the current eval batch
+### 10B — Visual Guides
 
-### 9C — Auto-Run Intelligence
+- [ ] **10.6** Create `src/components/canvas/SnapGuides.tsx` — alignment guide lines on canvas
+- [ ] **10.7** Ghost highlight: semi-transparent outline at snap position while dragging near target
+- [ ] **10.8** Guide lines: thin cyan (#1CABB0) lines extending across canvas when blocks aligned
+- [ ] **10.9** Snap feedback: subtle animation when block snaps
 
-- [ ] **9.10** In the eval scheduler, add smart debouncing that adapts to graph size:
-  - < 20 nodes: 50ms debounce (near-instant)
-  - 20-100 nodes: 150ms debounce
-  - 100-300 nodes: 500ms debounce
-  - 300+: manual only
-- [ ] **9.11** Add "Quick eval" mode for number/slider inputs: when user is actively typing in a number field, evaluate only the immediate downstream chain (not the full graph) for instant feedback, then full eval on blur
+### 10C — Integration
+
+- [ ] **10.10** Wire into `CanvasArea.tsx` `onNodeDrag` — adjust position in real-time
+- [ ] **10.11** "Magnetic snap" toggle in CanvasToolbar (separate from grid snap)
+- [ ] **10.12** Persist toggle in localStorage
+- [ ] **10.13** Works during multi-selection drag
+- [ ] **10.14** i18n keys across 7 locales
+- [ ] **10.15** Performance: snap computation < 2ms per frame with 500 blocks
 
 ---
 
-## Phase 10 — Housekeeping & Professional Audit
+## Phase 11 — Formula Bar Expression Language (NEW — MAJOR FEATURE)
 
-### 10A — Code Quality
+Users type `1+1=` → auto-creates Number(1), Number(1), Add, Display blocks wired together. Full typed language covering every block type.
 
-- [ ] **10.1** Run `npx tsc -b --noEmit` — fix any type errors introduced by new code
-- [ ] **10.2** Run `npm run lint` — fix all ESLint violations
-- [ ] **10.3** Run `npm run format` — apply Prettier to all new/modified files
-- [ ] **10.4** Scan for TODO/FIXME/HACK comments across the repo — resolve or convert to tracked GitHub issues
-- [ ] **10.5** Audit all `catch` blocks in `src/lib/` — ensure they use the `[ERROR_CODE]` pattern consistently
-- [ ] **10.6** Audit all `.catch` in `src/engine/` — ensure engine-disposed errors are silently swallowed, others logged
-- [ ] **10.7** Move `@types/dagre` from `dependencies` to `devDependencies` in `package.json`
-- [ ] **10.8** Run `npx depcheck` — identify and remove unused npm dependencies
-- [ ] **10.9** Run `npm audit` — fix any security vulnerabilities
-- [ ] **10.10** Run `cargo audit` — fix any Rust security advisories
-- [ ] **10.11** Run `cargo update` — apply patch-level Rust dependency updates
-- [ ] **10.12** Review `Cargo.toml` for unused optional features
+### 11A — Language Design (CSEL — ChainSolve Expression Language)
 
-### 10B — Documentation
+- [ ] **11.1** Design CSEL grammar:
+  - Arithmetic: `1 + 2`, `3 * (x + 2)`, `sin(pi/4)`
+  - Pipe/chain: `5 | add(3) | multiply(2) | display` or `5 -> add(3) -> display`
+  - Assignment: `x = 5; y = x * 2; y + 1 =`
+  - Block refs: `Number(5)`, `Slider(0, 100, 50)`, `Pacejka(alpha, Fz, B, C, D, E)`
+  - Functions: `sin(x)`, `max(a, b, c)` (maps to variadic blocks)
+  - Trailing `=` creates Display block for the result
+- [ ] **11.2** Document grammar in `docs/CSEL.md` with comprehensive examples
+- [ ] **11.3** Define AST types in `src/engine/csel/types.ts`
 
-- [ ] **10.13** Update `CLAUDE.md`:
-  - Add new eval model (auto/deferred/manual) to Architecture → Data flow section
-  - Add Run button and keyboard shortcuts to Key commands
-  - Add ODE, vehicle, NN training, LP/QP to "Adding a new block op" workflow
-  - Add `dashu-float` and high-precision mode to Hard invariants section
-  - Update ENGINE_CONTRACT_VERSION if bumped
-- [ ] **10.14** Update `docs/ARCHITECTURE.md`:
-  - Add eval scheduler to data flow diagram
-  - Add ODE/vehicle/NN modules to Rust engine section
-  - Add simulation worker to worker pool section
-- [ ] **10.15** Update `README.md`:
-  - Update block count (299 → ~350+)
-  - Add vehicle simulation, neural networks, ODE solvers to capabilities list
-  - Add arbitrary precision to key features
-- [ ] **10.16** Update `CHANGELOG.md` with entries for all new features
-- [ ] **10.17** Create new ADRs:
-  - `docs/adr/ADR-0014-eval-mode-hybrid.md` — decision to add manual eval alongside auto-eval
-  - `docs/adr/ADR-0015-drag-pause-optimization.md` — pausing engine during drag
-  - `docs/adr/ADR-0016-arbitrary-precision.md` — dashu-float, dual-path evaluation, WASM size tradeoff
-  - `docs/adr/ADR-0017-ode-solvers.md` — RK4/RK45/BDF solver selection
-  - `docs/adr/ADR-0018-vehicle-simulation.md` — Pacejka, quasi-steady-state lap sim approach
-  - `docs/adr/ADR-0019-simulation-worker.md` — dedicated worker for long-running computations
-- [ ] **10.18** Update `docs/W9_ENGINE.md` with new Rust modules and evaluation modes
-- [ ] **10.19** Update `docs/W9_3_CORRECTNESS.md` with compensated arithmetic and arbitrary precision
-- [ ] **10.20** Update `docs/UX.md` with Run button behavior, stale indicators, keyboard shortcuts
-- [ ] **10.21** Review and clean up any outdated docs (check for stale references, dead links)
+### 11B — Parser
 
-### 10C — i18n Completeness
+- [ ] **11.4** Create `src/engine/csel/lexer.ts` — tokeniser for numbers, identifiers, operators, parens, pipe, arrow, equals
+- [ ] **11.5** Create `src/engine/csel/parser.ts` — recursive descent parser producing AST
+- [ ] **11.6** `src/engine/csel/errors.ts` — descriptive parse errors with position info
+- [ ] **11.7** Unit tests: arithmetic, function calls, pipes, assignments, error cases
 
-- [ ] **10.22** Run `node scripts/check-i18n-keys.mjs` — verify all new keys present across all 7 locales
-- [ ] **10.23** Add translations for all new block labels (ODE, vehicle, NN enhancements, optimization)
-- [ ] **10.24** Add translations for new UI strings (toolbar, status bar, validation panel, precision selector)
-- [ ] **10.25** Verify no hardcoded strings with `node scripts/check-i18n-hardcoded.mjs`
+### 11C — Graph Generator
 
-### 10D — Database & Migrations
+- [ ] **11.8** Create `src/engine/csel/graphGen.ts` — converts AST to React Flow nodes + edges
+- [ ] **11.9** Map operators to blocks: `+` → `add`, `*` → `multiply`, `sin()` → `trig.sin`
+- [ ] **11.10** Auto-create Number source blocks for literals
+- [ ] **11.11** Trailing `=` or explicit `display` → create Display block
+- [ ] **11.12** Auto-layout using dagre (already a dependency) — left-to-right flow
+- [ ] **11.13** Handle variadic: `max(a, b, c, d)` → single max block with 4 inputs
+- [ ] **11.14** Handle variables: `x = 5` → named Number block; `x` references wire to it
+- [ ] **11.15** Unit tests: expression → node/edge graph, verify wiring
 
-- [ ] **10.26** Audit all 15 migrations for idempotency — verify re-runnable (IF NOT EXISTS, CREATE OR REPLACE)
-- [ ] **10.27** Verify all tables in `src/lib/` have corresponding RLS policies (cross-reference with migration 0013)
-- [ ] **10.28** Verify foreign key cascades are correct (cross-reference with migration 0012)
-- [ ] **10.29** Check for unused tables/columns that can be cleaned up
-- [ ] **10.30** Consider squashing all 15 migrations into a single clean baseline (pre-release, no deployed data)
+### 11D — Enhanced FormulaBar UI
 
-### 10E — Testing Completeness
+- [ ] **11.16** Redesign `FormulaBar.tsx` — full-width below sheet tabs, resizable height
+- [ ] **11.17** Syntax highlighting (colour operators, numbers, functions, errors)
+- [ ] **11.18** Autocomplete: block types, function names, variable names, constants
+- [ ] **11.19** Error preview: inline underlines with tooltip messages
+- [ ] **11.20** Expression history (up/down arrow cycles previous expressions)
+- [ ] **11.21** Enter → parse, generate blocks, add to canvas, clear bar
+- [ ] **11.22** Shift+Enter for multi-line, Enter to execute
+- [ ] **11.23** Toggle between value-edit mode (current) and expression mode (new)
 
-- [ ] **10.31** Ensure every new Rust module has inline `#[cfg(test)]` unit tests
-- [ ] **10.32** Add golden fixtures for all new op categories (listed in each phase above)
-- [ ] **10.33** Add property tests for new ops: determinism, incremental consistency, no-panic on random inputs
-- [ ] **10.34** Add Criterion benchmarks for: NN training throughput, ODE solver performance, Pacejka evaluation throughput, LP solver scaling
-- [ ] **10.35** Add Vitest unit tests for: evalScheduler, useIsStale hook, statusBar state transitions
-- [ ] **10.36** Add Playwright E2E test: drag a block → verify no console eval spam
-- [ ] **10.37** Add Playwright E2E test: click Run button → verify evaluation triggers
-- [ ] **10.38** Add Playwright E2E test: stale indicator appears after graph change in manual mode
+### 11E — Integration & Testing
 
-### 10F — CI & Scripts
+- [ ] **11.24** Wire expression submission to canvas: add generated nodes/edges via React Flow
+- [ ] **11.25** Position generated blocks relative to viewport centre
+- [ ] **11.26** Auto-select generated blocks after creation
+- [ ] **11.27** i18n keys across 7 locales
+- [ ] **11.28** E2E test: `1 + 2 =` → 3 blocks wired correctly
+- [ ] **11.29** E2E test: `sin(pi/4) =` → trig + constant + display
+- [ ] **11.30** E2E test: `x = 5; y = 10; x * y =` → named blocks with correct wiring
 
-- [ ] **10.39** Verify `scripts/verify-fast.sh` passes with all changes
-- [ ] **10.40** Verify `scripts/verify-ci.sh` passes with all changes (including WASM build with `high-precision` feature)
-- [ ] **10.41** Verify bundle size stays within budget (400KB JS gzip, 250KB WASM gzip) — check `dashu-float` impact
-- [ ] **10.42** Update `scripts/check-wasm-exports.mjs` if new WASM exports added (`validate_graph`, `run_simulation`)
-- [ ] **10.43** Run `CI=true npx playwright test --project=smoke --repeat-each=5` — flakiness check
-- [ ] **10.44** Full `npm run verify:ci` pass — all gates green
+---
 
-### 10G — Final Verification
+## Phase 12 — Frontend Polish
 
-- [ ] **10.45** Manual smoke test: create a simple 3-node graph (Number → Add → Display), verify auto-eval works instantly
-- [ ] **10.46** Manual smoke test: create a 100-node graph, drag blocks — verify 60fps, zero console spam
-- [ ] **10.47** Manual smoke test: switch to manual mode, edit values, verify stale indicators, click Run
-- [ ] **10.48** Manual smoke test: build an ODE graph (simple exponential), verify result matches e^t
-- [ ] **10.49** Manual smoke test: build a Pacejka tire sweep graph, verify force vs slip curve plots correctly
-- [ ] **10.50** Manual smoke test: train an XOR neural network, verify loss decreases over epochs
-- [ ] **10.51** Manual smoke test: enable high-precision mode (100 digits), compute `1/3 * 3`, verify exact 1.0
-- [ ] **10.52** Run full E2E suite: `npm run test:e2e` — all tests pass
-- [ ] **10.53** Run full Rust tests: `cargo test --workspace` — all tests pass
-- [ ] **10.54** Final `npm run verify:ci` — clean pass, ready for merge
+### 12A — CanvasArea Decomposition
+
+- [ ] **12.1** Extract keyboard shortcuts (~200 lines) to `src/hooks/useCanvasKeyboard.ts`
+- [ ] **12.2** Extract context menu logic (~150 lines) to `src/hooks/useCanvasContextMenu.ts`
+- [ ] **12.3** Extract drag/drop handlers to `src/hooks/useCanvasDragDrop.ts`
+- [ ] **12.4** Extract clipboard ops to `src/hooks/useCanvasClipboard.ts`
+- [ ] **12.5** Extract group/template ops to `src/hooks/useCanvasGroups.ts`
+- [ ] **12.6** Verify no behaviour changes — run E2E smoke after each extraction
+
+### 12B — Node Visual States
+
+- [ ] **12.7** `nodeStyles.ts` — stale overlay: `opacity: 0.5, filter: grayscale(30%), borderStyle: dashed`
+- [ ] **12.8** Computing spinner overlay when engine evaluating a node
+- [ ] **12.9** Error badge (red dot) in top-right corner
+- [ ] **12.10** Update OperationNode, DisplayNode, DataNode, PlotNode with stale/error styles
+
+---
+
+## Phase 13 — End-to-End UX Audit (NEW)
+
+Every user journey, from first signup to daily power use, must be polished and professional.
+
+### 13A — User Journey Audit
+
+- [ ] **13.1** Map every journey: signup → onboarding → first project → learning → upgrading → settings → power user
+- [ ] **13.2** Map collaboration: sharing, exporting, multiplayer considerations
+- [ ] **13.3** Map marketplace: publishing, downloading, reviews
+- [ ] **13.4** Document friction points, dead ends, confusion risks
+- [ ] **13.5** Create `docs/UX_AUDIT.md`
+
+### 13B — Visual Polish
+
+- [ ] **13.6** Audit every component: colour, spacing, typography, border radii, shadows — consistency
+- [ ] **13.7** All states visually distinct: hover, active, focused, disabled, loading, error, success
+- [ ] **13.8** Animation/transition audit: smooth easing, no jarring jumps
+- [ ] **13.9** Marketing readiness: canvas looks beautiful with 20-30 block graph
+- [ ] **13.10** Dark/light mode polish: all components correct in both themes
+
+### 13C — Performance at Scale
+
+- [ ] **13.11** Benchmark: 100, 500, 1000, 5000 blocks — FPS, eval time, memory
+- [ ] **13.12** Benchmark: 100 projects in list — load time, scroll performance
+- [ ] **13.13** Identify and fix performance cliffs
+- [ ] **13.14** Canvas virtualisation audit: only visible nodes rendered
+
+### 13D — Stability & Security
+
+- [ ] **13.15** WCAG 2.1 AA compliance: contrast, keyboard nav, screen reader labels
+- [ ] **13.16** Error boundary coverage on every lazy-loaded route/panel
+- [ ] **13.17** Offline resilience: graceful handling of network drops
+- [ ] **13.18** Browser compatibility: Chrome, Firefox, Safari, Edge
+- [ ] **13.19** Memory leak audit: open/close projects 50 times, verify stable memory
+
+### 13E — Competitive Benchmarking
+
+- [ ] **13.20** Side-by-side vs MATLAB/Simulink: where ChainSolve wins vs loses
+- [ ] **13.21** Side-by-side vs Excel: ease of building computation models
+- [ ] **13.22** Side-by-side vs Altair HyperStudy: DOE + optimisation workflow
+- [ ] **13.23** Document advantages and remaining gaps in `docs/COMPETITIVE_ANALYSIS.md`
+
+---
+
+## Phase 14 — Housekeeping & Professional Audit
+
+### 14A — Code Quality
+
+- [ ] **14.1** `npx tsc -b --noEmit` — fix all type errors
+- [ ] **14.2** `npm run lint` — fix all ESLint violations
+- [ ] **14.3** `npm run format` — Prettier on all files
+- [ ] **14.4** Scan TODO/FIXME/HACK comments — resolve or convert to GitHub issues
+- [ ] **14.5** Audit catch blocks for consistent `[ERROR_CODE]` pattern
+- [ ] **14.6** Move `@types/dagre` from dependencies to devDependencies
+- [ ] **14.7** `npx depcheck` — remove unused npm deps
+- [ ] **14.8** `npm audit` + `cargo audit` — fix security issues
+- [ ] **14.9** `cargo update` — patch-level updates
+
+### 14B — Documentation
+
+- [ ] **14.10** Update `CLAUDE.md` with reactive eval model, variadic blocks, CSEL, magnetic snapping
+- [ ] **14.11** Update `ARCHITECTURE.md` with new modules (ODE, vehicle, CSEL parser)
+- [ ] **14.12** Update `README.md` with new block count and capabilities
+- [ ] **14.13** Update `CHANGELOG.md`
+- [ ] **14.14** New ADRs: reactive eval, variadic blocks, CSEL grammar, magnetic snapping, simulation worker
+- [ ] **14.15** Update `W9_ENGINE.md`, `W9_3_CORRECTNESS.md`, `UX.md`
+- [ ] **14.16** Clean up outdated docs
+
+### 14C — i18n Completeness
+
+- [ ] **14.17** `node scripts/check-i18n-keys.mjs` — verify all keys across 7 locales
+- [ ] **14.18** Translations for all new block labels
+- [ ] **14.19** Translations for all new UI strings
+- [ ] **14.20** `node scripts/check-i18n-hardcoded.mjs` — no hardcoded strings
+
+### 14D — Database & Migrations
+
+- [ ] **14.21** Audit all 15 migrations for idempotency
+- [ ] **14.22** Verify RLS policies cover all tables
+- [ ] **14.23** Verify FK cascades correct
+- [ ] **14.24** Consider squashing to single clean baseline (pre-release)
+
+### 14E — Testing
+
+- [ ] **14.25** Every new Rust module has `#[cfg(test)]` unit tests
+- [ ] **14.26** Golden fixtures for all new op categories
+- [ ] **14.27** Property tests: determinism, incremental consistency, no-panic
+- [ ] **14.28** Criterion benchmarks: NN training, ODE solver, Pacejka, LP solver
+- [ ] **14.29** Vitest tests: evalScheduler, formula bar parser, snap detection
+- [ ] **14.30** Playwright E2E: drag without eval spam, Run button, formula bar expression, variadic blocks
+
+### 14F — CI & Final Verification
+
+- [ ] **14.31** `scripts/verify-fast.sh` passes
+- [ ] **14.32** `scripts/verify-ci.sh` passes (including WASM build)
+- [ ] **14.33** Bundle size within budget (400KB JS gzip, 250KB WASM gzip)
+- [ ] **14.34** `scripts/check-wasm-exports.mjs` updated for new exports
+- [ ] **14.35** Flakiness check: `CI=true npx playwright test --project=smoke --repeat-each=5`
+- [ ] **14.36** Full `npm run verify:ci` — all gates green
+
+### 14G — Final Smoke Tests
+
+- [ ] **14.37** 3-node graph (Number → Add → Display): reactive eval works instantly
+- [ ] **14.38** 100-node graph: drag blocks at 60fps, zero console spam
+- [ ] **14.39** Manual mode: edit values, stale indicators show, Run button evaluates
+- [ ] **14.40** Formula bar: type `1 + 2 =`, blocks created and wired correctly
+- [ ] **14.41** Variadic: add block with 5 inputs, all summed correctly
+- [ ] **14.42** Magnetic snap: drag near another block, ghost shows, snap on release
+- [ ] **14.43** ODE: exponential growth matches `e^t`
+- [ ] **14.44** Pacejka: tire force at known slip angle matches published data
+- [ ] **14.45** NN: train XOR, loss decreases, training completes at maxEpochs
+- [ ] **14.46** High precision: `1/3 * 3` at 100 digits equals exactly 1
+- [ ] **14.47** Full E2E suite: `npm run test:e2e`
+- [ ] **14.48** Full Rust tests: `cargo test --workspace`
+- [ ] **14.49** Final `npm run verify:ci` — clean pass
 
 ---
 
 ## Summary
 
-| Phase | Steps | New Rust Modules | New Blocks | Key Files |
-|-------|-------|-----------------|------------|-----------|
-| 0 — Drag Fix | 10 | — | — | CanvasArea.tsx, useGraphEngine.ts |
-| 1 — Eval Model | 37 | validate.rs extension | — | evalScheduler.ts, CanvasToolbar.tsx, statusBarStore.ts |
-| 2 — Precision | 26 | precision.rs, compensated.rs | — | types.rs, ops.rs, value.ts |
-| 3 — ODE Solvers | 14 | ode/rk4.rs, ode/rk45.rs, ode/bdf.rs | 6 | ode-blocks.ts |
-| 4 — Vehicle Sim | 24 | vehicle/tire.rs, suspension.rs, aero.rs, powertrain.rs, lap.rs, thermal.rs | ~25 | vehicle-blocks.ts |
-| 5 — NN Training | 10 | nn/lr_schedule.rs | 2 | nn-blocks.ts, ops.rs |
-| 6 — ML Workflows | 10 | ml/preprocess.rs, ml/classification_metrics.rs | ~6 | ml-blocks.ts |
-| 7 — Optimization | 12 | optim/lp.rs, optim/qp.rs, optim/pareto.rs, optim/sobol_sensitivity.rs | 4 | optim-blocks.ts |
-| 8 — Sim Worker | 14 | — | — | simulationWorker.ts, simulationStatusStore.ts, engine-wasm/lib.rs |
-| 9 — Frontend | 11 | — | — | CanvasArea.tsx (decomposition), nodeStyles.ts |
-| 10 — Housekeeping | 54 | — | — | All docs, scripts, CI |
-| **Total** | **222** | **~15 new modules** | **~43 new blocks** | |
+| Phase | Name | Steps | Status |
+| ----- | ---- | ----- | ------ |
+| 0 | Drag Performance Fix | 10 | DONE |
+| 1 | Reactive Evaluation Model | 28 | PARTIAL (rework needed) |
+| 2 | Multi-Input Variadic Blocks | 18 | NEW |
+| 3 | Scientific Accuracy & Precision | 25 | Pending |
+| 4 | ODE/PDE Solvers | 13 | Pending |
+| 5 | Vehicle Simulation | 17 | Pending |
+| 6 | NN Training Pipeline | 9 | Pending |
+| 7 | ML Training Workflows | 10 | Pending |
+| 8 | Optimisation Engine | 11 | Pending |
+| 9 | Long-Running Simulation Infra | 22 | Pending (reworked, no continuous) |
+| 10 | Block-to-Block Magnetic Snapping | 15 | NEW |
+| 11 | Formula Bar Expression Language | 30 | NEW |
+| 12 | Frontend Polish | 10 | Pending |
+| 13 | End-to-End UX Audit | 23 | NEW |
+| 14 | Housekeeping & Professional Audit | 49 | Pending (updated) |
+| **Total** | | **~290** | |
 
 ---
 
-*This checklist is the single source of truth for the ChainSolve improvements roadmap. Each item is designed to be independently implementable, testable, and verifiable. Phases are ordered by dependency — later phases build on earlier ones.*
+*This checklist is the single source of truth for the ChainSolve improvements roadmap. Every item is independently implementable, testable, and verifiable. Phases are ordered by dependency — later phases build on earlier ones. No continuous evaluation. No indefinite loops. Simple, robust, best-in-class.*
