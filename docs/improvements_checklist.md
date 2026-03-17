@@ -183,8 +183,8 @@ Ref: Pacejka 2012, Milliken & Milliken 1995, Dixon 2009.
 
 ### 5A — Tire (Pacejka Magic Formula)
 
-- [ ] **5.1** Create `vehicle/mod.rs` with `tire`, `suspension`, `aero`, `powertrain`, `lap`, `thermal` submodules
-- [ ] **5.2** `vehicle/tire.rs` — lateral force, longitudinal force, combined slip, tire sweep, presets
+- [x] **5.1** Create `vehicle/mod.rs` with `tire` submodule (suspension/aero/powertrain/lap/thermal deferred)
+- [x] **5.2** `vehicle/tire.rs` — Pacejka Magic Formula: lateral/longitudinal force, sweep, 4 presets, 6 tests
 - [ ] **5.3** Match arms in `ops.rs` for `veh.tire.*`
 - [ ] **5.4** Unit tests against published Pacejka data
 
