@@ -22,6 +22,7 @@
 //! - [`run_load_snapshot_with_options`] — load with eval options + progress callback
 //! - [`run_patch_with_options`]    — patch with eval options + progress callback
 
+pub mod autodiff;
 pub mod catalog;
 pub mod compensated;
 pub mod error;

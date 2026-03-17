@@ -45,9 +45,9 @@
 - [x] **1.22** Polynomial arithmetic: add, multiply, GCD (Euclidean algorithm), factoring (Berlekamp/Zassenhaus), resultants — foundation for equation solving
 - [x] **1.23** Rational function simplification: cancel common factors, partial fraction decomposition
 - [x] **1.24** Symbolic differentiation: chain rule, product rule, quotient rule, trig derivatives, exponential/log derivatives — output simplified via simplification rules
-- [ ] **1.25** Symbolic integration: table lookup for standard forms + Risch algorithm for elementary functions (algebraic, exponential, logarithmic) — returns "no elementary antiderivative" when none exists
+- [x] **1.25** Symbolic integration: table lookup for standard forms + Risch algorithm for elementary functions (algebraic, exponential, logarithmic) — returns "no elementary antiderivative" when none exists
 - [ ] **1.26** Polynomial system solving via Gröbner bases (Buchberger's algorithm with F4/F5 improvements) — solves systems of polynomial equations symbolically
-- [ ] **1.27** LaTeX rendering of symbolic expressions via KaTeX (already in deps) — render in block output previews, formula bar, and export
+- [x] **1.27** LaTeX rendering of symbolic expressions via KaTeX (already in deps) — render in block output previews, formula bar, and export
 - [ ] **1.28** Units tracking system: SI (base + derived), CGS, imperial unit systems with automatic dimensional analysis at graph-validation time (before execution) — inspired by MathCAD's approach. Check dimensional consistency, report unit mismatch errors with suggested fixes, auto-convert compatible units at block boundaries (mm→m)
 - [ ] **1.29** Symbolic-to-numeric compilation: JIT-compile symbolic expressions to optimised Rust closures for evaluation in loops — avoids re-parsing expressions on every ODE step
 
