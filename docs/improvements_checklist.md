@@ -401,12 +401,12 @@
 - [ ] **6.5** Bode plot: magnitude (dB) + phase (deg) vs frequency (Hz/rad/s) on log scale — standard for control systems. Output from TransferFunction frequency response.
 - [ ] **6.6** Nyquist plot: Re vs Im of G(jω) — for stability analysis (encirclement criterion). Root locus: poles/zeros vs gain parameter.
 - [ ] **6.7** XY animation: time-varying plots with playback controls (play/pause/speed/scrub) — for visualising simulation results over time
-- [ ] **6.8** Contour plot: 2D scalar field with isolines — for response surfaces and field visualisation
+- [x] **6.8** Contour plot: 2D scalar field with isolines — for response surfaces and field visualisation
 - [ ] **6.9** 3D surface plot: via Three.js or React Three Fiber — interactive rotation, zoom, colourmap, wireframe toggle
-- [ ] **6.10** Parallel coordinates: N vertical axes, each data point as a polyline — for multi-dimensional design space exploration
+- [x] **6.10** Parallel coordinates: N vertical axes, each data point as a polyline — for multi-dimensional design space exploration
 - [ ] **6.11** Pareto front plot: 2D/3D with dominated region shading — for multi-objective optimisation results
 - [ ] **6.12** Sankey diagram: flow quantities between nodes — for energy/mass balance visualisation
-- [ ] **6.13** Box-and-whisker, violin plots: statistical distribution visualisation
+- [x] **6.13** Box-and-whisker, violin plots: statistical distribution visualisation
 - [ ] **6.14** Scope block: 30fps live update during simulation, configurable buffer, vertical trigger line at current time — like Simulink's Scope
 - [ ] **6.15** Multi-axis: secondary Y-axis, stacked panels with shared X-axis (like Simulink Data Inspector)
 - [ ] **6.16** 3D viewport: Three.js orbit camera, mesh visualisation (wireframe/solid/transparent), section planes, vehicle animation, mechanism motion — for geometry and dynamics visualisation
