@@ -491,5 +491,7 @@ function formatNodeValue(expr: ExpressionNode): string {
       return `ERR(${expr.value.message})`
     case 'interval':
       return `[${expr.value.lo}, ${expr.value.hi}]`
+    case 'highPrecision':
+      return expr.value.display
   }
 }

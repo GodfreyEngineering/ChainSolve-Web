@@ -264,6 +264,11 @@ pub struct EvalOptions {
     /// Time budget in milliseconds. 0 = no budget.
     #[serde(default)]
     pub time_budget_ms: u64,
+    /// Phase 3: When set, evaluate arithmetic ops at this many decimal
+    /// digits of precision using dashu-float. Requires `high-precision` feature.
+    /// None = standard f64 precision.
+    #[serde(default)]
+    pub precision: Option<u32>,
 }
 
 impl Default for EvalOptions {
@@ -272,6 +277,7 @@ impl Default for EvalOptions {
             trace: false,
             max_trace_nodes: None,
             time_budget_ms: 0,
+            precision: None,
         }
     }
 }

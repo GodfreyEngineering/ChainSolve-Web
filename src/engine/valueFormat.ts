@@ -32,6 +32,8 @@ export function formatValueFull(v: Value | undefined): string {
       return `Error: ${v.message}`
     case 'interval':
       return `[${v.lo}, ${v.hi}]`
+    case 'highPrecision':
+      return v.display
   }
 }
 
@@ -53,6 +55,8 @@ export function formatValueJson(v: Value | undefined): string {
       return JSON.stringify({ error: v.message })
     case 'interval':
       return JSON.stringify({ lo: v.lo, hi: v.hi })
+    case 'highPrecision':
+      return JSON.stringify({ display: v.display, precision: v.precision })
   }
 }
 

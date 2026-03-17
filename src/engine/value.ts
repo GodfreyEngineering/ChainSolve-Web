@@ -35,7 +35,24 @@ export interface IntervalValue {
   readonly hi: number
 }
 
-export type Value = ScalarValue | VectorValue | TableValue | ErrorValue | IntervalValue
+/** Phase 3: Arbitrary-precision float value. */
+export interface HighPrecisionValue {
+  readonly kind: 'highPrecision'
+  /** Full decimal string representation (lossless). */
+  readonly display: string
+  /** f64 approximation for fast display/comparison. */
+  readonly approx: number
+  /** Decimal digits of precision used. */
+  readonly precision: number
+}
+
+export type Value =
+  | ScalarValue
+  | VectorValue
+  | TableValue
+  | ErrorValue
+  | IntervalValue
+  | HighPrecisionValue
 
 // ── Factory helpers ──────────────────────────────────────────────────────────
 
@@ -243,6 +260,9 @@ export function formatValue(v: Value | undefined, locale?: string, opts?: Format
       return v.message
     case 'interval':
       return `[${v.lo}, ${v.hi}]`
+    case 'highPrecision':
+      // Display the full decimal string, truncated to user's display precision
+      return v.display
   }
 }
 
