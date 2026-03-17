@@ -35,6 +35,72 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 
+// ── NaN/Inf detection helpers ───────────────────────────────────────
+
+/// Check if a Value contains any NaN or Inf values.
+fn value_contains_nan(v: &Value) -> bool {
+    match v {
+        Value::Scalar { value } => value.is_nan() || value.is_infinite(),
+        Value::Vector { value } => value.iter().any(|x| x.is_nan() || x.is_infinite()),
+        Value::Matrix { data, .. } => data.iter().any(|x| x.is_nan() || x.is_infinite()),
+        Value::Table { rows, .. } => rows.iter().any(|r| r.iter().any(|x| x.is_nan() || x.is_infinite())),
+        _ => false,
+    }
+}
+
+/// Detect NaN/Inf in a node's result and trace back to the input port(s) that
+/// carried NaN. Returns a diagnostic with the traceback info.
+fn check_nan_inf_result(
+    block_type: &str,
+    node_id: &str,
+    inputs: &HashMap<String, Value>,
+    result: &Value,
+) -> Option<Diagnostic> {
+    // Skip blocks that naturally produce NaN (e.g. when no inputs are connected).
+    if block_type == "number" || block_type == "display" || block_type == "vector_input"
+        || block_type == "table_input"
+    {
+        return None;
+    }
+
+    let result_has_nan = value_contains_nan(result);
+    if !result_has_nan {
+        return None;
+    }
+
+    // Find which input ports carry NaN.
+    let nan_ports: Vec<&str> = inputs
+        .iter()
+        .filter(|(_, v)| value_contains_nan(v))
+        .map(|(k, _)| k.as_str())
+        .collect();
+
+    if nan_ports.is_empty() {
+        // This block produced NaN from non-NaN inputs — it is the origin.
+        Some(Diagnostic {
+            node_id: Some(node_id.to_string()),
+            level: DiagLevel::Warning,
+            code: "NAN_ORIGIN".to_string(),
+            message: format!(
+                "Block '{}' produced NaN/Inf from valid inputs — this is the origin of the NaN.",
+                block_type,
+            ),
+        })
+    } else {
+        // NaN propagated from upstream input(s).
+        let ports_str = nan_ports.join(", ");
+        Some(Diagnostic {
+            node_id: Some(node_id.to_string()),
+            level: DiagLevel::Info,
+            code: "NAN_PROPAGATED".to_string(),
+            message: format!(
+                "NaN/Inf propagated through '{}' from input port(s): {}",
+                block_type, ports_str,
+            ),
+        })
+    }
+}
+
 // ── Progress callback signal ────────────────────────────────────────
 
 /// Signal returned by the progress callback.
@@ -373,12 +439,32 @@ impl EngineGraph {
                         .iter()
                         .map(|(k, v)| (k.clone(), v.summarize()))
                         .collect();
+                    let mut node_diags = Vec::new();
+                    // Detect NaN input ports for trace attribution.
+                    for (port_id, val) in &node_inputs {
+                        if value_contains_nan(val) {
+                            node_diags.push(Diagnostic {
+                                node_id: Some(node_id.clone()),
+                                level: DiagLevel::Info,
+                                code: "NAN_INPUT".to_string(),
+                                message: format!("Input port '{}' received NaN", port_id),
+                            });
+                        }
+                    }
+                    if value_contains_nan(&result) && node_diags.is_empty() {
+                        node_diags.push(Diagnostic {
+                            node_id: Some(node_id.clone()),
+                            level: DiagLevel::Info,
+                            code: "NAN_ORIGIN".to_string(),
+                            message: format!("Block '{}' produced NaN (no NaN inputs — this is the origin)", node.block_type),
+                        });
+                    }
                     trace.push(TraceEntry {
                         node_id: node_id.clone(),
                         op_id: node.block_type.clone(),
                         inputs: input_summaries,
                         output: result.summarize(),
-                        diagnostics: vec![],
+                        diagnostics: node_diags,
                     });
                 }
             }
@@ -397,6 +483,11 @@ impl EngineGraph {
 
             // Check for ill-conditioned matrices in sensitive ops.
             if let Some(diag) = check_ill_conditioning(&node.block_type, node_id, &node_inputs) {
+                diagnostics.push(diag);
+            }
+
+            // Check for NaN/Inf results with input traceback.
+            if let Some(diag) = check_nan_inf_result(&node.block_type, node_id, &node_inputs, &result) {
                 diagnostics.push(diag);
             }
 
@@ -1268,5 +1359,66 @@ mod tests {
         let mut g = EngineGraph::new();
         g.release_dataset("nope"); // should not panic
         assert_eq!(g.dataset_count(), 0);
+    }
+
+    #[test]
+    fn nan_origin_detected_on_divide_by_zero() {
+        // n1(1.0) → divide ← n2(0.0)  → should produce Inf and a NAN_ORIGIN diagnostic
+        let snap = EngineSnapshotV1 {
+            version: 1,
+            nodes: vec![
+                num_node("n1", 1.0),
+                num_node("n2", 0.0),
+                op_node("div", "divide"),
+            ],
+            edges: vec![
+                edge("e1", "n1", "out", "div", "a"),
+                edge("e2", "n2", "out", "div", "b"),
+            ],
+        };
+        let mut g = EngineGraph::new();
+        g.load_snapshot(snap);
+        let result = g.evaluate_dirty();
+        // 1/0 = Inf, which should trigger NAN_ORIGIN (no NaN inputs)
+        let nan_diags: Vec<_> = result
+            .diagnostics
+            .iter()
+            .filter(|d| d.code == "NAN_ORIGIN")
+            .collect();
+        assert_eq!(nan_diags.len(), 1);
+        assert_eq!(nan_diags[0].node_id.as_deref(), Some("div"));
+    }
+
+    #[test]
+    fn nan_propagation_detected() {
+        // n1(1) / n2(0) = Inf → sin(Inf) = NaN → negate(NaN) = NaN
+        // The divide node produces Inf (NAN_ORIGIN), sin produces NaN (NAN_PROPAGATED via input),
+        // negate gets NaN propagated further.
+        let snap = EngineSnapshotV1 {
+            version: 1,
+            nodes: vec![
+                num_node("n1", 1.0),
+                num_node("n2", 0.0),
+                op_node("div", "divide"),
+                op_node("s", "sin"),
+            ],
+            edges: vec![
+                edge("e1", "n1", "out", "div", "a"),
+                edge("e2", "n2", "out", "div", "b"),
+                edge("e3", "div", "out", "s", "a"),
+            ],
+        };
+        let mut g = EngineGraph::new();
+        g.load_snapshot(snap);
+        let result = g.evaluate_dirty();
+        // div should have NAN_ORIGIN (Inf from valid inputs)
+        // sin should have NAN_PROPAGATED (receives Inf from div)
+        let prop_diags: Vec<_> = result
+            .diagnostics
+            .iter()
+            .filter(|d| d.code == "NAN_PROPAGATED")
+            .collect();
+        assert!(!prop_diags.is_empty(), "Expected NAN_PROPAGATED diagnostic");
+        assert!(prop_diags.iter().any(|d| d.node_id.as_deref() == Some("s")));
     }
 }
