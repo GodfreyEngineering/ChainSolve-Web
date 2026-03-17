@@ -29,6 +29,7 @@ pub mod expr;
 pub mod graph;
 pub mod ml;
 pub mod nn;
+pub mod ode;
 pub mod ops;
 pub mod optim;
 pub mod precision;
