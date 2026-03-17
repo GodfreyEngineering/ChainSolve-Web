@@ -158,9 +158,9 @@ Required before vehicle simulation — suspension, thermal models, and lap sim n
 
 ### 4A — Core ODE Module
 
-- [ ] **4.1** Create `crates/engine-core/src/ode/mod.rs` with `rk4`, `rk45`, `bdf`, `types` submodules
-- [ ] **4.2** `ode/types.rs` — `OdeSystem`, `OdeResult`, `OdeSolverConfig` structs
-- [ ] **4.3** `ode/rk4.rs` — classic 4th-order Runge-Kutta (fixed step, expression-based RHS via `expr.rs`)
+- [x] **4.1** Create `crates/engine-core/src/ode/mod.rs` with `rk4`, `types` submodules (rk45, bdf deferred)
+- [x] **4.2** `ode/types.rs` — `OdeSystem`, `OdeResult`, `OdeSolverConfig` structs
+- [x] **4.3** `ode/rk4.rs` — classic 4th-order Runge-Kutta with expression-based RHS, parameter support, 4 tests
 - [ ] **4.4** `ode/rk45.rs` — Dormand-Prince adaptive step with error control (ref: Dormand & Prince 1980)
 - [ ] **4.5** `ode/bdf.rs` — implicit BDF for stiff systems with Newton iteration (ref: Hairer & Wanner 1996)
 - [ ] **4.6** Register `ode` module in `lib.rs`
