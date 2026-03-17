@@ -1165,7 +1165,9 @@
     "stop": "Detener evaluación",
     "autoRun": "Auto-ejecución activada",
     "manualMode": "Modo de evaluación manual",
-    "pendingChanges": "{{count}} cambios pendientes"
+    "pendingChanges": "{{count}} cambios pendientes",
+    "addInput": "+ Entrada",
+    "removeInput": "Eliminar entrada"
   },
   "inspector": {
     "pin": "Fijar al bloque actual",

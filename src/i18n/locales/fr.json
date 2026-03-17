@@ -1165,7 +1165,9 @@
     "stop": "Arrêter l'évaluation",
     "autoRun": "Exécution automatique activée",
     "manualMode": "Mode d'évaluation manuelle",
-    "pendingChanges": "{{count}} modifications en attente"
+    "pendingChanges": "{{count}} modifications en attente",
+    "addInput": "+ Entrée",
+    "removeInput": "Supprimer l'entrée"
   },
   "inspector": {
     "pin": "Épingler au nœud actuel",

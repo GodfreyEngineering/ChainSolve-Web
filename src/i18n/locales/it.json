@@ -1145,7 +1145,9 @@
     "stop": "Interrompi valutazione",
     "autoRun": "Esecuzione automatica attiva",
     "manualMode": "Modalità di valutazione manuale",
-    "pendingChanges": "{{count}} modifiche in sospeso"
+    "pendingChanges": "{{count}} modifiche in sospeso",
+    "addInput": "+ Ingresso",
+    "removeInput": "Rimuovi ingresso"
   },
   "inspector": {
     "pin": "Fissa al blocco corrente",

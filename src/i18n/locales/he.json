@@ -704,7 +704,9 @@
     "stop": "עצור חישוב",
     "autoRun": "הרצה אוטומטית מופעלת",
     "manualMode": "מצב חישוב ידני",
-    "pendingChanges": "{{count}} שינויים ממתינים"
+    "pendingChanges": "{{count}} שינויים ממתינים",
+    "addInput": "+ קלט",
+    "removeInput": "הסר קלט"
   },
   "annotation": {
     "text": "טקסט",

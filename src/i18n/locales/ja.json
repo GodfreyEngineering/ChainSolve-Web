@@ -1187,7 +1187,9 @@
     "stop": "評価を停止",
     "autoRun": "自動実行が有効",
     "manualMode": "手動評価モード",
-    "pendingChanges": "{{count}} 件の保留中の変更"
+    "pendingChanges": "{{count}} 件の保留中の変更",
+    "addInput": "+ 入力",
+    "removeInput": "入力を削除"
   },
   "inspector": {
     "pin": "Pin to current block",

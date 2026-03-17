@@ -1187,7 +1187,9 @@
     "stop": "Stop evaluation",
     "autoRun": "Auto-run enabled",
     "manualMode": "Manual evaluation mode",
-    "pendingChanges": "{{count}} pending changes"
+    "pendingChanges": "{{count}} pending changes",
+    "addInput": "+ Input",
+    "removeInput": "Remove input"
   },
   "inspector": {
     "pin": "Pin to current block",
