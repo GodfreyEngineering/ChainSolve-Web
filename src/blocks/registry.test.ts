@@ -131,7 +131,10 @@ describe('TS / Rust catalog alignment', () => {
     path.resolve(__dirname, '..', '..', 'crates', 'engine-core', 'src', 'catalog.rs'),
     'utf-8',
   )
-  const rustOpIds = new Set([...catalogSrc.matchAll(/op_id:\s*"([^"]+)"/g)].map((m) => m[1]))
+  const rustOpIds = new Set([
+    ...[...catalogSrc.matchAll(/op_id:\s*"([^"]+)"/g)].map((m) => m[1]),
+    ...[...catalogSrc.matchAll(/(?:entry|variadic_entry)\("([^"]+)"/g)].map((m) => m[1]),
+  ])
 
   it('every non-UI-only TS block has a Rust catalog entry', () => {
     const missingFromRust: string[] = []

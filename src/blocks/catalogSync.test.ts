@@ -29,8 +29,12 @@ function extractRustOpIds(): Set<string> {
     'utf-8',
   )
   const opIds = new Set<string>()
-  // Match: op_id: "some.op.name"
+  // Match: op_id: "some.op.name" (old CatalogEntry literal format)
   for (const m of catalogSrc.matchAll(/op_id:\s*"([^"]+)"/g)) {
+    opIds.add(m[1])
+  }
+  // Match: entry("some.op.name", ...) or variadic_entry("some.op.name", ...)
+  for (const m of catalogSrc.matchAll(/(?:entry|variadic_entry)\("([^"]+)"/g)) {
     opIds.add(m[1])
   }
   return opIds
