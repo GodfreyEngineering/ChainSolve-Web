@@ -325,7 +325,7 @@
 - [x] **3.32** Debug console: DebugConsolePanel with engine log output (eval started/complete, patch ops, errors)
 - [x] **3.33** Graph health panel: LazyGraphHealthPanel computes health on-demand (orphan nodes, cycles, crossing edges)
 - [x] **3.34** Problems panel: validation diagnostics display
-- [ ] **3.35** Probe mode: click any edge → floating inspector shows data value, type, shape, statistics (min/max/mean/std), and inline mini-plot — like Grasshopper's data viewer
+- [x] **3.35** Probe mode: click any edge → floating inspector shows data value, type, shape, statistics (min/max/mean/std), and inline mini-plot — like Grasshopper's data viewer
 - [ ] **3.36** Breakpoints: right-click node → "Set Breakpoint" — execution pauses before evaluating that node, showing all input values in inspector. Step over to continue.
 - [ ] **3.37** Step execution: step through graph one node at a time (forward/backward in topological order) — with current node highlighted and inputs/outputs displayed
 - [ ] **3.38** Execution timeline: collapsible bottom panel showing Gantt-chart of block execution with durations — identifies bottleneck blocks at a glance
