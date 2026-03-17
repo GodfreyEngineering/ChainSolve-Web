@@ -76,6 +76,9 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   // ── Data inputs (Pro) ─────────────────────────────────────────────────────
   tableInput:
     'Spreadsheet-style table input with named columns. Each column is a separate output port. Import from CSV or type values directly.',
+  // 2.7: MatrixInput — free tier, single table output
+  matrixInput:
+    '2D numeric matrix input with row/col index headers. Single output port emits the whole matrix as a Table value. Supports CSV/Excel copy-paste.',
   table_extract_col:
     'Extracts a single column from a table as an array. Connect a Table Input and specify the column index (0-based).',
 

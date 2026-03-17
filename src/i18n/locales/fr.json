@@ -379,6 +379,7 @@
     "categoryVectorOps": "Ops. Vectorielles",
     "categoryTableOps": "Ops. de Table",
     "tableInput": "Entrée Table",
+    "matrixInput": "Entrée Matrice",
     "table_extract_col": "Colonne de Table",
     "material_full": "Matériau (Complet)",
     "csvImport": "Import CSV",

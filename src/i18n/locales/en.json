@@ -387,6 +387,7 @@
     "categoryVectorOps": "Vector Ops",
     "categoryTableOps": "Table Ops",
     "tableInput": "Table Input",
+    "matrixInput": "Matrix Input",
     "table_extract_col": "Table Column",
     "material_full": "Material (Full)",
     "csvImport": "CSV Import",

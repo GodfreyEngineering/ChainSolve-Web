@@ -9,12 +9,23 @@
 import type { Node, Edge } from '@xyflow/react'
 import type { PatchOp, EngineNodeDef, EngineEdgeDef } from './wasm-types.ts'
 
+/**
+ * Block type aliases: UI block types that map to a different engine op.
+ * The UI block keeps its own type for rendering, but the engine sees the alias.
+ */
+const ENGINE_BLOCK_ALIASES: Record<string, string> = {
+  // matrixInput (2.7): same evaluation logic as tableInput — both read tableData
+  matrixInput: 'tableInput',
+}
+
 /** Convert a React Flow node to an engine node def. */
 function toEngineNode(node: Node): EngineNodeDef {
   const data = node.data as Record<string, unknown>
+  const uiBlockType = (data.blockType as string) ?? ''
+  const blockType = ENGINE_BLOCK_ALIASES[uiBlockType] ?? uiBlockType
   return {
     id: node.id,
-    blockType: (data.blockType as string) ?? '',
+    blockType,
     data,
   }
 }

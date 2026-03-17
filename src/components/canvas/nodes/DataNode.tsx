@@ -161,7 +161,9 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as NodeData
   const { updateNodeData } = useReactFlow()
   const value = useComputedValue(id)
-  const isTable = nd.blockType === 'tableInput'
+  const isTable = nd.blockType === 'tableInput' || nd.blockType === 'matrixInput'
+  /** 2.7: MatrixInput columns are auto-named numerically (read-only headers). */
+  const isMatrix = nd.blockType === 'matrixInput'
   const tableOutputMode = (nd.tableOutputMode as string | undefined) ?? 'columns'
 
   // 4.4: Collapse / expand state for the table editor
@@ -176,8 +178,14 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
   )
 
   const onTableChange = useCallback(
-    (columns: string[], rows: number[][]) => updateNodeData(id, { tableData: { columns, rows } }),
-    [id, updateNodeData],
+    (columns: string[], rows: number[][]) => {
+      // 2.7: MatrixInput auto-generates "1", "2", ... column names (immutable headers)
+      const finalColumns = isMatrix
+        ? columns.map((_, ci) => String(ci + 1))
+        : columns
+      updateNodeData(id, { tableData: { columns: finalColumns, rows } })
+    },
+    [id, isMatrix, updateNodeData],
   )
 
   const tableData = (nd.tableData as { columns: string[]; rows: number[][] } | undefined) ?? {
@@ -268,7 +276,24 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
       </div>
 
       {isTable ? (
-        tableOutputMode === 'columns' ? (
+        // 2.7: MatrixInput always uses a single "out" handle (whole table output)
+        isMatrix || tableOutputMode !== 'columns' ? (
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="out"
+            style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
+            title={
+              isMatrix
+                ? `${tableData.rows.length}\u00d7${tableData.columns.length} matrix`
+                : tableOutputMode === 'table'
+                  ? 'Entire table'
+                  : tableOutputMode === 'row'
+                    ? `Row ${(nd.tableOutputRow ?? 0) + 1}`
+                    : `Column ${tableData.columns[nd.tableOutputCol ?? 0] ?? 'A'}`
+            }
+          />
+        ) : (
           tableData.columns.map((col, ci) => (
             <Handle
               key={col}
@@ -282,21 +307,6 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
               title={col}
             />
           ))
-        ) : (
-          /* 4.08: Single output handle for table/row/column modes */
-          <Handle
-            type="source"
-            position={Position.Right}
-            id="out"
-            style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
-            title={
-              tableOutputMode === 'table'
-                ? 'Entire table'
-                : tableOutputMode === 'row'
-                  ? `Row ${(nd.tableOutputRow ?? 0) + 1}`
-                  : `Column ${tableData.columns[nd.tableOutputCol ?? 0] ?? 'A'}`
-            }
-          />
         )
       ) : (
         <Handle
