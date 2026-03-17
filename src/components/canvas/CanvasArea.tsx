@@ -572,7 +572,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         return !v
       })
     },
-    togglePause: () => setPaused((v) => !v),
+    togglePause: () => {
+      setPaused((v) => {
+        userPausedRef.current = !v
+        return !v
+      })
+    },
     refresh: () => setEngineKey((k) => k + 1),
     autoOrganise: (direction?: LayoutDirection) => handleAutoOrganise(direction ?? 'LR'),
     undo: handleUndo,
@@ -839,6 +844,14 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const [minimap, setMinimap] = useState(getMinimapPref)
   const [paused, setPaused] = useState(false)
   const [engineKey, setEngineKey] = useState(0)
+
+  // Phase 0: Track drag/interaction state to pause engine during drags.
+  // Uses a ref (not state) so drag frames don't trigger re-renders.
+  const isDraggingRef = useRef(false)
+  const dragSettleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Track whether the user manually paused via toolbar (so drag-unpause
+  // doesn't override it).
+  const userPausedRef = useRef(false)
 
   // Visual polish state (W12.1)
   const [edgesAnimated, setEdgesAnimated] = useState(getEdgesAnimatedPref)
@@ -2303,6 +2316,13 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   const onNodeDragStart = useCallback(() => {
     doSaveHistory()
+    // Phase 0: Pause engine during drag for 60fps canvas interaction.
+    isDraggingRef.current = true
+    if (dragSettleTimerRef.current !== null) {
+      clearTimeout(dragSettleTimerRef.current)
+      dragSettleTimerRef.current = null
+    }
+    setPaused(true)
   }, [doSaveHistory])
 
   // Phase 11: Auto-resize parent group when a member is dragged
@@ -2322,6 +2342,20 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           )
         }
       }
+      // Phase 0: Unpause engine after drag with 200ms settle delay.
+      // This prevents thrashing on rapid drag-release-drag sequences.
+      // Respects user's manual pause — if they paused via toolbar before
+      // dragging, we don't unpause on drag stop.
+      isDraggingRef.current = false
+      if (dragSettleTimerRef.current !== null) {
+        clearTimeout(dragSettleTimerRef.current)
+      }
+      dragSettleTimerRef.current = setTimeout(() => {
+        dragSettleTimerRef.current = null
+        if (!userPausedRef.current) {
+          setPaused(false)
+        }
+      }, 200)
     },
     [nodes, setNodes, onNodeDragStopProp],
   )
@@ -2600,6 +2634,29 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     if (spaceHeldRef.current) {
       spaceDraggedRef.current = true
     }
+    // Phase 0: Pause engine during viewport pan/zoom for smooth interaction.
+    if (!isDraggingRef.current) {
+      isDraggingRef.current = true
+      if (dragSettleTimerRef.current !== null) {
+        clearTimeout(dragSettleTimerRef.current)
+        dragSettleTimerRef.current = null
+      }
+      setPaused(true)
+    }
+  }, [])
+
+  const onMoveEnd = useCallback(() => {
+    // Phase 0: Unpause engine after viewport pan/zoom with settle delay.
+    isDraggingRef.current = false
+    if (dragSettleTimerRef.current !== null) {
+      clearTimeout(dragSettleTimerRef.current)
+    }
+    dragSettleTimerRef.current = setTimeout(() => {
+      dragSettleTimerRef.current = null
+      if (!userPausedRef.current) {
+        setPaused(false)
+      }
+    }, 200)
   }, [])
 
   // Insert annotation at the canvas position where user right-clicked (G6-1)
@@ -3425,6 +3482,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         fitView
                         fitViewOptions={{ padding: 0.2 }}
                         onMoveStart={onMoveStart}
+                        onMoveEnd={onMoveEnd}
                         deleteKeyCode={null}
                         minZoom={0.08}
                         maxZoom={4}
@@ -3575,7 +3633,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                             return !v
                           })
                         }}
-                        onTogglePause={() => setPaused((v) => !v)}
+                        onTogglePause={() => {
+                          setPaused((v) => {
+                            userPausedRef.current = !v
+                            return !v
+                          })
+                        }}
                         onRefresh={() => setEngineKey((k) => k + 1)}
                         onToggleInspector={() => {
                           if (inspVisible) {

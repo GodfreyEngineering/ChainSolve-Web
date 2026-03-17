@@ -21,7 +21,6 @@ import { updatePerfMetrics } from './perfMetrics.ts'
 import { perfMark, perfMeasure } from '../perf/marks.ts'
 import { dlog } from '../observability/debugLog.ts'
 import { recordEngineEval } from '../observability/engineTelemetry.ts'
-import { computeGraphHealth } from '../lib/graphHealth.ts'
 import { useStatusBarStore } from '../stores/statusBarStore.ts'
 import { ComputedStore } from '../contexts/ComputedStore.ts'
 
@@ -154,9 +153,22 @@ export function useGraphEngine(
       snapshotLoaded.current = false
     }
 
-    // Detect unpause transition: force a full re-eval of the latest graph.
+    // Detect unpause transition.
+    // Phase 0: Instead of always forcing a full snapshot reload on unpause,
+    // only do so if the graph actually has data changes that accumulated
+    // while paused. Position-only changes (from dragging) produce zero
+    // diff ops and don't need a reload. If snapshotLoaded is already true,
+    // the normal diff path (below) will handle any pending changes.
     if (prevPausedRef.current && !paused) {
-      snapshotLoaded.current = false
+      if (!snapshotLoaded.current) {
+        // Snapshot was never loaded (e.g. initial mount while paused) — must reload
+        // (snapshotLoaded.current stays false, so the snapshot path fires below)
+      } else {
+        // Snapshot was loaded before pause. Let the diff path handle changes.
+        // If there are actual data changes, diffGraph will produce ops and
+        // they'll be dispatched. If only positions changed, it's a no-op.
+        // No need to force snapshotLoaded = false.
+      }
     }
     prevPausedRef.current = paused
 
@@ -203,16 +215,9 @@ export function useGraphEngine(
           // K4-2: Log individual node error messages for console guidance.
           seenErrorsRef.current.clear()
           logNodeErrors(result.values, seenErrorsRef.current)
-          const health = computeGraphHealth(nodes, edges)
-          dlog.info('engine', 'Graph health', {
-            nodeCount: health.nodeCount,
-            edgeCount: health.edgeCount,
-            groupCount: health.groupCount,
-            orphanCount: health.orphanCount,
-            crossingEdgeCount: health.crossingEdgeCount,
-            cycleDetected: health.cycleDetected,
-            warningCount: health.warnings.length,
-          })
+          // Phase 0: Graph health moved to on-demand (GraphHealthPanel).
+          // Previously ran O(V+E) cycle detection + critical path analysis
+          // on every snapshot eval, causing "Graph health" console spam.
           if (perfEnabled) {
             updatePerfMetrics({
               lastEvalMs: result.elapsedUs / 1000,
