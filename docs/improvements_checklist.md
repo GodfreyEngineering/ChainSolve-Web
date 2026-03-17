@@ -94,8 +94,8 @@ Replace the "always auto-eval" model with a smart hybrid that auto-evals small g
   - `lastEvalNodeCount: number` — nodes computed in last eval
   - `pendingPatchCount: number` — patches waiting to be dispatched
   - `setEvalMode`, `setIsStale`, `setLastEvalMs`, `setLastEvalNodeCount`, `setPendingPatchCount` actions
-- [ ] **1.28** In `useGraphEngine.ts`, when `evalMode !== 'auto'` and `diffGraph` produces ops, set `isStale = true`
-- [ ] **1.29** After successful eval, set `isStale = false` and update `lastEvalMs` / `lastEvalNodeCount`
+- [x] **1.28** In `useGraphEngine.ts`, when scheduler enqueues ops, set `isStale = true`
+- [x] **1.29** After successful eval (snapshot + patch callbacks), set `isStale = false` and update `lastEvalMs` / `lastEvalNodeCount`
 - [ ] **1.30** Create `useIsStale(nodeId)` hook in `src/contexts/ComputedStore.ts` — returns true if node is in stale set
 - [ ] **1.31** In node components (`OperationNode.tsx`, `DisplayNode.tsx`, `DataNode.tsx`, `PlotNode.tsx`), when stale: apply `opacity: 0.5` and dashed border style
 - [ ] **1.32** Add stale overlay CSS constants to `src/components/canvas/nodes/nodeStyles.ts`
