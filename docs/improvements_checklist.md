@@ -401,19 +401,19 @@ Users type `1+1=` → auto-creates Number(1), Number(1), Add, Display blocks wir
 
 ### 11D — Enhanced FormulaBar UI
 
-- [ ] **11.16** Redesign `FormulaBar.tsx` — full-width below sheet tabs, resizable height
-- [ ] **11.17** Syntax highlighting (colour operators, numbers, functions, errors)
-- [ ] **11.18** Autocomplete: block types, function names, variable names, constants
-- [ ] **11.19** Error preview: inline underlines with tooltip messages
-- [ ] **11.20** Expression history (up/down arrow cycles previous expressions)
-- [ ] **11.21** Enter → parse, generate blocks, add to canvas, clear bar
-- [ ] **11.22** Shift+Enter for multi-line, Enter to execute
-- [ ] **11.23** Toggle between value-edit mode (current) and expression mode (new)
+- [x] **11.16** FormulaBar: added 'fx' toggle button to switch to expression mode
+- [ ] **11.17** Syntax highlighting *(deferred — basic text input works for v1)*
+- [ ] **11.18** Autocomplete in expression mode *(deferred — block type completions for v2)*
+- [ ] **11.19** Error preview: inline error messages shown when parse fails
+- [ ] **11.20** Expression history *(deferred)*
+- [x] **11.21** Enter → parse CSEL, generate blocks via graphGen, add to canvas, clear bar
+- [ ] **11.22** Shift+Enter for multi-line *(deferred)*
+- [x] **11.23** Toggle between value-edit mode and expression mode (fx button)
 
 ### 11E — Integration & Testing
 
-- [ ] **11.24** Wire expression submission to canvas: add generated nodes/edges via React Flow
-- [ ] **11.25** Position generated blocks relative to viewport centre
+- [x] **11.24** Wire expression submission: handleExpressionSubmit → parseCsel → generateGraph → addNodes/addEdges
+- [x] **11.25** Position generated blocks relative to viewport centre using getViewport()
 - [ ] **11.26** Auto-select generated blocks after creation
 - [ ] **11.27** i18n keys across 7 locales
 - [ ] **11.28** E2E test: `1 + 2 =` → 3 blocks wired correctly
