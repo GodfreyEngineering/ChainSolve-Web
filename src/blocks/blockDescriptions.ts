@@ -16,6 +16,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Reference a named variable defined in the Variables panel. Output updates when the variable value changes.',
   boolean_input:
     'Toggle switch outputting 0 (false) or 1 (true). Connect to IfThenElse for conditional computation.',
+  parameter_sweep:
+    'Generate a vector from start/stop/step range or explicit value list. Use for DOE and parameter studies.',
 
   // ── Constants ────────────────────────────────────────────────────────────
   constant:

@@ -92,6 +92,7 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("slider", "Slider", "input", "csSource", vec![], false),
         entry("variableSource", "Variable", "input", "csSource", vec![], false),
         entry("boolean_input", "Boolean Input", "input", "csSource", vec![], false),
+        entry("parameter_sweep", "Parameter Sweep", "input", "csSource", vec![], false),
         // H4-1: Core constant catalog entries (pi, euler, tau, phi) removed.
         // The unified Constant picker resolves selections in the TS bridge layer.
         // Rust eval handlers remain in ops.rs for backward compatibility.
@@ -627,14 +628,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 388);
+        assert_eq!(cat.len(), 389);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 388);
+        assert_eq!(parsed.as_array().unwrap().len(), 389);
     }
 
     #[test]

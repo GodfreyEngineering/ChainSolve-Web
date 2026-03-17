@@ -82,6 +82,25 @@ reg({
   tags: ['input', 'logic'],
 })
 
+reg({
+  type: 'parameter_sweep',
+  label: 'Parameter Sweep',
+  category: 'input',
+  nodeKind: 'csSource',
+  inputs: [],
+  defaultData: {
+    blockType: 'parameter_sweep',
+    label: 'Parameter Sweep',
+    start: 0,
+    stop: 10,
+    step: 1,
+  },
+  description:
+    'Define a parameter range (start, stop, step) or explicit value list for DOE and optimization sweeps. Outputs a vector of values.',
+  synonyms: ['sweep', 'range', 'linspace', 'parameter study', 'DOE'],
+  tags: ['input', 'DOE', 'optimization'],
+})
+
 // ── Constants category ────────────────────────────────────────────────────────
 // H4-1: Individual constant blocks (pi, euler, tau, phi, const.*) removed.
 // All constants accessed via the unified Constant picker backed by constantsCatalog.ts.

@@ -304,6 +304,25 @@ fn evaluate_node_inner(
                 None => Value::Vector { value: vec![] },
             }
         }
+        "parameter_sweep" => {
+            // Generate a vector from start/stop/step or from an explicit list.
+            if let Some(list) = data.get("values").and_then(|v| v.as_array()) {
+                let values: Vec<f64> = list.iter().filter_map(|v| v.as_f64()).collect();
+                Value::Vector { value: values }
+            } else {
+                let start = data.get("start").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                let stop = data.get("stop").and_then(|v| v.as_f64()).unwrap_or(10.0);
+                let step = data.get("step").and_then(|v| v.as_f64()).unwrap_or(1.0);
+                if step == 0.0 || (stop - start).is_sign_positive() != step.is_sign_positive() {
+                    Value::Vector { value: vec![] }
+                } else {
+                    let n = ((stop - start) / step).floor() as usize + 1;
+                    let n = n.min(100_000); // safety cap
+                    let values: Vec<f64> = (0..n).map(|i| start + step * i as f64).collect();
+                    Value::Vector { value: values }
+                }
+            }
+        }
         "tableInput" => {
             // Read table data from node data: { columns: [...], rows: [[...], ...] }
             match data.get("tableData") {
