@@ -96,9 +96,9 @@ Operator blocks (add, multiply, max, min, etc.) currently have exactly 2 inputs.
 
 ### 2B — TypeScript Variadic Support
 
-- [ ] **2.9** Add `variadic?: boolean`, `minInputs?: number`, `maxInputs?: number` to `BlockDef` in `src/blocks/types.ts`
-- [ ] **2.10** Read variadic fields from catalog in WASM bridge
-- [ ] **2.11** Mark add, multiply, max, min as variadic in block definitions
+- [x] **2.9** Add `variadic?: boolean`, `minInputs?: number`, `maxInputs?: number` to `BlockDef` in `src/blocks/types.ts`
+- [x] **2.10** Add variadic fields to `CatalogEntry` in `wasm-types.ts` for WASM bridge
+- [x] **2.11** Mark add, multiply, max, min as variadic in `registry.ts` block definitions
 - [ ] **2.12** Update `diffGraph.ts` to handle dynamic port changes (new/removed ports emit appropriate ops)
 
 ### 2C — Variadic Node UI
