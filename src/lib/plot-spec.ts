@@ -301,6 +301,182 @@ function buildSpec(
       }
       break
     }
+
+    case 'boxplot': {
+      // Expects a table with optional grouping column (col 0) and value column (col 1),
+      // or a vector (single distribution).
+      if (data.columns.length >= 2) {
+        const groupField = config.xColumn ?? data.columns[0] ?? 'group'
+        const valueField = config.yColumns?.[0] ?? data.columns[1] ?? 'value'
+        base.mark = { type: 'boxplot', extent: 1.5, median: { color: '#1CABB0' } }
+        base.encoding = {
+          x: { field: groupField, type: 'nominal', title: config.xLabel },
+          y: { field: valueField, type: 'quantitative', scale: yScale, title: config.yLabel },
+          color: { field: groupField, type: 'nominal', legend: config.showLegend ? {} : null },
+        }
+      } else {
+        // Single vector: show as single box
+        const valueField = data.columns[0] ?? 'y'
+        base.mark = { type: 'boxplot', extent: 1.5, median: { color: '#1CABB0' } }
+        base.encoding = {
+          x: { value: width / 2 },
+          y: { field: valueField, type: 'quantitative', scale: yScale, title: config.yLabel ?? 'Value' },
+        }
+      }
+      break
+    }
+
+    case 'violin': {
+      // Kernel density estimate rendered as an area mark.
+      // Expects a table with optional grouping column and value column, or a single vector.
+      if (data.columns.length >= 2) {
+        const groupField = config.xColumn ?? data.columns[0] ?? 'group'
+        const valueField = config.yColumns?.[0] ?? data.columns[1] ?? 'value'
+        base.transform = [
+          {
+            density: valueField,
+            groupby: [groupField],
+            as: ['_val', '_density'],
+          },
+        ]
+        base.mark = { type: 'area', orient: 'horizontal' }
+        base.encoding = {
+          x: {
+            field: '_density',
+            type: 'quantitative',
+            stack: 'center',
+            impute: null,
+            title: null,
+            axis: { labels: false, values: [0], grid: false, ticks: true },
+          },
+          y: { field: '_val', type: 'quantitative', scale: yScale, title: config.yLabel ?? 'Value' },
+          color: { field: groupField, type: 'nominal', legend: config.showLegend ? {} : null },
+          column: { field: groupField, header: { titleOrient: 'bottom' } },
+        }
+      } else {
+        const valueField = data.columns[0] ?? 'y'
+        base.transform = [{ density: valueField, as: ['_val', '_density'] }]
+        base.mark = 'area'
+        base.encoding = {
+          x: { field: '_density', type: 'quantitative', title: 'Density' },
+          y: { field: '_val', type: 'quantitative', scale: yScale, title: config.yLabel ?? 'Value' },
+        }
+      }
+      break
+    }
+
+    case 'parallelCoords': {
+      // Parallel coordinates: each column becomes an axis.
+      // Expects a Table input with N numeric columns.
+      // Uses Vega-Lite's fold transform + layer approach.
+      const allCols = data.columns
+      const colorField = config.xColumn // optional grouping/colour column
+      const numericCols = colorField
+        ? allCols.filter((c) => c !== colorField)
+        : allCols
+
+      if (numericCols.length === 0) {
+        return { error: 'Parallel coordinates requires a Table input with numeric columns' }
+      }
+
+      base.transform = [
+        {
+          window: [{ op: 'count', as: '_index' }],
+        },
+        {
+          fold: numericCols,
+          as: ['_key', '_value'],
+        },
+        {
+          joinaggregate: [
+            { op: 'min', field: '_value', as: '_min' },
+            { op: 'max', field: '_value', as: '_max' },
+          ],
+          groupby: ['_key'],
+        },
+        {
+          calculate: 'datum._max === datum._min ? 0.5 : (datum._value - datum._min) / (datum._max - datum._min)',
+          as: '_normValue',
+        },
+      ]
+      base.layer = [
+        {
+          mark: { type: 'rule', color: '#ccc' },
+          encoding: {
+            detail: { aggregate: 'count' },
+            x: { field: '_key', type: 'nominal' },
+          },
+        },
+        {
+          mark: 'line',
+          encoding: {
+            x: { field: '_key', type: 'nominal', axis: { title: null } },
+            y: { field: '_normValue', type: 'quantitative', axis: { title: 'Normalised value', tickCount: 5 } },
+            detail: { field: '_index', type: 'nominal' },
+            color: colorField
+              ? { field: colorField, type: 'nominal', legend: config.showLegend ? {} : null }
+              : { value: '#1CABB0' },
+            opacity: { value: 0.5 },
+            tooltip: numericCols.map((c) => ({ field: c, type: 'quantitative' })),
+          },
+        },
+      ]
+      // Remove mark/encoding (we're using layers)
+      delete base.mark
+      delete base.encoding
+      break
+    }
+
+    case 'contour': {
+      // 2D density contour using Vega-Lite density2d transform.
+      // Expects a Table with two numeric columns (x, y), or a vector (renders 1D distribution).
+      if (data.columns.length >= 2) {
+        const xField = config.xColumn ?? data.columns[0] ?? 'x'
+        const yField = config.yColumns?.[0] ?? data.columns[1] ?? 'y'
+        // Vega-Lite contour: use the 'density' transform + contour mark
+        base.layer = [
+          {
+            mark: 'point',
+            encoding: {
+              x: { field: xField, type: 'quantitative', scale: xScale, title: config.xLabel },
+              y: { field: yField, type: 'quantitative', scale: yScale, title: config.yLabel },
+              opacity: { value: 0.3 },
+              size: { value: 15 },
+              color: { value: '#6b7280' },
+            },
+          },
+          {
+            transform: [
+              {
+                density: yField,
+                groupby: [xField],
+                extent: [null, null],
+                as: ['_y', '_density'],
+              },
+            ],
+            mark: 'line',
+            encoding: {
+              x: { field: xField, type: 'quantitative', scale: xScale },
+              y: { field: '_y', type: 'quantitative', scale: yScale },
+              color: { field: '_density', type: 'quantitative', scale: { scheme: 'viridis' } },
+              detail: { field: xField, type: 'quantitative' },
+            },
+          },
+        ]
+        delete base.mark
+        delete base.encoding
+      } else {
+        // 1D: density curve only
+        const valueField = data.columns[0] ?? 'y'
+        base.transform = [{ density: valueField, as: ['_val', '_density'] }]
+        base.mark = { type: 'area', line: true, color: '#1CABB0', fillOpacity: 0.2 }
+        base.encoding = {
+          x: { field: '_val', type: 'quantitative', scale: xScale, title: config.xLabel ?? 'Value' },
+          y: { field: '_density', type: 'quantitative', title: 'Density' },
+        }
+      }
+      break
+    }
   }
 
   // Grid

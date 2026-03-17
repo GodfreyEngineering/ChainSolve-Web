@@ -80,7 +80,16 @@ export type NodeKind =
 
 // ── Plot configuration types ────────────────────────────────────────────────
 
-export type ChartType = 'xyLine' | 'xyScatter' | 'histogram' | 'bar' | 'heatmap'
+export type ChartType =
+  | 'xyLine'
+  | 'xyScatter'
+  | 'histogram'
+  | 'bar'
+  | 'heatmap'
+  | 'boxplot'
+  | 'violin'
+  | 'parallelCoords'
+  | 'contour'
 export type ScaleType = 'linear' | 'log'
 export type LegendPosition = 'right' | 'bottom' | 'none'
 export type PlotThemePreset = 'paper-single' | 'paper-double' | 'presentation' | 'report'

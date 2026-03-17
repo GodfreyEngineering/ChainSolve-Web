@@ -100,6 +100,10 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
           <option value="histogram">{t('plot.chartHistogram')}</option>
           <option value="bar">{t('plot.chartBar')}</option>
           <option value="heatmap">{t('plot.chartHeatmap')}</option>
+          <option value="boxplot">{t('plot.chartBoxplot')}</option>
+          <option value="violin">{t('plot.chartViolin')}</option>
+          <option value="parallelCoords">{t('plot.chartParallelCoords')}</option>
+          <option value="contour">{t('plot.chartContour')}</option>
         </select>,
       )}
 

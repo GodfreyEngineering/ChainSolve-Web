@@ -95,6 +95,94 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'boxPlot',
+    label: 'Box Plot',
+    category: 'plot',
+    nodeKind: 'csPlot',
+    inputs: [{ id: 'data', label: 'Data' }],
+    proOnly: true,
+    description:
+      'Box-and-whisker plot showing median, IQR (25th–75th percentile), and outliers. For a Table input use the first column as group and second as value. For a Vector input shows a single distribution.',
+    defaultData: {
+      blockType: 'boxPlot',
+      label: 'Box Plot',
+      plotConfig: {
+        chartType: 'boxplot',
+        showGrid: true,
+        showLegend: false,
+        legendPosition: 'right',
+        themePreset: 'paper-single',
+      } satisfies PlotConfig,
+    },
+  })
+
+  register({
+    type: 'violinPlot',
+    label: 'Violin Plot',
+    category: 'plot',
+    nodeKind: 'csPlot',
+    inputs: [{ id: 'data', label: 'Data' }],
+    proOnly: true,
+    description:
+      'Violin plot showing the kernel density estimate of a distribution. For a Table input use the first column as group and second as value. For a Vector input shows a single violin.',
+    defaultData: {
+      blockType: 'violinPlot',
+      label: 'Violin Plot',
+      plotConfig: {
+        chartType: 'violin',
+        showGrid: true,
+        showLegend: false,
+        legendPosition: 'right',
+        themePreset: 'paper-single',
+      } satisfies PlotConfig,
+    },
+  })
+
+  register({
+    type: 'parallelCoords',
+    label: 'Parallel Coordinates',
+    category: 'plot',
+    nodeKind: 'csPlot',
+    inputs: [{ id: 'data', label: 'Data' }],
+    proOnly: true,
+    description:
+      'Parallel coordinates plot for multi-dimensional data. Each column becomes a normalised axis. Accepts a Table input. Optionally set xColumn to a nominal column to colour lines by group.',
+    defaultData: {
+      blockType: 'parallelCoords',
+      label: 'Parallel Coordinates',
+      plotConfig: {
+        chartType: 'parallelCoords',
+        showGrid: false,
+        showLegend: true,
+        legendPosition: 'right',
+        themePreset: 'paper-single',
+      } satisfies PlotConfig,
+    },
+  })
+
+  register({
+    type: 'contourPlot',
+    label: 'Contour / Density Plot',
+    category: 'plot',
+    nodeKind: 'csPlot',
+    inputs: [{ id: 'data', label: 'Data' }],
+    proOnly: true,
+    description:
+      'Contour / density plot: for a 2-column Table (x,y), overlays a scatter with density contours. For a Vector, renders the 1D kernel density estimate as a filled area curve.',
+    defaultData: {
+      blockType: 'contourPlot',
+      label: 'Contour / Density Plot',
+      plotConfig: {
+        chartType: 'contour',
+        showGrid: true,
+        showLegend: false,
+        legendPosition: 'right',
+        themePreset: 'paper-single',
+      } satisfies PlotConfig,
+    },
+  })
+
+  register({
     type: 'listTable',
     label: 'Table Output',
     category: 'output',
