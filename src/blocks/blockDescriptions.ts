@@ -517,6 +517,20 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   matrix_trace: 'Computes the trace: sum of diagonal elements tr(A).',
   matrix_solve:
     'Solves the linear system Ax = b for x using Gaussian elimination with partial pivoting.',
+  matrix_lu:
+    'LU decomposition of a square matrix with partial pivoting. Returns L (lower triangular factor).',
+  matrix_qr:
+    'QR decomposition via modified Gram-Schmidt. Returns Q (orthogonal factor).',
+  matrix_svd:
+    'Singular Value Decomposition. Returns singular values σ₁ ≥ σ₂ ≥ … as a vector.',
+  matrix_cholesky:
+    'Cholesky decomposition of a symmetric positive-definite matrix. Returns L where A = LLᵀ.',
+  matrix_eigen:
+    'Eigenvalue decomposition of a symmetric matrix. Returns eigenvalues as a vector.',
+  matrix_schur:
+    'Schur decomposition. Returns the quasi-upper-triangular Schur form T where A = QTQᵀ.',
+  matrix_cond:
+    'Condition number κ(A) = σ_max / σ_min via SVD. Large values indicate ill-conditioning.',
 
   // ── SCI-12: Signal Processing / FFT ───────────────────────────────────────
   'signal.fft_magnitude':

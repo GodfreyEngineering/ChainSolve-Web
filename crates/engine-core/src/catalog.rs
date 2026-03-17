@@ -452,6 +452,13 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("matrix_det", "Determinant", "matrix", "csOperation", vec![p("matrix", "Matrix")], true),
         entry("matrix_trace", "Trace", "matrix", "csOperation", vec![p("matrix", "Matrix")], true),
         entry("matrix_solve", "Solve Ax = b", "matrix", "csOperation", vec![p("a", "A (matrix)"), p("b", "b (vector)")], true),
+        entry("matrix_lu", "LU Decompose", "matrix", "csOperation", vec![p("matrix", "Matrix")], true),
+        entry("matrix_qr", "QR Decompose", "matrix", "csOperation", vec![p("matrix", "Matrix")], true),
+        entry("matrix_svd", "SVD", "matrix", "csOperation", vec![p("matrix", "Matrix")], true),
+        entry("matrix_cholesky", "Cholesky", "matrix", "csOperation", vec![p("matrix", "Matrix")], true),
+        entry("matrix_eigen", "Eigendecomposition", "matrix", "csOperation", vec![p("matrix", "Matrix")], true),
+        entry("matrix_schur", "Schur Decompose", "matrix", "csOperation", vec![p("matrix", "Matrix")], true),
+        entry("matrix_cond", "Condition Number", "matrix", "csOperation", vec![p("matrix", "Matrix")], true),
 
         // ── BLK-10: Lookup Table Interpolation ───────────────────────────
         entry("lookup.1d", "Lookup Table 1D", "tableOps", "csOperation", vec![p("x_vec", "X (vector)"), p("y_vec", "Y (vector)"), p("x", "Query X")], false),
@@ -590,14 +597,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 361);
+        assert_eq!(cat.len(), 368);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 361);
+        assert_eq!(parsed.as_array().unwrap().len(), 368);
     }
 
     #[test]

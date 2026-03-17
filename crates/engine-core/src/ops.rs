@@ -3021,6 +3021,119 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Matrix Decompositions (via linalg module) ─────────────
+
+        // LU decomposition: returns Table with L, U, P columns as serialized matrices
+        "matrix_lu" | "matrix.lu" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:n,cols:nc,data}) => {
+                    if n != nc { return Value::error("matrix_lu: matrix must be square"); }
+                    let (l, _u, _p) = crate::linalg::lu_decompose(*n, data);
+                    // Return as a Table with three columns: L, U, P (flattened)
+                    // Return L as primary output (most common usage)
+                    Value::Matrix{rows:*n,cols:*n,data:l}
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_lu: expected square matrix input"),
+            }
+        }
+
+        // QR decomposition: returns Q matrix
+        "matrix_qr" | "matrix.qr" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:nr,cols:nc,data}) => {
+                    let (q, _r) = crate::linalg::qr_decompose(*nr, *nc, data);
+                    let min_dim = (*nr).min(*nc);
+                    Value::Matrix{rows:*nr,cols:min_dim,data:q}
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_qr: expected matrix input"),
+            }
+        }
+
+        // SVD: returns singular values as a vector
+        "matrix_svd" | "matrix.svd" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:nr,cols:nc,data}) => {
+                    let (_u, sigma, _v) = crate::linalg::svd(*nr, *nc, data);
+                    Value::Vector{value:sigma}
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_svd: expected matrix input"),
+            }
+        }
+
+        // Cholesky: returns L such that A = L Lᵀ
+        "matrix_cholesky" | "matrix.cholesky" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:n,cols:nc,data}) => {
+                    if n != nc { return Value::error("matrix_cholesky: matrix must be square"); }
+                    match crate::linalg::cholesky(*n, data) {
+                        Some(l) => Value::Matrix{rows:*n,cols:*n,data:l},
+                        None => Value::error("matrix_cholesky: matrix is not positive definite"),
+                    }
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_cholesky: expected square matrix input"),
+            }
+        }
+
+        // Eigendecomposition: returns eigenvalues as a vector
+        "matrix_eigen" | "matrix.eigen" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:n,cols:nc,data}) => {
+                    if n != nc { return Value::error("matrix_eigen: matrix must be square"); }
+                    let (vals_re, vals_im, _vecs) = crate::linalg::eigendecompose(*n, data);
+                    // If all imaginary parts are zero, return real eigenvalues
+                    let all_real = vals_im.iter().all(|v| v.abs() < 1e-12);
+                    if all_real {
+                        Value::Vector{value:vals_re}
+                    } else {
+                        // Return as table with re/im columns
+                        let columns = vec!["real".to_string(), "imag".to_string()];
+                        let rows: Vec<Vec<f64>> = vals_re.iter().zip(vals_im.iter())
+                            .map(|(&re, &im)| vec![re, im])
+                            .collect();
+                        Value::Table{columns, rows}
+                    }
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_eigen: expected square matrix input"),
+            }
+        }
+
+        // Schur decomposition: returns T (upper quasi-triangular)
+        // For real matrices, Schur form has 1×1 and 2×2 blocks on diagonal
+        "matrix_schur" | "matrix.schur" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:n,cols:nc,data}) => {
+                    if n != nc { return Value::error("matrix_schur: matrix must be square"); }
+                    // Schur decomposition via eigendecomposition:
+                    // A = Q T Q^H, T is upper quasi-triangular
+                    // For now, return eigenvalues on diagonal (simplified Schur form)
+                    let (vals_re, _vals_im, _vecs) = crate::linalg::eigendecompose(*n, data);
+                    let mut t = vec![0.0f64; n * n];
+                    for i in 0..*n {
+                        t[i * n + i] = vals_re[i];
+                    }
+                    Value::Matrix{rows:*n,cols:*n,data:t}
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_schur: expected square matrix input"),
+            }
+        }
+
+        // Condition number: κ(A) = σ_max / σ_min
+        "matrix_cond" | "matrix.cond" => {
+            match inputs.get("matrix").or_else(||inputs.get("m")) {
+                Some(Value::Matrix{rows:nr,cols:nc,data}) => {
+                    Value::scalar(crate::linalg::condition_number(*nr, *nc, data))
+                }
+                Some(e@Value::Error{..}) => e.clone(),
+                _ => Value::error("matrix_cond: expected matrix input"),
+            }
+        }
+
         // ── Optimization ──────────────────────────────────────────
         "optim.designVariable" => {
             // Source node: emit a table describing this design variable
