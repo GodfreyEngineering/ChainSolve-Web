@@ -88,6 +88,81 @@ const ANNOTATION_TYPES = new Set([
   'annotation_leader',
 ])
 
+// ── Domain color mapping (3.30) ─────────────────────────────────────────────
+
+import type { BlockCategory } from '../../../blocks/types'
+
+/**
+ * Domain accent colors for node header tinting (3.30).
+ * Returns a hex color for the physics/engineering domain, or null for
+ * general/math blocks that get the standard operation teal.
+ */
+export function getCategoryDomainColor(category: BlockCategory | undefined): string | null {
+  if (!category) return null
+  switch (category) {
+    // Mechanical engineering
+    case 'engMechanics':
+    case 'engSections':
+    case 'engInertia':
+      return '#3B82F6' // blue
+
+    // Fluid / structural
+    case 'engFluids':
+    case 'structural':
+      return '#06B6D4' // cyan
+
+    // Electrical
+    case 'engElectrical':
+      return '#EAB308' // yellow
+
+    // Thermal / atmospheric / thermodynamics
+    case 'engThermo':
+    case 'constThermo':
+    case 'constAtmos':
+      return '#EF4444' // red
+
+    // Control systems
+    case 'controlSystems':
+      return '#22C55E' // green
+
+    // Machine learning / neural networks / optimization
+    case 'machineLearning':
+    case 'neuralNetworks':
+    case 'optimization':
+    case 'numerical':
+      return '#A855F7' // purple
+
+    // Vehicle simulation
+    case 'vehicleSim':
+      return '#F97316' // orange
+
+    // Aerospace
+    case 'aerospace':
+      return '#64748B' // slate
+
+    // Chemistry / life sciences
+    case 'chem':
+    case 'lifeSci':
+      return '#10B981' // emerald
+
+    // Finance
+    case 'finTvm':
+    case 'finReturns':
+    case 'finDepr':
+    case 'finOptions':
+      return '#F59E0B' // amber
+
+    // Signal / complex / interval
+    case 'signal':
+    case 'complex':
+    case 'interval':
+      return '#8B5CF6' // violet
+
+    default:
+      return null
+  }
+}
+
 /**
  * Returns the CSS variable name for the node-type color.
  * Can be used directly in inline styles: `color: var(${getNodeTypeColor(bt)})`

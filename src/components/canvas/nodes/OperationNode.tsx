@@ -30,7 +30,7 @@ import { getUnitSymbol } from '../../../units/unitSymbols'
 import { getConversionFactor, areSameDimension } from '../../../units/unitCompat'
 import { useInferredUnits } from '../../../hooks/useInferredUnits'
 import { NODE_STYLES as s, userColorBg } from './nodeStyles'
-import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
+import { getNodeTypeColor, getNodeTypeIcon, getCategoryDomainColor } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
 import { useValueFlash } from '../../../hooks/useValueFlash'
 import { getPortUnitHint } from '../../../blocks/portUnitHints'
@@ -173,6 +173,9 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   const isErr = value !== undefined && isError(value)
   const errorMsg = isErr ? value.message : ''
 
+  // 3.30: Domain tint — blended into header when block belongs to a physics domain
+  const domainColor = !nd.userColor ? getCategoryDomainColor(def?.category) : null
+
   const borderOverride = isErr
     ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 1px var(--danger)' }
     : selected
@@ -180,6 +183,14 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
       : {}
 
   const ariaLabel = `${nd.label} block, output: ${formatValue(value)}`
+
+  // Header tint: domain color at 8% opacity, otherwise fall back to type color at 6%
+  const headerBg = domainColor
+    ? `linear-gradient(to right, color-mix(in srgb, ${domainColor} 8%, transparent), transparent)`
+    : `linear-gradient(to right, color-mix(in srgb, ${typeColor} 6%, transparent), transparent)`
+  const headerBorder = domainColor
+    ? `2px solid color-mix(in srgb, ${domainColor} 35%, transparent)`
+    : `2px solid color-mix(in srgb, ${typeColor} 30%, transparent)`
 
   return (
     <div
@@ -190,8 +201,8 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
       <div
         style={{
           ...s.header,
-          borderBottom: `2px solid color-mix(in srgb, ${typeColor} 30%, transparent)`,
-          background: `linear-gradient(to right, color-mix(in srgb, ${typeColor} 6%, transparent), transparent)`,
+          borderBottom: headerBorder,
+          background: headerBg,
         }}
       >
         <div className="cs-node-header-left" style={s.headerLeft}>
