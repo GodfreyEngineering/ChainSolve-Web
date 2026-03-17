@@ -400,7 +400,7 @@
 - [x] **6.4** CSP compliance: Vega with vega-interpreter for CSP-safe rendering
 - [x] **6.5** Bode plot: magnitude (dB) + phase (deg) vs frequency (Hz/rad/s) on log scale — standard for control systems. Output from TransferFunction frequency response.
 - [x] **6.6** Nyquist plot: Re vs Im of G(jω) — for stability analysis (encirclement criterion). Root locus: poles/zeros vs gain parameter.
-- [ ] **6.7** XY animation: time-varying plots with playback controls (play/pause/speed/scrub) — for visualising simulation results over time
+- [x] **6.7** XY animation: time-varying plots with playback controls (play/pause/speed/scrub) — for visualising simulation results over time
 - [x] **6.8** Contour plot: 2D scalar field with isolines — for response surfaces and field visualisation
 - [ ] **6.9** 3D surface plot: via Three.js or React Three Fiber — interactive rotation, zoom, colourmap, wireframe toggle
 - [x] **6.10** Parallel coordinates: N vertical axes, each data point as a polyline — for multi-dimensional design space exploration
