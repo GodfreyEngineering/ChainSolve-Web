@@ -29,7 +29,7 @@
 - [x] **1.11** Add `faer` crate (pure Rust, outperforms nalgebra at large sizes: 1024×1024 Cholesky in 2.4ms parallel) for dense linear algebra — replace nalgebra for matrices >64×64, keep nalgebra for small fixed-size. Faer provides: matrix multiply, eigendecomposition, SVD, QR, LU with partial/full pivoting
 - [x] **1.12** Sparse matrix module (`sparse.rs`): CSR/CSC/COO/BSR storage formats, sparse-dense conversion, sparse matrix-vector multiply
 - [x] **1.13** Sparse iterative solvers: CG (symmetric positive definite), GMRES (general), BiCGStab (non-symmetric) with ILU/AMG preconditioners — essential for FEM and large-scale systems
-- [ ] **1.14** Expose faer decompositions as blocks: LU, QR, SVD, Cholesky, eigendecomposition, Schur — each as a separate block returning the factored components
+- [x] **1.14** Expose faer decompositions as blocks: LU, QR, SVD, Cholesky, eigendecomposition, Schur — each as a separate block returning the factored components
 - [ ] **1.15** Condition number estimation (`cond()`) with automatic UI warning when ill-conditioned (κ > 10^12) — prevents silent numerical failures
 - [ ] **1.16** Rootfinding module: Newton-Raphson (with backtracking line search), Brent's method (guaranteed convergence for bracketed roots), polynomial roots via companion matrix eigenvalues
 - [ ] **1.17** Numerical integration: adaptive Gauss-Kronrod (7-15 point), Clenshaw-Curtis (for smooth integrands), Monte Carlo quadrature (for high-dimensional integrals)
