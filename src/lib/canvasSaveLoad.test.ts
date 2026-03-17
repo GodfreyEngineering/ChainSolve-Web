@@ -22,6 +22,7 @@ import { describe, it, expect } from 'vitest'
 import { buildCanvasJsonFromGraph, parseCanvasJson } from './canvasSchema'
 import { buildPhysics101 } from '../templates/physics-101'
 import { buildStats101 } from '../templates/stats-101'
+import { toEngineSnapshot } from '../engine/bridge'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -287,5 +288,99 @@ describe('canvasSaveLoad — legacy format migration', () => {
     const result = parseCanvasJson(raw, 'c1', 'p1')
     expect(result.schemaVersion).toBe(4)
     expect((result.nodes as RawNode[])[0].id).toBe('n1')
+  })
+})
+
+// ── 11.12: Save → close → reopen → execute = bit-identical results ────────────
+//
+// Proves that the engine snapshot produced from a loaded graph is identical to
+// the one produced from the original graph.  Since `toEngineSnapshot()` is the
+// sole input to the WASM evaluation engine, identical snapshots guarantee
+// bit-identical computation results — no WASM required to verify this property.
+
+describe('canvasSaveLoad — 11.12 round-trip execute equivalence', () => {
+  it('engine snapshot is identical before and after round-trip (scalar graph)', () => {
+    const nodes: RawNode[] = [
+      { id: 'n1', type: 'number', position: { x: 0, y: 0 }, data: { blockType: 'number', value: 3.14 } },
+      { id: 'n2', type: 'number', position: { x: 100, y: 0 }, data: { blockType: 'number', value: 2 } },
+      { id: 'n3', type: 'multiply', position: { x: 200, y: 0 }, data: { blockType: 'multiply', label: 'Multiply' } },
+      { id: 'n4', type: 'display', position: { x: 300, y: 0 }, data: { blockType: 'display', label: 'Out' } },
+    ]
+    const edges: RawEdge[] = [
+      { id: 'e1', source: 'n1', target: 'n3', sourceHandle: 'out', targetHandle: 'a' },
+      { id: 'e2', source: 'n2', target: 'n3', sourceHandle: 'out', targetHandle: 'b' },
+      { id: 'e3', source: 'n3', target: 'n4', sourceHandle: 'out', targetHandle: 'value' },
+    ]
+
+    const snapshotBefore = toEngineSnapshot(nodes, edges)
+
+    const loaded = roundTrip(nodes, edges)
+    const snapshotAfter = toEngineSnapshot(loaded.nodes as RawNode[], loaded.edges as RawEdge[])
+
+    expect(JSON.stringify(snapshotAfter)).toBe(JSON.stringify(snapshotBefore))
+  })
+
+  it('engine snapshot is identical for physics-101 template after round-trip', () => {
+    const graph = buildPhysics101('c-phys', 'p-test')
+    const snapshotBefore = toEngineSnapshot(graph.nodes as RawNode[], graph.edges as RawEdge[])
+
+    const loaded = roundTrip(graph.nodes, graph.edges, 'c-phys', 'p-test')
+    const snapshotAfter = toEngineSnapshot(loaded.nodes as RawNode[], loaded.edges as RawEdge[])
+
+    expect(JSON.stringify(snapshotAfter)).toBe(JSON.stringify(snapshotBefore))
+  })
+
+  it('engine snapshot is identical for stats-101 template after round-trip', () => {
+    const graph = buildStats101('c-stats', 'p-test')
+    const snapshotBefore = toEngineSnapshot(graph.nodes as RawNode[], graph.edges as RawEdge[])
+
+    const loaded = roundTrip(graph.nodes, graph.edges, 'c-stats', 'p-test')
+    const snapshotAfter = toEngineSnapshot(loaded.nodes as RawNode[], loaded.edges as RawEdge[])
+
+    expect(JSON.stringify(snapshotAfter)).toBe(JSON.stringify(snapshotBefore))
+  })
+
+  it('engine snapshot is stable across multiple save/load cycles', () => {
+    const nodes: RawNode[] = [
+      { id: 'x', type: 'number', position: { x: 0, y: 0 }, data: { blockType: 'number', value: 42 } },
+      { id: 'd', type: 'display', position: { x: 150, y: 0 }, data: { blockType: 'display', label: 'Display' } },
+    ]
+    const edges: RawEdge[] = [
+      { id: 'e', source: 'x', target: 'd', sourceHandle: 'out', targetHandle: 'value' },
+    ]
+
+    const snap0 = JSON.stringify(toEngineSnapshot(nodes, edges))
+
+    // Cycle 1
+    const load1 = roundTrip(nodes, edges)
+    const snap1 = JSON.stringify(toEngineSnapshot(load1.nodes as RawNode[], load1.edges as RawEdge[]))
+
+    // Cycle 2 (round-trip the loaded result)
+    const load2 = roundTrip(load1.nodes as RawNode[], load1.edges as RawEdge[])
+    const snap2 = JSON.stringify(toEngineSnapshot(load2.nodes as RawNode[], load2.edges as RawEdge[]))
+
+    expect(snap1).toBe(snap0)
+    expect(snap2).toBe(snap0)
+  })
+
+  it('manualValues are preserved and produce identical engine input after round-trip', () => {
+    const nodes: RawNode[] = [
+      {
+        id: 'op',
+        type: 'add',
+        position: { x: 0, y: 0 },
+        data: { blockType: 'add', label: 'Add', manualValues: { a: 7, b: 13 } },
+      },
+      { id: 'd', type: 'display', position: { x: 150, y: 0 }, data: { blockType: 'display', label: 'Out' } },
+    ]
+    const edges: RawEdge[] = [
+      { id: 'e1', source: 'op', target: 'd', sourceHandle: 'out', targetHandle: 'value' },
+    ]
+
+    const snapBefore = JSON.stringify(toEngineSnapshot(nodes, edges))
+    const loaded = roundTrip(nodes, edges)
+    const snapAfter = JSON.stringify(toEngineSnapshot(loaded.nodes as RawNode[], loaded.edges as RawEdge[]))
+
+    expect(snapAfter).toBe(snapBefore)
   })
 })
