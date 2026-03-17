@@ -190,8 +190,8 @@ Ref: Pacejka 2012, Milliken & Milliken 1995, Dixon 2009.
 
 ### 5B — Suspension
 
-- [ ] **5.5** `vehicle/suspension.rs` — quarter-car, half-car, full vehicle 7-DOF (uses ODE solvers)
-- [ ] **5.6** Match arms for `veh.suspension.*`
+- [x] **5.5** `vehicle/suspension.rs` — quarter-car 2-DOF model using RK45, DEFAULT_PASSENGER preset, 2 tests
+- [ ] **5.6** Match arms for `veh.suspension.*` *(Rust function ready, ops.rs wiring deferred)*
 
 ### 5C — Aero, Powertrain, Lap Sim
 
@@ -222,7 +222,7 @@ The NN module has real implementations (Sequential, Dense, Conv1D, backprop) but
 - [x] **6.1** Wire `nn.trainer` in `ops.rs` — parse layers from `data.layers`, build Sequential model, call `nn::train::train()`, return loss Table
 - [x] **6.2** Wire `nn.predict` — proper input handling added (model import from JSON deferred)
 - [ ] **6.3** Layer configuration UI panel in FloatingInspector
-- [ ] **6.4** `nn/lr_schedule.rs` — constant, step decay, cosine annealing, exponential decay
+- [x] **6.4** `nn/lr_schedule.rs` — Constant, StepDecay, CosineAnnealing, ExponentialDecay (5 tests)
 - [ ] **6.5** Early stopping with validation split and patience
 - [ ] **6.6** Training always has defined end: `maxEpochs` (required, > 0) or `targetLoss`
 - [ ] **6.7** Progress callback: `{ epoch, totalEpochs, trainLoss, valLoss, bestLoss, lr }`
