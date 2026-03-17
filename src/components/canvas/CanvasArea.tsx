@@ -55,6 +55,7 @@ import { BlockLibrary } from './BlockLibrary'
 import { DRAG_TYPE } from './blockLibraryUtils'
 import { FloatingInspector, INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS } from './FloatingInspector'
 import { NodeSideSheet } from './NodeSideSheet'
+import { EdgeProbePopover } from './EdgeProbePopover'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
 import { ExpressionPanel } from './ExpressionPanel'
@@ -812,6 +813,14 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const [inspPinned, setInspPinned] = useState(false)
   // 3.19: side sheet opened via double-click (slide from right, 400 px)
   const [sideSheetOpen, setSideSheetOpen] = useState(false)
+
+  // 3.35: Edge probe popover — shown on edge click
+  const [edgeProbe, setEdgeProbe] = useState<{
+    x: number
+    y: number
+    sourceNodeId: string
+    sourceLabel: string
+  } | null>(null)
   const { openWindow, closeWindow, isOpen: isWinOpen } = useWindowManager()
   const inspVisible = isWinOpen(INSPECTOR_WINDOW_ID)
 
@@ -1360,6 +1369,22 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     setInspectedId(null)
     closeWindow(INSPECTOR_WINDOW_ID)
   }, [closeWindow])
+
+  // 3.35: Edge probe — show popover on edge click with source value + stats
+  const onEdgeClick = useCallback(
+    (event: MouseEvent, edge: import('@xyflow/react').Edge) => {
+      const srcNode = nodes.find((n) => n.id === edge.source)
+      const srcData = srcNode?.data as import('../../blocks/registry').NodeData | undefined
+      const label = srcData?.label ?? edge.source
+      setEdgeProbe({
+        x: event.clientX + 12,
+        y: event.clientY - 8,
+        sourceNodeId: edge.source,
+        sourceLabel: String(label),
+      })
+    },
+    [nodes],
+  )
 
   // ── Drag-to-add from BlockLibrary ───────────────────────────────────────────
   const onDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -3583,6 +3608,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         onNodeDragStop={readOnly ? undefined : onNodeDragStop}
                         onNodeClick={onNodeClick}
                         onNodeDoubleClick={onNodeDoubleClick}
+                        onEdgeClick={onEdgeClick}
                         onPaneClick={onPaneClick}
                         onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}
                         onEdgeContextMenu={readOnly ? undefined : onEdgeContextMenu}
@@ -3867,6 +3893,17 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         onToggleCollapse={toggleGroupCollapse}
                         onUngroupNode={ungroupNode}
                         canUseGroups={ent.canUseGroups}
+                      />
+                    )}
+
+                    {/* 3.35: Edge probe popover */}
+                    {edgeProbe && (
+                      <EdgeProbePopover
+                        x={edgeProbe.x}
+                        y={edgeProbe.y}
+                        sourceLabel={edgeProbe.sourceLabel}
+                        value={computed.get(edgeProbe.sourceNodeId)}
+                        onClose={() => setEdgeProbe(null)}
                       />
                     )}
 
