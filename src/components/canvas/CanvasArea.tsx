@@ -2223,6 +2223,61 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       .catch(() => {})
   }, [doSaveHistory, setNodes, setEdges])
 
+  // 4.18: Intercept paste of tabular data (Excel/Sheets copy → tab-separated text)
+  useEffect(() => {
+    if (readOnly) return
+    const onPaste = (e: ClipboardEvent) => {
+      const text = e.clipboardData?.getData('text/plain') ?? ''
+      if (!text) return
+      const lines = text.split(/\r?\n/).filter((l) => l.length > 0)
+      if (lines.length < 1) return
+      const rows = lines.map((l) => l.split('\t'))
+      const maxCols = Math.max(...rows.map((r) => r.length))
+      if (maxCols < 2) return // not tabular — let normal paste proceed
+      e.preventDefault()
+      e.stopPropagation()
+
+      // Detect header row: first row is non-numeric?
+      const firstRow = rows[0]
+      const firstRowIsHeader =
+        rows.length > 1 && firstRow.some((cell) => isNaN(Number(cell.trim())) && cell.trim() !== '')
+      const columns = firstRowIsHeader
+        ? firstRow.map((c) => c.trim() || String(firstRow.indexOf(c) + 1))
+        : Array.from({ length: maxCols }, (_, i) => String.fromCharCode(65 + i))
+      const dataRows = firstRowIsHeader ? rows.slice(1) : rows
+      const tableRows = dataRows.map((row) =>
+        Array.from({ length: maxCols }, (_, ci) => {
+          const cell = row[ci]?.trim() ?? ''
+          const n = Number(cell)
+          return isNaN(n) ? 0 : n
+        }),
+      )
+      if (tableRows.length === 0) return
+
+      const id = `node_${++nodeIdCounter}`
+      const rect = canvasWrapRef.current?.getBoundingClientRect()
+      const screenX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2
+      const screenY = rect ? rect.top + rect.height / 2 : window.innerHeight / 2
+      const pos = screenToFlowPosition({ x: screenX, y: screenY })
+      doSaveHistory()
+      setNodes((nds) => [
+        ...nds,
+        {
+          id,
+          type: 'csData',
+          position: { x: pos.x - 120, y: pos.y - tableRows.length * 14 },
+          data: {
+            blockType: 'tableInput',
+            label: 'Pasted Table',
+            tableData: { columns, rows: tableRows },
+          },
+        } as Node<NodeData>,
+      ])
+    }
+    document.addEventListener('paste', onPaste)
+    return () => document.removeEventListener('paste', onPaste)
+  }, [readOnly, screenToFlowPosition, doSaveHistory, setNodes])
+
   // ── Select all ──────────────────────────────────────────────────────────
 
   const selectAll = useCallback(() => {
