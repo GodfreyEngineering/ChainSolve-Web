@@ -9,6 +9,7 @@
 pub mod gradient;
 pub mod genetic;
 pub mod lp;
+pub mod qp;
 pub mod simplex;
 pub mod sweep;
 pub mod montecarlo;
