@@ -495,9 +495,9 @@ Every user journey, from first signup to daily power use, must be polished and p
 - [ ] **14.3** `npm run format` — Prettier on all files
 - [ ] **14.4** Scan TODO/FIXME/HACK comments — resolve or convert to GitHub issues
 - [ ] **14.5** Audit catch blocks for consistent `[ERROR_CODE]` pattern
-- [ ] **14.6** Move `@types/dagre` from dependencies to devDependencies
+- [x] **14.6** Move `@types/dagre` + `@types/katex` from dependencies to devDependencies
 - [ ] **14.7** `npx depcheck` — remove unused npm deps
-- [ ] **14.8** `npm audit` + `cargo audit` — fix security issues
+- [x] **14.8** `npm audit` — 0 vulnerabilities. `cargo audit` not installed (deferred)
 - [ ] **14.9** `cargo update` — patch-level updates
 
 ### 14B — Documentation
