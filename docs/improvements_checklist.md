@@ -463,7 +463,7 @@
 - [x] **9.8** i18n: 7 locales (en, de, es, fr, he, it, ja) with 2191+ keys
 - [x] **9.9** Explore/marketplace: template gallery, search, categories, likes, downloads
 - [x] **9.10** Interactive 5-minute tutorial: build spring-mass-damper from scratch — demonstrates input→compute→visualise workflow. Opens as a ChainSolve graph with step-by-step annotations.
-- [ ] **9.11** Template gallery on home: "Vehicle Suspension K&C", "PID Controller Tuning", "Curve Fitting", "Neural Network Training", "Structural Optimisation", "Battery Thermal Model" — each fully functional with inline comments
+- [x] **9.11** Template gallery on home: "Vehicle Suspension K&C", "PID Controller Tuning", "Curve Fitting", "Neural Network Training", "Structural Optimisation", "Battery Thermal Model" — each fully functional with inline comments
 - [ ] **9.12** AI assistant (opt-in): natural language → suggested graph via LLM API. User reviews and approves before insertion. Like Mathematica's Notebook Assistant.
 - [x] **9.13** Progressive disclosure: simple blocks show minimal config by default. "Advanced" toggle reveals all parameters.
 - [ ] **9.14** MathSheet block: spreadsheet within node graph. Input ports → named variables. Cells support unit-aware formulas. Outputs computed columns. The Excel-killer feature.
