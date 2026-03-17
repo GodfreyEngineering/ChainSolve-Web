@@ -2437,7 +2437,10 @@
     "clickToEdit": "Click or press = to edit",
     "error": "Invalid expression",
     "hint": "Select a block to see its formula",
-    "hint2": "Click or = to edit"
+    "hint2": "Click or = to edit",
+    "exitExprMode": "Exit expression mode",
+    "enterExprMode": "Expression mode — type to create blocks",
+    "exprPlaceholder": "Type expression... e.g. 1+2= or sin(pi/4)= or x=5; x*2="
   },
   "nodeComments": {
     "comments": "Comments",

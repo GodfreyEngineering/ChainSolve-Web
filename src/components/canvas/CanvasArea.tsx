@@ -122,6 +122,8 @@ import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { useBlockSnapping } from '../../hooks/useBlockSnapping'
 import { SnapGuides } from './SnapGuides'
+import { parseCsel } from '../../engine/csel/parser'
+import { generateGraph } from '../../engine/csel/graphGen'
 import { useLongPress } from '../../hooks/useLongPress'
 import { BottomSheet } from '../ui/BottomSheet'
 import { ValuePopoverContext, type ShowValuePopover } from '../../contexts/ValuePopoverContext'
@@ -1097,7 +1099,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   } | null>(null)
 
   const canvasWrapRef = useRef<HTMLDivElement>(null)
-  const { screenToFlowPosition, fitView, zoomIn, zoomOut, zoomTo, getNode } = useReactFlow()
+  const { screenToFlowPosition, fitView, zoomIn, zoomOut, zoomTo, getNode, getViewport } =
+    useReactFlow()
 
   // UX-19: Presentation mode toggle
   const togglePresentationMode = useCallback(() => {
@@ -2018,6 +2021,46 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       )
     },
     [doSaveHistory, setNodes],
+  )
+
+  // Phase 11: Handle CSEL expression submission — parse, generate blocks, add to canvas
+  const handleExpressionSubmit = useCallback(
+    (expression: string) => {
+      const ast = parseCsel(expression)
+      if (ast.length === 0) return
+
+      // Get viewport center for positioning
+      const vp = getViewport()
+      const startX = (-vp.x + 200) / vp.zoom
+      const startY = (-vp.y + 200) / vp.zoom
+
+      const graph = generateGraph(ast, startX, startY)
+      if (graph.nodes.length === 0) return
+
+      doSaveHistory()
+
+      // Convert generated nodes to React Flow format
+      const newNodes = graph.nodes.map((gn) => ({
+        id: gn.id,
+        type: gn.type,
+        position: gn.position,
+        data: gn.data as NodeData,
+      }))
+
+      // Add nodes and edges
+      setNodes((nds) => [...nds, ...newNodes])
+      setEdges((eds) => [
+        ...eds,
+        ...graph.edges.map((ge) => ({
+          id: ge.id,
+          source: ge.source,
+          sourceHandle: ge.sourceHandle,
+          target: ge.target,
+          targetHandle: ge.targetHandle,
+        })),
+      ])
+    },
+    [doSaveHistory, setNodes, setEdges, getViewport],
   )
 
   /** UX-10: Restore to a specific history entry (displayIdx 0 = most recent). */
@@ -3377,6 +3420,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                                   })
                               : undefined
                           }
+                          onExpressionSubmit={handleExpressionSubmit}
                         />
                       )}
 
