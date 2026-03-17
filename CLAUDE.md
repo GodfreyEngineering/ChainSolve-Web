@@ -106,13 +106,29 @@ GOLDEN_UPDATE=1 cargo test -p engine-core --test golden
 
 ## Architecture
 
+### Evaluation model
+
+ChainSolve uses **reactive evaluation**: when inputs, blocks, or chains change, the engine evaluates once. It never loops continuously. Dragging blocks and adding annotations do NOT trigger evaluation. Users can also use manual mode (Run button / Ctrl+Enter / F5) for large graphs.
+
+The `EvalScheduler` (`src/engine/evalScheduler.ts`) manages dispatch timing with two modes:
+- **Reactive** (default): structural changes fire immediately, data changes debounce 50ms
+- **Manual**: ops accumulate until explicit Run
+
 ### Data flow
 
 1. User edits canvas → React Flow nodes/edges updated in `CanvasArea.tsx`
 2. `useGraphEngine` hook diffs the graph → produces `PatchOp[]` via `src/engine/diffGraph.ts`
-3. Patch is sent to a Web Worker via `postMessage`
-4. Worker (`src/engine/worker.ts`) applies patch and runs incremental evaluation via the WASM engine
+3. `EvalScheduler` decides when to dispatch based on mode (reactive/manual)
+4. Patch sent to Web Worker → WASM engine evaluates incrementally
 5. Results posted back → `ComputedContext` updates → UI re-renders
+
+### Formula Bar Expression Language (CSEL)
+
+Users can type expressions in the formula bar (fx mode) to create blocks:
+- `1 + 2 =` → creates Number(1), Number(2), Add, Display blocks wired together
+- `sin(pi/4) =` → creates constant, divide, sin, display
+- `x = 5; y = x * 2; y + 1 =` → creates named blocks with variable references
+- Parser: `src/engine/csel/parser.ts`, graph generator: `src/engine/csel/graphGen.ts`
 
 ### Layer boundaries (enforced by ESLint adapter-boundary rule)
 
@@ -142,7 +158,14 @@ The `src/engine/value.ts` mirror types let the UI pattern-match on value kinds w
 
 ### Rust/WASM engine
 
-- `crates/engine-core/` — Pure Rust: graph structure, value types (Scalar/Vector/Table/Interval/Text/Complex/Matrix), 150+ ops, validation
+- `crates/engine-core/` — Pure Rust: graph structure, value types (Scalar/Vector/Table/Interval/Text/Complex/Matrix/HighPrecision), 360+ ops, validation
+- `crates/engine-core/src/ode/` — ODE solvers: RK4 (fixed-step), RK45/Dormand-Prince (adaptive)
+- `crates/engine-core/src/vehicle/` — Pacejka tire model, quarter-car suspension, aero, powertrain, lap sim, brake thermal
+- `crates/engine-core/src/optim/` — LP (simplex), QP (projected gradient), NSGA-II (Pareto), Sobol sensitivity, gradient descent, genetic algorithm, Nelder-Mead, Monte Carlo, DOE
+- `crates/engine-core/src/nn/` — Sequential neural network with Dense/Conv1D layers, backprop training, LR schedules, model export
+- `crates/engine-core/src/ml/` — Linear/polynomial regression, KNN, decision tree, preprocessing, classification metrics (P/R/F1, ROC, AUC)
+- `crates/engine-core/src/precision.rs` — Arbitrary precision arithmetic via dashu-float (up to 9,999 decimal places)
+- `crates/engine-core/src/compensated.rs` — Neumaier compensated sum, Ogita-Rump-Oishi dot product
 - `crates/engine-wasm/` — wasm-bindgen bindings; persistent `EngineGraph` via thread-local storage
 - Protocol: snapshot load on first render, then incremental patches. Watchdog restarts worker after 5 s hang.
 - `ENGINE_CONTRACT_VERSION = 3` in `crates/engine-core/src/catalog.rs` versions the evaluation contract.
@@ -169,7 +192,11 @@ The required COOP/COEP response headers live in `public/_headers` (see Hard Inva
 
 ### Block system
 
-Blocks are defined in `src/blocks/` as metadata (`BlockDef`) with port schemas — no evaluation. The Rust engine owns all computation. `src/blocks/registry.ts` is the master registry. Block categories are defined as `BlockCategory` in `src/blocks/types.ts`. Block definition files follow the naming convention `*-blocks.ts`.
+Blocks are defined in `src/blocks/` as metadata (`BlockDef`) with port schemas — no evaluation. The Rust engine owns all computation. `src/blocks/registry.ts` is the master registry (361+ entries). Block categories are defined as `BlockCategory` in `src/blocks/types.ts`. Block definition files follow the naming convention `*-blocks.ts`.
+
+**Variadic blocks**: `add`, `multiply`, `max`, `min`, `vectorConcat`, `text_concat` support N inputs (2-64). The UI shows +/- buttons to add/remove ports. Variadic inputs use `in_0`, `in_1`, ..., `in_N` port naming. The Rust engine's `nary_broadcast` applies the binary op by left-fold across all inputs.
+
+**Magnetic snapping**: When dragging blocks near other blocks, guide lines appear and the block snaps to aligned positions (horizontal chain, vertical stack, center-align). Toggle via `magneticSnap` state in CanvasArea.
 
 ## Adding a new block op (end-to-end)
 
