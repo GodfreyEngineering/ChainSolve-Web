@@ -561,7 +561,7 @@
 - [x] **15.8** CLAUDE.md: updated with reactive eval, CSEL, variadic blocks, all new Rust modules, updated bundle budgets
 - [x] **15.9** TODO/FIXME/HACK scan: resolve all or convert to tracked GitHub issues
 - [BLOCKED: Windows Application Control policy prevents installing cargo-audit binary] **15.10** cargo audit: install cargo-audit, run on all crates, fix any advisories
-- [ ] **15.11** Migration audit: verify all 15 migrations idempotent, consider squashing to single baseline (pre-release)
+- [x] **15.11** Migration audit: verify all 15 migrations idempotent, consider squashing to single baseline (pre-release)
 - [ ] **15.12** RLS policy audit: verify every table has appropriate policies (cross-reference with 0013 migration)
 - [ ] **15.13** New ADRs: reactive eval model, CSEL grammar, magnetic snapping, simulation worker, faer integration, WebGPU strategy
 - [ ] **15.14** i18n: add translated labels for all new blocks (ODE, vehicle, ML classification, etc.) across all 7 locales
