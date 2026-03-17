@@ -356,7 +356,7 @@
 - [x] **4.3** PDF audit report export (pdf-lib + html-to-image for canvas capture)
 - [x] **4.4** SVG/PNG plot export (Vega-Lite → SVG/PNG)
 - [x] **4.5** Project JSON format (.chainsolvejson schema v3) with version migration
-- [ ] **4.6** Excel .xlsx read import: parse workbook sheets → DataTable values. Use a WASM-compiled xlsx parser or server-side Edge Function.
+- [x] **4.6** Excel .xlsx read import: parse workbook sheets → DataTable values. Use a WASM-compiled xlsx parser or server-side Edge Function.
 - [ ] **4.7** HDF5 import/export: hierarchical datasets for large arrays/matrices. Via `hdf5-rust` or Emscripten-compiled libhdf5.
 - [ ] **4.8** Parquet import/export: columnar format for large datasets. Via `parquet` Rust crate compiled to WASM.
 - [ ] **4.9** MATLAB .mat import: v5 format via `matfile` crate (pure Rust), v7.3 via HDF5 layer
