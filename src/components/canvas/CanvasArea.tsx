@@ -1145,7 +1145,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [telemetryProjectId, canvasId],
   )
 
-  const { computed, computedStore } = useGraphEngine(
+  const { computed, computedStore, triggerEval, pendingPatchCount } = useGraphEngine(
     nodes,
     edges,
     engine,
@@ -2414,6 +2414,13 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         return
       }
 
+      // Phase 1: Ctrl+Enter or F5 → trigger evaluation (Run)
+      if ((ctrl && e.key === 'Enter') || e.key === 'F5') {
+        e.preventDefault()
+        triggerEval()
+        return
+      }
+
       // Skip shortcuts when typing in form fields
       if (isInput) return
 
@@ -2609,6 +2616,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       presentationMode,
       togglePresentationMode,
       keybindingOverrides,
+      triggerEval,
     ],
   )
 
@@ -3701,6 +3709,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         presentationMode={presentationMode}
                         onTogglePresentationMode={togglePresentationMode}
                         isMobile={isMobile}
+                        onRun={triggerEval}
+                        pendingPatchCount={pendingPatchCount}
                       />
                       {/* Bottom Dock — hidden in presentation mode */}
                       {!presentationMode && (
