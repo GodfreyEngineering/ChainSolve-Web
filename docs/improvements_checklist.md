@@ -204,7 +204,7 @@ Ref: Pacejka 2012, Milliken & Milliken 1995, Dixon 2009.
 
 - [ ] **5.11** `veh.telemetry.compare` — overlay sim vs actual data
 - [x] **5.12** `vehicle/thermal.rs` — brake_temp_derivative, brake_energy, brake_power (4 tests)
-- [ ] **5.13** Match arms for `veh.brake.*` *(Rust functions ready, ops.rs wiring deferred)*
+- [x] **5.13** Match arms for `veh.brake.energy`, `veh.brake.power` + catalog entries + TS blocks
 
 ### 5E — Block Definitions & Registration
 
@@ -236,14 +236,14 @@ The NN module has real implementations (Sequential, Dense, Conv1D, backprop) but
 ### 7A — Feature Preprocessing
 
 - [x] **7.1** `ml/preprocess.rs` — standardize, normalize, train_test_split (3 tests)
-- [ ] **7.2** Ops: `ml.featureScale`, `ml.trainTestSplit` *(Rust functions ready, ops.rs wiring deferred)*
+- [x] **7.2** Ops: `ml.featureScale` wired in ops.rs + catalog + TS block (trainTestSplit deferred)
 - [ ] **7.3** Block definitions and i18n *(deferred)*
 
 ### 7B — Classification Metrics
 
 - [x] **7.4** `ml/classification_metrics.rs` — precision/recall/F1, ROC curve, AUC (4 tests)
-- [ ] **7.5** Ops: `ml.classMetrics`, `ml.rocCurve`, `ml.auc` *(Rust functions ready, ops.rs wiring deferred)*
-- [ ] **7.6** Block definitions and i18n *(deferred)*
+- [x] **7.5** Ops: `ml.classMetrics`, `ml.rocCurve`, `ml.auc` wired in ops.rs + catalog + TS blocks
+- [x] **7.6** Block definitions + descriptions added to registry.ts and blockDescriptions.ts
 
 ### 7C — Cross-Validation & Grid Search
 
