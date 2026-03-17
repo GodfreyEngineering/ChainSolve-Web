@@ -360,7 +360,7 @@
 - [ ] **4.7** HDF5 import/export: hierarchical datasets for large arrays/matrices. Via `hdf5-rust` or Emscripten-compiled libhdf5.
 - [ ] **4.8** Parquet import/export: columnar format for large datasets. Via `parquet` Rust crate compiled to WASM.
 - [ ] **4.9** MATLAB .mat import: v5 format via `matfile` crate (pure Rust), v7.3 via HDF5 layer
-- [ ] **4.10** NumPy .npy/.npz import: parse NumPy array format (simple binary header + data)
+- [x] **4.10** NumPy .npy/.npz import: parse NumPy array format (simple binary header + data)
 - [ ] **4.11** STEP/IGES geometry import: parse CAD boundary representations → display as 3D mesh in viewport
 - [ ] **4.12** STL mesh import: parse triangulated surface mesh for FEM preprocessing
 - [ ] **4.13** FMU .fmu import/export: zip containing modelDescription.xml + compiled binaries — parse and create block ports
