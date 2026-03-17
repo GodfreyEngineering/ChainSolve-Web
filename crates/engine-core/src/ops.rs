@@ -136,9 +136,9 @@ fn evaluate_node_inner(
         "preset.fluids.diesel_rho"     => Value::scalar(832.0),
 
         // ── Math (2 inputs: a, b or 1 input: in) ─────────────────
-        "add" => binary_broadcast(inputs, |a, b| a + b),
+        "add" => nary_broadcast(inputs, |a, b| a + b),
         "subtract" => binary_broadcast(inputs, |a, b| a - b),
-        "multiply" => binary_broadcast(inputs, |a, b| a * b),
+        "multiply" => nary_broadcast(inputs, |a, b| a * b),
         "divide" => binary_broadcast(inputs, |a, b| a / b),
         "power" => binary_broadcast_ports(inputs, "base", "exp", |base, exp| base.powf(exp)),
         "mod" => binary_broadcast(inputs, |a, b| a % b),
@@ -225,8 +225,8 @@ fn evaluate_node_inner(
         "greater" => binary_broadcast(inputs, |a, b| if a > b { 1.0 } else { 0.0 }),
         "less" => binary_broadcast(inputs, |a, b| if a < b { 1.0 } else { 0.0 }),
         "equal" => binary_broadcast(inputs, |a, b| if (a - b).abs() < f64::EPSILON { 1.0 } else { 0.0 }),
-        "max" => binary_broadcast(inputs, |a, b| a.max(b)),
-        "min" => binary_broadcast(inputs, |a, b| a.min(b)),
+        "max" => nary_broadcast(inputs, |a, b| a.max(b)),
+        "min" => nary_broadcast(inputs, |a, b| a.min(b)),
         "ifthenelse" => {
             let cond = scalar_or_nan(inputs, "cond");
             let then = scalar_or_nan(inputs, "then");
@@ -3732,6 +3732,75 @@ fn binary_broadcast(
     binary_broadcast_ports(inputs, "a", "b", f)
 }
 
+/// N-ary broadcast: applies a binary associative op across variadic inputs
+/// named `in_0`, `in_1`, ..., `in_N` by left-fold with broadcasting.
+/// Falls back to binary `a`/`b` ports if no `in_0` is found (backward compat).
+fn nary_broadcast(
+    inputs: &HashMap<String, Value>,
+    f: impl Fn(f64, f64) -> f64 + Copy,
+) -> Value {
+    // Check for variadic inputs (in_0, in_1, ...)
+    if inputs.contains_key("in_0") {
+        let mut i = 0;
+        let mut result: Option<Value> = None;
+        loop {
+            let key = format!("in_{}", i);
+            match inputs.get(&key) {
+                Some(val) => {
+                    result = Some(match result {
+                        None => val.clone(),
+                        Some(acc) => binary_broadcast_two_values(&acc, val, f),
+                    });
+                    i += 1;
+                }
+                None => break,
+            }
+        }
+        result.unwrap_or(Value::scalar(0.0))
+    } else {
+        // Fallback: standard binary a/b ports
+        binary_broadcast(inputs, f)
+    }
+}
+
+/// Helper: broadcast two Values with a binary op (not reading from ports).
+fn binary_broadcast_two_values(
+    a: &Value,
+    b: &Value,
+    f: impl Fn(f64, f64) -> f64,
+) -> Value {
+    match (a, b) {
+        (Value::Scalar { value: va }, Value::Scalar { value: vb }) => {
+            Value::scalar(f(*va, *vb))
+        }
+        (Value::Scalar { value: s }, Value::Vector { value: vec }) => {
+            Value::Vector {
+                value: vec.iter().map(|v| f(*s, *v)).collect(),
+            }
+        }
+        (Value::Vector { value: vec }, Value::Scalar { value: s }) => {
+            Value::Vector {
+                value: vec.iter().map(|v| f(*v, *s)).collect(),
+            }
+        }
+        (Value::Vector { value: va }, Value::Vector { value: vb }) => {
+            if va.len() != vb.len() {
+                return Value::error(format!(
+                    "Vector length mismatch: {} vs {}",
+                    va.len(),
+                    vb.len()
+                ));
+            }
+            Value::Vector {
+                value: va.iter().zip(vb.iter()).map(|(a, b)| f(*a, *b)).collect(),
+            }
+        }
+        (Value::Error { .. }, _) => a.clone(),
+        (_, Value::Error { .. }) => b.clone(),
+        _ => Value::error("Unsupported types for broadcast".to_string()),
+    }
+}
+
 fn require_vector<'a>(
     inputs: &'a HashMap<String, Value>,
     port: &str,
@@ -5561,5 +5630,75 @@ mod tests {
             let got = v.as_scalar().unwrap_or(f64::NAN);
             assert!(got > 0.0, "{}: expected positive, got {}", op_id, got);
         }
+    }
+
+    // ── Variadic (n-ary) tests ──────────────────────────────────────
+
+    #[test]
+    fn variadic_add_3_inputs() {
+        let inputs = make_inputs(&[("in_0", 1.0), ("in_1", 2.0), ("in_2", 3.0)]);
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(6.0));
+    }
+
+    #[test]
+    fn variadic_add_5_inputs() {
+        let inputs = make_inputs(&[("in_0", 10.0), ("in_1", 20.0), ("in_2", 30.0), ("in_3", 40.0), ("in_4", 50.0)]);
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(150.0));
+    }
+
+    #[test]
+    fn variadic_add_falls_back_to_binary() {
+        // When using a/b ports (no in_0), should still work
+        let inputs = make_inputs(&[("a", 3.0), ("b", 7.0)]);
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(10.0));
+    }
+
+    #[test]
+    fn variadic_multiply_3_inputs() {
+        let inputs = make_inputs(&[("in_0", 2.0), ("in_1", 3.0), ("in_2", 4.0)]);
+        let v = evaluate_node("multiply", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(24.0));
+    }
+
+    #[test]
+    fn variadic_max_4_inputs() {
+        let inputs = make_inputs(&[("in_0", 5.0), ("in_1", 2.0), ("in_2", 8.0), ("in_3", 1.0)]);
+        let v = evaluate_node("max", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(8.0));
+    }
+
+    #[test]
+    fn variadic_min_4_inputs() {
+        let inputs = make_inputs(&[("in_0", 5.0), ("in_1", 2.0), ("in_2", 8.0), ("in_3", 1.0)]);
+        let v = evaluate_node("min", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(1.0));
+    }
+
+    #[test]
+    fn variadic_add_scalar_vector_mix() {
+        let mut inputs: HashMap<String, Value> = HashMap::new();
+        inputs.insert("in_0".into(), Value::scalar(10.0));
+        inputs.insert("in_1".into(), Value::Vector { value: vec![1.0, 2.0, 3.0] });
+        inputs.insert("in_2".into(), Value::scalar(100.0));
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        match v {
+            Value::Vector { value } => {
+                assert_eq!(value, vec![111.0, 112.0, 113.0]);
+            }
+            _ => panic!("Expected vector, got {:?}", v),
+        }
+    }
+
+    #[test]
+    fn variadic_add_10_inputs() {
+        let mut inputs = HashMap::new();
+        for i in 0..10 {
+            inputs.insert(format!("in_{}", i), Value::scalar(i as f64 + 1.0));
+        }
+        let v = evaluate_node("add", &inputs, &HashMap::new());
+        assert_eq!(v.as_scalar(), Some(55.0)); // sum of 1..10 = 55
     }
 }
