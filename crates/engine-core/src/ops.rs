@@ -3134,6 +3134,83 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Rootfinding ──────────────────────────────────────────────
+
+        // Newton-Raphson: find root of f(x)=0 given formula and initial guess
+        "root_newton" | "root.newton" => {
+            let formula = data.get("formula").and_then(|v| v.as_str()).unwrap_or("");
+            if formula.is_empty() {
+                return Value::error("root_newton: no formula provided");
+            }
+            let x0 = scalar_or_nan(inputs, "x0");
+            if x0.is_nan() {
+                return Value::error("root_newton: initial guess x0 is required");
+            }
+            let tol = data.get("tol").and_then(|v| v.as_f64()).unwrap_or(1e-12);
+            let max_iter = data.get("maxIter").and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+
+            let cfg = crate::rootfinding::RootConfig { max_iter, tol };
+            let f = |x: f64| -> f64 {
+                let mut vars = std::collections::HashMap::new();
+                vars.insert("x".to_string(), x);
+                crate::expr::eval_expr(formula, &vars).unwrap_or(f64::NAN)
+            };
+            let result = crate::rootfinding::newton_raphson(&f, x0, &cfg);
+            if result.converged {
+                Value::scalar(result.root)
+            } else {
+                Value::error(format!(
+                    "root_newton: did not converge after {} iterations (f(x) = {:.2e})",
+                    result.iterations, result.function_value
+                ))
+            }
+        }
+
+        // Brent's method: find root of f(x)=0 in bracket [a, b]
+        "root_brent" | "root.brent" => {
+            let formula = data.get("formula").and_then(|v| v.as_str()).unwrap_or("");
+            if formula.is_empty() {
+                return Value::error("root_brent: no formula provided");
+            }
+            let a = scalar_or_nan(inputs, "a");
+            let b = scalar_or_nan(inputs, "b");
+            if a.is_nan() || b.is_nan() {
+                return Value::error("root_brent: bracket endpoints a and b are required");
+            }
+            let tol = data.get("tol").and_then(|v| v.as_f64()).unwrap_or(1e-12);
+            let max_iter = data.get("maxIter").and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+
+            let cfg = crate::rootfinding::RootConfig { max_iter, tol };
+            let f = |x: f64| -> f64 {
+                let mut vars = std::collections::HashMap::new();
+                vars.insert("x".to_string(), x);
+                crate::expr::eval_expr(formula, &vars).unwrap_or(f64::NAN)
+            };
+            let result = crate::rootfinding::brent(&f, a, b, &cfg);
+            if result.converged {
+                Value::scalar(result.root)
+            } else if result.root.is_nan() {
+                Value::error("root_brent: root not bracketed — f(a) and f(b) must have opposite signs")
+            } else {
+                Value::error(format!(
+                    "root_brent: did not converge after {} iterations (f(x) = {:.2e})",
+                    result.iterations, result.function_value
+                ))
+            }
+        }
+
+        // Polynomial roots: find all real roots of a polynomial
+        "root_polynomial" | "root.polynomial" => {
+            match inputs.get("coeffs").or_else(|| inputs.get("in_0")) {
+                Some(Value::Vector { value: coeffs }) => {
+                    let roots = crate::rootfinding::polynomial_roots(coeffs);
+                    Value::Vector { value: roots }
+                }
+                Some(e @ Value::Error { .. }) => e.clone(),
+                _ => Value::error("root_polynomial: expected vector of polynomial coefficients [c0, c1, ..., cn]"),
+            }
+        }
+
         // ── Optimization ──────────────────────────────────────────
         "optim.designVariable" => {
             // Source node: emit a table describing this design variable

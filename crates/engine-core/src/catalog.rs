@@ -460,6 +460,11 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("matrix_schur", "Schur Decompose", "matrix", "csOperation", vec![p("matrix", "Matrix")], true),
         entry("matrix_cond", "Condition Number", "matrix", "csOperation", vec![p("matrix", "Matrix")], true),
 
+        // ── Rootfinding ──────────────────────────────────────────────────
+        entry("root_newton", "Newton-Raphson Root", "numerical", "csOperation", vec![p("x0", "Initial Guess")], true),
+        entry("root_brent", "Brent Root", "numerical", "csOperation", vec![p("a", "Bracket a"), p("b", "Bracket b")], true),
+        entry("root_polynomial", "Polynomial Roots", "numerical", "csOperation", vec![p("coeffs", "Coefficients")], true),
+
         // ── BLK-10: Lookup Table Interpolation ───────────────────────────
         entry("lookup.1d", "Lookup Table 1D", "tableOps", "csOperation", vec![p("x_vec", "X (vector)"), p("y_vec", "Y (vector)"), p("x", "Query X")], false),
         entry("lookup.2d", "Lookup Table 2D", "tableOps", "csOperation", vec![p("x_vec", "X axis"), p("y_vec", "Y axis"), p("z_mat", "Z (table)"), p("x", "Query X"), p("y", "Query Y")], false),
@@ -597,14 +602,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 368);
+        assert_eq!(cat.len(), 371);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 368);
+        assert_eq!(parsed.as_array().unwrap().len(), 371);
     }
 
     #[test]

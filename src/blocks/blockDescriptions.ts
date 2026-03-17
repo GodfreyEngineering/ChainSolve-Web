@@ -532,6 +532,14 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   matrix_cond:
     'Condition number κ(A) = σ_max / σ_min via SVD. Large values indicate ill-conditioning.',
 
+  // ── Rootfinding ────────────────────────────────────────────────────────────
+  root_newton:
+    'Newton-Raphson rootfinding with backtracking line search. Uses numerical central difference for derivatives.',
+  root_brent:
+    "Brent's method rootfinding with guaranteed convergence for bracketed roots. Combines bisection, secant, and inverse quadratic interpolation.",
+  root_polynomial:
+    'Find all real roots of a polynomial via companion matrix eigenvalues. Input: coefficient vector [c0, c1, ..., cn].',
+
   // ── SCI-12: Signal Processing / FFT ───────────────────────────────────────
   'signal.fft_magnitude':
     'FFT magnitude spectrum: |FFT[k]| for k = 0..N/2. Input zero-padded to next power of 2.',

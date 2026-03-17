@@ -29,6 +29,7 @@ import { registerIntervalBlocks } from './interval-blocks'
 import { registerSignalBlocks } from './signal-blocks'
 import { registerComplexBlocks } from './complex-blocks'
 import { registerMatrixBlocks } from './matrix-blocks'
+import { registerNumericalBlocks } from './numerical-blocks'
 import { registerOptimBlocks } from './optim-blocks'
 import { registerMLBlocks } from './ml-blocks'
 import { registerNNBlocks } from './nn-blocks'
@@ -67,6 +68,7 @@ export function registerAllBlocks(): void {
   registerComplexBlocks(reg)
   registerMatrixBlocks(reg)
   registerLookupBlocks(reg)
+  registerNumericalBlocks(reg)
   registerOptimBlocks(reg)
   registerMLBlocks(reg)
   registerNNBlocks(reg)
