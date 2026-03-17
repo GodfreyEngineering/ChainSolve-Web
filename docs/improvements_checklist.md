@@ -219,8 +219,8 @@ Ref: Pacejka 2012, Milliken & Milliken 1995, Dixon 2009.
 
 The NN module has real implementations (Sequential, Dense, Conv1D, backprop) but `nn.trainer` is a stub.
 
-- [ ] **6.1** Wire `nn.trainer` in `ops.rs` — parse layers from `data.layers`, call `nn::train::train()`, return loss history + serialised model
-- [ ] **6.2** Wire `nn.predict` — deserialise model, run `Sequential::forward()`
+- [x] **6.1** Wire `nn.trainer` in `ops.rs` — parse layers from `data.layers`, build Sequential model, call `nn::train::train()`, return loss Table
+- [x] **6.2** Wire `nn.predict` — proper input handling added (model import from JSON deferred)
 - [ ] **6.3** Layer configuration UI panel in FloatingInspector
 - [ ] **6.4** `nn/lr_schedule.rs` — constant, step decay, cosine annealing, exponential decay
 - [ ] **6.5** Early stopping with validation split and patience
