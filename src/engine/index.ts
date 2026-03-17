@@ -111,6 +111,8 @@ export interface EngineAPI {
   readonly contractVersion: number
   /** Query dataset registry stats from the WASM engine. */
   getStats(): Promise<EngineStats>
+  /** Pre-run validation: detect cycles, missing inputs, dangling edges. */
+  validateGraph(): Promise<import('./wasm-types.ts').EngineDiagnostic[]>
   /** Subscribe to progress events. Returns unsubscribe function. */
   onProgress(handler: (event: ProgressEvent) => void): () => void
   /** Terminate the worker. After this call, the engine cannot be used. */
@@ -236,6 +238,11 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
         reject: (e: Error) => void
       }
     | { kind: 'stats'; resolve: (r: EngineStats) => void; reject: (e: Error) => void }
+    | {
+        kind: 'validate'
+        resolve: (r: import('./wasm-types.ts').EngineDiagnostic[]) => void
+        reject: (e: Error) => void
+      }
 
   const pending = new Map<number, PendingEntry>()
   const progressListeners = new Set<(event: ProgressEvent) => void>()
@@ -290,6 +297,17 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
         pending.delete(msg.requestId)
         if (p.kind === 'stats') {
           p.resolve(msg.stats)
+        }
+        return
+      }
+
+      if (msg.type === 'validateResult') {
+        clearWatchdog()
+        const p = pending.get(msg.requestId)
+        if (!p) return
+        pending.delete(msg.requestId)
+        if (p.kind === 'validate') {
+          p.resolve(msg.diagnostics)
         }
         return
       }
@@ -477,6 +495,16 @@ export async function createEngine(factory?: WorkerFactory): Promise<EngineAPI> 
         pending.set(id, { kind: 'stats', resolve, reject })
         startWatchdog(id)
         postRequest({ type: 'getStats', requestId: id })
+      })
+    },
+
+    validateGraph() {
+      if (disposed) return Promise.reject(new Error('Engine disposed'))
+      return new Promise<import('./wasm-types.ts').EngineDiagnostic[]>((resolve, reject) => {
+        const id = nextId++
+        pending.set(id, { kind: 'validate', resolve, reject })
+        startWatchdog(id)
+        postRequest({ type: 'validateGraph', requestId: id })
       })
     },
 

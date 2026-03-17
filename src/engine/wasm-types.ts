@@ -148,6 +148,7 @@ export type WorkerRequest =
   | { type: 'releaseDataset'; datasetId: string }
   | { type: 'cancel'; requestId: number }
   | { type: 'getStats'; requestId: number }
+  | { type: 'validateGraph'; requestId: number }
 
 // ── Engine stats (W9.4) ──────────────────────────────────────────
 
@@ -218,3 +219,4 @@ export type WorkerResponse =
       elapsedMs: number
     }
   | { type: 'stats'; requestId: number; stats: EngineStats }
+  | { type: 'validateResult'; requestId: number; diagnostics: EngineDiagnostic[] }

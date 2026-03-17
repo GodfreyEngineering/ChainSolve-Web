@@ -24,6 +24,9 @@ import initWasm, {
   get_engine_contract_version,
   dataset_count,
   dataset_total_bytes,
+  // @ts-expect-error — validate_graph is added in Rust but wasm-pack has not regenerated the .d.ts yet.
+  // After `npm run wasm:build:dev` this error resolves. See crates/engine-wasm/src/lib.rs.
+  validate_graph,
 } from '@engine-wasm/engine_wasm.js'
 import wasmUrl from '@engine-wasm/engine_wasm_bg.wasm?url'
 import type {
@@ -311,6 +314,21 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
         })
       } catch (err) {
         postError(msg.requestId, 'STATS_EXCEPTION', err)
+      }
+      break
+    }
+
+    case 'validateGraph': {
+      try {
+        const diagsJson = validate_graph()
+        const diagnostics = JSON.parse(diagsJson)
+        post({
+          type: 'validateResult',
+          requestId: msg.requestId,
+          diagnostics,
+        })
+      } catch (err) {
+        postError(msg.requestId, 'VALIDATE_EXCEPTION', err)
       }
       break
     }

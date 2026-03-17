@@ -60,6 +60,29 @@ pub fn run(snapshot_json: &str) -> Result<EvalResult, EngineError> {
     Ok(result)
 }
 
+/// Pre-run validation on a persistent EngineGraph.
+///
+/// Checks for cycles, missing required inputs, and dangling edges without
+/// running any computation. Returns a JSON-serializable list of diagnostics.
+pub fn run_validate(
+    graph: &graph::EngineGraph,
+) -> Vec<types::Diagnostic> {
+    // Build catalog inputs map: op_id → vec of required port ids
+    let cat = catalog::catalog();
+    let catalog_inputs: std::collections::HashMap<String, Vec<String>> = cat
+        .into_iter()
+        .filter(|entry| !entry.inputs.is_empty())
+        .map(|entry| {
+            (
+                entry.op_id.to_string(),
+                entry.inputs.iter().map(|p| p.id.to_string()).collect(),
+            )
+        })
+        .collect();
+
+    graph.validate_pre_eval(&catalog_inputs)
+}
+
 /// Load a snapshot into an EngineGraph and perform a full evaluation.
 /// Returns an EvalResult with all values.
 pub fn run_load_snapshot(

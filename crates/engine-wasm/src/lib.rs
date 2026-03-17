@@ -265,3 +265,20 @@ pub fn dataset_count() -> usize {
 pub fn dataset_total_bytes() -> usize {
     with_engine(|graph| graph.dataset_total_bytes())
 }
+
+/// Pre-run validation: detect structural issues without evaluation.
+///
+/// Returns a JSON array of `Diagnostic` objects. Does not modify the graph.
+#[wasm_bindgen]
+pub fn validate_graph() -> String {
+    let diags = ENGINE.with(|cell| {
+        let borrow = cell.borrow();
+        match borrow.as_ref() {
+            Some(graph) => engine_core::run_validate(graph),
+            None => vec![],
+        }
+    });
+    serde_json::to_string(&diags).unwrap_or_else(|e| {
+        err_json("SERIALIZE_FAILED", &format!("Failed to serialize diagnostics: {e}"))
+    })
+}

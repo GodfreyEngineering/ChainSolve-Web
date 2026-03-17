@@ -570,6 +570,165 @@ impl EngineGraph {
     pub fn values(&self) -> &HashMap<String, Value> {
         &self.values
     }
+
+    /// Pre-run validation: detect structural issues without running evaluation.
+    ///
+    /// Checks:
+    /// - Cycle detection (Kahn's algorithm)
+    /// - Missing required inputs (catalog ports with no incoming edge and no manual value)
+    /// - Dangling edges (source/target node missing)
+    ///
+    /// Returns diagnostics only — does not modify the graph or run any computation.
+    pub fn validate_pre_eval(&self, catalog_inputs: &HashMap<String, Vec<String>>) -> Vec<Diagnostic> {
+        let mut diags = Vec::new();
+
+        // 1. Cycle detection via Kahn's algorithm
+        let mut in_degree: HashMap<&str, usize> = HashMap::new();
+        for id in self.nodes.keys() {
+            in_degree.insert(id.as_str(), 0);
+        }
+        for edge in self.edges.values() {
+            *in_degree.entry(edge.target.as_str()).or_insert(0) += 1;
+        }
+
+        let mut queue: VecDeque<&str> = VecDeque::new();
+        for (&id, &deg) in &in_degree {
+            if deg == 0 {
+                queue.push_back(id);
+            }
+        }
+
+        let mut visited = 0usize;
+        let mut remaining = in_degree.clone();
+        while let Some(id) = queue.pop_front() {
+            visited += 1;
+            if let Some(neighbors) = self.out_adj.get(id) {
+                for (_, target_id, _) in neighbors {
+                    if let Some(deg) = remaining.get_mut(target_id.as_str()) {
+                        *deg = deg.saturating_sub(1);
+                        if *deg == 0 {
+                            queue.push_back(target_id.as_str());
+                        }
+                    }
+                }
+            }
+        }
+
+        if visited < self.nodes.len() {
+            let in_topo: HashSet<&str> = {
+                // Re-run Kahn's to get the set of non-cycle nodes
+                let mut topo_set = HashSet::new();
+                let mut in_deg2: HashMap<&str, usize> = HashMap::new();
+                for id in self.nodes.keys() {
+                    in_deg2.insert(id.as_str(), 0);
+                }
+                for edge in self.edges.values() {
+                    *in_deg2.entry(edge.target.as_str()).or_insert(0) += 1;
+                }
+                let mut q2: VecDeque<&str> = VecDeque::new();
+                for (&id, &deg) in &in_deg2 {
+                    if deg == 0 {
+                        q2.push_back(id);
+                    }
+                }
+                while let Some(id) = q2.pop_front() {
+                    topo_set.insert(id);
+                    if let Some(neighbors) = self.out_adj.get(id) {
+                        for (_, target_id, _) in neighbors {
+                            if let Some(deg) = in_deg2.get_mut(target_id.as_str()) {
+                                *deg = deg.saturating_sub(1);
+                                if *deg == 0 {
+                                    q2.push_back(target_id.as_str());
+                                }
+                            }
+                        }
+                    }
+                }
+                topo_set
+            };
+            for id in self.nodes.keys() {
+                if !in_topo.contains(id.as_str()) {
+                    diags.push(Diagnostic {
+                        node_id: Some(id.clone()),
+                        level: DiagLevel::Error,
+                        code: "CYCLE_DETECTED".to_string(),
+                        message: format!("Node '{}' is part of a cycle", id),
+                    });
+                }
+            }
+        }
+
+        // 2. Missing required inputs — check each node against catalog
+        for (node_id, node) in &self.nodes {
+            let block_type = &node.block_type;
+            // Look up required inputs from catalog
+            if let Some(required_ports) = catalog_inputs.get(block_type.as_str()) {
+                // Build set of ports connected by incoming edges
+                let connected_ports: HashSet<&str> = self
+                    .in_adj
+                    .get(node_id)
+                    .map(|edges| edges.iter().map(|(_, _, _, handle)| handle.as_str()).collect())
+                    .unwrap_or_default();
+
+                // Check for manual values
+                let manual_values = node.data.get("manualValues")
+                    .and_then(|v| v.as_object());
+                let port_overrides = node.data.get("portOverrides")
+                    .and_then(|v| v.as_object());
+
+                for port_id in required_ports {
+                    let has_edge = connected_ports.contains(port_id.as_str());
+                    let has_manual = manual_values
+                        .map(|m| m.contains_key(port_id))
+                        .unwrap_or(false);
+                    let is_overridden = port_overrides
+                        .and_then(|po| po.get(port_id))
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false);
+
+                    if !has_edge && !has_manual && !is_overridden {
+                        diags.push(Diagnostic {
+                            node_id: Some(node_id.clone()),
+                            level: DiagLevel::Warning,
+                            code: "MISSING_INPUT".to_string(),
+                            message: format!(
+                                "Node '{}' ({}): input '{}' has no connection or manual value",
+                                node_id, block_type, port_id
+                            ),
+                        });
+                    }
+                }
+            }
+        }
+
+        // 3. Dangling edges
+        for edge in self.edges.values() {
+            if !self.nodes.contains_key(&edge.source) {
+                diags.push(Diagnostic {
+                    node_id: None,
+                    level: DiagLevel::Error,
+                    code: "DANGLING_EDGE".to_string(),
+                    message: format!(
+                        "Edge '{}' references missing source node '{}'",
+                        edge.id, edge.source
+                    ),
+                });
+            }
+            if !self.nodes.contains_key(&edge.target) {
+                diags.push(Diagnostic {
+                    node_id: None,
+                    level: DiagLevel::Error,
+                    code: "DANGLING_EDGE".to_string(),
+                    message: format!(
+                        "Edge '{}' references missing target node '{}'",
+                        edge.id, edge.target
+                    ),
+                });
+            }
+        }
+
+        diags
+    }
 }
 
 /// ENG-05: Compute a cheap u64 hash of a Value using std's DefaultHasher.
