@@ -19,6 +19,8 @@ import type { Value } from '../../engine/value'
 import { safeEvalFormula, validateFormula, FORMULA_SYMBOLS } from '../../lib/formulaEval'
 import type { FormulaSymbol } from '../../lib/formulaEval'
 import { tokenize } from '../../engine/csel/lexer'
+import { parseCsel } from '../../engine/csel/parser'
+import { cselToLatex } from '../../engine/csel/latexGen'
 
 // ── 3.49: Expression history stored in localStorage ─────────────────────────
 
@@ -232,6 +234,9 @@ export function FormulaBar({
   // 3.48: CSEL expression mode autocomplete
   const [cselAcItems, setCselAcItems] = useState<Array<{ label: string; kind: 'fn' | 'const' | 'var'; insert: string }>>([])
   const [cselAcIdx, setCselAcIdx] = useState(0)
+
+  // 4.17: LaTeX copy feedback
+  const [latexCopied, setLatexCopied] = useState(false)
 
   // 3.49: Expression history — persisted across page reloads
   const [history, setHistory] = useState<string[]>(() => loadHistory())
@@ -654,6 +659,40 @@ export function FormulaBar({
                 </div>
               ))}
             </div>
+          )}
+
+          {/* 4.17: Copy as LaTeX button */}
+          {exprDraft.trim() && !exprError && (
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  const program = parseCsel(exprDraft.trim())
+                  const latex = cselToLatex(program)
+                  navigator.clipboard.writeText(latex).then(() => {
+                    setLatexCopied(true)
+                    setTimeout(() => setLatexCopied(false), 1500)
+                  }).catch(() => {})
+                } catch {
+                  // ignore parse errors — button won't show when there's an exprError
+                }
+              }}
+              style={{
+                fontSize: '0.6rem',
+                padding: '0.1rem 0.4rem',
+                borderRadius: 4,
+                border: '1px solid var(--border)',
+                background: latexCopied ? 'rgba(28,171,176,0.15)' : 'transparent',
+                color: latexCopied ? 'var(--primary)' : 'var(--text-faint)',
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                flexShrink: 0,
+                transition: 'color 0.2s, background 0.2s',
+              }}
+              title="Copy expression as LaTeX (4.17)"
+            >
+              {latexCopied ? '✓ LaTeX' : 'LaTeX'}
+            </button>
           )}
 
           {exprError && (
