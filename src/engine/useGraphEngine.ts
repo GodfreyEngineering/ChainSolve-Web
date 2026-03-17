@@ -133,21 +133,26 @@ export function useGraphEngine(
   const seenErrorsRef = useRef<Set<string>>(new Set())
 
   // Phase 1: EvalScheduler manages patch dispatch timing.
-  const [schedulerInstance] = useState(() => new EvalScheduler(evalMode ?? 'auto'))
+  // Stored in a ref — only accessed inside effects and callbacks (never during render).
+  const schedulerRef = useRef<EvalScheduler | null>(null)
   const [pendingPatchCount, setPendingPatchCount] = useState(0)
 
-  // Keep scheduler mode in sync with the evalMode prop.
+  // Lazily initialise and keep scheduler mode in sync with evalMode.
   useEffect(() => {
-    schedulerInstance.mode = evalMode ?? 'auto'
-  }, [evalMode, schedulerInstance])
-
-  // Register pending-count callback once.
-  useEffect(() => {
-    schedulerInstance.onPendingChange(setPendingPatchCount)
-    return () => {
-      schedulerInstance.dispose()
+    if (!schedulerRef.current) {
+      schedulerRef.current = new EvalScheduler(evalMode ?? 'auto')
+      schedulerRef.current.onPendingChange(setPendingPatchCount)
+    } else {
+      schedulerRef.current.mode = evalMode ?? 'auto'
     }
-  }, [schedulerInstance])
+  }, [evalMode])
+
+  // Dispose scheduler on unmount.
+  useEffect(() => {
+    return () => {
+      schedulerRef.current?.dispose()
+    }
+  }, [])
 
   useEffect(() => {
     // When refreshKey changes, force a full snapshot re-evaluation.
@@ -356,8 +361,10 @@ export function useGraphEngine(
       // Phase 1: Delegate dispatch timing to the EvalScheduler.
       // The scheduler handles debouncing, idle-callback, or manual
       // accumulation based on the current evalMode.
-      schedulerInstance.onFlush(firePatch)
-      schedulerInstance.enqueue(ops)
+      if (schedulerRef.current) {
+        schedulerRef.current.onFlush(firePatch)
+        schedulerRef.current.enqueue(ops)
+      }
     }
 
     prevNodesRef.current = nodes
@@ -365,7 +372,7 @@ export function useGraphEngine(
 
     // Cleanup: clear scheduler timers on effect re-run or unmount.
     return () => {
-      schedulerInstance.clear()
+      schedulerRef.current?.clear()
     }
   }, [
     nodes,
@@ -381,14 +388,14 @@ export function useGraphEngine(
     store,
     telemetryOpts,
     angleUnit,
-    schedulerInstance,
   ])
 
   // Phase 1: triggerEval — flush any pending scheduler ops OR force a full
   // snapshot reload if there are no pending ops (covers "re-run everything").
   const triggerEval = useCallback(() => {
-    if (schedulerInstance.pendingCount > 0) {
-      schedulerInstance.flush()
+    const sched = schedulerRef.current
+    if (sched && sched.pendingCount > 0) {
+      sched.flush()
     } else {
       // No pending ops — force a full snapshot reload (same as Refresh button)
       snapshotLoaded.current = false
@@ -399,7 +406,7 @@ export function useGraphEngine(
       // will pick it up since nodes/edges are in the dep array.
       prevNodesRef.current = [] // Force diff to see "everything changed"
     }
-  }, [schedulerInstance])
+  }, [])
 
   return { computed, isPartial, computedStore: store, triggerEval, pendingPatchCount }
 }
