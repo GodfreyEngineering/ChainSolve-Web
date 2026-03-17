@@ -31,6 +31,7 @@ pub mod ml;
 pub mod nn;
 pub mod ops;
 pub mod optim;
+pub mod precision;
 pub mod types;
 pub mod validate;
 
