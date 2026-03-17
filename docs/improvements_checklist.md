@@ -379,25 +379,25 @@ Users type `1+1=` → auto-creates Number(1), Number(1), Add, Display blocks wir
   - Functions: `sin(x)`, `max(a, b, c)` (maps to variadic blocks)
   - Trailing `=` creates Display block for the result
 - [ ] **11.2** Document grammar in `docs/CSEL.md` with comprehensive examples
-- [ ] **11.3** Define AST types in `src/engine/csel/types.ts`
+- [x] **11.3** Define AST types in `src/engine/csel/types.ts` — literal, identifier, binary, unary, call, assign, display
 
 ### 11B — Parser
 
-- [ ] **11.4** Create `src/engine/csel/lexer.ts` — tokeniser for numbers, identifiers, operators, parens, pipe, arrow, equals
-- [ ] **11.5** Create `src/engine/csel/parser.ts` — recursive descent parser producing AST
-- [ ] **11.6** `src/engine/csel/errors.ts` — descriptive parse errors with position info
-- [ ] **11.7** Unit tests: arithmetic, function calls, pipes, assignments, error cases
+- [x] **11.4** `src/engine/csel/lexer.ts` — tokeniser: numbers, identifiers, operators, parens, pipe, arrow, equals, semicolons
+- [x] **11.5** `src/engine/csel/parser.ts` — recursive descent parser with operator precedence (right-assoc ^)
+- [x] **11.6** Error handling via thrown `{ message, position }` objects with parse position
+- [x] **11.7** 11 parser tests + 4 graph generator tests = 15 tests total
 
 ### 11C — Graph Generator
 
-- [ ] **11.8** Create `src/engine/csel/graphGen.ts` — converts AST to React Flow nodes + edges
-- [ ] **11.9** Map operators to blocks: `+` → `add`, `*` → `multiply`, `sin()` → `trig.sin`
-- [ ] **11.10** Auto-create Number source blocks for literals
-- [ ] **11.11** Trailing `=` or explicit `display` → create Display block
-- [ ] **11.12** Auto-layout using dagre (already a dependency) — left-to-right flow
-- [ ] **11.13** Handle variadic: `max(a, b, c, d)` → single max block with 4 inputs
-- [ ] **11.14** Handle variables: `x = 5` → named Number block; `x` references wire to it
-- [ ] **11.15** Unit tests: expression → node/edge graph, verify wiring
+- [x] **11.8** `src/engine/csel/graphGen.ts` — converts AST to React Flow nodes + edges
+- [x] **11.9** Maps operators to blocks: `+`→add, `*`→multiply, `sin()`→sin, `max()`→max, etc.
+- [x] **11.10** Auto-creates Number source blocks for literals and known constants (pi, e, tau, phi)
+- [x] **11.11** Trailing `=` creates Display block for the result
+- [ ] **11.12** Auto-layout using dagre *(current: simple X-offset layout, dagre integration deferred)*
+- [x] **11.13** Variadic: `max(a,b,c,d)` → single max block with dynamicInputCount=4 and in_0..in_3 ports
+- [x] **11.14** Variables: `x = 5` → named Number block; `x` references reuse the same node ID
+- [x] **11.15** 4 graph generator tests: 1+2=, sin(pi/4)=, named variables, variadic max
 
 ### 11D — Enhanced FormulaBar UI
 
