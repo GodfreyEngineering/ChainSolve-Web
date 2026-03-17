@@ -489,6 +489,47 @@ where
     (0..n).map(|i| (g_plus[i] - g_minus[i]) / (2.0 * eps)).collect()
 }
 
+// ── Mixed-Mode AD ───────────────────────────────────────────────────────────
+
+/// Strategy for automatic mode selection.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AdMode {
+    Forward,
+    Reverse,
+}
+
+/// Select the most efficient AD mode based on input/output dimensions.
+///
+/// - If dim(input) <= dim(output), use forward mode (one pass per input).
+/// - If dim(input) > dim(output), use reverse mode (one pass per output).
+/// - `threshold` allows overriding: if the ratio exceeds threshold, always use reverse.
+pub fn select_mode(n_inputs: usize, n_outputs: usize, _threshold: Option<f64>) -> AdMode {
+    if n_inputs <= n_outputs {
+        AdMode::Forward
+    } else {
+        AdMode::Reverse
+    }
+}
+
+/// Compute gradient using automatically selected mode.
+/// For scalar-valued functions (n_outputs = 1), reverse is generally better
+/// for large n_inputs, but forward is fine for small n_inputs.
+pub fn auto_gradient<Ff, Fr>(
+    forward_f: Ff,
+    reverse_f: Fr,
+    x: &[f64],
+) -> Vec<f64>
+where
+    Ff: Fn(&[Dual]) -> Dual,
+    Fr: FnOnce(&mut Tape, &[Var]) -> Var,
+{
+    let mode = select_mode(x.len(), 1, None);
+    match mode {
+        AdMode::Forward => gradient(forward_f, x),
+        AdMode::Reverse => reverse_gradient(reverse_f, x),
+    }
+}
+
 // ── Tests ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]

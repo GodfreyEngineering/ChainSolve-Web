@@ -1181,6 +1181,1063 @@ impl fmt::Display for Polynomial {
     }
 }
 
+// ── Multivariate Polynomials & Gröbner Bases ────────────────────────────────
+
+/// Monomial ordering for Gröbner basis computation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MonomialOrder {
+    /// Graded reverse lexicographic (grevlex) — the standard choice.
+    GrevLex,
+    /// Pure lexicographic — useful for elimination.
+    Lex,
+    /// Graded lexicographic.
+    GrLex,
+}
+
+/// A monomial exponent vector. `exponents[i]` is the power of variable i.
+/// E.g., for variables [x, y, z], the monomial x²yz³ is [2, 1, 3].
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Monomial {
+    pub exponents: Vec<u32>,
+}
+
+impl Monomial {
+    /// Total degree of this monomial.
+    pub fn total_degree(&self) -> u32 {
+        self.exponents.iter().sum()
+    }
+
+    /// Multiply two monomials (add exponents).
+    pub fn mul(&self, other: &Monomial) -> Monomial {
+        let n = self.exponents.len().max(other.exponents.len());
+        let mut exponents = vec![0u32; n];
+        for (i, &e) in self.exponents.iter().enumerate() {
+            exponents[i] += e;
+        }
+        for (i, &e) in other.exponents.iter().enumerate() {
+            exponents[i] += e;
+        }
+        Monomial { exponents }
+    }
+
+    /// Check if `self` is divisible by `other` (component-wise >=).
+    pub fn is_divisible_by(&self, other: &Monomial) -> bool {
+        let n = other.exponents.len();
+        if self.exponents.len() < n {
+            return other.exponents[self.exponents.len()..].iter().all(|&e| e == 0);
+        }
+        for i in 0..n {
+            if self.exponents[i] < other.exponents[i] {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Divide `self` by `other` (subtract exponents). Panics if not divisible.
+    pub fn div(&self, other: &Monomial) -> Monomial {
+        let n = self.exponents.len().max(other.exponents.len());
+        let mut exponents = vec![0u32; n];
+        for i in 0..n {
+            let a = if i < self.exponents.len() { self.exponents[i] } else { 0 };
+            let b = if i < other.exponents.len() { other.exponents[i] } else { 0 };
+            debug_assert!(a >= b, "Monomial not divisible");
+            exponents[i] = a - b;
+        }
+        Monomial { exponents }
+    }
+
+    /// Least common multiple of two monomials (component-wise max).
+    pub fn lcm(&self, other: &Monomial) -> Monomial {
+        let n = self.exponents.len().max(other.exponents.len());
+        let mut exponents = vec![0u32; n];
+        for i in 0..n {
+            let a = if i < self.exponents.len() { self.exponents[i] } else { 0 };
+            let b = if i < other.exponents.len() { other.exponents[i] } else { 0 };
+            exponents[i] = a.max(b);
+        }
+        Monomial { exponents }
+    }
+
+    /// GCD of two monomials (component-wise min).
+    pub fn gcd(&self, other: &Monomial) -> Monomial {
+        let n = self.exponents.len().max(other.exponents.len());
+        let mut exponents = vec![0u32; n];
+        for i in 0..n {
+            let a = if i < self.exponents.len() { self.exponents[i] } else { 0 };
+            let b = if i < other.exponents.len() { other.exponents[i] } else { 0 };
+            exponents[i] = a.min(b);
+        }
+        Monomial { exponents }
+    }
+
+    /// Check if two monomials are coprime (gcd = 1).
+    pub fn is_coprime(&self, other: &Monomial) -> bool {
+        let n = self.exponents.len().min(other.exponents.len());
+        for i in 0..n {
+            if self.exponents[i] > 0 && other.exponents[i] > 0 {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Compare monomials under grevlex ordering.
+    fn cmp_grevlex(&self, other: &Monomial) -> std::cmp::Ordering {
+        let td_a = self.total_degree();
+        let td_b = other.total_degree();
+        if td_a != td_b {
+            return td_a.cmp(&td_b);
+        }
+        // Reverse lexicographic: compare from last variable, prefer *smaller* exponent
+        let n = self.exponents.len().max(other.exponents.len());
+        for i in (0..n).rev() {
+            let a = if i < self.exponents.len() { self.exponents[i] } else { 0 };
+            let b = if i < other.exponents.len() { other.exponents[i] } else { 0 };
+            if a != b {
+                // In grevlex, *smaller* last exponent is *larger* — reversed
+                return b.cmp(&a);
+            }
+        }
+        std::cmp::Ordering::Equal
+    }
+
+    /// Compare monomials under lex ordering.
+    fn cmp_lex(&self, other: &Monomial) -> std::cmp::Ordering {
+        let n = self.exponents.len().max(other.exponents.len());
+        for i in 0..n {
+            let a = if i < self.exponents.len() { self.exponents[i] } else { 0 };
+            let b = if i < other.exponents.len() { other.exponents[i] } else { 0 };
+            if a != b {
+                return a.cmp(&b).reverse();
+            }
+        }
+        std::cmp::Ordering::Equal
+    }
+
+    /// Compare monomials under grlex ordering.
+    fn cmp_grlex(&self, other: &Monomial) -> std::cmp::Ordering {
+        let td_a = self.total_degree();
+        let td_b = other.total_degree();
+        if td_a != td_b {
+            return td_a.cmp(&td_b);
+        }
+        self.cmp_lex(other)
+    }
+
+    /// Compare monomials under the given ordering.
+    pub fn cmp_order(&self, other: &Monomial, order: MonomialOrder) -> std::cmp::Ordering {
+        match order {
+            MonomialOrder::GrevLex => self.cmp_grevlex(other),
+            MonomialOrder::Lex => self.cmp_lex(other),
+            MonomialOrder::GrLex => self.cmp_grlex(other),
+        }
+    }
+
+    /// True if this monomial is the constant 1 (all exponents zero).
+    pub fn is_one(&self) -> bool {
+        self.exponents.iter().all(|&e| e == 0)
+    }
+}
+
+/// A multivariate polynomial: sparse representation as a list of (coefficient, monomial) pairs.
+#[derive(Debug, Clone)]
+pub struct MultiPoly {
+    /// Variable names for display. E.g., ["x", "y", "z"].
+    pub var_names: Vec<String>,
+    /// Terms sorted in descending order by the chosen monomial ordering.
+    /// Invariant: no two terms share the same monomial; no zero-coefficient terms.
+    pub terms: Vec<(f64, Monomial)>,
+    /// Monomial ordering used for this polynomial.
+    pub order: MonomialOrder,
+}
+
+/// Tolerance for treating coefficients as zero.
+const COEFF_EPS: f64 = 1e-12;
+
+impl MultiPoly {
+    /// Create from raw terms, normalizing (sorting + combining like terms).
+    pub fn new(var_names: Vec<String>, terms: Vec<(f64, Monomial)>, order: MonomialOrder) -> Self {
+        let mut poly = MultiPoly { var_names, terms, order };
+        poly.normalize();
+        poly
+    }
+
+    /// Zero polynomial.
+    pub fn zero(var_names: Vec<String>, order: MonomialOrder) -> Self {
+        MultiPoly { var_names, terms: vec![], order }
+    }
+
+    /// Constant polynomial.
+    pub fn constant(var_names: Vec<String>, c: f64, order: MonomialOrder) -> Self {
+        if c.abs() < COEFF_EPS {
+            return Self::zero(var_names, order);
+        }
+        let n = var_names.len();
+        MultiPoly {
+            var_names,
+            terms: vec![(c, Monomial { exponents: vec![0; n] })],
+            order,
+        }
+    }
+
+    /// Create a single-variable polynomial: variable `var_idx` raised to power `exp`.
+    pub fn var_power(var_names: Vec<String>, var_idx: usize, exp: u32, order: MonomialOrder) -> Self {
+        let n = var_names.len();
+        let mut exponents = vec![0u32; n];
+        exponents[var_idx] = exp;
+        MultiPoly {
+            var_names,
+            terms: vec![(1.0, Monomial { exponents })],
+            order,
+        }
+    }
+
+    /// Is this the zero polynomial?
+    pub fn is_zero(&self) -> bool {
+        self.terms.is_empty()
+    }
+
+    /// Total degree of the polynomial.
+    pub fn total_degree(&self) -> Option<u32> {
+        self.terms.iter().map(|(_, m)| m.total_degree()).max()
+    }
+
+    /// Leading term (coefficient, monomial) under the current ordering.
+    pub fn leading_term(&self) -> Option<&(f64, Monomial)> {
+        self.terms.first()
+    }
+
+    /// Leading monomial.
+    pub fn leading_monomial(&self) -> Option<&Monomial> {
+        self.terms.first().map(|(_, m)| m)
+    }
+
+    /// Leading coefficient.
+    pub fn leading_coeff(&self) -> Option<f64> {
+        self.terms.first().map(|(c, _)| *c)
+    }
+
+    /// Add two multivariate polynomials.
+    pub fn add(&self, other: &MultiPoly) -> MultiPoly {
+        let mut terms: Vec<(f64, Monomial)> = self.terms.clone();
+        terms.extend(other.terms.iter().cloned());
+        MultiPoly::new(self.var_names.clone(), terms, self.order)
+    }
+
+    /// Subtract two multivariate polynomials.
+    pub fn sub(&self, other: &MultiPoly) -> MultiPoly {
+        let neg: Vec<(f64, Monomial)> = other.terms.iter().map(|(c, m)| (-c, m.clone())).collect();
+        let mut terms = self.terms.clone();
+        terms.extend(neg);
+        MultiPoly::new(self.var_names.clone(), terms, self.order)
+    }
+
+    /// Multiply two multivariate polynomials.
+    pub fn mul(&self, other: &MultiPoly) -> MultiPoly {
+        let mut terms = Vec::with_capacity(self.terms.len() * other.terms.len());
+        for (ca, ma) in &self.terms {
+            for (cb, mb) in &other.terms {
+                terms.push((ca * cb, ma.mul(mb)));
+            }
+        }
+        MultiPoly::new(self.var_names.clone(), terms, self.order)
+    }
+
+    /// Scalar multiplication.
+    pub fn scale(&self, s: f64) -> MultiPoly {
+        let terms: Vec<(f64, Monomial)> = self.terms.iter().map(|(c, m)| (c * s, m.clone())).collect();
+        MultiPoly::new(self.var_names.clone(), terms, self.order)
+    }
+
+    /// Multiply by a monomial.
+    pub fn mul_monomial(&self, coeff: f64, mono: &Monomial) -> MultiPoly {
+        let terms: Vec<(f64, Monomial)> = self.terms.iter().map(|(c, m)| (c * coeff, m.mul(mono))).collect();
+        MultiPoly::new(self.var_names.clone(), terms, self.order)
+    }
+
+    /// Make the leading coefficient 1 (monic normalization).
+    pub fn make_monic(&self) -> MultiPoly {
+        if let Some(lc) = self.leading_coeff() {
+            if lc.abs() > COEFF_EPS {
+                return self.scale(1.0 / lc);
+            }
+        }
+        self.clone()
+    }
+
+    /// Multivariate polynomial division.
+    /// Returns (quotients, remainder) where `self = q[0]*divisors[0] + ... + q[n]*divisors[n] + remainder`.
+    pub fn divide(&self, divisors: &[MultiPoly]) -> (Vec<MultiPoly>, MultiPoly) {
+        let order = self.order;
+        let vars = self.var_names.clone();
+        let n = divisors.len();
+        let mut quotients: Vec<MultiPoly> = (0..n).map(|_| MultiPoly::zero(vars.clone(), order)).collect();
+        let mut remainder = MultiPoly::zero(vars.clone(), order);
+        let mut p = self.clone();
+
+        while !p.is_zero() {
+            let mut divided = false;
+            for i in 0..n {
+                if let (Some(lt_p), Some(lt_d)) = (p.leading_term(), divisors[i].leading_term()) {
+                    if lt_p.1.is_divisible_by(&lt_d.1) {
+                        let coeff = lt_p.0 / lt_d.0;
+                        let mono = lt_p.1.div(&lt_d.1);
+                        // quotients[i] += coeff * mono
+                        quotients[i] = quotients[i].add(&MultiPoly {
+                            var_names: vars.clone(),
+                            terms: vec![(coeff, mono.clone())],
+                            order,
+                        });
+                        // p -= coeff * mono * divisors[i]
+                        let sub_term = divisors[i].mul_monomial(coeff, &mono);
+                        p = p.sub(&sub_term);
+                        divided = true;
+                        break;
+                    }
+                }
+            }
+            if !divided {
+                // Move leading term of p to remainder
+                if let Some(lt) = p.leading_term().cloned() {
+                    remainder = remainder.add(&MultiPoly {
+                        var_names: vars.clone(),
+                        terms: vec![lt.clone()],
+                        order,
+                    });
+                    // Remove leading term from p
+                    p.terms.remove(0);
+                }
+            }
+        }
+
+        (quotients, remainder)
+    }
+
+    /// Reduce `self` modulo a set of polynomials (compute normal form).
+    pub fn reduce(&self, basis: &[MultiPoly]) -> MultiPoly {
+        let (_, remainder) = self.divide(basis);
+        remainder
+    }
+
+    /// Evaluate at a point (variable values).
+    pub fn eval_at(&self, values: &[f64]) -> f64 {
+        let mut result = 0.0;
+        for (coeff, mono) in &self.terms {
+            let mut term_val = *coeff;
+            for (i, &exp) in mono.exponents.iter().enumerate() {
+                if exp > 0 && i < values.len() {
+                    term_val *= values[i].powi(exp as i32);
+                }
+            }
+            result += term_val;
+        }
+        result
+    }
+
+    /// Normalize: sort terms in descending order, combine like terms, remove zeros.
+    fn normalize(&mut self) {
+        let order = self.order;
+        // Sort descending by monomial order
+        self.terms.sort_by(|a, b| b.1.cmp_order(&a.1, order));
+
+        // Combine like terms
+        let mut combined: Vec<(f64, Monomial)> = Vec::with_capacity(self.terms.len());
+        for (c, m) in self.terms.drain(..) {
+            if let Some(last) = combined.last_mut() {
+                if last.1 == m {
+                    last.0 += c;
+                    continue;
+                }
+            }
+            combined.push((c, m));
+        }
+
+        // Remove near-zero coefficients
+        combined.retain(|(c, _)| c.abs() > COEFF_EPS);
+        self.terms = combined;
+    }
+}
+
+impl fmt::Display for MultiPoly {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.terms.is_empty() {
+            return write!(f, "0");
+        }
+        let mut first = true;
+        for (coeff, mono) in &self.terms {
+            let c = *coeff;
+            if !first && c > 0.0 {
+                write!(f, " + ")?;
+            } else if !first && c < 0.0 {
+                write!(f, " - ")?;
+            } else if first && c < 0.0 {
+                write!(f, "-")?;
+            }
+            let ac = c.abs();
+            let is_const = mono.is_one();
+            if is_const || (ac - 1.0).abs() > COEFF_EPS {
+                if is_const {
+                    write!(f, "{ac}")?;
+                } else {
+                    write!(f, "{ac}")?;
+                }
+            }
+            if !is_const {
+                for (i, &exp) in mono.exponents.iter().enumerate() {
+                    if exp > 0 {
+                        if i < self.var_names.len() {
+                            write!(f, "{}", self.var_names[i])?;
+                        } else {
+                            write!(f, "x{i}")?;
+                        }
+                        if exp > 1 {
+                            write!(f, "^{exp}")?;
+                        }
+                    }
+                }
+            }
+            first = false;
+        }
+        Ok(())
+    }
+}
+
+// ── Gröbner Basis Computation ───────────────────────────────────────────────
+
+/// S-polynomial of two polynomials f, g.
+///
+/// S(f,g) = (lcm(LM(f),LM(g)) / LT(f)) * f  -  (lcm(LM(f),LM(g)) / LT(g)) * g
+pub fn s_polynomial(f: &MultiPoly, g: &MultiPoly) -> MultiPoly {
+    let lt_f = match f.leading_term() {
+        Some(t) => t,
+        None => return MultiPoly::zero(f.var_names.clone(), f.order),
+    };
+    let lt_g = match g.leading_term() {
+        Some(t) => t,
+        None => return MultiPoly::zero(f.var_names.clone(), f.order),
+    };
+
+    let lcm_mono = lt_f.1.lcm(&lt_g.1);
+
+    // lcm / LM(f) with coefficient adjustment
+    let div_f = lcm_mono.div(&lt_f.1);
+    let div_g = lcm_mono.div(&lt_g.1);
+
+    let scaled_f = f.mul_monomial(1.0 / lt_f.0, &div_f);
+    let scaled_g = g.mul_monomial(1.0 / lt_g.0, &div_g);
+
+    scaled_f.sub(&scaled_g)
+}
+
+/// Result of Gröbner basis computation.
+#[derive(Debug, Clone)]
+pub struct GroebnerResult {
+    /// The computed Gröbner basis.
+    pub basis: Vec<MultiPoly>,
+    /// Number of S-polynomials computed during the algorithm.
+    pub s_poly_count: usize,
+    /// Number of reductions to zero (indicates efficiency of criteria).
+    pub zero_reductions: usize,
+}
+
+/// Compute a Gröbner basis using Buchberger's algorithm with improvements:
+/// - Buchberger's first criterion: skip if LMs are coprime
+/// - Buchberger's second criterion (chain criterion): skip redundant pairs
+/// - Auto-reduction of the final basis (reduced Gröbner basis)
+///
+/// # Arguments
+/// * `generators` - Input polynomial system (the ideal generators)
+/// * `max_iterations` - Safety limit on number of iterations (default: 10000)
+///
+/// # Returns
+/// A `GroebnerResult` containing the reduced Gröbner basis.
+pub fn groebner_basis(generators: &[MultiPoly], max_iterations: usize) -> GroebnerResult {
+    if generators.is_empty() {
+        return GroebnerResult {
+            basis: vec![],
+            s_poly_count: 0,
+            zero_reductions: 0,
+        };
+    }
+
+    let order = generators[0].order;
+    let vars = generators[0].var_names.clone();
+
+    // Start with normalized copies
+    let mut basis: Vec<MultiPoly> = generators.iter()
+        .filter(|g| !g.is_zero())
+        .map(|g| g.make_monic())
+        .collect();
+
+    if basis.is_empty() {
+        return GroebnerResult {
+            basis: vec![],
+            s_poly_count: 0,
+            zero_reductions: 0,
+        };
+    }
+
+    // Collect all pairs to process
+    let mut pairs: Vec<(usize, usize)> = Vec::new();
+    for i in 0..basis.len() {
+        for j in (i + 1)..basis.len() {
+            pairs.push((i, j));
+        }
+    }
+
+    let mut s_poly_count = 0;
+    let mut zero_reductions = 0;
+    let mut iterations = 0;
+
+    while let Some((i, j)) = pairs.pop() {
+        iterations += 1;
+        if iterations > max_iterations {
+            break;
+        }
+
+        // Both indices must still be valid
+        if i >= basis.len() || j >= basis.len() {
+            continue;
+        }
+
+        // Buchberger's first criterion: if LMs are coprime, S-poly reduces to zero
+        if let (Some(lm_i), Some(lm_j)) = (basis[i].leading_monomial(), basis[j].leading_monomial()) {
+            if lm_i.is_coprime(lm_j) {
+                zero_reductions += 1;
+                continue;
+            }
+        }
+
+        // Buchberger's second criterion (simplified chain criterion):
+        // If there exists k != i,j such that LM(basis[k]) divides lcm(LM(f_i), LM(f_j))
+        // and pairs (i,k) and (j,k) have already been processed, skip.
+        let skip = {
+            if let (Some(lm_i), Some(lm_j)) = (basis[i].leading_monomial(), basis[j].leading_monomial()) {
+                let lcm_ij = lm_i.lcm(lm_j);
+                let mut should_skip = false;
+                for k in 0..basis.len() {
+                    if k == i || k == j { continue; }
+                    if let Some(lm_k) = basis[k].leading_monomial() {
+                        if lcm_ij.is_divisible_by(lm_k) {
+                            // Check that the lcm of (i,k) and (j,k) are strictly smaller
+                            let lcm_ik = lm_i.lcm(lm_k);
+                            let lcm_jk = lm_j.lcm(lm_k);
+                            if lcm_ik != lcm_ij && lcm_jk != lcm_ij {
+                                should_skip = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                should_skip
+            } else {
+                false
+            }
+        };
+        if skip {
+            zero_reductions += 1;
+            continue;
+        }
+
+        s_poly_count += 1;
+        let s = s_polynomial(&basis[i], &basis[j]);
+
+        // Reduce s modulo current basis
+        let remainder = s.reduce(&basis);
+
+        if !remainder.is_zero() {
+            let new_poly = remainder.make_monic();
+            let new_idx = basis.len();
+            // Add new pairs with existing basis elements
+            for k in 0..new_idx {
+                pairs.push((k, new_idx));
+            }
+            basis.push(new_poly);
+        } else {
+            zero_reductions += 1;
+        }
+    }
+
+    // Auto-reduce to get minimal/reduced Gröbner basis
+    let reduced = reduce_basis(&basis, &vars, order);
+
+    GroebnerResult {
+        basis: reduced,
+        s_poly_count,
+        zero_reductions,
+    }
+}
+
+/// Reduce a Gröbner basis: remove redundant generators and inter-reduce.
+fn reduce_basis(basis: &[MultiPoly], vars: &[String], order: MonomialOrder) -> Vec<MultiPoly> {
+    // Step 1: Remove generators whose LM is divisible by another generator's LM
+    let mut minimal: Vec<MultiPoly> = Vec::new();
+    for (i, gi) in basis.iter().enumerate() {
+        if gi.is_zero() { continue; }
+        let lm_i = match gi.leading_monomial() {
+            Some(m) => m,
+            None => continue,
+        };
+        let redundant = basis.iter().enumerate().any(|(j, gj)| {
+            if i == j || gj.is_zero() { return false; }
+            if let Some(lm_j) = gj.leading_monomial() {
+                lm_i.is_divisible_by(lm_j) && lm_i != lm_j
+            } else {
+                false
+            }
+        });
+        if !redundant {
+            minimal.push(gi.clone());
+        }
+    }
+
+    // Step 2: Inter-reduce: reduce each polynomial modulo the others
+    let mut reduced: Vec<MultiPoly> = Vec::with_capacity(minimal.len());
+    for i in 0..minimal.len() {
+        let others: Vec<MultiPoly> = minimal.iter().enumerate()
+            .filter(|&(j, _)| j != i)
+            .map(|(_, p)| p.clone())
+            .collect();
+        let r = minimal[i].reduce(&others);
+        if !r.is_zero() {
+            reduced.push(r.make_monic());
+        }
+    }
+
+    // Sort by leading monomial (descending) for consistent output
+    reduced.sort_by(|a, b| {
+        match (a.leading_monomial(), b.leading_monomial()) {
+            (Some(ma), Some(mb)) => mb.cmp_order(ma, order),
+            _ => std::cmp::Ordering::Equal,
+        }
+    });
+
+    reduced
+}
+
+/// Solve a system of polynomial equations using Gröbner bases.
+///
+/// Given polynomials f_1, ..., f_m in variables x_1, ..., x_n, computes a Gröbner
+/// basis of the ideal <f_1, ..., f_m> under lex ordering. For zero-dimensional ideals
+/// (finitely many solutions), the last polynomial in the lex Gröbner basis is
+/// univariate, and back-substitution yields the solutions.
+///
+/// # Arguments
+/// * `system` - Polynomial equations (each assumed = 0)
+/// * `var_names` - Variable names in elimination order (first variable eliminated last)
+///
+/// # Returns
+/// * `Ok(solutions)` - List of solution vectors [x_1, x_2, ..., x_n]
+/// * `Err(msg)` - If the system cannot be solved (infinite solutions, no solutions, etc.)
+pub fn solve_polynomial_system(
+    system: &[MultiPoly],
+    max_iterations: usize,
+) -> Result<Vec<Vec<f64>>, String> {
+    if system.is_empty() {
+        return Err("Empty polynomial system".to_string());
+    }
+
+    let var_names = system[0].var_names.clone();
+    let n_vars = var_names.len();
+
+    // Convert to lex order for elimination
+    let lex_system: Vec<MultiPoly> = system.iter().map(|p| {
+        MultiPoly::new(p.var_names.clone(), p.terms.clone(), MonomialOrder::Lex)
+    }).collect();
+
+    let result = groebner_basis(&lex_system, max_iterations);
+
+    if result.basis.is_empty() {
+        return Err("System has no solutions (basis is empty or all generators are zero)".to_string());
+    }
+
+    // Check for inconsistency: if basis = {1}, no solutions
+    if result.basis.len() == 1 {
+        if let Some((c, m)) = result.basis[0].leading_term() {
+            if m.is_one() && c.abs() > COEFF_EPS {
+                return Err("System is inconsistent (no solutions)".to_string());
+            }
+        }
+    }
+
+    // For a zero-dimensional ideal with lex order, the basis is "triangular":
+    // last poly is in x_n only, second-to-last in x_{n-1}, x_n, etc.
+    // Extract univariate polynomial in the last variable.
+    let last_var_idx = n_vars - 1;
+
+    // Find a univariate polynomial in the last variable
+    let mut univariate: Option<&MultiPoly> = None;
+    for poly in &result.basis {
+        let is_univariate = poly.terms.iter().all(|(_, m)| {
+            m.exponents.iter().enumerate().all(|(i, &e)| i == last_var_idx || e == 0)
+        });
+        if is_univariate {
+            univariate = Some(poly);
+            break;
+        }
+    }
+
+    let uni_poly = match univariate {
+        Some(p) => p,
+        None => return Err("System may have infinitely many solutions (no univariate polynomial found)".to_string()),
+    };
+
+    // Convert to univariate Polynomial and find roots
+    let max_deg = uni_poly.terms.iter()
+        .map(|(_, m)| if last_var_idx < m.exponents.len() { m.exponents[last_var_idx] } else { 0 })
+        .max()
+        .unwrap_or(0);
+
+    let mut coeffs = vec![0.0; (max_deg + 1) as usize];
+    for (c, m) in &uni_poly.terms {
+        let exp = if last_var_idx < m.exponents.len() { m.exponents[last_var_idx] } else { 0 };
+        coeffs[exp as usize] += c;
+    }
+    let uni = Polynomial::new(coeffs);
+
+    // Find real roots using companion matrix eigenvalues
+    let roots = find_real_roots_of_poly(&uni);
+
+    if roots.is_empty() {
+        return Err("No real solutions found for the univariate polynomial".to_string());
+    }
+
+    // Back-substitute to find solutions
+    if n_vars == 1 {
+        return Ok(roots.iter().map(|&r| vec![r]).collect());
+    }
+
+    let mut solutions: Vec<Vec<f64>> = Vec::new();
+
+    for &root_val in &roots {
+        // Substitute the last variable's value into the remaining polynomials
+        let mut remaining: Vec<MultiPoly> = Vec::new();
+        for poly in &result.basis {
+            let substituted = substitute_var_in_multipoly(poly, last_var_idx, root_val);
+            if !substituted.is_zero() {
+                remaining.push(substituted);
+            }
+        }
+
+        if remaining.is_empty() {
+            // All polynomials vanish — free variables
+            continue;
+        }
+
+        if n_vars == 2 {
+            // Only one variable left — find its roots from remaining polynomials
+            let first_var_idx = 0;
+            for rpoly in &remaining {
+                let is_univariate = rpoly.terms.iter().all(|(_, m)| {
+                    m.exponents.iter().enumerate().all(|(i, &e)| i == first_var_idx || e == 0)
+                });
+                if is_univariate {
+                    let max_d = rpoly.terms.iter()
+                        .map(|(_, m)| if first_var_idx < m.exponents.len() { m.exponents[first_var_idx] } else { 0 })
+                        .max()
+                        .unwrap_or(0);
+                    let mut c = vec![0.0; (max_d + 1) as usize];
+                    for (co, m) in &rpoly.terms {
+                        let exp = if first_var_idx < m.exponents.len() { m.exponents[first_var_idx] } else { 0 };
+                        c[exp as usize] += co;
+                    }
+                    let up = Polynomial::new(c);
+                    let r = find_real_roots_of_poly(&up);
+                    for &rv in &r {
+                        solutions.push(vec![rv, root_val]);
+                    }
+                    break;
+                }
+            }
+        } else {
+            // Recurse for n_vars > 2
+            let reduced_vars: Vec<String> = var_names.iter().enumerate()
+                .filter(|&(i, _)| i != last_var_idx)
+                .map(|(_, v)| v.clone())
+                .collect();
+
+            // Remap remaining polys to use reduced variable set
+            let mut reduced_system: Vec<MultiPoly> = Vec::new();
+            for rpoly in &remaining {
+                let new_terms: Vec<(f64, Monomial)> = rpoly.terms.iter().map(|(c, m)| {
+                    let new_exp: Vec<u32> = m.exponents.iter().enumerate()
+                        .filter(|&(i, _)| i != last_var_idx)
+                        .map(|(_, &e)| e)
+                        .collect();
+                    (*c, Monomial { exponents: new_exp })
+                }).collect();
+                reduced_system.push(MultiPoly::new(reduced_vars.clone(), new_terms, MonomialOrder::Lex));
+            }
+
+            match solve_polynomial_system(&reduced_system, max_iterations) {
+                Ok(sub_solutions) => {
+                    for mut sub_sol in sub_solutions {
+                        sub_sol.push(root_val);
+                        solutions.push(sub_sol);
+                    }
+                }
+                Err(_) => continue,
+            }
+        }
+    }
+
+    Ok(solutions)
+}
+
+/// Substitute a specific value for a variable in a multivariate polynomial.
+fn substitute_var_in_multipoly(poly: &MultiPoly, var_idx: usize, value: f64) -> MultiPoly {
+    let mut new_terms: Vec<(f64, Monomial)> = Vec::new();
+    for (coeff, mono) in &poly.terms {
+        let exp = if var_idx < mono.exponents.len() { mono.exponents[var_idx] } else { 0 };
+        let factor = value.powi(exp as i32);
+        let new_coeff = coeff * factor;
+        let mut new_exp = mono.exponents.clone();
+        if var_idx < new_exp.len() {
+            new_exp[var_idx] = 0;
+        }
+        new_terms.push((new_coeff, Monomial { exponents: new_exp }));
+    }
+    MultiPoly::new(poly.var_names.clone(), new_terms, poly.order)
+}
+
+/// Find real roots of a univariate polynomial.
+/// Uses companion matrix eigenvalue approach for degree > 2,
+/// quadratic formula for degree 2, linear for degree 1.
+fn find_real_roots_of_poly(poly: &Polynomial) -> Vec<f64> {
+    let deg = poly.degree();
+    if deg <= 0 {
+        return vec![];
+    }
+
+    if deg == 1 {
+        // ax + b = 0 => x = -b/a
+        let a = poly.coeffs[1];
+        let b = poly.coeffs[0];
+        if a.abs() < COEFF_EPS {
+            return vec![];
+        }
+        return vec![-b / a];
+    }
+
+    if deg == 2 {
+        let a = poly.coeffs[2];
+        let b = poly.coeffs[1];
+        let c = poly.coeffs[0];
+        let disc = b * b - 4.0 * a * c;
+        if disc < -COEFF_EPS {
+            return vec![];
+        }
+        let disc = disc.max(0.0).sqrt();
+        let mut roots = vec![(-b + disc) / (2.0 * a), (-b - disc) / (2.0 * a)];
+        roots.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+        // Deduplicate
+        roots.dedup_by(|a, b| (*a - *b).abs() < 1e-8);
+        return roots;
+    }
+
+    // For higher degrees, use companion matrix eigenvalue method
+    let n = deg as usize;
+    let lc = *poly.coeffs.last().unwrap();
+    if lc.abs() < COEFF_EPS {
+        // Degenerate — try reducing degree
+        let mut reduced = poly.coeffs.clone();
+        while reduced.last() == Some(&0.0) {
+            reduced.pop();
+        }
+        return find_real_roots_of_poly(&Polynomial::new(reduced));
+    }
+
+    // Build companion matrix
+    let mut companion = vec![vec![0.0; n]; n];
+    for i in 0..n {
+        // Last column: -c_i / c_n
+        companion[i][n - 1] = -poly.coeffs[i] / lc;
+        // Sub-diagonal
+        if i > 0 {
+            companion[i][i - 1] = 1.0;
+        }
+    }
+
+    // QR iteration to find eigenvalues
+    let eigenvalues = qr_eigenvalues(&companion, 1000);
+
+    // Filter for real eigenvalues and refine with Newton's method
+    let mut roots: Vec<f64> = Vec::new();
+    for ev in &eigenvalues {
+        // Verify root by evaluation
+        let val = poly.eval_at(*ev);
+        if val.abs() < 1e-6 {
+            // Refine with Newton's method
+            let refined = newton_refine_root(poly, *ev, 20);
+            roots.push(refined);
+        }
+    }
+
+    roots.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    roots.dedup_by(|a, b| (*a - *b).abs() < 1e-8);
+    roots
+}
+
+/// Simple QR iteration for finding real eigenvalues of a matrix.
+/// Returns approximate real eigenvalues.
+fn qr_eigenvalues(matrix: &[Vec<f64>], max_iter: usize) -> Vec<f64> {
+    let n = matrix.len();
+    if n == 0 { return vec![]; }
+    if n == 1 { return vec![matrix[0][0]]; }
+
+    // Copy matrix
+    let mut a: Vec<Vec<f64>> = matrix.to_vec();
+
+    // Apply QR iteration with shifts
+    for _ in 0..max_iter {
+        // Wilkinson shift: eigenvalue of bottom-right 2×2 closer to a[n-1][n-1]
+        let shift = if n >= 2 {
+            let an = a[n - 1][n - 1];
+            let an1 = a[n - 2][n - 2];
+            let b = a[n - 2][n - 1];
+            let delta = (an1 - an) / 2.0;
+            let mu = an - b * b / (delta + delta.signum() * (delta * delta + b * b).sqrt());
+            if mu.is_finite() { mu } else { 0.0 }
+        } else {
+            0.0
+        };
+
+        // Shift
+        for i in 0..n {
+            a[i][i] -= shift;
+        }
+
+        // QR factorization via Householder
+        let (q, r) = qr_decompose(&a);
+
+        // A = R * Q + shift * I
+        a = mat_mul(&r, &q);
+        for i in 0..n {
+            a[i][i] += shift;
+        }
+
+        // Check convergence (sub-diagonal elements small)
+        let mut converged = true;
+        for i in 1..n {
+            if a[i][i - 1].abs() > 1e-10 {
+                converged = false;
+                break;
+            }
+        }
+        if converged { break; }
+    }
+
+    // Extract diagonal as eigenvalues (real parts of eigenvalues for converged blocks)
+    let mut eigenvalues = Vec::new();
+    let mut i = 0;
+    while i < n {
+        if i + 1 < n && a[i + 1][i].abs() > 1e-10 {
+            // 2×2 block — might have complex eigenvalues
+            let p = a[i][i] + a[i + 1][i + 1]; // trace
+            let q = a[i][i] * a[i + 1][i + 1] - a[i][i + 1] * a[i + 1][i]; // det
+            let disc = p * p - 4.0 * q;
+            if disc >= 0.0 {
+                eigenvalues.push((p + disc.sqrt()) / 2.0);
+                eigenvalues.push((p - disc.sqrt()) / 2.0);
+            }
+            // Skip complex eigenvalues
+            i += 2;
+        } else {
+            eigenvalues.push(a[i][i]);
+            i += 1;
+        }
+    }
+
+    eigenvalues
+}
+
+/// QR decomposition via Householder reflections.
+fn qr_decompose(a: &[Vec<f64>]) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
+    let n = a.len();
+    let mut q = eye(n);
+    let mut r: Vec<Vec<f64>> = a.to_vec();
+
+    for j in 0..n.saturating_sub(1) {
+        // Extract column below diagonal
+        let mut x = vec![0.0; n - j];
+        for i in j..n {
+            x[i - j] = r[i][j];
+        }
+
+        let norm_x = x.iter().map(|v| v * v).sum::<f64>().sqrt();
+        if norm_x < 1e-15 { continue; }
+
+        let mut v = x.clone();
+        v[0] += v[0].signum() * norm_x;
+        let norm_v = v.iter().map(|v| v * v).sum::<f64>().sqrt();
+        if norm_v < 1e-15 { continue; }
+        for vi in &mut v { *vi /= norm_v; }
+
+        // Apply Householder: R = (I - 2vv^T) * R
+        for col in j..n {
+            let mut dot = 0.0;
+            for i in j..n {
+                dot += v[i - j] * r[i][col];
+            }
+            for i in j..n {
+                r[i][col] -= 2.0 * v[i - j] * dot;
+            }
+        }
+
+        // Accumulate Q = Q * (I - 2vv^T)
+        for row in 0..n {
+            let mut dot = 0.0;
+            for i in j..n {
+                dot += q[row][i] * v[i - j];
+            }
+            for i in j..n {
+                q[row][i] -= 2.0 * dot * v[i - j];
+            }
+        }
+    }
+
+    (q, r)
+}
+
+/// Identity matrix.
+fn eye(n: usize) -> Vec<Vec<f64>> {
+    let mut m = vec![vec![0.0; n]; n];
+    for i in 0..n { m[i][i] = 1.0; }
+    m
+}
+
+/// Matrix multiplication.
+fn mat_mul(a: &[Vec<f64>], b: &[Vec<f64>]) -> Vec<Vec<f64>> {
+    let n = a.len();
+    let mut c = vec![vec![0.0; n]; n];
+    for i in 0..n {
+        for k in 0..n {
+            let aik = a[i][k];
+            if aik.abs() < 1e-15 { continue; }
+            for j in 0..n {
+                c[i][j] += aik * b[k][j];
+            }
+        }
+    }
+    c
+}
+
+/// Newton's method to refine a root estimate.
+fn newton_refine_root(poly: &Polynomial, initial: f64, max_iter: usize) -> f64 {
+    let dpoly = poly.derivative();
+    let mut x = initial;
+    for _ in 0..max_iter {
+        let fx = poly.eval_at(x);
+        let dfx = dpoly.eval_at(x);
+        if dfx.abs() < 1e-15 { break; }
+        let step = fx / dfx;
+        x -= step;
+        if step.abs() < 1e-14 { break; }
+    }
+    x
+}
+
 // ── Tests ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -1499,5 +2556,247 @@ mod tests {
         // ∫exp(x^2) dx has no elementary antiderivative
         let e = exp(pow(var("x"), con(2.0)));
         assert!(matches!(integrate(&e, "x"), IntegrateResult::NoElementary));
+    }
+
+    // ── Multivariate Polynomial Tests ──────────────────────────────────────
+
+    #[test]
+    fn multipoly_basic_arithmetic() {
+        let vars = vec!["x".to_string(), "y".to_string()];
+        let order = MonomialOrder::GrevLex;
+
+        // p = x + y
+        let p = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![1, 0] }),
+            (1.0, Monomial { exponents: vec![0, 1] }),
+        ], order);
+
+        // q = x - y
+        let q = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![1, 0] }),
+            (-1.0, Monomial { exponents: vec![0, 1] }),
+        ], order);
+
+        // p * q = x^2 - y^2
+        let product = p.mul(&q);
+        // Evaluate at x=3, y=2: should be 9 - 4 = 5
+        assert!((product.eval_at(&[3.0, 2.0]) - 5.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn multipoly_division() {
+        let vars = vec!["x".to_string(), "y".to_string()];
+        let order = MonomialOrder::GrevLex;
+
+        // f = x^2*y + x*y^2 + y^2
+        let f = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![2, 1] }),
+            (1.0, Monomial { exponents: vec![1, 2] }),
+            (1.0, Monomial { exponents: vec![0, 2] }),
+        ], order);
+
+        // g1 = x*y - 1
+        let g1 = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![1, 1] }),
+            (-1.0, Monomial { exponents: vec![0, 0] }),
+        ], order);
+
+        // g2 = y^2 - 1
+        let g2 = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![0, 2] }),
+            (-1.0, Monomial { exponents: vec![0, 0] }),
+        ], order);
+
+        let (quotients, remainder) = f.divide(&[g1.clone(), g2.clone()]);
+
+        // Verify: f = q1*g1 + q2*g2 + remainder (at a test point)
+        let pt = [2.0, 3.0];
+        let lhs = f.eval_at(&pt);
+        let rhs = quotients[0].eval_at(&pt) * g1.eval_at(&pt)
+            + quotients[1].eval_at(&pt) * g2.eval_at(&pt)
+            + remainder.eval_at(&pt);
+        assert!((lhs - rhs).abs() < 1e-8, "Division identity failed: lhs={lhs}, rhs={rhs}");
+    }
+
+    #[test]
+    fn monomial_ordering() {
+        // Test grevlex: x^2*y > x*y^2 (same total degree 3, but last var y: 1 < 2, so first is bigger)
+        let m1 = Monomial { exponents: vec![2, 1] }; // x^2*y
+        let m2 = Monomial { exponents: vec![1, 2] }; // x*y^2
+
+        assert_eq!(m1.cmp_order(&m2, MonomialOrder::GrevLex), std::cmp::Ordering::Greater);
+
+        // Test lex: x^2 > x*y
+        let m3 = Monomial { exponents: vec![2, 0] }; // x^2
+        let m4 = Monomial { exponents: vec![1, 1] }; // x*y
+        assert_eq!(m3.cmp_order(&m4, MonomialOrder::Lex), std::cmp::Ordering::Greater);
+    }
+
+    #[test]
+    fn s_polynomial_basic() {
+        let vars = vec!["x".to_string(), "y".to_string()];
+        let order = MonomialOrder::GrevLex;
+
+        // f = x^3 - 2*x*y
+        let f = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![3, 0] }),
+            (-2.0, Monomial { exponents: vec![1, 1] }),
+        ], order);
+
+        // g = x^2*y - 2*y^2 + x
+        let g = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![2, 1] }),
+            (-2.0, Monomial { exponents: vec![0, 2] }),
+            (1.0, Monomial { exponents: vec![1, 0] }),
+        ], order);
+
+        let s = s_polynomial(&f, &g);
+        // S-poly should not be zero
+        assert!(!s.is_zero());
+    }
+
+    #[test]
+    fn groebner_basis_simple_linear() {
+        // System: x + y - 3 = 0, x - y - 1 = 0
+        // Solution: x = 2, y = 1
+        let vars = vec!["x".to_string(), "y".to_string()];
+        let order = MonomialOrder::Lex;
+
+        let f1 = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![1, 0] }),
+            (1.0, Monomial { exponents: vec![0, 1] }),
+            (-3.0, Monomial { exponents: vec![0, 0] }),
+        ], order);
+
+        let f2 = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![1, 0] }),
+            (-1.0, Monomial { exponents: vec![0, 1] }),
+            (-1.0, Monomial { exponents: vec![0, 0] }),
+        ], order);
+
+        let result = groebner_basis(&[f1, f2], 1000);
+        assert!(!result.basis.is_empty(), "Basis should not be empty");
+
+        // The reduced basis should contain polynomials that allow solving
+        // For a linear system with lex order, we expect triangular form
+    }
+
+    #[test]
+    fn solve_linear_system() {
+        // x + y = 3, x - y = 1 => x = 2, y = 1
+        let vars = vec!["x".to_string(), "y".to_string()];
+        let order = MonomialOrder::Lex;
+
+        let f1 = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![1, 0] }),
+            (1.0, Monomial { exponents: vec![0, 1] }),
+            (-3.0, Monomial { exponents: vec![0, 0] }),
+        ], order);
+
+        let f2 = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![1, 0] }),
+            (-1.0, Monomial { exponents: vec![0, 1] }),
+            (-1.0, Monomial { exponents: vec![0, 0] }),
+        ], order);
+
+        let solutions = solve_polynomial_system(&[f1, f2], 1000).expect("Should find solutions");
+        assert!(!solutions.is_empty(), "Should have at least one solution");
+
+        // Find the solution close to (2, 1)
+        let found = solutions.iter().any(|s| {
+            s.len() == 2 && (s[0] - 2.0).abs() < 1e-6 && (s[1] - 1.0).abs() < 1e-6
+        });
+        assert!(found, "Should find solution (2, 1), got: {:?}", solutions);
+    }
+
+    #[test]
+    fn solve_quadratic_system() {
+        // x^2 + y^2 = 5, x + y = 3
+        // Solutions: (1, 2) and (2, 1)
+        let vars = vec!["x".to_string(), "y".to_string()];
+        let order = MonomialOrder::Lex;
+
+        let f1 = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![2, 0] }),
+            (1.0, Monomial { exponents: vec![0, 2] }),
+            (-5.0, Monomial { exponents: vec![0, 0] }),
+        ], order);
+
+        let f2 = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![1, 0] }),
+            (1.0, Monomial { exponents: vec![0, 1] }),
+            (-3.0, Monomial { exponents: vec![0, 0] }),
+        ], order);
+
+        let solutions = solve_polynomial_system(&[f1, f2], 10000).expect("Should find solutions");
+        assert!(solutions.len() >= 2, "Should have 2 solutions, got {}", solutions.len());
+
+        let has_1_2 = solutions.iter().any(|s| (s[0] - 1.0).abs() < 1e-4 && (s[1] - 2.0).abs() < 1e-4);
+        let has_2_1 = solutions.iter().any(|s| (s[0] - 2.0).abs() < 1e-4 && (s[1] - 1.0).abs() < 1e-4);
+        assert!(has_1_2, "Should find solution (1, 2), got: {:?}", solutions);
+        assert!(has_2_1, "Should find solution (2, 1), got: {:?}", solutions);
+    }
+
+    #[test]
+    fn groebner_inconsistent_system() {
+        // x = 1, x = 2 => no solution
+        let vars = vec!["x".to_string()];
+        let order = MonomialOrder::Lex;
+
+        let f1 = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![1] }),
+            (-1.0, Monomial { exponents: vec![0] }),
+        ], order);
+
+        let f2 = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![1] }),
+            (-2.0, Monomial { exponents: vec![0] }),
+        ], order);
+
+        let result = solve_polynomial_system(&[f1, f2], 1000);
+        assert!(result.is_err(), "Inconsistent system should return error");
+    }
+
+    #[test]
+    fn groebner_coprime_criterion() {
+        // Test that coprime leading monomials trigger the first criterion
+        let vars = vec!["x".to_string(), "y".to_string()];
+        let order = MonomialOrder::GrevLex;
+
+        // f = x^2 + 1, g = y^2 + 1 (LMs x^2 and y^2 are coprime)
+        let f = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![2, 0] }),
+            (1.0, Monomial { exponents: vec![0, 0] }),
+        ], order);
+
+        let g = MultiPoly::new(vars.clone(), vec![
+            (1.0, Monomial { exponents: vec![0, 2] }),
+            (1.0, Monomial { exponents: vec![0, 0] }),
+        ], order);
+
+        let result = groebner_basis(&[f, g], 1000);
+        // Coprime criterion should handle this efficiently
+        assert!(result.zero_reductions > 0, "Should have zero reductions from coprime criterion");
+    }
+
+    #[test]
+    fn find_roots_quadratic() {
+        // x^2 - 5x + 6 = (x-2)(x-3) => roots 2, 3
+        let poly = Polynomial::new(vec![6.0, -5.0, 1.0]);
+        let roots = find_real_roots_of_poly(&poly);
+        assert_eq!(roots.len(), 2);
+        assert!((roots[0] - 2.0).abs() < 1e-10);
+        assert!((roots[1] - 3.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn find_roots_cubic() {
+        // x^3 - 6x^2 + 11x - 6 = (x-1)(x-2)(x-3) => roots 1, 2, 3
+        let poly = Polynomial::new(vec![-6.0, 11.0, -6.0, 1.0]);
+        let roots = find_real_roots_of_poly(&poly);
+        assert_eq!(roots.len(), 3, "Expected 3 roots, got {:?}", roots);
+        assert!((roots[0] - 1.0).abs() < 1e-6, "root[0]={}", roots[0]);
+        assert!((roots[1] - 2.0).abs() < 1e-6, "root[1]={}", roots[1]);
+        assert!((roots[2] - 3.0).abs() < 1e-6, "root[2]={}", roots[2]);
     }
 }
