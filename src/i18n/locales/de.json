@@ -1160,7 +1160,12 @@
     "hiddenView": "Ausgeblendete Bloecke anzeigen",
     "showAllHidden": "Alle ausgeblendeten Bloecke anzeigen",
     "noMatchesHint": "Versuchen Sie andere Suchbegriffe.",
-    "presentationMode": "Presentation mode (Ctrl+Shift+P)"
+    "presentationMode": "Presentation mode (Ctrl+Shift+P)",
+    "run": "Auswertung starten (Strg+Enter)",
+    "stop": "Auswertung stoppen",
+    "autoRun": "Automatische Auswertung aktiviert",
+    "manualMode": "Manueller Auswertungsmodus",
+    "pendingChanges": "{{count}} ausstehende Änderungen"
   },
   "inspector": {
     "pin": "An aktuellen Blöcke anheften",

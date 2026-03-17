@@ -1140,7 +1140,12 @@
     "hiddenView": "Mostra blocchi nascosti",
     "showAllHidden": "Mostra tutti i blocchi nascosti",
     "noMatchesHint": "Prova con altre parole chiave.",
-    "presentationMode": "Presentation mode (Ctrl+Shift+P)"
+    "presentationMode": "Presentation mode (Ctrl+Shift+P)",
+    "run": "Esegui valutazione (Ctrl+Invio)",
+    "stop": "Interrompi valutazione",
+    "autoRun": "Esecuzione automatica attiva",
+    "manualMode": "Modalità di valutazione manuale",
+    "pendingChanges": "{{count}} modifiche in sospeso"
   },
   "inspector": {
     "pin": "Fissa al blocco corrente",

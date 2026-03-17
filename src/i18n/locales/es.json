@@ -1160,7 +1160,12 @@
     "hiddenView": "Mostrar bloques ocultos",
     "showAllHidden": "Mostrar todos los bloques ocultos",
     "noMatchesHint": "Prueba con otras palabras clave.",
-    "presentationMode": "Presentation mode (Ctrl+Shift+P)"
+    "presentationMode": "Presentation mode (Ctrl+Shift+P)",
+    "run": "Ejecutar evaluación (Ctrl+Enter)",
+    "stop": "Detener evaluación",
+    "autoRun": "Auto-ejecución activada",
+    "manualMode": "Modo de evaluación manual",
+    "pendingChanges": "{{count}} cambios pendientes"
   },
   "inspector": {
     "pin": "Fijar al bloque actual",

@@ -1182,7 +1182,12 @@
     "hiddenView": "Toggle hidden blocks view",
     "showAllHidden": "Show all hidden blocks",
     "noMatchesHint": "Try different keywords.",
-    "presentationMode": "Presentation mode (Ctrl+Shift+P)"
+    "presentationMode": "Presentation mode (Ctrl+Shift+P)",
+    "run": "Run evaluation (Ctrl+Enter)",
+    "stop": "Stop evaluation",
+    "autoRun": "Auto-run enabled",
+    "manualMode": "Manual evaluation mode",
+    "pendingChanges": "{{count}} pending changes"
   },
   "inspector": {
     "pin": "Pin to current block",

@@ -699,7 +699,12 @@
     "valueBadges": "Value badges",
     "edgeBadges": "Chain badges",
     "themes": "ערכות נושא",
-    "presentationMode": "Presentation mode (Ctrl+Shift+P)"
+    "presentationMode": "Presentation mode (Ctrl+Shift+P)",
+    "run": "הרץ חישוב (Ctrl+Enter)",
+    "stop": "עצור חישוב",
+    "autoRun": "הרצה אוטומטית מופעלת",
+    "manualMode": "מצב חישוב ידני",
+    "pendingChanges": "{{count}} שינויים ממתינים"
   },
   "annotation": {
     "text": "טקסט",

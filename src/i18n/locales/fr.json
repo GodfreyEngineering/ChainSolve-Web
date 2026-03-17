@@ -1160,7 +1160,12 @@
     "hiddenView": "Afficher les blocs masques",
     "showAllHidden": "Afficher tous les blocs masques",
     "noMatchesHint": "Essayez d’autres mots-clés.",
-    "presentationMode": "Presentation mode (Ctrl+Shift+P)"
+    "presentationMode": "Presentation mode (Ctrl+Shift+P)",
+    "run": "Lancer l'évaluation (Ctrl+Entrée)",
+    "stop": "Arrêter l'évaluation",
+    "autoRun": "Exécution automatique activée",
+    "manualMode": "Mode d'évaluation manuelle",
+    "pendingChanges": "{{count}} modifications en attente"
   },
   "inspector": {
     "pin": "Épingler au nœud actuel",

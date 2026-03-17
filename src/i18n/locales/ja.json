@@ -1182,7 +1182,12 @@
     "hiddenView": "Toggle hidden blocks view",
     "showAllHidden": "Show all hidden blocks",
     "noMatchesHint": "Try different keywords.",
-    "presentationMode": "Presentation mode (Ctrl+Shift+P)"
+    "presentationMode": "Presentation mode (Ctrl+Shift+P)",
+    "run": "評価を実行 (Ctrl+Enter)",
+    "stop": "評価を停止",
+    "autoRun": "自動実行が有効",
+    "manualMode": "手動評価モード",
+    "pendingChanges": "{{count}} 件の保留中の変更"
   },
   "inspector": {
     "pin": "Pin to current block",
