@@ -3627,6 +3627,31 @@ fn evaluate_node_inner(
             Value::scalar(crate::vehicle::thermal::brake_power(energy, dt))
         }
 
+        // ── Vehicle Suspension ─────────────────────────────────────────
+
+        "veh.suspension.quarterCar" => {
+            let m_s = scalar_or(data, "m_s", 250.0);
+            let m_u = scalar_or(data, "m_u", 35.0);
+            let k_s = scalar_or(data, "k_s", 16000.0);
+            let c_s = scalar_or(data, "c_s", 1000.0);
+            let k_t = scalar_or(data, "k_t", 160000.0);
+            let road_step = scalar_or_nan(inputs, "road_step");
+            let t_end = scalar_or(data, "t_end", 2.0);
+            let dt = scalar_or(data, "dt", 0.005);
+
+            let params = crate::vehicle::suspension::QuarterCarParams { m_s, m_u, k_s, c_s, k_t };
+            let result = crate::vehicle::suspension::quarter_car_step_response(&params, road_step, t_end, dt);
+
+            Value::Table {
+                columns: result.column_names,
+                rows: result.t.iter().zip(result.states.iter()).map(|(t, ys)| {
+                    let mut row = vec![*t];
+                    row.extend_from_slice(ys);
+                    row
+                }).collect(),
+            }
+        }
+
         // ── Vehicle Lap Simulation ─────────────────────────────────────
 
         "veh.lap.simulate" => {

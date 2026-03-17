@@ -1030,6 +1030,28 @@ reg({
 })
 
 reg({
+  type: 'veh.suspension.quarterCar',
+  label: 'Quarter Car',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [{ id: 'road_step', label: 'Road step (m)' }],
+  defaultData: {
+    blockType: 'veh.suspension.quarterCar',
+    label: 'Quarter Car',
+    m_s: 250,
+    m_u: 35,
+    k_s: 16000,
+    c_s: 1000,
+    k_t: 160000,
+    t_end: 2.0,
+    dt: 0.005,
+  },
+  proOnly: true,
+  description:
+    'Quarter-car 2-DOF suspension model. Output = time series of sprung/unsprung displacement and velocity.',
+})
+
+reg({
   type: 'veh.lap.simulate',
   label: 'Lap Simulation',
   category: 'vehicleSim',

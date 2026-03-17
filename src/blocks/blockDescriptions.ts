@@ -606,6 +606,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'veh.powertrain.wheelSpeed':
     'Vehicle speed from engine RPM, tire radius, and overall gear ratio.',
   'veh.powertrain.drivetrainLoss': 'Apply drivetrain efficiency: P_out = P_in × η.',
+  'veh.suspension.quarterCar':
+    'Quarter-car 2-DOF suspension model. Simulates sprung/unsprung response to road input.',
   'veh.lap.simulate':
     'Point-mass quasi-steady-state lap simulation. Input = track (distance, curvature table). Output = speed profile table.',
   'veh.brake.energy': 'Kinetic energy dissipated in braking: E = 0.5 × m × (v1² - v2²).',
