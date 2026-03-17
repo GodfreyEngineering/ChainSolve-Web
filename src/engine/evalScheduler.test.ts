@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { EvalScheduler, suggestEvalMode } from './evalScheduler'
+import { EvalScheduler } from './evalScheduler'
 import type { PatchOp } from './wasm-types'
 
 const dataOp: PatchOp = {
@@ -22,10 +22,10 @@ describe('EvalScheduler', () => {
     vi.useRealTimers()
   })
 
-  describe('auto mode', () => {
-    it('dispatches data-only ops after debounce', () => {
+  describe('reactive mode', () => {
+    it('dispatches data-only ops after 50ms debounce', () => {
       const flush = vi.fn()
-      const scheduler = new EvalScheduler('auto')
+      const scheduler = new EvalScheduler('reactive')
       scheduler.onFlush(flush)
 
       scheduler.enqueue([dataOp])
@@ -38,7 +38,7 @@ describe('EvalScheduler', () => {
 
     it('dispatches structural ops immediately', () => {
       const flush = vi.fn()
-      const scheduler = new EvalScheduler('auto')
+      const scheduler = new EvalScheduler('reactive')
       scheduler.onFlush(flush)
 
       scheduler.enqueue([structuralOp])
@@ -46,9 +46,9 @@ describe('EvalScheduler', () => {
       expect(flush).toHaveBeenCalledWith([structuralOp])
     })
 
-    it('coalesces rapid data-only ops', () => {
+    it('coalesces rapid data-only ops within debounce window', () => {
       const flush = vi.fn()
-      const scheduler = new EvalScheduler('auto')
+      const scheduler = new EvalScheduler('reactive')
       scheduler.onFlush(flush)
 
       scheduler.enqueue([dataOp])
@@ -59,31 +59,35 @@ describe('EvalScheduler', () => {
 
       vi.advanceTimersByTime(50)
       expect(flush).toHaveBeenCalledTimes(1)
-      // Should contain both ops
       expect(flush.mock.calls[0][0]).toHaveLength(2)
     })
-  })
 
-  describe('deferred mode', () => {
-    it('dispatches after timeout fallback', () => {
+    it('fires exactly once per change, not continuously', () => {
       const flush = vi.fn()
-      const scheduler = new EvalScheduler('deferred')
+      const scheduler = new EvalScheduler('reactive')
       scheduler.onFlush(flush)
 
       scheduler.enqueue([dataOp])
-      expect(flush).not.toHaveBeenCalled()
+      vi.advanceTimersByTime(50)
+      expect(flush).toHaveBeenCalledTimes(1)
 
-      vi.advanceTimersByTime(2000)
+      // No more calls without new enqueue
+      vi.advanceTimersByTime(5000)
       expect(flush).toHaveBeenCalledTimes(1)
     })
 
-    it('dispatches structural ops immediately even in deferred mode', () => {
+    it('fires again when a new change is enqueued after previous dispatch', () => {
       const flush = vi.fn()
-      const scheduler = new EvalScheduler('deferred')
+      const scheduler = new EvalScheduler('reactive')
       scheduler.onFlush(flush)
 
-      scheduler.enqueue([structuralOp])
+      scheduler.enqueue([dataOp])
+      vi.advanceTimersByTime(50)
       expect(flush).toHaveBeenCalledTimes(1)
+
+      scheduler.enqueue([dataOp])
+      vi.advanceTimersByTime(50)
+      expect(flush).toHaveBeenCalledTimes(2)
     })
   })
 
@@ -110,18 +114,13 @@ describe('EvalScheduler', () => {
       expect(scheduler.pendingCount).toBe(0)
     })
 
-    it('does not dispatch structural ops automatically in manual mode', () => {
+    it('does not dispatch structural ops automatically', () => {
       const flush = vi.fn()
       const scheduler = new EvalScheduler('manual')
       scheduler.onFlush(flush)
 
       scheduler.enqueue([structuralOp])
       vi.advanceTimersByTime(10000)
-      // Manual mode: even structural ops wait for explicit flush
-      // Wait — the checklist says manual mode only fires on flush.
-      // But structural changes need immediate dispatch for graph consistency...
-      // Actually for manual mode, structural changes should also wait.
-      // The user explicitly chose manual control.
       expect(flush).not.toHaveBeenCalled()
     })
   })
@@ -145,9 +144,9 @@ describe('EvalScheduler', () => {
   })
 
   describe('clear', () => {
-    it('discards pending ops', () => {
+    it('discards pending ops without dispatching', () => {
       const flush = vi.fn()
-      const scheduler = new EvalScheduler('auto')
+      const scheduler = new EvalScheduler('reactive')
       scheduler.onFlush(flush)
 
       scheduler.enqueue([dataOp])
@@ -162,7 +161,7 @@ describe('EvalScheduler', () => {
   describe('dispose', () => {
     it('cancels timers and prevents further dispatches', () => {
       const flush = vi.fn()
-      const scheduler = new EvalScheduler('auto')
+      const scheduler = new EvalScheduler('reactive')
       scheduler.onFlush(flush)
 
       scheduler.enqueue([dataOp])
@@ -171,10 +170,20 @@ describe('EvalScheduler', () => {
       vi.advanceTimersByTime(100)
       expect(flush).not.toHaveBeenCalled()
     })
+
+    it('ignores enqueue after dispose', () => {
+      const flush = vi.fn()
+      const scheduler = new EvalScheduler('reactive')
+      scheduler.onFlush(flush)
+      scheduler.dispose()
+
+      scheduler.enqueue([structuralOp])
+      expect(flush).not.toHaveBeenCalled()
+    })
   })
 
   describe('mode switching', () => {
-    it('flushes pending ops when switching to auto', () => {
+    it('schedules pending ops when switching to reactive', () => {
       const flush = vi.fn()
       const scheduler = new EvalScheduler('manual')
       scheduler.onFlush(flush)
@@ -182,27 +191,14 @@ describe('EvalScheduler', () => {
       scheduler.enqueue([dataOp])
       expect(flush).not.toHaveBeenCalled()
 
-      scheduler.mode = 'auto'
-      // Should schedule auto dispatch
+      scheduler.mode = 'reactive'
       vi.advanceTimersByTime(50)
       expect(flush).toHaveBeenCalledTimes(1)
     })
-  })
-})
 
-describe('suggestEvalMode', () => {
-  it('returns auto for small graphs', () => {
-    expect(suggestEvalMode(10)).toBe('auto')
-    expect(suggestEvalMode(49)).toBe('auto')
-  })
-
-  it('returns deferred for medium graphs', () => {
-    expect(suggestEvalMode(50)).toBe('deferred')
-    expect(suggestEvalMode(299)).toBe('deferred')
-  })
-
-  it('returns manual for large graphs', () => {
-    expect(suggestEvalMode(300)).toBe('manual')
-    expect(suggestEvalMode(1000)).toBe('manual')
+    it('defaults to reactive mode', () => {
+      const scheduler = new EvalScheduler()
+      expect(scheduler.mode).toBe('reactive')
+    })
   })
 })

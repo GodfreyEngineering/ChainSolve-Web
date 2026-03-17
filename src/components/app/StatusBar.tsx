@@ -70,13 +70,11 @@ export function StatusBar() {
         <span className="statusbar-item">
           {chainCount} {t('statusBar.chains')}
         </span>
-        {evalMode !== 'auto' && (
+        {evalMode === 'manual' && (
           <>
             <span className="statusbar-sep" aria-hidden="true" />
             <span className="statusbar-item" style={{ opacity: 0.6, fontSize: '0.65rem' }}>
-              {evalMode === 'manual'
-                ? t('toolbar.manualMode', 'Manual')
-                : t('statusBar.deferred', 'Deferred')}
+              {t('toolbar.manualMode', 'Manual')}
             </span>
           </>
         )}

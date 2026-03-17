@@ -77,8 +77,6 @@ export interface CanvasToolbarProps {
   onTogglePresentationMode?: () => void
   /** 8.04: Mobile mode — larger touch targets. */
   isMobile?: boolean
-  /** Phase 1: Evaluation mode (auto/deferred/manual). */
-  evalMode?: 'auto' | 'deferred' | 'manual'
   /** Phase 1: Trigger evaluation (Run button). */
   onRun?: () => void
   /** Phase 1: Whether the graph has changed since last eval. */
@@ -295,7 +293,6 @@ export function CanvasToolbar({
   presentationMode,
   onTogglePresentationMode,
   isMobile,
-  evalMode,
   onRun,
   isStale,
   pendingPatchCount,
@@ -637,8 +634,8 @@ export function CanvasToolbar({
         <div style={sep} />
 
         {/* ── Engine ── */}
-        {/* Run button: visible in deferred/manual mode or when stale */}
-        {(evalMode === 'manual' || evalMode === 'deferred' || isStale) && onRun && (
+        {/* Run button: always visible, useful for force-refresh and manual mode */}
+        {onRun && (
           <Tooltip
             content={
               pendingPatchCount
@@ -671,22 +668,6 @@ export function CanvasToolbar({
             {paused ? <Play size={16} /> : <Pause size={16} />}
           </button>
         </Tooltip>
-
-        {/* Auto-run indicator: shows Zap icon when in auto mode */}
-        {evalMode === 'auto' && (
-          <Tooltip content={t('toolbar.autoRun', 'Auto-run')} side={tipSide}>
-            <span
-              style={{
-                ...btnStyle(true),
-                cursor: 'default',
-                opacity: 0.6,
-              }}
-              aria-label={t('toolbar.autoRun', 'Auto-run')}
-            >
-              <Zap size={14} />
-            </span>
-          </Tooltip>
-        )}
 
         <Tooltip content={t('toolbar.refresh')} side={tipSide}>
           <button onClick={onRefresh} style={btnStyle(false)} aria-label={t('toolbar.refresh')}>

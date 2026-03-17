@@ -143,10 +143,10 @@ export function useGraphEngine(
   // Lazily initialise and keep scheduler mode in sync with evalMode.
   useEffect(() => {
     if (!schedulerRef.current) {
-      schedulerRef.current = new EvalScheduler(evalMode ?? 'auto')
+      schedulerRef.current = new EvalScheduler(evalMode ?? 'reactive')
       schedulerRef.current.onPendingChange(setPendingPatchCount)
     } else {
-      schedulerRef.current.mode = evalMode ?? 'auto'
+      schedulerRef.current.mode = evalMode ?? 'reactive'
     }
   }, [evalMode])
 

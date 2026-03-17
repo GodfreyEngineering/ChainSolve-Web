@@ -80,11 +80,13 @@ const EVAL_MODE_KEY = 'cs:evalMode'
 function loadEvalMode(): EvalMode {
   try {
     const raw = localStorage.getItem(EVAL_MODE_KEY)
-    if (raw === 'auto' || raw === 'deferred' || raw === 'manual') return raw
+    if (raw === 'reactive' || raw === 'manual') return raw
+    // Migrate old values: auto/deferred → reactive
+    if (raw === 'auto' || raw === 'deferred') return 'reactive'
   } catch {
     // private browsing
   }
-  return 'auto'
+  return 'reactive'
 }
 
 export const useStatusBarStore = create<StatusBarState>((set) => ({
