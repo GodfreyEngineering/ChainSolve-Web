@@ -1029,6 +1029,84 @@ reg({
   description: 'Apply drivetrain efficiency: P_out = P_in × η.',
 })
 
+reg({
+  type: 'veh.brake.energy',
+  label: 'Brake Energy',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'mass', label: 'Mass (kg)' },
+    { id: 'v1', label: 'V1 (m/s)' },
+    { id: 'v2', label: 'V2 (m/s)' },
+  ],
+  defaultData: { blockType: 'veh.brake.energy', label: 'Brake Energy' },
+  proOnly: true,
+  description: 'Kinetic energy dissipated: E = 0.5 × m × (v1² - v2²).',
+})
+
+reg({
+  type: 'veh.brake.power',
+  label: 'Brake Power',
+  category: 'vehicleSim',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'energy', label: 'Energy (J)' },
+    { id: 'dt', label: 'Δt (s)' },
+  ],
+  defaultData: { blockType: 'veh.brake.power', label: 'Brake Power' },
+  proOnly: true,
+  description: 'Braking power: P = E / Δt.',
+})
+
+reg({
+  type: 'ml.featureScale',
+  label: 'Feature Scale',
+  category: 'machineLearning',
+  nodeKind: 'csOperation',
+  inputs: [{ id: 'data', label: 'Data (table)' }],
+  defaultData: { blockType: 'ml.featureScale', label: 'Feature Scale', mode: 'standardize' },
+  description: 'Standardize (z-score) or normalize (min-max) feature columns.',
+})
+
+reg({
+  type: 'ml.classMetrics',
+  label: 'Classification Metrics',
+  category: 'machineLearning',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'actual', label: 'Actual' },
+    { id: 'predicted', label: 'Predicted' },
+  ],
+  defaultData: { blockType: 'ml.classMetrics', label: 'Class Metrics' },
+  description: 'Compute precision, recall, and F1 score for binary classification.',
+})
+
+reg({
+  type: 'ml.rocCurve',
+  label: 'ROC Curve',
+  category: 'machineLearning',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'actual', label: 'Actual' },
+    { id: 'scores', label: 'Scores' },
+  ],
+  defaultData: { blockType: 'ml.rocCurve', label: 'ROC Curve' },
+  description: 'Generate ROC curve (FPR vs TPR) by sweeping classification threshold.',
+})
+
+reg({
+  type: 'ml.auc',
+  label: 'AUC Score',
+  category: 'machineLearning',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'actual', label: 'Actual' },
+    { id: 'scores', label: 'Scores' },
+  ],
+  defaultData: { blockType: 'ml.auc', label: 'AUC' },
+  description: 'Area Under the ROC Curve — measures classifier discrimination ability.',
+})
+
 // ── H5-1: Custom function block dynamic registration ────────────────────────
 
 import type { CustomFunction } from '../lib/customFunctions'

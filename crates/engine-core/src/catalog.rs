@@ -516,6 +516,13 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("veh.powertrain.gearRatio", "Gear Ratio", "vehicleSim", "csOperation", vec![p("torque", "Torque (Nm)"), p("rpm", "RPM"), p("ratio", "Ratio")], true),
         entry("veh.powertrain.wheelSpeed", "Wheel Speed", "vehicleSim", "csOperation", vec![p("rpm", "RPM"), p("radius", "Radius (m)"), p("ratio", "Overall ratio")], true),
         entry("veh.powertrain.drivetrainLoss", "Drivetrain Loss", "vehicleSim", "csOperation", vec![p("power", "Power (W)"), p("efficiency", "η")], true),
+        entry("veh.brake.energy", "Brake Energy", "vehicleSim", "csOperation", vec![p("mass", "Mass (kg)"), p("v1", "V1 (m/s)"), p("v2", "V2 (m/s)")], true),
+        entry("veh.brake.power", "Brake Power", "vehicleSim", "csOperation", vec![p("energy", "Energy (J)"), p("dt", "Δt (s)")], true),
+        // ML
+        entry("ml.featureScale", "Feature Scale", "machineLearning", "csOperation", vec![p("data", "Data (table)")], false),
+        entry("ml.classMetrics", "Classification Metrics", "machineLearning", "csOperation", vec![p("actual", "Actual"), p("predicted", "Predicted")], false),
+        entry("ml.rocCurve", "ROC Curve", "machineLearning", "csOperation", vec![p("actual", "Actual"), p("scores", "Scores")], false),
+        entry("ml.auc", "AUC Score", "machineLearning", "csOperation", vec![p("actual", "Actual"), p("scores", "Scores")], false),
     ]
 }
 
@@ -581,14 +588,14 @@ mod tests {
     #[test]
     fn catalog_has_expected_count() {
         let cat = catalog();
-        assert_eq!(cat.len(), 353);
+        assert_eq!(cat.len(), 359);
     }
 
     #[test]
     fn catalog_json_roundtrip() {
         let json = catalog_json();
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
-        assert_eq!(parsed.as_array().unwrap().len(), 353);
+        assert_eq!(parsed.as_array().unwrap().len(), 359);
     }
 
     #[test]

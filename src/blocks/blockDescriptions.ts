@@ -606,4 +606,10 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'veh.powertrain.wheelSpeed':
     'Vehicle speed from engine RPM, tire radius, and overall gear ratio.',
   'veh.powertrain.drivetrainLoss': 'Apply drivetrain efficiency: P_out = P_in × η.',
+  'veh.brake.energy': 'Kinetic energy dissipated in braking: E = 0.5 × m × (v1² - v2²).',
+  'veh.brake.power': 'Braking power: P = E / Δt.',
+  'ml.featureScale': 'Standardize (z-score) or normalize (min-max) feature columns.',
+  'ml.classMetrics': 'Compute precision, recall, and F1 score for binary classification.',
+  'ml.rocCurve': 'Generate ROC curve (FPR vs TPR) by sweeping classification threshold.',
+  'ml.auc': 'Area Under the ROC Curve — measures classifier discrimination ability.',
 }

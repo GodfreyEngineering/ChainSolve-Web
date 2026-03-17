@@ -3612,6 +3612,89 @@ fn evaluate_node_inner(
             Value::scalar(crate::vehicle::powertrain::drivetrain_loss(power, efficiency))
         }
 
+        // ── Vehicle Brake Thermal ────────────────────────────────────
+
+        "veh.brake.energy" => {
+            let mass = scalar_or_nan(inputs, "mass");
+            let v1 = scalar_or_nan(inputs, "v1");
+            let v2 = scalar_or_nan(inputs, "v2");
+            Value::scalar(crate::vehicle::thermal::brake_energy(mass, v1, v2))
+        }
+
+        "veh.brake.power" => {
+            let energy = scalar_or_nan(inputs, "energy");
+            let dt = scalar_or_nan(inputs, "dt");
+            Value::scalar(crate::vehicle::thermal::brake_power(energy, dt))
+        }
+
+        // ── ML Feature Preprocessing ─────────────────────────────────
+
+        "ml.featureScale" => {
+            match inputs.get("data") {
+                Some(Value::Table { columns, rows }) => {
+                    let mode = data.get("mode").and_then(|v| v.as_str()).unwrap_or("standardize");
+                    let (scaled, _params1, _params2) = if mode == "normalize" {
+                        crate::ml::preprocess::normalize(rows)
+                    } else {
+                        crate::ml::preprocess::standardize(rows)
+                    };
+                    Value::Table { columns: columns.clone(), rows: scaled }
+                }
+                _ => Value::error("ml.featureScale: 'data' input required (Table)"),
+            }
+        }
+
+        // ── ML Classification Metrics ────────────────────────────────
+
+        "ml.classMetrics" => {
+            let actual = match inputs.get("actual") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("ml.classMetrics: 'actual' input required (Vector)"),
+            };
+            let predicted = match inputs.get("predicted") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("ml.classMetrics: 'predicted' input required (Vector)"),
+            };
+            let (p, r, f1) = crate::ml::classification_metrics::precision_recall_f1(&actual, &predicted);
+            Value::Table {
+                columns: vec!["metric".to_string(), "value".to_string()],
+                rows: vec![
+                    vec![0.0, p],  // precision
+                    vec![1.0, r],  // recall
+                    vec![2.0, f1], // f1
+                ],
+            }
+        }
+
+        "ml.rocCurve" => {
+            let actual = match inputs.get("actual") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("ml.rocCurve: 'actual' input required"),
+            };
+            let scores = match inputs.get("scores") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("ml.rocCurve: 'scores' input required"),
+            };
+            let roc = crate::ml::classification_metrics::roc_curve(&actual, &scores);
+            Value::Table {
+                columns: vec!["fpr".to_string(), "tpr".to_string()],
+                rows: roc.into_iter().map(|(fpr, tpr)| vec![fpr, tpr]).collect(),
+            }
+        }
+
+        "ml.auc" => {
+            let actual = match inputs.get("actual") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("ml.auc: 'actual' input required"),
+            };
+            let scores = match inputs.get("scores") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("ml.auc: 'scores' input required"),
+            };
+            let roc = crate::ml::classification_metrics::roc_curve(&actual, &scores);
+            Value::scalar(crate::ml::classification_metrics::auc(&roc))
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }
