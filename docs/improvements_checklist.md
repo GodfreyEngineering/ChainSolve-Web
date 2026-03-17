@@ -511,7 +511,7 @@
 - [x] **12.3** README.md: overview, capabilities, quick start, testing
 - [x] **12.4** Block descriptions: blockDescriptions.ts for all 361+ blocks
 - [x] **12.5** 13 Architecture Decision Records (ADRs)
-- [ ] **12.6** CSEL grammar doc: docs/CSEL.md with full grammar, examples, operator precedence table
+- [x] **12.6** CSEL grammar doc: docs/CSEL.md with full grammar, examples, operator precedence table
 - [ ] **12.7** 20+ guided tutorials as ChainSolve graphs: mechanical dynamics, control design, data fitting, ML training, optimisation, vehicle K&C, FMU co-simulation
 - [ ] **12.8** 100+ example graphs by domain: mechanical, electrical, thermal, fluid, control, ML, optimisation, vehicle — one-click open and run
 - [ ] **12.9** Mathematical reference: embedded docs for every algorithm — ODE solvers (stability regions, convergence orders), optimisation (convergence proofs), AD (complexity analysis)
