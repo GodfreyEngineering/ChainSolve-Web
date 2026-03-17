@@ -10,7 +10,7 @@
  */
 
 import { useTranslation } from 'react-i18next'
-import { useState, useEffect, useRef, useMemo, type KeyboardEvent } from 'react'
+import { useState, useEffect, useRef, useMemo, type CSSProperties, type KeyboardEvent } from 'react'
 import {
   BLOCK_REGISTRY,
   BLOCK_TAXONOMY,
@@ -67,6 +67,8 @@ export function QuickAddPalette({
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [activeIdx, setActiveIdx] = useState(0)
+  // 9.16: Contextual help — track hovered block for description tooltip
+  const [hoveredDef, setHoveredDef] = useState<BlockDef | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -298,6 +300,7 @@ export function QuickAddPalette({
                       navIdx={idx}
                       onClick={() => commit(def)}
                       onMouseEnter={() => setActiveIdx(idx)}
+                      onHoverChange={setHoveredDef}
                     />
                   )
                 })
@@ -382,6 +385,47 @@ export function QuickAddPalette({
           )}
         </div>
       </div>
+
+      {/* 9.16: Contextual help — description tooltip shown to the right of the palette */}
+      {hoveredDef?.description && (
+        <div
+          style={{
+            position: 'fixed',
+            left: left + PALETTE_W + 6,
+            top,
+            zIndex: 1003,
+            width: 200,
+            background: 'var(--surface-2, #1e1e1e)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 8,
+            padding: '8px 10px',
+            fontFamily: "'Montserrat', system-ui, sans-serif",
+            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+            pointerEvents: 'none',
+          } as CSSProperties}
+        >
+          <div
+            style={{
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              color: 'var(--primary, #1CABB0)',
+              marginBottom: 4,
+              letterSpacing: '0.02em',
+            }}
+          >
+            {hoveredDef.label}
+          </div>
+          <div
+            style={{
+              fontSize: '0.65rem',
+              color: 'rgba(244,244,243,0.6)',
+              lineHeight: 1.5,
+            }}
+          >
+            {hoveredDef.description}
+          </div>
+        </div>
+      )}
     </>
   )
 }
@@ -433,14 +477,16 @@ interface BlockRowProps {
   navIdx: number
   onClick: () => void
   onMouseEnter: () => void
+  onHoverChange: (def: BlockDef | null) => void
 }
 
-function BlockRow({ def, isActive, locked, navIdx, onClick, onMouseEnter }: BlockRowProps) {
+function BlockRow({ def, isActive, locked, navIdx, onClick, onMouseEnter, onHoverChange }: BlockRowProps) {
   return (
     <div
       data-nav-idx={navIdx}
       onClick={onClick}
-      onMouseEnter={onMouseEnter}
+      onMouseEnter={() => { onMouseEnter(); onHoverChange(def) }}
+      onMouseLeave={() => onHoverChange(null)}
       style={{
         padding: '0.3rem 0.7rem',
         fontSize: '0.8rem',
