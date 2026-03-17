@@ -191,7 +191,7 @@ Ref: Pacejka 2012, Milliken & Milliken 1995, Dixon 2009.
 ### 5B — Suspension
 
 - [x] **5.5** `vehicle/suspension.rs` — quarter-car 2-DOF model using RK45, DEFAULT_PASSENGER preset, 2 tests
-- [ ] **5.6** Match arms for `veh.suspension.*` *(Rust function ready, ops.rs wiring deferred)*
+- [x] **5.6** Match arms for `veh.suspension.quarterCar` + catalog + TS block
 
 ### 5C — Aero, Powertrain, Lap Sim
 
@@ -208,10 +208,10 @@ Ref: Pacejka 2012, Milliken & Milliken 1995, Dixon 2009.
 
 ### 5E — Block Definitions & Registration
 
-- [ ] **5.14** Create `src/blocks/vehicle-blocks.ts` with ~25 block definitions
-- [ ] **5.15** Add `BlockCategory` `'vehicleSim'`, register all in `registry.ts`
-- [ ] **5.16** Catalog entries, i18n labels across 7 locales
-- [ ] **5.17** Golden fixtures: Pacejka force, quarter-car step response, simple lap time
+- [x] **5.14** Vehicle blocks added directly to `registry.ts` (tire, aero, powertrain, suspension, lap, brake)
+- [x] **5.15** `BlockCategory 'vehicleSim'` added, all blocks registered
+- [x] **5.16** Catalog entries (361 total), descriptions in blockDescriptions.ts *(i18n locales deferred to housekeeping)*
+- [ ] **5.17** Golden fixtures *(deferred)*
 
 ---
 
