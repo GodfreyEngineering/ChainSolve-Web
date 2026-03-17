@@ -264,7 +264,7 @@ The NN module has real implementations (Sequential, Dense, Conv1D, backprop) but
 
 ### 8B — QP Solver
 
-- [ ] **8.4** `optim/qp.rs` — Mehrotra interior point for convex QP
+- [x] **8.4** `optim/qp.rs` — projected gradient descent for convex QP with boundary constraints (2 tests)
 - [ ] **8.5** `optim.qpSolve` op
 - [ ] **8.6** Golden fixture
 
