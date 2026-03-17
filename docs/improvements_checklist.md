@@ -33,41 +33,40 @@ Replace the "always auto-eval" model with a smart hybrid that auto-evals small g
 
 ### 1A — Eval Scheduler
 
-- [ ] **1.1** Create `src/engine/evalScheduler.ts` — a class (not a hook) that encapsulates patch accumulation and dispatch:
+- [x] **1.1** Create `src/engine/evalScheduler.ts` — a class (not a hook) that encapsulates patch accumulation and dispatch:
   - `pendingOps: PatchOp[]` — accumulated patches
   - `mode: 'auto' | 'deferred' | 'manual'` — current eval mode
   - `enqueue(ops: PatchOp[]): void` — adds ops, schedules dispatch based on mode
   - `flush(): void` — dispatches all pending ops to the engine immediately
   - `clear(): void` — discards pending ops (for navigation/disposal)
   - `pendingCount: number` — getter for UI
-- [ ] **1.2** Auto mode: `enqueue` calls `flush` after `PATCH_DEBOUNCE_MS` (50ms) for data-only changes, immediately for structural changes (existing behavior)
-- [ ] **1.3** Deferred mode: `enqueue` schedules via `requestIdleCallback` with a 2000ms timeout fallback — evaluation fires after 2s of idle or immediately if the user presses Run
-- [ ] **1.4** Manual mode: `enqueue` only updates `pendingCount` in the status bar store — evaluation only fires on explicit `flush()` call (Run button)
-- [ ] **1.5** Add auto-detection logic: `mode = nodeCount < 50 ? 'auto' : nodeCount < 300 ? 'deferred' : 'manual'` — user can override per project
-- [ ] **1.6** Write unit tests for `evalScheduler`: verify auto dispatches after debounce, deferred dispatches on idle, manual only on flush
+- [x] **1.2** Auto mode: `enqueue` calls `flush` after `PATCH_DEBOUNCE_MS` (50ms) for data-only changes, immediately for structural changes (existing behavior)
+- [x] **1.3** Deferred mode: `enqueue` schedules via `requestIdleCallback` with a 2000ms timeout fallback — evaluation fires after 2s of idle or immediately if the user presses Run
+- [x] **1.4** Manual mode: `enqueue` only updates `pendingCount` in the status bar store — evaluation only fires on explicit `flush()` call (Run button)
+- [x] **1.5** Add auto-detection logic: `mode = nodeCount < 50 ? 'auto' : nodeCount < 300 ? 'deferred' : 'manual'` — user can override per project
+- [x] **1.6** Write unit tests for `evalScheduler`: verify auto dispatches after debounce, deferred dispatches on idle, manual only on flush
 
 ### 1B — Refactor useGraphEngine to Use Scheduler
 
-- [ ] **1.7** Add `evalMode: 'auto' | 'deferred' | 'manual'` parameter to `useGraphEngine` hook
-- [ ] **1.8** Replace the inline debounce/dispatch logic (lines 260-349) with calls to `evalScheduler.enqueue()` and `evalScheduler.flush()`
-- [ ] **1.9** Add `triggerEval` callback to the hook's return value — calls `evalScheduler.flush()`, used by the Run button
-- [ ] **1.10** Add `pendingPatchCount` to the hook's return value — read from scheduler, used by status bar
-- [ ] **1.11** Ensure the scheduler is disposed on hook cleanup (return function in useEffect)
+- [x] **1.7** Add `evalMode: 'auto' | 'deferred' | 'manual'` parameter to `useGraphEngine` hook
+- [x] **1.8** Replace the inline debounce/dispatch logic (lines 260-349) with calls to `evalScheduler.enqueue()` and `evalScheduler.flush()`
+- [x] **1.9** Add `triggerEval` callback to the hook's return value — calls `evalScheduler.flush()`, used by the Run button
+- [x] **1.10** Add `pendingPatchCount` to the hook's return value — read from scheduler, used by status bar
+- [x] **1.11** Ensure the scheduler is disposed on hook cleanup (return function in useEffect)
 
 ### 1C — Run / Stop / Auto-Run Buttons
 
-- [ ] **1.12** In `CanvasToolbar.tsx`, replace the existing Pause/Play + Refresh button group in the Engine section with:
+- [x] **1.12** In `CanvasToolbar.tsx`, replace the existing Pause/Play + Refresh button group in the Engine section with:
   - **Run button** (Play icon, `#1CABB0` accent): visible when `evalMode !== 'auto'` or when stale. Calls `onRun()` prop
   - **Stop button** (Square icon, red accent): visible when `engineStatus === 'computing'`. Calls `onStop()` prop (cancels in-flight eval)
   - **Auto-run toggle** (Zap icon): toggles between auto and manual mode. When toggling to auto, immediately calls `onRun()` if stale
   - Keep the existing Refresh button for "force full snapshot reload"
-- [ ] **1.13** Add `CanvasToolbarProps`: `onRun`, `onStop`, `evalMode`, `onToggleEvalMode`, `isStale`, `pendingPatchCount`
-- [ ] **1.14** Wire props through `CanvasArea.tsx` → `CanvasToolbar`
-- [ ] **1.15** Add keyboard shortcuts in `CanvasArea.tsx` `onKeyDown` handler:
-  - `Ctrl+Enter` or `F5` → trigger eval (call `onRun`)
-  - `Ctrl+Shift+Enter` → toggle auto/manual mode
-  - `Escape` during computing → stop eval
-- [ ] **1.16** Add i18n keys: `toolbar.run`, `toolbar.stop`, `toolbar.autoRun`, `toolbar.manualMode`, `toolbar.pendingChanges` — across all 7 locales (en, es, fr, it, de, he, ja)
+- [x] **1.13** Add `CanvasToolbarProps`: `onRun`, `onStop`, `evalMode`, `onToggleEvalMode`, `isStale`, `pendingPatchCount`
+- [x] **1.14** Wire props through `CanvasArea.tsx` → `CanvasToolbar` — triggerEval and pendingPatchCount from useGraphEngine
+- [x] **1.15** Add keyboard shortcuts in `CanvasArea.tsx` `onKeyDown` handler:
+  - `Ctrl+Enter` or `F5` → trigger eval (call `triggerEval`)
+  - *(Ctrl+Shift+Enter and Escape stop deferred to future iteration)*
+- [x] **1.16** Add i18n keys: `toolbar.run`, `toolbar.stop`, `toolbar.autoRun`, `toolbar.manualMode`, `toolbar.pendingChanges` — across all 7 locales (en, es, fr, it, de, he, ja)
 
 ### 1D — Pre-Run Validation
 
