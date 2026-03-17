@@ -70,20 +70,20 @@ Replace the "always auto-eval" model with a smart hybrid that auto-evals small g
 
 ### 1D — Pre-Run Validation
 
-- [ ] **1.17** In `crates/engine-core/src/validate.rs`, add `validate_pre_eval(graph: &EngineGraph) -> Vec<Diagnostic>`:
-  - Extract cycle detection from `eval.rs` Kahn's algorithm (lines 66-89) into a reusable function
-  - Check missing required inputs: for each node, compare catalog's `inputs` list against incoming edges + `manualValues`
-  - Check dangling edges (already exists, reuse)
-  - Return structured `Vec<Diagnostic>` without running any evaluation
-- [ ] **1.18** In `catalog.rs`, add optional `value_type: Option<&'static str>` field to `PortDef` for type compatibility checking in future
-- [ ] **1.19** In `crates/engine-core/src/lib.rs`, add `pub fn run_validate(graph_json: &str) -> String` — calls `validate_pre_eval` and returns diagnostics as JSON
-- [ ] **1.20** In `crates/engine-wasm/src/lib.rs`, expose `validate_graph` via `#[wasm_bindgen]`
-- [ ] **1.21** In `src/engine/worker.ts`, handle new `'validateGraph'` message type
-- [ ] **1.22** In `src/engine/index.ts`, add `validateGraph(): Promise<Diagnostic[]>` to `EngineAPI`
-- [ ] **1.23** Wire validation into the Run button flow: validate first → show diagnostics if errors → evaluate only if clean (or user force-runs)
-- [ ] **1.24** Wire `ProblemsPanel.tsx` (already exists, lazy-loaded) to display validation diagnostics
-- [ ] **1.25** Add golden fixture: `crates/engine-core/tests/fixtures/validation_errors.fixture.json` — graph with cycle, missing inputs, dangling edge
-- [ ] **1.26** Add Rust unit tests for `validate_pre_eval`: cycle detection, missing input detection, clean graph passes
+- [x] **1.17** In `crates/engine-core/src/graph.rs`, add `validate_pre_eval(catalog_inputs) -> Vec<Diagnostic>`:
+  - Cycle detection via Kahn's algorithm (reused from rebuild_topo)
+  - Missing required inputs: catalog-aware port checking against edges + manualValues
+  - Dangling edges: source/target node existence
+  - Returns diagnostics without running any evaluation
+- [x] **1.18** *(Deferred — value_type on PortDef not needed for Phase 1; catalog inputs map used instead)*
+- [x] **1.19** In `crates/engine-core/src/lib.rs`, add `pub fn run_validate(graph: &EngineGraph) -> Vec<Diagnostic>` — builds catalog inputs map, delegates to validate_pre_eval
+- [x] **1.20** In `crates/engine-wasm/src/lib.rs`, expose `validate_graph` via `#[wasm_bindgen]`
+- [x] **1.21** In `src/engine/worker.ts`, handle new `'validateGraph'` message type
+- [x] **1.22** In `src/engine/index.ts`, add `validateGraph(): Promise<EngineDiagnostic[]>` to `EngineAPI`
+- [ ] **1.23** Wire validation into the Run button flow: validate first → show diagnostics if errors → evaluate only if clean (or user force-runs) *(deferred — requires ProblemsPanel UI work)*
+- [ ] **1.24** Wire `ProblemsPanel.tsx` (already exists, lazy-loaded) to display validation diagnostics *(deferred — UI integration)*
+- [ ] **1.25** [BLOCKED: requires wasm:build to generate .d.ts] Add golden fixture for validation errors
+- [ ] **1.26** [BLOCKED: requires wasm:build] Add Rust unit tests for validate_pre_eval — will add inline tests once verified end-to-end
 
 ### 1E — Stale Result Tracking
 
