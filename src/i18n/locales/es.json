@@ -1151,7 +1151,8 @@
     "cancel": "Cancelar exportación",
     "close": "Cerrar",
     "recentExports": "Exportaciones recientes",
-    "pageSize": "Page size"
+    "pageSize": "Page size",
+    "format_git": "Compatible con Git (.chainsolve)"
   },
   "commandPalette": {
     "title": "Paleta de comandos",

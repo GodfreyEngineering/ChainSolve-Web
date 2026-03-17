@@ -1871,6 +1871,102 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     }
   }, [projectId, engine, toast, t])
 
+  // ── 5.11: Git-friendly .chainsolve export ────────────────────────────────────
+
+  const handleExportGitFriendly = useCallback(async () => {
+    if (!projectId || exportingRef.current) return
+
+    const { exportGitFriendlyProject } =
+      await import('../lib/chainsolvejson/exportChainsolveJson')
+
+    const abort = new AbortController()
+    exportAbortRef.current = abort
+    exportingRef.current = true
+    setExportInProgress(true)
+
+    const canvasRows = [...useCanvasesStore.getState().canvases].sort(
+      (a, b) => a.position - b.position,
+    )
+    const currentVariables = useVariablesStore.getState().variables
+
+    try {
+      const canvasInputs: {
+        id: string
+        name: string
+        position: number
+        graph: {
+          schemaVersion: 4
+          canvasId: string
+          projectId: string
+          nodes: unknown[]
+          edges: unknown[]
+          datasetRefs: string[]
+        }
+      }[] = []
+
+      for (let i = 0; i < canvasRows.length; i++) {
+        if (abort.signal.aborted) {
+          toast(t('chainsolveJsonExport.cancelled'), 'info')
+          return
+        }
+        const row = canvasRows[i]
+        const isActive = row.id === useCanvasesStore.getState().activeCanvasId
+        let nodes: unknown[]
+        let edges: unknown[]
+        if (isActive && canvasRef.current) {
+          const snap = canvasRef.current.getSnapshot()
+          nodes = snap.nodes
+          edges = snap.edges
+        } else {
+          const graph = await loadCanvasGraph(projectId, row.id)
+          nodes = graph.nodes
+          edges = graph.edges
+        }
+        canvasInputs.push({
+          id: row.id,
+          name: row.name,
+          position: row.position,
+          graph: { schemaVersion: 4 as const, canvasId: row.id, projectId, nodes, edges, datasetRefs: [] },
+        })
+      }
+
+      if (abort.signal.aborted) {
+        toast(t('chainsolveJsonExport.cancelled'), 'info')
+        return
+      }
+
+      const ps = useProjectStore.getState()
+
+      await exportGitFriendlyProject({
+        exportedAt: new Date().toISOString(),
+        appVersion: BUILD_VERSION,
+        buildSha: BUILD_SHA,
+        buildTime: BUILD_TIME,
+        buildEnv: BUILD_ENV,
+        engineVersion: engine.engineVersion,
+        engineContractVersion: engine.contractVersion,
+        projectId,
+        projectName: ps.projectName,
+        activeCanvasId: useCanvasesStore.getState().activeCanvasId,
+        variables: currentVariables,
+        createdAt: ps.createdAt,
+        updatedAt: ps.dbUpdatedAt,
+        canvases: canvasInputs,
+        assets: [],
+      })
+      toast(t('chainsolveJsonExport.success'), 'success')
+    } catch (err: unknown) {
+      if (!abort.signal.aborted) {
+        console.error('[git-export]', err)
+        toast(t('chainsolveJsonExport.failed'), 'error')
+      }
+    } finally {
+      exportingRef.current = false
+      exportAbortRef.current = null
+      setExportInProgress(false)
+    }
+  }, [projectId, engine, toast, t])
+
   // ── .chainsolvejson import ──────────────────────────────────────────────────
 
   const importFileRef = useRef<HTMLInputElement>(null)
@@ -2011,6 +2107,14 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
     void handleExportChainsolveJson()
   }, [ent.canExport, handleExportChainsolveJson])
 
+  const gatedExportGit = useCallback(() => {
+    if (!ent.canExport) {
+      setUpgradeExportOpen(true)
+      return
+    }
+    void handleExportGitFriendly()
+  }, [ent.canExport, handleExportGitFriendly])
+
   const gatedImportJson = useCallback(() => {
     if (!ent.canExport) {
       setUpgradeExportOpen(true)
@@ -2146,6 +2250,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           onCancelExport={handleCancelExport}
           onExportExcelProject={gatedExportExcel}
           onExportChainsolveJson={gatedExportJson}
+          onExportGitFriendly={gatedExportGit}
           onImportChainsolveJson={gatedImportJson}
           isOnline={isOnline}
           onRetryOffline={() => {

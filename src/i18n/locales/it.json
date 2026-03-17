@@ -1131,7 +1131,8 @@
     "cancel": "Annulla esportazione",
     "close": "Chiudi",
     "recentExports": "Esportazioni recenti",
-    "pageSize": "Page size"
+    "pageSize": "Page size",
+    "format_git": "Compatibile Git (.chainsolve)"
   },
   "commandPalette": {
     "title": "Tavolozza comandi",

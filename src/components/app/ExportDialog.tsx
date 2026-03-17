@@ -10,7 +10,7 @@ import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useStatusBarStore } from '../../stores/statusBarStore'
 
-export type ExportFormat = 'pdf' | 'xlsx' | 'json'
+export type ExportFormat = 'pdf' | 'xlsx' | 'json' | 'git'
 export type ExportScope = 'active' | 'project'
 
 const LS_KEY = 'cs:exportPrefs'
@@ -67,6 +67,8 @@ export interface ExportDialogProps {
   }) => void
   onExportXlsx: (opts: { includeTables: boolean; scope: ExportScope }) => void
   onExportJson: () => void
+  /** 5.11: Git-friendly .chainsolve export */
+  onExportGit?: () => void
   onCancelExport?: () => void
 }
 
@@ -78,6 +80,7 @@ export function ExportDialog({
   onExportPdf,
   onExportXlsx,
   onExportJson,
+  onExportGit,
   onCancelExport,
 }: ExportDialogProps) {
   const { t } = useTranslation()
@@ -109,13 +112,16 @@ export function ExportDialog({
       case 'json':
         onExportJson()
         break
+      case 'git':
+        onExportGit?.()
+        break
     }
     onClose()
-  }, [prefs, onExportPdf, onExportXlsx, onExportJson, onClose])
+  }, [prefs, onExportPdf, onExportXlsx, onExportJson, onExportGit, onClose])
 
   if (!open) return null
 
-  const scopeDisabled = prefs.format === 'json' || !hasProject
+  const scopeDisabled = prefs.format === 'json' || prefs.format === 'git' || !hasProject
 
   return (
     <div style={overlay} onClick={onClose}>
@@ -125,7 +131,7 @@ export function ExportDialog({
         {/* Format selector */}
         <Field label={t('exportDialog.format')}>
           <div style={radioGroup}>
-            {(['pdf', 'xlsx', 'json'] as const).map((f) => (
+            {(['pdf', 'xlsx', 'json', 'git'] as const).map((f) => (
               <label key={f} style={radioLabel}>
                 <input
                   type="radio"

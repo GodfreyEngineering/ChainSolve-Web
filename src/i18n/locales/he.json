@@ -1996,7 +1996,8 @@
     "cancel": "Cancel export",
     "close": "Close",
     "recentExports": "Recent exports",
-    "pageSize": "Page size"
+    "pageSize": "Page size",
+    "format_git": "ידידותי ל-Git (.chainsolve)"
   },
   "commandPalette": {
     "title": "Command Palette",
