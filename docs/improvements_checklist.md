@@ -41,10 +41,10 @@
 
 *Inspired by Mathematica/Maple but implemented in Rust for WASM. Key for ExpressionInput blocks, LaTeX display, and units enforcement.*
 
-- [ ] **1.21** Symbolic expression AST in Rust: `SymExpr` enum with variants for Variable, Constant, BinaryOp, UnaryOp, Function, Power, Sum, Product — stored as a DAG for common subexpression sharing
-- [ ] **1.22** Polynomial arithmetic: add, multiply, GCD (Euclidean algorithm), factoring (Berlekamp/Zassenhaus), resultants — foundation for equation solving
-- [ ] **1.23** Rational function simplification: cancel common factors, partial fraction decomposition
-- [ ] **1.24** Symbolic differentiation: chain rule, product rule, quotient rule, trig derivatives, exponential/log derivatives — output simplified via simplification rules
+- [x] **1.21** Symbolic expression AST in Rust: `SymExpr` enum with variants for Variable, Constant, BinaryOp, UnaryOp, Function, Power, Sum, Product — stored as a DAG for common subexpression sharing
+- [x] **1.22** Polynomial arithmetic: add, multiply, GCD (Euclidean algorithm), factoring (Berlekamp/Zassenhaus), resultants — foundation for equation solving
+- [x] **1.23** Rational function simplification: cancel common factors, partial fraction decomposition
+- [x] **1.24** Symbolic differentiation: chain rule, product rule, quotient rule, trig derivatives, exponential/log derivatives — output simplified via simplification rules
 - [ ] **1.25** Symbolic integration: table lookup for standard forms + Risch algorithm for elementary functions (algebraic, exponential, logarithmic) — returns "no elementary antiderivative" when none exists
 - [ ] **1.26** Polynomial system solving via Gröbner bases (Buchberger's algorithm with F4/F5 improvements) — solves systems of polynomial equations symbolically
 - [ ] **1.27** LaTeX rendering of symbolic expressions via KaTeX (already in deps) — render in block output previews, formula bar, and export

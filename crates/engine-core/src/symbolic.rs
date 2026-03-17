@@ -337,6 +337,212 @@ fn is_constant(expr: &Expr, var: &str) -> bool {
     }
 }
 
+// ── Symbolic Integration ────────────────────────────────────────────────────
+
+/// Result of symbolic integration.
+#[derive(Debug)]
+pub enum IntegrateResult {
+    /// Successfully found an antiderivative.
+    Ok(Expr),
+    /// No elementary antiderivative found.
+    NoElementary,
+}
+
+/// Compute the symbolic integral ∫ expr dx.
+///
+/// Uses table lookup for standard forms and linearity.
+/// Returns `IntegrateResult::NoElementary` when no closed form is found.
+/// Does NOT add a constant of integration.
+pub fn integrate(expr: &Expr, var: &str) -> IntegrateResult {
+    // If expression is constant w.r.t. var: ∫c dx = c*x
+    if is_constant(expr, var) {
+        return IntegrateResult::Ok(mul(expr.clone(), self::var(var)));
+    }
+
+    match expr.as_ref() {
+        // ∫x dx = x^2/2
+        SymExpr::Variable(name) if name == var => {
+            IntegrateResult::Ok(div(pow(self::var(var), two()), two()))
+        }
+
+        // ∫(f + g) dx = ∫f dx + ∫g dx (linearity)
+        SymExpr::BinaryOp { op: BinOp::Add, lhs, rhs } => {
+            match (integrate(lhs, var), integrate(rhs, var)) {
+                (IntegrateResult::Ok(il), IntegrateResult::Ok(ir)) => {
+                    IntegrateResult::Ok(add(il, ir))
+                }
+                _ => IntegrateResult::NoElementary,
+            }
+        }
+
+        // ∫(f - g) dx = ∫f dx - ∫g dx
+        SymExpr::BinaryOp { op: BinOp::Sub, lhs, rhs } => {
+            match (integrate(lhs, var), integrate(rhs, var)) {
+                (IntegrateResult::Ok(il), IntegrateResult::Ok(ir)) => {
+                    IntegrateResult::Ok(sub(il, ir))
+                }
+                _ => IntegrateResult::NoElementary,
+            }
+        }
+
+        // ∫(c * f) dx = c * ∫f dx  (constant factor)
+        SymExpr::BinaryOp { op: BinOp::Mul, lhs, rhs } => {
+            if is_constant(lhs, var) {
+                if let IntegrateResult::Ok(ir) = integrate(rhs, var) {
+                    return IntegrateResult::Ok(mul(lhs.clone(), ir));
+                }
+            }
+            if is_constant(rhs, var) {
+                if let IntegrateResult::Ok(il) = integrate(lhs, var) {
+                    return IntegrateResult::Ok(mul(il, rhs.clone()));
+                }
+            }
+            IntegrateResult::NoElementary
+        }
+
+        // ∫(f / c) dx = (1/c) * ∫f dx
+        SymExpr::BinaryOp { op: BinOp::Div, lhs, rhs } => {
+            if is_constant(rhs, var) {
+                if let IntegrateResult::Ok(il) = integrate(lhs, var) {
+                    return IntegrateResult::Ok(div(il, rhs.clone()));
+                }
+            }
+            // ∫(1/x) dx = ln|x|
+            if is_one(lhs) {
+                if let SymExpr::Variable(name) = rhs.as_ref() {
+                    if name == var {
+                        return IntegrateResult::Ok(ln(unop(UnaryOp::Abs, self::var(var))));
+                    }
+                }
+            }
+            IntegrateResult::NoElementary
+        }
+
+        // ∫x^n dx = x^(n+1)/(n+1)  for constant n ≠ -1
+        SymExpr::BinaryOp { op: BinOp::Pow, lhs, rhs } => {
+            if let SymExpr::Variable(name) = lhs.as_ref() {
+                if name == var && is_constant(rhs, var) {
+                    // Check for n = -1
+                    if let SymExpr::Constant(n) = rhs.as_ref() {
+                        if (*n + 1.0).abs() < 1e-15 {
+                            // ∫x^(-1) dx = ln|x|
+                            return IntegrateResult::Ok(ln(unop(UnaryOp::Abs, self::var(var))));
+                        }
+                    }
+                    let n_plus_1 = add(rhs.clone(), one());
+                    return IntegrateResult::Ok(div(
+                        pow(self::var(var), n_plus_1.clone()),
+                        n_plus_1,
+                    ));
+                }
+            }
+            // ∫a^x dx = a^x / ln(a)  for constant a
+            if is_constant(lhs, var) {
+                if let SymExpr::Variable(name) = rhs.as_ref() {
+                    if name == var {
+                        return IntegrateResult::Ok(div(
+                            pow(lhs.clone(), self::var(var)),
+                            ln(lhs.clone()),
+                        ));
+                    }
+                }
+            }
+            IntegrateResult::NoElementary
+        }
+
+        // ∫(-f) dx = -∫f dx
+        SymExpr::UnaryOp { op: UnaryOp::Neg, operand } => {
+            if let IntegrateResult::Ok(result) = integrate(operand, var) {
+                IntegrateResult::Ok(neg(result))
+            } else {
+                IntegrateResult::NoElementary
+            }
+        }
+
+        // Standard function integrals (for f(x) where arg is just x)
+        SymExpr::Function { func: f, arg } => {
+            // Only handle simple case: arg is exactly the variable
+            if let SymExpr::Variable(name) = arg.as_ref() {
+                if name == var {
+                    let x = self::var(var);
+                    return match f {
+                        // ∫sin(x) dx = -cos(x)
+                        Func::Sin => IntegrateResult::Ok(neg(cos(x))),
+                        // ∫cos(x) dx = sin(x)
+                        Func::Cos => IntegrateResult::Ok(sin(x)),
+                        // ∫tan(x) dx = -ln|cos(x)|
+                        Func::Tan => IntegrateResult::Ok(neg(ln(unop(UnaryOp::Abs, cos(x))))),
+                        // ∫exp(x) dx = exp(x)
+                        Func::Exp => IntegrateResult::Ok(exp(x)),
+                        // ∫ln(x) dx = x*ln(x) - x
+                        Func::Ln => IntegrateResult::Ok(sub(mul(x.clone(), ln(x.clone())), x)),
+                        // ∫1/sqrt(x) via x^(-1/2) handled by power rule; sqrt(x) = x^(1/2):
+                        // ∫sqrt(x) dx = (2/3)*x^(3/2)
+                        Func::Sqrt => IntegrateResult::Ok(
+                            mul(div(two(), con(3.0)), pow(x, div(con(3.0), two())))
+                        ),
+                        // ∫sinh(x) dx = cosh(x)
+                        Func::Sinh => IntegrateResult::Ok(func(Func::Cosh, x)),
+                        // ∫cosh(x) dx = sinh(x)
+                        Func::Cosh => IntegrateResult::Ok(func(Func::Sinh, x)),
+                        // ∫tanh(x) dx = ln(cosh(x))
+                        Func::Tanh => IntegrateResult::Ok(ln(func(Func::Cosh, x))),
+                        _ => IntegrateResult::NoElementary,
+                    };
+                }
+            }
+            IntegrateResult::NoElementary
+        }
+
+        // ∫(f1 + f2 + ... + fn) dx = ∫f1 + ∫f2 + ... + ∫fn
+        SymExpr::Sum(terms) => {
+            let mut results = Vec::new();
+            for t in terms {
+                match integrate(t, var) {
+                    IntegrateResult::Ok(r) => results.push(r),
+                    IntegrateResult::NoElementary => return IntegrateResult::NoElementary,
+                }
+            }
+            match results.len() {
+                0 => IntegrateResult::Ok(zero()),
+                1 => IntegrateResult::Ok(results.pop().unwrap()),
+                _ => IntegrateResult::Ok(Rc::new(SymExpr::Sum(results))),
+            }
+        }
+
+        // Product: try to pull out constant factors
+        SymExpr::Product(factors) => {
+            let (const_factors, var_factors): (Vec<_>, Vec<_>) =
+                factors.iter().partition(|f| is_constant(f, var));
+            if var_factors.is_empty() {
+                // All constant
+                return IntegrateResult::Ok(mul(expr.clone(), self::var(var)));
+            }
+            if const_factors.is_empty() {
+                return IntegrateResult::NoElementary;
+            }
+            // Build the variable part
+            let var_expr = if var_factors.len() == 1 {
+                var_factors[0].clone()
+            } else {
+                Rc::new(SymExpr::Product(var_factors.into_iter().cloned().collect()))
+            };
+            let const_expr = if const_factors.len() == 1 {
+                const_factors[0].clone()
+            } else {
+                Rc::new(SymExpr::Product(const_factors.into_iter().cloned().collect()))
+            };
+            if let IntegrateResult::Ok(result) = integrate(&var_expr, var) {
+                IntegrateResult::Ok(mul(const_expr, result))
+            } else {
+                IntegrateResult::NoElementary
+            }
+        }
+
+        _ => IntegrateResult::NoElementary,
+    }
+}
+
 // ── Simplification ──────────────────────────────────────────────────────────
 
 /// Apply algebraic simplification rules to reduce expression size.
@@ -1196,5 +1402,102 @@ mod tests {
         let e = add(mul(con(2.0), var("x")), con(1.0));
         let s = format!("{e}");
         assert_eq!(s, "((2 * x) + 1)");
+    }
+
+    #[test]
+    fn integrate_polynomial() {
+        // ∫x^2 dx = x^3/3
+        let x = var("x");
+        let e = pow(x.clone(), con(2.0));
+        let result = integrate(&e, "x");
+        match result {
+            IntegrateResult::Ok(antideriv) => {
+                let s = simplify(&antideriv);
+                // Check: d/dx of antideriv should give back x^2
+                let deriv = simplify(&differentiate(&s, "x"));
+                let mut vars = HashMap::new();
+                vars.insert("x".to_string(), 3.0);
+                let original_val = eval(&e, &vars);
+                let deriv_val = eval(&deriv, &vars);
+                assert!((original_val - deriv_val).abs() < 1e-10,
+                    "original={original_val}, deriv={deriv_val}");
+            }
+            IntegrateResult::NoElementary => panic!("Should find antiderivative of x^2"),
+        }
+    }
+
+    #[test]
+    fn integrate_sin() {
+        // ∫sin(x) dx = -cos(x)
+        let e = sin(var("x"));
+        match integrate(&e, "x") {
+            IntegrateResult::Ok(antideriv) => {
+                let deriv = simplify(&differentiate(&antideriv, "x"));
+                let mut vars = HashMap::new();
+                vars.insert("x".to_string(), 1.5);
+                let original = eval(&e, &vars);
+                let got = eval(&deriv, &vars);
+                assert!((original - got).abs() < 1e-10, "original={original}, got={got}");
+            }
+            IntegrateResult::NoElementary => panic!("Should find antiderivative of sin(x)"),
+        }
+    }
+
+    #[test]
+    fn integrate_exp() {
+        // ∫exp(x) dx = exp(x)
+        let e = exp(var("x"));
+        match integrate(&e, "x") {
+            IntegrateResult::Ok(antideriv) => {
+                let deriv = simplify(&differentiate(&antideriv, "x"));
+                let mut vars = HashMap::new();
+                vars.insert("x".to_string(), 2.0);
+                let original = eval(&e, &vars);
+                let got = eval(&deriv, &vars);
+                assert!((original - got).abs() < 1e-10);
+            }
+            IntegrateResult::NoElementary => panic!("Should find antiderivative of exp(x)"),
+        }
+    }
+
+    #[test]
+    fn integrate_constant_times_x() {
+        // ∫3x dx = 3x^2/2
+        let e = mul(con(3.0), var("x"));
+        match integrate(&e, "x") {
+            IntegrateResult::Ok(antideriv) => {
+                let deriv = simplify(&differentiate(&antideriv, "x"));
+                let mut vars = HashMap::new();
+                vars.insert("x".to_string(), 4.0);
+                let original = eval(&e, &vars); // 12
+                let got = eval(&deriv, &vars);
+                assert!((original - got).abs() < 1e-10, "original={original}, got={got}");
+            }
+            IntegrateResult::NoElementary => panic!("Should find antiderivative of 3x"),
+        }
+    }
+
+    #[test]
+    fn integrate_sum() {
+        // ∫(x + sin(x)) dx = x^2/2 - cos(x)
+        let e = add(var("x"), sin(var("x")));
+        match integrate(&e, "x") {
+            IntegrateResult::Ok(antideriv) => {
+                let deriv = simplify(&differentiate(&antideriv, "x"));
+                let mut vars = HashMap::new();
+                vars.insert("x".to_string(), 1.0);
+                let original = eval(&e, &vars);
+                let got = eval(&deriv, &vars);
+                assert!((original - got).abs() < 1e-10, "original={original}, got={got}");
+            }
+            IntegrateResult::NoElementary => panic!("Should find antiderivative"),
+        }
+    }
+
+    #[test]
+    fn integrate_no_elementary() {
+        // ∫exp(x^2) dx has no elementary antiderivative
+        let e = exp(pow(var("x"), con(2.0)));
+        assert!(matches!(integrate(&e, "x"), IntegrateResult::NoElementary));
     }
 }
