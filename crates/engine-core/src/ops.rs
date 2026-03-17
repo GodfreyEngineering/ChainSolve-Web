@@ -2956,43 +2956,23 @@ fn evaluate_node_inner(
             }
         }
 
-        // Matrix multiply A*B
+        // Matrix multiply A*B — dispatches to linalg (faer for large matrices)
         "matrix_multiply" | "matrix.multiply" => {
             match (inputs.get("a").or_else(||inputs.get("A")), inputs.get("b").or_else(||inputs.get("B"))) {
                 (Some(Value::Matrix{rows:ar,cols:ac,data:ad}), Some(Value::Matrix{rows:br,cols:bc,data:bd})) => {
-                    if ac != br { return Value::error(format!("matrix_multiply: inner dims mismatch {}x{} * {}x{}",ar,ac,br,bc)); }
-                    let mut out = vec![0.0f64; ar*bc];
-                    for i in 0..*ar { for j in 0..*bc { for k in 0..*ac { out[i*bc+j] += ad[i*ac+k]*bd[k*bc+j]; } } }
-                    Value::Matrix{rows:*ar,cols:*bc,data:out}
+                    crate::linalg::matrix_multiply(*ar, *ac, ad, *br, *bc, bd)
                 }
                 (Some(e@Value::Error{..}),_)|(_, Some(e@Value::Error{..})) => e.clone(),
                 _ => Value::error("matrix_multiply: expected two matrix inputs 'a' and 'b'"),
             }
         }
 
-        // Matrix determinant (Gaussian elimination)
+        // Matrix determinant — dispatches to linalg (faer for large matrices)
         "matrix_det" | "matrix.det" => {
             match inputs.get("matrix").or_else(||inputs.get("m")) {
                 Some(Value::Matrix{rows:n,cols:nc,data}) => {
                     if n != nc { return Value::error("matrix_det: matrix must be square"); }
-                    let n = *n; let mut a: Vec<f64> = data.clone();
-                    let mut det = 1.0f64;
-                    for col in 0..n {
-                        let pivot_row = (col..n).max_by(|&i,&j| a[i*n+col].abs().partial_cmp(&a[j*n+col].abs()).unwrap_or(std::cmp::Ordering::Equal));
-                        let pivot_row = match pivot_row { Some(r)=>r, None => return Value::error("matrix_det: singular matrix") };
-                        if a[pivot_row*n+col].abs() < 1e-300 { return Value::scalar(0.0); }
-                        if pivot_row != col {
-                            for j in 0..n { a.swap(col*n+j, pivot_row*n+j); }
-                            det *= -1.0;
-                        }
-                        det *= a[col*n+col];
-                        let piv = a[col*n+col];
-                        for row in col+1..n {
-                            let factor = a[row*n+col] / piv;
-                            for j in col..n { let v=a[col*n+j]; a[row*n+j] -= factor*v; }
-                        }
-                    }
-                    Value::scalar(det)
+                    Value::scalar(crate::linalg::matrix_det(*n, data))
                 }
                 Some(e@Value::Error{..}) => e.clone(),
                 _ => Value::error("matrix_det: expected matrix input"),
@@ -3011,58 +2991,30 @@ fn evaluate_node_inner(
             }
         }
 
-        // Matrix inverse (Gauss-Jordan)
+        // Matrix inverse — dispatches to linalg (faer for large matrices)
         "matrix_inverse" | "matrix.inverse" => {
             match inputs.get("matrix").or_else(||inputs.get("m")) {
                 Some(Value::Matrix{rows:n,cols:nc,data}) => {
                     if n != nc { return Value::error("matrix_inverse: matrix must be square"); }
-                    let n = *n;
-                    let mut a: Vec<f64> = data.clone();
-                    let mut inv: Vec<f64> = (0..n*n).map(|i| if i/n==i%n{1.0}else{0.0}).collect();
-                    for col in 0..n {
-                        let pivot = (col..n).max_by(|&i,&j| a[i*n+col].abs().partial_cmp(&a[j*n+col].abs()).unwrap_or(std::cmp::Ordering::Equal)).unwrap_or(col);
-                        if a[pivot*n+col].abs() < 1e-300 { return Value::error("matrix_inverse: singular matrix"); }
-                        if pivot != col {
-                            for j in 0..n { a.swap(col*n+j,pivot*n+j); inv.swap(col*n+j,pivot*n+j); }
-                        }
-                        let piv=a[col*n+col];
-                        for j in 0..n { a[col*n+j]/=piv; inv[col*n+j]/=piv; }
-                        for row in 0..n {
-                            if row==col { continue; }
-                            let f=a[row*n+col];
-                            for j in 0..n { let av=a[col*n+j]; let iv=inv[col*n+j]; a[row*n+j]-=f*av; inv[row*n+j]-=f*iv; }
-                        }
+                    match crate::linalg::matrix_inverse(*n, data) {
+                        Some(inv) => Value::Matrix{rows:*n,cols:*n,data:inv},
+                        None => Value::error("matrix_inverse: singular matrix"),
                     }
-                    Value::Matrix{rows:n,cols:n,data:inv}
                 }
                 Some(e@Value::Error{..}) => e.clone(),
                 _ => Value::error("matrix_inverse: expected matrix input"),
             }
         }
 
-        // Matrix solve Ax=b (least squares via Gauss elimination)
+        // Matrix solve Ax=b — dispatches to linalg (faer for large matrices)
         "matrix_solve" | "matrix.solve" => {
             match (inputs.get("a").or_else(||inputs.get("A")), inputs.get("b")) {
                 (Some(Value::Matrix{rows:nr,cols:nc,data:adata}), Some(Value::Vector{value:bv})) => {
                     if *nr != bv.len() { return Value::error("matrix_solve: rows of A must equal len of b"); }
-                    let n = *nr; let m = *nc;
-                    let mut aug: Vec<f64> = Vec::with_capacity(n*(m+1));
-                    for i in 0..n { aug.extend_from_slice(&adata[i*m..(i+1)*m]); aug.push(bv[i]); }
-                    let cols1 = m+1;
-                    for col in 0..m.min(n) {
-                        let pivot=(col..n).max_by(|&i,&j|aug[i*cols1+col].abs().partial_cmp(&aug[j*cols1+col].abs()).unwrap_or(std::cmp::Ordering::Equal)).unwrap_or(col);
-                        if aug[pivot*cols1+col].abs()<1e-300 { return Value::error("matrix_solve: singular system"); }
-                        if pivot!=col { for j in 0..cols1{aug.swap(col*cols1+j,pivot*cols1+j);} }
-                        let piv=aug[col*cols1+col];
-                        for j in col..cols1 { aug[col*cols1+j]/=piv; }
-                        for row in 0..n {
-                            if row==col{continue;}
-                            let f=aug[row*cols1+col];
-                            for j in col..cols1 { let v=aug[col*cols1+j]; aug[row*cols1+j]-=f*v; }
-                        }
+                    match crate::linalg::matrix_solve(*nr, *nc, adata, bv) {
+                        Some(x) => Value::Vector{value:x},
+                        None => Value::error("matrix_solve: singular system"),
                     }
-                    let x:Vec<f64>=(0..m).map(|i|if i<n{aug[i*cols1+m]}else{0.0}).collect();
-                    Value::Vector{value:x}
                 }
                 (Some(e@Value::Error{..}),_)|(_, Some(e@Value::Error{..})) => e.clone(),
                 _ => Value::error("matrix_solve: expected matrix 'a' and vector 'b'"),

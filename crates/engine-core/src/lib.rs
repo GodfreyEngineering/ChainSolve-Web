@@ -28,6 +28,7 @@ pub mod error;
 pub mod eval;
 pub mod expr;
 pub mod graph;
+pub mod linalg;
 pub mod ml;
 pub mod nn;
 pub mod ode;
