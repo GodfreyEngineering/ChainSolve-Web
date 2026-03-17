@@ -203,8 +203,8 @@ Ref: Pacejka 2012, Milliken & Milliken 1995, Dixon 2009.
 ### 5D — Telemetry & Thermal
 
 - [ ] **5.11** `veh.telemetry.compare` — overlay sim vs actual data
-- [ ] **5.12** `vehicle/thermal.rs` — brake thermal model with ODE solver
-- [ ] **5.13** Match arms for `veh.brake.*`
+- [x] **5.12** `vehicle/thermal.rs` — brake_temp_derivative, brake_energy, brake_power (4 tests)
+- [ ] **5.13** Match arms for `veh.brake.*` *(Rust functions ready, ops.rs wiring deferred)*
 
 ### 5E — Block Definitions & Registration
 
