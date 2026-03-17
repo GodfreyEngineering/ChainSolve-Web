@@ -270,14 +270,14 @@ The NN module has real implementations (Sequential, Dense, Conv1D, backprop) but
 
 ### 8C — Multi-Objective (NSGA-II)
 
-- [ ] **8.7** `optim/pareto.rs` — NSGA-II (ref: Deb et al. 2002)
-- [ ] **8.8** `optim.paretoFront` op, block definition, i18n
+- [x] **8.7** `optim/pareto.rs` — NSGA-II with non-dominated sorting, crowding distance, SBX crossover (2 tests)
+- [ ] **8.8** `optim.paretoFront` op, block definition, i18n *(Rust function ready, ops/TS wiring deferred)*
 
 ### 8D — Global Sensitivity (Sobol')
 
-- [ ] **8.9** `optim/sobol_sensitivity.rs` — Sobol' indices (ref: Saltelli 2002)
-- [ ] **8.10** `optim.sobolSensitivity` op, block definition, i18n
-- [ ] **8.11** Golden fixture with known analytical indices
+- [x] **8.9** `optim/sobol_sensitivity.rs` — Saltelli sampling, S1 + ST indices (2 tests)
+- [ ] **8.10** `optim.sobolSensitivity` op, block definition, i18n *(Rust function ready, ops/TS wiring deferred)*
+- [ ] **8.11** Golden fixture *(deferred)*
 
 ---
 
