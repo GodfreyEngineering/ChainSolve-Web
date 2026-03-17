@@ -31,11 +31,11 @@ function sanitizeHtml(html: string): string {
 
   const doc = new DOMParser().parseFromString(html, 'text/html')
 
-  function clean(node: Node): string {
-    if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? ''
-    if (node.nodeType !== Node.ELEMENT_NODE) return ''
+  function clean(node: globalThis.Node): string {
+    if (node.nodeType === globalThis.Node.TEXT_NODE) return node.textContent ?? ''
+    if (node.nodeType !== globalThis.Node.ELEMENT_NODE) return ''
     const el = node as Element
-    const children = Array.from(el.childNodes).map(clean).join('')
+    const children = Array.from(el.childNodes).map((n) => clean(n)).join('')
     if (SAFE_TAGS.has(el.tagName)) {
       const tag = el.tagName.toLowerCase()
       return tag === 'br' ? '<br>' : `<${tag}>${children}</${tag}>`
@@ -43,7 +43,7 @@ function sanitizeHtml(html: string): string {
     return children // strip the tag but keep text content
   }
 
-  return Array.from(doc.body.childNodes).map(clean).join('')
+  return Array.from(doc.body.childNodes).map((n) => clean(n)).join('')
 }
 
 /** Floating formatting toolbar for text editing. */

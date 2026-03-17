@@ -28,13 +28,15 @@ ChainSolve Web is a browser-based visual computation platform. Users wire togeth
 
 ## Setup
 
+**Prerequisites:** Rust stable toolchain, [wasm-pack](https://rustwasm.github.io/wasm-pack/), Node 20+, npm.
+
 ```bash
 npm ci
 npm run wasm:build:dev   # compile Rust → WASM (debug; required before first dev start)
 npm run dev              # http://localhost:5173
 ```
 
-Without a `.env` with real Supabase credentials, auth fails silently — fine for local UI work.
+Without a `.env` with real Supabase credentials, auth fails silently — fine for local UI work. Copy `.env.example` to `.env` for full setup. For Cloudflare Pages Functions, create `.dev.vars` (gitignored) with Supabase/Stripe secrets.
 
 ## Key commands
 
@@ -52,20 +54,32 @@ npm run format                # Prettier write
 npm run format:check          # Prettier check (CI gate)
 npm run lint                  # ESLint check
 npm run lint:fix              # ESLint auto-fix
+npm run check                 # format:check + lint + tsc (app + functions) — all static checks
 npm run typecheck             # wasm:build + tsc (app)
 npm run typecheck:functions   # tsc for Cloudflare Functions only
 
 # Testing
 npm run test:unit             # Vitest unit tests
+npx vitest run src/foo.test.ts  # Run a single test file
 npm run test:coverage         # Unit test coverage report
 npm run test:e2e:smoke        # Smoke suite (~30 s, mirrors CI)
 npm run test:e2e              # Full Playwright suite
+npm run test:e2e:visual       # Visual regression tests
+npm run test:e2e:a11y         # Accessibility tests
+npm run test:e2e:chaos        # Chaos/stress tests
 npm run test:e2e:ui           # Playwright UI mode
 
 # Rust / WASM
 cargo test --workspace        # All Rust tests
 cargo test -p engine-core     # engine-core only
+cargo test -p engine-core test_name  # Single Rust test
 cargo bench -p engine-core    # Criterion benchmarks
+
+# Utilities
+npm run doctor                # Diagnose missing dependencies
+npm run db:types              # Regenerate Supabase TS types
+npm run storybook             # Component library (Storybook, port 6006)
+npm run perf:bundle           # Check JS bundle sizes after build
 
 # Verification
 npm run verify:fast           # Quick checks (no cargo/wasm) — use before every push
