@@ -1180,6 +1180,17 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     angleUnit,
   )
 
+  // 3.22: Brief edge-flow pulse after each evaluation (particle-style animation).
+  const [evalPulseActive, setEvalPulseActive] = useState(false)
+  const evalPulseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    if (computed.size === 0) return
+    // Fire a 1.2s animated pulse on each eval completion
+    if (evalPulseTimerRef.current) clearTimeout(evalPulseTimerRef.current)
+    setEvalPulseActive(true)
+    evalPulseTimerRef.current = setTimeout(() => setEvalPulseActive(false), 1200)
+  }, [computed]) // eslint-disable-line react-hooks/exhaustive-deps -- intentionally triggers on computed reference change
+
   // H7-1: After engine eval, update published outputs store with publish block values.
   const updateFromCanvas = usePublishedOutputsStore((st) => st.updateFromCanvas)
   useEffect(() => {
@@ -3118,6 +3129,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                   )}
                   <div
                     data-edges-animated={effectiveEdgesAnimated ? 'true' : 'false'}
+                    data-eval-pulse={evalPulseActive ? 'true' : 'false'}
                     data-lod={effectiveLodTier}
                     data-badges={effectiveBadges ? 'true' : 'false'}
                     data-edge-badges={effectiveEdgeBadges ? 'true' : 'false'}

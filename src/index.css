@@ -344,6 +344,25 @@ button:focus:not(:focus-visible) {
   stroke-dasharray: 5 5;
   animation: cs-edge-flow 0.5s linear infinite;
 }
+/* 3.22: Post-eval particle pulse — brief flowing animation that plays once
+ * after each evaluation completes (1.2 s, then stops). Distinct from the
+ * user-toggled continuous animation above: faster speed + fades in/out. */
+@keyframes cs-edge-pulse {
+  0%   { stroke-dashoffset: 0;   opacity: 1; }
+  85%  { stroke-dashoffset: -30; opacity: 0.8; }
+  100% { stroke-dashoffset: -40; opacity: 0; }
+}
+[data-eval-pulse='true'] .react-flow__edge-path {
+  stroke-dasharray: 4 6;
+  animation: cs-edge-pulse 1.2s ease-out forwards;
+  animation-fill-mode: forwards;
+}
+/* Don't double-animate when user continuous-anim is also on */
+[data-edges-animated='true'][data-eval-pulse='true'] .react-flow__edge-path {
+  stroke-dasharray: 5 5;
+  animation: cs-edge-flow 0.5s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .react-flow__edge-path {
     animation: none !important;
