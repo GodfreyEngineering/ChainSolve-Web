@@ -120,6 +120,8 @@ const LazyChannelsPanel = lazy(() =>
 import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { useBlockSnapping } from '../../hooks/useBlockSnapping'
+import { SnapGuides } from './SnapGuides'
 import { useLongPress } from '../../hooks/useLongPress'
 import { BottomSheet } from '../ui/BottomSheet'
 import { ValuePopoverContext, type ShowValuePopover } from '../../contexts/ValuePopoverContext'
@@ -826,6 +828,19 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   // Snap-to-grid
   const [snapToGrid, setSnapToGrid] = useState(false)
+
+  // Phase 10: Magnetic block-to-block snapping
+  const [magneticSnap, _setMagneticSnap] = useState(() => {
+    try {
+      return localStorage.getItem('cs:magneticSnap') === 'true'
+    } catch {
+      return false
+    }
+  })
+  const [snapGuides, setSnapGuides] = useState<import('../../hooks/useBlockSnapping').SnapGuide[]>(
+    [],
+  )
+  const { computeSnap } = useBlockSnapping()
 
   // Formula bar (UX-16)
   const [formulaBarVisible, setFormulaBarVisible] = useState(getFormulaBarPref)
@@ -2342,6 +2357,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           )
         }
       }
+      // Phase 10: Clear snap guides on drag stop
+      setSnapGuides([])
       // Phase 0: Unpause engine after drag with 200ms settle delay.
       // This prevents thrashing on rapid drag-release-drag sequences.
       // Respects user's manual pause — if they paused via toolbar before
@@ -2358,6 +2375,25 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       }, 200)
     },
     [nodes, setNodes, onNodeDragStopProp],
+  )
+
+  // Phase 10: Magnetic snap during drag
+  const onNodeDrag = useCallback(
+    (_event: React.MouseEvent, node: { id: string; position: { x: number; y: number } }) => {
+      if (!magneticSnap) {
+        setSnapGuides([])
+        return
+      }
+      const result = computeSnap(node.id, node.position.x, node.position.y, nodes)
+      setSnapGuides(result.guides)
+      if (result.snapped) {
+        // Update node position to snapped position
+        setNodes((nds) =>
+          nds.map((n) => (n.id === node.id ? { ...n, position: { x: result.x, y: result.y } } : n)),
+        )
+      }
+    },
+    [magneticSnap, computeSnap, nodes, setNodes],
   )
 
   // ── Keyboard shortcuts ─────────────────────────────────────────────────
@@ -3472,6 +3508,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         onConnect={readOnly ? undefined : onConnect}
                         isValidConnection={isValidConnection}
                         onNodeDragStart={readOnly ? undefined : onNodeDragStart}
+                        onNodeDrag={readOnly ? undefined : onNodeDrag}
                         onNodeDragStop={readOnly ? undefined : onNodeDragStop}
                         onNodeClick={onNodeClick}
                         onNodeDoubleClick={onNodeDoubleClick}
@@ -3585,6 +3622,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                             </NodeToolbar>
                           ) : null,
                         )}
+                        {/* Phase 10: Magnetic snap guide lines */}
+                        <SnapGuides guides={snapGuides} />
                       </ReactFlow>
                       {minimap && (
                         <MinimapWrapper
