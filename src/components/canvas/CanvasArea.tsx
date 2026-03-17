@@ -56,6 +56,7 @@ import { DRAG_TYPE } from './blockLibraryUtils'
 import { FloatingInspector, INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS } from './FloatingInspector'
 import { NodeSideSheet } from './NodeSideSheet'
 import { EdgeProbePopover } from './EdgeProbePopover'
+import { DiffPanel } from './DiffPanel'
 import { useWindowManager } from '../../contexts/WindowManagerContext'
 import { ContextMenu, type ContextMenuTarget } from './ContextMenu'
 import { ExpressionPanel } from './ExpressionPanel'
@@ -141,6 +142,7 @@ import { OptimizerNode } from './nodes/OptimizerNode'
 import { MLModelNode } from './nodes/MLModelNode'
 import { NeuralNetNode } from './nodes/NeuralNetNode'
 import { copyValueToClipboard } from '../../engine/valueFormat'
+import type { Value } from '../../engine/value'
 import {
   computeGraphHealth,
   formatHealthReport,
@@ -821,6 +823,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     sourceNodeId: string
     sourceLabel: string
   } | null>(null)
+
+  // 3.40: Diff view — baseline snapshot for comparing current vs saved values
+  const [diffBaseline, setDiffBaseline] = useState<ReadonlyMap<string, Value> | null>(null)
   const { openWindow, closeWindow, isOpen: isWinOpen } = useWindowManager()
   const inspVisible = isWinOpen(INSPECTOR_WINDOW_ID)
 
@@ -2360,6 +2365,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     groupSelection,
     togglePresentationMode,
   ])
+
+  // 3.40: Node labels map for DiffPanel
+  const diffNodeLabels = useMemo<ReadonlyMap<string, string>>(
+    () => new Map(nodes.map((n) => [n.id, ((n.data as NodeData).label ?? n.id) as string])),
+    [nodes],
+  )
 
   // UX-03: Node labels for navigation search
   const paletteNodeLabels = useMemo(() => {
@@ -3904,6 +3915,43 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         sourceLabel={edgeProbe.sourceLabel}
                         value={computed.get(edgeProbe.sourceNodeId)}
                         onClose={() => setEdgeProbe(null)}
+                      />
+                    )}
+
+                    {/* 3.40: Snapshot diff — save baseline button + diff panel */}
+                    {!readOnly && (
+                      <button
+                        onClick={() => setDiffBaseline(diffBaseline ? null : new Map(computed))}
+                        style={{
+                          position: 'absolute',
+                          top: 8,
+                          right: diffBaseline ? 336 : 8,
+                          zIndex: 34,
+                          background: diffBaseline
+                            ? 'rgba(239,68,68,0.15)'
+                            : 'var(--surface, #2a2a2a)',
+                          border: `1px solid ${diffBaseline ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                          borderRadius: 7,
+                          color: diffBaseline ? '#ef4444' : 'rgba(244,244,243,0.6)',
+                          cursor: 'pointer',
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          padding: '4px 9px',
+                          fontFamily: "'Montserrat', system-ui, sans-serif",
+                          letterSpacing: '0.03em',
+                          transition: 'right 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
+                        }}
+                        title={diffBaseline ? 'Clear snapshot' : 'Save snapshot for diff'}
+                      >
+                        {diffBaseline ? '✕ Clear Snapshot' : '⊙ Save Snapshot'}
+                      </button>
+                    )}
+                    {diffBaseline && (
+                      <DiffPanel
+                        baseline={diffBaseline}
+                        current={computed}
+                        nodeLabels={diffNodeLabels}
+                        onClose={() => setDiffBaseline(null)}
                       />
                     )}
 
