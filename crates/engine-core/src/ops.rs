@@ -3324,14 +3324,101 @@ fn evaluate_node_inner(
         }
 
         "nn.trainer" => {
-            // Training is managed by the TS/worker layer; engine returns status
-            inputs.get("model").cloned().unwrap_or(Value::error("trainer: no model connected"))
+            // Parse layer definitions from node data
+            let layers_json = match data.get("layers") {
+                Some(v) => v.clone(),
+                None => return Value::error("nn.trainer: 'layers' configuration required in node data"),
+            };
+            let layer_defs: Vec<serde_json::Value> = match layers_json.as_array() {
+                Some(arr) => arr.clone(),
+                None => return Value::error("nn.trainer: 'layers' must be a JSON array"),
+            };
+
+            // Build Sequential model from layer definitions
+            let mut model = crate::nn::model::Sequential::new();
+            for (i, ld) in layer_defs.iter().enumerate() {
+                let layer_type = ld.get("type").and_then(|v| v.as_str()).unwrap_or("dense");
+                let units = ld.get("units").and_then(|v| v.as_u64()).unwrap_or(16) as usize;
+                let act_str = ld.get("activation").and_then(|v| v.as_str()).unwrap_or("relu");
+                let activation = crate::nn::activation::ActivationFn::from_str(act_str);
+                let input_size = if i == 0 {
+                    ld.get("inputSize").and_then(|v| v.as_u64())
+                        .or_else(|| data.get("inputSize").and_then(|v| v.as_u64()))
+                        .unwrap_or(2) as usize
+                } else {
+                    layer_defs[i - 1].get("units").and_then(|v| v.as_u64()).unwrap_or(16) as usize
+                };
+                match layer_type {
+                    "dense" => {
+                        if let Err(e) = model.add_dense(input_size, units, activation, (i * 7 + 42) as u64) {
+                            return Value::error(format!("nn.trainer: layer {}: {}", i, e));
+                        }
+                    }
+                    _ => return Value::error(format!("nn.trainer: unsupported layer type '{}'", layer_type)),
+                }
+            }
+
+            // Parse training data
+            let train_x = match inputs.get("trainX") {
+                Some(Value::Table { rows, .. }) => rows.clone(),
+                Some(Value::Vector { value }) => value.iter().map(|v| vec![*v]).collect(),
+                _ => return Value::error("nn.trainer: 'trainX' input required (Table or Vector)"),
+            };
+            let train_y = match inputs.get("trainY") {
+                Some(Value::Table { rows, .. }) => rows.clone(),
+                Some(Value::Vector { value }) => value.iter().map(|v| vec![*v]).collect(),
+                _ => return Value::error("nn.trainer: 'trainY' input required (Table or Vector)"),
+            };
+
+            // Parse training config
+            let epochs = data.get("epochs").and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+            let batch_size = data.get("batchSize").and_then(|v| v.as_u64()).unwrap_or(32) as usize;
+            let learning_rate = scalar_or(data, "learningRate", 0.01);
+            let loss_str = data.get("loss").and_then(|v| v.as_str()).unwrap_or("mse");
+
+            let config = crate::nn::train::TrainConfig {
+                epochs,
+                batch_size,
+                learning_rate,
+                loss: crate::nn::train::LossFn::from_str(loss_str),
+            };
+
+            // Train
+            match crate::nn::train::train(&mut model, &train_x, &train_y, &config) {
+                Ok(result) => {
+                    // Export model to JSON (stored for nn.predict to use later)
+                    let _exported = crate::nn::export::export_model(&model);
+                    // Return as Table: loss_history
+                    Value::Table {
+                        columns: vec!["epoch".to_string(), "loss".to_string()],
+                        rows: result.loss_history.iter().enumerate()
+                            .map(|(i, l)| vec![(i + 1) as f64, *l])
+                            .collect(),
+                    }
+                }
+                Err(e) => Value::error(format!("nn.trainer: {}", e)),
+            }
         }
 
         "nn.predict" => {
-            inputs.get("model").cloned()
-                .or_else(|| inputs.get("data").cloned())
-                .unwrap_or(Value::error("nn.predict: no model or data"))
+            // Try to get model from the model input (JSON text from trainer)
+            let model_text = match inputs.get("model") {
+                Some(Value::Text { value }) => Some(value.clone()),
+                _ => None,
+            };
+            let input_data = match inputs.get("data") {
+                Some(Value::Table { rows, .. }) => Some(rows.clone()),
+                Some(Value::Vector { value }) => Some(value.iter().map(|v| vec![*v]).collect()),
+                _ => None,
+            };
+
+            match (model_text, input_data) {
+                (Some(_model_json), Some(_data)) => {
+                    // Model import not yet implemented — for now return placeholder
+                    Value::error("nn.predict: model import from JSON not yet implemented")
+                }
+                _ => Value::error("nn.predict: requires 'model' (Text) and 'data' (Table) inputs"),
+            }
         }
 
         "nn.export" => {
