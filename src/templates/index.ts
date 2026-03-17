@@ -17,6 +17,7 @@ import { buildHeatTransfer } from './heat-transfer'
 import { buildOhmsLaw } from './ohms-law'
 import { buildFluidFlow } from './fluid-flow'
 import { buildInvestmentReturns } from './investment-returns'
+import { buildSpringMassDamper } from './spring-mass-damper'
 
 export interface TemplateMeta {
   /** Stable unique key — never rename after shipping. */
@@ -129,5 +130,14 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ['finance', 'interest', 'compound', 'investment'],
     category: 'Finance',
     buildGraph: buildInvestmentReturns,
+  },
+  {
+    id: 'spring-mass-damper',
+    name: 'Spring-Mass-Damper Tutorial',
+    description:
+      'Interactive 5-minute tutorial: spring-mass-damper system — natural frequency ωn, damping ratio ζ, % overshoot, and step response y(t). Annotated step-by-step.',
+    tags: ['tutorial', 'control', 'dynamics', 'spring', 'mechanical', 'damper'],
+    category: 'Engineering',
+    buildGraph: buildSpringMassDamper,
   },
 ]
