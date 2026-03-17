@@ -135,8 +135,14 @@ export interface PlotConfig {
   binCount?: number
   /** For Table input: column name for X axis. */
   xColumn?: string
-  /** For Table input: column names for Y series. */
+  /** For Table input: column names for Y series (left / primary axis). */
   yColumns?: string[]
+  /** Secondary Y-axis columns (right axis, xyLine/xyScatter only). */
+  yColumns2?: string[]
+  /** Right-axis label. */
+  y2Label?: string
+  /** Right-axis scale. */
+  y2Scale?: ScaleType
   /** Show ChainSolve branding in exports (default false). */
   showBranding?: boolean
 }

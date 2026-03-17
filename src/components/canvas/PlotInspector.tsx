@@ -304,6 +304,55 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
                 ))}
               </select>,
             )}
+
+          {/* Secondary Y-axis (xyLine / xyScatter only) */}
+          {(config.chartType === 'xyLine' || config.chartType === 'xyScatter') && (
+            <>
+              {field(
+                t('plot.y2Column'),
+                <select
+                  value={config.yColumns2?.[0] ?? ''}
+                  onChange={(e) =>
+                    onUpdate({ yColumns2: e.target.value ? [e.target.value] : undefined })
+                  }
+                  style={selectStyle}
+                >
+                  <option value="">{t('plot.y2None')}</option>
+                  {columns.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>,
+              )}
+              {config.yColumns2 && config.yColumns2.length > 0 && (
+                <div
+                  style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}
+                >
+                  {field(
+                    t('plot.y2Label'),
+                    <input
+                      style={inp}
+                      value={config.y2Label ?? ''}
+                      onChange={(e) => onUpdate({ y2Label: e.target.value || undefined })}
+                      placeholder={t('plot.yAxisPlaceholder')}
+                    />,
+                  )}
+                  {field(
+                    t('plot.y2Scale'),
+                    <select
+                      value={config.y2Scale ?? 'linear'}
+                      onChange={(e) => onUpdate({ y2Scale: e.target.value as ScaleType })}
+                      style={selectStyle}
+                    >
+                      <option value="linear">{t('plot.linear')}</option>
+                      <option value="log">{t('plot.log')}</option>
+                    </select>,
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </>
       )}
 

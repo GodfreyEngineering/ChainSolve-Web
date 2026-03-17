@@ -232,10 +232,100 @@ function buildSpec(
     case 'xyScatter': {
       const xField = config.xColumn ?? data.columns[0] ?? 'x'
       const yFields = config.yColumns ?? [data.columns[1] ?? data.columns[0] ?? 'y']
+      const markType = config.chartType === 'xyLine' ? 'line' : 'point'
 
+      // Secondary Y-axis: when yColumns2 is configured, build a dual-axis layer spec
+      const yFields2 = config.yColumns2 && config.yColumns2.length > 0 ? config.yColumns2 : null
+      if (yFields2) {
+        const y2Scale =
+          config.y2Scale === 'log' ? { type: 'log' as const } : { type: 'linear' as const }
+
+        // Primary layer (left axis)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const primaryLayer: Record<string, any> =
+          yFields.length <= 1
+            ? {
+                mark: { type: markType, strokeWidth: theme.lineWidth, color: '#1CABB0' },
+                encoding: {
+                  x: {
+                    field: xField,
+                    type: 'quantitative',
+                    scale: xScale,
+                    title: config.xLabel,
+                  },
+                  y: {
+                    field: yFields[0],
+                    type: 'quantitative',
+                    scale: yScale,
+                    axis: { title: config.yLabel },
+                  },
+                },
+              }
+            : {
+                transform: [{ fold: yFields, as: ['_series', '_val'] }],
+                mark: { type: markType, strokeWidth: theme.lineWidth },
+                encoding: {
+                  x: {
+                    field: xField,
+                    type: 'quantitative',
+                    scale: xScale,
+                    title: config.xLabel,
+                  },
+                  y: {
+                    field: '_val',
+                    type: 'quantitative',
+                    scale: yScale,
+                    axis: { title: config.yLabel },
+                  },
+                  color: { field: '_series', type: 'nominal' },
+                },
+              }
+
+        // Secondary layer (right axis, orange palette)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const secondaryLayer: Record<string, any> =
+          yFields2.length <= 1
+            ? {
+                mark: {
+                  type: markType,
+                  strokeWidth: theme.lineWidth,
+                  color: '#f97316',
+                  strokeDash: [6, 3],
+                },
+                encoding: {
+                  x: { field: xField, type: 'quantitative', scale: xScale },
+                  y: {
+                    field: yFields2[0],
+                    type: 'quantitative',
+                    scale: y2Scale,
+                    axis: { orient: 'right', title: config.y2Label },
+                  },
+                },
+              }
+            : {
+                transform: [{ fold: yFields2, as: ['_series2', '_val2'] }],
+                mark: { type: markType, strokeWidth: theme.lineWidth, strokeDash: [6, 3] },
+                encoding: {
+                  x: { field: xField, type: 'quantitative', scale: xScale },
+                  y: {
+                    field: '_val2',
+                    type: 'quantitative',
+                    scale: y2Scale,
+                    axis: { orient: 'right', title: config.y2Label },
+                  },
+                  color: { field: '_series2', type: 'nominal' },
+                },
+              }
+
+        base.resolve = { scale: { y: 'independent' } }
+        base.layer = [primaryLayer, secondaryLayer]
+        break
+      }
+
+      // Single-axis (original behaviour)
       if (yFields.length <= 1) {
         base.mark = {
-          type: config.chartType === 'xyLine' ? 'line' : 'point',
+          type: markType,
           strokeWidth: theme.lineWidth,
         }
         base.encoding = {
@@ -251,7 +341,7 @@ function buildSpec(
         // Multi-series: fold yColumns
         base.transform = [{ fold: yFields, as: ['series', 'value'] }]
         base.mark = {
-          type: config.chartType === 'xyLine' ? 'line' : 'point',
+          type: markType,
           strokeWidth: theme.lineWidth,
         }
         base.encoding = {
@@ -619,12 +709,21 @@ function buildSpec(
   // Annotations (reference lines, bands, text labels) as extra Vega-Lite layers
   if (config.referenceLines && config.referenceLines.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mainLayer: Record<string, any> = { mark: base.mark, encoding: base.encoding }
-    delete base.mark
-    delete base.encoding
-    if (base.transform) {
-      mainLayer.transform = base.transform
-      delete base.transform
+    let existingLayers: Record<string, any>[]
+    if (Array.isArray(base.layer)) {
+      // Already layered (e.g. dual-axis, Nyquist, Bode): append annotation layers
+      existingLayers = base.layer as Record<string, any>[]
+    } else {
+      // Not yet layered: wrap main spec into a layer
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mainLayer: Record<string, any> = { mark: base.mark, encoding: base.encoding }
+      delete base.mark
+      delete base.encoding
+      if (base.transform) {
+        mainLayer.transform = base.transform
+        delete base.transform
+      }
+      existingLayers = [mainLayer]
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -703,7 +802,7 @@ function buildSpec(
       },
     )
 
-    base.layer = [mainLayer, ...annotationLayers]
+    base.layer = [...existingLayers, ...annotationLayers]
   }
 
   // Interactive: scroll-to-zoom, drag-to-pan (double-click resets), hover tooltip
