@@ -224,7 +224,7 @@ The NN module has real implementations (Sequential, Dense, Conv1D, backprop) but
 - [ ] **6.3** Layer configuration UI panel in FloatingInspector
 - [x] **6.4** `nn/lr_schedule.rs` — Constant, StepDecay, CosineAnnealing, ExponentialDecay (5 tests)
 - [x] **6.5** TrainConfig: patience + validation_split fields added, TrainResult: val_loss_history + early_stopped
-- [ ] **6.6** Training always has defined end: `maxEpochs` (required, > 0) or `targetLoss`
+- [x] **6.6** Training always has defined end: epochs must be > 0 (enforced in ops.rs)
 - [ ] **6.7** Progress callback: `{ epoch, totalEpochs, trainLoss, valLoss, bestLoss, lr }`
 - [ ] **6.8** New blocks: `nn.lrSchedule`, `nn.summary`
 - [ ] **6.9** Golden fixture: XOR training, verify loss decreases
