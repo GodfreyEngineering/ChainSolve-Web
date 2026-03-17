@@ -9,7 +9,7 @@
  * Positioned absolute at top of canvas wrapper div.
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Node } from '@xyflow/react'
 import type { NodeData } from '../../blocks/types'
@@ -18,6 +18,33 @@ import { isScalar } from '../../engine/value'
 import type { Value } from '../../engine/value'
 import { safeEvalFormula, validateFormula, FORMULA_SYMBOLS } from '../../lib/formulaEval'
 import type { FormulaSymbol } from '../../lib/formulaEval'
+
+// ── 3.49: Expression history stored in localStorage ─────────────────────────
+
+const HISTORY_KEY = 'chainsolve.formulaHistory'
+const HISTORY_MAX = 50
+
+function loadHistory(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]') as string[]
+  } catch {
+    return []
+  }
+}
+
+function saveHistory(history: string[]): void {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
+  } catch {
+    // localStorage may be unavailable (private browsing)
+  }
+}
+
+/** Prepend an entry, deduplicate, and cap at HISTORY_MAX. */
+function pushHistory(history: string[], entry: string): string[] {
+  const deduped = [entry, ...history.filter((h) => h !== entry)]
+  return deduped.slice(0, HISTORY_MAX)
+}
 
 /** Extract the formula clause from a block description (e.g. "Output = A + B"). */
 function extractFormula(blockType: string): string {
@@ -75,6 +102,18 @@ export function FormulaBar({
   const [expressionMode, setExpressionMode] = useState(false)
   const [exprDraft, setExprDraft] = useState('')
   const [exprError, setExprError] = useState<string | null>(null)
+
+  // 3.49: Expression history — persisted across page reloads
+  const [history, setHistory] = useState<string[]>(() => loadHistory())
+  /** -1 = live draft; 0..N-1 = navigating history */
+  const [historyIdx, setHistoryIdx] = useState(-1)
+  /** Save the live draft when entering history navigation */
+  const liveDraftRef = useRef('')
+
+  // Keep liveDraftRef in sync with exprDraft when not navigating history
+  useEffect(() => {
+    if (historyIdx === -1) liveDraftRef.current = exprDraft
+  }, [exprDraft, historyIdx])
 
   // Live draft while editing
   const [draft, setDraft] = useState('')
@@ -263,16 +302,50 @@ export function FormulaBar({
             onChange={(e) => {
               setExprDraft(e.target.value)
               setExprError(null)
+              // Typing resets history navigation — user is editing a new expression
+              if (historyIdx !== -1) setHistoryIdx(-1)
             }}
             onKeyDown={(e) => {
+              // 3.49: Up arrow — navigate backwards through history
+              if (e.key === 'ArrowUp' && history.length > 0) {
+                e.preventDefault()
+                const nextIdx = historyIdx + 1
+                if (nextIdx < history.length) {
+                  setHistoryIdx(nextIdx)
+                  setExprDraft(history[nextIdx])
+                  setExprError(null)
+                }
+                return
+              }
+              // 3.49: Down arrow — navigate forwards / back to live draft
+              if (e.key === 'ArrowDown') {
+                e.preventDefault()
+                if (historyIdx > 0) {
+                  const nextIdx = historyIdx - 1
+                  setHistoryIdx(nextIdx)
+                  setExprDraft(history[nextIdx])
+                  setExprError(null)
+                } else if (historyIdx === 0) {
+                  setHistoryIdx(-1)
+                  setExprDraft(liveDraftRef.current)
+                  setExprError(null)
+                }
+                return
+              }
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
                 const expr = exprDraft.trim()
                 if (!expr) return
                 try {
                   onExpressionSubmit?.(expr)
+                  // 3.49: Save to history on successful submit
+                  const newHistory = pushHistory(history, expr)
+                  setHistory(newHistory)
+                  saveHistory(newHistory)
                   setExprDraft('')
                   setExprError(null)
+                  setHistoryIdx(-1)
+                  liveDraftRef.current = ''
                 } catch (err) {
                   setExprError(String(err))
                 }
@@ -281,6 +354,7 @@ export function FormulaBar({
                 setExpressionMode(false)
                 setExprDraft('')
                 setExprError(null)
+                setHistoryIdx(-1)
               }
             }}
             placeholder={t(
