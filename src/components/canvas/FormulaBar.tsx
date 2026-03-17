@@ -63,6 +63,46 @@ function extractFormula(blockType: string): string {
 
 const CSEL_CONSTANTS = new Set(['pi', 'e', 'tau', 'phi'])
 
+// ── 3.48: CSEL autocomplete candidates ───────────────────────────────────────
+
+const CSEL_FN_CANDIDATES: Array<{ label: string; insert: string }> = [
+  { label: 'sin(x)', insert: 'sin(' },
+  { label: 'cos(x)', insert: 'cos(' },
+  { label: 'tan(x)', insert: 'tan(' },
+  { label: 'asin(x)', insert: 'asin(' },
+  { label: 'acos(x)', insert: 'acos(' },
+  { label: 'atan(x)', insert: 'atan(' },
+  { label: 'sqrt(x)', insert: 'sqrt(' },
+  { label: 'abs(x)', insert: 'abs(' },
+  { label: 'ln(x)', insert: 'ln(' },
+  { label: 'log(x)', insert: 'log(' },
+  { label: 'log10(x)', insert: 'log10(' },
+  { label: 'exp(x)', insert: 'exp(' },
+  { label: 'floor(x)', insert: 'floor(' },
+  { label: 'ceil(x)', insert: 'ceil(' },
+  { label: 'round(x)', insert: 'round(' },
+  { label: 'max(a, b)', insert: 'max(' },
+  { label: 'min(a, b)', insert: 'min(' },
+]
+const CSEL_CONST_CANDIDATES: Array<{ label: string; insert: string }> = [
+  { label: 'pi  ≈ 3.14159', insert: 'pi' },
+  { label: 'e   ≈ 2.71828', insert: 'e' },
+  { label: 'tau ≈ 6.28318', insert: 'tau' },
+  { label: 'phi ≈ 1.61803', insert: 'phi' },
+]
+
+/** Extract variable names assigned in earlier statements within `text`. */
+function extractCselVars(text: string): string[] {
+  const vars: string[] = []
+  // Match patterns like "ident =" at statement boundaries
+  const assignRe = /(?:^|;)\s*([a-zA-Z_]\w*)\s*=/g
+  let m: RegExpExecArray | null
+  while ((m = assignRe.exec(text)) !== null) {
+    vars.push(m[1])
+  }
+  return vars
+}
+
 /**
  * Tokenise a CSEL expression and return an array of React spans with colours:
  *   operators → cyan, numbers → orange, functions → purple,
@@ -189,6 +229,9 @@ export function FormulaBar({
   // 3.47: Scroll tracking for overlay alignment
   const exprInputRef = useRef<HTMLInputElement>(null)
   const [exprScrollLeft, setExprScrollLeft] = useState(0)
+  // 3.48: CSEL expression mode autocomplete
+  const [cselAcItems, setCselAcItems] = useState<Array<{ label: string; kind: 'fn' | 'const' | 'var'; insert: string }>>([])
+  const [cselAcIdx, setCselAcIdx] = useState(0)
 
   // 3.49: Expression history — persisted across page reloads
   const [history, setHistory] = useState<string[]>(() => loadHistory())
@@ -231,6 +274,61 @@ export function FormulaBar({
       description: v.value !== undefined ? `= ${v.value} (from ${v.name})` : `from ${v.name}`,
     }))
   }, [upstreamVars])
+
+  /** 3.48: Update CSEL expression mode autocomplete suggestions. */
+  const updateCselAutocomplete = useCallback((text: string, cursorPos: number) => {
+    const before = text.slice(0, cursorPos)
+    const wordMatch = before.match(/[a-zA-Z_]\w*$/)
+    const word = wordMatch ? wordMatch[0].toLowerCase() : ''
+    if (!word) {
+      setCselAcItems([])
+      return
+    }
+    const vars = extractCselVars(text)
+    const results: Array<{ label: string; kind: 'fn' | 'const' | 'var'; insert: string }> = []
+    // Variables first
+    for (const v of vars) {
+      if (v.toLowerCase().startsWith(word) && v.toLowerCase() !== word) {
+        results.push({ label: v, kind: 'var', insert: v })
+      }
+    }
+    // Constants
+    for (const c of CSEL_CONST_CANDIDATES) {
+      if (c.insert.startsWith(word) && c.insert !== word) {
+        results.push({ label: c.label, kind: 'const', insert: c.insert })
+      }
+    }
+    // Functions
+    for (const f of CSEL_FN_CANDIDATES) {
+      if (f.insert.startsWith(word)) {
+        results.push({ label: f.label, kind: 'fn', insert: f.insert })
+      }
+    }
+    setCselAcItems(results.slice(0, 8))
+    setCselAcIdx(0)
+  }, [])
+
+  /** 3.48: Accept a CSEL autocomplete suggestion. */
+  const acceptCselAutocomplete = useCallback(
+    (item: { insert: string }) => {
+      const input = exprInputRef.current
+      if (!input) return
+      const cursorPos = input.selectionStart ?? exprDraft.length
+      const before = exprDraft.slice(0, cursorPos)
+      const after = exprDraft.slice(cursorPos)
+      const wordMatch = before.match(/[a-zA-Z_]\w*$/)
+      const wordLen = wordMatch ? wordMatch[0].length : 0
+      const newDraft = before.slice(0, before.length - wordLen) + item.insert + after
+      setExprDraft(newDraft)
+      setCselAcItems([])
+      const newPos = before.length - wordLen + item.insert.length
+      requestAnimationFrame(() => {
+        input.setSelectionRange(newPos, newPos)
+        input.focus()
+      })
+    },
+    [exprDraft],
+  )
 
   /** Update autocomplete suggestions based on current draft. */
   const updateAutocomplete = useCallback(
@@ -381,7 +479,7 @@ export function FormulaBar({
 
       {/* Phase 11: Expression mode input — full-width for CSEL expressions */}
       {expressionMode ? (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '0 8px', gap: 6 }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '0 8px', gap: 6, position: 'relative' }}>
           <span style={{ color: 'var(--text-faint)', fontSize: '0.7rem', flexShrink: 0 }}>=</span>
           {/* 3.47: Syntax-highlighted expression input via transparent input + overlay */}
           <div style={{ flex: 1, position: 'relative', overflow: 'hidden', height: '100%', display: 'flex', alignItems: 'center' }}>
@@ -419,9 +517,29 @@ export function FormulaBar({
                 setExprError(null)
                 // Typing resets history navigation — user is editing a new expression
                 if (historyIdx !== -1) setHistoryIdx(-1)
+                // 3.48: Update CSEL autocomplete
+                updateCselAutocomplete(e.target.value, e.target.selectionStart ?? e.target.value.length)
               }}
               onScroll={(e) => setExprScrollLeft((e.target as HTMLInputElement).scrollLeft)}
               onKeyDown={(e) => {
+                // 3.48: CSEL autocomplete navigation
+                if (cselAcItems.length > 0) {
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault()
+                    setCselAcIdx((i) => Math.min(i + 1, cselAcItems.length - 1))
+                    return
+                  }
+                  if (e.key === 'Tab' || e.key === 'Enter') {
+                    e.preventDefault()
+                    acceptCselAutocomplete(cselAcItems[cselAcIdx])
+                    return
+                  }
+                  if (e.key === 'Escape') {
+                    e.preventDefault()
+                    setCselAcItems([])
+                    return
+                  }
+                }
                 // 3.49: Up arrow — navigate backwards through history
                 if (e.key === 'ArrowUp' && history.length > 0) {
                   e.preventDefault()
@@ -450,6 +568,7 @@ export function FormulaBar({
                 }
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
+                  setCselAcItems([])
                   const expr = exprDraft.trim()
                   if (!expr) return
                   try {
@@ -467,6 +586,7 @@ export function FormulaBar({
                   }
                 }
                 if (e.key === 'Escape') {
+                  setCselAcItems([])
                   setExpressionMode(false)
                   setExprDraft('')
                   setExprError(null)
@@ -490,6 +610,52 @@ export function FormulaBar({
               }}
             />
           </div>
+          {/* 3.48: CSEL autocomplete dropdown */}
+          {cselAcItems.length > 0 && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 28,
+                right: 0,
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border)',
+                borderRadius: '0 0 8px 8px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                zIndex: 200,
+                overflow: 'hidden',
+              }}
+            >
+              {cselAcItems.map((item, i) => (
+                <div
+                  key={item.insert + i}
+                  onMouseDown={(ev) => { ev.preventDefault(); acceptCselAutocomplete(item) }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '4px 10px',
+                    cursor: 'pointer',
+                    background: i === cselAcIdx ? 'var(--primary-dim)' : 'transparent',
+                    fontSize: '0.75rem',
+                    fontFamily: 'ui-monospace, monospace',
+                  }}
+                >
+                  <span style={{
+                    fontSize: '0.6rem',
+                    padding: '1px 4px',
+                    borderRadius: 3,
+                    background: item.kind === 'fn' ? 'rgba(167,139,250,0.2)' : item.kind === 'const' ? 'rgba(251,146,60,0.2)' : 'rgba(74,222,128,0.2)',
+                    color: item.kind === 'fn' ? '#a78bfa' : item.kind === 'const' ? '#fb923c' : '#4ade80',
+                  }}>
+                    {item.kind === 'fn' ? 'fn' : item.kind === 'const' ? 'const' : 'var'}
+                  </span>
+                  <span style={{ color: 'var(--text)' }}>{item.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {exprError && (
             <span style={{ color: 'var(--danger)', fontSize: '0.65rem', flexShrink: 0 }}>
               {exprError}
