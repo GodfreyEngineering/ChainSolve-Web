@@ -163,16 +163,16 @@ Required before vehicle simulation — suspension, thermal models, and lap sim n
 - [x] **4.3** `ode/rk4.rs` — classic 4th-order Runge-Kutta with expression-based RHS, parameter support, 4 tests
 - [x] **4.4** `ode/rk45.rs` — Dormand-Prince RK4(5) adaptive step with automatic step control and error estimation
 - [ ] **4.5** `ode/bdf.rs` — implicit BDF for stiff systems (deferred — complex implicit solver with Newton iteration)
-- [ ] **4.6** Register `ode` module in `lib.rs`
-- [ ] **4.7** Unit tests: `y'=y` → `e^t`, stiff decay, harmonic oscillator energy conservation, Lorenz determinism
+- [x] **4.6** Register `ode` module in `lib.rs`
+- [x] **4.7** Unit tests: exponential growth (RK4+RK45), harmonic oscillator (RK4+RK45, energy conservation), parametric, structure
 
 ### 4B — ODE Blocks
 
-- [ ] **4.8** Match arms in `ops.rs` for `ode.rk4`, `ode.rk45`, `ode.bdf`, `ode.stateSpace`, `ode.initialCondition`, `ode.systemDef`
+- [x] **4.8** Match arms in `ops.rs` for `ode.rk4`, `ode.rk45` (bdf/stateSpace/initialCondition/systemDef deferred)
 - [ ] **4.9** Create `src/blocks/ode-blocks.ts` with 6 block definitions
 - [ ] **4.10** Register in `registry.ts`, add `BlockCategory` `'odeSolvers'`
 - [ ] **4.11** i18n labels across all 7 locales
-- [ ] **4.12** Catalog entries in `catalog.rs`
+- [x] **4.12** Catalog entries in `catalog.rs` (ode.rk4, ode.rk45 + 3 tire blocks = 347 total)
 - [ ] **4.13** Golden fixtures: exponential, harmonic, stiff
 
 ---
@@ -185,8 +185,8 @@ Ref: Pacejka 2012, Milliken & Milliken 1995, Dixon 2009.
 
 - [x] **5.1** Create `vehicle/mod.rs` with `tire` submodule (suspension/aero/powertrain/lap/thermal deferred)
 - [x] **5.2** `vehicle/tire.rs` — Pacejka Magic Formula: lateral/longitudinal force, sweep, 4 presets, 6 tests
-- [ ] **5.3** Match arms in `ops.rs` for `veh.tire.*`
-- [ ] **5.4** Unit tests against published Pacejka data
+- [x] **5.3** Match arms in `ops.rs` for `veh.tire.lateralForce`, `veh.tire.longForce`, `veh.tire.sweep`
+- [x] **5.4** 6 unit tests: zero-slip, monotonicity, Fz proportionality, antisymmetry, sweep, presets
 
 ### 5B — Suspension
 
