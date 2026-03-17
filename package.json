@@ -76,7 +76,7 @@
     "@storybook/react-vite": "^10.2.19",
     "@types/dagre": "^0.7.54",
     "@types/katex": "^0.16.8",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.5.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
