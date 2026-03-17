@@ -304,7 +304,7 @@
 - [ ] **3.17** Auto type coercion indicators: when scalar→vector broadcast happens, show a small "↗" icon on the port to indicate the coercion
 - [ ] **3.18** Inline value display upgrades: vectors show sparkline (tiny line chart), matrices show heatmap thumbnail (colour-coded density), signals show waveform preview, booleans show LED indicator (green/red)
 - [ ] **3.19** Double-click node → open full config panel as side sheet (slide from right, 400px wide) instead of requiring separate inspector — faster workflow
-- [ ] **3.20** Edge labels: on hover, show data shape label ("[3×3]", "[1024]", "5.23 N") — understand data flow without clicking
+- [x] **3.20** Edge labels: on hover, show data shape label ("[3×3]", "[1024]", "5.23 N") — understand data flow without clicking
 - [ ] **3.21** Smart edge routing: Bezier curves with obstacle avoidance — route around other nodes instead of through them (A* pathfinding on grid)
 - [ ] **3.22** Animated flow direction: subtle particle animation along edge during execution — shows data flowing through the graph
 - [ ] **3.23** Edge bundling: when many edges share source/target regions, bundle them visually for cleaner appearance — unbundle on hover
