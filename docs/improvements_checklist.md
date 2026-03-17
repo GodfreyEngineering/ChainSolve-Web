@@ -35,7 +35,7 @@
 - [x] **1.17** Numerical integration: adaptive Gauss-Kronrod (7-15 point), Clenshaw-Curtis (for smooth integrands), Monte Carlo quadrature (for high-dimensional integrals)
 - [x] **1.18** Enhanced interpolation: cubic spline (natural/clamped/not-a-knot), Akima (avoids oscillation), B-spline fitting, NURBS evaluation — extend existing 1D/2D lookup blocks
 - [x] **1.19** Random number generation: Xoshiro256++ (reproducible with seed control), Latin Hypercube sampling, Sobol quasi-random sequence, Halton sequence — essential for Monte Carlo and DOE
-- [ ] **1.20** Enhanced NaN/Inf error reporting: when a NaN is produced, trace it back through the graph to identify the originating block and show the user exactly which input caused it — display in Problems panel
+- [x] **1.20** Enhanced NaN/Inf error reporting: when a NaN is produced, trace it back through the graph to identify the originating block and show the user exactly which input caused it — display in Problems panel
 
 ### 1B — Symbolic Computation (CAS in Rust)
 
