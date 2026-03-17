@@ -1004,6 +1004,26 @@ button:focus:not(:focus-visible) {
   }
 }
 
+/* ── 3.16: Connection validity snap indicators ─────────────────────────────
+ * React Flow adds .valid / .invalid on handles when a drag is in progress.
+ * Green = connection allowed, Red = connection blocked (already occupied).
+ */
+.react-flow__handle.valid {
+  background: #22c55e !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.4), 0 0 10px rgba(34, 197, 94, 0.3) !important;
+  transform: scale(1.35) !important;
+  transition: background 0.1s, box-shadow 0.1s, transform 0.1s !important;
+}
+.react-flow__handle.invalid {
+  background: #ef4444 !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.4), 0 0 10px rgba(239, 68, 68, 0.3) !important;
+  transform: scale(1.25) !important;
+  transition: background 0.1s, box-shadow 0.1s, transform 0.1s !important;
+  cursor: not-allowed !important;
+}
+
 /* ── Phase 13: Button spinner ─────────────────────────────────────────────── */
 @keyframes cs-button-spin {
   to {
