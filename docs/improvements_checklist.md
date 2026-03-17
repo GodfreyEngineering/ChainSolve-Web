@@ -124,11 +124,11 @@ Make ChainSolve trustworthy for PhD-level research and production vehicle calcul
 - [x] **3.4** Handle in `kind_str()`, `summarize()`, `compute_value_hash()`
 - [x] **3.5** Update `canonicalize_value()` to pass through HP values unchanged
 - [x] **3.6** Create `precision.rs` — HP arithmetic: add, sub, mul, div using dashu-float DBig (sqrt/pow/trig deferred)
-- [ ] **3.7** Add `precision: Option<u32>` to `EvalOptions`
+- [x] **3.7** Add `precision: Option<u32>` to `EvalOptions`
 - [ ] **3.8** In `ops.rs`, branch to HP path when precision set
 - [ ] **3.9** Per-node precision override via `data.precision`
-- [ ] **3.10** Mirror `HighPrecision` in `src/engine/value.ts`
-- [ ] **3.11** Format HP values in `formatValue` — display string, truncated to user's display precision
+- [x] **3.10** Mirror `HighPrecisionValue` in `src/engine/value.ts`, update Value union type
+- [x] **3.11** Handle `highPrecision` in `formatValue`, `valueFormat.ts`, `expressionExtractor.ts`
 - [ ] **3.12** Precision mode selector in settings panel
 - [ ] **3.13** Golden fixture: `1/3 * 3 = 1.000...` at 100 digits
 - [ ] **3.14** Golden fixture: pi to 1000 digits
