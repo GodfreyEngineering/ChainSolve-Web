@@ -93,6 +93,7 @@ export type ChartType =
   | 'bode'
   | 'nyquist'
   | 'pareto'
+  | 'waterfall'
 export type ScaleType = 'linear' | 'log'
 export type LegendPosition = 'right' | 'bottom' | 'none'
 export type PlotThemePreset = 'paper-single' | 'paper-double' | 'presentation' | 'report'

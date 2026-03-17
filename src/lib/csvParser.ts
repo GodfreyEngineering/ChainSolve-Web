@@ -1,14 +1,16 @@
 /**
- * csvParser.ts — CSV + NumPy .npy + Excel .xlsx → table data parsers for file drop support.
+ * csvParser.ts — CSV + TSV + NumPy .npy + Excel .xlsx + JSON → table data parsers.
  *
- * CSV handles:
+ * CSV/TSV handles:
  * - Optional header row detection (non-numeric first cell → treat as header)
  * - Quoted values (strips leading/trailing quotes)
  * - Numeric and non-numeric cells (non-numeric → 0)
  * - Windows (CRLF) and Unix (LF) line endings
+ * - Auto-detects tab vs comma delimiter
  *
  * NumPy .npy (4.10): parses v1/v2 format for float32/float64 1D/2D arrays.
  * Excel .xlsx (4.6): dynamically imports SheetJS, reads first sheet.
+ * JSON: array of objects → columns are keys with numeric values.
  */
 
 export interface ParsedCSV {
@@ -32,8 +34,14 @@ export function parseCSVToTableData(text: string): ParsedCSV {
     return { columns: ['A'], rows: [[0]] }
   }
 
+  // Auto-detect delimiter: prefer tab if first line has more tabs than commas
+  const firstLine = lines[0]
+  const tabCount = (firstLine.match(/\t/g) ?? []).length
+  const commaCount = (firstLine.match(/,/g) ?? []).length
+  const delimiter = tabCount > commaCount ? '\t' : ','
+
   const splitLine = (line: string): string[] =>
-    line.split(',').map((v) => v.trim().replace(/^["']|["']$/g, ''))
+    line.split(delimiter).map((v) => v.trim().replace(/^["']|["']$/g, ''))
 
   const firstCells = splitLine(lines[0])
 
@@ -155,6 +163,72 @@ export function parseNpyToTableData(buf: ArrayBuffer): ParsedCSV | null {
   }
 
   return { columns, rows }
+}
+
+/**
+ * Parse a JSON string containing tabular data into ParsedCSV format.
+ *
+ * Supported input shapes:
+ *   - Array of objects: [{a:1,b:2},{a:3,b:4}] → columns from keys, values coerced to number
+ *   - Array of arrays: [[1,2],[3,4]] → columns named A, B, C…
+ *   - Single object with array values: {a:[1,2,3],b:[4,5,6]} → columns from keys
+ *
+ * Returns null if the JSON cannot be parsed or doesn't match any supported shape.
+ */
+export function parseJSONToTableData(text: string): ParsedCSV | null {
+  try {
+    const parsed: unknown = JSON.parse(text)
+
+    // Array of objects: [{col1: val, col2: val}, ...]
+    if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0] !== null && !Array.isArray(parsed[0])) {
+      const objs = parsed as Record<string, unknown>[]
+      const columns = Object.keys(objs[0])
+      if (columns.length === 0) return null
+      const rows = objs.map((obj) =>
+        columns.map((col) => {
+          const n = Number(obj[col])
+          return isNaN(n) ? 0 : n
+        }),
+      )
+      return { columns, rows }
+    }
+
+    // Array of arrays: [[1,2], [3,4], ...]
+    if (Array.isArray(parsed) && parsed.length > 0 && Array.isArray(parsed[0])) {
+      const arrs = parsed as unknown[][]
+      const numCols = Math.max(...arrs.map((r) => r.length))
+      const columns = Array.from({ length: numCols }, (_, i) =>
+        String.fromCharCode(65 + (i % 26)),
+      )
+      const rows = arrs.map((row) =>
+        columns.map((_, ci) => {
+          const n = Number(row[ci])
+          return isNaN(n) ? 0 : n
+        }),
+      )
+      return { columns, rows }
+    }
+
+    // Object with array values: {col1: [1,2,3], col2: [4,5,6]}
+    if (!Array.isArray(parsed) && typeof parsed === 'object' && parsed !== null) {
+      const obj = parsed as Record<string, unknown>
+      const columns = Object.keys(obj).filter((k) => Array.isArray(obj[k]))
+      if (columns.length === 0) return null
+      const arrays = columns.map((k) => obj[k] as unknown[])
+      const numRows = Math.max(...arrays.map((a) => a.length))
+      const rows = Array.from({ length: numRows }, (_, ri) =>
+        columns.map((_, ci) => {
+          const n = Number(arrays[ci][ri])
+          return isNaN(n) ? 0 : n
+        }),
+      )
+      return { columns, rows }
+    }
+
+    return null
+  } catch {
+    return null
+  }
 }
 
 /**

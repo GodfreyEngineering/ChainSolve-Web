@@ -231,6 +231,30 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'waterfallPlot',
+    label: 'Waterfall Chart',
+    category: 'plot',
+    nodeKind: 'csPlot',
+    inputs: [{ id: 'data', label: 'Data' }],
+    proOnly: false,
+    description:
+      'Waterfall chart showing cumulative incremental changes. Expects a Table with columns [category, value]. Positive increments are green, negative are red, bars float from the running total.',
+    defaultData: {
+      blockType: 'waterfallPlot',
+      label: 'Waterfall Chart',
+      plotConfig: {
+        chartType: 'waterfall',
+        showGrid: true,
+        showLegend: false,
+        legendPosition: 'right',
+        themePreset: 'paper-single',
+        xLabel: 'Category',
+        yLabel: 'Value',
+      } satisfies PlotConfig,
+    },
+  })
+
+  register({
     type: 'paretoPlot',
     label: 'Pareto Plot',
     category: 'plot',

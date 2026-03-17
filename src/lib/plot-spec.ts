@@ -790,6 +790,80 @@ function buildSpec(
       delete base.encoding
       break
     }
+
+    case 'waterfall': {
+      // Waterfall chart: shows cumulative running totals as floating bars.
+      // Input: 2-column Table [category, value]. Positive increments are green,
+      // negative increments are red, and running totals float from the
+      // previous bar's top.
+      const catField = config.xColumn ?? data.columns[0] ?? 'category'
+      const valField = config.yColumns?.[0] ?? data.columns[1] ?? 'value'
+      const rows = data.values as Record<string, number>[]
+
+      let running = 0
+      const waterfallData = rows.map((row) => {
+        const val = (row[valField] ?? 0) as number
+        const base = running
+        running += val
+        return {
+          _cat: row[catField],
+          _val: val,
+          _base: base,
+          _top: running,
+          _positive: val >= 0,
+        }
+      })
+
+      // Bar layer: floating bars from _base to _top
+      base.layer = [
+        {
+          data: { values: waterfallData },
+          mark: 'bar',
+          encoding: {
+            x: {
+              field: '_cat',
+              type: 'ordinal',
+              sort: null,
+              title: config.xLabel ?? catField,
+              axis: { grid: false },
+            },
+            y: {
+              field: '_base',
+              type: 'quantitative',
+              title: config.yLabel ?? valField,
+              scale: yScale,
+              axis: { grid: config.showGrid ?? true },
+            },
+            y2: { field: '_top' },
+            color: {
+              field: '_positive',
+              type: 'nominal',
+              scale: { range: ['#ef4444', '#22c55e'] },
+              legend: config.showLegend
+                ? { title: 'Direction', labelExpr: "datum.label ? 'Positive' : 'Negative'" }
+                : null,
+            },
+            tooltip: [
+              { field: '_cat', title: catField },
+              { field: '_val', title: 'Change', format: '.3g' },
+              { field: '_top', title: 'Running total', format: '.3g' },
+            ],
+          },
+        },
+        // Connector rule lines between bars
+        {
+          data: { values: waterfallData },
+          mark: { type: 'rule', color: '#6b7280', strokeWidth: 0.8 },
+          encoding: {
+            x: { field: '_cat', type: 'ordinal', sort: null },
+            y: { field: '_top', type: 'quantitative' },
+          },
+        },
+      ]
+      delete base.mark
+      delete base.encoding
+      break
+    }
   }
 
   // Grid

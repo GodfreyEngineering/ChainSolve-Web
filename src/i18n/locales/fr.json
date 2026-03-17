@@ -489,6 +489,7 @@
     "chartParallelCoords": "Coordonnées parallèles",
     "chartContour": "Contour / Densité",
     "chartPareto": "Front de Pareto",
+    "chartWaterfall": "Cascade",
     "exportSvg": "SVG",
     "exportPng": "PNG",
     "exportCsv": "CSV",

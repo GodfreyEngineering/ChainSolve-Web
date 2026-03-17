@@ -101,7 +101,7 @@ import { autoLayout, type LayoutDirection, type AutoLayoutResult } from '../../l
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard, pasteFromSystemClipboard } from '../../lib/clipboard'
 import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
-import { parseCSVToTableData, parseNpyToTableData, parseXlsxToTableData } from '../../lib/csvParser'
+import { parseCSVToTableData, parseNpyToTableData, parseXlsxToTableData, parseJSONToTableData } from '../../lib/csvParser'
 import { computeDatasetHash } from '../../lib/datasetHash'
 import { CommandPalette, type PaletteCommand } from './CommandPalette'
 import { FormulaBar } from './FormulaBar'
@@ -1548,10 +1548,54 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           return
         }
 
+        // JSON file → parse tabular data
+        if (nameLower.endsWith('.json')) {
+          const tableInputDef = BLOCK_REGISTRY.get('tableInput')
+          if (tableInputDef?.proOnly && !isBlockEntitled(tableInputDef, ent)) {
+            setShowUpgradeModal(true)
+            return
+          }
+          const position = screenToFlowPosition({ x: e.clientX, y: e.clientY })
+          const reader = new FileReader()
+          reader.onload = async (ev) => {
+            const text = ev.target?.result
+            if (typeof text !== 'string') return
+            const tableData = parseJSONToTableData(text)
+            if (!tableData) {
+              toast('Could not parse JSON: expected array of objects, array of arrays, or column-array object', 'error')
+              return
+            }
+            const datasetHash = await computeDatasetHash(tableData)
+            const id = `node_${++nodeIdCounter}`
+            doSaveHistory()
+            setNodes((nds) => [
+              ...nds,
+              {
+                id,
+                type: 'csData',
+                position,
+                data: {
+                  blockType: 'tableInput',
+                  label: file.name.replace(/\.json$/i, ''),
+                  tableData,
+                  datasetHash,
+                },
+              } as Node<NodeData>,
+            ])
+            toast(
+              `JSON loaded: ${file.name} (${tableData.rows.length} rows × ${tableData.columns.length} columns)`,
+              'success',
+            )
+          }
+          reader.readAsText(file)
+          return
+        }
+
         const isCSV =
           file.type === 'text/csv' ||
           file.type === 'text/plain' ||
-          file.name.toLowerCase().endsWith('.csv')
+          file.name.toLowerCase().endsWith('.csv') ||
+          file.name.toLowerCase().endsWith('.tsv')
         if (isCSV) {
           const tableInputDef = BLOCK_REGISTRY.get('tableInput')
           if (tableInputDef?.proOnly && !isBlockEntitled(tableInputDef, ent)) {
@@ -1582,7 +1626,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
               } as Node<NodeData>,
             ])
             toast(
-              `CSV loaded: ${file.name} (${tableData.rows.length} rows \u00d7 ${tableData.columns.length} columns)`,
+              `${nameLower.endsWith('.tsv') ? 'TSV' : 'CSV'} loaded: ${file.name} (${tableData.rows.length} rows \u00d7 ${tableData.columns.length} columns)`,
               'success',
             )
           }

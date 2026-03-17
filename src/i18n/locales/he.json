@@ -1533,6 +1533,7 @@
     "chartParallelCoords": "Parallel Coordinates",
     "chartContour": "Contour / Density",
     "chartPareto": "חזית פארטו",
+    "chartWaterfall": "מפל",
     "exportCsv": "CSV",
     "openInTab": "Open SVG in tab",
     "pngScale": "PNG Scale",

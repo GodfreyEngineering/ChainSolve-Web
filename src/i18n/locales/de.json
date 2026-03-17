@@ -489,6 +489,7 @@
     "chartParallelCoords": "Parallelkoordinaten",
     "chartContour": "Kontur / Dichte",
     "chartPareto": "Pareto-Front",
+    "chartWaterfall": "Wasserfall",
     "exportSvg": "SVG",
     "exportPng": "PNG",
     "exportCsv": "CSV",
