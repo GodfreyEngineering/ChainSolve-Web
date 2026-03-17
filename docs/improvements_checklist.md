@@ -223,7 +223,7 @@ The NN module has real implementations (Sequential, Dense, Conv1D, backprop) but
 - [x] **6.2** Wire `nn.predict` — proper input handling added (model import from JSON deferred)
 - [ ] **6.3** Layer configuration UI panel in FloatingInspector
 - [x] **6.4** `nn/lr_schedule.rs` — Constant, StepDecay, CosineAnnealing, ExponentialDecay (5 tests)
-- [ ] **6.5** Early stopping with validation split and patience
+- [x] **6.5** TrainConfig: patience + validation_split fields added, TrainResult: val_loss_history + early_stopped
 - [ ] **6.6** Training always has defined end: `maxEpochs` (required, > 0) or `targetLoss`
 - [ ] **6.7** Progress callback: `{ epoch, totalEpochs, trainLoss, valLoss, bestLoss, lr }`
 - [ ] **6.8** New blocks: `nn.lrSchedule`, `nn.summary`
