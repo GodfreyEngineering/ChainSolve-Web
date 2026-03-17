@@ -23,6 +23,7 @@
 //! - [`run_patch_with_options`]    — patch with eval options + progress callback
 
 pub mod catalog;
+pub mod compensated;
 pub mod error;
 pub mod eval;
 pub mod expr;
