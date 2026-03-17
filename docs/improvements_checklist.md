@@ -343,7 +343,7 @@
 - [x] **3.47** Syntax highlighting in expression input: colour operators (cyan), numbers (orange), functions (purple), variables (green), errors (red underline)
 - [x] **3.48** Autocomplete: as user types, suggest matching block types, function names, declared variables, and constants — dropdown with signature hints
 - [x] **3.49** Expression history: up/down arrow cycles through previously entered expressions (stored in localStorage)
-- [ ] **3.50** Drag from empty port → open search palette filtered to compatible block types — fastest way to add connected blocks
+- [x] **3.50** Drag from empty port → open search palette filtered to compatible block types — fastest way to add connected blocks
 
 ---
 
