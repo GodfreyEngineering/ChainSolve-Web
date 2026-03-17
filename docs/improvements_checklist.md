@@ -136,7 +136,7 @@ Make ChainSolve trustworthy for PhD-level research and production vehicle calcul
 
 ### 3B — Compensated Arithmetic
 
-- [ ] **3.16** Create `compensated.rs` — Ogita-Rump-Oishi dot product, Kahan-Babuska-Neumaier sum, compensated two-product
+- [x] **3.16** Create `compensated.rs` — Neumaier compensated sum, Ogita-Rump-Oishi dot product, Dekker two-product (7 tests)
 - [ ] **3.17** Replace `kahan_sum` in vector ops with `compensated_sum`
 - [ ] **3.18** Use `compensated_dot` in matrix multiply and statistics blocks
 - [ ] **3.19** Golden fixture: `sum(1e16, 1, -1e16) = 1`
