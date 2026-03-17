@@ -24,6 +24,51 @@ use crate::ops::evaluate_node;
 use crate::types::{Diagnostic, DiagLevel, EngineSnapshotV1, EvalResult, Value};
 use std::collections::{HashMap, VecDeque};
 
+/// Threshold for ill-conditioning warning: κ > 10^12.
+const ILL_CONDITIONED_THRESHOLD: f64 = 1e12;
+
+/// Ops that are sensitive to matrix conditioning.
+const CONDITIONING_SENSITIVE_OPS: &[&str] = &[
+    "matrix_solve", "matrix.solve",
+    "matrix_inverse", "matrix.inverse",
+    "matrix_lu", "matrix.lu",
+    "matrix_cholesky", "matrix.cholesky",
+    "matrix_cond", "matrix.cond",
+];
+
+/// Check if a matrix op input is ill-conditioned and return a diagnostic if so.
+pub(crate) fn check_ill_conditioning(
+    block_type: &str,
+    node_id: &str,
+    inputs: &HashMap<String, Value>,
+) -> Option<Diagnostic> {
+    if !CONDITIONING_SENSITIVE_OPS.iter().any(|&op| op == block_type) {
+        return None;
+    }
+
+    // Find the matrix input (try "matrix", "a", "m")
+    let matrix = inputs.get("matrix")
+        .or_else(|| inputs.get("a"))
+        .or_else(|| inputs.get("m"));
+
+    if let Some(Value::Matrix { rows, cols, data }) = matrix {
+        let kappa = crate::linalg::condition_number(*rows, *cols, data);
+        if kappa > ILL_CONDITIONED_THRESHOLD {
+            return Some(Diagnostic {
+                node_id: Some(node_id.to_string()),
+                level: DiagLevel::Warning,
+                code: "ILL_CONDITIONED".to_string(),
+                message: format!(
+                    "Matrix is ill-conditioned (κ ≈ {:.2e}). Results may be numerically unreliable.",
+                    kappa
+                ),
+            });
+        }
+    }
+
+    None
+}
+
 /// Evaluate a validated snapshot.
 ///
 /// Uses Kahn's topological sort to determine evaluation order.
@@ -183,6 +228,11 @@ pub fn evaluate(snapshot: &EngineSnapshotV1) -> EvalResult {
                     message: message.clone(),
                 });
             }
+        }
+
+        // Check for ill-conditioned matrices in sensitive ops.
+        if let Some(diag) = check_ill_conditioning(&node.block_type, node_id, &node_inputs) {
+            diagnostics.push(diag);
         }
 
         values.insert(node_id.to_string(), result);
@@ -376,5 +426,41 @@ mod tests {
 
         let result = evaluate(&snap);
         assert_eq!(result.values.get("d").unwrap().as_scalar(), Some(42.0));
+    }
+
+    #[test]
+    fn ill_conditioned_matrix_emits_warning() {
+        // [[1, 0], [0, 1e-14]] → κ = 1e14 > 1e12
+        let mut inputs = HashMap::new();
+        inputs.insert("matrix".to_string(), Value::Matrix {
+            rows: 2,
+            cols: 2,
+            data: vec![1.0, 0.0, 0.0, 1e-14],
+        });
+        let diag = check_ill_conditioning("matrix_solve", "test_node", &inputs);
+        assert!(diag.is_some());
+        let diag = diag.unwrap();
+        assert_eq!(diag.code, "ILL_CONDITIONED");
+        assert_eq!(diag.level, DiagLevel::Warning);
+    }
+
+    #[test]
+    fn well_conditioned_matrix_no_warning() {
+        let mut inputs = HashMap::new();
+        inputs.insert("matrix".to_string(), Value::Matrix {
+            rows: 2,
+            cols: 2,
+            data: vec![1.0, 0.0, 0.0, 1.0], // identity, κ = 1
+        });
+        let diag = check_ill_conditioning("matrix_solve", "test_node", &inputs);
+        assert!(diag.is_none());
+    }
+
+    #[test]
+    fn non_matrix_op_no_warning() {
+        let mut inputs = HashMap::new();
+        inputs.insert("a".to_string(), Value::scalar(5.0));
+        let diag = check_ill_conditioning("add", "test_node", &inputs);
+        assert!(diag.is_none());
     }
 }

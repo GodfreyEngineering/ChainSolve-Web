@@ -24,6 +24,7 @@
 //! topological order and returns an [`IncrementalEvalResult`] with only the
 //! changed values.
 
+use crate::eval::check_ill_conditioning;
 use crate::ops::evaluate_node_with_datasets;
 use crate::types::{
     Diagnostic, DiagLevel, EdgeDef, EngineSnapshotV1, EvalOptions, IncrementalEvalResult, NodeDef,
@@ -392,6 +393,11 @@ impl EngineGraph {
                         message: message.clone(),
                     });
                 }
+            }
+
+            // Check for ill-conditioned matrices in sensitive ops.
+            if let Some(diag) = check_ill_conditioning(&node.block_type, node_id, &node_inputs) {
+                diagnostics.push(diag);
             }
 
             // ENG-05: Compute a cheap hash of the new output to detect value changes.

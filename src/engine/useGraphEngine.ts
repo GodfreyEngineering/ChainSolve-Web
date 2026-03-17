@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Node, Edge } from '@xyflow/react'
 import type { EngineAPI } from './index.ts'
-import type { EvalOptions, PatchOp } from './wasm-types.ts'
+import type { EngineDiagnostic, EvalOptions, PatchOp } from './wasm-types.ts'
 import type { Value } from './value.ts'
 import type { ConstantsLookup } from './resolveBindings.ts'
 import type { VariablesMap } from '../lib/variables.ts'
@@ -89,6 +89,8 @@ export interface GraphEngineResult {
   triggerEval: () => void
   /** Number of patch ops waiting to be dispatched. */
   pendingPatchCount: number
+  /** Engine diagnostics from the last evaluation (warnings, errors). */
+  engineDiagnostics: EngineDiagnostic[]
 }
 
 export function useGraphEngine(
@@ -115,6 +117,7 @@ export function useGraphEngine(
 ): GraphEngineResult {
   const [computed, setComputed] = useState<ReadonlyMap<string, Value>>(new Map())
   const [isPartial, setIsPartial] = useState(false)
+  const [engineDiagnostics, setEngineDiagnostics] = useState<EngineDiagnostic[]>([])
   // UI-PERF-02: per-node subscription store — stable instance for the hook's lifetime
   const [store] = useState(() => new ComputedStore())
   const setEngineStatus = useStatusBarStore((s) => s.setEngineStatus)
@@ -229,6 +232,7 @@ export function useGraphEngine(
           store.load(result.values)
           setComputed(store.getAll())
           setIsPartial(result.partial ?? false)
+          setEngineDiagnostics(result.diagnostics ?? [])
           const snapshotErrors = Object.keys(result.values).filter(
             (id) => (result.values[id] as Value)?.kind === 'error',
           )
@@ -322,6 +326,7 @@ export function useGraphEngine(
             // K4-2: Log individual node error messages for console guidance.
             logNodeErrors(result.changedValues, seenErrorsRef.current)
             setIsPartial(result.partial ?? false)
+            setEngineDiagnostics(result.diagnostics ?? [])
             // MERGE changed values into existing map (not replace).
             const removedNodeIds = opsToSend
               .filter((op) => op.op === 'removeNode')
@@ -427,5 +432,5 @@ export function useGraphEngine(
     }
   }, [])
 
-  return { computed, isPartial, computedStore: store, triggerEval, pendingPatchCount }
+  return { computed, isPartial, computedStore: store, triggerEval, pendingPatchCount, engineDiagnostics }
 }

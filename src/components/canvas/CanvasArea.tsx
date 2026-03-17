@@ -1163,7 +1163,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [telemetryProjectId, canvasId],
   )
 
-  const { computed, computedStore, triggerEval, pendingPatchCount } = useGraphEngine(
+  const { computed, computedStore, triggerEval, pendingPatchCount, engineDiagnostics } = useGraphEngine(
     nodes,
     edges,
     engine,
@@ -3039,7 +3039,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         badge: problemCount,
         content: (
           <Suspense fallback={null}>
-            <LazyProblemsPanel />
+            <LazyProblemsPanel engineDiagnostics={engineDiagnostics} />
           </Suspense>
         ),
       },

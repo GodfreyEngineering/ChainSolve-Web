@@ -10,9 +10,10 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNodes, useEdges, useReactFlow, type Node, type Edge } from '@xyflow/react'
-import { CompassIcon, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { CompassIcon, AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useComputed } from '../../contexts/ComputedContext'
 import type { Value } from '../../engine/value'
+import type { EngineDiagnostic } from '../../engine/wasm-types'
 
 interface ErrorEntry {
   nodeId: string
@@ -55,7 +56,11 @@ function nodeLabel(nodeId: string, nodes: Node[]): string {
   return typeof data?.label === 'string' && data.label.length > 0 ? data.label : nodeId
 }
 
-export default function ProblemsPanel() {
+export default function ProblemsPanel({
+  engineDiagnostics = [],
+}: {
+  engineDiagnostics?: EngineDiagnostic[]
+}) {
   const { t } = useTranslation()
   const computed = useComputed()
   const nodes = useNodes()
@@ -86,7 +91,10 @@ export default function ProblemsPanel() {
     }
   }
 
-  if (errors.length === 0) {
+  // Filter engine diagnostics to warnings only (errors are already shown above).
+  const warnings = engineDiagnostics.filter((d) => d.level === 'warning')
+
+  if (errors.length === 0 && warnings.length === 0) {
     return (
       <div style={emptyStyle}>
         <CheckCircle2 size={16} style={{ color: 'var(--success)' }} />
@@ -100,38 +108,78 @@ export default function ProblemsPanel() {
 
   return (
     <div style={containerStyle}>
-      <div style={headerStyle}>
-        <AlertTriangle size={14} style={{ color: 'var(--danger)' }} />
-        <span>
-          {errors.length}{' '}
-          {errors.length === 1
-            ? t('problems.problem', 'problem')
-            : t('problems.problems', 'problems')}
-        </span>
-      </div>
-      <div style={listStyle}>
-        {errors.map((e) => (
-          <div key={e.nodeId} style={itemStyle}>
-            <div style={itemTopStyle}>
-              {e.isRootCause ? (
-                <span style={rootBadgeStyle}>{t('problems.root', 'root')}</span>
-              ) : (
-                <span style={propBadgeStyle}>{t('problems.propagated', 'chain')}</span>
-              )}
-              <span style={labelStyle}>{e.label}</span>
-              <button
-                style={jumpBtnStyle}
-                title={t('problems.jumpToNode', 'Jump to block')}
-                onClick={() => jumpToNode(e.isRootCause ? e.nodeId : e.rootCauseId)}
-              >
-                <CompassIcon size={10} />
-                {e.isRootCause ? t('problems.jump', 'Jump') : t('problems.jumpToRoot', 'Root')}
-              </button>
-            </div>
-            <div style={msgStyle}>{e.message}</div>
+      {errors.length > 0 && (
+        <>
+          <div style={headerStyle}>
+            <AlertTriangle size={14} style={{ color: 'var(--danger)' }} />
+            <span>
+              {errors.length}{' '}
+              {errors.length === 1
+                ? t('problems.problem', 'problem')
+                : t('problems.problems', 'problems')}
+            </span>
           </div>
-        ))}
-      </div>
+          <div style={listStyle}>
+            {errors.map((e) => (
+              <div key={e.nodeId} style={itemStyle}>
+                <div style={itemTopStyle}>
+                  {e.isRootCause ? (
+                    <span style={rootBadgeStyle}>{t('problems.root', 'root')}</span>
+                  ) : (
+                    <span style={propBadgeStyle}>{t('problems.propagated', 'chain')}</span>
+                  )}
+                  <span style={labelStyle}>{e.label}</span>
+                  <button
+                    style={jumpBtnStyle}
+                    title={t('problems.jumpToNode', 'Jump to block')}
+                    onClick={() => jumpToNode(e.isRootCause ? e.nodeId : e.rootCauseId)}
+                  >
+                    <CompassIcon size={10} />
+                    {e.isRootCause ? t('problems.jump', 'Jump') : t('problems.jumpToRoot', 'Root')}
+                  </button>
+                </div>
+                <div style={msgStyle}>{e.message}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {warnings.length > 0 && (
+        <>
+          <div style={headerStyle}>
+            <AlertCircle size={14} style={{ color: 'var(--warning)' }} />
+            <span>
+              {warnings.length}{' '}
+              {warnings.length === 1
+                ? t('problems.warning', 'warning')
+                : t('problems.warnings', 'warnings')}
+            </span>
+          </div>
+          <div style={listStyle}>
+            {warnings.map((w, i) => (
+              <div key={`warn-${w.nodeId ?? i}`} style={itemStyle}>
+                <div style={itemTopStyle}>
+                  <span style={warnBadgeStyle}>{w.code}</span>
+                  {w.nodeId && (
+                    <>
+                      <span style={labelStyle}>{nodeLabel(w.nodeId, nodes)}</span>
+                      <button
+                        style={jumpBtnStyle}
+                        title={t('problems.jumpToNode', 'Jump to block')}
+                        onClick={() => jumpToNode(w.nodeId!)}
+                      >
+                        <CompassIcon size={10} />
+                        {t('problems.jump', 'Jump')}
+                      </button>
+                    </>
+                  )}
+                </div>
+                <div style={warnMsgStyle}>{w.message}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -227,5 +275,18 @@ const jumpBtnStyle: React.CSSProperties = {
 const msgStyle: React.CSSProperties = {
   fontSize: '0.7rem',
   color: 'var(--danger-text, var(--danger))',
+  opacity: 0.85,
+}
+
+const warnBadgeStyle: React.CSSProperties = {
+  ...badgeBase,
+  background: 'color-mix(in srgb, var(--warning) 18%, transparent)',
+  color: 'var(--warning)',
+  border: '1px solid color-mix(in srgb, var(--warning) 35%, transparent)',
+}
+
+const warnMsgStyle: React.CSSProperties = {
+  fontSize: '0.7rem',
+  color: 'var(--warning)',
   opacity: 0.85,
 }
