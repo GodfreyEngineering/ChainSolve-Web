@@ -537,7 +537,7 @@ Every user journey, from first signup to daily power use, must be polished and p
 
 - [x] **14.31** `scripts/verify-fast.sh` passes (5159+ tests, verified regularly)
 - [ ] **14.32** `scripts/verify-ci.sh` passes (including WASM build)
-- [ ] **14.33** Bundle size within budget (400KB JS gzip, 250KB WASM gzip)
+- [ ] **14.33** Bundle size within budget (400KB JS gzip, 350KB WASM gzip)
 - [ ] **14.34** `scripts/check-wasm-exports.mjs` updated for new exports
 - [ ] **14.35** Flakiness check: `CI=true npx playwright test --project=smoke --repeat-each=5`
 - [ ] **14.36** Full `npm run verify:ci` — all gates green

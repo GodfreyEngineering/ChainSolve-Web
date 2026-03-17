@@ -35,8 +35,8 @@ const MANIFEST_PATH = join(DIST, '.vite', 'manifest.json')
 const KB = 1024
 const BUDGETS = {
   initialGzip: 400 * KB, // initial-load JS closure (gzip) — raised from 300 KB: React + React Flow + i18n + Sentry + engine bridge is ~355 KB gz
-  wasmRaw: 800 * KB, // per-WASM file (raw) — ENG-09: -O3 speed build is larger than -Oz
-  wasmGzip: 250 * KB, // per-WASM file (gzip) — ENG-09: updated for speed build
+  wasmRaw: 1000 * KB, // per-WASM file (raw) — raised from 800 KB: dashu-float HP arithmetic + ODE + vehicle + optim + NN/ML modules
+  wasmGzip: 350 * KB, // per-WASM file (gzip) — raised from 250 KB: same reason
 }
 
 // ── Helpers ───────────────────────────────────────────────────────

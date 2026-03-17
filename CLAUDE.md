@@ -293,8 +293,8 @@ Playwright does **not** run on PRs — only after merge to `main`, as a pre-cond
 | Metric | Budget |
 | ------ | ------ |
 | Initial JS (gzip) | 400 KB |
-| WASM (raw) | 800 KB |
-| WASM (gzip) | 250 KB |
+| WASM (raw) | 1000 KB |
+| WASM (gzip) | 350 KB |
 
 Use `React.lazy()` to keep new components out of the initial load. Run `npm run perf:bundle` after a build to check locally.
 
