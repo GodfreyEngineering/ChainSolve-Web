@@ -36,6 +36,7 @@ pub mod ops;
 pub mod optim;
 pub mod precision;
 pub mod sparse;
+pub mod sparse_solvers;
 pub mod vehicle;
 pub mod types;
 pub mod validate;
