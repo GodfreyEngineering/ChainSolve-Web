@@ -118,11 +118,11 @@ Make ChainSolve trustworthy for PhD-level research and production vehicle calcul
 
 ### 3A — Arbitrary Precision Foundation
 
-- [ ] **3.1** Add `dashu-float` dependency to `engine-core/Cargo.toml` behind `high-precision` feature flag
-- [ ] **3.2** Enable feature in `engine-wasm/Cargo.toml`
-- [ ] **3.3** Add `Value::HighPrecision { display: String, approx: f64, precision: u32 }` to `types.rs`
-- [ ] **3.4** Update serde for new variant
-- [ ] **3.5** Update `canonicalize_value()` to pass through HP values
+- [x] **3.1** Add `dashu-float` 0.4 to `engine-core/Cargo.toml` behind `high-precision` feature flag
+- [x] **3.2** Enable feature in `engine-wasm/Cargo.toml`
+- [x] **3.3** Add `Value::HighPrecision { display, approx, precision }` to `types.rs` with serde tagged variant
+- [x] **3.4** Handle in `kind_str()`, `summarize()`, `compute_value_hash()`
+- [x] **3.5** Update `canonicalize_value()` to pass through HP values unchanged
 - [ ] **3.6** Create `precision.rs` — HP arithmetic: add, sub, mul, div, sqrt, pow, sin, cos, pi (Chudnovsky)
 - [ ] **3.7** Add `precision: Option<u32>` to `EvalOptions`
 - [ ] **3.8** In `ops.rs`, branch to HP path when precision set
