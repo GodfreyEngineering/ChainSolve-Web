@@ -462,7 +462,7 @@
 - [x] **9.7** Settings: decimal places, sig figs, scientific notation threshold, angle unit (deg/rad), autosave interval, keybinding customisation
 - [x] **9.8** i18n: 7 locales (en, de, es, fr, he, it, ja) with 2191+ keys
 - [x] **9.9** Explore/marketplace: template gallery, search, categories, likes, downloads
-- [ ] **9.10** Interactive 5-minute tutorial: build spring-mass-damper from scratch — demonstrates input→compute→visualise workflow. Opens as a ChainSolve graph with step-by-step annotations.
+- [x] **9.10** Interactive 5-minute tutorial: build spring-mass-damper from scratch — demonstrates input→compute→visualise workflow. Opens as a ChainSolve graph with step-by-step annotations.
 - [ ] **9.11** Template gallery on home: "Vehicle Suspension K&C", "PID Controller Tuning", "Curve Fitting", "Neural Network Training", "Structural Optimisation", "Battery Thermal Model" — each fully functional with inline comments
 - [ ] **9.12** AI assistant (opt-in): natural language → suggested graph via LLM API. User reviews and approves before insertion. Like Mathematica's Notebook Assistant.
 - [x] **9.13** Progressive disclosure: simple blocks show minimal config by default. "Advanced" toggle reveals all parameters.
