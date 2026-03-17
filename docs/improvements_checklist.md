@@ -306,7 +306,7 @@
 - [ ] **3.19** Double-click node → open full config panel as side sheet (slide from right, 400px wide) instead of requiring separate inspector — faster workflow
 - [x] **3.20** Edge labels: on hover, show data shape label ("[3×3]", "[1024]", "5.23 N") — understand data flow without clicking
 - [ ] **3.21** Smart edge routing: Bezier curves with obstacle avoidance — route around other nodes instead of through them (A* pathfinding on grid)
-- [ ] **3.22** Animated flow direction: subtle particle animation along edge during execution — shows data flowing through the graph
+- [x] **3.22** Animated flow direction: subtle particle animation along edge during execution — shows data flowing through the graph
 - [ ] **3.23** Edge bundling: when many edges share source/target regions, bundle them visually for cleaner appearance — unbundle on hover
 
 ### 3C — Graph Organisation
