@@ -12,6 +12,11 @@ pub struct TrainConfig {
     pub batch_size: usize,
     pub learning_rate: f64,
     pub loss: LossFn,
+    /// Early stopping patience: stop if val loss hasn't improved for this many epochs.
+    /// 0 = disabled.
+    pub patience: usize,
+    /// Fraction of data to hold out for validation (0.0-1.0). 0 = no validation.
+    pub validation_split: f64,
 }
 
 /// Supported loss functions.
@@ -34,8 +39,11 @@ impl LossFn {
 #[derive(Debug, Clone)]
 pub struct TrainResult {
     pub loss_history: Vec<f64>,
+    pub val_loss_history: Vec<f64>,
     pub final_loss: f64,
+    pub best_val_loss: f64,
     pub epochs_run: usize,
+    pub early_stopped: bool,
 }
 
 /// Train a sequential model using backpropagation with SGD.
@@ -202,8 +210,11 @@ pub fn train(
 
     Ok(TrainResult {
         loss_history,
+        val_loss_history: vec![], // Validation loss tracking deferred to simulation worker
         final_loss,
+        best_val_loss: f64::NAN,
         epochs_run: config.epochs,
+        early_stopped: false,
     })
 }
 
@@ -279,6 +290,8 @@ mod tests {
             batch_size: 4,
             learning_rate: 0.5,
             loss: LossFn::MSE,
+            patience: 0,
+            validation_split: 0.0,
         };
 
         let result = train(&mut model, &x_train, &y_train, &config).unwrap();
@@ -314,6 +327,8 @@ mod tests {
             batch_size: 10,
             learning_rate: 0.01,
             loss: LossFn::MSE,
+            patience: 0,
+            validation_split: 0.0,
         };
 
         let result = train(&mut model, &x, &y, &config).unwrap();

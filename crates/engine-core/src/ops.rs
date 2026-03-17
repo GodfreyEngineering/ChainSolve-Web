@@ -3376,11 +3376,16 @@ fn evaluate_node_inner(
             let learning_rate = scalar_or(data, "learningRate", 0.01);
             let loss_str = data.get("loss").and_then(|v| v.as_str()).unwrap_or("mse");
 
+            let patience = data.get("patience").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
+            let validation_split = scalar_or(data, "validationSplit", 0.0);
+
             let config = crate::nn::train::TrainConfig {
                 epochs,
                 batch_size,
                 learning_rate,
                 loss: crate::nn::train::LossFn::from_str(loss_str),
+                patience,
+                validation_split,
             };
 
             // Train
