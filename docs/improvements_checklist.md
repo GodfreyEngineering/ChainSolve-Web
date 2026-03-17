@@ -342,7 +342,7 @@
 - [x] **3.46** Variables: x=5 creates named Number block; subsequent x references reuse same node ID
 - [ ] **3.47** Syntax highlighting in expression input: colour operators (cyan), numbers (orange), functions (purple), variables (green), errors (red underline)
 - [ ] **3.48** Autocomplete: as user types, suggest matching block types, function names, declared variables, and constants — dropdown with signature hints
-- [ ] **3.49** Expression history: up/down arrow cycles through previously entered expressions (stored in localStorage)
+- [x] **3.49** Expression history: up/down arrow cycles through previously entered expressions (stored in localStorage)
 - [ ] **3.50** Drag from empty port → open search palette filtered to compatible block types — fastest way to add connected blocks
 
 ---
