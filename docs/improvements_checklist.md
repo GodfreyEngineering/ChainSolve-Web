@@ -564,7 +564,7 @@
 - [x] **15.11** Migration audit: verify all 15 migrations idempotent, consider squashing to single baseline (pre-release)
 - [x] **15.12** RLS policy audit: verify every table has appropriate policies (cross-reference with 0013 migration)
 - [x] **15.13** New ADRs: reactive eval model, CSEL grammar, magnetic snapping, simulation worker, faer integration, WebGPU strategy
-- [ ] **15.14** i18n: add translated labels for all new blocks (ODE, vehicle, ML classification, etc.) across all 7 locales
+- [x] **15.14** i18n: add translated labels for all new blocks (ODE, vehicle, ML classification, etc.) across all 7 locales
 
 ---
 
