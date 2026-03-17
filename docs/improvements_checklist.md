@@ -103,12 +103,12 @@ Operator blocks (add, multiply, max, min, etc.) currently have exactly 2 inputs.
 
 ### 2C — Variadic Node UI
 
-- [ ] **2.13** In `OperationNode.tsx`, detect variadic blocks → render "+" button below last input handle
-- [ ] **2.14** "Add input" action: increment `dynamicInputCount` in node data, re-render handles with `in_0`...`in_N` IDs
-- [ ] **2.15** "Remove input" button on hover of each port beyond `minInputs` — removes port and disconnects edge
-- [ ] **2.16** Drag-to-expand: dragging a wire to the bottom of a variadic node auto-creates a new port
-- [ ] **2.17** i18n keys for add/remove port tooltips across all 7 locales
-- [ ] **2.18** E2E test: create add block with 4 inputs, wire numbers, verify sum
+- [x] **2.13** In `OperationNode.tsx`, detect variadic blocks → render "+" button below last input handle
+- [x] **2.14** "Add input" action: increment `dynamicInputCount` in node data, re-render handles with `in_0`...`in_N` IDs
+- [x] **2.15** "Remove input" button (×) on each port beyond `minInputs`
+- [ ] **2.16** Drag-to-expand: dragging a wire to the bottom of a variadic node auto-creates a new port *(deferred — requires React Flow connection event interception)*
+- [ ] **2.17** i18n keys for add/remove port tooltips across all 7 locales *(deferred to housekeeping)*
+- [ ] **2.18** E2E test: create add block with 4 inputs, wire numbers, verify sum *(blocked: browser)*
 
 ---
 
