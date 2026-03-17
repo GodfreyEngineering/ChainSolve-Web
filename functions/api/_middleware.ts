@@ -13,10 +13,18 @@
 
 import { checkRateLimit } from './_rateLimit'
 
+// Additional origins can be injected at deploy-time via ALLOWED_ORIGINS_EXTRA
+// (comma-separated list in the Cloudflare Pages environment variable), e.g.
+// "https://staging.app.chainsolve.co.uk" for a staging environment.
+declare const ALLOWED_ORIGINS_EXTRA: string | undefined
+const extraOrigins: string[] =
+  typeof ALLOWED_ORIGINS_EXTRA === 'string' && ALLOWED_ORIGINS_EXTRA.trim()
+    ? ALLOWED_ORIGINS_EXTRA.split(',').map((s) => s.trim()).filter(Boolean)
+    : []
+
 const ALLOWED_ORIGINS: readonly string[] = [
   'https://app.chainsolve.co.uk',
-  // TODO: add staging when available
-  // "https://staging.app.chainsolve.co.uk",
+  ...extraOrigins,
   'http://localhost:5173', // Vite dev server
 ]
 

@@ -36,6 +36,8 @@ function reg(def: {
   minInputs?: number
   maxInputs?: number
   description?: string
+  synonyms?: string[]
+  tags?: string[]
 }): void {
   BLOCK_REGISTRY.set(def.type, def)
 }
@@ -597,6 +599,7 @@ export const CATEGORY_ORDER: BlockCategory[] = [
   'neuralNetworks',
   'odeSolvers',
   'vehicleSim',
+  'numerical',
 ]
 
 export const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -652,6 +655,7 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   neuralNetworks: 'Neural Networks',
   odeSolvers: 'ODE Solvers',
   vehicleSim: 'Vehicle Simulation',
+  numerical: 'Numerical Methods',
 }
 
 // ── Block taxonomy (G3-1: 3 main categories with subcategories) ─────────────

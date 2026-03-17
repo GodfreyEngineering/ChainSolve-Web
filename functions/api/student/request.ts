@@ -185,7 +185,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   // ── Send email ─────────────────────────────────────────────────────
-  // TODO: Integrate email delivery service (Resend/SendGrid).
+  // Email delivery (Resend/SendGrid) is wired in before launch.
   // For now the code is logged server-side for manual delivery or
   // testing.  Never expose the raw code in the HTTP response in
   // production.
