@@ -548,6 +548,14 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   integrate_mc:
     'Monte Carlo quadrature with deterministic seed. Suitable for high-dimensional or irregular integrands.',
 
+  // ── Interpolation ─────────────────────────────────────────────────────────
+  interp_cubic_spline:
+    'Cubic spline interpolation through data points with natural, clamped, or not-a-knot boundary conditions.',
+  interp_akima:
+    'Akima sub-spline interpolation. Uses locally-weighted slopes to avoid oscillation near outliers.',
+  interp_bspline:
+    "B-spline curve evaluation using de Boor's algorithm. Control points define shape; degree controls smoothness.",
+
   // ── SCI-12: Signal Processing / FFT ───────────────────────────────────────
   'signal.fft_magnitude':
     'FFT magnitude spectrum: |FFT[k]| for k = 0..N/2. Input zero-padded to next power of 2.',

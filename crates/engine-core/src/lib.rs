@@ -29,6 +29,7 @@ pub mod eval;
 pub mod expr;
 pub mod graph;
 pub mod integrate;
+pub mod interpolate;
 pub mod linalg;
 pub mod ml;
 pub mod nn;

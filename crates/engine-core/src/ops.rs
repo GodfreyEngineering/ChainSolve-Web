@@ -3281,6 +3281,84 @@ fn evaluate_node_inner(
             Value::scalar(result.value)
         }
 
+        // ── Interpolation ─────────────────────────────────────────
+        "interp_cubic_spline" | "interp.cubicSpline" => {
+            let xs = match inputs.get("xs") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => vec![],
+            };
+            let ys = match inputs.get("ys") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => vec![],
+            };
+            if xs.len() < 2 || ys.len() < 2 || xs.len() != ys.len() {
+                return Value::error("interp_cubic_spline: need matching xs and ys with at least 2 points");
+            }
+            let boundary = match data.get("boundary").and_then(|v| v.as_str()).unwrap_or("natural") {
+                "clamped" => crate::interpolate::SplineBoundary::Clamped(0.0, 0.0),
+                "notaknot" => crate::interpolate::SplineBoundary::NotAKnot,
+                _ => crate::interpolate::SplineBoundary::Natural,
+            };
+            let spline = crate::interpolate::cubic_spline(&xs, &ys, boundary);
+            if let Some(Value::Vector { value: qv }) = inputs.get("query") {
+                let out: Vec<f64> = qv.iter().map(|&x| spline.eval(x)).collect();
+                Value::Vector { value: out }
+            } else {
+                let q = scalar_or_nan(inputs, "query");
+                if q.is_nan() {
+                    return Value::error("interp_cubic_spline: query point required");
+                }
+                Value::scalar(spline.eval(q))
+            }
+        }
+
+        "interp_akima" | "interp.akima" => {
+            let xs = match inputs.get("xs") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => vec![],
+            };
+            let ys = match inputs.get("ys") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => vec![],
+            };
+            if xs.len() < 2 || ys.len() < 2 || xs.len() != ys.len() {
+                return Value::error("interp_akima: need matching xs and ys with at least 2 points");
+            }
+            let spline = crate::interpolate::akima(&xs, &ys);
+            if let Some(Value::Vector { value: qv }) = inputs.get("query") {
+                let out: Vec<f64> = qv.iter().map(|&x| spline.eval(x)).collect();
+                Value::Vector { value: out }
+            } else {
+                let q = scalar_or_nan(inputs, "query");
+                if q.is_nan() {
+                    return Value::error("interp_akima: query point required");
+                }
+                Value::scalar(spline.eval(q))
+            }
+        }
+
+        "interp_bspline" | "interp.bspline" => {
+            let ctrl = match inputs.get("ctrl") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => vec![],
+            };
+            if ctrl.len() < 2 {
+                return Value::error("interp_bspline: need at least 2 control points");
+            }
+            let degree = data.get("degree").and_then(|v| v.as_u64()).unwrap_or(3) as usize;
+            let knots = crate::interpolate::uniform_knots(ctrl.len(), degree);
+            if let Some(Value::Vector { value: qv }) = inputs.get("query") {
+                let out: Vec<f64> = qv.iter().map(|&t| crate::interpolate::bspline_eval(&ctrl, &knots, degree, t)).collect();
+                Value::Vector { value: out }
+            } else {
+                let q = scalar_or_nan(inputs, "query");
+                if q.is_nan() {
+                    return Value::error("interp_bspline: query parameter t required");
+                }
+                Value::scalar(crate::interpolate::bspline_eval(&ctrl, &knots, degree, q))
+            }
+        }
+
         // ── Optimization ──────────────────────────────────────────
         "optim.designVariable" => {
             // Source node: emit a table describing this design variable

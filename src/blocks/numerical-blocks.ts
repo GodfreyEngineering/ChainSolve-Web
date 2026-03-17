@@ -118,4 +118,60 @@ export function registerNumericalBlocks(register: (def: BlockDef) => void): void
     synonyms: ['random integration', 'stochastic quadrature'],
     tags: ['numerical', 'integration', 'monte carlo'],
   })
+
+  // ── Interpolation ────────────────────────────────────────────
+
+  register({
+    type: 'interp_cubic_spline',
+    label: 'Cubic Spline Interpolation',
+    category: 'numerical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'xs', label: 'X Points' },
+      { id: 'ys', label: 'Y Points' },
+      { id: 'query', label: 'Query' },
+    ],
+    defaultData: {
+      blockType: 'interp_cubic_spline',
+      label: 'Cubic Spline Interpolation',
+      boundary: 'natural',
+    },
+    description:
+      'Cubic spline interpolation through data points. Supports natural, clamped, and not-a-knot boundary conditions. Query can be scalar or vector.',
+    synonyms: ['spline', 'cubic interpolation', 'curve fitting', 'smooth interpolation'],
+    tags: ['numerical', 'interpolation', 'spline'],
+  })
+
+  register({
+    type: 'interp_akima',
+    label: 'Akima Interpolation',
+    category: 'numerical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'xs', label: 'X Points' },
+      { id: 'ys', label: 'Y Points' },
+      { id: 'query', label: 'Query' },
+    ],
+    defaultData: { blockType: 'interp_akima', label: 'Akima Interpolation' },
+    description:
+      'Akima sub-spline interpolation. Uses locally-weighted slopes to avoid oscillation near outliers. Better than cubic splines for noisy or uneven data.',
+    synonyms: ['akima spline', 'anti-oscillation', 'local interpolation'],
+    tags: ['numerical', 'interpolation', 'akima'],
+  })
+
+  register({
+    type: 'interp_bspline',
+    label: 'B-Spline Evaluation',
+    category: 'numerical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'ctrl', label: 'Control Points' },
+      { id: 'query', label: 'Parameter t' },
+    ],
+    defaultData: { blockType: 'interp_bspline', label: 'B-Spline Evaluation', degree: 3 },
+    description:
+      'Evaluate a B-spline curve at parameter t using de Boor\'s algorithm. Control points define the curve shape; degree controls smoothness (default 3 = cubic).',
+    synonyms: ['b-spline', 'de boor', 'basis spline', 'NURBS'],
+    tags: ['numerical', 'interpolation', 'bspline'],
+  })
 }
