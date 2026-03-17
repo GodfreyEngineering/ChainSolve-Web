@@ -87,7 +87,7 @@ Replace the "always auto-eval" model with a smart hybrid that auto-evals small g
 
 ### 1E — Stale Result Tracking
 
-- [ ] **1.27** Add to `statusBarStore.ts`:
+- [x] **1.27** Add to `statusBarStore.ts`:
   - `evalMode: 'auto' | 'deferred' | 'manual'` with localStorage persistence (`cs:evalMode`)
   - `isStale: boolean` — true when graph changed since last eval in non-auto mode
   - `lastEvalMs: number | null` — elapsed time of last successful eval
