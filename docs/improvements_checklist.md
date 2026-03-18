@@ -474,7 +474,7 @@
 
 ## Category 10 — Extensibility & API
 
-- [ ] **10.1** Block SDK: Rust crate `chainsolve-block-sdk` with Block trait — metadata(), validate(), evaluate(). Blocks compiled to WASM for browser execution.
+- [x] **10.1** Block SDK: Rust crate `chainsolve-block-sdk` with Block trait — metadata(), validate(), evaluate(). Blocks compiled to WASM for browser execution.
 - [ ] **10.2** Plugin system: publish custom blocks as WASM modules to ChainSolve Block Registry. Dynamic loading at runtime. WASM memory isolation for sandboxing.
 - [ ] **10.3** REST API: POST /api/graph/execute (returns job ID), GET /api/graph/{id}/results, POST /api/graph/export/fmu, POST /api/graph/export/pdf
 - [ ] **10.4** WebSocket: /api/graph/{id}/stream for execution progress and intermediate results
