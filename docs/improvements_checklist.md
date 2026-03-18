@@ -402,7 +402,7 @@
 - [x] **6.6** Nyquist plot: Re vs Im of G(jω) — for stability analysis (encirclement criterion). Root locus: poles/zeros vs gain parameter.
 - [x] **6.7** XY animation: time-varying plots with playback controls (play/pause/speed/scrub) — for visualising simulation results over time
 - [x] **6.8** Contour plot: 2D scalar field with isolines — for response surfaces and field visualisation
-- [ ] **6.9** 3D surface plot: via Three.js or React Three Fiber — interactive rotation, zoom, colourmap, wireframe toggle
+- [x] **6.9** 3D surface plot: via Three.js or React Three Fiber — interactive rotation, zoom, colourmap, wireframe toggle
 - [x] **6.10** Parallel coordinates: N vertical axes, each data point as a polyline — for multi-dimensional design space exploration
 - [x] **6.11** Pareto front plot: 2D/3D with dominated region shading — for multi-objective optimisation results
 - [x] **6.12** Sankey diagram: flow quantities between nodes — for energy/mass balance visualisation
