@@ -20,7 +20,7 @@
 //!   dv_i/dt = a_i(q, v, t) (velocities from acceleration expressions)
 //! ```
 //!
-//! State vector: `y = [q_0, ..., q_{N-1}, v_0, ..., v_{N-1}]`  (positions first).
+//! State vector: `y = [q_0, ..., q_{N-1}, v_0, ..., v_{N-1}]` (positions first).
 //! Initial state: y0 has length 2N.
 //! Acceleration expressions: `equations` has length N, indexed y0..y{N-1} for
 //! positions and y{N}..y{2N-1} for velocities (same naming as other solvers).
@@ -44,7 +44,7 @@ pub enum SympMethod {
 ///     may use: `t`, `y0..y{N-1}` (positions), `y{N}..y{2N-1}` (velocities),
 ///     and named params.
 ///
-/// `y0` — initial state [q_0..q_{N-1}, v_0..v_{N-1}], length 2N.
+/// `y0` — initial state \[q_0..q_{N-1}, v_0..v_{N-1}\], length 2N.
 ///
 /// `state_names` — column header names for positions then velocities
 ///     (used in output table). If empty, defaults to `["q0".."qN", "v0".."vN"]`.

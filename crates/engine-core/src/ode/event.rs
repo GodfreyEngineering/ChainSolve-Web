@@ -8,7 +8,7 @@
 //!
 //! 1. Take a standard RK4 step from t to t+h.
 //! 2. Evaluate g before and after the step.
-//! 3. If `g_before * g_after <= 0` (sign change), bisect on [t, t+h]:
+//! 3. If `g_before * g_after <= 0` (sign change), bisect on \[t, t+h\]:
 //!    - Mid: t_mid = (t_left + t_right) / 2
 //!    - Advance the ODE from t_left to t_mid using the stored start state
 //!    - Evaluate g at t_mid; narrow the bracket

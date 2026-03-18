@@ -49,8 +49,8 @@ impl CudaContext {
     /// Dense matrix multiply C = A × B.  Stub always returns NotAvailable.
     ///
     /// # Parameters
-    /// - `a`: row-major f32 slice [M × K]
-    /// - `b`: row-major f32 slice [K × N]
+    /// - `a`: row-major f32 slice \[M × K\]
+    /// - `b`: row-major f32 slice \[K × N\]
     /// - `m`, `k`, `n`: matrix dimensions
     pub fn gemm(
         &self,

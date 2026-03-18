@@ -6,7 +6,7 @@ use crate::types::Value;
 /// Run a parametric sweep: evaluate `f(x)` for `steps` linearly spaced values
 /// of a single design variable from `var.min` to `var.max`.
 ///
-/// Returns a Table with columns ["input", "output"] and `steps` rows.
+/// Returns a Table with columns `["input", "output"]` and `steps` rows.
 pub fn parametric_sweep<F>(f: &F, var: &DesignVar, steps: usize) -> Value
 where
     F: Fn(&[f64]) -> f64,

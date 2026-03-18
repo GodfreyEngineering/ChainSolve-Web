@@ -11,13 +11,13 @@
 //! 3. One additional linear solve per parameter (using the already-factored A).
 //!
 //! The block accepts:
-//! - `A`: n×n matrix as a flat row-major Vec<f64>  (or generated from expressions)
+//! - `A`: n×n matrix as a flat row-major `Vec<f64>`  (or generated from expressions)
 //! - `b`: n-vector
 //! - `param_names`: comma-separated parameter names
 //! - `param_values`: comma-separated current parameter values
 //! - `A_expr` / `b_expr`: optional expression strings for A_ij / b_i that reference params
 //!
-//! Output: Table [param_idx, dx0/dp, dx1/dp, …, dxN/dp]
+//! Output: Table \[param_idx, dx0/dp, dx1/dp, …, dxN/dp\]
 
 use std::collections::HashMap;
 
@@ -40,7 +40,7 @@ fn eval(expr: &str, vars: &HashMap<String, f64>) -> f64 {
 }
 
 /// Build the n×n matrix A from expression strings (row-major) evaluated at params.
-/// `a_exprs[i * n + j]` is the expression for A[i,j].
+/// `a_exprs[i * n + j]` is the expression for `A[i,j]`.
 /// Variables available in expressions: param names.
 fn build_matrix(a_exprs: &[String], _n: usize, params: &HashMap<String, f64>) -> Vec<f64> {
     a_exprs.iter().map(|e| eval(e, params)).collect::<Vec<_>>()

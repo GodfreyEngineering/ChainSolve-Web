@@ -12,7 +12,7 @@
  * Bridge: ctrl.zoh → 'number', ctrl.rateTransition → 'number'.
  */
 
-import { memo, useEffect } from 'react'
+import { memo, createElement, useMemo, useEffect } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import type { NodeData } from '../../../blocks/types'
@@ -36,7 +36,10 @@ function ZOHNodeInner({ id, data, selected }: NodeProps) {
   const samplePeriod = nd.samplePeriod ?? 0.01
   const heldValue = nd.heldValue ?? 0
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
-  const TypeIcon = getNodeTypeIcon(nd.blockType)
+  const typeIcon = useMemo(
+    () => createElement(getNodeTypeIcon(nd.blockType), { size: 12 }),
+    [nd.blockType],
+  )
 
   // Read upstream value and pass through (reactive mode)
   const upstream = useComputedValue(id)
@@ -58,7 +61,7 @@ function ZOHNodeInner({ id, data, selected }: NodeProps) {
       }}
     >
       <div style={{ ...s.nodeHeader, background: typeColor }}>
-        <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
+        <span style={s.nodeHeaderIcon}>{typeIcon}</span>
         <span style={s.nodeHeaderLabel}>{nd.label ?? t('zoh.label', 'ZOH')}</span>
       </div>
       <div style={s.nodeBody}>
@@ -167,7 +170,10 @@ function RateTransitionNodeInner({ id, data, selected }: NodeProps) {
   const outputRate = nd.outputRate ?? 100
   const interpolation = nd.interpolation ?? 'zoh'
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
-  const TypeIcon = getNodeTypeIcon(nd.blockType)
+  const typeIcon = useMemo(
+    () => createElement(getNodeTypeIcon(nd.blockType), { size: 12 }),
+    [nd.blockType],
+  )
 
   // Pass through in reactive mode
   const upstream = useComputedValue(id)
@@ -189,7 +195,7 @@ function RateTransitionNodeInner({ id, data, selected }: NodeProps) {
       }}
     >
       <div style={{ ...s.nodeHeader, background: typeColor }}>
-        <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
+        <span style={s.nodeHeaderIcon}>{typeIcon}</span>
         <span style={s.nodeHeaderLabel}>
           {nd.label ?? t('rateTransition.label', 'Rate Transition')}
         </span>

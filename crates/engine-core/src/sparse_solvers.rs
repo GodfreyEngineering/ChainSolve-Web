@@ -556,7 +556,7 @@ mod tests {
         (a - b).abs() < tol
     }
 
-    /// Build a 3×3 SPD matrix: [[4,-1,0],[-1,4,-1],[0,-1,4]]
+    /// Build a 3×3 SPD matrix: `[[4,-1,0],[-1,4,-1],[0,-1,4]]`
     fn build_spd_3x3() -> CsrMatrix {
         let mut coo = CooMatrix::new(3, 3);
         coo.push(0, 0, 4.0);
@@ -569,7 +569,7 @@ mod tests {
         coo.to_csr()
     }
 
-    /// Build a 3×3 non-symmetric matrix: [[3,1,0],[0,3,1],[0,0,3]]
+    /// Build a 3×3 non-symmetric matrix: `[[3,1,0],[0,3,1],[0,0,3]]`
     fn build_nonsym_3x3() -> CsrMatrix {
         let mut coo = CooMatrix::new(3, 3);
         coo.push(0, 0, 3.0);

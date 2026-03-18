@@ -38,19 +38,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-interface PluginPackage {
-  id: string
-  name: string
-  description: string
-  category: string
-  author: string
-  version: string
-  downloadUrl: string
-  checksum: string
-  publishedAt: string
-  downloads: number
-}
-
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const MAX_WASM_BYTES = 10 * 1024 * 1024 // 10 MB

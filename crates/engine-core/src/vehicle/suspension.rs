@@ -4,7 +4,7 @@
 //!   m_s * x_s'' = -k_s*(x_s - x_u) - c_s*(x_s' - x_u')
 //!   m_u * x_u'' = k_s*(x_s - x_u) + c_s*(x_s' - x_u') - k_t*(x_u - x_r)
 //!
-//! State vector: [x_s, v_s, x_u, v_u] where v = dx/dt.
+//! State vector: \[x_s, v_s, x_u, v_u\] where v = dx/dt.
 //!
 //! Reference: Dixon, "Suspension Geometry and Computation" (2009).
 
@@ -39,7 +39,7 @@ pub const DEFAULT_PASSENGER: QuarterCarParams = QuarterCarParams {
 /// Simulate a quarter-car suspension response to a step road input.
 ///
 /// `road_step` is the road displacement (m) applied as a step at t=0.
-/// Returns a table of [t, x_s, v_s, x_u, v_u] over time.
+/// Returns a table of \[t, x_s, v_s, x_u, v_u\] over time.
 pub fn quarter_car_step_response(
     params: &QuarterCarParams,
     road_step: f64,
@@ -91,7 +91,7 @@ pub fn quarter_car_step_response(
 
 /// Parameters for a half-car (bicycle model in heave/pitch) suspension model.
 ///
-/// State: [z_s, dz_s, θ, dθ, z_uf, dz_uf, z_ur, dz_ur]
+/// State: \[z_s, dz_s, θ, dθ, z_uf, dz_uf, z_ur, dz_ur\]
 /// z_s = sprung mass heave (m), θ = pitch (rad)
 /// z_uf/z_ur = front/rear unsprung heave (m)
 #[derive(Debug, Clone)]
@@ -178,7 +178,7 @@ pub fn half_car_step_response(
 ///
 /// Body DOFs: heave (z_s), pitch (θ_p), roll (θ_r) → 3 DOF
 /// Wheel DOFs: front-left (z_fl), front-right (z_fr), rear-left (z_rl), rear-right (z_rr) → 4 DOF
-/// State: [z_s, dz_s, θ_p, dθ_p, θ_r, dθ_r, z_fl, dz_fl, z_fr, dz_fr, z_rl, dz_rl, z_rr, dz_rr]
+/// State: \[z_s, dz_s, θ_p, dθ_p, θ_r, dθ_r, z_fl, dz_fl, z_fr, dz_fr, z_rl, dz_rl, z_rr, dz_rr\]
 #[derive(Debug, Clone)]
 pub struct FullVehicleParams {
     pub m_s: f64,   // sprung mass (kg)

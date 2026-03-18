@@ -251,7 +251,7 @@ pub struct DaeSystem {
     pub algebraic_vars: Vec<String>,
     /// All equations as text strings (suitable for symbolic processing)
     pub equations: Vec<String>,
-    /// Structural incidence matrix: equations[i] references variables[j] iff incidence[i][j]
+    /// Structural incidence matrix: `equations[i]` references `variables[j]` iff `incidence[i][j]`
     pub incidence: Vec<Vec<bool>>,
     /// Structural index (0 = ODE, 1 = index-1 DAE, ≥2 = high-index DAE)
     pub structural_index: usize,
@@ -713,7 +713,7 @@ impl MultiDomainBlock {
     /// Create a DC motor block with electrical + rotational + thermal coupling.
     ///
     /// Parameters:
-    /// - `R`: armature resistance [Ω]
+    /// - `R`: armature resistance \[Ω\]
     /// - `L`: armature inductance \[H\]
     /// - `k`: motor constant \[V·s/rad = N·m/A\]
     /// - `J`: rotor inertia \[kg·m²\]

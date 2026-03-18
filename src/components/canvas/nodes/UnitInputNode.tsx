@@ -9,7 +9,7 @@
  * Temperature conversions handle the additive offset (°C → K, °F → K).
  */
 
-import { memo, useState, useRef, useEffect, useCallback } from 'react'
+import { memo, createElement, useMemo, useState, useRef, useEffect, useCallback } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import type { NodeData } from '../../../blocks/types'
@@ -109,7 +109,10 @@ function UnitInputNodeInner({ id, data, selected }: NodeProps) {
   }, [searchOpen])
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
-  const TypeIcon = getNodeTypeIcon(nd.blockType)
+  const typeIcon = useMemo(
+    () => createElement(getNodeTypeIcon(nd.blockType), { size: 12 }),
+    [nd.blockType],
+  )
 
   return (
     <div
@@ -122,7 +125,7 @@ function UnitInputNodeInner({ id, data, selected }: NodeProps) {
     >
       {/* Header */}
       <div style={{ ...s.nodeHeader, background: typeColor }}>
-        <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
+        <span style={s.nodeHeaderIcon}>{typeIcon}</span>
         <span style={s.nodeHeaderLabel}>{nd.label ?? t('unitInput.label', 'Unit Input')}</span>
       </div>
 

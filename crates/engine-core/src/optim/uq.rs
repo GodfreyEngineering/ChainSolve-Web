@@ -16,7 +16,7 @@
 //!
 //! ### Basis selection
 //!
-//! - **Legendre** (`"legendre"`, default): Uniform[-1,1] inputs → L_n(x)
+//! - **Legendre** (`"legendre"`, default): Uniform\[-1,1\] inputs → L_n(x)
 //! - **Hermite**  (`"hermite"`): Standard normal inputs → He_n(x) (probabilist's Hermite)
 //!
 //! Bases are built for total polynomial degree `p` and `n` input variables,
@@ -57,7 +57,7 @@ use crate::types::Value;
 /// Distribution type for each uncertain variable.
 #[derive(Clone, Debug)]
 pub enum UqDist {
-    /// Uniform on [min, max] → mapped to Legendre ξ ∈ [-1, 1].
+    /// Uniform on \[min, max\] → mapped to Legendre ξ ∈ \[-1, 1\].
     Uniform { min: f64, max: f64 },
     /// Normal(μ, σ) → mapped to Hermite ξ ∈ standard normal.
     Normal { mean: f64, std: f64 },
@@ -82,7 +82,7 @@ impl UqDist {
         }
     }
 
-    /// Map from standard space ξ ∈ [-1,1] (Legendre) or N(0,1) (Hermite) to physical space.
+    /// Map from standard space ξ ∈ \[-1,1\] (Legendre) or N(0,1) (Hermite) to physical space.
     pub fn from_standard(&self, xi: f64) -> f64 {
         match self {
             Self::Uniform { min, max } => min + 0.5 * (xi + 1.0) * (max - min),
@@ -324,7 +324,7 @@ fn eval_1d_poly(x: f64, n: usize, basis: BasisType) -> f64 {
     }
 }
 
-/// Legendre polynomial Lₙ(x) on [-1,1] via recurrence.
+/// Legendre polynomial Lₙ(x) on \[-1,1\] via recurrence.
 fn legendre(x: f64, n: usize) -> f64 {
     match n {
         0 => 1.0,

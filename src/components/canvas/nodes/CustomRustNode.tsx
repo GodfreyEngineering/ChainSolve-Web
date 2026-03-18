@@ -11,7 +11,7 @@
  * Bridge: scripting.rust → 'number' (data.value).
  */
 
-import { memo, useCallback, useEffect, useRef } from 'react'
+import { memo, createElement, useMemo, useCallback, useEffect, useRef } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps, useEdges } from '@xyflow/react'
 import type { NodeData } from '../../../blocks/types'
 import { NODE_STYLES as s } from './nodeStyles'
@@ -44,7 +44,10 @@ function CustomRustNodeInner({ id, data, selected }: NodeProps) {
   const abortRef = useRef<AbortController | null>(null)
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
-  const TypeIcon = getNodeTypeIcon(nd.blockType)
+  const typeIcon = useMemo(
+    () => createElement(getNodeTypeIcon(nd.blockType), { size: 12 }),
+    [nd.blockType],
+  )
 
   const rustVars: RustVar[] = (nd.rustVars as RustVar[] | undefined) ?? []
 
@@ -79,6 +82,7 @@ function CustomRustNodeInner({ id, data, selected }: NodeProps) {
 
   // ── Compile & evaluate ───────────────────────────────────────────────────
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const compileAndRun = useCallback(async () => {
     const code = nd.rustCode?.trim()
     if (!code) return
@@ -131,7 +135,7 @@ function CustomRustNodeInner({ id, data, selected }: NodeProps) {
         rustCompiling: false,
       })
     }
-  }, [id, nd.rustCode, v0, v1, v2, v3, v4, v5, v6, v7, updateNodeData]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [id, nd.rustCode, v0, v1, v2, v3, v4, v5, v6, v7, updateNodeData])
 
   // Debounce compile on code/input change (longer debounce — compilation is expensive)
   useEffect(() => {
@@ -181,7 +185,7 @@ function CustomRustNodeInner({ id, data, selected }: NodeProps) {
       }}
     >
       <div style={{ ...s.nodeHeader, background: typeColor }}>
-        <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
+        <span style={s.nodeHeaderIcon}>{typeIcon}</span>
         <span style={s.nodeHeaderLabel}>{nd.label ?? 'Custom Rust'}</span>
         <span style={{ marginLeft: 'auto', fontSize: 9, color: 'rgba(255,255,255,0.8)' }}>
           {statusText}

@@ -8102,7 +8102,7 @@ fn day_to_ymd(day: i64) -> (i64, i64, i64) {
     (year, month, dom)
 }
 
-/// Read the `c` (count) port, clamp to [min_c..6], return as usize.
+/// Read the `c` (count) port, clamp to \[min_c..6\], return as usize.
 fn validated_count(inputs: &HashMap<String, Value>, min_c: usize) -> usize {
     let raw = scalar_or_nan(inputs, "c");
     if raw.is_nan() { min_c } else { (raw.round() as usize).clamp(min_c, 6) }

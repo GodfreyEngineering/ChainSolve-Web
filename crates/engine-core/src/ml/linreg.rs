@@ -2,7 +2,7 @@
 
 use crate::types::Value;
 
-/// Trained linear regression model: y = coeffs[0] + coeffs[1]*x1 + coeffs[2]*x2 + ...
+/// Trained linear regression model: y = `coeffs[0]` + `coeffs[1]`*x1 + `coeffs[2]`*x2 + ...
 #[derive(Debug, Clone)]
 pub struct LinearModel {
     pub coefficients: Vec<f64>,
@@ -13,7 +13,7 @@ pub struct LinearModel {
 /// `x_rows`: each inner Vec is one sample's features.
 /// `y`: target values (one per sample).
 ///
-/// Returns coefficients [intercept, w1, w2, ...].
+/// Returns coefficients `[intercept, w1, w2, ...]`.
 pub fn fit(x_rows: &[Vec<f64>], y: &[f64]) -> Result<LinearModel, String> {
     let n = x_rows.len();
     if n == 0 {

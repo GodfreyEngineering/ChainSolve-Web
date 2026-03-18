@@ -6,14 +6,14 @@
 //!   - DeepONet: trunk-branch decomposition for operator learning.
 //!
 //! Architecture (FNO-1D):
-//!   Input u(x) ∈ R^N  →  Lift(W_0) → [FNO_layer × D] → Project(W_proj) → v(x) ∈ R^M
+//!   Input u(x) ∈ R^N  →  Lift(W_0) → \[FNO_layer × D\] → Project(W_proj) → v(x) ∈ R^M
 //!
 //! FNO layer:
 //!   h → FFT(h) → truncate to n_modes → R*h_hat + IFFT → W_local*h → GELU → out
 //!
 //! DeepONet:
-//!   branch: u(x_1..x_m) → MLP → [b_1..b_p]
-//!   trunk:  y (query point) → MLP → [t_1..t_p]
+//!   branch: u(x_1..x_m) → MLP → \[b_1..b_p\]
+//!   trunk:  y (query point) → MLP → \[t_1..t_p\]
 //!   output: sum(b_i * t_i) + bias
 
 use crate::rng::Xoshiro256;
@@ -59,9 +59,9 @@ fn fft_r2(re: &mut [f64], im: &mut [f64], inverse: bool) {
 
 // ── FNO layer ─────────────────────────────────────────────────────────────────
 
-/// Fourier layer spectral weights: [n_modes × width_in × width_out] complex
+/// Fourier layer spectral weights: \[n_modes × width_in × width_out\] complex
 struct SpectralConv {
-    /// Complex weights for Fourier modes: [n_modes][w_in × w_out] as (re, im) pairs.
+    /// Complex weights for Fourier modes: \[n_modes\]\[w_in × w_out\] as (re, im) pairs.
     w_re: Vec<f64>, // [n_modes * w_in * w_out]
     w_im: Vec<f64>, // [n_modes * w_in * w_out]
     n_modes: usize,
@@ -78,8 +78,8 @@ impl SpectralConv {
         SpectralConv { w_re, w_im, n_modes, w_in, w_out }
     }
 
-    /// Apply spectral convolution to batched input h: [n_points × w_in].
-    /// Returns [n_points × w_out].
+    /// Apply spectral convolution to batched input h: \[n_points × w_in\].
+    /// Returns \[n_points × w_out\].
     fn forward(&self, h: &[f64], n_pts: usize) -> Vec<f64> {
         assert_eq!(h.len(), n_pts * self.w_in);
         let n_padded = {
@@ -143,7 +143,7 @@ impl SpectralConv {
     }
 }
 
-/// Local linear layer: W [w_in × w_out] applied pointwise.
+/// Local linear layer: W \[w_in × w_out\] applied pointwise.
 struct PointwiseLinear {
     w: Vec<f64>,
     b: Vec<f64>,
@@ -266,7 +266,7 @@ impl FnoModel {
         self.d_out
     }
 
-    /// Forward pass: input h [n_pts × d_in], returns [n_pts × d_out].
+    /// Forward pass: input h \[n_pts × d_in\], returns \[n_pts × d_out\].
     pub fn forward(&self, h: &[f64]) -> Vec<f64> {
         let n_pts = self.n_pts;
         assert_eq!(
@@ -346,7 +346,7 @@ impl Adam {
 #[derive(Debug, Clone)]
 pub struct NeuralOpConfig {
     pub arch: NeuralOpArch,
-    /// Training data: rows = samples, cols = [u_1..u_n, v_1..v_m]
+    /// Training data: rows = samples, cols = \[u_1..u_n, v_1..v_m\]
     pub n_pts_in: usize,   // grid points for input function
     pub n_pts_out: usize,  // grid points for output function
     pub width: usize,
@@ -387,7 +387,7 @@ impl Default for NeuralOpConfig {
 /// Training result.
 #[derive(Debug)]
 pub struct NeuralOpResult {
-    /// Predicted output for each sample: [n_samples × n_pts_out]
+    /// Predicted output for each sample: \[n_samples × n_pts_out\]
     pub predictions: Vec<Vec<f64>>,
     pub final_loss: f64,
     pub loss_history: Vec<f64>,
@@ -503,7 +503,7 @@ fn deeponet_mse(
 
 /// Train a neural operator on (input function, output function) pairs.
 ///
-/// `train_data`: each row = [u_1..u_n_pts_in, v_1..v_n_pts_out]
+/// `train_data`: each row = \[u_1..u_n_pts_in, v_1..v_n_pts_out\]
 pub fn train_neural_op(
     cfg: &NeuralOpConfig,
     train_data: &[Vec<f64>],

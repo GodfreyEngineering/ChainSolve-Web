@@ -22,7 +22,7 @@ pub enum PdeType {
     Advection,
     /// u_t = -c * u_x + D * u_xx
     AdvectionDiffusion,
-    /// u_tt = c^2 * u_xx  (stored as [u, u_t])
+    /// u_tt = c^2 * u_xx  (stored as \[u, u_t\])
     Wave,
 }
 

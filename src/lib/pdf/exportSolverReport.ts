@@ -265,7 +265,7 @@ export async function exportSolverReport(
   }
 
   function drawKV(state: PageState, key: string, value: string, mono = false): PageState {
-    let s = ensureSpace(state, LH)
+    const s = ensureSpace(state, LH)
     const kw = fontBold.widthOfTextAtSize(`${key}: `, 9)
     s.page.drawText(`${key}: `, {
       x: MARGIN + 8,

@@ -149,7 +149,7 @@ fn encode_node(
 /// Export a Sequential model to ONNX protobuf bytes.
 ///
 /// Returns `Err` if the model is empty or contains unsupported layers.
-/// Input shape: [batch, input_size]. Batch dimension is dynamic (None).
+/// Input shape: \[batch, input_size\]. Batch dimension is dynamic (None).
 pub fn export_onnx(model: &Sequential, model_name: &str) -> Result<Vec<u8>, String> {
     if model.layers.is_empty() {
         return Err("Cannot export empty model".to_string());

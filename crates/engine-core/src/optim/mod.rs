@@ -61,7 +61,7 @@ pub struct OptimResult {
 
 /// Parse design variables from the "variables" input port.
 ///
-/// Variables come as a Table with columns ["name", "min", "max", "initial", "step"]
+/// Variables come as a Table with columns `["name", "min", "max", "initial", "step"]`
 /// or as scalar metadata encoded in node data.
 pub fn parse_design_vars(
     inputs: &HashMap<String, Value>,

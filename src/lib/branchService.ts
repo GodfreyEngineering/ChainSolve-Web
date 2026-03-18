@@ -96,7 +96,7 @@ export async function createBranch(
   const session = await requireSession()
 
   // Validate branch name
-  if (!/^[\w\-]{1,64}$/.test(branchName)) {
+  if (!/^[\w-]{1,64}$/.test(branchName)) {
     throw new ServiceError(
       'BRANCH_INVALID_NAME',
       'Branch name must be 1–64 alphanumeric/hyphen/underscore characters',

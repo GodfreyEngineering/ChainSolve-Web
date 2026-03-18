@@ -4,7 +4,7 @@ use super::linreg::{self, LinearModel};
 
 /// Fit polynomial regression of given `degree` on 1D input.
 ///
-/// Transforms x → [x, x², x³, ...] then applies OLS.
+/// Transforms x → \[x, x², x³, ...\] then applies OLS.
 pub fn fit(x: &[f64], y: &[f64], degree: usize) -> Result<LinearModel, String> {
     let degree = degree.max(1).min(10); // cap at degree 10
     let x_poly: Vec<Vec<f64>> = x

@@ -29,9 +29,9 @@
 //!
 //! `beta(l, c)` = binomial(l + c, c) = number of steps solvable with l levels and c checkpoints.
 //!
-//! The schedule recursively decides: for segment [s, t] with c checkpoints available,
-//! advance to the *binomial checkpoint* position, save state, recurse on [s, ckpt]
-//! then replay [ckpt, t] backward.
+//! The schedule recursively decides: for segment \[s, t\] with c checkpoints available,
+//! advance to the *binomial checkpoint* position, save state, recurse on \[s, ckpt\]
+//! then replay \[ckpt, t\] backward.
 //!
 //! Reference: Griewank, A. & Walther, A. "Algorithm 799: Revolve — an implementation
 //! of checkpointing for the reverse or adjoint mode of computational differentiation",

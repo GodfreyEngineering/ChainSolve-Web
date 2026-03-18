@@ -15,7 +15,7 @@
  * Additional named source handles for common Pacejka params (PCY1, PDY1, etc.)
  */
 
-import { memo, useCallback, useRef } from 'react'
+import { memo, createElement, useMemo, useCallback, useRef } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import type { NodeData } from '../../../blocks/types'
@@ -108,7 +108,10 @@ function TirFileInputNodeInner({ id, data, selected }: NodeProps) {
   const { updateNodeData } = useReactFlow()
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
-  const TypeIcon = getNodeTypeIcon(nd.blockType)
+  const typeIcon = useMemo(
+    () => createElement(getNodeTypeIcon(nd.blockType), { size: 12 }),
+    [nd.blockType],
+  )
 
   const fileName = nd.tirFileName || ''
   const tirError = nd.tirError ?? null
@@ -208,7 +211,7 @@ function TirFileInputNodeInner({ id, data, selected }: NodeProps) {
       }}
     >
       <div style={{ ...s.nodeHeader, background: typeColor }}>
-        <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
+        <span style={s.nodeHeaderIcon}>{typeIcon}</span>
         <span style={s.nodeHeaderLabel}>
           {nd.label ?? t('tirFileInput.label', '.tir File Input')}
         </span>

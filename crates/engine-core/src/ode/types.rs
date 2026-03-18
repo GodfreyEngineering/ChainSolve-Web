@@ -9,7 +9,7 @@ use std::collections::HashMap;
 /// and params are named constants.
 #[derive(Debug, Clone)]
 pub struct OdeSystem {
-    /// Expression strings for each state derivative: dy_i/dt = equations[i].
+    /// Expression strings for each state derivative: dy_i/dt = `equations[i]`.
     /// Variables available: `t`, `y0`, `y1`, ..., `yN`, plus any params.
     pub equations: Vec<String>,
     /// Names for each state variable (for output table column headers).
@@ -53,7 +53,7 @@ pub struct OdeResult {
     /// State values at each step. `states[i]` is the vector of state
     /// variable values at time `t[i]`.
     pub states: Vec<Vec<f64>>,
-    /// Column names: ["t", state_names[0], state_names[1], ...]
+    /// Column names: `["t", state_names[0], state_names[1], ...]`
     pub column_names: Vec<String>,
     /// Number of steps taken.
     pub steps: usize,

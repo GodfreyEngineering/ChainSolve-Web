@@ -8,7 +8,7 @@ use crate::types::Value;
 /// bounds `samples` times, evaluate `f`, and return statistical summary.
 ///
 /// Returns a Table with columns:
-/// - "statistic": [mean, std, min, max, p5, p25, p50, p75, p95, samples_used]
+/// - "statistic": \[mean, std, min, max, p5, p25, p50, p75, p95, samples_used\]
 /// - "value": corresponding numeric value
 /// - Plus a "histogram" column with bin counts (10 bins).
 pub fn monte_carlo<F>(f: &F, vars: &[DesignVar], samples: usize, seed: u64) -> Value

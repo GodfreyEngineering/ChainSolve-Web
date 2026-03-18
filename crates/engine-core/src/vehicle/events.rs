@@ -10,7 +10,7 @@
 
 use crate::types::Value;
 
-/// Build a `Value::Table` with columns [t, steer_angle, throttle, brake].
+/// Build a `Value::Table` with columns \[t, steer_angle, throttle, brake\].
 fn build_event_table(t: Vec<f64>, steer: Vec<f64>, throttle: Vec<f64>, brake: Vec<f64>) -> Value {
     let n = t.len();
     let rows: Vec<Vec<f64>> = (0..n)

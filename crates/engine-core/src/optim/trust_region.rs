@@ -329,7 +329,7 @@ mod tests {
         assert!(result.best_objective < 1e-4, "f* = {}", result.best_objective);
     }
 
-    /// Bounded: f = (x-3)² on [-1, 2] → x* = 2, f* = 1.
+    /// Bounded: f = (x-3)² on \[-1, 2\] → x* = 2, f* = 1.
     #[test]
     fn bounded_minimum() {
         let vars = vec![make_var("x", -1.0, 2.0, 0.0)];

@@ -29,7 +29,7 @@ pub struct DaeResult {
     /// Algebraic state at each step (n_alg values)
     pub z: Vec<Vec<f64>>,
     pub steps: usize,
-    /// Column names for output table: ["t", "y0", ..., "z0", ...]
+    /// Column names for output table: `["t", "y0", ..., "z0", ...]`
     pub column_names: Vec<String>,
 }
 

@@ -2,7 +2,7 @@
 //!
 //! Fits a polynomial regression metamodel to design-of-experiments (DOE) results.
 //! Supports:
-//! * **Quadratic RSM** (default): y = β₀ + Σᵢ βᵢxᵢ + Σᵢ βᵢᵢxᵢ² + Σᵢ<ⱼ βᵢⱼxᵢxⱼ
+//! * **Quadratic RSM** (default): y = β₀ + Σᵢ βᵢxᵢ + Σᵢ βᵢᵢxᵢ² + Σ(i\<j) βᵢⱼxᵢxⱼ
 //! * **Linear RSM**: y = β₀ + Σᵢ βᵢxᵢ
 //! * **Cubic RSM**: includes cubic terms xᵢ³
 //! * **RBF**: Radial Basis Function with Gaussian kernel (σ estimated from data)
@@ -10,8 +10,8 @@
 //! # Output
 //!
 //! Returns the metamodel as a Table with columns:
-//! - For polynomial: ["term", "coefficient"] where term is the monomial name
-//! - For RBF: ["center_0", "center_1", ..., "weight"] with one row per training point
+//! - For polynomial: `["term", "coefficient"]` where term is the monomial name
+//! - For RBF: `["center_0", "center_1", ..., "weight"]` with one row per training point
 //!
 //! # Usage
 //!
@@ -294,7 +294,7 @@ fn solve_gauss_jordan(a: &[Vec<f64>], b: &[f64]) -> Vec<f64> {
 mod tests {
     use super::*;
 
-    /// Fit y = x₀² + x₁² (quadratic surface) — coefficients should be [0,0,0,1,1,0]
+    /// Fit y = x₀² + x₁² (quadratic surface) — coefficients should be `[0,0,0,1,1,0]`
     #[test]
     fn fit_quadratic_sphere() {
         let x: Vec<Vec<f64>> = vec![

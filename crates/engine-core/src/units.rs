@@ -1,6 +1,6 @@
 //! Units tracking system: SI, CGS, and imperial unit systems.
 //!
-//! Each unit is described by its dimension vector [M, L, T, I, Θ, N, J]
+//! Each unit is described by its dimension vector \[M, L, T, I, Θ, N, J\]
 //! (mass, length, time, electric current, temperature, amount, luminous intensity)
 //! and a scale factor relative to the corresponding SI base unit.
 //!
@@ -8,7 +8,7 @@
 
 use std::collections::HashMap;
 
-/// SI base dimensions: [M, L, T, I, Θ, N, J].
+/// SI base dimensions: \[M, L, T, I, Θ, N, J\].
 /// Exponents are stored as i8 to allow dimensions like m/s (L=1, T=-1).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Dimension {

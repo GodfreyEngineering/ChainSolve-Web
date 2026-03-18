@@ -21,9 +21,9 @@
 //!
 //! ## Usage in blocks
 //!
-//! Both take a sequence Table `[T × D_in]` and output either:
-//! - The final hidden state vector `[D_h]` (default), or
-//! - The full hidden sequence Table `[T × D_h]` (when `return_sequences = true`).
+//! Both take a sequence Table \[T × D_in\] and output either:
+//! - The final hidden state vector \[D_h\] (default), or
+//! - The full hidden sequence Table \[T × D_h\] (when `return_sequences = true`).
 //!
 //! Weights are Xavier-initialised from a configurable seed.
 //! For trained weights, load from a JSON blob in block data.
@@ -53,7 +53,7 @@ impl WeightInit {
 fn sigmoid(x: f64) -> f64 { 1.0 / (1.0 + (-x).exp()) }
 fn tanh_f(x: f64) -> f64 { x.tanh() }
 
-/// Matrix-vector multiply: y[i] = Σ_j A[i*n + j] * x[j], A is m×n.
+/// Matrix-vector multiply: `y[i]` = Σ\_j `A[i*n + j]` * `x[j]`, A is m×n.
 fn matvec(a: &[f64], x: &[f64], m: usize, n: usize) -> Vec<f64> {
     (0..m).map(|i| (0..n).map(|j| a[i * n + j] * x.get(j).copied().unwrap_or(0.0)).sum()).collect()
 }
@@ -72,9 +72,9 @@ pub struct LstmLayer {
     input_size: usize,
     hidden_size: usize,
     /// W_f, W_i, W_g, W_o — each (hidden_size × (input_size + hidden_size))
-    /// Stored as one flat [4 * hidden_size * (input+hidden)] matrix: [f|i|g|o].
+    /// Stored as one flat \[4 * hidden_size * (input+hidden)\] matrix: \[f|i|g|o\].
     w: Vec<f64>,
-    /// Biases [4 * hidden_size]: [b_f | b_i | b_g | b_o].
+    /// Biases \[4 * hidden_size\]: \[b_f | b_i | b_g | b_o\].
     b: Vec<f64>,
 }
 
@@ -144,11 +144,11 @@ impl LstmLayer {
 pub struct GruLayer {
     input_size: usize,
     hidden_size: usize,
-    /// W_r, W_z — each (hidden_size × (input+hidden)), stored as [r|z] flat.
+    /// W_r, W_z — each (hidden_size × (input+hidden)), stored as \[r|z\] flat.
     w_rz: Vec<f64>,
     /// W_n — (hidden_size × (input+hidden)).
     w_n: Vec<f64>,
-    /// Biases b_r, b_z, b_n — each [hidden_size].
+    /// Biases b_r, b_z, b_n — each \[hidden_size\].
     b_rz: Vec<f64>,
     b_n: Vec<f64>,
 }
@@ -220,7 +220,7 @@ pub fn sequence_to_table(seq: &[Vec<f64>]) -> Value {
     Value::Table { columns, rows: seq.to_vec() }
 }
 
-/// LSTM block: sequence [T × D] → hidden states.
+/// LSTM block: sequence \[T × D\] → hidden states.
 pub fn lstm_forward(
     sequence: &[Vec<f64>],
     hidden_size: usize,
@@ -236,7 +236,7 @@ pub fn lstm_forward(
     sequence_to_table(&output)
 }
 
-/// GRU block: sequence [T × D] → hidden states.
+/// GRU block: sequence \[T × D\] → hidden states.
 pub fn gru_forward(
     sequence: &[Vec<f64>],
     hidden_size: usize,

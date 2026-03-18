@@ -88,7 +88,7 @@ fn eval_obj(obj_expr: &str, y: &[f64]) -> f64 {
 }
 
 /// Finite-difference Jacobian of f w.r.t. y: (n x n) matrix.
-/// Returns row-major: J[i * n + j] = df_i/dy_j.
+/// Returns row-major: `J[i * n + j]` = df_i/dy_j.
 fn fd_jac_y(system: &OdeSystem, t: f64, y: &[f64], eps: f64) -> Vec<f64> {
     let n = y.len();
     let f0 = eval_rhs_pub(system, t, y);
@@ -105,7 +105,7 @@ fn fd_jac_y(system: &OdeSystem, t: f64, y: &[f64], eps: f64) -> Vec<f64> {
 }
 
 /// Finite-difference Jacobian of f w.r.t. parameters: (n x n_params) matrix.
-/// Returns row-major: J[i * n_params + j] = df_i/dp_j.
+/// Returns row-major: `J[i * n_params + j]` = df_i/dp_j.
 fn fd_jac_p(
     system: &OdeSystem,
     t: f64,

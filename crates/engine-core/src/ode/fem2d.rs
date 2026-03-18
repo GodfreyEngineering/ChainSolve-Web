@@ -5,7 +5,7 @@
 //!
 //! ## Formulation
 //!
-//! −k∇²u = f  on Ω = [x0, x1] × [y0, y1]
+//! −k∇²u = f  on Ω = \[x0, x1\] × \[y0, y1\]
 //! u = g_D     on Γ_D  (Dirichlet boundary, currently all boundaries)
 //! k∂u/∂n = g_N on Γ_N  (Neumann, optional on specified edges)
 //!
@@ -36,9 +36,9 @@ use std::collections::HashMap;
 /// Node coordinates and connectivity for a 2D triangular mesh.
 #[derive(Debug, Clone)]
 pub struct Mesh2D {
-    /// Node coordinates: nodes[i] = (x, y).
+    /// Node coordinates: `nodes[i]` = (x, y).
     pub nodes: Vec<(f64, f64)>,
-    /// Triangular elements: tris[e] = [node0, node1, node2].
+    /// Triangular elements: `tris[e]` = `[node0, node1, node2]`.
     pub tris: Vec<[usize; 3]>,
     /// Number of nodes in x direction (nx_nodes = nx + 1).
     pub nx_nodes: usize,
@@ -46,7 +46,7 @@ pub struct Mesh2D {
     pub ny_nodes: usize,
 }
 
-/// Generate a structured triangular mesh on [x0, x1] × [y0, y1].
+/// Generate a structured triangular mesh on \[x0, x1\] × \[y0, y1\].
 pub fn generate_mesh(x0: f64, x1: f64, y0: f64, y1: f64, nx: usize, ny: usize) -> Mesh2D {
     let nx_nodes = nx + 1;
     let ny_nodes = ny + 1;
@@ -78,7 +78,7 @@ pub fn generate_mesh(x0: f64, x1: f64, y0: f64, y1: f64, nx: usize, ny: usize) -
 }
 
 /// P1 local stiffness matrix for a triangle with vertices (x0,y0), (x1,y1), (x2,y2).
-/// K_local[i][j] = k × ∫ ∇φ_i · ∇φ_j dA
+/// `K_local[i][j]` = k × ∫ ∇φ_i · ∇φ_j dA
 /// where φ_i are the barycentric basis functions.
 fn local_stiffness(nodes: &[(f64, f64)], tri: &[usize; 3], k: f64) -> [[f64; 3]; 3] {
     let (x0, y0) = nodes[tri[0]];
@@ -105,7 +105,7 @@ fn local_stiffness(nodes: &[(f64, f64)], tri: &[usize; 3], k: f64) -> [[f64; 3];
     k_local
 }
 
-/// P1 local load vector for a triangle: f_local[i] = ∫ f × φ_i dA ≈ f(centroid) × A/3.
+/// P1 local load vector for a triangle: `f_local[i]` = ∫ f × φ_i dA ≈ f(centroid) × A/3.
 fn local_load(nodes: &[(f64, f64)], tri: &[usize; 3], rhs_fn: &dyn Fn(f64, f64) -> f64) -> [f64; 3] {
     let (x0, y0) = nodes[tri[0]];
     let (x1, y1) = nodes[tri[1]];
@@ -131,7 +131,7 @@ pub struct Fem2DResult {
     pub n_dirichlet: usize,
 }
 
-/// Solve −k∇²u = f on [x0,x1]×[y0,y1] with Dirichlet u=g_D on all boundaries.
+/// Solve −k∇²u = f on \[x0,x1\]×\[y0,y1\] with Dirichlet u=g_D on all boundaries.
 ///
 /// - `nx`, `ny`: number of cells in each direction
 /// - `k`: diffusion coefficient (scalar, uniform)

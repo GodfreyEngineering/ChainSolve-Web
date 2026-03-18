@@ -15,7 +15,7 @@ use crate::types::Value;
 /// - "sobol": Sobol quasi-random sequence with `samples` rows
 /// - "box_behnken": Box-Behnken design (3+ factors, no corner points)
 /// - "ccc": Central Composite Circumscribed (rotatability α = (2^k)^0.25)
-/// - "ccf": Central Composite Face-centered (α = 1, fits in [-1,1]^k)
+/// - "ccf": Central Composite Face-centered (α = 1, fits in \[-1,1\]^k)
 /// - "taguchi": Taguchi orthogonal L-array (selects L4/L8/L9/L12/L16/L18/L27)
 pub fn design_of_experiments(
     vars: &[DesignVar],
@@ -165,7 +165,7 @@ fn central_composite(vars: &[DesignVar], face_centered: bool) -> Value {
 /// Taguchi L-array orthogonal design.
 ///
 /// Automatically selects the smallest standard L-array that fits all k factors.
-/// Coded values in {-1, 0, 1} (3-level) or {-1, 1} (2-level) mapped to [min, max].
+/// Coded values in {-1, 0, 1} (3-level) or {-1, 1} (2-level) mapped to \[min, max\].
 /// Supports k up to 26 factors (L27 is the largest built-in).
 fn taguchi(vars: &[DesignVar]) -> Value {
     let k = vars.len();

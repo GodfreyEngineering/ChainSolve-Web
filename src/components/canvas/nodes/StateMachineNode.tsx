@@ -18,7 +18,7 @@
  *  4. Update currentStateId + value (state index) in nodeData
  */
 
-import { memo, useEffect, useCallback } from 'react'
+import { memo, createElement, useMemo, useEffect, useCallback } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import type { NodeData } from '../../../blocks/types'
@@ -66,7 +66,10 @@ function StateMachineNodeInner({ id, data, selected }: NodeProps) {
   const currentStateId = nd.currentStateId ?? states[0]?.id ?? ''
   const dynamicInputCount = nd.dynamicInputCount ?? 2
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
-  const TypeIcon = getNodeTypeIcon(nd.blockType)
+  const typeIcon = useMemo(
+    () => createElement(getNodeTypeIcon(nd.blockType), { size: 12 }),
+    [nd.blockType],
+  )
 
   const currentState = states.find((s) => s.id === currentStateId) ?? states[0]
   const currentStateIndex = states.findIndex((s) => s.id === currentStateId)
@@ -147,7 +150,7 @@ function StateMachineNodeInner({ id, data, selected }: NodeProps) {
       }}
     >
       <div style={{ ...s.nodeHeader, background: typeColor }}>
-        <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
+        <span style={s.nodeHeaderIcon}>{typeIcon}</span>
         <span style={s.nodeHeaderLabel}>
           {nd.label ?? t('stateMachine.label', 'State Machine')}
         </span>

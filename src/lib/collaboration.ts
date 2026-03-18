@@ -231,7 +231,7 @@ export function createCollaborationSession(
 
   // ── Awareness broadcast ─────────────────────────────────────────────────
   let awarenessThrottle: ReturnType<typeof setTimeout> | null = null
-  let pendingAwareness: Partial<CollabUser> = {}
+  const pendingAwareness: Partial<CollabUser> = {}
 
   function flushAwareness() {
     if (!channel || destroyed) return

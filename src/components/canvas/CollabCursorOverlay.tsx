@@ -124,7 +124,7 @@ function PresenceBar({ users }: { users: CollabUser[] }) {
   )
 }
 
-/** Selection highlight: tints node border when a remote user has it selected. */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getNodeSelectionStyle(
   nodeId: string,
   users: CollabUser[],

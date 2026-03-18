@@ -53,7 +53,7 @@ impl Default for CmaesConfig {
 /// Run CMA-ES to minimize `f(x)` with design variable bounds.
 ///
 /// The objective is evaluated at the raw (un-normalised) parameter values.
-/// Bounds [min, max] per variable are enforced by re-sampling.
+/// Bounds \[min, max\] per variable are enforced by re-sampling.
 pub fn cmaes<F>(
     f: &F,
     vars: &[DesignVar],

@@ -34,7 +34,7 @@ pub fn standardize(data: &[Vec<f64>]) -> (Vec<Vec<f64>>, Vec<f64>, Vec<f64>) {
     (scaled, means, stds)
 }
 
-/// Normalise features to [0, 1]: (x - min) / (max - min) for each column.
+/// Normalise features to \[0, 1\]: (x - min) / (max - min) for each column.
 /// Returns (scaled_data, mins, maxs).
 pub fn normalize(data: &[Vec<f64>]) -> (Vec<Vec<f64>>, Vec<f64>, Vec<f64>) {
     if data.is_empty() { return (vec![], vec![], vec![]); }

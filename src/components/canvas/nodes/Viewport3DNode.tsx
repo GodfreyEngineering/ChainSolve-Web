@@ -11,7 +11,7 @@
  * Controls: mouse-drag to orbit, wheel to zoom, double-click to reset.
  */
 
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, createElement, useMemo, useCallback, useEffect, useRef, useState } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { useComputedValue } from '../../../contexts/ComputedContext'
@@ -307,7 +307,10 @@ function Viewport3DNodeInner({ id, data, selected }: NodeProps) {
   const dragRef = useRef<{ startX: number; startY: number; az: number; el: number } | null>(null)
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
-  const TypeIcon = getNodeTypeIcon(nd.blockType)
+  const typeIcon = useMemo(
+    () => createElement(getNodeTypeIcon(nd.blockType), { size: 12 }),
+    [nd.blockType],
+  )
 
   // Derive mesh from computed input or use demo cube
   const mesh: Mesh = (() => {
@@ -406,7 +409,7 @@ function Viewport3DNodeInner({ id, data, selected }: NodeProps) {
       }}
     >
       <div style={{ ...s.nodeHeader, background: typeColor }}>
-        <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
+        <span style={s.nodeHeaderIcon}>{typeIcon}</span>
         <span style={s.nodeHeaderLabel}>{nd.label ?? t('viewport3d.label', '3D Viewport')}</span>
       </div>
 

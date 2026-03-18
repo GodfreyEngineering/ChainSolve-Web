@@ -29,7 +29,7 @@ pub struct ParamEstConfig {
     /// Experimental time points.
     pub t_data: Vec<f64>,
     /// Observed state values at each time point.
-    /// `y_data[i]` is the vector of observed states at t_data[i].
+    /// `y_data[i]` is the vector of observed states at `t_data[i]`.
     pub y_data: Vec<Vec<f64>>,
     /// Which state indices to compare against data (subset of 0..n_states).
     /// If empty, all states are compared.

@@ -20,7 +20,7 @@
 //! 1. For each design point x, estimate μ and σ via Monte Carlo sampling
 //!    over the noise distribution (configurable N_mc samples).
 //! 2. Wrap robust objective in the existing L-BFGS-B optimizer.
-//! 3. Sweep k ∈ [k_min, k_max] to trace the Pareto front of (μ, σ) pairs.
+//! 3. Sweep k ∈ \[k_min, k_max\] to trace the Pareto front of (μ, σ) pairs.
 //!
 //! ## Output
 //!
@@ -253,7 +253,7 @@ mod tests {
         }
     }
 
-    /// Robust moments estimation: f = x, noise ~ N(0, σ), E[f] ≈ x, std ≈ σ.
+    /// Robust moments estimation: f = x, noise ~ N(0, σ), E\[f\] ≈ x, std ≈ σ.
     #[test]
     fn moments_linear() {
         let f = |x: &[f64]| x[0];

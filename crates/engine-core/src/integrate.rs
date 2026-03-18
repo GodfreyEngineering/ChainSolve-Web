@@ -14,7 +14,7 @@ pub struct IntegrationResult {
 
 // ── Gauss-Kronrod G7-K15 ────────────────────────────────────────────────────
 
-/// Gauss-Kronrod 15-point nodes (on [-1, 1]).
+/// Gauss-Kronrod 15-point nodes (on \[-1, 1\]).
 /// The 7 Gauss nodes are a subset at indices 1, 3, 5, 7, 9, 11, 13.
 const GK15_NODES: [f64; 15] = [
     -0.991455371120813,
@@ -66,7 +66,7 @@ const GK15_WEIGHTS_G: [f64; 7] = [
 
 /// Adaptive Gauss-Kronrod G7-K15 quadrature.
 ///
-/// Integrates `f` over `[a, b]` using adaptive subdivision.
+/// Integrates `f` over \[a, b\] using adaptive subdivision.
 /// The error is estimated as |K15 - G7|. If the error exceeds
 /// `tol`, the interval is split in half and each half is integrated
 /// recursively.
@@ -133,7 +133,7 @@ fn gk_recursive<F: Fn(f64) -> f64>(
 
 // ── Clenshaw-Curtis ─────────────────────────────────────────────────────────
 
-/// Clenshaw-Curtis quadrature on `[a, b]` using `n` points.
+/// Clenshaw-Curtis quadrature on \[a, b\] using `n` points.
 ///
 /// Excellent for smooth integrands; converges exponentially fast for
 /// analytic functions. Uses Chebyshev points and DCT-based weight
@@ -180,7 +180,7 @@ pub fn clenshaw_curtis<F: Fn(f64) -> f64>(f: &F, a: f64, b: f64, n: usize) -> In
 
 // ── Monte Carlo quadrature ──────────────────────────────────────────────────
 
-/// Monte Carlo quadrature: estimate ∫f(x)dx over `[a, b]` using `n` random samples.
+/// Monte Carlo quadrature: estimate ∫f(x)dx over \[a, b\] using `n` random samples.
 ///
 /// Uses a simple PRNG (xoshiro256++) seeded deterministically from `seed`.
 /// Returns the integral estimate with a statistical error estimate (σ/√n).
@@ -266,7 +266,7 @@ pub fn monte_carlo_nd<F: Fn(&[f64]) -> f64>(
     }
 }
 
-/// Xoshiro256++ PRNG — produces f64 in [0, 1).
+/// Xoshiro256++ PRNG — produces f64 in \[0, 1).
 fn xoshiro_next_f64(state: &mut [u64; 4]) -> f64 {
     let result = state[0].wrapping_add(state[3]).rotate_left(23).wrapping_add(state[0]);
     let t = state[1] << 17;

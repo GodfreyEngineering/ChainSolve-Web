@@ -10,7 +10,7 @@
 //! # PatchOp protocol
 //!
 //! The TypeScript diff engine (`src/engine/diffGraph.ts`) computes a
-//! `PatchOp[]` from the React Flow state delta and sends it to the worker.
+//! `PatchOp` list from the React Flow state delta and sends it to the worker.
 //! Each [`PatchOp`] variant mutates the graph structure and marks affected
 //! nodes dirty:
 //!
@@ -157,9 +157,9 @@ pub enum PatchOp {
 pub struct EngineGraph {
     nodes: HashMap<String, NodeDef>,
     edges: HashMap<String, EdgeDef>,
-    /// source_id → [(edge_id, target_id, target_handle)]
+    /// source_id → \[(edge_id, target_id, target_handle)\]
     out_adj: HashMap<String, Vec<(String, String, String)>>,
-    /// target_id → [(edge_id, source_id, source_handle, target_handle)]
+    /// target_id → \[(edge_id, source_id, source_handle, target_handle)\]
     in_adj: HashMap<String, Vec<(String, String, String, String)>>,
     /// Cached topological order.
     topo_order: Vec<String>,

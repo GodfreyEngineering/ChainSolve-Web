@@ -12,7 +12,7 @@
 //! 3. Compute L-BFGS search direction d = -H_k · g using two-loop recursion
 //!    on the stored (s, y) pairs (last m=10 steps).
 //! 4. Clip d so x + α·d stays feasible, then backtracking Armijo line search.
-//! 5. Project x to [lb, ub] after update.
+//! 5. Project x to \[lb, ub\] after update.
 //! 6. Update (s, y) memory if y·s > 1e-10 (positive curvature condition).
 //! 7. Convergence: ||g_proj||∞ < tol.
 //!
@@ -293,7 +293,7 @@ mod tests {
             "Rosenbrock: f* = {}", result.best_objective);
     }
 
-    /// Bound-constrained: f(x) = (x-3)², bounds [-1, 2] → x* = 2, f* = 1
+    /// Bound-constrained: f(x) = (x-3)², bounds \[-1, 2\] → x* = 2, f* = 1
     #[test]
     fn lbfgsb_bounded() {
         let vars = vec![DesignVar { name: "x".into(), min: -1.0, max: 2.0, initial: 0.0, step: 0.1 }];

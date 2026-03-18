@@ -17,7 +17,7 @@
  * Bridge: codeBlock → 'number' (node.data.value).
  */
 
-import { memo, useEffect, useCallback, useRef } from 'react'
+import { memo, createElement, useMemo, useEffect, useCallback, useRef } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import type { NodeData } from '../../../blocks/types'
@@ -112,7 +112,10 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
   const codeError: string | null = nd.codeError ?? null
   const codeOutput: number = nd.codeOutput ?? 0
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
-  const TypeIcon = getNodeTypeIcon(nd.blockType)
+  const typeIcon = useMemo(
+    () => createElement(getNodeTypeIcon(nd.blockType), { size: 12 }),
+    [nd.blockType],
+  )
 
   // Read all input values (up to 8 vars for perf)
   const in0 = useComputedValue(id)
@@ -128,6 +131,7 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
 
   const resolveN = (v: unknown): number => (typeof v === 'number' && Number.isFinite(v) ? v : 0)
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const evaluate = useCallback(() => {
     const varMap: Record<string, number> = {}
     codeVars.forEach((v, i) => {
@@ -140,7 +144,7 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
       const msg = err instanceof Error ? err.message : String(err)
       updateNodeData(id, { codeError: msg })
     }
-  }, [id, code, codeVars, in0, in1, in2, in3, in4, in5, in6, in7, updateNodeData]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [id, code, codeVars, in0, in1, in2, in3, in4, in5, in6, in7, updateNodeData])
 
   useEffect(() => {
     evaluate()
@@ -195,7 +199,7 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
       }}
     >
       <div style={{ ...s.nodeHeader, background: typeColor }}>
-        <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
+        <span style={s.nodeHeaderIcon}>{typeIcon}</span>
         <span style={s.nodeHeaderLabel}>{nd.label ?? t('codeBlock.label', 'Code Block')}</span>
       </div>
 

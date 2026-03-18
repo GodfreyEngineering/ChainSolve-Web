@@ -1,7 +1,7 @@
 //! pinn.rs — Physics-Informed Neural Network solver (2.97).
 //!
 //! Solves 1D boundary value problems of the form:
-//!   a·u''(x) + b·u'(x) + c·u(x) = f(x),   x ∈ [lo, hi]
+//!   a·u''(x) + b·u'(x) + c·u(x) = f(x),   x ∈ \[lo, hi\]
 //!   u(lo) = bc_left,  u(hi) = bc_right
 //!
 //! Features:

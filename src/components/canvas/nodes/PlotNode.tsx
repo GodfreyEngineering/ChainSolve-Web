@@ -112,7 +112,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<{ finalize: () => void } | null>(null)
   const [vegaApi, setVegaApi] = useState<VegaAPI | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!isSankey && !isSurface3d)
   const [renderError, setRenderError] = useState<string | null>(null)
   const [expandOpen, setExpandOpen] = useState(false)
 
@@ -121,10 +121,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
 
   // Lazy-load Vega on mount (skip for Sankey which uses pure SVG)
   useEffect(() => {
-    if (isSankey || isSurface3d) {
-      setLoading(false)
-      return
-    }
+    if (isSankey || isSurface3d) return
     let cancelled = false
     loadVega()
       .then((api) => {

@@ -15,8 +15,8 @@ use super::types::{OdeResult, OdeSolverConfig, OdeSystem};
 
 /// BDF coefficients for orders 1-5.
 /// Each BDF-k has:
-///   α coefficients (history weights): α[0] is the new-step coefficient (always 1),
-///   α[1..k] are the previous-step weights.
+///   α coefficients (history weights): `α[0]` is the new-step coefficient (always 1),
+///   `α[1..k]` are the previous-step weights.
 ///   β: coefficient of the new derivative (step h·β·f_new).
 /// Equation: y_{n+k} = β·h·f_{n+k} + Σ_{j=0}^{k-1} α_j·y_{n+k-j-1}
 /// (where y_{n+k-j-1} are the k most recent accepted values in reverse order)

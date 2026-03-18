@@ -25,7 +25,7 @@ pub struct SteadyStateResult {
     pub iterations: usize,
     /// Whether the solver converged within the tolerance.
     pub converged: bool,
-    /// Column names for the output table: ["state", "value"].
+    /// Column names for the output table: `["state", "value"]`.
     pub column_names: Vec<String>,
 }
 

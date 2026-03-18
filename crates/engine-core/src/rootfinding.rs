@@ -103,7 +103,7 @@ pub fn newton_raphson<F: Fn(f64) -> f64>(f: &F, x0: f64, cfg: &RootConfig) -> Ro
 
 // ── Brent's method ──────────────────────────────────────────────────────────
 
-/// Find a root of `f(x) = 0` in the interval `[a, b]` using Brent's method.
+/// Find a root of `f(x) = 0` in the interval \[a, b\] using Brent's method.
 ///
 /// Requires `f(a) * f(b) < 0` (the root must be bracketed).
 /// Combines bisection, secant, and inverse quadratic interpolation for

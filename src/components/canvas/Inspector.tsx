@@ -140,7 +140,9 @@ export function Inspector({
     setShowAdvanced((v) => {
       try {
         localStorage.setItem('cs:inspAdvanced', String(!v))
-      } catch {}
+      } catch {
+        /* localStorage unavailable */
+      }
       return !v
     })
 

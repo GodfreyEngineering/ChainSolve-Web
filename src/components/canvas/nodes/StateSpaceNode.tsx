@@ -9,7 +9,7 @@
  * Bridge maps 'stateSpace' → 'display'.
  */
 
-import { memo, useMemo, useCallback } from 'react'
+import { memo, createElement, useMemo, useCallback } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import type { NodeData } from '../../../blocks/types'
@@ -207,7 +207,10 @@ function StateSpaceNodeInner({ id, data, selected }: NodeProps) {
   const outputMode = nd.outputMode ?? 'step'
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
-  const TypeIcon = getNodeTypeIcon(nd.blockType)
+  const typeIcon = useMemo(
+    () => createElement(getNodeTypeIcon(nd.blockType), { size: 12 }),
+    [nd.blockType],
+  )
 
   const { A, B, C, D, valid, n, eigenVals, ctrlRank, obsRank } = useMemo(() => {
     const A = parseMatrix(matA)
@@ -284,7 +287,7 @@ function StateSpaceNodeInner({ id, data, selected }: NodeProps) {
     >
       {/* Header */}
       <div style={{ ...s.nodeHeader, background: typeColor }}>
-        <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
+        <span style={s.nodeHeaderIcon}>{typeIcon}</span>
         <span style={s.nodeHeaderLabel}>{nd.label ?? t('stateSpace.label', 'State Space')}</span>
         {valid && (
           <span

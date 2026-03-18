@@ -25,7 +25,7 @@
 //!
 //! ## Output
 //!
-//! Returns [`SqpResult`] containing the primal solution, objective, constraint
+//! Returns `SqpResult` containing the primal solution, objective, constraint
 //! residuals, and convergence history.
 
 use super::{DesignVar, OptimResult};

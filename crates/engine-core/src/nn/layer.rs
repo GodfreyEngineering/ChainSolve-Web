@@ -34,12 +34,12 @@ pub struct Conv1DLayer {
 }
 
 /// 2D convolutional layer.
-/// Input: [height × width × input_channels] row-major (HWC layout).
-/// Output: [out_h × out_w × n_filters] row-major.
+/// Input: \[height × width × input_channels\] row-major (HWC layout).
+/// Output: \[out_h × out_w × n_filters\] row-major.
 /// Padding: "valid" (no padding) or "same" (zero-pad to preserve spatial dims).
 #[derive(Debug, Clone)]
 pub struct Conv2DLayer {
-    /// Kernel weights: [n_filters][kH * kW * input_channels]
+    /// Kernel weights: \[n_filters\]\[kH * kW * input_channels\]
     pub filters: Vec<Vec<f64>>,
     pub biases: Vec<f64>,
     pub n_filters: usize,
@@ -78,9 +78,9 @@ impl Conv2DLayer {
     }
 
     /// Forward pass for 2D convolution.
-    /// - `input`: flattened [H × W × C] (HWC layout)
+    /// - `input`: flattened \[H × W × C\] (HWC layout)
     /// - `in_h`, `in_w`: spatial dimensions of the input
-    /// Returns flattened [out_h × out_w × n_filters].
+    /// Returns flattened \[out_h × out_w × n_filters\].
     pub fn forward(&self, input: &[f64], in_h: usize, in_w: usize) -> (Vec<f64>, usize, usize) {
         let (out_h, out_w, pad_h, pad_w) = if self.padding {
             // "same" padding: output size = ceil(in_size / stride)
@@ -198,8 +198,8 @@ impl Conv1DLayer {
     }
 
     /// Forward pass for 1D convolution (valid padding).
-    /// Input shape: [length * input_channels] flattened.
-    /// Output shape: [(length - kernel_size + 1) * n_filters] flattened.
+    /// Input shape: \[length * input_channels\] flattened.
+    /// Output shape: \[(length - kernel_size + 1) * n_filters\] flattened.
     pub fn forward(&self, input: &[f64], input_length: usize) -> Vec<f64> {
         if input_length < self.kernel_size {
             return vec![0.0; self.n_filters]; // too short

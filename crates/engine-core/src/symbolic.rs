@@ -970,15 +970,15 @@ fn to_latex_paren_if_compound(expr: &Expr) -> String {
 
 // ── Polynomial Utilities ────────────────────────────────────────────────────
 
-/// Represents a univariate polynomial: coeffs[i] is the coefficient of x^i.
-/// E.g., 3 + 2x + x^2 → coeffs = [3.0, 2.0, 1.0]
+/// Represents a univariate polynomial: `coeffs[i]` is the coefficient of x^i.
+/// E.g., 3 + 2x + x^2 → coeffs = `[3.0, 2.0, 1.0]`
 #[derive(Debug, Clone, PartialEq)]
 pub struct Polynomial {
     pub coeffs: Vec<f64>,
 }
 
 impl Polynomial {
-    /// Create from coefficient vector [c0, c1, ..., cn].
+    /// Create from coefficient vector `[c0, c1, ..., cn]`.
     pub fn new(coeffs: Vec<f64>) -> Self {
         let mut p = Polynomial { coeffs };
         p.trim();
@@ -1195,7 +1195,7 @@ pub enum MonomialOrder {
 }
 
 /// A monomial exponent vector. `exponents[i]` is the power of variable i.
-/// E.g., for variables [x, y, z], the monomial x²yz³ is [2, 1, 3].
+/// E.g., for variables \[x, y, z\], the monomial x²yz³ is \[2, 1, 3\].
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Monomial {
     pub exponents: Vec<u32>,
@@ -1343,7 +1343,7 @@ impl Monomial {
 /// A multivariate polynomial: sparse representation as a list of (coefficient, monomial) pairs.
 #[derive(Debug, Clone)]
 pub struct MultiPoly {
-    /// Variable names for display. E.g., ["x", "y", "z"].
+    /// Variable names for display. E.g., `["x", "y", "z"]`.
     pub var_names: Vec<String>,
     /// Terms sorted in descending order by the chosen monomial ordering.
     /// Invariant: no two terms share the same monomial; no zero-coefficient terms.
@@ -1867,7 +1867,7 @@ fn reduce_basis(basis: &[MultiPoly], _vars: &[String], order: MonomialOrder) -> 
 /// Solve a system of polynomial equations using Gröbner bases.
 ///
 /// Given polynomials f_1, ..., f_m in variables x_1, ..., x_n, computes a Gröbner
-/// basis of the ideal <f_1, ..., f_m> under lex ordering. For zero-dimensional ideals
+/// basis of the ideal `<f_1, ..., f_m>` under lex ordering. For zero-dimensional ideals
 /// (finitely many solutions), the last polynomial in the lex Gröbner basis is
 /// univariate, and back-substitution yields the solutions.
 ///
@@ -1876,7 +1876,7 @@ fn reduce_basis(basis: &[MultiPoly], _vars: &[String], order: MonomialOrder) -> 
 /// * `var_names` - Variable names in elimination order (first variable eliminated last)
 ///
 /// # Returns
-/// * `Ok(solutions)` - List of solution vectors [x_1, x_2, ..., x_n]
+/// * `Ok(solutions)` - List of solution vectors \[x_1, x_2, ..., x_n\]
 /// * `Err(msg)` - If the system cannot be solved (infinite solutions, no solutions, etc.)
 pub fn solve_polynomial_system(
     system: &[MultiPoly],

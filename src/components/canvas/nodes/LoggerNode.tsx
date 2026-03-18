@@ -11,7 +11,7 @@
  * The engine receives this block as a `display` pass-through (bridge.ts remap).
  */
 
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useMemo, useCallback, useEffect, useRef, useState } from 'react'
 import { Handle, Position, useEdges, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { useComputedValue } from '../../../contexts/ComputedContext'
@@ -118,8 +118,11 @@ function LoggerNodeInner({ id, data, selected }: NodeProps) {
     exportCsv(sorted, relativeTime, originRef.current)
   }, [entries, relativeTime])
 
+  // Derive origin from entries (last entry = earliest, since newest-first order)
+  const origin = entries.length > 0 ? entries[entries.length - 1].ts : 0
+
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
-  const TypeIcon = getNodeTypeIcon(nd.blockType)
+  const TypeIcon = useMemo(() => getNodeTypeIcon(nd.blockType), [nd.blockType])
 
   return (
     <div
@@ -198,7 +201,7 @@ function LoggerNodeInner({ id, data, selected }: NodeProps) {
                       {e.seq}
                     </td>
                     <td style={{ padding: '1px 4px', color: 'var(--muted)', width: 90 }}>
-                      {fmtTime(e.ts, e.absTs, relativeTime, originRef.current)}
+                      {fmtTime(e.ts, e.absTs, relativeTime, origin)}
                     </td>
                     <td style={{ padding: '1px 4px', color: 'var(--text)', textAlign: 'right' }}>
                       {fmtValue(e.value)}

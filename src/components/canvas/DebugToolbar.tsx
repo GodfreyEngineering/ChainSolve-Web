@@ -35,14 +35,6 @@ export function DebugToolbar({ onRunWithTrace }: DebugToolbarProps) {
     clearBreakpoints,
   } = useDebugStore()
 
-  const hasBreakpoints = breakpoints.size > 0
-  if (!active && !hasBreakpoints) return null
-
-  const atEnd = active && stepIndex >= trace.length - 1
-  const atStart = stepIndex === 0
-  const currentEntry: TraceEntry | undefined = trace[stepIndex]
-  const totalNodes = trace.length
-
   const handleStepForward = useCallback(() => {
     stepForward()
   }, [stepForward])
@@ -71,6 +63,14 @@ export function DebugToolbar({ onRunWithTrace }: DebugToolbarProps) {
   const handleRunWithTrace = useCallback(() => {
     onRunWithTrace()
   }, [onRunWithTrace])
+
+  const hasBreakpoints = breakpoints.size > 0
+  if (!active && !hasBreakpoints) return null
+
+  const atEnd = active && stepIndex >= trace.length - 1
+  const atStart = stepIndex === 0
+  const currentEntry: TraceEntry | undefined = trace[stepIndex]
+  const totalNodes = trace.length
 
   return (
     <div style={toolbarStyle} role="toolbar" aria-label="Debug controls">

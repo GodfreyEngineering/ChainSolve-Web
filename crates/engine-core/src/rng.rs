@@ -46,17 +46,17 @@ impl Xoshiro256 {
         result
     }
 
-    /// Generate a uniform f64 in [0, 1).
+    /// Generate a uniform f64 in \[0, 1).
     pub fn next_f64(&mut self) -> f64 {
         (self.next_u64() >> 11) as f64 * (1.0 / (1u64 << 53) as f64)
     }
 
-    /// Generate a uniform f64 in [lo, hi).
+    /// Generate a uniform f64 in \[lo, hi).
     pub fn next_range(&mut self, lo: f64, hi: f64) -> f64 {
         lo + self.next_f64() * (hi - lo)
     }
 
-    /// Fill a vector with `n` uniform random f64 values in [0, 1).
+    /// Fill a vector with `n` uniform random f64 values in \[0, 1).
     pub fn fill_uniform(&mut self, n: usize) -> Vec<f64> {
         (0..n).map(|_| self.next_f64()).collect()
     }
@@ -75,7 +75,7 @@ impl Xoshiro256 {
 ///
 /// Each dimension is stratified into `n_samples` equal bins, and exactly one
 /// sample falls in each bin. Returns a flat row-major `Vec<Vec<f64>>` where
-/// each inner vec has `n_dims` values in [0, 1).
+/// each inner vec has `n_dims` values in \[0, 1).
 pub fn latin_hypercube(n_samples: usize, n_dims: usize, seed: u64) -> Vec<Vec<f64>> {
     if n_samples == 0 || n_dims == 0 {
         return vec![];
@@ -124,7 +124,7 @@ pub fn van_der_corput(mut n: usize, base: usize) -> f64 {
 /// Generate `n_samples` points of a Sobol-like quasi-random sequence in `n_dims` dimensions.
 ///
 /// Uses Van der Corput sequences with co-prime bases for each dimension.
-/// Returns row-major `Vec<Vec<f64>>`, each value in [0, 1).
+/// Returns row-major `Vec<Vec<f64>>`, each value in \[0, 1).
 pub fn sobol_points(n_samples: usize, n_dims: usize) -> Vec<Vec<f64>> {
     if n_samples == 0 || n_dims == 0 {
         return vec![];
@@ -148,7 +148,7 @@ pub fn sobol_points(n_samples: usize, n_dims: usize) -> Vec<Vec<f64>> {
 ///
 /// The Halton sequence generalizes Van der Corput to multiple dimensions using
 /// consecutive prime bases. Identical to Sobol for 1D but uses the standard
-/// naming convention. Values in [0, 1).
+/// naming convention. Values in \[0, 1).
 ///
 /// Optionally skip the first `skip` points to avoid initial correlations
 /// (recommended: skip ≥ 20 for dimensions > 5).

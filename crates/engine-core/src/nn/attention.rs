@@ -6,10 +6,10 @@
 //! Attention(Q, K, V) = softmax( Q·Kᵀ / √d_k ) · V
 //! ```
 //!
-//! - Q: [seq_q × d_k] — query matrix
-//! - K: [seq_k × d_k] — key matrix
-//! - V: [seq_k × d_v] — value matrix
-//! - Output: [seq_q × d_v]
+//! - Q: \[seq_q × d_k\] — query matrix
+//! - K: \[seq_k × d_k\] — key matrix
+//! - V: \[seq_k × d_v\] — value matrix
+//! - Output: \[seq_q × d_v\]
 //!
 //! ## Causal masking (optional)
 //!
@@ -30,13 +30,13 @@ fn softmax_inplace(v: &mut [f64]) {
 
 /// Scaled dot-product attention.
 ///
-/// `q` — Query matrix [seq_q × d_k] (row-major flat).
-/// `k` — Key matrix   [seq_k × d_k] (row-major flat).
-/// `v` — Value matrix [seq_k × d_v] (row-major flat).
+/// `q` — Query matrix \[seq_q × d_k\] (row-major flat).
+/// `k` — Key matrix   \[seq_k × d_k\] (row-major flat).
+/// `v` — Value matrix \[seq_k × d_v\] (row-major flat).
 /// `seq_q`, `seq_k`, `d_k`, `d_v` — dimensions.
 /// `causal` — mask future positions.
 ///
-/// Returns output [seq_q × d_v] flat.
+/// Returns output \[seq_q × d_v\] flat.
 pub fn scaled_dot_product_attention(
     q: &[f64], k: &[f64], v: &[f64],
     seq_q: usize, seq_k: usize, d_k: usize, d_v: usize,

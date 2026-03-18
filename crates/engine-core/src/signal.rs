@@ -9,7 +9,7 @@
 use std::f64::consts::PI;
 
 /// One second-order section: H(z) = (b0 + b1*z⁻¹ + b2*z⁻²) / (a0 + a1*z⁻¹ + a2*z⁻²).
-/// Stored as [b0, b1, b2, a0, a1, a2].
+/// Stored as `[b0, b1, b2, a0, a1, a2]`.
 #[derive(Debug, Clone, Copy)]
 pub struct Sos {
     pub b: [f64; 3],
@@ -301,8 +301,8 @@ fn apply_one_sos(sos: &Sos, x: &[f64]) -> Vec<f64> {
     y
 }
 
-/// Return the magnitude response |H(e^{jω})| of an SOS filter at normalised frequencies ω ∈ [0, 1].
-/// `freqs` — vector of normalised frequencies in [0, 1] (1 = Nyquist).
+/// Return the magnitude response |H(e^{jω})| of an SOS filter at normalised frequencies ω ∈ \[0, 1\].
+/// `freqs` — vector of normalised frequencies in \[0, 1\] (1 = Nyquist).
 /// Returns a vector of magnitude values.
 pub fn frequency_response_magnitude(sections: &[Sos], freqs: &[f64]) -> Vec<f64> {
     freqs

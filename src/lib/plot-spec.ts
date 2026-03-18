@@ -951,6 +951,7 @@ function buildSpec(
     let existingLayers: Record<string, any>[]
     if (Array.isArray(base.layer)) {
       // Already layered (e.g. dual-axis, Nyquist, Bode): append annotation layers
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       existingLayers = base.layer as Record<string, any>[]
     } else {
       // Not yet layered: wrap main spec into a layer
