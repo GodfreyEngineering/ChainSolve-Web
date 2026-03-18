@@ -73,13 +73,16 @@ export function toEngineSnapshot(
       // 6.14: scope is a UI-only visualization block; engine treats it as pass-through display.
       // 2.131: timer is a UI-only timing measurement block; engine treats it as pass-through display.
       // 2.132: logger is a UI-only data recording block; engine treats it as pass-through display.
+      // 2.133: mathSheet is a UI-computed spreadsheet; engine treats it as a number source.
       let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock' || data.blockType === 'assertion' || data.blockType === 'scope' || data.blockType === 'timer' || data.blockType === 'logger'
         ? 'display'
         : data.blockType === 'wsInput'
           ? 'number'
           : data.blockType === 'restInput'
             ? 'number'
-            : data.blockType) as string
+            : data.blockType === 'mathSheet'
+              ? 'number'
+              : data.blockType) as string
       if (blockType === 'constant') {
         const constId = data.selectedConstantId
         if (typeof constId === 'string' && constId in CONSTANT_VALUES) {
@@ -145,6 +148,11 @@ export function toEngineSnapshot(
     }),
     edges: edges
       .filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target))
+      // 2.133: mathSheet computes in the UI; exclude edges targeting it from the engine.
+      .filter((e) => {
+        const tgt = evalNodes.find((n) => n.id === e.target)
+        return (tgt?.data as Record<string, unknown> | undefined)?.blockType !== 'mathSheet'
+      })
       .map((e) => {
         const tgtNode = evalNodes.find((n) => n.id === e.target)
         const tgtBlockType = (tgtNode?.data as Record<string, unknown> | undefined)?.blockType

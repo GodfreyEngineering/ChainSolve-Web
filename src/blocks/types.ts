@@ -84,6 +84,7 @@ export type NodeKind =
   | 'csScope'
   | 'csTimer'
   | 'csLogger'
+  | 'csMathSheet'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

@@ -2337,6 +2337,16 @@
     "allowNan": "NaN許可",
     "allowInf": "±Inf許可"
   },
+  "mathSheet": {
+    "result": "結果",
+    "inputs": "入力",
+    "addRow": "行を追加",
+    "removeRow": "行を削除",
+    "addCol": "列を追加",
+    "removeCol": "列を削除",
+    "addInput": "入力を追加",
+    "removeInput": "最後の入力を削除"
+  },
   "timeline": {
     "lastEval": "最後",
     "avgEval": "平均",

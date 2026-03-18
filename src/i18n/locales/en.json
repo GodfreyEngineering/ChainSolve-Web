@@ -2337,6 +2337,16 @@
     "allowNan": "NaN ok",
     "allowInf": "±Inf ok"
   },
+  "mathSheet": {
+    "result": "Result",
+    "inputs": "Inputs",
+    "addRow": "Add row",
+    "removeRow": "Remove row",
+    "addCol": "Add column",
+    "removeCol": "Remove column",
+    "addInput": "Add input",
+    "removeInput": "Remove last input"
+  },
   "timeline": {
     "lastEval": "Last",
     "avgEval": "Avg",

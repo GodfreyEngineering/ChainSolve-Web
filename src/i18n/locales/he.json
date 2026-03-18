@@ -1736,6 +1736,16 @@
     "allowNan": "NaN בסדר",
     "allowInf": "±Inf בסדר"
   },
+  "mathSheet": {
+    "result": "תוצאה",
+    "inputs": "קלטים",
+    "addRow": "הוסף שורה",
+    "removeRow": "הסר שורה",
+    "addCol": "הוסף עמודה",
+    "removeCol": "הסר עמודה",
+    "addInput": "הוסף קלט",
+    "removeInput": "הסר קלט אחרון"
+  },
   "timeline": {
     "lastEval": "אחרון",
     "avgEval": "ממוצע",

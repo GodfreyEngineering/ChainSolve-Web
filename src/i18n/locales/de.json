@@ -2289,6 +2289,16 @@
     "allowNan": "NaN ok",
     "allowInf": "±Inf ok"
   },
+  "mathSheet": {
+    "result": "Ergebnis",
+    "inputs": "Eingaben",
+    "addRow": "Zeile hinzufügen",
+    "removeRow": "Zeile entfernen",
+    "addCol": "Spalte hinzufügen",
+    "removeCol": "Spalte entfernen",
+    "addInput": "Eingabe hinzufügen",
+    "removeInput": "Letzte Eingabe entfernen"
+  },
   "timeline": {
     "lastEval": "Letzter",
     "avgEval": "Ø",

@@ -94,6 +94,7 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csScope',
   'csTimer',
   'csLogger',
+  'csMathSheet',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {

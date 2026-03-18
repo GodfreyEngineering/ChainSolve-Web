@@ -24,7 +24,8 @@ registerAllBlocks()
 // 6.14: scope is remapped to 'display' in bridge.ts; ring-buffer chart renders in the UI.
 // 2.131: timer is remapped to 'display' in bridge.ts; timing metrics rendered in the UI.
 // 2.132: logger is remapped to 'display' in bridge.ts; data logging rendered in the UI.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger'])
+// 2.133: mathSheet is remapped to 'number' in bridge.ts; spreadsheet computation runs in the UI.
+const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet'])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.

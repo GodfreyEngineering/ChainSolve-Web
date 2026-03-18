@@ -2239,6 +2239,16 @@
     "allowNan": "NaN ok",
     "allowInf": "±Inf ok"
   },
+  "mathSheet": {
+    "result": "Risultato",
+    "inputs": "Ingressi",
+    "addRow": "Aggiungi riga",
+    "removeRow": "Rimuovi riga",
+    "addCol": "Aggiungi colonna",
+    "removeCol": "Rimuovi colonna",
+    "addInput": "Aggiungi ingresso",
+    "removeInput": "Rimuovi ultimo ingresso"
+  },
   "timeline": {
     "lastEval": "Ultima",
     "avgEval": "Media",
