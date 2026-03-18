@@ -1,5 +1,5 @@
 /**
- * simulation-worker-entry.ts — 8.1/8.2: Web Worker entry point for simulation tasks.
+ * simulation-worker-entry.ts — 8.1/8.2/7.10: Web Worker entry point for simulation tasks.
  *
  * This file runs inside a dedicated Web Worker. It receives `runSimulation`
  * messages from SimulationWorkerAPI, executes the simulation loop using the
@@ -14,6 +14,10 @@
  *      export (if a snapshot is provided in config.inputs). This runs the
  *      Rust-side iterative loop with convergence detection and batch progress.
  *
+ * 7.10: Parameter sweeps use a streaming ring-buffer capped at the browser
+ *       memory budget (1 GB). Results are streamed as partialResults in
+ *       progress events rather than accumulated indefinitely.
+ *
  * 8.9: Since this is a separate worker, normal graph evaluation is unaffected.
  */
 
@@ -24,6 +28,7 @@ import initWasm, {
 import wasmUrl from '@engine-wasm/engine_wasm_bg.wasm?url'
 import type { SimulationConfig } from './simulationWorker'
 import type { SimTaskMetrics } from '../stores/simulationStatusStore'
+import { StreamingBuffer, capacityForBudget, BROWSER_BUDGET_BYTES } from './streamingBuffer'
 
 // ── WASM initialisation ───────────────────────────────────────────────────────
 
@@ -96,12 +101,17 @@ function postError(nodeId: string, error: string) {
 
 /**
  * Run a parameter sweep: evaluate a set of parameter values and collect outputs.
- * This is the primary simulation type available without additional Rust WASM exports.
+ *
+ * 7.10: Uses a streaming ring-buffer capped at the browser memory budget so
+ * arbitrarily large sweeps do not exhaust memory. Results are also emitted
+ * as `partialResults` in every progress event (latest 256 entries) so the
+ * main thread can display the sweep live without waiting for completion.
  *
  * Config inputs expected:
  *  - paramName: string — parameter being swept
  *  - values: number[] — parameter values to sweep
  *  - outputNodeId: string — node whose output to collect
+ *  - bufferBytes?: number — override browser memory budget in bytes (default 1 GB)
  */
 async function runParameterSweep(config: SimulationConfig): Promise<void> {
   const { nodeId, maxIterations, loop = false, loopCount = 1 } = config
@@ -109,25 +119,35 @@ async function runParameterSweep(config: SimulationConfig): Promise<void> {
     paramName?: string
     values?: number[]
     outputNodeId?: string
+    bufferBytes?: number
   }
 
   const values = Array.isArray(inputs.values) ? inputs.values : []
   const totalIterations = Math.min(values.length, maxIterations)
   const totalCycles = loop ? loopCount : 1
-  const results: number[] = []
+
+  // 7.10: Streaming ring-buffer — bounded by memory budget.
+  const budgetBytes = typeof inputs.bufferBytes === 'number' ? inputs.bufferBytes : BROWSER_BUDGET_BYTES
+  const capacity = capacityForBudget(budgetBytes)
+  const buffer = new StreamingBuffer<number>(capacity)
 
   for (let cycle = 1; cycle <= totalCycles && !cancelled; cycle++) {
     for (let i = 0; i < totalIterations && !cancelled; i++) {
       const value = values[i]
 
-      // Simulate work (actual engine call would go here when WASM is loaded)
-      await new Promise<void>((r) => setTimeout(r, 0))
+      // Yield to allow cancel messages to be processed.
+      if (i % 100 === 0) {
+        await new Promise<void>((r) => setTimeout(r, 0))
+      }
 
-      results.push(value)
+      // 7.10: Append to streaming buffer (evicts oldest when full).
+      buffer.append(value)
 
       postProgress(nodeId, i + 1, totalIterations, cycle, totalCycles, {
         paramValue: value,
-      })
+        bufferedEntries: buffer.size,
+        bufferFull: buffer.isFull ? 1 : 0,
+      }, buffer.tail(256))
     }
   }
 
@@ -136,8 +156,11 @@ async function runParameterSweep(config: SimulationConfig): Promise<void> {
       nodeId,
       {
         paramName: inputs.paramName ?? 'param',
-        values: results,
-        sweepCount: results.length,
+        // Return the buffered window (may be less than sweep length if buffer was full).
+        values: buffer.toArray(),
+        sweepCount: buffer.size,
+        bufferCapacity: capacity,
+        wasEvicted: buffer.isFull,
       },
       totalIterations,
       totalCycles,

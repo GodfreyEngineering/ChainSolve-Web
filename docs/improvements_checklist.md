@@ -443,7 +443,7 @@
 - [x] **8.4** Looping: when loop=true + loopCount=N, restart from initial conditions after each cycle. Results append to output table. E.g., pendulum over 10 periods → angle vs time with 10 periods of data for plotting.
 - [x] **8.5** Progress streaming: {type: 'simulationProgress', iteration, totalIterations, cycle, totalCycles, partialResults, metrics}
 - [x] **8.6** Cancellation: Stop button sends Abort signal. Clean stop after current cycle (no mid-cycle abort unless force-cancelled).
-- [ ] **8.7** Connected Plot blocks update live during looping: each cycle appends data points, graph extends in real-time
+- [x] **8.7** Connected Plot blocks update live during looping: each cycle appends data points, graph extends in real-time
 - [x] **8.8** SimulationStatusStore: tracks {nodeId, status, iteration, totalIterations, cycle, totalCycles, metrics}. StatusBar shows "Simulating (cycle 3/10)" or "Training (epoch 47/100)".
 - [x] **8.9** Normal graph eval continues while simulation runs on separate worker — two workers must be independent
 
