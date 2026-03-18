@@ -83,10 +83,10 @@
 - [x] **1.47** SharedArrayBuffer dataset transfer (ENG-02): COOP+COEP headers enable zero-copy for large datasets
 - [x] **1.48** Watchdog timer (5s timeout, W9.9): detects WASM hangs, auto-recreates worker, reloads snapshot from cache
 - [x] **1.49** Incremental evaluation with dirty-set propagation: only recompute nodes whose inputs changed. ENG-05 value hash pruning: skip downstream when output unchanged.
-- [ ] **1.50** WASM SIMD (128-bit fixed-width, cross-browser since 2024): vectorise inner loops for f64 operations (2x throughput for element-wise ops). Enable via `-C target-feature=+simd128` in Cargo.
+- [x] **1.50** WASM SIMD (128-bit fixed-width, cross-browser since 2024): vectorise inner loops for f64 operations (2x throughput for element-wise ops). Enable via `-C target-feature=+simd128` in Cargo.
 - [ ] **1.51** Multi-threaded WASM via `wasm-bindgen-rayon`: spawn thread pool inside WASM module for parallel evaluation of independent DAG branches. Requires SharedArrayBuffer (already enabled via COOP+COEP).
 - [ ] **1.52** Memory64 proposal support: when available, enables >4GB WASM address space for very large datasets/meshes. Feature-detect and enable at runtime.
-- [ ] **1.53** Streaming WASM compilation: use `WebAssembly.compileStreaming()` for <2s startup. Currently loads full module before init. Target: interactive within 2s on 4G connection.
+- [x] **1.53** Streaming WASM compilation: use `WebAssembly.compileStreaming()` for <2s startup. Currently loads full module before init. Target: interactive within 2s on 4G connection.
 
 ---
 
