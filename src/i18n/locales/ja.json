@@ -433,6 +433,7 @@
     "ode_symplectic": "シンプレクティックODEソルバー",
     "ode_steady_state": "定常状態ソルバー",
     "ode_dae": "DAE ソルバー",
+    "ode_dae_index_reduction": "DAE 指数低減",
     "ode_bdf": "ODE BDF",
     "ode_radau": "ODE ラダウ",
     "ode_pde1d": "PDE 1D ソルバー",

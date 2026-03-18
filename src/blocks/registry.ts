@@ -1004,6 +1004,28 @@ reg({
 })
 
 reg({
+  type: 'ode.daeIndexReduction',
+  label: 'DAE Index Reduction',
+  category: 'odeSolvers',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'diff_eqs', label: 'Diff. equations (text)' },
+    { id: 'alg_eqs', label: 'Constraints (text)' },
+  ],
+  defaultData: {
+    blockType: 'ode.daeIndexReduction',
+    label: 'DAE Index Reduction',
+    diff_eqs: 'y1; -y0',
+    alg_eqs: 'y0^2 + y1^2 - 1',
+  },
+  proOnly: true,
+  synonyms: ['pantelides', 'index reduction', 'dae index', 'high index', 'structural analysis'],
+  tags: ['ode', 'dae', 'pantelides', 'index reduction', 'constraint'],
+  description:
+    'Pantelides index reduction: detects the structural index of a DAE system using bipartite matching. Identifies which constraint equations need differentiation to reduce to index-1 form. Returns table with diff_count per constraint and overall structural_index.',
+})
+
+reg({
   type: 'ode.bdf',
   label: 'ODE Solver (BDF)',
   category: 'odeSolvers',

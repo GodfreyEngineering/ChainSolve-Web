@@ -657,6 +657,9 @@ pub fn catalog() -> Vec<CatalogEntry> {
         // Compiled expression eval & Gröbner bases
         entry("sym.compiledEval", "Compiled Eval", "math", "csOperation", vec![], false),
         entry("sym.groebner", "Gröbner Basis", "symbolic", "csOperation", vec![], false),
+        // DAE index reduction (2.36)
+        entry("ode.daeIndexReduction", "DAE Index Reduction", "simulation", "csOperation",
+            vec![p("diff_eqs", "Diff. eqs (text)"), p("alg_eqs", "Constraints (text)")], false),
         // ExpressionInput (2.12)
         entry("sym.expressionInput", "Expression Input", "input", "csSource", vec![], false),
         // Mixed-mode AD (1.32)

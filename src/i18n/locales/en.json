@@ -433,6 +433,7 @@
     "ode_symplectic": "Symplectic ODE",
     "ode_steady_state": "Steady-State",
     "ode_dae": "DAE Solver",
+    "ode_dae_index_reduction": "DAE Index Reduction",
     "ode_bdf": "ODE BDF",
     "ode_radau": "ODE Radau",
     "ode_pde1d": "PDE 1D Solver",

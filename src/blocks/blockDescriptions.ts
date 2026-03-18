@@ -822,6 +822,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Find the steady-state equilibrium y* of dy/dt = f(y) where f(y*) = 0. Newton-Raphson with numerical Jacobian. Ideal for finding operating points of control systems, chemical equilibria, or any autonomous ODE.',
   'ode.symplectic':
     'Solve a Hamiltonian system using a symplectic integrator (Störmer-Verlet or Symplectic Euler). Conserves energy exactly over long integrations. Ideal for orbital mechanics, molecular dynamics, pendulums.',
+  'ode.daeIndexReduction':
+    'Pantelides index reduction: structural analysis of a DAE system. Builds a bipartite incidence graph (equations × variables), finds maximum matching, and detects which algebraic constraint equations need differentiation to reduce to index-1 form. Reports structural_index (1=already index-1, 2+=high-index), diff_count per constraint. Pair with DAE Solver for full simulation.',
   'ode.dae':
     'Solve a differential-algebraic equation (DAE) system. Differential equations: dy_i/dt = f_i(t,y,z). Algebraic constraints: g_j(t,y,z)=0. Index-1 via BDF-2 + Newton iteration. Consistent initialisation refines z0 automatically before integration.',
   'ode.bdf':

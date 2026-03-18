@@ -2067,6 +2067,7 @@
     "ode_symplectic": "פותר ODE סימפלקטי",
     "ode_steady_state": "מצב יציב",
     "ode_dae": "פותר DAE",
+    "ode_dae_index_reduction": "הפחתת מדד DAE",
     "ode_bdf": "ODE BDF",
     "ode_radau": "ODE ראדאו",
     "ode_pde1d": "פותר PDE חד-מימדי",

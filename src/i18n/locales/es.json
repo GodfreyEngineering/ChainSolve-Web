@@ -425,6 +425,7 @@
     "ode_symplectic": "Solver ODE Simpléctico",
     "ode_steady_state": "Estado Estacionario",
     "ode_dae": "Solucionador DAE",
+    "ode_dae_index_reduction": "Reducción de Índice DAE",
     "ode_bdf": "ODE BDF",
     "ode_radau": "ODE Radau",
     "ode_pde1d": "Solucionador PDE 1D",

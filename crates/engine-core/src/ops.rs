@@ -5675,6 +5675,56 @@ fn evaluate_node_inner(
             Value::Table { columns, rows }
         }
 
+        // ── DAE Index Reduction: Pantelides Algorithm (2.36) ─────────
+        "ode.daeIndexReduction" => {
+            use crate::ode::dae::pantelides_index_reduction;
+
+            let parse_text = |key: &str| -> Option<Vec<String>> {
+                match inputs.get(key) {
+                    Some(Value::Text { value }) => {
+                        let v: Vec<String> = value.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+                        if !v.is_empty() { Some(v) } else { None }
+                    }
+                    _ => None,
+                }
+            };
+            let diff_eqs = match parse_text("diff_eqs").or_else(|| {
+                data.get("diff_eqs").and_then(|v| v.as_str()).map(|s| {
+                    s.split(';').map(|x| x.trim().to_string()).filter(|x| !x.is_empty()).collect()
+                })
+            }) {
+                Some(v) => v,
+                None => return Value::error("ode.daeIndexReduction: 'diff_eqs' required (semicolon-separated)"),
+            };
+            let alg_eqs = match parse_text("alg_eqs").or_else(|| {
+                data.get("alg_eqs").and_then(|v| v.as_str()).map(|s| {
+                    s.split(';').map(|x| x.trim().to_string()).filter(|x| !x.is_empty()).collect()
+                })
+            }) {
+                Some(v) => v,
+                None => return Value::error("ode.daeIndexReduction: 'alg_eqs' required (semicolon-separated)"),
+            };
+
+            let nd = diff_eqs.len();
+            let na = alg_eqs.len();
+            let diff_names: Vec<String> = (0..nd).map(|i| format!("y{i}")).collect();
+            let alg_names: Vec<String> = (0..na).map(|i| format!("z{i}")).collect();
+
+            let result = pantelides_index_reduction(&diff_eqs, &alg_eqs, &diff_names, &alg_names);
+
+            // Return table: [eq_idx, kind, diff_count, eq_str, assignment_var]
+            let n_alg = result.diff_counts.len();
+            let eq_idx: Vec<f64> = (0..n_alg).map(|i| i as f64).collect();
+            let diff_count: Vec<f64> = result.diff_counts.iter().map(|&c| c as f64).collect();
+            let structural_index_col: Vec<f64> = vec![result.structural_index as f64; n_alg];
+            let n_diff_col: Vec<f64> = vec![result.n_differentiated as f64; n_alg];
+
+            crate::types::build_table(
+                &["alg_eq_idx", "diff_count", "structural_index", "n_differentiated"],
+                &[eq_idx, diff_count, structural_index_col, n_diff_col],
+            )
+        }
+
         "ode.dae" => {
             use crate::ode::dae::{DaeConfig, solve_dae, dae_result_to_table};
 

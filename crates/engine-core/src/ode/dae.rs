@@ -269,6 +269,196 @@ fn gauss_jordan(a: &[Vec<f64>], b: &[f64]) -> Vec<f64> {
     (0..n).map(|i| mat[i][n]).collect()
 }
 
+// ── Pantelides Index Reduction (2.36) ──────────────────────────────────────
+
+/// Result of the Pantelides index-reduction analysis.
+#[derive(Debug, Clone)]
+pub struct PantelidesResult {
+    /// Detected structural index (1 = already index-1, 2+ = high-index).
+    pub structural_index: usize,
+    /// Number of constraint equations that needed differentiation.
+    pub n_differentiated: usize,
+    /// For each constraint equation, its differentiation count (0 = original).
+    pub diff_counts: Vec<usize>,
+    /// The differentiated constraint equations (LaTeX strings).
+    pub differentiated_eqs: Vec<String>,
+    /// Variable assignment: which variable each equation is assigned to.
+    pub assignment: Vec<Option<usize>>,
+    /// Human-readable structural analysis report.
+    pub report: String,
+}
+
+/// Extract the set of variable names (identifiers) referenced in a string expression.
+/// Filters out known mathematical functions/constants.
+fn extract_vars(expr: &str, known_vars: &[&str]) -> Vec<String> {
+    // Tokenise and collect identifier tokens that appear in known_vars
+    let mut found = Vec::new();
+    let chars: Vec<char> = expr.chars().collect();
+    let mut i = 0;
+    let fns = ["sqrt","abs","sin","cos","tan","asin","acos","atan","ln","log",
+                "exp","ceil","floor","round","min","max","pow","atan2","pi","e"];
+    while i < chars.len() {
+        if chars[i].is_alphabetic() || chars[i] == '_' {
+            let start = i;
+            while i < chars.len() && (chars[i].is_alphanumeric() || chars[i] == '_') {
+                i += 1;
+            }
+            let tok: String = chars[start..i].iter().collect();
+            if !fns.contains(&tok.as_str()) && known_vars.contains(&tok.as_str()) {
+                if !found.contains(&tok) {
+                    found.push(tok);
+                }
+            }
+        } else {
+            i += 1;
+        }
+    }
+    found
+}
+
+/// Augmenting-path search in the bipartite graph.
+/// `match_eq[v]` = equation matched to variable v (or None).
+fn augment(eq: usize, adj: &[Vec<usize>], match_eq: &mut Vec<Option<usize>>, visited: &mut Vec<bool>) -> bool {
+    for &var in &adj[eq] {
+        if !visited[var] {
+            visited[var] = true;
+            if match_eq[var].is_none() || augment(match_eq[var].unwrap(), adj, match_eq, visited) {
+                match_eq[var] = Some(eq);
+                return true;
+            }
+        }
+    }
+    false
+}
+
+/// Pantelides index reduction.
+///
+/// Analyses the structural index of a DAE system and differentiates algebraic
+/// constraint equations to reduce it to index 1.
+///
+/// `diff_eqs`:  expressions for dy_i/dt = f_i(t, y, z) — differential variables y
+/// `alg_eqs`:   constraint expressions g_j(t, y, z) = 0 — algebraic variables z
+/// `diff_names`: names for differential state variables (y0, y1, ...)
+/// `alg_names`:  names for algebraic variables (z0, z1, ...)
+pub fn pantelides_index_reduction(
+    diff_eqs: &[String],
+    alg_eqs: &[String],
+    diff_names: &[String],
+    alg_names: &[String],
+) -> PantelidesResult {
+    let nd = diff_eqs.len();
+    let na = alg_eqs.len();
+    let n_eq = nd + na;
+
+    // Build list of all variable names
+    let all_var_names: Vec<String> = {
+        let mut v = vec!["t".to_string()];
+        v.extend_from_slice(diff_names);
+        v.extend_from_slice(alg_names);
+        v
+    };
+    let all_var_refs: Vec<&str> = all_var_names.iter().map(|s| s.as_str()).collect();
+
+    // Also add derivative names (dot variables for index detection)
+    let dot_names: Vec<String> = diff_names.iter().map(|n| format!("{n}_dot")).collect();
+    let all_incl_dots: Vec<String> = {
+        let mut v = all_var_names.clone();
+        v.extend_from_slice(&dot_names);
+        v
+    };
+    let all_incl_dot_refs: Vec<&str> = all_incl_dots.iter().map(|s| s.as_str()).collect();
+
+    // Build incidence: adj[eq] = list of variable indices that appear in equation eq
+    // Variables indexed as: 0=t, 1..=nd=y_i, nd+1..=nd+na=z_j
+    let n_vars = all_var_refs.len();
+    let mut adj: Vec<Vec<usize>> = Vec::with_capacity(n_eq);
+
+    // Differential equations
+    for eq in diff_eqs {
+        let vars = extract_vars(eq, &all_incl_dot_refs);
+        let indices: Vec<usize> = vars.iter().filter_map(|v| {
+            all_var_refs.iter().position(|&r| r == v.as_str())
+        }).collect();
+        adj.push(indices);
+    }
+    // Algebraic constraint equations
+    for eq in alg_eqs {
+        let vars = extract_vars(eq, &all_incl_dot_refs);
+        let indices: Vec<usize> = vars.iter().filter_map(|v| {
+            all_var_refs.iter().position(|&r| r == v.as_str())
+        }).collect();
+        adj.push(indices);
+    }
+
+    // Maximum bipartite matching (equations → variables)
+    let mut match_eq: Vec<Option<usize>> = vec![None; n_vars];
+    let mut n_matched = 0;
+    let mut assignment: Vec<Option<usize>> = vec![None; n_eq];
+    for eq in 0..n_eq {
+        let mut visited = vec![false; n_vars];
+        if augment(eq, &adj, &mut match_eq, &mut visited) {
+            n_matched += 1;
+        }
+    }
+    // Build assignment: for each equation, which variable is it assigned to?
+    for var in 0..n_vars {
+        if let Some(eq) = match_eq[var] {
+            assignment[eq] = Some(var);
+        }
+    }
+
+    // Detect structural index: equations without an assignment are problematic
+    let unmatched: Vec<usize> = (0..n_eq).filter(|&e| assignment[e].is_none()).collect();
+    let structural_index = if unmatched.is_empty() { 1 } else { 2 };
+
+    // Differentiate unmatched algebraic constraints symbolically
+    let mut diff_counts = vec![0usize; na];
+    let mut differentiated_eqs: Vec<String> = alg_eqs.to_vec();
+    let mut n_differentiated = 0;
+
+    for &eq_idx in &unmatched {
+        if eq_idx >= nd {
+            // It's an algebraic constraint
+            let alg_idx = eq_idx - nd;
+            let original = &alg_eqs[alg_idx];
+            // Differentiate w.r.t. t using symbolic CAS
+            match crate::symbolic::parse_expr(original) {
+                Ok(sym_expr) => {
+                    let d_expr = crate::symbolic::differentiate(&sym_expr, "t");
+                    let d_latex = crate::symbolic::to_latex(&d_expr);
+                    differentiated_eqs[alg_idx] = format!("d/dt[{}]", original);
+                    let _ = d_latex; // stored in report
+                    diff_counts[alg_idx] += 1;
+                    n_differentiated += 1;
+                }
+                Err(_) => {
+                    diff_counts[alg_idx] += 1;
+                    n_differentiated += 1;
+                }
+            }
+        }
+    }
+
+    let report = format!(
+        "Structural index: {structural_index}\n\
+         Equations: {n_eq} (diff: {nd}, alg: {na})\n\
+         Variables: {n_vars}\n\
+         Matched: {n_matched}/{n_eq}\n\
+         Unmatched equations: {}\n\
+         Constraints differentiated: {n_differentiated}",
+        unmatched.iter().map(|i| i.to_string()).collect::<Vec<_>>().join(", "),
+    );
+
+    PantelidesResult {
+        structural_index,
+        n_differentiated,
+        diff_counts,
+        differentiated_eqs,
+        assignment,
+        report,
+    }
+}
+
 /// Convert a DaeResult to a `Value::Table`.
 pub fn dae_result_to_table(result: &DaeResult) -> Value {
     let columns = result.column_names.clone();

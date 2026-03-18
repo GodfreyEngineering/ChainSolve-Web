@@ -425,6 +425,7 @@
     "ode_symplectic": "Symplektischer ODE-Löser",
     "ode_steady_state": "Stationärer Zustand",
     "ode_dae": "DAE-Löser",
+    "ode_dae_index_reduction": "DAE Indexreduktion",
     "ode_bdf": "ODE BDF",
     "ode_radau": "ODE Radau",
     "ode_pde1d": "PDE 1D-Löser",
