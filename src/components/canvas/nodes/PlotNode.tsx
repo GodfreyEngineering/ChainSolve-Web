@@ -13,6 +13,8 @@ import { useComputedValue } from '../../../contexts/ComputedContext'
 import { formatValue, isTable } from '../../../engine/value'
 import type { Value } from '../../../engine/value'
 import type { NodeData, PlotConfig } from '../../../blocks/types'
+import { useSimulationStatusStore } from '../../../stores/simulationStatusStore'
+import { useSimulationSeriesStore } from '../../../stores/simulationSeriesStore'
 import { NODE_STYLES as s } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 import { Icon } from '../../ui/Icon'
@@ -53,6 +55,24 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
   const inputValue = useComputedValue(inputSourceId)
   const headerValue = useComputedValue(id)
 
+  // 8.7: Live simulation series — if the connected source node has a running simulation,
+  // synthesise a Table Value from accumulated metric series and use it for the chart.
+  const simTask = useSimulationStatusStore((s) => s.tasks[inputSourceId])
+  const simSeries = useSimulationSeriesStore((s) => s.series[inputSourceId])
+  const liveValue: Value | undefined = useMemo(() => {
+    if (!simTask || simTask.status !== 'running' || !simSeries || simSeries.rows.length === 0) {
+      return undefined
+    }
+    return {
+      kind: 'table' as const,
+      columns: simSeries.labels,
+      rows: simSeries.rows,
+    }
+  }, [simTask, simSeries])
+
+  // Use live simulation data when available; otherwise fall back to computed value.
+  const effectiveValue = liveValue ?? inputValue
+
   // Config patcher
   const updateConfig = useCallback(
     (patch: Partial<PlotConfig>) => {
@@ -72,17 +92,17 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
 
   // 6.12: Sankey is rendered as pure SVG — bypass Vega entirely.
   const isSankey = config.chartType === 'sankey'
-  const sankeyData = isSankey && inputValue && isTable(inputValue) ? inputValue : null
+  const sankeyData = isSankey && effectiveValue && isTable(effectiveValue) ? effectiveValue : null
 
   // 6.9: 3D surface plot — canvas-based renderer, bypass Vega.
   const isSurface3d = config.chartType === 'surface3d'
-  const surfaceData = isSurface3d && inputValue && isTable(inputValue) ? inputValue : null
+  const surfaceData = isSurface3d && effectiveValue && isTable(effectiveValue) ? effectiveValue : null
 
   // Derive spec result from inputs (pure computation, no side-effects)
   const specResult = useMemo(
     () =>
-      isSankey || isSurface3d ? { error: '' } : buildInlineSpec(inputValue, config, true),
-    [isSankey, isSurface3d, inputValue, config],
+      isSankey || isSurface3d ? { error: '' } : buildInlineSpec(effectiveValue, config, true),
+    [isSankey, isSurface3d, effectiveValue, config],
   )
   const specError = 'error' in specResult && specResult.error !== '' ? specResult.error : null
   const isDownsampled = !specError && !isSankey && !isSurface3d && (specResult as SpecResult).isDownsampled
@@ -209,6 +229,24 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
           <div className="cs-node-header-left" style={s.headerLeft}>
             <Icon icon={TypeIcon} size={14} style={{ ...s.headerIcon, color: typeColor }} />
             <span style={s.headerLabel}>{nd.label}</span>
+            {/* 8.7: Live badge when showing simulation series data */}
+            {liveValue !== undefined && (
+              <span
+                style={{
+                  fontSize: '0.55rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.05em',
+                  padding: '1px 4px',
+                  borderRadius: 3,
+                  background: '#1CABB0',
+                  color: '#fff',
+                  marginLeft: 4,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Live
+              </span>
+            )}
           </div>
           <span className="cs-node-header-value" style={s.headerValue}>
             {formatValue(headerValue)}
@@ -458,7 +496,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
                 }}
                 onClick={() =>
                   exportCSV(
-                    inputValue,
+                    effectiveValue,
                     `${nd.label.replace(/[^a-zA-Z0-9_-]/g, '_')}_${Date.now()}.csv`,
                   )
                 }
@@ -474,7 +512,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
       {/* Full-size modal */}
       {expandOpen && (
         <PlotExpandModalLazy
-          value={inputValue}
+          value={effectiveValue}
           config={config}
           label={nd.label}
           onClose={() => setExpandOpen(false)}

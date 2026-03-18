@@ -31,6 +31,7 @@
 
 import { useSimulationStatusStore } from '../stores/simulationStatusStore'
 import type { SimTaskMetrics } from '../stores/simulationStatusStore'
+import { useSimulationSeriesStore } from '../stores/simulationSeriesStore'
 
 // ── Configuration ─────────────────────────────────────────────────────────────
 
@@ -149,6 +150,8 @@ export class SimulationWorkerAPI {
 
     // Register in status store (8.8)
     store.startTask(nodeId, label, maxIterations, loop ? loopCount : 1)
+    // 8.7: Initialise live series accumulator for connected plot blocks
+    useSimulationSeriesStore.getState().initSeries(nodeId)
     this.startTime = Date.now()
 
     return new Promise<SimulationResult>((resolve, reject) => {
@@ -165,6 +168,7 @@ export class SimulationWorkerAPI {
         worker.terminate()
         this.worker = null
         store.cancelTask(nodeId)
+        useSimulationSeriesStore.getState().clearSeries(nodeId)
         reject(new DOMException('Simulation cancelled', 'AbortError'))
       }
       signal?.addEventListener('abort', onAbort, { once: true })
@@ -183,12 +187,18 @@ export class SimulationWorkerAPI {
             metrics: msg.metrics,
           }
           store.setProgress(nodeId, msg.iteration, msg.cycle, msg.metrics)
+          // 8.7: Accumulate numeric metrics into live series for plot blocks
+          if (Object.keys(msg.metrics).length > 0) {
+            useSimulationSeriesStore.getState().appendPoint(nodeId, msg.iteration, msg.metrics)
+          }
           onProgress?.(progress)
         } else if (msg.type === 'simulationComplete') {
           signal?.removeEventListener('abort', onAbort)
           worker.terminate()
           this.worker = null
           store.completeTask(nodeId)
+          // 8.7: Keep final series for a brief display, then clear
+          setTimeout(() => useSimulationSeriesStore.getState().clearSeries(nodeId), 5000)
           resolve({
             nodeId: msg.nodeId,
             op: config.op,

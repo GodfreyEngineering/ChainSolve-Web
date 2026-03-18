@@ -438,7 +438,7 @@
 *Dedicated worker for long-running tasks. All have defined endpoints. Optional looping for periodic simulations.*
 
 - [x] **8.1** Dedicated simulation worker: separate Web Worker from eval worker, loads same WASM. SimulationWorkerAPI class.
-- [ ] **8.2** run_simulation WASM export with progress_cb: config = {op, inputs, maxIterations, endTime?, convergenceThreshold?, batchSize?, loop?, loopCount?}
+- [x] **8.2** run_simulation WASM export with progress_cb: config = {op, inputs, maxIterations, endTime?, convergenceThreshold?, batchSize?, loop?, loopCount?}
 - [x] **8.3** All tasks finite: maxIterations, targetLoss, endTime, convergenceThreshold — no indefinite execution
 - [x] **8.4** Looping: when loop=true + loopCount=N, restart from initial conditions after each cycle. Results append to output table. E.g., pendulum over 10 periods → angle vs time with 10 periods of data for plotting.
 - [x] **8.5** Progress streaming: {type: 'simulationProgress', iteration, totalIterations, cycle, totalCycles, partialResults, metrics}
