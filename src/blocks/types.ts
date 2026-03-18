@@ -98,6 +98,7 @@ export type NodeKind =
   | 'csCodeBlock'
   | 'csTirFileInput'
   | 'csViewport3D'
+  | 'csOnnxInference'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

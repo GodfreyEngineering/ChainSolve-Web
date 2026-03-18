@@ -109,6 +109,9 @@ export function toEngineSnapshot(
                               // 4.14: tirFileInput parses .tir files in the UI; engine treats as tableInput.
                               : data.blockType === 'tirFileInput'
                                 ? 'tableInput'
+                                // 2.96: nn.onnxInference runs inference via onnxruntime-web in the UI; outputs first tensor as vector (data.vectorData).
+                                : data.blockType === 'nn.onnxInference'
+                                ? 'vectorInput'
                                 // 9.15/2.134: codeBlock evaluates JS code in the UI, outputs result as 'number'.
                                 : data.blockType === 'codeBlock'
                                 ? 'number'
@@ -190,10 +193,11 @@ export function toEngineSnapshot(
     edges: edges
       .filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target))
       // 2.133: mathSheet and 2.67 ctrl.deadZone compute in the UI; exclude their input edges.
+      // 2.96: nn.onnxInference reads input in the UI node component; exclude input edges from Rust.
       .filter((e) => {
         const tgt = evalNodes.find((n) => n.id === e.target)
         const bt = (tgt?.data as Record<string, unknown> | undefined)?.blockType
-        return bt !== 'mathSheet' && bt !== 'ctrl.deadZone'
+        return bt !== 'mathSheet' && bt !== 'ctrl.deadZone' && bt !== 'nn.onnxInference'
       })
       .map((e) => {
         const tgtNode = evalNodes.find((n) => n.id === e.target)
