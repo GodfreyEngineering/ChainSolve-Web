@@ -2389,6 +2389,12 @@
     "more": "más",
     "currentState": "Estado actual"
   },
+  "codeBlock": {
+    "label": "Bloque de código",
+    "vars": "Variables",
+    "addVar": "var",
+    "removeVar": "var"
+  },
   "timeline": {
     "lastEval": "Último",
     "avgEval": "Prom",

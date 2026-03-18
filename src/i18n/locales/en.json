@@ -2437,6 +2437,12 @@
     "more": "more",
     "currentState": "Current state"
   },
+  "codeBlock": {
+    "label": "Code Block",
+    "vars": "Variables",
+    "addVar": "var",
+    "removeVar": "var"
+  },
   "timeline": {
     "lastEval": "Last",
     "avgEval": "Avg",

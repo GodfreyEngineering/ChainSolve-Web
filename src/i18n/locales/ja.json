@@ -2437,6 +2437,12 @@
     "more": "他",
     "currentState": "現在の状態"
   },
+  "codeBlock": {
+    "label": "コードブロック",
+    "vars": "変数",
+    "addVar": "変数",
+    "removeVar": "変数"
+  },
   "timeline": {
     "lastEval": "最後",
     "avgEval": "平均",

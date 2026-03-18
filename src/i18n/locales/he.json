@@ -1836,6 +1836,12 @@
     "more": "עוד",
     "currentState": "מצב נוכחי"
   },
+  "codeBlock": {
+    "label": "בלוק קוד",
+    "vars": "משתנים",
+    "addVar": "משתנה",
+    "removeVar": "משתנה"
+  },
   "timeline": {
     "lastEval": "אחרון",
     "avgEval": "ממוצע",

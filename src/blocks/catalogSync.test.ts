@@ -38,7 +38,8 @@ registerAllBlocks()
 // 2.70: ctrl.zoh is remapped to 'number' in bridge.ts; hold logic runs in the UI.
 // 2.70: ctrl.rateTransition is remapped to 'number' in bridge.ts; rate conversion runs in the UI.
 // 2.71: stateMachine is remapped to 'number' in bridge.ts; FSM state tracking runs in the UI.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput', 'sqlQuery', 'timeSeries', 'unitInput', 'transferFunction', 'stateSpace', 'ctrl.zoh', 'ctrl.rateTransition', 'stateMachine'])
+// 9.15/2.134: codeBlock is remapped to 'number' in bridge.ts; JS evaluation runs in the UI.
+const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput', 'sqlQuery', 'timeSeries', 'unitInput', 'transferFunction', 'stateSpace', 'ctrl.zoh', 'ctrl.rateTransition', 'stateMachine', 'codeBlock'])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.
