@@ -488,12 +488,5 @@ export function buildFullVehicleModel(canvasId: string, projectId: string): Canv
     { id: 'fv-e-kc-out', source: 'fv-kc', sourceHandle: 'out', target: 'fv-disp-kc', targetHandle: 'value', animated: true },
   ]
 
-  return {
-    id: canvasId,
-    projectId,
-    name: 'Full-Vehicle Model',
-    nodes: nodes as CanvasJSON['nodes'],
-    edges: edges as CanvasJSON['edges'],
-    viewport: { x: 0, y: 0, zoom: 0.6 },
-  }
+  return { schemaVersion: 4, canvasId, projectId, nodes, edges, datasetRefs: [] }
 }

@@ -25,6 +25,9 @@ import { buildNeuralNetworkTraining } from './neural-network-training'
 import { buildStructuralOptimisation } from './structural-optimisation'
 import { buildBatteryThermal } from './battery-thermal'
 import { buildFullVehicleModel } from './full-vehicle-model'
+import { buildFourierSeries } from './fourier-series'
+import { buildPowerFlow } from './power-flow'
+import { buildStirlingsApproximation } from './stirlings-approximation'
 
 export interface TemplateMeta {
   /** Stable unique key — never rename after shipping. */
@@ -209,5 +212,32 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ['vehicle', 'automotive', 'suspension', 'powertrain', 'aero', 'tyre', 'brake', 'K&C', 'dynamics'],
     category: 'Engineering',
     buildGraph: buildFullVehicleModel,
+  },
+  {
+    id: 'fourier-series',
+    name: 'Fourier Series Approximation',
+    description:
+      'Square-wave approximation via 3-harmonic Fourier sum f(t) ≈ (4/π)·[sin(ωt) + sin(3ωt)/3 + sin(5ωt)/5] — shows how harmonics progressively sharpen the waveform.',
+    tags: ['tutorial', 'signal processing', 'fourier', 'harmonics', 'approximation', 'maths'],
+    category: 'Science',
+    buildGraph: buildFourierSeries,
+  },
+  {
+    id: 'power-flow',
+    name: 'AC Power Flow Analysis',
+    description:
+      'Apparent, active, and reactive power for a single-phase AC load: S = V·I, P = S·cos(φ), Q = S·sin(φ), pf = P/S — explore how phase angle affects useful power delivery.',
+    tags: ['tutorial', 'electrical', 'power', 'AC', 'power factor', 'engineering'],
+    category: 'Engineering',
+    buildGraph: buildPowerFlow,
+  },
+  {
+    id: 'stirlings-approximation',
+    name: "Stirling's Approximation",
+    description:
+      "Approximates n! ≈ √(2πn)·(n/e)^n using elementary operations — demonstrates how a complex factorial can be estimated accurately with square-root, power, and multiply blocks.",
+    tags: ['tutorial', 'maths', 'approximation', 'factorial', 'numerical methods', 'combinatorics'],
+    category: 'Science',
+    buildGraph: buildStirlingsApproximation,
   },
 ]
