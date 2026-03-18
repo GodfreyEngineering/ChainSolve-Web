@@ -20,10 +20,12 @@ const MetricsPage = lazy(() =>
 // production users unless VITE_DIAGNOSTICS_UI_ENABLED=true.
 const DiagnosticsPage = lazy(() => import('./pages/DiagnosticsPage'))
 
-// Lazy-load Terms, Privacy, and Cookie Policy pages (not needed on initial load)
+// Lazy-load legal pages (not needed on initial load)
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const CookiesPage = lazy(() => import('./pages/CookiesPage'))
+const AccessibilityPage = lazy(() => import('./pages/AccessibilityPage'))
+const LicencesPage = lazy(() => import('./pages/LicencesPage'))
 
 // Lazy-load docs page (public, not needed on initial load)
 const DocsPage = lazy(() => import('./pages/DocsPage'))
@@ -219,6 +221,22 @@ export default function App() {
         element={
           <Suspense fallback={<RouteSkeleton variant="minimal" />}>
             <CookiesPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/accessibility"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+            <AccessibilityPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/licences"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+            <LicencesPage />
           </Suspense>
         }
       />

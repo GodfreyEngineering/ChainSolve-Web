@@ -8,6 +8,8 @@
  *   - checkout.session.completed       → set plan to 'trialing' or 'pro'
  *   - customer.subscription.updated    → update plan + current_period_end
  *   - customer.subscription.deleted    → set plan to 'canceled'
+ *   - invoice.payment_failed           → set subscription_payment_failed flag for dunning
+ *   - invoice.paid                     → clear subscription_payment_failed flag
  *
  * D11-2: Also persists org max_seats when enterprise subscription is
  * activated (plan_key metadata indicates ent_10 → 10, ent_unlimited → null).
@@ -207,6 +209,41 @@ export const onRequestPost: PagesFunction<{
           // Audit failures must not block the purchase flow.
         }
       }
+    }
+  }
+
+  // 16.60: invoice.payment_failed — mark subscription as payment-failed for dunning.
+  // The subscription status will also fire as 'past_due' via subscription.updated,
+  // but the invoice event gives us a direct signal for dunning email logic.
+  if (event.type === 'invoice.payment_failed') {
+    const invoice = event.data.object as Stripe.Invoice
+    const customerId =
+      typeof invoice.customer === 'string' ? invoice.customer : (invoice.customer as Stripe.Customer)?.id
+    if (customerId) {
+      // Record the failed payment timestamp; dunning email logic reads this field.
+      await supabaseAdmin
+        .from('profiles')
+        .update({ subscription_payment_failed_at: new Date().toISOString() })
+        .eq('stripe_customer_id', customerId)
+        .then(({ error }) => {
+          if (error) console.error('[webhook] invoice.payment_failed update failed:', error.message)
+        })
+    }
+  }
+
+  // 16.60: invoice.paid — clear payment-failed state when subscription is recovered.
+  if (event.type === 'invoice.paid') {
+    const invoice = event.data.object as Stripe.Invoice
+    const customerId =
+      typeof invoice.customer === 'string' ? invoice.customer : (invoice.customer as Stripe.Customer)?.id
+    if (customerId) {
+      await supabaseAdmin
+        .from('profiles')
+        .update({ subscription_payment_failed_at: null })
+        .eq('stripe_customer_id', customerId)
+        .then(({ error }) => {
+          if (error) console.error('[webhook] invoice.paid clear failed:', error.message)
+        })
     }
   }
 
