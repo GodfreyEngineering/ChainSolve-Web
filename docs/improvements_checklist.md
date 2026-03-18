@@ -318,7 +318,7 @@
 - [x] **3.28** Auto-layout: dagre LR/TB directions. Triggered via toolbar button or Shift+click.
 - [x] **3.29** Alignment: distribute horizontally/vertically, align left/right/top/bottom/center. alignmentHelpers.ts with full implementation.
 - [x] **3.30** Domain-coloured backgrounds: auto-tint node backgrounds by physics domain — mechanical=blue, electrical=yellow, thermal=red, control=green, ML=purple, optimisation=orange — for instant visual parsing of complex multi-domain graphs
-- [ ] **3.31** SubGraph collapse: right-click group → "Collapse to SubGraph" — creates a composite block with exposed input/output ports (ports are the edges that cross the group boundary). Can be saved to template library. Like Houdini's Digital Assets.
+- [x] **3.31** SubGraph collapse: right-click group → "Collapse to SubGraph" — creates a composite block with exposed input/output ports (ports are the edges that cross the group boundary). Can be saved to template library. Like Houdini's Digital Assets.
 
 ### 3D — Debugging
 
