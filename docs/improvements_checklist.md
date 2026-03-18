@@ -358,7 +358,7 @@
 - [x] **4.5** Project JSON format (.chainsolvejson schema v3) with version migration
 - [x] **4.6** Excel .xlsx read import: parse workbook sheets → DataTable values. Use a WASM-compiled xlsx parser or server-side Edge Function.
 - [ ] **4.7** HDF5 import/export: hierarchical datasets for large arrays/matrices. Via `hdf5-rust` or Emscripten-compiled libhdf5.
-- [ ] **4.8** Parquet import/export: columnar format for large datasets. Via `parquet` Rust crate compiled to WASM.
+- [x] **4.8** Parquet import/export: columnar format for large datasets. Via `parquet` Rust crate compiled to WASM.
 - [x] **4.9** MATLAB .mat import: v5 format via `matfile` crate (pure Rust), v7.3 via HDF5 layer
 - [x] **4.10** NumPy .npy/.npz import: parse NumPy array format (simple binary header + data)
 - [ ] **4.11** STEP/IGES geometry import: parse CAD boundary representations → display as 3D mesh in viewport
