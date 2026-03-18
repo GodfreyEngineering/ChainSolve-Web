@@ -40,6 +40,7 @@
     "sbom": "bash scripts/gen-sbom.sh",
     "sbom:rust": "cargo sbom --output-format cyclone_dx_json_1_6 > legal/sbom/rust-sbom.cdx.json",
     "sbom:npm": "npx --yes @cyclonedx/cyclonedx-npm --spec-version 1.6 --output-format JSON --output-file legal/sbom/npm-sbom.cdx.json --package-lock-only",
+    "legal-pack": "bash scripts/gen-legal-pack.sh",
     "db:types": "supabase gen types typescript --local > src/lib/database.types.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"

@@ -1,5 +1,8 @@
 # Legal PDFs (downloaded DPAs — do not commit confidential PDFs)
 legal/*.pdf
+# Generated enterprise legal pack (regenerate with: npm run legal-pack)
+legal/ChainSolve_Legal_Pack.zip
+legal/pack-staging/
 
 # Logs
 logs
