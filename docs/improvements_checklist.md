@@ -269,7 +269,7 @@
 - [ ] **2.128** CustomRust: write custom Rust block logic — compiled server-side or to WASM. Hot-reloading for development. Block trait implementation with typed ports.
 - [ ] **2.129** SubGraph: collapse group of blocks into reusable parameterised composite block (like Houdini's Digital Assets) — exposed ports become the SubGraph's ports. Saved to user's template library.
 - [x] **2.130** Assertion: runtime check — verify value is in range, correct type, correct dimensions. Pass = green indicator, Fail = red with message. For validation workflows.
-- [ ] **2.131** Timer: measure wall-clock and CPU time for connected computation — identify performance bottlenecks
+- [x] **2.131** Timer: measure wall-clock and CPU time for connected computation — identify performance bottlenecks
 - [ ] **2.132** Logger: record time-series data from any port to structured log (Supabase table) — for post-processing and experiment tracking
 - [ ] **2.133** MathSheet: spreadsheet-like block within the node graph — accepts input ports as named variables, cells support unit-aware formulas, outputs computed columns. The "Excel-killer" feature: lets Excel users bring their mental model into ChainSolve while gaining units, version control, reproducibility.
 - [ ] **2.134** CodeBlock: write Rust/Python expressions inline with autocomplete, type inference, instant evaluation — variables from connected inputs available by name, output auto-typed. The "MATLAB-killer" feature: like MATLAB Live Editor but in a node graph.
