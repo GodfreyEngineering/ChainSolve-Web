@@ -13,6 +13,7 @@ pub mod lbfgsb;
 pub mod response_surface;
 pub mod robust;
 pub mod sqp;
+pub mod topology;
 pub mod trust_region;
 pub mod uq;
 pub mod genetic;

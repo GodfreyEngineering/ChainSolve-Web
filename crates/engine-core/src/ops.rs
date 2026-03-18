@@ -3989,6 +3989,18 @@ fn evaluate_node_inner(
             }
         }
 
+        "optim.topologyOpt" => {
+            use crate::optim::topology;
+            let nx = data.get("nx").and_then(|v| v.as_f64()).unwrap_or(40.0) as usize;
+            let ny = data.get("ny").and_then(|v| v.as_f64()).unwrap_or(20.0) as usize;
+            let vol_frac = data.get("volFrac").and_then(|v| v.as_f64()).unwrap_or(0.4);
+            let r_min = data.get("rMin").and_then(|v| v.as_f64()).unwrap_or(1.5);
+            let max_iter = data.get("maxIterations").and_then(|v| v.as_f64()).unwrap_or(100.0) as usize;
+            let tol = data.get("tolerance").and_then(|v| v.as_f64()).unwrap_or(1e-3);
+            let config = topology::TopoConfig { nx, ny, vol_frac, r_min, max_iter, tol };
+            topology::simp_topology(&config)
+        }
+
         "optim.convergencePlot" | "optim.resultsTable" => {
             // Pass through optimizer output (Table)
             inputs.get("data").cloned().unwrap_or(Value::scalar(f64::NAN))

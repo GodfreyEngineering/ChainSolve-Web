@@ -638,6 +638,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'FORM (First-Order Reliability Method) with HLRF algorithm. Searches for the Most Probable Point (MPP) of failure in standard normal u-space. Outputs reliability index β and failure probability P_f = Φ(-β).',
   'optim.robustDesign':
     'Robust Design: traces a Pareto front of mean vs variance by sweeping robustness weight k. For each k, minimises μ(x) + k·σ(x) using projected gradient descent with Monte Carlo moment estimation.',
+  'optim.topologyOpt':
+    'SIMP Topology Optimisation: minimises structural compliance on a 2D cantilever mesh. Uses Q4 bilinear FEM, OC update, and density filtering. Outputs [x, y, density] table for contour/heatmap visualisation of the optimal material distribution.',
   'optim.convergencePlot': 'Visualizes optimizer convergence: objective value vs iteration count.',
   'optim.resultsTable':
     'Displays final optimal variable values, objective value, and convergence status.',

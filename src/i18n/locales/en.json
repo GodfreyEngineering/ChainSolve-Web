@@ -437,6 +437,7 @@
     "optim_uq_pce": "UQ / PCE",
     "optim_form": "FORM Reliability",
     "optim_robust_design": "Robust Design",
+    "optim_topology_opt": "Topology Optimisation",
     "tire_pacejka": "Pacejka Tire",
     "quarter_car": "Quarter-Car Suspension",
     "aero_drag": "Aerodynamic Drag",

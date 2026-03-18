@@ -428,6 +428,7 @@
     "optim_uq_pce": "UQ / PCE",
     "optim_form": "Affidabilità FORM",
     "optim_robust_design": "Progettazione Robusta",
+    "optim_topology_opt": "Ottimizzazione Topologica",
     "tire_pacejka": "Pneumatico Pacejka",
     "quarter_car": "Sospensione Quarto di Veicolo",
     "aero_drag": "Resistenza Aerodinamica",

@@ -273,6 +273,28 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
       'Robust Design: minimises f_robust = μ + k·σ over a Pareto sweep of k ∈ [0, k_max]. Each Pareto point is optimised with L-projected gradient descent. Outputs table of (k, mean, std, robust_obj, x*) for plotting the Pareto front.',
   })
 
+  register({
+    type: 'optim.topologyOpt',
+    label: 'Topology Optimisation',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [],
+    defaultData: {
+      blockType: 'optim.topologyOpt',
+      label: 'Topology Optimisation',
+      nx: 40,
+      ny: 20,
+      volFrac: 0.4,
+      rMin: 1.5,
+      maxIterations: 100,
+      tolerance: 1e-3,
+    },
+    synonyms: ['simp', 'topology', 'structural optimization', 'compliance minimization', 'density field'],
+    tags: ['optimization', 'structural', 'FEM'],
+    description:
+      'SIMP Topology Optimisation: minimises structural compliance on a 2D cantilever beam mesh using the Solid Isotropic Material with Penalization method. Outputs density field [x, y, density] suitable for contour plot. nx×ny mesh, volume fraction vf, filter radius r_min.',
+  })
+
   // ── Visualization & Results ─────────────────────────────────────────────
 
   register({
