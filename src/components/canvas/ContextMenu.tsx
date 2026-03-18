@@ -11,6 +11,7 @@ import { useMenuPosition } from '../../hooks/useMenuPosition'
 import type { Value } from '../../engine/value'
 import { isError } from '../../engine/value'
 import type { AlignOp } from '../../lib/alignmentHelpers'
+import { useDebugStore } from '../../stores/debugStore'
 
 /** UX-14: Preset accent colors for node tinting. */
 const NODE_COLORS = [
@@ -234,6 +235,7 @@ export function ContextMenu({
 }: ContextMenuProps) {
   const { t } = useTranslation()
   const { menuRef, pos } = useMenuPosition(target.x, target.y)
+  const { breakpoints, toggleBreakpoint } = useDebugStore()
 
   const menuStyle: CSSProperties = {
     position: 'fixed',
@@ -362,6 +364,23 @@ export function ContextMenu({
                   onClose()
                 }}
               />
+            )}
+            {!target.isAnnotation && (
+              <>
+                <div style={sep} />
+                <MenuItem
+                  icon={breakpoints.has(target.nodeId) ? '🔴' : '⭕'}
+                  label={
+                    breakpoints.has(target.nodeId)
+                      ? t('contextMenu.clearBreakpoint', 'Clear Breakpoint')
+                      : t('contextMenu.setBreakpoint', 'Set Breakpoint')
+                  }
+                  onClick={() => {
+                    toggleBreakpoint(target.nodeId)
+                    onClose()
+                  }}
+                />
+              </>
             )}
             {onExplainNode && (
               <>

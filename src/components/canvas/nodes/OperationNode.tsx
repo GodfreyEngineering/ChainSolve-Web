@@ -37,6 +37,7 @@ import { getPortUnitHint } from '../../../blocks/portUnitHints'
 import { usePreferencesStore } from '../../../stores/preferencesStore'
 import { getValueTypeColor } from '../../../engine/portTypeColors'
 import { useFlowHighlightStore } from '../../../stores/flowHighlightStore'
+import { useDebugStore } from '../../../stores/debugStore'
 
 // SCI-06: Trig ops that are affected by the angle unit preference.
 // Forward trig (sin/cos/tan): input is an angle.
@@ -193,11 +194,17 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
   // 3.30: Domain tint — blended into header when block belongs to a physics domain
   const domainColor = !nd.userColor ? getCategoryDomainColor(def?.category) : null
 
+  // 3.36/3.37: Debug indicators — breakpoint dot and paused-node highlight
+  const hasBreakpoint = useDebugStore((s) => s.breakpoints.has(id))
+  const isPaused = useDebugStore((s) => s.pausedAtNodeId === id)
+
   const borderOverride = isErr
     ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 1px var(--danger)' }
-    : selected
-      ? { ...s.nodeSelected, borderColor: typeColor }
-      : {}
+    : isPaused
+      ? { borderColor: '#fa8c00', boxShadow: '0 0 0 2px rgba(250,140,0,0.6)' }
+      : selected
+        ? { ...s.nodeSelected, borderColor: typeColor }
+        : {}
 
   const ariaLabel = `${nd.label} block, output: ${formatValue(value)}`
 
@@ -258,6 +265,19 @@ function OperationNodeInner({ id, data, selected, draggable }: NodeProps) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flexShrink: 0 }}>
           {isLocked && <span style={{ fontSize: '0.6rem', lineHeight: 1, opacity: 0.7 }}>🔒</span>}
+          {hasBreakpoint && (
+            <span
+              title="Breakpoint set"
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                background: '#ef4444',
+                flexShrink: 0,
+                boxShadow: isPaused ? '0 0 4px #fa8c00' : undefined,
+              }}
+            />
+          )}
           {isErr && (
             <span
               style={{

@@ -195,6 +195,8 @@ import { NodeCommentsContext } from '../../contexts/NodeCommentsContext'
 import { NodeCommentDialog } from './NodeCommentDialog'
 import { BranchSelector } from './BranchSelector'
 import { switchToBranch } from '../../lib/branchService'
+import { DebugToolbar } from './DebugToolbar'
+import { useDebugStore } from '../../stores/debugStore'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -1291,6 +1293,24 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     engineTelemetryOpts,
     angleUnit,
   )
+
+  // 3.36: Run a full evaluation with trace:true to activate the debugger.
+  const handleRunWithTrace = useCallback(async () => {
+    const { activateWithTrace } = useDebugStore.getState()
+    engine.setTraceMode(true)
+    const snap = getCanonicalSnapshot(latestNodes.current, latestEdges.current)
+    const currentVariables = useVariablesStore.getState().variables
+    const engineSnap = toEngineSnapshot(snap.nodes, snap.edges, constantsLookup, currentVariables)
+    try {
+      await engine.loadSnapshot(engineSnap, { trace: true })
+      const trace = engine.getLastTrace()
+      if (trace && trace.length > 0) {
+        activateWithTrace(trace)
+      }
+    } finally {
+      engine.setTraceMode(false)
+    }
+  }, [engine, constantsLookup])
 
   // 3.22: Brief edge-flow pulse after each evaluation (particle-style animation).
   const [evalPulseActive, setEvalPulseActive] = useState(false)
@@ -4292,6 +4312,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         onRun={triggerEval}
                         pendingPatchCount={pendingPatchCount}
                       />
+
+                      {/* 3.36/3.37: Debug toolbar — shown when debug mode is active or breakpoints exist */}
+                      <DebugToolbar onRunWithTrace={handleRunWithTrace} />
 
                       {/* 5.9: Branch selector — top-right overlay, only when canvas has an ID */}
                       {canvasId && !presentationMode && (
