@@ -115,6 +115,8 @@ interface ContextMenuProps {
   onToggleMinimap?: () => void
   /** 3.15: Current minimap visible state. */
   minimapVisible?: boolean
+  /** 3.31: Collapse group as a SubGraph composite block. */
+  onCollapseAsSubGraph?: (nodeId: string) => void
 }
 
 const item: CSSProperties = {
@@ -228,6 +230,7 @@ export function ContextMenu({
   onAddComment,
   onToggleMinimap,
   minimapVisible,
+  onCollapseAsSubGraph,
 }: ContextMenuProps) {
   const { t } = useTranslation()
   const { menuRef, pos } = useMenuPosition(target.x, target.y)
@@ -529,6 +532,16 @@ export function ContextMenu({
                 onClose()
               }}
             />
+            {!target.isCollapsed && onCollapseAsSubGraph && (
+              <MenuItem
+                icon="⊞"
+                label={t('contextMenu.collapseAsSubGraph', 'Collapse to SubGraph')}
+                onClick={() => {
+                  onCollapseAsSubGraph(target.nodeId)
+                  onClose()
+                }}
+              />
+            )}
             <MenuItem
               icon="✎"
               label={t('contextMenu.rename')}

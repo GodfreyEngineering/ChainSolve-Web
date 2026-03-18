@@ -1916,6 +1916,7 @@
     "deleteNode": "Delete block",
     "expand": "Expand",
     "collapse": "Collapse",
+    "collapseAsSubGraph": "Collapse to SubGraph",
     "saveAsGroup": "Save as reusable group…",
     "ungroup": "Ungroup",
     "autoResize": "Auto-resize to fit",

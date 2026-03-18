@@ -235,6 +235,8 @@ export interface NodeData extends Record<string, unknown> {
   groupCollapsed?: boolean
   /** UX-21: Whether the group is locked — visual indicator, prevents accidental member edits. */
   groupLocked?: boolean
+  /** 3.31: When true, collapsed group renders as a composite block (SubGraph mode). */
+  groupAsSubGraph?: boolean
   /** Annotation type discriminator (csAnnotation nodes only). */
   annotationType?:
     | 'text'

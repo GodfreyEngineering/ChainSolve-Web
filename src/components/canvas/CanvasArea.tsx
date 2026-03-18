@@ -2245,6 +2245,29 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [nodes, edges, setNodes, setEdges, doSaveHistory, toast, t],
   )
 
+  // 3.31: Collapse group as a SubGraph composite block
+  const collapseAsSubGraph = useCallback(
+    (groupId: string) => {
+      const group = nodes.find((n) => n.id === groupId)
+      if (!group || (group.data as NodeData).groupCollapsed) return
+      doSaveHistory()
+      const crossing = getCrossingEdgesForGroup(groupId, nodes, edges)
+      if (crossing.length > 0) {
+        toast(t('canvas.collapseCrossingWarn', { count: crossing.length }), 'info')
+      }
+      const result = collapseGroup(groupId, nodes, edges)
+      // Mark the group as SubGraph mode
+      const updatedNodes = (result.nodes as Node<NodeData>[]).map((n) =>
+        n.id === groupId
+          ? { ...n, data: { ...n.data, groupAsSubGraph: true } }
+          : n,
+      )
+      setNodes(updatedNodes)
+      setEdges(result.edges)
+    },
+    [nodes, edges, setNodes, setEdges, doSaveHistory, toast, t],
+  )
+
   // Phase 11: Auto-resize group to fit member nodes
   const resizeGroupToFit = useCallback(
     (groupId: string) => {
@@ -4422,6 +4445,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         onAutoResizeGroup={resizeGroupToFit}
                         onDeleteSelected={deleteSelected}
                         onSaveAsTemplate={saveAsTemplate}
+                        onCollapseAsSubGraph={collapseAsSubGraph}
                         canUseGroups={ent.canUseGroups}
                         onCopyNodeValue={copyNodeValue}
                         onJumpToNode={jumpToNode}
