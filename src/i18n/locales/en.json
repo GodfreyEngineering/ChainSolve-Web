@@ -1269,7 +1269,8 @@
     "manualMode": "Manual evaluation mode",
     "pendingChanges": "{{count}} pending changes",
     "addInput": "+ Input",
-    "removeInput": "Remove input"
+    "removeInput": "Remove input",
+    "aiAssistant": "AI Assistant"
   },
   "inspector": {
     "pin": "Pin to current block",
@@ -1885,7 +1886,14 @@
     "suggestOptimizeTip": "Find redundancies and suggest structural improvements",
     "suggestImprovements": "Suggest improvements",
     "suggestImprovementsTip": "Recommend missing validations, better blocks, or additional outputs",
-    "patchPartialFail": "Applied with {{count}} error(s): {{first}}"
+    "patchPartialFail": "Applied with {{count}} error(s): {{first}}",
+    "noResponse": "No response",
+    "placeholder": "Describe what you'd like to build or change…",
+    "inputPlaceholder": "Describe what to build… (Enter to send)",
+    "highRiskTitle": "High-risk changes",
+    "highRiskDesc": "This will significantly modify your graph.",
+    "applyAnyway": "Apply anyway",
+    "optedOut": "AI assistant is disabled. Enable it in Settings → Privacy → ChainSolve AI."
   },
   "terms": {
     "title": "Terms & Conditions",

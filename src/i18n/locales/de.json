@@ -1247,7 +1247,8 @@
     "manualMode": "Manueller Auswertungsmodus",
     "pendingChanges": "{{count}} ausstehende Änderungen",
     "addInput": "+ Eingang",
-    "removeInput": "Eingang entfernen"
+    "removeInput": "Eingang entfernen",
+    "aiAssistant": "KI-Assistent"
   },
   "inspector": {
     "pin": "An aktuellen Blöcke anheften",
@@ -1838,7 +1839,14 @@
     "suggestOptimizeTip": "Find redundancies and suggest structural improvements",
     "suggestImprovements": "Suggest improvements",
     "suggestImprovementsTip": "Recommend missing validations, better blocks, or additional outputs",
-    "patchPartialFail": "Angewendet mit {{count}} Fehler(n): {{first}}"
+    "patchPartialFail": "Angewendet mit {{count}} Fehler(n): {{first}}",
+    "noResponse": "Keine Antwort",
+    "placeholder": "Beschreibe, was du bauen oder ändern möchtest…",
+    "inputPlaceholder": "Was soll gebaut werden… (Enter zum Senden)",
+    "highRiskTitle": "Hochriskante Änderungen",
+    "highRiskDesc": "Dies wird deinen Graphen erheblich verändern.",
+    "applyAnyway": "Trotzdem anwenden",
+    "optedOut": "KI-Assistent ist deaktiviert. Aktiviere ihn unter Einstellungen → Datenschutz → ChainSolve AI."
   },
   "terms": {
     "title": "Allgemeine Geschäftsbedingungen",

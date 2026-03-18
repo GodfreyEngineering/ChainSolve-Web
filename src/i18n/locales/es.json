@@ -1247,7 +1247,8 @@
     "manualMode": "Modo de evaluación manual",
     "pendingChanges": "{{count}} cambios pendientes",
     "addInput": "+ Entrada",
-    "removeInput": "Eliminar entrada"
+    "removeInput": "Eliminar entrada",
+    "aiAssistant": "Asistente de IA"
   },
   "inspector": {
     "pin": "Fijar al bloque actual",
@@ -1838,7 +1839,14 @@
     "suggestOptimizeTip": "Find redundancies and suggest structural improvements",
     "suggestImprovements": "Suggest improvements",
     "suggestImprovementsTip": "Recommend missing validations, better blocks, or additional outputs",
-    "patchPartialFail": "Aplicado con {{count}} error(es): {{first}}"
+    "patchPartialFail": "Aplicado con {{count}} error(es): {{first}}",
+    "noResponse": "Sin respuesta",
+    "placeholder": "Describe lo que quieres construir o cambiar…",
+    "inputPlaceholder": "Qué construir… (Enter para enviar)",
+    "highRiskTitle": "Cambios de alto riesgo",
+    "highRiskDesc": "Esto modificará significativamente tu gráfico.",
+    "applyAnyway": "Aplicar de todas formas",
+    "optedOut": "El asistente de IA está desactivado. Actívalo en Configuración → Privacidad → ChainSolve AI."
   },
   "terms": {
     "title": "Términos y Condiciones",

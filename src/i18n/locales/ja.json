@@ -1269,7 +1269,8 @@
     "manualMode": "手動評価モード",
     "pendingChanges": "{{count}} 件の保留中の変更",
     "addInput": "+ 入力",
-    "removeInput": "入力を削除"
+    "removeInput": "入力を削除",
+    "aiAssistant": "AIアシスタント"
   },
   "inspector": {
     "pin": "Pin to current block",
@@ -1885,7 +1886,14 @@
     "suggestOptimizeTip": "Find redundancies and suggest structural improvements",
     "suggestImprovements": "Suggest improvements",
     "suggestImprovementsTip": "Recommend missing validations, better blocks, or additional outputs",
-    "patchPartialFail": "{{count}} 件のエラーで適用されました: {{first}}"
+    "patchPartialFail": "{{count}} 件のエラーで適用されました: {{first}}",
+    "noResponse": "応答なし",
+    "placeholder": "構築または変更したいものを説明してください…",
+    "inputPlaceholder": "何を構築するか…（Enterで送信）",
+    "highRiskTitle": "高リスクの変更",
+    "highRiskDesc": "これによりグラフが大幅に変更されます。",
+    "applyAnyway": "とにかく適用",
+    "optedOut": "AIアシスタントは無効です。設定 → プライバシー → ChainSolve AIで有効にしてください。"
   },
   "terms": {
     "title": "Terms & Conditions",

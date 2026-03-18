@@ -35,6 +35,7 @@ import {
   EyeOff,
   ScanEye,
   Projector,
+  Bot,
 } from 'lucide-react'
 
 export interface CanvasToolbarProps {
@@ -80,6 +81,9 @@ export interface CanvasToolbarProps {
   onTogglePresentationMode?: () => void
   /** 8.04: Mobile mode — larger touch targets. */
   isMobile?: boolean
+  /** 9.12: AI assistant panel toggle. */
+  aiPanelOpen?: boolean
+  onToggleAiPanel?: () => void
   /** Phase 1: Trigger evaluation (Run button). */
   onRun?: () => void
   /** Phase 1: Whether the graph has changed since last eval. */
@@ -298,6 +302,8 @@ export function CanvasToolbar({
   presentationMode,
   onTogglePresentationMode,
   isMobile,
+  aiPanelOpen,
+  onToggleAiPanel,
   onRun,
   isStale,
   pendingPatchCount,
@@ -707,6 +713,20 @@ export function CanvasToolbar({
             <PanelRight size={16} />
           </button>
         </Tooltip>
+
+        {/* 9.12: AI assistant panel toggle */}
+        {onToggleAiPanel && (
+          <Tooltip content={t('toolbar.aiAssistant', 'AI Assistant')} side={tipSide}>
+            <button
+              onClick={onToggleAiPanel}
+              style={btnStyle(!!aiPanelOpen)}
+              aria-label={t('toolbar.aiAssistant', 'AI Assistant')}
+              aria-pressed={!!aiPanelOpen}
+            >
+              <Bot size={16} />
+            </button>
+          </Tooltip>
+        )}
 
         <div style={sep} />
 

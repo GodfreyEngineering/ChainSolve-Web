@@ -1247,7 +1247,8 @@
     "manualMode": "Mode d'évaluation manuelle",
     "pendingChanges": "{{count}} modifications en attente",
     "addInput": "+ Entrée",
-    "removeInput": "Supprimer l'entrée"
+    "removeInput": "Supprimer l'entrée",
+    "aiAssistant": "Assistant IA"
   },
   "inspector": {
     "pin": "Épingler au nœud actuel",
@@ -1838,7 +1839,14 @@
     "suggestOptimizeTip": "Find redundancies and suggest structural improvements",
     "suggestImprovements": "Suggest improvements",
     "suggestImprovementsTip": "Recommend missing validations, better blocks, or additional outputs",
-    "patchPartialFail": "Appliqué avec {{count}} erreur(s) : {{first}}"
+    "patchPartialFail": "Appliqué avec {{count}} erreur(s) : {{first}}",
+    "noResponse": "Aucune réponse",
+    "placeholder": "Décrivez ce que vous souhaitez construire ou modifier…",
+    "inputPlaceholder": "Que construire… (Entrée pour envoyer)",
+    "highRiskTitle": "Modifications à haut risque",
+    "highRiskDesc": "Ceci modifiera significativement votre graphique.",
+    "applyAnyway": "Appliquer quand même",
+    "optedOut": "L'assistant IA est désactivé. Activez-le dans Paramètres → Confidentialité → ChainSolve AI."
   },
   "terms": {
     "title": "Conditions Générales",

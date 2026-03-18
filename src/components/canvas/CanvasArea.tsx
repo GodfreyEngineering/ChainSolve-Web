@@ -126,6 +126,9 @@ const LazyVersionHistoryPanel = lazy(() =>
 const LazyChannelsPanel = lazy(() =>
   import('./ChannelsPanel').then((m) => ({ default: m.ChannelsPanel })),
 )
+const LazyAiAssistantPanel = lazy(() =>
+  import('./AiAssistantPanel').then((m) => ({ default: m.AiAssistantPanel })),
+)
 import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
@@ -876,6 +879,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   // Presentation mode (UX-19)
   const [presentationMode, setPresentationMode] = useState(false)
+  const [aiPanelOpen, setAiPanelOpen] = useState(false)
   const [spotlightMode, setSpotlightMode] = useState(false)
   const [laserMode, setLaserMode] = useState(false)
   const [laserPos, setLaserPos] = useState<{ x: number; y: number } | null>(null)
@@ -4173,6 +4177,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         presentationMode={presentationMode}
                         onTogglePresentationMode={togglePresentationMode}
                         isMobile={isMobile}
+                        aiPanelOpen={aiPanelOpen}
+                        onToggleAiPanel={() => setAiPanelOpen((v) => !v)}
                         onRun={triggerEval}
                         pendingPatchCount={pendingPatchCount}
                       />
@@ -4270,6 +4276,23 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         nodeLabels={diffNodeLabels}
                         onClose={() => setDiffBaseline(null)}
                       />
+                    )}
+
+                    {/* 9.12: AI assistant panel */}
+                    {aiPanelOpen && !readOnly && (
+                      <Suspense fallback={null}>
+                        <LazyAiAssistantPanel
+                          canvasId={canvasId ?? ''}
+                          nodes={nodes}
+                          edges={edges}
+                          selectedNodeIds={nodes.filter((n) => n.selected).map((n) => n.id)}
+                          onApplyPatch={(newNodes, newEdges) => {
+                            setNodes(newNodes)
+                            setEdges(newEdges)
+                          }}
+                          onClose={() => setAiPanelOpen(false)}
+                        />
+                      </Suspense>
                     )}
 
                     {/* ── Mobile overlay drawers ──────────────────────────────────────────── */}

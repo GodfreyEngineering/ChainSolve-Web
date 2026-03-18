@@ -57,7 +57,14 @@
     "suggestGenTemplate": "Save as template",
     "suggestGenTemplateTip": "Package the selected blocks as a reusable template",
     "suggestSimplify": "Simplify this chain",
-    "suggestSimplifyTip": "Suggest ways to reduce complexity or merge blocks"
+    "suggestSimplifyTip": "Suggest ways to reduce complexity or merge blocks",
+    "noResponse": "אין תגובה",
+    "placeholder": "תאר מה אתה רוצה לבנות או לשנות…",
+    "inputPlaceholder": "מה לבנות… (Enter לשליחה)",
+    "highRiskTitle": "שינויים בסיכון גבוה",
+    "highRiskDesc": "פעולה זו תשנה את הגרף שלך באופן משמעותי.",
+    "applyAnyway": "החל בכל זאת",
+    "optedOut": "עוזר ה-AI מושבת. הפעל אותו בהגדרות → פרטיות → ChainSolve AI."
   },
   "mobileNav": {
     "menu": "תפריט",
@@ -707,7 +714,8 @@
     "manualMode": "מצב חישוב ידני",
     "pendingChanges": "{{count}} שינויים ממתינים",
     "addInput": "+ קלט",
-    "removeInput": "הסר קלט"
+    "removeInput": "הסר קלט",
+    "aiAssistant": "עוזר AI"
   },
   "annotation": {
     "text": "טקסט",
