@@ -43,13 +43,6 @@ impl WeightInit {
         (self.0 as f64) / (u64::MAX as f64)
     }
 
-    #[allow(dead_code)]
-    fn next_normal(&mut self) -> f64 {
-        let u1 = self.next_f64().max(1e-15);
-        let u2 = self.next_f64();
-        (-2.0 * u1.ln()).sqrt() * (2.0 * std::f64::consts::PI * u2).cos()
-    }
-
     /// Xavier uniform ±sqrt(6 / (fan_in + fan_out)).
     fn xavier_vec(&mut self, n: usize, fan_in: usize, fan_out: usize) -> Vec<f64> {
         let limit = (6.0 / (fan_in + fan_out) as f64).sqrt();

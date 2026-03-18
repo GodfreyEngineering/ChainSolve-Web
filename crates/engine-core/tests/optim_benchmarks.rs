@@ -12,7 +12,7 @@
 //!   - Ackley (1987) "A Connectionist Machine for Genetic Hillclimbing"
 //!   - Zitzler, Deb & Thiele (2000) "Comparison of Multiobjective Evolutionary Algorithms"
 
-use engine_core::optim::{DesignVar, OptimResult};
+use engine_core::optim::DesignVar;
 use engine_core::optim::cmaes::{cmaes, CmaesConfig};
 use engine_core::optim::lbfgsb::lbfgsb;
 use engine_core::optim::pareto::{nsga2, NsgaConfig};

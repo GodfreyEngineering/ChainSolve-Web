@@ -187,14 +187,12 @@ const PARQUET_TYPE_INT64: i32 = 2;
 const PARQUET_TYPE_FLOAT: i32 = 4;
 const PARQUET_TYPE_DOUBLE: i32 = 5;
 const PARQUET_TYPE_BYTE_ARRAY: i32 = 6;
-#[allow(dead_code)]
 const PARQUET_TYPE_FIXED_LEN_BYTE_ARRAY: i32 = 7;
 
 const ENCODING_PLAIN: i32 = 0;
 const COMPRESSION_UNCOMPRESSED: i32 = 0;
 
 const PAGE_TYPE_DATA_PAGE: i32 = 0;
-#[allow(dead_code)]
 const PAGE_TYPE_DICTIONARY_PAGE: i32 = 2;
 const PAGE_TYPE_DATA_PAGE_V2: i32 = 3;
 
@@ -204,23 +202,19 @@ const PAGE_TYPE_DATA_PAGE_V2: i32 = 3;
 struct SchemaElement {
     name: String,
     ptype: Option<i32>, // None = group node
-    #[allow(dead_code)]
+    /// Repetition level: 0 = REQUIRED, 1 = OPTIONAL, 2 = REPEATED.
     repetition: Option<i32>,
-    #[allow(dead_code)]
+    /// Number of children for group nodes (non-leaf schema elements).
     num_children: Option<i32>,
 }
 
 #[derive(Debug, Clone)]
 struct ColumnMetaData {
     ptype: i32,
-    #[allow(dead_code)]
     codec: i32,
-    #[allow(dead_code)]
     num_values: i64,
     data_page_offset: i64,
-    #[allow(dead_code)]
     total_compressed_size: i64,
-    #[allow(dead_code)]
     total_uncompressed_size: i64,
 }
 
@@ -391,13 +385,10 @@ fn read_file_metadata(c: &mut ThriftCursor<'_>) -> ParquetResult<FileMetaData> {
 
 struct DataPageInfo {
     num_values: i32,
-    #[allow(dead_code)]
     encoding: i32,
     // v2 fields
     is_v2: bool,
-    #[allow(dead_code)]
     rep_levels_byte_len: i32,
-    #[allow(dead_code)]
     def_levels_byte_len: i32,
 }
 
@@ -489,20 +480,37 @@ fn read_column_values(
     let mut values: Vec<f64> = Vec::with_capacity(num_rows as usize);
     let ptype = meta.ptype;
 
+    // Validate that column metadata is consistent with the declared row count.
+    if meta.num_values > 0 && meta.num_values != num_rows {
+        return Err(err(format!(
+            "column declares {} values but row group has {} rows",
+            meta.num_values, num_rows
+        )));
+    }
+    // Validate compressed vs uncompressed sizes are consistent (both > 0 or both 0).
+    if meta.total_compressed_size > 0 && meta.total_uncompressed_size == 0 {
+        return Err(err("column has compressed_size > 0 but uncompressed_size = 0"));
+    }
+
     while values.len() < num_rows as usize {
         let (page_type, _uncompressed, _compressed, page_info) = read_page_header(&mut cursor)?;
         match page_type {
             t if t == PAGE_TYPE_DATA_PAGE || t == PAGE_TYPE_DATA_PAGE_V2 => {
                 let info = page_info.ok_or_else(|| err("DATA_PAGE without header"))?;
-                let data_start = cursor.pos;
 
-                // For V2 pages, skip repetition + definition level bytes (all required = 0 bytes)
+                // Reject dictionary encoding — only PLAIN (0) is supported.
+                if info.encoding != ENCODING_PLAIN {
+                    return Err(err(format!(
+                        "column uses encoding {} — only PLAIN (0) encoding is supported",
+                        info.encoding
+                    )));
+                }
+
+                // For V2 pages, skip repetition + definition level bytes.
                 if info.is_v2 {
                     cursor.pos += info.rep_levels_byte_len as usize + info.def_levels_byte_len as usize;
-                } else {
-                    // V1: required columns have no level data. Skip definition level encoding
-                    // (encoded as RLE: 4-byte length + data, only if there are nulls — skip).
                 }
+                // V1: required columns have no level data (zero bytes for required repetition).
 
                 let n = info.num_values as usize;
                 let data_slice = &col_bytes[cursor.pos..];
@@ -555,9 +563,8 @@ fn read_column_values(
                         // Booleans are bit-packed; not coercible to float — skip
                         let nbytes = (n + 7) / 8;
                         cursor.pos += nbytes;
-                        let _ = data_start;
                     }
-                    t if t == PARQUET_TYPE_BYTE_ARRAY => {
+                    t if t == PARQUET_TYPE_BYTE_ARRAY || t == PARQUET_TYPE_FIXED_LEN_BYTE_ARRAY => {
                         // Skip byte array column data (strings not coercible to f64)
                         // Each value: 4-byte length + data
                         for _ in 0..n {
@@ -573,8 +580,16 @@ fn read_column_values(
                     }
                 }
             }
+            t if t == PAGE_TYPE_DICTIONARY_PAGE => {
+                // Dictionary pages appear before data pages in dictionary-encoded columns.
+                // Since we validate PLAIN-only encoding above, this should not be reached
+                // for numeric columns, but skip gracefully in case of mixed files.
+                if _compressed > 0 {
+                    cursor.pos += _compressed as usize;
+                }
+            }
             _ => {
-                // Skip non-data pages (dictionary, index, etc.)
+                // Skip unknown page types (index pages, etc.)
                 if _compressed > 0 {
                     cursor.pos += _compressed as usize;
                 }
@@ -622,10 +637,32 @@ pub fn parse_parquet(bytes: &[u8]) -> ParquetResult<Vec<ParquetColumn>> {
     let mut c = ThriftCursor::new(footer_bytes);
     let meta = read_file_metadata(&mut c)?;
 
+    // Validate root schema element is a group (no ptype, has num_children).
+    if let Some(root) = meta.schema.first() {
+        if root.ptype.is_some() {
+            return Err(err("schema root element must be a group (no ptype)"));
+        }
+        if let Some(nc) = root.num_children {
+            let expected = (meta.schema.len() - 1) as i32;
+            if nc != expected {
+                return Err(err(format!(
+                    "schema root declares {} children but {} leaf elements found",
+                    nc, expected
+                )));
+            }
+        }
+    }
+
     // Build column name list from schema (skip root group element at index 0).
+    // Only include leaf elements (ptype is Some) — reject REPEATED columns
+    // (repetition = 2) since this reader only supports flat required/optional schemas.
     let col_schemas: Vec<&SchemaElement> = meta.schema.iter()
         .skip(1) // skip root message schema
-        .filter(|s| s.ptype.is_some())
+        .filter(|s| {
+            if s.ptype.is_none() { return false; } // skip nested groups
+            if s.repetition == Some(2) { return false; } // skip REPEATED (not supported)
+            true
+        })
         .collect();
 
     if meta.row_groups.is_empty() {

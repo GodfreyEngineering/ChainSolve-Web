@@ -11,8 +11,6 @@ import { supabase } from './supabase'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-export type ConnectStatus = 'not_connected' | 'pending' | 'active'
-
 export interface CheckoutResult {
   /** Stripe Checkout hosted URL — redirect the browser here to start payment. */
   url: string
@@ -44,15 +42,6 @@ export async function startConnectOnboarding(): Promise<string> {
     throw new Error(data.error ?? 'Failed to start Stripe onboarding')
   }
   return data.url!
-}
-
-/**
- * Get the Stripe Connect account status for the current user.
- *
- * @stub — edge function endpoint not yet implemented (future).
- */
-export async function getConnectStatus(): Promise<ConnectStatus> {
-  throw new Error('stripeConnectService.getConnectStatus: not yet implemented')
 }
 
 // ── Buyer purchase flow ───────────────────────────────────────────────────────

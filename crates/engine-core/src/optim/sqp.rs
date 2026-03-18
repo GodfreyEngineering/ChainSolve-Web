@@ -288,8 +288,7 @@ mod tests {
     fn inequality_constrained() {
         let vars = vec![var("x", -10.0, 0.0, -1.0)];
         let f = |x: &[f64]| x[0] * x[0];
-        let g = |x: &[f64]| -x[0] - 2.0; // g(x) = -x - 2 ≤ 0 means x ≥ -2
-        // Actually: we want x ≤ -2 i.e. x + 2 ≤ 0, g = x + 2
+        // g(x) = x + 2 ≤ 0 means x ≤ -2
         let g = |x: &[f64]| x[0] + 2.0;
         let result = augmented_lagrangian(
             &f,

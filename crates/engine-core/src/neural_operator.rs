@@ -18,36 +18,7 @@
 
 use crate::rng::Xoshiro256;
 
-// ── Complex arithmetic ────────────────────────────────────────────────────────
-
-#[allow(dead_code)]
-#[derive(Clone, Copy, Debug, Default)]
-struct C {
-    re: f64,
-    im: f64,
-}
-
-#[allow(dead_code)]
-impl C {
-    fn mul(self, rhs: C) -> C {
-        C { re: self.re * rhs.re - self.im * rhs.im, im: self.re * rhs.im + self.im * rhs.re }
-    }
-    fn add(self, rhs: C) -> C { C { re: self.re + rhs.re, im: self.im + rhs.im } }
-    fn scale(self, s: f64) -> C { C { re: self.re * s, im: self.im * s } }
-}
-
 // ── FFT helpers ───────────────────────────────────────────────────────────────
-
-/// Pad or truncate signal to next power of two.
-#[allow(dead_code)]
-fn pad_to_pow2(x: &[f64]) -> Vec<f64> {
-    let n = x.len();
-    let mut p = 1usize;
-    while p < n { p <<= 1; }
-    let mut out = vec![0.0; p];
-    out[..n].copy_from_slice(x);
-    out
-}
 
 /// Cooley-Tukey radix-2 FFT (power-of-two length only).
 fn fft_r2(re: &mut [f64], im: &mut [f64], inverse: bool) {
@@ -259,7 +230,6 @@ impl FnoLayer {
     }
 }
 
-#[allow(dead_code)]
 pub struct FnoModel {
     lift: PointwiseLinear,
     layers: Vec<FnoLayer>,
@@ -286,9 +256,24 @@ impl FnoModel {
         FnoModel { lift, layers, proj, width, d_in, d_out, n_pts }
     }
 
+    /// The channel width (internal feature dimension) of the FNO layers.
+    pub fn channel_width(&self) -> usize {
+        self.width
+    }
+
+    /// The number of output features per point.
+    pub fn output_dim(&self) -> usize {
+        self.d_out
+    }
+
     /// Forward pass: input h [n_pts × d_in], returns [n_pts × d_out].
     pub fn forward(&self, h: &[f64]) -> Vec<f64> {
         let n_pts = self.n_pts;
+        assert_eq!(
+            h.len(), n_pts * self.d_in,
+            "FNO: input length {} must equal n_pts ({}) × d_in ({})",
+            h.len(), n_pts, self.d_in
+        );
         // Lift
         let mut h_curr = self.lift.forward_seq(h, n_pts);
         // FNO layers

@@ -84,7 +84,7 @@ mod tests {
     #[test]
     fn standardize_basic() {
         let data = vec![vec![1.0, 10.0], vec![2.0, 20.0], vec![3.0, 30.0]];
-        let (scaled, means, stds) = standardize(&data);
+        let (scaled, means, _stds) = standardize(&data);
         assert!((means[0] - 2.0).abs() < 1e-10);
         assert!((means[1] - 20.0).abs() < 1e-10);
         // Mean of standardized should be ~0

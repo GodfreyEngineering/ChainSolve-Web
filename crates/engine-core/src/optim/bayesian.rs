@@ -58,10 +58,8 @@ fn matern52(x1: &[f64], x2: &[f64], length_scale: f64, sigma_f: f64) -> f64 {
 }
 
 /// Gaussian Process surrogate fitted to (X, y) observations.
-#[allow(dead_code)]
 struct GpSurrogate {
     x_train: Vec<Vec<f64>>,
-    y_train: Vec<f64>,
     /// Cholesky factor L (lower triangular) of K + σ²I.
     l: Vec<f64>,
     /// α = L⁻ᵀ (L⁻¹ y), used for predictions.
@@ -92,7 +90,7 @@ impl GpSurrogate {
         // α = L^{-T} L^{-1} y
         let alpha = chol_solve(&l, &y_train, n);
 
-        GpSurrogate { x_train, y_train, l, alpha, n, length_scale, sigma_f, sigma_n }
+        GpSurrogate { x_train, l, alpha, n, length_scale, sigma_f, sigma_n }
     }
 
     /// Predict mean and variance at a test point.

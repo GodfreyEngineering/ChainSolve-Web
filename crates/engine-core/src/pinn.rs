@@ -138,10 +138,6 @@ impl Layer {
 
 struct Mlp {
     layers: Vec<Layer>,
-    #[allow(dead_code)]
-    input_dim: usize,
-    #[allow(dead_code)]
-    output_dim: usize,
 }
 
 impl Mlp {
@@ -153,7 +149,12 @@ impl Mlp {
             prev = h;
         }
         layers.push(Layer::new(prev, output_dim, rng));
-        Mlp { layers, input_dim, output_dim }
+        // Verify the network was built with the expected dimensions.
+        debug_assert_eq!(layers.first().map(|l| l.n_in).unwrap_or(0), input_dim,
+            "MLP: first layer input dim mismatch");
+        debug_assert_eq!(layers.last().map(|l| l.n_out).unwrap_or(0), output_dim,
+            "MLP: last layer output dim mismatch");
+        Mlp { layers }
     }
 
     fn forward(&self, x: &[f64]) -> f64 {
@@ -167,19 +168,6 @@ impl Mlp {
             }
         }
         h[0]
-    }
-
-    /// Compute u(x) and du/dx via finite differences (single input).
-    #[allow(dead_code)]
-    fn forward_with_dx(&self, x: f64, embedding: &Embedding) -> (f64, f64) {
-        // Use finite differences (2nd-order centered)
-        let h_step = 1e-4;
-        let (x_lo, x_hi) = (x - h_step, x + h_step);
-        let u_lo = self.forward(&embedding.encode(x_lo));
-        let u_hi = self.forward(&embedding.encode(x_hi));
-        let u = self.forward(&embedding.encode(x));
-        let du_dx = (u_hi - u_lo) / (2.0 * h_step);
-        (u, du_dx)
     }
 
     /// Compute u(x), du/dx, d²u/dx².

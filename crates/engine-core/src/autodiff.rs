@@ -288,8 +288,6 @@ enum TapeOp {
 /// A node recorded on the computation tape.
 #[derive(Debug, Clone)]
 struct TapeNode {
-    #[allow(dead_code)]
-    value: f64,
     op: TapeOp,
 }
 
@@ -318,14 +316,14 @@ impl Tape {
     /// Register an input variable on the tape.
     pub fn var(&mut self, value: f64) -> Var {
         let idx = self.nodes.len();
-        self.nodes.push(TapeNode { value, op: TapeOp::Leaf });
+        self.nodes.push(TapeNode { op: TapeOp::Leaf });
         Var { idx, val: value }
     }
 
     /// Register a constant (gradient will not flow through it).
     pub fn constant(&mut self, value: f64) -> Var {
         let idx = self.nodes.len();
-        self.nodes.push(TapeNode { value, op: TapeOp::Leaf });
+        self.nodes.push(TapeNode { op: TapeOp::Leaf });
         Var { idx, val: value }
     }
 
@@ -333,7 +331,6 @@ impl Tape {
     fn unary(&mut self, input: Var, value: f64, deriv: f64) -> Var {
         let idx = self.nodes.len();
         self.nodes.push(TapeNode {
-            value,
             op: TapeOp::Unary { input: input.idx, deriv },
         });
         Var { idx, val: value }
@@ -343,7 +340,6 @@ impl Tape {
     fn binary(&mut self, lhs: Var, rhs: Var, value: f64, dlhs: f64, drhs: f64) -> Var {
         let idx = self.nodes.len();
         self.nodes.push(TapeNode {
-            value,
             op: TapeOp::Binary {
                 lhs: lhs.idx,
                 rhs: rhs.idx,

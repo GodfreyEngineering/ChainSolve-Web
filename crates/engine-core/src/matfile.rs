@@ -76,13 +76,6 @@ impl<'a> Cursor<'a> {
         self.buf.len().saturating_sub(self.pos)
     }
 
-    #[allow(dead_code)]
-    fn peek_u32(&self) -> Option<u32> {
-        if self.pos + 4 > self.buf.len() { return None; }
-        let b: [u8; 4] = self.buf[self.pos..self.pos+4].try_into().ok()?;
-        Some(if self.le { u32::from_le_bytes(b) } else { u32::from_be_bytes(b) })
-    }
-
     fn read_u8(&mut self) -> Option<u8> {
         if self.pos < self.buf.len() {
             let v = self.buf[self.pos];

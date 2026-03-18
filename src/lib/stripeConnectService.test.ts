@@ -5,7 +5,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   startConnectOnboarding,
-  getConnectStatus,
   createCheckoutSession,
   hasPurchased,
 } from './stripeConnectService'
@@ -94,14 +93,6 @@ describe('startConnectOnboarding', () => {
     const [, options] = mockFetch.mock.calls[0] as [string, RequestInit]
     expect((options.headers as Record<string, string>)['Authorization']).toBe('Bearer tok-abc')
     vi.unstubAllGlobals()
-  })
-})
-
-// ── Stubs still pending (future) ──────────────────────────────────────────────
-
-describe('stripeConnectService — remaining stubs', () => {
-  it('getConnectStatus throws not-implemented', async () => {
-    await expect(getConnectStatus()).rejects.toThrow('not yet implemented')
   })
 })
 
