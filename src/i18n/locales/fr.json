@@ -2399,7 +2399,9 @@
     "label": "Fichier .tir",
     "drop": "Déposer un fichier .tir ou cliquer",
     "params": "paramètres",
-    "clear": "Effacer"
+    "clear": "Effacer",
+    "export": "Exporter",
+    "exportTitle": "Télécharger le fichier .tir"
   },
   "timeline": {
     "lastEval": "Dernier",

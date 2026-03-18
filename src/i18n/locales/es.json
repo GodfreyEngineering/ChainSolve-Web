@@ -2399,7 +2399,9 @@
     "label": "Archivo .tir",
     "drop": "Soltar archivo .tir o hacer clic",
     "params": "parámetros",
-    "clear": "Borrar"
+    "clear": "Borrar",
+    "export": "Exportar",
+    "exportTitle": "Descargar archivo .tir"
   },
   "timeline": {
     "lastEval": "Último",

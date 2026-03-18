@@ -185,6 +185,19 @@ function TirFileInputNodeInner({ id, data, selected }: NodeProps) {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }, [id, updateNodeData])
 
+  // 2.80: Export .tir — download the raw text or reconstruct from tableData
+  const exportTir = useCallback(() => {
+    const raw = nd.tirRaw
+    if (!raw) return
+    const blob = new Blob([raw], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = nd.tirFileName || 'export.tir'
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [nd.tirRaw, nd.tirFileName])
+
   return (
     <div
       style={{
@@ -249,16 +262,31 @@ function TirFileInputNodeInner({ id, data, selected }: NodeProps) {
                 </div>
               </>
             )}
-            <button
-              className="nodrag"
-              onClick={clearFile}
-              style={{
-                background: '#2a2a2a', color: '#888', border: '1px solid #333',
-                borderRadius: 3, padding: '1px 8px', fontSize: 9, cursor: 'pointer',
-              }}
-            >
-              {t('tirFileInput.clear', 'Clear')}
-            </button>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {nd.tirRaw && (
+                <button
+                  className="nodrag"
+                  onClick={exportTir}
+                  title={t('tirFileInput.exportTitle', 'Download .tir file')}
+                  style={{
+                    background: '#1CABB022', color: typeColor, border: `1px solid ${typeColor}44`,
+                    borderRadius: 3, padding: '1px 8px', fontSize: 9, cursor: 'pointer',
+                  }}
+                >
+                  {t('tirFileInput.export', 'Export')}
+                </button>
+              )}
+              <button
+                className="nodrag"
+                onClick={clearFile}
+                style={{
+                  background: '#2a2a2a', color: '#888', border: '1px solid #333',
+                  borderRadius: 3, padding: '1px 8px', fontSize: 9, cursor: 'pointer',
+                }}
+              >
+                {t('tirFileInput.clear', 'Clear')}
+              </button>
+            </div>
           </div>
         )}
       </div>

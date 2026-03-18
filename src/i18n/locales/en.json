@@ -2448,7 +2448,9 @@
     "label": ".tir File Input",
     "drop": "Drop .tir file or click",
     "params": "params",
-    "clear": "Clear"
+    "clear": "Clear",
+    "export": "Export",
+    "exportTitle": "Download .tir file"
   },
   "timeline": {
     "lastEval": "Last",

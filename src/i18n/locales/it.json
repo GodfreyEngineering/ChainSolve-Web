@@ -2349,7 +2349,9 @@
     "label": "File .tir",
     "drop": "Trascina file .tir o fai clic",
     "params": "parametri",
-    "clear": "Cancella"
+    "clear": "Cancella",
+    "export": "Esporta",
+    "exportTitle": "Scarica file .tir"
   },
   "timeline": {
     "lastEval": "Ultima",

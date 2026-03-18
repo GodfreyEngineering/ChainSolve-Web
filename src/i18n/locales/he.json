@@ -1846,7 +1846,9 @@
     "label": "קובץ .tir",
     "drop": "גרור קובץ .tir או לחץ",
     "params": "פרמטרים",
-    "clear": "נקה"
+    "clear": "נקה",
+    "export": "ייצא",
+    "exportTitle": "הורד קובץ .tir"
   },
   "timeline": {
     "lastEval": "אחרון",

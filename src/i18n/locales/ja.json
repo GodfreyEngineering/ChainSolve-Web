@@ -2447,7 +2447,9 @@
     "label": ".tirファイル入力",
     "drop": ".tirファイルをドロップまたはクリック",
     "params": "パラメータ",
-    "clear": "クリア"
+    "clear": "クリア",
+    "export": "エクスポート",
+    "exportTitle": ".tirファイルをダウンロード"
   },
   "timeline": {
     "lastEval": "最後",
