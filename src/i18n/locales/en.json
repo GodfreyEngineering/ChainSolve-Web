@@ -2272,6 +2272,16 @@
     "snapshots": "Versions",
     "timeline": "Timeline"
   },
+  "assertion": {
+    "noValue": "No value",
+    "pass": "PASS",
+    "fail": "FAIL",
+    "value": "Value",
+    "min": "Min",
+    "max": "Max",
+    "allowNan": "NaN ok",
+    "allowInf": "±Inf ok"
+  },
   "timeline": {
     "lastEval": "Last",
     "avgEval": "Avg",

@@ -2224,6 +2224,16 @@
     "snapshots": "Versions",
     "timeline": "Chronologie"
   },
+  "assertion": {
+    "noValue": "Aucune valeur",
+    "pass": "RÉUSSI",
+    "fail": "ÉCHOUÉ",
+    "value": "Valeur",
+    "min": "Min",
+    "max": "Max",
+    "allowNan": "NaN ok",
+    "allowInf": "±Inf ok"
+  },
   "timeline": {
     "lastEval": "Dernier",
     "avgEval": "Moy",

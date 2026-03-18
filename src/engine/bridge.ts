@@ -68,7 +68,8 @@ export function toEngineSnapshot(
       // H4-1: Unified constant block resolves to 'number' with the looked-up
       // value. No Rust catalog entries needed for new constants.
       // 11.14: testBlock is a display pass-through in the engine; test logic runs in the UI.
-      let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock'
+      // 2.130: assertion is a UI-only validation block; engine treats it as pass-through display.
+      let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock' || data.blockType === 'assertion'
         ? 'display'
         : data.blockType) as string
       if (blockType === 'constant') {

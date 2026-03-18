@@ -78,6 +78,7 @@ export type NodeKind =
   | 'csMLModel'
   | 'csNeuralNet'
   | 'csTest'
+  | 'csAssertion'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

@@ -1671,6 +1671,16 @@
     "snapshots": "גרסאות",
     "timeline": "ציר זמן"
   },
+  "assertion": {
+    "noValue": "אין ערך",
+    "pass": "עבר",
+    "fail": "נכשל",
+    "value": "ערך",
+    "min": "מינ׳",
+    "max": "מקס׳",
+    "allowNan": "NaN בסדר",
+    "allowInf": "±Inf בסדר"
+  },
   "timeline": {
     "lastEval": "אחרון",
     "avgEval": "ממוצע",

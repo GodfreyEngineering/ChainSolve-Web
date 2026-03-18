@@ -2224,6 +2224,16 @@
     "snapshots": "Versionen",
     "timeline": "Zeitleiste"
   },
+  "assertion": {
+    "noValue": "Kein Wert",
+    "pass": "BESTANDEN",
+    "fail": "FEHLGESCHLAGEN",
+    "value": "Wert",
+    "min": "Min",
+    "max": "Max",
+    "allowNan": "NaN ok",
+    "allowInf": "±Inf ok"
+  },
   "timeline": {
     "lastEval": "Letzter",
     "avgEval": "Ø",

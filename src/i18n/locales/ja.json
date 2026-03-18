@@ -2272,6 +2272,16 @@
     "snapshots": "バージョン",
     "timeline": "タイムライン"
   },
+  "assertion": {
+    "noValue": "値なし",
+    "pass": "合格",
+    "fail": "失敗",
+    "value": "値",
+    "min": "最小",
+    "max": "最大",
+    "allowNan": "NaN許可",
+    "allowInf": "±Inf許可"
+  },
   "timeline": {
     "lastEval": "最後",
     "avgEval": "平均",

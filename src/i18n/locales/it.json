@@ -2174,6 +2174,16 @@
     "snapshots": "Versioni",
     "timeline": "Cronologia"
   },
+  "assertion": {
+    "noValue": "Nessun valore",
+    "pass": "PASSATO",
+    "fail": "FALLITO",
+    "value": "Valore",
+    "min": "Min",
+    "max": "Max",
+    "allowNan": "NaN ok",
+    "allowInf": "±Inf ok"
+  },
   "timeline": {
     "lastEval": "Ultima",
     "avgEval": "Media",
