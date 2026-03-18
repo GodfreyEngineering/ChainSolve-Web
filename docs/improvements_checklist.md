@@ -124,7 +124,7 @@
 - [ ] **2.23** Symbolic math blocks: `Differentiate` (symbolic d/dx), `Integrate` (symbolic ∫dx), `Simplify`, `Expand`, `Substitute` (replace variable with value/expression) — use CAS from 1B, display LaTeX
 - [ ] **2.24** Numerical integration blocks: `Integrate1D` (adaptive Gauss-Kronrod), `IntegrateMC` (Monte Carlo for high-dim) — input is expression or connected function subgraph
 - [x] **2.25** CurveFit: least-squares fitting to user-defined model (Levenberg-Marquardt algorithm), polynomial fit (degree N), spline smoothing — returns fitted parameters + R² + residuals
-- [ ] **2.26** Filter design: `DesignFilter` (Butterworth/Chebyshev I/II/elliptic, specify order + cutoff), `ApplyFilter` (FIR/IIR), `ZeroPhaseFilter` — for signal processing workflows
+- [x] **2.26** Filter design: `DesignFilter` (Butterworth/Chebyshev I/II/elliptic, specify order + cutoff), `ApplyFilter` (FIR/IIR), `ZeroPhaseFilter` — for signal processing workflows
 - [x] **2.27** Norm blocks: L1, L2, Linf, Frobenius norms — for vectors and matrices
 - [x] **2.28** RandomSample: uniform, normal, log-normal, Latin Hypercube, Sobol sequence, Halton sequence — with seed control for reproducibility
 
