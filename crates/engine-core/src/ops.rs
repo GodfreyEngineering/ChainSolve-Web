@@ -3762,6 +3762,24 @@ fn evaluate_node_inner(
             }
         }
 
+        "optim.cmaes" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let f = optim::get_objective_fn(data);
+                    let max_gen = data.get("maxGenerations").and_then(|v| v.as_f64()).unwrap_or(1000.0) as usize;
+                    let sigma0 = data.get("sigma0").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                    let tol = data.get("tolerance").and_then(|v| v.as_f64()).unwrap_or(1e-10);
+                    let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+                    let lambda = data.get("lambda").and_then(|v| v.as_f64()).unwrap_or(0.0) as usize;
+                    let config = optim::cmaes::CmaesConfig { max_gen, sigma0, tol, seed, lambda };
+                    let result = optim::cmaes::cmaes(&f, &vars, &config);
+                    optim::result_to_table(&result, &vars)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
         "optim.convergencePlot" | "optim.resultsTable" => {
             // Pass through optimizer output (Table)
             inputs.get("data").cloned().unwrap_or(Value::scalar(f64::NAN))

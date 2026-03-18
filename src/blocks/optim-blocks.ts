@@ -94,6 +94,30 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
       'Derivative-free simplex optimizer (Nelder-Mead). Works well for low-dimensional smooth problems.',
   })
 
+  register({
+    type: 'optim.cmaes',
+    label: 'CMA-ES',
+    category: 'optimization',
+    nodeKind: 'csOptimizer',
+    inputs: [
+      { id: 'objective', label: 'Objective' },
+      { id: 'variables', label: 'Variables' },
+    ],
+    defaultData: {
+      blockType: 'optim.cmaes',
+      label: 'CMA-ES',
+      maxGenerations: 1000,
+      sigma0: 0.3,
+      tolerance: 1e-10,
+      seed: 42,
+      lambda: 0,
+    },
+    synonyms: ['covariance matrix adaptation', 'evolution strategy', 'cma-es', 'cmaes', 'evolutionary'],
+    tags: ['optimization', 'gradient-free', 'evolutionary'],
+    description:
+      'CMA-ES: Covariance Matrix Adaptation Evolution Strategy. State-of-the-art gradient-free optimizer for non-convex, multimodal problems. Self-adapts step size and variable correlations. σ₀ = initial step size (0 = auto). λ = population size (0 = auto: 4+3·ln(n)).',
+  })
+
   // ── Visualization & Results ─────────────────────────────────────────────
 
   register({
