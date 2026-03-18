@@ -251,6 +251,20 @@ export async function acceptTerms(version: string): Promise<void> {
     throw new ServiceError('DB_ERROR', 'Profile not found. Please sign out and sign back in.')
   if (data.accepted_terms_version !== version)
     throw new ServiceError('DB_ERROR', 'Acceptance was not recorded. Please retry.', true)
+
+  // 16.80: Append to GDPR consent audit log (best-effort — do not block acceptance on failure)
+  await supabase
+    .from('user_consents')
+    .insert({
+      user_id: user.id,
+      consent_type: 'tos_accepted',
+      granted: true,
+      document_version: version,
+    })
+    .then(({ error: e }) => {
+      if (e) console.warn('[profilesService] consent audit insert failed:', e.message)
+    })
+
   invalidateProfileCache()
 }
 
@@ -269,6 +283,15 @@ export async function updateMarketingOptIn(optIn: boolean): Promise<void> {
     })
     .eq('id', user.id)
   if (error) throw new ServiceError('DB_ERROR', error.message, true)
+
+  // 16.80: Append to GDPR consent audit log
+  await supabase
+    .from('user_consents')
+    .insert({ user_id: user.id, consent_type: 'marketing_email', granted: optIn })
+    .then(({ error: e }) => {
+      if (e) console.warn('[profilesService] consent audit (marketing_email) insert failed:', e.message)
+    })
+
   invalidateProfileCache()
 }
 
