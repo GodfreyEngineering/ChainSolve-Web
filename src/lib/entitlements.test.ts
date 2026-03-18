@@ -29,22 +29,22 @@ import {
 // ── getEntitlements ────────────────────────────────────────────────────────────
 
 describe('getEntitlements', () => {
-  it('free plan: limited projects and canvases, groups+themes allowed, no other pro features', () => {
+  it('free plan: 3 projects/canvases, full engine (arrays+plots+CSV), no AI or custom features', () => {
     const ent = getEntitlements('free')
-    expect(ent.maxProjects).toBe(1)
-    expect(ent.maxCanvases).toBe(2)
-    expect(ent.canUploadCsv).toBe(false)
-    expect(ent.canUseArrays).toBe(false)
-    expect(ent.canUsePlots).toBe(false)
+    expect(ent.maxProjects).toBe(3)
+    expect(ent.maxCanvases).toBe(3)
+    expect(ent.canUploadCsv).toBe(true)
+    expect(ent.canUseArrays).toBe(true)
+    expect(ent.canUsePlots).toBe(true)
     expect(ent.canUseRules).toBe(false)
     expect(ent.canUseGroups).toBe(true)
     expect(ent.canEditThemes).toBe(true)
-    expect(ent.canExport).toBe(false)
+    expect(ent.canExport).toBe(true) // watermarked PDF
     expect(ent.canCreateCustomMaterials).toBe(false)
     expect(ent.canCreateCustomFunctions).toBe(false)
-    expect(ent.canUseListBlocks).toBe(false)
-    expect(ent.canUseGraphTableOutputs).toBe(false)
-    expect(ent.canImportFiles).toBe(false)
+    expect(ent.canUseListBlocks).toBe(true)
+    expect(ent.canUseGraphTableOutputs).toBe(true)
+    expect(ent.canImportFiles).toBe(true)
   })
 
   it('trialing plan: unlimited projects and canvases, all pro features', () => {
@@ -199,10 +199,11 @@ describe('canCreateProject', () => {
     expect(canCreateProject('past_due', 99)).toBe(false)
   })
 
-  it('free: true below limit (maxProjects=1), false at or above', () => {
+  it('free: true below limit (maxProjects=3), false at or above', () => {
     expect(canCreateProject('free', 0)).toBe(true)
-    expect(canCreateProject('free', 1)).toBe(false)
-    expect(canCreateProject('free', 2)).toBe(false)
+    expect(canCreateProject('free', 1)).toBe(true)
+    expect(canCreateProject('free', 2)).toBe(true)
+    expect(canCreateProject('free', 3)).toBe(false)
   })
 
   it('trialing: always true (unlimited)', () => {
@@ -246,10 +247,10 @@ describe('canCreateCanvas', () => {
     expect(canCreateCanvas('past_due', 99)).toBe(false)
   })
 
-  it('free: true below limit (maxCanvases=2), false at or above', () => {
+  it('free: true below limit (maxCanvases=3), false at or above', () => {
     expect(canCreateCanvas('free', 0)).toBe(true)
     expect(canCreateCanvas('free', 1)).toBe(true)
-    expect(canCreateCanvas('free', 2)).toBe(false)
+    expect(canCreateCanvas('free', 2)).toBe(true)
     expect(canCreateCanvas('free', 3)).toBe(false)
   })
 
@@ -312,12 +313,12 @@ describe('isBlockEntitled', () => {
 
   it('pro plot blocks require canUsePlots', () => {
     expect(isBlockEntitled({ proOnly: true, category: 'plot' }, proEnt)).toBe(true)
-    expect(isBlockEntitled({ proOnly: true, category: 'plot' }, freeEnt)).toBe(false)
+    expect(isBlockEntitled({ proOnly: true, category: 'plot' }, freeEnt)).toBe(true)
   })
 
   it('pro non-plot blocks require canUseArrays', () => {
     expect(isBlockEntitled({ proOnly: true, category: 'array' }, proEnt)).toBe(true)
-    expect(isBlockEntitled({ proOnly: true, category: 'array' }, freeEnt)).toBe(false)
+    expect(isBlockEntitled({ proOnly: true, category: 'array' }, freeEnt)).toBe(true)
   })
 
   it('past_due and canceled entitlements block pro features', () => {
