@@ -493,7 +493,8 @@
     "matrix_sparse_cg": "Sparse CG",
     "matrix_sparse_gmres": "Sparse GMRES",
     "units_convert": "Unit Converter",
-    "units_analyze": "Unit Analyser"
+    "units_analyze": "Unit Analyser",
+    "ad_ode_adjoint": "ODE Adjoint Sensitivity"
   },
   "plot": {
     "settings": "Plot Settings",

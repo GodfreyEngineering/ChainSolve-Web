@@ -676,6 +676,8 @@ pub fn catalog() -> Vec<CatalogEntry> {
         // Units (1.28)
         entry("units.convert", "Unit Converter", "math", "csOperation", vec![p("value", "Value")], false),
         entry("units.analyze", "Unit Analyser", "math", "csOperation", vec![], false),
+        // ODE Adjoint (1.33)
+        entry("ad.odeAdjoint", "ODE Adjoint Sensitivity", "simulation", "csOperation", vec![], false),
     ]
 }
 

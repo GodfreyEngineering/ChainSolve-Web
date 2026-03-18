@@ -6,6 +6,7 @@
 //! All solvers take an `OdeSystem` (equation definitions + parameter values)
 //! and return an `OdeResult` (time series of state variables as vectors).
 
+pub mod adjoint;
 pub mod bdf;
 pub mod dae;
 pub mod event;

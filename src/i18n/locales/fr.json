@@ -485,7 +485,8 @@
     "matrix_sparse_cg": "CG Creux",
     "matrix_sparse_gmres": "GMRES Creux",
     "units_convert": "Convertisseur d'Unités",
-    "units_analyze": "Analyseur d'Unités"
+    "units_analyze": "Analyseur d'Unités",
+    "ad_ode_adjoint": "Sensibilité Adjointe EDO"
   },
   "plot": {
     "settings": "Paramètres du graphique",

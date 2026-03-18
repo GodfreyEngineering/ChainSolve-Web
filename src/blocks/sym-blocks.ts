@@ -139,6 +139,28 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'ad.odeAdjoint',
+    label: 'ODE Adjoint Sensitivity',
+    category: 'simulation',
+    nodeKind: 'csOperation',
+    inputs: [],
+    defaultData: {
+      equations: '-k*y0',
+      param_names: 'k',
+      objective: '0.5*y0^2',
+      t_start: 0,
+      t_end: 1,
+      dt: 0.01,
+      n_checkpoints: 0,
+      fd_eps: 1e-6,
+    },
+    synonyms: ['adjoint', 'sensitivity', 'gradient', 'ODE', 'parameter estimation', 'PINNs'],
+    tags: ['ode', 'adjoint', 'ad', 'sensitivity'],
+    description:
+      'Discrete adjoint method: computes dJ/dp — the gradient of a scalar objective J w.r.t. ODE parameters p — without storing the full forward trajectory. Set equations (semicolon-separated dy_i/dt), param_names (comma-separated), and objective (expression of final state y0, y1, …). Returns Table [param_idx, gradient, objective].',
+  })
+
+  register({
     type: 'sym.groebner',
     label: 'Gröbner Basis',
     category: 'math',

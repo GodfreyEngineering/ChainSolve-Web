@@ -485,7 +485,8 @@
     "matrix_sparse_cg": "CG Disperso",
     "matrix_sparse_gmres": "GMRES Disperso",
     "units_convert": "Convertidor de Unidades",
-    "units_analyze": "Analizador de Unidades"
+    "units_analyze": "Analizador de Unidades",
+    "ad_ode_adjoint": "Sensibilidad Adjunta ODE"
   },
   "plot": {
     "settings": "Config. de Gráfico",

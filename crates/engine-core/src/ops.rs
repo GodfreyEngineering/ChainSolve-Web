@@ -6605,6 +6605,68 @@ fn evaluate_node_inner(
             crate::types::build_table(&col_refs, &col_data)
         }
 
+        // ── Discrete Adjoint ODE Sensitivity (1.33) ─────────────────
+        "ad.odeAdjoint" => {
+            use crate::ode::adjoint::{AdjointConfig, AdjointResult, discrete_adjoint};
+            use crate::ode::types::{OdeSystem, OdeSolverConfig};
+
+            // equations: semicolon-separated ODE RHS strings (dy_i/dt)
+            let eqs_str = data.get("equations").and_then(|v| v.as_str()).unwrap_or("").to_string();
+            if eqs_str.is_empty() {
+                return Value::error("ad.odeAdjoint: 'equations' field required (semicolon-separated)");
+            }
+            let equations: Vec<String> = eqs_str.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let n_state = equations.len();
+            let state_names: Vec<String> = (0..n_state).map(|i| format!("y{i}")).collect();
+
+            // param_names: comma-separated list of parameter names to differentiate w.r.t.
+            let param_names_str = data.get("param_names").and_then(|v| v.as_str()).unwrap_or("").to_string();
+            let param_names: Vec<String> = param_names_str.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+
+            // objective: scalar expression of final state (y0, y1, ...)
+            let objective_expr = data.get("objective").and_then(|v| v.as_str()).unwrap_or("y0^2").to_string();
+
+            // Parameters from block data
+            let mut params = std::collections::HashMap::new();
+            if let Some(serde_json::Value::Object(obj)) = data.get("params") {
+                for (k, v) in obj {
+                    if let Some(n) = v.as_f64() { params.insert(k.clone(), n); }
+                }
+            }
+            // Also accept initial conditions as y0_init, y1_init, ...
+            for i in 0..n_state {
+                let key = format!("y{i}_init");
+                if let Some(v) = data.get(&key).and_then(|v| v.as_f64()) {
+                    params.insert(key, v);
+                }
+            }
+
+            let t_start = scalar_or(data, "t_start", 0.0);
+            let t_end = scalar_or(data, "t_end", 1.0);
+            let dt = scalar_or(data, "dt", 0.01);
+            let fd_eps = scalar_or(data, "fd_eps", 1e-6);
+            let n_checkpoints = data.get("n_checkpoints").and_then(|v| v.as_f64()).unwrap_or(0.0) as usize;
+
+            let system = OdeSystem { equations, state_names, params };
+            let solver_cfg = OdeSolverConfig { t_start, t_end, dt, tolerance: 1e-6, max_steps: 100_000 };
+            let adj_cfg = AdjointConfig {
+                system, param_names, objective_expr, solver_cfg, n_checkpoints, fd_eps,
+            };
+
+            let result: AdjointResult = discrete_adjoint(&adj_cfg);
+
+            // Return Table: [param_name_idx, gradient, param_name (encoded as index)]
+            let n = result.grad.len();
+            let idx: Vec<f64> = (0..n).map(|i| i as f64).collect();
+            let grads = result.grad.clone();
+            let obj_col = vec![result.objective; n.max(1)];
+
+            if n == 0 {
+                return Value::scalar(result.objective);
+            }
+            crate::types::build_table(&["param_idx", "gradient", "objective"], &[idx, grads, obj_col])
+        }
+
         // ── Units Conversion (1.28) ──────────────────────────────────
         "units.convert" => {
             use crate::units::{lookup_unit, convert};
