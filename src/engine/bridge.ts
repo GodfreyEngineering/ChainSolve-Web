@@ -92,7 +92,10 @@ export function toEngineSnapshot(
                     ? 'ifthenelse'
                     : data.blockType === 'ctrl.mux'
                       ? 'vectorConcat'
-                      : data.blockType) as string
+                      // 2.9: fileInput is a drag-drop UI block; engine treats as tableInput.
+                      : data.blockType === 'fileInput'
+                        ? 'tableInput'
+                        : data.blockType) as string
       if (blockType === 'constant') {
         const constId = data.selectedConstantId
         if (typeof constId === 'string' && constId in CONSTANT_VALUES) {

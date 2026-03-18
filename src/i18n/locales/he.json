@@ -1739,6 +1739,16 @@
   "deadZone": {
     "band": "רוחב"
   },
+  "fileInput": {
+    "empty": "אין קובץ",
+    "drop": "גרור קובץ או לחץ לעיון",
+    "loading": "מנתח…",
+    "parseError": "לא ניתן לנתח את הקובץ",
+    "loaded": "נתונים נטענו",
+    "clear": "נקה",
+    "reload": "טען קובץ אחר",
+    "hasHeader": "השורה הראשונה היא כותרת"
+  },
   "mathSheet": {
     "result": "תוצאה",
     "inputs": "קלטים",

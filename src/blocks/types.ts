@@ -86,6 +86,7 @@ export type NodeKind =
   | 'csLogger'
   | 'csMathSheet'
   | 'csDeadZone'
+  | 'csFileInput'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

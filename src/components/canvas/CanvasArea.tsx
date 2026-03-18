@@ -57,6 +57,7 @@ import { TimerNode } from './nodes/TimerNode'
 import { LoggerNode } from './nodes/LoggerNode'
 import { MathSheetNode } from './nodes/MathSheetNode'
 import { DeadZoneNode } from './nodes/DeadZoneNode'
+import { FileInputNode } from './nodes/FileInputNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -210,6 +211,7 @@ const NODE_TYPES = {
   csLogger: LoggerNode,
   csMathSheet: MathSheetNode,
   csDeadZone: DeadZoneNode,
+  csFileInput: FileInputNode,
 } as const
 
 const EDGE_TYPES = {

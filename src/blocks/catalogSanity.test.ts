@@ -96,6 +96,7 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csLogger',
   'csMathSheet',
   'csDeadZone',
+  'csFileInput',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {

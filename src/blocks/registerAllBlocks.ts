@@ -43,6 +43,7 @@ import { registerTimerBlocks } from './timer-blocks'
 import { registerLoggerBlocks } from './logger-blocks'
 import { registerMathSheetBlocks } from './mathsheet-blocks'
 import { registerDeadZoneBlocks } from './deadzone-blocks'
+import { registerFileInputBlocks } from './fileinput-blocks'
 import { SEARCH_METADATA } from './blockSearchMetadata'
 
 function reg(
@@ -90,6 +91,7 @@ export function registerAllBlocks(): void {
   registerLoggerBlocks(reg)
   registerMathSheetBlocks(reg)
   registerDeadZoneBlocks(reg)
+  registerFileInputBlocks(reg)
 
   // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
   for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {

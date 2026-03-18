@@ -2340,6 +2340,16 @@
   "deadZone": {
     "band": "バンド"
   },
+  "fileInput": {
+    "empty": "ファイルなし",
+    "drop": "ファイルをドロップまたはクリック",
+    "loading": "解析中…",
+    "parseError": "ファイルを解析できません",
+    "loaded": "データ読込済",
+    "clear": "クリア",
+    "reload": "別のファイルを読み込む",
+    "hasHeader": "最初の行はヘッダー"
+  },
   "mathSheet": {
     "result": "結果",
     "inputs": "入力",

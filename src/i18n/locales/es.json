@@ -2292,6 +2292,16 @@
   "deadZone": {
     "band": "Banda"
   },
+  "fileInput": {
+    "empty": "Sin archivo",
+    "drop": "Soltar archivo o hacer clic",
+    "loading": "Analizando…",
+    "parseError": "No se pudo analizar el archivo",
+    "loaded": "Datos cargados",
+    "clear": "Limpiar",
+    "reload": "Cargar otro archivo",
+    "hasHeader": "La primera fila es encabezado"
+  },
   "mathSheet": {
     "result": "Resultado",
     "inputs": "Entradas",

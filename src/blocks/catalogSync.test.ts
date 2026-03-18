@@ -29,7 +29,8 @@ registerAllBlocks()
 // 2.67: ctrl.saturation is remapped to 'clamp' (existing Rust op) in bridge.ts.
 // 2.68: ctrl.switch is remapped to 'ifthenelse' (existing Rust op) in bridge.ts.
 // 2.68: ctrl.mux is remapped to 'vectorConcat' (existing Rust op) in bridge.ts.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux'])
+// 2.9: fileInput is remapped to 'tableInput' in bridge.ts; file parsing runs in the UI.
+const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput'])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.

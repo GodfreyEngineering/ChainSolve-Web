@@ -2340,6 +2340,16 @@
   "deadZone": {
     "band": "Band"
   },
+  "fileInput": {
+    "empty": "No file",
+    "drop": "Drop file or click to browse",
+    "loading": "Parsing…",
+    "parseError": "Could not parse file",
+    "loaded": "Data loaded",
+    "clear": "Clear",
+    "reload": "Load different file",
+    "hasHeader": "First row is header"
+  },
   "mathSheet": {
     "result": "Result",
     "inputs": "Inputs",
