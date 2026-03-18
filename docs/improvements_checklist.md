@@ -207,7 +207,7 @@
 - [x] **2.79** K&C analysis mode: virtual K&C rig — bump (bounce), roll, lateral compliance, longitudinal compliance, steering. Output: bump steer gradient (deg/mm), bump camber gradient, lateral stiffness (N/mm), roll centre height (mm), anti-dive/anti-squat percentages. This is the key differentiator vs Adams for vehicle dynamics engineers.
 - [x] **2.80** Standard .tir file import/export: parse Pacejka MF 6.2 parameter files used across the automotive industry (Adams, CarSim, IPG)
 - [x] **2.81** Vehicle event blocks: step steer (ramp input), sinusoidal steer (frequency sweep), lane change (ISO 3888 double lane change profile), braking in turn, constant radius — each generates the steering/throttle/brake time-series input for full-vehicle simulation
-- [ ] **2.82** Full-vehicle model template: pre-wired graph with chassis (mass, inertia, CG), 4 suspension corners (parameterised), steering (ratio, compliance), powertrain (engine map + gearbox), brake system (proportioning valve + disc thermal), tire models — user fills in parameters or loads from .tir/.csv
+- [x] **2.82** Full-vehicle model template: pre-wired graph with chassis (mass, inertia, CG), 4 suspension corners (parameterised), steering (ratio, compliance), powertrain (engine map + gearbox), brake system (proportioning valve + disc thermal), tire models — user fills in parameters or loads from .tir/.csv
 
 ### 2F — ML/AI Blocks
 
@@ -326,8 +326,8 @@
 - [x] **3.33** Graph health panel: LazyGraphHealthPanel computes health on-demand (orphan nodes, cycles, crossing edges)
 - [x] **3.34** Problems panel: validation diagnostics display
 - [x] **3.35** Probe mode: click any edge → floating inspector shows data value, type, shape, statistics (min/max/mean/std), and inline mini-plot — like Grasshopper's data viewer
-- [ ] **3.36** Breakpoints: right-click node → "Set Breakpoint" — execution pauses before evaluating that node, showing all input values in inspector. Step over to continue.
-- [ ] **3.37** Step execution: step through graph one node at a time (forward/backward in topological order) — with current node highlighted and inputs/outputs displayed
+- [x] **3.36** Breakpoints: right-click node → "Set Breakpoint" — execution pauses before evaluating that node, showing all input values in inspector. Step over to continue.
+- [x] **3.37** Step execution: step through graph one node at a time (forward/backward in topological order) — with current node highlighted and inputs/outputs displayed
 - [x] **3.38** Execution timeline: collapsible bottom panel showing Gantt-chart of block execution with durations — identifies bottleneck blocks at a glance
 - [x] **3.39** Data flow highlighting: hover over any port → all upstream (feeding) and downstream (consuming) connections highlighted in accent colour — trace data flow through complex graphs
 - [x] **3.40** Diff view: compare two execution snapshots side-by-side — value deltas highlighted (green=increased, red=decreased) — for regression analysis
@@ -518,7 +518,7 @@
 - [ ] **12.10** API docs: auto-generated from Rust doc comments at docs.chainsolve.dev. Python/JS SDK guides.
 - [ ] **12.11** Video walkthroughs: 5-minute per feature area, embedded in in-app help
 - [ ] **12.12** Community forum: Discourse integrated with Supabase Auth — share graphs as "Demonstrations"
-- [ ] **12.13** Changelog: every release with migration notes, breaking changes highlighted
+- [x] **12.13** Changelog: every release with migration notes, breaking changes highlighted
 
 ---
 
@@ -656,10 +656,10 @@
 
 ### Accessibility
 
-- [ ] **16.65** Keyboard navigation audit: verify that the entire application is operable via keyboard alone — all interactive elements (buttons, links, inputs, dropdowns, the node graph canvas) are reachable via Tab, activated via Enter/Space, and dismissable via Escape; focus indicators are visible on all focusable elements
-- [ ] **16.66** Screen reader compatibility: verify that all interactive elements have accessible names (aria-label, aria-labelledby, or visible text); verify that dynamic content updates (calculation results, error messages, status changes) are announced to screen readers via aria-live regions; verify that the node graph has a text-based alternative or summary for screen reader users
-- [ ] **16.67** Colour contrast: verify that all text meets WCAG 2.1 AA minimum contrast ratios — 4.5:1 for normal text, 3:1 for large text (18pt+ or 14pt+ bold); test both light and dark themes; pay particular attention to your orange (#FA8C00) on white backgrounds which may fail contrast requirements
-- [ ] **16.68** Colour independence: verify that no information is conveyed by colour alone — particularly port type differentiation in the node graph (which currently uses colour coding); add shape, icon, or text label as a secondary differentiator
+- [x] **16.65** Keyboard navigation audit: verify that the entire application is operable via keyboard alone — all interactive elements (buttons, links, inputs, dropdowns, the node graph canvas) are reachable via Tab, activated via Enter/Space, and dismissable via Escape; focus indicators are visible on all focusable elements
+- [x] **16.66** Screen reader compatibility: verify that all interactive elements have accessible names (aria-label, aria-labelledby, or visible text); verify that dynamic content updates (calculation results, error messages, status changes) are announced to screen readers via aria-live regions; verify that the node graph has a text-based alternative or summary for screen reader users
+- [x] **16.67** Colour contrast: verify that all text meets WCAG 2.1 AA minimum contrast ratios — 4.5:1 for normal text, 3:1 for large text (18pt+ or 14pt+ bold); test both light and dark themes; pay particular attention to your orange (#FA8C00) on white backgrounds which may fail contrast requirements
+- [x] **16.68** Colour independence: verify that no information is conveyed by colour alone — particularly port type differentiation in the node graph (which currently uses colour coding); add shape, icon, or text label as a secondary differentiator
 - [x] **16.69** Accessibility statement: create an accessibility statement at `/accessibility` documenting: the WCAG standard you target (2.1 AA), known limitations, and contact information for accessibility feedback; this is legally required for UK public sector bodies and strongly recommended for any service selling to universities
 
 ### Export Control & Sector-Specific

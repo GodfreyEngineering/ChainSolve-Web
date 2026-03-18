@@ -88,22 +88,25 @@ export interface Entitlements {
 // ── Entitlement map ──────────────────────────────────────────────────────────
 
 const ENTITLEMENTS: Record<Plan, Entitlements> = {
+  // 13.8: Free tier — genuinely useful, not a crippled demo.
+  // 3 projects (as documented in ToS), full computation engine, arrays, plots,
+  // CSV upload, basic export (watermarked PDF). No AI, no custom materials/functions.
   free: {
-    maxProjects: 1,
-    maxCanvases: 2,
-    canUploadCsv: false,
-    canUseArrays: false,
-    canUsePlots: false,
+    maxProjects: 3,
+    maxCanvases: 3,
+    canUploadCsv: true,
+    canUseArrays: true,
+    canUsePlots: true,
     canUseRules: false,
     canUseGroups: true,
     canEditThemes: true,
-    canExport: false,
+    canExport: true, // watermarked PDF export only — enforced in export dialog
     canUseAi: false,
     canCreateCustomMaterials: false,
     canCreateCustomFunctions: false,
-    canUseListBlocks: false,
-    canUseGraphTableOutputs: false,
-    canImportFiles: false,
+    canUseListBlocks: true,
+    canUseGraphTableOutputs: true,
+    canImportFiles: true,
     maxNNParameters: 100_000,
     maxNNEpochs: 100,
     aiDailyRequestLimit: 0,
