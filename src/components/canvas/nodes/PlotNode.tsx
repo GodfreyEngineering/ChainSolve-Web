@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { memo, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Handle, Position, useEdges, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useComputedValue } from '../../../contexts/ComputedContext'
-import { formatValue } from '../../../engine/value'
+import { formatValue, isTable } from '../../../engine/value'
 import type { Value } from '../../../engine/value'
 import type { NodeData, PlotConfig } from '../../../blocks/types'
 import { NODE_STYLES as s } from './nodeStyles'
@@ -19,6 +19,7 @@ import { Icon } from '../../ui/Icon'
 import { loadVega, type VegaAPI } from '../../../lib/vega-loader'
 import { buildInlineSpec, type SpecResult } from '../../../lib/plot-spec'
 import { exportCSV } from '../../../lib/plot-export'
+import { SankeyChart } from '../SankeyChart'
 
 const PlotExpandModalComponent = lazy(() => import('../PlotExpandModal'))
 
@@ -68,10 +69,17 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
     setTitleEditing(false)
   }
 
+  // 6.12: Sankey is rendered as pure SVG — bypass Vega entirely.
+  const isSankey = config.chartType === 'sankey'
+  const sankeyData = isSankey && inputValue && isTable(inputValue) ? inputValue : null
+
   // Derive spec result from inputs (pure computation, no side-effects)
-  const specResult = useMemo(() => buildInlineSpec(inputValue, config, true), [inputValue, config])
-  const specError = 'error' in specResult ? specResult.error : null
-  const isDownsampled = !specError && (specResult as SpecResult).isDownsampled
+  const specResult = useMemo(
+    () => (isSankey ? { error: '' } : buildInlineSpec(inputValue, config, true)),
+    [isSankey, inputValue, config],
+  )
+  const specError = 'error' in specResult && specResult.error !== '' ? specResult.error : null
+  const isDownsampled = !specError && !isSankey && (specResult as SpecResult).isDownsampled
 
   // Vega state
   const containerRef = useRef<HTMLDivElement>(null)
@@ -84,8 +92,12 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
   // Combined error: spec parsing errors take precedence over render errors
   const error = specError ?? renderError
 
-  // Lazy-load Vega on mount
+  // Lazy-load Vega on mount (skip for Sankey which uses pure SVG)
   useEffect(() => {
+    if (isSankey) {
+      setLoading(false)
+      return
+    }
     let cancelled = false
     loadVega()
       .then((api) => {
@@ -103,7 +115,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [isSankey])
 
   // Render chart when data, config, or vega API changes
   // setState is only called inside async callbacks (not synchronously in the effect body).
@@ -273,11 +285,36 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
             </div>
           )}
 
+          {/* 6.12: Sankey diagram — pure SVG renderer, bypasses Vega */}
+          {isSankey && !loading && (
+            <div className="nodrag nowheel" style={{ borderRadius: 6, overflow: 'hidden' }}>
+              {sankeyData ? (
+                <SankeyChart
+                  data={sankeyData}
+                  width={320}
+                  height={220}
+                  title={config.title}
+                />
+              ) : (
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '1.5rem 0.5rem',
+                    color: 'var(--text-faint)',
+                    fontSize: '0.75rem',
+                  }}
+                >
+                  {t('plot.connectTable', 'Connect a DataTable to render the Sankey diagram')}
+                </div>
+              )}
+            </div>
+          )}
+
           <div
             ref={containerRef}
             className="nodrag nowheel"
             style={{
-              display: loading || error ? 'none' : 'block',
+              display: isSankey || loading || error ? 'none' : 'block',
               overflow: 'hidden',
               borderRadius: 6,
             }}

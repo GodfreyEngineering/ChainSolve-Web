@@ -498,6 +498,8 @@
     "chartContour": "等高線 / 密度",
     "chartPareto": "パレートフロント",
     "chartWaterfall": "ウォーターフォール",
+    "chartSankey": "サンキー",
+    "connectTable": "サンキー図を表示するにはDataTableを接続してください",
     "exportSvg": "SVG",
     "exportPng": "PNG",
     "exportCsv": "CSV",

@@ -1534,6 +1534,8 @@
     "chartContour": "Contour / Density",
     "chartPareto": "חזית פארטו",
     "chartWaterfall": "מפל",
+    "chartSankey": "סנקי",
+    "connectTable": "חבר DataTable לעיבוד דיאגרמת Sankey",
     "exportCsv": "CSV",
     "openInTab": "Open SVG in tab",
     "pngScale": "PNG Scale",

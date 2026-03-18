@@ -110,6 +110,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
           <option value="contour">{t('plot.chartContour')}</option>
           <option value="pareto">{t('plot.chartPareto')}</option>
           <option value="waterfall">{t('plot.chartWaterfall')}</option>
+          <option value="sankey">{t('plot.chartSankey', 'Sankey')}</option>
         </select>,
       )}
 

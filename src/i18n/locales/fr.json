@@ -490,6 +490,8 @@
     "chartContour": "Contour / Densité",
     "chartPareto": "Front de Pareto",
     "chartWaterfall": "Cascade",
+    "chartSankey": "Sankey",
+    "connectTable": "Connectez une DataTable pour afficher le diagramme Sankey",
     "exportSvg": "SVG",
     "exportPng": "PNG",
     "exportCsv": "CSV",

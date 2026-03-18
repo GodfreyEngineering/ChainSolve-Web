@@ -94,6 +94,7 @@ export type ChartType =
   | 'nyquist'
   | 'pareto'
   | 'waterfall'
+  | 'sankey'
 export type ScaleType = 'linear' | 'log'
 export type LegendPosition = 'right' | 'bottom' | 'none'
 export type PlotThemePreset = 'paper-single' | 'paper-double' | 'presentation' | 'report'

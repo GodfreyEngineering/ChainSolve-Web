@@ -490,6 +490,8 @@
     "chartContour": "Kontur / Dichte",
     "chartPareto": "Pareto-Front",
     "chartWaterfall": "Wasserfall",
+    "chartSankey": "Sankey",
+    "connectTable": "Verbinde eine DataTable, um das Sankey-Diagramm zu rendern",
     "exportSvg": "SVG",
     "exportPng": "PNG",
     "exportCsv": "CSV",

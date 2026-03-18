@@ -279,6 +279,28 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'sankeyPlot',
+    label: 'Sankey Diagram',
+    category: 'plot',
+    nodeKind: 'csPlot',
+    inputs: [{ id: 'data', label: 'Data' }],
+    proOnly: false,
+    description:
+      'Sankey / flow diagram. Expects a Table with at least 3 columns: source (integer node ID), target (integer node ID), value (flow amount). Node labels default to "Node 0", "Node 1", … Use the config panel to set custom labels.',
+    defaultData: {
+      blockType: 'sankeyPlot',
+      label: 'Sankey Diagram',
+      plotConfig: {
+        chartType: 'sankey',
+        showGrid: false,
+        showLegend: false,
+        legendPosition: 'right',
+        themePreset: 'paper-single',
+      } satisfies PlotConfig,
+    },
+  })
+
+  register({
     type: 'listTable',
     label: 'Table Output',
     category: 'output',
