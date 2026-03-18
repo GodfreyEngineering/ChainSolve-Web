@@ -1,0 +1,10 @@
+[package]
+name = "chainsolve-cli"
+version = "0.1.0"
+edition = "2021"
+description = "ChainSolve headless CLI for graph execution in CI/CD and batch workflows (10.5)"
+
+[dependencies]
+engine-core = { path = "../engine-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
