@@ -499,7 +499,7 @@
 - [x] **11.10** FEA benchmarks: NAFEMS LE1, LE10, LE11 — standard finite element verification problems
 - [x] **11.11** FMU compliance: exported FMUs pass FMI Cross-Check validation suite
 - [x] **11.12** Round-trip: save → close → reopen → execute = bit-identical results
-- [ ] **11.13** Solver verification reports: auto-generated PDF documenting algorithm, convergence, error estimates, reference comparison — for regulatory submission
+- [x] **11.13** Solver verification reports: auto-generated PDF documenting algorithm, convergence, error estimates, reference comparison — for regulatory submission
 - [x] **11.14** TestBlock/TestSuite: user-defined assertions in graphs. TestBlock compares computed vs expected within tolerance. TestSuite aggregates pass/fail.
 
 ---
@@ -513,7 +513,7 @@
 - [x] **12.5** 13 Architecture Decision Records (ADRs)
 - [x] **12.6** CSEL grammar doc: docs/CSEL.md with full grammar, examples, operator precedence table
 - [x] **12.7** 20+ guided tutorials as ChainSolve graphs: mechanical dynamics, control design, data fitting, ML training, optimisation, vehicle K&C, FMU co-simulation
-- [ ] **12.8** 100+ example graphs by domain: mechanical, electrical, thermal, fluid, control, ML, optimisation, vehicle — one-click open and run
+- [x] **12.8** 100+ example graphs by domain: mechanical, electrical, thermal, fluid, control, ML, optimisation, vehicle — one-click open and run
 - [ ] **12.9** Mathematical reference: embedded docs for every algorithm — ODE solvers (stability regions, convergence orders), optimisation (convergence proofs), AD (complexity analysis)
 - [ ] **12.10** API docs: auto-generated from Rust doc comments at docs.chainsolve.dev. Python/JS SDK guides.
 - [ ] **12.11** Video walkthroughs: 5-minute per feature area, embedded in in-app help
