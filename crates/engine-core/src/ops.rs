@@ -5704,6 +5704,154 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Vehicle Half-Car (4-DOF) (item 2.78) ──────────────────────
+
+        "veh.suspension.halfCar" => {
+            use crate::vehicle::suspension::{HalfCarParams, half_car_step_response};
+            let p = HalfCarParams {
+                m_s: scalar_or(data, "m_s", 800.0),
+                i_y: scalar_or(data, "i_y", 1200.0),
+                m_uf: scalar_or(data, "m_uf", 35.0),
+                m_ur: scalar_or(data, "m_ur", 40.0),
+                k_sf: scalar_or(data, "k_sf", 18000.0),
+                c_sf: scalar_or(data, "c_sf", 1200.0),
+                k_sr: scalar_or(data, "k_sr", 20000.0),
+                c_sr: scalar_or(data, "c_sr", 1400.0),
+                k_tf: scalar_or(data, "k_tf", 160000.0),
+                k_tr: scalar_or(data, "k_tr", 160000.0),
+                a:    scalar_or(data, "a", 1.35),
+                b:    scalar_or(data, "b", 1.45),
+            };
+            let road_front = scalar_or_nan(inputs, "road_front");
+            let road_rear  = scalar_or_nan(inputs, "road_rear");
+            let t_end = scalar_or(data, "t_end", 3.0);
+            let dt    = scalar_or(data, "dt", 0.005);
+            let result = half_car_step_response(&p, road_front, road_rear, t_end, dt);
+            Value::Table {
+                columns: result.column_names[1..].to_vec(), // skip duplicate t col
+                rows: result.t.iter().zip(result.states.iter()).map(|(t, ys)| {
+                    let mut row = vec![*t]; row.extend_from_slice(ys); row
+                }).collect(),
+            }
+        }
+
+        // ── Vehicle Full-Car (7-DOF) (item 2.78) ──────────────────────
+
+        "veh.suspension.fullCar" => {
+            use crate::vehicle::suspension::{FullVehicleParams, full_vehicle_response};
+            let p = FullVehicleParams {
+                m_s:     scalar_or(data, "m_s", 1200.0),
+                i_pitch: scalar_or(data, "i_pitch", 1800.0),
+                i_roll:  scalar_or(data, "i_roll", 500.0),
+                m_wfl:   scalar_or(data, "m_wfl", 35.0),
+                m_wfr:   scalar_or(data, "m_wfr", 35.0),
+                m_wrl:   scalar_or(data, "m_wrl", 40.0),
+                m_wrr:   scalar_or(data, "m_wrr", 40.0),
+                k_fl: scalar_or(data, "k_fl", 18000.0), c_fl: scalar_or(data, "c_fl", 1200.0),
+                k_fr: scalar_or(data, "k_fr", 18000.0), c_fr: scalar_or(data, "c_fr", 1200.0),
+                k_rl: scalar_or(data, "k_rl", 20000.0), c_rl: scalar_or(data, "c_rl", 1400.0),
+                k_rr: scalar_or(data, "k_rr", 20000.0), c_rr: scalar_or(data, "c_rr", 1400.0),
+                k_tf: scalar_or(data, "k_tf", 160000.0),
+                k_tr: scalar_or(data, "k_tr", 160000.0),
+                k_arb_f: scalar_or(data, "k_arb_f", 5000.0),
+                k_arb_r: scalar_or(data, "k_arb_r", 3000.0),
+                a: scalar_or(data, "a", 1.35),
+                b: scalar_or(data, "b", 1.45),
+                tw_f: scalar_or(data, "tw_f", 0.75),
+                tw_r: scalar_or(data, "tw_r", 0.75),
+            };
+            let road_fl = scalar_or_nan(inputs, "road_fl");
+            let road_fr = scalar_or_nan(inputs, "road_fr");
+            let road_rl = scalar_or_nan(inputs, "road_rl");
+            let road_rr = scalar_or_nan(inputs, "road_rr");
+            let t_end = scalar_or(data, "t_end", 3.0);
+            let dt    = scalar_or(data, "dt", 0.005);
+            let result = full_vehicle_response(&p, [road_fl, road_fr, road_rl, road_rr], t_end, dt);
+            Value::Table {
+                columns: result.column_names,
+                rows: result.t.iter().zip(result.states.iter()).map(|(t, ys)| {
+                    let mut row = vec![*t]; row.extend_from_slice(ys); row
+                }).collect(),
+            }
+        }
+
+        // ── K&C Analysis (item 2.79) ───────────────────────────────────
+
+        "veh.suspension.kc" => {
+            use crate::vehicle::suspension::compute_kc;
+            let a_upper = scalar_or(data, "a_upper", 0.35);
+            let b_upper = scalar_or(data, "b_upper", 0.30);
+            let a_lower = scalar_or(data, "a_lower", 0.18);
+            let b_lower = scalar_or(data, "b_lower", 0.10);
+            let track_half = scalar_or(data, "track_half", 0.75);
+            let wheel_rate = scalar_or(data, "wheel_rate", 18000.0);
+            let toe_link_angle = scalar_or(data, "toe_link_angle_deg", 3.0);
+            let anti_angle = scalar_or(data, "anti_angle_deg", 8.0);
+            let kc = compute_kc(a_upper, b_upper, a_lower, b_lower, track_half, wheel_rate, toe_link_angle, anti_angle);
+            crate::types::build_table(
+                &["bump_steer_grad_rad_m", "bump_camber_grad_rad_m", "roll_centre_height_m", "lateral_stiffness_N_m", "anti_pct"],
+                &[
+                    vec![kc.bump_steer_grad],
+                    vec![kc.bump_camber_grad],
+                    vec![kc.roll_centre_height],
+                    vec![kc.lateral_stiffness],
+                    vec![kc.anti_pct],
+                ],
+            )
+        }
+
+        // ── Vehicle Event Blocks (item 2.81) ───────────────────────────
+
+        "veh.event.stepSteer" => {
+            use crate::vehicle::events::step_steer;
+            let t_start = scalar_or(data, "t_start", 0.5);
+            let ramp_time = scalar_or(data, "ramp_time", 0.1);
+            let target_angle = scalar_or(data, "target_angle", 0.1);
+            let t_end = scalar_or(data, "t_end", 5.0);
+            let dt = scalar_or(data, "dt", 0.01);
+            let throttle = scalar_or(data, "throttle", 0.5);
+            step_steer(t_start, ramp_time, target_angle, t_end, dt, throttle)
+        }
+
+        "veh.event.sineSweep" => {
+            use crate::vehicle::events::sine_steer_sweep;
+            let amplitude = scalar_or(data, "amplitude", 0.05);
+            let f_start = scalar_or(data, "f_start", 0.1);
+            let f_end = scalar_or(data, "f_end", 5.0);
+            let t_end = scalar_or(data, "t_end", 20.0);
+            let dt = scalar_or(data, "dt", 0.01);
+            let throttle = scalar_or(data, "throttle", 0.5);
+            sine_steer_sweep(amplitude, f_start, f_end, t_end, dt, throttle)
+        }
+
+        "veh.event.laneChange" => {
+            use crate::vehicle::events::iso_lane_change;
+            let v_kmh = scalar_or(data, "v_kmh", 80.0);
+            let amplitude = scalar_or(data, "amplitude", 0.15);
+            let dt = scalar_or(data, "dt", 0.01);
+            iso_lane_change(v_kmh, amplitude, dt)
+        }
+
+        "veh.event.brakeInTurn" => {
+            use crate::vehicle::events::brake_in_turn;
+            let steer_angle = scalar_or(data, "steer_angle", 0.1);
+            let brake_ramp_time = scalar_or(data, "brake_ramp_time", 0.3);
+            let t_brake_start = scalar_or(data, "t_brake_start", 1.0);
+            let t_end = scalar_or(data, "t_end", 4.0);
+            let dt = scalar_or(data, "dt", 0.01);
+            let throttle_before = scalar_or(data, "throttle_before", 0.5);
+            brake_in_turn(steer_angle, brake_ramp_time, t_brake_start, t_end, dt, throttle_before)
+        }
+
+        "veh.event.constantRadius" => {
+            use crate::vehicle::events::constant_radius;
+            let steer_angle = scalar_or(data, "steer_angle", 0.1);
+            let throttle = scalar_or(data, "throttle", 0.3);
+            let t_end = scalar_or(data, "t_end", 10.0);
+            let dt = scalar_or(data, "dt", 0.01);
+            constant_radius(steer_angle, throttle, t_end, dt)
+        }
+
         // ── Vehicle Lap Simulation ─────────────────────────────────────
 
         "veh.lap.simulate" => {

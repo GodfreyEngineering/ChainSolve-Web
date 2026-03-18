@@ -832,6 +832,22 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'veh.powertrain.drivetrainLoss': 'Apply drivetrain efficiency: P_out = P_in × η.',
   'veh.suspension.quarterCar':
     'Quarter-car 2-DOF suspension model. Simulates sprung/unsprung response to road input.',
+  'veh.suspension.halfCar':
+    'Half-car 4-DOF model (body heave+pitch + front/rear unsprung). Road inputs at front and rear. Outputs 8-state time series: z_body, pitch, z_front, z_rear and their rates.',
+  'veh.suspension.fullCar':
+    'Full-vehicle 7-DOF suspension (body heave/pitch/roll + 4 corner wheels). Supports anti-roll bars. 4 independent road inputs. Outputs 14-state time series.',
+  'veh.suspension.kc':
+    'Kinematic & Compliance analysis: linearised double-wishbone/McPherson geometry. Outputs bump steer (rad/m), bump camber (rad/m), roll centre height (m), lateral stiffness (N/m), anti-dive/squat %.',
+  'veh.event.stepSteer':
+    'Step steer event (ISO 7401): ramps steer from 0 to target_angle over ramp_time at t_start. Outputs table {t, steer_angle, throttle, brake}.',
+  'veh.event.sineSweep':
+    'Sinusoidal steer sweep (chirp): linearly sweeps from f_start to f_end Hz. Used for frequency-domain vehicle characterisation.',
+  'veh.event.laneChange':
+    'ISO 3888-2 double lane change (avoidance manoeuvre). Steer profile scaled by entry speed v_kmh. Two opposing half-sine pulses.',
+  'veh.event.brakeInTurn':
+    'Brake-in-turn manoeuvre: constant steer angle with progressive brake application from t_brake_start. Models trail-braking scenarios.',
+  'veh.event.constantRadius':
+    'Constant radius steady-state manoeuvre: fixed steer angle and throttle, no braking. Used for understeer/oversteer characterisation.',
   'veh.lap.simulate':
     'Point-mass quasi-steady-state lap simulation. Input = track (distance, curvature table). Output = speed profile table.',
   'veh.brake.energy': 'Kinetic energy dissipated in braking: E = 0.5 × m × (v1² - v2²).',
