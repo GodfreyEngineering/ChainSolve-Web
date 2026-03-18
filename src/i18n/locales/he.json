@@ -2066,6 +2066,8 @@
     "ode_event": "פותר ODE עם אירועים",
     "ode_symplectic": "פותר ODE סימפלקטי",
     "ode_steady_state": "מצב יציב",
+    "optim_trust_region": "אזור אמון",
+    "optim_sqp": "SQP",
     "tire_pacejka": "צמיג פאצקה",
     "quarter_car": "מתלה רבע-רכב",
     "aero_drag": "גרר אווירודינמי",

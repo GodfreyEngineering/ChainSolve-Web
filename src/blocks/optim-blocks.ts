@@ -160,6 +160,52 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
       'CMA-ES: Covariance Matrix Adaptation Evolution Strategy. State-of-the-art gradient-free optimizer for non-convex, multimodal problems. Self-adapts step size and variable correlations. σ₀ = initial step size (0 = auto). λ = population size (0 = auto: 4+3·ln(n)).',
   })
 
+  register({
+    type: 'optim.trustRegion',
+    label: 'Trust-Region',
+    category: 'optimization',
+    nodeKind: 'csOptimizer',
+    inputs: [
+      { id: 'objective', label: 'Objective' },
+      { id: 'variables', label: 'Variables' },
+    ],
+    defaultData: {
+      blockType: 'optim.trustRegion',
+      label: 'Trust-Region',
+      maxIterations: 1000,
+      tolerance: 1e-6,
+    },
+    synonyms: ['trust region', 'dogleg', 'powell dogleg', 'globally convergent'],
+    tags: ['optimization', 'gradient-based'],
+    description:
+      'Trust-Region Dogleg: globally convergent second-order method. Adapts trust-region radius each iteration. Combines Cauchy (steepest descent) and Newton steps via the dogleg path. Robust for non-convex problems.',
+  })
+
+  register({
+    type: 'optim.sqp',
+    label: 'SQP',
+    category: 'optimization',
+    nodeKind: 'csOptimizer',
+    inputs: [
+      { id: 'objective', label: 'Objective' },
+      { id: 'variables', label: 'Variables' },
+      { id: 'eq_constraints', label: 'Equality constraints' },
+      { id: 'ineq_constraints', label: 'Inequality constraints' },
+    ],
+    defaultData: {
+      blockType: 'optim.sqp',
+      label: 'SQP',
+      maxIterations: 100,
+      tolerance: 1e-6,
+      eq_constraints: [],
+      ineq_constraints: [],
+    },
+    synonyms: ['sqp', 'sequential quadratic programming', 'augmented lagrangian', 'constrained optimization'],
+    tags: ['optimization', 'constrained'],
+    description:
+      'SQP (Sequential Quadratic Programming) via Augmented Lagrangian. Handles equality constraints h(x)=0 and inequality constraints g(x)≤0 plus variable bounds. Outer loop updates Lagrange multipliers; inner loop uses projected gradient descent.',
+  })
+
   // ── Visualization & Results ─────────────────────────────────────────────
 
   register({

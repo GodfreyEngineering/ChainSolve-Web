@@ -528,6 +528,8 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("optim.sensitivity", "Sensitivity Analysis", "optimization", "csOperation", vec![p("objective", "Function"), p("variables", "Variables")], false),
         entry("optim.doe", "Design of Experiments", "optimization", "csOperation", vec![p("variables", "Variables")], false),
         entry("optim.responseSurface", "Response Surface", "optimization", "csOperation", vec![p("x", "Feature columns (table)"), p("y", "Response vector")], true),
+        entry("optim.sqp", "SQP", "optimization", "csOptimizer", vec![p("objective", "Objective"), p("variables", "Variables"), p("eq_constraints", "Equality constraints"), p("ineq_constraints", "Inequality constraints")], true),
+        entry("optim.trustRegion", "Trust-Region", "optimization", "csOptimizer", vec![p("objective", "Objective"), p("variables", "Variables")], true),
 
         // ── Machine Learning ──────────────────────────────────────────
         entry("ml.trainTestSplit", "Train/Test Split", "machineLearning", "csOperation", vec![p("data", "Dataset (table)")], false),

@@ -432,6 +432,8 @@
     "ode_event": "ODE イベントソルバー",
     "ode_symplectic": "シンプレクティックODEソルバー",
     "ode_steady_state": "定常状態ソルバー",
+    "optim_trust_region": "信頼領域法",
+    "optim_sqp": "SQP",
     "tire_pacejka": "Pacejkaタイヤ",
     "quarter_car": "1/4カーサスペンション",
     "aero_drag": "空力抗力",

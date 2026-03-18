@@ -424,6 +424,8 @@
     "ode_event": "Solveur ODE avec Événements",
     "ode_symplectic": "Solveur ODE Symplectique",
     "ode_steady_state": "État Stationnaire",
+    "optim_trust_region": "Région de Confiance",
+    "optim_sqp": "SQP",
     "tire_pacejka": "Pneumatique Pacejka",
     "quarter_car": "Suspension Quart de Véhicule",
     "aero_drag": "Traînée Aérodynamique",

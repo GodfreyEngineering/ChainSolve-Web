@@ -3824,6 +3824,79 @@ fn evaluate_node_inner(
             }
         }
 
+        "optim.trustRegion" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let f = optim::get_objective_fn(data);
+                    let max_iter = data.get("maxIterations").and_then(|v| v.as_f64()).unwrap_or(1000.0) as usize;
+                    let tol = data.get("tolerance").and_then(|v| v.as_f64()).unwrap_or(1e-6);
+                    let result = optim::trust_region::trust_region_dogleg(&f, &vars, max_iter, tol);
+                    optim::result_to_table(&result, &vars)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
+        "optim.sqp" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let f = optim::get_objective_fn(data);
+                    let max_outer = data.get("maxIterations").and_then(|v| v.as_f64()).unwrap_or(100.0) as usize;
+                    let tol = data.get("tolerance").and_then(|v| v.as_f64()).unwrap_or(1e-6);
+
+                    // Parse optional constraint expressions
+                    let eq_exprs: Vec<String> = data
+                        .get("eq_constraints")
+                        .and_then(|v| v.as_array())
+                        .map(|arr| arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect())
+                        .unwrap_or_default();
+                    let ineq_exprs: Vec<String> = data
+                        .get("ineq_constraints")
+                        .and_then(|v| v.as_array())
+                        .map(|arr| arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect())
+                        .unwrap_or_default();
+
+                    let eq_fns: Vec<Box<dyn Fn(&[f64]) -> f64>> = eq_exprs
+                        .iter()
+                        .map(|expr| {
+                            let e = expr.clone();
+                            let bx: Box<dyn Fn(&[f64]) -> f64> = Box::new(move |x: &[f64]| {
+                                let mut vars_map = std::collections::HashMap::new();
+                                for (i, &v) in x.iter().enumerate() {
+                                    vars_map.insert(format!("x{i}"), v);
+                                }
+                                crate::expr::eval_expr(&e, &vars_map).unwrap_or(f64::NAN)
+                            });
+                            bx
+                        })
+                        .collect();
+
+                    let ineq_fns: Vec<Box<dyn Fn(&[f64]) -> f64>> = ineq_exprs
+                        .iter()
+                        .map(|expr| {
+                            let e = expr.clone();
+                            let bx: Box<dyn Fn(&[f64]) -> f64> = Box::new(move |x: &[f64]| {
+                                let mut vars_map = std::collections::HashMap::new();
+                                for (i, &v) in x.iter().enumerate() {
+                                    vars_map.insert(format!("x{i}"), v);
+                                }
+                                crate::expr::eval_expr(&e, &vars_map).unwrap_or(f64::NAN)
+                            });
+                            bx
+                        })
+                        .collect();
+
+                    let result = optim::sqp::augmented_lagrangian(
+                        &f, &vars, eq_fns.as_slice(), ineq_fns.as_slice(), max_outer, tol,
+                    );
+                    optim::result_to_table(&result, &vars)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
         "optim.convergencePlot" | "optim.resultsTable" => {
             // Pass through optimizer output (Table)
             inputs.get("data").cloned().unwrap_or(Value::scalar(f64::NAN))

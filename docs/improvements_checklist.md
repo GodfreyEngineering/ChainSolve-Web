@@ -245,8 +245,8 @@
 - [x] **2.107** Sobol sensitivity: Saltelli sampling scheme (A, B, AB_i matrices). First-order S1 and total-order ST indices. SobolResult: s1, st, names, n_evals. 2 tests: x1 dominates x2, constant function. Ref: Saltelli (2002).
 - [x] **2.108** Existing optimisers: gradient descent (step + convergence), genetic algorithm (tournament + crossover + mutation), Nelder-Mead (simplex reflection/expansion/contraction), parametric sweep, Monte Carlo simulation, DOE (Sobol/LHS/factorial)
 - [x] **2.109** L-BFGS-B: limited-memory BFGS with bound constraints — the workhorse gradient-based optimiser for medium-scale problems (100-10000 variables). Uses AD for gradients.
-- [ ] **2.110** SQP: Sequential Quadratic Programming with augmented Lagrangian — handles equality + inequality constraints. Solves QP subproblem at each iteration.
-- [ ] **2.111** Trust-region (dogleg): globally convergent, robust for non-convex problems. Adaptively adjusts trust-region radius.
+- [x] **2.110** SQP: Sequential Quadratic Programming with augmented Lagrangian — handles equality + inequality constraints. Solves QP subproblem at each iteration.
+- [x] **2.111** Trust-region (dogleg): globally convergent, robust for non-convex problems. Adaptively adjusts trust-region radius.
 - [x] **2.112** CMA-ES: Covariance Matrix Adaptation Evolution Strategy — gradient-free, excellent for non-convex, multimodal problems. sep-CMA-ES variant for high-dimensional (>100 vars).
 - [ ] **2.113** Bayesian optimisation: GP surrogate with Matérn 5/2 kernel, acquisition functions (Expected Improvement, Upper Confidence Bound, Knowledge Gradient). Multi-objective via qNEHVI. Multi-fidelity via multi-task GP. Ref: BoTorch principles.
 - [ ] **2.114** NSGA-III: reference-direction-based multi-objective (better than NSGA-II for >3 objectives). MOEA/D with Tchebycheff decomposition.
