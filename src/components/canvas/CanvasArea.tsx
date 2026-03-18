@@ -927,6 +927,18 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     })
   }, [])
 
+  // 3.21: Smart edge routing — routes edges around node obstacles.
+  const [smartEdgeRoutingEnabled, setSmartEdgeRoutingEnabled] = useState(
+    () => usePreferencesStore.getState().smartEdgeRoutingEnabled,
+  )
+  const toggleSmartEdgeRouting = useCallback(() => {
+    setSmartEdgeRoutingEnabled((v) => {
+      const next = !v
+      usePreferencesStore.getState().update({ smartEdgeRoutingEnabled: next })
+      return next
+    })
+  }, [])
+
   // G5-2: Bottom dock collapsed state (persisted, default collapsed)
   const [dockCollapsed, setDockCollapsed] = useState(() => {
     try {
@@ -4184,6 +4196,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         }}
                         edgeBundlingEnabled={edgeBundlingEnabled}
                         onToggleEdgeBundling={toggleEdgeBundling}
+                        smartEdgeRoutingEnabled={smartEdgeRoutingEnabled}
+                        onToggleSmartEdgeRouting={toggleSmartEdgeRouting}
                         onInsertAnnotation={onInsertAnnotationAtCenter}
                         hiddenViewMode={hiddenViewMode}
                         onToggleHiddenView={() => setHiddenViewMode((v) => !v)}

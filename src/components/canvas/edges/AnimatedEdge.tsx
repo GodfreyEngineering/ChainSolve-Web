@@ -13,6 +13,9 @@
  * near the edge midpoint — visible without clicking, always available
  * regardless of the edgeBadgesEnabled setting.
  *
+ * 3.21: Smart edge routing — when enabled, edges route around node obstacles
+ * instead of through them using a corridor-avoidance algorithm.
+ *
  * Animation is controlled via the `data-edges-animated` attribute on the
  * canvas wrapper — CSS handles the dash-offset keyframes.
  */
@@ -27,6 +30,8 @@ import {
   useNodes,
   useEdges,
   type EdgeProps,
+  type Node,
+  type Position,
 } from '@xyflow/react'
 import { useComputedValue } from '../../../contexts/ComputedContext'
 import { useCanvasSettings } from '../../../contexts/CanvasSettingsContext'
@@ -70,6 +75,80 @@ function shapeLabel(v: Value, unitSymbol?: string): string {
     case 'error':
       return `\u26A0 ${v.message.slice(0, 40)}`
   }
+}
+
+// ── 3.21: Smart edge routing ─────────────────────────────────────────────────
+
+/** Padding applied around node bounding boxes when computing obstacle regions. */
+const ROUTE_PAD = 20
+
+/**
+ * Compute an obstacle-avoiding bezier edge path.
+ *
+ * Algorithm:
+ *  1. Build bounding boxes for all nodes except source and target.
+ *  2. Find nodes whose bounding box (+ ROUTE_PAD) overlaps the AABB corridor
+ *     between the source and target handles.
+ *  3. If none block the corridor, fall back to the standard bezier path.
+ *  4. Otherwise find the combined top/bottom of the obstacle cluster and
+ *     route around it (above if more space above, else below) using a cubic
+ *     bezier with vertically-shifted control points.
+ */
+function computeSmartPath(
+  sourceX: number,
+  sourceY: number,
+  targetX: number,
+  targetY: number,
+  sourcePosition: Position,
+  targetPosition: Position,
+  allNodes: Node[],
+  sourceId: string,
+  targetId: string,
+): [string, number, number] {
+  // AABB of the connection corridor
+  const cMinX = Math.min(sourceX, targetX)
+  const cMaxX = Math.max(sourceX, targetX)
+  const cMinY = Math.min(sourceY, targetY)
+  const cMaxY = Math.max(sourceY, targetY)
+
+  type Rect = { x: number; y: number; r: number; b: number }
+  const obstacles: Rect[] = allNodes
+    .filter((n) => n.id !== sourceId && n.id !== targetId)
+    .map((n) => {
+      const w = n.measured?.width ?? n.width ?? 200
+      const h = n.measured?.height ?? n.height ?? 80
+      return {
+        x: n.position.x,
+        y: n.position.y,
+        r: n.position.x + (w as number),
+        b: n.position.y + (h as number),
+      }
+    })
+
+  const blocking = obstacles.filter(
+    (o) =>
+      o.x - ROUTE_PAD < cMaxX &&
+      o.r + ROUTE_PAD > cMinX &&
+      o.y - ROUTE_PAD < cMaxY &&
+      o.b + ROUTE_PAD > cMinY,
+  )
+
+  if (blocking.length === 0) {
+    return getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition })
+  }
+
+  const bTop = Math.min(...blocking.map((o) => o.y)) - ROUTE_PAD
+  const bBottom = Math.max(...blocking.map((o) => o.b)) + ROUTE_PAD
+
+  const midX = (sourceX + targetX) / 2
+  const spaceAbove = cMinY - bTop
+  const spaceBelow = bBottom - cMaxY
+
+  const routeY = spaceAbove >= spaceBelow ? bTop - ROUTE_PAD : bBottom + ROUTE_PAD
+  // Cubic bezier: control points placed at (sourceX, routeY) and (targetX, routeY)
+  // so the curve swings to the routing Y before connecting to both endpoints.
+  const d = `M${sourceX},${sourceY} C${sourceX},${routeY} ${targetX},${routeY} ${targetX},${targetY}`
+  return [d, midX, routeY]
 }
 
 /** H1-2 + 4.05: Resolve unit mismatch, including inferred units from propagation. */
@@ -170,40 +249,73 @@ function AnimatedEdgeInner({
         ? 2
         : baseWidth
 
+  // 3.21: Smart edge routing.
+  const smartEdgeRoutingEnabled = usePreferencesStore((s) => s.smartEdgeRoutingEnabled)
+
   // 3.23: Apply bundle offset (perpendicular to edge direction at source).
   // When hovering, temporarily un-bundle this edge for clarity.
   const bundledSourceY = bundleTotal >= 3 && !hovered ? sourceY + bundleOffset : sourceY
 
-  const [edgePath, labelX, labelY] =
-    edgeType === 'straight'
-      ? getStraightPath({ sourceX, sourceY: bundledSourceY, targetX, targetY })
-      : edgeType === 'step'
-        ? getSmoothStepPath({
-            sourceX,
-            sourceY: bundledSourceY,
-            targetX,
-            targetY,
-            sourcePosition,
-            targetPosition,
-            borderRadius: 0,
-          })
-        : edgeType === 'smoothstep'
-          ? getSmoothStepPath({
-              sourceX,
-              sourceY: bundledSourceY,
-              targetX,
-              targetY,
-              sourcePosition,
-              targetPosition,
-            })
-          : getBezierPath({
-              sourceX,
-              sourceY: bundledSourceY,
-              targetX,
-              targetY,
-              sourcePosition,
-              targetPosition,
-            })
+  const [edgePath, labelX, labelY] = useMemo(() => {
+    // 3.21: Smart routing only applies to bezier edges with routing enabled.
+    if (smartEdgeRoutingEnabled && edgeType === 'bezier') {
+      return computeSmartPath(
+        sourceX,
+        bundledSourceY,
+        targetX,
+        targetY,
+        sourcePosition,
+        targetPosition,
+        allNodes,
+        source,
+        target,
+      )
+    }
+    if (edgeType === 'straight') {
+      return getStraightPath({ sourceX, sourceY: bundledSourceY, targetX, targetY })
+    }
+    if (edgeType === 'step') {
+      return getSmoothStepPath({
+        sourceX,
+        sourceY: bundledSourceY,
+        targetX,
+        targetY,
+        sourcePosition,
+        targetPosition,
+        borderRadius: 0,
+      })
+    }
+    if (edgeType === 'smoothstep') {
+      return getSmoothStepPath({
+        sourceX,
+        sourceY: bundledSourceY,
+        targetX,
+        targetY,
+        sourcePosition,
+        targetPosition,
+      })
+    }
+    return getBezierPath({
+      sourceX,
+      sourceY: bundledSourceY,
+      targetX,
+      targetY,
+      sourcePosition,
+      targetPosition,
+    })
+  }, [
+    smartEdgeRoutingEnabled,
+    edgeType,
+    sourceX,
+    bundledSourceY,
+    targetX,
+    targetY,
+    sourcePosition,
+    targetPosition,
+    allNodes,
+    source,
+    target,
+  ])
 
   return (
     <>

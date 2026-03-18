@@ -1230,6 +1230,7 @@
     "valueBadges": "Wert-Badges",
     "edgeBadges": "Ketten-Badges",
     "edgeBundling": "Kanten bündeln",
+    "smartEdgeRouting": "Intelligentes Kanten-Routing",
     "graphHealth": "Graph-Zustand",
     "bgDots": "Background dots",
     "variables": "Variablen",

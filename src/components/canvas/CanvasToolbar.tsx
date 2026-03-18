@@ -36,6 +36,7 @@ import {
   ScanEye,
   Projector,
   Bot,
+  GitBranch,
 } from 'lucide-react'
 
 export interface CanvasToolbarProps {
@@ -67,6 +68,9 @@ export interface CanvasToolbarProps {
   /** 3.23: Edge bundling toggle. */
   edgeBundlingEnabled?: boolean
   onToggleEdgeBundling?: () => void
+  /** 3.21: Smart edge routing toggle. */
+  smartEdgeRoutingEnabled?: boolean
+  onToggleSmartEdgeRouting?: () => void
   /** I3-1: Insert annotation at viewport center. */
   onInsertAnnotation?: (annotationType: string) => void
   /** K2-1: Toggle hidden-view mode (show hidden blocks as ghosts). */
@@ -293,6 +297,8 @@ export function CanvasToolbar({
   onToggleBgDots,
   edgeBundlingEnabled,
   onToggleEdgeBundling,
+  smartEdgeRoutingEnabled,
+  onToggleSmartEdgeRouting,
   // C.2: onInsertAnnotation no longer used in toolbar (annotations available via right-click menu)
   onInsertAnnotation: _,
   hiddenViewMode,
@@ -626,6 +632,20 @@ export function CanvasToolbar({
               aria-pressed={!!edgeBundlingEnabled}
             >
               <Layers size={16} />
+            </button>
+          </Tooltip>
+        )}
+
+        {/* 3.21: Smart edge routing toggle */}
+        {onToggleSmartEdgeRouting && (
+          <Tooltip content={t('toolbar.smartEdgeRouting', 'Smart edge routing')} side={tipSide}>
+            <button
+              onClick={onToggleSmartEdgeRouting}
+              style={btnStyle(!!smartEdgeRoutingEnabled)}
+              aria-label={t('toolbar.smartEdgeRouting', 'Smart edge routing')}
+              aria-pressed={!!smartEdgeRoutingEnabled}
+            >
+              <GitBranch size={16} />
             </button>
           </Tooltip>
         )}

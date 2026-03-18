@@ -67,6 +67,8 @@ export interface UserPreferences {
   autoLayoutDirection: 'LR' | 'TB'
   /** 3.23: Edge bundling — cluster parallel edges from the same source node visually. */
   edgeBundlingEnabled: boolean
+  /** 3.21: Smart edge routing — route edges around node obstacles instead of through them. */
+  smartEdgeRoutingEnabled: boolean
 
   // Export defaults
   exportIncludeImages: boolean
@@ -133,6 +135,7 @@ const DEFAULTS: UserPreferences = {
   canvasAnimationSpeed: 'medium',
   autoLayoutDirection: 'LR',
   edgeBundlingEnabled: false,
+  smartEdgeRoutingEnabled: false,
 
   exportIncludeImages: true,
   defaultExportFormat: 'pdf',
