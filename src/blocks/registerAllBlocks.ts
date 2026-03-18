@@ -47,6 +47,7 @@ import { registerFileInputBlocks } from './fileinput-blocks'
 import { registerSqlQueryBlocks } from './sqlquery-blocks'
 import { registerTimeSeriesBlocks } from './timeseries-blocks'
 import { registerUnitInputBlocks } from './unitinput-blocks'
+import { registerTransferFunctionBlocks } from './transferfunction-blocks'
 import { SEARCH_METADATA } from './blockSearchMetadata'
 
 function reg(
@@ -98,6 +99,7 @@ export function registerAllBlocks(): void {
   registerSqlQueryBlocks(reg)
   registerTimeSeriesBlocks(reg)
   registerUnitInputBlocks(reg)
+  registerTransferFunctionBlocks(reg)
 
   // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
   for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {

@@ -33,7 +33,8 @@ registerAllBlocks()
 // 4.20: sqlQuery is remapped to 'tableInput' in bridge.ts; SQL execution runs in the UI via sqlQueryService.
 // 2.11: timeSeries is remapped to 'tableInput' in bridge.ts; CSV parsing and resampling run in the UI.
 // 2.13: unitInput is remapped to 'number' in bridge.ts; SI conversion runs in the UI.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput', 'sqlQuery', 'timeSeries', 'unitInput'])
+// 2.65: transferFunction is remapped to 'display' in bridge.ts; LTI computation runs in the UI.
+const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput', 'sqlQuery', 'timeSeries', 'unitInput', 'transferFunction'])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.

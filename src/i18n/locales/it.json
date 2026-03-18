@@ -2262,6 +2262,16 @@
     "addInput": "Aggiungi ingresso",
     "removeInput": "Rimuovi ultimo ingresso"
   },
+  "transferFunction": {
+    "label": "Funzione di trasferimento",
+    "num": "Num (potenza più alta prima)",
+    "den": "Den (potenza più alta prima)",
+    "step": "Gradino",
+    "impulse": "Impulso",
+    "bode": "Bode",
+    "order": "Ordine",
+    "pts": "punti"
+  },
   "unitInput": {
     "label": "Ingresso con unità",
     "searchPlaceholder": "Cerca unità…",

@@ -2360,6 +2360,16 @@
     "addInput": "入力を追加",
     "removeInput": "最後の入力を削除"
   },
+  "transferFunction": {
+    "label": "伝達関数",
+    "num": "分子（最高次から）",
+    "den": "分母（最高次から）",
+    "step": "ステップ",
+    "impulse": "インパルス",
+    "bode": "ボード線図",
+    "order": "次数",
+    "pts": "点"
+  },
   "unitInput": {
     "label": "単位入力",
     "searchPlaceholder": "単位を検索…",

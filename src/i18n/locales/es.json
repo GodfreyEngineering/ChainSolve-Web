@@ -2312,6 +2312,16 @@
     "addInput": "Añadir entrada",
     "removeInput": "Eliminar última entrada"
   },
+  "transferFunction": {
+    "label": "Función de transferencia",
+    "num": "Num (potencia mayor primero)",
+    "den": "Den (potencia mayor primero)",
+    "step": "Escalón",
+    "impulse": "Impulso",
+    "bode": "Bode",
+    "order": "Orden",
+    "pts": "pts"
+  },
   "unitInput": {
     "label": "Entrada de unidad",
     "searchPlaceholder": "Buscar unidades…",

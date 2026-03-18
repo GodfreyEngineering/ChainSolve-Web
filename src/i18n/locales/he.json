@@ -1759,6 +1759,16 @@
     "addInput": "הוסף קלט",
     "removeInput": "הסר קלט אחרון"
   },
+  "transferFunction": {
+    "label": "פונקציית העברה",
+    "num": "מונה (חזקה גבוהה ראשון)",
+    "den": "מכנה (חזקה גבוהה ראשון)",
+    "step": "מדרגה",
+    "impulse": "אימפולס",
+    "bode": "בודה",
+    "order": "סדר",
+    "pts": "נקודות"
+  },
   "unitInput": {
     "label": "קלט יחידה",
     "searchPlaceholder": "חפש יחידות…",

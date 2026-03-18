@@ -2360,6 +2360,16 @@
     "addInput": "Add input",
     "removeInput": "Remove last input"
   },
+  "transferFunction": {
+    "label": "Transfer Function",
+    "num": "Num (highest power first)",
+    "den": "Den (highest power first)",
+    "step": "Step",
+    "impulse": "Impulse",
+    "bode": "Bode",
+    "order": "Order",
+    "pts": "pts"
+  },
   "unitInput": {
     "label": "Unit Input",
     "searchPlaceholder": "Search units…",

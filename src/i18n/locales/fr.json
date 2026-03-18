@@ -2312,6 +2312,16 @@
     "addInput": "Ajouter une entrée",
     "removeInput": "Supprimer la dernière entrée"
   },
+  "transferFunction": {
+    "label": "Fonction de transfert",
+    "num": "Num (puissance la plus haute en premier)",
+    "den": "Den (puissance la plus haute en premier)",
+    "step": "Échelon",
+    "impulse": "Impulsion",
+    "bode": "Bode",
+    "order": "Ordre",
+    "pts": "pts"
+  },
   "unitInput": {
     "label": "Entrée avec unité",
     "searchPlaceholder": "Rechercher des unités…",

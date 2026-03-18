@@ -2312,6 +2312,16 @@
     "addInput": "Eingabe hinzufügen",
     "removeInput": "Letzte Eingabe entfernen"
   },
+  "transferFunction": {
+    "label": "Übertragungsfunktion",
+    "num": "Zähler (höchste Potenz zuerst)",
+    "den": "Nenner (höchste Potenz zuerst)",
+    "step": "Sprung",
+    "impulse": "Impuls",
+    "bode": "Bode",
+    "order": "Ordnung",
+    "pts": "Punkte"
+  },
   "unitInput": {
     "label": "Einheiteneingabe",
     "searchPlaceholder": "Einheiten suchen…",

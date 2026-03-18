@@ -90,6 +90,7 @@ export type NodeKind =
   | 'csSqlQuery'
   | 'csTimeSeries'
   | 'csUnitInput'
+  | 'csTransferFunction'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 
