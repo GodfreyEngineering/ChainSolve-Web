@@ -949,7 +949,8 @@
     "addProbeNode": "Add probe display",
     "selectAll": "Select all",
     "hideMinimap": "Hide minimap",
-    "showMinimap": "Show minimap"
+    "showMinimap": "Show minimap",
+    "collapseAsSubGraph": "כווץ לתת-גרף"
   },
   "errorBoundary": {
     "title": "משהו השתבש",

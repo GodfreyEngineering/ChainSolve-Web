@@ -209,7 +209,7 @@ export function createCollaborationSession(
       opts.onPresenceChange?.([...activeUsers.values()])
     })
     .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-      for (const p of leftPresences as Array<{ userId: string }>) {
+      for (const p of (leftPresences as unknown) as Array<{ userId: string }>) {
         activeUsers.delete(p.userId)
       }
       opts.onPresenceChange?.([...activeUsers.values()])

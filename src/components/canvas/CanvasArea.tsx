@@ -1470,7 +1470,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   )
 
   // 3.50: Record which handle the user started dragging from
-  const onConnectStart = useCallback((_: MouseEvent | TouchEvent, params: OnConnectStartParams) => {
+  const onConnectStart = useCallback((_: unknown, params: OnConnectStartParams) => {
     connectingRef.current = {
       nodeId: params.nodeId,
       handleId: params.handleId,
@@ -1481,14 +1481,15 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
 
   // 3.50: If released on empty space (no connection formed), open QuickAddPalette for auto-wire
   const onConnectEnd = useCallback(
-    (event: MouseEvent | TouchEvent) => {
+    (event: unknown) => {
       const info = connectingRef.current
       connectingRef.current = null
       if (readOnly || !info || info.didConnect || !info.nodeId || !info.handleType) return
-      const clientX = 'clientX' in event ? event.clientX : event.touches[0]?.clientX ?? 0
-      const clientY = 'clientY' in event ? event.clientY : event.touches[0]?.clientY ?? 0
+      const ev = event as { clientX?: number; clientY?: number; touches?: TouchList; target?: EventTarget | null }
+      const clientX = ev.clientX ?? ev.touches?.[0]?.clientX ?? 0
+      const clientY = ev.clientY ?? ev.touches?.[0]?.clientY ?? 0
       // Only trigger when released over the canvas pane (not over a node handle)
-      const target = event.target as Element | null
+      const target = ev.target as Element | null
       if (target?.closest('.react-flow__handle')) return
       if (target?.closest('.react-flow__node')) return
       const pos = screenToFlowPosition({ x: clientX, y: clientY })

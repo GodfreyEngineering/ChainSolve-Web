@@ -41,8 +41,6 @@ import {
   gpuElementwise,
   gpuReduce,
   gpuFft,
-  EWOP,
-  REDOP,
 } from './gpuOps.ts'
 import type { CsrMatrix, EwOpCode, RedOpCode } from './gpuOps.ts'
 

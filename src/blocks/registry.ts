@@ -656,6 +656,8 @@ export const CATEGORY_LABELS: Record<BlockCategory, string> = {
   odeSolvers: 'ODE Solvers',
   vehicleSim: 'Vehicle Simulation',
   numerical: 'Numerical Methods',
+  simulation: 'Simulation',
+  visualization: 'Visualization',
 }
 
 // ── Block taxonomy (G3-1: 3 main categories with subcategories) ─────────────
@@ -681,7 +683,11 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
     id: 'inputBlocks',
     label: 'Input Blocks',
     subcategories: [
-      { id: 'inputNumber', label: 'Standard number input', blockTypes: ['number'] },
+      {
+        id: 'inputNumber',
+        label: 'Standard number input',
+        blockTypes: ['number', 'boolean_input', 'parameter_sweep', 'unitInput'],
+      },
       { id: 'inputSlider', label: 'Slider input', blockTypes: ['slider'] },
       { id: 'inputMaterial', label: 'Material input', blockTypes: ['material'] },
       {
@@ -690,7 +696,12 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
         blockTypes: ['constant'],
       },
       { id: 'inputVariable', label: 'Variable input', categories: ['variable'] },
-      { id: 'inputList', label: 'List input', categories: ['data'] },
+      {
+        id: 'inputList',
+        label: 'List input',
+        categories: ['data'],
+        blockTypes: ['wsInput', 'restInput', 'sym.expressionInput', 'mathSheet', 'codeBlock'],
+      },
     ],
   },
   {
@@ -735,6 +746,9 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
       { id: 'fnNeuralNetworks', label: 'Neural Networks', categories: ['neuralNetworks'] },
       { id: 'fnOdeSolvers', label: 'ODE Solvers', categories: ['odeSolvers'] },
       { id: 'fnVehicleSim', label: 'Vehicle Simulation', categories: ['vehicleSim'] },
+      { id: 'fnNumerical', label: 'Numerical Methods', categories: ['numerical'] },
+      { id: 'fnSimulation', label: 'Simulation', categories: ['simulation'] },
+      { id: 'fnCustom', label: 'Custom Functions', categories: ['customFunctions'] },
     ],
   },
   {
@@ -744,7 +758,16 @@ export const BLOCK_TAXONOMY: TaxonomyMainCategory[] = [
       {
         id: 'outDisplay',
         label: 'Display',
-        blockTypes: ['display', 'listTable'],
+        blockTypes: [
+          'display',
+          'listTable',
+          'testBlock',
+          'assertion',
+          'scope',
+          'timer',
+          'logger',
+          'viewport3d',
+        ],
       },
       { id: 'outPublish', label: 'Publish / Subscribe', blockTypes: ['publish', 'subscribe'] },
       { id: 'outGraph', label: 'Graph blocks', categories: ['plot'] },
@@ -848,7 +871,49 @@ export function getMaterialsCatalog(): MaterialsCatalogEntry[] {
 // 'constant' and 'material' are UI-only in the sense that their TS registry type
 // key ('constant', 'material') does not correspond to a Rust op with the same name.
 // The actual Rust ops for material are named 'material_full' (stored in data.blockType).
-export const UI_ONLY_BLOCKS: ReadonlySet<string> = new Set(['constant', 'material'])
+export const UI_ONLY_BLOCKS: ReadonlySet<string> = new Set([
+  'constant',
+  'material',
+  // Blocks with custom UI renderers that don't map to a single Rust op name:
+  'sqlQuery',
+  'timeSeries',
+  'unitInput',
+  'transferFunction',
+  'stateSpace',
+  'ctrl.zoh',
+  'ctrl.rateTransition',
+  'stateMachine',
+  'codeBlock',
+  'tirFileInput',
+  'viewport3d',
+  'nn.onnxInference',
+  'matrixInput',
+  'bodePlot',
+  'nyquistPlot',
+  'boxPlot',
+  'violinPlot',
+  'parallelCoords',
+  'contourPlot',
+  'waterfallPlot',
+  'paretoPlot',
+  'sankeyPlot',
+  'surfacePlot',
+  'ctrl.saturation',
+  'ctrl.switch',
+  'ctrl.mux',
+  'testBlock',
+  'assertion',
+  'wsInput',
+  'restInput',
+  'scope',
+  'timer',
+  'logger',
+  'mathSheet',
+  'ctrl.deadZone',
+  'fileInput',
+  'parquet_import',
+  'parquet_export',
+])
 
 /**
  * Validate and reconcile the TS registry with the Rust catalog.

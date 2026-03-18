@@ -22,7 +22,7 @@ export function registerParquetBlocks(register: (def: BlockDef) => void): void {
     category: 'data',
     nodeKind: 'csSource',
     inputs: [],
-    proOnly: false,
+    proOnly: true,
     defaultData: {
       blockType: 'parquet_import',
       label: 'Parquet Import',
@@ -49,7 +49,7 @@ export function registerParquetBlocks(register: (def: BlockDef) => void): void {
     category: 'data',
     nodeKind: 'csOperation',
     inputs: [{ id: 'table', label: 'Table' }],
-    proOnly: false,
+    proOnly: true,
     defaultData: {
       blockType: 'parquet_export',
       label: 'Parquet Export',

@@ -72,14 +72,14 @@ function StateMachineNodeInner({ id, data, selected }: NodeProps) {
   const currentStateIndex = states.findIndex((s) => s.id === currentStateId)
 
   // Read all input values
-  const in0 = useComputedValue(id, 'in_0')
-  const in1 = useComputedValue(id, 'in_1')
-  const in2 = useComputedValue(id, 'in_2')
-  const in3 = useComputedValue(id, 'in_3')
-  const in4 = useComputedValue(id, 'in_4')
-  const in5 = useComputedValue(id, 'in_5')
-  const in6 = useComputedValue(id, 'in_6')
-  const in7 = useComputedValue(id, 'in_7')
+  const in0 = useComputedValue(id)
+  const in1 = useComputedValue(id)
+  const in2 = useComputedValue(id)
+  const in3 = useComputedValue(id)
+  const in4 = useComputedValue(id)
+  const in5 = useComputedValue(id)
+  const in6 = useComputedValue(id)
+  const in7 = useComputedValue(id)
 
   const resolveInput = useCallback(
     (raw: unknown): number => (typeof raw === 'number' && Number.isFinite(raw) ? raw : 0),

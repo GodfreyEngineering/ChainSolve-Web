@@ -236,7 +236,7 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     category: 'plot',
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
-    proOnly: false,
+    proOnly: true,
     description:
       'Waterfall chart showing cumulative incremental changes. Expects a Table with columns [category, value]. Positive increments are green, negative are red, bars float from the running total.',
     defaultData: {
@@ -284,7 +284,7 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     category: 'plot',
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
-    proOnly: false,
+    proOnly: true,
     description:
       'Sankey / flow diagram. Expects a Table with at least 3 columns: source (integer node ID), target (integer node ID), value (flow amount). Node labels default to "Node 0", "Node 1", … Use the config panel to set custom labels.',
     defaultData: {
@@ -306,7 +306,7 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     category: 'plot',
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
-    proOnly: false,
+    proOnly: true,
     description:
       '3D surface plot with interactive rotation. Expects a DataTable where each row is an x-slice and each column is a y-slice — values are treated as z heights. Drag to rotate; toggle wireframe with the button.',
     defaultData: {

@@ -1963,7 +1963,8 @@
     "addProbeNode": "Add probe display",
     "selectAll": "Select all",
     "hideMinimap": "Hide minimap",
-    "showMinimap": "Show minimap"
+    "showMinimap": "Show minimap",
+    "collapseAsSubGraph": "Als SubGraph reduzieren"
   },
   "errorBoundary": {
     "title": "Etwas ist schiefgelaufen",

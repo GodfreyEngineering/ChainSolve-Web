@@ -21,6 +21,13 @@ export type ErrorCode =
   | 'INVALID_FILE'
   | 'CANVAS_INVALID'
   | 'SERIALIZATION_ERROR'
+  | 'BRANCH_LIST_FAILED'
+  | 'BRANCH_CREATE_FAILED'
+  | 'BRANCH_INVALID_NAME'
+  | 'BRANCH_EXISTS'
+  | 'BRANCH_DELETE_MAIN'
+  | 'BRANCH_DELETE_FAILED'
+  | 'SNAPSHOT_LOAD_FAILED'
 
 export class ServiceError extends Error {
   readonly code: ErrorCode

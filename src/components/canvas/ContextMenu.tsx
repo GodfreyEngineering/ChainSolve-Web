@@ -376,7 +376,7 @@ export function ContextMenu({
               <>
                 <div style={sep} />
                 <MenuItem
-                  icon={breakpoints.has(target.nodeId) ? '🔴' : '⭕'}
+                  icon={breakpoints.has(target.nodeId) ? '◉' : '⭕'}
                   label={
                     breakpoints.has(target.nodeId)
                       ? t('contextMenu.clearBreakpoint', 'Clear Breakpoint')

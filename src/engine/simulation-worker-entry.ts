@@ -22,7 +22,6 @@
  */
 
 import initWasm, {
-  // @ts-expect-error — run_simulation added in Rust; wasm-pack .d.ts regenerates on wasm:build
   run_simulation,
 } from '@engine-wasm/engine_wasm.js'
 import wasmUrl from '@engine-wasm/engine_wasm_bg.wasm?url'

@@ -59,6 +59,8 @@ const CATEGORY_TO_DOCS: Record<BlockCategory, DocsSection> = {
   odeSolvers: 'block-math',
   vehicleSim: 'block-math',
   numerical: 'block-math',
+  simulation: 'block-math',
+  visualization: 'block-plot',
 }
 
 export function getDocsSectionForCategory(category: BlockCategory): DocsSection {

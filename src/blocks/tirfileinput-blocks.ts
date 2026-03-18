@@ -25,7 +25,7 @@ export function registerTirFileInputBlocks(register: (def: BlockDef) => void): v
     category: 'data',
     nodeKind: 'csTirFileInput',
     inputs: [],
-    proOnly: false,
+    proOnly: true,
     defaultData: {
       blockType: 'tirFileInput',
       label: '.tir File Input',

@@ -10,7 +10,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { EngineSnapshotV1 } from '../engine/types'
+import type { EngineSnapshotV1 } from '../engine/wasm-types'
 
 export interface Demonstration {
   id: string
@@ -132,7 +132,7 @@ export async function getDemonstration(
   if (error) throw new Error(`[DEMO_FETCH] ${error.message}`)
 
   // Increment view count asynchronously (fire and forget)
-  supabase.rpc('increment_demonstration_view', { demo_id: id }).catch(() => {})
+  void supabase.rpc('increment_demonstration_view', { demo_id: id })
 
   return data as Demonstration
 }

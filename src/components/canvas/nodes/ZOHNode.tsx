@@ -39,7 +39,7 @@ function ZOHNodeInner({ id, data, selected }: NodeProps) {
   const TypeIcon = getNodeTypeIcon(nd.blockType)
 
   // Read upstream value and pass through (reactive mode)
-  const upstream = useComputedValue(id, 'u')
+  const upstream = useComputedValue(id)
   useEffect(() => {
     const v = typeof upstream === 'number' && Number.isFinite(upstream) ? upstream : heldValue
     updateNodeData(id, { heldValue: v, value: v })
@@ -123,7 +123,7 @@ function RateTransitionNodeInner({ id, data, selected }: NodeProps) {
   const TypeIcon = getNodeTypeIcon(nd.blockType)
 
   // Pass through in reactive mode
-  const upstream = useComputedValue(id, 'u')
+  const upstream = useComputedValue(id)
   useEffect(() => {
     const v = typeof upstream === 'number' && Number.isFinite(upstream) ? upstream : 0
     updateNodeData(id, { value: v })

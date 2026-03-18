@@ -6,3 +6,6 @@ export const PlanContext = createContext<Plan>('free')
 export function usePlan(): Plan {
   return useContext(PlanContext)
 }
+
+/** Alias for usePlan — use in components that import usePlanContext. */
+export const usePlanContext = usePlan

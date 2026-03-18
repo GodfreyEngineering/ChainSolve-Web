@@ -18,7 +18,7 @@ export function registerSqlQueryBlocks(register: (def: BlockDef) => void): void 
     category: 'data',
     nodeKind: 'csSqlQuery',
     inputs: [],
-    proOnly: false,
+    proOnly: true,
     defaultData: {
       blockType: 'sqlQuery',
       label: 'SQL Query',

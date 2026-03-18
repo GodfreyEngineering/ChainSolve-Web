@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { AppWindow } from '../ui/AppWindow'
-import type { EngineSnapshotV1 } from '../../engine/types'
+import type { EngineSnapshotV1 } from '../../engine/wasm-types'
 import type { Demonstration } from '../../lib/demonstrationsService'
 
 export const COMMUNITY_WINDOW_ID = 'community'

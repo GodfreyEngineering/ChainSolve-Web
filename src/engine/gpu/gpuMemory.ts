@@ -37,7 +37,7 @@ function poolKey(length: number): string {
   return String(length)
 }
 
-function evictLru(device: GPUDevice) {
+function evictLru(_device: GPUDevice) {
   if (poolTotalBytes <= POOL_MAX_BYTES) return
   // Collect all entries, sort by lastUsed ascending
   const all: Array<{ key: string; entry: PoolEntry; idx: number }> = []

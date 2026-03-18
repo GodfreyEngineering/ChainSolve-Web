@@ -23,14 +23,14 @@ export function registerTableBlocks(register: (def: BlockDef) => void): void {
   })
 
   // 2.7: MatrixInput — 2D numeric array with row/col index headers.
-  // Engine evaluates it as tableInput (reads tableData). Free tier.
+  // Engine evaluates it as tableInput (reads tableData). Pro only (data category).
   register({
     type: 'matrixInput',
     label: 'Matrix Input',
     category: 'data',
     nodeKind: 'csData',
     inputs: [],
-    proOnly: false,
+    proOnly: true,
     defaultData: {
       blockType: 'matrixInput',
       label: 'Matrix',

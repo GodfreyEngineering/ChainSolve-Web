@@ -49,7 +49,7 @@ export function BranchSelector({
   // Close on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as HTMLElement)) {
         setOpen(false)
       }
     }

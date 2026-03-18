@@ -104,7 +104,7 @@ function computeSmartPath(
   allNodes: Node[],
   sourceId: string,
   targetId: string,
-): [string, number, number] {
+): [string, number, number, number, number] {
   // AABB of the connection corridor
   const cMinX = Math.min(sourceX, targetX)
   const cMaxX = Math.max(sourceX, targetX)
@@ -148,7 +148,7 @@ function computeSmartPath(
   // Cubic bezier: control points placed at (sourceX, routeY) and (targetX, routeY)
   // so the curve swings to the routing Y before connecting to both endpoints.
   const d = `M${sourceX},${sourceY} C${sourceX},${routeY} ${targetX},${routeY} ${targetX},${targetY}`
-  return [d, midX, routeY]
+  return [d, midX, routeY, 0, 0]
 }
 
 /** H1-2 + 4.05: Resolve unit mismatch, including inferred units from propagation. */
@@ -178,7 +178,6 @@ function AnimatedEdgeInner({
   source,
   target,
   selected,
-  sourceHandle,
 }: EdgeProps) {
   const sourceValue = useComputedValue(source)
   const { edgeBadgesEnabled } = useCanvasSettings()
@@ -201,6 +200,7 @@ function AnimatedEdgeInner({
   // 3.23: Edge bundling — group edges by (source, sourceHandle) and offset perpendicular.
   const edgeBundlingEnabled = usePreferencesStore((s) => s.edgeBundlingEnabled)
   const allEdges = useEdges()
+  const sourceHandle = allEdges.find((e) => e.id === id)?.sourceHandle
   const { bundleOffset, bundleTotal } = useMemo(() => {
     if (!edgeBundlingEnabled) return { bundleOffset: 0, bundleTotal: 0 }
     // Group siblings: same source node and source handle

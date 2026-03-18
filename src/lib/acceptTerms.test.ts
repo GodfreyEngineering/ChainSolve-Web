@@ -32,10 +32,11 @@ vi.mock('./supabase', () => {
   mockUpdate.mockReturnValue({ eq: mockEq })
   mockGetUser.mockResolvedValue({ data: { user: { id: 'user-42' } } })
 
+  const mockInsert = vi.fn().mockReturnValue(Promise.resolve({ error: null }))
   return {
     supabase: {
       auth: { getUser: mockGetUser },
-      from: vi.fn().mockReturnValue({ update: mockUpdate }),
+      from: vi.fn().mockReturnValue({ update: mockUpdate, insert: mockInsert }),
     },
   }
 })

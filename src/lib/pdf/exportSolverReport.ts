@@ -427,7 +427,7 @@ export async function exportSolverReport(
 
   // ── Serialise and download ─────────────────────────────────────────────────
   const bytes = await doc.save()
-  const blob = new Blob([bytes], { type: 'application/pdf' })
+  const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
   const ts = formatTimestampForFilename(model.timestamp)
   const filename = options.filename ?? `solver-verification-${safeName(model.projectName)}-${ts}.pdf`
   downloadBlob(blob, filename)

@@ -221,13 +221,13 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'eng.conv.lpm_to_m3s': 'Converts litres per minute to cubic metres per second.',
   'eng.conv.m3s_to_lpm': 'Converts cubic metres per second to litres per minute.',
   unit_convert: 'Generic unit conversion. Pick input and output units from any dimension.',
-  'ode.fem2d': '2D FEM Poisson solver: assemble and solve −k∇²u=f on [x0,x1]×[y0,y1] with structured P1 triangular elements. Set rhs (source expression), dirichlet (boundary value expression), nx/ny (mesh density). Returns Table [x, y, u] — post-process with a connected plot or contour block.',
-  'ad.gradCheckpoint': 'Gradient checkpointing (Revolve): compute ODE sensitivities with O(c·s) memory instead of O(N·s). Uses binomial Revolve schedule for optimal checkpoint placement. Returns Table [param_idx, gradient, recomputations].',
-  'ad.customVjp': 'Custom VJP/JVP (JAX-style): define exact gradient rules for custom functions to avoid slow or numerically poor AD. Provide primal_expr, vjp_exprs (per-input cotangents), jvp_expr. Falls back to finite-diff when rules are omitted.',
-  'ad.linSolveSens': 'Implicit differentiation through Ax=b: computes dx/dp for each parameter using the implicit function theorem. No solver internals are differentiated — only one extra linear solve per parameter. Returns Table [param_idx, dx0/dp, dx1/dp, ...].',
-  'ad.odeAdjoint': 'Discrete adjoint ODE sensitivity: computes dJ/dp (gradient of objective J w.r.t. ODE parameters) via reverse-time adjoint equations. Optional checkpointing trades re-computation for memory. Returns Table [param_idx, gradient, objective].',
-  'units.convert': 'Unit converter backed by the engine SI dimension system (80+ units). Connect a Scalar or Vector, set from_unit and to_unit — the block outputs the converted value. Incompatible dimensions return an error.',
-  'units.analyze': 'Dimensional consistency checker. Enter a comma-separated list of unit symbols and the block returns a table with each unit\'s SI scale factor and whether it is consistent with the rest. Use to catch unit mix-ups in calculations.',
+  'ode.fem2d': '2D FEM Poisson solver: solve on [x0,x1]x[y0,y1] with P1 triangular elements. Set rhs, dirichlet, nx/ny. Returns Table [x, y, u]. Post-process with a plot or contour block.',
+  'ad.gradCheckpoint': 'Gradient checkpointing (Revolve): compute ODE sensitivities with O(cs) memory using binomial Revolve schedule. Returns Table [param_idx, gradient, recomputations].',
+  'ad.customVjp': 'Custom VJP/JVP (JAX-style): define exact gradient rules for custom functions. Provide primal_expr, vjp_exprs, jvp_expr. Falls back to finite-diff when rules are omitted.',
+  'ad.linSolveSens': 'Implicit differentiation through Ax=b: computes dx/dp via the implicit function theorem. One extra linear solve per parameter. Returns Table [param_idx, dx0/dp, ...].',
+  'ad.odeAdjoint': 'Discrete adjoint ODE sensitivity: computes dJ/dp via reverse-time adjoint equations. Optional checkpointing. Returns Table [param_idx, gradient, objective].',
+  'units.convert': 'Unit converter (80+ SI units). Connect Scalar or Vector, set from_unit and to_unit. Outputs converted value. Incompatible dimensions return an error.',
+  'units.analyze': "Dimensional consistency checker. Enter comma-separated unit symbols; returns a table with each unit's SI scale factor and consistency flag. Catches unit mix-ups.",
 
   // ── Finance: TVM ──────────────────────────────────────────────────────────
   'fin.tvm.simple_interest': 'Simple interest. I = P*r*t. Principal times rate times time.',
@@ -724,19 +724,19 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'optim.lbfgsb':
     'L-BFGS-B: Limited-memory BFGS with bound constraints. Numerical gradients. Stores m=10 (s,y) pairs. Fastest gradient-based method for smooth problems. Handles box constraints via gradient projection.',
   'optim.cmaes':
-    'CMA-ES: Covariance Matrix Adaptation Evolution Strategy. State-of-the-art gradient-free optimizer. Self-adapts step size and variable correlations. Outperforms genetic algorithms on continuous problems. Auto-selects population size λ = 4+3·ln(n).',
+    'CMA-ES: Covariance Matrix Adaptation Evolution Strategy. Self-adapts step size and variable correlations. State-of-the-art gradient-free optimizer for continuous problems.',
   'optim.trustRegion':
-    'Trust-Region Dogleg: globally convergent second-order optimizer. Adapts trust-region radius each iteration. Combines steepest descent (Cauchy) and Newton steps via the dogleg path. Robust for non-convex problems, uses numerical Hessian.',
+    'Trust-Region Dogleg optimizer. Combines Cauchy and Newton steps via dogleg path; adapts trust-region radius each iteration. Robust for non-convex problems.',
   'optim.sqp':
-    'SQP via Augmented Lagrangian. Handles equality h(x)=0 and inequality g(x)≤0 constraints plus variable bounds. Outer multiplier loop drives feasibility; inner projected gradient descent minimizes the augmented Lagrangian. Specify constraints as expression strings.',
+    'SQP via Augmented Lagrangian with equality h(x)=0 and inequality g(x)<=0 constraints plus bounds. Specify constraints as CSEL expression strings.',
   'optim.uqPce':
-    'Polynomial Chaos Expansion (PCE): fits a truncated polynomial surrogate via OLS regression. Outputs mean, variance, std, R², and Sobol first-order sensitivity indices. Legendre basis for Uniform inputs, Hermite for Gaussian. Supports degree 1–5.',
+    'Polynomial Chaos Expansion: OLS surrogate with Sobol sensitivity indices. Legendre basis for Uniform, Hermite for Gaussian inputs. Outputs mean, variance, std, R2. Supports degrees 1-5.',
   'optim.form':
-    'FORM (First-Order Reliability Method) with HLRF algorithm. Searches for the Most Probable Point (MPP) of failure in standard normal u-space. Outputs reliability index β and failure probability P_f = Φ(-β).',
+    'FORM (First-Order Reliability Method) with HLRF algorithm. Finds the MPP of failure in standard normal space. Outputs reliability index beta and failure probability Pf.',
   'optim.robustDesign':
     'Robust Design: traces a Pareto front of mean vs variance by sweeping robustness weight k. For each k, minimises μ(x) + k·σ(x) using projected gradient descent with Monte Carlo moment estimation.',
   'optim.topologyOpt':
-    'SIMP Topology Optimisation: minimises structural compliance on a 2D cantilever mesh. Uses Q4 bilinear FEM, OC update, and density filtering. Outputs [x, y, density] table for contour/heatmap visualisation of the optimal material distribution.',
+    'SIMP Topology Optimisation: minimises structural compliance on a 2D mesh. Q4 FEM with OC update and density filtering. Outputs [x, y, density] table for contour/heatmap visualisation.',
   'optim.convergencePlot': 'Visualizes optimizer convergence: objective value vs iteration count.',
   'optim.resultsTable':
     'Displays final optimal variable values, objective value, and convergence status.',
@@ -747,21 +747,21 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'optim.sensitivity':
     'Varies each input one at a time while holding others constant. Produces a tornado chart of parameter sensitivity.',
   'optim.responseSurface':
-    'Fit a polynomial or RBF metamodel to DOE results for contour plots and sensitivity analysis. Methods: "linear", "quadratic" (main+squared+interactions), "cubic", "rbf" (Gaussian RBF). Returns coefficient table with R².',
+    'Fit a polynomial or RBF metamodel to DOE results for contour plots and sensitivity. Methods: linear, quadratic, cubic, rbf (Gaussian RBF). Returns coefficient table with R2.',
   'optim.doe':
-    'Generates experiment matrices. Methods: "factorial", "lhs", "sobol", "box_behnken" (3+ factors), "ccc" (Central Composite Circumscribed, rotatable α=(2^k)^0.25), "ccf" (face-centered, fits ±1), "taguchi" (auto-selects L4/L8/L12/L16/L27). Outputs table of configurations.',
+    'Design of Experiments matrix generator. Methods: factorial, lhs, sobol, box_behnken, ccc, ccf, taguchi (L4-L27). Outputs table of experimental configurations.',
   'optim.paramEst':
-    'Fit ODE model parameters to experimental data using Levenberg-Marquardt. Input a table with column "t" and state columns. Configure ODE equations, parameter names, initial/lower/upper bounds. Returns table with estimated parameter values and std_error.',
+    'Fit ODE model parameters to experimental data via Levenberg-Marquardt. Input table with column t and state columns. Returns estimated parameter values and std_error.',
   'optim.bayesian':
-    'Bayesian optimisation with GP (Matérn 5/2) surrogate. n_initial random points warm-up, then maximise acquisition (ei/ucb/pi) to pick next evaluation. EI: Expected Improvement (xi shifts threshold). UCB: mu - kappa*sigma. PI: Probability of Improvement. Outputs convergence table.',
+    'Bayesian optimisation with GP (Matern 5/2) surrogate. Warm-up with n_initial random points, then maximise EI/UCB/PI acquisition. Outputs convergence table.',
   'optim.nsga3':
-    'NSGA-III multi-objective evolutionary algorithm. Reference-direction structured reference points (Das-Dennis lattice) maintain diversity for ≥3 objectives. SBX crossover + polynomial mutation. Configure objectives as semicolon-separated expressions. Returns Pareto front table.',
+    'NSGA-III multi-objective EA: Das-Dennis reference points maintain diversity for 3+ objectives. SBX crossover and polynomial mutation. Returns Pareto front table.',
   'optim.hyperopt':
-    'Bayesian Hyperparameter Optimisation: uses GP surrogate (Matérn 5/2) + Expected Improvement acquisition to find optimal hyperparameter values. Define param_names (semicolon-separated), param_mins, param_maxes, and an objective expression. n_initial warm-up evaluations, then n_trials total. acquisition: "ei"/"ucb"/"pi". Returns trial history table {trial, best_score, param0, ...}.',
+    'Bayesian Hyperparameter Optimisation: GP surrogate + EI/UCB/PI acquisition. Define param_names, param_mins, param_maxes, and objective expression. Returns trial history table.',
   'optim.surrogate':
-    'GP Surrogate (Gaussian Process, Matérn 5/2 kernel): fits a probabilistic surrogate to training data, then predicts mean and uncertainty at query points. Train table: feature columns + last column = target y. Query table: feature columns only. Returns {mean, std}. Tune length_scale (correlation range), sigma_f (signal amplitude), sigma_n (noise level). Ideal for expensive simulations: build surrogate from ~20–200 runs, predict anywhere instantly.',
+    'GP Surrogate (Matern 5/2): fits a probabilistic surrogate to training data, predicts mean and std at query points. Tune length_scale, sigma_f, sigma_n.',
   'optim.automl':
-    'AutoML: automatically selects the best regression model for your data using k-fold cross-validation. Tries: linear regression, polynomial (deg 2), decision tree (depth 5), GP surrogate (n≤200). Returns comparison table {model_idx, cv_rmse, r2, is_best}. model_idx: 0=linear, 1=poly2, 2=decision_tree, 3=gp. Set target_col to specify the target column name (defaults to last column). Use with TrainTestSplit for rigorous evaluation.',
+    'AutoML: selects the best regression model via k-fold CV (linear, poly2, decision tree, GP). Returns comparison table {model_idx, cv_rmse, r2, is_best}.',
 
   // ── Machine Learning (5.06) ─────────────────────────────────────────────
   'ml.trainTestSplit':
@@ -792,13 +792,13 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'nn.predict': 'Runs inference on a trained neural network. Feed new data to get predictions.',
   'nn.export': 'Exports a trained neural network to ONNX format for use in other tools.',
   'nn.lstm':
-    'LSTM (Long Short-Term Memory): processes a time sequence through forget/input/output gates and cell state. Input: Table [T × D]. Output: last hidden state vector or full sequence. Xavier-initialised weights from seed.',
+    'LSTM: processes a time sequence via forget/input/output gates and cell state. Input: Table [TxD]. Output: last hidden state or full sequence. Xavier-initialised.',
   'nn.gru':
-    'GRU (Gated Recurrent Unit): streamlined recurrent layer with reset and update gates. Fewer parameters than LSTM, comparable performance. Input: Table [T × D]. Output: last hidden state or full sequence.',
+    'GRU: recurrent layer with reset and update gates. Fewer parameters than LSTM, comparable performance. Input: Table [TxD]. Output: last hidden state or full sequence.',
   'nn.attention':
     'Scaled dot-product attention: Attention(Q,K,V) = softmax(Q·Kᵀ/√d_k)·V. Supports causal (autoregressive) masking. Use Q=K=V=same sequence for self-attention (Transformer building block).',
   'nn.conv2d':
-    '2D convolutional layer (inference). Input: Matrix or Table (H×W grayscale or flattened HWC tensor). kernel_h×kernel_w filters, configurable stride, padding "valid" or "same". He-initialised. Output: Matrix [out_h*out_w × n_filters].',
+    '2D convolutional layer. Input: Matrix or Table (HxW or HWC). kernel_h x kernel_w filters, stride, padding valid/same. He-init. Output: Matrix [out_h*out_w x n_filters].',
   // Symbolic Math (CAS)
   'sym.differentiate':
     'Symbolic differentiation: computes d(expr)/d(var) using chain rule, product rule, and standard function derivatives. Returns a LaTeX string. Simplifies the result automatically.',
@@ -811,34 +811,34 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'sym.substitute':
     'Substitutes a numeric value for a named variable in a symbolic expression, then simplifies. Useful for evaluating symbolic expressions at a point. Returns a LaTeX string.',
   'sym.expressionInput':
-    'Symbolic Expression Input: parse a mathematical expression string via the CAS and output it as a LaTeX string. Type expressions like "x^2 + sin(x)", "e^(-x^2/2)", or "a*cos(omega*t + phi)". The output connects directly to Differentiate, Integrate, Simplify, Substitute, and other symbolic blocks. Acts as a source node with no input ports.',
+    'Symbolic expression input: parse a math string via CAS, output as LaTeX. Connects to Differentiate, Integrate, Simplify, Substitute, and other CAS blocks. No input ports.',
   'ad.mixedJacobian':
-    'Mixed-Mode Automatic Differentiation: computes the exact Jacobian of a vector function using dual-number forward-mode AD. Automatically reports whether forward or reverse mode was selected based on the input/output dimension ratio (threshold). expressions: comma-separated output expressions (e.g. "x*y, x^2+y"). var_names: comma-separated variable names. Connect Vector port x or set x field. Returns Jacobian table where row i contains ∂f_i/∂x_j for all j.',
+    'Mixed-Mode AD: computes the exact Jacobian using dual-number forward AD. Auto-selects forward/reverse mode by input/output dimension ratio. Returns Jacobian table.',
   'sym.compiledEval':
-    'Compiled expression evaluator: pre-parses the formula into an AST once, then evaluates without re-parsing on each call. Significantly faster than repeated eval_expr() in tight loops (e.g., ODE steps, Monte Carlo). Set expr in data, connect input ports with variable names. Also used internally by ODE solvers to JIT-compile equation strings.',
+    'Compiled expression evaluator: pre-parses formula to AST for fast repeated evaluation. Faster than eval_expr() in tight loops (ODE steps, Monte Carlo).',
   'sym.groebner':
-    'Gröbner Basis: Buchberger\'s algorithm with coprime and chain criteria for efficiency, followed by auto-reduction to a reduced Gröbner basis. Input "polynomials" as semicolon-separated expressions (e.g. "x^2+y-1;x+y^2-1"), set "variables" (comma-separated). mode="basis" returns the basis polynomials as text; mode="solve" attempts to find numeric solutions for zero-dimensional ideals. order: "grevlex" (fastest, standard), "lex" (elimination, triangular output), "grlex".',
+    "Groebner Basis (Buchberger): auto-reduced basis for polynomial systems. Input: semicolon-separated polynomials, variables. Modes: basis/solve; orders: grevlex/lex/grlex.",
   // ODE Solvers
   'ode.rk4':
     'Solve a system of ODEs using the classic 4th-order Runge-Kutta method. Output = table of time vs state variables.',
   'ode.rk45':
     'Solve ODEs using the Dormand-Prince adaptive-step method. Automatically adjusts step size for accuracy.',
   'ode.event':
-    'Solve ODEs with zero-crossing event detection. When event_expr g(y,t) changes sign, bisection refines the exact crossing time. Use for impact problems (ball hitting ground), switch events, or trajectory termination.',
+    'ODE solver with zero-crossing event detection. Bisection refines the exact crossing time when event_expr changes sign. Use for impact, switch, or termination events.',
   'ode.steady_state':
-    'Find the steady-state equilibrium y* of dy/dt = f(y) where f(y*) = 0. Newton-Raphson with numerical Jacobian. Ideal for finding operating points of control systems, chemical equilibria, or any autonomous ODE.',
+    'Find ODE steady-state y* where f(y*)=0 via Newton-Raphson with numerical Jacobian. Ideal for control operating points, chemical equilibria, or autonomous ODEs.',
   'ode.symplectic':
-    'Solve a Hamiltonian system using a symplectic integrator (Störmer-Verlet or Symplectic Euler). Conserves energy exactly over long integrations. Ideal for orbital mechanics, molecular dynamics, pendulums.',
+    'Symplectic integrator (Stormer-Verlet) for Hamiltonian systems. Conserves energy over long runs. Ideal for orbital mechanics, molecular dynamics, and pendulums.',
   'ode.daeIndexReduction':
-    'Pantelides index reduction: structural analysis of a DAE system. Builds a bipartite incidence graph (equations × variables), finds maximum matching, and detects which algebraic constraint equations need differentiation to reduce to index-1 form. Reports structural_index (1=already index-1, 2+=high-index), diff_count per constraint. Pair with DAE Solver for full simulation.',
+    'Pantelides index reduction: bipartite-graph structural analysis of a DAE. Detects high-index constraints needing differentiation. Reports structural_index and diff_count.',
   'ode.dae':
-    'Solve a differential-algebraic equation (DAE) system. Differential equations: dy_i/dt = f_i(t,y,z). Algebraic constraints: g_j(t,y,z)=0. Index-1 via BDF-2 + Newton iteration. Consistent initialisation refines z0 automatically before integration.',
+    'DAE solver: differential equations dy/dt=f(t,y,z) plus algebraic constraints g(t,y,z)=0. BDF-2 + Newton iteration with automatic consistent initialisation.',
   'ode.bdf':
-    'Solve a stiff ODE system using Backward Differentiation Formulas (BDF orders 1–5). BDF methods are A-stable and well-suited for chemical kinetics, thermal systems, and other stiff problems. Uses Newton iteration with finite-difference Jacobian. Set order (1–5) in block data.',
+    'Stiff ODE solver using BDF orders 1-5 (A-stable). Suited for chemical kinetics and thermal systems. Newton iteration with finite-difference Jacobian.',
   'ode.radau':
-    'Solve a stiff ODE system using the 3-stage Radau IIA implicit Runge-Kutta method (order 5). L-stable: damps spurious oscillations. Excellent for very stiff problems and problems with discontinuities. Uses Newton iteration at each step.',
+    'Radau IIA stiff ODE solver (3-stage, order 5, L-stable). Damps spurious oscillations. Excellent for very stiff problems and problems with discontinuities.',
   'ode.pde1d':
-    'Solve a 1D PDE via Method of Lines. pde_type: "heat" (D·u_xx), "advection" (-c·u_x), "advection_diffusion" (-c·u_x+D·u_xx), "wave" (c²·u_xx). BCs: "dirichlet:VALUE" or "neumann". Output: table with columns t, x0..xN.',
+    '1D PDE via Method of Lines. Types: heat, advection, advection_diffusion, wave. BCs: dirichlet:VALUE or neumann. Output: table with columns t, x0..xN.',
   // Vehicle Simulation
   'veh.tire.lateralForce': 'Pacejka Magic Formula lateral tire force Fy from slip angle.',
   'veh.tire.longForce': 'Pacejka Magic Formula longitudinal tire force Fx from slip ratio.',
@@ -879,4 +879,73 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'ml.classMetrics': 'Compute precision, recall, and F1 score for binary classification.',
   'ml.rocCurve': 'Generate ROC curve (FPR vs TPR) by sweeping classification threshold.',
   'ml.auc': 'Area Under the ROC Curve — measures classifier discrimination ability.',
+
+  // ── Additional Plot Blocks ────────────────────────────────────────────────
+  bodePlot: 'Bode plot: frequency response magnitude and phase of a transfer function or data.',
+  nyquistPlot: 'Nyquist plot: complex frequency response on the real/imaginary plane for stability analysis.',
+  boxPlot: 'Box-and-whisker plot showing median, quartiles, and outliers for a dataset.',
+  violinPlot: 'Violin plot: kernel density estimate of data distribution with embedded box plot.',
+  parallelCoords: 'Parallel coordinates chart for visualising high-dimensional data and multi-objective results.',
+  contourPlot: 'Contour (level-curve) plot of a 2D scalar field from a mesh or table.',
+  waterfallPlot: 'Waterfall chart: cumulative stacked bars for financial or sequential delta visualisation.',
+  paretoPlot: 'Pareto front plot for multi-objective optimisation results with dominated/non-dominated points.',
+  sankeyPlot: 'Sankey flow diagram visualising material, energy, or information flows between nodes with proportional-width links.',
+  surfacePlot: '3D surface plot with interactive rotation. Rows and columns define the mesh; cell values are rendered as z heights.',
+
+  // ── Control Blocks ────────────────────────────────────────────────────────
+  'ctrl.saturation': 'Saturate a signal between lower and upper bounds. Maps to clamp op.',
+  'ctrl.switch': 'Switch between two inputs based on a boolean condition. Maps to ifthenelse op.',
+  'ctrl.mux': 'Multiplex several scalar inputs into a vector. Maps to vectorConcat op.',
+  'ctrl.deadZone': 'Dead-zone element: outputs zero within ±threshold, passes signal outside.',
+  'ctrl.zoh': 'Zero-order hold: samples input at each evaluation and holds until next tick.',
+  'ctrl.rateTransition': 'Rate transition: resample a signal from one update rate to another.',
+
+  // ── Neural Network Blocks ─────────────────────────────────────────────────
+  'nn.transferLearn': 'Fine-tune a pre-trained neural network on new data with frozen or trainable layers.',
+  'nn.neuralOp': 'Fourier Neural Operator layer for learning mappings on function spaces.',
+  'nn.pinn': 'Physics-Informed Neural Network: minimise PDE residuals and boundary conditions.',
+  'nn.onnxExport': 'Export a trained neural network to ONNX format for cross-platform deployment.',
+  'nn.onnxInference': 'Run ONNX model inference in the browser using onnxruntime-web.',
+
+  // ── Testing & Utilities ────────────────────────────────────────────────────
+  testBlock: 'Test probe block for unit testing graph outputs. Maps to display op.',
+  assertion: 'Assert that a computed value satisfies a condition. Throws on failure.',
+  wsInput: 'Receive real-time data from a WebSocket connection into the graph.',
+  restInput: 'Fetch data from an HTTP REST endpoint and inject it into the graph.',
+  scope: 'Ring-buffer oscilloscope: displays a scrolling time-window of a live signal.',
+  timer: 'Elapsed-time metrics block: measures and displays graph evaluation timing.',
+  logger: 'Data logger: records a signal over time to a table for export or analysis.',
+  mathSheet: 'Spreadsheet-style formula sheet: compute named cells using CSEL expressions.',
+  stateMachine: 'Finite state machine: define states, transitions, and actions in a visual editor.',
+  codeBlock: 'Execute custom JavaScript inside the graph. Inputs and outputs wired to ports.',
+
+  // ── Data Import / Export ─────────────────────────────────────────────────
+  fileInput: 'Import CSV, Excel, or JSON data from a local file into a DataTable.',
+  parquet_import: 'Read a Parquet columnar data file into a DataTable.',
+  parquet_export: 'Export a DataTable to Parquet columnar file format for downstream analytics.',
+  sqlQuery: 'Run a read-only SQL query against the project database and return results as a table.',
+  timeSeries: 'Load, parse, and resample multi-channel time-series data from CSV or clipboard.',
+  tirFileInput: 'Import Pacejka Magic Formula .tir tire parameter files for vehicle simulation.',
+  'data.hdf5Import': 'Read datasets from an HDF5 (.h5) file using h5wasm. Returns named Float64 arrays.',
+  'data.hdf5Export': 'Write arrays and tables to an HDF5 (.h5) file using h5wasm.',
+  'data.stepImport': 'Import STEP/IGES CAD geometry and extract mass properties or mesh data.',
+  'data.openDriveImport': 'Import OpenDRIVE (.xodr) road network files for vehicle path planning and simulation.',
+
+  // ── Inputs & UI ────────────────────────────────────────────────────────────
+  unitInput: 'Number input with SI unit annotation and automatic conversion factor output.',
+
+  // ── Control System Blocks ─────────────────────────────────────────────────
+  transferFunction: 'Continuous-time LTI transfer function: Bode/step/impulse response in the UI.',
+  stateSpace: 'Continuous-time state-space model (A, B, C, D matrices) with time/frequency response.',
+
+  // ── 3D & Visualisation ────────────────────────────────────────────────────
+  viewport3d: '3D viewport: render meshes, point clouds, or geometry from upstream blocks.',
+
+  // ── FMU ──────────────────────────────────────────────────────────────────
+  'fmu.import': 'Import and co-simulate a Functional Mock-up Unit (FMU v2.0) model.',
+  'fmu.export': 'Export a ChainSolve sub-graph as an FMU for use in external simulators.',
+
+  // ── Scripting ─────────────────────────────────────────────────────────────
+  'scripting.python': 'Execute Python code via Pyodide (in-browser WASM). Full NumPy/SciPy access.',
+  'scripting.rust': 'Compile and run custom Rust code server-side via the ChainSolve build service.',
 }

@@ -273,7 +273,6 @@ function TimeSeriesNodeInner({ id, data, selected }: NodeProps) {
       })
 
       // Fix: resample all at once per column for efficiency
-      const timeRow: number[] = grid
       const colRows: number[][] = parsed.signalColumns.map((_, ci) =>
         resampleColumn(parsed.times, parsed.signalData[ci], grid, resampleMethod),
       )

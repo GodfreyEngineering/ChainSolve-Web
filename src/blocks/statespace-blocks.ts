@@ -25,7 +25,7 @@ export function registerStateSpaceBlocks(register: (def: BlockDef) => void): voi
     label: 'State Space',
     category: 'controlSystems',
     nodeKind: 'csStateSpace',
-    inputs: ['u'],
+    inputs: [{ id: 'u', label: 'Input' }],
     proOnly: false,
     defaultData: {
       blockType: 'stateSpace',

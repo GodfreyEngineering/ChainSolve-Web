@@ -202,7 +202,7 @@ export function cselToLatex(program: CselProgram): string {
  * Convert a single CSEL expression string to LaTeX.
  * Returns `null` on parse error.
  */
-export function expressionToLatex(expr: string): string | null {
+export function expressionToLatex(_expr: string): string | null {
   // Dynamic import avoided — caller passes pre-parsed program if available.
   // For direct use, expose via the formula bar which already has the parser.
   // This is the raw single-node generator.

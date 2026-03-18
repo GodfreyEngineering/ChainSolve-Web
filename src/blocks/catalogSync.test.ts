@@ -47,7 +47,20 @@ registerAllBlocks()
 // 4.7: data.hdf5Import is remapped to 'tableInput' in bridge.ts; HDF5 parsing runs in the UI via h5wasm.
 // 4.11: data.stepImport is remapped to 'tableInput' in bridge.ts; STEP/IGES parsing runs in the UI.
 // 4.15: data.openDriveImport is remapped to 'tableInput' in bridge.ts; .xodr parsing runs in the UI.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput', 'sqlQuery', 'timeSeries', 'unitInput', 'transferFunction', 'stateSpace', 'ctrl.zoh', 'ctrl.rateTransition', 'stateMachine', 'codeBlock', 'tirFileInput', 'viewport3d', 'nn.onnxInference', 'fmu.import', 'scripting.python', 'scripting.rust', 'data.hdf5Import', 'data.stepImport', 'data.openDriveImport'])
+const UI_ONLY_BLOCKS = new Set([
+  'constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion',
+  'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet',
+  'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux',
+  'fileInput', 'sqlQuery', 'timeSeries', 'unitInput',
+  'transferFunction', 'stateSpace', 'ctrl.zoh', 'ctrl.rateTransition',
+  'stateMachine', 'codeBlock', 'tirFileInput', 'viewport3d', 'nn.onnxInference',
+  'fmu.import', 'scripting.python', 'scripting.rust',
+  'data.hdf5Import', 'data.stepImport', 'data.openDriveImport',
+  // Visualization/plot blocks rendered entirely in the UI:
+  'matrixInput', 'bodePlot', 'nyquistPlot', 'boxPlot', 'violinPlot',
+  'parallelCoords', 'contourPlot', 'waterfallPlot', 'paretoPlot',
+  'parquet_import', 'parquet_export',
+])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.
@@ -77,8 +90,10 @@ describe('Catalog ↔ Registry sync (F6-1)', () => {
   for (const [type] of BLOCK_REGISTRY) {
     if (!UI_ONLY_BLOCKS.has(type)) tsOps.add(type)
   }
-  // Active Rust ops: exclude deprecated ones removed from TS registry
-  const activeRustOps = new Set([...rustOps].filter((op) => !DEPRECATED_RUST_OPS.has(op)))
+  // Active Rust ops: exclude deprecated and UI-only (which have no matching TS registry entry)
+  const activeRustOps = new Set(
+    [...rustOps].filter((op) => !DEPRECATED_RUST_OPS.has(op) && !UI_ONLY_BLOCKS.has(op)),
+  )
 
   it('Rust catalog has ops', () => {
     expect(rustOps.size).toBeGreaterThan(100)

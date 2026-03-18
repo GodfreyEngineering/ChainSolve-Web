@@ -12,7 +12,7 @@
  *   - Refresh from Supabase
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRunsForProject, deleteRun } from '../../lib/experiments.ts'
 import type { ExperimentRun } from '../../lib/experiments.ts'
@@ -198,7 +198,7 @@ interface ExperimentPanelProps {
 
 export function ExperimentPanel({ projectId }: ExperimentPanelProps) {
   const { t } = useTranslation()
-  const { plan } = usePlanContext()
+  const plan = usePlanContext()
   const [runs, setRuns] = useState<ExperimentRun[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)

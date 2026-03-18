@@ -100,7 +100,7 @@ export async function createRun(input: CreateRunInput): Promise<ExperimentRun> {
     params:     input.params ?? {},
     tags:       input.tags ?? [],
     notes:      input.notes ?? null,
-    status:     'running',
+    status:     'running' as const,
   }
 
   const { data, error } = await supabase

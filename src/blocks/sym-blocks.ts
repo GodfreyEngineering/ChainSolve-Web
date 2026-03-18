@@ -145,6 +145,8 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [],
     defaultData: {
+      blockType: 'ad.gradCheckpoint',
+      label: 'Gradient Checkpointing',
       equations: '-k*y0',
       param_names: 'k',
       objective: '0.5*y0^2',
@@ -171,6 +173,8 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
       { id: 't', label: 'Tangent (JVP)' },
     ],
     defaultData: {
+      blockType: 'ad.customVjp',
+      label: 'Custom VJP/JVP Rule',
       var_names: 'x',
       primal_expr: 'x^2',
       vjp_exprs: '2*x*v',
@@ -190,6 +194,8 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [],
     defaultData: {
+      blockType: 'ad.linSolveSens',
+      label: 'Linear Solve Sensitivity',
       A_exprs: 'k;0;0;1',
       b_exprs: '1;1',
       param_names: 'k',
@@ -209,6 +215,8 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [],
     defaultData: {
+      blockType: 'ad.odeAdjoint',
+      label: 'ODE Adjoint Sensitivity',
       equations: '-k*y0',
       param_names: 'k',
       objective: '0.5*y0^2',

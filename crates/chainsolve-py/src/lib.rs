@@ -49,7 +49,7 @@
 
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::{PyComplex, PyDict, PyList};
 use std::collections::HashMap;
 
 use engine_core::types::{EvalResult, Value};
@@ -61,42 +61,40 @@ pyo3::create_exception!(chainsolve, SnapshotError, pyo3::exceptions::PyException
 
 // ── Value → Python conversion ─────────────────────────────────────────────────
 
-fn value_to_py(py: Python<'_>, v: &Value) -> PyResult<PyObject> {
+fn value_to_py<'py>(py: Python<'py>, v: &Value) -> PyResult<Bound<'py, PyAny>> {
     match v {
-        Value::Scalar { value } => Ok((*value).into_py(py)),
+        Value::Scalar { value } => Ok((*value).into_pyobject(py)?.into_any()),
         Value::Vector { value } => {
-            let list = PyList::new_bound(py, value.iter().copied());
-            Ok(list.into())
+            Ok(PyList::new(py, value.iter().copied())?.into_any())
         }
         Value::Matrix { rows, cols, data } => {
-            let d = PyDict::new_bound(py);
+            let d = PyDict::new(py);
             d.set_item("rows", *rows)?;
             d.set_item("cols", *cols)?;
-            d.set_item("data", PyList::new_bound(py, data.iter().copied()))?;
-            Ok(d.into())
+            d.set_item("data", PyList::new(py, data.iter().copied())?)?;
+            Ok(d.into_any())
         }
-        Value::Text { value } => Ok(value.clone().into_py(py)),
+        Value::Text { value } => Ok(value.clone().into_pyobject(py)?.into_any()),
         Value::Error { message } => Err(EvalError::new_err(message.clone())),
         Value::Interval { lo, hi } => {
-            let d = PyDict::new_bound(py);
+            let d = PyDict::new(py);
             d.set_item("lo", *lo)?;
             d.set_item("hi", *hi)?;
-            Ok(d.into())
+            Ok(d.into_any())
         }
         Value::Complex { re, im } => {
-            let c = pyo3::types::PyComplex::from_doubles_bound(py, *re, *im);
-            Ok(c.into())
+            Ok(PyComplex::from_doubles(py, *re, *im).into_any())
         }
-        Value::HighPrecision { display, .. } => Ok(display.clone().into_py(py)),
+        Value::HighPrecision { display, .. } => Ok(display.clone().into_pyobject(py)?.into_any()),
         Value::Table { columns, rows } => {
-            let d = PyDict::new_bound(py);
-            d.set_item("columns", PyList::new_bound(py, columns.iter()))?;
-            let rows_list = PyList::empty_bound(py);
+            let d = PyDict::new(py);
+            d.set_item("columns", PyList::new(py, columns.iter())?)?;
+            let rows_list = PyList::empty(py);
             for row in rows {
-                rows_list.append(PyList::new_bound(py, row.iter().copied()))?;
+                rows_list.append(PyList::new(py, row.iter().copied())?)?;
             }
             d.set_item("rows", rows_list)?;
-            Ok(d.into())
+            Ok(d.into_any())
         }
     }
 }
@@ -120,7 +118,7 @@ struct PyEvalResult {
 impl PyEvalResult {
     /// Return a dict mapping node IDs to their Python-typed values.
     fn values<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
-        let d = PyDict::new_bound(py);
+        let d = PyDict::new(py);
         for (k, v) in &self.result.values {
             match value_to_py(py, v) {
                 Ok(pv) => d.set_item(k, pv)?,
@@ -149,10 +147,10 @@ impl PyEvalResult {
     }
 
     /// Return the vector value for a node ID as a list[float].
-    fn vector(&self, py: Python<'_>, node_id: &str) -> PyResult<PyObject> {
+    fn vector<'py>(&self, py: Python<'py>, node_id: &str) -> PyResult<Bound<'py, PyAny>> {
         match self.result.values.get(node_id) {
             Some(Value::Vector { value }) => {
-                Ok(PyList::new_bound(py, value.iter().copied()).into())
+                Ok(PyList::new(py, value.iter().copied())?.into_any())
             }
             Some(Value::Error { message }) => Err(EvalError::new_err(message.clone())),
             Some(_) => Err(PyValueError::new_err(format!(
@@ -170,10 +168,10 @@ impl PyEvalResult {
     fn matrix<'py>(&self, py: Python<'py>, node_id: &str) -> PyResult<Bound<'py, PyDict>> {
         match self.result.values.get(node_id) {
             Some(Value::Matrix { rows, cols, data }) => {
-                let d = PyDict::new_bound(py);
+                let d = PyDict::new(py);
                 d.set_item("rows", *rows)?;
                 d.set_item("cols", *cols)?;
-                d.set_item("data", PyList::new_bound(py, data.iter().copied()))?;
+                d.set_item("data", PyList::new(py, data.iter().copied())?)?;
                 Ok(d)
             }
             Some(Value::Error { message }) => Err(EvalError::new_err(message.clone())),
@@ -202,7 +200,7 @@ impl PyEvalResult {
             .iter()
             .map(|d| format!("{:?}", d))
             .collect();
-        Ok(PyList::new_bound(py, msgs))
+        Ok(PyList::new(py, msgs)?)
     }
 
     fn __repr__(&self) -> String {
@@ -344,8 +342,8 @@ fn chainsolve(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyEvalResult>()?;
     m.add_function(wrap_pyfunction!(execute_json, m)?)?;
     m.add_function(wrap_pyfunction!(version, m)?)?;
-    m.add("EvalError", m.py().get_type_bound::<EvalError>())?;
-    m.add("SnapshotError", m.py().get_type_bound::<SnapshotError>())?;
+    m.add("EvalError", m.py().get_type::<EvalError>())?;
+    m.add("SnapshotError", m.py().get_type::<SnapshotError>())?;
     Ok(())
 }
 

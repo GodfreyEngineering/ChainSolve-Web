@@ -90,14 +90,14 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
   const TypeIcon = getNodeTypeIcon(nd.blockType)
 
   // Read all input values (up to 8 vars for perf)
-  const in0 = useComputedValue(id, `var_${codeVars[0]?.name ?? 'x'}`)
-  const in1 = useComputedValue(id, `var_${codeVars[1]?.name ?? 'y'}`)
-  const in2 = useComputedValue(id, `var_${codeVars[2]?.name ?? '_z'}`)
-  const in3 = useComputedValue(id, `var_${codeVars[3]?.name ?? '_w'}`)
-  const in4 = useComputedValue(id, `var_${codeVars[4]?.name ?? '_v0'}`)
-  const in5 = useComputedValue(id, `var_${codeVars[5]?.name ?? '_v1'}`)
-  const in6 = useComputedValue(id, `var_${codeVars[6]?.name ?? '_v2'}`)
-  const in7 = useComputedValue(id, `var_${codeVars[7]?.name ?? '_v3'}`)
+  const in0 = useComputedValue(id)
+  const in1 = useComputedValue(id)
+  const in2 = useComputedValue(id)
+  const in3 = useComputedValue(id)
+  const in4 = useComputedValue(id)
+  const in5 = useComputedValue(id)
+  const in6 = useComputedValue(id)
+  const in7 = useComputedValue(id)
 
   const inputRefs = [in0, in1, in2, in3, in4, in5, in6, in7]
 

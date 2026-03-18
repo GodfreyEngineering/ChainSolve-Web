@@ -229,7 +229,7 @@ function StateSpaceNodeInner({ id, data, selected }: NodeProps) {
     return { A, B, C, D, valid, n, eigenVals, ctrlRank, obsRank }
   }, [matA, matB, matC, matD])
 
-  const { timeVec, outVec } = useMemo(() => {
+  const { timeVec: _timeVec, outVec } = useMemo(() => {
     if (!valid) return { timeVec: [], outVec: [] }
     if (outputMode === 'eigen') return { timeVec: [], outVec: [] }
 

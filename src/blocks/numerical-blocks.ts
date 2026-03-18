@@ -329,6 +329,8 @@ export function registerNumericalBlocks(register: (def: BlockDef) => void): void
     nodeKind: 'csOperation',
     inputs: [],
     defaultData: {
+      blockType: 'ode.fem2d',
+      label: '2D FEM Solver',
       x0: 0,
       x1: 1,
       y0: 0,

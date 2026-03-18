@@ -21,7 +21,6 @@ export function registerViewport3DBlocks(register: (def: BlockDef) => void): voi
     category: 'visualization',
     nodeKind: 'csViewport3D',
     inputs: [{ id: 'mesh', label: 'Mesh' }],
-    outputs: [],
     defaultData: {
       blockType: 'viewport3d',
       label: '3D Viewport',

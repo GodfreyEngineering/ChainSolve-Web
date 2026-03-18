@@ -117,8 +117,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 STABLE
-SECURITY DEFINER
-SET search_path = public
+SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
   RETURN QUERY

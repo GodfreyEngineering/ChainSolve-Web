@@ -55,7 +55,18 @@ describe('Pro feature gating', () => {
 
   it('no Free-category block has proOnly: true (except known Pro upgrades)', () => {
     // BUG-12: material (unified full) is Pro-only but lives in presetMaterials (free category)
-    const KNOWN_PRO_IN_FREE_CATEGORY = new Set(['material'])
+    // scripting.rust: Pro-only (server-side compilation) but lives in customFunctions (free category)
+    // nn.transferLearn, nn.neuralOp, nn.pinn, nn.onnxExport: Pro-only advanced NN blocks in neuralNetworks (free category)
+    // scripting.python: Pro-only (Pyodide worker) but lives in customFunctions (free category)
+    const KNOWN_PRO_IN_FREE_CATEGORY = new Set([
+      'material',
+      'scripting.rust',
+      'nn.transferLearn',
+      'nn.neuralOp',
+      'nn.pinn',
+      'nn.onnxExport',
+      'scripting.python',
+    ])
     const wrongly: string[] = []
     for (const def of BLOCK_REGISTRY.values()) {
       if (

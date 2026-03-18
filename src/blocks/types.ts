@@ -60,6 +60,8 @@ export type BlockCategory =
   | 'odeSolvers'
   | 'vehicleSim'
   | 'numerical'
+  | 'simulation'
+  | 'visualization'
 
 /** Which React Flow custom-node renderer to use. */
 export type NodeKind =
@@ -202,8 +204,8 @@ export interface NodeData extends Record<string, unknown> {
   /** For Number + Slider + Display passthrough value. */
   value?: number
   /** Slider range. */
-  min?: number
-  max?: number
+  min?: number | null
+  max?: number | null
   step?: number
   /**
    * Per-port manual values for operation nodes.
@@ -229,7 +231,7 @@ export interface NodeData extends Record<string, unknown> {
   /** Vector data for vectorInput nodes. */
   vectorData?: number[]
   /** Table data for tableInput / csvImport nodes. */
-  tableData?: { columns: string[]; rows: number[][] }
+  tableData?: { columns: string[]; rows: number[][] } | null
   /** SHA-256 hex digest of the imported dataset content (4.22 — reproducibility). */
   datasetHash?: string
   /** Storage path of an uploaded CSV file. */

@@ -77,8 +77,7 @@ CREATE INDEX IF NOT EXISTS demonstrations_tags_idx
 CREATE OR REPLACE FUNCTION public.demonstrations_update_search_vector()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
+SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
   NEW.search_vector :=
@@ -100,8 +99,7 @@ CREATE TRIGGER set_demonstrations_search_vector
 CREATE OR REPLACE FUNCTION public.demonstrations_set_updated_at()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
+SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
   NEW.updated_at = now();
@@ -156,8 +154,7 @@ CREATE OR REPLACE FUNCTION public.search_demonstrations(
 RETURNS SETOF public.demonstrations
 LANGUAGE sql
 STABLE
-SECURITY DEFINER
-SET search_path = public
+SECURITY DEFINER SET search_path = public
 AS $$
   SELECT *
   FROM   public.demonstrations
@@ -183,8 +180,7 @@ GRANT EXECUTE ON FUNCTION public.search_demonstrations(text, text[], integer, in
 CREATE OR REPLACE FUNCTION public.increment_demonstration_view(demo_id uuid)
 RETURNS void
 LANGUAGE sql
-SECURITY DEFINER
-SET search_path = public
+SECURITY DEFINER SET search_path = public
 AS $$
   UPDATE public.demonstrations
   SET    view_count = view_count + 1

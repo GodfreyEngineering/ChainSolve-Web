@@ -71,6 +71,8 @@ const VALID_CATEGORIES: BlockCategory[] = [
   'odeSolvers',
   'vehicleSim',
   'numerical',
+  'simulation',
+  'visualization',
 ]
 
 const VALID_NODE_KINDS: NodeKind[] = [
@@ -109,6 +111,13 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csCodeBlock',
   'csTirFileInput',
   'csViewport3D',
+  'csOnnxInference',
+  'csFmuImport',
+  'csPythonScript',
+  'csCustomRust',
+  'csHdf5Import',
+  'csCADImport',
+  'csOpenDrive',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {

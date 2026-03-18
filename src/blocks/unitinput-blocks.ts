@@ -23,6 +23,8 @@ export function registerUnitInputBlocks(register: (def: BlockDef) => void): void
     inputs: [{ id: 'value', label: 'Value' }],
     proOnly: false,
     defaultData: {
+      blockType: 'units.convert',
+      label: 'Unit Converter',
       from_unit: 'm',
       to_unit: 'km',
     },
@@ -38,6 +40,8 @@ export function registerUnitInputBlocks(register: (def: BlockDef) => void): void
     inputs: [],
     proOnly: false,
     defaultData: {
+      blockType: 'units.analyze',
+      label: 'Unit Analyser',
       units: 'kg, m, s',
     },
     synonyms: ['unit', 'dimension', 'analyse', 'analyze', 'consistency', 'SI'],

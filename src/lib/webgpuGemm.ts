@@ -136,8 +136,8 @@ export async function gpuGemm(
     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
   })
 
-  device.queue.writeBuffer(bufA, 0, A)
-  device.queue.writeBuffer(bufB, 0, B)
+  device.queue.writeBuffer(bufA, 0, A.buffer as ArrayBuffer, A.byteOffset, A.byteLength)
+  device.queue.writeBuffer(bufB, 0, B.buffer as ArrayBuffer, B.byteOffset, B.byteLength)
 
   // Uniform dims buffer: M, K, N, pad
   const dimsData = new Uint32Array([M, K, N, 0])

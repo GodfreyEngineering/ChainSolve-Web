@@ -25,7 +25,7 @@ export function registerFileInputBlocks(register: (def: BlockDef) => void): void
     category: 'data',
     nodeKind: 'csFileInput',
     inputs: [],
-    proOnly: false,
+    proOnly: true,
     defaultData: {
       blockType: 'fileInput',
       label: 'File Input',

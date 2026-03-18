@@ -384,7 +384,7 @@ function MathSheetNodeInner({ id, data, selected }: NodeProps) {
         {/* Variable labels */}
         {sheetVars.length > 0 && (
           <div style={{ marginBottom: 4 }}>
-            {sheetVars.map((v, vi) => {
+            {sheetVars.map((v, _vi) => {
               const portId = `var_${v.name}`
               const edge = edges.find((e) => e.target === id && e.targetHandle === portId)
               const val = edge ? (varValues[v.name] ?? '—') : '—'

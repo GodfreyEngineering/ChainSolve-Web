@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import type { Node, Edge } from '@xyflow/react'
 import type { CollabUser, CollabSession } from '../lib/collaboration'
-import { getSupabaseClient } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 
 export interface UseCollaborationOptions {
   canvasId: string
@@ -52,7 +52,6 @@ export function useCollaboration(opts: UseCollaborationOptions): UseCollaboratio
 
     const init = async () => {
       const { createCollaborationSession } = await import('../lib/collaboration')
-      const supabase = getSupabaseClient()
       if (cancelled) return
 
       const session = createCollaborationSession(supabase, canvasId, userId, {

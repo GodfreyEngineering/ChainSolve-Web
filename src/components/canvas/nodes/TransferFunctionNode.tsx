@@ -111,7 +111,6 @@ function rk4Step(
   u: number,
   dt: number,
 ): number[] {
-  const n = x.length
   const f = (xx: number[]): number[] =>
     xx.map((_, i) => A[i].reduce((s, a, j) => s + a * xx[j], 0) + B[i] * u)
 
@@ -229,7 +228,7 @@ function TFNodeInner({ id, data, selected }: NodeProps) {
   const TypeIcon = getNodeTypeIcon(nd.blockType)
 
   // Compute response
-  const { timeVec, outVec, freqVec, magVec, phaseVec, isValid } = useMemo(() => {
+  const { timeVec: _timeVec, outVec, freqVec: _freqVec, magVec, phaseVec: _phaseVec, isValid } = useMemo(() => {
     if (den.length === 0 || den.every((d) => d === 0)) {
       return { timeVec: [], outVec: [], freqVec: [], magVec: [], phaseVec: [], isValid: false }
     }

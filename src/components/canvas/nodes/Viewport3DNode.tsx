@@ -257,7 +257,7 @@ function Viewport3DNodeInner({ id, data, selected }: NodeProps) {
   const { t } = useTranslation()
   const nd = data as Vp3dNodeData
   const { updateNodeData } = useReactFlow()
-  const meshInput = useComputedValue(id, 'mesh')
+  const meshInput = useComputedValue(id)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [az, setAz] = useState(nd.vp3dAzimuth ?? 45)

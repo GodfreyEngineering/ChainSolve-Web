@@ -708,9 +708,10 @@ function buildSpec(
       const annotated = pts.map((row, i) => ({ ...row, _pareto: isPareto[i] }))
 
       // Pareto front points sorted by xField for staircase line
-      const frontPts = annotated
+      type AnnotatedRow = Record<string, unknown> & { _pareto: boolean }
+      const frontPts = (annotated as AnnotatedRow[])
         .filter((r) => r._pareto)
-        .sort((a, b) => (a[xField] ?? 0) - (b[xField] ?? 0))
+        .sort((a, b) => ((a[xField] as number) ?? 0) - ((b[xField] as number) ?? 0))
 
       // Staircase line: for each consecutive pair (x1,y1)→(x2,y2), emit
       // intermediate point (x2,y1) to create right-angle steps.

@@ -255,4 +255,53 @@ export const NODE_STYLES = {
     border: '2px solid var(--node-bg)',
     zIndex: 10,
   } as CSSProperties,
+
+  // ── Aliases used by specialty nodes (CadImport, FmuImport, etc.) ─────────────
+  // These map the legacy names used in those components to the canonical keys above.
+  nodeWrapper: {
+    minWidth: 190,
+    maxWidth: 280,
+    background: 'var(--node-bg)',
+    border: '1.5px solid var(--node-border)',
+    borderRadius: 'var(--canvas-node-border-radius, 12px)',
+    boxShadow: 'var(--canvas-node-shadow, 0 1px 3px rgba(0,0,0,0.12) , 0 4px 16px rgba(0,0,0,0.2))',
+    fontFamily: "'Montserrat', system-ui, sans-serif",
+    fontSize: '0.8rem',
+    color: 'var(--text)',
+    overflow: 'visible',
+    transition: 'box-shadow 0.15s ease, border-color 0.15s ease',
+  } as CSSProperties,
+
+  nodeHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0.4rem 0.65rem',
+    background: 'var(--node-header-bg)',
+    borderBottom: '1px solid var(--node-border)',
+    borderRadius:
+      'var(--canvas-node-border-radius, 12px) var(--canvas-node-border-radius, 12px) 0 0',
+    gap: '0.5rem',
+    minHeight: 32,
+  } as CSSProperties,
+
+  nodeHeaderIcon: {
+    flexShrink: 0,
+    opacity: 0.7,
+  } as CSSProperties,
+
+  nodeHeaderLabel: {
+    fontWeight: 700,
+    fontSize: '0.73rem',
+    letterSpacing: '0.03em',
+    whiteSpace: 'nowrap' as const,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    textTransform: 'uppercase' as const,
+  } as CSSProperties,
+
+  nodeBody: {
+    padding: '0.45rem 0.65rem',
+  } as CSSProperties,
+
 }

@@ -1278,6 +1278,159 @@ export type Database = {
         }
         Relationships: []
       }
+      project_branches: {
+        Row: {
+          id: string
+          project_id: string
+          canvas_id: string
+          owner_id: string
+          branch_name: string
+          description: string | null
+          forked_from_snapshot_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          canvas_id: string
+          owner_id: string
+          branch_name: string
+          description?: string | null
+          forked_from_snapshot_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          canvas_id?: string
+          owner_id?: string
+          branch_name?: string
+          description?: string | null
+          forked_from_snapshot_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      experiment_runs: {
+        Row: {
+          id: string
+          user_id: string
+          project_id: string
+          canvas_id: string | null
+          name: string
+          run_type: string
+          status: 'running' | 'completed' | 'failed' | 'cancelled'
+          started_at: string
+          finished_at: string | null
+          duration_s: number | null
+          params: Json
+          metrics: Json
+          history: Json | null
+          tags: string[]
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          project_id: string
+          canvas_id?: string | null
+          name?: string
+          run_type?: string
+          status?: 'running' | 'completed' | 'failed' | 'cancelled'
+          started_at?: string
+          finished_at?: string | null
+          duration_s?: number | null
+          params?: Json
+          metrics?: Json
+          history?: Json | null
+          tags?: string[]
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          project_id?: string
+          canvas_id?: string | null
+          name?: string
+          run_type?: string
+          status?: 'running' | 'completed' | 'failed' | 'cancelled'
+          started_at?: string
+          finished_at?: string | null
+          duration_s?: number | null
+          params?: Json
+          metrics?: Json
+          history?: Json | null
+          tags?: string[]
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      experiment_checkpoints: {
+        Row: {
+          id: string
+          run_id: string
+          epoch: number
+          metrics: Json
+          weights_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          run_id: string
+          epoch: number
+          metrics?: Json
+          weights_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          run_id?: string
+          epoch?: number
+          metrics?: Json
+          weights_url?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      user_consents: {
+        Row: {
+          id: string
+          user_id: string | null
+          consent_type: string
+          granted: boolean
+          document_version: string | null
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          consent_type: string
+          granted: boolean
+          document_version?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          consent_type?: string
+          granted?: boolean
+          document_version?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
 
     Views: {
@@ -1412,6 +1565,22 @@ export type Database = {
       increment_share_link_views: {
         Args: { p_token: string }
         Returns: { project_id: string; is_active: boolean }[]
+      }
+      get_branches: {
+        Args: { p_project_id: string; p_canvas_id: string }
+        Returns: {
+          id: string
+          branch_name: string
+          description: string | null
+          created_at: string
+          snapshot_count: number
+          latest_label: string | null
+          latest_at: string | null
+        }[]
+      }
+      execute_sql_query: {
+        Args: { p_sql: string; p_params?: unknown[] }
+        Returns: { columns: string[]; rows: unknown[][] } | null
       }
     }
 

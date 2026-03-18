@@ -23,7 +23,7 @@ export function registerTimeSeriesBlocks(register: (def: BlockDef) => void): voi
     category: 'data',
     nodeKind: 'csTimeSeries',
     inputs: [],
-    proOnly: false,
+    proOnly: true,
     defaultData: {
       blockType: 'timeSeries',
       label: 'Time Series Input',

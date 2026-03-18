@@ -9,7 +9,7 @@
  * All functions fall back gracefully to no-op / error if Tauri is unavailable.
  */
 
-import type { EngineSnapshotV1 } from '../engine/types'
+import type { EngineSnapshotV1 } from '../engine/wasm-types'
 
 // ---------------------------------------------------------------------------
 // Tauri detection

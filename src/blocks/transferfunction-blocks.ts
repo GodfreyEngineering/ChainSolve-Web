@@ -26,7 +26,7 @@ export function registerTransferFunctionBlocks(register: (def: BlockDef) => void
     label: 'Transfer Function',
     category: 'controlSystems',
     nodeKind: 'csTransferFunction',
-    inputs: ['u'],
+    inputs: [{ id: 'u', label: 'Input' }],
     proOnly: false,
     defaultData: {
       blockType: 'transferFunction',

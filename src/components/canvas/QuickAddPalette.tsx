@@ -327,6 +327,7 @@ export function QuickAddPalette({
                         navIdx={idx}
                         onClick={() => commit(def)}
                         onMouseEnter={() => setActiveIdx(idx)}
+                        onHoverChange={setHoveredDef}
                       />
                     )
                   })}
@@ -349,6 +350,7 @@ export function QuickAddPalette({
                         navIdx={idx}
                         onClick={() => commit(def)}
                         onMouseEnter={() => setActiveIdx(idx)}
+                        onHoverChange={setHoveredDef}
                       />
                     )
                   })}
@@ -374,6 +376,7 @@ export function QuickAddPalette({
                             navIdx={idx}
                             onClick={() => commit(def)}
                             onMouseEnter={() => setActiveIdx(idx)}
+                            onHoverChange={setHoveredDef}
                           />
                         )
                       })}
