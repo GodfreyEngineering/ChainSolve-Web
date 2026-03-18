@@ -1,3 +1,6 @@
+# Legal PDFs (downloaded DPAs — do not commit confidential PDFs)
+legal/*.pdf
+
 # Logs
 logs
 *.log
