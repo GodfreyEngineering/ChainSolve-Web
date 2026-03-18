@@ -517,7 +517,7 @@
 - [x] **12.9** Mathematical reference: embedded docs for every algorithm — ODE solvers (stability regions, convergence orders), optimisation (convergence proofs), AD (complexity analysis)
 - [x] **12.10** API docs: auto-generated from Rust doc comments at docs.chainsolve.dev. Python/JS SDK guides.
 - [x] **12.11** Video walkthroughs: 5-minute per feature area, embedded in in-app help
-- [ ] **12.12** Community forum: Discourse integrated with Supabase Auth — share graphs as "Demonstrations"
+- [x] **12.12** Community forum: Discourse integrated with Supabase Auth — share graphs as "Demonstrations"
 - [x] **12.13** Changelog: every release with migration notes, breaking changes highlighted
 
 ---
