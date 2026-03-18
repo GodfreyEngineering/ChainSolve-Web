@@ -2101,6 +2101,7 @@
     "sym_substitute": "הצבה",
     "optim_param_est": "אמידת פרמטרים",
     "optim_bayesian": "אופטימיזציה בייסיאנית",
+    "optim_nsga3": "NSGA-III",
     "optim_lp": "פותר LP",
     "optim_qp": "פותר QP",
     "optim_nsga2": "NSGA-II",

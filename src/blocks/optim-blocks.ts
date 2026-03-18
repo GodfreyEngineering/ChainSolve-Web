@@ -453,4 +453,31 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
     description:
       'Bayesian optimisation with Gaussian Process (Matérn 5/2) surrogate. Acquisition: "ei" (Expected Improvement), "ucb" (Upper Confidence Bound, kappa controls exploration), "pi" (Probability of Improvement, xi shifts threshold). Returns convergence history table.',
   })
+
+  // ── NSGA-III ────────────────────────────────────────────────────────────────
+
+  register({
+    type: 'optim.nsga3',
+    label: 'NSGA-III',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'variables', label: 'Variables' }],
+    defaultData: {
+      blockType: 'optim.nsga3',
+      label: 'NSGA-III',
+      objectives: 'x0^2;(x0-1)^2',
+      pop_size: 60,
+      n_generations: 100,
+      divisions: 4,
+      crossover_prob: 0.9,
+      mutation_prob: 0.1,
+      eta_c: 20.0,
+      eta_m: 20.0,
+      seed: 42,
+    },
+    synonyms: ['NSGA-III', 'NSGA3', 'multi-objective', 'pareto', 'many-objective', 'reference directions', 'MOEA'],
+    tags: ['optimization', 'multi-objective', 'pareto', 'evolutionary'],
+    description:
+      'NSGA-III: Reference-direction-based multi-objective evolutionary algorithm. Superior to NSGA-II for ≥3 objectives. Uses Das-Dennis reference points for diversity preservation. Configure objectives as semicolon-separated expressions (x0, x1, ...). Returns Pareto front table with columns x0..xN, f0..fM.',
+  })
 }

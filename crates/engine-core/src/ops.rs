@@ -4174,6 +4174,55 @@ fn evaluate_node_inner(
             }
         }
 
+        "optim.nsga3" => {
+            use crate::optim::parse_design_vars;
+            use crate::optim::nsga3::{Nsga3Config, nsga3, mo_result_to_table};
+            match parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let n_vars = vars.len();
+                    let pop_size = data.get("pop_size").and_then(|v| v.as_f64()).unwrap_or(60.0) as usize;
+                    let n_generations = data.get("n_generations").and_then(|v| v.as_f64()).unwrap_or(100.0) as usize;
+                    let divisions = data.get("divisions").and_then(|v| v.as_f64()).unwrap_or(4.0) as usize;
+                    let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+                    let mutation_prob = data.get("mutation_prob").and_then(|v| v.as_f64()).unwrap_or(1.0 / n_vars as f64);
+
+                    // Parse objective expressions from data.objectives (semicolon-separated)
+                    let obj_raw = data.get("objectives").and_then(|v| v.as_str()).unwrap_or("x0^2;(x0-1)^2");
+                    let obj_exprs: Vec<String> = obj_raw.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+                    let n_obj = obj_exprs.len();
+                    let objectives: Vec<Box<dyn Fn(&[f64]) -> f64>> = obj_exprs.iter().map(|expr| {
+                        let expr = expr.clone();
+                        let b: Box<dyn Fn(&[f64]) -> f64> = Box::new(move |x: &[f64]| {
+                            let mut vars_map = std::collections::HashMap::new();
+                            for (i, &xi) in x.iter().enumerate() {
+                                vars_map.insert(format!("x{i}"), xi);
+                                if i == 0 { vars_map.insert("x".to_string(), xi); }
+                            }
+                            crate::expr::eval_expr(&expr, &vars_map).unwrap_or(f64::NAN)
+                        });
+                        b
+                    }).collect();
+
+                    let cfg = Nsga3Config {
+                        vars,
+                        objectives,
+                        pop_size,
+                        n_generations,
+                        crossover_prob: data.get("crossover_prob").and_then(|v| v.as_f64()).unwrap_or(0.9),
+                        mutation_prob,
+                        eta_c: data.get("eta_c").and_then(|v| v.as_f64()).unwrap_or(20.0),
+                        eta_m: data.get("eta_m").and_then(|v| v.as_f64()).unwrap_or(20.0),
+                        divisions,
+                        seed,
+                        use_moead: false,
+                    };
+                    let result = nsga3(&cfg);
+                    mo_result_to_table(&result, n_vars, n_obj)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
         // ── Machine Learning ─────────────────────────────────────────
         "ml.trainTestSplit" => {
             match inputs.get("data") {

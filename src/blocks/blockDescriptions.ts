@@ -657,6 +657,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Fit ODE model parameters to experimental data using Levenberg-Marquardt. Input a table with column "t" and state columns. Configure ODE equations, parameter names, initial/lower/upper bounds. Returns table with estimated parameter values and std_error.',
   'optim.bayesian':
     'Bayesian optimisation with GP (Matérn 5/2) surrogate. n_initial random points warm-up, then maximise acquisition (ei/ucb/pi) to pick next evaluation. EI: Expected Improvement (xi shifts threshold). UCB: mu - kappa*sigma. PI: Probability of Improvement. Outputs convergence table.',
+  'optim.nsga3':
+    'NSGA-III multi-objective evolutionary algorithm. Reference-direction structured reference points (Das-Dennis lattice) maintain diversity for ≥3 objectives. SBX crossover + polynomial mutation. Configure objectives as semicolon-separated expressions. Returns Pareto front table.',
 
   // ── Machine Learning (5.06) ─────────────────────────────────────────────
   'ml.trainTestSplit':

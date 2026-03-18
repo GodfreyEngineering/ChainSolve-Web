@@ -467,6 +467,7 @@
     "sym_substitute": "代入",
     "optim_param_est": "パラメータ推定",
     "optim_bayesian": "ベイズ最適化",
+    "optim_nsga3": "NSGA-III",
     "optim_lp": "LP ソルバー",
     "optim_qp": "QP ソルバー",
     "optim_nsga2": "NSGA-II",

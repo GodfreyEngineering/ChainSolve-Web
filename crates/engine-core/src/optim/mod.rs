@@ -8,6 +8,7 @@
 
 pub mod bayesian;
 pub mod cmaes;
+pub mod nsga3;
 pub mod curve_fit;
 pub mod param_est;
 pub mod doe;
