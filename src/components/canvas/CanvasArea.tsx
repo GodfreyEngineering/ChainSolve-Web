@@ -51,6 +51,7 @@ import { DisplayNode } from './nodes/DisplayNode'
 import { TestNode } from './nodes/TestNode'
 import { AssertionNode } from './nodes/AssertionNode'
 import { WsInputNode } from './nodes/WsInputNode'
+import { RestInputNode } from './nodes/RestInputNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -198,6 +199,7 @@ const NODE_TYPES = {
   csTest: TestNode,
   csAssertion: AssertionNode,
   csWebSocket: WsInputNode,
+  csRestApi: RestInputNode,
 } as const
 
 const EDGE_TYPES = {

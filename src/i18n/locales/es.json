@@ -2225,6 +2225,25 @@
     "snapshots": "Versiones",
     "timeline": "Cronología"
   },
+  "restInput": {
+    "value": "Valor",
+    "fetching": "Obteniendo…",
+    "error": "Error",
+    "idle": "Inactivo",
+    "fetch": "Obtener",
+    "poll": "Sondear",
+    "sec": "s",
+    "manual": "manual",
+    "pathPlaceholder": "Ruta JSON (ej. data.value)",
+    "headers": "Cabeceras (JSON)",
+    "body": "Cuerpo",
+    "showAdvanced": "▼ Cabeceras / Cuerpo",
+    "hideAdvanced": "▲ Cabeceras / Cuerpo",
+    "noUrl": "No hay URL configurada",
+    "httpError": "Error HTTP",
+    "pathNotFound": "Ruta no encontrada o no numérica",
+    "notNumeric": "La respuesta no es numérica"
+  },
   "wsInput": {
     "connected": "Conectado",
     "connecting": "Conectando…",

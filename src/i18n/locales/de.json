@@ -2225,6 +2225,25 @@
     "snapshots": "Versionen",
     "timeline": "Zeitleiste"
   },
+  "restInput": {
+    "value": "Wert",
+    "fetching": "Abrufen…",
+    "error": "Fehler",
+    "idle": "Bereit",
+    "fetch": "Abrufen",
+    "poll": "Abfragen",
+    "sec": "s",
+    "manual": "manuell",
+    "pathPlaceholder": "JSON-Pfad (z.B. data.value)",
+    "headers": "Header (JSON)",
+    "body": "Body",
+    "showAdvanced": "▼ Header / Body",
+    "hideAdvanced": "▲ Header / Body",
+    "noUrl": "Keine URL konfiguriert",
+    "httpError": "HTTP-Fehler",
+    "pathNotFound": "Pfad nicht gefunden oder nicht numerisch",
+    "notNumeric": "Antwort ist nicht numerisch"
+  },
   "wsInput": {
     "connected": "Verbunden",
     "connecting": "Verbinde…",

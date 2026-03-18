@@ -37,6 +37,7 @@ import { registerLookupBlocks } from './lookup-blocks'
 import { registerTestBlocks } from './test-blocks'
 import { registerAssertionBlocks } from './assertion-blocks'
 import { registerWebSocketBlocks } from './websocket-blocks'
+import { registerRestBlocks } from './rest-blocks'
 import { SEARCH_METADATA } from './blockSearchMetadata'
 
 function reg(
@@ -78,6 +79,7 @@ export function registerAllBlocks(): void {
   registerTestBlocks(reg)
   registerAssertionBlocks(reg)
   registerWebSocketBlocks(reg)
+  registerRestBlocks(reg)
 
   // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
   for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {

@@ -2175,6 +2175,25 @@
     "snapshots": "Versioni",
     "timeline": "Cronologia"
   },
+  "restInput": {
+    "value": "Valore",
+    "fetching": "Recupero…",
+    "error": "Errore",
+    "idle": "Inattivo",
+    "fetch": "Recupera",
+    "poll": "Sondaggio",
+    "sec": "s",
+    "manual": "manuale",
+    "pathPlaceholder": "Percorso JSON (es. data.value)",
+    "headers": "Intestazioni (JSON)",
+    "body": "Corpo",
+    "showAdvanced": "▼ Intestazioni / Corpo",
+    "hideAdvanced": "▲ Intestazioni / Corpo",
+    "noUrl": "Nessun URL configurato",
+    "httpError": "Errore HTTP",
+    "pathNotFound": "Percorso non trovato o non numerico",
+    "notNumeric": "La risposta non è numerica"
+  },
   "wsInput": {
     "connected": "Connesso",
     "connecting": "Connessione…",

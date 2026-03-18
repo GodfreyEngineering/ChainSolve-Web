@@ -2273,6 +2273,25 @@
     "snapshots": "バージョン",
     "timeline": "タイムライン"
   },
+  "restInput": {
+    "value": "値",
+    "fetching": "取得中…",
+    "error": "エラー",
+    "idle": "待機中",
+    "fetch": "取得",
+    "poll": "ポーリング",
+    "sec": "秒",
+    "manual": "手動",
+    "pathPlaceholder": "JSONパス (例: data.value)",
+    "headers": "ヘッダー (JSON)",
+    "body": "ボディ",
+    "showAdvanced": "▼ ヘッダー / ボディ",
+    "hideAdvanced": "▲ ヘッダー / ボディ",
+    "noUrl": "URLが設定されていません",
+    "httpError": "HTTPエラー",
+    "pathNotFound": "パスが見つからないか数値ではありません",
+    "notNumeric": "レスポンスが数値ではありません"
+  },
   "wsInput": {
     "connected": "接続中",
     "connecting": "接続しています…",

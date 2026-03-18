@@ -74,7 +74,9 @@ export function toEngineSnapshot(
         ? 'display'
         : data.blockType === 'wsInput'
           ? 'number'
-          : data.blockType) as string
+          : data.blockType === 'restInput'
+            ? 'number'
+            : data.blockType) as string
       if (blockType === 'constant') {
         const constId = data.selectedConstantId
         if (typeof constId === 'string' && constId in CONSTANT_VALUES) {

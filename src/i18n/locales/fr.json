@@ -2225,6 +2225,25 @@
     "snapshots": "Versions",
     "timeline": "Chronologie"
   },
+  "restInput": {
+    "value": "Valeur",
+    "fetching": "Récupération…",
+    "error": "Erreur",
+    "idle": "Inactif",
+    "fetch": "Récupérer",
+    "poll": "Sondage",
+    "sec": "s",
+    "manual": "manuel",
+    "pathPlaceholder": "Chemin JSON (ex. data.value)",
+    "headers": "En-têtes (JSON)",
+    "body": "Corps",
+    "showAdvanced": "▼ En-têtes / Corps",
+    "hideAdvanced": "▲ En-têtes / Corps",
+    "noUrl": "Aucune URL configurée",
+    "httpError": "Erreur HTTP",
+    "pathNotFound": "Chemin introuvable ou non numérique",
+    "notNumeric": "La réponse n'est pas numérique"
+  },
   "wsInput": {
     "connected": "Connecté",
     "connecting": "Connexion…",

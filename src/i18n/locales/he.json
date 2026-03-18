@@ -1672,6 +1672,25 @@
     "snapshots": "גרסאות",
     "timeline": "ציר זמן"
   },
+  "restInput": {
+    "value": "ערך",
+    "fetching": "מאחזר…",
+    "error": "שגיאה",
+    "idle": "לא פעיל",
+    "fetch": "אחזר",
+    "poll": "סקר",
+    "sec": "ש׳",
+    "manual": "ידני",
+    "pathPlaceholder": "נתיב JSON (למשל data.value)",
+    "headers": "כותרות (JSON)",
+    "body": "גוף",
+    "showAdvanced": "▼ כותרות / גוף",
+    "hideAdvanced": "▲ כותרות / גוף",
+    "noUrl": "לא הוגדר URL",
+    "httpError": "שגיאת HTTP",
+    "pathNotFound": "נתיב לא נמצא או אינו מספרי",
+    "notNumeric": "התגובה אינה מספרית"
+  },
   "wsInput": {
     "connected": "מחובר",
     "connecting": "מתחבר…",
