@@ -2239,6 +2239,9 @@
     "allowNan": "NaN ok",
     "allowInf": "±Inf ok"
   },
+  "deadZone": {
+    "band": "Banda"
+  },
   "mathSheet": {
     "result": "Risultato",
     "inputs": "Ingressi",

@@ -85,6 +85,7 @@ export type NodeKind =
   | 'csTimer'
   | 'csLogger'
   | 'csMathSheet'
+  | 'csDeadZone'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

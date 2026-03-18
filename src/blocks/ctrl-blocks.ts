@@ -135,4 +135,59 @@ export function registerCtrlBlocks(register: (def: BlockDef) => void): void {
     defaultData: { blockType: 'ctrl.bode_mag_1st', label: 'Bode Magnitude' },
     synonyms: ['bode plot', 'frequency response', 'magnitude'],
   })
+
+  // ── 2.67: Nonlinear control elements ────────────────────────────────────────
+
+  register({
+    type: 'ctrl.saturation',
+    label: 'Saturation',
+    category: 'controlSystems',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'val', label: 'u (signal)' },
+      { id: 'lo', label: 'u_min' },
+      { id: 'hi', label: 'u_max' },
+    ],
+    defaultData: { blockType: 'ctrl.saturation', label: 'Saturation', lo: -1, hi: 1 },
+    synonyms: ['saturation', 'clamp output', 'limiter', 'limit signal', 'saturate'],
+    tags: ['control', 'nonlinear', 'signal'],
+    description:
+      'Saturates signal u to [u_min, u_max]. Equivalent to a clamp. Output = u_min if u < u_min, u_max if u > u_max, else u. Essential nonlinear control element.',
+  })
+
+  // ── 2.68: Signal routing blocks ──────────────────────────────────────────────
+
+  register({
+    type: 'ctrl.switch',
+    label: 'Switch',
+    category: 'controlSystems',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'cond', label: 'Condition' },
+      { id: 'then', label: 'u1 (if ≠ 0)' },
+      { id: 'else', label: 'u2 (if = 0)' },
+    ],
+    defaultData: { blockType: 'ctrl.switch', label: 'Switch' },
+    synonyms: ['switch', 'selector', 'conditional select', 'signal select', 'mux switch'],
+    tags: ['control', 'routing', 'signal'],
+    description:
+      'Outputs u1 when condition is non-zero, u2 when condition is zero. Signal routing switch — like Simulink Switch.',
+  })
+
+  register({
+    type: 'ctrl.mux',
+    label: 'MUX',
+    category: 'controlSystems',
+    nodeKind: 'csOperation',
+    variadic: true,
+    inputs: [
+      { id: 'in_0', label: 'u1' },
+      { id: 'in_1', label: 'u2' },
+    ],
+    defaultData: { blockType: 'ctrl.mux', label: 'MUX', dynamicInputCount: 2 },
+    synonyms: ['mux', 'multiplex', 'combine signals', 'vector build', 'signal combiner', 'bus creator'],
+    tags: ['control', 'routing', 'signal', 'vector'],
+    description:
+      'Combines N scalar or vector signals into a single vector. Control-systems MUX — like Simulink Mux.',
+  })
 }

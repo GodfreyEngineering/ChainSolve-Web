@@ -56,6 +56,7 @@ import { ScopeNode } from './nodes/ScopeNode'
 import { TimerNode } from './nodes/TimerNode'
 import { LoggerNode } from './nodes/LoggerNode'
 import { MathSheetNode } from './nodes/MathSheetNode'
+import { DeadZoneNode } from './nodes/DeadZoneNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -208,6 +209,7 @@ const NODE_TYPES = {
   csTimer: TimerNode,
   csLogger: LoggerNode,
   csMathSheet: MathSheetNode,
+  csDeadZone: DeadZoneNode,
 } as const
 
 const EDGE_TYPES = {
