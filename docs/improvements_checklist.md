@@ -141,7 +141,7 @@
 - [x] **2.35** DAE solver: index-1 DAE via BDF with consistent initialisation (Brown's method) — for systems with algebraic constraints (e.g., constrained mechanical systems, electrical circuits)
 - [x] **2.36** DAE index reduction: Pantelides algorithm to detect high-index DAEs, automatically differentiate constraint equations to reduce to index-1 form, display structural analysis to user
 - [x] **2.37** PDE solver (1D): method-of-lines with automatic spatial discretisation (finite differences, configurable order) — convert PDE to system of ODEs and solve with existing ODE solvers. Support: heat equation, wave equation, advection-diffusion.
-- [ ] **2.38** PDE solver (2D FEM): triangle mesh generation (Delaunay), FEM assembly (P1/P2 elements), boundary condition specification (Dirichlet, Neumann, Robin), material property fields — for Poisson, elasticity, Stokes flow
+- [x] **2.38** PDE solver (2D FEM): triangle mesh generation (Delaunay), FEM assembly (P1/P2 elements), boundary condition specification (Dirichlet, Neumann, Robin), material property fields — for Poisson, elasticity, Stokes flow
 - [x] **2.39** SteadyState solver: Newton iteration to find equilibrium of dynamic system — given dy/dt = f(y), find y* where f(y*)=0. Uses Jacobian from AD engine (Category 1C).
 - [x] **2.40** ParameterEstimation: fit ODE/DAE model parameters to experimental data — Levenberg-Marquardt minimising sum of squared residuals between model output and data, using AD for Jacobian computation
 
@@ -494,9 +494,9 @@
 - [x] **11.5** Vitest: 5170+ unit tests across 129 test files
 - [x] **11.6** Playwright: 21 E2E spec files (smoke, canvas, auth, billing, marketplace, etc.)
 - [x] **11.7** Catalog sync: regex-based Rust↔TS alignment tests
-- [ ] **11.8** DETEST ODE benchmarks: A1-A5 (non-stiff), B1-B5 (mildly stiff), C1-C5 (stiff), D1-D5 (DAE), E1-E5 (second-order) — compare against published reference solutions
-- [ ] **11.9** Optimisation benchmarks: Rosenbrock, Rastrigin, Ackley, ZDT1-6 (multi-objective) — verify convergence and Pareto front quality
-- [ ] **11.10** FEA benchmarks: NAFEMS LE1, LE10, LE11 — standard finite element verification problems
+- [x] **11.8** DETEST ODE benchmarks: A1-A5 (non-stiff), B1-B5 (mildly stiff), C1-C5 (stiff), D1-D5 (DAE), E1-E5 (second-order) — compare against published reference solutions
+- [x] **11.9** Optimisation benchmarks: Rosenbrock, Rastrigin, Ackley, ZDT1-6 (multi-objective) — verify convergence and Pareto front quality
+- [x] **11.10** FEA benchmarks: NAFEMS LE1, LE10, LE11 — standard finite element verification problems
 - [ ] **11.11** FMU compliance: exported FMUs pass FMI Cross-Check validation suite
 - [x] **11.12** Round-trip: save → close → reopen → execute = bit-identical results
 - [ ] **11.13** Solver verification reports: auto-generated PDF documenting algorithm, convergence, error estimates, reference comparison — for regulatory submission
