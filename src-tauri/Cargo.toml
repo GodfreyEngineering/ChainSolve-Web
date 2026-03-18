@@ -1,0 +1,56 @@
+[package]
+name = "chainsolve-desktop"
+version = "0.1.0"
+description = "ChainSolve Desktop — offline-capable Rust/WebView wrapper"
+authors = ["Godfrey Engineering"]
+license = "MIT"
+repository = "https://github.com/godfrey-engineering/chainsolve"
+edition = "2021"
+
+[lib]
+name = "chainsolve_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "chainsolve-desktop"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [
+  "macos-private-api",
+  "tray-icon",
+] }
+tauri-plugin-fs = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-shell = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-single-instance = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Link against engine-core for offline evaluation without WASM
+# engine-core provides the same evaluation logic used in the browser
+engine-core = { path = "../crates/engine-core" }
+
+[features]
+# CUDA acceleration for desktop (requires NVIDIA driver)
+cuda = ["engine-core/native-cuda"]
+
+# Default target features for each platform
+[target.'cfg(target_os = "macos")'.dependencies]
+# macOS universal binary support handled by Tauri
+
+[target.'cfg(target_os = "windows")'.dependencies]
+# Windows: CUDA path is C:\Windows\System32\nvcuda.dll (driver-provided)
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = 3
+strip = true

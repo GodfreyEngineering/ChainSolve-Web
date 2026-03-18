@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Required for WebKit / network access from macOS app sandbox -->
+  <key>com.apple.security.network.client</key>
+  <true/>
+  <!-- Allow incoming network connections (for local dev server) -->
+  <key>com.apple.security.network.server</key>
+  <true/>
+  <!-- File system access for open/save dialogs -->
+  <key>com.apple.security.files.user-selected.read-write</key>
+  <true/>
+  <!-- Downloads folder -->
+  <key>com.apple.security.files.downloads.read-write</key>
+  <true/>
+</dict>
+</plist>

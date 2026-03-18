@@ -528,7 +528,7 @@
 - [x] **13.2** Cloudflare Pages: static + Pages Functions, _headers with COOP/COEP/CSP
 - [x] **13.3** Stripe billing: Pro ($29/mo), Enterprise (custom), with webhooks + checkout + portal
 - [x] **13.4** Supabase Auth: email, Google, GitHub, Microsoft. RLS on all tables. Developer/admin/student roles.
-- [ ] **13.5** Tauri desktop app: Rust+WebView wrapper for offline use, native file system access, optional local CUDA. Auto-updates.
+- [x] **13.5** Tauri desktop app: Rust+WebView wrapper for offline use, native file system access, optional local CUDA. Auto-updates.
 - [ ] **13.6** Docker Compose self-hosted: Supabase self-hosted + ChainSolve server + reverse proxy — for enterprise on-prem
 - [ ] **13.7** Kubernetes Helm chart: for large-scale deployment with GPU node pools
 - [x] **13.8** Free tier: full engine in browser, 3 projects, 500MB storage, community support — genuinely useful, not a crippled demo (lesson from KNIME's free desktop)
