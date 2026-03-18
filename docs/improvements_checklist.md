@@ -61,7 +61,7 @@
 - [x] **1.33** AD through ODE solvers: discrete adjoint method with checkpointing — compute gradients of ODE solution w.r.t. parameters without storing full trajectory. Essential for parameter estimation and PINNs.
 - [x] **1.34** AD through linear solvers: implicit differentiation via implicit function theorem — if Ax=b and A,b depend on parameters, compute dx/dp without differentiating the solver internals
 - [x] **1.35** Custom VJP/JVP rules: allow block authors to define efficient gradient rules for their blocks (like JAX's `custom_vjp`) instead of relying on automatic tracing
-- [ ] **1.36** Gradient checkpointing with binomial (Revolve) schedule: trade computation for memory in reverse-mode — essential for long ODE integrations and deep networks
+- [x] **1.36** Gradient checkpointing with binomial (Revolve) schedule: trade computation for memory in reverse-mode — essential for long ODE integrations and deep networks
 - [x] **1.37** Higher-order derivatives: Hessians via forward-over-reverse composition (one forward pass per Hessian column), Hessian-vector products (single reverse pass) — needed for Newton's method and UQ
 
 ### 1D — GPU Acceleration (WebGPU)

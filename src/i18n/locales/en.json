@@ -497,7 +497,8 @@
     "ad_ode_adjoint": "ODE Adjoint Sensitivity",
     "ad_lin_solve_sens": "Linear Solve Sensitivity",
     "ad_custom_vjp": "Custom VJP/JVP Rule",
-    "ad_grad_checkpoint": "Gradient Checkpointing"
+    "ad_grad_checkpoint": "Gradient Checkpointing",
+    "ode_fem2d": "2D FEM Solver"
   },
   "plot": {
     "settings": "Plot Settings",

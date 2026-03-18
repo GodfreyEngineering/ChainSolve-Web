@@ -489,7 +489,8 @@
     "ad_ode_adjoint": "ODE Adjoint-Sensitivität",
     "ad_lin_solve_sens": "Lineares System Sensitivität",
     "ad_custom_vjp": "Benutzerdefinierte VJP/JVP-Regel",
-    "ad_grad_checkpoint": "Gradient-Checkpointing"
+    "ad_grad_checkpoint": "Gradient-Checkpointing",
+    "ode_fem2d": "2D FEM Löser"
   },
   "plot": {
     "settings": "Diagramm-Einstellungen",

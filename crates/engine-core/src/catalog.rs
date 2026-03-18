@@ -685,6 +685,8 @@ pub fn catalog() -> Vec<CatalogEntry> {
             vec![p("x", "Eval point"), p("v", "Cotangent (VJP)"), p("t", "Tangent (JVP)")], false),
         // Gradient checkpointing (1.36)
         entry("ad.gradCheckpoint", "Gradient Checkpointing", "simulation", "csOperation", vec![], false),
+        // 2D FEM Poisson solver (2.38)
+        entry("ode.fem2d", "2D FEM Solver", "simulation", "csOperation", vec![], false),
     ]
 }
 

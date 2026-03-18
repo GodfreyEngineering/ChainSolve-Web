@@ -8,6 +8,7 @@
 
 pub mod adjoint;
 pub mod bdf;
+pub mod fem2d;
 pub mod dae;
 pub mod event;
 pub mod pde1d;

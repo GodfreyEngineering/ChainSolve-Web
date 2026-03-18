@@ -2131,7 +2131,8 @@
     "ad_ode_adjoint": "רגישות צמודה ODE",
     "ad_lin_solve_sens": "רגישות פתרון לינארי",
     "ad_custom_vjp": "כלל VJP/JVP מותאם אישית",
-    "ad_grad_checkpoint": "נקודות ביקורת גרדיאנט"
+    "ad_grad_checkpoint": "נקודות ביקורת גרדיאנט",
+    "ode_fem2d": "פותר FEM דו-ממדי"
   },
   "entitlements": {
     "projectLimitTitle": "Project limit reached",

@@ -488,7 +488,8 @@
     "ad_ode_adjoint": "Sensibilità Aggiunta ODE",
     "ad_lin_solve_sens": "Sensibilità Sistema Lineare",
     "ad_custom_vjp": "Regola VJP/JVP Personalizzata",
-    "ad_grad_checkpoint": "Checkpointing del Gradiente"
+    "ad_grad_checkpoint": "Checkpointing del Gradiente",
+    "ode_fem2d": "Solutore FEM 2D"
   },
   "plot": {
     "settings": "Impostazioni grafico",

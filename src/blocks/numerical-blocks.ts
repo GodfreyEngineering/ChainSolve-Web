@@ -321,4 +321,27 @@ export function registerNumericalBlocks(register: (def: BlockDef) => void): void
     synonyms: ['lognormal', 'log normal distribution', 'skewed distribution'],
     tags: ['numerical', 'random', 'sampling'],
   })
+
+  register({
+    type: 'ode.fem2d',
+    label: '2D FEM Solver',
+    category: 'simulation',
+    nodeKind: 'csOperation',
+    inputs: [],
+    defaultData: {
+      x0: 0,
+      x1: 1,
+      y0: 0,
+      y1: 1,
+      nx: 8,
+      ny: 8,
+      k: 1,
+      rhs: '1',
+      dirichlet: '0',
+    },
+    synonyms: ['FEM', 'finite element', 'Poisson', 'Laplace', 'PDE', '2D', 'mesh'],
+    tags: ['fem', 'pde', 'simulation', 'mesh'],
+    description:
+      'Solve −k∇²u = f on a rectangular domain [x0,x1]×[y0,y1] using P1 triangular finite elements. Set rhs (expression in x,y for source f) and dirichlet (expression for boundary condition g_D). Returns Table [x, y, u] — one row per node.',
+  })
 }

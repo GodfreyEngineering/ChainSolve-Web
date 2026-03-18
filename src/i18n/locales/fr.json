@@ -489,7 +489,8 @@
     "ad_ode_adjoint": "Sensibilité Adjointe EDO",
     "ad_lin_solve_sens": "Sensibilité Système Linéaire",
     "ad_custom_vjp": "Règle VJP/JVP Personnalisée",
-    "ad_grad_checkpoint": "Points de Contrôle de Gradient"
+    "ad_grad_checkpoint": "Points de Contrôle de Gradient",
+    "ode_fem2d": "Solveur FEM 2D"
   },
   "plot": {
     "settings": "Paramètres du graphique",

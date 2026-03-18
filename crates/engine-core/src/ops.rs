@@ -6605,6 +6605,31 @@ fn evaluate_node_inner(
             crate::types::build_table(&col_refs, &col_data)
         }
 
+        // ── 2D FEM Solver: Poisson equation (2.38) ───────────────────
+        "ode.fem2d" => {
+            use crate::ode::fem2d::solve_fem2d;
+
+            let x0 = scalar_or(data, "x0", 0.0);
+            let x1 = scalar_or(data, "x1", 1.0);
+            let y0 = scalar_or(data, "y0", 0.0);
+            let y1 = scalar_or(data, "y1", 1.0);
+            let nx = data.get("nx").and_then(|v| v.as_f64()).unwrap_or(8.0) as usize;
+            let ny = data.get("ny").and_then(|v| v.as_f64()).unwrap_or(8.0) as usize;
+            let k = scalar_or(data, "k", 1.0);
+            let rhs_expr = data.get("rhs").and_then(|v| v.as_str()).unwrap_or("1");
+            let dirichlet_expr = data.get("dirichlet").and_then(|v| v.as_str()).unwrap_or("0");
+
+            match solve_fem2d(x0, x1, y0, y1, nx, ny, k, rhs_expr, dirichlet_expr) {
+                Ok(result) => {
+                    let x_col: Vec<f64> = result.nodes.iter().map(|(x, _)| *x).collect();
+                    let y_col: Vec<f64> = result.nodes.iter().map(|(_, y)| *y).collect();
+                    let u_col = result.u.clone();
+                    crate::types::build_table(&["x", "y", "u"], &[x_col, y_col, u_col])
+                }
+                Err(e) => Value::error(format!("ode.fem2d: {e}")),
+            }
+        }
+
         // ── Gradient Checkpointing with Revolve Schedule (1.36) ──────
         "ad.gradCheckpoint" => {
             use crate::grad_checkpoint::revolve_adjoint;
