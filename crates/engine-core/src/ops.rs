@@ -6903,6 +6903,77 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── STL mesh import (4.12) ───────────────────────────────────────────
+        "stl_parse" => {
+            // Takes a Text value containing ASCII STL content.
+            // Returns a Matrix (n_triangles × 12):
+            //   [nx, ny, nz, v0x, v0y, v0z, v1x, v1y, v1z, v2x, v2y, v2z]
+            match inputs.get("text") {
+                Some(Value::Text { value }) => {
+                    match crate::stl::parse_stl_text(value) {
+                        Ok(tris) => crate::stl::stl_to_matrix(&tris),
+                        Err(e) => Value::error(e),
+                    }
+                }
+                Some(Value::Error { message }) => Value::Error { message: message.clone() },
+                _ => Value::error("stl_parse: requires 'text' input (ASCII STL content as Text value)"),
+            }
+        }
+
+        // ── MATLAB .mat v5 import (4.9) ──────────────────────────────────────
+        "mat_import" => {
+            // Reads MATLAB v5 binary data from data.matBytes (JSON array of u8 values).
+            // Returns the first numeric variable found as a Matrix (rows×cols, column-major)
+            // or as a Vector (for 1D arrays) or Scalar (for 1×1).
+            // Optional data.variable selects a named variable; defaults to first.
+            let bytes: Vec<u8> = data
+                .get("matBytes")
+                .and_then(|v| v.as_array())
+                .map(|arr| arr.iter().filter_map(|b| b.as_u64().map(|n| n as u8)).collect())
+                .unwrap_or_default();
+
+            if bytes.is_empty() {
+                return Value::error("mat_import: no data in 'matBytes' (expected JSON array of byte values)");
+            }
+
+            let want_name = data.get("variable").and_then(|v| v.as_str()).unwrap_or("");
+
+            match crate::matfile::parse_mat_v5(&bytes) {
+                Err(e) => Value::error(format!("mat_import: {e}")),
+                Ok(vars) => {
+                    if vars.is_empty() {
+                        return Value::error("mat_import: no numeric variables found in .mat file");
+                    }
+                    // Select variable: by name if specified, else first
+                    let var = if want_name.is_empty() {
+                        &vars[0]
+                    } else {
+                        match vars.iter().find(|v| v.name == want_name) {
+                            Some(v) => v,
+                            None => return Value::error(format!(
+                                "mat_import: variable '{}' not found (available: {})",
+                                want_name,
+                                vars.iter().map(|v| v.name.as_str()).collect::<Vec<_>>().join(", ")
+                            )),
+                        }
+                    };
+
+                    // Emit as appropriate Value type
+                    if var.rows == 1 && var.cols == 1 {
+                        Value::scalar(*var.data.first().unwrap_or(&0.0))
+                    } else if var.rows == 1 || var.cols == 1 {
+                        Value::Vector { value: var.data.clone() }
+                    } else {
+                        Value::Matrix {
+                            rows: var.rows,
+                            cols: var.cols,
+                            data: var.data.clone(),
+                        }
+                    }
+                }
+            }
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }
