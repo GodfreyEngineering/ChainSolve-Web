@@ -5,6 +5,8 @@
 //! not wasm32).
 
 use engine_core::graph::EngineGraph;
+use engine_core::ode::rk45::solve_rk45;
+use engine_core::ode::{OdeResult, OdeSolverConfig, OdeSystem};
 use engine_core::types::{EdgeDef, EngineSnapshotV1, NodeDef};
 use std::collections::HashMap;
 use std::time::Instant;
@@ -279,4 +281,78 @@ fn perf_smoke_dataset_1m_under_2000ms() {
         "1M-element dataset + vectorSum took {}ms (budget: 2000ms)",
         elapsed.as_millis()
     );
+}
+
+// ── 7.9: 100-state ODE benchmark ─────────────────────────────────────────────
+//
+// 50 uncoupled harmonic oscillators, each with 2 states (position + velocity).
+// Total: 100 states. Simulate t=[0, 1] with RK45 adaptive solver.
+// Budget: 2000ms on native (the 500ms target is for WASM in the browser; native
+// Rust is substantially faster than WASM, so the native budget is generous).
+
+/// Build a 100-state ODE system: 50 uncoupled harmonic oscillators.
+/// State layout: [x0, v0, x1, v1, ..., x49, v49]
+/// Equations: dx_i/dt = v_i, dv_i/dt = -x_i  (omega = 1)
+fn hundred_state_oscillators() -> (OdeSystem, Vec<f64>) {
+    const N_OSC: usize = 50;
+    const N_STATES: usize = N_OSC * 2;
+
+    let mut equations = Vec::with_capacity(N_STATES);
+    let mut y0 = Vec::with_capacity(N_STATES);
+
+    for i in 0..N_OSC {
+        let xi = i * 2;
+        let vi = xi + 1;
+        // dx_i/dt = v_i
+        equations.push(format!("y{vi}"));
+        // dv_i/dt = -x_i
+        equations.push(format!("-1.0 * y{xi}"));
+        // Initial conditions: x=1, v=0 for each oscillator
+        y0.push(1.0); // x_i(0) = 1
+        y0.push(0.0); // v_i(0) = 0
+    }
+
+    let system = OdeSystem {
+        equations,
+        state_names: (0..N_STATES).map(|i| format!("y{i}")).collect(),
+        params: HashMap::new(),
+    };
+
+    (system, y0)
+}
+
+/// 7.9: 100-state ODE (50 uncoupled harmonic oscillators), t=[0,1], RK45.
+/// Native budget: 2000ms (500ms target is for WASM in browser).
+#[test]
+fn perf_smoke_100_state_ode_rk45_under_2000ms() {
+    let (system, y0) = hundred_state_oscillators();
+    let config = OdeSolverConfig {
+        t_start: 0.0,
+        t_end: 1.0,
+        dt: 0.1, // initial step size hint for adaptive solver
+        tolerance: 1e-6,
+        max_steps: 100_000,
+    };
+
+    let start = Instant::now();
+    let result: OdeResult = solve_rk45(&system, &y0, &config);
+    let elapsed = start.elapsed();
+
+    // Correctness: at t=1, x_i ≈ cos(1) ≈ 0.5403 for each oscillator
+    // Check the first oscillator position (state y0)
+    let final_x0 = result.states.last().map(|s| s[0]).unwrap_or(f64::NAN);
+    let expected_x0 = (1.0_f64).cos(); // cos(omega*t) = cos(1)
+    assert!(
+        (final_x0 - expected_x0).abs() < 1e-4,
+        "x0(1.0) = {final_x0:.6}, expected ≈ {expected_x0:.6}"
+    );
+
+    assert!(
+        elapsed.as_millis() < 2_000,
+        "100-state ODE RK45 t=[0,1] took {}ms (budget: 2000ms, WASM target: 500ms)",
+        elapsed.as_millis()
+    );
+
+    // Verify we got at least 1 adaptive step
+    assert!(result.steps >= 1, "Expected at least 1 adaptive step, got {}", result.steps);
 }
