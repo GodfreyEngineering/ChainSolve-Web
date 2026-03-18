@@ -2262,6 +2262,11 @@
     "addInput": "Aggiungi ingresso",
     "removeInput": "Rimuovi ultimo ingresso"
   },
+  "unitInput": {
+    "label": "Ingresso con unità",
+    "searchPlaceholder": "Cerca unità…",
+    "noResults": "Nessuna unità trovata"
+  },
   "timeSeries": {
     "label": "Ingresso serie temporale",
     "drop": "Trascina CSV o clicca",

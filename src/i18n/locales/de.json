@@ -2312,6 +2312,11 @@
     "addInput": "Eingabe hinzufügen",
     "removeInput": "Letzte Eingabe entfernen"
   },
+  "unitInput": {
+    "label": "Einheiteneingabe",
+    "searchPlaceholder": "Einheiten suchen…",
+    "noResults": "Keine Einheiten gefunden"
+  },
   "timeSeries": {
     "label": "Zeitreihen-Eingabe",
     "drop": "CSV ablegen oder klicken",

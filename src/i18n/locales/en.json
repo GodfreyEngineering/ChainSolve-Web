@@ -2360,6 +2360,11 @@
     "addInput": "Add input",
     "removeInput": "Remove last input"
   },
+  "unitInput": {
+    "label": "Unit Input",
+    "searchPlaceholder": "Search units…",
+    "noResults": "No units found"
+  },
   "timeSeries": {
     "label": "Time Series Input",
     "drop": "Drop CSV or click to browse",

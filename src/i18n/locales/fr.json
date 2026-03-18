@@ -2312,6 +2312,11 @@
     "addInput": "Ajouter une entrée",
     "removeInput": "Supprimer la dernière entrée"
   },
+  "unitInput": {
+    "label": "Entrée avec unité",
+    "searchPlaceholder": "Rechercher des unités…",
+    "noResults": "Aucune unité trouvée"
+  },
   "timeSeries": {
     "label": "Entrée série temporelle",
     "drop": "Déposer CSV ou cliquer",

@@ -101,7 +101,10 @@ export function toEngineSnapshot(
                           // 2.11: timeSeries caches resampled data as tableData; engine treats as tableInput.
                           : data.blockType === 'timeSeries'
                             ? 'tableInput'
-                            : data.blockType) as string
+                            // 2.13: unitInput converts to SI value and outputs as 'number'.
+                            : data.blockType === 'unitInput'
+                              ? 'number'
+                              : data.blockType) as string
       if (blockType === 'constant') {
         const constId = data.selectedConstantId
         if (typeof constId === 'string' && constId in CONSTANT_VALUES) {

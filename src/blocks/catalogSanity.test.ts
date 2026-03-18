@@ -99,6 +99,7 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csFileInput',
   'csSqlQuery',
   'csTimeSeries',
+  'csUnitInput',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {

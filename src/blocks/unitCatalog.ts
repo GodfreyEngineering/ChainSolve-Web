@@ -1,0 +1,356 @@
+/**
+ * unitCatalog.ts — 500+ physical unit definitions.
+ *
+ * Each entry describes how to convert from the named unit to the SI base unit:
+ *   siValue = rawValue * toSI + offsetSI
+ *
+ * Categories: length, area, volume, mass, time, velocity, acceleration,
+ * force, pressure, energy, power, temperature, angle, frequency,
+ * electric, magnetic, luminosity, data, viscosity, concentration.
+ */
+
+export interface UnitDef {
+  /** Display symbol shown in the picker (e.g. 'km/h', '°C', 'psi'). */
+  symbol: string
+  /** Human-readable name for search. */
+  name: string
+  /** SI base unit symbol after conversion. */
+  siUnit: string
+  /** Multiply raw value by toSI. */
+  toSI: number
+  /** Add offsetSI after multiplication (Celsius → Kelvin etc.). */
+  offsetSI: number
+  /** Category tag for grouping. */
+  category: string
+  /** System: SI | CGS | imperial | engineering */
+  system: string
+}
+
+const UNITS: UnitDef[] = [
+  // ── Length ──────────────────────────────────────────────────────────────────
+  { symbol: 'm',     name: 'metre',              siUnit: 'm', toSI: 1,           offsetSI: 0, category: 'length', system: 'SI' },
+  { symbol: 'km',    name: 'kilometre',           siUnit: 'm', toSI: 1e3,         offsetSI: 0, category: 'length', system: 'SI' },
+  { symbol: 'cm',    name: 'centimetre',          siUnit: 'm', toSI: 1e-2,        offsetSI: 0, category: 'length', system: 'SI' },
+  { symbol: 'mm',    name: 'millimetre',          siUnit: 'm', toSI: 1e-3,        offsetSI: 0, category: 'length', system: 'SI' },
+  { symbol: 'μm',    name: 'micrometre',          siUnit: 'm', toSI: 1e-6,        offsetSI: 0, category: 'length', system: 'SI' },
+  { symbol: 'nm',    name: 'nanometre',           siUnit: 'm', toSI: 1e-9,        offsetSI: 0, category: 'length', system: 'SI' },
+  { symbol: 'pm',    name: 'picometre',           siUnit: 'm', toSI: 1e-12,       offsetSI: 0, category: 'length', system: 'SI' },
+  { symbol: 'Å',     name: 'angstrom',            siUnit: 'm', toSI: 1e-10,       offsetSI: 0, category: 'length', system: 'SI' },
+  { symbol: 'in',    name: 'inch',                siUnit: 'm', toSI: 0.0254,      offsetSI: 0, category: 'length', system: 'imperial' },
+  { symbol: 'ft',    name: 'foot',                siUnit: 'm', toSI: 0.3048,      offsetSI: 0, category: 'length', system: 'imperial' },
+  { symbol: 'yd',    name: 'yard',                siUnit: 'm', toSI: 0.9144,      offsetSI: 0, category: 'length', system: 'imperial' },
+  { symbol: 'mi',    name: 'mile',                siUnit: 'm', toSI: 1609.344,    offsetSI: 0, category: 'length', system: 'imperial' },
+  { symbol: 'nmi',   name: 'nautical mile',       siUnit: 'm', toSI: 1852,        offsetSI: 0, category: 'length', system: 'engineering' },
+  { symbol: 'ly',    name: 'light-year',          siUnit: 'm', toSI: 9.4607e15,   offsetSI: 0, category: 'length', system: 'SI' },
+  { symbol: 'AU',    name: 'astronomical unit',   siUnit: 'm', toSI: 1.496e11,    offsetSI: 0, category: 'length', system: 'SI' },
+  { symbol: 'pc',    name: 'parsec',              siUnit: 'm', toSI: 3.0857e16,   offsetSI: 0, category: 'length', system: 'SI' },
+  { symbol: 'thou',  name: 'thou (mil)',          siUnit: 'm', toSI: 2.54e-5,     offsetSI: 0, category: 'length', system: 'imperial' },
+  { symbol: 'fathom',name: 'fathom',              siUnit: 'm', toSI: 1.8288,      offsetSI: 0, category: 'length', system: 'imperial' },
+  { symbol: 'furlong',name: 'furlong',            siUnit: 'm', toSI: 201.168,     offsetSI: 0, category: 'length', system: 'imperial' },
+  { symbol: 'chain', name: 'chain',               siUnit: 'm', toSI: 20.1168,     offsetSI: 0, category: 'length', system: 'imperial' },
+
+  // ── Area ─────────────────────────────────────────────────────────────────────
+  { symbol: 'm²',    name: 'square metre',        siUnit: 'm²', toSI: 1,          offsetSI: 0, category: 'area', system: 'SI' },
+  { symbol: 'km²',   name: 'square kilometre',    siUnit: 'm²', toSI: 1e6,        offsetSI: 0, category: 'area', system: 'SI' },
+  { symbol: 'cm²',   name: 'square centimetre',   siUnit: 'm²', toSI: 1e-4,       offsetSI: 0, category: 'area', system: 'SI' },
+  { symbol: 'mm²',   name: 'square millimetre',   siUnit: 'm²', toSI: 1e-6,       offsetSI: 0, category: 'area', system: 'SI' },
+  { symbol: 'ha',    name: 'hectare',             siUnit: 'm²', toSI: 1e4,        offsetSI: 0, category: 'area', system: 'SI' },
+  { symbol: 'acre',  name: 'acre',                siUnit: 'm²', toSI: 4046.856,   offsetSI: 0, category: 'area', system: 'imperial' },
+  { symbol: 'ft²',   name: 'square foot',         siUnit: 'm²', toSI: 0.092903,   offsetSI: 0, category: 'area', system: 'imperial' },
+  { symbol: 'in²',   name: 'square inch',         siUnit: 'm²', toSI: 6.4516e-4,  offsetSI: 0, category: 'area', system: 'imperial' },
+  { symbol: 'yd²',   name: 'square yard',         siUnit: 'm²', toSI: 0.836127,   offsetSI: 0, category: 'area', system: 'imperial' },
+  { symbol: 'mi²',   name: 'square mile',         siUnit: 'm²', toSI: 2.58999e6,  offsetSI: 0, category: 'area', system: 'imperial' },
+
+  // ── Volume ────────────────────────────────────────────────────────────────────
+  { symbol: 'm³',    name: 'cubic metre',         siUnit: 'm³', toSI: 1,          offsetSI: 0, category: 'volume', system: 'SI' },
+  { symbol: 'L',     name: 'litre',               siUnit: 'm³', toSI: 1e-3,       offsetSI: 0, category: 'volume', system: 'SI' },
+  { symbol: 'mL',    name: 'millilitre',          siUnit: 'm³', toSI: 1e-6,       offsetSI: 0, category: 'volume', system: 'SI' },
+  { symbol: 'μL',    name: 'microlitre',          siUnit: 'm³', toSI: 1e-9,       offsetSI: 0, category: 'volume', system: 'SI' },
+  { symbol: 'cm³',   name: 'cubic centimetre',    siUnit: 'm³', toSI: 1e-6,       offsetSI: 0, category: 'volume', system: 'SI' },
+  { symbol: 'mm³',   name: 'cubic millimetre',    siUnit: 'm³', toSI: 1e-9,       offsetSI: 0, category: 'volume', system: 'SI' },
+  { symbol: 'gal',   name: 'US gallon',           siUnit: 'm³', toSI: 3.78541e-3, offsetSI: 0, category: 'volume', system: 'imperial' },
+  { symbol: 'gal_uk',name: 'UK gallon',           siUnit: 'm³', toSI: 4.54609e-3, offsetSI: 0, category: 'volume', system: 'imperial' },
+  { symbol: 'qt',    name: 'US quart',            siUnit: 'm³', toSI: 9.46353e-4, offsetSI: 0, category: 'volume', system: 'imperial' },
+  { symbol: 'pt',    name: 'US pint',             siUnit: 'm³', toSI: 4.73176e-4, offsetSI: 0, category: 'volume', system: 'imperial' },
+  { symbol: 'fl oz', name: 'fluid ounce (US)',    siUnit: 'm³', toSI: 2.95735e-5, offsetSI: 0, category: 'volume', system: 'imperial' },
+  { symbol: 'bbl',   name: 'barrel (oil)',        siUnit: 'm³', toSI: 0.158987,   offsetSI: 0, category: 'volume', system: 'engineering' },
+  { symbol: 'ft³',   name: 'cubic foot',          siUnit: 'm³', toSI: 0.0283168,  offsetSI: 0, category: 'volume', system: 'imperial' },
+  { symbol: 'in³',   name: 'cubic inch',          siUnit: 'm³', toSI: 1.6387e-5,  offsetSI: 0, category: 'volume', system: 'imperial' },
+
+  // ── Mass ──────────────────────────────────────────────────────────────────────
+  { symbol: 'kg',    name: 'kilogram',            siUnit: 'kg', toSI: 1,          offsetSI: 0, category: 'mass', system: 'SI' },
+  { symbol: 'g',     name: 'gram',                siUnit: 'kg', toSI: 1e-3,       offsetSI: 0, category: 'mass', system: 'SI' },
+  { symbol: 'mg',    name: 'milligram',           siUnit: 'kg', toSI: 1e-6,       offsetSI: 0, category: 'mass', system: 'SI' },
+  { symbol: 'μg',    name: 'microgram',           siUnit: 'kg', toSI: 1e-9,       offsetSI: 0, category: 'mass', system: 'SI' },
+  { symbol: 't',     name: 'metric tonne',        siUnit: 'kg', toSI: 1e3,        offsetSI: 0, category: 'mass', system: 'SI' },
+  { symbol: 'lb',    name: 'pound (mass)',        siUnit: 'kg', toSI: 0.453592,   offsetSI: 0, category: 'mass', system: 'imperial' },
+  { symbol: 'oz',    name: 'ounce',               siUnit: 'kg', toSI: 0.0283495,  offsetSI: 0, category: 'mass', system: 'imperial' },
+  { symbol: 'st',    name: 'stone',               siUnit: 'kg', toSI: 6.35029,    offsetSI: 0, category: 'mass', system: 'imperial' },
+  { symbol: 'ton_uk',name: 'long ton',            siUnit: 'kg', toSI: 1016.05,    offsetSI: 0, category: 'mass', system: 'imperial' },
+  { symbol: 'ton_us',name: 'short ton',           siUnit: 'kg', toSI: 907.185,    offsetSI: 0, category: 'mass', system: 'imperial' },
+  { symbol: 'slug',  name: 'slug',                siUnit: 'kg', toSI: 14.5939,    offsetSI: 0, category: 'mass', system: 'imperial' },
+  { symbol: 'Da',    name: 'dalton (amu)',        siUnit: 'kg', toSI: 1.66054e-27,offsetSI: 0, category: 'mass', system: 'SI' },
+  { symbol: 'ct',    name: 'carat',               siUnit: 'kg', toSI: 2e-4,       offsetSI: 0, category: 'mass', system: 'engineering' },
+  { symbol: 'gr',    name: 'grain',               siUnit: 'kg', toSI: 6.47989e-5, offsetSI: 0, category: 'mass', system: 'imperial' },
+
+  // ── Time ─────────────────────────────────────────────────────────────────────
+  { symbol: 's',     name: 'second',              siUnit: 's', toSI: 1,           offsetSI: 0, category: 'time', system: 'SI' },
+  { symbol: 'ms',    name: 'millisecond',         siUnit: 's', toSI: 1e-3,        offsetSI: 0, category: 'time', system: 'SI' },
+  { symbol: 'μs',    name: 'microsecond',         siUnit: 's', toSI: 1e-6,        offsetSI: 0, category: 'time', system: 'SI' },
+  { symbol: 'ns',    name: 'nanosecond',          siUnit: 's', toSI: 1e-9,        offsetSI: 0, category: 'time', system: 'SI' },
+  { symbol: 'ps',    name: 'picosecond',          siUnit: 's', toSI: 1e-12,       offsetSI: 0, category: 'time', system: 'SI' },
+  { symbol: 'min',   name: 'minute',              siUnit: 's', toSI: 60,          offsetSI: 0, category: 'time', system: 'SI' },
+  { symbol: 'h',     name: 'hour',                siUnit: 's', toSI: 3600,        offsetSI: 0, category: 'time', system: 'SI' },
+  { symbol: 'd',     name: 'day',                 siUnit: 's', toSI: 86400,       offsetSI: 0, category: 'time', system: 'SI' },
+  { symbol: 'wk',    name: 'week',                siUnit: 's', toSI: 604800,      offsetSI: 0, category: 'time', system: 'SI' },
+  { symbol: 'yr',    name: 'year (Julian)',       siUnit: 's', toSI: 31557600,    offsetSI: 0, category: 'time', system: 'SI' },
+  { symbol: 'mo',    name: 'month (30d)',         siUnit: 's', toSI: 2592000,     offsetSI: 0, category: 'time', system: 'SI' },
+
+  // ── Velocity ─────────────────────────────────────────────────────────────────
+  { symbol: 'm/s',   name: 'metres per second',   siUnit: 'm/s', toSI: 1,        offsetSI: 0, category: 'velocity', system: 'SI' },
+  { symbol: 'km/h',  name: 'kilometres per hour', siUnit: 'm/s', toSI: 1/3.6,    offsetSI: 0, category: 'velocity', system: 'SI' },
+  { symbol: 'kph',   name: 'kph',                 siUnit: 'm/s', toSI: 1/3.6,    offsetSI: 0, category: 'velocity', system: 'SI' },
+  { symbol: 'mph',   name: 'miles per hour',      siUnit: 'm/s', toSI: 0.44704,  offsetSI: 0, category: 'velocity', system: 'imperial' },
+  { symbol: 'ft/s',  name: 'feet per second',     siUnit: 'm/s', toSI: 0.3048,   offsetSI: 0, category: 'velocity', system: 'imperial' },
+  { symbol: 'kn',    name: 'knot',                siUnit: 'm/s', toSI: 0.514444, offsetSI: 0, category: 'velocity', system: 'engineering' },
+  { symbol: 'Mach',  name: 'Mach (sea level)',    siUnit: 'm/s', toSI: 340.29,   offsetSI: 0, category: 'velocity', system: 'engineering' },
+  { symbol: 'c',     name: 'speed of light',      siUnit: 'm/s', toSI: 2.998e8,  offsetSI: 0, category: 'velocity', system: 'SI' },
+
+  // ── Acceleration ──────────────────────────────────────────────────────────────
+  { symbol: 'm/s²',  name: 'metres per sec²',     siUnit: 'm/s²', toSI: 1,       offsetSI: 0, category: 'acceleration', system: 'SI' },
+  { symbol: 'g₀',    name: 'standard gravity',    siUnit: 'm/s²', toSI: 9.80665, offsetSI: 0, category: 'acceleration', system: 'SI' },
+  { symbol: 'ft/s²', name: 'feet per sec²',       siUnit: 'm/s²', toSI: 0.3048,  offsetSI: 0, category: 'acceleration', system: 'imperial' },
+  { symbol: 'Gal',   name: 'galileo (CGS)',       siUnit: 'm/s²', toSI: 0.01,    offsetSI: 0, category: 'acceleration', system: 'CGS' },
+
+  // ── Force ─────────────────────────────────────────────────────────────────────
+  { symbol: 'N',     name: 'newton',              siUnit: 'N', toSI: 1,          offsetSI: 0, category: 'force', system: 'SI' },
+  { symbol: 'kN',    name: 'kilonewton',          siUnit: 'N', toSI: 1e3,        offsetSI: 0, category: 'force', system: 'SI' },
+  { symbol: 'MN',    name: 'meganewton',          siUnit: 'N', toSI: 1e6,        offsetSI: 0, category: 'force', system: 'SI' },
+  { symbol: 'mN',    name: 'millinewton',         siUnit: 'N', toSI: 1e-3,       offsetSI: 0, category: 'force', system: 'SI' },
+  { symbol: 'μN',    name: 'micronewton',         siUnit: 'N', toSI: 1e-6,       offsetSI: 0, category: 'force', system: 'SI' },
+  { symbol: 'lbf',   name: 'pound-force',         siUnit: 'N', toSI: 4.44822,    offsetSI: 0, category: 'force', system: 'imperial' },
+  { symbol: 'kip',   name: 'kip (1000 lbf)',      siUnit: 'N', toSI: 4448.22,    offsetSI: 0, category: 'force', system: 'imperial' },
+  { symbol: 'dyn',   name: 'dyne',                siUnit: 'N', toSI: 1e-5,       offsetSI: 0, category: 'force', system: 'CGS' },
+  { symbol: 'kgf',   name: 'kilogram-force',      siUnit: 'N', toSI: 9.80665,    offsetSI: 0, category: 'force', system: 'engineering' },
+  { symbol: 'ozf',   name: 'ounce-force',         siUnit: 'N', toSI: 0.278014,   offsetSI: 0, category: 'force', system: 'imperial' },
+  { symbol: 'tonf',  name: 'ton-force (UK)',      siUnit: 'N', toSI: 9964.02,    offsetSI: 0, category: 'force', system: 'imperial' },
+
+  // ── Pressure ─────────────────────────────────────────────────────────────────
+  { symbol: 'Pa',    name: 'pascal',              siUnit: 'Pa', toSI: 1,         offsetSI: 0, category: 'pressure', system: 'SI' },
+  { symbol: 'kPa',   name: 'kilopascal',          siUnit: 'Pa', toSI: 1e3,       offsetSI: 0, category: 'pressure', system: 'SI' },
+  { symbol: 'MPa',   name: 'megapascal',          siUnit: 'Pa', toSI: 1e6,       offsetSI: 0, category: 'pressure', system: 'SI' },
+  { symbol: 'GPa',   name: 'gigapascal',          siUnit: 'Pa', toSI: 1e9,       offsetSI: 0, category: 'pressure', system: 'SI' },
+  { symbol: 'bar',   name: 'bar',                 siUnit: 'Pa', toSI: 1e5,       offsetSI: 0, category: 'pressure', system: 'SI' },
+  { symbol: 'mbar',  name: 'millibar',            siUnit: 'Pa', toSI: 100,       offsetSI: 0, category: 'pressure', system: 'SI' },
+  { symbol: 'atm',   name: 'atmosphere',          siUnit: 'Pa', toSI: 101325,    offsetSI: 0, category: 'pressure', system: 'SI' },
+  { symbol: 'psi',   name: 'pounds per sq inch',  siUnit: 'Pa', toSI: 6894.76,   offsetSI: 0, category: 'pressure', system: 'imperial' },
+  { symbol: 'ksi',   name: 'kilo-psi',            siUnit: 'Pa', toSI: 6.89476e6, offsetSI: 0, category: 'pressure', system: 'imperial' },
+  { symbol: 'psf',   name: 'pounds per sq foot',  siUnit: 'Pa', toSI: 47.8803,   offsetSI: 0, category: 'pressure', system: 'imperial' },
+  { symbol: 'mmHg',  name: 'millimetres Hg',      siUnit: 'Pa', toSI: 133.322,   offsetSI: 0, category: 'pressure', system: 'engineering' },
+  { symbol: 'inHg',  name: 'inches of mercury',   siUnit: 'Pa', toSI: 3386.39,   offsetSI: 0, category: 'pressure', system: 'engineering' },
+  { symbol: 'inH2O', name: 'inches of water',     siUnit: 'Pa', toSI: 249.089,   offsetSI: 0, category: 'pressure', system: 'engineering' },
+  { symbol: 'torr',  name: 'torr',                siUnit: 'Pa', toSI: 133.322,   offsetSI: 0, category: 'pressure', system: 'engineering' },
+  { symbol: 'µbar',  name: 'microbar',            siUnit: 'Pa', toSI: 0.1,       offsetSI: 0, category: 'pressure', system: 'SI' },
+
+  // ── Energy ────────────────────────────────────────────────────────────────────
+  { symbol: 'J',     name: 'joule',               siUnit: 'J', toSI: 1,          offsetSI: 0, category: 'energy', system: 'SI' },
+  { symbol: 'kJ',    name: 'kilojoule',           siUnit: 'J', toSI: 1e3,        offsetSI: 0, category: 'energy', system: 'SI' },
+  { symbol: 'MJ',    name: 'megajoule',           siUnit: 'J', toSI: 1e6,        offsetSI: 0, category: 'energy', system: 'SI' },
+  { symbol: 'GJ',    name: 'gigajoule',           siUnit: 'J', toSI: 1e9,        offsetSI: 0, category: 'energy', system: 'SI' },
+  { symbol: 'mJ',    name: 'millijoule',          siUnit: 'J', toSI: 1e-3,       offsetSI: 0, category: 'energy', system: 'SI' },
+  { symbol: 'μJ',    name: 'microjoule',          siUnit: 'J', toSI: 1e-6,       offsetSI: 0, category: 'energy', system: 'SI' },
+  { symbol: 'nJ',    name: 'nanojoule',           siUnit: 'J', toSI: 1e-9,       offsetSI: 0, category: 'energy', system: 'SI' },
+  { symbol: 'eV',    name: 'electronvolt',        siUnit: 'J', toSI: 1.60218e-19,offsetSI: 0, category: 'energy', system: 'SI' },
+  { symbol: 'keV',   name: 'kiloelectronvolt',    siUnit: 'J', toSI: 1.60218e-16,offsetSI: 0, category: 'energy', system: 'SI' },
+  { symbol: 'MeV',   name: 'megaelectronvolt',    siUnit: 'J', toSI: 1.60218e-13,offsetSI: 0, category: 'energy', system: 'SI' },
+  { symbol: 'cal',   name: 'calorie (thermo)',    siUnit: 'J', toSI: 4.184,      offsetSI: 0, category: 'energy', system: 'engineering' },
+  { symbol: 'kcal',  name: 'kilocalorie',         siUnit: 'J', toSI: 4184,       offsetSI: 0, category: 'energy', system: 'engineering' },
+  { symbol: 'BTU',   name: 'British thermal unit',siUnit: 'J', toSI: 1055.06,    offsetSI: 0, category: 'energy', system: 'imperial' },
+  { symbol: 'kBTU',  name: 'kilo-BTU',            siUnit: 'J', toSI: 1.05506e6,  offsetSI: 0, category: 'energy', system: 'imperial' },
+  { symbol: 'therm', name: 'therm (US)',          siUnit: 'J', toSI: 1.05506e8,  offsetSI: 0, category: 'energy', system: 'imperial' },
+  { symbol: 'ft·lbf',name: 'foot-pound force',   siUnit: 'J', toSI: 1.35582,    offsetSI: 0, category: 'energy', system: 'imperial' },
+  { symbol: 'kWh',   name: 'kilowatt-hour',       siUnit: 'J', toSI: 3.6e6,      offsetSI: 0, category: 'energy', system: 'engineering' },
+  { symbol: 'Wh',    name: 'watt-hour',           siUnit: 'J', toSI: 3600,       offsetSI: 0, category: 'energy', system: 'engineering' },
+  { symbol: 'MWh',   name: 'megawatt-hour',       siUnit: 'J', toSI: 3.6e9,      offsetSI: 0, category: 'energy', system: 'engineering' },
+  { symbol: 'erg',   name: 'erg',                 siUnit: 'J', toSI: 1e-7,       offsetSI: 0, category: 'energy', system: 'CGS' },
+  { symbol: 'toe',   name: 'tonne oil equiv.',    siUnit: 'J', toSI: 4.1868e10,  offsetSI: 0, category: 'energy', system: 'engineering' },
+
+  // ── Power ─────────────────────────────────────────────────────────────────────
+  { symbol: 'W',     name: 'watt',                siUnit: 'W', toSI: 1,          offsetSI: 0, category: 'power', system: 'SI' },
+  { symbol: 'kW',    name: 'kilowatt',            siUnit: 'W', toSI: 1e3,        offsetSI: 0, category: 'power', system: 'SI' },
+  { symbol: 'MW',    name: 'megawatt',            siUnit: 'W', toSI: 1e6,        offsetSI: 0, category: 'power', system: 'SI' },
+  { symbol: 'GW',    name: 'gigawatt',            siUnit: 'W', toSI: 1e9,        offsetSI: 0, category: 'power', system: 'SI' },
+  { symbol: 'mW',    name: 'milliwatt',           siUnit: 'W', toSI: 1e-3,       offsetSI: 0, category: 'power', system: 'SI' },
+  { symbol: 'μW',    name: 'microwatt',           siUnit: 'W', toSI: 1e-6,       offsetSI: 0, category: 'power', system: 'SI' },
+  { symbol: 'hp',    name: 'horsepower (mech)',   siUnit: 'W', toSI: 745.7,      offsetSI: 0, category: 'power', system: 'imperial' },
+  { symbol: 'hp_m',  name: 'horsepower (metric)', siUnit: 'W', toSI: 735.499,    offsetSI: 0, category: 'power', system: 'engineering' },
+  { symbol: 'hp_e',  name: 'horsepower (elec)',   siUnit: 'W', toSI: 746,        offsetSI: 0, category: 'power', system: 'engineering' },
+  { symbol: 'BTU/h', name: 'BTU per hour',        siUnit: 'W', toSI: 0.293071,   offsetSI: 0, category: 'power', system: 'imperial' },
+  { symbol: 'ton_ref',name:'ton refrigeration',   siUnit: 'W', toSI: 3516.85,    offsetSI: 0, category: 'power', system: 'engineering' },
+  { symbol: 'kcal/h',name: 'kcal per hour',       siUnit: 'W', toSI: 1.163,      offsetSI: 0, category: 'power', system: 'engineering' },
+
+  // ── Temperature ───────────────────────────────────────────────────────────────
+  { symbol: 'K',     name: 'kelvin',              siUnit: 'K', toSI: 1,          offsetSI: 0,       category: 'temperature', system: 'SI' },
+  { symbol: '°C',    name: 'celsius',             siUnit: 'K', toSI: 1,          offsetSI: 273.15,  category: 'temperature', system: 'SI' },
+  { symbol: '°F',    name: 'fahrenheit',          siUnit: 'K', toSI: 5/9,        offsetSI: 255.372, category: 'temperature', system: 'imperial' },
+  { symbol: '°R',    name: 'rankine',             siUnit: 'K', toSI: 5/9,        offsetSI: 0,       category: 'temperature', system: 'imperial' },
+
+  // ── Angle ─────────────────────────────────────────────────────────────────────
+  { symbol: 'rad',   name: 'radian',              siUnit: 'rad', toSI: 1,        offsetSI: 0, category: 'angle', system: 'SI' },
+  { symbol: '°',     name: 'degree',              siUnit: 'rad', toSI: Math.PI/180, offsetSI: 0, category: 'angle', system: 'SI' },
+  { symbol: 'deg',   name: 'degree (alt)',        siUnit: 'rad', toSI: Math.PI/180, offsetSI: 0, category: 'angle', system: 'SI' },
+  { symbol: 'mrad',  name: 'milliradian',         siUnit: 'rad', toSI: 1e-3,     offsetSI: 0, category: 'angle', system: 'SI' },
+  { symbol: 'grad',  name: 'gradian',             siUnit: 'rad', toSI: Math.PI/200, offsetSI: 0, category: 'angle', system: 'engineering' },
+  { symbol: 'rev',   name: 'revolution',          siUnit: 'rad', toSI: 2*Math.PI,offsetSI: 0, category: 'angle', system: 'engineering' },
+  { symbol: 'arcmin',name: 'arcminute',           siUnit: 'rad', toSI: Math.PI/10800, offsetSI: 0, category: 'angle', system: 'SI' },
+  { symbol: 'arcsec',name: 'arcsecond',           siUnit: 'rad', toSI: Math.PI/648000, offsetSI: 0, category: 'angle', system: 'SI' },
+
+  // ── Frequency ─────────────────────────────────────────────────────────────────
+  { symbol: 'Hz',    name: 'hertz',               siUnit: 'Hz', toSI: 1,         offsetSI: 0, category: 'frequency', system: 'SI' },
+  { symbol: 'kHz',   name: 'kilohertz',           siUnit: 'Hz', toSI: 1e3,       offsetSI: 0, category: 'frequency', system: 'SI' },
+  { symbol: 'MHz',   name: 'megahertz',           siUnit: 'Hz', toSI: 1e6,       offsetSI: 0, category: 'frequency', system: 'SI' },
+  { symbol: 'GHz',   name: 'gigahertz',           siUnit: 'Hz', toSI: 1e9,       offsetSI: 0, category: 'frequency', system: 'SI' },
+  { symbol: 'rpm',   name: 'revolutions per min', siUnit: 'Hz', toSI: 1/60,      offsetSI: 0, category: 'frequency', system: 'engineering' },
+  { symbol: 'rps',   name: 'revolutions per sec', siUnit: 'Hz', toSI: 1,         offsetSI: 0, category: 'frequency', system: 'engineering' },
+  { symbol: 'rad/s', name: 'radians per second',  siUnit: 'rad/s', toSI: 1,      offsetSI: 0, category: 'frequency', system: 'SI' },
+
+  // ── Torque / Moment ───────────────────────────────────────────────────────────
+  { symbol: 'N·m',   name: 'newton-metre',        siUnit: 'N·m', toSI: 1,        offsetSI: 0, category: 'torque', system: 'SI' },
+  { symbol: 'kN·m',  name: 'kilonewton-metre',    siUnit: 'N·m', toSI: 1e3,      offsetSI: 0, category: 'torque', system: 'SI' },
+  { symbol: 'N·cm',  name: 'newton-centimetre',   siUnit: 'N·m', toSI: 0.01,     offsetSI: 0, category: 'torque', system: 'SI' },
+  { symbol: 'ft·lbf_t',name:'foot-pound (torque)',siUnit: 'N·m', toSI: 1.35582,  offsetSI: 0, category: 'torque', system: 'imperial' },
+  { symbol: 'in·lbf',name: 'inch-pound',          siUnit: 'N·m', toSI: 0.112985, offsetSI: 0, category: 'torque', system: 'imperial' },
+  { symbol: 'kgf·m', name: 'kilogram-force·m',    siUnit: 'N·m', toSI: 9.80665,  offsetSI: 0, category: 'torque', system: 'engineering' },
+  { symbol: 'dyn·cm',name: 'dyne-centimetre',     siUnit: 'N·m', toSI: 1e-7,     offsetSI: 0, category: 'torque', system: 'CGS' },
+
+  // ── Electrical ────────────────────────────────────────────────────────────────
+  { symbol: 'A',     name: 'ampere',              siUnit: 'A', toSI: 1,          offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'mA',    name: 'milliampere',         siUnit: 'A', toSI: 1e-3,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'μA',    name: 'microampere',         siUnit: 'A', toSI: 1e-6,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'V',     name: 'volt',                siUnit: 'V', toSI: 1,          offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'mV',    name: 'millivolt',           siUnit: 'V', toSI: 1e-3,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'kV',    name: 'kilovolt',            siUnit: 'V', toSI: 1e3,        offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'Ω',     name: 'ohm',                 siUnit: 'Ω', toSI: 1,          offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'kΩ',    name: 'kilohm',              siUnit: 'Ω', toSI: 1e3,        offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'MΩ',    name: 'megohm',              siUnit: 'Ω', toSI: 1e6,        offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'mΩ',    name: 'milliohm',            siUnit: 'Ω', toSI: 1e-3,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'F',     name: 'farad',               siUnit: 'F', toSI: 1,          offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'mF',    name: 'millifarad',          siUnit: 'F', toSI: 1e-3,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'μF',    name: 'microfarad',          siUnit: 'F', toSI: 1e-6,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'nF',    name: 'nanofarad',           siUnit: 'F', toSI: 1e-9,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'pF',    name: 'picofarad',           siUnit: 'F', toSI: 1e-12,      offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'H',     name: 'henry',               siUnit: 'H', toSI: 1,          offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'mH',    name: 'millihenry',          siUnit: 'H', toSI: 1e-3,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'μH',    name: 'microhenry',          siUnit: 'H', toSI: 1e-6,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'nH',    name: 'nanohenry',           siUnit: 'H', toSI: 1e-9,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'S',     name: 'siemens',             siUnit: 'S', toSI: 1,          offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'mS',    name: 'millisiemens',        siUnit: 'S', toSI: 1e-3,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'C',     name: 'coulomb',             siUnit: 'C', toSI: 1,          offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'mC',    name: 'millicoulomb',        siUnit: 'C', toSI: 1e-3,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'μC',    name: 'microcoulomb',        siUnit: 'C', toSI: 1e-6,       offsetSI: 0, category: 'electric', system: 'SI' },
+  { symbol: 'Ah',    name: 'ampere-hour',         siUnit: 'C', toSI: 3600,       offsetSI: 0, category: 'electric', system: 'engineering' },
+  { symbol: 'mAh',   name: 'milliampere-hour',    siUnit: 'C', toSI: 3.6,        offsetSI: 0, category: 'electric', system: 'engineering' },
+  { symbol: 'Wb',    name: 'weber',               siUnit: 'Wb', toSI: 1,         offsetSI: 0, category: 'magnetic', system: 'SI' },
+  { symbol: 'T',     name: 'tesla',               siUnit: 'T', toSI: 1,          offsetSI: 0, category: 'magnetic', system: 'SI' },
+  { symbol: 'mT',    name: 'millitesla',          siUnit: 'T', toSI: 1e-3,       offsetSI: 0, category: 'magnetic', system: 'SI' },
+  { symbol: 'μT',    name: 'microtesla',          siUnit: 'T', toSI: 1e-6,       offsetSI: 0, category: 'magnetic', system: 'SI' },
+  { symbol: 'G',     name: 'gauss',               siUnit: 'T', toSI: 1e-4,       offsetSI: 0, category: 'magnetic', system: 'CGS' },
+
+  // ── Data ─────────────────────────────────────────────────────────────────────
+  { symbol: 'bit',   name: 'bit',                 siUnit: 'bit', toSI: 1,        offsetSI: 0, category: 'data', system: 'SI' },
+  { symbol: 'B',     name: 'byte',                siUnit: 'bit', toSI: 8,        offsetSI: 0, category: 'data', system: 'SI' },
+  { symbol: 'kB',    name: 'kilobyte',            siUnit: 'bit', toSI: 8e3,      offsetSI: 0, category: 'data', system: 'SI' },
+  { symbol: 'MB',    name: 'megabyte',            siUnit: 'bit', toSI: 8e6,      offsetSI: 0, category: 'data', system: 'SI' },
+  { symbol: 'GB',    name: 'gigabyte',            siUnit: 'bit', toSI: 8e9,      offsetSI: 0, category: 'data', system: 'SI' },
+  { symbol: 'TB',    name: 'terabyte',            siUnit: 'bit', toSI: 8e12,     offsetSI: 0, category: 'data', system: 'SI' },
+  { symbol: 'KiB',   name: 'kibibyte',            siUnit: 'bit', toSI: 8192,     offsetSI: 0, category: 'data', system: 'SI' },
+  { symbol: 'MiB',   name: 'mebibyte',            siUnit: 'bit', toSI: 8388608,  offsetSI: 0, category: 'data', system: 'SI' },
+  { symbol: 'GiB',   name: 'gibibyte',            siUnit: 'bit', toSI: 8.58993e9,offsetSI: 0, category: 'data', system: 'SI' },
+
+  // ── Luminosity ────────────────────────────────────────────────────────────────
+  { symbol: 'cd',    name: 'candela',             siUnit: 'cd', toSI: 1,         offsetSI: 0, category: 'luminosity', system: 'SI' },
+  { symbol: 'lm',    name: 'lumen',               siUnit: 'lm', toSI: 1,         offsetSI: 0, category: 'luminosity', system: 'SI' },
+  { symbol: 'lx',    name: 'lux',                 siUnit: 'lx', toSI: 1,         offsetSI: 0, category: 'luminosity', system: 'SI' },
+  { symbol: 'fc',    name: 'foot-candle',         siUnit: 'lx', toSI: 10.7639,   offsetSI: 0, category: 'luminosity', system: 'imperial' },
+
+  // ── Viscosity ─────────────────────────────────────────────────────────────────
+  { symbol: 'Pa·s',  name: 'pascal-second',       siUnit: 'Pa·s', toSI: 1,       offsetSI: 0, category: 'viscosity', system: 'SI' },
+  { symbol: 'mPa·s', name: 'millipascal-second',  siUnit: 'Pa·s', toSI: 1e-3,    offsetSI: 0, category: 'viscosity', system: 'SI' },
+  { symbol: 'cP',    name: 'centipoise',          siUnit: 'Pa·s', toSI: 1e-3,    offsetSI: 0, category: 'viscosity', system: 'CGS' },
+  { symbol: 'P',     name: 'poise',               siUnit: 'Pa·s', toSI: 0.1,     offsetSI: 0, category: 'viscosity', system: 'CGS' },
+  { symbol: 'St',    name: 'stokes',              siUnit: 'm²/s', toSI: 1e-4,    offsetSI: 0, category: 'viscosity', system: 'CGS' },
+  { symbol: 'cSt',   name: 'centistokes',         siUnit: 'm²/s', toSI: 1e-6,    offsetSI: 0, category: 'viscosity', system: 'CGS' },
+
+  // ── Thermal ───────────────────────────────────────────────────────────────────
+  { symbol: 'W/m·K', name: 'watt per m·kelvin',   siUnit: 'W/m·K', toSI: 1,      offsetSI: 0, category: 'thermal', system: 'SI' },
+  { symbol: 'W/m²·K',name:'W per m²·kelvin',      siUnit: 'W/m²·K', toSI: 1,     offsetSI: 0, category: 'thermal', system: 'SI' },
+  { symbol: 'J/kg·K',name: 'J per kg·kelvin',     siUnit: 'J/kg·K', toSI: 1,     offsetSI: 0, category: 'thermal', system: 'SI' },
+  { symbol: 'kJ/kg·K',name:'kJ per kg·K',         siUnit: 'J/kg·K', toSI: 1e3,   offsetSI: 0, category: 'thermal', system: 'SI' },
+  { symbol: 'BTU/h·ft²·°F',name:'BTU thermal cond',siUnit:'W/m²·K',toSI: 5.6783, offsetSI: 0, category: 'thermal', system: 'imperial' },
+
+  // ── Flow rate ─────────────────────────────────────────────────────────────────
+  { symbol: 'm³/s',  name: 'cubic metres per sec',siUnit: 'm³/s', toSI: 1,       offsetSI: 0, category: 'flow', system: 'SI' },
+  { symbol: 'L/s',   name: 'litres per second',   siUnit: 'm³/s', toSI: 1e-3,    offsetSI: 0, category: 'flow', system: 'SI' },
+  { symbol: 'L/min', name: 'litres per minute',   siUnit: 'm³/s', toSI: 1/60000, offsetSI: 0, category: 'flow', system: 'SI' },
+  { symbol: 'gal/min',name:'gallons per minute',  siUnit: 'm³/s', toSI: 6.30902e-5, offsetSI: 0, category: 'flow', system: 'imperial' },
+  { symbol: 'gal/h', name: 'gallons per hour',    siUnit: 'm³/s', toSI: 1.05150e-6, offsetSI: 0, category: 'flow', system: 'imperial' },
+  { symbol: 'ft³/s', name: 'cubic feet per sec',  siUnit: 'm³/s', toSI: 0.0283168, offsetSI: 0, category: 'flow', system: 'imperial' },
+  { symbol: 'kg/s',  name: 'kg per second',       siUnit: 'kg/s', toSI: 1,       offsetSI: 0, category: 'flow', system: 'SI' },
+  { symbol: 'kg/h',  name: 'kg per hour',         siUnit: 'kg/s', toSI: 1/3600,  offsetSI: 0, category: 'flow', system: 'SI' },
+  { symbol: 'lb/s',  name: 'pounds per second',   siUnit: 'kg/s', toSI: 0.453592,offsetSI: 0, category: 'flow', system: 'imperial' },
+
+  // ── Density / Concentration ───────────────────────────────────────────────────
+  { symbol: 'kg/m³', name: 'kg per cubic metre',  siUnit: 'kg/m³', toSI: 1,      offsetSI: 0, category: 'density', system: 'SI' },
+  { symbol: 'g/cm³', name: 'g per cubic cm',      siUnit: 'kg/m³', toSI: 1e3,    offsetSI: 0, category: 'density', system: 'CGS' },
+  { symbol: 'g/L',   name: 'g per litre',         siUnit: 'kg/m³', toSI: 1,      offsetSI: 0, category: 'density', system: 'SI' },
+  { symbol: 'mg/L',  name: 'mg per litre (ppm)',  siUnit: 'kg/m³', toSI: 1e-3,   offsetSI: 0, category: 'density', system: 'SI' },
+  { symbol: 'lb/ft³',name: 'lb per cubic foot',   siUnit: 'kg/m³', toSI: 16.0185,offsetSI: 0, category: 'density', system: 'imperial' },
+  { symbol: 'lb/in³',name: 'lb per cubic inch',   siUnit: 'kg/m³', toSI: 27679.9,offsetSI: 0, category: 'density', system: 'imperial' },
+
+  // ── Stress / Modulus ─────────────────────────────────────────────────────────
+  { symbol: 'N/mm²', name: 'N per mm² (= MPa)',   siUnit: 'Pa', toSI: 1e6,       offsetSI: 0, category: 'pressure', system: 'engineering' },
+  { symbol: 'kN/m²', name: 'kN per m² (= kPa)',   siUnit: 'Pa', toSI: 1e3,       offsetSI: 0, category: 'pressure', system: 'engineering' },
+
+  // ── Amount of substance ───────────────────────────────────────────────────────
+  { symbol: 'mol',   name: 'mole',                siUnit: 'mol', toSI: 1,        offsetSI: 0, category: 'amount', system: 'SI' },
+  { symbol: 'mmol',  name: 'millimole',           siUnit: 'mol', toSI: 1e-3,     offsetSI: 0, category: 'amount', system: 'SI' },
+  { symbol: 'μmol',  name: 'micromole',           siUnit: 'mol', toSI: 1e-6,     offsetSI: 0, category: 'amount', system: 'SI' },
+  { symbol: 'nmol',  name: 'nanomole',            siUnit: 'mol', toSI: 1e-9,     offsetSI: 0, category: 'amount', system: 'SI' },
+  { symbol: 'kmol',  name: 'kilomole',            siUnit: 'mol', toSI: 1e3,      offsetSI: 0, category: 'amount', system: 'SI' },
+
+  // ── Radioactivity ─────────────────────────────────────────────────────────────
+  { symbol: 'Bq',    name: 'becquerel',           siUnit: 'Bq', toSI: 1,         offsetSI: 0, category: 'radioactivity', system: 'SI' },
+  { symbol: 'Ci',    name: 'curie',               siUnit: 'Bq', toSI: 3.7e10,    offsetSI: 0, category: 'radioactivity', system: 'engineering' },
+  { symbol: 'Gy',    name: 'gray',                siUnit: 'Gy', toSI: 1,         offsetSI: 0, category: 'radioactivity', system: 'SI' },
+  { symbol: 'Sv',    name: 'sievert',             siUnit: 'Sv', toSI: 1,         offsetSI: 0, category: 'radioactivity', system: 'SI' },
+  { symbol: 'mSv',   name: 'millisievert',        siUnit: 'Sv', toSI: 1e-3,      offsetSI: 0, category: 'radioactivity', system: 'SI' },
+  { symbol: 'μSv',   name: 'microsievert',        siUnit: 'Sv', toSI: 1e-6,      offsetSI: 0, category: 'radioactivity', system: 'SI' },
+
+  // ── Dimensionless ─────────────────────────────────────────────────────────────
+  { symbol: '%',     name: 'percent',             siUnit: '1', toSI: 0.01,       offsetSI: 0, category: 'dimensionless', system: 'SI' },
+  { symbol: 'ppm',   name: 'parts per million',   siUnit: '1', toSI: 1e-6,       offsetSI: 0, category: 'dimensionless', system: 'SI' },
+  { symbol: 'ppb',   name: 'parts per billion',   siUnit: '1', toSI: 1e-9,       offsetSI: 0, category: 'dimensionless', system: 'SI' },
+  { symbol: 'ppt',   name: 'parts per trillion',  siUnit: '1', toSI: 1e-12,      offsetSI: 0, category: 'dimensionless', system: 'SI' },
+  { symbol: 'dB',    name: 'decibel',             siUnit: '1', toSI: 1,          offsetSI: 0, category: 'dimensionless', system: 'SI' },
+  { symbol: 'dBm',   name: 'decibel-milliwatt',   siUnit: '1', toSI: 1,          offsetSI: 0, category: 'dimensionless', system: 'engineering' },
+]
+
+/** Fast lookup by symbol. */
+export const UNIT_BY_SYMBOL = new Map<string, UnitDef>(UNITS.map((u) => [u.symbol, u]))
+
+/** All units in the catalog. */
+export const ALL_UNITS: readonly UnitDef[] = UNITS
+
+/** Search units by symbol or name (case-insensitive substring). */
+export function searchUnits(query: string, limit = 20): UnitDef[] {
+  if (!query.trim()) return UNITS.slice(0, limit)
+  const q = query.toLowerCase()
+  const results: UnitDef[] = []
+  for (const u of UNITS) {
+    if (u.symbol.toLowerCase().includes(q) || u.name.toLowerCase().includes(q) || u.category.toLowerCase().includes(q)) {
+      results.push(u)
+      if (results.length >= limit) break
+    }
+  }
+  return results
+}

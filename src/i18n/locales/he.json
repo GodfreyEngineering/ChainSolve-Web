@@ -1759,6 +1759,11 @@
     "addInput": "הוסף קלט",
     "removeInput": "הסר קלט אחרון"
   },
+  "unitInput": {
+    "label": "קלט יחידה",
+    "searchPlaceholder": "חפש יחידות…",
+    "noResults": "לא נמצאו יחידות"
+  },
   "timeSeries": {
     "label": "קלט סדרת זמן",
     "drop": "גרור CSV או לחץ לעיון",

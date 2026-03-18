@@ -2360,6 +2360,11 @@
     "addInput": "入力を追加",
     "removeInput": "最後の入力を削除"
   },
+  "unitInput": {
+    "label": "単位入力",
+    "searchPlaceholder": "単位を検索…",
+    "noResults": "単位が見つかりません"
+  },
   "timeSeries": {
     "label": "時系列入力",
     "drop": "CSVをドロップまたはクリック",
