@@ -634,7 +634,7 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'optim.sensitivity':
     'Varies each input one at a time while holding others constant. Produces a tornado chart of parameter sensitivity.',
   'optim.doe':
-    'Generates experiment matrices: full factorial, Latin hypercube, or Sobol sequence. Outputs table of configurations.',
+    'Generates experiment matrices. Methods: "factorial", "lhs", "sobol", "box_behnken" (3+ factors), "ccc" (Central Composite Circumscribed, rotatable α=(2^k)^0.25), "ccf" (face-centered, fits ±1), "taguchi" (auto-selects L4/L8/L12/L16/L27). Outputs table of configurations.',
 
   // ── Machine Learning (5.06) ─────────────────────────────────────────────
   'ml.trainTestSplit':

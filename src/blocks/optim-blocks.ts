@@ -194,9 +194,9 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
       blockType: 'optim.doe',
       label: 'Design of Experiments',
     },
-    synonyms: ['DOE', 'factorial', 'latin hypercube', 'sobol'],
+    synonyms: ['DOE', 'factorial', 'latin hypercube', 'sobol', 'box behnken', 'central composite', 'taguchi'],
     tags: ['optimization', 'DOE'],
     description:
-      'Generates experiment matrices: full factorial, Latin hypercube, or Sobol sequence. Outputs table of configurations.',
+      'Generates experiment matrices. Methods: "factorial", "lhs" (Latin Hypercube), "sobol", "box_behnken" (3+ factors, no corners), "ccc" (Central Composite Circumscribed, rotatable), "ccf" (Central Composite Face-centered), "taguchi" (L-array). Outputs table of configurations.',
   })
 }
