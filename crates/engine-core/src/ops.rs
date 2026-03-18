@@ -7291,6 +7291,19 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── STEP/IGES Import (4.11) ─────────────────────────────────────────
+        "data.stepImport" => {
+            // CAD geometry parsing runs in the browser via cadImport.ts.
+            // The engine passes through stored tableData (x, y, z vertex columns).
+            match inputs.get("out") {
+                Some(v) => v.clone(),
+                None => Value::Table {
+                    columns: vec!["x".to_string(), "y".to_string(), "z".to_string()],
+                    rows: vec![],
+                },
+            }
+        }
+
         // ── HDF5 Export (4.7) ────────────────────────────────────────────────
         "data.hdf5Export" => {
             // HDF5 file generation runs in the browser via h5wasm.

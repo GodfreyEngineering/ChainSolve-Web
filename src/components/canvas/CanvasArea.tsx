@@ -73,6 +73,7 @@ import { FmuImportNode } from './nodes/FmuImportNode'
 import { PythonScriptNode } from './nodes/PythonScriptNode'
 import { CustomRustNode } from './nodes/CustomRustNode'
 import { Hdf5ImportNode } from './nodes/Hdf5ImportNode'
+import { CadImportNode } from './nodes/CadImportNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -250,6 +251,7 @@ const NODE_TYPES = {
   csPythonScript: PythonScriptNode,
   csCustomRust: CustomRustNode,
   csHdf5Import: Hdf5ImportNode,
+  csCADImport: CadImportNode,
 } as const
 
 const EDGE_TYPES = {

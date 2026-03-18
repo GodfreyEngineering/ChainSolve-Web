@@ -103,6 +103,7 @@ export type NodeKind =
   | 'csPythonScript'
   | 'csCustomRust'
   | 'csHdf5Import'
+  | 'csCADImport'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

@@ -45,7 +45,8 @@ registerAllBlocks()
 // 2.127: scripting.python is remapped to 'number' in bridge.ts; Python runs in Pyodide worker in UI.
 // 2.128: scripting.rust is remapped to 'number' in bridge.ts; Rust compilation/execution runs server-side.
 // 4.7: data.hdf5Import is remapped to 'tableInput' in bridge.ts; HDF5 parsing runs in the UI via h5wasm.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput', 'sqlQuery', 'timeSeries', 'unitInput', 'transferFunction', 'stateSpace', 'ctrl.zoh', 'ctrl.rateTransition', 'stateMachine', 'codeBlock', 'tirFileInput', 'viewport3d', 'nn.onnxInference', 'fmu.import', 'scripting.python', 'scripting.rust', 'data.hdf5Import'])
+// 4.11: data.stepImport is remapped to 'tableInput' in bridge.ts; STEP/IGES parsing runs in the UI.
+const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput', 'sqlQuery', 'timeSeries', 'unitInput', 'transferFunction', 'stateSpace', 'ctrl.zoh', 'ctrl.rateTransition', 'stateMachine', 'codeBlock', 'tirFileInput', 'viewport3d', 'nn.onnxInference', 'fmu.import', 'scripting.python', 'scripting.rust', 'data.hdf5Import', 'data.stepImport'])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.
