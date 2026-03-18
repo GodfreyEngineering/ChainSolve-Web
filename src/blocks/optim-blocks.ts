@@ -454,6 +454,34 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
       'Bayesian optimisation with Gaussian Process (Matérn 5/2) surrogate. Acquisition: "ei" (Expected Improvement), "ucb" (Upper Confidence Bound, kappa controls exploration), "pi" (Probability of Improvement, xi shifts threshold). Returns convergence history table.',
   })
 
+  // ── Hyperparameter Optimisation (2.100) ─────────────────────────────────────
+
+  register({
+    type: 'optim.hyperopt',
+    label: 'Hyperparameter Opt.',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [],
+    defaultData: {
+      blockType: 'optim.hyperopt',
+      label: 'Hyperparameter Opt.',
+      param_names: 'learning_rate;n_layers',
+      param_mins: '0.0001;1',
+      param_maxes: '0.1;5',
+      objective: 'learning_rate^2 + n_layers',
+      n_trials: 30,
+      n_initial: 5,
+      acquisition: 'ei',
+      kappa: 2.0,
+      xi: 0.01,
+      seed: 42,
+    },
+    synonyms: ['hyperparameter', 'hyperopt', 'HPO', 'tuning', 'bayesian tuning', 'model tuning'],
+    tags: ['optimization', 'hyperparameter', 'bayesian', 'tuning'],
+    description:
+      'Bayesian hyperparameter optimisation using GP surrogate (Matérn 5/2) with Expected Improvement. Define parameters (semicolon-separated names, mins, maxes) and an objective expression. Returns trial history table {trial, best_score, param0, param1, ...}. acquisition: "ei"/"ucb"/"pi". kappa (UCB exploration), xi (EI threshold shift).',
+  })
+
   // ── GP Surrogate (2.99) ─────────────────────────────────────────────────────
 
   register({

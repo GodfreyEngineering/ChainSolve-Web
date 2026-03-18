@@ -229,9 +229,9 @@
 - [ ] **2.96** ONNX model import: load .onnx files for inference using ONNX Runtime compiled to WASM — supports models up to ~500MB (quantized) in browser, larger via server Edge Function. Covers TensorFlow/PyTorch model deployment.
 - [ ] **2.97** PINNBlock: physics-informed neural network — configure PDE residual expression + boundary conditions + collocation points. Implements adaptive sampling (residual-based), gradient balancing between loss terms (NTK-based weighting), Fourier feature embedding for spectral bias mitigation. Uses AD engine (1C).
 - [ ] **2.98** NeuralOperator: FNO (Fourier Neural Operator) or DeepONet architecture — learn solution mappings across parameter spaces. Configure modes, layers, trunk/branch networks. Train on input-output function pairs. Ref: Mamba Neural Operators achieve 90% error reduction over Transformer baselines.
-- [ ] **2.99** SurrogateModel: train NN or Gaussian Process surrogate from a connected simulation block — supports active learning with expected improvement sampling for efficient exploration
-- [ ] **2.100** Hyperparameter optimisation: TPE (Tree-structured Parzen Estimator) / CMA-ES sampler with ASHA/Hyperband pruning — right-click any parameter → "Mark as Hyperparameter" with range/distribution. Dashboard shows trial history, parameter importance.
-- [ ] **2.101** AutoML block: given DataTable + target column, auto-tries linear, tree ensemble, small NN — reports best with cross-validation scores
+- [x] **2.99** SurrogateModel: train NN or Gaussian Process surrogate from a connected simulation block — supports active learning with expected improvement sampling for efficient exploration
+- [x] **2.100** Hyperparameter optimisation: TPE (Tree-structured Parzen Estimator) / CMA-ES sampler with ASHA/Hyperband pruning — right-click any parameter → "Mark as Hyperparameter" with range/distribution. Dashboard shows trial history, parameter importance.
+- [x] **2.101** AutoML block: given DataTable + target column, auto-tries linear, tree ensemble, small NN — reports best with cross-validation scores
 - [ ] **2.102** Transfer learning: load pre-trained ONNX model, freeze specified layers, add new trainable layers, fine-tune on user data
 - [ ] **2.103** Experiment tracker: log metrics, parameters, model weights per training run to Supabase table — comparison view with parallel coordinates
 

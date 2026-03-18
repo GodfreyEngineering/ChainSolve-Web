@@ -5954,6 +5954,82 @@ fn evaluate_node_inner(
             Value::scalar(crate::ml::classification_metrics::auc(&roc))
         }
 
+        // ── Hyperparameter Optimisation (2.100) ──────────────────────
+        "optim.hyperopt" => {
+            use crate::optim::{DesignVar, bayesian::{BayesOptConfig, bayesian_optimise}};
+            // Parse hyperparameter definitions from data
+            let names_raw = data.get("param_names").and_then(|v| v.as_str()).unwrap_or("learning_rate;n_layers");
+            let mins_raw = data.get("param_mins").and_then(|v| v.as_str()).unwrap_or("0.0001;1");
+            let maxs_raw = data.get("param_maxes").and_then(|v| v.as_str()).unwrap_or("0.1;5");
+            let objective_expr = data.get("objective").and_then(|v| v.as_str()).unwrap_or("learning_rate^2").to_string();
+            let n_trials = data.get("n_trials").and_then(|v| v.as_f64()).unwrap_or(30.0) as usize;
+            let n_initial = data.get("n_initial").and_then(|v| v.as_f64()).unwrap_or(5.0) as usize;
+            let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+            let acquisition = data.get("acquisition").and_then(|v| v.as_str()).unwrap_or("ei").to_string();
+            let kappa = data.get("kappa").and_then(|v| v.as_f64()).unwrap_or(2.0);
+            let xi = data.get("xi").and_then(|v| v.as_f64()).unwrap_or(0.01);
+
+            let names: Vec<String> = names_raw.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let mins: Vec<f64> = mins_raw.split(';').filter_map(|s| s.trim().parse().ok()).collect();
+            let maxs: Vec<f64> = maxs_raw.split(';').filter_map(|s| s.trim().parse().ok()).collect();
+
+            if names.is_empty() {
+                return Value::error("optim.hyperopt: param_names must have ≥1 parameter");
+            }
+            let n_params = names.len();
+            let vars: Vec<DesignVar> = (0..n_params).map(|i| DesignVar {
+                name: names[i].clone(),
+                min: mins.get(i).copied().unwrap_or(0.0),
+                max: maxs.get(i).copied().unwrap_or(1.0),
+                initial: (mins.get(i).copied().unwrap_or(0.0) + maxs.get(i).copied().unwrap_or(1.0)) / 2.0,
+                step: 0.1,
+            }).collect();
+
+            let names_clone = names.clone();
+            let objective: Box<dyn Fn(&[f64]) -> f64> = Box::new(move |x: &[f64]| {
+                let mut vars_map = std::collections::HashMap::new();
+                for (i, name) in names_clone.iter().enumerate() {
+                    if let Some(&val) = x.get(i) {
+                        vars_map.insert(name.clone(), val);
+                    }
+                }
+                crate::expr::eval_expr(&objective_expr, &vars_map).unwrap_or(f64::NAN)
+            });
+
+            let cfg = BayesOptConfig {
+                vars: vars.clone(),
+                objective,
+                n_initial: n_initial.min(n_trials),
+                n_iterations: n_trials,
+                acquisition,
+                kappa,
+                xi,
+                seed,
+            };
+            let result = bayesian_optimise(&cfg);
+
+            // Build trial history table: [trial, param0..paramN-1, score]
+            let mut col_names: Vec<&str> = vec!["trial"];
+            let name_refs: Vec<String> = names.clone();
+            let n_hist = result.history.len();
+            let trial_col: Vec<f64> = (0..n_hist).map(|i| (i + 1) as f64).collect();
+            let score_col: Vec<f64> = result.history.clone();
+            // For param columns, just report best found value repeated (history doesn't track x per step)
+            let best_col: Vec<f64> = result.optimal_values.clone();
+
+            // Build simple table: trial | best_so_far | param0 | param1 | ...
+            let mut all_cols: Vec<Vec<f64>> = vec![trial_col, score_col];
+            let mut all_names: Vec<String> = vec!["trial".to_string(), "best_score".to_string()];
+            for (i, name) in name_refs.iter().enumerate() {
+                let val = best_col.get(i).copied().unwrap_or(f64::NAN);
+                all_cols.push(vec![val; n_hist]);
+                all_names.push(name.clone());
+            }
+            let col_name_refs: Vec<&str> = all_names.iter().map(|s| s.as_str()).collect();
+            let _ = col_names;
+            crate::types::build_table(&col_name_refs, &all_cols)
+        }
+
         // ── GP Surrogate (2.99) ───────────────────────────────────────
         "optim.surrogate" => {
             // train: Table — columns x0..xN-1, y (last column is target)

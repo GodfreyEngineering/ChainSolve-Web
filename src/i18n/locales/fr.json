@@ -460,6 +460,7 @@
     "sym_substitute": "Substituer",
     "optim_param_est": "Estimation de paramètres",
     "optim_bayesian": "Optimisation bayésienne",
+    "optim_hyperopt": "Opt. Hyperparamètres",
     "optim_surrogate": "Substitut GP",
     "optim_automl": "AutoML",
     "optim_nsga3": "NSGA-III",

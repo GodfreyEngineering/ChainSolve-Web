@@ -654,7 +654,8 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("veh.lap.simulate", "Lap Simulation", "vehicleSim", "csOperation", vec![p("track", "Track (table)")], true),
         entry("veh.brake.energy", "Brake Energy", "vehicleSim", "csOperation", vec![p("mass", "Mass (kg)"), p("v1", "V1 (m/s)"), p("v2", "V2 (m/s)")], true),
         entry("veh.brake.power", "Brake Power", "vehicleSim", "csOperation", vec![p("energy", "Energy (J)"), p("dt", "Δt (s)")], true),
-        // Surrogate & AutoML
+        // Surrogate, AutoML & Hyperopt
+        entry("optim.hyperopt", "Hyperparameter Opt.", "optimization", "csOperation", vec![], false),
         entry("optim.surrogate", "GP Surrogate", "optimization", "csOperation", vec![p("train", "Train (table)"), p("query", "Query (table)")], false),
         entry("optim.automl", "AutoML", "machineLearning", "csOperation", vec![p("data", "Data (table)")], false),
         // ML

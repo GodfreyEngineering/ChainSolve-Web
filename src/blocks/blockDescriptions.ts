@@ -749,6 +749,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Bayesian optimisation with GP (Matérn 5/2) surrogate. n_initial random points warm-up, then maximise acquisition (ei/ucb/pi) to pick next evaluation. EI: Expected Improvement (xi shifts threshold). UCB: mu - kappa*sigma. PI: Probability of Improvement. Outputs convergence table.',
   'optim.nsga3':
     'NSGA-III multi-objective evolutionary algorithm. Reference-direction structured reference points (Das-Dennis lattice) maintain diversity for ≥3 objectives. SBX crossover + polynomial mutation. Configure objectives as semicolon-separated expressions. Returns Pareto front table.',
+  'optim.hyperopt':
+    'Bayesian Hyperparameter Optimisation: uses GP surrogate (Matérn 5/2) + Expected Improvement acquisition to find optimal hyperparameter values. Define param_names (semicolon-separated), param_mins, param_maxes, and an objective expression. n_initial warm-up evaluations, then n_trials total. acquisition: "ei"/"ucb"/"pi". Returns trial history table {trial, best_score, param0, ...}.',
   'optim.surrogate':
     'GP Surrogate (Gaussian Process, Matérn 5/2 kernel): fits a probabilistic surrogate to training data, then predicts mean and uncertainty at query points. Train table: feature columns + last column = target y. Query table: feature columns only. Returns {mean, std}. Tune length_scale (correlation range), sigma_f (signal amplitude), sigma_n (noise level). Ideal for expensive simulations: build surrogate from ~20–200 runs, predict anywhere instantly.',
   'optim.automl':

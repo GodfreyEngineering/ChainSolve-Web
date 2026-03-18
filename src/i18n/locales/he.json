@@ -2102,6 +2102,7 @@
     "sym_substitute": "הצבה",
     "optim_param_est": "אמידת פרמטרים",
     "optim_bayesian": "אופטימיזציה בייסיאנית",
+    "optim_hyperopt": "אופטימיזציית היפר-פרמטרים",
     "optim_surrogate": "מודל GP",
     "optim_automl": "AutoML",
     "optim_nsga3": "NSGA-III",
