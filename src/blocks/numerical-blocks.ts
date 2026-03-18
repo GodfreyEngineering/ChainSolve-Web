@@ -119,6 +119,64 @@ export function registerNumericalBlocks(register: (def: BlockDef) => void): void
     tags: ['numerical', 'integration', 'monte carlo'],
   })
 
+  // ── Curve Fitting ────────────────────────────────────────────
+
+  register({
+    type: 'curve_fit_poly',
+    label: 'Polynomial Fit',
+    category: 'numerical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'x', label: 'X Data' },
+      { id: 'y', label: 'Y Data' },
+    ],
+    defaultData: { blockType: 'curve_fit_poly', label: 'Polynomial Fit', degree: 2 },
+    description:
+      'Least-squares polynomial fit of specified degree to (x, y) data. Returns a table of coefficients c0, c1, ..., cN plus R² and data count. Use with ml.predict or table extraction to evaluate the fitted polynomial.',
+    synonyms: [
+      'polynomial regression',
+      'poly fit',
+      'curve fitting',
+      'least squares',
+      'regression',
+    ],
+    tags: ['numerical', 'curveFit', 'regression', 'polynomial'],
+  })
+
+  register({
+    type: 'curve_fit_lm',
+    label: 'Curve Fit (LM)',
+    category: 'numerical',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'x', label: 'X Data' },
+      { id: 'y', label: 'Y Data' },
+    ],
+    defaultData: {
+      blockType: 'curve_fit_lm',
+      label: 'Curve Fit (LM)',
+      formula: 'a * exp(-b * x) + c',
+      params: [
+        { name: 'a', initial: 1.0 },
+        { name: 'b', initial: 0.1 },
+        { name: 'c', initial: 0.0 },
+      ],
+      maxIter: 200,
+      tol: 1e-8,
+    },
+    description:
+      'Levenberg-Marquardt nonlinear least-squares curve fitting to a user-defined model. Parameters converge from initial guesses to minimise sum of squared residuals. Returns parameter values, R², and iteration count.',
+    synonyms: [
+      'nonlinear regression',
+      'Levenberg Marquardt',
+      'LM',
+      'curve fitting',
+      'parameter estimation',
+      'model fitting',
+    ],
+    tags: ['numerical', 'curveFit', 'nonlinear', 'levenberg-marquardt'],
+  })
+
   // ── Interpolation ────────────────────────────────────────────
 
   register({

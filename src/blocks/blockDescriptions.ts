@@ -555,6 +555,12 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   integrate_mc:
     'Monte Carlo quadrature with deterministic seed. Suitable for high-dimensional or irregular integrands.',
 
+  // ── Curve Fitting ────────────────────────────────────────────────────────
+  curve_fit_poly:
+    'Polynomial least-squares fit. Returns coefficients c0..cN and R².',
+  curve_fit_lm:
+    'Levenberg-Marquardt nonlinear curve fitting to a user-defined model. Returns fitted parameters and R².',
+
   // ── Norms ────────────────────────────────────────────────────────────────
   norm_l1: 'L1 norm (Manhattan distance): sum of absolute values.',
   norm_l2: 'L2 norm (Euclidean): square root of sum of squares.',

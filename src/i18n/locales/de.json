@@ -415,6 +415,8 @@
     "root_poly": "Polynom-Nullstellen",
     "integrate_gk": "Gauss-Kronrod-Integral",
     "integrate_mc": "Monte-Carlo-Integral",
+    "curve_fit_poly": "Polynomfit",
+    "curve_fit_lm": "Kurvenanpassung (LM)",
     "interp_spline": "Kubischer Spline",
     "interp_akima": "Akima-Spline",
     "ode_rk4": "ODE RK4",

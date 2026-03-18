@@ -423,6 +423,8 @@
     "root_poly": "多項式の根",
     "integrate_gk": "ガウス・クロンロッド積分",
     "integrate_mc": "モンテカルロ積分",
+    "curve_fit_poly": "多項式フィット",
+    "curve_fit_lm": "曲線フィット (LM)",
     "interp_spline": "3次スプライン",
     "interp_akima": "Akimaスプライン",
     "ode_rk4": "ODE RK4",

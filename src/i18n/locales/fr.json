@@ -415,6 +415,8 @@
     "root_poly": "Racines Polynomiales",
     "integrate_gk": "Intégrale Gauss-Kronrod",
     "integrate_mc": "Intégrale Monte Carlo",
+    "curve_fit_poly": "Ajustement Polynomial",
+    "curve_fit_lm": "Ajustement de Courbe (LM)",
     "interp_spline": "Spline Cubique",
     "interp_akima": "Spline Akima",
     "ode_rk4": "ODE RK4",

@@ -472,6 +472,10 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("integrate_cc", "Clenshaw-Curtis Integral", "numerical", "csOperation", vec![p("a", "Lower Bound"), p("b", "Upper Bound")], true),
         entry("integrate_mc", "Monte Carlo Integral", "numerical", "csOperation", vec![p("a", "Lower Bound"), p("b", "Upper Bound")], true),
 
+        // ── Curve Fitting ────────────────────────────────────────────────
+        entry("curve_fit_poly", "Polynomial Fit", "numerical", "csOperation", vec![p("x", "X Data"), p("y", "Y Data")], false),
+        entry("curve_fit_lm", "Curve Fit (LM)", "numerical", "csOperation", vec![p("x", "X Data"), p("y", "Y Data")], true),
+
         // ── Norms ────────────────────────────────────────────────────────
         entry("norm_l1", "L1 Norm", "math", "csOperation", vec![p("a", "Input")], false),
         entry("norm_l2", "L2 Norm", "math", "csOperation", vec![p("a", "Input")], false),

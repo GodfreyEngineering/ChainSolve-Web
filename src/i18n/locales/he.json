@@ -2057,6 +2057,8 @@
     "root_poly": "שורשי פולינום",
     "integrate_gk": "אינטגרל גאוס-קרונרוד",
     "integrate_mc": "אינטגרל מונטה קרלו",
+    "curve_fit_poly": "התאמת פולינום",
+    "curve_fit_lm": "התאמת עקומה (LM)",
     "interp_spline": "ספליין קובי",
     "interp_akima": "ספליין אקימה",
     "ode_rk4": "ODE RK4",

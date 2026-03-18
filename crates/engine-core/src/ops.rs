@@ -3300,6 +3300,124 @@ fn evaluate_node_inner(
             Value::scalar(result.value)
         }
 
+        // ── Curve Fitting ──────────────────────────────────────────
+        // curve_fit_poly: polynomial least-squares fit of given degree.
+        // Inputs: x (vector), y (vector). Data: degree (int, default 2).
+        // Returns: Table{["param","value"]} with rows for each coefficient
+        //   ("c0"..="cN") plus ("r_squared", R²) and ("n_data", n).
+        "curve_fit_poly" | "curve_fit.poly" => {
+            let x = match inputs.get("x") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("curve_fit_poly: x must be a vector"),
+            };
+            let y = match inputs.get("y") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("curve_fit_poly: y must be a vector"),
+            };
+            if x.len() != y.len() || x.is_empty() {
+                return Value::error("curve_fit_poly: x and y must be same non-empty length");
+            }
+            let degree = data.get("degree").and_then(|v| v.as_u64()).unwrap_or(2) as usize;
+            match crate::ml::polyreg::fit(&x, &y, degree) {
+                Err(e) => Value::error(&format!("curve_fit_poly: {e}")),
+                Ok(model) => {
+                    // Compute R²
+                    let fitted: Vec<f64> = crate::ml::polyreg::predict(&model, &x, degree);
+                    let ss_res: f64 = y.iter().zip(fitted.iter()).map(|(&yi, &fi)| (yi - fi).powi(2)).sum();
+                    let y_mean = y.iter().copied().sum::<f64>() / y.len() as f64;
+                    let ss_tot: f64 = y.iter().map(|&yi| (yi - y_mean).powi(2)).sum();
+                    let r2 = if ss_tot > 1e-30 { 1.0 - ss_res / ss_tot } else { 1.0 };
+                    // Build result table
+                    let mut rows: Vec<Vec<f64>> = model
+                        .coefficients
+                        .iter()
+                        .enumerate()
+                        .map(|(i, &c)| vec![i as f64, c])
+                        .collect();
+                    rows.push(vec![model.coefficients.len() as f64, r2]); // r_squared row
+                    rows.push(vec![model.coefficients.len() as f64 + 1.0, x.len() as f64]); // n_data row
+                    Value::Table {
+                        columns: vec!["coefficient_index".to_string(), "value".to_string()],
+                        rows,
+                    }
+                }
+            }
+        }
+
+        // curve_fit_lm: Levenberg-Marquardt fit of a user-defined model.
+        // Inputs: x (vector), y (vector).
+        // Data: formula (string with "x" and "p0".."pN"), params (JSON array of
+        //   {name:string, initial:number}), maxIter (int, default 200),
+        //   tol (float, default 1e-8).
+        // Returns: Table{["param","value"]} with (name_i, val_i), ("r_squared",R²).
+        "curve_fit_lm" | "curve_fit.lm" => {
+            let x = match inputs.get("x") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("curve_fit_lm: x must be a vector"),
+            };
+            let y = match inputs.get("y") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("curve_fit_lm: y must be a vector"),
+            };
+            if x.len() != y.len() || x.is_empty() {
+                return Value::error("curve_fit_lm: x and y must be same non-empty length");
+            }
+            let formula = data.get("formula").and_then(|v| v.as_str()).unwrap_or("");
+            if formula.is_empty() {
+                return Value::error("curve_fit_lm: formula is required (e.g. \"a*exp(-b*x)+c\")");
+            }
+            // Parse parameter definitions: [{name, initial}]
+            let param_defs = data.get("params").and_then(|v| v.as_array());
+            let (param_names, initial_params): (Vec<String>, Vec<f64>) = if let Some(arr) = param_defs {
+                arr.iter()
+                    .filter_map(|p| {
+                        let name = p.get("name").and_then(|v| v.as_str()).unwrap_or("p").to_string();
+                        let init = p.get("initial").and_then(|v| v.as_f64()).unwrap_or(1.0);
+                        Some((name, init))
+                    })
+                    .unzip()
+            } else {
+                // Fallback: single parameter "a" with initial=1
+                (vec!["a".to_string()], vec![1.0])
+            };
+            if initial_params.is_empty() {
+                return Value::error("curve_fit_lm: at least one parameter required");
+            }
+            let max_iter = data.get("maxIter").and_then(|v| v.as_u64()).unwrap_or(200) as usize;
+            let tol = data.get("tol").and_then(|v| v.as_f64()).unwrap_or(1e-8);
+            let formula_str = formula.to_string();
+            let names_clone = param_names.clone();
+            let f_model = |xi: f64, p: &[f64]| -> f64 {
+                let mut vars = std::collections::HashMap::new();
+                vars.insert("x".to_string(), xi);
+                for (i, name) in names_clone.iter().enumerate() {
+                    vars.insert(name.clone(), *p.get(i).unwrap_or(&f64::NAN));
+                    // Also insert p0, p1, ... aliases
+                    vars.insert(format!("p{i}"), *p.get(i).unwrap_or(&f64::NAN));
+                }
+                crate::expr::eval_expr(&formula_str, &vars).unwrap_or(f64::NAN)
+            };
+            let result = crate::optim::curve_fit::levenberg_marquardt(
+                &f_model,
+                &x,
+                &y,
+                &initial_params,
+                max_iter,
+                tol,
+            );
+            let mut rows: Vec<Vec<f64>> = param_names
+                .iter()
+                .enumerate()
+                .map(|(i, _)| vec![i as f64, result.params.get(i).copied().unwrap_or(f64::NAN)])
+                .collect();
+            rows.push(vec![param_names.len() as f64, result.r_squared]);
+            rows.push(vec![param_names.len() as f64 + 1.0, result.iterations as f64]);
+            Value::Table {
+                columns: vec!["param_index".to_string(), "value".to_string()],
+                rows,
+            }
+        }
+
         // ── Norms ─────────────────────────────────────────────────
         "norm_l1" | "norm.l1" => {
             match inputs.get("a") {

@@ -423,6 +423,8 @@
     "root_poly": "Polynomial Roots",
     "integrate_gk": "Gauss-Kronrod Integral",
     "integrate_mc": "Monte Carlo Integral",
+    "curve_fit_poly": "Polynomial Fit",
+    "curve_fit_lm": "Curve Fit (LM)",
     "interp_spline": "Cubic Spline",
     "interp_akima": "Akima Spline",
     "ode_rk4": "ODE RK4",

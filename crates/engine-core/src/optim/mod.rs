@@ -6,17 +6,18 @@
 //! or expression encoded in the node data, or a simple passthrough of the
 //! upstream scalar value for design-variable-driven optimization.
 
-pub mod gradient;
+pub mod curve_fit;
+pub mod doe;
 pub mod genetic;
+pub mod gradient;
 pub mod lp;
+pub mod montecarlo;
 pub mod pareto;
 pub mod qp;
+pub mod sensitivity;
 pub mod simplex;
 pub mod sobol_sensitivity;
 pub mod sweep;
-pub mod montecarlo;
-pub mod sensitivity;
-pub mod doe;
 
 use crate::types::Value;
 use std::collections::HashMap;
