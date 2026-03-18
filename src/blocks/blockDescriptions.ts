@@ -669,6 +669,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Solve a system of ODEs using the classic 4th-order Runge-Kutta method. Output = table of time vs state variables.',
   'ode.rk45':
     'Solve ODEs using the Dormand-Prince adaptive-step method. Automatically adjusts step size for accuracy.',
+  'ode.steady_state':
+    'Find the steady-state equilibrium y* of dy/dt = f(y) where f(y*) = 0. Newton-Raphson with numerical Jacobian. Ideal for finding operating points of control systems, chemical equilibria, or any autonomous ODE.',
   'ode.symplectic':
     'Solve a Hamiltonian system using a symplectic integrator (Störmer-Verlet or Symplectic Euler). Conserves energy exactly over long integrations. Ideal for orbital mechanics, molecular dynamics, pendulums.',
   // Vehicle Simulation

@@ -4156,6 +4156,64 @@ fn evaluate_node_inner(
             Value::Table { columns, rows }
         }
 
+        "ode.steady_state" => {
+            // Parse equations from Text input
+            let equations_text = match inputs.get("equations") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => return Value::error("ode.steady_state: 'equations' input required (Text, semicolon-separated)"),
+            };
+            let equations: Vec<String> = equations_text.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            if equations.is_empty() {
+                return Value::error("ode.steady_state: no equations provided");
+            }
+
+            // Parse initial guess from Vector input
+            let y0 = match inputs.get("y0") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                _ => return Value::error("ode.steady_state: 'y0' input required (initial guess vector)"),
+            };
+            if y0.len() != equations.len() {
+                return Value::error(format!(
+                    "ode.steady_state: {} equations but {} initial values",
+                    equations.len(), y0.len()
+                ));
+            }
+
+            let t_eval = scalar_or(data, "t_eval", 0.0);
+            let max_iter = data.get("max_iter").and_then(|v| v.as_f64()).unwrap_or(100.0) as usize;
+            let tol = scalar_or(data, "tol", 1e-10);
+
+            // Collect parameters
+            let mut params = std::collections::HashMap::new();
+            if let Some(serde_json::Value::Object(obj)) = data.get("params") {
+                for (k, v) in obj {
+                    if let Some(num) = v.as_f64() {
+                        params.insert(k.clone(), num);
+                    }
+                }
+            }
+
+            let state_names: Vec<String> = (0..equations.len()).map(|i| format!("y{i}")).collect();
+
+            let result = crate::ode::steady_state::solve_steady_state(
+                &equations, &y0, &params, &state_names, t_eval, max_iter, tol,
+            );
+
+            // Return Table: columns = ["state_index", "equilibrium"]
+            // Plus metadata rows for residual and convergence
+            let columns = vec!["state_index".to_string(), "equilibrium".to_string()];
+            let mut rows: Vec<Vec<f64>> = result.y_eq.iter().enumerate().map(|(i, &v)| {
+                vec![i as f64, v]
+            }).collect();
+            // Append metadata rows (index N = residual, N+1 = converged flag)
+            let n_eq = equations.len() as f64;
+            rows.push(vec![n_eq, result.residual]);
+            rows.push(vec![n_eq + 1.0, if result.converged { 1.0 } else { 0.0 }]);
+
+            Value::Table { columns, rows }
+        }
+
         "ode.symplectic" => {
             // Parse acceleration expressions from Text input (semicolon-separated)
             let accel_text = match inputs.get("accelerations") {

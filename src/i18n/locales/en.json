@@ -430,6 +430,7 @@
     "ode_rk4": "ODE RK4",
     "ode_rk45": "ODE RK45 (Adaptive)",
     "ode_symplectic": "Symplectic ODE",
+    "ode_steady_state": "Steady-State",
     "tire_pacejka": "Pacejka Tire",
     "quarter_car": "Quarter-Car Suspension",
     "aero_drag": "Aerodynamic Drag",

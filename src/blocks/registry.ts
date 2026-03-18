@@ -914,6 +914,27 @@ reg({
 })
 
 reg({
+  type: 'ode.steady_state',
+  label: 'Steady-State Solver',
+  category: 'odeSolvers',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'equations', label: 'Equations (text)' },
+    { id: 'y0', label: 'Initial guess' },
+  ],
+  defaultData: {
+    blockType: 'ode.steady_state',
+    label: 'Steady-State',
+    max_iter: 100,
+    tol: 1e-10,
+    t_eval: 0.0,
+  },
+  proOnly: true,
+  description:
+    'Find the equilibrium y* of dy/dt = f(y, t) where f(y*) = 0. Uses Newton-Raphson with numerical Jacobian (central differences). Returns Table of [state_index, equilibrium] plus residual and convergence rows.',
+})
+
+reg({
   type: 'ode.symplectic',
   label: 'Symplectic ODE Solver',
   category: 'odeSolvers',

@@ -422,6 +422,7 @@
     "ode_rk4": "ODE RK4",
     "ode_rk45": "ODE RK45 (Adaptativo)",
     "ode_symplectic": "Solver ODE Simpléctico",
+    "ode_steady_state": "Estado Estacionario",
     "tire_pacejka": "Neumático Pacejka",
     "quarter_car": "Suspensión Cuarto de Coche",
     "aero_drag": "Resistencia Aerodiánamica",

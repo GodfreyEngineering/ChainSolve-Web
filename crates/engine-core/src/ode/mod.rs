@@ -8,6 +8,7 @@
 
 pub mod rk4;
 pub mod rk45;
+pub mod steady_state;
 pub mod symplectic;
 pub mod types;
 
