@@ -6974,6 +6974,48 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Parquet import (4.8) ─────────────────────────────────────────────
+        "parquet_import" => {
+            // Reads Parquet file bytes from data.parquetBytes (JSON array of u8).
+            // Returns a Table value with all numeric columns.
+            let bytes: Vec<u8> = data.get("parquetBytes")
+                .and_then(|v| v.as_array())
+                .map(|arr| arr.iter().filter_map(|b| b.as_u64().map(|n| n as u8)).collect())
+                .unwrap_or_default();
+            if bytes.is_empty() {
+                Value::error("parquet_import: no data in parquetBytes field")
+            } else {
+                match crate::parquet::parse_parquet(&bytes) {
+                    Ok(cols) => crate::parquet::parquet_to_table(cols),
+                    Err(e) => Value::error(e),
+                }
+            }
+        }
+
+        // ── Parquet export (4.8) ─────────────────────────────────────────────
+        "parquet_export" => {
+            // Converts a Table input to a Parquet file byte vector (Value::Vector of u8 as f64).
+            match inputs.get("table") {
+                Some(Value::Table { columns, rows }) => {
+                    let col_data: Vec<Vec<f64>> = columns.iter().enumerate().map(|(ci, _)| {
+                        rows.iter().map(|r| *r.get(ci).unwrap_or(&0.0)).collect()
+                    }).collect();
+                    let pairs: Vec<(&str, &[f64])> = columns.iter()
+                        .zip(col_data.iter())
+                        .map(|(name, data)| (name.as_str(), data.as_slice()))
+                        .collect();
+                    match crate::parquet::write_parquet(&pairs) {
+                        Ok(file_bytes) => Value::Vector {
+                            value: file_bytes.iter().map(|b| *b as f64).collect(),
+                        },
+                        Err(e) => Value::error(e),
+                    }
+                }
+                Some(Value::Error { message }) => Value::Error { message: message.clone() },
+                _ => Value::error("parquet_export: requires 'table' input (Table value)"),
+            }
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }

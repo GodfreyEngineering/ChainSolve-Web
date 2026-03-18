@@ -45,6 +45,7 @@ import { registerLoggerBlocks } from './logger-blocks'
 import { registerMathSheetBlocks } from './mathsheet-blocks'
 import { registerDeadZoneBlocks } from './deadzone-blocks'
 import { registerFileInputBlocks } from './fileinput-blocks'
+import { registerParquetBlocks } from './parquet-blocks'
 import { registerSqlQueryBlocks } from './sqlquery-blocks'
 import { registerTimeSeriesBlocks } from './timeseries-blocks'
 import { registerUnitInputBlocks } from './unitinput-blocks'
@@ -104,6 +105,7 @@ export function registerAllBlocks(): void {
   registerMathSheetBlocks(reg)
   registerDeadZoneBlocks(reg)
   registerFileInputBlocks(reg)
+  registerParquetBlocks(reg)
   registerSqlQueryBlocks(reg)
   registerTimeSeriesBlocks(reg)
   registerUnitInputBlocks(reg)

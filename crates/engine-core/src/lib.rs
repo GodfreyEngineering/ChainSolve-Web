@@ -37,6 +37,8 @@ pub mod interpolate;
 pub mod linalg;
 pub mod matfile;
 pub mod ml;
+pub mod parquet;
+
 pub mod nn;
 pub mod ode;
 pub mod ops;
