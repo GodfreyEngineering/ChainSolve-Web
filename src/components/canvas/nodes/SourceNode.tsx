@@ -23,7 +23,7 @@ import { usePlan } from '../../../contexts/PlanContext'
 import { getEntitlements } from '../../../lib/entitlements'
 import { NODE_STYLES as s, userColorBg } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
-import { getValueTypeColor } from '../../../engine/portTypeColors'
+import { getValueTypeColor, getValueTypeShape, getValueTypeLabel } from '../../../engine/portTypeColors'
 import { Icon } from '../../ui/Icon'
 import { useValueFlash } from '../../../hooks/useValueFlash'
 
@@ -798,9 +798,12 @@ function SourceNodeInner({ id, data, selected, draggable }: NodeProps) {
           type="source"
           position={Position.Right}
           id="out"
+          title={getValueTypeLabel(value)}
+          aria-label={`Output — ${getValueTypeLabel(value)}`}
           style={{
             ...s.handleRight,
             background: getValueTypeColor(value),
+            borderRadius: getValueTypeShape(value),
             top: '50%',
             transform: 'translateY(-50%)',
           }}

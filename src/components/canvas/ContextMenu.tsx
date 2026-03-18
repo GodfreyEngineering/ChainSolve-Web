@@ -170,7 +170,14 @@ function MenuItem({
     <div
       style={item}
       role="menuitem"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
       onMouseEnter={(e) => {
         ;(e.currentTarget as HTMLDivElement).style.background = danger
           ? 'var(--menu-danger-hover)'

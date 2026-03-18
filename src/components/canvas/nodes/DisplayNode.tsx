@@ -272,6 +272,23 @@ function DisplayNodeInner({ id, data, selected }: NodeProps) {
           id="value"
           style={{ ...s.handleLeft, top: '50%', transform: 'translateY(-50%)' }}
         />
+        {/* 16.66: aria-live region — announces value changes to screen readers.
+            aria-live="polite" won't interrupt ongoing speech; aria-atomic="true"
+            ensures the full value is announced rather than just the diff. */}
+        <span
+          aria-live="polite"
+          aria-atomic="true"
+          style={{
+            position: 'absolute',
+            width: 1,
+            height: 1,
+            overflow: 'hidden',
+            clip: 'rect(0,0,0,0)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {nd.label}: {formatValue(value)}
+        </span>
         {/* SCI-16: Right-click for copy menu */}
         <span
           style={{ ...displayStyle, cursor: scalarValue !== null ? 'context-menu' : undefined }}
