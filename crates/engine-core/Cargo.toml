@@ -38,7 +38,7 @@ rayon = { version = "1", optional = true }
 # cudarc is only usable on native targets with an NVIDIA driver.
 # wasm32 targets cannot link libcuda.so — the native-cuda feature ensures
 # this dep is excluded from WASM compilation via cfg checks in cuda.rs.
-cudarc = { version = "0.12", features = ["cublas"], optional = true }
+cudarc = { version = "0.19", features = ["cublas"], optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.8", features = ["html_reports"] }
