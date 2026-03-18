@@ -108,6 +108,7 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csStateMachine',
   'csCodeBlock',
   'csTirFileInput',
+  'csViewport3D',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {

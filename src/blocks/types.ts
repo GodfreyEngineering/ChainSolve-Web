@@ -97,6 +97,7 @@ export type NodeKind =
   | 'csStateMachine'
   | 'csCodeBlock'
   | 'csTirFileInput'
+  | 'csViewport3D'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

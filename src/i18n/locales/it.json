@@ -2673,6 +2673,11 @@
     "adding": "Adding…",
     "add": "Add"
   },
+  "viewport3d": {
+    "label": "Viewport 3D",
+    "cycleMode": "Cambia modalità di rendering (griglia/solido/trasparente)",
+    "demo": "cubo demo"
+  },
   "branch": {
     "switchBranch": "Cambia ramo",
     "branches": "Rami",

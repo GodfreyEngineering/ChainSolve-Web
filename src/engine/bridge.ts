@@ -119,7 +119,10 @@ export function toEngineSnapshot(
                                 : data.blockType === 'ctrl.zoh'
                                 ? 'number'
                                 : data.blockType === 'ctrl.rateTransition'
-                                  ? 'number'
+                                ? 'number'
+                                // 6.16: viewport3d renders in the UI; engine sees as 'display'.
+                                : data.blockType === 'viewport3d'
+                                  ? 'display'
                                   : data.blockType) as string
       if (blockType === 'constant') {
         const constId = data.selectedConstantId

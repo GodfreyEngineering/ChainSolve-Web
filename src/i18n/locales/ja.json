@@ -2770,6 +2770,11 @@
     "decline": "Decline",
     "accept": "Accept"
   },
+  "viewport3d": {
+    "label": "3Dビューポート",
+    "cycleMode": "レンダリングモードを切り替え（ワイヤーフレーム/ソリッド/透明）",
+    "demo": "デモキューブ"
+  },
   "branch": {
     "switchBranch": "ブランチを切り替え",
     "branches": "ブランチ",

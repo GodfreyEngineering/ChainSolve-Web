@@ -2740,6 +2740,11 @@
     "decline": "Decline",
     "accept": "Accept"
   },
+  "viewport3d": {
+    "label": "Fenêtre 3D",
+    "cycleMode": "Changer le mode de rendu (fil de fer/solide/transparent)",
+    "demo": "cube de démonstration"
+  },
   "branch": {
     "switchBranch": "Changer de branche",
     "branches": "Branches",

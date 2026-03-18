@@ -2668,6 +2668,11 @@
     "adding": "Adding…",
     "add": "Add"
   },
+  "viewport3d": {
+    "label": "תצוגה תלת-ממדית",
+    "cycleMode": "החלף מצב עיבוד (רשת/מלא/שקוף)",
+    "demo": "קובייה להדגמה"
+  },
   "branch": {
     "switchBranch": "החלף ענף",
     "branches": "ענפים",

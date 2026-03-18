@@ -2740,6 +2740,11 @@
     "decline": "Decline",
     "accept": "Accept"
   },
+  "viewport3d": {
+    "label": "Visor 3D",
+    "cycleMode": "Cambiar modo de renderizado (alambre/sólido/transparente)",
+    "demo": "cubo demo"
+  },
   "branch": {
     "switchBranch": "Cambiar rama",
     "branches": "Ramas",

@@ -2740,6 +2740,11 @@
     "decline": "Decline",
     "accept": "Accept"
   },
+  "viewport3d": {
+    "label": "3D-Ansichtsfenster",
+    "cycleMode": "Darstellungsmodus umschalten (Drahtgitter/Vollständig/Transparent)",
+    "demo": "Demo-Würfel"
+  },
   "branch": {
     "switchBranch": "Branch wechseln",
     "branches": "Branches",

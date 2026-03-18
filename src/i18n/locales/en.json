@@ -2777,6 +2777,11 @@
     "decline": "Decline",
     "accept": "Accept"
   },
+  "viewport3d": {
+    "label": "3D Viewport",
+    "cycleMode": "Toggle render mode (wireframe/solid/transparent)",
+    "demo": "demo cube"
+  },
   "branch": {
     "switchBranch": "Switch branch",
     "branches": "Branches",
