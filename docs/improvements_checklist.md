@@ -137,7 +137,7 @@
 - [ ] **2.31** ODE implicit BDF: Backward Differentiation Formulas orders 1-5 with Newton iteration — essential for stiff systems (chemical kinetics, some thermal problems). Order and step size adaptation. Ref: Hairer & Wanner "Solving ODEs II".
 - [ ] **2.32** ODE Radau IIA: implicit Runge-Kutta of order 5 — L-stable, excellent for very stiff problems with discontinuities. Ref: Hairer & Wanner.
 - [x] **2.33** ODE symplectic: Störmer-Verlet (2nd order) and symplectic Euler (1st order) — preserve energy for Hamiltonian systems (planetary orbits, molecular dynamics). Essential that total energy drift is O(h²) over long integrations.
-- [ ] **2.34** ODE event detection: zero-crossing detection with bisection refinement — essential for impact problems, switch events, termination conditions (e.g., "stop when ball hits ground")
+- [x] **2.34** ODE event detection: zero-crossing detection with bisection refinement — essential for impact problems, switch events, termination conditions (e.g., "stop when ball hits ground")
 - [ ] **2.35** DAE solver: index-1 DAE via BDF with consistent initialisation (Brown's method) — for systems with algebraic constraints (e.g., constrained mechanical systems, electrical circuits)
 - [ ] **2.36** DAE index reduction: Pantelides algorithm to detect high-index DAEs, automatically differentiate constraint equations to reduce to index-1 form, display structural analysis to user
 - [ ] **2.37** PDE solver (1D): method-of-lines with automatic spatial discretisation (finite differences, configurable order) — convert PDE to system of ODEs and solve with existing ODE solvers. Support: heat equation, wave equation, advection-diffusion.
