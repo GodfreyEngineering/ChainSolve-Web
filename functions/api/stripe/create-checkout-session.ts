@@ -179,6 +179,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       success_url: SUCCESS_URL,
       cancel_url: CANCEL_URL,
       allow_promotion_codes: true,
+      // 16.63: Collect billing address for UK VAT / Stripe Tax calculation.
+      // Stripe Tax must be enabled in the Stripe dashboard (Tax > Settings) for
+      // automatic_tax to apply rates. Until Stripe Tax is activated, this is a
+      // no-op and can be left in place safely.
+      billing_address_collection: 'required',
+      automatic_tax: { enabled: true },
+      // Keep the customer's billing address up to date for future invoices.
+      customer_update: { address: 'auto', name: 'auto' },
     })
 
     return Response.json({ ok: true, url: session.url })
