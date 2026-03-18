@@ -615,6 +615,7 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("nn.conv2d", "Conv2D", "neuralNetworks", "csOperation", vec![p("input", "Input (Matrix/Table)")], true),
         entry("nn.pinn", "PINN Solver", "neuralNetworks", "csOperation", vec![], true),
         entry("nn.neuralOp", "Neural Operator", "neuralNetworks", "csOperation", vec![p("trainData", "Training data (table)")], true),
+        entry("nn.transferLearn", "Transfer Learn", "neuralNetworks", "csOperation", vec![p("features", "Features (table)"), p("labels", "Labels (vector/table)")], true),
 
         // ── Symbolic Math (CAS) ────────────────────────────────────────
         entry("sym.differentiate", "Differentiate", "math", "csOperation", vec![p("expr", "Expression (text)"), p("var", "Variable (text)")], true),

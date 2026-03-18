@@ -238,6 +238,40 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
       '2D convolutional layer. Accepts Matrix input (H×W) or flattened image. n_filters feature maps, kernel_h×kernel_w spatial kernel, stride, padding ("valid" or "same"). He-initialised weights. Output: Matrix of [out_h*out_w × n_filters].',
   })
 
+  // ── Transfer Learning ────────────────────────────────────────────────────
+
+  register({
+    type: 'nn.transferLearn',
+    label: 'Transfer Learn',
+    category: 'neuralNetworks',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'features', label: 'Features (table)' },
+      { id: 'labels', label: 'Labels (vector/table)' },
+    ],
+    proOnly: true,
+    defaultData: {
+      blockType: 'nn.transferLearn',
+      label: 'Transfer Learn',
+      hiddenSizes: [64],
+      epochs: 100,
+      lr: 0.001,
+      batchSize: 32,
+      loss: 'mse',
+      seed: 42,
+    },
+    synonyms: [
+      'transfer learning', 'fine-tune', 'fine tuning', 'frozen layers',
+      'pretrained', 'feature extraction', 'domain adaptation',
+    ],
+    tags: ['nn', 'transfer', 'fine-tune', 'pretrained'],
+    description:
+      'Transfer learning: takes pre-computed features from a frozen base model (e.g. ONNX inference output) ' +
+      'and trains a new Dense head on top. ' +
+      'Features: table [n_samples × feature_dim]. Labels: vector or table [n_samples × n_classes]. ' +
+      'Trains a new MLP head using backpropagation. Output: table of predictions + final loss.',
+  })
+
   // ── Neural Operator (FNO / DeepONet) ────────────────────────────────────
 
   register({

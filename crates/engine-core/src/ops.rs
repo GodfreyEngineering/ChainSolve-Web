@@ -5091,6 +5091,111 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Transfer Learning (frozen base + trainable head) ───────────
+
+        "nn.transferLearn" => {
+            use crate::nn::activation::ActivationFn;
+            use crate::nn::model::Sequential;
+            use crate::nn::train::{TrainConfig, LossFn, train};
+
+            // Extract features table (output of base/frozen model)
+            let features: Vec<Vec<f64>> = match inputs.get("features") {
+                Some(Value::Table { rows, .. }) => rows.clone(),
+                Some(Value::Matrix { rows, cols, data: mat_data }) => {
+                    let r = *rows;
+                    let c = *cols;
+                    (0..r).map(|i| mat_data[i * c..(i + 1) * c].to_vec()).collect()
+                }
+                _ => return Value::error("nn.transferLearn: 'features' table input required (rows=samples, cols=feature_dim)"),
+            };
+
+            // Extract labels table
+            let labels: Vec<Vec<f64>> = match inputs.get("labels") {
+                Some(Value::Table { rows, .. }) => rows.clone(),
+                Some(Value::Vector { value: vdata, .. }) => vdata.iter().map(|&v| vec![v]).collect(),
+                Some(Value::Scalar { value }) => vec![vec![*value]],
+                _ => return Value::error("nn.transferLearn: 'labels' input required (Vector or Table)"),
+            };
+
+            if features.is_empty() {
+                return Value::error("nn.transferLearn: empty features");
+            }
+            if features.len() != labels.len() {
+                return Value::error(format!(
+                    "nn.transferLearn: features ({}) and labels ({}) length mismatch",
+                    features.len(), labels.len()
+                ));
+            }
+
+            let feature_dim = features[0].len();
+            let label_dim = labels[0].len();
+
+            // Parse head architecture
+            let hidden_sizes: Vec<usize> = data.get("hiddenSizes")
+                .and_then(|v| v.as_array())
+                .map(|arr| arr.iter().filter_map(|x| x.as_f64().map(|n| n as usize)).collect())
+                .unwrap_or_else(|| vec![64]);
+
+            let epochs = data.get("epochs").and_then(|v| v.as_f64()).unwrap_or(100.0) as usize;
+            let lr = data.get("lr").and_then(|v| v.as_f64()).unwrap_or(1e-3);
+            let batch_size = data.get("batchSize").and_then(|v| v.as_f64()).unwrap_or(32.0) as usize;
+            let loss_str = data.get("loss").and_then(|v| v.as_str()).unwrap_or("mse");
+            let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+
+            // Build head model: feature_dim → hidden_sizes → label_dim
+            let mut model = Sequential::new();
+            let mut in_size = feature_dim;
+            for (i, &h) in hidden_sizes.iter().enumerate() {
+                if let Err(e) = model.add_dense(in_size, h, ActivationFn::ReLU, seed + i as u64) {
+                    return Value::error(format!("nn.transferLearn: {e}"));
+                }
+                in_size = h;
+            }
+            // Output layer (linear activation for regression, softmax handled by CrossEntropy)
+            let out_activation = if loss_str.contains("ce") || loss_str.contains("cross") {
+                ActivationFn::Softmax
+            } else {
+                ActivationFn::Linear
+            };
+            if let Err(e) = model.add_dense(in_size, label_dim, out_activation, seed + 99) {
+                return Value::error(format!("nn.transferLearn: {e}"));
+            }
+
+            let cfg = TrainConfig {
+                epochs,
+                batch_size,
+                learning_rate: lr,
+                loss: LossFn::from_str(loss_str),
+                patience: 0,
+                validation_split: 0.0,
+            };
+
+            let result = match train(&mut model, &features, &labels, &cfg) {
+                Ok(r) => r,
+                Err(e) => return Value::error(format!("nn.transferLearn training failed: {e}")),
+            };
+
+            // Run inference on training data to get predictions
+            let predictions: Vec<Vec<f64>> = features.iter()
+                .map(|x| model.forward(x))
+                .collect();
+
+            // Return Table: columns = [pred_0..pred_n, epoch_loss (last col = loss)]
+            // First n_samples rows = predictions; last row = loss_history summary
+            let mut rows = predictions;
+            // Append a summary row with final_loss
+            rows.push(vec![result.final_loss]);
+
+            let col_names: Vec<String> = (0..label_dim)
+                .map(|i| format!("pred_{i}"))
+                .collect();
+
+            Value::Table {
+                columns: col_names,
+                rows,
+            }
+        }
+
         // ── Neural Operator (FNO / DeepONet) ───────────────────────────
 
         "nn.neuralOp" => {
