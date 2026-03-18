@@ -2360,6 +2360,20 @@
     "addInput": "Add input",
     "removeInput": "Remove last input"
   },
+  "sqlQuery": {
+    "label": "SQL Query",
+    "sql": "SQL",
+    "params": "Parameters",
+    "run": "Run Query",
+    "running": "Running…",
+    "auto": "Auto",
+    "addParam": "Add parameter",
+    "removeParam": "Remove parameter",
+    "results": "Results",
+    "rows": "rows",
+    "cols": "cols",
+    "empty": "Run query to see results"
+  },
   "timeline": {
     "lastEval": "Last",
     "avgEval": "Avg",

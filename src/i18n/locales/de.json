@@ -2312,6 +2312,20 @@
     "addInput": "Eingabe hinzufügen",
     "removeInput": "Letzte Eingabe entfernen"
   },
+  "sqlQuery": {
+    "label": "SQL-Abfrage",
+    "sql": "SQL",
+    "params": "Parameter",
+    "run": "Abfrage ausführen",
+    "running": "Wird ausgeführt…",
+    "auto": "Auto",
+    "addParam": "Parameter hinzufügen",
+    "removeParam": "Parameter entfernen",
+    "results": "Ergebnisse",
+    "rows": "Zeilen",
+    "cols": "Spalten",
+    "empty": "Abfrage ausführen, um Ergebnisse zu sehen"
+  },
   "timeline": {
     "lastEval": "Letzter",
     "avgEval": "Ø",

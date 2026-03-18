@@ -58,6 +58,7 @@ import { LoggerNode } from './nodes/LoggerNode'
 import { MathSheetNode } from './nodes/MathSheetNode'
 import { DeadZoneNode } from './nodes/DeadZoneNode'
 import { FileInputNode } from './nodes/FileInputNode'
+import { SqlQueryNode } from './nodes/SqlQueryNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -212,6 +213,7 @@ const NODE_TYPES = {
   csMathSheet: MathSheetNode,
   csDeadZone: DeadZoneNode,
   csFileInput: FileInputNode,
+  csSqlQuery: SqlQueryNode,
 } as const
 
 const EDGE_TYPES = {

@@ -2312,6 +2312,20 @@
     "addInput": "Añadir entrada",
     "removeInput": "Eliminar última entrada"
   },
+  "sqlQuery": {
+    "label": "Consulta SQL",
+    "sql": "SQL",
+    "params": "Parámetros",
+    "run": "Ejecutar consulta",
+    "running": "Ejecutando…",
+    "auto": "Auto",
+    "addParam": "Añadir parámetro",
+    "removeParam": "Eliminar parámetro",
+    "results": "Resultados",
+    "rows": "filas",
+    "cols": "cols",
+    "empty": "Ejecutar consulta para ver resultados"
+  },
   "timeline": {
     "lastEval": "Último",
     "avgEval": "Prom",

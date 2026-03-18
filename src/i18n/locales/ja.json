@@ -2360,6 +2360,20 @@
     "addInput": "入力を追加",
     "removeInput": "最後の入力を削除"
   },
+  "sqlQuery": {
+    "label": "SQLクエリ",
+    "sql": "SQL",
+    "params": "パラメータ",
+    "run": "クエリを実行",
+    "running": "実行中…",
+    "auto": "自動",
+    "addParam": "パラメータを追加",
+    "removeParam": "パラメータを削除",
+    "results": "結果",
+    "rows": "行",
+    "cols": "列",
+    "empty": "クエリを実行して結果を表示"
+  },
   "timeline": {
     "lastEval": "最後",
     "avgEval": "平均",

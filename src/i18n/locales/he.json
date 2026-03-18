@@ -1759,6 +1759,20 @@
     "addInput": "הוסף קלט",
     "removeInput": "הסר קלט אחרון"
   },
+  "sqlQuery": {
+    "label": "שאילתת SQL",
+    "sql": "SQL",
+    "params": "פרמטרים",
+    "run": "הפעל שאילתה",
+    "running": "מריץ…",
+    "auto": "אוטו",
+    "addParam": "הוסף פרמטר",
+    "removeParam": "הסר פרמטר",
+    "results": "תוצאות",
+    "rows": "שורות",
+    "cols": "עמודות",
+    "empty": "הפעל שאילתה לצפייה בתוצאות"
+  },
   "timeline": {
     "lastEval": "אחרון",
     "avgEval": "ממוצע",

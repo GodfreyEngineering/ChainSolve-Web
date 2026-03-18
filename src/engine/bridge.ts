@@ -95,7 +95,10 @@ export function toEngineSnapshot(
                       // 2.9: fileInput is a drag-drop UI block; engine treats as tableInput.
                       : data.blockType === 'fileInput'
                         ? 'tableInput'
-                        : data.blockType) as string
+                        // 4.20: sqlQuery caches results as tableData; engine treats as tableInput.
+                        : data.blockType === 'sqlQuery'
+                          ? 'tableInput'
+                          : data.blockType) as string
       if (blockType === 'constant') {
         const constId = data.selectedConstantId
         if (typeof constId === 'string' && constId in CONSTANT_VALUES) {

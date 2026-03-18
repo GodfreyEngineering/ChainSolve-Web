@@ -87,6 +87,7 @@ export type NodeKind =
   | 'csMathSheet'
   | 'csDeadZone'
   | 'csFileInput'
+  | 'csSqlQuery'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 
