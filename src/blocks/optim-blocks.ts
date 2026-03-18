@@ -95,6 +95,28 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'optim.lbfgsb',
+    label: 'L-BFGS-B',
+    category: 'optimization',
+    nodeKind: 'csOptimizer',
+    inputs: [
+      { id: 'objective', label: 'Objective' },
+      { id: 'variables', label: 'Variables' },
+    ],
+    defaultData: {
+      blockType: 'optim.lbfgsb',
+      label: 'L-BFGS-B',
+      maxIterations: 1000,
+      memory: 10,
+      tolerance: 1e-8,
+    },
+    synonyms: ['l-bfgs', 'bfgs', 'quasi-newton', 'gradient based', 'l-bfgs-b'],
+    tags: ['optimization', 'gradient-based'],
+    description:
+      'L-BFGS-B: Limited-memory BFGS with bound constraints. Uses numerical gradients (central differences). memory = history size (default 10). The workhorse gradient-based optimizer for smooth, convex or mildly non-convex problems.',
+  })
+
+  register({
     type: 'optim.cmaes',
     label: 'CMA-ES',
     category: 'optimization',

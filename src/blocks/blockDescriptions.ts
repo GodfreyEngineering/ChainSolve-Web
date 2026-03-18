@@ -624,6 +624,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Population-based optimizer using selection, crossover, and mutation. Good for non-smooth or multi-modal problems.',
   'optim.nelderMead':
     'Derivative-free simplex optimizer (Nelder-Mead). Works well for low-dimensional smooth problems.',
+  'optim.lbfgsb':
+    'L-BFGS-B: Limited-memory BFGS with bound constraints. Numerical gradients. Stores m=10 (s,y) pairs. Fastest gradient-based method for smooth problems. Handles box constraints via gradient projection.',
   'optim.cmaes':
     'CMA-ES: Covariance Matrix Adaptation Evolution Strategy. State-of-the-art gradient-free optimizer. Self-adapts step size and variable correlations. Outperforms genetic algorithms on continuous problems. Auto-selects population size λ = 4+3·ln(n).',
   'optim.convergencePlot': 'Visualizes optimizer convergence: objective value vs iteration count.',

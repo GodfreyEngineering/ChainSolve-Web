@@ -3762,6 +3762,21 @@ fn evaluate_node_inner(
             }
         }
 
+        "optim.lbfgsb" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let f = optim::get_objective_fn(data);
+                    let max_iter = data.get("maxIterations").and_then(|v| v.as_f64()).unwrap_or(1000.0) as usize;
+                    let m_memory = data.get("memory").and_then(|v| v.as_f64()).unwrap_or(10.0) as usize;
+                    let tol = data.get("tolerance").and_then(|v| v.as_f64()).unwrap_or(1e-8);
+                    let result = optim::lbfgsb::lbfgsb(&f, &vars, max_iter, m_memory, tol);
+                    optim::result_to_table(&result, &vars)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
         "optim.cmaes" => {
             use crate::optim;
             match optim::parse_design_vars(inputs, data) {

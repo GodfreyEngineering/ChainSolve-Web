@@ -519,6 +519,7 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("optim.gradientDescent", "Gradient Descent", "optimization", "csOperation", vec![p("objective", "Objective"), p("variables", "Variables")], false),
         entry("optim.geneticAlgorithm", "Genetic Algorithm", "optimization", "csOperation", vec![p("objective", "Objective"), p("variables", "Variables")], false),
         entry("optim.nelderMead", "Nelder-Mead", "optimization", "csOperation", vec![p("objective", "Objective"), p("variables", "Variables")], false),
+        entry("optim.lbfgsb", "L-BFGS-B", "optimization", "csOperation", vec![p("objective", "Objective"), p("variables", "Variables")], true),
         entry("optim.cmaes", "CMA-ES", "optimization", "csOperation", vec![p("objective", "Objective"), p("variables", "Variables")], true),
         entry("optim.convergencePlot", "Convergence Plot", "optimization", "csPlot", vec![p("data", "Optimizer output")], false),
         entry("optim.resultsTable", "Optimization Results", "optimization", "csDisplay", vec![p("data", "Optimizer output")], false),
