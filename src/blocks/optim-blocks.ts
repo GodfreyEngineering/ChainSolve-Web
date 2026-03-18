@@ -95,6 +95,26 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'optim.responseSurface',
+    label: 'Response Surface',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'x', label: 'Feature columns (table)' },
+      { id: 'y', label: 'Response vector' },
+    ],
+    defaultData: {
+      blockType: 'optim.responseSurface',
+      label: 'Response Surface',
+      method: 'quadratic',
+    },
+    synonyms: ['metamodel', 'surrogate', 'polynomial fit', 'kriging', 'rbf', 'rsm', 'response surface methodology'],
+    tags: ['optimization', 'metamodel', 'surrogate'],
+    description:
+      'Fit a polynomial or RBF metamodel to DOE results. Methods: "linear" (main effects only), "quadratic" (default: main + squared + interactions), "cubic" (adds cubic terms), "rbf" (Gaussian radial basis functions). Returns coefficient table with R².',
+  })
+
+  register({
     type: 'optim.lbfgsb',
     label: 'L-BFGS-B',
     category: 'optimization',

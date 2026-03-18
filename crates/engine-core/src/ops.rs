@@ -3762,6 +3762,35 @@ fn evaluate_node_inner(
             }
         }
 
+        "optim.responseSurface" => {
+            // Extract feature matrix from Table input
+            let (x_data, feature_names): (Vec<Vec<f64>>, Vec<String>) = match inputs.get("x") {
+                Some(Value::Table { columns, rows }) => {
+                    let feat_cols: Vec<usize> = (0..columns.len()).collect();
+                    let x: Vec<Vec<f64>> = rows.iter().map(|row| {
+                        feat_cols.iter().map(|&c| *row.get(c).unwrap_or(&0.0)).collect()
+                    }).collect();
+                    (x, columns.clone())
+                }
+                Some(Value::Matrix { rows, cols, data }) => {
+                    let x: Vec<Vec<f64>> = (0..*rows).map(|r| {
+                        (0..*cols).map(|c| data[r * *cols + c]).collect()
+                    }).collect();
+                    let names: Vec<String> = (0..*cols).map(|i| format!("x{i}")).collect();
+                    (x, names)
+                }
+                _ => return Value::error("optim.responseSurface: 'x' input required (Table of features)"),
+            };
+            let y_data: Vec<f64> = match inputs.get("y") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                Some(Value::Table { rows, .. }) => rows.iter().flat_map(|r| r.iter().cloned()).collect(),
+                _ => return Value::error("optim.responseSurface: 'y' input required (response vector)"),
+            };
+            let method = data.get("method").and_then(|v| v.as_str()).unwrap_or("quadratic").to_string();
+            crate::optim::response_surface::fit_response_surface(&x_data, &y_data, &method, &feature_names)
+        }
+
         "optim.lbfgsb" => {
             use crate::optim;
             match optim::parse_design_vars(inputs, data) {

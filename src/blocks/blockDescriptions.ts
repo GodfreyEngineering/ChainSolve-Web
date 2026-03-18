@@ -637,6 +637,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Runs N random samples from specified distributions. Outputs statistics (mean, std, percentiles) and histogram.',
   'optim.sensitivity':
     'Varies each input one at a time while holding others constant. Produces a tornado chart of parameter sensitivity.',
+  'optim.responseSurface':
+    'Fit a polynomial or RBF metamodel to DOE results for contour plots and sensitivity analysis. Methods: "linear", "quadratic" (main+squared+interactions), "cubic", "rbf" (Gaussian RBF). Returns coefficient table with R².',
   'optim.doe':
     'Generates experiment matrices. Methods: "factorial", "lhs", "sobol", "box_behnken" (3+ factors), "ccc" (Central Composite Circumscribed, rotatable α=(2^k)^0.25), "ccf" (face-centered, fits ±1), "taguchi" (auto-selects L4/L8/L12/L16/L27). Outputs table of configurations.',
 
