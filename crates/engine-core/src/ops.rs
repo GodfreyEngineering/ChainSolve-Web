@@ -4144,6 +4144,36 @@ fn evaluate_node_inner(
             }
         }
 
+        "optim.bayesian" => {
+            use crate::optim::{parse_design_vars, result_to_table};
+            use crate::optim::bayesian::{BayesOptConfig, bayesian_optimise};
+            match parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let n_initial = data.get("n_initial").and_then(|v| v.as_f64()).unwrap_or(5.0) as usize;
+                    let n_iterations = data.get("n_iterations").and_then(|v| v.as_f64()).unwrap_or(20.0) as usize;
+                    let acquisition = data.get("acquisition").and_then(|v| v.as_str()).unwrap_or("ei").to_string();
+                    let kappa = data.get("kappa").and_then(|v| v.as_f64()).unwrap_or(2.576);
+                    let xi = data.get("xi").and_then(|v| v.as_f64()).unwrap_or(0.01);
+                    let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+                    let vars_clone = vars.clone();
+                    let obj = crate::optim::get_objective_fn(data);
+                    let cfg = BayesOptConfig {
+                        vars,
+                        objective: obj,
+                        n_initial,
+                        n_iterations,
+                        acquisition,
+                        kappa,
+                        xi,
+                        seed,
+                    };
+                    let result = bayesian_optimise(&cfg);
+                    result_to_table(&result, &vars_clone)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
         // ── Machine Learning ─────────────────────────────────────────
         "ml.trainTestSplit" => {
             match inputs.get("data") {

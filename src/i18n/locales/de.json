@@ -458,6 +458,7 @@
     "sym_expand": "Ausklammern",
     "sym_substitute": "Ersetzen",
     "optim_param_est": "Parameterschätzung",
+    "optim_bayesian": "Bayesianische Optimierung",
     "optim_lp": "LP-Löser",
     "optim_qp": "QP-Löser",
     "optim_nsga2": "NSGA-II",

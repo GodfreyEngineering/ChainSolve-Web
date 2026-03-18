@@ -655,6 +655,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Generates experiment matrices. Methods: "factorial", "lhs", "sobol", "box_behnken" (3+ factors), "ccc" (Central Composite Circumscribed, rotatable α=(2^k)^0.25), "ccf" (face-centered, fits ±1), "taguchi" (auto-selects L4/L8/L12/L16/L27). Outputs table of configurations.',
   'optim.paramEst':
     'Fit ODE model parameters to experimental data using Levenberg-Marquardt. Input a table with column "t" and state columns. Configure ODE equations, parameter names, initial/lower/upper bounds. Returns table with estimated parameter values and std_error.',
+  'optim.bayesian':
+    'Bayesian optimisation with GP (Matérn 5/2) surrogate. n_initial random points warm-up, then maximise acquisition (ei/ucb/pi) to pick next evaluation. EI: Expected Improvement (xi shifts threshold). UCB: mu - kappa*sigma. PI: Probability of Improvement. Outputs convergence table.',
 
   // ── Machine Learning (5.06) ─────────────────────────────────────────────
   'ml.trainTestSplit':

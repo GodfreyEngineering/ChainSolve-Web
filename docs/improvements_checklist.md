@@ -248,7 +248,7 @@
 - [x] **2.110** SQP: Sequential Quadratic Programming with augmented Lagrangian — handles equality + inequality constraints. Solves QP subproblem at each iteration.
 - [x] **2.111** Trust-region (dogleg): globally convergent, robust for non-convex problems. Adaptively adjusts trust-region radius.
 - [x] **2.112** CMA-ES: Covariance Matrix Adaptation Evolution Strategy — gradient-free, excellent for non-convex, multimodal problems. sep-CMA-ES variant for high-dimensional (>100 vars).
-- [ ] **2.113** Bayesian optimisation: GP surrogate with Matérn 5/2 kernel, acquisition functions (Expected Improvement, Upper Confidence Bound, Knowledge Gradient). Multi-objective via qNEHVI. Multi-fidelity via multi-task GP. Ref: BoTorch principles.
+- [x] **2.113** Bayesian optimisation: GP surrogate with Matérn 5/2 kernel, acquisition functions (Expected Improvement, Upper Confidence Bound, Knowledge Gradient). Multi-objective via qNEHVI. Multi-fidelity via multi-task GP. Ref: BoTorch principles.
 - [ ] **2.114** NSGA-III: reference-direction-based multi-objective (better than NSGA-II for >3 objectives). MOEA/D with Tchebycheff decomposition.
 - [x] **2.115** Enhanced DOE: Taguchi orthogonal arrays, D-optimal (coordinate exchange), Box-Behnken, Central Composite (face/inscribed/circumscribed) — add to existing factorial/LHS/Sobol
 - [x] **2.116** Response surface: fit polynomial/RBF/Kriging metamodel to DOE results — visualise as contour + 3D surface + sensitivity tornado

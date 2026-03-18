@@ -466,6 +466,7 @@
     "sym_expand": "Expand",
     "sym_substitute": "Substitute",
     "optim_param_est": "Parameter Estimation",
+    "optim_bayesian": "Bayesian Optimisation",
     "optim_lp": "LP Solver",
     "optim_qp": "QP Solver",
     "optim_nsga2": "NSGA-II",

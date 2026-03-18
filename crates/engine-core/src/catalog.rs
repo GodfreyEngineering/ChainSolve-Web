@@ -535,6 +535,7 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("optim.robustDesign", "Robust Design", "optimization", "csOperation", vec![p("objective", "Objective"), p("variables", "Variables")], true),
         entry("optim.topologyOpt", "Topology Optimisation", "optimization", "csOperation", vec![], true),
         entry("optim.paramEst", "Parameter Estimation", "optimization", "csOperation", vec![p("data", "Observed data (table)"), p("y0", "Initial state")], true),
+        entry("optim.bayesian", "Bayesian Optimisation", "optimization", "csOperation", vec![p("variables", "Variables")], true),
 
         // ── Machine Learning ──────────────────────────────────────────
         entry("ml.trainTestSplit", "Train/Test Split", "machineLearning", "csOperation", vec![p("data", "Dataset (table)")], false),

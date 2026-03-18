@@ -6,6 +6,7 @@
 //! or expression encoded in the node data, or a simple passthrough of the
 //! upstream scalar value for design-variable-driven optimization.
 
+pub mod bayesian;
 pub mod cmaes;
 pub mod curve_fit;
 pub mod param_est;

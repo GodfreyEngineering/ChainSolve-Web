@@ -429,4 +429,28 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
     description:
       'Fits ODE model parameters to experimental data using Levenberg-Marquardt. Inputs: observed data table (column "t" required) and initial state y0. Configure equations (semicolon-separated), param names (comma-separated), initial/lower/upper bounds. Outputs table with param_idx, value, std_error columns.',
   })
+
+  // ── Bayesian Optimisation ────────────────────────────────────────────────
+
+  register({
+    type: 'optim.bayesian',
+    label: 'Bayesian Optimisation',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'variables', label: 'Variables' }],
+    defaultData: {
+      blockType: 'optim.bayesian',
+      label: 'Bayesian Optimisation',
+      n_initial: 5,
+      n_iterations: 20,
+      acquisition: 'ei',
+      kappa: 2.576,
+      xi: 0.01,
+      seed: 42,
+    },
+    synonyms: ['bayesian', 'gaussian process', 'GP', 'EI', 'UCB', 'expected improvement', 'surrogate'],
+    tags: ['optimization', 'bayesian', 'gaussian process', 'surrogate'],
+    description:
+      'Bayesian optimisation with Gaussian Process (Matérn 5/2) surrogate. Acquisition: "ei" (Expected Improvement), "ucb" (Upper Confidence Bound, kappa controls exploration), "pi" (Probability of Improvement, xi shifts threshold). Returns convergence history table.',
+  })
 }
