@@ -2360,6 +2360,19 @@
     "addInput": "Add input",
     "removeInput": "Remove last input"
   },
+  "timeSeries": {
+    "label": "Time Series Input",
+    "drop": "Drop CSV or click to browse",
+    "loading": "Parsing…",
+    "parseError": "Parse error",
+    "noTimeData": "No valid time data",
+    "timeCol": "Time column",
+    "method": "Method",
+    "interval": "Interval (s)",
+    "hasHeader": "Has header",
+    "signals": "signals",
+    "pts": "pts"
+  },
   "sqlQuery": {
     "label": "SQL Query",
     "sql": "SQL",

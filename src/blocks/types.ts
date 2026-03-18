@@ -88,6 +88,7 @@ export type NodeKind =
   | 'csDeadZone'
   | 'csFileInput'
   | 'csSqlQuery'
+  | 'csTimeSeries'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

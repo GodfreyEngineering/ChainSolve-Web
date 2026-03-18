@@ -31,7 +31,8 @@ registerAllBlocks()
 // 2.68: ctrl.mux is remapped to 'vectorConcat' (existing Rust op) in bridge.ts.
 // 2.9: fileInput is remapped to 'tableInput' in bridge.ts; file parsing runs in the UI.
 // 4.20: sqlQuery is remapped to 'tableInput' in bridge.ts; SQL execution runs in the UI via sqlQueryService.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput', 'sqlQuery'])
+// 2.11: timeSeries is remapped to 'tableInput' in bridge.ts; CSV parsing and resampling run in the UI.
+const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput', 'sqlQuery', 'timeSeries'])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.

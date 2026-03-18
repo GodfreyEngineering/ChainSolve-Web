@@ -2312,6 +2312,19 @@
     "addInput": "Añadir entrada",
     "removeInput": "Eliminar última entrada"
   },
+  "timeSeries": {
+    "label": "Entrada de serie temporal",
+    "drop": "Soltar CSV o hacer clic",
+    "loading": "Analizando…",
+    "parseError": "Error de análisis",
+    "noTimeData": "Sin datos de tiempo válidos",
+    "timeCol": "Columna de tiempo",
+    "method": "Método",
+    "interval": "Intervalo (s)",
+    "hasHeader": "Tiene encabezado",
+    "signals": "señales",
+    "pts": "pts"
+  },
   "sqlQuery": {
     "label": "Consulta SQL",
     "sql": "SQL",

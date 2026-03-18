@@ -1759,6 +1759,19 @@
     "addInput": "הוסף קלט",
     "removeInput": "הסר קלט אחרון"
   },
+  "timeSeries": {
+    "label": "קלט סדרת זמן",
+    "drop": "גרור CSV או לחץ לעיון",
+    "loading": "מנתח…",
+    "parseError": "שגיאת ניתוח",
+    "noTimeData": "אין נתוני זמן תקפים",
+    "timeCol": "עמודת זמן",
+    "method": "שיטה",
+    "interval": "מרווח (ש׳)",
+    "hasHeader": "יש כותרת",
+    "signals": "אותות",
+    "pts": "נקודות"
+  },
   "sqlQuery": {
     "label": "שאילתת SQL",
     "sql": "SQL",

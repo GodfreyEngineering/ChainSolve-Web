@@ -45,6 +45,7 @@ import { registerMathSheetBlocks } from './mathsheet-blocks'
 import { registerDeadZoneBlocks } from './deadzone-blocks'
 import { registerFileInputBlocks } from './fileinput-blocks'
 import { registerSqlQueryBlocks } from './sqlquery-blocks'
+import { registerTimeSeriesBlocks } from './timeseries-blocks'
 import { SEARCH_METADATA } from './blockSearchMetadata'
 
 function reg(
@@ -94,6 +95,7 @@ export function registerAllBlocks(): void {
   registerDeadZoneBlocks(reg)
   registerFileInputBlocks(reg)
   registerSqlQueryBlocks(reg)
+  registerTimeSeriesBlocks(reg)
 
   // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
   for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {

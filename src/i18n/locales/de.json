@@ -2312,6 +2312,19 @@
     "addInput": "Eingabe hinzufügen",
     "removeInput": "Letzte Eingabe entfernen"
   },
+  "timeSeries": {
+    "label": "Zeitreihen-Eingabe",
+    "drop": "CSV ablegen oder klicken",
+    "loading": "Wird geladen…",
+    "parseError": "Lesefehler",
+    "noTimeData": "Keine gültigen Zeitdaten",
+    "timeCol": "Zeitspalte",
+    "method": "Methode",
+    "interval": "Intervall (s)",
+    "hasHeader": "Hat Kopfzeile",
+    "signals": "Signale",
+    "pts": "Punkte"
+  },
   "sqlQuery": {
     "label": "SQL-Abfrage",
     "sql": "SQL",

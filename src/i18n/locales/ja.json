@@ -2360,6 +2360,19 @@
     "addInput": "入力を追加",
     "removeInput": "最後の入力を削除"
   },
+  "timeSeries": {
+    "label": "時系列入力",
+    "drop": "CSVをドロップまたはクリック",
+    "loading": "解析中…",
+    "parseError": "解析エラー",
+    "noTimeData": "有効な時刻データがありません",
+    "timeCol": "時刻列",
+    "method": "補間方法",
+    "interval": "間隔 (s)",
+    "hasHeader": "ヘッダーあり",
+    "signals": "信号",
+    "pts": "点"
+  },
   "sqlQuery": {
     "label": "SQLクエリ",
     "sql": "SQL",
