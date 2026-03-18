@@ -487,7 +487,8 @@
     "units_convert": "Convertidor de Unidades",
     "units_analyze": "Analizador de Unidades",
     "ad_ode_adjoint": "Sensibilidad Adjunta ODE",
-    "ad_lin_solve_sens": "Sensibilidad Sistema Lineal"
+    "ad_lin_solve_sens": "Sensibilidad Sistema Lineal",
+    "ad_custom_vjp": "Regla VJP/JVP Personalizada"
   },
   "plot": {
     "settings": "Config. de Gráfico",

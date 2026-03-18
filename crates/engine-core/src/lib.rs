@@ -24,6 +24,7 @@
 
 pub mod autodiff;
 pub mod autodiff_linsolve;
+pub mod custom_vjp;
 pub mod catalog;
 pub mod compensated;
 pub mod error;

@@ -139,6 +139,29 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'ad.customVjp',
+    label: 'Custom VJP/JVP Rule',
+    category: 'math',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'x', label: 'Eval point' },
+      { id: 'v', label: 'Cotangent (VJP)' },
+      { id: 't', label: 'Tangent (JVP)' },
+    ],
+    defaultData: {
+      var_names: 'x',
+      primal_expr: 'x^2',
+      vjp_exprs: '2*x*v',
+      jvp_expr: '2*x*t0',
+      mode: 'primal',
+    },
+    synonyms: ['custom gradient', 'VJP', 'JVP', 'vjp', 'jvp', 'custom_vjp', 'custom_jvp', 'JAX'],
+    tags: ['ad', 'vjp', 'jvp', 'gradient'],
+    description:
+      'Custom VJP/JVP rule (JAX-style): define efficient gradient rules for custom functions. Set primal_expr (f(x0,x1,…)), vjp_exprs (semicolon-separated ∂f/∂xi·v per input), jvp_expr (J·t). mode: "primal" → f(x), "vjp" → Vector of cotangents, "jvp" → scalar J·t.',
+  })
+
+  register({
     type: 'ad.linSolveSens',
     label: 'Linear Solve Sensitivity',
     category: 'math',

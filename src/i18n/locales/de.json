@@ -487,7 +487,8 @@
     "units_convert": "Einheitenumrechner",
     "units_analyze": "Einheitenanalyse",
     "ad_ode_adjoint": "ODE Adjoint-Sensitivität",
-    "ad_lin_solve_sens": "Lineares System Sensitivität"
+    "ad_lin_solve_sens": "Lineares System Sensitivität",
+    "ad_custom_vjp": "Benutzerdefinierte VJP/JVP-Regel"
   },
   "plot": {
     "settings": "Diagramm-Einstellungen",

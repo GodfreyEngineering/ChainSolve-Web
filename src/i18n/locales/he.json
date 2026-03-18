@@ -2129,7 +2129,8 @@
     "units_convert": "ממיר יחידות",
     "units_analyze": "מנתח יחידות",
     "ad_ode_adjoint": "רגישות צמודה ODE",
-    "ad_lin_solve_sens": "רגישות פתרון לינארי"
+    "ad_lin_solve_sens": "רגישות פתרון לינארי",
+    "ad_custom_vjp": "כלל VJP/JVP מותאם אישית"
   },
   "entitlements": {
     "projectLimitTitle": "Project limit reached",

@@ -680,6 +680,9 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("ad.odeAdjoint", "ODE Adjoint Sensitivity", "simulation", "csOperation", vec![], false),
         // Implicit diff through linear solvers (1.34)
         entry("ad.linSolveSens", "Linear Solve Sensitivity", "math", "csOperation", vec![], false),
+        // Custom VJP/JVP rules (1.35)
+        entry("ad.customVjp", "Custom VJP/JVP Rule", "math", "csOperation",
+            vec![p("x", "Eval point"), p("v", "Cotangent (VJP)"), p("t", "Tangent (JVP)")], false),
     ]
 }
 

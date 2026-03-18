@@ -6605,6 +6605,59 @@ fn evaluate_node_inner(
             crate::types::build_table(&col_refs, &col_data)
         }
 
+        // ── Custom VJP/JVP Rules (1.35) ──────────────────────────────
+        "ad.customVjp" => {
+            use crate::custom_vjp::eval_custom_ad;
+
+            let var_names_str = data.get("var_names").and_then(|v| v.as_str()).unwrap_or("x");
+            let var_names: Vec<String> = var_names_str.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+
+            // Evaluation point
+            let x_vals: Vec<f64> = match inputs.get("x") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                _ => data.get("x").and_then(|v| v.as_str()).map(|s|
+                    s.split(',').filter_map(|p| p.trim().parse().ok()).collect()
+                ).unwrap_or_else(|| vec![0.0; var_names.len()]),
+            };
+
+            // Cotangent for VJP
+            let v_vals: Vec<f64> = match inputs.get("v") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                _ => data.get("v").and_then(|v| v.as_str()).map(|s|
+                    s.split(',').filter_map(|p| p.trim().parse().ok()).collect()
+                ).unwrap_or_else(|| vec![1.0]),
+            };
+
+            // Tangent for JVP
+            let t_vals: Vec<f64> = match inputs.get("t") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                _ => data.get("t").and_then(|v| v.as_str()).map(|s|
+                    s.split(',').filter_map(|p| p.trim().parse().ok()).collect()
+                ).unwrap_or_else(|| vec![1.0; var_names.len()]),
+            };
+
+            let primal_expr = data.get("primal_expr").and_then(|v| v.as_str()).unwrap_or("");
+            if primal_expr.is_empty() {
+                return Value::error("ad.customVjp: 'primal_expr' required");
+            }
+            let vjp_exprs_str = data.get("vjp_exprs").and_then(|v| v.as_str()).unwrap_or("");
+            let vjp_exprs: Vec<String> = if vjp_exprs_str.is_empty() { vec![] }
+                else { vjp_exprs_str.split(';').map(|s| s.trim().to_string()).collect() };
+            let jvp_expr = data.get("jvp_expr").and_then(|v| v.as_str()).unwrap_or("");
+            let mode = data.get("mode").and_then(|v| v.as_str()).unwrap_or("primal");
+
+            let result = eval_custom_ad(&var_names, &x_vals, &v_vals, &t_vals, primal_expr, &vjp_exprs, jvp_expr, mode);
+
+            match mode {
+                "vjp" => Value::Vector { value: result.vjp },
+                "jvp" => Value::scalar(result.jvp),
+                _ => Value::scalar(result.primal),
+            }
+        }
+
         // ── AD Through Linear Solvers: Implicit Differentiation (1.34) ──
         "ad.linSolveSens" => {
             use crate::autodiff_linsolve::implicit_diff;
