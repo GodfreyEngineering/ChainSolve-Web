@@ -19,7 +19,8 @@ registerAllBlocks()
 // sankeyPlot/surfacePlot render in the UI (bypassing Vega/Rust entirely).
 // testBlock is remapped to 'display' in bridge.ts; test logic runs in the UI.
 // 2.130: assertion is remapped to 'display' in bridge.ts; validation logic runs in the UI.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion'])
+// 4.19: wsInput is remapped to 'number' in bridge.ts; WebSocket connection managed in the UI.
+const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput'])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.

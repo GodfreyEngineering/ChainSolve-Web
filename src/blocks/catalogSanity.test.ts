@@ -89,6 +89,7 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csNeuralNet',
   'csTest',
   'csAssertion',
+  'csWebSocket',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {

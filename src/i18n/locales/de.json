@@ -2225,6 +2225,20 @@
     "snapshots": "Versionen",
     "timeline": "Zeitleiste"
   },
+  "wsInput": {
+    "connected": "Verbunden",
+    "connecting": "Verbinde…",
+    "error": "Fehler",
+    "idle": "Bereit",
+    "value": "Wert",
+    "url": "URL",
+    "field": "Feld",
+    "hz": "Rate (Hz)",
+    "connect": "Verbinden",
+    "disconnect": "Trennen",
+    "connError": "Verbindungsfehler",
+    "connClosed": "Verbindung unerwartet getrennt"
+  },
   "assertion": {
     "noValue": "Kein Wert",
     "pass": "BESTANDEN",

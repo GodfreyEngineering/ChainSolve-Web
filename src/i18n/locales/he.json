@@ -1672,6 +1672,20 @@
     "snapshots": "גרסאות",
     "timeline": "ציר זמן"
   },
+  "wsInput": {
+    "connected": "מחובר",
+    "connecting": "מתחבר…",
+    "error": "שגיאה",
+    "idle": "לא פעיל",
+    "value": "ערך",
+    "url": "כתובת URL",
+    "field": "שדה",
+    "hz": "קצב (Hz)",
+    "connect": "התחבר",
+    "disconnect": "נתק",
+    "connError": "שגיאת חיבור",
+    "connClosed": "החיבור נסגר באופן בלתי צפוי"
+  },
   "assertion": {
     "noValue": "אין ערך",
     "pass": "עבר",

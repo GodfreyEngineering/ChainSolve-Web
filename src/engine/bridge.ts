@@ -69,9 +69,12 @@ export function toEngineSnapshot(
       // value. No Rust catalog entries needed for new constants.
       // 11.14: testBlock is a display pass-through in the engine; test logic runs in the UI.
       // 2.130: assertion is a UI-only validation block; engine treats it as pass-through display.
+      // 4.19: wsInput is remapped to 'number' — node.data.value is the live WebSocket value.
       let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock' || data.blockType === 'assertion'
         ? 'display'
-        : data.blockType) as string
+        : data.blockType === 'wsInput'
+          ? 'number'
+          : data.blockType) as string
       if (blockType === 'constant') {
         const constId = data.selectedConstantId
         if (typeof constId === 'string' && constId in CONSTANT_VALUES) {

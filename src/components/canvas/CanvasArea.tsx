@@ -50,6 +50,7 @@ import { OperationNode } from './nodes/OperationNode'
 import { DisplayNode } from './nodes/DisplayNode'
 import { TestNode } from './nodes/TestNode'
 import { AssertionNode } from './nodes/AssertionNode'
+import { WsInputNode } from './nodes/WsInputNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -196,6 +197,7 @@ const NODE_TYPES = {
   csNeuralNet: NeuralNetNode,
   csTest: TestNode,
   csAssertion: AssertionNode,
+  csWebSocket: WsInputNode,
 } as const
 
 const EDGE_TYPES = {

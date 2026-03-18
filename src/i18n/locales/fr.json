@@ -2225,6 +2225,20 @@
     "snapshots": "Versions",
     "timeline": "Chronologie"
   },
+  "wsInput": {
+    "connected": "Connecté",
+    "connecting": "Connexion…",
+    "error": "Erreur",
+    "idle": "Inactif",
+    "value": "Valeur",
+    "url": "URL",
+    "field": "Champ",
+    "hz": "Fréquence (Hz)",
+    "connect": "Connecter",
+    "disconnect": "Déconnecter",
+    "connError": "Erreur de connexion",
+    "connClosed": "Connexion fermée de façon inattendue"
+  },
   "assertion": {
     "noValue": "Aucune valeur",
     "pass": "RÉUSSI",
