@@ -2066,6 +2066,8 @@
     "ode_event": "פותר ODE עם אירועים",
     "ode_symplectic": "פותר ODE סימפלקטי",
     "ode_steady_state": "מצב יציב",
+    "ode_bdf": "ODE BDF",
+    "ode_radau": "ODE ראדאו",
     "optim_trust_region": "אזור אמון",
     "optim_sqp": "SQP",
     "optim_uq_pce": "UQ / PCE",

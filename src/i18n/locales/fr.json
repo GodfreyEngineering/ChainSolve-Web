@@ -424,6 +424,8 @@
     "ode_event": "Solveur ODE avec Événements",
     "ode_symplectic": "Solveur ODE Symplectique",
     "ode_steady_state": "État Stationnaire",
+    "ode_bdf": "ODE BDF",
+    "ode_radau": "ODE Radau",
     "optim_trust_region": "Région de Confiance",
     "optim_sqp": "SQP",
     "optim_uq_pce": "UQ / PCE",

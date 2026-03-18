@@ -978,6 +978,53 @@ reg({
     'Solve a Hamiltonian (conservative) system using a symplectic integrator. Provide N acceleration expressions a_i(q,v,t) and initial state [q0..qN-1, v0..vN-1]. Method: "verlet" (Störmer-Verlet, 2nd order) or "euler" (Symplectic Euler, 1st order). No secular energy drift.',
 })
 
+reg({
+  type: 'ode.bdf',
+  label: 'ODE Solver (BDF)',
+  category: 'odeSolvers',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'equations', label: 'Equations (text)' },
+    { id: 'y0', label: 'Initial state' },
+  ],
+  defaultData: {
+    blockType: 'ode.bdf',
+    label: 'ODE BDF',
+    t_end: 1.0,
+    dt: 0.01,
+    tolerance: 1e-6,
+    order: 2,
+  },
+  proOnly: true,
+  synonyms: ['bdf', 'backward differentiation formula', 'stiff', 'implicit'],
+  tags: ['ode', 'stiff', 'implicit'],
+  description:
+    'Solve a stiff ODE system using Backward Differentiation Formulas (BDF), orders 1–5. Excellent for chemical kinetics, thermal systems. Output: table of (t, y0, y1, ...).',
+})
+
+reg({
+  type: 'ode.radau',
+  label: 'ODE Solver (Radau)',
+  category: 'odeSolvers',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'equations', label: 'Equations (text)' },
+    { id: 'y0', label: 'Initial state' },
+  ],
+  defaultData: {
+    blockType: 'ode.radau',
+    label: 'ODE Radau',
+    t_end: 1.0,
+    dt: 0.05,
+    tolerance: 1e-6,
+  },
+  proOnly: true,
+  synonyms: ['radau', 'radau iia', 'l-stable', 'stiff', 'implicit runge-kutta'],
+  tags: ['ode', 'stiff', 'implicit', 'radau'],
+  description:
+    'Solve a stiff ODE system using the 3-stage Radau IIA implicit Runge-Kutta method (order 5). L-stable, excellent for very stiff problems with discontinuities. Output: table of (t, y0, ...).',
+})
+
 // ── Vehicle Simulation (Phase 5) ────────────────────────────────────────────
 
 reg({

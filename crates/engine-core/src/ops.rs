@@ -4743,6 +4743,60 @@ fn evaluate_node_inner(
             Value::Table { columns, rows }
         }
 
+        "ode.bdf" | "ode.radau" => {
+            let equations_text = match inputs.get("equations") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => return Value::error(format!("{block_type}: 'equations' input required (Text, semicolon-separated)")),
+            };
+            let equations: Vec<String> = equations_text.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            if equations.is_empty() {
+                return Value::error(format!("{block_type}: no equations provided"));
+            }
+            let y0 = match inputs.get("y0") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                _ => return Value::error(format!("{block_type}: 'y0' input required")),
+            };
+            if y0.len() != equations.len() {
+                return Value::error(format!("{block_type}: {} equations but {} initial values", equations.len(), y0.len()));
+            }
+
+            let t_start = scalar_or(data, "t_start", 0.0);
+            let t_end = scalar_or(data, "t_end", 1.0);
+            let dt = scalar_or(data, "dt", 0.01);
+            let tolerance = scalar_or(data, "tolerance", 1e-6);
+            let state_names: Vec<String> = (0..equations.len()).map(|i| format!("y{i}")).collect();
+
+            let mut params = std::collections::HashMap::new();
+            if let Some(serde_json::Value::Object(obj)) = data.get("params") {
+                for (k, v) in obj {
+                    if let Some(n) = v.as_f64() { params.insert(k.clone(), n); }
+                }
+            }
+            // Pass bdf_order from data into params
+            if block_type == "ode.bdf" {
+                let order = data.get("order").and_then(|v| v.as_f64()).unwrap_or(2.0);
+                params.insert("bdf_order".to_string(), order);
+            }
+
+            let system = crate::ode::OdeSystem { equations, state_names, params };
+            let cfg = crate::ode::OdeSolverConfig { t_start, t_end, dt, tolerance, max_steps: 100_000 };
+
+            let result = if block_type == "ode.bdf" {
+                crate::ode::bdf::solve_bdf(&system, &y0, &cfg)
+            } else {
+                crate::ode::radau::solve_radau(&system, &y0, &cfg)
+            };
+
+            let columns = result.column_names.clone();
+            let rows: Vec<Vec<f64>> = result.t.iter().zip(result.states.iter()).map(|(t, ys)| {
+                let mut row = vec![*t];
+                row.extend_from_slice(ys);
+                row
+            }).collect();
+            Value::Table { columns, rows }
+        }
+
         // ── Vehicle Simulation (Phase 5) ──────────────────────────────
 
         "veh.tire.lateralForce" => {

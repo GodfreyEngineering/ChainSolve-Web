@@ -424,6 +424,8 @@
     "ode_event": "ODE Ereignis-Solver",
     "ode_symplectic": "Symplektischer ODE-Löser",
     "ode_steady_state": "Stationärer Zustand",
+    "ode_bdf": "ODE BDF",
+    "ode_radau": "ODE Radau",
     "optim_trust_region": "Trust-Region",
     "optim_sqp": "SQP",
     "optim_uq_pce": "UQ / PCE",

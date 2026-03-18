@@ -432,6 +432,8 @@
     "ode_event": "ODE イベントソルバー",
     "ode_symplectic": "シンプレクティックODEソルバー",
     "ode_steady_state": "定常状態ソルバー",
+    "ode_bdf": "ODE BDF",
+    "ode_radau": "ODE ラダウ",
     "optim_trust_region": "信頼領域法",
     "optim_sqp": "SQP",
     "optim_uq_pce": "UQ / PCE",

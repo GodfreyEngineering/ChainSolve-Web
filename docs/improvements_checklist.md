@@ -121,8 +121,8 @@
 - [x] **2.20** Combinatorics: factorial, permutation, combination
 - [x] **2.21** Lookup table: 1D interpolation (linear on x/y vectors), 2D interpolation (bilinear on x/y/z table)
 - [x] **2.22** Decomposition blocks exposing faer: `LU_Decompose` (returns L,U,P matrices), `QR_Decompose` (returns Q,R), `SVD` (returns U,S,V), `Cholesky` (returns L), `Eigen` (returns eigenvalues vector + eigenvectors matrix), `Schur` (returns T,Q) — each as a multi-output block
-- [ ] **2.23** Symbolic math blocks: `Differentiate` (symbolic d/dx), `Integrate` (symbolic ∫dx), `Simplify`, `Expand`, `Substitute` (replace variable with value/expression) — use CAS from 1B, display LaTeX
-- [ ] **2.24** Numerical integration blocks: `Integrate1D` (adaptive Gauss-Kronrod), `IntegrateMC` (Monte Carlo for high-dim) — input is expression or connected function subgraph
+- [x] **2.23** Symbolic math blocks: `Differentiate` (symbolic d/dx), `Integrate` (symbolic ∫dx), `Simplify`, `Expand`, `Substitute` (replace variable with value/expression) — use CAS from 1B, display LaTeX
+- [x] **2.24** Numerical integration blocks: `Integrate1D` (adaptive Gauss-Kronrod), `IntegrateMC` (Monte Carlo for high-dim) — input is expression or connected function subgraph
 - [x] **2.25** CurveFit: least-squares fitting to user-defined model (Levenberg-Marquardt algorithm), polynomial fit (degree N), spline smoothing — returns fitted parameters + R² + residuals
 - [x] **2.26** Filter design: `DesignFilter` (Butterworth/Chebyshev I/II/elliptic, specify order + cutoff), `ApplyFilter` (FIR/IIR), `ZeroPhaseFilter` — for signal processing workflows
 - [x] **2.27** Norm blocks: L1, L2, Linf, Frobenius norms — for vectors and matrices
@@ -134,8 +134,8 @@
 
 - [x] **2.29** ODE RK4: classic fixed-step 4th-order Runge-Kutta — expression-based RHS via expr.rs, parameter support, adaptive final step. 4 tests: exponential growth (rel error <1e-8), harmonic oscillator (energy conservation <1e-6), parametric (k=2), structure validation.
 - [x] **2.30** ODE RK45 Dormand-Prince: embedded 4(5) pair with automatic step control — h_new = h × clamp(0.9×(tol/err)^0.2, 0.2, 5.0). Step rejection when error exceeds tolerance. 2 tests: adaptive uses fewer steps than RK4, harmonic oscillator full-period return. Ref: Dormand & Prince 1980, equivalent to MATLAB ode45.
-- [ ] **2.31** ODE implicit BDF: Backward Differentiation Formulas orders 1-5 with Newton iteration — essential for stiff systems (chemical kinetics, some thermal problems). Order and step size adaptation. Ref: Hairer & Wanner "Solving ODEs II".
-- [ ] **2.32** ODE Radau IIA: implicit Runge-Kutta of order 5 — L-stable, excellent for very stiff problems with discontinuities. Ref: Hairer & Wanner.
+- [x] **2.31** ODE implicit BDF: Backward Differentiation Formulas orders 1-5 with Newton iteration — essential for stiff systems (chemical kinetics, some thermal problems). Order and step size adaptation. Ref: Hairer & Wanner "Solving ODEs II".
+- [x] **2.32** ODE Radau IIA: implicit Runge-Kutta of order 5 — L-stable, excellent for very stiff problems with discontinuities. Ref: Hairer & Wanner.
 - [x] **2.33** ODE symplectic: Störmer-Verlet (2nd order) and symplectic Euler (1st order) — preserve energy for Hamiltonian systems (planetary orbits, molecular dynamics). Essential that total energy drift is O(h²) over long integrations.
 - [x] **2.34** ODE event detection: zero-crossing detection with bisection refinement — essential for impact problems, switch events, termination conditions (e.g., "stop when ball hits ground")
 - [ ] **2.35** DAE solver: index-1 DAE via BDF with consistent initialisation (Brown's method) — for systems with algebraic constraints (e.g., constrained mechanical systems, electrical circuits)

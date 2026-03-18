@@ -6,7 +6,9 @@
 //! All solvers take an `OdeSystem` (equation definitions + parameter values)
 //! and return an `OdeResult` (time series of state variables as vectors).
 
+pub mod bdf;
 pub mod event;
+pub mod radau;
 pub mod rk4;
 pub mod rk45;
 pub mod steady_state;

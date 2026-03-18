@@ -710,6 +710,10 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Find the steady-state equilibrium y* of dy/dt = f(y) where f(y*) = 0. Newton-Raphson with numerical Jacobian. Ideal for finding operating points of control systems, chemical equilibria, or any autonomous ODE.',
   'ode.symplectic':
     'Solve a Hamiltonian system using a symplectic integrator (Störmer-Verlet or Symplectic Euler). Conserves energy exactly over long integrations. Ideal for orbital mechanics, molecular dynamics, pendulums.',
+  'ode.bdf':
+    'Solve a stiff ODE system using Backward Differentiation Formulas (BDF orders 1–5). BDF methods are A-stable and well-suited for chemical kinetics, thermal systems, and other stiff problems. Uses Newton iteration with finite-difference Jacobian. Set order (1–5) in block data.',
+  'ode.radau':
+    'Solve a stiff ODE system using the 3-stage Radau IIA implicit Runge-Kutta method (order 5). L-stable: damps spurious oscillations. Excellent for very stiff problems and problems with discontinuities. Uses Newton iteration at each step.',
   // Vehicle Simulation
   'veh.tire.lateralForce': 'Pacejka Magic Formula lateral tire force Fy from slip angle.',
   'veh.tire.longForce': 'Pacejka Magic Formula longitudinal tire force Fx from slip ratio.',

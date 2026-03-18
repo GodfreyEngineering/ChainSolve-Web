@@ -573,6 +573,8 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("ode.event", "ODE Event Solver", "odeSolvers", "csOperation", vec![p("equations", "Equations (text)"), p("y0", "Initial state")], true),
         entry("ode.symplectic", "Symplectic ODE Solver", "odeSolvers", "csOperation", vec![p("accelerations", "Accelerations (text)"), p("y0", "Initial state [q, v]")], true),
         entry("ode.steady_state", "Steady-State Solver", "odeSolvers", "csOperation", vec![p("equations", "Equations (text)"), p("y0", "Initial guess")], true),
+        entry("ode.bdf", "ODE Solver (BDF)", "odeSolvers", "csOperation", vec![p("equations", "Equations (text)"), p("y0", "Initial state")], true),
+        entry("ode.radau", "ODE Solver (Radau)", "odeSolvers", "csOperation", vec![p("equations", "Equations (text)"), p("y0", "Initial state")], true),
 
         // ── Vehicle Simulation (Phase 5) ───────────────────────────────
         entry("veh.tire.lateralForce", "Pacejka Lateral Fy", "vehicleSim", "csOperation", vec![p("slip_angle", "Slip angle (rad)"), p("Fz", "Fz (N)"), p("B", "B"), p("C", "C"), p("D", "D"), p("E", "E")], true),
