@@ -479,7 +479,7 @@
 - [ ] **10.3** REST API: POST /api/graph/execute (returns job ID), GET /api/graph/{id}/results, POST /api/graph/export/fmu, POST /api/graph/export/pdf
 - [ ] **10.4** WebSocket: /api/graph/{id}/stream for execution progress and intermediate results
 - [x] **10.5** CLI: `chainsolve-cli` Rust binary — headless graph execution, CI/CD, batch sweeps. Reads .chainsolve JSON, outputs CSV/HDF5/JSON.
-- [ ] **10.6** Python bindings: `pip install chainsolve` via PyO3. `chainsolve.Graph.load("model.chainsolve").execute(params={...})` from Jupyter.
+- [x] **10.6** Python bindings: `pip install chainsolve` via PyO3. `chainsolve.Graph.load("model.chainsolve").execute(params={...})` from Jupyter.
 - [ ] **10.7** JS/TS SDK: `npm install @chainsolve/sdk` — programmatic graph construction and execution.
 - [ ] **10.8** Webhooks: trigger external URLs on execution completion (CI/CD, notifications, pipelines)
 
