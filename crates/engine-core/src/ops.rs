@@ -4156,6 +4156,73 @@ fn evaluate_node_inner(
             Value::Table { columns, rows }
         }
 
+        "ode.symplectic" => {
+            // Parse acceleration expressions from Text input (semicolon-separated)
+            let accel_text = match inputs.get("accelerations") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => return Value::error("ode.symplectic: 'accelerations' input required (Text, semicolon-separated)"),
+            };
+            let accel_exprs: Vec<String> = accel_text.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let n = accel_exprs.len();
+            if n == 0 {
+                return Value::error("ode.symplectic: no acceleration expressions provided");
+            }
+
+            // Parse initial state [q0..qN-1, v0..vN-1] from Vector input
+            let y0 = match inputs.get("y0") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                _ => return Value::error("ode.symplectic: 'y0' input required ([q0..qN, v0..vN])"),
+            };
+            if y0.len() != 2 * n {
+                return Value::error(format!(
+                    "ode.symplectic: {} acceleration expressions require {} initial values (got {})",
+                    n, 2 * n, y0.len()
+                ));
+            }
+
+            let t_start = scalar_or(data, "t_start", 0.0);
+            let t_end = scalar_or(data, "t_end", 1.0);
+            let dt = scalar_or(data, "dt", 0.01);
+
+            // Determine method from data
+            let method_str = data.get("method").and_then(|v| v.as_str()).unwrap_or("verlet");
+            let method = if method_str == "euler" {
+                crate::ode::symplectic::SympMethod::SympEuler
+            } else {
+                crate::ode::symplectic::SympMethod::VelocityVerlet
+            };
+
+            // Collect parameters
+            let mut params = std::collections::HashMap::new();
+            if let Some(serde_json::Value::Object(obj)) = data.get("params") {
+                for (k, v) in obj {
+                    if let Some(num) = v.as_f64() {
+                        params.insert(k.clone(), num);
+                    }
+                }
+            }
+
+            let config = crate::ode::OdeSolverConfig {
+                t_start, t_end, dt,
+                tolerance: 1e-6,
+                max_steps: 100_000,
+            };
+
+            let result = crate::ode::symplectic::solve_symplectic(
+                &accel_exprs, &y0, &config, &params, &[], method,
+            );
+
+            let columns = result.column_names.clone();
+            let rows: Vec<Vec<f64>> = result.t.iter().zip(result.states.iter()).map(|(t, ys)| {
+                let mut row = vec![*t];
+                row.extend_from_slice(ys);
+                row
+            }).collect();
+
+            Value::Table { columns, rows }
+        }
+
         // ── Vehicle Simulation (Phase 5) ──────────────────────────────
 
         "veh.tire.lateralForce" => {

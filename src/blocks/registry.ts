@@ -913,6 +913,27 @@ reg({
     'Solve a system of ODEs using the Dormand-Prince RK4(5) adaptive-step method. Automatically adjusts step size for accuracy.',
 })
 
+reg({
+  type: 'ode.symplectic',
+  label: 'Symplectic ODE Solver',
+  category: 'odeSolvers',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'accelerations', label: 'Accelerations (text)' },
+    { id: 'y0', label: 'Initial state [q, v]' },
+  ],
+  defaultData: {
+    blockType: 'ode.symplectic',
+    label: 'Symplectic ODE',
+    t_end: 10.0,
+    dt: 0.01,
+    method: 'verlet',
+  },
+  proOnly: true,
+  description:
+    'Solve a Hamiltonian (conservative) system using a symplectic integrator. Provide N acceleration expressions a_i(q,v,t) and initial state [q0..qN-1, v0..vN-1]. Method: "verlet" (Störmer-Verlet, 2nd order) or "euler" (Symplectic Euler, 1st order). No secular energy drift.',
+})
+
 // ── Vehicle Simulation (Phase 5) ────────────────────────────────────────────
 
 reg({

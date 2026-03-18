@@ -421,6 +421,7 @@
     "interp_akima": "Spline Akima",
     "ode_rk4": "ODE RK4",
     "ode_rk45": "ODE RK45 (Adaptatif)",
+    "ode_symplectic": "Solveur ODE Symplectique",
     "tire_pacejka": "Pneumatique Pacejka",
     "quarter_car": "Suspension Quart de Véhicule",
     "aero_drag": "Traînée Aérodynamique",

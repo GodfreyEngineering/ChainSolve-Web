@@ -2063,6 +2063,7 @@
     "interp_akima": "ספליין אקימה",
     "ode_rk4": "ODE RK4",
     "ode_rk45": "ODE RK45",
+    "ode_symplectic": "פותר ODE סימפלקטי",
     "tire_pacejka": "צמיג פאצקה",
     "quarter_car": "מתלה רבע-רכב",
     "aero_drag": "גרר אווירודינמי",

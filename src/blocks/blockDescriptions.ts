@@ -669,6 +669,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Solve a system of ODEs using the classic 4th-order Runge-Kutta method. Output = table of time vs state variables.',
   'ode.rk45':
     'Solve ODEs using the Dormand-Prince adaptive-step method. Automatically adjusts step size for accuracy.',
+  'ode.symplectic':
+    'Solve a Hamiltonian system using a symplectic integrator (Störmer-Verlet or Symplectic Euler). Conserves energy exactly over long integrations. Ideal for orbital mechanics, molecular dynamics, pendulums.',
   // Vehicle Simulation
   'veh.tire.lateralForce': 'Pacejka Magic Formula lateral tire force Fy from slip angle.',
   'veh.tire.longForce': 'Pacejka Magic Formula longitudinal tire force Fx from slip ratio.',

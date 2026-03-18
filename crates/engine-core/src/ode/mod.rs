@@ -8,6 +8,7 @@
 
 pub mod rk4;
 pub mod rk45;
+pub mod symplectic;
 pub mod types;
 
 pub use types::{OdeResult, OdeSolverConfig, OdeSystem};

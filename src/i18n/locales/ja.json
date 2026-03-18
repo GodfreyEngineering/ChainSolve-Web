@@ -429,6 +429,7 @@
     "interp_akima": "Akimaスプライン",
     "ode_rk4": "ODE RK4",
     "ode_rk45": "ODE RK45 (適応型)",
+    "ode_symplectic": "シンプレクティックODEソルバー",
     "tire_pacejka": "Pacejkaタイヤ",
     "quarter_car": "1/4カーサスペンション",
     "aero_drag": "空力抗力",
