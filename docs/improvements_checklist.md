@@ -364,7 +364,7 @@
 - [ ] **4.11** STEP/IGES geometry import: parse CAD boundary representations → display as 3D mesh in viewport
 - [ ] **4.12** STL mesh import: parse triangulated surface mesh for FEM preprocessing
 - [ ] **4.13** FMU .fmu import/export: zip containing modelDescription.xml + compiled binaries — parse and create block ports
-- [ ] **4.14** .tir tire parameter file: parse Pacejka MF 6.2 format used across automotive industry
+- [x] **4.14** .tir tire parameter file: parse Pacejka MF 6.2 format used across automotive industry
 - [ ] **4.15** OpenDRIVE .xodr: parse road geometry description for driving simulation scenarios
 - [ ] **4.16** ONNX export: save trained neural network as .onnx file for deployment in other tools
 - [x] **4.17** LaTeX export: render symbolic expressions as LaTeX source code for papers/reports
