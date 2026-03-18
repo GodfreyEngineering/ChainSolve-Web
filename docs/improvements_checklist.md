@@ -361,9 +361,9 @@
 - [x] **4.8** Parquet import/export: columnar format for large datasets. Via `parquet` Rust crate compiled to WASM.
 - [x] **4.9** MATLAB .mat import: v5 format via `matfile` crate (pure Rust), v7.3 via HDF5 layer
 - [x] **4.10** NumPy .npy/.npz import: parse NumPy array format (simple binary header + data)
-- [ ] **4.11** STEP/IGES geometry import: parse CAD boundary representations → display as 3D mesh in viewport
+- [x] **4.11** STEP/IGES geometry import: parse CAD boundary representations → display as 3D mesh in viewport
 - [x] **4.12** STL mesh import: parse triangulated surface mesh for FEM preprocessing
-- [ ] **4.13** FMU .fmu import/export: zip containing modelDescription.xml + compiled binaries — parse and create block ports
+- [x] **4.13** FMU .fmu import/export: zip containing modelDescription.xml + compiled binaries — parse and create block ports
 - [x] **4.14** .tir tire parameter file: parse Pacejka MF 6.2 format used across automotive industry
 - [ ] **4.15** OpenDRIVE .xodr: parse road geometry description for driving simulation scenarios
 - [ ] **4.16** ONNX export: save trained neural network as .onnx file for deployment in other tools

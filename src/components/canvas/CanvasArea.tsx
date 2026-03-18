@@ -74,6 +74,7 @@ import { PythonScriptNode } from './nodes/PythonScriptNode'
 import { CustomRustNode } from './nodes/CustomRustNode'
 import { Hdf5ImportNode } from './nodes/Hdf5ImportNode'
 import { CadImportNode } from './nodes/CadImportNode'
+import { OpenDriveNode } from './nodes/OpenDriveNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -252,6 +253,7 @@ const NODE_TYPES = {
   csCustomRust: CustomRustNode,
   csHdf5Import: Hdf5ImportNode,
   csCADImport: CadImportNode,
+  csOpenDrive: OpenDriveNode,
 } as const
 
 const EDGE_TYPES = {

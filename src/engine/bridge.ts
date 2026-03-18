@@ -127,6 +127,9 @@ export function toEngineSnapshot(
                                 // 4.11: data.stepImport parses STEP/IGES in the UI; outputs vertex table as tableInput.
                                 : data.blockType === 'data.stepImport'
                                 ? 'tableInput'
+                                // 4.15: data.openDriveImport parses .xodr in the UI; outputs road sample table as tableInput.
+                                : data.blockType === 'data.openDriveImport'
+                                ? 'tableInput'
                                 // 9.15/2.134: codeBlock evaluates JS code in the UI, outputs result as 'number'.
                                 : data.blockType === 'codeBlock'
                                 ? 'number'
@@ -212,7 +215,7 @@ export function toEngineSnapshot(
       .filter((e) => {
         const tgt = evalNodes.find((n) => n.id === e.target)
         const bt = (tgt?.data as Record<string, unknown> | undefined)?.blockType
-        return bt !== 'mathSheet' && bt !== 'ctrl.deadZone' && bt !== 'nn.onnxInference' && bt !== 'scripting.python' && bt !== 'scripting.rust' && bt !== 'data.hdf5Import' && bt !== 'data.stepImport'
+        return bt !== 'mathSheet' && bt !== 'ctrl.deadZone' && bt !== 'nn.onnxInference' && bt !== 'scripting.python' && bt !== 'scripting.rust' && bt !== 'data.hdf5Import' && bt !== 'data.stepImport' && bt !== 'data.openDriveImport'
       })
       .map((e) => {
         const tgtNode = evalNodes.find((n) => n.id === e.target)

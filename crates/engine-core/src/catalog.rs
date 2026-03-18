@@ -616,6 +616,7 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("fmu.import", "FMU Import", "data", "csFmuImport", vec![], true),
         entry("data.hdf5Import", "HDF5 Import", "data", "csHdf5Import", vec![], true),
         entry("data.stepImport", "STEP/IGES Import", "data", "csCADImport", vec![], true),
+        entry("data.openDriveImport", "OpenDRIVE Import", "data", "csOpenDrive", vec![], true),
         entry("data.hdf5Export", "HDF5 Export", "data", "csOperation", vec![p("data", "Table or vector")], true),
         entry("scripting.python", "Python Script", "customFunctions", "csPythonScript", vec![], true),
         entry("scripting.rust", "Custom Rust", "customFunctions", "csCustomRust", vec![], true),

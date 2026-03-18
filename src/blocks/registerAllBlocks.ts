@@ -62,6 +62,7 @@ import { registerPythonBlocks } from './python-blocks'
 import { registerCustomRustBlocks } from './customrust-blocks'
 import { registerHdf5Blocks } from './hdf5-blocks'
 import { registerCadImportBlocks } from './cadimport-blocks'
+import { registerOpenDriveBlocks } from './opendrive-blocks'
 import { SEARCH_METADATA } from './blockSearchMetadata'
 
 function reg(
@@ -128,6 +129,7 @@ export function registerAllBlocks(): void {
   registerCustomRustBlocks(reg)
   registerHdf5Blocks(reg)
   registerCadImportBlocks(reg)
+  registerOpenDriveBlocks(reg)
 
   // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
   for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {

@@ -104,6 +104,7 @@ export type NodeKind =
   | 'csCustomRust'
   | 'csHdf5Import'
   | 'csCADImport'
+  | 'csOpenDrive'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

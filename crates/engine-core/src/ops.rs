@@ -7291,6 +7291,16 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── OpenDRIVE Import (4.15) ──────────────────────────────────────────
+        "data.openDriveImport" => {
+            // .xodr parsing runs in the browser via openDrive.ts.
+            // The engine passes through stored tableData (road_idx, s, x, y, hdg).
+            Value::Table {
+                columns: vec!["road_idx".to_string(), "s".to_string(), "x".to_string(), "y".to_string(), "hdg".to_string()],
+                rows: vec![],
+            }
+        }
+
         // ── STEP/IGES Import (4.11) ─────────────────────────────────────────
         "data.stepImport" => {
             // CAD geometry parsing runs in the browser via cadImport.ts.
