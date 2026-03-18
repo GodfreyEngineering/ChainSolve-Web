@@ -343,6 +343,96 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'eng.elec.diode_shockley':
     'Shockley ideal diode equation I = Is × (e^(V/(η·Vt)) − 1). η: ideality factor, Vt: thermal voltage (~0.02585 V at 300 K).',
 
+  // ── Multibody Mechanics (items 2.48–2.51) ─────────────────────────────────
+  'eng.multibody.spring_force':
+    'Spring force F = k·x (Hooke\'s law). k: spring stiffness (N/m), x: displacement (m).',
+  'eng.multibody.damper_force':
+    'Viscous damper force F = b·v. b: damping coefficient (N·s/m), v: velocity (m/s).',
+  'eng.multibody.mass_accel':
+    "Newton's second law: a = F/m. Outputs acceleration of a mass m under net force F.",
+  'eng.multibody.smd_natural_freq':
+    'Spring-Mass-Damper natural frequency ωn = √(k/m), damping ratio ζ = b/(2√(km)), damped freq ωd = ωn√(1−ζ²). Outputs table {omega_n, zeta, omega_d}.',
+  'eng.multibody.rigid_body_1d':
+    '1D rigid body dynamics with Coulomb friction. F_net = F − μ·Fn, a = F_net/m, KE = ½mv². Outputs table {F_net, a, KE}.',
+  'eng.multibody.joint_revolute':
+    'Revolute joint: angular acceleration α = τ/I. τ: torque (N·m), I: moment of inertia (kg·m²).',
+  'eng.multibody.joint_prismatic':
+    'Prismatic (sliding) joint: linear acceleration a = F/m.',
+  'eng.multibody.dh_transform':
+    'Denavit-Hartenberg homogeneous transform matrix for one robot joint. Inputs: θ (joint angle), d (link offset), a (link length), α (twist angle). Returns 4×4 matrix.',
+  'eng.multibody.contact_penalty':
+    'Penalty-based contact: F_n = k_p·max(0,−gap), F_friction = μ·F_n. gap<0 = interpenetration. Outputs table {F_normal, F_friction}.',
+  'eng.multibody.stribeck_friction':
+    'Stribeck friction model: μ = μk + (μs−μk)·exp(−(v/vs)²). Smoothly transitions from static to kinetic friction. Returns friction force F = μ·Fn.',
+  'eng.multibody.fk_2dof_planar':
+    '2-DOF planar robot forward kinematics. x = l₁cos(θ₁) + l₂cos(θ₁+θ₂), y = l₁sin(θ₁) + l₂sin(θ₁+θ₂). Outputs table {x, y}.',
+  'eng.multibody.ik_2dof_planar':
+    '2-DOF planar robot inverse kinematics. Given end-effector (x,y), returns joint angles θ₁, θ₂ via geometric solution. Errors if target is out of reach.',
+
+  // ── Active Electronics (items 2.54–2.57) ─────────────────────────────────
+  'eng.elec.diode_iv':
+    'Exponential diode I-V: I = Is·(exp(V/(n·Vt)) − 1). Vt = kT/q ≈ 25.85 mV at 300 K. n: ideality factor (1–2).',
+  'eng.elec.mosfet_id':
+    'Square-law MOSFET: cutoff (Vgs<Vth), triode, or saturation. kp = μn·Cox·W/L (A/V²). Saturation: Id = kp/2·(Vgs−Vth)².',
+  'eng.elec.igbt_vce_drop':
+    'IGBT simplified on-state model: Vce = Vce0 + Ic·Rce. Vce0: threshold voltage, Rce: on-state resistance.',
+  'eng.elec.opamp_vout':
+    'Ideal OpAmp: Vout = A·(V+−V−), clipped to ±Vcc. Set A=1e5 for ideal behaviour; finite A for real op-amp modelling.',
+  'eng.elec.pwm_duty':
+    'PWM average output voltage: V_avg = Vdc × duty. duty ∈ [0,1]. Use for averaged-value motor drive models.',
+  'eng.elec.hbridge_vout':
+    'H-bridge bipolar PWM average output: Vout = Vdc·(duty_a − duty_b). Produces ±Vdc range for bidirectional motor control.',
+  'eng.elec.three_phase_spwm':
+    '3-phase SPWM: line-to-neutral peak voltage = m·Vdc/2. m: modulation index [0,1]. RMS line-to-line = m·Vdc/√2.',
+  'eng.elec.dc_motor':
+    'DC motor steady-state: ω = (V−Ia·Ra)/Ke (rad/s), T = Kt·Ia (N·m), P = T·ω (W). Ke≈Kt for SI units. Outputs table {omega, torque, power}.',
+  'eng.elec.pmsm_torque':
+    'PMSM electromagnetic torque in dq-frame: T = (3/2)·(P/2)·(λ·iq + (Ld−Lq)·id·iq). Includes reluctance torque term.',
+  'eng.elec.pmsm_vd_vq':
+    'PMSM dq voltage equations: Vd = Rs·id − ωe·Lq·iq, Vq = Rs·iq + ωe·Ld·id + ωe·λ. ωe: electrical angular speed (rad/s). Outputs table {Vd, Vq}.',
+  'eng.elec.battery_thevenin':
+    'Thevenin equivalent circuit battery model (ECM): Vt = OCV − I·R0 − V_RC. RC branch: V1 = I·R1·(1−e^(−dt/τ)), τ=R1·C1. Outputs {Vt, V1, V_drop}.',
+  'eng.elec.battery_soc':
+    'Coulomb-counting SOC update: SOC = SOC0 − I·dt/(Q_nom·3600). I: discharge current (A), Q_nom: nominal capacity (Ah). SOC clipped to [0,1].',
+
+  // ── Thermal Network (item 2.59) ───────────────────────────────────────────
+  'eng.thermal.conductor_R':
+    'Thermal conduction (Fourier): Q = k·A·ΔT/L (W). R_thermal = L/(k·A) (K/W). k: conductivity (W/mK).',
+  'eng.thermal.capacitor_dT':
+    'Lumped thermal capacitor: ΔT = Q·dt/(m·c). Temperature rise of mass m with specific heat c under heat input Q over time dt.',
+  'eng.thermal.convection':
+    "Newton's law of cooling: Q = h·A·(Ts − Tf). h: convection coefficient (W/m²K), A: area (m²).",
+  'eng.thermal.radiation':
+    'Thermal radiation: Q = ε·σ·A·(Ts⁴ − Tamb⁴). σ = 5.67×10⁻⁸ W/(m²K⁴). Temperatures in Kelvin.',
+
+  // ── Heat Exchanger (item 2.60) ────────────────────────────────────────────
+  'eng.thermal.hx_lmtd':
+    'LMTD method: Q = U·A·LMTD, LMTD = (ΔT1−ΔT2)/ln(ΔT1/ΔT2). ΔT1, ΔT2: terminal temperature differences. Use for counter/co-flow HX.',
+  'eng.thermal.hx_ntu':
+    'ε-NTU method: effectiveness ε from NTU and capacity ratio Cr = Cmin/Cmax. Q = ε·Q_max. Outputs table {eps, Q}. Works for all HX flow configurations.',
+
+  // ── Pipe / Valve / Pump / Hydraulics (items 2.61–2.63) ────────────────────
+  'eng.fluids.pipe_dp':
+    'Darcy-Weisbach: ΔP = (f·L/D + K_minor)·½ρv². f: Darcy friction factor, K_minor: sum of minor loss coefficients. For laminar: f = 64/Re.',
+  'eng.fluids.valve_cv':
+    'Valve flow coefficient: Q (m³/h) = Cv·√(ΔP_bar/SG). Cv from manufacturer datasheet. SG: specific gravity (water=1).',
+  'eng.fluids.pump_power':
+    'Pump power: P_hyd = ρ·g·H·Q (hydraulic), P_shaft = P_hyd/η (shaft). η: overall pump efficiency. Outputs table {P_hyd, P_shaft}.',
+  'eng.fluids.orifice_flow':
+    'Sharp-edged orifice flow: Q = Cd·A·√(2·ΔP/ρ). Cd ≈ 0.611 for sharp-edged orifice. Returns volumetric flow (m³/s).',
+  'eng.fluids.accumulator':
+    'Isentropic gas accumulator: P2 = P1·(V1/V2)^γ. γ = 1.4 for nitrogen (adiabatic). Pre-charge: P1, V1.',
+  'eng.fluids.hydraulic_cylinder':
+    'Hydraulic cylinder: F = P_bore·A_bore − P_rod·A_rod, velocity = Q/A_bore. Differential area effect for rod-side. Outputs table {F, v}.',
+  'eng.fluids.hydraulic_motor':
+    'Hydraulic motor: T = ΔP·D/(2π), ω = Q·2π/D, P_mech = T·ω·η. D: displacement (m³/rev). Outputs table {torque, omega, power}.',
+  'eng.fluids.water_density':
+    'Water density polynomial fit (0–100°C): ρ ≈ 999.84 + 0.068T − 0.0091T² + 10⁻⁵T³ kg/m³. Max ρ at ~4°C.',
+  'eng.fluids.water_viscosity':
+    'Water dynamic viscosity (Vogel equation). Returns μ in Pa·s. Valid 0–100°C. μ decreases sharply with temperature.',
+  'eng.fluids.oil_viscosity':
+    'Oil kinematic viscosity by Walther ASTM D341. Specify ν at 40°C and 100°C, get ν at any temperature T (°C). Returns cSt.',
+
   // ── BLK-01: Chemical Engineering ─────────────────────────────────────────
   'chem.ideal_gas_n':
     'Ideal gas law solved for moles: n = PV/(RT). P: pressure (Pa), V: volume (m³), T: temperature (K).',
@@ -694,6 +784,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'GRU (Gated Recurrent Unit): streamlined recurrent layer with reset and update gates. Fewer parameters than LSTM, comparable performance. Input: Table [T × D]. Output: last hidden state or full sequence.',
   'nn.attention':
     'Scaled dot-product attention: Attention(Q,K,V) = softmax(Q·Kᵀ/√d_k)·V. Supports causal (autoregressive) masking. Use Q=K=V=same sequence for self-attention (Transformer building block).',
+  'nn.conv2d':
+    '2D convolutional layer (inference). Input: Matrix or Table (H×W grayscale or flattened HWC tensor). kernel_h×kernel_w filters, configurable stride, padding "valid" or "same". He-initialised. Output: Matrix [out_h*out_w × n_filters].',
   // Symbolic Math (CAS)
   'sym.differentiate':
     'Symbolic differentiation: computes d(expr)/d(var) using chain rule, product rule, and standard function derivatives. Returns a LaTeX string. Simplifies the result automatically.',

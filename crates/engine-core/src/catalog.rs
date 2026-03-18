@@ -326,6 +326,56 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("eng.elec.three_phase_P", "Three-Phase Power", "engElectrical", "csOperation", vec![p("VL", "VL (V)"), p("IL", "IL (A)"), p("pf", "pf")], true),
         entry("eng.elec.diode_shockley", "Diode Current (Shockley)", "engElectrical", "csOperation", vec![p("Is", "Is (A)"), p("V", "V (V)"), p("eta", "\u{03B7}"), p("Vt", "Vt (V)")], true),
 
+        // ── Multibody Mechanics (items 2.48–2.51) ───────────────────────
+        entry("eng.multibody.spring_force", "Spring Force F=kx", "engMechanics", "csOperation", vec![p("k", "k (N/m)"), p("x", "x (m)")], true),
+        entry("eng.multibody.damper_force", "Damper Force F=bv", "engMechanics", "csOperation", vec![p("b", "b (N·s/m)"), p("v", "v (m/s)")], true),
+        entry("eng.multibody.mass_accel", "Mass Acceleration a=F/m", "engMechanics", "csOperation", vec![p("F", "F (N)"), p("m", "m (kg)")], true),
+        entry("eng.multibody.smd_natural_freq", "SMD Natural Frequency", "engMechanics", "csOperation", vec![p("k", "k (N/m)"), p("m", "m (kg)"), p("b", "b (N·s/m)")], true),
+        entry("eng.multibody.rigid_body_1d", "Rigid Body 1D", "engMechanics", "csOperation", vec![p("m", "m (kg)"), p("F", "F (N)"), p("v", "v (m/s)"), p("mu", "\u{03BC}"), p("Fn", "F_n (N)")], true),
+        entry("eng.multibody.joint_revolute", "Revolute Joint \u{03B1}=\u{03C4}/I", "engMechanics", "csOperation", vec![p("tau", "\u{03C4} (N·m)"), p("I", "I (kg·m\u{00B2})")], true),
+        entry("eng.multibody.joint_prismatic", "Prismatic Joint a=F/m", "engMechanics", "csOperation", vec![p("F", "F (N)"), p("m", "m (kg)")], true),
+        entry("eng.multibody.dh_transform", "DH Transform Matrix", "engMechanics", "csOperation", vec![p("theta", "\u{03B8} (rad)"), p("d", "d (m)"), p("a", "a (m)"), p("alpha", "\u{03B1} (rad)")], true),
+        entry("eng.multibody.contact_penalty", "Contact Model (Penalty)", "engMechanics", "csOperation", vec![p("k_p", "k_p (N/m)"), p("gap", "gap (m)"), p("mu", "\u{03BC}")], true),
+        entry("eng.multibody.stribeck_friction", "Stribeck Friction", "engMechanics", "csOperation", vec![p("mu_s", "\u{03BC}_s"), p("mu_k", "\u{03BC}_k"), p("vs", "v_s (m/s)"), p("v", "v (m/s)"), p("Fn", "F_n (N)")], true),
+        entry("eng.multibody.fk_2dof_planar", "FK 2-DOF Planar Arm", "engMechanics", "csOperation", vec![p("l1", "l\u{2081} (m)"), p("l2", "l\u{2082} (m)"), p("theta1", "\u{03B8}\u{2081} (rad)"), p("theta2", "\u{03B8}\u{2082} (rad)")], true),
+        entry("eng.multibody.ik_2dof_planar", "IK 2-DOF Planar Arm", "engMechanics", "csOperation", vec![p("l1", "l\u{2081} (m)"), p("l2", "l\u{2082} (m)"), p("x", "x (m)"), p("y", "y (m)")], true),
+
+        // ── Active Electronics (items 2.54–2.57) ────────────────────────
+        entry("eng.elec.diode_iv", "Diode I-V (Exponential)", "engElectrical", "csOperation", vec![p("Is", "Is (A)"), p("V", "V (V)"), p("n", "n"), p("Vt", "Vt (V)")], true),
+        entry("eng.elec.mosfet_id", "MOSFET Drain Current", "engElectrical", "csOperation", vec![p("kp", "kp (A/V\u{00B2})"), p("Vgs", "Vgs (V)"), p("Vth", "Vth (V)"), p("Vds", "Vds (V)")], true),
+        entry("eng.elec.igbt_vce_drop", "IGBT Vce Drop", "engElectrical", "csOperation", vec![p("Vce0", "Vce0 (V)"), p("Ic", "Ic (A)"), p("Rce", "Rce (\u{03A9})")], true),
+        entry("eng.elec.opamp_vout", "OpAmp Output", "engElectrical", "csOperation", vec![p("Vp", "V+ (V)"), p("Vm", "V- (V)"), p("A", "A (gain)"), p("Vcc", "Vcc (V)")], true),
+        entry("eng.elec.pwm_duty", "PWM Average Output", "engElectrical", "csOperation", vec![p("Vdc", "Vdc (V)"), p("duty", "duty (0-1)")], true),
+        entry("eng.elec.hbridge_vout", "H-Bridge Output", "engElectrical", "csOperation", vec![p("Vdc", "Vdc (V)"), p("duty_a", "duty_a"), p("duty_b", "duty_b")], true),
+        entry("eng.elec.three_phase_spwm", "3-Phase SPWM Voltage", "engElectrical", "csOperation", vec![p("Vdc", "Vdc (V)"), p("m", "m (mod. index)")], true),
+        entry("eng.elec.dc_motor", "DC Motor Steady-State", "engElectrical", "csOperation", vec![p("V", "V (V)"), p("Ia", "Ia (A)"), p("Ra", "Ra (\u{03A9})"), p("Ke", "Ke (V·s/rad)"), p("Kt", "Kt (N·m/A)")], true),
+        entry("eng.elec.pmsm_torque", "PMSM Torque (dq-frame)", "engElectrical", "csOperation", vec![p("P", "P (pole pairs)"), p("lambda", "\u{03BB} (Wb)"), p("Ld", "Ld (H)"), p("Lq", "Lq (H)"), p("id", "id (A)"), p("iq", "iq (A)")], true),
+        entry("eng.elec.pmsm_vd_vq", "PMSM Vd/Vq Equations", "engElectrical", "csOperation", vec![p("Rs", "Rs (\u{03A9})"), p("Ld", "Ld (H)"), p("Lq", "Lq (H)"), p("lambda", "\u{03BB} (Wb)"), p("omega", "\u{03C9}_e (rad/s)"), p("id", "id (A)"), p("iq", "iq (A)")], true),
+        entry("eng.elec.battery_thevenin", "Battery (Thevenin ECM)", "engElectrical", "csOperation", vec![p("OCV", "OCV (V)"), p("I", "I (A)"), p("R0", "R0 (\u{03A9})"), p("R1", "R1 (\u{03A9})"), p("C1", "C1 (F)"), p("dt", "dt (s)")], true),
+        entry("eng.elec.battery_soc", "Battery SOC Update", "engElectrical", "csOperation", vec![p("SOC0", "SOC0 (0-1)"), p("I", "I (A)"), p("dt", "dt (s)"), p("Q_nom", "Q_nom (Ah)")], true),
+
+        // ── Thermal Network (item 2.59) ──────────────────────────────────
+        entry("eng.thermal.conductor_R", "Thermal Conduction Q=k\u{00B7}A\u{00B7}\u{0394}T/L", "engThermo", "csOperation", vec![p("L", "L (m)"), p("k", "k (W/mK)"), p("A", "A (m\u{00B2})"), p("dT", "\u{0394}T (K)")], true),
+        entry("eng.thermal.capacitor_dT", "Thermal Mass \u{0394}T=Q\u{00B7}dt/(m\u{00B7}c)", "engThermo", "csOperation", vec![p("m", "m (kg)"), p("c", "c (J/kgK)"), p("Q", "Q (W)"), p("dt", "dt (s)")], true),
+        entry("eng.thermal.convection", "Convection Q=h\u{00B7}A\u{00B7}\u{0394}T", "engThermo", "csOperation", vec![p("h", "h (W/m\u{00B2}K)"), p("A", "A (m\u{00B2})"), p("Ts", "T_s (K)"), p("Tf", "T_f (K)")], true),
+        entry("eng.thermal.radiation", "Radiation Q=\u{03B5}\u{03C3}A(T\u{2074}-T_amb\u{2074})", "engThermo", "csOperation", vec![p("eps", "\u{03B5}"), p("A", "A (m\u{00B2})"), p("Ts", "T_s (K)"), p("Tamb", "T_amb (K)")], true),
+
+        // ── Heat Exchanger (item 2.60) ───────────────────────────────────
+        entry("eng.thermal.hx_lmtd", "Heat Exchanger (LMTD)", "engThermo", "csOperation", vec![p("U", "U (W/m\u{00B2}K)"), p("A", "A (m\u{00B2})"), p("dT1", "\u{0394}T1 (K)"), p("dT2", "\u{0394}T2 (K)")], true),
+        entry("eng.thermal.hx_ntu", "Heat Exchanger (\u{03B5}-NTU)", "engThermo", "csOperation", vec![p("NTU", "NTU"), p("Cr", "C_r"), p("Q_max", "Q_max (W)")], true),
+
+        // ── Pipe / Valve / Pump / Hydraulics (items 2.61–2.63) ──────────
+        entry("eng.fluids.pipe_dp", "Pipe Pressure Drop (Darcy-Weisbach)", "engFluids", "csOperation", vec![p("f", "f (Darcy)"), p("L", "L (m)"), p("D", "D (m)"), p("rho", "\u{03C1} (kg/m\u{00B3})"), p("v", "v (m/s)"), p("K_minor", "K_minor")], true),
+        entry("eng.fluids.valve_cv", "Valve Flow (Cv)", "engFluids", "csOperation", vec![p("Cv", "Cv"), p("dP", "\u{0394}P (bar)"), p("SG", "SG")], true),
+        entry("eng.fluids.pump_power", "Pump Power", "engFluids", "csOperation", vec![p("rho", "\u{03C1} (kg/m\u{00B3})"), p("g", "g (m/s\u{00B2})"), p("H", "H (m)"), p("Q", "Q (m\u{00B3}/s)"), p("eta", "\u{03B7}")], true),
+        entry("eng.fluids.orifice_flow", "Orifice Flow (Cd)", "engFluids", "csOperation", vec![p("Cd", "Cd"), p("A", "A (m\u{00B2})"), p("dP", "\u{0394}P (Pa)"), p("rho", "\u{03C1} (kg/m\u{00B3})")], true),
+        entry("eng.fluids.accumulator", "Gas Accumulator P2=P1(V1/V2)^\u{03B3}", "engFluids", "csOperation", vec![p("P1", "P1 (Pa)"), p("V1", "V1 (m\u{00B3})"), p("V2", "V2 (m\u{00B3})"), p("gamma", "\u{03B3}")], true),
+        entry("eng.fluids.hydraulic_cylinder", "Hydraulic Cylinder", "engFluids", "csOperation", vec![p("P_bore", "P_bore (Pa)"), p("A_bore", "A_bore (m\u{00B2})"), p("P_rod", "P_rod (Pa)"), p("A_rod", "A_rod (m\u{00B2})"), p("Q", "Q (m\u{00B3}/s)")], true),
+        entry("eng.fluids.hydraulic_motor", "Hydraulic Motor", "engFluids", "csOperation", vec![p("dP", "\u{0394}P (Pa)"), p("D", "D (m\u{00B3}/rev)"), p("Q", "Q (m\u{00B3}/s)"), p("eta", "\u{03B7}")], true),
+        entry("eng.fluids.water_density", "Water Density \u{03C1}(T)", "engFluids", "csOperation", vec![p("T", "T (\u{00B0}C)")], true),
+        entry("eng.fluids.water_viscosity", "Water Viscosity \u{03BC}(T)", "engFluids", "csOperation", vec![p("T", "T (\u{00B0}C)")], true),
+        entry("eng.fluids.oil_viscosity", "Oil Viscosity (Walther ASTM D341)", "engFluids", "csOperation", vec![p("nu40", "\u{03BD}40 (cSt)"), p("nu100", "\u{03BD}100 (cSt)"), p("T", "T (\u{00B0}C)")], true),
+
         // ── BLK-01: Chemical Engineering ────────────────────────────────
         entry("chem.ideal_gas_n", "n = PV/RT", "chem", "csOperation", vec![p("P", "P (Pa)"), p("V", "V (m3)"), p("R", "R (J/molK)"), p("T", "T (K)")], true),
         entry("chem.antoine_vp", "Antoine VP", "chem", "csOperation", vec![p("A", "A"), p("B", "B"), p("C", "C"), p("T", "T (C)")], true),
@@ -562,6 +612,7 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("nn.lstm", "LSTM", "neuralNetworks", "csOperation", vec![p("sequence", "Sequence (table)")], true),
         entry("nn.gru", "GRU", "neuralNetworks", "csOperation", vec![p("sequence", "Sequence (table)")], true),
         entry("nn.attention", "Attention", "neuralNetworks", "csOperation", vec![p("query", "Query (table)"), p("key", "Key (table)"), p("value", "Value (table)")], true),
+        entry("nn.conv2d", "Conv2D", "neuralNetworks", "csOperation", vec![p("input", "Input (Matrix/Table)")], true),
 
         // ── Symbolic Math (CAS) ────────────────────────────────────────
         entry("sym.differentiate", "Differentiate", "math", "csOperation", vec![p("expr", "Expression (text)"), p("var", "Variable (text)")], true),

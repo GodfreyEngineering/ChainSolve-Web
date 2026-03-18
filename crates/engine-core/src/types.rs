@@ -108,6 +108,22 @@ impl Value {
         assert_eq!(data.len(), rows * cols);
         Value::Matrix { rows, cols, data }
     }
+}
+
+/// Convenience: build a single-row `Value::Table` from parallel column-name and
+/// column-data slices. Each entry in `col_data` is a `Vec<f64>` (the row values
+/// for that column); all vecs must have the same length.
+pub fn build_table(col_names: &[&str], col_data: &[Vec<f64>]) -> Value {
+    let columns: Vec<String> = col_names.iter().map(|s| s.to_string()).collect();
+    let n_rows = col_data.first().map(|v| v.len()).unwrap_or(0);
+    let mut rows: Vec<Vec<f64>> = Vec::with_capacity(n_rows);
+    for r in 0..n_rows {
+        rows.push(col_data.iter().map(|col| col.get(r).copied().unwrap_or(f64::NAN)).collect());
+    }
+    Value::Table { columns, rows }
+}
+
+impl Value {
 
     pub fn as_matrix_data(&self) -> Option<(usize, usize, &Vec<f64>)> {
         match self {

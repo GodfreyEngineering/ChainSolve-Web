@@ -225,7 +225,7 @@
 - [x] **2.92** LSTM layer: Long Short-Term Memory with forget/input/output gates — for time-series prediction and sequence modeling
 - [x] **2.93** GRU layer: Gated Recurrent Unit (simpler than LSTM, often similar performance) — for sequence tasks
 - [x] **2.94** Attention layer: scaled dot-product attention Q×K^T/√d_k → softmax → ×V — foundation for transformer architectures
-- [ ] **2.95** Conv2D layer: 2D convolution with configurable kernel size, stride, padding — for image-based tasks
+- [x] **2.95** Conv2D layer: 2D convolution with configurable kernel size, stride, padding — for image-based tasks
 - [ ] **2.96** ONNX model import: load .onnx files for inference using ONNX Runtime compiled to WASM — supports models up to ~500MB (quantized) in browser, larger via server Edge Function. Covers TensorFlow/PyTorch model deployment.
 - [ ] **2.97** PINNBlock: physics-informed neural network — configure PDE residual expression + boundary conditions + collocation points. Implements adaptive sampling (residual-based), gradient balancing between loss terms (NTK-based weighting), Fourier feature embedding for spectral bias mitigation. Uses AD engine (1C).
 - [ ] **2.98** NeuralOperator: FNO (Fourier Neural Operator) or DeepONet architecture — learn solution mappings across parameter spaces. Configure modes, layers, trunk/branch networks. Train on input-output function pairs. Ref: Mamba Neural Operators achieve 90% error reduction over Transformer baselines.

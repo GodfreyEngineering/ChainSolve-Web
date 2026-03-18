@@ -1913,6 +1913,455 @@ fn evaluate_node_inner(
             else { Value::scalar(is * ((v / (n * vt)).exp() - 1.0)) }
         }
 
+        // ── Multibody Mechanics (items 2.48–2.51) ──────────────────────
+        // 2.48 — Spring / Damper / Mass / RigidBody formula blocks
+        "eng.multibody.spring_force" => {
+            let k = scalar_or_nan(inputs, "k");
+            let x = scalar_or_nan(inputs, "x");
+            Value::scalar(k * x)
+        }
+        "eng.multibody.damper_force" => {
+            let b = scalar_or_nan(inputs, "b");
+            let v = scalar_or_nan(inputs, "v");
+            Value::scalar(b * v)
+        }
+        "eng.multibody.mass_accel" => {
+            let f = scalar_or_nan(inputs, "F");
+            let m = scalar_or_nan(inputs, "m");
+            if m == 0.0 { Value::error("Mass = 0") }
+            else { Value::scalar(f / m) }
+        }
+        "eng.multibody.smd_natural_freq" => {
+            // ωn = sqrt(k/m), ζ = b / (2*sqrt(k*m))
+            let k = scalar_or_nan(inputs, "k");
+            let m = scalar_or_nan(inputs, "m");
+            let b = scalar_or_nan(inputs, "b");
+            if k <= 0.0 || m <= 0.0 { Value::error("k and m must be positive") }
+            else {
+                let wn = (k / m).sqrt();
+                let zeta = b / (2.0 * (k * m).sqrt());
+                crate::types::build_table(
+                    &["omega_n", "zeta", "omega_d"],
+                    &[vec![wn], vec![zeta], vec![wn * (1.0 - zeta * zeta).max(0.0).sqrt()]],
+                )
+            }
+        }
+        "eng.multibody.rigid_body_1d" => {
+            // Net force, acceleration, and kinetic energy for 1D rigid body
+            let m    = scalar_or_nan(inputs, "m");
+            let f    = scalar_or_nan(inputs, "F");
+            let v    = scalar_or_nan(inputs, "v");
+            let mu   = scalar_or_nan(inputs, "mu");
+            let fn_n = scalar_or_nan(inputs, "Fn");
+            let f_friction = mu * fn_n;
+            let f_net = f - f_friction;
+            if m == 0.0 { Value::error("Mass = 0") }
+            else {
+                crate::types::build_table(
+                    &["F_net", "a", "KE"],
+                    &[vec![f_net], vec![f_net / m], vec![0.5 * m * v * v]],
+                )
+            }
+        }
+        // 2.49 — Joint blocks (formula approximations)
+        "eng.multibody.joint_revolute" => {
+            // τ = I * α  (revolute: torque → angular acceleration)
+            let tau = scalar_or_nan(inputs, "tau");
+            let i   = scalar_or_nan(inputs, "I");
+            if i == 0.0 { Value::error("Inertia = 0") }
+            else { Value::scalar(tau / i) }
+        }
+        "eng.multibody.joint_prismatic" => {
+            // F = m * a  (prismatic: force → linear acceleration)
+            let f = scalar_or_nan(inputs, "F");
+            let m = scalar_or_nan(inputs, "m");
+            if m == 0.0 { Value::error("Mass = 0") }
+            else { Value::scalar(f / m) }
+        }
+        "eng.multibody.dh_transform" => {
+            // Denavit-Hartenberg: single joint transform parameters → 4x4 homogeneous matrix (flat)
+            // T = Rz(θ) * Tz(d) * Tx(a) * Rx(α)
+            let theta = scalar_or_nan(inputs, "theta"); // joint angle rad
+            let d     = scalar_or_nan(inputs, "d");     // link offset
+            let a     = scalar_or_nan(inputs, "a");     // link length
+            let alpha = scalar_or_nan(inputs, "alpha"); // twist angle rad
+            let ct = theta.cos(); let st = theta.sin();
+            let ca = alpha.cos(); let sa = alpha.sin();
+            // Row-major 4x4 DH matrix
+            let mat = vec![
+                ct, -st*ca,  st*sa, a*ct,
+                st,  ct*ca, -ct*sa, a*st,
+                0.0, sa,     ca,    d,
+                0.0, 0.0,    0.0,   1.0,
+            ];
+            Value::Matrix { rows: 4, cols: 4, data: mat }
+        }
+        // 2.50 — ContactModel
+        "eng.multibody.contact_penalty" => {
+            // Penalty contact: F_n = k_p * max(0, -gap), F_f = μ * F_n (Coulomb)
+            let kp  = scalar_or_nan(inputs, "k_p");
+            let gap = scalar_or_nan(inputs, "gap");
+            let mu  = scalar_or_nan(inputs, "mu");
+            let fn_val = kp * (-gap).max(0.0);
+            let ff_val = mu * fn_val;
+            crate::types::build_table(
+                &["F_normal", "F_friction"],
+                &[vec![fn_val], vec![ff_val]],
+            )
+        }
+        "eng.multibody.stribeck_friction" => {
+            // Stribeck friction: μ = μk + (μs - μk)*exp(-(v/vs)^2)
+            let mu_s = scalar_or_nan(inputs, "mu_s");
+            let mu_k = scalar_or_nan(inputs, "mu_k");
+            let vs   = scalar_or_nan(inputs, "vs");
+            let v    = scalar_or_nan(inputs, "v");
+            let fn_n = scalar_or_nan(inputs, "Fn");
+            if vs == 0.0 { Value::error("Stribeck vs = 0") }
+            else {
+                let mu = mu_k + (mu_s - mu_k) * (-(v / vs).powi(2)).exp();
+                Value::scalar(mu * fn_n)
+            }
+        }
+        // 2.51 — KinematicChain (forward kinematics end-effector from joint angles)
+        "eng.multibody.fk_2dof_planar" => {
+            // 2-DOF planar arm: x = l1*cos(θ1) + l2*cos(θ1+θ2), y = l1*sin(θ1) + l2*sin(θ1+θ2)
+            let l1 = scalar_or_nan(inputs, "l1");
+            let l2 = scalar_or_nan(inputs, "l2");
+            let t1 = scalar_or_nan(inputs, "theta1");
+            let t2 = scalar_or_nan(inputs, "theta2");
+            let x = l1 * t1.cos() + l2 * (t1 + t2).cos();
+            let y = l1 * t1.sin() + l2 * (t1 + t2).sin();
+            crate::types::build_table(&["x", "y"], &[vec![x], vec![y]])
+        }
+        "eng.multibody.ik_2dof_planar" => {
+            // 2-DOF planar IK: θ2 = acos((x²+y²-l1²-l2²)/(2*l1*l2)), θ1 = atan2(y,x) - atan2(l2*sin θ2, l1+l2*cos θ2)
+            let l1 = scalar_or_nan(inputs, "l1");
+            let l2 = scalar_or_nan(inputs, "l2");
+            let x  = scalar_or_nan(inputs, "x");
+            let y  = scalar_or_nan(inputs, "y");
+            let cos_t2 = (x*x + y*y - l1*l1 - l2*l2) / (2.0 * l1 * l2);
+            if cos_t2.abs() > 1.0 { Value::error("IK: target out of reach") }
+            else {
+                let t2 = cos_t2.acos();
+                let t1 = y.atan2(x) - (l2 * t2.sin()).atan2(l1 + l2 * t2.cos());
+                crate::types::build_table(&["theta1", "theta2"], &[vec![t1], vec![t2]])
+            }
+        }
+
+        // ── Active Electronics (items 2.54–2.57) ───────────────────────
+        // 2.54 — Diode (exponential I-V), MOSFET, IGBT
+        "eng.elec.diode_iv" => {
+            // I = Is*(exp(V/(n*Vt)) - 1) — same as diode_shockley but Vt direct input
+            let is_ = scalar_or_nan(inputs, "Is");
+            let v   = scalar_or_nan(inputs, "V");
+            let n   = scalar_or_nan(inputs, "n");
+            let vt  = scalar_or_nan(inputs, "Vt");
+            if vt == 0.0 || n == 0.0 { Value::error("Diode: n·Vt = 0") }
+            else { Value::scalar(is_ * ((v / (n * vt)).exp() - 1.0)) }
+        }
+        "eng.elec.mosfet_id" => {
+            // Square-law MOSFET: triode / saturation
+            // Sat: Id = (μn·Cox·W/L)/2 * (Vgs-Vth)^2
+            // Tri: Id = (μn·Cox·W/L) * [(Vgs-Vth)*Vds - Vds^2/2]
+            let kp  = scalar_or_nan(inputs, "kp");   // μn*Cox*W/L (A/V²)
+            let vgs = scalar_or_nan(inputs, "Vgs");
+            let vth = scalar_or_nan(inputs, "Vth");
+            let vds = scalar_or_nan(inputs, "Vds");
+            let vov = vgs - vth;
+            if vov <= 0.0 { Value::scalar(0.0) } // cutoff
+            else if vds >= vov { Value::scalar(kp / 2.0 * vov * vov) } // saturation
+            else { Value::scalar(kp * (vov * vds - vds * vds / 2.0)) } // triode
+        }
+        "eng.elec.igbt_vce_drop" => {
+            // IGBT simplified on-state: V_ce = V_ce0 + Ic * R_ce
+            let vce0 = scalar_or_nan(inputs, "Vce0");
+            let ic   = scalar_or_nan(inputs, "Ic");
+            let rce  = scalar_or_nan(inputs, "Rce");
+            Value::scalar(vce0 + ic * rce)
+        }
+        // 2.55 — OpAmp, PWM, H-Bridge, Inverter
+        "eng.elec.opamp_vout" => {
+            // Ideal: Vout = A*(V+ - V-), clipped to ±Vcc
+            let vp  = scalar_or_nan(inputs, "Vp");
+            let vm  = scalar_or_nan(inputs, "Vm");
+            let a   = scalar_or_nan(inputs, "A");
+            let vcc = scalar_or_nan(inputs, "Vcc");
+            let vout = (a * (vp - vm)).clamp(-vcc, vcc);
+            Value::scalar(vout)
+        }
+        "eng.elec.pwm_duty" => {
+            // Average output = Vdc * duty; duty = t_on / T
+            let vdc  = scalar_or_nan(inputs, "Vdc");
+            let duty = scalar_or_nan(inputs, "duty");
+            Value::scalar(vdc * duty.clamp(0.0, 1.0))
+        }
+        "eng.elec.hbridge_vout" => {
+            // H-bridge: Vout = Vdc * (duty_a - duty_b), bipolar PWM
+            let vdc   = scalar_or_nan(inputs, "Vdc");
+            let duty_a = scalar_or_nan(inputs, "duty_a");
+            let duty_b = scalar_or_nan(inputs, "duty_b");
+            Value::scalar(vdc * (duty_a - duty_b))
+        }
+        "eng.elec.three_phase_spwm" => {
+            // 3-phase SPWM line-to-neutral voltage magnitude: V_peak = m * Vdc / 2
+            let vdc = scalar_or_nan(inputs, "Vdc");
+            let m   = scalar_or_nan(inputs, "m");   // modulation index 0..1
+            Value::scalar(m.clamp(0.0, 1.0) * vdc / 2.0)
+        }
+        // 2.56 — DC Motor, PMSM
+        "eng.elec.dc_motor" => {
+            // DC motor steady-state: ω = (V - Ia*Ra) / Ke, T = Kt*Ia, P = T*ω
+            let v   = scalar_or_nan(inputs, "V");
+            let ia  = scalar_or_nan(inputs, "Ia");
+            let ra  = scalar_or_nan(inputs, "Ra");
+            let ke  = scalar_or_nan(inputs, "Ke");
+            let kt  = scalar_or_nan(inputs, "Kt");
+            if ke == 0.0 { Value::error("DC motor: Ke = 0") }
+            else {
+                let omega = (v - ia * ra) / ke;
+                let torque = kt * ia;
+                let power = torque * omega;
+                crate::types::build_table(
+                    &["omega", "torque", "power"],
+                    &[vec![omega], vec![torque], vec![power]],
+                )
+            }
+        }
+        "eng.elec.pmsm_torque" => {
+            // PMSM torque in dq-frame: T = (3/2)*(P/2)*(λ*iq + (Ld-Lq)*id*iq)
+            let p      = scalar_or_nan(inputs, "P");    // pole pairs
+            let lambda = scalar_or_nan(inputs, "lambda"); // flux linkage Wb
+            let ld     = scalar_or_nan(inputs, "Ld");
+            let lq     = scalar_or_nan(inputs, "Lq");
+            let id     = scalar_or_nan(inputs, "id");
+            let iq     = scalar_or_nan(inputs, "iq");
+            Value::scalar(1.5 * (p / 2.0) * (lambda * iq + (ld - lq) * id * iq))
+        }
+        "eng.elec.pmsm_vd_vq" => {
+            // PMSM dq voltage equations: Vd = Rs*id - ω*Lq*iq, Vq = Rs*iq + ω*Ld*id + ω*λ
+            let rs     = scalar_or_nan(inputs, "Rs");
+            let ld     = scalar_or_nan(inputs, "Ld");
+            let lq     = scalar_or_nan(inputs, "Lq");
+            let lambda = scalar_or_nan(inputs, "lambda");
+            let omega  = scalar_or_nan(inputs, "omega"); // electrical rad/s
+            let id     = scalar_or_nan(inputs, "id");
+            let iq     = scalar_or_nan(inputs, "iq");
+            let vd = rs * id - omega * lq * iq;
+            let vq = rs * iq + omega * ld * id + omega * lambda;
+            crate::types::build_table(&["Vd", "Vq"], &[vec![vd], vec![vq]])
+        }
+        // 2.57 — Battery Thevenin model
+        "eng.elec.battery_thevenin" => {
+            // Thevenin battery: Vt = OCV - I*(R0 + R1*(1-exp(-t/τ1)))
+            // Simple DC approximation: τ >> dt → Vt ≈ OCV - I*(R0 + R1)
+            let ocv = scalar_or_nan(inputs, "OCV");
+            let i   = scalar_or_nan(inputs, "I");    // discharge positive
+            let r0  = scalar_or_nan(inputs, "R0");
+            let r1  = scalar_or_nan(inputs, "R1");
+            let c1  = scalar_or_nan(inputs, "C1");
+            let dt  = scalar_or_nan(inputs, "dt");
+            // RC relaxation: V1(t) = V1(0)*exp(-dt/τ) + I*R1*(1-exp(-dt/τ))
+            // Assuming V1(0)=0 (initial), τ = R1*C1
+            let tau = r1 * c1;
+            let v1 = if tau > 0.0 { i * r1 * (1.0 - (-dt / tau).exp()) } else { i * r1 };
+            let vt = ocv - i * r0 - v1;
+            crate::types::build_table(&["Vt", "V1", "V_drop"], &[vec![vt], vec![v1], vec![i * r0 + v1]])
+        }
+        "eng.elec.battery_soc" => {
+            // SOC update: SOC = SOC0 - (I*dt) / (Q_nom * 3600) where Q_nom in Ah
+            let soc0  = scalar_or_nan(inputs, "SOC0");
+            let i     = scalar_or_nan(inputs, "I");
+            let dt    = scalar_or_nan(inputs, "dt");
+            let q_nom = scalar_or_nan(inputs, "Q_nom"); // Ah
+            if q_nom == 0.0 { Value::error("Battery: Q_nom = 0") }
+            else { Value::scalar((soc0 - i * dt / (q_nom * 3600.0)).clamp(0.0, 1.0)) }
+        }
+
+        // ── Thermal Network (item 2.59) ─────────────────────────────────
+        "eng.thermal.conductor_R" => {
+            // Thermal resistance R = L/(k*A), heat flow Q = ΔT/R
+            let l = scalar_or_nan(inputs, "L");
+            let k = scalar_or_nan(inputs, "k");
+            let a = scalar_or_nan(inputs, "A");
+            let dt = scalar_or_nan(inputs, "dT");
+            if k == 0.0 || a == 0.0 { Value::error("Thermal: k*A = 0") }
+            else {
+                let r = l / (k * a);
+                Value::scalar(dt / r)
+            }
+        }
+        "eng.thermal.capacitor_dT" => {
+            // Thermal capacitor: dT/dt = Q/(m*c), ΔT = Q*dt/(m*c)
+            let m = scalar_or_nan(inputs, "m");
+            let c = scalar_or_nan(inputs, "c");
+            let q = scalar_or_nan(inputs, "Q");
+            let dt = scalar_or_nan(inputs, "dt");
+            if m == 0.0 || c == 0.0 { Value::error("Thermal cap: m*c = 0") }
+            else { Value::scalar(q * dt / (m * c)) }
+        }
+        "eng.thermal.convection" => {
+            // Q = h*A*(T_surface - T_fluid)
+            let h  = scalar_or_nan(inputs, "h");
+            let a  = scalar_or_nan(inputs, "A");
+            let ts = scalar_or_nan(inputs, "Ts");
+            let tf = scalar_or_nan(inputs, "Tf");
+            Value::scalar(h * a * (ts - tf))
+        }
+        "eng.thermal.radiation" => {
+            // Q = ε*σ*A*(T_s^4 - T_amb^4), σ = 5.670374419e-8 W/m²K⁴
+            let eps = scalar_or_nan(inputs, "eps");
+            let a   = scalar_or_nan(inputs, "A");
+            let ts  = scalar_or_nan(inputs, "Ts");
+            let ta  = scalar_or_nan(inputs, "Tamb");
+            const SIGMA: f64 = 5.670_374_419e-8;
+            Value::scalar(eps * SIGMA * a * (ts.powi(4) - ta.powi(4)))
+        }
+
+        // ── Heat Exchanger (item 2.60) ──────────────────────────────────
+        "eng.thermal.hx_lmtd" => {
+            // LMTD method: Q = U*A*LMTD, LMTD = (ΔT1 - ΔT2) / ln(ΔT1/ΔT2)
+            let u   = scalar_or_nan(inputs, "U");
+            let a   = scalar_or_nan(inputs, "A");
+            let dt1 = scalar_or_nan(inputs, "dT1");
+            let dt2 = scalar_or_nan(inputs, "dT2");
+            if dt1 <= 0.0 || dt2 <= 0.0 { Value::error("LMTD: ΔT must be positive") }
+            else if (dt1 - dt2).abs() < 1e-10 {
+                Value::scalar(u * a * dt1) // equal ΔT edge case
+            } else {
+                let lmtd = (dt1 - dt2) / (dt1 / dt2).ln();
+                Value::scalar(u * a * lmtd)
+            }
+        }
+        "eng.thermal.hx_ntu" => {
+            // ε-NTU method: ε = 1 - exp(-NTU*(1-Cr)) / (1 - Cr*exp(-NTU*(1-Cr))) for Cr<1
+            //               ε = NTU/(1+NTU) for Cr=1 (balanced)
+            let ntu = scalar_or_nan(inputs, "NTU");
+            let cr  = scalar_or_nan(inputs, "Cr");   // C_min/C_max
+            let q_max = scalar_or_nan(inputs, "Q_max"); // C_min*(T_h_in - T_c_in)
+            let eps = if (cr - 1.0).abs() < 1e-6 {
+                ntu / (1.0 + ntu)
+            } else {
+                let exp_val = ((-ntu * (1.0 - cr)).exp());
+                (1.0 - exp_val) / (1.0 - cr * exp_val)
+            };
+            crate::types::build_table(&["eps", "Q"], &[vec![eps], vec![eps * q_max]])
+        }
+
+        // ── Pipe / Valve / Pump / Hydraulics (items 2.61–2.63) ─────────
+        "eng.fluids.pipe_dp" => {
+            // Darcy-Weisbach: ΔP = f * (L/D) * (ρ*v²/2) + K_minor * (ρ*v²/2)
+            let f  = scalar_or_nan(inputs, "f");       // Darcy friction factor
+            let l  = scalar_or_nan(inputs, "L");
+            let d  = scalar_or_nan(inputs, "D");
+            let rho = scalar_or_nan(inputs, "rho");
+            let v   = scalar_or_nan(inputs, "v");       // mean velocity m/s
+            let k_m = scalar_or_nan(inputs, "K_minor"); // sum of minor loss coeffs
+            if d == 0.0 { Value::error("Pipe: D = 0") }
+            else {
+                let dyn_press = 0.5 * rho * v * v;
+                Value::scalar((f * l / d + k_m) * dyn_press)
+            }
+        }
+        "eng.fluids.valve_cv" => {
+            // Valve flow: Q = Cv * sqrt(ΔP / SG), Q in US gpm if Cv in US units
+            // SI version: Q(m³/h) = Cv * sqrt(ΔP_bar / SG)
+            let cv = scalar_or_nan(inputs, "Cv");
+            let dp = scalar_or_nan(inputs, "dP");   // bar
+            let sg = scalar_or_nan(inputs, "SG");   // specific gravity
+            if sg <= 0.0 { Value::error("Valve: SG ≤ 0") }
+            else { Value::scalar(cv * (dp.max(0.0) / sg).sqrt()) }
+        }
+        "eng.fluids.pump_power" => {
+            // Pump hydraulic power: P_hyd = ρ*g*H*Q, shaft power = P_hyd / η
+            let rho = scalar_or_nan(inputs, "rho");
+            let g   = scalar_or_nan(inputs, "g");
+            let h   = scalar_or_nan(inputs, "H");
+            let q   = scalar_or_nan(inputs, "Q");
+            let eta = scalar_or_nan(inputs, "eta");
+            let p_hyd = rho * g * h * q;
+            let p_shaft = if eta > 0.0 { p_hyd / eta } else { f64::INFINITY };
+            crate::types::build_table(&["P_hyd", "P_shaft"], &[vec![p_hyd], vec![p_shaft]])
+        }
+        "eng.fluids.orifice_flow" => {
+            // Orifice: Q = Cd * A * sqrt(2*ΔP/ρ)
+            let cd  = scalar_or_nan(inputs, "Cd");
+            let a   = scalar_or_nan(inputs, "A");
+            let dp  = scalar_or_nan(inputs, "dP");
+            let rho = scalar_or_nan(inputs, "rho");
+            if rho <= 0.0 { Value::error("Orifice: ρ ≤ 0") }
+            else { Value::scalar(cd * a * (2.0 * dp.max(0.0) / rho).sqrt()) }
+        }
+        "eng.fluids.accumulator" => {
+            // Gas spring accumulator: P1*V1^γ = P2*V2^γ → P2 = P1*(V1/V2)^γ
+            let p1    = scalar_or_nan(inputs, "P1");
+            let v1    = scalar_or_nan(inputs, "V1");
+            let v2    = scalar_or_nan(inputs, "V2");
+            let gamma = scalar_or_nan(inputs, "gamma"); // adiabatic index ~1.4
+            if v2 <= 0.0 { Value::error("Accumulator: V2 ≤ 0") }
+            else { Value::scalar(p1 * (v1 / v2).powf(gamma)) }
+        }
+        // 2.62 — Hydraulic cylinder/motor
+        "eng.fluids.hydraulic_cylinder" => {
+            // F = P * A_bore - P_rod * A_rod, v = Q / A_bore
+            let p_b  = scalar_or_nan(inputs, "P_bore");
+            let a_b  = scalar_or_nan(inputs, "A_bore");
+            let p_r  = scalar_or_nan(inputs, "P_rod");
+            let a_r  = scalar_or_nan(inputs, "A_rod");
+            let q    = scalar_or_nan(inputs, "Q");
+            if a_b == 0.0 { Value::error("Cylinder: A_bore = 0") }
+            else {
+                let f = p_b * a_b - p_r * a_r;
+                let v = q / a_b;
+                crate::types::build_table(&["F", "v"], &[vec![f], vec![v]])
+            }
+        }
+        "eng.fluids.hydraulic_motor" => {
+            // T = ΔP * D / (2π), ω = Q / D * 2π, P = T * ω
+            let dp = scalar_or_nan(inputs, "dP");
+            let d  = scalar_or_nan(inputs, "D");   // displacement m³/rev
+            let q  = scalar_or_nan(inputs, "Q");   // flow rate m³/s
+            let eta = scalar_or_nan(inputs, "eta");
+            if d == 0.0 { Value::error("Hydraulic motor: D = 0") }
+            else {
+                let torque = dp * d / (2.0 * std::f64::consts::PI);
+                let omega  = q / d * 2.0 * std::f64::consts::PI;
+                let power  = torque * omega * eta;
+                crate::types::build_table(&["torque", "omega", "power"], &[vec![torque], vec![omega], vec![power]])
+            }
+        }
+        // 2.63 — Fluid properties (polynomial fits for water/oil)
+        "eng.fluids.water_density" => {
+            // ρ(T) ≈ 999.842 + 0.06786*T - 0.009095*T² + 1.001e-5*T³  (T in °C, valid 0–100°C)
+            let t = scalar_or_nan(inputs, "T");
+            Value::scalar(999.842 + 0.06786*t - 9.095e-3*t*t + 1.001e-5*t*t*t)
+        }
+        "eng.fluids.water_viscosity" => {
+            // μ(T) [Pa·s] — Vogel equation approximation (T in °C)
+            let t = scalar_or_nan(inputs, "T");
+            Value::scalar(2.414e-5 * 10.0_f64.powf(247.8 / (t + 273.15 + 133.15)))
+        }
+        "eng.fluids.oil_viscosity" => {
+            // Walther equation: log10(log10(ν+0.7)) = A - B*log10(T_K)
+            // Simplified: ν(T) = ν_40 * exp(k*(1/T_K - 1/313.15)) with k from ν_100
+            let nu40  = scalar_or_nan(inputs, "nu40");  // cSt at 40°C
+            let nu100 = scalar_or_nan(inputs, "nu100"); // cSt at 100°C
+            let t     = scalar_or_nan(inputs, "T");     // °C
+            if nu40 <= 0.0 || nu100 <= 0.0 { Value::error("Oil: ν must be positive") }
+            else {
+                // ASTM D341 Walther equation
+                let w40  = (nu40 + 0.7_f64).ln().ln();
+                let w100 = (nu100 + 0.7_f64).ln().ln();
+                let t40_k = 313.15_f64;
+                let t100_k = 373.15_f64;
+                let b = (w40 - w100) / (t100_k.ln() - t40_k.ln());
+                let a = w40 + b * t40_k.ln();
+                let t_k = t + 273.15;
+                let w = a - b * t_k.ln();
+                let nu = (w.exp().exp()) - 0.7;
+                Value::scalar(nu)
+            }
+        }
+
         // ── BLK-06: Biology and Life Sciences ─────────────────────────
         "bio.michaelis_menten" => {
             let vmax = scalar_or_nan(inputs, "Vmax");
@@ -4545,6 +4994,63 @@ fn evaluate_node_inner(
             };
             let causal = data.get("causal").and_then(|v| v.as_bool()).unwrap_or(false);
             attention::attention_block(&q, &k, &v, causal)
+        }
+
+        "nn.conv2d" => {
+            use crate::nn::layer::{Conv2DLayer};
+            use crate::nn::activation::ActivationFn;
+
+            // Input: flat image tensor [H × W × C] from a Matrix or Vector
+            let (input, in_h, in_w, in_c): (Vec<f64>, usize, usize, usize) = match inputs.get("input") {
+                Some(Value::Matrix { rows, cols, data }) => {
+                    let h = *rows;
+                    let w = *cols;
+                    (data.clone(), h, w, 1)
+                }
+                Some(Value::Vector { value }) => {
+                    let n = value.len();
+                    let side = (n as f64).sqrt() as usize;
+                    (value.clone(), side, side.max(1), 1)
+                }
+                Some(Value::Table { rows, .. }) => {
+                    let h = rows.len();
+                    let w = rows.first().map(|r| r.len()).unwrap_or(1);
+                    let flat: Vec<f64> = rows.iter().flat_map(|r| r.iter().cloned()).collect();
+                    (flat, h, w, 1)
+                }
+                _ => return Value::error("nn.conv2d: 'input' must be a Matrix, Vector, or Table"),
+            };
+
+            let n_filters = data.get("n_filters").and_then(|v| v.as_f64()).unwrap_or(4.0) as usize;
+            let kernel_h = data.get("kernel_h").and_then(|v| v.as_f64()).unwrap_or(3.0) as usize;
+            let kernel_w = data.get("kernel_w").and_then(|v| v.as_f64()).unwrap_or(3.0) as usize;
+            let stride_h = data.get("stride_h").and_then(|v| v.as_f64()).unwrap_or(1.0) as usize;
+            let stride_w = data.get("stride_w").and_then(|v| v.as_f64()).unwrap_or(1.0) as usize;
+            let padding = data.get("padding").and_then(|v| v.as_str()).unwrap_or("valid") == "same";
+            let act_str = data.get("activation").and_then(|v| v.as_str()).unwrap_or("relu");
+            let activation = match act_str {
+                "sigmoid" => ActivationFn::Sigmoid,
+                "tanh" => ActivationFn::Tanh,
+                "linear" | "none" => ActivationFn::Linear,
+                _ => ActivationFn::ReLU,
+            };
+            let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+            let input_channels = in_c;
+
+            let layer = Conv2DLayer::new(input_channels, n_filters, kernel_h, kernel_w, stride_h, stride_w, padding, activation, seed);
+            let (output, out_h, out_w) = layer.forward(&input, in_h, in_w);
+
+            if out_h == 0 || out_w == 0 {
+                return Value::error("nn.conv2d: input too small for kernel size");
+            }
+
+            // Return as Matrix (n_filters feature maps flattened into rows)
+            // Each row = one output pixel's channel vector
+            Value::Matrix {
+                rows: out_h * out_w,
+                cols: n_filters,
+                data: output,
+            }
         }
 
         // ── Symbolic Math (CAS) ────────────────────────────────────────
