@@ -4156,6 +4156,67 @@ fn evaluate_node_inner(
             Value::Table { columns, rows }
         }
 
+        "ode.event" => {
+            // Parse equations from Text input
+            let equations_text = match inputs.get("equations") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => return Value::error("ode.event: 'equations' input required (Text, semicolon-separated)"),
+            };
+            let equations: Vec<String> = equations_text.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            if equations.is_empty() {
+                return Value::error("ode.event: no equations provided");
+            }
+
+            // Parse initial state
+            let y0 = match inputs.get("y0") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                _ => return Value::error("ode.event: 'y0' input required (initial state vector)"),
+            };
+            if y0.len() != equations.len() {
+                return Value::error(format!(
+                    "ode.event: {} equations but {} initial values",
+                    equations.len(), y0.len()
+                ));
+            }
+
+            let t_start = scalar_or(data, "t_start", 0.0);
+            let t_end = scalar_or(data, "t_end", 1.0);
+            let dt = scalar_or(data, "dt", 0.01);
+            let event_expr = data.get("event_expr").and_then(|v| v.as_str()).unwrap_or("y0").to_string();
+            let terminate = data.get("terminate").and_then(|v| v.as_bool()).unwrap_or(true);
+            let event_tol = scalar_or(data, "event_tol", 1e-8);
+
+            let state_names: Vec<String> = (0..equations.len()).map(|i| format!("y{i}")).collect();
+
+            let mut params = std::collections::HashMap::new();
+            if let Some(serde_json::Value::Object(obj)) = data.get("params") {
+                for (k, v) in obj {
+                    if let Some(num) = v.as_f64() {
+                        params.insert(k.clone(), num);
+                    }
+                }
+            }
+
+            let system = crate::ode::OdeSystem { equations, state_names, params };
+            let config = crate::ode::OdeSolverConfig {
+                t_start, t_end, dt, tolerance: 1e-6, max_steps: 100_000,
+            };
+
+            let result = crate::ode::event::solve_event_rk4(
+                &system, &y0, &config, &event_expr, terminate, event_tol,
+            );
+
+            let columns = result.column_names.clone();
+            let rows: Vec<Vec<f64>> = result.t.iter().zip(result.states.iter()).map(|(t, ys)| {
+                let mut row = vec![*t];
+                row.extend_from_slice(ys);
+                row
+            }).collect();
+
+            Value::Table { columns, rows }
+        }
+
         "ode.steady_state" => {
             // Parse equations from Text input
             let equations_text = match inputs.get("equations") {

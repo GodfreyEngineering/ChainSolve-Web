@@ -420,6 +420,7 @@
     "interp_akima": "Spline Akima",
     "ode_rk4": "ODE RK4",
     "ode_rk45": "ODE RK45 (Adattivo)",
+    "ode_event": "Solutore ODE con Eventi",
     "ode_symplectic": "Solutore ODE Simplettico",
     "ode_steady_state": "Stato Stazionario",
     "tire_pacejka": "Pneumatico Pacejka",

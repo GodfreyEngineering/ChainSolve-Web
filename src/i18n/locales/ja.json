@@ -429,6 +429,7 @@
     "interp_akima": "Akimaスプライン",
     "ode_rk4": "ODE RK4",
     "ode_rk45": "ODE RK45 (適応型)",
+    "ode_event": "ODE イベントソルバー",
     "ode_symplectic": "シンプレクティックODEソルバー",
     "ode_steady_state": "定常状態ソルバー",
     "tire_pacejka": "Pacejkaタイヤ",

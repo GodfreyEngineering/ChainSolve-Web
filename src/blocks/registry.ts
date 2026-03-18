@@ -914,6 +914,29 @@ reg({
 })
 
 reg({
+  type: 'ode.event',
+  label: 'ODE Event Solver',
+  category: 'odeSolvers',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'equations', label: 'Equations (text)' },
+    { id: 'y0', label: 'Initial state' },
+  ],
+  defaultData: {
+    blockType: 'ode.event',
+    label: 'ODE Event',
+    t_end: 10.0,
+    dt: 0.01,
+    event_expr: 'y0',
+    terminate: true,
+    event_tol: 1e-8,
+  },
+  proOnly: true,
+  description:
+    'Solve ODEs with zero-crossing event detection (RK4 + bisection refinement). Set event_expr to g(y,t); integration stops (or records) when g crosses 0. Event time located to within event_tol.',
+})
+
+reg({
   type: 'ode.steady_state',
   label: 'Steady-State Solver',
   category: 'odeSolvers',

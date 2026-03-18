@@ -551,6 +551,7 @@ pub fn catalog() -> Vec<CatalogEntry> {
         // ── ODE Solvers (Phase 4) ──────────────────────────────────────
         entry("ode.rk4", "ODE Solver (RK4)", "odeSolvers", "csOperation", vec![p("equations", "Equations (text)"), p("y0", "Initial state")], true),
         entry("ode.rk45", "ODE Solver (Adaptive)", "odeSolvers", "csOperation", vec![p("equations", "Equations (text)"), p("y0", "Initial state")], true),
+        entry("ode.event", "ODE Event Solver", "odeSolvers", "csOperation", vec![p("equations", "Equations (text)"), p("y0", "Initial state")], true),
         entry("ode.symplectic", "Symplectic ODE Solver", "odeSolvers", "csOperation", vec![p("accelerations", "Accelerations (text)"), p("y0", "Initial state [q, v]")], true),
         entry("ode.steady_state", "Steady-State Solver", "odeSolvers", "csOperation", vec![p("equations", "Equations (text)"), p("y0", "Initial guess")], true),
 

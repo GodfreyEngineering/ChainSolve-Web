@@ -2063,6 +2063,7 @@
     "interp_akima": "ספליין אקימה",
     "ode_rk4": "ODE RK4",
     "ode_rk45": "ODE RK45",
+    "ode_event": "פותר ODE עם אירועים",
     "ode_symplectic": "פותר ODE סימפלקטי",
     "ode_steady_state": "מצב יציב",
     "tire_pacejka": "צמיג פאצקה",
