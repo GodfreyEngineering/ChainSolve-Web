@@ -405,7 +405,7 @@
 - [ ] **6.9** 3D surface plot: via Three.js or React Three Fiber — interactive rotation, zoom, colourmap, wireframe toggle
 - [x] **6.10** Parallel coordinates: N vertical axes, each data point as a polyline — for multi-dimensional design space exploration
 - [x] **6.11** Pareto front plot: 2D/3D with dominated region shading — for multi-objective optimisation results
-- [ ] **6.12** Sankey diagram: flow quantities between nodes — for energy/mass balance visualisation
+- [x] **6.12** Sankey diagram: flow quantities between nodes — for energy/mass balance visualisation
 - [x] **6.13** Box-and-whisker, violin plots: statistical distribution visualisation
 - [ ] **6.14** Scope block: 30fps live update during simulation, configurable buffer, vertical trigger line at current time — like Simulink's Scope
 - [x] **6.15** Multi-axis: secondary Y-axis, stacked panels with shared X-axis (like Simulink Data Inspector)
