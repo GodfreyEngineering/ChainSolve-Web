@@ -2269,7 +2269,19 @@
     "history": "History",
     "channels": "Channels",
     "notes": "Notes",
-    "snapshots": "バージョン"
+    "snapshots": "バージョン",
+    "timeline": "タイムライン"
+  },
+  "timeline": {
+    "lastEval": "最後",
+    "avgEval": "平均",
+    "maxEval": "最大",
+    "evalCount": "評価",
+    "nodes": "ノード",
+    "empty": "まだ評価がありません。グラフを実行してタイミングデータを表示してください。",
+    "fast": "高速 (<20ms)",
+    "moderate": "普通 (<100ms)",
+    "slow": "低速 (≥100ms)"
   },
   "versions": {
     "saveVersion": "バージョンを保存",

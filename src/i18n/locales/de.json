@@ -2221,7 +2221,19 @@
     "history": "History",
     "channels": "Channels",
     "notes": "Notes",
-    "snapshots": "Versionen"
+    "snapshots": "Versionen",
+    "timeline": "Zeitleiste"
+  },
+  "timeline": {
+    "lastEval": "Letzter",
+    "avgEval": "Ø",
+    "maxEval": "Max",
+    "evalCount": "Ausw.",
+    "nodes": "Blöcke",
+    "empty": "Noch keine Auswertungen. Führe den Graphen aus, um Zeitdaten zu sehen.",
+    "fast": "Schnell (<20ms)",
+    "moderate": "Mittel (<100ms)",
+    "slow": "Langsam (≥100ms)"
   },
   "versions": {
     "saveVersion": "Version speichern",

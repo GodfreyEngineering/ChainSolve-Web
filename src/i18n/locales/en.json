@@ -2269,7 +2269,19 @@
     "history": "History",
     "channels": "Channels",
     "notes": "Notes",
-    "snapshots": "Versions"
+    "snapshots": "Versions",
+    "timeline": "Timeline"
+  },
+  "timeline": {
+    "lastEval": "Last",
+    "avgEval": "Avg",
+    "maxEval": "Max",
+    "evalCount": "Evals",
+    "nodes": "nodes",
+    "empty": "No evaluations yet. Run the graph to see timing data.",
+    "fast": "Fast (<20ms)",
+    "moderate": "Moderate (<100ms)",
+    "slow": "Slow (≥100ms)"
   },
   "versions": {
     "saveVersion": "Save version",

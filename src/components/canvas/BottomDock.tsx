@@ -23,6 +23,7 @@ export type DockTab =
   | 'notes'
   | 'channels'
   | 'snapshots'
+  | 'timeline'
 
 export interface DockPanel {
   id: DockTab

@@ -129,6 +129,9 @@ const LazyChannelsPanel = lazy(() =>
 const LazyAiAssistantPanel = lazy(() =>
   import('./AiAssistantPanel').then((m) => ({ default: m.AiAssistantPanel })),
 )
+const LazyEvalTimelinePanel = lazy(() =>
+  import('./EvalTimelinePanel').then((m) => ({ default: m.EvalTimelinePanel })),
+)
 import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
@@ -3459,6 +3462,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             },
           ]
         : []),
+      // 3.38: Execution timeline panel
+      {
+        id: 'timeline' as DockTab,
+        label: t('dock.timeline', 'Timeline'),
+        content: (
+          <Suspense fallback={null}>
+            <LazyEvalTimelinePanel />
+          </Suspense>
+        ),
+      },
     ],
     [
       nodes,

@@ -2171,7 +2171,19 @@
     "output": "Output",
     "problems": "Problemi",
     "history": "History",
-    "snapshots": "Versioni"
+    "snapshots": "Versioni",
+    "timeline": "Cronologia"
+  },
+  "timeline": {
+    "lastEval": "Ultima",
+    "avgEval": "Media",
+    "maxEval": "Max",
+    "evalCount": "Eval",
+    "nodes": "nodi",
+    "empty": "Nessuna valutazione ancora. Esegui il grafico per vedere i dati di tempo.",
+    "fast": "Veloce (<20ms)",
+    "moderate": "Moderato (<100ms)",
+    "slow": "Lento (≥100ms)"
   },
   "versions": {
     "saveVersion": "Salva versione",

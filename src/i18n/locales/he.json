@@ -1668,7 +1668,19 @@
     "output": "פלט",
     "problems": "בעיות",
     "history": "History",
-    "snapshots": "גרסאות"
+    "snapshots": "גרסאות",
+    "timeline": "ציר זמן"
+  },
+  "timeline": {
+    "lastEval": "אחרון",
+    "avgEval": "ממוצע",
+    "maxEval": "מקסימום",
+    "evalCount": "הערכות",
+    "nodes": "בלוקים",
+    "empty": "אין הערכות עדיין. הרץ את הגרף כדי לראות נתוני זמן.",
+    "fast": "מהיר (<20ms)",
+    "moderate": "בינוני (<100ms)",
+    "slow": "איטי (≥100ms)"
   },
   "versions": {
     "saveVersion": "שמור גרסה",
