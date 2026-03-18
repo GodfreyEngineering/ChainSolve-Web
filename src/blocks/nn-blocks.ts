@@ -351,4 +351,86 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
       'NTK-based gradient balancing, adaptive collocation resampling. ' +
       'Output: Table [x, u(x)] at n_eval evaluation points.',
   })
+
+  // ── Neural Operator ──────────────────────────────────────────────────────
+
+  register({
+    type: 'nn.neuralOp',
+    label: 'Neural Operator',
+    category: 'neuralNetworks',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'trainData', label: 'Train data (table)' }],
+    proOnly: true,
+    defaultData: {
+      blockType: 'nn.neuralOp',
+      label: 'Neural Operator',
+      arch: 'fno',
+      nPtsIn: 16,
+      nPtsOut: 16,
+      width: 16,
+      nLayers: 4,
+      nModes: 8,
+      epochs: 500,
+      lr: 1e-3,
+      hiddenSizes: [64, 64],
+      basisSize: 32,
+      seed: 42,
+    },
+    synonyms: ['fno', 'deeponet', 'fourier neural operator', 'operator learning'],
+    tags: ['nn', 'operator', 'fno', 'deeponet'],
+    description: 'Neural Operator (FNO / DeepONet): learns mappings between function spaces.',
+  })
+
+  // ── Transfer Learning ────────────────────────────────────────────────────
+
+  register({
+    type: 'nn.transferLearn',
+    label: 'Transfer Learn',
+    category: 'neuralNetworks',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'features', label: 'Features (table)' },
+      { id: 'labels', label: 'Labels (vector/table)' },
+    ],
+    proOnly: true,
+    defaultData: {
+      blockType: 'nn.transferLearn',
+      label: 'Transfer Learn',
+      hiddenSizes: [64, 32],
+      epochs: 200,
+      lr: 1e-3,
+      batchSize: 32,
+      loss: 'mse',
+      seed: 42,
+    },
+    synonyms: ['transfer learning', 'fine tuning', 'mlp head'],
+    tags: ['nn', 'transfer', 'fine-tune'],
+    description: 'Transfer Learning: trains a lightweight MLP head on pre-computed features.',
+  })
+
+  // ── ONNX Export (4.16) ───────────────────────────────────────────────────
+
+  register({
+    type: 'nn.onnxExport',
+    label: 'ONNX Export',
+    category: 'neuralNetworks',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'trainX', label: 'Features (table/vector)' },
+      { id: 'trainY', label: 'Labels (vector)' },
+    ],
+    proOnly: true,
+    defaultData: {
+      blockType: 'nn.onnxExport',
+      label: 'ONNX Export',
+      hiddenSizes: [64, 32],
+      epochs: 100,
+      lr: 1e-3,
+      modelName: 'model',
+      seed: 42,
+    },
+    synonyms: ['onnx', 'export model', 'onnx file', 'model deployment'],
+    tags: ['nn', 'onnx', 'export', 'deploy'],
+    description: 'ONNX Export: trains a Dense MLP then serializes weights as ONNX protobuf (opset 17).',
+  })
 }

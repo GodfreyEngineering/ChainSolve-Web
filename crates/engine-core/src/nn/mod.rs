@@ -10,4 +10,5 @@ pub mod model;
 pub mod recurrent;
 pub mod train;
 pub mod export;
+pub mod onnx_export;
 pub mod lr_schedule;

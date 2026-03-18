@@ -4937,6 +4937,78 @@ fn evaluate_node_inner(
             inputs.get("model").cloned().unwrap_or(Value::error("nn.export: no model connected"))
         }
 
+        // ── ONNX Export (4.16) ───────────────────────────────────────────────
+        "nn.onnxExport" => {
+            use crate::nn::activation::ActivationFn;
+            use crate::nn::model::Sequential;
+            use crate::nn::train::{TrainConfig, LossFn, train};
+            use crate::nn::onnx_export::export_onnx;
+
+            // Parse trainX
+            let train_x: Vec<Vec<f64>> = match inputs.get("trainX") {
+                Some(Value::Table { rows, .. }) => rows.clone(),
+                Some(Value::Vector { value }) => value.iter().map(|&v| vec![v]).collect(),
+                _ => return Value::error("nn.onnxExport: 'trainX' input required (Table or Vector)"),
+            };
+            // Parse trainY
+            let train_y: Vec<Vec<f64>> = match inputs.get("trainY") {
+                Some(Value::Table { rows, .. }) => rows.clone(),
+                Some(Value::Vector { value }) => value.iter().map(|&v| vec![v]).collect(),
+                Some(Value::Scalar { value }) => vec![vec![*value]],
+                _ => return Value::error("nn.onnxExport: 'trainY' input required (Vector or Table)"),
+            };
+            if train_x.is_empty() || train_x.len() != train_y.len() {
+                return Value::error("nn.onnxExport: trainX and trainY length mismatch");
+            }
+
+            let input_dim = train_x[0].len();
+            let output_dim = train_y[0].len();
+
+            // Build model from data.layers config or default MLP
+            let mut model = Sequential::new();
+            let hidden_sizes: Vec<usize> = data.get("hiddenSizes")
+                .and_then(|v| v.as_array())
+                .map(|arr| arr.iter().filter_map(|x| x.as_f64().map(|n| n as usize)).collect())
+                .unwrap_or_else(|| vec![64, 32]);
+            let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+
+            let mut in_size = input_dim;
+            for (i, &h) in hidden_sizes.iter().enumerate() {
+                if let Err(e) = model.add_dense(in_size, h, ActivationFn::ReLU, seed + i as u64) {
+                    return Value::error(format!("nn.onnxExport: {e}"));
+                }
+                in_size = h;
+            }
+            if let Err(e) = model.add_dense(in_size, output_dim, ActivationFn::Linear, seed + 99) {
+                return Value::error(format!("nn.onnxExport: {e}"));
+            }
+
+            // Train
+            let epochs = data.get("epochs").and_then(|v| v.as_f64()).unwrap_or(100.0) as usize;
+            let lr = data.get("lr").and_then(|v| v.as_f64()).unwrap_or(1e-3);
+            let config = TrainConfig {
+                epochs,
+                learning_rate: lr,
+                loss: LossFn::MSE,
+                batch_size: 32,
+                patience: 0,
+                validation_split: 0.0,
+            };
+            if let Err(e) = train(&mut model, &train_x, &train_y, &config) {
+                return Value::error(format!("nn.onnxExport training failed: {e}"));
+            }
+
+            // Export to ONNX bytes
+            let model_name = data.get("modelName").and_then(|v| v.as_str()).unwrap_or("model");
+            match export_onnx(&model, model_name) {
+                Ok(bytes) => {
+                    // Return as Vector of byte values (u8 as f64) for JS download
+                    Value::Vector { value: bytes.iter().map(|&b| b as f64).collect() }
+                }
+                Err(e) => Value::error(format!("nn.onnxExport: {e}")),
+            }
+        }
+
         "nn.lstm" => {
             use crate::nn::recurrent;
             let sequence: Vec<Vec<f64>> = match inputs.get("sequence") {
