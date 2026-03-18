@@ -22,6 +22,7 @@
 //! - [`run_load_snapshot_with_options`] — load with eval options + progress callback
 //! - [`run_patch_with_options`]    — patch with eval options + progress callback
 
+pub mod acausal;
 pub mod cuda;
 pub mod autodiff;
 pub mod fmu_export;

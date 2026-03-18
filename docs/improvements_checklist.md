@@ -540,12 +540,12 @@
 
 *The "Simulink-killer" — acausal modeling (like Simscape/Modelica) with signal-flow control in a single graph.*
 
-- [ ] **14.1** Port-based connections: through variables (force, current, heat flow) and across variables (velocity, voltage, temperature) between physics blocks — engine automatically generates DAE system
-- [ ] **14.2** Modified nodal analysis: for electrical networks, generate KCL/KVL equations from topology. Analogous formulations for mechanical (d'Alembert), hydraulic (continuity), thermal (energy balance).
-- [ ] **14.3** Multi-domain coupling: electrical motor has mechanical shaft port + electrical terminal port + thermal loss port — seamless cross-domain simulation
-- [ ] **14.4** Equation-based block authoring: Modelica-like syntax — declare variables with units, write equations (potentially implicit/acausal), declare ports. Engine applies symbolic processing.
-- [ ] **14.5** Symbolic index reduction: Pantelides algorithm to detect and reduce high-index DAEs — display structural analysis to user showing which equations/variables are problematic
-- [ ] **14.6** FMI 2.0/3.0: import FMUs as blocks (170+ tools support FMI), export subgraphs as FMUs — enables integration with existing automotive/aerospace toolchains on day one
+- [x] **14.1** Port-based connections: through variables (force, current, heat flow) and across variables (velocity, voltage, temperature) between physics blocks — engine automatically generates DAE system
+- [x] **14.2** Modified nodal analysis: for electrical networks, generate KCL/KVL equations from topology. Analogous formulations for mechanical (d'Alembert), hydraulic (continuity), thermal (energy balance).
+- [x] **14.3** Multi-domain coupling: electrical motor has mechanical shaft port + electrical terminal port + thermal loss port — seamless cross-domain simulation
+- [x] **14.4** Equation-based block authoring: Modelica-like syntax — declare variables with units, write equations (potentially implicit/acausal), declare ports. Engine applies symbolic processing.
+- [x] **14.5** Symbolic index reduction: Pantelides algorithm to detect and reduce high-index DAEs — display structural analysis to user showing which equations/variables are problematic
+- [x] **14.6** FMI 2.0/3.0: import FMUs as blocks (170+ tools support FMI), export subgraphs as FMUs — enables integration with existing automotive/aerospace toolchains on day one
 
 ---
 
