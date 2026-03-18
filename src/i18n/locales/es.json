@@ -2312,6 +2312,18 @@
     "addInput": "Añadir entrada",
     "removeInput": "Eliminar última entrada"
   },
+  "stateSpace": {
+    "label": "Espacio de estados",
+    "matrix": "matriz",
+    "step": "Escalón",
+    "impulse": "Impulso",
+    "eigen": "Autovalores",
+    "stable": "Estable",
+    "unstable": "Inestable",
+    "invalid": "Matrices inválidas",
+    "ctrl": "Contr.",
+    "obs": "Obs."
+  },
   "transferFunction": {
     "label": "Función de transferencia",
     "num": "Num (potencia mayor primero)",

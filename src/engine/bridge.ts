@@ -74,10 +74,11 @@ export function toEngineSnapshot(
       // 2.131: timer is a UI-only timing measurement block; engine treats it as pass-through display.
       // 2.132: logger is a UI-only data recording block; engine treats it as pass-through display.
       // 2.65: transferFunction is a UI-computed LTI block; engine treats it as pass-through display.
+      // 2.66: stateSpace is a UI-computed LTI block; engine treats it as pass-through display.
       // 2.133: mathSheet is a UI-computed spreadsheet; engine treats it as a number source.
       // 2.67: ctrl.saturation → clamp, ctrl.deadZone → number (UI-computed)
       // 2.68: ctrl.switch → ifthenelse, ctrl.mux → vectorConcat
-      let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock' || data.blockType === 'assertion' || data.blockType === 'scope' || data.blockType === 'timer' || data.blockType === 'logger' || data.blockType === 'transferFunction'
+      let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock' || data.blockType === 'assertion' || data.blockType === 'scope' || data.blockType === 'timer' || data.blockType === 'logger' || data.blockType === 'transferFunction' || data.blockType === 'stateSpace'
         ? 'display'
         : data.blockType === 'wsInput'
           ? 'number'

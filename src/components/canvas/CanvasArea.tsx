@@ -62,6 +62,7 @@ import { SqlQueryNode } from './nodes/SqlQueryNode'
 import { TimeSeriesNode } from './nodes/TimeSeriesNode'
 import { UnitInputNode } from './nodes/UnitInputNode'
 import { TransferFunctionNode } from './nodes/TransferFunctionNode'
+import { StateSpaceNode } from './nodes/StateSpaceNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -220,6 +221,7 @@ const NODE_TYPES = {
   csTimeSeries: TimeSeriesNode,
   csUnitInput: UnitInputNode,
   csTransferFunction: TransferFunctionNode,
+  csStateSpace: StateSpaceNode,
 } as const
 
 const EDGE_TYPES = {

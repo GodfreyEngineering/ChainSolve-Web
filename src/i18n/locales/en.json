@@ -2360,6 +2360,18 @@
     "addInput": "Add input",
     "removeInput": "Remove last input"
   },
+  "stateSpace": {
+    "label": "State Space",
+    "matrix": "matrix",
+    "step": "Step",
+    "impulse": "Impulse",
+    "eigen": "Eigen",
+    "stable": "Stable",
+    "unstable": "Unstable",
+    "invalid": "Invalid matrices",
+    "ctrl": "Ctrl",
+    "obs": "Obs"
+  },
   "transferFunction": {
     "label": "Transfer Function",
     "num": "Num (highest power first)",

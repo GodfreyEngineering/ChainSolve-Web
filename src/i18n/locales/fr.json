@@ -2312,6 +2312,18 @@
     "addInput": "Ajouter une entrée",
     "removeInput": "Supprimer la dernière entrée"
   },
+  "stateSpace": {
+    "label": "Espace d'état",
+    "matrix": "matrice",
+    "step": "Échelon",
+    "impulse": "Impulsion",
+    "eigen": "Valeurs propres",
+    "stable": "Stable",
+    "unstable": "Instable",
+    "invalid": "Matrices invalides",
+    "ctrl": "Comm.",
+    "obs": "Obs."
+  },
   "transferFunction": {
     "label": "Fonction de transfert",
     "num": "Num (puissance la plus haute en premier)",

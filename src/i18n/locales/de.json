@@ -2312,6 +2312,18 @@
     "addInput": "Eingabe hinzufügen",
     "removeInput": "Letzte Eingabe entfernen"
   },
+  "stateSpace": {
+    "label": "Zustandsraum",
+    "matrix": "Matrix",
+    "step": "Sprung",
+    "impulse": "Impuls",
+    "eigen": "Eigenwerte",
+    "stable": "Stabil",
+    "unstable": "Instabil",
+    "invalid": "Ungültige Matrizen",
+    "ctrl": "Steuerb.",
+    "obs": "Beob."
+  },
   "transferFunction": {
     "label": "Übertragungsfunktion",
     "num": "Zähler (höchste Potenz zuerst)",

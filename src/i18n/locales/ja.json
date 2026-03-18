@@ -2360,6 +2360,18 @@
     "addInput": "入力を追加",
     "removeInput": "最後の入力を削除"
   },
+  "stateSpace": {
+    "label": "状態空間",
+    "matrix": "行列",
+    "step": "ステップ",
+    "impulse": "インパルス",
+    "eigen": "固有値",
+    "stable": "安定",
+    "unstable": "不安定",
+    "invalid": "無効な行列",
+    "ctrl": "可制御",
+    "obs": "可観測"
+  },
   "transferFunction": {
     "label": "伝達関数",
     "num": "分子（最高次から）",

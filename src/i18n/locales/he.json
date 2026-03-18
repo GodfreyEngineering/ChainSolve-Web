@@ -1759,6 +1759,18 @@
     "addInput": "הוסף קלט",
     "removeInput": "הסר קלט אחרון"
   },
+  "stateSpace": {
+    "label": "מרחב מצב",
+    "matrix": "מטריצה",
+    "step": "מדרגה",
+    "impulse": "אימפולס",
+    "eigen": "ערכים עצמיים",
+    "stable": "יציב",
+    "unstable": "לא יציב",
+    "invalid": "מטריצות לא תקפות",
+    "ctrl": "שלט.",
+    "obs": "תצפ."
+  },
   "transferFunction": {
     "label": "פונקציית העברה",
     "num": "מונה (חזקה גבוהה ראשון)",

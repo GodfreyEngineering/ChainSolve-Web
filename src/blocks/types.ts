@@ -91,6 +91,7 @@ export type NodeKind =
   | 'csTimeSeries'
   | 'csUnitInput'
   | 'csTransferFunction'
+  | 'csStateSpace'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

@@ -101,6 +101,7 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csTimeSeries',
   'csUnitInput',
   'csTransferFunction',
+  'csStateSpace',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {
