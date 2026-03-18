@@ -67,7 +67,10 @@ export function toEngineSnapshot(
       // V2-006: Probe removed from UI; legacy graphs still remap to display.
       // H4-1: Unified constant block resolves to 'number' with the looked-up
       // value. No Rust catalog entries needed for new constants.
-      let blockType = (data.blockType === 'probe' ? 'display' : data.blockType) as string
+      // 11.14: testBlock is a display pass-through in the engine; test logic runs in the UI.
+      let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock'
+        ? 'display'
+        : data.blockType) as string
       if (blockType === 'constant') {
         const constId = data.selectedConstantId
         if (typeof constId === 'string' && constId in CONSTANT_VALUES) {
@@ -133,12 +136,21 @@ export function toEngineSnapshot(
     }),
     edges: edges
       .filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target))
-      .map((e) => ({
-        id: e.id,
-        source: e.source,
-        sourceHandle: e.sourceHandle ?? 'out',
-        target: e.target,
-        targetHandle: e.targetHandle ?? 'in',
-      })),
+      .map((e) => {
+        const tgtNode = evalNodes.find((n) => n.id === e.target)
+        const tgtBlockType = (tgtNode?.data as Record<string, unknown> | undefined)?.blockType
+        // 11.14: testBlock maps 'actual' input port → 'value' for the engine display pass-through.
+        const targetHandle =
+          tgtBlockType === 'testBlock' && e.targetHandle === 'actual'
+            ? 'value'
+            : (e.targetHandle ?? 'in')
+        return {
+          id: e.id,
+          source: e.source,
+          sourceHandle: e.sourceHandle ?? 'out',
+          target: e.target,
+          targetHandle,
+        }
+      }),
   }
 }

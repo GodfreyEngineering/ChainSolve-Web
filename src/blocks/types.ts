@@ -77,6 +77,7 @@ export type NodeKind =
   | 'csOptimizer'
   | 'csMLModel'
   | 'csNeuralNet'
+  | 'csTest'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

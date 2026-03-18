@@ -34,6 +34,7 @@ import { registerOptimBlocks } from './optim-blocks'
 import { registerMLBlocks } from './ml-blocks'
 import { registerNNBlocks } from './nn-blocks'
 import { registerLookupBlocks } from './lookup-blocks'
+import { registerTestBlocks } from './test-blocks'
 import { SEARCH_METADATA } from './blockSearchMetadata'
 
 function reg(
@@ -72,6 +73,7 @@ export function registerAllBlocks(): void {
   registerOptimBlocks(reg)
   registerMLBlocks(reg)
   registerNNBlocks(reg)
+  registerTestBlocks(reg)
 
   // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
   for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {

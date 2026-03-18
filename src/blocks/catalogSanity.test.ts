@@ -87,6 +87,7 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csOptimizer',
   'csMLModel',
   'csNeuralNet',
+  'csTest',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {

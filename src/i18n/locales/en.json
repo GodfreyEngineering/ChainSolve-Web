@@ -2285,6 +2285,15 @@
   "output": {
     "engineStatus": "Engine"
   },
+  "test": {
+    "pass": "PASS",
+    "fail": "FAIL",
+    "noValue": "No value",
+    "actual": "Actual",
+    "expected": "Expected",
+    "absolute": "abs",
+    "relative": "rel"
+  },
   "problems": {
     "noProblems": "No problems detected",
     "problem": "problem",

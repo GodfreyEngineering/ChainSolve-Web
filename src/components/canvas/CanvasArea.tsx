@@ -48,6 +48,7 @@ import '@xyflow/react/dist/style.css'
 import { SourceNode } from './nodes/SourceNode'
 import { OperationNode } from './nodes/OperationNode'
 import { DisplayNode } from './nodes/DisplayNode'
+import { TestNode } from './nodes/TestNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -186,6 +187,7 @@ const NODE_TYPES = {
   csOptimizer: OptimizerNode,
   csMLModel: MLModelNode,
   csNeuralNet: NeuralNetNode,
+  csTest: TestNode,
 } as const
 
 const EDGE_TYPES = {

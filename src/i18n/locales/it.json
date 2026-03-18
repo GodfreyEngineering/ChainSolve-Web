@@ -2315,6 +2315,15 @@
   "output": {
     "engineStatus": "Motore"
   },
+  "test": {
+    "pass": "SUPERATO",
+    "fail": "FALLITO",
+    "noValue": "Nessun valore",
+    "actual": "Effettivo",
+    "expected": "Atteso",
+    "absolute": "ass",
+    "relative": "rel"
+  },
   "problems": {
     "noProblems": "Nessun problema rilevato",
     "problem": "problema",

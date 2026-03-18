@@ -2367,6 +2367,15 @@
   "output": {
     "engineStatus": "Motor"
   },
+  "test": {
+    "pass": "APROBADO",
+    "fail": "FALLADO",
+    "noValue": "Sin valor",
+    "actual": "Actual",
+    "expected": "Esperado",
+    "absolute": "abs",
+    "relative": "rel"
+  },
   "problems": {
     "noProblems": "No se detectaron problemas",
     "problem": "problema",

@@ -2310,6 +2310,15 @@
   "output": {
     "engineStatus": "מנוע"
   },
+  "test": {
+    "pass": "עבר",
+    "fail": "נכשל",
+    "noValue": "אין ערך",
+    "actual": "בפועל",
+    "expected": "צפוי",
+    "absolute": "מוחלט",
+    "relative": "יחסי"
+  },
   "problems": {
     "noProblems": "לא זוהו בעיות",
     "problem": "בעיה",

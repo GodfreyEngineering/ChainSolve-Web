@@ -16,7 +16,9 @@ import { registerAllBlocks } from './registerAllBlocks'
 registerAllBlocks()
 
 // UI-only blocks have no Rust op — excluded from the sync check.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material'])
+// sankeyPlot/surfacePlot render in the UI (bypassing Vega/Rust entirely).
+// testBlock is remapped to 'display' in bridge.ts; test logic runs in the UI.
+const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock'])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.

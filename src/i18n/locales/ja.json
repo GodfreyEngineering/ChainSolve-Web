@@ -2285,6 +2285,15 @@
   "output": {
     "engineStatus": "Engine"
   },
+  "test": {
+    "pass": "合格",
+    "fail": "不合格",
+    "noValue": "値なし",
+    "actual": "実測値",
+    "expected": "期待値",
+    "absolute": "絶対",
+    "relative": "相対"
+  },
   "problems": {
     "noProblems": "No problems detected",
     "problem": "problem",
