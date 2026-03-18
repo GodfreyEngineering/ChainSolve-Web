@@ -95,6 +95,7 @@ export type ChartType =
   | 'pareto'
   | 'waterfall'
   | 'sankey'
+  | 'surface3d'
 export type ScaleType = 'linear' | 'log'
 export type LegendPosition = 'right' | 'bottom' | 'none'
 export type PlotThemePreset = 'paper-single' | 'paper-double' | 'presentation' | 'report'

@@ -301,6 +301,28 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'surfacePlot',
+    label: '3D Surface Plot',
+    category: 'plot',
+    nodeKind: 'csPlot',
+    inputs: [{ id: 'data', label: 'Data' }],
+    proOnly: false,
+    description:
+      '3D surface plot with interactive rotation. Expects a DataTable where each row is an x-slice and each column is a y-slice — values are treated as z heights. Drag to rotate; toggle wireframe with the button.',
+    defaultData: {
+      blockType: 'surfacePlot',
+      label: '3D Surface',
+      plotConfig: {
+        chartType: 'surface3d',
+        showGrid: false,
+        showLegend: false,
+        legendPosition: 'right',
+        themePreset: 'paper-single',
+      } satisfies PlotConfig,
+    },
+  })
+
+  register({
     type: 'listTable',
     label: 'Table Output',
     category: 'output',

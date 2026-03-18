@@ -111,6 +111,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
           <option value="pareto">{t('plot.chartPareto')}</option>
           <option value="waterfall">{t('plot.chartWaterfall')}</option>
           <option value="sankey">{t('plot.chartSankey', 'Sankey')}</option>
+          <option value="surface3d">{t('plot.chartSurface3d', '3D Surface')}</option>
         </select>,
       )}
 

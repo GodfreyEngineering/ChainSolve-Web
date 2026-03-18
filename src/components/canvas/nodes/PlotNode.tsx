@@ -20,6 +20,7 @@ import { loadVega, type VegaAPI } from '../../../lib/vega-loader'
 import { buildInlineSpec, type SpecResult } from '../../../lib/plot-spec'
 import { exportCSV } from '../../../lib/plot-export'
 import { SankeyChart } from '../SankeyChart'
+import { SurfacePlot } from '../SurfacePlot'
 
 const PlotExpandModalComponent = lazy(() => import('../PlotExpandModal'))
 
@@ -73,13 +74,18 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
   const isSankey = config.chartType === 'sankey'
   const sankeyData = isSankey && inputValue && isTable(inputValue) ? inputValue : null
 
+  // 6.9: 3D surface plot — canvas-based renderer, bypass Vega.
+  const isSurface3d = config.chartType === 'surface3d'
+  const surfaceData = isSurface3d && inputValue && isTable(inputValue) ? inputValue : null
+
   // Derive spec result from inputs (pure computation, no side-effects)
   const specResult = useMemo(
-    () => (isSankey ? { error: '' } : buildInlineSpec(inputValue, config, true)),
-    [isSankey, inputValue, config],
+    () =>
+      isSankey || isSurface3d ? { error: '' } : buildInlineSpec(inputValue, config, true),
+    [isSankey, isSurface3d, inputValue, config],
   )
   const specError = 'error' in specResult && specResult.error !== '' ? specResult.error : null
-  const isDownsampled = !specError && !isSankey && (specResult as SpecResult).isDownsampled
+  const isDownsampled = !specError && !isSankey && !isSurface3d && (specResult as SpecResult).isDownsampled
 
   // Vega state
   const containerRef = useRef<HTMLDivElement>(null)
@@ -94,7 +100,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
 
   // Lazy-load Vega on mount (skip for Sankey which uses pure SVG)
   useEffect(() => {
-    if (isSankey) {
+    if (isSankey || isSurface3d) {
       setLoading(false)
       return
     }
@@ -115,7 +121,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
     return () => {
       cancelled = true
     }
-  }, [isSankey])
+  }, [isSankey, isSurface3d])
 
   // Render chart when data, config, or vega API changes
   // setState is only called inside async callbacks (not synchronously in the effect body).
@@ -310,11 +316,36 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
             </div>
           )}
 
+          {/* 6.9: 3D surface plot — canvas renderer, bypasses Vega */}
+          {isSurface3d && !loading && (
+            <div className="nodrag nowheel" style={{ borderRadius: 6, overflow: 'hidden' }}>
+              {surfaceData ? (
+                <SurfacePlot
+                  data={surfaceData}
+                  width={320}
+                  height={220}
+                  title={config.title}
+                />
+              ) : (
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '1.5rem 0.5rem',
+                    color: 'var(--text-faint)',
+                    fontSize: '0.75rem',
+                  }}
+                >
+                  {t('plot.connectTableSurface', 'Connect a DataTable (≥2×2) to render the surface')}
+                </div>
+              )}
+            </div>
+          )}
+
           <div
             ref={containerRef}
             className="nodrag nowheel"
             style={{
-              display: isSankey || loading || error ? 'none' : 'block',
+              display: isSankey || isSurface3d || loading || error ? 'none' : 'block',
               overflow: 'hidden',
               borderRadius: 6,
             }}
