@@ -2207,7 +2207,27 @@
     "problems": "Probleme",
     "history": "History",
     "channels": "Channels",
-    "notes": "Notes"
+    "notes": "Notes",
+    "snapshots": "Versionen"
+  },
+  "versions": {
+    "saveVersion": "Version speichern",
+    "save": "Speichern",
+    "labelPlaceholder": "Versionsname…",
+    "untitled": "Schnappschuss",
+    "loading": "Versionen werden geladen…",
+    "empty": "Noch keine gespeicherten Versionen. Klicke auf „Version speichern".",
+    "noProject": "Öffne ein gespeichertes Projekt, um den Versionsverlauf zu nutzen.",
+    "refresh": "Aktualisieren",
+    "restore": "Wiederherstellen",
+    "delete": "Löschen",
+    "clickToRename": "Klicken zum Umbenennen",
+    "confirmRestore": "Diese Version wiederherstellen? Die aktuelle Canvas wird ersetzt.",
+    "confirmDelete": "Diese Version löschen? Dies kann nicht rückgängig gemacht werden.",
+    "loadError": "Versionen konnten nicht geladen werden",
+    "saveError": "Version konnte nicht gespeichert werden",
+    "restoreError": "Version konnte nicht wiederhergestellt werden",
+    "deleteError": "Version konnte nicht gelöscht werden"
   },
   "sidebar": {
     "projects": "Projekte",

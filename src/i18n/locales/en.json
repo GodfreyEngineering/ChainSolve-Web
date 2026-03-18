@@ -2255,7 +2255,27 @@
     "problems": "Problems",
     "history": "History",
     "channels": "Channels",
-    "notes": "Notes"
+    "notes": "Notes",
+    "snapshots": "Versions"
+  },
+  "versions": {
+    "saveVersion": "Save version",
+    "save": "Save",
+    "labelPlaceholder": "Version name…",
+    "untitled": "Snapshot",
+    "loading": "Loading versions…",
+    "empty": "No saved versions yet. Click \"Save version\" to create one.",
+    "noProject": "Open a saved project to use version history.",
+    "refresh": "Refresh",
+    "restore": "Restore",
+    "delete": "Delete",
+    "clickToRename": "Click to rename",
+    "confirmRestore": "Restore this version? Current canvas will be replaced.",
+    "confirmDelete": "Delete this version? This cannot be undone.",
+    "loadError": "Failed to load versions",
+    "saveError": "Failed to save version",
+    "restoreError": "Failed to restore version",
+    "deleteError": "Failed to delete version"
   },
   "output": {
     "engineStatus": "Engine"

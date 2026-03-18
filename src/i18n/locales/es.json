@@ -2207,7 +2207,27 @@
     "problems": "Problemas",
     "history": "History",
     "channels": "Channels",
-    "notes": "Notes"
+    "notes": "Notes",
+    "snapshots": "Versiones"
+  },
+  "versions": {
+    "saveVersion": "Guardar versión",
+    "save": "Guardar",
+    "labelPlaceholder": "Nombre de versión…",
+    "untitled": "Instantánea",
+    "loading": "Cargando versiones…",
+    "empty": "Aún no hay versiones guardadas. Haz clic en «Guardar versión».",
+    "noProject": "Abre un proyecto guardado para usar el historial de versiones.",
+    "refresh": "Actualizar",
+    "restore": "Restaurar",
+    "delete": "Eliminar",
+    "clickToRename": "Haz clic para renombrar",
+    "confirmRestore": "¿Restaurar esta versión? El lienzo actual será reemplazado.",
+    "confirmDelete": "¿Eliminar esta versión? Esta acción no se puede deshacer.",
+    "loadError": "Error al cargar las versiones",
+    "saveError": "Error al guardar la versión",
+    "restoreError": "Error al restaurar la versión",
+    "deleteError": "Error al eliminar la versión"
   },
   "sidebar": {
     "projects": "Proyectos",

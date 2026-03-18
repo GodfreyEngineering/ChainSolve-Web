@@ -119,6 +119,9 @@ const LazyCanvasNotes = lazy(() =>
 const LazyHistoryPanel = lazy(() =>
   import('./HistoryPanel').then((m) => ({ default: m.HistoryPanel })),
 )
+const LazyVersionHistoryPanel = lazy(() =>
+  import('./VersionHistoryPanel').then((m) => ({ default: m.VersionHistoryPanel })),
+)
 const LazyChannelsPanel = lazy(() =>
   import('./ChannelsPanel').then((m) => ({ default: m.ChannelsPanel })),
 )
@@ -2322,6 +2325,15 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [historyRestoreToIndex, setNodes, setEdges],
   )
 
+  // 5.8: Restore a Supabase snapshot onto the canvas.
+  const handleRestoreSnapshot = useCallback(
+    (snapNodes: Node<NodeData>[], snapEdges: Edge[]) => {
+      setNodes(snapNodes)
+      setEdges(snapEdges)
+    },
+    [setNodes, setEdges],
+  )
+
   // ── Clipboard handlers ──────────────────────────────────────────────────
 
   const handleCopy = useCallback(() => {
@@ -3412,6 +3424,21 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 </Suspense>
               ),
             },
+            {
+              id: 'snapshots' as DockTab,
+              label: t('dock.snapshots', 'Versions'),
+              content: (
+                <Suspense fallback={null}>
+                  <LazyVersionHistoryPanel
+                    projectId={telemetryProjectId}
+                    canvasId={canvasId}
+                    nodes={nodes}
+                    edges={edges}
+                    onRestore={handleRestoreSnapshot}
+                  />
+                </Suspense>
+              ),
+            },
           ]
         : []),
     ],
@@ -3429,6 +3456,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       canvasId,
       healthWarningCount,
       problemCount,
+      telemetryProjectId,
+      handleRestoreSnapshot,
     ],
   )
 

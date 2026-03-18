@@ -2207,7 +2207,27 @@
     "problems": "Problemes",
     "history": "History",
     "channels": "Channels",
-    "notes": "Notes"
+    "notes": "Notes",
+    "snapshots": "Versions"
+  },
+  "versions": {
+    "saveVersion": "Enregistrer la version",
+    "save": "Enregistrer",
+    "labelPlaceholder": "Nom de la version…",
+    "untitled": "Instantané",
+    "loading": "Chargement des versions…",
+    "empty": "Aucune version enregistrée. Cliquez sur « Enregistrer la version ».",
+    "noProject": "Ouvrez un projet enregistré pour utiliser l'historique des versions.",
+    "refresh": "Actualiser",
+    "restore": "Restaurer",
+    "delete": "Supprimer",
+    "clickToRename": "Cliquer pour renommer",
+    "confirmRestore": "Restaurer cette version ? Le canvas actuel sera remplacé.",
+    "confirmDelete": "Supprimer cette version ? Cette action est irréversible.",
+    "loadError": "Impossible de charger les versions",
+    "saveError": "Impossible d'enregistrer la version",
+    "restoreError": "Impossible de restaurer la version",
+    "deleteError": "Impossible de supprimer la version"
   },
   "sidebar": {
     "projects": "Projets",

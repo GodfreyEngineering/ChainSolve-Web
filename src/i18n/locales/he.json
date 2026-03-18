@@ -1654,7 +1654,27 @@
     "dragToResize": "Drag to resize",
     "output": "פלט",
     "problems": "בעיות",
-    "history": "History"
+    "history": "History",
+    "snapshots": "גרסאות"
+  },
+  "versions": {
+    "saveVersion": "שמור גרסה",
+    "save": "שמור",
+    "labelPlaceholder": "שם גרסה…",
+    "untitled": "תמונת מצב",
+    "loading": "טוען גרסאות…",
+    "empty": "אין גרסאות שמורות. לחץ על «שמור גרסה» כדי ליצור אחת.",
+    "noProject": "פתח פרויקט שמור כדי להשתמש בהיסטוריית הגרסאות.",
+    "refresh": "רענן",
+    "restore": "שחזר",
+    "delete": "מחק",
+    "clickToRename": "לחץ לשינוי שם",
+    "confirmRestore": "לשחזר גרסה זו? הקנבס הנוכחי יוחלף.",
+    "confirmDelete": "למחוק גרסה זו? לא ניתן לבטל פעולה זו.",
+    "loadError": "טעינת הגרסאות נכשלה",
+    "saveError": "שמירת הגרסה נכשלה",
+    "restoreError": "שחזור הגרסה נכשל",
+    "deleteError": "מחיקת הגרסה נכשלה"
   },
   "sidebar": {
     "projects": "פרויקטים",

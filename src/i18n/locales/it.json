@@ -2157,7 +2157,27 @@
     "console": "Console",
     "output": "Output",
     "problems": "Problemi",
-    "history": "History"
+    "history": "History",
+    "snapshots": "Versioni"
+  },
+  "versions": {
+    "saveVersion": "Salva versione",
+    "save": "Salva",
+    "labelPlaceholder": "Nome versione…",
+    "untitled": "Istantanea",
+    "loading": "Caricamento versioni…",
+    "empty": "Nessuna versione salvata. Clicca su «Salva versione» per crearne una.",
+    "noProject": "Apri un progetto salvato per utilizzare la cronologia versioni.",
+    "refresh": "Aggiorna",
+    "restore": "Ripristina",
+    "delete": "Elimina",
+    "clickToRename": "Clicca per rinominare",
+    "confirmRestore": "Ripristinare questa versione? Il canvas corrente verrà sostituito.",
+    "confirmDelete": "Eliminare questa versione? Questa azione non può essere annullata.",
+    "loadError": "Impossibile caricare le versioni",
+    "saveError": "Impossibile salvare la versione",
+    "restoreError": "Impossibile ripristinare la versione",
+    "deleteError": "Impossibile eliminare la versione"
   },
   "sidebar": {
     "projects": "Progetti",
