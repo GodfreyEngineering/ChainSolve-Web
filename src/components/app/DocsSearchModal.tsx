@@ -2,6 +2,7 @@ import { useState, useRef, useMemo, useLayoutEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppWindow } from '../ui/AppWindow'
 import { searchDocs, DOCS_INDEX, type DocsEntry } from '../../docs/docsIndex'
+import { getWalkthroughById, isPlaceholder } from '../../docs/videoWalkthroughs'
 
 export const DOCS_WINDOW_ID = 'docs'
 
@@ -101,9 +102,25 @@ export const DocsSearchModal = DocsSearchWindow
 // ── DocsItem ─────────────────────────────────────────────────────────────────
 
 function DocsItem({ entry }: { entry: DocsEntry }) {
+  const walkthrough = entry.videoId ? getWalkthroughById(entry.videoId) : undefined
+  const hasVideo = walkthrough !== undefined && !isPlaceholder(walkthrough.youtubeId)
+  const hasPlaceholder = walkthrough !== undefined && isPlaceholder(walkthrough.youtubeId)
+
   return (
     <div style={itemStyle} role="listitem">
-      <p style={itemTitleStyle}>{entry.title}</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <p style={itemTitleStyle}>{entry.title}</p>
+        {hasVideo && (
+          <span style={videoBadgeStyle} title={`Watch: ${walkthrough.title}`} aria-label="Video walkthrough available">
+            ▶ {walkthrough.durationLabel}
+          </span>
+        )}
+        {hasPlaceholder && (
+          <span style={comingSoonBadgeStyle} aria-label="Video coming soon">
+            🎬 Soon
+          </span>
+        )}
+      </div>
       <p style={itemDescStyle}>{entry.description}</p>
     </div>
   )
@@ -173,4 +190,30 @@ const browseHintStyle: React.CSSProperties = {
   margin: '0 0 0.5rem 0',
   fontSize: '0.82rem',
   color: 'var(--text-muted)',
+}
+
+const videoBadgeStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '0.2rem',
+  background: 'var(--primary)',
+  color: '#fff',
+  fontSize: '0.68rem',
+  fontWeight: 700,
+  padding: '1px 6px',
+  borderRadius: 99,
+  flexShrink: 0,
+}
+
+const comingSoonBadgeStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '0.2rem',
+  background: 'var(--card)',
+  color: 'var(--text-muted)',
+  fontSize: '0.68rem',
+  fontWeight: 600,
+  padding: '1px 6px',
+  borderRadius: 99,
+  flexShrink: 0,
 }

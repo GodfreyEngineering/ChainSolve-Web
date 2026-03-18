@@ -13,6 +13,8 @@ export interface DocsEntry {
   title: string
   description: string
   keywords: string[]
+  /** Optional video walkthrough ID from videoWalkthroughs.ts */
+  videoId?: string
 }
 
 export const DOCS_INDEX: DocsEntry[] = [
@@ -21,6 +23,7 @@ export const DOCS_INDEX: DocsEntry[] = [
     id: 'gs-first-chain',
     section: 'Getting started',
     title: 'Your first chain',
+    videoId: 'intro-first-chain',
     description:
       'Five steps to build your first live calculation: add Number blocks, connect an Add block, attach a Display block, and see the result update instantly. Start here if you have never used ChainSolve before.',
     keywords: [
@@ -38,6 +41,7 @@ export const DOCS_INDEX: DocsEntry[] = [
     id: 'gs-variables',
     section: 'Getting started',
     title: 'Variables for parametric studies',
+    videoId: 'intro-variables',
     description:
       'Bind a variable to any block input. Set a slider range (min/max/step). Drag the slider — all bound blocks update live. Ideal for "what-if" parametric design.',
     keywords: ['variable', 'parametric', 'slider', 'bind', 'what-if', 'range', 'parameter study'],
@@ -87,6 +91,7 @@ export const DOCS_INDEX: DocsEntry[] = [
     id: 'gs-export',
     section: 'Getting started',
     title: 'Exporting your calculation',
+    videoId: 'export-pdf',
     description:
       'File → Export → Audit PDF for a formatted report. File → Export → Excel for a live workbook. File → Export → Project for a .chainsolvejson backup. File → Share for a read-only link.',
     keywords: ['export', 'pdf', 'excel', 'xlsx', 'json', 'share', 'report', 'download', 'backup'],
