@@ -653,6 +653,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Fit a polynomial or RBF metamodel to DOE results for contour plots and sensitivity analysis. Methods: "linear", "quadratic" (main+squared+interactions), "cubic", "rbf" (Gaussian RBF). Returns coefficient table with R².',
   'optim.doe':
     'Generates experiment matrices. Methods: "factorial", "lhs", "sobol", "box_behnken" (3+ factors), "ccc" (Central Composite Circumscribed, rotatable α=(2^k)^0.25), "ccf" (face-centered, fits ±1), "taguchi" (auto-selects L4/L8/L12/L16/L27). Outputs table of configurations.',
+  'optim.paramEst':
+    'Fit ODE model parameters to experimental data using Levenberg-Marquardt. Input a table with column "t" and state columns. Configure ODE equations, parameter names, initial/lower/upper bounds. Returns table with estimated parameter values and std_error.',
 
   // ── Machine Learning (5.06) ─────────────────────────────────────────────
   'ml.trainTestSplit':

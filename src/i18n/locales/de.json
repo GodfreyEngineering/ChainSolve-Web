@@ -456,6 +456,7 @@
     "sym_simplify": "Vereinfachen",
     "sym_expand": "Ausklammern",
     "sym_substitute": "Ersetzen",
+    "optim_param_est": "Parameterschätzung",
     "optim_lp": "LP-Löser",
     "optim_qp": "QP-Löser",
     "optim_nsga2": "NSGA-II",

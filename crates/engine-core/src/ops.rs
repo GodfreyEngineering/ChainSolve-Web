@@ -4064,6 +4064,86 @@ fn evaluate_node_inner(
             }
         }
 
+        "optim.paramEst" => {
+            use crate::optim::param_est::{levenberg_marquardt, ParamEstConfig};
+            // Extract observed data table
+            let (t_data, y_data, n_obs) = match inputs.get("data") {
+                Some(Value::Table { columns, rows }) => {
+                    let t_idx = columns.iter().position(|c| c == "t").unwrap_or(0);
+                    let t_data: Vec<f64> = rows.iter().map(|r| r.get(t_idx).copied().unwrap_or(0.0)).collect();
+                    let y_cols: Vec<usize> = (0..columns.len()).filter(|&i| i != t_idx).collect();
+                    let y_data: Vec<Vec<f64>> = rows.iter()
+                        .map(|r| y_cols.iter().map(|&c| r.get(c).copied().unwrap_or(f64::NAN)).collect())
+                        .collect();
+                    let n = y_cols.len();
+                    (t_data, y_data, n)
+                }
+                _ => {
+                    return Value::error("optim.paramEst: 'data' input must be a Table with column 't'");
+                }
+            };
+            // Initial state from y0 input or data
+            let y0: Vec<f64> = match inputs.get("y0") {
+                Some(Value::Vector { value: v }) => v.clone(),
+                Some(Value::Scalar { value: s }) => vec![*s],
+                _ => {
+                    // Fall back: first row of data excluding t
+                    if y_data.is_empty() { vec![0.0] } else { y_data[0].clone() }
+                }
+            };
+            // equations from node data
+            let diff_eqs_raw = data.get("equations").and_then(|v| v.as_str()).unwrap_or("dy/dt = -k*y");
+            let diff_eqs: Vec<String> = diff_eqs_raw.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            // parameter names and initial values
+            let param_names_raw = data.get("params").and_then(|v| v.as_str()).unwrap_or("k");
+            let param_names: Vec<String> = param_names_raw.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let param_init_raw = data.get("param_init").and_then(|v| v.as_str()).unwrap_or("1.0");
+            let param_init: Vec<f64> = param_init_raw.split(',').filter_map(|s| s.trim().parse().ok()).collect();
+            let param_lower_raw = data.get("param_lower").and_then(|v| v.as_str()).unwrap_or("0.0");
+            let param_lower: Vec<f64> = param_lower_raw.split(',').filter_map(|s| s.trim().parse().ok()).collect();
+            let param_upper_raw = data.get("param_upper").and_then(|v| v.as_str()).unwrap_or("1e6");
+            let param_upper: Vec<f64> = param_upper_raw.split(',').filter_map(|s| s.trim().parse().ok()).collect();
+            let observed_states: Vec<usize> = (0..n_obs).collect();
+            let max_iter = data.get("max_iter").and_then(|v| v.as_f64()).unwrap_or(200.0) as usize;
+            let tol = data.get("tol").and_then(|v| v.as_f64()).unwrap_or(1e-8);
+            let t_start = t_data.first().copied().unwrap_or(0.0);
+            let t_end_val = t_data.last().copied().unwrap_or(1.0);
+            let cfg = ParamEstConfig {
+                diff_eqs,
+                y0,
+                param_names: param_names.clone(),
+                param_init,
+                param_lower,
+                param_upper,
+                t_data,
+                y_data,
+                observed_states,
+                solver: crate::ode::OdeSolverConfig {
+                    t_start,
+                    t_end: t_end_val,
+                    dt: data.get("dt").and_then(|v| v.as_f64()).unwrap_or(0.01),
+                    tolerance: tol,
+                    max_steps: 100_000,
+                },
+                max_iter,
+                tol,
+            };
+            let result = levenberg_marquardt(&cfg);
+            // Return table: param, value, std_error
+            let mut rows = Vec::with_capacity(param_names.len() + 1);
+            for (i, name) in param_names.iter().enumerate() {
+                let _ = name;
+                let val = result.params.get(i).copied().unwrap_or(f64::NAN);
+                let std = result.param_std.get(i).copied().unwrap_or(f64::NAN);
+                rows.push(vec![i as f64, val, std]);
+            }
+            rows.push(vec![param_names.len() as f64, result.residual_sum_sq, f64::NAN]);
+            Value::Table {
+                columns: vec!["param_idx".to_string(), "value".to_string(), "std_error".to_string()],
+                rows,
+            }
+        }
+
         // ── Machine Learning ─────────────────────────────────────────
         "ml.trainTestSplit" => {
             match inputs.get("data") {

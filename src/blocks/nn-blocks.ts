@@ -152,4 +152,65 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
     tags: ['nn', 'export'],
     description: 'Exports a trained neural network to ONNX format for use in other tools.',
   })
+
+  // ── Recurrent & Attention Layers ────────────────────────────────────────
+
+  register({
+    type: 'nn.lstm',
+    label: 'LSTM',
+    category: 'neuralNetworks',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'sequence', label: 'Sequence (table T×D)' }],
+    defaultData: {
+      blockType: 'nn.lstm',
+      label: 'LSTM',
+      hiddenSize: 32,
+      seed: 42,
+      returnSequences: false,
+    },
+    synonyms: ['lstm', 'long short term memory', 'recurrent', 'rnn'],
+    tags: ['nn', 'recurrent', 'sequence'],
+    description:
+      'LSTM (Long Short-Term Memory) layer. Input: Table [T × D] (timesteps × features). Output: last hidden state vector [H] (returnSequences=false) or full hidden sequence Table [T × H]. Xavier-initialised weights with configurable seed.',
+  })
+
+  register({
+    type: 'nn.gru',
+    label: 'GRU',
+    category: 'neuralNetworks',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'sequence', label: 'Sequence (table T×D)' }],
+    defaultData: {
+      blockType: 'nn.gru',
+      label: 'GRU',
+      hiddenSize: 32,
+      seed: 42,
+      returnSequences: false,
+    },
+    synonyms: ['gru', 'gated recurrent unit', 'recurrent', 'rnn'],
+    tags: ['nn', 'recurrent', 'sequence'],
+    description:
+      'GRU (Gated Recurrent Unit) layer — simpler than LSTM, often similar performance. Input: Table [T × D]. Output: last hidden state [H] or full sequence [T × H]. Uses reset and update gates.',
+  })
+
+  register({
+    type: 'nn.attention',
+    label: 'Attention',
+    category: 'neuralNetworks',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'query', label: 'Query (table seq_q × d_k)' },
+      { id: 'key', label: 'Key (table seq_k × d_k)' },
+      { id: 'value', label: 'Value (table seq_k × d_v)' },
+    ],
+    defaultData: {
+      blockType: 'nn.attention',
+      label: 'Attention',
+      causal: false,
+    },
+    synonyms: ['attention', 'transformer', 'self-attention', 'scaled dot product'],
+    tags: ['nn', 'attention', 'transformer'],
+    description:
+      'Scaled dot-product attention: Attention(Q,K,V) = softmax(Q·Kᵀ/√d_k)·V. Causal=true masks future positions (for autoregressive models). Q=K=V for self-attention. Output: [seq_q × d_v] table.',
+  })
 }

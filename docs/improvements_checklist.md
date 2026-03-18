@@ -143,7 +143,7 @@
 - [ ] **2.37** PDE solver (1D): method-of-lines with automatic spatial discretisation (finite differences, configurable order) — convert PDE to system of ODEs and solve with existing ODE solvers. Support: heat equation, wave equation, advection-diffusion.
 - [ ] **2.38** PDE solver (2D FEM): triangle mesh generation (Delaunay), FEM assembly (P1/P2 elements), boundary condition specification (Dirichlet, Neumann, Robin), material property fields — for Poisson, elasticity, Stokes flow
 - [x] **2.39** SteadyState solver: Newton iteration to find equilibrium of dynamic system — given dy/dt = f(y), find y* where f(y*)=0. Uses Jacobian from AD engine (Category 1C).
-- [ ] **2.40** ParameterEstimation: fit ODE/DAE model parameters to experimental data — Levenberg-Marquardt minimising sum of squared residuals between model output and data, using AD for Jacobian computation
+- [x] **2.40** ParameterEstimation: fit ODE/DAE model parameters to experimental data — Levenberg-Marquardt minimising sum of squared residuals between model output and data, using AD for Jacobian computation
 
 ### 2D — Physics Domain Blocks
 

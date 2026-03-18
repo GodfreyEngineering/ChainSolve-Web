@@ -2098,6 +2098,7 @@
     "sym_simplify": "פישוט",
     "sym_expand": "פיתוח",
     "sym_substitute": "הצבה",
+    "optim_param_est": "אמידת פרמטרים",
     "optim_lp": "פותר LP",
     "optim_qp": "פותר QP",
     "optim_nsga2": "NSGA-II",

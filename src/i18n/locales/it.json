@@ -455,6 +455,7 @@
     "sym_simplify": "Semplificare",
     "sym_expand": "Espandere",
     "sym_substitute": "Sostituire",
+    "optim_param_est": "Stima dei parametri",
     "optim_lp": "Risolutore LP",
     "optim_qp": "Risolutore QP",
     "optim_nsga2": "NSGA-II",

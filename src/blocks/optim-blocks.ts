@@ -400,4 +400,33 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
     description:
       'Generates experiment matrices. Methods: "factorial", "lhs" (Latin Hypercube), "sobol", "box_behnken" (3+ factors, no corners), "ccc" (Central Composite Circumscribed, rotatable), "ccf" (Central Composite Face-centered), "taguchi" (L-array). Outputs table of configurations.',
   })
+
+  // ── Parameter Estimation ────────────────────────────────────────────────
+
+  register({
+    type: 'optim.paramEst',
+    label: 'Parameter Estimation',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'data', label: 'Observed Data (table)' },
+      { id: 'y0', label: 'Initial State' },
+    ],
+    defaultData: {
+      blockType: 'optim.paramEst',
+      label: 'Parameter Estimation',
+      equations: 'dy/dt = -k*y',
+      params: 'k',
+      param_init: '1.0',
+      param_lower: '0.0',
+      param_upper: '1e6',
+      max_iter: 200,
+      tol: 1e-8,
+      dt: 0.01,
+    },
+    synonyms: ['parameter estimation', 'curve fit', 'LM', 'Levenberg-Marquardt', 'system identification'],
+    tags: ['optimization', 'ODE', 'fitting'],
+    description:
+      'Fits ODE model parameters to experimental data using Levenberg-Marquardt. Inputs: observed data table (column "t" required) and initial state y0. Configure equations (semicolon-separated), param names (comma-separated), initial/lower/upper bounds. Outputs table with param_idx, value, std_error columns.',
+  })
 }

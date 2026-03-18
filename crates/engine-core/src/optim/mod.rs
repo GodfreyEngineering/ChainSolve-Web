@@ -8,6 +8,7 @@
 
 pub mod cmaes;
 pub mod curve_fit;
+pub mod param_est;
 pub mod doe;
 pub mod lbfgsb;
 pub mod response_surface;

@@ -5,7 +5,9 @@
 
 pub mod layer;
 pub mod activation;
+pub mod attention;
 pub mod model;
+pub mod recurrent;
 pub mod train;
 pub mod export;
 pub mod lr_schedule;

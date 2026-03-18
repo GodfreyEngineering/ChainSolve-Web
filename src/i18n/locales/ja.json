@@ -464,6 +464,7 @@
     "sym_simplify": "簡略化",
     "sym_expand": "展開",
     "sym_substitute": "代入",
+    "optim_param_est": "パラメータ推定",
     "optim_lp": "LP ソルバー",
     "optim_qp": "QP ソルバー",
     "optim_nsga2": "NSGA-II",
