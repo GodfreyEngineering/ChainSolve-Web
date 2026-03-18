@@ -407,7 +407,7 @@
 - [x] **6.11** Pareto front plot: 2D/3D with dominated region shading — for multi-objective optimisation results
 - [x] **6.12** Sankey diagram: flow quantities between nodes — for energy/mass balance visualisation
 - [x] **6.13** Box-and-whisker, violin plots: statistical distribution visualisation
-- [ ] **6.14** Scope block: 30fps live update during simulation, configurable buffer, vertical trigger line at current time — like Simulink's Scope
+- [x] **6.14** Scope block: 30fps live update during simulation, configurable buffer, vertical trigger line at current time — like Simulink's Scope
 - [x] **6.15** Multi-axis: secondary Y-axis, stacked panels with shared X-axis (like Simulink Data Inspector)
 - [ ] **6.16** 3D viewport: Three.js orbit camera, mesh visualisation (wireframe/solid/transparent), section planes, vehicle animation, mechanism motion — for geometry and dynamics visualisation
 - [x] **6.17** Plot annotations: interactive arrows, text labels, reference lines (horizontal/vertical), shaded regions — all draggable
