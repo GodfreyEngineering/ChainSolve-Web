@@ -10,15 +10,31 @@
 //!   y_next = y + h/6 * (k1 + 2*k2 + 2*k3 + k4)
 
 use super::types::{OdeResult, OdeSolverConfig, OdeSystem};
-use crate::expr::eval_expr;
+use crate::expr::{eval_expr, compile, CompiledExpr};
 use std::collections::HashMap;
 
-/// Evaluate the RHS of the ODE system at the given state.
-fn eval_rhs(system: &OdeSystem, t: f64, y: &[f64]) -> Vec<f64> {
-    eval_rhs_pub(system, t, y)
+/// Pre-compile ODE system equations for fast repeated evaluation.
+///
+/// Falls back to string evaluation if compilation fails for any equation.
+pub fn compile_system(system: &OdeSystem) -> Vec<Option<CompiledExpr>> {
+    system.equations.iter().map(|eq| compile(eq).ok()).collect()
 }
 
-/// Public version of eval_rhs for use by other solvers (RK45, BDF).
+/// Evaluate the RHS using pre-compiled expressions (fast path).
+fn eval_rhs_compiled(
+    compiled: &[Option<CompiledExpr>],
+    equations: &[String],
+    vars: &HashMap<String, f64>,
+) -> Vec<f64> {
+    compiled.iter().zip(equations.iter()).map(|(c, eq)| {
+        match c {
+            Some(compiled_eq) => compiled_eq.eval(vars).unwrap_or(f64::NAN),
+            None => eval_expr(eq, vars).unwrap_or(f64::NAN),
+        }
+    }).collect()
+}
+
+/// Public eval_rhs for use by other solvers (RK45, BDF) that haven't yet adopted CompiledExpr.
 pub fn eval_rhs_pub(system: &OdeSystem, t: f64, y: &[f64]) -> Vec<f64> {
     let n = system.equations.len();
     let mut vars: HashMap<String, f64> = system.params.clone();
@@ -38,6 +54,7 @@ pub fn eval_rhs_pub(system: &OdeSystem, t: f64, y: &[f64]) -> Vec<f64> {
 
 /// Solve an ODE system using the classic 4th-order Runge-Kutta method.
 ///
+/// Pre-compiles all equations once for fast repeated evaluation (1.29 JIT).
 /// Returns a table of (t, y0, y1, ..., yN) at each time step.
 pub fn solve_rk4(
     system: &OdeSystem,
@@ -46,6 +63,18 @@ pub fn solve_rk4(
 ) -> OdeResult {
     let n = system.equations.len();
     assert_eq!(n, y0.len(), "Number of equations must match initial state dimension");
+
+    // Pre-compile equations once (JIT optimisation: avoids re-parsing every step)
+    let compiled = compile_system(system);
+
+    let eval = |t: f64, y: &[f64]| -> Vec<f64> {
+        let mut vars: HashMap<String, f64> = system.params.clone();
+        vars.insert("t".to_string(), t);
+        for i in 0..y.len() {
+            vars.insert(format!("y{}", i), y[i]);
+        }
+        eval_rhs_compiled(&compiled, &system.equations, &vars)
+    };
 
     let dt = config.dt;
     let mut t = config.t_start;
@@ -63,16 +92,16 @@ pub fn solve_rk4(
             dt
         };
 
-        let k1 = eval_rhs(system, t, &y);
+        let k1 = eval(t, &y);
 
         let y_k2: Vec<f64> = y.iter().zip(&k1).map(|(yi, k)| yi + h * k / 2.0).collect();
-        let k2 = eval_rhs(system, t + h / 2.0, &y_k2);
+        let k2 = eval(t + h / 2.0, &y_k2);
 
         let y_k3: Vec<f64> = y.iter().zip(&k2).map(|(yi, k)| yi + h * k / 2.0).collect();
-        let k3 = eval_rhs(system, t + h / 2.0, &y_k3);
+        let k3 = eval(t + h / 2.0, &y_k3);
 
         let y_k4: Vec<f64> = y.iter().zip(&k3).map(|(yi, k)| yi + h * k).collect();
-        let k4 = eval_rhs(system, t + h, &y_k4);
+        let k4 = eval(t + h, &y_k4);
 
         // RK4 update: y_next = y + h/6 * (k1 + 2*k2 + 2*k3 + k4)
         for i in 0..n {

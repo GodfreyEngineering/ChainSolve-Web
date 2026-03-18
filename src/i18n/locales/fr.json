@@ -458,6 +458,7 @@
     "sym_simplify": "Simplifier",
     "sym_expand": "Développer",
     "sym_substitute": "Substituer",
+    "sym_compiled_eval": "Éval Compilée",
     "sym_groebner": "Base de Gröbner",
     "optim_param_est": "Estimation de paramètres",
     "optim_bayesian": "Optimisation bayésienne",

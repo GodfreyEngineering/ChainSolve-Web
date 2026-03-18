@@ -5156,6 +5156,42 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Compiled Expression Eval (1.29) ──────────────────────────
+        "sym.compiledEval" => {
+            // Pre-parse the expression once, then evaluate with port inputs as vars.
+            // For a single invocation this is equivalent to eval_expr, but
+            // the block signals intent: "this expression is evaluated in a loop".
+            let expr_str = match inputs.get("expr") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => data.get("expr").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+            };
+            if expr_str.is_empty() {
+                return Value::error("sym.compiledEval: 'expr' field or input required");
+            }
+            let compiled = match crate::expr::compile(&expr_str) {
+                Ok(c) => c,
+                Err(e) => return Value::error(format!("sym.compiledEval parse error: {e}")),
+            };
+            // Gather all numeric inputs as variables
+            let mut vars = std::collections::HashMap::new();
+            for (k, v) in inputs {
+                if k == "expr" { continue; }
+                if let Some(f) = v.as_scalar() {
+                    vars.insert(k.clone(), f);
+                }
+            }
+            // Also add data values as variables (useful for static parameters)
+            for (k, v) in data {
+                if let Some(f) = v.as_f64() {
+                    vars.entry(k.clone()).or_insert(f);
+                }
+            }
+            match compiled.eval(&vars) {
+                Ok(v) => Value::scalar(v),
+                Err(e) => Value::error(format!("sym.compiledEval eval error: {e}")),
+            }
+        }
+
         // ── Gröbner Bases (1.26) ─────────────────────────────────────
         "sym.groebner" => {
             use crate::symbolic::{MultiPoly, Monomial, MonomialOrder, groebner_basis, solve_polynomial_system};

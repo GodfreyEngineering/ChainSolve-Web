@@ -85,6 +85,23 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'sym.compiledEval',
+    label: 'Compiled Eval',
+    category: 'math',
+    nodeKind: 'csOperation',
+    inputs: [],
+    defaultData: {
+      blockType: 'sym.compiledEval',
+      label: 'Compiled Eval',
+      expr: 'x^2 + y',
+    },
+    synonyms: ['compiled eval', 'expression eval', 'fast eval', 'jit', 'compiled expression'],
+    tags: ['sym', 'expression', 'evaluation', 'performance'],
+    description:
+      'Evaluates a mathematical expression with pre-compiled AST (no re-parsing on repeated calls). Set expr="x^2+sin(y)" and connect input ports with matching names (x, y, etc.). Equivalent to a custom function but faster in loops. Used internally by ODE solvers for JIT equation compilation.',
+  })
+
+  register({
     type: 'sym.groebner',
     label: 'Gröbner Basis',
     category: 'math',

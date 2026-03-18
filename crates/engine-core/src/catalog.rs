@@ -654,7 +654,8 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("veh.lap.simulate", "Lap Simulation", "vehicleSim", "csOperation", vec![p("track", "Track (table)")], true),
         entry("veh.brake.energy", "Brake Energy", "vehicleSim", "csOperation", vec![p("mass", "Mass (kg)"), p("v1", "V1 (m/s)"), p("v2", "V2 (m/s)")], true),
         entry("veh.brake.power", "Brake Power", "vehicleSim", "csOperation", vec![p("energy", "Energy (J)"), p("dt", "Δt (s)")], true),
-        // Gröbner bases
+        // Compiled expression eval & Gröbner bases
+        entry("sym.compiledEval", "Compiled Eval", "math", "csOperation", vec![], false),
         entry("sym.groebner", "Gröbner Basis", "symbolic", "csOperation", vec![], false),
         // Surrogate, AutoML & Hyperopt
         entry("optim.hyperopt", "Hyperparameter Opt.", "optimization", "csOperation", vec![], false),
