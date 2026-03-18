@@ -2345,6 +2345,12 @@
     "addVar": "var",
     "removeVar": "var"
   },
+  "tirFileInput": {
+    "label": "File .tir",
+    "drop": "Trascina file .tir o fai clic",
+    "params": "parametri",
+    "clear": "Cancella"
+  },
   "timeline": {
     "lastEval": "Ultima",
     "avgEval": "Media",

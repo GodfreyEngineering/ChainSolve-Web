@@ -2444,6 +2444,12 @@
     "addVar": "var",
     "removeVar": "var"
   },
+  "tirFileInput": {
+    "label": ".tir File Input",
+    "drop": "Drop .tir file or click",
+    "params": "params",
+    "clear": "Clear"
+  },
   "timeline": {
     "lastEval": "Last",
     "avgEval": "Avg",

@@ -106,8 +106,11 @@ export function toEngineSnapshot(
                             // 2.13: unitInput converts to SI value and outputs as 'number'.
                             : data.blockType === 'unitInput'
                               ? 'number'
-                              // 9.15/2.134: codeBlock evaluates JS code in the UI, outputs result as 'number'.
-                              : data.blockType === 'codeBlock'
+                              // 4.14: tirFileInput parses .tir files in the UI; engine treats as tableInput.
+                              : data.blockType === 'tirFileInput'
+                                ? 'tableInput'
+                                // 9.15/2.134: codeBlock evaluates JS code in the UI, outputs result as 'number'.
+                                : data.blockType === 'codeBlock'
                                 ? 'number'
                                 // 2.71: stateMachine outputs current state index as 'number'.
                                 : data.blockType === 'stateMachine'

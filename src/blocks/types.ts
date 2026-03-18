@@ -96,6 +96,7 @@ export type NodeKind =
   | 'csRateTransition'
   | 'csStateMachine'
   | 'csCodeBlock'
+  | 'csTirFileInput'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

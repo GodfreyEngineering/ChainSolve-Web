@@ -2443,6 +2443,12 @@
     "addVar": "変数",
     "removeVar": "変数"
   },
+  "tirFileInput": {
+    "label": ".tirファイル入力",
+    "drop": ".tirファイルをドロップまたはクリック",
+    "params": "パラメータ",
+    "clear": "クリア"
+  },
   "timeline": {
     "lastEval": "最後",
     "avgEval": "平均",

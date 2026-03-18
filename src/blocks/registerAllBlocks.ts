@@ -52,6 +52,7 @@ import { registerStateSpaceBlocks } from './statespace-blocks'
 import { registerDiscreteControlBlocks } from './discretecontrol-blocks'
 import { registerStateMachineBlocks } from './statemachine-blocks'
 import { registerCodeBlockBlocks } from './codeblock-blocks'
+import { registerTirFileInputBlocks } from './tirfileinput-blocks'
 import { SEARCH_METADATA } from './blockSearchMetadata'
 
 function reg(
@@ -108,6 +109,7 @@ export function registerAllBlocks(): void {
   registerDiscreteControlBlocks(reg)
   registerStateMachineBlocks(reg)
   registerCodeBlockBlocks(reg)
+  registerTirFileInputBlocks(reg)
 
   // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
   for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {

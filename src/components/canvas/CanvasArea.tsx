@@ -66,6 +66,7 @@ import { StateSpaceNode } from './nodes/StateSpaceNode'
 import { ZOHNode, RateTransitionNode } from './nodes/ZOHNode'
 import { StateMachineNode } from './nodes/StateMachineNode'
 import { CodeBlockNode } from './nodes/CodeBlockNode'
+import { TirFileInputNode } from './nodes/TirFileInputNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -229,6 +230,7 @@ const NODE_TYPES = {
   csRateTransition: RateTransitionNode,
   csStateMachine: StateMachineNode,
   csCodeBlock: CodeBlockNode,
+  csTirFileInput: TirFileInputNode,
 } as const
 
 const EDGE_TYPES = {

@@ -2395,6 +2395,12 @@
     "addVar": "var",
     "removeVar": "var"
   },
+  "tirFileInput": {
+    "label": "Fichier .tir",
+    "drop": "Déposer un fichier .tir ou cliquer",
+    "params": "paramètres",
+    "clear": "Effacer"
+  },
   "timeline": {
     "lastEval": "Dernier",
     "avgEval": "Moy",

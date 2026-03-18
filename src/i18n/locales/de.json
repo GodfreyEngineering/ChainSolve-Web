@@ -2395,6 +2395,12 @@
     "addVar": "Var",
     "removeVar": "Var"
   },
+  "tirFileInput": {
+    "label": ".tir-Datei",
+    "drop": ".tir-Datei ablegen oder klicken",
+    "params": "Parameter",
+    "clear": "Löschen"
+  },
   "timeline": {
     "lastEval": "Letzter",
     "avgEval": "Ø",
