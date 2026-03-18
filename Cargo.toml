@@ -2,6 +2,11 @@
 resolver = "2"
 members = ["crates/*"]
 
+[workspace.package]
+license = "MIT"
+repository = "https://github.com/godfrey-engineering/chainsolve"
+edition = "2021"
+
 # Size-optimized release profile for WASM builds.
 # lto + opt-level "z" + codegen-units 1 produce the smallest binary.
 [profile.release]

@@ -481,7 +481,7 @@
 - [x] **10.5** CLI: `chainsolve-cli` Rust binary — headless graph execution, CI/CD, batch sweeps. Reads .chainsolve JSON, outputs CSV/HDF5/JSON.
 - [x] **10.6** Python bindings: `pip install chainsolve` via PyO3. `chainsolve.Graph.load("model.chainsolve").execute(params={...})` from Jupyter.
 - [x] **10.7** JS/TS SDK: `npm install @chainsolve/sdk` — programmatic graph construction and execution.
-- [ ] **10.8** Webhooks: trigger external URLs on execution completion (CI/CD, notifications, pipelines)
+- [x] **10.8** Webhooks: trigger external URLs on execution completion (CI/CD, notifications, pipelines)
 
 ---
 

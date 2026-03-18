@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "ChainSolve WASM bindings for the graph evaluation engine"
 repository = "https://github.com/ChainSolve/ChainSolve-Web"
-license = "LicenseRef-Proprietary"
+license.workspace = true
 publish = false
 
 [lib]

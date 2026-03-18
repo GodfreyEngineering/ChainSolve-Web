@@ -2,6 +2,7 @@
 name = "chainsolve-py"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "Python bindings for the ChainSolve engine via PyO3 (10.6)"
 
 [lib]

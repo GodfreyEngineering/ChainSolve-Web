@@ -2,6 +2,7 @@
 name = "chainsolve-cli"
 version = "0.1.0"
 edition = "2021"
+license.workspace = true
 description = "ChainSolve headless CLI for graph execution in CI/CD and batch workflows (10.5)"
 
 [dependencies]

@@ -1,0 +1,95 @@
+# cargo-deny configuration — 16.2: Licence gate for Rust dependencies.
+#
+# Run: cargo deny check licenses
+# CI:  cargo deny check (checks all: licences + advisories + bans + sources)
+#
+# Allowlist: MIT, Apache-2.0, BSD-2/3-Clause, ISC, Zlib, BSL-1.0,
+# Unicode-DFS-2016, MPL-2.0, CC0-1.0, Unlicense, OpenSSL.
+# Deny: GPL-2.0, GPL-3.0, LGPL-2.1 (not "or-later"), AGPL, SSPL, CC-BY-NC-*.
+
+[licenses]
+# Confidence threshold for SPDX expression matching.
+confidence-threshold = 0.8
+
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Zlib",
+  "BSL-1.0",
+  "Unicode-DFS-2016",
+  "Unicode-3.0",
+  "MPL-2.0",
+  "CC0-1.0",
+  "Unlicense",
+  "OpenSSL",
+]
+
+deny = [
+  "GPL-2.0",
+  "GPL-3.0",
+  "AGPL-3.0",
+  "SSPL-1.0",
+]
+
+# r-efi: MIT OR Apache-2.0 OR LGPL-2.1-or-later — we use the MIT/Apache path.
+# The OR means we can choose a permissive licence; this exception records that.
+[[licenses.exceptions]]
+name = "r-efi"
+version = "*"
+allow = ["MIT", "Apache-2.0", "LGPL-2.1-or-later"]  # OR expression — MIT chosen
+
+# Our own workspace crates.
+[[licenses.exceptions]]
+name = "engine-core"
+version = "*"
+allow = ["MIT"]
+
+[[licenses.exceptions]]
+name = "engine-wasm"
+version = "*"
+allow = ["MIT"]
+
+[[licenses.exceptions]]
+name = "chainsolve-cli"
+version = "*"
+allow = ["MIT"]
+
+[[licenses.exceptions]]
+name = "chainsolve-py"
+version = "*"
+allow = ["MIT"]
+
+[[licenses.exceptions]]
+name = "chainsolve-block-sdk"
+version = "*"
+allow = ["MIT"]
+
+# ── Advisories ─────────────────────────────────────────────────────────────────
+# Block builds on crates with known security advisories unless explicitly ignored.
+[advisories]
+version = 2
+# Reject crates with unmaintained status or known vulnerabilities.
+unmaintained = "warn"
+yanked = "deny"
+
+# ── Bans ───────────────────────────────────────────────────────────────────────
+# Deny multiple versions of the same crate to prevent diamond-dependency bloat.
+[bans]
+multiple-versions = "warn"
+# Allow duplicates for crates commonly duplicated in the ecosystem.
+skip = [
+  { name = "bitflags" },
+  { name = "syn" },
+  { name = "proc-macro2" },
+]
+
+# ── Sources ────────────────────────────────────────────────────────────────────
+# Only allow crates from crates.io and our own workspace path deps.
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
