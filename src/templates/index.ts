@@ -24,6 +24,7 @@ import { buildCurveFitting } from './curve-fitting'
 import { buildNeuralNetworkTraining } from './neural-network-training'
 import { buildStructuralOptimisation } from './structural-optimisation'
 import { buildBatteryThermal } from './battery-thermal'
+import { buildFullVehicleModel } from './full-vehicle-model'
 
 export interface TemplateMeta {
   /** Stable unique key — never rename after shipping. */
@@ -199,5 +200,14 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ['battery', 'thermal', 'EV', 'energy', 'electrical', 'engineering'],
     category: 'Engineering',
     buildGraph: buildBatteryThermal,
+  },
+  {
+    id: 'full-vehicle-model',
+    name: 'Full-Vehicle Model',
+    description:
+      'Complete vehicle simulation: 7-DOF suspension dynamics, powertrain chain, aerodynamic forces, Pacejka tyre model, brake energy analysis, and K&C geometry — pre-wired for a 1 200 kg sports saloon.',
+    tags: ['vehicle', 'automotive', 'suspension', 'powertrain', 'aero', 'tyre', 'brake', 'K&C', 'dynamics'],
+    category: 'Engineering',
+    buildGraph: buildFullVehicleModel,
   },
 ]
