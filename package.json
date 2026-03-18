@@ -70,6 +70,7 @@
     "web-vitals": "^5.1.0",
     "write-excel-file": "^3.0.6",
     "xlsx": "^0.18.5",
+    "yjs": "^13.6.30",
     "zustand": "^5.0.12"
   },
   "overrides": {
