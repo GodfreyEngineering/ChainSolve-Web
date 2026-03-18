@@ -2665,5 +2665,16 @@
     "addPlaceholder": "Add a comment…",
     "adding": "Adding…",
     "add": "Add"
+  },
+  "branch": {
+    "switchBranch": "החלף ענף",
+    "branches": "ענפים",
+    "loading": "טוען…",
+    "snapshots": "תמונות מצב",
+    "create": "צור ענף",
+    "namePlaceholder": "שם-ענף",
+    "createBtn": "צור",
+    "delete": "מחק ענף",
+    "confirmDelete": "למחוק את הענף \"{{name}}\"?"
   }
 }

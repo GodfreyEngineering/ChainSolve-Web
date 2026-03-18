@@ -2767,5 +2767,16 @@
     "message": "We use essential cookies for authentication and localStorage for preferences. No tracking cookies are used.",
     "decline": "Decline",
     "accept": "Accept"
+  },
+  "branch": {
+    "switchBranch": "ブランチを切り替え",
+    "branches": "ブランチ",
+    "loading": "読み込み中…",
+    "snapshots": "スナップショット",
+    "create": "ブランチを作成",
+    "namePlaceholder": "ブランチ名",
+    "createBtn": "作成",
+    "delete": "ブランチを削除",
+    "confirmDelete": "ブランチ「{{name}}」を削除しますか？"
   }
 }

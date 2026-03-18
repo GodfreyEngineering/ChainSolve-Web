@@ -2670,5 +2670,16 @@
     "addPlaceholder": "Add a comment…",
     "adding": "Adding…",
     "add": "Add"
+  },
+  "branch": {
+    "switchBranch": "Cambia ramo",
+    "branches": "Rami",
+    "loading": "Caricamento…",
+    "snapshots": "istantanee",
+    "create": "Crea ramo",
+    "namePlaceholder": "nome-ramo",
+    "createBtn": "Crea",
+    "delete": "Elimina ramo",
+    "confirmDelete": "Eliminare il ramo \"{{name}}\"?"
   }
 }

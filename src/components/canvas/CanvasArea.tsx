@@ -192,6 +192,8 @@ import { getUnitSymbol } from '../../units/unitSymbols'
 import { listNodeComments, type NodeComment } from '../../lib/nodeCommentsService'
 import { NodeCommentsContext } from '../../contexts/NodeCommentsContext'
 import { NodeCommentDialog } from './NodeCommentDialog'
+import { BranchSelector } from './BranchSelector'
+import { switchToBranch } from '../../lib/branchService'
 
 // ── Node type registry ────────────────────────────────────────────────────────
 
@@ -549,6 +551,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const isMobile = useIsMobile()
   const ent = getEntitlements(plan)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  // 5.9: Branch state
+  const [currentBranch, setCurrentBranch] = useState('main')
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>(
     initialNodes ?? INITIAL_NODES,
   )
@@ -2268,6 +2272,23 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       setEdges(result.edges)
     },
     [nodes, edges, setNodes, setEdges, doSaveHistory, toast, t],
+  )
+
+  // 5.9: Switch to a branch — load latest snapshot and apply to canvas
+  const onBranchSwitch = useCallback(
+    async (branchName: string) => {
+      if (!canvasId) return
+      const projectId = useProjectStore.getState().projectId
+      if (!projectId) return
+      const graph = await switchToBranch(projectId, canvasId, branchName)
+      if (graph) {
+        doSaveHistory()
+        setNodes(graph.nodes as Node<NodeData>[])
+        setEdges(graph.edges)
+      }
+      setCurrentBranch(branchName)
+    },
+    [canvasId, setNodes, setEdges, doSaveHistory],
   )
 
   // Phase 11: Auto-resize group to fit member nodes
@@ -4269,6 +4290,23 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                         onRun={triggerEval}
                         pendingPatchCount={pendingPatchCount}
                       />
+
+                      {/* 5.9: Branch selector — top-right overlay, only when canvas has an ID */}
+                      {canvasId && !presentationMode && (
+                        <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 17 }}>
+                          <BranchSelector
+                            projectId={useProjectStore.getState().projectId ?? ''}
+                            canvasId={canvasId}
+                            currentBranch={currentBranch}
+                            onBranchSwitch={onBranchSwitch}
+                            getCurrentGraph={() => ({
+                              nodes: latestNodes.current,
+                              edges: latestEdges.current,
+                            })}
+                          />
+                        </div>
+                      )}
+
                       {/* Bottom Dock — hidden in presentation mode */}
                       {!presentationMode && (
                         <BottomDock

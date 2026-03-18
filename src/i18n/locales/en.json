@@ -2774,5 +2774,16 @@
     "message": "We use essential cookies for authentication and localStorage for preferences. No tracking cookies are used.",
     "decline": "Decline",
     "accept": "Accept"
+  },
+  "branch": {
+    "switchBranch": "Switch branch",
+    "branches": "Branches",
+    "loading": "Loading…",
+    "snapshots": "snapshots",
+    "create": "Create branch",
+    "namePlaceholder": "branch-name",
+    "createBtn": "Create",
+    "delete": "Delete branch",
+    "confirmDelete": "Delete branch \"{{name}}\"?"
   }
 }

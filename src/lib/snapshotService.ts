@@ -76,18 +76,29 @@ export async function listSnapshots(
 /**
  * Save a snapshot of the current canvas graph.
  * Uploads graph JSON to storage, then inserts a DB row.
+ *
+ * Options:
+ *  - label: human-readable label for the snapshot
+ *  - branchName: branch this snapshot belongs to (default: 'main')
  */
 export async function createSnapshot(
   projectId: string,
   canvasId: string,
   nodes: unknown[],
   edges: unknown[],
-  label?: string,
+  labelOrOptions?: string | { label?: string; branchName?: string },
 ): Promise<ProjectSnapshot> {
   const session = await requireSession()
   const userId = session.user.id
   const snapshotId = crypto.randomUUID()
   const storagePath = snapshotKey(userId, projectId, canvasId, snapshotId)
+
+  const label =
+    typeof labelOrOptions === 'string'
+      ? labelOrOptions
+      : (labelOrOptions?.label ?? null)
+  const branchName =
+    typeof labelOrOptions === 'object' ? (labelOrOptions?.branchName ?? 'main') : 'main'
 
   // Upload graph JSON
   const payload = { nodes, edges, snapshot_id: snapshotId, canvas_id: canvasId }
@@ -110,6 +121,7 @@ export async function createSnapshot(
       owner_id: userId,
       snapshot_storage_path: storagePath,
       label: label ?? null,
+      branch_name: branchName,
       format_version: 1,
       node_count: nodes.length,
       edge_count: edges.length,

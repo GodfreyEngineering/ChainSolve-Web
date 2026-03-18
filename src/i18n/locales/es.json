@@ -2737,5 +2737,16 @@
     "message": "We use essential cookies for authentication and localStorage for preferences. No tracking cookies are used.",
     "decline": "Decline",
     "accept": "Accept"
+  },
+  "branch": {
+    "switchBranch": "Cambiar rama",
+    "branches": "Ramas",
+    "loading": "Cargando…",
+    "snapshots": "instantáneas",
+    "create": "Crear rama",
+    "namePlaceholder": "nombre-de-rama",
+    "createBtn": "Crear",
+    "delete": "Eliminar rama",
+    "confirmDelete": "¿Eliminar rama \"{{name}}\"?"
   }
 }
