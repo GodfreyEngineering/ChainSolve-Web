@@ -10,12 +10,22 @@ publish = false
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+default = []
+# Multi-threaded WASM via wasm-bindgen-rayon (1.51).
+# Requires RUSTFLAGS='-C target-feature=+atomics,+bulk-memory,+mutable-globals'
+# and SharedArrayBuffer (COOP+COEP headers are already in place).
+# Enable with: CARGO_FEATURES=parallel wasm-pack build ...
+parallel = ["engine-core/parallel", "wasm-bindgen-rayon"]
+
 [dependencies]
 engine-core = { path = "../engine-core", features = ["high-precision", "faer"] }
 wasm-bindgen = "0.2"
 serde_json = "1"
 console_error_panic_hook = "0.1"
 js-sys = "0.3"
+# Optional thread pool for parallel DAG evaluation (1.51).
+wasm-bindgen-rayon = { version = "1", optional = true }
 
 # Disable wasm-pack's built-in wasm-opt download.
 # We run our own deterministic wasm-opt step via the binaryen npm

@@ -7,15 +7,23 @@
 //!
 //! # Thread model
 //!
-//! WASM is single-threaded. The persistent [`EngineGraph`] is stored in a
-//! `thread_local!` `RefCell<Option<EngineGraph>>`. The `with_engine` helper
-//! lazily initialises it on first use.
+//! Default: WASM is single-threaded. The persistent [`EngineGraph`] is stored
+//! in a `thread_local!` `RefCell<Option<EngineGraph>>`. The `with_engine`
+//! helper lazily initialises it on first use.
+//!
+//! With the `parallel` feature and a WASM build compiled with atomics support:
+//! [`init_thread_pool`] bootstraps a rayon thread pool so independent DAG
+//! branches can be evaluated concurrently. SharedArrayBuffer must be available
+//! (COOP+COEP headers, already configured in `public/_headers`).
 //!
 //! # Startup
 //!
 //! [`init`] is marked `#[wasm_bindgen(start)]` and runs automatically when
 //! the WASM module is instantiated. It installs `console_error_panic_hook`
 //! so Rust panics appear as readable messages in the browser console.
+//!
+//! When using the `parallel` feature, the TypeScript worker must additionally
+//! call `await init_thread_pool(numThreads)` after WASM init.  See worker.ts.
 
 use engine_core::graph::{EngineGraph, EvalSignal};
 use engine_core::types::EvalOptions;
@@ -45,6 +53,26 @@ fn err_json(code: &str, message: &str) -> String {
 #[wasm_bindgen(start)]
 pub fn init() {
     console_error_panic_hook::set_once();
+}
+
+/// Initialise the rayon thread pool for parallel DAG evaluation (1.51).
+///
+/// Must be called after WASM init and before any evaluation when the `parallel`
+/// feature is enabled. `num_threads` should be `navigator.hardwareConcurrency - 1`
+/// (leave one core for the UI thread). No-op on single-threaded WASM builds.
+///
+/// Returns a Promise that resolves when all threads are ready.
+#[wasm_bindgen]
+pub fn init_thread_pool(num_threads: usize) -> js_sys::Promise {
+    #[cfg(feature = "parallel")]
+    {
+        wasm_bindgen_rayon::init_thread_pool(num_threads)
+    }
+    #[cfg(not(feature = "parallel"))]
+    {
+        let _ = num_threads;
+        js_sys::Promise::resolve(&wasm_bindgen::JsValue::UNDEFINED)
+    }
 }
 
 /// Evaluate a graph snapshot (JSON string in → JSON string out).

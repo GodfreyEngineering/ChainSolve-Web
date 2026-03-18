@@ -9,6 +9,8 @@
  *  5. Returns typed responses to main thread
  */
 
+import { gpuAccelerator } from './gpu/index.ts'
+import { detectMemory64Support } from './memory64.ts'
 import initWasm, {
   evaluate,
   load_snapshot,
@@ -27,6 +29,9 @@ import initWasm, {
   // @ts-expect-error — validate_graph is added in Rust but wasm-pack has not regenerated the .d.ts yet.
   // After `npm run wasm:build:dev` this error resolves. See crates/engine-wasm/src/lib.rs.
   validate_graph,
+  // @ts-expect-error — init_thread_pool is added in Rust but wasm-pack has not regenerated the .d.ts yet.
+  // Available only when the `parallel` feature is compiled in.
+  init_thread_pool,
 } from '@engine-wasm/engine_wasm.js'
 import wasmUrl from '@engine-wasm/engine_wasm_bg.wasm?url'
 import type {
@@ -179,6 +184,11 @@ async function initialize() {
   const t0 = performance.now()
   try {
     await initWasm({ module_or_path: wasmUrl })
+    // 1.38 / 1.40 — initialise WebGPU accelerator in parallel (non-blocking;
+    // GPU unavailability is logged and ignored — all ops fall back to CPU).
+    gpuAccelerator.init().catch(() => {/* GPU unavailable — silent fallback */})
+    // 1.52 — probe Memory64 support (non-blocking; result cached for later queries).
+    detectMemory64Support().catch(() => {/* not supported */})
     const initMs = performance.now() - t0
     const catalog = JSON.parse(get_catalog())
     const constantValues = JSON.parse(get_constant_values()) as Record<string, number>
@@ -339,6 +349,21 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
       // yet (queued before this cancel) discards its result.
       // The main thread also handles stale results via pendingRef coalescing.
       latestEvalSeq = Number.MAX_SAFE_INTEGER
+      break
+    }
+
+    case 'initThreadPool': {
+      // 1.51 — bootstrap rayon thread pool for parallel DAG evaluation.
+      // Only effective when the `parallel` feature was compiled into the WASM binary.
+      // On single-threaded WASM builds this is a no-op Promise.resolve().
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      Promise.resolve(init_thread_pool(msg.numThreads) as Promise<void>)
+        .then(() => {
+          post({ type: 'threadPoolReady', requestId: msg.requestId })
+        })
+        .catch((err: unknown) => {
+          postError(msg.requestId, 'THREAD_POOL_INIT_FAILED', err)
+        })
       break
     }
   }

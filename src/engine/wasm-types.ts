@@ -155,6 +155,8 @@ export type WorkerRequest =
   | { type: 'cancel'; requestId: number }
   | { type: 'getStats'; requestId: number }
   | { type: 'validateGraph'; requestId: number }
+  /** 1.51: Bootstrap rayon thread pool inside WASM for parallel DAG evaluation. */
+  | { type: 'initThreadPool'; requestId: number; numThreads: number }
 
 // ── Engine stats (W9.4) ──────────────────────────────────────────
 
@@ -226,3 +228,5 @@ export type WorkerResponse =
     }
   | { type: 'stats'; requestId: number; stats: EngineStats }
   | { type: 'validateResult'; requestId: number; diagnostics: EngineDiagnostic[] }
+  /** 1.51: Thread pool successfully initialised. */
+  | { type: 'threadPoolReady'; requestId: number }

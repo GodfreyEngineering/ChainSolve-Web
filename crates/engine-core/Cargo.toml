@@ -8,12 +8,24 @@ license.workspace = true
 default = []
 high-precision = ["dashu-float"]
 faer = ["dep:faer"]
+# Parallel evaluation of independent DAG branches via rayon (1.51).
+# Requires SharedArrayBuffer on WASM builds — automatically skipped when
+# the target does not support atomics.
+parallel = ["dep:rayon"]
+# Native CUDA acceleration for server-side execution (1.43).
+# NEVER enable on WASM targets — links against libcuda.so.
+native-cuda = ["dep:cudarc"]
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 dashu-float = { version = "0.4", optional = true }
 faer = { version = "0.24.0", default-features = false, features = ["std"], optional = true }
+rayon = { version = "1", optional = true }
+# cudarc is only usable on native targets with an NVIDIA driver.
+# wasm32 targets cannot link libcuda.so — the native-cuda feature ensures
+# this dep is excluded from WASM compilation via cfg checks in cuda.rs.
+cudarc = { version = "0.12", features = ["cublas"], optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.8", features = ["html_reports"] }

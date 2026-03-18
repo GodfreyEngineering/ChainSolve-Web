@@ -68,12 +68,12 @@
 
 *All major browsers support WebGPU since mid-2025. This is the key performance lever for large numerical workloads.*
 
-- [ ] **1.38** WebGPU compute shaders via `wgpu` crate (pure Rust, compiles to WASM): initialise GPU device, create compute pipelines, manage buffer allocation
-- [ ] **1.39** WGSL compute shaders for: dense GEMM (tiled, 16×16 workgroup), batch GEMM, sparse SpMV (CSR format), element-wise ops (add/mul/exp/sin over arrays), reduction (sum/max/min), FFT (Cooley-Tukey radix-2)
-- [ ] **1.40** Auto GPU offloading: when a matrix operation exceeds configurable size threshold (default 512×512), transparently dispatch to GPU shader instead of CPU. Fall back to CPU if GPU unavailable.
-- [ ] **1.41** Shader compilation cache: store compiled pipelines in IndexedDB keyed by shader hash to avoid recompilation on page reload
-- [ ] **1.42** GPU memory management: persistent GPU buffers with lazy CPU↔GPU transfer, structure-of-arrays layout for coalesced memory access, explicit buffer lifecycle management
-- [ ] **1.43** Optional native CUDA path (behind feature flag) for server-side execution on NVIDIA hardware via `cudarc` crate — for jobs dispatched to server compute
+- [x] **1.38** WebGPU compute shaders via `wgpu` crate (pure Rust, compiles to WASM): initialise GPU device, create compute pipelines, manage buffer allocation
+- [x] **1.39** WGSL compute shaders for: dense GEMM (tiled, 16×16 workgroup), batch GEMM, sparse SpMV (CSR format), element-wise ops (add/mul/exp/sin over arrays), reduction (sum/max/min), FFT (Cooley-Tukey radix-2)
+- [x] **1.40** Auto GPU offloading: when a matrix operation exceeds configurable size threshold (default 512×512), transparently dispatch to GPU shader instead of CPU. Fall back to CPU if GPU unavailable.
+- [x] **1.41** Shader compilation cache: store compiled pipelines in IndexedDB keyed by shader hash to avoid recompilation on page reload
+- [x] **1.42** GPU memory management: persistent GPU buffers with lazy CPU↔GPU transfer, structure-of-arrays layout for coalesced memory access, explicit buffer lifecycle management
+- [x] **1.43** Optional native CUDA path (behind feature flag) for server-side execution on NVIDIA hardware via `cudarc` crate — for jobs dispatched to server compute
 
 ### 1E — WASM & Runtime Performance
 
@@ -84,8 +84,8 @@
 - [x] **1.48** Watchdog timer (5s timeout, W9.9): detects WASM hangs, auto-recreates worker, reloads snapshot from cache
 - [x] **1.49** Incremental evaluation with dirty-set propagation: only recompute nodes whose inputs changed. ENG-05 value hash pruning: skip downstream when output unchanged.
 - [x] **1.50** WASM SIMD (128-bit fixed-width, cross-browser since 2024): vectorise inner loops for f64 operations (2x throughput for element-wise ops). Enable via `-C target-feature=+simd128` in Cargo.
-- [ ] **1.51** Multi-threaded WASM via `wasm-bindgen-rayon`: spawn thread pool inside WASM module for parallel evaluation of independent DAG branches. Requires SharedArrayBuffer (already enabled via COOP+COEP).
-- [ ] **1.52** Memory64 proposal support: when available, enables >4GB WASM address space for very large datasets/meshes. Feature-detect and enable at runtime.
+- [x] **1.51** Multi-threaded WASM via `wasm-bindgen-rayon`: spawn thread pool inside WASM module for parallel evaluation of independent DAG branches. Requires SharedArrayBuffer (already enabled via COOP+COEP).
+- [x] **1.52** Memory64 proposal support: when available, enables >4GB WASM address space for very large datasets/meshes. Feature-detect and enable at runtime.
 - [x] **1.53** Streaming WASM compilation: use `WebAssembly.compileStreaming()` for <2s startup. Currently loads full module before init. Target: interactive within 2s on 4G connection.
 
 ---
@@ -512,7 +512,7 @@
 - [x] **12.4** Block descriptions: blockDescriptions.ts for all 361+ blocks
 - [x] **12.5** 13 Architecture Decision Records (ADRs)
 - [x] **12.6** CSEL grammar doc: docs/CSEL.md with full grammar, examples, operator precedence table
-- [ ] **12.7** 20+ guided tutorials as ChainSolve graphs: mechanical dynamics, control design, data fitting, ML training, optimisation, vehicle K&C, FMU co-simulation
+- [x] **12.7** 20+ guided tutorials as ChainSolve graphs: mechanical dynamics, control design, data fitting, ML training, optimisation, vehicle K&C, FMU co-simulation
 - [ ] **12.8** 100+ example graphs by domain: mechanical, electrical, thermal, fluid, control, ML, optimisation, vehicle — one-click open and run
 - [ ] **12.9** Mathematical reference: embedded docs for every algorithm — ODE solvers (stability regions, convergence orders), optimisation (convergence proofs), AD (complexity analysis)
 - [ ] **12.10** API docs: auto-generated from Rust doc comments at docs.chainsolve.dev. Python/JS SDK guides.
@@ -531,8 +531,8 @@
 - [ ] **13.5** Tauri desktop app: Rust+WebView wrapper for offline use, native file system access, optional local CUDA. Auto-updates.
 - [ ] **13.6** Docker Compose self-hosted: Supabase self-hosted + ChainSolve server + reverse proxy — for enterprise on-prem
 - [ ] **13.7** Kubernetes Helm chart: for large-scale deployment with GPU node pools
-- [ ] **13.8** Free tier: full engine in browser, 3 projects, 500MB storage, community support — genuinely useful, not a crippled demo (lesson from KNIME's free desktop)
-- [ ] **13.9** Academic tier: Pro-equivalent for verified students/faculty (up to 100 seats per campus) — collapses MATLAB's $50K–200K campus license model
+- [x] **13.8** Free tier: full engine in browser, 3 projects, 500MB storage, community support — genuinely useful, not a crippled demo (lesson from KNIME's free desktop)
+- [x] **13.9** Academic tier: Pro-equivalent for verified students/faculty (up to 100 seats per campus) — collapses MATLAB's $50K–200K campus license model
 
 ---
 
