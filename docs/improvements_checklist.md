@@ -205,7 +205,7 @@
 - [x] **2.77** Brake thermal: dT/dt = (P_brake - h×A×(T-T_amb)) / (m×c), brake_energy = 0.5×m×(v1²-v2²), brake_power = E/Δt. 4 tests: energy, power, heating, cooling.
 - [ ] **2.78** Half-car (4-DOF: front/rear sprung + unsprung) and full-vehicle (7-DOF: body heave/pitch/roll + 4 wheel DOFs) suspension models — configurable spring/damper curves, anti-roll bar
 - [ ] **2.79** K&C analysis mode: virtual K&C rig — bump (bounce), roll, lateral compliance, longitudinal compliance, steering. Output: bump steer gradient (deg/mm), bump camber gradient, lateral stiffness (N/mm), roll centre height (mm), anti-dive/anti-squat percentages. This is the key differentiator vs Adams for vehicle dynamics engineers.
-- [ ] **2.80** Standard .tir file import/export: parse Pacejka MF 6.2 parameter files used across the automotive industry (Adams, CarSim, IPG)
+- [x] **2.80** Standard .tir file import/export: parse Pacejka MF 6.2 parameter files used across the automotive industry (Adams, CarSim, IPG)
 - [ ] **2.81** Vehicle event blocks: step steer (ramp input), sinusoidal steer (frequency sweep), lane change (ISO 3888 double lane change profile), braking in turn, constant radius — each generates the steering/throttle/brake time-series input for full-vehicle simulation
 - [ ] **2.82** Full-vehicle model template: pre-wired graph with chassis (mass, inertia, CG), 4 suspension corners (parameterised), steering (ratio, compliance), powertrain (engine map + gearbox), brake system (proportioning valve + disc thermal), tire models — user fills in parameters or loads from .tir/.csv
 
