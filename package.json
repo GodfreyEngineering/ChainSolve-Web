@@ -37,6 +37,9 @@
     "licence:rust": "node scripts/gen-rust-licences.mjs",
     "licence:frontend": "npx license-checker --json --out legal/frontend-dependency-licences.json && npx license-checker --failOn \"GPL-2.0;GPL-3.0;AGPL-3.0;SSPL-1.0\"",
     "licence:all": "npm run licence:rust && npm run licence:frontend",
+    "sbom": "bash scripts/gen-sbom.sh",
+    "sbom:rust": "cargo sbom --output-format cyclone_dx_json_1_6 > legal/sbom/rust-sbom.cdx.json",
+    "sbom:npm": "npx --yes @cyclonedx/cyclonedx-npm --spec-version 1.6 --output-format JSON --output-file legal/sbom/npm-sbom.cdx.json --package-lock-only",
     "db:types": "supabase gen types typescript --local > src/lib/database.types.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
