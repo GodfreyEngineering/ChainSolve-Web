@@ -496,7 +496,8 @@
     "units_analyze": "単位解析器",
     "ad_ode_adjoint": "ODE随伴感度解析",
     "ad_lin_solve_sens": "線形解法感度解析",
-    "ad_custom_vjp": "カスタムVJP/JVPルール"
+    "ad_custom_vjp": "カスタムVJP/JVPルール",
+    "ad_grad_checkpoint": "勾配チェックポインティング"
   },
   "plot": {
     "settings": "Plot Settings",

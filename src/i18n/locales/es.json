@@ -488,7 +488,8 @@
     "units_analyze": "Analizador de Unidades",
     "ad_ode_adjoint": "Sensibilidad Adjunta ODE",
     "ad_lin_solve_sens": "Sensibilidad Sistema Lineal",
-    "ad_custom_vjp": "Regla VJP/JVP Personalizada"
+    "ad_custom_vjp": "Regla VJP/JVP Personalizada",
+    "ad_grad_checkpoint": "Puntos de Control de Gradiente"
   },
   "plot": {
     "settings": "Config. de Gráfico",

@@ -139,6 +139,28 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'ad.gradCheckpoint',
+    label: 'Gradient Checkpointing',
+    category: 'simulation',
+    nodeKind: 'csOperation',
+    inputs: [],
+    defaultData: {
+      equations: '-k*y0',
+      param_names: 'k',
+      objective: '0.5*y0^2',
+      t_start: 0,
+      t_end: 1,
+      dt: 0.01,
+      n_checkpoints: 4,
+      fd_eps: 1e-6,
+    },
+    synonyms: ['checkpoint', 'revolve', 'binomial', 'memory', 'adjoint', 'gradient'],
+    tags: ['ad', 'checkpoint', 'revolve', 'memory-efficient'],
+    description:
+      'Gradient checkpointing with the Revolve binomial schedule: compute ODE parameter gradients using O(c·s) memory instead of O(N·s) where c=checkpoints, N=steps. Uses optimal Revolve placement to minimise re-computation. Same output as ODE Adjoint: Table [param_idx, gradient, recomputations].',
+  })
+
+  register({
     type: 'ad.customVjp',
     label: 'Custom VJP/JVP Rule',
     category: 'math',

@@ -6605,6 +6605,50 @@ fn evaluate_node_inner(
             crate::types::build_table(&col_refs, &col_data)
         }
 
+        // ── Gradient Checkpointing with Revolve Schedule (1.36) ──────
+        "ad.gradCheckpoint" => {
+            use crate::grad_checkpoint::revolve_adjoint;
+            use crate::ode::types::{OdeSystem, OdeSolverConfig};
+
+            let eqs_str = data.get("equations").and_then(|v| v.as_str()).unwrap_or("");
+            if eqs_str.is_empty() {
+                return Value::error("ad.gradCheckpoint: 'equations' field required");
+            }
+            let equations: Vec<String> = eqs_str.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let n_state = equations.len();
+            let state_names: Vec<String> = (0..n_state).map(|i| format!("y{i}")).collect();
+            let param_names_str = data.get("param_names").and_then(|v| v.as_str()).unwrap_or("");
+            let param_names: Vec<String> = param_names_str.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let objective_expr = data.get("objective").and_then(|v| v.as_str()).unwrap_or("y0^2").to_string();
+
+            let mut params = std::collections::HashMap::new();
+            if let Some(serde_json::Value::Object(obj)) = data.get("params") {
+                for (k, v) in obj { if let Some(n) = v.as_f64() { params.insert(k.clone(), n); } }
+            }
+            for i in 0..n_state {
+                let key = format!("y{i}_init");
+                if let Some(v) = data.get(&key).and_then(|v| v.as_f64()) { params.insert(key, v); }
+            }
+
+            let t_start = scalar_or(data, "t_start", 0.0);
+            let t_end = scalar_or(data, "t_end", 1.0);
+            let dt = scalar_or(data, "dt", 0.01);
+            let fd_eps = scalar_or(data, "fd_eps", 1e-6);
+            let n_checkpoints = data.get("n_checkpoints").and_then(|v| v.as_f64()).unwrap_or(4.0) as usize;
+
+            let system = OdeSystem { equations, state_names, params };
+            let solver_cfg = OdeSolverConfig { t_start, t_end, dt, tolerance: 1e-6, max_steps: 100_000 };
+
+            let result = revolve_adjoint(&system, &param_names, &objective_expr, &solver_cfg, n_checkpoints, fd_eps);
+
+            let np = result.grad.len();
+            if np == 0 { return Value::scalar(result.objective); }
+            let idx: Vec<f64> = (0..np).map(|i| i as f64).collect();
+            let recomp: Vec<f64> = vec![result.recomputations as f64; np];
+            crate::types::build_table(&["param_idx", "gradient", "recomputations"],
+                &[idx, result.grad, recomp])
+        }
+
         // ── Custom VJP/JVP Rules (1.35) ──────────────────────────────
         "ad.customVjp" => {
             use crate::custom_vjp::eval_custom_ad;

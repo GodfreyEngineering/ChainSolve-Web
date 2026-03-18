@@ -488,7 +488,8 @@
     "units_analyze": "Einheitenanalyse",
     "ad_ode_adjoint": "ODE Adjoint-Sensitivität",
     "ad_lin_solve_sens": "Lineares System Sensitivität",
-    "ad_custom_vjp": "Benutzerdefinierte VJP/JVP-Regel"
+    "ad_custom_vjp": "Benutzerdefinierte VJP/JVP-Regel",
+    "ad_grad_checkpoint": "Gradient-Checkpointing"
   },
   "plot": {
     "settings": "Diagramm-Einstellungen",

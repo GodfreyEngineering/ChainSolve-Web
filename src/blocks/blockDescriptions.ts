@@ -221,6 +221,7 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'eng.conv.lpm_to_m3s': 'Converts litres per minute to cubic metres per second.',
   'eng.conv.m3s_to_lpm': 'Converts cubic metres per second to litres per minute.',
   unit_convert: 'Generic unit conversion. Pick input and output units from any dimension.',
+  'ad.gradCheckpoint': 'Gradient checkpointing (Revolve): compute ODE sensitivities with O(c·s) memory instead of O(N·s). Uses binomial Revolve schedule for optimal checkpoint placement. Returns Table [param_idx, gradient, recomputations].',
   'ad.customVjp': 'Custom VJP/JVP (JAX-style): define exact gradient rules for custom functions to avoid slow or numerically poor AD. Provide primal_expr, vjp_exprs (per-input cotangents), jvp_expr. Falls back to finite-diff when rules are omitted.',
   'ad.linSolveSens': 'Implicit differentiation through Ax=b: computes dx/dp for each parameter using the implicit function theorem. No solver internals are differentiated — only one extra linear solve per parameter. Returns Table [param_idx, dx0/dp, dx1/dp, ...].',
   'ad.odeAdjoint': 'Discrete adjoint ODE sensitivity: computes dJ/dp (gradient of objective J w.r.t. ODE parameters) via reverse-time adjoint equations. Optional checkpointing trades re-computation for memory. Returns Table [param_idx, gradient, objective].',

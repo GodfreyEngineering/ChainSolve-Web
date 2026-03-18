@@ -683,6 +683,8 @@ pub fn catalog() -> Vec<CatalogEntry> {
         // Custom VJP/JVP rules (1.35)
         entry("ad.customVjp", "Custom VJP/JVP Rule", "math", "csOperation",
             vec![p("x", "Eval point"), p("v", "Cotangent (VJP)"), p("t", "Tangent (JVP)")], false),
+        // Gradient checkpointing (1.36)
+        entry("ad.gradCheckpoint", "Gradient Checkpointing", "simulation", "csOperation", vec![], false),
     ]
 }
 

@@ -2130,7 +2130,8 @@
     "units_analyze": "מנתח יחידות",
     "ad_ode_adjoint": "רגישות צמודה ODE",
     "ad_lin_solve_sens": "רגישות פתרון לינארי",
-    "ad_custom_vjp": "כלל VJP/JVP מותאם אישית"
+    "ad_custom_vjp": "כלל VJP/JVP מותאם אישית",
+    "ad_grad_checkpoint": "נקודות ביקורת גרדיאנט"
   },
   "entitlements": {
     "projectLimitTitle": "Project limit reached",
