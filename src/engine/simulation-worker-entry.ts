@@ -1,5 +1,5 @@
 /**
- * simulation-worker-entry.ts — 8.1: Web Worker entry point for simulation tasks.
+ * simulation-worker-entry.ts — 8.1/8.2: Web Worker entry point for simulation tasks.
  *
  * This file runs inside a dedicated Web Worker. It receives `runSimulation`
  * messages from SimulationWorkerAPI, executes the simulation loop using the
@@ -10,11 +10,35 @@
  *  - 'runParameterSweep': Evaluate graph for multiple parameter values
  *  - Any future simulation type via extensible dispatch table
  *
+ * 8.2: Non-parameter-sweep ops are dispatched to the WASM run_simulation
+ *      export (if a snapshot is provided in config.inputs). This runs the
+ *      Rust-side iterative loop with convergence detection and batch progress.
+ *
  * 8.9: Since this is a separate worker, normal graph evaluation is unaffected.
  */
 
+import initWasm, {
+  // @ts-expect-error — run_simulation added in Rust; wasm-pack .d.ts regenerates on wasm:build
+  run_simulation,
+} from '@engine-wasm/engine_wasm.js'
+import wasmUrl from '@engine-wasm/engine_wasm_bg.wasm?url'
 import type { SimulationConfig } from './simulationWorker'
 import type { SimTaskMetrics } from '../stores/simulationStatusStore'
+
+// ── WASM initialisation ───────────────────────────────────────────────────────
+
+let wasmReady = false
+let wasmInitPromise: Promise<void> | null = null
+
+function ensureWasm(): Promise<void> {
+  if (wasmReady) return Promise.resolve()
+  if (!wasmInitPromise) {
+    wasmInitPromise = initWasm({ module_or_path: wasmUrl }).then(() => {
+      wasmReady = true
+    })
+  }
+  return wasmInitPromise
+}
 
 // ── Worker message type (received from main thread) ───────────────────────────
 
@@ -122,11 +146,84 @@ async function runParameterSweep(config: SimulationConfig): Promise<void> {
 }
 
 /**
- * Run a finite iteration loop simulation (generic).
- * Used for operations that don't have direct WASM bindings yet.
+ * 8.2: Run a simulation via the WASM run_simulation export.
  *
- * Config inputs expected:
- *  - stepDelayMs: number — artificial step delay for testing (default 0)
+ * Requires config.inputs.snapshot (string) — a serialised EngineSnapshotV1.
+ * The WASM engine runs the iterative loop internally, calling our progress
+ * callback after every batchSize iterations. When it returns, we parse the
+ * result and post simulationComplete.
+ */
+async function runWasmSimulation(config: SimulationConfig): Promise<void> {
+  const {
+    nodeId,
+    op,
+    maxIterations,
+    batchSize = 10,
+    convergenceThreshold,
+    loop = false,
+    loopCount = 1,
+  } = config
+  const snapshotJson = (config.inputs as Record<string, unknown>).snapshot as string
+
+  await ensureWasm()
+
+  const wasmConfig = {
+    nodeId,
+    op,
+    snapshot: snapshotJson,
+    maxIterations,
+    batchSize,
+    loop,
+    loopCount: loop ? loopCount : 1,
+    ...(convergenceThreshold !== undefined ? { convergenceThreshold } : {}),
+  }
+
+  const resultJson: string = run_simulation(
+    JSON.stringify(wasmConfig),
+    (progressJson: string) => {
+      if (cancelled) return
+      try {
+        const p = JSON.parse(progressJson) as {
+          iteration: number
+          totalIterations: number
+          cycle: number
+          totalCycles: number
+          elapsedUs: number
+        }
+        const metrics: SimTaskMetrics = { elapsedUs: p.elapsedUs }
+        postProgress(nodeId, p.iteration, p.totalIterations, p.cycle, p.totalCycles, metrics)
+      } catch {
+        // ignore malformed progress JSON
+      }
+    },
+  )
+
+  if (cancelled) return
+
+  const result = JSON.parse(resultJson) as {
+    error?: { code: string; message: string }
+    cycles?: number
+    iterations?: number
+    converged?: boolean
+    outputs?: Record<string, unknown>
+  }
+
+  if (result.error) {
+    postError(nodeId, `[${result.error.code}] ${result.error.message}`)
+    return
+  }
+
+  postComplete(
+    nodeId,
+    result.outputs ?? {},
+    result.iterations ?? maxIterations,
+    result.cycles ?? (loop ? loopCount : 1),
+  )
+}
+
+/**
+ * Run a finite iteration loop simulation (generic JS fallback).
+ * Used when no snapshot is provided in config.inputs (e.g. pure JS operations).
  */
 async function runGenericLoop(config: SimulationConfig): Promise<void> {
   const { nodeId, maxIterations, endTime, convergenceThreshold, loop = false, loopCount = 1 } =
@@ -184,8 +281,11 @@ self.onmessage = async (e: MessageEvent<IncomingMessage>) => {
     try {
       if (config.op === 'runParameterSweep') {
         await runParameterSweep(config)
+      } else if (typeof (config.inputs as Record<string, unknown>).snapshot === 'string') {
+        // 8.2: WASM-backed simulation for ops that supply an engine snapshot.
+        await runWasmSimulation(config)
       } else {
-        // Default: generic iteration loop for solveOde, trainNeuralNet, etc.
+        // Fallback: generic JS loop (no snapshot provided).
         await runGenericLoop(config)
       }
     } catch (err) {

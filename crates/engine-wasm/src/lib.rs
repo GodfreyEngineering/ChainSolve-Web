@@ -282,3 +282,148 @@ pub fn validate_graph() -> String {
         err_json("SERIALIZE_FAILED", &format!("Failed to serialize diagnostics: {e}"))
     })
 }
+
+// ── run_simulation (8.2) ──────────────────────────────────────────────────────
+
+/// Run a simulation task with iterative progress callbacks (8.2).
+///
+/// The WASM-side loop executes each "step" as a full engine evaluation,
+/// reporting progress after every `batchSize` iterations.  This function
+/// runs synchronously from Rust's point of view; the progress callback
+/// sends `postMessage` events back to the main thread from within the
+/// simulation Web Worker.
+///
+/// # Config JSON shape
+/// ```json
+/// {
+///   "nodeId": "sim1",
+///   "op": "solveOde",
+///   "snapshot": "{ ... EngineSnapshotV1 ... }",
+///   "maxIterations": 1000,
+///   "batchSize": 50,
+///   "loop": false,
+///   "loopCount": 1,
+///   "convergenceThreshold": 1e-6
+/// }
+/// ```
+///
+/// # Progress callback
+/// Called after every batch with a JSON argument:
+/// ```json
+/// {
+///   "iteration": 50,
+///   "totalIterations": 1000,
+///   "cycle": 0,
+///   "totalCycles": 1,
+///   "elapsedUs": 12345
+/// }
+/// ```
+///
+/// # Return value
+/// ```json
+/// { "cycles": 1, "iterations": 1000, "outputs": { "nodeId": <value> } }
+/// ```
+/// or `{ "error": { "code": "...", "message": "..." } }` on failure.
+#[wasm_bindgen]
+pub fn run_simulation(config_json: &str, progress_cb: &js_sys::Function) -> String {
+    // Parse the simulation config.
+    let config: serde_json::Value = match serde_json::from_str(config_json) {
+        Ok(v) => v,
+        Err(e) => return err_json("INVALID_SIM_CONFIG", &e.to_string()),
+    };
+
+    let snapshot_json = match config.get("snapshot").and_then(|v| v.as_str()) {
+        Some(s) => s.to_string(),
+        None => return err_json("INVALID_SIM_CONFIG", "missing 'snapshot' field"),
+    };
+    let max_iterations = config.get("maxIterations")
+        .and_then(|v| v.as_u64()).unwrap_or(100) as usize;
+    let batch_size = config.get("batchSize")
+        .and_then(|v| v.as_u64()).unwrap_or(10) as usize;
+    let loop_mode = config.get("loop")
+        .and_then(|v| v.as_bool()).unwrap_or(false);
+    let loop_count = if loop_mode {
+        config.get("loopCount").and_then(|v| v.as_u64()).unwrap_or(1) as usize
+    } else {
+        1
+    };
+    let convergence_threshold = config.get("convergenceThreshold")
+        .and_then(|v| v.as_f64());
+
+    let start_ms = js_sys::Date::now();
+    let total_cycles = loop_count;
+    let total_iterations = max_iterations;
+
+    let mut last_outputs: std::collections::HashMap<String, engine_core::types::Value> =
+        std::collections::HashMap::new();
+    let mut converged = false;
+
+    for cycle in 0..total_cycles {
+        for iteration in (0..total_iterations).step_by(batch_size.max(1)) {
+            let batch_end = (iteration + batch_size).min(total_iterations);
+            let batch_steps = batch_end - iteration;
+
+            // Run the engine for this batch's iterations.
+            // Each step is one full graph evaluation on the snapshot.
+            // For real-world use, the snapshot would be mutated by prior
+            // outputs (e.g. ODE state) — here we evaluate batch_steps times.
+            let mut batch_result = None;
+            for _ in 0..batch_steps {
+                match engine_core::run(&snapshot_json) {
+                    Ok(r) => { batch_result = Some(r); }
+                    Err(e) => {
+                        return err_json(&e.code.to_string(), &e.message);
+                    }
+                }
+            }
+
+            if let Some(ref r) = batch_result {
+                // Check convergence if threshold is set.
+                if let Some(threshold) = convergence_threshold {
+                    let mut max_delta: f64 = 0.0;
+                    for (k, v) in &r.values {
+                        if let (
+                            Some(engine_core::types::Value::Scalar { value: prev }),
+                            engine_core::types::Value::Scalar { value: curr },
+                        ) = (last_outputs.get(k), v) {
+                            max_delta = max_delta.max((curr - prev).abs());
+                        }
+                    }
+                    if max_delta < threshold && iteration > 0 {
+                        converged = true;
+                    }
+                }
+                last_outputs = r.values.clone();
+            }
+
+            // Report progress via JS callback.
+            let elapsed_us = ((js_sys::Date::now() - start_ms) * 1000.0) as u64;
+            let progress_json = format!(
+                r#"{{"iteration":{},"totalIterations":{},"cycle":{},"totalCycles":{},"elapsedUs":{}}}"#,
+                batch_end, total_iterations, cycle, total_cycles, elapsed_us
+            );
+            let this = wasm_bindgen::JsValue::NULL;
+            let _ = progress_cb.call1(
+                &this,
+                &wasm_bindgen::JsValue::from_str(&progress_json),
+            );
+
+            if converged { break; }
+        }
+        if converged { break; }
+    }
+
+    // Serialize final outputs.
+    let outputs_val = serde_json::to_value(&last_outputs).unwrap_or(serde_json::Value::Null);
+    let elapsed_us = ((js_sys::Date::now() - start_ms) * 1000.0) as u64;
+    let result = serde_json::json!({
+        "cycles": total_cycles,
+        "iterations": total_iterations,
+        "elapsedUs": elapsed_us,
+        "converged": converged,
+        "outputs": outputs_val,
+    });
+    serde_json::to_string(&result).unwrap_or_else(|e| {
+        err_json("SERIALIZE_FAILED", &e.to_string())
+    })
+}

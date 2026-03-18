@@ -82,6 +82,22 @@ declare module '@engine-wasm/engine_wasm.js' {
   ): string
 
   /**
+   * Run a simulation task with iterative progress callbacks (8.2).
+   *
+   * @param config_json - JSON-encoded SimulationConfig:
+   *   { nodeId, op, snapshot, maxIterations, batchSize?, loop?, loopCount?, convergenceThreshold? }
+   * @param progress_cb - Called after every batch with JSON:
+   *   { iteration, totalIterations, cycle, totalCycles, elapsedUs }
+   * @returns JSON-encoded result:
+   *   { cycles, iterations, elapsedUs, converged, outputs: Record<string, Value> }
+   *   or { error: { code, message } } on failure.
+   */
+  export function run_simulation(
+    config_json: string,
+    progress_cb: (progress_json: string) => void,
+  ): string
+
+  /**
    * Initialize the WASM module.
    * Must be called before any other exported function.
    * @param input - Object with module_or_path key pointing to the .wasm file
