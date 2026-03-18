@@ -81,6 +81,12 @@ impl Sequential {
                     let length = data.len() / l.input_channels.max(1);
                     l.forward(&data, length)
                 }
+                Layer::Conv2D(l) => {
+                    let spatial = data.len() / l.input_channels.max(1);
+                    let side = (spatial as f64).sqrt() as usize;
+                    let (out, _, _) = l.forward(&data, side, side);
+                    out
+                }
                 Layer::Dropout(l) => l.forward_inference(&data),
             };
         }
@@ -105,6 +111,10 @@ impl Sequential {
                 ),
                 Layer::Conv1D(c) => (
                     format!("Conv1D({}→{}, k={})", c.input_channels, c.n_filters, c.kernel_size),
+                    c.param_count(),
+                ),
+                Layer::Conv2D(c) => (
+                    format!("Conv2D({}→{}, k={}x{})", c.input_channels, c.n_filters, c.kernel_h, c.kernel_w),
                     c.param_count(),
                 ),
                 Layer::Dropout(d) => (format!("Dropout({})", d.rate), 0),

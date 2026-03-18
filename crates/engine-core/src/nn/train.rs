@@ -70,6 +70,9 @@ pub fn train(
             Layer::Conv1D(_) => {
                 return Err("Backpropagation for Conv1D not yet implemented. Use Dense layers.".into());
             }
+            Layer::Conv2D(_) => {
+                return Err("Backpropagation for Conv2D not yet implemented. Use Dense layers.".into());
+            }
         }
     }
 

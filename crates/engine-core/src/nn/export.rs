@@ -68,6 +68,25 @@ pub fn export_model(model: &Sequential) -> ModelExport {
                     extra,
                 }
             }
+            Layer::Conv2D(c) => {
+                let weights: Vec<f64> = c.filters.iter().flat_map(|f| f.iter().copied()).collect();
+                let mut extra = std::collections::HashMap::new();
+                extra.insert("kernel_h".into(), serde_json::json!(c.kernel_h));
+                extra.insert("kernel_w".into(), serde_json::json!(c.kernel_w));
+                extra.insert("input_channels".into(), serde_json::json!(c.input_channels));
+                extra.insert("stride_h".into(), serde_json::json!(c.stride_h));
+                extra.insert("stride_w".into(), serde_json::json!(c.stride_w));
+                extra.insert("padding".into(), serde_json::json!(if c.padding { "same" } else { "valid" }));
+                LayerExport {
+                    layer_type: "conv2d".into(),
+                    input_size: c.input_channels,
+                    output_size: c.n_filters,
+                    activation: format!("{:?}", c.activation).to_lowercase(),
+                    weights,
+                    biases: c.biases.clone(),
+                    extra,
+                }
+            }
             Layer::Dropout(d) => LayerExport {
                 layer_type: "dropout".into(),
                 input_size: 0,

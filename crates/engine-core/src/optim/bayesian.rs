@@ -293,6 +293,27 @@ fn maximise_acquisition(
     best_x
 }
 
+/// Fit a GP surrogate on (x_train, y_train) and predict at x_test points.
+///
+/// Returns `Vec<(mean, std)>` — one entry per test point.
+pub fn gp_fit_predict(
+    x_train: Vec<Vec<f64>>,
+    y_train: Vec<f64>,
+    x_test: &[Vec<f64>],
+    length_scale: f64,
+    sigma_f: f64,
+    sigma_n: f64,
+) -> Vec<(f64, f64)> {
+    if x_train.is_empty() || y_train.is_empty() {
+        return x_test.iter().map(|_| (f64::NAN, f64::NAN)).collect();
+    }
+    let gp = GpSurrogate::fit(x_train, y_train, length_scale, sigma_f, sigma_n);
+    x_test.iter().map(|x| {
+        let (mean, var) = gp.predict(x);
+        (mean, var.sqrt())
+    }).collect()
+}
+
 /// Run Bayesian optimisation.
 pub fn bayesian_optimise(cfg: &BayesOptConfig) -> OptimResult {
     let d = cfg.vars.len();

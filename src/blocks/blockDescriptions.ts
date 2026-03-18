@@ -749,6 +749,10 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Bayesian optimisation with GP (Matérn 5/2) surrogate. n_initial random points warm-up, then maximise acquisition (ei/ucb/pi) to pick next evaluation. EI: Expected Improvement (xi shifts threshold). UCB: mu - kappa*sigma. PI: Probability of Improvement. Outputs convergence table.',
   'optim.nsga3':
     'NSGA-III multi-objective evolutionary algorithm. Reference-direction structured reference points (Das-Dennis lattice) maintain diversity for ≥3 objectives. SBX crossover + polynomial mutation. Configure objectives as semicolon-separated expressions. Returns Pareto front table.',
+  'optim.surrogate':
+    'GP Surrogate (Gaussian Process, Matérn 5/2 kernel): fits a probabilistic surrogate to training data, then predicts mean and uncertainty at query points. Train table: feature columns + last column = target y. Query table: feature columns only. Returns {mean, std}. Tune length_scale (correlation range), sigma_f (signal amplitude), sigma_n (noise level). Ideal for expensive simulations: build surrogate from ~20–200 runs, predict anywhere instantly.',
+  'optim.automl':
+    'AutoML: automatically selects the best regression model for your data using k-fold cross-validation. Tries: linear regression, polynomial (deg 2), decision tree (depth 5), GP surrogate (n≤200). Returns comparison table {model_idx, cv_rmse, r2, is_best}. model_idx: 0=linear, 1=poly2, 2=decision_tree, 3=gp. Set target_col to specify the target column name (defaults to last column). Use with TrainTestSplit for rigorous evaluation.',
 
   // ── Machine Learning (5.06) ─────────────────────────────────────────────
   'ml.trainTestSplit':

@@ -8,6 +8,7 @@ use crate::optim::genetic::SimpleRng;
 pub enum Layer {
     Dense(DenseLayer),
     Conv1D(Conv1DLayer),
+    Conv2D(Conv2DLayer),
     Dropout(DropoutLayer),
 }
 
@@ -30,6 +31,110 @@ pub struct Conv1DLayer {
     pub kernel_size: usize,
     pub input_channels: usize,
     pub activation: ActivationFn,
+}
+
+/// 2D convolutional layer.
+/// Input: [height × width × input_channels] row-major (HWC layout).
+/// Output: [out_h × out_w × n_filters] row-major.
+/// Padding: "valid" (no padding) or "same" (zero-pad to preserve spatial dims).
+#[derive(Debug, Clone)]
+pub struct Conv2DLayer {
+    /// Kernel weights: [n_filters][kH * kW * input_channels]
+    pub filters: Vec<Vec<f64>>,
+    pub biases: Vec<f64>,
+    pub n_filters: usize,
+    pub kernel_h: usize,
+    pub kernel_w: usize,
+    pub input_channels: usize,
+    pub stride_h: usize,
+    pub stride_w: usize,
+    pub padding: bool, // true = "same", false = "valid"
+    pub activation: ActivationFn,
+}
+
+impl Conv2DLayer {
+    /// Create a new Conv2D layer with He initialisation.
+    pub fn new(
+        input_channels: usize,
+        n_filters: usize,
+        kernel_h: usize,
+        kernel_w: usize,
+        stride_h: usize,
+        stride_w: usize,
+        padding: bool,
+        activation: ActivationFn,
+        seed: u64,
+    ) -> Self {
+        let mut rng = SimpleRng::new(seed);
+        let fan_in = input_channels * kernel_h * kernel_w;
+        let scale = (2.0 / fan_in as f64).sqrt(); // He initialisation
+        let filters: Vec<Vec<f64>> = (0..n_filters)
+            .map(|_| {
+                (0..fan_in).map(|_| rng.next_gaussian() * scale).collect()
+            })
+            .collect();
+        let biases = vec![0.0; n_filters];
+        Self { filters, biases, n_filters, kernel_h, kernel_w, input_channels, stride_h, stride_w, padding, activation }
+    }
+
+    /// Forward pass for 2D convolution.
+    /// - `input`: flattened [H × W × C] (HWC layout)
+    /// - `in_h`, `in_w`: spatial dimensions of the input
+    /// Returns flattened [out_h × out_w × n_filters].
+    pub fn forward(&self, input: &[f64], in_h: usize, in_w: usize) -> (Vec<f64>, usize, usize) {
+        let (out_h, out_w, pad_h, pad_w) = if self.padding {
+            // "same" padding: output size = ceil(in_size / stride)
+            let oh = (in_h + self.stride_h - 1) / self.stride_h;
+            let ow = (in_w + self.stride_w - 1) / self.stride_w;
+            let ph = ((oh - 1) * self.stride_h + self.kernel_h).saturating_sub(in_h);
+            let pw = ((ow - 1) * self.stride_w + self.kernel_w).saturating_sub(in_w);
+            (oh, ow, ph / 2, pw / 2)
+        } else {
+            // "valid" padding
+            if in_h < self.kernel_h || in_w < self.kernel_w {
+                return (vec![], 0, 0);
+            }
+            let oh = (in_h - self.kernel_h) / self.stride_h + 1;
+            let ow = (in_w - self.kernel_w) / self.stride_w + 1;
+            (oh, ow, 0, 0)
+        };
+
+        let total = out_h * out_w * self.n_filters;
+        let mut output = vec![0.0f64; total];
+
+        for oh in 0..out_h {
+            for ow_idx in 0..out_w {
+                for f in 0..self.n_filters {
+                    let mut val = self.biases[f];
+                    for kh in 0..self.kernel_h {
+                        for kw in 0..self.kernel_w {
+                            let ih = oh * self.stride_h + kh;
+                            let iw = ow_idx * self.stride_w + kw;
+                            // Apply padding
+                            let ih_padded = ih.wrapping_sub(pad_h);
+                            let iw_padded = iw.wrapping_sub(pad_w);
+                            if ih_padded < in_h && iw_padded < in_w {
+                                for c in 0..self.input_channels {
+                                    let in_idx = (ih_padded * in_w + iw_padded) * self.input_channels + c;
+                                    let k_idx = (kh * self.kernel_w + kw) * self.input_channels + c;
+                                    val += input.get(in_idx).copied().unwrap_or(0.0)
+                                        * self.filters[f].get(k_idx).copied().unwrap_or(0.0);
+                                }
+                            }
+                        }
+                    }
+                    output[(oh * out_w + ow_idx) * self.n_filters + f] = val;
+                }
+            }
+        }
+
+        super::activation::apply(&self.activation, &mut output);
+        (output, out_h, out_w)
+    }
+
+    pub fn param_count(&self) -> usize {
+        self.n_filters * self.kernel_h * self.kernel_w * self.input_channels + self.n_filters
+    }
 }
 
 /// Dropout layer (identity at inference, random zeroing during training).
@@ -155,6 +260,7 @@ impl Layer {
         match self {
             Layer::Dense(l) => l.param_count(),
             Layer::Conv1D(l) => l.param_count(),
+            Layer::Conv2D(l) => l.param_count(),
             Layer::Dropout(_) => 0,
         }
     }

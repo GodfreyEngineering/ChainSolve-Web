@@ -468,6 +468,8 @@
     "sym_substitute": "Substitute",
     "optim_param_est": "Parameter Estimation",
     "optim_bayesian": "Bayesian Optimisation",
+    "optim_surrogate": "GP Surrogate",
+    "optim_automl": "AutoML",
     "optim_nsga3": "NSGA-III",
     "optim_lp": "LP Solver",
     "optim_qp": "QP Solver",

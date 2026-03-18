@@ -5954,6 +5954,227 @@ fn evaluate_node_inner(
             Value::scalar(crate::ml::classification_metrics::auc(&roc))
         }
 
+        // ── GP Surrogate (2.99) ───────────────────────────────────────
+        "optim.surrogate" => {
+            // train: Table — columns x0..xN-1, y (last column is target)
+            // query: Table — columns x0..xN-1
+            let train_table = match inputs.get("train") {
+                Some(Value::Table { columns, rows }) => Some((columns.clone(), rows.clone())),
+                _ => None,
+            };
+            let query_table = match inputs.get("query") {
+                Some(Value::Table { columns, rows }) => Some((columns.clone(), rows.clone())),
+                _ => None,
+            };
+            match (train_table, query_table) {
+                (Some((_, train_rows)), Some((_, query_rows))) => {
+                    if train_rows.is_empty() {
+                        return Value::error("optim.surrogate: train table is empty");
+                    }
+                    let n_cols = train_rows[0].len();
+                    if n_cols < 2 {
+                        return Value::error("optim.surrogate: train table must have ≥2 columns (features + target)");
+                    }
+                    let length_scale = data.get("length_scale").and_then(|v| v.as_f64()).unwrap_or(1.0);
+                    let sigma_f = data.get("sigma_f").and_then(|v| v.as_f64()).unwrap_or(1.0);
+                    let sigma_n = data.get("sigma_n").and_then(|v| v.as_f64()).unwrap_or(1e-3);
+
+                    let x_train: Vec<Vec<f64>> = train_rows.iter()
+                        .map(|r| r[..n_cols - 1].to_vec())
+                        .collect();
+                    let y_train: Vec<f64> = train_rows.iter()
+                        .map(|r| r[n_cols - 1])
+                        .collect();
+
+                    let x_test: Vec<Vec<f64>> = query_rows.iter()
+                        .map(|r| r.clone())
+                        .collect();
+
+                    let preds = crate::optim::bayesian::gp_fit_predict(
+                        x_train, y_train, &x_test, length_scale, sigma_f, sigma_n,
+                    );
+
+                    let mean_col: Vec<f64> = preds.iter().map(|(m, _)| *m).collect();
+                    let std_col: Vec<f64> = preds.iter().map(|(_, s)| *s).collect();
+                    crate::types::build_table(&["mean", "std"], &[mean_col, std_col])
+                }
+                _ => Value::error("optim.surrogate: connect 'train' Table and 'query' Table"),
+            }
+        }
+
+        // ── AutoML (2.101) ───────────────────────────────────────────
+        "optim.automl" => {
+            let (columns, rows) = match inputs.get("data") {
+                Some(Value::Table { columns, rows }) => (columns.clone(), rows.clone()),
+                _ => return Value::error("optim.automl: 'data' Table input required"),
+            };
+            if rows.len() < 4 {
+                return Value::error("optim.automl: need ≥4 rows");
+            }
+            let n_cols = columns.len();
+            if n_cols < 2 {
+                return Value::error("optim.automl: table must have ≥2 columns (features + target)");
+            }
+            // target_col: name or last column by default
+            let target_col_name = data.get("target_col").and_then(|v| v.as_str()).unwrap_or("").to_string();
+            let target_idx = if target_col_name.is_empty() {
+                n_cols - 1
+            } else {
+                columns.iter().position(|c| c == &target_col_name).unwrap_or(n_cols - 1)
+            };
+
+            let x_rows: Vec<Vec<f64>> = rows.iter().map(|r| {
+                r.iter().enumerate().filter(|(i, _)| *i != target_idx).map(|(_, &v)| v).collect()
+            }).collect();
+            let y: Vec<f64> = rows.iter().map(|r| r[target_idx]).collect();
+
+            let n = rows.len();
+            let n_folds = data.get("cv_folds").and_then(|v| v.as_f64()).unwrap_or(5.0) as usize;
+            let n_folds = n_folds.clamp(2, n.min(10));
+            let fold_size = n / n_folds;
+
+            // k-fold CV helper — returns RMSE
+            let kfold_rmse = |predict_fn: &dyn Fn(&[Vec<f64>], &[f64], &[Vec<f64>]) -> Vec<f64>| -> f64 {
+                let mut sq_err_sum = 0.0;
+                let mut count = 0usize;
+                for f in 0..n_folds {
+                    let val_start = f * fold_size;
+                    let val_end = (val_start + fold_size).min(n);
+                    let train_x: Vec<Vec<f64>> = (0..n).filter(|&i| i < val_start || i >= val_end).map(|i| x_rows[i].clone()).collect();
+                    let train_y: Vec<f64> = (0..n).filter(|&i| i < val_start || i >= val_end).map(|i| y[i]).collect();
+                    let val_x: Vec<Vec<f64>> = x_rows[val_start..val_end].to_vec();
+                    let val_y = &y[val_start..val_end];
+                    if train_x.is_empty() || val_x.is_empty() { continue; }
+                    let preds = predict_fn(&train_x, &train_y, &val_x);
+                    for (p, &a) in preds.iter().zip(val_y.iter()) {
+                        sq_err_sum += (p - a).powi(2);
+                        count += 1;
+                    }
+                }
+                if count == 0 { f64::NAN } else { (sq_err_sum / count as f64).sqrt() }
+            };
+
+            // Compute R² on full dataset
+            let r2_score = |preds: &[f64]| -> f64 {
+                let mean_y = y.iter().sum::<f64>() / y.len() as f64;
+                let ss_res: f64 = y.iter().zip(preds).map(|(a, p)| (a - p).powi(2)).sum();
+                let ss_tot: f64 = y.iter().map(|a| (a - mean_y).powi(2)).sum();
+                if ss_tot < 1e-12 { return 0.0; }
+                1.0 - ss_res / ss_tot
+            };
+
+            let mut result_rows: Vec<Vec<f64>> = Vec::new();
+            let mut model_names: Vec<String> = Vec::new();
+
+            // Model 1: Linear Regression
+            let lin_rmse = kfold_rmse(&|tx, ty, vx| {
+                match crate::ml::linreg::fit(tx, ty) {
+                    Ok(m) => crate::ml::linreg::predict(&m, vx),
+                    Err(_) => vx.iter().map(|_| f64::NAN).collect(),
+                }
+            });
+            let lin_model = crate::ml::linreg::fit(&x_rows, &y);
+            let lin_r2 = lin_model.as_ref().map(|m| r2_score(&crate::ml::linreg::predict(m, &x_rows))).unwrap_or(f64::NAN);
+            model_names.push("linear".to_string());
+            result_rows.push(vec![lin_rmse, lin_r2]);
+
+            // Model 2: Polynomial Regression (degree 2, single feature only)
+            let poly_rmse = if x_rows[0].len() == 1 {
+                let xs: Vec<f64> = x_rows.iter().map(|r| r[0]).collect();
+                kfold_rmse(&|tx, ty, vx| {
+                    let tx_1d: Vec<f64> = tx.iter().map(|r| r[0]).collect();
+                    let vx_1d: Vec<f64> = vx.iter().map(|r| r[0]).collect();
+                    match crate::ml::polyreg::fit(&tx_1d, ty, 2) {
+                        Ok(m) => {
+                            let vx_rows: Vec<Vec<f64>> = vx_1d.iter().map(|&v| {
+                                let mut row = vec![1.0, v, v * v];
+                                row.truncate(m.coefficients.len());
+                                row
+                            }).collect();
+                            crate::ml::linreg::predict(&m, &vx_rows)
+                        }
+                        Err(_) => vx.iter().map(|_| f64::NAN).collect(),
+                    }
+                });
+                let xs_ref: &Vec<f64> = &xs;
+                match crate::ml::polyreg::fit(xs_ref, &y, 2) {
+                    Ok(m) => {
+                        let x2_rows: Vec<Vec<f64>> = xs.iter().map(|&v| vec![1.0, v, v * v]).collect();
+                        let preds = crate::ml::linreg::predict(&m, &x2_rows);
+                        let rmse = (y.iter().zip(&preds).map(|(a, p)| (a - p).powi(2)).sum::<f64>() / y.len() as f64).sqrt();
+                        rmse
+                    }
+                    Err(_) => f64::NAN,
+                }
+            } else {
+                f64::NAN
+            };
+            let poly_r2 = if x_rows[0].len() == 1 && !poly_rmse.is_nan() {
+                let xs: Vec<f64> = x_rows.iter().map(|r| r[0]).collect();
+                match crate::ml::polyreg::fit(&xs, &y, 2) {
+                    Ok(m) => {
+                        let x2_rows: Vec<Vec<f64>> = xs.iter().map(|&v| vec![1.0, v, v * v]).collect();
+                        r2_score(&crate::ml::linreg::predict(&m, &x2_rows))
+                    }
+                    Err(_) => f64::NAN,
+                }
+            } else {
+                f64::NAN
+            };
+            model_names.push("poly2".to_string());
+            result_rows.push(vec![poly_rmse, poly_r2]);
+
+            // Model 3: Decision Tree
+            let tree_rmse = kfold_rmse(&|tx, ty, vx| {
+                match crate::ml::decision_tree::fit(tx, ty, 5) {
+                    Ok(m) => crate::ml::decision_tree::predict(&m, vx),
+                    Err(_) => vx.iter().map(|_| f64::NAN).collect(),
+                }
+            });
+            let tree_model = crate::ml::decision_tree::fit(&x_rows, &y, 5);
+            let tree_r2 = tree_model.as_ref().map(|m| r2_score(&crate::ml::decision_tree::predict(m, &x_rows))).unwrap_or(f64::NAN);
+            model_names.push("decision_tree".to_string());
+            result_rows.push(vec![tree_rmse, tree_r2]);
+
+            // Model 4: GP Surrogate (small datasets only)
+            let gp_rmse = if n <= 200 {
+                kfold_rmse(&|tx, ty, vx| {
+                    let preds = crate::optim::bayesian::gp_fit_predict(
+                        tx.to_vec(), ty.to_vec(), vx, 1.0, 1.0, 1e-3,
+                    );
+                    preds.into_iter().map(|(m, _)| m).collect()
+                })
+            } else {
+                f64::NAN
+            };
+            let gp_r2 = if n <= 200 {
+                let preds = crate::optim::bayesian::gp_fit_predict(
+                    x_rows.clone(), y.clone(), &x_rows, 1.0, 1.0, 1e-3,
+                );
+                r2_score(&preds.iter().map(|(m, _)| *m).collect::<Vec<_>>())
+            } else {
+                f64::NAN
+            };
+            model_names.push("gp_surrogate".to_string());
+            result_rows.push(vec![gp_rmse, gp_r2]);
+
+            // Find best model by lowest CV RMSE (ignoring NaN)
+            let best_idx = result_rows.iter().enumerate()
+                .filter(|(_, r)| !r[0].is_nan())
+                .min_by(|(_, a), (_, b)| a[0].partial_cmp(&b[0]).unwrap_or(std::cmp::Ordering::Equal))
+                .map(|(i, _)| i)
+                .unwrap_or(0);
+            let _ = model_names;
+
+            // Return as Table with columns [model_idx, cv_rmse, r2, is_best]
+            // model_idx: 0=linear, 1=poly2, 2=decision_tree, 3=gp_surrogate
+            let model_idx: Vec<f64> = (0..4usize).map(|i| i as f64).collect();
+            let cv_rmse: Vec<f64> = result_rows.iter().map(|r| r[0]).collect();
+            let r2_vals: Vec<f64> = result_rows.iter().map(|r| r[1]).collect();
+            let is_best: Vec<f64> = (0..4usize).map(|i| if i == best_idx { 1.0 } else { 0.0 }).collect();
+            crate::types::build_table(&["model_idx", "cv_rmse", "r2", "is_best"], &[model_idx, cv_rmse, r2_vals, is_best])
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }

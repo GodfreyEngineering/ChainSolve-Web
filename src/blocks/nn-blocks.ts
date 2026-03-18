@@ -213,4 +213,28 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
     description:
       'Scaled dot-product attention: Attention(Q,K,V) = softmax(Q·Kᵀ/√d_k)·V. Causal=true masks future positions (for autoregressive models). Q=K=V for self-attention. Output: [seq_q × d_v] table.',
   })
+
+  register({
+    type: 'nn.conv2d',
+    label: 'Conv2D',
+    category: 'neuralNetworks',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'input', label: 'Input (Matrix/Table)' }],
+    defaultData: {
+      blockType: 'nn.conv2d',
+      label: 'Conv2D',
+      n_filters: 4,
+      kernel_h: 3,
+      kernel_w: 3,
+      stride_h: 1,
+      stride_w: 1,
+      padding: 'valid',
+      activation: 'relu',
+      seed: 42,
+    },
+    synonyms: ['conv2d', '2D convolution', 'image', 'CNN', 'convolutional'],
+    tags: ['nn', 'conv2d', 'CNN', 'image'],
+    description:
+      '2D convolutional layer. Accepts Matrix input (H×W) or flattened image. n_filters feature maps, kernel_h×kernel_w spatial kernel, stride, padding ("valid" or "same"). He-initialised weights. Output: Matrix of [out_h*out_w × n_filters].',
+  })
 }

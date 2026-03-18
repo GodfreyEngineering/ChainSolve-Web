@@ -454,6 +454,50 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
       'Bayesian optimisation with Gaussian Process (Matérn 5/2) surrogate. Acquisition: "ei" (Expected Improvement), "ucb" (Upper Confidence Bound, kappa controls exploration), "pi" (Probability of Improvement, xi shifts threshold). Returns convergence history table.',
   })
 
+  // ── GP Surrogate (2.99) ─────────────────────────────────────────────────────
+
+  register({
+    type: 'optim.surrogate',
+    label: 'GP Surrogate',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'train', label: 'Train (table)' },
+      { id: 'query', label: 'Query (table)' },
+    ],
+    defaultData: {
+      blockType: 'optim.surrogate',
+      label: 'GP Surrogate',
+      length_scale: 1.0,
+      sigma_f: 1.0,
+      sigma_n: 0.001,
+    },
+    synonyms: ['gaussian process', 'GP', 'surrogate model', 'kriging', 'emulator', 'metamodel'],
+    tags: ['optimization', 'surrogate', 'gaussian process', 'machine learning'],
+    description:
+      'Gaussian Process surrogate model (Matérn 5/2 kernel). Train table: feature columns + last column = target. Query table: feature columns only. Returns predictions table {mean, std}. Tune length_scale, sigma_f (signal), sigma_n (noise). Ideal for expensive simulations.',
+  })
+
+  // ── AutoML (2.101) ──────────────────────────────────────────────────────────
+
+  register({
+    type: 'optim.automl',
+    label: 'AutoML',
+    category: 'machineLearning',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'data', label: 'Data (table)' }],
+    defaultData: {
+      blockType: 'optim.automl',
+      label: 'AutoML',
+      target_col: '',
+      cv_folds: 5,
+    },
+    synonyms: ['automl', 'auto machine learning', 'model selection', 'auto fit', 'best model'],
+    tags: ['machine learning', 'automation', 'model selection', 'cross-validation'],
+    description:
+      'AutoML: auto-tries linear regression, polynomial (degree 2), decision tree, and GP surrogate on your data. Uses k-fold cross-validation (default 5). target_col: name of target column (default = last column). Returns table {model_idx, cv_rmse, r2, is_best} — model_idx: 0=linear, 1=poly2, 2=decision_tree, 3=gp_surrogate.',
+  })
+
   // ── NSGA-III ────────────────────────────────────────────────────────────────
 
   register({
