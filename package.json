@@ -41,6 +41,8 @@
     "sbom:rust": "cargo sbom --output-format cyclone_dx_json_1_6 > legal/sbom/rust-sbom.cdx.json",
     "sbom:npm": "npx --yes @cyclonedx/cyclonedx-npm --spec-version 1.6 --output-format JSON --output-file legal/sbom/npm-sbom.cdx.json --package-lock-only",
     "legal-pack": "bash scripts/gen-legal-pack.sh",
+    "docs:api": "typedoc",
+    "docs:api:watch": "typedoc --watch",
     "db:types": "supabase gen types typescript --local > src/lib/database.types.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
@@ -99,6 +101,8 @@
     "jsdom": "^28.1.0",
     "prettier": "^3.8.1",
     "storybook": "^10.2.17",
+    "typedoc": "^0.28.7",
+    "typedoc-plugin-markdown": "^4.6.3",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.57.1",
     "vite": "^7.3.1",

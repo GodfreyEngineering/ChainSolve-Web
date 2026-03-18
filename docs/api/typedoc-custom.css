@@ -1,0 +1,22 @@
+/* ChainSolve TypeDoc theme overrides */
+
+:root {
+  --color-accent: #1CABB0;
+  --color-background: #1a1a1a;
+  --color-background-secondary: #383838;
+  --color-text: #F4F4F3;
+  --color-link: #1CABB0;
+}
+
+.tsd-page-title h1 {
+  color: var(--color-accent);
+  font-family: Montserrat, sans-serif;
+}
+
+.tsd-navigation a:hover {
+  color: var(--color-accent);
+}
+
+.tsd-index-heading {
+  color: var(--color-accent);
+}

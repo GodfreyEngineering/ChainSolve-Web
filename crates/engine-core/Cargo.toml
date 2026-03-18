@@ -3,6 +3,19 @@ name = "engine-core"
 version = "0.1.0"
 edition = "2021"
 license.workspace = true
+description = "ChainSolve computation engine — pure Rust, compiles to native and WASM"
+repository = "https://github.com/godfrey-engineering/chainsolve"
+documentation = "https://docs.chainsolve.dev/rust/engine_core"
+keywords = ["computation", "wasm", "engineering", "simulation", "solver"]
+categories = ["science", "mathematics", "wasm"]
+
+[package.metadata.docs.rs]
+# Build all features so every module is documented on docs.rs
+all-features = true
+# Target docs.rs default (x86_64-unknown-linux-gnu) — WASM target is not needed for docs
+targets = []
+# Render math in doc comments using KaTeX
+rustdoc-args = ["--cfg", "docsrs", "--html-in-header", "docs/katex-header.html"]
 
 [features]
 default = []

@@ -5,6 +5,13 @@ edition = "2021"
 description = "SDK for authoring custom ChainSolve computation blocks"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/godfrey-engineering/chainsolve"
+documentation = "https://docs.chainsolve.dev/rust/chainsolve_block_sdk"
+keywords = ["wasm", "plugin", "chainsolve", "block", "computation"]
+categories = ["wasm", "api-bindings"]
+
+[package.metadata.docs.rs]
+all-features = true
+targets = []
 
 [dependencies]
 engine-core = { path = "../engine-core" }

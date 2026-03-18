@@ -1,0 +1,57 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "ChainSolve JS/TS SDK",
+  "entryPoints": [
+    "src/lib/algorithmDocs.ts",
+    "src/lib/exampleGraphs.ts",
+    "src/lib/hybridCompute.ts",
+    "src/lib/webgpuGemm.ts",
+    "src/lib/pluginLoader.ts",
+    "src/lib/pdf/exportSolverReport.ts",
+    "src/engine/index.ts",
+    "src/engine/diffGraph.ts",
+    "src/engine/evalScheduler.ts",
+    "src/engine/value.ts",
+    "src/engine/workerPool.ts",
+    "src/blocks/registry.ts",
+    "src/blocks/types.ts"
+  ],
+  "out": "docs/api/js",
+  "readme": "docs/sdk-overview.md",
+  "includeVersion": true,
+  "githubPages": false,
+  "hideGenerator": true,
+  "categorizeByGroup": true,
+  "defaultCategory": "General",
+  "categoryOrder": [
+    "Engine",
+    "Evaluation",
+    "Blocks",
+    "Algorithms",
+    "Export",
+    "Plugins",
+    "GPU",
+    "*"
+  ],
+  "groupOrder": ["Variables", "Functions", "Interfaces", "Type Aliases", "*"],
+  "navigationLinks": {
+    "GitHub": "https://github.com/godfrey-engineering/chainsolve",
+    "App": "https://chainsolve.dev",
+    "Rust API": "../rust/engine_core/index.html"
+  },
+  "customCss": "docs/api/typedoc-custom.css",
+  "externalPattern": ["**/node_modules/**"],
+  "excludeExternals": true,
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "disableSources": false,
+  "treatWarningsAsErrors": false,
+  "logLevel": "Warn",
+  "sort": ["source-order"],
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": true,
+    "external": false
+  }
+}

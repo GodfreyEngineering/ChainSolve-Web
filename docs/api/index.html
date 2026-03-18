@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChainSolve API Documentation</title>
+  <style>
+    :root { --accent: #1CABB0; --bg: #1a1a1a; --card: #2a2a2a; --text: #F4F4F3; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Montserrat, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+    }
+    header { text-align: center; }
+    header h1 { color: var(--accent); font-size: 2.5rem; margin-bottom: 0.5rem; }
+    header p { color: #aaa; max-width: 520px; line-height: 1.6; }
+    .cards {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 800px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.75rem 2rem;
+      min-width: 220px;
+      max-width: 280px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid #333;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 0.75rem; }
+    .card p { color: #aaa; font-size: 0.875rem; line-height: 1.5; }
+    .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    footer { color: #666; font-size: 0.8rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ChainSolve Docs</h1>
+    <p>
+      Auto-generated API reference from Rust doc comments and TypeScript source.
+      Updated on every push to <code>main</code>.
+    </p>
+  </header>
+
+  <div class="cards">
+    <a class="card" href="rust/engine_core/index.html">
+      <div class="badge">Rust</div>
+      <h2>engine-core</h2>
+      <p>
+        Pure Rust computation engine — ops, eval, graph, ODE solvers,
+        optimisation, AD, neural nets, FMU export.
+      </p>
+    </a>
+
+    <a class="card" href="rust/chainsolve_block_sdk/index.html">
+      <div class="badge">Rust</div>
+      <h2>Block SDK</h2>
+      <p>
+        Build custom WASM computation blocks with the
+        <code>export_blocks!</code> macro and C-ABI interface.
+      </p>
+    </a>
+
+    <a class="card" href="js/index.html">
+      <div class="badge">TypeScript</div>
+      <h2>JS/TS SDK</h2>
+      <p>
+        Engine bridge, evaluation scheduling, plugin loader, hybrid
+        CPU/GPU compute, PDF export, algorithm reference.
+      </p>
+    </a>
+  </div>
+
+  <footer>
+    <a href="https://chainsolve.dev">chainsolve.dev</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/godfrey-engineering/chainsolve">GitHub</a>
+  </footer>
+</body>
+</html>
