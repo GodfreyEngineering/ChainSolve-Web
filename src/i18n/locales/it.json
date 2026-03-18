@@ -485,7 +485,8 @@
     "matrix_sparse_gmres": "GMRES Sparso",
     "units_convert": "Convertitore di Unità",
     "units_analyze": "Analizzatore di Unità",
-    "ad_ode_adjoint": "Sensibilità Aggiunta ODE"
+    "ad_ode_adjoint": "Sensibilità Aggiunta ODE",
+    "ad_lin_solve_sens": "Sensibilità Sistema Lineare"
   },
   "plot": {
     "settings": "Impostazioni grafico",

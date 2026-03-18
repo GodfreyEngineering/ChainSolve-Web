@@ -486,7 +486,8 @@
     "matrix_sparse_gmres": "Sparse GMRES",
     "units_convert": "Einheitenumrechner",
     "units_analyze": "Einheitenanalyse",
-    "ad_ode_adjoint": "ODE Adjoint-Sensitivität"
+    "ad_ode_adjoint": "ODE Adjoint-Sensitivität",
+    "ad_lin_solve_sens": "Lineares System Sensitivität"
   },
   "plot": {
     "settings": "Diagramm-Einstellungen",

@@ -678,6 +678,8 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("units.analyze", "Unit Analyser", "math", "csOperation", vec![], false),
         // ODE Adjoint (1.33)
         entry("ad.odeAdjoint", "ODE Adjoint Sensitivity", "simulation", "csOperation", vec![], false),
+        // Implicit diff through linear solvers (1.34)
+        entry("ad.linSolveSens", "Linear Solve Sensitivity", "math", "csOperation", vec![], false),
     ]
 }
 

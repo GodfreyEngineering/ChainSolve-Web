@@ -2128,7 +2128,8 @@
     "matrix_sparse_gmres": "GMRES דלילה",
     "units_convert": "ממיר יחידות",
     "units_analyze": "מנתח יחידות",
-    "ad_ode_adjoint": "רגישות צמודה ODE"
+    "ad_ode_adjoint": "רגישות צמודה ODE",
+    "ad_lin_solve_sens": "רגישות פתרון לינארי"
   },
   "entitlements": {
     "projectLimitTitle": "Project limit reached",

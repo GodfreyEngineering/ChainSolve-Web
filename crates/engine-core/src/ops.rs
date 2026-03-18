@@ -6605,6 +6605,59 @@ fn evaluate_node_inner(
             crate::types::build_table(&col_refs, &col_data)
         }
 
+        // ── AD Through Linear Solvers: Implicit Differentiation (1.34) ──
+        "ad.linSolveSens" => {
+            use crate::autodiff_linsolve::implicit_diff;
+
+            // A_exprs: semicolon-separated row-major expressions for A matrix entries
+            // b_exprs: semicolon-separated expressions for b vector entries
+            // param_names: comma-separated
+            // param_values: comma-separated current values
+            let a_str = data.get("A_exprs").and_then(|v| v.as_str()).unwrap_or("");
+            let b_str = data.get("b_exprs").and_then(|v| v.as_str()).unwrap_or("");
+            if a_str.is_empty() || b_str.is_empty() {
+                return Value::error("ad.linSolveSens: A_exprs and b_exprs required");
+            }
+            let a_exprs: Vec<String> = a_str.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let b_exprs: Vec<String> = b_str.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let n = b_exprs.len();
+            if a_exprs.len() != n * n {
+                return Value::error(format!("ad.linSolveSens: A_exprs has {} entries; expected {}×{}={}", a_exprs.len(), n, n, n*n));
+            }
+
+            let param_names_str = data.get("param_names").and_then(|v| v.as_str()).unwrap_or("");
+            let param_names: Vec<String> = param_names_str.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let param_vals_str = data.get("param_values").and_then(|v| v.as_str()).unwrap_or("");
+            let param_vals: Vec<f64> = param_vals_str.split(',').filter_map(|s| s.trim().parse().ok()).collect();
+
+            let mut params = std::collections::HashMap::new();
+            for (name, val) in param_names.iter().zip(param_vals.iter()) {
+                params.insert(name.clone(), *val);
+            }
+            let fd_eps = scalar_or(data, "fd_eps", 1e-6);
+
+            let result = implicit_diff(&a_exprs, &b_exprs, &param_names, &params, fd_eps);
+
+            // Build Table: columns = [param_idx, x0, x1, ..., xN-1, dx0/dp, dx1/dp, ...]
+            // Simpler: one row per parameter, columns: [param_idx, dx0, dx1, ...]
+            let np = param_names.len();
+            if np == 0 {
+                // No parameters — just return the solution
+                return Value::Vector { value: result.x };
+            }
+            let idx: Vec<f64> = (0..np).map(|i| i as f64).collect();
+            let mut col_data = vec![idx];
+            for j in 0..n {
+                let dxj: Vec<f64> = result.sensitivities.iter().map(|sens| sens[j]).collect();
+                col_data.push(dxj);
+            }
+            let mut col_names = vec!["param_idx"];
+            let dx_names: Vec<String> = (0..n).map(|j| format!("dx{j}/dp")).collect();
+            let dx_refs: Vec<&str> = dx_names.iter().map(|s| s.as_str()).collect();
+            col_names.extend_from_slice(&dx_refs);
+            crate::types::build_table(&col_names, &col_data)
+        }
+
         // ── Discrete Adjoint ODE Sensitivity (1.33) ─────────────────
         "ad.odeAdjoint" => {
             use crate::ode::adjoint::{AdjointConfig, AdjointResult, discrete_adjoint};

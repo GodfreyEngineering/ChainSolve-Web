@@ -139,6 +139,25 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'ad.linSolveSens',
+    label: 'Linear Solve Sensitivity',
+    category: 'math',
+    nodeKind: 'csOperation',
+    inputs: [],
+    defaultData: {
+      A_exprs: 'k;0;0;1',
+      b_exprs: '1;1',
+      param_names: 'k',
+      param_values: '1',
+      fd_eps: 1e-6,
+    },
+    synonyms: ['implicit differentiation', 'linear system', 'sensitivity', 'IFT', 'Ax=b'],
+    tags: ['ad', 'linear', 'sensitivity', 'implicit'],
+    description:
+      'AD through linear solvers via implicit function theorem. Given A(p)x = b(p), computes dx/dp_k = A⁻¹·(db/dp_k − (dA/dp_k)·x) for each parameter. Set A_exprs (semicolon-separated row-major n²entries), b_exprs (n entries), param_names, param_values. Returns Table [param_idx, dx0/dp, dx1/dp, ...].',
+  })
+
+  register({
     type: 'ad.odeAdjoint',
     label: 'ODE Adjoint Sensitivity',
     category: 'simulation',
