@@ -244,7 +244,7 @@
 - [x] **2.106** NSGA-II: non-dominated sorting + crowding distance + SBX crossover + polynomial mutation + tournament selection. ParetoResult: solutions, objectives, generations. Configurable pop_size, generations, crossover_rate, mutation_rate. 2 tests: dominance, bi-objective Pareto. Ref: Deb et al. (2002).
 - [x] **2.107** Sobol sensitivity: Saltelli sampling scheme (A, B, AB_i matrices). First-order S1 and total-order ST indices. SobolResult: s1, st, names, n_evals. 2 tests: x1 dominates x2, constant function. Ref: Saltelli (2002).
 - [x] **2.108** Existing optimisers: gradient descent (step + convergence), genetic algorithm (tournament + crossover + mutation), Nelder-Mead (simplex reflection/expansion/contraction), parametric sweep, Monte Carlo simulation, DOE (Sobol/LHS/factorial)
-- [ ] **2.109** L-BFGS-B: limited-memory BFGS with bound constraints — the workhorse gradient-based optimiser for medium-scale problems (100-10000 variables). Uses AD for gradients.
+- [x] **2.109** L-BFGS-B: limited-memory BFGS with bound constraints — the workhorse gradient-based optimiser for medium-scale problems (100-10000 variables). Uses AD for gradients.
 - [ ] **2.110** SQP: Sequential Quadratic Programming with augmented Lagrangian — handles equality + inequality constraints. Solves QP subproblem at each iteration.
 - [ ] **2.111** Trust-region (dogleg): globally convergent, robust for non-convex problems. Adaptively adjusts trust-region radius.
 - [x] **2.112** CMA-ES: Covariance Matrix Adaptation Evolution Strategy — gradient-free, excellent for non-convex, multimodal problems. sep-CMA-ES variant for high-dimensional (>100 vars).
