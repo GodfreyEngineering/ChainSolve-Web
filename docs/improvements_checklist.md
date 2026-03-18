@@ -266,8 +266,8 @@
 - [x] **2.125** FMU import: load FMI 2.0/3.0 FMUs — parse modelDescription.xml, create block ports from FMU variables, call FMU C API during evaluation via WASM interface. Supports model exchange and co-simulation modes.
 - [x] **2.126** FMU export: package a ChainSolve subgraph as an FMU zip — generate C code from Rust computation graph, produce modelDescription.xml, package as standard FMU. Enables HIL integration.
 - [x] **2.127** PythonScript: execute Python in sandboxed Pyodide (WASM-compiled CPython 3.11) — access NumPy, SciPy, scikit-learn, pandas. Input ports become Python variables, output is Python return value.
-- [ ] **2.128** CustomRust: write custom Rust block logic — compiled server-side or to WASM. Hot-reloading for development. Block trait implementation with typed ports.
-- [ ] **2.129** SubGraph: collapse group of blocks into reusable parameterised composite block (like Houdini's Digital Assets) — exposed ports become the SubGraph's ports. Saved to user's template library.
+- [x] **2.128** CustomRust: write custom Rust block logic — compiled server-side or to WASM. Hot-reloading for development. Block trait implementation with typed ports.
+- [x] **2.129** SubGraph: collapse group of blocks into reusable parameterised composite block (like Houdini's Digital Assets) — exposed ports become the SubGraph's ports. Saved to user's template library.
 - [x] **2.130** Assertion: runtime check — verify value is in range, correct type, correct dimensions. Pass = green indicator, Fail = red with message. For validation workflows.
 - [x] **2.131** Timer: measure wall-clock and CPU time for connected computation — identify performance bottlenecks
 - [x] **2.132** Logger: record time-series data from any port to structured log (Supabase table) — for post-processing and experiment tracking

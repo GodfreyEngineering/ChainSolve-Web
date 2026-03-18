@@ -69,6 +69,10 @@ import { CodeBlockNode } from './nodes/CodeBlockNode'
 import { TirFileInputNode } from './nodes/TirFileInputNode'
 import { Viewport3DNode } from './nodes/Viewport3DNode'
 import { OnnxInferenceNode } from './nodes/OnnxInferenceNode'
+import { FmuImportNode } from './nodes/FmuImportNode'
+import { PythonScriptNode } from './nodes/PythonScriptNode'
+import { CustomRustNode } from './nodes/CustomRustNode'
+import { Hdf5ImportNode } from './nodes/Hdf5ImportNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -242,6 +246,10 @@ const NODE_TYPES = {
   csTirFileInput: TirFileInputNode,
   csViewport3D: Viewport3DNode,
   csOnnxInference: OnnxInferenceNode,
+  csFmuImport: FmuImportNode,
+  csPythonScript: PythonScriptNode,
+  csCustomRust: CustomRustNode,
+  csHdf5Import: Hdf5ImportNode,
 } as const
 
 const EDGE_TYPES = {

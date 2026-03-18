@@ -102,6 +102,7 @@ export type NodeKind =
   | 'csFmuImport'
   | 'csPythonScript'
   | 'csCustomRust'
+  | 'csHdf5Import'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

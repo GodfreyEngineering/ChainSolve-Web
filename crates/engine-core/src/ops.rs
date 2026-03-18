@@ -7291,6 +7291,17 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── HDF5 Export (4.7) ────────────────────────────────────────────────
+        "data.hdf5Export" => {
+            // HDF5 file generation runs in the browser via h5wasm.
+            // The engine passes through the input data so downstream blocks
+            // can observe it; the UI node handles the actual file download.
+            match inputs.get("data") {
+                Some(v) => v.clone(),
+                None => Value::error("data.hdf5Export: 'data' input required (Table or Vector)"),
+            }
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }
