@@ -1672,6 +1672,12 @@
     "snapshots": "גרסאות",
     "timeline": "ציר זמן"
   },
+  "scope": {
+    "noSignal": "אין אות",
+    "min": "מינ׳",
+    "max": "מקס׳",
+    "samples": "נק׳"
+  },
   "restInput": {
     "value": "ערך",
     "fetching": "מאחזר…",

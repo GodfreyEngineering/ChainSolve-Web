@@ -2175,6 +2175,12 @@
     "snapshots": "Versioni",
     "timeline": "Cronologia"
   },
+  "scope": {
+    "noSignal": "Nessun segnale",
+    "min": "min",
+    "max": "max",
+    "samples": "pts"
+  },
   "restInput": {
     "value": "Valore",
     "fetching": "Recupero…",

@@ -81,6 +81,7 @@ export type NodeKind =
   | 'csAssertion'
   | 'csWebSocket'
   | 'csRestApi'
+  | 'csScope'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

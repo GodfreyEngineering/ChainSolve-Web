@@ -91,6 +91,7 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csAssertion',
   'csWebSocket',
   'csRestApi',
+  'csScope',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {

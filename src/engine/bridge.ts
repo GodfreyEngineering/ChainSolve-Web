@@ -70,7 +70,8 @@ export function toEngineSnapshot(
       // 11.14: testBlock is a display pass-through in the engine; test logic runs in the UI.
       // 2.130: assertion is a UI-only validation block; engine treats it as pass-through display.
       // 4.19: wsInput is remapped to 'number' — node.data.value is the live WebSocket value.
-      let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock' || data.blockType === 'assertion'
+      // 6.14: scope is a UI-only visualization block; engine treats it as pass-through display.
+      let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock' || data.blockType === 'assertion' || data.blockType === 'scope'
         ? 'display'
         : data.blockType === 'wsInput'
           ? 'number'
