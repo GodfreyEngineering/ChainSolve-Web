@@ -55,11 +55,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Generate Rust docs
+        # Use explicit features to avoid enabling native-cuda (requires CUDA toolkit).
         run: |
           cargo doc \
             --workspace \
             --no-deps \
-            --all-features \
+            --features engine-core/high-precision,engine-core/faer,engine-core/parallel \
             --exclude chainsolve-desktop
         env:
           # Rustdoc uses RUSTDOCFLAGS for extra flags
