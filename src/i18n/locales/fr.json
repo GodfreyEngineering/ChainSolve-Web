@@ -2555,7 +2555,8 @@
     "engineError": "Erreur",
     "snapToGrid": "Aligner sur la grille",
     "nodes": "Nodes",
-    "edges": "Edges"
+    "edges": "Edges",
+    "simCycle": "cycle"
   },
   "panels": {
     "view": "Affichage",

@@ -2619,7 +2619,8 @@
     "edges": "Edges",
     "stale": "Stale — re-run needed",
     "pendingChanges": "pending",
-    "deferred": "Deferred"
+    "deferred": "Deferred",
+    "simCycle": "cycle"
   },
   "history": {
     "confirmRestore": "Restore this snapshot? Current state will be autosaved first.",

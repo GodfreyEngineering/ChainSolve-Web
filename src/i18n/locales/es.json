@@ -2555,7 +2555,8 @@
     "engineError": "Error",
     "snapToGrid": "Ajustar a cuadricula",
     "nodes": "Nodes",
-    "edges": "Edges"
+    "edges": "Edges",
+    "simCycle": "ciclo"
   },
   "panels": {
     "view": "Vista",

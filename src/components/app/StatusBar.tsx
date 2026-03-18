@@ -7,6 +7,7 @@
 
 import { useTranslation } from 'react-i18next'
 import { useStatusBarStore, type EngineStatus } from '../../stores/statusBarStore'
+import { useSimulationStatusStore } from '../../stores/simulationStatusStore'
 import { useCanvasesStore } from '../../stores/canvasesStore'
 import { Circle, AlertCircle, Loader2, Grid3X3, FileSpreadsheet } from 'lucide-react'
 
@@ -35,6 +36,12 @@ export function StatusBar() {
   const evalMode = useStatusBarStore((s) => s.evalMode)
 
   const exportProgress = useStatusBarStore((s) => s.exportProgress)
+
+  // 8.8: Simulation status — show the first running task in the status bar
+  const runningSimTasks = useSimulationStatusStore((s) =>
+    Object.values(s.tasks).filter((t) => t.status === 'running'),
+  )
+  const primarySim = runningSimTasks[0] ?? null
 
   const canvases = useCanvasesStore((s) => s.canvases)
   const activeCanvasId = useCanvasesStore((s) => s.activeCanvasId)
@@ -83,6 +90,25 @@ export function StatusBar() {
         <div className="statusbar-center">
           <Loader2 size={12} className="statusbar-spin" />
           <span className="statusbar-item">{exportProgress}</span>
+        </div>
+      )}
+      {/* 8.8: Simulation status — "Simulating (cycle 3/10)" or "Training (epoch 47/100)" */}
+      {primarySim && !exportProgress && (
+        <div className="statusbar-center">
+          <Loader2 size={12} className="statusbar-spin" />
+          <span className="statusbar-item" title={primarySim.label}>
+            {primarySim.label}
+            {primarySim.totalCycles > 1
+              ? ` (${t('statusBar.simCycle', 'cycle')} ${primarySim.cycle}/${primarySim.totalCycles})`
+              : primarySim.totalIterations > 0
+                ? ` (${primarySim.iteration}/${primarySim.totalIterations})`
+                : ''}
+          </span>
+          {runningSimTasks.length > 1 && (
+            <span className="statusbar-item" style={{ opacity: 0.6 }}>
+              +{runningSimTasks.length - 1}
+            </span>
+          )}
         </div>
       )}
       <div className="statusbar-right">

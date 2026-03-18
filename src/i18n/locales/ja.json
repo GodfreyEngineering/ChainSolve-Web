@@ -2615,7 +2615,8 @@
     "engineError": "Error",
     "snapToGrid": "Snap to grid",
     "nodes": "Nodes",
-    "edges": "Edges"
+    "edges": "Edges",
+    "simCycle": "サイクル"
   },
   "history": {
     "confirmRestore": "Restore this snapshot? Current state will be autosaved first.",

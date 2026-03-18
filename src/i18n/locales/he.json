@@ -2498,7 +2498,8 @@
     "engineIdle": "מוכן",
     "engineComputing": "מחשב",
     "engineError": "שגיאה",
-    "snapToGrid": "הצמד לרשת"
+    "snapToGrid": "הצמד לרשת",
+    "simCycle": "מחזור"
   },
   "panels": {
     "view": "תצוגה",

@@ -2503,7 +2503,8 @@
     "engineIdle": "Inattivo",
     "engineComputing": "Calcolo",
     "engineError": "Errore",
-    "snapToGrid": "Aggancia alla griglia"
+    "snapToGrid": "Aggancia alla griglia",
+    "simCycle": "ciclo"
   },
   "panels": {
     "view": "Vista",

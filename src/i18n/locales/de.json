@@ -2555,7 +2555,8 @@
     "engineError": "Fehler",
     "snapToGrid": "Am Raster einrasten",
     "nodes": "Nodes",
-    "edges": "Edges"
+    "edges": "Edges",
+    "simCycle": "Zyklus"
   },
   "panels": {
     "view": "Ansicht",
