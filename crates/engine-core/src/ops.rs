@@ -2241,7 +2241,7 @@ fn evaluate_node_inner(
             let eps = if (cr - 1.0).abs() < 1e-6 {
                 ntu / (1.0 + ntu)
             } else {
-                let exp_val = ((-ntu * (1.0 - cr)).exp());
+                let exp_val = (-ntu * (1.0 - cr)).exp();
                 (1.0 - exp_val) / (1.0 - cr * exp_val)
             };
             crate::types::build_table(&["eps", "Q"], &[vec![eps], vec![eps * q_max]])
@@ -6088,7 +6088,7 @@ fn evaluate_node_inner(
 
         "ode.pde1d" => {
             use crate::ode::pde1d::{
-                Pde1dConfig, BcType, parse_pde_type, parse_bc, solve_pde1d, pde1d_result_to_table,
+                Pde1dConfig, parse_pde_type, parse_bc, solve_pde1d, pde1d_result_to_table,
             };
 
             let pde_type_str = data.get("pde_type").and_then(|v| v.as_str()).unwrap_or("heat");
@@ -6577,7 +6577,7 @@ fn evaluate_node_inner(
             let result = bayesian_optimise(&cfg);
 
             // Build trial history table: [trial, param0..paramN-1, score]
-            let mut col_names: Vec<&str> = vec!["trial"];
+            let col_names: Vec<&str> = vec!["trial"];
             let name_refs: Vec<String> = names.clone();
             let n_hist = result.history.len();
             let trial_col: Vec<f64> = (0..n_hist).map(|i| (i + 1) as f64).collect();

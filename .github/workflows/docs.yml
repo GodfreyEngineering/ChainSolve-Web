@@ -60,7 +60,7 @@ jobs:
             --workspace \
             --no-deps \
             --all-features \
-            --document-private-items=false
+            --exclude chainsolve-desktop
         env:
           # Rustdoc uses RUSTDOCFLAGS for extra flags
           RUSTDOCFLAGS: >-

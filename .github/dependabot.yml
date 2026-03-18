@@ -1,68 +1,62 @@
-# Dependabot v2 — dependency update policy.
-#
-# Policy:
-#   - npm patch+minor updates: grouped into 1 weekly PR (low risk).
-#   - npm major updates: individual PRs, limited to 3 open at a time.
-#   - GitHub Actions: grouped into 1 weekly PR.
-#   - Cargo: grouped into 1 weekly PR.
-#
-# See docs/DEV/DEPENDENCY_POLICY.md for the rationale.
-
 version: 2
+
 updates:
-  # ── npm dependencies ──────────────────────────────────────────────────────
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: "weekly"
-      day: "monday"
-    reviewers:
-      - "GodfreyEngineering"
-    labels:
-      - "dependencies"
-      - "npm"
-    open-pull-requests-limit: 5
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/London
     groups:
-      npm-patch-minor:
-        applies-to: version-updates
-        update-types:
-          - "minor"
-          - "patch"
-
-  # ── Rust / Cargo dependencies ─────────────────────────────────────────────
-  - package-ecosystem: "cargo"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    reviewers:
-      - "GodfreyEngineering"
-    labels:
-      - "dependencies"
-      - "rust"
-    open-pull-requests-limit: 3
-    groups:
-      cargo-all:
-        applies-to: version-updates
-        update-types:
-          - "major"
-          - "minor"
-          - "patch"
-
-  # ── GitHub Actions ────────────────────────────────────────────────────────
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    reviewers:
-      - "GodfreyEngineering"
-    labels:
-      - "dependencies"
-      - "github-actions"
-    open-pull-requests-limit: 3
-    groups:
-      gha-all:
-        applies-to: version-updates
+      vitest:
         patterns:
-          - "*"
+          - "vitest"
+          - "@vitest/*"
+      eslint:
+        patterns:
+          - "eslint"
+          - "@eslint/*"
+          - "typescript-eslint"
+          - "eslint-plugin-*"
+      storybook:
+        patterns:
+          - "storybook"
+          - "@storybook/*"
+      playwright:
+        patterns:
+          - "@playwright/test"
+          - "@axe-core/playwright"
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/*"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+          - "@vitejs/plugin-react"
+          - "react-i18next"
+          - "react-router-dom"
+    open-pull-requests-limit: 10
+    versioning-strategy: auto
+
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 5

@@ -42,7 +42,7 @@ fn eval(expr: &str, vars: &HashMap<String, f64>) -> f64 {
 /// Build the n×n matrix A from expression strings (row-major) evaluated at params.
 /// `a_exprs[i * n + j]` is the expression for A[i,j].
 /// Variables available in expressions: param names.
-fn build_matrix(a_exprs: &[String], n: usize, params: &HashMap<String, f64>) -> Vec<f64> {
+fn build_matrix(a_exprs: &[String], _n: usize, params: &HashMap<String, f64>) -> Vec<f64> {
     a_exprs.iter().map(|e| eval(e, params)).collect::<Vec<_>>()
 }
 

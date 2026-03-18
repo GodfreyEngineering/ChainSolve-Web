@@ -67,6 +67,7 @@ const D_TIME:    Dimension = dim!(0, 0, 1, 0, 0, 0, 0);
 const D_CURRENT: Dimension = dim!(0, 0, 0, 1, 0, 0, 0);
 const D_TEMP:    Dimension = dim!(0, 0, 0, 0, 1, 0, 0);
 const D_AMOUNT:  Dimension = dim!(0, 0, 0, 0, 0, 1, 0);
+#[allow(dead_code)]
 const D_LUM:     Dimension = dim!(0, 0, 0, 0, 0, 0, 1);
 const D_FORCE:   Dimension = dim!(1, 1,-2, 0, 0, 0, 0);
 const D_PRESSURE:Dimension = dim!(1,-1,-2, 0, 0, 0, 0);
@@ -84,6 +85,7 @@ const D_CAPAC:   Dimension = dim!(-1,-2,4,2, 0, 0, 0);
 const D_INDUCT:  Dimension = dim!(1, 2,-2,-2, 0, 0, 0);
 const D_FREQ:    Dimension = dim!(0, 0,-1, 0, 0, 0, 0);
 const D_ANGLE:   Dimension = Dimension::DIMENSIONLESS;
+#[allow(dead_code)]
 const D_TORQUE:  Dimension = D_ENERGY; // N⋅m = kg⋅m²/s²
 const D_VISC_DYN:Dimension = dim!(1,-1,-1, 0, 0, 0, 0); // Pa⋅s
 const D_VISC_KIN:Dimension = dim!(0, 2,-1, 0, 0, 0, 0); // m²/s

@@ -11,6 +11,10 @@
 --   - Full-text search index on title + description + tags
 --   - Soft delete via `deleted_at` (GDPR)
 --   - Foreign key to public.projects
+--
+-- NOTE: `search_vector` is maintained by a trigger (not GENERATED ALWAYS AS)
+-- because `to_tsvector(regconfig, text)` is STABLE, not IMMUTABLE, and
+-- PostgreSQL requires generated columns to use only IMMUTABLE functions.
 
 SET search_path = public;
 
@@ -42,12 +46,8 @@ CREATE TABLE IF NOT EXISTS public.demonstrations (
   updated_at       timestamptz NOT NULL DEFAULT now(),
   deleted_at       timestamptz,         -- soft delete
 
-  -- Full-text search
-  search_vector    tsvector GENERATED ALWAYS AS (
-    setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
-    setweight(to_tsvector('english', coalesce(description, '')), 'B') ||
-    setweight(to_tsvector('english', coalesce(array_to_string(tags, ' '), '')), 'C')
-  ) STORED
+  -- Full-text search vector (maintained by trigger below)
+  search_vector    tsvector
 );
 
 -- ── Indexes ──────────────────────────────────────────────────────────────────
@@ -66,6 +66,34 @@ CREATE INDEX IF NOT EXISTS demonstrations_search_vector_idx
 CREATE INDEX IF NOT EXISTS demonstrations_tags_idx
   ON public.demonstrations USING GIN (tags)
   WHERE deleted_at IS NULL;
+
+-- ── search_vector trigger ────────────────────────────────────────────────────
+--
+-- Keeps search_vector in sync with title, description, tags on every
+-- INSERT or UPDATE.  Using a trigger instead of GENERATED ALWAYS AS because
+-- to_tsvector() is STABLE (depends on the active configuration), and
+-- PostgreSQL only allows IMMUTABLE functions in generated column expressions.
+
+CREATE OR REPLACE FUNCTION public.demonstrations_update_search_vector()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  NEW.search_vector :=
+    setweight(to_tsvector('english', coalesce(NEW.title, '')), 'A') ||
+    setweight(to_tsvector('english', coalesce(NEW.description, '')), 'B') ||
+    setweight(to_tsvector('english', coalesce(array_to_string(NEW.tags, ' '), '')), 'C');
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS set_demonstrations_search_vector ON public.demonstrations;
+CREATE TRIGGER set_demonstrations_search_vector
+  BEFORE INSERT OR UPDATE OF title, description, tags
+  ON public.demonstrations
+  FOR EACH ROW EXECUTE FUNCTION public.demonstrations_update_search_vector();
 
 -- ── updated_at trigger ───────────────────────────────────────────────────────
 

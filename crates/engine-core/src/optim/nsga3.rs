@@ -12,7 +12,7 @@
 //!   - Zhang & Li (2007) "MOEA/D: A Multiobjective Evolutionary Algorithm Based
 //!     on Decomposition", IEEE TEVC.
 
-use crate::optim::{DesignVar, OptimResult};
+use crate::optim::DesignVar;
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -274,7 +274,7 @@ fn make_individual(x: Vec<f64>, objectives: &[Box<dyn Fn(&[f64]) -> f64>]) -> Mo
 /// Run NSGA-III.
 pub fn nsga3(cfg: &Nsga3Config) -> MoResult {
     let m = cfg.objectives.len();
-    let d = cfg.vars.len();
+    let _d = cfg.vars.len();
     let mut rng = Rng(cfg.seed);
     let mut n_evals = 0;
 

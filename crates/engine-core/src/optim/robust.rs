@@ -26,7 +26,7 @@
 //!
 //! Returns a Table with columns: `k`, `mean`, `std`, `robust_obj`, `x0`, `x1`, …
 
-use super::{DesignVar, OptimResult};
+use super::DesignVar;
 use crate::types::Value;
 
 /// Robust design configuration.
@@ -94,7 +94,7 @@ fn estimate_moments<F>(
 where
     F: Fn(&[f64]) -> f64,
 {
-    let n = x.len();
+    let _n = x.len();
     let mut vals = Vec::with_capacity(n_mc);
 
     for _ in 0..n_mc {
@@ -146,7 +146,7 @@ where
         let n_mc = config.n_mc;
 
         // Build robust objective closure
-        let mut rng_inner = Rng(config.seed.wrapping_add(ki as u64 * 1000 + 1));
+        let _rng_inner = Rng(config.seed.wrapping_add(ki as u64 * 1000 + 1));
         let robust_f = |x: &[f64]| {
             // Use fixed random draws for reproducibility during optimization
             let mut r = Rng(config.seed.wrapping_add(ki as u64 * 9999));

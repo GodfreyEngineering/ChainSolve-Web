@@ -76,6 +76,7 @@ impl<'a> Cursor<'a> {
         self.buf.len().saturating_sub(self.pos)
     }
 
+    #[allow(dead_code)]
     fn peek_u32(&self) -> Option<u32> {
         if self.pos + 4 > self.buf.len() { return None; }
         let b: [u8; 4] = self.buf[self.pos..self.pos+4].try_into().ok()?;
@@ -309,7 +310,7 @@ fn parse_matrix(data: &[u8], le: bool) -> Option<MatVar> {
     }
 
     // ── Sub-element 4: Real Data ──────────────────────────────────────────────
-    let (rdt, rdn, rds) = c.read_tag()?;
+    let (rdt, rdn, _rds) = c.read_tag()?;
     let numel = rows * cols;
 
     let class_name: &'static str = match mx_class {

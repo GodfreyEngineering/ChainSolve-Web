@@ -37,7 +37,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Rust tests
-        run: cargo test --workspace
+        # Exclude src-tauri: it requires GTK/WebKit system libraries not present
+        # on ubuntu-latest runners. Desktop builds are handled by tauri.yml on release.
+        run: cargo test --workspace --exclude chainsolve-desktop
 
   # ── Job 2: WASM build + Node checks + Vite build ──────────────────────────
   # Runs in parallel with rust_tests.  Produces the dist/ artifact consumed by

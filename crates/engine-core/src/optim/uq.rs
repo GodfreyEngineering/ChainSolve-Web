@@ -459,7 +459,7 @@ pub fn pce_to_table(result: &PceResult, var_names: &[String]) -> Value {
         "statistic".to_string(),
         "value".to_string(),
     ];
-    let mut rows: Vec<Vec<f64>> = vec![
+    let rows: Vec<Vec<f64>> = vec![
         vec![0.0, result.mean],
         vec![1.0, result.variance],
         vec![2.0, result.std],

@@ -81,7 +81,7 @@ where
     let mu = lambda / 2;
 
     // Weights (positive for selection, zero for rest)
-    let mut weights: Vec<f64> = (0..mu).map(|i| ((lambda as f64 / 2.0 + 0.5).ln() - ((i + 1) as f64).ln())).collect();
+    let mut weights: Vec<f64> = (0..mu).map(|i| (lambda as f64 / 2.0 + 0.5).ln() - ((i + 1) as f64).ln()).collect();
     let w_sum: f64 = weights.iter().sum();
     for w in &mut weights { *w /= w_sum; }
 

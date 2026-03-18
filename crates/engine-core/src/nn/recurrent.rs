@@ -29,7 +29,6 @@
 //! For trained weights, load from a JSON blob in block data.
 
 use crate::types::Value;
-use super::activation;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -44,6 +43,7 @@ impl WeightInit {
         (self.0 as f64) / (u64::MAX as f64)
     }
 
+    #[allow(dead_code)]
     fn next_normal(&mut self) -> f64 {
         let u1 = self.next_f64().max(1e-15);
         let u2 = self.next_f64();
@@ -213,7 +213,7 @@ impl GruLayer {
 // ── Block-level functions ─────────────────────────────────────────────────────
 
 /// Parse a sequence from a Table input: each row is one timestep.
-pub fn table_to_sequence(columns: &[String], rows: &[Vec<f64>]) -> Vec<Vec<f64>> {
+pub fn table_to_sequence(_columns: &[String], rows: &[Vec<f64>]) -> Vec<Vec<f64>> {
     rows.to_vec()
 }
 

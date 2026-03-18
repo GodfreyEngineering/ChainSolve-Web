@@ -1770,7 +1770,7 @@ pub fn groebner_basis(generators: &[MultiPoly], max_iterations: usize) -> Groebn
 }
 
 /// Reduce a Gröbner basis: remove redundant generators and inter-reduce.
-fn reduce_basis(basis: &[MultiPoly], vars: &[String], order: MonomialOrder) -> Vec<MultiPoly> {
+fn reduce_basis(basis: &[MultiPoly], _vars: &[String], order: MonomialOrder) -> Vec<MultiPoly> {
     // Step 1: Remove generators whose LM is divisible by another generator's LM
     let mut minimal: Vec<MultiPoly> = Vec::new();
     for (i, gi) in basis.iter().enumerate() {

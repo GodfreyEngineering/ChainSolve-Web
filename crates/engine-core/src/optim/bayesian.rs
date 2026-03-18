@@ -58,6 +58,7 @@ fn matern52(x1: &[f64], x2: &[f64], length_scale: f64, sigma_f: f64) -> f64 {
 }
 
 /// Gaussian Process surrogate fitted to (X, y) observations.
+#[allow(dead_code)]
 struct GpSurrogate {
     x_train: Vec<Vec<f64>>,
     y_train: Vec<f64>,
@@ -344,7 +345,7 @@ pub fn bayesian_optimise(cfg: &BayesOptConfig) -> OptimResult {
         let y_best = y_obs[best_idx];
 
         // Fit GP with automatic length scale (geometric mean of variable ranges)
-        let length_scale = cfg.vars.iter().map(|v| (v.max - v.min)).product::<f64>().powf(1.0 / d as f64) * 0.5;
+        let length_scale = cfg.vars.iter().map(|v| v.max - v.min).product::<f64>().powf(1.0 / d as f64) * 0.5;
         let sigma_f = (y_obs.iter().map(|&y| y.powi(2)).sum::<f64>() / y_obs.len() as f64).sqrt().max(0.1);
         let sigma_n = 1e-3;
 

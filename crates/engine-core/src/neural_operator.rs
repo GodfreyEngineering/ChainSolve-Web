@@ -20,12 +20,14 @@ use crate::rng::Xoshiro256;
 
 // ── Complex arithmetic ────────────────────────────────────────────────────────
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, Debug, Default)]
 struct C {
     re: f64,
     im: f64,
 }
 
+#[allow(dead_code)]
 impl C {
     fn mul(self, rhs: C) -> C {
         C { re: self.re * rhs.re - self.im * rhs.im, im: self.re * rhs.im + self.im * rhs.re }
@@ -37,6 +39,7 @@ impl C {
 // ── FFT helpers ───────────────────────────────────────────────────────────────
 
 /// Pad or truncate signal to next power of two.
+#[allow(dead_code)]
 fn pad_to_pow2(x: &[f64]) -> Vec<f64> {
     let n = x.len();
     let mut p = 1usize;
@@ -256,6 +259,7 @@ impl FnoLayer {
     }
 }
 
+#[allow(dead_code)]
 pub struct FnoModel {
     lift: PointwiseLinear,
     layers: Vec<FnoLayer>,

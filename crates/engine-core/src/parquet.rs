@@ -215,6 +215,7 @@ struct ColumnMetaData {
     ptype: i32,
     #[allow(dead_code)]
     codec: i32,
+    #[allow(dead_code)]
     num_values: i64,
     data_page_offset: i64,
     #[allow(dead_code)]
@@ -358,12 +359,10 @@ fn read_row_group(c: &mut ThriftCursor<'_>) -> ParquetResult<RowGroup> {
 }
 
 fn read_file_metadata(c: &mut ThriftCursor<'_>) -> ParquetResult<FileMetaData> {
-    let mut version = 0i32;
     let mut schema = Vec::new();
     let mut num_rows = 0i64;
     let mut row_groups = Vec::new();
     let mut last_field: i16 = 0;
-    let _ = version;
     loop {
         let b = c.read_byte()?;
         let ttype = b & 0x0F;
@@ -372,7 +371,7 @@ fn read_file_metadata(c: &mut ThriftCursor<'_>) -> ParquetResult<FileMetaData> {
         let field_id = if delta == 0 { c.read_varint_i64()? as i16 } else { last_field + delta };
         last_field = field_id;
         match (field_id, ttype) {
-            (1, 4) | (1, 5) => { version = c.read_i32()?; }
+            (1, 4) | (1, 5) => { let _ = c.read_i32()?; }
             (2, 11) => { // schema: list<SchemaElement>
                 let (_, n) = c.read_list_header()?;
                 for _ in 0..n { schema.push(read_schema_element(c)?); }

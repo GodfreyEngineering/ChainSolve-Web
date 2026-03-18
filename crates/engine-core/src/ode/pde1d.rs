@@ -11,8 +11,7 @@
 //! Time integration: RK4 (fixed step) on the resulting ODE system.
 //! Boundary conditions: Dirichlet (fixed value) or Neumann (zero flux).
 
-use crate::ode::{OdeSolverConfig, OdeResult};
-use std::collections::HashMap;
+use crate::ode::OdeSolverConfig;
 
 /// PDE type supported by the 1D MOL solver.
 #[derive(Debug, Clone, Copy, PartialEq)]

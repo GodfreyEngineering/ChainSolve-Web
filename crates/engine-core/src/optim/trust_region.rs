@@ -142,13 +142,13 @@ where
 
         // ── 3. Dogleg step ────────────────────────────────────────────────
         // gᵀHg
-        let gtHg: f64 = (0..n)
+        let gt_hg: f64 = (0..n)
             .map(|i| g[i] * (0..n).map(|j| hess[i][j] * g[j]).sum::<f64>())
             .sum();
 
         // Cauchy step magnitude and direction
         let g_sq: f64 = g.iter().map(|&gi| gi * gi).sum();
-        let tau_sd = if gtHg > 1e-15 { g_sq / gtHg } else { delta / g_norm.max(1e-15) };
+        let tau_sd = if gt_hg > 1e-15 { g_sq / gt_hg } else { delta / g_norm.max(1e-15) };
         let p_sd: Vec<f64> = g.iter().map(|&gi| -tau_sd * gi).collect();
         let p_sd_norm: f64 = p_sd.iter().map(|&pi| pi * pi).sum::<f64>().sqrt();
 
@@ -206,10 +206,10 @@ where
         // Predicted reduction: m(0) - m(p) = -gᵀp - 0.5 pᵀHp
         let pred: f64 = {
             let gtp: f64 = (0..n).map(|i| g[i] * step[i]).sum();
-            let ptHp: f64 = (0..n)
+            let pt_hp: f64 = (0..n)
                 .map(|i| step[i] * (0..n).map(|j| hess[i][j] * step[j]).sum::<f64>())
                 .sum();
-            -gtp - 0.5 * ptHp
+            -gtp - 0.5 * pt_hp
         };
 
         let rho = if pred.abs() < 1e-15 { 1.0 } else { actual / pred };
