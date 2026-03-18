@@ -156,31 +156,31 @@
 - [x] **2.45** Fluids: Q=Av, v=Q/A, ṁ=ρQ, Reynolds Re, q=½ρv², Hagen-Poiseuille, Darcy-Weisbach, buoyancy F=ρVg (8 blocks)
 - [x] **2.46** Thermo: ideal gas PV=nRT (P and T forms), Q=mcΔT, conduction Q̇=kAΔT/L, convection Q̇=hAΔT, Carnot η, thermal expansion ΔL=αLΔT (7 blocks)
 - [x] **2.47** Structural: beam deflection (simply supported PL³/48EI, cantilever PL³/3EI), beam moment Pab/L, Euler buckling, Von Mises, combined stress, steel check utilisation, Terzaghi bearing capacity, ACI concrete moment (9 blocks)
-- [ ] **2.48** Mass, Spring, Damper, RigidBody components: define with properties → connect → automatic equation assembly for multi-body systems
-- [ ] **2.49** Joint types: revolute (1 DOF rotation), prismatic (1 DOF translation), spherical (3 DOF), universal (2 DOF), fixed (0 DOF) — for mechanism modeling
-- [ ] **2.50** ContactModel: penalty-based contact with Coulomb friction (μ_s, μ_k) and optional Stribeck curve — essential for impact and mechanism simulation
-- [ ] **2.51** KinematicChain: forward kinematics (DH parameters → end-effector pose), inverse kinematics (numerical, Jacobian-based) for serial mechanisms/robot arms
+- [x] **2.48** Mass, Spring, Damper, RigidBody components: define with properties → connect → automatic equation assembly for multi-body systems
+- [x] **2.49** Joint types: revolute (1 DOF rotation), prismatic (1 DOF translation), spherical (3 DOF), universal (2 DOF), fixed (0 DOF) — for mechanism modeling
+- [x] **2.50** ContactModel: penalty-based contact with Coulomb friction (μ_s, μ_k) and optional Stribeck curve — essential for impact and mechanism simulation
+- [x] **2.51** KinematicChain: forward kinematics (DH parameters → end-effector pose), inverse kinematics (numerical, Jacobian-based) for serial mechanisms/robot arms
 
 #### Electrical (existing + new)
 
 - [x] **2.52** Basic: Ohm's V=IR, power P=VI/I²R/V²R, capacitance C=Q/V, series/parallel resistance (7 blocks)
 - [x] **2.53** Extended: RC/RL time constant, RLC resonant frequency/Q factor, voltage/current divider, capacitive/inductive reactance, RC filter cutoff, transformer voltage, three-phase power, Shockley diode (12 blocks)
-- [ ] **2.54** Active components: Diode (exponential I-V), MOSFET (square-law model), IGBT (on/off with voltage drop) — for power electronics simulation
-- [ ] **2.55** OpAmp (ideal + finite gain), PWMGenerator (duty cycle, frequency), HBridge (4-switch), ThreePhaseInverter (6-switch SPWM) — for motor drive design
-- [ ] **2.56** DCMotor (back-EMF, armature resistance, inductance, torque constant), PMSMMotor (dq-frame Park transform, flux linkage, torque equation) — for electromechanical co-simulation
-- [ ] **2.57** Battery: equivalent circuit model (Thevenin: OCV + R_series + R_parallel||C) with SOC lookup table, thermal coupling (resistive heating), aging model (capacity fade)
+- [x] **2.54** Active components: Diode (exponential I-V), MOSFET (square-law model), IGBT (on/off with voltage drop) — for power electronics simulation
+- [x] **2.55** OpAmp (ideal + finite gain), PWMGenerator (duty cycle, frequency), HBridge (4-switch), ThreePhaseInverter (6-switch SPWM) — for motor drive design
+- [x] **2.56** DCMotor (back-EMF, armature resistance, inductance, torque constant), PMSMMotor (dq-frame Park transform, flux linkage, torque equation) — for electromechanical co-simulation
+- [x] **2.57** Battery: equivalent circuit model (Thevenin: OCV + R_series + R_parallel||C) with SOC lookup table, thermal coupling (resistive heating), aging model (capacity fade)
 
 #### Thermal (existing + new)
 
 - [x] **2.58** Brake thermal: dT/dt = (P_brake - h×A×(T-T_amb)) / (m×c), brake energy E=½m(v1²-v2²), brake power P=E/Δt (3 blocks, 4 tests)
-- [ ] **2.59** ThermalConductor (k×A/L), ThermalCapacitor (m×c), Convection (h×A), Radiation (ε×σ×A×(T⁴-T_amb⁴)) — lumped-parameter thermal network components
-- [ ] **2.60** HeatExchanger: ε-NTU method (effectiveness from NTU and Cr) AND LMTD method (log-mean temperature difference) — for heat exchanger sizing and rating
+- [x] **2.59** ThermalConductor (k×A/L), ThermalCapacitor (m×c), Convection (h×A), Radiation (ε×σ×A×(T⁴-T_amb⁴)) — lumped-parameter thermal network components
+- [x] **2.60** HeatExchanger: ε-NTU method (effectiveness from NTU and Cr) AND LMTD method (log-mean temperature difference) — for heat exchanger sizing and rating
 
 #### Fluid (new)
 
-- [ ] **2.61** Pipe (pressure drop from Darcy-Weisbach + minor losses), Valve (Cv characteristic), Pump (H-Q curve interpolation), Accumulator (gas spring), Orifice (sharp-edged flow coefficient)
-- [ ] **2.62** HydraulicCylinder (pressure → force, flow → velocity), HydraulicMotor (pressure → torque) — for hydraulic system simulation
-- [ ] **2.63** FluidProperties: density ρ(T,P), viscosity μ(T), bulk modulus β(T,P) as polynomial fits or lookup tables — for accurate hydraulic simulation
+- [x] **2.61** Pipe (pressure drop from Darcy-Weisbach + minor losses), Valve (Cv characteristic), Pump (H-Q curve interpolation), Accumulator (gas spring), Orifice (sharp-edged flow coefficient)
+- [x] **2.62** HydraulicCylinder (pressure → force, flow → velocity), HydraulicMotor (pressure → torque) — for hydraulic system simulation
+- [x] **2.63** FluidProperties: density ρ(T,P), viscosity μ(T), bulk modulus β(T,P) as polynomial fits or lookup tables — for accurate hydraulic simulation
 
 #### Signal/Control (existing + new)
 
