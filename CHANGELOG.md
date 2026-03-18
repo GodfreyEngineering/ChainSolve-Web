@@ -6,18 +6,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added
+### Added (2026-03-17 — Legal & Compliance sprint)
 
-- Single baseline migration for fresh Supabase installs (`0001_baseline_schema.sql`)
+- **Legal document PDF export** via browser print dialog (ToS + Privacy Policy download buttons)
+- **Legal language notice** component for non-English users on all legal pages (16.75)
+- **Enterprise legal pack** generation script (`npm run legal-pack`) assembling DPA template,
+  ROPA, DPIA, breach response, SBOM, licence audits into `ChainSolve_Legal_Pack.zip` (16.82)
+- **SBOM generation** script (`npm run sbom`) — CycloneDX 1.6 JSON via cargo-sbom + cyclonedx-npm (16.81)
+- **Impressum page** at `/de/impressum` satisfying German TMG §5 and Austrian ECG §5 (16.78)
+- **GDPR consent audit table** (`user_consents`) with RLS; recording ToS acceptance, cookie consent,
+  and marketing opt-in to append-only audit log (16.80)
+- **DPA template** (`legal/dpa-template.md`) covering GDPR Art. 28/32 obligations (16.82)
+- **Font licence audit** (`legal/font-licences.md`) — Montserrat + JetBrains Mono both OFL 1.1 (16.8)
+- **Asset licence audit** (`legal/asset-licences.md`) — Lucide React ISC, first-party SVGs (16.9)
+- **Terms of Service** expanded with definitions, 13+/16+ age eligibility, export control +
+  WMD prohibited use, GBP currency, VAT note, free tier limits (3 projects, 500MB), licence grants (16.12)
+- **Cookie Policy page** at `/cookies` with full storage inventory (16.34–16.35)
+- **Privacy Policy** GDPR rewrite (UK/EU GDPR, ePrivacy, COPPA) (16.21–16.33)
+- **DPA references** for all 6 sub-processors with transfer mechanisms (16.39–16.42)
+- **ROPA** (Art. 30 Record of Processing Activities) at `legal/ropa.md` (16.43)
+- **Breach response plan** at `legal/breach-response.md` with ICO 72-hour notification template (16.44)
+- **DPIA screening assessment** at `legal/dpia-assessment.md` (16.45)
+- **Security.txt** at `/.well-known/security.txt` (RFC 9116) (16.50)
+- **Accessibility statement** at `/accessibility` (WCAG 2.1 AA) (16.69)
+- **Licences page** at `/licences` with third-party notice attribution (16.73)
+- **Cookie settings link** in footer and cookie consent banner re-show mechanism (16.74)
+- **Impressum link** in site-wide LegalFooter
+- **Do Not Track** support in observability client (16.38)
+- **Stripe webhook** handlers for `invoice.payment_failed` / `invoice.paid` lifecycle (16.60)
+- **Export control assessment** (`legal/export-control-assessment.md`) — UK SECL / EAR99 (16.70–16.72)
+- **Single baseline migration** for fresh Supabase installs (`0001_baseline_schema.sql`)
 - Supabase bootstrap documentation (`docs/DEV/SUPABASE_BOOTSTRAP.md`)
-- Root `SECURITY.md`, `SUPPORT.md`, `CHANGELOG.md` standard repo docs
-- Verify-ci, env setup, and DB bootstrap sections in root README
 
 ### Changed
 
+- **Terms of Service** sections renumbered (added Definitions as §1); calculation accuracy
+  disclaimer promoted to its own prominent section
 - Archived 54 iterative migrations to `supabase/migrations_archive/`
-- Updated all documentation references to archived migration paths
 - Consolidated scripts with README documentation (M1-2)
+- `COMPANY` in `src/lib/brand.ts` now includes `registeredAddress` and `director` fields
 
 ### Removed
 
