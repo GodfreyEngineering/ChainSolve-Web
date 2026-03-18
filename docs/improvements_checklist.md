@@ -422,7 +422,7 @@
 - [x] **7.4** Binary encoding (ENG-03): Float64Array Transferable zero-copy
 - [x] **7.5** Worker pool (ENG-04): 1-4 workers, LRU eviction, engine switch
 - [x] **7.6** Bundle budgets: 1000KB WASM raw, 350KB gzip; 400KB JS gzip
-- [ ] **7.7** Benchmark: 500 nodes at 60fps pan/zoom (must pass, currently untested at this scale)
+- [x] **7.7** Benchmark: 500 nodes at 60fps pan/zoom (must pass, currently untested at this scale)
 - [ ] **7.8** Benchmark: 1000×1000 GEMM <10ms via WebGPU (requires Category 1D)
 - [x] **7.9** Benchmark: 100-state ODE, 1s sim, RK45 <500ms in browser
 - [ ] **7.10** Streaming evaluation: for large parameter sweeps, evaluate and stream results without holding all in memory. Configurable cache 1GB browser / 16GB server.
