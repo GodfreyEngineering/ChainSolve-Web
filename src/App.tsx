@@ -26,6 +26,7 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const CookiesPage = lazy(() => import('./pages/CookiesPage'))
 const AccessibilityPage = lazy(() => import('./pages/AccessibilityPage'))
 const LicencesPage = lazy(() => import('./pages/LicencesPage'))
+const ImpressumPage = lazy(() => import('./pages/ImpressumPage'))
 
 // Lazy-load docs page (public, not needed on initial load)
 const DocsPage = lazy(() => import('./pages/DocsPage'))
@@ -237,6 +238,14 @@ export default function App() {
         element={
           <Suspense fallback={<RouteSkeleton variant="minimal" />}>
             <LicencesPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/de/impressum"
+        element={
+          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+            <ImpressumPage />
           </Suspense>
         }
       />

@@ -78,6 +78,12 @@ export function LegalFooter() {
         <Link to="/accessibility" style={linkStyle}>
           {t('footer.accessibilityLink', 'Accessibility')}
         </Link>
+        <span style={sepStyle} aria-hidden="true">
+          |
+        </span>
+        <Link to="/de/impressum" style={linkStyle}>
+          Impressum
+        </Link>
       </div>
     </footer>
   )
