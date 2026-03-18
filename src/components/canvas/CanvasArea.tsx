@@ -151,6 +151,9 @@ const LazyAiAssistantPanel = lazy(() =>
 const LazyEvalTimelinePanel = lazy(() =>
   import('./EvalTimelinePanel').then((m) => ({ default: m.EvalTimelinePanel })),
 )
+const LazyExperimentPanel = lazy(() =>
+  import('./ExperimentPanel').then((m) => ({ default: m.ExperimentPanel })),
+)
 import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
 import { useIsMobile } from '../../hooks/useIsMobile'
@@ -3584,6 +3587,16 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         content: (
           <Suspense fallback={null}>
             <LazyEvalTimelinePanel />
+          </Suspense>
+        ),
+      },
+      // 2.103: Experiment tracker panel
+      {
+        id: 'experiments' as DockTab,
+        label: t('dock.experiments', 'Experiments'),
+        content: (
+          <Suspense fallback={null}>
+            <LazyExperimentPanel projectId={telemetryProjectId ?? null} />
           </Suspense>
         ),
       },

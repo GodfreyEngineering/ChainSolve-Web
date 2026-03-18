@@ -24,6 +24,7 @@ export type DockTab =
   | 'channels'
   | 'snapshots'
   | 'timeline'
+  | 'experiments'
 
 export interface DockPanel {
   id: DockTab
@@ -85,7 +86,9 @@ function loadTab(): DockTab {
       v === 'history' ||
       v === 'notes' ||
       v === 'channels' ||
-      v === 'snapshots'
+      v === 'snapshots' ||
+      v === 'experiments' ||
+      v === 'timeline'
     )
       return v
   } catch {
