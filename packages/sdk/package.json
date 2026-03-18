@@ -1,0 +1,34 @@
+{
+  "name": "@chainsolve/sdk",
+  "version": "0.1.0",
+  "description": "JS/TS SDK for the ChainSolve computation engine — programmatic graph construction and execution (10.7)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "chainsolve",
+    "computation",
+    "graph",
+    "engineering",
+    "matlab-alternative"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
