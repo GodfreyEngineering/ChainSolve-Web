@@ -25,6 +25,7 @@ import {
   getStraightPath,
   getSmoothStepPath,
   useNodes,
+  useEdges,
   type EdgeProps,
 } from '@xyflow/react'
 import { useComputedValue } from '../../../contexts/ComputedContext'
@@ -98,6 +99,7 @@ function AnimatedEdgeInner({
   source,
   target,
   selected,
+  sourceHandle,
 }: EdgeProps) {
   const sourceValue = useComputedValue(source)
   const { edgeBadgesEnabled } = useCanvasSettings()
@@ -116,6 +118,23 @@ function AnimatedEdgeInner({
   const [hovered, setHovered] = useState(false)
   const onMouseEnter = useCallback(() => setHovered(true), [])
   const onMouseLeave = useCallback(() => setHovered(false), [])
+
+  // 3.23: Edge bundling — group edges by (source, sourceHandle) and offset perpendicular.
+  const edgeBundlingEnabled = usePreferencesStore((s) => s.edgeBundlingEnabled)
+  const allEdges = useEdges()
+  const { bundleOffset, bundleTotal } = useMemo(() => {
+    if (!edgeBundlingEnabled) return { bundleOffset: 0, bundleTotal: 0 }
+    // Group siblings: same source node and source handle
+    const handle = sourceHandle ?? ''
+    const siblings = allEdges.filter(
+      (e) => e.source === source && (e.sourceHandle ?? '') === handle,
+    )
+    if (siblings.length < 3) return { bundleOffset: 0, bundleTotal: 0 }
+    const myIdx = siblings.findIndex((e) => e.id === id)
+    const center = (siblings.length - 1) / 2
+    const offset = (myIdx - center) * 5 // 5px spacing between bundled edges
+    return { bundleOffset: offset, bundleTotal: siblings.length }
+  }, [edgeBundlingEnabled, allEdges, source, sourceHandle, id])
 
   const edgeTitle = useMemo(() => {
     const srcNode = allNodes.find((n) => n.id === source)
@@ -151,13 +170,17 @@ function AnimatedEdgeInner({
         ? 2
         : baseWidth
 
+  // 3.23: Apply bundle offset (perpendicular to edge direction at source).
+  // When hovering, temporarily un-bundle this edge for clarity.
+  const bundledSourceY = bundleTotal >= 3 && !hovered ? sourceY + bundleOffset : sourceY
+
   const [edgePath, labelX, labelY] =
     edgeType === 'straight'
-      ? getStraightPath({ sourceX, sourceY, targetX, targetY })
+      ? getStraightPath({ sourceX, sourceY: bundledSourceY, targetX, targetY })
       : edgeType === 'step'
         ? getSmoothStepPath({
             sourceX,
-            sourceY,
+            sourceY: bundledSourceY,
             targetX,
             targetY,
             sourcePosition,
@@ -167,7 +190,7 @@ function AnimatedEdgeInner({
         : edgeType === 'smoothstep'
           ? getSmoothStepPath({
               sourceX,
-              sourceY,
+              sourceY: bundledSourceY,
               targetX,
               targetY,
               sourcePosition,
@@ -175,7 +198,7 @@ function AnimatedEdgeInner({
             })
           : getBezierPath({
               sourceX,
-              sourceY,
+              sourceY: bundledSourceY,
               targetX,
               targetY,
               sourcePosition,
@@ -239,6 +262,31 @@ function AnimatedEdgeInner({
           </div>
         </EdgeLabelRenderer>
       )}
+      {/* 3.23: Bundle count badge — shown when 3+ edges share the same source handle */}
+      {bundleTotal >= 3 && !hovered && (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${sourceX + 12}px,${bundledSourceY}px)`,
+              pointerEvents: 'none',
+              fontSize: '0.55rem',
+              fontWeight: 700,
+              fontFamily: "'JetBrains Mono', monospace",
+              color: '#fff',
+              background: 'rgba(28,171,176,0.75)',
+              border: '1px solid rgba(28,171,176,0.5)',
+              borderRadius: 3,
+              padding: '0 3px',
+              lineHeight: 1.4,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            ×{bundleTotal}
+          </div>
+        </EdgeLabelRenderer>
+      )}
+
       {/* 3.20: Data-shape hover label — always available, shown on mouse-over */}
       {hovered && !edgeBadgesEnabled && sourceValue !== undefined && sourceValue.kind !== 'error' && (
         <EdgeLabelRenderer>

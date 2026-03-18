@@ -1207,6 +1207,7 @@
     "debugConsole": "Console di debug",
     "valueBadges": "Badge di valore",
     "edgeBadges": "Badge di catena",
+    "edgeBundling": "Raggruppa connessioni",
     "graphHealth": "Salute del grafo",
     "bgDots": "Background dots",
     "variables": "Variabili",

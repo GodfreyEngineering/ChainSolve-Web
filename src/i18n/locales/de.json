@@ -1227,6 +1227,7 @@
     "debugConsole": "Debug-Konsole",
     "valueBadges": "Wert-Badges",
     "edgeBadges": "Ketten-Badges",
+    "edgeBundling": "Kanten bündeln",
     "graphHealth": "Graph-Zustand",
     "bgDots": "Background dots",
     "variables": "Variablen",

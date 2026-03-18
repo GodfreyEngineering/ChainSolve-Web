@@ -63,6 +63,9 @@ export interface CanvasToolbarProps {
   onToggleEdgeBadges?: () => void
   bgDotsVisible?: boolean
   onToggleBgDots?: () => void
+  /** 3.23: Edge bundling toggle. */
+  edgeBundlingEnabled?: boolean
+  onToggleEdgeBundling?: () => void
   /** I3-1: Insert annotation at viewport center. */
   onInsertAnnotation?: (annotationType: string) => void
   /** K2-1: Toggle hidden-view mode (show hidden blocks as ghosts). */
@@ -284,6 +287,8 @@ export function CanvasToolbar({
   onToggleEdgeBadges,
   bgDotsVisible,
   onToggleBgDots,
+  edgeBundlingEnabled,
+  onToggleEdgeBundling,
   // C.2: onInsertAnnotation no longer used in toolbar (annotations available via right-click menu)
   onInsertAnnotation: _,
   hiddenViewMode,
@@ -601,6 +606,20 @@ export function CanvasToolbar({
               aria-pressed={!!edgeBadgesEnabled}
             >
               <Tags size={16} />
+            </button>
+          </Tooltip>
+        )}
+
+        {/* 3.23: Edge bundling toggle */}
+        {onToggleEdgeBundling && (
+          <Tooltip content={t('toolbar.edgeBundling', 'Bundle edges')} side={tipSide}>
+            <button
+              onClick={onToggleEdgeBundling}
+              style={btnStyle(!!edgeBundlingEnabled)}
+              aria-label={t('toolbar.edgeBundling', 'Bundle edges')}
+              aria-pressed={!!edgeBundlingEnabled}
+            >
+              <Layers size={16} />
             </button>
           </Tooltip>
         )}

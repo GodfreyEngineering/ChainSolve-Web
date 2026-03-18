@@ -65,6 +65,8 @@ export interface UserPreferences {
   canvasAnimationSpeed: 'none' | 'slow' | 'medium' | 'fast'
   /** Auto-layout direction preference */
   autoLayoutDirection: 'LR' | 'TB'
+  /** 3.23: Edge bundling — cluster parallel edges from the same source node visually. */
+  edgeBundlingEnabled: boolean
 
   // Export defaults
   exportIncludeImages: boolean
@@ -130,6 +132,7 @@ const DEFAULTS: UserPreferences = {
   canvasNodeShadow: 'subtle',
   canvasAnimationSpeed: 'medium',
   autoLayoutDirection: 'LR',
+  edgeBundlingEnabled: false,
 
   exportIncludeImages: true,
   defaultExportFormat: 'pdf',

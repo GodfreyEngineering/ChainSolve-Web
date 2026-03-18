@@ -1227,6 +1227,7 @@
     "debugConsole": "Consola de depuración",
     "valueBadges": "Insignias de valor",
     "edgeBadges": "Insignias de cadena",
+    "edgeBundling": "Agrupar conexiones",
     "graphHealth": "Estado del grafo",
     "bgDots": "Background dots",
     "variables": "Variables",

@@ -904,6 +904,18 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const [badgesEnabled, setBadgesEnabled] = useState(getBadgesPref)
   const [edgeBadgesEnabled, setEdgeBadgesEnabled] = useState(getEdgeBadgesPref)
 
+  // 3.23: Edge bundling — reads initial state from preferencesStore (persisted across sessions).
+  const [edgeBundlingEnabled, setEdgeBundlingEnabled] = useState(
+    () => usePreferencesStore.getState().edgeBundlingEnabled,
+  )
+  const toggleEdgeBundling = useCallback(() => {
+    setEdgeBundlingEnabled((v) => {
+      const next = !v
+      usePreferencesStore.getState().update({ edgeBundlingEnabled: next })
+      return next
+    })
+  }, [])
+
   // G5-2: Bottom dock collapsed state (persisted, default collapsed)
   const [dockCollapsed, setDockCollapsed] = useState(() => {
     try {
@@ -4149,6 +4161,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                             return !v
                           })
                         }}
+                        edgeBundlingEnabled={edgeBundlingEnabled}
+                        onToggleEdgeBundling={toggleEdgeBundling}
                         onInsertAnnotation={onInsertAnnotationAtCenter}
                         hiddenViewMode={hiddenViewMode}
                         onToggleHiddenView={() => setHiddenViewMode((v) => !v)}
