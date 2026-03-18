@@ -2366,6 +2366,21 @@
     "cols": "Spalten",
     "empty": "Abfrage ausführen, um Ergebnisse zu sehen"
   },
+  "zoh": {
+    "label": "ZOH",
+    "period": "Abtastperiode (s)",
+    "fs": "fs",
+    "held": "Gehalten"
+  },
+  "rateTransition": {
+    "label": "Ratenübergang",
+    "inputRate": "Eingang (Hz)",
+    "outputRate": "Ausgang (Hz)",
+    "interpolation": "Interpolation",
+    "ratio": "Verhältnis",
+    "downsample": "Unterabtastung",
+    "upsample": "Überabtastung"
+  },
   "timeline": {
     "lastEval": "Letzter",
     "avgEval": "Ø",

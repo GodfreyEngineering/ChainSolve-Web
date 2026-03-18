@@ -2366,6 +2366,21 @@
     "cols": "cols",
     "empty": "Exécuter la requête pour voir les résultats"
   },
+  "zoh": {
+    "label": "ZOH",
+    "period": "Période d'échantillonnage (s)",
+    "fs": "fs",
+    "held": "Maintenu"
+  },
+  "rateTransition": {
+    "label": "Transition de débit",
+    "inputRate": "Entrée (Hz)",
+    "outputRate": "Sortie (Hz)",
+    "interpolation": "Interpolation",
+    "ratio": "Rapport",
+    "downsample": "sous-échantillonnage",
+    "upsample": "sur-échantillonnage"
+  },
   "timeline": {
     "lastEval": "Dernier",
     "avgEval": "Moy",

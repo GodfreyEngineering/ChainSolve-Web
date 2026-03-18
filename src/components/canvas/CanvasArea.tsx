@@ -63,6 +63,7 @@ import { TimeSeriesNode } from './nodes/TimeSeriesNode'
 import { UnitInputNode } from './nodes/UnitInputNode'
 import { TransferFunctionNode } from './nodes/TransferFunctionNode'
 import { StateSpaceNode } from './nodes/StateSpaceNode'
+import { ZOHNode, RateTransitionNode } from './nodes/ZOHNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -222,6 +223,8 @@ const NODE_TYPES = {
   csUnitInput: UnitInputNode,
   csTransferFunction: TransferFunctionNode,
   csStateSpace: StateSpaceNode,
+  csZOH: ZOHNode,
+  csRateTransition: RateTransitionNode,
 } as const
 
 const EDGE_TYPES = {

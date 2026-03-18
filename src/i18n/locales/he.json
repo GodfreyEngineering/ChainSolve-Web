@@ -1813,6 +1813,21 @@
     "cols": "עמודות",
     "empty": "הפעל שאילתה לצפייה בתוצאות"
   },
+  "zoh": {
+    "label": "ZOH",
+    "period": "תקופת דגימה (ש׳)",
+    "fs": "fs",
+    "held": "מוחזק"
+  },
+  "rateTransition": {
+    "label": "מעבר קצב",
+    "inputRate": "כניסה (Hz)",
+    "outputRate": "יציאה (Hz)",
+    "interpolation": "אינטרפולציה",
+    "ratio": "יחס",
+    "downsample": "דגימת חסר",
+    "upsample": "דגימת יתר"
+  },
   "timeline": {
     "lastEval": "אחרון",
     "avgEval": "ממוצע",

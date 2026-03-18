@@ -70,6 +70,7 @@ const VALID_CATEGORIES: BlockCategory[] = [
   'neuralNetworks',
   'odeSolvers',
   'vehicleSim',
+  'numerical',
 ]
 
 const VALID_NODE_KINDS: NodeKind[] = [
@@ -102,6 +103,8 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csUnitInput',
   'csTransferFunction',
   'csStateSpace',
+  'csZOH',
+  'csRateTransition',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {

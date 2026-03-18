@@ -2366,6 +2366,21 @@
     "cols": "cols",
     "empty": "Ejecutar consulta para ver resultados"
   },
+  "zoh": {
+    "label": "ZOH",
+    "period": "Período de muestreo (s)",
+    "fs": "fs",
+    "held": "Retenido"
+  },
+  "rateTransition": {
+    "label": "Transición de tasa",
+    "inputRate": "Entrada (Hz)",
+    "outputRate": "Salida (Hz)",
+    "interpolation": "Interpolación",
+    "ratio": "Razón",
+    "downsample": "submuestreo",
+    "upsample": "sobremuestreo"
+  },
   "timeline": {
     "lastEval": "Último",
     "avgEval": "Prom",

@@ -2316,6 +2316,21 @@
     "cols": "col",
     "empty": "Esegui la query per vedere i risultati"
   },
+  "zoh": {
+    "label": "ZOH",
+    "period": "Periodo di campionamento (s)",
+    "fs": "fs",
+    "held": "Trattenuto"
+  },
+  "rateTransition": {
+    "label": "Transizione di frequenza",
+    "inputRate": "Ingresso (Hz)",
+    "outputRate": "Uscita (Hz)",
+    "interpolation": "Interpolazione",
+    "ratio": "Rapporto",
+    "downsample": "sottocampionamento",
+    "upsample": "sovracampionamento"
+  },
   "timeline": {
     "lastEval": "Ultima",
     "avgEval": "Media",

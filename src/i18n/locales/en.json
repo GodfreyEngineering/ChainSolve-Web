@@ -2414,6 +2414,21 @@
     "cols": "cols",
     "empty": "Run query to see results"
   },
+  "zoh": {
+    "label": "ZOH",
+    "period": "Sample period (s)",
+    "fs": "fs",
+    "held": "Held"
+  },
+  "rateTransition": {
+    "label": "Rate Transition",
+    "inputRate": "In (Hz)",
+    "outputRate": "Out (Hz)",
+    "interpolation": "Interpolation",
+    "ratio": "Ratio",
+    "downsample": "downsample",
+    "upsample": "upsample"
+  },
   "timeline": {
     "lastEval": "Last",
     "avgEval": "Avg",

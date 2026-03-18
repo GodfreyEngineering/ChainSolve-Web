@@ -2414,6 +2414,21 @@
     "cols": "列",
     "empty": "クエリを実行して結果を表示"
   },
+  "zoh": {
+    "label": "ZOH",
+    "period": "サンプル周期 (s)",
+    "fs": "fs",
+    "held": "保持値"
+  },
+  "rateTransition": {
+    "label": "レート遷移",
+    "inputRate": "入力 (Hz)",
+    "outputRate": "出力 (Hz)",
+    "interpolation": "補間",
+    "ratio": "比率",
+    "downsample": "ダウンサンプル",
+    "upsample": "アップサンプル"
+  },
   "timeline": {
     "lastEval": "最後",
     "avgEval": "平均",

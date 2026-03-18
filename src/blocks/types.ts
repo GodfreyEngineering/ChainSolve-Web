@@ -92,6 +92,8 @@ export type NodeKind =
   | 'csUnitInput'
   | 'csTransferFunction'
   | 'csStateSpace'
+  | 'csZOH'
+  | 'csRateTransition'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

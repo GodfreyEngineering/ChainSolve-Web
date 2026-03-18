@@ -106,7 +106,12 @@ export function toEngineSnapshot(
                             // 2.13: unitInput converts to SI value and outputs as 'number'.
                             : data.blockType === 'unitInput'
                               ? 'number'
-                              : data.blockType) as string
+                              // 2.70: ctrl.zoh and ctrl.rateTransition pass through input as 'number' in reactive mode.
+                              : data.blockType === 'ctrl.zoh'
+                                ? 'number'
+                                : data.blockType === 'ctrl.rateTransition'
+                                  ? 'number'
+                                  : data.blockType) as string
       if (blockType === 'constant') {
         const constId = data.selectedConstantId
         if (typeof constId === 'string' && constId in CONSTANT_VALUES) {
