@@ -101,6 +101,7 @@ export type NodeKind =
   | 'csOnnxInference'
   | 'csFmuImport'
   | 'csPythonScript'
+  | 'csCustomRust'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

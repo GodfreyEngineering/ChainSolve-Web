@@ -43,7 +43,8 @@ registerAllBlocks()
 // 2.96: nn.onnxInference is remapped to 'vector' in bridge.ts; ONNX inference runs in the UI via onnxruntime-web.
 // 2.125: fmu.import is remapped to 'tableInput' in bridge.ts; FMU parsing runs in the UI.
 // 2.127: scripting.python is remapped to 'number' in bridge.ts; Python runs in Pyodide worker in UI.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput', 'sqlQuery', 'timeSeries', 'unitInput', 'transferFunction', 'stateSpace', 'ctrl.zoh', 'ctrl.rateTransition', 'stateMachine', 'codeBlock', 'tirFileInput', 'viewport3d', 'nn.onnxInference', 'fmu.import', 'scripting.python'])
+// 2.128: scripting.rust is remapped to 'number' in bridge.ts; Rust compilation/execution runs server-side.
+const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer', 'logger', 'mathSheet', 'ctrl.deadZone', 'ctrl.saturation', 'ctrl.switch', 'ctrl.mux', 'fileInput', 'sqlQuery', 'timeSeries', 'unitInput', 'transferFunction', 'stateSpace', 'ctrl.zoh', 'ctrl.rateTransition', 'stateMachine', 'codeBlock', 'tirFileInput', 'viewport3d', 'nn.onnxInference', 'fmu.import', 'scripting.python', 'scripting.rust'])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.
