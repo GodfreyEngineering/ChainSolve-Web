@@ -98,7 +98,10 @@ function truncate(s: string, max: number): string {
 }
 
 function isEnabled(): boolean {
-  return OBS_ENABLED
+  if (!OBS_ENABLED) return false
+  // Respect the browser's Do Not Track signal (16.38)
+  if (navigator.doNotTrack === '1') return false
+  return true
 }
 
 function sampleRate(): number {

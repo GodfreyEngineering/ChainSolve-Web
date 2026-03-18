@@ -49,6 +49,12 @@ export function LegalFooter() {
         <Link to="/privacy" style={linkStyle}>
           {t('footer.privacyLink')}
         </Link>
+        <span style={sepStyle} aria-hidden="true">
+          |
+        </span>
+        <Link to="/cookies" style={linkStyle}>
+          {t('footer.cookiesLink', 'Cookie Policy')}
+        </Link>
       </div>
     </footer>
   )

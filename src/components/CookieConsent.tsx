@@ -1,23 +1,64 @@
 /**
- * CookieConsent — 7.07: Cookie consent banner.
+ * CookieConsent — 7.07: Cookie consent banner and settings link.
  *
  * Shows on first visit. Persists choice in localStorage.
  * If declined: disables Sentry and analytics (auth still works).
+ *
+ * Also exports CookieSettingsLink — a small inline button that re-opens
+ * the consent banner so users can change their preference at any time.
  */
 
 import { useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { getCookieConsent, setCookieConsent } from '../lib/cookieConsent'
+
+/** Inline link/button to re-open the consent banner. Use in Cookie Policy page. */
+export function CookieSettingsLink() {
+  const [, setTick] = useState(0)
+
+  const handleClick = useCallback(() => {
+    // Clear stored choice so the banner re-appears
+    try {
+      localStorage.removeItem('cs:cookie-consent')
+    } catch {
+      // localStorage unavailable
+    }
+    // Force re-render so CookieConsentBanner (rendered in App) becomes visible
+    window.dispatchEvent(new CustomEvent('cs:cookie-consent-reset'))
+    setTick((n) => n + 1)
+  }, [])
+
+  return (
+    <button
+      onClick={handleClick}
+      style={{
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        color: 'var(--primary)',
+        textDecoration: 'underline',
+        cursor: 'pointer',
+        font: 'inherit',
+        fontSize: '0.92rem',
+      }}
+    >
+      Cookie Settings
+    </button>
+  )
+}
 
 export function CookieConsentBanner() {
   const { t } = useTranslation()
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    // Only show if the user hasn't made a choice yet
-    if (getCookieConsent() === null) {
-      setVisible(true)
-    }
+    // Show banner on first visit or when preference is reset via CookieSettingsLink
+    if (getCookieConsent() === null) setVisible(true)
+
+    const onReset = () => setVisible(true)
+    window.addEventListener('cs:cookie-consent-reset', onReset)
+    return () => window.removeEventListener('cs:cookie-consent-reset', onReset)
   }, [])
 
   const handleChoice = useCallback((choice: 'accepted' | 'declined') => {
@@ -45,8 +86,11 @@ export function CookieConsentBanner() {
         <p style={textStyle}>
           {t(
             'cookie.message',
-            'We use essential cookies for authentication and localStorage for preferences. No tracking cookies are used.',
-          )}
+            'We use essential storage for authentication and localStorage for preferences. We also use Sentry for error reporting (optional). No advertising cookies are used.',
+          )}{' '}
+          <Link to="/cookies" style={cookiePolicyLinkStyle}>
+            {t('cookie.learnMore', 'Cookie Policy')}
+          </Link>
         </p>
         <div style={btnRow}>
           <button style={declineBtn} onClick={() => handleChoice('declined')}>
@@ -121,4 +165,10 @@ const declineBtn: React.CSSProperties = {
   fontSize: '0.82rem',
   cursor: 'pointer',
   fontFamily: 'inherit',
+}
+
+const cookiePolicyLinkStyle: React.CSSProperties = {
+  color: 'var(--primary, #6366f1)',
+  textDecoration: 'underline',
+  whiteSpace: 'nowrap',
 }

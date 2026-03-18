@@ -107,6 +107,8 @@ export function initWebVitals(): void {
   if (_initialized) return
   if (!OBS_ENABLED) return
   if (typeof window === 'undefined') return
+  // Respect Do Not Track (16.38)
+  if (navigator.doNotTrack === '1') return
 
   _initialized = true
 
