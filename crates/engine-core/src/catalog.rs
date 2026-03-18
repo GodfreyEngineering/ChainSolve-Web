@@ -614,6 +614,7 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("nn.attention", "Attention", "neuralNetworks", "csOperation", vec![p("query", "Query (table)"), p("key", "Key (table)"), p("value", "Value (table)")], true),
         entry("nn.conv2d", "Conv2D", "neuralNetworks", "csOperation", vec![p("input", "Input (Matrix/Table)")], true),
         entry("fmu.import", "FMU Import", "data", "csFmuImport", vec![], true),
+        entry("scripting.python", "Python Script", "customFunctions", "csPythonScript", vec![], true),
         entry("fmu.export", "FMU Export", "data", "csOperation", vec![p("data", "Computed value")], true),
         entry("nn.pinn", "PINN Solver", "neuralNetworks", "csOperation", vec![], true),
         entry("nn.neuralOp", "Neural Operator", "neuralNetworks", "csOperation", vec![p("trainData", "Training data (table)")], true),

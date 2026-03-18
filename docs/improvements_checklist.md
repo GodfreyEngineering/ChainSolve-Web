@@ -263,8 +263,8 @@
 - [x] **2.122** Text: num_to_text, text_concat (variadic), text_length, text_to_num
 - [x] **2.123** Date/time: date_from_ymd, year/month/day extraction, days_between, add_days, is_leap_year, days_in_month
 - [x] **2.124** Unit conversion: configurable from/to unit pickers with dimensional compatibility checking
-- [ ] **2.125** FMU import: load FMI 2.0/3.0 FMUs — parse modelDescription.xml, create block ports from FMU variables, call FMU C API during evaluation via WASM interface. Supports model exchange and co-simulation modes.
-- [ ] **2.126** FMU export: package a ChainSolve subgraph as an FMU zip — generate C code from Rust computation graph, produce modelDescription.xml, package as standard FMU. Enables HIL integration.
+- [x] **2.125** FMU import: load FMI 2.0/3.0 FMUs — parse modelDescription.xml, create block ports from FMU variables, call FMU C API during evaluation via WASM interface. Supports model exchange and co-simulation modes.
+- [x] **2.126** FMU export: package a ChainSolve subgraph as an FMU zip — generate C code from Rust computation graph, produce modelDescription.xml, package as standard FMU. Enables HIL integration.
 - [ ] **2.127** PythonScript: execute Python in sandboxed Pyodide (WASM-compiled CPython 3.11) — access NumPy, SciPy, scikit-learn, pandas. Input ports become Python variables, output is Python return value.
 - [ ] **2.128** CustomRust: write custom Rust block logic — compiled server-side or to WASM. Hot-reloading for development. Block trait implementation with typed ports.
 - [ ] **2.129** SubGraph: collapse group of blocks into reusable parameterised composite block (like Houdini's Digital Assets) — exposed ports become the SubGraph's ports. Saved to user's template library.

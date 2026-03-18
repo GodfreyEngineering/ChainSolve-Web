@@ -100,6 +100,7 @@ export type NodeKind =
   | 'csViewport3D'
   | 'csOnnxInference'
   | 'csFmuImport'
+  | 'csPythonScript'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

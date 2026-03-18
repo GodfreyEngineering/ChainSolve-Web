@@ -115,6 +115,9 @@ export function toEngineSnapshot(
                                 // 2.125: fmu.import parses FMU archive in the UI; outputs variable initial values as tableInput.
                                 : data.blockType === 'fmu.import'
                                 ? 'tableInput'
+                                // 2.127: scripting.python executes Python in the UI via Pyodide; outputs result as 'number'.
+                                : data.blockType === 'scripting.python'
+                                ? 'number'
                                 // 9.15/2.134: codeBlock evaluates JS code in the UI, outputs result as 'number'.
                                 : data.blockType === 'codeBlock'
                                 ? 'number'
@@ -200,7 +203,7 @@ export function toEngineSnapshot(
       .filter((e) => {
         const tgt = evalNodes.find((n) => n.id === e.target)
         const bt = (tgt?.data as Record<string, unknown> | undefined)?.blockType
-        return bt !== 'mathSheet' && bt !== 'ctrl.deadZone' && bt !== 'nn.onnxInference'
+        return bt !== 'mathSheet' && bt !== 'ctrl.deadZone' && bt !== 'nn.onnxInference' && bt !== 'scripting.python'
       })
       .map((e) => {
         const tgtNode = evalNodes.find((n) => n.id === e.target)
