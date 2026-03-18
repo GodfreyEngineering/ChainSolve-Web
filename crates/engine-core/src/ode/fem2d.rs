@@ -183,15 +183,17 @@ pub fn solve_fem2d(
     }
 
     // Apply Dirichlet boundary conditions
+    // Standard elimination: for each boundary node i with value g_i,
+    // subtract K[j,i]*g_i from f[j] for all other nodes j, then zero
+    // row/column i and set K[i,i]=1, f[i]=g_i.
     let mut n_dirichlet = 0;
     for i in 0..n {
         if is_boundary(i) {
             n_dirichlet += 1;
             let (x, y) = mesh.nodes[i];
             let g = eval(dirichlet_expr, x, y);
-            // Subtract contribution from rhs for interior nodes
             for j in 0..n {
-                if !is_boundary(j) {
+                if j != i {
                     f_global[j] -= k_global[j * n + i] * g;
                     k_global[j * n + i] = 0.0;
                     k_global[i * n + j] = 0.0;

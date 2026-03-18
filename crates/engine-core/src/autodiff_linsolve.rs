@@ -69,8 +69,6 @@ pub fn gauss_solve(a: &[f64], b: &[f64]) -> Option<Vec<f64>> {
         let pivot_row = (col..n).max_by(|&r1, &r2| {
             aug[r1 * (n + 1) + col].abs().partial_cmp(&aug[r2 * (n + 1) + col].abs()).unwrap()
         })?;
-        aug.swap(col * (n + 1), pivot_row * (n + 1)); // swap whole rows
-        // Actually swap element-by-element
         for j in 0..=n {
             let tmp = aug[col * (n + 1) + j];
             aug[col * (n + 1) + j] = aug[pivot_row * (n + 1) + j];
