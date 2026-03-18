@@ -378,8 +378,8 @@ pub fn train_pinn(cfg: &PinnConfig) -> PinnResult {
                 let h = 1e-4;
                 let enc_p = embedding.encode(x + h);
                 let enc_m = embedding.encode(x - h);
-                let gp = net.backward(&enc_p, residual * cfg.pde.b / h);
-                let gm = net.backward(&enc_m, -residual * cfg.pde.b / h);
+                let gp = net.backward(&enc_p, 2.0 * residual * cfg.pde.b / h);
+                let gm = net.backward(&enc_m, -2.0 * residual * cfg.pde.b / h);
                 for (gi, (gv_p, gv_m)) in pde_grads.iter_mut().zip(gp.iter().zip(gm.iter())) {
                     *gi += gv_p + gv_m;
                 }
@@ -390,7 +390,7 @@ pub fn train_pinn(cfg: &PinnConfig) -> PinnResult {
                 let enc_p = embedding.encode(x + h);
                 let enc_0 = embedding.encode(x);
                 let enc_m = embedding.encode(x - h);
-                let s = residual * cfg.pde.a / (h * h);
+                let s = 2.0 * residual * cfg.pde.a / (h * h);
                 let gp = net.backward(&enc_p, s);
                 let g0 = net.backward(&enc_0, -2.0 * s);
                 let gm = net.backward(&enc_m, s);
@@ -490,7 +490,7 @@ mod tests {
             bc_left: 0.0,
             bc_right: 0.0,
             hidden_sizes: vec![16, 16],
-            epochs: 500,
+            epochs: 1000,
             lr: 1e-3,
             n_collocation: 32,
             n_eval: 11,

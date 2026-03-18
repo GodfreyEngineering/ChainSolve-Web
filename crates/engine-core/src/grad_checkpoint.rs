@@ -278,6 +278,7 @@ mod tests {
     fn revolve_checkpointing_decay() {
         let mut params = HashMap::new();
         params.insert("k".to_string(), 1.0);
+        params.insert("y0_init".to_string(), 1.0);
         let system = OdeSystem {
             equations: vec!["-k*y0".to_string()],
             state_names: vec!["y".to_string()],

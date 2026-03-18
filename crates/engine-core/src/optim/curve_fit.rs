@@ -57,6 +57,42 @@ where
         };
     }
 
+    // Run LM from the given initial params
+    let mut best = lm_core(f_model, x_data, y_data, initial_params, max_iter, tol);
+
+    // If the fit is poor, try perturbed starting points to escape local minima.
+    // This is especially important for models with frequency-like parameters
+    // (e.g. sinusoidal fits) where the cost landscape has many local minima.
+    if best.r_squared < 0.99 {
+        let scales = [0.5, 1.5, 2.0, 0.1];
+        for &s in &scales {
+            let perturbed: Vec<f64> = initial_params.iter()
+                .map(|&p| p * s + (1.0 - s) * 0.1)
+                .collect();
+            let result = lm_core(f_model, x_data, y_data, &perturbed, max_iter, tol);
+            if result.r_squared > best.r_squared {
+                best = result;
+            }
+        }
+    }
+
+    best
+}
+
+/// Core Levenberg-Marquardt iteration (single start).
+fn lm_core<F>(
+    f_model: &F,
+    x_data: &[f64],
+    y_data: &[f64],
+    initial_params: &[f64],
+    max_iter: usize,
+    tol: f64,
+) -> CurveFitResult
+where
+    F: Fn(f64, &[f64]) -> f64,
+{
+    let n_data = x_data.len();
+    let n_params = initial_params.len();
     let h = 1e-6_f64; // central-difference step for Jacobian
     let mut params = initial_params.to_vec();
     let mut lambda = 1e-3_f64;

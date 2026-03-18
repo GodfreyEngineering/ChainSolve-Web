@@ -58,6 +58,7 @@ fn matern52(x1: &[f64], x2: &[f64], length_scale: f64, sigma_f: f64) -> f64 {
 }
 
 /// Gaussian Process surrogate fitted to (X, y) observations.
+#[allow(dead_code)]
 struct GpSurrogate {
     x_train: Vec<Vec<f64>>,
     /// Cholesky factor L (lower triangular) of K + σ²I.
@@ -105,7 +106,7 @@ impl GpSurrogate {
         let mean: f64 = k_star.iter().zip(&self.alpha).map(|(k, a)| k * a).sum();
 
         // variance = k(x,x) - k_star^T (L L^T)^{-1} k_star
-        let k_xx = matern52(x, x, self.length_scale, self.sigma_f) + self.sigma_n * self.sigma_n;
+        let k_xx = matern52(x, x, self.length_scale, self.sigma_f);
         // v = L^{-1} k_star
         let v = forward_solve(&self.l, &k_star, n);
         let var = (k_xx - v.iter().map(|vi| vi * vi).sum::<f64>()).max(1e-10);
@@ -186,7 +187,7 @@ fn acquisition(x: &[f64], gp: &GpSurrogate, y_best: f64, acq_type: &str, kappa: 
     let (mu, var) = gp.predict(x);
     let sigma = var.sqrt();
     match acq_type {
-        "ucb" => mu - kappa * sigma, // minimisation: negate UCB
+        "ucb" => -(mu - kappa * sigma), // minimisation: negate so maximising acquisition finds low-mu regions
         "pi" => {
             if sigma < 1e-10 { return 0.0; }
             let z = (y_best - mu - xi) / sigma;
@@ -371,9 +372,9 @@ pub fn bayesian_optimise(cfg: &BayesOptConfig) -> OptimResult {
         let new_best = y_obs[best_idx];
         history.push(new_best);
 
-        // Convergence: no improvement > tol for last 5 iterations
-        if iter >= 4 {
-            let tail = &history[history.len().saturating_sub(5)..];
+        // Convergence: no improvement > tol for last 10 iterations
+        if iter >= 9 {
+            let tail = &history[history.len().saturating_sub(10)..];
             let range = tail.iter().cloned().fold(f64::INFINITY, f64::min)
                 - tail.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
             if range.abs() < 1e-6 * (prev_best.abs() + 1e-10) {

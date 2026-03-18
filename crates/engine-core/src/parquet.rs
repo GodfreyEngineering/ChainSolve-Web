@@ -753,11 +753,12 @@ pub fn parquet_to_table(columns: Vec<ParquetColumn>) -> Value {
 struct ThriftWriter {
     buf: Vec<u8>,
     last_field: i16,
+    field_stack: Vec<i16>,
 }
 
 impl ThriftWriter {
     fn new() -> Self {
-        Self { buf: Vec::new(), last_field: 0 }
+        Self { buf: Vec::new(), last_field: 0, field_stack: Vec::new() }
     }
 
     fn write_varint(&mut self, mut n: u64) {
@@ -820,11 +821,12 @@ impl ThriftWriter {
 
     fn stop(&mut self) {
         self.buf.push(0);
-        self.last_field = 0;
+        self.last_field = self.field_stack.pop().unwrap_or(0);
     }
 
-    /// Write a nested struct, resetting field counter.
+    /// Write a nested struct, saving and resetting the field counter.
     fn begin_nested(&mut self) {
+        self.field_stack.push(self.last_field);
         self.last_field = 0;
     }
 

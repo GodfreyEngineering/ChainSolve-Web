@@ -137,7 +137,7 @@ pub fn solve_with_events(
         let g_next = eval_event(&y, t);
 
         // Check for zero crossing
-        if !g_prev.is_nan() && !g_next.is_nan() && g_prev * g_next <= 0.0 {
+        if !g_prev.is_nan() && !g_next.is_nan() && g_prev * g_next < 0.0 {
             // Bisect to find event time
             let mut t_lo = t_prev;
             let mut t_hi = t;

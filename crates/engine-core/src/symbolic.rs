@@ -1309,7 +1309,7 @@ impl Monomial {
             let a = if i < self.exponents.len() { self.exponents[i] } else { 0 };
             let b = if i < other.exponents.len() { other.exponents[i] } else { 0 };
             if a != b {
-                return a.cmp(&b).reverse();
+                return a.cmp(&b);
             }
         }
         std::cmp::Ordering::Equal
@@ -1468,15 +1468,32 @@ impl MultiPoly {
 
     /// Multivariate polynomial division.
     /// Returns (quotients, remainder) where `self = q[0]*divisors[0] + ... + q[n]*divisors[n] + remainder`.
+    ///
+    /// Includes a safety iteration limit to prevent infinite loops from
+    /// floating-point imprecision in coefficient cancellation.
     pub fn divide(&self, divisors: &[MultiPoly]) -> (Vec<MultiPoly>, MultiPoly) {
+        const MAX_DIVIDE_ITERATIONS: usize = 50_000;
         let order = self.order;
         let vars = self.var_names.clone();
         let n = divisors.len();
         let mut quotients: Vec<MultiPoly> = (0..n).map(|_| MultiPoly::zero(vars.clone(), order)).collect();
         let mut remainder = MultiPoly::zero(vars.clone(), order);
         let mut p = self.clone();
+        let mut iterations = 0usize;
 
         while !p.is_zero() {
+            iterations += 1;
+            if iterations > MAX_DIVIDE_ITERATIONS {
+                // Safety: dump remaining terms into remainder and bail out
+                for term in p.terms.drain(..) {
+                    remainder = remainder.add(&MultiPoly {
+                        var_names: vars.clone(),
+                        terms: vec![term],
+                        order,
+                    });
+                }
+                break;
+            }
             let mut divided = false;
             for i in 0..n {
                 if let (Some(lt_p), Some(lt_d)) = (p.leading_term(), divisors[i].leading_term()) {
@@ -1792,16 +1809,47 @@ fn reduce_basis(basis: &[MultiPoly], _vars: &[String], order: MonomialOrder) -> 
         }
     }
 
-    // Step 2: Inter-reduce: reduce each polynomial modulo the others
-    let mut reduced: Vec<MultiPoly> = Vec::with_capacity(minimal.len());
-    for i in 0..minimal.len() {
-        let others: Vec<MultiPoly> = minimal.iter().enumerate()
-            .filter(|&(j, _)| j != i)
-            .map(|(_, p)| p.clone())
-            .collect();
-        let r = minimal[i].reduce(&others);
-        if !r.is_zero() {
-            reduced.push(r.make_monic());
+    // Step 2: Inter-reduce: reduce each polynomial modulo the others.
+    // We must update the basis after each reduction to avoid simultaneously
+    // reducing away all generators sharing the same leading variable.
+    let mut reduced = minimal;
+    let mut changed = true;
+    let mut inter_reduce_iters = 0usize;
+    while changed {
+        changed = false;
+        inter_reduce_iters += 1;
+        if inter_reduce_iters > 100 {
+            break; // Safety limit
+        }
+        let mut i = 0;
+        while i < reduced.len() {
+            let others: Vec<MultiPoly> = reduced.iter().enumerate()
+                .filter(|&(j, _)| j != i)
+                .map(|(_, p)| p.clone())
+                .collect();
+            let r = reduced[i].reduce(&others);
+            if r.is_zero() {
+                reduced.remove(i);
+                changed = true;
+                // Don't increment i — next element shifted into position i
+            } else {
+                let r_monic = r.make_monic();
+                // Check if the reduction actually changed the polynomial
+                let old_len = reduced[i].terms.len();
+                let new_len = r_monic.terms.len();
+                if old_len != new_len {
+                    changed = true;
+                } else {
+                    // Check leading monomials differ
+                    let old_lm = reduced[i].leading_monomial().cloned();
+                    let new_lm = r_monic.leading_monomial().cloned();
+                    if old_lm != new_lm {
+                        changed = true;
+                    }
+                }
+                reduced[i] = r_monic;
+                i += 1;
+            }
         }
     }
 

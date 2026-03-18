@@ -106,7 +106,7 @@ where
 
     for iter in 0..max_iter {
         // Check convergence
-        let g_inf = g_proj.iter().cloned().fold(0.0_f64, f64::max);
+        let g_inf = g_proj.iter().map(|g| g.abs()).fold(0.0_f64, f64::max);
         if g_inf < tol {
             converged = true;
             break;

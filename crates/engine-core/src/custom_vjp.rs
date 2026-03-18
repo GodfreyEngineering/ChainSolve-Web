@@ -100,9 +100,9 @@ pub fn eval_custom_ad(
         if vjp_exprs.len() == n {
             // One expression per input
             vjp_exprs.iter().map(|e| eval_expr(e, &base_vars)).collect()
-        } else if vjp_exprs.len() == 1 {
-            // Single expression expected to return n comma-separated values — but
-            // since we evaluate to a scalar, fall back to finite-diff Jacobian * v
+        } else if vjp_exprs.len() <= 1 {
+            // No custom VJP or single expression that can't return multiple values —
+            // fall back to finite-diff Jacobian * v
             let mut result = vec![0.0f64; n];
             let f0 = primal;
             let eps = 1e-6;
