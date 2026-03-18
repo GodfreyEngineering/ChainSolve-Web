@@ -5053,6 +5053,44 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Physics-Informed Neural Network ────────────────────────────
+
+        "nn.pinn" => {
+            use crate::pinn::{PinnConfig, PinnPde, train_pinn};
+            let cfg = PinnConfig {
+                pde: PinnPde {
+                    a: data.get("pde_a").and_then(|v| v.as_f64()).unwrap_or(-1.0),
+                    b: data.get("pde_b").and_then(|v| v.as_f64()).unwrap_or(0.0),
+                    c: data.get("pde_c").and_then(|v| v.as_f64()).unwrap_or(0.0),
+                    f_const: data.get("f_const").and_then(|v| v.as_f64()).unwrap_or(1.0),
+                    f_sin: data.get("f_sin").and_then(|v| v.as_f64()).unwrap_or(0.0),
+                },
+                domain_lo: data.get("domainLo").and_then(|v| v.as_f64()).unwrap_or(0.0),
+                domain_hi: data.get("domainHi").and_then(|v| v.as_f64()).unwrap_or(1.0),
+                bc_left: data.get("bcLeft").and_then(|v| v.as_f64()).unwrap_or(0.0),
+                bc_right: data.get("bcRight").and_then(|v| v.as_f64()).unwrap_or(0.0),
+                hidden_sizes: data.get("hiddenSizes")
+                    .and_then(|v| v.as_array())
+                    .map(|arr| arr.iter().filter_map(|x| x.as_f64().map(|n| n as usize)).collect())
+                    .unwrap_or_else(|| vec![32, 32, 32]),
+                epochs: data.get("epochs").and_then(|v| v.as_f64()).unwrap_or(2000.0) as usize,
+                lr: data.get("lr").and_then(|v| v.as_f64()).unwrap_or(1e-3),
+                n_collocation: data.get("nCollocation").and_then(|v| v.as_f64()).unwrap_or(64.0) as usize,
+                n_eval: data.get("nEval").and_then(|v| v.as_f64()).unwrap_or(100.0) as usize,
+                fourier_features: data.get("fourierFeatures").and_then(|v| v.as_f64()).unwrap_or(4.0) as usize,
+                seed: data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64,
+            };
+            let result = train_pinn(&cfg);
+            // Return Table: columns = [x, u]
+            let rows: Vec<Vec<f64>> = result.xs.iter().zip(result.us.iter())
+                .map(|(&x, &u)| vec![x, u])
+                .collect();
+            Value::Table {
+                columns: vec!["x".to_string(), "u".to_string()],
+                rows,
+            }
+        }
+
         // ── Symbolic Math (CAS) ────────────────────────────────────────
 
         "sym.differentiate" => {

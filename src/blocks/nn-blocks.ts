@@ -237,4 +237,47 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
     description:
       '2D convolutional layer. Accepts Matrix input (H×W) or flattened image. n_filters feature maps, kernel_h×kernel_w spatial kernel, stride, padding ("valid" or "same"). He-initialised weights. Output: Matrix of [out_h*out_w × n_filters].',
   })
+
+  // ── Physics-Informed Neural Network ────────────────────────────────────
+
+  register({
+    type: 'nn.pinn',
+    label: 'PINN Solver',
+    category: 'neuralNetworks',
+    nodeKind: 'csOperation',
+    inputs: [],
+    proOnly: true,
+    defaultData: {
+      blockType: 'nn.pinn',
+      label: 'PINN Solver',
+      // PDE: a·u'' + b·u' + c·u = f_const + f_sin·sin(π·x)
+      pde_a: -1,
+      pde_b: 0,
+      pde_c: 0,
+      f_const: 1,
+      f_sin: 0,
+      domainLo: 0,
+      domainHi: 1,
+      bcLeft: 0,
+      bcRight: 0,
+      hiddenSizes: [32, 32, 32],
+      epochs: 2000,
+      lr: 0.001,
+      nCollocation: 64,
+      nEval: 100,
+      fourierFeatures: 4,
+      seed: 42,
+    },
+    synonyms: [
+      'pinn', 'physics-informed', 'neural network pde', 'boundary value problem',
+      'bvp', 'ode solver', 'neural pde', 'scientific ml',
+    ],
+    tags: ['nn', 'pinn', 'pde', 'physics', 'bvp'],
+    description:
+      'Physics-Informed Neural Network (PINN): trains a neural network to satisfy a 1D BVP ' +
+      'of the form a·u\'\' + b·u\' + c·u = f(x) with Dirichlet boundary conditions. ' +
+      'Features: Fourier feature embedding for spectral bias mitigation, ' +
+      'NTK-based gradient balancing, adaptive collocation resampling. ' +
+      'Output: Table [x, u(x)] at n_eval evaluation points.',
+  })
 }

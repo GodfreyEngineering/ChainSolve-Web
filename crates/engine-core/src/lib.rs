@@ -42,6 +42,7 @@ pub mod parquet;
 
 pub mod nn;
 pub mod ode;
+pub mod pinn;
 pub mod ops;
 pub mod optim;
 pub mod precision;

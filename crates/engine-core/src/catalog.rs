@@ -613,6 +613,7 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("nn.gru", "GRU", "neuralNetworks", "csOperation", vec![p("sequence", "Sequence (table)")], true),
         entry("nn.attention", "Attention", "neuralNetworks", "csOperation", vec![p("query", "Query (table)"), p("key", "Key (table)"), p("value", "Value (table)")], true),
         entry("nn.conv2d", "Conv2D", "neuralNetworks", "csOperation", vec![p("input", "Input (Matrix/Table)")], true),
+        entry("nn.pinn", "PINN Solver", "neuralNetworks", "csOperation", vec![], true),
 
         // ── Symbolic Math (CAS) ────────────────────────────────────────
         entry("sym.differentiate", "Differentiate", "math", "csOperation", vec![p("expr", "Expression (text)"), p("var", "Variable (text)")], true),
