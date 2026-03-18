@@ -425,7 +425,7 @@
 - [x] **7.7** Benchmark: 500 nodes at 60fps pan/zoom (must pass, currently untested at this scale)
 - [ ] **7.8** Benchmark: 1000×1000 GEMM <10ms via WebGPU (requires Category 1D)
 - [x] **7.9** Benchmark: 100-state ODE, 1s sim, RK45 <500ms in browser
-- [ ] **7.10** Streaming evaluation: for large parameter sweeps, evaluate and stream results without holding all in memory. Configurable cache 1GB browser / 16GB server.
+- [x] **7.10** Streaming evaluation: for large parameter sweeps, evaluate and stream results without holding all in memory. Configurable cache 1GB browser / 16GB server.
 - [x] **7.11** LRU cache with configurable size: evict least-recently-used cached block results when memory pressure detected
 - [ ] **7.12** Hybrid compute: dispatch heavy jobs to Supabase Edge Function calling native Rust binary — graphs >1000 blocks or matrices >10000×10000
 - [x] **7.13** Cold start <3s on 4G: code splitting (React.lazy), lazy block pack loading, WASM streaming compilation
