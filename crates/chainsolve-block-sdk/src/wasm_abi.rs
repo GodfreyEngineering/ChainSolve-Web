@@ -36,8 +36,8 @@
 //!
 //! # Using the macro
 //!
-//! ```no_run
-//! use chainsolve_block_sdk::{Block, BlockRegistry, wasm_abi};
+//! ```ignore
+//! use chainsolve_block_sdk::{Block, BlockRegistry, export_blocks};
 //!
 //! // Build a registry containing your blocks:
 //! fn build_registry() -> BlockRegistry {
@@ -47,7 +47,7 @@
 //! }
 //!
 //! // Generate the five WASM exports:
-//! wasm_abi::export_blocks!(build_registry);
+//! export_blocks!(build_registry);
 //! ```
 
 #[allow(unused_imports)]
