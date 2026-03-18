@@ -272,7 +272,7 @@
 - [x] **2.131** Timer: measure wall-clock and CPU time for connected computation — identify performance bottlenecks
 - [x] **2.132** Logger: record time-series data from any port to structured log (Supabase table) — for post-processing and experiment tracking
 - [x] **2.133** MathSheet: spreadsheet-like block within the node graph — accepts input ports as named variables, cells support unit-aware formulas, outputs computed columns. The "Excel-killer" feature: lets Excel users bring their mental model into ChainSolve while gaining units, version control, reproducibility.
-- [ ] **2.134** CodeBlock: write Rust/Python expressions inline with autocomplete, type inference, instant evaluation — variables from connected inputs available by name, output auto-typed. The "MATLAB-killer" feature: like MATLAB Live Editor but in a node graph.
+- [x] **2.134** CodeBlock: write Rust/Python expressions inline with autocomplete, type inference, instant evaluation — variables from connected inputs available by name, output auto-typed. The "MATLAB-killer" feature: like MATLAB Live Editor but in a node graph.
 
 ---
 
@@ -467,7 +467,7 @@
 - [x] **9.12** AI assistant (opt-in): natural language → suggested graph via LLM API. User reviews and approves before insertion. Like Mathematica's Notebook Assistant.
 - [x] **9.13** Progressive disclosure: simple blocks show minimal config by default. "Advanced" toggle reveals all parameters.
 - [x] **9.14** MathSheet block: spreadsheet within node graph. Input ports → named variables. Cells support unit-aware formulas. Outputs computed columns. The Excel-killer feature.
-- [ ] **9.15** CodeBlock: inline Rust/Python with autocomplete, type inference, instant eval. Connected input variables available by name. Output auto-typed. The MATLAB-killer feature.
+- [x] **9.15** CodeBlock: inline Rust/Python with autocomplete, type inference, instant eval. Connected input variables available by name. Output auto-typed. The MATLAB-killer feature.
 - [x] **9.16** Contextual help: hover over block in search palette → 3-sentence description + animated GIF preview
 
 ---
