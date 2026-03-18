@@ -104,7 +104,7 @@
 - [x] **2.6** Variable source block: named variable with cross-sheet publish/subscribe
 - [x] **2.7** MatrixInput: 2D array with spreadsheet-like editor (row/col headers, cell editing), CSV/Excel import, copy-paste from Excel/Sheets
 - [x] **2.8** BooleanInput: toggle switch block outputting 0.0/1.0, for if-then-else logic and conditional computation
-- [ ] **2.9** FileInput: drag-and-drop block accepting CSV, Excel (.xlsx), HDF5, Parquet, JSON, MATLAB .mat (v5 via matfile crate, v7.3 via HDF5), NumPy .npy/.npz, image formats — parses file and outputs DataTable/Matrix/Vector
+- [x] **2.9** FileInput: drag-and-drop block accepting CSV, Excel (.xlsx), HDF5, Parquet, JSON, MATLAB .mat (v5 via matfile crate, v7.3 via HDF5), NumPy .npy/.npz, image formats — parses file and outputs DataTable/Matrix/Vector
 - [x] **2.10** ParameterSweep: defines a parameter range (start, stop, step OR explicit list) for DOE/optimisation — connects to DOE blocks, output is a vector of values
 - [ ] **2.11** TimeSeriesInput: time-stamped data with configurable resampling (linear, ZOH, cubic) and time format parsing
 - [ ] **2.12** ExpressionInput: free-form mathematical expression parsed to symbolic representation with live LaTeX preview — uses the symbolic CAS (Category 1B). Output is SymbolicExpr value type.
