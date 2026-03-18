@@ -33,6 +33,7 @@ import { registerNumericalBlocks } from './numerical-blocks'
 import { registerOptimBlocks } from './optim-blocks'
 import { registerMLBlocks } from './ml-blocks'
 import { registerNNBlocks } from './nn-blocks'
+import { registerSymBlocks } from './sym-blocks'
 import { registerLookupBlocks } from './lookup-blocks'
 import { registerTestBlocks } from './test-blocks'
 import { registerAssertionBlocks } from './assertion-blocks'
@@ -92,6 +93,7 @@ export function registerAllBlocks(): void {
   registerOptimBlocks(reg)
   registerMLBlocks(reg)
   registerNNBlocks(reg)
+  registerSymBlocks(reg)
   registerTestBlocks(reg)
   registerAssertionBlocks(reg)
   registerWebSocketBlocks(reg)

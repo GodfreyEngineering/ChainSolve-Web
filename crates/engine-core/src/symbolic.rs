@@ -2238,6 +2238,304 @@ fn newton_refine_root(poly: &Polynomial, initial: f64, max_iter: usize) -> f64 {
     x
 }
 
+// ── Expression Parser ────────────────────────────────────────────────────────
+
+/// Parse a mathematical expression string into a `SymExpr`.
+///
+/// Supports: numbers, variables (single or multi-char identifiers), +, -, *, /,
+/// ^ (right-associative power), unary minus, parentheses, and common functions:
+/// sin, cos, tan, asin, acos, atan, exp, ln, log, sqrt, sinh, cosh, tanh.
+///
+/// Examples: "x^2 + sin(x)", "3*x + 2", "exp(-x^2/2)"
+pub fn parse_expr(s: &str) -> Result<Expr, String> {
+    let tokens = tokenize(s)?;
+    let mut pos = 0usize;
+    let expr = parse_additive(&tokens, &mut pos)?;
+    if pos < tokens.len() {
+        return Err(format!("Unexpected token at position {pos}: {:?}", tokens[pos]));
+    }
+    Ok(expr)
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum Token {
+    Number(f64),
+    Ident(String),
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    Caret,
+    LParen,
+    RParen,
+    Comma,
+}
+
+fn tokenize(s: &str) -> Result<Vec<Token>, String> {
+    let mut tokens = Vec::new();
+    let mut chars = s.chars().peekable();
+    while let Some(&c) = chars.peek() {
+        match c {
+            ' ' | '\t' | '\n' => { chars.next(); }
+            '+' => { chars.next(); tokens.push(Token::Plus); }
+            '-' => { chars.next(); tokens.push(Token::Minus); }
+            '*' => { chars.next(); tokens.push(Token::Star); }
+            '/' => { chars.next(); tokens.push(Token::Slash); }
+            '^' => { chars.next(); tokens.push(Token::Caret); }
+            '(' => { chars.next(); tokens.push(Token::LParen); }
+            ')' => { chars.next(); tokens.push(Token::RParen); }
+            ',' => { chars.next(); tokens.push(Token::Comma); }
+            '0'..='9' | '.' => {
+                let mut num = String::new();
+                while let Some(&d) = chars.peek() {
+                    if d.is_ascii_digit() || d == '.' {
+                        num.push(d);
+                        chars.next();
+                    } else { break; }
+                }
+                // Handle exponent notation: e.g. 1e-3, 2.5E+4
+                if let Some(&e) = chars.peek() {
+                    if e == 'e' || e == 'E' {
+                        num.push(e);
+                        chars.next();
+                        if let Some(&s) = chars.peek() {
+                            if s == '+' || s == '-' { num.push(s); chars.next(); }
+                        }
+                        while let Some(&d) = chars.peek() {
+                            if d.is_ascii_digit() { num.push(d); chars.next(); } else { break; }
+                        }
+                    }
+                }
+                let v: f64 = num.parse().map_err(|_| format!("Invalid number: {num}"))?;
+                tokens.push(Token::Number(v));
+            }
+            'a'..='z' | 'A'..='Z' | '_' => {
+                let mut name = String::new();
+                while let Some(&c2) = chars.peek() {
+                    if c2.is_alphanumeric() || c2 == '_' { name.push(c2); chars.next(); } else { break; }
+                }
+                tokens.push(Token::Ident(name));
+            }
+            other => return Err(format!("Unexpected character: {other}")),
+        }
+    }
+    Ok(tokens)
+}
+
+fn parse_additive(tokens: &[Token], pos: &mut usize) -> Result<Expr, String> {
+    let mut lhs = parse_multiplicative(tokens, pos)?;
+    loop {
+        match tokens.get(*pos) {
+            Some(Token::Plus) => { *pos += 1; let rhs = parse_multiplicative(tokens, pos)?; lhs = add(lhs, rhs); }
+            Some(Token::Minus) => { *pos += 1; let rhs = parse_multiplicative(tokens, pos)?; lhs = sub(lhs, rhs); }
+            _ => break,
+        }
+    }
+    Ok(lhs)
+}
+
+fn parse_multiplicative(tokens: &[Token], pos: &mut usize) -> Result<Expr, String> {
+    let mut lhs = parse_power(tokens, pos)?;
+    loop {
+        match tokens.get(*pos) {
+            Some(Token::Star) => { *pos += 1; let rhs = parse_power(tokens, pos)?; lhs = mul(lhs, rhs); }
+            Some(Token::Slash) => { *pos += 1; let rhs = parse_power(tokens, pos)?; lhs = div(lhs, rhs); }
+            // Implicit multiplication: ident or number followed by ident/lparen without operator
+            Some(Token::LParen) | Some(Token::Ident(_)) | Some(Token::Number(_)) => {
+                // Only do implicit mul if previous was not an operator situation that naturally terminates
+                // We skip implicit mul to keep parser simple
+                break;
+            }
+            _ => break,
+        }
+    }
+    Ok(lhs)
+}
+
+fn parse_power(tokens: &[Token], pos: &mut usize) -> Result<Expr, String> {
+    let base = parse_unary(tokens, pos)?;
+    if let Some(Token::Caret) = tokens.get(*pos) {
+        *pos += 1;
+        // Right-associative
+        let exp = parse_power(tokens, pos)?;
+        Ok(pow(base, exp))
+    } else {
+        Ok(base)
+    }
+}
+
+fn parse_unary(tokens: &[Token], pos: &mut usize) -> Result<Expr, String> {
+    if let Some(Token::Minus) = tokens.get(*pos) {
+        *pos += 1;
+        let operand = parse_power(tokens, pos)?;
+        Ok(neg(operand))
+    } else if let Some(Token::Plus) = tokens.get(*pos) {
+        *pos += 1;
+        parse_power(tokens, pos)
+    } else {
+        parse_atom(tokens, pos)
+    }
+}
+
+fn parse_atom(tokens: &[Token], pos: &mut usize) -> Result<Expr, String> {
+    match tokens.get(*pos) {
+        Some(Token::Number(v)) => { let v = *v; *pos += 1; Ok(con(v)) }
+        Some(Token::Ident(name)) => {
+            let name = name.clone();
+            *pos += 1;
+            // Check if followed by '(' — function call
+            if let Some(Token::LParen) = tokens.get(*pos) {
+                *pos += 1;
+                let arg = parse_additive(tokens, pos)?;
+                // Consume ')'
+                match tokens.get(*pos) {
+                    Some(Token::RParen) => { *pos += 1; }
+                    _ => return Err("Expected ')' after function argument".to_string()),
+                }
+                let f = match name.to_lowercase().as_str() {
+                    "sin" => Func::Sin,
+                    "cos" => Func::Cos,
+                    "tan" => Func::Tan,
+                    "asin" | "arcsin" => Func::Asin,
+                    "acos" | "arccos" => Func::Acos,
+                    "atan" | "arctan" => Func::Atan,
+                    "exp" => Func::Exp,
+                    "ln" | "log" => Func::Ln,
+                    "log10" => Func::Log10,
+                    "sqrt" => Func::Sqrt,
+                    "sinh" => Func::Sinh,
+                    "cosh" => Func::Cosh,
+                    "tanh" => Func::Tanh,
+                    other => return Err(format!("Unknown function: {other}")),
+                };
+                Ok(func(f, arg))
+            } else {
+                // Built-in constants
+                match name.as_str() {
+                    "pi" | "PI" => Ok(con(std::f64::consts::PI)),
+                    "e" | "E" => Ok(con(std::f64::consts::E)),
+                    _ => Ok(var(&name)),
+                }
+            }
+        }
+        Some(Token::LParen) => {
+            *pos += 1;
+            let inner = parse_additive(tokens, pos)?;
+            match tokens.get(*pos) {
+                Some(Token::RParen) => { *pos += 1; Ok(inner) }
+                _ => Err("Expected ')'".to_string()),
+            }
+        }
+        other => Err(format!("Unexpected token in atom: {other:?}")),
+    }
+}
+
+/// Expand an expression: distribute multiplication over addition/subtraction.
+///
+/// Applies: a*(b+c) = a*b + a*c, (a+b)*c = a*c + b*c recursively.
+/// Also flattens nested sums and products.
+pub fn expand(expr: &Expr) -> Expr {
+    match expr.as_ref() {
+        SymExpr::Variable(_) | SymExpr::Constant(_) => expr.clone(),
+        SymExpr::UnaryOp { op, operand } => {
+            let e = expand(operand);
+            unop(*op, e)
+        }
+        SymExpr::Function { func: f, arg } => {
+            func(*f, expand(arg))
+        }
+        SymExpr::BinaryOp { op, lhs, rhs } => {
+            let l = expand(lhs);
+            let r = expand(rhs);
+            match op {
+                BinOp::Mul => expand_mul(&l, &r),
+                BinOp::Add => add(l, r),
+                BinOp::Sub => sub(l, r),
+                BinOp::Div => div(l, r),
+                BinOp::Pow => {
+                    // Expand integer powers: (a+b)^n = binomial expansion for small n
+                    if let SymExpr::Constant(n) = r.as_ref() {
+                        let n = *n;
+                        if n == n.floor() && n >= 0.0 && n <= 6.0 {
+                            let n = n as u32;
+                            return expand_power(&l, n);
+                        }
+                    }
+                    pow(l, r)
+                }
+            }
+        }
+        SymExpr::Sum(terms) => {
+            let expanded: Vec<Expr> = terms.iter().map(expand).collect();
+            if expanded.is_empty() { return zero(); }
+            expanded.into_iter().reduce(add).unwrap()
+        }
+        SymExpr::Product(factors) => {
+            let expanded: Vec<Expr> = factors.iter().map(expand).collect();
+            if expanded.is_empty() { return one(); }
+            expanded.into_iter().reduce(|a, b| expand_mul(&a, &b)).unwrap()
+        }
+    }
+}
+
+fn expand_mul(l: &Expr, r: &Expr) -> Expr {
+    // Distribute l over r's sum
+    match (l.as_ref(), r.as_ref()) {
+        (_, SymExpr::BinaryOp { op: BinOp::Add, lhs, rhs }) => {
+            let left = expand_mul(l, lhs);
+            let right = expand_mul(l, rhs);
+            add(left, right)
+        }
+        (_, SymExpr::BinaryOp { op: BinOp::Sub, lhs, rhs }) => {
+            let left = expand_mul(l, lhs);
+            let right = expand_mul(l, rhs);
+            sub(left, right)
+        }
+        (SymExpr::BinaryOp { op: BinOp::Add, lhs, rhs }, _) => {
+            let left = expand_mul(lhs, r);
+            let right = expand_mul(rhs, r);
+            add(left, right)
+        }
+        (SymExpr::BinaryOp { op: BinOp::Sub, lhs, rhs }, _) => {
+            let left = expand_mul(lhs, r);
+            let right = expand_mul(rhs, r);
+            sub(left, right)
+        }
+        _ => mul(l.clone(), r.clone()),
+    }
+}
+
+fn expand_power(base: &Expr, n: u32) -> Expr {
+    if n == 0 { return one(); }
+    if n == 1 { return base.clone(); }
+    // Use repeated squaring: expand((a+b)^n)
+    match base.as_ref() {
+        SymExpr::BinaryOp { op: BinOp::Add, lhs, rhs } => {
+            // Binomial theorem: sum_{k=0}^{n} C(n,k) * lhs^k * rhs^(n-k)
+            let mut result = zero();
+            let mut binom = 1u64;
+            for k in 0..=n {
+                let term = mul(
+                    mul(con(binom as f64), expand_power(lhs, k)),
+                    expand_power(rhs, n - k),
+                );
+                let term = expand(&term);
+                result = add(result, term);
+                if k < n {
+                    binom = binom * (n - k) as u64 / (k + 1) as u64;
+                }
+            }
+            result
+        }
+        _ => {
+            // Generic: base^n = base * base^(n-1)
+            let half = expand_power(base, n / 2);
+            let sq = expand_mul(&half, &half);
+            if n % 2 == 0 { sq } else { expand_mul(&sq, base) }
+        }
+    }
+}
+
 // ── Tests ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -2798,5 +3096,87 @@ mod tests {
         assert!((roots[0] - 1.0).abs() < 1e-6, "root[0]={}", roots[0]);
         assert!((roots[1] - 2.0).abs() < 1e-6, "root[1]={}", roots[1]);
         assert!((roots[2] - 3.0).abs() < 1e-6, "root[2]={}", roots[2]);
+    }
+
+    #[test]
+    fn parse_constant() {
+        let e = parse_expr("3.14").unwrap();
+        assert!((eval(&e, &HashMap::new()) - 3.14).abs() < 1e-10);
+    }
+
+    #[test]
+    fn parse_variable() {
+        let e = parse_expr("x").unwrap();
+        let mut vars = HashMap::new();
+        vars.insert("x".to_string(), 5.0);
+        assert!((eval(&e, &vars) - 5.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn parse_arithmetic() {
+        // 2 + 3 * x at x=4 → 14
+        let e = parse_expr("2 + 3 * x").unwrap();
+        let mut vars = HashMap::new();
+        vars.insert("x".to_string(), 4.0);
+        assert!((eval(&e, &vars) - 14.0).abs() < 1e-10, "got {}", eval(&e, &vars));
+    }
+
+    #[test]
+    fn parse_power() {
+        // x^2 at x=3 → 9
+        let e = parse_expr("x^2").unwrap();
+        let mut vars = HashMap::new();
+        vars.insert("x".to_string(), 3.0);
+        assert!((eval(&e, &vars) - 9.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn parse_function_sin() {
+        let e = parse_expr("sin(x)").unwrap();
+        let mut vars = HashMap::new();
+        vars.insert("x".to_string(), 1.0);
+        assert!((eval(&e, &vars) - 1.0_f64.sin()).abs() < 1e-10);
+    }
+
+    #[test]
+    fn parse_nested() {
+        // (x + 1)^2 at x=3 → 16
+        let e = parse_expr("(x + 1)^2").unwrap();
+        let mut vars = HashMap::new();
+        vars.insert("x".to_string(), 3.0);
+        assert!((eval(&e, &vars) - 16.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn parse_unary_minus() {
+        // -x at x=2 → -2
+        let e = parse_expr("-x").unwrap();
+        let mut vars = HashMap::new();
+        vars.insert("x".to_string(), 2.0);
+        assert!((eval(&e, &vars) + 2.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn expand_product_over_sum() {
+        // x*(y+z) at x=2, y=3, z=4 → 14  (both before and after expand)
+        let e = parse_expr("x*(y + z)").unwrap();
+        let expanded = expand(&e);
+        let mut vars = HashMap::new();
+        vars.insert("x".to_string(), 2.0);
+        vars.insert("y".to_string(), 3.0);
+        vars.insert("z".to_string(), 4.0);
+        let orig = eval(&e, &vars);
+        let got = eval(&expanded, &vars);
+        assert!((orig - got).abs() < 1e-10, "orig={orig}, got={got}");
+    }
+
+    #[test]
+    fn expand_square() {
+        // (x+1)^2 = x^2 + 2x + 1; at x=3 → 16
+        let e = parse_expr("(x + 1)^2").unwrap();
+        let expanded = expand(&e);
+        let mut vars = HashMap::new();
+        vars.insert("x".to_string(), 3.0);
+        assert!((eval(&expanded, &vars) - 16.0).abs() < 1e-10);
     }
 }

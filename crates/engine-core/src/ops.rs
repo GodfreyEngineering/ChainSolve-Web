@@ -4329,6 +4329,168 @@ fn evaluate_node_inner(
             inputs.get("model").cloned().unwrap_or(Value::error("nn.export: no model connected"))
         }
 
+        "nn.lstm" => {
+            use crate::nn::recurrent;
+            let sequence: Vec<Vec<f64>> = match inputs.get("sequence") {
+                Some(Value::Table { rows, .. }) => rows.clone(),
+                Some(Value::Matrix { rows, cols, data }) => {
+                    (0..*rows).map(|r| (0..*cols).map(|c| data[r * *cols + c]).collect()).collect()
+                }
+                Some(Value::Vector { value }) => value.iter().map(|&v| vec![v]).collect(),
+                _ => return Value::error("nn.lstm: 'sequence' input required (Table [T × D])"),
+            };
+            let hidden_size = data.get("hiddenSize").and_then(|v| v.as_f64()).unwrap_or(32.0) as usize;
+            let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+            let return_seq = data.get("returnSequences").and_then(|v| v.as_bool()).unwrap_or(false);
+            recurrent::lstm_forward(&sequence, hidden_size, seed, return_seq)
+        }
+
+        "nn.gru" => {
+            use crate::nn::recurrent;
+            let sequence: Vec<Vec<f64>> = match inputs.get("sequence") {
+                Some(Value::Table { rows, .. }) => rows.clone(),
+                Some(Value::Matrix { rows, cols, data }) => {
+                    (0..*rows).map(|r| (0..*cols).map(|c| data[r * *cols + c]).collect()).collect()
+                }
+                Some(Value::Vector { value }) => value.iter().map(|&v| vec![v]).collect(),
+                _ => return Value::error("nn.gru: 'sequence' input required (Table [T × D])"),
+            };
+            let hidden_size = data.get("hiddenSize").and_then(|v| v.as_f64()).unwrap_or(32.0) as usize;
+            let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+            let return_seq = data.get("returnSequences").and_then(|v| v.as_bool()).unwrap_or(false);
+            recurrent::gru_forward(&sequence, hidden_size, seed, return_seq)
+        }
+
+        "nn.attention" => {
+            use crate::nn::attention;
+            let to_seq = |key: &str| -> Option<Vec<Vec<f64>>> {
+                match inputs.get(key) {
+                    Some(Value::Table { rows, .. }) => Some(rows.clone()),
+                    Some(Value::Matrix { rows, cols, data }) => {
+                        Some((0..*rows).map(|r| (0..*cols).map(|c| data[r * *cols + c]).collect()).collect())
+                    }
+                    _ => None,
+                }
+            };
+            let q = match to_seq("query") {
+                Some(s) => s,
+                None => return Value::error("nn.attention: 'query' input required (Table)"),
+            };
+            let k = match to_seq("key").or_else(|| to_seq("query")) {
+                Some(s) => s,
+                None => return Value::error("nn.attention: 'key' input required (Table)"),
+            };
+            let v = match to_seq("value").or_else(|| to_seq("key")) {
+                Some(s) => s,
+                None => return Value::error("nn.attention: 'value' input required (Table)"),
+            };
+            let causal = data.get("causal").and_then(|v| v.as_bool()).unwrap_or(false);
+            attention::attention_block(&q, &k, &v, causal)
+        }
+
+        // ── Symbolic Math (CAS) ────────────────────────────────────────
+
+        "sym.differentiate" => {
+            use crate::symbolic;
+            let expr_str = match inputs.get("expr") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => return Value::error("sym.differentiate: 'expr' input required (Text)"),
+            };
+            let var_str = match inputs.get("var") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => data.get("var").and_then(|v| if let serde_json::Value::String(s) = v { Some(s.clone()) } else { None }).unwrap_or_else(|| "x".to_string()),
+            };
+            match symbolic::parse_expr(&expr_str) {
+                Ok(e) => {
+                    let de = symbolic::simplify(&symbolic::differentiate(&e, &var_str));
+                    Value::Text { value: symbolic::to_latex(&de) }
+                }
+                Err(err) => Value::error(format!("sym.differentiate parse error: {err}")),
+            }
+        }
+
+        "sym.integrate" => {
+            use crate::symbolic;
+            let expr_str = match inputs.get("expr") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => return Value::error("sym.integrate: 'expr' input required (Text)"),
+            };
+            let var_str = match inputs.get("var") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => data.get("var").and_then(|v| if let serde_json::Value::String(s) = v { Some(s.clone()) } else { None }).unwrap_or_else(|| "x".to_string()),
+            };
+            match symbolic::parse_expr(&expr_str) {
+                Ok(e) => {
+                    match symbolic::integrate(&e, &var_str) {
+                        symbolic::IntegrateResult::Ok(antideriv) => {
+                            let simplified = symbolic::simplify(&antideriv);
+                            Value::Text { value: symbolic::to_latex(&simplified) }
+                        }
+                        symbolic::IntegrateResult::NoElementary => {
+                            Value::Text { value: "\\text{no elementary antiderivative}".to_string() }
+                        }
+                    }
+                }
+                Err(err) => Value::error(format!("sym.integrate parse error: {err}")),
+            }
+        }
+
+        "sym.simplify" => {
+            use crate::symbolic;
+            let expr_str = match inputs.get("expr") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => return Value::error("sym.simplify: 'expr' input required (Text)"),
+            };
+            match symbolic::parse_expr(&expr_str) {
+                Ok(e) => {
+                    let simplified = symbolic::simplify(&e);
+                    Value::Text { value: symbolic::to_latex(&simplified) }
+                }
+                Err(err) => Value::error(format!("sym.simplify parse error: {err}")),
+            }
+        }
+
+        "sym.expand" => {
+            use crate::symbolic;
+            let expr_str = match inputs.get("expr") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => return Value::error("sym.expand: 'expr' input required (Text)"),
+            };
+            match symbolic::parse_expr(&expr_str) {
+                Ok(e) => {
+                    let expanded = symbolic::expand(&e);
+                    Value::Text { value: symbolic::to_latex(&expanded) }
+                }
+                Err(err) => Value::error(format!("sym.expand parse error: {err}")),
+            }
+        }
+
+        "sym.substitute" => {
+            use crate::symbolic;
+            let expr_str = match inputs.get("expr") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => return Value::error("sym.substitute: 'expr' input required (Text)"),
+            };
+            let var_str = match inputs.get("var") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => data.get("var").and_then(|v| if let serde_json::Value::String(s) = v { Some(s.clone()) } else { None }).unwrap_or_else(|| "x".to_string()),
+            };
+            let value_f = match inputs.get("value") {
+                Some(Value::Scalar { value }) => *value,
+                Some(Value::Text { value }) => value.parse::<f64>().unwrap_or(f64::NAN),
+                _ => f64::NAN,
+            };
+            match symbolic::parse_expr(&expr_str) {
+                Ok(e) => {
+                    let replacement = symbolic::con(value_f);
+                    let substituted = symbolic::substitute(&e, &var_str, &replacement);
+                    let simplified = symbolic::simplify(&substituted);
+                    Value::Text { value: symbolic::to_latex(&simplified) }
+                }
+                Err(err) => Value::error(format!("sym.substitute parse error: {err}")),
+            }
+        }
+
         // ── ODE Solvers (Phase 4) ──────────────────────────────────────
 
         "ode.rk4" | "ode.rk45" => {

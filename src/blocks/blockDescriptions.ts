@@ -682,6 +682,23 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Trains a neural network using backpropagation. Configurable epochs, batch size, learning rate, and loss function.',
   'nn.predict': 'Runs inference on a trained neural network. Feed new data to get predictions.',
   'nn.export': 'Exports a trained neural network to ONNX format for use in other tools.',
+  'nn.lstm':
+    'LSTM (Long Short-Term Memory): processes a time sequence through forget/input/output gates and cell state. Input: Table [T × D]. Output: last hidden state vector or full sequence. Xavier-initialised weights from seed.',
+  'nn.gru':
+    'GRU (Gated Recurrent Unit): streamlined recurrent layer with reset and update gates. Fewer parameters than LSTM, comparable performance. Input: Table [T × D]. Output: last hidden state or full sequence.',
+  'nn.attention':
+    'Scaled dot-product attention: Attention(Q,K,V) = softmax(Q·Kᵀ/√d_k)·V. Supports causal (autoregressive) masking. Use Q=K=V=same sequence for self-attention (Transformer building block).',
+  // Symbolic Math (CAS)
+  'sym.differentiate':
+    'Symbolic differentiation: computes d(expr)/d(var) using chain rule, product rule, and standard function derivatives. Returns a LaTeX string. Simplifies the result automatically.',
+  'sym.integrate':
+    'Symbolic integration: finds ∫expr d(var) using a Risch-inspired table lookup approach for elementary functions (polynomials, exp, ln, sin, cos). Returns LaTeX or "no elementary antiderivative".',
+  'sym.simplify':
+    'Symbolically simplifies an expression: cancels zero terms, evaluates constant sub-expressions, and applies basic algebraic rules. Returns a LaTeX string.',
+  'sym.expand':
+    'Expands a symbolic expression by distributing multiplication over addition. Supports binomial theorem for integer powers up to 6. E.g. (x+1)² → x² + 2x + 1. Returns LaTeX.',
+  'sym.substitute':
+    'Substitutes a numeric value for a named variable in a symbolic expression, then simplifies. Useful for evaluating symbolic expressions at a point. Returns a LaTeX string.',
   // ODE Solvers
   'ode.rk4':
     'Solve a system of ODEs using the classic 4th-order Runge-Kutta method. Output = table of time vs state variables.',

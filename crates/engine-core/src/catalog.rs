@@ -556,6 +556,16 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("nn.trainer", "NN Trainer", "neuralNetworks", "csOperation", vec![p("model", "Model"), p("trainX", "Training data"), p("trainY", "Training labels")], true),
         entry("nn.predict", "NN Predict", "neuralNetworks", "csOperation", vec![p("model", "Trained model"), p("data", "Input data")], true),
         entry("nn.export", "NN Export", "neuralNetworks", "csOperation", vec![p("model", "Trained model")], true),
+        entry("nn.lstm", "LSTM", "neuralNetworks", "csOperation", vec![p("sequence", "Sequence (table)")], true),
+        entry("nn.gru", "GRU", "neuralNetworks", "csOperation", vec![p("sequence", "Sequence (table)")], true),
+        entry("nn.attention", "Attention", "neuralNetworks", "csOperation", vec![p("query", "Query (table)"), p("key", "Key (table)"), p("value", "Value (table)")], true),
+
+        // ── Symbolic Math (CAS) ────────────────────────────────────────
+        entry("sym.differentiate", "Differentiate", "math", "csOperation", vec![p("expr", "Expression (text)"), p("var", "Variable (text)")], true),
+        entry("sym.integrate", "Integrate", "math", "csOperation", vec![p("expr", "Expression (text)"), p("var", "Variable (text)")], true),
+        entry("sym.simplify", "Simplify", "math", "csOperation", vec![p("expr", "Expression (text)")], true),
+        entry("sym.expand", "Expand", "math", "csOperation", vec![p("expr", "Expression (text)")], true),
+        entry("sym.substitute", "Substitute", "math", "csOperation", vec![p("expr", "Expression (text)"), p("var", "Variable (text)"), p("value", "Value")], true),
 
         // ── ODE Solvers (Phase 4) ──────────────────────────────────────
         entry("ode.rk4", "ODE Solver (RK4)", "odeSolvers", "csOperation", vec![p("equations", "Equations (text)"), p("y0", "Initial state")], true),
