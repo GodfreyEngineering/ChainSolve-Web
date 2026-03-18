@@ -2125,7 +2125,9 @@
     "matrix_chol": "כולסקי",
     "matrix_eig": "ערכים עצמיים",
     "matrix_sparse_cg": "CG דלילה",
-    "matrix_sparse_gmres": "GMRES דלילה"
+    "matrix_sparse_gmres": "GMRES דלילה",
+    "units_convert": "ממיר יחידות",
+    "units_analyze": "מנתח יחידות"
   },
   "entitlements": {
     "projectLimitTitle": "Project limit reached",

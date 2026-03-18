@@ -221,6 +221,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'eng.conv.lpm_to_m3s': 'Converts litres per minute to cubic metres per second.',
   'eng.conv.m3s_to_lpm': 'Converts cubic metres per second to litres per minute.',
   unit_convert: 'Generic unit conversion. Pick input and output units from any dimension.',
+  'units.convert': 'Unit converter backed by the engine SI dimension system (80+ units). Connect a Scalar or Vector, set from_unit and to_unit — the block outputs the converted value. Incompatible dimensions return an error.',
+  'units.analyze': 'Dimensional consistency checker. Enter a comma-separated list of unit symbols and the block returns a table with each unit\'s SI scale factor and whether it is consistent with the rest. Use to catch unit mix-ups in calculations.',
 
   // ── Finance: TVM ──────────────────────────────────────────────────────────
   'fin.tvm.simple_interest': 'Simple interest. I = P*r*t. Principal times rate times time.',

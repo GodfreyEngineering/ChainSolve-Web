@@ -44,6 +44,7 @@ pub mod signal;
 pub mod sparse;
 pub mod sparse_solvers;
 pub mod symbolic;
+pub mod units;
 pub mod vehicle;
 pub mod types;
 pub mod validate;

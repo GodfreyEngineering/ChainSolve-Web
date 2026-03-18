@@ -16,6 +16,36 @@ import type { BlockDef } from './registry'
 
 export function registerUnitInputBlocks(register: (def: BlockDef) => void): void {
   register({
+    type: 'units.convert',
+    label: 'Unit Converter',
+    category: 'math',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'value', label: 'Value' }],
+    proOnly: false,
+    defaultData: {
+      from_unit: 'm',
+      to_unit: 'km',
+    },
+    synonyms: ['unit', 'convert', 'SI', 'imperial', 'metric', 'dimensional'],
+    tags: ['units', 'conversion', 'math'],
+  })
+
+  register({
+    type: 'units.analyze',
+    label: 'Unit Analyser',
+    category: 'math',
+    nodeKind: 'csOperation',
+    inputs: [],
+    proOnly: false,
+    defaultData: {
+      units: 'kg, m, s',
+    },
+    synonyms: ['unit', 'dimension', 'analyse', 'analyze', 'consistency', 'SI'],
+    tags: ['units', 'analysis', 'math'],
+  })
+
+
+  register({
     type: 'unitInput',
     label: 'Unit Input',
     category: 'input',

@@ -483,7 +483,9 @@
     "matrix_chol": "Cholesky",
     "matrix_eig": "Valores Propios",
     "matrix_sparse_cg": "CG Disperso",
-    "matrix_sparse_gmres": "GMRES Disperso"
+    "matrix_sparse_gmres": "GMRES Disperso",
+    "units_convert": "Convertidor de Unidades",
+    "units_analyze": "Analizador de Unidades"
   },
   "plot": {
     "settings": "Config. de Gráfico",

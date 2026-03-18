@@ -673,6 +673,9 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("ml.classMetrics", "Classification Metrics", "machineLearning", "csOperation", vec![p("actual", "Actual"), p("predicted", "Predicted")], false),
         entry("ml.rocCurve", "ROC Curve", "machineLearning", "csOperation", vec![p("actual", "Actual"), p("scores", "Scores")], false),
         entry("ml.auc", "AUC Score", "machineLearning", "csOperation", vec![p("actual", "Actual"), p("scores", "Scores")], false),
+        // Units (1.28)
+        entry("units.convert", "Unit Converter", "math", "csOperation", vec![p("value", "Value")], false),
+        entry("units.analyze", "Unit Analyser", "math", "csOperation", vec![], false),
     ]
 }
 

@@ -483,7 +483,9 @@
     "matrix_chol": "Cholesky",
     "matrix_eig": "Valeurs Propres",
     "matrix_sparse_cg": "CG Creux",
-    "matrix_sparse_gmres": "GMRES Creux"
+    "matrix_sparse_gmres": "GMRES Creux",
+    "units_convert": "Convertisseur d'Unités",
+    "units_analyze": "Analyseur d'Unités"
   },
   "plot": {
     "settings": "Paramètres du graphique",

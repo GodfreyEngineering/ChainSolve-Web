@@ -491,7 +491,9 @@
     "matrix_chol": "コレスキー分解",
     "matrix_eig": "固有値",
     "matrix_sparse_cg": "疏行列CG法",
-    "matrix_sparse_gmres": "疏行列GMRES法"
+    "matrix_sparse_gmres": "疏行列GMRES法",
+    "units_convert": "単位変換器",
+    "units_analyze": "単位解析器"
   },
   "plot": {
     "settings": "Plot Settings",

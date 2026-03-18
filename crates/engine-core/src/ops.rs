@@ -6605,6 +6605,67 @@ fn evaluate_node_inner(
             crate::types::build_table(&col_refs, &col_data)
         }
 
+        // ── Units Conversion (1.28) ──────────────────────────────────
+        "units.convert" => {
+            use crate::units::{lookup_unit, convert};
+            let from_sym = data.get("from_unit").and_then(|v| v.as_str()).unwrap_or("m");
+            let to_sym   = data.get("to_unit").and_then(|v| v.as_str()).unwrap_or("m");
+            let from_def = match lookup_unit(from_sym) {
+                Some(d) => d,
+                None => return Value::error(format!("units.convert: unknown unit '{from_sym}'")),
+            };
+            let to_def = match lookup_unit(to_sym) {
+                Some(d) => d,
+                None => return Value::error(format!("units.convert: unknown unit '{to_sym}'")),
+            };
+            match inputs.get("value") {
+                Some(Value::Scalar { value }) => {
+                    match convert(*value, &from_def, &to_def) {
+                        Some(result) => Value::scalar(result),
+                        None => Value::error(format!(
+                            "units.convert: incompatible dimensions ({} → {})",
+                            from_def.dimension.display(), to_def.dimension.display()
+                        )),
+                    }
+                }
+                Some(Value::Vector { value }) => {
+                    let converted: Vec<f64> = value.iter().filter_map(|&v| convert(v, &from_def, &to_def)).collect();
+                    if converted.len() != value.len() {
+                        return Value::error(format!(
+                            "units.convert: incompatible dimensions ({} → {})",
+                            from_def.dimension.display(), to_def.dimension.display()
+                        ));
+                    }
+                    Value::Vector { value: converted }
+                }
+                _ => Value::error("units.convert: 'value' input required (Scalar or Vector)"),
+            }
+        }
+
+        // ── Units Analysis (1.28) ────────────────────────────────────
+        "units.analyze" => {
+            use crate::units::analyse_units;
+            let symbols_str = data.get("units").and_then(|v| v.as_str()).unwrap_or("kg,m,s");
+            let symbols: Vec<&str> = symbols_str.split(',').map(|s| s.trim()).filter(|s| !s.is_empty()).collect();
+            let analysis = analyse_units(&symbols);
+            let n = analysis.entries.len();
+            let sym_col: Vec<f64> = (0..n).map(|i| i as f64).collect();
+            let scale_col: Vec<f64> = analysis.entries.iter().map(|e| e.scale).collect();
+            let ok_col: Vec<f64> = analysis.entries.iter().map(|e| if e.ok { 1.0 } else { 0.0 }).collect();
+            let consistent = if analysis.is_consistent { 1.0 } else { 0.0 };
+            // Return a summary scalar + table on the same block output
+            // (The block output is a Table; the summary is in the first row of a "meta" column)
+            let mut rows: Vec<Vec<f64>> = Vec::with_capacity(n + 1);
+            rows.push(vec![consistent, f64::NAN, f64::NAN]);
+            for (i, _e) in analysis.entries.iter().enumerate() {
+                rows.push(vec![sym_col[i], scale_col[i], ok_col[i]]);
+            }
+            Value::Table {
+                columns: vec!["idx_or_meta".to_string(), "scale_si".to_string(), "ok".to_string()],
+                rows,
+            }
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }

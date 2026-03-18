@@ -483,7 +483,9 @@
     "matrix_chol": "Cholesky",
     "matrix_eig": "Eigenwerte",
     "matrix_sparse_cg": "Sparse CG",
-    "matrix_sparse_gmres": "Sparse GMRES"
+    "matrix_sparse_gmres": "Sparse GMRES",
+    "units_convert": "Einheitenumrechner",
+    "units_analyze": "Einheitenanalyse"
   },
   "plot": {
     "settings": "Diagramm-Einstellungen",
