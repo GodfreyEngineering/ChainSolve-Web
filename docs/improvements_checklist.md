@@ -108,7 +108,7 @@
 - [x] **2.10** ParameterSweep: defines a parameter range (start, stop, step OR explicit list) for DOE/optimisation — connects to DOE blocks, output is a vector of values
 - [x] **2.11** TimeSeriesInput: time-stamped data with configurable resampling (linear, ZOH, cubic) and time format parsing
 - [ ] **2.12** ExpressionInput: free-form mathematical expression parsed to symbolic representation with live LaTeX preview — uses the symbolic CAS (Category 1B). Output is SymbolicExpr value type.
-- [ ] **2.13** UnitInput: physical quantity with unit picker dropdown (search across 500+ units: SI base/derived, CGS, imperial, engineering) — output carries unit metadata for dimensional checking
+- [x] **2.13** UnitInput: physical quantity with unit picker dropdown (search across 500+ units: SI base/derived, CGS, imperial, engineering) — output carries unit metadata for dimensional checking
 
 ### 2B — Math & Linear Algebra Blocks
 
