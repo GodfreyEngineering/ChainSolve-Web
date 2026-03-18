@@ -1,0 +1,28 @@
+apiVersion: v2
+name: chainsolve
+description: >
+  ChainSolve — Browser-native visual computation platform.
+  Deploys the ChainSolve frontend, native compute engine, and
+  (optionally) a self-hosted Supabase stack onto Kubernetes.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://chainsolve.dev
+icon: https://chainsolve.dev/icon.png
+sources:
+  - https://github.com/godfrey-engineering/chainsolve
+keywords:
+  - computation
+  - engineering
+  - simulation
+  - wasm
+  - webgpu
+maintainers:
+  - name: Godfrey Engineering
+    url: https://chainsolve.dev
+dependencies:
+  # Supabase self-hosted (optional — disable if using Supabase cloud)
+  - name: supabase
+    version: "0.1.x"
+    repository: "https://supabase.github.io/helm-charts"
+    condition: supabase.enabled

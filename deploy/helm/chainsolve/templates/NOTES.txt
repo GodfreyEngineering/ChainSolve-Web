@@ -1,0 +1,37 @@
+ChainSolve has been deployed!
+
+1. Get the application URL:
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+  https://{{ .host }}
+{{- end }}
+{{- else if contains "NodePort" .Values.frontend.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "chainsolve.fullname" . }}-frontend)
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.frontend.service.type }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+  Watch its status with: kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "chainsolve.fullname" . }}-frontend
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "chainsolve.fullname" . }}-frontend --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP
+{{- else if contains "ClusterIP" .Values.frontend.service.type }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "chainsolve.fullname" . }}-frontend 8080:80
+  echo "Visit http://localhost:8080"
+{{- end }}
+
+2. Check pod status:
+  kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+3. View engine logs:
+  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/component=engine --tail=50
+
+{{- if .Values.gpuEngine.enabled }}
+4. GPU engine is enabled:
+  kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/component=engine-gpu
+{{- end }}
+
+{{- if .Values.supabase.enabled }}
+5. Supabase Studio (Admin UI):
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ .Release.Name }}-supabase-studio 3000:3000
+  echo "Visit http://localhost:3000"
+{{- end }}

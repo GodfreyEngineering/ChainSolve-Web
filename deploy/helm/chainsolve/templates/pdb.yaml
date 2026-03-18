@@ -1,0 +1,32 @@
+{{- if and .Values.frontend.enabled .Values.frontend.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "chainsolve.fullname" . }}-frontend
+  labels:
+    {{- include "chainsolve.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+spec:
+  minAvailable: {{ .Values.frontend.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "chainsolve.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: frontend
+{{- end }}
+
+{{- if and .Values.engine.enabled .Values.engine.podDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "chainsolve.fullname" . }}-engine
+  labels:
+    {{- include "chainsolve.labels" . | nindent 4 }}
+    app.kubernetes.io/component: engine
+spec:
+  minAvailable: {{ .Values.engine.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "chainsolve.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: engine
+{{- end }}

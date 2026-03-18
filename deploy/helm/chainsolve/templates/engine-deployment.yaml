@@ -1,0 +1,133 @@
+{{- if .Values.engine.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chainsolve.fullname" . }}-engine
+  labels:
+    {{- include "chainsolve.labels" . | nindent 4 }}
+    app.kubernetes.io/component: engine
+spec:
+  {{- if not .Values.engine.autoscaling.enabled }}
+  replicas: {{ .Values.engine.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "chainsolve.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: engine
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 2
+  template:
+    metadata:
+      labels:
+        {{- include "chainsolve.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: engine
+    spec:
+      serviceAccountName: {{ include "chainsolve.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: engine
+          image: {{ include "chainsolve.image" (dict "Values" .Values "image" .Values.engine.image) }}
+          imagePullPolicy: {{ .Values.engine.image.pullPolicy }}
+          args: ["--port", "3099"]
+          ports:
+            - name: http
+              containerPort: 3099
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.engine.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+
+{{- if .Values.gpuEngine.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chainsolve.fullname" . }}-engine-gpu
+  labels:
+    {{- include "chainsolve.labels" . | nindent 4 }}
+    app.kubernetes.io/component: engine-gpu
+spec:
+  {{- if not .Values.gpuEngine.autoscaling.enabled }}
+  replicas: {{ .Values.gpuEngine.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "chainsolve.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: engine-gpu
+  template:
+    metadata:
+      labels:
+        {{- include "chainsolve.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: engine-gpu
+    spec:
+      serviceAccountName: {{ include "chainsolve.serviceAccountName" . }}
+      {{- with .Values.gpuEngine.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gpuEngine.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gpuEngine.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: engine-gpu
+          image: {{ include "chainsolve.image" (dict "Values" .Values "image" .Values.gpuEngine.image) }}
+          imagePullPolicy: {{ .Values.gpuEngine.image.pullPolicy }}
+          args: ["--port", "3099"]
+          ports:
+            - name: http
+              containerPort: 3099
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.gpuEngine.resources | nindent 12 }}
+          # GPU containers need privileged access for CUDA
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+{{- end }}

@@ -1,0 +1,235 @@
+##############################################################################
+# ChainSolve Helm Chart — Default Values
+#
+# Override these values in a custom values file:
+#   helm install chainsolve ./deploy/helm/chainsolve \
+#     --values my-values.yaml
+##############################################################################
+
+# ── Global ────────────────────────────────────────────────────────────────────
+global:
+  # Docker image registry (set to your private registry for air-gapped deployments)
+  imageRegistry: ""
+  # Image pull secrets for private registries
+  imagePullSecrets: []
+  # Storage class for persistent volumes
+  storageClass: ""
+
+# ── ChainSolve frontend ───────────────────────────────────────────────────────
+frontend:
+  enabled: true
+  image:
+    repository: chainsolve/app
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  replicaCount: 2
+
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  # Horizontal Pod Autoscaling
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  # Pod Disruption Budget — keep at least 1 replica during node drain
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+  # Environment variables injected into the nginx container
+  env:
+    VITE_SUPABASE_URL: ""      # Set to your Supabase URL
+    VITE_SUPABASE_ANON_KEY: "" # Set to your Supabase anon key
+
+  # Secrets mounted as env vars (reference existing Kubernetes secrets)
+  envFrom: []
+  # Example:
+  # - secretRef:
+  #     name: chainsolve-secrets
+
+# ── Native compute engine ─────────────────────────────────────────────────────
+engine:
+  enabled: true
+  image:
+    repository: chainsolve/engine
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  replicaCount: 2
+
+  # CPU-only engine nodes
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+    limits:
+      cpu: "4"
+      memory: "4Gi"
+
+  service:
+    type: ClusterIP
+    port: 3099
+
+  # Autoscaling for the compute engine
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 60
+
+  # Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+# ── GPU compute engine (separate deployment for GPU nodes) ────────────────────
+gpuEngine:
+  enabled: false
+  image:
+    repository: chainsolve/engine-cuda
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+  replicaCount: 1
+
+  resources:
+    requests:
+      cpu: "1"
+      memory: "4Gi"
+      nvidia.com/gpu: "1"
+    limits:
+      cpu: "8"
+      memory: "16Gi"
+      nvidia.com/gpu: "1"
+
+  service:
+    type: ClusterIP
+    port: 3099
+
+  # Node selector for GPU nodes
+  # Example: for GKE GPU node pool labelled with accelerator=nvidia-tesla-t4
+  nodeSelector:
+    cloud.google.com/gke-accelerator: nvidia-tesla-t4
+
+  # Toleration for NVIDIA GPU node taint
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+
+  # Affinity to prefer GPU nodes
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: cloud.google.com/gke-accelerator
+                operator: Exists
+
+  autoscaling:
+    enabled: true
+    minReplicas: 0
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 50
+
+# ── Ingress ───────────────────────────────────────────────────────────────────
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    # COOP/COEP headers for SharedArrayBuffer
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Cross-Origin-Opener-Policy: same-origin";
+      more_set_headers "Cross-Origin-Embedder-Policy: require-corp";
+    # TLS certificate via cert-manager
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: chainsolve.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+        - path: /api/engine/
+          pathType: Prefix
+          service: engine
+  tls:
+    - secretName: chainsolve-tls
+      hosts:
+        - chainsolve.example.com
+
+# ── Supabase (self-hosted, optional) ─────────────────────────────────────────
+supabase:
+  enabled: false
+  # Supabase Helm chart values
+  # See https://github.com/supabase-community/supabase-kubernetes
+  secret:
+    jwt:
+      secretKeyBase: ""
+      anonKey: ""
+      serviceKey: ""
+    db:
+      username: supabase
+      password: ""
+      database: postgres
+
+# ── cert-manager (optional) ──────────────────────────────────────────────────
+certManager:
+  enabled: false
+  # ClusterIssuer for Let's Encrypt
+  clusterIssuer:
+    email: admin@example.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretName: letsencrypt-prod
+
+# ── Prometheus monitoring (optional) ─────────────────────────────────────────
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+    namespace: monitoring
+    interval: 30s
+
+# ── Pod security ─────────────────────────────────────────────────────────────
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 2000
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# ── Network policies ──────────────────────────────────────────────────────────
+networkPolicy:
+  enabled: false
+  # When enabled, only allows traffic between chainsolve services
+  ingressFrom:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/instance: chainsolve
+
+# ── Service account ───────────────────────────────────────────────────────────
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
