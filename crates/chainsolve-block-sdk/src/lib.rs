@@ -52,6 +52,8 @@
 
 pub use engine_core::types::Value;
 
+pub mod wasm_abi;
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

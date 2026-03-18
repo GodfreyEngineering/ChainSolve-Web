@@ -427,7 +427,7 @@
 - [x] **7.9** Benchmark: 100-state ODE, 1s sim, RK45 <500ms in browser
 - [x] **7.10** Streaming evaluation: for large parameter sweeps, evaluate and stream results without holding all in memory. Configurable cache 1GB browser / 16GB server.
 - [x] **7.11** LRU cache with configurable size: evict least-recently-used cached block results when memory pressure detected
-- [ ] **7.12** Hybrid compute: dispatch heavy jobs to Supabase Edge Function calling native Rust binary — graphs >1000 blocks or matrices >10000×10000
+- [x] **7.12** Hybrid compute: dispatch heavy jobs to Supabase Edge Function calling native Rust binary — graphs >1000 blocks or matrices >10000×10000
 - [x] **7.13** Cold start <3s on 4G: code splitting (React.lazy), lazy block pack loading, WASM streaming compilation
 - [x] **7.14** Offline support: Service Worker caches WASM + app shell, IndexedDB stores graphs locally, sync to Supabase when online
 
