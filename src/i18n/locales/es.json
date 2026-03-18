@@ -460,6 +460,7 @@
     "sym_substitute": "Sustituir",
     "sym_compiled_eval": "Eval Compilada",
     "sym_groebner": "Base de Gröbner",
+    "ad_mixed_jacobian": "Jacobiano Modo Mixto (AD)",
     "optim_param_est": "Estimación de parámetros",
     "optim_bayesian": "Optimización bayesiana",
     "optim_hyperopt": "Opt. de Hiperparámetros",

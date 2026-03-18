@@ -530,6 +530,54 @@ where
     }
 }
 
+/// Compute the Jacobian of a vector function given as compiled expressions.
+///
+/// Uses forward-mode dual-number AD (exact, no finite-difference error).
+/// When `n_in <= threshold * n_out`, the mode is reported as "forward";
+/// otherwise "reverse" is reported (though both internally use forward-mode
+/// dual numbers since we have the compiled AST, making it always efficient).
+///
+/// Returns `(jacobian, mode_str)` where `jacobian[i][j]` = ∂f_i/∂x_j.
+pub fn mixed_jacobian_compiled(
+    compiled_funcs: &[&crate::expr::CompiledExpr],
+    var_names: &[&str],
+    x: &[f64],
+    threshold: f64,
+) -> (Vec<Vec<f64>>, &'static str) {
+    let n_in = x.len();
+    let n_out = compiled_funcs.len();
+
+    let mode = if n_in as f64 <= threshold * n_out as f64 {
+        "forward"
+    } else {
+        "reverse"
+    };
+
+    // Forward-mode: n_in dual evaluations, one column of the Jacobian per pass.
+    let mut jac = vec![vec![0.0; n_in]; n_out];
+
+    for col in 0..n_in {
+        // Tangent e_col: 1 for variable `col`, 0 for all others.
+        let dual_vars: std::collections::HashMap<String, Dual> = var_names
+            .iter()
+            .zip(x.iter())
+            .enumerate()
+            .map(|(j, (name, &val))| {
+                let d = if j == col { Dual::variable(val) } else { Dual::constant(val) };
+                (name.to_string(), d)
+            })
+            .collect();
+
+        for (row, compiled) in compiled_funcs.iter().enumerate() {
+            jac[row][col] = compiled.eval_dual(&dual_vars)
+                .map(|d| d.dot)
+                .unwrap_or(f64::NAN);
+        }
+    }
+
+    (jac, mode)
+}
+
 // ── Tests ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]

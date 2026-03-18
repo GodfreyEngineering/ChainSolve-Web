@@ -57,7 +57,7 @@
 
 - [x] **1.30** Forward-mode AD via dual numbers: `DualNumber { value: f64, derivative: f64 }` — efficient when number of inputs << number of outputs (e.g., sensitivity of 1000 outputs to 3 inputs)
 - [x] **1.31** Reverse-mode AD via tape-based recording: build computation graph during forward pass, then traverse backward to compute gradients — efficient for scalar loss functions (neural network training)
-- [ ] **1.32** Mixed-mode AD: automatically select forward vs reverse based on input/output dimension ratio. If dim(input) < dim(output), use forward; otherwise reverse. Threshold configurable.
+- [x] **1.32** Mixed-mode AD: automatically select forward vs reverse based on input/output dimension ratio. If dim(input) < dim(output), use forward; otherwise reverse. Threshold configurable.
 - [ ] **1.33** AD through ODE solvers: discrete adjoint method with checkpointing — compute gradients of ODE solution w.r.t. parameters without storing full trajectory. Essential for parameter estimation and PINNs.
 - [ ] **1.34** AD through linear solvers: implicit differentiation via implicit function theorem — if Ax=b and A,b depend on parameters, compute dx/dp without differentiating the solver internals
 - [ ] **1.35** Custom VJP/JVP rules: allow block authors to define efficient gradient rules for their blocks (like JAX's `custom_vjp`) instead of relying on automatic tracing

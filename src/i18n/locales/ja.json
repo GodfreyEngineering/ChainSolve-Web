@@ -468,6 +468,7 @@
     "sym_substitute": "代入",
     "sym_compiled_eval": "コンパイル済み評価",
     "sym_groebner": "グレブナー基底",
+    "ad_mixed_jacobian": "混合モードヤコビアン (AD)",
     "optim_param_est": "パラメータ推定",
     "optim_bayesian": "ベイズ最適化",
     "optim_hyperopt": "ハイパーパラメータ最適化",

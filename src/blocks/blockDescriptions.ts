@@ -803,6 +803,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Expands a symbolic expression by distributing multiplication over addition. Supports binomial theorem for integer powers up to 6. E.g. (x+1)² → x² + 2x + 1. Returns LaTeX.',
   'sym.substitute':
     'Substitutes a numeric value for a named variable in a symbolic expression, then simplifies. Useful for evaluating symbolic expressions at a point. Returns a LaTeX string.',
+  'ad.mixedJacobian':
+    'Mixed-Mode Automatic Differentiation: computes the exact Jacobian of a vector function using dual-number forward-mode AD. Automatically reports whether forward or reverse mode was selected based on the input/output dimension ratio (threshold). expressions: comma-separated output expressions (e.g. "x*y, x^2+y"). var_names: comma-separated variable names. Connect Vector port x or set x field. Returns Jacobian table where row i contains ∂f_i/∂x_j for all j.',
   'sym.compiledEval':
     'Compiled expression evaluator: pre-parses the formula into an AST once, then evaluates without re-parsing on each call. Significantly faster than repeated eval_expr() in tight loops (e.g., ODE steps, Monte Carlo). Set expr in data, connect input ports with variable names. Also used internally by ODE solvers to JIT-compile equation strings.',
   'sym.groebner':

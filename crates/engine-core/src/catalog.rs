@@ -657,6 +657,8 @@ pub fn catalog() -> Vec<CatalogEntry> {
         // Compiled expression eval & Gröbner bases
         entry("sym.compiledEval", "Compiled Eval", "math", "csOperation", vec![], false),
         entry("sym.groebner", "Gröbner Basis", "symbolic", "csOperation", vec![], false),
+        // Mixed-mode AD (1.32)
+        entry("ad.mixedJacobian", "Mixed-Mode Jacobian", "math", "csOperation", vec![p("x", "Eval point (vector)")], false),
         // Surrogate, AutoML & Hyperopt
         entry("optim.hyperopt", "Hyperparameter Opt.", "optimization", "csOperation", vec![], false),
         entry("optim.surrogate", "GP Surrogate", "optimization", "csOperation", vec![p("train", "Train (table)"), p("query", "Query (table)")], false),

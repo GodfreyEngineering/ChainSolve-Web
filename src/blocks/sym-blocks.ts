@@ -102,6 +102,26 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'ad.mixedJacobian',
+    label: 'Mixed-Mode Jacobian',
+    category: 'math',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'x', label: 'Eval point (vector)' }],
+    defaultData: {
+      blockType: 'ad.mixedJacobian',
+      label: 'Mixed-Mode Jacobian',
+      expressions: 'x*y, x^2+y',
+      var_names: 'x,y',
+      x: '1,1',
+      threshold: 1.0,
+    },
+    synonyms: ['jacobian', 'mixed mode AD', 'automatic differentiation', 'gradient', 'forward AD', 'reverse AD'],
+    tags: ['ad', 'autodiff', 'jacobian', 'gradient', 'differentiation'],
+    description:
+      'Mixed-mode automatic differentiation: computes the Jacobian of a vector function using forward-mode dual-number AD. Selects forward mode (reported) when n_inputs ≤ threshold × n_outputs, reverse otherwise. expressions: comma-separated output expressions (e.g. "x*y, x^2+y"). var_names: comma-separated variable names. x: evaluation point as Vector port or comma-separated data. Returns Jacobian as Table.',
+  })
+
+  register({
     type: 'sym.groebner',
     label: 'Gröbner Basis',
     category: 'math',

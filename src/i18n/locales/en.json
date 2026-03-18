@@ -468,6 +468,7 @@
     "sym_substitute": "Substitute",
     "sym_compiled_eval": "Compiled Eval",
     "sym_groebner": "Gröbner Basis",
+    "ad_mixed_jacobian": "Mixed-Mode Jacobian",
     "optim_param_est": "Parameter Estimation",
     "optim_bayesian": "Bayesian Optimisation",
     "optim_hyperopt": "Hyperparameter Opt.",

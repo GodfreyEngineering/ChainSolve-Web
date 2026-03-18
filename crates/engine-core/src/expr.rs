@@ -56,6 +56,15 @@ impl CompiledExpr {
     pub fn eval(&self, vars: &HashMap<String, f64>) -> Result<f64, String> {
         eval_node(&self.root, vars)
     }
+
+    /// Evaluate the compiled expression using Dual numbers for forward-mode AD.
+    ///
+    /// Supply Dual variables where the tangent component carries the derivative
+    /// direction. Use `Dual::variable(v)` for the differentiated input and
+    /// `Dual::constant(v)` for all others.
+    pub fn eval_dual(&self, vars: &HashMap<String, crate::autodiff::Dual>) -> Result<crate::autodiff::Dual, String> {
+        eval_node_dual(&self.root, vars)
+    }
 }
 
 /// Compile a formula string into a `CompiledExpr` AST.
@@ -71,6 +80,53 @@ pub fn compile(formula: &str) -> Result<CompiledExpr, String> {
         return Err(format!("Unexpected token at position {}", parser.pos));
     }
     Ok(CompiledExpr { root })
+}
+
+fn eval_node_dual(node: &ExprNode, vars: &HashMap<String, crate::autodiff::Dual>) -> Result<crate::autodiff::Dual, String> {
+    use crate::autodiff::Dual;
+    match node {
+        ExprNode::Number(n) => Ok(Dual::constant(*n)),
+        ExprNode::Constant(c) => Ok(Dual::constant(*c)),
+        ExprNode::Variable(name) => vars.get(name.as_str())
+            .copied()
+            .ok_or_else(|| format!("Unknown variable: {name}")),
+        ExprNode::UnaryMinus(inner) => Ok(-eval_node_dual(inner, vars)?),
+        ExprNode::BinOp { op, left, right } => {
+            let l = eval_node_dual(left, vars)?;
+            let r = eval_node_dual(right, vars)?;
+            Ok(match op {
+                BinOpKind::Add => l + r,
+                BinOpKind::Sub => l - r,
+                BinOpKind::Mul => l * r,
+                BinOpKind::Div => l / r,
+                BinOpKind::Pow => l.pow_dual(r),
+            })
+        }
+        ExprNode::FnCall { name, args } => {
+            let vals: Result<Vec<Dual>, String> = args.iter().map(|a| eval_node_dual(a, vars)).collect();
+            let vals = vals?;
+            Ok(match name {
+                FnKind::Sqrt  => vals[0].sqrt(),
+                FnKind::Abs   => vals[0].abs(),
+                FnKind::Sin   => vals[0].sin(),
+                FnKind::Cos   => vals[0].cos(),
+                FnKind::Tan   => vals[0].tan(),
+                FnKind::Asin  => vals[0].asin(),
+                FnKind::Acos  => vals[0].acos(),
+                FnKind::Atan  => vals[0].atan(),
+                FnKind::Ln    => vals[0].ln(),
+                FnKind::Log10 => vals[0].log10(),
+                FnKind::Exp   => vals[0].exp(),
+                FnKind::Ceil  => Dual::constant(vals[0].val.ceil()),  // non-smooth: zero grad
+                FnKind::Floor => Dual::constant(vals[0].val.floor()),
+                FnKind::Round => Dual::constant(vals[0].val.round()),
+                FnKind::Min   => vals[0].min(vals[1]),
+                FnKind::Max   => vals[0].max(vals[1]),
+                FnKind::Pow2  => vals[0].pow_dual(vals[1]),
+                FnKind::Atan2 => vals[0].atan2(vals[1]),
+            })
+        }
+    }
 }
 
 fn eval_node(node: &ExprNode, vars: &HashMap<String, f64>) -> Result<f64, String> {

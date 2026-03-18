@@ -6464,6 +6464,82 @@ fn evaluate_node_inner(
             crate::types::build_table(&["model_idx", "cv_rmse", "r2", "is_best"], &[model_idx, cv_rmse, r2_vals, is_best])
         }
 
+        // ── Mixed-Mode AD (1.32) ─────────────────────────────────────
+        "ad.mixedJacobian" => {
+            // Compute the Jacobian of a vector function using mixed-mode AD.
+            // data["expressions"]: comma-separated output expressions, e.g. "x*y, x^2+y"
+            // data["var_names"]:   comma-separated input variable names, e.g. "x,y"
+            // input "x":           Vector of evaluation point values, OR
+            // data["x"]:           comma-separated fallback if no port connected
+            // data["threshold"]:   mode-switch ratio (default 1.0)
+            // Output: Table with columns [output_idx, <var_names...>] — each row is ∂f_i/∂x
+
+            let exprs_str = data.get("expressions").and_then(|v| v.as_str()).unwrap_or("");
+            if exprs_str.is_empty() {
+                return Value::error("ad.mixedJacobian: 'expressions' field required (comma-separated)");
+            }
+            let var_names_str = data.get("var_names").and_then(|v| v.as_str()).unwrap_or("x");
+            let var_names: Vec<String> = var_names_str.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            if var_names.is_empty() {
+                return Value::error("ad.mixedJacobian: 'var_names' field required");
+            }
+
+            // Evaluation point: from port "x" (Vector) or data["x"] (comma-sep)
+            let x_vals: Vec<f64> = match inputs.get("x") {
+                Some(Value::Vector { value: xd, .. }) => xd.clone(),
+                _ => {
+                    let xs = data.get("x").and_then(|v| v.as_str()).unwrap_or("");
+                    xs.split(',').filter_map(|s| s.trim().parse::<f64>().ok()).collect()
+                }
+            };
+            if x_vals.len() != var_names.len() {
+                return Value::error(format!(
+                    "ad.mixedJacobian: {} var_names but {} x values",
+                    var_names.len(), x_vals.len()
+                ));
+            }
+
+            let threshold = scalar_or(data, "threshold", 1.0);
+
+            // Compile each expression
+            let expr_strs: Vec<String> = exprs_str.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let mut compiled_vec = Vec::with_capacity(expr_strs.len());
+            for es in &expr_strs {
+                match crate::expr::compile(es) {
+                    Ok(c) => compiled_vec.push(c),
+                    Err(e) => return Value::error(format!("ad.mixedJacobian compile error in '{}': {}", es, e)),
+                }
+            }
+            let compiled_refs: Vec<&crate::expr::CompiledExpr> = compiled_vec.iter().collect();
+            let var_refs: Vec<&str> = var_names.iter().map(|s| s.as_str()).collect();
+
+            let (jac, mode) = crate::autodiff::mixed_jacobian_compiled(
+                &compiled_refs,
+                &var_refs,
+                &x_vals,
+                threshold,
+            );
+
+            // Build Table: columns = ["output_idx", "mode", var_names..., "expr"]
+            let n_out = jac.len();
+            let n_in = var_names.len();
+            let mut col_names = vec!["output_idx".to_string()];
+            col_names.extend(var_names.iter().cloned());
+            col_names.push("mode".to_string());
+
+            // Build column data
+            let output_idx: Vec<f64> = (0..n_out).map(|i| i as f64).collect();
+            let mode_col: Vec<f64> = vec![if mode == "forward" { 0.0 } else { 1.0 }; n_out];
+            let mut col_data: Vec<Vec<f64>> = vec![output_idx];
+            for j in 0..n_in {
+                col_data.push(jac.iter().map(|row| row[j]).collect());
+            }
+            col_data.push(mode_col);
+
+            let col_refs: Vec<&str> = col_names.iter().map(|s| s.as_str()).collect();
+            crate::types::build_table(&col_refs, &col_data)
+        }
+
         _ => Value::error(format!("Unknown block type: {}", block_type)),
     }
 }
