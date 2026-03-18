@@ -460,6 +460,7 @@
     "nn_lstm": "LSTM",
     "nn_gru": "GRU",
     "nn_attention": "Attention",
+    "nn_conv2d": "Conv2D",
     "sym_differentiate": "Differentiate",
     "sym_integrate": "Integrate",
     "sym_simplify": "Simplify",

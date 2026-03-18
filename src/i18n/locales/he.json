@@ -2094,6 +2094,7 @@
     "nn_lstm": "LSTM",
     "nn_gru": "GRU",
     "nn_attention": "תשומת לב",
+    "nn_conv2d": "Conv2D",
     "sym_differentiate": "גזירה",
     "sym_integrate": "אינטגרציה",
     "sym_simplify": "פישוט",
