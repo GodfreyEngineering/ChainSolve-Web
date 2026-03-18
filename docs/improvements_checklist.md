@@ -529,7 +529,7 @@
 - [x] **13.3** Stripe billing: Pro ($29/mo), Enterprise (custom), with webhooks + checkout + portal
 - [x] **13.4** Supabase Auth: email, Google, GitHub, Microsoft. RLS on all tables. Developer/admin/student roles.
 - [x] **13.5** Tauri desktop app: Rust+WebView wrapper for offline use, native file system access, optional local CUDA. Auto-updates.
-- [ ] **13.6** Docker Compose self-hosted: Supabase self-hosted + ChainSolve server + reverse proxy — for enterprise on-prem
+- [x] **13.6** Docker Compose self-hosted: Supabase self-hosted + ChainSolve server + reverse proxy — for enterprise on-prem
 - [ ] **13.7** Kubernetes Helm chart: for large-scale deployment with GPU node pools
 - [x] **13.8** Free tier: full engine in browser, 3 projects, 500MB storage, community support — genuinely useful, not a crippled demo (lesson from KNIME's free desktop)
 - [x] **13.9** Academic tier: Pro-equivalent for verified students/faculty (up to 100 seats per campus) — collapses MATLAB's $50K–200K campus license model

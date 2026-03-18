@@ -1,0 +1,136 @@
+_format_version: "3.0"
+_transform: true
+
+###############################################################################
+# Kong declarative config for Supabase self-hosted
+# Reference: https://supabase.com/docs/guides/self-hosting/docker
+###############################################################################
+
+services:
+  # ── Auth (GoTrue) ──────────────────────────────────────────────────────────
+  - name: auth-v1
+    url: http://supabase-auth:9999/
+    routes:
+      - name: auth-v1-all
+        strip_path: true
+        paths:
+          - /auth/v1/
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - apikey
+            - Content-Type
+            - X-Client-Info
+          exposed_headers:
+            - Content-Range
+          max_age: 3600
+          credentials: true
+
+  # ── REST (PostgREST) ──────────────────────────────────────────────────────
+  - name: rest-v1
+    url: http://supabase-rest:3000/
+    routes:
+      - name: rest-v1-all
+        strip_path: true
+        paths:
+          - /rest/v1/
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - apikey
+            - Content-Type
+            - X-Client-Info
+            - Prefer
+            - Range
+          exposed_headers:
+            - Content-Range
+          max_age: 3600
+          credentials: true
+
+  # ── Realtime ───────────────────────────────────────────────────────────────
+  - name: realtime-v1
+    url: http://supabase-realtime:4000/socket/
+    routes:
+      - name: realtime-v1-all
+        strip_path: true
+        paths:
+          - /realtime/v1/
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - OPTIONS
+          headers:
+            - Authorization
+            - apikey
+            - Content-Type
+            - X-Client-Info
+          max_age: 3600
+          credentials: true
+
+  # ── Storage ────────────────────────────────────────────────────────────────
+  - name: storage-v1
+    url: http://supabase-storage:5000/
+    routes:
+      - name: storage-v1-all
+        strip_path: true
+        paths:
+          - /storage/v1/
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - apikey
+            - Content-Type
+            - X-Client-Info
+            - Cache-Control
+            - X-Upsert
+          exposed_headers:
+            - Content-Range
+          max_age: 3600
+          credentials: true
+
+  # ── Meta API ───────────────────────────────────────────────────────────────
+  - name: meta
+    url: http://supabase-meta:8080/
+    routes:
+      - name: meta-all
+        strip_path: true
+        paths:
+          - /pg/

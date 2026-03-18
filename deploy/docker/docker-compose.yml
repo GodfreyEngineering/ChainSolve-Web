@@ -1,0 +1,263 @@
+##############################################################################
+# ChainSolve — Self-Hosted Docker Compose Stack
+#
+# Services:
+#   chainsolve      — Nginx + frontend static files + native engine server
+#   supabase-db     — PostgreSQL 15 (Supabase schema)
+#   supabase-kong   — API gateway + auth proxy
+#   supabase-auth   — GoTrue authentication server
+#   supabase-rest   — PostgREST API
+#   supabase-realtime — Realtime websocket subscriptions
+#   supabase-storage  — Object storage (local disk)
+#   supabase-imgproxy — Image transformation
+#   supabase-meta   — Supabase Studio / Meta API
+#   supabase-studio — Admin UI (optional, port 3000)
+#
+# Quick start:
+#   cp deploy/docker/.env.example deploy/docker/.env
+#   # Edit .env with your secrets
+#   cd deploy/docker
+#   docker compose up -d
+#
+# Access:
+#   App:          http://localhost:8080
+#   Supabase UI:  http://localhost:3000  (Studio)
+#   Engine API:   http://localhost:8080/api/engine/health
+##############################################################################
+
+version: "3.9"
+
+# ── Network ──────────────────────────────────────────────────────────────────
+networks:
+  chainsolve-net:
+    driver: bridge
+
+# ── Volumes ──────────────────────────────────────────────────────────────────
+volumes:
+  supabase-db-data:
+  supabase-storage-data:
+
+services:
+
+  # ── ChainSolve frontend + native engine ────────────────────────────────────
+  chainsolve:
+    image: chainsolve/app:latest
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+      args:
+        VITE_SUPABASE_URL: http://localhost:8080/supabase
+        VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+    ports:
+      - "8080:80"
+      - "3099:3099"
+    environment:
+      ENGINE_PORT: "3099"
+    depends_on:
+      - supabase-kong
+    networks:
+      - chainsolve-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── PostgreSQL ────────────────────────────────────────────────────────────
+  supabase-db:
+    image: supabase/postgres:15.6.1.117
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXP: 3600
+    volumes:
+      - supabase-db-data:/var/lib/postgresql/data
+      - ../../supabase/migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - chainsolve-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Kong API gateway ──────────────────────────────────────────────────────
+  supabase-kong:
+    image: kong:3.1
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
+    volumes:
+      - ./supabase/kong.yml:/var/lib/kong/kong.yml:ro
+    networks:
+      - chainsolve-net
+    restart: unless-stopped
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+
+  # ── GoTrue authentication ─────────────────────────────────────────────────
+  supabase-auth:
+    image: supabase/gotrue:v2.158.4
+    environment:
+      GOTRUE_API_HOST: "0.0.0.0"
+      GOTRUE_API_PORT: "9999"
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@supabase-db:5432/postgres
+      GOTRUE_SITE_URL: ${SITE_URL:-http://localhost:8080}
+      GOTRUE_URI_ALLOW_LIST: ${SITE_URL:-http://localhost:8080}/**
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_SMTP_HOST: ${SMTP_HOST:-}
+      GOTRUE_SMTP_PORT: ${SMTP_PORT:-587}
+      GOTRUE_SMTP_USER: ${SMTP_USER:-}
+      GOTRUE_SMTP_PASS: ${SMTP_PASS:-}
+      GOTRUE_SMTP_SENDER_NAME: ChainSolve
+      GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
+      GOTRUE_LOG_LEVEL: warn
+    networks:
+      - chainsolve-net
+    restart: unless-stopped
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+
+  # ── PostgREST ─────────────────────────────────────────────────────────────
+  supabase-rest:
+    image: postgrest/postgrest:v12.2.0
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@supabase-db:5432/postgres
+      PGRST_DB_SCHEMAS: public,graphql_public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_APP_SETTINGS_JWT_SECRET: ${JWT_SECRET}
+      PGRST_APP_SETTINGS_JWT_EXP: 3600
+    networks:
+      - chainsolve-net
+    restart: unless-stopped
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+
+  # ── Realtime ──────────────────────────────────────────────────────────────
+  supabase-realtime:
+    image: supabase/realtime:v2.30.23
+    environment:
+      PORT: "4000"
+      DB_HOST: supabase-db
+      DB_PORT: "5432"
+      DB_USER: supabase_admin
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: postgres
+      DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
+      DB_ENC_KEY: ${REALTIME_ENC_KEY:-supabaserealtimesecret}
+      API_JWT_SECRET: ${JWT_SECRET}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      ERL_AFLAGS: "-proto_dist inet_tcp"
+      ENABLE_TAILSCALE: "false"
+      DNS_NODES: "''"
+    networks:
+      - chainsolve-net
+    restart: unless-stopped
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+
+  # ── Storage ───────────────────────────────────────────────────────────────
+  supabase-storage:
+    image: supabase/storage-api:v1.11.11
+    environment:
+      ANON_KEY: ${SUPABASE_ANON_KEY}
+      SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      POSTGREST_URL: http://supabase-rest:3000
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@supabase-db:5432/postgres
+      FILE_SIZE_LIMIT: 52428800  # 50 MB
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: stub
+      GLOBAL_S3_BUCKET: stub
+      ENABLE_IMAGE_TRANSFORMATION: "true"
+      IMGPROXY_URL: http://supabase-imgproxy:5001
+    volumes:
+      - supabase-storage-data:/var/lib/storage
+    networks:
+      - chainsolve-net
+    restart: unless-stopped
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+
+  # ── Image proxy ───────────────────────────────────────────────────────────
+  supabase-imgproxy:
+    image: darthsim/imgproxy:v3.8.0
+    environment:
+      IMGPROXY_BIND: ":5001"
+      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
+      IMGPROXY_USE_ETAG: "true"
+      IMGPROXY_ENABLE_WEBP_DETECTION: "true"
+    volumes:
+      - supabase-storage-data:/var/lib/storage:ro
+    networks:
+      - chainsolve-net
+    restart: unless-stopped
+
+  # ── Supabase Meta ─────────────────────────────────────────────────────────
+  supabase-meta:
+    image: supabase/postgres-meta:v0.83.2
+    environment:
+      PG_META_PORT: "8080"
+      PG_META_DB_HOST: supabase-db
+      PG_META_DB_PORT: "5432"
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: supabase_admin
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - chainsolve-net
+    restart: unless-stopped
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+
+  # ── Supabase Studio (Admin UI) ────────────────────────────────────────────
+  # Access at http://localhost:3000
+  supabase-studio:
+    image: supabase/studio:2024.11.04-sha-u5rxkuo
+    ports:
+      - "3000:3000"
+    environment:
+      HOSTNAME: "0.0.0.0"
+      STUDIO_PG_META_URL: http://supabase-meta:8080
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DEFAULT_ORGANIZATION_NAME: "ChainSolve"
+      DEFAULT_PROJECT_NAME: "ChainSolve Self-Hosted"
+      SUPABASE_URL: http://supabase-kong:8000
+      SUPABASE_PUBLIC_URL: http://localhost:8000
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      AUTH_JWT_SECRET: ${JWT_SECRET}
+      LOGFLARE_API_KEY: ${LOGFLARE_API_KEY:-}
+      LOGFLARE_URL: http://analytics:4000
+    networks:
+      - chainsolve-net
+    restart: unless-stopped
+    depends_on:
+      supabase-db:
+        condition: service_healthy
