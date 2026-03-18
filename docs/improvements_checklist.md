@@ -437,15 +437,15 @@
 
 *Dedicated worker for long-running tasks. All have defined endpoints. Optional looping for periodic simulations.*
 
-- [ ] **8.1** Dedicated simulation worker: separate Web Worker from eval worker, loads same WASM. SimulationWorkerAPI class.
+- [x] **8.1** Dedicated simulation worker: separate Web Worker from eval worker, loads same WASM. SimulationWorkerAPI class.
 - [ ] **8.2** run_simulation WASM export with progress_cb: config = {op, inputs, maxIterations, endTime?, convergenceThreshold?, batchSize?, loop?, loopCount?}
-- [ ] **8.3** All tasks finite: maxIterations, targetLoss, endTime, convergenceThreshold — no indefinite execution
-- [ ] **8.4** Looping: when loop=true + loopCount=N, restart from initial conditions after each cycle. Results append to output table. E.g., pendulum over 10 periods → angle vs time with 10 periods of data for plotting.
-- [ ] **8.5** Progress streaming: {type: 'simulationProgress', iteration, totalIterations, cycle, totalCycles, partialResults, metrics}
-- [ ] **8.6** Cancellation: Stop button sends Abort signal. Clean stop after current cycle (no mid-cycle abort unless force-cancelled).
+- [x] **8.3** All tasks finite: maxIterations, targetLoss, endTime, convergenceThreshold — no indefinite execution
+- [x] **8.4** Looping: when loop=true + loopCount=N, restart from initial conditions after each cycle. Results append to output table. E.g., pendulum over 10 periods → angle vs time with 10 periods of data for plotting.
+- [x] **8.5** Progress streaming: {type: 'simulationProgress', iteration, totalIterations, cycle, totalCycles, partialResults, metrics}
+- [x] **8.6** Cancellation: Stop button sends Abort signal. Clean stop after current cycle (no mid-cycle abort unless force-cancelled).
 - [ ] **8.7** Connected Plot blocks update live during looping: each cycle appends data points, graph extends in real-time
-- [ ] **8.8** SimulationStatusStore: tracks {nodeId, status, iteration, totalIterations, cycle, totalCycles, metrics}. StatusBar shows "Simulating (cycle 3/10)" or "Training (epoch 47/100)".
-- [ ] **8.9** Normal graph eval continues while simulation runs on separate worker — two workers must be independent
+- [x] **8.8** SimulationStatusStore: tracks {nodeId, status, iteration, totalIterations, cycle, totalCycles, metrics}. StatusBar shows "Simulating (cycle 3/10)" or "Training (epoch 47/100)".
+- [x] **8.9** Normal graph eval continues while simulation runs on separate worker — two workers must be independent
 
 ---
 
