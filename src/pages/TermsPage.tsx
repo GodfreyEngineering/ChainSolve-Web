@@ -11,6 +11,7 @@ import { BRAND, CONTACT } from '../lib/brand'
 import { LegalFooter } from '../components/ui/LegalFooter'
 import { usePageMeta, useHreflang } from '../lib/seo'
 import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
+import { LegalLanguageNotice } from '../components/ui/LegalLanguageNotice'
 
 export default function TermsPage() {
   const { t } = useTranslation()
@@ -26,6 +27,8 @@ export default function TermsPage() {
             <img src={BRAND.logoWideText} alt={t('app.name')} style={s.logo} />
           </Link>
         </header>
+
+        <LegalLanguageNotice canonicalUrl="/terms" />
 
         <article style={s.article}>
           <h1 style={s.title}>{t('terms.title')}</h1>

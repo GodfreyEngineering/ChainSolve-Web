@@ -15,6 +15,7 @@ import { BRAND, CONTACT } from '../lib/brand'
 import { LegalFooter } from '../components/ui/LegalFooter'
 import { usePageMeta, useHreflang } from '../lib/seo'
 import { CookieSettingsLink } from '../components/CookieConsent'
+import { LegalLanguageNotice } from '../components/ui/LegalLanguageNotice'
 
 export default function CookiesPage() {
   const { t } = useTranslation()
@@ -30,6 +31,8 @@ export default function CookiesPage() {
             <img src={BRAND.logoWideText} alt={t('app.name')} style={s.logo} />
           </Link>
         </header>
+
+        <LegalLanguageNotice canonicalUrl="/cookies" />
 
         <article style={s.article}>
           <h1 style={s.title}>Cookie Policy</h1>

@@ -14,6 +14,7 @@ import { BRAND, CONTACT, COMPANY } from '../lib/brand'
 import { LegalFooter } from '../components/ui/LegalFooter'
 import { usePageMeta, useHreflang } from '../lib/seo'
 import { CURRENT_PRIVACY_VERSION } from '../lib/termsVersion'
+import { LegalLanguageNotice } from '../components/ui/LegalLanguageNotice'
 
 export default function PrivacyPage() {
   const { t } = useTranslation()
@@ -29,6 +30,8 @@ export default function PrivacyPage() {
             <img src={BRAND.logoWideText} alt={t('app.name')} style={s.logo} />
           </Link>
         </header>
+
+        <LegalLanguageNotice canonicalUrl="/privacy" />
 
         <article style={s.article}>
           <h1 style={s.title}>{t('privacy.title')}</h1>

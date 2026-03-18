@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { BRAND, CONTACT } from '../lib/brand'
 import { LegalFooter } from '../components/ui/LegalFooter'
 import { usePageMeta, useHreflang } from '../lib/seo'
+import { LegalLanguageNotice } from '../components/ui/LegalLanguageNotice'
 
 export default function AccessibilityPage() {
   const { t } = useTranslation()
@@ -28,6 +29,8 @@ export default function AccessibilityPage() {
             <img src={BRAND.logoWideText} alt={t('app.name')} style={s.logo} />
           </Link>
         </header>
+
+        <LegalLanguageNotice canonicalUrl="/accessibility" />
 
         <article style={s.article}>
           <h1 style={s.title}>Accessibility Statement</h1>

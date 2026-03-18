@@ -682,7 +682,7 @@
 - [x] **16.79** Legal document version control: store all legal documents (ToS, Privacy Policy, Cookie Policy, DPAs) in the git repository under `legal/` with version history; every published version should be tagged with its effective date
 - [x] **16.80** Consent audit table: create a Supabase table `user_consents` with columns: user_id, consent_type (tos_accepted, privacy_accepted, cookie_analytics, cookie_marketing, marketing_email), consented_at (timestamp), document_version (string), ip_address, user_agent; record every consent event; this is your evidence of lawful consent under GDPR and is essential for any ICO inquiry or enterprise due diligence
 - [x] **16.81** SBOM generation: implement automated Software Bill of Materials generation in CI (e.g., `cargo sbom` for Rust, `npx @cyclonedx/cyclonedx-npm` for JS) outputting CycloneDX or SPDX format; store in `legal/sbom/`; enterprise and defence customers will request this during procurement
-- [ ] **16.82** Enterprise-ready legal pack: create a downloadable `ChainSolve_Legal_Pack.zip` containing: ToS PDF, Privacy Policy PDF, Cookie Policy PDF, Security Overview PDF, SBOM, THIRD\_PARTY\_LICENCES.md, sub-processor list, data processing addendum template; this is what enterprise procurement teams need and having it ready accelerates sales cycles from weeks to days
+- [x] **16.82** Enterprise-ready legal pack: create a downloadable `ChainSolve_Legal_Pack.zip` containing: ToS PDF, Privacy Policy PDF, Cookie Policy PDF, Security Overview PDF, SBOM, THIRD\_PARTY\_LICENCES.md, sub-processor list, data processing addendum template; this is what enterprise procurement teams need and having it ready accelerates sales cycles from weeks to days
 
  --
 
