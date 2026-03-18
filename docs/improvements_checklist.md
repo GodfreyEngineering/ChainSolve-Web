@@ -190,7 +190,7 @@
 - [x] **2.67** Saturation (clamp output), DeadZone (zero within ±band), RateLimiter (max dy/dt), Delay (pure time delay via buffer) — essential nonlinear control elements
 - [x] **2.68** MUX (combine N scalars → vector), DEMUX (split vector → N scalars), Switch (select input based on condition) — signal routing
 - [x] **2.69** Scope: real-time signal visualisation during simulation — 30fps update, configurable buffer depth (last N points or all), vertical trigger line at current time
-- [ ] **2.70** ZeroOrderHold (sample continuous → discrete), RateTransition (change sample rate) — for mixed continuous/discrete simulation
+- [x] **2.70** ZeroOrderHold (sample continuous → discrete), RateTransition (change sample rate) — for mixed continuous/discrete simulation
 - [ ] **2.71** StateflowBlock: visual finite state machine editor — define states, transitions with guard conditions, entry/during/exit actions — for mode-switching logic (gear shift, flight modes, battery management)
 
 ### 2E — Vehicle Dynamics Domain
