@@ -803,6 +803,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Expands a symbolic expression by distributing multiplication over addition. Supports binomial theorem for integer powers up to 6. E.g. (x+1)² → x² + 2x + 1. Returns LaTeX.',
   'sym.substitute':
     'Substitutes a numeric value for a named variable in a symbolic expression, then simplifies. Useful for evaluating symbolic expressions at a point. Returns a LaTeX string.',
+  'sym.groebner':
+    'Gröbner Basis: Buchberger\'s algorithm with coprime and chain criteria for efficiency, followed by auto-reduction to a reduced Gröbner basis. Input "polynomials" as semicolon-separated expressions (e.g. "x^2+y-1;x+y^2-1"), set "variables" (comma-separated). mode="basis" returns the basis polynomials as text; mode="solve" attempts to find numeric solutions for zero-dimensional ideals. order: "grevlex" (fastest, standard), "lex" (elimination, triangular output), "grlex".',
   // ODE Solvers
   'ode.rk4':
     'Solve a system of ODEs using the classic 4th-order Runge-Kutta method. Output = table of time vs state variables.',

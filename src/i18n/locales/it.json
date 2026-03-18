@@ -457,6 +457,7 @@
     "sym_simplify": "Semplificare",
     "sym_expand": "Espandere",
     "sym_substitute": "Sostituire",
+    "sym_groebner": "Base di Gröbner",
     "optim_param_est": "Stima dei parametri",
     "optim_bayesian": "Ottimizzazione bayesiana",
     "optim_hyperopt": "Ott. Iperparametri",

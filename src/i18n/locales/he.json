@@ -2100,6 +2100,7 @@
     "sym_simplify": "פישוט",
     "sym_expand": "פיתוח",
     "sym_substitute": "הצבה",
+    "sym_groebner": "בסיס גרובנר",
     "optim_param_est": "אמידת פרמטרים",
     "optim_bayesian": "אופטימיזציה בייסיאנית",
     "optim_hyperopt": "אופטימיזציית היפר-פרמטרים",

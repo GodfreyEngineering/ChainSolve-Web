@@ -5156,6 +5156,183 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Gröbner Bases (1.26) ─────────────────────────────────────
+        "sym.groebner" => {
+            use crate::symbolic::{MultiPoly, Monomial, MonomialOrder, groebner_basis, solve_polynomial_system};
+
+            // Helper: parse a single polynomial term like "3*x^2*y" or "-x" or "2.5"
+            fn parse_poly_term(term: &str, var_names: &[String]) -> Result<(f64, Monomial), String> {
+                let term = term.trim();
+                if term.is_empty() {
+                    return Ok((0.0, Monomial { exponents: vec![0u32; var_names.len()] }));
+                }
+                let parts: Vec<&str> = term.split('*').collect();
+                let mut coeff = 1.0f64;
+                let mut exps = vec![0u32; var_names.len()];
+                for part in &parts {
+                    let part = part.trim();
+                    if part.is_empty() { continue; }
+                    if let Ok(n) = part.parse::<f64>() {
+                        coeff *= n;
+                    } else if let Some((vname, exp_str)) = part.split_once('^') {
+                        let vname = vname.trim();
+                        let exp: u32 = exp_str.trim().parse()
+                            .map_err(|_| format!("Invalid exponent '{}' in term '{}'", exp_str, term))?;
+                        let idx = var_names.iter().position(|v| v == vname)
+                            .ok_or_else(|| format!("Unknown variable '{}' in term '{}'", vname, term))?;
+                        exps[idx] += exp;
+                    } else {
+                        let vname = part;
+                        let idx = var_names.iter().position(|v| v == vname)
+                            .ok_or_else(|| format!("Unknown variable '{}' in term '{}'", vname, term))?;
+                        exps[idx] += 1;
+                    }
+                }
+                Ok((coeff, Monomial { exponents: exps }))
+            }
+
+            // Helper: parse a polynomial expression into a MultiPoly
+            fn parse_poly_expr(s: &str, var_names: &[String], order: MonomialOrder) -> Result<MultiPoly, String> {
+                // Handle "LHS = RHS" form: subtract RHS from LHS
+                let s_owned;
+                let s = if let Some((lhs, rhs)) = s.split_once('=') {
+                    s_owned = format!("({})-({})=0", lhs, rhs);
+                    let _ = s_owned.as_str(); // just to hold it
+                    // Actually rewrite as "lhs - rhs"
+                    let rhs_terms: Vec<&str> = rhs.split_terminator('+').collect();
+                    let _ = rhs_terms;
+                    // Simpler: treat s as "lhs - rhs" by replacing '= rhs' with nothing
+                    // Parse lhs - rhs terms by prepending lhs + "- (" + rhs + ")"
+                    format!("{}-({})_end", lhs.trim(), rhs.trim())
+                } else {
+                    s.to_string()
+                };
+
+                // Tokenize into signed terms by scanning for top-level + and -
+                let s = s.trim_end_matches("_end");
+                let mut terms_raw: Vec<String> = Vec::new();
+                let mut current = String::new();
+                let mut depth = 0usize; // bracket depth
+
+                // Prepend implicit + if doesn't start with sign
+                let leading_sign = if !s.is_empty() && (s.as_bytes()[0] == b'-') { "" } else { "+" };
+                let full = format!("{}{}", leading_sign, s);
+                let bytes = full.as_bytes();
+                let len = bytes.len();
+                let mut i = 0;
+                while i < len {
+                    let c = bytes[i] as char;
+                    match c {
+                        '(' => { depth += 1; current.push(c); }
+                        ')' => {
+                            if depth > 0 { depth -= 1; }
+                            current.push(c);
+                        }
+                        '+' | '-' if depth == 0 && !current.is_empty() => {
+                            let t = current.trim().to_string();
+                            if !t.is_empty() && t != "+" && t != "-" {
+                                terms_raw.push(t);
+                            }
+                            current = c.to_string();
+                        }
+                        _ => { current.push(c); }
+                    }
+                    i += 1;
+                }
+                if !current.trim().is_empty() {
+                    terms_raw.push(current.trim().to_string());
+                }
+
+                // Parse each signed term
+                let mut terms: Vec<(f64, Monomial)> = Vec::new();
+                for tt in &terms_raw {
+                    let tt = tt.trim();
+                    if tt.is_empty() { continue; }
+                    let (sign, rest) = if let Some(r) = tt.strip_prefix('-') {
+                        (-1.0f64, r.trim())
+                    } else if let Some(r) = tt.strip_prefix('+') {
+                        (1.0f64, r.trim())
+                    } else {
+                        (1.0f64, tt)
+                    };
+                    // Handle parenthesised group: "(term1 + term2 ...)"
+                    let rest = rest.trim_matches(|c| c == '(' || c == ')');
+                    let (c, mono) = parse_poly_term(rest, var_names)?;
+                    terms.push((sign * c, mono));
+                }
+
+                Ok(MultiPoly::new(var_names.to_vec(), terms, order))
+            }
+
+            // --- Main op logic ---
+            let polynomials_text = match inputs.get("polynomials") {
+                Some(Value::Text { value }) => value.clone(),
+                _ => data.get("polynomials").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+            };
+            if polynomials_text.is_empty() {
+                return Value::error("sym.groebner: 'polynomials' input (Text, semicolon-separated) required");
+            }
+            let variables_text = data.get("variables").and_then(|v| v.as_str()).unwrap_or("x,y");
+            let var_names: Vec<String> = variables_text.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            if var_names.is_empty() {
+                return Value::error("sym.groebner: 'variables' must list variable names (comma-separated)");
+            }
+            let order_str = data.get("order").and_then(|v| v.as_str()).unwrap_or("grevlex");
+            let order = match order_str {
+                "lex" => MonomialOrder::Lex,
+                "grlex" => MonomialOrder::GrLex,
+                _ => MonomialOrder::GrevLex,
+            };
+            let max_iter = data.get("max_iter").and_then(|v| v.as_f64()).unwrap_or(10000.0) as usize;
+            let mode = data.get("mode").and_then(|v| v.as_str()).unwrap_or("basis");
+
+            let poly_strs: Vec<&str> = polynomials_text.split(';').collect();
+            let mut generators: Vec<MultiPoly> = Vec::new();
+            for ps in &poly_strs {
+                let ps = ps.trim();
+                if ps.is_empty() { continue; }
+                match parse_poly_expr(ps, &var_names, order) {
+                    Ok(p) => generators.push(p),
+                    Err(e) => return Value::error(format!("sym.groebner parse error in '{}': {}", ps, e)),
+                }
+            }
+
+            if generators.is_empty() {
+                return Value::error("sym.groebner: no valid polynomials parsed");
+            }
+
+            if mode == "solve" {
+                match solve_polynomial_system(&generators, max_iter) {
+                    Ok(solutions) => {
+                        if solutions.is_empty() {
+                            Value::Text { value: "No solutions found".to_string() }
+                        } else {
+                            let lines: Vec<String> = solutions.iter().enumerate().map(|(i, sol)| {
+                                let parts: Vec<String> = var_names.iter().zip(sol.iter())
+                                    .map(|(v, &x)| format!("{v} = {x:.6}"))
+                                    .collect();
+                                format!("Solution {}: {}", i + 1, parts.join(", "))
+                            }).collect();
+                            Value::Text { value: lines.join("\n") }
+                        }
+                    }
+                    Err(e) => Value::Text { value: format!("Error: {e}") },
+                }
+            } else {
+                // Return basis as text
+                let result = groebner_basis(&generators, max_iter);
+                let basis_strs: Vec<String> = result.basis.iter().map(|p| format!("{p}")).collect();
+                let text = format!(
+                    "Gröbner basis ({} polynomials, {} S-polys, {} zero reductions):\n{}",
+                    basis_strs.len(),
+                    result.s_poly_count,
+                    result.zero_reductions,
+                    basis_strs.join("\n")
+                );
+                Value::Text { value: text }
+            }
+        }
+
         // ── ODE Solvers (Phase 4) ──────────────────────────────────────
 
         "ode.rk4" | "ode.rk45" => {

@@ -83,4 +83,24 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
     description:
       'Substitutes a numeric value for a variable in a symbolic expression. Returns simplified LaTeX string.',
   })
+
+  register({
+    type: 'sym.groebner',
+    label: 'Gröbner Basis',
+    category: 'math',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'polynomials', label: 'Polynomials (text)' }],
+    defaultData: {
+      blockType: 'sym.groebner',
+      label: 'Gröbner Basis',
+      variables: 'x,y',
+      order: 'grevlex',
+      mode: 'basis',
+      max_iter: 10000,
+    },
+    synonyms: ['groebner', 'grobner', 'buchberger', 'polynomial system', 'ideal basis', 'polynomial solve'],
+    tags: ['sym', 'algebra', 'polynomial', 'groebner'],
+    description:
+      'Gröbner basis (Buchberger\'s algorithm): computes a canonical basis for a polynomial ideal. Input: semicolon-separated polynomial expressions (e.g. "x^2+y-1;x+y^2-1"), variables field (comma-separated). order: "grevlex" (default), "lex", "grlex". mode: "basis" (return basis polynomials) or "solve" (find solutions for zero-dimensional ideals). Returns Text.',
+  })
 }

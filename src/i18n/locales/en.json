@@ -466,6 +466,7 @@
     "sym_simplify": "Simplify",
     "sym_expand": "Expand",
     "sym_substitute": "Substitute",
+    "sym_groebner": "Gröbner Basis",
     "optim_param_est": "Parameter Estimation",
     "optim_bayesian": "Bayesian Optimisation",
     "optim_hyperopt": "Hyperparameter Opt.",
