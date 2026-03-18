@@ -34,3 +34,9 @@ proptest = "1"
 [[bench]]
 name = "engine_benchmarks"
 harness = false
+
+[[bin]]
+name = "serve"
+path = "src/bin/serve.rs"
+# Heavy-compute HTTP server for hybrid eval (7.12).
+# Build with: cargo build -p engine-core --bin serve --release

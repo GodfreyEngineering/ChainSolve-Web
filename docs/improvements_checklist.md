@@ -384,7 +384,7 @@
 - [x] **5.4** Node comments: threaded comments attached to nodes (node_comments table)
 - [x] **5.5** Audit log: append-only audit_log table with user, timestamp, event_type, metadata
 - [x] **5.6** Conflict detection: Compare-And-Swap on projects.updated_at, ConflictBanner UI
-- [ ] **5.7** Real-time co-editing: Yjs CRDT for shared graph state (nodes, edges, params) with <100ms sync via WebSocket — each user sees coloured cursors and selection highlights. Supabase Realtime Presence for online indicators.
+- [x] **5.7** Real-time co-editing: Yjs CRDT for shared graph state (nodes, edges, params) with <100ms sync via WebSocket — each user sees coloured cursors and selection highlights. Supabase Realtime Presence for online indicators.
 - [x] **5.8** Graph versioning: every save = immutable snapshot (JSONB + Storage) — version history panel with diff view showing added/removed/modified nodes (colour-coded)
 - [x] **5.9** Branching: create named branches for experimentation — merge with conflict resolution UI (side-by-side node comparison)
 - [x] **5.10** Export as interactive standalone HTML: embed graph + results + data in single file — no server needed for review
@@ -423,7 +423,7 @@
 - [x] **7.5** Worker pool (ENG-04): 1-4 workers, LRU eviction, engine switch
 - [x] **7.6** Bundle budgets: 1000KB WASM raw, 350KB gzip; 400KB JS gzip
 - [x] **7.7** Benchmark: 500 nodes at 60fps pan/zoom (must pass, currently untested at this scale)
-- [ ] **7.8** Benchmark: 1000×1000 GEMM <10ms via WebGPU (requires Category 1D)
+- [x] **7.8** Benchmark: 1000×1000 GEMM <10ms via WebGPU (requires Category 1D)
 - [x] **7.9** Benchmark: 100-state ODE, 1s sim, RK45 <500ms in browser
 - [x] **7.10** Streaming evaluation: for large parameter sweeps, evaluate and stream results without holding all in memory. Configurable cache 1GB browser / 16GB server.
 - [x] **7.11** LRU cache with configurable size: evict least-recently-used cached block results when memory pressure detected
