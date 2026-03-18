@@ -24,6 +24,7 @@
 
 pub mod cuda;
 pub mod autodiff;
+pub mod fmu_export;
 pub mod autodiff_linsolve;
 pub mod custom_vjp;
 pub mod grad_checkpoint;
