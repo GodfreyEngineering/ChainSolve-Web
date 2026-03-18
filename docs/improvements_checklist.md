@@ -222,9 +222,9 @@
 - [x] **2.89** ML preprocessing: standardize (z-score per column), normalize (min-max to [0,1]), train_test_split (deterministic by ratio). 3 tests.
 - [x] **2.90** Classification metrics: precision/recall/F1 (binary), ROC curve (sweep threshold → FPR/TPR pairs), AUC (trapezoidal rule). 4 tests.
 - [x] **2.91** Feature scale block wired in ops.rs: ml.featureScale accepts Table, mode=standardize/normalize
-- [ ] **2.92** LSTM layer: Long Short-Term Memory with forget/input/output gates — for time-series prediction and sequence modeling
-- [ ] **2.93** GRU layer: Gated Recurrent Unit (simpler than LSTM, often similar performance) — for sequence tasks
-- [ ] **2.94** Attention layer: scaled dot-product attention Q×K^T/√d_k → softmax → ×V — foundation for transformer architectures
+- [x] **2.92** LSTM layer: Long Short-Term Memory with forget/input/output gates — for time-series prediction and sequence modeling
+- [x] **2.93** GRU layer: Gated Recurrent Unit (simpler than LSTM, often similar performance) — for sequence tasks
+- [x] **2.94** Attention layer: scaled dot-product attention Q×K^T/√d_k → softmax → ×V — foundation for transformer architectures
 - [ ] **2.95** Conv2D layer: 2D convolution with configurable kernel size, stride, padding — for image-based tasks
 - [ ] **2.96** ONNX model import: load .onnx files for inference using ONNX Runtime compiled to WASM — supports models up to ~500MB (quantized) in browser, larger via server Edge Function. Covers TensorFlow/PyTorch model deployment.
 - [ ] **2.97** PINNBlock: physics-informed neural network — configure PDE residual expression + boundary conditions + collocation points. Implements adaptive sampling (residual-based), gradient balancing between loss terms (NTK-based weighting), Fourier feature embedding for spectral bias mitigation. Uses AD engine (1C).
