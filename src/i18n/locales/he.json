@@ -1678,6 +1678,15 @@
     "max": "מקס׳",
     "samples": "נק׳"
   },
+  "timer": {
+    "last": "אחרון",
+    "mean": "ממוצע",
+    "rate": "קצב",
+    "count": "ספירה",
+    "waiting": "ממתין להערכות…",
+    "noSignal": "חבר אות",
+    "reset": "אפס"
+  },
   "restInput": {
     "value": "ערך",
     "fetching": "מאחזר…",

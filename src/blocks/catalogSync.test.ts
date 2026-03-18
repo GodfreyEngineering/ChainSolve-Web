@@ -22,7 +22,8 @@ registerAllBlocks()
 // 4.19: wsInput is remapped to 'number' in bridge.ts; WebSocket connection managed in the UI.
 // 4.21: restInput is remapped to 'number' in bridge.ts; fetch() calls managed in the UI.
 // 6.14: scope is remapped to 'display' in bridge.ts; ring-buffer chart renders in the UI.
-const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope'])
+// 2.131: timer is remapped to 'display' in bridge.ts; timing metrics rendered in the UI.
+const UI_ONLY_BLOCKS = new Set(['constant', 'material', 'sankeyPlot', 'surfacePlot', 'testBlock', 'assertion', 'wsInput', 'restInput', 'scope', 'timer'])
 
 // Deprecated Rust ops: still in catalog.rs for backward compat but removed
 // from the TS registry. BUG-12: material_full renamed → 'material'.

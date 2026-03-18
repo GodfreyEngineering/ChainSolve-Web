@@ -2279,6 +2279,15 @@
     "max": "max",
     "samples": "pts"
   },
+  "timer": {
+    "last": "Last",
+    "mean": "Mean",
+    "rate": "Rate",
+    "count": "Count",
+    "waiting": "Waiting for evals…",
+    "noSignal": "Connect a signal",
+    "reset": "Reset"
+  },
   "restInput": {
     "value": "Value",
     "fetching": "Fetching…",

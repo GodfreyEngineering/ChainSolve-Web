@@ -82,6 +82,7 @@ export type NodeKind =
   | 'csWebSocket'
   | 'csRestApi'
   | 'csScope'
+  | 'csTimer'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

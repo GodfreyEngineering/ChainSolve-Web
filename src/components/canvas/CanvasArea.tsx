@@ -53,6 +53,7 @@ import { AssertionNode } from './nodes/AssertionNode'
 import { WsInputNode } from './nodes/WsInputNode'
 import { RestInputNode } from './nodes/RestInputNode'
 import { ScopeNode } from './nodes/ScopeNode'
+import { TimerNode } from './nodes/TimerNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -202,6 +203,7 @@ const NODE_TYPES = {
   csWebSocket: WsInputNode,
   csRestApi: RestInputNode,
   csScope: ScopeNode,
+  csTimer: TimerNode,
 } as const
 
 const EDGE_TYPES = {

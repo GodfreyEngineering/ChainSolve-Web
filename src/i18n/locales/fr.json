@@ -2231,6 +2231,15 @@
     "max": "max",
     "samples": "pts"
   },
+  "timer": {
+    "last": "Dernier",
+    "mean": "Moyen",
+    "rate": "Fréquence",
+    "count": "Nombre",
+    "waiting": "En attente d'évaluations…",
+    "noSignal": "Connecter un signal",
+    "reset": "Réinitialiser"
+  },
   "restInput": {
     "value": "Valeur",
     "fetching": "Récupération…",

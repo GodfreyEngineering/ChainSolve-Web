@@ -2231,6 +2231,15 @@
     "max": "máx",
     "samples": "pts"
   },
+  "timer": {
+    "last": "Último",
+    "mean": "Media",
+    "rate": "Tasa",
+    "count": "Cuenta",
+    "waiting": "Esperando evaluaciones…",
+    "noSignal": "Conectar señal",
+    "reset": "Reiniciar"
+  },
   "restInput": {
     "value": "Valor",
     "fetching": "Obteniendo…",

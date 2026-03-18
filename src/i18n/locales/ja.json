@@ -2279,6 +2279,15 @@
     "max": "最大",
     "samples": "pts"
   },
+  "timer": {
+    "last": "最後",
+    "mean": "平均",
+    "rate": "レート",
+    "count": "回数",
+    "waiting": "評価を待っています…",
+    "noSignal": "信号を接続",
+    "reset": "リセット"
+  },
   "restInput": {
     "value": "値",
     "fetching": "取得中…",

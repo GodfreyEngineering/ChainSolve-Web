@@ -2231,6 +2231,15 @@
     "max": "max",
     "samples": "Pkt"
   },
+  "timer": {
+    "last": "Letzt",
+    "mean": "Mittel",
+    "rate": "Rate",
+    "count": "Anzahl",
+    "waiting": "Warte auf Auswertungen…",
+    "noSignal": "Signal verbinden",
+    "reset": "Zurücksetzen"
+  },
   "restInput": {
     "value": "Wert",
     "fetching": "Abrufen…",
