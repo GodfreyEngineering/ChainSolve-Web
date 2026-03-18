@@ -2381,6 +2381,14 @@
     "downsample": "Unterabtastung",
     "upsample": "Überabtastung"
   },
+  "stateMachine": {
+    "label": "Zustandsautomat",
+    "states": "Zustände",
+    "transitions": "Übergänge",
+    "noState": "Kein Zustand",
+    "more": "mehr",
+    "currentState": "Aktueller Zustand"
+  },
   "timeline": {
     "lastEval": "Letzter",
     "avgEval": "Ø",

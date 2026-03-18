@@ -2429,6 +2429,14 @@
     "downsample": "ダウンサンプル",
     "upsample": "アップサンプル"
   },
+  "stateMachine": {
+    "label": "状態機械",
+    "states": "状態",
+    "transitions": "遷移",
+    "noState": "状態なし",
+    "more": "他",
+    "currentState": "現在の状態"
+  },
   "timeline": {
     "lastEval": "最後",
     "avgEval": "平均",

@@ -2429,6 +2429,14 @@
     "downsample": "downsample",
     "upsample": "upsample"
   },
+  "stateMachine": {
+    "label": "State Machine",
+    "states": "States",
+    "transitions": "Transitions",
+    "noState": "No state",
+    "more": "more",
+    "currentState": "Current state"
+  },
   "timeline": {
     "lastEval": "Last",
     "avgEval": "Avg",

@@ -105,6 +105,7 @@ const VALID_NODE_KINDS: NodeKind[] = [
   'csStateSpace',
   'csZOH',
   'csRateTransition',
+  'csStateMachine',
 ]
 
 describe('Block catalog sanity (F6-2)', () => {

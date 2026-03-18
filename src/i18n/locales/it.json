@@ -2331,6 +2331,14 @@
     "downsample": "sottocampionamento",
     "upsample": "sovracampionamento"
   },
+  "stateMachine": {
+    "label": "Macchina a stati",
+    "states": "Stati",
+    "transitions": "Transizioni",
+    "noState": "Nessuno stato",
+    "more": "altri",
+    "currentState": "Stato corrente"
+  },
   "timeline": {
     "lastEval": "Ultima",
     "avgEval": "Media",

@@ -2381,6 +2381,14 @@
     "downsample": "submuestreo",
     "upsample": "sobremuestreo"
   },
+  "stateMachine": {
+    "label": "Máquina de estados",
+    "states": "Estados",
+    "transitions": "Transiciones",
+    "noState": "Sin estado",
+    "more": "más",
+    "currentState": "Estado actual"
+  },
   "timeline": {
     "lastEval": "Último",
     "avgEval": "Prom",

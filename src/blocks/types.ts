@@ -94,6 +94,7 @@ export type NodeKind =
   | 'csStateSpace'
   | 'csZOH'
   | 'csRateTransition'
+  | 'csStateMachine'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

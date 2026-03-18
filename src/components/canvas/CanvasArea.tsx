@@ -64,6 +64,7 @@ import { UnitInputNode } from './nodes/UnitInputNode'
 import { TransferFunctionNode } from './nodes/TransferFunctionNode'
 import { StateSpaceNode } from './nodes/StateSpaceNode'
 import { ZOHNode, RateTransitionNode } from './nodes/ZOHNode'
+import { StateMachineNode } from './nodes/StateMachineNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -225,6 +226,7 @@ const NODE_TYPES = {
   csStateSpace: StateSpaceNode,
   csZOH: ZOHNode,
   csRateTransition: RateTransitionNode,
+  csStateMachine: StateMachineNode,
 } as const
 
 const EDGE_TYPES = {

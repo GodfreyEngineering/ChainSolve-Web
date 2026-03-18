@@ -106,8 +106,11 @@ export function toEngineSnapshot(
                             // 2.13: unitInput converts to SI value and outputs as 'number'.
                             : data.blockType === 'unitInput'
                               ? 'number'
-                              // 2.70: ctrl.zoh and ctrl.rateTransition pass through input as 'number' in reactive mode.
-                              : data.blockType === 'ctrl.zoh'
+                              // 2.71: stateMachine outputs current state index as 'number'.
+                              : data.blockType === 'stateMachine'
+                                ? 'number'
+                                // 2.70: ctrl.zoh and ctrl.rateTransition pass through input as 'number' in reactive mode.
+                                : data.blockType === 'ctrl.zoh'
                                 ? 'number'
                                 : data.blockType === 'ctrl.rateTransition'
                                   ? 'number'

@@ -1828,6 +1828,14 @@
     "downsample": "דגימת חסר",
     "upsample": "דגימת יתר"
   },
+  "stateMachine": {
+    "label": "מכונת מצבים",
+    "states": "מצבים",
+    "transitions": "מעברים",
+    "noState": "אין מצב",
+    "more": "עוד",
+    "currentState": "מצב נוכחי"
+  },
   "timeline": {
     "lastEval": "אחרון",
     "avgEval": "ממוצע",
