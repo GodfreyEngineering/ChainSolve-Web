@@ -979,6 +979,31 @@ reg({
 })
 
 reg({
+  type: 'ode.dae',
+  label: 'DAE Solver',
+  category: 'odeSolvers',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'diff_eqs', label: 'Differential eqs (text)' },
+    { id: 'alg_eqs', label: 'Algebraic eqs (text)' },
+    { id: 'y0', label: 'Diff initial state' },
+    { id: 'z0', label: 'Alg initial guess' },
+  ],
+  defaultData: {
+    blockType: 'ode.dae',
+    label: 'DAE Solver',
+    t_end: 1.0,
+    dt: 0.01,
+    tolerance: 1e-6,
+  },
+  proOnly: true,
+  synonyms: ['dae', 'differential algebraic', 'algebraic constraint', 'index-1'],
+  tags: ['ode', 'dae', 'algebraic', 'constraint'],
+  description:
+    'Solve a differential-algebraic equation (DAE) system: dy/dt = f(t,y,z), g(t,y,z)=0. Index-1 via BDF-2 with Newton iteration. Consistent initialisation finds z0 automatically.',
+})
+
+reg({
   type: 'ode.bdf',
   label: 'ODE Solver (BDF)',
   category: 'odeSolvers',

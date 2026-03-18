@@ -423,6 +423,7 @@
     "ode_event": "Solutore ODE con Eventi",
     "ode_symplectic": "Solutore ODE Simplettico",
     "ode_steady_state": "Stato Stazionario",
+    "ode_dae": "Solutore DAE",
     "ode_bdf": "ODE BDF",
     "ode_radau": "ODE Radau",
     "optim_trust_region": "Regione di Fiducia",

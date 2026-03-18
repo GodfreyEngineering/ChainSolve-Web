@@ -7,6 +7,7 @@
 //! and return an `OdeResult` (time series of state variables as vectors).
 
 pub mod bdf;
+pub mod dae;
 pub mod event;
 pub mod radau;
 pub mod rk4;

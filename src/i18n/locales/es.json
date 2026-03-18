@@ -424,6 +424,7 @@
     "ode_event": "Solver ODE con Eventos",
     "ode_symplectic": "Solver ODE Simpléctico",
     "ode_steady_state": "Estado Estacionario",
+    "ode_dae": "Solucionador DAE",
     "ode_bdf": "ODE BDF",
     "ode_radau": "ODE Radau",
     "optim_trust_region": "Región de Confianza",

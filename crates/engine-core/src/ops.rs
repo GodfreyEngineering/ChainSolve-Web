@@ -4797,6 +4797,62 @@ fn evaluate_node_inner(
             Value::Table { columns, rows }
         }
 
+        "ode.dae" => {
+            use crate::ode::dae::{DaeConfig, solve_dae, dae_result_to_table};
+
+            let parse_text = |key: &str| -> Option<Vec<String>> {
+                if let Some(Value::Text { value }) = inputs.get(key) {
+                    let v: Vec<String> = value.split(';').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+                    if !v.is_empty() { Some(v) } else { None }
+                } else { None }
+            };
+            let diff_eqs = match parse_text("diff_eqs") {
+                Some(v) => v,
+                None => return Value::error("ode.dae: 'diff_eqs' input required (Text, semicolon-separated)"),
+            };
+            let alg_eqs = match parse_text("alg_eqs") {
+                Some(v) => v,
+                None => return Value::error("ode.dae: 'alg_eqs' input required (Text, semicolon-separated)"),
+            };
+            let y0 = match inputs.get("y0") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                _ => return Value::error("ode.dae: 'y0' input required (differential initial state)"),
+            };
+            let z0 = match inputs.get("z0") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                None | Some(_) => vec![0.0f64; alg_eqs.len()], // default to zeros
+            };
+            if y0.len() != diff_eqs.len() {
+                return Value::error(format!("ode.dae: {} diff_eqs but {} y0 values", diff_eqs.len(), y0.len()));
+            }
+            if z0.len() != alg_eqs.len() {
+                return Value::error(format!("ode.dae: {} alg_eqs but {} z0 values", alg_eqs.len(), z0.len()));
+            }
+
+            let nd = diff_eqs.len();
+            let na = alg_eqs.len();
+            let t_start = scalar_or(data, "t_start", 0.0);
+            let t_end = scalar_or(data, "t_end", 1.0);
+            let dt = scalar_or(data, "dt", 0.01);
+            let tolerance = scalar_or(data, "tolerance", 1e-6);
+
+            let diff_names: Vec<String> = (0..nd).map(|i| format!("y{i}")).collect();
+            let alg_names: Vec<String> = (0..na).map(|j| format!("z{j}")).collect();
+
+            let mut params = std::collections::HashMap::new();
+            if let Some(serde_json::Value::Object(obj)) = data.get("params") {
+                for (k, v) in obj { if let Some(n) = v.as_f64() { params.insert(k.clone(), n); } }
+            }
+
+            let dae_cfg = DaeConfig { diff_eqs, alg_eqs, diff_names, alg_names, params };
+            let solver_cfg = crate::ode::OdeSolverConfig { t_start, t_end, dt, tolerance, max_steps: 100_000 };
+
+            let result = solve_dae(&dae_cfg, &y0, &z0, &solver_cfg);
+            dae_result_to_table(&result)
+        }
+
         // ── Vehicle Simulation (Phase 5) ──────────────────────────────
 
         "veh.tire.lateralForce" => {

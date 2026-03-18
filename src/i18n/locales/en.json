@@ -432,6 +432,7 @@
     "ode_event": "ODE Event Solver",
     "ode_symplectic": "Symplectic ODE",
     "ode_steady_state": "Steady-State",
+    "ode_dae": "DAE Solver",
     "ode_bdf": "ODE BDF",
     "ode_radau": "ODE Radau",
     "optim_trust_region": "Trust-Region",

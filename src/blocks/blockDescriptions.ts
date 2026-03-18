@@ -710,6 +710,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Find the steady-state equilibrium y* of dy/dt = f(y) where f(y*) = 0. Newton-Raphson with numerical Jacobian. Ideal for finding operating points of control systems, chemical equilibria, or any autonomous ODE.',
   'ode.symplectic':
     'Solve a Hamiltonian system using a symplectic integrator (Störmer-Verlet or Symplectic Euler). Conserves energy exactly over long integrations. Ideal for orbital mechanics, molecular dynamics, pendulums.',
+  'ode.dae':
+    'Solve a differential-algebraic equation (DAE) system. Differential equations: dy_i/dt = f_i(t,y,z). Algebraic constraints: g_j(t,y,z)=0. Index-1 via BDF-2 + Newton iteration. Consistent initialisation refines z0 automatically before integration.',
   'ode.bdf':
     'Solve a stiff ODE system using Backward Differentiation Formulas (BDF orders 1–5). BDF methods are A-stable and well-suited for chemical kinetics, thermal systems, and other stiff problems. Uses Newton iteration with finite-difference Jacobian. Set order (1–5) in block data.',
   'ode.radau':
