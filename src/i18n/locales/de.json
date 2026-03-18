@@ -2231,6 +2231,12 @@
     "max": "max",
     "samples": "Pkt"
   },
+  "logger": {
+    "noData": "Noch keine Daten",
+    "noSignal": "Signal verbinden",
+    "export": "CSV exportieren",
+    "clear": "Löschen"
+  },
   "timer": {
     "last": "Letzt",
     "mean": "Mittel",

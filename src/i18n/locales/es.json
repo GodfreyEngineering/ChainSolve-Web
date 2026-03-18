@@ -2231,6 +2231,12 @@
     "max": "máx",
     "samples": "pts"
   },
+  "logger": {
+    "noData": "Sin datos aún",
+    "noSignal": "Conectar señal",
+    "export": "Exportar CSV",
+    "clear": "Limpiar"
+  },
   "timer": {
     "last": "Último",
     "mean": "Media",

@@ -83,6 +83,7 @@ export type NodeKind =
   | 'csRestApi'
   | 'csScope'
   | 'csTimer'
+  | 'csLogger'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

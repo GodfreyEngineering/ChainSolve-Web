@@ -2181,6 +2181,12 @@
     "max": "max",
     "samples": "pts"
   },
+  "logger": {
+    "noData": "Nessun dato ancora",
+    "noSignal": "Collegare un segnale",
+    "export": "Esporta CSV",
+    "clear": "Cancella"
+  },
   "timer": {
     "last": "Ultimo",
     "mean": "Media",

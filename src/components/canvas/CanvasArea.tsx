@@ -54,6 +54,7 @@ import { WsInputNode } from './nodes/WsInputNode'
 import { RestInputNode } from './nodes/RestInputNode'
 import { ScopeNode } from './nodes/ScopeNode'
 import { TimerNode } from './nodes/TimerNode'
+import { LoggerNode } from './nodes/LoggerNode'
 import { DataNode } from './nodes/DataNode'
 import { PlotNode } from './nodes/PlotNode'
 import { ListTableNode } from './nodes/ListTableNode'
@@ -204,6 +205,7 @@ const NODE_TYPES = {
   csRestApi: RestInputNode,
   csScope: ScopeNode,
   csTimer: TimerNode,
+  csLogger: LoggerNode,
 } as const
 
 const EDGE_TYPES = {

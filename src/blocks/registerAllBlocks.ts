@@ -40,6 +40,7 @@ import { registerWebSocketBlocks } from './websocket-blocks'
 import { registerRestBlocks } from './rest-blocks'
 import { registerScopeBlocks } from './scope-blocks'
 import { registerTimerBlocks } from './timer-blocks'
+import { registerLoggerBlocks } from './logger-blocks'
 import { SEARCH_METADATA } from './blockSearchMetadata'
 
 function reg(
@@ -84,6 +85,7 @@ export function registerAllBlocks(): void {
   registerRestBlocks(reg)
   registerScopeBlocks(reg)
   registerTimerBlocks(reg)
+  registerLoggerBlocks(reg)
 
   // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
   for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {

@@ -2279,6 +2279,12 @@
     "max": "最大",
     "samples": "pts"
   },
+  "logger": {
+    "noData": "データなし",
+    "noSignal": "信号を接続",
+    "export": "CSVエクスポート",
+    "clear": "クリア"
+  },
   "timer": {
     "last": "最後",
     "mean": "平均",

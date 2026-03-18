@@ -72,7 +72,8 @@ export function toEngineSnapshot(
       // 4.19: wsInput is remapped to 'number' — node.data.value is the live WebSocket value.
       // 6.14: scope is a UI-only visualization block; engine treats it as pass-through display.
       // 2.131: timer is a UI-only timing measurement block; engine treats it as pass-through display.
-      let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock' || data.blockType === 'assertion' || data.blockType === 'scope' || data.blockType === 'timer'
+      // 2.132: logger is a UI-only data recording block; engine treats it as pass-through display.
+      let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock' || data.blockType === 'assertion' || data.blockType === 'scope' || data.blockType === 'timer' || data.blockType === 'logger'
         ? 'display'
         : data.blockType === 'wsInput'
           ? 'number'
