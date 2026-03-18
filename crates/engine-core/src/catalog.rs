@@ -657,6 +657,8 @@ pub fn catalog() -> Vec<CatalogEntry> {
         // Compiled expression eval & Gröbner bases
         entry("sym.compiledEval", "Compiled Eval", "math", "csOperation", vec![], false),
         entry("sym.groebner", "Gröbner Basis", "symbolic", "csOperation", vec![], false),
+        // ExpressionInput (2.12)
+        entry("sym.expressionInput", "Expression Input", "input", "csSource", vec![], false),
         // Mixed-mode AD (1.32)
         entry("ad.mixedJacobian", "Mixed-Mode Jacobian", "math", "csOperation", vec![p("x", "Eval point (vector)")], false),
         // Surrogate, AutoML & Hyperopt

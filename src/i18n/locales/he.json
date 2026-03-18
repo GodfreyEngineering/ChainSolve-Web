@@ -2100,6 +2100,7 @@
     "sym_simplify": "פישוט",
     "sym_expand": "פיתוח",
     "sym_substitute": "הצבה",
+    "sym_expression_input": "קלט ביטוי",
     "sym_compiled_eval": "הערכה מקומפלת",
     "sym_groebner": "בסיס גרובנר",
     "ad_mixed_jacobian": "יעקוביאן מצב מעורב (AD)",

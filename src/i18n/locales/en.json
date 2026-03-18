@@ -466,6 +466,7 @@
     "sym_simplify": "Simplify",
     "sym_expand": "Expand",
     "sym_substitute": "Substitute",
+    "sym_expression_input": "Expression Input",
     "sym_compiled_eval": "Compiled Eval",
     "sym_groebner": "Gröbner Basis",
     "ad_mixed_jacobian": "Mixed-Mode Jacobian",

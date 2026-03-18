@@ -457,6 +457,7 @@
     "sym_simplify": "Semplificare",
     "sym_expand": "Espandere",
     "sym_substitute": "Sostituire",
+    "sym_expression_input": "Ingresso Espressione",
     "sym_compiled_eval": "Eval Compilata",
     "sym_groebner": "Base di Gröbner",
     "ad_mixed_jacobian": "Jacobiano Modalità Mista (AD)",

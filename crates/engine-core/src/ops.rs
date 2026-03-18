@@ -6464,6 +6464,21 @@ fn evaluate_node_inner(
             crate::types::build_table(&["model_idx", "cv_rmse", "r2", "is_best"], &[model_idx, cv_rmse, r2_vals, is_best])
         }
 
+        // ── ExpressionInput (2.12) ──────────────────────────────────
+        "sym.expressionInput" => {
+            // Parse the expression from data["expr"] and output LaTeX.
+            // Acts as a symbolic source block — connects to sym.* blocks.
+            use crate::symbolic;
+            let expr_str = data.get("expr").and_then(|v| v.as_str()).unwrap_or("");
+            if expr_str.is_empty() {
+                return Value::Text { value: "\\text{(enter expression)}".to_string() };
+            }
+            match symbolic::parse_expr(expr_str) {
+                Ok(e) => Value::Text { value: symbolic::to_latex(&e) },
+                Err(err) => Value::error(format!("sym.expressionInput parse error: {err}")),
+            }
+        }
+
         // ── Mixed-Mode AD (1.32) ─────────────────────────────────────
         "ad.mixedJacobian" => {
             // Compute the Jacobian of a vector function using mixed-mode AD.

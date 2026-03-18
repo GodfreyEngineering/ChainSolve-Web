@@ -102,6 +102,23 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
   })
 
   register({
+    type: 'sym.expressionInput',
+    label: 'Expression Input',
+    category: 'input',
+    nodeKind: 'csSource',
+    inputs: [],
+    defaultData: {
+      blockType: 'sym.expressionInput',
+      label: 'Expression Input',
+      expr: 'x^2 + sin(x)',
+    },
+    synonyms: ['expression input', 'symbolic input', 'formula input', 'math expression', 'latex'],
+    tags: ['sym', 'input', 'expression', 'latex', 'symbolic'],
+    description:
+      'Symbolic expression source block: type a mathematical expression (e.g. "x^2 + sin(x)"). Parses via the symbolic CAS and outputs the expression as a LaTeX string. Connect to Differentiate, Integrate, Simplify, Substitute, or Compiled Eval blocks.',
+  })
+
+  register({
     type: 'ad.mixedJacobian',
     label: 'Mixed-Mode Jacobian',
     category: 'math',

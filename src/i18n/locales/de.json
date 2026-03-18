@@ -458,6 +458,7 @@
     "sym_simplify": "Vereinfachen",
     "sym_expand": "Ausklammern",
     "sym_substitute": "Ersetzen",
+    "sym_expression_input": "Ausdruckseingabe",
     "sym_compiled_eval": "Kompilierter Ausdruck",
     "sym_groebner": "Gröbner-Basis",
     "ad_mixed_jacobian": "Gemischter Jacobian (AD)",
