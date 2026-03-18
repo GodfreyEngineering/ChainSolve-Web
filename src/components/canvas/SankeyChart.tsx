@@ -64,8 +64,16 @@ interface LayoutLink {
 // ── Palette ───────────────────────────────────────────────────────────────────
 
 const PALETTE = [
-  '#1CABB0', '#f97316', '#8b5cf6', '#22c55e', '#ef4444',
-  '#eab308', '#06b6d4', '#ec4899', '#a3e635', '#fb923c',
+  '#1CABB0',
+  '#f97316',
+  '#8b5cf6',
+  '#22c55e',
+  '#ef4444',
+  '#eab308',
+  '#06b6d4',
+  '#ec4899',
+  '#a3e635',
+  '#fb923c',
 ]
 
 // ── Layout ────────────────────────────────────────────────────────────────────
@@ -85,7 +93,10 @@ function sankeyLayout(
 
   // Collect unique node IDs
   const allIds = new Set<number>()
-  for (const l of rawLinks) { allIds.add(l.src); allIds.add(l.tgt) }
+  for (const l of rawLinks) {
+    allIds.add(l.src)
+    allIds.add(l.tgt)
+  }
   const nodeIds = Array.from(allIds).sort((a, b) => a - b)
 
   // BFS depth assignment starting from nodes with no incoming edges
@@ -120,7 +131,10 @@ function sankeyLayout(
   // Compute total in/out flow per node
   const outFlow = new Map<number, number>()
   const inFlow = new Map<number, number>()
-  for (const id of nodeIds) { outFlow.set(id, 0); inFlow.set(id, 0) }
+  for (const id of nodeIds) {
+    outFlow.set(id, 0)
+    inFlow.set(id, 0)
+  }
   for (const l of rawLinks) {
     outFlow.set(l.src, (outFlow.get(l.src) ?? 0) + l.val)
     inFlow.set(l.tgt, (inFlow.get(l.tgt) ?? 0) + l.val)
@@ -135,12 +149,15 @@ function sankeyLayout(
   }
 
   // Global max flow for proportional bar heights
-  const globalMax = Math.max(...nodeIds.map((id) => Math.max(outFlow.get(id) ?? 0, inFlow.get(id) ?? 0)), 1)
+  const globalMax = Math.max(
+    ...nodeIds.map((id) => Math.max(outFlow.get(id) ?? 0, inFlow.get(id) ?? 0)),
+    1,
+  )
 
   const usableW = W - PAD_X * 2 - NODE_W
   const usableH = H - PAD_Y * 2
 
-  const xOf = (d: number) => maxDepth === 0 ? PAD_X : PAD_X + (d / maxDepth) * usableW
+  const xOf = (d: number) => (maxDepth === 0 ? PAD_X : PAD_X + (d / maxDepth) * usableW)
 
   const nodeMap = new Map<number, LayoutNode>()
 
@@ -170,7 +187,10 @@ function sankeyLayout(
   // Compute link ribbons (cumulative y-offsets per node)
   const srcOffset = new Map<number, number>()
   const tgtOffset = new Map<number, number>()
-  for (const id of nodeIds) { srcOffset.set(id, 0); tgtOffset.set(id, 0) }
+  for (const id of nodeIds) {
+    srcOffset.set(id, 0)
+    tgtOffset.set(id, 0)
+  }
 
   // Sort links for deterministic ribbon stacking
   const sorted = [...rawLinks].sort((a, b) => a.tgt - b.tgt || a.src - b.src)

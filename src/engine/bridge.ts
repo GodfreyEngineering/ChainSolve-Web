@@ -78,73 +78,82 @@ export function toEngineSnapshot(
       // 2.133: mathSheet is a UI-computed spreadsheet; engine treats it as a number source.
       // 2.67: ctrl.saturation → clamp, ctrl.deadZone → number (UI-computed)
       // 2.68: ctrl.switch → ifthenelse, ctrl.mux → vectorConcat
-      let blockType = (data.blockType === 'probe' || data.blockType === 'testBlock' || data.blockType === 'assertion' || data.blockType === 'scope' || data.blockType === 'timer' || data.blockType === 'logger' || data.blockType === 'transferFunction' || data.blockType === 'stateSpace'
-        ? 'display'
-        : data.blockType === 'wsInput'
-          ? 'number'
-          : data.blockType === 'restInput'
+      let blockType = (
+        data.blockType === 'probe' ||
+        data.blockType === 'testBlock' ||
+        data.blockType === 'assertion' ||
+        data.blockType === 'scope' ||
+        data.blockType === 'timer' ||
+        data.blockType === 'logger' ||
+        data.blockType === 'transferFunction' ||
+        data.blockType === 'stateSpace'
+          ? 'display'
+          : data.blockType === 'wsInput'
             ? 'number'
-            : data.blockType === 'mathSheet'
+            : data.blockType === 'restInput'
               ? 'number'
-              : data.blockType === 'ctrl.deadZone'
+              : data.blockType === 'mathSheet'
                 ? 'number'
-                : data.blockType === 'ctrl.saturation'
-                  ? 'clamp'
-                  : data.blockType === 'ctrl.switch'
-                    ? 'ifthenelse'
-                    : data.blockType === 'ctrl.mux'
-                      ? 'vectorConcat'
-                      // 2.9: fileInput is a drag-drop UI block; engine treats as tableInput.
-                      : data.blockType === 'fileInput'
-                        ? 'tableInput'
-                        // 4.20: sqlQuery caches results as tableData; engine treats as tableInput.
-                        : data.blockType === 'sqlQuery'
+                : data.blockType === 'ctrl.deadZone'
+                  ? 'number'
+                  : data.blockType === 'ctrl.saturation'
+                    ? 'clamp'
+                    : data.blockType === 'ctrl.switch'
+                      ? 'ifthenelse'
+                      : data.blockType === 'ctrl.mux'
+                        ? 'vectorConcat'
+                        : // 2.9: fileInput is a drag-drop UI block; engine treats as tableInput.
+                          data.blockType === 'fileInput'
                           ? 'tableInput'
-                          // 2.11: timeSeries caches resampled data as tableData; engine treats as tableInput.
-                          : data.blockType === 'timeSeries'
+                          : // 4.20: sqlQuery caches results as tableData; engine treats as tableInput.
+                            data.blockType === 'sqlQuery'
                             ? 'tableInput'
-                            // 2.13: unitInput converts to SI value and outputs as 'number'.
-                            : data.blockType === 'unitInput'
-                              ? 'number'
-                              // 4.14: tirFileInput parses .tir files in the UI; engine treats as tableInput.
-                              : data.blockType === 'tirFileInput'
-                                ? 'tableInput'
-                                // 2.96: nn.onnxInference runs inference via onnxruntime-web in the UI; outputs first tensor as vector (data.vectorData).
-                                : data.blockType === 'nn.onnxInference'
-                                ? 'vectorInput'
-                                // 2.125: fmu.import parses FMU archive in the UI; outputs variable initial values as tableInput.
-                                : data.blockType === 'fmu.import'
-                                ? 'tableInput'
-                                // 2.127: scripting.python executes Python in the UI via Pyodide; outputs result as 'number'.
-                                : data.blockType === 'scripting.python'
+                            : // 2.11: timeSeries caches resampled data as tableData; engine treats as tableInput.
+                              data.blockType === 'timeSeries'
+                              ? 'tableInput'
+                              : // 2.13: unitInput converts to SI value and outputs as 'number'.
+                                data.blockType === 'unitInput'
                                 ? 'number'
-                                // 2.128: scripting.rust is compiled server-side; outputs result as 'number'.
-                                : data.blockType === 'scripting.rust'
-                                ? 'number'
-                                // 4.7: data.hdf5Import reads HDF5 via h5wasm in the UI; outputs datasets as tableInput.
-                                : data.blockType === 'data.hdf5Import'
-                                ? 'tableInput'
-                                // 4.11: data.stepImport parses STEP/IGES in the UI; outputs vertex table as tableInput.
-                                : data.blockType === 'data.stepImport'
-                                ? 'tableInput'
-                                // 4.15: data.openDriveImport parses .xodr in the UI; outputs road sample table as tableInput.
-                                : data.blockType === 'data.openDriveImport'
-                                ? 'tableInput'
-                                // 9.15/2.134: codeBlock evaluates JS code in the UI, outputs result as 'number'.
-                                : data.blockType === 'codeBlock'
-                                ? 'number'
-                                // 2.71: stateMachine outputs current state index as 'number'.
-                                : data.blockType === 'stateMachine'
-                                ? 'number'
-                                // 2.70: ctrl.zoh and ctrl.rateTransition pass through input as 'number' in reactive mode.
-                                : data.blockType === 'ctrl.zoh'
-                                ? 'number'
-                                : data.blockType === 'ctrl.rateTransition'
-                                ? 'number'
-                                // 6.16: viewport3d renders in the UI; engine sees as 'display'.
-                                : data.blockType === 'viewport3d'
-                                  ? 'display'
-                                  : data.blockType) as string
+                                : // 4.14: tirFileInput parses .tir files in the UI; engine treats as tableInput.
+                                  data.blockType === 'tirFileInput'
+                                  ? 'tableInput'
+                                  : // 2.96: nn.onnxInference runs inference via onnxruntime-web in the UI; outputs first tensor as vector (data.vectorData).
+                                    data.blockType === 'nn.onnxInference'
+                                    ? 'vectorInput'
+                                    : // 2.125: fmu.import parses FMU archive in the UI; outputs variable initial values as tableInput.
+                                      data.blockType === 'fmu.import'
+                                      ? 'tableInput'
+                                      : // 2.127: scripting.python executes Python in the UI via Pyodide; outputs result as 'number'.
+                                        data.blockType === 'scripting.python'
+                                        ? 'number'
+                                        : // 2.128: scripting.rust is compiled server-side; outputs result as 'number'.
+                                          data.blockType === 'scripting.rust'
+                                          ? 'number'
+                                          : // 4.7: data.hdf5Import reads HDF5 via h5wasm in the UI; outputs datasets as tableInput.
+                                            data.blockType === 'data.hdf5Import'
+                                            ? 'tableInput'
+                                            : // 4.11: data.stepImport parses STEP/IGES in the UI; outputs vertex table as tableInput.
+                                              data.blockType === 'data.stepImport'
+                                              ? 'tableInput'
+                                              : // 4.15: data.openDriveImport parses .xodr in the UI; outputs road sample table as tableInput.
+                                                data.blockType === 'data.openDriveImport'
+                                                ? 'tableInput'
+                                                : // 9.15/2.134: codeBlock evaluates JS code in the UI, outputs result as 'number'.
+                                                  data.blockType === 'codeBlock'
+                                                  ? 'number'
+                                                  : // 2.71: stateMachine outputs current state index as 'number'.
+                                                    data.blockType === 'stateMachine'
+                                                    ? 'number'
+                                                    : // 2.70: ctrl.zoh and ctrl.rateTransition pass through input as 'number' in reactive mode.
+                                                      data.blockType === 'ctrl.zoh'
+                                                      ? 'number'
+                                                      : data.blockType === 'ctrl.rateTransition'
+                                                        ? 'number'
+                                                        : // 6.16: viewport3d renders in the UI; engine sees as 'display'.
+                                                          data.blockType === 'viewport3d'
+                                                          ? 'display'
+                                                          : data.blockType
+      ) as string
       if (blockType === 'constant') {
         const constId = data.selectedConstantId
         if (typeof constId === 'string' && constId in CONSTANT_VALUES) {
@@ -215,7 +224,16 @@ export function toEngineSnapshot(
       .filter((e) => {
         const tgt = evalNodes.find((n) => n.id === e.target)
         const bt = (tgt?.data as Record<string, unknown> | undefined)?.blockType
-        return bt !== 'mathSheet' && bt !== 'ctrl.deadZone' && bt !== 'nn.onnxInference' && bt !== 'scripting.python' && bt !== 'scripting.rust' && bt !== 'data.hdf5Import' && bt !== 'data.stepImport' && bt !== 'data.openDriveImport'
+        return (
+          bt !== 'mathSheet' &&
+          bt !== 'ctrl.deadZone' &&
+          bt !== 'nn.onnxInference' &&
+          bt !== 'scripting.python' &&
+          bt !== 'scripting.rust' &&
+          bt !== 'data.hdf5Import' &&
+          bt !== 'data.stepImport' &&
+          bt !== 'data.openDriveImport'
+        )
       })
       .map((e) => {
         const tgtNode = evalNodes.find((n) => n.id === e.target)

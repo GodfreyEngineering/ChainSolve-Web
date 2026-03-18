@@ -205,12 +205,12 @@
   --warning-dim: rgba(180, 83, 9, 0.1);
   /* 16.67: value-type colours — darker versions for light theme text/icon use.
      Decorative handle/edge elements keep the bright originals via media query. */
-  --value-color-scalar:   #1d4ed8; /* blue-700 — 5.2:1 on white */
-  --value-color-vector:   #15803d; /* green-700 — 5.5:1 on white */
-  --value-color-table:    #7e22ce; /* purple-700 — 5.3:1 on white */
+  --value-color-scalar: #1d4ed8; /* blue-700 — 5.2:1 on white */
+  --value-color-vector: #15803d; /* green-700 — 5.5:1 on white */
+  --value-color-table: #7e22ce; /* purple-700 — 5.3:1 on white */
   --value-color-interval: #b45309; /* amber-700 — 4.8:1 on white */
-  --value-color-error:    #b91c1c; /* red-700 — 4.9:1 on white */
-  --value-color-any:      #374151; /* gray-700 — 9.7:1 on white */
+  --value-color-error: #b91c1c; /* red-700 — 4.9:1 on white */
+  --value-color-any: #374151; /* gray-700 — 9.7:1 on white */
   --overlay: rgba(0, 0, 0, 0.4);
 
   --toolbar-bg: var(--surface-1);
@@ -359,9 +359,18 @@ button:focus:not(:focus-visible) {
  * after each evaluation completes (1.2 s, then stops). Distinct from the
  * user-toggled continuous animation above: faster speed + fades in/out. */
 @keyframes cs-edge-pulse {
-  0%   { stroke-dashoffset: 0;   opacity: 1; }
-  85%  { stroke-dashoffset: -30; opacity: 0.8; }
-  100% { stroke-dashoffset: -40; opacity: 0; }
+  0% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  85% {
+    stroke-dashoffset: -30;
+    opacity: 0.8;
+  }
+  100% {
+    stroke-dashoffset: -40;
+    opacity: 0;
+  }
 }
 [data-eval-pulse='true'] .react-flow__edge-path {
   stroke-dasharray: 4 6;
@@ -1022,16 +1031,26 @@ button:focus:not(:focus-visible) {
 .react-flow__handle.valid {
   background: #22c55e !important;
   border-color: rgba(255, 255, 255, 0.8) !important;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.4), 0 0 10px rgba(34, 197, 94, 0.3) !important;
+  box-shadow:
+    0 0 0 3px rgba(34, 197, 94, 0.4),
+    0 0 10px rgba(34, 197, 94, 0.3) !important;
   transform: scale(1.35) !important;
-  transition: background 0.1s, box-shadow 0.1s, transform 0.1s !important;
+  transition:
+    background 0.1s,
+    box-shadow 0.1s,
+    transform 0.1s !important;
 }
 .react-flow__handle.invalid {
   background: #ef4444 !important;
   border-color: rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.4), 0 0 10px rgba(239, 68, 68, 0.3) !important;
+  box-shadow:
+    0 0 0 3px rgba(239, 68, 68, 0.4),
+    0 0 10px rgba(239, 68, 68, 0.3) !important;
   transform: scale(1.25) !important;
-  transition: background 0.1s, box-shadow 0.1s, transform 0.1s !important;
+  transition:
+    background 0.1s,
+    box-shadow 0.1s,
+    transform 0.1s !important;
   cursor: not-allowed !important;
 }
 
@@ -1299,7 +1318,7 @@ select:focus-visible,
   button,
   .cs-cookie-banner,
   [data-no-print],
-  [aria-label="Language notice"] {
+  [aria-label='Language notice'] {
     display: none !important;
   }
 
@@ -1316,7 +1335,7 @@ select:focus-visible,
   }
 
   /* Show full URLs for print */
-  a[href^="http"]::after {
+  a[href^='http']::after {
     content: ' (' attr(href) ')';
     font-size: 9pt;
     opacity: 0.6;
@@ -1328,7 +1347,9 @@ select:focus-visible,
     break-inside: avoid;
   }
 
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     page-break-after: avoid;
     break-after: avoid;
   }

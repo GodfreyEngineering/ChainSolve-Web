@@ -39,8 +39,8 @@ export default function AccessibilityPage() {
           <section style={s.section}>
             <h2 style={s.heading}>Our commitment</h2>
             <p style={s.para}>
-              Godfrey Engineering Ltd is committed to making ChainSolve accessible to as many
-              people as possible. We aim to meet the{' '}
+              Godfrey Engineering Ltd is committed to making ChainSolve accessible to as many people
+              as possible. We aim to meet the{' '}
               <a
                 href="https://www.w3.org/TR/WCAG21/"
                 style={s.link}
@@ -72,7 +72,10 @@ export default function AccessibilityPage() {
               <li>
                 Error messages identify the affected field and describe how to correct the error.
               </li>
-              <li>The application works without JavaScript-dependent animations if the user has enabled &ldquo;Prefers reduced motion&rdquo; in their operating system.</li>
+              <li>
+                The application works without JavaScript-dependent animations if the user has
+                enabled &ldquo;Prefers reduced motion&rdquo; in their operating system.
+              </li>
             </ul>
           </section>
 
@@ -108,9 +111,7 @@ export default function AccessibilityPage() {
               ChainSolve is built with React 19 and React Flow. The core computation engine runs in
               a Web Worker via WebAssembly. Styles use CSS custom properties for theming.
             </p>
-            <p style={s.para}>
-              We test accessibility using:
-            </p>
+            <p style={s.para}>We test accessibility using:</p>
             <ul style={s.list}>
               <li>Playwright automated accessibility checks (axe-core)</li>
               <li>Manual keyboard-only navigation testing</li>

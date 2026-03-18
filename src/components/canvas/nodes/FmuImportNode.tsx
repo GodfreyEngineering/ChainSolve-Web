@@ -138,7 +138,7 @@ function FmuImportNodeInner({ id, data, selected }: NodeProps) {
             whiteSpace: 'nowrap',
           }}
         >
-          {loading ? 'Parsing FMU…' : nd.fmuName ?? 'Load .fmu file…'}
+          {loading ? 'Parsing FMU…' : (nd.fmuName ?? 'Load .fmu file…')}
         </button>
 
         {/* Model info */}

@@ -152,8 +152,8 @@ export async function gpuBatchGemm(
 // ── Sparse SpMV (CSR) ────────────────────────────────────────────────────────
 
 export interface CsrMatrix {
-  rowPtr: Uint32Array  // length = numRows + 1
-  colIdx: Uint32Array  // length = nnz
+  rowPtr: Uint32Array // length = numRows + 1
+  colIdx: Uint32Array // length = nnz
   values: Float32Array // length = nnz
   numRows: number
   numCols: number
@@ -222,8 +222,16 @@ export async function gpuSpMV(
 // ── Element-wise ops ─────────────────────────────────────────────────────────
 
 export const EWOP = {
-  ADD: 0, MUL: 1, SUB: 2, DIV: 3,
-  EXP: 4, SIN: 5, COS: 6, SQRT: 7, ABS: 8, NEG: 9,
+  ADD: 0,
+  MUL: 1,
+  SUB: 2,
+  DIV: 3,
+  EXP: 4,
+  SIN: 5,
+  COS: 6,
+  SQRT: 7,
+  ABS: 8,
+  NEG: 9,
 } as const
 
 export type EwOpCode = (typeof EWOP)[keyof typeof EWOP]

@@ -116,8 +116,20 @@ function StateMachineNodeInner({ id, data, selected }: NodeProps) {
       updateNodeData(id, { currentStateId: nextStateId, value: Math.max(0, nextIndex) })
     }
   }, [
-    id, in0, in1, in2, in3, in4, in5, in6, in7,
-    currentStateId, transitions, states, updateNodeData, resolveInput,
+    id,
+    in0,
+    in1,
+    in2,
+    in3,
+    in4,
+    in5,
+    in6,
+    in7,
+    currentStateId,
+    transitions,
+    states,
+    updateNodeData,
+    resolveInput,
   ])
 
   const inputHandles = Array.from({ length: Math.max(0, dynamicInputCount) }, (_, i) => i)
@@ -136,22 +148,42 @@ function StateMachineNodeInner({ id, data, selected }: NodeProps) {
     >
       <div style={{ ...s.nodeHeader, background: typeColor }}>
         <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
-        <span style={s.nodeHeaderLabel}>{nd.label ?? t('stateMachine.label', 'State Machine')}</span>
+        <span style={s.nodeHeaderLabel}>
+          {nd.label ?? t('stateMachine.label', 'State Machine')}
+        </span>
       </div>
 
       <div style={s.nodeBody}>
         {/* Current state indicator */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8,
-          padding: '4px 8px', background: '#2a2a2a', borderRadius: 4,
-        }}>
-          <div style={{
-            width: 10, height: 10, borderRadius: '50%',
-            background: currentState?.color ?? '#888',
-            boxShadow: `0 0 6px ${currentState?.color ?? '#888'}88`,
-            flexShrink: 0,
-          }} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: '#F4F4F3', fontFamily: 'JetBrains Mono, monospace' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            marginBottom: 8,
+            padding: '4px 8px',
+            background: '#2a2a2a',
+            borderRadius: 4,
+          }}
+        >
+          <div
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: '50%',
+              background: currentState?.color ?? '#888',
+              boxShadow: `0 0 6px ${currentState?.color ?? '#888'}88`,
+              flexShrink: 0,
+            }}
+          />
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: '#F4F4F3',
+              fontFamily: 'JetBrains Mono, monospace',
+            }}
+          >
             {currentState?.name ?? t('stateMachine.noState', 'No state')}
           </span>
           <span style={{ fontSize: 9, color: '#666', marginLeft: 'auto' }}>
@@ -161,17 +193,37 @@ function StateMachineNodeInner({ id, data, selected }: NodeProps) {
 
         {/* States list */}
         <div style={{ marginBottom: 6 }}>
-          <div style={{ fontSize: 9, color: '#666', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <div
+            style={{
+              fontSize: 9,
+              color: '#666',
+              marginBottom: 3,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+            }}
+          >
             {t('stateMachine.states', 'States')}
           </div>
           {states.slice(0, 6).map((st) => (
-            <div key={st.id} style={{
-              display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2,
-              opacity: st.id === currentStateId ? 1 : 0.5,
-            }}>
-              <div style={{
-                width: 7, height: 7, borderRadius: '50%', background: st.color, flexShrink: 0,
-              }} />
+            <div
+              key={st.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                marginBottom: 2,
+                opacity: st.id === currentStateId ? 1 : 0.5,
+              }}
+            >
+              <div
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  background: st.color,
+                  flexShrink: 0,
+                }}
+              />
               <span style={{ fontSize: 9, color: '#aaa', fontFamily: 'JetBrains Mono, monospace' }}>
                 {st.name}
               </span>
@@ -186,7 +238,15 @@ function StateMachineNodeInner({ id, data, selected }: NodeProps) {
 
         {/* Transitions list */}
         <div>
-          <div style={{ fontSize: 9, color: '#666', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <div
+            style={{
+              fontSize: 9,
+              color: '#666',
+              marginBottom: 3,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+            }}
+          >
             {t('stateMachine.transitions', 'Transitions')} ({transitions.length})
           </div>
           {transitions.slice(0, 4).map((tr) => {
@@ -194,13 +254,18 @@ function StateMachineNodeInner({ id, data, selected }: NodeProps) {
             const toSt = states.find((s) => s.id === tr.to)
             const isActive = tr.from === currentStateId
             return (
-              <div key={tr.id} style={{
-                fontSize: 8, color: isActive ? '#aaa' : '#555',
-                fontFamily: 'JetBrains Mono, monospace',
-                marginBottom: 2, padding: '1px 0',
-                borderLeft: isActive ? `2px solid ${typeColor}` : '2px solid transparent',
-                paddingLeft: 4,
-              }}>
+              <div
+                key={tr.id}
+                style={{
+                  fontSize: 8,
+                  color: isActive ? '#aaa' : '#555',
+                  fontFamily: 'JetBrains Mono, monospace',
+                  marginBottom: 2,
+                  padding: '1px 0',
+                  borderLeft: isActive ? `2px solid ${typeColor}` : '2px solid transparent',
+                  paddingLeft: 4,
+                }}
+              >
                 {fromSt?.name ?? '?'} → {toSt?.name ?? '?'}
                 <span style={{ color: '#666', marginLeft: 4 }}>{tr.guard}</span>
               </div>
@@ -223,7 +288,10 @@ function StateMachineNodeInner({ id, data, selected }: NodeProps) {
           id={`in_${i}`}
           style={{
             top: `${handleSpacing * (i + 1)}%`,
-            background: '#888', width: 8, height: 8, border: '2px solid #1a1a1a',
+            background: '#888',
+            width: 8,
+            height: 8,
+            border: '2px solid #1a1a1a',
           }}
         />
       ))}
@@ -233,7 +301,13 @@ function StateMachineNodeInner({ id, data, selected }: NodeProps) {
         type="source"
         position={Position.Right}
         id="state"
-        style={{ top: '50%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
+        style={{
+          top: '50%',
+          background: typeColor,
+          width: 8,
+          height: 8,
+          border: '2px solid #1a1a1a',
+        }}
       />
     </div>
   )

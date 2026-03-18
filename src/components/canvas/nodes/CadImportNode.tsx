@@ -38,9 +38,8 @@ function CadImportNodeInner({ id, data, selected }: NodeProps) {
       setError(null)
       try {
         const text = await file.text()
-        const { parseStep, parseIges, meshToTable, detectCadFormat } = await import(
-          '../../../lib/cadImport'
-        )
+        const { parseStep, parseIges, meshToTable, detectCadFormat } =
+          await import('../../../lib/cadImport')
         const fmt = detectCadFormat(file.name)
         const mesh = fmt === 'iges' ? parseIges(text) : parseStep(text)
         const tableData = meshToTable(mesh)

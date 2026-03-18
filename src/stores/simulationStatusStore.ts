@@ -58,20 +58,10 @@ interface SimulationStatusStore {
   tasks: Record<string, SimTaskState>
 
   /** Register a new task (sets status to 'running'). */
-  startTask: (
-    nodeId: string,
-    label: string,
-    totalIterations?: number,
-    totalCycles?: number,
-  ) => void
+  startTask: (nodeId: string, label: string, totalIterations?: number, totalCycles?: number) => void
 
   /** Update progress for a running task. */
-  setProgress: (
-    nodeId: string,
-    iteration: number,
-    cycle?: number,
-    metrics?: SimTaskMetrics,
-  ) => void
+  setProgress: (nodeId: string, iteration: number, cycle?: number, metrics?: SimTaskMetrics) => void
 
   /** Mark a task as completed. */
   completeTask: (nodeId: string) => void

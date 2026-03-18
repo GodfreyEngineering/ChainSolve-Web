@@ -62,9 +62,18 @@ export interface CollabSession {
 // ── User color palette ────────────────────────────────────────────────────────
 
 const COLLAB_COLORS = [
-  '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71',
-  '#1abc9c', '#3498db', '#9b59b6', '#e91e63',
-  '#00bcd4', '#ff5722', '#8bc34a', '#673ab7',
+  '#e74c3c',
+  '#e67e22',
+  '#f1c40f',
+  '#2ecc71',
+  '#1abc9c',
+  '#3498db',
+  '#9b59b6',
+  '#e91e63',
+  '#00bcd4',
+  '#ff5722',
+  '#8bc34a',
+  '#673ab7',
 ]
 
 let colorIdx = 0
@@ -209,7 +218,7 @@ export function createCollaborationSession(
       opts.onPresenceChange?.([...activeUsers.values()])
     })
     .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-      for (const p of (leftPresences as unknown) as Array<{ userId: string }>) {
+      for (const p of leftPresences as unknown as Array<{ userId: string }>) {
         activeUsers.delete(p.userId)
       }
       opts.onPresenceChange?.([...activeUsers.values()])
@@ -291,5 +300,15 @@ export function createCollaborationSession(
     doc.destroy()
   }
 
-  return { doc, nodesMap, edgesMap, activeUsers, updateCursor, updateSelection, syncToYjs, getState, destroy }
+  return {
+    doc,
+    nodesMap,
+    edgesMap,
+    activeUsers,
+    updateCursor,
+    updateSelection,
+    syncToYjs,
+    getState,
+    destroy,
+  }
 }

@@ -56,7 +56,11 @@ function rgbStr(r: number, g: number, b: number, a = 1): string {
 
 // ── Projection ────────────────────────────────────────────────────────────────
 
-interface Vec3 { x: number; y: number; z: number }
+interface Vec3 {
+  x: number
+  y: number
+  z: number
+}
 
 function rotateX(v: Vec3, c: number, s: number): Vec3 {
   return { x: v.x, y: v.y * c - v.z * s, z: v.y * s + v.z * c }
@@ -118,7 +122,7 @@ function buildQuads(rows: readonly (readonly number[])[]): Quad[] | null {
       quads.push({
         pts: [p0, p1, p2, p3],
         zAvg,
-        t: (zAvg - (-0.7)) / 1.4,
+        t: (zAvg - -0.7) / 1.4,
       })
     }
   }

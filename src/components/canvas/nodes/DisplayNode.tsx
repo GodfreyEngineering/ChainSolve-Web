@@ -69,9 +69,15 @@ const HEAT_CELL = 5
 const HEAT_MAX_CELLS = 14 // max columns or rows displayed
 
 /** MatrixHeatmap — tiny colour-coded density grid for table values. */
-function MatrixHeatmap({ rows, cols }: { rows: readonly (readonly number[])[]; cols: readonly string[] }) {
+function MatrixHeatmap({
+  rows,
+  cols,
+}: {
+  rows: readonly (readonly number[])[]
+  cols: readonly string[]
+}) {
   const displayRows = rows.slice(0, HEAT_MAX_CELLS)
-  const colCount = Math.min((cols.length || displayRows[0]?.length || 0), HEAT_MAX_CELLS)
+  const colCount = Math.min(cols.length || displayRows[0]?.length || 0, HEAT_MAX_CELLS)
   if (displayRows.length === 0 || colCount === 0) return null
 
   // Compute global min/max for normalization

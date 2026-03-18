@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import {
-  startConnectOnboarding,
-  createCheckoutSession,
-  hasPurchased,
-} from './stripeConnectService'
+import { startConnectOnboarding, createCheckoutSession, hasPurchased } from './stripeConnectService'
 
 // ── Supabase mock ─────────────────────────────────────────────────────────────
 

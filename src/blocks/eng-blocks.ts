@@ -959,8 +959,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Spring Force F=kx',
     category: 'engMechanics',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'k', label: 'k (N/m)' }, { id: 'x', label: 'x (m)' }],
-    defaultData: { blockType: 'eng.multibody.spring_force', label: 'Spring F=kx', manualValues: { k: 1000 } },
+    inputs: [
+      { id: 'k', label: 'k (N/m)' },
+      { id: 'x', label: 'x (m)' },
+    ],
+    defaultData: {
+      blockType: 'eng.multibody.spring_force',
+      label: 'Spring F=kx',
+      manualValues: { k: 1000 },
+    },
     synonyms: ['spring', 'Hooke', 'elastic force'],
     tags: ['mechanics', 'spring'],
   })
@@ -970,8 +977,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Damper Force F=bv',
     category: 'engMechanics',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'b', label: 'b (N·s/m)' }, { id: 'v', label: 'v (m/s)' }],
-    defaultData: { blockType: 'eng.multibody.damper_force', label: 'Damper F=bv', manualValues: { b: 100 } },
+    inputs: [
+      { id: 'b', label: 'b (N·s/m)' },
+      { id: 'v', label: 'v (m/s)' },
+    ],
+    defaultData: {
+      blockType: 'eng.multibody.damper_force',
+      label: 'Damper F=bv',
+      manualValues: { b: 100 },
+    },
     synonyms: ['damper', 'dashpot', 'viscous damping'],
     tags: ['mechanics', 'damper'],
   })
@@ -981,7 +995,10 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Mass Acceleration a=F/m',
     category: 'engMechanics',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'F', label: 'F (N)' }, { id: 'm', label: 'm (kg)' }],
+    inputs: [
+      { id: 'F', label: 'F (N)' },
+      { id: 'm', label: 'm (kg)' },
+    ],
     defaultData: { blockType: 'eng.multibody.mass_accel', label: 'a=F/m', manualValues: { m: 1 } },
     synonyms: ['Newton', 'mass acceleration', 'F=ma'],
     tags: ['mechanics', 'mass'],
@@ -992,11 +1009,20 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'SMD Natural Frequency',
     category: 'engMechanics',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'k', label: 'k (N/m)' }, { id: 'm', label: 'm (kg)' }, { id: 'b', label: 'b (N·s/m)' }],
-    defaultData: { blockType: 'eng.multibody.smd_natural_freq', label: 'SMD ωn, ζ', manualValues: { k: 1000, m: 1, b: 10 } },
+    inputs: [
+      { id: 'k', label: 'k (N/m)' },
+      { id: 'm', label: 'm (kg)' },
+      { id: 'b', label: 'b (N·s/m)' },
+    ],
+    defaultData: {
+      blockType: 'eng.multibody.smd_natural_freq',
+      label: 'SMD ωn, ζ',
+      manualValues: { k: 1000, m: 1, b: 10 },
+    },
     synonyms: ['natural frequency', 'damping ratio', 'spring mass damper'],
     tags: ['mechanics', 'vibration'],
-    description: 'Spring-Mass-Damper system: outputs ωn (rad/s), ζ (damping ratio), ωd (damped natural freq).',
+    description:
+      'Spring-Mass-Damper system: outputs ωn (rad/s), ζ (damping ratio), ωd (damped natural freq).',
   })
 
   register({
@@ -1011,10 +1037,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'mu', label: 'μ' },
       { id: 'Fn', label: 'Fn (N)' },
     ],
-    defaultData: { blockType: 'eng.multibody.rigid_body_1d', label: 'Rigid Body 1D', manualValues: { m: 1, mu: 0.3 } },
+    defaultData: {
+      blockType: 'eng.multibody.rigid_body_1d',
+      label: 'Rigid Body 1D',
+      manualValues: { m: 1, mu: 0.3 },
+    },
     synonyms: ['rigid body', 'body dynamics', 'kinetics'],
     tags: ['mechanics', 'rigid body'],
-    description: 'Outputs F_net (N), acceleration (m/s²), and kinetic energy (J) for a 1D rigid body with Coulomb friction.',
+    description:
+      'Outputs F_net (N), acceleration (m/s²), and kinetic energy (J) for a 1D rigid body with Coulomb friction.',
   })
 
   register({
@@ -1022,8 +1053,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Revolute Joint α=τ/I',
     category: 'engMechanics',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'tau', label: 'τ (N·m)' }, { id: 'I', label: 'I (kg·m²)' }],
-    defaultData: { blockType: 'eng.multibody.joint_revolute', label: 'Revolute α=τ/I', manualValues: { I: 0.1 } },
+    inputs: [
+      { id: 'tau', label: 'τ (N·m)' },
+      { id: 'I', label: 'I (kg·m²)' },
+    ],
+    defaultData: {
+      blockType: 'eng.multibody.joint_revolute',
+      label: 'Revolute α=τ/I',
+      manualValues: { I: 0.1 },
+    },
     synonyms: ['revolute joint', 'rotational joint', 'hinge'],
     tags: ['mechanics', 'joint'],
   })
@@ -1033,8 +1071,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Prismatic Joint a=F/m',
     category: 'engMechanics',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'F', label: 'F (N)' }, { id: 'm', label: 'm (kg)' }],
-    defaultData: { blockType: 'eng.multibody.joint_prismatic', label: 'Prismatic a=F/m', manualValues: { m: 1 } },
+    inputs: [
+      { id: 'F', label: 'F (N)' },
+      { id: 'm', label: 'm (kg)' },
+    ],
+    defaultData: {
+      blockType: 'eng.multibody.joint_prismatic',
+      label: 'Prismatic a=F/m',
+      manualValues: { m: 1 },
+    },
     synonyms: ['prismatic joint', 'sliding joint', 'linear joint'],
     tags: ['mechanics', 'joint'],
   })
@@ -1050,7 +1095,11 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'a', label: 'a (m)' },
       { id: 'alpha', label: 'α (rad)' },
     ],
-    defaultData: { blockType: 'eng.multibody.dh_transform', label: 'DH Matrix', manualValues: { theta: 0, d: 0, a: 1, alpha: 0 } },
+    defaultData: {
+      blockType: 'eng.multibody.dh_transform',
+      label: 'DH Matrix',
+      manualValues: { theta: 0, d: 0, a: 1, alpha: 0 },
+    },
     synonyms: ['Denavit-Hartenberg', 'DH', 'homogeneous transform', 'robot kinematics'],
     tags: ['mechanics', 'kinematics', 'robotics'],
     description: 'Denavit-Hartenberg homogeneous transform. Returns 4×4 matrix for one joint.',
@@ -1061,11 +1110,20 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Contact Model (Penalty)',
     category: 'engMechanics',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'k_p', label: 'k_p (N/m)' }, { id: 'gap', label: 'gap (m)' }, { id: 'mu', label: 'μ' }],
-    defaultData: { blockType: 'eng.multibody.contact_penalty', label: 'Contact', manualValues: { k_p: 1e5, mu: 0.3 } },
+    inputs: [
+      { id: 'k_p', label: 'k_p (N/m)' },
+      { id: 'gap', label: 'gap (m)' },
+      { id: 'mu', label: 'μ' },
+    ],
+    defaultData: {
+      blockType: 'eng.multibody.contact_penalty',
+      label: 'Contact',
+      manualValues: { k_p: 1e5, mu: 0.3 },
+    },
     synonyms: ['contact', 'collision', 'impact', 'penalty contact'],
     tags: ['mechanics', 'contact'],
-    description: 'Penalty-based contact with Coulomb friction. gap>0 = no contact, gap<0 = penetration.',
+    description:
+      'Penalty-based contact with Coulomb friction. gap>0 = no contact, gap<0 = penetration.',
   })
 
   register({
@@ -1080,10 +1138,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'v', label: 'v (m/s)' },
       { id: 'Fn', label: 'Fn (N)' },
     ],
-    defaultData: { blockType: 'eng.multibody.stribeck_friction', label: 'Stribeck', manualValues: { mu_s: 0.5, mu_k: 0.3, vs: 0.01 } },
+    defaultData: {
+      blockType: 'eng.multibody.stribeck_friction',
+      label: 'Stribeck',
+      manualValues: { mu_s: 0.5, mu_k: 0.3, vs: 0.01 },
+    },
     synonyms: ['Stribeck', 'friction model', 'stick-slip'],
     tags: ['mechanics', 'friction'],
-    description: 'Stribeck friction curve: μ = μk + (μs−μk)·exp(−(v/vs)²). Models static→kinetic transition.',
+    description:
+      'Stribeck friction curve: μ = μk + (μs−μk)·exp(−(v/vs)²). Models static→kinetic transition.',
   })
 
   register({
@@ -1097,10 +1160,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'theta1', label: 'θ₁ (rad)' },
       { id: 'theta2', label: 'θ₂ (rad)' },
     ],
-    defaultData: { blockType: 'eng.multibody.fk_2dof_planar', label: 'FK 2-DOF', manualValues: { l1: 1, l2: 0.8, theta1: 0, theta2: 0 } },
+    defaultData: {
+      blockType: 'eng.multibody.fk_2dof_planar',
+      label: 'FK 2-DOF',
+      manualValues: { l1: 1, l2: 0.8, theta1: 0, theta2: 0 },
+    },
     synonyms: ['forward kinematics', 'planar robot', '2-link arm'],
     tags: ['mechanics', 'kinematics', 'robotics'],
-    description: 'Forward kinematics for a 2-DOF planar robot arm. Outputs end-effector (x, y) position.',
+    description:
+      'Forward kinematics for a 2-DOF planar robot arm. Outputs end-effector (x, y) position.',
   })
 
   register({
@@ -1114,10 +1182,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'x', label: 'x (m)' },
       { id: 'y', label: 'y (m)' },
     ],
-    defaultData: { blockType: 'eng.multibody.ik_2dof_planar', label: 'IK 2-DOF', manualValues: { l1: 1, l2: 0.8 } },
+    defaultData: {
+      blockType: 'eng.multibody.ik_2dof_planar',
+      label: 'IK 2-DOF',
+      manualValues: { l1: 1, l2: 0.8 },
+    },
     synonyms: ['inverse kinematics', 'planar robot', '2-link arm', 'IK'],
     tags: ['mechanics', 'kinematics', 'robotics'],
-    description: 'Inverse kinematics for a 2-DOF planar arm. Given end-effector (x,y), outputs joint angles θ₁, θ₂.',
+    description:
+      'Inverse kinematics for a 2-DOF planar arm. Given end-effector (x,y), outputs joint angles θ₁, θ₂.',
   })
 
   // ── Active Electronics (items 2.54–2.57) ───────────────────────────
@@ -1133,10 +1206,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'n', label: 'n (ideality)' },
       { id: 'Vt', label: 'Vt (V)' },
     ],
-    defaultData: { blockType: 'eng.elec.diode_iv', label: 'Diode I-V', manualValues: { Is: 1e-12, n: 1, Vt: 0.02585 } },
+    defaultData: {
+      blockType: 'eng.elec.diode_iv',
+      label: 'Diode I-V',
+      manualValues: { Is: 1e-12, n: 1, Vt: 0.02585 },
+    },
     synonyms: ['diode', 'exponential diode', 'rectifier', 'pn junction'],
     tags: ['electronics', 'semiconductor', 'diode'],
-    description: 'Diode exponential I-V: I = Is·(exp(V/(n·Vt)) − 1). Vt = kT/q ≈ 25.85 mV at 300 K.',
+    description:
+      'Diode exponential I-V: I = Is·(exp(V/(n·Vt)) − 1). Vt = kT/q ≈ 25.85 mV at 300 K.',
   })
 
   register({
@@ -1145,15 +1223,20 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     category: 'engElectrical',
     nodeKind: 'csOperation',
     inputs: [
-      { id: 'kp', label: "kp (A/V²)" },
+      { id: 'kp', label: 'kp (A/V²)' },
       { id: 'Vgs', label: 'Vgs (V)' },
       { id: 'Vth', label: 'Vth (V)' },
       { id: 'Vds', label: 'Vds (V)' },
     ],
-    defaultData: { blockType: 'eng.elec.mosfet_id', label: 'MOSFET Id', manualValues: { kp: 0.001, Vth: 1.0 } },
+    defaultData: {
+      blockType: 'eng.elec.mosfet_id',
+      label: 'MOSFET Id',
+      manualValues: { kp: 0.001, Vth: 1.0 },
+    },
     synonyms: ['MOSFET', 'FET', 'transistor', 'square law'],
     tags: ['electronics', 'MOSFET', 'power electronics'],
-    description: 'Square-law MOSFET model: cutoff (Vgs<Vth), triode, or saturation. kp = μn·Cox·W/L.',
+    description:
+      'Square-law MOSFET model: cutoff (Vgs<Vth), triode, or saturation. kp = μn·Cox·W/L.',
   })
 
   register({
@@ -1161,8 +1244,16 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'IGBT Vce Drop',
     category: 'engElectrical',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'Vce0', label: 'Vce0 (V)' }, { id: 'Ic', label: 'Ic (A)' }, { id: 'Rce', label: 'Rce (Ω)' }],
-    defaultData: { blockType: 'eng.elec.igbt_vce_drop', label: 'IGBT Vce', manualValues: { Vce0: 1.4, Rce: 0.05 } },
+    inputs: [
+      { id: 'Vce0', label: 'Vce0 (V)' },
+      { id: 'Ic', label: 'Ic (A)' },
+      { id: 'Rce', label: 'Rce (Ω)' },
+    ],
+    defaultData: {
+      blockType: 'eng.elec.igbt_vce_drop',
+      label: 'IGBT Vce',
+      manualValues: { Vce0: 1.4, Rce: 0.05 },
+    },
     synonyms: ['IGBT', 'insulated gate bipolar transistor', 'power switch'],
     tags: ['electronics', 'IGBT', 'power electronics'],
     description: 'IGBT simplified on-state model: Vce = Vce0 + Ic·Rce.',
@@ -1179,10 +1270,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'A', label: 'A (gain)' },
       { id: 'Vcc', label: 'Vcc (V)' },
     ],
-    defaultData: { blockType: 'eng.elec.opamp_vout', label: 'OpAmp', manualValues: { A: 1e5, Vcc: 15 } },
+    defaultData: {
+      blockType: 'eng.elec.opamp_vout',
+      label: 'OpAmp',
+      manualValues: { A: 1e5, Vcc: 15 },
+    },
     synonyms: ['op-amp', 'operational amplifier', 'comparator'],
     tags: ['electronics', 'opamp', 'amplifier'],
-    description: 'OpAmp output: Vout = A·(V+−V−), clipped to ±Vcc. A=1e5 for ideal, finite for real.',
+    description:
+      'OpAmp output: Vout = A·(V+−V−), clipped to ±Vcc. A=1e5 for ideal, finite for real.',
   })
 
   register({
@@ -1190,7 +1286,10 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'PWM Average Output',
     category: 'engElectrical',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'Vdc', label: 'Vdc (V)' }, { id: 'duty', label: 'duty (0-1)' }],
+    inputs: [
+      { id: 'Vdc', label: 'Vdc (V)' },
+      { id: 'duty', label: 'duty (0-1)' },
+    ],
     defaultData: { blockType: 'eng.elec.pwm_duty', label: 'PWM Vavg', manualValues: { Vdc: 48 } },
     synonyms: ['PWM', 'pulse width modulation', 'duty cycle'],
     tags: ['electronics', 'PWM', 'power electronics'],
@@ -1202,11 +1301,20 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'H-Bridge Output',
     category: 'engElectrical',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'Vdc', label: 'Vdc (V)' }, { id: 'duty_a', label: 'duty_a' }, { id: 'duty_b', label: 'duty_b' }],
-    defaultData: { blockType: 'eng.elec.hbridge_vout', label: 'H-Bridge', manualValues: { Vdc: 48 } },
+    inputs: [
+      { id: 'Vdc', label: 'Vdc (V)' },
+      { id: 'duty_a', label: 'duty_a' },
+      { id: 'duty_b', label: 'duty_b' },
+    ],
+    defaultData: {
+      blockType: 'eng.elec.hbridge_vout',
+      label: 'H-Bridge',
+      manualValues: { Vdc: 48 },
+    },
     synonyms: ['H-bridge', 'full bridge', 'bipolar PWM', 'motor driver'],
     tags: ['electronics', 'H-bridge', 'motor drive'],
-    description: 'H-bridge average output: Vout = Vdc·(duty_a − duty_b). Models bipolar PWM motor drive.',
+    description:
+      'H-bridge average output: Vout = Vdc·(duty_a − duty_b). Models bipolar PWM motor drive.',
   })
 
   register({
@@ -1214,8 +1322,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: '3-Phase SPWM Voltage',
     category: 'engElectrical',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'Vdc', label: 'Vdc (V)' }, { id: 'm', label: 'm (mod. index)' }],
-    defaultData: { blockType: 'eng.elec.three_phase_spwm', label: '3Ph SPWM', manualValues: { Vdc: 400, m: 0.9 } },
+    inputs: [
+      { id: 'Vdc', label: 'Vdc (V)' },
+      { id: 'm', label: 'm (mod. index)' },
+    ],
+    defaultData: {
+      blockType: 'eng.elec.three_phase_spwm',
+      label: '3Ph SPWM',
+      manualValues: { Vdc: 400, m: 0.9 },
+    },
     synonyms: ['3-phase inverter', 'SPWM', 'VSI', 'variable frequency drive'],
     tags: ['electronics', 'inverter', 'three-phase'],
     description: '3-phase inverter line-to-neutral peak voltage: V_peak = m·Vdc/2. m ∈ [0,1].',
@@ -1233,10 +1348,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'Ke', label: 'Ke (V·s/rad)' },
       { id: 'Kt', label: 'Kt (N·m/A)' },
     ],
-    defaultData: { blockType: 'eng.elec.dc_motor', label: 'DC Motor', manualValues: { Ra: 0.5, Ke: 0.1, Kt: 0.1 } },
+    defaultData: {
+      blockType: 'eng.elec.dc_motor',
+      label: 'DC Motor',
+      manualValues: { Ra: 0.5, Ke: 0.1, Kt: 0.1 },
+    },
     synonyms: ['DC motor', 'back-EMF', 'brushed motor', 'permanent magnet motor'],
     tags: ['electronics', 'motor', 'electromechanical'],
-    description: 'DC motor steady-state: ω = (V−Ia·Ra)/Ke, T = Kt·Ia, P = T·ω. Outputs table {omega, torque, power}.',
+    description:
+      'DC motor steady-state: ω = (V−Ia·Ra)/Ke, T = Kt·Ia, P = T·ω. Outputs table {omega, torque, power}.',
   })
 
   register({
@@ -1252,10 +1372,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'id', label: 'id (A)' },
       { id: 'iq', label: 'iq (A)' },
     ],
-    defaultData: { blockType: 'eng.elec.pmsm_torque', label: 'PMSM Torque', manualValues: { P: 4, lambda: 0.1, Ld: 0.005, Lq: 0.008 } },
+    defaultData: {
+      blockType: 'eng.elec.pmsm_torque',
+      label: 'PMSM Torque',
+      manualValues: { P: 4, lambda: 0.1, Ld: 0.005, Lq: 0.008 },
+    },
     synonyms: ['PMSM', 'BLDC', 'permanent magnet synchronous', 'dq frame', 'Park transform'],
     tags: ['electronics', 'motor', 'PMSM'],
-    description: 'PMSM electromagnetic torque: T = (3/2)·(P/2)·(λ·iq + (Ld−Lq)·id·iq). Includes reluctance torque.',
+    description:
+      'PMSM electromagnetic torque: T = (3/2)·(P/2)·(λ·iq + (Ld−Lq)·id·iq). Includes reluctance torque.',
   })
 
   register({
@@ -1272,7 +1397,11 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'id', label: 'id (A)' },
       { id: 'iq', label: 'iq (A)' },
     ],
-    defaultData: { blockType: 'eng.elec.pmsm_vd_vq', label: 'PMSM Vdq', manualValues: { Rs: 0.1, Ld: 0.005, Lq: 0.008, lambda: 0.1 } },
+    defaultData: {
+      blockType: 'eng.elec.pmsm_vd_vq',
+      label: 'PMSM Vdq',
+      manualValues: { Rs: 0.1, Ld: 0.005, Lq: 0.008, lambda: 0.1 },
+    },
     synonyms: ['PMSM voltage', 'dq voltage', 'Park equations'],
     tags: ['electronics', 'motor', 'PMSM'],
     description: 'PMSM dq voltage: Vd = Rs·id − ωe·Lq·iq, Vq = Rs·iq + ωe·Ld·id + ωe·λ.',
@@ -1291,10 +1420,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'C1', label: 'C1 (F)' },
       { id: 'dt', label: 'dt (s)' },
     ],
-    defaultData: { blockType: 'eng.elec.battery_thevenin', label: 'Battery Thevenin', manualValues: { OCV: 3.6, R0: 0.01, R1: 0.02, C1: 2000, dt: 1 } },
+    defaultData: {
+      blockType: 'eng.elec.battery_thevenin',
+      label: 'Battery Thevenin',
+      manualValues: { OCV: 3.6, R0: 0.01, R1: 0.02, C1: 2000, dt: 1 },
+    },
     synonyms: ['battery model', 'Thevenin', 'equivalent circuit model', 'ECM', 'Li-ion'],
     tags: ['electronics', 'battery', 'energy storage'],
-    description: 'Thevenin battery equivalent circuit: Vt = OCV − I·R0 − V_RC. RC branch with τ = R1·C1.',
+    description:
+      'Thevenin battery equivalent circuit: Vt = OCV − I·R0 − V_RC. RC branch with τ = R1·C1.',
   })
 
   register({
@@ -1308,7 +1442,11 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'dt', label: 'dt (s)' },
       { id: 'Q_nom', label: 'Q_nom (Ah)' },
     ],
-    defaultData: { blockType: 'eng.elec.battery_soc', label: 'Battery SOC', manualValues: { SOC0: 1.0, Q_nom: 100, dt: 1 } },
+    defaultData: {
+      blockType: 'eng.elec.battery_soc',
+      label: 'Battery SOC',
+      manualValues: { SOC0: 1.0, Q_nom: 100, dt: 1 },
+    },
     synonyms: ['SOC', 'state of charge', 'coulomb counting', 'battery'],
     tags: ['electronics', 'battery', 'energy storage'],
     description: 'Coulomb-counting SOC update: SOC = SOC0 − (I·dt)/(Q_nom·3600). Clipped to [0,1].',
@@ -1327,7 +1465,11 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'A', label: 'A (m²)' },
       { id: 'dT', label: 'ΔT (K)' },
     ],
-    defaultData: { blockType: 'eng.thermal.conductor_R', label: 'Thermal Cond.', manualValues: { k: 50, A: 0.01, L: 0.1 } },
+    defaultData: {
+      blockType: 'eng.thermal.conductor_R',
+      label: 'Thermal Cond.',
+      manualValues: { k: 50, A: 0.01, L: 0.1 },
+    },
     synonyms: ['thermal resistance', 'conduction', 'Fourier heat', 'thermal conductor'],
     tags: ['thermal', 'heat transfer'],
     description: 'Thermal conduction: Q = k·A·ΔT/L. R_thermal = L/(k·A).',
@@ -1338,8 +1480,17 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Thermal Mass ΔT=Q·dt/(m·c)',
     category: 'engThermo',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'm', label: 'm (kg)' }, { id: 'c', label: 'c (J/kgK)' }, { id: 'Q', label: 'Q (W)' }, { id: 'dt', label: 'dt (s)' }],
-    defaultData: { blockType: 'eng.thermal.capacitor_dT', label: 'Thermal Mass', manualValues: { m: 1, c: 900, dt: 1 } },
+    inputs: [
+      { id: 'm', label: 'm (kg)' },
+      { id: 'c', label: 'c (J/kgK)' },
+      { id: 'Q', label: 'Q (W)' },
+      { id: 'dt', label: 'dt (s)' },
+    ],
+    defaultData: {
+      blockType: 'eng.thermal.capacitor_dT',
+      label: 'Thermal Mass',
+      manualValues: { m: 1, c: 900, dt: 1 },
+    },
     synonyms: ['thermal capacitor', 'thermal mass', 'heat capacity'],
     tags: ['thermal', 'heat transfer'],
     description: 'Temperature rise from heat input: ΔT = Q·dt/(m·c). Lumped thermal capacitor.',
@@ -1350,8 +1501,17 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Convection Q=h·A·ΔT',
     category: 'engThermo',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'h', label: 'h (W/m²K)' }, { id: 'A', label: 'A (m²)' }, { id: 'Ts', label: 'Ts (K)' }, { id: 'Tf', label: 'Tf (K)' }],
-    defaultData: { blockType: 'eng.thermal.convection', label: 'Convection', manualValues: { h: 25, A: 0.1 } },
+    inputs: [
+      { id: 'h', label: 'h (W/m²K)' },
+      { id: 'A', label: 'A (m²)' },
+      { id: 'Ts', label: 'Ts (K)' },
+      { id: 'Tf', label: 'Tf (K)' },
+    ],
+    defaultData: {
+      blockType: 'eng.thermal.convection',
+      label: 'Convection',
+      manualValues: { h: 25, A: 0.1 },
+    },
     synonyms: ['convection', 'Newton cooling', 'heat transfer coefficient'],
     tags: ['thermal', 'heat transfer'],
     description: 'Newton convection: Q = h·A·(Ts − Tf). h = heat transfer coefficient W/(m²·K).',
@@ -1362,8 +1522,17 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Radiation Q=ε·σ·A·(T⁴−Tamb⁴)',
     category: 'engThermo',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'eps', label: 'ε (emissivity)' }, { id: 'A', label: 'A (m²)' }, { id: 'Ts', label: 'Ts (K)' }, { id: 'Tamb', label: 'Tamb (K)' }],
-    defaultData: { blockType: 'eng.thermal.radiation', label: 'Radiation', manualValues: { eps: 0.9, A: 0.1, Tamb: 293.15 } },
+    inputs: [
+      { id: 'eps', label: 'ε (emissivity)' },
+      { id: 'A', label: 'A (m²)' },
+      { id: 'Ts', label: 'Ts (K)' },
+      { id: 'Tamb', label: 'Tamb (K)' },
+    ],
+    defaultData: {
+      blockType: 'eng.thermal.radiation',
+      label: 'Radiation',
+      manualValues: { eps: 0.9, A: 0.1, Tamb: 293.15 },
+    },
     synonyms: ['radiation', 'Stefan-Boltzmann', 'radiative heat transfer'],
     tags: ['thermal', 'heat transfer'],
     description: 'Radiation: Q = ε·σ·A·(Ts⁴ − Tamb⁴), σ = 5.67×10⁻⁸ W/(m²K⁴).',
@@ -1376,8 +1545,17 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Heat Exchanger (LMTD)',
     category: 'engThermo',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'U', label: 'U (W/m²K)' }, { id: 'A', label: 'A (m²)' }, { id: 'dT1', label: 'ΔT1 (K)' }, { id: 'dT2', label: 'ΔT2 (K)' }],
-    defaultData: { blockType: 'eng.thermal.hx_lmtd', label: 'HX LMTD', manualValues: { U: 500, A: 1 } },
+    inputs: [
+      { id: 'U', label: 'U (W/m²K)' },
+      { id: 'A', label: 'A (m²)' },
+      { id: 'dT1', label: 'ΔT1 (K)' },
+      { id: 'dT2', label: 'ΔT2 (K)' },
+    ],
+    defaultData: {
+      blockType: 'eng.thermal.hx_lmtd',
+      label: 'HX LMTD',
+      manualValues: { U: 500, A: 1 },
+    },
     synonyms: ['heat exchanger', 'LMTD', 'log mean temperature'],
     tags: ['thermal', 'heat exchanger'],
     description: 'LMTD method: Q = U·A·LMTD, LMTD = (ΔT1−ΔT2)/ln(ΔT1/ΔT2).',
@@ -1388,8 +1566,16 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Heat Exchanger (ε-NTU)',
     category: 'engThermo',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'NTU', label: 'NTU' }, { id: 'Cr', label: 'Cr (Cmin/Cmax)' }, { id: 'Q_max', label: 'Q_max (W)' }],
-    defaultData: { blockType: 'eng.thermal.hx_ntu', label: 'HX ε-NTU', manualValues: { NTU: 2, Cr: 0.5 } },
+    inputs: [
+      { id: 'NTU', label: 'NTU' },
+      { id: 'Cr', label: 'Cr (Cmin/Cmax)' },
+      { id: 'Q_max', label: 'Q_max (W)' },
+    ],
+    defaultData: {
+      blockType: 'eng.thermal.hx_ntu',
+      label: 'HX ε-NTU',
+      manualValues: { NTU: 2, Cr: 0.5 },
+    },
     synonyms: ['heat exchanger', 'NTU method', 'effectiveness-NTU', 'epsilon-NTU'],
     tags: ['thermal', 'heat exchanger'],
     description: 'ε-NTU method: effectiveness ε and heat transfer Q. Outputs table {eps, Q}.',
@@ -1410,10 +1596,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'v', label: 'v (m/s)' },
       { id: 'K_minor', label: 'K_minor' },
     ],
-    defaultData: { blockType: 'eng.fluids.pipe_dp', label: 'Pipe ΔP', manualValues: { f: 0.02, L: 10, D: 0.05, rho: 1000, K_minor: 0 } },
+    defaultData: {
+      blockType: 'eng.fluids.pipe_dp',
+      label: 'Pipe ΔP',
+      manualValues: { f: 0.02, L: 10, D: 0.05, rho: 1000, K_minor: 0 },
+    },
     synonyms: ['pipe pressure drop', 'Darcy-Weisbach', 'pipe friction', 'head loss'],
     tags: ['fluid', 'pipe', 'hydraulics'],
-    description: 'ΔP = (f·L/D + K_minor)·½ρv². Darcy friction factor f from Moody chart or correlations.',
+    description:
+      'ΔP = (f·L/D + K_minor)·½ρv². Darcy friction factor f from Moody chart or correlations.',
   })
 
   register({
@@ -1421,8 +1612,16 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Valve Flow (Cv)',
     category: 'engFluids',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'Cv', label: 'Cv' }, { id: 'dP', label: 'ΔP (bar)' }, { id: 'SG', label: 'SG (specific gravity)' }],
-    defaultData: { blockType: 'eng.fluids.valve_cv', label: 'Valve Cv', manualValues: { Cv: 10, SG: 1 } },
+    inputs: [
+      { id: 'Cv', label: 'Cv' },
+      { id: 'dP', label: 'ΔP (bar)' },
+      { id: 'SG', label: 'SG (specific gravity)' },
+    ],
+    defaultData: {
+      blockType: 'eng.fluids.valve_cv',
+      label: 'Valve Cv',
+      manualValues: { Cv: 10, SG: 1 },
+    },
     synonyms: ['valve', 'Cv', 'flow coefficient', 'control valve'],
     tags: ['fluid', 'valve', 'hydraulics'],
     description: 'Valve flow: Q (m³/h) = Cv·√(ΔP_bar/SG). Cv is the valve flow coefficient.',
@@ -1440,10 +1639,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'Q', label: 'Q (m³/s)' },
       { id: 'eta', label: 'η (efficiency)' },
     ],
-    defaultData: { blockType: 'eng.fluids.pump_power', label: 'Pump Power', manualValues: { rho: 1000, g: 9.81, eta: 0.75 } },
+    defaultData: {
+      blockType: 'eng.fluids.pump_power',
+      label: 'Pump Power',
+      manualValues: { rho: 1000, g: 9.81, eta: 0.75 },
+    },
     synonyms: ['pump', 'hydraulic power', 'pump efficiency'],
     tags: ['fluid', 'pump', 'hydraulics'],
-    description: 'Pump hydraulic power P_hyd = ρ·g·H·Q, shaft power = P_hyd/η. Outputs table {P_hyd, P_shaft}.',
+    description:
+      'Pump hydraulic power P_hyd = ρ·g·H·Q, shaft power = P_hyd/η. Outputs table {P_hyd, P_shaft}.',
   })
 
   register({
@@ -1451,8 +1655,17 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Orifice Flow (Cd)',
     category: 'engFluids',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'Cd', label: 'Cd (discharge coeff)' }, { id: 'A', label: 'A (m²)' }, { id: 'dP', label: 'ΔP (Pa)' }, { id: 'rho', label: 'ρ (kg/m³)' }],
-    defaultData: { blockType: 'eng.fluids.orifice_flow', label: 'Orifice', manualValues: { Cd: 0.61, rho: 1000 } },
+    inputs: [
+      { id: 'Cd', label: 'Cd (discharge coeff)' },
+      { id: 'A', label: 'A (m²)' },
+      { id: 'dP', label: 'ΔP (Pa)' },
+      { id: 'rho', label: 'ρ (kg/m³)' },
+    ],
+    defaultData: {
+      blockType: 'eng.fluids.orifice_flow',
+      label: 'Orifice',
+      manualValues: { Cd: 0.61, rho: 1000 },
+    },
     synonyms: ['orifice', 'flow meter', 'discharge coefficient', 'sharp-edged orifice'],
     tags: ['fluid', 'orifice', 'flow measurement'],
     description: 'Orifice flow: Q = Cd·A·√(2·ΔP/ρ). Cd ≈ 0.61 for sharp-edged orifice.',
@@ -1463,8 +1676,17 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Gas Accumulator P₂=P₁(V₁/V₂)^γ',
     category: 'engFluids',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'P1', label: 'P1 (Pa)' }, { id: 'V1', label: 'V1 (m³)' }, { id: 'V2', label: 'V2 (m³)' }, { id: 'gamma', label: 'γ (adiabatic)' }],
-    defaultData: { blockType: 'eng.fluids.accumulator', label: 'Accumulator', manualValues: { gamma: 1.4 } },
+    inputs: [
+      { id: 'P1', label: 'P1 (Pa)' },
+      { id: 'V1', label: 'V1 (m³)' },
+      { id: 'V2', label: 'V2 (m³)' },
+      { id: 'gamma', label: 'γ (adiabatic)' },
+    ],
+    defaultData: {
+      blockType: 'eng.fluids.accumulator',
+      label: 'Accumulator',
+      manualValues: { gamma: 1.4 },
+    },
     synonyms: ['accumulator', 'gas spring', 'hydraulic accumulator', 'bladder'],
     tags: ['fluid', 'accumulator', 'hydraulics'],
     description: 'Isentropic gas accumulator: P2 = P1·(V1/V2)^γ. γ = 1.4 for nitrogen (typical).',
@@ -1482,10 +1704,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
       { id: 'A_rod', label: 'A_rod (m²)' },
       { id: 'Q', label: 'Q (m³/s)' },
     ],
-    defaultData: { blockType: 'eng.fluids.hydraulic_cylinder', label: 'Hyd. Cylinder', manualValues: { A_bore: 0.01, A_rod: 0.005 } },
+    defaultData: {
+      blockType: 'eng.fluids.hydraulic_cylinder',
+      label: 'Hyd. Cylinder',
+      manualValues: { A_bore: 0.01, A_rod: 0.005 },
+    },
     synonyms: ['hydraulic cylinder', 'linear actuator', 'hydraulic ram'],
     tags: ['fluid', 'hydraulics', 'actuator'],
-    description: 'Hydraulic cylinder: F = P_bore·A_bore − P_rod·A_rod, v = Q/A_bore. Outputs table {F, v}.',
+    description:
+      'Hydraulic cylinder: F = P_bore·A_bore − P_rod·A_rod, v = Q/A_bore. Outputs table {F, v}.',
   })
 
   register({
@@ -1493,11 +1720,21 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Hydraulic Motor',
     category: 'engFluids',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'dP', label: 'ΔP (Pa)' }, { id: 'D', label: 'D (m³/rev)' }, { id: 'Q', label: 'Q (m³/s)' }, { id: 'eta', label: 'η (efficiency)' }],
-    defaultData: { blockType: 'eng.fluids.hydraulic_motor', label: 'Hyd. Motor', manualValues: { D: 50e-6, eta: 0.9 } },
+    inputs: [
+      { id: 'dP', label: 'ΔP (Pa)' },
+      { id: 'D', label: 'D (m³/rev)' },
+      { id: 'Q', label: 'Q (m³/s)' },
+      { id: 'eta', label: 'η (efficiency)' },
+    ],
+    defaultData: {
+      blockType: 'eng.fluids.hydraulic_motor',
+      label: 'Hyd. Motor',
+      manualValues: { D: 50e-6, eta: 0.9 },
+    },
     synonyms: ['hydraulic motor', 'hydrostatic motor', 'hydraulic drive'],
     tags: ['fluid', 'hydraulics', 'motor'],
-    description: 'Hydraulic motor: T = ΔP·D/(2π), ω = Q/D·2π, P_mech = T·ω·η. Outputs table {torque, omega, power}.',
+    description:
+      'Hydraulic motor: T = ΔP·D/(2π), ω = Q/D·2π, P_mech = T·ω·η. Outputs table {torque, omega, power}.',
   })
 
   register({
@@ -1506,10 +1743,15 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     category: 'engFluids',
     nodeKind: 'csOperation',
     inputs: [{ id: 'T', label: 'T (°C)' }],
-    defaultData: { blockType: 'eng.fluids.water_density', label: 'Water ρ(T)', manualValues: { T: 20 } },
+    defaultData: {
+      blockType: 'eng.fluids.water_density',
+      label: 'Water ρ(T)',
+      manualValues: { T: 20 },
+    },
     synonyms: ['water density', 'fluid density', 'temperature dependent density'],
     tags: ['fluid', 'properties', 'water'],
-    description: 'Water density vs temperature (0–100°C): ρ ≈ 999.84 + 0.068T − 0.0091T² + 1e-5T³ kg/m³.',
+    description:
+      'Water density vs temperature (0–100°C): ρ ≈ 999.84 + 0.068T − 0.0091T² + 1e-5T³ kg/m³.',
   })
 
   register({
@@ -1518,7 +1760,11 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     category: 'engFluids',
     nodeKind: 'csOperation',
     inputs: [{ id: 'T', label: 'T (°C)' }],
-    defaultData: { blockType: 'eng.fluids.water_viscosity', label: 'Water μ(T)', manualValues: { T: 20 } },
+    defaultData: {
+      blockType: 'eng.fluids.water_viscosity',
+      label: 'Water μ(T)',
+      manualValues: { T: 20 },
+    },
     synonyms: ['water viscosity', 'dynamic viscosity', 'fluid viscosity'],
     tags: ['fluid', 'properties', 'water'],
     description: 'Water dynamic viscosity vs temperature using Vogel equation. Returns μ in Pa·s.',
@@ -1529,11 +1775,26 @@ export function registerEngBlocks(register: (def: BlockDef) => void): void {
     label: 'Oil Viscosity (Walther ASTM D341)',
     category: 'engFluids',
     nodeKind: 'csOperation',
-    inputs: [{ id: 'nu40', label: 'ν40 (cSt at 40°C)' }, { id: 'nu100', label: 'ν100 (cSt at 100°C)' }, { id: 'T', label: 'T (°C)' }],
-    defaultData: { blockType: 'eng.fluids.oil_viscosity', label: 'Oil ν(T)', manualValues: { nu40: 46, nu100: 7, T: 60 } },
-    synonyms: ['oil viscosity', 'lubricant viscosity', 'ASTM D341', 'Walther equation', 'viscosity index'],
+    inputs: [
+      { id: 'nu40', label: 'ν40 (cSt at 40°C)' },
+      { id: 'nu100', label: 'ν100 (cSt at 100°C)' },
+      { id: 'T', label: 'T (°C)' },
+    ],
+    defaultData: {
+      blockType: 'eng.fluids.oil_viscosity',
+      label: 'Oil ν(T)',
+      manualValues: { nu40: 46, nu100: 7, T: 60 },
+    },
+    synonyms: [
+      'oil viscosity',
+      'lubricant viscosity',
+      'ASTM D341',
+      'Walther equation',
+      'viscosity index',
+    ],
     tags: ['fluid', 'properties', 'oil'],
-    description: 'Oil kinematic viscosity vs temperature using Walther ASTM D341 equation. Give ν at 40°C and 100°C.',
+    description:
+      'Oil kinematic viscosity vs temperature using Walther ASTM D341 equation. Give ν at 40°C and 100°C.',
   })
 
   // ── Conversions ─────────────────────────────────────────────────────

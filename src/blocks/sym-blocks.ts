@@ -132,7 +132,14 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
       x: '1,1',
       threshold: 1.0,
     },
-    synonyms: ['jacobian', 'mixed mode AD', 'automatic differentiation', 'gradient', 'forward AD', 'reverse AD'],
+    synonyms: [
+      'jacobian',
+      'mixed mode AD',
+      'automatic differentiation',
+      'gradient',
+      'forward AD',
+      'reverse AD',
+    ],
     tags: ['ad', 'autodiff', 'jacobian', 'gradient', 'differentiation'],
     description:
       'Mixed-mode automatic differentiation: computes the Jacobian of a vector function using forward-mode dual-number AD. Selects forward mode (reported) when n_inputs ≤ threshold × n_outputs, reverse otherwise. expressions: comma-separated output expressions (e.g. "x*y, x^2+y"). var_names: comma-separated variable names. x: evaluation point as Vector port or comma-separated data. Returns Jacobian as Table.',
@@ -246,7 +253,14 @@ export function registerSymBlocks(register: (def: BlockDef) => void): void {
       mode: 'basis',
       max_iter: 10000,
     },
-    synonyms: ['groebner', 'grobner', 'buchberger', 'polynomial system', 'ideal basis', 'polynomial solve'],
+    synonyms: [
+      'groebner',
+      'grobner',
+      'buchberger',
+      'polynomial system',
+      'ideal basis',
+      'polynomial solve',
+    ],
     tags: ['sym', 'algebra', 'polynomial', 'groebner'],
     description:
       'Gröbner basis (Buchberger\'s algorithm): computes a canonical basis for a polynomial ideal. Input: semicolon-separated polynomial expressions (e.g. "x^2+y-1;x+y^2-1"), variables field (comma-separated). order: "grevlex" (default), "lex", "grlex". mode: "basis" (return basis polynomials) or "solve" (find solutions for zero-dimensional ideals). Returns Text.',

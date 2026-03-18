@@ -128,7 +128,12 @@ import { autoLayout, type LayoutDirection, type AutoLayoutResult } from '../../l
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard, pasteFromSystemClipboard } from '../../lib/clipboard'
 import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
-import { parseCSVToTableData, parseNpyToTableData, parseXlsxToTableData, parseJSONToTableData } from '../../lib/csvParser'
+import {
+  parseCSVToTableData,
+  parseNpyToTableData,
+  parseXlsxToTableData,
+  parseJSONToTableData,
+} from '../../lib/csvParser'
 import { computeDatasetHash } from '../../lib/datasetHash'
 import { CommandPalette, type PaletteCommand } from './CommandPalette'
 import { FormulaBar } from './FormulaBar'
@@ -1297,19 +1302,20 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     [telemetryProjectId, canvasId],
   )
 
-  const { computed, computedStore, triggerEval, pendingPatchCount, engineDiagnostics } = useGraphEngine(
-    nodes,
-    edges,
-    engine,
-    undefined,
-    combinedEngineKey,
-    paused,
-    constantsLookup,
-    variables,
-    publishedOutputs,
-    engineTelemetryOpts,
-    angleUnit,
-  )
+  const { computed, computedStore, triggerEval, pendingPatchCount, engineDiagnostics } =
+    useGraphEngine(
+      nodes,
+      edges,
+      engine,
+      undefined,
+      combinedEngineKey,
+      paused,
+      constantsLookup,
+      variables,
+      publishedOutputs,
+      engineTelemetryOpts,
+      angleUnit,
+    )
 
   // 3.36: Run a full evaluation with trace:true to activate the debugger.
   const handleRunWithTrace = useCallback(async () => {
@@ -1485,7 +1491,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       const info = connectingRef.current
       connectingRef.current = null
       if (readOnly || !info || info.didConnect || !info.nodeId || !info.handleType) return
-      const ev = event as { clientX?: number; clientY?: number; touches?: TouchList; target?: EventTarget | null }
+      const ev = event as {
+        clientX?: number
+        clientY?: number
+        touches?: TouchList
+        target?: EventTarget | null
+      }
       const clientX = ev.clientX ?? ev.touches?.[0]?.clientX ?? 0
       const clientY = ev.clientY ?? ev.touches?.[0]?.clientY ?? 0
       // Only trigger when released over the canvas pane (not over a node handle)
@@ -1498,7 +1509,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         screenY: clientY,
         flowX: pos.x,
         flowY: pos.y,
-        connectSource: { nodeId: info.nodeId, handleId: info.handleId, handleType: info.handleType },
+        connectSource: {
+          nodeId: info.nodeId,
+          handleId: info.handleId,
+          handleType: info.handleType,
+        },
       })
     },
     [readOnly, screenToFlowPosition],
@@ -1679,7 +1694,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
             if (typeof text !== 'string') return
             const tableData = parseJSONToTableData(text)
             if (!tableData) {
-              toast('Could not parse JSON: expected array of objects, array of arrays, or column-array object', 'error')
+              toast(
+                'Could not parse JSON: expected array of objects, array of arrays, or column-array object',
+                'error',
+              )
               return
             }
             const datasetHash = await computeDatasetHash(tableData)
@@ -2304,9 +2322,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       const result = collapseGroup(groupId, nodes, edges)
       // Mark the group as SubGraph mode
       const updatedNodes = (result.nodes as Node<NodeData>[]).map((n) =>
-        n.id === groupId
-          ? { ...n, data: { ...n.data, groupAsSubGraph: true } }
-          : n,
+        n.id === groupId ? { ...n, data: { ...n.data, groupAsSubGraph: true } } : n,
       )
       setNodes(updatedNodes)
       setEdges(result.edges)
@@ -3370,7 +3386,12 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           // User dragged from an output → new block receives data
           setEdges((eds) =>
             addEdge(
-              { source: src.nodeId, sourceHandle: src.handleId, target: id, targetHandle: firstInputId },
+              {
+                source: src.nodeId,
+                sourceHandle: src.handleId,
+                target: id,
+                targetHandle: firstInputId,
+              },
               eds,
             ),
           )

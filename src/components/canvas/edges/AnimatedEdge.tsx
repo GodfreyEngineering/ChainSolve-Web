@@ -339,12 +339,11 @@ function AnimatedEdgeInner({
           strokeWidth: highlightStrokeWidth,
           strokeDasharray: mismatch ? '6 3' : undefined,
           opacity: highlightOpacity,
-          filter:
-            isOnHighlightedPath
-              ? `drop-shadow(0 0 3px ${effectiveStroke})`
-              : selected
-                ? `drop-shadow(0 0 4px ${effectiveStroke})`
-                : undefined,
+          filter: isOnHighlightedPath
+            ? `drop-shadow(0 0 3px ${effectiveStroke})`
+            : selected
+              ? `drop-shadow(0 0 4px ${effectiveStroke})`
+              : undefined,
           transition: 'opacity 0.15s ease, stroke-width 0.1s ease',
         }}
       />
@@ -400,30 +399,33 @@ function AnimatedEdgeInner({
       )}
 
       {/* 3.20: Data-shape hover label — always available, shown on mouse-over */}
-      {hovered && !edgeBadgesEnabled && sourceValue !== undefined && sourceValue.kind !== 'error' && (
-        <EdgeLabelRenderer>
-          <div
-            className="cs-edge-shape-label"
-            style={{
-              position: 'absolute',
-              transform: `translate(-50%, ${mismatch ? '10%' : '-50%'}) translate(${labelX}px,${labelY}px)`,
-              pointerEvents: 'none',
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: '0.6rem',
-              color: effectiveStroke,
-              background: 'rgba(20,20,30,0.9)',
-              border: `1px solid ${effectiveStroke}44`,
-              borderRadius: 3,
-              padding: '0.05rem 0.35rem',
-              whiteSpace: 'nowrap',
-              opacity: 0.95,
-              transition: 'opacity 0.1s ease',
-            }}
-          >
-            {shapeLabel(sourceValue, srcUnit ? getUnitSymbol(srcUnit) : undefined)}
-          </div>
-        </EdgeLabelRenderer>
-      )}
+      {hovered &&
+        !edgeBadgesEnabled &&
+        sourceValue !== undefined &&
+        sourceValue.kind !== 'error' && (
+          <EdgeLabelRenderer>
+            <div
+              className="cs-edge-shape-label"
+              style={{
+                position: 'absolute',
+                transform: `translate(-50%, ${mismatch ? '10%' : '-50%'}) translate(${labelX}px,${labelY}px)`,
+                pointerEvents: 'none',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '0.6rem',
+                color: effectiveStroke,
+                background: 'rgba(20,20,30,0.9)',
+                border: `1px solid ${effectiveStroke}44`,
+                borderRadius: 3,
+                padding: '0.05rem 0.35rem',
+                whiteSpace: 'nowrap',
+                opacity: 0.95,
+                transition: 'opacity 0.1s ease',
+              }}
+            >
+              {shapeLabel(sourceValue, srcUnit ? getUnitSymbol(srcUnit) : undefined)}
+            </div>
+          </EdgeLabelRenderer>
+        )}
       {edgeBadgesEnabled && sourceValue !== undefined && (
         <EdgeLabelRenderer>
           <div

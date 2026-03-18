@@ -240,7 +240,10 @@ function UnitInputNodeInner({ id, data, selected }: NodeProps) {
                 suggestions.map((u) => (
                   <div
                     key={u.symbol}
-                    onMouseDown={(e) => { e.preventDefault(); selectUnit(u) }}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      selectUnit(u)
+                    }}
                     style={{
                       padding: '5px 8px',
                       cursor: 'pointer',
@@ -251,10 +254,21 @@ function UnitInputNodeInner({ id, data, selected }: NodeProps) {
                       borderBottom: '1px solid #333',
                       background: u.symbol === unit ? '#333' : 'transparent',
                     }}
-                    onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.background = '#3a3a3a')}
-                    onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.background = u.symbol === unit ? '#333' : 'transparent')}
+                    onMouseEnter={(e) =>
+                      ((e.currentTarget as HTMLDivElement).style.background = '#3a3a3a')
+                    }
+                    onMouseLeave={(e) =>
+                      ((e.currentTarget as HTMLDivElement).style.background =
+                        u.symbol === unit ? '#333' : 'transparent')
+                    }
                   >
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', color: typeColor, fontWeight: 700 }}>
+                    <span
+                      style={{
+                        fontFamily: 'JetBrains Mono, monospace',
+                        color: typeColor,
+                        fontWeight: 700,
+                      }}
+                    >
                       {u.symbol}
                     </span>
                     <span style={{ color: '#aaa', fontSize: 9, textAlign: 'right' }}>{u.name}</span>

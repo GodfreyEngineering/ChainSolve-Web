@@ -94,9 +94,7 @@ export async function createSnapshot(
   const storagePath = snapshotKey(userId, projectId, canvasId, snapshotId)
 
   const label =
-    typeof labelOrOptions === 'string'
-      ? labelOrOptions
-      : (labelOrOptions?.label ?? null)
+    typeof labelOrOptions === 'string' ? labelOrOptions : (labelOrOptions?.label ?? null)
   const branchName =
     typeof labelOrOptions === 'object' ? (labelOrOptions?.branchName ?? 'main') : 'main'
 

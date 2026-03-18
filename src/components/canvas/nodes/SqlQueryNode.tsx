@@ -368,7 +368,9 @@ function SqlQueryNodeInner({ id, data, selected }: NodeProps) {
                   {rowCount > 4 && (
                     <tr>
                       <td
-                        colSpan={Math.min(previewCols.length, 4) + (tableData.columns.length > 4 ? 1 : 0)}
+                        colSpan={
+                          Math.min(previewCols.length, 4) + (tableData.columns.length > 4 ? 1 : 0)
+                        }
                         style={{ padding: '2px 4px', color: '#666', fontSize: 8 }}
                       >
                         +{rowCount - 4} more rows

@@ -42,11 +42,7 @@ export function DiffPanel({ baseline, current, nodeLabels, onClose }: DiffPanelP
       if (baseNum !== null && currNum !== null) {
         const delta = currNum - baseNum
         const direction: DiffEntry['direction'] =
-          delta > 1e-12
-            ? 'increased'
-            : delta < -1e-12
-              ? 'decreased'
-              : 'same'
+          delta > 1e-12 ? 'increased' : delta < -1e-12 ? 'decreased' : 'same'
         if (direction !== 'same') {
           result.push({ nodeId, label, baseline: base, current: curr, delta, direction })
         }
@@ -104,7 +100,14 @@ export function DiffPanel({ baseline, current, nodeLabels, onClose }: DiffPanelP
       {/* Body */}
       <div style={bodyStyle}>
         {entries.length === 0 ? (
-          <div style={{ color: 'rgba(244,244,243,0.4)', fontSize: '0.72rem', padding: '8px 0', textAlign: 'center' }}>
+          <div
+            style={{
+              color: 'rgba(244,244,243,0.4)',
+              fontSize: '0.72rem',
+              padding: '8px 0',
+              textAlign: 'center',
+            }}
+          >
             No changes from baseline
           </div>
         ) : (

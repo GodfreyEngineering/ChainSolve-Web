@@ -44,7 +44,11 @@ export async function loadOnnxSession(
 
   const existing = sessionCache.get(nodeId)
   if (existing) {
-    try { await existing.release() } catch { /* ignore */ }
+    try {
+      await existing.release()
+    } catch {
+      /* ignore */
+    }
   }
 
   const session = await OrtSession.create(buffer, {
@@ -104,7 +108,11 @@ export async function runOnnxInference(
 export async function releaseOnnxSession(nodeId: string): Promise<void> {
   const session = sessionCache.get(nodeId)
   if (session) {
-    try { await session.release() } catch { /* ignore */ }
+    try {
+      await session.release()
+    } catch {
+      /* ignore */
+    }
     sessionCache.delete(nodeId)
   }
 }

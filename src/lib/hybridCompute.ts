@@ -94,7 +94,10 @@ export async function dispatchHeavyEval(
 
   // Build an AbortSignal that fires on either the caller's signal or timeout
   const ctrl = new AbortController()
-  const timer = setTimeout(() => ctrl.abort(new Error('[HYBRID_TIMEOUT] remote eval timed out')), timeoutMs)
+  const timer = setTimeout(
+    () => ctrl.abort(new Error('[HYBRID_TIMEOUT] remote eval timed out')),
+    timeoutMs,
+  )
   if (signal) {
     signal.addEventListener('abort', () => ctrl.abort(signal.reason), { once: true })
   }

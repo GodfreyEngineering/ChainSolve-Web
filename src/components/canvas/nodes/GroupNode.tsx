@@ -225,29 +225,54 @@ function GroupNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
     const outHandles = proxyHandles.filter((h) => h.type === 'source')
     const maxPorts = Math.max(inHandles.length, outHandles.length, 1)
     return (
-      <div style={{
-        minWidth: 180, maxWidth: 260,
-        background: 'var(--surface-2)',
-        border: `1.5px solid ${selected ? color : color + '88'}`,
-        borderRadius: 8,
-        boxShadow: selected
-          ? `0 0 0 2px ${color}55, 0 4px 16px rgba(0,0,0,0.5)`
-          : '0 3px 12px rgba(0,0,0,0.4)',
-        overflow: 'hidden',
-        transition: 'box-shadow 0.2s, border-color 0.2s',
-      }}>
+      <div
+        style={{
+          minWidth: 180,
+          maxWidth: 260,
+          background: 'var(--surface-2)',
+          border: `1.5px solid ${selected ? color : color + '88'}`,
+          borderRadius: 8,
+          boxShadow: selected
+            ? `0 0 0 2px ${color}55, 0 4px 16px rgba(0,0,0,0.5)`
+            : '0 3px 12px rgba(0,0,0,0.4)',
+          overflow: 'hidden',
+          transition: 'box-shadow 0.2s, border-color 0.2s',
+        }}
+      >
         {/* Solid header — block style */}
-        <div style={{
-          background: color,
-          padding: '4px 8px',
-          display: 'flex', alignItems: 'center', gap: 6,
-          borderBottom: `1px solid ${color}66`,
-        }}>
+        <div
+          style={{
+            background: color,
+            padding: '4px 8px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            borderBottom: `1px solid ${color}66`,
+          }}
+        >
           <span style={{ fontSize: 9, opacity: 0.9 }}>⊞</span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: '#fff',
+              flex: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {nd.label}
           </span>
-          <span style={{ fontSize: 8, color: `${color}cc`, background: 'rgba(255,255,255,0.2)', padding: '0 4px', borderRadius: 3 }}>
+          <span
+            style={{
+              fontSize: 8,
+              color: `${color}cc`,
+              background: 'rgba(255,255,255,0.2)',
+              padding: '0 4px',
+              borderRadius: 3,
+            }}
+          >
             ⊞ SubGraph
           </span>
         </div>
@@ -257,19 +282,65 @@ function GroupNodeInner({ id, data, selected }: NodeProps<Node<NodeData>>) {
             const inH = inHandles[i]
             const outH = outHandles[i]
             return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1px 10px', minHeight: 22, position: 'relative' }}>
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '1px 10px',
+                  minHeight: 22,
+                  position: 'relative',
+                }}
+              >
                 {inH ? (
                   <>
-                    <Handle type="target" position={Position.Left} id={inH.id} style={{ position: 'relative', left: -10, top: 'auto', background: '#888', width: 8, height: 8, border: '2px solid #1a1a1a', transform: 'none' }} />
+                    <Handle
+                      type="target"
+                      position={Position.Left}
+                      id={inH.id}
+                      style={{
+                        position: 'relative',
+                        left: -10,
+                        top: 'auto',
+                        background: '#888',
+                        width: 8,
+                        height: 8,
+                        border: '2px solid #1a1a1a',
+                        transform: 'none',
+                      }}
+                    />
                     <span style={{ fontSize: 9, color: '#aaa', marginLeft: 4 }}>{inH.label}</span>
                   </>
-                ) : <span />}
+                ) : (
+                  <span />
+                )}
                 {outH ? (
                   <>
-                    <span style={{ fontSize: 9, color: '#aaa', marginRight: 4, textAlign: 'right' }}>{outH.label}</span>
-                    <Handle type="source" position={Position.Right} id={outH.id} style={{ position: 'relative', right: -10, top: 'auto', background: color, width: 8, height: 8, border: '2px solid #1a1a1a', transform: 'none' }} />
+                    <span
+                      style={{ fontSize: 9, color: '#aaa', marginRight: 4, textAlign: 'right' }}
+                    >
+                      {outH.label}
+                    </span>
+                    <Handle
+                      type="source"
+                      position={Position.Right}
+                      id={outH.id}
+                      style={{
+                        position: 'relative',
+                        right: -10,
+                        top: 'auto',
+                        background: color,
+                        width: 8,
+                        height: 8,
+                        border: '2px solid #1a1a1a',
+                        transform: 'none',
+                      }}
+                    />
                   </>
-                ) : <span />}
+                ) : (
+                  <span />
+                )}
               </div>
             )
           })}

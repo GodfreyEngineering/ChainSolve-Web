@@ -56,7 +56,9 @@ function runAssertion(
     return allowNan ? { pass: true } : { pass: false, reason: 'value is NaN' }
   }
   if (!isFinite(value)) {
-    return allowInf ? { pass: true } : { pass: false, reason: `value is ${value > 0 ? '+' : '-'}Infinity` }
+    return allowInf
+      ? { pass: true }
+      : { pass: false, reason: `value is ${value > 0 ? '+' : '-'}Infinity` }
   }
   if (min != null && value < min) {
     return { pass: false, reason: `${fmtNum(value)} < min ${fmtNum(min)}` }
@@ -223,7 +225,16 @@ function AssertionNodeInner({ id, data, selected }: NodeProps) {
 
         {/* allowNan / allowInf toggles */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.6rem', color: 'var(--muted)', cursor: 'pointer' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 3,
+              fontSize: '0.6rem',
+              color: 'var(--muted)',
+              cursor: 'pointer',
+            }}
+          >
             <input
               type="checkbox"
               checked={allowNan}
@@ -233,7 +244,16 @@ function AssertionNodeInner({ id, data, selected }: NodeProps) {
             />
             {t('assertion.allowNan', 'NaN ok')}
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.6rem', color: 'var(--muted)', cursor: 'pointer' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 3,
+              fontSize: '0.6rem',
+              color: 'var(--muted)',
+              cursor: 'pointer',
+            }}
+          >
             <input
               type="checkbox"
               checked={allowInf}

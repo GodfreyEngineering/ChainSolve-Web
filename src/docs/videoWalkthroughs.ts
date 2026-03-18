@@ -293,7 +293,15 @@ export const VIDEO_WALKTHROUGHS: VideoWalkthrough[] = [
       { t: 200, label: 'Hybrid compute routing' },
       { t: 265, label: 'When to use GPU vs CPU' },
     ],
-    tags: ['WebGPU', 'GPU', 'GEMM', 'matrix multiply', 'benchmark', 'hybrid compute', 'performance'],
+    tags: [
+      'WebGPU',
+      'GPU',
+      'GEMM',
+      'matrix multiply',
+      'benchmark',
+      'hybrid compute',
+      'performance',
+    ],
   },
 
   // ── Block SDK ────────────────────────────────────────────────────────
@@ -318,9 +326,7 @@ export const VIDEO_WALKTHROUGHS: VideoWalkthrough[] = [
 
 /** Look up a walkthrough by feature area. */
 export function getWalkthroughForArea(featureArea: string): VideoWalkthrough | undefined {
-  return VIDEO_WALKTHROUGHS.find(
-    (v) => v.featureArea.toLowerCase() === featureArea.toLowerCase(),
-  )
+  return VIDEO_WALKTHROUGHS.find((v) => v.featureArea.toLowerCase() === featureArea.toLowerCase())
 }
 
 /** Look up a walkthrough by its unique id. */

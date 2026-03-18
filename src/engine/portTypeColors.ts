@@ -71,11 +71,17 @@ export function getValueTypeShape(v: Value | undefined): string {
 export function getValueTypeLabel(v: Value | undefined): string {
   if (!v) return 'any'
   switch (v.kind) {
-    case 'scalar':      return 'scalar'
-    case 'highPrecision': return 'high-precision scalar'
-    case 'vector':      return 'vector'
-    case 'table':       return 'table'
-    case 'interval':    return 'interval'
-    case 'error':       return 'error'
+    case 'scalar':
+      return 'scalar'
+    case 'highPrecision':
+      return 'high-precision scalar'
+    case 'vector':
+      return 'vector'
+    case 'table':
+      return 'table'
+    case 'interval':
+      return 'interval'
+    case 'error':
+      return 'error'
   }
 }

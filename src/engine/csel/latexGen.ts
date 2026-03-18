@@ -102,9 +102,8 @@ function gen(node: CselNode, parentPrec = 0): string {
       if (op === '^') {
         const baseStr = gen(left, myPrec + 1)
         const expStr = gen(right)
-        const base = left.type === 'binary' || left.type === 'call'
-          ? `\\left(${gen(left)}\\right)`
-          : baseStr
+        const base =
+          left.type === 'binary' || left.type === 'call' ? `\\left(${gen(left)}\\right)` : baseStr
         return `${base}^{${expStr}}`
       }
 
@@ -114,8 +113,7 @@ function gen(node: CselNode, parentPrec = 0): string {
         const r = gen(right, myPrec)
         // If right is a simple identifier or number, use implicit multiply
         const useImplicit =
-          right.type === 'identifier' ||
-          (right.type === 'literal' && left.type !== 'literal')
+          right.type === 'identifier' || (right.type === 'literal' && left.type !== 'literal')
         const joiner = useImplicit ? ' ' : ' \\cdot '
         const lParen = precedence_of(left) < myPrec ? `\\left(${l}\\right)` : l
         const rParen = precedence_of(right) < myPrec ? `\\left(${r}\\right)` : r
@@ -127,8 +125,8 @@ function gen(node: CselNode, parentPrec = 0): string {
       const r = gen(right, myPrec)
       const lParen = precedence_of(left) < myPrec ? `\\left(${l}\\right)` : l
       // For subtraction, wrap if right precedence is same (a-(b-c) needs parens)
-      const needsRParen = op === '-' && right.type === 'binary' &&
-        (right.op === '+' || right.op === '-')
+      const needsRParen =
+        op === '-' && right.type === 'binary' && (right.op === '+' || right.op === '-')
       const rParen = needsRParen ? `\\left(${r}\\right)` : r
 
       const opStr = op === '+' ? ' + ' : ' - '

@@ -13,14 +13,7 @@
  *  - Conversation history within the session
  */
 
-import {
-  memo,
-  useCallback,
-  useRef,
-  useState,
-  useEffect,
-  type KeyboardEvent,
-} from 'react'
+import { memo, useCallback, useRef, useState, useEffect, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Node, Edge } from '@xyflow/react'
 import { sendAiRequestStreaming } from '../../lib/ai/aiService'
@@ -55,17 +48,23 @@ export interface AiAssistantPanelProps {
 
 function riskColor(level: RiskLevel): string {
   switch (level) {
-    case 'low': return '#22c55e'
-    case 'medium': return '#f59e0b'
-    case 'high': return '#ef4444'
+    case 'low':
+      return '#22c55e'
+    case 'medium':
+      return '#f59e0b'
+    case 'high':
+      return '#ef4444'
   }
 }
 
 function riskLabel(level: RiskLevel, t: ReturnType<typeof useTranslation>['t']): string {
   switch (level) {
-    case 'low': return t('ai.riskLow', 'Low risk')
-    case 'medium': return t('ai.riskMedium', 'Medium risk')
-    case 'high': return t('ai.riskHigh', 'High risk — confirm before applying')
+    case 'low':
+      return t('ai.riskLow', 'Low risk')
+    case 'medium':
+      return t('ai.riskMedium', 'Medium risk')
+    case 'high':
+      return t('ai.riskHigh', 'High risk — confirm before applying')
   }
 }
 
@@ -143,9 +142,7 @@ function AiAssistantPanelInner({
       finalText = `⚠ ${err instanceof Error ? err.message : 'Request failed'}`
     }
 
-    const risk = finalResponse
-      ? assessRisk(finalResponse.patchOps ?? []).level
-      : undefined
+    const risk = finalResponse ? assessRisk(finalResponse.patchOps ?? []).level : undefined
     setMessages((prev) => {
       const updated = [...prev]
       const last = updated[updated.length - 1]
@@ -191,8 +188,18 @@ function AiAssistantPanelInner({
     return (
       <div style={panelStyle}>
         <PanelHeader onClose={onClose} t={t} />
-        <div style={{ padding: '1.5rem 1rem', color: 'var(--text-faint)', fontSize: '0.8rem', textAlign: 'center' }}>
-          {t('ai.optedOut', 'AI assistant is disabled. Enable it in Settings → Privacy → ChainSolve AI.')}
+        <div
+          style={{
+            padding: '1.5rem 1rem',
+            color: 'var(--text-faint)',
+            fontSize: '0.8rem',
+            textAlign: 'center',
+          }}
+        >
+          {t(
+            'ai.optedOut',
+            'AI assistant is disabled. Enable it in Settings → Privacy → ChainSolve AI.',
+          )}
         </div>
       </div>
     )
@@ -203,14 +210,40 @@ function AiAssistantPanelInner({
       <PanelHeader onClose={onClose} t={t} />
 
       {/* Message list */}
-      <div ref={listRef} style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+      <div
+        ref={listRef}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '0.5rem 0.75rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.6rem',
+        }}
+      >
         {messages.length === 0 && (
-          <div style={{ color: 'var(--muted)', fontSize: '0.75rem', textAlign: 'center', marginTop: '1rem', opacity: 0.6 }}>
-            {t('ai.placeholder', 'Describe what you\'d like to build or change…')}
+          <div
+            style={{
+              color: 'var(--muted)',
+              fontSize: '0.75rem',
+              textAlign: 'center',
+              marginTop: '1rem',
+              opacity: 0.6,
+            }}
+          >
+            {t('ai.placeholder', "Describe what you'd like to build or change…")}
           </div>
         )}
         {messages.map((msg, i) => (
-          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', gap: 4 }}>
+          <div
+            key={i}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start',
+              gap: 4,
+            }}
+          >
             <div
               style={{
                 maxWidth: '92%',
@@ -230,46 +263,57 @@ function AiAssistantPanelInner({
             </div>
 
             {/* Risk badge + Apply button for assistant messages with patches */}
-            {msg.role === 'assistant' && !msg.streaming && msg.patchOps && msg.patchOps.length > 0 && (
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                {msg.risk && (
-                  <span
+            {msg.role === 'assistant' &&
+              !msg.streaming &&
+              msg.patchOps &&
+              msg.patchOps.length > 0 && (
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  {msg.risk && (
+                    <span
+                      style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 600,
+                        padding: '1px 6px',
+                        borderRadius: 10,
+                        background: `${riskColor(msg.risk)}22`,
+                        color: riskColor(msg.risk),
+                        border: `1px solid ${riskColor(msg.risk)}44`,
+                      }}
+                    >
+                      {riskLabel(msg.risk, t)}
+                    </span>
+                  )}
+                  <button
+                    onClick={() => applyMessage(msg)}
                     style={{
-                      fontSize: '0.6rem',
+                      fontSize: '0.65rem',
+                      padding: '2px 10px',
+                      borderRadius: 6,
+                      border: '1px solid var(--primary, #1CABB0)',
+                      background: 'rgba(28,171,176,0.1)',
+                      color: 'var(--primary, #1CABB0)',
+                      cursor: 'pointer',
                       fontWeight: 600,
-                      padding: '1px 6px',
-                      borderRadius: 10,
-                      background: `${riskColor(msg.risk)}22`,
-                      color: riskColor(msg.risk),
-                      border: `1px solid ${riskColor(msg.risk)}44`,
                     }}
                   >
-                    {riskLabel(msg.risk, t)}
-                  </span>
-                )}
-                <button
-                  onClick={() => applyMessage(msg)}
-                  style={{
-                    fontSize: '0.65rem',
-                    padding: '2px 10px',
-                    borderRadius: 6,
-                    border: '1px solid var(--primary, #1CABB0)',
-                    background: 'rgba(28,171,176,0.1)',
-                    color: 'var(--primary, #1CABB0)',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                  }}
-                >
-                  {t('ai.apply', 'Apply')} ({msg.patchOps.length})
-                </button>
-              </div>
-            )}
+                    {t('ai.apply', 'Apply')} ({msg.patchOps.length})
+                  </button>
+                </div>
+              )}
           </div>
         ))}
       </div>
 
       {/* Input row */}
-      <div style={{ padding: '0.5rem 0.75rem', borderTop: '1px solid var(--border)', display: 'flex', gap: 6, alignItems: 'flex-end' }}>
+      <div
+        style={{
+          padding: '0.5rem 0.75rem',
+          borderTop: '1px solid var(--border)',
+          display: 'flex',
+          gap: 6,
+          alignItems: 'flex-end',
+        }}
+      >
         <textarea
           ref={inputRef}
           value={input}
@@ -299,7 +343,8 @@ function AiAssistantPanelInner({
             padding: '0.4rem 0.75rem',
             borderRadius: 6,
             border: 'none',
-            background: loading || !input.trim() ? 'var(--surface-3, #555)' : 'var(--primary, #1CABB0)',
+            background:
+              loading || !input.trim() ? 'var(--surface-3, #555)' : 'var(--primary, #1CABB0)',
             color: '#fff',
             cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
             fontSize: '0.7rem',
@@ -335,16 +380,39 @@ function AiAssistantPanelInner({
               textAlign: 'center',
             }}
           >
-            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--danger)', marginBottom: 8 }}>
+            <div
+              style={{
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                color: 'var(--danger)',
+                marginBottom: 8,
+              }}
+            >
               ⚠ {t('ai.highRiskTitle', 'High-risk changes')}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text)', marginBottom: 16, lineHeight: 1.5 }}>
-              {confirmPending.risk?.reasons?.join('. ') || t('ai.highRiskDesc', 'This will significantly modify your graph.')}
+            <div
+              style={{
+                fontSize: '0.75rem',
+                color: 'var(--text)',
+                marginBottom: 16,
+                lineHeight: 1.5,
+              }}
+            >
+              {confirmPending.risk?.reasons?.join('. ') ||
+                t('ai.highRiskDesc', 'This will significantly modify your graph.')}
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
               <button
                 onClick={() => setConfirmPending(null)}
-                style={{ padding: '6px 16px', borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: 'pointer', fontSize: '0.75rem' }}
+                style={{
+                  padding: '6px 16px',
+                  borderRadius: 6,
+                  border: '1px solid var(--border)',
+                  background: 'transparent',
+                  color: 'var(--text)',
+                  cursor: 'pointer',
+                  fontSize: '0.75rem',
+                }}
               >
                 {t('ai.cancel', 'Cancel')}
               </button>
@@ -354,7 +422,16 @@ function AiAssistantPanelInner({
                   if (msg) applyMessage(msg, true)
                   setConfirmPending(null)
                 }}
-                style={{ padding: '6px 16px', borderRadius: 6, border: 'none', background: 'var(--danger)', color: '#fff', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                style={{
+                  padding: '6px 16px',
+                  borderRadius: 6,
+                  border: 'none',
+                  background: 'var(--danger)',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                }}
               >
                 {t('ai.applyAnyway', 'Apply anyway')}
               </button>
@@ -368,28 +445,53 @@ function AiAssistantPanelInner({
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
-function PanelHeader({ onClose, t }: { onClose: () => void; t: ReturnType<typeof useTranslation>['t'] }) {
+function PanelHeader({
+  onClose,
+  t,
+}: {
+  onClose: () => void
+  t: ReturnType<typeof useTranslation>['t']
+}) {
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '0.6rem 0.75rem',
-      borderBottom: '1px solid var(--border)',
-      flexShrink: 0,
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0.6rem 0.75rem',
+        borderBottom: '1px solid var(--border)',
+        flexShrink: 0,
+      }}
+    >
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <span style={{ fontSize: '1rem' }}>✨</span>
         <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)' }}>
           {t('ai.title', 'ChainSolve AI')}
         </span>
-        <span style={{ fontSize: '0.55rem', padding: '1px 5px', borderRadius: 6, background: 'rgba(28,171,176,0.15)', color: 'var(--primary, #1CABB0)', fontWeight: 600 }}>
+        <span
+          style={{
+            fontSize: '0.55rem',
+            padding: '1px 5px',
+            borderRadius: 6,
+            background: 'rgba(28,171,176,0.15)',
+            color: 'var(--primary, #1CABB0)',
+            fontWeight: 600,
+          }}
+        >
           opt-in
         </span>
       </div>
       <button
         onClick={onClose}
-        style={{ background: 'transparent', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: 0 }}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--muted)',
+          cursor: 'pointer',
+          fontSize: '1rem',
+          lineHeight: 1,
+          padding: 0,
+        }}
         aria-label={t('common.close', 'Close')}
       >
         ×

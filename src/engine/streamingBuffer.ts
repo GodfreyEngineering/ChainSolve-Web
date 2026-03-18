@@ -54,10 +54,7 @@ export class StreamingBuffer<T = number> {
       return this.buf.slice(0, this._size)
     }
     // Full ring: entries from head (oldest) to end, then 0 to head-1.
-    return [
-      ...this.buf.slice(this.head),
-      ...this.buf.slice(0, this.head),
-    ]
+    return [...this.buf.slice(this.head), ...this.buf.slice(0, this.head)]
   }
 
   /** Return only the last `n` entries. */

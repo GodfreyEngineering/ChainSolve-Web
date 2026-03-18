@@ -73,11 +73,7 @@ export async function publishDemonstration(
     snapshot_json: JSON.stringify(input.snapshot),
   }
 
-  const { data, error } = await supabase
-    .from('demonstrations')
-    .insert(row)
-    .select()
-    .single()
+  const { data, error } = await supabase.from('demonstrations').insert(row).select().single()
 
   if (error) {
     throw new Error(`[DEMO_INSERT] ${error.message}`)
@@ -128,7 +124,7 @@ export async function getDemonstration(
     .is('deleted_at', null)
     .single()
 
-  if (error?.code === 'PGRST116') return null  // not found
+  if (error?.code === 'PGRST116') return null // not found
   if (error) throw new Error(`[DEMO_FETCH] ${error.message}`)
 
   // Increment view count asynchronously (fire and forget)
@@ -144,7 +140,12 @@ export async function getDemonstration(
 export async function updateDemonstration(
   supabase: SupabaseClient,
   id: string,
-  patch: Partial<Pick<Demonstration, 'title' | 'description' | 'tags' | 'discourse_topic_id' | 'discourse_topic_url'>>,
+  patch: Partial<
+    Pick<
+      Demonstration,
+      'title' | 'description' | 'tags' | 'discourse_topic_id' | 'discourse_topic_url'
+    >
+  >,
 ): Promise<Demonstration> {
   const { data, error } = await supabase
     .from('demonstrations')
@@ -161,10 +162,7 @@ export async function updateDemonstration(
 // Soft delete
 // ---------------------------------------------------------------------------
 
-export async function deleteDemonstration(
-  supabase: SupabaseClient,
-  id: string,
-): Promise<void> {
+export async function deleteDemonstration(supabase: SupabaseClient, id: string): Promise<void> {
   const { error } = await supabase
     .from('demonstrations')
     .update({ deleted_at: new Date().toISOString() })
@@ -177,9 +175,7 @@ export async function deleteDemonstration(
 // List own demonstrations
 // ---------------------------------------------------------------------------
 
-export async function getMyDemonstrations(
-  supabase: SupabaseClient,
-): Promise<Demonstration[]> {
+export async function getMyDemonstrations(supabase: SupabaseClient): Promise<Demonstration[]> {
   const {
     data: { user },
   } = await supabase.auth.getUser()

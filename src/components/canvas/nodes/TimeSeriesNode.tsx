@@ -168,8 +168,12 @@ function parseTimeSeriesCsv(
   timeColumn: string,
   hasHeader: boolean,
 ): ParsedTimeSeries {
-  const lines = text.trim().split(/\r?\n/).filter((l) => l.trim() !== '')
-  if (lines.length === 0) return { columns: [], times: [], signalColumns: [], signalData: [], error: 'Empty file' }
+  const lines = text
+    .trim()
+    .split(/\r?\n/)
+    .filter((l) => l.trim() !== '')
+  if (lines.length === 0)
+    return { columns: [], times: [], signalColumns: [], signalData: [], error: 'Empty file' }
 
   const delim = (() => {
     const t = (lines[0].match(/\t/g) ?? []).length
@@ -251,7 +255,7 @@ function TimeSeriesNodeInner({ id, data, selected }: NodeProps) {
       const endT = nd.endTime !== '' ? parseFloat(nd.endTime) : tMax
 
       let grid: number[]
-      if (sampleInterval > 0 && sampleInterval < (endT - startT)) {
+      if (sampleInterval > 0 && sampleInterval < endT - startT) {
         const n = Math.floor((endT - startT) / sampleInterval) + 1
         grid = Array.from({ length: Math.min(n, 100_000) }, (_, i) => startT + i * sampleInterval)
       } else {
@@ -337,7 +341,9 @@ function TimeSeriesNodeInner({ id, data, selected }: NodeProps) {
       {/* Header */}
       <div style={{ ...s.nodeHeader, background: typeColor }}>
         <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
-        <span style={s.nodeHeaderLabel}>{nd.label ?? t('timeSeries.label', 'Time Series Input')}</span>
+        <span style={s.nodeHeaderLabel}>
+          {nd.label ?? t('timeSeries.label', 'Time Series Input')}
+        </span>
         {hasData && (
           <span style={{ marginLeft: 'auto', fontSize: 9, opacity: 0.8 }}>
             {tableData.rows.length} {t('timeSeries.pts', 'pts')}
@@ -348,7 +354,10 @@ function TimeSeriesNodeInner({ id, data, selected }: NodeProps) {
       <div style={s.nodeBody}>
         {/* Drop zone */}
         <div
-          onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setIsDragging(true)
+          }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
           onClick={() => fileInputRef.current?.click()}
@@ -364,7 +373,9 @@ function TimeSeriesNodeInner({ id, data, selected }: NodeProps) {
           }}
         >
           {loading ? (
-            <span style={{ fontSize: 9, color: '#aaa' }}>{t('timeSeries.loading', 'Parsing…')}</span>
+            <span style={{ fontSize: 9, color: '#aaa' }}>
+              {t('timeSeries.loading', 'Parsing…')}
+            </span>
           ) : nd.fileName ? (
             <span style={{ fontSize: 9, color: '#ccc' }}>{nd.fileName}</span>
           ) : (
@@ -393,27 +404,56 @@ function TimeSeriesNodeInner({ id, data, selected }: NodeProps) {
         )}
 
         {/* Config */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 6px', marginBottom: 6 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '4px 6px',
+            marginBottom: 6,
+          }}
+        >
           {/* Time column */}
-          <label style={{ fontSize: 9, color: '#aaa', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <label
+            style={{ fontSize: 9, color: '#aaa', display: 'flex', flexDirection: 'column', gap: 2 }}
+          >
             {t('timeSeries.timeCol', 'Time column')}
             <input
               className="nodrag"
               type="text"
               value={timeColumn}
               onChange={(e) => updateNodeData(id, { timeColumn: e.target.value })}
-              style={{ background: '#1a1a1a', color: '#F4F4F3', border: '1px solid #444', borderRadius: 3, padding: '2px 5px', fontSize: 9, outline: 'none' }}
+              style={{
+                background: '#1a1a1a',
+                color: '#F4F4F3',
+                border: '1px solid #444',
+                borderRadius: 3,
+                padding: '2px 5px',
+                fontSize: 9,
+                outline: 'none',
+              }}
             />
           </label>
 
           {/* Resample method */}
-          <label style={{ fontSize: 9, color: '#aaa', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <label
+            style={{ fontSize: 9, color: '#aaa', display: 'flex', flexDirection: 'column', gap: 2 }}
+          >
             {t('timeSeries.method', 'Method')}
             <select
               className="nodrag"
               value={resampleMethod}
-              onChange={(e) => updateNodeData(id, { resampleMethod: e.target.value as ResampleMethod })}
-              style={{ background: '#1a1a1a', color: '#F4F4F3', border: '1px solid #444', borderRadius: 3, padding: '2px 4px', fontSize: 9, outline: 'none' }}
+              onChange={(e) =>
+                updateNodeData(id, { resampleMethod: e.target.value as ResampleMethod })
+              }
+              style={{
+                background: '#1a1a1a',
+                color: '#F4F4F3',
+                border: '1px solid #444',
+                borderRadius: 3,
+                padding: '2px 4px',
+                fontSize: 9,
+                outline: 'none',
+              }}
             >
               <option value="linear">Linear</option>
               <option value="zoh">ZOH</option>
@@ -422,7 +462,9 @@ function TimeSeriesNodeInner({ id, data, selected }: NodeProps) {
           </label>
 
           {/* Sample interval */}
-          <label style={{ fontSize: 9, color: '#aaa', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <label
+            style={{ fontSize: 9, color: '#aaa', display: 'flex', flexDirection: 'column', gap: 2 }}
+          >
             {t('timeSeries.interval', 'Interval (s)')}
             <input
               className="nodrag"
@@ -430,15 +472,34 @@ function TimeSeriesNodeInner({ id, data, selected }: NodeProps) {
               min={0}
               step={0.001}
               value={sampleInterval}
-              onChange={(e) => updateNodeData(id, { sampleInterval: parseFloat(e.target.value) || 0 })}
-              style={{ background: '#1a1a1a', color: '#F4F4F3', border: '1px solid #444', borderRadius: 3, padding: '2px 5px', fontSize: 9, outline: 'none' }}
+              onChange={(e) =>
+                updateNodeData(id, { sampleInterval: parseFloat(e.target.value) || 0 })
+              }
+              style={{
+                background: '#1a1a1a',
+                color: '#F4F4F3',
+                border: '1px solid #444',
+                borderRadius: 3,
+                padding: '2px 5px',
+                fontSize: 9,
+                outline: 'none',
+              }}
             />
           </label>
 
           {/* Has header */}
           <label
             className="nodrag"
-            style={{ fontSize: 9, color: '#aaa', display: 'flex', alignItems: 'center', gap: 4, gridColumn: '2', alignSelf: 'end', paddingBottom: 4 }}
+            style={{
+              fontSize: 9,
+              color: '#aaa',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              gridColumn: '2',
+              alignSelf: 'end',
+              paddingBottom: 4,
+            }}
           >
             <input
               type="checkbox"
@@ -482,7 +543,13 @@ function TimeSeriesNodeInner({ id, data, selected }: NodeProps) {
           type="source"
           position={Position.Right}
           id="out"
-          style={{ top: '50%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
+          style={{
+            top: '50%',
+            background: typeColor,
+            width: 8,
+            height: 8,
+            border: '2px solid #1a1a1a',
+          }}
         />
       )}
     </div>

@@ -65,33 +65,39 @@ function OnnxInferenceNodeInner({ id, data, selected }: NodeProps) {
 
   // ── Model loading ────────────────────────────────────────────────────────
 
-  const handleLoadModel = useCallback(async (file: File) => {
-    setLoading(true)
-    setLoadError(null)
-    try {
-      const buffer = await file.arrayBuffer()
-      const { loadOnnxSession } = await import('../../../lib/onnx')
-      const { info } = await loadOnnxSession(id, buffer)
-      updateNodeData(id, {
-        modelName: file.name,
-        inputNames: info.inputNames,
-        outputNames: info.outputNames,
-        inferenceError: null,
-      })
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err)
-      setLoadError(msg)
-    } finally {
-      setLoading(false)
-    }
-  }, [id, updateNodeData])
+  const handleLoadModel = useCallback(
+    async (file: File) => {
+      setLoading(true)
+      setLoadError(null)
+      try {
+        const buffer = await file.arrayBuffer()
+        const { loadOnnxSession } = await import('../../../lib/onnx')
+        const { info } = await loadOnnxSession(id, buffer)
+        updateNodeData(id, {
+          modelName: file.name,
+          inputNames: info.inputNames,
+          outputNames: info.outputNames,
+          inferenceError: null,
+        })
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        setLoadError(msg)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [id, updateNodeData],
+  )
 
-  const onFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) void handleLoadModel(file)
-    // Reset so same file can be reloaded
-    e.target.value = ''
-  }, [handleLoadModel])
+  const onFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (file) void handleLoadModel(file)
+      // Reset so same file can be reloaded
+      e.target.value = ''
+    },
+    [handleLoadModel],
+  )
 
   // ── Inference ─────────────────────────────────────────────────────────────
 
@@ -173,7 +179,9 @@ function OnnxInferenceNodeInner({ id, data, selected }: NodeProps) {
           style={{
             width: '100%',
             padding: '4px 8px',
-            background: modelLoaded ? 'color-mix(in srgb, var(--primary) 20%, transparent)' : 'var(--surface-2)',
+            background: modelLoaded
+              ? 'color-mix(in srgb, var(--primary) 20%, transparent)'
+              : 'var(--surface-2)',
             border: `1px solid ${modelLoaded ? 'var(--primary)' : 'var(--border)'}`,
             borderRadius: 4,
             cursor: 'pointer',
@@ -188,8 +196,8 @@ function OnnxInferenceNodeInner({ id, data, selected }: NodeProps) {
           {loading
             ? t('onnxInference.loading', 'Loading…')
             : nd.modelName
-            ? nd.modelName
-            : t('onnxInference.loadModel', 'Load .onnx model…')}
+              ? nd.modelName
+              : t('onnxInference.loadModel', 'Load .onnx model…')}
         </button>
 
         {/* Model info */}
@@ -221,7 +229,8 @@ function OnnxInferenceNodeInner({ id, data, selected }: NodeProps) {
         {/* Output preview */}
         {outputLen > 0 && !displayError && (
           <div style={{ marginTop: 4, fontSize: 9, color: 'var(--muted)' }}>
-            [{outputLen}]: {firstFew.join(', ')}{outputLen > 4 ? '…' : ''}
+            [{outputLen}]: {firstFew.join(', ')}
+            {outputLen > 4 ? '…' : ''}
           </div>
         )}
 

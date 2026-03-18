@@ -29,9 +29,7 @@ export function parseStep(text: string): MeshData {
   const entityMap = new Map<number, { type: string; raw: string }>()
 
   // STEP can have multi-line entities; normalise line continuations
-  const data = text
-    .replace(/\r\n?/g, '\n')
-    .replace(/\n([^#])/g, ' $1') // join continuations (lines not starting with #)
+  const data = text.replace(/\r\n?/g, '\n').replace(/\n([^#])/g, ' $1') // join continuations (lines not starting with #)
 
   const entityRe = /#(\d+)\s*=\s*([A-Z_]+)\s*\(([^;]*)\)\s*;/g
   for (const m of data.matchAll(entityRe)) {
@@ -43,8 +41,7 @@ export function parseStep(text: string): MeshData {
     [...raw.matchAll(/-?\d+\.?\d*(?:[eE][+-]?\d+)?/g)].map((m) => parseFloat(m[0]))
 
   // Helper: extract #ref ids
-  const refs = (raw: string): number[] =>
-    [...raw.matchAll(/#(\d+)/g)].map((m) => parseInt(m[1]))
+  const refs = (raw: string): number[] => [...raw.matchAll(/#(\d+)/g)].map((m) => parseInt(m[1]))
 
   // 1. Collect CARTESIAN_POINTs
   const cpMap = new Map<number, [number, number, number]>()

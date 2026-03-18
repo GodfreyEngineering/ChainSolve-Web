@@ -71,9 +71,7 @@ export interface NativeEvalResult {
  * Evaluate a graph snapshot using the native Rust engine.
  * Returns parsed EvalResult.
  */
-export async function nativeEvalSnapshot(
-  snapshot: EngineSnapshotV1,
-): Promise<NativeEvalResult> {
+export async function nativeEvalSnapshot(snapshot: EngineSnapshotV1): Promise<NativeEvalResult> {
   if (!isTauri()) {
     throw new Error('[TAURI_ENGINE] Not running in Tauri desktop app')
   }
@@ -87,9 +85,7 @@ export async function nativeEvalSnapshot(
  * Load a snapshot into the persistent session graph and evaluate.
  * More efficient than nativeEvalSnapshot for subsequent incremental patches.
  */
-export async function nativeLoadSnapshot(
-  snapshot: EngineSnapshotV1,
-): Promise<NativeEvalResult> {
+export async function nativeLoadSnapshot(snapshot: EngineSnapshotV1): Promise<NativeEvalResult> {
   if (!isTauri()) {
     throw new Error('[TAURI_ENGINE] Not running in Tauri desktop app')
   }

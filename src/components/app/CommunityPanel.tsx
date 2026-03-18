@@ -13,12 +13,7 @@ export function CommunityPanel() {
   const [view, setView] = useState<'browse' | 'publish'>('browse')
 
   return (
-    <AppWindow
-      windowId={COMMUNITY_WINDOW_ID}
-      title="Community"
-      minWidth={460}
-      minHeight={380}
-    >
+    <AppWindow windowId={COMMUNITY_WINDOW_ID} title="Community" minWidth={460} minHeight={380}>
       <div style={rootStyle}>
         {/* Tab bar */}
         <div style={tabBarStyle} role="tablist">
@@ -67,9 +62,7 @@ function BrowseView() {
 
       {/* Results */}
       {loading && <p style={mutedStyle}>Loading…</p>}
-      {!loading && demos.length === 0 && query.trim() === '' && (
-        <EmptyBrowse />
-      )}
+      {!loading && demos.length === 0 && query.trim() === '' && <EmptyBrowse />}
       {!loading && demos.length === 0 && query.trim().length > 0 && (
         <p style={mutedStyle}>No demonstrations matching "{query}".</p>
       )}
@@ -84,10 +77,17 @@ function EmptyBrowse() {
   return (
     <div style={emptyStyle}>
       <span style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🌐</span>
-      <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center' }}>
+      <p
+        style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center' }}
+      >
         Browse graphs shared by the ChainSolve community.
         <br />
-        <a href="https://forum.chainsolve.dev" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>
+        <a
+          href="https://forum.chainsolve.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: 'var(--primary)' }}
+        >
           Visit the forum
         </a>{' '}
         to discuss and discover.
@@ -178,7 +178,14 @@ function PublishView({ snapshot }: PublishViewProps) {
       <div style={{ ...paneStyle, alignItems: 'center', paddingTop: '2rem', gap: '1rem' }}>
         <span style={{ fontSize: '2rem' }}>🎉</span>
         <p style={{ margin: 0, color: 'var(--text)', fontWeight: 600 }}>Graph published!</p>
-        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center' }}>
+        <p
+          style={{
+            margin: 0,
+            color: 'var(--text-muted)',
+            fontSize: '0.875rem',
+            textAlign: 'center',
+          }}
+        >
           Your demonstration is now visible in the community and the forum thread has been created.
         </p>
         <button style={primaryButtonStyle} onClick={() => setForm(EMPTY_FORM)}>
@@ -195,9 +202,7 @@ function PublishView({ snapshot }: PublishViewProps) {
         automatically so the community can discuss it.
       </p>
 
-      {!snapshot && (
-        <p style={warningStyle}>Open a project to share its current graph.</p>
-      )}
+      {!snapshot && <p style={warningStyle}>Open a project to share its current graph.</p>}
 
       <label style={labelStyle}>
         Title *

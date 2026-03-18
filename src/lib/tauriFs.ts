@@ -115,7 +115,10 @@ export async function saveExportFile(
 
     const savePath = await invoke('plugin:dialog|save', {
       defaultPath: defaultName,
-      filters: [{ name: mimeLabel, extensions }, { name: 'All Files', extensions: ['*'] }],
+      filters: [
+        { name: mimeLabel, extensions },
+        { name: 'All Files', extensions: ['*'] },
+      ],
       title: `Save ${mimeLabel}`,
     })
 

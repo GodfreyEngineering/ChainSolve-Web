@@ -200,9 +200,7 @@ function LoggerNodeInner({ id, data, selected }: NodeProps) {
                     <td style={{ padding: '1px 4px', color: 'var(--muted)', width: 90 }}>
                       {fmtTime(e.ts, e.absTs, relativeTime, originRef.current)}
                     </td>
-                    <td
-                      style={{ padding: '1px 4px', color: 'var(--text)', textAlign: 'right' }}
-                    >
+                    <td style={{ padding: '1px 4px', color: 'var(--text)', textAlign: 'right' }}>
                       {fmtValue(e.value)}
                     </td>
                   </tr>

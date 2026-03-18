@@ -209,7 +209,9 @@ function TirFileInputNodeInner({ id, data, selected }: NodeProps) {
     >
       <div style={{ ...s.nodeHeader, background: typeColor }}>
         <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
-        <span style={s.nodeHeaderLabel}>{nd.label ?? t('tirFileInput.label', '.tir File Input')}</span>
+        <span style={s.nodeHeaderLabel}>
+          {nd.label ?? t('tirFileInput.label', '.tir File Input')}
+        </span>
       </div>
 
       <div style={s.nodeBody}>
@@ -222,9 +224,12 @@ function TirFileInputNodeInner({ id, data, selected }: NodeProps) {
             onClick={() => fileInputRef.current?.click()}
             style={{
               border: `2px dashed ${typeColor}55`,
-              borderRadius: 4, padding: '12px 8px',
-              textAlign: 'center', cursor: 'pointer',
-              fontSize: 9, color: '#888',
+              borderRadius: 4,
+              padding: '12px 8px',
+              textAlign: 'center',
+              cursor: 'pointer',
+              fontSize: 9,
+              color: '#888',
             }}
           >
             {t('tirFileInput.drop', 'Drop .tir file or click')}
@@ -238,7 +243,16 @@ function TirFileInputNodeInner({ id, data, selected }: NodeProps) {
           </div>
         ) : (
           <div style={{ fontSize: 9 }}>
-            <div style={{ color: '#F4F4F3', fontWeight: 600, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div
+              style={{
+                color: '#F4F4F3',
+                fontWeight: 600,
+                marginBottom: 4,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               📄 {fileName}
             </div>
             {tirError ? (
@@ -250,12 +264,30 @@ function TirFileInputNodeInner({ id, data, selected }: NodeProps) {
                 </div>
                 <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 4 }}>
                   {hasLateral && (
-                    <span style={{ fontSize: 8, padding: '1px 5px', background: '#1CABB022', color: typeColor, border: `1px solid ${typeColor}44`, borderRadius: 3 }}>
+                    <span
+                      style={{
+                        fontSize: 8,
+                        padding: '1px 5px',
+                        background: '#1CABB022',
+                        color: typeColor,
+                        border: `1px solid ${typeColor}44`,
+                        borderRadius: 3,
+                      }}
+                    >
                       Lateral
                     </span>
                   )}
                   {hasLongitudinal && (
-                    <span style={{ fontSize: 8, padding: '1px 5px', background: '#1CABB022', color: typeColor, border: `1px solid ${typeColor}44`, borderRadius: 3 }}>
+                    <span
+                      style={{
+                        fontSize: 8,
+                        padding: '1px 5px',
+                        background: '#1CABB022',
+                        color: typeColor,
+                        border: `1px solid ${typeColor}44`,
+                        borderRadius: 3,
+                      }}
+                    >
                       Long.
                     </span>
                   )}
@@ -269,8 +301,13 @@ function TirFileInputNodeInner({ id, data, selected }: NodeProps) {
                   onClick={exportTir}
                   title={t('tirFileInput.exportTitle', 'Download .tir file')}
                   style={{
-                    background: '#1CABB022', color: typeColor, border: `1px solid ${typeColor}44`,
-                    borderRadius: 3, padding: '1px 8px', fontSize: 9, cursor: 'pointer',
+                    background: '#1CABB022',
+                    color: typeColor,
+                    border: `1px solid ${typeColor}44`,
+                    borderRadius: 3,
+                    padding: '1px 8px',
+                    fontSize: 9,
+                    cursor: 'pointer',
                   }}
                 >
                   {t('tirFileInput.export', 'Export')}
@@ -280,8 +317,13 @@ function TirFileInputNodeInner({ id, data, selected }: NodeProps) {
                 className="nodrag"
                 onClick={clearFile}
                 style={{
-                  background: '#2a2a2a', color: '#888', border: '1px solid #333',
-                  borderRadius: 3, padding: '1px 8px', fontSize: 9, cursor: 'pointer',
+                  background: '#2a2a2a',
+                  color: '#888',
+                  border: '1px solid #333',
+                  borderRadius: 3,
+                  padding: '1px 8px',
+                  fontSize: 9,
+                  cursor: 'pointer',
                 }}
               >
                 {t('tirFileInput.clear', 'Clear')}
@@ -295,7 +337,13 @@ function TirFileInputNodeInner({ id, data, selected }: NodeProps) {
         type="source"
         position={Position.Right}
         id="out"
-        style={{ top: '50%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
+        style={{
+          top: '50%',
+          background: typeColor,
+          width: 8,
+          height: 8,
+          border: '2px solid #1a1a1a',
+        }}
       />
     </div>
   )

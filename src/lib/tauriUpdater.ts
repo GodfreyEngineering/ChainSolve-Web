@@ -66,9 +66,7 @@ export async function checkForUpdate(): Promise<UpdateInfo | null> {
  * Calls `onProgress` with a 0-100 progress value during download.
  * After installation, a restart is required.
  */
-export async function downloadAndInstall(
-  onProgress?: (progress: number) => void,
-): Promise<void> {
+export async function downloadAndInstall(onProgress?: (progress: number) => void): Promise<void> {
   if (!isTauri()) return
   const invoke = getInvoke()
 

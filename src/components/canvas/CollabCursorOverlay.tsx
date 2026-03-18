@@ -21,7 +21,17 @@ interface CollabCursorOverlayProps {
  * A single remote cursor: coloured SVG arrow + user name tag.
  * Position is in canvas coordinates; viewport transforms to screen.
  */
-function RemoteCursor({ user, vx, vy, zoom }: { user: CollabUser; vx: number; vy: number; zoom: number }) {
+function RemoteCursor({
+  user,
+  vx,
+  vy,
+  zoom,
+}: {
+  user: CollabUser
+  vx: number
+  vy: number
+  zoom: number
+}) {
   if (!user.cursor) return null
 
   const sx = user.cursor.x * zoom + vx

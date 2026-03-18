@@ -41,19 +41,19 @@ use std::collections::{HashMap, HashSet};
 /// The **across variable** is equal at all ports connected to the same node (KVL analogue).
 #[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum PhysicalDomain {
-    /// Electrical: through = current [A], across = voltage [V]
+    /// Electrical: through = current \[A\], across = voltage \[V\]
     Electrical,
-    /// Translational mechanical: through = force [N], across = velocity [m/s]
+    /// Translational mechanical: through = force \[N\], across = velocity \[m/s\]
     Translational,
-    /// Rotational mechanical: through = torque [N·m], across = angular velocity [rad/s]
+    /// Rotational mechanical: through = torque \[N·m\], across = angular velocity \[rad/s\]
     Rotational,
-    /// Thermal: through = heat flow [W], across = temperature [K]
+    /// Thermal: through = heat flow \[W\], across = temperature \[K\]
     Thermal,
-    /// Hydraulic: through = volumetric flow [m³/s], across = pressure [Pa]
+    /// Hydraulic: through = volumetric flow \[m³/s\], across = pressure \[Pa\]
     Hydraulic,
-    /// Pneumatic: through = mass flow [kg/s], across = pressure [Pa]
+    /// Pneumatic: through = mass flow \[kg/s\], across = pressure \[Pa\]
     Pneumatic,
-    /// Magnetic: through = magnetic flux rate [Wb/s], across = MMF [A]
+    /// Magnetic: through = magnetic flux rate \[Wb/s\], across = MMF \[A\]
     Magnetic,
     /// Custom domain with user-specified variable names
     Custom {
@@ -714,10 +714,10 @@ impl MultiDomainBlock {
     ///
     /// Parameters:
     /// - `R`: armature resistance [Ω]
-    /// - `L`: armature inductance [H]
-    /// - `k`: motor constant [V·s/rad = N·m/A]
-    /// - `J`: rotor inertia [kg·m²]
-    /// - `b`: friction coefficient [N·m·s/rad]
+    /// - `L`: armature inductance \[H\]
+    /// - `k`: motor constant \[V·s/rad = N·m/A\]
+    /// - `J`: rotor inertia \[kg·m²\]
+    /// - `b`: friction coefficient \[N·m·s/rad\]
     pub fn dc_motor(id: &str, r: f64, l: f64, k: f64, j: f64, b: f64) -> Self {
         let p_elec = Port::new(id, "p_elec", PhysicalDomain::Electrical);
         let n_elec = Port::new(id, "n_elec", PhysicalDomain::Electrical);

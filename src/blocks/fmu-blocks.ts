@@ -30,8 +30,14 @@ export function registerFmuBlocks(register: (def: BlockDef) => void): void {
       tableData: null,
     },
     synonyms: [
-      'fmu', 'fmi', 'functional mock-up unit', 'co-simulation', 'model exchange',
-      'fmi 2.0', 'fmi 3.0', 'modelDescription',
+      'fmu',
+      'fmi',
+      'functional mock-up unit',
+      'co-simulation',
+      'model exchange',
+      'fmi 2.0',
+      'fmi 3.0',
+      'modelDescription',
     ],
     tags: ['fmu', 'fmi', 'import', 'simulation', 'external'],
     description:
@@ -59,8 +65,12 @@ export function registerFmuBlocks(register: (def: BlockDef) => void): void {
       outputVariables: [],
     },
     synonyms: [
-      'fmu export', 'fmi export', 'functional mock-up unit export',
-      'hil', 'hardware in the loop', 'co-simulation export',
+      'fmu export',
+      'fmi export',
+      'functional mock-up unit export',
+      'hil',
+      'hardware in the loop',
+      'co-simulation export',
     ],
     tags: ['fmu', 'fmi', 'export', 'simulation', 'hil'],
     description:

@@ -98,9 +98,7 @@ export default function ImpressumPage() {
         <img src={BRAND.logoWideText} alt="ChainSolve" style={logoStyle} />
 
         <h1 style={h1Style}>Impressum</h1>
-        <p style={subtitleStyle}>
-          Angaben gemäß § 5 TMG (Telemediengesetz) / Legal Disclosure
-        </p>
+        <p style={subtitleStyle}>Angaben gemäß § 5 TMG (Telemediengesetz) / Legal Disclosure</p>
 
         {/* Diensteanbieter / Service Provider */}
         <section style={sectionStyle}>
@@ -126,9 +124,7 @@ export default function ImpressumPage() {
 
         {/* Managing Director */}
         <section style={sectionStyle}>
-          <h2 style={h2Style}>
-            Vertretungsberechtigte Person / Managing Director
-          </h2>
+          <h2 style={h2Style}>Vertretungsberechtigte Person / Managing Director</h2>
           <div style={rowStyle}>{COMPANY.director}</div>
         </section>
 
@@ -145,9 +141,7 @@ export default function ImpressumPage() {
 
         {/* Companies House Registration */}
         <section style={sectionStyle}>
-          <h2 style={h2Style}>
-            Registereintrag / Companies House Registration
-          </h2>
+          <h2 style={h2Style}>Registereintrag / Companies House Registration</h2>
           <div style={rowStyle}>
             Register: Companies House (England &amp; Wales)
             <br />
@@ -168,19 +162,16 @@ export default function ImpressumPage() {
         <section style={sectionStyle}>
           <h2 style={h2Style}>USt-IdNr. / VAT Number</h2>
           <div style={rowStyle}>
-            VAT registration pending. This disclosure will be updated upon
-            receipt of a VAT registration number from HMRC.
+            VAT registration pending. This disclosure will be updated upon receipt of a VAT
+            registration number from HMRC.
           </div>
         </section>
 
         {/* Platform / Streitschlichtung */}
         <section style={sectionStyle}>
-          <h2 style={h2Style}>
-            Online-Streitbeilegung / Online Dispute Resolution
-          </h2>
+          <h2 style={h2Style}>Online-Streitbeilegung / Online Dispute Resolution</h2>
           <div style={rowStyle}>
-            Die Europäische Kommission stellt eine Plattform zur
-            Online-Streitbeilegung (OS) bereit:{' '}
+            Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:{' '}
             <a
               href="https://ec.europa.eu/consumers/odr/"
               target="_blank"
@@ -191,10 +182,9 @@ export default function ImpressumPage() {
             </a>
             <br />
             <br />
-            The European Commission provides a platform for online dispute
-            resolution (ODR). We are not obliged and not willing to participate
-            in dispute resolution proceedings before a consumer arbitration
-            board.
+            The European Commission provides a platform for online dispute resolution (ODR). We are
+            not obliged and not willing to participate in dispute resolution proceedings before a
+            consumer arbitration board.
           </div>
         </section>
 
@@ -202,18 +192,16 @@ export default function ImpressumPage() {
         <section style={sectionStyle}>
           <h2 style={h2Style}>Haftungsausschluss / Disclaimer</h2>
           <div style={rowStyle}>
-            Despite careful content control, we assume no liability for the
-            content of external links. The operators of the linked pages are
-            solely responsible for their content.
+            Despite careful content control, we assume no liability for the content of external
+            links. The operators of the linked pages are solely responsible for their content.
           </div>
         </section>
 
         <hr style={dividerStyle} />
 
         <p style={noteStyle}>
-          ChainSolve is a product of {COMPANY.name}, registered in{' '}
-          {COMPANY.jurisdiction}. This Impressum was last reviewed on 17 March
-          2026. For privacy information, see our{' '}
+          ChainSolve is a product of {COMPANY.name}, registered in {COMPANY.jurisdiction}. This
+          Impressum was last reviewed on 17 March 2026. For privacy information, see our{' '}
           <Link to="/privacy" style={linkStyle}>
             Privacy Policy
           </Link>

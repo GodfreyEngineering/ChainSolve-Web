@@ -46,9 +46,7 @@ export default function CookiesPage() {
               we use <strong>browser localStorage</strong>, <strong>sessionStorage</strong>, and{' '}
               <strong>IndexedDB</strong> to operate the application and remember your preferences.
             </p>
-            <p style={s.para}>
-              We categorise storage items as follows:
-            </p>
+            <p style={s.para}>We categorise storage items as follows:</p>
             <ul style={s.list}>
               <li>
                 <strong>Strictly necessary</strong> — required to operate the service; cannot be
@@ -99,7 +97,9 @@ export default function CookiesPage() {
                     you logged in.
                   </td>
                   <td style={s.td}>localStorage / persistent</td>
-                  <td style={s.td}>Until logout or session expiry (typically 1 hour; refresh token 7 days)</td>
+                  <td style={s.td}>
+                    Until logout or session expiry (typically 1 hour; refresh token 7 days)
+                  </td>
                 </tr>
                 <tr>
                   <td style={s.td}>
@@ -203,9 +203,9 @@ export default function CookiesPage() {
                   </td>
                   <td style={s.td}>
                     Local cache of your computation graph snapshots. Implements
-                    stale-while-revalidate: shows your last-known canvas instantly while fetching the
-                    latest version from the server. Scoped to your user ID. Cleared on logout. Max
-                    100 entries (LRU eviction).
+                    stale-while-revalidate: shows your last-known canvas instantly while fetching
+                    the latest version from the server. Scoped to your user ID. Cleared on logout.
+                    Max 100 entries (LRU eviction).
                   </td>
                   <td style={s.td}>Until logout; LRU evicted after 100 entries</td>
                 </tr>
@@ -230,31 +230,85 @@ export default function CookiesPage() {
               </thead>
               <tbody>
                 {[
-                  ['cs:prefs', 'Centralised user preferences: angle units, number formatting, autosave interval, keyboard shortcuts, analytics opt-in, theme.', 'Until changed'],
+                  [
+                    'cs:prefs',
+                    'Centralised user preferences: angle units, number formatting, autosave interval, keyboard shortcuts, analytics opt-in, theme.',
+                    'Until changed',
+                  ],
                   ['chainsolve.theme', 'Light / dark / system theme preference.', 'Until changed'],
                   ['cs:lang', 'Selected UI language (en, es, fr, de, it, he).', 'Until changed'],
                   ['cs:libWidth', 'Block library panel width (pixels).', 'Until changed'],
-                  ['cs:magneticSnap', 'Magnetic snap-to-grid toggle on the canvas.', 'Until changed'],
+                  [
+                    'cs:magneticSnap',
+                    'Magnetic snap-to-grid toggle on the canvas.',
+                    'Until changed',
+                  ],
                   ['cs:dockCollapsed', 'Bottom dock collapse state.', 'Until changed'],
                   ['cs:inspAdvanced', 'Inspector panel advanced mode toggle.', 'Until changed'],
-                  ['cs:window-geometry', 'Persisted positions/sizes of floating panels and windows.', 'Until changed'],
-                  ['cs:panelLayout', 'Main UI panel dimensions (sidebar width, dock height).', 'Until changed'],
-                  ['cs:recent', 'Recently-used block types (max 8) for quick access.', 'Rolling, max 8 entries'],
+                  [
+                    'cs:window-geometry',
+                    'Persisted positions/sizes of floating panels and windows.',
+                    'Until changed',
+                  ],
+                  [
+                    'cs:panelLayout',
+                    'Main UI panel dimensions (sidebar width, dock height).',
+                    'Until changed',
+                  ],
+                  [
+                    'cs:recent',
+                    'Recently-used block types (max 8) for quick access.',
+                    'Rolling, max 8 entries',
+                  ],
                   ['cs:favs', 'Favourite/starred block types.', 'Until changed'],
                   ['cs:pinned', 'Pinned blocks for quick access (max 12).', 'Until changed'],
-                  ['chainsolve.recentProjects', 'Most recently opened projects (max 10) for the File menu.', 'Rolling, max 10 entries'],
+                  [
+                    'chainsolve.recentProjects',
+                    'Most recently opened projects (max 10) for the File menu.',
+                    'Rolling, max 10 entries',
+                  ],
                   ['cs:pinnedProjects', 'User-pinned project IDs.', 'Until changed'],
-                  ['cs:onboarding-checklist', 'Tracks which onboarding steps have been completed and whether the checklist has been dismissed.', 'Until dismissed'],
-                  ['cs:blockedUsers', 'Client-side list of blocked user IDs (Explore marketplace).', 'Until changed'],
-                  ['chainsolve.installed_block_packs', 'Installed block pack definitions from the Explore marketplace.', 'Until uninstalled'],
-                  ['cs:comment-rate', 'Timestamps for marketplace comment rate-limiting (5 per minute). Contains timestamps only, no content.', 'Rolling 60-second window'],
-                  ['cs:custom-themes', 'User-defined custom theme CSS variable overrides (Pro feature).', 'Until deleted'],
+                  [
+                    'cs:onboarding-checklist',
+                    'Tracks which onboarding steps have been completed and whether the checklist has been dismissed.',
+                    'Until dismissed',
+                  ],
+                  [
+                    'cs:blockedUsers',
+                    'Client-side list of blocked user IDs (Explore marketplace).',
+                    'Until changed',
+                  ],
+                  [
+                    'chainsolve.installed_block_packs',
+                    'Installed block pack definitions from the Explore marketplace.',
+                    'Until uninstalled',
+                  ],
+                  [
+                    'cs:comment-rate',
+                    'Timestamps for marketplace comment rate-limiting (5 per minute). Contains timestamps only, no content.',
+                    'Rolling 60-second window',
+                  ],
+                  [
+                    'cs:custom-themes',
+                    'User-defined custom theme CSS variable overrides (Pro feature).',
+                    'Until deleted',
+                  ],
                   ['cs:active-theme', 'Currently active custom theme ID.', 'Until changed'],
-                  ['cs:custom-materials', 'User-defined custom material definitions (Pro feature).', 'Until deleted'],
-                  ['cs:custom-functions', 'User-defined custom function block formulas (Pro feature).', 'Until deleted'],
+                  [
+                    'cs:custom-materials',
+                    'User-defined custom material definitions (Pro feature).',
+                    'Until deleted',
+                  ],
+                  [
+                    'cs:custom-functions',
+                    'User-defined custom function block formulas (Pro feature).',
+                    'Until deleted',
+                  ],
                 ].map(([key, purpose, expiry]) => (
                   <tr key={key}>
-                    <td style={s.td}><code>{key}</code></td>
+                    <td style={s.td}>
+                      <code>{key}</code>
+                    </td>
                     <td style={s.td}>{purpose}</td>
                     <td style={s.td}>{expiry}</td>
                   </tr>
@@ -296,8 +350,8 @@ export default function CookiesPage() {
                   <td style={s.td}>
                     Captures JavaScript exceptions and performance traces. Sentry may set its own
                     internal state in localStorage. Sentry is only initialised if{' '}
-                    <code>SENTRY_DSN</code> is configured and you have consented. You can disable
-                    it by declining cookie consent or via{' '}
+                    <code>SENTRY_DSN</code> is configured and you have consented. You can disable it
+                    by declining cookie consent or via{' '}
                     <strong>Settings → Privacy → Crash reporting</strong>.
                   </td>
                   <td style={s.td}>Session-scoped; disabled immediately on opt-out</td>
@@ -310,12 +364,11 @@ export default function CookiesPage() {
           <section style={s.section}>
             <h2 style={s.heading}>5. Do Not Track</h2>
             <p style={s.para}>
-              ChainSolve respects the browser&rsquo;s{' '}
-              <strong>Do Not Track (DNT)</strong> signal. If your browser sends{' '}
-              <code>DNT: 1</code>, our observability pipeline suppresses all analytics and
-              performance-timing data for your session. Error reporting (Sentry) is still used to
-              detect crashes that would affect service reliability, but only if you have separately
-              consented.
+              ChainSolve respects the browser&rsquo;s <strong>Do Not Track (DNT)</strong> signal. If
+              your browser sends <code>DNT: 1</code>, our observability pipeline suppresses all
+              analytics and performance-timing data for your session. Error reporting (Sentry) is
+              still used to detect crashes that would affect service reliability, but only if you
+              have separately consented.
             </p>
           </section>
 
@@ -323,19 +376,20 @@ export default function CookiesPage() {
           <section style={s.section}>
             <h2 style={s.heading}>6. No third-party tracking or advertising cookies</h2>
             <p style={s.para}>
-              ChainSolve uses <strong>no Google Analytics, no Meta Pixel, no advertising
-              cookies, no marketing trackers, and no social media tracking pixels</strong>.
-              Our Content Security Policy (CSP) explicitly blocks any third-party scripts not in our
-              whitelist.
+              ChainSolve uses{' '}
+              <strong>
+                no Google Analytics, no Meta Pixel, no advertising cookies, no marketing trackers,
+                and no social media tracking pixels
+              </strong>
+              . Our Content Security Policy (CSP) explicitly blocks any third-party scripts not in
+              our whitelist.
             </p>
           </section>
 
           {/* ── Managing Preferences ───────────────────────────────────── */}
           <section style={s.section}>
             <h2 style={s.heading}>7. Managing your cookie preferences</h2>
-            <p style={s.para}>
-              You can change your cookie consent choice at any time:
-            </p>
+            <p style={s.para}>You can change your cookie consent choice at any time:</p>
             <ul style={s.list}>
               <li>
                 Use the <CookieSettingsLink /> button below.
@@ -344,9 +398,7 @@ export default function CookiesPage() {
                 Clear all application storage via your browser&rsquo;s Developer Tools (Application
                 → Storage → Clear site data).
               </li>
-              <li>
-                Use your browser&rsquo;s built-in cookie/storage management settings.
-              </li>
+              <li>Use your browser&rsquo;s built-in cookie/storage management settings.</li>
             </ul>
             <p style={s.para}>
               Clearing strictly-necessary storage (authentication tokens) will log you out of

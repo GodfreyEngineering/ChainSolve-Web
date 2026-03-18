@@ -96,8 +96,8 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong>Technical / security data</strong> &mdash; IP address, user agent, browser
-                type, and session timestamps recorded in security logs and the terms-acceptance audit
-                log.
+                type, and session timestamps recorded in security logs and the terms-acceptance
+                audit log.
               </li>
               <li>
                 <strong>Communications data</strong> &mdash; content of support emails or contact
@@ -111,7 +111,9 @@ export default function PrivacyPage() {
             <h2 style={s.heading}>3. {t('privacy.s3Title')}</h2>
             <p style={s.para}>We use your data for the following purposes:</p>
             <ul style={s.list}>
-              <li>Providing and operating the Service (account management, project storage, billing)</li>
+              <li>
+                Providing and operating the Service (account management, project storage, billing)
+              </li>
               <li>Authenticating users and managing sessions</li>
               <li>Processing payments and managing subscriptions</li>
               <li>
@@ -138,9 +140,7 @@ export default function PrivacyPage() {
           {/* ── 4. Legal Basis for Processing (GDPR Art. 6) ────────────── */}
           <section style={s.section}>
             <h2 style={s.heading}>4. Legal Basis for Processing</h2>
-            <p style={s.para}>
-              Under UK GDPR Art. 6, we rely on the following legal bases:
-            </p>
+            <p style={s.para}>Under UK GDPR Art. 6, we rely on the following legal bases:</p>
             <ul style={s.list}>
               <li>
                 <strong>Contract performance (Art. 6(1)(b))</strong> &mdash; processing of account
@@ -154,16 +154,16 @@ export default function PrivacyPage() {
                 regulators and courts.
               </li>
               <li>
-                <strong>Legitimate interests (Art. 6(1)(f))</strong> &mdash; security logging,
-                fraud prevention, rate limiting, and aggregated analytics. Our legitimate interest
-                is operating a secure and reliable service. These interests do not override your
-                rights where you object.
+                <strong>Legitimate interests (Art. 6(1)(f))</strong> &mdash; security logging, fraud
+                prevention, rate limiting, and aggregated analytics. Our legitimate interest is
+                operating a secure and reliable service. These interests do not override your rights
+                where you object.
               </li>
               <li>
-                <strong>Consent (Art. 6(1)(a))</strong> &mdash; sending marketing emails and
-                loading non-essential analytics scripts. You may withdraw consent at any time via
-                profile settings or by emailing us; withdrawal does not affect the lawfulness of
-                prior processing.
+                <strong>Consent (Art. 6(1)(a))</strong> &mdash; sending marketing emails and loading
+                non-essential analytics scripts. You may withdraw consent at any time via profile
+                settings or by emailing us; withdrawal does not affect the lawfulness of prior
+                processing.
               </li>
             </ul>
           </section>
@@ -194,9 +194,9 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong>OpenAI</strong> &mdash; ChainSolve AI requests (opt-in feature only).
-                Requests are sent with <code>store:&nbsp;false</code> so OpenAI does not retain
-                your data for training. OpenAI is a US company; transfers covered by SCCs / UK
-                IDTA. See our{' '}
+                Requests are sent with <code>store:&nbsp;false</code> so OpenAI does not retain your
+                data for training. OpenAI is a US company; transfers covered by SCCs / UK IDTA. See
+                our{' '}
                 <a href="/docs?section=ai-assistant" style={s.link}>
                   AI Privacy documentation
                 </a>{' '}
@@ -283,10 +283,10 @@ export default function PrivacyPage() {
                 associated data is purged within 30 days.
               </li>
               <li>
-                <strong>Project data</strong> (graphs, files, configurations) &mdash; retained
-                while your account is active. Deleted within 30 days of account deletion request.
-                After deletion, projects remain accessible in read-only mode for 30 days to allow
-                data export.
+                <strong>Project data</strong> (graphs, files, configurations) &mdash; retained while
+                your account is active. Deleted within 30 days of account deletion request. After
+                deletion, projects remain accessible in read-only mode for 30 days to allow data
+                export.
               </li>
               <li>
                 <strong>Security and audit logs</strong> (terms acceptance, login events) &mdash;
@@ -412,10 +412,10 @@ export default function PrivacyPage() {
           <section style={s.section}>
             <h2 style={s.heading}>11. {t('privacy.s8Title')}</h2>
             <p style={s.para}>
-              ChainSolve is not directed at children under 13 years of age (or under 16 in EU
-              member states that have raised the age of digital consent under GDPR Art. 8). We do
-              not knowingly collect personal data from children. If you believe a child has
-              registered or provided personal data, contact{' '}
+              ChainSolve is not directed at children under 13 years of age (or under 16 in EU member
+              states that have raised the age of digital consent under GDPR Art. 8). We do not
+              knowingly collect personal data from children. If you believe a child has registered
+              or provided personal data, contact{' '}
               <a href={`mailto:${CONTACT.support}`} style={s.link}>
                 {CONTACT.support}
               </a>{' '}
@@ -469,12 +469,7 @@ export default function PrivacyPage() {
             <p style={s.para}>
               You also have the right to lodge a complaint with the UK&rsquo;s supervisory authority
               for data protection, the Information Commissioner&rsquo;s Office (ICO), at{' '}
-              <a
-                href="https://ico.org.uk"
-                style={s.link}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://ico.org.uk" style={s.link} target="_blank" rel="noopener noreferrer">
                 ico.org.uk
               </a>
               .

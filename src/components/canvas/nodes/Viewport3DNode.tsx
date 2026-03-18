@@ -21,9 +21,20 @@ import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-interface Vertex { x: number; y: number; z: number }
-interface Face { i: number; j: number; k: number }
-interface Mesh { vertices: Vertex[]; faces: Face[] }
+interface Vertex {
+  x: number
+  y: number
+  z: number
+}
+interface Face {
+  i: number
+  j: number
+  k: number
+}
+interface Mesh {
+  vertices: Vertex[]
+  faces: Face[]
+}
 
 interface Vp3dNodeData extends NodeData {
   vp3dMode: 'wireframe' | 'solid' | 'transparent'
@@ -38,30 +49,43 @@ interface Vp3dNodeData extends NodeData {
 
 const DEMO_CUBE: Mesh = {
   vertices: [
-    { x: -0.5, y: -0.5, z: -0.5 }, { x:  0.5, y: -0.5, z: -0.5 },
-    { x:  0.5, y:  0.5, z: -0.5 }, { x: -0.5, y:  0.5, z: -0.5 },
-    { x: -0.5, y: -0.5, z:  0.5 }, { x:  0.5, y: -0.5, z:  0.5 },
-    { x:  0.5, y:  0.5, z:  0.5 }, { x: -0.5, y:  0.5, z:  0.5 },
+    { x: -0.5, y: -0.5, z: -0.5 },
+    { x: 0.5, y: -0.5, z: -0.5 },
+    { x: 0.5, y: 0.5, z: -0.5 },
+    { x: -0.5, y: 0.5, z: -0.5 },
+    { x: -0.5, y: -0.5, z: 0.5 },
+    { x: 0.5, y: -0.5, z: 0.5 },
+    { x: 0.5, y: 0.5, z: 0.5 },
+    { x: -0.5, y: 0.5, z: 0.5 },
   ],
   faces: [
     // Front
-    { i: 4, j: 5, k: 6 }, { i: 4, j: 6, k: 7 },
+    { i: 4, j: 5, k: 6 },
+    { i: 4, j: 6, k: 7 },
     // Back
-    { i: 1, j: 0, k: 3 }, { i: 1, j: 3, k: 2 },
+    { i: 1, j: 0, k: 3 },
+    { i: 1, j: 3, k: 2 },
     // Left
-    { i: 0, j: 4, k: 7 }, { i: 0, j: 7, k: 3 },
+    { i: 0, j: 4, k: 7 },
+    { i: 0, j: 7, k: 3 },
     // Right
-    { i: 5, j: 1, k: 2 }, { i: 5, j: 2, k: 6 },
+    { i: 5, j: 1, k: 2 },
+    { i: 5, j: 2, k: 6 },
     // Top
-    { i: 7, j: 6, k: 2 }, { i: 7, j: 2, k: 3 },
+    { i: 7, j: 6, k: 2 },
+    { i: 7, j: 2, k: 3 },
     // Bottom
-    { i: 0, j: 1, k: 5 }, { i: 0, j: 5, k: 4 },
+    { i: 0, j: 1, k: 5 },
+    { i: 0, j: 5, k: 4 },
   ],
 }
 
 // ── Mesh parsing from DataTable ───────────────────────────────────────────────
 
-interface RawTable { columns: string[]; rows: number[][] }
+interface RawTable {
+  columns: string[]
+  rows: number[][]
+}
 
 function parseTableToMesh(raw: RawTable): Mesh | null {
   const { columns, rows } = raw
@@ -82,7 +106,14 @@ function parseTableToMesh(raw: RawTable): Mesh | null {
       const fi = Math.round(r[fii])
       const fj = Math.round(r[fji])
       const fk = Math.round(r[fki])
-      if (fi >= 0 && fj >= 0 && fk >= 0 && fi < vertices.length && fj < vertices.length && fk < vertices.length) {
+      if (
+        fi >= 0 &&
+        fj >= 0 &&
+        fk >= 0 &&
+        fi < vertices.length &&
+        fj < vertices.length &&
+        fk < vertices.length
+      ) {
         faces.push({ i: fi, j: fj, k: fk })
       }
     }
@@ -94,7 +125,9 @@ function parseTableToMesh(raw: RawTable): Mesh | null {
 
 // ── Projection helpers ────────────────────────────────────────────────────────
 
-function deg2rad(d: number) { return (d * Math.PI) / 180 }
+function deg2rad(d: number) {
+  return (d * Math.PI) / 180
+}
 
 /**
  * Project a 3D vertex to 2D canvas coordinates using perspective projection.
@@ -113,8 +146,10 @@ function project(
   const elR = deg2rad(el)
 
   // Rotate around Y axis (azimuth), then X axis (elevation)
-  const cosAz = Math.cos(azR), sinAz = Math.sin(azR)
-  const cosEl = Math.cos(elR), sinEl = Math.sin(elR)
+  const cosAz = Math.cos(azR),
+    sinAz = Math.sin(azR)
+  const cosEl = Math.cos(elR),
+    sinEl = Math.sin(elR)
 
   // Azimuth rotation
   const x1 = cosAz * v.x + sinAz * v.z
@@ -142,8 +177,10 @@ function faceNormal(
   b: { x: number; y: number; z: number },
   c: { x: number; y: number; z: number },
 ) {
-  const ux = b.x - a.x, uy = b.y - a.y
-  const vx = c.x - a.x, vy = c.y - a.y
+  const ux = b.x - a.x,
+    uy = b.y - a.y
+  const vx = c.x - a.x,
+    vy = c.y - a.y
   // 2D cross product — z-component of 3D cross product
   return ux * vy - uy * vx
 }
@@ -223,9 +260,10 @@ function renderMesh(
       ctx.stroke()
     } else {
       // Compute a simple light intensity from face normal direction
-      const brightness = mode === 'transparent'
-        ? 0.5
-        : Math.max(0.15, Math.min(1.0, (normal > 0 ? 0.7 : 0.25) + 0.3))
+      const brightness =
+        mode === 'transparent'
+          ? 0.5
+          : Math.max(0.15, Math.min(1.0, (normal > 0 ? 0.7 : 0.25) + 0.3))
 
       const alpha = mode === 'transparent' ? 0.4 : 1.0
       const r = Math.round(mr * brightness)
@@ -263,7 +301,9 @@ function Viewport3DNodeInner({ id, data, selected }: NodeProps) {
   const [az, setAz] = useState(nd.vp3dAzimuth ?? 45)
   const [el, setEl] = useState(nd.vp3dElevation ?? 30)
   const [zoom, setZoom] = useState(nd.vp3dZoom ?? 1.5)
-  const [mode, setMode] = useState<'wireframe' | 'solid' | 'transparent'>(nd.vp3dMode ?? 'wireframe')
+  const [mode, setMode] = useState<'wireframe' | 'solid' | 'transparent'>(
+    nd.vp3dMode ?? 'wireframe',
+  )
   const dragRef = useRef<{ startX: number; startY: number; az: number; el: number } | null>(null)
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
@@ -283,44 +323,67 @@ function Viewport3DNodeInner({ id, data, selected }: NodeProps) {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    renderMesh(canvas, mesh, az, el, zoom, mode, nd.vp3dBgColor ?? '#1a1a1a', nd.vp3dMeshColor ?? '#1CABB0')
+    renderMesh(
+      canvas,
+      mesh,
+      az,
+      el,
+      zoom,
+      mode,
+      nd.vp3dBgColor ?? '#1a1a1a',
+      nd.vp3dMeshColor ?? '#1CABB0',
+    )
   }, [mesh, az, el, zoom, mode, nd.vp3dBgColor, nd.vp3dMeshColor])
 
   // Mouse drag to orbit
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    dragRef.current = { startX: e.clientX, startY: e.clientY, az, el }
-    const onMove = (ev: MouseEvent) => {
-      if (!dragRef.current) return
-      const dx = ev.clientX - dragRef.current.startX
-      const dy = ev.clientY - dragRef.current.startY
-      setAz(dragRef.current.az + dx * 0.5)
-      setEl(Math.max(-89, Math.min(89, dragRef.current.el - dy * 0.5)))
-    }
-    const onUp = () => {
-      setAz((a) => { updateNodeData(id, { vp3dAzimuth: a }); return a })
-      setEl((e2) => { updateNodeData(id, { vp3dElevation: e2 }); return e2 })
-      dragRef.current = null
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup', onUp)
-    }
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', onUp)
-  }, [az, el, id, updateNodeData])
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      dragRef.current = { startX: e.clientX, startY: e.clientY, az, el }
+      const onMove = (ev: MouseEvent) => {
+        if (!dragRef.current) return
+        const dx = ev.clientX - dragRef.current.startX
+        const dy = ev.clientY - dragRef.current.startY
+        setAz(dragRef.current.az + dx * 0.5)
+        setEl(Math.max(-89, Math.min(89, dragRef.current.el - dy * 0.5)))
+      }
+      const onUp = () => {
+        setAz((a) => {
+          updateNodeData(id, { vp3dAzimuth: a })
+          return a
+        })
+        setEl((e2) => {
+          updateNodeData(id, { vp3dElevation: e2 })
+          return e2
+        })
+        dragRef.current = null
+        window.removeEventListener('mousemove', onMove)
+        window.removeEventListener('mouseup', onUp)
+      }
+      window.addEventListener('mousemove', onMove)
+      window.addEventListener('mouseup', onUp)
+    },
+    [az, el, id, updateNodeData],
+  )
 
   // Mouse wheel to zoom
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault()
-    setZoom((z) => {
-      const next = Math.max(0.5, Math.min(10, z + e.deltaY * 0.005))
-      updateNodeData(id, { vp3dZoom: next })
-      return next
-    })
-  }, [id, updateNodeData])
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      e.preventDefault()
+      setZoom((z) => {
+        const next = Math.max(0.5, Math.min(10, z + e.deltaY * 0.005))
+        updateNodeData(id, { vp3dZoom: next })
+        return next
+      })
+    },
+    [id, updateNodeData],
+  )
 
   // Double-click to reset view
   const handleDoubleClick = useCallback(() => {
-    setAz(45); setEl(30); setZoom(1.5)
+    setAz(45)
+    setEl(30)
+    setZoom(1.5)
     updateNodeData(id, { vp3dAzimuth: 45, vp3dElevation: 30, vp3dZoom: 1.5 })
   }, [id, updateNodeData])
 
@@ -367,17 +430,20 @@ function Viewport3DNodeInner({ id, data, selected }: NodeProps) {
             onClick={cycleMode}
             title={t('viewport3d.cycleMode', 'Toggle render mode')}
             style={{
-              background: '#2a2a2a', color: '#aaa', border: '1px solid #333',
-              borderRadius: 3, padding: '1px 7px', fontSize: 9, cursor: 'pointer',
+              background: '#2a2a2a',
+              color: '#aaa',
+              border: '1px solid #333',
+              borderRadius: 3,
+              padding: '1px 7px',
+              fontSize: 9,
+              cursor: 'pointer',
             }}
           >
             {mode}
           </button>
           <span style={{ flex: 1 }} />
           {isDemoMesh && (
-            <span style={{ fontSize: 8, color: '#555' }}>
-              {t('viewport3d.demo', 'demo cube')}
-            </span>
+            <span style={{ fontSize: 8, color: '#555' }}>{t('viewport3d.demo', 'demo cube')}</span>
           )}
           <span style={{ fontSize: 8, color: '#555' }}>
             {mesh.vertices.length}v {mesh.faces.length}f
@@ -390,7 +456,13 @@ function Viewport3DNodeInner({ id, data, selected }: NodeProps) {
         type="target"
         position={Position.Left}
         id="mesh"
-        style={{ top: '50%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
+        style={{
+          top: '50%',
+          background: typeColor,
+          width: 8,
+          height: 8,
+          border: '2px solid #1a1a1a',
+        }}
       />
     </div>
   )

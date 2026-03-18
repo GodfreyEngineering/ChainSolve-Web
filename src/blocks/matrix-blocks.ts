@@ -120,8 +120,7 @@ export function registerMatrixBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'matrix', label: 'Matrix' }],
     defaultData: { blockType: 'matrix_lu', label: 'LU Decompose' },
-    description:
-      'LU decomposition of a square matrix. Returns L (lower triangular factor).',
+    description: 'LU decomposition of a square matrix. Returns L (lower triangular factor).',
     synonyms: ['LU factorization', 'PLU', 'lower upper'],
     tags: ['matrix', 'linear algebra', 'decomposition'],
   })
@@ -133,8 +132,7 @@ export function registerMatrixBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'matrix', label: 'Matrix' }],
     defaultData: { blockType: 'matrix_qr', label: 'QR Decompose' },
-    description:
-      'QR decomposition via modified Gram-Schmidt. Returns Q (orthogonal factor).',
+    description: 'QR decomposition via modified Gram-Schmidt. Returns Q (orthogonal factor).',
     synonyms: ['QR factorization', 'orthogonal decomposition'],
     tags: ['matrix', 'linear algebra', 'decomposition'],
   })
@@ -146,13 +144,8 @@ export function registerMatrixBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'matrix', label: 'Matrix' }],
     defaultData: { blockType: 'matrix_svd', label: 'SVD' },
-    description:
-      'Singular Value Decomposition. Returns vector of singular values σ₁ ≥ σ₂ ≥ …',
-    synonyms: [
-      'singular value decomposition',
-      'sigma values',
-      'principal values',
-    ],
+    description: 'Singular Value Decomposition. Returns vector of singular values σ₁ ≥ σ₂ ≥ …',
+    synonyms: ['singular value decomposition', 'sigma values', 'principal values'],
     tags: ['matrix', 'linear algebra', 'decomposition'],
   })
 
@@ -176,14 +169,8 @@ export function registerMatrixBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'matrix', label: 'Matrix' }],
     defaultData: { blockType: 'matrix_eigen', label: 'Eigendecomposition' },
-    description:
-      'Eigenvalue decomposition of a symmetric matrix. Returns eigenvalues as a vector.',
-    synonyms: [
-      'eigenvalues',
-      'eigenvectors',
-      'spectral decomposition',
-      'diagonalization',
-    ],
+    description: 'Eigenvalue decomposition of a symmetric matrix. Returns eigenvalues as a vector.',
+    synonyms: ['eigenvalues', 'eigenvectors', 'spectral decomposition', 'diagonalization'],
     tags: ['matrix', 'linear algebra', 'decomposition'],
   })
 
@@ -222,7 +209,8 @@ export function registerMatrixBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'a', label: 'Input' }],
     defaultData: { blockType: 'norm_l1', label: 'L1 Norm' },
-    description: 'L1 norm (Manhattan distance): sum of absolute values. Works on vectors and matrices.',
+    description:
+      'L1 norm (Manhattan distance): sum of absolute values. Works on vectors and matrices.',
     synonyms: ['manhattan', 'taxicab', 'absolute sum', 'L1'],
     tags: ['math', 'norm', 'linear algebra'],
   })
@@ -234,7 +222,8 @@ export function registerMatrixBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'a', label: 'Input' }],
     defaultData: { blockType: 'norm_l2', label: 'L2 Norm' },
-    description: 'L2 norm (Euclidean distance): square root of sum of squares. Works on vectors and matrices.',
+    description:
+      'L2 norm (Euclidean distance): square root of sum of squares. Works on vectors and matrices.',
     synonyms: ['euclidean', 'magnitude', 'length', 'L2'],
     tags: ['math', 'norm', 'linear algebra'],
   })
@@ -246,7 +235,8 @@ export function registerMatrixBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'a', label: 'Input' }],
     defaultData: { blockType: 'norm_linf', label: 'L-Infinity Norm' },
-    description: 'L-infinity norm (max norm): maximum absolute value. Works on vectors and matrices.',
+    description:
+      'L-infinity norm (max norm): maximum absolute value. Works on vectors and matrices.',
     synonyms: ['max norm', 'infinity norm', 'Chebyshev', 'Linf'],
     tags: ['math', 'norm', 'linear algebra'],
   })
@@ -258,7 +248,8 @@ export function registerMatrixBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'a', label: 'Input' }],
     defaultData: { blockType: 'norm_frobenius', label: 'Frobenius Norm' },
-    description: 'Frobenius norm: square root of sum of squared elements. Equivalent to L2 for vectors. Standard matrix norm.',
+    description:
+      'Frobenius norm: square root of sum of squared elements. Equivalent to L2 for vectors. Standard matrix norm.',
     synonyms: ['frobenius', 'Hilbert-Schmidt', 'matrix norm'],
     tags: ['math', 'norm', 'linear algebra', 'matrix'],
   })

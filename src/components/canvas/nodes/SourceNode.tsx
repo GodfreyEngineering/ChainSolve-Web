@@ -23,7 +23,11 @@ import { usePlan } from '../../../contexts/PlanContext'
 import { getEntitlements } from '../../../lib/entitlements'
 import { NODE_STYLES as s, userColorBg } from './nodeStyles'
 import { getNodeTypeColor, getNodeTypeIcon } from './nodeTypeColors'
-import { getValueTypeColor, getValueTypeShape, getValueTypeLabel } from '../../../engine/portTypeColors'
+import {
+  getValueTypeColor,
+  getValueTypeShape,
+  getValueTypeLabel,
+} from '../../../engine/portTypeColors'
 import { Icon } from '../../ui/Icon'
 import { useValueFlash } from '../../../hooks/useValueFlash'
 

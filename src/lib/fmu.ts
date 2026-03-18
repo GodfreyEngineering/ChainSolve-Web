@@ -16,7 +16,7 @@ function u16(buf: Uint8Array, off: number): number {
   return buf[off] | (buf[off + 1] << 8)
 }
 function u32(buf: Uint8Array, off: number): number {
-  return ((buf[off] | (buf[off + 1] << 8) | (buf[off + 2] << 16) | (buf[off + 3] << 24)) >>> 0)
+  return (buf[off] | (buf[off + 1] << 8) | (buf[off + 2] << 16) | (buf[off + 3] << 24)) >>> 0
 }
 
 /**
@@ -104,7 +104,13 @@ export async function extractFromZip(
 
 // ── FMU types ─────────────────────────────────────────────────────────────────
 
-export type FmuCausality = 'input' | 'output' | 'parameter' | 'local' | 'independent' | 'calculatedParameter'
+export type FmuCausality =
+  | 'input'
+  | 'output'
+  | 'parameter'
+  | 'local'
+  | 'independent'
+  | 'calculatedParameter'
 export type FmuVariability = 'fixed' | 'tunable' | 'discrete' | 'continuous' | 'constant'
 
 export interface FmuVariable {

@@ -74,8 +74,15 @@ export function registerStateMachineBlocks(register: (def: BlockDef) => void): v
       dynamicInputCount: 2,
     },
     synonyms: [
-      'state machine', 'FSM', 'statechart', 'Stateflow', 'mode switch',
-      'finite state machine', 'mode logic', 'gear shift', 'flight mode',
+      'state machine',
+      'FSM',
+      'statechart',
+      'Stateflow',
+      'mode switch',
+      'finite state machine',
+      'mode logic',
+      'gear shift',
+      'flight mode',
     ],
     tags: ['control', 'discrete', 'logic', 'mode', 'state'],
     description:

@@ -46,8 +46,15 @@ export function registerStateSpaceBlocks(register: (def: BlockDef) => void): voi
       outputMode: 'step',
     },
     synonyms: [
-      'state space', 'LTI', 'linear system', 'dx/dt', 'A B C D matrix',
-      'controllability', 'observability', 'eigenvalue', 'poles',
+      'state space',
+      'LTI',
+      'linear system',
+      'dx/dt',
+      'A B C D matrix',
+      'controllability',
+      'observability',
+      'eigenvalue',
+      'poles',
     ],
     tags: ['control', 'LTI', 'state space', 'eigenvalue'],
     description:

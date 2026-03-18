@@ -232,7 +232,9 @@ export function FormulaBar({
   const exprInputRef = useRef<HTMLInputElement>(null)
   const [exprScrollLeft, setExprScrollLeft] = useState(0)
   // 3.48: CSEL expression mode autocomplete
-  const [cselAcItems, setCselAcItems] = useState<Array<{ label: string; kind: 'fn' | 'const' | 'var'; insert: string }>>([])
+  const [cselAcItems, setCselAcItems] = useState<
+    Array<{ label: string; kind: 'fn' | 'const' | 'var'; insert: string }>
+  >([])
   const [cselAcIdx, setCselAcIdx] = useState(0)
 
   // 4.17: LaTeX copy feedback
@@ -484,10 +486,28 @@ export function FormulaBar({
 
       {/* Phase 11: Expression mode input — full-width for CSEL expressions */}
       {expressionMode ? (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '0 8px', gap: 6, position: 'relative' }}>
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 8px',
+            gap: 6,
+            position: 'relative',
+          }}
+        >
           <span style={{ color: 'var(--text-faint)', fontSize: '0.7rem', flexShrink: 0 }}>=</span>
           {/* 3.47: Syntax-highlighted expression input via transparent input + overlay */}
-          <div style={{ flex: 1, position: 'relative', overflow: 'hidden', height: '100%', display: 'flex', alignItems: 'center' }}>
+          <div
+            style={{
+              flex: 1,
+              position: 'relative',
+              overflow: 'hidden',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             {/* Highlight overlay — scrolls with input via exprScrollLeft */}
             <div
               aria-hidden="true"
@@ -508,10 +528,16 @@ export function FormulaBar({
                 opacity: exprError ? 0.4 : 1,
               }}
             >
-              {exprDraft
-                ? highlightCsel(exprDraft)
-                : <span style={{ color: 'var(--text-faint)' }}>{t('formulaBar.exprPlaceholder', 'Type expression... e.g. 1+2= or sin(pi/4)= or x=5; x*2=')}</span>
-              }
+              {exprDraft ? (
+                highlightCsel(exprDraft)
+              ) : (
+                <span style={{ color: 'var(--text-faint)' }}>
+                  {t(
+                    'formulaBar.exprPlaceholder',
+                    'Type expression... e.g. 1+2= or sin(pi/4)= or x=5; x*2=',
+                  )}
+                </span>
+              )}
             </div>
             <input
               ref={exprInputRef}
@@ -523,7 +549,10 @@ export function FormulaBar({
                 // Typing resets history navigation — user is editing a new expression
                 if (historyIdx !== -1) setHistoryIdx(-1)
                 // 3.48: Update CSEL autocomplete
-                updateCselAutocomplete(e.target.value, e.target.selectionStart ?? e.target.value.length)
+                updateCselAutocomplete(
+                  e.target.value,
+                  e.target.selectionStart ?? e.target.value.length,
+                )
               }}
               onScroll={(e) => setExprScrollLeft((e.target as HTMLInputElement).scrollLeft)}
               onKeyDown={(e) => {
@@ -634,7 +663,10 @@ export function FormulaBar({
               {cselAcItems.map((item, i) => (
                 <div
                   key={item.insert + i}
-                  onMouseDown={(ev) => { ev.preventDefault(); acceptCselAutocomplete(item) }}
+                  onMouseDown={(ev) => {
+                    ev.preventDefault()
+                    acceptCselAutocomplete(item)
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -646,13 +678,25 @@ export function FormulaBar({
                     fontFamily: 'ui-monospace, monospace',
                   }}
                 >
-                  <span style={{
-                    fontSize: '0.6rem',
-                    padding: '1px 4px',
-                    borderRadius: 3,
-                    background: item.kind === 'fn' ? 'rgba(167,139,250,0.2)' : item.kind === 'const' ? 'rgba(251,146,60,0.2)' : 'rgba(74,222,128,0.2)',
-                    color: item.kind === 'fn' ? '#a78bfa' : item.kind === 'const' ? '#fb923c' : '#4ade80',
-                  }}>
+                  <span
+                    style={{
+                      fontSize: '0.6rem',
+                      padding: '1px 4px',
+                      borderRadius: 3,
+                      background:
+                        item.kind === 'fn'
+                          ? 'rgba(167,139,250,0.2)'
+                          : item.kind === 'const'
+                            ? 'rgba(251,146,60,0.2)'
+                            : 'rgba(74,222,128,0.2)',
+                      color:
+                        item.kind === 'fn'
+                          ? '#a78bfa'
+                          : item.kind === 'const'
+                            ? '#fb923c'
+                            : '#4ade80',
+                    }}
+                  >
                     {item.kind === 'fn' ? 'fn' : item.kind === 'const' ? 'const' : 'var'}
                   </span>
                   <span style={{ color: 'var(--text)' }}>{item.label}</span>
@@ -669,10 +713,13 @@ export function FormulaBar({
                 try {
                   const program = parseCsel(exprDraft.trim())
                   const latex = cselToLatex(program)
-                  navigator.clipboard.writeText(latex).then(() => {
-                    setLatexCopied(true)
-                    setTimeout(() => setLatexCopied(false), 1500)
-                  }).catch(() => {})
+                  navigator.clipboard
+                    .writeText(latex)
+                    .then(() => {
+                      setLatexCopied(true)
+                      setTimeout(() => setLatexCopied(false), 1500)
+                    })
+                    .catch(() => {})
                 } catch {
                   // ignore parse errors — button won't show when there's an exprError
                 }

@@ -110,7 +110,7 @@ function OpenDriveNodeInner({ id, data, selected }: NodeProps) {
             whiteSpace: 'nowrap' as const,
           }}
         >
-          {loading ? 'Parsing .xodr…' : nd.xodrFileName ?? 'Load .xodr…'}
+          {loading ? 'Parsing .xodr…' : (nd.xodrFileName ?? 'Load .xodr…')}
         </button>
 
         {loaded && (

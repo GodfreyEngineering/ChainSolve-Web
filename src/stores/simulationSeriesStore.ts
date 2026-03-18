@@ -76,7 +76,10 @@ export const useSimulationSeriesStore = create<SimSeriesStore>((set) => ({
       // Back-fill existing rows if labels were extended.
       const rows =
         newLabels.length > existing.labels.length
-          ? existing.rows.map((r) => [...r, ...Array(newLabels.length - existing.labels.length).fill(NaN)])
+          ? existing.rows.map((r) => [
+              ...r,
+              ...Array(newLabels.length - existing.labels.length).fill(NaN),
+            ])
           : existing.rows
 
       return {

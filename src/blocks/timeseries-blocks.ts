@@ -47,8 +47,16 @@ export function registerTimeSeriesBlocks(register: (def: BlockDef) => void): voi
       parseError: '',
     },
     synonyms: [
-      'time series', 'timeseries', 'signal', 'waveform', 'resample', 'interpolate',
-      'timestamp', 'sensor', 'log', 'telemetry',
+      'time series',
+      'timeseries',
+      'signal',
+      'waveform',
+      'resample',
+      'interpolate',
+      'timestamp',
+      'sensor',
+      'log',
+      'telemetry',
     ],
     tags: ['data', 'time', 'signal', 'resample'],
     description:

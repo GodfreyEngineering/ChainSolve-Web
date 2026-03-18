@@ -95,14 +95,31 @@ function Hdf5ImportNodeInner({ id, data, selected }: NodeProps) {
           className="nodrag"
           onClick={() => fileInputRef.current?.click()}
           disabled={loading}
-          style={{ width: '100%', padding: '4px 8px', background: loaded ? 'color-mix(in srgb, var(--primary) 20%, transparent)' : 'var(--surface-2)', border: `1px solid ${loaded ? 'var(--primary)' : 'var(--border)'}`, borderRadius: 4, cursor: 'pointer', fontSize: 10, color: loaded ? 'var(--primary)' : 'var(--text)', textAlign: 'left' as const, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          style={{
+            width: '100%',
+            padding: '4px 8px',
+            background: loaded
+              ? 'color-mix(in srgb, var(--primary) 20%, transparent)'
+              : 'var(--surface-2)',
+            border: `1px solid ${loaded ? 'var(--primary)' : 'var(--border)'}`,
+            borderRadius: 4,
+            cursor: 'pointer',
+            fontSize: 10,
+            color: loaded ? 'var(--primary)' : 'var(--text)',
+            textAlign: 'left' as const,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
         >
-          {loading ? 'Reading HDF5…' : nd.hdf5FileName ?? 'Load .h5 / .hdf5…'}
+          {loading ? 'Reading HDF5…' : (nd.hdf5FileName ?? 'Load .h5 / .hdf5…')}
         </button>
 
         {loaded && nd.hdf5DatasetPaths.length > 0 && (
           <div style={{ marginTop: 4, fontSize: 9, color: 'var(--muted)' }}>
-            {nd.hdf5DatasetPaths.length} dataset{nd.hdf5DatasetPaths.length !== 1 ? 's' : ''}: {nd.hdf5DatasetPaths.slice(0, 3).join(', ')}{nd.hdf5DatasetPaths.length > 3 ? '…' : ''}
+            {nd.hdf5DatasetPaths.length} dataset{nd.hdf5DatasetPaths.length !== 1 ? 's' : ''}:{' '}
+            {nd.hdf5DatasetPaths.slice(0, 3).join(', ')}
+            {nd.hdf5DatasetPaths.length > 3 ? '…' : ''}
           </div>
         )}
 
@@ -113,13 +130,30 @@ function Hdf5ImportNodeInner({ id, data, selected }: NodeProps) {
         )}
 
         {error && (
-          <div style={{ marginTop: 4, padding: '2px 4px', background: 'color-mix(in srgb, var(--danger) 15%, transparent)', border: '1px solid var(--danger)', borderRadius: 3, fontSize: 9, color: 'var(--danger)', wordBreak: 'break-all' as const }}>
+          <div
+            style={{
+              marginTop: 4,
+              padding: '2px 4px',
+              background: 'color-mix(in srgb, var(--danger) 15%, transparent)',
+              border: '1px solid var(--danger)',
+              borderRadius: 3,
+              fontSize: 9,
+              color: 'var(--danger)',
+              wordBreak: 'break-all' as const,
+            }}
+          >
             {error}
           </div>
         )}
       </div>
 
-      <Handle type="source" position={Position.Right} id="out" style={{ top: '50%' }} title="Output: table of HDF5 datasets" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="out"
+        style={{ top: '50%' }}
+        title="Output: table of HDF5 datasets"
+      />
     </div>
   )
 }

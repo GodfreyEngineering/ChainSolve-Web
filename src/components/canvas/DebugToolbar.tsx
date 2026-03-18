@@ -82,8 +82,8 @@ export function DebugToolbar({ onRunWithTrace }: DebugToolbarProps) {
             <span style={statusTextStyle}>
               {pausedAtNodeId ? (
                 <>
-                  Paused at <code style={codeStyle}>{pausedAtNodeId}</code>
-                  {' '}(node {stepIndex + 1} of {totalNodes})
+                  Paused at <code style={codeStyle}>{pausedAtNodeId}</code> (node {stepIndex + 1} of{' '}
+                  {totalNodes})
                 </>
               ) : (
                 `Step ${stepIndex + 1} of ${totalNodes}`
@@ -104,9 +104,7 @@ export function DebugToolbar({ onRunWithTrace }: DebugToolbarProps) {
       {active && currentEntry && (
         <div style={nodeInfoStyle}>
           <span style={opStyle}>{currentEntry.opId}</span>
-          <span style={outputPreviewStyle}>
-            → {summariseValue(currentEntry.output)}
-          </span>
+          <span style={outputPreviewStyle}>→ {summariseValue(currentEntry.output)}</span>
         </div>
       )}
 
@@ -119,16 +117,32 @@ export function DebugToolbar({ onRunWithTrace }: DebugToolbarProps) {
         )}
         {active && (
           <>
-            <DebugButton onClick={handleStepBackward} disabled={atStart} title={t('debug.stepBack', 'Step back')}>
+            <DebugButton
+              onClick={handleStepBackward}
+              disabled={atStart}
+              title={t('debug.stepBack', 'Step back')}
+            >
               ⏮
             </DebugButton>
-            <DebugButton onClick={handleStepForward} disabled={atEnd} title={t('debug.stepOver', 'Step forward')}>
+            <DebugButton
+              onClick={handleStepForward}
+              disabled={atEnd}
+              title={t('debug.stepOver', 'Step forward')}
+            >
               ⏭
             </DebugButton>
-            <DebugButton onClick={handleContinue} disabled={atEnd} title={t('debug.continue', 'Continue to next breakpoint')}>
+            <DebugButton
+              onClick={handleContinue}
+              disabled={atEnd}
+              title={t('debug.continue', 'Continue to next breakpoint')}
+            >
               ▶ Continue
             </DebugButton>
-            <DebugButton onClick={handleEnd} disabled={atEnd} title={t('debug.continueToEnd', 'Continue to end')}>
+            <DebugButton
+              onClick={handleEnd}
+              disabled={atEnd}
+              title={t('debug.continueToEnd', 'Continue to end')}
+            >
               ⏩ End
             </DebugButton>
             <div style={sepStyle} />
@@ -151,10 +165,20 @@ export function DebugToolbar({ onRunWithTrace }: DebugToolbarProps) {
 
 // ── Helper ───────────────────────────────────────────────────────────────────
 
-function summariseValue(v: { kind: string; value?: number | string; length?: number; rows?: number; message?: string }): string {
+function summariseValue(v: {
+  kind: string
+  value?: number | string
+  length?: number
+  rows?: number
+  message?: string
+}): string {
   switch (v.kind) {
     case 'scalar':
-      return typeof v.value === 'number' ? Number(v.value).toPrecision(6).replace(/\.?0+$/, '') : String(v.value)
+      return typeof v.value === 'number'
+        ? Number(v.value)
+            .toPrecision(6)
+            .replace(/\.?0+$/, '')
+        : String(v.value)
     case 'vector':
       return `Vector(${v.length ?? '?'})`
     case 'table':

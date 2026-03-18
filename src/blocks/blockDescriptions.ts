@@ -221,13 +221,20 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'eng.conv.lpm_to_m3s': 'Converts litres per minute to cubic metres per second.',
   'eng.conv.m3s_to_lpm': 'Converts cubic metres per second to litres per minute.',
   unit_convert: 'Generic unit conversion. Pick input and output units from any dimension.',
-  'ode.fem2d': '2D FEM Poisson solver: solve on [x0,x1]x[y0,y1] with P1 triangular elements. Set rhs, dirichlet, nx/ny. Returns Table [x, y, u]. Post-process with a plot or contour block.',
-  'ad.gradCheckpoint': 'Gradient checkpointing (Revolve): compute ODE sensitivities with O(cs) memory using binomial Revolve schedule. Returns Table [param_idx, gradient, recomputations].',
-  'ad.customVjp': 'Custom VJP/JVP (JAX-style): define exact gradient rules for custom functions. Provide primal_expr, vjp_exprs, jvp_expr. Falls back to finite-diff when rules are omitted.',
-  'ad.linSolveSens': 'Implicit differentiation through Ax=b: computes dx/dp via the implicit function theorem. One extra linear solve per parameter. Returns Table [param_idx, dx0/dp, ...].',
-  'ad.odeAdjoint': 'Discrete adjoint ODE sensitivity: computes dJ/dp via reverse-time adjoint equations. Optional checkpointing. Returns Table [param_idx, gradient, objective].',
-  'units.convert': 'Unit converter (80+ SI units). Connect Scalar or Vector, set from_unit and to_unit. Outputs converted value. Incompatible dimensions return an error.',
-  'units.analyze': "Dimensional consistency checker. Enter comma-separated unit symbols; returns a table with each unit's SI scale factor and consistency flag. Catches unit mix-ups.",
+  'ode.fem2d':
+    '2D FEM Poisson solver: solve on [x0,x1]x[y0,y1] with P1 triangular elements. Set rhs, dirichlet, nx/ny. Returns Table [x, y, u]. Post-process with a plot or contour block.',
+  'ad.gradCheckpoint':
+    'Gradient checkpointing (Revolve): compute ODE sensitivities with O(cs) memory using binomial Revolve schedule. Returns Table [param_idx, gradient, recomputations].',
+  'ad.customVjp':
+    'Custom VJP/JVP (JAX-style): define exact gradient rules for custom functions. Provide primal_expr, vjp_exprs, jvp_expr. Falls back to finite-diff when rules are omitted.',
+  'ad.linSolveSens':
+    'Implicit differentiation through Ax=b: computes dx/dp via the implicit function theorem. One extra linear solve per parameter. Returns Table [param_idx, dx0/dp, ...].',
+  'ad.odeAdjoint':
+    'Discrete adjoint ODE sensitivity: computes dJ/dp via reverse-time adjoint equations. Optional checkpointing. Returns Table [param_idx, gradient, objective].',
+  'units.convert':
+    'Unit converter (80+ SI units). Connect Scalar or Vector, set from_unit and to_unit. Outputs converted value. Incompatible dimensions return an error.',
+  'units.analyze':
+    "Dimensional consistency checker. Enter comma-separated unit symbols; returns a table with each unit's SI scale factor and consistency flag. Catches unit mix-ups.",
 
   // ── Finance: TVM ──────────────────────────────────────────────────────────
   'fin.tvm.simple_interest': 'Simple interest. I = P*r*t. Principal times rate times time.',
@@ -352,7 +359,7 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
 
   // ── Multibody Mechanics (items 2.48–2.51) ─────────────────────────────────
   'eng.multibody.spring_force':
-    'Spring force F = k·x (Hooke\'s law). k: spring stiffness (N/m), x: displacement (m).',
+    "Spring force F = k·x (Hooke's law). k: spring stiffness (N/m), x: displacement (m).",
   'eng.multibody.damper_force':
     'Viscous damper force F = b·v. b: damping coefficient (N·s/m), v: velocity (m/s).',
   'eng.multibody.mass_accel':
@@ -363,8 +370,7 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     '1D rigid body dynamics with Coulomb friction. F_net = F − μ·Fn, a = F_net/m, KE = ½mv². Outputs table {F_net, a, KE}.',
   'eng.multibody.joint_revolute':
     'Revolute joint: angular acceleration α = τ/I. τ: torque (N·m), I: moment of inertia (kg·m²).',
-  'eng.multibody.joint_prismatic':
-    'Prismatic (sliding) joint: linear acceleration a = F/m.',
+  'eng.multibody.joint_prismatic': 'Prismatic (sliding) joint: linear acceleration a = F/m.',
   'eng.multibody.dh_transform':
     'Denavit-Hartenberg homogeneous transform matrix for one robot joint. Inputs: θ (joint angle), d (link offset), a (link length), α (twist angle). Returns 4×4 matrix.',
   'eng.multibody.contact_penalty':
@@ -623,14 +629,11 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Solves the linear system Ax = b for x using Gaussian elimination with partial pivoting.',
   matrix_lu:
     'LU decomposition of a square matrix with partial pivoting. Returns L (lower triangular factor).',
-  matrix_qr:
-    'QR decomposition via modified Gram-Schmidt. Returns Q (orthogonal factor).',
-  matrix_svd:
-    'Singular Value Decomposition. Returns singular values σ₁ ≥ σ₂ ≥ … as a vector.',
+  matrix_qr: 'QR decomposition via modified Gram-Schmidt. Returns Q (orthogonal factor).',
+  matrix_svd: 'Singular Value Decomposition. Returns singular values σ₁ ≥ σ₂ ≥ … as a vector.',
   matrix_cholesky:
     'Cholesky decomposition of a symmetric positive-definite matrix. Returns L where A = LLᵀ.',
-  matrix_eigen:
-    'Eigenvalue decomposition of a symmetric matrix. Returns eigenvalues as a vector.',
+  matrix_eigen: 'Eigenvalue decomposition of a symmetric matrix. Returns eigenvalues as a vector.',
   matrix_schur:
     'Schur decomposition. Returns the quasi-upper-triangular Schur form T where A = QTQᵀ.',
   matrix_cond:
@@ -653,8 +656,7 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Monte Carlo quadrature with deterministic seed. Suitable for high-dimensional or irregular integrands.',
 
   // ── Curve Fitting ────────────────────────────────────────────────────────
-  curve_fit_poly:
-    'Polynomial least-squares fit. Returns coefficients c0..cN and R².',
+  curve_fit_poly: 'Polynomial least-squares fit. Returns coefficients c0..cN and R².',
   curve_fit_lm:
     'Levenberg-Marquardt nonlinear curve fitting to a user-defined model. Returns fitted parameters and R².',
 
@@ -673,10 +675,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     "B-spline curve evaluation using de Boor's algorithm. Control points define shape; degree controls smoothness.",
 
   // ── Random Number Generation ──────────────────────────────────────────────
-  rng_uniform:
-    'Generate uniform random numbers using Xoshiro256++ PRNG. Deterministic given seed.',
-  rng_lhs:
-    'Latin Hypercube Sampling — stratified random sampling with guaranteed space coverage.',
+  rng_uniform: 'Generate uniform random numbers using Xoshiro256++ PRNG. Deterministic given seed.',
+  rng_lhs: 'Latin Hypercube Sampling — stratified random sampling with guaranteed space coverage.',
   rng_sobol:
     'Sobol quasi-random low-discrepancy sequence. More uniform than pseudorandom for integration and DOE.',
   rng_halton:
@@ -817,7 +817,7 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'sym.compiledEval':
     'Compiled expression evaluator: pre-parses formula to AST for fast repeated evaluation. Faster than eval_expr() in tight loops (ODE steps, Monte Carlo).',
   'sym.groebner':
-    "Groebner Basis (Buchberger): auto-reduced basis for polynomial systems. Input: semicolon-separated polynomials, variables. Modes: basis/solve; orders: grevlex/lex/grlex.",
+    'Groebner Basis (Buchberger): auto-reduced basis for polynomial systems. Input: semicolon-separated polynomials, variables. Modes: basis/solve; orders: grevlex/lex/grlex.',
   // ODE Solvers
   'ode.rk4':
     'Solve a system of ODEs using the classic 4th-order Runge-Kutta method. Output = table of time vs state variables.',
@@ -882,15 +882,21 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
 
   // ── Additional Plot Blocks ────────────────────────────────────────────────
   bodePlot: 'Bode plot: frequency response magnitude and phase of a transfer function or data.',
-  nyquistPlot: 'Nyquist plot: complex frequency response on the real/imaginary plane for stability analysis.',
+  nyquistPlot:
+    'Nyquist plot: complex frequency response on the real/imaginary plane for stability analysis.',
   boxPlot: 'Box-and-whisker plot showing median, quartiles, and outliers for a dataset.',
   violinPlot: 'Violin plot: kernel density estimate of data distribution with embedded box plot.',
-  parallelCoords: 'Parallel coordinates chart for visualising high-dimensional data and multi-objective results.',
+  parallelCoords:
+    'Parallel coordinates chart for visualising high-dimensional data and multi-objective results.',
   contourPlot: 'Contour (level-curve) plot of a 2D scalar field from a mesh or table.',
-  waterfallPlot: 'Waterfall chart: cumulative stacked bars for financial or sequential delta visualisation.',
-  paretoPlot: 'Pareto front plot for multi-objective optimisation results with dominated/non-dominated points.',
-  sankeyPlot: 'Sankey flow diagram visualising material, energy, or information flows between nodes with proportional-width links.',
-  surfacePlot: '3D surface plot with interactive rotation. Rows and columns define the mesh; cell values are rendered as z heights.',
+  waterfallPlot:
+    'Waterfall chart: cumulative stacked bars for financial or sequential delta visualisation.',
+  paretoPlot:
+    'Pareto front plot for multi-objective optimisation results with dominated/non-dominated points.',
+  sankeyPlot:
+    'Sankey flow diagram visualising material, energy, or information flows between nodes with proportional-width links.',
+  surfacePlot:
+    '3D surface plot with interactive rotation. Rows and columns define the mesh; cell values are rendered as z heights.',
 
   // ── Control Blocks ────────────────────────────────────────────────────────
   'ctrl.saturation': 'Saturate a signal between lower and upper bounds. Maps to clamp op.',
@@ -901,7 +907,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   'ctrl.rateTransition': 'Rate transition: resample a signal from one update rate to another.',
 
   // ── Neural Network Blocks ─────────────────────────────────────────────────
-  'nn.transferLearn': 'Fine-tune a pre-trained neural network on new data with frozen or trainable layers.',
+  'nn.transferLearn':
+    'Fine-tune a pre-trained neural network on new data with frozen or trainable layers.',
   'nn.neuralOp': 'Fourier Neural Operator layer for learning mappings on function spaces.',
   'nn.pinn': 'Physics-Informed Neural Network: minimise PDE residuals and boundary conditions.',
   'nn.onnxExport': 'Export a trained neural network to ONNX format for cross-platform deployment.',
@@ -926,17 +933,20 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
   sqlQuery: 'Run a read-only SQL query against the project database and return results as a table.',
   timeSeries: 'Load, parse, and resample multi-channel time-series data from CSV or clipboard.',
   tirFileInput: 'Import Pacejka Magic Formula .tir tire parameter files for vehicle simulation.',
-  'data.hdf5Import': 'Read datasets from an HDF5 (.h5) file using h5wasm. Returns named Float64 arrays.',
+  'data.hdf5Import':
+    'Read datasets from an HDF5 (.h5) file using h5wasm. Returns named Float64 arrays.',
   'data.hdf5Export': 'Write arrays and tables to an HDF5 (.h5) file using h5wasm.',
   'data.stepImport': 'Import STEP/IGES CAD geometry and extract mass properties or mesh data.',
-  'data.openDriveImport': 'Import OpenDRIVE (.xodr) road network files for vehicle path planning and simulation.',
+  'data.openDriveImport':
+    'Import OpenDRIVE (.xodr) road network files for vehicle path planning and simulation.',
 
   // ── Inputs & UI ────────────────────────────────────────────────────────────
   unitInput: 'Number input with SI unit annotation and automatic conversion factor output.',
 
   // ── Control System Blocks ─────────────────────────────────────────────────
   transferFunction: 'Continuous-time LTI transfer function: Bode/step/impulse response in the UI.',
-  stateSpace: 'Continuous-time state-space model (A, B, C, D matrices) with time/frequency response.',
+  stateSpace:
+    'Continuous-time state-space model (A, B, C, D matrices) with time/frequency response.',
 
   // ── 3D & Visualisation ────────────────────────────────────────────────────
   viewport3d: '3D viewport: render meshes, point clouds, or geometry from upstream blocks.',
@@ -947,5 +957,6 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
 
   // ── Scripting ─────────────────────────────────────────────────────────────
   'scripting.python': 'Execute Python code via Pyodide (in-browser WASM). Full NumPy/SciPy access.',
-  'scripting.rust': 'Compile and run custom Rust code server-side via the ChainSolve build service.',
+  'scripting.rust':
+    'Compile and run custom Rust code server-side via the ChainSolve build service.',
 }

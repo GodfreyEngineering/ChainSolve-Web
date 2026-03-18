@@ -29,15 +29,39 @@ import { useComputedValue } from '../../../contexts/ComputedContext'
 // ── Safe evaluation helpers ───────────────────────────────────────────────────
 
 const MATH_SCOPE: Record<string, unknown> = {
-  Math, PI: Math.PI, E: Math.E, LN2: Math.LN2, LN10: Math.LN10,
-  abs: Math.abs, sqrt: Math.sqrt, cbrt: Math.cbrt, pow: Math.pow,
-  sin: Math.sin, cos: Math.cos, tan: Math.tan,
-  asin: Math.asin, acos: Math.acos, atan: Math.atan, atan2: Math.atan2,
-  sinh: Math.sinh, cosh: Math.cosh, tanh: Math.tanh,
-  exp: Math.exp, log: Math.log, log2: Math.log2, log10: Math.log10,
-  floor: Math.floor, ceil: Math.ceil, round: Math.round, trunc: Math.trunc,
-  min: Math.min, max: Math.max, sign: Math.sign, hypot: Math.hypot,
-  isNaN, isFinite,
+  Math,
+  PI: Math.PI,
+  E: Math.E,
+  LN2: Math.LN2,
+  LN10: Math.LN10,
+  abs: Math.abs,
+  sqrt: Math.sqrt,
+  cbrt: Math.cbrt,
+  pow: Math.pow,
+  sin: Math.sin,
+  cos: Math.cos,
+  tan: Math.tan,
+  asin: Math.asin,
+  acos: Math.acos,
+  atan: Math.atan,
+  atan2: Math.atan2,
+  sinh: Math.sinh,
+  cosh: Math.cosh,
+  tanh: Math.tanh,
+  exp: Math.exp,
+  log: Math.log,
+  log2: Math.log2,
+  log10: Math.log10,
+  floor: Math.floor,
+  ceil: Math.ceil,
+  round: Math.round,
+  trunc: Math.trunc,
+  min: Math.min,
+  max: Math.max,
+  sign: Math.sign,
+  hypot: Math.hypot,
+  isNaN,
+  isFinite,
 }
 
 /**
@@ -54,9 +78,10 @@ function evalCode(code: string, vars: Record<string, number>): number {
   const allVals = [...mathVals, ...varVals]
 
   // Auto-wrap single expressions without `return`
-  const body = code.trim().includes('\n') || code.trim().toLowerCase().includes('return')
-    ? code
-    : `return (${code})`
+  const body =
+    code.trim().includes('\n') || code.trim().toLowerCase().includes('return')
+      ? code
+      : `return (${code})`
 
   // eslint-disable-next-line no-new-func
   const fn = new Function(...allKeys, body)
@@ -101,8 +126,7 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
 
   const inputRefs = [in0, in1, in2, in3, in4, in5, in6, in7]
 
-  const resolveN = (v: unknown): number =>
-    typeof v === 'number' && Number.isFinite(v) ? v : 0
+  const resolveN = (v: unknown): number => (typeof v === 'number' && Number.isFinite(v) ? v : 0)
 
   const evaluate = useCallback(() => {
     const varMap: Record<string, number> = {}
@@ -118,7 +142,9 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
     }
   }, [id, code, codeVars, in0, in1, in2, in3, in4, in5, in6, in7, updateNodeData]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { evaluate() }, [evaluate])
+  useEffect(() => {
+    evaluate()
+  }, [evaluate])
 
   // Debounce code textarea changes
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -183,12 +209,17 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
           rows={4}
           style={{
             width: '100%',
-            background: '#111', color: '#F4F4F3',
+            background: '#111',
+            color: '#F4F4F3',
             border: `1px solid ${codeError ? '#e74c3c' : '#333'}`,
-            borderRadius: 4, padding: '4px 6px', fontSize: 10,
+            borderRadius: 4,
+            padding: '4px 6px',
+            fontSize: 10,
             fontFamily: 'JetBrains Mono, monospace',
-            outline: 'none', resize: 'vertical',
-            boxSizing: 'border-box', lineHeight: 1.5,
+            outline: 'none',
+            resize: 'vertical',
+            boxSizing: 'border-box',
+            lineHeight: 1.5,
           }}
         />
 
@@ -198,29 +229,52 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
             ⚠ {codeError}
           </div>
         ) : (
-          <div style={{ fontSize: 9, color: '#aaa', marginTop: 4, fontFamily: 'JetBrains Mono, monospace' }}>
+          <div
+            style={{
+              fontSize: 9,
+              color: '#aaa',
+              marginTop: 4,
+              fontFamily: 'JetBrains Mono, monospace',
+            }}
+          >
             = {codeOutput.toPrecision(6)}
           </div>
         )}
 
         {/* Variables */}
         <div style={{ marginTop: 6 }}>
-          <div style={{ fontSize: 9, color: '#666', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <div
+            style={{
+              fontSize: 9,
+              color: '#666',
+              marginBottom: 3,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+            }}
+          >
             {t('codeBlock.vars', 'Variables')}
           </div>
           {codeVars.map((v, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
-              <span style={{ fontSize: 9, color: '#666', width: 12, textAlign: 'right' }}>{i + 1}</span>
+              <span style={{ fontSize: 9, color: '#666', width: 12, textAlign: 'right' }}>
+                {i + 1}
+              </span>
               <input
                 className="nodrag"
                 type="text"
                 value={v.name}
                 onChange={(e) => renameVar(i, e.target.value)}
                 style={{
-                  background: '#1a1a1a', color: '#F4F4F3', border: '1px solid #333',
-                  borderRadius: 3, padding: '1px 4px', fontSize: 9,
-                  fontFamily: 'JetBrains Mono, monospace', outline: 'none',
-                  width: 60, flexShrink: 0,
+                  background: '#1a1a1a',
+                  color: '#F4F4F3',
+                  border: '1px solid #333',
+                  borderRadius: 3,
+                  padding: '1px 4px',
+                  fontSize: 9,
+                  fontFamily: 'JetBrains Mono, monospace',
+                  outline: 'none',
+                  width: 60,
+                  flexShrink: 0,
                 }}
               />
               <span style={{ fontSize: 9, color: '#555', fontFamily: 'JetBrains Mono, monospace' }}>
@@ -234,8 +288,13 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
               className="nodrag"
               onClick={addVar}
               style={{
-                background: '#2a2a2a', color: '#aaa', border: '1px solid #444',
-                borderRadius: 3, padding: '1px 6px', fontSize: 9, cursor: 'pointer',
+                background: '#2a2a2a',
+                color: '#aaa',
+                border: '1px solid #444',
+                borderRadius: 3,
+                padding: '1px 6px',
+                fontSize: 9,
+                cursor: 'pointer',
               }}
             >
               + {t('codeBlock.addVar', 'var')}
@@ -245,8 +304,13 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
                 className="nodrag"
                 onClick={removeVar}
                 style={{
-                  background: '#2a2a2a', color: '#888', border: '1px solid #333',
-                  borderRadius: 3, padding: '1px 6px', fontSize: 9, cursor: 'pointer',
+                  background: '#2a2a2a',
+                  color: '#888',
+                  border: '1px solid #333',
+                  borderRadius: 3,
+                  padding: '1px 6px',
+                  fontSize: 9,
+                  cursor: 'pointer',
                 }}
               >
                 − {t('codeBlock.removeVar', 'var')}
@@ -265,7 +329,10 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
           id={`var_${v.name}`}
           style={{
             top: `${handleSpacing * (i + 1)}%`,
-            background: '#888', width: 8, height: 8, border: '2px solid #1a1a1a',
+            background: '#888',
+            width: 8,
+            height: 8,
+            border: '2px solid #1a1a1a',
           }}
         />
       ))}
@@ -275,7 +342,13 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
         type="source"
         position={Position.Right}
         id="out"
-        style={{ top: '50%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
+        style={{
+          top: '50%',
+          background: typeColor,
+          width: 8,
+          height: 8,
+          border: '2px solid #1a1a1a',
+        }}
       />
     </div>
   )

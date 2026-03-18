@@ -52,9 +52,7 @@ export default function PlotExpandModal({ value, config, label, onClose }: PlotE
 
   // Extract sorted unique time values from the time column
   const timeValues: number[] = animTable
-    ? Array.from(
-        new Set(animTable.rows.map((r) => r[timeColIdx] as number)),
-      ).sort((a, b) => a - b)
+    ? Array.from(new Set(animTable.rows.map((r) => r[timeColIdx] as number))).sort((a, b) => a - b)
     : []
 
   const [frameIdx, setFrameIdx] = useState(timeValues.length > 0 ? timeValues.length - 1 : 0)
@@ -100,7 +98,12 @@ export default function PlotExpandModal({ value, config, label, onClose }: PlotE
   }, [timeValues.length, speed])
 
   // Clean up interval on unmount
-  useEffect(() => () => { if (animIntervalRef.current !== null) clearInterval(animIntervalRef.current) }, [])
+  useEffect(
+    () => () => {
+      if (animIntervalRef.current !== null) clearInterval(animIntervalRef.current)
+    },
+    [],
+  )
 
   const theme = THEME_PRESETS[config.themePreset ?? 'paper-single']
   const modalWidth = Math.max(theme.width + 80, 500)
@@ -214,7 +217,10 @@ export default function PlotExpandModal({ value, config, label, onClose }: PlotE
               </button>
               <button
                 style={{ ...btnStyle }}
-                onClick={() => { stopAnimation(); setFrameIdx(0) }}
+                onClick={() => {
+                  stopAnimation()
+                  setFrameIdx(0)
+                }}
               >
                 ↩ Reset
               </button>
@@ -223,10 +229,20 @@ export default function PlotExpandModal({ value, config, label, onClose }: PlotE
                 min={0}
                 max={timeValues.length - 1}
                 value={frameIdx}
-                onChange={(e) => { stopAnimation(); setFrameIdx(Number(e.target.value)) }}
+                onChange={(e) => {
+                  stopAnimation()
+                  setFrameIdx(Number(e.target.value))
+                }}
                 style={{ flex: 1, minWidth: '6rem', accentColor: 'var(--primary)' }}
               />
-              <span style={{ fontSize: '0.72rem', color: 'rgba(244,244,243,0.6)', minWidth: '3rem', textAlign: 'right' }}>
+              <span
+                style={{
+                  fontSize: '0.72rem',
+                  color: 'rgba(244,244,243,0.6)',
+                  minWidth: '3rem',
+                  textAlign: 'right',
+                }}
+              >
                 t={currentTime.toPrecision(4)}
               </span>
               <select

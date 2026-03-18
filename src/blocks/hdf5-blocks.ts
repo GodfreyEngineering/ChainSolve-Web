@@ -26,8 +26,14 @@ export function registerHdf5Blocks(register: (def: BlockDef) => void): void {
       tableData: null,
     },
     synonyms: [
-      'hdf5', 'h5', 'hierarchical data format', 'he5', 'netcdf',
-      'scientific data', 'large arrays', 'hdf',
+      'hdf5',
+      'h5',
+      'hierarchical data format',
+      'he5',
+      'netcdf',
+      'scientific data',
+      'large arrays',
+      'hdf',
     ],
     tags: ['hdf5', 'import', 'data', 'scientific'],
     description:

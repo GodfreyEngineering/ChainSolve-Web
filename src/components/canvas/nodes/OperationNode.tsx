@@ -35,7 +35,11 @@ import { Icon } from '../../ui/Icon'
 import { useValueFlash } from '../../../hooks/useValueFlash'
 import { getPortUnitHint } from '../../../blocks/portUnitHints'
 import { usePreferencesStore } from '../../../stores/preferencesStore'
-import { getValueTypeColor, getValueTypeShape, getValueTypeLabel } from '../../../engine/portTypeColors'
+import {
+  getValueTypeColor,
+  getValueTypeShape,
+  getValueTypeLabel,
+} from '../../../engine/portTypeColors'
 import { useFlowHighlightStore } from '../../../stores/flowHighlightStore'
 import { useDebugStore } from '../../../stores/debugStore'
 

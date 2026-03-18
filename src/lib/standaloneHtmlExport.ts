@@ -111,7 +111,13 @@ function esc(str: string): string {
     .replace(/"/g, '&quot;')
 }
 
-function buildHtml({ projectName, exportDate, imageDataUrl, resultRows, graphJson }: HtmlArgs): string {
+function buildHtml({
+  projectName,
+  exportDate,
+  imageDataUrl,
+  resultRows,
+  graphJson,
+}: HtmlArgs): string {
   const tableRows = resultRows
     .map(
       (r) =>

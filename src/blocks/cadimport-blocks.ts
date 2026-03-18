@@ -4,7 +4,9 @@
 
 import type { BlockDef } from './types'
 
-type RegFn = (def: Omit<BlockDef, 'synonyms' | 'tags' | 'description' | 'proOnly'> & { proOnly?: boolean }) => void
+type RegFn = (
+  def: Omit<BlockDef, 'synonyms' | 'tags' | 'description' | 'proOnly'> & { proOnly?: boolean },
+) => void
 
 export function registerCadImportBlocks(reg: RegFn): void {
   reg({

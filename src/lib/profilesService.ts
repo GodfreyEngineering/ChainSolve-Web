@@ -289,7 +289,8 @@ export async function updateMarketingOptIn(optIn: boolean): Promise<void> {
     .from('user_consents')
     .insert({ user_id: user.id, consent_type: 'marketing_email', granted: optIn })
     .then(({ error: e }) => {
-      if (e) console.warn('[profilesService] consent audit (marketing_email) insert failed:', e.message)
+      if (e)
+        console.warn('[profilesService] consent audit (marketing_email) insert failed:', e.message)
     })
 
   invalidateProfileCache()

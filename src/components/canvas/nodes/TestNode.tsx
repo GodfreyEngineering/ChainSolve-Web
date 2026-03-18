@@ -38,7 +38,12 @@ interface TestNodeData extends NodeData {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function checkPass(actual: number, expected: number, tolerance: number, mode: ToleranceMode): boolean {
+function checkPass(
+  actual: number,
+  expected: number,
+  tolerance: number,
+  mode: ToleranceMode,
+): boolean {
   const diff = Math.abs(actual - expected)
   if (mode === 'relative') {
     const base = Math.max(Math.abs(expected), 1e-300)
@@ -92,11 +97,12 @@ function TestNodeInner({ id, data, selected }: NodeProps) {
   const failColor = '#ef4444'
   const statusColor = testResult === null ? 'var(--muted)' : testResult.pass ? passColor : failColor
   const statusIcon = testResult === null ? '—' : testResult.pass ? '✓' : '✗'
-  const statusLabel = testResult === null
-    ? t('test.noValue', 'No value')
-    : testResult.pass
-      ? t('test.pass', 'PASS')
-      : t('test.fail', 'FAIL')
+  const statusLabel =
+    testResult === null
+      ? t('test.noValue', 'No value')
+      : testResult.pass
+        ? t('test.pass', 'PASS')
+        : t('test.fail', 'FAIL')
 
   return (
     <div
@@ -177,9 +183,7 @@ function TestNodeInner({ id, data, selected }: NodeProps) {
 
         {/* Tolerance row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
-          <span style={{ fontSize: '0.65rem', color: 'var(--muted)', flexShrink: 0 }}>
-            ±
-          </span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--muted)', flexShrink: 0 }}>±</span>
           <input
             type="number"
             value={tolerance}
@@ -201,9 +205,7 @@ function TestNodeInner({ id, data, selected }: NodeProps) {
           />
           <select
             value={toleranceMode}
-            onChange={(e) =>
-              updateField({ toleranceMode: e.target.value as ToleranceMode })
-            }
+            onChange={(e) => updateField({ toleranceMode: e.target.value as ToleranceMode })}
             className="nodrag"
             style={{
               fontSize: '0.6rem',

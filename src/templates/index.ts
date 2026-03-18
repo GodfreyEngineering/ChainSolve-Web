@@ -209,7 +209,17 @@ export const TEMPLATES: TemplateMeta[] = [
     name: 'Full-Vehicle Model',
     description:
       'Complete vehicle simulation: 7-DOF suspension dynamics, powertrain chain, aerodynamic forces, Pacejka tyre model, brake energy analysis, and K&C geometry — pre-wired for a 1 200 kg sports saloon.',
-    tags: ['vehicle', 'automotive', 'suspension', 'powertrain', 'aero', 'tyre', 'brake', 'K&C', 'dynamics'],
+    tags: [
+      'vehicle',
+      'automotive',
+      'suspension',
+      'powertrain',
+      'aero',
+      'tyre',
+      'brake',
+      'K&C',
+      'dynamics',
+    ],
     category: 'Engineering',
     buildGraph: buildFullVehicleModel,
   },
@@ -235,7 +245,7 @@ export const TEMPLATES: TemplateMeta[] = [
     id: 'stirlings-approximation',
     name: "Stirling's Approximation",
     description:
-      "Approximates n! ≈ √(2πn)·(n/e)^n using elementary operations — demonstrates how a complex factorial can be estimated accurately with square-root, power, and multiply blocks.",
+      'Approximates n! ≈ √(2πn)·(n/e)^n using elementary operations — demonstrates how a complex factorial can be estimated accurately with square-root, power, and multiply blocks.',
     tags: ['tutorial', 'maths', 'approximation', 'factorial', 'numerical methods', 'combinatorics'],
     category: 'Science',
     buildGraph: buildStirlingsApproximation,

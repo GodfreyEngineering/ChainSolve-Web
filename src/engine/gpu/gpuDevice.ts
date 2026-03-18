@@ -55,10 +55,7 @@ export async function initGpuDevice(): Promise<GpuDeviceHandle | null> {
           adapter.limits.maxStorageBufferBindingSize,
           256 * 1024 * 1024, // 256 MB ceiling
         ),
-        maxBufferSize: Math.min(
-          adapter.limits.maxBufferSize,
-          256 * 1024 * 1024,
-        ),
+        maxBufferSize: Math.min(adapter.limits.maxBufferSize, 256 * 1024 * 1024),
       },
     })
 

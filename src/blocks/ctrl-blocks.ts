@@ -185,7 +185,14 @@ export function registerCtrlBlocks(register: (def: BlockDef) => void): void {
       { id: 'in_1', label: 'u2' },
     ],
     defaultData: { blockType: 'ctrl.mux', label: 'MUX', dynamicInputCount: 2 },
-    synonyms: ['mux', 'multiplex', 'combine signals', 'vector build', 'signal combiner', 'bus creator'],
+    synonyms: [
+      'mux',
+      'multiplex',
+      'combine signals',
+      'vector build',
+      'signal combiner',
+      'bus creator',
+    ],
     tags: ['control', 'routing', 'signal', 'vector'],
     description:
       'Combines N scalar or vector signals into a single vector. Control-systems MUX — like Simulink Mux.',

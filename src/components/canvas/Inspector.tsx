@@ -1401,10 +1401,15 @@ export function Inspector({
             {/* SHA-256 dataset hash (4.22 — reproducibility) */}
             {nd.datasetHash && (
               <div style={{ marginTop: '0.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                  <span style={{ ...fieldLabel, fontSize: '0.6rem' }}>
-                    SHA-256 hash
-                  </span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 2,
+                  }}
+                >
+                  <span style={{ ...fieldLabel, fontSize: '0.6rem' }}>SHA-256 hash</span>
                   <button
                     type="button"
                     style={{
@@ -1417,7 +1422,9 @@ export function Inspector({
                       cursor: 'pointer',
                       fontFamily: 'inherit',
                     }}
-                    onClick={() => navigator.clipboard.writeText(nd.datasetHash as string).catch(() => {})}
+                    onClick={() =>
+                      navigator.clipboard.writeText(nd.datasetHash as string).catch(() => {})
+                    }
                     title="Copy full SHA-256 hash"
                   >
                     Copy

@@ -52,13 +52,7 @@ export function NodeSideSheet({
   return (
     <>
       {/* Invisible backdrop — click outside to close */}
-      {open && (
-        <div
-          aria-hidden="true"
-          onClick={handleBackdropClick}
-          style={backdropStyle}
-        />
-      )}
+      {open && <div aria-hidden="true" onClick={handleBackdropClick} style={backdropStyle} />}
 
       {/* Side sheet panel */}
       <div

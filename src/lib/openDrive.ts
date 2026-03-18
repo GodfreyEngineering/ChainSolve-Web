@@ -181,7 +181,9 @@ export function parseOpenDrive(xml: string): XodrResult {
       if (pt.y > maxY) maxY = pt.y
     }
   }
-  if (!isFinite(minX)) { minX = maxX = minY = maxY = 0 }
+  if (!isFinite(minX)) {
+    minX = maxX = minY = maxY = 0
+  }
 
   return { roads, totalLength, boundingBox: { minX, maxX, minY, maxY } }
 }

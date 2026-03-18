@@ -61,8 +61,7 @@ function TimerNodeInner({ id, data, selected }: NodeProps) {
     if (prev !== null) {
       const interval = now - prev
       intervalsRef.current = [...intervalsRef.current, interval].slice(-MAX_SAMPLES)
-      const mean =
-        intervalsRef.current.reduce((a, b) => a + b, 0) / intervalsRef.current.length
+      const mean = intervalsRef.current.reduce((a, b) => a + b, 0) / intervalsRef.current.length
       const hz = mean > 0 ? 1000 / mean : 0
       setStats({ lastMs: interval, meanMs: mean, hz, count: countRef.current })
     } else {
@@ -84,10 +83,18 @@ function TimerNodeInner({ id, data, selected }: NodeProps) {
   const TypeIcon = getNodeTypeIcon(nd.blockType)
 
   const fmtMs = (ms: number) =>
-    ms < 1 ? `${(ms * 1000).toFixed(0)}µs` : ms < 1000 ? `${ms.toFixed(1)}ms` : `${(ms / 1000).toFixed(2)}s`
+    ms < 1
+      ? `${(ms * 1000).toFixed(0)}µs`
+      : ms < 1000
+        ? `${ms.toFixed(1)}ms`
+        : `${(ms / 1000).toFixed(2)}s`
 
   const fmtHz = (hz: number) =>
-    hz >= 1000 ? `${(hz / 1000).toFixed(1)}kHz` : hz >= 1 ? `${hz.toFixed(1)}Hz` : `${hz.toFixed(3)}Hz`
+    hz >= 1000
+      ? `${(hz / 1000).toFixed(1)}kHz`
+      : hz >= 1
+        ? `${hz.toFixed(1)}Hz`
+        : `${hz.toFixed(3)}Hz`
 
   return (
     <div

@@ -191,20 +191,71 @@ function CustomRustNodeInner({ id, data, selected }: NodeProps) {
       <div style={s.nodeBody}>
         {/* Input variables */}
         {rustVars.map((rv, i) => (
-          <div key={rv.id} style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3, position: 'relative' }}>
+          <div
+            key={rv.id}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              marginBottom: 3,
+              position: 'relative',
+            }}
+          >
             <input
               className="nodrag"
               value={rv.name}
               onChange={(e) => renameVar(rv.id, e.target.value)}
-              style={{ flex: 1, padding: '1px 4px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 3, fontSize: 9, color: 'var(--text)', fontFamily: "'JetBrains Mono', monospace" }}
+              style={{
+                flex: 1,
+                padding: '1px 4px',
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border)',
+                borderRadius: 3,
+                fontSize: 9,
+                color: 'var(--text)',
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
             />
-            <button className="nodrag" onClick={() => removeVar(rv.id)} style={{ padding: '0 4px', fontSize: 10, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}>×</button>
-            <Handle type="target" position={Position.Left} id={rv.id} style={{ top: `${44 + i * 23}px` }} title={rv.name} />
+            <button
+              className="nodrag"
+              onClick={() => removeVar(rv.id)}
+              style={{
+                padding: '0 4px',
+                fontSize: 10,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--muted)',
+              }}
+            >
+              ×
+            </button>
+            <Handle
+              type="target"
+              position={Position.Left}
+              id={rv.id}
+              style={{ top: `${44 + i * 23}px` }}
+              title={rv.name}
+            />
           </div>
         ))}
 
         {rustVars.length < 8 && (
-          <button className="nodrag" onClick={addVar} style={{ width: '100%', padding: '2px 0', fontSize: 9, background: 'none', border: '1px dashed var(--border)', borderRadius: 3, cursor: 'pointer', color: 'var(--muted)', marginBottom: 4 }}>
+          <button
+            className="nodrag"
+            onClick={addVar}
+            style={{
+              width: '100%',
+              padding: '2px 0',
+              fontSize: 9,
+              background: 'none',
+              border: '1px dashed var(--border)',
+              borderRadius: 3,
+              cursor: 'pointer',
+              color: 'var(--muted)',
+              marginBottom: 4,
+            }}
+          >
             + variable
           </button>
         )}
@@ -215,26 +266,71 @@ function CustomRustNodeInner({ id, data, selected }: NodeProps) {
           value={nd.rustCode ?? ''}
           onChange={(e) => updateNodeData(id, { rustCode: e.target.value })}
           spellCheck={false}
-          placeholder={'// Rust function body\n// Variables: x1: f64, x2: f64, ...\n// Return value is the block output\nx1.powi(2) + x2.powi(2)'}
-          style={{ width: '100%', minHeight: 80, padding: '4px 6px', background: 'var(--surface-2)', border: `1px solid ${(nd.rustError && !isInfoError) ? 'var(--danger)' : 'var(--border)'}`, borderRadius: 4, fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: 'var(--text)', resize: 'vertical', lineHeight: 1.4, boxSizing: 'border-box' }}
+          placeholder={
+            '// Rust function body\n// Variables: x1: f64, x2: f64, ...\n// Return value is the block output\nx1.powi(2) + x2.powi(2)'
+          }
+          style={{
+            width: '100%',
+            minHeight: 80,
+            padding: '4px 6px',
+            background: 'var(--surface-2)',
+            border: `1px solid ${nd.rustError && !isInfoError ? 'var(--danger)' : 'var(--border)'}`,
+            borderRadius: 4,
+            fontSize: 9,
+            fontFamily: "'JetBrains Mono', monospace",
+            color: 'var(--text)',
+            resize: 'vertical',
+            lineHeight: 1.4,
+            boxSizing: 'border-box',
+          }}
         />
 
         {/* Error/info display */}
         {nd.rustError && (
-          <div style={{ marginTop: 4, padding: '2px 4px', background: isInfoError ? 'color-mix(in srgb, var(--primary) 10%, transparent)' : 'color-mix(in srgb, var(--danger) 15%, transparent)', border: `1px solid ${isInfoError ? 'var(--primary)' : 'var(--danger)'}`, borderRadius: 3, fontSize: 8, color: isInfoError ? 'var(--primary)' : 'var(--danger)', fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'pre-wrap', wordBreak: 'break-all' as const, maxHeight: 60, overflow: 'auto' }}>
+          <div
+            style={{
+              marginTop: 4,
+              padding: '2px 4px',
+              background: isInfoError
+                ? 'color-mix(in srgb, var(--primary) 10%, transparent)'
+                : 'color-mix(in srgb, var(--danger) 15%, transparent)',
+              border: `1px solid ${isInfoError ? 'var(--primary)' : 'var(--danger)'}`,
+              borderRadius: 3,
+              fontSize: 8,
+              color: isInfoError ? 'var(--primary)' : 'var(--danger)',
+              fontFamily: "'JetBrains Mono', monospace",
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-all' as const,
+              maxHeight: 60,
+              overflow: 'auto',
+            }}
+          >
             {nd.rustError}
           </div>
         )}
 
         {/* Success: show output value */}
         {!nd.rustError && nd.rustCompiledHash && (
-          <div style={{ marginTop: 4, fontSize: 9, color: 'var(--primary)', fontFamily: "'JetBrains Mono', monospace" }}>
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: 9,
+              color: 'var(--primary)',
+              fontFamily: "'JetBrains Mono', monospace",
+            }}
+          >
             → {(nd.value ?? 0).toPrecision(6)}
           </div>
         )}
       </div>
 
-      <Handle type="source" position={Position.Right} id="out" style={{ top: '50%' }} title="Output (f64)" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="out"
+        style={{ top: '50%' }}
+        title="Output (f64)"
+      />
     </div>
   )
 }

@@ -117,7 +117,10 @@ export function parseNpyToTableData(buf: ArrayBuffer): ParsedCSV | null {
   const descr = descrMatch[1]
 
   // Determine bytes per element and array reader
-  const dtypeMap: Record<string, { bytes: number; read: (dv: DataView, offset: number, le: boolean) => number }> = {
+  const dtypeMap: Record<
+    string,
+    { bytes: number; read: (dv: DataView, offset: number, le: boolean) => number }
+  > = {
     '<f8': { bytes: 8, read: (dv, o, le) => dv.getFloat64(o, le) },
     '<f4': { bytes: 4, read: (dv, o, le) => dv.getFloat32(o, le) },
     '>f8': { bytes: 8, read: (dv, o, _le) => dv.getFloat64(o, false) },
@@ -135,7 +138,10 @@ export function parseNpyToTableData(buf: ArrayBuffer): ParsedCSV | null {
   // Parse shape
   const shapeMatch = header.match(/'shape'\s*:\s*\(([^)]*)\)/)
   if (!shapeMatch) return null
-  const shapeParts = shapeMatch[1].split(',').map((s) => s.trim()).filter(Boolean)
+  const shapeParts = shapeMatch[1]
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
   const shape = shapeParts.map(Number)
   if (shape.some(isNaN)) return null
 
@@ -154,9 +160,7 @@ export function parseNpyToTableData(buf: ArrayBuffer): ParsedCSV | null {
     flat.push(dtype.read(dv, i * dtype.bytes, littleEndian))
   }
 
-  const columns = Array.from({ length: ncols }, (_, ci) =>
-    ncols === 1 ? 'value' : String(ci + 1),
-  )
+  const columns = Array.from({ length: ncols }, (_, ci) => (ncols === 1 ? 'value' : String(ci + 1)))
   const rows: number[][] = []
   for (let ri = 0; ri < nrows; ri++) {
     rows.push(flat.slice(ri * ncols, ri * ncols + ncols))
@@ -180,7 +184,13 @@ export function parseJSONToTableData(text: string): ParsedCSV | null {
     const parsed: unknown = JSON.parse(text)
 
     // Array of objects: [{col1: val, col2: val}, ...]
-    if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0] !== null && !Array.isArray(parsed[0])) {
+    if (
+      Array.isArray(parsed) &&
+      parsed.length > 0 &&
+      typeof parsed[0] === 'object' &&
+      parsed[0] !== null &&
+      !Array.isArray(parsed[0])
+    ) {
       const objs = parsed as Record<string, unknown>[]
       const columns = Object.keys(objs[0])
       if (columns.length === 0) return null
@@ -197,9 +207,7 @@ export function parseJSONToTableData(text: string): ParsedCSV | null {
     if (Array.isArray(parsed) && parsed.length > 0 && Array.isArray(parsed[0])) {
       const arrs = parsed as unknown[][]
       const numCols = Math.max(...arrs.map((r) => r.length))
-      const columns = Array.from({ length: numCols }, (_, i) =>
-        String.fromCharCode(65 + (i % 26)),
-      )
+      const columns = Array.from({ length: numCols }, (_, i) => String.fromCharCode(65 + (i % 26)))
       const rows = arrs.map((row) =>
         columns.map((_, ci) => {
           const n = Number(row[ci])
@@ -237,54 +245,13 @@ export function parseJSONToTableData(text: string): ParsedCSV | null {
  * Reads the first sheet. Row 1 is used as column headers if any cell is
  * non-numeric; otherwise columns are named A, B, C…
  * Non-numeric cell values in data rows are coerced to 0.
- * Dynamically imports SheetJS (xlsx) so it does not affect initial bundle size.
+ *
+ * Note: XLSX parsing is not currently supported (the xlsx dependency was
+ * removed due to unpatched security vulnerabilities). This function returns
+ * null until a safe replacement is integrated. CSV/TSV import via
+ * parseCSV() remains fully functional.
  */
-export async function parseXlsxToTableData(buf: ArrayBuffer): Promise<ParsedCSV | null> {
-  try {
-    const XLSX = await import('xlsx')
-    const wb = XLSX.read(new Uint8Array(buf), { type: 'array' })
-    const sheetName = wb.SheetNames[0]
-    if (!sheetName) return null
-    const ws = wb.Sheets[sheetName]
-    if (!ws) return null
-
-    // Get raw rows as arrays (header: 1 keeps first row as data)
-    const raw = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: 0 })
-    if (raw.length === 0) return null
-
-    const firstRow = raw[0] as unknown[]
-
-    // Detect header row: first row is a header if any cell is non-numeric string
-    const isHeader = firstRow.some((v) => typeof v === 'string' && v !== '' && isNaN(Number(v)))
-
-    let columns: string[]
-    let dataRows: unknown[][]
-
-    if (isHeader) {
-      columns = firstRow.map((v, i) =>
-        v != null && String(v).trim() !== ''
-          ? String(v).trim()
-          : String.fromCharCode(65 + (i % 26)),
-      )
-      dataRows = raw.slice(1) as unknown[][]
-    } else {
-      columns = firstRow.map((_, i) => String.fromCharCode(65 + (i % 26)))
-      dataRows = raw as unknown[][]
-    }
-
-    if (dataRows.length === 0) return { columns, rows: [columns.map(() => 0)] }
-
-    const rows = dataRows.map((row) => {
-      const cells = row as unknown[]
-      return columns.map((_, ci) => {
-        const cellVal = cells[ci]
-        const n = Number(cellVal)
-        return isNaN(n) ? 0 : n
-      })
-    })
-
-    return { columns, rows }
-  } catch {
-    return null
-  }
+export async function parseXlsxToTableData(_buf: ArrayBuffer): Promise<ParsedCSV | null> {
+  // TODO: integrate a safe XLSX parser (e.g. exceljs or a WASM-based reader)
+  return null
 }

@@ -33,8 +33,14 @@ function normalise(values: number[]): number[] {
 }
 
 const COLORS = [
-  '#1CABB0', '#f97316', '#a855f7', '#22c55e',
-  '#3b82f6', '#ef4444', '#eab308', '#ec4899',
+  '#1CABB0',
+  '#f97316',
+  '#a855f7',
+  '#22c55e',
+  '#3b82f6',
+  '#ef4444',
+  '#eab308',
+  '#ec4899',
 ]
 
 function ParallelCoords({ runs, axes }: ParallelCoordsProps) {
@@ -85,26 +91,27 @@ function ParallelCoords({ runs, axes }: ParallelCoordsProps) {
       {axes.map((axis, i) => (
         <g key={axis}>
           <line
-            x1={colX(i)} y1={padY}
-            x2={colX(i)} y2={height - padY}
-            stroke="var(--border)" strokeWidth={1}
+            x1={colX(i)}
+            y1={padY}
+            x2={colX(i)}
+            y2={height - padY}
+            stroke="var(--border)"
+            strokeWidth={1}
           />
-          <text
-            x={colX(i)} y={padY - 4}
-            textAnchor="middle"
-            fontSize={9}
-            fill="var(--muted)"
-          >
+          <text x={colX(i)} y={padY - 4} textAnchor="middle" fontSize={9} fill="var(--muted)">
             {axis}
           </text>
           <text
-            x={colX(i)} y={height - padY + 12}
+            x={colX(i)}
+            y={height - padY + 12}
             textAnchor="middle"
             fontSize={8}
             fill="var(--muted)"
           >
-            {axisValues[axis].reduce((mi, v, idx) =>
-              v < (axisValues[axis][mi] ?? Infinity) ? idx : mi, 0) === 0
+            {axisValues[axis].reduce(
+              (mi, v, idx) => (v < (axisValues[axis][mi] ?? Infinity) ? idx : mi),
+              0,
+            ) === 0
               ? String(axisValues[axis][0]?.toFixed(3) ?? '')
               : ''}
           </text>
@@ -140,9 +147,9 @@ interface RunRowProps {
 
 function RunRow({ run, selected, onToggle, onDelete }: RunRowProps) {
   const statusColor: Record<string, string> = {
-    running:   '#3b82f6',
+    running: '#3b82f6',
     completed: '#22c55e',
-    failed:    '#ef4444',
+    failed: '#ef4444',
     cancelled: '#6b7280',
   }
   const color = statusColor[run.status] ?? '#6b7280'
@@ -151,7 +158,9 @@ function RunRow({ run, selected, onToggle, onDelete }: RunRowProps) {
   return (
     <tr
       style={{
-        background: selected ? 'color-mix(in srgb, var(--primary) 10%, transparent)' : 'transparent',
+        background: selected
+          ? 'color-mix(in srgb, var(--primary) 10%, transparent)'
+          : 'transparent',
         cursor: 'pointer',
       }}
       onClick={onToggle}
@@ -165,7 +174,16 @@ function RunRow({ run, selected, onToggle, onDelete }: RunRowProps) {
           aria-label={`Select run ${run.name}`}
         />
       </td>
-      <td style={{ padding: '4px 6px', fontSize: 11, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <td
+        style={{
+          padding: '4px 6px',
+          fontSize: 11,
+          maxWidth: 140,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
         {run.name}
       </td>
       <td style={{ padding: '4px 6px' }}>
@@ -179,9 +197,18 @@ function RunRow({ run, selected, onToggle, onDelete }: RunRowProps) {
       </td>
       <td style={{ padding: '4px 6px' }}>
         <button
-          onClick={(e) => { e.stopPropagation(); onDelete() }}
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete()
+          }}
           aria-label={`Delete run ${run.name}`}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 12 }}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'var(--muted)',
+            fontSize: 12,
+          }}
         >
           ✕
         </button>
@@ -207,7 +234,9 @@ export function ExperimentPanel({ projectId }: ExperimentPanelProps) {
 
   useEffect(() => {
     mountedRef.current = true
-    return () => { mountedRef.current = false }
+    return () => {
+      mountedRef.current = false
+    }
   }, [])
 
   const load = useCallback(async () => {
@@ -224,7 +253,9 @@ export function ExperimentPanel({ projectId }: ExperimentPanelProps) {
     }
   }, [projectId])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    void load()
+  }, [load])
 
   const toggleSelect = useCallback((id: string) => {
     setSelected((prev) => {
@@ -238,16 +269,17 @@ export function ExperimentPanel({ projectId }: ExperimentPanelProps) {
     try {
       await deleteRun(id)
       setRuns((prev) => prev.filter((r) => r.id !== id))
-      setSelected((prev) => { const n = new Set(prev); n.delete(id); return n })
+      setSelected((prev) => {
+        const n = new Set(prev)
+        n.delete(id)
+        return n
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     }
   }, [])
 
-  const selectedRuns = useMemo(
-    () => runs.filter((r) => selected.has(r.id)),
-    [runs, selected],
-  )
+  const selectedRuns = useMemo(() => runs.filter((r) => selected.has(r.id)), [runs, selected])
 
   // Collect all numeric metric/param keys shared across selected runs for parallel coords
   const parallelAxes = useMemo(() => {
@@ -272,7 +304,15 @@ export function ExperimentPanel({ projectId }: ExperimentPanelProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderBottom: '1px solid var(--border)' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '6px 10px',
+          borderBottom: '1px solid var(--border)',
+        }}
+      >
         <span style={{ fontSize: 12, fontWeight: 600 }}>
           {t('experiments.title', 'Experiments')} ({runs.length})
         </span>
@@ -280,7 +320,14 @@ export function ExperimentPanel({ projectId }: ExperimentPanelProps) {
           onClick={() => void load()}
           disabled={loading}
           aria-label={t('experiments.refresh', 'Refresh')}
-          style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 6px', cursor: 'pointer', fontSize: 11 }}
+          style={{
+            background: 'none',
+            border: '1px solid var(--border)',
+            borderRadius: 4,
+            padding: '2px 6px',
+            cursor: 'pointer',
+            fontSize: 11,
+          }}
         >
           {loading ? '⟳' : t('experiments.refresh', 'Refresh')}
         </button>
@@ -292,14 +339,27 @@ export function ExperimentPanel({ projectId }: ExperimentPanelProps) {
       </div>
 
       {error && (
-        <div style={{ padding: '6px 10px', background: 'color-mix(in srgb, var(--error) 15%, transparent)', fontSize: 11, color: 'var(--error)' }}>
+        <div
+          style={{
+            padding: '6px 10px',
+            background: 'color-mix(in srgb, var(--error) 15%, transparent)',
+            fontSize: 11,
+            color: 'var(--error)',
+          }}
+        >
           {error}
         </div>
       )}
 
       {/* Parallel coordinates (only when 2+ selected) */}
       {selected.size >= 2 && (
-        <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border)', overflowX: 'auto' }}>
+        <div
+          style={{
+            padding: '8px 10px',
+            borderBottom: '1px solid var(--border)',
+            overflowX: 'auto',
+          }}
+        >
           <div style={{ fontSize: 10, color: 'var(--muted)', marginBottom: 4 }}>
             {t('experiments.parallelCoords', 'Parallel Coordinates')}
           </div>
@@ -311,7 +371,10 @@ export function ExperimentPanel({ projectId }: ExperimentPanelProps) {
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {runs.length === 0 && !loading && (
           <div style={{ padding: 16, color: 'var(--muted)', fontSize: 11, textAlign: 'center' }}>
-            {t('experiments.noRuns', 'No experiment runs yet. Training runs from Neural Network blocks will appear here.')}
+            {t(
+              'experiments.noRuns',
+              'No experiment runs yet. Training runs from Neural Network blocks will appear here.',
+            )}
           </div>
         )}
         {runs.length > 0 && (
@@ -319,10 +382,18 @@ export function ExperimentPanel({ projectId }: ExperimentPanelProps) {
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
                 <th style={{ padding: '4px 6px', width: 16 }} />
-                <th style={{ padding: '4px 6px', textAlign: 'left' }}>{t('experiments.name', 'Name')}</th>
-                <th style={{ padding: '4px 6px', textAlign: 'left' }}>{t('experiments.status', 'Status')}</th>
-                <th style={{ padding: '4px 6px', textAlign: 'left' }}>{t('experiments.metrics', 'Metrics')}</th>
-                <th style={{ padding: '4px 6px', textAlign: 'left' }}>{t('experiments.date', 'Date')}</th>
+                <th style={{ padding: '4px 6px', textAlign: 'left' }}>
+                  {t('experiments.name', 'Name')}
+                </th>
+                <th style={{ padding: '4px 6px', textAlign: 'left' }}>
+                  {t('experiments.status', 'Status')}
+                </th>
+                <th style={{ padding: '4px 6px', textAlign: 'left' }}>
+                  {t('experiments.metrics', 'Metrics')}
+                </th>
+                <th style={{ padding: '4px 6px', textAlign: 'left' }}>
+                  {t('experiments.date', 'Date')}
+                </th>
                 <th style={{ padding: '4px 6px', width: 24 }} />
               </tr>
             </thead>

@@ -315,9 +315,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
               t('plot.animTimeColumn'),
               <select
                 value={config.animTimeColumn ?? ''}
-                onChange={(e) =>
-                  onUpdate({ animTimeColumn: e.target.value || undefined })
-                }
+                onChange={(e) => onUpdate({ animTimeColumn: e.target.value || undefined })}
                 style={selectStyle}
               >
                 <option value="">{t('plot.animNone')}</option>
@@ -350,9 +348,7 @@ export function PlotInspector({ config, inputValue, onUpdate }: PlotInspectorPro
                 </select>,
               )}
               {config.yColumns2 && config.yColumns2.length > 0 && (
-                <div
-                  style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}
-                >
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
                   {field(
                     t('plot.y2Label'),
                     <input
@@ -477,7 +473,12 @@ function AnnotationEditor({ annotations, onUpdate }: AnnotationEditorProps) {
           <div key={idx} style={annotationCard}>
             {/* Row 1: type + axis + remove */}
             <div
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '0.3rem', marginBottom: '0.3rem' }}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr auto',
+                gap: '0.3rem',
+                marginBottom: '0.3rem',
+              }}
             >
               <select
                 style={{ ...tinyInp, appearance: 'auto', cursor: 'pointer' }}
@@ -509,7 +510,14 @@ function AnnotationEditor({ annotations, onUpdate }: AnnotationEditorProps) {
 
             {/* Row 2: value fields */}
             {kind === 'line' && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem', marginBottom: '0.3rem' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '0.3rem',
+                  marginBottom: '0.3rem',
+                }}
+              >
                 <input
                   type="number"
                   style={tinyInp}
@@ -527,7 +535,14 @@ function AnnotationEditor({ annotations, onUpdate }: AnnotationEditorProps) {
             )}
 
             {kind === 'band' && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.3rem', marginBottom: '0.3rem' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gap: '0.3rem',
+                  marginBottom: '0.3rem',
+                }}
+              >
                 <input
                   type="number"
                   style={tinyInp}
@@ -552,7 +567,14 @@ function AnnotationEditor({ annotations, onUpdate }: AnnotationEditorProps) {
             )}
 
             {kind === 'text' && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.3rem', marginBottom: '0.3rem' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gap: '0.3rem',
+                  marginBottom: '0.3rem',
+                }}
+              >
                 <input
                   type="number"
                   style={tinyInp}
@@ -581,8 +603,12 @@ function AnnotationEditor({ annotations, onUpdate }: AnnotationEditorProps) {
               type="text"
               style={tinyInp}
               value={ann.text ?? ann.label ?? ''}
-              placeholder={kind === 'text' ? t('plot.annotationTextContent') : t('plot.annotationLabel')}
-              onChange={(e) => updateAt(idx, { text: e.target.value || undefined, label: undefined })}
+              placeholder={
+                kind === 'text' ? t('plot.annotationTextContent') : t('plot.annotationLabel')
+              }
+              onChange={(e) =>
+                updateAt(idx, { text: e.target.value || undefined, label: undefined })
+              }
             />
           </div>
         )

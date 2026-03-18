@@ -31,10 +31,7 @@ export interface SqlQueryResult {
  * Error handling: network or SQL errors surface as SqlQueryResult.error;
  * callers should display the message and treat columns/rows as empty.
  */
-export async function runSqlQuery(
-  sql: string,
-  params: unknown[] = [],
-): Promise<SqlQueryResult> {
+export async function runSqlQuery(sql: string, params: unknown[] = []): Promise<SqlQueryResult> {
   const t0 = performance.now()
 
   if (!sql.trim()) {

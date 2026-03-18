@@ -63,11 +63,30 @@ function ZOHNodeInner({ id, data, selected }: NodeProps) {
       </div>
       <div style={s.nodeBody}>
         {/* Timing diagram */}
-        <svg width={100} height={24} style={{ display: 'block', margin: '0 auto 6px', opacity: 0.7 }}>
-          <polyline points={diagramPts} fill="none" stroke={typeColor} strokeWidth={1.5} strokeLinejoin="round" />
+        <svg
+          width={100}
+          height={24}
+          style={{ display: 'block', margin: '0 auto 6px', opacity: 0.7 }}
+        >
+          <polyline
+            points={diagramPts}
+            fill="none"
+            stroke={typeColor}
+            strokeWidth={1.5}
+            strokeLinejoin="round"
+          />
         </svg>
 
-        <label style={{ fontSize: 9, color: '#aaa', display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 4 }}>
+        <label
+          style={{
+            fontSize: 9,
+            color: '#aaa',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            marginBottom: 4,
+          }}
+        >
           {t('zoh.period', 'Sample period (s)')}
           <input
             className="nodrag"
@@ -75,11 +94,18 @@ function ZOHNodeInner({ id, data, selected }: NodeProps) {
             min={0.0001}
             step={0.001}
             value={samplePeriod}
-            onChange={(e) => updateNodeData(id, { samplePeriod: parseFloat(e.target.value) || 0.01 })}
+            onChange={(e) =>
+              updateNodeData(id, { samplePeriod: parseFloat(e.target.value) || 0.01 })
+            }
             style={{
-              background: '#1a1a1a', color: '#F4F4F3', border: '1px solid #444',
-              borderRadius: 3, padding: '2px 6px', fontSize: 10,
-              fontFamily: 'JetBrains Mono, monospace', outline: 'none',
+              background: '#1a1a1a',
+              color: '#F4F4F3',
+              border: '1px solid #444',
+              borderRadius: 3,
+              padding: '2px 6px',
+              fontSize: 10,
+              fontFamily: 'JetBrains Mono, monospace',
+              outline: 'none',
             }}
           />
         </label>
@@ -87,15 +113,36 @@ function ZOHNodeInner({ id, data, selected }: NodeProps) {
         <div style={{ fontSize: 9, color: '#888', fontFamily: 'JetBrains Mono, monospace' }}>
           {t('zoh.fs', 'fs')} = {(1 / samplePeriod).toFixed(1)} Hz
         </div>
-        <div style={{ fontSize: 9, color: '#aaa', fontFamily: 'JetBrains Mono, monospace', marginTop: 2 }}>
+        <div
+          style={{
+            fontSize: 9,
+            color: '#aaa',
+            fontFamily: 'JetBrains Mono, monospace',
+            marginTop: 2,
+          }}
+        >
           {t('zoh.held', 'Held')} = {heldValue.toFixed(4)}
         </div>
       </div>
 
-      <Handle type="target" position={Position.Left} id="u"
-        style={{ top: '50%', background: '#888', width: 8, height: 8, border: '2px solid #1a1a1a' }} />
-      <Handle type="source" position={Position.Right} id="out"
-        style={{ top: '50%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }} />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="u"
+        style={{ top: '50%', background: '#888', width: 8, height: 8, border: '2px solid #1a1a1a' }}
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="out"
+        style={{
+          top: '50%',
+          background: typeColor,
+          width: 8,
+          height: 8,
+          border: '2px solid #1a1a1a',
+        }}
+      />
     </div>
   )
 }
@@ -129,7 +176,7 @@ function RateTransitionNodeInner({ id, data, selected }: NodeProps) {
     updateNodeData(id, { value: v })
   }, [id, upstream, updateNodeData])
 
-  const ratio = inputRate > 0 ? (outputRate / inputRate) : 1
+  const ratio = inputRate > 0 ? outputRate / inputRate : 1
   const isDown = outputRate < inputRate
 
   return (
@@ -143,59 +190,102 @@ function RateTransitionNodeInner({ id, data, selected }: NodeProps) {
     >
       <div style={{ ...s.nodeHeader, background: typeColor }}>
         <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
-        <span style={s.nodeHeaderLabel}>{nd.label ?? t('rateTransition.label', 'Rate Transition')}</span>
+        <span style={s.nodeHeaderLabel}>
+          {nd.label ?? t('rateTransition.label', 'Rate Transition')}
+        </span>
       </div>
       <div style={s.nodeBody}>
         {/* Rate ratio indicator */}
-        <div style={{
-          textAlign: 'center', fontSize: 14, fontWeight: 700,
-          fontFamily: 'JetBrains Mono, monospace', color: typeColor, marginBottom: 6,
-        }}>
+        <div
+          style={{
+            textAlign: 'center',
+            fontSize: 14,
+            fontWeight: 700,
+            fontFamily: 'JetBrains Mono, monospace',
+            color: typeColor,
+            marginBottom: 6,
+          }}
+        >
           {inputRate} Hz {isDown ? '↓' : '↑'} {outputRate} Hz
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 6px', marginBottom: 6 }}>
-          <label style={{ fontSize: 9, color: '#aaa', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '4px 6px',
+            marginBottom: 6,
+          }}
+        >
+          <label
+            style={{ fontSize: 9, color: '#aaa', display: 'flex', flexDirection: 'column', gap: 2 }}
+          >
             {t('rateTransition.inputRate', 'In (Hz)')}
             <input
               className="nodrag"
               type="number"
               min={1}
               value={inputRate}
-              onChange={(e) => updateNodeData(id, { inputRate: parseFloat(e.target.value) || 1000 })}
+              onChange={(e) =>
+                updateNodeData(id, { inputRate: parseFloat(e.target.value) || 1000 })
+              }
               style={{
-                background: '#1a1a1a', color: '#F4F4F3', border: '1px solid #444',
-                borderRadius: 3, padding: '2px 5px', fontSize: 10,
-                fontFamily: 'JetBrains Mono, monospace', outline: 'none',
+                background: '#1a1a1a',
+                color: '#F4F4F3',
+                border: '1px solid #444',
+                borderRadius: 3,
+                padding: '2px 5px',
+                fontSize: 10,
+                fontFamily: 'JetBrains Mono, monospace',
+                outline: 'none',
               }}
             />
           </label>
-          <label style={{ fontSize: 9, color: '#aaa', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <label
+            style={{ fontSize: 9, color: '#aaa', display: 'flex', flexDirection: 'column', gap: 2 }}
+          >
             {t('rateTransition.outputRate', 'Out (Hz)')}
             <input
               className="nodrag"
               type="number"
               min={1}
               value={outputRate}
-              onChange={(e) => updateNodeData(id, { outputRate: parseFloat(e.target.value) || 100 })}
+              onChange={(e) =>
+                updateNodeData(id, { outputRate: parseFloat(e.target.value) || 100 })
+              }
               style={{
-                background: '#1a1a1a', color: '#F4F4F3', border: '1px solid #444',
-                borderRadius: 3, padding: '2px 5px', fontSize: 10,
-                fontFamily: 'JetBrains Mono, monospace', outline: 'none',
+                background: '#1a1a1a',
+                color: '#F4F4F3',
+                border: '1px solid #444',
+                borderRadius: 3,
+                padding: '2px 5px',
+                fontSize: 10,
+                fontFamily: 'JetBrains Mono, monospace',
+                outline: 'none',
               }}
             />
           </label>
         </div>
 
-        <label style={{ fontSize: 9, color: '#aaa', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <label
+          style={{ fontSize: 9, color: '#aaa', display: 'flex', alignItems: 'center', gap: 6 }}
+        >
           {t('rateTransition.interpolation', 'Interpolation')}
           <select
             className="nodrag"
             value={interpolation}
-            onChange={(e) => updateNodeData(id, { interpolation: e.target.value as 'zoh' | 'linear' })}
+            onChange={(e) =>
+              updateNodeData(id, { interpolation: e.target.value as 'zoh' | 'linear' })
+            }
             style={{
-              background: '#1a1a1a', color: '#F4F4F3', border: '1px solid #444',
-              borderRadius: 3, padding: '2px 4px', fontSize: 9, outline: 'none', flex: 1,
+              background: '#1a1a1a',
+              color: '#F4F4F3',
+              border: '1px solid #444',
+              borderRadius: 3,
+              padding: '2px 4px',
+              fontSize: 9,
+              outline: 'none',
+              flex: 1,
             }}
           >
             <option value="zoh">ZOH</option>
@@ -205,14 +295,30 @@ function RateTransitionNodeInner({ id, data, selected }: NodeProps) {
 
         <div style={{ fontSize: 8, color: '#666', marginTop: 4 }}>
           {t('rateTransition.ratio', 'Ratio')}: {ratio.toFixed(4)}
-          {isDown ? ` (${t('rateTransition.downsample', 'downsample')})` : ` (${t('rateTransition.upsample', 'upsample')})`}
+          {isDown
+            ? ` (${t('rateTransition.downsample', 'downsample')})`
+            : ` (${t('rateTransition.upsample', 'upsample')})`}
         </div>
       </div>
 
-      <Handle type="target" position={Position.Left} id="u"
-        style={{ top: '50%', background: '#888', width: 8, height: 8, border: '2px solid #1a1a1a' }} />
-      <Handle type="source" position={Position.Right} id="out"
-        style={{ top: '50%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }} />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="u"
+        style={{ top: '50%', background: '#888', width: 8, height: 8, border: '2px solid #1a1a1a' }}
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="out"
+        style={{
+          top: '50%',
+          background: typeColor,
+          width: 8,
+          height: 8,
+          border: '2px solid #1a1a1a',
+        }}
+      />
     </div>
   )
 }

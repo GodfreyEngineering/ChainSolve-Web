@@ -127,7 +127,8 @@ export function ExportDialog({
 
   if (!open) return null
 
-  const scopeDisabled = prefs.format === 'json' || prefs.format === 'git' || prefs.format === 'html' || !hasProject
+  const scopeDisabled =
+    prefs.format === 'json' || prefs.format === 'git' || prefs.format === 'html' || !hasProject
 
   return (
     <div style={overlay} onClick={onClose}>

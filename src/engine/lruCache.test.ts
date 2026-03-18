@@ -129,7 +129,10 @@ describe('LruCache', () => {
     c.set('b', 20)
     c.set('c', 30) // evicts 'a'
     c.set('d', 40) // evicts 'b'
-    expect(evicted).toEqual([['a', 10], ['b', 20]])
+    expect(evicted).toEqual([
+      ['a', 10],
+      ['b', 20],
+    ])
   })
 
   it('rejects maxEntries < 1', () => {
@@ -174,9 +177,9 @@ describe('BlockResultCache', () => {
   it('tracks hit rate', () => {
     const cache = new BlockResultCache(100)
     cache.set('n', 'h', 1)
-    cache.get('n', 'h')   // hit
-    cache.get('n', 'h')   // hit
-    cache.get('n', 'x')   // miss
+    cache.get('n', 'h') // hit
+    cache.get('n', 'h') // hit
+    cache.get('n', 'x') // miss
     expect(cache.hits).toBe(2)
     expect(cache.misses).toBe(1)
     expect(cache.hitRate).toBeCloseTo(2 / 3)

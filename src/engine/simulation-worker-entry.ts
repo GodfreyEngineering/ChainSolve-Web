@@ -21,9 +21,7 @@
  * 8.9: Since this is a separate worker, normal graph evaluation is unaffected.
  */
 
-import initWasm, {
-  run_simulation,
-} from '@engine-wasm/engine_wasm.js'
+import initWasm, { run_simulation } from '@engine-wasm/engine_wasm.js'
 import wasmUrl from '@engine-wasm/engine_wasm_bg.wasm?url'
 import type { SimulationConfig } from './simulationWorker'
 import type { SimTaskMetrics } from '../stores/simulationStatusStore'
@@ -126,7 +124,8 @@ async function runParameterSweep(config: SimulationConfig): Promise<void> {
   const totalCycles = loop ? loopCount : 1
 
   // 7.10: Streaming ring-buffer — bounded by memory budget.
-  const budgetBytes = typeof inputs.bufferBytes === 'number' ? inputs.bufferBytes : BROWSER_BUDGET_BYTES
+  const budgetBytes =
+    typeof inputs.bufferBytes === 'number' ? inputs.bufferBytes : BROWSER_BUDGET_BYTES
   const capacity = capacityForBudget(budgetBytes)
   const buffer = new StreamingBuffer<number>(capacity)
 
@@ -142,11 +141,19 @@ async function runParameterSweep(config: SimulationConfig): Promise<void> {
       // 7.10: Append to streaming buffer (evicts oldest when full).
       buffer.append(value)
 
-      postProgress(nodeId, i + 1, totalIterations, cycle, totalCycles, {
-        paramValue: value,
-        bufferedEntries: buffer.size,
-        bufferFull: buffer.isFull ? 1 : 0,
-      }, buffer.tail(256))
+      postProgress(
+        nodeId,
+        i + 1,
+        totalIterations,
+        cycle,
+        totalCycles,
+        {
+          paramValue: value,
+          bufferedEntries: buffer.size,
+          bufferFull: buffer.isFull ? 1 : 0,
+        },
+        buffer.tail(256),
+      )
     }
   }
 
@@ -200,25 +207,22 @@ async function runWasmSimulation(config: SimulationConfig): Promise<void> {
     ...(convergenceThreshold !== undefined ? { convergenceThreshold } : {}),
   }
 
-  const resultJson: string = run_simulation(
-    JSON.stringify(wasmConfig),
-    (progressJson: string) => {
-      if (cancelled) return
-      try {
-        const p = JSON.parse(progressJson) as {
-          iteration: number
-          totalIterations: number
-          cycle: number
-          totalCycles: number
-          elapsedUs: number
-        }
-        const metrics: SimTaskMetrics = { elapsedUs: p.elapsedUs }
-        postProgress(nodeId, p.iteration, p.totalIterations, p.cycle, p.totalCycles, metrics)
-      } catch {
-        // ignore malformed progress JSON
+  const resultJson: string = run_simulation(JSON.stringify(wasmConfig), (progressJson: string) => {
+    if (cancelled) return
+    try {
+      const p = JSON.parse(progressJson) as {
+        iteration: number
+        totalIterations: number
+        cycle: number
+        totalCycles: number
+        elapsedUs: number
       }
-    },
-  )
+      const metrics: SimTaskMetrics = { elapsedUs: p.elapsedUs }
+      postProgress(nodeId, p.iteration, p.totalIterations, p.cycle, p.totalCycles, metrics)
+    } catch {
+      // ignore malformed progress JSON
+    }
+  })
 
   if (cancelled) return
 
@@ -248,8 +252,14 @@ async function runWasmSimulation(config: SimulationConfig): Promise<void> {
  * Used when no snapshot is provided in config.inputs (e.g. pure JS operations).
  */
 async function runGenericLoop(config: SimulationConfig): Promise<void> {
-  const { nodeId, maxIterations, endTime, convergenceThreshold, loop = false, loopCount = 1 } =
-    config
+  const {
+    nodeId,
+    maxIterations,
+    endTime,
+    convergenceThreshold,
+    loop = false,
+    loopCount = 1,
+  } = config
   const totalIterations = maxIterations
   const totalCycles = loop ? loopCount : 1
   let metricValue = 1.0

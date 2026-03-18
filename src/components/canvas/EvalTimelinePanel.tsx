@@ -77,13 +77,38 @@ export function EvalTimelinePanel() {
   const lastMs = count > 0 ? history[history.length - 1].ms : 0
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', padding: '0.5rem 0.75rem', gap: '0.5rem' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        overflow: 'hidden',
+        padding: '0.5rem 0.75rem',
+        gap: '0.5rem',
+      }}
+    >
       {/* Stats row */}
       <div style={{ display: 'flex', gap: '1.5rem', flexShrink: 0, flexWrap: 'wrap' }}>
-        <StatChip label={t('timeline.lastEval', 'Last')} value={count > 0 ? `${lastMs.toFixed(1)} ms` : '—'} color={count > 0 ? barColor(lastMs) : 'var(--muted)'} />
-        <StatChip label={t('timeline.avgEval', 'Avg')} value={count > 0 ? `${avgMs.toFixed(1)} ms` : '—'} color="var(--text-faint, #888)" />
-        <StatChip label={t('timeline.maxEval', 'Max')} value={count > 0 ? `${maxMs.toFixed(1)} ms` : '—'} color={count > 0 ? barColor(maxMs) : 'var(--muted)'} />
-        <StatChip label={t('timeline.evalCount', 'Evals')} value={String(count)} color="var(--primary, #1CABB0)" />
+        <StatChip
+          label={t('timeline.lastEval', 'Last')}
+          value={count > 0 ? `${lastMs.toFixed(1)} ms` : '—'}
+          color={count > 0 ? barColor(lastMs) : 'var(--muted)'}
+        />
+        <StatChip
+          label={t('timeline.avgEval', 'Avg')}
+          value={count > 0 ? `${avgMs.toFixed(1)} ms` : '—'}
+          color="var(--text-faint, #888)"
+        />
+        <StatChip
+          label={t('timeline.maxEval', 'Max')}
+          value={count > 0 ? `${maxMs.toFixed(1)} ms` : '—'}
+          color={count > 0 ? barColor(maxMs) : 'var(--muted)'}
+        />
+        <StatChip
+          label={t('timeline.evalCount', 'Evals')}
+          value={String(count)}
+          color="var(--primary, #1CABB0)"
+        />
       </div>
 
       {/* Bar chart */}
@@ -92,7 +117,17 @@ export function EvalTimelinePanel() {
         onMouseLeave={() => setTooltip(null)}
       >
         {count === 0 ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted)', fontSize: '0.75rem', opacity: 0.6 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              color: 'var(--muted)',
+              fontSize: '0.75rem',
+              opacity: 0.6,
+            }}
+          >
             {t('timeline.empty', 'No evaluations yet. Run the graph to see timing data.')}
           </div>
         ) : (
@@ -122,15 +157,30 @@ export function EvalTimelinePanel() {
               boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
             }}
           >
-            <div style={{ fontWeight: 700, color: barColor(tooltip.record.ms) }}>{tooltip.record.ms.toFixed(2)} ms</div>
-            <div style={{ opacity: 0.75 }}>{tooltip.record.nodes}/{tooltip.record.totalNodes} {t('timeline.nodes', 'nodes')}</div>
-            <div style={{ opacity: 0.5 }}>{new Date(tooltip.record.timestamp).toLocaleTimeString()}</div>
+            <div style={{ fontWeight: 700, color: barColor(tooltip.record.ms) }}>
+              {tooltip.record.ms.toFixed(2)} ms
+            </div>
+            <div style={{ opacity: 0.75 }}>
+              {tooltip.record.nodes}/{tooltip.record.totalNodes} {t('timeline.nodes', 'nodes')}
+            </div>
+            <div style={{ opacity: 0.5 }}>
+              {new Date(tooltip.record.timestamp).toLocaleTimeString()}
+            </div>
           </div>
         )}
       </div>
 
       {/* Legend */}
-      <div style={{ display: 'flex', gap: '1rem', flexShrink: 0, fontSize: '0.62rem', color: 'var(--muted)', alignItems: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '1rem',
+          flexShrink: 0,
+          fontSize: '0.62rem',
+          color: 'var(--muted)',
+          alignItems: 'center',
+        }}
+      >
         <LegendItem color="#22c55e" label={t('timeline.fast', 'Fast (<20ms)')} />
         <LegendItem color="#f59e0b" label={t('timeline.moderate', 'Moderate (<100ms)')} />
         <LegendItem color="#ef4444" label={t('timeline.slow', 'Slow (≥100ms)')} />
@@ -144,8 +194,26 @@ export function EvalTimelinePanel() {
 function StatChip({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-      <span style={{ fontSize: '0.6rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</span>
-      <span style={{ fontSize: '0.8rem', fontWeight: 700, color, fontFamily: "'JetBrains Mono', monospace" }}>{value}</span>
+      <span
+        style={{
+          fontSize: '0.6rem',
+          color: 'var(--muted)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em',
+        }}
+      >
+        {label}
+      </span>
+      <span
+        style={{
+          fontSize: '0.8rem',
+          fontWeight: 700,
+          color,
+          fontFamily: "'JetBrains Mono', monospace",
+        }}
+      >
+        {value}
+      </span>
     </div>
   )
 }

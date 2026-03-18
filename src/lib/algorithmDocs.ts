@@ -136,8 +136,7 @@ const rk45: AlgorithmDoc = {
   id: 'ode.rk45',
   name: 'Dormand-Prince RK45 (DOPRI5)',
   category: 'ode',
-  shortDescription:
-    'Embedded 4th/5th-order Runge-Kutta with adaptive step-size control (DOPRI5).',
+  shortDescription: 'Embedded 4th/5th-order Runge-Kutta with adaptive step-size control (DOPRI5).',
   fullDescription:
     'The Dormand-Prince method (DOPRI5) is the most widely used adaptive explicit ODE solver. ' +
     'It uses an embedded Runge-Kutta pair: a 5th-order solution to advance the state and a ' +
@@ -201,7 +200,7 @@ const rk45: AlgorithmDoc = {
   relatedAlgorithms: ['ode.rk4', 'ode.bdf', 'ode.radau'],
   references: [
     {
-      title: "A family of embedded Runge-Kutta formulae",
+      title: 'A family of embedded Runge-Kutta formulae',
       authors: 'Dormand, Prince',
       year: 1980,
       doi: '10.1016/0771-050X(80)90013-3',
@@ -231,17 +230,32 @@ const bdf: AlgorithmDoc = {
   complexity: {
     time: 'O(N · n³) for dense Jacobian (n = state dimension)',
     space: 'O(n²) for Jacobian storage; O(q · n) for multistep history',
-    notes:
-      'Cost dominated by linear solves. Use sparse/banded Jacobian when n is large.',
+    notes: 'Cost dominated by linear solves. Use sparse/banded Jacobian when n is large.',
   },
-  convergenceOrder: 'BDF-q is order q (q = 1…6). Convergence requires |arg(λh)| < α_q (A(α)-stability).',
+  convergenceOrder:
+    'BDF-q is order q (q = 1…6). Convergence requires |arg(λh)| < α_q (A(α)-stability).',
   stabilityRegion:
     'BDF1, BDF2: A-stable (entire left half-plane). BDF3–6: A(α)-stable with α decreasing. ' +
     'All BDF methods are zero-stable.',
   parameters: [
-    { name: 'Max order', symbol: 'q_{max}', description: 'Maximum BDF order (1–6). BDF2 is often sufficient.', defaultValue: '5' } as AlgorithmParam,
-    { name: 'Relative tolerance', symbol: '\\varepsilon_{rel}', description: 'Relative error tolerance.', defaultValue: '1e-3' } as AlgorithmParam,
-    { name: 'Absolute tolerance', symbol: '\\varepsilon_{abs}', description: 'Absolute error tolerance per component.', defaultValue: '1e-6' } as AlgorithmParam,
+    {
+      name: 'Max order',
+      symbol: 'q_{max}',
+      description: 'Maximum BDF order (1–6). BDF2 is often sufficient.',
+      defaultValue: '5',
+    } as AlgorithmParam,
+    {
+      name: 'Relative tolerance',
+      symbol: '\\varepsilon_{rel}',
+      description: 'Relative error tolerance.',
+      defaultValue: '1e-3',
+    } as AlgorithmParam,
+    {
+      name: 'Absolute tolerance',
+      symbol: '\\varepsilon_{abs}',
+      description: 'Absolute error tolerance per component.',
+      defaultValue: '1e-6',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Handles stiff problems efficiently',
@@ -260,7 +274,12 @@ const bdf: AlgorithmDoc = {
     'to reduce cost and improve robustness.',
   relatedAlgorithms: ['ode.rk45', 'ode.radau'],
   references: [
-    { title: 'Numerical Solution of Initial Value Problems in Differential-Algebraic Equations', authors: 'Brenan, Campbell, Petzold', year: 1996, doi: '10.1137/1.9781611971224' },
+    {
+      title: 'Numerical Solution of Initial Value Problems in Differential-Algebraic Equations',
+      authors: 'Brenan, Campbell, Petzold',
+      year: 1996,
+      doi: '10.1137/1.9781611971224',
+    },
   ],
 }
 
@@ -275,7 +294,7 @@ const radau: AlgorithmDoc = {
     'of the stability function lie inside the unit disk for all Re(z) < 0 (L-stable), making ' +
     'it ideal for stiff and differential-algebraic problems. Each step solves a 3n×3n ' +
     'block-structured nonlinear system using a simplified Newton iteration that exploits the ' +
-    'method\'s Kronecker product structure to reduce to two n×n complex linear solves. ' +
+    "method's Kronecker product structure to reduce to two n×n complex linear solves. " +
     'It is the reference implementation for stiff problems in Hairer & Wanner\'s "Solving ODEs II".',
   equations: [
     '\\text{Butcher tableau: } c_i, a_{ij}, b_i \\text{ chosen so that order} = 2s - 1',
@@ -291,8 +310,18 @@ const radau: AlgorithmDoc = {
   convergenceOrder: 'Order 5. Stiffly accurate: y_last stage = y_{n+1}.',
   stabilityRegion: 'L-stable: entire left half-plane, and R(∞) = 0 (damped at infinity).',
   parameters: [
-    { name: 'Relative tolerance', symbol: '\\varepsilon_{rel}', defaultValue: '1e-3', description: 'Per-component relative error.' } as AlgorithmParam,
-    { name: 'Absolute tolerance', symbol: '\\varepsilon_{abs}', defaultValue: '1e-6', description: 'Per-component absolute error floor.' } as AlgorithmParam,
+    {
+      name: 'Relative tolerance',
+      symbol: '\\varepsilon_{rel}',
+      defaultValue: '1e-3',
+      description: 'Per-component relative error.',
+    } as AlgorithmParam,
+    {
+      name: 'Absolute tolerance',
+      symbol: '\\varepsilon_{abs}',
+      defaultValue: '1e-6',
+      description: 'Per-component absolute error floor.',
+    } as AlgorithmParam,
   ],
   strengths: [
     'L-stable — ideal for very stiff problems and DAEs',
@@ -310,7 +339,13 @@ const radau: AlgorithmDoc = {
     '(e.g., parabolic PDEs, reaction-diffusion). For moderately stiff systems BDF is often faster.',
   relatedAlgorithms: ['ode.bdf', 'ode.rk45'],
   references: [
-    { title: 'Solving Ordinary Differential Equations II: Stiff and Differential-Algebraic Problems', authors: 'Hairer, Wanner', year: 1996, doi: '10.1007/978-3-642-05221-7' },
+    {
+      title:
+        'Solving Ordinary Differential Equations II: Stiff and Differential-Algebraic Problems',
+      authors: 'Hairer, Wanner',
+      year: 1996,
+      doi: '10.1007/978-3-642-05221-7',
+    },
   ],
 }
 
@@ -336,9 +371,24 @@ const gradientDescent: AlgorithmDoc = {
   complexity: { time: 'O(k · d) per k iterations on d-dimensional problem', space: 'O(d)' },
   convergenceOrder: 'Linear (R-linear) for strongly convex; sub-linear in general.',
   parameters: [
-    { name: 'Learning rate', symbol: '\\alpha', description: 'Step size. Too large → divergence; too small → slow convergence.', range: '(0, 2/L]' } as AlgorithmParam,
-    { name: 'Max iterations', symbol: 'k_{max}', description: 'Iteration budget.', defaultValue: '1000' } as AlgorithmParam,
-    { name: 'Tolerance', symbol: '\\varepsilon', description: 'Stop when ‖∇f‖ < ε.', defaultValue: '1e-6' } as AlgorithmParam,
+    {
+      name: 'Learning rate',
+      symbol: '\\alpha',
+      description: 'Step size. Too large → divergence; too small → slow convergence.',
+      range: '(0, 2/L]',
+    } as AlgorithmParam,
+    {
+      name: 'Max iterations',
+      symbol: 'k_{max}',
+      description: 'Iteration budget.',
+      defaultValue: '1000',
+    } as AlgorithmParam,
+    {
+      name: 'Tolerance',
+      symbol: '\\varepsilon',
+      description: 'Stop when ‖∇f‖ < ε.',
+      defaultValue: '1e-6',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Simple to implement, works for any differentiable function',
@@ -354,9 +404,7 @@ const gradientDescent: AlgorithmDoc = {
     'Use for large-scale ML problems. For small-to-medium optimisation prefer L-BFGS or ' +
     'Newton methods. Use Adam for stochastic settings.',
   relatedAlgorithms: ['opt.lbfgs', 'opt.nelder_mead', 'opt.nsga2'],
-  references: [
-    { title: 'Convex Optimization', authors: 'Boyd, Vandenberghe', year: 2004 },
-  ],
+  references: [{ title: 'Convex Optimization', authors: 'Boyd, Vandenberghe', year: 2004 }],
 }
 
 const lbfgs: AlgorithmDoc = {
@@ -379,10 +427,22 @@ const lbfgs: AlgorithmDoc = {
     time: 'O(k · m · d) for k iterations',
     space: 'O(m · d) — key advantage over full BFGS O(d²)',
   },
-  convergenceOrder: 'Superlinear near solution (q-superlinear for strongly convex), linear globally.',
+  convergenceOrder:
+    'Superlinear near solution (q-superlinear for strongly convex), linear globally.',
   parameters: [
-    { name: 'History size', symbol: 'm', description: 'Number of s/y pairs stored. More = better Hessian approx, more memory.', defaultValue: '10', range: '[3, 20]' } as AlgorithmParam,
-    { name: 'Tolerance', symbol: '\\varepsilon', description: 'Stop when ‖∇f‖ < ε · ‖∇f_0‖.', defaultValue: '1e-5' } as AlgorithmParam,
+    {
+      name: 'History size',
+      symbol: 'm',
+      description: 'Number of s/y pairs stored. More = better Hessian approx, more memory.',
+      defaultValue: '10',
+      range: '[3, 20]',
+    } as AlgorithmParam,
+    {
+      name: 'Tolerance',
+      symbol: '\\varepsilon',
+      description: 'Stop when ‖∇f‖ < ε · ‖∇f_0‖.',
+      defaultValue: '1e-5',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Fast convergence with low memory (O(md) vs O(d²))',
@@ -399,7 +459,12 @@ const lbfgs: AlgorithmDoc = {
     'full BFGS or Newton is faster. Add L2 regularisation for ill-conditioned problems.',
   relatedAlgorithms: ['opt.gradient_descent', 'opt.nelder_mead'],
   references: [
-    { title: 'Numerical Optimization', authors: 'Nocedal, Wright', year: 2006, doi: '10.1007/978-0-387-40065-5' },
+    {
+      title: 'Numerical Optimization',
+      authors: 'Nocedal, Wright',
+      year: 2006,
+      doi: '10.1007/978-0-387-40065-5',
+    },
   ],
 }
 
@@ -423,10 +488,30 @@ const nelderMead: AlgorithmDoc = {
   complexity: { time: 'O(k · n) function evaluations for n-dimensional problem', space: 'O(n²)' },
   convergenceOrder: 'No proven convergence order. Empirically O(1/k) for smooth convex problems.',
   parameters: [
-    { name: 'Reflection coefficient', symbol: '\\alpha', defaultValue: '1.0', description: 'Controls reflection step length.' } as AlgorithmParam,
-    { name: 'Expansion coefficient', symbol: '\\gamma', defaultValue: '2.0', description: 'Controls expansion step.' } as AlgorithmParam,
-    { name: 'Contraction coefficient', symbol: '\\beta', defaultValue: '0.5', description: 'Controls contraction step.' } as AlgorithmParam,
-    { name: 'Shrink coefficient', symbol: '\\delta', defaultValue: '0.5', description: 'Controls shrink step.' } as AlgorithmParam,
+    {
+      name: 'Reflection coefficient',
+      symbol: '\\alpha',
+      defaultValue: '1.0',
+      description: 'Controls reflection step length.',
+    } as AlgorithmParam,
+    {
+      name: 'Expansion coefficient',
+      symbol: '\\gamma',
+      defaultValue: '2.0',
+      description: 'Controls expansion step.',
+    } as AlgorithmParam,
+    {
+      name: 'Contraction coefficient',
+      symbol: '\\beta',
+      defaultValue: '0.5',
+      description: 'Controls contraction step.',
+    } as AlgorithmParam,
+    {
+      name: 'Shrink coefficient',
+      symbol: '\\delta',
+      defaultValue: '0.5',
+      description: 'Controls shrink step.',
+    } as AlgorithmParam,
   ],
   strengths: [
     'No gradient required — works for non-smooth, noisy objectives',
@@ -443,7 +528,12 @@ const nelderMead: AlgorithmDoc = {
     'high-dimensional or constrained problems. For smooth problems prefer L-BFGS.',
   relatedAlgorithms: ['opt.gradient_descent', 'opt.nsga2'],
   references: [
-    { title: 'A simplex method for function minimization', authors: 'Nelder, Mead', year: 1965, doi: '10.1093/comjnl/7.4.308' },
+    {
+      title: 'A simplex method for function minimization',
+      authors: 'Nelder, Mead',
+      year: 1965,
+      doi: '10.1093/comjnl/7.4.308',
+    },
   ],
 }
 
@@ -463,13 +553,40 @@ const nsga2: AlgorithmDoc = {
     '\\text{Crowding distance: } d_i = \\sum_m \\frac{f_m^{i+1} - f_m^{i-1}}{f_m^{max} - f_m^{min}}',
     '\\text{Selection: prefer lower rank, break ties with larger crowding distance}',
   ],
-  complexity: { time: 'O(G · M · N²) where G = generations, M = objectives, N = population', space: 'O(N · d)' },
+  complexity: {
+    time: 'O(G · M · N²) where G = generations, M = objectives, N = population',
+    space: 'O(N · d)',
+  },
   convergenceOrder: 'Stochastic convergence; theoretical Pareto front convergence in probability.',
   parameters: [
-    { name: 'Population size', symbol: 'N', defaultValue: '100', description: 'Number of candidates per generation.', range: '[50, 1000]' } as AlgorithmParam,
-    { name: 'Generations', symbol: 'G', defaultValue: '200', description: 'Number of evolutionary generations.', range: '[50, 2000]' } as AlgorithmParam,
-    { name: 'Crossover probability', symbol: 'p_c', defaultValue: '0.9', description: 'Probability of applying SBX crossover.', range: '[0.6, 1.0]' } as AlgorithmParam,
-    { name: 'Mutation probability', symbol: 'p_m', defaultValue: '1/d', description: 'Per-gene mutation probability (1/d recommended).', range: '[1/d, 0.1]' } as AlgorithmParam,
+    {
+      name: 'Population size',
+      symbol: 'N',
+      defaultValue: '100',
+      description: 'Number of candidates per generation.',
+      range: '[50, 1000]',
+    } as AlgorithmParam,
+    {
+      name: 'Generations',
+      symbol: 'G',
+      defaultValue: '200',
+      description: 'Number of evolutionary generations.',
+      range: '[50, 2000]',
+    } as AlgorithmParam,
+    {
+      name: 'Crossover probability',
+      symbol: 'p_c',
+      defaultValue: '0.9',
+      description: 'Probability of applying SBX crossover.',
+      range: '[0.6, 1.0]',
+    } as AlgorithmParam,
+    {
+      name: 'Mutation probability',
+      symbol: 'p_m',
+      defaultValue: '1/d',
+      description: 'Per-gene mutation probability (1/d recommended).',
+      range: '[1/d, 0.1]',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Handles multiple conflicting objectives simultaneously',
@@ -487,7 +604,12 @@ const nsga2: AlgorithmDoc = {
     'For > 3 objectives consider NSGA-III or MOEA/D. Set N ≥ 100 for reliable Pareto fronts.',
   relatedAlgorithms: ['opt.gradient_descent', 'opt.nelder_mead'],
   references: [
-    { title: 'A fast and elitist multiobjective genetic algorithm: NSGA-II', authors: 'Deb, Pratap, Agarwal, Meyarivan', year: 2002, doi: '10.1109/4235.996017' },
+    {
+      title: 'A fast and elitist multiobjective genetic algorithm: NSGA-II',
+      authors: 'Deb, Pratap, Agarwal, Meyarivan',
+      year: 2002,
+      doi: '10.1109/4235.996017',
+    },
   ],
 }
 
@@ -495,8 +617,7 @@ const simplex: AlgorithmDoc = {
   id: 'opt.simplex',
   name: 'Simplex Method (Linear Programming)',
   category: 'optimisation',
-  shortDescription:
-    'Vertex-traversal algorithm for solving linear programs in standard form.',
+  shortDescription: 'Vertex-traversal algorithm for solving linear programs in standard form.',
   fullDescription:
     'The simplex method solves LP: min cᵀx subject to Ax = b, x ≥ 0 by moving along edges ' +
     'of the feasibility polytope from vertex to vertex, strictly decreasing the objective. ' +
@@ -510,9 +631,15 @@ const simplex: AlgorithmDoc = {
     '\\text{Basis update: } B_{new}^{-1} \\leftarrow \\text{rank-1 update of } B^{-1}',
   ],
   complexity: { time: 'O(n²m) average; O(2^n) worst-case', space: 'O(nm)' },
-  convergenceOrder: 'Finite convergence (cycling prevented by Bland\'s rule or perturbation).',
+  convergenceOrder: "Finite convergence (cycling prevented by Bland's rule or perturbation).",
   parameters: [
-    { name: 'Pivot rule', symbol: '—', description: 'Dantzig (max reduced cost) or Bland (anti-cycling). Dantzig is faster in practice.', defaultValue: 'Dantzig' } as AlgorithmParam,
+    {
+      name: 'Pivot rule',
+      symbol: '—',
+      description:
+        'Dantzig (max reduced cost) or Bland (anti-cycling). Dantzig is faster in practice.',
+      defaultValue: 'Dantzig',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Exact solution for LP — no approximation',
@@ -528,9 +655,7 @@ const simplex: AlgorithmDoc = {
     'Use for LP subproblems within larger pipelines, resource allocation, and portfolio ' +
     'problems. For QP, use active-set or interior-point methods. For MIP, use branch-and-bound.',
   relatedAlgorithms: ['opt.gradient_descent', 'opt.lbfgs'],
-  references: [
-    { title: 'Linear Programming', authors: 'Dantzig', year: 1963 },
-  ],
+  references: [{ title: 'Linear Programming', authors: 'Dantzig', year: 1963 }],
 }
 
 // ---------------------------------------------------------------------------
@@ -562,7 +687,12 @@ const forwardAD: AlgorithmDoc = {
   },
   convergenceOrder: 'Exact (machine precision) — not iterative.',
   parameters: [
-    { name: 'Seed vector', symbol: 'v', description: 'Input direction for directional derivative. Use identity basis vectors to compute full Jacobian.' } as AlgorithmParam,
+    {
+      name: 'Seed vector',
+      symbol: 'v',
+      description:
+        'Input direction for directional derivative. Use identity basis vectors to compute full Jacobian.',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Memory-efficient: no tape storage',
@@ -579,7 +709,12 @@ const forwardAD: AlgorithmDoc = {
     'For n >> m (e.g., training neural networks with scalar loss), reverse mode is far more efficient.',
   relatedAlgorithms: ['ad.reverse', 'ad.vjp'],
   references: [
-    { title: 'Evaluating Derivatives: Principles and Techniques of Algorithmic Differentiation', authors: 'Griewank, Walther', year: 2008, doi: '10.1137/1.9780898717761' },
+    {
+      title: 'Evaluating Derivatives: Principles and Techniques of Algorithmic Differentiation',
+      authors: 'Griewank, Walther',
+      year: 2008,
+      doi: '10.1137/1.9780898717761',
+    },
   ],
 }
 
@@ -609,7 +744,13 @@ const reverseAD: AlgorithmDoc = {
   },
   convergenceOrder: 'Exact (machine precision) — not iterative.',
   parameters: [
-    { name: 'Checkpointing segments', symbol: 's', description: 'Number of checkpoints for memory reduction (grad-checkpoint). Memory: O(s·n), recomputation: O(log s) extra passes.', defaultValue: 'none' } as AlgorithmParam,
+    {
+      name: 'Checkpointing segments',
+      symbol: 's',
+      description:
+        'Number of checkpoints for memory reduction (grad-checkpoint). Memory: O(s·n), recomputation: O(log s) extra passes.',
+      defaultValue: 'none',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Computes full gradient in O(T(f)) regardless of n_inputs — ideal for ML',
@@ -627,7 +768,12 @@ const reverseAD: AlgorithmDoc = {
     'Enable gradient checkpointing if tape memory exceeds RAM.',
   relatedAlgorithms: ['ad.forward', 'ad.vjp'],
   references: [
-    { title: 'Learning representations by back-propagating errors', authors: 'Rumelhart, Hinton, Williams', year: 1986, doi: '10.1038/323533a0' },
+    {
+      title: 'Learning representations by back-propagating errors',
+      authors: 'Rumelhart, Hinton, Williams',
+      year: 1986,
+      doi: '10.1038/323533a0',
+    },
     { title: 'Evaluating Derivatives', authors: 'Griewank, Walther', year: 2008 },
   ],
 }
@@ -698,21 +844,29 @@ const luDecomp: AlgorithmDoc = {
   ],
   complexity: { time: 'O(n³) factorisation, O(n²) per solve', space: 'O(n²)' },
   parameters: [
-    { name: 'Pivot threshold', symbol: '\\tau', description: 'Threshold for treating a pivot as zero.', defaultValue: 'machine epsilon · ‖A‖' } as AlgorithmParam,
+    {
+      name: 'Pivot threshold',
+      symbol: '\\tau',
+      description: 'Threshold for treating a pivot as zero.',
+      defaultValue: 'machine epsilon · ‖A‖',
+    } as AlgorithmParam,
   ],
   strengths: [
     'General: works for any non-singular matrix',
     'Reuse factorisation for multiple right-hand sides',
     'Numerically stable with partial pivoting',
   ],
-  weaknesses: [
-    'O(n³) cost — impractical for large sparse systems',
-    'Dense storage only',
-  ],
-  guidance: 'Use for small-to-medium dense systems (n ≤ 10,000). For sparse systems use sparse LU (SuperLU) or iterative solvers (CG, GMRES).',
+  weaknesses: ['O(n³) cost — impractical for large sparse systems', 'Dense storage only'],
+  guidance:
+    'Use for small-to-medium dense systems (n ≤ 10,000). For sparse systems use sparse LU (SuperLU) or iterative solvers (CG, GMRES).',
   relatedAlgorithms: ['linalg.cholesky', 'linalg.qr', 'linalg.svd'],
   references: [
-    { title: 'Matrix Computations', authors: 'Golub, Van Loan', year: 2013, doi: '10.56021/9781421407944' },
+    {
+      title: 'Matrix Computations',
+      authors: 'Golub, Van Loan',
+      year: 2013,
+      doi: '10.56021/9781421407944',
+    },
   ],
 }
 
@@ -733,9 +887,17 @@ const svd: AlgorithmDoc = {
     'A^+ = V \\Sigma^+ U^T',
     '\\kappa(A) = \\sigma_1 / \\sigma_n',
   ],
-  complexity: { time: 'O(mn · min(m,n)) for m×n matrix (using divide-and-conquer bidiagonalization)', space: 'O(mn)' },
+  complexity: {
+    time: 'O(mn · min(m,n)) for m×n matrix (using divide-and-conquer bidiagonalization)',
+    space: 'O(mn)',
+  },
   parameters: [
-    { name: 'Truncation rank', symbol: 'k', description: 'For thin SVD / low-rank approx: keep top k singular values.', defaultValue: 'full' } as AlgorithmParam,
+    {
+      name: 'Truncation rank',
+      symbol: 'k',
+      description: 'For thin SVD / low-rank approx: keep top k singular values.',
+      defaultValue: 'full',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Reveals rank, range, null space, condition number',
@@ -747,11 +909,10 @@ const svd: AlgorithmDoc = {
     'O(mn²) cost — expensive for large matrices',
     'Overkill if only the solution to Ax=b is needed',
   ],
-  guidance: 'Use when rank information, pseudoinverse, or low-rank approximation is needed. For dense square systems prefer LU or Cholesky.',
+  guidance:
+    'Use when rank information, pseudoinverse, or low-rank approximation is needed. For dense square systems prefer LU or Cholesky.',
   relatedAlgorithms: ['linalg.lu', 'linalg.qr', 'linalg.cholesky'],
-  references: [
-    { title: 'Matrix Computations', authors: 'Golub, Van Loan', year: 2013 },
-  ],
+  references: [{ title: 'Matrix Computations', authors: 'Golub, Van Loan', year: 2013 }],
 }
 
 // ---------------------------------------------------------------------------
@@ -767,7 +928,7 @@ const fft: AlgorithmDoc = {
     'The Cooley-Tukey radix-2 FFT recursively factors the DFT of length N = 2^k into ' +
     'two DFTs of length N/2 using the "butterfly" pattern, exploiting the periodicity of ' +
     'the complex exponential. This reduces the O(N²) naive DFT to O(N log₂ N). ' +
-    'For non-power-of-2 lengths, mixed-radix or Bluestein\'s algorithm is used.',
+    "For non-power-of-2 lengths, mixed-radix or Bluestein's algorithm is used.",
   equations: [
     'X[k] = \\sum_{n=0}^{N-1} x[n] e^{-j 2\\pi k n / N}',
     '\\text{Butterfly: } X[k] = E[k] + W_N^k O[k],\\; X[k + N/2] = E[k] - W_N^k O[k]',
@@ -776,8 +937,19 @@ const fft: AlgorithmDoc = {
   ],
   complexity: { time: 'O(N log N)', space: 'O(N)' },
   parameters: [
-    { name: 'Window function', symbol: 'w[n]', description: 'Applied before FFT to reduce spectral leakage. Options: rectangular, Hann, Hamming, Blackman.', defaultValue: 'Hann' } as AlgorithmParam,
-    { name: 'FFT length', symbol: 'N', description: 'Pad to next power of 2 for efficiency.', defaultValue: 'input length' } as AlgorithmParam,
+    {
+      name: 'Window function',
+      symbol: 'w[n]',
+      description:
+        'Applied before FFT to reduce spectral leakage. Options: rectangular, Hann, Hamming, Blackman.',
+      defaultValue: 'Hann',
+    } as AlgorithmParam,
+    {
+      name: 'FFT length',
+      symbol: 'N',
+      description: 'Pad to next power of 2 for efficiency.',
+      defaultValue: 'input length',
+    } as AlgorithmParam,
   ],
   strengths: [
     'O(N log N) — orders of magnitude faster than naive O(N²) DFT',
@@ -789,10 +961,16 @@ const fft: AlgorithmDoc = {
     'Frequency resolution limited by N/f_s',
     'Complex output requires magnitude/phase extraction for display',
   ],
-  guidance: 'Apply a window function (Hann is default) before FFT. Frequency resolution: Δf = f_s/N. Use zero-padding to interpolate the spectrum.',
+  guidance:
+    'Apply a window function (Hann is default) before FFT. Frequency resolution: Δf = f_s/N. Use zero-padding to interpolate the spectrum.',
   relatedAlgorithms: ['signal.fir', 'signal.stft'],
   references: [
-    { title: 'An algorithm for the machine calculation of complex Fourier series', authors: 'Cooley, Tukey', year: 1965, doi: '10.1090/S0025-5718-1965-0178586-1' },
+    {
+      title: 'An algorithm for the machine calculation of complex Fourier series',
+      authors: 'Cooley, Tukey',
+      year: 1965,
+      doi: '10.1090/S0025-5718-1965-0178586-1',
+    },
   ],
 }
 
@@ -805,12 +983,12 @@ const brent: AlgorithmDoc = {
   name: "Brent's Method",
   category: 'rootfinding',
   shortDescription:
-    "Superlinearly convergent bracketed rootfinder combining bisection, secant, and inverse quadratic interpolation.",
+    'Superlinearly convergent bracketed rootfinder combining bisection, secant, and inverse quadratic interpolation.',
   fullDescription:
     "Brent's method guarantees convergence (like bisection) while achieving near-secant " +
-    "speed when the function is smooth. At each iteration it uses inverse quadratic interpolation " +
-    "or the secant method if they promise improvement, and falls back to bisection otherwise. " +
-    "This makes it the default rootfinder in MATLAB (fzero), SciPy (brentq), and GNU GSL.",
+    'speed when the function is smooth. At each iteration it uses inverse quadratic interpolation ' +
+    'or the secant method if they promise improvement, and falls back to bisection otherwise. ' +
+    'This makes it the default rootfinder in MATLAB (fzero), SciPy (brentq), and GNU GSL.',
   equations: [
     '\\text{Bisection: } c = (a + b)/2',
     '\\text{Secant: } c = b - f(b) \\cdot \\frac{b - a}{f(b) - f(a)}',
@@ -818,10 +996,21 @@ const brent: AlgorithmDoc = {
     '\\text{Convergence (smooth): } |x_n - x^*| \\le C |x_{n-1} - x^*|^{\\phi} \\quad (\\phi \\approx 1.618)',
   ],
   complexity: { time: 'O(log((b-a)/ε)) evaluations guaranteed', space: 'O(1)' },
-  convergenceOrder: 'Superlinear (golden ratio ≈ 1.618) when smooth; bisection fallback guarantees convergence.',
+  convergenceOrder:
+    'Superlinear (golden ratio ≈ 1.618) when smooth; bisection fallback guarantees convergence.',
   parameters: [
-    { name: 'Bracket [a, b]', symbol: '[a,b]', description: 'Initial bracket with f(a)·f(b) < 0.', range: 'f(a)·f(b) < 0 required' } as AlgorithmParam,
-    { name: 'Tolerance', symbol: '\\varepsilon', defaultValue: '1e-10', description: 'Target bracket width for convergence.' } as AlgorithmParam,
+    {
+      name: 'Bracket [a, b]',
+      symbol: '[a,b]',
+      description: 'Initial bracket with f(a)·f(b) < 0.',
+      range: 'f(a)·f(b) < 0 required',
+    } as AlgorithmParam,
+    {
+      name: 'Tolerance',
+      symbol: '\\varepsilon',
+      defaultValue: '1e-10',
+      description: 'Target bracket width for convergence.',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Guaranteed convergence (bisection safety net)',
@@ -833,10 +1022,11 @@ const brent: AlgorithmDoc = {
     'Requires initial bracket (must know a sign change)',
     'Not suitable for multiple roots without pre-processing',
   ],
-  guidance: 'Default choice for scalar rootfinding. Ensure a valid bracket first (use sign scan or plot). For vector problems use Newton-Raphson.',
+  guidance:
+    'Default choice for scalar rootfinding. Ensure a valid bracket first (use sign scan or plot). For vector problems use Newton-Raphson.',
   relatedAlgorithms: ['root.newton'],
   references: [
-    { title: "Algorithms for minimization without derivatives", authors: 'Brent', year: 1973 },
+    { title: 'Algorithms for minimization without derivatives', authors: 'Brent', year: 1973 },
   ],
 }
 
@@ -846,22 +1036,36 @@ const newton: AlgorithmDoc = {
   category: 'rootfinding',
   shortDescription: 'Quadratically convergent rootfinder using first-order Taylor expansion.',
   fullDescription:
-    'Newton-Raphson iterates x_{n+1} = x_n − f(x_n)/f\'(x_n) by linearising f around ' +
+    "Newton-Raphson iterates x_{n+1} = x_n − f(x_n)/f'(x_n) by linearising f around " +
     'the current estimate. Convergence is quadratic (doubles correct digits each iteration) ' +
     'near a simple root. For vector systems, each iteration requires solving a Jacobian linear ' +
     'system (J Δx = −f). Modifications: backtracking line search (robust), chord iteration ' +
     '(freeze Jacobian), Shamanskii (update every k steps).',
   equations: [
-    'x_{n+1} = x_n - \\frac{f(x_n)}{f\'(x_n)} \\quad (\\text{scalar})',
+    "x_{n+1} = x_n - \\frac{f(x_n)}{f'(x_n)} \\quad (\\text{scalar})",
     'J(x_n) \\Delta x_n = -f(x_n),\\quad x_{n+1} = x_n + \\Delta x_n \\quad (\\text{vector})',
     '|x_{n+1} - x^*| \\le C |x_n - x^*|^2 \\quad (\\text{quadratic convergence})',
   ],
   complexity: { time: 'O(k · n³) for vector system (n×n Jacobian, k iterations)', space: 'O(n²)' },
   convergenceOrder: 'Quadratic (order 2) near a simple root; linear near a multiple root.',
   parameters: [
-    { name: 'Initial guess', symbol: 'x_0', description: 'Starting point. Must be close enough to the root for convergence.' } as AlgorithmParam,
-    { name: 'Tolerance', symbol: '\\varepsilon', defaultValue: '1e-10', description: 'Stop when |f(x)| < ε or |Δx| < ε.' } as AlgorithmParam,
-    { name: 'Max iterations', symbol: 'k_{max}', defaultValue: '50', description: 'Iteration limit.' } as AlgorithmParam,
+    {
+      name: 'Initial guess',
+      symbol: 'x_0',
+      description: 'Starting point. Must be close enough to the root for convergence.',
+    } as AlgorithmParam,
+    {
+      name: 'Tolerance',
+      symbol: '\\varepsilon',
+      defaultValue: '1e-10',
+      description: 'Stop when |f(x)| < ε or |Δx| < ε.',
+    } as AlgorithmParam,
+    {
+      name: 'Max iterations',
+      symbol: 'k_{max}',
+      defaultValue: '50',
+      description: 'Iteration limit.',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Quadratic convergence — fastest local convergence possible',
@@ -873,7 +1077,8 @@ const newton: AlgorithmDoc = {
     'Convergence only guaranteed locally',
     'Fails near singular Jacobians or multiple roots',
   ],
-  guidance: 'Provide a good initial guess (use bisection or parameter continuation to get close). Add backtracking line search for robustness.',
+  guidance:
+    'Provide a good initial guess (use bisection or parameter continuation to get close). Add backtracking line search for robustness.',
   relatedAlgorithms: ['root.brent'],
   references: [
     { title: 'Numerical Recipes', authors: 'Press, Teukolsky, Vetterling, Flannery', year: 2007 },
@@ -901,12 +1106,31 @@ const gaussKronrod: AlgorithmDoc = {
     '\\text{Error estimate: } |Q_{15} - Q_7|',
     '\\text{Adaptive: split } [a,b] \\text{ if error} > \\varepsilon_{abs} + \\varepsilon_{rel} |Q|',
   ],
-  complexity: { time: 'O(k · 15) function evaluations for k subintervals', space: 'O(k) for the interval stack' },
-  convergenceOrder: 'Exponential for analytic functions; algebraic O(h^{2p}) for p-smooth functions.',
+  complexity: {
+    time: 'O(k · 15) function evaluations for k subintervals',
+    space: 'O(k) for the interval stack',
+  },
+  convergenceOrder:
+    'Exponential for analytic functions; algebraic O(h^{2p}) for p-smooth functions.',
   parameters: [
-    { name: 'Absolute tolerance', symbol: '\\varepsilon_{abs}', defaultValue: '1e-8', description: 'Absolute error goal.' } as AlgorithmParam,
-    { name: 'Relative tolerance', symbol: '\\varepsilon_{rel}', defaultValue: '1e-6', description: 'Relative error goal.' } as AlgorithmParam,
-    { name: 'Max subintervals', symbol: 'n_{max}', defaultValue: '1000', description: 'Limit on adaptive refinement.' } as AlgorithmParam,
+    {
+      name: 'Absolute tolerance',
+      symbol: '\\varepsilon_{abs}',
+      defaultValue: '1e-8',
+      description: 'Absolute error goal.',
+    } as AlgorithmParam,
+    {
+      name: 'Relative tolerance',
+      symbol: '\\varepsilon_{rel}',
+      defaultValue: '1e-6',
+      description: 'Relative error goal.',
+    } as AlgorithmParam,
+    {
+      name: 'Max subintervals',
+      symbol: 'n_{max}',
+      defaultValue: '1000',
+      description: 'Limit on adaptive refinement.',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Highly accurate for smooth integrands',
@@ -918,10 +1142,15 @@ const gaussKronrod: AlgorithmDoc = {
     'Expensive for high-dimensional integrals (curse of dimensionality)',
     'Can fail for highly oscillatory integrands without specialised rules',
   ],
-  guidance: 'Default for 1D quadrature of smooth functions. For oscillatory integrands use Clenshaw-Curtis or Filon. For d>5 dimensions use Monte Carlo.',
+  guidance:
+    'Default for 1D quadrature of smooth functions. For oscillatory integrands use Clenshaw-Curtis or Filon. For d>5 dimensions use Monte Carlo.',
   relatedAlgorithms: ['int.monte_carlo', 'int.clenshaw_curtis'],
   references: [
-    { title: 'QUADPACK: A Subroutine Package for Automatic Integration', authors: 'Piessens et al.', year: 1983 },
+    {
+      title: 'QUADPACK: A Subroutine Package for Automatic Integration',
+      authors: 'Piessens et al.',
+      year: 1983,
+    },
   ],
 }
 
@@ -947,7 +1176,13 @@ const linearRegression: AlgorithmDoc = {
   ],
   complexity: { time: 'O(np²) for QR (n samples, p features)', space: 'O(np)' },
   parameters: [
-    { name: 'Regularisation', symbol: '\\lambda', description: 'L2 penalty (Ridge). 0 = no regularisation.', defaultValue: '0.0', range: '[0, ∞)' } as AlgorithmParam,
+    {
+      name: 'Regularisation',
+      symbol: '\\lambda',
+      description: 'L2 penalty (Ridge). 0 = no regularisation.',
+      defaultValue: '0.0',
+      range: '[0, ∞)',
+    } as AlgorithmParam,
   ],
   strengths: [
     'Closed-form solution — no iteration',
@@ -959,10 +1194,16 @@ const linearRegression: AlgorithmDoc = {
     'Sensitive to outliers without robust modifications',
     'Multicollinearity requires regularisation',
   ],
-  guidance: 'Use as baseline for regression tasks. Add Ridge (λ>0) for correlated features. Use LASSO for feature selection.',
+  guidance:
+    'Use as baseline for regression tasks. Add Ridge (λ>0) for correlated features. Use LASSO for feature selection.',
   relatedAlgorithms: ['ml.knn', 'ml.decision_tree'],
   references: [
-    { title: 'The Elements of Statistical Learning', authors: 'Hastie, Tibshirani, Friedman', year: 2009, doi: '10.1007/978-0-387-84858-7' },
+    {
+      title: 'The Elements of Statistical Learning',
+      authors: 'Hastie, Tibshirani, Friedman',
+      year: 2009,
+      doi: '10.1007/978-0-387-84858-7',
+    },
   ],
 }
 
@@ -979,34 +1220,37 @@ const cubicSpline: AlgorithmDoc = {
     'Cubic spline interpolation constructs a piecewise cubic polynomial S(x) passing through ' +
     'all n data points with continuous first and second derivatives (C² globally). This avoids ' +
     'the Runge phenomenon of high-degree polynomial interpolation. Boundary conditions: ' +
-    'natural (S\'\'=0 at ends), clamped (S\'=known), not-a-knot (third derivative continuous ' +
+    "natural (S''=0 at ends), clamped (S'=known), not-a-knot (third derivative continuous " +
     'across first/last interior knot). The coefficients are found by solving a tridiagonal ' +
     'linear system in O(n).',
   equations: [
     'S_i(x) = a_i + b_i(x-x_i) + c_i(x-x_i)^2 + d_i(x-x_i)^3',
-    'S_i(x_{i+1}) = S_{i+1}(x_{i+1}),\\; S\'_i = S\'_{i+1},\\; S\'\'_i = S\'\'_{i+1}',
+    "S_i(x_{i+1}) = S_{i+1}(x_{i+1}),\\; S'_i = S'_{i+1},\\; S''_i = S''_{i+1}",
     'h_i c_{i-1} + 2(h_i + h_{i+1}) c_i + h_{i+1} c_{i+1} = 3 \\left(\\frac{y_{i+1}-y_i}{h_{i+1}} - \\frac{y_i - y_{i-1}}{h_i}\\right)',
     '\\text{Error: } |f(x) - S(x)| \\le \\frac{5}{384} h^4 \\max |f^{(4)}|',
   ],
-  complexity: { time: 'O(n) to build (tridiagonal solve), O(log n) to evaluate (binary search)', space: 'O(n)' },
+  complexity: {
+    time: 'O(n) to build (tridiagonal solve), O(log n) to evaluate (binary search)',
+    space: 'O(n)',
+  },
   convergenceOrder: 'O(h⁴) as max knot spacing h → 0.',
   parameters: [
-    { name: 'Boundary condition', symbol: '—', description: 'Natural, clamped, or not-a-knot.', defaultValue: 'not-a-knot' } as AlgorithmParam,
+    {
+      name: 'Boundary condition',
+      symbol: '—',
+      description: 'Natural, clamped, or not-a-knot.',
+      defaultValue: 'not-a-knot',
+    } as AlgorithmParam,
   ],
-  strengths: [
-    'Smooth (C²), no Runge phenomenon',
-    'O(n) construction',
-    'Accurate: O(h⁴) error',
-  ],
+  strengths: ['Smooth (C²), no Runge phenomenon', 'O(n) construction', 'Accurate: O(h⁴) error'],
   weaknesses: [
     'Global: changing one point affects all segments',
     'Can oscillate for data with sharp changes (use Akima instead)',
   ],
-  guidance: 'Default interpolation for smooth data. Use Akima for data with isolated sharp features. Use B-spline for noisy data (approximation rather than interpolation).',
+  guidance:
+    'Default interpolation for smooth data. Use Akima for data with isolated sharp features. Use B-spline for noisy data (approximation rather than interpolation).',
   relatedAlgorithms: ['interp.akima', 'interp.bspline'],
-  references: [
-    { title: 'Numerical Analysis', authors: 'Burden, Faires', year: 2010 },
-  ],
+  references: [{ title: 'Numerical Analysis', authors: 'Burden, Faires', year: 2010 }],
 }
 
 // ---------------------------------------------------------------------------
@@ -1015,17 +1259,28 @@ const cubicSpline: AlgorithmDoc = {
 
 export const ALGORITHM_DOCS: AlgorithmDoc[] = [
   // ODE
-  rk4, rk45, bdf, radau,
+  rk4,
+  rk45,
+  bdf,
+  radau,
   // Optimisation
-  gradientDescent, lbfgs, nelderMead, nsga2, simplex,
+  gradientDescent,
+  lbfgs,
+  nelderMead,
+  nsga2,
+  simplex,
   // Autodiff
-  forwardAD, reverseAD, vjp,
+  forwardAD,
+  reverseAD,
+  vjp,
   // Linear algebra
-  luDecomp, svd,
+  luDecomp,
+  svd,
   // Signal
   fft,
   // Rootfinding
-  brent, newton,
+  brent,
+  newton,
   // Integration
   gaussKronrod,
   // ML

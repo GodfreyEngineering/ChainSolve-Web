@@ -34,14 +34,7 @@ export type { CsrMatrix, EwOpCode, RedOpCode } from './gpuOps.ts'
 export type { GpuDeviceHandle } from './gpuDevice.ts'
 
 import { initGpuDevice, getGpuDevice } from './gpuDevice.ts'
-import {
-  gpuGemm,
-  gpuBatchGemm,
-  gpuSpMV,
-  gpuElementwise,
-  gpuReduce,
-  gpuFft,
-} from './gpuOps.ts'
+import { gpuGemm, gpuBatchGemm, gpuSpMV, gpuElementwise, gpuReduce, gpuFft } from './gpuOps.ts'
 import type { CsrMatrix, EwOpCode, RedOpCode } from './gpuOps.ts'
 
 /**

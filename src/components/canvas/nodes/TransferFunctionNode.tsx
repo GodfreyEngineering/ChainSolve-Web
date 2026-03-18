@@ -53,7 +53,10 @@ function cdiv(ar: number, ai: number, br: number, bi: number): [number, number] 
 }
 
 /** Convert transfer function coefficients to companion form state-space A, B, C, D. */
-function tfToSS(num: number[], den: number[]): {
+function tfToSS(
+  num: number[],
+  den: number[],
+): {
   A: number[][]
   B: number[]
   C: number[]
@@ -104,13 +107,7 @@ function tfToSS(num: number[], den: number[]): {
 }
 
 /** RK4 step for dx/dt = Ax + Bu, with u=const over dt. */
-function rk4Step(
-  x: number[],
-  A: number[][],
-  B: number[],
-  u: number,
-  dt: number,
-): number[] {
+function rk4Step(x: number[], A: number[][], B: number[], u: number, dt: number): number[] {
   const f = (xx: number[]): number[] =>
     xx.map((_, i) => A[i].reduce((s, a, j) => s + a * xx[j], 0) + B[i] * u)
 
@@ -228,13 +225,27 @@ function TFNodeInner({ id, data, selected }: NodeProps) {
   const TypeIcon = getNodeTypeIcon(nd.blockType)
 
   // Compute response
-  const { timeVec: _timeVec, outVec, freqVec: _freqVec, magVec, phaseVec: _phaseVec, isValid } = useMemo(() => {
+  const {
+    timeVec: _timeVec,
+    outVec,
+    freqVec: _freqVec,
+    magVec,
+    phaseVec: _phaseVec,
+    isValid,
+  } = useMemo(() => {
     if (den.length === 0 || den.every((d) => d === 0)) {
       return { timeVec: [], outVec: [], freqVec: [], magVec: [], phaseVec: [], isValid: false }
     }
     if (outputMode === 'bode') {
       const { freq, mag, phase } = computeBode(num, den, wMin, wMax, nPoints)
-      return { timeVec: freq, outVec: [], freqVec: freq, magVec: mag, phaseVec: phase, isValid: true }
+      return {
+        timeVec: freq,
+        outVec: [],
+        freqVec: freq,
+        magVec: mag,
+        phaseVec: phase,
+        isValid: true,
+      }
     }
     if (outputMode === 'impulse') {
       const { time, output } = computeImpulseResponse(num, den, nPoints, tEnd)
@@ -306,7 +317,14 @@ function TFNodeInner({ id, data, selected }: NodeProps) {
             borderBottom: '1px solid #333',
           }}
         >
-          <div style={{ color: '#F4F4F3', borderBottom: '1px solid #888', paddingBottom: 2, marginBottom: 2 }}>
+          <div
+            style={{
+              color: '#F4F4F3',
+              borderBottom: '1px solid #888',
+              paddingBottom: 2,
+              marginBottom: 2,
+            }}
+          >
             {fmtCoeffs(num)}
           </div>
           <div style={{ color: '#aaa' }}>{fmtCoeffs(den)}</div>
@@ -381,20 +399,18 @@ function TFNodeInner({ id, data, selected }: NodeProps) {
                 fontWeight: outputMode === mode ? 700 : 400,
               }}
             >
-              {mode === 'step' ? t('transferFunction.step', 'Step')
-                : mode === 'impulse' ? t('transferFunction.impulse', 'Impulse')
-                : t('transferFunction.bode', 'Bode')}
+              {mode === 'step'
+                ? t('transferFunction.step', 'Step')
+                : mode === 'impulse'
+                  ? t('transferFunction.impulse', 'Impulse')
+                  : t('transferFunction.bode', 'Bode')}
             </button>
           ))}
         </div>
 
         {/* Mini preview sparkline */}
         {isValid && previewData.length > 1 && (
-          <svg
-            width={120}
-            height={32}
-            style={{ display: 'block', margin: '0 auto 4px' }}
-          >
+          <svg width={120} height={32} style={{ display: 'block', margin: '0 auto 4px' }}>
             <polyline
               points={sparkline}
               fill="none"
@@ -424,24 +440,74 @@ function TFNodeInner({ id, data, selected }: NodeProps) {
       {/* Output handles */}
       {outputMode === 'bode' ? (
         <>
-          <Handle type="source" position={Position.Right} id="bode_freq"
-            style={{ top: '33%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
-            title="Frequency (rad/s)" />
-          <Handle type="source" position={Position.Right} id="bode_mag"
-            style={{ top: '55%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
-            title="Magnitude (dB)" />
-          <Handle type="source" position={Position.Right} id="bode_phase"
-            style={{ top: '77%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
-            title="Phase (deg)" />
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="bode_freq"
+            style={{
+              top: '33%',
+              background: typeColor,
+              width: 8,
+              height: 8,
+              border: '2px solid #1a1a1a',
+            }}
+            title="Frequency (rad/s)"
+          />
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="bode_mag"
+            style={{
+              top: '55%',
+              background: typeColor,
+              width: 8,
+              height: 8,
+              border: '2px solid #1a1a1a',
+            }}
+            title="Magnitude (dB)"
+          />
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="bode_phase"
+            style={{
+              top: '77%',
+              background: typeColor,
+              width: 8,
+              height: 8,
+              border: '2px solid #1a1a1a',
+            }}
+            title="Phase (deg)"
+          />
         </>
       ) : (
         <>
-          <Handle type="source" position={Position.Right} id="time"
-            style={{ top: '40%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
-            title="Time" />
-          <Handle type="source" position={Position.Right} id="output"
-            style={{ top: '65%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
-            title="Output" />
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="time"
+            style={{
+              top: '40%',
+              background: typeColor,
+              width: 8,
+              height: 8,
+              border: '2px solid #1a1a1a',
+            }}
+            title="Time"
+          />
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="output"
+            style={{
+              top: '65%',
+              background: typeColor,
+              width: 8,
+              height: 8,
+              border: '2px solid #1a1a1a',
+            }}
+            title="Output"
+          />
         </>
       )}
     </div>

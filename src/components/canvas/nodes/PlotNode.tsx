@@ -96,16 +96,17 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
 
   // 6.9: 3D surface plot — canvas-based renderer, bypass Vega.
   const isSurface3d = config.chartType === 'surface3d'
-  const surfaceData = isSurface3d && effectiveValue && isTable(effectiveValue) ? effectiveValue : null
+  const surfaceData =
+    isSurface3d && effectiveValue && isTable(effectiveValue) ? effectiveValue : null
 
   // Derive spec result from inputs (pure computation, no side-effects)
   const specResult = useMemo(
-    () =>
-      isSankey || isSurface3d ? { error: '' } : buildInlineSpec(effectiveValue, config, true),
+    () => (isSankey || isSurface3d ? { error: '' } : buildInlineSpec(effectiveValue, config, true)),
     [isSankey, isSurface3d, effectiveValue, config],
   )
   const specError = 'error' in specResult && specResult.error !== '' ? specResult.error : null
-  const isDownsampled = !specError && !isSankey && !isSurface3d && (specResult as SpecResult).isDownsampled
+  const isDownsampled =
+    !specError && !isSankey && !isSurface3d && (specResult as SpecResult).isDownsampled
 
   // Vega state
   const containerRef = useRef<HTMLDivElement>(null)
@@ -333,12 +334,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
           {isSankey && !loading && (
             <div className="nodrag nowheel" style={{ borderRadius: 6, overflow: 'hidden' }}>
               {sankeyData ? (
-                <SankeyChart
-                  data={sankeyData}
-                  width={320}
-                  height={220}
-                  title={config.title}
-                />
+                <SankeyChart data={sankeyData} width={320} height={220} title={config.title} />
               ) : (
                 <div
                   style={{
@@ -358,12 +354,7 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
           {isSurface3d && !loading && (
             <div className="nodrag nowheel" style={{ borderRadius: 6, overflow: 'hidden' }}>
               {surfaceData ? (
-                <SurfacePlot
-                  data={surfaceData}
-                  width={320}
-                  height={220}
-                  title={config.title}
-                />
+                <SurfacePlot data={surfaceData} width={320} height={220} title={config.title} />
               ) : (
                 <div
                   style={{
@@ -373,7 +364,10 @@ function PlotNodeInner({ id, data, selected }: NodeProps) {
                     fontSize: '0.75rem',
                   }}
                 >
-                  {t('plot.connectTableSurface', 'Connect a DataTable (≥2×2) to render the surface')}
+                  {t(
+                    'plot.connectTableSurface',
+                    'Connect a DataTable (≥2×2) to render the surface',
+                  )}
                 </div>
               )}
             </div>

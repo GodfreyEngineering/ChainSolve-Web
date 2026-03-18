@@ -53,8 +53,14 @@ function tokenize(src: string): Tok[] {
   let i = 0
   while (i < src.length) {
     const c = src[i]
-    if (c === ' ' || c === '\t') { i++; continue }
-    if ((c >= '0' && c <= '9') || (c === '.' && i + 1 < src.length && src[i + 1] >= '0' && src[i + 1] <= '9')) {
+    if (c === ' ' || c === '\t') {
+      i++
+      continue
+    }
+    if (
+      (c >= '0' && c <= '9') ||
+      (c === '.' && i + 1 < src.length && src[i + 1] >= '0' && src[i + 1] <= '9')
+    ) {
       let j = i
       while (j < src.length && ((src[j] >= '0' && src[j] <= '9') || src[j] === '.')) j++
       if (j < src.length && (src[j] === 'e' || src[j] === 'E')) {
@@ -66,15 +72,31 @@ function tokenize(src: string): Tok[] {
       i = j
     } else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_') {
       let j = i
-      while (j < src.length && ((src[j] >= 'a' && src[j] <= 'z') || (src[j] >= 'A' && src[j] <= 'Z') || (src[j] >= '0' && src[j] <= '9') || src[j] === '_')) j++
+      while (
+        j < src.length &&
+        ((src[j] >= 'a' && src[j] <= 'z') ||
+          (src[j] >= 'A' && src[j] <= 'Z') ||
+          (src[j] >= '0' && src[j] <= '9') ||
+          src[j] === '_')
+      )
+        j++
       toks.push({ kind: 'id', val: src.slice(i, j) })
       i = j
     } else if ('+-*/^'.includes(c)) {
-      toks.push({ kind: 'op', val: c }); i++
-    } else if (c === '(') { toks.push({ kind: 'lp', val: '(' }); i++ }
-    else if (c === ')') { toks.push({ kind: 'rp', val: ')' }); i++ }
-    else if (c === ',') { toks.push({ kind: 'comma', val: ',' }); i++ }
-    else { i++ }
+      toks.push({ kind: 'op', val: c })
+      i++
+    } else if (c === '(') {
+      toks.push({ kind: 'lp', val: '(' })
+      i++
+    } else if (c === ')') {
+      toks.push({ kind: 'rp', val: ')' })
+      i++
+    } else if (c === ',') {
+      toks.push({ kind: 'comma', val: ',' })
+      i++
+    } else {
+      i++
+    }
   }
   toks.push({ kind: 'eof', val: '' })
   return toks
@@ -90,10 +112,16 @@ class FormulaParser {
     this.ctx = ctx
   }
 
-  private peek(): Tok { return this.toks[this.pos] }
-  private next(): Tok { return this.toks[this.pos++] }
+  private peek(): Tok {
+    return this.toks[this.pos]
+  }
+  private next(): Tok {
+    return this.toks[this.pos++]
+  }
 
-  parse(): number { return this.addSub() }
+  parse(): number {
+    return this.addSub()
+  }
 
   private addSub(): number {
     let v = this.mulDiv()
@@ -139,7 +167,10 @@ class FormulaParser {
       const args: number[] = []
       if (this.peek().kind !== 'rp') {
         args.push(this.parse())
-        while (this.peek().kind === 'comma') { this.next(); args.push(this.parse()) }
+        while (this.peek().kind === 'comma') {
+          this.next()
+          args.push(this.parse())
+        }
       }
       if (this.peek().kind === 'rp') this.next()
       return this.applyFn(name, args)
@@ -150,35 +181,61 @@ class FormulaParser {
   private applyFn(name: string, args: number[]): number {
     const [a = NaN, b = NaN] = args
     switch (name.toLowerCase()) {
-      case 'sin': return Math.sin(a)
-      case 'cos': return Math.cos(a)
-      case 'tan': return Math.tan(a)
-      case 'asin': return Math.asin(a)
-      case 'acos': return Math.acos(a)
-      case 'atan': return Math.atan(a)
-      case 'atan2': return Math.atan2(a, b)
-      case 'sqrt': return Math.sqrt(a)
-      case 'abs': return Math.abs(a)
-      case 'ln': return Math.log(a)
-      case 'log': return Math.log10(a)
-      case 'log2': return Math.log2(a)
-      case 'exp': return Math.exp(a)
-      case 'floor': return Math.floor(a)
-      case 'ceil': return Math.ceil(a)
-      case 'round': return Math.round(a)
-      case 'sign': return Math.sign(a)
-      case 'mod': return a % b
-      case 'pow': return Math.pow(a, b)
-      case 'min': return Math.min(...args)
-      case 'max': return Math.max(...args)
-      case 'if': return args[0] ? args[1] : args[2]
-      default: return NaN
+      case 'sin':
+        return Math.sin(a)
+      case 'cos':
+        return Math.cos(a)
+      case 'tan':
+        return Math.tan(a)
+      case 'asin':
+        return Math.asin(a)
+      case 'acos':
+        return Math.acos(a)
+      case 'atan':
+        return Math.atan(a)
+      case 'atan2':
+        return Math.atan2(a, b)
+      case 'sqrt':
+        return Math.sqrt(a)
+      case 'abs':
+        return Math.abs(a)
+      case 'ln':
+        return Math.log(a)
+      case 'log':
+        return Math.log10(a)
+      case 'log2':
+        return Math.log2(a)
+      case 'exp':
+        return Math.exp(a)
+      case 'floor':
+        return Math.floor(a)
+      case 'ceil':
+        return Math.ceil(a)
+      case 'round':
+        return Math.round(a)
+      case 'sign':
+        return Math.sign(a)
+      case 'mod':
+        return a % b
+      case 'pow':
+        return Math.pow(a, b)
+      case 'min':
+        return Math.min(...args)
+      case 'max':
+        return Math.max(...args)
+      case 'if':
+        return args[0] ? args[1] : args[2]
+      default:
+        return NaN
     }
   }
 
   private primary(): number {
     const tok = this.peek()
-    if (tok.kind === 'num') { this.next(); return parseFloat(tok.val) }
+    if (tok.kind === 'num') {
+      this.next()
+      return parseFloat(tok.val)
+    }
     if (tok.kind === 'id') {
       this.next()
       const n = tok.val
@@ -206,11 +263,17 @@ function evalFormula(formula: string, ctx: Record<string, number>): number {
   try {
     const parser = new FormulaParser(tokenize(expr), ctx)
     return parser.parse()
-  } catch { return NaN }
+  } catch {
+    return NaN
+  }
 }
 
-function colLetter(col: number): string { return String.fromCharCode(65 + col) }
-function colIdx(letter: string): number { return letter.toUpperCase().charCodeAt(0) - 65 }
+function colLetter(col: number): string {
+  return String.fromCharCode(65 + col)
+}
+function colIdx(letter: string): number {
+  return letter.toUpperCase().charCodeAt(0) - 65
+}
 
 function parseCellAddr(addr: string): { row: number; col: number } | null {
   const m = addr.match(/^([A-Za-z])([0-9]+)$/)
@@ -224,14 +287,17 @@ function evaluateSheet(
   numCols: number,
   varValues: Record<string, number>,
 ): number[][] {
-  const result: number[][] = Array.from({ length: numRows }, () => new Array(numCols).fill(NaN) as number[])
+  const result: number[][] = Array.from(
+    { length: numRows },
+    () => new Array(numCols).fill(NaN) as number[],
+  )
   const ctx: Record<string, number> = { ...varValues }
   for (let r = 0; r < numRows; r++) {
     for (let c = 0; c < numCols; c++) {
       const cellStr = cells[r]?.[c] ?? ''
       if (cellStr !== '') {
         const n = parseFloat(cellStr)
-        result[r][c] = cellStr.startsWith('=') ? evalFormula(cellStr, ctx) : (isNaN(n) ? NaN : n)
+        result[r][c] = cellStr.startsWith('=') ? evalFormula(cellStr, ctx) : isNaN(n) ? NaN : n
       }
       const ref = `${colLetter(c)}${r + 1}`
       if (!isNaN(result[r][c])) ctx[ref] = result[r][c]
@@ -263,7 +329,8 @@ function MathSheetNodeInner({ id, data, selected }: NodeProps) {
   const sheetVars: SheetVar[] = nd.sheetVars ?? [{ name: 'x' }, { name: 'y' }]
   const numRows: number = nd.numRows ?? 5
   const numCols: number = nd.numCols ?? 3
-  const cells: string[][] = nd.cells ?? Array.from({ length: numRows }, () => new Array(numCols).fill('') as string[])
+  const cells: string[][] =
+    nd.cells ?? Array.from({ length: numRows }, () => new Array(numCols).fill('') as string[])
   const resultCell: string = nd.resultCell ?? ''
 
   // ── Resolve upstream variable values ────────────────────────────────────────
@@ -315,20 +382,26 @@ function MathSheetNodeInner({ id, data, selected }: NodeProps) {
   const [editVal, setEditVal] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const startEdit = useCallback((r: number, c: number) => {
-    setEditCell({ r, c })
-    setEditVal(cells[r]?.[c] ?? '')
-    setTimeout(() => inputRef.current?.focus(), 0)
-  }, [cells])
+  const startEdit = useCallback(
+    (r: number, c: number) => {
+      setEditCell({ r, c })
+      setEditVal(cells[r]?.[c] ?? '')
+      setTimeout(() => inputRef.current?.focus(), 0)
+    },
+    [cells],
+  )
 
-  const commitEdit = useCallback((r: number, c: number, val: string) => {
-    const newCells = cells.map((row) => [...row])
-    while (newCells.length <= r) newCells.push(new Array(numCols).fill('') as string[])
-    while ((newCells[r]?.length ?? 0) <= c) newCells[r].push('')
-    newCells[r][c] = val
-    updateNodeData(id, { cells: newCells })
-    setEditCell(null)
-  }, [cells, id, numCols, updateNodeData])
+  const commitEdit = useCallback(
+    (r: number, c: number, val: string) => {
+      const newCells = cells.map((row) => [...row])
+      while (newCells.length <= r) newCells.push(new Array(numCols).fill('') as string[])
+      while ((newCells[r]?.length ?? 0) <= c) newCells[r].push('')
+      newCells[r][c] = val
+      updateNodeData(id, { cells: newCells })
+      setEditCell(null)
+    },
+    [cells, id, numCols, updateNodeData],
+  )
 
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
   const TypeIcon = getNodeTypeIcon(nd.blockType)
@@ -352,12 +425,21 @@ function MathSheetNodeInner({ id, data, selected }: NodeProps) {
           <Icon icon={TypeIcon} size={14} style={{ ...s.headerIcon, color: typeColor }} />
           <span style={s.headerLabel}>{nd.label}</span>
         </div>
-        <span style={{ fontSize: '0.6rem', color: 'var(--muted)', fontFamily: "'JetBrains Mono', monospace" }}>
+        <span
+          style={{
+            fontSize: '0.6rem',
+            color: 'var(--muted)',
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
           {isNaN(resultValue) ? '—' : fmtNum(resultValue)}
         </span>
       </div>
 
-      <div className="cs-node-body" style={{ ...s.body, padding: '0.4rem 0.5rem', position: 'relative' }}>
+      <div
+        className="cs-node-body"
+        style={{ ...s.body, padding: '0.4rem 0.5rem', position: 'relative' }}
+      >
         {/* Input handles (variables) */}
         {sheetVars.map((v, vi) => (
           <Handle
@@ -399,10 +481,18 @@ function MathSheetNodeInner({ id, data, selected }: NodeProps) {
                     fontSize: '0.6rem',
                   }}
                 >
-                  <span style={{ color: typeColor, fontFamily: "'JetBrains Mono', monospace", width: 16 }}>
+                  <span
+                    style={{
+                      color: typeColor,
+                      fontFamily: "'JetBrains Mono', monospace",
+                      width: 16,
+                    }}
+                  >
                     {v.name}
                   </span>
-                  <span style={{ color: 'var(--muted)', fontFamily: "'JetBrains Mono', monospace" }}>
+                  <span
+                    style={{ color: 'var(--muted)', fontFamily: "'JetBrains Mono', monospace" }}
+                  >
                     = {typeof val === 'number' ? fmtNum(val) : val}
                   </span>
                 </div>
@@ -423,7 +513,13 @@ function MathSheetNodeInner({ id, data, selected }: NodeProps) {
           }}
         >
           {/* Column headers */}
-          <div style={{ display: 'flex', background: 'var(--card)', borderBottom: '1px solid var(--border)' }}>
+          <div
+            style={{
+              display: 'flex',
+              background: 'var(--card)',
+              borderBottom: '1px solid var(--border)',
+            }}
+          >
             <div style={{ width: ROW_HDR_W, height: COL_HDR_H, flexShrink: 0 }} />
             {Array.from({ length: numCols }, (_, c) => (
               <div
@@ -485,9 +581,7 @@ function MathSheetNodeInner({ id, data, selected }: NodeProps) {
                       width: CELL_W,
                       height: CELL_H,
                       borderLeft: '1px solid var(--border)',
-                      background: isResultCell
-                        ? `${typeColor}22`
-                        : 'transparent',
+                      background: isResultCell ? `${typeColor}22` : 'transparent',
                       position: 'relative',
                       flexShrink: 0,
                     }}
@@ -533,22 +627,19 @@ function MathSheetNodeInner({ id, data, selected }: NodeProps) {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: cellContent.startsWith('=') ? 'flex-end' : 'flex-start',
-                          color: isNaN(displayVal) && cellContent !== ''
-                            ? '#ef4444'
-                            : isResultCell
-                              ? typeColor
-                              : 'var(--text)',
+                          color:
+                            isNaN(displayVal) && cellContent !== ''
+                              ? '#ef4444'
+                              : isResultCell
+                                ? typeColor
+                                : 'var(--text)',
                           overflow: 'hidden',
                           cursor: 'default',
                           userSelect: 'none',
                         }}
                         title={cellContent}
                       >
-                        {cellContent === ''
-                          ? null
-                          : isNaN(displayVal)
-                            ? '!'
-                            : fmtNum(displayVal)}
+                        {cellContent === '' ? null : isNaN(displayVal) ? '!' : fmtNum(displayVal)}
                       </div>
                     )}
                   </div>
@@ -610,10 +701,7 @@ function MathSheetNodeInner({ id, data, selected }: NodeProps) {
           <button
             onClick={() => {
               const newCols = Math.min(numCols + 1, 6)
-              const newCells = cells.map((row) => [
-                ...row,
-                ...Array(newCols - row.length).fill(''),
-              ])
+              const newCells = cells.map((row) => [...row, ...Array(newCols - row.length).fill('')])
               updateNodeData(id, { numCols: newCols, cells: newCells })
             }}
             className="nodrag"
@@ -664,7 +752,10 @@ function MathSheetNodeInner({ id, data, selected }: NodeProps) {
                 const used = new Set(sheetVars.map((v) => v.name))
                 let name = ''
                 for (const l of letters) {
-                  if (!used.has(l)) { name = l; break }
+                  if (!used.has(l)) {
+                    name = l
+                    break
+                  }
                 }
                 if (!name) name = `v${sheetVars.length}`
                 updateNodeData(id, { sheetVars: [...sheetVars, { name }] })

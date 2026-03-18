@@ -18,13 +18,7 @@ interface EdgeProbePopoverProps {
   onClose: () => void
 }
 
-export function EdgeProbePopover({
-  x,
-  y,
-  sourceLabel,
-  value,
-  onClose,
-}: EdgeProbePopoverProps) {
+export function EdgeProbePopover({ x, y, sourceLabel, value, onClose }: EdgeProbePopoverProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   // Close on Escape or outside click
@@ -50,23 +44,25 @@ export function EdgeProbePopover({
   return (
     <div
       ref={ref}
-      style={{
-        position: 'fixed',
-        left: x,
-        top: y,
-        zIndex: 9999,
-        background: 'var(--surface-2, #2a2a2a)',
-        border: `1px solid ${kindColor}40`,
-        borderRadius: 10,
-        boxShadow: `0 4px 24px rgba(0,0,0,0.45), 0 0 0 1px ${kindColor}20`,
-        padding: '10px 14px',
-        minWidth: 220,
-        maxWidth: 320,
-        fontFamily: "'Montserrat', system-ui, sans-serif",
-        fontSize: '0.75rem',
-        color: 'var(--text, #f4f4f3)',
-        pointerEvents: 'all',
-      } as CSSProperties}
+      style={
+        {
+          position: 'fixed',
+          left: x,
+          top: y,
+          zIndex: 9999,
+          background: 'var(--surface-2, #2a2a2a)',
+          border: `1px solid ${kindColor}40`,
+          borderRadius: 10,
+          boxShadow: `0 4px 24px rgba(0,0,0,0.45), 0 0 0 1px ${kindColor}20`,
+          padding: '10px 14px',
+          minWidth: 220,
+          maxWidth: 320,
+          fontFamily: "'Montserrat', system-ui, sans-serif",
+          fontSize: '0.75rem',
+          color: 'var(--text, #f4f4f3)',
+          pointerEvents: 'all',
+        } as CSSProperties
+      }
       role="dialog"
       aria-label="Edge probe"
     >
@@ -220,9 +216,7 @@ function computeStats(value: Value | undefined): Stats | null {
     const min = Math.min(...allVals)
     const max = Math.max(...allVals)
     const mean = allVals.reduce((a, b) => a + b, 0) / allVals.length
-    const std = Math.sqrt(
-      allVals.reduce((a, b) => a + (b - mean) ** 2, 0) / allVals.length,
-    )
+    const std = Math.sqrt(allVals.reduce((a, b) => a + (b - mean) ** 2, 0) / allVals.length)
     return { shape, min, max, mean, std }
   }
   if (value.kind === 'interval') {

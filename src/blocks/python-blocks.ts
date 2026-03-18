@@ -18,7 +18,8 @@ export function registerPythonBlocks(register: (def: BlockDef) => void): void {
     defaultData: {
       blockType: 'scripting.python',
       label: 'Python Script',
-      pyCode: '# Python 3.11 (Pyodide)\n# last expression = output\nimport numpy as np\nnp.sqrt(x1)',
+      pyCode:
+        '# Python 3.11 (Pyodide)\n# last expression = output\nimport numpy as np\nnp.sqrt(x1)',
       pyVars: [{ id: 'pv_default', name: 'x1' }],
       value: 0,
       pyResultJson: null,
@@ -26,8 +27,16 @@ export function registerPythonBlocks(register: (def: BlockDef) => void): void {
       pyRunning: false,
     },
     synonyms: [
-      'python', 'pyodide', 'numpy', 'scipy', 'pandas', 'scikit-learn',
-      'script', 'custom code', 'python script', 'python block',
+      'python',
+      'pyodide',
+      'numpy',
+      'scipy',
+      'pandas',
+      'scikit-learn',
+      'script',
+      'custom code',
+      'python script',
+      'python block',
     ],
     tags: ['python', 'scripting', 'custom', 'pyodide', 'numpy'],
     description:

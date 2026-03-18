@@ -98,10 +98,7 @@ export function freeBuffer(device: GPUDevice, buf: GpuBuffer) {
  * Create a uniform buffer (small, not pooled).
  * `data` must be a Uint32Array or Float32Array whose byteLength is 16-aligned.
  */
-export function createUniform(
-  device: GPUDevice,
-  data: Uint32Array | Float32Array,
-): GPUBuffer {
+export function createUniform(device: GPUDevice, data: Uint32Array | Float32Array): GPUBuffer {
   const buf = device.createBuffer({
     size: data.byteLength,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,

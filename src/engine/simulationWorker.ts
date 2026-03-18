@@ -156,10 +156,9 @@ export class SimulationWorkerAPI {
 
     return new Promise<SimulationResult>((resolve, reject) => {
       // 8.1: Dedicated worker (separate from eval worker pool)
-      this.worker = new Worker(
-        new URL('./simulation-worker-entry.ts', import.meta.url),
-        { type: 'module' },
-      )
+      this.worker = new Worker(new URL('./simulation-worker-entry.ts', import.meta.url), {
+        type: 'module',
+      })
       const worker = this.worker
 
       // 8.6: Cancellation via AbortSignal

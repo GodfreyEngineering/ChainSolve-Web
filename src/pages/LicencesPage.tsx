@@ -76,16 +76,16 @@ export default function LicencesPage() {
               </li>
             </ul>
             <p style={s.para}>
-              No GPL, AGPL, LGPL, or SSPL components are included. Our CI pipeline enforces this
-              via <code>cargo deny</code> and <code>license-checker</code>.
+              No GPL, AGPL, LGPL, or SSPL components are included. Our CI pipeline enforces this via{' '}
+              <code>cargo deny</code> and <code>license-checker</code>.
             </p>
           </section>
 
           <section style={s.section}>
             <h2 style={s.heading}>Full Licence Text</h2>
             <p style={s.para}>
-              A complete machine-readable list of all 700+ open-source dependencies and their
-              SPDX licence identifiers is available in our GitHub repository:
+              A complete machine-readable list of all 700+ open-source dependencies and their SPDX
+              licence identifiers is available in our GitHub repository:
             </p>
             <ul style={s.list}>
               <li>
@@ -97,13 +97,12 @@ export default function LicencesPage() {
                 <code>legal/frontend-dependency-licences.md</code>
               </li>
               <li>
-                <strong>Combined (all dependencies)</strong>:{' '}
-                <code>THIRD_PARTY_LICENCES.md</code>
+                <strong>Combined (all dependencies)</strong>: <code>THIRD_PARTY_LICENCES.md</code>
               </li>
             </ul>
             <p style={s.para}>
-              Font licences are documented in <code>legal/font-licences.md</code>. Icon licences
-              are documented in <code>legal/asset-licences.md</code>.
+              Font licences are documented in <code>legal/font-licences.md</code>. Icon licences are
+              documented in <code>legal/asset-licences.md</code>.
             </p>
           </section>
 

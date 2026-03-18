@@ -86,7 +86,9 @@ export function VersionHistoryPanel({
       const list = await listSnapshots(projectId, canvasId)
       setSnapshots(list)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('versions.loadError', 'Failed to load versions'))
+      setError(
+        err instanceof Error ? err.message : t('versions.loadError', 'Failed to load versions'),
+      )
     } finally {
       setLoading(false)
     }
@@ -108,7 +110,9 @@ export function VersionHistoryPanel({
       setShowInput(false)
       await refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('versions.saveError', 'Failed to save version'))
+      setError(
+        err instanceof Error ? err.message : t('versions.saveError', 'Failed to save version'),
+      )
     } finally {
       setSaving(false)
     }
@@ -117,14 +121,23 @@ export function VersionHistoryPanel({
   // Restore a snapshot onto the canvas
   const handleRestore = useCallback(
     async (snap: ProjectSnapshot) => {
-      if (!confirm(t('versions.confirmRestore', 'Restore this version? Current canvas will be replaced.'))) return
+      if (
+        !confirm(
+          t('versions.confirmRestore', 'Restore this version? Current canvas will be replaced.'),
+        )
+      )
+        return
       setRestoring(snap.id)
       setError(null)
       try {
         const graph = await loadSnapshot(snap)
         onRestore(graph.nodes as Node<NodeData>[], graph.edges as Edge[])
       } catch (err) {
-        setError(err instanceof Error ? err.message : t('versions.restoreError', 'Failed to restore version'))
+        setError(
+          err instanceof Error
+            ? err.message
+            : t('versions.restoreError', 'Failed to restore version'),
+        )
       } finally {
         setRestoring(null)
       }
@@ -152,13 +165,18 @@ export function VersionHistoryPanel({
   // Delete a snapshot
   const handleDelete = useCallback(
     async (snap: ProjectSnapshot) => {
-      if (!confirm(t('versions.confirmDelete', 'Delete this version? This cannot be undone.'))) return
+      if (!confirm(t('versions.confirmDelete', 'Delete this version? This cannot be undone.')))
+        return
       setError(null)
       try {
         await deleteSnapshot(snap)
         setSnapshots((prev) => prev.filter((s) => s.id !== snap.id))
       } catch (err) {
-        setError(err instanceof Error ? err.message : t('versions.deleteError', 'Failed to delete version'))
+        setError(
+          err instanceof Error
+            ? err.message
+            : t('versions.deleteError', 'Failed to delete version'),
+        )
       }
     },
     [t],

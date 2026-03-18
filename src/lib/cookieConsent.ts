@@ -34,12 +34,12 @@ export function setCookieConsent(choice: 'accepted' | 'declined'): void {
 
 /** Append cookie consent choice to the GDPR user_consents audit table. */
 async function recordCookieConsentAudit(choice: 'accepted' | 'declined'): Promise<void> {
-  const { data: { user } } = await supabase.auth.getUser()
-  await supabase
-    .from('user_consents')
-    .insert({
-      user_id: user?.id ?? null,
-      consent_type: 'cookie_analytics',
-      granted: choice === 'accepted',
-    })
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  await supabase.from('user_consents').insert({
+    user_id: user?.id ?? null,
+    consent_type: 'cookie_analytics',
+    granted: choice === 'accepted',
+  })
 }

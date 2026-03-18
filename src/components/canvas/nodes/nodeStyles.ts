@@ -303,5 +303,4 @@ export const NODE_STYLES = {
   nodeBody: {
     padding: '0.45rem 0.65rem',
   } as CSSProperties,
-
 }

@@ -28,8 +28,13 @@ export function registerCustomRustBlocks(register: (def: BlockDef) => void): voi
       rustCompiledHash: null,
     },
     synonyms: [
-      'custom rust', 'rust script', 'custom block', 'rust code', 'native code',
-      'wasm compile', 'server compile',
+      'custom rust',
+      'rust script',
+      'custom block',
+      'rust code',
+      'native code',
+      'wasm compile',
+      'server compile',
     ],
     tags: ['rust', 'scripting', 'custom', 'wasm', 'native'],
     description:

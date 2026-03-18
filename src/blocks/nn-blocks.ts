@@ -261,8 +261,13 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
       seed: 42,
     },
     synonyms: [
-      'transfer learning', 'fine-tune', 'fine tuning', 'frozen layers',
-      'pretrained', 'feature extraction', 'domain adaptation',
+      'transfer learning',
+      'fine-tune',
+      'fine tuning',
+      'frozen layers',
+      'pretrained',
+      'feature extraction',
+      'domain adaptation',
     ],
     tags: ['nn', 'transfer', 'fine-tune', 'pretrained'],
     description:
@@ -297,8 +302,13 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
       seed: 42,
     },
     synonyms: [
-      'fno', 'fourier neural operator', 'deeponet', 'operator learning',
-      'neural operator', 'pde operator', 'solution operator',
+      'fno',
+      'fourier neural operator',
+      'deeponet',
+      'operator learning',
+      'neural operator',
+      'pde operator',
+      'solution operator',
     ],
     tags: ['nn', 'operator', 'fno', 'deeponet', 'pde'],
     description:
@@ -340,13 +350,19 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
       seed: 42,
     },
     synonyms: [
-      'pinn', 'physics-informed', 'neural network pde', 'boundary value problem',
-      'bvp', 'ode solver', 'neural pde', 'scientific ml',
+      'pinn',
+      'physics-informed',
+      'neural network pde',
+      'boundary value problem',
+      'bvp',
+      'ode solver',
+      'neural pde',
+      'scientific ml',
     ],
     tags: ['nn', 'pinn', 'pde', 'physics', 'bvp'],
     description:
       'Physics-Informed Neural Network (PINN): trains a neural network to satisfy a 1D BVP ' +
-      'of the form a·u\'\' + b·u\' + c·u = f(x) with Dirichlet boundary conditions. ' +
+      "of the form a·u'' + b·u' + c·u = f(x) with Dirichlet boundary conditions. " +
       'Features: Fourier feature embedding for spectral bias mitigation, ' +
       'NTK-based gradient balancing, adaptive collocation resampling. ' +
       'Output: Table [x, u(x)] at n_eval evaluation points.',
@@ -431,6 +447,7 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
     },
     synonyms: ['onnx', 'export model', 'onnx file', 'model deployment'],
     tags: ['nn', 'onnx', 'export', 'deploy'],
-    description: 'ONNX Export: trains a Dense MLP then serializes weights as ONNX protobuf (opset 17).',
+    description:
+      'ONNX Export: trains a Dense MLP then serializes weights as ONNX protobuf (opset 17).',
   })
 }

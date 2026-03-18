@@ -73,7 +73,8 @@ export function buildSpringMassDamper(canvasId: string, projectId: string): Canv
         blockType: '__annotation__',
         label: '',
         annotationType: 'text',
-        annotationText: '① Set inputs\n\nChange k, m, c, t to explore\ndifferent system configurations.',
+        annotationText:
+          '① Set inputs\n\nChange k, m, c, t to explore\ndifferent system configurations.',
         annotationColor: '#60a5fa',
         annotationFontSize: 11,
         width: 160,
@@ -116,7 +117,8 @@ export function buildSpringMassDamper(canvasId: string, projectId: string): Canv
         blockType: '__annotation__',
         label: '',
         annotationType: 'text',
-        annotationText: '② Computation\n\nThe engine evaluates each block\nautomatically — no code needed.',
+        annotationText:
+          '② Computation\n\nThe engine evaluates each block\nautomatically — no code needed.',
         annotationColor: '#4ade80',
         annotationFontSize: 11,
         width: 160,
@@ -167,7 +169,8 @@ export function buildSpringMassDamper(canvasId: string, projectId: string): Canv
         blockType: '__annotation__',
         label: '',
         annotationType: 'text',
-        annotationText: '③ Results\n\nDisplay blocks show live results.\nDouble-click any block to inspect.',
+        annotationText:
+          '③ Results\n\nDisplay blocks show live results.\nDouble-click any block to inspect.',
         annotationColor: '#a78bfa',
         annotationFontSize: 11,
         width: 160,
@@ -198,24 +201,66 @@ export function buildSpringMassDamper(canvasId: string, projectId: string): Canv
     // ωn = √(k/m)
     { id: 'smd-e1', source: 'smd-k', sourceHandle: 'out', target: 'smd-wn', targetHandle: 'k' },
     { id: 'smd-e2', source: 'smd-m', sourceHandle: 'out', target: 'smd-wn', targetHandle: 'm' },
-    { id: 'smd-e3', source: 'smd-wn', sourceHandle: 'out', target: 'smd-wn-disp', targetHandle: 'value' },
+    {
+      id: 'smd-e3',
+      source: 'smd-wn',
+      sourceHandle: 'out',
+      target: 'smd-wn-disp',
+      targetHandle: 'value',
+    },
 
     // ζ = c/(2√km)
     { id: 'smd-e4', source: 'smd-c', sourceHandle: 'out', target: 'smd-zeta', targetHandle: 'c' },
     { id: 'smd-e5', source: 'smd-k', sourceHandle: 'out', target: 'smd-zeta', targetHandle: 'k' },
     { id: 'smd-e6', source: 'smd-m', sourceHandle: 'out', target: 'smd-zeta', targetHandle: 'm' },
-    { id: 'smd-e7', source: 'smd-zeta', sourceHandle: 'out', target: 'smd-zeta-disp', targetHandle: 'value' },
+    {
+      id: 'smd-e7',
+      source: 'smd-zeta',
+      sourceHandle: 'out',
+      target: 'smd-zeta-disp',
+      targetHandle: 'value',
+    },
 
     // %OS (from ζ)
-    { id: 'smd-e8', source: 'smd-zeta', sourceHandle: 'out', target: 'smd-os', targetHandle: 'zeta' },
-    { id: 'smd-e9', source: 'smd-os', sourceHandle: 'out', target: 'smd-os-disp', targetHandle: 'value' },
+    {
+      id: 'smd-e8',
+      source: 'smd-zeta',
+      sourceHandle: 'out',
+      target: 'smd-os',
+      targetHandle: 'zeta',
+    },
+    {
+      id: 'smd-e9',
+      source: 'smd-os',
+      sourceHandle: 'out',
+      target: 'smd-os-disp',
+      targetHandle: 'value',
+    },
 
     // Step 2nd order (K=1, wn from block, zeta from block, t from input)
     { id: 'smd-e10', source: 'smd-K', sourceHandle: 'out', target: 'smd-step', targetHandle: 'K' },
-    { id: 'smd-e11', source: 'smd-wn', sourceHandle: 'out', target: 'smd-step', targetHandle: 'wn' },
-    { id: 'smd-e12', source: 'smd-zeta', sourceHandle: 'out', target: 'smd-step', targetHandle: 'zeta' },
+    {
+      id: 'smd-e11',
+      source: 'smd-wn',
+      sourceHandle: 'out',
+      target: 'smd-step',
+      targetHandle: 'wn',
+    },
+    {
+      id: 'smd-e12',
+      source: 'smd-zeta',
+      sourceHandle: 'out',
+      target: 'smd-step',
+      targetHandle: 'zeta',
+    },
     { id: 'smd-e13', source: 'smd-t', sourceHandle: 'out', target: 'smd-step', targetHandle: 't' },
-    { id: 'smd-e14', source: 'smd-step', sourceHandle: 'out', target: 'smd-step-disp', targetHandle: 'value' },
+    {
+      id: 'smd-e14',
+      source: 'smd-step',
+      sourceHandle: 'out',
+      target: 'smd-step-disp',
+      targetHandle: 'value',
+    },
   ]
 
   return { schemaVersion: 4, canvasId, projectId, nodes, edges, datasetRefs: [] }

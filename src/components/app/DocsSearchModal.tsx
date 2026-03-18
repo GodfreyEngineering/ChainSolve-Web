@@ -111,7 +111,11 @@ function DocsItem({ entry }: { entry: DocsEntry }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         <p style={itemTitleStyle}>{entry.title}</p>
         {hasVideo && (
-          <span style={videoBadgeStyle} title={`Watch: ${walkthrough.title}`} aria-label="Video walkthrough available">
+          <span
+            style={videoBadgeStyle}
+            title={`Watch: ${walkthrough.title}`}
+            aria-label="Video walkthrough available"
+          >
             ▶ {walkthrough.durationLabel}
           </span>
         )}

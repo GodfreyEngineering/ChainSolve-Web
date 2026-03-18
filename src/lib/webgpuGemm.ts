@@ -203,7 +203,13 @@ export interface GemmBenchmarkResult {
 export async function benchmarkGpuGemm(): Promise<GemmBenchmarkResult> {
   const device = await getDevice()
   if (!device) {
-    return { supported: false, ms: null, gflops: null, passed: false, error: 'WebGPU not available' }
+    return {
+      supported: false,
+      ms: null,
+      gflops: null,
+      passed: false,
+      error: 'WebGPU not available',
+    }
   }
 
   const M = 1000

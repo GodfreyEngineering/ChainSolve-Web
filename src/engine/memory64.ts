@@ -54,14 +54,20 @@ export async function detectMemory64Support(): Promise<Memory64Info> {
   //   000c: 01           - initial pages = 1 (64KiB)
   //   000d: (end)
   const memory64Probe = new Uint8Array([
-    0x00, 0x61, 0x73, 0x6d, // magic
-    0x01, 0x00, 0x00, 0x00, // version
-    0x05,                   // memory section
-    0x04,                   // section size
-    0x01,                   // memory count: 1
-    0x04,                   // memory type: memory64 (flags = 4 = i64)
-    0x01,                   // min pages: 1
-    0x00,                   // end
+    0x00,
+    0x61,
+    0x73,
+    0x6d, // magic
+    0x01,
+    0x00,
+    0x00,
+    0x00, // version
+    0x05, // memory section
+    0x04, // section size
+    0x01, // memory count: 1
+    0x04, // memory type: memory64 (flags = 4 = i64)
+    0x01, // min pages: 1
+    0x00, // end
   ])
 
   let supported = false
@@ -88,9 +94,7 @@ export async function detectMemory64Support(): Promise<Memory64Info> {
   }
 
   if (supported) {
-    console.info(
-      `[Memory64] WebAssembly Memory64 supported — allocatable: ${allocatable}`,
-    )
+    console.info(`[Memory64] WebAssembly Memory64 supported — allocatable: ${allocatable}`)
   } else {
     console.info('[Memory64] WebAssembly Memory64 not supported in this browser')
   }

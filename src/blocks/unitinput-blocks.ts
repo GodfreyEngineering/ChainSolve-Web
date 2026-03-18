@@ -48,7 +48,6 @@ export function registerUnitInputBlocks(register: (def: BlockDef) => void): void
     tags: ['units', 'analysis', 'math'],
   })
 
-
   register({
     type: 'unitInput',
     label: 'Unit Input',
@@ -72,7 +71,16 @@ export function registerUnitInputBlocks(register: (def: BlockDef) => void): void
       /** SI-converted output value (what the engine receives). */
       value: 1,
     },
-    synonyms: ['unit', 'quantity', 'physical', 'measurement', 'dimension', 'SI', 'imperial', 'metric'],
+    synonyms: [
+      'unit',
+      'quantity',
+      'physical',
+      'measurement',
+      'dimension',
+      'SI',
+      'imperial',
+      'metric',
+    ],
     tags: ['input', 'unit', 'physical'],
     description:
       'Physical quantity input with 500+ unit picker. Enter a value and pick a unit — output is automatically converted to SI base units for dimensional-safe computation.',

@@ -1353,18 +1353,26 @@ reg({
   defaultData: {
     blockType: 'veh.suspension.halfCar',
     label: 'Half Car',
-    m_s: 800, i_y: 1200,
-    m_uf: 35, m_ur: 40,
-    k_sf: 18000, c_sf: 1200,
-    k_sr: 20000, c_sr: 1400,
-    k_tf: 160000, k_tr: 160000,
-    a: 1.35, b: 1.45,
-    t_end: 3.0, dt: 0.005,
+    m_s: 800,
+    i_y: 1200,
+    m_uf: 35,
+    m_ur: 40,
+    k_sf: 18000,
+    c_sf: 1200,
+    k_sr: 20000,
+    c_sr: 1400,
+    k_tf: 160000,
+    k_tr: 160000,
+    a: 1.35,
+    b: 1.45,
+    t_end: 3.0,
+    dt: 0.005,
   },
   proOnly: true,
   synonyms: ['half car', 'pitch bounce', '4 DOF suspension'],
   tags: ['vehicle', 'suspension', 'dynamics'],
-  description: 'Half-car 4-DOF suspension (heave + pitch + front/rear unsprung). Outputs time series of body heave, pitch, and wheel displacements.',
+  description:
+    'Half-car 4-DOF suspension (heave + pitch + front/rear unsprung). Outputs time series of body heave, pitch, and wheel displacements.',
 })
 
 reg({
@@ -1381,19 +1389,37 @@ reg({
   defaultData: {
     blockType: 'veh.suspension.fullCar',
     label: 'Full Vehicle',
-    m_s: 1200, i_pitch: 1800, i_roll: 500,
-    m_wfl: 35, m_wfr: 35, m_wrl: 40, m_wrr: 40,
-    k_fl: 18000, c_fl: 1200, k_fr: 18000, c_fr: 1200,
-    k_rl: 20000, c_rl: 1400, k_rr: 20000, c_rr: 1400,
-    k_tf: 160000, k_tr: 160000,
-    k_arb_f: 5000, k_arb_r: 3000,
-    a: 1.35, b: 1.45, tw_f: 0.75, tw_r: 0.75,
-    t_end: 3.0, dt: 0.005,
+    m_s: 1200,
+    i_pitch: 1800,
+    i_roll: 500,
+    m_wfl: 35,
+    m_wfr: 35,
+    m_wrl: 40,
+    m_wrr: 40,
+    k_fl: 18000,
+    c_fl: 1200,
+    k_fr: 18000,
+    c_fr: 1200,
+    k_rl: 20000,
+    c_rl: 1400,
+    k_rr: 20000,
+    c_rr: 1400,
+    k_tf: 160000,
+    k_tr: 160000,
+    k_arb_f: 5000,
+    k_arb_r: 3000,
+    a: 1.35,
+    b: 1.45,
+    tw_f: 0.75,
+    tw_r: 0.75,
+    t_end: 3.0,
+    dt: 0.005,
   },
   proOnly: true,
   synonyms: ['full vehicle', '7 DOF', 'heave pitch roll', 'full car'],
   tags: ['vehicle', 'suspension', 'dynamics'],
-  description: 'Full-vehicle 7-DOF model (body heave/pitch/roll + 4 wheel DOFs) with anti-roll bars. Outputs 14-state time series.',
+  description:
+    'Full-vehicle 7-DOF model (body heave/pitch/roll + 4 wheel DOFs) with anti-roll bars. Outputs 14-state time series.',
 })
 
 reg({
@@ -1405,17 +1431,27 @@ reg({
   defaultData: {
     blockType: 'veh.suspension.kc',
     label: 'K&C Analysis',
-    a_upper: 0.35, b_upper: 0.30,
-    a_lower: 0.18, b_lower: 0.10,
+    a_upper: 0.35,
+    b_upper: 0.3,
+    a_lower: 0.18,
+    b_lower: 0.1,
     track_half: 0.75,
     wheel_rate: 18000,
     toe_link_angle_deg: 3,
     anti_angle_deg: 8,
   },
   proOnly: true,
-  synonyms: ['K&C', 'kinematics compliance', 'bump steer', 'roll centre', 'anti-dive', 'anti-squat'],
+  synonyms: [
+    'K&C',
+    'kinematics compliance',
+    'bump steer',
+    'roll centre',
+    'anti-dive',
+    'anti-squat',
+  ],
   tags: ['vehicle', 'suspension', 'kinematics'],
-  description: 'K&C (Kinematics & Compliance) analysis. Outputs bump steer gradient, bump camber gradient, roll centre height, lateral stiffness, anti-dive/squat %.',
+  description:
+    'K&C (Kinematics & Compliance) analysis. Outputs bump steer gradient, bump camber gradient, roll centre height, lateral stiffness, anti-dive/squat %.',
 })
 
 reg({
@@ -1427,13 +1463,18 @@ reg({
   defaultData: {
     blockType: 'veh.event.stepSteer',
     label: 'Step Steer',
-    t_start: 0.5, ramp_time: 0.1, target_angle: 0.1,
-    t_end: 5.0, dt: 0.01, throttle: 0.5,
+    t_start: 0.5,
+    ramp_time: 0.1,
+    target_angle: 0.1,
+    t_end: 5.0,
+    dt: 0.01,
+    throttle: 0.5,
   },
   proOnly: true,
   synonyms: ['step steer', 'steer input', 'ISO 7401'],
   tags: ['vehicle', 'event', 'manoeuvre'],
-  description: 'Step steer event generator. Ramps steer angle from 0 to target over ramp_time. Outputs table {t, steer_angle, throttle, brake}.',
+  description:
+    'Step steer event generator. Ramps steer angle from 0 to target over ramp_time. Outputs table {t, steer_angle, throttle, brake}.',
 })
 
 reg({
@@ -1445,13 +1486,18 @@ reg({
   defaultData: {
     blockType: 'veh.event.sineSweep',
     label: 'Sine Sweep',
-    amplitude: 0.05, f_start: 0.1, f_end: 5.0,
-    t_end: 20.0, dt: 0.01, throttle: 0.5,
+    amplitude: 0.05,
+    f_start: 0.1,
+    f_end: 5.0,
+    t_end: 20.0,
+    dt: 0.01,
+    throttle: 0.5,
   },
   proOnly: true,
   synonyms: ['sine sweep', 'frequency sweep', 'chirp steer'],
   tags: ['vehicle', 'event', 'frequency'],
-  description: 'Sinusoidal steer frequency sweep (chirp). Linear frequency ramp from f_start to f_end. Outputs table {t, steer_angle, throttle, brake}.',
+  description:
+    'Sinusoidal steer frequency sweep (chirp). Linear frequency ramp from f_start to f_end. Outputs table {t, steer_angle, throttle, brake}.',
 })
 
 reg({
@@ -1463,12 +1509,15 @@ reg({
   defaultData: {
     blockType: 'veh.event.laneChange',
     label: 'Lane Change',
-    v_kmh: 80, amplitude: 0.15, dt: 0.01,
+    v_kmh: 80,
+    amplitude: 0.15,
+    dt: 0.01,
   },
   proOnly: true,
   synonyms: ['lane change', 'double lane change', 'ISO 3888', 'avoidance'],
   tags: ['vehicle', 'event', 'manoeuvre'],
-  description: 'ISO 3888-2 double lane change steering profile. Duration scaled by entry speed. Outputs {t, steer_angle, throttle, brake}.',
+  description:
+    'ISO 3888-2 double lane change steering profile. Duration scaled by entry speed. Outputs {t, steer_angle, throttle, brake}.',
 })
 
 reg({
@@ -1480,13 +1529,18 @@ reg({
   defaultData: {
     blockType: 'veh.event.brakeInTurn',
     label: 'Brake in Turn',
-    steer_angle: 0.1, brake_ramp_time: 0.3,
-    t_brake_start: 1.0, t_end: 4.0, dt: 0.01, throttle_before: 0.5,
+    steer_angle: 0.1,
+    brake_ramp_time: 0.3,
+    t_brake_start: 1.0,
+    t_end: 4.0,
+    dt: 0.01,
+    throttle_before: 0.5,
   },
   proOnly: true,
   synonyms: ['brake in turn', 'braking cornering', 'trail braking'],
   tags: ['vehicle', 'event', 'braking'],
-  description: 'Combined braking and cornering manoeuvre. Constant steer with progressive brake application.',
+  description:
+    'Combined braking and cornering manoeuvre. Constant steer with progressive brake application.',
 })
 
 reg({
@@ -1498,7 +1552,10 @@ reg({
   defaultData: {
     blockType: 'veh.event.constantRadius',
     label: 'Const. Radius',
-    steer_angle: 0.1, throttle: 0.3, t_end: 10.0, dt: 0.01,
+    steer_angle: 0.1,
+    throttle: 0.3,
+    t_end: 10.0,
+    dt: 0.01,
   },
   proOnly: true,
   synonyms: ['constant radius', 'steady state cornering', 'circular'],

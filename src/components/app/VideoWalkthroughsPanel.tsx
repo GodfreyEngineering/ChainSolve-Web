@@ -56,9 +56,7 @@ export function VideoWalkthroughsPanel() {
               aria-label="Search video walkthroughs"
             />
 
-            {results.length === 0 && (
-              <p style={emptyStyle}>No walkthroughs matching "{query}".</p>
-            )}
+            {results.length === 0 && <p style={emptyStyle}>No walkthroughs matching "{query}".</p>}
 
             <div style={listStyle}>
               {grouped.map(([area, videos]) => (
@@ -107,9 +105,7 @@ function VideoListItem({
         <p style={itemTitleStyle}>{video.title}</p>
         <p style={itemMetaStyle}>
           {video.durationLabel}
-          {placeholder && (
-            <span style={comingSoonStyle}> · Coming soon</span>
-          )}
+          {placeholder && <span style={comingSoonStyle}> · Coming soon</span>}
         </p>
         <p style={itemDescStyle}>{video.description}</p>
       </div>
@@ -350,7 +346,7 @@ const detailDescStyle: React.CSSProperties = {
 
 const embedWrapperStyle: React.CSSProperties = {
   position: 'relative',
-  paddingTop: '56.25%',  // 16:9
+  paddingTop: '56.25%', // 16:9
   background: '#000',
   borderRadius: 6,
   overflow: 'hidden',

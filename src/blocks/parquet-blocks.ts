@@ -34,8 +34,15 @@ export function registerParquetBlocks(register: (def: BlockDef) => void): void {
       fileSize: 0,
     },
     synonyms: [
-      'parquet', 'columnar', 'arrow', 'pandas', 'spark',
-      'duckdb', '.parquet', 'import parquet', 'load parquet',
+      'parquet',
+      'columnar',
+      'arrow',
+      'pandas',
+      'spark',
+      'duckdb',
+      '.parquet',
+      'import parquet',
+      'load parquet',
     ],
     tags: ['data', 'import', 'file', 'columnar', 'parquet'],
     description:
@@ -55,8 +62,13 @@ export function registerParquetBlocks(register: (def: BlockDef) => void): void {
       label: 'Parquet Export',
     },
     synonyms: [
-      'parquet', 'columnar', 'export parquet', 'save parquet', 'download parquet',
-      'write parquet', '.parquet',
+      'parquet',
+      'columnar',
+      'export parquet',
+      'save parquet',
+      'download parquet',
+      'write parquet',
+      '.parquet',
     ],
     tags: ['data', 'export', 'file', 'columnar', 'parquet'],
     description:

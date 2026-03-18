@@ -1876,8 +1876,7 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
   const handleExportGitFriendly = useCallback(async () => {
     if (!projectId || exportingRef.current) return
 
-    const { exportGitFriendlyProject } =
-      await import('../lib/chainsolvejson/exportChainsolveJson')
+    const { exportGitFriendlyProject } = await import('../lib/chainsolvejson/exportChainsolveJson')
 
     const abort = new AbortController()
     exportAbortRef.current = abort
@@ -1926,7 +1925,14 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
           id: row.id,
           name: row.name,
           position: row.position,
-          graph: { schemaVersion: 4 as const, canvasId: row.id, projectId, nodes, edges, datasetRefs: [] },
+          graph: {
+            schemaVersion: 4 as const,
+            canvasId: row.id,
+            projectId,
+            nodes,
+            edges,
+            datasetRefs: [],
+          },
         })
       }
 
@@ -1984,7 +1990,9 @@ export default function CanvasPage({ embedded, onControlsReady }: CanvasPageProp
         projectName: ps.projectName ?? 'ChainSolve Project',
         exportedAt: new Date().toISOString(),
         viewportElement: viewportDom,
-        nodes: (snap?.nodes ?? []) as import('@xyflow/react').Node<import('../blocks/types').NodeData>[],
+        nodes: (snap?.nodes ?? []) as import('@xyflow/react').Node<
+          import('../blocks/types').NodeData
+        >[],
         computedValues: allComputed,
         graphJson: JSON.stringify({ nodes: snap?.nodes ?? [], edges: snap?.edges ?? [] }),
       })

@@ -410,7 +410,12 @@ function buildSpec(
         base.mark = { type: 'boxplot', extent: 1.5, median: { color: '#1CABB0' } }
         base.encoding = {
           x: { value: width / 2 },
-          y: { field: valueField, type: 'quantitative', scale: yScale, title: config.yLabel ?? 'Value' },
+          y: {
+            field: valueField,
+            type: 'quantitative',
+            scale: yScale,
+            title: config.yLabel ?? 'Value',
+          },
         }
       }
       break
@@ -439,7 +444,12 @@ function buildSpec(
             title: null,
             axis: { labels: false, values: [0], grid: false, ticks: true },
           },
-          y: { field: '_val', type: 'quantitative', scale: yScale, title: config.yLabel ?? 'Value' },
+          y: {
+            field: '_val',
+            type: 'quantitative',
+            scale: yScale,
+            title: config.yLabel ?? 'Value',
+          },
           color: { field: groupField, type: 'nominal', legend: config.showLegend ? {} : null },
           column: { field: groupField, header: { titleOrient: 'bottom' } },
         }
@@ -449,7 +459,12 @@ function buildSpec(
         base.mark = 'area'
         base.encoding = {
           x: { field: '_density', type: 'quantitative', title: 'Density' },
-          y: { field: '_val', type: 'quantitative', scale: yScale, title: config.yLabel ?? 'Value' },
+          y: {
+            field: '_val',
+            type: 'quantitative',
+            scale: yScale,
+            title: config.yLabel ?? 'Value',
+          },
         }
       }
       break
@@ -461,9 +476,7 @@ function buildSpec(
       // Uses Vega-Lite's fold transform + layer approach.
       const allCols = data.columns
       const colorField = config.xColumn // optional grouping/colour column
-      const numericCols = colorField
-        ? allCols.filter((c) => c !== colorField)
-        : allCols
+      const numericCols = colorField ? allCols.filter((c) => c !== colorField) : allCols
 
       if (numericCols.length === 0) {
         return { error: 'Parallel coordinates requires a Table input with numeric columns' }
@@ -485,7 +498,8 @@ function buildSpec(
           groupby: ['_key'],
         },
         {
-          calculate: 'datum._max === datum._min ? 0.5 : (datum._value - datum._min) / (datum._max - datum._min)',
+          calculate:
+            'datum._max === datum._min ? 0.5 : (datum._value - datum._min) / (datum._max - datum._min)',
           as: '_normValue',
         },
       ]
@@ -501,7 +515,11 @@ function buildSpec(
           mark: 'line',
           encoding: {
             x: { field: '_key', type: 'nominal', axis: { title: null } },
-            y: { field: '_normValue', type: 'quantitative', axis: { title: 'Normalised value', tickCount: 5 } },
+            y: {
+              field: '_normValue',
+              type: 'quantitative',
+              axis: { title: 'Normalised value', tickCount: 5 },
+            },
             detail: { field: '_index', type: 'nominal' },
             color: colorField
               ? { field: colorField, type: 'nominal', legend: config.showLegend ? {} : null }
@@ -561,7 +579,12 @@ function buildSpec(
         base.transform = [{ density: valueField, as: ['_val', '_density'] }]
         base.mark = { type: 'area', line: true, color: '#1CABB0', fillOpacity: 0.2 }
         base.encoding = {
-          x: { field: '_val', type: 'quantitative', scale: xScale, title: config.xLabel ?? 'Value' },
+          x: {
+            field: '_val',
+            type: 'quantitative',
+            scale: xScale,
+            title: config.xLabel ?? 'Value',
+          },
           y: { field: '_density', type: 'quantitative', title: 'Density' },
         }
       }
@@ -592,7 +615,12 @@ function buildSpec(
             mark: { type: 'line', strokeWidth: theme.lineWidth, color: '#1CABB0' },
             encoding: {
               x: { ...freqEnc, axis: { ...freqEnc.axis, labels: false, title: null } },
-              y: { field: magField, type: 'quantitative', title: config.yLabel ?? 'Magnitude (dB)', axis: { grid: config.showGrid ?? true } },
+              y: {
+                field: magField,
+                type: 'quantitative',
+                title: config.yLabel ?? 'Magnitude (dB)',
+                axis: { grid: config.showGrid ?? true },
+              },
               tooltip: [
                 { field: freqField, title: 'Freq', format: '.3g' },
                 { field: magField, title: 'Mag (dB)', format: '.2f' },
@@ -604,7 +632,12 @@ function buildSpec(
             mark: { type: 'line', strokeWidth: theme.lineWidth, color: '#f472b6' },
             encoding: {
               x: freqEnc,
-              y: { field: phaseField, type: 'quantitative', title: 'Phase (deg)', axis: { grid: config.showGrid ?? true } },
+              y: {
+                field: phaseField,
+                type: 'quantitative',
+                title: 'Phase (deg)',
+                axis: { grid: config.showGrid ?? true },
+              },
               tooltip: [
                 { field: freqField, title: 'Freq', format: '.3g' },
                 { field: phaseField, title: 'Phase (°)', format: '.1f' },
@@ -620,7 +653,12 @@ function buildSpec(
         base.mark = { type: 'line', strokeWidth: theme.lineWidth, color: '#1CABB0' }
         base.encoding = {
           x: freqEnc,
-          y: { field: magField, type: 'quantitative', title: config.yLabel ?? 'Magnitude (dB)', axis: { grid: config.showGrid ?? true } },
+          y: {
+            field: magField,
+            type: 'quantitative',
+            title: config.yLabel ?? 'Magnitude (dB)',
+            axis: { grid: config.showGrid ?? true },
+          },
           tooltip: [
             { field: freqField, title: 'Freq', format: '.3g' },
             { field: magField, title: 'Mag (dB)', format: '.2f' },
@@ -646,8 +684,20 @@ function buildSpec(
         {
           mark: { type: 'line', strokeWidth: theme.lineWidth, color: '#1CABB0' },
           encoding: {
-            x: { field: reField, type: 'quantitative', scale: xScale, title: config.xLabel ?? 'Re[G(jω)]', axis: { grid: config.showGrid ?? true } },
-            y: { field: imField, type: 'quantitative', scale: yScale, title: config.yLabel ?? 'Im[G(jω)]', axis: { grid: config.showGrid ?? true } },
+            x: {
+              field: reField,
+              type: 'quantitative',
+              scale: xScale,
+              title: config.xLabel ?? 'Re[G(jω)]',
+              axis: { grid: config.showGrid ?? true },
+            },
+            y: {
+              field: imField,
+              type: 'quantitative',
+              scale: yScale,
+              title: config.yLabel ?? 'Im[G(jω)]',
+              axis: { grid: config.showGrid ?? true },
+            },
             tooltip: [
               { field: reField, title: 'Re', format: '.4f' },
               { field: imField, title: 'Im', format: '.4f' },
@@ -672,7 +722,13 @@ function buildSpec(
               im: Math.sin((i * Math.PI) / 180),
             })),
           },
-          mark: { type: 'line', color: '#6b7280', strokeDash: [4, 4], strokeWidth: 0.8, opacity: 0.5 },
+          mark: {
+            type: 'line',
+            color: '#6b7280',
+            strokeDash: [4, 4],
+            strokeWidth: 0.8,
+            opacity: 0.5,
+          },
           encoding: {
             x: { field: 're', type: 'quantitative' },
             y: { field: 'im', type: 'quantitative' },
@@ -694,14 +750,15 @@ function buildSpec(
       // Compute Pareto front client-side: a point p dominates q iff
       // p.x <= q.x AND p.y <= q.y with at least one strict inequality (minimisation).
       const pts = data.values as Record<string, number>[]
-      const isPareto = pts.map((p, i) =>
-        !pts.some(
-          (q, j) =>
-            i !== j &&
-            (q[xField] ?? 0) <= (p[xField] ?? 0) &&
-            (q[yField] ?? 0) <= (p[yField] ?? 0) &&
-            ((q[xField] ?? 0) < (p[xField] ?? 0) || (q[yField] ?? 0) < (p[yField] ?? 0)),
-        ),
+      const isPareto = pts.map(
+        (p, i) =>
+          !pts.some(
+            (q, j) =>
+              i !== j &&
+              (q[xField] ?? 0) <= (p[xField] ?? 0) &&
+              (q[yField] ?? 0) <= (p[yField] ?? 0) &&
+              ((q[xField] ?? 0) < (p[xField] ?? 0) || (q[yField] ?? 0) < (p[yField] ?? 0)),
+          ),
       )
 
       // Annotate values with _pareto boolean

@@ -22,9 +22,7 @@ export function registerOnnxBlocks(register: (def: BlockDef) => void): void {
     label: 'ONNX Inference',
     category: 'neuralNetworks',
     nodeKind: 'csOnnxInference',
-    inputs: [
-      { id: 'data', label: 'Input data (vector)' },
-    ],
+    inputs: [{ id: 'data', label: 'Input data (vector)' }],
     proOnly: false,
     defaultData: {
       blockType: 'nn.onnxInference',
@@ -46,8 +44,16 @@ export function registerOnnxBlocks(register: (def: BlockDef) => void): void {
       inferring: false,
     },
     synonyms: [
-      'onnx', 'inference', 'model', 'neural network', 'import',
-      'tensorflow', 'pytorch', 'keras', 'onnxruntime', 'load model',
+      'onnx',
+      'inference',
+      'model',
+      'neural network',
+      'import',
+      'tensorflow',
+      'pytorch',
+      'keras',
+      'onnxruntime',
+      'load model',
     ],
     tags: ['nn', 'onnx', 'inference', 'import', 'model'],
     description:

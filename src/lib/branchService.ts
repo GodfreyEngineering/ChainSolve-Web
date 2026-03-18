@@ -51,10 +51,7 @@ async function requireSession() {
  * List all branches for a project canvas.
  * Returns branches with snapshot count and latest snapshot metadata.
  */
-export async function listBranches(
-  projectId: string,
-  canvasId: string,
-): Promise<ProjectBranch[]> {
+export async function listBranches(projectId: string, canvasId: string): Promise<ProjectBranch[]> {
   const { data, error } = await supabase.rpc('get_branches', {
     p_project_id: projectId,
     p_canvas_id: canvasId,
@@ -67,10 +64,7 @@ export async function listBranches(
  * Ensure the 'main' branch record exists for a project canvas.
  * Called on first save if branches table has no 'main' entry yet.
  */
-export async function ensureMainBranch(
-  projectId: string,
-  canvasId: string,
-): Promise<void> {
+export async function ensureMainBranch(projectId: string, canvasId: string): Promise<void> {
   const session = await requireSession()
   const { error } = await supabase.from('project_branches').upsert(
     {

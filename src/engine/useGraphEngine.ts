@@ -432,5 +432,12 @@ export function useGraphEngine(
     }
   }, [])
 
-  return { computed, isPartial, computedStore: store, triggerEval, pendingPatchCount, engineDiagnostics }
+  return {
+    computed,
+    isPartial,
+    computedStore: store,
+    triggerEval,
+    pendingPatchCount,
+    engineDiagnostics,
+  }
 }

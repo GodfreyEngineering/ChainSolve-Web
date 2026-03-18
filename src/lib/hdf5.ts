@@ -144,7 +144,11 @@ export async function readHdf5(buffer: ArrayBuffer): Promise<Hdf5Dataset[]> {
     collectDatasets(file, '/', results)
   } finally {
     file?.close()
-    try { h5.FS.unlink(tmpPath) } catch { /* ignore */ }
+    try {
+      h5.FS.unlink(tmpPath)
+    } catch {
+      /* ignore */
+    }
   }
 
   return results
@@ -174,7 +178,11 @@ export async function writeHdf5(entries: Hdf5WriteEntry[]): Promise<ArrayBuffer>
   }
 
   const buf = h5.FS.readFile(tmpPath)
-  try { h5.FS.unlink(tmpPath) } catch { /* ignore */ }
+  try {
+    h5.FS.unlink(tmpPath)
+  } catch {
+    /* ignore */
+  }
 
   return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer
 }

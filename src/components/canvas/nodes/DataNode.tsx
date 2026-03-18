@@ -180,9 +180,7 @@ function DataNodeInner({ id, data, selected }: NodeProps) {
   const onTableChange = useCallback(
     (columns: string[], rows: number[][]) => {
       // 2.7: MatrixInput auto-generates "1", "2", ... column names (immutable headers)
-      const finalColumns = isMatrix
-        ? columns.map((_, ci) => String(ci + 1))
-        : columns
+      const finalColumns = isMatrix ? columns.map((_, ci) => String(ci + 1)) : columns
       updateNodeData(id, { tableData: { columns: finalColumns, rows } })
     },
     [id, isMatrix, updateNodeData],

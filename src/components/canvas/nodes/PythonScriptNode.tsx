@@ -199,7 +199,16 @@ function PythonScriptNodeInner({ id, data, selected }: NodeProps) {
       <div style={s.nodeBody}>
         {/* Input variables */}
         {pyVars.map((pv, i) => (
-          <div key={pv.id} style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3, position: 'relative' }}>
+          <div
+            key={pv.id}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              marginBottom: 3,
+              position: 'relative',
+            }}
+          >
             <input
               className="nodrag"
               value={pv.name}
@@ -218,7 +227,14 @@ function PythonScriptNodeInner({ id, data, selected }: NodeProps) {
             <button
               className="nodrag"
               onClick={() => removeVar(pv.id)}
-              style={{ padding: '0 4px', fontSize: 10, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)' }}
+              style={{
+                padding: '0 4px',
+                fontSize: 10,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--muted)',
+              }}
             >
               ×
             </button>
@@ -236,7 +252,17 @@ function PythonScriptNodeInner({ id, data, selected }: NodeProps) {
           <button
             className="nodrag"
             onClick={addVar}
-            style={{ width: '100%', padding: '2px 0', fontSize: 9, background: 'none', border: '1px dashed var(--border)', borderRadius: 3, cursor: 'pointer', color: 'var(--muted)', marginBottom: 4 }}
+            style={{
+              width: '100%',
+              padding: '2px 0',
+              fontSize: 9,
+              background: 'none',
+              border: '1px dashed var(--border)',
+              borderRadius: 3,
+              cursor: 'pointer',
+              color: 'var(--muted)',
+              marginBottom: 4,
+            }}
           >
             + variable
           </button>
@@ -248,7 +274,9 @@ function PythonScriptNodeInner({ id, data, selected }: NodeProps) {
           value={nd.pyCode ?? ''}
           onChange={(e) => updateNodeData(id, { pyCode: e.target.value })}
           spellCheck={false}
-          placeholder={'# Python 3 (Pyodide)\n# output = last expression\nimport numpy as np\nnp.sqrt(x1)'}
+          placeholder={
+            '# Python 3 (Pyodide)\n# output = last expression\nimport numpy as np\nnp.sqrt(x1)'
+          }
           style={{
             width: '100%',
             minHeight: 80,
@@ -267,15 +295,45 @@ function PythonScriptNodeInner({ id, data, selected }: NodeProps) {
 
         {/* Error */}
         {nd.pyError && (
-          <div style={{ marginTop: 4, padding: '2px 4px', background: 'color-mix(in srgb, var(--danger) 15%, transparent)', border: '1px solid var(--danger)', borderRadius: 3, fontSize: 8, color: 'var(--danger)', fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'pre-wrap', wordBreak: 'break-all' as const, maxHeight: 60, overflow: 'auto' }}>
+          <div
+            style={{
+              marginTop: 4,
+              padding: '2px 4px',
+              background: 'color-mix(in srgb, var(--danger) 15%, transparent)',
+              border: '1px solid var(--danger)',
+              borderRadius: 3,
+              fontSize: 8,
+              color: 'var(--danger)',
+              fontFamily: "'JetBrains Mono', monospace",
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-all' as const,
+              maxHeight: 60,
+              overflow: 'auto',
+            }}
+          >
             {nd.pyError}
           </div>
         )}
 
         {/* Result preview */}
         {nd.pyResultJson !== null && !nd.pyError && (
-          <div style={{ marginTop: 4, padding: '2px 4px', background: 'var(--surface-2)', borderRadius: 3, fontSize: 8, color: 'var(--muted)', fontFamily: "'JetBrains Mono', monospace", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'pre', maxHeight: 40 }}>
-            {nd.pyResultJson.slice(0, 120)}{nd.pyResultJson.length > 120 ? '…' : ''}
+          <div
+            style={{
+              marginTop: 4,
+              padding: '2px 4px',
+              background: 'var(--surface-2)',
+              borderRadius: 3,
+              fontSize: 8,
+              color: 'var(--muted)',
+              fontFamily: "'JetBrains Mono', monospace",
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'pre',
+              maxHeight: 40,
+            }}
+          >
+            {nd.pyResultJson.slice(0, 120)}
+            {nd.pyResultJson.length > 120 ? '…' : ''}
           </div>
         )}
 
@@ -287,7 +345,13 @@ function PythonScriptNodeInner({ id, data, selected }: NodeProps) {
       </div>
 
       {/* Output handle */}
-      <Handle type="source" position={Position.Right} id="out" style={{ top: '50%' }} title="Output (scalar or first element)" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="out"
+        style={{ top: '50%' }}
+        title="Output (scalar or first element)"
+      />
     </div>
   )
 }

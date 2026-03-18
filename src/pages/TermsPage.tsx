@@ -43,7 +43,9 @@ export default function TermsPage() {
 
           <section style={s.section}>
             <h2 style={s.heading}>1. Definitions</h2>
-            <p style={s.para}>In these Terms, the following terms have the meanings set out below:</p>
+            <p style={s.para}>
+              In these Terms, the following terms have the meanings set out below:
+            </p>
             <ul style={s.list}>
               <li>
                 <strong>"Service"</strong> means the ChainSolve web application, computation engine,
@@ -119,28 +121,41 @@ export default function TermsPage() {
             <h2 style={s.heading}>5. Acceptable Use</h2>
             <p style={s.para}>You agree not to:</p>
             <ul style={s.list}>
-              <li>Use the Service for any unlawful purpose or in violation of applicable laws or regulations</li>
-              <li>Attempt to gain unauthorised access to any part of the Service, its servers, or connected networks</li>
-              <li>Interfere with or disrupt the Service or the servers and networks connected to it</li>
-              <li>Upload malicious content, viruses, trojans, worms, or harmful code of any kind</li>
+              <li>
+                Use the Service for any unlawful purpose or in violation of applicable laws or
+                regulations
+              </li>
+              <li>
+                Attempt to gain unauthorised access to any part of the Service, its servers, or
+                connected networks
+              </li>
+              <li>
+                Interfere with or disrupt the Service or the servers and networks connected to it
+              </li>
+              <li>
+                Upload malicious content, viruses, trojans, worms, or harmful code of any kind
+              </li>
               <li>Use the Service to infringe upon the intellectual property rights of others</li>
-              <li>Scrape, crawl, or use automated means to access the Service without our express written permission</li>
+              <li>
+                Scrape, crawl, or use automated means to access the Service without our express
+                written permission
+              </li>
               <li>
                 Reverse engineer, decompile, disassemble, or attempt to extract source code from the
-                computation engine or any proprietary components of the Service (except to the extent
-                permitted by applicable law that cannot be excluded by contract)
+                computation engine or any proprietary components of the Service (except to the
+                extent permitted by applicable law that cannot be excluded by contract)
               </li>
               <li>
-                Use the Service in connection with the development, design, manufacture, or production
-                of nuclear, chemical, biological, or radiological weapons, or any other weapons of mass
-                destruction, or for any purpose prohibited by applicable export control laws including
-                the UK Export Control Act 2002, EU Dual-Use Regulation, or the US Export Administration
-                Regulations (EAR)
+                Use the Service in connection with the development, design, manufacture, or
+                production of nuclear, chemical, biological, or radiological weapons, or any other
+                weapons of mass destruction, or for any purpose prohibited by applicable export
+                control laws including the UK Export Control Act 2002, EU Dual-Use Regulation, or
+                the US Export Administration Regulations (EAR)
               </li>
               <li>
-                Use the Service to process or store data that is subject to export control restrictions
-                (including ITAR-controlled technical data) without ensuring compliance with all applicable
-                export control regulations
+                Use the Service to process or store data that is subject to export control
+                restrictions (including ITAR-controlled technical data) without ensuring compliance
+                with all applicable export control regulations
               </li>
               <li>
                 Resell, sublicence, or commercialise the Service or access to it without our express
@@ -182,9 +197,9 @@ export default function TermsPage() {
             <h2 style={s.heading}>7. Subscriptions, Free Tier, and Payments</h2>
             <p style={s.para}>
               <strong>Free Tier:</strong> The Service is available under a free tier limited to 3
-              projects, 500 MB of storage, and community support. Free tier users may not export
-              PDF reports (or PDF exports include a ChainSolve watermark). The free tier is
-              genuinely usable and is not artificially crippled.
+              projects, 500 MB of storage, and community support. Free tier users may not export PDF
+              reports (or PDF exports include a ChainSolve watermark). The free tier is genuinely
+              usable and is not artificially crippled.
             </p>
             <p style={s.para}>
               <strong>Paid Subscriptions:</strong> Enhanced features are available under paid

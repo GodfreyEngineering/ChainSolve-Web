@@ -56,16 +56,56 @@ export function buildCurveFitting(canvasId: string, projectId: string): CanvasJS
     },
 
     // ── Operations ────────────────────────────────────────────────────────
-    { id: 'cf-slope', type: 'csOperation', position: { x: 300, y: 60 }, data: { blockType: 'stat.linreg_slope', label: 'Slope b' } },
-    { id: 'cf-intercept', type: 'csOperation', position: { x: 300, y: 180 }, data: { blockType: 'stat.linreg_intercept', label: 'Intercept a' } },
-    { id: 'cf-r2', type: 'csOperation', position: { x: 300, y: 300 }, data: { blockType: 'stat.linreg_r2', label: 'R² coefficient' } },
-    { id: 'cf-predict', type: 'csOperation', position: { x: 300, y: 420 }, data: { blockType: 'stat.linreg_predict', label: 'Predicted ŷ at x_q' } },
+    {
+      id: 'cf-slope',
+      type: 'csOperation',
+      position: { x: 300, y: 60 },
+      data: { blockType: 'stat.linreg_slope', label: 'Slope b' },
+    },
+    {
+      id: 'cf-intercept',
+      type: 'csOperation',
+      position: { x: 300, y: 180 },
+      data: { blockType: 'stat.linreg_intercept', label: 'Intercept a' },
+    },
+    {
+      id: 'cf-r2',
+      type: 'csOperation',
+      position: { x: 300, y: 300 },
+      data: { blockType: 'stat.linreg_r2', label: 'R² coefficient' },
+    },
+    {
+      id: 'cf-predict',
+      type: 'csOperation',
+      position: { x: 300, y: 420 },
+      data: { blockType: 'stat.linreg_predict', label: 'Predicted ŷ at x_q' },
+    },
 
     // ── Displays ──────────────────────────────────────────────────────────
-    { id: 'cf-disp-slope', type: 'csDisplay', position: { x: 560, y: 60 }, data: { blockType: 'display', label: 'Slope b' } },
-    { id: 'cf-disp-intercept', type: 'csDisplay', position: { x: 560, y: 180 }, data: { blockType: 'display', label: 'Intercept a' } },
-    { id: 'cf-disp-r2', type: 'csDisplay', position: { x: 560, y: 300 }, data: { blockType: 'display', label: 'R² (fit quality)' } },
-    { id: 'cf-disp-predict', type: 'csDisplay', position: { x: 560, y: 420 }, data: { blockType: 'display', label: 'Predicted ŷ' } },
+    {
+      id: 'cf-disp-slope',
+      type: 'csDisplay',
+      position: { x: 560, y: 60 },
+      data: { blockType: 'display', label: 'Slope b' },
+    },
+    {
+      id: 'cf-disp-intercept',
+      type: 'csDisplay',
+      position: { x: 560, y: 180 },
+      data: { blockType: 'display', label: 'Intercept a' },
+    },
+    {
+      id: 'cf-disp-r2',
+      type: 'csDisplay',
+      position: { x: 560, y: 300 },
+      data: { blockType: 'display', label: 'R² (fit quality)' },
+    },
+    {
+      id: 'cf-disp-predict',
+      type: 'csDisplay',
+      position: { x: 560, y: 420 },
+      data: { blockType: 'display', label: 'Predicted ŷ' },
+    },
 
     // ── Guidance annotation ───────────────────────────────────────────────
     {
@@ -90,20 +130,50 @@ export function buildCurveFitting(canvasId: string, projectId: string): CanvasJS
     // slope
     { id: 'cf-e1', source: 'cf-x', sourceHandle: 'out', target: 'cf-slope', targetHandle: 'x' },
     { id: 'cf-e2', source: 'cf-y', sourceHandle: 'out', target: 'cf-slope', targetHandle: 'y' },
-    { id: 'cf-e3', source: 'cf-slope', sourceHandle: 'out', target: 'cf-disp-slope', targetHandle: 'value' },
+    {
+      id: 'cf-e3',
+      source: 'cf-slope',
+      sourceHandle: 'out',
+      target: 'cf-disp-slope',
+      targetHandle: 'value',
+    },
     // intercept
     { id: 'cf-e4', source: 'cf-x', sourceHandle: 'out', target: 'cf-intercept', targetHandle: 'x' },
     { id: 'cf-e5', source: 'cf-y', sourceHandle: 'out', target: 'cf-intercept', targetHandle: 'y' },
-    { id: 'cf-e6', source: 'cf-intercept', sourceHandle: 'out', target: 'cf-disp-intercept', targetHandle: 'value' },
+    {
+      id: 'cf-e6',
+      source: 'cf-intercept',
+      sourceHandle: 'out',
+      target: 'cf-disp-intercept',
+      targetHandle: 'value',
+    },
     // R²
     { id: 'cf-e7', source: 'cf-x', sourceHandle: 'out', target: 'cf-r2', targetHandle: 'x' },
     { id: 'cf-e8', source: 'cf-y', sourceHandle: 'out', target: 'cf-r2', targetHandle: 'y' },
-    { id: 'cf-e9', source: 'cf-r2', sourceHandle: 'out', target: 'cf-disp-r2', targetHandle: 'value' },
+    {
+      id: 'cf-e9',
+      source: 'cf-r2',
+      sourceHandle: 'out',
+      target: 'cf-disp-r2',
+      targetHandle: 'value',
+    },
     // predict
     { id: 'cf-e10', source: 'cf-x', sourceHandle: 'out', target: 'cf-predict', targetHandle: 'x' },
     { id: 'cf-e11', source: 'cf-y', sourceHandle: 'out', target: 'cf-predict', targetHandle: 'y' },
-    { id: 'cf-e12', source: 'cf-xq', sourceHandle: 'out', target: 'cf-predict', targetHandle: 'x_new' },
-    { id: 'cf-e13', source: 'cf-predict', sourceHandle: 'out', target: 'cf-disp-predict', targetHandle: 'value' },
+    {
+      id: 'cf-e12',
+      source: 'cf-xq',
+      sourceHandle: 'out',
+      target: 'cf-predict',
+      targetHandle: 'x_new',
+    },
+    {
+      id: 'cf-e13',
+      source: 'cf-predict',
+      sourceHandle: 'out',
+      target: 'cf-disp-predict',
+      targetHandle: 'value',
+    },
   ]
 
   return { schemaVersion: 4, canvasId, projectId, nodes, edges, datasetRefs: [] }

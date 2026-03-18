@@ -40,7 +40,13 @@ export function registerDiscreteControlBlocks(register: (def: BlockDef) => void)
       value: 0,
     },
     synonyms: [
-      'zero order hold', 'ZOH', 'sample hold', 'discrete', 'sampling', 'ADC', 'sample and hold',
+      'zero order hold',
+      'ZOH',
+      'sample hold',
+      'discrete',
+      'sampling',
+      'ADC',
+      'sample and hold',
     ],
     tags: ['control', 'discrete', 'sample', 'hold'],
     description:
@@ -68,8 +74,13 @@ export function registerDiscreteControlBlocks(register: (def: BlockDef) => void)
       value: 0,
     },
     synonyms: [
-      'rate transition', 'sample rate', 'decimation', 'upsampling', 'downsampling',
-      'rate change', 'multirate',
+      'rate transition',
+      'sample rate',
+      'decimation',
+      'upsampling',
+      'downsampling',
+      'rate change',
+      'multirate',
     ],
     tags: ['control', 'discrete', 'rate', 'sampling'],
     description:

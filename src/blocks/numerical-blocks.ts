@@ -68,12 +68,7 @@ export function registerNumericalBlocks(register: (def: BlockDef) => void): void
     },
     description:
       'Adaptive Gauss-Kronrod G7-K15 quadrature. Integrates f(x) over [a, b] with automatic error control. Set the formula in block settings (variable: x).',
-    synonyms: [
-      'quadrature',
-      'adaptive integration',
-      'gauss kronrod',
-      'definite integral',
-    ],
+    synonyms: ['quadrature', 'adaptive integration', 'gauss kronrod', 'definite integral'],
     tags: ['numerical', 'integration', 'quadrature'],
   })
 
@@ -133,13 +128,7 @@ export function registerNumericalBlocks(register: (def: BlockDef) => void): void
     defaultData: { blockType: 'curve_fit_poly', label: 'Polynomial Fit', degree: 2 },
     description:
       'Least-squares polynomial fit of specified degree to (x, y) data. Returns a table of coefficients c0, c1, ..., cN plus R² and data count. Use with ml.predict or table extraction to evaluate the fitted polynomial.',
-    synonyms: [
-      'polynomial regression',
-      'poly fit',
-      'curve fitting',
-      'least squares',
-      'regression',
-    ],
+    synonyms: ['polynomial regression', 'poly fit', 'curve fitting', 'least squares', 'regression'],
     tags: ['numerical', 'curveFit', 'regression', 'polynomial'],
   })
 
@@ -228,7 +217,7 @@ export function registerNumericalBlocks(register: (def: BlockDef) => void): void
     ],
     defaultData: { blockType: 'interp_bspline', label: 'B-Spline Evaluation', degree: 3 },
     description:
-      'Evaluate a B-spline curve at parameter t using de Boor\'s algorithm. Control points define the curve shape; degree controls smoothness (default 3 = cubic).',
+      "Evaluate a B-spline curve at parameter t using de Boor's algorithm. Control points define the curve shape; degree controls smoothness (default 3 = cubic).",
     synonyms: ['b-spline', 'de boor', 'basis spline', 'NURBS'],
     tags: ['numerical', 'interpolation', 'bspline'],
   })
@@ -257,7 +246,13 @@ export function registerNumericalBlocks(register: (def: BlockDef) => void): void
     category: 'numerical',
     nodeKind: 'csOperation',
     inputs: [],
-    defaultData: { blockType: 'rng_lhs', label: 'Latin Hypercube Sample', samples: 100, dims: 1, seed: 42 },
+    defaultData: {
+      blockType: 'rng_lhs',
+      label: 'Latin Hypercube Sample',
+      samples: 100,
+      dims: 1,
+      seed: 42,
+    },
     description:
       'Latin Hypercube Sampling — stratified random sampling where each dimension is divided into equal-probability bins. Better space coverage than pure random.',
     synonyms: ['LHS', 'stratified sampling', 'space-filling'],
@@ -283,7 +278,13 @@ export function registerNumericalBlocks(register: (def: BlockDef) => void): void
     category: 'numerical',
     nodeKind: 'csOperation',
     inputs: [],
-    defaultData: { blockType: 'rng_halton', label: 'Halton Sequence', samples: 100, dims: 1, skip: 0 },
+    defaultData: {
+      blockType: 'rng_halton',
+      label: 'Halton Sequence',
+      samples: 100,
+      dims: 1,
+      skip: 0,
+    },
     description:
       'Halton quasi-random sequence using co-prime bases. Low-discrepancy sequence for up to ~20 dimensions. Optional skip parameter to avoid initial correlations.',
     synonyms: ['halton', 'quasi-random', 'low discrepancy'],

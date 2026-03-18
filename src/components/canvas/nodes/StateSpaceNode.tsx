@@ -32,9 +32,15 @@ interface SSNodeData extends NodeData {
 
 /** Parse 'a,b;c,d' or 'a b\nc d' into number[][]. */
 function parseMatrix(raw: string): number[][] {
-  const rows = raw.trim().split(/[;\n]+/).map((r) =>
-    r.trim().split(/[\s,]+/).map((v) => parseFloat(v.trim())),
-  )
+  const rows = raw
+    .trim()
+    .split(/[;\n]+/)
+    .map((r) =>
+      r
+        .trim()
+        .split(/[\s,]+/)
+        .map((v) => parseFloat(v.trim())),
+    )
   return rows.filter((r) => r.length > 0 && r.every((v) => !isNaN(v)))
 }
 
@@ -56,13 +62,7 @@ function matMat(A: number[][], B: number[][]): number[][] {
 }
 
 /** RK4 step for MIMO: dx/dt = Ax + Bu. */
-function rk4Step(
-  x: number[],
-  A: number[][],
-  B: number[][],
-  u: number[],
-  dt: number,
-): number[] {
+function rk4Step(x: number[], A: number[][], B: number[][], u: number[], dt: number): number[] {
   const f = (xx: number[]): number[] => {
     const ax = matVec(A, xx)
     const bu = matVec(B, u)
@@ -215,8 +215,8 @@ function StateSpaceNodeInner({ id, data, selected }: NodeProps) {
     const C = parseMatrix(matC)
     const D = parseMatrix(matD)
     const n = A.length
-    const valid = n > 0 && A.every((r) => r.length === n) &&
-      B.length === n && C.every((r) => r.length === n)
+    const valid =
+      n > 0 && A.every((r) => r.length === n) && B.length === n && C.every((r) => r.length === n)
 
     if (!valid) return { A, B, C, D, valid: false, n, eigenVals: [], ctrlRank: 0, obsRank: 0 }
 
@@ -255,11 +255,13 @@ function StateSpaceNodeInner({ id, data, selected }: NodeProps) {
     const minY = Math.min(...data.filter(Number.isFinite))
     const maxY = Math.max(...data.filter(Number.isFinite))
     const rY = maxY - minY || 1
-    return data.map((v, i) => {
-      const x = (i / (data.length - 1)) * W
-      const y = H - ((v - minY) / rY) * H
-      return `${x.toFixed(1)},${y.toFixed(1)}`
-    }).join(' ')
+    return data
+      .map((v, i) => {
+        const x = (i / (data.length - 1)) * W
+        const y = H - ((v - minY) / rY) * H
+        return `${x.toFixed(1)},${y.toFixed(1)}`
+      })
+      .join(' ')
   }, [outVec])
 
   const onMatChange = useCallback(
@@ -285,10 +287,14 @@ function StateSpaceNodeInner({ id, data, selected }: NodeProps) {
         <span style={s.nodeHeaderIcon}>{TypeIcon && <TypeIcon size={12} />}</span>
         <span style={s.nodeHeaderLabel}>{nd.label ?? t('stateSpace.label', 'State Space')}</span>
         {valid && (
-          <span style={{
-            marginLeft: 'auto', fontSize: 9, opacity: 0.9,
-            color: stable ? '#4ade80' : '#f87171',
-          }}>
+          <span
+            style={{
+              marginLeft: 'auto',
+              fontSize: 9,
+              opacity: 0.9,
+              color: stable ? '#4ade80' : '#f87171',
+            }}
+          >
             {stable ? t('stateSpace.stable', 'Stable') : t('stateSpace.unstable', 'Unstable')}
           </span>
         )}
@@ -342,15 +348,19 @@ function StateSpaceNodeInner({ id, data, selected }: NodeProps) {
                 fontWeight: outputMode === mode ? 700 : 400,
               }}
             >
-              {mode === 'step' ? t('stateSpace.step', 'Step')
-                : mode === 'impulse' ? t('stateSpace.impulse', 'Impulse')
-                : t('stateSpace.eigen', 'Eigen')}
+              {mode === 'step'
+                ? t('stateSpace.step', 'Step')
+                : mode === 'impulse'
+                  ? t('stateSpace.impulse', 'Impulse')
+                  : t('stateSpace.eigen', 'Eigen')}
             </button>
           ))}
         </div>
 
         {!valid && (
-          <div style={{ fontSize: 9, color: '#f87171' }}>{t('stateSpace.invalid', 'Invalid matrices')}</div>
+          <div style={{ fontSize: 9, color: '#f87171' }}>
+            {t('stateSpace.invalid', 'Invalid matrices')}
+          </div>
         )}
 
         {/* Eigenvalue display */}
@@ -358,7 +368,8 @@ function StateSpaceNodeInner({ id, data, selected }: NodeProps) {
           <div style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', color: '#aaa' }}>
             {eigenVals.map((e, i) => (
               <div key={i} style={{ color: e.re < 0 ? '#4ade80' : '#f87171' }}>
-                λ{i + 1} = {e.re.toFixed(3)}{e.im !== 0 ? ` ${e.im >= 0 ? '+' : ''}${e.im.toFixed(3)}j` : ''}
+                λ{i + 1} = {e.re.toFixed(3)}
+                {e.im !== 0 ? ` ${e.im >= 0 ? '+' : ''}${e.im.toFixed(3)}j` : ''}
               </div>
             ))}
           </div>
@@ -368,31 +379,65 @@ function StateSpaceNodeInner({ id, data, selected }: NodeProps) {
         {valid && (
           <div style={{ fontSize: 8, color: '#666', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             <span>n={n}</span>
-            <span>{t('stateSpace.ctrl', 'Ctrl')} {ctrlRank}/{n}</span>
-            <span>{t('stateSpace.obs', 'Obs')} {obsRank}/{n}</span>
+            <span>
+              {t('stateSpace.ctrl', 'Ctrl')} {ctrlRank}/{n}
+            </span>
+            <span>
+              {t('stateSpace.obs', 'Obs')} {obsRank}/{n}
+            </span>
           </div>
         )}
 
         {/* Sparkline */}
         {sparkline && (
           <svg width={100} height={28} style={{ display: 'block', margin: '4px auto 0' }}>
-            <polyline points={sparkline} fill="none" stroke={typeColor} strokeWidth={1.5}
-              strokeLinecap="round" strokeLinejoin="round" />
+            <polyline
+              points={sparkline}
+              fill="none"
+              stroke={typeColor}
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         )}
       </div>
 
       {/* Input handle */}
-      <Handle type="target" position={Position.Left} id="u"
-        style={{ top: '50%', background: '#888', width: 8, height: 8, border: '2px solid #1a1a1a' }} />
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="u"
+        style={{ top: '50%', background: '#888', width: 8, height: 8, border: '2px solid #1a1a1a' }}
+      />
 
       {/* Output handles */}
-      <Handle type="source" position={Position.Right} id="time"
-        style={{ top: '35%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
-        title="Time" />
-      <Handle type="source" position={Position.Right} id="output"
-        style={{ top: '65%', background: typeColor, width: 8, height: 8, border: '2px solid #1a1a1a' }}
-        title="y(t)" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="time"
+        style={{
+          top: '35%',
+          background: typeColor,
+          width: 8,
+          height: 8,
+          border: '2px solid #1a1a1a',
+        }}
+        title="Time"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="output"
+        style={{
+          top: '65%',
+          background: typeColor,
+          width: 8,
+          height: 8,
+          border: '2px solid #1a1a1a',
+        }}
+        title="y(t)"
+      />
     </div>
   )
 }

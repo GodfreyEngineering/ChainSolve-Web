@@ -20,19 +20,19 @@ import type { EngineDiagnostic } from '../../engine/wasm-types'
 // ── Data model ────────────────────────────────────────────────────────────────
 
 export type SolverName =
-  | 'RK4'        // Fixed-step Runge-Kutta 4th order
-  | 'RK45'       // Dormand-Prince adaptive (default ODE solver)
-  | 'RK23'       // Bogacki-Shampine adaptive
-  | 'BDF'        // Backwards differentiation formula (stiff)
-  | 'Radau'      // Radau IIA 5th order (stiff/DAE)
-  | 'LSODA'      // Automatic stiffness detection
-  | 'Euler'      // Forward Euler (educational)
+  | 'RK4' // Fixed-step Runge-Kutta 4th order
+  | 'RK45' // Dormand-Prince adaptive (default ODE solver)
+  | 'RK23' // Bogacki-Shampine adaptive
+  | 'BDF' // Backwards differentiation formula (stiff)
+  | 'Radau' // Radau IIA 5th order (stiff/DAE)
+  | 'LSODA' // Automatic stiffness detection
+  | 'Euler' // Forward Euler (educational)
   | 'Symplectic' // Störmer-Verlet (Hamiltonian)
-  | 'Simplex'    // Nelder-Mead optimisation
-  | 'GradDesc'   // Gradient descent
-  | 'LBFGS'      // Limited-memory BFGS
-  | 'NSGA2'      // Non-dominated sorting GA II
-  | string       // Custom / unknown
+  | 'Simplex' // Nelder-Mead optimisation
+  | 'GradDesc' // Gradient descent
+  | 'LBFGS' // Limited-memory BFGS
+  | 'NSGA2' // Non-dominated sorting GA II
+  | string // Custom / unknown
 
 export interface ConvergencePoint {
   /** Integration time or iteration index. */
@@ -104,27 +104,36 @@ export interface SolverReportOptions {
 // ── Algorithm descriptions ────────────────────────────────────────────────────
 
 const ALGORITHM_DESCRIPTIONS: Partial<Record<SolverName, string>> = {
-  RK4: 'Fixed-step Runge-Kutta 4th order (RK4). Classic explicit 4-stage method. ' +
+  RK4:
+    'Fixed-step Runge-Kutta 4th order (RK4). Classic explicit 4-stage method. ' +
     'Global error O(h⁴) where h is the step size. Suitable for non-stiff problems ' +
     'where a fixed step size is required (e.g. real-time simulation).',
-  RK45: 'Dormand-Prince RK45 (DOPRI5) adaptive step-size control. Embedded pair of ' +
+  RK45:
+    'Dormand-Prince RK45 (DOPRI5) adaptive step-size control. Embedded pair of ' +
     '4th/5th order Runge-Kutta formulas. Error controlled via step doubling. ' +
     'Widely used reference solver; matches MATLAB ODE45.',
-  RK23: 'Bogacki-Shampine RK23. Embedded 2nd/3rd order pair. Lower order than RK45 ' +
+  RK23:
+    'Bogacki-Shampine RK23. Embedded 2nd/3rd order pair. Lower order than RK45 ' +
     'but requires fewer function evaluations per step — efficient for low-accuracy requirements.',
-  BDF: 'Backwards Differentiation Formula (BDF). Variable-order, variable-step implicit ' +
+  BDF:
+    'Backwards Differentiation Formula (BDF). Variable-order, variable-step implicit ' +
     'multistep method. Orders 1-5. Optimised for stiff ODEs and DAEs where explicit ' +
     'methods require extremely small steps.',
-  Radau: 'Radau IIA 5th order implicit Runge-Kutta. L-stable; ideal for stiff systems ' +
+  Radau:
+    'Radau IIA 5th order implicit Runge-Kutta. L-stable; ideal for stiff systems ' +
     'and fully implicit DAEs of index ≤ 3. Requires Newton iteration at each step.',
-  Simplex: 'Nelder-Mead simplex optimisation. Derivative-free direct search. Convergence ' +
+  Simplex:
+    'Nelder-Mead simplex optimisation. Derivative-free direct search. Convergence ' +
     'not guaranteed for non-convex problems; suitable for low-dimensional smooth objectives.',
-  GradDesc: 'Gradient descent with configurable learning rate and optional momentum. ' +
+  GradDesc:
+    'Gradient descent with configurable learning rate and optional momentum. ' +
     'First-order method; convergence rate depends on problem conditioning.',
-  LBFGS: 'Limited-memory BFGS quasi-Newton method. Approximates the Hessian using ' +
+  LBFGS:
+    'Limited-memory BFGS quasi-Newton method. Approximates the Hessian using ' +
     'the last m (default: 10) gradient/position pairs. Superlinear convergence near ' +
     'minima for smooth objectives.',
-  NSGA2: 'Non-Dominated Sorting Genetic Algorithm II (NSGA-II). Elitist multi-objective ' +
+  NSGA2:
+    'Non-Dominated Sorting Genetic Algorithm II (NSGA-II). Elitist multi-objective ' +
     'evolutionary algorithm. Produces an approximation of the Pareto front.',
 }
 
@@ -153,7 +162,7 @@ function rgbF(r: number, g: number, b: number): [number, number, number] {
   return [r / 255, g / 255, b / 255]
 }
 
-const COL_ACCENT: RGBColor = rgbF(28, 171, 176)    // ChainSolve teal
+const COL_ACCENT: RGBColor = rgbF(28, 171, 176) // ChainSolve teal
 const COL_TEXT: RGBColor = rgbF(40, 40, 40)
 const COL_DIM: RGBColor = rgbF(120, 120, 120)
 const COL_PASS: RGBColor = rgbF(46, 204, 113)
@@ -238,7 +247,10 @@ export async function exportSolverReport(
     s = { ...s, y: s.y - 6 }
     // Accent bar
     s.page.drawRectangle({
-      x: MARGIN, y: s.y - 2, width: CONTENT_W, height: LH + 6,
+      x: MARGIN,
+      y: s.y - 2,
+      width: CONTENT_W,
+      height: LH + 6,
       color: rgb(...COL_HEADER_BG),
     })
     s.page.drawLine({
@@ -252,14 +264,20 @@ export async function exportSolverReport(
     return s
   }
 
-  function drawKV(
-    state: PageState, key: string, value: string, mono = false,
-  ): PageState {
+  function drawKV(state: PageState, key: string, value: string, mono = false): PageState {
     let s = ensureSpace(state, LH)
     const kw = fontBold.widthOfTextAtSize(`${key}: `, 9)
-    s.page.drawText(`${key}: `, { x: MARGIN + 8, y: s.y, size: 9, font: fontBold, color: rgb(...COL_DIM) })
+    s.page.drawText(`${key}: `, {
+      x: MARGIN + 8,
+      y: s.y,
+      size: 9,
+      font: fontBold,
+      color: rgb(...COL_DIM),
+    })
     s.page.drawText(value, {
-      x: MARGIN + 8 + kw, y: s.y, size: 9,
+      x: MARGIN + 8 + kw,
+      y: s.y,
+      size: 9,
       font: mono ? fontMono : fontNormal,
       color: rgb(...COL_TEXT),
     })
@@ -267,14 +285,20 @@ export async function exportSolverReport(
   }
 
   function drawFooter(state: PageState): void {
-    state.page.drawText(
-      `ChainSolve Solver Verification Report — Page ${state.pageNum}`,
-      { x: MARGIN, y: FOOTER_Y, size: 8, font: fontNormal, color: rgb(...COL_DIM) },
-    )
-    state.page.drawText(
-      model.timestamp.slice(0, 10),
-      { x: PAGE_WIDTH - MARGIN - 60, y: FOOTER_Y, size: 8, font: fontNormal, color: rgb(...COL_DIM) },
-    )
+    state.page.drawText(`ChainSolve Solver Verification Report — Page ${state.pageNum}`, {
+      x: MARGIN,
+      y: FOOTER_Y,
+      size: 8,
+      font: fontNormal,
+      color: rgb(...COL_DIM),
+    })
+    state.page.drawText(model.timestamp.slice(0, 10), {
+      x: PAGE_WIDTH - MARGIN - 60,
+      y: FOOTER_Y,
+      size: 8,
+      font: fontNormal,
+      color: rgb(...COL_DIM),
+    })
   }
 
   // ── Cover / header ─────────────────────────────────────────────────────────
@@ -282,16 +306,25 @@ export async function exportSolverReport(
 
   // Title block
   state.page.drawRectangle({
-    x: 0, y: PAGE_HEIGHT - 100, width: PAGE_WIDTH, height: 100,
+    x: 0,
+    y: PAGE_HEIGHT - 100,
+    width: PAGE_WIDTH,
+    height: 100,
     color: rgb(...COL_ACCENT),
   })
   state.page.drawText('Solver Verification Report', {
-    x: MARGIN, y: PAGE_HEIGHT - 50,
-    size: 22, font: fontBold, color: rgb(1, 1, 1),
+    x: MARGIN,
+    y: PAGE_HEIGHT - 50,
+    size: 22,
+    font: fontBold,
+    color: rgb(1, 1, 1),
   })
   state.page.drawText(model.projectName, {
-    x: MARGIN, y: PAGE_HEIGHT - 72,
-    size: 13, font: fontNormal, color: rgb(0.9, 0.98, 1),
+    x: MARGIN,
+    y: PAGE_HEIGHT - 72,
+    size: 13,
+    font: fontNormal,
+    color: rgb(0.9, 0.98, 1),
   })
   state = { ...state, y: PAGE_HEIGHT - 115 }
 
@@ -306,7 +339,8 @@ export async function exportSolverReport(
 
   // ── Algorithm description ───────────────────────────────────────────────────
   state = drawSectionHeader(state, `1. Algorithm: ${model.solverName}`)
-  const algDesc = model.algorithmDescription ||
+  const algDesc =
+    model.algorithmDescription ||
     ALGORITHM_DESCRIPTIONS[model.solverName as SolverName] ||
     `${model.solverName} — no description available.`
   state = drawText(state, algDesc, { indent: 8, size: 9 })
@@ -331,9 +365,27 @@ export async function exportSolverReport(
     state = drawSectionHeader(state, '3. Convergence History (sampled)')
     // Table header
     state = ensureSpace(state, LH)
-    state.page.drawText('Step / t', { x: MARGIN + 8, y: state.y, size: 9, font: fontBold, color: rgb(...COL_DIM) })
-    state.page.drawText('Error estimate', { x: MARGIN + 130, y: state.y, size: 9, font: fontBold, color: rgb(...COL_DIM) })
-    state.page.drawText('Step size', { x: MARGIN + 280, y: state.y, size: 9, font: fontBold, color: rgb(...COL_DIM) })
+    state.page.drawText('Step / t', {
+      x: MARGIN + 8,
+      y: state.y,
+      size: 9,
+      font: fontBold,
+      color: rgb(...COL_DIM),
+    })
+    state.page.drawText('Error estimate', {
+      x: MARGIN + 130,
+      y: state.y,
+      size: 9,
+      font: fontBold,
+      color: rgb(...COL_DIM),
+    })
+    state.page.drawText('Step size', {
+      x: MARGIN + 280,
+      y: state.y,
+      size: 9,
+      font: fontBold,
+      color: rgb(...COL_DIM),
+    })
     state = { ...state, y: state.y - LH }
 
     // Sample up to 40 points
@@ -342,10 +394,28 @@ export async function exportSolverReport(
     for (let i = 0; i < pts.length; i += step) {
       const pt = pts[i]
       state = ensureSpace(state, LH)
-      state.page.drawText(pt.x.toExponential(3), { x: MARGIN + 8, y: state.y, size: 8, font: fontMono, color: rgb(...COL_TEXT) })
-      state.page.drawText(pt.error.toExponential(4), { x: MARGIN + 130, y: state.y, size: 8, font: fontMono, color: rgb(...COL_TEXT) })
+      state.page.drawText(pt.x.toExponential(3), {
+        x: MARGIN + 8,
+        y: state.y,
+        size: 8,
+        font: fontMono,
+        color: rgb(...COL_TEXT),
+      })
+      state.page.drawText(pt.error.toExponential(4), {
+        x: MARGIN + 130,
+        y: state.y,
+        size: 8,
+        font: fontMono,
+        color: rgb(...COL_TEXT),
+      })
       if (pt.stepSize != null) {
-        state.page.drawText(pt.stepSize.toExponential(3), { x: MARGIN + 280, y: state.y, size: 8, font: fontMono, color: rgb(...COL_TEXT) })
+        state.page.drawText(pt.stepSize.toExponential(3), {
+          x: MARGIN + 280,
+          y: state.y,
+          size: 8,
+          font: fontMono,
+          color: rgb(...COL_TEXT),
+        })
       }
       state = { ...state, y: state.y - LH }
     }
@@ -356,19 +426,56 @@ export async function exportSolverReport(
     state = drawSectionHeader(state, '4. Reference Comparisons')
 
     // Column headers
-    const cols = { name: MARGIN + 8, ref: MARGIN + 160, comp: MARGIN + 270, err: MARGIN + 360, pass: MARGIN + 450 }
+    const cols = {
+      name: MARGIN + 8,
+      ref: MARGIN + 160,
+      comp: MARGIN + 270,
+      err: MARGIN + 360,
+      pass: MARGIN + 450,
+    }
     state = ensureSpace(state, LH)
-    state.page.drawText('Reference', { x: cols.name, y: state.y, size: 8, font: fontBold, color: rgb(...COL_DIM) })
-    state.page.drawText('Expected', { x: cols.ref, y: state.y, size: 8, font: fontBold, color: rgb(...COL_DIM) })
-    state.page.drawText('Computed', { x: cols.comp, y: state.y, size: 8, font: fontBold, color: rgb(...COL_DIM) })
-    state.page.drawText('|Error|', { x: cols.err, y: state.y, size: 8, font: fontBold, color: rgb(...COL_DIM) })
-    state.page.drawText('Pass', { x: cols.pass, y: state.y, size: 8, font: fontBold, color: rgb(...COL_DIM) })
+    state.page.drawText('Reference', {
+      x: cols.name,
+      y: state.y,
+      size: 8,
+      font: fontBold,
+      color: rgb(...COL_DIM),
+    })
+    state.page.drawText('Expected', {
+      x: cols.ref,
+      y: state.y,
+      size: 8,
+      font: fontBold,
+      color: rgb(...COL_DIM),
+    })
+    state.page.drawText('Computed', {
+      x: cols.comp,
+      y: state.y,
+      size: 8,
+      font: fontBold,
+      color: rgb(...COL_DIM),
+    })
+    state.page.drawText('|Error|', {
+      x: cols.err,
+      y: state.y,
+      size: 8,
+      font: fontBold,
+      color: rgb(...COL_DIM),
+    })
+    state.page.drawText('Pass', {
+      x: cols.pass,
+      y: state.y,
+      size: 8,
+      font: fontBold,
+      color: rgb(...COL_DIM),
+    })
     state = { ...state, y: state.y - LH }
     // Divider
     state.page.drawLine({
       start: { x: MARGIN, y: state.y + LH - 2 },
       end: { x: PAGE_WIDTH - MARGIN, y: state.y + LH - 2 },
-      thickness: 0.5, color: rgb(...COL_DIM),
+      thickness: 0.5,
+      color: rgb(...COL_DIM),
     })
 
     let allPassed = true
@@ -377,11 +484,41 @@ export async function exportSolverReport(
       if (!rc.passed) allPassed = false
       const passColor = rc.passed ? COL_PASS : COL_FAIL
       const passText = rc.passed ? 'PASS' : 'FAIL'
-      state.page.drawText(rc.name.slice(0, 22), { x: cols.name, y: state.y, size: 8, font: fontNormal, color: rgb(...COL_TEXT) })
-      state.page.drawText(rc.referenceValue.toExponential(5), { x: cols.ref, y: state.y, size: 8, font: fontMono, color: rgb(...COL_TEXT) })
-      state.page.drawText(rc.computedValue.toExponential(5), { x: cols.comp, y: state.y, size: 8, font: fontMono, color: rgb(...COL_TEXT) })
-      state.page.drawText(rc.absoluteError.toExponential(3), { x: cols.err, y: state.y, size: 8, font: fontMono, color: rgb(...COL_TEXT) })
-      state.page.drawText(passText, { x: cols.pass, y: state.y, size: 8, font: fontBold, color: rgb(...passColor) })
+      state.page.drawText(rc.name.slice(0, 22), {
+        x: cols.name,
+        y: state.y,
+        size: 8,
+        font: fontNormal,
+        color: rgb(...COL_TEXT),
+      })
+      state.page.drawText(rc.referenceValue.toExponential(5), {
+        x: cols.ref,
+        y: state.y,
+        size: 8,
+        font: fontMono,
+        color: rgb(...COL_TEXT),
+      })
+      state.page.drawText(rc.computedValue.toExponential(5), {
+        x: cols.comp,
+        y: state.y,
+        size: 8,
+        font: fontMono,
+        color: rgb(...COL_TEXT),
+      })
+      state.page.drawText(rc.absoluteError.toExponential(3), {
+        x: cols.err,
+        y: state.y,
+        size: 8,
+        font: fontMono,
+        color: rgb(...COL_TEXT),
+      })
+      state.page.drawText(passText, {
+        x: cols.pass,
+        y: state.y,
+        size: 8,
+        font: fontBold,
+        color: rgb(...passColor),
+      })
       state = { ...state, y: state.y - LH }
     }
 
@@ -390,17 +527,30 @@ export async function exportSolverReport(
     const summaryText = allPassed
       ? `✓ All ${model.referenceComparisons.length} reference comparisons passed.`
       : `✗ ${model.referenceComparisons.filter((r) => !r.passed).length} of ${model.referenceComparisons.length} comparisons failed.`
-    state = drawText(state, summaryText, { font: fontBold, size: 10, color: summaryColor, indent: 8 })
+    state = drawText(state, summaryText, {
+      font: fontBold,
+      size: 10,
+      color: summaryColor,
+      indent: 8,
+    })
   }
 
   // ── Diagnostics ─────────────────────────────────────────────────────────────
   if (model.diagnostics.length > 0) {
     state = drawSectionHeader(state, '5. Diagnostics')
     for (const diag of model.diagnostics) {
-      const color = diag.level === 'error' ? COL_FAIL : diag.level === 'warning' ? [200, 120, 0] as RGBColor : COL_DIM
-      const prefix = diag.level === 'error' ? '[ERROR]' : diag.level === 'warning' ? '[WARN]' : '[INFO]'
+      const color =
+        diag.level === 'error'
+          ? COL_FAIL
+          : diag.level === 'warning'
+            ? ([200, 120, 0] as RGBColor)
+            : COL_DIM
+      const prefix =
+        diag.level === 'error' ? '[ERROR]' : diag.level === 'warning' ? '[WARN]' : '[INFO]'
       state = drawText(state, `${prefix} ${diag.code}: ${diag.message}`, {
-        size: 9, color, indent: 8,
+        size: 9,
+        color,
+        indent: 8,
       })
     }
   }
@@ -414,14 +564,20 @@ export async function exportSolverReport(
   // Draw footer on all pages
   for (let i = 0; i < doc.getPageCount(); i++) {
     const pg = doc.getPage(i)
-    pg.drawText(
-      `ChainSolve Solver Verification Report — Page ${i + 1} of ${doc.getPageCount()}`,
-      { x: MARGIN, y: FOOTER_Y, size: 8, font: fontNormal, color: rgb(...COL_DIM) },
-    )
-    pg.drawText(
-      model.timestamp.slice(0, 10),
-      { x: PAGE_WIDTH - MARGIN - 60, y: FOOTER_Y, size: 8, font: fontNormal, color: rgb(...COL_DIM) },
-    )
+    pg.drawText(`ChainSolve Solver Verification Report — Page ${i + 1} of ${doc.getPageCount()}`, {
+      x: MARGIN,
+      y: FOOTER_Y,
+      size: 8,
+      font: fontNormal,
+      color: rgb(...COL_DIM),
+    })
+    pg.drawText(model.timestamp.slice(0, 10), {
+      x: PAGE_WIDTH - MARGIN - 60,
+      y: FOOTER_Y,
+      size: 8,
+      font: fontNormal,
+      color: rgb(...COL_DIM),
+    })
   }
   void drawFooter
 
@@ -429,7 +585,8 @@ export async function exportSolverReport(
   const bytes = await doc.save()
   const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
   const ts = formatTimestampForFilename(model.timestamp)
-  const filename = options.filename ?? `solver-verification-${safeName(model.projectName)}-${ts}.pdf`
+  const filename =
+    options.filename ?? `solver-verification-${safeName(model.projectName)}-${ts}.pdf`
   downloadBlob(blob, filename)
 }
 

@@ -301,10 +301,30 @@ describe('canvasSaveLoad — legacy format migration', () => {
 describe('canvasSaveLoad — 11.12 round-trip execute equivalence', () => {
   it('engine snapshot is identical before and after round-trip (scalar graph)', () => {
     const nodes: RawNode[] = [
-      { id: 'n1', type: 'number', position: { x: 0, y: 0 }, data: { blockType: 'number', value: 3.14 } },
-      { id: 'n2', type: 'number', position: { x: 100, y: 0 }, data: { blockType: 'number', value: 2 } },
-      { id: 'n3', type: 'multiply', position: { x: 200, y: 0 }, data: { blockType: 'multiply', label: 'Multiply' } },
-      { id: 'n4', type: 'display', position: { x: 300, y: 0 }, data: { blockType: 'display', label: 'Out' } },
+      {
+        id: 'n1',
+        type: 'number',
+        position: { x: 0, y: 0 },
+        data: { blockType: 'number', value: 3.14 },
+      },
+      {
+        id: 'n2',
+        type: 'number',
+        position: { x: 100, y: 0 },
+        data: { blockType: 'number', value: 2 },
+      },
+      {
+        id: 'n3',
+        type: 'multiply',
+        position: { x: 200, y: 0 },
+        data: { blockType: 'multiply', label: 'Multiply' },
+      },
+      {
+        id: 'n4',
+        type: 'display',
+        position: { x: 300, y: 0 },
+        data: { blockType: 'display', label: 'Out' },
+      },
     ]
     const edges: RawEdge[] = [
       { id: 'e1', source: 'n1', target: 'n3', sourceHandle: 'out', targetHandle: 'a' },
@@ -342,8 +362,18 @@ describe('canvasSaveLoad — 11.12 round-trip execute equivalence', () => {
 
   it('engine snapshot is stable across multiple save/load cycles', () => {
     const nodes: RawNode[] = [
-      { id: 'x', type: 'number', position: { x: 0, y: 0 }, data: { blockType: 'number', value: 42 } },
-      { id: 'd', type: 'display', position: { x: 150, y: 0 }, data: { blockType: 'display', label: 'Display' } },
+      {
+        id: 'x',
+        type: 'number',
+        position: { x: 0, y: 0 },
+        data: { blockType: 'number', value: 42 },
+      },
+      {
+        id: 'd',
+        type: 'display',
+        position: { x: 150, y: 0 },
+        data: { blockType: 'display', label: 'Display' },
+      },
     ]
     const edges: RawEdge[] = [
       { id: 'e', source: 'x', target: 'd', sourceHandle: 'out', targetHandle: 'value' },
@@ -353,11 +383,15 @@ describe('canvasSaveLoad — 11.12 round-trip execute equivalence', () => {
 
     // Cycle 1
     const load1 = roundTrip(nodes, edges)
-    const snap1 = JSON.stringify(toEngineSnapshot(load1.nodes as RawNode[], load1.edges as RawEdge[]))
+    const snap1 = JSON.stringify(
+      toEngineSnapshot(load1.nodes as RawNode[], load1.edges as RawEdge[]),
+    )
 
     // Cycle 2 (round-trip the loaded result)
     const load2 = roundTrip(load1.nodes as RawNode[], load1.edges as RawEdge[])
-    const snap2 = JSON.stringify(toEngineSnapshot(load2.nodes as RawNode[], load2.edges as RawEdge[]))
+    const snap2 = JSON.stringify(
+      toEngineSnapshot(load2.nodes as RawNode[], load2.edges as RawEdge[]),
+    )
 
     expect(snap1).toBe(snap0)
     expect(snap2).toBe(snap0)
@@ -371,7 +405,12 @@ describe('canvasSaveLoad — 11.12 round-trip execute equivalence', () => {
         position: { x: 0, y: 0 },
         data: { blockType: 'add', label: 'Add', manualValues: { a: 7, b: 13 } },
       },
-      { id: 'd', type: 'display', position: { x: 150, y: 0 }, data: { blockType: 'display', label: 'Out' } },
+      {
+        id: 'd',
+        type: 'display',
+        position: { x: 150, y: 0 },
+        data: { blockType: 'display', label: 'Out' },
+      },
     ]
     const edges: RawEdge[] = [
       { id: 'e1', source: 'op', target: 'd', sourceHandle: 'out', targetHandle: 'value' },
@@ -379,7 +418,9 @@ describe('canvasSaveLoad — 11.12 round-trip execute equivalence', () => {
 
     const snapBefore = JSON.stringify(toEngineSnapshot(nodes, edges))
     const loaded = roundTrip(nodes, edges)
-    const snapAfter = JSON.stringify(toEngineSnapshot(loaded.nodes as RawNode[], loaded.edges as RawEdge[]))
+    const snapAfter = JSON.stringify(
+      toEngineSnapshot(loaded.nodes as RawNode[], loaded.edges as RawEdge[]),
+    )
 
     expect(snapAfter).toBe(snapBefore)
   })

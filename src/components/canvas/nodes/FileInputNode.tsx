@@ -48,7 +48,10 @@ function detectDelimiter(line: string): string {
 }
 
 function parseCsv(text: string, hasHeader: boolean): TableData {
-  const lines = text.trim().split(/\r?\n/).filter((l) => l.trim() !== '')
+  const lines = text
+    .trim()
+    .split(/\r?\n/)
+    .filter((l) => l.trim() !== '')
   if (lines.length === 0) return { columns: [], rows: [] }
 
   const delim = detectDelimiter(lines[0])
@@ -115,11 +118,17 @@ function parseJson(text: string): TableData {
 }
 
 function parsePlainText(text: string): TableData {
-  const lines = text.trim().split(/\r?\n/).filter((l) => l.trim() !== '')
+  const lines = text
+    .trim()
+    .split(/\r?\n/)
+    .filter((l) => l.trim() !== '')
   if (lines.length === 0) return { columns: [], rows: [] }
 
   const rows = lines.map((line) =>
-    line.trim().split(/\s+/).map((v) => parseFloat(v) || 0),
+    line
+      .trim()
+      .split(/\s+/)
+      .map((v) => parseFloat(v) || 0),
   )
   const ncols = Math.max(...rows.map((r) => r.length))
   const columns = Array.from({ length: ncols }, (_, i) => `Col${i + 1}`)
@@ -222,7 +231,17 @@ function TablePreview({ columns, rows }: { columns: string[]; rows: number[][] }
                   {row[ci] ?? ''}
                 </td>
               ))}
-              {moreC && <td style={{ padding: '1px 4px', color: 'rgba(244,244,243,0.2)', textAlign: 'center' }}>…</td>}
+              {moreC && (
+                <td
+                  style={{
+                    padding: '1px 4px',
+                    color: 'rgba(244,244,243,0.2)',
+                    textAlign: 'center',
+                  }}
+                >
+                  …
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -487,28 +506,28 @@ function FileInputNodeInner({ id, data, selected }: NodeProps) {
       </div>
 
       {/* Output handles: one per column (matching tableInput behavior) */}
-      {hasData
-        ? tableData.columns.map((col, ci) => (
-            <Handle
-              key={`col_${ci}`}
-              type="source"
-              position={Position.Right}
-              id={`col_${ci}`}
-              style={{
-                ...s.handleRight,
-                top: `${((ci + 1) / (tableData.columns.length + 1)) * 100}%`,
-              }}
-              title={col}
-            />
-          ))
-        : (
-            <Handle
-              type="source"
-              position={Position.Right}
-              id="out"
-              style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
-            />
-          )}
+      {hasData ? (
+        tableData.columns.map((col, ci) => (
+          <Handle
+            key={`col_${ci}`}
+            type="source"
+            position={Position.Right}
+            id={`col_${ci}`}
+            style={{
+              ...s.handleRight,
+              top: `${((ci + 1) / (tableData.columns.length + 1)) * 100}%`,
+            }}
+            title={col}
+          />
+        ))
+      ) : (
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="out"
+          style={{ ...s.handleRight, top: '50%', transform: 'translateY(-50%)' }}
+        />
+      )}
     </div>
   )
 }

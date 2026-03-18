@@ -186,9 +186,13 @@ async function initialize() {
     await initWasm({ module_or_path: wasmUrl })
     // 1.38 / 1.40 — initialise WebGPU accelerator in parallel (non-blocking;
     // GPU unavailability is logged and ignored — all ops fall back to CPU).
-    gpuAccelerator.init().catch(() => {/* GPU unavailable — silent fallback */})
+    gpuAccelerator.init().catch(() => {
+      /* GPU unavailable — silent fallback */
+    })
     // 1.52 — probe Memory64 support (non-blocking; result cached for later queries).
-    detectMemory64Support().catch(() => {/* not supported */})
+    detectMemory64Support().catch(() => {
+      /* not supported */
+    })
     const initMs = performance.now() - t0
     const catalog = JSON.parse(get_catalog())
     const constantValues = JSON.parse(get_constant_values()) as Record<string, number>
