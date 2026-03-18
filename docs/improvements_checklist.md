@@ -185,7 +185,7 @@
 #### Signal/Control (existing + new)
 
 - [x] **2.64** Control: step response (1st/2nd order), PID output, RMS, peak-to-peak, settling time, overshoot, natural frequency, damping ratio, Bode magnitude 1st order (10 blocks)
-- [ ] **2.65** TransferFunction: define G(s) = num(s)/den(s) as coefficient arrays; evaluate step/impulse response, frequency response (Bode plot data output)
+- [x] **2.65** TransferFunction: define G(s) = num(s)/den(s) as coefficient arrays; evaluate step/impulse response, frequency response (Bode plot data output)
 - [ ] **2.66** StateSpace: define dx/dt=Ax+Bu, y=Cx+Du; simulate with ODE solver, compute eigenvalues for stability, controllability/observability matrices
 - [x] **2.67** Saturation (clamp output), DeadZone (zero within ±band), RateLimiter (max dy/dt), Delay (pure time delay via buffer) — essential nonlinear control elements
 - [x] **2.68** MUX (combine N scalars → vector), DEMUX (split vector → N scalars), Switch (select input based on condition) — signal routing
