@@ -206,6 +206,73 @@ export function registerOptimBlocks(register: (def: BlockDef) => void): void {
       'SQP (Sequential Quadratic Programming) via Augmented Lagrangian. Handles equality constraints h(x)=0 and inequality constraints g(x)≤0 plus variable bounds. Outer loop updates Lagrange multipliers; inner loop uses projected gradient descent.',
   })
 
+  // ── UQ & Robust Design ─────────────────────────────────────────────────
+
+  register({
+    type: 'optim.uqPce',
+    label: 'UQ / PCE',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'x', label: 'Samples (table)' },
+      { id: 'y', label: 'Responses' },
+    ],
+    defaultData: {
+      blockType: 'optim.uqPce',
+      label: 'UQ / PCE',
+      degree: 2,
+      basis: 'legendre',
+    },
+    synonyms: ['polynomial chaos', 'pce', 'uncertainty quantification', 'uq', 'sobol indices'],
+    tags: ['optimization', 'uq', 'reliability'],
+    description:
+      'Polynomial Chaos Expansion (PCE): fits a sparse polynomial surrogate to sample data. Outputs mean, variance, std, R², and Sobol first-order sensitivity indices per variable. Basis: "legendre" (Uniform inputs) or "hermite" (Gaussian inputs). Degree 1–5.',
+  })
+
+  register({
+    type: 'optim.form',
+    label: 'FORM Reliability',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'variables', label: 'Variables' }],
+    defaultData: {
+      blockType: 'optim.form',
+      label: 'FORM Reliability',
+      n_vars: 1,
+      beta0: 2.0,
+      maxIterations: 100,
+      tolerance: 1e-6,
+    },
+    synonyms: ['form', 'reliability', 'failure probability', 'first order reliability', 'hlrf', 'mpp'],
+    tags: ['optimization', 'reliability', 'uq'],
+    description:
+      'FORM (First-Order Reliability Method) via HLRF algorithm. Finds the Most Probable Point (MPP) of failure in standard normal space. Outputs reliability index β and failure probability P_f = Φ(-β).',
+  })
+
+  register({
+    type: 'optim.robustDesign',
+    label: 'Robust Design',
+    category: 'optimization',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'objective', label: 'Objective' },
+      { id: 'variables', label: 'Variables' },
+    ],
+    defaultData: {
+      blockType: 'optim.robustDesign',
+      label: 'Robust Design',
+      noiseStd: 0.1,
+      nMc: 50,
+      nPareto: 10,
+      kMax: 5.0,
+      maxIterations: 200,
+    },
+    synonyms: ['robust', 'taguchi', 'noise', 'mean variance', 'pareto robust'],
+    tags: ['optimization', 'robust', 'uncertainty'],
+    description:
+      'Robust Design: minimises f_robust = μ + k·σ over a Pareto sweep of k ∈ [0, k_max]. Each Pareto point is optimised with L-projected gradient descent. Outputs table of (k, mean, std, robust_obj, x*) for plotting the Pareto front.',
+  })
+
   // ── Visualization & Results ─────────────────────────────────────────────
 
   register({

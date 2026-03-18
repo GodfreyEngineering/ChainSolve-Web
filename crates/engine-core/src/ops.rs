@@ -3897,6 +3897,98 @@ fn evaluate_node_inner(
             }
         }
 
+        "optim.uqPce" => {
+            use crate::optim::uq;
+            // Extract sample matrix x and response vector y
+            let (samples_x, var_names): (Vec<Vec<f64>>, Vec<String>) = match inputs.get("x") {
+                Some(Value::Table { columns, rows }) => {
+                    let x = rows.clone();
+                    (x, columns.clone())
+                }
+                Some(Value::Matrix { rows, cols, data }) => {
+                    let x: Vec<Vec<f64>> = (0..*rows)
+                        .map(|r| (0..*cols).map(|c| data[r * *cols + c]).collect())
+                        .collect();
+                    let names: Vec<String> = (0..*cols).map(|i| format!("x{i}")).collect();
+                    (x, names)
+                }
+                _ => return Value::error("uqPce: 'x' input required (sample table)"),
+            };
+            let y_data: Vec<f64> = match inputs.get("y") {
+                Some(Value::Vector { value }) => value.clone(),
+                Some(Value::Scalar { value }) => vec![*value],
+                Some(Value::Table { rows, .. }) => rows.iter().flat_map(|r| r.iter().cloned()).collect(),
+                _ => return Value::error("uqPce: 'y' input required (response vector)"),
+            };
+            let degree = data.get("degree").and_then(|v| v.as_f64()).unwrap_or(2.0) as usize;
+            let basis_str = data.get("basis").and_then(|v| v.as_str()).unwrap_or("legendre");
+            let n_vars = samples_x.first().map(|r| r.len()).unwrap_or(0);
+            let dists: Vec<uq::UqDist> = (0..n_vars)
+                .map(|_| match basis_str {
+                    "hermite" => uq::UqDist::Normal { mean: 0.0, std: 1.0 },
+                    _ => uq::UqDist::Uniform { min: -1.0, max: 1.0 },
+                })
+                .collect();
+            match uq::fit_pce(&samples_x, &y_data, &dists, degree) {
+                Ok(result) => uq::pce_to_table(&result, &var_names),
+                Err(e) => Value::error(e),
+            }
+        }
+
+        "optim.form" => {
+            use crate::optim::uq;
+            let n_vars = data.get("n_vars").and_then(|v| v.as_f64()).unwrap_or(1.0) as usize;
+            let max_iter = data.get("maxIterations").and_then(|v| v.as_f64()).unwrap_or(100.0) as usize;
+            let tol = data.get("tolerance").and_then(|v| v.as_f64()).unwrap_or(1e-6);
+            let beta0 = data.get("beta0").and_then(|v| v.as_f64()).unwrap_or(2.0);
+            // Default limit state: linear g(u) = β₀ - u₀ (use expression if provided)
+            let expr = data.get("expression").and_then(|v| v.as_str()).map(|s| s.to_string());
+            let var_names: Vec<String> = (0..n_vars).map(|i| format!("u{i}")).collect();
+            let (beta, p_failure, mpp) = if let Some(expr_str) = expr {
+                let g = move |u: &[f64]| {
+                    let mut vars_map = std::collections::HashMap::new();
+                    for (i, &v) in u.iter().enumerate() {
+                        vars_map.insert(format!("u{i}"), v);
+                        vars_map.insert(format!("x{i}"), v);
+                    }
+                    crate::expr::eval_expr(&expr_str, &vars_map).unwrap_or(f64::NAN)
+                };
+                uq::form_hlrf(&g, n_vars, max_iter, tol)
+            } else {
+                let g = move |u: &[f64]| beta0 - u.iter().sum::<f64>();
+                uq::form_hlrf(&g, n_vars, max_iter, tol)
+            };
+            uq::form_to_table(beta, p_failure, &mpp, &var_names)
+        }
+
+        "optim.robustDesign" => {
+            use crate::optim;
+            match optim::parse_design_vars(inputs, data) {
+                Ok(vars) => {
+                    let f = optim::get_objective_fn(data);
+                    let noise_std_val = data.get("noiseStd").and_then(|v| v.as_f64()).unwrap_or(0.1);
+                    let noise_std = vec![noise_std_val];
+                    let n_mc = data.get("nMc").and_then(|v| v.as_f64()).unwrap_or(50.0) as usize;
+                    let seed = data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64;
+                    let n_pareto = data.get("nPareto").and_then(|v| v.as_f64()).unwrap_or(10.0) as usize;
+                    let k_max = data.get("kMax").and_then(|v| v.as_f64()).unwrap_or(5.0);
+                    let max_iter = data.get("maxIterations").and_then(|v| v.as_f64()).unwrap_or(200.0) as usize;
+                    let config = optim::robust::RobustConfig {
+                        noise_std,
+                        n_mc: n_mc.max(5),
+                        seed,
+                        n_pareto: n_pareto.max(2),
+                        k_min: 0.0,
+                        k_max,
+                        max_iter,
+                        tol: 1e-5,
+                    };
+                    optim::robust::robust_pareto(&f, &vars, &config)
+                }
+                Err(e) => Value::error(e),
+            }
+        }
+
         "optim.convergencePlot" | "optim.resultsTable" => {
             // Pass through optimizer output (Table)
             inputs.get("data").cloned().unwrap_or(Value::scalar(f64::NAN))

@@ -632,6 +632,12 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Trust-Region Dogleg: globally convergent second-order optimizer. Adapts trust-region radius each iteration. Combines steepest descent (Cauchy) and Newton steps via the dogleg path. Robust for non-convex problems, uses numerical Hessian.',
   'optim.sqp':
     'SQP via Augmented Lagrangian. Handles equality h(x)=0 and inequality g(x)≤0 constraints plus variable bounds. Outer multiplier loop drives feasibility; inner projected gradient descent minimizes the augmented Lagrangian. Specify constraints as expression strings.',
+  'optim.uqPce':
+    'Polynomial Chaos Expansion (PCE): fits a truncated polynomial surrogate via OLS regression. Outputs mean, variance, std, R², and Sobol first-order sensitivity indices. Legendre basis for Uniform inputs, Hermite for Gaussian. Supports degree 1–5.',
+  'optim.form':
+    'FORM (First-Order Reliability Method) with HLRF algorithm. Searches for the Most Probable Point (MPP) of failure in standard normal u-space. Outputs reliability index β and failure probability P_f = Φ(-β).',
+  'optim.robustDesign':
+    'Robust Design: traces a Pareto front of mean vs variance by sweeping robustness weight k. For each k, minimises μ(x) + k·σ(x) using projected gradient descent with Monte Carlo moment estimation.',
   'optim.convergencePlot': 'Visualizes optimizer convergence: objective value vs iteration count.',
   'optim.resultsTable':
     'Displays final optimal variable values, objective value, and convergence status.',

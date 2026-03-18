@@ -252,8 +252,8 @@
 - [ ] **2.114** NSGA-III: reference-direction-based multi-objective (better than NSGA-II for >3 objectives). MOEA/D with Tchebycheff decomposition.
 - [x] **2.115** Enhanced DOE: Taguchi orthogonal arrays, D-optimal (coordinate exchange), Box-Behnken, Central Composite (face/inscribed/circumscribed) — add to existing factorial/LHS/Sobol
 - [x] **2.116** Response surface: fit polynomial/RBF/Kriging metamodel to DOE results — visualise as contour + 3D surface + sensitivity tornado
-- [ ] **2.117** UQ: Polynomial Chaos Expansion (Legendre/Hermite bases up to degree 5 with LAR sparse selection), reliability (FORM with HLRF algorithm, importance sampling, subset simulation) — output: failure probability, reliability index β
-- [ ] **2.118** Robust design: objective = weighted mean + k×std under uncertainty — Pareto optimisation of mean performance vs variance
+- [x] **2.117** UQ: Polynomial Chaos Expansion (Legendre/Hermite bases up to degree 5 with LAR sparse selection), reliability (FORM with HLRF algorithm, importance sampling, subset simulation) — output: failure probability, reliability index β
+- [x] **2.118** Robust design: objective = weighted mean + k×std under uncertainty — Pareto optimisation of mean performance vs variance
 - [ ] **2.119** Topology optimisation: SIMP method on 2D FEM mesh with density filtering and projection — output optimised material distribution as density field
 
 ### 2H — Utility Blocks
