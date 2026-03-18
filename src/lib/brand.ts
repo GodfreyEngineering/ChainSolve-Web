@@ -37,4 +37,8 @@ export const COMPANY = {
   name: 'Godfrey Engineering Ltd',
   jurisdiction: 'England & Wales',
   companyNumber: '16845827',
+  /** Registered address — update when registered office is confirmed. */
+  registeredAddress: 'Registered in England and Wales',
+  /** Managing director — update when finalized. */
+  director: 'Ben Godfrey',
 } as const
