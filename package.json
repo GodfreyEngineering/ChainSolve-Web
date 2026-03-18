@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run wasm:build && tsc -b && vite build",
-    "wasm:build": "wasm-pack build crates/engine-wasm --target web --release && node scripts/optimize-wasm.mjs",
-    "wasm:build:dev": "wasm-pack build crates/engine-wasm --target web --dev",
+    "wasm:build": "RUSTFLAGS='-C target-feature=+simd128' wasm-pack build crates/engine-wasm --target web --release && node scripts/optimize-wasm.mjs",
+    "wasm:build:dev": "RUSTFLAGS='-C target-feature=+simd128' wasm-pack build crates/engine-wasm --target web --dev",
     "wasm:test": "cargo test --workspace",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
