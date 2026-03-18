@@ -118,4 +118,72 @@ export function registerSignalBlocks(register: (def: BlockDef) => void): void {
     description:
       'Windowed-sinc FIR highpass filter via spectral inversion. cutoff_norm is the normalized cutoff frequency (0 to 0.5 = Nyquist). taps must be an odd integer >= 3.',
   })
+
+  // ── IIR Filter Design ────────────────────────────────────────
+
+  register({
+    type: 'signal.filter_butter',
+    label: 'Butterworth IIR Filter',
+    category: 'signal',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'y', label: 'Signal' },
+      { id: 'cutoff', label: 'Cutoff (0-1)' },
+    ],
+    defaultData: {
+      blockType: 'signal.filter_butter',
+      label: 'Butterworth IIR Filter',
+      order: 4,
+      pass: 'lowpass',
+      zeroPhaseBool: false,
+    },
+    synonyms: ['butterworth', 'IIR filter', 'lowpass IIR', 'highpass IIR'],
+    tags: ['signal', 'filter', 'iir', 'butterworth'],
+    description:
+      'Digital Butterworth IIR filter (maximally flat magnitude). Set order (1-8), pass (lowpass/highpass), and optional zeroPhaseBool in block settings. Cutoff is normalised 0-1 (1 = Nyquist). More selective than FIR for same order.',
+  })
+
+  register({
+    type: 'signal.filter_cheby1',
+    label: 'Chebyshev I IIR Filter',
+    category: 'signal',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'y', label: 'Signal' },
+      { id: 'cutoff', label: 'Cutoff (0-1)' },
+    ],
+    defaultData: {
+      blockType: 'signal.filter_cheby1',
+      label: 'Chebyshev I IIR Filter',
+      order: 4,
+      rippleDb: 0.5,
+      pass: 'lowpass',
+      zeroPhaseBool: false,
+    },
+    synonyms: ['chebyshev', 'cheby1', 'IIR filter', 'equiripple'],
+    tags: ['signal', 'filter', 'iir', 'chebyshev'],
+    description:
+      'Chebyshev Type I IIR filter — equal ripple in the passband, steeper roll-off than Butterworth. Set order (1-8), rippleDb (passband ripple), and pass type in block settings.',
+  })
+
+  register({
+    type: 'signal.filter_zero_phase',
+    label: 'Zero-Phase Filter',
+    category: 'signal',
+    nodeKind: 'csOperation',
+    inputs: [
+      { id: 'y', label: 'Signal' },
+      { id: 'cutoff', label: 'Cutoff (0-1)' },
+    ],
+    defaultData: {
+      blockType: 'signal.filter_zero_phase',
+      label: 'Zero-Phase Filter',
+      order: 4,
+      pass: 'lowpass',
+    },
+    synonyms: ['zero phase', 'filtfilt', 'forward backward filter', 'acausal'],
+    tags: ['signal', 'filter', 'iir', 'zero-phase'],
+    description:
+      'Forward-backward Butterworth IIR filter with zero phase shift. Applies the filter twice (once forward, once backward). Effective order is doubled. Ideal for offline signal processing where phase matters.',
+  })
 }

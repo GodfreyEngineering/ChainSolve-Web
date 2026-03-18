@@ -606,6 +606,12 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Applies a low-pass FIR filter. cutoff_norm = f_cutoff / f_sample (0..0.5). taps: filter order.',
   'signal.filter_highpass_fir':
     'Applies a high-pass FIR filter. cutoff_norm = f_cutoff / f_sample (0..0.5). taps: filter order.',
+  'signal.filter_butter':
+    'Butterworth IIR lowpass/highpass filter. Maximally flat magnitude response. Order 1-8, cutoff 0-1.',
+  'signal.filter_cheby1':
+    'Chebyshev Type I IIR filter. Equal passband ripple, steeper roll-off than Butterworth. Order 1-8.',
+  'signal.filter_zero_phase':
+    'Zero-phase (forward-backward) Butterworth filter. No phase shift. Effective order is doubled.',
 
   // ── Optimization (5.01) ─────────────────────────────────────────────────
   'optim.designVariable':

@@ -508,6 +508,10 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("signal.window_blackman", "Blackman Window", "signal", "csOperation", vec![p("n", "N (length)")], true),
         entry("signal.filter_lowpass_fir", "Low-pass FIR Filter", "signal", "csOperation", vec![p("y", "y (vector)"), p("cutoff_norm", "f_c/f_s"), p("taps", "Taps")], true),
         entry("signal.filter_highpass_fir", "High-pass FIR Filter", "signal", "csOperation", vec![p("y", "y (vector)"), p("cutoff_norm", "f_c/f_s"), p("taps", "Taps")], true),
+        // IIR filter design and application
+        entry("signal.filter_butter", "Butterworth IIR Filter", "signal", "csOperation", vec![p("y", "Signal"), p("cutoff", "Cutoff (0-1)")], true),
+        entry("signal.filter_cheby1", "Chebyshev I IIR Filter", "signal", "csOperation", vec![p("y", "Signal"), p("cutoff", "Cutoff (0-1)")], true),
+        entry("signal.filter_zero_phase", "Zero-Phase Filter", "signal", "csOperation", vec![p("y", "Signal"), p("cutoff", "Cutoff (0-1)")], true),
 
         // ── Optimization ──────────────────────────────────────────────
         entry("optim.designVariable", "Design Variable", "optimization", "csSource", vec![], false),

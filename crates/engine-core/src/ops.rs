@@ -2831,6 +2831,91 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── IIR Filter Design (signal module) ────────────────────────────────
+
+        // Butterworth IIR lowpass or highpass filter.
+        // Data: order (int, 1-8), pass ("lowpass"|"highpass"), zeroPhaseBool.
+        // Inputs: y (Signal vector), cutoff (normalised 0-1, i.e. fraction of Nyquist).
+        "signal.filter_butter" | "filter_butter" => {
+            use crate::signal::{butterworth, FilterPass};
+            let yv = match inputs.get("y") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("filter_butter: y must be a vector"),
+            };
+            let cutoff = match inputs.get("cutoff") {
+                Some(Value::Scalar { value: v }) => *v,
+                _ => data.get("cutoff").and_then(|v| v.as_f64()).unwrap_or(0.3),
+            };
+            let order = data.get("order").and_then(|v| v.as_u64()).unwrap_or(4) as usize;
+            let pass_str = data.get("pass").and_then(|v| v.as_str()).unwrap_or("lowpass");
+            let pass = if pass_str == "highpass" { FilterPass::Highpass } else { FilterPass::Lowpass };
+            let zero_phase = data.get("zeroPhaseBool").and_then(|v| v.as_bool()).unwrap_or(false);
+            match butterworth(order, cutoff, pass) {
+                Err(e) => Value::error(&format!("filter_butter: {e}")),
+                Ok(sos) => {
+                    let out = if zero_phase {
+                        crate::signal::apply_sos_zero_phase(&sos, &yv)
+                    } else {
+                        crate::signal::apply_sos(&sos, &yv)
+                    };
+                    Value::Vector { value: out }
+                }
+            }
+        }
+
+        // Chebyshev Type I IIR filter.
+        // Data: order (1-8), rippleDb (float, default 0.5), pass ("lowpass"|"highpass").
+        "signal.filter_cheby1" | "filter_cheby1" => {
+            use crate::signal::{chebyshev1, FilterPass};
+            let yv = match inputs.get("y") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("filter_cheby1: y must be a vector"),
+            };
+            let cutoff = match inputs.get("cutoff") {
+                Some(Value::Scalar { value: v }) => *v,
+                _ => data.get("cutoff").and_then(|v| v.as_f64()).unwrap_or(0.3),
+            };
+            let order = data.get("order").and_then(|v| v.as_u64()).unwrap_or(4) as usize;
+            let ripple_db = data.get("rippleDb").and_then(|v| v.as_f64()).unwrap_or(0.5);
+            let pass_str = data.get("pass").and_then(|v| v.as_str()).unwrap_or("lowpass");
+            let pass = if pass_str == "highpass" { FilterPass::Highpass } else { FilterPass::Lowpass };
+            let zero_phase = data.get("zeroPhaseBool").and_then(|v| v.as_bool()).unwrap_or(false);
+            match chebyshev1(order, cutoff, ripple_db, pass) {
+                Err(e) => Value::error(&format!("filter_cheby1: {e}")),
+                Ok(sos) => {
+                    let out = if zero_phase {
+                        crate::signal::apply_sos_zero_phase(&sos, &yv)
+                    } else {
+                        crate::signal::apply_sos(&sos, &yv)
+                    };
+                    Value::Vector { value: out }
+                }
+            }
+        }
+
+        // Zero-phase Butterworth filter convenience block.
+        // Same as filter_butter with zeroPhaseBool=true.
+        "signal.filter_zero_phase" | "filter_zero_phase" => {
+            use crate::signal::{butterworth, FilterPass};
+            let yv = match inputs.get("y") {
+                Some(Value::Vector { value }) => value.clone(),
+                _ => return Value::error("filter_zero_phase: y must be a vector"),
+            };
+            let cutoff = match inputs.get("cutoff") {
+                Some(Value::Scalar { value: v }) => *v,
+                _ => data.get("cutoff").and_then(|v| v.as_f64()).unwrap_or(0.3),
+            };
+            let order = data.get("order").and_then(|v| v.as_u64()).unwrap_or(4) as usize;
+            let pass_str = data.get("pass").and_then(|v| v.as_str()).unwrap_or("lowpass");
+            let pass = if pass_str == "highpass" { FilterPass::Highpass } else { FilterPass::Lowpass };
+            match butterworth(order, cutoff, pass) {
+                Err(e) => Value::error(&format!("filter_zero_phase: {e}")),
+                Ok(sos) => Value::Vector {
+                    value: crate::signal::apply_sos_zero_phase(&sos, &yv),
+                },
+            }
+        }
+
         // ── SCI-08: Complex Number Operations ─────────────────────────────────
 
         "complex_from" | "complex.from" => {

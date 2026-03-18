@@ -40,6 +40,7 @@ pub mod optim;
 pub mod precision;
 pub mod rng;
 pub mod rootfinding;
+pub mod signal;
 pub mod sparse;
 pub mod sparse_solvers;
 pub mod symbolic;
