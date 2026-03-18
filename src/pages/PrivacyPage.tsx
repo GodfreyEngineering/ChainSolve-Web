@@ -15,6 +15,7 @@ import { LegalFooter } from '../components/ui/LegalFooter'
 import { usePageMeta, useHreflang } from '../lib/seo'
 import { CURRENT_PRIVACY_VERSION } from '../lib/termsVersion'
 import { LegalLanguageNotice } from '../components/ui/LegalLanguageNotice'
+import { LegalPdfDownload } from '../components/ui/LegalPdfDownload'
 
 export default function PrivacyPage() {
   const { t } = useTranslation()
@@ -34,7 +35,10 @@ export default function PrivacyPage() {
         <LegalLanguageNotice canonicalUrl="/privacy" />
 
         <article style={s.article}>
-          <h1 style={s.title}>{t('privacy.title')}</h1>
+          <div style={s.titleRow}>
+            <h1 style={s.title}>{t('privacy.title')}</h1>
+            <LegalPdfDownload filename="ChainSolve-Privacy-Policy" />
+          </div>
           <p style={s.meta}>
             {t('terms.version', { version: CURRENT_PRIVACY_VERSION })} &middot;{' '}
             {t('terms.effectiveDate', { date: lastUpdated })}
@@ -518,8 +522,16 @@ const s = {
     borderRadius: 'var(--radius-xl)',
     padding: '2.5rem',
   } as React.CSSProperties,
+  titleRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '1rem',
+    flexWrap: 'wrap' as const,
+    marginBottom: '0.25rem',
+  } as React.CSSProperties,
   title: {
-    margin: '0 0 0.25rem',
+    margin: 0,
     fontSize: '1.75rem',
     fontWeight: 700,
   } as React.CSSProperties,

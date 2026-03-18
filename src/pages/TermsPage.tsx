@@ -12,6 +12,7 @@ import { LegalFooter } from '../components/ui/LegalFooter'
 import { usePageMeta, useHreflang } from '../lib/seo'
 import { CURRENT_TERMS_VERSION } from '../lib/termsVersion'
 import { LegalLanguageNotice } from '../components/ui/LegalLanguageNotice'
+import { LegalPdfDownload } from '../components/ui/LegalPdfDownload'
 
 export default function TermsPage() {
   const { t } = useTranslation()
@@ -31,7 +32,10 @@ export default function TermsPage() {
         <LegalLanguageNotice canonicalUrl="/terms" />
 
         <article style={s.article}>
-          <h1 style={s.title}>{t('terms.title')}</h1>
+          <div style={s.titleRow}>
+            <h1 style={s.title}>{t('terms.title')}</h1>
+            <LegalPdfDownload filename="ChainSolve-Terms-of-Service" />
+          </div>
           <p style={s.meta}>
             {t('terms.version', { version: CURRENT_TERMS_VERSION })} &middot;{' '}
             {t('terms.effectiveDate', { date: effectiveDate })}
@@ -350,6 +354,14 @@ const s = {
   } as React.CSSProperties,
   logo: {
     height: 32,
+  } as React.CSSProperties,
+  titleRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '1rem',
+    flexWrap: 'wrap' as const,
+    marginBottom: '0.25rem',
   } as React.CSSProperties,
   article: {
     background: 'var(--surface-2)',
