@@ -232,7 +232,7 @@
 - [x] **2.99** SurrogateModel: train NN or Gaussian Process surrogate from a connected simulation block — supports active learning with expected improvement sampling for efficient exploration
 - [x] **2.100** Hyperparameter optimisation: TPE (Tree-structured Parzen Estimator) / CMA-ES sampler with ASHA/Hyperband pruning — right-click any parameter → "Mark as Hyperparameter" with range/distribution. Dashboard shows trial history, parameter importance.
 - [x] **2.101** AutoML block: given DataTable + target column, auto-tries linear, tree ensemble, small NN — reports best with cross-validation scores
-- [ ] **2.102** Transfer learning: load pre-trained ONNX model, freeze specified layers, add new trainable layers, fine-tune on user data
+- [x] **2.102** Transfer learning: load pre-trained ONNX model, freeze specified layers, add new trainable layers, fine-tune on user data
 - [x] **2.103** Experiment tracker: log metrics, parameters, model weights per training run to Supabase table — comparison view with parallel coordinates
 
 ### 2G — Optimisation Blocks

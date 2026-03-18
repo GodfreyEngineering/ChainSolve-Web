@@ -112,6 +112,9 @@ export function toEngineSnapshot(
                                 // 2.96: nn.onnxInference runs inference via onnxruntime-web in the UI; outputs first tensor as vector (data.vectorData).
                                 : data.blockType === 'nn.onnxInference'
                                 ? 'vectorInput'
+                                // 2.125: fmu.import parses FMU archive in the UI; outputs variable initial values as tableInput.
+                                : data.blockType === 'fmu.import'
+                                ? 'tableInput'
                                 // 9.15/2.134: codeBlock evaluates JS code in the UI, outputs result as 'number'.
                                 : data.blockType === 'codeBlock'
                                 ? 'number'

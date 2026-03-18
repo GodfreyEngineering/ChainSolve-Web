@@ -99,6 +99,7 @@ export type NodeKind =
   | 'csTirFileInput'
   | 'csViewport3D'
   | 'csOnnxInference'
+  | 'csFmuImport'
 
 // ── Plot configuration types ────────────────────────────────────────────────
 

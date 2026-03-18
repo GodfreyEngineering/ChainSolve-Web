@@ -57,6 +57,7 @@ import { registerCodeBlockBlocks } from './codeblock-blocks'
 import { registerTirFileInputBlocks } from './tirfileinput-blocks'
 import { registerViewport3DBlocks } from './viewport3d-blocks'
 import { registerOnnxBlocks } from './onnx-blocks'
+import { registerFmuBlocks } from './fmu-blocks'
 import { SEARCH_METADATA } from './blockSearchMetadata'
 
 function reg(
@@ -118,6 +119,7 @@ export function registerAllBlocks(): void {
   registerTirFileInputBlocks(reg)
   registerViewport3DBlocks(reg)
   registerOnnxBlocks(reg)
+  registerFmuBlocks(reg)
 
   // E5-5: Apply search metadata (synonyms + tags) after all blocks are registered
   for (const [opId, meta] of Object.entries(SEARCH_METADATA)) {
