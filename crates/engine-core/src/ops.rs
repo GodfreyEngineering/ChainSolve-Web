@@ -5091,6 +5091,76 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── Neural Operator (FNO / DeepONet) ───────────────────────────
+
+        "nn.neuralOp" => {
+            use crate::neural_operator::{NeuralOpConfig, NeuralOpArch, train_neural_op};
+
+            // Parse training data from connected table input
+            let train_data: Vec<Vec<f64>> = match inputs.get("trainData") {
+                Some(Value::Table { rows, .. }) => rows.clone(),
+                Some(Value::Matrix { rows, cols, data: mat_data }) => {
+                    let r = *rows;
+                    let c = *cols;
+                    (0..r).map(|i| mat_data[i * c..(i + 1) * c].to_vec()).collect()
+                }
+                _ => return Value::error("nn.neuralOp: 'trainData' table input required (rows = samples, cols = [u..., v...])"),
+            };
+
+            if train_data.is_empty() {
+                return Value::error("nn.neuralOp: training data is empty");
+            }
+
+            let arch_str = data.get("arch").and_then(|v| v.as_str()).unwrap_or("fno");
+            let arch = if arch_str == "deeponet" { NeuralOpArch::DeepONet } else { NeuralOpArch::Fno };
+
+            let n_pts_in  = data.get("nPtsIn").and_then(|v| v.as_f64()).unwrap_or(16.0) as usize;
+            let n_pts_out = data.get("nPtsOut").and_then(|v| v.as_f64()).unwrap_or(16.0) as usize;
+
+            // Validate column count matches n_pts_in + n_pts_out
+            let expected_cols = n_pts_in + n_pts_out;
+            if train_data[0].len() != expected_cols {
+                return Value::error(format!(
+                    "nn.neuralOp: training data has {} columns but nPtsIn+nPtsOut={}",
+                    train_data[0].len(), expected_cols
+                ));
+            }
+
+            let cfg = NeuralOpConfig {
+                arch,
+                n_pts_in,
+                n_pts_out,
+                width: data.get("width").and_then(|v| v.as_f64()).unwrap_or(16.0) as usize,
+                n_layers: data.get("nLayers").and_then(|v| v.as_f64()).unwrap_or(4.0) as usize,
+                n_modes: data.get("nModes").and_then(|v| v.as_f64()).unwrap_or(8.0) as usize,
+                epochs: data.get("epochs").and_then(|v| v.as_f64()).unwrap_or(500.0) as usize,
+                lr: data.get("lr").and_then(|v| v.as_f64()).unwrap_or(1e-3),
+                seed: data.get("seed").and_then(|v| v.as_f64()).unwrap_or(42.0) as u64,
+                hidden: data.get("hidden")
+                    .and_then(|v| v.as_array())
+                    .map(|arr| arr.iter().filter_map(|x| x.as_f64().map(|n| n as usize)).collect())
+                    .unwrap_or_else(|| vec![64, 64]),
+                basis_size: data.get("basisSize").and_then(|v| v.as_f64()).unwrap_or(32.0) as usize,
+            };
+
+            let result = train_neural_op(&cfg, &train_data);
+
+            // Return Table: each row = [predicted output values..., loss_at_end]
+            // First row: loss history summary; remaining rows: predictions
+            let mut rows: Vec<Vec<f64>> = result.predictions;
+            // Append a final_loss row (single value in first col)
+            rows.push(vec![result.final_loss]);
+
+            let col_names: Vec<String> = (0..n_pts_out)
+                .map(|i| format!("v_{i}"))
+                .collect();
+
+            Value::Table {
+                columns: col_names,
+                rows,
+            }
+        }
+
         // ── Symbolic Math (CAS) ────────────────────────────────────────
 
         "sym.differentiate" => {

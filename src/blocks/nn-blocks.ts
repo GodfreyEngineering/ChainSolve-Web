@@ -238,6 +238,43 @@ export function registerNNBlocks(register: (def: BlockDef) => void): void {
       '2D convolutional layer. Accepts Matrix input (H×W) or flattened image. n_filters feature maps, kernel_h×kernel_w spatial kernel, stride, padding ("valid" or "same"). He-initialised weights. Output: Matrix of [out_h*out_w × n_filters].',
   })
 
+  // ── Neural Operator (FNO / DeepONet) ────────────────────────────────────
+
+  register({
+    type: 'nn.neuralOp',
+    label: 'Neural Operator',
+    category: 'neuralNetworks',
+    nodeKind: 'csOperation',
+    inputs: [{ id: 'trainData', label: 'Training data (table)' }],
+    proOnly: true,
+    defaultData: {
+      blockType: 'nn.neuralOp',
+      label: 'Neural Operator',
+      arch: 'fno',
+      nPtsIn: 16,
+      nPtsOut: 16,
+      width: 16,
+      nLayers: 4,
+      nModes: 8,
+      epochs: 500,
+      lr: 0.001,
+      hidden: [64, 64],
+      basisSize: 32,
+      seed: 42,
+    },
+    synonyms: [
+      'fno', 'fourier neural operator', 'deeponet', 'operator learning',
+      'neural operator', 'pde operator', 'solution operator',
+    ],
+    tags: ['nn', 'operator', 'fno', 'deeponet', 'pde'],
+    description:
+      'Neural Operator: learns PDE solution operators from input/output function pairs. ' +
+      'arch="fno": Fourier Neural Operator (spectral convolution). ' +
+      'arch="deeponet": DeepONet (branch-trunk decomposition). ' +
+      'Training data: table where each row = [u_1..u_nPtsIn, v_1..v_nPtsOut]. ' +
+      'Output: table of predicted output functions + final loss.',
+  })
+
   // ── Physics-Informed Neural Network ────────────────────────────────────
 
   register({

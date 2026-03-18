@@ -41,6 +41,7 @@ pub mod ml;
 pub mod parquet;
 
 pub mod nn;
+pub mod neural_operator;
 pub mod ode;
 pub mod pinn;
 pub mod ops;
