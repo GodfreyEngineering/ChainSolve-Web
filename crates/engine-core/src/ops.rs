@@ -4933,6 +4933,66 @@ fn evaluate_node_inner(
             dae_result_to_table(&result)
         }
 
+        "ode.pde1d" => {
+            use crate::ode::pde1d::{
+                Pde1dConfig, BcType, parse_pde_type, parse_bc, solve_pde1d, pde1d_result_to_table,
+            };
+
+            let pde_type_str = data.get("pde_type").and_then(|v| v.as_str()).unwrap_or("heat");
+            let pde_type = parse_pde_type(pde_type_str);
+
+            let diffusivity = scalar_or(data, "diffusivity", 0.1);
+            let velocity = scalar_or(data, "velocity", 0.0);
+            let source = scalar_or(data, "source", 0.0);
+            let x0 = scalar_or(data, "x0", 0.0);
+            let x_end = scalar_or(data, "x_end", 1.0);
+            let n_points = data.get("n_points").and_then(|v| v.as_f64()).unwrap_or(21.0) as usize;
+            let n_snapshots = data.get("n_snapshots").and_then(|v| v.as_f64()).unwrap_or(10.0) as usize;
+
+            let bc_left_str = data.get("bc_left").and_then(|v| v.as_str()).unwrap_or("dirichlet:0.0");
+            let bc_right_str = data.get("bc_right").and_then(|v| v.as_str()).unwrap_or("dirichlet:0.0");
+            let bc_left = parse_bc(bc_left_str);
+            let bc_right = parse_bc(bc_right_str);
+
+            // u0: initial condition from input vector or default (zeros)
+            let u0: Vec<f64> = match inputs.get("u0") {
+                Some(Value::Vector { value }) => {
+                    let mut v = value.clone();
+                    v.resize(n_points, *value.last().unwrap_or(&0.0));
+                    v
+                }
+                Some(Value::Scalar { value }) => vec![*value; n_points],
+                _ => vec![0.0f64; n_points],
+            };
+
+            let t_start = scalar_or(data, "t_start", 0.0);
+            let t_end = scalar_or(data, "t_end", 1.0);
+            let dt = scalar_or(data, "dt", 0.001);
+
+            let solver = crate::ode::OdeSolverConfig {
+                t_start, t_end, dt, tolerance: 1e-6, max_steps: 500_000,
+            };
+
+            let cfg = Pde1dConfig {
+                pde_type,
+                diffusivity,
+                velocity,
+                source,
+                x0,
+                x_end,
+                n_points,
+                bc_left,
+                bc_right,
+                u0,
+                ut0: vec![0.0f64; n_points],
+                solver,
+                n_snapshots,
+            };
+
+            let result = solve_pde1d(&cfg);
+            pde1d_result_to_table(&result)
+        }
+
         // ── Vehicle Simulation (Phase 5) ──────────────────────────────
 
         "veh.tire.lateralForce" => {

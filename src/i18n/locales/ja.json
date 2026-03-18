@@ -435,6 +435,7 @@
     "ode_dae": "DAE ソルバー",
     "ode_bdf": "ODE BDF",
     "ode_radau": "ODE ラダウ",
+    "ode_pde1d": "PDE 1D ソルバー",
     "optim_trust_region": "信頼領域法",
     "optim_sqp": "SQP",
     "optim_uq_pce": "UQ / PCE",

@@ -718,6 +718,8 @@ export const BLOCK_DESCRIPTIONS: Record<string, string> = {
     'Solve a stiff ODE system using Backward Differentiation Formulas (BDF orders 1–5). BDF methods are A-stable and well-suited for chemical kinetics, thermal systems, and other stiff problems. Uses Newton iteration with finite-difference Jacobian. Set order (1–5) in block data.',
   'ode.radau':
     'Solve a stiff ODE system using the 3-stage Radau IIA implicit Runge-Kutta method (order 5). L-stable: damps spurious oscillations. Excellent for very stiff problems and problems with discontinuities. Uses Newton iteration at each step.',
+  'ode.pde1d':
+    'Solve a 1D PDE via Method of Lines. pde_type: "heat" (D·u_xx), "advection" (-c·u_x), "advection_diffusion" (-c·u_x+D·u_xx), "wave" (c²·u_xx). BCs: "dirichlet:VALUE" or "neumann". Output: table with columns t, x0..xN.',
   // Vehicle Simulation
   'veh.tire.lateralForce': 'Pacejka Magic Formula lateral tire force Fy from slip angle.',
   'veh.tire.longForce': 'Pacejka Magic Formula longitudinal tire force Fx from slip ratio.',

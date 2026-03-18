@@ -9,6 +9,7 @@
 pub mod bdf;
 pub mod dae;
 pub mod event;
+pub mod pde1d;
 pub mod radau;
 pub mod rk4;
 pub mod rk45;

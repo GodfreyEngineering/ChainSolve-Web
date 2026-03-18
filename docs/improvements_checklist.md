@@ -140,7 +140,7 @@
 - [x] **2.34** ODE event detection: zero-crossing detection with bisection refinement — essential for impact problems, switch events, termination conditions (e.g., "stop when ball hits ground")
 - [x] **2.35** DAE solver: index-1 DAE via BDF with consistent initialisation (Brown's method) — for systems with algebraic constraints (e.g., constrained mechanical systems, electrical circuits)
 - [ ] **2.36** DAE index reduction: Pantelides algorithm to detect high-index DAEs, automatically differentiate constraint equations to reduce to index-1 form, display structural analysis to user
-- [ ] **2.37** PDE solver (1D): method-of-lines with automatic spatial discretisation (finite differences, configurable order) — convert PDE to system of ODEs and solve with existing ODE solvers. Support: heat equation, wave equation, advection-diffusion.
+- [x] **2.37** PDE solver (1D): method-of-lines with automatic spatial discretisation (finite differences, configurable order) — convert PDE to system of ODEs and solve with existing ODE solvers. Support: heat equation, wave equation, advection-diffusion.
 - [ ] **2.38** PDE solver (2D FEM): triangle mesh generation (Delaunay), FEM assembly (P1/P2 elements), boundary condition specification (Dirichlet, Neumann, Robin), material property fields — for Poisson, elasticity, Stokes flow
 - [x] **2.39** SteadyState solver: Newton iteration to find equilibrium of dynamic system — given dy/dt = f(y), find y* where f(y*)=0. Uses Jacobian from AD engine (Category 1C).
 - [x] **2.40** ParameterEstimation: fit ODE/DAE model parameters to experimental data — Levenberg-Marquardt minimising sum of squared residuals between model output and data, using AD for Jacobian computation

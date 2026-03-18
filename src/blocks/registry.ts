@@ -1050,6 +1050,36 @@ reg({
     'Solve a stiff ODE system using the 3-stage Radau IIA implicit Runge-Kutta method (order 5). L-stable, excellent for very stiff problems with discontinuities. Output: table of (t, y0, ...).',
 })
 
+reg({
+  type: 'ode.pde1d',
+  label: 'PDE 1D Solver',
+  category: 'odeSolvers',
+  nodeKind: 'csOperation',
+  inputs: [{ id: 'u0', label: 'Initial condition (vector)' }],
+  defaultData: {
+    blockType: 'ode.pde1d',
+    label: 'PDE 1D Solver',
+    pde_type: 'heat',
+    diffusivity: 0.1,
+    velocity: 0.0,
+    source: 0.0,
+    x0: 0.0,
+    x_end: 1.0,
+    n_points: 21,
+    bc_left: 'dirichlet:0.0',
+    bc_right: 'dirichlet:0.0',
+    t_start: 0.0,
+    t_end: 1.0,
+    dt: 0.001,
+    n_snapshots: 10,
+  },
+  proOnly: true,
+  synonyms: ['pde', '1d', 'method of lines', 'heat equation', 'diffusion', 'advection', 'wave'],
+  tags: ['pde', 'heat', 'diffusion', 'advection', 'wave', 'mol'],
+  description:
+    'Solve a 1D PDE using the Method of Lines (MOL). Supports heat/diffusion (u_t = D·u_xx), advection (u_t = -c·u_x), advection-diffusion, and wave (u_tt = c²·u_xx). Outputs table of snapshots: columns t, x0..xN.',
+})
+
 // ── Vehicle Simulation (Phase 5) ────────────────────────────────────────────
 
 reg({

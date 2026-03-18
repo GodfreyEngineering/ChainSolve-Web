@@ -426,6 +426,7 @@
     "ode_dae": "Solutore DAE",
     "ode_bdf": "ODE BDF",
     "ode_radau": "ODE Radau",
+    "ode_pde1d": "Solutore PDE 1D",
     "optim_trust_region": "Regione di Fiducia",
     "optim_sqp": "SQP",
     "optim_uq_pce": "UQ / PCE",
