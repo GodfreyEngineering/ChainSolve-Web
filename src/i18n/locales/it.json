@@ -1286,7 +1286,8 @@
     "copyAll": "Copia tutto",
     "items": "elementi",
     "value": "Valore",
-    "showingFirst": "Prime 50 righe di {{count}}"
+    "showingFirst": "Prime 50 righe di {{count}}",
+    "title": "Ispettore"
   },
   "annotation": {
     "text": "Testo",
@@ -1916,7 +1917,9 @@
     "selectAll": "Select all",
     "hideMinimap": "Hide minimap",
     "showMinimap": "Show minimap",
-    "collapseAsSubGraph": "Comprimi come sottografo"
+    "collapseAsSubGraph": "Comprimi come sottografo",
+    "clearBreakpoint": "Rimuovi punto di interruzione",
+    "setBreakpoint": "Imposta punto di interruzione"
   },
   "errorBoundary": {
     "title": "Qualcosa è andato storto",
@@ -2188,7 +2191,10 @@
     "registered": "Registrata in {{jurisdiction}}",
     "companyNo": "N. società {{number}}",
     "termsLink": "Termini",
-    "privacyLink": "Privacy"
+    "privacyLink": "Privacy",
+    "cookiesLink": "Politica dei cookie",
+    "cookieSettings": "Impostazioni cookie",
+    "accessibilityLink": "Accessibilità"
   },
   "privacy": {
     "title": "Informativa sulla privacy",
@@ -2216,7 +2222,8 @@
     "problems": "Problemi",
     "history": "History",
     "snapshots": "Versioni",
-    "timeline": "Cronologia"
+    "timeline": "Cronologia",
+    "experiments": "Esperimenti"
   },
   "scope": {
     "noSignal": "Nessun segnale",
@@ -2717,6 +2724,9 @@
     "adding": "Adding…",
     "add": "Add"
   },
+  "cookie": {
+    "learnMore": "Politica dei cookie"
+  },
   "viewport3d": {
     "label": "Viewport 3D",
     "cycleMode": "Cambia modalità di rendering (griglia/solido/trasparente)",
@@ -2732,5 +2742,33 @@
     "createBtn": "Crea",
     "delete": "Elimina ramo",
     "confirmDelete": "Eliminare il ramo \"{{name}}\"?"
+  },
+  "debug": {
+    "stepBack": "Passo indietro",
+    "stepOver": "Passo avanti",
+    "continue": "Continua al prossimo punto di interruzione",
+    "continueToEnd": "Continua fino alla fine",
+    "stop": "Interrompi debug",
+    "clearAll": "Rimuovi tutti i punti di interruzione"
+  },
+  "experiments": {
+    "proRequired": "Il monitoraggio degli esperimenti è disponibile nel piano Pro.",
+    "title": "Esperimenti",
+    "refresh": "Aggiorna",
+    "selectedCount": "{{n}} selezionati per il confronto",
+    "parallelCoords": "Coordinate parallele",
+    "noRuns": "Nessuna esecuzione di esperimenti ancora. Le esecuzioni di addestramento dai blocchi di reti neurali appariranno qui.",
+    "name": "Nome",
+    "status": "Stato",
+    "metrics": "Metriche",
+    "date": "Data"
+  },
+  "onnxInference": {
+    "label": "Inferenza ONNX",
+    "loading": "Caricamento\u2026",
+    "loadModel": "Carica modello .onnx\u2026",
+    "inferring": "Inferenza in corso\u2026",
+    "inputData": "Dati di input (vettore)",
+    "output": "Tensore di output (vettore)"
   }
 }

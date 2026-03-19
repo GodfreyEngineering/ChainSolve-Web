@@ -1,7 +1,7 @@
 //! `wasm_abi` — C-compatible ABI for WASM plugin modules (10.2).
 //!
 //! When compiled for `wasm32` targets, include this module and call
-//! [`export_blocks!`] macro to expose the four required exports that the
+//! `export_blocks!` macro to expose the four required exports that the
 //! ChainSolve runtime uses to discover and evaluate custom blocks.
 //!
 //! # ABI contract
@@ -12,7 +12,7 @@
 //!    Returns the number of blocks exported by this WASM module.
 //!
 //! 2. `cs_block_metadata_json(idx: i32, out_len: *mut i32) -> *const u8`
-//!    Returns a pointer to a UTF-8 JSON string containing [`BlockMetadata`]
+//!    Returns a pointer to a UTF-8 JSON string containing `BlockMetadata`
 //!    for block `idx`. The host must copy the bytes before calling any
 //!    other export. The string is owned by static memory — do not free it.
 //!

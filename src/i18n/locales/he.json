@@ -950,7 +950,9 @@
     "selectAll": "Select all",
     "hideMinimap": "Hide minimap",
     "showMinimap": "Show minimap",
-    "collapseAsSubGraph": "כווץ לתת-גרף"
+    "collapseAsSubGraph": "כווץ לתת-גרף",
+    "clearBreakpoint": "הסר נקודת עצירה",
+    "setBreakpoint": "הגדר נקודת עצירה"
   },
   "errorBoundary": {
     "title": "משהו השתבש",
@@ -1428,7 +1430,10 @@
     "registered": "רשומה ב{{jurisdiction}}",
     "companyNo": "מס' חברה {{number}}",
     "termsLink": "תנאים",
-    "privacyLink": "פרטיות"
+    "privacyLink": "פרטיות",
+    "cookiesLink": "מדיניות עוגיות",
+    "cookieSettings": "הגדרות עוגיות",
+    "accessibilityLink": "נגישות"
   },
   "privacy": {
     "title": "מדיניות פרטיות",
@@ -1657,7 +1662,8 @@
     "copyAll": "Copy all",
     "items": "items",
     "value": "Value",
-    "showingFirst": "Showing first 50 of {{count}} rows"
+    "showingFirst": "Showing first 50 of {{count}} rows",
+    "title": "מפקח"
   },
   "dock": {
     "library": "ספרייה",
@@ -1671,7 +1677,8 @@
     "problems": "בעיות",
     "history": "History",
     "snapshots": "גרסאות",
-    "timeline": "ציר זמן"
+    "timeline": "ציר זמן",
+    "experiments": "ניסויים"
   },
   "scope": {
     "noSignal": "אין אות",
@@ -2712,6 +2719,9 @@
     "adding": "Adding…",
     "add": "Add"
   },
+  "cookie": {
+    "learnMore": "מדיניות עוגיות"
+  },
   "viewport3d": {
     "label": "תצוגה תלת-ממדית",
     "cycleMode": "החלף מצב עיבוד (רשת/מלא/שקוף)",
@@ -2727,5 +2737,33 @@
     "createBtn": "צור",
     "delete": "מחק ענף",
     "confirmDelete": "למחוק את הענף \"{{name}}\"?"
+  },
+  "debug": {
+    "stepBack": "צעד אחורה",
+    "stepOver": "צעד קדימה",
+    "continue": "המשך לנקודת העצירה הבאה",
+    "continueToEnd": "המשך עד הסוף",
+    "stop": "עצור ניפוי באגים",
+    "clearAll": "הסר את כל נקודות העצירה"
+  },
+  "experiments": {
+    "proRequired": "מעקב ניסויים זמין בתוכנית Pro.",
+    "title": "ניסויים",
+    "refresh": "רענון",
+    "selectedCount": "{{n}} נבחרו להשוואה",
+    "parallelCoords": "קואורדינטות מקבילות",
+    "noRuns": "אין עדיין הרצות ניסוי. הרצות אימון מבלוקים של רשתות נוירונים יופיעו כאן.",
+    "name": "שם",
+    "status": "סטטוס",
+    "metrics": "מדדים",
+    "date": "תאריך"
+  },
+  "onnxInference": {
+    "label": "הסקה ONNX",
+    "loading": "טוען\u2026",
+    "loadModel": "טען מודל .onnx\u2026",
+    "inferring": "מבצע הסקה\u2026",
+    "inputData": "נתוני קלט (וקטור)",
+    "output": "טנסור פלט (וקטור)"
   }
 }

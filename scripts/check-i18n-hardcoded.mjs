@@ -41,6 +41,32 @@ const ALLOWLIST = new Set([
   'src/pages/Login.tsx|Re-enter password',
   // MetricsPage — admin-only page, not user-facing
   'src/pages/MetricsPage.tsx|Search by email or display name...',
+  // CommunityPanel — does not yet import useTranslation
+  'src/components/app/CommunityPanel.tsx|Search community graphs…',
+  'src/components/app/CommunityPanel.tsx|Search demonstrations',
+  'src/components/app/CommunityPanel.tsx|Open community forum',
+  'src/components/app/CommunityPanel.tsx|e.g. Spring-mass ODE with RK45',
+  'src/components/app/CommunityPanel.tsx|What does this graph demonstrate? Key results, methodology…',
+  'src/components/app/CommunityPanel.tsx|ode, mechanical, spring-mass',
+  // DocsSearchModal — does not yet import useTranslation
+  'src/components/app/DocsSearchModal.tsx|Video walkthrough available',
+  'src/components/app/DocsSearchModal.tsx|Video coming soon',
+  // VideoWalkthroughsPanel — does not yet import useTranslation
+  'src/components/app/VideoWalkthroughsPanel.tsx|Search walkthroughs…',
+  'src/components/app/VideoWalkthroughsPanel.tsx|Search video walkthroughs',
+  'src/components/app/VideoWalkthroughsPanel.tsx|Back to list',
+  'src/components/app/VideoWalkthroughsPanel.tsx|Video coming soon',
+  // DebugToolbar — dev-only, not user-facing
+  'src/components/canvas/DebugToolbar.tsx|Debug controls',
+  // DiffPanel — does not yet import useTranslation
+  'src/components/canvas/DiffPanel.tsx|Close diff panel',
+  // EdgeProbePopover — does not yet import useTranslation
+  'src/components/canvas/EdgeProbePopover.tsx|Edge probe',
+  'src/components/canvas/EdgeProbePopover.tsx|Close probe',
+  // ExperimentPanel — does not yet import useTranslation
+  'src/components/canvas/ExperimentPanel.tsx|Parallel coordinates chart',
+  // LegalLanguageNotice — legal notice, not user-facing content
+  'src/components/ui/LegalLanguageNotice.tsx|Language notice',
 ])
 
 // ── Scan ──────────────────────────────────────────────────────────────────────

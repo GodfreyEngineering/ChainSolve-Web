@@ -1320,7 +1320,8 @@
     "copyAll": "Copiar todo",
     "items": "elementos",
     "value": "Valor",
-    "showingFirst": "Mostrando las primeras 50 de {{count}} filas"
+    "showingFirst": "Mostrando las primeras 50 de {{count}} filas",
+    "title": "Inspector"
   },
   "annotation": {
     "text": "Texto",
@@ -1964,7 +1965,9 @@
     "selectAll": "Select all",
     "hideMinimap": "Hide minimap",
     "showMinimap": "Show minimap",
-    "collapseAsSubGraph": "Contraer como SubGráfico"
+    "collapseAsSubGraph": "Contraer como SubGráfico",
+    "clearBreakpoint": "Eliminar punto de interrupción",
+    "setBreakpoint": "Establecer punto de interrupción"
   },
   "errorBoundary": {
     "title": "Algo salió mal",
@@ -2236,7 +2239,10 @@
     "registered": "Registrada en {{jurisdiction}}",
     "companyNo": "N.º de empresa {{number}}",
     "termsLink": "Términos",
-    "privacyLink": "Privacidad"
+    "privacyLink": "Privacidad",
+    "cookiesLink": "Política de cookies",
+    "cookieSettings": "Configuración de cookies",
+    "accessibilityLink": "Accesibilidad"
   },
   "privacy": {
     "title": "Política de privacidad",
@@ -2266,7 +2272,8 @@
     "channels": "Channels",
     "notes": "Notes",
     "snapshots": "Versiones",
-    "timeline": "Cronología"
+    "timeline": "Cronología",
+    "experiments": "Experimentos"
   },
   "scope": {
     "noSignal": "Sin señal",
@@ -2782,7 +2789,8 @@
     "ariaLabel": "Cookie consent",
     "message": "We use essential cookies for authentication and localStorage for preferences. No tracking cookies are used.",
     "decline": "Decline",
-    "accept": "Accept"
+    "accept": "Accept",
+    "learnMore": "Política de cookies"
   },
   "viewport3d": {
     "label": "Visor 3D",
@@ -2799,5 +2807,33 @@
     "createBtn": "Crear",
     "delete": "Eliminar rama",
     "confirmDelete": "¿Eliminar rama \"{{name}}\"?"
+  },
+  "debug": {
+    "stepBack": "Paso atrás",
+    "stepOver": "Paso adelante",
+    "continue": "Continuar al siguiente punto de interrupción",
+    "continueToEnd": "Continuar hasta el final",
+    "stop": "Detener depuración",
+    "clearAll": "Eliminar todos los puntos de interrupción"
+  },
+  "experiments": {
+    "proRequired": "El seguimiento de experimentos está disponible en el plan Pro.",
+    "title": "Experimentos",
+    "refresh": "Actualizar",
+    "selectedCount": "{{n}} seleccionados para comparación",
+    "parallelCoords": "Coordenadas paralelas",
+    "noRuns": "Aún no hay ejecuciones de experimentos. Las ejecuciones de entrenamiento de bloques de redes neuronales aparecerán aquí.",
+    "name": "Nombre",
+    "status": "Estado",
+    "metrics": "Métricas",
+    "date": "Fecha"
+  },
+  "onnxInference": {
+    "label": "Inferencia ONNX",
+    "loading": "Cargando\u2026",
+    "loadModel": "Cargar modelo .onnx\u2026",
+    "inferring": "Infiriendo\u2026",
+    "inputData": "Datos de entrada (vector)",
+    "output": "Tensor de salida (vector)"
   }
 }

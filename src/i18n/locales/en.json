@@ -1342,7 +1342,8 @@
     "copyAll": "Copy all",
     "items": "items",
     "value": "Value",
-    "showingFirst": "Showing first 50 of {{count}} rows"
+    "showingFirst": "Showing first 50 of {{count}} rows",
+    "title": "Inspector"
   },
   "annotation": {
     "text": "Text",
@@ -2011,7 +2012,9 @@
     "addProbeNode": "Add probe display",
     "selectAll": "Select all",
     "hideMinimap": "Hide minimap",
-    "showMinimap": "Show minimap"
+    "showMinimap": "Show minimap",
+    "clearBreakpoint": "Clear Breakpoint",
+    "setBreakpoint": "Set Breakpoint"
   },
   "errorBoundary": {
     "title": "Something went wrong",
@@ -2284,7 +2287,10 @@
     "registered": "Registered in {{jurisdiction}}",
     "companyNo": "Company No. {{number}}",
     "termsLink": "Terms",
-    "privacyLink": "Privacy"
+    "privacyLink": "Privacy",
+    "cookiesLink": "Cookie Policy",
+    "cookieSettings": "Cookie Settings",
+    "accessibilityLink": "Accessibility"
   },
   "privacy": {
     "title": "Privacy Policy",
@@ -2314,7 +2320,8 @@
     "channels": "Channels",
     "notes": "Notes",
     "snapshots": "Versions",
-    "timeline": "Timeline"
+    "timeline": "Timeline",
+    "experiments": "Experiments"
   },
   "scope": {
     "noSignal": "No signal",
@@ -2818,7 +2825,8 @@
     "ariaLabel": "Cookie consent",
     "message": "We use essential cookies for authentication and localStorage for preferences. No tracking cookies are used.",
     "decline": "Decline",
-    "accept": "Accept"
+    "accept": "Accept",
+    "learnMore": "Cookie Policy"
   },
   "viewport3d": {
     "label": "3D Viewport",
@@ -2835,5 +2843,33 @@
     "createBtn": "Create",
     "delete": "Delete branch",
     "confirmDelete": "Delete branch \"{{name}}\"?"
+  },
+  "debug": {
+    "stepBack": "Step back",
+    "stepOver": "Step forward",
+    "continue": "Continue to next breakpoint",
+    "continueToEnd": "Continue to end",
+    "stop": "Stop debugging",
+    "clearAll": "Clear all breakpoints"
+  },
+  "experiments": {
+    "proRequired": "Experiment tracking is available on the Pro plan.",
+    "title": "Experiments",
+    "refresh": "Refresh",
+    "selectedCount": "{{n}} selected for comparison",
+    "parallelCoords": "Parallel Coordinates",
+    "noRuns": "No experiment runs yet. Training runs from Neural Network blocks will appear here.",
+    "name": "Name",
+    "status": "Status",
+    "metrics": "Metrics",
+    "date": "Date"
+  },
+  "onnxInference": {
+    "label": "ONNX Inference",
+    "loading": "Loading\u2026",
+    "loadModel": "Load .onnx model\u2026",
+    "inferring": "Inferring\u2026",
+    "inputData": "Input data (vector)",
+    "output": "Output tensor (vector)"
   }
 }
