@@ -82,6 +82,9 @@ export default defineConfig({
     // initial JS budget. 1500 KB guards against accidental hoisting.
     // UI-PERF-05: block registry lazy-loaded post engine-init.
     chunkSizeWarningLimit: 1500,
+    // TEMPORARY: Enable source maps so production errors show real component names.
+    // Remove after diagnosing the React #185 infinite loop.
+    sourcemap: true,
   },
   worker: {
     format: 'es',
