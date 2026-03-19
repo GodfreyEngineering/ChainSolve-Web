@@ -68,7 +68,7 @@ async function dumpBootDiagnostics(
       reactMounted: !!document.querySelector('[data-testid="react-mounted"]'),
       engineReady: !!document.querySelector('[data-testid="engine-ready"]'),
       engineFatal: !!document.querySelector('[data-testid="engine-fatal"]'),
-      rootInnerHtml: (document.getElementById('root')?.innerHTML ?? '').slice(0, 300),
+      rootInnerHtml: (document.getElementById('root')?.innerHTML ?? '').slice(0, 800),
     }))
     .catch(() => ({ error: 'page.evaluate failed — renderer may have crashed' }))
 

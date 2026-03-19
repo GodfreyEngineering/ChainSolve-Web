@@ -9,7 +9,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+// Note: CookieConsentBanner renders outside <BrowserRouter> in main.tsx,
+// so we use a plain <a> tag instead of react-router-dom's <Link>.
 import { useTranslation } from 'react-i18next'
 import { getCookieConsent, setCookieConsent } from '../lib/cookieConsent'
 
@@ -88,9 +89,9 @@ export function CookieConsentBanner() {
             'cookie.message',
             'We use essential storage for authentication and localStorage for preferences. We also use Sentry for error reporting (optional). No advertising cookies are used.',
           )}{' '}
-          <Link to="/cookies" style={cookiePolicyLinkStyle}>
+          <a href="/cookies" style={cookiePolicyLinkStyle}>
             {t('cookie.learnMore', 'Cookie Policy')}
-          </Link>
+          </a>
         </p>
         <div style={btnRow}>
           <button style={declineBtn} onClick={() => handleChoice('declined')}>
