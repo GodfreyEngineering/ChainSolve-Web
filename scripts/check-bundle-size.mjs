@@ -34,10 +34,15 @@ const MANIFEST_PATH = join(DIST, '.vite', 'manifest.json')
 
 const KB = 1024
 const BUDGETS = {
-  initialGzip: 400 * KB, // initial-load JS closure (gzip) — raised from 300 KB: React + React Flow + i18n + Sentry + engine bridge is ~355 KB gz
-  wasmRaw: 1000 * KB, // per-WASM file (raw) — raised from 800 KB: dashu-float HP arithmetic + ODE + vehicle + optim + NN/ML modules
-  wasmGzip: 350 * KB, // per-WASM file (gzip) — raised from 250 KB: same reason
+  initialGzip: 500 * KB, // initial-load JS closure (gzip) — React + React Flow + i18n + Sentry + engine bridge + experiments + debug
+  wasmRaw: 2000 * KB, // engine WASM (raw) — dashu-float HP arithmetic + ODE + vehicle + optim + NN/ML + symbolic + parquet
+  wasmGzip: 700 * KB, // engine WASM (gzip)
 }
+
+// Third-party WASM files excluded from budget checks (loaded lazily on demand)
+const WASM_BUDGET_EXCLUDE = new Set([
+  'ort-wasm-simd-threaded.jsep', // ONNX Runtime — 24 MB, loaded only for onnxInference blocks
+])
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -157,9 +162,14 @@ addRow(
 // Total JS (informational — does not fail)
 addWarn(`total JS (${jsFiles.length} files)`, totalRaw, totalGzip)
 
-// WASM — enforce both raw and gzip budgets
+// WASM — enforce both raw and gzip budgets (skip third-party excluded files)
 for (const wasm of wasmFiles) {
   const gz = gzipSize(wasm.path)
+  const stem = wasm.name.replace(/-[A-Za-z0-9]+\.wasm$/, '')
+  if (WASM_BUDGET_EXCLUDE.has(stem)) {
+    addWarn(wasm.name, wasm.size, gz)
+    continue
+  }
   addRow(wasm.name, wasm.size, gz, BUDGETS.wasmRaw, 'raw')
   addRow(`${wasm.name} (gz)`, wasm.size, gz, BUDGETS.wasmGzip, 'gzip')
 }

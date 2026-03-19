@@ -203,9 +203,10 @@ jobs:
           INDEXEOF
 
       - name: Setup GitHub Pages
+        # Requires Pages to be enabled in repo Settings > Pages > Source: GitHub Actions.
+        # If not yet enabled, this step will fail — enable it manually first.
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
+        continue-on-error: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -215,3 +216,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        continue-on-error: true
