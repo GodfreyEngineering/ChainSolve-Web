@@ -16,7 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRunsForProject, deleteRun } from '../../lib/experiments.ts'
 import type { ExperimentRun } from '../../lib/experiments.ts'
-import { usePlanContext } from '../../contexts/PlanContext.tsx'
+import { usePlanContext } from '../../contexts/PlanContext'
 
 // ── Parallel Coordinates ─────────────────────────────────────────────────────
 
