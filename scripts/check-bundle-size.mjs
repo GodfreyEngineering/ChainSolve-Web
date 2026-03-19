@@ -224,10 +224,7 @@ if (hasManifest && initialFiles.length > 0) {
 
 console.log('')
 
-// TEMPORARY: Skip enforcement while diagnosing React #185 infinite loop.
-// vite.config.ts has minify: false, making the bundle ~2x larger.
-// TODO: Set back to false when minification is re-enabled.
-const SKIP_ENFORCEMENT = true
+const SKIP_ENFORCEMENT = false
 
 if (failed && !SKIP_ENFORCEMENT) {
   console.error('Bundle size check FAILED — one or more files exceed their budget.\n')

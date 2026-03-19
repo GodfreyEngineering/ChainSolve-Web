@@ -37,10 +37,13 @@ export function StatusBar() {
 
   const exportProgress = useStatusBarStore((s) => s.exportProgress)
 
-  // 8.8: Simulation status — show the first running task in the status bar
-  const runningSimTasks = useSimulationStatusStore((s) =>
-    Object.values(s.tasks).filter((t) => t.status === 'running'),
-  )
+  // 8.8: Simulation status — show the first running task in the status bar.
+  // Read the tasks object directly (stable reference) and derive the filtered
+  // list outside the selector to avoid creating a new array every render,
+  // which would cause Zustand's Object.is comparison to always return false
+  // and trigger an infinite re-render loop (React #185).
+  const simTasks = useSimulationStatusStore((s) => s.tasks)
+  const runningSimTasks = Object.values(simTasks).filter((t) => t.status === 'running')
   const primarySim = runningSimTasks[0] ?? null
 
   const canvases = useCanvasesStore((s) => s.canvases)

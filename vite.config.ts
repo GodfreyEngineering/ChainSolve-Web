@@ -82,10 +82,6 @@ export default defineConfig({
     // initial JS budget. 1500 KB guards against accidental hoisting.
     // UI-PERF-05: block registry lazy-loaded post engine-init.
     chunkSizeWarningLimit: 1500,
-    // TEMPORARY: Disable minification so React #185 error shows real component names.
-    // Remove after diagnosing the infinite loop.
-    sourcemap: true,
-    minify: false,
   },
   worker: {
     format: 'es',
