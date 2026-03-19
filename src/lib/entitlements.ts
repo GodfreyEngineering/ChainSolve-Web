@@ -90,13 +90,14 @@ export interface Entitlements {
 const ENTITLEMENTS: Record<Plan, Entitlements> = {
   // 13.8: Free tier — genuinely useful, not a crippled demo.
   // 3 projects, full scalar computation engine, CSV upload, basic export (watermarked PDF).
-  // No arrays/plots (Pro), no AI, no custom materials/functions.
+  // Arrays/plots available but Pro-only blocks gated via isBlockEntitled().
+  // No AI, no custom materials/functions.
   free: {
     maxProjects: 3,
     maxCanvases: 3,
     canUploadCsv: true,
-    canUseArrays: false,
-    canUsePlots: false,
+    canUseArrays: true,
+    canUsePlots: true,
     canUseRules: false,
     canUseGroups: true,
     canEditThemes: true,
@@ -484,13 +485,15 @@ export function validateNNEpochs(plan: Plan, epochs: number): string | null {
 
 /**
  * Whether a block is usable under the given entitlements.
- * Free blocks always pass. Pro blocks are gated by category.
+ * Free blocks always pass. Pro-only blocks require canUseRules
+ * (which is true for all paid plans and false for free/past_due/canceled).
  */
 export function isBlockEntitled(
   def: { proOnly?: boolean; category: string },
   ent: Entitlements,
 ): boolean {
   if (!def.proOnly) return true
-  if (def.category === 'plot') return ent.canUsePlots
-  return ent.canUseArrays
+  // canUseRules is false on free plan and true on all paid plans —
+  // use it as the proxy for "has Pro access" to gate proOnly blocks.
+  return ent.canUseRules
 }

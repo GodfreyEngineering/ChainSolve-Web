@@ -29,13 +29,13 @@ import {
 // ── getEntitlements ────────────────────────────────────────────────────────────
 
 describe('getEntitlements', () => {
-  it('free plan: 3 projects/canvases, scalar engine only (no arrays/plots), no AI or custom features', () => {
+  it('free plan: 3 projects/canvases, full engine (arrays+plots+CSV), no AI or custom features', () => {
     const ent = getEntitlements('free')
     expect(ent.maxProjects).toBe(3)
     expect(ent.maxCanvases).toBe(3)
     expect(ent.canUploadCsv).toBe(true)
-    expect(ent.canUseArrays).toBe(false)
-    expect(ent.canUsePlots).toBe(false)
+    expect(ent.canUseArrays).toBe(true)
+    expect(ent.canUsePlots).toBe(true)
     expect(ent.canUseRules).toBe(false)
     expect(ent.canUseGroups).toBe(true)
     expect(ent.canEditThemes).toBe(true)
@@ -311,12 +311,12 @@ describe('isBlockEntitled', () => {
     expect(isBlockEntitled({ proOnly: undefined, category: 'math' }, freeEnt)).toBe(true)
   })
 
-  it('pro plot blocks require canUsePlots', () => {
+  it('pro plot blocks blocked on free', () => {
     expect(isBlockEntitled({ proOnly: true, category: 'plot' }, proEnt)).toBe(true)
     expect(isBlockEntitled({ proOnly: true, category: 'plot' }, freeEnt)).toBe(false)
   })
 
-  it('pro non-plot blocks require canUseArrays', () => {
+  it('pro non-plot blocks blocked on free', () => {
     expect(isBlockEntitled({ proOnly: true, category: 'array' }, proEnt)).toBe(true)
     expect(isBlockEntitled({ proOnly: true, category: 'array' }, freeEnt)).toBe(false)
   })
