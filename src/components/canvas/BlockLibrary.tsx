@@ -834,11 +834,19 @@ export function BlockLibrary({
     syncCustomFunctions(customFunctions)
   }, [customFunctions])
 
-  // G5-1: Lazy-load block descriptions for hover tooltips
-  const [descriptions, setDescriptions] = useState<Record<string, string>>({})
+  // G5-1: Lazy-load block descriptions; prefer inline BlockDef.description,
+  // fall back to legacy BLOCK_DESCRIPTIONS file during migration.
+  const [legacyDescs, setLegacyDescs] = useState<Record<string, string>>({})
   useEffect(() => {
-    import('../../blocks/blockDescriptions').then((m) => setDescriptions(m.BLOCK_DESCRIPTIONS))
+    import('../../blocks/blockDescriptions').then((m) => setLegacyDescs(m.BLOCK_DESCRIPTIONS))
   }, [])
+  const descriptions = useMemo(() => {
+    const merged: Record<string, string> = { ...legacyDescs }
+    for (const [key, def] of BLOCK_REGISTRY) {
+      if (def.description) merged[key] = def.description
+    }
+    return merged
+  }, [legacyDescs])
 
   // Refresh recent list when panel is focused (user may have added blocks)
   const refreshRecent = useCallback(() => setRecent(getRecentlyUsed()), [])

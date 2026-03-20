@@ -20,6 +20,7 @@ export function registerStructBlocks(register: (def: BlockDef) => void): void {
       { id: 'I', label: 'I (m⁴)' },
     ],
     defaultData: { blockType: 'struct.beam_deflect_ss', label: 'Beam Deflection SS' },
+    description: 'Simply supported beam mid-span deflection: δ = PL³/(48EI). Point load at centre.',
     synonyms: ['beam', 'deflection', 'simply supported'],
     tags: ['structural', 'civil'],
   })
@@ -36,7 +37,9 @@ export function registerStructBlocks(register: (def: BlockDef) => void): void {
       { id: 'I', label: 'I (m⁴)' },
     ],
     defaultData: { blockType: 'struct.beam_deflect_cantilever', label: 'Cantilever Deflection' },
+    description: 'Cantilever beam tip deflection: δ = PL³/(3EI). Point load at free end.',
     synonyms: ['cantilever', 'beam', 'deflection'],
+    tags: ['structural', 'civil'],
   })
 
   register({
@@ -51,7 +54,10 @@ export function registerStructBlocks(register: (def: BlockDef) => void): void {
       { id: 'L', label: 'L (m)' },
     ],
     defaultData: { blockType: 'struct.beam_moment_ss', label: 'Beam Moment SS' },
+    description:
+      'Bending moment at load point on a simply supported beam: M = P·a·b/L. Load at distance a from left support.',
     synonyms: ['bending moment', 'beam'],
+    tags: ['structural', 'civil'],
   })
 
   register({
@@ -70,7 +76,10 @@ export function registerStructBlocks(register: (def: BlockDef) => void): void {
       label: 'Euler Buckling',
       manualValues: { K: 1.0 },
     },
+    description:
+      'Euler critical buckling load: P_cr = π²EI/(KL)². K is the effective length factor (1.0 for pinned-pinned).',
     synonyms: ['buckling', 'column', 'critical load'],
+    tags: ['structural', 'stability'],
   })
 
   register({
@@ -84,7 +93,10 @@ export function registerStructBlocks(register: (def: BlockDef) => void): void {
       { id: 'txy', label: 'τ_xy (Pa)' },
     ],
     defaultData: { blockType: 'struct.von_mises', label: 'Von Mises' },
+    description:
+      'Von Mises equivalent stress: σ_vm = √(σ_x² − σ_x·σ_y + σ_y² + 3τ_xy²). Yield criterion for ductile metals.',
     synonyms: ['von mises', 'yield', 'equivalent stress'],
+    tags: ['structural', 'stress'],
   })
 
   register({
@@ -97,6 +109,10 @@ export function registerStructBlocks(register: (def: BlockDef) => void): void {
       { id: 's_bend', label: 'σ_bending (Pa)' },
     ],
     defaultData: { blockType: 'struct.combined_stress', label: 'Combined Stress' },
+    description:
+      'Combined normal stress: σ = σ_axial + σ_bending. Superposition of axial and bending stresses.',
+    synonyms: ['combined stress', 'superposition', 'axial bending'],
+    tags: ['structural', 'stress'],
   })
 
   register({
@@ -114,7 +130,10 @@ export function registerStructBlocks(register: (def: BlockDef) => void): void {
       label: 'Steel Utilization',
       manualValues: { phi: 0.9 },
     },
+    description:
+      'Steel utilization ratio: Util = σ/(F_y · φ). Values ≤ 1.0 pass the AISC strength check.',
     synonyms: ['utilization ratio', 'AISC', 'steel design'],
+    tags: ['structural', 'design'],
   })
 
   register({
@@ -132,7 +151,10 @@ export function registerStructBlocks(register: (def: BlockDef) => void): void {
       { id: 'Ngamma', label: 'N_γ' },
     ],
     defaultData: { blockType: 'struct.bearing_capacity', label: 'Bearing Capacity' },
+    description:
+      'Terzaghi ultimate bearing capacity: q_ult = c·N_c + γ·D_f·N_q + 0.5·γ·B·N_γ. Shallow strip foundation.',
     synonyms: ['bearing capacity', 'Terzaghi', 'foundation'],
+    tags: ['structural', 'geotechnical'],
   })
 
   register({
@@ -148,6 +170,9 @@ export function registerStructBlocks(register: (def: BlockDef) => void): void {
       { id: 'fy', label: 'f_y (Pa)' },
     ],
     defaultData: { blockType: 'struct.concrete_moment_aci', label: 'ACI Moment Capacity' },
+    description:
+      "ACI nominal moment capacity: M_n = A_s·f_y·(d − a/2) where a = A_s·f_y/(0.85·f'c·b). Reinforced concrete beam.",
     synonyms: ['ACI', 'concrete', 'flexural capacity'],
+    tags: ['structural', 'concrete'],
   })
 }

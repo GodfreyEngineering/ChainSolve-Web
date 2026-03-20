@@ -156,23 +156,17 @@ describe('Sample templates', () => {
         expect(tmpl.tags.length).toBeGreaterThan(0)
       })
 
-      // curve-fitting uses stat.linreg_* and vector blocks that are not yet
-      // implemented — skip blockType validation for it until those blocks ship.
-      const skipBlockTypeCheck = tmpl.id === 'curve-fitting'
-      it.skipIf(skipBlockTypeCheck)(
-        'all blockTypes are registered in BLOCK_REGISTRY or are annotations',
-        () => {
-          const invalid: string[] = []
-          for (const node of nodes) {
-            const bt = node.data.blockType as string
-            if (bt === '__annotation__' || bt.startsWith('annotation_')) continue
-            if (!BLOCK_REGISTRY.has(bt)) {
-              invalid.push(`${node.id}: blockType="${bt}" not found in BLOCK_REGISTRY`)
-            }
+      it('all blockTypes are registered in BLOCK_REGISTRY or are annotations', () => {
+        const invalid: string[] = []
+        for (const node of nodes) {
+          const bt = node.data.blockType as string
+          if (bt === '__annotation__' || bt.startsWith('annotation_')) continue
+          if (!BLOCK_REGISTRY.has(bt)) {
+            invalid.push(`${node.id}: blockType="${bt}" not found in BLOCK_REGISTRY`)
           }
-          expect(invalid, `Unregistered blockTypes:\n${invalid.join('\n')}`).toEqual([])
-        },
-      )
+        }
+        expect(invalid, `Unregistered blockTypes:\n${invalid.join('\n')}`).toEqual([])
+      })
     })
   }
 })

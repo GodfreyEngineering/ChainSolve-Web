@@ -17,6 +17,8 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'h', label: 'h (m)' }],
     defaultData: { blockType: 'aero.ISA_T', label: 'ISA Temperature' },
+    description:
+      'ISA standard atmosphere temperature at altitude h (m). Uses lapse rate model for troposphere and stratosphere.',
     synonyms: ['ISA', 'standard atmosphere', 'temperature altitude'],
     tags: ['aerospace', 'atmosphere'],
   })
@@ -28,7 +30,10 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'h', label: 'h (m)' }],
     defaultData: { blockType: 'aero.ISA_P', label: 'ISA Pressure' },
+    description:
+      'ISA standard atmosphere pressure at altitude h (m). Barometric formula for troposphere and stratosphere.',
     synonyms: ['ISA', 'standard atmosphere', 'pressure altitude'],
+    tags: ['aerospace', 'atmosphere'],
   })
 
   register({
@@ -38,7 +43,10 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'h', label: 'h (m)' }],
     defaultData: { blockType: 'aero.ISA_rho', label: 'ISA Density' },
+    description:
+      'ISA standard atmosphere air density at altitude h (m). Derived from pressure and temperature via ideal gas law.',
     synonyms: ['ISA', 'air density', 'standard atmosphere'],
+    tags: ['aerospace', 'atmosphere'],
   })
 
   register({
@@ -48,7 +56,9 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'h', label: 'h (m)' }],
     defaultData: { blockType: 'aero.ISA_a', label: 'Speed of Sound' },
+    description: 'Speed of sound at altitude h (m). a = sqrt(γ·R·T) using ISA temperature.',
     synonyms: ['speed of sound', 'ISA', 'acoustic velocity'],
+    tags: ['aerospace', 'atmosphere'],
   })
 
   // ── Aerodynamics ────────────────────────────────────────────────────
@@ -63,7 +73,9 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
       { id: 'a', label: 'a (m/s)' },
     ],
     defaultData: { blockType: 'aero.mach_from_v', label: 'Mach Number' },
+    description: 'Mach number: M = v / a. Ratio of velocity to speed of sound.',
     synonyms: ['mach', 'mach number', 'velocity'],
+    tags: ['aerospace', 'aerodynamics'],
   })
 
   register({
@@ -76,7 +88,9 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
       { id: 'v', label: 'v (m/s)' },
     ],
     defaultData: { blockType: 'aero.dynamic_q', label: 'Dynamic Pressure' },
+    description: 'Dynamic pressure: q = ½ρv². Kinetic energy per unit volume of the airflow (Pa).',
     synonyms: ['dynamic pressure', 'aerodynamic pressure'],
+    tags: ['aerospace', 'aerodynamics'],
   })
 
   register({
@@ -90,7 +104,10 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
       { id: 'S', label: 'S (m²)' },
     ],
     defaultData: { blockType: 'aero.lift', label: 'Lift Force' },
+    description:
+      'Aerodynamic lift force: L = C_L · q · S. Product of lift coefficient, dynamic pressure, and reference area (N).',
     synonyms: ['lift', 'aerodynamic lift'],
+    tags: ['aerospace', 'aerodynamics'],
   })
 
   register({
@@ -104,7 +121,10 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
       { id: 'S', label: 'S (m²)' },
     ],
     defaultData: { blockType: 'aero.drag', label: 'Drag Force' },
+    description:
+      'Aerodynamic drag force: D = C_D · q · S. Product of drag coefficient, dynamic pressure, and reference area (N).',
     synonyms: ['drag', 'aerodynamic drag'],
+    tags: ['aerospace', 'aerodynamics'],
   })
 
   // ── Propulsion ──────────────────────────────────────────────────────
@@ -119,7 +139,10 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
       { id: 'fuel_flow', label: 'ṁ_fuel (kg/s)' },
     ],
     defaultData: { blockType: 'aero.tsfc', label: 'TSFC' },
+    description:
+      'Thrust Specific Fuel Consumption: TSFC = ṁ_fuel / Thrust. Lower is more fuel-efficient (kg/(N·s)).',
     synonyms: ['TSFC', 'thrust specific fuel consumption', 'fuel efficiency'],
+    tags: ['aerospace', 'propulsion'],
   })
 
   register({
@@ -138,7 +161,10 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
       label: 'Tsiolkovsky Δv',
       manualValues: { g0: 9.80665 },
     },
+    description:
+      'Tsiolkovsky rocket equation: Δv = Isp · g₀ · ln(m₀/m_f). Computes maximum velocity change from propellant mass ratio.',
     synonyms: ['rocket equation', 'Tsiolkovsky', 'delta-v'],
+    tags: ['aerospace', 'propulsion', 'orbital'],
   })
 
   // ── Orbital Mechanics ───────────────────────────────────────────────
@@ -157,7 +183,10 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
       label: 'Orbital Velocity',
       manualValues: { GM: 3.986004418e14 },
     },
+    description:
+      'Circular orbital velocity: v = √(GM/r). Speed for a circular orbit at radius r from body center.',
     synonyms: ['orbital velocity', 'circular orbit'],
+    tags: ['aerospace', 'orbital'],
   })
 
   register({
@@ -174,7 +203,10 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
       label: 'Escape Velocity',
       manualValues: { GM: 3.986004418e14 },
     },
+    description:
+      'Escape velocity: v_esc = √(2GM/r). Minimum speed to escape gravitational field from radius r.',
     synonyms: ['escape velocity', 'escape speed'],
+    tags: ['aerospace', 'orbital'],
   })
 
   register({
@@ -192,7 +224,10 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
       label: 'Hohmann Δv₁',
       manualValues: { GM: 3.986004418e14 },
     },
+    description:
+      'First burn Δv for a Hohmann transfer orbit from radius r₁ to r₂. Accelerates from circular orbit to transfer ellipse.',
     synonyms: ['Hohmann transfer', 'orbital transfer', 'delta-v'],
+    tags: ['aerospace', 'orbital'],
   })
 
   register({
@@ -210,6 +245,9 @@ export function registerAeroBlocks(register: (def: BlockDef) => void): void {
       label: 'Hohmann Δv₂',
       manualValues: { GM: 3.986004418e14 },
     },
+    description:
+      'Second burn Δv for a Hohmann transfer orbit. Circularises from the transfer ellipse into the target orbit at r₂.',
     synonyms: ['Hohmann transfer', 'orbital transfer', 'delta-v'],
+    tags: ['aerospace', 'orbital'],
   })
 }

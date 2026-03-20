@@ -31,6 +31,9 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
         maxPoints: 2000,
       } satisfies PlotConfig,
     },
+    description: 'XY line or scatter plot. Connect vector or table data to visualize trends.',
+    synonyms: ['line chart', 'scatter plot', 'graph', 'xy chart'],
+    tags: ['plot', 'visualization'],
   })
 
   register({
@@ -52,6 +55,9 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
         binCount: 30,
       } satisfies PlotConfig,
     },
+    description: 'Histogram chart showing the frequency distribution of a data set.',
+    synonyms: ['frequency distribution', 'bin chart', 'distribution plot'],
+    tags: ['plot', 'visualization', 'statistics'],
   })
 
   register({
@@ -72,6 +78,9 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
         themePreset: 'paper-single',
       } satisfies PlotConfig,
     },
+    description: 'Bar chart displaying categorical data as vertical bars.',
+    synonyms: ['bar graph', 'column chart', 'categorical chart'],
+    tags: ['plot', 'visualization'],
   })
 
   register({
@@ -92,6 +101,9 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
         themePreset: 'paper-single',
       } satisfies PlotConfig,
     },
+    description: 'Heatmap visualization rendering a table as a color-coded grid.',
+    synonyms: ['heat map', 'color grid', 'density map'],
+    tags: ['plot', 'visualization'],
   })
 
   register({
@@ -101,6 +113,8 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
     proOnly: true,
+    synonyms: ['bode diagram', 'frequency response', 'transfer function plot'],
+    tags: ['plot', 'control', 'frequency'],
     description:
       'Bode plot for control systems: magnitude (dB) vs frequency on a log axis, with optional phase panel below. Expects a Table with columns: freq, mag_dB, and optionally phase_deg.',
     defaultData: {
@@ -125,6 +139,8 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
     proOnly: true,
+    synonyms: ['nyquist diagram', 'complex plane', 'stability plot'],
+    tags: ['plot', 'control', 'frequency'],
     description:
       'Nyquist plot: real part vs imaginary part of G(jω). Expects a Table with columns re, im (and optionally freq for tooltip). Includes a unit-circle reference and critical point marker at (−1, 0).',
     defaultData: {
@@ -149,8 +165,10 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
     proOnly: true,
+    synonyms: ['box and whisker', 'quartile plot', 'distribution summary'],
+    tags: ['plot', 'statistics'],
     description:
-      'Box-and-whisker plot showing median, IQR (25th–75th percentile), and outliers. For a Table input use the first column as group and second as value. For a Vector input shows a single distribution.',
+      'Box-and-whisker plot showing median, IQR (25th-75th percentile), and outliers. For a Table input use the first column as group and second as value. For a Vector input shows a single distribution.',
     defaultData: {
       blockType: 'boxPlot',
       label: 'Box Plot',
@@ -171,6 +189,8 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
     proOnly: true,
+    synonyms: ['kde plot', 'density distribution', 'violin chart'],
+    tags: ['plot', 'statistics'],
     description:
       'Violin plot showing the kernel density estimate of a distribution. For a Table input use the first column as group and second as value. For a Vector input shows a single violin.',
     defaultData: {
@@ -193,6 +213,8 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
     proOnly: true,
+    synonyms: ['parallel axes', 'multivariate plot', 'multi-dimensional'],
+    tags: ['plot', 'visualization'],
     description:
       'Parallel coordinates plot for multi-dimensional data. Each column becomes a normalised axis. Accepts a Table input. Optionally set xColumn to a nominal column to colour lines by group.',
     defaultData: {
@@ -215,6 +237,8 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
     proOnly: true,
+    synonyms: ['contour map', 'density plot', 'kde contour'],
+    tags: ['plot', 'visualization'],
     description:
       'Contour / density plot: for a 2-column Table (x,y), overlays a scatter with density contours. For a Vector, renders the 1D kernel density estimate as a filled area curve.',
     defaultData: {
@@ -237,6 +261,8 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
     proOnly: true,
+    synonyms: ['waterfall', 'bridge chart', 'cumulative change'],
+    tags: ['plot', 'finance'],
     description:
       'Waterfall chart showing cumulative incremental changes. Expects a Table with columns [category, value]. Positive increments are green, negative are red, bars float from the running total.',
     defaultData: {
@@ -261,6 +287,8 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
     proOnly: true,
+    synonyms: ['pareto front', 'multi-objective', 'trade-off plot'],
+    tags: ['plot', 'optimization'],
     description:
       'Pareto front plot for multi-objective optimisation. Expects a Table with two numeric columns [objective1, objective2]. Non-dominated (Pareto-optimal) points are highlighted in cyan with a staircase front line.',
     defaultData: {
@@ -285,8 +313,10 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
     proOnly: true,
+    synonyms: ['sankey', 'flow diagram', 'alluvial chart'],
+    tags: ['plot', 'visualization'],
     description:
-      'Sankey / flow diagram. Expects a Table with at least 3 columns: source (integer node ID), target (integer node ID), value (flow amount). Node labels default to "Node 0", "Node 1", … Use the config panel to set custom labels.',
+      'Sankey / flow diagram. Expects a Table with at least 3 columns: source (integer node ID), target (integer node ID), value (flow amount). Node labels default to "Node 0", "Node 1", ... Use the config panel to set custom labels.',
     defaultData: {
       blockType: 'sankeyPlot',
       label: 'Sankey Diagram',
@@ -307,8 +337,10 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csPlot',
     inputs: [{ id: 'data', label: 'Data' }],
     proOnly: true,
+    synonyms: ['3d plot', 'surface chart', 'mesh plot', 'wireframe'],
+    tags: ['plot', 'visualization', '3d'],
     description:
-      '3D surface plot with interactive rotation. Expects a DataTable where each row is an x-slice and each column is a y-slice — values are treated as z heights. Drag to rotate; toggle wireframe with the button.',
+      '3D surface plot with interactive rotation. Expects a DataTable where each row is an x-slice and each column is a y-slice - values are treated as z heights. Drag to rotate; toggle wireframe with the button.',
     defaultData: {
       blockType: 'surfacePlot',
       label: '3D Surface',
@@ -332,5 +364,9 @@ export function registerPlotBlocks(register: (def: BlockDef) => void): void {
       blockType: 'listTable',
       label: 'Table Output',
     },
+    description:
+      'Displays list or table data in a scrollable table with summary statistics (count, min, max, mean, std dev, sum).',
+    synonyms: ['data table', 'results table', 'table view'],
+    tags: ['output', 'data'],
   })
 }

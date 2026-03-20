@@ -19,6 +19,8 @@ export function registerBioBlocks(register: (def: BlockDef) => void): void {
       { id: 'S', label: '[S]' },
     ],
     defaultData: { blockType: 'bio.michaelis_menten', label: 'Michaelis-Menten' },
+    description:
+      'Michaelis-Menten enzyme kinetics: v = V_max · [S] / (K_m + [S]). Relates reaction velocity to substrate concentration.',
     synonyms: ['enzyme kinetics', 'Michaelis-Menten', 'reaction velocity'],
     tags: ['biology', 'biochemistry'],
   })
@@ -34,7 +36,10 @@ export function registerBioBlocks(register: (def: BlockDef) => void): void {
       { id: 'L', label: '[L]' },
     ],
     defaultData: { blockType: 'bio.hill_eq', label: 'Hill Equation' },
+    description:
+      'Hill equation: θ = [L]^n / (K_d^n + [L]^n). Models cooperative ligand binding with Hill coefficient n.',
     synonyms: ['Hill equation', 'cooperativity', 'binding'],
+    tags: ['biology', 'biochemistry'],
   })
 
   register({
@@ -49,7 +54,10 @@ export function registerBioBlocks(register: (def: BlockDef) => void): void {
       { id: 't', label: 't' },
     ],
     defaultData: { blockType: 'bio.logistic_growth', label: 'Logistic Growth' },
+    description:
+      'Logistic growth model: N(t) = K / (1 + ((K−N₀)/N₀)·e^(−r·t)). S-shaped growth with carrying capacity K.',
     synonyms: ['logistic growth', 'population dynamics', 'carrying capacity'],
+    tags: ['biology', 'ecology'],
   })
 
   register({
@@ -63,7 +71,10 @@ export function registerBioBlocks(register: (def: BlockDef) => void): void {
       { id: 't', label: 't' },
     ],
     defaultData: { blockType: 'bio.exp_decay', label: 'Exponential Decay' },
+    description:
+      'Exponential decay: N(t) = N₀·e^(−λt). First-order decay for radioactive, chemical, or biological processes.',
     synonyms: ['exponential decay', 'radioactive decay', 'first order decay'],
+    tags: ['biology', 'physics'],
   })
 
   register({
@@ -73,7 +84,10 @@ export function registerBioBlocks(register: (def: BlockDef) => void): void {
     nodeKind: 'csOperation',
     inputs: [{ id: 'lambda', label: 'λ (decay rate)' }],
     defaultData: { blockType: 'bio.half_life', label: 'Half-Life' },
+    description:
+      'Half-life from decay constant: t₁/₂ = ln(2)/λ. Time for quantity to reduce by half.',
     synonyms: ['half life', 'radioactive', 'decay constant'],
+    tags: ['biology', 'physics'],
   })
 
   register({
@@ -88,7 +102,10 @@ export function registerBioBlocks(register: (def: BlockDef) => void): void {
       { id: 't', label: 't (h)' },
     ],
     defaultData: { blockType: 'bio.drug_1cmp', label: '1-Cmp PK' },
+    description:
+      'One-compartment pharmacokinetics: C(t) = (D/V_d)·e^(−k_el·t). IV bolus drug concentration over time.',
     synonyms: ['pharmacokinetics', 'drug concentration', 'one compartment'],
+    tags: ['biology', 'pharmacology'],
   })
 
   register({
@@ -102,7 +119,10 @@ export function registerBioBlocks(register: (def: BlockDef) => void): void {
       { id: 'HA', label: '[HA]' },
     ],
     defaultData: { blockType: 'bio.henderson_hasselbalch', label: 'Henderson-Hasselbalch' },
+    description:
+      'Henderson-Hasselbalch equation: pH = pKa + log₁₀([A⁻]/[HA]). Relates pH to acid dissociation.',
     synonyms: ['Henderson-Hasselbalch', 'pH buffer', 'acid-base'],
+    tags: ['biology', 'chemistry'],
   })
 
   register({
@@ -123,7 +143,10 @@ export function registerBioBlocks(register: (def: BlockDef) => void): void {
       label: 'Nernst Potential',
       manualValues: { R: 8.314462618, F: 96485.33212 },
     },
+    description:
+      'Nernst equation: E = (RT/(zF))·ln([out]/[in]). Equilibrium membrane potential for an ion species.',
     synonyms: ['Nernst', 'membrane potential', 'electrochemistry'],
+    tags: ['biology', 'biophysics'],
   })
 
   register({
@@ -136,7 +159,10 @@ export function registerBioBlocks(register: (def: BlockDef) => void): void {
       { id: 'height_m', label: 'height (m)' },
     ],
     defaultData: { blockType: 'bio.BMI', label: 'BMI' },
+    description:
+      'Body Mass Index: BMI = mass(kg) / height(m)². Standard clinical measure of body composition.',
     synonyms: ['BMI', 'body mass index'],
+    tags: ['biology', 'clinical'],
   })
 
   register({
@@ -149,6 +175,9 @@ export function registerBioBlocks(register: (def: BlockDef) => void): void {
       { id: 'H_cm', label: 'H (cm)' },
     ],
     defaultData: { blockType: 'bio.BSA_dubois', label: 'BSA DuBois' },
+    description:
+      'DuBois body surface area: BSA = 0.007184 · W^0.425 · H^0.725. Used for drug dosing (m²).',
     synonyms: ['BSA', 'body surface area', 'DuBois'],
+    tags: ['biology', 'clinical'],
   })
 }

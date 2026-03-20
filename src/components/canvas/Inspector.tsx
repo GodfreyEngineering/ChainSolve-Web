@@ -6,7 +6,7 @@
  * Shows per-port manual value + override toggle for operation nodes.
  */
 
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MousePointer } from 'lucide-react'
 import { useNodes, useEdges, useReactFlow } from '@xyflow/react'
@@ -122,11 +122,19 @@ export function Inspector({
     return undefined
   })()
 
-  // G4-1: Lazy-load block descriptions to avoid bloating the initial bundle
-  const [descriptions, setDescriptions] = useState<Record<string, string>>({})
+  // G4-1: Lazy-load block descriptions; prefer inline BlockDef.description,
+  // fall back to legacy BLOCK_DESCRIPTIONS file during migration.
+  const [legacyDescs, setLegacyDescs] = useState<Record<string, string>>({})
   useEffect(() => {
-    import('../../blocks/blockDescriptions').then((m) => setDescriptions(m.BLOCK_DESCRIPTIONS))
+    import('../../blocks/blockDescriptions').then((m) => setLegacyDescs(m.BLOCK_DESCRIPTIONS))
   }, [])
+  const descriptions = useMemo(() => {
+    const merged: Record<string, string> = { ...legacyDescs }
+    for (const [key, def] of BLOCK_REGISTRY) {
+      if (def.description) merged[key] = def.description
+    }
+    return merged
+  }, [legacyDescs])
 
   // 9.13: Progressive disclosure — advanced section collapsed by default
   const [showAdvanced, setShowAdvanced] = useState(() => {

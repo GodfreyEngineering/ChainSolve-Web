@@ -24,6 +24,9 @@ export function registerChemBlocks(register: (def: BlockDef) => void): void {
       label: 'n = PV/RT',
       manualValues: { R: 8.314462618 },
     },
+    description: 'Ideal gas law solved for moles: n = PV/RT. R defaults to 8.314 J/(mol·K).',
+    synonyms: ['ideal gas', 'PV=nRT', 'gas law', 'moles'],
+    tags: ['chemical', 'thermodynamics'],
   })
 
   register({
@@ -38,6 +41,8 @@ export function registerChemBlocks(register: (def: BlockDef) => void): void {
       { id: 'T', label: 'T (°C)' },
     ],
     defaultData: { blockType: 'chem.antoine_vp', label: 'Antoine VP' },
+    description:
+      'Antoine equation for vapor pressure: log₁₀(P) = A − B/(C+T). T in °C, returns pressure in mmHg.',
     synonyms: ['vapor pressure', 'antoine equation'],
     tags: ['chemical', 'thermodynamics'],
   })
@@ -52,6 +57,10 @@ export function registerChemBlocks(register: (def: BlockDef) => void): void {
       { id: 'Psat', label: 'P_sat' },
     ],
     defaultData: { blockType: 'chem.raoults_partial', label: "Raoult's P_partial" },
+    description:
+      "Raoult's law partial pressure: P_i = x_i · P_sat. Mole fraction times saturation pressure for ideal solutions.",
+    synonyms: ["Raoult's law", 'partial pressure', 'VLE'],
+    tags: ['chemical', 'thermodynamics'],
   })
 
   register({
@@ -69,6 +78,10 @@ export function registerChemBlocks(register: (def: BlockDef) => void): void {
       label: 'K = exp(−ΔG/RT)',
       manualValues: { R: 8.314462618 },
     },
+    description:
+      'Thermodynamic equilibrium constant: K = exp(−ΔG/RT). Relates Gibbs free energy to equilibrium.',
+    synonyms: ['equilibrium constant', 'Gibbs free energy', 'thermodynamic equilibrium'],
+    tags: ['chemical', 'thermodynamics'],
   })
 
   register({
@@ -87,7 +100,10 @@ export function registerChemBlocks(register: (def: BlockDef) => void): void {
       label: 'k = A·exp(−Ea/RT)',
       manualValues: { R: 8.314462618 },
     },
-    synonyms: ['reaction rate', 'activation energy'],
+    description:
+      'Arrhenius rate constant: k = A·exp(−Ea/RT). Models temperature dependence of reaction rates.',
+    synonyms: ['reaction rate', 'activation energy', 'Arrhenius'],
+    tags: ['chemical', 'kinetics'],
   })
 
   register({
@@ -100,6 +116,10 @@ export function registerChemBlocks(register: (def: BlockDef) => void): void {
       { id: 'H_react', label: 'H_reactants' },
     ],
     defaultData: { blockType: 'chem.heat_reaction', label: 'ΔH_rxn' },
+    description:
+      'Heat of reaction: ΔH_rxn = H_products − H_reactants. Positive = endothermic, negative = exothermic.',
+    synonyms: ['enthalpy of reaction', 'heat of reaction', 'exothermic'],
+    tags: ['chemical', 'thermodynamics'],
   })
 
   register({
@@ -112,6 +132,10 @@ export function registerChemBlocks(register: (def: BlockDef) => void): void {
       { id: 'n_total', label: 'n_total (mol)' },
     ],
     defaultData: { blockType: 'chem.mole_fraction', label: 'x = n/n_total' },
+    description:
+      'Mole fraction: x = n_component / n_total. Dimensionless ratio summing to 1 across all components.',
+    synonyms: ['mole fraction', 'composition', 'molar ratio'],
+    tags: ['chemical', 'composition'],
   })
 
   register({
@@ -124,7 +148,10 @@ export function registerChemBlocks(register: (def: BlockDef) => void): void {
       { id: 'dC_dx', label: 'dC/dx (mol/m⁴)' },
     ],
     defaultData: { blockType: 'chem.ficks_flux', label: "Fick's Flux" },
-    synonyms: ['diffusion', 'mass transfer'],
+    description:
+      "Fick's first law of diffusion: J = −D · (dC/dx). Molar flux proportional to concentration gradient.",
+    synonyms: ['diffusion', 'mass transfer', "Fick's law"],
+    tags: ['chemical', 'transport'],
   })
 
   register({
@@ -137,7 +164,10 @@ export function registerChemBlocks(register: (def: BlockDef) => void): void {
       { id: 'tau', label: 'τ (s)' },
     ],
     defaultData: { blockType: 'chem.CSTR_conv', label: 'CSTR Conversion' },
+    description:
+      'CSTR conversion for first-order kinetics: X = kτ / (1 + kτ). Continuous stirred-tank reactor.',
     synonyms: ['reactor', 'conversion', 'CSTR'],
+    tags: ['chemical', 'reactor'],
   })
 
   register({
@@ -151,5 +181,9 @@ export function registerChemBlocks(register: (def: BlockDef) => void): void {
       { id: 'T2', label: 'T₂ (K)' },
     ],
     defaultData: { blockType: 'chem.enthalpy_sensible', label: 'ΔH = Cp·ΔT' },
+    description:
+      'Sensible enthalpy change: ΔH = Cp · (T₂ − T₁). Heat required for a temperature change at constant pressure.',
+    synonyms: ['sensible heat', 'enthalpy change', 'heat capacity'],
+    tags: ['chemical', 'thermodynamics'],
   })
 }

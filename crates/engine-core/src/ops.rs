@@ -1247,6 +1247,96 @@ fn evaluate_node_inner(
             }
         }
 
+        // ── LinReg (vector-input variants) ──────────────────────────────
+        "stats.rel.linreg_slope_vec" => {
+            let xv = inputs.get("x").cloned().unwrap_or_else(|| Value::error("missing x"));
+            let yv = inputs.get("y").cloned().unwrap_or_else(|| Value::error("missing y"));
+            match (&xv, &yv) {
+                (Value::Vector { value: xd }, Value::Vector { value: yd }) if xd.len() == yd.len() && xd.len() >= 2 => {
+                    let n = xd.len() as f64;
+                    let mx: f64 = kahan_sum(xd.iter().copied()) / n;
+                    let my: f64 = kahan_sum(yd.iter().copied()) / n;
+                    let num: f64 = kahan_sum(xd.iter().zip(yd.iter()).map(|(x, y)| (x - mx) * (y - my)));
+                    let den: f64 = kahan_sum(xd.iter().map(|x| (x - mx).powi(2)));
+                    if den == 0.0 { Value::error("LinReg slope: zero variance in X") }
+                    else { Value::scalar(num / den) }
+                }
+                (Value::Error { .. }, _) => xv,
+                (_, Value::Error { .. }) => yv,
+                _ => Value::error("LinReg slope: x and y must be equal-length vectors (≥2 points)"),
+            }
+        }
+        "stats.rel.linreg_intercept_vec" => {
+            let xv = inputs.get("x").cloned().unwrap_or_else(|| Value::error("missing x"));
+            let yv = inputs.get("y").cloned().unwrap_or_else(|| Value::error("missing y"));
+            match (&xv, &yv) {
+                (Value::Vector { value: xd }, Value::Vector { value: yd }) if xd.len() == yd.len() && xd.len() >= 2 => {
+                    let n = xd.len() as f64;
+                    let mx: f64 = kahan_sum(xd.iter().copied()) / n;
+                    let my: f64 = kahan_sum(yd.iter().copied()) / n;
+                    let num: f64 = kahan_sum(xd.iter().zip(yd.iter()).map(|(x, y)| (x - mx) * (y - my)));
+                    let den: f64 = kahan_sum(xd.iter().map(|x| (x - mx).powi(2)));
+                    if den == 0.0 { Value::error("LinReg intercept: zero variance in X") }
+                    else { let slope = num / den; Value::scalar(my - slope * mx) }
+                }
+                (Value::Error { .. }, _) => xv,
+                (_, Value::Error { .. }) => yv,
+                _ => Value::error("LinReg intercept: x and y must be equal-length vectors (≥2 points)"),
+            }
+        }
+        "stats.rel.linreg_r2" => {
+            let xv = inputs.get("x").cloned().unwrap_or_else(|| Value::error("missing x"));
+            let yv = inputs.get("y").cloned().unwrap_or_else(|| Value::error("missing y"));
+            match (&xv, &yv) {
+                (Value::Vector { value: xd }, Value::Vector { value: yd }) if xd.len() == yd.len() && xd.len() >= 2 => {
+                    let n = xd.len() as f64;
+                    let mx: f64 = kahan_sum(xd.iter().copied()) / n;
+                    let my: f64 = kahan_sum(yd.iter().copied()) / n;
+                    let ss_xy: f64 = kahan_sum(xd.iter().zip(yd.iter()).map(|(x, y)| (x - mx) * (y - my)));
+                    let ss_xx: f64 = kahan_sum(xd.iter().map(|x| (x - mx).powi(2)));
+                    let ss_yy: f64 = kahan_sum(yd.iter().map(|y| (y - my).powi(2)));
+                    if ss_xx == 0.0 || ss_yy == 0.0 {
+                        Value::error("LinReg R²: zero variance")
+                    } else {
+                        let slope = ss_xy / ss_xx;
+                        let intercept = my - slope * mx;
+                        let ss_res: f64 = kahan_sum(xd.iter().zip(yd.iter()).map(|(x, y)| {
+                            let pred = slope.mul_add(*x, intercept);
+                            (y - pred).powi(2)
+                        }));
+                        Value::scalar(1.0 - ss_res / ss_yy)
+                    }
+                }
+                (Value::Error { .. }, _) => xv,
+                (_, Value::Error { .. }) => yv,
+                _ => Value::error("LinReg R²: x and y must be equal-length vectors (≥2 points)"),
+            }
+        }
+        "stats.rel.linreg_predict" => {
+            let xv = inputs.get("x").cloned().unwrap_or_else(|| Value::error("missing x"));
+            let yv = inputs.get("y").cloned().unwrap_or_else(|| Value::error("missing y"));
+            let x_new = scalar_or_nan(inputs, "x_new");
+            match (&xv, &yv) {
+                (Value::Vector { value: xd }, Value::Vector { value: yd }) if xd.len() == yd.len() && xd.len() >= 2 => {
+                    let n = xd.len() as f64;
+                    let mx: f64 = kahan_sum(xd.iter().copied()) / n;
+                    let my: f64 = kahan_sum(yd.iter().copied()) / n;
+                    let ss_xy: f64 = kahan_sum(xd.iter().zip(yd.iter()).map(|(x, y)| (x - mx) * (y - my)));
+                    let ss_xx: f64 = kahan_sum(xd.iter().map(|x| (x - mx).powi(2)));
+                    if ss_xx == 0.0 {
+                        Value::error("LinReg predict: zero variance in X")
+                    } else {
+                        let slope = ss_xy / ss_xx;
+                        let intercept = my - slope * mx;
+                        Value::scalar(slope.mul_add(x_new, intercept))
+                    }
+                }
+                (Value::Error { .. }, _) => xv,
+                (_, Value::Error { .. }) => yv,
+                _ => Value::error("LinReg predict: x and y must be equal-length vectors (≥2 points)"),
+            }
+        }
+
         // ── Probability → Combinatorics ───────────────────────────────
         "prob.comb.factorial" => {
             unary_broadcast_port(inputs, "n", |n| {
@@ -9344,6 +9434,38 @@ mod tests {
         let inputs = make_inputs(&[("c", 3.0), ("x1", 1.0), ("x2", 2.0), ("x3", 3.0), ("y1", 2.0), ("y2", 4.0), ("y3", 6.0)]);
         let v = evaluate_node("stats.rel.linreg_intercept", &inputs, &HashMap::new());
         assert!((v.as_scalar().unwrap() - 0.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn stats_linreg_r2_perfect_fit() {
+        // X=[1,2,3], Y=[2,4,6] → perfect linear fit → R²=1.0
+        let mut inputs = HashMap::new();
+        inputs.insert("x".to_string(), Value::Vector { value: vec![1.0, 2.0, 3.0] });
+        inputs.insert("y".to_string(), Value::Vector { value: vec![2.0, 4.0, 6.0] });
+        let v = evaluate_node("stats.rel.linreg_r2", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 1.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn stats_linreg_r2_noisy() {
+        // X=[1,2,3,4,5,6], Y=[2.1,3.9,6.2,7.8,10.1,11.9] → R²≈0.999
+        let mut inputs = HashMap::new();
+        inputs.insert("x".to_string(), Value::Vector { value: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0] });
+        inputs.insert("y".to_string(), Value::Vector { value: vec![2.1, 3.9, 6.2, 7.8, 10.1, 11.9] });
+        let v = evaluate_node("stats.rel.linreg_r2", &inputs, &HashMap::new());
+        let r2 = v.as_scalar().unwrap();
+        assert!(r2 > 0.99 && r2 <= 1.0, "R²={r2}, expected ~0.999");
+    }
+
+    #[test]
+    fn stats_linreg_predict() {
+        // X=[1,2,3], Y=[2,4,6], slope=2, intercept=0 → predict(7)=14
+        let mut inputs = HashMap::new();
+        inputs.insert("x".to_string(), Value::Vector { value: vec![1.0, 2.0, 3.0] });
+        inputs.insert("y".to_string(), Value::Vector { value: vec![2.0, 4.0, 6.0] });
+        inputs.insert("x_new".to_string(), Value::scalar(7.0));
+        let v = evaluate_node("stats.rel.linreg_predict", &inputs, &HashMap::new());
+        assert!((v.as_scalar().unwrap() - 14.0).abs() < 1e-10);
     }
 
     #[test]

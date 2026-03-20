@@ -18,6 +18,9 @@ export function registerVectorBlocks(register: (def: BlockDef) => void): void {
     inputs: [{ id: 'vec', label: 'List' }],
     proOnly: true,
     defaultData: { blockType: 'vectorLength', label: 'Length' },
+    description: 'Returns the number of elements in a list.',
+    synonyms: ['count', 'size', 'list length'],
+    tags: ['list', 'aggregate'],
   })
 
   register({
@@ -28,6 +31,9 @@ export function registerVectorBlocks(register: (def: BlockDef) => void): void {
     inputs: [{ id: 'vec', label: 'List' }],
     proOnly: true,
     defaultData: { blockType: 'vectorSum', label: 'Sum' },
+    description: 'Sums all elements of a list.',
+    synonyms: ['total', 'sum list', 'aggregate'],
+    tags: ['list', 'aggregate'],
   })
 
   register({
@@ -38,6 +44,9 @@ export function registerVectorBlocks(register: (def: BlockDef) => void): void {
     inputs: [{ id: 'vec', label: 'List' }],
     proOnly: true,
     defaultData: { blockType: 'vectorMean', label: 'Mean' },
+    description: 'Arithmetic mean (average) of all elements in a list.',
+    synonyms: ['average', 'mean list', 'avg'],
+    tags: ['list', 'aggregate'],
   })
 
   register({
@@ -48,6 +57,9 @@ export function registerVectorBlocks(register: (def: BlockDef) => void): void {
     inputs: [{ id: 'vec', label: 'List' }],
     proOnly: true,
     defaultData: { blockType: 'vectorMin', label: 'Min' },
+    description: 'Returns the minimum value in a list.',
+    synonyms: ['minimum', 'smallest', 'list min'],
+    tags: ['list', 'aggregate'],
   })
 
   register({
@@ -58,6 +70,9 @@ export function registerVectorBlocks(register: (def: BlockDef) => void): void {
     inputs: [{ id: 'vec', label: 'List' }],
     proOnly: true,
     defaultData: { blockType: 'vectorMax', label: 'Max' },
+    description: 'Returns the maximum value in a list.',
+    synonyms: ['maximum', 'largest', 'list max'],
+    tags: ['list', 'aggregate'],
   })
 
   register({
@@ -68,6 +83,9 @@ export function registerVectorBlocks(register: (def: BlockDef) => void): void {
     inputs: [{ id: 'vec', label: 'List' }],
     proOnly: true,
     defaultData: { blockType: 'vectorSort', label: 'Sort' },
+    description: 'Sorts a list in ascending order.',
+    synonyms: ['sort', 'order', 'ascending'],
+    tags: ['list', 'transform'],
   })
 
   register({
@@ -78,6 +96,9 @@ export function registerVectorBlocks(register: (def: BlockDef) => void): void {
     inputs: [{ id: 'vec', label: 'List' }],
     proOnly: true,
     defaultData: { blockType: 'vectorReverse', label: 'Reverse' },
+    description: 'Reverses the order of elements in a list.',
+    synonyms: ['reverse', 'flip', 'invert order'],
+    tags: ['list', 'transform'],
   })
 
   register({
@@ -92,6 +113,9 @@ export function registerVectorBlocks(register: (def: BlockDef) => void): void {
     ],
     proOnly: true,
     defaultData: { blockType: 'vectorSlice', label: 'Slice' },
+    description: 'Extracts a sub-list from Start to End index (0-based, exclusive end).',
+    synonyms: ['sublist', 'range', 'slice'],
+    tags: ['list', 'transform'],
   })
 
   register({
@@ -105,6 +129,9 @@ export function registerVectorBlocks(register: (def: BlockDef) => void): void {
     ],
     proOnly: true,
     defaultData: { blockType: 'vectorConcat', label: 'Concat' },
+    description: 'Concatenates two lists into one.',
+    synonyms: ['join', 'merge', 'append lists'],
+    tags: ['list', 'transform'],
   })
 
   register({
@@ -118,5 +145,8 @@ export function registerVectorBlocks(register: (def: BlockDef) => void): void {
     ],
     proOnly: true,
     defaultData: { blockType: 'vectorMap', label: 'List x Scalar' },
+    description: 'Multiplies every element of a list by a scalar value.',
+    synonyms: ['scale', 'multiply list', 'scalar multiply'],
+    tags: ['list', 'transform'],
   })
 }

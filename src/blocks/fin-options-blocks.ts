@@ -23,6 +23,8 @@ export function registerFinOptionsBlocks(register: (def: BlockDef) => void): voi
     nodeKind: 'csOperation',
     inputs: BSInputs,
     defaultData: { blockType: 'fin.options.bs_call', label: 'BS Call' },
+    description:
+      'Black-Scholes call option price: C = S·N(d₁) − K·e^(−rT)·N(d₂). European call option valuation.',
     synonyms: ['Black-Scholes', 'call option', 'options pricing'],
     tags: ['finance', 'options'],
   })
@@ -34,7 +36,10 @@ export function registerFinOptionsBlocks(register: (def: BlockDef) => void): voi
     nodeKind: 'csOperation',
     inputs: BSInputs,
     defaultData: { blockType: 'fin.options.bs_put', label: 'BS Put' },
+    description:
+      'Black-Scholes put option price: P = K·e^(−rT)·N(−d₂) − S·N(−d₁). European put option valuation.',
     synonyms: ['Black-Scholes', 'put option', 'options pricing'],
+    tags: ['finance', 'options'],
   })
 
   register({
@@ -44,7 +49,10 @@ export function registerFinOptionsBlocks(register: (def: BlockDef) => void): voi
     nodeKind: 'csOperation',
     inputs: BSInputs,
     defaultData: { blockType: 'fin.options.bs_delta', label: 'BS Delta' },
+    description:
+      'Black-Scholes delta (Δ): rate of change of option price with respect to spot price. N(d₁) for calls.',
     synonyms: ['delta', 'option delta', 'hedge ratio'],
+    tags: ['finance', 'options', 'greeks'],
   })
 
   register({
@@ -54,7 +62,10 @@ export function registerFinOptionsBlocks(register: (def: BlockDef) => void): voi
     nodeKind: 'csOperation',
     inputs: BSInputs,
     defaultData: { blockType: 'fin.options.bs_gamma', label: 'BS Gamma' },
+    description:
+      'Black-Scholes gamma (Γ): second derivative of option price with respect to spot. Measures delta convexity.',
     synonyms: ['gamma', 'option gamma', 'convexity'],
+    tags: ['finance', 'options', 'greeks'],
   })
 
   register({
@@ -64,7 +75,9 @@ export function registerFinOptionsBlocks(register: (def: BlockDef) => void): voi
     nodeKind: 'csOperation',
     inputs: BSInputs,
     defaultData: { blockType: 'fin.options.bs_vega', label: 'BS Vega' },
+    description: 'Black-Scholes vega (ν): sensitivity of option price to implied volatility σ.',
     synonyms: ['vega', 'option vega', 'volatility sensitivity'],
+    tags: ['finance', 'options', 'greeks'],
   })
 
   register({
@@ -77,7 +90,10 @@ export function registerFinOptionsBlocks(register: (def: BlockDef) => void): voi
       { id: 'b', label: 'b (odds)' },
     ],
     defaultData: { blockType: 'fin.options.kelly', label: 'Kelly f*' },
+    description:
+      'Kelly criterion: f* = (p·b − (1−p)) / b. Optimal fraction of capital to wager for maximum growth.',
     synonyms: ['Kelly criterion', 'optimal bet', 'position sizing'],
+    tags: ['finance', 'risk'],
   })
 
   register({
@@ -94,7 +110,10 @@ export function registerFinOptionsBlocks(register: (def: BlockDef) => void): voi
       label: 'Historical VaR',
       manualValues: { conf: 0.95 },
     },
+    description:
+      'Historical Value at Risk: the loss threshold exceeded with probability (1 − confidence). Uses percentile of historical returns.',
     synonyms: ['VaR', 'value at risk', 'historical simulation'],
+    tags: ['finance', 'risk'],
   })
 
   register({
@@ -111,7 +130,10 @@ export function registerFinOptionsBlocks(register: (def: BlockDef) => void): voi
       label: 'Historical CVaR',
       manualValues: { conf: 0.95 },
     },
+    description:
+      'Conditional VaR (Expected Shortfall): average loss beyond the VaR threshold. More conservative risk measure than VaR.',
     synonyms: ['CVaR', 'expected shortfall', 'conditional VaR'],
+    tags: ['finance', 'risk'],
   })
 
   register({
@@ -126,7 +148,10 @@ export function registerFinOptionsBlocks(register: (def: BlockDef) => void): voi
       { id: 'n', label: 'n (periods)' },
     ],
     defaultData: { blockType: 'fin.options.bond_duration', label: 'Macaulay Duration' },
+    description:
+      'Macaulay duration: weighted average time to receive bond cash flows. Measures interest rate sensitivity.',
     synonyms: ['Macaulay duration', 'bond duration', 'interest rate sensitivity'],
+    tags: ['finance', 'bonds'],
   })
 
   register({
@@ -145,6 +170,9 @@ export function registerFinOptionsBlocks(register: (def: BlockDef) => void): voi
       label: 'DCF Valuation',
       manualValues: { g: 0.03, n: 5 },
     },
+    description:
+      'Discounted cash flow valuation with terminal value. Discounts FCF at WACC, adds Gordon growth terminal value.',
     synonyms: ['DCF', 'discounted cash flow', 'valuation', 'WACC'],
+    tags: ['finance', 'valuation'],
   })
 }

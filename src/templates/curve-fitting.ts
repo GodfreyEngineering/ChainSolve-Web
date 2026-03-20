@@ -36,15 +36,23 @@ export function buildCurveFitting(canvasId: string, projectId: string): CanvasJS
     // ── Input vectors ─────────────────────────────────────────────────────
     {
       id: 'cf-x',
-      type: 'csSource',
+      type: 'csData',
       position: { x: 0, y: 40 },
-      data: { blockType: 'vector', label: 'x values', value: [1, 2, 3, 4, 5, 6] },
+      data: {
+        blockType: 'tableInput',
+        label: 'x values',
+        tableData: { columns: ['x'], rows: [[1], [2], [3], [4], [5], [6]] },
+      },
     },
     {
       id: 'cf-y',
-      type: 'csSource',
+      type: 'csData',
       position: { x: 0, y: 180 },
-      data: { blockType: 'vector', label: 'y values', value: [2.1, 3.9, 6.2, 7.8, 10.1, 11.9] },
+      data: {
+        blockType: 'tableInput',
+        label: 'y values',
+        tableData: { columns: ['y'], rows: [[2.1], [3.9], [6.2], [7.8], [10.1], [11.9]] },
+      },
     },
 
     // ── Query point ───────────────────────────────────────────────────────
@@ -60,25 +68,25 @@ export function buildCurveFitting(canvasId: string, projectId: string): CanvasJS
       id: 'cf-slope',
       type: 'csOperation',
       position: { x: 300, y: 60 },
-      data: { blockType: 'stat.linreg_slope', label: 'Slope b' },
+      data: { blockType: 'stats.rel.linreg_slope_vec', label: 'Slope b' },
     },
     {
       id: 'cf-intercept',
       type: 'csOperation',
       position: { x: 300, y: 180 },
-      data: { blockType: 'stat.linreg_intercept', label: 'Intercept a' },
+      data: { blockType: 'stats.rel.linreg_intercept_vec', label: 'Intercept a' },
     },
     {
       id: 'cf-r2',
       type: 'csOperation',
       position: { x: 300, y: 300 },
-      data: { blockType: 'stat.linreg_r2', label: 'R² coefficient' },
+      data: { blockType: 'stats.rel.linreg_r2', label: 'R² coefficient' },
     },
     {
       id: 'cf-predict',
       type: 'csOperation',
       position: { x: 300, y: 420 },
-      data: { blockType: 'stat.linreg_predict', label: 'Predicted ŷ at x_q' },
+      data: { blockType: 'stats.rel.linreg_predict', label: 'Predicted ŷ at x_q' },
     },
 
     // ── Displays ──────────────────────────────────────────────────────────

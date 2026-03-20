@@ -51,6 +51,9 @@ reg({
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'number', label: 'Number', value: 0 },
+  description: 'Enter a fixed numeric value. Use as input to any operation block.',
+  synonyms: ['value', 'input', 'literal', 'scalar'],
+  tags: ['input'],
 })
 
 reg({
@@ -60,6 +63,10 @@ reg({
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'slider', label: 'Slider', value: 0, min: 0, max: 100, step: 1 },
+  description:
+    'Interactive slider for exploring a range of values. Drag to sweep through min/max and see results update live.',
+  synonyms: ['range', 'dial', 'knob', 'slider'],
+  tags: ['input', 'interactive'],
 })
 
 reg({
@@ -69,6 +76,10 @@ reg({
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'variableSource', label: 'Variable', value: 0 },
+  description:
+    'Reference a named variable defined in the Variables panel. Output updates when the variable value changes.',
+  synonyms: ['var', 'parameter', 'named', 'reference'],
+  tags: ['input', 'binding'],
 })
 
 reg({
@@ -114,6 +125,10 @@ reg({
   nodeKind: 'csSource',
   inputs: [],
   defaultData: { blockType: 'constant', label: 'Constant' },
+  description:
+    'Unified constant picker. Search and select from the full catalog of math, physics, and engineering constants.',
+  synonyms: ['pi', 'euler', 'boltzmann', 'avogadro', 'physics constant'],
+  tags: ['constant', 'input'],
 })
 
 // BUG-12: Single unified Material block (multi-output, formerly material_full).
@@ -129,6 +144,10 @@ reg({
   inputs: [],
   proOnly: true,
   defaultData: { blockType: 'material_full', label: 'Material' },
+  description:
+    'Material picker. Select a material and get all its properties (density, modulus, conductivity, etc.) as separate output handles.',
+  synonyms: ['steel', 'aluminium', 'copper', 'density', 'modulus'],
+  tags: ['material', 'input'],
 })
 
 // ── Math category ─────────────────────────────────────────────────────────────
@@ -146,6 +165,10 @@ reg({
   variadic: true,
   minInputs: 2,
   maxInputs: 64,
+  description:
+    'Sum two or more values. Output = A + B. Supports variadic inputs (2-64). Broadcasts across scalars, vectors, and tables.',
+  synonyms: ['plus', 'sum', '+', 'addition', 'total'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -158,6 +181,9 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'subtract', label: 'Subtract' },
+  description: 'Subtracts B from A. Output = A - B.',
+  synonyms: ['minus', 'difference', '-', 'subtraction'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -173,6 +199,10 @@ reg({
   variadic: true,
   minInputs: 2,
   maxInputs: 64,
+  description:
+    'Multiply two or more values. Output = A × B. Supports variadic inputs (2-64). Broadcasts across scalars, vectors, and tables.',
+  synonyms: ['times', 'product', '*', 'x', 'multiplication'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -185,6 +215,9 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'divide', label: 'Divide' },
+  description: 'Divides A by B. Output = A / B. Returns error if B = 0.',
+  synonyms: ['quotient', 'ratio', '/', 'division'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -194,6 +227,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'negate', label: 'Negate' },
+  description: 'Flips the sign of the input. Output = -A.',
+  synonyms: ['negative', 'flip sign', 'unary minus', 'invert'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -203,6 +239,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'abs', label: 'Abs' },
+  description: 'Absolute value. Returns the magnitude of the input, always non-negative.',
+  synonyms: ['absolute', 'magnitude', '|x|'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -212,6 +251,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'sqrt', label: 'Sqrt' },
+  description: 'Square root. Returns NaN for negative inputs.',
+  synonyms: ['root', 'square root', '√'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -224,6 +266,9 @@ reg({
     { id: 'exp', label: 'Exp' },
   ],
   defaultData: { blockType: 'power', label: 'Power' },
+  description: 'Raises Base to the power of Exp. Output = Base^Exp.',
+  synonyms: ['exponent', '^', 'raise', 'pow', '**'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -233,6 +278,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'floor', label: 'Floor' },
+  description: 'Rounds down to the nearest integer. floor(2.7) = 2, floor(-2.3) = -3.',
+  synonyms: ['round down', 'truncate', 'integer down'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -242,6 +290,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'ceil', label: 'Ceil' },
+  description: 'Rounds up to the nearest integer. ceil(2.1) = 3, ceil(-2.7) = -2.',
+  synonyms: ['round up', 'ceiling', 'integer up'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -251,6 +302,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'round', label: 'Round' },
+  description: 'Rounds to the nearest integer. round(2.5) = 3.',
+  synonyms: ['nearest', 'rounding', 'round off'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -263,6 +317,9 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'mod', label: 'Mod' },
+  description: 'Modulo (remainder). Output = A mod B. Returns error if B = 0.',
+  synonyms: ['remainder', 'mod', '%', 'modulus'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -276,6 +333,9 @@ reg({
     { id: 'max', label: 'Max' },
   ],
   defaultData: { blockType: 'clamp', label: 'Clamp' },
+  description: 'Constrains a value between Min and Max. clamp(Val, Min, Max).',
+  synonyms: ['constrain', 'limit', 'bound', 'saturate'],
+  tags: ['arithmetic', 'comparison'],
 })
 
 reg({
@@ -285,6 +345,10 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'trunc', label: 'Trunc' },
+  description:
+    'Truncates toward zero, removing the fractional part. trunc(2.9) = 2, trunc(-2.9) = -2.',
+  synonyms: ['truncate', 'integer part', 'drop fraction'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -294,6 +358,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'sign', label: 'Sign' },
+  description: 'Returns the sign of the input: -1, 0, or 1.',
+  synonyms: ['signum', 'sign function', 'positive negative'],
+  tags: ['arithmetic', 'math'],
 })
 
 reg({
@@ -303,6 +370,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'ln', label: 'Ln' },
+  description: 'Natural logarithm (base e). Returns NaN for non-positive inputs.',
+  synonyms: ['natural log', 'loge', 'logarithm'],
+  tags: ['logarithm', 'math'],
 })
 
 reg({
@@ -312,6 +382,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'log10', label: 'Log10' },
+  description: 'Common logarithm (base 10). Returns NaN for non-positive inputs.',
+  synonyms: ['common log', 'log base 10', 'lg'],
+  tags: ['logarithm', 'math'],
 })
 
 reg({
@@ -321,6 +394,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'exp', label: 'Exp' },
+  description: 'Exponential function. Output = e^A.',
+  synonyms: ['e^x', 'exponential', 'exp function'],
+  tags: ['exponential', 'math'],
 })
 
 reg({
@@ -333,6 +409,9 @@ reg({
     { id: 'base', label: 'Base' },
   ],
   defaultData: { blockType: 'log_base', label: 'Log (base)' },
+  description: 'Logarithm with arbitrary base. Output = log(Value) / log(Base).',
+  synonyms: ['log base', 'custom log', 'log arbitrary'],
+  tags: ['logarithm', 'math'],
 })
 
 reg({
@@ -345,6 +424,9 @@ reg({
     { id: 'digits', label: 'Digits' },
   ],
   defaultData: { blockType: 'roundn', label: 'Round N' },
+  description: 'Rounds to N decimal places. roundn(3.14159, 2) = 3.14.',
+  synonyms: ['round decimal', 'precision', 'decimal places'],
+  tags: ['arithmetic', 'math'],
 })
 
 // ── Trig category ─────────────────────────────────────────────────────────────
@@ -356,6 +438,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'θ (rad)' }],
   defaultData: { blockType: 'sin', label: 'Sin' },
+  description: 'Sine function. Input in radians.',
+  synonyms: ['sine', 'sin function'],
+  tags: ['trigonometry'],
 })
 
 reg({
@@ -365,6 +450,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'θ (rad)' }],
   defaultData: { blockType: 'cos', label: 'Cos' },
+  description: 'Cosine function. Input in radians.',
+  synonyms: ['cosine', 'cos function'],
+  tags: ['trigonometry'],
 })
 
 reg({
@@ -374,6 +462,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'θ (rad)' }],
   defaultData: { blockType: 'tan', label: 'Tan' },
+  description: 'Tangent function. Input in radians.',
+  synonyms: ['tangent', 'tan function'],
+  tags: ['trigonometry'],
 })
 
 reg({
@@ -383,6 +474,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'asin', label: 'Asin' },
+  description: 'Inverse sine (arcsine). Output in radians. Domain: [-1, 1].',
+  synonyms: ['arcsine', 'inverse sine', 'asin'],
+  tags: ['trigonometry'],
 })
 
 reg({
@@ -392,6 +486,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'acos', label: 'Acos' },
+  description: 'Inverse cosine (arccosine). Output in radians. Domain: [-1, 1].',
+  synonyms: ['arccosine', 'inverse cosine', 'acos'],
+  tags: ['trigonometry'],
 })
 
 reg({
@@ -401,6 +498,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'a', label: 'A' }],
   defaultData: { blockType: 'atan', label: 'Atan' },
+  description: 'Inverse tangent (arctangent). Output in radians.',
+  synonyms: ['arctangent', 'inverse tangent', 'atan'],
+  tags: ['trigonometry'],
 })
 
 reg({
@@ -413,6 +513,10 @@ reg({
     { id: 'x', label: 'X' },
   ],
   defaultData: { blockType: 'atan2', label: 'Atan2' },
+  description:
+    'Two-argument arctangent. Returns angle from positive x-axis to point (X, Y) in radians.',
+  synonyms: ['angle', 'arctangent2', 'atan2', 'two-arg atan'],
+  tags: ['trigonometry'],
 })
 
 reg({
@@ -422,6 +526,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'deg', label: '°' }],
   defaultData: { blockType: 'degToRad', label: 'Deg→Rad' },
+  description: 'Converts degrees to radians. Output = input × pi / 180.',
+  synonyms: ['degrees to radians', 'to radians', 'deg2rad'],
+  tags: ['conversion', 'trigonometry'],
 })
 
 reg({
@@ -431,6 +538,9 @@ reg({
   nodeKind: 'csOperation',
   inputs: [{ id: 'rad', label: 'rad' }],
   defaultData: { blockType: 'radToDeg', label: 'Rad→Deg' },
+  description: 'Converts radians to degrees. Output = input × 180 / pi.',
+  synonyms: ['radians to degrees', 'to degrees', 'rad2deg'],
+  tags: ['conversion', 'trigonometry'],
 })
 
 // ── Logic category ────────────────────────────────────────────────────────────
@@ -445,6 +555,9 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'greater', label: 'A > B' },
+  description: 'Returns 1 if A > B, otherwise 0.',
+  synonyms: ['>', 'more than', 'greater than'],
+  tags: ['logic', 'comparison'],
 })
 
 reg({
@@ -457,6 +570,9 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'less', label: 'A < B' },
+  description: 'Returns 1 if A < B, otherwise 0.',
+  synonyms: ['<', 'fewer than', 'less than'],
+  tags: ['logic', 'comparison'],
 })
 
 reg({
@@ -469,6 +585,9 @@ reg({
     { id: 'b', label: 'B' },
   ],
   defaultData: { blockType: 'equal', label: 'A = B' },
+  description: 'Returns 1 if A equals B, otherwise 0.',
+  synonyms: ['equals', '==', 'compare', 'equal to'],
+  tags: ['logic', 'comparison'],
 })
 
 reg({
@@ -482,6 +601,10 @@ reg({
     { id: 'else', label: 'Else' },
   ],
   defaultData: { blockType: 'ifthenelse', label: 'If/Then/Else' },
+  description:
+    'Conditional branch. If the condition is non-zero, outputs Then; otherwise outputs Else.',
+  synonyms: ['conditional', 'if else', 'branch', 'switch', 'ternary'],
+  tags: ['logic'],
 })
 
 reg({
@@ -497,6 +620,9 @@ reg({
   variadic: true,
   minInputs: 2,
   maxInputs: 64,
+  description: 'Returns the larger of two or more values. Supports variadic inputs (2-64).',
+  synonyms: ['maximum', 'largest', 'greatest', 'biggest'],
+  tags: ['comparison', 'math'],
 })
 
 reg({
@@ -512,6 +638,9 @@ reg({
   variadic: true,
   minInputs: 2,
   maxInputs: 64,
+  description: 'Returns the smaller of two or more values. Supports variadic inputs (2-64).',
+  synonyms: ['minimum', 'smallest', 'least'],
+  tags: ['comparison', 'math'],
 })
 
 // ── Output category ───────────────────────────────────────────────────────────
@@ -523,6 +652,10 @@ reg({
   nodeKind: 'csDisplay',
   inputs: [{ id: 'value', label: 'Value' }],
   defaultData: { blockType: 'display', label: 'Display' },
+  description:
+    'Shows a computed value prominently on the canvas. Connect any output to see its result.',
+  synonyms: ['result', 'answer', 'show', 'output', 'view'],
+  tags: ['output'],
 })
 
 // ── H7-1: Publish / Subscribe blocks (cross-sheet value sharing) ─────────────
@@ -534,6 +667,10 @@ reg({
   nodeKind: 'csPublish',
   inputs: [{ id: 'value', label: 'Value' }],
   defaultData: { blockType: 'publish', label: 'Publish', publishChannelName: '' },
+  description:
+    'Publishes its input value under a named channel. Subscribe blocks on any sheet can read from this channel.',
+  synonyms: ['broadcast', 'emit', 'send', 'channel'],
+  tags: ['output', 'cross-sheet'],
 })
 
 reg({
@@ -543,6 +680,10 @@ reg({
   nodeKind: 'csSubscribe',
   inputs: [],
   defaultData: { blockType: 'subscribe', label: 'Subscribe', subscribeChannelName: '' },
+  description:
+    'Reads the latest value from a named publish channel. Use to share values across sheets.',
+  synonyms: ['receive', 'listen', 'channel', 'link'],
+  tags: ['input', 'cross-sheet'],
 })
 
 // ── Block palette (ordered for display) ──────────────────────────────────────
@@ -915,6 +1056,75 @@ export const UI_ONLY_BLOCKS: ReadonlySet<string> = new Set([
   'parquet_export',
 ])
 
+// ── Linear Regression (vector-input variants) ────────────────────────────────
+
+reg({
+  type: 'stats.rel.linreg_slope_vec',
+  label: 'LinReg Slope (vector)',
+  category: 'statsRel',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'x', label: 'X' },
+    { id: 'y', label: 'Y' },
+  ],
+  defaultData: { blockType: 'stats.rel.linreg_slope_vec', label: 'LinReg Slope' },
+  proOnly: true,
+  description: 'Linear regression slope from paired x,y vectors. b = Σ(x−x̄)(y−ȳ) / Σ(x−x̄)².',
+  synonyms: ['regression slope', 'line fit', 'OLS slope', 'gradient'],
+  tags: ['statistics', 'regression'],
+})
+
+reg({
+  type: 'stats.rel.linreg_intercept_vec',
+  label: 'LinReg Intercept (vector)',
+  category: 'statsRel',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'x', label: 'X' },
+    { id: 'y', label: 'Y' },
+  ],
+  defaultData: { blockType: 'stats.rel.linreg_intercept_vec', label: 'LinReg Intercept' },
+  proOnly: true,
+  description: 'Linear regression intercept from paired x,y vectors. a = ȳ − b·x̄.',
+  synonyms: ['regression intercept', 'y-intercept', 'OLS intercept', 'bias'],
+  tags: ['statistics', 'regression'],
+})
+
+reg({
+  type: 'stats.rel.linreg_r2',
+  label: 'LinReg R²',
+  category: 'statsRel',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'x', label: 'X' },
+    { id: 'y', label: 'Y' },
+  ],
+  defaultData: { blockType: 'stats.rel.linreg_r2', label: 'LinReg R²' },
+  proOnly: true,
+  description:
+    'Coefficient of determination (R²) for linear fit. R² = 1 − SS_res/SS_tot. Range [0,1]; 1 = perfect fit.',
+  synonyms: ['r-squared', 'goodness of fit', 'coefficient of determination', 'R2'],
+  tags: ['statistics', 'regression'],
+})
+
+reg({
+  type: 'stats.rel.linreg_predict',
+  label: 'LinReg Predict',
+  category: 'statsRel',
+  nodeKind: 'csOperation',
+  inputs: [
+    { id: 'x', label: 'X' },
+    { id: 'y', label: 'Y' },
+    { id: 'x_new', label: 'X new' },
+  ],
+  defaultData: { blockType: 'stats.rel.linreg_predict', label: 'LinReg Predict' },
+  proOnly: true,
+  description:
+    'Predict y at a new x value using linear regression on x,y vectors. ŷ = a + b·x_new.',
+  synonyms: ['regression predict', 'interpolate', 'forecast', 'extrapolate'],
+  tags: ['statistics', 'regression', 'prediction'],
+})
+
 /**
  * Validate and reconcile the TS registry with the Rust catalog.
  *
@@ -961,6 +1171,8 @@ reg({
   proOnly: true,
   description:
     'Solve a system of ODEs using the classic 4th-order Runge-Kutta method (fixed step). Output = table of (t, y0, y1, ...).',
+  synonyms: ['rk4', 'runge kutta', 'ode solver', 'fixed step'],
+  tags: ['ode', 'numerical'],
 })
 
 reg({
@@ -976,6 +1188,8 @@ reg({
   proOnly: true,
   description:
     'Solve a system of ODEs using the Dormand-Prince RK4(5) adaptive-step method. Automatically adjusts step size for accuracy.',
+  synonyms: ['rk45', 'dormand prince', 'adaptive ode', 'variable step'],
+  tags: ['ode', 'numerical'],
 })
 
 reg({
@@ -999,6 +1213,8 @@ reg({
   proOnly: true,
   description:
     'Solve ODEs with zero-crossing event detection (RK4 + bisection refinement). Set event_expr to g(y,t); integration stops (or records) when g crosses 0. Event time located to within event_tol.',
+  synonyms: ['event detection', 'zero crossing', 'ode event', 'impact'],
+  tags: ['ode', 'numerical', 'event'],
 })
 
 reg({
@@ -1020,6 +1236,8 @@ reg({
   proOnly: true,
   description:
     'Find the equilibrium y* of dy/dt = f(y, t) where f(y*) = 0. Uses Newton-Raphson with numerical Jacobian (central differences). Returns Table of [state_index, equilibrium] plus residual and convergence rows.',
+  synonyms: ['equilibrium', 'steady state', 'fixed point', 'newton'],
+  tags: ['ode', 'numerical', 'equilibrium'],
 })
 
 reg({
@@ -1041,6 +1259,8 @@ reg({
   proOnly: true,
   description:
     'Solve a Hamiltonian (conservative) system using a symplectic integrator. Provide N acceleration expressions a_i(q,v,t) and initial state [q0..qN-1, v0..vN-1]. Method: "verlet" (Störmer-Verlet, 2nd order) or "euler" (Symplectic Euler, 1st order). No secular energy drift.',
+  synonyms: ['verlet', 'symplectic', 'hamiltonian', 'energy conserving', 'leapfrog'],
+  tags: ['ode', 'numerical', 'symplectic'],
 })
 
 reg({
@@ -1185,6 +1405,8 @@ reg({
   defaultData: { blockType: 'veh.tire.lateralForce', label: 'Pacejka Fy' },
   proOnly: true,
   description: 'Pacejka Magic Formula lateral tire force Fy from slip angle. Output = Fy (N).',
+  synonyms: ['pacejka', 'lateral force', 'tire', 'cornering'],
+  tags: ['vehicle', 'tire'],
 })
 
 reg({
@@ -1203,6 +1425,8 @@ reg({
   defaultData: { blockType: 'veh.tire.longForce', label: 'Pacejka Fx' },
   proOnly: true,
   description: 'Pacejka Magic Formula longitudinal tire force Fx from slip ratio. Output = Fx (N).',
+  synonyms: ['pacejka', 'longitudinal force', 'tire', 'traction'],
+  tags: ['vehicle', 'tire'],
 })
 
 reg({
@@ -1227,6 +1451,8 @@ reg({
   proOnly: true,
   description:
     'Generate a Pacejka tire force vs slip table for plotting. Output = table (slip, force).',
+  synonyms: ['tire sweep', 'slip sweep', 'pacejka table', 'force curve'],
+  tags: ['vehicle', 'tire'],
 })
 
 reg({
@@ -1243,6 +1469,8 @@ reg({
   defaultData: { blockType: 'veh.aero.drag', label: 'Aero Drag' },
   proOnly: true,
   description: 'Aerodynamic drag force: F = 0.5 × ρ × Cd × A × v².',
+  synonyms: ['drag', 'air resistance', 'aero drag', 'wind resistance'],
+  tags: ['vehicle', 'aerodynamics'],
 })
 
 reg({
@@ -1259,6 +1487,8 @@ reg({
   defaultData: { blockType: 'veh.aero.downforce', label: 'Aero Downforce' },
   proOnly: true,
   description: 'Aerodynamic downforce: F = 0.5 × ρ × Cl × A × v².',
+  synonyms: ['downforce', 'lift', 'aero downforce', 'negative lift'],
+  tags: ['vehicle', 'aerodynamics'],
 })
 
 reg({
@@ -1273,6 +1503,8 @@ reg({
   defaultData: { blockType: 'veh.aero.balance', label: 'Aero Balance' },
   proOnly: true,
   description: 'Front downforce percentage: F_front / F_total × 100.',
+  synonyms: ['aero balance', 'front percentage', 'downforce distribution'],
+  tags: ['vehicle', 'aerodynamics'],
 })
 
 reg({
@@ -1288,6 +1520,8 @@ reg({
   defaultData: { blockType: 'veh.powertrain.gearRatio', label: 'Gear Ratio' },
   proOnly: true,
   description: 'Apply gear ratio: torque_out = torque × ratio, rpm_out = rpm / ratio.',
+  synonyms: ['gear', 'transmission', 'ratio', 'gearbox'],
+  tags: ['vehicle', 'powertrain'],
 })
 
 reg({
@@ -1303,6 +1537,8 @@ reg({
   defaultData: { blockType: 'veh.powertrain.wheelSpeed', label: 'Wheel Speed' },
   proOnly: true,
   description: 'Vehicle speed from engine RPM, tire radius, and overall gear ratio.',
+  synonyms: ['wheel speed', 'vehicle speed', 'rpm to speed'],
+  tags: ['vehicle', 'powertrain'],
 })
 
 reg({
@@ -1317,6 +1553,8 @@ reg({
   defaultData: { blockType: 'veh.powertrain.drivetrainLoss', label: 'Drivetrain Loss' },
   proOnly: true,
   description: 'Apply drivetrain efficiency: P_out = P_in × η.',
+  synonyms: ['drivetrain', 'efficiency', 'power loss', 'transmission loss'],
+  tags: ['vehicle', 'powertrain'],
 })
 
 reg({
@@ -1339,6 +1577,8 @@ reg({
   proOnly: true,
   description:
     'Quarter-car 2-DOF suspension model. Output = time series of sprung/unsprung displacement and velocity.',
+  synonyms: ['quarter car', '2 DOF', 'ride model', 'suspension response'],
+  tags: ['vehicle', 'suspension', 'dynamics'],
 })
 
 reg({
@@ -1580,6 +1820,8 @@ reg({
   proOnly: true,
   description:
     'Point-mass quasi-steady-state lap simulation. Input = track (distance, curvature). Output = speed profile.',
+  synonyms: ['lap sim', 'lap time', 'track simulation', 'point mass'],
+  tags: ['vehicle', 'lap simulation'],
 })
 
 reg({
@@ -1595,6 +1837,8 @@ reg({
   defaultData: { blockType: 'veh.brake.energy', label: 'Brake Energy' },
   proOnly: true,
   description: 'Kinetic energy dissipated: E = 0.5 × m × (v1² - v2²).',
+  synonyms: ['brake energy', 'braking energy', 'kinetic energy'],
+  tags: ['vehicle', 'braking'],
 })
 
 reg({
@@ -1609,6 +1853,8 @@ reg({
   defaultData: { blockType: 'veh.brake.power', label: 'Brake Power' },
   proOnly: true,
   description: 'Braking power: P = E / Δt.',
+  synonyms: ['brake power', 'braking power', 'deceleration power'],
+  tags: ['vehicle', 'braking'],
 })
 
 reg({
@@ -1619,6 +1865,8 @@ reg({
   inputs: [{ id: 'data', label: 'Data (table)' }],
   defaultData: { blockType: 'ml.featureScale', label: 'Feature Scale', mode: 'standardize' },
   description: 'Standardize (z-score) or normalize (min-max) feature columns.',
+  synonyms: ['normalize', 'standardize', 'z-score', 'min-max', 'scaling'],
+  tags: ['machine learning', 'preprocessing'],
 })
 
 reg({
@@ -1632,6 +1880,8 @@ reg({
   ],
   defaultData: { blockType: 'ml.classMetrics', label: 'Class Metrics' },
   description: 'Compute precision, recall, and F1 score for binary classification.',
+  synonyms: ['precision', 'recall', 'F1', 'classification metrics'],
+  tags: ['machine learning', 'classification'],
 })
 
 reg({
@@ -1645,6 +1895,8 @@ reg({
   ],
   defaultData: { blockType: 'ml.rocCurve', label: 'ROC Curve' },
   description: 'Generate ROC curve (FPR vs TPR) by sweeping classification threshold.',
+  synonyms: ['ROC', 'receiver operating characteristic', 'FPR TPR'],
+  tags: ['machine learning', 'classification'],
 })
 
 reg({
@@ -1658,6 +1910,8 @@ reg({
   ],
   defaultData: { blockType: 'ml.auc', label: 'AUC' },
   description: 'Area Under the ROC Curve — measures classifier discrimination ability.',
+  synonyms: ['AUC', 'area under curve', 'classifier score'],
+  tags: ['machine learning', 'classification'],
 })
 
 // ── H5-1: Custom function block dynamic registration ────────────────────────

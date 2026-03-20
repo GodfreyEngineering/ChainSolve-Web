@@ -136,6 +136,8 @@
   --value-color-scalar: #60a5fa; /* blue   — float / scalar */
   --value-color-vector: #4ade80; /* green  — vector / array */
   --value-color-table: #c084fc; /* purple — matrix / table */
+  --value-color-text: #a8a29e; /* stone  — text / string */
+  --value-color-complex: #22d3ee; /* cyan   — complex number */
   --value-color-interval: #fb923c; /* orange — interval / signal */
   --value-color-error: #f87171; /* red    — error */
   --value-color-any: #9ca3af; /* gray   — unknown / any */
@@ -208,6 +210,8 @@
   --value-color-scalar: #1d4ed8; /* blue-700 — 5.2:1 on white */
   --value-color-vector: #15803d; /* green-700 — 5.5:1 on white */
   --value-color-table: #7e22ce; /* purple-700 — 5.3:1 on white */
+  --value-color-text: #57534e; /* stone-600 — 7.0:1 on white */
+  --value-color-complex: #0e7490; /* cyan-700 — 5.0:1 on white */
   --value-color-interval: #b45309; /* amber-700 — 4.8:1 on white */
   --value-color-error: #b91c1c; /* red-700 — 4.9:1 on white */
   --value-color-any: #374151; /* gray-700 — 9.7:1 on white */

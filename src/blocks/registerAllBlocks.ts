@@ -65,9 +65,7 @@ import { registerCadImportBlocks } from './cadimport-blocks'
 import { registerOpenDriveBlocks } from './opendrive-blocks'
 import { SEARCH_METADATA } from './blockSearchMetadata'
 
-function reg(
-  def: Omit<BlockDef, 'synonyms' | 'tags' | 'description' | 'proOnly'> & { proOnly?: boolean },
-): void {
+function reg(def: Omit<BlockDef, 'proOnly'> & { proOnly?: boolean }): void {
   BLOCK_REGISTRY.set(def.type, def)
 }
 

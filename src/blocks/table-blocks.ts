@@ -20,6 +20,10 @@ export function registerTableBlocks(register: (def: BlockDef) => void): void {
       label: 'Table',
       tableData: { columns: ['A', 'B'], rows: [[0, 0]] },
     },
+    description:
+      'Spreadsheet-style table input with named columns. Each column is a separate output port. Import from CSV or type values directly.',
+    synonyms: ['spreadsheet', 'csv', 'data table', 'grid'],
+    tags: ['data', 'input'],
   })
 
   // 2.7: MatrixInput — 2D numeric array with row/col index headers.
@@ -43,6 +47,10 @@ export function registerTableBlocks(register: (def: BlockDef) => void): void {
         ],
       },
     },
+    description:
+      '2D numeric matrix input with row/col index headers. Single output port emits the whole matrix as a Table value.',
+    synonyms: ['matrix', 'grid', '2d array', 'numeric table'],
+    tags: ['data', 'input', 'matrix'],
   })
 
   register({
@@ -59,5 +67,9 @@ export function registerTableBlocks(register: (def: BlockDef) => void): void {
       blockType: 'table_extract_col',
       label: 'Table Col',
     },
+    description:
+      'Extracts a single column from a table as a list. Specify the column index (0-based).',
+    synonyms: ['column', 'extract', 'select column'],
+    tags: ['data', 'table'],
   })
 }

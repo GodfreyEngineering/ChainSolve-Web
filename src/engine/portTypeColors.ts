@@ -5,6 +5,8 @@
  *   scalar/float    → blue   (--value-color-scalar)
  *   vector          → green  (--value-color-vector)
  *   table/matrix    → purple (--value-color-table)
+ *   text            → gray   (--value-color-text)
+ *   complex         → cyan   (--value-color-complex)
  *   interval/signal → orange (--value-color-interval)
  *   error           → red    (--value-color-error)
  *   unknown/any     → gray   (--value-color-any)
@@ -14,6 +16,9 @@
  *   scalar    → circle  (50%)
  *   vector    → rounded square (4px)
  *   table     → square  (2px)
+ *   text      → wide pill (8px)
+ *   complex   → hexagon-ish (50% 4px)
+ *   matrix    → square  (2px)
  *   interval  → pill    (50% 0%)
  *   error     → sharp   (0%)
  *   any       → circle  (50%)
@@ -29,18 +34,28 @@ import type { Value } from './value'
  */
 export function getValueTypeColor(v: Value | undefined): string {
   if (!v) return 'var(--value-color-any)'
-  switch (v.kind) {
+  // Cast to string to handle Rust value kinds (text, complex, matrix)
+  // that exist at runtime but aren't in the TS Value union yet.
+  const kind = v.kind as string
+  switch (kind) {
     case 'scalar':
     case 'highPrecision':
       return 'var(--value-color-scalar)'
     case 'vector':
       return 'var(--value-color-vector)'
     case 'table':
+    case 'matrix':
       return 'var(--value-color-table)'
+    case 'text':
+      return 'var(--value-color-text, var(--value-color-any))'
+    case 'complex':
+      return 'var(--value-color-complex, var(--value-color-scalar))'
     case 'interval':
       return 'var(--value-color-interval)'
     case 'error':
       return 'var(--value-color-error)'
+    default:
+      return 'var(--value-color-any)'
   }
 }
 
@@ -50,18 +65,26 @@ export function getValueTypeColor(v: Value | undefined): string {
  */
 export function getValueTypeShape(v: Value | undefined): string {
   if (!v) return '50%' // circle — unknown
-  switch (v.kind) {
+  const kind = v.kind as string
+  switch (kind) {
     case 'scalar':
     case 'highPrecision':
       return '50%' // circle
     case 'vector':
       return '4px' // rounded square
     case 'table':
+    case 'matrix':
       return '2px' // square
+    case 'text':
+      return '8px' // wide pill
+    case 'complex':
+      return '50% 4px' // hexagon-ish
     case 'interval':
       return '50% 0% 50% 0%' // diamond-ish
     case 'error':
       return '0%' // sharp square
+    default:
+      return '50%' // circle — unknown
   }
 }
 
@@ -70,7 +93,8 @@ export function getValueTypeShape(v: Value | undefined): string {
  */
 export function getValueTypeLabel(v: Value | undefined): string {
   if (!v) return 'any'
-  switch (v.kind) {
+  const kind = v.kind as string
+  switch (kind) {
     case 'scalar':
       return 'scalar'
     case 'highPrecision':
@@ -79,9 +103,17 @@ export function getValueTypeLabel(v: Value | undefined): string {
       return 'vector'
     case 'table':
       return 'table'
+    case 'matrix':
+      return 'matrix'
+    case 'text':
+      return 'text'
+    case 'complex':
+      return 'complex'
     case 'interval':
       return 'interval'
     case 'error':
       return 'error'
+    default:
+      return 'unknown'
   }
 }

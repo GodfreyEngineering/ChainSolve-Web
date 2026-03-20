@@ -30,8 +30,12 @@ export function registerTextBlocks(register: (def: BlockDef) => void): void {
       { id: 'b', label: 'B' },
     ],
     defaultData: { blockType: 'text_concat', label: 'Concatenate' },
-    description: 'Concatenate two text values',
-    synonyms: ['join', 'append', 'string concat'],
+    variadic: true,
+    minInputs: 2,
+    maxInputs: 64,
+    description:
+      'Concatenate two or more text values. Supports variadic inputs (2-64). Numbers are auto-converted to text.',
+    synonyms: ['join', 'append', 'string concat', 'merge text'],
     tags: ['text', 'string'],
   })
 

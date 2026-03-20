@@ -312,7 +312,7 @@ describe('Block descriptions (G4-1)', () => {
     const missing: string[] = []
     for (const type of BLOCK_REGISTRY.keys()) {
       if (DESCRIPTION_EXEMPT.has(type)) continue
-      const desc = BLOCK_DESCRIPTIONS[type]
+      const desc = BLOCK_REGISTRY.get(type)?.description ?? BLOCK_DESCRIPTIONS[type]
       if (!desc || desc.trim().length === 0) {
         missing.push(type)
       }

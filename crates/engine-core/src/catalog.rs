@@ -276,6 +276,10 @@ pub fn catalog() -> Vec<CatalogEntry> {
         entry("stats.rel.correlation", "Correlation", "statsRel", "csOperation", vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6"), p("y1", "Y1"), p("y2", "Y2"), p("y3", "Y3"), p("y4", "Y4"), p("y5", "Y5"), p("y6", "Y6")], true),
         entry("stats.rel.linreg_slope", "LinReg Slope", "statsRel", "csOperation", vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6"), p("y1", "Y1"), p("y2", "Y2"), p("y3", "Y3"), p("y4", "Y4"), p("y5", "Y5"), p("y6", "Y6")], true),
         entry("stats.rel.linreg_intercept", "LinReg Intercept", "statsRel", "csOperation", vec![p("c", "Count"), p("x1", "X1"), p("x2", "X2"), p("x3", "X3"), p("x4", "X4"), p("x5", "X5"), p("x6", "X6"), p("y1", "Y1"), p("y2", "Y2"), p("y3", "Y3"), p("y4", "Y4"), p("y5", "Y5"), p("y6", "Y6")], true),
+        entry("stats.rel.linreg_slope_vec", "LinReg Slope (vector)", "statsRel", "csOperation", vec![p("x", "X"), p("y", "Y")], true),
+        entry("stats.rel.linreg_intercept_vec", "LinReg Intercept (vector)", "statsRel", "csOperation", vec![p("x", "X"), p("y", "Y")], true),
+        entry("stats.rel.linreg_r2", "LinReg R²", "statsRel", "csOperation", vec![p("x", "X"), p("y", "Y")], true),
+        entry("stats.rel.linreg_predict", "LinReg Predict", "statsRel", "csOperation", vec![p("x", "X"), p("y", "Y"), p("x_new", "X new")], true),
         // ── Probability → Combinatorics ────────────────────────────────
         entry("prob.comb.factorial", "n!", "probComb", "csOperation", vec![p("n", "n")], true),
         entry("prob.comb.permutation", "P(n,k)", "probComb", "csOperation", vec![p("n", "n"), p("k", "k")], true),

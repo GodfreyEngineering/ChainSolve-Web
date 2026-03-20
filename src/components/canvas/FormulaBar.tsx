@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import type { Node } from '@xyflow/react'
 import type { NodeData } from '../../blocks/types'
 import { BLOCK_DESCRIPTIONS } from '../../blocks/blockDescriptions'
+import { BLOCK_REGISTRY } from '../../blocks/registry'
 import { isScalar } from '../../engine/value'
 import type { Value } from '../../engine/value'
 import { safeEvalFormula, validateFormula, FORMULA_SYMBOLS } from '../../lib/formulaEval'
@@ -51,7 +52,7 @@ function pushHistory(history: string[], entry: string): string[] {
 
 /** Extract the formula clause from a block description (e.g. "Output = A + B"). */
 function extractFormula(blockType: string): string {
-  const desc = BLOCK_DESCRIPTIONS[blockType]
+  const desc = BLOCK_REGISTRY.get(blockType)?.description ?? BLOCK_DESCRIPTIONS[blockType]
   if (!desc) return blockType
   const match = desc.match(/[Oo]utput\s*=\s*([^.]+)/)
   if (match) return match[1].trim()
