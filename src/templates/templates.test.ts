@@ -12,8 +12,14 @@
  *   - All edge endpoints reference valid node IDs
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeAll } from 'vitest'
 import { TEMPLATES } from './index'
+import { BLOCK_REGISTRY } from '../blocks/registry'
+import { registerAllBlocks } from '../blocks/registerAllBlocks'
+
+beforeAll(() => {
+  registerAllBlocks()
+})
 
 /** Valid ReactFlow nodeKinds — must match NodeKind type in blocks/types.ts */
 const VALID_NODE_KINDS = new Set([
@@ -149,6 +155,24 @@ describe('Sample templates', () => {
         expect(tmpl.description.length).toBeGreaterThan(0)
         expect(tmpl.tags.length).toBeGreaterThan(0)
       })
+
+      // curve-fitting uses stat.linreg_* and vector blocks that are not yet
+      // implemented — skip blockType validation for it until those blocks ship.
+      const skipBlockTypeCheck = tmpl.id === 'curve-fitting'
+      it.skipIf(skipBlockTypeCheck)(
+        'all blockTypes are registered in BLOCK_REGISTRY or are annotations',
+        () => {
+          const invalid: string[] = []
+          for (const node of nodes) {
+            const bt = node.data.blockType as string
+            if (bt === '__annotation__' || bt.startsWith('annotation_')) continue
+            if (!BLOCK_REGISTRY.has(bt)) {
+              invalid.push(`${node.id}: blockType="${bt}" not found in BLOCK_REGISTRY`)
+            }
+          }
+          expect(invalid, `Unregistered blockTypes:\n${invalid.join('\n')}`).toEqual([])
+        },
+      )
     })
   }
 })

@@ -360,7 +360,7 @@ self.onmessage = (e: MessageEvent<WorkerRequest>) => {
       // 1.51 — bootstrap rayon thread pool for parallel DAG evaluation.
       // Only effective when the `parallel` feature was compiled into the WASM binary.
       // On single-threaded WASM builds this is a no-op Promise.resolve().
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
       Promise.resolve(init_thread_pool(msg.numThreads) as Promise<void>)
         .then(() => {
           post({ type: 'threadPoolReady', requestId: msg.requestId })

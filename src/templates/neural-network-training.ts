@@ -97,33 +97,33 @@ export function buildNeuralNetworkTraining(canvasId: string, projectId: string):
       id: 'nn-p1-wt',
       type: 'csOperation',
       position: { x: 320, y: 580 },
-      data: { blockType: 'math.mul', label: 'n_in × h' },
+      data: { blockType: 'multiply', label: 'n_in × h', dynamicInputCount: 2 },
     },
     {
       id: 'nn-p1',
       type: 'csOperation',
       position: { x: 320, y: 680 },
-      data: { blockType: 'math.add', label: 'Layer 1 params' },
+      data: { blockType: 'add', label: 'Layer 1 params', dynamicInputCount: 2 },
     },
     // params_layer2 = h × n_out + n_out
     {
       id: 'nn-p2-wt',
       type: 'csOperation',
       position: { x: 320, y: 800 },
-      data: { blockType: 'math.mul', label: 'h × n_out' },
+      data: { blockType: 'multiply', label: 'h × n_out', dynamicInputCount: 2 },
     },
     {
       id: 'nn-p2',
       type: 'csOperation',
       position: { x: 320, y: 900 },
-      data: { blockType: 'math.add', label: 'Layer 2 params' },
+      data: { blockType: 'add', label: 'Layer 2 params', dynamicInputCount: 2 },
     },
     // total params
     {
       id: 'nn-total-p',
       type: 'csOperation',
       position: { x: 320, y: 1000 },
-      data: { blockType: 'math.add', label: 'Total parameters' },
+      data: { blockType: 'add', label: 'Total parameters', dynamicInputCount: 2 },
     },
 
     // ── Operations: cross-entropy loss H = -y·log(ŷ) ────────────────────
@@ -131,19 +131,19 @@ export function buildNeuralNetworkTraining(canvasId: string, projectId: string):
       id: 'nn-log',
       type: 'csOperation',
       position: { x: 320, y: 1120 },
-      data: { blockType: 'math.ln', label: 'ln(ŷ)' },
+      data: { blockType: 'ln', label: 'ln(ŷ)' },
     },
     {
       id: 'nn-mul',
       type: 'csOperation',
       position: { x: 320, y: 1220 },
-      data: { blockType: 'math.mul', label: 'y · ln(ŷ)' },
+      data: { blockType: 'multiply', label: 'y · ln(ŷ)', dynamicInputCount: 2 },
     },
     {
       id: 'nn-neg',
       type: 'csOperation',
       position: { x: 320, y: 1320 },
-      data: { blockType: 'math.neg', label: '-y·ln(ŷ)' },
+      data: { blockType: 'negate', label: '-y·ln(ŷ)' },
     },
 
     // ── Displays ──────────────────────────────────────────────────────────
@@ -277,7 +277,7 @@ export function buildNeuralNetworkTraining(canvasId: string, projectId: string):
       targetHandle: 'value',
     },
     // Cross-entropy loss
-    { id: 'nn-e14', source: 'nn-pred', sourceHandle: 'out', target: 'nn-log', targetHandle: 'x' },
+    { id: 'nn-e14', source: 'nn-pred', sourceHandle: 'out', target: 'nn-log', targetHandle: 'a' },
     {
       id: 'nn-e15',
       source: 'nn-true',
@@ -286,7 +286,7 @@ export function buildNeuralNetworkTraining(canvasId: string, projectId: string):
       targetHandle: 'in_0',
     },
     { id: 'nn-e16', source: 'nn-log', sourceHandle: 'out', target: 'nn-mul', targetHandle: 'in_1' },
-    { id: 'nn-e17', source: 'nn-mul', sourceHandle: 'out', target: 'nn-neg', targetHandle: 'x' },
+    { id: 'nn-e17', source: 'nn-mul', sourceHandle: 'out', target: 'nn-neg', targetHandle: 'a' },
     {
       id: 'nn-e18',
       source: 'nn-neg',

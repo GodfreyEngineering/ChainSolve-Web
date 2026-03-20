@@ -1344,7 +1344,7 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     if (evalPulseTimerRef.current) clearTimeout(evalPulseTimerRef.current)
     setEvalPulseActive(true)
     evalPulseTimerRef.current = setTimeout(() => setEvalPulseActive(false), 1200)
-  }, [computed]) // eslint-disable-line react-hooks/exhaustive-deps -- intentionally triggers on computed reference change
+  }, [computed])
 
   // H7-1: After engine eval, update published outputs store with publish block values.
   const updateFromCanvas = usePublishedOutputsStore((st) => st.updateFromCanvas)

@@ -97,7 +97,7 @@ export function buildStructuralOptimisation(canvasId: string, projectId: string)
       id: 'so-r',
       type: 'csOperation',
       position: { x: 320, y: 600 },
-      data: { blockType: 'math.sub', label: 'r = R − t' },
+      data: { blockType: 'subtract', label: 'r = R − t' },
     },
 
     // ── Operations: geometry ─────────────────────────────────────────────
@@ -105,19 +105,19 @@ export function buildStructuralOptimisation(canvasId: string, projectId: string)
       id: 'so-R2',
       type: 'csOperation',
       position: { x: 320, y: 720 },
-      data: { blockType: 'math.pow', label: 'R²' },
+      data: { blockType: 'power', label: 'R²' },
     },
     {
       id: 'so-r2',
       type: 'csOperation',
       position: { x: 320, y: 820 },
-      data: { blockType: 'math.pow', label: 'r²' },
+      data: { blockType: 'power', label: 'r²' },
     },
     {
       id: 'so-A-diff',
       type: 'csOperation',
       position: { x: 320, y: 920 },
-      data: { blockType: 'math.sub', label: 'R² − r²' },
+      data: { blockType: 'subtract', label: 'R² − r²' },
     },
     {
       id: 'so-pi',
@@ -129,7 +129,7 @@ export function buildStructuralOptimisation(canvasId: string, projectId: string)
       id: 'so-A',
       type: 'csOperation',
       position: { x: 320, y: 1020 },
-      data: { blockType: 'math.mul', label: 'A = π(R²−r²)' },
+      data: { blockType: 'multiply', dynamicInputCount: 2, label: 'A = π(R²−r²)' },
     },
 
     // ── Operations: second moment of area I = π(R⁴−r⁴)/4 ────────────────
@@ -137,25 +137,25 @@ export function buildStructuralOptimisation(canvasId: string, projectId: string)
       id: 'so-R4',
       type: 'csOperation',
       position: { x: 320, y: 1140 },
-      data: { blockType: 'math.pow', label: 'R⁴' },
+      data: { blockType: 'power', label: 'R⁴' },
     },
     {
       id: 'so-r4',
       type: 'csOperation',
       position: { x: 320, y: 1240 },
-      data: { blockType: 'math.pow', label: 'r⁴' },
+      data: { blockType: 'power', label: 'r⁴' },
     },
     {
       id: 'so-I-diff',
       type: 'csOperation',
       position: { x: 320, y: 1340 },
-      data: { blockType: 'math.sub', label: 'R⁴ − r⁴' },
+      data: { blockType: 'subtract', label: 'R⁴ − r⁴' },
     },
     {
       id: 'so-I-num',
       type: 'csOperation',
       position: { x: 320, y: 1440 },
-      data: { blockType: 'math.mul', label: 'π(R⁴−r⁴)' },
+      data: { blockType: 'multiply', dynamicInputCount: 2, label: 'π(R⁴−r⁴)' },
     },
     {
       id: 'so-four',
@@ -167,7 +167,7 @@ export function buildStructuralOptimisation(canvasId: string, projectId: string)
       id: 'so-I',
       type: 'csOperation',
       position: { x: 320, y: 1540 },
-      data: { blockType: 'math.div', label: 'I = π(R⁴−r⁴)/4' },
+      data: { blockType: 'divide', label: 'I = π(R⁴−r⁴)/4' },
     },
 
     // ── Operations: section modulus Z = I/R ──────────────────────────────
@@ -175,7 +175,7 @@ export function buildStructuralOptimisation(canvasId: string, projectId: string)
       id: 'so-Z',
       type: 'csOperation',
       position: { x: 320, y: 1660 },
-      data: { blockType: 'math.div', label: 'Z = I/R' },
+      data: { blockType: 'divide', label: 'Z = I/R' },
     },
 
     // ── Operations: bending moment M = PL/4 ──────────────────────────────
@@ -183,13 +183,13 @@ export function buildStructuralOptimisation(canvasId: string, projectId: string)
       id: 'so-PL',
       type: 'csOperation',
       position: { x: 320, y: 80 },
-      data: { blockType: 'math.mul', label: 'P·L' },
+      data: { blockType: 'multiply', dynamicInputCount: 2, label: 'P·L' },
     },
     {
       id: 'so-M',
       type: 'csOperation',
       position: { x: 320, y: 180 },
-      data: { blockType: 'math.div', label: 'M = PL/4' },
+      data: { blockType: 'divide', label: 'M = PL/4' },
     },
     {
       id: 'so-four2',
@@ -203,7 +203,7 @@ export function buildStructuralOptimisation(canvasId: string, projectId: string)
       id: 'so-sigma',
       type: 'csOperation',
       position: { x: 320, y: 1760 },
-      data: { blockType: 'math.div', label: 'σ = M/Z' },
+      data: { blockType: 'divide', label: 'σ = M/Z' },
     },
 
     // ── Operations: deflection δ = PL³/(48EI) ────────────────────────────
@@ -211,19 +211,19 @@ export function buildStructuralOptimisation(canvasId: string, projectId: string)
       id: 'so-L3',
       type: 'csOperation',
       position: { x: 320, y: 280 },
-      data: { blockType: 'math.pow', label: 'L³' },
+      data: { blockType: 'power', label: 'L³' },
     },
     {
       id: 'so-PL3',
       type: 'csOperation',
       position: { x: 320, y: 380 },
-      data: { blockType: 'math.mul', label: 'P·L³' },
+      data: { blockType: 'multiply', dynamicInputCount: 2, label: 'P·L³' },
     },
     {
       id: 'so-EI',
       type: 'csOperation',
       position: { x: 320, y: 480 },
-      data: { blockType: 'math.mul', label: '48·E·I' },
+      data: { blockType: 'multiply', dynamicInputCount: 2, label: '48·E·I' },
     },
     {
       id: 'so-48',
@@ -235,13 +235,13 @@ export function buildStructuralOptimisation(canvasId: string, projectId: string)
       id: 'so-48EI',
       type: 'csOperation',
       position: { x: 320, y: 560 },
-      data: { blockType: 'math.mul', label: '48EI' },
+      data: { blockType: 'multiply', dynamicInputCount: 2, label: '48EI' },
     },
     {
       id: 'so-delta',
       type: 'csOperation',
       position: { x: 320, y: 1860 },
-      data: { blockType: 'math.div', label: 'δ = PL³/(48EI)' },
+      data: { blockType: 'divide', label: 'δ = PL³/(48EI)' },
     },
 
     // ── Operations: mass = ρ·A·L ─────────────────────────────────────────
@@ -249,13 +249,13 @@ export function buildStructuralOptimisation(canvasId: string, projectId: string)
       id: 'so-rhoA',
       type: 'csOperation',
       position: { x: 320, y: 1960 },
-      data: { blockType: 'math.mul', label: 'ρ·A' },
+      data: { blockType: 'multiply', dynamicInputCount: 2, label: 'ρ·A' },
     },
     {
       id: 'so-mass',
       type: 'csOperation',
       position: { x: 320, y: 2060 },
-      data: { blockType: 'math.mul', label: 'Mass = ρ·A·L' },
+      data: { blockType: 'multiply', dynamicInputCount: 2, label: 'Mass = ρ·A·L' },
     },
 
     // ── Displays ──────────────────────────────────────────────────────────

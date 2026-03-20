@@ -93,13 +93,13 @@ export function buildBatteryThermal(canvasId: string, projectId: string): Canvas
       id: 'bt-I2',
       type: 'csOperation',
       position: { x: 320, y: 80 },
-      data: { blockType: 'math.pow', label: 'I²' },
+      data: { blockType: 'power', label: 'I²' },
     },
     {
       id: 'bt-Qgen',
       type: 'csOperation',
       position: { x: 320, y: 180 },
-      data: { blockType: 'math.mul', label: 'Q_gen = I²·R_int' },
+      data: { blockType: 'multiply', label: 'Q_gen = I²·R_int', dynamicInputCount: 2 },
     },
 
     // ── Operations: Q_loss = h·A·(T_cell − T_amb) ────────────────────────
@@ -108,39 +108,39 @@ export function buildBatteryThermal(canvasId: string, projectId: string): Canvas
       id: 'bt-hA',
       type: 'csOperation',
       position: { x: 320, y: 360 },
-      data: { blockType: 'math.mul', label: 'h·A' },
+      data: { blockType: 'multiply', label: 'h·A', dynamicInputCount: 2 },
     },
     {
       id: 'bt-Qgen-half',
       type: 'csOperation',
       position: { x: 320, y: 460 },
-      data: { blockType: 'math.mul', label: 'Q_net·t' },
+      data: { blockType: 'multiply', label: 'Q_net·t', dynamicInputCount: 2 },
     }, // placeholder label, reused below
     // estimate ΔT from Q_gen only for cooling calc
     {
       id: 'bt-mCp',
       type: 'csOperation',
       position: { x: 320, y: 560 },
-      data: { blockType: 'math.mul', label: 'm·Cp' },
+      data: { blockType: 'multiply', label: 'm·Cp', dynamicInputCount: 2 },
     },
     {
       id: 'bt-dT-est',
       type: 'csOperation',
       position: { x: 320, y: 660 },
-      data: { blockType: 'math.div', label: 'ΔT_est = Q_gen·t/(m·Cp)' },
+      data: { blockType: 'divide', label: 'ΔT_est = Q_gen·t/(m·Cp)' },
     },
     {
       id: 'bt-Qgen-t',
       type: 'csOperation',
       position: { x: 160, y: 660 },
-      data: { blockType: 'math.mul', label: 'Q_gen·t' },
+      data: { blockType: 'multiply', label: 'Q_gen·t', dynamicInputCount: 2 },
     },
     // cooling loss based on ΔT_est
     {
       id: 'bt-Qloss',
       type: 'csOperation',
       position: { x: 320, y: 780 },
-      data: { blockType: 'math.mul', label: 'Q_loss = h·A·ΔT_est' },
+      data: { blockType: 'multiply', label: 'Q_loss = h·A·ΔT_est', dynamicInputCount: 2 },
     },
 
     // ── Operations: Q_net = Q_gen − Q_loss ───────────────────────────────
@@ -148,7 +148,7 @@ export function buildBatteryThermal(canvasId: string, projectId: string): Canvas
       id: 'bt-Qnet',
       type: 'csOperation',
       position: { x: 320, y: 900 },
-      data: { blockType: 'math.sub', label: 'Q_net = Q_gen − Q_loss' },
+      data: { blockType: 'subtract', label: 'Q_net = Q_gen − Q_loss' },
     },
 
     // ── Operations: ΔT = Q_net·t / (m·Cp) ───────────────────────────────
@@ -156,13 +156,13 @@ export function buildBatteryThermal(canvasId: string, projectId: string): Canvas
       id: 'bt-Qnet-t',
       type: 'csOperation',
       position: { x: 320, y: 1020 },
-      data: { blockType: 'math.mul', label: 'Q_net·t' },
+      data: { blockType: 'multiply', label: 'Q_net·t', dynamicInputCount: 2 },
     },
     {
       id: 'bt-dT',
       type: 'csOperation',
       position: { x: 320, y: 1120 },
-      data: { blockType: 'math.div', label: 'ΔT = Q_net·t/(m·Cp)' },
+      data: { blockType: 'divide', label: 'ΔT = Q_net·t/(m·Cp)' },
     },
 
     // ── Operations: T_cell = T_amb + ΔT ──────────────────────────────────
@@ -170,7 +170,7 @@ export function buildBatteryThermal(canvasId: string, projectId: string): Canvas
       id: 'bt-Tcell',
       type: 'csOperation',
       position: { x: 320, y: 1240 },
-      data: { blockType: 'math.add', label: 'T_cell = T_amb + ΔT' },
+      data: { blockType: 'add', label: 'T_cell = T_amb + ΔT', dynamicInputCount: 2 },
     },
 
     // ── Displays ──────────────────────────────────────────────────────────

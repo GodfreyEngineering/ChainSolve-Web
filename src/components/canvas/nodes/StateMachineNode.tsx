@@ -48,7 +48,7 @@ function evalGuard(guard: string, inputs: Record<string, number>): boolean {
   try {
     const keys = Object.keys(inputs)
     const vals = keys.map((k) => inputs[k])
-    // eslint-disable-next-line no-new-func
+
     const fn = new Function(...keys, `return !!(${guard})`)
     return Boolean(fn(...vals))
   } catch {

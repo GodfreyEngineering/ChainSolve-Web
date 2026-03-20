@@ -83,7 +83,6 @@ function evalCode(code: string, vars: Record<string, number>): number {
       ? code
       : `return (${code})`
 
-  // eslint-disable-next-line no-new-func
   const fn = new Function(...allKeys, body)
   const result = fn(...allVals)
   if (typeof result === 'number' && Number.isFinite(result)) return result

@@ -70,7 +70,7 @@ export function diffGraph(
   // Filter out group nodes and annotations (not engine-relevant).
   const isNonEval = (n: Node) => {
     const bt = (n.data as Record<string, unknown>).blockType as string
-    return bt === '__group__' || bt.startsWith('annotation_')
+    return bt === '__group__' || bt === '__annotation__' || bt.startsWith('annotation_')
   }
   const prevEvalNodes = prevNodes.filter((n) => !isNonEval(n))
   const nextEvalNodes = nextNodes.filter((n) => !isNonEval(n))

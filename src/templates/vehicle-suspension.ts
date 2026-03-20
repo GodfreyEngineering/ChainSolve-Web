@@ -80,7 +80,7 @@ export function buildVehicleSuspension(canvasId: string, projectId: string): Can
       id: 'vs-fn-s',
       type: 'csOperation',
       position: { x: 300, y: 180 },
-      data: { blockType: 'ctrl.natural_freq_hz', label: 'fn_s (Hz)' },
+      data: { blockType: 'ctrl.natural_freq', label: 'fn_s (Hz)' },
     },
 
     // ── Operations: damping ──────────────────────────────────────────────
@@ -108,7 +108,7 @@ export function buildVehicleSuspension(canvasId: string, projectId: string): Can
       id: 'vs-fn-u',
       type: 'csOperation',
       position: { x: 300, y: 620 },
-      data: { blockType: 'ctrl.natural_freq_hz', label: 'fn_u (Hz)' },
+      data: { blockType: 'ctrl.natural_freq', label: 'fn_u (Hz)' },
     },
 
     // ── Displays ─────────────────────────────────────────────────────────
