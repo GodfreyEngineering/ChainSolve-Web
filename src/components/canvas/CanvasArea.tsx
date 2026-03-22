@@ -142,7 +142,6 @@ const LazyFindBlockDialog = lazy(() =>
   import('./FindBlockDialog').then((m) => ({ default: m.FindBlockDialog })),
 )
 const LazyDebugConsolePanel = lazy(() => import('./DebugConsolePanel'))
-const LazyGraphHealthPanel = lazy(() => import('./GraphHealthPanel'))
 const LazyOutputPanel = lazy(() => import('./OutputPanel'))
 const LazyProblemsPanel = lazy(() => import('./ProblemsPanel'))
 const LazyCanvasNotes = lazy(() =>
@@ -151,20 +150,8 @@ const LazyCanvasNotes = lazy(() =>
 const LazyHistoryPanel = lazy(() =>
   import('./HistoryPanel').then((m) => ({ default: m.HistoryPanel })),
 )
-const LazyVersionHistoryPanel = lazy(() =>
-  import('./VersionHistoryPanel').then((m) => ({ default: m.VersionHistoryPanel })),
-)
-const LazyChannelsPanel = lazy(() =>
-  import('./ChannelsPanel').then((m) => ({ default: m.ChannelsPanel })),
-)
 const LazyAiAssistantPanel = lazy(() =>
   import('./AiAssistantPanel').then((m) => ({ default: m.AiAssistantPanel })),
-)
-const LazyEvalTimelinePanel = lazy(() =>
-  import('./EvalTimelinePanel').then((m) => ({ default: m.EvalTimelinePanel })),
-)
-const LazyExperimentPanel = lazy(() =>
-  import('./ExperimentPanel').then((m) => ({ default: m.ExperimentPanel })),
 )
 import { BottomDock, type DockPanel, type DockTab } from './BottomDock'
 import { INITIAL_NODES, INITIAL_EDGES } from './canvasDefaults'
