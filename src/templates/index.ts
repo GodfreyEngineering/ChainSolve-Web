@@ -28,6 +28,9 @@ import { buildFullVehicleModel } from './full-vehicle-model'
 import { buildFourierSeries } from './fourier-series'
 import { buildPowerFlow } from './power-flow'
 import { buildStirlingsApproximation } from './stirlings-approximation'
+import { buildBlackScholes } from './black-scholes'
+import { buildChemicalReactor } from './chemical-reactor'
+import { buildAerospaceDrag } from './aerospace-drag'
 
 export interface TemplateMeta {
   /** Stable unique key — never rename after shipping. */
@@ -249,5 +252,32 @@ export const TEMPLATES: TemplateMeta[] = [
     tags: ['tutorial', 'maths', 'approximation', 'factorial', 'numerical methods', 'combinatorics'],
     category: 'Science',
     buildGraph: buildStirlingsApproximation,
+  },
+  {
+    id: 'black-scholes',
+    name: 'Black-Scholes Option Pricing',
+    description:
+      'European call/put prices and Greeks (Delta, Gamma, Vega) via the Black-Scholes model — five shared inputs drive five parallel calculations.',
+    tags: ['finance', 'options', 'greeks', 'Black-Scholes', 'derivatives'],
+    category: 'Finance',
+    buildGraph: buildBlackScholes,
+  },
+  {
+    id: 'chemical-reactor',
+    name: 'CSTR with Arrhenius Kinetics',
+    description:
+      'Continuous stirred-tank reactor (CSTR) with first-order Arrhenius kinetics: rate constant k = A·exp(−Ea/RT), residence time τ = V/Q, conversion X = kτ/(1+kτ), and outlet concentration C_A.',
+    tags: ['chemical', 'reactor', 'CSTR', 'Arrhenius', 'kinetics', 'engineering'],
+    category: 'Engineering',
+    buildGraph: buildChemicalReactor,
+  },
+  {
+    id: 'aerospace-drag',
+    name: 'Aircraft Cruise Drag & Lift',
+    description:
+      'ISA atmosphere, dynamic pressure, lift L = CL\u00B7q\u00B7S, drag D = CD\u00B7q\u00B7S, L/D ratio, Mach number, and TSFC for straight-and-level cruise at altitude \u2014 showcases the full aerospace block pack.',
+    tags: ['aerospace', 'aerodynamics', 'drag', 'lift', 'ISA', 'TSFC', 'cruise'],
+    category: 'Engineering',
+    buildGraph: buildAerospaceDrag,
   },
 ]

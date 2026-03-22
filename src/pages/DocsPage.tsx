@@ -50,6 +50,7 @@ export type DocsSection =
   | 'exports'
   | 'settings-themes'
   | 'ai-assistant'
+  | 'formula-bar'
   | 'troubleshooting'
   | 'shortcuts'
 
@@ -102,6 +103,10 @@ function useSidebarGroups(): SidebarGroup[] {
           { id: 'exports' as DocsSection, label: t('docsPage.secExports') },
           { id: 'settings-themes' as DocsSection, label: t('docsPage.secSettingsThemes') },
           { id: 'ai-assistant' as DocsSection, label: t('docsPage.secAiAssistant') },
+          {
+            id: 'formula-bar' as DocsSection,
+            label: t('docsPage.secFormulaBar', 'Formula Bar & CSEL'),
+          },
         ],
       },
       {
@@ -146,6 +151,7 @@ const SECTION_CONTENT_KEY: Record<DocsSection, string> = {
   exports: 'exports',
   'settings-themes': 'settingsThemes',
   'ai-assistant': 'ai',
+  'formula-bar': 'formulaBar',
   troubleshooting: 'trouble',
   shortcuts: 'shortcuts',
 }
@@ -552,6 +558,8 @@ function DocsContent({ section }: { section: DocsSection }) {
       return <SettingsThemesSection />
     case 'ai-assistant':
       return <AiAssistantSection />
+    case 'formula-bar':
+      return <FormulaBarSection />
     case 'troubleshooting':
       return <TroubleshootingSection />
     case 'shortcuts':
@@ -1455,6 +1463,35 @@ function AiAssistantSection() {
       <P>{c('ai', 'privacyBody')}</P>
 
       <Tip>{c('ai', 'tip')}</Tip>
+    </>
+  )
+}
+
+function FormulaBarSection() {
+  return (
+    <>
+      <H1>{c('formulaBar', 'intro').split('.')[0]}</H1>
+      <P>{c('formulaBar', 'intro')}</P>
+
+      <H2 id="toc-openTitle">{c('formulaBar', 'openTitle')}</H2>
+      <P>{c('formulaBar', 'openBody')}</P>
+
+      <H2 id="toc-syntaxTitle">{c('formulaBar', 'syntaxTitle')}</H2>
+      <P>{c('formulaBar', 'syntaxBasic')}</P>
+      <P>{c('formulaBar', 'syntaxFunctions')}</P>
+      <P>{c('formulaBar', 'syntaxVariables')}</P>
+      <P>{c('formulaBar', 'syntaxConstants')}</P>
+
+      <H2 id="toc-autocompleteTitle">{c('formulaBar', 'autocompleteTitle')}</H2>
+      <P>{c('formulaBar', 'autocompleteBody')}</P>
+
+      <H2 id="toc-historyTitle">{c('formulaBar', 'historyTitle')}</H2>
+      <P>{c('formulaBar', 'historyBody')}</P>
+
+      <H2 id="toc-latexTitle">{c('formulaBar', 'latexTitle')}</H2>
+      <P>{c('formulaBar', 'latexBody')}</P>
+
+      <Tip>{c('formulaBar', 'tip')}</Tip>
     </>
   )
 }

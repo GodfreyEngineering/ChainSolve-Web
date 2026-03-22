@@ -667,6 +667,33 @@ export const DOCS_CONTENT: DocsContentMap = {
     tip: 'Tip: Be specific in your prompts. Include the relevant variables, units, and constraints for the best results.',
   },
 
+  formulaBar: {
+    intro:
+      'The Formula Bar is a text-based way to create and edit blocks on the canvas. It accepts CSEL (ChainSolve Expression Language) — a lightweight expression syntax that auto-generates blocks and connections from typed formulas.',
+    openTitle: 'Using the Formula Bar',
+    openBody:
+      'Click the formula bar at the top of the canvas (the fx area), or press F2 to focus it. When a Number or Slider block is selected, the formula bar shows and lets you edit its value. When no block is selected, you can type a CSEL expression.',
+    syntaxTitle: 'CSEL syntax',
+    syntaxBasic:
+      'Type a mathematical expression followed by = to create the blocks and see the result. Example: 1 + 2 = creates two Number blocks, an Add block, and a Display block, all wired together.',
+    syntaxFunctions:
+      'Use function names for trig and math: sin(pi/4) = creates a constant (pi), divide, sin, and display chain. Available functions: sin, cos, tan, asin, acos, atan, sqrt, abs, ln, log10, exp, floor, ceil, round.',
+    syntaxVariables:
+      'Assign names to create reusable values: x = 5; y = x * 2; y + 1 = creates named Number blocks with variable references. Variables persist in the expression scope and create connected block chains.',
+    syntaxConstants:
+      "Built-in constants: pi (π), e (Euler's number), tau (2π), phi (golden ratio). Type them by name in any expression.",
+    autocompleteTitle: 'Autocomplete',
+    autocompleteBody:
+      'As you type, the formula bar offers autocomplete suggestions for function names, constants, and upstream variables from connected blocks. Use arrow keys to navigate and Tab or Enter to accept a suggestion.',
+    historyTitle: 'Expression history',
+    historyBody:
+      'Press Up/Down arrow keys to recall previous expressions. History is saved across sessions (up to 50 entries) and persisted in your browser.',
+    latexTitle: 'LaTeX copy',
+    latexBody:
+      'Click the LaTeX icon next to the formula bar to copy the current expression as a LaTeX string. Useful for pasting into academic papers, reports, or documentation.',
+    tip: 'Tip: The formula bar is the fastest way to build simple chains. For complex models, use the block library or AI assistant instead.',
+  },
+
   shortcuts: {
     intro: 'Keyboard shortcuts for common actions. On Mac, replace Ctrl with Cmd.',
     generalTitle: 'General',
