@@ -26,7 +26,7 @@ try {
           blockAllMedia: false,
         }),
       ],
-      tracesSampleRate: import.meta.env.PROD ? 0.2 : 1.0,
+      tracesSampleRate: 1.0,
       tracePropagationTargets: [
         'localhost',
         /^https:\/\/app\.chainsolve\.co\.uk/,

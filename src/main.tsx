@@ -52,10 +52,14 @@ if (POSTHOG_KEY && cookieConsent !== 'declined') {
     .then(({ default: posthog }) => {
       posthog.init(POSTHOG_KEY, {
         api_host: POSTHOG_HOST || 'https://t.chainsolve.co.uk',
-        persistence: 'memory', // GDPR-safe: no cookie written without consent
-        autocapture: false, // Intentional tracking only for an engineering tool
+        ui_host: 'https://eu.posthog.com',
+        person_profiles: 'identified_only',
+        persistence: 'localStorage+cookie',
         capture_pageview: false, // Handled by PageViewTracker component
         capture_pageleave: true, // Required for accurate bounce rate & session duration
+        autocapture: false, // Intentional tracking only for an engineering tool
+        scroll_depth: true, // Track how far users scroll on each page
+        enable_heatmaps: true, // Required for scroll depth tracking
         loaded: (ph) => {
           if (import.meta.env.DEV) ph.debug()
           if (!import.meta.env.PROD) ph.opt_out_capturing()
