@@ -67,10 +67,33 @@ export function diffGraph(
 ): PatchOp[] {
   const ops: PatchOp[] = []
 
-  // Filter out group nodes and annotations (not engine-relevant).
+  // Filter out nodes that are not engine-relevant:
+  // - Groups and annotations (canvas-only visual elements)
+  // - Client-side-only blocks (Python, Rust compile, SQL, 3D viewport, etc.)
+  //   that execute in the browser or require external services, not the WASM engine
+  const CLIENT_ONLY_BLOCKS = new Set([
+    'pythonScript',
+    'customRust',
+    'sqlQuery',
+    'viewport3d',
+    'mathSheet',
+    'stateMachine',
+    'codeBlock',
+    'onnxInference',
+    'fmuImport',
+    'hdf5Import',
+    'cadImport',
+    'openDrive',
+    'tirFileInput',
+  ])
   const isNonEval = (n: Node) => {
     const bt = (n.data as Record<string, unknown>).blockType as string
-    return bt === '__group__' || bt === '__annotation__' || bt.startsWith('annotation_')
+    return (
+      bt === '__group__' ||
+      bt === '__annotation__' ||
+      bt.startsWith('annotation_') ||
+      CLIENT_ONLY_BLOCKS.has(bt)
+    )
   }
   const prevEvalNodes = prevNodes.filter((n) => !isNonEval(n))
   const nextEvalNodes = nextNodes.filter((n) => !isNonEval(n))
