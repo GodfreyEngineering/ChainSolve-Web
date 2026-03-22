@@ -13,6 +13,55 @@ import type { PatchOp, EngineNodeDef, EngineEdgeDef } from './wasm-types.ts'
  * Block type aliases: UI block types that map to a different engine op.
  * The UI block keeps its own type for rendering, but the engine sees the alias.
  */
+/**
+ * UI-only blocks that have custom renderers but no matching Rust catalog op.
+ * These are excluded from the engine evaluation pipeline to prevent
+ * "Unknown block type" errors. Keep in sync with UI_ONLY_BLOCKS in
+ * src/blocks/registry.ts — not imported to avoid circular dependency.
+ */
+const UI_ONLY_BLOCK_SET = new Set([
+  'constant',
+  'material',
+  'sqlQuery',
+  'timeSeries',
+  'unitInput',
+  'transferFunction',
+  'stateSpace',
+  'ctrl.zoh',
+  'ctrl.rateTransition',
+  'stateMachine',
+  'codeBlock',
+  'tirFileInput',
+  'viewport3d',
+  'nn.onnxInference',
+  'matrixInput',
+  'bodePlot',
+  'nyquistPlot',
+  'boxPlot',
+  'violinPlot',
+  'parallelCoords',
+  'contourPlot',
+  'waterfallPlot',
+  'paretoPlot',
+  'sankeyPlot',
+  'surfacePlot',
+  'ctrl.saturation',
+  'ctrl.switch',
+  'ctrl.mux',
+  'testBlock',
+  'assertion',
+  'wsInput',
+  'restInput',
+  'scope',
+  'timer',
+  'logger',
+  'mathSheet',
+  'ctrl.deadZone',
+  'fileInput',
+  'parquet_import',
+  'parquet_export',
+])
+
 const ENGINE_BLOCK_ALIASES: Record<string, string> = {
   // matrixInput (2.7): same evaluation logic as tableInput — both read tableData
   matrixInput: 'tableInput',
@@ -69,30 +118,15 @@ export function diffGraph(
 
   // Filter out nodes that are not engine-relevant:
   // - Groups and annotations (canvas-only visual elements)
-  // - Client-side-only blocks (Python, Rust compile, SQL, 3D viewport, etc.)
-  //   that execute in the browser or require external services, not the WASM engine
-  const CLIENT_ONLY_BLOCKS = new Set([
-    'pythonScript',
-    'customRust',
-    'sqlQuery',
-    'viewport3d',
-    'mathSheet',
-    'stateMachine',
-    'codeBlock',
-    'onnxInference',
-    'fmuImport',
-    'hdf5Import',
-    'cadImport',
-    'openDrive',
-    'tirFileInput',
-  ])
+  // - UI-only blocks (custom renderers, no matching Rust catalog op)
+  //   Keep in sync with UI_ONLY_BLOCKS in src/blocks/registry.ts
   const isNonEval = (n: Node) => {
     const bt = (n.data as Record<string, unknown>).blockType as string
     return (
       bt === '__group__' ||
       bt === '__annotation__' ||
       bt.startsWith('annotation_') ||
-      CLIENT_ONLY_BLOCKS.has(bt)
+      UI_ONLY_BLOCK_SET.has(bt)
     )
   }
   const prevEvalNodes = prevNodes.filter((n) => !isNonEval(n))
