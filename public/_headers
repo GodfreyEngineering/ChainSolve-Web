@@ -50,10 +50,12 @@
   X-XSS-Protection: 0
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   # ENG-02: COOP/COEP enable SharedArrayBuffer for zero-copy dataset transfer.
-  # require-corp enforces that all embedded cross-origin resources must opt in
-  # via their own CORP header. Stripe, Cloudflare, and Google Fonts all do so.
+  # 'credentialless' allows cross-origin resources (Plausible analytics, Pyodide
+  # CDN for Python blocks, Google Fonts, etc.) without requiring each server to
+  # send Cross-Origin-Resource-Policy headers. SharedArrayBuffer is still enabled.
+  # Supported: Chrome 96+, Firefox 119+, Safari 15.2+ (~98% global coverage).
   Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Embedder-Policy: credentialless
   # 'wasm-unsafe-eval' permits WebAssembly.instantiateStreaming() in the Rust/WASM
   # engine worker without enabling arbitrary eval(). See docs/SECURITY.md §2.
   # CSP reports route to /api/report/csp (W9.8 observability pipeline).
@@ -61,5 +63,5 @@
   # duplicate violation reports with no benefit. To test a stricter policy in
   # the future, temporarily add a Content-Security-Policy-Report-Only header
   # with the tighter directives, observe reports, then promote to enforced.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://challenges.cloudflare.com https://plausible.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://eu.i.posthog.com https://t.chainsolve.co.uk https://plausible.io; frame-src https://js.stripe.com https://challenges.cloudflare.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; report-uri /api/report/csp; report-to csp-endpoint
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://challenges.cloudflare.com https://plausible.io https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://eu.i.posthog.com https://t.chainsolve.co.uk https://plausible.io https://cdn.jsdelivr.net; frame-src https://js.stripe.com https://challenges.cloudflare.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; report-uri /api/report/csp; report-to csp-endpoint
   Reporting-Endpoints: csp-endpoint="/api/report/csp"

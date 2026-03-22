@@ -706,8 +706,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return jsonError('AI service not configured', 503)
     }
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error(`[ai ${reqId}] Missing Supabase config`)
-      return jsonError('Server configuration error', 500)
+      console.error(
+        `[ai ${reqId}] Missing Supabase config — SUPABASE_URL=${!!SUPABASE_URL}, SUPABASE_SERVICE_ROLE_KEY=${!!SUPABASE_SERVICE_ROLE_KEY}`,
+      )
+      return jsonError('AI service temporarily unavailable. Please try again later.', 503)
     }
 
     // ── Parse body ────────────────────────────────────────────────────────

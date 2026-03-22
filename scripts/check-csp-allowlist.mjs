@@ -40,6 +40,8 @@ const APPROVED_ORIGINS = [
   'https://t.chainsolve.co.uk',
   // Plausible traffic analytics (script-src: tracking script, connect-src: event API)
   'https://plausible.io',
+  // jsDelivr CDN (script-src + connect-src: Pyodide runtime for Python Script blocks)
+  'https://cdn.jsdelivr.net',
 ]
 
 // ── Keywords that are not external origins ────────────────────────────────────
