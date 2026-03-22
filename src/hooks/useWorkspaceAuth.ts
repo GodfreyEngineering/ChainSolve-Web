@@ -8,7 +8,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as Sentry from '@sentry/react'
-import posthog from 'posthog-js'
 import { supabase } from '../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../lib/profilesService'
@@ -85,7 +84,8 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
       if (!session) {
         try {
           Sentry.setUser(null)
-          posthog.reset()
+          const { getPostHogInstance } = await import('../main')
+          getPostHogInstance()?.reset()
         } catch {
           // best-effort
         }
@@ -112,7 +112,8 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
         // Clear analytics identity on signout
         try {
           Sentry.setUser(null)
-          posthog.reset()
+          const { getPostHogInstance } = await import('../main')
+          getPostHogInstance()?.reset()
         } catch {
           // Analytics reset must never block signout
         }
@@ -141,7 +142,8 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
         try {
           Sentry.setUser({ id: validatedUser.id, email: validatedUser.email })
           const effectivePlan = resolveEffectivePlan(p)
-          posthog.identify(validatedUser.id, {
+          const { getPostHogInstance } = await import('../main')
+          getPostHogInstance()?.identify(validatedUser.id, {
             email: validatedUser.email,
             tier: effectivePlan,
             created_at: validatedUser.created_at,

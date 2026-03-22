@@ -8,8 +8,6 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import './i18n/config'
 import * as Sentry from '@sentry/react'
-import posthog from 'posthog-js'
-import { PostHogProvider } from 'posthog-js/react'
 
 import { installResizeObserverErrorSuppressor } from './lib/suppressResizeObserverError'
 import { initObservability } from './observability/client'
@@ -43,23 +41,35 @@ try {
   // intentionally swallowed
 }
 
-// ── 4. Initialise PostHog ───────────────────────────────────────────────────
+// ── 4. Lazy-load PostHog to keep it out of the initial JS bundle ────────────
+// posthog-js is ~45 KB gzip; loading it eagerly exceeds the 500 KB budget.
+// We initialise it asynchronously and pass the instance down via context.
 const cookieConsent = getCookieConsent()
-try {
-  if (POSTHOG_KEY && cookieConsent !== 'declined') {
-    posthog.init(POSTHOG_KEY, {
-      api_host: POSTHOG_HOST || 'https://eu.i.posthog.com',
-      persistence: 'memory', // GDPR-safe: no cookie written without consent
-      autocapture: false, // Intentional tracking only for an engineering tool
-      capture_pageview: false, // Handled by PageViewTracker component
-      loaded: (ph) => {
-        if (import.meta.env.DEV) ph.debug()
-        if (!import.meta.env.PROD) ph.opt_out_capturing()
-      },
+let posthogInstance: typeof import('posthog-js').default | null = null
+
+if (POSTHOG_KEY && cookieConsent !== 'declined') {
+  import('posthog-js')
+    .then(({ default: posthog }) => {
+      posthog.init(POSTHOG_KEY, {
+        api_host: POSTHOG_HOST || 'https://eu.i.posthog.com',
+        persistence: 'memory', // GDPR-safe: no cookie written without consent
+        autocapture: false, // Intentional tracking only for an engineering tool
+        capture_pageview: false, // Handled by PageViewTracker component
+        loaded: (ph) => {
+          if (import.meta.env.DEV) ph.debug()
+          if (!import.meta.env.PROD) ph.opt_out_capturing()
+        },
+      })
+      posthogInstance = posthog
     })
-  }
-} catch {
-  // PostHog must never prevent the app from booting
+    .catch(() => {
+      // PostHog must never prevent the app from booting
+    })
+}
+
+/** Get the PostHog instance (may be null if not yet loaded or disabled). */
+export function getPostHogInstance() {
+  return posthogInstance
 }
 
 // ── 5. Observability pipeline (custom error handlers) ───────────────────────
@@ -232,9 +242,7 @@ createRoot(document.getElementById('root')!, {
     <ErrorBoundary>
       <ThemeProvider>
         <ToastProvider>
-          <PostHogProvider client={posthog}>
-            <Root />
-          </PostHogProvider>
+          <Root />
         </ToastProvider>
       </ThemeProvider>
     </ErrorBoundary>

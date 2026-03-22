@@ -8,25 +8,48 @@
  * Plausible receives only high-value conversion events (traffic analytics).
  */
 
-import { usePostHog } from 'posthog-js/react'
 import { trackEvent as plausibleTrack } from './plausible'
+import { getPostHogInstance } from '../main'
 
 // ── Event definitions ────────────────────────────────────────────────────────
 
 type ChainSolveEvent =
   | {
       name: 'calculation_run'
-      props: { node_count: number; duration_ms: number; success: boolean; error_code?: string }
+      props: {
+        node_count: number
+        duration_ms: number
+        success: boolean
+        error_code?: string
+      }
     }
   | { name: 'node_added'; props: { node_type: string } }
   | { name: 'node_connected'; props: { source_type: string; target_type: string } }
   | { name: 'graph_saved'; props: { node_count: number; edge_count: number } }
-  | { name: 'graph_exported'; props: { format: 'pdf' | 'csv' | 'json' | 'xlsx' } }
-  | { name: 'template_used'; props: { template_id: string; template_name: string } }
-  | { name: 'subscription_upgrade_clicked'; props: { from_tier: string; to_tier: string } }
-  | { name: 'onboarding_step_completed'; props: { step: number; step_name: string } }
-  | { name: 'sign_up_completed'; props: { method: 'email' | 'google' | 'github' } }
-  | { name: 'feedback_submitted'; props: { type: 'bug' | 'improvement' | 'question' } }
+  | {
+      name: 'graph_exported'
+      props: { format: 'pdf' | 'csv' | 'json' | 'xlsx' }
+    }
+  | {
+      name: 'template_used'
+      props: { template_id: string; template_name: string }
+    }
+  | {
+      name: 'subscription_upgrade_clicked'
+      props: { from_tier: string; to_tier: string }
+    }
+  | {
+      name: 'onboarding_step_completed'
+      props: { step: number; step_name: string }
+    }
+  | {
+      name: 'sign_up_completed'
+      props: { method: 'email' | 'google' | 'github' }
+    }
+  | {
+      name: 'feedback_submitted'
+      props: { type: 'bug' | 'improvement' | 'question' }
+    }
 
 // High-value events that also fire to Plausible (traffic-level conversions)
 const PLAUSIBLE_EVENTS = new Set<string>([
@@ -39,12 +62,10 @@ const PLAUSIBLE_EVENTS = new Set<string>([
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useAnalytics() {
-  const posthog = usePostHog()
-
   return {
     track: (event: ChainSolveEvent) => {
       // Always send to PostHog
-      posthog?.capture(event.name, event.props)
+      getPostHogInstance()?.capture(event.name, event.props)
 
       // Send key conversion events to Plausible too
       if (PLAUSIBLE_EVENTS.has(event.name)) {
