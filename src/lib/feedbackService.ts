@@ -30,8 +30,8 @@ export interface FeedbackResult {
 export async function submitFeedback(payload: FeedbackPayload): Promise<FeedbackResult> {
   // Table created by migration 0024. After `supabase db push && npm run db:types`,
   // remove the @ts-expect-error — the type will be auto-generated.
-  // @ts-expect-error feedback table not yet in database.types.ts
   const { data, error } = await supabase
+    // @ts-expect-error feedback table not yet in database.types.ts
     .from('feedback')
     .insert({
       user_id: payload.userId,

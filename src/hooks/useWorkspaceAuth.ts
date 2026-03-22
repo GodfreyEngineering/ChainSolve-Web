@@ -144,7 +144,6 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
           posthog.identify(validatedUser.id, {
             email: validatedUser.email,
             tier: effectivePlan,
-            locale: p?.locale ?? 'en',
             created_at: validatedUser.created_at,
           })
         } catch {

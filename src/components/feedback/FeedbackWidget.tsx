@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { MessageSquarePlus } from 'lucide-react'
 import { Modal } from '../ui/Modal'
 import { Input } from '../ui/Input'
@@ -33,26 +34,22 @@ type FeedbackCategory =
   | 'billing'
   | 'other'
 
-const TYPE_OPTIONS: { value: FeedbackType; label: string }[] = [
-  { value: 'bug', label: 'Bug Report' },
-  { value: 'improvement', label: 'Suggestion' },
-  { value: 'question', label: 'Question' },
-]
-
-const CATEGORY_OPTIONS: { value: FeedbackCategory; label: string }[] = [
-  { value: 'calculation', label: 'Calculation Engine' },
-  { value: 'ui', label: 'UI / Interface' },
-  { value: 'performance', label: 'Performance' },
-  { value: 'blocks', label: 'Nodes & Blocks' },
-  { value: 'export', label: 'Export' },
-  { value: 'auth', label: 'Account & Auth' },
-  { value: 'billing', label: 'Billing' },
-  { value: 'other', label: 'Other' },
+const TYPE_KEYS: FeedbackType[] = ['bug', 'improvement', 'question']
+const CATEGORY_KEYS: FeedbackCategory[] = [
+  'calculation',
+  'ui',
+  'performance',
+  'blocks',
+  'export',
+  'auth',
+  'billing',
+  'other',
 ]
 
 // ── Component ────────────────────────────────────────────────────────────────
 
 export function FeedbackWidget() {
+  const { t } = useTranslation()
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
@@ -130,13 +127,13 @@ export function FeedbackWidget() {
         sendFeedbackConfirmation(userEmail, result.ticketId, type, title.trim())
       }
 
-      toast(`Report received — ID: CS-${result.shortId}. We'll review it shortly.`, 'success')
+      toast(t('feedback.successWithId', { shortId: result.shortId }), 'success')
       resetForm()
 
       // Auto-close after 4 seconds
       autoCloseRef.current = setTimeout(() => setOpen(false), 4000)
     } catch {
-      toast('Failed to submit feedback. Please try again.', 'error')
+      toast(t('feedback.error'), 'error')
     } finally {
       setSubmitting(false)
     }
@@ -145,6 +142,11 @@ export function FeedbackWidget() {
   // Don't render for unauthenticated users
   if (!userId) return null
 
+  const categoryOptions = CATEGORY_KEYS.map((key) => ({
+    value: key,
+    label: t(`feedback.category_${key}`),
+  }))
+
   return (
     <>
       {/* Floating action button */}
@@ -152,44 +154,44 @@ export function FeedbackWidget() {
         type="button"
         onClick={() => setOpen(true)}
         style={fabStyle}
-        aria-label="Send feedback"
-        title="Send feedback"
+        aria-label={t('feedback.widgetLabel')}
+        title={t('feedback.widgetLabel')}
       >
         <MessageSquarePlus size={18} />
       </button>
 
       {/* Feedback modal */}
-      <Modal open={open} onClose={handleClose} title="Send Feedback" width={500}>
+      <Modal open={open} onClose={handleClose} title={t('feedback.title')} width={500}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
           {/* Type selector */}
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {TYPE_OPTIONS.map((opt) => (
+            {TYPE_KEYS.map((key) => (
               <button
-                key={opt.value}
+                key={key}
                 type="button"
-                onClick={() => setType(opt.value)}
+                onClick={() => setType(key)}
                 style={{
                   ...typeBtnStyle,
-                  ...(type === opt.value ? typeBtnActiveStyle : {}),
+                  ...(type === key ? typeBtnActiveStyle : {}),
                 }}
               >
-                {opt.label}
+                {t(`feedback.type_${key}`)}
               </button>
             ))}
           </div>
 
           {/* Category */}
           <Select
-            label="Category"
-            options={CATEGORY_OPTIONS}
+            label={t('feedback.categoryLabel')}
+            options={categoryOptions}
             value={category}
             onChange={(e) => setCategory(e.target.value as FeedbackCategory)}
           />
 
           {/* Title */}
           <Input
-            label="Title"
-            placeholder="Brief summary of the issue or idea"
+            label={t('feedback.titleLabel')}
+            placeholder={t('feedback.titlePlaceholder')}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -198,9 +200,9 @@ export function FeedbackWidget() {
 
           {/* Description */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-            <label style={labelStyle}>Description</label>
+            <label style={labelStyle}>{t('feedback.descriptionLabel')}</label>
             <textarea
-              placeholder="Describe in detail — what happened, what you expected, steps to reproduce for bugs"
+              placeholder={t('feedback.descriptionPlaceholder')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
@@ -208,7 +210,7 @@ export function FeedbackWidget() {
               required
             />
             {description.length > 0 && description.trim().length < 20 && (
-              <span style={errorHintStyle}>Minimum 20 characters</span>
+              <span style={errorHintStyle}>{t('feedback.descriptionMinLength')}</span>
             )}
           </div>
 
@@ -220,11 +222,11 @@ export function FeedbackWidget() {
               style={collapsibleBtnStyle}
             >
               {showErrors ? '\u25BE' : '\u25B8'}{' '}
-              {errorLogs ? 'Console Error Detected' : 'Error Details (optional)'}
+              {errorLogs ? t('feedback.errorDetected') : t('feedback.errorOptional')}
             </button>
             {showErrors && (
               <textarea
-                placeholder="Paste any error messages or console output here"
+                placeholder={t('feedback.errorPlaceholder')}
                 value={errorLogs}
                 onChange={(e) => setErrorLogs(e.target.value)}
                 rows={3}
@@ -243,7 +245,7 @@ export function FeedbackWidget() {
             <span style={metaStyle}>v{BUILD_VERSION}</span>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <Button variant="secondary" size="sm" onClick={handleClose}>
-                Cancel
+                {t('feedback.cancel')}
               </Button>
               <Button
                 variant="primary"
@@ -252,7 +254,7 @@ export function FeedbackWidget() {
                 disabled={!title.trim() || description.trim().length < 20 || submitting}
                 loading={submitting}
               >
-                Submit
+                {submitting ? t('feedback.submitting') : t('feedback.submit')}
               </Button>
             </div>
           </div>
