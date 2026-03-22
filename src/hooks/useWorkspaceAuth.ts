@@ -7,6 +7,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import * as Sentry from '@sentry/react'
+import posthog from 'posthog-js'
 import { supabase } from '../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../lib/profilesService'
@@ -81,6 +83,12 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
         data: { session },
       } = await supabase.auth.getSession()
       if (!session) {
+        try {
+          Sentry.setUser(null)
+          posthog.reset()
+        } catch {
+          // best-effort
+        }
         navigate('/login')
         return
       }
@@ -101,6 +109,13 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
           console.warn('[auth] session invalid — signing out:', msg)
         }
         await supabase.auth.signOut()
+        // Clear analytics identity on signout
+        try {
+          Sentry.setUser(null)
+          posthog.reset()
+        } catch {
+          // Analytics reset must never block signout
+        }
         navigate('/login')
         return
       }
@@ -121,6 +136,20 @@ export function useWorkspaceAuth(): WorkspaceAuthState {
         const { getOrCreateProfile } = await import('../lib/profilesService')
         const p = await getOrCreateProfile()
         setProfile(p)
+
+        // Identity stitching: tell Sentry + PostHog who this user is
+        try {
+          Sentry.setUser({ id: validatedUser.id, email: validatedUser.email })
+          const effectivePlan = resolveEffectivePlan(p)
+          posthog.identify(validatedUser.id, {
+            email: validatedUser.email,
+            tier: effectivePlan,
+            locale: p?.locale ?? 'en',
+            created_at: validatedUser.created_at,
+          })
+        } catch {
+          // Analytics identity must never block auth
+        }
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
         console.error('[auth] getOrCreateProfile failed:', msg)

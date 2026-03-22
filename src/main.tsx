@@ -1,85 +1,103 @@
 /* eslint-disable react-refresh/only-export-components */
+
+// ── 1. Sentry must initialise before ALL other imports ──────────────────────
+import './instrument'
+
 import { StrictMode, useCallback, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './i18n/config'
+import * as Sentry from '@sentry/react'
+import posthog from 'posthog-js'
+import { PostHogProvider } from 'posthog-js/react'
+
 import { installResizeObserverErrorSuppressor } from './lib/suppressResizeObserverError'
 import { initObservability } from './observability/client'
-import * as Sentry from '@sentry/react'
-import { SENTRY_DSN } from './lib/env.ts'
-import App from './App.tsx'
+import { getCookieConsent } from './lib/cookieConsent'
+import { POSTHOG_KEY, POSTHOG_HOST } from './lib/env'
+import App from './App'
 
-// G0-4: Suppress benign ResizeObserver loop errors BEFORE observability
-// installs its error handler, so the noise never reaches error reporting.
+// ── 2. Console error capture for feedback widget pre-population ─────────────
+declare global {
+  interface Window {
+    __lastConsoleError?: string
+  }
+}
+const _origConsoleError = console.error.bind(console)
+console.error = (...args: unknown[]) => {
+  try {
+    window.__lastConsoleError = args
+      .map((a) => (typeof a === 'string' ? a : JSON.stringify(a)))
+      .join(' ')
+  } catch {
+    // best-effort
+  }
+  _origConsoleError(...args)
+}
+
+// ── 3. Suppress benign ResizeObserver loop errors ───────────────────────────
+// G0-4: BEFORE observability installs its error handler.
 try {
   installResizeObserverErrorSuppressor()
 } catch {
   // intentionally swallowed
 }
 
-// 7.07: Check cookie consent before initialising tracking.
-import { getCookieConsent } from './lib/cookieConsent.ts'
-const _cookieConsent = getCookieConsent()
-
-// DEV-04: Initialise Sentry error tracking if a DSN is configured.
-// Must run before any other error handlers so it captures boot-time errors.
-// 7.07: Skip Sentry if the user declined cookie consent.
+// ── 4. Initialise PostHog ───────────────────────────────────────────────────
+const cookieConsent = getCookieConsent()
 try {
-  if (SENTRY_DSN && _cookieConsent !== 'declined') {
-    Sentry.init({
-      dsn: SENTRY_DSN,
-      integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
-      tracesSampleRate: 0.1,
-      replaysSessionSampleRate: 0.05,
-      replaysOnErrorSampleRate: 1.0,
-      ignoreErrors: [
-        // Benign browser noise — not actionable
-        'ResizeObserver loop',
-        // Expected when no session exists
-        'AuthSessionMissingError',
-        // User navigation / fetch cancellation
-        'AbortError',
-      ],
+  if (POSTHOG_KEY && cookieConsent !== 'declined') {
+    posthog.init(POSTHOG_KEY, {
+      api_host: POSTHOG_HOST || 'https://eu.i.posthog.com',
+      persistence: 'memory', // GDPR-safe: no cookie written without consent
+      autocapture: false, // Intentional tracking only for an engineering tool
+      capture_pageview: false, // Handled by PageViewTracker component
+      loaded: (ph) => {
+        if (import.meta.env.DEV) ph.debug()
+        if (!import.meta.env.PROD) ph.opt_out_capturing()
+      },
     })
   }
 } catch {
-  // intentionally swallowed — Sentry must never prevent the app from booting
+  // PostHog must never prevent the app from booting
 }
 
-// Initialise observability early — installs global error handlers.
-// Never throws; failures are silently swallowed so the app always boots.
+// ── 5. Observability pipeline (custom error handlers) ───────────────────────
 try {
   initObservability()
 } catch {
   // intentionally swallowed
 }
 
-// Apply any persisted custom theme (D8-2) before first render to avoid flash.
+// ── 6. Apply persisted custom theme (D8-2) before first render ──────────────
 import { applyPersistedCustomTheme } from './lib/customThemes'
 try {
   applyPersistedCustomTheme()
 } catch {
   // intentionally swallowed
 }
-import { ErrorBoundary } from './components/ErrorBoundary.tsx'
-import { ThemeProvider } from './components/ThemeProvider.tsx'
-import { ToastProvider } from './components/ui/Toast.tsx'
-import { EngineFatalError } from './components/EngineFatalError.tsx'
-import { SettingsModalProvider } from './components/SettingsModalProvider.tsx'
-import { WindowManagerProvider } from './contexts/WindowManagerContext.tsx'
-import { PanelLayoutProvider } from './contexts/PanelLayoutContext.tsx'
-import { WindowDock } from './components/ui/WindowDock.tsx'
-import { EngineContext } from './contexts/EngineContext.ts'
-import { WorkerPoolContext } from './contexts/WorkerPoolContext.ts'
-import { createEngine, type EngineAPI } from './engine/index.ts'
-import { createWorkerPool, type WorkerPoolAPI } from './engine/workerPool.ts'
+
+// ── 7. Remaining imports ────────────────────────────────────────────────────
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { ThemeProvider } from './components/ThemeProvider'
+import { ToastProvider } from './components/ui/Toast'
+import { EngineFatalError } from './components/EngineFatalError'
+import { SettingsModalProvider } from './components/SettingsModalProvider'
+import { WindowManagerProvider } from './contexts/WindowManagerContext'
+import { PanelLayoutProvider } from './contexts/PanelLayoutContext'
+import { WindowDock } from './components/ui/WindowDock'
+import { EngineContext } from './contexts/EngineContext'
+import { WorkerPoolContext } from './contexts/WorkerPoolContext'
+import { createEngine, type EngineAPI } from './engine/index'
+import { createWorkerPool, type WorkerPoolAPI } from './engine/workerPool'
 import { BrowserRouter } from 'react-router-dom'
-import { LoadingScreen } from './components/ui/LoadingScreen.tsx'
-import { OfflineBanner } from './components/OfflineBanner.tsx'
-import { CookieConsentBanner } from './components/CookieConsent.tsx'
-import { registerServiceWorker, captureInstallPrompt } from './lib/serviceWorker.ts'
-import { initWebVitals } from './observability/webVitals.ts'
-import { useCanvasAppearance } from './hooks/useCanvasAppearance.ts'
+import { LoadingScreen } from './components/ui/LoadingScreen'
+import { OfflineBanner } from './components/OfflineBanner'
+import { CookieConsentBanner } from './components/CookieConsent'
+import { registerServiceWorker, captureInstallPrompt } from './lib/serviceWorker'
+import { initWebVitals } from './observability/webVitals'
+import { useCanvasAppearance } from './hooks/useCanvasAppearance'
+import { PageViewTracker } from './components/analytics/PageViewTracker'
 
 // UI-PERF-04: Register service worker for offline support and asset caching.
 // When a new SW is waiting (new deployment detected), reload automatically so
@@ -182,6 +200,7 @@ function Root() {
       {!error && !engine && <LoadingScreen />}
 
       <BrowserRouter>
+        <PageViewTracker />
         <WindowManagerProvider>
           <PanelLayoutProvider>
             <SettingsModalProvider>
@@ -203,12 +222,19 @@ function Root() {
   )
 }
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById('root')!, {
+  // DEV-04: Report uncaught errors to Sentry with rich React context
+  onUncaughtError: Sentry.reactErrorHandler(),
+  onCaughtError: Sentry.reactErrorHandler(),
+  onRecoverableError: Sentry.reactErrorHandler(),
+}).render(
   <StrictMode>
     <ErrorBoundary>
       <ThemeProvider>
         <ToastProvider>
-          <Root />
+          <PostHogProvider client={posthog}>
+            <Root />
+          </PostHogProvider>
         </ToastProvider>
       </ThemeProvider>
     </ErrorBoundary>

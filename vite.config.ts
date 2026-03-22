@@ -76,6 +76,7 @@ export default defineConfig({
   },
   build: {
     manifest: true,
+    sourcemap: true,
     // The main chunk contains core SPA infrastructure (React, router,
     // engine bridge). The block registry and all domain block files are
     // loaded as a lazy chunk (dynamic import in main.tsx) to stay under the

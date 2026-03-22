@@ -40,6 +40,18 @@ export const LLM_API_KEY = (import.meta.env.VITE_LLM_API_KEY as string) ?? ''
 /** DEV-04: Sentry DSN for error tracking. Empty string disables Sentry. */
 export const SENTRY_DSN = (import.meta.env.VITE_SENTRY_DSN as string) ?? ''
 
+/** PostHog project API key. Empty string disables PostHog. */
+export const POSTHOG_KEY = (import.meta.env.VITE_PUBLIC_POSTHOG_KEY as string) ?? ''
+
+/** PostHog API host (e.g. https://eu.i.posthog.com). */
+export const POSTHOG_HOST = (import.meta.env.VITE_PUBLIC_POSTHOG_HOST as string) ?? ''
+
+/** Plausible domain for traffic analytics (e.g. app.chainsolve.co.uk). */
+export const PLAUSIBLE_DOMAIN = (import.meta.env.VITE_PLAUSIBLE_DOMAIN as string) ?? ''
+
+/** Application version string. Updated each release. */
+export const APP_VERSION = (import.meta.env.VITE_APP_VERSION as string) ?? ''
+
 // ── Placeholder detection ────────────────────────────────────────────────────
 
 const PLACEHOLDER_URL = 'https://placeholder.supabase.co'

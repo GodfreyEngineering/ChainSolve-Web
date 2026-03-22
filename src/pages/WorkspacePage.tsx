@@ -30,6 +30,7 @@ import { WelcomeCanvas } from '../components/canvas/WelcomeCanvas'
 import { LoadingScreen } from '../components/ui/LoadingScreen'
 import { useSidebarStore } from '../stores/sidebarStore'
 import { StatusBar } from '../components/app/StatusBar'
+import { FeedbackWidget } from '../components/feedback/FeedbackWidget'
 
 import { listProjects, importProject, type ProjectJSON } from '../lib/projects'
 import { canCreateProject, isAtProjectLimit } from '../lib/entitlements'
@@ -405,6 +406,9 @@ export default function WorkspacePage() {
 
       {/* Status bar */}
       <StatusBar />
+
+      {/* Floating feedback widget */}
+      <FeedbackWidget />
     </div>
   )
 }

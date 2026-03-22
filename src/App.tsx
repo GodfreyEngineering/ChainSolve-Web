@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom'
+import * as Sentry from '@sentry/react'
 import { SettingsRedirect } from './components/SettingsRedirect'
 import { isDiagnosticsUIEnabled } from './lib/devFlags'
 import { RouteSkeleton } from './components/ui/RouteSkeleton'
@@ -173,176 +174,228 @@ function NotFoundPage() {
   )
 }
 
+function SentryFallback({ resetError }: { resetError: () => void }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        gap: '1rem',
+        padding: '2rem',
+        textAlign: 'center',
+        background: 'var(--bg)',
+        color: 'var(--text)',
+        fontFamily: "'Montserrat', system-ui, sans-serif",
+      }}
+    >
+      <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Something went wrong</h2>
+      <p
+        style={{
+          opacity: 0.6,
+          maxWidth: 420,
+          margin: 0,
+          fontSize: '0.9rem',
+          lineHeight: 1.5,
+        }}
+      >
+        The ChainSolve team has been notified automatically. Try refreshing — if the problem
+        persists, contact support@chainsolve.co.uk.
+      </p>
+      <button
+        onClick={resetError}
+        style={{
+          padding: '0.6rem 1.5rem',
+          background: 'var(--primary)',
+          color: 'var(--color-on-primary)',
+          border: 'none',
+          borderRadius: 8,
+          fontWeight: 600,
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          fontSize: '0.9rem',
+        }}
+      >
+        Try again
+      </button>
+    </div>
+  )
+}
+
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/app" replace />} />
-      <Route
-        path="/login"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
-            <Login initialMode="login" />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/signup"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
-            <Login initialMode="signup" />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/reset-password"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
-            <Login initialMode="reset" />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/terms"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
-            <TermsPage />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/privacy"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
-            <PrivacyPage />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/cookies"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
-            <CookiesPage />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/accessibility"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
-            <AccessibilityPage />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/licences"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
-            <LicencesPage />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/de/impressum"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
-            <ImpressumPage />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/app"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="page" />}>
-            <WorkspacePage />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/app/:projectId"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="page" />}>
-            <WorkspacePage />
-          </Suspense>
-        }
-      />
-      <Route path="/settings" element={<SettingsRedirect />} />
-      <Route path="/billing/success" element={<BillingSuccess />} />
-      <Route path="/billing/cancel" element={<BillingCancel />} />
-      <Route
-        path="/docs"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="minimal" />}>
-            <DocsPage />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/orgs"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="page" />}>
-            <OrgsPage />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/audit-log"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="page" />}>
-            <AuditLogPage />
-          </Suspense>
-        }
-      />
-      {isDiagnosticsUIEnabled() && (
+    <Sentry.ErrorBoundary fallback={({ resetError }) => <SentryFallback resetError={resetError} />}>
+      <Routes>
+        <Route path="/" element={<Navigate to="/app" replace />} />
         <Route
-          path="/diagnostics"
+          path="/login"
           element={
-            <Suspense fallback={<RouteSkeleton variant="page" />}>
-              <DiagnosticsPage />
+            <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+              <Login initialMode="login" />
             </Suspense>
           }
         />
-      )}
-      {/* OBS-01: Admin metrics dashboard (is_admin guard enforced by CF Function) */}
-      <Route
-        path="/admin/metrics"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="page" />}>
-            <MetricsPage />
-          </Suspense>
-        }
-      />
-      {/* Legacy redirects */}
-      <Route path="/canvas" element={<ScratchRedirect />} />
-      <Route path="/canvas/:projectId" element={<CanvasRedirect />} />
-      <Route
-        path="/explore"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="page" />}>
-            <ExplorePage />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/explore/:itemId"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="page" />}>
-            <ExploreItemPage />
-          </Suspense>
-        }
-      />
-      <Route path="/marketplace" element={<ExploreRedirect />} />
-      <Route path="/marketplace/*" element={<ExploreRedirect />} />
-      {/* ADV-02: Shared project viewer */}
-      <Route
-        path="/share/:token"
-        element={
-          <Suspense fallback={<RouteSkeleton variant="page" />}>
-            <SharedProjectPage />
-          </Suspense>
-        }
-      />
-      {/* Catch-all 404 */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+        <Route
+          path="/signup"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+              <Login initialMode="signup" />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+              <Login initialMode="reset" />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+              <TermsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/privacy"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+              <PrivacyPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/cookies"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+              <CookiesPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/accessibility"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+              <AccessibilityPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/licences"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+              <LicencesPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/de/impressum"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+              <ImpressumPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="page" />}>
+              <WorkspacePage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/app/:projectId"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="page" />}>
+              <WorkspacePage />
+            </Suspense>
+          }
+        />
+        <Route path="/settings" element={<SettingsRedirect />} />
+        <Route path="/billing/success" element={<BillingSuccess />} />
+        <Route path="/billing/cancel" element={<BillingCancel />} />
+        <Route
+          path="/docs"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="minimal" />}>
+              <DocsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/orgs"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="page" />}>
+              <OrgsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/audit-log"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="page" />}>
+              <AuditLogPage />
+            </Suspense>
+          }
+        />
+        {isDiagnosticsUIEnabled() && (
+          <Route
+            path="/diagnostics"
+            element={
+              <Suspense fallback={<RouteSkeleton variant="page" />}>
+                <DiagnosticsPage />
+              </Suspense>
+            }
+          />
+        )}
+        {/* OBS-01: Admin metrics dashboard (is_admin guard enforced by CF Function) */}
+        <Route
+          path="/admin/metrics"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="page" />}>
+              <MetricsPage />
+            </Suspense>
+          }
+        />
+        {/* Legacy redirects */}
+        <Route path="/canvas" element={<ScratchRedirect />} />
+        <Route path="/canvas/:projectId" element={<CanvasRedirect />} />
+        <Route
+          path="/explore"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="page" />}>
+              <ExplorePage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/explore/:itemId"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="page" />}>
+              <ExploreItemPage />
+            </Suspense>
+          }
+        />
+        <Route path="/marketplace" element={<ExploreRedirect />} />
+        <Route path="/marketplace/*" element={<ExploreRedirect />} />
+        {/* ADV-02: Shared project viewer */}
+        <Route
+          path="/share/:token"
+          element={
+            <Suspense fallback={<RouteSkeleton variant="page" />}>
+              <SharedProjectPage />
+            </Suspense>
+          }
+        />
+        {/* Catch-all 404 */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Sentry.ErrorBoundary>
   )
 }
