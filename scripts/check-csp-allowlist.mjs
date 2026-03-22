@@ -35,6 +35,11 @@ const APPROVED_ORIGINS = [
   'https://challenges.cloudflare.com',
   // Sentry error tracking (DEV-04: error + performance reports via XHR/fetch)
   'https://*.sentry.io',
+  // PostHog product analytics (connect-src: event ingestion — direct + reverse proxy)
+  'https://eu.i.posthog.com',
+  'https://t.chainsolve.co.uk',
+  // Plausible traffic analytics (script-src: tracking script, connect-src: event API)
+  'https://plausible.io',
 ]
 
 // ── Keywords that are not external origins ────────────────────────────────────

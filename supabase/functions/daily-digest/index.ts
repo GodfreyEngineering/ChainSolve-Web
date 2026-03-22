@@ -95,7 +95,7 @@ serve(async (req: Request) => {
         Authorization: `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
-        from: 'ChainSolve Ops <alerts@godfreyengineering.com>',
+        from: 'ChainSolve Ops <alerts@alerts.godfreyengineering.com>',
         to: [OPS_EMAIL],
         subject,
         html: htmlBody,

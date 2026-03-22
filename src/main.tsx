@@ -51,7 +51,7 @@ if (POSTHOG_KEY && cookieConsent !== 'declined') {
   import('posthog-js')
     .then(({ default: posthog }) => {
       posthog.init(POSTHOG_KEY, {
-        api_host: POSTHOG_HOST || 'https://eu.i.posthog.com',
+        api_host: POSTHOG_HOST || 'https://t.chainsolve.co.uk',
         persistence: 'memory', // GDPR-safe: no cookie written without consent
         autocapture: false, // Intentional tracking only for an engineering tool
         capture_pageview: false, // Handled by PageViewTracker component
