@@ -14,17 +14,7 @@ import { Tooltip } from '../ui/Tooltip'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-export type DockTab =
-  | 'console'
-  | 'health'
-  | 'output'
-  | 'problems'
-  | 'history'
-  | 'notes'
-  | 'channels'
-  | 'snapshots'
-  | 'timeline'
-  | 'experiments'
+export type DockTab = 'output' | 'problems' | 'console' | 'notes' | 'history'
 
 export interface DockPanel {
   id: DockTab
@@ -79,22 +69,17 @@ function loadTab(): DockTab {
   try {
     const v = localStorage.getItem(TAB_KEY)
     if (
-      v === 'console' ||
-      v === 'health' ||
       v === 'output' ||
       v === 'problems' ||
-      v === 'history' ||
+      v === 'console' ||
       v === 'notes' ||
-      v === 'channels' ||
-      v === 'snapshots' ||
-      v === 'experiments' ||
-      v === 'timeline'
+      v === 'history'
     )
       return v
   } catch {
     // ignore
   }
-  return 'console'
+  return 'output'
 }
 
 function saveTab(tab: DockTab) {

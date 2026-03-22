@@ -1530,14 +1530,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const onNodeDoubleClick = useCallback(
     (_: MouseEvent, node: Node) => {
       if (!inspPinned) setInspectedId(node.id)
-      if (isMobile) {
-        // Mobile: use the existing floating inspector / bottom sheet
-        openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
-        setLibVisible(false)
-      } else {
-        // Desktop: open the side sheet (3.19)
-        setSideSheetOpen(true)
-      }
+      // Always open the floating inspector window (consistent on desktop + mobile)
+      openWindow(INSPECTOR_WINDOW_ID, INSPECTOR_DEFAULTS)
+      if (isMobile) setLibVisible(false)
+      // Close the sidebar side-sheet if it was open
+      setSideSheetOpen(false)
     },
     [isMobile, inspPinned, openWindow],
   )
@@ -3518,32 +3515,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
   const dockPanels = useMemo<DockPanel[]>(
     () => [
       {
-        id: 'console' as DockTab,
-        label: t('debugConsole.title', 'Debug Console'),
-        content: (
-          <Suspense fallback={null}>
-            <LazyDebugConsolePanel docked />
-          </Suspense>
-        ),
-      },
-      {
-        id: 'health' as DockTab,
-        label: t('toolbar.graphHealth', 'Graph Health'),
-        badge: healthWarningCount,
-        content: (
-          <Suspense fallback={null}>
-            <LazyGraphHealthPanel
-              docked
-              nodes={nodes}
-              edges={edges}
-              onClose={() => setDockCollapsed(true)}
-              onFixWithAi={onFixWithAi}
-              onExplainIssues={onExplainIssues}
-            />
-          </Suspense>
-        ),
-      },
-      {
         id: 'output' as DockTab,
         label: t('dock.output', 'Output'),
         content: (
@@ -3563,28 +3534,11 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
         ),
       },
       {
-        id: 'history' as DockTab,
-        label: t('dock.history', 'History'),
+        id: 'console' as DockTab,
+        label: t('debugConsole.title', 'Debug Console'),
         content: (
           <Suspense fallback={null}>
-            <LazyHistoryPanel
-              entries={stackEntries}
-              currentNodeCount={nodes.length}
-              currentEdgeCount={edges.length}
-              onRestore={handleRestoreHistory}
-              onSaveCheckpoint={handleSaveCheckpoint}
-              onClear={historyClear}
-              onRenameEntry={handleRenameHistoryEntry}
-            />
-          </Suspense>
-        ),
-      },
-      {
-        id: 'channels' as DockTab,
-        label: t('dock.channels', 'Channels'),
-        content: (
-          <Suspense fallback={null}>
-            <LazyChannelsPanel />
+            <LazyDebugConsolePanel docked />
           </Suspense>
         ),
       },
@@ -3599,40 +3553,22 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
                 </Suspense>
               ),
             },
-            {
-              id: 'snapshots' as DockTab,
-              label: t('dock.snapshots', 'Versions'),
-              content: (
-                <Suspense fallback={null}>
-                  <LazyVersionHistoryPanel
-                    projectId={telemetryProjectId}
-                    canvasId={canvasId}
-                    nodes={nodes}
-                    edges={edges}
-                    onRestore={handleRestoreSnapshot}
-                  />
-                </Suspense>
-              ),
-            },
           ]
         : []),
-      // 3.38: Execution timeline panel
       {
-        id: 'timeline' as DockTab,
-        label: t('dock.timeline', 'Timeline'),
+        id: 'history' as DockTab,
+        label: t('dock.history', 'History'),
         content: (
           <Suspense fallback={null}>
-            <LazyEvalTimelinePanel />
-          </Suspense>
-        ),
-      },
-      // 2.103: Experiment tracker panel
-      {
-        id: 'experiments' as DockTab,
-        label: t('dock.experiments', 'Experiments'),
-        content: (
-          <Suspense fallback={null}>
-            <LazyExperimentPanel projectId={telemetryProjectId ?? null} />
+            <LazyHistoryPanel
+              entries={stackEntries}
+              currentNodeCount={nodes.length}
+              currentEdgeCount={edges.length}
+              onRestore={handleRestoreHistory}
+              onSaveCheckpoint={handleSaveCheckpoint}
+              onClear={historyClear}
+              onRenameEntry={handleRenameHistoryEntry}
+            />
           </Suspense>
         ),
       },
