@@ -198,15 +198,15 @@ export function FeedbackWidget() {
             autoFocus
           />
 
-          {/* Description */}
+          {/* Description — no maxLength; users may paste long terminal errors */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
             <label style={labelStyle}>{t('feedback.descriptionLabel')}</label>
             <textarea
               placeholder={t('feedback.descriptionPlaceholder')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              style={textareaStyle}
+              rows={6}
+              style={descriptionStyle}
               required
             />
             {description.length > 0 && description.trim().length < 20 && (
@@ -320,6 +320,12 @@ const textareaStyle: React.CSSProperties = {
   resize: 'vertical',
   fontFamily: 'inherit',
   minHeight: 80,
+}
+
+const descriptionStyle: React.CSSProperties = {
+  ...textareaStyle,
+  minHeight: 120,
+  maxHeight: '50vh',
 }
 
 const errorHintStyle: React.CSSProperties = {

@@ -55,6 +55,8 @@ if (POSTHOG_KEY && cookieConsent !== 'declined') {
         persistence: 'memory', // GDPR-safe: no cookie written without consent
         autocapture: false, // Intentional tracking only for an engineering tool
         capture_pageview: false, // Handled by PageViewTracker component
+        capture_pageleave: true, // Required for accurate bounce rate & session duration
+        scroll_depth: true, // Track how far users scroll on each page
         loaded: (ph) => {
           if (import.meta.env.DEV) ph.debug()
           if (!import.meta.env.PROD) ph.opt_out_capturing()

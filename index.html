@@ -9,7 +9,10 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="robots" content="index, follow" />
-    <meta name="description" content="ChainSolve — scientific node-graph calculator. Build computation chains visually." />
+    <meta
+      name="description"
+      content="ChainSolve — scientific node-graph calculator. Build computation chains visually."
+    />
     <meta name="theme-color" content="#1CABB0" />
     <link rel="canonical" href="https://app.chainsolve.co.uk/" />
     <!-- Hreflang: international locale signals -->
@@ -22,7 +25,10 @@
     <link rel="alternate" hreflang="x-default" href="https://app.chainsolve.co.uk/" />
     <!-- Open Graph -->
     <meta property="og:title" content="ChainSolve" />
-    <meta property="og:description" content="Scientific node-graph calculator. Build computation chains visually." />
+    <meta
+      property="og:description"
+      content="Scientific node-graph calculator. Build computation chains visually."
+    />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://app.chainsolve.co.uk/" />
     <meta property="og:image" content="https://app.chainsolve.co.uk/og-image.png" />
@@ -37,20 +43,47 @@
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="ChainSolve" />
-    <meta name="twitter:description" content="Scientific node-graph calculator. Build computation chains visually." />
+    <meta
+      name="twitter:description"
+      content="Scientific node-graph calculator. Build computation chains visually."
+    />
     <meta name="twitter:image" content="https://app.chainsolve.co.uk/og-image.png" />
     <!-- Boot ladder rung 1: HTML parsed by browser (no JS required).
          e2e tests check for this sentinel to distinguish a network/server
          failure from a JS/React/WASM failure. -->
     <meta name="x-boot" data-testid="boot-html" content="loaded" />
+    <!-- Plausible: privacy-friendly traffic analytics (no cookies, GDPR-safe).
+         The script auto-tracks pageviews. Custom events via the Events API in
+         src/lib/plausible.ts. data-api left default (plausible.io). -->
+    <script
+      defer
+      data-domain="app.chainsolve.co.uk"
+      src="https://plausible.io/js/script.js"
+      crossorigin="anonymous"
+    ></script>
     <title>ChainSolve</title>
   </head>
   <body>
     <div id="root">
       <main>
         <!-- J4-1: Pre-React loading screen (removed when React mounts) -->
-        <div id="cs-preloader" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f0f0f">
-          <img src="/brand/logo-wide-text.png" alt="ChainSolve loading" width="120" height="30" style="opacity:0.4">
+        <div
+          id="cs-preloader"
+          style="
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f0f0f;
+          "
+        >
+          <img
+            src="/brand/logo-wide-text.png"
+            alt="ChainSolve loading"
+            width="120"
+            height="30"
+            style="opacity: 0.4"
+          />
         </div>
       </main>
     </div>

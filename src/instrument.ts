@@ -16,7 +16,6 @@ try {
   if (SENTRY_DSN && cookieConsent !== 'declined') {
     Sentry.init({
       dsn: SENTRY_DSN,
-      enabled: import.meta.env.PROD,
       release: `chainsolve@${APP_VERSION || 'dev'}`,
       environment: import.meta.env.PROD ? 'production' : 'development',
       integrations: [
