@@ -28,6 +28,8 @@ import TurnstileWidget from '../components/ui/TurnstileWidget'
 import { isTurnstileEnabled } from '../lib/turnstile'
 import { enforceAndRegisterSession, isSingleSessionRequired } from '../lib/sessionService'
 import { getRememberMe, setRememberMe } from '../lib/rememberMe'
+import { getPostHogInstance } from '../main'
+import { trackEvent as plausibleTrack } from '../lib/plausible'
 
 export type AuthMode = 'login' | 'signup' | 'reset'
 
@@ -155,6 +157,8 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
           const singleRequired = await isSingleSessionRequired(session.user.id)
           await enforceAndRegisterSession(session.user.id, singleRequired)
         }
+        getPostHogInstance()?.capture('sign_up_completed', { method: 'email' })
+        plausibleTrack('sign_up_completed', { method: 'email' })
         navigate('/app')
       } else if (mode === 'reset') {
         const { error: resetErr } = await resetPasswordForEmail(email, token)
@@ -163,6 +167,7 @@ export default function Login({ initialMode = 'login' }: LoginProps) {
       } else {
         const { error: signInErr } = await signInWithPassword(email, password, token)
         if (signInErr) throw signInErr
+        getPostHogInstance()?.capture('login', { method: 'email' })
         setRememberMe(rememberMe)
         // J1-4: Check for enrolled MFA factors before completing login.
         const { factors } = await listMfaFactors()

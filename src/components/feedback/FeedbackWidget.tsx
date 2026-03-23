@@ -20,6 +20,7 @@ import {
   getFeedbackUser,
 } from '../../lib/feedbackService'
 import { BUILD_VERSION } from '../../lib/build-info'
+import { getPostHogInstance } from '../../main'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -121,6 +122,8 @@ export function FeedbackWidget() {
         browserInfo,
         route: window.location.pathname,
       })
+
+      getPostHogInstance()?.capture('feedback_submitted', { type })
 
       // Fire-and-forget: send confirmation email
       if (userEmail) {

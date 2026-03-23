@@ -299,6 +299,13 @@ export async function createProjectFromTemplate(templateId: string): Promise<Pro
   const tmpl = TEMPLATES.find((t) => t.id === templateId)
   if (!tmpl) throw new Error(`Unknown template: ${templateId}`)
 
+  import('../main').then(({ getPostHogInstance }) => {
+    getPostHogInstance()?.capture('template_used', {
+      template_id: tmpl.id,
+      template_name: tmpl.name,
+    })
+  })
+
   const session = await requireSession()
   const uniqueName = await resolveUniqueName(tmpl.name)
   const projectId = crypto.randomUUID()

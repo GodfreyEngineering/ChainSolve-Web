@@ -117,6 +117,7 @@ import {
 } from '../../lib/groups'
 import { saveTemplate as saveTemplateApi } from '../../lib/templates'
 import type { Template } from '../../lib/templates'
+import { getPostHogInstance } from '../../main'
 import { AnimatedEdge } from './edges/AnimatedEdge'
 import { CanvasSettingsContext } from '../../contexts/CanvasSettingsContext'
 import { PlanContext } from '../../contexts/PlanContext'
@@ -2348,6 +2349,10 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       doSaveHistory()
       setNodes((nds) => [...nds, groupNode, ...memberNodes] as Node<NodeData>[])
       setEdges((eds) => [...eds, ...newEdges])
+      getPostHogInstance()?.capture('template_used', {
+        template_id: template.id,
+        template_name: template.name,
+      })
     },
     [screenToFlowPosition, setNodes, setEdges, doSaveHistory],
   )

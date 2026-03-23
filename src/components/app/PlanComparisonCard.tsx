@@ -10,6 +10,8 @@
 import { useState, useCallback, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { refreshSession, signOut } from '../../lib/auth'
+import { getPostHogInstance } from '../../main'
+import { trackEvent as plausibleTrack } from '../../lib/plausible'
 import type { Plan, PlanKey } from '../../lib/entitlements'
 
 // ── Feature definitions ─────────────────────────────────────────────────────
@@ -109,39 +111,50 @@ export function PlanComparisonCard({
   const prices = PRICING[cycle]
   const features = compact ? FEATURES.filter((f) => !(f.free && f.pro)) : FEATURES
 
-  const handleCheckout = useCallback(async (planKey: PlanKey) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const { session, error: refreshErr } = await refreshSession()
-      if (refreshErr || !session) {
-        await signOut()
-        window.location.assign('/login')
-        return
-      }
-      const res = await fetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ plan_key: planKey }),
+  const handleCheckout = useCallback(
+    async (planKey: PlanKey) => {
+      setLoading(true)
+      setError(null)
+      getPostHogInstance()?.capture('subscription_upgrade_clicked', {
+        from_tier: currentPlan ?? 'free',
+        to_tier: planKey,
       })
-      let json: Record<string, unknown>
+      plausibleTrack('subscription_upgrade_clicked', {
+        from_tier: currentPlan ?? 'free',
+        to_tier: planKey,
+      })
       try {
-        json = (await res.json()) as Record<string, unknown>
-      } catch {
-        throw new Error(`Server returned a non-JSON response (HTTP ${res.status})`)
+        const { session, error: refreshErr } = await refreshSession()
+        if (refreshErr || !session) {
+          await signOut()
+          window.location.assign('/login')
+          return
+        }
+        const res = await fetch('/api/stripe/create-checkout-session', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ plan_key: planKey }),
+        })
+        let json: Record<string, unknown>
+        try {
+          json = (await res.json()) as Record<string, unknown>
+        } catch {
+          throw new Error(`Server returned a non-JSON response (HTTP ${res.status})`)
+        }
+        if (!res.ok)
+          throw new Error(typeof json.error === 'string' ? json.error : `HTTP ${res.status}`)
+        if (typeof json.url !== 'string') throw new Error('No redirect URL returned')
+        window.location.assign(json.url)
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Upgrade request failed')
+        setLoading(false)
       }
-      if (!res.ok)
-        throw new Error(typeof json.error === 'string' ? json.error : `HTTP ${res.status}`)
-      if (typeof json.url !== 'string') throw new Error('No redirect URL returned')
-      window.location.assign(json.url)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Upgrade request failed')
-      setLoading(false)
-    }
-  }, [])
+    },
+    [currentPlan],
+  )
 
   const proPlanKey: PlanKey = cycle === 'monthly' ? 'pro_monthly' : 'pro_annual'
 

@@ -9,6 +9,8 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useStatusBarStore } from '../../stores/statusBarStore'
+import { getPostHogInstance } from '../../main'
+import { trackEvent as plausibleTrack } from '../../lib/plausible'
 
 export type ExportFormat = 'pdf' | 'xlsx' | 'json' | 'git' | 'html'
 export type ExportScope = 'active' | 'project'
@@ -100,6 +102,8 @@ export function ExportDialog({
 
   const handleExport = useCallback(() => {
     if (prefs.remember) savePrefs(prefs)
+    getPostHogInstance()?.capture('graph_exported', { format: prefs.format })
+    plausibleTrack('graph_exported', { format: prefs.format })
 
     switch (prefs.format) {
       case 'pdf':
