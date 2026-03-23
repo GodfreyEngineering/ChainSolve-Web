@@ -16,7 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRunsForProject, deleteRun } from '../../lib/experiments.ts'
 import type { ExperimentRun } from '../../lib/experiments.ts'
-import { usePlanContext } from '../../contexts/PlanContext'
+import { usePlan } from '../../contexts/PlanContext'
 
 // ── Parallel Coordinates ─────────────────────────────────────────────────────
 
@@ -225,7 +225,7 @@ interface ExperimentPanelProps {
 
 export function ExperimentPanel({ projectId }: ExperimentPanelProps) {
   const { t } = useTranslation()
-  const plan = usePlanContext()
+  const plan = usePlan()
   const [runs, setRuns] = useState<ExperimentRun[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)

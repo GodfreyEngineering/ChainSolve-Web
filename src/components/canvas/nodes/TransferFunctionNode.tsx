@@ -213,8 +213,8 @@ function TFNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as TFNodeData
   const { updateNodeData } = useReactFlow()
 
-  const num = nd.numerator ?? [1]
-  const den = nd.denominator ?? [1, 2, 1]
+  const num = useMemo(() => nd.numerator ?? [1], [nd.numerator])
+  const den = useMemo(() => nd.denominator ?? [1, 2, 1], [nd.denominator])
   const nPoints = nd.nPoints ?? 200
   const tEnd = nd.tEnd ?? 0
   const wMin = nd.wMin ?? 0.01

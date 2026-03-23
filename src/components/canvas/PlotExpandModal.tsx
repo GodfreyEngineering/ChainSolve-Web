@@ -7,7 +7,7 @@
  * Default-exported for React.lazy() compatibility.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { Modal } from '../ui/Modal'
 import type { Value } from '../../engine/value'
 import { isTable } from '../../engine/value'
@@ -63,14 +63,17 @@ export default function PlotExpandModal({ value, config, label, onClose }: PlotE
   const currentTime = timeValues[frameIdx] ?? 0
 
   // Filtered value: rows where time col <= currentTime
-  const animValue: Value | undefined =
-    animTable && timeValues.length > 0
-      ? {
-          kind: 'table',
-          columns: animTable.columns,
-          rows: animTable.rows.filter((r) => (r[timeColIdx] as number) <= currentTime),
-        }
-      : value
+  const animValue: Value | undefined = useMemo(
+    () =>
+      animTable && timeValues.length > 0
+        ? {
+            kind: 'table',
+            columns: animTable.columns,
+            rows: animTable.rows.filter((r) => (r[timeColIdx] as number) <= currentTime),
+          }
+        : value,
+    [animTable, timeValues.length, timeColIdx, currentTime, value],
+  )
 
   const stopAnimation = useCallback(() => {
     if (animIntervalRef.current !== null) {

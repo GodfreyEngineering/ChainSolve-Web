@@ -1,5 +1,5 @@
 /**
- * csvParser.ts — CSV + TSV + NumPy .npy + Excel .xlsx + JSON → table data parsers.
+ * csvParser.ts — CSV + TSV + NumPy .npy + JSON → table data parsers.
  *
  * CSV/TSV handles:
  * - Optional header row detection (non-numeric first cell → treat as header)
@@ -9,7 +9,6 @@
  * - Auto-detects tab vs comma delimiter
  *
  * NumPy .npy (4.10): parses v1/v2 format for float32/float64 1D/2D arrays.
- * Excel .xlsx (4.6): dynamically imports SheetJS, reads first sheet.
  * JSON: array of objects → columns are keys with numeric values.
  */
 
@@ -237,21 +236,4 @@ export function parseJSONToTableData(text: string): ParsedCSV | null {
   } catch {
     return null
   }
-}
-
-/**
- * 4.6: Parse Excel .xlsx / .xls ArrayBuffer into ParsedCSV format.
- *
- * Reads the first sheet. Row 1 is used as column headers if any cell is
- * non-numeric; otherwise columns are named A, B, C…
- * Non-numeric cell values in data rows are coerced to 0.
- *
- * Note: XLSX parsing is not currently supported (the xlsx dependency was
- * removed due to unpatched security vulnerabilities). This function returns
- * null until a safe replacement is integrated. CSV/TSV import via
- * parseCSV() remains fully functional.
- */
-export async function parseXlsxToTableData(_buf: ArrayBuffer): Promise<ParsedCSV | null> {
-  // TODO: integrate a safe XLSX parser (e.g. exceljs or a WASM-based reader)
-  return null
 }

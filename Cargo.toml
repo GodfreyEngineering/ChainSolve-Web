@@ -15,3 +15,8 @@ opt-level = "z"
 codegen-units = 1
 panic = "abort"
 strip = true
+
+# Desktop (Tauri) release profile — speed over size.
+[profile.desktop]
+inherits = "release"
+opt-level = 3

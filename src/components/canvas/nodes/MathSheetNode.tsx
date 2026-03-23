@@ -326,7 +326,10 @@ function MathSheetNodeInner({ id, data, selected }: NodeProps) {
   const computed = useComputed()
   const edges = useEdges()
 
-  const sheetVars: SheetVar[] = nd.sheetVars ?? [{ name: 'x' }, { name: 'y' }]
+  const sheetVars: SheetVar[] = useMemo(
+    () => nd.sheetVars ?? [{ name: 'x' }, { name: 'y' }],
+    [nd.sheetVars],
+  )
   const numRows: number = nd.numRows ?? 5
   const numCols: number = nd.numCols ?? 3
   const cells: string[][] =

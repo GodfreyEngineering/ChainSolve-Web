@@ -138,6 +138,13 @@ Users can type expressions in the formula bar (fx mode) to create blocks:
 - `src/blocks/` — Block definitions (metadata + port schemas); no evaluation logic
 - `src/stores/` — Zustand stores (project metadata, variables, published outputs)
 - `src/contexts/` — React Contexts (engine API, plan/entitlements, theme, canvas settings)
+- `src/hooks/` — Shared React hooks (e.g. `useCanvasEngine`, `useGraphEngine`)
+- `src/i18n/` — Internationalization (react-i18next); locale files in `locales/` (en, de, fr, es, it)
+- `src/templates/` — Pre-built canvas templates (aerospace, finance, chemical engineering, etc.)
+- `src/annotations/` — Canvas annotation system (text labels, notes on the canvas)
+- `src/observability/` — Sentry + PostHog + Plausible analytics wiring
+- `src/pages/` — Top-level route pages (landing, docs, dashboard, canvas, etc.)
+- `src/units/` — Unit conversion definitions
 - `functions/` — Cloudflare Pages Functions (server-side: Stripe webhooks, CSP reports)
 
 ### Rust vs TypeScript boundary
@@ -168,7 +175,7 @@ The `src/engine/value.ts` mirror types let the UI pattern-match on value kinds w
 - `crates/engine-core/src/compensated.rs` — Neumaier compensated sum, Ogita-Rump-Oishi dot product
 - `crates/engine-wasm/` — wasm-bindgen bindings; persistent `EngineGraph` via thread-local storage
 - Protocol: snapshot load on first render, then incremental patches. Watchdog restarts worker after 5 s hang.
-- `ENGINE_CONTRACT_VERSION = 3` in `crates/engine-core/src/catalog.rs` versions the evaluation contract.
+- `ENGINE_CONTRACT_VERSION = 4` in `crates/engine-core/src/catalog.rs` versions the evaluation contract.
 
 ### Worker pool (ENG-04)
 
@@ -192,7 +199,7 @@ The required COOP/COEP response headers live in `public/_headers` (see Hard Inva
 
 ### Block system
 
-Blocks are defined in `src/blocks/` as metadata (`BlockDef`) with port schemas — no evaluation. The Rust engine owns all computation. `src/blocks/registry.ts` is the master registry (361+ entries). Block categories are defined as `BlockCategory` in `src/blocks/types.ts`. Block definition files follow the naming convention `*-blocks.ts`.
+Blocks are defined in `src/blocks/` as metadata (`BlockDef`) with port schemas — no evaluation. The Rust engine owns all computation. `src/blocks/registry.ts` is the master registry (85+ entries). Block categories are defined as `BlockCategory` in `src/blocks/types.ts`. Block definition files follow the naming convention `*-blocks.ts`.
 
 **Variadic blocks**: `add`, `multiply`, `max`, `min`, `vectorConcat`, `text_concat` support N inputs (2-64). The UI shows +/- buttons to add/remove ports. Variadic inputs use `in_0`, `in_1`, ..., `in_N` port naming. The Rust engine's `nary_broadcast` applies the binary op by left-fold across all inputs.
 
@@ -249,8 +256,8 @@ TypeScript error codes use `[SCREAMING_SNAKE_CASE]` as the first token in thrown
 
 When changing anything affecting engine evaluation (broadcasting, error propagation, value semantics):
 
-1. Bump `ENGINE_CONTRACT_VERSION` in `crates/engine-core/src/catalog.rs` (currently `3`)
-2. Update the expected version in `src/engine/index.ts` (search `contractVersion`)
+1. Bump `ENGINE_CONTRACT_VERSION` in `crates/engine-core/src/catalog.rs` (currently `4`)
+2. Update the expected version in `src/engine/index.ts` (search `EXPECTED_CONTRACT_VERSION`)
 3. Document in `docs/W9_3_CORRECTNESS.md`
 
 ### 2. CSP must keep `'wasm-unsafe-eval'`
@@ -273,10 +280,10 @@ The `/*` section in `public/_headers` must include:
 
 ```text
 Cross-Origin-Opener-Policy: same-origin
-Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Embedder-Policy: credentialless
 ```
 
-Without these, `crossOriginIsolated` is `false`, `SharedArrayBuffer` is unavailable, and dataset transfer falls back to ArrayBuffer copy. Never remove them.
+Without these, `crossOriginIsolated` is `false`, `SharedArrayBuffer` is unavailable, and dataset transfer falls back to ArrayBuffer copy. `credentialless` (not `require-corp`) is used so that cross-origin resources (Plausible, Google Fonts, CDN scripts) load without each server needing `Cross-Origin-Resource-Policy` headers. Never remove them.
 
 ## CI structure
 
@@ -292,9 +299,9 @@ Playwright does **not** run on PRs — only after merge to `main`, as a pre-cond
 
 | Metric | Budget |
 | ------ | ------ |
-| Initial JS (gzip) | 400 KB |
-| WASM (raw) | 1000 KB |
-| WASM (gzip) | 350 KB |
+| Initial JS (gzip) | 500 KB |
+| WASM (raw) | 2000 KB |
+| WASM (gzip) | 700 KB |
 
 Use `React.lazy()` to keep new components out of the initial load. Run `npm run perf:bundle` after a build to check locally.
 

@@ -61,8 +61,8 @@ function StateMachineNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as StateMachineNodeData
   const { updateNodeData } = useReactFlow()
 
-  const states: FsmState[] = nd.fsmStates ?? []
-  const transitions: FsmTransition[] = nd.fsmTransitions ?? []
+  const states: FsmState[] = useMemo(() => nd.fsmStates ?? [], [nd.fsmStates])
+  const transitions: FsmTransition[] = useMemo(() => nd.fsmTransitions ?? [], [nd.fsmTransitions])
   const currentStateId = nd.currentStateId ?? states[0]?.id ?? ''
   const dynamicInputCount = nd.dynamicInputCount ?? 2
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`

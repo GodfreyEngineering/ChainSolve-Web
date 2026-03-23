@@ -15,7 +15,7 @@
  *  - Execution time badge
  */
 
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import type { NodeData } from '../../../blocks/types'
@@ -57,7 +57,7 @@ function SqlQueryNodeInner({ id, data, selected }: NodeProps) {
   const [running, setRunning] = useState(false)
 
   const sql = nd.sql ?? ''
-  const params = nd.params ?? []
+  const params = useMemo(() => nd.params ?? [], [nd.params])
   const tableData: TableData = (nd.tableData as TableData | undefined) ?? {
     columns: [],
     rows: [],

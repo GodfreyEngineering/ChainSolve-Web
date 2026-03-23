@@ -59,6 +59,7 @@ if (POSTHOG_KEY && cookieConsent !== 'declined') {
         capture_pageleave: true, // Required for accurate bounce rate & session duration
         autocapture: false, // Intentional tracking only for an engineering tool
         enable_heatmaps: true, // Enables scroll depth tracking in PostHog
+        defaults: '2026-01-30', // PostHog config snapshot date
         loaded: (ph) => {
           if (import.meta.env.DEV) ph.debug()
           if (!import.meta.env.PROD) ph.opt_out_capturing()

@@ -48,9 +48,3 @@ cuda = ["engine-core/native-cuda"]
 [target.'cfg(target_os = "windows")'.dependencies]
 # Windows: CUDA path is C:\Windows\System32\nvcuda.dll (driver-provided)
 
-[profile.release]
-panic = "abort"
-codegen-units = 1
-lto = true
-opt-level = 3
-strip = true

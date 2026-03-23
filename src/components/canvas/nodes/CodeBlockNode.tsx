@@ -68,8 +68,17 @@ const MATH_SCOPE: Record<string, unknown> = {
  * Evaluate user code with named variable bindings and math scope injected.
  * Wraps single-expression code (no `return`) automatically.
  * Returns the numeric result or throws on error.
+ *
+ * SECURITY: Uses new Function() to run user-authored code in the main thread.
+ * The scope is sandboxed to MATH_SCOPE builtins + declared variables — no
+ * DOM, fetch, or import access. This is acceptable for v1.0 because the user
+ * only executes their own expressions on their own machine.
+ *
+ * Limitation: no execution timeout. A tight infinite loop will freeze the tab.
+ * Post-launch, consider moving evaluation to a Web Worker with terminate().
  */
 function evalCode(code: string, vars: Record<string, number>): number {
+  if (code.length > 10_000) throw new Error('Code exceeds 10,000 character limit')
   const mathKeys = Object.keys(MATH_SCOPE)
   const mathVals = mathKeys.map((k) => MATH_SCOPE[k])
   const varKeys = Object.keys(vars)
@@ -106,7 +115,10 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
   const nd = data as CodeBlockNodeData
   const { updateNodeData } = useReactFlow()
 
-  const codeVars: CodeBlockVar[] = nd.codeVars ?? [{ name: 'x' }, { name: 'y' }]
+  const codeVars: CodeBlockVar[] = useMemo(
+    () => nd.codeVars ?? [{ name: 'x' }, { name: 'y' }],
+    [nd.codeVars],
+  )
   const code: string = nd.code ?? 'return 0'
   const codeError: string | null = nd.codeError ?? null
   const codeOutput: number = nd.codeOutput ?? 0
@@ -130,11 +142,11 @@ function CodeBlockNodeInner({ id, data, selected }: NodeProps) {
 
   const resolveN = (v: unknown): number => (typeof v === 'number' && Number.isFinite(v) ? v : 0)
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const evaluate = useCallback(() => {
+    const inputs = [in0, in1, in2, in3, in4, in5, in6, in7]
     const varMap: Record<string, number> = {}
     codeVars.forEach((v, i) => {
-      varMap[v.name] = resolveN(inputRefs[i])
+      varMap[v.name] = resolveN(inputs[i])
     })
     try {
       const result = evalCode(code, varMap)

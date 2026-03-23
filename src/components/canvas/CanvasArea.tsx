@@ -128,12 +128,7 @@ import { autoLayout, type LayoutDirection, type AutoLayoutResult } from '../../l
 import { useGraphHistory } from '../../hooks/useGraphHistory'
 import { copyToClipboard, pasteFromClipboard, pasteFromSystemClipboard } from '../../lib/clipboard'
 import { computeAlignment, type AlignOp } from '../../lib/alignmentHelpers'
-import {
-  parseCSVToTableData,
-  parseNpyToTableData,
-  parseXlsxToTableData,
-  parseJSONToTableData,
-} from '../../lib/csvParser'
+import { parseCSVToTableData, parseNpyToTableData, parseJSONToTableData } from '../../lib/csvParser'
 import { computeDatasetHash } from '../../lib/datasetHash'
 import { CommandPalette, type PaletteCommand } from './CommandPalette'
 import { FormulaBar } from './FormulaBar'
@@ -553,8 +548,8 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     onOpenVariables,
     onOpenGroups,
     onOpenMaterials,
-    onFixWithAi,
-    onExplainIssues,
+    onFixWithAi: _onFixWithAi,
+    onExplainIssues: _onExplainIssues,
     onExplainNode,
     onInsertFromPrompt,
     onNodeDragStop: onNodeDragStopProp,
@@ -1617,50 +1612,9 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
           return
         }
 
-        // 4.6: Excel .xlsx / .xls file → parse first sheet and create tableInput block
+        // Excel .xlsx / .xls — not yet supported (SheetJS removed for security)
         if (nameLower.endsWith('.xlsx') || nameLower.endsWith('.xls')) {
-          const tableInputDef = BLOCK_REGISTRY.get('tableInput')
-          if (tableInputDef?.proOnly && !isBlockEntitled(tableInputDef, ent)) {
-            setShowUpgradeModal(true)
-            return
-          }
-          const position = screenToFlowPosition({ x: e.clientX, y: e.clientY })
-          const reader = new FileReader()
-          reader.onload = async (ev) => {
-            const buf = ev.target?.result
-            if (!(buf instanceof ArrayBuffer)) return
-            try {
-              const tableData = await parseXlsxToTableData(buf)
-              if (!tableData) {
-                toast('Could not parse Excel file: no numeric sheet data found', 'error')
-                return
-              }
-              const datasetHash = await computeDatasetHash(tableData)
-              const id = `node_${++nodeIdCounter}`
-              doSaveHistory()
-              setNodes((nds) => [
-                ...nds,
-                {
-                  id,
-                  type: 'csData',
-                  position,
-                  data: {
-                    blockType: 'tableInput',
-                    label: file.name.replace(/\.(xlsx|xls)$/i, ''),
-                    tableData,
-                    datasetHash,
-                  },
-                } as Node<NodeData>,
-              ])
-              toast(
-                `Excel loaded: ${file.name} (${tableData.rows.length} rows × ${tableData.columns.length} columns)`,
-                'success',
-              )
-            } catch {
-              toast('Failed to parse Excel file', 'error')
-            }
-          }
-          reader.readAsArrayBuffer(file)
+          toast('Excel import is not yet supported. Please export to CSV first.', 'info')
           return
         }
 
@@ -2477,15 +2431,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       setEdges(target.edges)
     },
     [historyRestoreToIndex, setNodes, setEdges],
-  )
-
-  // 5.8: Restore a Supabase snapshot onto the canvas.
-  const handleRestoreSnapshot = useCallback(
-    (snapNodes: Node<NodeData>[], snapEdges: Edge[]) => {
-      setNodes(snapNodes)
-      setEdges(snapEdges)
-    },
-    [setNodes, setEdges],
   )
 
   // ── Clipboard handlers ──────────────────────────────────────────────────
@@ -3481,24 +3426,6 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
     return count
   }, [computed])
 
-  // Simple health warning count: disconnected nodes (no edges)
-  const healthWarningCount = useMemo(() => {
-    const connectedIds = new Set<string>()
-    for (const e of edges) {
-      connectedIds.add(e.source)
-      connectedIds.add(e.target)
-    }
-    const realNodes = nodes.filter((n) => {
-      const bt = (n.data as Record<string, unknown>).blockType as string
-      return bt !== '__group__' && !bt.startsWith('annotation_')
-    })
-    let warnings = 0
-    for (const n of realNodes) {
-      if (!connectedIds.has(n.id)) warnings++
-    }
-    return warnings + problemCount
-  }, [nodes, edges, problemCount])
-
   const dockPanels = useMemo<DockPanel[]>(
     () => [
       {
@@ -3564,18 +3491,14 @@ const CanvasInner = forwardRef<CanvasAreaHandle, CanvasAreaProps>(function Canva
       nodes,
       edges,
       t,
-      onFixWithAi,
-      onExplainIssues,
       stackEntries,
       handleRestoreHistory,
       handleSaveCheckpoint,
       historyClear,
       handleRenameHistoryEntry,
       canvasId,
-      healthWarningCount,
       problemCount,
-      telemetryProjectId,
-      handleRestoreSnapshot,
+      engineDiagnostics,
     ],
   )
 

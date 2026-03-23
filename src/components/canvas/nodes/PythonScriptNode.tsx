@@ -13,7 +13,7 @@
  * Supports up to 8 input variables.
  */
 
-import { memo, useEffect, useCallback, useRef, useState } from 'react'
+import { memo, useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps, useEdges } from '@xyflow/react'
 import type { NodeData } from '../../../blocks/types'
 import { NODE_STYLES as s } from './nodeStyles'
@@ -63,7 +63,10 @@ function PythonScriptNodeInner({ id, data, selected }: NodeProps) {
   const typeColor = `var(${getNodeTypeColor(nd.blockType)})`
   const TypeIcon = getNodeTypeIcon(nd.blockType)
 
-  const pyVars: PythonVar[] = (nd.pyVars as PythonVar[] | undefined) ?? []
+  const pyVars: PythonVar[] = useMemo(
+    () => (nd.pyVars as PythonVar[] | undefined) ?? [],
+    [nd.pyVars],
+  )
 
   // Fixed 8-slot upstream reads (React hooks must not be called in loops)
   const slotId = (i: number) => pyVars[i]?.id ?? `__slot_${i}`
@@ -83,20 +86,20 @@ function PythonScriptNodeInner({ id, data, selected }: NodeProps) {
   const v5 = useComputedValue(e5?.source ?? '')
   const v6 = useComputedValue(e6?.source ?? '')
   const v7 = useComputedValue(e7?.source ?? '')
-  const slotVals = [v0, v1, v2, v3, v4, v5, v6, v7]
-
-  // Build variable bindings
-  const varValues: Record<string, unknown> = {}
-  pyVars.forEach((pv, i) => {
-    const val = valueToInput(slotVals[i])
-    if (val !== undefined) varValues[pv.name] = val
-  })
+  const slotVals = useMemo(() => [v0, v1, v2, v3, v4, v5, v6, v7], [v0, v1, v2, v3, v4, v5, v6, v7])
 
   // ── Run Python ─────────────────────────────────────────────────────────────
 
   const runPython = useCallback(async () => {
     const code = nd.pyCode
     if (!code?.trim()) return
+
+    // Build variable bindings from current slot values
+    const varValues: Record<string, unknown> = {}
+    pyVars.forEach((pv, i) => {
+      const val = valueToInput(slotVals[i])
+      if (val !== undefined) varValues[pv.name] = val
+    })
 
     setPyodideLoading(true)
     updateNodeData(id, { pyRunning: true, pyError: null })
@@ -131,7 +134,7 @@ function PythonScriptNodeInner({ id, data, selected }: NodeProps) {
     } finally {
       setPyodideLoading(false)
     }
-  }, [id, nd.pyCode, v0, v1, v2, v3, v4, v5, v6, v7, updateNodeData]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [id, nd.pyCode, pyVars, slotVals, updateNodeData])
 
   // Debounced re-run on code/input change
   useEffect(() => {

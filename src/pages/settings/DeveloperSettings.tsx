@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import * as Sentry from '@sentry/react'
 import { Select } from '../../components/ui/Select'
 import { Button } from '../../components/ui/Button'
 import {
@@ -10,6 +11,7 @@ import {
 } from '../../lib/entitlements'
 import { usePreferencesStore } from '../../stores/preferencesStore'
 import { BUILD_VERSION, BUILD_SHA, BUILD_ENV } from '../../lib/build-info'
+import { getPostHogInstance } from '../../main'
 
 interface Props {
   cardStyle: React.CSSProperties
@@ -43,6 +45,8 @@ export function DeveloperSettings({
   const defaultLod = usePreferencesStore((s) => s.defaultLod)
   const updatePrefs = usePreferencesStore((s) => s.update)
   const [planOverride, setPlanOverride] = useState<string>(getDevPlanOverride() ?? '')
+  const [sentryStatus, setSentryStatus] = useState('')
+  const [posthogStatus, setPosthogStatus] = useState('')
 
   const handlePlanChange = (value: string) => {
     setPlanOverride(value)
@@ -120,6 +124,63 @@ export function DeveloperSettings({
           >
             {t('settings.devClearOverride')}
           </Button>
+        </div>
+      </div>
+
+      {/* Observability */}
+      <h3 style={subheadingStyle}>Observability</h3>
+      <div style={cardStyle}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          <InfoRow
+            label="Sentry DSN"
+            value={import.meta.env.VITE_SENTRY_DSN ? 'configured' : 'not set'}
+          />
+          <InfoRow
+            label="PostHog key"
+            value={import.meta.env.VITE_PUBLIC_POSTHOG_KEY ? 'configured' : 'not set'}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', alignItems: 'center' }}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              Sentry.captureMessage('Sentry verification test from DeveloperSettings', 'info')
+              setSentryStatus('Sent!')
+              setTimeout(() => setSentryStatus(''), 3000)
+            }}
+          >
+            Test Sentry
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const ph = getPostHogInstance()
+              if (ph) {
+                ph.capture('test_event', { source: 'developer_settings' })
+                setPosthogStatus('Sent!')
+              } else {
+                setPosthogStatus('PostHog not initialized')
+              }
+              setTimeout(() => setPosthogStatus(''), 3000)
+            }}
+          >
+            Test PostHog
+          </Button>
+          {sentryStatus && (
+            <span style={{ fontSize: '0.75rem', color: 'var(--success)' }}>{sentryStatus}</span>
+          )}
+          {posthogStatus && (
+            <span
+              style={{
+                fontSize: '0.75rem',
+                color: posthogStatus === 'Sent!' ? 'var(--success)' : 'var(--warning)',
+              }}
+            >
+              {posthogStatus}
+            </span>
+          )}
         </div>
       </div>
     </div>

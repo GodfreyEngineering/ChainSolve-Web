@@ -49,7 +49,10 @@ function CustomRustNodeInner({ id, data, selected }: NodeProps) {
     [nd.blockType],
   )
 
-  const rustVars: RustVar[] = (nd.rustVars as RustVar[] | undefined) ?? []
+  const rustVars: RustVar[] = useMemo(
+    () => (nd.rustVars as RustVar[] | undefined) ?? [],
+    [nd.rustVars],
+  )
 
   // Fixed 8-slot upstream reads (no hooks-in-loop)
   const slotId = (i: number) => rustVars[i]?.id ?? `__rs_${i}`
@@ -69,20 +72,10 @@ function CustomRustNodeInner({ id, data, selected }: NodeProps) {
   const v5 = useComputedValue(e5?.source ?? '')
   const v6 = useComputedValue(e6?.source ?? '')
   const v7 = useComputedValue(e7?.source ?? '')
-  const slotVals = [v0, v1, v2, v3, v4, v5, v6, v7]
-
-  const getVarValues = () => {
-    const vars: Record<string, number> = {}
-    rustVars.forEach((rv, i) => {
-      const v = slotVals[i]
-      vars[rv.name] = v?.kind === 'scalar' ? v.value : 0
-    })
-    return vars
-  }
+  const slotVals = useMemo(() => [v0, v1, v2, v3, v4, v5, v6, v7], [v0, v1, v2, v3, v4, v5, v6, v7])
 
   // ── Compile & evaluate ───────────────────────────────────────────────────
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const compileAndRun = useCallback(async () => {
     const code = nd.rustCode?.trim()
     if (!code) return
@@ -93,7 +86,11 @@ function CustomRustNodeInner({ id, data, selected }: NodeProps) {
 
     updateNodeData(id, { rustCompiling: true, rustError: null })
 
-    const varValues = getVarValues()
+    const varValues: Record<string, number> = {}
+    rustVars.forEach((rv, i) => {
+      const v = slotVals[i]
+      varValues[rv.name] = v?.kind === 'scalar' ? v.value : 0
+    })
 
     try {
       const response = await fetch('/api/compile-rust', {
@@ -135,7 +132,7 @@ function CustomRustNodeInner({ id, data, selected }: NodeProps) {
         rustCompiling: false,
       })
     }
-  }, [id, nd.rustCode, v0, v1, v2, v3, v4, v5, v6, v7, updateNodeData])
+  }, [id, nd.rustCode, rustVars, slotVals, updateNodeData])
 
   // Debounce compile on code/input change (longer debounce — compilation is expensive)
   useEffect(() => {
