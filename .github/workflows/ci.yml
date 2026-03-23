@@ -326,13 +326,20 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
-      - name: Build (production — real Supabase credentials)
+      - name: Build (production — real credentials baked into bundle)
         # Re-run only the Vite build (TypeScript + asset bundling).  The WASM
         # binary is already in crates/engine-wasm/pkg/ from the artifact above.
+        # All VITE_* vars are embedded by Vite at build time via import.meta.env.
         run: npx tsc -b && npx vite build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          VITE_PUBLIC_POSTHOG_KEY: ${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}
+          VITE_PUBLIC_POSTHOG_HOST: ${{ vars.VITE_PUBLIC_POSTHOG_HOST }}
+          VITE_PLAUSIBLE_DOMAIN: ${{ vars.VITE_PLAUSIBLE_DOMAIN }}
+          VITE_APP_VERSION: ${{ vars.VITE_APP_VERSION }}
 
       - name: Guard — no placeholder Supabase URL in production bundle
         # Belt-and-suspenders: if the URL secret was absent or placeholder, Vite
