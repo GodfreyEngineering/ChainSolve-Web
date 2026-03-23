@@ -43,7 +43,7 @@ let _sessionId: string | null = null
 
 function getSessionId(): string {
   if (!_sessionId) {
-    _sessionId = `session_${Math.random().toString(36).slice(2)}`
+    _sessionId = `session_${crypto.randomUUID()}`
   }
   return _sessionId
 }

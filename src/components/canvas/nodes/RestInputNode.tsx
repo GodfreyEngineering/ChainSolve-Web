@@ -116,7 +116,7 @@ function RestInputNodeInner({ id, data, selected }: NodeProps) {
       setStatusCode(res.status)
 
       if (!res.ok) {
-        setErrorMsg(t('restInput.httpError', `HTTP ${res.status}`).replace('HTTP', `HTTP`))
+        setErrorMsg(t('restInput.httpError', `HTTP ${res.status}`))
         setStatus('error')
         return
       }
