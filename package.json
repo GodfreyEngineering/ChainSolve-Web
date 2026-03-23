@@ -53,7 +53,7 @@
   "dependencies": {
     "@sentry/react": "^10.44.0",
     "@sentry/vite-plugin": "^5.1.1",
-    "@supabase/supabase-js": "^2.99.2",
+    "@supabase/supabase-js": "^2.99.3",
     "@tanstack/react-virtual": "^3.13.23",
     "@xyflow/react": "^12.10.1",
     "dagre": "^0.8.5",
