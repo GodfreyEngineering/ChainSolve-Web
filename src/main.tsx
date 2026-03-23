@@ -58,8 +58,7 @@ if (POSTHOG_KEY && cookieConsent !== 'declined') {
         capture_pageview: false, // Handled by PageViewTracker component
         capture_pageleave: true, // Required for accurate bounce rate & session duration
         autocapture: false, // Intentional tracking only for an engineering tool
-        scroll_depth: true, // Track how far users scroll on each page
-        enable_heatmaps: true, // Required for scroll depth tracking
+        enable_heatmaps: true, // Enables scroll depth tracking in PostHog
         loaded: (ph) => {
           if (import.meta.env.DEV) ph.debug()
           if (!import.meta.env.PROD) ph.opt_out_capturing()
